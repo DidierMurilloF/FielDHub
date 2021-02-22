@@ -1,0 +1,145 @@
+#' Generates a Resolvable Incomplete Block Design 
+#'
+#' @description Randomly generates a resolvable incomplete block design (IBD) of characteristics (t, k, r). 
+#' The randomization can be done across locations.
+#'
+#' @param t Number of  treatments.
+#' @param r Number of full blocks (or resolvable replicates) (also number of replicates per treatment).
+#' @param k Size of incomplete blocks (number of unites per incomplete block). 
+#' @param l Number of locations. By default \code{l = 1}.
+#' @param plotNumber Numeric vector with the starting plot number for each location. By default \code{plotNumber = 101}.
+#' @param seed (optional) Real number that specifies the starting seed to obtain reproducible designs.
+#' @param locationNames (optional) Names for each location.
+#' @param data (optional) Data frame with label list of treatments.
+#' 
+#' @importFrom stats runif na.omit
+#'
+#' @return A list with information on the design parameters.
+#' @return Data frame with the incomplete block design field book: Location, Plot, Block, iBlock, Unit_per_iBlock, Treatment.
+#'
+#'
+#' @references
+#' Edmondson, R.N. 2020. Package blocksdesign: Nested and Crossed Block Designs for
+#' Factorial and Unstructured Treatment Sets.
+#'
+#' @examples
+#' # Example 1: Generates a resolvable IBD of characteristics (t,k,r) = (12,4,2).
+#' ibd1 <- incomplete_blocks(t = 12, k = 4, r = 2, seed = 1984) #1-resolvable IBDs
+#' ibd1$infoDesign
+#' head(ibd1$fieldBook)
+#' 
+#' # Example 2: Generates a balanced resolvable IBD of characteristics (t,k,r) = (15,3,7).
+#' ibd2 <- incomplete_blocks(t = 15, k = 3, r = 7, seed = 1985)  #1-resolvable BIBDs
+#' ibd2$infoDesign
+#' head(ibd2$fieldBook)  
+#'              
+#'                   
+#' @export
+incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101, locationNames = NULL,
+                              seed = NULL, data = NULL) {
+
+  if (is.null(seed) || !is.numeric(seed)) seed <- runif(1, min = -50000, max = 50000)
+  set.seed(seed)
+  lookup <- FALSE
+  if(is.null(data)) {
+    if (is.null(r) || is.null(t) || is.null(k) || is.null(l)) {
+      shiny::validate('Some of the basic design parameters are missing (t, k, r or l).')
+    }
+    arg1 <- list(k, r, l);arg2 <- c(k, r, l)
+    if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
+      shiny::validate('incomplete_blocks() requires k, r and l be possitive integers.')
+    }
+    if (is.numeric(t) && t %% 1 != 0) shiny::validate('incomplete_blocks() requires t to be a possitive integer.')
+    if (is.numeric(t)) {
+      if (length(t) == 1) {
+        if (t == 1 || t < 1) {
+          shiny::validate('incomplete_blocks() requires more than one treatment.')
+        } 
+        nt <- t
+      }else if ((length(t) > 1)) {
+        nt <- length(t)
+        TRT <- t
+      }
+    }else if (is.character(t) || is.factor(t)) {
+      if (length(t) == 1) {
+        shiny::validate('incomplete_blocks() requires more than one treatment.')
+      } 
+      nt <- length(t)
+      TRT <- t
+      lookup <- TRUE
+      dataLookUp <- data.frame(list(TREATMENT = 1:nt, LABEL_TREATMENT = TRT))
+    }else if ((length(t) > 1)) {
+      nt <- length(t)
+      TRT <- t
+      lookup <- TRUE
+      dataLookUp <- data.frame(list(TREATMENT = 1:nt, LABEL_TREATMENT = TRT))
+    }
+  }else if (!is.null(data)) {
+    if (is.null(r) || is.null(k) || is.null(l)) {
+      shiny::validate('Some of the basic design parameters are missing (t, k, r)')
+    }
+    if(!is.data.frame(data)) shiny::validate("Data must be a data frame.")
+    data <- as.data.frame(na.omit(data[,1]))
+    colnames(data) <- "Treatment"
+    data$Treatment <- as.character(data$Treatment)
+    new_t <- length(data$Treatment)
+    if (t != new_t) base::stop("Number of treatments do not match with the data input.")
+    TRT <- data$Treatment
+    nt <- length(TRT)
+    lookup <- TRUE
+    dataLookUp <- data.frame(list(TREATMENT = 1:nt, LABEL_TREATMENT = TRT))
+  }
+  if(any(plotNumber %% 1 != 0) || any(plotNumber < 1) || any(diff(plotNumber) < 0)) {
+    shiny::validate("'incomplete_blocks()' requires plotNumber to be possitive integers and sorted.")
+  }
+  if (is.null(plotNumber) || length(plotNumber) != l) {
+    if (length(plotNumber) != l || is.null(plotNumber)) plotNumber <- seq(1001, 1000*(l+1), 1000)
+    warning("Since plotNumber was missing, it was set up to default values.")
+  } 
+  if (k >= nt) shiny::validate('incomplete_blocks() requires that k < t.')
+  if(is.null(locationNames) || length(locationNames) != l) locationNames <- 1:l
+  # nrep = r / ntrt = t / nunits = k / t*r/k = b 
+  nincblock <- nt*r/k
+  N <- nt * r
+  if (k * nincblock != N) {
+    shiny::validate('Size of experiment defined by number of units per incomplete block (nunits) is inconsistent. Check input parameters.')
+  }
+  if (nt %% k != 0) {
+    shiny::validate('Number of treatments can not be fully distributed over the specified incomplete block specification.')
+  }
+  
+  ibd_plots <- ibd_plot_numbers(nt = nt, plot.number = plotNumber, r = r, l = l)
+  b <- nt/k
+  outIBD_loc <- vector(mode = "list", length = l)
+  for (i in 1:l) {
+    mydes <- blocksdesign::blocks(treatments = nt, replicates = r, blocks = list(r, b),
+                                  seed = seed)
+    matdf <- base::data.frame(list(LOCATION = rep(locationNames[i], each = N)))
+    matdf$PLOT <- as.numeric(unlist(ibd_plots[[i]]))
+    matdf$BLOCK <- rep(c(1:r), each = nt)
+    matdf$iBLOCK <- rep(c(1:b), each = k)
+    matdf$UNIT <- rep(c(1:k), nincblock)
+    matdf$TREATMENT <- mydes$Design[,4]
+    colnames(matdf) <- c("LOCATION","PLOT", "REP", "IBLOCK", "UNIT", "ENTRY")
+    
+    outIBD_loc[[i]] <- matdf
+  }
+
+  OutIBD <- dplyr::bind_rows(outIBD_loc)
+  OutIBD <- as.data.frame(OutIBD)
+  OutIBD$ENTRY <- as.numeric(OutIBD$ENTRY)
+  if(lookup) {
+    OutIBD <- dplyr::inner_join(OutIBD, dataLookUp, by = "ENTRY")
+    OutIBD <- OutIBD[,-6]
+    colnames(OutIBD) <- c("LOCATION","PLOT", "REP", "IBLOCK", "UNIT", "ENTRY")
+  }
+  
+  ID <- 1:nrow(OutIBD)
+  OutIBD_new <- cbind(ID, OutIBD)
+  lambda <- r*(k - 1)/(nt - 1)
+  
+  infoDesign <- list(Reps = r, iBlocks = b, NumberTreatments = nt, NumberLocations = l, 
+                     Locations = locationNames, seed = seed, lambda = lambda)
+  
+  return(list(infoDesign = infoDesign, fieldBook = OutIBD_new))
+}

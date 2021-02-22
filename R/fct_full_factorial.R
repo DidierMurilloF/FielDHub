@@ -1,0 +1,158 @@
+#' Generates a Full Factorial Design
+#' 
+#' @description It randomly generates a full factorial design across locations.
+#'
+#' @param setfactors Numeric vector with levels of each factor.
+#' @param reps Number of replicates (full blocks).
+#' @param l Number of locations. By default \code{l = 1}.
+#' @param type Option for CRD or RCBD designs. Values are \code{type = 1} (CRD) or \code{type = 2} (RCBD). By default \code{type = 2}. 
+#' @param plotNumber Numeric vector with the starting plot number for each location. By default \code{plotNumber = 101}.
+#' @param continuous Logical fpr plot number continuous or not. By default \code{continuous = FALSE}.
+#' @param planter Option for \code{serpentine} or \code{cartesian} plot arrangement. By default  \code{planter = 'serpentine'}.
+#' @param seed (optional) Real number that specifies the starting seed to obtain reproducible designs.
+#' @param locationNames (optional) Names for each location.
+#' @param data (optional) Data frame with the labels of factors.
+#' 
+#' @importFrom stats runif na.omit
+#' 
+#' @return A list with information on the design parameters.
+#' @return Data frame with the full factorial field book.
+#' 
+#'
+#' @references
+#' \emph{Design and Analysis of Experiments, Volume 1, Introduction to Experimental Design. Second Edition}.
+#'  Klaus Hinkelmann & Oscar Kempthorne.John Wiley & Sons, Inc., Hoboken, New Jersey.
+#' 
+#' @examples
+#' # Example 1: Generates a full factorial with 3 factors each with 2 levels. 
+#' # This in an RCBD arrangement with 3 reps.
+#' fullFact1 <- full_factorial(setfactors = c(2,2,2), reps = 3, l = 1, type = 2, 
+#'                             plotNumber = 101, 
+#'                             continuous = TRUE, 
+#'                             planter = "serpentine", 
+#'                             seed = 325, 
+#'                             locationNames = "FARGO")
+#' fullFact1$infoDesign
+#' head(fullFact1$fieldBook,10)
+#' 
+#' # Example 2: Generates a full factorial with 3 factors and each with levels: 2,3, 
+#' # and 2, respectively. 
+#' # This in an RCBD arrangement with 5 reps in 3 locations.
+#' fullFact2 <- full_factorial(setfactors = c(2,3,2), reps = 5, l = 3, type = 2, 
+#'                             plotNumber = c(101,1001,2001), 
+#'                             continuous = FALSE, 
+#'                             planter = "serpentine", 
+#'                             seed = 326, 
+#'                             locationNames = c("Loc1","Loc2","Loc3"))
+#' fullFact2$infoDesign
+#' head(fullFact2$fieldBook,10)
+#'
+#' @export
+full_factorial <- function(setfactors = NULL, reps = NULL, l = 1, type = 2, plotNumber = 101, 
+                           continuous = FALSE, planter = "serpentine", seed = NULL, 
+                           locationNames = NULL, data = NULL) {
+  
+  if (all(c("serpentine", "cartesian") != planter)) {
+    stop("Input for planter choice is unknown. Please, choose one: serpentine or cartesian.")
+  }
+  if (is.null(seed) || !is.numeric(seed)) seed <- runif(1, min = -50000, max = 50000)
+  get.levels <- function(k = NULL) {
+    newlevels <- list();s <- 1
+    for (i in k) {
+      newlevels[[s]] <- rep(1:i, 1)
+      s <- s + 1
+    }
+    return(newlevels)
+  }
+  if(l < 1 || is.null(l)) stop("Please, check the value for the number of locations.")
+  if (!is.null(plotNumber)) {
+    if (any(!is.numeric(plotNumber)) || any(plotNumber < 1) || any(plotNumber %% 1 != 0) ||
+        any(diff(plotNumber) < 0)) {
+      shiny::validate("The input plotNumber must be an integer greater than 0 and sorted.")
+    } 
+  }else {
+    plotNumber <- seq(1001, 1000*(l+1), 1000)
+    warning("Since plotNumber was NULL, it was set up to default values for each site.")
+  }
+  if (is.null(data)) {
+    if(!is.null(setfactors)) {
+      if(is.numeric(setfactors)) {
+        if (length(setfactors) < 2) stop("More than one factor needs to be specified.")
+        nt <- length(setfactors)
+        TRT <- rep(LETTERS[1:nt], each = reps)
+        newlevels <- get.levels(k = setfactors)
+        allcomb <- expand.grid(newlevels)
+        colnames(allcomb) <- levels(as.factor(TRT))
+        data <- data.frame(list(factors = rep(levels(as.factor(TRT)), times = setfactors),
+                                levels = unlist(newlevels)))
+      }else stop("In 'full_factorial()' the input setfactors must be a numeric vector.")
+    }
+  }else {
+    if(!is.data.frame(data)) stop("Data must be a data frame.")
+    data <- as.data.frame(na.omit(data[,1:2]))
+    colnames(data) <- c("factors", "levels")
+    data$factors <- factor(data$factors, as.character(unique(data$factors)))
+    l.factors <- levels(data$factors)
+    levels.by.factor <- list()
+    data.by.factor <- list()
+    v <- 1
+    for(i in l.factors) {
+      data.by.factor[[v]] <- subset(data, data$factors == i)
+      levels.by.factor[[v]] <- data.by.factor[[v]][,2]
+      v <- v + 1
+    }
+    nt <- length(l.factors)
+    allcomb <- base::expand.grid(levels.by.factor, KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE)
+    colnames(allcomb) <- l.factors 
+    newlevels <- data.by.factor
+    TRT <- l.factors
+  }
+  if (is.null(locationNames)) {
+    locationNames <- 1:l
+  }else if (!is.null(locationNames)) {
+    if (length(locationNames) < l || length(locationNames) > l) locationNames <- 1:l
+  }
+  nruns <- nrow(allcomb)
+  trt <- vector(mode = "character", length = nruns)
+  for (i in 1:nrow(allcomb)) {
+    trt[i] <- paste(allcomb[i,], collapse = " ")
+  }
+  design.loc <- list()
+  for (locs in 1:l) {
+    if (type == 1) {
+      m1 <- CRD(t = trt, reps = reps, plotNumber = plotNumber[locs], seed = seed,
+                data = NULL, locationName = locationNames[1])$fieldBook
+      m1 <- m1[,-1]
+      kind <- "CRD"
+    }else {
+      m1 <- RCBD(t = trt, reps = reps, l = 1, plotNumber = plotNumber[locs], continuous = continuous,
+                 planter = planter, seed = seed, locationNames = locationNames[locs])$fieldBook
+      m1 <- m1[,-1]
+      kind <- "RCBD"
+    }
+    m1 <- cbind(m1, matrix(data = 0, nrow = nruns, ncol = nt + 1, byrow = TRUE))
+    t <- nruns * reps
+    z <- 1:t
+    for (j in z) {
+      m1[j, 4:(4 + nt - 1)] <- unlist(strsplit(m1[j,3], " "))
+      m1[j, ncol(m1)] <- paste(m1[j, 4:(4 + nt - 1)], collapse = "*")
+    }
+    design <- m1
+    design <- design[,-3]
+    design.loc[[locs]] <- design
+  }
+  design <- paste_by_row(design.loc)
+  TRT <- factor(TRT, as.character(unique(TRT)))
+  ColFactors <- paste("FACTOR_", levels(TRT), sep = "")
+  colnames(design) <- c("PLOT", "REP", ColFactors, "TRT_COMB")
+  if (kind == "RCBD") {
+    design <- design[order(design$PLOT, design$REP),]
+  }
+  nruns <- nrow(allcomb)
+  design <- cbind(LOCATION = rep(locationNames, each = nruns * reps), design)
+  fullfactorial <- list(factors = levels(TRT), levels = newlevels, runs = nruns, alltreatments = allcomb, 
+                        Reps = reps, Locations = l, locationNames = locationNames, kind = kind)
+  #infoDesign = list(factors = levels(TRT), levels = newlevels)
+  # data = data, 
+  return(list(infoDesign = fullfactorial, fieldBook = design))
+}

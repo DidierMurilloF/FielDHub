@@ -1,0 +1,255 @@
+* {
+  margin: 0;
+  padding:0;
+  box-sizing: border-box;
+}
+
+html,body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.7em;
+}
+
+.navbar {
+  margin-bottom: 0;
+  padding: 0;
+}
+
+.selectize-input {
+  height: 43px;
+}
+ 
+li a {
+  font-size: 20px;
+}
+
+.container {
+  margin: auto;
+  max-width: 1200px;
+  padding: 0 20px;
+}
+
+h1, h2, h3 {
+  padding-bottom: 10px;
+}
+
+p {
+  margin: 10px 0;
+}
+
+.p-box {
+  font-size: 16px;
+}
+
+.text-primary1 {
+  color: #ffc72a;
+  font-size: 88px;
+  font-weight: bold;
+}
+
+.text-primary2 {
+  color: #0a5640;
+  font-size: 88px;
+  font-weight: bold;
+}
+
+.welcome-primary {
+  font-size: 28px;
+  font-weight: bold;
+}
+
+#text-primary {
+  color:#ffc72a;
+  font-weight: bold;
+}
+
+#text-primary1 {
+  color:#ffc72a;
+}
+
+#text-primary2 {
+  color:#0a5640;
+}
+
+.tittle-FielDHub {
+  color:#ffc72a;
+  font-weight: bold;
+}
+
+.lead {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.btn {
+  display: inline-block;
+  font-size: 18px;
+  font-weight: bold;
+  color: #474747;
+  background: #95a5a6;
+  padding: 13px 20px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: #18bc9c;
+  color: #343a40;
+}
+
+.btn-light {
+  background: #f4f4f4;
+  color: #333;
+}
+
+.bg-dark {
+  background: #444;
+  color: #fff;
+}
+
+.bg-light {
+  background: #f4f4f4;
+  color: #333;
+}
+
+.bg-primary {
+  background: #f7c08a;
+  color: #333;
+}
+
+.clr {
+  clear: both;
+}
+
+/* Showcase */
+#showcase {
+  background: url('baner46.jpg') no-repeat center center/cover;
+  /*background: url('golden.jpg') no-repeat center center/cover;*/
+  height: 550px;
+}
+
+#showcase .showcase-content {
+  color: #fff;
+  text-align: center;
+  padding-top: 170px;
+}
+
+#showcase .showcase-content p {
+  padding-bottom: 20px;
+  line-height: 1.7em;
+}
+
+/* Features */
+.box {
+  float: left;
+  width: 33.3%;
+  padding: 50px;
+  text-align:center;
+}
+
+.box i {
+  margin-bottom: 10px;
+}
+
+/* Home Info */
+#home-info {
+  height: 450px;
+}
+
+#home-info .info-img {
+  float: left;
+  width: 50%;
+  background: url('drone1.jpg') no-repeat;
+  /*background: url('wheatharvest_ndsu.jpg') no-repeat;*/
+  
+  min-height: 100%;
+}
+
+#home-info .info-content {
+  float: right;
+  width: 50%;
+  height: 100%;
+  text-align: center;
+  padding: 30px 30px;
+  overflow: hidden;
+}
+
+#home-info .info-content p {
+  padding-bottom: 30px;
+  padding-top: 10px;
+}
+
+/* About Us*/
+
+.ABC {
+  background-color: #edebeb;
+}    
+
+.section-tittle {
+  margin-left: 150px;
+  margin-right: 100px;
+}
+
+.aboutUs-p {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 18px;
+  line-height: 1.6em;
+}
+
+.profile-p {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 14px;
+  line-height: 1.5em;
+  padding-top: 10;
+  padding-bottom: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.grid-container {
+  display: grid;
+  justify-content: center;
+  grid-row-gap: 5px;
+  grid-template-columns: 29% 29% 29%;
+  grid-template-rows: auto auto auto;
+  background-color: #edebeb;
+  padding: 1px;
+  padding-bottom: 50px;
+}
+
+.grid-item {
+  padding: 20px;
+  font-size: 16px;
+  text-align:left;
+  padding-bottom: 5px;
+}
+
+.circular--portrait {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  overflow: hidden;
+  border-radius: 50%;
+}
+                              
+.circular--portrait img {
+  width: 100%;
+  height: auto;
+}
+
+/* footer */
+.container-fluid {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+a {
+  font-size: 16px;
+}
+  
+#main-footer {
+  text-align: center;
+  background: #444;
+  color: #fff;
+  padding: 20px;
+}

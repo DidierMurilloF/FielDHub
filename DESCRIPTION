@@ -1,0 +1,36 @@
+Package: FielDHub
+Title: Shiny App
+Version: 0.0.0.9000
+Authors@R: person('Didier', 'Murillo', email = 'didier.murilloflorez@ndsu.edu', role = c('cre', 'aut'))
+Description: FielDHub: A Shiny App to Randomize Partially-Replicated/Unreplicated, 
+ Augmented and Classical Field Designs for Plant Breeding Trials.
+License: MIT + file LICENSE
+Imports: 
+    config,
+    golem,
+    shiny,
+    processx,
+    attempt,
+    DT,
+    glue,
+    htmltools,
+    shinythemes,
+    turner,
+    dplyr,
+    shinyjqui,
+    numbers,
+    blocksdesign,
+    shinycssloaders,
+    magrittr,
+    ggplot2,
+    plotly,
+    viridis,
+    pkgload
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.1.1
+Suggests: 
+    testthat (>= 3.0.0),
+    spelling
+Config/testthat/edition: 3
+Language: en-US
