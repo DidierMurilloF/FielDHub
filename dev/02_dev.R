@@ -26,7 +26,7 @@ usethis::use_package("shinycssloaders")
 usethis::use_package("ggplot2")
 usethis::use_package("plotly")
 usethis::use_package("viridis")
-#usethis::use_package("rlang")
+usethis::use_package("rlang", "Suggests")
 usethis::use_pipe()
 usethis::use_spell_check()
 

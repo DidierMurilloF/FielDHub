@@ -31,6 +31,7 @@ LazyData: true
 RoxygenNote: 7.1.1
 Suggests: 
     testthat (>= 3.0.0),
-    spelling
+    spelling,
+    rlang
 Config/testthat/edition: 3
 Language: en-US

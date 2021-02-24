@@ -11,3 +11,4 @@ $run_dev.*
 ^rsconnect$
 ^\.travis\.yml$
 ^\.github$
+^docs$
