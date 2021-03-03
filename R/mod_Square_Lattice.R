@@ -36,20 +36,6 @@ mod_Square_Lattice_ui <- function(id){
                    selectInput(inputId = ns("k.square"), label = "Input # of Plots per IBlock:", choices = ""),
                    numericInput(inputId = ns("l.square"), label = "Input # of Locations:", value = NULL, min = 1),
                    
-                   # fluidRow(
-                   #   column(6,style=list("padding-right: 28px;"),
-                   #          numericInput(inputId = ns("r.square"), label = "Input # of Blocks:", value = NULL, min = 2)
-                   #   ),
-                   #   column(6, style=list("padding-left: 5px;"),
-                   #          numericInput(inputId = ns("l.square"), label = "Input # of Locations:", value = 1, min = 1)
-                   #   )
-                   # ),
-                   
-                   
-                   
-                   # selectInput(inputId = ns("planter_mov__square"), label = "Plot Order Layout:",
-                   #             choices = c("serpentine", "cartesian"), multiple = FALSE,
-                   #             selected = "serpentine"),
                    fluidRow(
                      column(6, style=list("padding-right: 28px;"),
                             textInput(inputId = ns("plot_start.square"), "Starting Plot Number:", value = 101)

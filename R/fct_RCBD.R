@@ -64,14 +64,14 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101, continuous = FA
     shiny::validate("'RCBD()' requires that locations number to be an integer greater than 0.")
   }
   b <- reps
-  if (!is.null(plotNumber)) {
+  if (!is.null(plotNumber) && length(plotNumber) == l) {
     if (any(!is.numeric(plotNumber)) || any(plotNumber < 1) || any(plotNumber %% 1 != 0) ||
         any(diff(plotNumber) < 0)) {
       shiny::validate("Input plotNumber must be an integer greater than 0 and sorted.")
     } 
   }else {
     plotNumber <- seq(1001, 1000*(l+1), 1000)
-    warning("Since plotNumber was NULL, it was set up to its default value for each site.")
+    warning("'plotNumber' was set up to its default value for each site.")
   }
   if (!is.null(locationNames)) locationNames <- toupper(locationNames) else locationName <- 1:l
   if (is.null(data)) {
@@ -125,7 +125,7 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101, continuous = FA
     }
     RCBD.layout.loc[[i]] <- RCBD.layout
   }
-  plotNumber <- seriePlot.numbers(plot.number = plotNumber, reps = b, l = l)
+  plotNumber <- seriePlot.numbers(plot.number = plotNumber, reps = b, l = l, t = nt)
   if (!continuous) {
     if (planter == "serpentine"){
       p.number.loc <- vector(mode = "list", length = l)
@@ -173,6 +173,10 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101, continuous = FA
   }
   RCBD.output <- data.frame(list(LOCATION = rep(locationNames, each = nt * b), PLOT = as.vector(t(p.number.loc1)),
                                  REP = rep(1:b, each = nt), TREATMENT = as.vector(t(RCBD))))
+  ID <- 1:nrow(RCBD.output)
+  RCBD_output <- cbind(ID, RCBD.output)
+  RCBD_output <- as.data.frame(RCBD_output)
+  
   RCBD.layout <- as.data.frame(RCBD.layout)
   
   parameters = list(blocks = b, number.of.treatments = nt, treatments = mytreatments,
@@ -181,5 +185,5 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101, continuous = FA
   
   return(list(infoDesign = parameters, RCBD.layout = RCBD.layout.loc,
               plotNumber.layout = p.number.loc,
-              fieldBook = RCBD.output))
+              fieldBook = RCBD_output))
 }

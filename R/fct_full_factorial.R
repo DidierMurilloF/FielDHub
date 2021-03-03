@@ -65,14 +65,14 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1, type = 2, plot
     return(newlevels)
   }
   if(l < 1 || is.null(l)) stop("Please, check the value for the number of locations.")
-  if (!is.null(plotNumber)) {
+  if (!is.null(plotNumber) && length(plotNumber) == l) {
     if (any(!is.numeric(plotNumber)) || any(plotNumber < 1) || any(plotNumber %% 1 != 0) ||
         any(diff(plotNumber) < 0)) {
       shiny::validate("The input plotNumber must be an integer greater than 0 and sorted.")
     } 
   }else {
     plotNumber <- seq(1001, 1000*(l+1), 1000)
-    warning("Since plotNumber was NULL, it was set up to default values for each site.")
+    warning("'plotNumber' was set up to its default values for each site.")
   }
   if (is.null(data)) {
     if(!is.null(setfactors)) {
@@ -122,12 +122,12 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1, type = 2, plot
     if (type == 1) {
       m1 <- CRD(t = trt, reps = reps, plotNumber = plotNumber[locs], seed = seed,
                 data = NULL, locationName = locationNames[1])$fieldBook
-      m1 <- m1[,-1]
+      m1 <- m1[,-c(1,2)]
       kind <- "CRD"
     }else {
       m1 <- RCBD(t = trt, reps = reps, l = 1, plotNumber = plotNumber[locs], continuous = continuous,
                  planter = planter, seed = seed, locationNames = locationNames[locs])$fieldBook
-      m1 <- m1[,-1]
+      m1 <- m1[,-c(1,2)]
       kind <- "RCBD"
     }
     m1 <- cbind(m1, matrix(data = 0, nrow = nruns, ncol = nt + 1, byrow = TRUE))
@@ -149,10 +149,8 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1, type = 2, plot
     design <- design[order(design$PLOT, design$REP),]
   }
   nruns <- nrow(allcomb)
-  design <- cbind(LOCATION = rep(locationNames, each = nruns * reps), design)
+  design_output <- cbind(ID = 1:nrow(design), LOCATION = rep(locationNames, each = nruns * reps), design)
   fullfactorial <- list(factors = levels(TRT), levels = newlevels, runs = nruns, alltreatments = allcomb, 
                         Reps = reps, Locations = l, locationNames = locationNames, kind = kind)
-  #infoDesign = list(factors = levels(TRT), levels = newlevels)
-  # data = data, 
-  return(list(infoDesign = fullfactorial, fieldBook = design))
+  return(list(infoDesign = fullfactorial, fieldBook = design_output))
 }

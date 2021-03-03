@@ -124,7 +124,7 @@ mod_RCBD_server <- function(id){
       modalDialog(
         selectInput(inputId = ns("trailsRCBD"), label = "Select One:", choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
         conditionalPanel("input.trailsRCBD == 'Other'", ns = ns,
-                         textInput(inputId = ns("OtherRCBD"), label = "Input Trail Name:", value = NULL)
+                         textInput(inputId = ns("OtherRCBD"), label = "Input Trial Name:", value = NULL)
         ),
         fluidRow(
           column(6, 
@@ -191,12 +191,11 @@ mod_RCBD_server <- function(id){
         cnamesdf.rcbd <- colnames(df.rcbd)
         df.rcbd <- norm_trunc(a = min, b = max, data = df.rcbd)
         colnames(df.rcbd) <- c(cnamesdf.rcbd[1:(ncol(df.rcbd) - 1)], valsRCBD$trail.rcbd)
-        a <- ncol(df.rcbd)
+        df.rcbd <- df.rcbd[order(df.rcbd$ID),]
       }else {
         df.rcbd <-  RCBD_reactive()$fieldBook
-        a <- ncol(df.rcbd)
       }
-      return(list(df = df.rcbd, a = a))
+      return(list(df = df.rcbd))
     })
     
     

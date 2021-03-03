@@ -36,20 +36,7 @@ mod_Rectangular_Lattice_ui <- function(id){
                    numericInput(inputId = ns("r.rectangular"), label = "Input # of Full Reps:", value = NULL, min = 2),
                    selectInput(inputId = ns("k.rectangular"), label = "Input # of Plots per IBlock:", choices = ""),
                    numericInput(inputId = ns("l.rectangular"), label = "Input # of Locations:", value = NULL, min = 1),
-                   # 
-                   # fluidRow(
-                   #   column(6,style=list("padding-right: 28px;"),
-                   #          numericInput(inputId = ns("r.rectangular"), label = "Input # of Blocks:", value = NULL, min = 2)
-                   #   ),
-                   #   column(6, style=list("padding-left: 5px;"),
-                   #          numericInput(inputId = ns("l.rectangular"), label = "Input # of Locations:", value = 1, min = 1)
-                   #   )
-                   # ),
-                   
-                   
-                   # selectInput(inputId = ns("planter_mov__rectangular"), label = "Plot Order Layout:",
-                   #             choices = c("serpentine", "cartesian"), multiple = FALSE,
-                   #             selected = "serpentine"),
+
                    fluidRow(
                      column(6, style=list("padding-right: 28px;"),
                             textInput(inputId = ns("plot_start.rectangular"), "Starting Plot Number:", value = 101)
@@ -164,7 +151,7 @@ mod_Rectangular_Lattice_server <- function(id) {
       modalDialog(
         selectInput(inputId = ns("trailsRECT"), label = "Select One:", choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
         conditionalPanel("input.trailsRECT == 'Other'", ns = ns,
-                         textInput(inputId = ns("OtherRECT"), label = "Input Trail Name:", value = NULL)
+                         textInput(inputId = ns("OtherRECT"), label = "Input Trial Name:", value = NULL)
         ),
         fluidRow(
           column(6,
@@ -258,8 +245,6 @@ mod_Rectangular_Lattice_server <- function(id) {
       
     })
     
-    
-    # Downloadable csv of selected dataset ----
     output$downloadData.rectangular <- downloadHandler(
       filename = function() {
         loc <- paste("Rectangular_Lattice_", sep = "")
@@ -270,15 +255,6 @@ mod_Rectangular_Lattice_server <- function(id) {
         write.csv(df, file, row.names = FALSE)
       }
     )
-    #Update_k = Update_k
-    #return(list(RECTANGULAR.output = RECTANGULAR.output))
     
   })
 }
-
-    
-## To be copied in the UI
-# mod_Rectangular_Lattice_ui("Rectangular_Lattice_ui_1")
-    
-## To be copied in the server
-# mod_Rectangular_Lattice_server("Rectangular_Lattice_ui_1")

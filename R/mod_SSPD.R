@@ -155,13 +155,13 @@ mod_SSPD_server <- function(id){
     })
     
     
-    valsspd <- reactiveValues(maxV.sspd = NULL, minV.sspd = NULL, trail.sspd = NULL)
+    valsspd <- reactiveValues(maxV.sspd = NULL, minV.sspd = NULL, Trial.sspd = NULL)
     
     simuModal.sspd <- function(failed = FALSE) {
       modalDialog(
-        selectInput(inputId = ns("trailsRowCol"), label = "Select One:", choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
-        conditionalPanel("input.trailsRowCol == 'Other'", ns = ns,
-                         textInput(inputId = ns("Otherspd"), label = "Input Trail Name:", value = NULL)
+        selectInput(inputId = ns("TrialsRowCol"), label = "Select One:", choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
+        conditionalPanel("input.TrialsRowCol == 'Other'", ns = ns,
+                         textInput(inputId = ns("Otherspd"), label = "Input Trial Name:", value = NULL)
         ),
         fluidRow(
           column(6, 
@@ -200,13 +200,13 @@ mod_SSPD_server <- function(id){
       if (input$max.sspd > input$min.sspd && input$min.sspd != input$max.sspd) {
         valsspd$maxV.sspd <- input$max.sspd
         valsspd$minV.sspd <- input$min.sspd
-        if(input$trailsRowCol == "Other") {
+        if(input$TrialsRowCol == "Other") {
           req(input$Otherspd)
           if(!is.null(input$Otherspd)) {
-            valsspd$trail.sspd <- input$Otherspd
+            valsspd$Trial.sspd <- input$Otherspd
           }else showModal(simuModal.sspd(failed = TRUE))
         }else {
-          valsspd$trail.sspd <- as.character(input$trailsRowCol)
+          valsspd$Trial.sspd <- as.character(input$TrialsRowCol)
         }
         removeModal()
       }else {
@@ -221,17 +221,16 @@ mod_SSPD_server <- function(id){
     simuData_sspd <- reactive({
       req(sspd_reactive()$fieldBook)
       
-      if(!is.null(valsspd$maxV.sspd) && !is.null(valsspd$minV.sspd) && !is.null(valsspd$trail.sspd)) {
+      if(!is.null(valsspd$maxV.sspd) && !is.null(valsspd$minV.sspd) && !is.null(valsspd$Trial.sspd)) {
         max <- as.numeric(valsspd$maxV.sspd)
         min <- as.numeric(valsspd$minV.sspd)
         df.sspd <- sspd_reactive()$fieldBook
         cnamesdf.sspd <- colnames(df.sspd)
         df.sspd <- norm_trunc(a = min, b = max, data = df.sspd)
-        colnames(df.sspd) <- c(cnamesdf.sspd[1:(ncol(df.sspd) - 1)], valsspd$trail.sspd)
-        a <- ncol(df.sspd)
+        colnames(df.sspd) <- c(cnamesdf.sspd[1:(ncol(df.sspd) - 1)], valsspd$Trial.sspd)
+        df.sspd <- df.sspd[order(df.sspd$ID),]
       }else {
         df.sspd <- sspd_reactive()$fieldBook  
-        a <- ncol(df.sspd)
       }
       return(list(df = df.sspd, a = a))
     })
@@ -240,7 +239,6 @@ mod_SSPD_server <- function(id){
     output$SSPD.output  <- DT::renderDataTable({
       
       df <- simuData_sspd()$df
-      a <- as.numeric(simuData_sspd()$a)
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "500px"))
       

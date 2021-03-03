@@ -314,9 +314,6 @@ mod_Diagonal_server <- function(id) {
                     of checks based on the total number of plots you want to have in the final layout.', options = list(
                       columnDefs = list(list(className = 'dt-center', targets = "_all"))))
       
-      # DT::datatable(df, rownames = FALSE, caption = 'Table of Checks.', options = list(
-      #   columnDefs = list(list(className = 'dt-center', targets = "_all"))))
-      
     })
     
     output$dt2 <- DT::renderDT({
@@ -325,6 +322,7 @@ mod_Diagonal_server <- function(id) {
       if (multi) req(getData()$data_entry)
       req(rand_checks()$map_checks)
       w_map <- rand_checks()$map_checks
+      #w_map <- as.matrix(available_percent1()$d_checks[[19]])
       if (is.null(w_map))
         return(NULL)
       
@@ -557,8 +555,9 @@ mod_Diagonal_server <- function(id) {
           name_expt = paste0(rep("Block", times = blocks), 1:blocks)
         }
         map_letters <- rand_lines()$w_map_letter
+        checksEntries <- as.vector(getChecks()$checksEntries)
         split_name_diagonal1 <- names_dbrows(w_map = w_map, myWay = "By Row", kindExpt = "DBUDC", data_dim_each_block = data_dim_each_block,
-                                             w_map_letters = map_letters, expt_name = name_expt, Checks = 1:input$checks)
+                                             w_map_letters = map_letters, expt_name = name_expt, Checks = checksEntries)
       }else if (input$myWay == "By Column" && input$kindExpt == "DBUDC") {
         map_letters <- rand_lines()$w_map_letter
         data_dim_each_block <- available_percent1()$data_dim_each_block
@@ -575,8 +574,6 @@ mod_Diagonal_server <- function(id) {
                                                expt_name = name_expt, data_entry = data_entry, reps = NULL,
                                                data_dim_each_block = data_dim_each_block, w_map_letters1 = map_letters)
       }else if (input$kindExpt == "SUDC") {
-        # map_letters <- rand_lines()$w_map_letter
-        # data_dim_each_block <- available_percent1()$data_dim_each_block
         Name_expt <- as.vector(unlist(strsplit(input$expt_name, ",")))
         blocks <- 1
         if (length(Name_expt) == blocks && !is.null(Name_expt)) {
@@ -675,12 +672,10 @@ mod_Diagonal_server <- function(id) {
     })
     
     put_Filler_in_name <- reactive({
-      #Option_NCD <- TRUE
       req(rand_lines()$rand)
       req(input$n_rows, input$n_cols)
       r_map <- rand_lines()$rand
       if("Filler" %in% r_map) Option_NCD <- TRUE else Option_NCD <- FALSE
-      #multi <- input$kindExpt == "RDC" || input$kindExpt == "DBUDC"
       
       if (input$kindExpt != "DBUDC" && Option_NCD == TRUE) {
         blocks <- 1
@@ -697,7 +692,7 @@ mod_Diagonal_server <- function(id) {
           }else{
             split_names[1,((input$n_cols + 1) - Fillers):input$n_cols] <- "Filler"
           }
-        }else{
+        }else {
           split_names[1,((input$n_cols + 1) - Fillers):input$n_cols] <- "Filler"
         }
       }
@@ -1093,10 +1088,6 @@ mod_Diagonal_server <- function(id) {
     })
     
     
-    
-    
-    
-    
     valsDIAG <- reactiveValues(ROX = NULL, ROY = NULL, trail = NULL, minValue = NULL,
                                 maxValue = NULL)
     
@@ -1104,7 +1095,7 @@ mod_Diagonal_server <- function(id) {
       modalDialog(
         fluidRow(
           column(6, 
-                 selectInput(inputId = ns("trailsDIAG"), label = "Select One Trail:", 
+                 selectInput(inputId = ns("trailsDIAG"), label = "Select One:", 
                              choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
           ),
           column(6, 
@@ -1112,16 +1103,16 @@ mod_Diagonal_server <- function(id) {
           )
         ),
         conditionalPanel("input.trailsDIAG == 'Other'", ns = ns,
-                         textInput(inputId = ns("OtherDIAG"), label = "Input Trail Name:", value = NULL)
+                         textInput(inputId = ns("OtherDIAG"), label = "Input Trial Name:", value = NULL)
         ),
         fluidRow(
           column(6, 
                  selectInput(inputId = ns("ROX.DIAG"), "Select the Correlation in Rows:", 
-                             choices = seq(0.1, 0.9, 0.1))
+                             choices = seq(0.1, 0.9, 0.1), selected = 0.5)
           ),
           column(6, 
                  selectInput(inputId = ns("ROY.DIAG"), "Select the Correlation in Cols:", 
-                             choices = seq(0.1, 0.9, 0.1))
+                             choices = seq(0.1, 0.9, 0.1), selected = 0.5)
           )
         ),
         fluidRow(
@@ -1275,9 +1266,6 @@ mod_Diagonal_server <- function(id) {
     #     )
     #   }
     # )
-    
-    # return(list(dt1 = dt1, dt8  = dt8,  table1 = table1,  dt2 =  dt2, dt3 = dt3, dt4 = dt4,
-    #             dt5 = dt5, dt6 = dt6))
   })
 }
     

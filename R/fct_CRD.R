@@ -97,6 +97,10 @@ CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL,
   design <- data.frame(list(LOCATION = rep(locationName, N)), PLOT = sample(plotNumber:(plotNumber + N - 1)),
                        REP = REP, TREATMENT = TRT)
   design <- design[order(design$PLOT),]
+  id <- 1:nrow(design)
+  design <- cbind(id, design)
+  colnames(design)[1] <- "ID"
+  design <- as.data.frame(design)
   rownames(design) <- 1:N
   TRT <- levels(factor(TRT, as.character(unique(TRT))))
   parameters <- list(numberofTreatments = nt, treatments = TRT, Reps = reps, locationName = locationName,

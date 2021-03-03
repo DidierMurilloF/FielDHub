@@ -155,7 +155,7 @@ mod_Alpha_Lattice_server <- function(id){
         modalDialog(
           selectInput(inputId = ns("trailsALPHA"), label = "Select One:", choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
           conditionalPanel("input.trailsALPHA == 'Other'", ns = ns,
-                           textInput(inputId = ns("OtherALPHA"), label = "Input the Trail Name:", value = NULL)
+                           textInput(inputId = ns("OtherALPHA"), label = "Input the Trial Name:", value = NULL)
           ),
           fluidRow(
             column(6,

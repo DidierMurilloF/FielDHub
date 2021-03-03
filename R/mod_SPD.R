@@ -149,7 +149,7 @@ mod_SPD_server <- function(id){
       modalDialog(
         selectInput(inputId = ns("trailsspd"), label = "Select One:", choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
         conditionalPanel("input.trailsspd == 'Other'", ns = ns,
-                         textInput(inputId = ns("Otherspd"), label = "Input Location Name:", value = NULL)
+                         textInput(inputId = ns("Otherspd"), label = "Input Trial Name:", value = NULL)
         ),
         fluidRow(
           column(6, 
@@ -216,19 +216,17 @@ mod_SPD_server <- function(id){
         cnamesdf.spd <- colnames(df.spd)
         df.spd <- norm_trunc(a = min, b = max, data = df.spd)
         colnames(df.spd) <- c(cnamesdf.spd[1:(ncol(df.spd) - 1)], valspd$trail.spd)
-        a <- ncol(df.spd)
+        df.spd <- df.spd[order(df.spd$ID),]
       }else {
         df.spd <- spd_reactive()$fieldBook  
-        a <- ncol(df.spd)
       }
-      return(list(df = df.spd, a = a))
+      return(list(df = df.spd))
     })
     
     
     output$SPD.output <- DT::renderDataTable({
       
       df <- simuData_spd()$df
-      a <- as.numeric(simuData_spd()$a)
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "500px"))
       
@@ -247,7 +245,6 @@ mod_SPD_server <- function(id){
         write.csv(df, file, row.names = FALSE)
       }
     )
-    #return(list(SPD.output = SPD.output))
   })
 }
     

@@ -69,7 +69,6 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
     Name.Treatments <- as.character(Treatment.f)
     ls.len <- n.treatments
   }
-  
   if(!is.null(l) && is.numeric(l) && length(l) == 1) {
     if (l > 1 && is.null(locationNames)) {
       locationNames <- 1:l
@@ -78,16 +77,14 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
     }
     if (length(plotNumber) < l || is.null(plotNumber)) plotNumber <- seq(1001, 1000*(l+1), 1000)
   }else stop("\n'latinsquare()' requires a integer for number of locations!")
-  plot.numbs <- seriePlot.numbers(plot.number = plotNumber, reps = reps, l = l)
+  plot.numbs <- seriePlot.numbers(plot.number = plotNumber, reps = reps, l = l, t = ls.len*ls.len)
   if (!is.null(locationNames) && length(locationNames) == l) {
     locs <- locationNames
   }else locs <- 1:l
   step.random <- vector(mode = "list", length = reps)
   lsd.reps <- vector(mode = "list", length = reps)
   out.ls <- vector(mode = "list", length = reps)
-  #lsd.out.l <- vector(mode = "list", length = l)
   plotSquares <- vector(mode = "list", length = reps)
-  #z <- 1
   x <- seq(1, reps * l, reps)
   y <- seq(reps, reps * l, reps)
   for (j in 1:reps) {
@@ -129,16 +126,8 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
                                    COLUMN = Column,
                                    TREATMENT = as.vector(t(new_expt.ls))))
   }
-  #for (sites in 1:l) {
-    #lsd.out.l[[sites]] <- paste_by_row(out.ls[x[sites]:y[sites]])
-  #}
   expt.ls <- paste_by_row(lsd.reps)
   latinsquare.expt <- paste_by_row(out.ls)
-  #latinsquare.expt.Loc <- paste_by_row(lsd.out.l)
-  #ls.output.Loc <- latinsquare.expt.Loc
-  # ls.output.Loc$ROW <- factor(ls.output.Loc$ROW, levels = Name.Rows)
-  # ls.output.Loc$COLUMN <- factor(ls.output.Loc$COLUMN, levels = Name.Columns)
-  # ls.output.Loc.order <- ls.output.Loc[order(ls.output.Loc$SQUARE, ls.output.Loc$ROW, ls.output.Loc$COLUMN), ]
   ls.output <- latinsquare.expt
   ls.output$ROW <- factor(ls.output$ROW, levels = Name.Rows)
   ls.output$COLUMN <- factor(ls.output$COLUMN, levels = Name.Columns)
@@ -147,5 +136,7 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
     ls.output.order$LOCATION <- rep(locationNames, each = (ls.len * ls.len) * reps)
   }
   rownames(ls.output.order) <- 1:nrow(ls.output.order)
-  return(list(squares = lsd.reps, plotSquares = plotSquares, fieldBook = ls.output.order))
+  latin_design <- cbind(ID = 1:nrow(ls.output.order), ls.output.order)
+  
+  return(list(squares = lsd.reps, plotSquares = plotSquares, fieldBook = latin_design))
 }

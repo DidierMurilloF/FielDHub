@@ -139,7 +139,7 @@ mod_STRIPD_server <- function(id){
       modalDialog(
         selectInput(inputId = ns("trailsStrip"), label = "Select One:", choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
         conditionalPanel("input.trailsStrip == 'Other'", ns = ns,
-                         textInput(inputId = ns("OtherStrip"), label = "Input Trail Name:", value = NULL)
+                         textInput(inputId = ns("OtherStrip"), label = "Input Trial Name:", value = NULL)
         ),
         fluidRow(
           column(6, 

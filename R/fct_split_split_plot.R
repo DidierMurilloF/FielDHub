@@ -141,33 +141,10 @@ split_split_plot <- function(wp = NULL, sp = NULL, ssp = NULL, reps = NULL, type
     warning("Since plotNumber was NULL, it was set up to its default value for each location.")
   }
   plot.number <- plotNumber
-  if (!is.null(plot.number)) {
-    if (any(plot.number < 1)) stop ("Plot numbers should be positive values.")
-    if (any(plot.number %% 1 != 0)) stop ("Plot numbers should be integer values.")
-    if (length(plot.number) == l) {
-      plot.number <- plot.number[1:l]
-      plot.random <- matrix(data = NA, nrow = wp * b, ncol = l)
-      for (k in 1:l) {
-        plots <- plot.number[k]:(plot.number[k] + (wp * b) - 1)
-        plot.random[,k] <- replicate(1, sample(plots))
-      }
-    }else if (length(plot.number) < l) {
-      plots <- plot.number[1]:(plot.number[1] + (wp * b) - 1)
-      plot.random <- replicate(l, sample(plots))
-      warning("Length of plot numbers is lessen than location numbers: only the first used.")
-    }else if (length(plot.number) > l) {
-      plot.number <- plot.number[1:l]
-      plot.random <- matrix(data = NA, nrow = wp * b, ncol = l)
-      for (k in 1:l) {
-        plots <- plot.number[k]:(plot.number[k] + (wp * b) - 1)
-        plot.random[,k] <- replicate(1, sample(plots))
-      }
-      warning("Length of plot numbers is greater than location numbers.")
-    }
-  }else {
-    stop ("Please, input the plot number(s).")
-  }
   if (type == 1) crd <- TRUE else crd <- FALSE
+  pred_plots <- plot_number_splits(plot.number = plot.number, reps = b, l = l, t = wp, crd = crd)
+  plot.random <- pred_plots$plots
+  p.number.loc <- pred_plots$plots_loc
   if (crd) {
     loc.list <- vector(mode = "list", length = l)
     for (v in 1:l) {
@@ -186,7 +163,8 @@ split_split_plot <- function(wp = NULL, sp = NULL, ssp = NULL, reps = NULL, type
     wp.random <- as.vector(sspd.layout[,3])
     type <- "CRD"
   }else {
-    plot.numbers <- apply(plot.random,2, sort)
+    #plot.numbers <- apply(plot.random,2, sort)
+    plot.numbers <- as.vector(unlist(p.number.loc))
     wp.random <- replicate(b * l, sample(WholePlots, replace = FALSE))
     sspd.layout <- matrix(data = 0, nrow = (b * wp) * l, ncol = 5)
     colnames(sspd.layout) <- c("PLOT", "BLOCK", "Whole-plot", "Sub-plot", "Sub-Sub Plot")
@@ -243,10 +221,9 @@ split_split_plot <- function(wp = NULL, sp = NULL, ssp = NULL, reps = NULL, type
   for (j in z) {
     sspd.output[j, ncol(sspd.output)] <- paste(sspd.output[j, 4:6], collapse = "|")
   }
-  
+  sspd_output <- cbind(ID = 1:nrow(sspd.output), sspd.output)
   info.design <- list(Whole.Plots = WholePlots, Sub.Plots = SubPlots, Sub.Sub.Plots = SubSubPlots,
                       Locations = l, type.design = type, seed = seed)
-  # layoutlocations = loc.spd.layout,
 
-  return(list(infoDesign = info.design, fieldBook = sspd.output))
+  return(list(infoDesign = info.design, fieldBook = sspd_output))
 }

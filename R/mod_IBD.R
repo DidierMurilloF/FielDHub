@@ -39,20 +39,7 @@ mod_IBD_ui <- function(id){
                    
                    selectInput(inputId = ns("k.ibd"), label = "Input # of Plots per IBlock:", choices = ""),
                    
-                   # fluidRow(
-                   #   column(6,style=list("padding-right: 28px;"),
-                   #          numericInput(inputId = ns("r.ibd"), label = "Input # of Full Reps:", value = NULL, min = 2)
-                   #          
-                   #   ),
-                   #   column(6, style=list("padding-left: 5px;"),
-                   #          selectInput(inputId = ns("k.ibd"), label = "Input # of Plots per IBlock:", choices = "")
-                   #   )
-                   # ),
-                   
                    numericInput(inputId = ns("l.ibd"), label = "Input # of Locations:", value = NULL, min = 1),
-                   # selectInput(inputId = ns("planter_mov_ibd"), label = "Plot Order Layout:",
-                   #             choices = c("serpentine", "cartesian"), multiple = FALSE,
-                   #             selected = "serpentine"),
                    
                    
                    fluidRow(
@@ -171,7 +158,7 @@ mod_IBD_server <- function(id){
       modalDialog(
         selectInput(inputId = ns("trailsIBD"), label = "Select One:", choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
         conditionalPanel("input.trailsIBD == 'Other'", ns = ns,
-                         textInput(inputId = ns("OtherIBD"), label = "Input Trail Name:", value = NULL)
+                         textInput(inputId = ns("OtherIBD"), label = "Input Trial Name:", value = NULL)
         ),
         fluidRow(
           column(6, 

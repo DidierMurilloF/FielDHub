@@ -30,126 +30,93 @@ random_checks <- function(dt = NULL, d_checks = NULL, p = NULL, percent = NULL, 
   multi <- kindExpt == "RDC" || kindExpt == "DBUDC"
   
   if (multi == TRUE && kindExpt == "DBUDC"){
-    
     req(data_dim_each_block)
-    
     req(data)
-    
     if (myWay == "By Row"){
-      
       data_dim_each_block <- data_dim_each_block
-      
       my_row_sets <- automatically_cuts(data = w_map, planter_mov = planter_mov, way = "By Row",
                                         dim_data = data_dim_each_block)[[1]]
-      
       if(is.null(my_row_sets)) return(NULL)
-      
       blocks <- length(my_row_sets)
-      
     }else {
-      
       data_dim_each_block <- data_dim_each_block
-      
       cuts_by_c <- automatically_cuts(data = w_map, planter_mov = planter_mov, way = "By Column",
                                       dim_data = data_dim_each_block)
-      
       if(is.null(cuts_by_c)) return(NULL)
-      
       blocks <- length(cuts_by_c)
-      
       m = diff(cuts_by_c)
-      
       my_col_sets = c(cuts_by_c[1], m)
-      
     }
     
-    if (myWay == "By Column"){
-      
+    if (myWay == "By Column") {
       w_map_split <- turner::matrix_to_blocks(w_map, blocks = my_col_sets, byrow = FALSE)
-      
       Total_checks <- numeric()                                                              
       for (n in 1:length(w_map_split)){
         Total_checks[n] <- sum(w_map_split[[n]] == 1)
       }
-      
-      checks = Checks
+      checks <- Checks
       rand_checks <- list()
       for (j in 1:length(w_map_split)){
-        
         res <- Total_checks[j] %% length(checks)
-        
         if (res == 0){
           s <- rep(checks, Total_checks[j]/length(checks))
           rand_checks[[j]] <- sample(s)
         }else{
-          v <- c(rep(checks,Total_checks[j]/length(checks)), sample(checks[1:res], res))
+          if (res > 1) {
+            v <- c(rep(checks,(Total_checks[j]-res)/length(checks)), 
+                   checks[sample(1:length(checks), size = res)])
+          }else {
+            v <- c(rep(checks,(Total_checks[j]-res)/length(checks)), 
+                   checks[sample(1:length(checks), size = 1)])
+          }
           rand_checks[[j]] <- sample(v)
         }
-        
       }
-      
       w_map[w_map == 1] <- unlist(rand_checks)
-      
       col_checks <- ifelse(w_map != 0, w_map, 0) 
-      
-    }else{
-      
+    }else {
       w_map_split <- turner::matrix_to_blocks(w_map, blocks = my_row_sets, byrow = TRUE)
-      
       Total_checks <- numeric()                                                              
       for (n in 1:length(w_map_split)){
         Total_checks[n] <- sum(w_map_split[[n]] == 1)
       }
-      
-      
-      checks = Checks
+      checks <- Checks
       rand_checks <- list()
       for (j in 1:length(w_map_split)){
-        
         res <- Total_checks[j] %% length(checks)
-        
-        if (res == 0){
+        if (res == 0) {
           s <- rep(checks, Total_checks[j]/length(checks))
           rand_checks[[j]] <- sample(s)
-        }else{
-          v <- c(rep(checks,Total_checks[j]/length(checks)), sample(checks[1:res],res))
+        }else {
+          if (res > 1) {
+            v <- c(rep(checks,(Total_checks[j]-res)/length(checks)), 
+                   checks[sample(1:length(checks), size = res)])
+          }else {
+            v <- c(rep(checks,(Total_checks[j]-res)/length(checks)), 
+                   checks[sample(1:length(checks), size = 1)])
+          }
           rand_checks[[j]] <- sample(v)
         }
-        
       }
-      
       w_map <- t(w_map)
-      
       w_map[w_map == 1] <- unlist(rand_checks)
-      
       w_map <- t(w_map)
-      
       col_checks <- ifelse(w_map != 0, w_map, 0) 
-      
     }
-    
   }else if (multi == TRUE && kindExpt == "RDC"){
-    
     if (myWay == "By Column"){
-      
       x <- as.numeric(n_cols)/as.numeric(n_reps)
-      
       reps <- as.numeric(n_reps)
       my_col_sets <- rep(x, reps)
-      
       w_map_split <- turner::matrix_to_blocks(w_map, blocks = my_col_sets, byrow = FALSE)
-      
       Total_checks <- numeric()                                                              
       for (n in 1:length(w_map_split)){
         Total_checks[n] <- sum(w_map_split[[n]] == 1)
       }
-      
       checks = Checks
       rand_checks <- list()
       for (j in 1:length(w_map_split)){
-        
         res <- Total_checks[j] %% length(checks)
-        
         if (res == 0){
           s <- rep(checks, Total_checks[j]/length(checks))
           rand_checks[[j]] <- sample(s)
@@ -157,15 +124,10 @@ random_checks <- function(dt = NULL, d_checks = NULL, p = NULL, percent = NULL, 
           v <- c(rep(checks,Total_checks[j]/length(checks)), sample(checks,res))
           rand_checks[[j]] <- sample(v)
         }
-        
       }
-      
       w_map[w_map == 1] <- unlist(rand_checks)
-      
       col_checks <- ifelse(w_map != 0, w_map, 0) 
-      
     }else if(myWay == "By Row"){
-      
       v <- as.numeric(n_rows)/as.numeric(n_reps)
       if (v %% 1 != 0) return(NULL)
       reps <- as.numeric(n_reps)
@@ -175,33 +137,22 @@ random_checks <- function(dt = NULL, d_checks = NULL, p = NULL, percent = NULL, 
         cuts[i] <- v + s
         s <- s + v
       }
-      
       lili <- list()
       s <- 1
       for (i in 1:length(cuts)){
-        
         lili[[i]] <- s:(cuts[i])
-        
         s <- (cuts[i] + 1)
-        
       }
-      
       my_row_sets <- lili
-      
       w_map_split <- turner::matrix_to_blocks(w_map, blocks = my_row_sets, byrow = TRUE)
-      
       Total_checks <- numeric()                                                              
       for (n in 1:length(w_map_split)){
         Total_checks[n] <- sum(w_map_split[[n]] == 1)
       }
-      
-      
       checks = Checks
       rand_checks <- list()
       for (j in 1:length(w_map_split)){
-        
         res <- Total_checks[j] %% length(checks)
-        
         if (res == 0){
           s <- rep(checks, Total_checks[j]/length(checks))
           rand_checks[[j]] <- sample(s)
@@ -211,31 +162,21 @@ random_checks <- function(dt = NULL, d_checks = NULL, p = NULL, percent = NULL, 
         }
         
       }
-      
       w_map <- t(w_map)
-      
       w_map[w_map == 1] <- unlist(rand_checks)
-      
       w_map <- t(w_map)
-      
       col_checks <- ifelse(w_map != 0, w_map, 0) 
-      
     }
   }else if (multi == FALSE){
-    
     w_map_split <- list(w_map)
-    
     Total_checks <- numeric()                                                              
     for (n in 1:length(w_map_split)){
       Total_checks[n] <- sum(w_map_split[[n]] == 1)
     }
-    
     checks = Checks
     rand_checks <- list()
     for (j in 1:length(w_map_split)){
-      
       res <- Total_checks[j] %% length(checks)
-      
       if (res == 0){
         s <- rep(checks, Total_checks[j]/length(checks))
         rand_checks[[j]] <- sample(s)
@@ -243,13 +184,9 @@ random_checks <- function(dt = NULL, d_checks = NULL, p = NULL, percent = NULL, 
         v <- c(rep(checks,Total_checks[j]/length(checks)), sample(checks,res))
         rand_checks[[j]] <- sample(v)
       }
-      
     }
-    
     w_map[w_map == 1] <- unlist(rand_checks)
-    
     col_checks <- ifelse(w_map != 0, w_map, 0) 
-    
   }
   
   list(map_checks = w_map, col_checks = col_checks)

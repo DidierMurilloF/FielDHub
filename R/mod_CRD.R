@@ -119,7 +119,7 @@ mod_CRD_server <- function(id) {
       modalDialog(
         selectInput(inputId = ns("trailsCRD"), label = "Select One:", choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
         conditionalPanel("input.trailsCRD == 'Other'", ns = ns,
-                         textInput(inputId = ns("OtherCRD"), label = "Input Trail Name:", value = NULL)
+                         textInput(inputId = ns("OtherCRD"), label = "Input Trial Name:", value = NULL)
         ),
         fluidRow(
           column(6, 
@@ -185,21 +185,18 @@ mod_CRD_server <- function(id) {
         cnamesdf.crd <- colnames(df.crd)
         df.crd <- norm_trunc(a = min, b = max, data = df.crd)
         colnames(df.crd) <- c(cnamesdf.crd[1:(ncol(df.crd) - 1)], vals$trail.CRD)
-        a <- ncol(df.crd)
+        df.crd <- df.crd[order(df.crd$ID),]
       }else {
         df.crd <-  CRD_reactive()$fieldBook
-        a <- ncol(df.crd)
       }
       
-      return(list(df = df.crd, a = a))
-      
+      return(list(df = df.crd))
     })
     
     output$CRD.output <- DT::renderDT({
       df <- simuDataCRD()$df
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "500px"))
-      a <- as.numeric(simuDataCRD()$a)
       DT::datatable(df, rownames = FALSE, options = list(
         columnDefs = list(list(className = 'dt-center', targets = "_all"))))
     })

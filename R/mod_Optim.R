@@ -355,7 +355,7 @@ mod_Optim_server <- function(id){
       modalDialog(
         fluidRow(
           column(6, 
-                 selectInput(inputId = ns("trailsOPTIM"), label = "Select One Trail:", 
+                 selectInput(inputId = ns("trailsOPTIM"), label = "Select One:", 
                              choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
           ),
           column(6, 
@@ -363,16 +363,16 @@ mod_Optim_server <- function(id){
           )
         ),
         conditionalPanel("input.trailsOPTIM == 'Other'", ns = ns,
-                         textInput(inputId = ns("OtherOPTIM"), label = "Input Trail Name:", value = NULL)
+                         textInput(inputId = ns("OtherOPTIM"), label = "Input Trial Name:", value = NULL)
         ),
         fluidRow(
           column(6, 
                  selectInput(inputId = ns("ROX.O"), "Select the Correlation in Rows:", 
-                             choices = seq(0.1, 0.9, 0.1))
+                             choices = seq(0.1, 0.9, 0.1), selected = 0.5)
           ),
           column(6, 
                  selectInput(inputId = ns("ROY.O"), "Select the Correlation in Cols:", 
-                             choices = seq(0.1, 0.9, 0.1))
+                             choices = seq(0.1, 0.9, 0.1), selected = 0.5)
           )
         ),
         fluidRow(

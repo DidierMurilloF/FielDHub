@@ -7,7 +7,7 @@ ibd_plot_numbers <- function(nt = NULL, plot.number = NULL, r = NULL, l = NULL) 
     
     if (length(plot.number) == l) {
       plot.number <- plot.number[1:l]
-      plot.number <- seriePlot.numbers(plot.number = plot.number, reps = r, l = l)
+      plot.number <- seriePlot.numbers(plot.number = plot.number, reps = r, l = l, t = nt)
       p.number.loc <- vector(mode = "list", length = l)
       for (k in 1:l) {
         plotsDesign <- matrix(data = NA, nrow = nt, ncol = r)
@@ -20,7 +20,7 @@ ibd_plot_numbers <- function(nt = NULL, plot.number = NULL, r = NULL, l = NULL) 
       }
     }else if (length(plot.number) < l) {
       plot.number <- seq(1001, 1000*(l+1), 1000)
-      plot.number <- seriePlot.numbers(plot.number = plot.number, reps = r, l = l)
+      plot.number <- seriePlot.numbers(plot.number = plot.number, reps = r, l = l, t = nt)
       p.number.loc <- vector(mode = "list", length = l)
       for (k in 1:l) {
         plotsDesign <- matrix(data = NA, nrow = nt, ncol = r)
@@ -34,6 +34,7 @@ ibd_plot_numbers <- function(nt = NULL, plot.number = NULL, r = NULL, l = NULL) 
       warning("Length of plot numbers is lower than the number of locations.")
     }else if (length(plot.number) > l) {
       plot.number <- plot.number[1:l]
+      plot.number <- seriePlot.numbers(plot.number = plot.number, reps = r, l = l, t = nt)
       plotsDesign <- matrix(data = NA, nrow = nt, ncol = l)
       p.number.loc <- vector(mode = "list", length = l)
       for (k in 1:l) {
@@ -49,7 +50,7 @@ ibd_plot_numbers <- function(nt = NULL, plot.number = NULL, r = NULL, l = NULL) 
     }
   }else {
     plot.number <- seq(1001, 1000*(l+1), 1000)
-    plot.number <- seriePlot.numbers(plot.number = plot.number, reps = r, l = l)
+    plot.number <- seriePlot.numbers(plot.number = plot.number, reps = r, l = l, t = nt)
     p.number.loc <- vector(mode = "list", length = l)
     for (k in 1:l) {
       plotsDesign <- matrix(data = NA, nrow = nt, ncol = r)

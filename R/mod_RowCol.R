@@ -137,7 +137,7 @@ mod_RowCol_server <- function(id){
       modalDialog(
         selectInput(inputId = ns("trailsRowCol"), label = "Select One:", choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
         conditionalPanel("input.trailsRowCol == 'Other'", ns = ns,
-                         textInput(inputId = ns("OtherRowCol"), label = "Input Trail Name:", value = NULL)
+                         textInput(inputId = ns("OtherRowCol"), label = "Input Trial Name:", value = NULL)
         ),
         fluidRow(
           column(6, 

@@ -35,30 +35,7 @@ mod_FD_ui <- function(id){
                                                           selected = ","))
                                     )
                    ),
-                   # conditionalPanel("input.kindFD == 'FD_RCBD'", ns = ns,
-                   #                  fluidRow(
-                   #                    column(6, style=list("padding-right: 28px;"),
-                   #                           numericInput(ns("blocks.fd"), label = "Input # of Blocks:",
-                   #                                        value = 2, min = 2)
-                   #                    ),
-                   #                    column(6,style=list("padding-left: 5px;"),
-                   #                           numericInput(inputId = ns("myseed.blocks"), label = "Seed Number:",
-                   #                                        value = 123, min = 1)
-                   #                    )
-                   #                  )
-                   # ),
-                   # conditionalPanel("input.kindFD != 'FD_RCBD'", ns = ns,
-                   #                  fluidRow(
-                   #                    column(6, style=list("padding-right: 28px;"),
-                   #                           numericInput(inputId = ns("reps.fd"), label = "Input # of Reps:",
-                   #                                        value = 2, min = 2)
-                   #                    ),
-                   #                    column(6,style=list("padding-left: 5px;"),
-                   #                           numericInput(inputId = ns("myseed.reps"), label = "Seed Number:",
-                   #                                        value = 123, min = 1)
-                   #                    )
-                   #                  )
-                   # ),
+               
                    fluidRow(
                      column(6, style=list("padding-right: 28px;"),
                        numericInput(inputId = ns("reps.fd"), label = "Input # of Full Reps:",

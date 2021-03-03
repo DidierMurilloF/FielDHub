@@ -121,7 +121,6 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
     matdf$UNIT <- rep(c(1:k), nincblock)
     matdf$TREATMENT <- mydes$Design[,4]
     colnames(matdf) <- c("LOCATION","PLOT", "REP", "IBLOCK", "UNIT", "ENTRY")
-    
     outIBD_loc[[i]] <- matdf
   }
 

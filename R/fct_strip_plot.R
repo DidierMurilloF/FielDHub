@@ -80,9 +80,9 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
           nV <- length(Vplots)
         }
       }else {
-        stop("\n'stripDesign()' requires an 1-dimensional array for input Hplots and Vplots.")
+        stop("\n'strip_plot()' requires an 1-dimensional array for input Hplots and Vplots.")
       }
-    }else stop("\n 'stripDesign()' requires arguments to be differents than NULL")
+    }else stop("\n 'strip_plot()' requires arguments to be differents than NULL")
   }else {
     if(!is.data.frame(data)) stop("Data must be a data frame.")
     data <- na.omit(data)
@@ -104,17 +104,17 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
     }else if (l > 1 && !is.null(locationNames)) {
       if (length(locationNames) < l) locationNames <- 1:l
     }
-  }else stop("\n'stripDesign()' requires number of locations to be an integer.")
-  if (!is.null(plotNumber)) {
+  }else stop("\n'strip_plot()' requires number of locations to be an integer.")
+  if (!is.null(plotNumber) && length(plotNumber) == l) {
     if (any(!is.numeric(plotNumber)) || any(plotNumber < 1) || any(plotNumber %% 1 != 0) ||
         any(diff(plotNumber) < 0)) {
       shiny::validate("Input plotNumber must be an integer greater than 0, and sorted.")
     } 
   }else {
     plotNumber <- seq(1001, 1000*(l+1), 1000)
-    warning("Since plotNumber was NULL, it was set up to its default value for each location.")
+    warning("'plotNumber' was set up to its default value for each location.")
   }
-  plot.numbs <- seriePlot.numbers(plot.number = plotNumber, reps = b, l = l)
+  plot.numbs <- seriePlot.numbers(plot.number = plotNumber, reps = b, l = l, t = nH*nV)
   if (!is.null(locationNames) && length(locationNames) == l) {
     locs <- locationNames
   }else locs <- 1:l
@@ -164,9 +164,17 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
     stripDesig.output$LOCATION <- rep(locationNames, each = (nH * nV) * b)
   }
   
+  stripDesig.output$LOCATION <- factor(stripDesig.output$LOCATION, levels = as.character(unique(locationNames)))
+  stripDesig_output <- stripDesig.output[order(stripDesig.output$LOCATION, stripDesig.output$PLOT),]
+  
+  id <- 1:nrow(stripDesig_output)
+  stripDesig_output <- cbind(id, stripDesig_output)
+  colnames(stripDesig_output)[1] <- "ID"
+  stripDesig_output <- as.data.frame(stripDesig_output)
+  
   infoDesign <- list(Hplots = nH, Vplots = nV, blocks = b, numberLocations = l,
                      nameLocations = locationNames, seed = seed)
   
   return(list(infoDesign = infoDesign, stripsBlockLoc = strips.b.loc,
-              plotLayouts = PLOTS, fieldBook = stripDesig.output))
+              plotLayouts = PLOTS, fieldBook = stripDesig_output))
 }

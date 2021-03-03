@@ -133,7 +133,7 @@ mod_LSD_server <- function(id){
       modalDialog(
         selectInput(inputId = ns("trailsLSD"), label = "Select One:", choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
         conditionalPanel("input.trailsLSD == 'Other'", ns = ns,
-                         textInput(inputId = ns("OtherLSD"), label = "Input Trail Name:", value = NULL)
+                         textInput(inputId = ns("OtherLSD"), label = "Input Trial Name:", value = NULL)
         ),
         fluidRow(
           column(6, 
@@ -201,12 +201,11 @@ mod_LSD_server <- function(id){
         cnamesdf.lsd <- colnames(df.lsd)
         df.lsd <- norm_trunc(a = min, b = max, data = df.lsd)
         colnames(df.lsd) <- c(cnamesdf.lsd[1:(ncol(df.lsd) - 1)], valsLSD$trail.lsd)
-        a <- 7
+        df.lsd <- df.lsd[order(df.lsd$ID),]
       }else {
         df.lsd <- latinsquare_reactive()$fieldBook
-        a <- 6
       }
-      return(list(df = df.lsd, a = a))
+      return(list(df = df.lsd))
     })
     
     

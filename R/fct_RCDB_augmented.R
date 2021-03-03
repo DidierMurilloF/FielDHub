@@ -149,7 +149,6 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
           w <- w + 1
         }
         col_checks <- ifelse(layout != 0, 1, 0)
-        #Do the randomization for the genotyps
         v <- which.min(rand_len_cuts)
         Block_Fillers <- lines_blocks[v]
         blocks_data <- 1:b
@@ -251,7 +250,6 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
   }
   ##########################################################################################
   fieldbook <- dplyr::bind_rows(outputDesign_loc)
-  #fieldbook <- fieldbook[,c(2,3,1, 4:11)]
   ID <- 1:nrow(fieldbook)
   fieldbook <- fieldbook[, c(6:9,4,2,3,5,10,1,11)]
   fieldbook <- cbind(ID, fieldbook)
@@ -261,6 +259,8 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
   fieldbook$EXPT <- factor(fieldbook$EXPT, levels = as.character(exptName))
   fieldbook$LOCATION <- factor(fieldbook$LOCATION, levels = as.character(locationNames))
   fieldbook <- fieldbook[order(fieldbook$LOCATION, fieldbook$EXPT),]
+  
+  fieldbook <- fieldbook[,-4]
   DataChecks <- data[1:checks,]
 
   layout_loc1 <- as.matrix(layout1_loc1[[1]])

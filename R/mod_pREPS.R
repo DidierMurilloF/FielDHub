@@ -118,37 +118,6 @@ mod_pREPS_server <- function(id){
         if(!is.numeric(data_up.preps$REPS) || !is.integer(data_up.preps$REPS) ||
            is.factor(data_up.preps$REPS)) validate("'REPS' must be numeric.")
       }else {
-        # req(input$lines.preps)
-        # req(input$amountChecks.preps)
-        # req(input$repGens.preps)
-        # req(input$repUnits.preps)
-        # lines <- as.numeric(input$lines.preps)
-        # RepChecks <- as.numeric(as.vector(unlist(strsplit(input$amountChecks.preps, ","))))
-        # checks <- length(RepChecks)
-        # if (length(checks) == 1 && checks > 1) {
-        #   checksEntries <- 1:checks
-        #   checks <- checks
-        # }else if (length(checks) > 1) {
-        #   checksEntries <- checks
-        #   checks <- length(checks)
-        # } else if (length(checks) == 1 && checks == 1) {
-        #   checksEntries <- checks
-        #   checks <- length(checks)
-        # }
-        # repGens <- as.numeric(as.vector(unlist(strsplit(input$repGens.preps, ","))))
-        # repUnits <- as.numeric(as.vector(unlist(strsplit(input$repUnits.preps, ","))))
-        # if (length(repGens) != length(repUnits)) shiny::validate("repGens and repUnits may have the same length.")
-        # lessEntries <- sum(repGens*repUnits) - sum(repGens)
-        # lessEntries1 <- sum(repGens*repUnits)
-        # reps.checks <- c(RepChecks, rep(repUnits, times = repGens))
-        # REPS <- c(reps.checks, rep(1, lines - lessEntries1))
-        # NAME <- c(paste(rep("Check", checks), 1:checks),
-        #           paste(rep("gen", sum(repGens)), (checksEntries[checks] + 1):(sum(repGens) + checksEntries[checks])),
-        #           paste(rep("gen", length(REPS) - (sum(repGens) + checks)),
-        #                 (sum(repGens) + checksEntries[checks] + 1):(checksEntries[1] + (lines  + checks - lessEntries) - 1)))
-        # data_up.preps <- data.frame(list(ENTRY = checksEntries[1]:(checksEntries[1] + (lines  + checks - lessEntries) - 1),
-        #                                  NAME = NAME,	REPS = REPS))
-        # colnames(data_up.preps) <- c("ENTRY", "NAME", "REPS")
         req(input$nrows.preps)
         req(input$ncols.preps)
         req(input$repGens.preps)
@@ -367,7 +336,7 @@ mod_pREPS_server <- function(id){
       modalDialog(
         fluidRow(
           column(6, 
-                 selectInput(inputId = ns("trailsPREP"), label = "Select One Trail:", 
+                 selectInput(inputId = ns("trailsPREP"), label = "Select One:", 
                              choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
           ),
           column(6, 
@@ -375,16 +344,16 @@ mod_pREPS_server <- function(id){
           )
         ),
         conditionalPanel("input.trailsPREP == 'Other'", ns = ns,
-                         textInput(inputId = ns("OtherPREP"), label = "Input Trail Name:", value = NULL)
+                         textInput(inputId = ns("OtherPREP"), label = "Input Trial Name:", value = NULL)
         ),
         fluidRow(
           column(6, 
                  selectInput(inputId = ns("ROX.PREP"), "Select the Correlation in Rows:", 
-                             choices = seq(0.1, 0.9, 0.1))
+                             choices = seq(0.1, 0.9, 0.1),  selected = 0.5)
           ),
           column(6, 
                  selectInput(inputId = ns("ROY.PREP"), "Select the Correlation in Cols:", 
-                             choices = seq(0.1, 0.9, 0.1))
+                             choices = seq(0.1, 0.9, 0.1),  selected = 0.5)
           )
         ),
         fluidRow(

@@ -134,8 +134,6 @@ available_percent <- function(n_rows, n_cols, checks, Option_NCD = FALSE, Visual
     
     n_Checks <- sum(w_map != 0)
     
-    #multi <- kindExpt == "RDC" || kindExpt == "DBUDC"
-    
     if (kindExpt == "RDC" || kindExpt == "SUDC") {
       
       if (visualCheck == TRUE && Option_NCD == TRUE) return(NULL)
@@ -580,20 +578,6 @@ available_percent <- function(n_rows, n_cols, checks, Option_NCD = FALSE, Visual
           M[m, c(1,2,3,4,5,6)] <- c(m, per, n_Checks, Fillers, expt_lines, pots)
         }else{ # By Column
           return(NULL)
-          # cuts_by_c <- automatically_cuts(data = w_map, planter_mov = planter_mov1, way = "By Column",
-          #                                 dim_data = data_dim_each_block)
-          # m = diff(cuts_by_c)
-          # my_col_sets = c(cuts_by_c[1], m)
-          # split_map_checks <- turner::matrix_to_blocks(w_map, blocks = my_col_sets, byrow = FALSE)
-          # lines_expt <- available_lines(myWay = "By Column", data_checks = w_map, col_sets = my_col_sets,
-          #                               row_sets = NULL, Fillers = FALSE)
-          # n_Checks <- length(which(w_map == 1))
-          # pots <- nrow(w_map) * ncol(w_map)
-          # per <- round((n_Checks/pots)*100,1)
-          # expt_lines <- pots - n_Checks
-          # f_expt_lines <- expt_lines
-          # Fillers <- 0
-          # M[m, c(1,2,3,4,5,6)] <- c(m, per, n_Checks, Fillers, f_expt_lines, pots)
         }
       }else if (Option_NCD == FALSE){
         n_Checks <- length(which(w_map == 1))

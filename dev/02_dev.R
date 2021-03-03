@@ -104,6 +104,7 @@ golem::add_utils("concurrence_matrix")
 golem::add_utils("order_ls")
 golem::add_utils("ZST")
 golem::add_utils("AR1xAR1_simulation")
+golem::add_utils("plot_number_splits")
 
 ## External resources
 ## Creates .js and .css files at inst/app/www

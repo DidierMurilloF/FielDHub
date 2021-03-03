@@ -1,5 +1,5 @@
-names_dbrows <- function(w_map = NULL, myWay = "By Row", kindExpt = "DBUDC", data_dim_each_block = data_dim_each_block,
-                         planter = "serpentine", w_map_letters = NULL, expt_name = NULL, Checks = checks) {
+names_dbrows <- function(w_map = NULL, myWay = "By Row", kindExpt = "DBUDC", data_dim_each_block = NULL,
+                         planter = "serpentine", w_map_letters = NULL, expt_name = NULL, Checks = NULL) {
   checks <- Checks
   if (kindExpt == "DBUDC") {
     if (myWay == "By Row") {

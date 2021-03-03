@@ -1,6 +1,6 @@
 # MIT License
 
-Copyright (c) 2020 North Dakota State University (NDSU)
+Copyright (c) 2021 North Dakota State University (NDSU)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
