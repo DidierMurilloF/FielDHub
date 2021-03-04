@@ -12,3 +12,4 @@ $run_dev.*
 ^\.travis\.yml$
 ^\.github$
 ^docs$
+^joss$
