@@ -587,88 +587,6 @@ mod_Diagonal_server <- function(id) {
                                                expt_name = name_expt, data_entry = data_entry, reps = NULL,
                                                data_dim_each_block = NULL, w_map_letters1 = map_letters)
       }
-      # if (multi == TRUE && Option_NCD == FALSE) {
-      #   req(getData()$data_entry)
-      #   if (input$kindExpt == "DBUDC"){
-      #     req(available_percent1()$data_dim_each_block)
-      #     if (input$myWay == "By Row"){
-      #       data_dim_each_block <- available_percent1()$data_dim_each_block
-      #       my_row_sets <- automatically_cuts(data = w_map, planter_mov = input$planter_mov,
-      #                                         way = "By Row", dim_data = data_dim_each_block)[[1]]
-      #       blocks <- length(my_row_sets)
-      #     }else {
-      #       data_dim_each_block <- available_percent1()$data_dim_each_block
-      #       cuts_by_c <- automatically_cuts(data = w_map, planter_mov = NULL, way = "By Column",
-      #                                       dim_data = data_dim_each_block)  
-      #       blocks <- length(cuts_by_c)
-      #       m = diff(cuts_by_c)
-      #       my_col_sets = c(cuts_by_c[1], m)
-      #     }
-      #     Name_expt <- as.vector(unlist(strsplit(input$expt_name, ",")))
-      #     if (length(Name_expt) == blocks) {
-      #       name_expt <- Name_expt
-      #     }else{
-      #       name_expt = paste0(rep("Block", times = blocks), 1:blocks)
-      #     }
-      #     if (input$myWay == "By Row"){
-      #       split_names <- split_name(n_rows = n_rows, n_cols = n_cols, Name_expt = name_expt,
-      #                                 by_row = TRUE, col_sets = NULL, row_sets = my_row_sets)
-      #     }else{
-      #       split_names <- split_name(n_rows = n_rows, n_cols = n_cols, Name_expt = name_expt,
-      #                                 by_row = FALSE, col_sets = my_col_sets, row_sets = NULL)
-      #     }
-      #     list(my_names = split_names)
-      #   }
-      # }else if(multi == TRUE && Option_NCD == TRUE){
-      #   
-      #   req(getData()$data_entry)
-      #   if (input$kindExpt == "DBUDC") {
-      #     if (input$myWay == "By Row") {
-      #       data_dim_each_block <- available_percent1()$data_dim_each_block
-      #       my_row_sets <- automatically_cuts(data = w_map, planter_mov = input$planter_mov,
-      #                                         way = "By Row", dim_data = data_dim_each_block)[[1]]
-      #       blocks <- length(my_row_sets)
-      #       w_map_letters1 <- rand_lines()$w_map_letters
-      #       Index_block <- LETTERS[1:blocks]
-      #       Name_expt <- as.vector(unlist(strsplit(input$expt_name, ",")))
-      #       if (length(Name_expt) == blocks) {
-      #         name_blocks <- Name_expt
-      #       }else {
-      #         name_blocks <- paste(rep("Block", blocks), 1:blocks, sep = "")
-      #       }
-      #       z <- 1
-      #       for(i in Index_block){ 
-      #         w_map_letters1[w_map_letters1 == i] <- name_blocks[z] 
-      #         z <- z + 1 
-      #       } 
-      #       checks_ch <- as.character(checks) 
-      #       for(i in nrow(w_map_letters1):1) { 
-      #         for(j in 1:ncol(w_map_letters1)) { 
-      #           if (any(checks_ch %in% w_map_letters1[i, j]) && w_map_letters1[i,j] != "Filler") {
-      #             if (j != ncol(w_map_letters1)){
-      #               if(w_map_letters1[i, j + 1] == "Filler") {
-      #                 w_map_letters1[i, j] <- w_map_letters1[i, j - 1]
-      #               }else w_map_letters1[i, j] <- w_map_letters1[i, j + 1]
-      #             }else if (j == ncol(w_map_letters1)) {
-      #               w_map_letters1[i, j] <- w_map_letters1[i, j - 1]
-      #             }
-      #           }
-      #         }
-      #       }
-      #       split_names <- w_map_letters1
-      #     }else{
-      #       return(NULL)
-      #     }
-      #   }
-      #   list(my_names = split_names)
-      # }else{
-      #   blocks <- 1
-      #   if (input$expt_name != "") {
-      #     Name_expt <- input$expt_name 
-      #   }else Name_expt = paste0(rep("Expt1", times = blocks), 1:blocks)
-      #   split_names <- matrix(data = Name_expt, ncol = n_cols, nrow = n_rows)
-      #   list(my_names = split_names)
-      # }
     })
     
     put_Filler_in_name <- reactive({
@@ -1075,12 +993,10 @@ mod_Diagonal_server <- function(id) {
       }
       if(input$kindExpt == "DBUDC") {
         final_expt_export <- final_expt_export[,-11]
-        #final_expt_export <- final_expt_export[, c(2,3,1,4:10)]
-      }#else final_expt_export <- final_expt_export[, c(2,3,1,4:10)]
+      }
       
       ID <- 1:nrow(final_expt_export)
       final_expt_export <- final_expt_export[, c(6,7,9,4,2,3,5,1,10)]
-      #final_expt_export <- final_expt_export[,3]
       final_expt_export_F <- cbind(ID, final_expt_export)
       colnames(final_expt_export_F)[10] <- "TREATMENT"
       

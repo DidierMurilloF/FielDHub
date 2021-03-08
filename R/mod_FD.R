@@ -19,7 +19,7 @@ mod_FD_ui <- function(id){
                                choices = c("Factorial in a CRD" = "FD_CRD", "Factorial in a RCBD" = "FD_RCBD"),
                                multiple = FALSE),
                    
-                   conditionalPanel("input.owndata != 'Yes'",
+                   conditionalPanel("input.owndata != 'Yes'", ns = ns,
                                     textInput(inputId = ns("setfactors"), label = "Input # of Entries for Each Factor: (Separated by Comma)",
                                               value = NULL)     
                    ),

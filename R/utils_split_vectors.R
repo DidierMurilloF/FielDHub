@@ -1,10 +1,6 @@
 split_vectors <- function(x, len_cuts){
   
-  # if (length(x) != sum(len_cuts)){
-  #   stop("Length of the vector does not macth with the length of cuts")
-  # }
   if (length(x) != sum(len_cuts)) {
-    #print(c(length(x), sum(len_cuts)))
     return(NULL)
   } 
   cut_test <- x; dim_each_split <- len_cuts

@@ -367,9 +367,6 @@ mod_RCBD_augmented_server <- function(id) {
          write.csv(df, file, row.names = FALSE)
        }
      )
-     
-    # return(list(dt8_a_rcbd = dt8_a_rcbd, table1_a_rcbd = table1_a_rcbd, dt2_a_rcbd = dt2_a_rcbd,
-    #             dt_names_a = dt_names_a, dt4_a_rcbd = dt4_a_rcbd, dt5_a = dt5_a))
  
   })
 }

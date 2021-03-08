@@ -1,10 +1,10 @@
-export_design <- function(G, movement_planter = NULL, location = NULL, Year = 2020,
+export_design <- function(G, movement_planter = NULL, location = NULL, Year = NULL,
                           data_file = NULL, reps = FALSE){
   
   if (all(c("serpentine", "cartesian") != movement_planter)) {
     stop("Input movement_planter is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
   }
-  
+  Year <- year <- format(Sys.Date(), "%Y")
   H <- G[[3]]
   asExport_cordenates <- function(){
     
