@@ -88,10 +88,23 @@ mod_IBD_server <- function(id){
       return(list(dataUp.ibd = dataUp.ibd))
     })
     
-    observeEvent(input$t.ibd, {
-      req(input$t.ibd)
+    get_tIBD <- reactive({
+      if(is.null(input$file.IBD)) {
+        req(input$t.ibd)
+        t_ibd <- input$t.ibd
+      }else {
+        req(input$file.IBD)
+        t_ibd <- nrow(getData.ibd()$dataUp.ibd)
+      }
+      return(list(t_ibd = t_ibd))
+    })
+    
+    observeEvent(get_tIBD()$t_ibd, {# input$t.ibd
+      #req(input$t.ibd)
+      req(get_tIBD()$t_ibd)
       
-      t <- input$t.ibd
+      #t <- input$t.ibd
+      t <- as.numeric(get_tIBD()$t_ibd)
       if (numbers::isPrime(t)) {
         w <- 1
         k <- "No Options Available"
@@ -125,7 +138,8 @@ mod_IBD_server <- function(id){
       seed.rcbd <- as.numeric(input$myseed.ibd)
       
       if (input$owndataibd == "Yes") {
-        t.ibd <- NULL 
+        req(get_tIBD()$t_ibd)
+        t.ibd <- as.numeric(get_tIBD()$t_ibd)
         data.ibd <- getData.ibd()$dataUp.ibd
       }else {
         req(input$t.ibd)

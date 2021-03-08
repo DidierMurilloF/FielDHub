@@ -67,15 +67,15 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
       nt <- length(t)
       TRT <- t
       lookup <- TRUE
-      dataLookUp <- data.frame(list(TREATMENT = 1:nt, LABEL_TREATMENT = TRT))
+      dataLookUp <- data.frame(list(ENTRY = 1:nt, LABEL_TREATMENT = TRT))
     }else if ((length(t) > 1)) {
       nt <- length(t)
       TRT <- t
       lookup <- TRUE
-      dataLookUp <- data.frame(list(TREATMENT = 1:nt, LABEL_TREATMENT = TRT))
+      dataLookUp <- data.frame(list(ENTRY = 1:nt, LABEL_TREATMENT = TRT))
     }
   }else if (!is.null(data)) {
-    if (is.null(r) || is.null(k) || is.null(l)) {
+    if (is.null(t) || is.null(r) || is.null(k) || is.null(l)) {
       shiny::validate('Some of the basic design parameters are missing (t, k, r)')
     }
     if(!is.data.frame(data)) shiny::validate("Data must be a data frame.")
@@ -87,7 +87,7 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
     TRT <- data$Treatment
     nt <- length(TRT)
     lookup <- TRUE
-    dataLookUp <- data.frame(list(TREATMENT = 1:nt, LABEL_TREATMENT = TRT))
+    dataLookUp <- data.frame(list(ENTRY = 1:nt, LABEL_TREATMENT = TRT))#TREATMENT
   }
   if(any(plotNumber %% 1 != 0) || any(plotNumber < 1) || any(diff(plotNumber) < 0)) {
     shiny::validate("'incomplete_blocks()' requires plotNumber to be possitive integers and sorted.")
@@ -130,7 +130,7 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
   if(lookup) {
     OutIBD <- dplyr::inner_join(OutIBD, dataLookUp, by = "ENTRY")
     OutIBD <- OutIBD[,-6]
-    colnames(OutIBD) <- c("LOCATION","PLOT", "REP", "IBLOCK", "UNIT", "ENTRY")
+    colnames(OutIBD) <- c("LOCATION","PLOT", "REP", "IBLOCK", "UNIT", "TREATMENT")
   }
   
   ID <- 1:nrow(OutIBD)
