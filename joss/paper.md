@@ -12,13 +12,13 @@ authors:
     affiliation: 1
   - name: Salvador A. Gezan
     affiliation: 2
+  - name: Ana M. Heilman
+    affiliation: 1
   - name: Thomas C. Walk
     affiliation: 1
   - name: Johan S. Aparicio
     affiliation: 3
   - name: Richard D. Horsley
-    affiliation: 1
-  - name: Ana M. Heilman
     affiliation: 1
 affiliations:
  - name: North Dakota State University
