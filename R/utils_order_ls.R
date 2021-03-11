@@ -1,8 +1,13 @@
-order_ls <- function(S = NULL) {
+order_ls <- function(S = NULL, data = NULL) {
   cindex <- ncol(S)
   rindex <- nrow(S)
-  r <- paste("Row", 1:rindex, sep = " ")
-  c <- paste("Column", 1:cindex, sep = " ")
+  if (is.null(data)) {
+    r <- paste("Row", 1:rindex, sep = " ")
+    c <- paste("Column", 1:cindex, sep = " ")
+  }else {
+    r <- factor(data[,1], levels = as.character(unique(data[,1])))
+    c <- factor(data[,2], levels = as.character(unique(data[,2])))
+  }
   rnames <- rownames(S)
   cnames <- colnames(S)
   rOrder <- vector(mode = "numeric")

@@ -14,9 +14,9 @@ CRD(
 )
 }
 \arguments{
-\item{t}{an integer number with total number of treatments or a vector of dimension t with labels.}
+\item{t}{An integer number with total number of treatments or a vector of dimension t with labels.}
 
-\item{reps}{Number of replicates (full blocks) of each treatment.}
+\item{reps}{Number of replicates of each treatment.}
 
 \item{plotNumber}{Starting plot number. By default \code{plotNumber = 101}.}
 
@@ -54,8 +54,22 @@ crd2 <- CRD(t = Gens,
 crd2$infoDesign
 head(crd2$fieldBook,10)
 
+# Example 3: Generates a CRD design with 12 treatments and 4 reps each.
+# In this case, we show how to use the option data.
+treatments <- paste("ND-", 1:12, sep = "")
+treatment_list <- data.frame(list(TREATMENT = treatments, REP = 4))
+head(treatment_list)
+crd3 <- CRD(t = NULL, 
+            reps = NULL, 
+            plotNumber = 2001, 
+            seed = 1655, 
+            locationName = "Cali",
+            data = treatment_list)
+crd3$infoDesign
+head(crd3$fieldBook,10)
+
 }
 \references{
-\emph{Design and Analysis of Experiments, Volume 1, Introduction to Experimental Design. Second Edition}.
- Klaus Hinkelmann & Oscar Kempthorne.John Wiley & Sons, Inc., Hoboken, New Jersey.
+Federer, W. T. (1955). Experimental Design. Theory and Application. New York, USA. The
+Macmillan Company.
 }

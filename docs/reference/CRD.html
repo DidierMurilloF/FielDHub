@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FielDHub</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
       </span>
     </div>
 
@@ -92,7 +92,12 @@
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/DidierMurilloF/FielDHub/">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
       </ul>
       
     </div><!--/.nav-collapse -->
@@ -107,7 +112,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Generates a Completely Randomized Design (CRD)</h1>
-    
+    <small class="dont-index">Source: <a href='https://github.com/DidierMurilloF/FielDHub/blob/master/R/fct_CRD.R'><code>R/fct_CRD.R</code></a></small>
     <div class="hidden name"><code>CRD.Rd</code></div>
     </div>
 
@@ -129,11 +134,11 @@
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>t</th>
-      <td><p>an integer number with total number of treatments or a vector of dimension t with labels.</p></td>
+      <td><p>An integer number with total number of treatments or a vector of dimension t with labels.</p></td>
     </tr>
     <tr>
       <th>reps</th>
-      <td><p>Number of replicates (full blocks) of each treatment.</p></td>
+      <td><p>Number of replicates of each treatment.</p></td>
     </tr>
     <tr>
       <th>plotNumber</th>
@@ -159,8 +164,8 @@
 <p>Data frame with the CRD field book.</p>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
-    <p><em>Design and Analysis of Experiments, Volume 1, Introduction to Experimental Design. Second Edition</em>.
- Klaus Hinkelmann &amp; Oscar Kempthorne.John Wiley &amp; Sons, Inc., Hoboken, New Jersey.</p>
+    <p>Federer, W. T. (1955). Experimental Design. Theory and Application. New York, USA. The
+Macmillan Company.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'># Example 1: Generates a CRD design with 10 treatments and 5 reps each.</span>
@@ -185,17 +190,17 @@
 #&gt; $seed
 #&gt; [1] 1987
 #&gt; </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>crd1</span><span class='op'>$</span><span class='va'>fieldBook</span>,<span class='fl'>10</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;    LOCATION PLOT REP TREATMENT
-#&gt; 1     Fargo  101   3        T5
-#&gt; 2     Fargo  102   3        T7
-#&gt; 3     Fargo  103   2        T1
-#&gt; 4     Fargo  104   2        T5
-#&gt; 5     Fargo  105   5        T5
-#&gt; 6     Fargo  106   3        T3
-#&gt; 7     Fargo  107   3       T10
-#&gt; 8     Fargo  108   2        T8
-#&gt; 9     Fargo  109   3        T9
-#&gt; 10    Fargo  110   3        T8</div><div class='input'>
+</div><div class='output co'>#&gt;    ID LOCATION PLOT REP TREATMENT
+#&gt; 1   1    Fargo  101   3        T5
+#&gt; 2   2    Fargo  102   3        T7
+#&gt; 3   3    Fargo  103   2        T1
+#&gt; 4   4    Fargo  104   2        T5
+#&gt; 5   5    Fargo  105   5        T5
+#&gt; 6   6    Fargo  106   3        T3
+#&gt; 7   7    Fargo  107   3       T10
+#&gt; 8   8    Fargo  108   2        T8
+#&gt; 9   9    Fargo  109   3        T9
+#&gt; 10 10    Fargo  110   3        T8</div><div class='input'>
 <span class='co'># Example 2: Generates a CRD design with 15 treatments and 6 reps each.</span>
 <span class='va'>Gens</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span><span class='op'>(</span><span class='st'>"Wheat"</span>, <span class='fl'>1</span><span class='op'>:</span><span class='fl'>15</span>, sep <span class='op'>=</span> <span class='st'>""</span><span class='op'>)</span>
 <span class='va'>crd2</span> <span class='op'>&lt;-</span> <span class='fu'>CRD</span><span class='op'>(</span>t <span class='op'>=</span> <span class='va'>Gens</span>, 
@@ -221,17 +226,62 @@
 #&gt; $seed
 #&gt; [1] 1654
 #&gt; </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>crd2</span><span class='op'>$</span><span class='va'>fieldBook</span>,<span class='fl'>10</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;    LOCATION PLOT REP TREATMENT
-#&gt; 1     Fargo 1001   6    Wheat3
-#&gt; 2     Fargo 1002   2    Wheat8
-#&gt; 3     Fargo 1003   4    Wheat4
-#&gt; 4     Fargo 1004   5    Wheat8
-#&gt; 5     Fargo 1005   3   Wheat12
-#&gt; 6     Fargo 1006   1   Wheat10
-#&gt; 7     Fargo 1007   6    Wheat9
-#&gt; 8     Fargo 1008   2   Wheat11
-#&gt; 9     Fargo 1009   1    Wheat1
-#&gt; 10    Fargo 1010   1    Wheat4</div><div class='input'>
+</div><div class='output co'>#&gt;    ID LOCATION PLOT REP TREATMENT
+#&gt; 1   1    Fargo 1001   6    Wheat3
+#&gt; 2   2    Fargo 1002   2    Wheat8
+#&gt; 3   3    Fargo 1003   4    Wheat4
+#&gt; 4   4    Fargo 1004   5    Wheat8
+#&gt; 5   5    Fargo 1005   3   Wheat12
+#&gt; 6   6    Fargo 1006   1   Wheat10
+#&gt; 7   7    Fargo 1007   6    Wheat9
+#&gt; 8   8    Fargo 1008   2   Wheat11
+#&gt; 9   9    Fargo 1009   1    Wheat1
+#&gt; 10 10    Fargo 1010   1    Wheat4</div><div class='input'>
+<span class='co'># Example 3: Generates a CRD design with 12 treatments and 4 reps each.</span>
+<span class='co'># In this case, we show how to use the option data.</span>
+<span class='va'>treatments</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span><span class='op'>(</span><span class='st'>"ND-"</span>, <span class='fl'>1</span><span class='op'>:</span><span class='fl'>12</span>, sep <span class='op'>=</span> <span class='st'>""</span><span class='op'>)</span>
+<span class='va'>treatment_list</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>TREATMENT <span class='op'>=</span> <span class='va'>treatments</span>, REP <span class='op'>=</span> <span class='fl'>4</span><span class='op'>)</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>treatment_list</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;   TREATMENT REP
+#&gt; 1      ND-1   4
+#&gt; 2      ND-2   4
+#&gt; 3      ND-3   4
+#&gt; 4      ND-4   4
+#&gt; 5      ND-5   4
+#&gt; 6      ND-6   4</div><div class='input'><span class='va'>crd3</span> <span class='op'>&lt;-</span> <span class='fu'>CRD</span><span class='op'>(</span>t <span class='op'>=</span> <span class='cn'>NULL</span>, 
+            reps <span class='op'>=</span> <span class='cn'>NULL</span>, 
+            plotNumber <span class='op'>=</span> <span class='fl'>2001</span>, 
+            seed <span class='op'>=</span> <span class='fl'>1655</span>, 
+            locationName <span class='op'>=</span> <span class='st'>"Cali"</span>,
+            data <span class='op'>=</span> <span class='va'>treatment_list</span><span class='op'>)</span>
+<span class='va'>crd3</span><span class='op'>$</span><span class='va'>infoDesign</span>
+</div><div class='output co'>#&gt; $numberofTreatments
+#&gt; [1] 12
+#&gt; 
+#&gt; $treatments
+#&gt;  [1] "ND-1"  "ND-2"  "ND-3"  "ND-4"  "ND-5"  "ND-6"  "ND-7"  "ND-8"  "ND-9" 
+#&gt; [10] "ND-10" "ND-11" "ND-12"
+#&gt; 
+#&gt; $Reps
+#&gt;  [1] 4 4 4 4 4 4 4 4 4 4 4 4
+#&gt; 
+#&gt; $locationName
+#&gt; [1] "Cali"
+#&gt; 
+#&gt; $seed
+#&gt; [1] 1655
+#&gt; </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>crd3</span><span class='op'>$</span><span class='va'>fieldBook</span>,<span class='fl'>10</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;    ID LOCATION PLOT REP TREATMENT
+#&gt; 1   1     Cali 2001   4      ND-3
+#&gt; 2   2     Cali 2002   1      ND-6
+#&gt; 3   3     Cali 2003   3     ND-10
+#&gt; 4   4     Cali 2004   1     ND-10
+#&gt; 5   5     Cali 2005   3      ND-7
+#&gt; 6   6     Cali 2006   2      ND-2
+#&gt; 7   7     Cali 2007   2     ND-12
+#&gt; 8   8     Cali 2008   4      ND-6
+#&gt; 9   9     Cali 2009   2     ND-10
+#&gt; 10 10     Cali 2010   3      ND-2</div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -244,7 +294,7 @@
 
       <footer>
       <div class="copyright">
-  <p>Developed by Didier Murillo.</p>
+  <p>Developed by Didier Murillo, Salvador Gezan.</p>
 </div>
 
 <div class="pkgdown">

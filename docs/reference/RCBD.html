@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FielDHub</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
       </span>
     </div>
 
@@ -92,7 +92,12 @@
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/DidierMurilloF/FielDHub/">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
       </ul>
       
     </div><!--/.nav-collapse -->
@@ -107,7 +112,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Generates a Randomized Complete Block Design (RCBD)</h1>
-    
+    <small class="dont-index">Source: <a href='https://github.com/DidierMurilloF/FielDHub/blob/master/R/fct_RCBD.R'><code>R/fct_RCBD.R</code></a></small>
     <div class="hidden name"><code>RCBD.Rd</code></div>
     </div>
 
@@ -176,8 +181,8 @@
 <p>Data frame with the RCBD field book.</p>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
-    <p><em>Design and Analysis of Experiments, Volume 1, Introduction to Experimental Design. Second Edition</em>.
- Klaus Hinkelmann &amp; Oscar Kempthorne.John Wiley &amp; Sons, Inc., Hoboken, New Jersey.</p>
+    <p>Federer, W. T. (1955). Experimental Design. Theory and Application. New York, USA. The
+Macmillan Company.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'># Example 1: Generates a RCBD design with 3 blocks and 20 treatments across 3 locations.</span>
@@ -220,27 +225,27 @@
 #&gt; </div><div class='input'><span class='va'>rcbd1</span><span class='op'>$</span><span class='va'>RCBD.layout</span>
 </div><div class='output co'>#&gt; [[1]]
 #&gt;      Block --Treatments--                           
-#&gt; [1,] "1"   "N A K L C O T M R Q H F I D S G P E B J"
-#&gt; [2,] "2"   "E F K B M H S J Q A L O G T N I D C R P"
-#&gt; [3,] "3"   "D G P C H J I T L F K A Q R M O N E B S"
-#&gt; [4,] "4"   "R K D J I M N E P O L T G B S F C H A Q"
-#&gt; [5,] "5"   "O R P J G D E T A B I F C N S Q M L K H"
+#&gt; [1,] "1"   "G E D T F N C H J I R P Q K A O L S B M"
+#&gt; [2,] "2"   "G T D A M B N O R K L I E F H Q S J P C"
+#&gt; [3,] "3"   "R M O T B G K J Q D E N S A P L F C H I"
+#&gt; [4,] "4"   "M P T J I H K R E A G O N L Q C F B S D"
+#&gt; [5,] "5"   "Q F D G A T C B R L M E H N J O K S I P"
 #&gt; 
 #&gt; [[2]]
 #&gt;      Block --Treatments--                           
-#&gt; [1,] "1"   "K M E A G H I S T F C N Q L R D P J O B"
-#&gt; [2,] "2"   "P S O D Q B L E K R T F N M J G I A H C"
-#&gt; [3,] "3"   "T Q K G P M N O E B J D H A R S L C I F"
-#&gt; [4,] "4"   "R M I L Q J D F A K C E B T O P N H G S"
-#&gt; [5,] "5"   "I S K Q F T O L B H P C E N R J D M A G"
+#&gt; [1,] "1"   "T M L S F O D N H A J G R E P I K B C Q"
+#&gt; [2,] "2"   "K M A B R E C S Q L H F O G P I D T J N"
+#&gt; [3,] "3"   "A K C E B M R F G T H Q N D S J I O P L"
+#&gt; [4,] "4"   "M R H F C E P G S B D L J K A T I Q N O"
+#&gt; [5,] "5"   "T N L B F R P E S A D I J C O H Q K M G"
 #&gt; 
 #&gt; [[3]]
 #&gt;      Block --Treatments--                           
-#&gt; [1,] "1"   "N K O J R H D B A M I E S T F P G Q C L"
-#&gt; [2,] "2"   "F T A G N D P E J Q H L S R I O B K M C"
-#&gt; [3,] "3"   "R M E A F H D T P L Q I B C J O S G K N"
-#&gt; [4,] "4"   "S Q M L R C T E F D N A G J P B O K I H"
-#&gt; [5,] "5"   "J F K P T R I G L S D B E N O Q C H M A"
+#&gt; [1,] "1"   "G H S N R A Q F D J T B E P K O I M L C"
+#&gt; [2,] "2"   "A I C H S G J B Q O T R N E D K P L M F"
+#&gt; [3,] "3"   "F A O E T J H R P K C I G D L N M S B Q"
+#&gt; [4,] "4"   "R M T O D K H B Q C A G E J I N S L F P"
+#&gt; [5,] "5"   "M R A L J T P B S K F Q C N D O G E H I"
 #&gt; </div><div class='input'><span class='va'>rcbd1</span><span class='op'>$</span><span class='va'>plotNumber.layout</span>
 </div><div class='output co'>#&gt; [[1]]
 #&gt;      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13] [,14]
@@ -284,20 +289,31 @@
 #&gt; [4,]  2266  2265  2264  2263  2262  2261
 #&gt; [5,]  2295  2296  2297  2298  2299  2300
 #&gt; </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>rcbd1</span><span class='op'>$</span><span class='va'>fieldBook</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;   LOCATION PLOT REP TREATMENT
-#&gt; 1    FARGO  101   1         N
-#&gt; 2    FARGO  102   1         A
-#&gt; 3    FARGO  103   1         K
-#&gt; 4    FARGO  104   1         L
-#&gt; 5    FARGO  105   1         C
-#&gt; 6    FARGO  106   1         O</div><div class='input'>
+</div><div class='output co'>#&gt;   ID LOCATION PLOT REP TREATMENT
+#&gt; 1  1    FARGO  101   1         G
+#&gt; 2  2    FARGO  102   1         E
+#&gt; 3  3    FARGO  103   1         D
+#&gt; 4  4    FARGO  104   1         T
+#&gt; 5  5    FARGO  105   1         F
+#&gt; 6  6    FARGO  106   1         N</div><div class='input'>
 <span class='co'># Example 2: Generates a RCBD design with 6 blocks and 18 treatments in one location.</span>
-<span class='va'>rcbd2</span> <span class='op'>&lt;-</span> <span class='fu'>RCBD</span><span class='op'>(</span>t <span class='op'>=</span> <span class='fl'>18</span>, reps <span class='op'>=</span> <span class='fl'>6</span>, l <span class='op'>=</span> <span class='fl'>1</span>, 
+<span class='co'># In this case, we show how to use the option data.</span>
+<span class='va'>treatments</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span><span class='op'>(</span><span class='st'>"ND-"</span>, <span class='fl'>1</span><span class='op'>:</span><span class='fl'>18</span>, sep <span class='op'>=</span> <span class='st'>""</span><span class='op'>)</span>
+<span class='va'>treatment_list</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>TREATMENT <span class='op'>=</span> <span class='va'>treatments</span><span class='op'>)</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>treatment_list</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;   TREATMENT
+#&gt; 1      ND-1
+#&gt; 2      ND-2
+#&gt; 3      ND-3
+#&gt; 4      ND-4
+#&gt; 5      ND-5
+#&gt; 6      ND-6</div><div class='input'><span class='va'>rcbd2</span> <span class='op'>&lt;-</span> <span class='fu'>RCBD</span><span class='op'>(</span>reps <span class='op'>=</span> <span class='fl'>6</span>, l <span class='op'>=</span> <span class='fl'>1</span>, 
               plotNumber <span class='op'>=</span> <span class='fl'>101</span>, 
               continuous <span class='op'>=</span> <span class='cn'>FALSE</span>, 
               planter <span class='op'>=</span> <span class='st'>"serpentine"</span>, 
               seed <span class='op'>=</span> <span class='fl'>13</span>, 
-              locationNames <span class='op'>=</span> <span class='st'>"IBAGUE"</span><span class='op'>)</span>
+              locationNames <span class='op'>=</span> <span class='st'>"IBAGUE"</span>,
+              data <span class='op'>=</span> <span class='va'>treatment_list</span><span class='op'>)</span>
 <span class='va'>rcbd2</span><span class='op'>$</span><span class='va'>infoDesign</span>                  
 </div><div class='output co'>#&gt; $blocks
 #&gt; [1] 6
@@ -306,8 +322,8 @@
 #&gt; [1] 18
 #&gt; 
 #&gt; $treatments
-#&gt;  [1] "T1"  "T2"  "T3"  "T4"  "T5"  "T6"  "T7"  "T8"  "T9"  "T10" "T11" "T12"
-#&gt; [13] "T13" "T14" "T15" "T16" "T17" "T18"
+#&gt;  [1] "ND-1"  "ND-2"  "ND-3"  "ND-4"  "ND-5"  "ND-6"  "ND-7"  "ND-8"  "ND-9" 
+#&gt; [10] "ND-10" "ND-11" "ND-12" "ND-13" "ND-14" "ND-15" "ND-16" "ND-17" "ND-18"
 #&gt; 
 #&gt; $locations
 #&gt; [1] 1
@@ -324,13 +340,20 @@
 #&gt; [1] 13
 #&gt; </div><div class='input'><span class='va'>rcbd2</span><span class='op'>$</span><span class='va'>RCBD.layout</span>
 </div><div class='output co'>#&gt; [[1]]
-#&gt;      Block --Treatments--                                                  
-#&gt; [1,] "1"   "T17 T13 T9 T16 T18 T10 T12 T7 T2 T8 T1 T14 T4 T6 T11 T15 T5 T3"
-#&gt; [2,] "2"   "T17 T18 T11 T6 T7 T12 T10 T4 T15 T8 T1 T13 T16 T5 T14 T3 T2 T9"
-#&gt; [3,] "3"   "T3 T10 T14 T6 T17 T9 T11 T5 T16 T8 T4 T18 T1 T13 T7 T15 T12 T2"
-#&gt; [4,] "4"   "T5 T12 T2 T10 T9 T8 T4 T17 T15 T7 T14 T11 T13 T16 T18 T3 T6 T1"
-#&gt; [5,] "5"   "T11 T17 T4 T13 T3 T1 T5 T16 T7 T10 T6 T2 T18 T8 T12 T9 T15 T14"
-#&gt; [6,] "6"   "T14 T9 T17 T3 T8 T5 T18 T6 T16 T13 T10 T7 T4 T15 T12 T1 T2 T11"
+#&gt;      Block
+#&gt; [1,] "1"  
+#&gt; [2,] "2"  
+#&gt; [3,] "3"  
+#&gt; [4,] "4"  
+#&gt; [5,] "5"  
+#&gt; [6,] "6"  
+#&gt;      --Treatments--                                                                                      
+#&gt; [1,] "ND-6 ND-4 ND-15 ND-13 ND-12 ND-16 ND-3 ND-10 ND-18 ND-9 ND-14 ND-5 ND-2 ND-17 ND-7 ND-8 ND-1 ND-11"
+#&gt; [2,] "ND-7 ND-1 ND-15 ND-16 ND-5 ND-12 ND-2 ND-10 ND-9 ND-8 ND-4 ND-11 ND-6 ND-13 ND-3 ND-18 ND-14 ND-17"
+#&gt; [3,] "ND-10 ND-6 ND-11 ND-17 ND-5 ND-16 ND-1 ND-4 ND-3 ND-12 ND-14 ND-13 ND-15 ND-2 ND-18 ND-8 ND-9 ND-7"
+#&gt; [4,] "ND-14 ND-9 ND-17 ND-3 ND-8 ND-5 ND-18 ND-6 ND-16 ND-13 ND-10 ND-7 ND-4 ND-15 ND-12 ND-1 ND-2 ND-11"
+#&gt; [5,] "ND-11 ND-16 ND-8 ND-18 ND-14 ND-9 ND-1 ND-4 ND-5 ND-17 ND-15 ND-3 ND-6 ND-12 ND-7 ND-13 ND-2 ND-10"
+#&gt; [6,] "ND-16 ND-5 ND-10 ND-14 ND-12 ND-13 ND-17 ND-8 ND-3 ND-4 ND-6 ND-9 ND-2 ND-11 ND-18 ND-1 ND-7 ND-15"
 #&gt; </div><div class='input'><span class='va'>rcbd2</span><span class='op'>$</span><span class='va'>plotNumber.layout</span>
 </div><div class='output co'>#&gt; [[1]]
 #&gt;      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13] [,14]
@@ -348,13 +371,13 @@
 #&gt; [5,]   515   516   517   518
 #&gt; [6,]   604   603   602   601
 #&gt; </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>rcbd2</span><span class='op'>$</span><span class='va'>fieldBook</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;   LOCATION PLOT REP TREATMENT
-#&gt; 1   IBAGUE  101   1       T17
-#&gt; 2   IBAGUE  102   1       T13
-#&gt; 3   IBAGUE  103   1        T9
-#&gt; 4   IBAGUE  104   1       T16
-#&gt; 5   IBAGUE  105   1       T18
-#&gt; 6   IBAGUE  106   1       T10</div><div class='input'>
+</div><div class='output co'>#&gt;   ID LOCATION PLOT REP TREATMENT
+#&gt; 1  1   IBAGUE  101   1      ND-6
+#&gt; 2  2   IBAGUE  102   1      ND-4
+#&gt; 3  3   IBAGUE  103   1     ND-15
+#&gt; 4  4   IBAGUE  104   1     ND-13
+#&gt; 5  5   IBAGUE  105   1     ND-12
+#&gt; 6  6   IBAGUE  106   1     ND-16</div><div class='input'>
 
 </div></pre>
   </div>
@@ -368,7 +391,7 @@
 
       <footer>
       <div class="copyright">
-  <p>Developed by Didier Murillo.</p>
+  <p>Developed by Didier Murillo, Salvador Gezan.</p>
 </div>
 
 <div class="pkgdown">

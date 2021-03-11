@@ -38,16 +38,33 @@ Data frame with the latin square field book.
 Randomly generates a latin square design of up 10 treatments.
 }
 \examples{
-# Example 1: Generates a latin square design with 5 treatments and 3 reps.
-latinSq1 <- latin_square(t = 5, reps = 3, plotNumber = 101, planter = "serpentine",
-                         seed = 1981, locationNames = "FARGO") 
+# Example 1: Generates a latin square design with 4 treatments and 2 reps.
+latinSq1 <- latin_square(t = 4, 
+                         reps = 2, 
+                         plotNumber = 101, 
+                         planter = "cartesian",
+                         seed = 1980) 
 latinSq1$squares
 latinSq1$plotSquares
 head(latinSq1$fieldBook)
 
-             
+# Example 2: Generates a latin square design with 5 treatments and 3 reps.
+latin_data <- data.frame(list(ROW = paste("Period", 1:5, sep = ""),
+                              COLUMN = paste("Cow", 1:5, sep = ""),
+                              TREATMENT = paste("Diet", 1:5, sep = "")))
+print(latin_data)
+latinSq2 <- latin_square(t = NULL, 
+                         reps = 3, 
+                         plotNumber = 101, 
+                         planter = "cartesian",
+                         seed = 1981, 
+                         data = latin_data) 
+latinSq2$squares
+latinSq2$plotSquares
+head(latinSq2$fieldBook)
+
 }
 \references{
-\emph{Design and Analysis of Experiments, Volume 1, Introduction to Experimental Design. Second Edition}.
- Klaus Hinkelmann & Oscar Kempthorne.John Wiley & Sons, Inc., Hoboken, New Jersey.
+Federer, W. T. (1955). Experimental Design. Theory and Application. New York, USA. The
+Macmillan Company.
 }

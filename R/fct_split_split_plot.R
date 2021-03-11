@@ -21,8 +21,8 @@
 #'
 #'
 #' @references
-#' \emph{Design and Analysis of Experiments, Volume 1, Introduction to Experimental Design. Second Edition}.
-#'  Klaus Hinkelmann & Oscar Kempthorne.John Wiley & Sons, Inc., Hoboken, New Jersey.
+#' Federer, W. T. (1955). Experimental Design. Theory and Application. New York, USA. The
+#' Macmillan Company.
 #'
 #' @examples
 #' # Example 1: Generates a split split plot design SSPD with 5 whole plots, 2 sub-plots,
@@ -38,15 +38,20 @@
 #' # Example 2: Generates a split split plot design SSPD with 2 whole plost 
 #' # (Irrigation, No irrigation), 5 sub plots (4 types of fungicide + one control), and 
 #' # 10 sub-sub plots (Ten varieties of beans), and 4 reps in an RCBD arrangement.
-#' # This is for 3 locations.
+#' # This is for 3 locations. In this case, we show how to use the option data.
 #' wp <- paste("IRR_", c("NO", "Yes"), sep = "") #Irrigation (2 Whole plots)
 #' sp <- c("NFung", paste("Fung", 1:4, sep = "")) #Fungicides (5 Sub plots)
 #' ssp <- paste("Beans", 1:10, sep = "") #Beans varieties (10 Sub-sub plots)
-#' SSPD2 <- split_split_plot(wp = wp, sp = sp, ssp = ssp, reps = 4, l = 3, 
+#' split_split_plot_Data <- data.frame(list(WHOLPLOT = c(wp, rep(NA, 8)), 
+#'                                          SUBPLOT = c(sp, rep(NA, 5)),
+#'                                          SUB_SUBPLOTS = ssp))
+#' head(split_split_plot_Data, 12)
+#' SSPD2 <- split_split_plot(reps = 4, l = 3, 
 #'                           plotNumber = c(101, 1001, 2001),
 #'                           seed = 23, 
 #'                           type = 2, 
-#'                           locationNames = c("A", "B", "C"))
+#'                           locationNames = c("A", "B", "C"),
+#'                           data = split_split_plot_Data)
 #' SSPD2$infoDesign
 #' head(SSPD2$fieldBook,12)
 #'              

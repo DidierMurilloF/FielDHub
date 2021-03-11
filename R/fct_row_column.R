@@ -23,8 +23,8 @@
 #'
 #'
 #' @references
-#' Edmondson, R.N. 2020. Package blocksdesign: Nested and Crossed Block Designs for
-#' Factorial and Unstructured Treatment Sets.
+#' Edmondson., R. N. (2021). blocksdesign: Nested and crossed block designs for factorial and
+#' unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign
 #'
 #' @examples
 #' 
@@ -40,10 +40,15 @@
 #' 
 #' #Example 2: Generates a row-column design with 3 full blocks and 30 treatments
 #' # and 5 rows, for two locations.
+#' # In this case, we show how to use the option data.
+#' treatments <- paste("ND-", 1:30, sep = "")
+#' treatment_list <- data.frame(list(TREATMENT = treatments))
+#' head(treatment_list)
 #' rowcold2 <- row_column(t = 30, nrows = 5, r = 3, l = 2, 
 #'                        plotNumber= c(101,1001), 
 #'                        locationNames = c("A", "B"),
-#'                        seed = 15)
+#'                        seed = 15,
+#'                        data = treatment_list)
 #' rowcold2$infoDesign
 #' rowcold2$resolvableBlocks
 #' head(rowcold2$fieldBook,12)
@@ -85,8 +90,8 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
     }
     data_RowCol <- NULL
   }else if (!is.null(data)) {
-    if (is.null(r) || is.null(k) || is.null(l)) {
-      shiny::validate('Some of the basic design parameters are missing (r, k, l).')
+    if (is.null(t) || is.null(r) || is.null(k) || is.null(l)) {
+      shiny::validate('Some of the basic design parameters are missing (t, r, k or l).')
     }
     if(!is.data.frame(data)) shiny::validate("Data must be a data frame.")
     data <- as.data.frame(na.omit(data[,1]))
@@ -123,12 +128,20 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
   for (j in 1:r) {
      z <- OutRowCol
      z <- subset(z, z$LOCATION == loc[1] & z$REP == j)
-     Resolvable_rc_reps[[j]] <- matrix(data = as.vector(z$ENTRY), nrow = nunits, ncol = ib, byrow = TRUE)
+     if (is.null(data)){
+       Resolvable_rc_reps[[j]] <- matrix(data = as.vector(z$ENTRY), nrow = nunits, 
+                                         ncol = ib, byrow = TRUE)
+     }else {
+       Resolvable_rc_reps[[j]] <- matrix(data = as.vector(z$TREATMENT), nrow = nunits, 
+                                         ncol = ib, byrow = TRUE)
+     }
   }
   df <- OutRowCol
-  c1 <- concurrence_matrix(df=df, trt='ENTRY', target='REP')
-  c2 <- concurrence_matrix (df=df, trt='ENTRY', target='ROW')
-  c3 <- concurrence_matrix (df=df, trt='ENTRY', target='COLUMN')
+  
+  if (is.null(data)) trt <- "ENTRY" else trt <- "TREATMENT"
+  c1 <- concurrence_matrix(df=df, trt=trt, target='REP')
+  c2 <- concurrence_matrix (df=df, trt=trt, target='ROW')
+  c3 <- concurrence_matrix (df=df, trt=trt, target='COLUMN')
   summ <- merge(c1, c2, by="Concurrence", all=TRUE)
   new_summ <- merge(summ, c3, by='Concurrence', all=TRUE)
 

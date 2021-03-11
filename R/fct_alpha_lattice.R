@@ -1,14 +1,8 @@
 #' Generates an Alpha Design
 #' 
 #' 
-#' @description  Randomly generates an Alpha design like \code{alpha(0,1)} across multiple locations.
+#' @description  Randomly generates an alpha design like \code{alpha(0,1)} across multiple locations.
 #' 
-#' @details Alpha lattice designs are a type of replicated designs that divide the replicate into incomplete blocks 
-#' that contain a fraction of the total number of entries. Treatments are distributed among the blocks so 
-#' that all pairs occur in the same incomplete-block in nearly equal frequency. The design permits removal 
-#' of incomplete-block effects from the plot residuals and maximizes the use of comparisons between treatments 
-#' in the same incomplete-block. The \code{alpha_lattice} function can only be used to a number of treatments that 
-#' are multiply of the size 
 #'
 #' @param t Number of  treatments.
 #' @param r Number of full blocks (or resolvable replicates) (also number of replicates per treatment).
@@ -28,8 +22,9 @@
 #'
 #'
 #' @references
-#' R. N. Edmondson. 2021. blocksdesign: Nested and Crossed Block Designs for Factorial and
-#' Unstructured Treatment Sets.
+#' Edmondson., R. N. (2021). blocksdesign: Nested and crossed block designs for factorial and
+#' unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign
+#'
 #'
 #' @examples
 #' # Example 1: Generates an alpha design with 7 full blocks and 15 treatments.
@@ -44,14 +39,18 @@
 #' 
 #' # Example 2: Generates an alpha design with 5 full blocks and 50 treatment.
 #' # Size of iBlocks k = 10. 
+#' # In this case, we show how to use the option data.
+#' treatments <- paste("G-", 1:50, sep = "")
+#' treatment_list <- data.frame(list(TREATMENT = treatments))
+#' head(treatment_list) 
 #' alphalattice2 <- alpha_lattice(t = 50, k = 10, r = 5, 
 #'                                l = 1, 
-#'                                plotNumber = c(101,1001,2001), 
-#'                                locationNames = LETTERS[1:3], 
-#'                                seed = 1945)
+#'                                plotNumber = 1001, 
+#'                                locationNames = "A", 
+#'                                seed = 1945,
+#'                                data = treatment_list)
 #' alphalattice2$infoDesign
 #' head(alphalattice2$fieldBook, 10)
-#' 
 #' 
 #' @export
 alpha_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101, locationNames = NULL,
@@ -88,8 +87,8 @@ alpha_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101,
     }
     data_alpha <- NULL
   }else if (!is.null(data)) {
-    if (is.null(r) || is.null(k) || is.null(l)) {
-      shiny::validate('Basic design parameters missing (t, k, r).')
+    if (is.null(t) || is.null(r) || is.null(k) || is.null(l)) {
+      shiny::validate('Basic design parameters missing (t, k, r or l).')
     }
     if(!is.data.frame(data)) shiny::validate("Data must be a data frame.")
     data <- as.data.frame(na.omit(data[,1]))

@@ -64,7 +64,11 @@ strip1$plotLayouts
 head(strip1$fieldBook,12)                     
 
 # Example 2: Generates a strip plot design with 5 vertical strips and 5 horizontal strips,
-# with 6 reps across to 3 locations.
+# with 6 reps across to 3 locations. In this case, we show how to use the option data.
+Hplots <- LETTERS[1:5]
+Vplots <- LETTERS[1:4]
+strip_data <- data.frame(list(HPLOTS = Hplots, VPLOTS = c(Vplots, NA)))
+head(strip_data)
 strip2 <- strip_plot(Hplots = 5, 
                      Vplots = 5, 
                      b = 6, 
@@ -72,7 +76,8 @@ strip2 <- strip_plot(Hplots = 5,
                      plotNumber = c(101,1001,2001),
                      planter = "cartesian",
                      locationNames = c("A", "B", "C"), 
-                     seed = 222)
+                     seed = 222,
+                     data = strip_data)
 strip2$infoDesign                  
 strip2$stripsBlockLoc
 strip2$plotLayouts
@@ -80,6 +85,6 @@ head(strip2$fieldBook,12)
 
 }
 \references{
-\emph{Design and Analysis of Experiments, Volume 1, Introduction to Experimental Design. Second Edition}.
- Klaus Hinkelmann & Oscar Kempthorne.John Wiley & Sons, Inc., Hoboken, New Jersey.
+Federer, W. T. (1955). Experimental Design. Theory and Application. New York, USA. The
+Macmillan Company.
 }

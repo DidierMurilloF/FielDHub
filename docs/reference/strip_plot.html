@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FielDHub</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
       </span>
     </div>
 
@@ -92,7 +92,12 @@
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/DidierMurilloF/FielDHub/">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
       </ul>
       
     </div><!--/.nav-collapse -->
@@ -107,7 +112,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Strip Plot Design</h1>
-    
+    <small class="dont-index">Source: <a href='https://github.com/DidierMurilloF/FielDHub/blob/master/R/fct_strip_plot.R'><code>R/fct_strip_plot.R</code></a></small>
     <div class="hidden name"><code>strip_plot.Rd</code></div>
     </div>
 
@@ -175,8 +180,8 @@
 <p>Data frame with the strip plot field book.</p>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
-    <p><em>Design and Analysis of Experiments, Volume 1, Introduction to Experimental Design. Second Edition</em>.
- Klaus Hinkelmann &amp; Oscar Kempthorne.John Wiley &amp; Sons, Inc., Hoboken, New Jersey.</p>
+    <p>Federer, W. T. (1955). Experimental Design. Theory and Application. New York, USA. The
+Macmillan Company.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'># Example 1: Generates a strip plot design with 5 vertical strips and 4 horizontal strips,</span>
@@ -254,35 +259,45 @@
 #&gt; [3,]  311  312  313  314  315
 #&gt; [4,]  320  319  318  317  316
 #&gt; </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>strip1</span><span class='op'>$</span><span class='va'>fieldBook</span>,<span class='fl'>12</span><span class='op'>)</span>                     
-</div><div class='output co'>#&gt;    LOCATION PLOT REP HSTRIP VSTRIP TRT_COMB
-#&gt; 1         A  101   1     H2     V4    H2|V4
-#&gt; 2         A  102   1     H2     V2    H2|V2
-#&gt; 3         A  103   1     H2     V5    H2|V5
-#&gt; 4         A  104   1     H2     V1    H2|V1
-#&gt; 5         A  105   1     H2     V3    H2|V3
-#&gt; 6         A  110   1     H1     V4    H1|V4
-#&gt; 7         A  109   1     H1     V2    H1|V2
-#&gt; 8         A  108   1     H1     V5    H1|V5
-#&gt; 9         A  107   1     H1     V1    H1|V1
-#&gt; 10        A  106   1     H1     V3    H1|V3
-#&gt; 11        A  111   1     H3     V4    H3|V4
-#&gt; 12        A  112   1     H3     V2    H3|V2</div><div class='input'>
+</div><div class='output co'>#&gt;    ID LOCATION PLOT REP HSTRIP VSTRIP TRT_COMB
+#&gt; 1   1        A  101   1     H2     V4    H2|V4
+#&gt; 2   2        A  102   1     H2     V2    H2|V2
+#&gt; 3   3        A  103   1     H2     V5    H2|V5
+#&gt; 4   4        A  104   1     H2     V1    H2|V1
+#&gt; 5   5        A  105   1     H2     V3    H2|V3
+#&gt; 10  6        A  106   1     H1     V3    H1|V3
+#&gt; 9   7        A  107   1     H1     V1    H1|V1
+#&gt; 8   8        A  108   1     H1     V5    H1|V5
+#&gt; 7   9        A  109   1     H1     V2    H1|V2
+#&gt; 6  10        A  110   1     H1     V4    H1|V4
+#&gt; 11 11        A  111   1     H3     V4    H3|V4
+#&gt; 12 12        A  112   1     H3     V2    H3|V2</div><div class='input'>
 <span class='co'># Example 2: Generates a strip plot design with 5 vertical strips and 5 horizontal strips,</span>
-<span class='co'># with 6 reps across to 3 locations.</span>
-<span class='va'>strip2</span> <span class='op'>&lt;-</span> <span class='fu'>strip_plot</span><span class='op'>(</span>Hplots <span class='op'>=</span> <span class='fl'>5</span>, 
+<span class='co'># with 6 reps across to 3 locations. In this case, we show how to use the option data.</span>
+<span class='va'>Hplots</span> <span class='op'>&lt;-</span> <span class='va'>LETTERS</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>5</span><span class='op'>]</span>
+<span class='va'>Vplots</span> <span class='op'>&lt;-</span> <span class='va'>LETTERS</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>4</span><span class='op'>]</span>
+<span class='va'>strip_data</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>HPLOTS <span class='op'>=</span> <span class='va'>Hplots</span>, VPLOTS <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>Vplots</span>, <span class='cn'>NA</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>strip_data</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;   HPLOTS VPLOTS
+#&gt; 1      A      A
+#&gt; 2      B      B
+#&gt; 3      C      C
+#&gt; 4      D      D
+#&gt; 5      E   &lt;NA&gt;</div><div class='input'><span class='va'>strip2</span> <span class='op'>&lt;-</span> <span class='fu'>strip_plot</span><span class='op'>(</span>Hplots <span class='op'>=</span> <span class='fl'>5</span>, 
                      Vplots <span class='op'>=</span> <span class='fl'>5</span>, 
                      b <span class='op'>=</span> <span class='fl'>6</span>, 
                      l <span class='op'>=</span> <span class='fl'>3</span>, 
                      plotNumber <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>101</span>,<span class='fl'>1001</span>,<span class='fl'>2001</span><span class='op'>)</span>,
                      planter <span class='op'>=</span> <span class='st'>"cartesian"</span>,
                      locationNames <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"A"</span>, <span class='st'>"B"</span>, <span class='st'>"C"</span><span class='op'>)</span>, 
-                     seed <span class='op'>=</span> <span class='fl'>222</span><span class='op'>)</span>
+                     seed <span class='op'>=</span> <span class='fl'>222</span>,
+                     data <span class='op'>=</span> <span class='va'>strip_data</span><span class='op'>)</span>
 <span class='va'>strip2</span><span class='op'>$</span><span class='va'>infoDesign</span>                  
 </div><div class='output co'>#&gt; $Hplots
-#&gt; [1] 5
+#&gt; [1] 4
 #&gt; 
 #&gt; $Vplots
-#&gt; [1] 5
+#&gt; [1] 4
 #&gt; 
 #&gt; $blocks
 #&gt; [1] 6
@@ -298,311 +313,275 @@
 #&gt; </div><div class='input'><span class='va'>strip2</span><span class='op'>$</span><span class='va'>stripsBlockLoc</span>
 </div><div class='output co'>#&gt; [[1]]
 #&gt; [[1]][[1]]
-#&gt;    a1      a3      a0      a4      a2     
-#&gt; b4 "b4|a1" "b4|a3" "b4|a0" "b4|a4" "b4|a2"
-#&gt; b1 "b1|a1" "b1|a3" "b1|a0" "b1|a4" "b1|a2"
-#&gt; b2 "b2|a1" "b2|a3" "b2|a0" "b2|a4" "b2|a2"
-#&gt; b3 "b3|a1" "b3|a3" "b3|a0" "b3|a4" "b3|a2"
-#&gt; b0 "b0|a1" "b0|a3" "b0|a0" "b0|a4" "b0|a2"
+#&gt;   C     B     D     A    
+#&gt; A "A|C" "A|B" "A|D" "A|A"
+#&gt; B "B|C" "B|B" "B|D" "B|A"
+#&gt; D "D|C" "D|B" "D|D" "D|A"
+#&gt; C "C|C" "C|B" "C|D" "C|A"
 #&gt; 
 #&gt; [[1]][[2]]
-#&gt;    a0      a3      a4      a1      a2     
-#&gt; b1 "b1|a0" "b1|a3" "b1|a4" "b1|a1" "b1|a2"
-#&gt; b0 "b0|a0" "b0|a3" "b0|a4" "b0|a1" "b0|a2"
-#&gt; b4 "b4|a0" "b4|a3" "b4|a4" "b4|a1" "b4|a2"
-#&gt; b2 "b2|a0" "b2|a3" "b2|a4" "b2|a1" "b2|a2"
-#&gt; b3 "b3|a0" "b3|a3" "b3|a4" "b3|a1" "b3|a2"
+#&gt;   A     B     C     D    
+#&gt; A "A|A" "A|B" "A|C" "A|D"
+#&gt; B "B|A" "B|B" "B|C" "B|D"
+#&gt; D "D|A" "D|B" "D|C" "D|D"
+#&gt; C "C|A" "C|B" "C|C" "C|D"
 #&gt; 
 #&gt; [[1]][[3]]
-#&gt;    a0      a2      a4      a1      a3     
-#&gt; b4 "b4|a0" "b4|a2" "b4|a4" "b4|a1" "b4|a3"
-#&gt; b0 "b0|a0" "b0|a2" "b0|a4" "b0|a1" "b0|a3"
-#&gt; b3 "b3|a0" "b3|a2" "b3|a4" "b3|a1" "b3|a3"
-#&gt; b2 "b2|a0" "b2|a2" "b2|a4" "b2|a1" "b2|a3"
-#&gt; b1 "b1|a0" "b1|a2" "b1|a4" "b1|a1" "b1|a3"
+#&gt;   A     D     C     B    
+#&gt; A "A|A" "A|D" "A|C" "A|B"
+#&gt; D "D|A" "D|D" "D|C" "D|B"
+#&gt; B "B|A" "B|D" "B|C" "B|B"
+#&gt; C "C|A" "C|D" "C|C" "C|B"
 #&gt; 
 #&gt; [[1]][[4]]
-#&gt;    a4      a2      a0      a3      a1     
-#&gt; b4 "b4|a4" "b4|a2" "b4|a0" "b4|a3" "b4|a1"
-#&gt; b1 "b1|a4" "b1|a2" "b1|a0" "b1|a3" "b1|a1"
-#&gt; b0 "b0|a4" "b0|a2" "b0|a0" "b0|a3" "b0|a1"
-#&gt; b3 "b3|a4" "b3|a2" "b3|a0" "b3|a3" "b3|a1"
-#&gt; b2 "b2|a4" "b2|a2" "b2|a0" "b2|a3" "b2|a1"
+#&gt;   D     A     B     C    
+#&gt; B "B|D" "B|A" "B|B" "B|C"
+#&gt; A "A|D" "A|A" "A|B" "A|C"
+#&gt; C "C|D" "C|A" "C|B" "C|C"
+#&gt; D "D|D" "D|A" "D|B" "D|C"
 #&gt; 
 #&gt; [[1]][[5]]
-#&gt;    a3      a4      a1      a2      a0     
-#&gt; b4 "b4|a3" "b4|a4" "b4|a1" "b4|a2" "b4|a0"
-#&gt; b1 "b1|a3" "b1|a4" "b1|a1" "b1|a2" "b1|a0"
-#&gt; b2 "b2|a3" "b2|a4" "b2|a1" "b2|a2" "b2|a0"
-#&gt; b3 "b3|a3" "b3|a4" "b3|a1" "b3|a2" "b3|a0"
-#&gt; b0 "b0|a3" "b0|a4" "b0|a1" "b0|a2" "b0|a0"
+#&gt;   B     A     C     D    
+#&gt; A "A|B" "A|A" "A|C" "A|D"
+#&gt; B "B|B" "B|A" "B|C" "B|D"
+#&gt; C "C|B" "C|A" "C|C" "C|D"
+#&gt; D "D|B" "D|A" "D|C" "D|D"
 #&gt; 
 #&gt; [[1]][[6]]
-#&gt;    a1      a3      a4      a0      a2     
-#&gt; b1 "b1|a1" "b1|a3" "b1|a4" "b1|a0" "b1|a2"
-#&gt; b3 "b3|a1" "b3|a3" "b3|a4" "b3|a0" "b3|a2"
-#&gt; b2 "b2|a1" "b2|a3" "b2|a4" "b2|a0" "b2|a2"
-#&gt; b4 "b4|a1" "b4|a3" "b4|a4" "b4|a0" "b4|a2"
-#&gt; b0 "b0|a1" "b0|a3" "b0|a4" "b0|a0" "b0|a2"
+#&gt;   C     B     D     A    
+#&gt; C "C|C" "C|B" "C|D" "C|A"
+#&gt; D "D|C" "D|B" "D|D" "D|A"
+#&gt; A "A|C" "A|B" "A|D" "A|A"
+#&gt; B "B|C" "B|B" "B|D" "B|A"
 #&gt; 
 #&gt; 
 #&gt; [[2]]
 #&gt; [[2]][[1]]
-#&gt;    a3      a4      a2      a0      a1     
-#&gt; b4 "b4|a3" "b4|a4" "b4|a2" "b4|a0" "b4|a1"
-#&gt; b3 "b3|a3" "b3|a4" "b3|a2" "b3|a0" "b3|a1"
-#&gt; b0 "b0|a3" "b0|a4" "b0|a2" "b0|a0" "b0|a1"
-#&gt; b2 "b2|a3" "b2|a4" "b2|a2" "b2|a0" "b2|a1"
-#&gt; b1 "b1|a3" "b1|a4" "b1|a2" "b1|a0" "b1|a1"
+#&gt;   B     C     D     A    
+#&gt; C "C|B" "C|C" "C|D" "C|A"
+#&gt; B "B|B" "B|C" "B|D" "B|A"
+#&gt; D "D|B" "D|C" "D|D" "D|A"
+#&gt; A "A|B" "A|C" "A|D" "A|A"
 #&gt; 
 #&gt; [[2]][[2]]
-#&gt;    a3      a0      a4      a1      a2     
-#&gt; b1 "b1|a3" "b1|a0" "b1|a4" "b1|a1" "b1|a2"
-#&gt; b4 "b4|a3" "b4|a0" "b4|a4" "b4|a1" "b4|a2"
-#&gt; b2 "b2|a3" "b2|a0" "b2|a4" "b2|a1" "b2|a2"
-#&gt; b3 "b3|a3" "b3|a0" "b3|a4" "b3|a1" "b3|a2"
-#&gt; b0 "b0|a3" "b0|a0" "b0|a4" "b0|a1" "b0|a2"
+#&gt;   B     C     D     A    
+#&gt; B "B|B" "B|C" "B|D" "B|A"
+#&gt; D "D|B" "D|C" "D|D" "D|A"
+#&gt; A "A|B" "A|C" "A|D" "A|A"
+#&gt; C "C|B" "C|C" "C|D" "C|A"
 #&gt; 
 #&gt; [[2]][[3]]
-#&gt;    a2      a0      a3      a1      a4     
-#&gt; b3 "b3|a2" "b3|a0" "b3|a3" "b3|a1" "b3|a4"
-#&gt; b2 "b2|a2" "b2|a0" "b2|a3" "b2|a1" "b2|a4"
-#&gt; b4 "b4|a2" "b4|a0" "b4|a3" "b4|a1" "b4|a4"
-#&gt; b0 "b0|a2" "b0|a0" "b0|a3" "b0|a1" "b0|a4"
-#&gt; b1 "b1|a2" "b1|a0" "b1|a3" "b1|a1" "b1|a4"
+#&gt;   D     C     A     B    
+#&gt; D "D|D" "D|C" "D|A" "D|B"
+#&gt; A "A|D" "A|C" "A|A" "A|B"
+#&gt; C "C|D" "C|C" "C|A" "C|B"
+#&gt; B "B|D" "B|C" "B|A" "B|B"
 #&gt; 
 #&gt; [[2]][[4]]
-#&gt;    a0      a3      a2      a1      a4     
-#&gt; b4 "b4|a0" "b4|a3" "b4|a2" "b4|a1" "b4|a4"
-#&gt; b3 "b3|a0" "b3|a3" "b3|a2" "b3|a1" "b3|a4"
-#&gt; b1 "b1|a0" "b1|a3" "b1|a2" "b1|a1" "b1|a4"
-#&gt; b0 "b0|a0" "b0|a3" "b0|a2" "b0|a1" "b0|a4"
-#&gt; b2 "b2|a0" "b2|a3" "b2|a2" "b2|a1" "b2|a4"
+#&gt;   A     D     C     B    
+#&gt; B "B|A" "B|D" "B|C" "B|B"
+#&gt; D "D|A" "D|D" "D|C" "D|B"
+#&gt; A "A|A" "A|D" "A|C" "A|B"
+#&gt; C "C|A" "C|D" "C|C" "C|B"
 #&gt; 
 #&gt; [[2]][[5]]
-#&gt;    a4      a3      a1      a2      a0     
-#&gt; b4 "b4|a4" "b4|a3" "b4|a1" "b4|a2" "b4|a0"
-#&gt; b0 "b0|a4" "b0|a3" "b0|a1" "b0|a2" "b0|a0"
-#&gt; b3 "b3|a4" "b3|a3" "b3|a1" "b3|a2" "b3|a0"
-#&gt; b2 "b2|a4" "b2|a3" "b2|a1" "b2|a2" "b2|a0"
-#&gt; b1 "b1|a4" "b1|a3" "b1|a1" "b1|a2" "b1|a0"
+#&gt;   C     D     A     B    
+#&gt; B "B|C" "B|D" "B|A" "B|B"
+#&gt; D "D|C" "D|D" "D|A" "D|B"
+#&gt; C "C|C" "C|D" "C|A" "C|B"
+#&gt; A "A|C" "A|D" "A|A" "A|B"
 #&gt; 
 #&gt; [[2]][[6]]
-#&gt;    a4      a3      a0      a2      a1     
-#&gt; b0 "b0|a4" "b0|a3" "b0|a0" "b0|a2" "b0|a1"
-#&gt; b4 "b4|a4" "b4|a3" "b4|a0" "b4|a2" "b4|a1"
-#&gt; b3 "b3|a4" "b3|a3" "b3|a0" "b3|a2" "b3|a1"
-#&gt; b1 "b1|a4" "b1|a3" "b1|a0" "b1|a2" "b1|a1"
-#&gt; b2 "b2|a4" "b2|a3" "b2|a0" "b2|a2" "b2|a1"
+#&gt;   C     A     B     D    
+#&gt; C "C|C" "C|A" "C|B" "C|D"
+#&gt; A "A|C" "A|A" "A|B" "A|D"
+#&gt; D "D|C" "D|A" "D|B" "D|D"
+#&gt; B "B|C" "B|A" "B|B" "B|D"
 #&gt; 
 #&gt; 
 #&gt; [[3]]
 #&gt; [[3]][[1]]
-#&gt;    a3      a2      a4      a0      a1     
-#&gt; b1 "b1|a3" "b1|a2" "b1|a4" "b1|a0" "b1|a1"
-#&gt; b2 "b2|a3" "b2|a2" "b2|a4" "b2|a0" "b2|a1"
-#&gt; b0 "b0|a3" "b0|a2" "b0|a4" "b0|a0" "b0|a1"
-#&gt; b3 "b3|a3" "b3|a2" "b3|a4" "b3|a0" "b3|a1"
-#&gt; b4 "b4|a3" "b4|a2" "b4|a4" "b4|a0" "b4|a1"
+#&gt;   D     C     B     A    
+#&gt; A "A|D" "A|C" "A|B" "A|A"
+#&gt; B "B|D" "B|C" "B|B" "B|A"
+#&gt; D "D|D" "D|C" "D|B" "D|A"
+#&gt; C "C|D" "C|C" "C|B" "C|A"
 #&gt; 
 #&gt; [[3]][[2]]
-#&gt;    a3      a1      a4      a2      a0     
-#&gt; b3 "b3|a3" "b3|a1" "b3|a4" "b3|a2" "b3|a0"
-#&gt; b0 "b0|a3" "b0|a1" "b0|a4" "b0|a2" "b0|a0"
-#&gt; b1 "b1|a3" "b1|a1" "b1|a4" "b1|a2" "b1|a0"
-#&gt; b4 "b4|a3" "b4|a1" "b4|a4" "b4|a2" "b4|a0"
-#&gt; b2 "b2|a3" "b2|a1" "b2|a4" "b2|a2" "b2|a0"
+#&gt;   D     C     B     A    
+#&gt; A "A|D" "A|C" "A|B" "A|A"
+#&gt; D "D|D" "D|C" "D|B" "D|A"
+#&gt; C "C|D" "C|C" "C|B" "C|A"
+#&gt; B "B|D" "B|C" "B|B" "B|A"
 #&gt; 
 #&gt; [[3]][[3]]
-#&gt;    a1      a4      a0      a3      a2     
-#&gt; b4 "b4|a1" "b4|a4" "b4|a0" "b4|a3" "b4|a2"
-#&gt; b0 "b0|a1" "b0|a4" "b0|a0" "b0|a3" "b0|a2"
-#&gt; b1 "b1|a1" "b1|a4" "b1|a0" "b1|a3" "b1|a2"
-#&gt; b3 "b3|a1" "b3|a4" "b3|a0" "b3|a3" "b3|a2"
-#&gt; b2 "b2|a1" "b2|a4" "b2|a0" "b2|a3" "b2|a2"
+#&gt;   B     C     A     D    
+#&gt; D "D|B" "D|C" "D|A" "D|D"
+#&gt; B "B|B" "B|C" "B|A" "B|D"
+#&gt; C "C|B" "C|C" "C|A" "C|D"
+#&gt; A "A|B" "A|C" "A|A" "A|D"
 #&gt; 
 #&gt; [[3]][[4]]
-#&gt;    a1      a3      a2      a0      a4     
-#&gt; b4 "b4|a1" "b4|a3" "b4|a2" "b4|a0" "b4|a4"
-#&gt; b3 "b3|a1" "b3|a3" "b3|a2" "b3|a0" "b3|a4"
-#&gt; b2 "b2|a1" "b2|a3" "b2|a2" "b2|a0" "b2|a4"
-#&gt; b0 "b0|a1" "b0|a3" "b0|a2" "b0|a0" "b0|a4"
-#&gt; b1 "b1|a1" "b1|a3" "b1|a2" "b1|a0" "b1|a4"
+#&gt;   B     A     D     C    
+#&gt; A "A|B" "A|A" "A|D" "A|C"
+#&gt; D "D|B" "D|A" "D|D" "D|C"
+#&gt; C "C|B" "C|A" "C|D" "C|C"
+#&gt; B "B|B" "B|A" "B|D" "B|C"
 #&gt; 
 #&gt; [[3]][[5]]
-#&gt;    a4      a3      a2      a1      a0     
-#&gt; b1 "b1|a4" "b1|a3" "b1|a2" "b1|a1" "b1|a0"
-#&gt; b4 "b4|a4" "b4|a3" "b4|a2" "b4|a1" "b4|a0"
-#&gt; b0 "b0|a4" "b0|a3" "b0|a2" "b0|a1" "b0|a0"
-#&gt; b3 "b3|a4" "b3|a3" "b3|a2" "b3|a1" "b3|a0"
-#&gt; b2 "b2|a4" "b2|a3" "b2|a2" "b2|a1" "b2|a0"
+#&gt;   A     D     C     B    
+#&gt; A "A|A" "A|D" "A|C" "A|B"
+#&gt; B "B|A" "B|D" "B|C" "B|B"
+#&gt; C "C|A" "C|D" "C|C" "C|B"
+#&gt; D "D|A" "D|D" "D|C" "D|B"
 #&gt; 
 #&gt; [[3]][[6]]
-#&gt;    a2      a3      a1      a4      a0     
-#&gt; b0 "b0|a2" "b0|a3" "b0|a1" "b0|a4" "b0|a0"
-#&gt; b1 "b1|a2" "b1|a3" "b1|a1" "b1|a4" "b1|a0"
-#&gt; b3 "b3|a2" "b3|a3" "b3|a1" "b3|a4" "b3|a0"
-#&gt; b4 "b4|a2" "b4|a3" "b4|a1" "b4|a4" "b4|a0"
-#&gt; b2 "b2|a2" "b2|a3" "b2|a1" "b2|a4" "b2|a0"
+#&gt;   D     C     A     B    
+#&gt; C "C|D" "C|C" "C|A" "C|B"
+#&gt; D "D|D" "D|C" "D|A" "D|B"
+#&gt; B "B|D" "B|C" "B|A" "B|B"
+#&gt; A "A|D" "A|C" "A|A" "A|B"
 #&gt; 
 #&gt; </div><div class='input'><span class='va'>strip2</span><span class='op'>$</span><span class='va'>plotLayouts</span>
 </div><div class='output co'>#&gt; [[1]]
-#&gt;      [,1] [,2] [,3] [,4] [,5]
-#&gt; [1,]  101  102  103  104  105
-#&gt; [2,]  106  107  108  109  110
-#&gt; [3,]  111  112  113  114  115
-#&gt; [4,]  116  117  118  119  120
-#&gt; [5,]  121  122  123  124  125
+#&gt;      [,1] [,2] [,3] [,4]
+#&gt; [1,]  101  102  103  104
+#&gt; [2,]  105  106  107  108
+#&gt; [3,]  109  110  111  112
+#&gt; [4,]  113  114  115  116
 #&gt; 
 #&gt; [[2]]
-#&gt;      [,1] [,2] [,3] [,4] [,5]
-#&gt; [1,]  201  202  203  204  205
-#&gt; [2,]  206  207  208  209  210
-#&gt; [3,]  211  212  213  214  215
-#&gt; [4,]  216  217  218  219  220
-#&gt; [5,]  221  222  223  224  225
+#&gt;      [,1] [,2] [,3] [,4]
+#&gt; [1,]  201  202  203  204
+#&gt; [2,]  205  206  207  208
+#&gt; [3,]  209  210  211  212
+#&gt; [4,]  213  214  215  216
 #&gt; 
 #&gt; [[3]]
-#&gt;      [,1] [,2] [,3] [,4] [,5]
-#&gt; [1,]  301  302  303  304  305
-#&gt; [2,]  306  307  308  309  310
-#&gt; [3,]  311  312  313  314  315
-#&gt; [4,]  316  317  318  319  320
-#&gt; [5,]  321  322  323  324  325
+#&gt;      [,1] [,2] [,3] [,4]
+#&gt; [1,]  301  302  303  304
+#&gt; [2,]  305  306  307  308
+#&gt; [3,]  309  310  311  312
+#&gt; [4,]  313  314  315  316
 #&gt; 
 #&gt; [[4]]
-#&gt;      [,1] [,2] [,3] [,4] [,5]
-#&gt; [1,]  401  402  403  404  405
-#&gt; [2,]  406  407  408  409  410
-#&gt; [3,]  411  412  413  414  415
-#&gt; [4,]  416  417  418  419  420
-#&gt; [5,]  421  422  423  424  425
+#&gt;      [,1] [,2] [,3] [,4]
+#&gt; [1,]  401  402  403  404
+#&gt; [2,]  405  406  407  408
+#&gt; [3,]  409  410  411  412
+#&gt; [4,]  413  414  415  416
 #&gt; 
 #&gt; [[5]]
-#&gt;      [,1] [,2] [,3] [,4] [,5]
-#&gt; [1,]  501  502  503  504  505
-#&gt; [2,]  506  507  508  509  510
-#&gt; [3,]  511  512  513  514  515
-#&gt; [4,]  516  517  518  519  520
-#&gt; [5,]  521  522  523  524  525
+#&gt;      [,1] [,2] [,3] [,4]
+#&gt; [1,]  501  502  503  504
+#&gt; [2,]  505  506  507  508
+#&gt; [3,]  509  510  511  512
+#&gt; [4,]  513  514  515  516
 #&gt; 
 #&gt; [[6]]
-#&gt;      [,1] [,2] [,3] [,4] [,5]
-#&gt; [1,]  601  602  603  604  605
-#&gt; [2,]  606  607  608  609  610
-#&gt; [3,]  611  612  613  614  615
-#&gt; [4,]  616  617  618  619  620
-#&gt; [5,]  621  622  623  624  625
+#&gt;      [,1] [,2] [,3] [,4]
+#&gt; [1,]  601  602  603  604
+#&gt; [2,]  605  606  607  608
+#&gt; [3,]  609  610  611  612
+#&gt; [4,]  613  614  615  616
 #&gt; 
 #&gt; [[7]]
-#&gt;      [,1] [,2] [,3] [,4] [,5]
-#&gt; [1,] 1001 1002 1003 1004 1005
-#&gt; [2,] 1006 1007 1008 1009 1010
-#&gt; [3,] 1011 1012 1013 1014 1015
-#&gt; [4,] 1016 1017 1018 1019 1020
-#&gt; [5,] 1021 1022 1023 1024 1025
+#&gt;      [,1] [,2] [,3] [,4]
+#&gt; [1,] 1001 1002 1003 1004
+#&gt; [2,] 1005 1006 1007 1008
+#&gt; [3,] 1009 1010 1011 1012
+#&gt; [4,] 1013 1014 1015 1016
 #&gt; 
 #&gt; [[8]]
-#&gt;      [,1] [,2] [,3] [,4] [,5]
-#&gt; [1,] 1101 1102 1103 1104 1105
-#&gt; [2,] 1106 1107 1108 1109 1110
-#&gt; [3,] 1111 1112 1113 1114 1115
-#&gt; [4,] 1116 1117 1118 1119 1120
-#&gt; [5,] 1121 1122 1123 1124 1125
+#&gt;      [,1] [,2] [,3] [,4]
+#&gt; [1,] 1101 1102 1103 1104
+#&gt; [2,] 1105 1106 1107 1108
+#&gt; [3,] 1109 1110 1111 1112
+#&gt; [4,] 1113 1114 1115 1116
 #&gt; 
 #&gt; [[9]]
-#&gt;      [,1] [,2] [,3] [,4] [,5]
-#&gt; [1,] 1201 1202 1203 1204 1205
-#&gt; [2,] 1206 1207 1208 1209 1210
-#&gt; [3,] 1211 1212 1213 1214 1215
-#&gt; [4,] 1216 1217 1218 1219 1220
-#&gt; [5,] 1221 1222 1223 1224 1225
+#&gt;      [,1] [,2] [,3] [,4]
+#&gt; [1,] 1201 1202 1203 1204
+#&gt; [2,] 1205 1206 1207 1208
+#&gt; [3,] 1209 1210 1211 1212
+#&gt; [4,] 1213 1214 1215 1216
 #&gt; 
 #&gt; [[10]]
-#&gt;      [,1] [,2] [,3] [,4] [,5]
-#&gt; [1,] 1301 1302 1303 1304 1305
-#&gt; [2,] 1306 1307 1308 1309 1310
-#&gt; [3,] 1311 1312 1313 1314 1315
-#&gt; [4,] 1316 1317 1318 1319 1320
-#&gt; [5,] 1321 1322 1323 1324 1325
+#&gt;      [,1] [,2] [,3] [,4]
+#&gt; [1,] 1301 1302 1303 1304
+#&gt; [2,] 1305 1306 1307 1308
+#&gt; [3,] 1309 1310 1311 1312
+#&gt; [4,] 1313 1314 1315 1316
 #&gt; 
 #&gt; [[11]]
-#&gt;      [,1] [,2] [,3] [,4] [,5]
-#&gt; [1,] 1401 1402 1403 1404 1405
-#&gt; [2,] 1406 1407 1408 1409 1410
-#&gt; [3,] 1411 1412 1413 1414 1415
-#&gt; [4,] 1416 1417 1418 1419 1420
-#&gt; [5,] 1421 1422 1423 1424 1425
+#&gt;      [,1] [,2] [,3] [,4]
+#&gt; [1,] 1401 1402 1403 1404
+#&gt; [2,] 1405 1406 1407 1408
+#&gt; [3,] 1409 1410 1411 1412
+#&gt; [4,] 1413 1414 1415 1416
 #&gt; 
 #&gt; [[12]]
-#&gt;      [,1] [,2] [,3] [,4] [,5]
-#&gt; [1,] 1501 1502 1503 1504 1505
-#&gt; [2,] 1506 1507 1508 1509 1510
-#&gt; [3,] 1511 1512 1513 1514 1515
-#&gt; [4,] 1516 1517 1518 1519 1520
-#&gt; [5,] 1521 1522 1523 1524 1525
+#&gt;      [,1] [,2] [,3] [,4]
+#&gt; [1,] 1501 1502 1503 1504
+#&gt; [2,] 1505 1506 1507 1508
+#&gt; [3,] 1509 1510 1511 1512
+#&gt; [4,] 1513 1514 1515 1516
 #&gt; 
 #&gt; [[13]]
-#&gt;      [,1] [,2] [,3] [,4] [,5]
-#&gt; [1,] 2001 2002 2003 2004 2005
-#&gt; [2,] 2006 2007 2008 2009 2010
-#&gt; [3,] 2011 2012 2013 2014 2015
-#&gt; [4,] 2016 2017 2018 2019 2020
-#&gt; [5,] 2021 2022 2023 2024 2025
+#&gt;      [,1] [,2] [,3] [,4]
+#&gt; [1,] 2001 2002 2003 2004
+#&gt; [2,] 2005 2006 2007 2008
+#&gt; [3,] 2009 2010 2011 2012
+#&gt; [4,] 2013 2014 2015 2016
 #&gt; 
 #&gt; [[14]]
-#&gt;      [,1] [,2] [,3] [,4] [,5]
-#&gt; [1,] 2101 2102 2103 2104 2105
-#&gt; [2,] 2106 2107 2108 2109 2110
-#&gt; [3,] 2111 2112 2113 2114 2115
-#&gt; [4,] 2116 2117 2118 2119 2120
-#&gt; [5,] 2121 2122 2123 2124 2125
+#&gt;      [,1] [,2] [,3] [,4]
+#&gt; [1,] 2101 2102 2103 2104
+#&gt; [2,] 2105 2106 2107 2108
+#&gt; [3,] 2109 2110 2111 2112
+#&gt; [4,] 2113 2114 2115 2116
 #&gt; 
 #&gt; [[15]]
-#&gt;      [,1] [,2] [,3] [,4] [,5]
-#&gt; [1,] 2201 2202 2203 2204 2205
-#&gt; [2,] 2206 2207 2208 2209 2210
-#&gt; [3,] 2211 2212 2213 2214 2215
-#&gt; [4,] 2216 2217 2218 2219 2220
-#&gt; [5,] 2221 2222 2223 2224 2225
+#&gt;      [,1] [,2] [,3] [,4]
+#&gt; [1,] 2201 2202 2203 2204
+#&gt; [2,] 2205 2206 2207 2208
+#&gt; [3,] 2209 2210 2211 2212
+#&gt; [4,] 2213 2214 2215 2216
 #&gt; 
 #&gt; [[16]]
-#&gt;      [,1] [,2] [,3] [,4] [,5]
-#&gt; [1,] 2301 2302 2303 2304 2305
-#&gt; [2,] 2306 2307 2308 2309 2310
-#&gt; [3,] 2311 2312 2313 2314 2315
-#&gt; [4,] 2316 2317 2318 2319 2320
-#&gt; [5,] 2321 2322 2323 2324 2325
+#&gt;      [,1] [,2] [,3] [,4]
+#&gt; [1,] 2301 2302 2303 2304
+#&gt; [2,] 2305 2306 2307 2308
+#&gt; [3,] 2309 2310 2311 2312
+#&gt; [4,] 2313 2314 2315 2316
 #&gt; 
 #&gt; [[17]]
-#&gt;      [,1] [,2] [,3] [,4] [,5]
-#&gt; [1,] 2401 2402 2403 2404 2405
-#&gt; [2,] 2406 2407 2408 2409 2410
-#&gt; [3,] 2411 2412 2413 2414 2415
-#&gt; [4,] 2416 2417 2418 2419 2420
-#&gt; [5,] 2421 2422 2423 2424 2425
+#&gt;      [,1] [,2] [,3] [,4]
+#&gt; [1,] 2401 2402 2403 2404
+#&gt; [2,] 2405 2406 2407 2408
+#&gt; [3,] 2409 2410 2411 2412
+#&gt; [4,] 2413 2414 2415 2416
 #&gt; 
 #&gt; [[18]]
-#&gt;      [,1] [,2] [,3] [,4] [,5]
-#&gt; [1,] 2501 2502 2503 2504 2505
-#&gt; [2,] 2506 2507 2508 2509 2510
-#&gt; [3,] 2511 2512 2513 2514 2515
-#&gt; [4,] 2516 2517 2518 2519 2520
-#&gt; [5,] 2521 2522 2523 2524 2525
+#&gt;      [,1] [,2] [,3] [,4]
+#&gt; [1,] 2501 2502 2503 2504
+#&gt; [2,] 2505 2506 2507 2508
+#&gt; [3,] 2509 2510 2511 2512
+#&gt; [4,] 2513 2514 2515 2516
 #&gt; </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>strip2</span><span class='op'>$</span><span class='va'>fieldBook</span>,<span class='fl'>12</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;    LOCATION PLOT REP HSTRIP VSTRIP TRT_COMB
-#&gt; 1         A  101   1     b4     a1    b4|a1
-#&gt; 2         A  102   1     b4     a3    b4|a3
-#&gt; 3         A  103   1     b4     a0    b4|a0
-#&gt; 4         A  104   1     b4     a4    b4|a4
-#&gt; 5         A  105   1     b4     a2    b4|a2
-#&gt; 6         A  106   1     b1     a1    b1|a1
-#&gt; 7         A  107   1     b1     a3    b1|a3
-#&gt; 8         A  108   1     b1     a0    b1|a0
-#&gt; 9         A  109   1     b1     a4    b1|a4
-#&gt; 10        A  110   1     b1     a2    b1|a2
-#&gt; 11        A  111   1     b2     a1    b2|a1
-#&gt; 12        A  112   1     b2     a3    b2|a3</div><div class='input'>
+</div><div class='output co'>#&gt;    ID LOCATION PLOT REP HSTRIP VSTRIP TRT_COMB
+#&gt; 1   1        A  101   1      A      C      A|C
+#&gt; 2   2        A  102   1      A      B      A|B
+#&gt; 3   3        A  103   1      A      D      A|D
+#&gt; 4   4        A  104   1      A      A      A|A
+#&gt; 5   5        A  105   1      B      C      B|C
+#&gt; 6   6        A  106   1      B      B      B|B
+#&gt; 7   7        A  107   1      B      D      B|D
+#&gt; 8   8        A  108   1      B      A      B|A
+#&gt; 9   9        A  109   1      D      C      D|C
+#&gt; 10 10        A  110   1      D      B      D|B
+#&gt; 11 11        A  111   1      D      D      D|D
+#&gt; 12 12        A  112   1      D      A      D|A</div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -615,7 +594,7 @@
 
       <footer>
       <div class="copyright">
-  <p>Developed by Didier Murillo.</p>
+  <p>Developed by Didier Murillo, Salvador Gezan.</p>
 </div>
 
 <div class="pkgdown">

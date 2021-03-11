@@ -18,7 +18,7 @@ A table with summary of cases.
 A list with the entries for each location.
 }
 \description{
-Split a populationof genotypes randomly into several locations, with the
+Split a population of genotypes randomly into several locations, with the
 aim of having approximatelly the same number of replicates of each genotype, line or
 treatment per location.
 }

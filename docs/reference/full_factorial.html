@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FielDHub</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
       </span>
     </div>
 
@@ -92,7 +92,12 @@
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/DidierMurilloF/FielDHub/">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
       </ul>
       
     </div><!--/.nav-collapse -->
@@ -107,7 +112,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Generates a Full Factorial Design</h1>
-    
+    <small class="dont-index">Source: <a href='https://github.com/DidierMurilloF/FielDHub/blob/master/R/fct_full_factorial.R'><code>R/fct_full_factorial.R</code></a></small>
     <div class="hidden name"><code>full_factorial.Rd</code></div>
     </div>
 
@@ -179,8 +184,8 @@
 <p>Data frame with the full factorial field book.</p>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
-    <p><em>Design and Analysis of Experiments, Volume 1, Introduction to Experimental Design. Second Edition</em>.
- Klaus Hinkelmann &amp; Oscar Kempthorne.John Wiley &amp; Sons, Inc., Hoboken, New Jersey.</p>
+    <p>Federer, W. T. (1955). Experimental Design. Theory and Application. New York, USA. The
+Macmillan Company.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'># Example 1: Generates a full factorial with 3 factors each with 2 levels. </span>
@@ -232,58 +237,77 @@
 #&gt; $kind
 #&gt; [1] "RCBD"
 #&gt; </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>fullFact1</span><span class='op'>$</span><span class='va'>fieldBook</span>,<span class='fl'>10</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;    LOCATION PLOT REP FACTOR_A FACTOR_B FACTOR_C TRT_COMB
-#&gt; 1     FARGO  101   1        2        1        2    2*1*2
-#&gt; 2     FARGO  102   1        2        2        1    2*2*1
-#&gt; 3     FARGO  103   1        2        1        1    2*1*1
-#&gt; 4     FARGO  104   1        1        1        1    1*1*1
-#&gt; 5     FARGO  105   1        1        2        1    1*2*1
-#&gt; 6     FARGO  106   1        1        2        2    1*2*2
-#&gt; 7     FARGO  107   1        2        2        2    2*2*2
-#&gt; 8     FARGO  108   1        1        1        2    1*1*2
-#&gt; 16    FARGO  109   2        2        2        1    2*2*1
-#&gt; 15    FARGO  110   2        1        1        2    1*1*2</div><div class='input'>
+</div><div class='output co'>#&gt;    ID LOCATION PLOT REP FACTOR_A FACTOR_B FACTOR_C TRT_COMB
+#&gt; 1   1    FARGO  101   1        1        2        1    1*2*1
+#&gt; 2   2    FARGO  102   1        1        1        1    1*1*1
+#&gt; 3   3    FARGO  103   1        2        2        2    2*2*2
+#&gt; 4   4    FARGO  104   1        1        1        2    1*1*2
+#&gt; 5   5    FARGO  105   1        1        2        2    1*2*2
+#&gt; 6   6    FARGO  106   1        2        1        1    2*1*1
+#&gt; 7   7    FARGO  107   1        2        2        1    2*2*1
+#&gt; 8   8    FARGO  108   1        2        1        2    2*1*2
+#&gt; 16  9    FARGO  109   2        1        1        2    1*1*2
+#&gt; 15 10    FARGO  110   2        2        2        2    2*2*2</div><div class='input'>
 <span class='co'># Example 2: Generates a full factorial with 3 factors and each with levels: 2,3, </span>
-<span class='co'># and 2, respectively. </span>
-<span class='co'># This in an RCBD arrangement with 5 reps in 3 locations.</span>
-<span class='va'>fullFact2</span> <span class='op'>&lt;-</span> <span class='fu'>full_factorial</span><span class='op'>(</span>setfactors <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>2</span>,<span class='fl'>3</span>,<span class='fl'>2</span><span class='op'>)</span>, reps <span class='op'>=</span> <span class='fl'>5</span>, l <span class='op'>=</span> <span class='fl'>3</span>, type <span class='op'>=</span> <span class='fl'>2</span>, 
+<span class='co'># and 2, respectively. In this case, we show how to use the option data.</span>
+<span class='va'>FACTORS</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"A"</span>, <span class='st'>"B"</span>, <span class='st'>"C"</span><span class='op'>)</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>2</span>,<span class='fl'>3</span>,<span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>LEVELS</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"a0"</span>, <span class='st'>"a1"</span>, <span class='st'>"b0"</span>, <span class='st'>"b1"</span>, <span class='st'>"b2"</span>, <span class='st'>"c0"</span>, <span class='st'>"c1"</span><span class='op'>)</span>
+<span class='va'>data_factorial</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>FACTOR <span class='op'>=</span> <span class='va'>FACTORS</span>, LEVEL <span class='op'>=</span> <span class='va'>LEVELS</span><span class='op'>)</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>data_factorial</span><span class='op'>)</span> 
+</div><div class='output co'>#&gt;   FACTOR LEVEL
+#&gt; 1      A    a0
+#&gt; 2      A    a1
+#&gt; 3      B    b0
+#&gt; 4      B    b1
+#&gt; 5      B    b2
+#&gt; 6      C    c0
+#&gt; 7      C    c1</div><div class='input'><span class='co'># This in an RCBD arrangement with 5 reps in 3 locations.</span>
+<span class='va'>fullFact2</span> <span class='op'>&lt;-</span> <span class='fu'>full_factorial</span><span class='op'>(</span>setfactors <span class='op'>=</span> <span class='cn'>NULL</span>, reps <span class='op'>=</span> <span class='fl'>5</span>, l <span class='op'>=</span> <span class='fl'>3</span>, type <span class='op'>=</span> <span class='fl'>2</span>, 
                             plotNumber <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>101</span>,<span class='fl'>1001</span>,<span class='fl'>2001</span><span class='op'>)</span>, 
                             continuous <span class='op'>=</span> <span class='cn'>FALSE</span>, 
                             planter <span class='op'>=</span> <span class='st'>"serpentine"</span>, 
                             seed <span class='op'>=</span> <span class='fl'>326</span>, 
-                            locationNames <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Loc1"</span>,<span class='st'>"Loc2"</span>,<span class='st'>"Loc3"</span><span class='op'>)</span><span class='op'>)</span>
+                            locationNames <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Loc1"</span>,<span class='st'>"Loc2"</span>,<span class='st'>"Loc3"</span><span class='op'>)</span>,
+                            data <span class='op'>=</span> <span class='va'>data_factorial</span><span class='op'>)</span>
 <span class='va'>fullFact2</span><span class='op'>$</span><span class='va'>infoDesign</span>
 </div><div class='output co'>#&gt; $factors
 #&gt; [1] "A" "B" "C"
 #&gt; 
 #&gt; $levels
 #&gt; $levels[[1]]
-#&gt; [1] 1 2
+#&gt;   factors levels
+#&gt; 1       A     a0
+#&gt; 2       A     a1
 #&gt; 
 #&gt; $levels[[2]]
-#&gt; [1] 1 2 3
+#&gt;   factors levels
+#&gt; 3       B     b0
+#&gt; 4       B     b1
+#&gt; 5       B     b2
 #&gt; 
 #&gt; $levels[[3]]
-#&gt; [1] 1 2
+#&gt;   factors levels
+#&gt; 6       C     c0
+#&gt; 7       C     c1
 #&gt; 
 #&gt; 
 #&gt; $runs
 #&gt; [1] 12
 #&gt; 
 #&gt; $alltreatments
-#&gt;    A B C
-#&gt; 1  1 1 1
-#&gt; 2  2 1 1
-#&gt; 3  1 2 1
-#&gt; 4  2 2 1
-#&gt; 5  1 3 1
-#&gt; 6  2 3 1
-#&gt; 7  1 1 2
-#&gt; 8  2 1 2
-#&gt; 9  1 2 2
-#&gt; 10 2 2 2
-#&gt; 11 1 3 2
-#&gt; 12 2 3 2
+#&gt;     A  B  C
+#&gt; 1  a0 b0 c0
+#&gt; 2  a1 b0 c0
+#&gt; 3  a0 b1 c0
+#&gt; 4  a1 b1 c0
+#&gt; 5  a0 b2 c0
+#&gt; 6  a1 b2 c0
+#&gt; 7  a0 b0 c1
+#&gt; 8  a1 b0 c1
+#&gt; 9  a0 b1 c1
+#&gt; 10 a1 b1 c1
+#&gt; 11 a0 b2 c1
+#&gt; 12 a1 b2 c1
 #&gt; 
 #&gt; $Reps
 #&gt; [1] 5
@@ -297,17 +321,17 @@
 #&gt; $kind
 #&gt; [1] "RCBD"
 #&gt; </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>fullFact2</span><span class='op'>$</span><span class='va'>fieldBook</span>,<span class='fl'>10</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;    LOCATION PLOT REP FACTOR_A FACTOR_B FACTOR_C TRT_COMB
-#&gt; 1      Loc1  101   1        1        3        2    1*3*2
-#&gt; 2      Loc1  102   1        2        2        2    2*2*2
-#&gt; 3      Loc1  103   1        2        3        1    2*3*1
-#&gt; 4      Loc1  104   1        2        3        2    2*3*2
-#&gt; 5      Loc1  105   1        2        1        2    2*1*2
-#&gt; 6      Loc1  106   1        1        1        1    1*1*1
-#&gt; 7      Loc1  107   1        2        2        1    2*2*1
-#&gt; 8      Loc1  108   1        1        1        2    1*1*2
-#&gt; 9      Loc1  109   1        1        3        1    1*3*1
-#&gt; 10     Loc1  110   1        2        1        1    2*1*1</div><div class='input'>
+</div><div class='output co'>#&gt;    ID LOCATION PLOT REP FACTOR_A FACTOR_B FACTOR_C TRT_COMB
+#&gt; 1   1     Loc1  101   1       a0       b2       c0 a0*b2*c0
+#&gt; 2   2     Loc1  102   1       a0       b2       c1 a0*b2*c1
+#&gt; 3   3     Loc1  103   1       a1       b2       c0 a1*b2*c0
+#&gt; 4   4     Loc1  104   1       a1       b0       c0 a1*b0*c0
+#&gt; 5   5     Loc1  105   1       a0       b1       c1 a0*b1*c1
+#&gt; 6   6     Loc1  106   1       a0       b1       c0 a0*b1*c0
+#&gt; 7   7     Loc1  107   1       a0       b0       c1 a0*b0*c1
+#&gt; 8   8     Loc1  108   1       a1       b2       c1 a1*b2*c1
+#&gt; 9   9     Loc1  109   1       a1       b1       c1 a1*b1*c1
+#&gt; 10 10     Loc1  110   1       a1       b1       c0 a1*b1*c0</div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -320,7 +344,7 @@
 
       <footer>
       <div class="copyright">
-  <p>Developed by Didier Murillo.</p>
+  <p>Developed by Didier Murillo, Salvador Gezan.</p>
 </div>
 
 <div class="pkgdown">

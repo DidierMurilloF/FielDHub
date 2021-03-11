@@ -23,8 +23,8 @@
 #' 
 #'
 #' @references
-#' \emph{Design and Analysis of Experiments, Volume 1, Introduction to Experimental Design. Second Edition}.
-#'  Klaus Hinkelmann & Oscar Kempthorne.John Wiley & Sons, Inc., Hoboken, New Jersey.
+#' Federer, W. T. (1955). Experimental Design. Theory and Application. New York, USA. The
+#' Macmillan Company.
 #' 
 #' @examples
 #' #Example 1: Generates an ARCBD with 6 blocks, 3 checks for each, and 50 treatments in two locations.
@@ -40,11 +40,18 @@
 #' head(ARCBD1$fieldbook, 12)
 #'                    
 #' #Example 2: Generates an ARCBD with 17 blocks, 4 checks for each, and 350 treatments in 3 locations.
+#' # In this case, we show how to use the option data.
+#' checks <- 4;
+#' list_checks <- paste("CH", 1:checks, sep = "")
+#' treatments <- paste("G", 5:354, sep = "")
+#' treatment_list <- data.frame(list(ENTRY = 1:354, NAME = c(list_checks, treatments)))
+#' head(treatment_list, 12)
 #' ARCBD2 <- RCBD_augmented(lines = 350, checks = 4, b = 17, l = 3, 
 #'                          planter = "serpentine", 
 #'                          plotNumber = c(101,1001,2001), 
 #'                          seed = 24, 
-#'                          locationNames = LETTERS[1:3])
+#'                          locationNames = LETTERS[1:3],
+#'                          data = treatment_list)
 #' ARCBD2$infoDesign
 #' ARCBD2$layoutRandom
 #' ARCBD2$exptNames
@@ -79,9 +86,9 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
 
   if (!is.null(data)) {
     data <- as.data.frame(data)
-    data <- na.omit(data)
     if (ncol(data) < 2) base::stop("Data input needs at least two columns with: ENTRY and NAME.")
     data <- data[,1:2]
+    data <- na.omit(data)
     colnames(data) <- c("ENTRY", "NAME")
     new_lines <- nrow(data) - checks
     if (lines != new_lines) base::stop("Number of experimental lines do not match with data input provided.")

@@ -1,6 +1,6 @@
 #' Split a population of genotypes randomly into several locations.
 #' 
-#' @description Split a populationof genotypes randomly into several locations, with the
+#' @description Split a population of genotypes randomly into several locations, with the
 #' aim of having approximatelly the same number of replicates of each genotype, line or
 #' treatment per location.
 #'

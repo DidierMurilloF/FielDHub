@@ -59,19 +59,24 @@ fullFact1$infoDesign
 head(fullFact1$fieldBook,10)
 
 # Example 2: Generates a full factorial with 3 factors and each with levels: 2,3, 
-# and 2, respectively. 
+# and 2, respectively. In this case, we show how to use the option data.
+FACTORS <- rep(c("A", "B", "C"), c(2,3,2))
+LEVELS <- c("a0", "a1", "b0", "b1", "b2", "c0", "c1")
+data_factorial <- data.frame(list(FACTOR = FACTORS, LEVEL = LEVELS))
+print(data_factorial) 
 # This in an RCBD arrangement with 5 reps in 3 locations.
-fullFact2 <- full_factorial(setfactors = c(2,3,2), reps = 5, l = 3, type = 2, 
+fullFact2 <- full_factorial(setfactors = NULL, reps = 5, l = 3, type = 2, 
                             plotNumber = c(101,1001,2001), 
                             continuous = FALSE, 
                             planter = "serpentine", 
                             seed = 326, 
-                            locationNames = c("Loc1","Loc2","Loc3"))
+                            locationNames = c("Loc1","Loc2","Loc3"),
+                            data = data_factorial)
 fullFact2$infoDesign
 head(fullFact2$fieldBook,10)
 
 }
 \references{
-\emph{Design and Analysis of Experiments, Volume 1, Introduction to Experimental Design. Second Edition}.
- Klaus Hinkelmann & Oscar Kempthorne.John Wiley & Sons, Inc., Hoboken, New Jersey.
+Federer, W. T. (1955). Experimental Design. Theory and Application. New York, USA. The
+Macmillan Company.
 }

@@ -20,8 +20,8 @@
 #' 
 #'
 #' @references
-#' \emph{Design and Analysis of Experiments, Volume 1, Introduction to Experimental Design. Second Edition}.
-#'  Klaus Hinkelmann & Oscar Kempthorne.John Wiley & Sons, Inc., Hoboken, New Jersey.
+#' Federer, W. T. (1955). Experimental Design. Theory and Application. New York, USA. The
+#' Macmillan Company.
 #' 
 #' @examples
 #' # Example 1: Generates a strip plot design with 5 vertical strips and 4 horizontal strips,
@@ -42,7 +42,11 @@
 #' head(strip1$fieldBook,12)                     
 #' 
 #' # Example 2: Generates a strip plot design with 5 vertical strips and 5 horizontal strips,
-#' # with 6 reps across to 3 locations.
+#' # with 6 reps across to 3 locations. In this case, we show how to use the option data.
+#' Hplots <- LETTERS[1:5]
+#' Vplots <- LETTERS[1:4]
+#' strip_data <- data.frame(list(HPLOTS = Hplots, VPLOTS = c(Vplots, NA)))
+#' head(strip_data)
 #' strip2 <- strip_plot(Hplots = 5, 
 #'                      Vplots = 5, 
 #'                      b = 6, 
@@ -50,7 +54,8 @@
 #'                      plotNumber = c(101,1001,2001),
 #'                      planter = "cartesian",
 #'                      locationNames = c("A", "B", "C"), 
-#'                      seed = 222)
+#'                      seed = 222,
+#'                      data = strip_data)
 #' strip2$infoDesign                  
 #' strip2$stripsBlockLoc
 #' strip2$plotLayouts
@@ -85,9 +90,9 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
     }else stop("\n 'strip_plot()' requires arguments to be differents than NULL")
   }else {
     if(!is.data.frame(data)) stop("Data must be a data frame.")
-    data <- na.omit(data)
     if (ncol(data) < 2) base::stop("Data input needs at least two columns.")
     data <- as.data.frame(data[,1:2])
+    data <- na.omit(data)
     colnames(data) <- c("Hplot", "Vplot")
     Hplots <- as.vector(na.omit(data$Hplot))
     Vplots <- as.vector(na.omit(data$Vplot))

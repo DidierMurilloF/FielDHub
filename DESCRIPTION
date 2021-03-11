@@ -1,9 +1,34 @@
 Package: FielDHub
-Title: Shiny App
-Version: 0.0.0.9000
-Authors@R: person('Didier', 'Murillo', email = 'didier.murilloflorez@ndsu.edu', role = c('cre', 'aut'))
-Description: FielDHub: A Shiny App to Randomize Partially-Replicated/Unreplicated, 
- Augmented and Classical Field Designs for Plant Breeding Trials.
+Title: A Shiny app for Design of Experiments in Life Sciences
+Version: 0.1.0
+Authors@R: 
+    c(person(given = "Didier",
+             family = "Murillo",
+             role = c("cre", "aut"),
+             email = "didier.murilloflorez@ndsu.edu"),
+      person(given = "Salvador",
+             family = "Gezan",
+             role = "aut",
+             email = "forestats.sg@gmail.com"),
+      person(given = "Ana",
+             family = "Heilman",
+             role = "ctb",
+             email = "ana.heilman.morales@ndsu.edu"),
+      person(given = "Thomas",
+             family = "Walk",
+             role = "ctb",
+             email = "tom.walk@ndsu.edu"),
+      person(given = "Johan",
+             family = "Aparicio",
+             role = "ctb",
+             email = "j.aparicio@cgiar.org"),
+      person(given = "Richard",
+             family = "Horsley",
+             role = "ctb",
+             email = "richard.horsley@ndsu.edu"))
+Description: FielDHub is an R Shiny design of experiments (DOE) app that aids in the creation of 
+ traditional, unreplicated, augmented and partially-replicated designs applied to agriculture, 
+ plant breeding, forestry, animal and biological sciences..
 License: MIT + file LICENSE
 Imports: 
     config,
@@ -24,14 +49,15 @@ Imports:
     magrittr,
     ggplot2,
     plotly,
-    viridis,
-    pkgload
+    viridis
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
-Suggests: 
-    testthat (>= 3.0.0),
-    spelling,
-    rlang
+Author: Didier Murillo [cre, aut], Salvador Gezan [aut], Ana Heilman [ctb],
+ Thomas Walk [ctb], Johan Aparicio [ctb], Richard Horsley [ctb]
+Maintainer: Didier Murillo <didier.murilloflorez@ndsu.edu>
+Suggests: testthat (>= 3.0.0), spelling, rlang
 Config/testthat/edition: 3
+URL: https://github.com/DidierMurilloF/FielDHub
+BugReports: https://github.com/DidierMurilloF/FielDHub/issues
 Language: en-US

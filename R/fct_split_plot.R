@@ -20,8 +20,8 @@
 #'
 #'
 #' @references
-#' \emph{Design and Analysis of Experiments, Volume 1, Introduction to Experimental Design. Second Edition}.
-#'  Klaus Hinkelmann & Oscar Kempthorne.John Wiley & Sons, Inc., Hoboken, New Jersey.
+#' Federer, W. T. (1955). Experimental Design. Theory and Application. New York, USA. The
+#' Macmillan Company.
 #'
 #' @examples
 #' # Example 1: Generates a split plot design SPD with 4 whole plots, 2 sub plots per whole plot,
@@ -38,13 +38,17 @@
 #' # Example 2: Generates a split plot design SPD with 5 whole plots 
 #' # (4 types of fungicide + one control), 10 sub plots per whole plot (10 bean varieties), 
 #' # and 6 reps in an RCBD arrangement. This in 3 locations or sites.
+#' # In this case, we show how to use the option data.
 #' wp <- c("NFung", paste("Fung", 1:4, sep = ""))  # Fungicides (5 Whole plots)
 #' sp <- paste("Beans", 1:10, sep = "")            # Beans varieties (10 sub plots)
-#' SPDExample2 <- split_plot(wp = wp, sp = sp, reps = 6, l = 3, 
+#' split_plot_Data <- data.frame(list(WHOLPLOT = c(wp, rep(NA, 5)), SUBPLOT = sp))
+#' head(split_plot_Data, 12)
+#' SPDExample2 <- split_plot(reps = 6, l = 3, 
 #'                           plotNumber = c(101, 1001, 2001),
 #'                           seed = 23, 
 #'                           type = 2, 
-#'                           locationNames = c("A", "B", "C"))
+#'                           locationNames = c("A", "B", "C"),
+#'                           data = split_plot_Data)
 #' SPDExample2$infoDesign
 #' SPDExample2$layoutlocations
 #' head(SPDExample2$fieldBook,12)

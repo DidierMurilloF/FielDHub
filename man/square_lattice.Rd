@@ -42,7 +42,7 @@ It randomly generates a square lattice design across locations.
 }
 \examples{
 #Example 1: Generates a square lattice design with 5 full blocks, 8 units per iBlock,
-# 8 iBlocks for a square number of treatmens of 64 in two locations.
+# 8 IBlocks for a square number of treatmens of 64 in two locations.
 squareLattice1 <- square_lattice(t = 64, k = 8, r = 5, l = 2, 
                                  plotNumber = c(1001, 2001),
                                  locationNames = c("FARGO", "MINOT"), 
@@ -50,17 +50,22 @@ squareLattice1 <- square_lattice(t = 64, k = 8, r = 5, l = 2,
 squareLattice1$infoDesign
 head(squareLattice1$fieldBook,12)
 
-#Example 2: Generates a square lattice design with 3 full blocks, 12 units per iBlock,
-# 12 iBlocks for a square number of treatmens of 144 in one location.
-squareLattice2 <- square_lattice(t = 100, k = 10, r = 3, l = 1, 
+#Example 2: Generates a square lattice design with 3 full blocks, 7 units per iBlock,
+# 7 IBlocks for a square number of treatmens of 49 in one location.
+# In this case, we show how to use the option data.
+treatments <- paste("G", 1:49, sep = "")
+treatment_list <- data.frame(list(TREATMENT = treatments))
+head(treatment_list) 
+squareLattice2 <- square_lattice(t = 49, k = 7, r = 3, l = 1, 
                                  plotNumber = 1001,
                                  locationNames = "CASSELTON", 
-                                 seed = 1986)
+                                 seed = 1986,
+                                 data = treatment_list)
 squareLattice2$infoDesign
 head(squareLattice2$fieldBook,12)
 
 }
 \references{
-Edmondson, R.N. 2020. Package blocksdesign: Nested and Crossed Block Designs for
-Factorial and Unstructured Treatment Sets.
+Edmondson., R. N. (2021). blocksdesign: Nested and crossed block designs for factorial and
+unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign
 }

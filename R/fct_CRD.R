@@ -2,8 +2,8 @@
 #' 
 #' @description It randomly generates a completely randomized design.
 #'
-#' @param t an integer number with total number of treatments or a vector of dimension t with labels.
-#' @param reps Number of replicates (full blocks) of each treatment.
+#' @param t An integer number with total number of treatments or a vector of dimension t with labels.
+#' @param reps Number of replicates of each treatment.
 #' @param plotNumber Starting plot number. By default \code{plotNumber = 101}.
 #' @param locationName (optional) Name of the location.
 #' @param seed (optional) Real number that specifies the starting seed to obtain reproducible designs.
@@ -16,8 +16,8 @@
 #' 
 #'
 #' @references
-#' \emph{Design and Analysis of Experiments, Volume 1, Introduction to Experimental Design. Second Edition}.
-#'  Klaus Hinkelmann & Oscar Kempthorne.John Wiley & Sons, Inc., Hoboken, New Jersey.
+#' Federer, W. T. (1955). Experimental Design. Theory and Application. New York, USA. The
+#' Macmillan Company.
 #' 
 #' @examples
 #' # Example 1: Generates a CRD design with 10 treatments and 5 reps each.
@@ -38,6 +38,20 @@
 #'             locationName = "Fargo")
 #' crd2$infoDesign
 #' head(crd2$fieldBook,10)
+#' 
+#' # Example 3: Generates a CRD design with 12 treatments and 4 reps each.
+#' # In this case, we show how to use the option data.
+#' treatments <- paste("ND-", 1:12, sep = "")
+#' treatment_list <- data.frame(list(TREATMENT = treatments, REP = 4))
+#' head(treatment_list)
+#' crd3 <- CRD(t = NULL, 
+#'             reps = NULL, 
+#'             plotNumber = 2001, 
+#'             seed = 1655, 
+#'             locationName = "Cali",
+#'             data = treatment_list)
+#' crd3$infoDesign
+#' head(crd3$fieldBook,10)
 #'
 #' @export
 CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL, 
@@ -74,12 +88,11 @@ CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL,
     REP <- rep(1:reps, times = nt)
   }else {
     if(!is.data.frame(data)) stop("Data must be a data frame.")
-    data <- na.omit(data)
     if (ncol(data) < 2) validate("Data input needs at least two columns with the names: Treatment and Reps.")
     data <- as.data.frame(data[,1:2])
+    data <- na.omit(data)
     colnames(data) <- c("Treatment", "Reps")
-    if(!is.numeric(data$Reps) || !is.integer(data$Reps) ||
-       is.factor(data$Reps)) validate("Reps must be numeric.")
+    if(is.character(data[,2]) || is.factor(data[,2])) validate("Reps must be numeric.")
     data$Reps <- as.numeric(data$Reps)
     TRT <- rep(data$Treatment, times = data$Reps)
     N <- sum(data$Reps)

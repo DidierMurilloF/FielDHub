@@ -679,7 +679,7 @@ mod_Diagonal_server <- function(id) {
           df <- as.data.frame(my_names) 
           rownames(df) <- nrow(df):1
           options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                    scrollX = TRUE, scrollY = "1000px"))
+                                    scrollX = TRUE, scrollY = scrollY(input$n_rows)))
           DT::datatable(df) %>% 
             DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
                             backgroundColor = DT::styleEqual(name_expt, colores_back[1:blocks])
@@ -698,7 +698,7 @@ mod_Diagonal_server <- function(id) {
           df <- as.data.frame(my_names) 
           rownames(df) <- nrow(df):1
           options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                    scrollX = TRUE, scrollY = "1000px"))
+                                    scrollX = TRUE, scrollY = scrollY(input$n_rows)))
           DT::datatable(df) %>% 
             DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
                             backgroundColor = DT::styleEqual(expe_names, colores_back[1:reps])
@@ -1184,9 +1184,3 @@ mod_Diagonal_server <- function(id) {
     # )
   })
 }
-    
-## To be copied in the UI
-# mod_Diagonal_ui("Diagonal_ui_1")
-    
-## To be copied in the server
-# mod_Diagonal_server("Diagonal_ui_1")

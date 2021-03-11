@@ -74,7 +74,7 @@ Note that design generation needs the dimension of the field (number of rows and
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FielDHub</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
       </span>
     </div>
 
@@ -94,7 +94,12 @@ Note that design generation needs the dimension of the field (number of rows and
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/DidierMurilloF/FielDHub/">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
       </ul>
       
     </div><!--/.nav-collapse -->
@@ -109,7 +114,7 @@ Note that design generation needs the dimension of the field (number of rows and
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Generates an Spatial Un-replicated Optimized Arrangement Design</h1>
-    
+    <small class="dont-index">Source: <a href='https://github.com/DidierMurilloF/FielDHub/blob/master/R/fct_optimized_arrangement.R'><code>R/fct_optimized_arrangement.R</code></a></small>
     <div class="hidden name"><code>optimized_arrangement.Rd</code></div>
     </div>
 
@@ -195,8 +200,10 @@ Note that design generation needs the dimension of the field (number of rows and
 <p>A data frame with fieldBook design. This includes the index (Row, Column).</p>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
-    <p>Hinkelmann, Klaus, Kempthorne, Oscar. Design and Analysis of Experiments, Volume 3 : Special Designs and Applications.
-Hoboken, N.J.: Wiley-Interscience.</p>
+    <p>Clarke, G. P. Y., &amp; Stefanova, K. T. (2011). Optimal design for early-generation plant
+breeding trials with unreplicated or partially replicated test lines. Australian &amp; New
+Zealand Journal of Statistics, 53(4), 461–480. 
+https://doi.org/https://doi.org/10.1111/j.1467-842X.2011.00642.x</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'># Example 1: Generates a spatial unreplicated optimized arrangement design in one location</span>
@@ -318,14 +325,45 @@ Hoboken, N.J.: Wiley-Interscience.</p>
 #&gt; 12   1     12    74  112      0 20RW1 CASSELTON CAS 2021  gen 74</div><div class='input'>                  
 <span class='co'># Example 2: Generates a spatial unreplicated optimized arrangement design in one location</span>
 <span class='co'># with 635 genotypes + 65 check plots (4 checks) for a field with dimension 20 rows x 35 cols.</span>
-<span class='va'>OptimAd2</span> <span class='op'>&lt;-</span> <span class='fu'>optimized_arrangement</span><span class='op'>(</span>nrows <span class='op'>=</span> <span class='fl'>20</span>, ncols <span class='op'>=</span> <span class='fl'>35</span>, lines <span class='op'>=</span> <span class='fl'>635</span>, 
-                                  amountChecks <span class='op'>=</span> <span class='fl'>65</span>, 
-                                  checks <span class='op'>=</span> <span class='fl'>4</span>,
+<span class='co'># As example, we set up the data option with the entries list.</span>
+<span class='va'>checks</span> <span class='op'>&lt;-</span> <span class='fl'>4</span>
+<span class='va'>list_checks</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span><span class='op'>(</span><span class='st'>"CH"</span>, <span class='fl'>1</span><span class='op'>:</span><span class='va'>checks</span>, sep <span class='op'>=</span> <span class='st'>""</span><span class='op'>)</span>
+<span class='va'>treatments</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span><span class='op'>(</span><span class='st'>"G"</span>, <span class='fl'>5</span><span class='op'>:</span><span class='fl'>639</span>, sep <span class='op'>=</span> <span class='st'>""</span><span class='op'>)</span>
+<span class='va'>REPS</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>17</span>, <span class='fl'>16</span>, <span class='fl'>16</span>, <span class='fl'>16</span>, <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>635</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>treatment_list</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>ENTRY <span class='op'>=</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>639</span>, NAME <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>list_checks</span>, <span class='va'>treatments</span><span class='op'>)</span>, REPS <span class='op'>=</span> <span class='va'>REPS</span><span class='op'>)</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>treatment_list</span>, <span class='fl'>12</span><span class='op'>)</span> 
+</div><div class='output co'>#&gt;    ENTRY NAME REPS
+#&gt; 1      1  CH1   17
+#&gt; 2      2  CH2   16
+#&gt; 3      3  CH3   16
+#&gt; 4      4  CH4   16
+#&gt; 5      5   G5    1
+#&gt; 6      6   G6    1
+#&gt; 7      7   G7    1
+#&gt; 8      8   G8    1
+#&gt; 9      9   G9    1
+#&gt; 10    10  G10    1
+#&gt; 11    11  G11    1
+#&gt; 12    12  G12    1</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>tail</a></span><span class='op'>(</span><span class='va'>treatment_list</span>, <span class='fl'>12</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;     ENTRY NAME REPS
+#&gt; 628   628 G628    1
+#&gt; 629   629 G629    1
+#&gt; 630   630 G630    1
+#&gt; 631   631 G631    1
+#&gt; 632   632 G632    1
+#&gt; 633   633 G633    1
+#&gt; 634   634 G634    1
+#&gt; 635   635 G635    1
+#&gt; 636   636 G636    1
+#&gt; 637   637 G637    1
+#&gt; 638   638 G638    1
+#&gt; 639   639 G639    1</div><div class='input'><span class='va'>OptimAd2</span> <span class='op'>&lt;-</span> <span class='fu'>optimized_arrangement</span><span class='op'>(</span>nrows <span class='op'>=</span> <span class='fl'>20</span>, ncols <span class='op'>=</span> <span class='fl'>35</span>, 
                                   planter <span class='op'>=</span> <span class='st'>"serpentine"</span>, 
                                   plotNumber <span class='op'>=</span> <span class='fl'>101</span>,
                                   seed <span class='op'>=</span> <span class='fl'>12</span>,
                                   exptName <span class='op'>=</span> <span class='st'>"20YWA2"</span>,
-                                  locationNames <span class='op'>=</span> <span class='st'>"MINOT"</span><span class='op'>)</span>
+                                  locationNames <span class='op'>=</span> <span class='st'>"MINOT"</span>,
+                                  data <span class='op'>=</span> <span class='va'>treatment_list</span><span class='op'>)</span>
 <span class='va'>OptimAd2</span><span class='op'>$</span><span class='va'>infoDesign</span>
 </div><div class='output co'>#&gt; $Lines
 #&gt; [1] 635
@@ -334,70 +372,70 @@ Hoboken, N.J.: Wiley-Interscience.</p>
 #&gt; [1] 1 2 3 4
 #&gt; 
 #&gt; $RepChecks
-#&gt; [1] 16 16 17 16
+#&gt; [1] 17 16 16 16
 #&gt; </div><div class='input'><span class='va'>OptimAd2</span><span class='op'>$</span><span class='va'>layoutRandom</span>
 </div><div class='output co'>#&gt;       Col1 Col2 Col3 Col4 Col5 Col6 Col7 Col8 Col9 Col10 Col11 Col12 Col13
-#&gt; Row20  632  233  275    1  109  429  526   64  388   356   180   340   217
-#&gt; Row19  289  128  362  430  373  513  393    1  382   181   569   389   406
-#&gt; Row18  578  498    1  564   27   63  441   45  182   376   522   198   585
-#&gt; Row17  101  334  558  627    1  270  146  106  537    61   177    16   445
-#&gt; Row16  597  617   15  369  478  200  390   36  166   223     3   481   462
+#&gt; Row20  632  233  275    2  109  429  526   64  388   356   180   340   217
+#&gt; Row19  289  128  362  430  373  513  393    2  382   181   569   389   406
+#&gt; Row18  578  498    2  564   27   63  441   45  182   376   522   198   585
+#&gt; Row17  101  334  558  627    2  270  146  106  537    61   177    16   445
+#&gt; Row16  597  617   15  369  478  200  390   36  166   223     1   481   462
 #&gt; Row15  322  500  409   52   21  516  421  132  282   514   505   125   354
-#&gt; Row14  366  168  119  465  621    4   32    1  497     3   544   176   215
-#&gt; Row13    3  407  108   93  427  589   81  380  309   556    90     1   566
+#&gt; Row14  366  168  119  465  621    4   32    2  497     1   544   176   215
+#&gt; Row13    1  407  108   93  427  589   81  380  309   556    90     2   566
 #&gt; Row12  620  294  375  280  574  104   12  379  450    14   102     4    10
-#&gt; Row11  413    1  239    3  346   28  602  169   19   263   494   467   515
-#&gt; Row10  145  512  364   86   22  288    2  614  531   254   344    69     4
-#&gt; Row9   248  472    6  100  349  357   55  571  232     2   359   553     1
-#&gt; Row8     2  588  463  629  351  613  123  243  178   378   591   587   110
-#&gt; Row7   129  581    2  608  368  170  199   11  570   484   404   291   222
-#&gt; Row6   464    4  528  384  371  547  436  133  144   579     1    50   451
-#&gt; Row5    20  171  319  140  184    2  308  147    3    49   205   245   572
+#&gt; Row11  413    2  239    1  346   28  602  169   19   263   494   467   515
+#&gt; Row10  145  512  364   86   22  288    3  614  531   254   344    69     4
+#&gt; Row9   248  472    6  100  349  357   55  571  232     3   359   553     1
+#&gt; Row8     3  588  463  629  351  613  123  243  178   378   591   587   110
+#&gt; Row7   129  581    3  608  368  170  199   11  570   484   404   291   222
+#&gt; Row6   464    4  528  384  371  547  436  133  144   579     2    50   451
+#&gt; Row5    20  171  319  140  184    3  308  147    1    49   205   245   572
 #&gt; Row4   535  523  201  473  636  314  607  116   91   634    92    75   204
 #&gt; Row3    95  580  127  536  563  331  534  228   67   399   453   477   342
 #&gt; Row2   599   72   56  598  615  391  565  412  350     5   361   532   509
 #&gt; Row1   164  419  210  605   94  358  387  552  297   437   143   352   583
 #&gt;       Col14 Col15 Col16 Col17 Col18 Col19 Col20 Col21 Col22 Col23 Col24 Col25
-#&gt; Row20   370   360    39   618   296   186   235   142     3   279     7   631
-#&gt; Row19    42   122    78    41     3   284     2   555   475   543   541   207
-#&gt; Row18     1   157   551   616   112   400   521   506   300   559   343   435
-#&gt; Row17   538   341    48   459   424   619   492   325   600   221     4     1
-#&gt; Row16   576   542   355   230     1   567   172   487   417   273   160   241
-#&gt; Row15    13    98     1     1   130   272   550   557   483   226   449   267
+#&gt; Row20   370   360    39   618   296   186   235   142     1   279     7   631
+#&gt; Row19    42   122    78    41     1   284     3   555   475   543   541   207
+#&gt; Row18     2   157   551   616   112   400   521   506   300   559   343   435
+#&gt; Row17   538   341    48   459   424   619   492   325   600   221     4     2
+#&gt; Row16   576   542   355   230     2   567   172   487   417   273   160   241
+#&gt; Row15    13    98     2     2   130   272   550   557   483   226   449   267
 #&gt; Row14   161   256   258   154   495   452   259   310   212   103   320   432
 #&gt; Row13   251   633   293   305   165   156   622   192   312    71   196    26
-#&gt; Row12   268   218   247   338    30   183   414     3   134   316     2   611
+#&gt; Row12   268   218   247   338    30   183   414     1   134   316     3   611
 #&gt; Row11   630     4   394   253    74    88   115   410   403   540   137   236
 #&gt; Row10   120   336   302   203   246   329   486   493   596    96   496   269
-#&gt; Row9      3   281   396   624   327    37   367   491   471   167    84   539
-#&gt; Row8    238   593     3   460    51   260   529    59   518     2   335   485
-#&gt; Row7    290   213    87     2   604    76   252     3   304   298   345   261
+#&gt; Row9      1   281   396   624   327    37   367   491   471   167    84   539
+#&gt; Row8    238   593     1   460    51   260   529    59   518     3   335   485
+#&gt; Row7    290   213    87     3   604    76   252     1   304   298   345   261
 #&gt; Row6    638   313   214   173   117    58   188    60   138   216   348   229
-#&gt; Row5    262    73   426    33   265     3   577    77   250   187   625    43
+#&gt; Row5    262    73   426    33   265     1   577    77   250   187   625    43
 #&gt; Row4    527   639   150   174   415   431   508   135   139   439   422    38
 #&gt; Row3    386   163   383   458   392     4   479   448    85   525    29   402
-#&gt; Row2     44    24   517   433    23   420   337   398   482   131   141     2
-#&gt; Row1    197     4   480   189   255   562   299   507     2     3   105   332
+#&gt; Row2     44    24   517   433    23   420   337   398   482   131   141     3
+#&gt; Row1    197     4   480   189   255   562   299   507     3     1   105   332
 #&gt;       Col26 Col27 Col28 Col29 Col30 Col31 Col32 Col33 Col34 Col35
-#&gt; Row20   330   190     4   152   121    53   159   573     3   219
+#&gt; Row20   330   190     4   152   121    53   159   573     1   219
 #&gt; Row19   501   635   321   418   328   202   488   423   287   326
-#&gt; Row18   510    18   610   590   603   292     1   476   575   637
+#&gt; Row18   510    18   610   590   603   292     2   476   575   637
 #&gt; Row17   612    25   520   244   149   446   401   466    65   405
-#&gt; Row16     2   286   277   554   306     2    54   560    66   623
+#&gt; Row16     2   286   277   554   306     3    54   560    66   623
 #&gt; Row15   249   333   126   237   155     4   499   546   266   311
 #&gt; Row14   601   586   271     4     8    31   220   374   208   469
-#&gt; Row13    57   594     2   278   113   365    35   148   408   324
+#&gt; Row13    57   594     3   278   113   365    35   148   408   324
 #&gt; Row12   455   285    68   153   225   561    99   474   303   231
 #&gt; Row11    70   276   162   568     4   257   339   490   626   377
-#&gt; Row10   372   468   470   411   315   179    40     3    46   224
+#&gt; Row10   372   468   470   411   315   179    40     1    46   224
 #&gt; Row9     80   347   114   592   428    62   548   175   234   136
-#&gt; Row8    318   381   442   549   227    97    17    34   195     2
+#&gt; Row8    318   381   442   549   227    97    17    34   195     3
 #&gt; Row7    206   118   503   416   440    79    47   438   194   385
 #&gt; Row6    489   124   191   530     4    89   461   317   457   502
 #&gt; Row5    395   307   158   582    82   397   211   434   240   107
-#&gt; Row4      2   606   584     4   301   425   209   595    83     4
-#&gt; Row3    456     3   323   274   151   504   443   628     4   242
-#&gt; Row2    511     1   264   185   447   519     2   609   545   295
+#&gt; Row4      3   606   584     4   301   425   209   595    83     4
+#&gt; Row3    456     1   323   274   151   504   443   628     4   242
+#&gt; Row2    511     2   264   185   447   519     3   609   545   295
 #&gt; Row1    444   454   111   363   533   193   353   524   283     9</div><div class='input'><span class='va'>OptimAd2</span><span class='op'>$</span><span class='va'>plotNumber</span>
 </div><div class='output co'>#&gt;       Col1 Col2 Col3 Col4 Col5 Col6 Col7 Col8 Col9 Col10 Col11 Col12 Col13
 #&gt; Row20  800  799  798  797  796  795  794  793  792   791   790   789   788
@@ -462,19 +500,19 @@ Hoboken, N.J.: Wiley-Interscience.</p>
 #&gt; Row3    196   197   198   199   200   201   202   203   204   205
 #&gt; Row2    145   144   143   142   141   140   139   138   137   136
 #&gt; Row1    126   127   128   129   130   131   132   133   134   135</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>OptimAd2</span><span class='op'>$</span><span class='va'>fieldBook</span>,<span class='fl'>12</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;    ROW COLUMN ENTRY PLOT CHECKS   EXPT LOCATION LOC YEAR    NAME
-#&gt; 1    1      1   164  101      0 20YWA2    MINOT MNT 2021 gen 164
-#&gt; 2    1      2   419  102      0 20YWA2    MINOT MNT 2021 gen 419
-#&gt; 3    1      3   210  103      0 20YWA2    MINOT MNT 2021 gen 210
-#&gt; 4    1      4   605  104      0 20YWA2    MINOT MNT 2021 gen 605
-#&gt; 5    1      5    94  105      0 20YWA2    MINOT MNT 2021  gen 94
-#&gt; 6    1      6   358  106      0 20YWA2    MINOT MNT 2021 gen 358
-#&gt; 7    1      7   387  107      0 20YWA2    MINOT MNT 2021 gen 387
-#&gt; 8    1      8   552  108      0 20YWA2    MINOT MNT 2021 gen 552
-#&gt; 9    1      9   297  109      0 20YWA2    MINOT MNT 2021 gen 297
-#&gt; 10   1     10   437  110      0 20YWA2    MINOT MNT 2021 gen 437
-#&gt; 11   1     11   143  111      0 20YWA2    MINOT MNT 2021 gen 143
-#&gt; 12   1     12   352  112      0 20YWA2    MINOT MNT 2021 gen 352</div><div class='input'>                  
+</div><div class='output co'>#&gt;    ROW COLUMN ENTRY PLOT CHECKS   EXPT LOCATION LOC YEAR NAME
+#&gt; 1    1      1   164  101      0 20YWA2    MINOT MNT 2021 G164
+#&gt; 2    1      2   419  102      0 20YWA2    MINOT MNT 2021 G419
+#&gt; 3    1      3   210  103      0 20YWA2    MINOT MNT 2021 G210
+#&gt; 4    1      4   605  104      0 20YWA2    MINOT MNT 2021 G605
+#&gt; 5    1      5    94  105      0 20YWA2    MINOT MNT 2021  G94
+#&gt; 6    1      6   358  106      0 20YWA2    MINOT MNT 2021 G358
+#&gt; 7    1      7   387  107      0 20YWA2    MINOT MNT 2021 G387
+#&gt; 8    1      8   552  108      0 20YWA2    MINOT MNT 2021 G552
+#&gt; 9    1      9   297  109      0 20YWA2    MINOT MNT 2021 G297
+#&gt; 10   1     10   437  110      0 20YWA2    MINOT MNT 2021 G437
+#&gt; 11   1     11   143  111      0 20YWA2    MINOT MNT 2021 G143
+#&gt; 12   1     12   352  112      0 20YWA2    MINOT MNT 2021 G352</div><div class='input'>                  
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -487,7 +525,7 @@ Hoboken, N.J.: Wiley-Interscience.</p>
 
       <footer>
       <div class="copyright">
-  <p>Developed by Didier Murillo.</p>
+  <p>Developed by Didier Murillo, Salvador Gezan.</p>
 </div>
 
 <div class="pkgdown">

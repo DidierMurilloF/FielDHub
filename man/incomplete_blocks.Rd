@@ -35,7 +35,7 @@ incomplete_blocks(
 \value{
 A list with information on the design parameters.
 
-Data frame with the incomplete block design field book: Location, Plot, Block, iBlock, Unit_per_iBlock, Treatment.
+Data frame with the incomplete block design field book.
 }
 \description{
 Randomly generates a resolvable incomplete block design (IBD) of characteristics (t, k, r). 
@@ -43,18 +43,29 @@ The randomization can be done across locations.
 }
 \examples{
 # Example 1: Generates a resolvable IBD of characteristics (t,k,r) = (12,4,2).
-ibd1 <- incomplete_blocks(t = 12, k = 4, r = 2, seed = 1984) #1-resolvable IBDs
+#1-resolvable IBDs
+ibd1 <- incomplete_blocks(t = 12, 
+                          k = 4, 
+                          r = 2, 
+                          seed = 1984)
 ibd1$infoDesign
 head(ibd1$fieldBook)
 
 # Example 2: Generates a balanced resolvable IBD of characteristics (t,k,r) = (15,3,7).
-ibd2 <- incomplete_blocks(t = 15, k = 3, r = 7, seed = 1985)  #1-resolvable BIBDs
+# In this case, we show how to use the option data.
+treatments <- paste("TX-", 1:15, sep = "")
+treatment_list <- data.frame(list(TREATMENT = treatments))
+head(treatment_list) 
+ibd2 <- incomplete_blocks(t = 15,
+                          k = 3, 
+                          r = 7, 
+                          seed = 1985,
+                          data = treatment_list) 
 ibd2$infoDesign
 head(ibd2$fieldBook)  
              
-                  
 }
 \references{
-Edmondson, R.N. 2020. Package blocksdesign: Nested and Crossed Block Designs for
-Factorial and Unstructured Treatment Sets.
+Edmondson., R. N. (2021). blocksdesign: Nested and crossed block designs for factorial and
+unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign
 }

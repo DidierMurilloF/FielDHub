@@ -6,7 +6,8 @@
 #' @param ncols Number of columns in the field.
 #' @param lines Number of genotypes, experimental lines or treatments.
 #' @param checks Integer number of genotypes checks or a numeric vector. 
-#' @param kindExpt Type of diagonal design, with options \code{'SUDC'} and \code{'DBUDC'}. 
+#' @param kindExpt Type of diagonal design, with options Single Un-replicated Diagonal Checks \code{'SUDC'} and 
+#' Decision Blocks Un-replicated Design with Diagonal Checks \code{'DBUDC'}. 
 #' By default \code{kindExpt = 'SUDC'}.
 #' @param planter Option for \code{serpentine} or \code{cartesian} plot arrangement. 
 #' By default  \code{planter = 'serpentine'}.
@@ -16,29 +17,26 @@
 #' @param splitBy Option to split the field when \code{kindExpt = 'DBUDC'} is selected. 
 #' By default \code{splitBy = 'row'}.
 #' @param seed (optional) Real number that specifies the starting seed to obtain reproducible designs.
-#' @param blocks Number of experiments or blocks to generate an DBUDC design. 
+#' @param blocks Number of experiments or blocks to generate an \code{DBUDC} design. 
 #' If \code{kindExpt = 'DBUDC'} and data is null, \code{blocks} are mandatory.
 #' @param exptName (optional) Name of the experiment.
 #' @param locationNames (optional) Names each location.
 #' @param data (optional) Data frame with 3 columns: \code{ENTRY | NAME | BLOCK} or only 2 
 #' columns \code{ENTRY | NAME} if \code{kindExpt = 'SUDC'}.
 #' 
-#' @details Constructs for a field of an arbitrary number of rows and columns randomized single or multi-level experiments for an arbitrary number of
-#' treatments \code{lines} and an arbitrary feasible number of checks. An arbitrary number of \code{checks} are allocated in a systematic diagonal movement.n un-replicated diagonal arrangement design  where the checks be allocated in 
-#' a systematic diagonal movement. In most of the cases is guarantee that each row and column has 
-#' checks. Note that design generation needs the dimension of the field (number of rows and columns).
-#' 
 #' 
 #' @return A list with information on the design parameters.
 #' @return A matrix with the randomization layout.
 #' @return A matrix with the layout plot number.
-#' @return A data frame with fieldBook design. This includes the index (Row, Column).
+#' @return A data frame with field book design. This includes the index (Row, Column).
 #'
 #'
 #' @references
-#' Hinkelmann, Klaus, Kempthorne, Oscar. Design and Analysis of Experiments, Volume 3: 
-#' Special Designs and Applications.
-#' Hoboken, N.J.: Wiley-Interscience.
+#' Clarke, G. P. Y., & Stefanova, K. T. (2011). Optimal design for early-generation plant
+#' breeding trials with unreplicated or partially replicated test lines. Australian & New
+#' Zealand Journal of Statistics, 53(4), 461–480. 
+#' https://doi.org/https://doi.org/10.1111/j.1467-842X.2011.00642.x
+#'
 #'
 #' @examples
 #' 
@@ -60,14 +58,22 @@
 #' 
 #' # Example 2: Generates a spatial decision block diagonal arrangement design in one location
 #' # with 720 treatments allocated in 5 experiments or blocks for a field with dimensions
-#' # 30 rows x 26 cols in a serpentine arrangement.
-#' spatDB <- diagonal_arrangement(nrows = 30, ncols = 26, lines = 720, 
+#' # 30 rows x 26 cols in a serpentine arrangement. In this case, we show how to set up the data 
+#' # option with the entries list.
+#' checks <- 5;expts <- 5
+#' list_checks <- paste("CH", 1:checks, sep = "")
+#' treatments <- paste("G", 6:725, sep = "")
+#' BLOCK <- c(rep("ALL", checks), rep(1:expts, c(150,155,95,200,120)))
+#' treatment_list <- data.frame(list(ENTRY = 1:725, NAME = c(list_checks, treatments), BLOCK = BLOCK))
+#' head(treatment_list, 12) 
+#' tail(treatment_list, 12)
+#' spatDB <- diagonal_arrangement(nrows = 30, ncols = 26,
 #'                                checks = 5, 
 #'                                plotNumber = 1, 
 #'                                kindExpt = "DBUDC", 
 #'                                planter = "serpentine", 
 #'                                splitBy = "row", 
-#'                                blocks = c(150,155,95,200,120))
+#'                                data = treatment_list)
 #' spatDB$infoDesign
 #' spatDB$layoutRandom
 #' spatDB$plotsNumber
@@ -532,11 +538,13 @@ diagonal_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL, check
   if(is.null(fieldBook) || !is.data.frame(fieldBook)) base::stop("fieldBook is NULL or != data frame.")
   if(dim(fieldBook)[1]*dim(fieldBook)[2] == 0) base::stop("fieldBook is NULL or != data frame or length 0.")
   fieldBook <- fieldBook[,-11]
-  fieldBook <- fieldBook[, c(2,3,1,4:10)]
-  # if (kindExpt != "RDC") {
-  #   fieldBook <- fieldBook[,-11]
-  #   fieldBook <- fieldBook[, c(2,3,1,4:10)]
-  # }else fieldBook <- fieldBook[, c(2,3,1,4:11)]
+  
+  ID <- 1:nrow(fieldBook)
+  fieldBook <- fieldBook[, c(6,7,9,4,2,3,5,1,10)]
+  fieldBook <- cbind(ID, fieldBook)
+  colnames(fieldBook)[10] <- "TREATMENT"
+  
+  #fieldBook <- fieldBook[, c(2,3,1,4:10)]
   
   rownames(fieldBook) <- 1:nrow(fieldBook)
   

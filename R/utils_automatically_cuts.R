@@ -1,9 +1,6 @@
 automatically_cuts <- function(data = NULL, planter_mov = "serpentine",
                                way = "By Row", dim_data = NULL){
   req(data)
-  # if (all(c("serpentine", "cartesian") != planter_mov)) {
-  #   stop("planter_mov choice is unknown. Please, choose one: serpentine or cartesian.")
-  # }
   w_map <- data
   auto_cuts_by_r <- numeric()
   data_dim_each_block <- dim_data

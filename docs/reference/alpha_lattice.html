@@ -40,7 +40,7 @@
 
 
 <meta property="og:title" content="Generates an Alpha Design — alpha_lattice" />
-<meta property="og:description" content="Randomly generates an Alpha design like alpha(0,1) across multiple locations." />
+<meta property="og:description" content="Randomly generates an alpha design like alpha(0,1) across multiple locations." />
 
 
 
@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FielDHub</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
       </span>
     </div>
 
@@ -92,7 +92,12 @@
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/DidierMurilloF/FielDHub/">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
       </ul>
       
     </div><!--/.nav-collapse -->
@@ -107,12 +112,12 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Generates an Alpha Design</h1>
-    
+    <small class="dont-index">Source: <a href='https://github.com/DidierMurilloF/FielDHub/blob/master/R/fct_alpha_lattice.R'><code>R/fct_alpha_lattice.R</code></a></small>
     <div class="hidden name"><code>alpha_lattice.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Randomly generates an Alpha design like <code>alpha(0,1)</code> across multiple locations.</p>
+    <p>Randomly generates an alpha design like <code>alpha(0,1)</code> across multiple locations.</p>
     </div>
 
     <pre class="usage"><span class='fu'>alpha_lattice</span><span class='op'>(</span>
@@ -167,18 +172,10 @@
 
     <p>A list with information on the design parameters.</p>
 <p>Data frame with the alpha design field book.</p>
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
-
-    <p>Alpha lattice designs are a type of replicated designs that divide the replicate into incomplete blocks 
-that contain a fraction of the total number of entries. Treatments are distributed among the blocks so 
-that all pairs occur in the same incomplete-block in nearly equal frequency. The design permits removal 
-of incomplete-block effects from the plot residuals and maximizes the use of comparisons between treatments 
-in the same incomplete-block. The <code>alpha_lattice</code> function can only be used to a number of treatments that 
-are multiply of the size</p>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
-    <p>R. N. Edmondson. 2021. blocksdesign: Nested and Crossed Block Designs for Factorial and
-Unstructured Treatment Sets.</p>
+    <p>Edmondson., R. N. (2021). blocksdesign: Nested and crossed block designs for factorial and
+unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'># Example 1: Generates an alpha design with 7 full blocks and 15 treatments.</span>
@@ -223,12 +220,23 @@ Unstructured Treatment Sets.</p>
 #&gt; 10 10 GreenHouse  110   1      4    1     8</div><div class='input'>
 <span class='co'># Example 2: Generates an alpha design with 5 full blocks and 50 treatment.</span>
 <span class='co'># Size of iBlocks k = 10. </span>
-<span class='va'>alphalattice2</span> <span class='op'>&lt;-</span> <span class='fu'>alpha_lattice</span><span class='op'>(</span>t <span class='op'>=</span> <span class='fl'>50</span>, k <span class='op'>=</span> <span class='fl'>10</span>, r <span class='op'>=</span> <span class='fl'>5</span>, 
+<span class='co'># In this case, we show how to use the option data.</span>
+<span class='va'>treatments</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span><span class='op'>(</span><span class='st'>"G-"</span>, <span class='fl'>1</span><span class='op'>:</span><span class='fl'>50</span>, sep <span class='op'>=</span> <span class='st'>""</span><span class='op'>)</span>
+<span class='va'>treatment_list</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>TREATMENT <span class='op'>=</span> <span class='va'>treatments</span><span class='op'>)</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>treatment_list</span><span class='op'>)</span> 
+</div><div class='output co'>#&gt;   TREATMENT
+#&gt; 1       G-1
+#&gt; 2       G-2
+#&gt; 3       G-3
+#&gt; 4       G-4
+#&gt; 5       G-5
+#&gt; 6       G-6</div><div class='input'><span class='va'>alphalattice2</span> <span class='op'>&lt;-</span> <span class='fu'>alpha_lattice</span><span class='op'>(</span>t <span class='op'>=</span> <span class='fl'>50</span>, k <span class='op'>=</span> <span class='fl'>10</span>, r <span class='op'>=</span> <span class='fl'>5</span>, 
                                l <span class='op'>=</span> <span class='fl'>1</span>, 
-                               plotNumber <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>101</span>,<span class='fl'>1001</span>,<span class='fl'>2001</span><span class='op'>)</span>, 
-                               locationNames <span class='op'>=</span> <span class='va'>LETTERS</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>3</span><span class='op'>]</span>, 
-                               seed <span class='op'>=</span> <span class='fl'>1945</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='warning'>Warning: Since plotNumber was missing, it was set up to default values.</span></div><div class='input'><span class='va'>alphalattice2</span><span class='op'>$</span><span class='va'>infoDesign</span>
+                               plotNumber <span class='op'>=</span> <span class='fl'>1001</span>, 
+                               locationNames <span class='op'>=</span> <span class='st'>"A"</span>, 
+                               seed <span class='op'>=</span> <span class='fl'>1945</span>,
+                               data <span class='op'>=</span> <span class='va'>treatment_list</span><span class='op'>)</span>
+<span class='va'>alphalattice2</span><span class='op'>$</span><span class='va'>infoDesign</span>
 </div><div class='output co'>#&gt; $Reps
 #&gt; [1] 5
 #&gt; 
@@ -242,7 +250,7 @@ Unstructured Treatment Sets.</p>
 #&gt; [1] 1
 #&gt; 
 #&gt; $Locations
-#&gt; [1] 1
+#&gt; [1] "A"
 #&gt; 
 #&gt; $seed
 #&gt; [1] 1945
@@ -250,18 +258,17 @@ Unstructured Treatment Sets.</p>
 #&gt; $lambda
 #&gt; [1] 0.9183673
 #&gt; </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>alphalattice2</span><span class='op'>$</span><span class='va'>fieldBook</span>, <span class='fl'>10</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;    ID LOCATION PLOT REP IBLOCK UNIT ENTRY
-#&gt; 1   1        1 1001   1      1    1    20
-#&gt; 2   2        1 1002   1      1    2    21
-#&gt; 3   3        1 1003   1      1    3     4
-#&gt; 4   4        1 1004   1      1    4    41
-#&gt; 5   5        1 1005   1      1    5    14
-#&gt; 6   6        1 1006   1      1    6    45
-#&gt; 7   7        1 1007   1      1    7    15
-#&gt; 8   8        1 1008   1      1    8    11
-#&gt; 9   9        1 1009   1      1    9     2
-#&gt; 10 10        1 1010   1      1   10    35</div><div class='input'>
-
+</div><div class='output co'>#&gt;    ID LOCATION PLOT REP IBLOCK UNIT TREATMENT
+#&gt; 1   1        A 1001   1      1    1      G-20
+#&gt; 2   2        A 1002   1      1    2      G-21
+#&gt; 3   3        A 1003   1      1    3       G-4
+#&gt; 4   4        A 1004   1      1    4      G-41
+#&gt; 5   5        A 1005   1      1    5      G-14
+#&gt; 6   6        A 1006   1      1    6      G-45
+#&gt; 7   7        A 1007   1      1    7      G-15
+#&gt; 8   8        A 1008   1      1    8      G-11
+#&gt; 9   9        A 1009   1      1    9       G-2
+#&gt; 10 10        A 1010   1      1   10      G-35</div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -274,7 +281,7 @@ Unstructured Treatment Sets.</p>
 
       <footer>
       <div class="copyright">
-  <p>Developed by Didier Murillo.</p>
+  <p>Developed by Didier Murillo, Salvador Gezan.</p>
 </div>
 
 <div class="pkgdown">

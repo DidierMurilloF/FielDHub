@@ -25,8 +25,10 @@
 #'
 #'
 #' @references
-#' Hinkelmann, Klaus, Kempthorne, Oscar. Design and Analysis of Experiments, Volume 3 : Special Designs and Applications.
-#' Hoboken, N.J.: Wiley-Interscience.
+#' Cullis, S., B. R., & Coombes, N. E. (2006). On the design of early generation variety trials
+#' with correlated data. Journal of Agricultural, Biological, and Environmental Statistics, 11,
+#' 381–393. https://doi.org/10.1198/108571106X154443
+#'
 #'
 #' @examples
 #' # Example 1: Generates a spatial optimized partially replicated arrangement design in one 
@@ -45,17 +47,23 @@
 #' SpatpREP1$plotNumber
 #' head(SpatpREP1$fieldBook,12)
 #' 
-#' # Example 2: Generates a spatial optimized partially replicated arrangement design with 459 
-#' # genotypes in a field with dimensions 30 rows x 20 cols. Note that there 351 genotypes 
-#' # unreplicated (only one time), 75 genotypes replicated two times, and 33 genotypes
-#' # replicated three times. In this case we don't have check plots.
+#' # Example 2: Generates a spatial optimized partially replicated arrangement design with 492 
+#' # genotypes in a field with dimensions 30 rows x 20 cols. Note that there 384 genotypes 
+#' # unreplicated (only one time), 108 genotypes replicated two times. 
+#' # In this case we don't have check plots.
+#' # We are going to show how to should look the data input for this design.
+#' NAME <- paste("G", 1:492, sep = "")
+#' repGens = c(108, 384);repUnits = c(2,1)
+#' REPS <- rep(repUnits, repGens)
+#' treatment_list <- data.frame(list(ENTRY = 1:492, NAME = NAME, REPS = REPS))
+#' head(treatment_list, 12) 
+#' tail(treatment_list, 12)
 #' SpatpREP2 <- partially_replicated(nrows = 30, 
 #'                                   ncols = 20, 
-#'                                   repGens = c(351,75,33),
-#'                                   repUnits = c(1,2,3),
 #'                                   planter = "serpentine", 
 #'                                   plotNumber = 101,
-#'                                   seed = 41)
+#'                                   seed = 41,
+#'                                   data = treatment_list)
 #' SpatpREP2$infoDesign
 #' SpatpREP2$layoutRandom
 #' SpatpREP2$plotNumber

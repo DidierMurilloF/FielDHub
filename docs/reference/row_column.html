@@ -74,7 +74,7 @@ hence, design is suboptimal. The randomization can be done across locations." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FielDHub</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
       </span>
     </div>
 
@@ -94,7 +94,12 @@ hence, design is suboptimal. The randomization can be done across locations." />
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/DidierMurilloF/FielDHub/">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
       </ul>
       
     </div><!--/.nav-collapse -->
@@ -109,7 +114,7 @@ hence, design is suboptimal. The randomization can be done across locations." />
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Generates a Resolvable Row-Column Design (RowColD)</h1>
-    
+    <small class="dont-index">Source: <a href='https://github.com/DidierMurilloF/FielDHub/blob/master/R/fct_row_column.R'><code>R/fct_row_column.R</code></a></small>
     <div class="hidden name"><code>row_column.Rd</code></div>
     </div>
 
@@ -174,8 +179,8 @@ hence, design is suboptimal. The randomization can be done across locations.</p>
 <p>Data frame with the RowColD field book.</p>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
-    <p>Edmondson, R.N. 2020. Package blocksdesign: Nested and Crossed Block Designs for
-Factorial and Unstructured Treatment Sets.</p>
+    <p>Edmondson., R. N. (2021). blocksdesign: Nested and crossed block designs for factorial and
+unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
@@ -249,10 +254,21 @@ Factorial and Unstructured Treatment Sets.</p>
 #&gt; 12 12     Loc1  112   1   2      6    19</div><div class='input'>
 <span class='co'>#Example 2: Generates a row-column design with 3 full blocks and 30 treatments</span>
 <span class='co'># and 5 rows, for two locations.</span>
-<span class='va'>rowcold2</span> <span class='op'>&lt;-</span> <span class='fu'>row_column</span><span class='op'>(</span>t <span class='op'>=</span> <span class='fl'>30</span>, nrows <span class='op'>=</span> <span class='fl'>5</span>, r <span class='op'>=</span> <span class='fl'>3</span>, l <span class='op'>=</span> <span class='fl'>2</span>, 
+<span class='co'># In this case, we show how to use the option data.</span>
+<span class='va'>treatments</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span><span class='op'>(</span><span class='st'>"ND-"</span>, <span class='fl'>1</span><span class='op'>:</span><span class='fl'>30</span>, sep <span class='op'>=</span> <span class='st'>""</span><span class='op'>)</span>
+<span class='va'>treatment_list</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>TREATMENT <span class='op'>=</span> <span class='va'>treatments</span><span class='op'>)</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>treatment_list</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;   TREATMENT
+#&gt; 1      ND-1
+#&gt; 2      ND-2
+#&gt; 3      ND-3
+#&gt; 4      ND-4
+#&gt; 5      ND-5
+#&gt; 6      ND-6</div><div class='input'><span class='va'>rowcold2</span> <span class='op'>&lt;-</span> <span class='fu'>row_column</span><span class='op'>(</span>t <span class='op'>=</span> <span class='fl'>30</span>, nrows <span class='op'>=</span> <span class='fl'>5</span>, r <span class='op'>=</span> <span class='fl'>3</span>, l <span class='op'>=</span> <span class='fl'>2</span>, 
                        plotNumber<span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>101</span>,<span class='fl'>1001</span><span class='op'>)</span>, 
                        locationNames <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"A"</span>, <span class='st'>"B"</span><span class='op'>)</span>,
-                       seed <span class='op'>=</span> <span class='fl'>15</span><span class='op'>)</span>
+                       seed <span class='op'>=</span> <span class='fl'>15</span>,
+                       data <span class='op'>=</span> <span class='va'>treatment_list</span><span class='op'>)</span>
 <span class='va'>rowcold2</span><span class='op'>$</span><span class='va'>infoDesign</span>
 </div><div class='output co'>#&gt; $nRows
 #&gt; [1] 5
@@ -276,42 +292,42 @@ Factorial and Unstructured Treatment Sets.</p>
 #&gt; [1] 15
 #&gt; </div><div class='input'><span class='va'>rowcold2</span><span class='op'>$</span><span class='va'>resolvableBlocks</span>
 </div><div class='output co'>#&gt; [[1]]
-#&gt;      [,1] [,2] [,3] [,4] [,5] [,6]
-#&gt; [1,]   28    1   21    2   30   18
-#&gt; [2,]   16   11   24   29   19   22
-#&gt; [3,]    4   25   26   17   14    8
-#&gt; [4,]    5   12   23    3   13   10
-#&gt; [5,]   27    7   15    9    6   20
+#&gt;      [,1]    [,2]    [,3]    [,4]    [,5]    [,6]   
+#&gt; [1,] "ND-28" "ND-1"  "ND-21" "ND-2"  "ND-30" "ND-18"
+#&gt; [2,] "ND-16" "ND-11" "ND-24" "ND-29" "ND-19" "ND-22"
+#&gt; [3,] "ND-4"  "ND-25" "ND-26" "ND-17" "ND-14" "ND-8" 
+#&gt; [4,] "ND-5"  "ND-12" "ND-23" "ND-3"  "ND-13" "ND-10"
+#&gt; [5,] "ND-27" "ND-7"  "ND-15" "ND-9"  "ND-6"  "ND-20"
 #&gt; 
 #&gt; [[2]]
-#&gt;      [,1] [,2] [,3] [,4] [,5] [,6]
-#&gt; [1,]   12   22   16   19   25    1
-#&gt; [2,]   14    4    8    9   13   24
-#&gt; [3,]   20   11   30   28   21   10
-#&gt; [4,]   17   15    7   18    5   27
-#&gt; [5,]   26    6   29   23    3    2
+#&gt;      [,1]    [,2]    [,3]    [,4]    [,5]    [,6]   
+#&gt; [1,] "ND-12" "ND-22" "ND-16" "ND-19" "ND-25" "ND-1" 
+#&gt; [2,] "ND-14" "ND-4"  "ND-8"  "ND-9"  "ND-13" "ND-24"
+#&gt; [3,] "ND-20" "ND-11" "ND-30" "ND-28" "ND-21" "ND-10"
+#&gt; [4,] "ND-17" "ND-15" "ND-7"  "ND-18" "ND-5"  "ND-27"
+#&gt; [5,] "ND-26" "ND-6"  "ND-29" "ND-23" "ND-3"  "ND-2" 
 #&gt; 
 #&gt; [[3]]
-#&gt;      [,1] [,2] [,3] [,4] [,5] [,6]
-#&gt; [1,]   23   14   16   13    7   21
-#&gt; [2,]    1   28    6   29    9    8
-#&gt; [3,]   30   25   26   18   15   27
-#&gt; [4,]    4   22   10   24    5   12
-#&gt; [5,]   17    2    3   11   20   19
+#&gt;      [,1]    [,2]    [,3]    [,4]    [,5]    [,6]   
+#&gt; [1,] "ND-23" "ND-14" "ND-16" "ND-13" "ND-7"  "ND-21"
+#&gt; [2,] "ND-1"  "ND-28" "ND-6"  "ND-29" "ND-9"  "ND-8" 
+#&gt; [3,] "ND-30" "ND-25" "ND-26" "ND-18" "ND-15" "ND-27"
+#&gt; [4,] "ND-4"  "ND-22" "ND-10" "ND-24" "ND-5"  "ND-12"
+#&gt; [5,] "ND-17" "ND-2"  "ND-3"  "ND-11" "ND-20" "ND-19"
 #&gt; </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>rowcold2</span><span class='op'>$</span><span class='va'>fieldBook</span>,<span class='fl'>12</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;    ID LOCATION PLOT REP ROW COLUMN ENTRY
-#&gt; 1   1        A  101   1   1      1    28
-#&gt; 2   2        A  102   1   1      2     1
-#&gt; 3   3        A  103   1   1      3    21
-#&gt; 4   4        A  104   1   1      4     2
-#&gt; 5   5        A  105   1   1      5    30
-#&gt; 6   6        A  106   1   1      6    18
-#&gt; 7   7        A  107   1   2      1    16
-#&gt; 8   8        A  108   1   2      2    11
-#&gt; 9   9        A  109   1   2      3    24
-#&gt; 10 10        A  110   1   2      4    29
-#&gt; 11 11        A  111   1   2      5    19
-#&gt; 12 12        A  112   1   2      6    22</div><div class='input'>  
+</div><div class='output co'>#&gt;    ID LOCATION PLOT REP ROW COLUMN TREATMENT
+#&gt; 1   1        A  101   1   1      1     ND-28
+#&gt; 2   2        A  102   1   1      2      ND-1
+#&gt; 3   3        A  103   1   1      3     ND-21
+#&gt; 4   4        A  104   1   1      4      ND-2
+#&gt; 5   5        A  105   1   1      5     ND-30
+#&gt; 6   6        A  106   1   1      6     ND-18
+#&gt; 7   7        A  107   1   2      1     ND-16
+#&gt; 8   8        A  108   1   2      2     ND-11
+#&gt; 9   9        A  109   1   2      3     ND-24
+#&gt; 10 10        A  110   1   2      4     ND-29
+#&gt; 11 11        A  111   1   2      5     ND-19
+#&gt; 12 12        A  112   1   2      6     ND-22</div><div class='input'>  
 
 </div></pre>
   </div>
@@ -325,7 +341,7 @@ Factorial and Unstructured Treatment Sets.</p>
 
       <footer>
       <div class="copyright">
-  <p>Developed by Didier Murillo.</p>
+  <p>Developed by Didier Murillo, Salvador Gezan.</p>
 </div>
 
 <div class="pkgdown">

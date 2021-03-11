@@ -76,14 +76,21 @@ head(OptimAd1$fieldBook,12)
                   
 # Example 2: Generates a spatial unreplicated optimized arrangement design in one location
 # with 635 genotypes + 65 check plots (4 checks) for a field with dimension 20 rows x 35 cols.
-OptimAd2 <- optimized_arrangement(nrows = 20, ncols = 35, lines = 635, 
-                                  amountChecks = 65, 
-                                  checks = 4,
+# As example, we set up the data option with the entries list.
+checks <- 4
+list_checks <- paste("CH", 1:checks, sep = "")
+treatments <- paste("G", 5:639, sep = "")
+REPS <- c(17, 16, 16, 16, rep(1, 635))
+treatment_list <- data.frame(list(ENTRY = 1:639, NAME = c(list_checks, treatments), REPS = REPS))
+head(treatment_list, 12) 
+tail(treatment_list, 12)
+OptimAd2 <- optimized_arrangement(nrows = 20, ncols = 35, 
                                   planter = "serpentine", 
                                   plotNumber = 101,
                                   seed = 12,
                                   exptName = "20YWA2",
-                                  locationNames = "MINOT")
+                                  locationNames = "MINOT",
+                                  data = treatment_list)
 OptimAd2$infoDesign
 OptimAd2$layoutRandom
 OptimAd2$plotNumber
@@ -91,6 +98,8 @@ head(OptimAd2$fieldBook,12)
                   
 }
 \references{
-Hinkelmann, Klaus, Kempthorne, Oscar. Design and Analysis of Experiments, Volume 3 : Special Designs and Applications.
-Hoboken, N.J.: Wiley-Interscience.
+Clarke, G. P. Y., & Stefanova, K. T. (2011). Optimal design for early-generation plant
+breeding trials with unreplicated or partially replicated test lines. Australian & New
+Zealand Journal of Statistics, 53(4), 461–480. 
+https://doi.org/https://doi.org/10.1111/j.1467-842X.2011.00642.x
 }

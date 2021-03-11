@@ -22,8 +22,8 @@
 #' 
 #'
 #' @references
-#' \emph{Design and Analysis of Experiments, Volume 1, Introduction to Experimental Design. Second Edition}.
-#'  Klaus Hinkelmann & Oscar Kempthorne.John Wiley & Sons, Inc., Hoboken, New Jersey.
+#' Federer, W. T. (1955). Experimental Design. Theory and Application. New York, USA. The
+#' Macmillan Company.
 #' 
 #' @examples
 #' # Example 1: Generates a RCBD design with 3 blocks and 20 treatments across 3 locations.
@@ -39,12 +39,17 @@
 #' head(rcbd1$fieldBook)
 #' 
 #' # Example 2: Generates a RCBD design with 6 blocks and 18 treatments in one location.
-#' rcbd2 <- RCBD(t = 18, reps = 6, l = 1, 
+#' # In this case, we show how to use the option data.
+#' treatments <- paste("ND-", 1:18, sep = "")
+#' treatment_list <- data.frame(list(TREATMENT = treatments))
+#' head(treatment_list)
+#' rcbd2 <- RCBD(reps = 6, l = 1, 
 #'               plotNumber = 101, 
 #'               continuous = FALSE, 
 #'               planter = "serpentine", 
 #'               seed = 13, 
-#'               locationNames = "IBAGUE")
+#'               locationNames = "IBAGUE",
+#'               data = treatment_list)
 #' rcbd2$infoDesign                  
 #' rcbd2$RCBD.layout
 #' rcbd2$plotNumber.layout
@@ -173,6 +178,10 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101, continuous = FA
   }
   RCBD.output <- data.frame(list(LOCATION = rep(locationNames, each = nt * b), PLOT = as.vector(t(p.number.loc1)),
                                  REP = rep(1:b, each = nt), TREATMENT = as.vector(t(RCBD))))
+  
+  RCBD.output$LOCATION <- factor(RCBD.output$LOCATION, levels = as.character(unique(locationNames)))
+  RCBD.output <- RCBD.output[order(RCBD.output$LOCATION, RCBD.output$PLOT),]
+  
   ID <- 1:nrow(RCBD.output)
   RCBD_output <- cbind(ID, RCBD.output)
   RCBD_output <- as.data.frame(RCBD_output)

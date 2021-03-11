@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FielDHub</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
       </span>
     </div>
 
@@ -92,7 +92,12 @@
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/DidierMurilloF/FielDHub/">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
       </ul>
       
     </div><!--/.nav-collapse -->
@@ -107,7 +112,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Generates a Latin Square Design</h1>
-    
+    <small class="dont-index">Source: <a href='https://github.com/DidierMurilloF/FielDHub/blob/master/R/fct_latin_square.R'><code>R/fct_latin_square.R</code></a></small>
     <div class="hidden name"><code>latin_square.Rd</code></div>
     </div>
 
@@ -164,70 +169,124 @@
 <p>Data frame with the latin square field book.</p>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
-    <p><em>Design and Analysis of Experiments, Volume 1, Introduction to Experimental Design. Second Edition</em>.
- Klaus Hinkelmann &amp; Oscar Kempthorne.John Wiley &amp; Sons, Inc., Hoboken, New Jersey.</p>
+    <p>Federer, W. T. (1955). Experimental Design. Theory and Application. New York, USA. The
+Macmillan Company.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='co'># Example 1: Generates a latin square design with 5 treatments and 3 reps.</span>
-<span class='va'>latinSq1</span> <span class='op'>&lt;-</span> <span class='fu'>latin_square</span><span class='op'>(</span>t <span class='op'>=</span> <span class='fl'>5</span>, reps <span class='op'>=</span> <span class='fl'>3</span>, plotNumber <span class='op'>=</span> <span class='fl'>101</span>, planter <span class='op'>=</span> <span class='st'>"serpentine"</span>,
-                         seed <span class='op'>=</span> <span class='fl'>1981</span>, locationNames <span class='op'>=</span> <span class='st'>"FARGO"</span><span class='op'>)</span> 
+    <pre class="examples"><div class='input'><span class='co'># Example 1: Generates a latin square design with 4 treatments and 2 reps.</span>
+<span class='va'>latinSq1</span> <span class='op'>&lt;-</span> <span class='fu'>latin_square</span><span class='op'>(</span>t <span class='op'>=</span> <span class='fl'>4</span>, 
+                         reps <span class='op'>=</span> <span class='fl'>2</span>, 
+                         plotNumber <span class='op'>=</span> <span class='fl'>101</span>, 
+                         planter <span class='op'>=</span> <span class='st'>"cartesian"</span>,
+                         seed <span class='op'>=</span> <span class='fl'>1980</span><span class='op'>)</span> 
 <span class='va'>latinSq1</span><span class='op'>$</span><span class='va'>squares</span>
 </div><div class='output co'>#&gt; [[1]]
-#&gt;       Column 1 Column 2 Column 3 Column 4 Column 5
-#&gt; Row 1 "T4"     "T3"     "T2"     "T1"     "T5"    
-#&gt; Row 2 "T1"     "T2"     "T4"     "T5"     "T3"    
-#&gt; Row 3 "T3"     "T5"     "T1"     "T2"     "T4"    
-#&gt; Row 4 "T2"     "T4"     "T5"     "T3"     "T1"    
-#&gt; Row 5 "T5"     "T1"     "T3"     "T4"     "T2"    
+#&gt;       Column 1 Column 2 Column 3 Column 4
+#&gt; Row 1 "T1"     "T4"     "T2"     "T3"    
+#&gt; Row 2 "T3"     "T1"     "T4"     "T2"    
+#&gt; Row 3 "T4"     "T2"     "T3"     "T1"    
+#&gt; Row 4 "T2"     "T3"     "T1"     "T4"    
 #&gt; 
 #&gt; [[2]]
-#&gt;       Column 1 Column 2 Column 3 Column 4 Column 5
-#&gt; Row 1 "T2"     "T4"     "T5"     "T3"     "T1"    
-#&gt; Row 2 "T1"     "T2"     "T3"     "T4"     "T5"    
-#&gt; Row 3 "T3"     "T5"     "T1"     "T2"     "T4"    
-#&gt; Row 4 "T4"     "T1"     "T2"     "T5"     "T3"    
-#&gt; Row 5 "T5"     "T3"     "T4"     "T1"     "T2"    
+#&gt;       Column 1 Column 2 Column 3 Column 4
+#&gt; Row 1 "T1"     "T3"     "T4"     "T2"    
+#&gt; Row 2 "T2"     "T4"     "T3"     "T1"    
+#&gt; Row 3 "T4"     "T1"     "T2"     "T3"    
+#&gt; Row 4 "T3"     "T2"     "T1"     "T4"    
+#&gt; </div><div class='input'><span class='va'>latinSq1</span><span class='op'>$</span><span class='va'>plotSquares</span>
+</div><div class='output co'>#&gt; [[1]]
+#&gt;      [,1] [,2] [,3] [,4]
+#&gt; [1,]  101  102  103  104
+#&gt; [2,]  105  106  107  108
+#&gt; [3,]  109  110  111  112
+#&gt; [4,]  113  114  115  116
+#&gt; 
+#&gt; [[2]]
+#&gt;      [,1] [,2] [,3] [,4]
+#&gt; [1,]  201  202  203  204
+#&gt; [2,]  205  206  207  208
+#&gt; [3,]  209  210  211  212
+#&gt; [4,]  213  214  215  216
+#&gt; </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>latinSq1</span><span class='op'>$</span><span class='va'>fieldBook</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;   ID LOCATION PLOT SQUARE   ROW   COLUMN TREATMENT
+#&gt; 1  1        1  101      1 Row 1 Column 1        T1
+#&gt; 2  2        1  102      1 Row 1 Column 2        T4
+#&gt; 3  3        1  103      1 Row 1 Column 3        T2
+#&gt; 4  4        1  104      1 Row 1 Column 4        T3
+#&gt; 5  5        1  105      1 Row 2 Column 1        T3
+#&gt; 6  6        1  106      1 Row 2 Column 2        T1</div><div class='input'>
+<span class='co'># Example 2: Generates a latin square design with 5 treatments and 3 reps.</span>
+<span class='va'>latin_data</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>ROW <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span><span class='op'>(</span><span class='st'>"Period"</span>, <span class='fl'>1</span><span class='op'>:</span><span class='fl'>5</span>, sep <span class='op'>=</span> <span class='st'>""</span><span class='op'>)</span>,
+                              COLUMN <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span><span class='op'>(</span><span class='st'>"Cow"</span>, <span class='fl'>1</span><span class='op'>:</span><span class='fl'>5</span>, sep <span class='op'>=</span> <span class='st'>""</span><span class='op'>)</span>,
+                              TREATMENT <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span><span class='op'>(</span><span class='st'>"Diet"</span>, <span class='fl'>1</span><span class='op'>:</span><span class='fl'>5</span>, sep <span class='op'>=</span> <span class='st'>""</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>latin_data</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;       ROW COLUMN TREATMENT
+#&gt; 1 Period1   Cow1     Diet1
+#&gt; 2 Period2   Cow2     Diet2
+#&gt; 3 Period3   Cow3     Diet3
+#&gt; 4 Period4   Cow4     Diet4
+#&gt; 5 Period5   Cow5     Diet5</div><div class='input'><span class='va'>latinSq2</span> <span class='op'>&lt;-</span> <span class='fu'>latin_square</span><span class='op'>(</span>t <span class='op'>=</span> <span class='cn'>NULL</span>, 
+                         reps <span class='op'>=</span> <span class='fl'>3</span>, 
+                         plotNumber <span class='op'>=</span> <span class='fl'>101</span>, 
+                         planter <span class='op'>=</span> <span class='st'>"cartesian"</span>,
+                         seed <span class='op'>=</span> <span class='fl'>1981</span>, 
+                         data <span class='op'>=</span> <span class='va'>latin_data</span><span class='op'>)</span> 
+<span class='va'>latinSq2</span><span class='op'>$</span><span class='va'>squares</span>
+</div><div class='output co'>#&gt; [[1]]
+#&gt;         Cow1    Cow2    Cow3    Cow4    Cow5   
+#&gt; Period1 "Diet4" "Diet3" "Diet2" "Diet1" "Diet5"
+#&gt; Period2 "Diet1" "Diet2" "Diet4" "Diet5" "Diet3"
+#&gt; Period3 "Diet3" "Diet5" "Diet1" "Diet2" "Diet4"
+#&gt; Period4 "Diet2" "Diet4" "Diet5" "Diet3" "Diet1"
+#&gt; Period5 "Diet5" "Diet1" "Diet3" "Diet4" "Diet2"
+#&gt; 
+#&gt; [[2]]
+#&gt;         Cow1    Cow2    Cow3    Cow4    Cow5   
+#&gt; Period1 "Diet2" "Diet4" "Diet5" "Diet3" "Diet1"
+#&gt; Period2 "Diet1" "Diet2" "Diet3" "Diet4" "Diet5"
+#&gt; Period3 "Diet3" "Diet5" "Diet1" "Diet2" "Diet4"
+#&gt; Period4 "Diet4" "Diet1" "Diet2" "Diet5" "Diet3"
+#&gt; Period5 "Diet5" "Diet3" "Diet4" "Diet1" "Diet2"
 #&gt; 
 #&gt; [[3]]
-#&gt;       Column 1 Column 2 Column 3 Column 4 Column 5
-#&gt; Row 1 "T4"     "T2"     "T1"     "T3"     "T5"    
-#&gt; Row 2 "T1"     "T3"     "T2"     "T5"     "T4"    
-#&gt; Row 3 "T3"     "T5"     "T4"     "T2"     "T1"    
-#&gt; Row 4 "T5"     "T1"     "T3"     "T4"     "T2"    
-#&gt; Row 5 "T2"     "T4"     "T5"     "T1"     "T3"    
-#&gt; </div><div class='input'><span class='va'>latinSq1</span><span class='op'>$</span><span class='va'>plotSquares</span>
+#&gt;         Cow1    Cow2    Cow3    Cow4    Cow5   
+#&gt; Period1 "Diet4" "Diet2" "Diet1" "Diet3" "Diet5"
+#&gt; Period2 "Diet1" "Diet3" "Diet2" "Diet5" "Diet4"
+#&gt; Period3 "Diet3" "Diet5" "Diet4" "Diet2" "Diet1"
+#&gt; Period4 "Diet5" "Diet1" "Diet3" "Diet4" "Diet2"
+#&gt; Period5 "Diet2" "Diet4" "Diet5" "Diet1" "Diet3"
+#&gt; </div><div class='input'><span class='va'>latinSq2</span><span class='op'>$</span><span class='va'>plotSquares</span>
 </div><div class='output co'>#&gt; [[1]]
 #&gt;      [,1] [,2] [,3] [,4] [,5]
 #&gt; [1,]  101  102  103  104  105
-#&gt; [2,]  110  109  108  107  106
+#&gt; [2,]  106  107  108  109  110
 #&gt; [3,]  111  112  113  114  115
-#&gt; [4,]  120  119  118  117  116
+#&gt; [4,]  116  117  118  119  120
 #&gt; [5,]  121  122  123  124  125
 #&gt; 
 #&gt; [[2]]
 #&gt;      [,1] [,2] [,3] [,4] [,5]
 #&gt; [1,]  201  202  203  204  205
-#&gt; [2,]  210  209  208  207  206
+#&gt; [2,]  206  207  208  209  210
 #&gt; [3,]  211  212  213  214  215
-#&gt; [4,]  220  219  218  217  216
+#&gt; [4,]  216  217  218  219  220
 #&gt; [5,]  221  222  223  224  225
 #&gt; 
 #&gt; [[3]]
 #&gt;      [,1] [,2] [,3] [,4] [,5]
 #&gt; [1,]  301  302  303  304  305
-#&gt; [2,]  310  309  308  307  306
+#&gt; [2,]  306  307  308  309  310
 #&gt; [3,]  311  312  313  314  315
-#&gt; [4,]  320  319  318  317  316
+#&gt; [4,]  316  317  318  319  320
 #&gt; [5,]  321  322  323  324  325
-#&gt; </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>latinSq1</span><span class='op'>$</span><span class='va'>fieldBook</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;   LOCATION PLOT SQUARE   ROW   COLUMN TREATMENT
-#&gt; 1    FARGO  101      1 Row 1 Column 1        T4
-#&gt; 2    FARGO  102      1 Row 1 Column 2        T3
-#&gt; 3    FARGO  103      1 Row 1 Column 3        T2
-#&gt; 4    FARGO  104      1 Row 1 Column 4        T1
-#&gt; 5    FARGO  105      1 Row 1 Column 5        T5
-#&gt; 6    FARGO  106      1 Row 2 Column 5        T3</div><div class='input'>
-             
+#&gt; </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>latinSq2</span><span class='op'>$</span><span class='va'>fieldBook</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;   ID LOCATION PLOT SQUARE     ROW COLUMN TREATMENT
+#&gt; 1  1        1  101      1 Period1   Cow1     Diet4
+#&gt; 2  2        1  102      1 Period1   Cow2     Diet3
+#&gt; 3  3        1  103      1 Period1   Cow3     Diet2
+#&gt; 4  4        1  104      1 Period1   Cow4     Diet1
+#&gt; 5  5        1  105      1 Period1   Cow5     Diet5
+#&gt; 6  6        1  106      1 Period2   Cow1     Diet1</div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -240,7 +299,7 @@
 
       <footer>
       <div class="copyright">
-  <p>Developed by Didier Murillo.</p>
+  <p>Developed by Didier Murillo, Salvador Gezan.</p>
 </div>
 
 <div class="pkgdown">

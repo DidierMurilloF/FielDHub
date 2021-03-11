@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FielDHub</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
       </span>
     </div>
 
@@ -92,7 +92,12 @@
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/DidierMurilloF/FielDHub/">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
       </ul>
       
     </div><!--/.nav-collapse -->
@@ -107,7 +112,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Generates a Split Plot Design</h1>
-    
+    <small class="dont-index">Source: <a href='https://github.com/DidierMurilloF/FielDHub/blob/master/R/fct_split_plot.R'><code>R/fct_split_plot.R</code></a></small>
     <div class="hidden name"><code>split_plot.Rd</code></div>
     </div>
 
@@ -174,8 +179,8 @@
 <p>Data frame with the split plot field book.</p>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
-    <p><em>Design and Analysis of Experiments, Volume 1, Introduction to Experimental Design. Second Edition</em>.
- Klaus Hinkelmann &amp; Oscar Kempthorne.John Wiley &amp; Sons, Inc., Hoboken, New Jersey.</p>
+    <p>Federer, W. T. (1955). Experimental Design. Theory and Application. New York, USA. The
+Macmillan Company.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'># Example 1: Generates a split plot design SPD with 4 whole plots, 2 sub plots per whole plot,</span>
@@ -199,9 +204,7 @@
 #&gt; [1] "FARGO"
 #&gt; 
 #&gt; $plotNumbers
-#&gt; $plotNumbers[[1]]
-#&gt; [1] 101 201 301 401 501
-#&gt; 
+#&gt; [1] 101
 #&gt; 
 #&gt; $typeDesign
 #&gt; [1] "RCBD"
@@ -232,29 +235,43 @@
 #&gt; [19,] "503" "5" "2"        "2 1"   
 #&gt; [20,] "504" "5" "4"        "2 1"   
 #&gt; </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>SPDExample1</span><span class='op'>$</span><span class='va'>fieldBook</span>,<span class='fl'>12</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;    LOCATION PLOT REP WHOLE-PLOT SUB-PLOT TRT_COMB
-#&gt; 1     FARGO  101   1          1        1      1|1
-#&gt; 2     FARGO  101   1          1        2      1|2
-#&gt; 3     FARGO  102   1          4        2      4|2
-#&gt; 4     FARGO  102   1          4        1      4|1
-#&gt; 5     FARGO  103   1          3        2      3|2
-#&gt; 6     FARGO  103   1          3        1      3|1
-#&gt; 7     FARGO  104   1          2        2      2|2
-#&gt; 8     FARGO  104   1          2        1      2|1
-#&gt; 9     FARGO  201   2          3        1      3|1
-#&gt; 10    FARGO  201   2          3        2      3|2
-#&gt; 11    FARGO  202   2          2        2      2|2
-#&gt; 12    FARGO  202   2          2        1      2|1</div><div class='input'>
+</div><div class='output co'>#&gt;    ID LOCATION PLOT REP WHOLE-PLOT SUB-PLOT TRT_COMB
+#&gt; 1   1    FARGO  101   1          1        1      1|1
+#&gt; 2   2    FARGO  101   1          1        2      1|2
+#&gt; 3   3    FARGO  102   1          4        2      4|2
+#&gt; 4   4    FARGO  102   1          4        1      4|1
+#&gt; 5   5    FARGO  103   1          3        2      3|2
+#&gt; 6   6    FARGO  103   1          3        1      3|1
+#&gt; 7   7    FARGO  104   1          2        2      2|2
+#&gt; 8   8    FARGO  104   1          2        1      2|1
+#&gt; 9   9    FARGO  201   2          3        1      3|1
+#&gt; 10 10    FARGO  201   2          3        2      3|2
+#&gt; 11 11    FARGO  202   2          2        2      2|2
+#&gt; 12 12    FARGO  202   2          2        1      2|1</div><div class='input'>
 <span class='co'># Example 2: Generates a split plot design SPD with 5 whole plots </span>
 <span class='co'># (4 types of fungicide + one control), 10 sub plots per whole plot (10 bean varieties), </span>
 <span class='co'># and 6 reps in an RCBD arrangement. This in 3 locations or sites.</span>
+<span class='co'># In this case, we show how to use the option data.</span>
 <span class='va'>wp</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"NFung"</span>, <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span><span class='op'>(</span><span class='st'>"Fung"</span>, <span class='fl'>1</span><span class='op'>:</span><span class='fl'>4</span>, sep <span class='op'>=</span> <span class='st'>""</span><span class='op'>)</span><span class='op'>)</span>  <span class='co'># Fungicides (5 Whole plots)</span>
 <span class='va'>sp</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span><span class='op'>(</span><span class='st'>"Beans"</span>, <span class='fl'>1</span><span class='op'>:</span><span class='fl'>10</span>, sep <span class='op'>=</span> <span class='st'>""</span><span class='op'>)</span>            <span class='co'># Beans varieties (10 sub plots)</span>
-<span class='va'>SPDExample2</span> <span class='op'>&lt;-</span> <span class='fu'>split_plot</span><span class='op'>(</span>wp <span class='op'>=</span> <span class='va'>wp</span>, sp <span class='op'>=</span> <span class='va'>sp</span>, reps <span class='op'>=</span> <span class='fl'>6</span>, l <span class='op'>=</span> <span class='fl'>3</span>, 
+<span class='va'>split_plot_Data</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>WHOLPLOT <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>wp</span>, <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='cn'>NA</span>, <span class='fl'>5</span><span class='op'>)</span><span class='op'>)</span>, SUBPLOT <span class='op'>=</span> <span class='va'>sp</span><span class='op'>)</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>split_plot_Data</span>, <span class='fl'>12</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;    WHOLPLOT SUBPLOT
+#&gt; 1     NFung  Beans1
+#&gt; 2     Fung1  Beans2
+#&gt; 3     Fung2  Beans3
+#&gt; 4     Fung3  Beans4
+#&gt; 5     Fung4  Beans5
+#&gt; 6      &lt;NA&gt;  Beans6
+#&gt; 7      &lt;NA&gt;  Beans7
+#&gt; 8      &lt;NA&gt;  Beans8
+#&gt; 9      &lt;NA&gt;  Beans9
+#&gt; 10     &lt;NA&gt; Beans10</div><div class='input'><span class='va'>SPDExample2</span> <span class='op'>&lt;-</span> <span class='fu'>split_plot</span><span class='op'>(</span>reps <span class='op'>=</span> <span class='fl'>6</span>, l <span class='op'>=</span> <span class='fl'>3</span>, 
                           plotNumber <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>101</span>, <span class='fl'>1001</span>, <span class='fl'>2001</span><span class='op'>)</span>,
                           seed <span class='op'>=</span> <span class='fl'>23</span>, 
                           type <span class='op'>=</span> <span class='fl'>2</span>, 
-                          locationNames <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"A"</span>, <span class='st'>"B"</span>, <span class='st'>"C"</span><span class='op'>)</span><span class='op'>)</span>
+                          locationNames <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"A"</span>, <span class='st'>"B"</span>, <span class='st'>"C"</span><span class='op'>)</span>,
+                          data <span class='op'>=</span> <span class='va'>split_plot_Data</span><span class='op'>)</span>
 <span class='va'>SPDExample2</span><span class='op'>$</span><span class='va'>infoDesign</span>
 </div><div class='output co'>#&gt; $WholePlots
 #&gt; [1] "NFung" "Fung1" "Fung2" "Fung3" "Fung4"
@@ -270,15 +287,7 @@
 #&gt; [1] "A" "B" "C"
 #&gt; 
 #&gt; $plotNumbers
-#&gt; $plotNumbers[[1]]
-#&gt; [1] 101 201 301 401 501 601
-#&gt; 
-#&gt; $plotNumbers[[2]]
-#&gt; [1] 1001 1101 1201 1301 1401 1501
-#&gt; 
-#&gt; $plotNumbers[[3]]
-#&gt; [1] 2001 2101 2201 2301 2401 2501
-#&gt; 
+#&gt; [1]  101 1001 2001
 #&gt; 
 #&gt; $typeDesign
 #&gt; [1] "RCBD"
@@ -478,19 +487,19 @@
 #&gt; [29,] "Beans3 Beans5 Beans4 Beans2 Beans7 Beans10 Beans9 Beans8 Beans1 Beans6"
 #&gt; [30,] "Beans3 Beans6 Beans2 Beans9 Beans1 Beans4 Beans8 Beans7 Beans5 Beans10"
 #&gt; </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>SPDExample2</span><span class='op'>$</span><span class='va'>fieldBook</span>,<span class='fl'>12</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;    LOCATION PLOT REP WHOLE-PLOT SUB-PLOT      TRT_COMB
-#&gt; 1         A  101   1      Fung4   Beans5  Fung4|Beans5
-#&gt; 2         A  101   1      Fung4   Beans1  Fung4|Beans1
-#&gt; 3         A  101   1      Fung4   Beans2  Fung4|Beans2
-#&gt; 4         A  101   1      Fung4   Beans3  Fung4|Beans3
-#&gt; 5         A  101   1      Fung4  Beans10 Fung4|Beans10
-#&gt; 6         A  101   1      Fung4   Beans6  Fung4|Beans6
-#&gt; 7         A  101   1      Fung4   Beans7  Fung4|Beans7
-#&gt; 8         A  101   1      Fung4   Beans9  Fung4|Beans9
-#&gt; 9         A  101   1      Fung4   Beans4  Fung4|Beans4
-#&gt; 10        A  101   1      Fung4   Beans8  Fung4|Beans8
-#&gt; 11        A  102   1      Fung3   Beans9  Fung3|Beans9
-#&gt; 12        A  102   1      Fung3  Beans10 Fung3|Beans10</div><div class='input'>             
+</div><div class='output co'>#&gt;    ID LOCATION PLOT REP WHOLE-PLOT SUB-PLOT      TRT_COMB
+#&gt; 1   1        A  101   1      Fung4   Beans5  Fung4|Beans5
+#&gt; 2   2        A  101   1      Fung4   Beans1  Fung4|Beans1
+#&gt; 3   3        A  101   1      Fung4   Beans2  Fung4|Beans2
+#&gt; 4   4        A  101   1      Fung4   Beans3  Fung4|Beans3
+#&gt; 5   5        A  101   1      Fung4  Beans10 Fung4|Beans10
+#&gt; 6   6        A  101   1      Fung4   Beans6  Fung4|Beans6
+#&gt; 7   7        A  101   1      Fung4   Beans7  Fung4|Beans7
+#&gt; 8   8        A  101   1      Fung4   Beans9  Fung4|Beans9
+#&gt; 9   9        A  101   1      Fung4   Beans4  Fung4|Beans4
+#&gt; 10 10        A  101   1      Fung4   Beans8  Fung4|Beans8
+#&gt; 11 11        A  102   1      Fung3   Beans9  Fung3|Beans9
+#&gt; 12 12        A  102   1      Fung3  Beans10 Fung3|Beans10</div><div class='input'>             
                   
 </div></pre>
   </div>
@@ -504,7 +513,7 @@
 
       <footer>
       <div class="copyright">
-  <p>Developed by Didier Murillo.</p>
+  <p>Developed by Didier Murillo, Salvador Gezan.</p>
 </div>
 
 <div class="pkgdown">

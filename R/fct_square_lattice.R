@@ -17,12 +17,12 @@
 #' @return Data frame with the square lattice design field book.
 #'
 #' @references
-#' Edmondson, R.N. 2020. Package blocksdesign: Nested and Crossed Block Designs for
-#' Factorial and Unstructured Treatment Sets.
+#' Edmondson., R. N. (2021). blocksdesign: Nested and crossed block designs for factorial and
+#' unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign
 #' 
 #' @examples
 #' #Example 1: Generates a square lattice design with 5 full blocks, 8 units per iBlock,
-#' # 8 iBlocks for a square number of treatmens of 64 in two locations.
+#' # 8 IBlocks for a square number of treatmens of 64 in two locations.
 #' squareLattice1 <- square_lattice(t = 64, k = 8, r = 5, l = 2, 
 #'                                  plotNumber = c(1001, 2001),
 #'                                  locationNames = c("FARGO", "MINOT"), 
@@ -30,12 +30,17 @@
 #' squareLattice1$infoDesign
 #' head(squareLattice1$fieldBook,12)
 #' 
-#' #Example 2: Generates a square lattice design with 3 full blocks, 12 units per iBlock,
-#' # 12 iBlocks for a square number of treatmens of 144 in one location.
-#' squareLattice2 <- square_lattice(t = 100, k = 10, r = 3, l = 1, 
+#' #Example 2: Generates a square lattice design with 3 full blocks, 7 units per iBlock,
+#' # 7 IBlocks for a square number of treatmens of 49 in one location.
+#' # In this case, we show how to use the option data.
+#' treatments <- paste("G", 1:49, sep = "")
+#' treatment_list <- data.frame(list(TREATMENT = treatments))
+#' head(treatment_list) 
+#' squareLattice2 <- square_lattice(t = 49, k = 7, r = 3, l = 1, 
 #'                                  plotNumber = 1001,
 #'                                  locationNames = "CASSELTON", 
-#'                                  seed = 1986)
+#'                                  seed = 1986,
+#'                                  data = treatment_list)
 #' squareLattice2$infoDesign
 #' head(squareLattice2$fieldBook,12)
 #' 
@@ -48,7 +53,7 @@ square_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101
   lookup <- FALSE
   if(is.null(data)) {
     if (is.null(t) || is.null(k) || is.null(r) || is.null(l)) {
-      shiny::validate('Some of the basic design parameters are missing (t, k, r and l).')
+      shiny::validate('Some of the basic design parameters are missing (t, k, r or l).')
     }
     arg1 <- list(k, r, l);arg2 <- c(k, r, l)
     if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
@@ -74,8 +79,8 @@ square_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101
     }
     data_alpha <- NULL
   }else if (!is.null(data)) {
-    if (is.null(r) || is.null(k) || is.null(l)) {
-      shiny::validate('Some of the basic design parameters are missing (r, k, l).')
+    if (is.null(t) || is.null(r) || is.null(k) || is.null(l)) {
+      shiny::validate('Some of the basic design parameters are missing (t, r, k or l).')
     }
     if(!is.data.frame(data)) shiny::validate("Data must be a data frame.")
     data <- as.data.frame(na.omit(data[,1]))
@@ -101,7 +106,7 @@ square_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101
   rownames(OutSquare_Lattice) <- 1:nrow(OutSquare_Lattice)
   
   lambda <- r*(k - 1)/(nt - 1)
-  infoDesign <- list(Reps = r, iBlocks = s, NumberTreatments = nt, NumberLocations = l, 
+  infoDesign <- list(Reps = r, IBlocks = s, NumberTreatments = nt, NumberLocations = l, 
                      Locations = locationNames, seed = seed, lambda = lambda)
   
   return(list(infoDesign = infoDesign, fieldBook = OutSquare_Lattice))

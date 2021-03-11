@@ -61,12 +61,17 @@ rcbd1$plotNumber.layout
 head(rcbd1$fieldBook)
 
 # Example 2: Generates a RCBD design with 6 blocks and 18 treatments in one location.
-rcbd2 <- RCBD(t = 18, reps = 6, l = 1, 
+# In this case, we show how to use the option data.
+treatments <- paste("ND-", 1:18, sep = "")
+treatment_list <- data.frame(list(TREATMENT = treatments))
+head(treatment_list)
+rcbd2 <- RCBD(reps = 6, l = 1, 
               plotNumber = 101, 
               continuous = FALSE, 
               planter = "serpentine", 
               seed = 13, 
-              locationNames = "IBAGUE")
+              locationNames = "IBAGUE",
+              data = treatment_list)
 rcbd2$infoDesign                  
 rcbd2$RCBD.layout
 rcbd2$plotNumber.layout
@@ -75,6 +80,6 @@ head(rcbd2$fieldBook)
 
 }
 \references{
-\emph{Design and Analysis of Experiments, Volume 1, Introduction to Experimental Design. Second Edition}.
- Klaus Hinkelmann & Oscar Kempthorne.John Wiley & Sons, Inc., Hoboken, New Jersey.
+Federer, W. T. (1955). Experimental Design. Theory and Application. New York, USA. The
+Macmillan Company.
 }

@@ -18,8 +18,8 @@
 #' 
 #'
 #' @references
-#' Edmondson, R.N. 2020. Package blocksdesign: Nested and Crossed Block Designs for
-#' Factorial and Unstructured Treatment Sets.
+#' Edmondson., R. N. (2021). blocksdesign: Nested and crossed block designs for factorial and
+#' unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign
 #' 
 #' @examples
 #' # Example 1: Generates a rectangular lattice design with 6 full blocks, 4 units per iblock (k)
@@ -32,11 +32,16 @@
 #' head(rectangularLattice1$fieldBook,12)
 #' 
 #' # Example 2: Generates a rectangular lattice design with 5 full blocks, 7 units per iblock (k)
-#' # and 56 treatments across 3 locations.
-#' rectangularLattice2 <- rectangular_lattice(t = 56, k = 7, r = 5, l = 3, 
-#'                                            plotNumber = c(1001,2001,3001),
-#'                                            locationNames = c("Loc1", "Loc2", "Loc3"), 
-#'                                            seed = 127)
+#' # and 56 treatments across 2 locations.
+#' # In this case, we show how to use the option data.
+#' treatments <- paste("ND-", 1:56, sep = "")
+#' treatment_list <- data.frame(list(TREATMENT = treatments))
+#' head(treatment_list) 
+#' rectangularLattice2 <- rectangular_lattice(t = 56, k = 7, r = 5, l = 2, 
+#'                                            plotNumber = c(1001,2001),
+#'                                            locationNames = c("Loc1", "Loc2"), 
+#'                                            seed = 127,
+#'                                            data = treatment_list)
 #' rectangularLattice2$infoDesign
 #' head(rectangularLattice2$fieldBook,12)
 #' 

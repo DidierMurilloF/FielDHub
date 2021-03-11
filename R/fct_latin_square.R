@@ -17,25 +17,41 @@
 #' 
 #'
 #' @references
-#' \emph{Design and Analysis of Experiments, Volume 1, Introduction to Experimental Design. Second Edition}.
-#'  Klaus Hinkelmann & Oscar Kempthorne.John Wiley & Sons, Inc., Hoboken, New Jersey.
+#' Federer, W. T. (1955). Experimental Design. Theory and Application. New York, USA. The
+#' Macmillan Company.
 #'
 #' @examples
-#' # Example 1: Generates a latin square design with 5 treatments and 3 reps.
-#' latinSq1 <- latin_square(t = 5, reps = 3, plotNumber = 101, planter = "serpentine",
-#'                          seed = 1981, locationNames = "FARGO") 
+#' # Example 1: Generates a latin square design with 4 treatments and 2 reps.
+#' latinSq1 <- latin_square(t = 4, 
+#'                          reps = 2, 
+#'                          plotNumber = 101, 
+#'                          planter = "cartesian",
+#'                          seed = 1980) 
 #' latinSq1$squares
 #' latinSq1$plotSquares
 #' head(latinSq1$fieldBook)
 #' 
-#'              
+#' # Example 2: Generates a latin square design with 5 treatments and 3 reps.
+#' latin_data <- data.frame(list(ROW = paste("Period", 1:5, sep = ""),
+#'                               COLUMN = paste("Cow", 1:5, sep = ""),
+#'                               TREATMENT = paste("Diet", 1:5, sep = "")))
+#' print(latin_data)
+#' latinSq2 <- latin_square(t = NULL, 
+#'                          reps = 3, 
+#'                          plotNumber = 101, 
+#'                          planter = "cartesian",
+#'                          seed = 1981, 
+#'                          data = latin_data) 
+#' latinSq2$squares
+#' latinSq2$plotSquares
+#' head(latinSq2$fieldBook)
+#' 
 #' @export
 latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpentine", 
                          seed = NULL, locationNames = NULL, data = NULL) {
   
   if (is.null(seed) || !is.numeric(seed)) seed <- runif(1, min = -50000, max = 50000)
   set.seed(seed)
-  if (t > 10) stop("\n'latinsquare()' allows only up to 10 treatments.")
   if (all(c("serpentine", "cartesian") != planter)) {
     base::stop('Input planter is unknown. Please, choose one: "serpentine" or "cartesian"')
   }
@@ -44,6 +60,7 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
   if (is.null(data)) {
     if (all(!is.null(c(n, reps))) && all(base::lengths(list(n, reps)) == 1)) {
       if (all(is.numeric(c(n, reps))) && all(c(n, reps) %% 1 == 0) & all(c(n, reps) > 0)) {
+        if (n > 10) stop("\n'latinsquare()' allows only up to 10 treatments.")
         ls.len <- n
         Name.Rows <- paste(rep("Row", ls.len), 1:ls.len)
         Name.Columns <- paste(rep("Column", ls.len), 1:ls.len)
@@ -68,6 +85,7 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
     Name.Columns <- as.character(Column.f)
     Name.Treatments <- as.character(Treatment.f)
     ls.len <- n.treatments
+    if (ls.len > 10) stop("\n'latinsquare()' allows only up to 10 treatments.")
   }
   if(!is.null(l) && is.numeric(l) && length(l) == 1) {
     if (l > 1 && is.null(locationNames)) {
@@ -114,7 +132,7 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
       expt.ls[expt.ls == i] <- trt.r[w]
       w <- w + 1
     }
-    new_expt.ls <- order_ls(S = expt.ls)
+    new_expt.ls <- order_ls(S = expt.ls, data = data)
     lsd.reps[[j]] <- new_expt.ls
     step.random[[j]] <- list(ls.random, ls.random.r, ls.random.c)
     Row <- rep(rownames(lsd.reps[[j]]), each = ls.len)
@@ -138,5 +156,6 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
   rownames(ls.output.order) <- 1:nrow(ls.output.order)
   latin_design <- cbind(ID = 1:nrow(ls.output.order), ls.output.order)
   
-  return(list(squares = lsd.reps, plotSquares = plotSquares, fieldBook = latin_design))
+  return(list(squares = lsd.reps, plotSquares = plotSquares, 
+              fieldBook = latin_design))
 }

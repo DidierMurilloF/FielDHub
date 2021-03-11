@@ -58,10 +58,15 @@ head(rowcold1$fieldBook,12)
 
 #Example 2: Generates a row-column design with 3 full blocks and 30 treatments
 # and 5 rows, for two locations.
+# In this case, we show how to use the option data.
+treatments <- paste("ND-", 1:30, sep = "")
+treatment_list <- data.frame(list(TREATMENT = treatments))
+head(treatment_list)
 rowcold2 <- row_column(t = 30, nrows = 5, r = 3, l = 2, 
                        plotNumber= c(101,1001), 
                        locationNames = c("A", "B"),
-                       seed = 15)
+                       seed = 15,
+                       data = treatment_list)
 rowcold2$infoDesign
 rowcold2$resolvableBlocks
 head(rowcold2$fieldBook,12)
@@ -69,6 +74,6 @@ head(rowcold2$fieldBook,12)
 
 }
 \references{
-Edmondson, R.N. 2020. Package blocksdesign: Nested and Crossed Block Designs for
-Factorial and Unstructured Treatment Sets.
+Edmondson., R. N. (2021). blocksdesign: Nested and crossed block designs for factorial and
+unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign
 }

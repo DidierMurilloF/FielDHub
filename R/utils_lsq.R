@@ -1,4 +1,4 @@
-lsq <- function(len, reps = 1, seed = NA, returnstrings = FALSE) {
+lsq <- function(len, reps = 1, seed = NA) {
   
   if (!is.na(seed)) {
     if (exists(".Random.seed"))  { saved.seed <- .Random.seed }
@@ -6,7 +6,7 @@ lsq <- function(len, reps = 1, seed = NA, returnstrings = FALSE) {
     set.seed(seed)
   }
   allsq <- matrix(nrow = reps*len, ncol = len)
-  if (returnstrings) { squareid <- vector(mode = "character", length = reps) }
+  #if (returnstrings) { squareid <- vector(mode = "character", length = reps) }
   sample1 <- function(x) {
     if (length(x)==1) { return(x) }
     else              { return(sample(x,1)) }
@@ -49,6 +49,5 @@ lsq <- function(len, reps = 1, seed = NA, returnstrings = FALSE) {
   colnames(ls4.random) <- paste(rep("Column", len), 1:len)
   rownames(ls4.random) <- paste(rep("Row", len), 1:len)
   
-  if (returnstrings) { return(squareid) }
-  else               { return(ls4.random) }
+  return(ls4.random)
 }

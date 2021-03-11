@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FielDHub</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
       </span>
     </div>
 
@@ -92,7 +92,12 @@
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/DidierMurilloF/FielDHub/">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
       </ul>
       
     </div><!--/.nav-collapse -->
@@ -107,7 +112,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Generates a Square Lattice Design.</h1>
-    
+    <small class="dont-index">Source: <a href='https://github.com/DidierMurilloF/FielDHub/blob/master/R/fct_square_lattice.R'><code>R/fct_square_lattice.R</code></a></small>
     <div class="hidden name"><code>square_lattice.Rd</code></div>
     </div>
 
@@ -169,12 +174,12 @@
 <p>Data frame with the square lattice design field book.</p>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
-    <p>Edmondson, R.N. 2020. Package blocksdesign: Nested and Crossed Block Designs for
-Factorial and Unstructured Treatment Sets.</p>
+    <p>Edmondson., R. N. (2021). blocksdesign: Nested and crossed block designs for factorial and
+unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'>#Example 1: Generates a square lattice design with 5 full blocks, 8 units per iBlock,</span>
-<span class='co'># 8 iBlocks for a square number of treatmens of 64 in two locations.</span>
+<span class='co'># 8 IBlocks for a square number of treatmens of 64 in two locations.</span>
 <span class='va'>squareLattice1</span> <span class='op'>&lt;-</span> <span class='fu'>square_lattice</span><span class='op'>(</span>t <span class='op'>=</span> <span class='fl'>64</span>, k <span class='op'>=</span> <span class='fl'>8</span>, r <span class='op'>=</span> <span class='fl'>5</span>, l <span class='op'>=</span> <span class='fl'>2</span>, 
                                  plotNumber <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1001</span>, <span class='fl'>2001</span><span class='op'>)</span>,
                                  locationNames <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"FARGO"</span>, <span class='st'>"MINOT"</span><span class='op'>)</span>, 
@@ -183,7 +188,7 @@ Factorial and Unstructured Treatment Sets.</p>
 </div><div class='output co'>#&gt; $Reps
 #&gt; [1] 5
 #&gt; 
-#&gt; $iBlocks
+#&gt; $IBlocks
 #&gt; [1] 8
 #&gt; 
 #&gt; $NumberTreatments
@@ -214,21 +219,32 @@ Factorial and Unstructured Treatment Sets.</p>
 #&gt; 10 10    FARGO 1010   1      2    2    55
 #&gt; 11 11    FARGO 1011   1      2    3    54
 #&gt; 12 12    FARGO 1012   1      2    4    53</div><div class='input'>
-<span class='co'>#Example 2: Generates a square lattice design with 3 full blocks, 12 units per iBlock,</span>
-<span class='co'># 12 iBlocks for a square number of treatmens of 144 in one location.</span>
-<span class='va'>squareLattice2</span> <span class='op'>&lt;-</span> <span class='fu'>square_lattice</span><span class='op'>(</span>t <span class='op'>=</span> <span class='fl'>100</span>, k <span class='op'>=</span> <span class='fl'>10</span>, r <span class='op'>=</span> <span class='fl'>3</span>, l <span class='op'>=</span> <span class='fl'>1</span>, 
+<span class='co'>#Example 2: Generates a square lattice design with 3 full blocks, 7 units per iBlock,</span>
+<span class='co'># 7 IBlocks for a square number of treatmens of 49 in one location.</span>
+<span class='co'># In this case, we show how to use the option data.</span>
+<span class='va'>treatments</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span><span class='op'>(</span><span class='st'>"G"</span>, <span class='fl'>1</span><span class='op'>:</span><span class='fl'>49</span>, sep <span class='op'>=</span> <span class='st'>""</span><span class='op'>)</span>
+<span class='va'>treatment_list</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>TREATMENT <span class='op'>=</span> <span class='va'>treatments</span><span class='op'>)</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>treatment_list</span><span class='op'>)</span> 
+</div><div class='output co'>#&gt;   TREATMENT
+#&gt; 1        G1
+#&gt; 2        G2
+#&gt; 3        G3
+#&gt; 4        G4
+#&gt; 5        G5
+#&gt; 6        G6</div><div class='input'><span class='va'>squareLattice2</span> <span class='op'>&lt;-</span> <span class='fu'>square_lattice</span><span class='op'>(</span>t <span class='op'>=</span> <span class='fl'>49</span>, k <span class='op'>=</span> <span class='fl'>7</span>, r <span class='op'>=</span> <span class='fl'>3</span>, l <span class='op'>=</span> <span class='fl'>1</span>, 
                                  plotNumber <span class='op'>=</span> <span class='fl'>1001</span>,
                                  locationNames <span class='op'>=</span> <span class='st'>"CASSELTON"</span>, 
-                                 seed <span class='op'>=</span> <span class='fl'>1986</span><span class='op'>)</span>
+                                 seed <span class='op'>=</span> <span class='fl'>1986</span>,
+                                 data <span class='op'>=</span> <span class='va'>treatment_list</span><span class='op'>)</span>
 <span class='va'>squareLattice2</span><span class='op'>$</span><span class='va'>infoDesign</span>
 </div><div class='output co'>#&gt; $Reps
 #&gt; [1] 3
 #&gt; 
-#&gt; $iBlocks
-#&gt; [1] 10
+#&gt; $IBlocks
+#&gt; [1] 7
 #&gt; 
 #&gt; $NumberTreatments
-#&gt; [1] 100
+#&gt; [1] 49
 #&gt; 
 #&gt; $NumberLocations
 #&gt; [1] 1
@@ -240,21 +256,21 @@ Factorial and Unstructured Treatment Sets.</p>
 #&gt; [1] 1986
 #&gt; 
 #&gt; $lambda
-#&gt; [1] 0.2727273
+#&gt; [1] 0.375
 #&gt; </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>squareLattice2</span><span class='op'>$</span><span class='va'>fieldBook</span>,<span class='fl'>12</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;    ID  LOCATION PLOT REP IBLOCK UNIT ENTRY
-#&gt; 1   1 CASSELTON 1001   1      1    1    83
-#&gt; 2   2 CASSELTON 1002   1      1    2    53
-#&gt; 3   3 CASSELTON 1003   1      1    3    73
-#&gt; 4   4 CASSELTON 1004   1      1    4    33
-#&gt; 5   5 CASSELTON 1005   1      1    5    13
-#&gt; 6   6 CASSELTON 1006   1      1    6    63
-#&gt; 7   7 CASSELTON 1007   1      1    7     3
-#&gt; 8   8 CASSELTON 1008   1      1    8    23
-#&gt; 9   9 CASSELTON 1009   1      1    9    43
-#&gt; 10 10 CASSELTON 1010   1      1   10    93
-#&gt; 11 11 CASSELTON 1011   1      2    1    65
-#&gt; 12 12 CASSELTON 1012   1      2    2    95</div><div class='input'>
+</div><div class='output co'>#&gt;    ID  LOCATION PLOT REP IBLOCK UNIT TREATMENT
+#&gt; 1   1 CASSELTON 1001   1      1    1       G46
+#&gt; 2   2 CASSELTON 1002   1      1    2        G4
+#&gt; 3   3 CASSELTON 1003   1      1    3       G18
+#&gt; 4   4 CASSELTON 1004   1      1    4       G32
+#&gt; 5   5 CASSELTON 1005   1      1    5       G39
+#&gt; 6   6 CASSELTON 1006   1      1    6       G11
+#&gt; 7   7 CASSELTON 1007   1      1    7       G25
+#&gt; 8   8 CASSELTON 1008   1      2    1       G19
+#&gt; 9   9 CASSELTON 1009   1      2    2       G47
+#&gt; 10 10 CASSELTON 1010   1      2    3        G5
+#&gt; 11 11 CASSELTON 1011   1      2    4       G26
+#&gt; 12 12 CASSELTON 1012   1      2    5       G33</div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -267,7 +283,7 @@ Factorial and Unstructured Treatment Sets.</p>
 
       <footer>
       <div class="copyright">
-  <p>Developed by Didier Murillo.</p>
+  <p>Developed by Didier Murillo, Salvador Gezan.</p>
 </div>
 
 <div class="pkgdown">

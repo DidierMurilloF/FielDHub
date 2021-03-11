@@ -8,19 +8,19 @@ seriePlot.numbers <- function(plot.number = NULL, reps = NULL, l = NULL, t = NUL
       plot.number <- plot.number[1:l]
     }else if (length(plot.number) < l) {
       plot.number <- rep(plot.number[1], l)
-      warning("Length of plot numbers is lower than number of locations. Only the first is used.")
     }else if (length(plot.number) > l) {
       plot.number <- plot.number[1:l]
-      warning("Length of plot numbers is greater than number of locations.")
     }
   }else {
-    stop ("Please, input the plot number(s).")
+    plot.number <- seq(1001, 1000*(l+1), 1000)
+    warning("'plotNumber' was set up to its default values for each site.")
   }
   plot.numbs <- list()
+  #if (reps == 1) reps <- 2
   if (overlap == FALSE) {
     for (k in 1:l) {
       if (plot.number[k] == 1) {
-        plot.numbs[[k]] <- seq(1, (101)*(reps-1), 100)
+        plot.numbs[[k]] <- seq(1, (100)*(reps), 100)
       }else if (plot.number[k] > 1 && plot.number[k] < 1000) {
         plot.numbs[[k]] <- seq(plot.number[k], (101)*reps, 100)
       }else if (plot.number[k] >= 1000 && plot.number[k] < 10000) {
@@ -36,7 +36,9 @@ seriePlot.numbers <- function(plot.number = NULL, reps = NULL, l = NULL, t = NUL
       if (plot.number[k] == 1) {
         plot.numbs[[k]] <- seq(1, t*reps, t)
       }else if (plot.number[k] > 1 && plot.number[k] < 1000) {
-        plot.numbs[[k]] <- seq(plot.number[k], t*reps, t)
+        if (reps == 1) B <- 1 else B <- 0
+        if (t == 100) R <- 1 else R <- 0
+        plot.numbs[[k]] <- seq(plot.number[k], (t+R)*reps + B, t)
       }else if (plot.number[k] >= 1000 && plot.number[k] < 10000) {
         plot.numbs[[k]] <- seq(plot.number[k], plot.number[k]+(t*(reps-1)), t)
       }else if (plot.number[k] >= 10000 && plot.number[k] < 100000) {
