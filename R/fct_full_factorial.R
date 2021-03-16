@@ -7,7 +7,7 @@
 #' @param l Number of locations. By default \code{l = 1}.
 #' @param type Option for CRD or RCBD designs. Values are \code{type = 1} (CRD) or \code{type = 2} (RCBD). By default \code{type = 2}. 
 #' @param plotNumber Numeric vector with the starting plot number for each location. By default \code{plotNumber = 101}.
-#' @param continuous Logical fpr plot number continuous or not. By default \code{continuous = FALSE}.
+#' @param continuous Logical for plot number continuous or not. By default \code{continuous = FALSE}.
 #' @param planter Option for \code{serpentine} or \code{cartesian} plot arrangement. By default  \code{planter = 'serpentine'}.
 #' @param seed (optional) Real number that specifies the starting seed to obtain reproducible designs.
 #' @param locationNames (optional) Names for each location.

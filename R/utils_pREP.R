@@ -19,15 +19,14 @@ pREP <- function(nrows = NULL, ncols = NULL, RepChecks = NULL, checks = NULL, Fi
     lines <- nrows*ncols - sum(RepChecks)
     checksEntries <- checks
     checks <- length(checksEntries)
-    NAME <- c(paste(rep("Check", checks), 1:checks),
-              paste(rep("gen", lines), (checksEntries[checks] + 1):(checksEntries[1] + lines + checks - 1)))
+    NAME <- c(paste(rep("CH", checks), 1:checks, sep = ""),
+              paste(rep("G", lines), (checksEntries[checks] + 1):(checksEntries[1] + lines + checks - 1), sep = ""))
     reps.checks <- RepChecks
     REPS <- c(reps.checks, rep(1, lines))
     gen.list <- data.frame(list(ENTRY = checksEntries[1]:(checksEntries[1] + lines + checks - 1),	NAME = NAME,	REPS = REPS))
     gen.list.O <- gen.list[order(gen.list$REPS, decreasing = TRUE), ]
     my_REPS <- subset(gen.list.O, REPS > 1)
     my_GENS <- subset(gen.list.O, REPS == 1)
-    
   }
   
   ######################some review on the data entry#####################################

@@ -19,7 +19,7 @@ RCBD_augmented(
 )
 }
 \arguments{
-\item{lines}{Treatments, number of new lines for test.}
+\item{lines}{Treatments, number of lines for test.}
 
 \item{checks}{Number of checks per augmented block.}
 
@@ -54,7 +54,7 @@ Data frame with the ARCBD field book.
 It randomly generates an augmented randomized complete block design across locations (ARCBD).
 }
 \examples{
-#Example 1: Generates an ARCBD with 6 blocks, 3 checks for each, and 50 treatments in two locations.
+# Example 1: Generates an ARCBD with 6 blocks, 3 checks for each, and 50 treatments in two locations.
 ARCBD1 <- RCBD_augmented(lines = 50, checks = 3, b = 6, l = 2, 
                          planter = "cartesian", 
                          plotNumber = c(1,1001),
@@ -66,7 +66,7 @@ ARCBD1$exptNames
 ARCBD1$plotNumber
 head(ARCBD1$fieldbook, 12)
                    
-#Example 2: Generates an ARCBD with 17 blocks, 4 checks for each, and 350 treatments in 3 locations.
+# Example 2: Generates an ARCBD with 17 blocks, 4 checks for each, and 350 treatments in 3 locations.
 # In this case, we show how to use the option data.
 checks <- 4;
 list_checks <- paste("CH", 1:checks, sep = "")

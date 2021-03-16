@@ -6,7 +6,7 @@
 #'
 #' @param t Number of  treatments.
 #' @param r Number of full blocks (or resolvable replicates) (also number of replicates per treatment).
-#' @param k Size of incomplete blocks (number of unites per incomplete block). 
+#' @param k Size of incomplete blocks (number of units per incomplete block). 
 #' @param l Number of locations. By default \code{l = 1}.
 #' @param plotNumber Numeric vector with the starting plot number for each location. By default \code{plotNumber = 101}.
 #' @param locationNames (optional) String with names for each of the \code{l} locations.
@@ -28,7 +28,7 @@
 #'
 #' @examples
 #' # Example 1: Generates an alpha design with 7 full blocks and 15 treatments.
-#' # Size of iBlocks k = 3.
+#' # Size of IBlocks k = 3.
 #' alphalattice1 <- alpha_lattice(t = 15, k = 3, r = 7, 
 #'                                l = 1, 
 #'                                plotNumber = 101, 
@@ -38,7 +38,7 @@
 #' head(alphalattice1$fieldBook, 10)
 #' 
 #' # Example 2: Generates an alpha design with 5 full blocks and 50 treatment.
-#' # Size of iBlocks k = 10. 
+#' # Size of IBlocks k = 10. 
 #' # In this case, we show how to use the option data.
 #' treatments <- paste("G-", 1:50, sep = "")
 #' treatment_list <- data.frame(list(TREATMENT = treatments))

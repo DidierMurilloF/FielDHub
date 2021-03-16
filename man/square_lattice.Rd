@@ -18,7 +18,7 @@ square_lattice(
 \arguments{
 \item{t}{Number of  treatments.}
 
-\item{k}{Size of incomplete blocks (number of unites per incomplete block).}
+\item{k}{Size of incomplete blocks (number of units per incomplete block).}
 
 \item{r}{Number of blocks (full resolvable replicates).}
 
@@ -41,7 +41,7 @@ Data frame with the square lattice design field book.
 It randomly generates a square lattice design across locations.
 }
 \examples{
-#Example 1: Generates a square lattice design with 5 full blocks, 8 units per iBlock,
+# Example 1: Generates a square lattice design with 5 full blocks, 8 units per IBlock,
 # 8 IBlocks for a square number of treatmens of 64 in two locations.
 squareLattice1 <- square_lattice(t = 64, k = 8, r = 5, l = 2, 
                                  plotNumber = c(1001, 2001),
@@ -50,7 +50,7 @@ squareLattice1 <- square_lattice(t = 64, k = 8, r = 5, l = 2,
 squareLattice1$infoDesign
 head(squareLattice1$fieldBook,12)
 
-#Example 2: Generates a square lattice design with 3 full blocks, 7 units per iBlock,
+# Example 2: Generates a square lattice design with 3 full blocks, 7 units per IBlock,
 # 7 IBlocks for a square number of treatmens of 49 in one location.
 # In this case, we show how to use the option data.
 treatments <- paste("G", 1:49, sep = "")

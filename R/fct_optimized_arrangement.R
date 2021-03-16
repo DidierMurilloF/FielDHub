@@ -28,8 +28,7 @@
 #' @references
 #' Clarke, G. P. Y., & Stefanova, K. T. (2011). Optimal design for early-generation plant
 #' breeding trials with unreplicated or partially replicated test lines. Australian & New
-#' Zealand Journal of Statistics, 53(4), 461–480. 
-#' https://doi.org/https://doi.org/10.1111/j.1467-842X.2011.00642.x
+#' Zealand Journal of Statistics, 53(4), 461–480.
 #'
 #' @examples
 #' # Example 1: Generates a spatial unreplicated optimized arrangement design in one location
@@ -218,8 +217,12 @@ optimized_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,  amo
   
   fieldBook <- as.data.frame(export_spat()$final_expt)
   fieldBook <- fieldBook[,-11]
-  fieldBook <- fieldBook[, c(2,3,1,4:10)]
-  rownames(fieldBook) <- 1:nrow(fieldBook)
+  ID <- 1:nrow(fieldBook)
+  fieldBook <- fieldBook[, c(6,7,9,4,2,3,5,1,10)]
+  fieldBook <- cbind(ID, fieldBook)
+  colnames(fieldBook)[10] <- "TREATMENT"
+  # fieldBook <- fieldBook[, c(2,3,1,4:10)]
+  # rownames(fieldBook) <- 1:nrow(fieldBook)
   layoutR = prep$field.map
   rownames(layoutR) <- paste("Row", nrow(layoutR):1, sep = "")
   colnames(layoutR) <- paste("Col", 1:ncol(layoutR), sep = "")

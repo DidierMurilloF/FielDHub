@@ -18,7 +18,7 @@ rectangular_lattice(
 \arguments{
 \item{t}{Number of  treatments.}
 
-\item{k}{Size of incomplete blocks (number of unites per incomplete block).}
+\item{k}{Size of incomplete blocks (number of units per incomplete block).}
 
 \item{r}{Number of blocks (full resolvable replicates).}
 
@@ -41,7 +41,7 @@ Data frame with the rectangular lattice design field book.
 It randomly generates a rectangular lattice design across locations.
 }
 \examples{
-# Example 1: Generates a rectangular lattice design with 6 full blocks, 4 units per iblock (k)
+# Example 1: Generates a rectangular lattice design with 6 full blocks, 4 units per IBlock (k)
 # and 20 treatments in one location.
 rectangularLattice1 <- rectangular_lattice(t = 20, k = 4, r = 6, l = 1, 
                                            plotNumber = 101,
@@ -50,7 +50,7 @@ rectangularLattice1 <- rectangular_lattice(t = 20, k = 4, r = 6, l = 1,
 rectangularLattice1$infoDesign
 head(rectangularLattice1$fieldBook,12)
 
-# Example 2: Generates a rectangular lattice design with 5 full blocks, 7 units per iblock (k)
+# Example 2: Generates a rectangular lattice design with 5 full blocks, 7 units per IBlock (k)
 # and 56 treatments across 2 locations.
 # In this case, we show how to use the option data.
 treatments <- paste("ND-", 1:56, sep = "")

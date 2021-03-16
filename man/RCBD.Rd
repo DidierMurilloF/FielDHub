@@ -17,7 +17,7 @@ RCBD(
 )
 }
 \arguments{
-\item{t}{an integer number with total number of treatments or a vector of dimension t with labels.}
+\item{t}{An integer number with total number of treatments or a vector of dimension t with labels.}
 
 \item{reps}{Number of replicates (full blocks) of each treatment.}
 
@@ -40,7 +40,7 @@ A list with information on the design parameters.
 
 RCBD layout for each location.
 
-plot number layout for each location.
+Plot number layout for each location.
 
 Data frame with the RCBD field book.
 }

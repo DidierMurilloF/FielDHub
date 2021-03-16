@@ -28,7 +28,7 @@ Authors@R:
              email = "richard.horsley@ndsu.edu"))
 Description: FielDHub is an R Shiny design of experiments (DOE) app that aids in the creation of 
  traditional, unreplicated, augmented and partially-replicated designs applied to agriculture, 
- plant breeding, forestry, animal and biological sciences..
+ plant breeding, forestry, animal and biological sciences.
 License: MIT + file LICENSE
 Imports: 
     config,

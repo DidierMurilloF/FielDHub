@@ -3,7 +3,7 @@
 #' 
 #' @description It randomly generates a randomized complete block design (RCBD) across locations.
 #'
-#' @param t an integer number with total number of treatments or a vector of dimension t with labels.
+#' @param t An integer number with total number of treatments or a vector of dimension t with labels.
 #' @param reps Number of replicates (full blocks) of each treatment.
 #' @param l Number of locations. By default \code{l = 1}.
 #' @param plotNumber Numeric vector with the starting plot number for each location. By default \code{plotNumber = 101}.
@@ -17,7 +17,7 @@
 #' 
 #' @return A list with information on the design parameters.
 #' @return RCBD layout for each location.
-#' @return plot number layout for each location.
+#' @return Plot number layout for each location.
 #' @return Data frame with the RCBD field book.
 #' 
 #'

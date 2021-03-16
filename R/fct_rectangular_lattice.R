@@ -4,7 +4,7 @@
 #'
 #' @param t Number of  treatments.
 #' @param r Number of blocks (full resolvable replicates).
-#' @param k Size of incomplete blocks (number of unites per incomplete block). 
+#' @param k Size of incomplete blocks (number of units per incomplete block). 
 #' @param l Number of locations. By default \code{l = 1}.
 #' @param plotNumber Numeric vector with the starting plot number for each location. By default \code{plotNumber = 101}.
 #' @param seed (optional) Real number that specifies the starting seed to obtain reproducible designs.
@@ -22,7 +22,7 @@
 #' unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign
 #' 
 #' @examples
-#' # Example 1: Generates a rectangular lattice design with 6 full blocks, 4 units per iblock (k)
+#' # Example 1: Generates a rectangular lattice design with 6 full blocks, 4 units per IBlock (k)
 #' # and 20 treatments in one location.
 #' rectangularLattice1 <- rectangular_lattice(t = 20, k = 4, r = 6, l = 1, 
 #'                                            plotNumber = 101,
@@ -31,7 +31,7 @@
 #' rectangularLattice1$infoDesign
 #' head(rectangularLattice1$fieldBook,12)
 #' 
-#' # Example 2: Generates a rectangular lattice design with 5 full blocks, 7 units per iblock (k)
+#' # Example 2: Generates a rectangular lattice design with 5 full blocks, 7 units per IBlock (k)
 #' # and 56 treatments across 2 locations.
 #' # In this case, we show how to use the option data.
 #' treatments <- paste("ND-", 1:56, sep = "")

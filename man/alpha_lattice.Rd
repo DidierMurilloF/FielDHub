@@ -18,7 +18,7 @@ alpha_lattice(
 \arguments{
 \item{t}{Number of  treatments.}
 
-\item{k}{Size of incomplete blocks (number of unites per incomplete block).}
+\item{k}{Size of incomplete blocks (number of units per incomplete block).}
 
 \item{r}{Number of full blocks (or resolvable replicates) (also number of replicates per treatment).}
 
@@ -42,7 +42,7 @@ Randomly generates an alpha design like \code{alpha(0,1)} across multiple locati
 }
 \examples{
 # Example 1: Generates an alpha design with 7 full blocks and 15 treatments.
-# Size of iBlocks k = 3.
+# Size of IBlocks k = 3.
 alphalattice1 <- alpha_lattice(t = 15, k = 3, r = 7, 
                                l = 1, 
                                plotNumber = 101, 
@@ -52,7 +52,7 @@ alphalattice1$infoDesign
 head(alphalattice1$fieldBook, 10)
 
 # Example 2: Generates an alpha design with 5 full blocks and 50 treatment.
-# Size of iBlocks k = 10. 
+# Size of IBlocks k = 10. 
 # In this case, we show how to use the option data.
 treatments <- paste("G-", 1:50, sep = "")
 treatment_list <- data.frame(list(TREATMENT = treatments))

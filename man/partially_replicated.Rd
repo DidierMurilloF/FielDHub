@@ -76,7 +76,7 @@ head(SpatpREP1$fieldBook,12)
 # genotypes in a field with dimensions 30 rows x 20 cols. Note that there 384 genotypes 
 # unreplicated (only one time), 108 genotypes replicated two times. 
 # In this case we don't have check plots.
-# We are going to show how to should look the data input for this design.
+# As example, we set up the data option with the entries list.
 NAME <- paste("G", 1:492, sep = "")
 repGens = c(108, 384);repUnits = c(2,1)
 REPS <- rep(repUnits, repGens)

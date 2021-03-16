@@ -100,6 +100,5 @@ head(OptimAd2$fieldBook,12)
 \references{
 Clarke, G. P. Y., & Stefanova, K. T. (2011). Optimal design for early-generation plant
 breeding trials with unreplicated or partially replicated test lines. Australian & New
-Zealand Journal of Statistics, 53(4), 461–480. 
-https://doi.org/https://doi.org/10.1111/j.1467-842X.2011.00642.x
+Zealand Journal of Statistics, 53(4), 461–480.
 }

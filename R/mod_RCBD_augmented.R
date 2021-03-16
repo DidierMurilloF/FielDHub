@@ -184,7 +184,6 @@ mod_RCBD_augmented_server <- function(id) {
       b <- as.numeric(input$blocks_a_rcbd)
       seed.number <- as.numeric(input$myseed_a_rcbd)
       planter <- input$planter_mov1_a_rcbd
-      #plot.number <- as.numeric(input$plot_start_a_rcbd)
       plot.number <- as.numeric(unlist(strsplit(input$plot_start_a_rcbd, ",")))
       loc <- as.vector(unlist(strsplit(input$Location_a_rcbd, ",")))
       l.arcbd <- as.numeric(input$l.arcbd)
@@ -216,7 +215,6 @@ mod_RCBD_augmented_server <- function(id) {
        colores <- c('royalblue','salmon', 'green', 'orange','orchid', 'slategrey',
                     'greenyellow', 'blueviolet','deepskyblue','gold','blue', 'red')
        s <- unlist(rcbd_augmented_reactive()$entriesTreatments)
-       #rownames(df) <- paste("Block", rep(b:1, repsExpt))
        B <- paste("Block", rep(b:1, repsExpt), sep = "")
        E <- paste("E", rep(repsExpt:1, each = b), sep = "")
        rownames(df) <- paste(B,E)
@@ -248,26 +246,16 @@ mod_RCBD_augmented_server <- function(id) {
        req(input$blocks_a_rcbd)
        req(rcbd_augmented_reactive()$layoutRandom)
        req(input$expt_name_a_rcbd)
-       # r_map <- rcbd_augmented_reactive()$layoutRandom
-       # ncols <- ncol(r_map)
        b <- as.numeric(input$blocks_a_rcbd)
        repsExpt <- as.numeric(input$nExpt_a_rcbd)
        nameexpt <- as.vector(unlist(strsplit(input$expt_name_a_rcbd, ",")))
        if (length(nameexpt) != 0) {
          Name_expt <- nameexpt
        }else Name_expt <- paste(rep('Expt', repsExpt), 1:repsExpt, sep = "")
-       # infoDesign <- rcbd_augmented_reactive()$infoDesign
-       # Fillers <- as.numeric(infoDesign$Fillers)
-       # if (Fillers > 0) {
-       #   my_names <- split_name_reactive_a()$my_names_Filles
-       # }else  my_names <- split_name_reactive_a()$my_names
-       
-       #df <- as.data.frame(my_names)
        df <-  as.data.frame(rcbd_augmented_reactive()$exptNames)
        B <- paste("Block", rep(b:1, repsExpt), sep = "")
        E <- paste("E", rep(repsExpt:1, each = b), sep = "")
        rownames(df) <- paste(B,E)
-       #rownames(df) <- paste("Block", rep(b:1, repsExpt))
        colnames(df) <- paste("V", 1:ncol(df), sep = "")
        options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                  scrollX = TRUE, scrollY = scrollY(b)))
@@ -275,30 +263,7 @@ mod_RCBD_augmented_server <- function(id) {
          DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
                          backgroundColor = DT::styleEqual(Name_expt, rep(c('yellow'), length(Name_expt))))
      })
-     
-     # plot_number_reactive_a <- reactive({
-     #   req(input$blocks_a_rcbd)
-     #   req(input$plot_start_a_rcbd)
-     #   req(split_name_reactive_a()$my_names)
-     #   req(input$planter_mov1_a_rcbd)
-     # 
-     #   datos_name <- split_name_reactive_a()$my_names
-     #   b <- as.numeric(input$blocks_a_rcbd)
-     #   datos_name <- as.matrix(datos_name) 
-     #   movement_planter <- input$planter_mov1_a_rcbd
-     #   infoDesign <- rcbd_augmented_reactive()$infoDesign
-     #   Fillers <- as.numeric(infoDesign$Fillers)
-     #   plot_n_start <- as.numeric(as.vector(unlist(strsplit(input$plot_start_a_rcbd, ",")))) 
-     #   planter <- input$planter_mov1_a_rcbd
-     #   
-     #   if (input$expt_name_a_rcbd != "") { 
-     #     Name_expt <- input$expt_name_a_rcbd  
-     #   }else Name_expt = paste0(rep("ARCBD", times = 1), 1)
-     #   
-     #   plotEXPT <- ARCBD_plot_number(plot.number = plot_n_start[1], planter = planter, b = b, name.expt = Name_expt,
-     #                                 Fillers = Fillers, nameEXPT = datos_name)
-     # })
-     
+
      output$dt4_a_rcbd <- DT::renderDT({
        req(rcbd_augmented_reactive()$infoDesign)
        req(input$blocks_a_rcbd)
@@ -360,7 +325,6 @@ mod_RCBD_augmented_server <- function(id) {
          loc <- input$Location_a_rcbd
          loc <- paste(loc, "_", "ARCBD_", sep = "")
          paste(loc, Sys.Date(), ".csv", sep = "")
-         #paste("RCBD_Augmented", ".csv", sep = "")
        },
        content = function(file) {
          df <- as.data.frame(rcbd_augmented_reactive()$fieldbook)
@@ -370,9 +334,3 @@ mod_RCBD_augmented_server <- function(id) {
  
   })
 }
-    
-## To be copied in the UI
-# mod_RCBD_augmented_ui("RCBD_augmented_ui_1")
-    
-## To be copied in the server
-# mod_RCBD_augmented_server("RCBD_augmented_ui_1")

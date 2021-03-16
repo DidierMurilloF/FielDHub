@@ -7,8 +7,8 @@
 #' @param plotNumber Starting plot number. By default \code{plotNumber = 101}.
 #' @param planter Option for \code{serpentine} or \code{cartesian} arrangement. By default \code{planter = 'serpentine'}.
 #' @param seed (optional) Real number that specifies the starting seed to obtain reproducible designs.
-#' @param locationNames Name for each location.
-#' @param data optional) Data frame with label list of treatments.
+#' @param locationNames (optional) Name for the location.
+#' @param data (optional) Data frame with label list of treatments.
 #' 
 #' @importFrom stats runif na.omit
 #'

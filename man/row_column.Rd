@@ -41,7 +41,7 @@ Data frame with the RowColD field book.
 }
 \description{
 It randomly generates a resolvable row-column designs (RowColD). 
-Note that design optimizatin is only done at the level of rows and not columns; 
+Note that design optimization is only done at the level of rows and not columns; 
 hence, design is suboptimal. The randomization can be done across locations.
 }
 \examples{
@@ -56,7 +56,7 @@ rowcold1$infoDesign
 rowcold1$resolvableBlocks
 head(rowcold1$fieldBook,12)
 
-#Example 2: Generates a row-column design with 3 full blocks and 30 treatments
+# Example 2: Generates a row-column design with 3 full blocks and 30 treatments
 # and 5 rows, for two locations.
 # In this case, we show how to use the option data.
 treatments <- paste("ND-", 1:30, sep = "")

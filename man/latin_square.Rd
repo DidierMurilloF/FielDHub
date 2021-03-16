@@ -25,9 +25,9 @@ latin_square(
 
 \item{seed}{(optional) Real number that specifies the starting seed to obtain reproducible designs.}
 
-\item{locationNames}{Name for each location.}
+\item{locationNames}{(optional) Name for the location.}
 
-\item{data}{optional) Data frame with label list of treatments.}
+\item{data}{(optional) Data frame with label list of treatments.}
 }
 \value{
 A list with information on the design parameters.

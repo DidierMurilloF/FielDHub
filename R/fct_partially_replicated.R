@@ -51,7 +51,7 @@
 #' # genotypes in a field with dimensions 30 rows x 20 cols. Note that there 384 genotypes 
 #' # unreplicated (only one time), 108 genotypes replicated two times. 
 #' # In this case we don't have check plots.
-#' # We are going to show how to should look the data input for this design.
+#' # As example, we set up the data option with the entries list.
 #' NAME <- paste("G", 1:492, sep = "")
 #' repGens = c(108, 384);repUnits = c(2,1)
 #' REPS <- rep(repUnits, repGens)
@@ -178,8 +178,10 @@ partially_replicated <- function(nrows = NULL, ncols = NULL, repGens = NULL, rep
   
   fieldBook <- as.data.frame(export_spat()$final_expt)
   fieldBook <- fieldBook[,-11]
-  fieldBook <- fieldBook[, c(2,3,1,4:10)]
-  rownames(fieldBook) <- 1:nrow(fieldBook)
+  ID <- 1:nrow(fieldBook)
+  fieldBook <- fieldBook[, c(6,7,9,4,2,3,5,1,10)]
+  fieldBook <- cbind(ID, fieldBook)
+  colnames(fieldBook)[10] <- "TREATMENT"
   layoutR = prep$field.map
   rownames(layoutR) <- paste("Row", nrow(layoutR):1, sep = "")
   colnames(layoutR) <- paste("Col", 1:ncol(layoutR), sep = "")

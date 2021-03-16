@@ -5,7 +5,7 @@
 #'
 #' @param t Number of  treatments.
 #' @param r Number of full blocks (or resolvable replicates) (also number of replicates per treatment).
-#' @param k Size of incomplete blocks (number of unites per incomplete block). 
+#' @param k Size of incomplete blocks (number of units per incomplete block). 
 #' @param l Number of locations. By default \code{l = 1}.
 #' @param plotNumber Numeric vector with the starting plot number for each location. By default \code{plotNumber = 101}.
 #' @param seed (optional) Real number that specifies the starting seed to obtain reproducible designs.
@@ -24,7 +24,7 @@
 #'
 #' @examples
 #' # Example 1: Generates a resolvable IBD of characteristics (t,k,r) = (12,4,2).
-#' #1-resolvable IBDs
+#' # 1-resolvable IBDs
 #' ibd1 <- incomplete_blocks(t = 12, 
 #'                           k = 4, 
 #'                           r = 2, 

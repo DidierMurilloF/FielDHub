@@ -38,9 +38,9 @@ By default  \code{planter = 'serpentine'}.}
 \item{plotNumber}{Numeric vector with the starting plot number for each location. 
 By default \code{plotNumber = 101}.}
 
-\item{kindExpt}{Type of diagonal design, with options Single Un-replicated Diagonal Checks \code{'SUDC'} and 
-Decision Blocks Un-replicated Design with Diagonal Checks \code{'DBUDC'}. 
-By default \code{kindExpt = 'SUDC'}.}
+\item{kindExpt}{Type of diagonal design, with single options: Single Un-replicated Diagonal Checks
+\code{'SUDC'} and Decision Blocks Un-replicated Design with Diagonal Checks \code{'DBUDC'} 
+for multiple experiments. By default \code{kindExpt = 'SUDC'}.}
 
 \item{splitBy}{Option to split the field when \code{kindExpt = 'DBUDC'} is selected. 
 By default \code{splitBy = 'row'}.}
@@ -54,7 +54,7 @@ If \code{kindExpt = 'DBUDC'} and data is null, \code{blocks} are mandatory.}
 
 \item{locationNames}{(optional) Names each location.}
 
-\item{data}{(optional) Data frame with 3 columns: \code{ENTRY | NAME | BLOCK} or only 2 
+\item{data}{(optional) Data frame with 2 columns: \code{ENTRY | NAME | BLOCK} or only 2 
 columns \code{ENTRY | NAME} if \code{kindExpt = 'SUDC'}.}
 }
 \value{
@@ -130,6 +130,5 @@ head(spatAB$fieldBook,12)
 \references{
 Clarke, G. P. Y., & Stefanova, K. T. (2011). Optimal design for early-generation plant
 breeding trials with unreplicated or partially replicated test lines. Australian & New
-Zealand Journal of Statistics, 53(4), 461–480. 
-https://doi.org/https://doi.org/10.1111/j.1467-842X.2011.00642.x
+Zealand Journal of Statistics, 53(4), 461–480.
 }

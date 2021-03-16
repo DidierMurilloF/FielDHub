@@ -6,9 +6,9 @@
 #' @param ncols Number of columns in the field.
 #' @param lines Number of genotypes, experimental lines or treatments.
 #' @param checks Integer number of genotypes checks or a numeric vector. 
-#' @param kindExpt Type of diagonal design, with options Single Un-replicated Diagonal Checks \code{'SUDC'} and 
-#' Decision Blocks Un-replicated Design with Diagonal Checks \code{'DBUDC'}. 
-#' By default \code{kindExpt = 'SUDC'}.
+#' @param kindExpt Type of diagonal design, with single options: Single Un-replicated Diagonal Checks
+#' \code{'SUDC'} and Decision Blocks Un-replicated Design with Diagonal Checks \code{'DBUDC'} 
+#' for multiple experiments. By default \code{kindExpt = 'SUDC'}.
 #' @param planter Option for \code{serpentine} or \code{cartesian} plot arrangement. 
 #' By default  \code{planter = 'serpentine'}.
 #' @param l Number of locations or sites. By default  \code{l = 1}.
@@ -21,7 +21,7 @@
 #' If \code{kindExpt = 'DBUDC'} and data is null, \code{blocks} are mandatory.
 #' @param exptName (optional) Name of the experiment.
 #' @param locationNames (optional) Names each location.
-#' @param data (optional) Data frame with 3 columns: \code{ENTRY | NAME | BLOCK} or only 2 
+#' @param data (optional) Data frame with 2 columns: \code{ENTRY | NAME | BLOCK} or only 2 
 #' columns \code{ENTRY | NAME} if \code{kindExpt = 'SUDC'}.
 #' 
 #' 
@@ -34,8 +34,7 @@
 #' @references
 #' Clarke, G. P. Y., & Stefanova, K. T. (2011). Optimal design for early-generation plant
 #' breeding trials with unreplicated or partially replicated test lines. Australian & New
-#' Zealand Journal of Statistics, 53(4), 461–480. 
-#' https://doi.org/https://doi.org/10.1111/j.1467-842X.2011.00642.x
+#' Zealand Journal of Statistics, 53(4), 461–480.
 #'
 #'
 #' @examples

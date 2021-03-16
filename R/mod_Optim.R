@@ -338,7 +338,6 @@ mod_Optim_server <- function(id){
                                              data_file = my_data_VLOOKUP, reps = FALSE)
       final_expt_export <- as.data.frame(final_expt_export)
       final_expt_export <- final_expt_export[, -11]
-      #final_expt_export <- final_expt_export[, c(2,3,1,4:10)]
       ID <- 1:nrow(final_expt_export)
       final_expt_export <- final_expt_export[, c(6,7,9,4,2,3,5,1,10)]
       final_expt_export_F <- cbind(ID, final_expt_export)

@@ -2,7 +2,7 @@
 #' 
 #' @description It randomly generates an augmented randomized complete block design across locations (ARCBD).
 #'
-#' @param lines Treatments, number of new lines for test.
+#' @param lines Treatments, number of lines for test.
 #' @param checks Number of checks per augmented block.
 #' @param b Number of augmented blocks.
 #' @param l Number of locations. By default \code{l = 1}.
@@ -27,7 +27,7 @@
 #' Macmillan Company.
 #' 
 #' @examples
-#' #Example 1: Generates an ARCBD with 6 blocks, 3 checks for each, and 50 treatments in two locations.
+#' # Example 1: Generates an ARCBD with 6 blocks, 3 checks for each, and 50 treatments in two locations.
 #' ARCBD1 <- RCBD_augmented(lines = 50, checks = 3, b = 6, l = 2, 
 #'                          planter = "cartesian", 
 #'                          plotNumber = c(1,1001),
@@ -39,7 +39,7 @@
 #' ARCBD1$plotNumber
 #' head(ARCBD1$fieldbook, 12)
 #'                    
-#' #Example 2: Generates an ARCBD with 17 blocks, 4 checks for each, and 350 treatments in 3 locations.
+#' # Example 2: Generates an ARCBD with 17 blocks, 4 checks for each, and 350 treatments in 3 locations.
 #' # In this case, we show how to use the option data.
 #' checks <- 4;
 #' list_checks <- paste("CH", 1:checks, sep = "")
@@ -94,8 +94,8 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
     if (lines != new_lines) base::stop("Number of experimental lines do not match with data input provided.")
     lines <- new_lines
   }else {
-    NAME <- c(paste(rep("Check", checks), 1:checks),
-              paste(rep("gen", lines), (checks + 1):(lines + checks)))
+    NAME <- c(paste(rep("CH", checks), 1:checks, sep = ""),
+              paste(rep("G", lines), (checks + 1):(lines + checks), sep = ""))
     data <- data.frame(list(ENTRY = 1:(lines + checks),	NAME = NAME))
   }
   all_genotypes <- lines + checks * b

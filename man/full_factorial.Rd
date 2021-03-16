@@ -28,7 +28,7 @@ full_factorial(
 
 \item{plotNumber}{Numeric vector with the starting plot number for each location. By default \code{plotNumber = 101}.}
 
-\item{continuous}{Logical fpr plot number continuous or not. By default \code{continuous = FALSE}.}
+\item{continuous}{Logical for plot number continuous or not. By default \code{continuous = FALSE}.}
 
 \item{planter}{Option for \code{serpentine} or \code{cartesian} plot arrangement. By default  \code{planter = 'serpentine'}.}
 

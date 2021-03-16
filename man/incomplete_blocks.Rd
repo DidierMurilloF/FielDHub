@@ -18,7 +18,7 @@ incomplete_blocks(
 \arguments{
 \item{t}{Number of  treatments.}
 
-\item{k}{Size of incomplete blocks (number of unites per incomplete block).}
+\item{k}{Size of incomplete blocks (number of units per incomplete block).}
 
 \item{r}{Number of full blocks (or resolvable replicates) (also number of replicates per treatment).}
 
@@ -43,7 +43,7 @@ The randomization can be done across locations.
 }
 \examples{
 # Example 1: Generates a resolvable IBD of characteristics (t,k,r) = (12,4,2).
-#1-resolvable IBDs
+# 1-resolvable IBDs
 ibd1 <- incomplete_blocks(t = 12, 
                           k = 4, 
                           r = 2, 
