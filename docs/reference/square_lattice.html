@@ -140,7 +140,7 @@
     </tr>
     <tr>
       <th>k</th>
-      <td><p>Size of incomplete blocks (number of unites per incomplete block).</p></td>
+      <td><p>Size of incomplete blocks (number of units per incomplete block).</p></td>
     </tr>
     <tr>
       <th>r</th>
@@ -178,7 +178,7 @@
 unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='co'>#Example 1: Generates a square lattice design with 5 full blocks, 8 units per iBlock,</span>
+    <pre class="examples"><div class='input'><span class='co'># Example 1: Generates a square lattice design with 5 full blocks, 8 units per IBlock,</span>
 <span class='co'># 8 IBlocks for a square number of treatmens of 64 in two locations.</span>
 <span class='va'>squareLattice1</span> <span class='op'>&lt;-</span> <span class='fu'>square_lattice</span><span class='op'>(</span>t <span class='op'>=</span> <span class='fl'>64</span>, k <span class='op'>=</span> <span class='fl'>8</span>, r <span class='op'>=</span> <span class='fl'>5</span>, l <span class='op'>=</span> <span class='fl'>2</span>, 
                                  plotNumber <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1001</span>, <span class='fl'>2001</span><span class='op'>)</span>,
@@ -219,7 +219,7 @@ unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign</p>
 #&gt; 10 10    FARGO 1010   1      2    2    55
 #&gt; 11 11    FARGO 1011   1      2    3    54
 #&gt; 12 12    FARGO 1012   1      2    4    53</div><div class='input'>
-<span class='co'>#Example 2: Generates a square lattice design with 3 full blocks, 7 units per iBlock,</span>
+<span class='co'># Example 2: Generates a square lattice design with 3 full blocks, 7 units per IBlock,</span>
 <span class='co'># 7 IBlocks for a square number of treatmens of 49 in one location.</span>
 <span class='co'># In this case, we show how to use the option data.</span>
 <span class='va'>treatments</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span><span class='op'>(</span><span class='st'>"G"</span>, <span class='fl'>1</span><span class='op'>:</span><span class='fl'>49</span>, sep <span class='op'>=</span> <span class='st'>""</span><span class='op'>)</span>

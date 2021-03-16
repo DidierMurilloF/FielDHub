@@ -202,8 +202,7 @@ Note that design generation needs the dimension of the field (number of rows and
 
     <p>Clarke, G. P. Y., &amp; Stefanova, K. T. (2011). Optimal design for early-generation plant
 breeding trials with unreplicated or partially replicated test lines. Australian &amp; New
-Zealand Journal of Statistics, 53(4), 461–480. 
-https://doi.org/https://doi.org/10.1111/j.1467-842X.2011.00642.x</p>
+Zealand Journal of Statistics, 53(4), 461–480.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'># Example 1: Generates a spatial unreplicated optimized arrangement design in one location</span>
@@ -310,19 +309,19 @@ https://doi.org/https://doi.org/10.1111/j.1467-842X.2011.00642.x</p>
 #&gt; Row3    154   155   156   157   158   159   160
 #&gt; Row2    134   135   136   137   138   139   140
 #&gt; Row1    114   115   116   117   118   119   120</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>OptimAd1</span><span class='op'>$</span><span class='va'>fieldBook</span>,<span class='fl'>12</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;    ROW COLUMN ENTRY PLOT CHECKS  EXPT  LOCATION LOC YEAR    NAME
-#&gt; 1    1      1   185  101      0 20RW1 CASSELTON CAS 2021 gen 185
-#&gt; 2    1      2    96  102      0 20RW1 CASSELTON CAS 2021  gen 96
-#&gt; 3    1      3   104  103      0 20RW1 CASSELTON CAS 2021 gen 104
-#&gt; 4    1      4   216  104      0 20RW1 CASSELTON CAS 2021 gen 216
-#&gt; 5    1      5   215  105      0 20RW1 CASSELTON CAS 2021 gen 215
-#&gt; 6    1      6   169  106      0 20RW1 CASSELTON CAS 2021 gen 169
-#&gt; 7    1      7     2  107      1 20RW1 CASSELTON CAS 2021 Check 2
-#&gt; 8    1      8     4  108      1 20RW1 CASSELTON CAS 2021 Check 4
-#&gt; 9    1      9   226  109      0 20RW1 CASSELTON CAS 2021 gen 226
-#&gt; 10   1     10   248  110      0 20RW1 CASSELTON CAS 2021 gen 248
-#&gt; 11   1     11   126  111      0 20RW1 CASSELTON CAS 2021 gen 126
-#&gt; 12   1     12    74  112      0 20RW1 CASSELTON CAS 2021  gen 74</div><div class='input'>                  
+</div><div class='output co'>#&gt;    ID  EXPT  LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
+#&gt; 1   1 20RW1 CASSELTON 2021  101   1      1      0   185      G185
+#&gt; 2   2 20RW1 CASSELTON 2021  102   1      2      0    96       G96
+#&gt; 3   3 20RW1 CASSELTON 2021  103   1      3      0   104      G104
+#&gt; 4   4 20RW1 CASSELTON 2021  104   1      4      0   216      G216
+#&gt; 5   5 20RW1 CASSELTON 2021  105   1      5      0   215      G215
+#&gt; 6   6 20RW1 CASSELTON 2021  106   1      6      0   169      G169
+#&gt; 7   7 20RW1 CASSELTON 2021  107   1      7      1     2       CH2
+#&gt; 20  8 20RW1 CASSELTON 2021  108   1      8      1     4       CH4
+#&gt; 24  9 20RW1 CASSELTON 2021  109   1      9      0   226      G226
+#&gt; 25 10 20RW1 CASSELTON 2021  110   1     10      0   248      G248
+#&gt; 26 11 20RW1 CASSELTON 2021  111   1     11      0   126      G126
+#&gt; 27 12 20RW1 CASSELTON 2021  112   1     12      0    74       G74</div><div class='input'>                  
 <span class='co'># Example 2: Generates a spatial unreplicated optimized arrangement design in one location</span>
 <span class='co'># with 635 genotypes + 65 check plots (4 checks) for a field with dimension 20 rows x 35 cols.</span>
 <span class='co'># As example, we set up the data option with the entries list.</span>
@@ -500,19 +499,19 @@ https://doi.org/https://doi.org/10.1111/j.1467-842X.2011.00642.x</p>
 #&gt; Row3    196   197   198   199   200   201   202   203   204   205
 #&gt; Row2    145   144   143   142   141   140   139   138   137   136
 #&gt; Row1    126   127   128   129   130   131   132   133   134   135</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>OptimAd2</span><span class='op'>$</span><span class='va'>fieldBook</span>,<span class='fl'>12</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;    ROW COLUMN ENTRY PLOT CHECKS   EXPT LOCATION LOC YEAR NAME
-#&gt; 1    1      1   164  101      0 20YWA2    MINOT MNT 2021 G164
-#&gt; 2    1      2   419  102      0 20YWA2    MINOT MNT 2021 G419
-#&gt; 3    1      3   210  103      0 20YWA2    MINOT MNT 2021 G210
-#&gt; 4    1      4   605  104      0 20YWA2    MINOT MNT 2021 G605
-#&gt; 5    1      5    94  105      0 20YWA2    MINOT MNT 2021  G94
-#&gt; 6    1      6   358  106      0 20YWA2    MINOT MNT 2021 G358
-#&gt; 7    1      7   387  107      0 20YWA2    MINOT MNT 2021 G387
-#&gt; 8    1      8   552  108      0 20YWA2    MINOT MNT 2021 G552
-#&gt; 9    1      9   297  109      0 20YWA2    MINOT MNT 2021 G297
-#&gt; 10   1     10   437  110      0 20YWA2    MINOT MNT 2021 G437
-#&gt; 11   1     11   143  111      0 20YWA2    MINOT MNT 2021 G143
-#&gt; 12   1     12   352  112      0 20YWA2    MINOT MNT 2021 G352</div><div class='input'>                  
+</div><div class='output co'>#&gt;    ID   EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
+#&gt; 1   1 20YWA2    MINOT 2021  101   1      1      0   164      G164
+#&gt; 2   2 20YWA2    MINOT 2021  102   1      2      0   419      G419
+#&gt; 3   3 20YWA2    MINOT 2021  103   1      3      0   210      G210
+#&gt; 4   4 20YWA2    MINOT 2021  104   1      4      0   605      G605
+#&gt; 5   5 20YWA2    MINOT 2021  105   1      5      0    94       G94
+#&gt; 6   6 20YWA2    MINOT 2021  106   1      6      0   358      G358
+#&gt; 7   7 20YWA2    MINOT 2021  107   1      7      0   387      G387
+#&gt; 8   8 20YWA2    MINOT 2021  108   1      8      0   552      G552
+#&gt; 9   9 20YWA2    MINOT 2021  109   1      9      0   297      G297
+#&gt; 10 10 20YWA2    MINOT 2021  110   1     10      0   437      G437
+#&gt; 11 11 20YWA2    MINOT 2021  111   1     11      0   143      G143
+#&gt; 12 12 20YWA2    MINOT 2021  112   1     12      0   352      G352</div><div class='input'>                  
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
