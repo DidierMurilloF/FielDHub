@@ -139,7 +139,7 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1, type = 2, plot
     t <- nruns * reps
     z <- 1:t
     for (j in z) {
-      m1[j, 4:(4 + nt - 1)] <- unlist(strsplit(m1[j,3], " "))
+      m1[j, 4:(4 + nt - 1)] <- unlist(strsplit(as.character(m1[j,3]), " "))
       m1[j, ncol(m1)] <- paste(m1[j, 4:(4 + nt - 1)], collapse = "*")
     }
     design <- m1

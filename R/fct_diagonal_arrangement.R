@@ -184,7 +184,8 @@ diagonal_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL, check
         data_entry_UP <- na.omit(data_entry[,1:3]) 
         colnames(data_entry_UP) <- c("ENTRY", "NAME", "BLOCK")
         B <- data_entry_UP[(checks + 1):nrow(data_entry_UP),]
-        Block_levels <- as.numeric(levels(as.factor(B$BLOCK)))
+        Block_levels <- suppressWarnings(as.numeric(levels(as.factor(B$BLOCK))))
+        Block_levels <- na.omit(Block_levels)
         Blocks <- length(Block_levels)
         if (Option_NCD == TRUE) {
           data_entry1 <- data_entry_UP[(checks + 1):nrow(data_entry_UP), ]

@@ -138,8 +138,12 @@ pREP <- function(nrows = NULL, ncols = NULL, RepChecks = NULL, checks = NULL, Fi
     
   }
   entries <- list(entry.checks = entry.checks, entry.gens = entry.gens)
+  if (length(entry.gens) == 1) {
+    layout1[layout1 == 0] <- as.vector(entry.gens)
+  }else {
+    layout1[layout1 == 0] <- sample(entry.gens)
+  }
   
-  layout1[layout1 == 0] <- sample(entry.gens)
   ###################################################
   
   layout <- apply(layout1, c(1,2), as.numeric)
