@@ -1,5 +1,5 @@
 Package: FielDHub
-Title: A Shiny app for Design of Experiments in Life Sciences
+Title: A Shiny App for Design of Experiments in Life Sciences
 Version: 0.1.0
 Authors@R: 
     c(person(given = "Didier",
@@ -26,15 +26,15 @@ Authors@R:
              family = "Horsley",
              role = "ctb",
              email = "richard.horsley@ndsu.edu"))
-Description: FielDHub is an R Shiny design of experiments (DOE) app that aids in the creation of 
- traditional, unreplicated, augmented and partially-replicated designs applied to agriculture, 
+Description: A shiny design of experiments (DOE) app that aids in the creation of traditional, 
+ unreplicated, augmented and partially-replicated designs applied to agriculture, 
  plant breeding, forestry, animal and biological sciences.
+Depends: R (>= 3.6.0)
 License: MIT + file LICENSE
 Imports: 
     config,
     golem,
-    shiny,
-    processx,
+    shiny (>= 1.6.0),
     attempt,
     DT,
     glue,
