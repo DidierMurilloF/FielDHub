@@ -1,6 +1,6 @@
-#' Generates a Latin Square Design 
+#' Generates a Latin Square Design
 #'
-#' Randomly generates a latin square design of up 10 treatments. 
+#' Randomly generates a latin square design of up 10 treatments.
 #'
 #' @param t Number of treatments.
 #' @param reps Number of full resolvable squares. By default \code{reps = 1}.
@@ -9,12 +9,13 @@
 #' @param seed (optional) Real number that specifies the starting seed to obtain reproducible designs.
 #' @param locationNames (optional) Name for the location.
 #' @param data (optional) Data frame with label list of treatments.
-#' 
+#'
 #' @importFrom stats runif na.omit
 #'
-#' @return A list with information on the design parameters. 
+#' @return A list with information on the design parameters.
 #' @return Data frame with the latin square field book.
-#' 
+#'
+#' @importFrom stats setNames
 #'
 #' @references
 #' Federer, W. T. (1955). Experimental Design. Theory and Application. New York, USA. The
@@ -22,34 +23,34 @@
 #'
 #' @examples
 #' # Example 1: Generates a latin square design with 4 treatments and 2 reps.
-#' latinSq1 <- latin_square(t = 4, 
-#'                          reps = 2, 
-#'                          plotNumber = 101, 
+#' latinSq1 <- latin_square(t = 4,
+#'                          reps = 2,
+#'                          plotNumber = 101,
 #'                          planter = "cartesian",
-#'                          seed = 1980) 
-#' latinSq1$squares
-#' latinSq1$plotSquares
+#'                          seed = 1980)
+#' print(latinSq1)
+#' summary(latinSq1)
 #' head(latinSq1$fieldBook)
-#' 
+#'
 #' # Example 2: Generates a latin square design with 5 treatments and 3 reps.
 #' latin_data <- data.frame(list(ROW = paste("Period", 1:5, sep = ""),
 #'                               COLUMN = paste("Cow", 1:5, sep = ""),
 #'                               TREATMENT = paste("Diet", 1:5, sep = "")))
 #' print(latin_data)
-#' latinSq2 <- latin_square(t = NULL, 
-#'                          reps = 3, 
-#'                          plotNumber = 101, 
+#' latinSq2 <- latin_square(t = NULL,
+#'                          reps = 3,
+#'                          plotNumber = 101,
 #'                          planter = "cartesian",
-#'                          seed = 1981, 
-#'                          data = latin_data) 
+#'                          seed = 1981,
+#'                          data = latin_data)
 #' latinSq2$squares
 #' latinSq2$plotSquares
 #' head(latinSq2$fieldBook)
-#' 
+#'
 #' @export
-latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpentine", 
+latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpentine",
                          seed = NULL, locationNames = NULL, data = NULL) {
-  
+
   if (is.null(seed) || !is.numeric(seed)) seed <- runif(1, min = -50000, max = 50000)
   set.seed(seed)
   if (all(c("serpentine", "cartesian") != planter)) {
@@ -102,12 +103,13 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
   step.random <- vector(mode = "list", length = reps)
   lsd.reps <- vector(mode = "list", length = reps)
   out.ls <- vector(mode = "list", length = reps)
-  plotSquares <- vector(mode = "list", length = reps)
+  plotSquares <- setNames(vector(mode = "list", length = reps),
+                          paste0("rep", seq(1:reps))) # set names
   x <- seq(1, reps * l, reps)
   y <- seq(reps, reps * l, reps)
   for (j in 1:reps) {
     D <- plot.numbs[[l]]
-    P <- matrix(data = D[j]:(D[j] + (ls.len*ls.len) - 1), nrow = ls.len, ncol = ls.len, 
+    P <- matrix(data = D[j]:(D[j] + (ls.len*ls.len) - 1), nrow = ls.len, ncol = ls.len,
                 byrow = TRUE)
     if(planter == "serpentine") P <- serpentinelayout(P, opt = 2)
     plotSquares[[j]] <- P
@@ -155,7 +157,144 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
   }
   rownames(ls.output.order) <- 1:nrow(ls.output.order)
   latin_design <- cbind(ID = 1:nrow(ls.output.order), ls.output.order)
-  
-  return(list(squares = lsd.reps, plotSquares = plotSquares, 
-              fieldBook = latin_design))
+  lsd.reps <- setNames(lsd.reps, paste0("rep", seq(1:reps))) # set names
+  parameters <- list(
+    numberofTreatments = length(unique(ls.output$ROW)),
+    numberofRowns = length(unique(ls.output$ROW)),
+    numberofColumns =  length(unique(ls.output$COLUMN)),
+    rep = reps,
+    locationName =  locationNames,
+    seed =  seed
+  )
+  output <- list(infoDesign =  parameters, squares = lsd.reps,
+                 plotSquares = plotSquares, fieldBook = latin_design)
+  class(output) <- "FielDHub"
+  return(invisible(output))
+}
+
+#-----------------------------------------------------------------------
+# Print
+#-----------------------------------------------------------------------
+#' @rdname print.latin_square
+#' @method print latin_square
+#' @title Print an \code{FielDHub} object
+#' @usage \method{print}{latin_square}(x, n, ...)
+#' @aliases print.latin_square
+#' @description Prints information about latin square design
+#' @return an object inheriting from class \code{FielDHub}
+#' @param x an object inheriting from class
+#' @param n a single integer. If positive or zero, size for the
+#'   resulting object: number of elements for a vector (including
+#'   lists), rows for a matrix or data frame or lines for a function. If
+#'   negative, all but the n last/first number of elements of x.
+#'
+#' @param ... further arguments passed to \code{\link{head}}.
+#' @author Thiago de Paula Oliveira,
+#'   \email{thiago.paula.oliveira@@alumni.usp.br}
+#' @importFrom utils head str
+#' @examples
+#' # Example 1: Generates a latin square design with 4 treatments and 2 reps.
+#' latinSq1 <- latin_square(t = 4,
+#'                          reps = 2,
+#'                          plotNumber = 101,
+#'                          planter = "cartesian",
+#'                          seed = 1980)
+#' print(latinSq1)
+#'
+#' @export
+
+print.latin_square <- function(x, n=10, ...){
+  #---------------------------------------------------------------------
+  # Parameters
+  #---------------------------------------------------------------------
+  cat("Latin square design:", "\n\n")
+  cat("Information on the design parameters:", "\n")
+  str(x$infoDesign)
+  #---------------------------------------------------------------------
+  # Head
+  #---------------------------------------------------------------------
+  nr <- nrow(x$fieldBook)
+  nhead <- min(n, nr)
+  if (n < 0) {
+    nhead_print <- nr + n
+  }else {
+    nhead_print <- nhead
+  }
+  cat("\n",  nhead_print,
+      "First observations of the data frame with the latin_square field book:",
+      "\n")
+  print(head(x$fieldBook, n=nhead, ...))
+}
+
+#-----------------------------------------------------------------------
+# Summary
+#-----------------------------------------------------------------------
+#' @rdname summary.latin_square
+#' @method summary latin_square
+#' @title Summary an \code{latin_square} object
+#' @usage \method{summary}{latin_square}(object, ...)
+#' @aliases summary.latin_square
+#' @description Summarise information on the design parameters, and data
+#'   frame structure
+#' @return an object inheriting from class \code{summary.latin_square}
+#' @param object an object inheriting from class
+#'   \code{FielDHub}
+#'
+#' @param ... Unused, for extensibility
+#' @author Thiago de Paula Oliveira,
+#'   \email{thiago.paula.oliveira@@alumni.usp.br}
+#'
+#' @examples
+#' # Example 1: Generates a latin square design with 4 treatments and 2 reps.
+#' latinSq1 <- latin_square(t = 4,
+#'                          reps = 2,
+#'                          plotNumber = 101,
+#'                          planter = "cartesian",
+#'                          seed = 1980)
+#' summary(latinSq1)
+#'
+#'
+#' @export
+summary.latin_square <- function(object, ...) {
+  structure(object, oClass=class(object),
+            class = "summary.latin_square")
+}
+
+#-----------------------------------------------------------------------
+# Print summary
+#-----------------------------------------------------------------------
+#' @rdname print.summary.latin_square
+#' @method summary latin_square
+#' @title Print the summary of an \code{FielDHub} object
+#' @usage \method{print}{summary.latin_square}(x, ...)
+#' @aliases print.summary.latin_square
+#' @description Print summary information on the design parameters, and
+#'   data frame structure
+#' @return an object inheriting from class \code{FielDHub}
+#' @param x an object inheriting from class \code{FielDHub}
+#'
+#' @param ... Unused, for extensibility
+#' @author Thiago de Paula Oliveira,
+#'   \email{thiago.paula.oliveira@@alumni.usp.br}
+#' @importFrom utils str
+#' @importFrom dplyr glimpse
+#' @export
+print.summary.latin_square <- function(x, ...){
+  cat("Latin square design:", "\n\n")
+  #---------------------------------------------------------------------
+  cat("1. Information on the design parameters:", "\n")
+  str(x$infoDesign)
+  cat("\n")
+  #---------------------------------------------------------------------
+  cat("2. Squares:", "\n")
+  print(x$squares)
+  cat("\n")
+  #---------------------------------------------------------------------
+  cat("3. Plot squares:", "\n")
+  print(x$plotSquares)
+  cat("\n")
+  #---------------------------------------------------------------------
+  cat("4. Strcuture of the data frame with the latin_square field book:", "\n\n")
+  dplyr::glimpse(x$fieldBook)
+  #---------------------------------------------------------------------
 }

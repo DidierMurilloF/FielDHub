@@ -1,17 +1,17 @@
-#' Generates a Resolvable Incomplete Block Design 
+#' Generates a Resolvable Incomplete Block Design
 #'
-#' @description Randomly generates a resolvable incomplete block design (IBD) of characteristics (t, k, r). 
+#' @description Randomly generates a resolvable incomplete block design (IBD) of characteristics (t, k, r).
 #' The randomization can be done across locations.
 #'
 #' @param t Number of  treatments.
 #' @param r Number of full blocks (or resolvable replicates) (also number of replicates per treatment).
-#' @param k Size of incomplete blocks (number of units per incomplete block). 
+#' @param k Size of incomplete blocks (number of units per incomplete block).
 #' @param l Number of locations. By default \code{l = 1}.
 #' @param plotNumber Numeric vector with the starting plot number for each location. By default \code{plotNumber = 101}.
 #' @param seed (optional) Real number that specifies the starting seed to obtain reproducible designs.
 #' @param locationNames (optional) Names for each location.
 #' @param data (optional) Data frame with label list of treatments.
-#' 
+#'
 #' @importFrom stats runif na.omit
 #'
 #' @return A list with information on the design parameters.
@@ -25,26 +25,26 @@
 #' @examples
 #' # Example 1: Generates a resolvable IBD of characteristics (t,k,r) = (12,4,2).
 #' # 1-resolvable IBDs
-#' ibd1 <- incomplete_blocks(t = 12, 
-#'                           k = 4, 
-#'                           r = 2, 
+#' ibd1 <- incomplete_blocks(t = 12,
+#'                           k = 4,
+#'                           r = 2,
 #'                           seed = 1984)
 #' ibd1$infoDesign
 #' head(ibd1$fieldBook)
-#' 
+#'
 #' # Example 2: Generates a balanced resolvable IBD of characteristics (t,k,r) = (15,3,7).
 #' # In this case, we show how to use the option data.
 #' treatments <- paste("TX-", 1:15, sep = "")
 #' treatment_list <- data.frame(list(TREATMENT = treatments))
-#' head(treatment_list) 
+#' head(treatment_list)
 #' ibd2 <- incomplete_blocks(t = 15,
-#'                           k = 3, 
-#'                           r = 7, 
+#'                           k = 3,
+#'                           r = 7,
 #'                           seed = 1985,
-#'                           data = treatment_list) 
+#'                           data = treatment_list)
 #' ibd2$infoDesign
-#' head(ibd2$fieldBook)  
-#'              
+#' head(ibd2$fieldBook)
+#'
 #' @export
 incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101, locationNames = NULL,
                               seed = NULL, data = NULL) {
@@ -65,7 +65,7 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
       if (length(t) == 1) {
         if (t == 1 || t < 1) {
           shiny::validate('incomplete_blocks() requires more than one treatment.')
-        } 
+        }
         nt <- t
       }else if ((length(t) > 1)) {
         nt <- length(t)
@@ -74,7 +74,7 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
     }else if (is.character(t) || is.factor(t)) {
       if (length(t) == 1) {
         shiny::validate('incomplete_blocks() requires more than one treatment.')
-      } 
+      }
       nt <- length(t)
       TRT <- t
       lookup <- TRUE
@@ -106,10 +106,10 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
   if (is.null(plotNumber) || length(plotNumber) != l) {
     if (length(plotNumber) != l || is.null(plotNumber)) plotNumber <- seq(1001, 1000*(l+1), 1000)
     warning("Since plotNumber was missing, it was set up to default values.")
-  } 
+  }
   if (k >= nt) shiny::validate('incomplete_blocks() requires that k < t.')
   if(is.null(locationNames) || length(locationNames) != l) locationNames <- 1:l
-  # nrep = r / ntrt = t / nunits = k / t*r/k = b 
+  # nrep = r / ntrt = t / nunits = k / t*r/k = b
   nincblock <- nt*r/k
   N <- nt * r
   if (k * nincblock != N) {
@@ -118,7 +118,7 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
   if (nt %% k != 0) {
     shiny::validate('Number of treatments can not be fully distributed over the specified incomplete block specification.')
   }
-  
+
   ibd_plots <- ibd_plot_numbers(nt = nt, plot.number = plotNumber, r = r, l = l)
   b <- nt/k
   outIBD_loc <- vector(mode = "list", length = l)
@@ -143,13 +143,13 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
     OutIBD <- OutIBD[,-6]
     colnames(OutIBD) <- c("LOCATION","PLOT", "REP", "IBLOCK", "UNIT", "TREATMENT")
   }
-  
+
   ID <- 1:nrow(OutIBD)
   OutIBD_new <- cbind(ID, OutIBD)
   lambda <- r*(k - 1)/(nt - 1)
-  
-  infoDesign <- list(Reps = r, iBlocks = b, NumberTreatments = nt, NumberLocations = l, 
+
+  infoDesign <- list(Reps = r, iBlocks = b, NumberTreatments = nt, NumberLocations = l,
                      Locations = locationNames, seed = seed, lambda = lambda)
-  
+
   return(list(infoDesign = infoDesign, fieldBook = OutIBD_new))
 }

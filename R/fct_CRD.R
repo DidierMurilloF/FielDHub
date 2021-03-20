@@ -119,9 +119,9 @@ CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL,
   TRT <- levels(factor(TRT, as.character(unique(TRT))))
   parameters <- list(numberofTreatments = nt, treatments = TRT, Reps = reps, locationName = locationName,
                      seed = seed)
-  CRD <- list(infoDesign = parameters, fieldBook = design)
-  class(CRD) <- "CRD"
-  return(invisible(CRD))
+  output <- list(infoDesign = parameters, fieldBook = design)
+  class(output) <- "FielDHub"
+  return(invisible(output))
 }
 
 #-----------------------------------------------------------------------
@@ -129,15 +129,17 @@ CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL,
 #-----------------------------------------------------------------------
 #' @rdname print.CRD
 #' @method print CRD
-#' @title Print an \code{CRD} object
+#' @title Print an \code{FielDHub} object
 #' @usage \method{print}{CRD}(x, n, ...)
 #' @aliases print.CRD
 #' @description Prints information about randomization of Completely
-#'   Randomized Design (CDR)
-#' @return an object inheriting from class \code{CRD}
+#'   Randomized Design (CRD)
+#' @return an object inheriting from class \code{FielDHub}
 #' @param x an object inheriting from class
-#' @param n a single integer...
-#'   \code{\link[FielDHub]{CRD}}
+#' @param n a single integer. If positive or zero, size for the
+#'   resulting object: number of elements for a vector (including
+#'   lists), rows for a matrix or data frame or lines for a function. If
+#'   negative, all but the n last/first number of elements of x.
 #'
 #' @param ... further arguments passed to \code{\link{head}}.
 #' @author Thiago de Paula Oliveira,
@@ -186,7 +188,7 @@ print.CRD <- function(x, n=10, ...){
 #'   frame structure
 #' @return an object inheriting from class \code{summary.CRD}
 #' @param object an object inheriting from class
-#'   \code{\link[FielDHub]{CRD}}
+#'   \code{FielDHub}
 #'
 #' @param ... Unused, for extensibility
 #' @author Thiago de Paula Oliveira,
@@ -210,13 +212,13 @@ summary.CRD <- function(object, ...) {
 #-----------------------------------------------------------------------
 #' @rdname print.summary.CRD
 #' @method summary CRD
-#' @title Print the summary of an \code{CRD} object
+#' @title Print the summary of an \code{FielDHub} object
 #' @usage \method{print}{summary.CRD}(x, ...)
 #' @aliases print.summary.CRD
 #' @description Print summary information on the design parameters, and
 #'   data frame structure
-#' @return an object inheriting from class \code{CRD}
-#' @param x an object inheriting from class \code{\link[FielDHub]{CRD}}
+#' @return an object inheriting from class \code{FielDHub}
+#' @param x an object inheriting from class \code{FielDHub}
 #'
 #' @param ... Unused, for extensibility
 #' @author Thiago de Paula Oliveira,

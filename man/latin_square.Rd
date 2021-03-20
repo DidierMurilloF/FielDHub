@@ -39,13 +39,13 @@ Randomly generates a latin square design of up 10 treatments.
 }
 \examples{
 # Example 1: Generates a latin square design with 4 treatments and 2 reps.
-latinSq1 <- latin_square(t = 4, 
-                         reps = 2, 
-                         plotNumber = 101, 
+latinSq1 <- latin_square(t = 4,
+                         reps = 2,
+                         plotNumber = 101,
                          planter = "cartesian",
-                         seed = 1980) 
-latinSq1$squares
-latinSq1$plotSquares
+                         seed = 1980)
+print(latinSq1)
+summary(latinSq1)
 head(latinSq1$fieldBook)
 
 # Example 2: Generates a latin square design with 5 treatments and 3 reps.
@@ -53,12 +53,12 @@ latin_data <- data.frame(list(ROW = paste("Period", 1:5, sep = ""),
                               COLUMN = paste("Cow", 1:5, sep = ""),
                               TREATMENT = paste("Diet", 1:5, sep = "")))
 print(latin_data)
-latinSq2 <- latin_square(t = NULL, 
-                         reps = 3, 
-                         plotNumber = 101, 
+latinSq2 <- latin_square(t = NULL,
+                         reps = 3,
+                         plotNumber = 101,
                          planter = "cartesian",
-                         seed = 1981, 
-                         data = latin_data) 
+                         seed = 1981,
+                         data = latin_data)
 latinSq2$squares
 latinSq2$plotSquares
 head(latinSq2$fieldBook)

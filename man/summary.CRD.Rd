@@ -8,7 +8,7 @@
 }
 \arguments{
 \item{object}{an object inheriting from class
-\code{\link[FielDHub]{CRD}}}
+\code{FielDHub}}
 
 \item{...}{Unused, for extensibility}
 }
