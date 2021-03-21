@@ -38,15 +38,15 @@ A list with information on the design parameters.
 Data frame with the incomplete block design field book.
 }
 \description{
-Randomly generates a resolvable incomplete block design (IBD) of characteristics (t, k, r). 
+Randomly generates a resolvable incomplete block design (IBD) of characteristics (t, k, r).
 The randomization can be done across locations.
 }
 \examples{
 # Example 1: Generates a resolvable IBD of characteristics (t,k,r) = (12,4,2).
 # 1-resolvable IBDs
-ibd1 <- incomplete_blocks(t = 12, 
-                          k = 4, 
-                          r = 2, 
+ibd1 <- incomplete_blocks(t = 12,
+                          k = 4,
+                          r = 2,
                           seed = 1984)
 ibd1$infoDesign
 head(ibd1$fieldBook)
@@ -55,15 +55,15 @@ head(ibd1$fieldBook)
 # In this case, we show how to use the option data.
 treatments <- paste("TX-", 1:15, sep = "")
 treatment_list <- data.frame(list(TREATMENT = treatments))
-head(treatment_list) 
+head(treatment_list)
 ibd2 <- incomplete_blocks(t = 15,
-                          k = 3, 
-                          r = 7, 
+                          k = 3,
+                          r = 7,
                           seed = 1985,
-                          data = treatment_list) 
+                          data = treatment_list)
 ibd2$infoDesign
-head(ibd2$fieldBook)  
-             
+head(ibd2$fieldBook)
+
 }
 \references{
 Edmondson., R. N. (2021). blocksdesign: Nested and crossed block designs for factorial and

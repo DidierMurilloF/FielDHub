@@ -14,6 +14,7 @@ full_factorial(
   planter = "serpentine",
   seed = NULL,
   locationNames = NULL,
+  factorLabels = TRUE,
   data = NULL
 )
 }
@@ -24,17 +25,26 @@ full_factorial(
 
 \item{l}{Number of locations. By default \code{l = 1}.}
 
-\item{type}{Option for CRD or RCBD designs. Values are \code{type = 1} (CRD) or \code{type = 2} (RCBD). By default \code{type = 2}.}
+\item{type}{Option for CRD or RCBD designs. Values are \code{type =
+1} (CRD) or \code{type = 2} (RCBD). By default \code{type = 2}.}
 
-\item{plotNumber}{Numeric vector with the starting plot number for each location. By default \code{plotNumber = 101}.}
+\item{plotNumber}{Numeric vector with the starting plot number for
+each location. By default \code{plotNumber = 101}.}
 
-\item{continuous}{Logical for plot number continuous or not. By default \code{continuous = FALSE}.}
+\item{continuous}{Logical for plot number continuous or not. By
+default \code{continuous = FALSE}.}
 
-\item{planter}{Option for \code{serpentine} or \code{cartesian} plot arrangement. By default  \code{planter = 'serpentine'}.}
+\item{planter}{Option for \code{serpentine} or \code{cartesian} plot
+arrangement. By default \code{planter = 'serpentine'}.}
 
-\item{seed}{(optional) Real number that specifies the starting seed to obtain reproducible designs.}
+\item{seed}{(optional) Real number that specifies the starting seed
+to obtain reproducible designs.}
 
 \item{locationNames}{(optional) Names for each location.}
+
+\item{factorLabels}{(optional) If \code{TRUE} retain the levels
+labels from the original data set otherwise, numeric labels will be
+assigned. Default is \code{factorLabels =TRUE}.}
 
 \item{data}{(optional) Data frame with the labels of factors.}
 }
@@ -47,29 +57,29 @@ Data frame with the full factorial field book.
 It randomly generates a full factorial design across locations.
 }
 \examples{
-# Example 1: Generates a full factorial with 3 factors each with 2 levels. 
+# Example 1: Generates a full factorial with 3 factors each with 2 levels.
 # This in an RCBD arrangement with 3 reps.
-fullFact1 <- full_factorial(setfactors = c(2,2,2), reps = 3, l = 1, type = 2, 
-                            plotNumber = 101, 
-                            continuous = TRUE, 
-                            planter = "serpentine", 
-                            seed = 325, 
+fullFact1 <- full_factorial(setfactors = c(2,2,2), reps = 3, l = 1, type = 2,
+                            plotNumber = 101,
+                            continuous = TRUE,
+                            planter = "serpentine",
+                            seed = 325,
                             locationNames = "FARGO")
 fullFact1$infoDesign
 head(fullFact1$fieldBook,10)
 
-# Example 2: Generates a full factorial with 3 factors and each with levels: 2,3, 
-# and 2, respectively. In this case, we show how to use the option data.
+# Example 2: Generates a full factorial with 3 factors and each with levels: 2,3,
+# and 2, respectively. In this case, we show how to use the option data
 FACTORS <- rep(c("A", "B", "C"), c(2,3,2))
 LEVELS <- c("a0", "a1", "b0", "b1", "b2", "c0", "c1")
 data_factorial <- data.frame(list(FACTOR = FACTORS, LEVEL = LEVELS))
-print(data_factorial) 
+print(data_factorial)
 # This in an RCBD arrangement with 5 reps in 3 locations.
-fullFact2 <- full_factorial(setfactors = NULL, reps = 5, l = 3, type = 2, 
-                            plotNumber = c(101,1001,2001), 
-                            continuous = FALSE, 
-                            planter = "serpentine", 
-                            seed = 326, 
+fullFact2 <- full_factorial(setfactors = NULL, reps = 5, l = 3, type = 2,
+                            plotNumber = c(101,1001,2001),
+                            continuous = FALSE,
+                            planter = "serpentine",
+                            seed = 326,
                             locationNames = c("Loc1","Loc2","Loc3"),
                             data = data_factorial)
 fullFact2$infoDesign
