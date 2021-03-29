@@ -13,7 +13,7 @@
 #' @param locationNames (optional) Names for each location.
 #' @param data (optional) Data frame with the labels of treatments.
 #' 
-#' @importFrom stats runif na.omit
+#' @importFrom stats runif na.omit setNames
 #' 
 #' @return A list with information on the design parameters.
 #' @return RCBD layout for each location.
@@ -110,12 +110,14 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101, continuous = FA
     mytreatments <- data$Treatment
   }
   if (length(locationNames) != l) {
-    locationNames <- paste("loc", 1:l)
+    locationNames <- paste("loc", 1:l, sep = "")
     warning("Number of locations do not match with length of names of them provided.")
   }
   RCBD <- matrix(data = NA, nrow = b * l, ncol = nt, byrow = TRUE)
   RCBD.layout <- matrix(data = NA, nrow = b, ncol = 2, byrow = TRUE)
-  RCBD.layout.loc <- vector(mode = "list", length = l)
+  #RCBD.layout.loc <- vector(mode = "list", length = l)
+  RCBD.layout.loc <- setNames(vector(mode = "list", length = l),
+                              paste0("Loc_", locationNames)) # set names
   k <- seq(1, l * b, b)
   m <- seq(b, l * b, b)
   for (i in 1:l) {
@@ -131,9 +133,13 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101, continuous = FA
     RCBD.layout.loc[[i]] <- RCBD.layout
   }
   plotNumber <- seriePlot.numbers(plot.number = plotNumber, reps = b, l = l, t = nt)
+  p.number.loc <- setNames(vector(mode = "list", length = l),
+                           paste0("Loc_", locationNames))
   if (!continuous) {
-    if (planter == "serpentine"){
-      p.number.loc <- vector(mode = "list", length = l)
+    if (planter == "serpentine") {
+      #p.number.loc <- vector(mode = "list", length = l)
+      # p.number.loc <- setNames(vector(mode = "list", length = l),
+      #                          paste0("Loc_", locationNames))
       for (i in 1:l) {
         M <- matrix(data = NA, ncol = nt, nrow = b, byrow = TRUE)
         for (k in 1:b) {
@@ -143,7 +149,9 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101, continuous = FA
         p.number.loc[[i]] <- serpentinelayout(M, opt = 2)
       }
     }else {
-      p.number.loc <- vector(mode = "list", length = l)
+      #p.number.loc <- vector(mode = "list", length = l)
+      # p.number.loc <- setNames(vector(mode = "list", length = l),
+      #                          paste0("Loc_", locationNames))
       for (i in 1:l) {
         M <- matrix(data = NA, ncol = nt, nrow = b, byrow = TRUE)
         for (k in 1:b) {
@@ -155,7 +163,9 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101, continuous = FA
     }
   }else {
     if (planter == "serpentine") {
-      p.number.loc <- vector(mode = "list", length = l)
+      #p.number.loc <- vector(mode = "list", length = l)
+      # p.number.loc <- setNames(vector(mode = "list", length = l),
+      #                          paste0("Loc_", locationNames))
       for (i in 1:l) {
         D <- plotNumber[[i]]
         M <- matrix(data = D[i]:(D[i] + (nt * b - 1)), ncol = nt,
@@ -163,7 +173,9 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101, continuous = FA
         p.number.loc[[i]] <- serpentinelayout(M, opt = 2)
       }
     }else {
-      p.number.loc <- vector(mode = "list", length = l)
+      #p.number.loc <- vector(mode = "list", length = l)
+      # p.number.loc <- setNames(vector(mode = "list", length = l),
+      #                          paste0("Loc_", locationNames))
       for (i in 1:l) {
         D <- plotNumber[[i]]
         p.number.loc[[i]] <- matrix(data = D[i]:(D[i] + (nt * b - 1)), ncol = nt,

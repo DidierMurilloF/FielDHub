@@ -24,6 +24,12 @@
 #' @param data (optional) Data frame with 2 columns: \code{ENTRY | NAME | BLOCK} or only 2 
 #' columns \code{ENTRY | NAME} if \code{kindExpt = 'SUDC'}.
 #' 
+#' @author Didier Murillo [aut],
+#'         Salvador Gezan [aut],
+#'         Ana Heilman [ctb],
+#'         Thomas Walk [ctb], 
+#'         Johan Aparicio [ctb], 
+#'         Richard Horsley [ctb]
 #' 
 #' @return A list with information on the design parameters.
 #' @return A matrix with the randomization layout.

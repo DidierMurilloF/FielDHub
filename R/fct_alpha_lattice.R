@@ -13,6 +13,13 @@
 #' @param seed (optional) Real number that specifies the starting seed to obtain reproducible designs.
 #' @param data (optional) Data frame with label list of treatments.
 #' 
+#' @author Didier Murillo [aut],
+#'         Salvador Gezan [aut],
+#'         Ana Heilman [ctb],
+#'         Thomas Walk [ctb], 
+#'         Johan Aparicio [ctb], 
+#'         Richard Horsley [ctb]
+#' 
 #' 
 #' @importFrom stats runif na.omit
 #' 

@@ -10,7 +10,7 @@
 #' @param locationNames (optional) Name for the location.
 #' @param data (optional) Data frame with label list of treatments.
 #' 
-#' @importFrom stats runif na.omit
+#' @importFrom stats runif na.omit setNames
 #'
 #' @return A list with information on the design parameters. 
 #' @return Data frame with the latin square field book.
@@ -102,7 +102,9 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
   step.random <- vector(mode = "list", length = reps)
   lsd.reps <- vector(mode = "list", length = reps)
   out.ls <- vector(mode = "list", length = reps)
-  plotSquares <- vector(mode = "list", length = reps)
+  #plotSquares <- vector(mode = "list", length = reps)
+  plotSquares <- setNames(vector(mode = "list", length = reps),
+                          paste0("rep", seq(1:reps))) # set names
   x <- seq(1, reps * l, reps)
   y <- seq(reps, reps * l, reps)
   for (j in 1:reps) {
@@ -147,6 +149,7 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
   expt.ls <- paste_by_row(lsd.reps)
   latinsquare.expt <- paste_by_row(out.ls)
   ls.output <- latinsquare.expt
+  lsd.reps <- setNames(lsd.reps, paste0("rep", seq(1:reps))) # set names
   ls.output$ROW <- factor(ls.output$ROW, levels = Name.Rows)
   ls.output$COLUMN <- factor(ls.output$COLUMN, levels = Name.Columns)
   ls.output.order <- ls.output[order(ls.output$PLOT, ls.output$SQUARE, ls.output$ROW), ]
