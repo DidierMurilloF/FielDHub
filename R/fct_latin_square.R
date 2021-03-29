@@ -9,13 +9,10 @@
 #' @param seed (optional) Real number that specifies the starting seed to obtain reproducible designs.
 #' @param locationNames (optional) Name for the location.
 #' @param data (optional) Data frame with label list of treatments.
-<<<<<<< HEAD
 #' 
 #' @importFrom stats runif na.omit setNames
-=======
 #'
 #' @importFrom stats runif na.omit
->>>>>>> 35edf13de740b6e4f8fc263651185eca90786739
 #'
 #' @return A list with information on the design parameters.
 #' @return Data frame with the latin square field book.
@@ -108,10 +105,6 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
   step.random <- vector(mode = "list", length = reps)
   lsd.reps <- vector(mode = "list", length = reps)
   out.ls <- vector(mode = "list", length = reps)
-<<<<<<< HEAD
-  #plotSquares <- vector(mode = "list", length = reps)
-=======
->>>>>>> 35edf13de740b6e4f8fc263651185eca90786739
   plotSquares <- setNames(vector(mode = "list", length = reps),
                           paste0("rep", seq(1:reps))) # set names
   x <- seq(1, reps * l, reps)
