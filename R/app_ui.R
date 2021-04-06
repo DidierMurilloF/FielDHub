@@ -11,6 +11,7 @@ app_ui <- function(request) {
     golem_add_external_resources(),
     # List the first level UI elements here
     fluidPage(theme = shinythemes::shinytheme("flatly"),
+              shinyalert::useShinyalert(), 
               navbarPage("FielDHub", 
                          tabPanel(" Welcome!", icon = icon("home", lib = "glyphicon"),
                                   htmltools::includeHTML(

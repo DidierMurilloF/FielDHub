@@ -26,6 +26,7 @@ usethis::use_package("shinycssloaders")
 usethis::use_package("ggplot2")
 usethis::use_package("plotly")
 usethis::use_package("viridis")
+usethis::use_package("shinyalert")
 usethis::use_package("rlang", "Suggests")
 usethis::use_pipe()
 usethis::use_spell_check()
@@ -105,6 +106,7 @@ golem::add_utils("order_ls")
 golem::add_utils("ZST")
 golem::add_utils("AR1xAR1_simulation")
 golem::add_utils("plot_number_splits")
+golem::add_utils("NO_Random")
 
 ## External resources
 ## Creates .js and .css files at inst/app/www

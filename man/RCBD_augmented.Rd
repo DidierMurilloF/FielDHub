@@ -15,6 +15,7 @@ RCBD_augmented(
   seed = NULL,
   locationNames = NULL,
   repsExpt = 1,
+  random = TRUE,
   data = NULL
 )
 }
@@ -38,6 +39,8 @@ RCBD_augmented(
 \item{locationNames}{(optional) Name for each location.}
 
 \item{repsExpt}{(optional) Number of reps of experiment. By default \code{repsExpt = 1}.}
+
+\item{random}{Logical value to randomize treatments or not. By default \code{random = TRUE}.}
 
 \item{data}{(optional) Data frame with the labels of treatments.}
 }

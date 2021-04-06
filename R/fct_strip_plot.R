@@ -85,7 +85,7 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
           nV <- length(Vplots)
         }
       }else {
-        stop("\n'strip_plot()' requires an 1-dimensional array for input Hplots and Vplots.")
+        stop("\n 'strip_plot()' requires an 1-dimensional array for input Hplots and Vplots.")
       }
     }else stop("\n 'strip_plot()' requires arguments to be differents than NULL")
   }else {
@@ -130,7 +130,11 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
   z <- 1
   x <- seq(1, b * l, b)
   y <- seq(b, b * l, b)
-  PLOTS <- vector(mode = "list", length = b*l)
+  x_1 <- paste0("rep", seq(1:b), sep = "_Loc_")
+  y_1 <- paste0(rep(x_1, l), rep(locationNames, each = b))
+  PLOTS <- setNames(vector(mode = "list", length = b*l),
+                                 y_1)
+  #PLOTS <- vector(mode = "list", length = b*l)
   for (sites in 1:l) {
     for (r in 1:b) {
       D <- plot.numbs[[sites]]

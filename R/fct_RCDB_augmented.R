@@ -12,6 +12,7 @@
 #' @param exptName (optional) Name of experiment.
 #' @param locationNames (optional) Name for each location.
 #' @param repsExpt (optional) Number of reps of experiment. By default \code{repsExpt = 1}.
+#' @param random Logical value to randomize treatments or not. By default \code{random = TRUE}.
 #' @param data (optional) Data frame with the labels of treatments.
 #' 
 #' @importFrom stats runif na.omit
@@ -63,7 +64,7 @@
 #' @export
 RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter = "serpentine", 
                            plotNumber = 101, exptName  = NULL, seed = NULL, locationNames = NULL,
-                           repsExpt = 1, data = NULL) {
+                           repsExpt = 1, random = TRUE, data = NULL) {
 
   if (all(c("serpentine", "cartesian") != planter)) {
     stop("Input planter choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
@@ -85,7 +86,7 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
       shiny::validate("RCBD_augmented() requires input plotNumber to be possitive integers and sorted.")
     }
   }
-
+  
   if (!is.null(data)) {
     data <- as.data.frame(data)
     if (ncol(data) < 2) base::stop("Data input needs at least two columns with: ENTRY and NAME.")
@@ -126,84 +127,126 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
     for (expts in expt) {
       Blocks <- vector(mode = "list", length = b)
       layout <- base::matrix(data = 0, nrow = b, ncol = plots_per_block, byrow = TRUE)
-      if (Fillers > 0) {
-        if (Fillers >= (plots_per_block - checks - 2)) {
-          shiny::validate("Number of Filler overcome the amount allowed per block. Please, choose another quantity of blocks.")
-        } 
-        len_cuts <- rep(lines_per_plot, times = b - 1)
-        len_cuts <- c(len_cuts, lines - sum(len_cuts))
-        entries <- as.vector(data[(checks + 1):nrow(data),1])
-        entries <- sample(entries)
-        rand_len_cuts <- sample(len_cuts)
-        lines_blocks <- split_vectors(x = entries, len_cuts = rand_len_cuts)
-        if (b %% 2 == 0) { 
-          if(planter == "serpentine") {
-            layout[1,1:Fillers] <- "Filler"
-          }else{ 
-            layout[1,((ncol(layout) + 1) - Fillers):ncol(layout)] <- "Filler" 
+      if (random) {
+        if (Fillers > 0) {
+          if (Fillers >= (plots_per_block - checks - 2)) {
+            shiny::validate("Number of Filler overcome the amount allowed per block. Please, choose another quantity of blocks.")
           } 
-        }else { 
-          layout[1,((ncol(layout) + 1) - Fillers):ncol(layout)] <- "Filler" 
-        }
-        z <- b
-        w <- 1
-        for (i in b:1) {
-          datos <- sample(c(rep(0, len_cuts[w]), 1:checks))
-          Bi <- sample(datos)
-          ci <- as.vector(layout[i,])
-          ci[ci == 0] <- Bi
-          layout[i,] <- ci
-          Blocks[[z]] <- ci
-          z <- z - 1
-          w <- w + 1
-        }
-        col_checks <- ifelse(layout != 0, 1, 0)
-        v <- which.min(rand_len_cuts)
-        Block_Fillers <- lines_blocks[v]
-        blocks_data <- 1:b
-        blocks_data <- blocks_data[-v]
-        random_lines_in_b <- sample(blocks_data)
-        BF <- as.vector(layout[1,])
-        BF[BF == 0] <- sample(Block_Fillers[[1]])
-        layout[1,] <- BF 
-        Blocks[[b]] <- BF
-        s <- 1
-        for (j in 2:b) {
-          z <- random_lines_in_b[j-1]
-          Bi <- sample(lines_blocks[[z]])
-          ci <- as.vector(layout[j,])
-          ci[ci == 0] <- Bi
-          layout[j,] <- ci
-          Blocks[[s]] <- ci
-          s <- s + 1
+          len_cuts <- rep(lines_per_plot, times = b - 1)
+          len_cuts <- c(len_cuts, lines - sum(len_cuts))
+          entries <- as.vector(data[(checks + 1):nrow(data),1])
+          entries <- sample(entries)
+          rand_len_cuts <- sample(len_cuts)
+          lines_blocks <- split_vectors(x = entries, len_cuts = rand_len_cuts)
+          if (b %% 2 == 0) { 
+            if(planter == "serpentine") {
+              layout[1,1:Fillers] <- "Filler"
+            }else{ 
+              layout[1,((ncol(layout) + 1) - Fillers):ncol(layout)] <- "Filler" 
+            } 
+          }else { 
+            layout[1,((ncol(layout) + 1) - Fillers):ncol(layout)] <- "Filler" 
+          }
+          z <- b
+          w <- 1
+          for (i in b:1) {
+            datos <- sample(c(rep(0, len_cuts[w]), 1:checks))
+            Bi <- sample(datos)
+            ci <- as.vector(layout[i,])
+            ci[ci == 0] <- Bi
+            layout[i,] <- ci
+            Blocks[[z]] <- ci
+            z <- z - 1
+            w <- w + 1
+          }
+          col_checks <- ifelse(layout != 0, 1, 0)
+          v <- which.min(rand_len_cuts)
+          Block_Fillers <- lines_blocks[v]
+          blocks_data <- 1:b
+          blocks_data <- blocks_data[-v]
+          random_lines_in_b <- sample(blocks_data)
+          BF <- as.vector(layout[1,])
+          BF[BF == 0] <- sample(Block_Fillers[[1]])
+          layout[1,] <- BF 
+          Blocks[[b]] <- BF
+          s <- 1
+          for (j in 2:b) {
+            z <- random_lines_in_b[j-1]
+            Bi <- sample(lines_blocks[[z]])
+            ci <- as.vector(layout[j,])
+            ci[ci == 0] <- Bi
+            layout[j,] <- ci
+            Blocks[[s]] <- ci
+            s <- s + 1
+          }
+          plotsPerBlock <- rep(ncol(layout), nrow(layout))
+          plotsPerBlock <- c(plotsPerBlock[-length(plotsPerBlock)], ncol(layout) - Fillers)
+        }else {
+          datos <- sample(c(rep(0, lines_per_plot), 1:checks))
+          len_cuts <- rep(lines_per_plot, times = b)
+          z <- b
+          for (i in 1:b) {
+            Bi <- sample(datos)
+            ci <- as.vector(layout[i,])
+            ci[ci == 0] <- Bi
+            layout[i,] <- ci
+            Blocks[[z]] <- ci
+            z <- z - 1
+          }
+          col_checks <- ifelse(layout != 0, 1,0)
+          blocks_data <- 1:b
+          random_lines_in_b <- sample(blocks_data)
+          entries <- as.vector(data[(checks + 1):nrow(data),1])
+          entries <- sample(entries)
+          lines_blocks <- split_vectors(x = entries, len_cuts = len_cuts)
+          s <- 1
+          for (j in 1:b) {
+            z <- random_lines_in_b[j]
+            Bi <- sample(lines_blocks[[z]])
+            cj <- as.vector(layout[j,])
+            cj[cj == 0] <- Bi
+            layout[j,] <- cj
+            Blocks[[s]] <- cj
+            s <- s + 1
+          }
+          plotsPerBlock <- rep(ncol(layout), nrow(layout))
         }
       }else {
-        datos <- sample(c(rep(0, lines_per_plot), 1:checks))
-        len_cuts <- rep(lines_per_plot, times = b)
-        z <- b
-        for (i in 1:b) {
-          Bi <- sample(datos)
-          ci <- as.vector(layout[i,])
-          ci[ci == 0] <- Bi
-          layout[i,] <- ci
-          Blocks[[z]] <- ci
-          z <- z - 1
-        }
-        col_checks <- ifelse(layout != 0, 1,0)
-        blocks_data <- 1:b
-        random_lines_in_b <- sample(blocks_data)
         entries <- as.vector(data[(checks + 1):nrow(data),1])
-        entries <- sample(entries)
-        lines_blocks <- split_vectors(x = entries, len_cuts = len_cuts)
-        s <- 1
-        for (j in 1:b) {
-          z <- random_lines_in_b[j]
-          Bi <- sample(lines_blocks[[z]])
-          cj <- as.vector(layout[j,])
-          cj[cj == 0] <- Bi
-          layout[j,] <- cj
-          Blocks[[s]] <- cj
-          s <- s + 1
+        if (Fillers > 0) {
+          if (Fillers >= (plots_per_block - checks - 2)) {
+            shiny::validate("Number of Filler overcome the amount allowed per block. Please, choose another quantity of blocks.")
+          } 
+          layout_a <- t(replicate(b,  sample(c(rep(0, plots_per_block - checks), 1:checks))))
+          if (b %% 2 == 0) { 
+            if(planter == "serpentine") {
+              #layout_a[1,1:Fillers] <- "Filler"
+              layout_a[1,] <- c(rep("Filler", Fillers), 
+                                sample(c(1:checks, rep(0, ncol(layout_a) - Fillers - checks)), 
+                                       size = ncol(layout_a) - Fillers, replace = FALSE))
+            }else{ 
+              #layout_a[1,((ncol(layout_a) + 1) - Fillers):ncol(layout_a)] <- "Filler" 
+              layout_a[1,] <- c(sample(c(1:checks, rep(0, ncol(layout_a) - Fillers - checks)), 
+                                       size = ncol(layout_a) - Fillers, replace = FALSE),
+                                rep("Filler", Fillers))
+            } 
+          }else { 
+            #layout_a[1,((ncol(layout_a) + 1) - Fillers):ncol(layout_a)] <- "Filler" 
+            layout_a[1,] <- c(sample(c(1:checks, rep(0, ncol(layout_a) - Fillers - checks)), 
+                                     size = ncol(layout_a) - Fillers, replace = FALSE),
+                              rep("Filler", Fillers))
+          }
+          col_checks <- ifelse(layout_a != 0, 1,0)
+          no_randomData <- NO_Random(checksMap = layout_a, data_Entry = entries, planter = planter)
+          layout <- no_randomData$w_map_letters
+          len_cuts <- no_randomData$len_cut 
+          plotsPerBlock <- c(len_cuts[-length(len_cuts)], ncol(layout_a) - Fillers)
+        }else {
+          layout_a <- t(replicate(b,  sample(c(rep(0, plots_per_block - checks), 1:checks))))
+          col_checks <- ifelse(layout_a != 0, 1,0)
+          no_randomData <- NO_Random(checksMap = layout_a, data_Entry = entries, planter = planter)
+          layout <- no_randomData$w_map_letters
+          plotsPerBlock <- no_randomData$len_cut 
         }
       }
       Blocks_info <- base::matrix(data = rep(b:1, each = plots_per_block), nrow = b, ncol = plots_per_block, byrow = TRUE)
@@ -235,7 +278,7 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
       Col_checks_expt[[sky]] <- as.data.frame(Col_checks)
       sky <- sky - 1
     }
-
+    
     layout1 <- dplyr::bind_rows(layout1_expt) 
     plot_number <- dplyr::bind_rows(plot_number_expt)  
     Col_checks <- dplyr::bind_rows(Col_checks_expt) 
@@ -246,7 +289,7 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
       layout1_loc1[[1]] <- layout1
       plot_loc1[[1]] <- plot_number
     } 
- 
+    
     results_to_export <- list(layout1, plot_number, Col_checks, my_names, Blocks_info)
     year <- format(Sys.Date(), "%Y")
     outputDesign <- export_design(G = results_to_export, movement_planter = planter, location = locationNames[locations],
@@ -271,12 +314,13 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
   
   fieldbook <- fieldbook[,-4]
   DataChecks <- data[1:checks,]
-
+  
   layout_loc1 <- as.matrix(layout1_loc1[[1]])
   Plot_loc1 <- as.matrix(plot_loc1[[1]])
   
-  infoDesign <- list(Blocks = b, plotsPerBlock = len_cuts, Checks = DataChecks, repsExpt = repsExpt, 
-                     numberLocations = l,Fillers = Fillers, seed = seed)
+  infoDesign <- list(Blocks = b, plotsPerBlock = plotsPerBlock, Checks = DataChecks, 
+                     repsExpt = repsExpt, numberLocations = l, Fillers = Fillers, 
+                     seed = seed)
   
   return(list(infoDesign = infoDesign, entriesTreatments = entries, layoutRandom = layout_loc1,
               plotNumber = Plot_loc1, exptNames = my_names, fieldbook = fieldbook,

@@ -29,19 +29,19 @@ mod_RCBD_augmented_ui <- function(id){
                                     )              
                    ),
                    
-                   # fluidRow(
-                   #   column(6,style=list("padding-right: 28px;"),
-                   #          numericInput(inputId = ns("myseed_a_rcbd"), label = "Seed Number:",
-                   #                       value = 1, min = 1)
-                   #   ),
-                   #   column(6,style=list("padding-left: 5px;"),
-                   #          # checkboxInput(inputId = ns("Option_NCD"), label = "Are you Including Filler Plots?",
-                   #          #               value = FALSE)
-                   #   )
-                   # ),
+                   fluidRow(
+                     column(6,style=list("padding-right: 28px;"),
+                            numericInput(inputId = ns("nExpt_a_rcbd"), label = "Input # of Stacked Expts:",
+                                         value = 1, min = 1, max = 100)
+                     ),
+                     column(6,style=list("padding-left: 5px;"),
+                             checkboxInput(inputId = ns("random"), label = "Randomize Entries?",
+                                           value = TRUE)
+                     )
+                   ),
                    
-                   numericInput(inputId = ns("nExpt_a_rcbd"), label = "Input # of Stacked Expts:",
-                                value = 1, min = 1, max = 100),
+                   # numericInput(inputId = ns("nExpt_a_rcbd"), label = "Input # of Stacked Expts:",
+                   #              value = 1, min = 1, max = 100),
                    
                    # fluidRow(
                    #   column(6,style=list("padding-right: 28px;"),
@@ -124,6 +124,15 @@ mod_RCBD_augmented_server <- function(id) {
   moduleServer( id, function(input, output, session) {
     ns <- session$ns
     
+    observeEvent(input$random, {
+      # Show a modal when the button is pressed
+      if (input$random == FALSE) {
+        shinyalert::shinyalert("Warning!!", "By unchecking this option you will only randomized the check plots.", 
+                               type = "warning")
+      }
+      
+    })
+    
     getDataup_a_rcbd <- reactive({
       if (input$owndata_a_rcbd == "Yes") {
         req(input$file1_a_rcbd)
@@ -195,10 +204,10 @@ mod_RCBD_augmented_server <- function(id) {
       }else Name_expt <- paste(rep('Expt', repsExpt), 1:repsExpt, sep = "")
       
       if (length(plot.number) != length(Name_expt)) plot.number <- 1001
-      
+      random <- input$random
       ARCBD <- RCBD_augmented(lines = lines, checks = checks, b = b, l = l.arcbd, planter = planter,
                               plotNumber = plot.number, exptName = Name_expt, seed = seed.number,
-                              locationNames = loc, repsExpt = repsExpt, data = gen.list)
+                              locationNames = loc, repsExpt = repsExpt, random = random, data = gen.list)
 
     })
     

@@ -124,17 +124,25 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
   rownames(OutRowCol) <- 1:nrow(OutRowCol)
   loc <- levels(OutRowCol$LOCATION)
   ib <- nt/k
-  Resolvable_rc_reps <- vector(mode = "list", length = r)
-  for (j in 1:r) {
-     z <- OutRowCol
-     z <- subset(z, z$LOCATION == loc[1] & z$REP == j)
-     if (is.null(data)){
-       Resolvable_rc_reps[[j]] <- matrix(data = as.vector(z$ENTRY), nrow = nunits, 
-                                         ncol = ib, byrow = TRUE)
-     }else {
-       Resolvable_rc_reps[[j]] <- matrix(data = as.vector(z$TREATMENT), nrow = nunits, 
-                                         ncol = ib, byrow = TRUE)
-     }
+  #Resolvable_rc_reps <- vector(mode = "list", length = r)
+  x <- paste0("rep", seq(1:r), sep = "_Loc_")
+  y <- paste0(rep(x, l), rep(locationNames, each = r))
+  Resolvable_rc_reps <- setNames(vector(mode = "list", length = r*l),
+                                 y)
+  w <- 1
+  for (sites in 1:l) {
+    for (j in 1:r) {
+      z <- OutRowCol
+      z <- subset(z, z$LOCATION == loc[sites] & z$REP == j)
+      if (is.null(data)){
+        Resolvable_rc_reps[[w]] <- matrix(data = as.vector(z$ENTRY), nrow = nunits, 
+                                          ncol = ib, byrow = TRUE)
+      }else {
+        Resolvable_rc_reps[[w]] <- matrix(data = as.vector(z$TREATMENT), nrow = nunits, 
+                                          ncol = ib, byrow = TRUE)
+      }
+      w <- w + 1
+    }
   }
   df <- OutRowCol
   
