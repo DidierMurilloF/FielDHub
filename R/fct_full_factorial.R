@@ -23,9 +23,8 @@
 #'
 #' @importFrom stats runif na.omit
 #'
-#' @return A list with information on the design parameters.
-#' @return Data frame with the full factorial field book.
-#'
+#' @return A list with information two elements: \code{infoDesign} is a 
+#' and \code{fieldBook} is a data frame with the full factorial field book.
 #'
 #' @references
 #' Federer, W. T. (1955). Experimental Design. Theory and Application. New York, USA. The
