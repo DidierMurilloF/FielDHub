@@ -11,6 +11,14 @@
 #' @param locationNames (optional) Names for each location.
 #' @param data (optional) Data frame with label list of treatments.
 #' 
+#' 
+#' @author Didier Murillo [aut],
+#'         Salvador Gezan [aut],
+#'         Ana Heilman [ctb],
+#'         Thomas Walk [ctb], 
+#'         Johan Aparicio [ctb], 
+#'         Richard Horsley [ctb]
+#' 
 #' @importFrom stats runif na.omit
 #'
 #' @return A list with information on the design parameters.
@@ -34,7 +42,8 @@
 #' # 7 IBlocks for a square number of treatmens of 49 in one location.
 #' # In this case, we show how to use the option data.
 #' treatments <- paste("G", 1:49, sep = "")
-#' treatment_list <- data.frame(list(TREATMENT = treatments))
+#' ENTRY <- 1:49
+#' treatment_list <- data.frame(list(ENTRY = ENTRY, TREATMENT = treatments))
 #' head(treatment_list) 
 #' squareLattice2 <- square_lattice(t = 49, k = 7, r = 3, l = 1, 
 #'                                  plotNumber = 1001,
@@ -83,15 +92,15 @@ square_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101
       shiny::validate('Some of the basic design parameters are missing (t, r, k or l).')
     }
     if(!is.data.frame(data)) shiny::validate("Data must be a data frame.")
-    data <- as.data.frame(na.omit(data[,1]))
-    colnames(data) <- "Treatment"
-    data$Treatment <- as.character(data$Treatment)
-    new_t <- length(data$Treatment)
+    data_up <- as.data.frame(data[,c(1,2)])
+    data_up <- na.omit(data_up)
+    colnames(data_up) <- c("ENTRY", "TREATMENT")
+    data_up$TREATMENT <- as.character(data_up$TREATMENT)
+    new_t <- length(data_up$TREATMENT)
     if (t != new_t) base::stop("Number of treatments do not match with data input.")
-    TRT <- data$Treatment
+    TRT <- data_up$TREATMENT
     nt <- length(TRT)
-    if (nt != t) shiny::validate('Number of treatment do not match with data input.')
-    data_alpha <- data
+    data_alpha <- data_up
   }
   if (sqrt(nt) %% 1 != 0) shiny::validate('square_lattice() requires t to be a square number.')
   if(is.null(locationNames) || length(locationNames) != l) locationNames <- 1:l

@@ -14,6 +14,13 @@
 #' @param locationNames (optional) Names for each location.
 #' @param data (optional) Data frame with label list of treatments
 #' 
+#' @author Didier Murillo [aut],
+#'         Salvador Gezan [aut],
+#'         Ana Heilman [ctb],
+#'         Thomas Walk [ctb], 
+#'         Johan Aparicio [ctb], 
+#'         Richard Horsley [ctb]
+#' 
 #' 
 #' @importFrom stats runif na.omit
 #' 
@@ -42,7 +49,8 @@
 #' # and 5 rows, for two locations.
 #' # In this case, we show how to use the option data.
 #' treatments <- paste("ND-", 1:30, sep = "")
-#' treatment_list <- data.frame(list(TREATMENT = treatments))
+#' ENTRY <- 1:30
+#' treatment_list <- data.frame(list(ENTRY = ENTRY, TREATMENT = treatments))
 #' head(treatment_list)
 #' rowcold2 <- row_column(t = 30, nrows = 5, r = 3, l = 2, 
 #'                        plotNumber= c(101,1001), 
@@ -94,14 +102,16 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
       shiny::validate('Some of the basic design parameters are missing (t, r, k or l).')
     }
     if(!is.data.frame(data)) shiny::validate("Data must be a data frame.")
-    data <- as.data.frame(na.omit(data[,1]))
-    colnames(data) <- "Treatment"
-    data$Treatment <- as.character(data$Treatment)
-    new_t <- length(data$Treatment)
+    data_up <- as.data.frame(data[,c(1,2)])
+    data_up <- na.omit(data_up)
+    colnames(data_up) <- c("ENTRY", "TREATMENT")
+    data_up$TREATMENT <- as.character(data_up$TREATMENT)
+    new_t <- length(data_up$TREATMENT)
     if (t != new_t) base::stop("Number of treatments do not match with data input.")
-    TRT <- data$Treatment
+    TRT <- data_up$TREATMENT
     nt <- length(TRT)
-    data_RowCol <- data
+    data_RowCol <- data_up
+    lookup <- TRUE
   }
   if (k >= nt) shiny::validate('incomplete_blocks() requires k < t.')
   if(is.null(locationNames) || length(locationNames) != l) locationNames <- 1:l
@@ -118,17 +128,15 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
   OutRowCol <- OutRowCol[order(OutRowCol$LOCATION, OutRowCol$REP, OutRowCol$ROW),]
   RowCol_plots <- ibd_plot_numbers(nt = nt, plot.number = plotNumber, r = r, l = l)
   OutRowCol$PLOT <- as.vector(unlist(RowCol_plots))
-  OutRowCol <- OutRowCol[,c(2,3,4,7,5,6)]
+  if(lookup) {
+    OutRowCol <- OutRowCol[,c(2,3,4,8,5,6,7)]
+  }else OutRowCol <- OutRowCol[,c(2,3,4,7,5,6)]
   ID <- 1:nrow(OutRowCol)
   OutRowCol <- cbind(ID, OutRowCol)
   rownames(OutRowCol) <- 1:nrow(OutRowCol)
   loc <- levels(OutRowCol$LOCATION)
   ib <- nt/k
-  #Resolvable_rc_reps <- vector(mode = "list", length = r)
-  x <- paste0("rep", seq(1:r), sep = "_Loc_")
-  y <- paste0(rep(x, l), rep(locationNames, each = r))
-  Resolvable_rc_reps <- setNames(vector(mode = "list", length = r*l),
-                                 y)
+  Resolvable_rc_reps <- vector(mode = "list", length = r*l)
   w <- 1
   for (sites in 1:l) {
     for (j in 1:r) {
@@ -144,6 +152,18 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
       w <- w + 1
     }
   }
+  
+  NEW_Resolvable <- setNames(vector(mode = "list", length = l),
+                             paste0("Loc_", locationNames))
+  x <- seq(1, r * l, r)
+  y <- seq(r, r * l, r)
+  z <- 1
+  for (loc in 1:l) {
+    NEW_Resolvable[[loc]] <- setNames(Resolvable_rc_reps[x[z]:y[z]], 
+                                 paste0(rep("rep", r), 1:r))
+    z <- z + 1
+  }
+  
   df <- OutRowCol
   
   if (is.null(data)) trt <- "ENTRY" else trt <- "TREATMENT"
@@ -157,6 +177,6 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
   infoDesign <- list(nRows = nrows, nCols = ib, Reps = r, NumberTreatments = nt, NumberLocations = l, 
                      Locations = locationNames, seed = seed)
 
-  return(list(infoDesign = infoDesign, resolvableBlocks = Resolvable_rc_reps, concurrence = new_summ,
+  return(list(infoDesign = infoDesign, resolvableBlocks = NEW_Resolvable, concurrence = new_summ,
               fieldBook = OutRowCol))
 }

@@ -60,7 +60,8 @@ head(rowcold1$fieldBook,12)
 # and 5 rows, for two locations.
 # In this case, we show how to use the option data.
 treatments <- paste("ND-", 1:30, sep = "")
-treatment_list <- data.frame(list(TREATMENT = treatments))
+ENTRY <- 1:30
+treatment_list <- data.frame(list(ENTRY = ENTRY, TREATMENT = treatments))
 head(treatment_list)
 rowcold2 <- row_column(t = 30, nrows = 5, r = 3, l = 2, 
                        plotNumber= c(101,1001), 
@@ -76,4 +77,12 @@ head(rowcold2$fieldBook,12)
 \references{
 Edmondson., R. N. (2021). blocksdesign: Nested and crossed block designs for factorial and
 unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign
+}
+\author{
+Didier Murillo [aut],
+        Salvador Gezan [aut],
+        Ana Heilman [ctb],
+        Thomas Walk [ctb], 
+        Johan Aparicio [ctb], 
+        Richard Horsley [ctb]
 }

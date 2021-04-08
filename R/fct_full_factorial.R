@@ -20,6 +20,13 @@
 #'   labels from the original data set otherwise, numeric labels will be
 #'   assigned. Default is \code{factorLabels =TRUE}.
 #' @param data (optional) Data frame with the labels of factors.
+#' 
+#' @author Didier Murillo [aut],
+#'         Salvador Gezan [aut],
+#'         Ana Heilman [ctb],
+#'         Thomas Walk [ctb], 
+#'         Johan Aparicio [ctb], 
+#'         Richard Horsley [ctb]
 #'
 #' @importFrom stats runif na.omit
 #'

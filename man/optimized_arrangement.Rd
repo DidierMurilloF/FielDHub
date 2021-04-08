@@ -102,3 +102,11 @@ Clarke, G. P. Y., & Stefanova, K. T. (2011). Optimal design for early-generation
 breeding trials with unreplicated or partially replicated test lines. Australian & New
 Zealand Journal of Statistics, 53(4), 461–480.
 }
+\author{
+Didier Murillo [aut],
+        Salvador Gezan [aut],
+        Ana Heilman [ctb],
+        Thomas Walk [ctb], 
+        Johan Aparicio [ctb], 
+        Richard Horsley [ctb]
+}

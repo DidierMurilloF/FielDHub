@@ -15,6 +15,14 @@
 #' @param random Logical value to randomize treatments or not. By default \code{random = TRUE}.
 #' @param data (optional) Data frame with the labels of treatments.
 #' 
+#' 
+#' @author Didier Murillo [aut],
+#'         Salvador Gezan [aut],
+#'         Ana Heilman [ctb],
+#'         Thomas Walk [ctb], 
+#'         Johan Aparicio [ctb], 
+#'         Richard Horsley [ctb]
+#' 
 #' @importFrom stats runif na.omit
 #' 
 #' @return A list with information on the design parameters.

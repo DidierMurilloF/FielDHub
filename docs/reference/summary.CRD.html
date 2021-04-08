@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Authors • FielDHub</title>
+<title>Summary an CRD object — summary.CRD • FielDHub</title>
 
 
 <!-- jquery -->
@@ -18,8 +18,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
 
 <!-- bootstrap-toc -->
-<link rel="stylesheet" href="bootstrap-toc.css">
-<script src="bootstrap-toc.js"></script>
+<link rel="stylesheet" href="../bootstrap-toc.css">
+<script src="../bootstrap-toc.js"></script>
 
 <!-- Font Awesome icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
@@ -33,13 +33,15 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
-<link href="pkgdown.css" rel="stylesheet">
-<script src="pkgdown.js"></script>
+<link href="../pkgdown.css" rel="stylesheet">
+<script src="../pkgdown.js"></script>
 
 
 
 
-<meta property="og:title" content="Authors" />
+<meta property="og:title" content="Summary an CRD object — summary.CRD" />
+<meta property="og:description" content="Summarise information on the design parameters, and data
+  frame structure" />
 
 
 
@@ -58,7 +60,7 @@
   </head>
 
   <body data-spy="scroll" data-target="#toc">
-    <div class="container template-authors">
+    <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -70,7 +72,7 @@
         <span class="icon-bar"></span>
       </button>
       <span class="navbar-brand">
-        <a class="navbar-link" href="index.html">FielDHub</a>
+        <a class="navbar-link" href="../index.html">FielDHub</a>
         <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
       </span>
     </div>
@@ -78,16 +80,16 @@
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
-  <a href="index.html">
+  <a href="../index.html">
     <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
 <li>
-  <a href="reference/index.html">Reference</a>
+  <a href="../reference/index.html">Reference</a>
 </li>
 <li>
-  <a href="news/index.html">Changelog</a>
+  <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -108,46 +110,74 @@
       </header>
 
 <div class="row">
-  <div class="contents col-md-9">
+  <div class="col-md-9 contents">
     <div class="page-header">
-      <h1>Authors</h1>
+    <h1>Summary an <code>CRD</code> object</h1>
+    <small class="dont-index">Source: <a href='https://github.com/DidierMurilloF/FielDHub/blob/master/R/fct_CRD.R'><code>R/fct_CRD.R</code></a></small>
+    <div class="hidden name"><code>summary.CRD.Rd</code></div>
     </div>
 
-    <ul class="list-unstyled">
-      <li>
-        <p><strong>Didier Murillo</strong>. Maintainer, author. 
-        </p>
-      </li>
-      <li>
-        <p><strong>Salvador Gezan</strong>. Author. 
-        </p>
-      </li>
-      <li>
-        <p><strong>Ana Heilman</strong>. Contributor. 
-        </p>
-      </li>
-      <li>
-        <p><strong>Thomas Walk</strong>. Contributor. 
-        </p>
-      </li>
-      <li>
-        <p><strong>Johan Aparicio</strong>. Contributor. 
-        </p>
-      </li>
-      <li>
-        <p><strong>Richard Horsley</strong>. Contributor. 
-        </p>
-      </li>
-      <li>
-        <p><strong>North Dakota State University</strong>. Copyright holder. 
-        </p>
-      </li>
-    </ul>
+    <div class="ref-description">
+    <p>Summarise information on the design parameters, and data
+  frame structure</p>
+    </div>
 
+    <pre class="usage"><span class='co'># S3 method for CRD</span>
+<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>...</span><span class='op'>)</span></pre>
+
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>object</th>
+      <td><p>an object inheriting from class
+<code>FielDHub</code></p></td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td><p>Unused, for extensibility</p></td>
+    </tr>
+    </table>
+
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>an object inheriting from class <code>summary.CRD</code></p>
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Thiago de Paula Oliveira,
+  <a href='mailto:thiago.paula.oliveira@alumni.usp.br'>thiago.paula.oliveira@alumni.usp.br</a></p>
+
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='co'># Example 1: Generates a CRD design with 5 treatments and 5 reps each.</span>
+<span class='va'>crd1</span> <span class='op'>&lt;-</span> <span class='fu'><a href='CRD.html'>CRD</a></span><span class='op'>(</span>t <span class='op'>=</span> <span class='fl'>5</span>, reps <span class='op'>=</span> <span class='fl'>5</span>, plotNumber <span class='op'>=</span> <span class='fl'>101</span>,
+seed <span class='op'>=</span> <span class='fl'>1985</span>, locationName <span class='op'>=</span> <span class='st'>"Fargo"</span><span class='op'>)</span>
+<span class='va'>crd1</span><span class='op'>$</span><span class='va'>infoDesign</span>
+</div><div class='output co'>#&gt; $numberofTreatments
+#&gt; [1] 5
+#&gt; 
+#&gt; $treatments
+#&gt; [1] "T1" "T2" "T3" "T4" "T5"
+#&gt; 
+#&gt; $Reps
+#&gt; [1] 5
+#&gt; 
+#&gt; $locationName
+#&gt; [1] "Fargo"
+#&gt; 
+#&gt; $seed
+#&gt; [1] 1985
+#&gt; </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>crd1</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;            Length Class      Mode
+#&gt; infoDesign 5      -none-     list
+#&gt; fieldBook  5      data.frame list</div><div class='input'>
+</div></pre>
   </div>
-
+  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
+    <nav id="toc" data-toggle="toc" class="sticky-top">
+      <h2 data-toc-skip>Contents</h2>
+    </nav>
+  </div>
 </div>
-
 
 
       <footer>

@@ -40,3 +40,11 @@ split$rowsEachlist
 split$listLocations
 
 }
+\author{
+Didier Murillo [aut],
+        Salvador Gezan [aut],
+        Ana Heilman [ctb],
+        Thomas Walk [ctb], 
+        Johan Aparicio [ctb], 
+        Richard Horsley [ctb]
+}

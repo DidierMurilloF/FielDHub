@@ -12,6 +12,14 @@
 #' @param locationNames (optional) Names for each location.
 #' @param data (optional) data frame with the labels of vertical and hirizontal plots.
 #' 
+#' 
+#' @author Didier Murillo [aut],
+#'         Salvador Gezan [aut],
+#'         Ana Heilman [ctb],
+#'         Thomas Walk [ctb], 
+#'         Johan Aparicio [ctb], 
+#'         Richard Horsley [ctb]
+#' 
 #' @importFrom stats runif na.omit
 #' 
 #' @return A list with information on the design parameters.
@@ -130,11 +138,7 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
   z <- 1
   x <- seq(1, b * l, b)
   y <- seq(b, b * l, b)
-  x_1 <- paste0("rep", seq(1:b), sep = "_Loc_")
-  y_1 <- paste0(rep(x_1, l), rep(locationNames, each = b))
-  PLOTS <- setNames(vector(mode = "list", length = b*l),
-                                 y_1)
-  #PLOTS <- vector(mode = "list", length = b*l)
+  PLOTS <- vector(mode = "list", length = b*l)
   for (sites in 1:l) {
     for (r in 1:b) {
       D <- plot.numbs[[sites]]
@@ -162,17 +166,29 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
   }
   stripDesig.output <- paste_by_row(stripDesig.out.l)
   stripDesig.out.loc <- vector(mode = "list", length = l)
-  strips.b.loc <- vector(mode = "list", length = l)
+  #strips.b.loc <- vector(mode = "list", length = l)
+  strips.b.loc <- setNames(vector(mode = "list", length = l),
+                           paste0("Loc_", locationNames))
+  NEW_PLOTS <- setNames(vector(mode = "list", length = l),
+                        paste0("Loc_", locationNames))
   w <- 1
   for (loc in 1:l) {
     stripDesig.out.loc[[loc]] <- paste_by_row(stripDesig.b[x[w]:y[w]])
     strips.b.loc[[loc]] <- strips.b[x[w]:y[w]]
+    strips.b.loc[[loc]] <- setNames(strips.b.loc[[loc]], 
+                                     paste0(rep("rep", b), 1:b))
+    NEW_PLOTS[[loc]] <- setNames(PLOTS[x[w]:y[w]], 
+                                 paste0(rep("rep", b), 1:b))
     w <- w + 1
   }
+  
+  
+  
+  
+  
   if (!is.null(locationNames) && length(locationNames) == l) {
     stripDesig.output$LOCATION <- rep(locationNames, each = (nH * nV) * b)
   }
-  
   stripDesig.output$LOCATION <- factor(stripDesig.output$LOCATION, levels = as.character(unique(locationNames)))
   stripDesig_output <- stripDesig.output[order(stripDesig.output$LOCATION, stripDesig.output$PLOT),]
   
@@ -185,5 +201,5 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
                      nameLocations = locationNames, seed = seed)
   
   return(list(infoDesign = infoDesign, stripsBlockLoc = strips.b.loc,
-              plotLayouts = PLOTS, fieldBook = stripDesig_output))
+              plotLayouts = NEW_PLOTS, fieldBook = stripDesig_output))
 }

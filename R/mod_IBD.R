@@ -99,11 +99,9 @@ mod_IBD_server <- function(id){
       return(list(t_ibd = t_ibd))
     })
     
-    observeEvent(get_tIBD()$t_ibd, {# input$t.ibd
-      #req(input$t.ibd)
-      req(get_tIBD()$t_ibd)
+    observeEvent(get_tIBD()$t_ibd, {
       
-      #t <- input$t.ibd
+      req(get_tIBD()$t_ibd)
       t <- as.numeric(get_tIBD()$t_ibd)
       if (numbers::isPrime(t)) {
         w <- 1
@@ -128,8 +126,6 @@ mod_IBD_server <- function(id){
       req(input$plot_start.ibd)
       req(input$Location.ibd)
       req(input$l.ibd)
-      # req(input$planter_mov_ibd)
-      # planter <- as.character(input$planter_mov_ibd)
       r.ibd <- as.numeric(input$r.ibd)
       k.ibd <- as.numeric(input$k.ibd)
       plot_start.ibd <- as.vector(unlist(strsplit(input$plot_start.ibd, ",")))
@@ -150,21 +146,13 @@ mod_IBD_server <- function(id){
       l.ibd <- as.numeric(input$l.ibd)
       
       if (r.ibd < 2) validate("Incomplete Blocks Design needs at least 2 replicates.")
-      
-      # shinybusy::show_modal_spinner(
-      #   spin = "cube-grid",
-      #   color = "firebrick",
-      #   text = "Please wait..."
-      # )
-      # show the modal window
+
       incomplete_blocks(t = t.ibd, k = k.ibd, r = r.ibd, l = l.ibd, plotNumber = plot_start.ibd,
                         seed = seed.ibd,
                         locationNames = loc,
                         data = data.ibd) 
       
     })
-    #shinybusy::remove_modal_spinner() # remove it when done
-    
     
     valsIBD <- reactiveValues(maxV.ibd = NULL, minV.ibd = NULL, trail.ibd = NULL)
     

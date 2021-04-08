@@ -132,9 +132,9 @@ mod_Optim_server <- function(id){
         inFile <- input$file3
         data_up <- load_file(name = inFile$name, path = inFile$datapat, sep = input$sep.OPTIM)
         data_up <- as.data.frame(data_up)
-        data_up <- na.omit(data_up)
-        if (ncol(data_up) < 3) base::stop("Data input needs at least three columns with: ENTRY, NAME and REPS.")
+        if (ncol(data_up) < 3) shiny::validate("Data input needs at least three columns with: ENTRY, NAME and REPS.")
         data_up <- as.data.frame(data_up[,1:3])
+        data_up <- na.omit(data_up)
         colnames(data_up) <- c("ENTRY", "NAME", "REPS")
         if(!is.numeric(data_up$REPS) || !is.integer(data_up$REPS) ||
            is.factor(data_up$REPS)) validate("'REPS' must be numeric.")

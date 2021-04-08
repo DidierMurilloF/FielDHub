@@ -9,6 +9,14 @@
 #' @param seed (optional) Real number that specifies the starting seed to obtain reproducible designs.
 #' @param data (optional) Data frame with the 2 columns with labels of each treatments and its number of replicates.
 #'
+#'
+#' @author Didier Murillo [aut],
+#'         Salvador Gezan [aut],
+#'         Ana Heilman [ctb],
+#'         Thomas Walk [ctb], 
+#'         Johan Aparicio [ctb], 
+#'         Richard Horsley [ctb]
+#'         
 #' @importFrom stats runif na.omit
 #'
 #' @return A list with information on the design parameters.

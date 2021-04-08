@@ -54,7 +54,8 @@ head(squareLattice1$fieldBook,12)
 # 7 IBlocks for a square number of treatmens of 49 in one location.
 # In this case, we show how to use the option data.
 treatments <- paste("G", 1:49, sep = "")
-treatment_list <- data.frame(list(TREATMENT = treatments))
+ENTRY <- 1:49
+treatment_list <- data.frame(list(ENTRY = ENTRY, TREATMENT = treatments))
 head(treatment_list) 
 squareLattice2 <- square_lattice(t = 49, k = 7, r = 3, l = 1, 
                                  plotNumber = 1001,
@@ -68,4 +69,12 @@ head(squareLattice2$fieldBook,12)
 \references{
 Edmondson., R. N. (2021). blocksdesign: Nested and crossed block designs for factorial and
 unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign
+}
+\author{
+Didier Murillo [aut],
+        Salvador Gezan [aut],
+        Ana Heilman [ctb],
+        Thomas Walk [ctb], 
+        Johan Aparicio [ctb], 
+        Richard Horsley [ctb]
 }

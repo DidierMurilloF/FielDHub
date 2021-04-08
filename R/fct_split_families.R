@@ -8,6 +8,13 @@
 #' @param data Data frame with the entry (ENTRY) and the labels of each treatment (NAME)
 #' and number of individuals per family group (FAMILY).
 #' 
+#' @author Didier Murillo [aut],
+#'         Salvador Gezan [aut],
+#'         Ana Heilman [ctb],
+#'         Thomas Walk [ctb], 
+#'         Johan Aparicio [ctb], 
+#'         Richard Horsley [ctb]
+#' 
 #' @importFrom stats na.omit 
 #' 
 #' @return A table with summary of cases.

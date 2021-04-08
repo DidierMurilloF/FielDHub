@@ -54,7 +54,8 @@ head(ibd1$fieldBook)
 # Example 2: Generates a balanced resolvable IBD of characteristics (t,k,r) = (15,3,7).
 # In this case, we show how to use the option data.
 treatments <- paste("TX-", 1:15, sep = "")
-treatment_list <- data.frame(list(TREATMENT = treatments))
+ENTRY <- 1:15
+treatment_list <- data.frame(list(ENTRY = ENTRY, TREATMENT = treatments))
 head(treatment_list)
 ibd2 <- incomplete_blocks(t = 15,
                           k = 3,
@@ -68,4 +69,12 @@ head(ibd2$fieldBook)
 \references{
 Edmondson., R. N. (2021). blocksdesign: Nested and crossed block designs for factorial and
 unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign
+}
+\author{
+Didier Murillo [aut],
+        Salvador Gezan [aut],
+        Ana Heilman [ctb],
+        Thomas Walk [ctb], 
+        Johan Aparicio [ctb], 
+        Richard Horsley [ctb]
 }

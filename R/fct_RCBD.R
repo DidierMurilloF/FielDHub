@@ -13,6 +13,14 @@
 #' @param locationNames (optional) Names for each location.
 #' @param data (optional) Data frame with the labels of treatments.
 #' 
+#' 
+#' @author Didier Murillo [aut],
+#'         Salvador Gezan [aut],
+#'         Ana Heilman [ctb],
+#'         Thomas Walk [ctb], 
+#'         Johan Aparicio [ctb], 
+#'         Richard Horsley [ctb]
+#' 
 #' @importFrom stats runif na.omit setNames
 #' 
 #' @return A list with information on the design parameters.
@@ -137,9 +145,6 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101, continuous = FA
                            paste0("Loc_", locationNames))
   if (!continuous) {
     if (planter == "serpentine") {
-      #p.number.loc <- vector(mode = "list", length = l)
-      # p.number.loc <- setNames(vector(mode = "list", length = l),
-      #                          paste0("Loc_", locationNames))
       for (i in 1:l) {
         M <- matrix(data = NA, ncol = nt, nrow = b, byrow = TRUE)
         for (k in 1:b) {
@@ -149,9 +154,6 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101, continuous = FA
         p.number.loc[[i]] <- serpentinelayout(M, opt = 2)
       }
     }else {
-      #p.number.loc <- vector(mode = "list", length = l)
-      # p.number.loc <- setNames(vector(mode = "list", length = l),
-      #                          paste0("Loc_", locationNames))
       for (i in 1:l) {
         M <- matrix(data = NA, ncol = nt, nrow = b, byrow = TRUE)
         for (k in 1:b) {
@@ -163,9 +165,6 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101, continuous = FA
     }
   }else {
     if (planter == "serpentine") {
-      #p.number.loc <- vector(mode = "list", length = l)
-      # p.number.loc <- setNames(vector(mode = "list", length = l),
-      #                          paste0("Loc_", locationNames))
       for (i in 1:l) {
         D <- plotNumber[[i]]
         M <- matrix(data = D[i]:(D[i] + (nt * b - 1)), ncol = nt,
@@ -173,9 +172,6 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101, continuous = FA
         p.number.loc[[i]] <- serpentinelayout(M, opt = 2)
       }
     }else {
-      #p.number.loc <- vector(mode = "list", length = l)
-      # p.number.loc <- setNames(vector(mode = "list", length = l),
-      #                          paste0("Loc_", locationNames))
       for (i in 1:l) {
         D <- plotNumber[[i]]
         p.number.loc[[i]] <- matrix(data = D[i]:(D[i] + (nt * b - 1)), ncol = nt,

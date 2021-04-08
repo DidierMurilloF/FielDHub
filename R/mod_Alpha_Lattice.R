@@ -38,9 +38,6 @@ mod_Alpha_Lattice_ui <- function(id){
                    selectInput(inputId = ns("k.alpha"), label = "Input # of Plots per IBlock:", choices = ""),
                    numericInput(inputId = ns("l.alpha"), label = "Input # of Locations:", value = NULL, min = 1),
                    
-                   # selectInput(inputId = ns("planter_mov__alpha"), label = "Plot Order Layout:",
-                   #             choices = c("serpentine", "cartesian"), multiple = FALSE,
-                   #             selected = "serpentine"),
                    fluidRow(
                      column(6, style=list("padding-right: 28px;"),
                             textInput(inputId = ns("plot_start.alpha"), "Starting Plot Number:", value = 101)
@@ -78,7 +75,7 @@ mod_Alpha_Lattice_ui <- function(id){
 #'
 #' @noRd 
 mod_Alpha_Lattice_server <- function(id){
-  moduleServer(id, function(input, output, session){
+  moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
     getData.alpha <- reactive({
@@ -88,10 +85,21 @@ mod_Alpha_Lattice_server <- function(id){
       return(list(dataUp.alpha = dataUp.alpha))
     })
     
-    observeEvent(input$t.alpha, {
-      req(input$t.alpha)
+    get_tALPHA <- reactive({
+      if(is.null(input$file.alpha)) {
+        req(input$t.alpha)
+        t_alpha <- input$t.alpha
+      }else {
+        req(input$file.alpha)
+        t_alpha <- nrow(getData.alpha()$dataUp.alpha)
+      }
+      return(list(t_alpha = t_alpha))
+    })
+    
+    observeEvent(get_tALPHA()$t_alpha, {
+      req(get_tALPHA()$t_alpha)
       
-      t <- input$t.alpha
+      t <- as.numeric(get_tALPHA()$t_alpha)
       if (numbers::isPrime(t)) {
         w <- 1
         k <- "No Options Available"
@@ -109,7 +117,6 @@ mod_Alpha_Lattice_server <- function(id){
     ALPHA_reactive <- eventReactive(input$RUN.alpha, {
       
       req(input$k.alpha)
-      req(input$t.alpha)
       req(input$myseed.alpha)
       req(input$plot_start.alpha)
       req(input$Location.alpha)
@@ -121,22 +128,23 @@ mod_Alpha_Lattice_server <- function(id){
       plot_start.alpha <- as.vector(unlist(strsplit(input$plot_start.alpha, ",")))
       plot_start.alpha <- as.numeric(plot_start.alpha)
       loc <-  as.vector(unlist(strsplit(input$Location.alpha, ",")))
-      seed.rcbd <- as.numeric(input$myseed.alpha)
       
       if (input$owndata_alpha == "Yes") {
-        t.alpha <- NULL 
-        data.alpha <- getData.alpha()$dataUp.alpha
+        t.alpha <- as.numeric(get_tALPHA()$t_alpha)
+        data.alpha <- as.data.frame(getData.alpha()$dataUp.alpha)
+        if (ncol(data.alpha) < 2) shiny::validate("Data input needs at least two columns with: ENTRY and NAME.")
+        data_alpha <- as.data.frame(data.alpha[,c(1,2)])
       }else {
         req(input$t.alpha)
         t.alpha <- as.numeric(input$t.alpha)
-        data.alpha <- NULL
+        data_alpha <- NULL
       }
       seed.alpha <- as.numeric(input$myseed.alpha)
       l.alpha <- as.numeric(input$l.alpha)
       if (r.alpha < 2) validate("Alpha Design needs at least 2 replicates.")
       
       
-      if(k.alpha == "No Options Available") validate("No Options Available.")
+      if(k.alpha == "No Options Available") shiny::validate("No Options Available.")
       s <- t.alpha / k.alpha
       if (s %% 1 != 0) validate("No Options Available.")
 
@@ -144,7 +152,7 @@ mod_Alpha_Lattice_server <- function(id){
                     plotNumber = plot_start.alpha, 
                     seed = seed.alpha,
                     locationNames = loc, 
-                    data = data.alpha) 
+                    data = data_alpha) 
       
     })
     

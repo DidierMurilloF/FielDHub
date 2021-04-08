@@ -11,6 +11,14 @@
 #' @param locationNames (optional) Names for each location.
 #' @param data (optional) Data frame with label list of treatments.
 #' 
+#' 
+#' @author Didier Murillo [aut],
+#'         Salvador Gezan [aut],
+#'         Ana Heilman [ctb],
+#'         Thomas Walk [ctb], 
+#'         Johan Aparicio [ctb], 
+#'         Richard Horsley [ctb]
+#' 
 #' @importFrom stats runif na.omit
 #'
 #' @return A list with information on the design parameters.
@@ -35,7 +43,8 @@
 #' # and 56 treatments across 2 locations.
 #' # In this case, we show how to use the option data.
 #' treatments <- paste("ND-", 1:56, sep = "")
-#' treatment_list <- data.frame(list(TREATMENT = treatments))
+#' ENTRY <- 1:56
+#' treatment_list <- data.frame(list(ENTRY = ENTRY, TREATMENT = treatments))
 #' head(treatment_list) 
 #' rectangularLattice2 <- rectangular_lattice(t = 56, k = 7, r = 5, l = 2, 
 #'                                            plotNumber = c(1001,2001),
@@ -80,19 +89,19 @@ rectangular_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber 
     }
     data_alpha <- NULL
   }else if (!is.null(data)) {
-    if (is.null(r) || is.null(k) || is.null(l)) {
+    if (is.null(t) || is.null(r) || is.null(k) || is.null(l)) {
       shiny::validate('Some of the basic design parameters are missing (t, k, r).')
     }
     if(!is.data.frame(data)) shiny::validate("Data must be a data frame.")
-    data <- as.data.frame(na.omit(data[,1]))
-    colnames(data) <- "Treatment"
-    data$Treatment <- as.character(data$Treatment)
-    new_t <- length(data$Treatment)
+    data_up <- as.data.frame(data[,c(1,2)])
+    data_up <- na.omit(data_up)
+    colnames(data_up) <- c("ENTRY", "TREATMENT")
+    data_up$TREATMENT <- as.character(data_up$TREATMENT)
+    new_t <- length(data_up$TREATMENT)
     if (t != new_t) base::stop("Number of treatments do not match with data input.")
-    TRT <- data$Treatment
+    TRT <- data_up$TREATMENT
     nt <- length(TRT)
-    if (nt != t) shiny::validate('Number of treatment do not match with data input.')
-    data_alpha <- data
+    data_alpha <- data_up
   }
   s <- nt / k
   if (s %% 1 != 0 || k != (s - 1) || nt != s*(s - 1)) {

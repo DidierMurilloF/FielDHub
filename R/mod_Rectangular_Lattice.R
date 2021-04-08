@@ -84,9 +84,21 @@ mod_Rectangular_Lattice_server <- function(id) {
       return(list(dataUp.rectangular= dataUp.rectangular))
     })
     
-    observeEvent(input$t.rectangular, {
-      req(input$t.rectangular)
-      t <- input$t.rectangular
+    get_tRECT <- reactive({
+      if(is.null(input$file.rectangular)) {
+        req(input$t.rectangular)
+        t.rectangular <- input$t.rectangular
+      }else {
+        req(input$file.rectangular)
+        t.rectangular <- nrow(getData.rectangular()$dataUp.rectangular)
+      }
+      return(list(t.rectangular = t.rectangular))
+    })
+    
+    observeEvent(get_tRECT()$t.rectangular, {
+      req(get_tRECT()$t.rectangular)
+      
+      t <- as.numeric(get_tRECT()$t.rectangular)
       D <- numbers::divisors(t)
       D <- D[2:(length(D)-1)]
       pk <- numeric()
@@ -125,7 +137,7 @@ mod_Rectangular_Lattice_server <- function(id) {
       seed.rcbd <- as.numeric(input$myseed.rectangular)
       
       if (input$owndata_rectangular == "Yes") {
-        t.rectangular <- NULL 
+        t.rectangular <- as.numeric(get_tRECT()$t.rectangular)
         data.rectangular <- getData.rectangular()$dataUp.rectangular
       }else {
         req(input$t.rectangular)

@@ -10,6 +10,14 @@
 #' @param locationNames (optional) Name for the location.
 #' @param data (optional) Data frame with label list of treatments.
 #' 
+#' @author Didier Murillo [aut],
+#'         Salvador Gezan [aut],
+#'         Ana Heilman [ctb],
+#'         Thomas Walk [ctb], 
+#'         Johan Aparicio [ctb],
+#'         Thiago de Paula Oliveira[ctb] 
+#'         Richard Horsley [ctb]
+#' 
 #' @importFrom stats runif na.omit setNames
 #'
 #' @importFrom stats runif na.omit

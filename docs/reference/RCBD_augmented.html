@@ -131,6 +131,7 @@
   seed <span class='op'>=</span> <span class='cn'>NULL</span>,
   locationNames <span class='op'>=</span> <span class='cn'>NULL</span>,
   repsExpt <span class='op'>=</span> <span class='fl'>1</span>,
+  random <span class='op'>=</span> <span class='cn'>TRUE</span>,
   data <span class='op'>=</span> <span class='cn'>NULL</span>
 <span class='op'>)</span></pre>
 
@@ -178,6 +179,10 @@
       <td><p>(optional) Number of reps of experiment. By default <code>repsExpt = 1</code>.</p></td>
     </tr>
     <tr>
+      <th>random</th>
+      <td><p>Logical value to randomize treatments or not. By default <code>random = TRUE</code>.</p></td>
+    </tr>
+    <tr>
       <th>data</th>
       <td><p>(optional) Data frame with the labels of treatments.</p></td>
     </tr>
@@ -193,9 +198,18 @@
 
     <p>Federer, W. T. (1955). Experimental Design. Theory and Application. New York, USA. The
 Macmillan Company.</p>
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Didier Murillo [aut],
+        Salvador Gezan [aut],
+        Ana Heilman [ctb],
+        Thomas Walk [ctb], 
+        Johan Aparicio [ctb], 
+        Richard Horsley [ctb]</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='co'># Example 1: Generates an ARCBD with 6 blocks, 3 checks for each, and 50 treatments in two locations.</span>
+    <pre class="examples"><div class='input'><span class='co'># Example 1: Generates an ARCBD with 6 blocks, 3 checks for each, and 50 treatments </span>
+<span class='co'># in two locations.</span>
 <span class='va'>ARCBD1</span> <span class='op'>&lt;-</span> <span class='fu'>RCBD_augmented</span><span class='op'>(</span>lines <span class='op'>=</span> <span class='fl'>50</span>, checks <span class='op'>=</span> <span class='fl'>3</span>, b <span class='op'>=</span> <span class='fl'>6</span>, l <span class='op'>=</span> <span class='fl'>2</span>, 
                          planter <span class='op'>=</span> <span class='st'>"cartesian"</span>, 
                          plotNumber <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span>,<span class='fl'>1001</span><span class='op'>)</span>,
@@ -206,7 +220,7 @@ Macmillan Company.</p>
 #&gt; [1] 6
 #&gt; 
 #&gt; $plotsPerBlock
-#&gt; [1] 9 9 9 9 9 5
+#&gt; [1] 12 12 12 12 12  8
 #&gt; 
 #&gt; $Checks
 #&gt;   ENTRY NAME
@@ -260,7 +274,8 @@ Macmillan Company.</p>
 #&gt; 10 10 Expt1    FARGO 2021   10   1     10      0     1     5        G5
 #&gt; 11 11 Expt1    FARGO 2021   11   1     11      1     1     1       CH1
 #&gt; 12 12 Expt1    FARGO 2021   12   1     12      0     1    17       G17</div><div class='input'>                   
-<span class='co'># Example 2: Generates an ARCBD with 17 blocks, 4 checks for each, and 350 treatments in 3 locations.</span>
+<span class='co'># Example 2: Generates an ARCBD with 17 blocks, 4 checks for each, and 350 treatments </span>
+<span class='co'># in 3 locations.</span>
 <span class='co'># In this case, we show how to use the option data.</span>
 <span class='va'>checks</span> <span class='op'>&lt;-</span> <span class='fl'>4</span>;
 <span class='va'>list_checks</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span><span class='op'>(</span><span class='st'>"CH"</span>, <span class='fl'>1</span><span class='op'>:</span><span class='va'>checks</span>, sep <span class='op'>=</span> <span class='st'>""</span><span class='op'>)</span>
@@ -290,7 +305,7 @@ Macmillan Company.</p>
 #&gt; [1] 17
 #&gt; 
 #&gt; $plotsPerBlock
-#&gt;  [1] 21 21 21 21 21 21 21 21 21 21 21 21 21 21 21 21 14
+#&gt;  [1] 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 18
 #&gt; 
 #&gt; $Checks
 #&gt;   ENTRY NAME

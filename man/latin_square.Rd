@@ -68,3 +68,12 @@ head(latinSq2$fieldBook)
 Federer, W. T. (1955). Experimental Design. Theory and Application. New York, USA. The
 Macmillan Company.
 }
+\author{
+Didier Murillo [aut],
+        Salvador Gezan [aut],
+        Ana Heilman [ctb],
+        Thomas Walk [ctb], 
+        Johan Aparicio [ctb],
+        Thiago de Paula Oliveira[ctb] 
+        Richard Horsley [ctb]
+}

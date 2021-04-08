@@ -11,6 +11,13 @@
 #' @param seed (optional) Real number that specifies the starting seed to obtain reproducible designs.
 #' @param locationNames (optional) Names for each location.
 #' @param data (optional) Data frame with label list of treatments.
+#' 
+#' @author Didier Murillo [aut],
+#'         Salvador Gezan [aut],
+#'         Ana Heilman [ctb],
+#'         Thomas Walk [ctb], 
+#'         Johan Aparicio [ctb], 
+#'         Richard Horsley [ctb]
 #'
 #' @importFrom stats runif na.omit
 #'
@@ -35,7 +42,8 @@
 #' # Example 2: Generates a balanced resolvable IBD of characteristics (t,k,r) = (15,3,7).
 #' # In this case, we show how to use the option data.
 #' treatments <- paste("TX-", 1:15, sep = "")
-#' treatment_list <- data.frame(list(TREATMENT = treatments))
+#' ENTRY <- 1:15
+#' treatment_list <- data.frame(list(ENTRY = ENTRY, TREATMENT = treatments))
 #' head(treatment_list)
 #' ibd2 <- incomplete_blocks(t = 15,
 #'                           k = 3,
@@ -90,15 +98,17 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
       shiny::validate('Some of the basic design parameters are missing (t, k, r or l)')
     }
     if(!is.data.frame(data)) shiny::validate("Data must be a data frame.")
-    data <- as.data.frame(na.omit(data[,1]))
-    colnames(data) <- "Treatment"
-    data$Treatment <- as.character(data$Treatment)
-    new_t <- length(data$Treatment)
+    if (ncol(data) < 2) base::stop("Data input needs at least two columns with: ENTRY and NAME.")
+    data_up <- as.data.frame(data[,c(1,2)])
+    data_up <- na.omit(data_up)
+    colnames(data_up) <- c("ENTRY", "TREATMENT")
+    data_up$TREATMENT <- as.character(data_up$TREATMENT)
+    new_t <- length(data_up$TREATMENT)
     if (t != new_t) base::stop("Number of treatments do not match with the data input.")
-    TRT <- data$Treatment
+    TRT <- data_up$TREATMENT
     nt <- length(TRT)
     lookup <- TRUE
-    dataLookUp <- data.frame(list(ENTRY = 1:nt, LABEL_TREATMENT = TRT))#TREATMENT
+    dataLookUp <- data.frame(list(ENTRY = 1:nt, LABEL_TREATMENT = TRT))
   }
   if(any(plotNumber %% 1 != 0) || any(plotNumber < 1) || any(diff(plotNumber) < 0)) {
     shiny::validate("'incomplete_blocks()' requires plotNumber to be possitive integers and sorted.")
@@ -123,8 +133,7 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
   b <- nt/k
   outIBD_loc <- vector(mode = "list", length = l)
   for (i in 1:l) {
-    mydes <- blocksdesign::blocks(treatments = nt, replicates = r, blocks = list(r, b),
-                                  seed = seed)
+    mydes <- blocksdesign::blocks(treatments = nt, replicates = r, blocks = list(r, b), seed = NULL)
     matdf <- base::data.frame(list(LOCATION = rep(locationNames[i], each = N)))
     matdf$PLOT <- as.numeric(unlist(ibd_plots[[i]]))
     matdf$BLOCK <- rep(c(1:r), each = nt)
@@ -142,6 +151,9 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
     OutIBD <- dplyr::inner_join(OutIBD, dataLookUp, by = "ENTRY")
     OutIBD <- OutIBD[,-6]
     colnames(OutIBD) <- c("LOCATION","PLOT", "REP", "IBLOCK", "UNIT", "TREATMENT")
+    OutIBD <- dplyr::inner_join(OutIBD, data_up, by = "TREATMENT")
+    OutIBD <- OutIBD[, c(1:5,7,6)]
+    colnames(OutIBD) <- c("LOCATION","PLOT", "REP", "IBLOCK", "UNIT", "ENTRY", "TREATMENT")
   }
 
   ID <- 1:nrow(OutIBD)

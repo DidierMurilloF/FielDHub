@@ -48,7 +48,8 @@
 #' # Size of IBlocks k = 10. 
 #' # In this case, we show how to use the option data.
 #' treatments <- paste("G-", 1:50, sep = "")
-#' treatment_list <- data.frame(list(TREATMENT = treatments))
+#' ENTRY <- 1:50
+#' treatment_list <- data.frame(list(ENTRY = ENTRY, TREATMENT = treatments))
 #' head(treatment_list) 
 #' alphalattice2 <- alpha_lattice(t = 50, k = 10, r = 5, 
 #'                                l = 1, 
@@ -98,15 +99,17 @@ alpha_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101,
       shiny::validate('Basic design parameters missing (t, k, r or l).')
     }
     if(!is.data.frame(data)) shiny::validate("Data must be a data frame.")
-    data <- as.data.frame(na.omit(data[,1]))
-    colnames(data) <- "Treatment"
-    data$Treatment <- as.character(data$Treatment)
-    new_t <- length(data$Treatment)
+    if (ncol(data) < 2) base::stop("Data input needs at least two columns with: ENTRY and NAME.")
+    data_up <- as.data.frame(data[,c(1,2)])
+    data_up <- na.omit(data_up)
+    colnames(data_up) <- c("ENTRY", "TREATMENT")
+    data_up$TREATMENT <- as.character(data_up$TREATMENT)
+    new_t <- length(data_up$TREATMENT)
     if (t != new_t) base::stop("Number of treatments do not match with data input.")
-    TRT <- data$Treatment
+    TRT <- data_up$TREATMENT
     nt <- length(TRT)
     if (nt != t) shiny::validate('Number of treatment do not match with data input')
-    data_alpha <- data
+    data_alpha <- data_up
   }
   if (k >= nt) shiny::validate('incomplete_blocks() requires that k < t.')
   if(is.null(locationNames) || length(locationNames) != l) locationNames <- 1:l

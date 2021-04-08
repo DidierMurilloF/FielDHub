@@ -94,6 +94,17 @@ mod_RowCol_server <- function(id){
       return(list(dataUp.rcd = dataUp.rcd))
     })
     
+    Get_tROWCOL <- reactive({
+      if(is.null(input$file.RCD)) {
+        req(input$t.rcd)
+        t.ROWCOL <- input$t.rcd
+      }else {
+        req(input$file.RCD)
+        t.ROWCOL <- nrow(getData.rcd()$dataUp.rcd)
+      }
+      return(list(t.ROWCOL = t.ROWCOL))
+    })
+    
     RowCol_reactive <- reactive({
       
       req(input$t.rcd)
@@ -113,7 +124,7 @@ mod_RowCol_server <- function(id){
       loc.rcd <-  as.vector(unlist(strsplit(input$Location.rcd, ",")))
       
       if (input$owndataRCD == "Yes") {
-        t.rcd <- NULL 
+        t.rcd <- as.numeric(Get_tROWCOL()$t.ROWCOL)
         data.rcd <- getData.rcd()$dataUp.rcd
       }else {
         req(input$t.rcd)

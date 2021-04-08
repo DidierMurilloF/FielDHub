@@ -55,7 +55,8 @@ head(alphalattice1$fieldBook, 10)
 # Size of IBlocks k = 10. 
 # In this case, we show how to use the option data.
 treatments <- paste("G-", 1:50, sep = "")
-treatment_list <- data.frame(list(TREATMENT = treatments))
+ENTRY <- 1:50
+treatment_list <- data.frame(list(ENTRY = ENTRY, TREATMENT = treatments))
 head(treatment_list) 
 alphalattice2 <- alpha_lattice(t = 50, k = 10, r = 5, 
                                l = 1, 

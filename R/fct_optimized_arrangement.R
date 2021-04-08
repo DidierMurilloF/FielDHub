@@ -18,6 +18,13 @@
 #' @param locationNames (optional) Name for each location.
 #' @param data (optional) Data frame with 3 columns: \code{ENTRY | NAME | REPS}.
 #' 
+#' @author Didier Murillo [aut],
+#'         Salvador Gezan [aut],
+#'         Ana Heilman [ctb],
+#'         Thomas Walk [ctb], 
+#'         Johan Aparicio [ctb], 
+#'         Richard Horsley [ctb]
+#' 
 #' 
 #' @return A list with information on the design parameters.
 #' @return A matrix with the randomization layout.

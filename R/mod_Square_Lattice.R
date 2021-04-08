@@ -93,9 +93,21 @@ mod_Square_Lattice_server <- function(id){
       return(list(dataUp.square = dataUp.square))
     })
     
-    observeEvent(input$t.square, {
-      req(input$t.square)
-      t <- input$t.square
+    get_tSQUARE <- reactive({
+      if(is.null(input$file.square)) {
+        req(input$t.square)
+        t_square <- input$t.square
+      }else {
+        req(input$file.square)
+        t_square <- nrow(getData.square()$dataUp.square)
+      }
+      return(list(t_square = t_square))
+    })
+    
+    observeEvent(get_tSQUARE()$t_square, {
+      req(get_tSQUARE()$t_square)
+      
+      t <- as.numeric(get_tSQUARE()$t_square)
       if (sqrt(t) %% 1 != 0) {
         w <- 1
         k <- "No Options Available"
@@ -125,7 +137,7 @@ mod_Square_Lattice_server <- function(id){
       seed.rcbd <- as.numeric(input$myseed.square)
       
       if (input$owndata_square == "Yes") {
-        t.square <- NULL 
+        t.square <- as.numeric(get_tSQUARE()$t_square)
         data.square <- getData.square()$dataUp.square
       }else {
         req(input$t.square)

@@ -100,3 +100,11 @@ Cullis, S., B. R., & Coombes, N. E. (2006). On the design of early generation va
 with correlated data. Journal of Agricultural, Biological, and Environmental Statistics, 11,
 381–393. https://doi.org/10.1198/108571106X154443
 }
+\author{
+Didier Murillo [aut],
+        Salvador Gezan [aut],
+        Ana Heilman [ctb],
+        Thomas Walk [ctb], 
+        Johan Aparicio [ctb], 
+        Richard Horsley [ctb]
+}

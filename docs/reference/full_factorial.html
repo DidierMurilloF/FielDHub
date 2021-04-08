@@ -130,6 +130,7 @@
   planter <span class='op'>=</span> <span class='st'>"serpentine"</span>,
   seed <span class='op'>=</span> <span class='cn'>NULL</span>,
   locationNames <span class='op'>=</span> <span class='cn'>NULL</span>,
+  factorLabels <span class='op'>=</span> <span class='cn'>TRUE</span>,
   data <span class='op'>=</span> <span class='cn'>NULL</span>
 <span class='op'>)</span></pre>
 
@@ -150,27 +151,38 @@
     </tr>
     <tr>
       <th>type</th>
-      <td><p>Option for CRD or RCBD designs. Values are <code>type = 1</code> (CRD) or <code>type = 2</code> (RCBD). By default <code>type = 2</code>.</p></td>
+      <td><p>Option for CRD or RCBD designs. Values are <code>type =
+1</code> (CRD) or <code>type = 2</code> (RCBD). By default <code>type = 2</code>.</p></td>
     </tr>
     <tr>
       <th>plotNumber</th>
-      <td><p>Numeric vector with the starting plot number for each location. By default <code>plotNumber = 101</code>.</p></td>
+      <td><p>Numeric vector with the starting plot number for
+each location. By default <code>plotNumber = 101</code>.</p></td>
     </tr>
     <tr>
       <th>continuous</th>
-      <td><p>Logical for plot number continuous or not. By default <code>continuous = FALSE</code>.</p></td>
+      <td><p>Logical for plot number continuous or not. By
+default <code>continuous = FALSE</code>.</p></td>
     </tr>
     <tr>
       <th>planter</th>
-      <td><p>Option for <code>serpentine</code> or <code>cartesian</code> plot arrangement. By default  <code>planter = 'serpentine'</code>.</p></td>
+      <td><p>Option for <code>serpentine</code> or <code>cartesian</code> plot
+arrangement. By default <code>planter = 'serpentine'</code>.</p></td>
     </tr>
     <tr>
       <th>seed</th>
-      <td><p>(optional) Real number that specifies the starting seed to obtain reproducible designs.</p></td>
+      <td><p>(optional) Real number that specifies the starting seed
+to obtain reproducible designs.</p></td>
     </tr>
     <tr>
       <th>locationNames</th>
       <td><p>(optional) Names for each location.</p></td>
+    </tr>
+    <tr>
+      <th>factorLabels</th>
+      <td><p>(optional) If <code>TRUE</code> retain the levels
+labels from the original data set otherwise, numeric labels will be
+assigned. Default is <code>factorLabels =TRUE</code>.</p></td>
     </tr>
     <tr>
       <th>data</th>
@@ -186,15 +198,23 @@
 
     <p>Federer, W. T. (1955). Experimental Design. Theory and Application. New York, USA. The
 Macmillan Company.</p>
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Didier Murillo [aut],
+        Salvador Gezan [aut],
+        Ana Heilman [ctb],
+        Thomas Walk [ctb], 
+        Johan Aparicio [ctb], 
+        Richard Horsley [ctb]</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='co'># Example 1: Generates a full factorial with 3 factors each with 2 levels. </span>
+    <pre class="examples"><div class='input'><span class='co'># Example 1: Generates a full factorial with 3 factors each with 2 levels.</span>
 <span class='co'># This in an RCBD arrangement with 3 reps.</span>
-<span class='va'>fullFact1</span> <span class='op'>&lt;-</span> <span class='fu'>full_factorial</span><span class='op'>(</span>setfactors <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>2</span>,<span class='fl'>2</span>,<span class='fl'>2</span><span class='op'>)</span>, reps <span class='op'>=</span> <span class='fl'>3</span>, l <span class='op'>=</span> <span class='fl'>1</span>, type <span class='op'>=</span> <span class='fl'>2</span>, 
-                            plotNumber <span class='op'>=</span> <span class='fl'>101</span>, 
-                            continuous <span class='op'>=</span> <span class='cn'>TRUE</span>, 
-                            planter <span class='op'>=</span> <span class='st'>"serpentine"</span>, 
-                            seed <span class='op'>=</span> <span class='fl'>325</span>, 
+<span class='va'>fullFact1</span> <span class='op'>&lt;-</span> <span class='fu'>full_factorial</span><span class='op'>(</span>setfactors <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>2</span>,<span class='fl'>2</span>,<span class='fl'>2</span><span class='op'>)</span>, reps <span class='op'>=</span> <span class='fl'>3</span>, l <span class='op'>=</span> <span class='fl'>1</span>, type <span class='op'>=</span> <span class='fl'>2</span>,
+                            plotNumber <span class='op'>=</span> <span class='fl'>101</span>,
+                            continuous <span class='op'>=</span> <span class='cn'>TRUE</span>,
+                            planter <span class='op'>=</span> <span class='st'>"serpentine"</span>,
+                            seed <span class='op'>=</span> <span class='fl'>325</span>,
                             locationNames <span class='op'>=</span> <span class='st'>"FARGO"</span><span class='op'>)</span>
 <span class='va'>fullFact1</span><span class='op'>$</span><span class='va'>infoDesign</span>
 </div><div class='output co'>#&gt; $factors
@@ -248,12 +268,12 @@ Macmillan Company.</p>
 #&gt; 8   8    FARGO  108   1        2        1        2    2*1*2
 #&gt; 16  9    FARGO  109   2        1        1        2    1*1*2
 #&gt; 15 10    FARGO  110   2        2        2        2    2*2*2</div><div class='input'>
-<span class='co'># Example 2: Generates a full factorial with 3 factors and each with levels: 2,3, </span>
-<span class='co'># and 2, respectively. In this case, we show how to use the option data.</span>
+<span class='co'># Example 2: Generates a full factorial with 3 factors and each with levels: 2,3,</span>
+<span class='co'># and 2, respectively. In this case, we show how to use the option data</span>
 <span class='va'>FACTORS</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"A"</span>, <span class='st'>"B"</span>, <span class='st'>"C"</span><span class='op'>)</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>2</span>,<span class='fl'>3</span>,<span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span>
 <span class='va'>LEVELS</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"a0"</span>, <span class='st'>"a1"</span>, <span class='st'>"b0"</span>, <span class='st'>"b1"</span>, <span class='st'>"b2"</span>, <span class='st'>"c0"</span>, <span class='st'>"c1"</span><span class='op'>)</span>
 <span class='va'>data_factorial</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>FACTOR <span class='op'>=</span> <span class='va'>FACTORS</span>, LEVEL <span class='op'>=</span> <span class='va'>LEVELS</span><span class='op'>)</span><span class='op'>)</span>
-<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>data_factorial</span><span class='op'>)</span> 
+<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>data_factorial</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;   FACTOR LEVEL
 #&gt; 1      A    a0
 #&gt; 2      A    a1
@@ -262,11 +282,11 @@ Macmillan Company.</p>
 #&gt; 5      B    b2
 #&gt; 6      C    c0
 #&gt; 7      C    c1</div><div class='input'><span class='co'># This in an RCBD arrangement with 5 reps in 3 locations.</span>
-<span class='va'>fullFact2</span> <span class='op'>&lt;-</span> <span class='fu'>full_factorial</span><span class='op'>(</span>setfactors <span class='op'>=</span> <span class='cn'>NULL</span>, reps <span class='op'>=</span> <span class='fl'>5</span>, l <span class='op'>=</span> <span class='fl'>3</span>, type <span class='op'>=</span> <span class='fl'>2</span>, 
-                            plotNumber <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>101</span>,<span class='fl'>1001</span>,<span class='fl'>2001</span><span class='op'>)</span>, 
-                            continuous <span class='op'>=</span> <span class='cn'>FALSE</span>, 
-                            planter <span class='op'>=</span> <span class='st'>"serpentine"</span>, 
-                            seed <span class='op'>=</span> <span class='fl'>326</span>, 
+<span class='va'>fullFact2</span> <span class='op'>&lt;-</span> <span class='fu'>full_factorial</span><span class='op'>(</span>setfactors <span class='op'>=</span> <span class='cn'>NULL</span>, reps <span class='op'>=</span> <span class='fl'>5</span>, l <span class='op'>=</span> <span class='fl'>3</span>, type <span class='op'>=</span> <span class='fl'>2</span>,
+                            plotNumber <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>101</span>,<span class='fl'>1001</span>,<span class='fl'>2001</span><span class='op'>)</span>,
+                            continuous <span class='op'>=</span> <span class='cn'>FALSE</span>,
+                            planter <span class='op'>=</span> <span class='st'>"serpentine"</span>,
+                            seed <span class='op'>=</span> <span class='fl'>326</span>,
                             locationNames <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Loc1"</span>,<span class='st'>"Loc2"</span>,<span class='st'>"Loc3"</span><span class='op'>)</span>,
                             data <span class='op'>=</span> <span class='va'>data_factorial</span><span class='op'>)</span>
 <span class='va'>fullFact2</span><span class='op'>$</span><span class='va'>infoDesign</span>

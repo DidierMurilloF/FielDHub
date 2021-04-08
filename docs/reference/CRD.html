@@ -166,13 +166,21 @@
 
     <p>Federer, W. T. (1955). Experimental Design. Theory and Application. New York, USA. The
 Macmillan Company.</p>
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Didier Murillo [aut],
+        Salvador Gezan [aut],
+        Ana Heilman [ctb],
+        Thomas Walk [ctb], 
+        Johan Aparicio [ctb], 
+        Richard Horsley [ctb]</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'># Example 1: Generates a CRD design with 10 treatments and 5 reps each.</span>
-<span class='va'>crd1</span> <span class='op'>&lt;-</span> <span class='fu'>CRD</span><span class='op'>(</span>t <span class='op'>=</span> <span class='fl'>10</span>, 
-            reps <span class='op'>=</span> <span class='fl'>5</span>, 
-            plotNumber <span class='op'>=</span> <span class='fl'>101</span>, 
-            seed <span class='op'>=</span> <span class='fl'>1987</span>, 
+<span class='va'>crd1</span> <span class='op'>&lt;-</span> <span class='fu'>CRD</span><span class='op'>(</span>t <span class='op'>=</span> <span class='fl'>10</span>,
+            reps <span class='op'>=</span> <span class='fl'>5</span>,
+            plotNumber <span class='op'>=</span> <span class='fl'>101</span>,
+            seed <span class='op'>=</span> <span class='fl'>1987</span>,
             locationName <span class='op'>=</span> <span class='st'>"Fargo"</span><span class='op'>)</span>
 <span class='va'>crd1</span><span class='op'>$</span><span class='va'>infoDesign</span>
 </div><div class='output co'>#&gt; $numberofTreatments
@@ -203,10 +211,10 @@ Macmillan Company.</p>
 #&gt; 10 10    Fargo  110   3        T8</div><div class='input'>
 <span class='co'># Example 2: Generates a CRD design with 15 treatments and 6 reps each.</span>
 <span class='va'>Gens</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span><span class='op'>(</span><span class='st'>"Wheat"</span>, <span class='fl'>1</span><span class='op'>:</span><span class='fl'>15</span>, sep <span class='op'>=</span> <span class='st'>""</span><span class='op'>)</span>
-<span class='va'>crd2</span> <span class='op'>&lt;-</span> <span class='fu'>CRD</span><span class='op'>(</span>t <span class='op'>=</span> <span class='va'>Gens</span>, 
-            reps <span class='op'>=</span> <span class='fl'>6</span>, 
-            plotNumber <span class='op'>=</span> <span class='fl'>1001</span>, 
-            seed <span class='op'>=</span> <span class='fl'>1654</span>, 
+<span class='va'>crd2</span> <span class='op'>&lt;-</span> <span class='fu'>CRD</span><span class='op'>(</span>t <span class='op'>=</span> <span class='va'>Gens</span>,
+            reps <span class='op'>=</span> <span class='fl'>6</span>,
+            plotNumber <span class='op'>=</span> <span class='fl'>1001</span>,
+            seed <span class='op'>=</span> <span class='fl'>1654</span>,
             locationName <span class='op'>=</span> <span class='st'>"Fargo"</span><span class='op'>)</span>
 <span class='va'>crd2</span><span class='op'>$</span><span class='va'>infoDesign</span>
 </div><div class='output co'>#&gt; $numberofTreatments
@@ -248,10 +256,10 @@ Macmillan Company.</p>
 #&gt; 3      ND-3   4
 #&gt; 4      ND-4   4
 #&gt; 5      ND-5   4
-#&gt; 6      ND-6   4</div><div class='input'><span class='va'>crd3</span> <span class='op'>&lt;-</span> <span class='fu'>CRD</span><span class='op'>(</span>t <span class='op'>=</span> <span class='cn'>NULL</span>, 
-            reps <span class='op'>=</span> <span class='cn'>NULL</span>, 
-            plotNumber <span class='op'>=</span> <span class='fl'>2001</span>, 
-            seed <span class='op'>=</span> <span class='fl'>1655</span>, 
+#&gt; 6      ND-6   4</div><div class='input'><span class='va'>crd3</span> <span class='op'>&lt;-</span> <span class='fu'>CRD</span><span class='op'>(</span>t <span class='op'>=</span> <span class='cn'>NULL</span>,
+            reps <span class='op'>=</span> <span class='cn'>NULL</span>,
+            plotNumber <span class='op'>=</span> <span class='fl'>2001</span>,
+            seed <span class='op'>=</span> <span class='fl'>1655</span>,
             locationName <span class='op'>=</span> <span class='st'>"Cali"</span>,
             data <span class='op'>=</span> <span class='va'>treatment_list</span><span class='op'>)</span>
 <span class='va'>crd3</span><span class='op'>$</span><span class='va'>infoDesign</span>

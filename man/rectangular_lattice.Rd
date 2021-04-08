@@ -54,7 +54,8 @@ head(rectangularLattice1$fieldBook,12)
 # and 56 treatments across 2 locations.
 # In this case, we show how to use the option data.
 treatments <- paste("ND-", 1:56, sep = "")
-treatment_list <- data.frame(list(TREATMENT = treatments))
+ENTRY <- 1:56
+treatment_list <- data.frame(list(ENTRY = ENTRY, TREATMENT = treatments))
 head(treatment_list) 
 rectangularLattice2 <- rectangular_lattice(t = 56, k = 7, r = 5, l = 2, 
                                            plotNumber = c(1001,2001),
@@ -68,4 +69,12 @@ head(rectangularLattice2$fieldBook,12)
 \references{
 Edmondson., R. N. (2021). blocksdesign: Nested and crossed block designs for factorial and
 unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign
+}
+\author{
+Didier Murillo [aut],
+        Salvador Gezan [aut],
+        Ana Heilman [ctb],
+        Thomas Walk [ctb], 
+        Johan Aparicio [ctb], 
+        Richard Horsley [ctb]
 }
