@@ -10,6 +10,9 @@
 #' @param planter Option for \code{serpentine} or \code{cartesian} arrangement. By default \code{planter = 'serpentine'}.
 #' @param seed (optional) Real number that specifies the starting seed to obtain reproducible designs.
 #' @param locationNames (optional) Names for each location.
+#' @param factorLabels (optional) If \code{TRUE} retain the levels
+#'   labels from the original data set otherwise, numeric labels will be
+#'   assigned. Default is \code{factorLabels =TRUE}.
 #' @param data (optional) data frame with the labels of vertical and hirizontal plots.
 #' 
 #' 
@@ -72,9 +75,9 @@
 #' @export
 strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = NULL,
                        planter = "serpentine", locationNames = NULL, seed = NULL, 
-                       data = NULL) {
+                       factorLabels = TRUE, data = NULL) {
   
-  if (is.null(seed) || !is.numeric(seed)) seed <- runif(1, min = -50000, max = 50000)
+  if (is.null(seed) || is.character(seed) || is.factor(seed)) seed <- runif(1, min = -50000, max = 50000)
   set.seed(seed)
   arg0 <- c(Hplots, Vplots)
   arg1 <- list(Hplots, Vplots)
@@ -110,6 +113,10 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
     nV <- length(levels(Vplots.f))
     Hplots <- as.character(Hplots.f)
     Vplots <- as.character(Vplots.f)
+    if(!factorLabels) {
+      Hplots <- as.character(1:nH)
+      Vplots <- as.character((nH + 1):(nH + nV))
+    }
   }
   if(!is.null(l) && is.numeric(l) && length(l) == 1) {
     if (l > 1 && is.null(locationNames)) {
@@ -181,10 +188,6 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
                                  paste0(rep("rep", b), 1:b))
     w <- w + 1
   }
-  
-  
-  
-  
   
   if (!is.null(locationNames) && length(locationNames) == l) {
     stripDesig.output$LOCATION <- rep(locationNames, each = (nH * nV) * b)

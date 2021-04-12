@@ -73,6 +73,7 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101, continuous = FA
     stop("Input planter choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
   }
   if (is.null(seed) || !is.numeric(seed)) seed <- runif(1, min = -50000, max = 50000)
+  set.seed(seed)
   if (is.null(l) || !is.numeric(l) || l %% 1 != 0) {
     shiny::validate("'RCBD()' requires that locations number to be an integer greater than 0.")
   }
@@ -123,7 +124,6 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101, continuous = FA
   }
   RCBD <- matrix(data = NA, nrow = b * l, ncol = nt, byrow = TRUE)
   RCBD.layout <- matrix(data = NA, nrow = b, ncol = 2, byrow = TRUE)
-  #RCBD.layout.loc <- vector(mode = "list", length = l)
   RCBD.layout.loc <- setNames(vector(mode = "list", length = l),
                               paste0("Loc_", locationNames)) # set names
   k <- seq(1, l * b, b)

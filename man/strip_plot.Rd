@@ -13,6 +13,7 @@ strip_plot(
   planter = "serpentine",
   locationNames = NULL,
   seed = NULL,
+  factorLabels = TRUE,
   data = NULL
 )
 }
@@ -32,6 +33,10 @@ strip_plot(
 \item{locationNames}{(optional) Names for each location.}
 
 \item{seed}{(optional) Real number that specifies the starting seed to obtain reproducible designs.}
+
+\item{factorLabels}{(optional) If \code{TRUE} retain the levels
+labels from the original data set otherwise, numeric labels will be
+assigned. Default is \code{factorLabels =TRUE}.}
 
 \item{data}{(optional) data frame with the labels of vertical and hirizontal plots.}
 }

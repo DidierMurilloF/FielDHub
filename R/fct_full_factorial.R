@@ -77,7 +77,8 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
   if (all(c("serpentine", "cartesian") != planter)) {
     stop("Input for planter choice is unknown. Please, choose one: serpentine or cartesian.")
   }
-  if (is.null(seed) || !is.numeric(seed)) seed <- runif(1, min = -50000, max = 50000)
+  if (is.null(seed) || is.character(seed) || is.factor(seed)) seed <- runif(1, min = -50000, max = 50000)
+  set.seed(seed)
   get.levels <- function(k = NULL) {
     newlevels <- list();s <- 1
     for (i in k) {
@@ -123,6 +124,9 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
       levels.by.factor[[v]] <- data.by.factor[[v]][,2]
       v <- v + 1
     }
+    if (!factorLabels) {
+      levels.by.factor <- split_vectors(x = 1:nrow(data), len_cuts = base::lengths(levels.by.factor))
+    }
     nt <- length(l.factors)
     allcomb <- base::expand.grid(levels.by.factor, KEEP.OUT.ATTRS = FALSE,
                                  stringsAsFactors = FALSE)
@@ -137,12 +141,9 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
   }
   nruns <- nrow(allcomb)
   trt <- vector(mode = "character", length = nruns)
-  for (i in 1:nrow(allcomb)) {
-    if (factorLabels == FALSE) {
-      trt[i] <- paste(allcomb[i,], collapse = " ")
-    }else {
-      trt[i] <- paste(apply(allcomb[i,], 2, as.character), collapse = " ")
-    }
+  H <- 1:nrow(allcomb)
+  for (i in H) {
+    trt[i] <- paste(allcomb[i,], collapse = " ")
   }
   design.loc <- list()
   for (locs in 1:l) {

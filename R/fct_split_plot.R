@@ -10,6 +10,9 @@
 #' @param plotNumber Numeric vector with the starting plot number for each location. By default \code{plotNumber = 101}.
 #' @param seed (optional) Real number that specifies the starting seed to obtain reproducible designs.
 #' @param locationNames (optional) Names for each location.
+#' @param factorLabels (optional) If \code{TRUE} retain the levels
+#'   labels from the original data set otherwise, numeric labels will be
+#'   assigned. Default is \code{factorLabels =TRUE}.
 #' @param data (optional) Data frame with label list of treatments.
 #' 
 #' 
@@ -64,9 +67,10 @@
 #'                   
 #' @export
 split_plot <- function(wp = NULL, sp = NULL, reps = NULL, type = 2, l = 1, plotNumber = 101, 
-                       seed = NULL, locationNames = NULL, data = NULL) {
+                       seed = NULL, locationNames = NULL, factorLabels = TRUE, 
+                       data = NULL) {
   
-  if (is.null(seed) || !is.numeric(seed)) seed <- runif(1, min = -50000, max = 50000)
+  if (is.null(seed) || is.character(seed) || is.factor(seed)) seed <- runif(1, min = -50000, max = 50000)
   set.seed(seed)
   if (all(c(1,2) != type)) {
     stop("Input type is unknown. Please, choose one: 1 or 2, for CRD or RCBD, respectively.")
@@ -117,6 +121,10 @@ split_plot <- function(wp = NULL, sp = NULL, reps = NULL, type = 2, l = 1, plotN
     sp <- length(levels(SubPlots.f))
     WholePlots <- as.character(WholePlots.f)
     SubPlots <- as.character(SubPlots.f)
+    if(!factorLabels) {
+      WholePlots <- as.character(1:wp)
+      SubPlots <- as.character((wp + 1):(wp + sp))
+    }
   }
   b <- reps
   if (!is.null(plotNumber)) {

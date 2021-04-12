@@ -11,6 +11,9 @@
 #' @param plotNumber Numeric vector with the starting plot number for each location. By default \code{plotNumber = 101}.
 #' @param seed (optional) Real number that specifies the starting seed to obtain reproducible designs.
 #' @param locationNames (optional) Names for each location.
+#' @param factorLabels (optional) If \code{TRUE} retain the levels
+#'   labels from the original data set otherwise, numeric labels will be
+#'   assigned. Default is \code{factorLabels =TRUE}.
 #' @param data (optional) Data frame with label list of treatments.
 #' 
 #' 
@@ -65,7 +68,8 @@
 #'              
 #' @export
 split_split_plot <- function(wp = NULL, sp = NULL, ssp = NULL, reps = NULL, type = 2, l = 1, plotNumber = 101, 
-                             seed = NULL, locationNames = NULL, data = NULL) {
+                             seed = NULL, locationNames = NULL, factorLabels = TRUE,
+                             data = NULL) {
 
   if (is.null(seed) || !is.numeric(seed)) seed <- runif(1, min = -50000, max = 50000)
   set.seed(seed)
@@ -143,6 +147,11 @@ split_split_plot <- function(wp = NULL, sp = NULL, ssp = NULL, reps = NULL, type
     WholePlots <- as.character(WholePlots.f)
     SubPlots <- as.character(SubPlots.f)
     SubSubPlots <- as.character(SubSubPlot.f)
+    if(!factorLabels) {
+      WholePlots <- as.character(1:wp)
+      SubPlots <- as.character((wp + 1):(wp + sp))
+      SubSubPlots <- as.character((wp + sp + 1):(wp + sp + ssp))
+    }
   }
   if (!is.null(plotNumber)) {
     if (any(!is.numeric(plotNumber)) || any(plotNumber < 1) || any(plotNumber %% 1 != 0) ||

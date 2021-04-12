@@ -14,6 +14,7 @@ split_split_plot(
   plotNumber = 101,
   seed = NULL,
   locationNames = NULL,
+  factorLabels = TRUE,
   data = NULL
 )
 }
@@ -35,6 +36,10 @@ split_split_plot(
 \item{seed}{(optional) Real number that specifies the starting seed to obtain reproducible designs.}
 
 \item{locationNames}{(optional) Names for each location.}
+
+\item{factorLabels}{(optional) If \code{TRUE} retain the levels
+labels from the original data set otherwise, numeric labels will be
+assigned. Default is \code{factorLabels =TRUE}.}
 
 \item{data}{(optional) Data frame with label list of treatments.}
 }

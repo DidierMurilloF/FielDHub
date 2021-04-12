@@ -65,7 +65,8 @@
 CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL,
                 seed = NULL, data = NULL) {
 
-  if (is.null(seed) || !is.numeric(seed)) seed <- runif(1, min = -50000, max = 50000)
+  if (is.null(seed) || is.character(seed) || is.factor(seed)) seed <- runif(1, min = -50000, max = 50000)
+  set.seed(seed)
   if (!is.null(plotNumber)) {
     if (plotNumber < 1 || plotNumber %% 1 != 0) shiny::validate('plotNumber must be an integer greater than 0.')
   }else {
