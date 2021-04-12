@@ -236,9 +236,24 @@ mod_RCBD_augmented_server <- function(id) {
        E <- paste("E", rep(repsExpt:1, each = b), sep = "")
        rownames(df) <- paste(B,E)
        colnames(df) <- paste("V", 1:ncol(df), sep = "")
-       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                 scrollX = TRUE, scrollY = "1000px"))
-       DT::datatable(df) %>% 
+       # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
+       #                           scrollX = TRUE, scrollY = "1000px"))
+       # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
+       # DT::datatable(df,
+       #               extensions = 'FixedColumns',
+       #               options = list(
+       #                 dom = 't',
+       #                 scrollX = TRUE,
+       #                 fixedColumns = TRUE
+       #               )) %>%
+       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
+       DT::datatable(df,
+                     extensions = 'FixedColumns',
+                     options = list(
+                       dom = 't',
+                       scrollX = TRUE,
+                       fixedColumns = TRUE
+                     )) %>%
          DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
                          backgroundColor = DT::styleEqual(c(checks), 
                                                           colores[1:len_checks])) %>% 

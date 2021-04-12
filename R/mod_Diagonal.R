@@ -333,12 +333,20 @@ mod_Diagonal_server <- function(id) {
       
       df <- as.data.frame(w_map)
       rownames(df) <- nrow(df):1
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                scrollX = TRUE, scrollY = "1000px"))
-      DT::datatable(df) %>% 
-        DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-                        backgroundColor = DT::styleEqual(c(checks,0,"Filler"), 
-                                                         c(colores[1:len_checks],'yellow', 'snow')))
+      # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
+      #                           scrollX = TRUE, scrollY = "1000px"))
+      # DT::datatable(df) %>%
+      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
+      DT::datatable(df,
+                    extensions = 'FixedColumns',
+                    options = list(
+                      dom = 't',
+                      scrollX = TRUE,
+                      fixedColumns = TRUE
+                    )) %>% 
+      DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
+                      backgroundColor = DT::styleEqual(c(checks,0,"Filler"), 
+                                                       c(colores[1:len_checks],'yellow', 'snow')))
     })
     
     output$dt8 <- DT::renderDT({
@@ -520,19 +528,35 @@ mod_Diagonal_server <- function(id) {
           Visual_ch <- as.numeric(input$Visual_ch)
           df <- as.data.frame(r_map)
           rownames(df) <- nrow(df):1
-          options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                    scrollX = TRUE, scrollY = "1000px"))
-          DT::datatable(df) %>%
-            DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-                            backgroundColor = DT::styleEqual(c(a, Visual_ch), c(my_colors, 'red')))
+          # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
+          #                           scrollX = TRUE, scrollY = "1000px"))
+          # DT::datatable(df) %>%
+          options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
+          DT::datatable(df,
+                        extensions = 'FixedColumns',
+                        options = list(
+                          dom = 't',
+                          scrollX = TRUE,
+                          fixedColumns = TRUE
+                        )) %>% 
+          DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
+                          backgroundColor = DT::styleEqual(c(a, Visual_ch), c(my_colors, 'red')))
         }else{
           df <- as.data.frame(r_map)
           rownames(df) <- nrow(df):1
-          options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                    scrollX = TRUE, scrollY = "1000px"))
-          DT::datatable(df) %>%
-            DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-                            backgroundColor = DT::styleEqual(a, my_colors))
+          # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
+          #                           scrollX = TRUE, scrollY = "1000px"))
+          # DT::datatable(df) %>%
+          options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
+          DT::datatable(df,
+                        extensions = 'FixedColumns',
+                        options = list(
+                          dom = 't',
+                          scrollX = TRUE,
+                          fixedColumns = TRUE
+                        )) %>% 
+          DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
+                          backgroundColor = DT::styleEqual(a, my_colors))
         }
       }
     })
@@ -644,11 +668,19 @@ mod_Diagonal_server <- function(id) {
           }else Name_expt = paste0(rep("Expt1", times = blocks), 1:blocks)
           df <- as.data.frame(my_names)
           rownames(df) <- nrow(df):1
-          options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                    scrollX = TRUE, scrollY = scrollY(input$n_rows)))
-          DT::datatable(df) %>% 
-            DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-                            backgroundColor = DT::styleEqual(Name_expt, c('yellow')))
+          # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
+          #                           scrollX = TRUE, scrollY = scrollY(input$n_rows)))
+          # DT::datatable(df) %>%
+          options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
+          DT::datatable(df,
+                        extensions = 'FixedColumns',
+                        options = list(
+                          dom = 't',
+                          scrollX = TRUE,
+                          fixedColumns = TRUE
+                        )) %>% 
+          DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
+                          backgroundColor = DT::styleEqual(Name_expt, c('yellow')))
         }else{
           blocks = 1
           if (input$expt_name != ""){
@@ -656,11 +688,19 @@ mod_Diagonal_server <- function(id) {
           }else Name_expt = paste0(rep("Expt1", times = blocks), 1:blocks)
           df <- as.data.frame(my_names)
           rownames(df) <- nrow(df):1
-          options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                    scrollX = TRUE, scrollY = scrollY(input$n_rows)))
-          DT::datatable(df) %>% 
-            DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-                            backgroundColor = DT::styleEqual(Name_expt, c('yellow')))
+          # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
+          #                           scrollX = TRUE, scrollY = scrollY(input$n_rows)))
+          # DT::datatable(df) %>%
+          options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
+          DT::datatable(df,
+                        extensions = 'FixedColumns',
+                        options = list(
+                          dom = 't',
+                          scrollX = TRUE,
+                          fixedColumns = TRUE
+                        )) %>% 
+          DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
+                          backgroundColor = DT::styleEqual(Name_expt, c('yellow')))
         }
       }else if(multi == TRUE){
         if(input$kindExpt == "DBUDC") { 
@@ -685,12 +725,20 @@ mod_Diagonal_server <- function(id) {
                             'violet', 'thistle') 
           df <- as.data.frame(my_names) 
           rownames(df) <- nrow(df):1
-          options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                    scrollX = TRUE, scrollY = scrollY(input$n_rows)))
-          DT::datatable(df) %>% 
-            DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-                            backgroundColor = DT::styleEqual(name_expt, colores_back[1:blocks])
-            ) 
+          # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
+          #                           scrollX = TRUE, scrollY = scrollY(input$n_rows)))
+          # DT::datatable(df) %>%
+          options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
+          DT::datatable(df,
+                        extensions = 'FixedColumns',
+                        options = list(
+                          dom = 't',
+                          scrollX = TRUE,
+                          fixedColumns = TRUE
+                        )) %>% 
+          DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
+                          backgroundColor = DT::styleEqual(name_expt, colores_back[1:blocks])
+          ) 
         }else if(input$kindExpt == "RDC") { 
           reps <- as.numeric(input$n_reps) 
           Name_expt <- as.vector(unlist(strsplit(input$expt_name, ",")))[1] 
@@ -704,12 +752,20 @@ mod_Diagonal_server <- function(id) {
                             'violet', 'thistle') 
           df <- as.data.frame(my_names) 
           rownames(df) <- nrow(df):1
-          options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                    scrollX = TRUE, scrollY = scrollY(input$n_rows)))
-          DT::datatable(df) %>% 
-            DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-                            backgroundColor = DT::styleEqual(expe_names, colores_back[1:reps])
-            ) 
+          # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
+          #                           scrollX = TRUE, scrollY = scrollY(input$n_rows)))
+          # DT::datatable(df) %>%
+          options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
+          DT::datatable(df,
+                        extensions = 'FixedColumns',
+                        options = list(
+                          dom = 't',
+                          scrollX = TRUE,
+                          fixedColumns = TRUE
+                        )) %>% 
+          DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
+                          backgroundColor = DT::styleEqual(expe_names, colores_back[1:reps])
+          ) 
         } 
       } 
     })
@@ -878,9 +934,17 @@ mod_Diagonal_server <- function(id) {
           my_colors <- unlist(my_colors) 
           df <- as.data.frame(plot_num)
           rownames(df) <- nrow(df):1
-          options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                    scrollX = TRUE, scrollY = "1000px"))
-          DT::datatable(df) %>%
+          # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
+          #                           scrollX = TRUE, scrollY = "1000px"))
+          # DT::datatable(df) %>%
+          options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
+          DT::datatable(df,
+                        extensions = 'FixedColumns',
+                        options = list(
+                          dom = 't',
+                          scrollX = TRUE,
+                          fixedColumns = TRUE
+                        )) %>% 
             DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
                             backgroundColor = DT::styleEqual(a, my_colors)) 
         }else { 
@@ -905,9 +969,17 @@ mod_Diagonal_server <- function(id) {
           my_colors <- unlist(my_colors)
           df <- as.data.frame(w_map_letters1)
           rownames(df) <- nrow(df):1
-          options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                    scrollX = TRUE, scrollY = "1000px"))
-          DT::datatable(df) %>%
+          # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
+          #                           scrollX = TRUE, scrollY = "1000px"))
+          # DT::datatable(df) %>%
+          options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
+          DT::datatable(df,
+                        extensions = 'FixedColumns',
+                        options = list(
+                          dom = 't',
+                          scrollX = TRUE,
+                          fixedColumns = TRUE
+                        )) %>% 
             DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
                             backgroundColor = DT::styleEqual(c(a,0), c(my_colors, "red")))
         }
@@ -919,24 +991,40 @@ mod_Diagonal_server <- function(id) {
           len_a <- length(a)
           df <- as.data.frame(plot_num)
           rownames(df) <- nrow(df):1
-          options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                    scrollX = TRUE, scrollY = "1000px"))
-          DT::datatable(df) %>%
-            DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-                            backgroundColor = DT::styleEqual(c(a,0), 
-                                                             c(rep(c('yellow'), len_a),"red"))
-            )
+          # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
+          #                           scrollX = TRUE, scrollY = "1000px"))
+          # DT::datatable(df) %>%
+          options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
+          DT::datatable(df,
+                        extensions = 'FixedColumns',
+                        options = list(
+                          dom = 't',
+                          scrollX = TRUE,
+                          fixedColumns = TRUE
+                        )) %>% 
+          DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
+                          backgroundColor = DT::styleEqual(c(a,0), 
+                                                           c(rep(c('yellow'), len_a),"red"))
+          )
         }else{
           a <- as.vector(as.matrix(plot_num))
           len_a <- length(a)
           df <- as.data.frame(plot_num)
           rownames(df) <- nrow(df):1
-          options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                    scrollX = TRUE, scrollY = "1000px"))
-          DT::datatable(df) %>%
-            DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-                            backgroundColor = DT::styleEqual(a, 
-                                                             rep('yellow', length(a)))
+          # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
+          #                           scrollX = TRUE, scrollY = "1000px"))
+          # DT::datatable(df) %>%
+          options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
+          DT::datatable(df,
+                        extensions = 'FixedColumns',
+                        options = list(
+                          dom = 't',
+                          scrollX = TRUE,
+                          fixedColumns = TRUE
+                        )) %>% 
+          DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
+                          backgroundColor = DT::styleEqual(a, 
+                                                           rep('yellow', length(a)))
             )
         }
       }
