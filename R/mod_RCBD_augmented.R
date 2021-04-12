@@ -138,7 +138,9 @@ mod_RCBD_augmented_server <- function(id) {
         req(input$file1_a_rcbd)
         inFile <- input$file1_a_rcbd
         data_up <- load_file(name = inFile$name, path = inFile$datapat, sep = input$sep.a_rcbd)
-        data_up <- as.data.frame(na.omit(data_up[,1:3]))
+        if (ncol(data_up) < 2) shiny::validate("Data input needs at least two columns with: ENTRY and NAME.")
+        data_up <- as.data.frame(data_up[,1:2])
+        data_up <- na.omit(data_up)
         colnames(data_up) <- c("ENTRY", "NAME")
       }else {
         req(input$checks_a_rcbd)
@@ -187,9 +189,14 @@ mod_RCBD_augmented_server <- function(id) {
       req(getDataup_a_rcbd()$dataUp_a_rcbd)
       req(input$Location_a_rcbd)
       
-      gen.list <- getDataup_a_rcbd()$dataUp_a_rcbd
-      lines <- as.numeric(input$lines_a_rcbd)
       checks <- as.numeric(input$checks_a_rcbd)
+      if (input$owndata_a_rcbd == "Yes") {
+        gen.list <- getDataup_a_rcbd()$dataUp_a_rcbd
+        lines <- as.numeric(nrow(gen.list) - checks)
+      }else {
+        lines <- as.numeric(input$lines_a_rcbd)
+        gen.list <- getDataup_a_rcbd()$dataUp_a_rcbd
+      }
       b <- as.numeric(input$blocks_a_rcbd)
       seed.number <- as.numeric(input$myseed_a_rcbd)
       planter <- input$planter_mov1_a_rcbd
@@ -207,7 +214,8 @@ mod_RCBD_augmented_server <- function(id) {
       random <- input$random
       ARCBD <- RCBD_augmented(lines = lines, checks = checks, b = b, l = l.arcbd, planter = planter,
                               plotNumber = plot.number, exptName = Name_expt, seed = seed.number,
-                              locationNames = loc, repsExpt = repsExpt, random = random, data = gen.list)
+                              locationNames = loc, repsExpt = repsExpt, random = random, 
+                              data = gen.list)
 
     })
     
