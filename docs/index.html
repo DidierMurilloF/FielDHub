@@ -102,7 +102,7 @@
 <h3 class="hasAnchor">
 <a href="#diagonal-arrangement-example" class="anchor"></a>Diagonal Arrangement Example</h3>
 <p>A project needs to test 270 genotypes in a field containing 20 rows and 15 columns of plots. In this example, these 270 genotypes are divided among three different experiments. In addition, four checks are included in a systematic diagonal arrangement across experiments to fill 30 plots representing 10% of the total number of experimental plots. An option to include filler plots is also available for fields where the number of experimental plots does not equal the number of available field plots.</p>
-<p><img src="DExample.png" alt="\label{fig:Fig2}"></p>
+<p><img src="DExample.PNG"></p>
 <p>The figure above shows a map of an experiment randomized as a Decision Block Unreplicated Design with Checks on Diagonals. Yellow, gray, and green shade the blocks of unreplicated experiments, while distinctively colored check plots are replicated throughout the field in a systematic diagonal arrangement.</p>
 <p>To illustrate using FielDHub to build experimental designs through R code, the design produced in the R Shiny interface described above can also be created using the function <code><a href="reference/diagonal_arrangement.html">diagonal_arrangement()</a></code> in the R script below. Note, that to obtain identical results, users must include the same seed number in the script as was used in the Shiny app. In this case, the seed number is 1249.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
@@ -179,7 +179,7 @@
 <h3 class="hasAnchor">
 <a href="#partially-replicated-design-example" class="anchor"></a>Partially Replicated Design Example</h3>
 <p>Partially replicated designs are commonly employed in early generation field trials. This type of design is characterized by replication of a portion of the entries, with the remaining entries only appearing once in the experiment. As an example, considered a field trial with 288 plots containing 75 entries appearing two times each, and 138 entries only appearing once. This field trials is arranged in a field of 16 rows by 18 columns.</p>
-<p><img src="pREPExample.png"></p>
+<p><img src="pREPExample.PNG"></p>
 <p>In the figure above, green plots contain replicated entries, and yellow plots contain entries that only appear once.</p>
 <p>Instead of using the Shiny FielDHub app, users can use the standalone FielDHub function <code><a href="reference/partially_replicated.html">partially_replicated()</a></code>. The partially replicated layout described above can be produced through scripting as follows. As noted in the previous example, to obtain identical results between the script and the Shiny app, users need to use the same seed number, which, in this case, is 77.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
