@@ -26,11 +26,15 @@
 #'         Richard Horsley [ctb]
 #' 
 #' 
-#' @return A list with information on the design parameters.
-#' @return A matrix with the randomization layout.
-#' @return A matrix with the layout plot number.
-#' @return A data frame with fieldBook design. This includes the index (Row, Column).
-#'
+#' 
+#' @return A list with five elements.
+#' \itemize{
+#'   \item \code{infoDesign} is a list with information on the design parameters.
+#'   \item \code{layoutRandom} is a matrix with the randomization layout.
+#'   \item \code{plotNumber} is a matrix with the layout plot number.
+#'   \item \code{data_entry} is a data frame with the data input.
+#'   \item \code{fieldBook} is a data frame with field book design. This includes the index (Row, Column).
+#' }
 #'
 #' @references
 #' Cullis, S., B. R., & Coombes, N. E. (2006). On the design of early generation variety trials
@@ -142,6 +146,9 @@ partially_replicated <- function(nrows = NULL, ncols = NULL, repGens = NULL, rep
     colnames(data) <- c("ENTRY", "NAME", "REPS")
   }
   
+  if (is.null(seed)) {seed <- runif(1, min = -10000, max = 10000)}
+  set.seed(seed)
+  
   prep <- pREP(nrows = nrows, ncols = ncols, RepChecks = NULL, checks = NULL, Fillers = 0,
                seed = seed, optim = TRUE, niter = 1000, data = data)
   
@@ -201,9 +208,8 @@ partially_replicated <- function(nrows = NULL, ncols = NULL, repGens = NULL, rep
   Checks <- length(EntryChecks)
   infoDesign <- list(Greps = Checks, RepGens = RepChecks, EntryReps = EntryChecks)
   return(list(infoDesign = infoDesign, 
-              dataInput = data, 
               layoutRandom = layoutR, 
-              plotNumber = plot_num, 
+              plotNumber = plot_num,
+              data_entry = data,
               fieldBook = fieldBook))
-  
 }

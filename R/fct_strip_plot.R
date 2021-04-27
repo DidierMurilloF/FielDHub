@@ -25,11 +25,16 @@
 #' 
 #' @importFrom stats runif na.omit
 #' 
-#' @return A list with information on the design parameters.
-#' @return Strip blocks for each location.
-#' @return Data frame with the strip plot field book.
 #' 
-#'
+#' @return A list with four elements.
+#' \itemize{
+#'   \item \code{infoDesign} is a list with information on the design parameters.
+#'   \item \code{stripsBlockLoc} is a list with the strip blocks for each location.
+#'   \item \code{plotLayouts} is a list with the layout plot numbers for each location.
+#'   \item \code{fieldBook} is a data frame  with the strip plot field book.
+#' }
+#' 
+#' 
 #' @references
 #' Federer, W. T. (1955). Experimental Design. Theory and Application. New York, USA. The
 #' Macmillan Company.

@@ -36,13 +36,13 @@ RCBD(
 \item{data}{(optional) Data frame with the labels of treatments.}
 }
 \value{
-A list with information on the design parameters.
-
-RCBD layout for each location.
-
-Plot number layout for each location.
-
-Data frame with the RCBD field book.
+A list with five elements.
+\itemize{
+  \item \code{infoDesign} is a list with information on the design parameters.
+  \item \code{layoutRandom} is the RCBD layout randomization for each location.
+  \item \code{plotNumber} is the plot number layout for each location.
+  \item \code{fieldBook} is a data frame with the RCBD field book design.
+}
 }
 \description{
 It randomly generates a randomized complete block design (RCBD) across locations.
@@ -56,8 +56,8 @@ rcbd1 <- RCBD(t = LETTERS[1:20], reps = 5, l = 3,
               seed = 1020, 
               locationNames = c("FARGO", "MINOT", "CASSELTON"))
 rcbd1$infoDesign                  
-rcbd1$RCBD.layout
-rcbd1$plotNumber.layout
+rcbd1$layoutRandom
+rcbd1$plotNumber
 head(rcbd1$fieldBook)
 
 # Example 2: Generates a RCBD design with 6 blocks and 18 treatments in one location.
@@ -73,8 +73,8 @@ rcbd2 <- RCBD(reps = 6, l = 1,
               locationNames = "IBAGUE",
               data = treatment_list)
 rcbd2$infoDesign                  
-rcbd2$RCBD.layout
-rcbd2$plotNumber.layout
+rcbd2$layoutRandom
+rcbd2$plotNumber
 head(rcbd2$fieldBook)
 
 

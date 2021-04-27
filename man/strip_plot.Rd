@@ -41,11 +41,13 @@ assigned. Default is \code{factorLabels =TRUE}.}
 \item{data}{(optional) data frame with the labels of vertical and hirizontal plots.}
 }
 \value{
-A list with information on the design parameters.
-
-Strip blocks for each location.
-
-Data frame with the strip plot field book.
+A list with four elements.
+\itemize{
+  \item \code{infoDesign} is a list with information on the design parameters.
+  \item \code{stripsBlockLoc} is a list with the strip blocks for each location.
+  \item \code{plotLayouts} is a list with the layout plot numbers for each location.
+  \item \code{fieldBook} is a data frame  with the strip plot field book.
+}
 }
 \description{
 It randomly generates a strip plot design across locations.

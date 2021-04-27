@@ -189,10 +189,14 @@ Note that design generation needs the dimension of the field (number of rows and
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A list with information on the design parameters.</p>
-<p>A matrix with the randomization layout.</p>
-<p>A matrix with the layout plot number.</p>
-<p>A data frame with fieldBook design. This includes the index (Row, Column).</p>
+    <p>A list with five elements.</p><ul>
+<li><p><code>infoDesign</code> is a list with information on the design parameters.</p></li>
+<li><p><code>layoutRandom</code> is a matrix with the randomization layout.</p></li>
+<li><p><code>plotNumber</code> is a matrix with the layout plot number.</p></li>
+<li><p><code>data_entry</code> is a data frame with the data input.</p></li>
+<li><p><code>fieldBook</code> is a data frame with field book design. This includes the index (Row, Column).</p></li>
+</ul>
+
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
     <p>Cullis, S., B. R., &amp; Coombes, N. E. (2006). On the design of early generation variety trials
@@ -234,57 +238,57 @@ with correlated data. Journal of Agricultural, Biological, and Environmental Sta
 #&gt; [51] 51 52 53 54 55 56 57 58 59 60 61 62
 #&gt; </div><div class='input'><span class='va'>SpatpREP1</span><span class='op'>$</span><span class='va'>layoutRandom</span>
 </div><div class='output co'>#&gt;       Col1 Col2 Col3 Col4 Col5 Col6 Col7 Col8 Col9 Col10 Col11 Col12 Col13
-#&gt; Row25  155   15   11  249  274   56  339  289   34   168     3     9   176
-#&gt; Row24    9  271   29   28  251  177  317    1  282   253    23   338   178
-#&gt; Row23   17  134   43  214  318  323  305  333  329     2   185     2     2
-#&gt; Row22  132   56  272   59  108  309   83  216   68    59   105   233   261
-#&gt; Row21    1  215   52  334   45  161  101   10  264     2   294   208    30
-#&gt; Row20    7   30  260  191  210    2  321  268   31   225   133    81    33
-#&gt; Row19  231  239    3    5    9   22   38  109    2    86   332    77   129
-#&gt; Row18  303   57   76  241  206  218    8  328   19    41    67    80   336
-#&gt; Row17  320  154    2  166  252  267  137  118  242   213   142   146   135
-#&gt; Row16  299   36    5  255    7  254   36  122  326   110    70   209    42
-#&gt; Row15   48  262  295  188  322   69  220  102  217   229    50     1   307
-#&gt; Row14    1   14   31   26  331  245    2  232   39   284    20    74     2
-#&gt; Row13   78  169  223  125   25  117   53    2    2    53     1     2   152
-#&gt; Row12    1  314  256   54  167    1  165  270  281   162   153     1    17
-#&gt; Row11   90    1   89  330  115    1  159   27    4    84   179     5    85
-#&gt; Row10  189  199   99   73   46   60  144   71  292    55     1    88    57
-#&gt; Row9   130  187  139   58   51   91    1  186  126    21    72    62    50
-#&gt; Row8   175  311  247   13  300  269   66   60  131   306    13   337     1
-#&gt; Row7   259  182   12   48  298   61   16  288  200    43   160    54   228
-#&gt; Row6   193  141   95  192   62  204  194   92   40   230   123   138   243
-#&gt; Row5   236   20  341  148  257  234   11   15  136   297    26   149   273
-#&gt; Row4    24  266  151  219   12   39   47  174  120   202    23    94   280
-#&gt; Row3    58   41  181    1  150  114  173   47   45    16   157   258   226
-#&gt; Row2   296   61  340    6   25   38  107    1  286   119   127    21    87
-#&gt; Row1    79  308   49  147    2  211  112    2   28    10   196   212   302
+#&gt; Row25  239   12   35   41  158  169   88  292   48   324    46     4   154
+#&gt; Row24   38  281   53  180  338    2  185   50  287   107     2   159   249
+#&gt; Row23   36   70   11  204  247    2  245  280   66    27   182     2     1
+#&gt; Row22  155   18    2    8   10  303  309   89  106    29    57    76   290
+#&gt; Row21  173  127   19  298  110  135  261   29  294    69   227    34    25
+#&gt; Row20  285    1  216  160  156   60   74   98    9    47    91   231     9
+#&gt; Row19  221   68   53  141   58   28   24   78   39    84    96   257   196
+#&gt; Row18   49   31  125  214  262  342    1   26   32    55   310   260   268
+#&gt; Row17    8  137   48   15  237  276  233  105  277   283   163   109   240
+#&gt; Row16  272   38   22  147   50  117    2  321  332   224   282   279    61
+#&gt; Row15    2    6  242   86    1  152  275  172   90    35    40    21   208
+#&gt; Row14   27    1  111   54  270  198   13   39  197   130   114   222    51
+#&gt; Row13  183   94  184  251   43  191   30   31   47   134    33     1   217
+#&gt; Row12    2  145  146   32   25    6  306  211   17   322    73     6    20
+#&gt; Row11  244   41  341  263  144   42  126    2  334   181   317     4   228
+#&gt; Row10  121   64  210  337   52  284  241  293  194     4    24   335    20
+#&gt; Row9   179  318  278  143  323  325    2  103  133    59   299    17     7
+#&gt; Row8   316   95   63   14  122  250   71   59   45   218    46   253    33
+#&gt; Row7   170  161  330   23  291   11    1   85  305    54   189    44   328
+#&gt; Row6    11  295  331  301   37   80  178  139   12   201   320   215   243
+#&gt; Row5   212    3  157  203  312  112   51  118  192    93     2   193   238
+#&gt; Row4    62   72  319  232  138    2   10  286  252   176    56   119   230
+#&gt; Row3   209  113  115    8   87    2  151   61   16    18   162   339   246
+#&gt; Row2   207   52  258   19   21    2  124    1  131   213   190    43   264
+#&gt; Row1   168  297    2  195  308  327  248    2    1     7   226   254    82
 #&gt;       Col14 Col15 Col16 Col17 Col18
-#&gt; Row25   315   325   244     2   100
-#&gt; Row24    35     1    46     6    65
-#&gt; Row23   235     8    82    18   316
-#&gt; Row22    42     3   277   111   207
-#&gt; Row21   312   128    35   285    44
-#&gt; Row20   227   335    12    98   246
-#&gt; Row19   342     1   197    97   324
-#&gt; Row18   221     2   319     2    32
-#&gt; Row17   279   250    75   237     8
-#&gt; Row16   170    96    11     2   203
-#&gt; Row15   327   222    14   171    63
-#&gt; Row14     7   301   183   310   143
-#&gt; Row13   116    93   304   291   124
-#&gt; Row12    51   290   205   195    22
-#&gt; Row11    33    19   265   163   158
-#&gt; Row10    55   184   240     4    37
-#&gt; Row9     27   104   248    24   106
-#&gt; Row8    313     2   263   224   190
-#&gt; Row7    121   164    37    64   287
-#&gt; Row6     18    49    29     2   145
-#&gt; Row5     32   238    10   103     1
-#&gt; Row4    198    40   172   276    52
-#&gt; Row3    278   140    34     4   113
-#&gt; Row2    156   201   283     1     1
-#&gt; Row1      6   293   180   275    44</div><div class='input'><span class='va'>SpatpREP1</span><span class='op'>$</span><span class='va'>plotNumber</span>
+#&gt; Row25    99   289   315     1   148
+#&gt; Row24     1   116    60    23   288
+#&gt; Row23    67    62   229     7   205
+#&gt; Row22     2    45   314   104   101
+#&gt; Row21   307    16     1   255    56
+#&gt; Row20   199   136    58   187   220
+#&gt; Row19   336     1   219   256   123
+#&gt; Row18   167    42   128    44    30
+#&gt; Row17    75   274   102   108     1
+#&gt; Row16   259   200    49     1   165
+#&gt; Row15   304    83     1   186   271
+#&gt; Row14     2   329   188   296   273
+#&gt; Row13   223   166   120   206   140
+#&gt; Row12    26   164   100    92    55
+#&gt; Row11     1     3   311   177   149
+#&gt; Row10   234   267   236     5     9
+#&gt; Row9     15   340    79    28   150
+#&gt; Row8    266    13   171    77   129
+#&gt; Row7    265     5     2   326   132
+#&gt; Row6     22     1    36    10    97
+#&gt; Row5     37   153    40   225    14
+#&gt; Row4    269    12   174   202     1
+#&gt; Row3    333   175     1    34   302
+#&gt; Row2    142   300   313     3     5
+#&gt; Row1     57   235    81    65     2</div><div class='input'><span class='va'>SpatpREP1</span><span class='op'>$</span><span class='va'>plotNumber</span>
 </div><div class='output co'>#&gt;       Col1 Col2 Col3 Col4 Col5 Col6 Col7 Col8 Col9 Col10 Col11 Col12 Col13
 #&gt; Row25  533  534  535  536  537  538  539  540  541   542   543   544   545
 #&gt; Row24  515  516  517  518  519  520  521  522  523   524   525   526   527
@@ -338,18 +342,18 @@ with correlated data. Journal of Agricultural, Biological, and Environmental Sta
 #&gt; Row2    132   133   134   135   136
 #&gt; Row1    114   115   116   117   118</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>SpatpREP1</span><span class='op'>$</span><span class='va'>fieldBook</span>,<span class='fl'>12</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;    ID       EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-#&gt; 1   1 20ExptpREP        1 2021  101   1      1      0    79       G79
-#&gt; 2   2 20ExptpREP        1 2021  102   1      2      0   308      G308
-#&gt; 3   3 20ExptpREP        1 2021  103   1      3      1    49       G49
-#&gt; 5   4 20ExptpREP        1 2021  104   1      4      0   147      G147
-#&gt; 6   5 20ExptpREP        1 2021  105   1      5      1     2        G2
-#&gt; 26  6 20ExptpREP        1 2021  106   1      6      0   211      G211
-#&gt; 27  7 20ExptpREP        1 2021  107   1      7      0   112      G112
-#&gt; 12  8 20ExptpREP        1 2021  108   1      8      1     2        G2
-#&gt; 28  9 20ExptpREP        1 2021  109   1      9      1    28       G28
-#&gt; 32 10 20ExptpREP        1 2021  110   1     10      1    10       G10
-#&gt; 33 11 20ExptpREP        1 2021  111   1     11      0   196      G196
-#&gt; 34 12 20ExptpREP        1 2021  112   1     12      0   212      G212</div><div class='input'>
+#&gt; 1   1 20ExptpREP        1 2021  101   1      1      0   168      G168
+#&gt; 2   2 20ExptpREP        1 2021  102   1      2      0   297      G297
+#&gt; 3   3 20ExptpREP        1 2021  103   1      3      1     2        G2
+#&gt; 23  4 20ExptpREP        1 2021  104   1      4      0   195      G195
+#&gt; 24  5 20ExptpREP        1 2021  105   1      5      0   308      G308
+#&gt; 25  6 20ExptpREP        1 2021  106   1      6      0   327      G327
+#&gt; 26  7 20ExptpREP        1 2021  107   1      7      0   248      G248
+#&gt; 8   8 20ExptpREP        1 2021  108   1      8      1     2        G2
+#&gt; 35  9 20ExptpREP        1 2021  109   1      9      1     1        G1
+#&gt; 48 10 20ExptpREP        1 2021  110   1     10      1     7        G7
+#&gt; 50 11 20ExptpREP        1 2021  111   1     11      0   226      G226
+#&gt; 51 12 20ExptpREP        1 2021  112   1     12      0   254      G254</div><div class='input'>
 <span class='co'># Example 2: Generates a spatial optimized partially replicated arrangement design with 492 </span>
 <span class='co'># genotypes in a field with dimensions 30 rows x 20 cols. Note that there 384 genotypes </span>
 <span class='co'># unreplicated (only one time), 108 genotypes replicated two times. </span>
@@ -409,67 +413,67 @@ with correlated data. Journal of Agricultural, Biological, and Environmental Sta
 #&gt;  [91]  91  92  93  94  95  96  97  98  99 100 101 102 103 104 105 106 107 108
 #&gt; </div><div class='input'><span class='va'>SpatpREP2</span><span class='op'>$</span><span class='va'>layoutRandom</span>
 </div><div class='output co'>#&gt;       Col1 Col2 Col3 Col4 Col5 Col6 Col7 Col8 Col9 Col10 Col11 Col12 Col13
-#&gt; Row30   80  439   34  362   92   77   80  347  119   149    58   170   478
-#&gt; Row29   38  472   41  106  434   60   26  159  302   420   234   341    68
-#&gt; Row28  390   38   37  286  426  153  306   88  109   373    36   101   174
-#&gt; Row27  139    2   54  116  210  345  113  104  381    47   375   284   232
-#&gt; Row26  450  367   28  324   70  383   40   69  329   407   224    82    24
-#&gt; Row25  140  230  274  147  283  239   68   12  484   143    46   332    23
-#&gt; Row24   99  355  281  238  319   60  173   84  465   145   326   317   350
-#&gt; Row23   64  120  339  291   12  295  424  205   95    86   244   267   199
-#&gt; Row22  344   56  333   14  380   57  372  107   35   327   437   135   421
-#&gt; Row21   18  282  277   58  360  307  187  157  400   171   310     5   130
-#&gt; Row20  197   93   82    3  300  262   54   75    9   491   388   299   315
-#&gt; Row19  191  246   16  270  102   59  289  293  364     7   220   207    43
-#&gt; Row18   49   91  405    6  351   10  104  214  154    32   288   325   374
-#&gt; Row17  313  382   76   51  430  108  468  445  100    72    97    39   328
-#&gt; Row16  391  179  178   37   39   15  368   20  155    71    51    33   318
-#&gt; Row15  126  417  201  404   49    8   91  463   79   309    17   453   395
-#&gt; Row14  414  186  455   53   42  162  330  117  208   252   212   438   422
-#&gt; Row13  320  394  237  389  150  399   21  203   45   235   305    67   481
-#&gt; Row12  256  471  264  393  285  480   72  346  296     4    31   129    22
-#&gt; Row11  308   19  416  287  398  200  349  363    4   443   204    74   132
-#&gt; Row10  271  100   66  243  273   86  451  385  371   312    44   172   431
-#&gt; Row9    25  470  433  454  474   98  321   87  492   359   419   101   213
-#&gt; Row8   357   25  248  215  144  137   29  469  401   418   142    95    30
-#&gt; Row7    98   81  194  444  297  163   52   61  138    73   188   183    77
-#&gt; Row6   125  112  202  475   48  118  458   65   42   105   272   222   335
-#&gt; Row5   102  165    7   28  397  265  410  348   48   216   379   254    29
-#&gt; Row4   169  476  340   70  427  477  136  376  226    64   461   361    27
-#&gt; Row3    62  253  314  247  449  378  278  429   16    46    35    96   106
-#&gt; Row2   206   41    9   66   57  148  353  146  403   290    78   436    63
-#&gt; Row1     5   71  446  298   14  488  334  266  485   459    55   107   121
+#&gt; Row30  345  178    8  158  211   89   70  236   83   342   292   234    42
+#&gt; Row29  286  131   75  104  228   87   77  249  395   308    59   313    52
+#&gt; Row28  420  471    6  129  213  402  253   61  260   426    47   392   133
+#&gt; Row27  195  146   10  338  433  215  413   16  317    14   394    77    33
+#&gt; Row26  287  360  107  454   32  453    5  477  489   149   166    36   369
+#&gt; Row25  285  365  169  180  314  290    7   86  460   172    56   153   105
+#&gt; Row24   18  456   37  188  305   31  238   40  363   208   459   349   274
+#&gt; Row23   62   63   88  490   55  385  210  252  440    92   357   174   488
+#&gt; Row22  396   66  318   74  421  108  204   91   32   299    60   128   320
+#&gt; Row21   80  254  157   51  321  461  400  344  467   275   309    87   209
+#&gt; Row20  428   58   67  106  103  409   76   48   45   377   201   462   110
+#&gt; Row19  447   84  173  156   69   62  343  182  388    93   370   330    43
+#&gt; Row18   49   20  221   56  256   23   64  304  258    19   416   227   271
+#&gt; Row17  387  482   98   48  379   38  176  109  122    50   481   346   220
+#&gt; Row16  261  183  291   35   65   89  245  101  198    99   102    17   378
+#&gt; Row15  130  478  418  415   88   37   73  410   74   232   427   381   233
+#&gt; Row14  443  121  217   68   82  430  123  452  288   114   207    22    85
+#&gt; Row13  393  140  386  289  417  257   38  425   44     7   331    65   137
+#&gt; Row12  102  163  187  422  355  150   14  262   45    42     3   431   340
+#&gt; Row11  438   55  139  356  272  277  127  177    9   480   406    81    22
+#&gt; Row10  371    4  293  278  362   96  332  203  325   397    54    52   212
+#&gt; Row9    64  105  270  205  190   80  383  106   85   403   148    49   411
+#&gt; Row8   251   41  337    2  191  284   82  366  484   239    46    34   136
+#&gt; Row7     2   19  359  224  323  374   96   25  269    72   380   441    95
+#&gt; Row6   429  222  125  483   28  263  449   97   13    79   265   326   243
+#&gt; Row5   101  246  432   35  465  486  218  466    6   175   145   200    92
+#&gt; Row4   179  120  165   63  113  341  241  458  126     3   398   404    50
+#&gt; Row3    61  391   59  141  470  384  455  298   11   117     9    18    73
+#&gt; Row2   124   98   90  138   66  352  242  439  434   333    68   487   267
+#&gt; Row1    24  247  336  368   26  339  350  367  297   189    12   348   181
 #&gt;       Col14 Col15 Col16 Col17 Col18 Col19 Col20
-#&gt; Row30   268    27   479   369   460   134   377
-#&gt; Row29   111   412   193   196   358   384    24
-#&gt; Row28   490    62   181   218   425    26   128
-#&gt; Row27   294   124   242   245    89   108   462
-#&gt; Row26    53   392   217    15   467   158   365
-#&gt; Row25    11   110   103   304    78   189    94
-#&gt; Row24    36   241   336   483   164   337    74
-#&gt; Row23    33   448   423   160     8   233   331
-#&gt; Row22     1    22   343    61   249   161   176
-#&gt; Row21   263    83   223   168     1   441     6
-#&gt; Row20   486   432    85   311   406   231   225
-#&gt; Row19   261    92    75    13    31   457   409
-#&gt; Row18   396   323    11     3   250    90   133
-#&gt; Row17    50   356   370    73   131   366   408
-#&gt; Row16   428   198   303   190   122   251   338
-#&gt; Row15    67   276   354   127    63    88   152
-#&gt; Row14   413    79   103   442   487    65   387
-#&gt; Row13   166    96    52   227   415   322    44
-#&gt; Row12   435   229   301    81   195    47    83
-#&gt; Row11    13   257   221   151   259    56    69
-#&gt; Row10    50    45     2   182    94   452   192
-#&gt; Row9     21   466    87    10    43    30   489
-#&gt; Row8    447   411   185    89   342   440   209
-#&gt; Row7    386    85   177   211    55   482   456
-#&gt; Row6    240   115    19   228   279   123    18
-#&gt; Row5    175   292   473    97    76   316   402
-#&gt; Row4     40    17   184    90   280    32    34
-#&gt; Row3    167   236    20   269   464   141   219
-#&gt; Row2    255   275   258   180   105    99    59
-#&gt; Row1    352    23   114    84   156    93   260</div><div class='input'><span class='va'>SpatpREP2</span><span class='op'>$</span><span class='va'>plotNumber</span>
+#&gt; Row30   335    28   193   196   310    24   472
+#&gt; Row29   382   435   283   451   444   319    71
+#&gt; Row28   401    10    76    29   282    46   328
+#&gt; Row27    25   436   408   111    16    51   457
+#&gt; Row26   375     1   358    58   108   300   273
+#&gt; Row25    53   334    79   206    86   312    13
+#&gt; Row24   303   160   414    78   115   155    72
+#&gt; Row23    83   450   159   295   281   464   474
+#&gt; Row22    21    26   266   135   324   170   255
+#&gt; Row21   229    41   307   353    39   216    33
+#&gt; Row20   361   202    30   259   399   276   162
+#&gt; Row19   448    90    75   103   240   405   264
+#&gt; Row18   144   407    36   469   147   100   372
+#&gt; Row17    69   327   134    40     4   491   468
+#&gt; Row16   389   419   118   112   424   479   437
+#&gt; Row15    71   412   364   316    39   104   164
+#&gt; Row14   184   219    94   446   154    44   279
+#&gt; Row13    60    11    94   423   197   390    47
+#&gt; Row12   167   306   315    70   311    67    31
+#&gt; Row11    81   442   347   116   376    78    57
+#&gt; Row10    27    57    84   248     8   230   142
+#&gt; Row9    280   226   294   107    27    95   268
+#&gt; Row8    475   492   354    12   192   151   152
+#&gt; Row7    171    53   237   301    23   231   225
+#&gt; Row6    329   223    91   132   186   250     5
+#&gt; Row5    161   463    15    99    20   445   476
+#&gt; Row4     54   100   185    17   119    15    30
+#&gt; Row3    473   302    43   244   143   199   373
+#&gt; Row2    485   296   322   351    34    29    93
+#&gt; Row1     21     1   235    97   214   194   168</div><div class='input'><span class='va'>SpatpREP2</span><span class='op'>$</span><span class='va'>plotNumber</span>
 </div><div class='output co'>#&gt;       Col1 Col2 Col3 Col4 Col5 Col6 Col7 Col8 Col9 Col10 Col11 Col12 Col13
 #&gt; Row30  700  699  698  697  696  695  694  693  692   691   690   689   688
 #&gt; Row29  661  662  663  664  665  666  667  668  669   670   671   672   673
@@ -533,16 +537,16 @@ with correlated data. Journal of Agricultural, Biological, and Environmental Sta
 #&gt; Row2    127   126   125   124   123   122   121
 #&gt; Row1    114   115   116   117   118   119   120</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>SpatpREP2</span><span class='op'>$</span><span class='va'>fieldBook</span>,<span class='fl'>10</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;    ID       EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-#&gt; 1   1 20ExptpREP        1 2021  101   1      1      1     5        G5
-#&gt; 3   2 20ExptpREP        1 2021  102   1      2      1    71       G71
-#&gt; 5   3 20ExptpREP        1 2021  103   1      3      0   446      G446
-#&gt; 6   4 20ExptpREP        1 2021  104   1      4      0   298      G298
-#&gt; 7   5 20ExptpREP        1 2021  105   1      5      1    14       G14
-#&gt; 9   6 20ExptpREP        1 2021  106   1      6      0   488      G488
-#&gt; 10  7 20ExptpREP        1 2021  107   1      7      0   334      G334
-#&gt; 11  8 20ExptpREP        1 2021  108   1      8      0   266      G266
-#&gt; 12  9 20ExptpREP        1 2021  109   1      9      0   485      G485
-#&gt; 13 10 20ExptpREP        1 2021  110   1     10      0   459      G459</div><div class='input'>
+#&gt; 1   1 20ExptpREP        1 2021  101   1      1      1    24       G24
+#&gt; 3   2 20ExptpREP        1 2021  102   1      2      0   247      G247
+#&gt; 4   3 20ExptpREP        1 2021  103   1      3      0   336      G336
+#&gt; 5   4 20ExptpREP        1 2021  104   1      4      0   368      G368
+#&gt; 7   5 20ExptpREP        1 2021  105   1      5      1    26       G26
+#&gt; 8   6 20ExptpREP        1 2021  106   1      6      0   339      G339
+#&gt; 9   7 20ExptpREP        1 2021  107   1      7      0   350      G350
+#&gt; 10  8 20ExptpREP        1 2021  108   1      8      0   367      G367
+#&gt; 11  9 20ExptpREP        1 2021  109   1      9      0   297      G297
+#&gt; 12 10 20ExptpREP        1 2021  110   1     10      0   189      G189</div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

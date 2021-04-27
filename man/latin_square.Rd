@@ -33,6 +33,12 @@ latin_square(
 A list with information on the design parameters.
 
 Data frame with the latin square field book.
+
+A list with two elements.
+\itemize{
+  \item \code{infoDesign} is a list with information on the design parameters.
+  \item \code{fieldBook} is a data frame with the latin square field book.
+}
 }
 \description{
 Randomly generates a latin square design of up 10 treatments.

@@ -4,10 +4,10 @@
 \alias{run_app}
 \title{Run the Shiny Application}
 \usage{
-run_app(...)
+run_app()
 }
-\arguments{
-\item{...}{A series of options to be used inside the app.}
+\value{
+A shiny app.
 }
 \description{
 Run the Shiny Application

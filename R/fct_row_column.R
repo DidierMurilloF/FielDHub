@@ -24,9 +24,13 @@
 #' 
 #' @importFrom stats runif na.omit
 #' 
-#' @return A list with information on the design parameters.
-#' @return A list with the resolvables row columns for the first location.
-#' @return Data frame with the RowColD field book.
+#' @return A list with four elements.
+#' \itemize{
+#'   \item \code{infoDesign} is a list with information on the design parameters.
+#'   \item \code{resolvableBlocks} a list with the resolvables row columns. 
+#'   \item \code{concurrence} is the concurrence matrix.
+#'   \item \code{fieldBook} is a data frame with the row-column field book.
+#' }
 #'
 #'
 #' @references

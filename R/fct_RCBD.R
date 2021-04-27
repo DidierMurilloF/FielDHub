@@ -23,10 +23,14 @@
 #' 
 #' @importFrom stats runif na.omit setNames
 #' 
-#' @return A list with information on the design parameters.
-#' @return RCBD layout for each location.
-#' @return Plot number layout for each location.
-#' @return Data frame with the RCBD field book.
+#' 
+#' @return A list with five elements.
+#' \itemize{
+#'   \item \code{infoDesign} is a list with information on the design parameters.
+#'   \item \code{layoutRandom} is the RCBD layout randomization for each location.
+#'   \item \code{plotNumber} is the plot number layout for each location.
+#'   \item \code{fieldBook} is a data frame with the RCBD field book design.
+#' } 
 #' 
 #'
 #' @references
@@ -42,8 +46,8 @@
 #'               seed = 1020, 
 #'               locationNames = c("FARGO", "MINOT", "CASSELTON"))
 #' rcbd1$infoDesign                  
-#' rcbd1$RCBD.layout
-#' rcbd1$plotNumber.layout
+#' rcbd1$layoutRandom
+#' rcbd1$plotNumber
 #' head(rcbd1$fieldBook)
 #' 
 #' # Example 2: Generates a RCBD design with 6 blocks and 18 treatments in one location.
@@ -59,8 +63,8 @@
 #'               locationNames = "IBAGUE",
 #'               data = treatment_list)
 #' rcbd2$infoDesign                  
-#' rcbd2$RCBD.layout
-#' rcbd2$plotNumber.layout
+#' rcbd2$layoutRandom
+#' rcbd2$plotNumber
 #' head(rcbd2$fieldBook)
 #' 
 #'
@@ -200,7 +204,7 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101, continuous = FA
                     locations = l, plotNumber = plotNumber, locationNames = locationNames,
                     seed = seed)
   
-  return(list(infoDesign = parameters, RCBD.layout = RCBD.layout.loc,
-              plotNumber.layout = p.number.loc,
+  return(list(infoDesign = parameters, layoutRandom = RCBD.layout.loc,
+              plotNumber = p.number.loc,
               fieldBook = RCBD_output))
 }

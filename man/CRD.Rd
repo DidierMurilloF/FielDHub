@@ -27,9 +27,11 @@ CRD(
 \item{data}{(optional) Data frame with the 2 columns with labels of each treatments and its number of replicates.}
 }
 \value{
-A list with information on the design parameters.
-
-Data frame with the CRD field book.
+A list with two elements.
+\itemize{
+  \item \code{infoDesign} is a list with information on the design parameters.
+  \item \code{fieldBook} is a data frame with the CRD field book.
+}
 }
 \description{
 It randomly generates a completely randomized design.

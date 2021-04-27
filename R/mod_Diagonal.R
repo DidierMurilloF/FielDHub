@@ -486,7 +486,7 @@ mod_Diagonal_server <- function(id) {
         rownames(df) <- nrow(df):1
         # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
         #                           scrollX = TRUE, scrollY = "1000px"))
-        options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
+        options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "800px"))
         DT::datatable(df,
                       extensions = 'FixedColumns',
                       options = list(
@@ -531,7 +531,7 @@ mod_Diagonal_server <- function(id) {
           # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
           #                           scrollX = TRUE, scrollY = "1000px"))
           # DT::datatable(df) %>%
-          options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
+          options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "850px"))
           DT::datatable(df,
                         extensions = 'FixedColumns',
                         options = list(
@@ -547,7 +547,7 @@ mod_Diagonal_server <- function(id) {
           # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
           #                           scrollX = TRUE, scrollY = "1000px"))
           # DT::datatable(df) %>%
-          options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
+          options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "850px"))
           DT::datatable(df,
                         extensions = 'FixedColumns',
                         options = list(

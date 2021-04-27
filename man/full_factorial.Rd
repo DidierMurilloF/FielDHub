@@ -49,9 +49,11 @@ assigned. Default is \code{factorLabels =TRUE}.}
 \item{data}{(optional) Data frame with the labels of factors.}
 }
 \value{
-A list with information on the design parameters.
-
-Data frame with the full factorial field book.
+A list with two elements.
+\itemize{
+  \item \code{infoDesign} is a list with information on the design parameters.
+  \item \code{fieldBook} is a data frame with the full factorial field book.
+}
 }
 \description{
 It randomly generates a full factorial design across locations.

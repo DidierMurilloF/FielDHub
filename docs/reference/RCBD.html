@@ -175,10 +175,13 @@
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A list with information on the design parameters.</p>
-<p>RCBD layout for each location.</p>
-<p>Plot number layout for each location.</p>
-<p>Data frame with the RCBD field book.</p>
+    <p>A list with five elements.</p><ul>
+<li><p><code>infoDesign</code> is a list with information on the design parameters.</p></li>
+<li><p><code>layoutRandom</code> is the RCBD layout randomization for each location.</p></li>
+<li><p><code>plotNumber</code> is the plot number layout for each location.</p></li>
+<li><p><code>fieldBook</code> is a data frame with the RCBD field book design.</p></li>
+</ul>
+
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
     <p>Federer, W. T. (1955). Experimental Design. Theory and Application. New York, USA. The
@@ -230,31 +233,31 @@ Macmillan Company.</p>
 #&gt; 
 #&gt; $seed
 #&gt; [1] 1020
-#&gt; </div><div class='input'><span class='va'>rcbd1</span><span class='op'>$</span><span class='va'>RCBD.layout</span>
+#&gt; </div><div class='input'><span class='va'>rcbd1</span><span class='op'>$</span><span class='va'>layoutRandom</span>
 </div><div class='output co'>#&gt; $Loc_FARGO
 #&gt;      Block --Treatments--                           
-#&gt; [1,] "1"   "F H N I J T G A M K S E C O L R P B D Q"
-#&gt; [2,] "2"   "M I D R J H T G L E C N Q O B A F P S K"
-#&gt; [3,] "3"   "T R N P Q J F A D B S E I C K G L H O M"
-#&gt; [4,] "4"   "Q P N F C T S H D M K G A O E I R B J L"
-#&gt; [5,] "5"   "H I E P N A L Q D M C S O R G J B K T F"
+#&gt; [1,] "1"   "P R L T E A J O M C K F I Q G D S H N B"
+#&gt; [2,] "2"   "Q H G M F D L P E B J N A I K C T R O S"
+#&gt; [3,] "3"   "R B G K H E S C F D I T P N Q M A O J L"
+#&gt; [4,] "4"   "M I T B N G O J Q C A L P E S R D K H F"
+#&gt; [5,] "5"   "M C Q O E H I A P S R L J G F B T D K N"
 #&gt; 
 #&gt; $Loc_MINOT
 #&gt;      Block --Treatments--                           
-#&gt; [1,] "1"   "R Q G D O H S F T E B K M I J P A L C N"
-#&gt; [2,] "2"   "P E D S O A F K T G C I L N B J R H M Q"
-#&gt; [3,] "3"   "N O S E P L C H K R B J T D I Q A F G M"
-#&gt; [4,] "4"   "L R M J G E T H B O P S C F N K D A Q I"
-#&gt; [5,] "5"   "E C J F O P G H B K N S R L Q A I M D T"
+#&gt; [1,] "1"   "F O C A G D L B I S P T H K M E N R Q J"
+#&gt; [2,] "2"   "Q H K A G D E M N O C S J I T L P F B R"
+#&gt; [3,] "3"   "B K D L O E A R F S I P G T C Q J N M H"
+#&gt; [4,] "4"   "C P L O B K E H Q G N A T R J F S M D I"
+#&gt; [5,] "5"   "G S D B H L Q K A P E J T R I C O F M N"
 #&gt; 
 #&gt; $Loc_CASSELTON
 #&gt;      Block --Treatments--                           
-#&gt; [1,] "1"   "P D M B I O K G C Q N A E S L F J T R H"
-#&gt; [2,] "2"   "O D G P C Q A L T N B R I E H J K F M S"
-#&gt; [3,] "3"   "K M J D C L H E P T N I B A O R F G S Q"
-#&gt; [4,] "4"   "I G H N O J K D Q R P C E F S B L T M A"
-#&gt; [5,] "5"   "P M J I R H C D E K S F N L A Q G B O T"
-#&gt; </div><div class='input'><span class='va'>rcbd1</span><span class='op'>$</span><span class='va'>plotNumber.layout</span>
+#&gt; [1,] "1"   "P G T E L O K H D N S C M I A J Q R B F"
+#&gt; [2,] "2"   "C D L F A T I G S O B J M E R P H N Q K"
+#&gt; [3,] "3"   "C G K N B A L Q I F D H J M O P S T E R"
+#&gt; [4,] "4"   "E L H D F J A T S N B G Q M I O P C K R"
+#&gt; [5,] "5"   "T I M A H K E C Q L D J R B G S N O F P"
+#&gt; </div><div class='input'><span class='va'>rcbd1</span><span class='op'>$</span><span class='va'>plotNumber</span>
 </div><div class='output co'>#&gt; $Loc_FARGO
 #&gt;      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13] [,14]
 #&gt; [1,]  101  102  103  104  105  106  107  108  109   110   111   112   113   114
@@ -298,12 +301,12 @@ Macmillan Company.</p>
 #&gt; [5,]  2295  2296  2297  2298  2299  2300
 #&gt; </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>rcbd1</span><span class='op'>$</span><span class='va'>fieldBook</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;   ID LOCATION PLOT REP TREATMENT
-#&gt; 1  1    FARGO  101   1         F
-#&gt; 2  2    FARGO  102   1         H
-#&gt; 3  3    FARGO  103   1         N
-#&gt; 4  4    FARGO  104   1         I
-#&gt; 5  5    FARGO  105   1         J
-#&gt; 6  6    FARGO  106   1         T</div><div class='input'>
+#&gt; 1  1    FARGO  101   1         P
+#&gt; 2  2    FARGO  102   1         R
+#&gt; 3  3    FARGO  103   1         L
+#&gt; 4  4    FARGO  104   1         T
+#&gt; 5  5    FARGO  105   1         E
+#&gt; 6  6    FARGO  106   1         A</div><div class='input'>
 <span class='co'># Example 2: Generates a RCBD design with 6 blocks and 18 treatments in one location.</span>
 <span class='co'># In this case, we show how to use the option data.</span>
 <span class='va'>treatments</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span><span class='op'>(</span><span class='st'>"ND-"</span>, <span class='fl'>1</span><span class='op'>:</span><span class='fl'>18</span>, sep <span class='op'>=</span> <span class='st'>""</span><span class='op'>)</span>
@@ -346,7 +349,7 @@ Macmillan Company.</p>
 #&gt; 
 #&gt; $seed
 #&gt; [1] 13
-#&gt; </div><div class='input'><span class='va'>rcbd2</span><span class='op'>$</span><span class='va'>RCBD.layout</span>
+#&gt; </div><div class='input'><span class='va'>rcbd2</span><span class='op'>$</span><span class='va'>layoutRandom</span>
 </div><div class='output co'>#&gt; $Loc_IBAGUE
 #&gt;      Block
 #&gt; [1,] "1"  
@@ -356,13 +359,13 @@ Macmillan Company.</p>
 #&gt; [5,] "5"  
 #&gt; [6,] "6"  
 #&gt;      --Treatments--                                                                                      
-#&gt; [1,] "ND-1 ND-18 ND-17 ND-10 ND-13 ND-6 ND-14 ND-12 ND-15 ND-7 ND-5 ND-9 ND-11 ND-2 ND-4 ND-8 ND-16 ND-3"
-#&gt; [2,] "ND-16 ND-3 ND-13 ND-2 ND-11 ND-1 ND-10 ND-18 ND-7 ND-8 ND-14 ND-6 ND-12 ND-4 ND-9 ND-17 ND-5 ND-15"
-#&gt; [3,] "ND-5 ND-11 ND-18 ND-1 ND-4 ND-8 ND-9 ND-10 ND-3 ND-2 ND-16 ND-15 ND-7 ND-14 ND-17 ND-13 ND-12 ND-6"
-#&gt; [4,] "ND-12 ND-7 ND-2 ND-3 ND-15 ND-17 ND-9 ND-10 ND-18 ND-11 ND-1 ND-13 ND-14 ND-4 ND-5 ND-16 ND-8 ND-6"
-#&gt; [5,] "ND-15 ND-7 ND-2 ND-10 ND-17 ND-13 ND-4 ND-16 ND-14 ND-3 ND-12 ND-9 ND-6 ND-5 ND-18 ND-11 ND-8 ND-1"
-#&gt; [6,] "ND-7 ND-18 ND-8 ND-9 ND-4 ND-17 ND-12 ND-2 ND-6 ND-11 ND-15 ND-5 ND-3 ND-14 ND-1 ND-16 ND-10 ND-13"
-#&gt; </div><div class='input'><span class='va'>rcbd2</span><span class='op'>$</span><span class='va'>plotNumber.layout</span>
+#&gt; [1,] "ND-3 ND-5 ND-10 ND-13 ND-6 ND-14 ND-4 ND-8 ND-18 ND-1 ND-11 ND-2 ND-17 ND-12 ND-9 ND-7 ND-16 ND-15"
+#&gt; [2,] "ND-15 ND-17 ND-12 ND-1 ND-11 ND-4 ND-8 ND-7 ND-5 ND-3 ND-14 ND-9 ND-10 ND-13 ND-2 ND-6 ND-18 ND-16"
+#&gt; [3,] "ND-17 ND-12 ND-8 ND-14 ND-10 ND-6 ND-7 ND-18 ND-2 ND-1 ND-13 ND-9 ND-11 ND-15 ND-16 ND-3 ND-4 ND-5"
+#&gt; [4,] "ND-14 ND-13 ND-16 ND-1 ND-8 ND-9 ND-15 ND-6 ND-7 ND-12 ND-10 ND-18 ND-11 ND-4 ND-3 ND-5 ND-2 ND-17"
+#&gt; [5,] "ND-14 ND-11 ND-9 ND-4 ND-1 ND-16 ND-3 ND-8 ND-5 ND-7 ND-10 ND-18 ND-12 ND-6 ND-2 ND-15 ND-13 ND-17"
+#&gt; [6,] "ND-3 ND-5 ND-17 ND-9 ND-6 ND-18 ND-1 ND-14 ND-12 ND-8 ND-4 ND-11 ND-15 ND-2 ND-10 ND-16 ND-13 ND-7"
+#&gt; </div><div class='input'><span class='va'>rcbd2</span><span class='op'>$</span><span class='va'>plotNumber</span>
 </div><div class='output co'>#&gt; $Loc_IBAGUE
 #&gt;      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13] [,14]
 #&gt; [1,]  101  102  103  104  105  106  107  108  109   110   111   112   113   114
@@ -380,12 +383,12 @@ Macmillan Company.</p>
 #&gt; [6,]   604   603   602   601
 #&gt; </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>rcbd2</span><span class='op'>$</span><span class='va'>fieldBook</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;   ID LOCATION PLOT REP TREATMENT
-#&gt; 1  1   IBAGUE  101   1      ND-1
-#&gt; 2  2   IBAGUE  102   1     ND-18
-#&gt; 3  3   IBAGUE  103   1     ND-17
-#&gt; 4  4   IBAGUE  104   1     ND-10
-#&gt; 5  5   IBAGUE  105   1     ND-13
-#&gt; 6  6   IBAGUE  106   1      ND-6</div><div class='input'>
+#&gt; 1  1   IBAGUE  101   1      ND-3
+#&gt; 2  2   IBAGUE  102   1      ND-5
+#&gt; 3  3   IBAGUE  103   1     ND-10
+#&gt; 4  4   IBAGUE  104   1     ND-13
+#&gt; 5  5   IBAGUE  105   1      ND-6
+#&gt; 6  6   IBAGUE  106   1     ND-14</div><div class='input'>
 
 </div></pre>
   </div>

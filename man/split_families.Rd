@@ -13,9 +13,11 @@ split_families(l = NULL, data = NULL)
 and number of individuals per family group (FAMILY).}
 }
 \value{
-A table with summary of cases.
-
-A list with the entries for each location.
+A list with two elements.
+\itemize{
+  \item \code{rowsEachlist} is a table with a summary of cases.
+  \item \code{listLocations} is a list with the entries for each location
+}
 }
 \description{
 Split a population of genotypes randomly into several locations, with the

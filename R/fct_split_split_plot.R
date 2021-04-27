@@ -27,8 +27,12 @@
 #' 
 #' @importFrom stats runif 
 #'
-#' @return A list with parameters information of design. 
-#' @return Data frame with the split split plot field book.
+#' 
+#' @return A list with two elements.
+#' \itemize{
+#'   \item \code{infoDesign} is a list with information on the design parameters.
+#'   \item \code{fieldBook} is a data frame with the split split plot field book.
+#' }
 #'
 #'
 #' @references

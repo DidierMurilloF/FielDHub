@@ -194,10 +194,14 @@ Note that design generation needs the dimension of the field (number of rows and
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A list with information on the design parameters.</p>
-<p>A matrix with the randomization layout.</p>
-<p>A matrix with the layout plot number.</p>
-<p>A data frame with fieldBook design. This includes the index (Row, Column).</p>
+    <p>A list with five elements.</p><ul>
+<li><p><code>infoDesign</code> is a list with information on the design parameters.</p></li>
+<li><p><code>layoutRandom</code> is a matrix with the randomization layout.</p></li>
+<li><p><code>plotNumber</code> is a matrix with the layout plot number.</p></li>
+<li><p><code>data_entry</code> is a data frame with the data input.</p></li>
+<li><p><code>fieldBook</code> is a data frame with field book design. This includes the index (Row, Column).</p></li>
+</ul>
+
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
     <p>Clarke, G. P. Y., &amp; Stefanova, K. T. (2011). Optimal design for early-generation plant
@@ -234,47 +238,47 @@ Zealand Journal of Statistics, 53(4), 461–480.</p>
 #&gt; [1]  7  7 10  7  7
 #&gt; </div><div class='input'><span class='va'>OptimAd1</span><span class='op'>$</span><span class='va'>layoutRandom</span>
 </div><div class='output co'>#&gt;       Col1 Col2 Col3 Col4 Col5 Col6 Col7 Col8 Col9 Col10 Col11 Col12 Col13
-#&gt; Row20  182  109   64   18  168   81    1  220  125    13     2   360    90
-#&gt; Row19  119   11  130  181  206  146  107  357   33    93   304   189    37
-#&gt; Row18    8  163  286  334  297   26  180  233   49   250    69   246   208
-#&gt; Row17  201  229  345    3   42  113  353   83  351   177   270    77   259
-#&gt; Row16   40   24   47  151  253   61  131  197    3   335    48     2   133
-#&gt; Row15  364  187  196  188    4  331  203  326  165   350   238   325   292
-#&gt; Row14    2  161  358  309    1  311  210  274  293    31    76   317   103
-#&gt; Row13  135  154  265  247  192  362  150   58  251     3   256   367   244
-#&gt; Row12  200  280  144  121  342  100   65  281   62   243    16   321   359
-#&gt; Row11  354  205  300  279  278   70   68  271  139   193    60   242    75
-#&gt; Row10  337  212   85    5  336   38   32  172   22   277    78   255   141
-#&gt; Row9    27  263   35  110  148  234  285  258  136   183   137     3   262
-#&gt; Row8   237  175    7  145   21   84  164  301    1   194   252   344    34
-#&gt; Row7   122  264    1   17   82  282  173  217  149   112   312   195   241
-#&gt; Row6   318    2  209  166   19  179  178  268  152    88   267   249   329
-#&gt; Row5   134  272    5  223  294   43  330   51   25   124     4   346   170
-#&gt; Row4     6  227  106  199   12    2    9    5   94    36   158   296   275
-#&gt; Row3   202  287  332  211  108    3  320  302  254   322   132   236     4
-#&gt; Row2     1   91   92   52  288  128  114  245  290   235    71   361     1
-#&gt; Row1   185   96  104  216  215  169    2    4  226   248   126    74   156
+#&gt; Row20  296    4   16  123  276  190  251  117  229   166    62   160   165
+#&gt; Row19  131   97   82  307  344  293  218  258    2    48   239    66     2
+#&gt; Row18    5  230   69   71  164  286  114  248  142   280    88   156   223
+#&gt; Row17   30   68    4   23   22  254   44  314  243    17     3   225   309
+#&gt; Row16  299  167  285  125    1  270  301    1  234   320   326   274   332
+#&gt; Row15    1  304   18  198  232  181   43  358  246   173    56   306   233
+#&gt; Row14  237  195  138  150  357    2  183  140  308     5   215   271   353
+#&gt; Row13  241  202  279  336   74  328  126   39  106   158   345     3   323
+#&gt; Row12  316  222  103  264  249  120  275    2   40   289   236     1   220
+#&gt; Row11  199   94   45  322  265  231  331  343    3   163   101   252    76
+#&gt; Row10  119  294  216  335  356  364  155  319  342   146    42   327     5
+#&gt; Row9    32   12  272   98    4  192  291   46   83   350   261   200   346
+#&gt; Row8   205  196   33   59  300   31  211  311  201   351   212    21   365
+#&gt; Row7   305  180  367  313  177   10    4  310   11   136    14   159   161
+#&gt; Row6   100   50  139  151  208  116    5  226  110     1   113   197   361
+#&gt; Row5   149  105   79    5   91  339  227  214  262   141    81    93   134
+#&gt; Row4   360  179  315   51   20   36  312  157  278   337   213    89   187
+#&gt; Row3   266  281    4  366  325    2  269   37  273   189   244    96   341
+#&gt; Row2    87    7  352  124  185  107   13  122  221   253     4   175   219
+#&gt; Row1    24   72  349  137   41   65  128  191  298   130    86   147   256
 #&gt;       Col14 Col15 Col16 Col17 Col18 Col19 Col20
-#&gt; Row20    20    63   339   306    45    10   153
-#&gt; Row19     2   123   129   231     3   221   105
-#&gt; Row18   295     1   328   355    44     5   310
-#&gt; Row17   313   160   102     2   352   118    54
-#&gt; Row16    29   184   327   116   239   319   228
-#&gt; Row15     2   298   365   289   366   232   303
-#&gt; Row14   120   224   261   101    55    23   174
-#&gt; Row13   284   190   276   307   315    28   305
-#&gt; Row12    95   260   347    46   162     5     5
-#&gt; Row11   343     4   348     2    89    86   266
-#&gt; Row10   299   157     5   207    50    57    14
-#&gt; Row9     98    73     3   138   143    97   159
-#&gt; Row8    225   176   147    41     4    30   111
-#&gt; Row7    308   314   316    53   341   257     4
-#&gt; Row6     99   186   333   191   115   230    59
-#&gt; Row5    222   273    56   140   338   219   155
-#&gt; Row4    214    66    67   218   198   171   269
-#&gt; Row3    142    15   340    39   291   204    72
-#&gt; Row2    213   240   283   127    79   363   349
-#&gt; Row1    117    87   167   324   323   356    80</div><div class='input'><span class='va'>OptimAd1</span><span class='op'>$</span><span class='va'>plotNumber</span>
+#&gt; Row20   260   170   282   359   121    34   324
+#&gt; Row19   186   283   206   250    99   210   203
+#&gt; Row18   267   127   303   104   109   235     2
+#&gt; Row17    38     6    90    19   174   295   217
+#&gt; Row16   268   207   297   292    75   362    58
+#&gt; Row15    25    60   111   363    28     5   321
+#&gt; Row14   115   288    84    53   168   108    29
+#&gt; Row13   176   135    67   112     5    35   259
+#&gt; Row12   148   247   188    15   102    92    52
+#&gt; Row11   354    64    95     3   263   245     8
+#&gt; Row10   145     2   287   242    70    57   129
+#&gt; Row9      3    26   152    80   154     9    49
+#&gt; Row8    240     2   333     2    27    73   330
+#&gt; Row7     63   318   209   355     3   255   133
+#&gt; Row6    182   144   329    47   224    77   290
+#&gt; Row5    172   118   347   143   302    85   228
+#&gt; Row4    338   284     1   348   162   194     3
+#&gt; Row3    169   317    78   340   153   171   238
+#&gt; Row2    277   178     1   193    54   334   132
+#&gt; Row1      2   204   184    61    55     4   257</div><div class='input'><span class='va'>OptimAd1</span><span class='op'>$</span><span class='va'>plotNumber</span>
 </div><div class='output co'>#&gt;       Col1 Col2 Col3 Col4 Col5 Col6 Col7 Col8 Col9 Col10 Col11 Col12 Col13
 #&gt; Row20  481  482  483  484  485  486  487  488  489   490   491   492   493
 #&gt; Row19  461  462  463  464  465  466  467  468  469   470   471   472   473
@@ -318,18 +322,18 @@ Zealand Journal of Statistics, 53(4), 461–480.</p>
 #&gt; Row2    134   135   136   137   138   139   140
 #&gt; Row1    114   115   116   117   118   119   120</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>OptimAd1</span><span class='op'>$</span><span class='va'>fieldBook</span>,<span class='fl'>12</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;    ID  EXPT  LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-#&gt; 1   1 20RW1 CASSELTON 2021  101   1      1      0   185      G185
-#&gt; 2   2 20RW1 CASSELTON 2021  102   1      2      0    96       G96
-#&gt; 3   3 20RW1 CASSELTON 2021  103   1      3      0   104      G104
-#&gt; 4   4 20RW1 CASSELTON 2021  104   1      4      0   216      G216
-#&gt; 5   5 20RW1 CASSELTON 2021  105   1      5      0   215      G215
-#&gt; 6   6 20RW1 CASSELTON 2021  106   1      6      0   169      G169
-#&gt; 7   7 20RW1 CASSELTON 2021  107   1      7      1     2       CH2
-#&gt; 20  8 20RW1 CASSELTON 2021  108   1      8      1     4       CH4
-#&gt; 24  9 20RW1 CASSELTON 2021  109   1      9      0   226      G226
-#&gt; 25 10 20RW1 CASSELTON 2021  110   1     10      0   248      G248
-#&gt; 26 11 20RW1 CASSELTON 2021  111   1     11      0   126      G126
-#&gt; 27 12 20RW1 CASSELTON 2021  112   1     12      0    74       G74</div><div class='input'>                  
+#&gt; 1   1 20RW1 CASSELTON 2021  101   1      1      0    24       G24
+#&gt; 2   2 20RW1 CASSELTON 2021  102   1      2      0    72       G72
+#&gt; 3   3 20RW1 CASSELTON 2021  103   1      3      0   349      G349
+#&gt; 4   4 20RW1 CASSELTON 2021  104   1      4      0   137      G137
+#&gt; 5   5 20RW1 CASSELTON 2021  105   1      5      0    41       G41
+#&gt; 6   6 20RW1 CASSELTON 2021  106   1      6      0    65       G65
+#&gt; 7   7 20RW1 CASSELTON 2021  107   1      7      0   128      G128
+#&gt; 8   8 20RW1 CASSELTON 2021  108   1      8      0   191      G191
+#&gt; 9   9 20RW1 CASSELTON 2021  109   1      9      0   298      G298
+#&gt; 10 10 20RW1 CASSELTON 2021  110   1     10      0   130      G130
+#&gt; 11 11 20RW1 CASSELTON 2021  111   1     11      0    86       G86
+#&gt; 12 12 20RW1 CASSELTON 2021  112   1     12      0   147      G147</div><div class='input'>                  
 <span class='co'># Example 2: Generates a spatial unreplicated optimized arrangement design in one location</span>
 <span class='co'># with 635 genotypes + 65 check plots (4 checks) for a field with dimension 20 rows x 35 cols.</span>
 <span class='co'># As example, we set up the data option with the entries list.</span>
@@ -382,68 +386,68 @@ Zealand Journal of Statistics, 53(4), 461–480.</p>
 #&gt; [1] 17 16 16 16
 #&gt; </div><div class='input'><span class='va'>OptimAd2</span><span class='op'>$</span><span class='va'>layoutRandom</span>
 </div><div class='output co'>#&gt;       Col1 Col2 Col3 Col4 Col5 Col6 Col7 Col8 Col9 Col10 Col11 Col12 Col13
-#&gt; Row20  632  233  275    2  109  429  526   64  388   356   180   340   217
-#&gt; Row19  289  128  362  430  373  513  393    2  382   181   569   389   406
-#&gt; Row18  578  498    2  564   27   63  441   45  182   376   522   198   585
-#&gt; Row17  101  334  558  627    2  270  146  106  537    61   177    16   445
-#&gt; Row16  597  617   15  369  478  200  390   36  166   223     1   481   462
-#&gt; Row15  322  500  409   52   21  516  421  132  282   514   505   125   354
-#&gt; Row14  366  168  119  465  621    4   32    2  497     1   544   176   215
-#&gt; Row13    1  407  108   93  427  589   81  380  309   556    90     2   566
-#&gt; Row12  620  294  375  280  574  104   12  379  450    14   102     4    10
-#&gt; Row11  413    2  239    1  346   28  602  169   19   263   494   467   515
-#&gt; Row10  145  512  364   86   22  288    3  614  531   254   344    69     4
-#&gt; Row9   248  472    6  100  349  357   55  571  232     3   359   553     1
-#&gt; Row8     3  588  463  629  351  613  123  243  178   378   591   587   110
-#&gt; Row7   129  581    3  608  368  170  199   11  570   484   404   291   222
-#&gt; Row6   464    4  528  384  371  547  436  133  144   579     2    50   451
-#&gt; Row5    20  171  319  140  184    3  308  147    1    49   205   245   572
-#&gt; Row4   535  523  201  473  636  314  607  116   91   634    92    75   204
-#&gt; Row3    95  580  127  536  563  331  534  228   67   399   453   477   342
-#&gt; Row2   599   72   56  598  615  391  565  412  350     5   361   532   509
-#&gt; Row1   164  419  210  605   94  358  387  552  297   437   143   352   583
+#&gt; Row20  397  230  525  527    3  561  607    2  562   292    22   186   277
+#&gt; Row19  232   20    1  197  469  221   66  243  191    28     9   117   254
+#&gt; Row18  177   23  548  267  564  432    2  206  239    51   234   165     2
+#&gt; Row17   29    3   96  122  529  560   93  228    3   472   500   392    71
+#&gt; Row16  202  351  294   60   41  539  462  216  618   464   161   201   381
+#&gt; Row15  395  323  402  456  110  114  408  163    1   180   350   189   125
+#&gt; Row14  568  409  127  129    2  327  483  332  345   498   273   422   128
+#&gt; Row13  569   63  445  174  296  465  321  634  581    86   383   627   631
+#&gt; Row12  580  156  272  417  162  151  269  226  526   330   449   535   597
+#&gt; Row11    1   46  556  486  299   77  401   90  358   457    11   362     4
+#&gt; Row10  261  619  584  424  385  258  260  355  121   252   257   188   217
+#&gt; Row9   604  278  153  235  578    1  520  461  106   479   499    78   367
+#&gt; Row8   482  557  399  503   73  337  196    2   47   546     2   360   563
+#&gt; Row7   594  113   88   81  220  173  530  407  168   306   144     1   333
+#&gt; Row6   593  433  147  523  411  379    2  591  325     4   478    80   365
+#&gt; Row5     4  467  250    4   76    3  590  316   12   496     2   286    75
+#&gt; Row4   280   97  204  601  193  545  315  130  396   211   192    24   139
+#&gt; Row3   439  551  388  493  133  543  429  276  247   534   352     4     6
+#&gt; Row2    69  109  514    1  589   89  369   44  507     4   450   207   270
+#&gt; Row1   210    4   98  298  347  552  300  194  143   354   312    43   451
 #&gt;       Col14 Col15 Col16 Col17 Col18 Col19 Col20 Col21 Col22 Col23 Col24 Col25
-#&gt; Row20   370   360    39   618   296   186   235   142     1   279     7   631
-#&gt; Row19    42   122    78    41     1   284     3   555   475   543   541   207
-#&gt; Row18     2   157   551   616   112   400   521   506   300   559   343   435
-#&gt; Row17   538   341    48   459   424   619   492   325   600   221     4     2
-#&gt; Row16   576   542   355   230     2   567   172   487   417   273   160   241
-#&gt; Row15    13    98     2     2   130   272   550   557   483   226   449   267
-#&gt; Row14   161   256   258   154   495   452   259   310   212   103   320   432
-#&gt; Row13   251   633   293   305   165   156   622   192   312    71   196    26
-#&gt; Row12   268   218   247   338    30   183   414     1   134   316     3   611
-#&gt; Row11   630     4   394   253    74    88   115   410   403   540   137   236
-#&gt; Row10   120   336   302   203   246   329   486   493   596    96   496   269
-#&gt; Row9      1   281   396   624   327    37   367   491   471   167    84   539
-#&gt; Row8    238   593     1   460    51   260   529    59   518     3   335   485
-#&gt; Row7    290   213    87     3   604    76   252     1   304   298   345   261
-#&gt; Row6    638   313   214   173   117    58   188    60   138   216   348   229
-#&gt; Row5    262    73   426    33   265     1   577    77   250   187   625    43
-#&gt; Row4    527   639   150   174   415   431   508   135   139   439   422    38
-#&gt; Row3    386   163   383   458   392     4   479   448    85   525    29   402
-#&gt; Row2     44    24   517   433    23   420   337   398   482   131   141     3
-#&gt; Row1    197     4   480   189   255   562   299   507     3     1   105   332
+#&gt; Row20   205   152   313   549    79   138   140   183    52   633   335   222
+#&gt; Row19    70   466     4   624     4   394   386   610     8   531   419   213
+#&gt; Row18   154   307   291   440   405   517   187   319   504   364   178   287
+#&gt; Row17   311   495   444   623   324     3   477    14   107   617     1    67
+#&gt; Row16     1   412   274    74   259   387    62   588   544   540   181   342
+#&gt; Row15   373   219   366   134   344   421   263   275    48     2   281   603
+#&gt; Row14   233   629   406     3   537    18   622     3   238   116   305   268
+#&gt; Row13   283   329    91   532   199     4   468   215   446   343   164   375
+#&gt; Row12   359    36     3   511   550   639   458   474   572     1     2   167
+#&gt; Row11   418     1   137   494   505   184   510    54   195   519   308    35
+#&gt; Row10   141   119    85    10   145   246     3   611    39   625   454     4
+#&gt; Row9    249   346   463   185   256    83   533    13     2   374   349   255
+#&gt; Row8    398    19   169   515   331   587    57    61   576   171   103   288
+#&gt; Row7    410     4   632    95   227   626   602   371   289   159    59     4
+#&gt; Row6    108   157   637   487   370   470   303     1   488   179   242   175
+#&gt; Row5    126   435   427   484   170   608   547   295   437   538   100   582
+#&gt; Row4      3   262   155     1   368   336    53   425   413   485   416   612
+#&gt; Row3     32   502   279   241   583   297     2   115   309   245   356   372
+#&gt; Row2    104   380   290   403   599    50    55   148   404   554   229   237
+#&gt; Row1    363   513   448    26    38   314   497   613     3   447   553   301
 #&gt;       Col26 Col27 Col28 Col29 Col30 Col31 Col32 Col33 Col34 Col35
-#&gt; Row20   330   190     4   152   121    53   159   573     1   219
-#&gt; Row19   501   635   321   418   328   202   488   423   287   326
-#&gt; Row18   510    18   610   590   603   292     2   476   575   637
-#&gt; Row17   612    25   520   244   149   446   401   466    65   405
-#&gt; Row16     2   286   277   554   306     3    54   560    66   623
-#&gt; Row15   249   333   126   237   155     4   499   546   266   311
-#&gt; Row14   601   586   271     4     8    31   220   374   208   469
-#&gt; Row13    57   594     3   278   113   365    35   148   408   324
-#&gt; Row12   455   285    68   153   225   561    99   474   303   231
-#&gt; Row11    70   276   162   568     4   257   339   490   626   377
-#&gt; Row10   372   468   470   411   315   179    40     1    46   224
-#&gt; Row9     80   347   114   592   428    62   548   175   234   136
-#&gt; Row8    318   381   442   549   227    97    17    34   195     3
-#&gt; Row7    206   118   503   416   440    79    47   438   194   385
-#&gt; Row6    489   124   191   530     4    89   461   317   457   502
-#&gt; Row5    395   307   158   582    82   397   211   434   240   107
-#&gt; Row4      3   606   584     4   301   425   209   595    83     4
-#&gt; Row3    456     1   323   274   151   504   443   628     4   242
-#&gt; Row2    511     2   264   185   447   519     3   609   545   295
-#&gt; Row1    444   454   111   363   533   193   353   524   283     9</div><div class='input'><span class='va'>OptimAd2</span><span class='op'>$</span><span class='va'>plotNumber</span>
+#&gt; Row20   190   573   225   524     2   150   231    25    45   248
+#&gt; Row19   251    68     5   326   431   160   570   453   101   455
+#&gt; Row18   480   443    16     1   266   512     1   253   320   284
+#&gt; Row17   528   198    33   620   491   541   120    82    17   596
+#&gt; Row16   536   378   415   565    21   223     7     2     4   341
+#&gt; Row15   285     1    42   208   400   521   630   317    27   393
+#&gt; Row14   264   318   310   304   328     3   567   158    30   436
+#&gt; Row13    40   598     4   595     1   501   203   452   124   200
+#&gt; Row12    31   123   265   111   430   571    87   339    58   146
+#&gt; Row11   389   338   149   522   614   566   509    49   600    65
+#&gt; Row10   628   459   518   322   616     2   224   575   609    84
+#&gt; Row9    423   218   244   438   414   112     1   574   212   118
+#&gt; Row8    176   293   142     3   340   442   476   555   132   353
+#&gt; Row7    236   102   441   348   434   166   172   420   508   635
+#&gt; Row6    105   473   605   579   471   585   492   182   302   475
+#&gt; Row5    214    15   384   426   506   376   615   382   460    34
+#&gt; Row4     99    72   209   558   586   490   559   489   361     3
+#&gt; Row3      3   136   621    94   577   606   636    92   592     3
+#&gt; Row2      2   481    56   516    64   357   377   271   240   428
+#&gt; Row1    391   542   638   282    37   135   131     4   334   390</div><div class='input'><span class='va'>OptimAd2</span><span class='op'>$</span><span class='va'>plotNumber</span>
 </div><div class='output co'>#&gt;       Col1 Col2 Col3 Col4 Col5 Col6 Col7 Col8 Col9 Col10 Col11 Col12 Col13
 #&gt; Row20  800  799  798  797  796  795  794  793  792   791   790   789   788
 #&gt; Row19  731  732  733  734  735  736  737  738  739   740   741   742   743
@@ -508,18 +512,18 @@ Zealand Journal of Statistics, 53(4), 461–480.</p>
 #&gt; Row2    145   144   143   142   141   140   139   138   137   136
 #&gt; Row1    126   127   128   129   130   131   132   133   134   135</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>OptimAd2</span><span class='op'>$</span><span class='va'>fieldBook</span>,<span class='fl'>12</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;    ID   EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-#&gt; 1   1 20YWA2    MINOT 2021  101   1      1      0   164      G164
-#&gt; 2   2 20YWA2    MINOT 2021  102   1      2      0   419      G419
-#&gt; 3   3 20YWA2    MINOT 2021  103   1      3      0   210      G210
-#&gt; 4   4 20YWA2    MINOT 2021  104   1      4      0   605      G605
-#&gt; 5   5 20YWA2    MINOT 2021  105   1      5      0    94       G94
-#&gt; 6   6 20YWA2    MINOT 2021  106   1      6      0   358      G358
-#&gt; 7   7 20YWA2    MINOT 2021  107   1      7      0   387      G387
-#&gt; 8   8 20YWA2    MINOT 2021  108   1      8      0   552      G552
-#&gt; 9   9 20YWA2    MINOT 2021  109   1      9      0   297      G297
-#&gt; 10 10 20YWA2    MINOT 2021  110   1     10      0   437      G437
-#&gt; 11 11 20YWA2    MINOT 2021  111   1     11      0   143      G143
-#&gt; 12 12 20YWA2    MINOT 2021  112   1     12      0   352      G352</div><div class='input'>                  
+#&gt; 1   1 20YWA2    MINOT 2021  101   1      1      0   210      G210
+#&gt; 2   2 20YWA2    MINOT 2021  102   1      2      1     4       CH4
+#&gt; 18  3 20YWA2    MINOT 2021  103   1      3      0    98       G98
+#&gt; 19  4 20YWA2    MINOT 2021  104   1      4      0   298      G298
+#&gt; 20  5 20YWA2    MINOT 2021  105   1      5      0   347      G347
+#&gt; 21  6 20YWA2    MINOT 2021  106   1      6      0   552      G552
+#&gt; 22  7 20YWA2    MINOT 2021  107   1      7      0   300      G300
+#&gt; 23  8 20YWA2    MINOT 2021  108   1      8      0   194      G194
+#&gt; 24  9 20YWA2    MINOT 2021  109   1      9      0   143      G143
+#&gt; 25 10 20YWA2    MINOT 2021  110   1     10      0   354      G354
+#&gt; 26 11 20YWA2    MINOT 2021  111   1     11      0   312      G312
+#&gt; 27 12 20YWA2    MINOT 2021  112   1     12      0    43       G43</div><div class='input'>                  
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

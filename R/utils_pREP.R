@@ -1,7 +1,8 @@
 #' @importFrom stats dist
 pREP <- function(nrows = NULL, ncols = NULL, RepChecks = NULL, checks = NULL, Fillers = NULL,
-                 seed = NULL, optim = TRUE, niter = 1000, data = NULL) {
+                 seed = NULL, optim = TRUE, niter = 10000, data = NULL) {
   
+  niter <- 10000
   gen.list <- data
   
   if (!is.null(gen.list)) {
@@ -48,7 +49,7 @@ pREP <- function(nrows = NULL, ncols = NULL, RepChecks = NULL, checks = NULL, Fi
   }
   
   ########## Setting up the features of the experiment###########################
-  set.seed(seed)
+
   
   datos <- sample(c(rep(0, nrows*ncols - total.checks),
                     rep(1, total.checks)))

@@ -58,13 +58,14 @@ If \code{kindExpt = 'DBUDC'} and data is null, \code{blocks} are mandatory.}
 columns \code{ENTRY | NAME} if \code{kindExpt = 'SUDC'}.}
 }
 \value{
-A list with information on the design parameters.
-
-A matrix with the randomization layout.
-
-A matrix with the layout plot number.
-
-A data frame with field book design. This includes the index (Row, Column).
+A list with five elements.
+\itemize{
+  \item \code{infoDesign} is a list with information on the design parameters.
+  \item \code{layoutRandom} is a matrix with the randomization layout.
+  \item \code{plotsNumber} is a matrix with the layout plot number.
+  \item \code{data_entry} is a data frame with the data input.
+  \item \code{fieldBook} is a data frame with field book design. This includes the index (Row, Column).
+}
 }
 \description{
 Randomly generates an spatial un-replicated diagonal arrangement design.

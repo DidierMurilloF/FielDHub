@@ -44,9 +44,11 @@ assigned. Default is \code{factorLabels =TRUE}.}
 \item{data}{(optional) Data frame with label list of treatments.}
 }
 \value{
-A list with parameters information of design.
-
-Data frame with the split split plot field book.
+A list with two elements.
+\itemize{
+  \item \code{infoDesign} is a list with information on the design parameters.
+  \item \code{fieldBook} is a data frame with the split split plot field book.
+}
 }
 \description{
 It randomly generates a split split plot design (SSPD) across locations.

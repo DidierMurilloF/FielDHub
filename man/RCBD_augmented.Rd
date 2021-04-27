@@ -45,13 +45,15 @@ RCBD_augmented(
 \item{data}{(optional) Data frame with the labels of treatments.}
 }
 \value{
-A list with information on the design parameters.
-
-ARCBD layout for the first location.
-
-Plot number layout for the first location.
-
-Data frame with the ARCBD field book.
+A list with five elements.
+\itemize{
+  \item \code{infoDesign} is a list with information on the design parameters.
+  \item \code{layoutRandom} is the ARCBD layout randomization for the first location.
+  \item \code{plotNumber} is the plot number layout for the first location.
+  \item \code{exptNames} is the experiment names layout.
+  \item \code{data_entry} is a data frame with the data input.
+  \item \code{fieldBook} is a data frame with the ARCBD field book.
+}
 }
 \description{
 It randomly generates an augmented randomized complete block design across locations (ARCBD).

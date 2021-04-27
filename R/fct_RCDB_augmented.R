@@ -25,11 +25,18 @@
 #' 
 #' @importFrom stats runif na.omit
 #' 
-#' @return A list with information on the design parameters.
-#' @return ARCBD layout for the first location.
-#' @return Plot number layout for the first location.
-#' @return Data frame with the ARCBD field book.
 #' 
+#' @return A list with five elements.
+#' \itemize{
+#'   \item \code{infoDesign} is a list with information on the design parameters.
+#'   \item \code{layoutRandom} is the ARCBD layout randomization for the first location.
+#'   \item \code{plotNumber} is the plot number layout for the first location.
+#'   \item \code{exptNames} is the experiment names layout.
+#'   \item \code{data_entry} is a data frame with the data input.
+#'   \item \code{fieldBook} is a data frame with the ARCBD field book.
+#' }
+#' 
+#'
 #'
 #' @references
 #' Federer, W. T. (1955). Experimental Design. Theory and Application. New York, USA. The
@@ -88,13 +95,11 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
   if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
     shiny::validate('RCBD_augmented() requires input lines, b and l to be possitive integers.')
   }
-  
   if (!is.null(plotNumber) && is.numeric(plotNumber)) {
     if(any(plotNumber %% 1 != 0) || any(plotNumber < 1) || any(diff(plotNumber) < 0)) {
       shiny::validate("RCBD_augmented() requires input plotNumber to be possitive integers and sorted.")
     }
   }
-  
   if (!is.null(data)) {
     data <- as.data.frame(data)
     if (ncol(data) < 2) base::stop("Data input needs at least two columns with: ENTRY and NAME.")
@@ -228,18 +233,15 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
           layout_a <- t(replicate(b,  sample(c(rep(0, plots_per_block - checks), 1:checks))))
           if (b %% 2 == 0) { 
             if(planter == "serpentine") {
-              #layout_a[1,1:Fillers] <- "Filler"
               layout_a[1,] <- c(rep("Filler", Fillers), 
                                 sample(c(1:checks, rep(0, ncol(layout_a) - Fillers - checks)), 
                                        size = ncol(layout_a) - Fillers, replace = FALSE))
-            }else{ 
-              #layout_a[1,((ncol(layout_a) + 1) - Fillers):ncol(layout_a)] <- "Filler" 
+            }else{
               layout_a[1,] <- c(sample(c(1:checks, rep(0, ncol(layout_a) - Fillers - checks)), 
                                        size = ncol(layout_a) - Fillers, replace = FALSE),
                                 rep("Filler", Fillers))
             } 
-          }else { 
-            #layout_a[1,((ncol(layout_a) + 1) - Fillers):ncol(layout_a)] <- "Filler" 
+          }else {
             layout_a[1,] <- c(sample(c(1:checks, rep(0, ncol(layout_a) - Fillers - checks)), 
                                      size = ncol(layout_a) - Fillers, replace = FALSE),
                               rep("Filler", Fillers))
@@ -330,7 +332,7 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
                      repsExpt = repsExpt, numberLocations = l, Fillers = Fillers, 
                      seed = seed)
   
-  return(list(infoDesign = infoDesign, entriesTreatments = entries, layoutRandom = layout_loc1,
+  return(list(infoDesign = infoDesign, entries = entries, layoutRandom = layout_loc1,
               plotNumber = Plot_loc1, exptNames = my_names, fieldbook = fieldbook,
-              dataInput = data))
+              data_entry = data))
 }

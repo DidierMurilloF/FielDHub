@@ -42,13 +42,14 @@ partially_replicated(
 \item{data}{(optional) Dataframe with 3 columns: \code{ENTRY | NAME | REPS}.}
 }
 \value{
-A list with information on the design parameters.
-
-A matrix with the randomization layout.
-
-A matrix with the layout plot number.
-
-A data frame with fieldBook design. This includes the index (Row, Column).
+A list with five elements.
+\itemize{
+  \item \code{infoDesign} is a list with information on the design parameters.
+  \item \code{layoutRandom} is a matrix with the randomization layout.
+  \item \code{plotNumber} is a matrix with the layout plot number.
+  \item \code{data_entry} is a data frame with the data input.
+  \item \code{fieldBook} is a data frame with field book design. This includes the index (Row, Column).
+}
 }
 \description{
 Randomly generates a spatial partially replicated design, where the distance 

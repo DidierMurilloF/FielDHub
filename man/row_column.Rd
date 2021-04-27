@@ -33,11 +33,13 @@ row_column(
 \item{data}{(optional) Data frame with label list of treatments}
 }
 \value{
-A list with information on the design parameters.
-
-A list with the resolvables row columns for the first location.
-
-Data frame with the RowColD field book.
+A list with four elements.
+\itemize{
+  \item \code{infoDesign} is a list with information on the design parameters.
+  \item \code{resolvableBlocks} a list with the resolvables row columns. 
+  \item \code{concurrence} is the concurrence matrix.
+  \item \code{fieldBook} is a data frame with the row-column field book.
+}
 }
 \description{
 It randomly generates a resolvable row-column designs (RowColD). 

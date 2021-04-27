@@ -163,7 +163,8 @@ mod_pREPS_server <- function(id){
       niter <- 10000
       
       OPTIM <- input$Optim.pREPS
-      pREPS <- pREP(nrows = nrows, ncols = ncols, RepChecks = r.checks, checks = n.checks, seed = preps.seed,
+      set.seed(preps.seed)
+      pREPS <- pREP(nrows = nrows, ncols = ncols, RepChecks = r.checks, checks = n.checks, seed = NULL,
                     optim = OPTIM, niter = niter, data = gen.list) 
       
     })
@@ -172,9 +173,6 @@ mod_pREPS_server <- function(id){
     output$BINARYpREPS <- DT::renderDT({
       B <- pREPS_reactive()$binary.field
       df <- as.data.frame(B)
-      #DT::datatable(df)
-      # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE))
-      # DT::datatable(df) %>%
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
       DT::datatable(df,
                     extensions = 'FixedColumns',
@@ -203,7 +201,7 @@ mod_pREPS_server <- function(id){
       # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE))
       # 
       # DT::datatable(df) %>%
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
+      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "850px"))
       DT::datatable(df,
                     extensions = 'FixedColumns',
                     options = list(

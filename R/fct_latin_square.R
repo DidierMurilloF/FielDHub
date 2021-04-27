@@ -24,6 +24,12 @@
 #'
 #' @return A list with information on the design parameters.
 #' @return Data frame with the latin square field book.
+#' 
+#' @return A list with two elements.
+#' \itemize{
+#'   \item \code{infoDesign} is a list with information on the design parameters.
+#'   \item \code{fieldBook} is a data frame with the latin square field book.
+#' }
 #'
 #' @importFrom stats setNames
 #'

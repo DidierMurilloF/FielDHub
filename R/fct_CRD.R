@@ -19,9 +19,11 @@
 #'         
 #' @importFrom stats runif na.omit
 #'
-#' @return A list with information on the design parameters.
-#' @return Data frame with the CRD field book.
-#'
+#' @return A list with two elements.
+#' \itemize{
+#'   \item \code{infoDesign} is a list with information on the design parameters.
+#'   \item \code{fieldBook} is a data frame with the CRD field book.
+#' }
 #'
 #' @references
 #' Federer, W. T. (1955). Experimental Design. Theory and Application. New York, USA. The

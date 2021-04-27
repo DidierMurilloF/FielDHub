@@ -67,4 +67,10 @@ Plant breeding field research projects at NDSU are using `FielDHub` to refine ex
 
 This application was developed as part of a collaboration between North Dakota State University (ND, USA), VSN International (Hemel Hempstead, UK) and CIAT (Cali, Colombia). The authors want to express the support from their respective institutions for allowing us to dedicate time to this exciting product. Special thanks to Dr. Blaine Johnson and Dr. Andrew Green for their useful contributions. 
 
+# Availability and Community Guidelines
+
+The software is available at the [GitHub](https://github.com/DidierMurilloF/FielDHub/) repository. The GitHub repository also contains the source code for this paper.
+
+Users and contributors are welcome to contribute, request features, and report bugs in this GitHub repository
+
 # References

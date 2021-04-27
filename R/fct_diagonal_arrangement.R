@@ -31,11 +31,15 @@
 #'         Johan Aparicio [ctb], 
 #'         Richard Horsley [ctb]
 #' 
-#' @return A list with information on the design parameters.
-#' @return A matrix with the randomization layout.
-#' @return A matrix with the layout plot number.
-#' @return A data frame with field book design. This includes the index (Row, Column).
-#'
+#' 
+#' @return A list with five elements.
+#' \itemize{
+#'   \item \code{infoDesign} is a list with information on the design parameters.
+#'   \item \code{layoutRandom} is a matrix with the randomization layout.
+#'   \item \code{plotsNumber} is a matrix with the layout plot number.
+#'   \item \code{data_entry} is a data frame with the data input.
+#'   \item \code{fieldBook} is a data frame with field book design. This includes the index (Row, Column).
+#' }
 #'
 #' @references
 #' Clarke, G. P. Y., & Stefanova, K. T. (2011). Optimal design for early-generation plant
@@ -549,9 +553,6 @@ diagonal_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL, check
   fieldBook <- fieldBook[, c(6,7,9,4,2,3,5,1,10)]
   fieldBook <- cbind(ID, fieldBook)
   colnames(fieldBook)[10] <- "TREATMENT"
-  
-  #fieldBook <- fieldBook[, c(2,3,1,4:10)]
-  
   rownames(fieldBook) <- 1:nrow(fieldBook)
   
   linesexpt <- data_random$Lines
@@ -571,6 +572,9 @@ diagonal_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL, check
   if (any(as.vector(layoutR) == "Filler")) Fillers <- sum(layoutR == "Filler") 
   percentChecks <- round(sum(RepChecks)/(nrows*ncols),3) * 100
   percentChecks <- paste(percentChecks, "%", sep = "")
+  if (Fillers == 0) {
+    layoutR <- apply(layoutR, c(1,2), as.numeric)
+  }
   infoDesign <- list(Lines = linesexpt, checks = checks, RepChecks = RepChecks, percentChecks = percentChecks,
                      Fillers = Fillers, seed = seed)
   return(list(infoDesign = infoDesign, layoutRandom = layoutR, plotsNumber = plot_num,

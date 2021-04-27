@@ -16,9 +16,12 @@
 #'         Richard Horsley [ctb]
 #' 
 #' @importFrom stats na.omit 
-#' 
-#' @return A table with summary of cases.
-#' @return A list with the entries for each location.
+#'
+#' @return A list with two elements.
+#' \itemize{
+#'   \item \code{rowsEachlist} is a table with a summary of cases.
+#'   \item \code{listLocations} is a list with the entries for each location
+#' }
 #' 
 #'
 #' @examples
@@ -96,7 +99,6 @@ split_families <- function(l = NULL, data = NULL) {
     }
     sp <- sp + 1
   }
-  
   rowseach <- vector(mode = "numeric", length = l)
   for(i in locations) { rowseach[i] <- nrow(Glist_locations[[i]]) }
   rowsEachlist <- data.frame(list(Location = paste("Location", 1:l), n = rowseach))
