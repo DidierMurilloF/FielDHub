@@ -85,6 +85,35 @@ mod_RCBD_server <- function(id){
       return(list(dataUp.rcbd = dataUp.rcbd))
     })
     
+    
+    entryListFormat_RCBD <- data.frame(TREATMENT = c(paste("TRT_", LETTERS[1:9], sep = "")))
+    entriesInfoModal_RCBD <- function() {
+      modalDialog(
+        title = div(tags$h3("Important message", style = "color: red;")),
+        h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
+        renderTable(entryListFormat_RCBD,
+                    bordered = TRUE,
+                    align = 'c',
+                    striped = TRUE),
+        h4("Note that only the TREATMENT column is requared."),
+        easyClose = FALSE
+      )
+    }
+    
+    toListen <- reactive({
+      list(input$owndatarcbd)
+    })
+    
+    observeEvent(toListen(), {
+      if (input$owndatarcbd == "Yes") {
+        showModal(
+          shinyjqui::jqui_draggable(
+            entriesInfoModal_RCBD()
+          )
+        )
+      }
+    })
+    
     RCBD_reactive <- reactive({
       
       req(input$b)

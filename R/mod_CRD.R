@@ -113,6 +113,35 @@ mod_CRD_server <- function(id) {
       
     })
     
+    entryListFormat_CRD <- data.frame(TREATMENT = c(paste("TRT_", LETTERS[1:9], sep = "")), 
+                                      REP = as.factor(rep(5, 9)))
+    entriesInfoModal_CRD <- function() {
+      modalDialog(
+        title = div(tags$h3("Important message", style = "color: red;")),
+        h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
+        renderTable(entryListFormat_CRD,
+                    bordered = TRUE,
+                    align = 'c',
+                    striped = TRUE),
+        h4("Note that reps might be unbalanced."),
+        easyClose = FALSE
+      )
+    }
+    
+    toListen <- reactive({
+      list(input$owndatacrd)
+    })
+    
+    observeEvent(toListen(), {
+      if (input$owndatacrd == "Yes") {
+        showModal(
+          shinyjqui::jqui_draggable(
+            entriesInfoModal_CRD()
+          )
+        )
+      }
+    })
+    
     vals <- reactiveValues(maxV.CRD = NULL, minV.CRD = NULL, trail.CRD = NULL)
     
     simuModal.crd <- function(failed = FALSE) {

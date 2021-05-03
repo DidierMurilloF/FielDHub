@@ -82,6 +82,38 @@ mod_LSD_server <- function(id){
     
     ns <- session$ns
     
+    entryListFormat_LSD <- data.frame(list(ROW = paste("Period", 1:5, sep = ""),
+                                       COLUMN = paste("Cow", 1:5, sep = ""),
+                                       TREATMENT = paste("Diet", 1:5, sep = "")))
+    
+    entriesInfoModal_LSD <- function() {
+      modalDialog(
+        title = div(tags$h3("Important message", style = "color: red;")),
+        h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
+        renderTable(entryListFormat_LSD,
+                    bordered = TRUE,
+                    align = 'c',
+                    striped = TRUE),
+        #h4("Note that only the TREATMENT column is requared."),
+        easyClose = FALSE
+      )
+    }
+    
+    toListen <- reactive({
+      list(input$owndataLSD)
+    })
+    
+    observeEvent(toListen(), {
+      if (input$owndataLSD == "Yes") {
+        showModal(
+          shinyjqui::jqui_draggable(
+            entriesInfoModal_LSD()
+          )
+        )
+      }
+    })
+    
+    
     getData.lsd <- reactive({
       req(input$file.LSD)
       req(input$sep.lsd)

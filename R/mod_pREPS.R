@@ -150,6 +150,37 @@ mod_pREPS_server <- function(id){
         columnDefs = list(list(className = 'dt-center', targets = "_all"))))
     })
     
+    entryListFormat_pREP <- data.frame(ENTRY = 1:9, 
+                                       NAME = c(paste("Genotype", LETTERS[1:9], sep = "")),
+                                       REPS = as.factor(c(rep(2, times = 3), rep(1,6))))
+    
+    entriesInfoModal_pREP <- function() {
+      modalDialog(
+        title = div(tags$h3("Important message", style = "color: red;")),
+        h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
+        renderTable(entryListFormat_pREP,
+                    bordered = TRUE,
+                    align = 'c',
+                    striped = TRUE),
+        #h4("Note that the controls must be in the first rows of the CSV file."),
+        easyClose = FALSE
+      )
+    }
+    
+    toListen <- reactive({
+      list(input$owndataPREPS)
+    })
+    
+    observeEvent(toListen(), {
+      if (input$owndataPREPS == 'Yes'){
+        showModal(
+          shinyjqui::jqui_draggable(
+            entriesInfoModal_pREP()
+          )
+        )
+      }
+    })
+    
     pREPS_reactive <- reactive({
       
       req(input$nrows.preps, input$ncols.preps)

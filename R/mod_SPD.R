@@ -87,6 +87,39 @@ mod_SPD_server <- function(id){
     
     ns <- session$ns
     
+    wp <- c("NFung", paste("Fung", 1:4, sep = "")) 
+    sp <- paste("Beans", 1:10, sep = "")            
+    entryListFormat_SPD <- data.frame(list(WHOLPLOT = c(wp, rep("", 5)), SUBPLOT = sp))
+    
+    entriesInfoModal_SPD<- function() {
+      modalDialog(
+        title = div(tags$h3("Important message", style = "color: red;")),
+        h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
+        renderTable(entryListFormat_SPD,
+                    bordered = TRUE,
+                    align = 'c',
+                    striped = TRUE),
+        #h4("Note that reps might be unbalanced."),
+        easyClose = FALSE
+      )
+    }
+    
+    toListen <- reactive({
+      list(input$owndataSPD)
+    })
+    
+    observeEvent(toListen(), {
+      if (input$owndataSPD == "Yes") {
+        showModal(
+          shinyjqui::jqui_draggable(
+            entriesInfoModal_SPD()
+          )
+        )
+      }
+    })
+    
+    
+    
     getData.spd <- reactive({
       req(input$file.SPD)
       inFile <- input$file.SPD

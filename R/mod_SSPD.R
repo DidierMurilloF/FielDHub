@@ -90,7 +90,42 @@ mod_SSPD_ui <- function(id){
 #' @noRd 
 mod_SSPD_server <- function(id){
   moduleServer( id, function(input, output, session){
+    
     ns <- session$ns
+    
+   wp <- paste("IRR_", c("NO", "Yes"), sep = "") 
+   sp <- c("NFung", paste("Fung", 1:4, sep = "")) 
+   ssp <- paste("Beans", 1:10, sep = "") 
+   entryListFormat_SSPD <- data.frame(list(WHOLPLOT = c(wp, rep("", 8)), 
+                                            SUBPLOT = c(sp, rep("", 5)),
+                                            SUB_SUBPLOTS = ssp))            
+  
+    entriesInfoModal_SSPD <- function() {
+      modalDialog(
+        title = div(tags$h3("Important message", style = "color: red;")),
+        h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
+        renderTable(entryListFormat_SSPD,
+                    bordered = TRUE,
+                    align = 'c',
+                    striped = TRUE),
+        #h4("Note that reps might be unbalanced."),
+        easyClose = FALSE
+      )
+    }
+    
+    toListen <- reactive({
+      list(input$owndataSSPD)
+    })
+    
+    observeEvent(toListen(), {
+      if (input$owndataSSPD == "Yes") {
+        showModal(
+          shinyjqui::jqui_draggable(
+            entriesInfoModal_SSPD()
+          )
+        )
+      }
+    })
     
     getData.sspd <- reactive({
       req(input$file.SSPD)

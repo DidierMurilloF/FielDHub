@@ -84,6 +84,37 @@ mod_FD_server <- function(id) {
     
     ns <- session$ns
     
+    FACTORS <- rep(c("A", "B", "C"), c(2,3,2))
+    LEVELS <- c("a0", "a1", "b0", "b1", "b2", "c0", "c1")
+    entryListFormat_FD <- data.frame(list(FACTOR = FACTORS, LEVEL = LEVELS))
+    
+    entriesInfoModal_FD <- function() {
+      modalDialog(
+        title = div(tags$h3("Important message", style = "color: red;")),
+        h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
+        renderTable(entryListFormat_FD,
+                    bordered = TRUE,
+                    align = 'c',
+                    striped = TRUE),
+        #h4("Note that reps might be unbalanced."),
+        easyClose = FALSE
+      )
+    }
+    
+    toListen <- reactive({
+      list(input$owndata)
+    })
+    
+    observeEvent(toListen(), {
+      if (input$owndata == "Yes") {
+        showModal(
+          shinyjqui::jqui_draggable(
+            entriesInfoModal_FD()
+          )
+        )
+      }
+    })
+    
     getData.fd <- reactive({
       req(input$file.FD)
       req(input$sep.fd)

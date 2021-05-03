@@ -74,7 +74,7 @@ ssp <- paste("Beans", 1:10, sep = "") #Beans varieties (10 Sub-sub plots)
 split_split_plot_Data <- data.frame(list(WHOLPLOT = c(wp, rep(NA, 8)), 
                                          SUBPLOT = c(sp, rep(NA, 5)),
                                          SUB_SUBPLOTS = ssp))
-head(split_split_plot_Data, 12)
+head(split_split_plot_Data, 10)
 SSPD2 <- split_split_plot(reps = 4, l = 3, 
                           plotNumber = c(101, 1001, 2001),
                           seed = 23, 

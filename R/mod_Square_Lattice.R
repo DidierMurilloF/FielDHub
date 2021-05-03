@@ -120,6 +120,37 @@ mod_Square_Lattice_server <- function(id){
                         choices = k, selected = k[1])
     })
     
+    
+    entryListFormat_SQUARE <- data.frame(ENTRY = 1:9, 
+                                         NAME = c(paste("Genotype", LETTERS[1:9], sep = "")))
+    entriesInfoModal_SQUARE <- function() {
+      modalDialog(
+        title = div(tags$h3("Important message", style = "color: red;")),
+        h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
+        renderTable(entryListFormat_SQUARE,
+                    bordered = TRUE,
+                    align = 'c',
+                    striped = TRUE),
+        h4("Users can use any set of entry numbers."),
+        easyClose = FALSE
+      )
+    }
+    
+    toListen <- reactive({
+      list(input$owndata_square)
+    })
+    
+    observeEvent(toListen(), {
+      if (input$owndata_square == "Yes") {
+        showModal(
+          shinyjqui::jqui_draggable(
+            entriesInfoModal_SQUARE()
+          )
+        )
+      }
+    })
+    
+    
     SQUARE_reactive <- eventReactive(input$RUN.square,{
       
       req(input$k.square)

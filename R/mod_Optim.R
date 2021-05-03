@@ -32,16 +32,7 @@ mod_Optim_ui <- function(id) {
                    
                    numericInput(ns("tplots.s"), label = "Input # of Total Check Plots:",
                                 value = 30, min = 1),
-                   # fluidRow(
-                   #   column(6,style=list("padding-right: 28px;"),
-                   #          numericInput(ns("checks.s"), label = "Input # of Checks:", value = 3, min = 1),
-                   #   ),
-                   #   column(6,style=list("padding-left: 5px;"),
-                   #           numericInput(ns("tplots.s"), label = "Input # of Total Check Plots:",
-                   #                        value = 30, min = 1)
-                   #   )
-                   # ),
-                   
+
                    conditionalPanel("input.owndataOPTIM != 'Yes'", ns = ns,
                                     
                                     fluidRow(
@@ -110,9 +101,6 @@ mod_Optim_ui <- function(id) {
           tabPanel("Plot Number Field", DT::DTOutput(ns("PLOTFIELD"))),
           tabPanel("Field Book", DT::DTOutput(ns("OPTIMOUTPUT"))),
           tabPanel("Heatmap", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmap")), type = 5))
-          # conditionalPanel(condition = "input.heatmap_s==true", ns = ns,
-          # 
-          # )
          )
       )
     )
@@ -176,6 +164,38 @@ mod_Optim_server <- function(id){
                                 scrollX = TRUE, scrollY = "600px"))
       DT::datatable(df, rownames = TRUE, options = list(
         columnDefs = list(list(className = 'dt-left', targets = 0:3))))
+    })
+    
+    
+    entryListFormat_OPTIM <- data.frame(ENTRY = 1:9, 
+                                        NAME = c(c("CHECK1", "CHECK2","CHECK3"), paste("Genotype", LETTERS[1:6], sep = "")),
+                                        REPS = as.factor(c(rep(10, times = 3), rep(1,6))))
+    
+    entriesInfoModal_OPTIM <- function() {
+      modalDialog(
+        title = div(tags$h3("Important message", style = "color: red;")),
+        h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
+        renderTable(entryListFormat_OPTIM,
+                    bordered = TRUE,
+                    align = 'c',
+                    striped = TRUE),
+        h4("Note that the controls must be in the first rows of the CSV file."),
+        easyClose = FALSE
+      )
+    }
+    
+    toListen <- reactive({
+      list(input$owndataOPTIM)
+    })
+    
+    observeEvent(toListen(), {
+      if (input$owndataOPTIM == "Yes") {
+        showModal(
+          shinyjqui::jqui_draggable(
+            entriesInfoModal_OPTIM()
+          )
+        )
+      }
     })
     
     output$table_checks <- DT::renderDT({

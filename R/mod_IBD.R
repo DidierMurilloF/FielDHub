@@ -79,7 +79,40 @@ mod_IBD_ui <- function(id){
 #' @noRd 
 mod_IBD_server <- function(id){
   moduleServer( id, function(input, output, session){
+    
     ns <- session$ns
+    
+    treatments <- paste("TX-", 1:9, sep = "")
+    entryListFormat_IBD <- data.frame(ENTRY = 1:9, 
+                                      NAME = treatments)
+    entriesInfoModal_IBD <- function() {
+      modalDialog(
+        title = div(tags$h3("Important message", style = "color: red;")),
+        h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
+        renderTable(entryListFormat_IBD,
+                    bordered = TRUE,
+                    align = 'c',
+                    striped = TRUE),
+        #h4("Users can use any set of entry numbers."),
+        easyClose = FALSE
+      )
+    }
+    
+    toListen <- reactive({
+      list(input$owndataibd)
+    })
+    
+    observeEvent(toListen(), {
+      if (input$owndataibd == "Yes") {
+        showModal(
+          shinyjqui::jqui_draggable(
+            entriesInfoModal_IBD()
+          )
+        )
+      }
+    })
+    
+    
     
     getData.ibd <- reactive({
       req(input$file.IBD)

@@ -86,6 +86,38 @@ mod_STRIPD_server <- function(id){
     
     ns <- session$ns
     
+    
+    Hplots <- LETTERS[1:5]
+    Vplots <- LETTERS[1:4]
+    entryListFormat_STRIP <- data.frame(list(HPLOTS = Hplots, VPLOTS = c(Vplots, "")))           
+    
+    entriesInfoModal_STRIP <- function() {
+      modalDialog(
+        title = div(tags$h3("Important message", style = "color: red;")),
+        h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
+        renderTable(entryListFormat_STRIP,
+                    bordered = TRUE,
+                    align = 'c',
+                    striped = TRUE),
+        #h4("Note that reps might be unbalanced."),
+        easyClose = FALSE
+      )
+    }
+    
+    toListen <- reactive({
+      list(input$owndataSTRIP)
+    })
+    
+    observeEvent(toListen(), {
+      if (input$owndataSTRIP == "Yes") {
+        showModal(
+          shinyjqui::jqui_draggable(
+            entriesInfoModal_STRIP()
+          )
+        )
+      }
+    })
+    
     getData.strip <- reactive({
       req(input$file.STRIP)
       inFile <- input$file.STRIP

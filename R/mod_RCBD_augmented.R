@@ -40,20 +40,6 @@ mod_RCBD_augmented_ui <- function(id){
                      )
                    ),
                    
-                   # numericInput(inputId = ns("nExpt_a_rcbd"), label = "Input # of Stacked Expts:",
-                   #              value = 1, min = 1, max = 100),
-                   
-                   # fluidRow(
-                   #   column(6,style=list("padding-right: 28px;"),
-                   #          textInput(ns("expt_name_a_rcbd"), "Input Experiment Name:", value = "Expt1"),
-                   #   ),
-                   #   column(6,style=list("padding-left: 5px;"),
-                   #          numericInput(inputId = ns("nExpt_a_rcbd"), label = "Input # of Expts:",
-                   #                       value = 1, min = 1, max = 100)
-                   #   )
-                   #   
-                   # ),
-                   
                    conditionalPanel("input.owndata_a_rcbd == 'No'", ns = ns,
                                     numericInput(inputId = ns("lines_a_rcbd"), label = "Input # of Entries:", value = 50)
                    ),
@@ -166,6 +152,35 @@ mod_RCBD_augmented_server <- function(id) {
       DT::datatable(df, rownames = FALSE)
     })
     
+    entryListFormat_ARCBD <- data.frame(ENTRY = 1:9, 
+                                        NAME = c(c("CHECK1", "CHECK2","CHECK3"), paste("Genotype", LETTERS[1:6], sep = "")))
+    entriesInfoModal_ARCBD <- function() {
+      modalDialog(
+        title = div(tags$h3("Important message", style = "color: red;")),
+        h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
+        renderTable(entryListFormat_ARCBD,
+                    bordered = TRUE,
+                    align = 'c',
+                    striped = TRUE),
+        h4("Note that the controls must be in the first rows of the CSV file."),
+        easyClose = FALSE
+      )
+    }
+    
+    toListen <- reactive({
+      list(input$owndata_a_rcbd)
+    })
+    
+    observeEvent(toListen(), {
+      if (input$owndata_a_rcbd == "Yes") {
+        showModal(
+          shinyjqui::jqui_draggable(
+            entriesInfoModal_ARCBD()
+          )
+        )
+      }
+    })
+    
     output$table1_a_rcbd <- DT::renderDT({
       req(input$checks_a_rcbd)
       req(getDataup_a_rcbd()$dataUp_a_rcbd)
@@ -236,16 +251,6 @@ mod_RCBD_augmented_server <- function(id) {
        E <- paste("E", rep(repsExpt:1, each = b), sep = "")
        rownames(df) <- paste(B,E)
        colnames(df) <- paste("V", 1:ncol(df), sep = "")
-       # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-       #                           scrollX = TRUE, scrollY = "1000px"))
-       # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
-       # DT::datatable(df,
-       #               extensions = 'FixedColumns',
-       #               options = list(
-       #                 dom = 't',
-       #                 scrollX = TRUE,
-       #                 fixedColumns = TRUE
-       #               )) %>%
        options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
        DT::datatable(df,
                      extensions = 'FixedColumns',

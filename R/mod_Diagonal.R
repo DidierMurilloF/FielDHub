@@ -177,7 +177,7 @@ mod_Diagonal_ui <- function(id){
 mod_Diagonal_server <- function(id) {
   moduleServer( id, function(input, output, session) {
     ns <- session$ns
-    #Option_NCD
+    
     getData <- reactive({
       Option_NCD <- TRUE
       if (input$owndataDIAGONALS == "Yes") {
@@ -255,6 +255,56 @@ mod_Diagonal_server <- function(id) {
       
       list(data_entry = data_entry_UP, dim_data_entry = dim_data_entry, dim_data_1 = dim_data_1)
       
+    })
+    
+    entryListFormat_SUDC <- data.frame(ENTRY = 1:9, NAME = c(c("CHECK1", "CHECK2","CHECK3"), paste("Genotype", LETTERS[1:6], sep = "")))
+    entryListFormat_DBUDC <- data.frame(ENTRY = 1:9, NAME = c(c("CHECK1", "CHECK2","CHECK3"), paste("Genotype", LETTERS[1:6], sep = "")),
+                                        BLOCK = c(rep("ALL", 3), rep(1:3, each = 2)))
+    
+    toListen <- reactive({
+      list(input$owndataDIAGONALS,input$kindExpt)
+    })
+    
+    entriesInfoModal_SUDC <- function() {
+      modalDialog(
+        title = div(tags$h3("Important message", style = "color: red;")),
+        h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
+        renderTable(entryListFormat_SUDC,
+                    bordered = TRUE,
+                    align  = 'c',
+                    striped = TRUE),
+        h4("Note that the controls must be in the first rows of the CSV file."),
+        easyClose = FALSE
+      )
+    }
+    
+    entriesInfoModal_DBUDC <- function() {
+      modalDialog(
+        title = div(tags$h3("Important message", style = "color: red;")),
+        h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
+        renderTable(entryListFormat_DBUDC,
+                    bordered = TRUE,
+                    align = 'c',
+                    striped = TRUE),
+        h4("Note that the controls must be in the first rows of the CSV file."),
+        easyClose = FALSE
+      )
+    }
+
+    observeEvent(toListen(), {
+      if (input$owndataDIAGONALS == "Yes" && input$kindExpt == "SUDC") {
+        showModal(
+          shinyjqui::jqui_draggable(
+            entriesInfoModal_SUDC()
+          )
+        )
+      }else if (input$owndataDIAGONALS == "Yes" && input$kindExpt == "DBUDC") {
+        showModal(
+          shinyjqui::jqui_draggable(
+            entriesInfoModal_DBUDC()
+          )
+        )
+      }
     })
     
     getChecks <- reactive({
@@ -528,9 +578,6 @@ mod_Diagonal_server <- function(id) {
           Visual_ch <- as.numeric(input$Visual_ch)
           df <- as.data.frame(r_map)
           rownames(df) <- nrow(df):1
-          # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-          #                           scrollX = TRUE, scrollY = "1000px"))
-          # DT::datatable(df) %>%
           options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "850px"))
           DT::datatable(df,
                         extensions = 'FixedColumns',
@@ -544,9 +591,6 @@ mod_Diagonal_server <- function(id) {
         }else{
           df <- as.data.frame(r_map)
           rownames(df) <- nrow(df):1
-          # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-          #                           scrollX = TRUE, scrollY = "1000px"))
-          # DT::datatable(df) %>%
           options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "850px"))
           DT::datatable(df,
                         extensions = 'FixedColumns',
@@ -829,11 +873,6 @@ mod_Diagonal_server <- function(id) {
                                                      my_row_sets = my_row_sets, ByCol = FALSE, my_col_sets = NULL,
                                                      which.blocks = Block_Fillers, n_blocks = n_blocks,
                                                      data.dim.each = data.dim.each)
-            
-            # my_split_plot_nub <- plot_number(movement_planter = input$planter_mov, n_blocks = n_blocks,
-            #                                  n_rows = input$n_rows, n_cols = input$n_cols, plot_n_start = plot_n_start,
-            #                                  datos = datos_name, expe_name = expe_names, ByRow = TRUE,
-            #                                  my_row_sets = my_row_sets, ByCol = FALSE, my_col_sets = NULL) 
           }
           
         }
