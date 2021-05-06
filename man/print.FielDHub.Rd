@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils_S3_methods.R
 \name{print.FielDHub}
 \alias{print.FielDHub}
-\title{Print an \code{FielDHub} object}
+\title{Print a \code{FielDHub} object}
 \usage{
 \method{print}{FielDHub}(x, n, ...)
 }

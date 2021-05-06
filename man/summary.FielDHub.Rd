@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils_S3_methods.R
 \name{summary.FielDHub}
 \alias{summary.FielDHub}
-\title{Summary an \code{FielDHub} object}
+\title{Summary a \code{FielDHub} object}
 \usage{
 \method{summary}{FielDHub}(object, ...)
 }

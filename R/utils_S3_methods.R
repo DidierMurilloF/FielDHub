@@ -3,7 +3,7 @@
 #-----------------------------------------------------------------------
 #' @rdname print.FielDHub
 #' @method print FielDHub
-#' @title Print an \code{FielDHub} object
+#' @title Print a \code{FielDHub} object
 #' @usage \method{print}{FielDHub}(x, n, ...)
 #' @aliases print.FielDHub
 #' @description Prints information about any \code{FielDHub} function.
@@ -264,7 +264,7 @@ print.FielDHub <- function(x, n=10, ...){
 #-----------------------------------------------------------------------
 #' @rdname summary.FielDHub
 #' @method summary FielDHub
-#' @title Summary an \code{FielDHub} object
+#' @title Summary a \code{FielDHub} object
 #' @usage \method{summary}{FielDHub}(object, ...)
 #' @aliases summary.FielDHub
 #' @description Summarise information on the design parameters, and data
@@ -295,7 +295,7 @@ summary.FielDHub <- function(object, ...) {
 #-----------------------------------------------------------------------
 #' @rdname print.summary.FielDHub
 #' @method print summary.FielDHub
-#' @title Print the summary of an \code{FielDHub} object
+#' @title Print the summary of a \code{FielDHub} object
 #' @usage \method{print}{summary.FielDHub}(x, ...)
 #' @aliases print.summary.FielDHub
 #' @description Print summary information on the design parameters, and
