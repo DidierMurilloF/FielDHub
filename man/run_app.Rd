@@ -4,10 +4,13 @@
 \alias{run_app}
 \title{Run the Shiny Application}
 \usage{
-run_app()
+run_app(...)
+}
+\arguments{
+\item{...}{Unused, for extensibility}
 }
 \value{
-A shiny app.
+A shiny app object
 }
 \description{
 Run the Shiny Application

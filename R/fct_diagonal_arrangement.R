@@ -5,7 +5,7 @@
 #' @param nrows Number of rows in the field.
 #' @param ncols Number of columns in the field.
 #' @param lines Number of genotypes, experimental lines or treatments.
-#' @param checks Integer number of genotypes checks or a numeric vector. 
+#' @param checks Number of genotypes checks. 
 #' @param kindExpt Type of diagonal design, with single options: Single Un-replicated Diagonal Checks
 #' \code{'SUDC'} and Decision Blocks Un-replicated Design with Diagonal Checks \code{'DBUDC'} 
 #' for multiple experiments. By default \code{kindExpt = 'SUDC'}.
@@ -21,7 +21,7 @@
 #' If \code{kindExpt = 'DBUDC'} and data is null, \code{blocks} are mandatory.
 #' @param exptName (optional) Name of the experiment.
 #' @param locationNames (optional) Names each location.
-#' @param data (optional) Data frame with 2 columns: \code{ENTRY | NAME | BLOCK} or only 2 
+#' @param data (optional) Data frame with 3 columns: \code{ENTRY | NAME | BLOCK} or only 2 
 #' columns \code{ENTRY | NAME} if \code{kindExpt = 'SUDC'}.
 #' 
 #' @author Didier Murillo [aut],

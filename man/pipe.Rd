@@ -6,6 +6,14 @@
 \usage{
 lhs \%>\% rhs
 }
+\arguments{
+\item{lhs}{A value or the magrittr placeholder.}
+
+\item{rhs}{A function call using the magrittr semantics.}
+}
+\value{
+It depends on the arguments \code{lhs} and \code{rhs}.
+}
 \description{
 See \code{magrittr::\link[magrittr:pipe]{\%>\%}} for details.
 }

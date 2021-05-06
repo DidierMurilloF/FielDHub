@@ -28,7 +28,7 @@ diagonal_arrangement(
 
 \item{lines}{Number of genotypes, experimental lines or treatments.}
 
-\item{checks}{Integer number of genotypes checks or a numeric vector.}
+\item{checks}{Number of genotypes checks.}
 
 \item{planter}{Option for \code{serpentine} or \code{cartesian} plot arrangement. 
 By default  \code{planter = 'serpentine'}.}
@@ -54,7 +54,7 @@ If \code{kindExpt = 'DBUDC'} and data is null, \code{blocks} are mandatory.}
 
 \item{locationNames}{(optional) Names each location.}
 
-\item{data}{(optional) Data frame with 2 columns: \code{ENTRY | NAME | BLOCK} or only 2 
+\item{data}{(optional) Data frame with 3 columns: \code{ENTRY | NAME | BLOCK} or only 2 
 columns \code{ENTRY | NAME} if \code{kindExpt = 'SUDC'}.}
 }
 \value{
