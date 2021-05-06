@@ -246,7 +246,8 @@ mod_RCBD_augmented_server <- function(id) {
        repsExpt <- as.numeric(input$nExpt_a_rcbd)
        colores <- c('royalblue','salmon', 'green', 'orange','orchid', 'slategrey',
                     'greenyellow', 'blueviolet','deepskyblue','gold','blue', 'red')
-       s <- unlist(rcbd_augmented_reactive()$entriesTreatments)
+       #s <- unlist(rcbd_augmented_reactive()$entries)
+       s <- rcbd_augmented_reactive()$infoDesign$entries
        B <- paste("Block", rep(b:1, repsExpt), sep = "")
        E <- paste("E", rep(repsExpt:1, each = b), sep = "")
        rownames(df) <- paste(B,E)
@@ -260,10 +261,10 @@ mod_RCBD_augmented_server <- function(id) {
                        fixedColumns = TRUE
                      )) %>%
          DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-                         backgroundColor = DT::styleEqual(c(checks), 
-                                                          colores[1:len_checks])) %>% 
+                         backgroundColor = DT::styleEqual(c(checks),
+                                                          colores[1:len_checks])) %>%
          DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-                         backgroundColor = DT::styleEqual(s, 
+                         backgroundColor = DT::styleEqual(s,
                                                           rep('gray', length(s)
                                                           )
                          )
@@ -286,7 +287,7 @@ mod_RCBD_augmented_server <- function(id) {
        b <- as.numeric(input$blocks_a_rcbd)
        repsExpt <- as.numeric(input$nExpt_a_rcbd)
        nameexpt <- as.vector(unlist(strsplit(input$expt_name_a_rcbd, ",")))
-       if (length(nameexpt) != 0) {
+       if (length(nameexpt) == repsExpt) {
          Name_expt <- nameexpt
        }else Name_expt <- paste(rep('Expt', repsExpt), 1:repsExpt, sep = "")
        df <-  as.data.frame(rcbd_augmented_reactive()$exptNames)
@@ -294,18 +295,23 @@ mod_RCBD_augmented_server <- function(id) {
        E <- paste("E", rep(repsExpt:1, each = b), sep = "")
        rownames(df) <- paste(B,E)
        colnames(df) <- paste("V", 1:ncol(df), sep = "")
-       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                 scrollX = TRUE, scrollY = scrollY(b)))
-       DT::datatable(df) %>% 
+       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
+       DT::datatable(df,
+                     extensions = 'FixedColumns',
+                     options = list(
+                       dom = 't',
+                       scrollX = TRUE,
+                       fixedColumns = TRUE
+                     )) %>%
          DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-                         backgroundColor = DT::styleEqual(Name_expt, rep(c('yellow'), length(Name_expt))))
+                         backgroundColor = DT::styleEqual(Name_expt, rep('yellow', length(Name_expt))
+                                                          )
+                         )
      })
 
      output$dt4_a_rcbd <- DT::renderDT({
        req(rcbd_augmented_reactive()$infoDesign)
        req(input$blocks_a_rcbd)
-       #
-       #plot_num1 <- plot_number_reactive_a()$plot_num
        plot_num1 <- rcbd_augmented_reactive()$plotNumber
        b <- as.numeric(input$blocks_a_rcbd)
        infoDesign <- rcbd_augmented_reactive()$infoDesign
@@ -320,9 +326,14 @@ mod_RCBD_augmented_server <- function(id) {
          E <- paste("E", rep(repsExpt:1, each = b), sep = "")
          rownames(df) <- paste(B,E)
          colnames(df) <- paste("V", 1:ncol(df), sep = "")
-         options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                   scrollX = TRUE, scrollY = "1000px"))
-         DT::datatable(df) %>%
+         options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
+         DT::datatable(df,
+                       extensions = 'FixedColumns',
+                       options = list(
+                         dom = 't',
+                         scrollX = TRUE,
+                         fixedColumns = TRUE
+                       )) %>%
            DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
                            backgroundColor = DT::styleEqual(a, 
                                                             rep('yellow', length(a)))
@@ -336,22 +347,25 @@ mod_RCBD_augmented_server <- function(id) {
          E <- paste("E", rep(repsExpt:1, each = b), sep = "")
          rownames(df) <- paste(B,E)
          colnames(df) <- paste("V", 1:ncol(df), sep = "")
-         options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                   scrollX = TRUE, scrollY = "1000px"))
-         DT::datatable(df) %>%
+         options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
+         DT::datatable(df,
+                       extensions = 'FixedColumns',
+                       options = list(
+                         dom = 't',
+                         scrollX = TRUE,
+                         fixedColumns = TRUE
+                       )) %>%
            DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-                           backgroundColor = DT::styleEqual(c(a,0),
-                                                            c(rep(c('yellow'), len_a),"red"))
-           )
+                           backgroundColor = DT::styleEqual(c(a,0),c(rep(c('yellow'), len_a),"red"))
+               )
        }
      })
      
      output$dt5_a <- DT::renderDT({
-       if(is.null(rcbd_augmented_reactive()$fieldbook)) return(NULL)
-       df <- rcbd_augmented_reactive()$fieldbook
+       if(is.null(rcbd_augmented_reactive()$fieldBook)) return(NULL)
+       df <- rcbd_augmented_reactive()$fieldBook
        options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                  scrollX = TRUE, scrollY = "600px"))
-       #DT::datatable(df, rownames = FALSE)
        DT::datatable(df, rownames = FALSE, options = list(
          columnDefs = list(list(className = 'dt-center', targets = "_all"))))
      })
@@ -364,7 +378,7 @@ mod_RCBD_augmented_server <- function(id) {
          paste(loc, Sys.Date(), ".csv", sep = "")
        },
        content = function(file) {
-         df <- as.data.frame(rcbd_augmented_reactive()$fieldbook)
+         df <- as.data.frame(rcbd_augmented_reactive()$fieldBook)
          write.csv(df, file, row.names = FALSE)
        }
      )

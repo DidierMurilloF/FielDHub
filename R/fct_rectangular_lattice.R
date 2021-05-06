@@ -123,7 +123,9 @@ rectangular_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber 
   rownames(OutRectagular_Lattice) <- 1:nrow(OutRectagular_Lattice)
 
   infoDesign <- list(Reps = r, iBlocks = s, NumberTreatments = nt, NumberLocations = l, 
-                     Locations = locationNames, seed = seed, lambda = lambda)
-  
-  return(list(infoDesign = infoDesign, fieldBook = OutRectagular_Lattice))
+                     Locations = locationNames, seed = seed, lambda = lambda,
+                     idDesign = 11)
+  output <- list(infoDesign = infoDesign, fieldBook = OutRectagular_Lattice)
+  class(output) <- "FielDHub"
+  return(invisible(output))
 }

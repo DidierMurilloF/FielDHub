@@ -66,7 +66,7 @@
 #' @export
 CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL,
                 seed = NULL, data = NULL) {
-
+  
   if (is.null(seed) || is.character(seed) || is.factor(seed)) seed <- runif(1, min = -50000, max = 50000)
   set.seed(seed)
   if (!is.null(plotNumber)) {
@@ -117,7 +117,7 @@ CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL,
     nt <- length(data$Treatment)
     reps <- as.vector(data$Reps)
   }
-
+  
   design <- data.frame(list(LOCATION = rep(locationName, N)),
                        PLOT = sample(plotNumber:(plotNumber + N - 1)),
                        REP = as.factor(REP), TREATMENT = TRT)
@@ -129,122 +129,8 @@ CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL,
   rownames(design) <- 1:N
   TRT <- levels(factor(TRT, as.character(unique(TRT))))
   parameters <- list(numberofTreatments = nt, treatments = TRT, Reps = reps, locationName = locationName,
-                     seed = seed)
+                     seed = seed, idDesign = 1)
   output <- list(infoDesign = parameters, fieldBook = design)
   class(output) <- "FielDHub"
   return(invisible(output))
-}
-
-#-----------------------------------------------------------------------
-# Print
-#-----------------------------------------------------------------------
-#' @rdname print.CRD
-#' @method print CRD
-#' @title Print an \code{FielDHub} object
-#' @usage \method{print}{CRD}(x, n, ...)
-#' @aliases print.CRD
-#' @description Prints information about randomization of Completely
-#'   Randomized Design (CRD)
-#' @return an object inheriting from class \code{FielDHub}
-#' @param x an object inheriting from class
-#' @param n a single integer. If positive or zero, size for the
-#'   resulting object: number of elements for a vector (including
-#'   lists), rows for a matrix or data frame or lines for a function. If
-#'   negative, all but the n last/first number of elements of x.
-#'
-#' @param ... further arguments passed to \code{\link{head}}.
-#' @author Thiago de Paula Oliveira,
-#'   \email{thiago.paula.oliveira@@alumni.usp.br}
-#' @importFrom utils head str
-#' @examples
-#' # Example 1: Generates a CRD design with 5 treatments and 5 reps each.
-#' crd1 <- CRD(t = 5, reps = 5, plotNumber = 101,
-#' seed = 1985, locationName = "Fargo")
-#' crd1$infoDesign
-#' print(crd1)
-#'
-#' @export
-print.CRD <- function(x, n=10, ...){
-  #---------------------------------------------------------------------
-  # Parameters
-  #---------------------------------------------------------------------
-  cat("Completely Randomized Design (CRD)", "\n\n")
-  cat("Information on the design parameters:", "\n")
-  str(x$infoDesign)
-  #---------------------------------------------------------------------
-  # Head
-  #---------------------------------------------------------------------
-  nr <- nrow(x$fieldBook)
-  nhead <- min(n, nr)
-  if (n < 0) {
-    nhead_print <- nr + n
-  }else {
-    nhead_print <- nhead
-  }
-  cat("\n",  nhead_print,
-      "First observations of the data frame with the CRD field book:",
-      "\n")
-  print(head(x$fieldBook, n=nhead, ...))
-}
-
-#-----------------------------------------------------------------------
-# Summary
-#-----------------------------------------------------------------------
-#' @rdname summary.CRD
-#' @method summary CRD
-#' @title Summary an \code{CRD} object
-#' @usage \method{summary}{CRD}(object, ...)
-#' @aliases summary.CRD
-#' @description Summarise information on the design parameters, and data
-#'   frame structure
-#' @return an object inheriting from class \code{summary.CRD}
-#' @param object an object inheriting from class
-#'   \code{FielDHub}
-#'
-#' @param ... Unused, for extensibility
-#' @author Thiago de Paula Oliveira,
-#'   \email{thiago.paula.oliveira@@alumni.usp.br}
-#'
-#' @examples
-#' # Example 1: Generates a CRD design with 5 treatments and 5 reps each.
-#' crd1 <- CRD(t = 5, reps = 5, plotNumber = 101,
-#' seed = 1985, locationName = "Fargo")
-#' crd1$infoDesign
-#' summary(crd1)
-#'
-#' @export
-summary.CRD <- function(object, ...) {
-  structure(object, oClass=class(object),
-            class = "summary.CRD")
-}
-
-#-----------------------------------------------------------------------
-# Print summary
-#-----------------------------------------------------------------------
-#' @rdname print.summary.CRD
-#' @method summary CRD
-#' @title Print the summary of an \code{FielDHub} object
-#' @usage \method{print}{summary.CRD}(x, ...)
-#' @aliases print.summary.CRD
-#' @description Print summary information on the design parameters, and
-#'   data frame structure
-#' @return an object inheriting from class \code{FielDHub}
-#' @param x an object inheriting from class \code{FielDHub}
-#'
-#' @param ... Unused, for extensibility
-#' @author Thiago de Paula Oliveira,
-#'   \email{thiago.paula.oliveira@@alumni.usp.br}
-#' @importFrom utils str
-#' @importFrom dplyr glimpse
-#' @export
-print.summary.CRD <- function(x, ...){
-  cat("Completely Randomized Design (CRD):", "\n\n")
-  #---------------------------------------------------------------------
-  cat("1. Information on the design parameters:", "\n")
-  str(x$infoDesign)
-  cat("\n")
-  #---------------------------------------------------------------------
-  cat("2. Strcuture of the data frame with the CRD field book:", "\n\n")
-  dplyr::glimpse(x$fieldBook)
-  #---------------------------------------------------------------------
 }

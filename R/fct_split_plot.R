@@ -218,7 +218,10 @@ split_plot <- function(wp = NULL, sp = NULL, reps = NULL, type = 2, l = 1, plotN
                      locationNames = locationNames,
                      plotNumbers = plot.number,
                      typeDesign = type,
-                     seed = seed)
-  return(list(infoDesign = info.design, layoutlocations = loc.spd.layout, 
-              fieldBook = spd_output))
+                     seed = seed,
+                     idDesign = 5)
+  output <- list(infoDesign = info.design, layoutlocations = loc.spd.layout, 
+              fieldBook = spd_output)
+  class(output) <- "FielDHub"
+  return(invisible(output))
 }

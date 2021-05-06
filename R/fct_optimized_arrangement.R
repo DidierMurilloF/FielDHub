@@ -239,9 +239,10 @@ optimized_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,  amo
   rownames(plot_num) <- paste("Row", nrow(plot_num):1, sep = "")
   colnames(plot_num) <- paste("Col", 1:ncol(plot_num), sep = "")
   
-  infoDesign <- list(Lines = lines, checks = checksEntries, RepChecks = RepChecks)
-  
-  return(list(infoDesign = infoDesign, layoutRandom = layoutR, plotNumber = plot_num, 
-              data_entry = dataInput, fieldBook = fieldBook))
-  
+  infoDesign <- list(Lines = lines, checks = checksEntries, RepChecks = RepChecks, seed = seed,
+                     idDesign = 16)
+  output <- list(infoDesign = infoDesign, layoutRandom = layoutR, plotNumber = plot_num, 
+                 data_entry = dataInput, fieldBook = fieldBook)
+  class(output) <- "FielDHub"
+  return(invisible(output))
 }

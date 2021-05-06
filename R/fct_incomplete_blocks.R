@@ -158,13 +158,13 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
     OutIBD <- OutIBD[, c(1:5,7,6)]
     colnames(OutIBD) <- c("LOCATION","PLOT", "REP", "IBLOCK", "UNIT", "ENTRY", "TREATMENT")
   }
-
   ID <- 1:nrow(OutIBD)
   OutIBD_new <- cbind(ID, OutIBD)
   lambda <- r*(k - 1)/(nt - 1)
-
   infoDesign <- list(Reps = r, iBlocks = b, NumberTreatments = nt, NumberLocations = l,
-                     Locations = locationNames, seed = seed, lambda = lambda)
-
-  return(list(infoDesign = infoDesign, fieldBook = OutIBD_new))
+                     Locations = locationNames, seed = seed, lambda = lambda, 
+                     idDesign = 8)
+  output <- list(infoDesign = infoDesign, fieldBook = OutIBD_new)
+  class(output) <- "FielDHub"
+  return(invisible(output))
 }

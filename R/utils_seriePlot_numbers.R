@@ -16,20 +16,22 @@ seriePlot.numbers <- function(plot.number = NULL, reps = NULL, l = NULL, t = NUL
     warning("'plotNumber' was set up to its default values for each site.")
   }
   plot.numbs <- list()
-  #if (reps == 1) reps <- 2
   if (overlap == FALSE) {
     for (k in 1:l) {
       if (plot.number[k] == 1) {
-        plot.numbs[[k]] <- seq(1, (100)*(reps), 100)
-      }else if (plot.number[k] > 1 && plot.number[k] < 1000) {
-        plot.numbs[[k]] <- seq(plot.number[k], (101)*reps, 100)
-      }else if (plot.number[k] >= 1000 && plot.number[k] < 10000) {
-        plot.numbs[[k]] <- seq(plot.number[k], plot.number[k]+(100*(reps-1)), 100)
-      }else if (plot.number[k] >= 10000 && plot.number[k] < 100000) {
-        plot.numbs[[k]] <- seq(plot.number[k], plot.number[k]+(100*(reps-1)), 100)
-      }else if (plot.number[k] >= 100000) {
-        plot.numbs[[k]] <- seq(plot.number[k], plot.number[k]+(100*(reps-1)), 100)
+        plot.numbs[[k]] <- seq(1, (100)*(reps), 100)[1:reps]
+      }else if (plot.number[k] > 1) {
+        # && plot.number[k] < 1000
+        #plot.numbs[[k]] <- seq(plot.number[k], (101)*reps, 100)[1:reps]
+        plot.numbs[[k]] <- seq(plot.number[k], plot.number[k]+(100*(reps-1)), 100)[1:reps]
       }
+      # else if (plot.number[k] >= 1000 && plot.number[k] < 10000) {
+      #   plot.numbs[[k]] <- seq(plot.number[k], plot.number[k]+(100*(reps-1)), 100)[1:reps]
+      # }else if (plot.number[k] >= 10000 && plot.number[k] < 100000) {
+      #   plot.numbs[[k]] <- seq(plot.number[k], plot.number[k]+(100*(reps-1)), 100)[1:reps]
+      # }else if (plot.number[k] >= 100000) {
+      #   plot.numbs[[k]] <- seq(plot.number[k], plot.number[k]+(100*(reps-1)), 100)[1:reps]
+      # }
     }
   }else {
     for (k in 1:l) {
@@ -38,13 +40,14 @@ seriePlot.numbers <- function(plot.number = NULL, reps = NULL, l = NULL, t = NUL
       }else if (plot.number[k] > 1 && plot.number[k] < 1000) {
         if (reps == 1) B <- 1 else B <- 0
         if (t == 100) R <- 1 else R <- 0
-        plot.numbs[[k]] <- seq(plot.number[k], (t+R)*reps + B, t)
+        #plot.numbs[[k]] <- seq(plot.number[k], (t+R)*reps + B, t)
+        plot.numbs[[k]] <- seq(plot.number[k], plot.number[k]+(t*(reps-1)), t)[1:reps]
       }else if (plot.number[k] >= 1000 && plot.number[k] < 10000) {
-        plot.numbs[[k]] <- seq(plot.number[k], plot.number[k]+(t*(reps-1)), t)
+        plot.numbs[[k]] <- seq(plot.number[k], plot.number[k]+(t*(reps-1)), t)[1:reps]
       }else if (plot.number[k] >= 10000 && plot.number[k] < 100000) {
-        plot.numbs[[k]] <- seq(plot.number[k], plot.number[k]+(t*(reps-1)), t)
+        plot.numbs[[k]] <- seq(plot.number[k], plot.number[k]+(t*(reps-1)), t)[1:reps]
       }else if (plot.number[k] >= 100000) {
-        plot.numbs[[k]] <- seq(plot.number[k], plot.number[k]+(t*(reps-1)), t)
+        plot.numbs[[k]] <- seq(plot.number[k], plot.number[k]+(t*(reps-1)), t)[1:reps]
       }
     }
   }

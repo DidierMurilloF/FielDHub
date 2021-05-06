@@ -98,7 +98,7 @@ mod_RowCol_server <- function(id){
                     bordered = TRUE,
                     align = 'c',
                     striped = TRUE),
-        h4("Users can use any set of entry numbers."),
+        h4("Entry numbers can be any set of consecutive positive numbers."),
         easyClose = FALSE
       )
     }

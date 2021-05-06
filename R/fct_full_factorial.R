@@ -106,10 +106,12 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
         nt <- length(setfactors)
         TRT <- rep(LETTERS[1:nt], each = reps)
         newlevels <- get.levels(k = setfactors)
-        allcomb <- expand.grid(newlevels)
+        allcomb <- expand.grid(newlevels, KEEP.OUT.ATTRS = FALSE,
+                               stringsAsFactors = FALSE)
         colnames(allcomb) <- levels(as.factor(TRT))
         data <- data.frame(list(factors = rep(levels(as.factor(TRT)), times = setfactors),
                                 levels = unlist(newlevels)))
+        levels.by.factor <- as.vector(unlist(newlevels))
       }else stop("In 'full_factorial()' the input setfactors must be a numeric vector.")
     }
   }else {
@@ -180,7 +182,14 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
   }
   nruns <- nrow(allcomb)
   design_output <- cbind(ID = 1:nrow(design), LOCATION = rep(locationNames, each = nruns * reps), design)
-  fullfactorial <- list(factors = levels(TRT), levels = newlevels, runs = nruns, alltreatments = allcomb,
-                        Reps = reps, Locations = l, locationNames = locationNames, kind = kind)
-  return(list(infoDesign = fullfactorial, fieldBook = design_output))
+  levelsByFactor <- levels.by.factor
+  #newlevels
+  allcomb <- as.data.frame(allcomb)
+  fullfactorial <- list(factors = levels(TRT), levels = levelsByFactor, runs = nruns, alltreatments = allcomb,
+                        Reps = reps, Locations = l, locationNames = locationNames, kind = kind, 
+                        idDesign = 4)
+  
+  output <- list(infoDesign = fullfactorial, fieldBook = design_output)
+  class(output) <- "FielDHub"
+  return(invisible(output))
 }

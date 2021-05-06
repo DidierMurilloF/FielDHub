@@ -27,7 +27,7 @@
 #' @return A list with four elements.
 #' \itemize{
 #'   \item \code{infoDesign} is a list with information on the design parameters.
-#'   \item \code{resolvableBlocks} a list with the resolvables row columns. 
+#'   \item \code{resolvableBlocks} a list with the resolvable row columns blocks. 
 #'   \item \code{concurrence} is the concurrence matrix.
 #'   \item \code{fieldBook} is a data frame with the row-column field book.
 #' }
@@ -178,9 +178,12 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
   new_summ <- merge(summ, c3, by='Concurrence', all=TRUE)
 
   
-  infoDesign <- list(nRows = nrows, nCols = ib, Reps = r, NumberTreatments = nt, NumberLocations = l, 
-                     Locations = locationNames, seed = seed)
-
-  return(list(infoDesign = infoDesign, resolvableBlocks = NEW_Resolvable, concurrence = new_summ,
-              fieldBook = OutRowCol))
+  infoDesign <- list(nRows = nrows, nCols = ib, Reps = r, NumberTreatments = nt, 
+                     NumberLocations = l, Locations = locationNames, seed = seed,
+                     idDesign = 9)
+  output <- list(infoDesign = infoDesign, resolvableBlocks = NEW_Resolvable, 
+                 concurrence = new_summ,
+                 fieldBook = OutRowCol)
+  class(output) <- "FielDHub"
+  return(invisible(output))
 }

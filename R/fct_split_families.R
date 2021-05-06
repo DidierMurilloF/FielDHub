@@ -20,7 +20,7 @@
 #' @return A list with two elements.
 #' \itemize{
 #'   \item \code{rowsEachlist} is a table with a summary of cases.
-#'   \item \code{listLocations} is a list with the entries for each location
+#'   \item \code{data_locations} is a data frame with the entries for each location
 #' }
 #' 
 #'
@@ -37,9 +37,10 @@
 #' gen.list <- data.frame(list(ENTRY = ENTRY, NAME = NAME, FAMILY = FAMILY))
 #' head(gen.list)
 #' # Now we are going to use the split_families() function.
-#' split <- split_families(l = 8, data = gen.list)
-#' split$rowsEachlist
-#' split$listLocations
+#' split_population <- split_families(l = 8, data = gen.list)
+#' print(split_population)
+#' summary(split_population)
+#' head(split_population$data_locations,12)
 #'
 #' @export
 split_families <- function(l = NULL, data = NULL) {
@@ -102,5 +103,10 @@ split_families <- function(l = NULL, data = NULL) {
   rowseach <- vector(mode = "numeric", length = l)
   for(i in locations) { rowseach[i] <- nrow(Glist_locations[[i]]) }
   rowsEachlist <- data.frame(list(Location = paste("Location", 1:l), n = rowseach))
-  return(list(rowsEachlist = rowsEachlist, listLocations = Glist_locations))
+  data_locations <- dplyr::bind_rows(Glist_locations)
+  data_locations$LOCATION <- rep(paste("Location", 1:l), rowseach)
+  output <- list(rowsEachlist = rowsEachlist, data_locations = data_locations,
+                 infoDesign = list(idDesign = 17))
+  class(output) <- "FielDHub"
+  return(invisible(output))
 }

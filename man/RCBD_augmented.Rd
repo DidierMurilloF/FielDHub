@@ -70,7 +70,7 @@ ARCBD1$infoDesign
 ARCBD1$layoutRandom
 ARCBD1$exptNames
 ARCBD1$plotNumber
-head(ARCBD1$fieldbook, 12)
+head(ARCBD1$fieldBook, 12)
                    
 # Example 2: Generates an ARCBD with 17 blocks, 4 checks for each, and 350 treatments 
 # in 3 locations.
@@ -90,7 +90,7 @@ ARCBD2$infoDesign
 ARCBD2$layoutRandom
 ARCBD2$exptNames
 ARCBD2$plotNumber
-head(ARCBD2$fieldbook, 12)
+head(ARCBD2$fieldBook, 12)
                                        
 }
 \references{

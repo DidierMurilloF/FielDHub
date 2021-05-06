@@ -16,7 +16,7 @@ and number of individuals per family group (FAMILY).}
 A list with two elements.
 \itemize{
   \item \code{rowsEachlist} is a table with a summary of cases.
-  \item \code{listLocations} is a list with the entries for each location
+  \item \code{data_locations} is a data frame with the entries for each location
 }
 }
 \description{
@@ -37,9 +37,10 @@ for (i in x) { FAMILY[i] <- sample(1:families, size = 1, replace = TRUE) }
 gen.list <- data.frame(list(ENTRY = ENTRY, NAME = NAME, FAMILY = FAMILY))
 head(gen.list)
 # Now we are going to use the split_families() function.
-split <- split_families(l = 8, data = gen.list)
-split$rowsEachlist
-split$listLocations
+split_population <- split_families(l = 8, data = gen.list)
+print(split_population)
+summary(split_population)
+head(split_population$data_locations,12)
 
 }
 \author{

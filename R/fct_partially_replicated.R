@@ -206,10 +206,13 @@ partially_replicated <- function(nrows = NULL, ncols = NULL, repGens = NULL, rep
   RepChecks <- prep$reps.checks
   EntryChecks <- prep$entryChecks
   Checks <- length(EntryChecks)
-  infoDesign <- list(Greps = Checks, RepGens = RepChecks, EntryReps = EntryChecks)
-  return(list(infoDesign = infoDesign, 
-              layoutRandom = layoutR, 
-              plotNumber = plot_num,
-              data_entry = data,
-              fieldBook = fieldBook))
+  infoDesign <- list(Greps = Checks, RepGens = RepChecks, EntryReps = EntryChecks, 
+                     idDesign = 13)
+  output <- list(infoDesign = infoDesign, 
+                 layoutRandom = layoutR, 
+                 plotNumber = plot_num,
+                 data_entry = data,
+                 fieldBook = fieldBook)
+  class(output) <- "FielDHub"
+  return(invisible(output))
 }

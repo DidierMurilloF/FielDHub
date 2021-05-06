@@ -107,6 +107,8 @@ golem::add_utils("ZST")
 golem::add_utils("AR1xAR1_simulation")
 golem::add_utils("plot_number_splits")
 golem::add_utils("NO_Random")
+golem::add_utils("infoPrint")
+golem::add_utils("S3_methods")
 
 ## External resources
 ## Creates .js and .css files at inst/app/www

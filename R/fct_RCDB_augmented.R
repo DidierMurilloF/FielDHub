@@ -54,7 +54,7 @@
 #' ARCBD1$layoutRandom
 #' ARCBD1$exptNames
 #' ARCBD1$plotNumber
-#' head(ARCBD1$fieldbook, 12)
+#' head(ARCBD1$fieldBook, 12)
 #'                    
 #' # Example 2: Generates an ARCBD with 17 blocks, 4 checks for each, and 350 treatments 
 #' # in 3 locations.
@@ -74,7 +74,7 @@
 #' ARCBD2$layoutRandom
 #' ARCBD2$exptNames
 #' ARCBD2$plotNumber
-#' head(ARCBD2$fieldbook, 12)
+#' head(ARCBD2$fieldBook, 12)
 #'                                        
 #' @export
 RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter = "serpentine", 
@@ -329,10 +329,11 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
   Plot_loc1 <- as.matrix(plot_loc1[[1]])
   
   infoDesign <- list(Blocks = b, plotsPerBlock = plotsPerBlock, Checks = DataChecks, 
-                     repsExpt = repsExpt, numberLocations = l, Fillers = Fillers, 
-                     seed = seed)
-  
-  return(list(infoDesign = infoDesign, entries = entries, layoutRandom = layout_loc1,
-              plotNumber = Plot_loc1, exptNames = my_names, fieldbook = fieldbook,
-              data_entry = data))
+                     entries = entries, repsExpt = repsExpt, numberLocations = l, 
+                     Fillers = Fillers, seed = seed, idDesign = 14)
+  output <- list(infoDesign = infoDesign, layoutRandom = layout_loc1,
+                 plotNumber = Plot_loc1, exptNames = my_names, data_entry = data, 
+                 fieldBook = fieldbook)
+  class(output) <- "FielDHub"
+  return(invisible(output))
 }

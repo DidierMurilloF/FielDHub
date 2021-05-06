@@ -36,7 +36,7 @@ row_column(
 A list with four elements.
 \itemize{
   \item \code{infoDesign} is a list with information on the design parameters.
-  \item \code{resolvableBlocks} a list with the resolvables row columns. 
+  \item \code{resolvableBlocks} a list with the resolvable row columns blocks. 
   \item \code{concurrence} is the concurrence matrix.
   \item \code{fieldBook} is a data frame with the row-column field book.
 }

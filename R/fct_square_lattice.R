@@ -119,7 +119,9 @@ square_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101
   
   lambda <- r*(k - 1)/(nt - 1)
   infoDesign <- list(Reps = r, IBlocks = s, NumberTreatments = nt, NumberLocations = l, 
-                     Locations = locationNames, seed = seed, lambda = lambda)
-  
-  return(list(infoDesign = infoDesign, fieldBook = OutSquare_Lattice))
+                     Locations = locationNames, seed = seed, lambda = lambda,
+                     idDesign = 10)
+  output <- list(infoDesign = infoDesign, fieldBook = OutSquare_Lattice)
+  class(output) <- "FielDHub"
+  return(invisible(output))
 }

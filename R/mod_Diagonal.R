@@ -372,7 +372,6 @@ mod_Diagonal_server <- function(id) {
       if (multi) req(getData()$data_entry)
       req(rand_checks()$map_checks)
       w_map <- rand_checks()$map_checks
-      #w_map <- as.matrix(available_percent1()$d_checks[[19]])
       if (is.null(w_map))
         return(NULL)
       
@@ -383,9 +382,6 @@ mod_Diagonal_server <- function(id) {
       
       df <- as.data.frame(w_map)
       rownames(df) <- nrow(df):1
-      # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-      #                           scrollX = TRUE, scrollY = "1000px"))
-      # DT::datatable(df) %>%
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
       DT::datatable(df,
                     extensions = 'FixedColumns',
@@ -534,8 +530,6 @@ mod_Diagonal_server <- function(id) {
                      'greenyellow', 'blueviolet','deepskyblue','gold','blue', 'red')
         s <- unlist(rand_lines()$Entries)
         rownames(df) <- nrow(df):1
-        # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-        #                           scrollX = TRUE, scrollY = "1000px"))
         options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "800px"))
         DT::datatable(df,
                       extensions = 'FixedColumns',

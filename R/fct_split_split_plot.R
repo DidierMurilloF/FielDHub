@@ -249,7 +249,8 @@ split_split_plot <- function(wp = NULL, sp = NULL, ssp = NULL, reps = NULL, type
   }
   sspd_output <- cbind(ID = 1:nrow(sspd.output), sspd.output)
   info.design <- list(Whole.Plots = WholePlots, Sub.Plots = SubPlots, Sub.Sub.Plots = SubSubPlots,
-                      Locations = l, type.design = type, seed = seed)
-
-  return(list(infoDesign = info.design, fieldBook = sspd_output))
+                      Locations = l, type.design = type, seed = seed, idDesign = 6)
+  output <- list(infoDesign = info.design, fieldBook = sspd_output)
+  class(output) <- "FielDHub"
+  return(invisible(output))
 }

@@ -200,11 +200,14 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101, continuous = FA
   
   RCBD.layout <- as.data.frame(RCBD.layout)
   
+  plotNumber <- as.vector(unlist(plotNumber))
+  
   parameters = list(blocks = b, number.of.treatments = nt, treatments = mytreatments,
                     locations = l, plotNumber = plotNumber, locationNames = locationNames,
-                    seed = seed)
-  
-  return(list(infoDesign = parameters, layoutRandom = RCBD.layout.loc,
-              plotNumber = p.number.loc,
-              fieldBook = RCBD_output))
+                    seed = seed, idDesign = 2)
+  output <- list(infoDesign = parameters, layoutRandom = RCBD.layout.loc,
+                 plotNumber = p.number.loc,
+                 fieldBook = RCBD_output)
+  class(output) <- "FielDHub"
+  return(invisible(output))
 }
