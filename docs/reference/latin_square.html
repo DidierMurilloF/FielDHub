@@ -194,59 +194,19 @@ Macmillan Company.</p>
                          planter <span class='op'>=</span> <span class='st'>"cartesian"</span>,
                          seed <span class='op'>=</span> <span class='fl'>1980</span><span class='op'>)</span>
 <span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>latinSq1</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; $infoDesign
-#&gt; $infoDesign$numberofTreatments
-#&gt; [1] 4
+</div><div class='output co'>#&gt; Latin Square Design: 
 #&gt; 
-#&gt; $infoDesign$numberofRowns
-#&gt; [1] 4
+#&gt; Information on the design parameters: 
+#&gt; List of 7
+#&gt;  $ numberofTreatments: int 4
+#&gt;  $ numberofRowns     : int 4
+#&gt;  $ numberofColumns   : int 4
+#&gt;  $ rep               : num 2
+#&gt;  $ locationName      : NULL
+#&gt;  $ seed              : num 1980
+#&gt;  $ idDesign          : num 3
 #&gt; 
-#&gt; $infoDesign$numberofColumns
-#&gt; [1] 4
-#&gt; 
-#&gt; $infoDesign$rep
-#&gt; [1] 2
-#&gt; 
-#&gt; $infoDesign$locationName
-#&gt; NULL
-#&gt; 
-#&gt; $infoDesign$seed
-#&gt; [1] 1980
-#&gt; 
-#&gt; 
-#&gt; $squares
-#&gt; $squares$rep1
-#&gt;       Column 1 Column 2 Column 3 Column 4
-#&gt; Row 1 "T1"     "T4"     "T2"     "T3"    
-#&gt; Row 2 "T3"     "T1"     "T4"     "T2"    
-#&gt; Row 3 "T4"     "T2"     "T3"     "T1"    
-#&gt; Row 4 "T2"     "T3"     "T1"     "T4"    
-#&gt; 
-#&gt; $squares$rep2
-#&gt;       Column 1 Column 2 Column 3 Column 4
-#&gt; Row 1 "T1"     "T3"     "T4"     "T2"    
-#&gt; Row 2 "T2"     "T4"     "T3"     "T1"    
-#&gt; Row 3 "T4"     "T1"     "T2"     "T3"    
-#&gt; Row 4 "T3"     "T2"     "T1"     "T4"    
-#&gt; 
-#&gt; 
-#&gt; $plotSquares
-#&gt; $plotSquares$rep1
-#&gt;      [,1] [,2] [,3] [,4]
-#&gt; [1,]  101  102  103  104
-#&gt; [2,]  105  106  107  108
-#&gt; [3,]  109  110  111  112
-#&gt; [4,]  113  114  115  116
-#&gt; 
-#&gt; $plotSquares$rep2
-#&gt;      [,1] [,2] [,3] [,4]
-#&gt; [1,]  201  202  203  204
-#&gt; [2,]  205  206  207  208
-#&gt; [3,]  209  210  211  212
-#&gt; [4,]  213  214  215  216
-#&gt; 
-#&gt; 
-#&gt; $fieldBook
+#&gt;  10 First observations of the data frame with the latin_square field book: 
 #&gt;    ID LOCATION PLOT SQUARE   ROW   COLUMN TREATMENT
 #&gt; 1   1        1  101      1 Row 1 Column 1        T1
 #&gt; 2   2        1  102      1 Row 1 Column 2        T4
@@ -257,37 +217,61 @@ Macmillan Company.</p>
 #&gt; 7   7        1  107      1 Row 2 Column 3        T4
 #&gt; 8   8        1  108      1 Row 2 Column 4        T2
 #&gt; 9   9        1  109      1 Row 3 Column 1        T4
-#&gt; 10 10        1  110      1 Row 3 Column 2        T2
-#&gt; 11 11        1  111      1 Row 3 Column 3        T3
-#&gt; 12 12        1  112      1 Row 3 Column 4        T1
-#&gt; 13 13        1  113      1 Row 4 Column 1        T2
-#&gt; 14 14        1  114      1 Row 4 Column 2        T3
-#&gt; 15 15        1  115      1 Row 4 Column 3        T1
-#&gt; 16 16        1  116      1 Row 4 Column 4        T4
-#&gt; 17 17        1  201      2 Row 1 Column 1        T1
-#&gt; 18 18        1  202      2 Row 1 Column 2        T3
-#&gt; 19 19        1  203      2 Row 1 Column 3        T4
-#&gt; 20 20        1  204      2 Row 1 Column 4        T2
-#&gt; 21 21        1  205      2 Row 2 Column 1        T2
-#&gt; 22 22        1  206      2 Row 2 Column 2        T4
-#&gt; 23 23        1  207      2 Row 2 Column 3        T3
-#&gt; 24 24        1  208      2 Row 2 Column 4        T1
-#&gt; 25 25        1  209      2 Row 3 Column 1        T4
-#&gt; 26 26        1  210      2 Row 3 Column 2        T1
-#&gt; 27 27        1  211      2 Row 3 Column 3        T2
-#&gt; 28 28        1  212      2 Row 3 Column 4        T3
-#&gt; 29 29        1  213      2 Row 4 Column 1        T3
-#&gt; 30 30        1  214      2 Row 4 Column 2        T2
-#&gt; 31 31        1  215      2 Row 4 Column 3        T1
-#&gt; 32 32        1  216      2 Row 4 Column 4        T4
+#&gt; 10 10        1  110      1 Row 3 Column 2        T2</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>latinSq1</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; Latin Square Design: 
 #&gt; 
-#&gt; attr(,"class")
-#&gt; [1] "FielDHub"</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>latinSq1</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;             Length Class      Mode
-#&gt; infoDesign  6      -none-     list
-#&gt; squares     2      -none-     list
-#&gt; plotSquares 2      -none-     list
-#&gt; fieldBook   7      data.frame list</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>latinSq1</span><span class='op'>$</span><span class='va'>fieldBook</span><span class='op'>)</span>
+#&gt; 1. Information on the design parameters: 
+#&gt; List of 7
+#&gt;  $ numberofTreatments: int 4
+#&gt;  $ numberofRowns     : int 4
+#&gt;  $ numberofColumns   : int 4
+#&gt;  $ rep               : num 2
+#&gt;  $ locationName      : NULL
+#&gt;  $ seed              : num 1980
+#&gt;  $ idDesign          : num 3
+#&gt; 
+#&gt; 2. Squares: 
+#&gt; $rep1
+#&gt;       Column 1 Column 2 Column 3 Column 4
+#&gt; Row 1 "T1"     "T4"     "T2"     "T3"    
+#&gt; Row 2 "T3"     "T1"     "T4"     "T2"    
+#&gt; Row 3 "T4"     "T2"     "T3"     "T1"    
+#&gt; Row 4 "T2"     "T3"     "T1"     "T4"    
+#&gt; 
+#&gt; $rep2
+#&gt;       Column 1 Column 2 Column 3 Column 4
+#&gt; Row 1 "T1"     "T3"     "T4"     "T2"    
+#&gt; Row 2 "T2"     "T4"     "T3"     "T1"    
+#&gt; Row 3 "T4"     "T1"     "T2"     "T3"    
+#&gt; Row 4 "T3"     "T2"     "T1"     "T4"    
+#&gt; 
+#&gt; 
+#&gt; 3. Plot squares: 
+#&gt; $rep1
+#&gt;      [,1] [,2] [,3] [,4]
+#&gt; [1,]  101  102  103  104
+#&gt; [2,]  105  106  107  108
+#&gt; [3,]  109  110  111  112
+#&gt; [4,]  113  114  115  116
+#&gt; 
+#&gt; $rep2
+#&gt;      [,1] [,2] [,3] [,4]
+#&gt; [1,]  201  202  203  204
+#&gt; [2,]  205  206  207  208
+#&gt; [3,]  209  210  211  212
+#&gt; [4,]  213  214  215  216
+#&gt; 
+#&gt; 
+#&gt; 4. Structure of the data frame with the latin_square field book: 
+#&gt; 
+#&gt; 'data.frame':	32 obs. of  7 variables:
+#&gt;  $ ID       : int  1 2 3 4 5 6 7 8 9 10 ...
+#&gt;  $ LOCATION : int  1 1 1 1 1 1 1 1 1 1 ...
+#&gt;  $ PLOT     : int  101 102 103 104 105 106 107 108 109 110 ...
+#&gt;  $ SQUARE   : int  1 1 1 1 1 1 1 1 1 1 ...
+#&gt;  $ ROW      : Factor w/ 4 levels "Row 1","Row 2",..: 1 1 1 1 2 2 2 2 3 3 ...
+#&gt;  $ COLUMN   : Factor w/ 4 levels "Column 1","Column 2",..: 1 2 3 4 1 2 3 4 1 2 ...
+#&gt;  $ TREATMENT: chr  "T1" "T4" "T2" "T3" ...</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>latinSq1</span><span class='op'>$</span><span class='va'>fieldBook</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;   ID LOCATION PLOT SQUARE   ROW   COLUMN TREATMENT
 #&gt; 1  1        1  101      1 Row 1 Column 1        T1
 #&gt; 2  2        1  102      1 Row 1 Column 2        T4

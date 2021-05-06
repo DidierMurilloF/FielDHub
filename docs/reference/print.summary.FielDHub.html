@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Run the Shiny Application — run_app • FielDHub</title>
+<title>Print the summary of a FielDHub object — print.summary.FielDHub • FielDHub</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,9 @@
 
 
 
-<meta property="og:title" content="Run the Shiny Application — run_app" />
-<meta property="og:description" content="Run the Shiny Application" />
+<meta property="og:title" content="Print the summary of a FielDHub object — print.summary.FielDHub" />
+<meta property="og:description" content="Print summary information on the design parameters, and
+  data frame structure" />
 
 
 
@@ -111,20 +112,26 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Run the Shiny Application</h1>
-    <small class="dont-index">Source: <a href='https://github.com/DidierMurilloF/FielDHub/blob/master/R/run_app.R'><code>R/run_app.R</code></a></small>
-    <div class="hidden name"><code>run_app.Rd</code></div>
+    <h1>Print the summary of a <code>FielDHub</code> object</h1>
+    <small class="dont-index">Source: <a href='https://github.com/DidierMurilloF/FielDHub/blob/master/R/utils_S3_methods.R'><code>R/utils_S3_methods.R</code></a></small>
+    <div class="hidden name"><code>print.summary.FielDHub.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Run the Shiny Application</p>
+    <p>Print summary information on the design parameters, and
+  data frame structure</p>
     </div>
 
-    <pre class="usage"><span class='fu'>run_app</span><span class='op'>(</span><span class='va'>...</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='co'># S3 method for summary.FielDHub</span>
+<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>x</th>
+      <td><p>an object inheriting from class <code>FielDHub</code></p></td>
+    </tr>
     <tr>
       <th>...</th>
       <td><p>Unused, for extensibility</p></td>
@@ -133,7 +140,12 @@
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A shiny app object</p>
+    <p>an object inheriting from class <code>FielDHub</code></p>
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Thiago de Paula Oliveira,
+  <a href='mailto:thiago.paula.oliveira@alumni.usp.br'>thiago.paula.oliveira@alumni.usp.br</a> [aut],
+  Didier Murillo [aut]</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

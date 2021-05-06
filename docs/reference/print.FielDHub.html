@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Run the Shiny Application — run_app • FielDHub</title>
+<title>Print a FielDHub object — print.FielDHub • FielDHub</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Run the Shiny Application — run_app" />
-<meta property="og:description" content="Run the Shiny Application" />
+<meta property="og:title" content="Print a FielDHub object — print.FielDHub" />
+<meta property="og:description" content="Prints information about any FielDHub function." />
 
 
 
@@ -111,30 +111,94 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Run the Shiny Application</h1>
-    <small class="dont-index">Source: <a href='https://github.com/DidierMurilloF/FielDHub/blob/master/R/run_app.R'><code>R/run_app.R</code></a></small>
-    <div class="hidden name"><code>run_app.Rd</code></div>
+    <h1>Print a <code>FielDHub</code> object</h1>
+    <small class="dont-index">Source: <a href='https://github.com/DidierMurilloF/FielDHub/blob/master/R/utils_S3_methods.R'><code>R/utils_S3_methods.R</code></a></small>
+    <div class="hidden name"><code>print.FielDHub.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Run the Shiny Application</p>
+    <p>Prints information about any <code>FielDHub</code> function.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>run_app</span><span class='op'>(</span><span class='va'>...</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='co'># S3 method for FielDHub</span>
+<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>n</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
+      <th>x</th>
+      <td><p>an object inheriting from class</p></td>
+    </tr>
+    <tr>
+      <th>n</th>
+      <td><p>a single integer. If positive or zero, size for the
+resulting object: number of elements for a vector (including
+lists), rows for a matrix or data frame or lines for a function. If
+negative, all but the n last/first number of elements of x.</p></td>
+    </tr>
+    <tr>
       <th>...</th>
-      <td><p>Unused, for extensibility</p></td>
+      <td><p>further arguments passed to <code><a href='https://rdrr.io/r/utils/head.html'>head</a></code>.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A shiny app object</p>
+    <p>an object inheriting from class <code>FielDHub</code></p>
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
 
+    <p>Thiago de Paula Oliveira,
+  <a href='mailto:thiago.paula.oliveira@alumni.usp.br'>thiago.paula.oliveira@alumni.usp.br</a> [aut],
+  Didier Murillo [aut]</p>
+
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='co'># Example 1: Generates a CRD design with 5 treatments and 5 reps each.</span>
+<span class='va'>crd1</span> <span class='op'>&lt;-</span> <span class='fu'><a href='CRD.html'>CRD</a></span><span class='op'>(</span>t <span class='op'>=</span> <span class='fl'>5</span>, reps <span class='op'>=</span> <span class='fl'>5</span>, plotNumber <span class='op'>=</span> <span class='fl'>101</span>,
+seed <span class='op'>=</span> <span class='fl'>1985</span>, locationName <span class='op'>=</span> <span class='st'>"Fargo"</span><span class='op'>)</span>
+<span class='va'>crd1</span><span class='op'>$</span><span class='va'>infoDesign</span>
+</div><div class='output co'>#&gt; $numberofTreatments
+#&gt; [1] 5
+#&gt; 
+#&gt; $treatments
+#&gt; [1] "T1" "T2" "T3" "T4" "T5"
+#&gt; 
+#&gt; $Reps
+#&gt; [1] 5
+#&gt; 
+#&gt; $locationName
+#&gt; [1] "Fargo"
+#&gt; 
+#&gt; $seed
+#&gt; [1] 1985
+#&gt; 
+#&gt; $idDesign
+#&gt; [1] 1
+#&gt; </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>crd1</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; Completely Randomized Design (CRD) 
+#&gt; 
+#&gt; Information on the design parameters: 
+#&gt; List of 6
+#&gt;  $ numberofTreatments: num 5
+#&gt;  $ treatments        : chr [1:5] "T1" "T2" "T3" "T4" ...
+#&gt;  $ Reps              : num 5
+#&gt;  $ locationName      : chr "Fargo"
+#&gt;  $ seed              : num 1985
+#&gt;  $ idDesign          : num 1
+#&gt; 
+#&gt;  10 First observations of the data frame with the CRD field book: 
+#&gt;    ID LOCATION PLOT REP TREATMENT
+#&gt; 1   1    Fargo  101   3        T3
+#&gt; 2   2    Fargo  102   4        T2
+#&gt; 3   3    Fargo  103   2        T1
+#&gt; 4   4    Fargo  104   3        T5
+#&gt; 5   5    Fargo  105   2        T5
+#&gt; 6   6    Fargo  106   2        T4
+#&gt; 7   7    Fargo  107   4        T3
+#&gt; 8   8    Fargo  108   5        T4
+#&gt; 9   9    Fargo  109   1        T2
+#&gt; 10 10    Fargo  110   5        T1</div><div class='input'>
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

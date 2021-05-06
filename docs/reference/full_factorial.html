@@ -224,15 +224,7 @@ Macmillan Company.</p>
 #&gt; [1] "A" "B" "C"
 #&gt; 
 #&gt; $levels
-#&gt; $levels[[1]]
-#&gt; [1] 1 2
-#&gt; 
-#&gt; $levels[[2]]
-#&gt; [1] 1 2
-#&gt; 
-#&gt; $levels[[3]]
-#&gt; [1] 1 2
-#&gt; 
+#&gt; [1] 1 2 1 2 1 2
 #&gt; 
 #&gt; $runs
 #&gt; [1] 8
@@ -259,6 +251,9 @@ Macmillan Company.</p>
 #&gt; 
 #&gt; $kind
 #&gt; [1] "RCBD"
+#&gt; 
+#&gt; $idDesign
+#&gt; [1] 4
 #&gt; </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>fullFact1</span><span class='op'>$</span><span class='va'>fieldBook</span>,<span class='fl'>10</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;    ID LOCATION PLOT REP FACTOR_A FACTOR_B FACTOR_C TRT_COMB
 #&gt; 1   1    FARGO  101   1        1        2        2    1*2*2
@@ -298,20 +293,13 @@ Macmillan Company.</p>
 #&gt; 
 #&gt; $levels
 #&gt; $levels[[1]]
-#&gt;   factors levels
-#&gt; 1       A     a0
-#&gt; 2       A     a1
+#&gt; [1] "a0" "a1"
 #&gt; 
 #&gt; $levels[[2]]
-#&gt;   factors levels
-#&gt; 3       B     b0
-#&gt; 4       B     b1
-#&gt; 5       B     b2
+#&gt; [1] "b0" "b1" "b2"
 #&gt; 
 #&gt; $levels[[3]]
-#&gt;   factors levels
-#&gt; 6       C     c0
-#&gt; 7       C     c1
+#&gt; [1] "c0" "c1"
 #&gt; 
 #&gt; 
 #&gt; $runs
@@ -343,6 +331,9 @@ Macmillan Company.</p>
 #&gt; 
 #&gt; $kind
 #&gt; [1] "RCBD"
+#&gt; 
+#&gt; $idDesign
+#&gt; [1] 4
 #&gt; </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>fullFact2</span><span class='op'>$</span><span class='va'>fieldBook</span>,<span class='fl'>10</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;    ID LOCATION PLOT REP FACTOR_A FACTOR_B FACTOR_C TRT_COMB
 #&gt; 1   1     Loc1  101   1       a0       b2       c0 a0*b2*c0

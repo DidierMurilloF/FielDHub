@@ -231,6 +231,9 @@ Macmillan Company.</p>
 #&gt; 
 #&gt; $seed
 #&gt; [1] 23
+#&gt; 
+#&gt; $idDesign
+#&gt; [1] 6
 #&gt; </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>SSPD1</span><span class='op'>$</span><span class='va'>fieldBook</span>,<span class='fl'>12</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;    ID LOCATION PLOT REP WHOLE-PLOT SUB-PLOT SUB-SUB-PLOT TRT_COMB
 #&gt; 1   1    FARGO  101   1          1        2            2    1|2|2
@@ -255,7 +258,7 @@ Macmillan Company.</p>
 <span class='va'>split_split_plot_Data</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>WHOLPLOT <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>wp</span>, <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='cn'>NA</span>, <span class='fl'>8</span><span class='op'>)</span><span class='op'>)</span>, 
                                          SUBPLOT <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>sp</span>, <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='cn'>NA</span>, <span class='fl'>5</span><span class='op'>)</span><span class='op'>)</span>,
                                          SUB_SUBPLOTS <span class='op'>=</span> <span class='va'>ssp</span><span class='op'>)</span><span class='op'>)</span>
-<span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>split_split_plot_Data</span>, <span class='fl'>12</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>split_split_plot_Data</span>, <span class='fl'>10</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;    WHOLPLOT SUBPLOT SUB_SUBPLOTS
 #&gt; 1    IRR_NO   NFung       Beans1
 #&gt; 2   IRR_Yes   Fung1       Beans2
@@ -291,6 +294,9 @@ Macmillan Company.</p>
 #&gt; 
 #&gt; $seed
 #&gt; [1] 23
+#&gt; 
+#&gt; $idDesign
+#&gt; [1] 6
 #&gt; </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>SSPD2</span><span class='op'>$</span><span class='va'>fieldBook</span>,<span class='fl'>12</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;    ID LOCATION PLOT REP WHOLE-PLOT SUB-PLOT SUB-SUB-PLOT             TRT_COMB
 #&gt; 1   1        A  101   1     IRR_NO    Fung3       Beans3  IRR_NO|Fung3|Beans3
