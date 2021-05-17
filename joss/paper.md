@@ -1,5 +1,5 @@
 ---
-title: '`FielDHub`: An R Shiny Package for Design of Experiments in Life Sciences'
+title: '`FielDHub`: A Shiny App for Design of Experiments in Life Sciences'
 tags:
   - R
   - Shiny
