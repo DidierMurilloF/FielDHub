@@ -12,7 +12,7 @@ lhs \%>\% rhs
 \item{rhs}{A function call using the magrittr semantics.}
 }
 \value{
-It depends on the arguments \code{lhs} and \code{rhs}.
+No return value, called for side effects.
 }
 \description{
 See \code{magrittr::\link[magrittr:pipe]{\%>\%}} for details.
