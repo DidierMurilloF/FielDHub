@@ -37,7 +37,7 @@ bibliography: paper.bib
 
 # Statement of need
 
-`FielDHub` allows users to perform randomizations of field, laboratory, and greenhouse experiments, while providing output via interactive field layouts and tables that can be extracted and saved. This app has a novel design that offers DOE options and features that are not currently available in most software applications.  Users are guided in each step of the DOE platform in an interactive interface, which includes a feature that helps to generate randomizations with an option to simulate data for a response variable. This last feature makes it suitable for teaching and evaluation purposes, where instructors can use the graphical dynamic user interface and/or use the functions included in the R package for teaching R scripting courses. This app also provides a graphical workflow to import treatment lists and export field books. For field experiments with a strict spatial arrangement, it allows users to specify the dimensions of the field as row and columns, while controlling the percentage of check plots, and obtaining field maps and field books that can be used directly as templates and input files for centralized databases.
+`FielDHub` allows users to perform randomizations of field, laboratory, and greenhouse experiments, while providing output via interactive field layouts and tables that can be extracted and saved. This app has a novel design that offers DOE options and features that are not currently available in most software applications.  Users are guided in each step of the DOE platform in an interactive interface, which includes a feature that helps to generate randomizations with an option to simulate data for a response variable. This last feature makes it suitable for teaching and evaluation purposes, where instructors can use the graphical dynamic user interface and/or use the functions included in the R package for teaching R scripting courses. This app also provides a graphical workflow to import treatment lists and export field books. For field experiments with a strict spatial arrangement, it allows users to specify the dimensions of the field (the number of rows and columns), while controlling the percentage of check plots, and obtaining field maps and field books that can be used directly as templates and input files for centralized databases.
 
 `FielDHub` is currently being used by different breeding programs at NDSU and in graduate courses to teach the concepts of randomization, blocking, replication and simulations. The combination, in a single application, of novel and traditional designs, an interactive user interface, visualizations, and generation of templates and field layouts will enable the discovery of outstanding genotypes, while using efficient experimental designs that meet the requirements of the research being conducted.
 
@@ -69,8 +69,6 @@ This application was developed as part of a collaboration between North Dakota S
 
 # Availability and Community Guidelines
 
-The software is available at the [GitHub](https://github.com/DidierMurilloF/FielDHub/) repository. The GitHub repository also contains the source code for this paper.
-
-Users and contributors are welcome to contribute, request features, and report bugs in this GitHub repository
+The software is available at the [GitHub](https://github.com/DidierMurilloF/FielDHub/) repository. The GitHub repository also contains the source code for this paper. Users and contributors are welcome to contribute, request features, and report bugs in this GitHub repository.
 
 # References
