@@ -3,6 +3,25 @@
 
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 
+
+## Installation
+
+### Development version from GitHub
+
+``` r
+devtools::install_github("DidierMurilloF/FielDHub")
+```
+
+### Stable version from R CRAN
+
+``` r
+install.packages("FielDHub")
+```
+
+## FielDHub Paper
+
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.03122/status.svg)](https://doi.org/10.21105/joss.03122)
+
 ## Overview
 
 A shiny design of experiments (DOE) app that aids in the creation of traditional, un-replicated, augmented and partially-replicated designs applied to agriculture, plant breeding, forestry, animal and biological sciences. 
@@ -11,14 +30,6 @@ For more details and examples of all functions present in the FielDHub package. 
 
 
 ![](FielDHub_Overview.png)
-
-## Installation
-
-You can install the dev version of FielDHub from:
-
-``` r
-devtools::install_github("DidierMurilloF/FielDHub")
-```
 
 ## Usage
 

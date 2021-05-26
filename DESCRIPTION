@@ -29,7 +29,7 @@ Authors@R:
       person(given = "North Dakota State University",
              role = "cph"))
 Description: A shiny design of experiments (DOE) app that aids in the creation of traditional, 
- unreplicated, augmented and partially-replicated designs applied to agriculture, 
+ un-replicated, augmented and partially-replicated designs applied to agriculture, 
  plant breeding, forestry, animal and biological sciences.
 Depends: R (>= 3.6.0)
 License: MIT + file LICENSE
@@ -54,11 +54,10 @@ Imports:
     viridis,
     shinyalert
 Encoding: UTF-8
-LazyData: true
 RoxygenNote: 7.1.1
 Author: Didier Murillo [cre, aut], Salvador Gezan [aut], Ana Heilman [ctb],
  Thomas Walk [ctb], Johan Aparicio [ctb], Richard Horsley [ctb], 
- North Dakota State University [cph].
+ North Dakota State University [cph]
 Maintainer: Didier Murillo <didier.murilloflorez@ndsu.edu>
 Suggests: testthat (>= 3.0.0), spelling, rlang
 Config/testthat/edition: 3
