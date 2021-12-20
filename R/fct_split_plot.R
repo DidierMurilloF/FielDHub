@@ -151,7 +151,7 @@ split_plot <- function(wp = NULL, sp = NULL, reps = NULL, type = 2, l = 1, plotN
       spd.layout <- matrix(data = 0, nrow = wp * b, ncol = 4)
       spd.layout[,1] <- plot.random[,v]
       spd.layout[,2] <- rep(1:b, each = wp)
-      spd.layout[,3] <- rep(WholePlots, each = b)
+      spd.layout[,3] <- rep(WholePlots, times = b)
       spd.layout <- spd.layout[order(spd.layout[,1]),]
       rownames(spd.layout) <- 1:(wp * b)
       colnames(spd.layout) <- c("PLOT", "REP", "Whole-plot", "Sub-plot")

@@ -32,11 +32,11 @@ mod_STRIPD_ui <- function(id){
                    conditionalPanel("input.owndataSTRIP != 'Yes'", ns = ns,
                                     fluidRow(
                                       column(6, style=list("padding-right: 28px;"),
-                                             numericInput(ns("HStrip.strip"), label = "Input # of Horizontal Stripes:",
+                                             numericInput(ns("HStrip.strip"), label = "Input # of Horizontal Strips:",
                                                           value = NULL, min = 2)
                                       ),
                                       column(6, style=list("padding-left: 5px;"),
-                                             numericInput(ns("VStrip.strip"), label = "Input # of Vertical Stripes:",
+                                             numericInput(ns("VStrip.strip"), label = "Input # of Vertical Strips:",
                                                           value = NULL, min = 2)
                                       )
                                     )           
