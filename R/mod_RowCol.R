@@ -58,6 +58,10 @@ mod_RowCol_ui <- function(id){
                      )
                    ),
                    
+                   selectInput(inputId = ns("planter_mov_rcd"), label = "Plot Order Layout:",
+                               choices = c("serpentine", "cartesian"), multiple = FALSE,
+                               selected = "serpentine"),
+                   
                    numericInput(ns("seed.rcd"), label = "Seed Number:", value = 1),
                    
                    fluidRow(
@@ -72,14 +76,21 @@ mod_RowCol_ui <- function(id){
 
       mainPanel(
         width = 8,
-        tabsetPanel(
-          tabPanel("Field Book", DT::DTOutput(ns("rowcolD")))
+        fluidRow(
+          column(12, align="center",
+                 tabsetPanel(
+                   tabPanel("Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout_rowcol"), width = "100%", height = "630px"),
+                                                                         type = 5)),
+                   tabPanel("Field Book", DT::DTOutput(ns("rowcolD")))
+                 )
+          ),
+          column(12,uiOutput(ns("well_panel_layout_ROWCOL")))
         )
       )
     )
   )
 }
-    
+
 #' RowCol Server Functions
 #'
 #' @noRd 
@@ -172,6 +183,51 @@ mod_RowCol_server <- function(id){
       
     })
     
+    
+    output$well_panel_layout_ROWCOL <- renderUI({
+      req(RowCol_reactive()$fieldBook)
+      obj_rcd <- RowCol_reactive()
+      planting_rcd <- input$planter_mov_rcd
+      allBooks_rcd<- plot_layout(x = obj_rcd, optionLayout = 1)$newBooks
+      nBooks_rcd <- length(allBooks_rcd)
+      layoutOptions_rcd <- 1:nBooks_rcd
+      loc <-  as.vector(unlist(strsplit(input$Location.rcd, ",")))
+      wellPanel(
+        fluidRow(
+          column(2,
+                 radioButtons(ns("typlotrcd"), "Type of Plot:",
+                              c("Entries/Treatments" = 1,
+                                "Plots" = 2))
+          ),
+          column(3, #align="center",
+                 selectInput(inputId = ns("layoutO_rcd"), label = "Layout option:", choices = layoutOptions_rcd)
+          ),
+          column(3, #align="center",
+                 selectInput(inputId = ns("locLayout_rcd"), label = "Location:", choices = loc)
+          )
+        )
+      )
+    })
+    
+    reactive_layoutROWCOL <- reactive({
+      req(input$layoutO_rcd)
+      req(RowCol_reactive())
+      obj_rcd <- RowCol_reactive()
+      opt_rcd <- as.numeric(input$layoutO_rcd)
+      planting_rcd <- input$planter_mov_rcd
+      plot_layout(x = obj_rcd, optionLayout = opt_rcd, planter = planting_rcd)
+    })
+    
+    output$layout_rowcol <- renderPlot({
+      req(RowCol_reactive())
+      req(input$typlotrcd)
+      if (input$typlotrcd == 1) {
+        reactive_layoutROWCOL()$out_layout
+      } else reactive_layoutROWCOL()$out_layoutPlots
+    })
+    
+    
+    
     valsRowColD <- reactiveValues(maxV.RowCol = NULL, minV.RowCol = NULL, trail.RowCol = NULL)
     
     simuModal.RowCol <- function(failed = FALSE) {
@@ -237,17 +293,18 @@ mod_RowCol_server <- function(id){
     
     simuData_RowCol <- reactive({
       req(RowCol_reactive()$fieldBook)
-      
       if(!is.null(valsRowColD$maxV.RowCol) && !is.null(valsRowColD$minV.RowCol) && !is.null(valsRowColD$trail.RowCol)) {
         max <- as.numeric(valsRowColD$maxV.RowCol)
         min <- as.numeric(valsRowColD$minV.RowCol)
-        df.RowCol <- RowCol_reactive()$fieldBook
+        #df.RowCol <- RowCol_reactive()$fieldBook
+        df.RowCol <- reactive_layoutROWCOL()$fieldBookXY
         cnamesdf.RowCol <- colnames(df.RowCol)
         df.RowCol <- norm_trunc(a = min, b = max, data = df.RowCol)
         colnames(df.RowCol) <- c(cnamesdf.RowCol[1:(ncol(df.RowCol) - 1)], valsRowColD$trail.RowCol)
         a <- ncol(df.RowCol)
       }else {
-        df.RowCol <- RowCol_reactive()$fieldBook  
+        #df.RowCol <- RowCol_reactive()$fieldBook  
+        df.RowCol <- reactive_layoutROWCOL()$fieldBookXY
         a <- ncol(df.RowCol)
       }
       return(list(df = df.RowCol, a = a))

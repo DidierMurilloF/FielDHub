@@ -36,6 +36,10 @@ mod_Rectangular_Lattice_ui <- function(id){
                    numericInput(inputId = ns("r.rectangular"), label = "Input # of Full Reps:", value = NULL, min = 2),
                    selectInput(inputId = ns("k.rectangular"), label = "Input # of Plots per IBlock:", choices = ""),
                    numericInput(inputId = ns("l.rectangular"), label = "Input # of Locations:", value = NULL, min = 1),
+                   
+                   selectInput(inputId = ns("planter_mov_rect"), label = "Plot Order Layout:",
+                               choices = c("serpentine", "cartesian"), multiple = FALSE,
+                               selected = "serpentine"),
 
                    fluidRow(
                      column(6, style=list("padding-right: 28px;"),
@@ -62,8 +66,15 @@ mod_Rectangular_Lattice_ui <- function(id){
       
       mainPanel(
         width = 8,
-        tabsetPanel(
-          tabPanel("Rectangular Lattice Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("RECTANGULAR.output")), type = 5))
+        fluidRow(
+          column(12, align="center",
+                 tabsetPanel(
+                   tabPanel("Alpha Lattice Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.output_rt"), width = "100%", height = "630px"),
+                                                                                       type = 5)),
+                   tabPanel("Rectangular Lattice Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("RECTANGULAR.output")), type = 5))
+                 )
+          ),
+          column(12,uiOutput(ns("well_panel_layout_rt")))
         )
       )
     )
@@ -184,9 +195,87 @@ mod_Rectangular_Lattice_server <- function(id) {
                           seed = seed.rectangular, 
                           locationNames = loc, 
                           data = data.rectangular) 
-      
     })
     
+    upDateSites_RT <- eventReactive(input$RUN.rectangular, {
+      req(input$l.rectangular)
+      locs <- as.numeric(input$l.rectangular)
+      sites <- 1:locs
+      return(list(sites = sites))
+    })
+    
+    output$well_panel_layout_rt <- renderUI({
+      req(RECTANGULAR_reactive())
+      req(input$l.rectangular)
+      locs_rt <- as.numeric(input$l.rectangular)
+      repsRect <- as.numeric(input$r.rectangular)
+      if ((repsRect >= 4 & repsRect %% 2 == 0) | (repsRect >= 4 & sqrt(repsRect) %% 1 == 0)) {
+        orderReps <- c("Vertical Stack Panel" = "vertical_stack_panel", "Horizontal Stack Panel" = "horizontal_stack_panel",  
+                       "Grid Panel" = "grid_panel")
+      } else {
+        orderReps <- c("Vertical Stack Panel" = "vertical_stack_panel", "Horizontal Stack Panel" = "horizontal_stack_panel")
+      }
+      obj_rt <- RECTANGULAR_reactive()
+      allBooks_rt <- plot_layout(x = obj_rt, optionLayout = 1, orderReps = "vertical_stack_panel")$newBooks
+      nBooks_rt <- length(allBooks_rt)
+      layoutOptions_rt <- 1:nBooks_rt
+      wellPanel(
+        column(3,
+               radioButtons(ns("typlotRT"), "Type of Plot:",
+                            c("Entries/Treatments" = 1,
+                              "Plots" = 2))
+        ),
+        fluidRow(
+          column(3,
+                 selectInput(inputId = ns("orderRepsRT"), label = "Reps layout:", 
+                             choices = orderReps)
+          ),
+          column(2, #align="center",
+                 selectInput(inputId = ns("layoutO_rt"), label = "Layout option:", choices = layoutOptions_rt, selected = 1)
+          ),
+          column(2, #align="center",
+                 selectInput(inputId = ns("locLayout_rt"), label = "Location:", choices = as.numeric(upDateSites_RT()$sites))
+          )
+        )
+      )
+    })
+    
+    observeEvent(input$orderRepsRT, {
+      req(input$orderRepsRT)
+      req(input$l.rectangular)
+      obj_rt <- RECTANGULAR_reactive()
+      allBooks <- plot_layout(x = obj_rt, optionLayout = 1, orderReps = input$orderRepsRT)$newBooks
+      nBooks <- length(allBooks)
+      NewlayoutOptions <- 1:nBooks
+      updateSelectInput(session = session, inputId = 'layoutO_rt',
+                        label = "Layout option:",
+                        choices = NewlayoutOptions,
+                        selected = 1
+      )
+    })
+    
+    reactive_layoutRect <- reactive({
+      req(input$orderRepsRT)
+      req(input$layoutO_rt)
+      req(input$locLayout_rt)
+      req(input$planter_mov_rect)
+      req(RECTANGULAR_reactive())
+      obj_rt <- RECTANGULAR_reactive()
+      opt_rt <- as.numeric(input$layoutO_rt)
+      locSelected <- as.numeric(input$locLayout_rt)
+      try(plot_layout(x = obj_rt, optionLayout = opt_rt, planter = input$planter_mov_rect, l = locSelected, 
+                      orderReps = input$orderRepsRT), silent = TRUE)
+    })
+    
+    output$layout.output_rt <- renderPlot({
+      req(reactive_layoutRect())
+      req(RECTANGULAR_reactive())
+      req(input$typlotRT)
+      if (input$typlotRT == 1) {
+        reactive_layoutRect()$out_layout
+      } else reactive_layoutRect()$out_layoutPlots
+      
+    })
     
     valsRECT <- reactiveValues(maxV.rectangular= NULL, minV.rectangular= NULL, trail.rectangular= NULL)
     
@@ -222,7 +311,7 @@ mod_Rectangular_Lattice_server <- function(id) {
     observeEvent(input$Simulate.rectangular, {
       req(input$k.rectangular)
       req(input$r.rectangular)
-      req(RECTANGULAR_reactive()$fieldBook)
+      req(reactive_layoutRect()$fieldBookXY)
       showModal(
         shinyjqui::jqui_draggable(
           simuModal.rectangular()
@@ -238,10 +327,10 @@ mod_Rectangular_Lattice_server <- function(id) {
         if(input$trailsRECT == "Other") {
           req(input$OtherRECT)
           if(!is.null(input$OtherRECT)) {
-            valsRECT$trail.rectangular<- as.character(input$OtherRECT)
+            valsRECT$trail.rectangular <- as.character(input$OtherRECT)
           }else showModal(simuModal.rectangular(failed = TRUE))
         }else {
-          valsRECT$trail.rectangular<- as.character(input$trailsRECT)
+          valsRECT$trail.rectangular <- as.character(input$trailsRECT)
         }
         removeModal()
       }else {
@@ -255,17 +344,17 @@ mod_Rectangular_Lattice_server <- function(id) {
     
     
     simuDataRECT <- reactive({
-      req(RECTANGULAR_reactive()$fieldBook)
+      req(reactive_layoutRect()$fieldBookXY)
       if(!is.null(valsRECT$maxV.rectangular) && !is.null(valsRECT$minV.rectangular) && !is.null(valsRECT$trail.rectangular)) {
         max <- as.numeric(valsRECT$maxV.rectangular)
         min <- as.numeric(valsRECT$minV.rectangular)
-        df.rectangular<- RECTANGULAR_reactive()$fieldBook
+        df.rectangular <- reactive_layoutRect()$fieldBookXY
         cnamesdf.rectangular<- colnames(df.rectangular)
         df.rectangular<- norm_trunc(a = min, b = max, data = df.rectangular)
         colnames(df.rectangular) <- c(cnamesdf.rectangular[1:(ncol(df.rectangular) - 1)], valsRECT$trail.rectangular)
         a <- ncol(df.rectangular)
       }else {
-        df.rectangular<-  RECTANGULAR_reactive()$fieldBook
+        df.rectangular <- reactive_layoutRect()$fieldBookXY
         a <- ncol(df.rectangular)
       }
       return(list(df = df.rectangular, a = a))

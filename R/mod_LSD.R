@@ -16,10 +16,6 @@ mod_LSD_ui <- function(id){
                    radioButtons(inputId = ns("owndataLSD"), label = "Import entries' list?", choices = c("Yes", "No"), selected = "No",
                                 inline = TRUE, width = NULL, choiceNames = NULL, choiceValues = NULL), 
                    
-                   # selectInput(inputId = ns("kindLSD"), label = "Select LSD Type:",
-                   #             choices = c("Latin Square" = "LSD","Repeated Latin Square" = "LSD.REP"),
-                   #             multiple = FALSE),
-                   
                    conditionalPanel("input.owndataLSD == 'Yes'", ns = ns,
                                     fluidRow(
                                       column(8, style=list("padding-right: 28px;"),
@@ -42,9 +38,9 @@ mod_LSD_ui <- function(id){
 
                    numericInput(ns("reps.lsd"), label = "Input # of Full Reps (Squares):",
                                 value = 1, min = 1),
-                   selectInput(inputId = ns("planter.lsd"), label = "Plot Order Layout:",
-                               choices = c("serpentine", "cartesian"), multiple = FALSE,
-                               selected = "serpentine"),
+                   # selectInput(inputId = ns("planter.lsd"), label = "Plot Order Layout:",
+                   #             choices = c("serpentine", "cartesian"), multiple = FALSE,
+                   #             selected = "serpentine"),
                    fluidRow(
                      column(6, style=list("padding-right: 28px;"),
                             textInput(ns("plot_start.lsd"), "Starting Plot Number:", value = 101)
@@ -66,9 +62,19 @@ mod_LSD_ui <- function(id){
       ),
       
       mainPanel(width = 8,
-        tabsetPanel(
-          tabPanel("Field Book",DT::DTOutput(ns("LSD.output")))
-        )      
+        # tabsetPanel(
+        #   tabPanel("Field Book",DT::DTOutput(ns("LSD.output")))
+        # )
+        fluidRow(
+          column(12, align="center",
+                 tabsetPanel(
+                   tabPanel("Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout_lsd"), width = "100%", height = "630px"),
+                                                                         type = 5)),
+                   tabPanel("Field Book", DT::DTOutput(ns("LSD.output")))
+                 )
+          ),
+          column(12,uiOutput(ns("well_panel_layout_LSD")))
+        )
       )
     ) 
   )
@@ -94,7 +100,6 @@ mod_LSD_server <- function(id){
                     bordered = TRUE,
                     align = 'c',
                     striped = TRUE),
-        #h4("Note that only the TREATMENT column is requared."),
         easyClose = FALSE
       )
     }
@@ -152,11 +157,55 @@ mod_LSD_server <- function(id){
       LSD.design <- latin_square(t = n.lsd, 
                                  reps = reps.lsd, 
                                  plotNumber = plot_start.lsd[1],
-                                 planter = input$planter.lsd,
+                                 planter = "cartesian",
                                  seed = seed.number.lsd, 
                                  locationNames = loc.lsd[1], 
                                  data = data.lsd)
     })
+    
+    
+    output$well_panel_layout_LSD <- renderUI({
+      req(latinsquare_reactive()$fieldBook)
+      obj_lsd <- latinsquare_reactive()
+      planting_lsd <- input$planter.lsd
+      allBooks_lsd<- plot_layout(x = obj_lsd, optionLayout = 1)$newBooks
+      nBooks_lsd <- length(allBooks_lsd)
+      layoutOptions_lsd <- 1:nBooks_lsd
+      loc <-  as.vector(unlist(strsplit(input$Location.lsd, ",")))
+      wellPanel(
+        fluidRow(
+          column(2,
+                 radioButtons(ns("typlotlsd"), "Type of Plot:",
+                              c("Entries/Treatments" = 1,
+                                "Plots" = 2))
+          ),
+          column(3, #align="center",
+                 selectInput(inputId = ns("layoutO_lsd"), label = "Layout option:", choices = layoutOptions_lsd)
+          ),
+          column(3, #align="center",
+                 selectInput(inputId = ns("locLayout_lsd"), label = "Location:", choices = loc)
+          )
+        )
+      )
+    })
+    
+    reactive_layoutLSD <- reactive({
+      req(input$layoutO_lsd)
+      req(latinsquare_reactive())
+      obj_lsd <- latinsquare_reactive()
+      opt_lsd <- as.numeric(input$layoutO_lsd)
+      planting_lsd <- input$planter.lsd
+      plot_layout(x = obj_lsd, optionLayout = opt_lsd, planter = "cartesian")
+    })
+    
+    output$layout_lsd <- renderPlot({
+      req(latinsquare_reactive())
+      req(input$typlotlsd)
+      if (input$typlotlsd == 1) {
+        reactive_layoutLSD()$out_layout
+      } else reactive_layoutLSD()$out_layoutPlots
+    })
+    
     
     
     valsLSD <- reactiveValues(maxV.lsd = NULL, minV.lsd = NULL, trail.lsd = NULL)
@@ -229,13 +278,15 @@ mod_LSD_server <- function(id){
       if(!is.null(valsLSD$maxV.lsd) && !is.null(valsLSD$minV.lsd) && !is.null(valsLSD$trail.lsd)) {
         max <- as.numeric(valsLSD$maxV.lsd)
         min <- as.numeric(valsLSD$minV.lsd)
-        df.lsd <- latinsquare_reactive()$fieldBook
+        #df.lsd <- latinsquare_reactive()$fieldBook
+        df.lsd <- reactive_layoutLSD()$fieldBookXY
         cnamesdf.lsd <- colnames(df.lsd)
         df.lsd <- norm_trunc(a = min, b = max, data = df.lsd)
         colnames(df.lsd) <- c(cnamesdf.lsd[1:(ncol(df.lsd) - 1)], valsLSD$trail.lsd)
         df.lsd <- df.lsd[order(df.lsd$ID),]
       }else {
-        df.lsd <- latinsquare_reactive()$fieldBook
+        #df.lsd <- latinsquare_reactive()$fieldBook
+        df.lsd <- reactive_layoutLSD()$fieldBookXY
       }
       return(list(df = df.lsd))
     })

@@ -18,3 +18,4 @@ $run_dev.*
 ^pREPExample\.PNG$
 ^DExample.PNG$
 ^CONTRIBUTING\.md$
+^rsconnect$

@@ -16,7 +16,7 @@ mod_FD_ui <- function(id){
                    radioButtons(inputId = ns("owndata"), label = "Import entries' list?", choices = c("Yes", "No"), selected = "No",
                                 inline = TRUE, width = NULL, choiceNames = NULL, choiceValues = NULL),
                    selectInput(inputId = ns("kindFD"), label = "Select a Factorial Design Type:",
-                               choices = c("Factorial in a CRD" = "FD_CRD", "Factorial in a RCBD" = "FD_RCBD"),
+                               choices = c("Factorial in a RCBD" = "FD_RCBD", "Factorial in a CRD" = "FD_CRD"),
                                multiple = FALSE),
                    
                    conditionalPanel("input.owndata != 'Yes'", ns = ns,
@@ -39,7 +39,7 @@ mod_FD_ui <- function(id){
                    fluidRow(
                      column(6, style=list("padding-right: 28px;"),
                        numericInput(inputId = ns("reps.fd"), label = "Input # of Full Reps:",
-                                    value = 2, min = 2)
+                                    value = 3, min = 2)
                      ),
                      column(6,style=list("padding-left: 5px;"),
                        numericInput(ns("l.fd"), label = "Input # of Locations:",
@@ -54,6 +54,10 @@ mod_FD_ui <- function(id){
                             textInput(ns("Location.fd"), "Input Location:", value = "FARGO")
                      )
                    ),
+                   selectInput(inputId = ns("planter_mov_fd"), label = "Plot Order Layout:",
+                               choices = c("serpentine", "cartesian"), multiple = FALSE,
+                               selected = "serpentine"),
+                   
                    numericInput(inputId = ns("myseed.reps"), label = "Seed Number:",
                                 value = 123, min = 1),
                    fluidRow(
@@ -68,14 +72,23 @@ mod_FD_ui <- function(id){
       ),
       
       mainPanel(width = 8,
-        tabsetPanel(
-          tabPanel("Field Book", DT::DTOutput(ns("FD.Output")))
+        # tabsetPanel(
+        #   tabPanel("Field Book", DT::DTOutput(ns("FD.Output")))
+        # )
+        fluidRow(
+          column(12, align="center",
+                 tabsetPanel(
+                   tabPanel("Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout_fd"), width = "100%", height = "630px"),
+                                                                         type = 5)),
+                   tabPanel("Field Book", DT::DTOutput(ns("FD.Output")))
+                 )
+          ),
+          column(12,uiOutput(ns("well_panel_layout_FD")))
         )
       )
     ) 
   )
 }
-    
 #' FD Server Functions
 #'
 #' @noRd 
@@ -170,6 +183,73 @@ mod_FD_server <- function(id) {
       
     })
     
+    
+    output$well_panel_layout_FD <- renderUI({
+      req(fd_reactive()$fieldBook)
+      obj_fd <- fd_reactive()
+      planting_fd <- input$planter_mov_fd
+      allBooks_fd <- plot_layout(x = obj_fd, optionLayout = 1, orderReps = "vertical_stack_panel")$newBooks
+      nBooks_fd <- length(allBooks_fd)
+      layoutOptions_fd <- 1:nBooks_fd
+      orderReps_fd <- c("Vertical Stack Panel" = "vertical_stack_panel", "Horizontal Stack Panel" = "horizontal_stack_panel")
+      #loc <-  as.vector(unlist(strsplit(input$Location.fd, ",")))
+      sites <- as.numeric(input$l.fd)
+      wellPanel(
+        column(2,
+               radioButtons(ns("typlotfd"), "Type of Plot:",
+                            c("Entries/Treatments" = 1,
+                              "Plots" = 2))
+        ),
+        fluidRow(
+          column(3,
+                 selectInput(inputId = ns("orderRepsFD"), label = "Reps layout:", 
+                             choices = orderReps_fd),
+          ),
+          column(3, #align="center",
+                 selectInput(inputId = ns("layoutO_fd"), label = "Layout option:", choices = layoutOptions_fd)
+          ),
+          column(3, #align="center",
+                 selectInput(inputId = ns("locLayout_fd"), label = "Location:", choices = 1:sites)
+          )
+        )
+      )
+    })
+    
+    observeEvent(input$orderRepsFD, {
+      req(input$orderRepsFD)
+      req(input$l.fd)
+      obj_fd <- fd_reactive()
+      allBooks <- plot_layout(x = obj_fd, optionLayout = 1, orderReps = input$orderRepsFD)$newBooks
+      nBooks <- length(allBooks)
+      NewlayoutOptions <- 1:nBooks
+      updateSelectInput(session = session, inputId = 'layoutO_fd',
+                        label = "Layout option:",
+                        choices = NewlayoutOptions,
+                        selected = 1
+      )
+    })
+    
+    reactive_layoutFD <- reactive({
+      req(input$layoutO_fd)
+      req(fd_reactive())
+      obj_fd <- fd_reactive()
+      opt_fd <- as.numeric(input$layoutO_fd)
+      planting_fd <- input$planter_mov_fd
+      locSelected <- as.numeric(input$locLayout_fd)
+      #plot_layout(x = obj_fd, optionLayout = opt_fd, planter = planting_fd)
+      try(plot_layout(x = obj_fd, optionLayout = opt_fd, orderReps = input$orderRepsFD,
+                      planter = planting_fd , l = locSelected), silent = TRUE)
+    })
+    
+    output$layout_fd <- renderPlot({
+      req(fd_reactive())
+      req(reactive_layoutFD())
+      req(input$typlotfd)
+      if (input$typlotfd == 1) {
+        reactive_layoutFD()$out_layout
+      } else reactive_layoutFD()$out_layoutPlots
+    })
+    
     valsfd <- reactiveValues(maxV.fd = NULL, minV.fd = NULL, trail.fd = NULL)
     
     simuModal.fd <- function(failed = FALSE) {
@@ -238,13 +318,15 @@ mod_FD_server <- function(id) {
       if(!is.null(valsfd$maxV.fd) && !is.null(valsfd$minV.fd) && !is.null(valsfd$trail.fd)) {
         max <- as.numeric(valsfd$maxV.fd)
         min <- as.numeric(valsfd$minV.fd)
-        df.fd <- fd_reactive()$fieldBook
+        #df.fd <- fd_reactive()$fieldBook
+        df.fd <- reactive_layoutFD()$allSitesFielbook
         cnamesdf.fd <- colnames(df.fd)
         df.fd <- norm_trunc(a = min, b = max, data = df.fd)
         colnames(df.fd) <- c(cnamesdf.fd[1:(ncol(df.fd) - 1)], valsfd$trail.fd)
         a <- ncol(df.fd)
       }else {
-        df.fd <- fd_reactive()$fieldBook  
+        #df.fd <- fd_reactive()$fieldBook 
+        df.fd <- reactive_layoutFD()$allSitesFielbook
         a <- ncol(df.fd)
       }
       return(list(df = df.fd, a = a))

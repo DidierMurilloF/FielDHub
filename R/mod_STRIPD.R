@@ -32,11 +32,11 @@ mod_STRIPD_ui <- function(id){
                    conditionalPanel("input.owndataSTRIP != 'Yes'", ns = ns,
                                     fluidRow(
                                       column(6, style=list("padding-right: 28px;"),
-                                             numericInput(ns("HStrip.strip"), label = "Input # of Horizontal Stripes:",
+                                             numericInput(ns("HStrip.strip"), label = "Input # of Horizontal Strips:",
                                                           value = NULL, min = 2)
                                       ),
                                       column(6, style=list("padding-left: 5px;"),
-                                             numericInput(ns("VStrip.strip"), label = "Input # of Vertical Stripes:",
+                                             numericInput(ns("VStrip.strip"), label = "Input # of Vertical Strips:",
                                                           value = NULL, min = 2)
                                       )
                                     )           
@@ -70,8 +70,15 @@ mod_STRIPD_ui <- function(id){
       
       mainPanel(
         width = 8,
-        tabsetPanel(
-          tabPanel("Field Book", DT::DTOutput(ns("STRIP.output")))
+        fluidRow(
+          column(12, align="center",
+                 tabsetPanel(
+                   tabPanel("Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout_strip"), width = "100%", height = "630px"),
+                                                                         type = 5)),
+                   tabPanel("Field Book", DT::DTOutput(ns("STRIP.output")))
+                 )
+          ),
+          column(12,uiOutput(ns("well_panel_layout_STRIP")))
         )
       )
     ) 
@@ -81,12 +88,9 @@ mod_STRIPD_ui <- function(id){
 #' STRIPD Server Functions
 #'
 #' @noRd 
-mod_STRIPD_server <- function(id){
+mod_STRIPD_server <- function(id) {
   moduleServer( id, function(input, output, session) {
-    
     ns <- session$ns
-    
-    
     Hplots <- LETTERS[1:5]
     Vplots <- LETTERS[1:4]
     entryListFormat_STRIP <- data.frame(list(HPLOTS = Hplots, VPLOTS = c(Vplots, "")))           
@@ -165,6 +169,48 @@ mod_STRIPD_server <- function(id){
     })
     
     
+    output$well_panel_layout_STRIP <- renderUI({
+      req(strip_reactive()$fieldBook)
+      obj_strip <- strip_reactive()
+      planting_strip <- input$planter.strip
+      allBooks_strip<- plot_layout(x = obj_strip, optionLayout = 1)$newBooks
+      nBooks_strip <- length(allBooks_strip)
+      layoutOptions_strip <- 1:nBooks_strip
+      loc <-  as.vector(unlist(strsplit(input$Location.strip, ",")))
+      wellPanel(
+        fluidRow(
+          column(2,
+                 radioButtons(ns("typlotstrip"), "Type of Plot:",
+                              c("Entries/Treatments" = 1,
+                                "Plots" = 2))
+          ),
+          column(3, #align="center",
+                 selectInput(inputId = ns("layoutO_strip"), label = "Layout option:", choices = layoutOptions_strip)
+          ),
+          column(3, #align="center",
+                 selectInput(inputId = ns("locLayout_strip"), label = "Location:", choices = loc)
+          )
+        )
+      )
+    })
+    
+    reactive_layoutSTRIP <- reactive({
+      req(input$layoutO_strip)
+      req(strip_reactive())
+      obj_strip <- strip_reactive()
+      opt_strip <- as.numeric(input$layoutO_strip)
+      planting_strip <- input$planter.strip
+      plot_layout(x = obj_strip, optionLayout = opt_strip, planter = planting_strip)
+    })
+    
+    output$layout_strip <- renderPlot({
+      req(strip_reactive())
+      req(input$typlotstrip)
+      if (input$typlotstrip == 1) {
+        reactive_layoutSTRIP()$out_layout
+      } else reactive_layoutSTRIP()$out_layoutPlots
+    })
+    
     valsStrip <- reactiveValues(maxV.strip = NULL, minV.strip = NULL, trail.strip = NULL)
     
     simuModal.strip <- function(failed = FALSE) {
@@ -233,13 +279,15 @@ mod_STRIPD_server <- function(id){
       if(!is.null(valsStrip$maxV.strip) && !is.null(valsStrip$minV.strip) && !is.null(valsStrip$trail.strip)) {
         max <- as.numeric(valsStrip$maxV.strip)
         min <- as.numeric(valsStrip$minV.strip)
-        df.strip <- strip_reactive()$fieldBook
+        #df.strip <- strip_reactive()$fieldBook
+        df.strip <- reactive_layoutSTRIP()$fieldBookXY
         cnamesdf.strip <- colnames(df.strip)
         df.strip <- norm_trunc(a = min, b = max, data = df.strip)
         colnames(df.strip) <- c(cnamesdf.strip[1:(ncol(df.strip) - 1)], valsStrip$trail.strip)
         a <- ncol(df.strip)
       }else {
-        df.strip <- strip_reactive()$fieldBook 
+        #df.strip <- strip_reactive()$fieldBook
+        df.strip <- reactive_layoutSTRIP()$fieldBookXY
         a <- ncol(df.strip)
       }
       return(list(df = df.strip, a = a))

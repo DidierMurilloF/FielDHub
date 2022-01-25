@@ -7,7 +7,7 @@
 #' @noRd 
 #'
 #' @importFrom shiny NS tagList 
-mod_IBD_ui <- function(id){
+mod_IBD_ui <- function(id) {
   ns <- NS(id)
   # Options for Spinner
   #options(spinner.color="#0275D8", spinner.color.background="#ffffff", spinner.size=2)
@@ -49,7 +49,11 @@ mod_IBD_ui <- function(id){
                      column(6,style=list("padding-left: 5px;"),
                             textInput(inputId = ns("Location.ibd"), "Input Location:", value = "FARGO")
                      )
-                   ),  
+                   ), 
+                   
+                   selectInput(inputId = ns("planter_mov_ibd"), label = "Plot Order Layout:",
+                               choices = c("serpentine", "cartesian"), multiple = FALSE,
+                               selected = "serpentine"),
                    
                    numericInput(inputId = ns("myseed.ibd"), label = "Seed Number:",
                                 value = 4),
@@ -66,8 +70,15 @@ mod_IBD_ui <- function(id){
       
       mainPanel(
         width = 8,
-        tabsetPanel(
-          tabPanel("Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("IBD.output")), type = 5))
+        fluidRow(
+          column(12, align="center",
+                 tabsetPanel(
+                   tabPanel("Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout_ibd"), width = "100%", height = "630px"),
+                                                                         type = 5)),
+                   tabPanel("Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("IBD.output")), type = 5))
+                 )
+          ),
+          column(12,uiOutput(ns("well_panel_layout_IBD")))
         )
       )
     )
@@ -187,6 +198,49 @@ mod_IBD_server <- function(id){
       
     })
     
+    output$well_panel_layout_IBD <- renderUI({
+      req(IBD_reactive()$fieldBook)
+      obj_ibd <- IBD_reactive()
+      planting_ibd <- input$planter_mov_ibd
+      allBooks_ibd<- plot_layout(x = obj_ibd, optionLayout = 1)$newBooks
+      nBooks_ibd <- length(allBooks_ibd)
+      layoutOptions_ibd <- 1:nBooks_ibd
+      loc <-  as.vector(unlist(strsplit(input$Location.ibd, ",")))
+      wellPanel(
+        fluidRow(
+          column(2,
+                 radioButtons(ns("typlotibd"), "Type of Plot:",
+                              c("Entries/Treatments" = 1,
+                                "Plots" = 2))
+          ),
+          column(3, #align="center",
+                 selectInput(inputId = ns("layoutO_ibd"), label = "Layout option:", choices = layoutOptions_ibd)
+          ),
+          column(3, #align="center",
+                 selectInput(inputId = ns("locLayout_ibd"), label = "Location:", choices = loc)
+          )
+        )
+      )
+    })
+    
+    reactive_layoutIBD <- reactive({
+      req(input$layoutO_ibd)
+      req(IBD_reactive())
+      obj_ibd <- IBD_reactive()
+      opt_ibd <- as.numeric(input$layoutO_ibd)
+      planting_ibd <- input$planter_mov_ibd
+      plot_layout(x = obj_ibd, optionLayout = opt_ibd, planter = planting_ibd)
+    })
+    
+    output$layout_ibd <- renderPlot({
+      req(IBD_reactive())
+      req(input$typlotibd)
+      if (input$typlotibd == 1) {
+        reactive_layoutIBD()$out_layout
+      } else reactive_layoutIBD()$out_layoutPlots
+    })
+    
+    
     valsIBD <- reactiveValues(maxV.ibd = NULL, minV.ibd = NULL, trail.ibd = NULL)
     
     simuModal.ibd <- function(failed = FALSE) {
@@ -256,13 +310,15 @@ mod_IBD_server <- function(id){
       if(!is.null(valsIBD$maxV.ibd) && !is.null(valsIBD$minV.ibd) && !is.null(valsIBD$trail.ibd)) {
         max <- as.numeric(valsIBD$maxV.ibd)
         min <- as.numeric(valsIBD$minV.ibd)
-        df.ibd <- IBD_reactive()$fieldBook
+        #df.ibd <- IBD_reactive()$fieldBook
+        df.ibd <- reactive_layoutIBD()$fieldBookXY
         cnamesdf.ibd <- colnames(df.ibd)
         df.ibd <- norm_trunc(a = min, b = max, data = df.ibd)
         colnames(df.ibd) <- c(cnamesdf.ibd[1:(ncol(df.ibd) - 1)], valsIBD$trail.ibd)
         a <- ncol(df.ibd)
       }else {
-        df.ibd <-  IBD_reactive()$fieldBook
+        #df.ibd <-  IBD_reactive()$fieldBook
+        df.ibd <- reactive_layoutIBD()$fieldBookXY
         a <- ncol(df.ibd)
       }
       return(list(df = df.ibd, a = a))
@@ -279,12 +335,6 @@ mod_IBD_server <- function(id){
       a <- as.numeric(simuDataIBD()$a)
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "500px"))
-      
-      # shinybusy::show_modal_spinner(
-      #   spin = "cube-grid",
-      #   color = "firebrick",
-      #   text = "Please wait..."
-      # )
       DT::datatable(df, rownames = FALSE, options = list(
         columnDefs = list(list(className = 'dt-center', targets = "_all"))))
       

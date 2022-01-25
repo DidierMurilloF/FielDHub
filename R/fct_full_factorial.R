@@ -75,7 +75,6 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
                            planter = "serpentine", seed = NULL,
                            locationNames = NULL, factorLabels = TRUE,
                            data = NULL) {
-
   if (all(c("serpentine", "cartesian") != planter)) {
     stop("Input for planter choice is unknown. Please, choose one: serpentine or cartesian.")
   }
@@ -84,7 +83,7 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
   get.levels <- function(k = NULL) {
     newlevels <- list();s <- 1
     for (i in k) {
-      newlevels[[s]] <- rep(1:i, 1)
+      newlevels[[s]] <- rep(0:(i-1), 1)
       s <- s + 1
     }
     return(newlevels)
@@ -152,13 +151,13 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
   design.loc <- list()
   for (locs in 1:l) {
     if (type == 1) {
-      m1 <- CRD(t = trt, reps = reps, plotNumber = plotNumber[locs], seed = seed,
+      m1 <- CRD(t = trt, reps = reps, plotNumber = plotNumber[locs], # seed = seed,
                 data = NULL, locationName = locationNames[1])$fieldBook
       m1 <- m1[,-c(1,2)]
       kind <- "CRD"
     }else {
       m1 <- RCBD(t = trt, reps = reps, l = 1, plotNumber = plotNumber[locs], continuous = continuous,
-                 planter = planter, seed = seed, locationNames = locationNames[locs])$fieldBook
+                 planter = planter, locationNames = locationNames[locs])$fieldBook # seed = seed,
       m1 <- m1[,-c(1,2)]
       kind <- "RCBD"
     }

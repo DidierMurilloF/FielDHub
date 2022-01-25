@@ -50,6 +50,10 @@ mod_CRD_ui <- function(id) {
                      )
                    ),
                    
+                   selectInput(inputId = ns("planter_mov_crd"), label = "Plot Order Layout:",
+                               choices = c("serpentine", "cartesian"), multiple = FALSE,
+                               selected = "serpentine"),
+                   
                    numericInput(inputId = ns("myseed.crd"), label = "Seed Number:",
                                 value = 123, min = 1),
                    fluidRow(
@@ -62,14 +66,32 @@ mod_CRD_ui <- function(id) {
                    )
       ),
       mainPanel(width = 8,
-                tabsetPanel(
-                  tabPanel("Field Book", DT::DTOutput(ns("CRD.output")))
-                )
+        fluidRow(
+          column(12, align="center",
+                 tabsetPanel(
+                   tabPanel("Completely Randomized Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.crd"), width = "100%", height = "630px"),
+                                                                                               type = 5)),
+                   tabPanel("Completely Randomized Field Book", DT::DTOutput(ns("CRD.output")))
+                 )
+          ),
+          column(12,uiOutput(ns("well_panel_layout_CRD")))
+        )
       )
     )
   )
 }
 
+# fluidRow(
+#   column(12, align="center",
+#          tabsetPanel(
+#            tabPanel("Completely Randomized Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.crd"), width = "100%", height = "630px"),
+#                                                                                        type = 5)),
+#            tabPanel("Completely Randomized Field Book", DT::DTOutput(ns("CRD.output")))
+#          )
+#   ),
+#   column(12,uiOutput(ns("well_panel_layout")))
+# )
+# "Completely Randomized Field Book", DT::DTOutput(ns("CRD.output"))
 #' CRD Server Function
 #'
 #' @noRd 
@@ -111,6 +133,52 @@ mod_CRD_server <- function(id) {
       my.design <- CRD(t = t, reps = reps, plotNumber = plot_start.crd, seed = myseed.crd,
                        locationName = loc, data = data.crd)
       
+    })
+    
+    output$well_panel_layout_CRD <- renderUI({
+      req(CRD_reactive()$fieldBook)
+      #req(input$planter_mov_crd)
+      obj_crd <- CRD_reactive()
+      planting_crd <- input$planter_mov_crd
+      allBooks_crd <- plot_layout(x = obj_crd, optionLayout = 1, planter = planting_crd)$newBooks
+      nBooks_crd <- length(allBooks_crd)
+      layoutOptions_crd <- 1:nBooks_crd
+      wellPanel(
+        fluidRow(
+          column(2,
+                 radioButtons(ns("typlotCRD"), "Type of Plot:",
+                              c("Entries/Treatments" = 1,
+                                "Plots" = 2))
+          ),
+          column(3, #align="center",
+                 selectInput(inputId = ns("layoutO_crd"), label = "Layout option:", choices = layoutOptions_crd)
+          )
+          # column(3, #align="center",
+          #        selectInput(inputId = ns("locLayout_crd"), label = "Location:", choices = 1)
+          # )
+          # column(2, #align="center",
+          #        downloadButton(outputId = "downCRDLayout", label = "Download the layout")
+          # ),
+        )
+      )
+    })
+    
+    reactive_layoutCRD <- reactive({
+      req(input$layoutO_crd)
+      req(CRD_reactive())
+      obj_crd <- CRD_reactive()
+      opt_crd <- as.numeric(input$layoutO_crd)
+      planting_crd <- input$planter_mov_crd
+      plot_layout(x = obj_crd, optionLayout = opt_crd, planter = planting_crd)
+    })
+    
+    output$layout.crd <- renderPlot({
+      #reactive_layoutCRD()$out_layout
+      req(CRD_reactive())
+      req(input$typlotCRD)
+      if (input$typlotCRD == 1) {
+        reactive_layoutCRD()$out_layout
+      } else reactive_layoutCRD()$out_layoutPlots
     })
     
     entryListFormat_CRD <- data.frame(TREATMENT = c(paste("TRT_", LETTERS[1:9], sep = "")), 
@@ -210,13 +278,15 @@ mod_CRD_server <- function(id) {
       if(!is.null(vals$maxV.CRD) && !is.null(vals$minV.CRD) && !is.null(vals$trail.CRD)) {
         max <- as.numeric(vals$maxV.CRD)
         min <- as.numeric(vals$minV.CRD)
-        df.crd <- CRD_reactive()$fieldBook
+        #df.crd <- CRD_reactive()$fieldBook
+        df.crd <- reactive_layoutCRD()$fieldBookXY
         cnamesdf.crd <- colnames(df.crd)
         df.crd <- norm_trunc(a = min, b = max, data = df.crd)
         colnames(df.crd) <- c(cnamesdf.crd[1:(ncol(df.crd) - 1)], vals$trail.CRD)
         df.crd <- df.crd[order(df.crd$ID),]
       }else {
-        df.crd <-  CRD_reactive()$fieldBook
+        #df.crd <-  CRD_reactive()$fieldBook
+        df.crd <- reactive_layoutCRD()$fieldBookXY
       }
       
       return(list(df = df.crd))
@@ -238,11 +308,32 @@ mod_CRD_server <- function(id) {
       content = function(file) {
         df <- as.data.frame(simuDataCRD()$df)
         write.csv(df, file, row.names = FALSE)
-        
       }
     )
     
-    #return(list(CRD.output = CRD.output))
+    # # downloadHandler contains 2 arguments as functions, namely filename, content
+    # output$downCRDLayout <- downloadHandler(
+    #   filename =  function() {
+    #     paste("CRD_Layout", "png", sep=".")
+    #   },
+    #   # content is a function with argument file. content writes the plot to the device
+    #   content = function(file) {
+    #     grDevices::png(file)
+    #     
+    #     if (input$typlotCRD == 1) {
+    #       reactive_layoutCRD()$out_layout
+    #     } else reactive_layoutCRD()$out_layoutPlots
+    #     plot(x=x(), y=y(), main = "iris dataset plot", xlab = xl(), ylab = yl()) # draw the plot
+    #     dev.off()  # turn the device off
+    #     # if(input$var3 == "png")
+    #     #   png(file) # open the png device
+    #     # else
+    #     #   pdf(file) # open the pdf device
+    #     # plot(x=x(), y=y(), main = "iris dataset plot", xlab = xl(), ylab = yl()) # draw the plot
+    #     # dev.off()  # turn the device off
+    #     
+    #   } 
+    # )
     
   })
 }

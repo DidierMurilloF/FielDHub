@@ -38,6 +38,10 @@ mod_Alpha_Lattice_ui <- function(id){
                    selectInput(inputId = ns("k.alpha"), label = "Input # of Plots per IBlock:", choices = ""),
                    numericInput(inputId = ns("l.alpha"), label = "Input # of Locations:", value = NULL, min = 1),
                    
+                   selectInput(inputId = ns("planter_mov_alpha"), label = "Plot Order Layout:",
+                               choices = c("serpentine", "cartesian"), multiple = FALSE,
+                               selected = "serpentine"),
+                   
                    fluidRow(
                      column(6, style=list("padding-right: 28px;"),
                             textInput(inputId = ns("plot_start.alpha"), "Starting Plot Number:", value = 101)
@@ -63,8 +67,15 @@ mod_Alpha_Lattice_ui <- function(id){
       
       mainPanel(
         width = 8,
-        tabsetPanel(
-          tabPanel("Alpha Lattice Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("ALPHA.output")), type = 5))
+        fluidRow(
+          column(12, align="center",
+                 tabsetPanel(
+                   tabPanel("Alpha Lattice Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.output"), width = "100%", height = "630px"),
+                                                                                       type = 5)),
+                   tabPanel("Alpha Lattice Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("ALPHA.output")), type = 5))
+                 )
+          ),
+          column(12,uiOutput(ns("well_panel_layout")))
         )
       )
     )
@@ -183,11 +194,113 @@ mod_Alpha_Lattice_server <- function(id){
                     plotNumber = plot_start.alpha, 
                     seed = seed.alpha,
                     locationNames = loc, 
-                    data = data_alpha) 
-      
+                    data = data_alpha)
+    })
+    
+    upDateSites <- eventReactive(input$RUN.alpha, {
+      req(input$l.alpha)
+      locs <- as.numeric(input$l.alpha)
+      sites <- 1:locs
+      return(list(sites = sites))
     })
     
     
+    output$well_panel_layout <- renderUI({
+      req(ALPHA_reactive()$fieldBook)
+      req(input$l.alpha)
+      req(input$r.alpha)
+      locs <- as.numeric(input$l.alpha)
+      repsAlpha <- as.numeric(input$r.alpha)
+      if ((repsAlpha >= 4 & repsAlpha %% 2 == 0) | (repsAlpha >= 4 & sqrt(repsAlpha) %% 1 == 0)) {
+        orderReps <- c("Vertical Stack Panel" = "vertical_stack_panel", "Horizontal Stack Panel" = "horizontal_stack_panel",  
+                       "Grid Panel" = "grid_panel")
+      } else {
+        orderReps <- c("Vertical Stack Panel" = "vertical_stack_panel", "Horizontal Stack Panel" = "horizontal_stack_panel")
+      }
+      obj <- ALPHA_reactive()
+      allBooks <- plot_layout(x = obj, optionLayout = 1, orderReps = "vertical_stack_panel")$newBooks
+      nBooks <- length(allBooks)
+      layoutOptions <- 1:nBooks
+      wellPanel(
+        column(3,
+               radioButtons(ns("typlotALPHA"), "Type of Plot:",
+                            c("Entries/Treatments" = 1,
+                              "Plots" = 2,
+                              "heatmap" = 3))
+        ),
+        fluidRow(
+          column(3,
+                 selectInput(inputId = ns("orderRepsAlpha"), label = "Reps layout:", 
+                             choices = orderReps)
+          ),
+          column(2, 
+                 selectInput(inputId = ns("layoutO"), label = "Layout option:", choices = layoutOptions, selected = 1)
+          ),
+          column(2, 
+                 selectInput(inputId = ns("locLayout"), label = 'Location:', choices = as.numeric(upDateSites()$sites))
+          )
+        )
+      )
+    })
+    
+    observeEvent(input$orderRepsAlpha, {
+      req(input$orderRepsAlpha)
+      req(input$l.alpha)
+      obj <- ALPHA_reactive()
+      allBooks <- plot_layout(x = obj, optionLayout = 1, orderReps = input$orderRepsAlpha)$newBooks
+      nBooks <- length(allBooks)
+      NewlayoutOptions <- 1:nBooks
+      updateSelectInput(session = session, inputId = 'layoutO',
+                        label = "Layout option:",
+                        choices = NewlayoutOptions,
+                        selected = 1
+      )
+    })
+    
+    reactive_layoutAlpha <- reactive({
+      req(input$orderRepsAlpha)
+      req(input$planter_mov_alpha)
+      req(input$layoutO)
+      req(ALPHA_reactive())
+      obj <- ALPHA_reactive()
+      opt <- as.numeric(input$layoutO)
+      locSelected <- as.numeric(input$locLayout)
+      try(plot_layout(x = obj, optionLayout = opt, planter = input$planter_mov_alpha, l = locSelected, 
+                      orderReps = input$orderRepsAlpha), silent = TRUE)
+    })
+    
+    
+    # heatmap_obj <- reactive({
+    #   req(simuDataPREP()$dfSimulation)
+    #     w <- as.character(valsPREP$trail.prep)
+    #     df <- simuDataPREP()$dfSimulation
+    #     p1 <- ggplot2::ggplot(df, ggplot2::aes(x = df[,4], y = df[,3], fill = df[,7], text = df[,8])) + 
+    #       ggplot2::geom_tile() +
+    #       ggplot2::xlab("COLUMN") +
+    #       ggplot2::ylab("ROW") +
+    #       ggplot2::labs(fill = w) +
+    #       viridis::scale_fill_viridis(discrete = FALSE)
+    #     
+    #     p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 710)
+    #     
+    #     return(p2)
+    # })
+    # 
+    # output$heatmap_prep <- plotly::renderPlotly({
+    #   req(heatmap_obj())
+    #   heatmap_obj()
+    # })
+    
+    
+    output$layout.output <- renderPlot({
+      req(reactive_layoutAlpha())
+      req(ALPHA_reactive())
+      req(input$typlotALPHA)
+      if (input$typlotALPHA == 1) {
+        reactive_layoutAlpha()$out_layout
+      } else reactive_layoutAlpha()$out_layoutPlots
+    })
+
     valsALPHA <- reactiveValues(maxV.alpha = NULL, minV.alpha = NULL, trail.alpha = NULL)
 
       simuModal.alpha <- function(failed = FALSE) {
@@ -222,7 +335,7 @@ mod_Alpha_Lattice_server <- function(id){
       observeEvent(input$Simulate.alpha, {
         req(input$k.alpha)
         req(input$r.alpha)
-        req(ALPHA_reactive()$fieldBook)
+        req(reactive_layoutAlpha()$fieldBookXY)
         showModal(
           shinyjqui::jqui_draggable(
             simuModal.alpha()
@@ -253,24 +366,26 @@ mod_Alpha_Lattice_server <- function(id){
         }
       })
      
-     
       simuDataALPHA <- reactive({
-        req(ALPHA_reactive()$fieldBook)
+        req(reactive_layoutAlpha())
         if(!is.null(valsALPHA$maxV.alpha) && !is.null(valsALPHA$minV.alpha) && !is.null(valsALPHA$trail.alpha)) {
           max <- as.numeric(valsALPHA$maxV.alpha)
           min <- as.numeric(valsALPHA$minV.alpha)
-          df.alpha <- ALPHA_reactive()$fieldBook
+          #df.alpha <- ALPHA_reactive()$fieldBook
+          #df.alpha <- reactive_layoutAlpha()$fieldBookXY
+          df.alpha <- reactive_layoutAlpha()$allSitesFielbook
           cnamesdf.alpha <- colnames(df.alpha)
           df.alpha <- norm_trunc(a = min, b = max, data = df.alpha)
           colnames(df.alpha) <- c(cnamesdf.alpha[1:(ncol(df.alpha) - 1)], valsALPHA$trail.alpha)
           a <- ncol(df.alpha)
         }else {
-          df.alpha <-  ALPHA_reactive()$fieldBook
+          #df.alpha <-  ALPHA_reactive()$fieldBook
+          #df.alpha <- reactive_layoutAlpha()$fieldBookXY
+          df.alpha <- reactive_layoutAlpha()$allSitesFielbook
           a <- ncol(df.alpha)
         }
         return(list(df = df.alpha, a = a))
       })
-     
      
       output$ALPHA.output <- DT::renderDataTable({
         req(input$k.alpha)
@@ -288,8 +403,7 @@ mod_Alpha_Lattice_server <- function(id){
           columnDefs = list(list(className = 'dt-center', targets = "_all"))))
      
       })
-    
-    
+  
     # Downloadable csv of selected dataset ----
     output$downloadData.alpha <- downloadHandler(
       filename = function() {
@@ -301,14 +415,6 @@ mod_Alpha_Lattice_server <- function(id){
         write.csv(df, file, row.names = FALSE)
       }
     )
-    #Update_k = Update_k
-    #return(list(ALPHA.output = ALPHA.output))
     
   })
 }
-    
-## To be copied in the UI
-# mod_Alpha_Lattice_ui("Alpha_Lattice_ui_1")
-    
-## To be copied in the server
-# mod_Alpha_Lattice_server("Alpha_Lattice_ui_1")

@@ -151,7 +151,7 @@ split_plot <- function(wp = NULL, sp = NULL, reps = NULL, type = 2, l = 1, plotN
       spd.layout <- matrix(data = 0, nrow = wp * b, ncol = 4)
       spd.layout[,1] <- plot.random[,v]
       spd.layout[,2] <- rep(1:b, each = wp)
-      spd.layout[,3] <- rep(WholePlots, each = b)
+      spd.layout[,3] <- rep(WholePlots, times = b)
       spd.layout <- spd.layout[order(spd.layout[,1]),]
       rownames(spd.layout) <- 1:(wp * b)
       colnames(spd.layout) <- c("PLOT", "REP", "Whole-plot", "Sub-plot")
@@ -201,13 +201,13 @@ split_plot <- function(wp = NULL, sp = NULL, reps = NULL, type = 2, l = 1, plotN
     REPS <- rep(wp.reps, each = sp)
     spd.output <- data.frame(list(LOCATION = LOCATION, PLOT = PLOT, REP = REPS,
                                   wp = wp.d, sp = sp.d, TREATMENT = NA))
-    colnames(spd.output) <- c("LOCATION", "PLOT", "REP", "WHOLE-PLOT", "SUB-PLOT", "TRT_COMB")
+    colnames(spd.output) <- c("LOCATION", "PLOT", "REP", "WHOLE_PLOT", "SUB_PLOT", "TRT_COMB")
   }else {
     PLOT <- rep(plots.n, each = sp)
     Block <- rep(rep(1:b, each = wp * sp), times = l)
     spd.output <- data.frame(list(LOCATION = LOCATION, PLOT = PLOT, BLOCK = Block,
                                   wp = wp.d, sp = sp.d, TREATMENT = NA))
-    colnames(spd.output) <- c("LOCATION", "PLOT", "REP", "WHOLE-PLOT", "SUB-PLOT", "TRT_COMB")
+    colnames(spd.output) <- c("LOCATION", "PLOT", "REP", "WHOLE_PLOT", "SUB_PLOT", "TRT_COMB")
   }
   z <- 1:nrow(spd.output)
   for (j in z) {

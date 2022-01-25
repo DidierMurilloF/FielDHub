@@ -36,6 +36,10 @@ mod_Square_Lattice_ui <- function(id){
                    selectInput(inputId = ns("k.square"), label = "Input # of Plots per IBlock:", choices = ""),
                    numericInput(inputId = ns("l.square"), label = "Input # of Locations:", value = NULL, min = 1),
                    
+                   selectInput(inputId = ns("planter_mov_square"), label = "Plot Order Layout:",
+                               choices = c("serpentine", "cartesian"), multiple = FALSE,
+                               selected = "serpentine"),
+                   
                    fluidRow(
                      column(6, style=list("padding-right: 28px;"),
                             textInput(inputId = ns("plot_start.square"), "Starting Plot Number:", value = 101)
@@ -46,14 +50,6 @@ mod_Square_Lattice_ui <- function(id){
                    ),
                    numericInput(inputId = ns("myseed.square"), label = "Seed Number:",
                                                        value = 5, min = 1),
-                   # fluidRow(
-                   #   column(6, style=list("padding-right: 28px;"),
-                   #          numericInput(inputId = ns("myseed.square"), label = "Seed Number:",
-                   #                       value = 5, min = 1)),
-                   #   column(6, style=list("padding-right: 28px;"),
-                   #          actionButton(inputId = ns("RUN.square"), "Run!", icon = icon("cocktail"))
-                   #   )
-                   #  ),
                     
                    fluidRow(
                      column(6,# style=list("padding-right: 28px;"),
@@ -71,8 +67,16 @@ mod_Square_Lattice_ui <- function(id){
       
       mainPanel(
         width = 8,
-        tabsetPanel(
-          tabPanel("Square Lattice Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("SQUARE.output")), type = 5))
+        fluidRow(
+          column(12, align="center",
+                 tabsetPanel(
+                   tabPanel("Square Lattice Field Layout", 
+                            shinycssloaders::withSpinner(plotOutput(ns("layout.output_sq"), width = "100%", height = "630px"),
+                                                                                       type = 5)),
+                   tabPanel("Square Lattice Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("SQUARE.output")), type = 5))
+                 )
+          ),
+          column(12,uiOutput(ns("well_panel_layout_sq")))
         )
       )
     )
@@ -183,6 +187,84 @@ mod_Square_Lattice_server <- function(id){
       
     })
     
+    upDateSites_SQ <- eventReactive(input$RUN.square, {
+      req(input$l.square)
+      locs <- as.numeric(input$l.square)
+      sites <- 1:locs
+      return(list(sites = sites))
+    })
+    
+    output$well_panel_layout_sq <- renderUI({
+      req(SQUARE_reactive())
+      req(input$l.square)
+      req(input$r.square)
+      locs_sq <- as.numeric(input$l.square)
+      repsSquare <- as.numeric(input$r.square)
+      if ((repsSquare >= 4 & repsSquare %% 2 == 0) | (repsSquare >= 4 & sqrt(repsSquare) %% 1 == 0)) {
+        orderReps <- c("Vertical Stack Panel" = "vertical_stack_panel", "Horizontal Stack Panel" = "horizontal_stack_panel",  
+                       "Grid Panel" = "grid_panel")
+      } else {
+        orderReps <- c("Vertical Stack Panel" = "vertical_stack_panel", "Horizontal Stack Panel" = "horizontal_stack_panel")
+      }
+      obj_sq <- SQUARE_reactive()
+      allBooks_sq <- plot_layout(x = obj_sq, optionLayout = 1)$newBooks
+      nBooks_sq <- length(allBooks_sq)
+      layoutOptions_sq <- 1:nBooks_sq
+      wellPanel(
+        column(3,
+               radioButtons(ns("typlotSQ"), "Type of Plot:",
+                            c("Entries/Treatments" = 1,
+                              "Plots" = 2))
+        ),
+        fluidRow(
+          column(3,
+                 selectInput(inputId = ns("orderReps_sq"), label = "Reps layout:", 
+                             choices = orderReps)
+          ),
+          column(2, #align="center",
+                 selectInput(inputId = ns("layoutO_sq"), label = "Layout option:", choices = layoutOptions_sq, selected = 1)
+          ),
+          column(2, #align="center",
+                 selectInput(inputId = ns("locLayout_sq"), label = "Location:", choices = as.numeric(upDateSites_SQ()$sites))
+          )
+        )
+      )
+    })
+    
+    observeEvent(input$orderReps_sq, {
+      req(input$orderReps_sq)
+      req(input$l.square)
+      obj_sq <- SQUARE_reactive()
+      allBooks <- plot_layout(x = obj_sq, optionLayout = 1, orderReps = input$orderReps_sq)$newBooks
+      nBooks <- length(allBooks)
+      NewlayoutOptions <- 1:nBooks
+      updateSelectInput(session = session, inputId = 'layoutO_sq',
+                        label = "Layout option:",
+                        choices = NewlayoutOptions,
+                        selected = 1
+      )
+    })
+    
+    reactive_layoutSquare <- reactive({
+      req(input$layoutO_sq)
+      req(SQUARE_reactive())
+      obj_sq <- SQUARE_reactive()
+      opt_sq <- as.numeric(input$layoutO_sq)
+      locSelected <- as.numeric(input$locLayout_sq)
+      #plot_layout(x = obj_sq, optionLayout = opt_sq)
+      try(plot_layout(x = obj_sq, optionLayout = opt_sq, planter = input$planter_mov_square, l = locSelected, 
+                      orderReps = input$orderReps_sq), silent = TRUE)
+    })
+    
+    output$layout.output_sq <- renderPlot({
+      req(reactive_layoutSquare())
+      req(SQUARE_reactive())
+      req(input$typlotSQ)
+      if (input$typlotSQ == 1) {
+        reactive_layoutSquare()$out_layout
+      } else reactive_layoutSquare()$out_layoutPlots
+      
+    })
     
     valsSQUARE <- reactiveValues(maxV.square = NULL, minV.square = NULL, trail.square = NULL)
     
@@ -220,7 +302,7 @@ mod_Square_Lattice_server <- function(id){
     observeEvent(input$Simulate.square, {
       req(input$k.square)
       req(input$r.square)
-      req(SQUARE_reactive()$fieldBook)
+      req(reactive_layoutSquare()$fieldBookXY)
       showModal(
         shinyjqui::jqui_draggable(
           simuModal.square()
@@ -253,17 +335,20 @@ mod_Square_Lattice_server <- function(id){
     
     
     simuDataSQUARE <- reactive({
-      req(SQUARE_reactive()$fieldBook)
+      #req(SQUARE_reactive()$fieldBook)
+      req(reactive_layoutSquare()$fieldBookXY)
       if(!is.null(valsSQUARE$maxV.square) && !is.null(valsSQUARE$minV.square) && !is.null(valsSQUARE$trail.square)) {
         max <- as.numeric(valsSQUARE$maxV.square)
         min <- as.numeric(valsSQUARE$minV.square)
-        df.square <- SQUARE_reactive()$fieldBook
+        #df.square <- SQUARE_reactive()$fieldBook
+        df.square <- reactive_layoutSquare()$fieldBookXY
         cnamesdf.square <- colnames(df.square)
         df.square <- norm_trunc(a = min, b = max, data = df.square)
         colnames(df.square) <- c(cnamesdf.square[1:(ncol(df.square) - 1)], valsSQUARE$trail.square)
         a <- ncol(df.square)
       }else {
-        df.square <-  SQUARE_reactive()$fieldBook
+        #df.square <-  SQUARE_reactive()$fieldBook
+        df.square <- reactive_layoutSquare()$fieldBookXY
         a <- ncol(df.square)
       }
       return(list(df = df.square, a = a))
@@ -271,7 +356,6 @@ mod_Square_Lattice_server <- function(id){
     
     
     output$SQUARE.output <- DT::renderDataTable({
-      #input$RUN.square
       req(input$k.square)
       k.square <- input$k.square
       if (k.square == "No Options Available") {
@@ -298,8 +382,6 @@ mod_Square_Lattice_server <- function(id){
         write.csv(df, file, row.names = FALSE)
       }
     )
-    #Update_k = Update_k
-    #return(list(SQUARE.output = SQUARE.output))
     
   })
 }

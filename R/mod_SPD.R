@@ -16,7 +16,7 @@ mod_SPD_ui <- function(id){
                    radioButtons(inputId = ns("owndataSPD"), label = "Import entries' list?", choices = c("Yes", "No"), selected = "No",
                                 inline = TRUE, width = NULL, choiceNames = NULL, choiceValues = NULL),
                    selectInput(inputId = ns("kindSPD"), label = "Select SPD Type:",
-                               choices = c("Split-Plot in a CRD" = "SPD_CRD", "Split-Plot in a RCBD" = "SPD_RCBD"),
+                               choices = c("Split-Plot in a RCBD" = "SPD_RCBD", "Split-Plot in a CRD" = "SPD_CRD"),
                                multiple = FALSE),
                    
                    conditionalPanel("input.owndataSPD == 'Yes'", ns = ns,
@@ -41,7 +41,7 @@ mod_SPD_ui <- function(id){
                    fluidRow(
                      column(6, style=list("padding-right: 28px;"),
                             numericInput(ns("reps.spd"), label = "Input # of Full Reps:",
-                                         value = 2, min = 2), 
+                                         value = 3, min = 2), 
                      ),
                      column(6,style=list("padding-left: 5px;"),
                             numericInput(ns("l.spd"), label = "Input # of Locations:",
@@ -56,6 +56,9 @@ mod_SPD_ui <- function(id){
                             textInput(ns("Location.spd"), "Input the Location:", value = "FARGO")
                      )
                    ),
+                   selectInput(inputId = ns("planter_mov_spd"), label = "Plot Order Layout:",
+                               choices = c("serpentine", "cartesian"), multiple = FALSE,
+                               selected = "serpentine"),
                    
                    numericInput(inputId = ns("myseed.spd"), label = "Seed Number:", value = 123, min = 1),
                    
@@ -71,9 +74,16 @@ mod_SPD_ui <- function(id){
       
       mainPanel(
         width = 8,
-        tabsetPanel(
-          tabPanel("Field Book", DT::DTOutput(ns("SPD.output")))
-        )   
+        fluidRow(
+          column(12, align="center",
+                 tabsetPanel(
+                   tabPanel("Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout_spd"), width = "100%", height = "630px"),
+                                                                         type = 5)),
+                   tabPanel("Field Book", DT::DTOutput(ns("SPD.output")))
+                 )
+          ),
+          column(12,uiOutput(ns("well_panel_layout_SPD")))
+        )
       )
     )    
   )
@@ -117,8 +127,6 @@ mod_SPD_server <- function(id){
         )
       }
     })
-    
-    
     
     getData.spd <- reactive({
       req(input$file.SPD)
@@ -171,10 +179,73 @@ mod_SPD_server <- function(id){
       
       SPD <- split_plot(wp = wp, sp = sp, reps = reps.spd, l = l.spd, plotNumber = plot_start.spd, seed = seed.spd,
                         type = type, locationNames = loc.spd, data = data.spd)
-      
-      
     })
     
+    
+    output$well_panel_layout_SPD <- renderUI({
+      req(spd_reactive()$fieldBook)
+      obj_spd <- spd_reactive()
+      planting_spd <- input$planter_mov_spd
+      allBooks_spd<- plot_layout(x = obj_spd, optionLayout = 1, orderReps = "vertical_stack_panel")$newBooks
+      nBooks_spd <- length(allBooks_spd)
+      layoutOptions_spd <- 1:nBooks_spd
+      sites <- as.numeric(input$l.spd)
+      #loc <-  as.vector(unlist(strsplit(input$Location.spd, ",")))
+      orderReps_spd <- c("Vertical Stack Panel" = "vertical_stack_panel", "Horizontal Stack Panel" = "horizontal_stack_panel")
+      wellPanel(
+        column(2,
+               radioButtons(ns("typlotspd"), "Type of Plot:",
+                            c("Entries/Treatments" = 1,
+                              "Plots" = 2))
+        ),
+        fluidRow(
+          column(3,
+                 selectInput(inputId = ns("orderRepsSPD"), label = "Reps layout:", 
+                             choices = orderReps_spd),
+          ),
+          column(2, #align="center",
+                 selectInput(inputId = ns("layoutO_spd"), label = "Layout option:", choices = layoutOptions_spd)
+          ),
+          column(2, #align="center",
+                 selectInput(inputId = ns("locLayout_spd"), label = "Location:", choices = 1:sites)
+          )
+        )
+      )
+    })
+    
+    observeEvent(input$orderRepsSPD, {
+      req(input$orderRepsSPD)
+      req(input$l.spd)
+      obj_spd <- spd_reactive()
+      allBooks <- plot_layout(x = obj_spd, optionLayout = 1, orderReps = input$orderRepsSPD)$newBooks
+      nBooks <- length(allBooks)
+      NewlayoutOptions <- 1:nBooks
+      updateSelectInput(session = session, inputId = 'layoutO_spd',
+                        label = "Layout option:",
+                        choices = NewlayoutOptions,
+                        selected = 1
+      )
+    })
+    
+    reactive_layoutSPD <- reactive({
+      req(input$layoutO_spd)
+      req(input$orderRepsSPD)
+      req(spd_reactive())
+      obj_spd <- spd_reactive()
+      opt_spd <- as.numeric(input$layoutO_spd)
+      planting_spd <- input$planter_mov_spd
+      locSelected_spd <- as.numeric(input$locLayout_spd)
+      try(plot_layout(x = obj_spd, optionLayout = opt_spd, planter = planting_spd, orderReps = input$orderRepsSPD,
+                      l = locSelected_spd), silent = TRUE)
+    })
+    
+    output$layout_spd <- renderPlot({
+      req(spd_reactive())
+      req(input$typlotspd)
+      if (input$typlotspd == 1) {
+        reactive_layoutSPD()$out_layout
+      } else reactive_layoutSPD()$out_layoutPlots
+    })
     
     valspd <- reactiveValues(maxV.spd = NULL, minV.spd = NULL, trail.spd = NULL)
     
@@ -245,13 +316,15 @@ mod_SPD_server <- function(id){
       if(!is.null(valspd$maxV.spd) && !is.null(valspd$minV.spd) && !is.null(valspd$trail.spd)) {
         max <- as.numeric(valspd$maxV.spd)
         min <- as.numeric(valspd$minV.spd)
-        df.spd <- spd_reactive()$fieldBook
+        #df.spd <- spd_reactive()$fieldBook
+        df.spd <- reactive_layoutSPD()$fieldBookXY
         cnamesdf.spd <- colnames(df.spd)
         df.spd <- norm_trunc(a = min, b = max, data = df.spd)
         colnames(df.spd) <- c(cnamesdf.spd[1:(ncol(df.spd) - 1)], valspd$trail.spd)
         df.spd <- df.spd[order(df.spd$ID),]
       }else {
-        df.spd <- spd_reactive()$fieldBook  
+        #df.spd <- spd_reactive()$fieldBook 
+        df.spd <- reactive_layoutSPD()$fieldBookXY
       }
       return(list(df = df.spd))
     })

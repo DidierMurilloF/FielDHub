@@ -46,13 +46,17 @@ mod_SSPD_ui <- function(id){
                    fluidRow(
                      column(6, style=list("padding-right: 28px;"),
                        numericInput(ns("reps.sspd"), label = "Input # of Full Reps:",
-                                    value = 2, min = 2)
+                                    value = 3, min = 2)
                      ),
                      column(6, style=list("padding-left: 5px;"),
                        numericInput(ns("l.sspd"), label = "Input # of Locations:",
                                     value = 1, min = 1)
                      )
                    ), 
+                   
+                   selectInput(inputId = ns("planter_mov_sspd"), label = "Plot Order Layout:",
+                               choices = c("serpentine", "cartesian"), multiple = FALSE,
+                               selected = "serpentine"),
                    
                    fluidRow(
                      column(6,style=list("padding-right: 28px;"),
@@ -77,13 +81,35 @@ mod_SSPD_ui <- function(id){
       
       mainPanel(
         width = 8,
-        tabsetPanel(
-          tabPanel("Field Book", DT::DTOutput(ns("SSPD.output")))
-        )     
+        # tabsetPanel(
+        #   tabPanel("Field Book", DT::DTOutput(ns("SSPD.output")))
+        # )
+        fluidRow(
+          column(12, align="center",
+                 tabsetPanel(
+                   tabPanel("Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout_sspd"), width = "100%", height = "630px"),
+                                                                         type = 5)),
+                   tabPanel("Field Book", DT::DTOutput(ns("SSPD.output")))
+                 )
+          ),
+          column(12,uiOutput(ns("well_panel_layout_SSPD")))
+        )
       )
     )
   )
 }
+
+
+# fluidRow(
+#   column(12, align="center",
+#          tabsetPanel(
+#            tabPanel("Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout_sspd"), width = "100%", height = "630px"),
+#                                                                  type = 5)),
+#            tabPanel("Field Book", DT::DTOutput(ns("SSPD.output")))
+#          )
+#   ),
+#   column(12,uiOutput(ns("well_panel_layout_SSPD")))
+# )
     
 #' SSPD Server Functions
 #'
@@ -189,6 +215,50 @@ mod_SSPD_server <- function(id){
       
     })
     
+  
+    output$well_panel_layout_SSPD <- renderUI({
+      req(sspd_reactive()$fieldBook)
+      obj_sspd <- sspd_reactive()
+      planting_sspd <- input$planter_mov_sspd
+      allBooks_sspd<- plot_layout(x = obj_sspd, optionLayout = 1)$newBooks
+      nBooks_sspd <- length(allBooks_sspd)
+      layoutOptions_sspd <- 1:nBooks_sspd
+      loc <-  as.vector(unlist(strsplit(input$Location.sspd, ",")))
+      wellPanel(
+        fluidRow(
+          column(2,
+                 radioButtons(ns("typlotsspd"), "Type of Plot:",
+                              c("Entries/Treatments" = 1,
+                                "Plots" = 2))
+          ),
+          column(3, #align="center",
+                 selectInput(inputId = ns("layoutO_sspd"), label = "Layout option:", choices = layoutOptions_sspd)
+          ),
+          column(3, #align="center",
+                 selectInput(inputId = ns("locLayout_sspd"), label = "Location:", choices = loc)
+          )
+        )
+      )
+    })
+    
+    reactive_layoutSSPD <- reactive({
+      req(input$layoutO_sspd)
+      req(sspd_reactive())
+      obj_sspd <- sspd_reactive()
+      opt_sspd <- as.numeric(input$layoutO_sspd)
+      planting_sspd <- input$planter_mov_sspd
+      plot_layout(x = obj_sspd, optionLayout = opt_sspd, planter = planting_sspd)
+    })
+    
+    output$layout_sspd <- renderPlot({
+      req(sspd_reactive())
+      req(input$typlotsspd)
+      if (input$typlotsspd == 1) {
+        reactive_layoutSSPD()$out_layout
+      } else reactive_layoutSSPD()$out_layoutPlots
+    })
+    
+    
     
     valsspd <- reactiveValues(maxV.sspd = NULL, minV.sspd = NULL, Trial.sspd = NULL)
     
@@ -259,17 +329,16 @@ mod_SSPD_server <- function(id){
       if(!is.null(valsspd$maxV.sspd) && !is.null(valsspd$minV.sspd) && !is.null(valsspd$Trial.sspd)) {
         max <- as.numeric(valsspd$maxV.sspd)
         min <- as.numeric(valsspd$minV.sspd)
-        df.sspd <- sspd_reactive()$fieldBook
+        df.sspd <- reactive_layoutSSPD()$fieldBookXY
         cnamesdf.sspd <- colnames(df.sspd)
         df.sspd <- norm_trunc(a = min, b = max, data = df.sspd)
         colnames(df.sspd) <- c(cnamesdf.sspd[1:(ncol(df.sspd) - 1)], valsspd$Trial.sspd)
         df.sspd <- df.sspd[order(df.sspd$ID),]
       }else {
-        df.sspd <- sspd_reactive()$fieldBook  
+        df.sspd <- reactive_layoutSSPD()$fieldBookXY
       }
       return(list(df = df.sspd, a = a))
     })
-    
     
     output$SSPD.output  <- DT::renderDataTable({
       

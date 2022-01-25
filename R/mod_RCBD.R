@@ -7,7 +7,7 @@
 #' @noRd 
 #'
 #' @importFrom shiny NS tagList 
-mod_RCBD_ui <- function(id){
+mod_RCBD_ui <- function(id) {
   ns <- NS(id)
   tagList(
     h4("Randomized Complete Block Designs"),
@@ -61,14 +61,20 @@ mod_RCBD_ui <- function(id){
       ),
 
       mainPanel(width = 8,
-        tabsetPanel(
-          tabPanel("Field Book", DT::DTOutput(ns("RCBD.output")))
+        fluidRow(
+          column(12, align="center",
+                 tabsetPanel(
+                   tabPanel("Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout_rcbd"), width = "100%", height = "630px"),
+                                                                                       type = 5)),
+                   tabPanel("Field Book", DT::DTOutput(ns("RCBD.output")))
+                 )
+          ),
+          column(12,uiOutput(ns("well_panel_layout_RCBD")))
         )
       )
     )
   )
 }
-    
 #' RCBD Server Functions
 #'
 #' @noRd 
@@ -146,6 +152,75 @@ mod_RCBD_server <- function(id){
       
     })
     
+    output$well_panel_layout_RCBD <- renderUI({
+      req(RCBD_reactive()$fieldBook)
+      req(input$l.rcbd)
+      obj_rcbd <- RCBD_reactive()
+      planting_rcbd <- input$planter_mov_rcbd
+      allBooks_rcbd <- plot_layout(x = obj_rcbd, optionLayout = 1, orderReps = "vertical_stack_panel")$newBooks
+      nBooks_rcbd <- length(allBooks_rcbd)
+      layoutOptions_rcbd <- 1:nBooks_rcbd
+      orderReps_rcbd <- c("Vertical Stack Panel" = "vertical_stack_panel", "Horizontal Stack Panel" = "horizontal_stack_panel")
+      #loc <-  as.vector(unlist(strsplit(input$Location.rcbd, ",")))
+      sites <- as.numeric(input$l.rcbd)
+      wellPanel(
+        column(3,
+               radioButtons(ns("typlotRCBD"), "Type of Plot:",
+                            c("Entries/Treatments" = 1,
+                              "Plots" = 2))
+        ),
+        fluidRow(
+          column(3,
+                 selectInput(inputId = ns("orderRepsRCBD"), label = "Reps layout:", 
+                             choices = orderReps_rcbd),
+          ),
+          column(2, #align="center",
+                 selectInput(inputId = ns("layoutO_rcbd"), label = "Layout option:", choices = layoutOptions_rcbd, selected = 1)
+          ),
+          column(2, #align="center",
+                 selectInput(inputId = ns("locLayout_rcbd"), label = "Location:", choices = 1:sites)
+          )
+        )
+      )
+    })
+    
+    observeEvent(input$orderRepsRCBD, {
+      req(input$orderRepsRCBD)
+      req(input$l.rcbd)
+      obj_rcbd <- RCBD_reactive()
+      allBooks <- try(plot_layout(x = obj_rcbd, optionLayout = 1, orderReps = input$orderRepsRCBD)$newBooks, silent = TRUE)
+      nBooks <- length(allBooks)
+      NewlayoutOptions <- 1:nBooks
+      updateSelectInput(session = session, inputId = 'layoutO_rcbd',
+                        label = "Layout option:",
+                        choices = NewlayoutOptions,
+                        selected = 1
+      )
+    })
+    
+    reactive_layoutRCBD <- reactive({
+      req(input$orderRepsRCBD)
+      req(input$layoutO_rcbd)
+      req(input$planter_mov_rcbd)
+      req(input$locLayout_rcbd)
+      req(RCBD_reactive())
+      obj_rcbd <- RCBD_reactive()
+      opt_rcbd <- as.numeric(input$layoutO_rcbd)
+      planting_rcbd <- input$planter_mov_rcbd
+      locSelected <- as.numeric(input$locLayout_rcbd)
+      try(plot_layout(x = obj_rcbd, optionLayout = opt_rcbd, orderReps = input$orderRepsRCBD,
+                      planter = planting_rcbd, l = locSelected), silent = TRUE)
+    })
+    
+    output$layout_rcbd <- renderPlot({
+      req(RCBD_reactive())
+      req(reactive_layoutRCBD)
+      req(input$typlotRCBD)
+      if (input$typlotRCBD == 1) {
+        reactive_layoutRCBD()$out_layout
+      } else reactive_layoutRCBD()$out_layoutPlots
+    })
+    
     
     valsRCBD <- reactiveValues(maxV.rcbd = NULL, minV.rcbd = NULL, trail.rcbd = NULL)
     
@@ -217,12 +292,14 @@ mod_RCBD_server <- function(id){
         max <- as.numeric(valsRCBD$maxV.rcbd)
         min <- as.numeric(valsRCBD$minV.rcbd)
         df.rcbd <- RCBD_reactive()$fieldBook
+        df.rcbd <- reactive_layoutRCBD()$allSitesFielbook
         cnamesdf.rcbd <- colnames(df.rcbd)
         df.rcbd <- norm_trunc(a = min, b = max, data = df.rcbd)
         colnames(df.rcbd) <- c(cnamesdf.rcbd[1:(ncol(df.rcbd) - 1)], valsRCBD$trail.rcbd)
         df.rcbd <- df.rcbd[order(df.rcbd$ID),]
       }else {
-        df.rcbd <-  RCBD_reactive()$fieldBook
+        #df.rcbd <-  RCBD_reactive()$fieldBook
+        df.rcbd <- reactive_layoutRCBD()$allSitesFielbook
       }
       return(list(df = df.rcbd))
     })
