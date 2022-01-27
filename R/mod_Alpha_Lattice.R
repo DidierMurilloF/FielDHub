@@ -81,7 +81,7 @@ mod_Alpha_Lattice_ui <- function(id){
     )
   )
 }
-    
+
 #' Alpha_Lattice Server Functions
 #'
 #' @noRd 
@@ -119,10 +119,10 @@ mod_Alpha_Lattice_server <- function(id){
         k <- k[2:(length(k) - 1)]
         w <- 2
       }
-
+      
       updateSelectInput(session = session, inputId = 'k.alpha', label = "Input # of Plots per IBlock:",
                         choices = k, selected = k[1])
-
+      
     })
     
     
@@ -155,7 +155,7 @@ mod_Alpha_Lattice_server <- function(id){
       }
     })
     
-
+    
     ALPHA_reactive <- eventReactive(input$RUN.alpha, {
       
       req(input$k.alpha)
@@ -166,7 +166,7 @@ mod_Alpha_Lattice_server <- function(id){
       req(input$r.alpha)
       r.alpha <- as.numeric(input$r.alpha)
       k.alpha <- as.numeric(input$k.alpha)
-
+      
       plot_start.alpha <- as.vector(unlist(strsplit(input$plot_start.alpha, ",")))
       plot_start.alpha <- as.numeric(plot_start.alpha)
       loc <-  as.vector(unlist(strsplit(input$Location.alpha, ",")))
@@ -189,7 +189,7 @@ mod_Alpha_Lattice_server <- function(id){
       if(k.alpha == "No Options Available") shiny::validate("No Options Available.")
       s <- t.alpha / k.alpha
       if (s %% 1 != 0) validate("No Options Available.")
-
+      
       alpha_lattice(t = t.alpha, k = k.alpha, r = r.alpha, l = l.alpha, 
                     plotNumber = plot_start.alpha, 
                     seed = seed.alpha,
@@ -226,7 +226,7 @@ mod_Alpha_Lattice_server <- function(id){
                radioButtons(ns("typlotALPHA"), "Type of Plot:",
                             c("Entries/Treatments" = 1,
                               "Plots" = 2,
-                              "heatmap" = 3))
+                              "Heatmap" = 3))
         ),
         fluidRow(
           column(3,
@@ -292,118 +292,153 @@ mod_Alpha_Lattice_server <- function(id){
     # })
     
     
+    # output$layout.output <- renderPlot({
+    #   req(reactive_layoutAlpha())
+    #   req(ALPHA_reactive())
+    #   req(input$typlotALPHA)
+    #   if (input$typlotALPHA == 1) {
+    #     reactive_layoutAlpha()$out_layout
+    #   } else if (input$typlotALPHA == 2) {
+    #     reactive_layoutAlpha()$out_layoutPlots
+    #   } else return(NULL)
+    # })
+    
+    valsALPHA <- reactiveValues(maxV.alpha = NULL, minV.alpha = NULL, trail.alpha = NULL)
+    
+    simuModal.alpha <- function(failed = FALSE) {
+      modalDialog(
+        selectInput(inputId = ns("trailsALPHA"), label = "Select One:", choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
+        conditionalPanel("input.trailsALPHA == 'Other'", ns = ns,
+                         textInput(inputId = ns("OtherALPHA"), label = "Input the Trial Name:", value = NULL)
+        ),
+        fluidRow(
+          column(6,
+                 numericInput(inputId = ns("min.alpha"), "Input the min value", value = NULL)
+          ),
+          column(6,
+                 numericInput(inputId = ns("max.alpha"), "Input the max value", value = NULL)
+                 
+          )
+          
+        ),
+        
+        if (failed)
+          div(tags$b("Invalid input of data max and min", style = "color: red;")),
+        
+        footer = tagList(
+          modalButton("Cancel"),
+          actionButton(inputId = ns("ok.alpha"), "GO")
+        )
+        
+      )
+      
+    }
+    
+    observeEvent(input$Simulate.alpha, {
+      req(input$k.alpha)
+      req(input$r.alpha)
+      req(reactive_layoutAlpha()$fieldBookXY)
+      showModal(
+        shinyjqui::jqui_draggable(
+          simuModal.alpha()
+        )
+      )
+    })
+    
+    observeEvent(input$ok.alpha, {
+      req(input$max.alpha, input$min.alpha)
+      if (input$max.alpha > input$min.alpha && input$min.alpha != input$max.alpha) {
+        valsALPHA$maxV.alpha <- input$max.alpha
+        valsALPHA$minV.alpha <- input$min.alpha
+        if(input$trailsALPHA == "Other") {
+          req(input$OtherALPHA)
+          if(!is.null(input$OtherALPHA)) {
+            valsALPHA$trail.alpha <- as.character(input$OtherALPHA)
+          }else showModal(simuModal.alpha(failed = TRUE))
+        }else {
+          valsALPHA$trail.alpha <- as.character(input$trailsALPHA)
+        }
+        removeModal()
+      }else {
+        showModal(
+          shinyjqui::jqui_draggable(
+            simuModal.alpha(failed = TRUE)
+          )
+        )
+      }
+    })
+    
+    simuDataALPHA <- reactive({
+      set.seed(input$myseed.alpha)
+      req(reactive_layoutAlpha())
+      if(!is.null(valsALPHA$maxV.alpha) && !is.null(valsALPHA$minV.alpha) && !is.null(valsALPHA$trail.alpha)) {
+        max <- as.numeric(valsALPHA$maxV.alpha)
+        min <- as.numeric(valsALPHA$minV.alpha)
+        df.alpha <- reactive_layoutAlpha()$allSitesFielbook
+        cnamesdf.alpha <- colnames(df.alpha)
+        df.alpha <- norm_trunc(a = min, b = max, data = df.alpha)
+        colnames(df.alpha) <- c(cnamesdf.alpha[1:(ncol(df.alpha) - 1)], valsALPHA$trail.alpha)
+        a <- ncol(df.alpha)
+      }else {
+        df.alpha <- reactive_layoutAlpha()$allSitesFielbook
+        a <- ncol(df.alpha)
+      }
+      return(list(df = df.alpha, a = a))
+    })
+    
+    
+    
+    heatmap_obj <- reactive({
+      req(simuDataALPHA()$df)
+      if (ncol(simuDataALPHA()$df) == 10) {
+        locs <- factor(simuDataALPHA()$df$LOCATION, levels = unique(simuDataALPHA()$df$LOCATION))
+        locLevels <- levels(locs)
+        df = subset(simuDataALPHA()$df, LOCATION == locLevels[1])
+        p1 <- ggplot2::ggplot(df, ggplot2::aes(x = df[,5], y = df[,4], fill = df[,10])) +
+          ggplot2::geom_tile() +
+          ggplot2::xlab("COLUMN") +
+          ggplot2::ylab("ROW") +
+          #ggplot2::labs(fill = w) +
+          viridis::scale_fill_viridis(discrete = FALSE)
+        #p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 710)
+        return(p1)
+      } else return(NULL)
+    })
+    
+    # output$heatmap_prep <- plotly::renderPlotly({
+    #   req(heatmap_obj())
+    #   heatmap_obj()
+    # })
+    
+    
     output$layout.output <- renderPlot({
       req(reactive_layoutAlpha())
       req(ALPHA_reactive())
       req(input$typlotALPHA)
       if (input$typlotALPHA == 1) {
         reactive_layoutAlpha()$out_layout
-      } else reactive_layoutAlpha()$out_layoutPlots
+      } else if (input$typlotALPHA == 2) {
+        reactive_layoutAlpha()$out_layoutPlots
+      } else heatmap_obj()
     })
-
-    valsALPHA <- reactiveValues(maxV.alpha = NULL, minV.alpha = NULL, trail.alpha = NULL)
-
-      simuModal.alpha <- function(failed = FALSE) {
-        modalDialog(
-          selectInput(inputId = ns("trailsALPHA"), label = "Select One:", choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
-          conditionalPanel("input.trailsALPHA == 'Other'", ns = ns,
-                           textInput(inputId = ns("OtherALPHA"), label = "Input the Trial Name:", value = NULL)
-          ),
-          fluidRow(
-            column(6,
-                   numericInput(inputId = ns("min.alpha"), "Input the min value", value = NULL)
-            ),
-            column(6,
-                   numericInput(inputId = ns("max.alpha"), "Input the max value", value = NULL)
-     
-            )
-     
-          ),
-     
-          if (failed)
-            div(tags$b("Invalid input of data max and min", style = "color: red;")),
-     
-          footer = tagList(
-            modalButton("Cancel"),
-            actionButton(inputId = ns("ok.alpha"), "GO")
-          )
-     
-        )
-     
+    
+    output$ALPHA.output <- DT::renderDataTable({
+      req(input$k.alpha)
+      k.alpha <- input$k.alpha
+      if (k.alpha == "No Options Available") {
+        validate("No options for these amout of treatments ):")
       }
-     
-      observeEvent(input$Simulate.alpha, {
-        req(input$k.alpha)
-        req(input$r.alpha)
-        req(reactive_layoutAlpha()$fieldBookXY)
-        showModal(
-          shinyjqui::jqui_draggable(
-            simuModal.alpha()
-          )
-        )
-      })
-     
-      observeEvent(input$ok.alpha, {
-        req(input$max.alpha, input$min.alpha)
-        if (input$max.alpha > input$min.alpha && input$min.alpha != input$max.alpha) {
-          valsALPHA$maxV.alpha <- input$max.alpha
-          valsALPHA$minV.alpha <- input$min.alpha
-          if(input$trailsALPHA == "Other") {
-            req(input$OtherALPHA)
-            if(!is.null(input$OtherALPHA)) {
-              valsALPHA$trail.alpha <- as.character(input$OtherALPHA)
-            }else showModal(simuModal.alpha(failed = TRUE))
-          }else {
-            valsALPHA$trail.alpha <- as.character(input$trailsALPHA)
-          }
-          removeModal()
-        }else {
-          showModal(
-            shinyjqui::jqui_draggable(
-              simuModal.alpha(failed = TRUE)
-            )
-          )
-        }
-      })
-     
-      simuDataALPHA <- reactive({
-        req(reactive_layoutAlpha())
-        if(!is.null(valsALPHA$maxV.alpha) && !is.null(valsALPHA$minV.alpha) && !is.null(valsALPHA$trail.alpha)) {
-          max <- as.numeric(valsALPHA$maxV.alpha)
-          min <- as.numeric(valsALPHA$minV.alpha)
-          #df.alpha <- ALPHA_reactive()$fieldBook
-          #df.alpha <- reactive_layoutAlpha()$fieldBookXY
-          df.alpha <- reactive_layoutAlpha()$allSitesFielbook
-          cnamesdf.alpha <- colnames(df.alpha)
-          df.alpha <- norm_trunc(a = min, b = max, data = df.alpha)
-          colnames(df.alpha) <- c(cnamesdf.alpha[1:(ncol(df.alpha) - 1)], valsALPHA$trail.alpha)
-          a <- ncol(df.alpha)
-        }else {
-          #df.alpha <-  ALPHA_reactive()$fieldBook
-          #df.alpha <- reactive_layoutAlpha()$fieldBookXY
-          df.alpha <- reactive_layoutAlpha()$allSitesFielbook
-          a <- ncol(df.alpha)
-        }
-        return(list(df = df.alpha, a = a))
-      })
-     
-      output$ALPHA.output <- DT::renderDataTable({
-        req(input$k.alpha)
-        k.alpha <- input$k.alpha
-        if (k.alpha == "No Options Available") {
-          validate("No options for these amout of treatments ):")
-        }
-        req(simuDataALPHA()$df)
-        df <- simuDataALPHA()$df
-        a <- as.numeric(simuDataALPHA()$a)
-        options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                  scrollX = TRUE, scrollY = "500px"))
-     
-        DT::datatable(df, rownames = FALSE, options = list(
-          columnDefs = list(list(className = 'dt-center', targets = "_all"))))
-     
-      })
-  
+      req(simuDataALPHA()$df)
+      df <- simuDataALPHA()$df
+      a <- as.numeric(simuDataALPHA()$a)
+      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
+                                scrollX = TRUE, scrollY = "500px"))
+      
+      DT::datatable(df, rownames = FALSE, options = list(
+        columnDefs = list(list(className = 'dt-center', targets = "_all"))))
+      
+    })
+    
     # Downloadable csv of selected dataset ----
     output$downloadData.alpha <- downloadHandler(
       filename = function() {
