@@ -354,32 +354,8 @@ mod_Alpha_Lattice_server <- function(id){
       )
     }
     
-<<<<<<< HEAD
     output$tabsetAlpha <- renderUI({
       req(input$typlotALPHA)
-      # if(is.null(input$typlotALPHA)) {
-      #   # tabsetPanel(
-      #   #   tabPanel("Alpha Lattice Field Layout"),#, plotOutput(ns("blank"), width = "100%", height = "650px")),
-      #   #   tabPanel("Alpha Lattice Field Book")
-      #   # )
-      #   return(NULL)
-      # } else {
-      #   tabsetPanel(
-      #     if (is.null(heatmap_obj)) {
-      #       tabPanel("Alpha Lattice Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.output"), width = "100%", height = "650px"),
-      #                                                                           type = 5))
-      #     } else {
-      #       tabPanel("Alpha Lattice Field Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapAlpha"), width = "100%", height = "650px"),
-      #                                                                           type = 5))
-      #     },
-      #     tabPanel("Alpha Lattice Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("ALPHA.output")), type = 5))
-      #   )
-      # }
-      
-      # if (is.null(input$typlotALPHA)) {
-      #   k <- 1
-      # }else k <- 2
-      
       tabsetPanel(
         if (input$typlotALPHA != 3) {
           tabPanel("Alpha Lattice Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.output"), width = "100%", height = "650px"),
@@ -393,26 +369,15 @@ mod_Alpha_Lattice_server <- function(id){
       
     })
     
-    # blank_plot <- reactive({
-    #   ggplot2::ggplot(data = NULL) + ggplot2::theme_minimal()
-    # })
-    # 
-    # output$blank <- renderPlot({
-    #   req(blank_plot())
-    #   blank_plot()
-    # })
-=======
     locNum <- reactive(
       return(as.numeric(input$locLayout))
     )
->>>>>>> 06fd261e3e04cd4548e726e53a8895b7cd85248a
     
     heatmap_obj <- reactive({
       req(simuDataALPHA()$df)
       if (ncol(simuDataALPHA()$df) == 10) {
         locs <- factor(simuDataALPHA()$df$LOCATION, levels = unique(simuDataALPHA()$df$LOCATION))
         locLevels <- levels(locs)
-<<<<<<< HEAD
         df = subset(simuDataALPHA()$df, LOCATION == locLevels[1])
         loc <- levels(factor(df$LOCATION))
         trail <- as.character(valsALPHA$trail.alpha)
@@ -433,17 +398,6 @@ mod_Alpha_Lattice_server <- function(id){
         
         p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 640)
         return(p2)
-      } else return(NULL)
-=======
-        df = subset(simuDataALPHA()$df, LOCATION == locLevels[locNum()])
-        p1 <- ggplot2::ggplot(df, ggplot2::aes(x = df[,5], y = df[,4], fill = df[,10])) +
-          ggplot2::geom_tile() +
-          ggplot2::xlab("COLUMN") +
-          ggplot2::ylab("ROW") +
-          #ggplot2::labs(fill = w) +
-          viridis::scale_fill_viridis(discrete = FALSE)
-        #p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 710)
-        return(p1)
       } else {
         showModal(
           shinyjqui::jqui_draggable(
@@ -452,7 +406,6 @@ mod_Alpha_Lattice_server <- function(id){
         )
         return(NULL)
         }
->>>>>>> 06fd261e3e04cd4548e726e53a8895b7cd85248a
     })
     
     output$heatmapAlpha <- plotly::renderPlotly({
