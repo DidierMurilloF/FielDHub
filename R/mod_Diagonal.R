@@ -100,15 +100,7 @@ mod_Diagonal_ui <- function(id){
                                                                       selectInput(inputId = ns("Block_Fillers"), label = "Which Blocks:",
                                                                                   choices = "Block_Fillers", multiple = TRUE, selected = "")               
                                                      )
-                                                     
-                                                     # selectInput(inputId = ns("Block_Fillers"), label = "Which Blocks:",
-                                                     #             choices = "Block_Fillers", multiple = TRUE, selected = "")               
                                     )
-                                    # conditionalPanel(condition = "input.kindExpt == 'RDC'", ns = ns,
-                                    #                  
-                                    #                  selectInput(inputId = ns("n_reps"), label = "Input # of Reps:",
-                                    #                              choices = c(2:20), multiple = FALSE),                
-                                    # ),
                    ),
                    conditionalPanel(condition = "input.kindExpt == 'SUDC'", ns = ns,
                                     selectInput(inputId = ns("planter_mov1"), label = "Plot Order Layout:",

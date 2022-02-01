@@ -554,9 +554,3 @@ mod_pREPS_server <- function(id){
  
   })
 }
-    
-## To be copied in the UI
-# mod_pREPS_ui("pREPS_ui_1")
-    
-## To be copied in the server
-# mod_pREPS_server("pREPS_ui_1")

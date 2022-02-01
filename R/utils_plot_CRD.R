@@ -6,7 +6,7 @@
 #'
 #' @noRd
 plot_CRD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1, 
-                     planter = "serpentine") {
+                     planter = "serpentine", l = 1) {
   books <- vector(mode = "list", length = 2)
   cols <- rep(1:n_TrtGen, times = n_Reps)
   breaks <- split_vectors(x = cols, len_cuts = rep(n_TrtGen, each = n_Reps))

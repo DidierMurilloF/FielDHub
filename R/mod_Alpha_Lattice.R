@@ -67,15 +67,9 @@ mod_Alpha_Lattice_ui <- function(id){
       
       mainPanel(
         width = 8,
-        fluidRow(
-          column(12, align="center",
-                 tabsetPanel(
-                   tabPanel("Alpha Lattice Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.output"), width = "100%", height = "630px"),
-                                                                                       type = 5)),
-                   tabPanel("Alpha Lattice Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("ALPHA.output")), type = 5))
-                 )
-          ),
-          column(12,uiOutput(ns("well_panel_layout")))
+        fixedRow(
+            column(12, align="center", uiOutput(ns("tabsetAlpha"))),
+            column(12, uiOutput(ns("well_panel_layout")))
         )
       )
     )
@@ -226,7 +220,7 @@ mod_Alpha_Lattice_server <- function(id){
                radioButtons(ns("typlotALPHA"), "Type of Plot:",
                             c("Entries/Treatments" = 1,
                               "Plots" = 2,
-                              "Heatmap" = 3))
+                              "Heatmap" = 3), selected = 1)
         ),
         fluidRow(
           column(3,
@@ -268,40 +262,6 @@ mod_Alpha_Lattice_server <- function(id){
       try(plot_layout(x = obj, optionLayout = opt, planter = input$planter_mov_alpha, l = locSelected, 
                       orderReps = input$orderRepsAlpha), silent = TRUE)
     })
-    
-    
-    # heatmap_obj <- reactive({
-    #   req(simuDataPREP()$dfSimulation)
-    #     w <- as.character(valsPREP$trail.prep)
-    #     df <- simuDataPREP()$dfSimulation
-    #     p1 <- ggplot2::ggplot(df, ggplot2::aes(x = df[,4], y = df[,3], fill = df[,7], text = df[,8])) + 
-    #       ggplot2::geom_tile() +
-    #       ggplot2::xlab("COLUMN") +
-    #       ggplot2::ylab("ROW") +
-    #       ggplot2::labs(fill = w) +
-    #       viridis::scale_fill_viridis(discrete = FALSE)
-    #     
-    #     p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 710)
-    #     
-    #     return(p2)
-    # })
-    # 
-    # output$heatmap_prep <- plotly::renderPlotly({
-    #   req(heatmap_obj())
-    #   heatmap_obj()
-    # })
-    
-    
-    # output$layout.output <- renderPlot({
-    #   req(reactive_layoutAlpha())
-    #   req(ALPHA_reactive())
-    #   req(input$typlotALPHA)
-    #   if (input$typlotALPHA == 1) {
-    #     reactive_layoutAlpha()$out_layout
-    #   } else if (input$typlotALPHA == 2) {
-    #     reactive_layoutAlpha()$out_layoutPlots
-    #   } else return(NULL)
-    # })
     
     valsALPHA <- reactiveValues(maxV.alpha = NULL, minV.alpha = NULL, trail.alpha = NULL)
     
@@ -387,6 +347,52 @@ mod_Alpha_Lattice_server <- function(id){
     })
     
     
+    output$tabsetAlpha <- renderUI({
+      req(input$typlotALPHA)
+      # if(is.null(input$typlotALPHA)) {
+      #   # tabsetPanel(
+      #   #   tabPanel("Alpha Lattice Field Layout"),#, plotOutput(ns("blank"), width = "100%", height = "650px")),
+      #   #   tabPanel("Alpha Lattice Field Book")
+      #   # )
+      #   return(NULL)
+      # } else {
+      #   tabsetPanel(
+      #     if (is.null(heatmap_obj)) {
+      #       tabPanel("Alpha Lattice Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.output"), width = "100%", height = "650px"),
+      #                                                                           type = 5))
+      #     } else {
+      #       tabPanel("Alpha Lattice Field Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapAlpha"), width = "100%", height = "650px"),
+      #                                                                           type = 5))
+      #     },
+      #     tabPanel("Alpha Lattice Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("ALPHA.output")), type = 5))
+      #   )
+      # }
+      
+      # if (is.null(input$typlotALPHA)) {
+      #   k <- 1
+      # }else k <- 2
+      
+      tabsetPanel(
+        if (input$typlotALPHA != 3) {
+          tabPanel("Alpha Lattice Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.output"), width = "100%", height = "650px"),
+                                                                              type = 5))
+        } else {
+          tabPanel("Alpha Lattice Field Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapAlpha"), width = "100%", height = "650px"),
+                                                                              type = 5))
+        },
+        tabPanel("Alpha Lattice Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("ALPHA.output")), type = 5))
+      )
+      
+    })
+    
+    # blank_plot <- reactive({
+    #   ggplot2::ggplot(data = NULL) + ggplot2::theme_minimal()
+    # })
+    # 
+    # output$blank <- renderPlot({
+    #   req(blank_plot())
+    #   blank_plot()
+    # })
     
     heatmap_obj <- reactive({
       req(simuDataALPHA()$df)
@@ -394,21 +400,32 @@ mod_Alpha_Lattice_server <- function(id){
         locs <- factor(simuDataALPHA()$df$LOCATION, levels = unique(simuDataALPHA()$df$LOCATION))
         locLevels <- levels(locs)
         df = subset(simuDataALPHA()$df, LOCATION == locLevels[1])
-        p1 <- ggplot2::ggplot(df, ggplot2::aes(x = df[,5], y = df[,4], fill = df[,10])) +
+        loc <- levels(factor(df$LOCATION))
+        trail <- as.character(valsALPHA$trail.alpha)
+        label_trail <- paste(trail, ": ")
+        new_df <- df %>%
+          dplyr::mutate(text = paste0("Site: ", loc, "\n", "Row: ", df$ROW, "\n", "Col: ", df$COLUMN, "\n", "Entry: ", 
+                                      df$ENTRY, "\n", label_trail, round(df[,10],2)))
+        w <- as.character(valsALPHA$trail.alpha)
+        new_df$ROW <- as.factor(new_df$ROW) # Set up ROWS as factors
+        new_df$COLUMN <- as.factor(new_df$COLUMN) # Set up COLUMNS as factors
+        p1 <- ggplot2::ggplot(new_df, ggplot2::aes(x = new_df[,5], y = new_df[,4], fill = new_df[,10], text = text)) +
           ggplot2::geom_tile() +
           ggplot2::xlab("COLUMN") +
           ggplot2::ylab("ROW") +
-          #ggplot2::labs(fill = w) +
-          viridis::scale_fill_viridis(discrete = FALSE)
-        #p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 710)
-        return(p1)
+          ggplot2::labs(fill = w) +
+          viridis::scale_fill_viridis(discrete = FALSE) +
+          ggplot2::theme_minimal() # I added this option 
+        
+        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 640)
+        return(p2)
       } else return(NULL)
     })
     
-    # output$heatmap_prep <- plotly::renderPlotly({
-    #   req(heatmap_obj())
-    #   heatmap_obj()
-    # })
+    output$heatmapAlpha <- plotly::renderPlotly({
+      req(heatmap_obj())
+      heatmap_obj()
+    })
     
     
     output$layout.output <- renderPlot({
@@ -419,7 +436,7 @@ mod_Alpha_Lattice_server <- function(id){
         reactive_layoutAlpha()$out_layout
       } else if (input$typlotALPHA == 2) {
         reactive_layoutAlpha()$out_layoutPlots
-      } else heatmap_obj()
+      }
     })
     
     output$ALPHA.output <- DT::renderDataTable({
