@@ -374,26 +374,36 @@ mod_Alpha_Lattice_server <- function(id){
       if(!is.null(valsALPHA$maxV.alpha) && !is.null(valsALPHA$minV.alpha) && !is.null(valsALPHA$trail.alpha)) {
         max <- as.numeric(valsALPHA$maxV.alpha)
         min <- as.numeric(valsALPHA$minV.alpha)
-        df.alpha <- reactive_layoutAlpha()$allSitesFielbook
+        df.alpha <- reactive_layoutAlpha()$allSitesFieldbook
         cnamesdf.alpha <- colnames(df.alpha)
         df.alpha <- norm_trunc(a = min, b = max, data = df.alpha)
         colnames(df.alpha) <- c(cnamesdf.alpha[1:(ncol(df.alpha) - 1)], valsALPHA$trail.alpha)
         a <- ncol(df.alpha)
       }else {
-        df.alpha <- reactive_layoutAlpha()$allSitesFielbook
+        df.alpha <- reactive_layoutAlpha()$allSitesFieldbook
         a <- ncol(df.alpha)
       }
       return(list(df = df.alpha, a = a))
     })
     
+    heatmapInfoModal_ALPHA <- function() {
+      modalDialog(
+        title = div(tags$h3("Important message", style = "color: red;")),
+        h4("Simulate some data to see a heatmap!"),
+        easyClose = FALSE
+      )
+    }
     
+    locNum <- reactive(
+      return(as.numeric(input$locLayout))
+    )
     
     heatmap_obj <- reactive({
       req(simuDataALPHA()$df)
       if (ncol(simuDataALPHA()$df) == 10) {
         locs <- factor(simuDataALPHA()$df$LOCATION, levels = unique(simuDataALPHA()$df$LOCATION))
         locLevels <- levels(locs)
-        df = subset(simuDataALPHA()$df, LOCATION == locLevels[1])
+        df = subset(simuDataALPHA()$df, LOCATION == locLevels[locNum()])
         p1 <- ggplot2::ggplot(df, ggplot2::aes(x = df[,5], y = df[,4], fill = df[,10])) +
           ggplot2::geom_tile() +
           ggplot2::xlab("COLUMN") +
@@ -402,7 +412,14 @@ mod_Alpha_Lattice_server <- function(id){
           viridis::scale_fill_viridis(discrete = FALSE)
         #p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 710)
         return(p1)
-      } else return(NULL)
+      } else {
+        showModal(
+          shinyjqui::jqui_draggable(
+            heatmapInfoModal_ALPHA()
+          )
+        )
+        return(NULL)
+        }
     })
     
     # output$heatmap_prep <- plotly::renderPlotly({
