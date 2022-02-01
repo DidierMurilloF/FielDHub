@@ -69,7 +69,7 @@ mod_Rectangular_Lattice_ui <- function(id){
         fluidRow(
           column(12, align="center",
                  tabsetPanel(
-                   tabPanel("Alpha Lattice Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.output_rt"), width = "100%", height = "630px"),
+                   tabPanel("Rectangular Lattice Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.output_rt"), width = "100%", height = "630px"),
                                                                                        type = 5)),
                    tabPanel("Rectangular Lattice Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("RECTANGULAR.output")), type = 5))
                  )
@@ -223,7 +223,8 @@ mod_Rectangular_Lattice_server <- function(id) {
         column(3,
                radioButtons(ns("typlotRT"), "Type of Plot:",
                             c("Entries/Treatments" = 1,
-                              "Plots" = 2))
+                              "Plots" = 2,
+                              "Heatmap" = 3))
         ),
         fluidRow(
           column(3,
@@ -267,15 +268,6 @@ mod_Rectangular_Lattice_server <- function(id) {
                       orderReps = input$orderRepsRT), silent = TRUE)
     })
     
-    output$layout.output_rt <- renderPlot({
-      req(reactive_layoutRect())
-      req(RECTANGULAR_reactive())
-      req(input$typlotRT)
-      if (input$typlotRT == 1) {
-        reactive_layoutRect()$out_layout
-      } else reactive_layoutRect()$out_layoutPlots
-      
-    })
     
     valsRECT <- reactiveValues(maxV.rectangular= NULL, minV.rectangular= NULL, trail.rectangular= NULL)
     
@@ -344,22 +336,70 @@ mod_Rectangular_Lattice_server <- function(id) {
     
     
     simuDataRECT <- reactive({
-      req(reactive_layoutRect()$fieldBookXY)
+      set.seed(input$myseed.rectangular)
+      req(reactive_layoutRect()$allSitesFieldbook)
       if(!is.null(valsRECT$maxV.rectangular) && !is.null(valsRECT$minV.rectangular) && !is.null(valsRECT$trail.rectangular)) {
         max <- as.numeric(valsRECT$maxV.rectangular)
         min <- as.numeric(valsRECT$minV.rectangular)
-        df.rectangular <- reactive_layoutRect()$fieldBookXY
+        df.rectangular <- reactive_layoutRect()$allSitesFieldbook
         cnamesdf.rectangular<- colnames(df.rectangular)
         df.rectangular<- norm_trunc(a = min, b = max, data = df.rectangular)
         colnames(df.rectangular) <- c(cnamesdf.rectangular[1:(ncol(df.rectangular) - 1)], valsRECT$trail.rectangular)
         a <- ncol(df.rectangular)
       }else {
-        df.rectangular <- reactive_layoutRect()$fieldBookXY
+        df.rectangular <- reactive_layoutRect()$allSitesFieldbook
         a <- ncol(df.rectangular)
       }
       return(list(df = df.rectangular, a = a))
     })
     
+    heatmapInfoModal_Rect <- function() {
+      modalDialog(
+        title = div(tags$h3("Important message", style = "color: red;")),
+        h4("Simulate some data to see a heatmap!"),
+        easyClose = FALSE
+      )
+    }
+    
+    locNum <- reactive(
+      return(as.numeric(input$locLayout_rt))
+    )
+    
+    heatmap_obj <- reactive({
+      req(simuDataRECT()$df)
+      if (ncol(simuDataRECT()$df) == 10) {
+        locs <- factor(simuDataRECT()$df$LOCATION, levels = unique(simuDataRECT()$df$LOCATION))
+        locLevels <- levels(locs)
+        df = subset(simuDataRECT()$df, LOCATION == locLevels[locNum()])
+        p1 <- ggplot2::ggplot(df, ggplot2::aes(x = df[,5], y = df[,4], fill = df[,10])) +
+          ggplot2::geom_tile() +
+          ggplot2::xlab("COLUMN") +
+          ggplot2::ylab("ROW") +
+          #ggplot2::labs(fill = w) +
+          viridis::scale_fill_viridis(discrete = FALSE)
+        #p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 710)
+        return(p1)
+      } else {
+        showModal(
+          shinyjqui::jqui_draggable(
+            heatmapInfoModal_Rect()
+          )
+        )
+        return(NULL)
+      }
+    })
+    
+    output$layout.output_rt <- renderPlot({
+      req(reactive_layoutRect())
+      req(RECTANGULAR_reactive())
+      req(input$typlotRT)
+      if (input$typlotRT == 1) {
+        reactive_layoutRect()$out_layout
+      } else if (input$typlotRT == 2) {
+        reactive_layoutRect()$out_layoutPlots
+      } else heatmap_obj()
+      
+    })
     
     output$RECTANGULAR.output <- DT::renderDataTable({
       req(input$k.rectangular)

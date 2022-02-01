@@ -334,19 +334,27 @@ mod_Alpha_Lattice_server <- function(id){
       if(!is.null(valsALPHA$maxV.alpha) && !is.null(valsALPHA$minV.alpha) && !is.null(valsALPHA$trail.alpha)) {
         max <- as.numeric(valsALPHA$maxV.alpha)
         min <- as.numeric(valsALPHA$minV.alpha)
-        df.alpha <- reactive_layoutAlpha()$allSitesFielbook
+        df.alpha <- reactive_layoutAlpha()$allSitesFieldbook
         cnamesdf.alpha <- colnames(df.alpha)
         df.alpha <- norm_trunc(a = min, b = max, data = df.alpha)
         colnames(df.alpha) <- c(cnamesdf.alpha[1:(ncol(df.alpha) - 1)], valsALPHA$trail.alpha)
         a <- ncol(df.alpha)
       }else {
-        df.alpha <- reactive_layoutAlpha()$allSitesFielbook
+        df.alpha <- reactive_layoutAlpha()$allSitesFieldbook
         a <- ncol(df.alpha)
       }
       return(list(df = df.alpha, a = a))
     })
     
+    heatmapInfoModal_ALPHA <- function() {
+      modalDialog(
+        title = div(tags$h3("Important message", style = "color: red;")),
+        h4("Simulate some data to see a heatmap!"),
+        easyClose = FALSE
+      )
+    }
     
+<<<<<<< HEAD
     output$tabsetAlpha <- renderUI({
       req(input$typlotALPHA)
       # if(is.null(input$typlotALPHA)) {
@@ -393,12 +401,18 @@ mod_Alpha_Lattice_server <- function(id){
     #   req(blank_plot())
     #   blank_plot()
     # })
+=======
+    locNum <- reactive(
+      return(as.numeric(input$locLayout))
+    )
+>>>>>>> 06fd261e3e04cd4548e726e53a8895b7cd85248a
     
     heatmap_obj <- reactive({
       req(simuDataALPHA()$df)
       if (ncol(simuDataALPHA()$df) == 10) {
         locs <- factor(simuDataALPHA()$df$LOCATION, levels = unique(simuDataALPHA()$df$LOCATION))
         locLevels <- levels(locs)
+<<<<<<< HEAD
         df = subset(simuDataALPHA()$df, LOCATION == locLevels[1])
         loc <- levels(factor(df$LOCATION))
         trail <- as.character(valsALPHA$trail.alpha)
@@ -420,6 +434,25 @@ mod_Alpha_Lattice_server <- function(id){
         p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 640)
         return(p2)
       } else return(NULL)
+=======
+        df = subset(simuDataALPHA()$df, LOCATION == locLevels[locNum()])
+        p1 <- ggplot2::ggplot(df, ggplot2::aes(x = df[,5], y = df[,4], fill = df[,10])) +
+          ggplot2::geom_tile() +
+          ggplot2::xlab("COLUMN") +
+          ggplot2::ylab("ROW") +
+          #ggplot2::labs(fill = w) +
+          viridis::scale_fill_viridis(discrete = FALSE)
+        #p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 710)
+        return(p1)
+      } else {
+        showModal(
+          shinyjqui::jqui_draggable(
+            heatmapInfoModal_ALPHA()
+          )
+        )
+        return(NULL)
+        }
+>>>>>>> 06fd261e3e04cd4548e726e53a8895b7cd85248a
     })
     
     output$heatmapAlpha <- plotly::renderPlotly({

@@ -98,7 +98,7 @@ plot_layout <- function(x = NULL, optionLayout = 1, planter = "serpentine", l = 
         }
     }
     return(list(out_layout = retrn0$p1, out_layoutPlots = retrn0$p2, fieldBookXY = retrn0$df, 
-                newBooks = retrn0$newBooks, allSitesFielbook = retrn0$allSitesFielbook))
+                newBooks = retrn0$newBooks, allSitesFieldbook = retrn0$allSitesFielbook))
   } else if (x$infoDesign$idDesign %in% c(1, 2, 4)) {
       if (x$infoDesign$idDesign == 1) {
         n_TrtGen <- dplyr::n_distinct(x$fieldBook$TREATMENT)

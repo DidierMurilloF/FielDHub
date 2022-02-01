@@ -214,7 +214,8 @@ mod_Square_Lattice_server <- function(id){
         column(3,
                radioButtons(ns("typlotSQ"), "Type of Plot:",
                             c("Entries/Treatments" = 1,
-                              "Plots" = 2))
+                              "Plots" = 2,
+                              "Heatmap" = 3))
         ),
         fluidRow(
           column(3,
@@ -262,7 +263,9 @@ mod_Square_Lattice_server <- function(id){
       req(input$typlotSQ)
       if (input$typlotSQ == 1) {
         reactive_layoutSquare()$out_layout
-      } else reactive_layoutSquare()$out_layoutPlots
+      } else if (input$typlotSQ == 2) {
+        reactive_layoutSquare()$out_layoutPlots
+      } else heatmap_obj()
       
     })
     
@@ -335,25 +338,61 @@ mod_Square_Lattice_server <- function(id){
     
     
     simuDataSQUARE <- reactive({
+      set.seed(input$myseed.square)
       #req(SQUARE_reactive()$fieldBook)
-      req(reactive_layoutSquare()$fieldBookXY)
+      req(reactive_layoutSquare()$allSitesFieldbook)
       if(!is.null(valsSQUARE$maxV.square) && !is.null(valsSQUARE$minV.square) && !is.null(valsSQUARE$trail.square)) {
         max <- as.numeric(valsSQUARE$maxV.square)
         min <- as.numeric(valsSQUARE$minV.square)
         #df.square <- SQUARE_reactive()$fieldBook
-        df.square <- reactive_layoutSquare()$fieldBookXY
+        df.square <- reactive_layoutSquare()$allSitesFieldbook
         cnamesdf.square <- colnames(df.square)
         df.square <- norm_trunc(a = min, b = max, data = df.square)
         colnames(df.square) <- c(cnamesdf.square[1:(ncol(df.square) - 1)], valsSQUARE$trail.square)
         a <- ncol(df.square)
       }else {
         #df.square <-  SQUARE_reactive()$fieldBook
-        df.square <- reactive_layoutSquare()$fieldBookXY
+        df.square <- reactive_layoutSquare()$allSitesFieldbook
         a <- ncol(df.square)
       }
       return(list(df = df.square, a = a))
     })
     
+    heatmapInfoModal_Square <- function() {
+      modalDialog(
+        title = div(tags$h3("Important message", style = "color: red;")),
+        h4("Simulate some data to see a heatmap!"),
+        easyClose = FALSE
+      )
+    }
+    
+    locNum <- reactive(
+      return(as.numeric(input$locLayout_sq))
+    )
+    
+    heatmap_obj <- reactive({
+      req(simuDataSQUARE()$df)
+      if (ncol(simuDataSQUARE()$df) == 10) {
+        locs <- factor(simuDataSQUARE()$df$LOCATION, levels = unique(simuDataSQUARE()$df$LOCATION))
+        locLevels <- levels(locs)
+        df = subset(simuDataSQUARE()$df, LOCATION == locLevels[locNum()])
+        p1 <- ggplot2::ggplot(df, ggplot2::aes(x = df[,5], y = df[,4], fill = df[,10])) +
+          ggplot2::geom_tile() +
+          ggplot2::xlab("COLUMN") +
+          ggplot2::ylab("ROW") +
+          #ggplot2::labs(fill = w) +
+          viridis::scale_fill_viridis(discrete = FALSE)
+        #p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 710)
+        return(p1)
+      } else {
+        showModal(
+          shinyjqui::jqui_draggable(
+            heatmapInfoModal_Square()
+          )
+        )
+        return(NULL)
+      }
+    })
     
     output$SQUARE.output <- DT::renderDataTable({
       req(input$k.square)

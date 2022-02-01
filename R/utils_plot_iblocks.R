@@ -291,7 +291,7 @@ plot_iblocks <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks, 
   newBooksSelected <- newBooksLocs[[site]]
   df1 <- newBooksSelected[opt]
   df <- as.data.frame(df1)
-  print(df[,1])
+  #print(df[,1])
   if (x$infoDesign$idDesign %in% c(10, 11, 12, 8)) {
     allSites <- vector(mode = "list", length = nlocs)
     for (st in 1:nlocs) {
