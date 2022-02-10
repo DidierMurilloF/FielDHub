@@ -355,17 +355,17 @@ mod_Alpha_Lattice_server <- function(id){
     }
     
     output$tabsetAlpha <- renderUI({
-      #req(input$typlotALPHA)
+      req(input$typlotALPHA)
       tabsetPanel(
-        # if (input$typlotALPHA != 3) {
-        #   tabPanel("Alpha Lattice Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.output"), width = "100%", height = "650px"),
-        #                                                                       type = 5))
-        # } else {
-        #   tabPanel("Alpha Lattice Field Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapAlpha"), width = "100%", height = "650px"),
-        #                                                                       type = 5))
-        # },
-        tabPanel("Alpha Lattice Field Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapAlpha"), width = "100%", height = "650px"),
-                                                                              type = 5)),
+        if (input$typlotALPHA != 3) {
+          tabPanel("Alpha Lattice Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.output"), width = "100%", height = "650px"),
+                                                                              type = 5))
+        } else {
+          tabPanel("Alpha Lattice Field Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapAlpha"), width = "100%", height = "650px"),
+                                                                              type = 5))
+        },
+        # tabPanel("Alpha Lattice Field Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapAlpha"), width = "100%", height = "650px"),
+        #                                                                       type = 5)),
         tabPanel("Alpha Lattice Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("ALPHA.output")), type = 5))
       )
       
@@ -413,25 +413,13 @@ mod_Alpha_Lattice_server <- function(id){
         }
     })
     
-    # output$heatmapAlpha <- plotly::renderPlotly({
-    #   req(heatmap_obj())
-    #   heatmap_obj()
-    # })
-    
-    
-    # output$layout.output <- renderPlot({
-    #   req(reactive_layoutAlpha())
-    #   req(ALPHA_reactive())
-    #   req(input$typlotALPHA)
-    #   if (input$typlotALPHA == 1) {
-    #     reactive_layoutAlpha()$out_layout
-    #   } else if (input$typlotALPHA == 2) {
-    #     reactive_layoutAlpha()$out_layoutPlots
-    #   }
-    # })
-    
-    
     output$heatmapAlpha <- plotly::renderPlotly({
+      req(heatmap_obj())
+      heatmap_obj()
+    })
+
+
+    output$layout.output <- renderPlot({
       req(reactive_layoutAlpha())
       req(ALPHA_reactive())
       req(input$typlotALPHA)
@@ -439,8 +427,20 @@ mod_Alpha_Lattice_server <- function(id){
         reactive_layoutAlpha()$out_layout
       } else if (input$typlotALPHA == 2) {
         reactive_layoutAlpha()$out_layoutPlots
-      } else heatmap_obj()
+      }
     })
+    
+    
+    # output$heatmapAlpha <- plotly::renderPlotly({
+    #   req(reactive_layoutAlpha())
+    #   req(ALPHA_reactive())
+    #   req(input$typlotALPHA)
+    #   if (input$typlotALPHA == 1) {
+    #     reactive_layoutAlpha()$out_layout
+    #   } else if (input$typlotALPHA == 2) {
+    #     reactive_layoutAlpha()$out_layoutPlots
+    #   } #else heatmap_obj()
+    # })
     
     output$ALPHA.output <- DT::renderDataTable({
       req(input$k.alpha)

@@ -279,14 +279,14 @@ mod_RCBD_server <- function(id){
         max <- as.numeric(valsRCBD$maxV.rcbd)
         min <- as.numeric(valsRCBD$minV.rcbd)
         df.rcbd <- RCBD_reactive()$fieldBook
-        df.rcbd <- reactive_layoutRCBD()$allSitesFielbook
+        df.rcbd <- reactive_layoutRCBD()$allSitesFieldbook
         cnamesdf.rcbd <- colnames(df.rcbd)
         df.rcbd <- norm_trunc(a = min, b = max, data = df.rcbd)
         colnames(df.rcbd) <- c(cnamesdf.rcbd[1:(ncol(df.rcbd) - 1)], valsRCBD$trail.rcbd)
         df.rcbd <- df.rcbd[order(df.rcbd$ID),]
       }else {
         #df.rcbd <-  RCBD_reactive()$fieldBook
-        df.rcbd <- reactive_layoutRCBD()$allSitesFielbook
+        df.rcbd <- reactive_layoutRCBD()$allSitesFieldbook
       }
       return(list(df = df.rcbd))
     })

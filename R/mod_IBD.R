@@ -199,15 +199,20 @@ mod_IBD_server <- function(id){
       allBooks_ibd<- plot_layout(x = obj_ibd, optionLayout = 1)$newBooks
       nBooks_ibd <- length(allBooks_ibd)
       layoutOptions_ibd <- 1:nBooks_ibd
+      orderReps <- c("Vertical Stack Panel" = "vertical_stack_panel", "Horizontal Stack Panel" = "horizontal_stack_panel")
       #loc <-  as.vector(unlist(strsplit(input$Location.ibd, ",")))
       site <- as.numeric(input$l.ibd)
       wellPanel(
+        column(2,
+               radioButtons(ns("typlotibd"), "Type of Plot:",
+                            c("Entries/Treatments" = 1,
+                              "Plots" = 2,
+                              "Heatmap" = 3), selected = 1)
+        ),
         fluidRow(
-          column(2,
-                 radioButtons(ns("typlotibd"), "Type of Plot:",
-                              c("Entries/Treatments" = 1,
-                                "Plots" = 2,
-                                "Heatmap" = 3), selected = 1)
+          column(3,
+                 selectInput(inputId = ns("orderRepsibd"), label = "Reps layout:", 
+                             choices = orderReps)
           ),
           column(3, #align="center",
                  selectInput(inputId = ns("layoutO_ibd"), label = "Layout option:", choices = layoutOptions_ibd)
@@ -219,17 +224,34 @@ mod_IBD_server <- function(id){
       )
     })
     
+    
+    observeEvent(input$orderRepsibd, {
+      req(input$orderRepsibd)
+      req(input$l.ibd)
+      obj <- IBD_reactive()
+      allBooks <- plot_layout(x = obj, optionLayout = 1, orderReps = input$orderRepsibd)$newBooks
+      nBooks <- length(allBooks)
+      NewlayoutOptions <- 1:nBooks
+      updateSelectInput(session = session, inputId = 'layoutO_ibd',
+                        label = "Layout option:",
+                        choices = NewlayoutOptions,
+                        selected = 1
+      )
+    })
+    
+    
     reactive_layoutIBD <- reactive({
       req(input$layoutO_ibd)
       req(IBD_reactive())
       obj_ibd <- IBD_reactive()
       opt_ibd <- as.numeric(input$layoutO_ibd)
       planting_ibd <- input$planter_mov_ibd
-      plot_layout(x = obj_ibd, optionLayout = opt_ibd, planter = planting_ibd)
+      # plot_layout(x = obj_ibd, optionLayout = opt_ibd, planter = planting_ibd)
+      locSelected <- as.numeric(input$locLayout_ibd)
+      try(plot_layout(x = obj_ibd, optionLayout =  opt_ibd, planter = planting_ibd, l = locSelected, 
+                      orderReps = input$orderRepsibd), silent = TRUE)
     })
     
-
-
     
     valsIBD <- reactiveValues(maxV.ibd = NULL, minV.ibd = NULL, trail.ibd = NULL)
     
