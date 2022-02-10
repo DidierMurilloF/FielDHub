@@ -17,7 +17,7 @@ mod_RCBD_ui <- function(id) {
                                 inline = TRUE, width = NULL, choiceNames = NULL, choiceValues = NULL),
                    conditionalPanel("input.owndatarcbd != 'Yes'", ns = ns,
                                     numericInput(ns("t"), label = "Input # of Treatments:",
-                                                 value = NULL, min = 2)
+                                                 value = 18, min = 2)
                    ),
                    conditionalPanel("input.owndatarcbd == 'Yes'", ns = ns,
                                     fluidRow(
@@ -32,7 +32,7 @@ mod_RCBD_ui <- function(id) {
                                     )        
                    ),
                    
-                   numericInput(inputId = ns("b"), label = "Input # of Full Reps:", value = NULL, min = 2),
+                   numericInput(inputId = ns("b"), label = "Input # of Full Reps:", value = 3, min = 2),
                    
                    numericInput(inputId = ns("l.rcbd"), label = "Input # of Locations:", value = 1, min = 1),
                    selectInput(inputId = ns("planter_mov_rcbd"), label = "Plot Order Layout:",

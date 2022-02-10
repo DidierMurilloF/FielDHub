@@ -33,15 +33,15 @@ mod_STRIPD_ui <- function(id){
                                     fluidRow(
                                       column(6, style=list("padding-right: 28px;"),
                                              numericInput(ns("HStrip.strip"), label = "Input # of Horizontal Strips:",
-                                                          value = NULL, min = 2)
+                                                          value = 5, min = 2)
                                       ),
                                       column(6, style=list("padding-left: 5px;"),
                                              numericInput(ns("VStrip.strip"), label = "Input # of Vertical Strips:",
-                                                          value = NULL, min = 2)
+                                                          value = 5, min = 2)
                                       )
                                     )           
                    ),
-                   numericInput(ns("blocks.strip"), label = "Input # of Full Reps:", value = 2, min = 2),
+                   numericInput(ns("blocks.strip"), label = "Input # of Full Reps:", value = 3, min = 2),
                    numericInput(ns("l.strip"), label = "Input # of Locations:",
                                 value = 1, min = 1), 
                    selectInput(inputId = ns("planter.strip"), label = "Plot Order Layout:",
@@ -156,13 +156,13 @@ mod_STRIPD_server <- function(id) {
         Vplots.strip <- as.numeric(input$VStrip.strip)
         data.strip <- NULL
       }
-      
+      # input$planter.strip
       STRIP <- strip_plot(Hplots = Hplots.strip, 
                           Vplots = Vplots.strip, 
                           b = reps.strip, 
                           l = l.strip,
                           seed = seed.strip,
-                          planter = input$planter.strip,
+                          planter = "cartesian",
                           plotNumber = plot_start.strip,
                           locationNames = loc.strip, 
                           data = data.strip)
@@ -173,10 +173,12 @@ mod_STRIPD_server <- function(id) {
       req(strip_reactive()$fieldBook)
       obj_strip <- strip_reactive()
       planting_strip <- input$planter.strip
-      allBooks_strip<- plot_layout(x = obj_strip, optionLayout = 1)$newBooks
+      allBooks_strip<- plot_layout(x = obj_strip, optionLayout = 1, orderReps = "vertical_stack_panel")$newBooks
       nBooks_strip <- length(allBooks_strip)
       layoutOptions_strip <- 1:nBooks_strip
-      loc <-  as.vector(unlist(strsplit(input$Location.strip, ",")))
+      orderReps_strips <- c("Vertical Stack Panel" = "vertical_stack_panel", "Horizontal Stack Panel" = "horizontal_stack_panel")
+      #loc <-  as.vector(unlist(strsplit(input$Location.strip, ",")))
+      sites <- as.numeric(input$l.strip)
       wellPanel(
         fluidRow(
           column(2,
@@ -184,15 +186,35 @@ mod_STRIPD_server <- function(id) {
                               c("Entries/Treatments" = 1,
                                 "Plots" = 2))
           ),
+          column(3,
+                 selectInput(inputId = ns("orderRepsSTRIP"), label = "Reps layout:", 
+                             choices = orderReps_strips),
+          ),
           column(3, #align="center",
                  selectInput(inputId = ns("layoutO_strip"), label = "Layout option:", choices = layoutOptions_strip)
           ),
           column(3, #align="center",
-                 selectInput(inputId = ns("locLayout_strip"), label = "Location:", choices = loc)
+                 selectInput(inputId = ns("locLayout_strip"), label = "Location:", choices = 1:sites)
           )
         )
       )
     })
+    
+    
+    observeEvent(input$orderRepsSTRIP, {
+      req(input$orderRepsSTRIP)
+      req(input$l.strip)
+      obj_strips <- strip_reactive()
+      allBooks <- try(plot_layout(x = obj_strips, optionLayout = 1, orderReps = input$orderRepsSTRIP)$newBooks, silent = TRUE)
+      nBooks <- length(allBooks)
+      NewlayoutOptions <- 1:nBooks
+      updateSelectInput(session = session, inputId = 'layoutO_rcbd',
+                        label = "Layout option:",
+                        choices = NewlayoutOptions,
+                        selected = 1
+      )
+    })
+    
     
     reactive_layoutSTRIP <- reactive({
       req(input$layoutO_strip)
@@ -200,7 +222,9 @@ mod_STRIPD_server <- function(id) {
       obj_strip <- strip_reactive()
       opt_strip <- as.numeric(input$layoutO_strip)
       planting_strip <- input$planter.strip
-      plot_layout(x = obj_strip, optionLayout = opt_strip, planter = planting_strip)
+      locSelected <- as.numeric(input$locLayout_strip)
+      try(plot_layout(x = obj_strip, optionLayout = opt_strip, planter = planting_strip, orderReps = input$orderRepsSTRIP,
+                      l = locSelected), silent = TRUE)
     })
     
     output$layout_strip <- renderPlot({
@@ -280,14 +304,14 @@ mod_STRIPD_server <- function(id) {
         max <- as.numeric(valsStrip$maxV.strip)
         min <- as.numeric(valsStrip$minV.strip)
         #df.strip <- strip_reactive()$fieldBook
-        df.strip <- reactive_layoutSTRIP()$fieldBookXY
+        df.strip <- reactive_layoutSTRIP()$allSitesFieldbook
         cnamesdf.strip <- colnames(df.strip)
         df.strip <- norm_trunc(a = min, b = max, data = df.strip)
         colnames(df.strip) <- c(cnamesdf.strip[1:(ncol(df.strip) - 1)], valsStrip$trail.strip)
         a <- ncol(df.strip)
       }else {
         #df.strip <- strip_reactive()$fieldBook
-        df.strip <- reactive_layoutSTRIP()$fieldBookXY
+        df.strip <- reactive_layoutSTRIP()$allSitesFieldbook
         a <- ncol(df.strip)
       }
       return(list(df = df.strip, a = a))

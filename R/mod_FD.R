@@ -209,7 +209,7 @@ mod_FD_server <- function(id) {
                  selectInput(inputId = ns("layoutO_fd"), label = "Layout option:", choices = layoutOptions_fd)
           ),
           column(3, #align="center",
-                 selectInput(inputId = ns("locLayout_fd"), label = "Location:", choices = 1:sites)
+                 selectInput(inputId = ns("locLayout_fd"), label = "Location:", choices = 1:sites, selected = 1)
           )
         )
       )
@@ -236,7 +236,6 @@ mod_FD_server <- function(id) {
       opt_fd <- as.numeric(input$layoutO_fd)
       planting_fd <- input$planter_mov_fd
       locSelected <- as.numeric(input$locLayout_fd)
-      #plot_layout(x = obj_fd, optionLayout = opt_fd, planter = planting_fd)
       try(plot_layout(x = obj_fd, optionLayout = opt_fd, orderReps = input$orderRepsFD,
                       planter = planting_fd , l = locSelected), silent = TRUE)
     })
@@ -318,15 +317,15 @@ mod_FD_server <- function(id) {
       if(!is.null(valsfd$maxV.fd) && !is.null(valsfd$minV.fd) && !is.null(valsfd$trail.fd)) {
         max <- as.numeric(valsfd$maxV.fd)
         min <- as.numeric(valsfd$minV.fd)
-        #df.fd <- fd_reactive()$fieldBook
-        df.fd <- reactive_layoutFD()$allSitesFielbook
+        df.fd <- reactive_layoutFD()$allSitesFieldbook
+        #df.fd <- reactive_layoutFD()$fieldBookXY
         cnamesdf.fd <- colnames(df.fd)
         df.fd <- norm_trunc(a = min, b = max, data = df.fd)
         colnames(df.fd) <- c(cnamesdf.fd[1:(ncol(df.fd) - 1)], valsfd$trail.fd)
         a <- ncol(df.fd)
       }else {
-        #df.fd <- fd_reactive()$fieldBook 
-        df.fd <- reactive_layoutFD()$allSitesFielbook
+        df.fd <- reactive_layoutFD()$allSitesFieldbook
+        #df.fd <- reactive_layoutFD()$fieldBookXY
         a <- ncol(df.fd)
       }
       return(list(df = df.fd, a = a))

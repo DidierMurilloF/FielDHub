@@ -319,7 +319,7 @@ plot_iblocks <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks, 
                            text = ENTRY, cex = 1, shorten = "no",
                            data = df, xlab = "COLUMNS", ylab = "ROWS",
                            main = main, 
-                           show.key = FALSE)
+                           show.key = FALSE, gg=TRUE)
     df$REP <- as.factor(df$REP)
     p2 <- desplot::desplot(REP ~ COLUMN + ROW, flip = FALSE,
                            out1 = REP,
@@ -330,78 +330,7 @@ plot_iblocks <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks, 
                            text = PLOT, cex = 1, shorten = "no",
                            data = df, xlab = "COLUMNS", ylab = "ROWS",
                            main = main,
-                           show.key = FALSE)
-  } # else if (x$infoDesign$idDesign == 5) {
-  #   allSites <- vector(mode = "list", length = nlocs)
-  #   for (st in 1:nlocs) {
-  #     newBooksSelected_1 <- newBooksLocs[[st]]
-  #     df_1 <- newBooksSelected_1[opt]
-  #     allSites[[st]] <- as.data.frame(df_1)
-  #   }
-  #   allSitesFielbook <- dplyr::bind_rows(allSites)
-  #   allSitesFielbook <- allSitesFielbook[,c(1:3,8,9,4:7)]
-  #   
-  #   df <- df[,c(1:3,8,9,4:7)]
-  #   # df$`WHOLE-PLOT` <- as.factor(df$`WHOLE-PLOT`)
-  #   # df$`SUB-PLOT` <- as.factor(df$`SUB-PLOT`)
-  #   df$`WHOLE-PLOT` <- as.factor(df[,5])
-  #   df$`SUB-PLOT` <- as.factor(df[,6])
-  #   df$REP <- as.factor(df$REP)
-  #   # Plot field layout
-  #   rows <- max(as.numeric(df$ROW))
-  #   cols <- max(as.numeric(df$COLUMN))
-  #   ds <- "Split Plot Design (RCBD) " 
-  #   main <- paste0(ds, rows, "X", cols)
-  #   # Plot field layout
-  #   p1 <- desplot::desplot(REP ~ COLUMN + ROW, flip = FALSE,
-  #                          out1 = REP,
-  #                          out2 = `WHOLE-PLOT`,
-  #                          col = `SUB-PLOT`,
-  #                          out2.gpar=list(col = "gray50", lwd = 1, lty = 1),
-  #                          text = `WHOLE-PLOT`, cex = 1, shorten = "no",
-  #                          data = df, xlab = "COLUMNS", ylab = "ROWS",
-  #                          main = main, 
-  #                          show.key = TRUE)
-  #   
-  #   p2 <- desplot::desplot(REP ~ COLUMN + ROW, flip = FALSE,
-  #                          out1 = REP,
-  #                          out2.gpar=list(col = "gray50", lwd = 1, lty = 1),
-  #                          text = PLOT, cex = 1, shorten = "no",
-  #                          data = df, xlab = "COLUMNS", ylab = "ROWS",
-  #                          main = main, 
-  #                          show.key = FALSE)
-  # } else if (x$infoDesign$idDesign == 6) {
-  #   # Plot field layout
-  #   df <- df[,c(1:3,9,10,4:8)]
-  #   df$`WHOLE-PLOT` <- as.factor(df$`WHOLE-PLOT`)
-  #   df$`SUB-PLOT` <- as.factor(df$`SUB-PLOT`)
-  #   df$`SUB-SUB-PLOT` <- as.factor(df$`SUB-SUB-PLOT`)
-  #   df$REP <- as.factor(df$REP)
-  #   # Plot field layout
-  #   rows <- max(as.numeric(df$ROW))
-  #   cols <- max(as.numeric(df$COLUMN))
-  #   ds <- "Split-Split Plot Design (RCBD) " 
-  #   main <- paste0(ds, rows, "X", cols)
-  #   
-  #   p1 <- desplot::desplot(`WHOLE-PLOT` ~ COLUMN + ROW, flip = FALSE,
-  #                    out1 = REP, 
-  #                    out1.gpar = list(col = "black", lty = 1, lwd = 2),
-  #                    out2 = `WHOLE-PLOT`,
-  #                    out3.gpar = list(col = "black", lty = 3),
-  #                    text = `SUB-SUB-PLOT`, cex = 1,
-  #                    col = `SUB-PLOT`,
-  #                    data = df,
-  #                    main = main,
-  #                    show.key = TRUE, key.cex = 0.7)
-  #   
-  #   p2 <- desplot::desplot(REP ~ COLUMN + ROW, flip = FALSE,
-  #                          out1 = REP,
-  #                          out2.gpar=list(col = "gray50", lwd = 1, lty = 1),
-  #                          text = PLOT, cex = 1, shorten = "no",
-  #                          data = df, xlab = "COLUMNS", ylab = "ROWS",
-  #                          main = main, 
-  #                          show.key = FALSE, key.cex = 0.7)
-  #   
-  # }
+                           show.key = FALSE, gg=TRUE)
+  }
   return(list(p1 = p1, p2 = p2, df = df, newBooks = newBooksSelected, allSitesFielbook = allSitesFielbook))
 }

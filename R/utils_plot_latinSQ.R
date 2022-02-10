@@ -5,48 +5,100 @@
 #' @return The return value, if any, from executing the utility.
 #'
 #' @noRd
-plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, optionLayout = 1, 
-                         planter = "serpentine") {
+plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, optionLayout = 1, orderReps = "horizontal_stack_panel", 
+                         planter = "serpentine", l = 1) {
   rsRep <- dims[1]
   csRep <- dims[2]
   
+  
+  site <- l
+  locations <- factor(x$fieldBook$LOCATION, levels = unique(x$fieldBook$LOCATION))
+  nlocs <- length(levels(locations))
+  newBooksLocs <- vector(mode = "list", length = nlocs)
+  countLocs <- 1
   books0 <- list(NULL)
-  if (x$infoDesign$idDesign == 9) {
-    NewROWS1 <- rep(1:(rsRep*n_Reps), each = csRep)
-    NewCOLUMNS1 <- x$fieldBook$COLUMN
-    NewROWS2 <- x$fieldBook$ROW
-  } else if (x$infoDesign$idDesign == 7) {
-    NewROWS1 <- rep(1:(rsRep*n_Reps), each = csRep)
-    NewCOLUMNS1 <- rep(rep(1:csRep, times = rsRep), times = n_Reps)
-    NewROWS2 <- rep(rep(1:rsRep, each = csRep), times = n_Reps)
-  } else {
-    NewROWS1 <- rep(1:(rsRep*n_Reps), each = csRep)
-    NewCOLUMNS1 <- rep(rep(1:csRep, times = rsRep), times = n_Reps)
-    NewROWS2 <- rep(rep(1:rsRep, each = csRep), times = n_Reps)
-  }
-  books0[[1]] <- x$fieldBook %>% 
-    dplyr::mutate(NewROW = NewROWS1,
-                  NewCOLUMNS = NewCOLUMNS1)
-  
   books1 <- list(NULL)
-  w <- 1:(csRep*n_Reps)
-  u <- seq(1, length(w), by = csRep)
-  v <- seq(csRep, length(w), by = csRep)
-  z <- vector(mode = "list", length = n_Reps)
-  for (j in 1:n_Reps) {
-    z[[j]] <- c(rep(u[j]:v[j], times = rsRep))
-  }
-  z <- unlist(z)
-  books1[[1]] <- x$fieldBook %>% 
-    dplyr::mutate(NewROW = NewROWS2,
-                  NewCOLUMNS = z )
   
-  books <- c(books0, books1)
-  newBooks <- books[!sapply(books,is.null)]
+  
+  for (locs in levels(locations)) {
+    NewBook <- x$fieldBook %>%
+      dplyr::filter(LOCATION == locs)
+    plots <- NewBook$PLOT
+    
+    #books0 <- list(NULL)
+    if (x$infoDesign$idDesign == 9) {
+      NewROWS1 <- rep(1:(rsRep*n_Reps), each = csRep)
+      NewCOLUMNS1 <- NewBook$COLUMN
+      NewROWS2 <- NewBook$ROW
+    } else if (x$infoDesign$idDesign == 7) {
+      NewROWS1 <- rep(1:(rsRep*n_Reps), each = csRep)
+      NewCOLUMNS1 <- rep(rep(1:csRep, times = rsRep), times = n_Reps)
+      NewROWS2 <- rep(rep(1:rsRep, each = csRep), times = n_Reps)
+    } else {
+      NewROWS1 <- rep(1:(rsRep*n_Reps), each = csRep)
+      NewCOLUMNS1 <- rep(rep(1:csRep, times = rsRep), times = n_Reps)
+      NewROWS2 <- rep(rep(1:rsRep, each = csRep), times = n_Reps)
+    }
+
+    if (orderReps == "vertical_stack_panel") {
+      
+      df1 <- NewBook %>% 
+        dplyr::mutate(NewROW = NewROWS1,
+                      NewCOLUMNS = NewCOLUMNS1)
+      
+      df1 <- df1[order(df1$NewROW, decreasing = FALSE), ]
+      nCols <- max(df1$NewCOLUMNS)
+      newPlots <- planter_transform(plots = plots, planter = planter, reps = n_Reps, 
+                                    cols = nCols, units = NULL)
+      df1$PLOT <- newPlots
+      books0[[1]] <- df1
+    } else if (orderReps == "horizontal_stack_panel") {
+      #books1 <- list(NULL)
+      w <- 1:(csRep*n_Reps)
+      u <- seq(1, length(w), by = csRep)
+      v <- seq(csRep, length(w), by = csRep)
+      z <- vector(mode = "list", length = n_Reps)
+      for (j in 1:n_Reps) {
+        z[[j]] <- c(rep(u[j]:v[j], times = rsRep))
+      }
+      z <- unlist(z)
+      df2 <- NewBook %>% 
+        dplyr::mutate(NewROW = NewROWS2,
+                      NewCOLUMNS = z )
+      
+      df2 <- df2[order(df2$NewROW, decreasing = FALSE), ]
+      nCols <- max(df2$NewCOLUMNS)
+      newPlots <- planter_transform(plots = plots, planter = planter, reps = n_Reps, 
+                                    cols = nCols, units = NULL)
+      df2$PLOT <- newPlots
+      books1[[1]] <- df2
+    }
+ 
+    books_sq <- c(books0, books1)
+    newBooks <- books_sq[!sapply(books_sq, is.null)]
+    newBooksLocs[[countLocs]] <- newBooks
+    countLocs <- countLocs + 1
+  }
+  
   opt <- optionLayout
-  df <- as.data.frame(newBooks[[opt]])
+  newBooksSelected <- newBooksLocs[[site]]
+  df1 <- newBooksSelected[opt]
+  df <- as.data.frame(df1)
+  
+  # books <- c(books0, books1)
+  # newBooks <- books[!sapply(books,is.null)]
+  # opt <- optionLayout
+  # df <- as.data.frame(newBooks[[opt]])
   
   if (x$infoDesign$idDesign == 9){
+    allSites <- vector(mode = "list", length = nlocs)
+    for (st in 1:nlocs) {
+      newBooksSelected_1 <- newBooksLocs[[st]]
+      df_1 <- newBooksSelected_1[opt]
+      allSites[[st]] <- as.data.frame(df_1)
+    }
+    allSitesFieldbook <- dplyr::bind_rows(allSites)
+    allSitesFieldbook <- allSitesFieldbook[,c(1:3,8,9,4:7)]
     df <- df[,c(1:3,8,9,4:7)]
     colnames(df) <- c("ID", "LOCATION", "PLOT", "ROW", "COLUMN", "REP", "ROW_REP", 
                       "COLUMN_REP", "ENTRY")
@@ -75,6 +127,15 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, optionLayout = 1,
                            main = main,
                            show.key = FALSE)
   } else  if (x$infoDesign$idDesign == 7) {
+    allSites <- vector(mode = "list", length = nlocs)
+    for (st in 1:nlocs) {
+      newBooksSelected_1 <- newBooksLocs[[st]]
+      df_1 <- newBooksSelected_1[opt]
+      allSites[[st]] <- as.data.frame(df_1)
+    }
+    allSitesFieldbook <- dplyr::bind_rows(allSites)
+    allSitesFieldbook <- allSitesFieldbook[,c(1:3,8,9,4:7)]
+    
     df <- df[,c(1:3,8,9,4:7)]
     colnames(df) <- c("ID", "LOCATION", "PLOT", "ROW", "COLUMN", "REP", "HSTRIP", "VSTRIP", "TRT_COMB")
     rows <- max(as.numeric(df$ROW))
@@ -98,12 +159,22 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, optionLayout = 1,
                            main = main,
                            show.key = FALSE)
   } else {
+    allSites <- vector(mode = "list", length = nlocs)
+    for (st in 1:nlocs) {
+      newBooksSelected_1 <- newBooksLocs[[st]]
+      df_1 <- newBooksSelected_1[opt]
+      allSites[[st]] <- as.data.frame(df_1)
+    }
+    allSitesFieldbook <- dplyr::bind_rows(allSites)
+    allSitesFieldbook <- allSitesFieldbook[,c(1:3,8,9,4:7)]
+    
+    
     df <- df[,c(1:3,8,9,4:7)]
     colnames(df) <- c("ID", "LOCATION", "PLOT", "ROW", "COLUMN", "SQUARE", "ROW_SQ", 
                       "COLUMN_SQ", "TREATMENT")
     rows <- max(as.numeric(df$ROW))
     cols <- max(as.numeric(df$COLUMN))
-    ds <- "Row-Column Design " 
+    ds <- "Latin Square Design " 
     main <- paste0(ds, rows, "X", cols)
     # Plot field layout
     df$TREATMENT <- as.factor(df$TREATMENT)
@@ -122,5 +193,6 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, optionLayout = 1,
                            main = main,
                            show.key = FALSE)
   }
-  return(list(p1 = p1, p2 = p2, df = df, newBooks = newBooks))
+  return(list(p1 = p1, p2 = p2, df = df, newBooks = newBooksSelected, 
+              allSitesFieldbook = allSitesFieldbook))
 }

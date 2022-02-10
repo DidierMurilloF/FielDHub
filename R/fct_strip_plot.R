@@ -124,7 +124,7 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
     }
   }
   if(!is.null(l) && is.numeric(l) && length(l) == 1) {
-    if (l > 1 && is.null(locationNames)) {
+    if (l >= 1 && is.null(locationNames)) {
       locationNames <- 1:l
     }else if (l > 1 && !is.null(locationNames)) {
       if (length(locationNames) < l) locationNames <- 1:l

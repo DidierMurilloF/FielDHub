@@ -33,16 +33,17 @@ mod_RowCol_ui <- function(id){
                    ),
                    
                    numericInput(ns("t.rcd"), label = "Input # of Treatments:",
-                                value = NULL, min = 1),
+                                value = 36, min = 2),
                    
                    fluidRow(
                      column(6, style=list("padding-right: 28px;"),
-                            numericInput(ns("k.rcd"), label = "Input # of Rows:",
-                                         value = NULL, min = 2)
+                            selectInput(inputId = ns("k.rcd"), label = "Input # of Rows:", choices = ""),
+                            # numericInput(ns("k.rcd"), label = "Input # of Rows:",
+                            #              value = NULL, min = 2)
                      ),
                      column(6,style=list("padding-left: 5px;"),
                             numericInput(ns("r.rcd"), label = "Input # of Full Reps:",
-                                         value = 2, min = 2)
+                                         value = 3, min = 2)
                      )
                    ),
                    
@@ -146,6 +147,29 @@ mod_RowCol_server <- function(id){
       return(list(t.ROWCOL = t.ROWCOL))
     })
     
+    
+    
+    observeEvent(Get_tROWCOL()$t.ROWCOL, {
+      req(Get_tROWCOL()$t.ROWCOL)
+      
+      t <- as.numeric(Get_tROWCOL()$t.ROWCOL)
+      if (numbers::isPrime(t)) {
+        w <- 1
+        k <- "No Options Available"
+      }else {
+        k <- numbers::divisors(t)
+        k <- k[2:(length(k) - 1)]
+        w <- 2
+      }
+      
+      updateSelectInput(session = session, inputId = 'k.rcd', label = "Input # of Rows:",
+                        choices = k, selected = k[1])
+      
+    })
+    
+    
+    
+    
     RowCol_reactive <- reactive({
       
       req(input$t.rcd)
@@ -191,21 +215,43 @@ mod_RowCol_server <- function(id){
       allBooks_rcd<- plot_layout(x = obj_rcd, optionLayout = 1)$newBooks
       nBooks_rcd <- length(allBooks_rcd)
       layoutOptions_rcd <- 1:nBooks_rcd
-      loc <-  as.vector(unlist(strsplit(input$Location.rcd, ",")))
+      orderReps <- c("Vertical Stack Panel" = "vertical_stack_panel", "Horizontal Stack Panel" = "horizontal_stack_panel")
+      #loc <-  as.vector(unlist(strsplit(input$Location.rcd, ",")))
+      sites <- as.numeric(input$l.rcd)
       wellPanel(
+        column(2,
+               radioButtons(ns("typlotrcd"), "Type of Plot:",
+                            c("Entries/Treatments" = 1,
+                              "Plots" = 2))
+        ),
         fluidRow(
-          column(2,
-                 radioButtons(ns("typlotrcd"), "Type of Plot:",
-                              c("Entries/Treatments" = 1,
-                                "Plots" = 2))
+ 
+          column(3,
+                 selectInput(inputId = ns("orderRepsRowCol"), label = "Reps layout:", 
+                             choices = orderReps)
           ),
           column(3, #align="center",
                  selectInput(inputId = ns("layoutO_rcd"), label = "Layout option:", choices = layoutOptions_rcd)
           ),
           column(3, #align="center",
-                 selectInput(inputId = ns("locLayout_rcd"), label = "Location:", choices = loc)
+                 selectInput(inputId = ns("locLayout_rcd"), label = "Location:", choices = 1:sites)
           )
         )
+      )
+    })
+    
+    
+    observeEvent(input$orderRepsRowCol, {
+      req(input$orderRepsRowCol)
+      req(input$l.rcd)
+      obj <- RowCol_reactive()
+      allBooks <- plot_layout(x = obj, optionLayout = 1, orderReps = input$orderRepsRowCol)$newBooks
+      nBooks <- length(allBooks)
+      NewlayoutOptions <- 1:nBooks
+      updateSelectInput(session = session, inputId = 'layoutO_rcd',
+                        label = "Layout option:",
+                        choices = NewlayoutOptions,
+                        selected = 1
       )
     })
     
@@ -215,7 +261,9 @@ mod_RowCol_server <- function(id){
       obj_rcd <- RowCol_reactive()
       opt_rcd <- as.numeric(input$layoutO_rcd)
       planting_rcd <- input$planter_mov_rcd
-      plot_layout(x = obj_rcd, optionLayout = opt_rcd, planter = planting_rcd)
+      locSelected <- as.numeric(input$locLayout_rcd)
+      try(plot_layout(x = obj_rcd, optionLayout = opt_rcd, planter = planting_rcd, l = locSelected, 
+                      orderReps = input$orderRepsRowCol), silent = TRUE)
     })
     
     output$layout_rowcol <- renderPlot({
@@ -297,14 +345,14 @@ mod_RowCol_server <- function(id){
         max <- as.numeric(valsRowColD$maxV.RowCol)
         min <- as.numeric(valsRowColD$minV.RowCol)
         #df.RowCol <- RowCol_reactive()$fieldBook
-        df.RowCol <- reactive_layoutROWCOL()$fieldBookXY
+        df.RowCol <- reactive_layoutROWCOL()$allSitesFieldbook
         cnamesdf.RowCol <- colnames(df.RowCol)
         df.RowCol <- norm_trunc(a = min, b = max, data = df.RowCol)
         colnames(df.RowCol) <- c(cnamesdf.RowCol[1:(ncol(df.RowCol) - 1)], valsRowColD$trail.RowCol)
         a <- ncol(df.RowCol)
       }else {
         #df.RowCol <- RowCol_reactive()$fieldBook  
-        df.RowCol <- reactive_layoutROWCOL()$fieldBookXY
+        df.RowCol <- reactive_layoutROWCOL()$allSitesFieldbook
         a <- ncol(df.RowCol)
       }
       return(list(df = df.RowCol, a = a))

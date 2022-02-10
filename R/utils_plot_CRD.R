@@ -7,44 +7,72 @@
 #' @noRd
 plot_CRD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1, 
                      planter = "serpentine", l = 1) {
-  books <- vector(mode = "list", length = 2)
-  cols <- rep(1:n_TrtGen, times = n_Reps)
-  breaks <- split_vectors(x = cols, len_cuts = rep(n_TrtGen, each = n_Reps))
-  lngt <- 1:length(breaks)
-  new_breaks <- vector(mode = "list", length = n_Reps)
-  for (n in lngt) {
-    if (n %% 2 == 0) {
-      new_breaks[[n]] <- rev(breaks[[n]])
-    } else new_breaks[[n]] <- breaks[[n]]
+  
+  site <- l
+  locations <- factor(x$fieldBook$LOCATION, levels = unique(x$fieldBook$LOCATION))
+  nlocs <- length(levels(locations))
+  newBooksLocs <- vector(mode = "list", length = nlocs)
+  countLocs <- 1
+  books0 <- list(NULL)
+  books1 <- list(NULL)
+  for (locs in levels(locations)) {
+    NewBook <- x$fieldBook %>%
+      dplyr::filter(LOCATION == locs)
+    
+    cols <- rep(1:n_TrtGen, times = n_Reps)
+    breaks <- split_vectors(x = cols, len_cuts = rep(n_TrtGen, each = n_Reps))
+    lngt <- 1:length(breaks)
+    new_breaks <- vector(mode = "list", length = n_Reps)
+    for (n in lngt) {
+      if (n %% 2 == 0) {
+        new_breaks[[n]] <- rev(breaks[[n]])
+      } else new_breaks[[n]] <- breaks[[n]]
+    }
+    COLUMN_serp <- unlist(new_breaks)
+    if (planter == "serpentine") {
+      COLUMN <- COLUMN_serp
+    } else COLUMN <- rep(1:n_TrtGen, times = n_Reps)
+    books0[[1]] <- NewBook %>% 
+      dplyr::mutate(ROW = rep(1:n_Reps, each = n_TrtGen),
+                    COLUMN = COLUMN)
+    cols <- rep(1:n_Reps, times = n_TrtGen)
+    breaks <- split_vectors(x = cols, len_cuts = rep(n_Reps, each = n_TrtGen))
+    lngt <- 1:length(breaks)
+    new_breaks <- vector(mode = "list", length = n_TrtGen)
+    for (n in lngt) {
+      if (n %% 2 == 0) {
+        new_breaks[[n]] <- rev(breaks[[n]])
+      } else new_breaks[[n]] <- breaks[[n]]
+    }
+    COLUMN_serp <- unlist(new_breaks)
+    if (planter == "serpentine") {
+      COLUMN <- COLUMN_serp
+    } else COLUMN <- rep(1:n_Reps, times = n_TrtGen)
+    books1[[1]] <- NewBook %>% 
+      dplyr::mutate(ROW = rep(1:n_TrtGen, each = n_Reps),
+                    COLUMN = COLUMN)
+    books_crd <- c(books0, books1)
+    newBooks <- books_crd[!sapply(books_crd,is.null)]
+    newBooksLocs[[countLocs]] <- newBooks
+    countLocs <- countLocs + 1
   }
-  COLUMN_serp <- unlist(new_breaks)
-  if (planter == "serpentine") {
-    COLUMN <- COLUMN_serp
-  } else COLUMN <- rep(1:n_TrtGen, times = n_Reps)
-  books[[1]] <- x$fieldBook %>% 
-    dplyr::mutate(ROW = rep(1:n_Reps, each = n_TrtGen),
-                  COLUMN = COLUMN)
-  cols <- rep(1:n_Reps, times = n_TrtGen)
-  breaks <- split_vectors(x = cols, len_cuts = rep(n_Reps, each = n_TrtGen))
-  lngt <- 1:length(breaks)
-  new_breaks <- vector(mode = "list", length = n_TrtGen)
-  for (n in lngt) {
-    if (n %% 2 == 0) {
-      new_breaks[[n]] <- rev(breaks[[n]])
-    } else new_breaks[[n]] <- breaks[[n]]
-  }
-  COLUMN_serp <- unlist(new_breaks)
-  if (planter == "serpentine") {
-    COLUMN <- COLUMN_serp
-  } else COLUMN <- rep(1:n_Reps, times = n_TrtGen)
-  books[[2]] <- x$fieldBook %>% 
-    dplyr::mutate(ROW = rep(1:n_TrtGen, each = n_Reps),
-                  COLUMN = COLUMN)
-  newBooks <- books
+
+  # opt <- optionLayout
+  # df <- as.data.frame(newBooks[[opt]])
   opt <- optionLayout
-  df <- as.data.frame(newBooks[[opt]])
+  newBooksSelected <- newBooksLocs[[site]]
+  df1 <- newBooksSelected[opt]
+  df <- as.data.frame(df1)
   
   if (x$infoDesign$idDesign == 1) {
+    allSites <- vector(mode = "list", length = nlocs)
+    for (st in 1:nlocs) {
+      newBooksSelected_1 <- newBooksLocs[[st]]
+      df_1 <- newBooksSelected_1[opt]
+      allSites[[st]] <- as.data.frame(df_1)
+    }
+    allSitesFieldbook <- dplyr::bind_rows(allSites)
+    allSitesFieldbook <- allSitesFieldbook[,c(1:3,6,7,4:5)]
     df <- df[,c(1:3,6,7,4:5)]
     # Plot field layout
     rows <- max(as.numeric(df$ROW))
@@ -69,9 +97,19 @@ plot_CRD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1,
                            main = main, 
                            show.key = FALSE)
   } else if (x$infoDesign$idDesign == 4) {
+    allSites <- vector(mode = "list", length = nlocs)
+    for (st in 1:nlocs) {
+      newBooksSelected_1 <- newBooksLocs[[st]]
+      df_1 <- newBooksSelected_1[opt]
+      allSites[[st]] <- as.data.frame(df_1)
+    }
+    allSitesFieldbook <- dplyr::bind_rows(allSites)
+    nc <- ncol(df)
+    allSitesFieldbook <- allSitesFieldbook[,c(1:3,(nc-1),nc,4:(nc-2))]
+    df <- df[, c(1:3,(nc-1),nc,4:(nc-2))]
     if (x$infoDesign$kind == "CRD") {
-      nc <- ncol(df)
-      df <- df[,c(1:3,(nc-1),nc,4:(nc-2))]
+      # nc <- ncol(df)
+      # df <- df[,c(1:3,(nc-1),nc,4:(nc-2))]
       # Plot field layout
       rows <- max(as.numeric(df$ROW))
       cols <- max(as.numeric(df$COLUMN))
@@ -93,9 +131,19 @@ plot_CRD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1,
                              show.key = FALSE)
     }
   } else if (x$infoDesign$idDesign == 5) {
+    allSites <- vector(mode = "list", length = nlocs)
+    for (st in 1:nlocs) {
+      newBooksSelected_1 <- newBooksLocs[[st]]
+      df_1 <- newBooksSelected_1[opt]
+      allSites[[st]] <- as.data.frame(df_1)
+    }
+    allSitesFieldbook <- dplyr::bind_rows(allSites)
+    nc <- ncol(df)
+    allSitesFieldbook <- allSitesFieldbook[,c(1:3,(nc-1),nc,4:(nc-2))]
+    df <- df[,c(1:3,(nc-1),nc,4:(nc-2))]
     if (x$infoDesign$typeDesign == "CRD") {
-      nc <- ncol(df)
-      df <- df[,c(1:3,(nc-1),nc,4:(nc-2))]
+      # nc <- ncol(df)
+      # df <- df[,c(1:3,(nc-1),nc,4:(nc-2))]
       rows <- max(as.numeric(df$ROW))
       cols <- max(as.numeric(df$COLUMN))
       ds <- "Split Plot Design (CRD) " 
@@ -120,8 +168,18 @@ plot_CRD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1,
                              show.key = FALSE)
     }
   } else if (x$infoDesign$idDesign == 6) {
+    allSites <- vector(mode = "list", length = nlocs)
+    for (st in 1:nlocs) {
+      newBooksSelected_1 <- newBooksLocs[[st]]
+      df_1 <- newBooksSelected_1[opt]
+      allSites[[st]] <- as.data.frame(df_1)
+    }
+    allSitesFieldbook <- dplyr::bind_rows(allSites)
+    nc <- ncol(df)
+    allSitesFieldbook <- allSitesFieldbook[,c(1:3,9,10,4:8)]
+    df <- df[,c(1:3,9,10,4:8)]
     if (x$infoDesign$typeDesign == "CRD") {
-      df <- df[,c(1:3,9,10,4:8)]
+      # df <- df[,c(1:3,9,10,4:8)]
       df$WHOLE_PLOT <- as.factor(df$WHOLE_PLOT)
       df$SUB_PLOT <- as.factor(df$SUB_PLOT)
       df$SUB_SUB_PLOT <- as.factor(df$SUB_SUB_PLOT)
@@ -148,5 +206,6 @@ plot_CRD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1,
                              show.key = FALSE)
     }
   }
-  return(list(p1 = p1, p2 = p2, df = df, newBooks = newBooks))
+  return(list(p1 = p1, p2 = p2, df = df, newBooks = newBooksSelected, 
+              allSitesFieldbook = allSitesFieldbook))
 }
