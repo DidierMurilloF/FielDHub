@@ -350,7 +350,7 @@ mod_Alpha_Lattice_server <- function(id){
       modalDialog(
         title = div(tags$h3("Important message", style = "color: red;")),
         h4("Simulate some data to see a heatmap!"),
-        easyClose = FALSE
+        easyClose = TRUE
       )
     }
     
@@ -378,10 +378,11 @@ mod_Alpha_Lattice_server <- function(id){
       if (ncol(simuDataALPHA()$df) == 10) {
         locs <- factor(simuDataALPHA()$df$LOCATION, levels = unique(simuDataALPHA()$df$LOCATION))
         locLevels <- levels(locs)
-        df = subset(simuDataALPHA()$df, LOCATION == locLevels[1])
+        df = subset(simuDataALPHA()$df, LOCATION == locLevels[locNum()])
         loc <- levels(factor(df$LOCATION))
         trail <- as.character(valsALPHA$trail.alpha)
         label_trail <- paste(trail, ": ")
+        heatmapTitle <- paste("Heatmap for ", trail)
         new_df <- df %>%
           dplyr::mutate(text = paste0("Site: ", loc, "\n", "Row: ", df$ROW, "\n", "Col: ", df$COLUMN, "\n", "Entry: ", 
                                       df$ENTRY, "\n", label_trail, round(df[,10],2)))
@@ -394,7 +395,9 @@ mod_Alpha_Lattice_server <- function(id){
           ggplot2::ylab("ROW") +
           ggplot2::labs(fill = w) +
           viridis::scale_fill_viridis(discrete = FALSE) +
-          ggplot2::theme_minimal() # I added this option 
+          ggplot2::ggtitle(heatmapTitle) +
+          ggplot2::theme_minimal() + # I added this option 
+          ggplot2::theme(plot.title = ggplot2::element_text(family="Calibri", face="bold", size=13, hjust=0.5))
         
         p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 640)
         return(p2)

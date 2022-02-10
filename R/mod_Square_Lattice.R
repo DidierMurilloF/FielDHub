@@ -67,18 +67,11 @@ mod_Square_Lattice_ui <- function(id){
       
       mainPanel(
         width = 8,
-        fluidRow(
-          column(12, align="center",
-                 tabsetPanel(
-                   tabPanel("Square Lattice Field Layout", 
-                            shinycssloaders::withSpinner(plotOutput(ns("layout.output_sq"), width = "100%", height = "630px"),
-                                                                                       type = 5)),
-                   tabPanel("Square Lattice Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("SQUARE.output")), type = 5))
-                 )
-          ),
-          column(12,uiOutput(ns("well_panel_layout_sq")))
+        fixedRow(
+          column(12, align="center", uiOutput(ns("tabsetSquare"))),
+          column(12, uiOutput(ns("well_panel_layout_sq")))
         )
-      )
+    )
     )
   )
 }
@@ -265,7 +258,7 @@ mod_Square_Lattice_server <- function(id){
         reactive_layoutSquare()$out_layout
       } else if (input$typlotSQ == 2) {
         reactive_layoutSquare()$out_layoutPlots
-      } else heatmap_obj()
+      }
       
     })
     
@@ -362,9 +355,24 @@ mod_Square_Lattice_server <- function(id){
       modalDialog(
         title = div(tags$h3("Important message", style = "color: red;")),
         h4("Simulate some data to see a heatmap!"),
-        easyClose = FALSE
+        easyClose = TRUE
       )
     }
+    
+    output$tabsetSquare <- renderUI({
+      req(input$typlotSQ)
+      tabsetPanel(
+        if (input$typlotSQ != 3) {
+          tabPanel("Square Lattice Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.output_sq"), width = "100%", height = "650px"),
+                                                                                    type = 5))
+        } else {
+          tabPanel("Square Lattice Field Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapSquare"), width = "100%", height = "650px"),
+                                                                                    type = 5))
+        },
+        tabPanel("Square Lattice Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("SQUARE.output")), type = 5))
+      )
+      
+    })
     
     locNum <- reactive(
       return(as.numeric(input$locLayout_sq))
@@ -376,14 +384,28 @@ mod_Square_Lattice_server <- function(id){
         locs <- factor(simuDataSQUARE()$df$LOCATION, levels = unique(simuDataSQUARE()$df$LOCATION))
         locLevels <- levels(locs)
         df = subset(simuDataSQUARE()$df, LOCATION == locLevels[locNum()])
-        p1 <- ggplot2::ggplot(df, ggplot2::aes(x = df[,5], y = df[,4], fill = df[,10])) +
+        loc <- levels(factor(df$LOCATION))
+        trail <- as.character(valsSQUARE$trail.square)
+        label_trail <- paste(trail, ": ")
+        heatmapTitle <- paste("Heatmap for ", trail)
+        new_df <- df %>%
+          dplyr::mutate(text = paste0("Site: ", loc, "\n", "Row: ", df$ROW, "\n", "Col: ", df$COLUMN, "\n", "Entry: ", 
+                                      df$ENTRY, "\n", label_trail, round(df[,10],2)))
+        w <- as.character(valsSQUARE$trail.square)
+        new_df$ROW <- as.factor(new_df$ROW) # Set up ROWS as factors
+        new_df$COLUMN <- as.factor(new_df$COLUMN) # Set up COLUMNS as factors
+        p1 <- ggplot2::ggplot(new_df, ggplot2::aes(x = new_df[,5], y = new_df[,4], fill = new_df[,10], text = text)) +
           ggplot2::geom_tile() +
           ggplot2::xlab("COLUMN") +
           ggplot2::ylab("ROW") +
-          #ggplot2::labs(fill = w) +
-          viridis::scale_fill_viridis(discrete = FALSE)
-        #p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 710)
-        return(p1)
+          ggplot2::labs(fill = w) +
+          viridis::scale_fill_viridis(discrete = FALSE) +
+          ggplot2::ggtitle(heatmapTitle) +
+          ggplot2::theme_minimal() + # I added this option 
+          ggplot2::theme(plot.title = ggplot2::element_text(family="Calibri", face="bold", size=13, hjust=0.5))
+        
+        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 640)
+        return(p2)
       } else {
         showModal(
           shinyjqui::jqui_draggable(
@@ -392,6 +414,11 @@ mod_Square_Lattice_server <- function(id){
         )
         return(NULL)
       }
+    })
+    
+    output$heatmapSquare <- plotly::renderPlotly({
+      req(heatmap_obj())
+      heatmap_obj()
     })
     
     output$SQUARE.output <- DT::renderDataTable({

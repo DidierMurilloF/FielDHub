@@ -75,7 +75,7 @@ plot_CRD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1,
       # Plot field layout
       rows <- max(as.numeric(df$ROW))
       cols <- max(as.numeric(df$COLUMN))
-      ds <- "Full Factorial Desin (CRD) " 
+      ds <- "Full Factorial Design (CRD) " 
       main <- paste0(ds, rows, "X", cols)
       # Plot field layout
       p1 <- desplot::desplot(TRT_COMB ~ COLUMN + ROW, flip = FALSE,

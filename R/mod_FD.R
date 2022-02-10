@@ -1,3 +1,5 @@
+#FD first try
+
 #' FD UI Function
 #'
 #' @description A shiny Module.
@@ -35,15 +37,15 @@ mod_FD_ui <- function(id){
                                                           selected = ","))
                                     )
                    ),
-               
+                   
                    fluidRow(
                      column(6, style=list("padding-right: 28px;"),
-                       numericInput(inputId = ns("reps.fd"), label = "Input # of Full Reps:",
-                                    value = 3, min = 2)
+                            numericInput(inputId = ns("reps.fd"), label = "Input # of Full Reps:",
+                                         value = 3, min = 2)
                      ),
                      column(6,style=list("padding-left: 5px;"),
-                       numericInput(ns("l.fd"), label = "Input # of Locations:",
-                                    value = 1, min = 1)
+                            numericInput(ns("l.fd"), label = "Input # of Locations:",
+                                         value = 1, min = 1)
                      )
                    ),
                    fluidRow(
@@ -72,19 +74,13 @@ mod_FD_ui <- function(id){
       ),
       
       mainPanel(width = 8,
-        # tabsetPanel(
-        #   tabPanel("Field Book", DT::DTOutput(ns("FD.Output")))
-        # )
-        fluidRow(
-          column(12, align="center",
-                 tabsetPanel(
-                   tabPanel("Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout_fd"), width = "100%", height = "630px"),
-                                                                         type = 5)),
-                   tabPanel("Field Book", DT::DTOutput(ns("FD.Output")))
-                 )
-          ),
-          column(12,uiOutput(ns("well_panel_layout_FD")))
-        )
+                # tabsetPanel(
+                #   tabPanel("Field Book", DT::DTOutput(ns("FD.Output")))
+                # )
+                fixedRow(
+                  column(12, align="center", uiOutput(ns("tabsetFD"))),
+                  column(12, uiOutput(ns("well_panel_layout_FD")))
+                )
       )
     ) 
   )
@@ -198,7 +194,8 @@ mod_FD_server <- function(id) {
         column(2,
                radioButtons(ns("typlotfd"), "Type of Plot:",
                             c("Entries/Treatments" = 1,
-                              "Plots" = 2))
+                              "Plots" = 2,
+                              "Heatmap" = 3), selected = 1)
         ),
         fluidRow(
           column(3,
@@ -332,6 +329,95 @@ mod_FD_server <- function(id) {
       return(list(df = df.fd, a = a))
     })
     
+    heatmapInfoModal_fd <- function() {
+      modalDialog(
+        title = div(tags$h3("Important message", style = "color: red;")),
+        h4("Simulate some data to see a heatmap!"),
+        easyClose = TRUE
+      )
+    }
+    
+    output$tabsetFD <- renderUI({
+      req(input$typlotfd)
+      tabsetPanel(
+        if (input$typlotfd != 3) {
+          tabPanel("Factorial Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.output"), width = "100%", height = "650px"),
+                                                                          type = 5))
+        } else {
+          tabPanel("Factorial Field Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapFD"), width = "100%", height = "650px"),
+                                                                          type = 5))
+        },
+        tabPanel("Factorial Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("FD.Output")), type = 5))
+      )
+      
+    })
+    
+    kindNum <- reactive(
+      if (input$kindFD == "FD_RCBD") {
+        return(10)
+      } else {
+        return(8)
+      }
+    )
+    
+    locNum <- reactive(
+      return(as.numeric(input$locLayout_fd))
+    )
+    
+    heatmap_obj <- reactive({
+      req(simuData_fd()$df)
+      if (ncol(simuData_fd()$df) == kindNum()) {
+        locs <- factor(simuData_fd()$df$LOCATION, levels = unique(simuData_fd()$df$LOCATION))
+        locLevels <- levels(locs)
+        df = subset(simuData_fd()$df, LOCATION == locLevels[locNum()])
+        loc <- levels(factor(df$LOCATION))
+        trail <- as.character(valsfd$trail.fd)
+        label_trail <- paste(trail, ": ")
+        heatmapTitle <- paste("Heatmap for ", trail)
+        new_df <- df %>%
+          dplyr::mutate(text = paste0("Site: ", loc, "\n", "Row: ", df$ROW, "\n", "Col: ", df$COLUMN, "\n", "Entry: ", 
+                                      df$ENTRY, "\n", label_trail, round(df[,kindNum()],2)))
+        w <- as.character(valsfd$trail.fd)
+        new_df$ROW <- as.factor(new_df$ROW) # Set up ROWS as factors
+        new_df$COLUMN <- as.factor(new_df$COLUMN) # Set up COLUMNS as factors
+        p1 <- ggplot2::ggplot(new_df, ggplot2::aes(x = new_df[,5], y = new_df[,4], fill = new_df[,kindNum()], text = text)) +
+          ggplot2::geom_tile() +
+          ggplot2::xlab("COLUMN") +
+          ggplot2::ylab("ROW") +
+          ggplot2::labs(fill = w) +
+          viridis::scale_fill_viridis(discrete = FALSE) +
+          ggplot2::ggtitle(heatmapTitle) +
+          ggplot2::theme_minimal() + # I added this option 
+          ggplot2::theme(plot.title = ggplot2::element_text(family="Calibri", face="bold", size=13, hjust=0.5))
+        
+        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 640)
+        return(p2)
+      } else {
+        showModal(
+          shinyjqui::jqui_draggable(
+            heatmapInfoModal_fd()
+          )
+        )
+        return(NULL)
+      }
+    })
+    
+    output$heatmapFD <- plotly::renderPlotly({
+      req(heatmap_obj())
+      heatmap_obj()
+    })
+    
+    
+    output$layout.output <- renderPlot({
+      req(reactive_layoutFD())
+      req(fd_reactive())
+      req(input$typlotfd)
+      if (input$typlotfd == 1) {
+        reactive_layoutFD()$out_layout
+      } else if (input$typlotfd == 2) {
+        reactive_layoutFD()$out_layoutPlots
+      }
+    })
     
     output$FD.Output <- DT::renderDataTable({
       df <- simuData_fd()$df
@@ -356,9 +442,9 @@ mod_FD_server <- function(id) {
     )
   })
 }
-    
+
 ## To be copied in the UI
 # mod_FD_ui("FD_ui_1")
-    
+
 ## To be copied in the server
 # mod_FD_server("FD_ui_1")

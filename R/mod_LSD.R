@@ -35,7 +35,7 @@ mod_LSD_ui <- function(id){
                                     numericInput(ns("n.lsd"), label = "Input # of Treatments:",
                                                  value = NULL, min = 2),             
                    ),
-
+                   
                    numericInput(ns("reps.lsd"), label = "Input # of Full Reps (Squares):",
                                 value = 1, min = 1),
                    # selectInput(inputId = ns("planter.lsd"), label = "Plot Order Layout:",
@@ -62,24 +62,15 @@ mod_LSD_ui <- function(id){
       ),
       
       mainPanel(width = 8,
-        # tabsetPanel(
-        #   tabPanel("Field Book",DT::DTOutput(ns("LSD.output")))
-        # )
-        fluidRow(
-          column(12, align="center",
-                 tabsetPanel(
-                   tabPanel("Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout_lsd"), width = "100%", height = "630px"),
-                                                                         type = 5)),
-                   tabPanel("Field Book", DT::DTOutput(ns("LSD.output")))
-                 )
-          ),
-          column(12,uiOutput(ns("well_panel_layout_LSD")))
-        )
+                fixedRow(
+                  column(12, align="center", uiOutput(ns("tabsetLSD"))),
+                  column(12, uiOutput(ns("well_panel_layout_LSD")))
+                )
       )
     ) 
   )
 }
-    
+
 #' LSD Server Functions
 #'
 #' @noRd 
@@ -89,8 +80,8 @@ mod_LSD_server <- function(id){
     ns <- session$ns
     
     entryListFormat_LSD <- data.frame(list(ROW = paste("Period", 1:5, sep = ""),
-                                       COLUMN = paste("Cow", 1:5, sep = ""),
-                                       TREATMENT = paste("Diet", 1:5, sep = "")))
+                                           COLUMN = paste("Cow", 1:5, sep = ""),
+                                           TREATMENT = paste("Diet", 1:5, sep = "")))
     
     entriesInfoModal_LSD <- function() {
       modalDialog(
@@ -140,20 +131,20 @@ mod_LSD_server <- function(id){
       seed.number.lsd <- as.numeric(input$seed.lsd)
       
       #if (input$kindLSD == "LSD.REP") {
-        if (input$owndataLSD == "Yes") {
-          n.lsd <- NULL
-          reps.lsd <- as.numeric(input$reps.lsd)
-          data.lsd <- getData.lsd()$dataUp.lsd
-          n <- as.numeric(nrow(data.lsd))
-          if (n > 10) validate("Only up to 10 treatments are allowed.")
-        }else {
-          req(input$n.lsd)
-          n <- as.numeric(input$n.lsd)
-          if (n > 10) validate("Only up to 10 treatments are allowed.")
-          n.lsd <- n
-          reps.lsd <- as.numeric(input$reps.lsd)
-          data.lsd <- NULL
-        }
+      if (input$owndataLSD == "Yes") {
+        n.lsd <- NULL
+        reps.lsd <- as.numeric(input$reps.lsd)
+        data.lsd <- getData.lsd()$dataUp.lsd
+        n <- as.numeric(nrow(data.lsd))
+        if (n > 10) validate("Only up to 10 treatments are allowed.")
+      }else {
+        req(input$n.lsd)
+        n <- as.numeric(input$n.lsd)
+        if (n > 10) validate("Only up to 10 treatments are allowed.")
+        n.lsd <- n
+        reps.lsd <- as.numeric(input$reps.lsd)
+        data.lsd <- NULL
+      }
       LSD.design <- latin_square(t = n.lsd, 
                                  reps = reps.lsd, 
                                  plotNumber = plot_start.lsd[1],
@@ -177,7 +168,8 @@ mod_LSD_server <- function(id){
           column(2,
                  radioButtons(ns("typlotlsd"), "Type of Plot:",
                               c("Entries/Treatments" = 1,
-                                "Plots" = 2))
+                                "Plots" = 2,
+                                "Heatmap" = 3), selected = 1)
           ),
           column(3, #align="center",
                  selectInput(inputId = ns("layoutO_lsd"), label = "Layout option:", choices = layoutOptions_lsd)
@@ -291,6 +283,85 @@ mod_LSD_server <- function(id){
       return(list(df = df.lsd))
     })
     
+    heatmapInfoModal_LSD <- function() {
+      modalDialog(
+        title = div(tags$h3("Important message", style = "color: red;")),
+        h4("Simulate some data to see a heatmap!"),
+        easyClose = TRUE
+      )
+    }
+    
+    output$tabsetLSD <- renderUI({
+      req(input$typlotlsd)
+      tabsetPanel(
+        if (input$typlotlsd != 3) {
+          tabPanel("Latin Square Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.output"), width = "100%", height = "650px"),
+                                                                              type = 5))
+        } else {
+          tabPanel("Latin Square Field Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapLSD"), width = "100%", height = "650px"),
+                                                                              type = 5))
+        },
+        tabPanel("Latin Square Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("LSD.output")), type = 5))
+      )
+      
+    })
+    
+    
+    
+    heatmap_obj <- reactive({
+      req(simuDataLSD()$df)
+      if (ncol(simuDataLSD()$df) == 10) {
+        locs <- factor(simuDataLSD()$df$LOCATION, levels = unique(simuDataLSD()$df$LOCATION))
+        locLevels <- levels(locs)
+        df = subset(simuDataLSD()$df, LOCATION == locLevels[1])
+        loc <- levels(factor(df$LOCATION))
+        trail <- as.character(valsLSD$trail.lsd)
+        label_trail <- paste(trail, ": ")
+        heatmapTitle <- paste("Heatmap for ", trail)
+        new_df <- df %>%
+          dplyr::mutate(text = paste0("Site: ", loc, "\n", "Row: ", df$ROW, "\n", "Col: ", df$COLUMN, "\n", "Entry: ", 
+                                      df$ENTRY, "\n", label_trail, round(df[,10],2)))
+        w <- as.character(valsLSD$trail.lsd)
+        new_df$ROW <- as.factor(new_df$ROW) # Set up ROWS as factors
+        new_df$COLUMN <- as.factor(new_df$COLUMN) # Set up COLUMNS as factors
+        p1 <- ggplot2::ggplot(new_df, ggplot2::aes(x = new_df[,5], y = new_df[,4], fill = new_df[,10], text = text)) +
+          ggplot2::geom_tile() +
+          ggplot2::xlab("COLUMN") +
+          ggplot2::ylab("ROW") +
+          ggplot2::labs(fill = w) +
+          viridis::scale_fill_viridis(discrete = FALSE) +
+          ggplot2::ggtitle(heatmapTitle) +
+          ggplot2::theme_minimal() + # I added this option 
+          ggplot2::theme(plot.title = ggplot2::element_text(family="Calibri", face="bold", size=13, hjust=0.5))
+        
+        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 640)
+        return(p2)
+      } else {
+        showModal(
+          shinyjqui::jqui_draggable(
+            heatmapInfoModal_LSD()
+          )
+        )
+        return(NULL)
+      }
+    })
+    
+    output$heatmapLSD <- plotly::renderPlotly({
+      req(heatmap_obj())
+      heatmap_obj()
+    })
+    
+    
+    output$layout.output <- renderPlot({
+      req(reactive_layoutLSD())
+      req(latinsquare_reactive())
+      req(input$typlotlsd)
+      if (input$typlotlsd == 1) {
+        reactive_layoutLSD()$out_layout
+      } else if (input$typlotlsd == 2) {
+        reactive_layoutLSD()$out_layoutPlots
+      }
+    })
     
     output$LSD.output <- DT::renderDataTable({
       
@@ -314,12 +385,12 @@ mod_LSD_server <- function(id){
         write.csv(df, file, row.names = FALSE)
       }
     )
-
+    
   })
 }
-    
+
 ## To be copied in the UI
 # mod_LSD_ui("LSD_ui_1")
-    
+
 ## To be copied in the server
 # mod_LSD_server("LSD_ui_1")
