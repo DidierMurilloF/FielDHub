@@ -65,17 +65,12 @@ mod_CRD_ui <- function(id) {
                      )
                    )
       ),
-      mainPanel(width = 8,
-        fluidRow(
-          column(12, align="center",
-                 tabsetPanel(
-                   tabPanel("Completely Randomized Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.crd"), width = "100%", height = "630px"),
-                                                                                               type = 5)),
-                   tabPanel("Completely Randomized Field Book", DT::DTOutput(ns("CRD.output")))
-                 )
-          ),
-          column(12,uiOutput(ns("well_panel_layout_CRD")))
-        )
+      mainPanel(
+        width = 8,
+        fixedRow(
+          column(12, align="center", uiOutput(ns("tabsetCRD"))),
+        ),
+        column(12,uiOutput(ns("well_panel_layout_CRD")))
       )
     )
   )
@@ -148,7 +143,8 @@ mod_CRD_server <- function(id) {
           column(2,
                  radioButtons(ns("typlotCRD"), "Type of Plot:",
                               c("Entries/Treatments" = 1,
-                                "Plots" = 2))
+                                "Plots" = 2,
+                                "Heatmap" = 3))
           ),
           column(3, #align="center",
                  selectInput(inputId = ns("layoutO_crd"), label = "Layout option:", choices = layoutOptions_crd)
@@ -170,15 +166,6 @@ mod_CRD_server <- function(id) {
       opt_crd <- as.numeric(input$layoutO_crd)
       planting_crd <- input$planter_mov_crd
       plot_layout(x = obj_crd, optionLayout = opt_crd, planter = planting_crd)
-    })
-    
-    output$layout.crd <- renderPlot({
-      #reactive_layoutCRD()$out_layout
-      req(CRD_reactive())
-      req(input$typlotCRD)
-      if (input$typlotCRD == 1) {
-        reactive_layoutCRD()$out_layout
-      } else reactive_layoutCRD()$out_layoutPlots
     })
     
     entryListFormat_CRD <- data.frame(TREATMENT = c(paste("TRT_", LETTERS[1:9], sep = "")), 
@@ -290,6 +277,79 @@ mod_CRD_server <- function(id) {
       }
       
       return(list(df = df.crd))
+    })
+    
+    heatmapInfoModal_CRD <- function() {
+      modalDialog(
+        title = div(tags$h3("Important message", style = "color: red;")),
+        h4("Simulate some data to see a heatmap!"),
+        easyClose = TRUE
+      )
+    }
+    
+    output$tabsetCRD <- renderUI({
+      req(input$typlotCRD)
+      tabsetPanel(
+        if (input$typlotCRD != 3) {
+          tabPanel("Completely Randomized Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.crd"), width = "100%", height = "650px"),
+                                                                                    type = 5))
+        } else {
+          tabPanel("Completely Randomized Field Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapCRD"), width = "100%", height = "650px"),
+                                                                                    type = 5))
+        },
+        tabPanel("Completely Randomized Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("CRD.output")), type = 5))
+      )
+      
+    })
+    
+    heatmap_obj <- reactive({
+      req(simuDataCRD()$df)
+      if (ncol(simuDataCRD()$df) == 8) {
+        trail <- as.character(vals$trail.CRD)
+        label_trail <- paste(trail, ": ")
+        heatmapTitle <- paste("Heatmap for ", trail)
+        df <- simuDataCRD()$df
+        new_df <- df %>%
+          dplyr::mutate(text = paste0("Row: ", df$ROW, "\n", "Col: ", df$COLUMN, "\n", "Entry: ", 
+                                      df$TREATMENT, "\n", label_trail, round(df[,8],2)))
+        w <- as.character(vals$trail.CRD)
+        new_df$ROW <- as.factor(new_df$ROW) # Set up ROWS as factors
+        new_df$COLUMN <- as.factor(new_df$COLUMN) # Set up COLUMNS as factors
+        p1 <- ggplot2::ggplot(new_df, ggplot2::aes(x = new_df[,5], y = new_df[,4], fill = new_df[,8], text = text)) +
+          ggplot2::geom_tile() +
+          ggplot2::xlab("COLUMN") +
+          ggplot2::ylab("ROW") +
+          ggplot2::labs(fill = w) +
+          viridis::scale_fill_viridis(discrete = FALSE) +
+          ggplot2::ggtitle(heatmapTitle) +
+          ggplot2::theme_minimal() + # I added this option 
+          ggplot2::theme(plot.title = ggplot2::element_text(family="Calibri", face="bold", size=13, hjust=0.5))
+        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 640)
+        return(p2)
+      } else {
+        showModal(
+          shinyjqui::jqui_draggable(
+            heatmapInfoModal_CRD()
+          )
+        )
+        return(NULL)
+      }
+    })
+    
+    output$heatmapCRD <- plotly::renderPlotly({
+      req(heatmap_obj())
+      heatmap_obj()
+    })
+    
+    output$layout.crd <- renderPlot({
+      #reactive_layoutCRD()$out_layout
+      req(CRD_reactive())
+      req(input$typlotCRD)
+      if (input$typlotCRD == 1) {
+        reactive_layoutCRD()$out_layout
+      } else if (input$typlotCRD == 2) {
+        reactive_layoutCRD()$out_layoutPlots
+      }
     })
     
     output$CRD.output <- DT::renderDT({
