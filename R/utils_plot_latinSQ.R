@@ -99,6 +99,8 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, optionLayout = 1,
     }
     allSitesFieldbook <- dplyr::bind_rows(allSites)
     allSitesFieldbook <- allSitesFieldbook[,c(1:3,8,9,4:7)]
+    colnames(allSitesFieldbook) <- c("ID", "LOCATION", "PLOT", "ROW", "COLUMN", "REP", "ROW_REP", 
+                      "COLUMN_REP", "ENTRY")
     df <- df[,c(1:3,8,9,4:7)]
     colnames(df) <- c("ID", "LOCATION", "PLOT", "ROW", "COLUMN", "REP", "ROW_REP", 
                       "COLUMN_REP", "ENTRY")
@@ -135,6 +137,7 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, optionLayout = 1,
     }
     allSitesFieldbook <- dplyr::bind_rows(allSites)
     allSitesFieldbook <- allSitesFieldbook[,c(1:3,8,9,4:7)]
+    colnames(allSitesFieldbook) <- c("ID", "LOCATION", "PLOT", "ROW", "COLUMN", "REP", "HSTRIP", "VSTRIP", "TRT_COMB")
     
     df <- df[,c(1:3,8,9,4:7)]
     colnames(df) <- c("ID", "LOCATION", "PLOT", "ROW", "COLUMN", "REP", "HSTRIP", "VSTRIP", "TRT_COMB")

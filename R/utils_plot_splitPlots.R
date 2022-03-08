@@ -299,8 +299,8 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblock
       df_1 <- newBooksSelected_1[opt]
       allSites[[st]] <- as.data.frame(df_1)
     }
-    allSitesFielbook <- dplyr::bind_rows(allSites)
-    allSitesFielbook <- allSitesFielbook[,c(1:3,8,9,4:7)]
+    allSitesFieldbook <- dplyr::bind_rows(allSites)
+    allSitesFieldbook <- allSitesFieldbook[,c(1:3,8,9,4:7)]
     
     df <- df[,c(1:3,8,9,4:7)]
     df$WHOLE_PLOT <- as.factor(df$WHOLE_PLOT)
@@ -338,8 +338,8 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblock
       df_1 <- newBooksSelected_1[opt]
       allSites[[st]] <- as.data.frame(df_1)
     }
-    allSitesFielbook <- dplyr::bind_rows(allSites)
-    allSitesFielbook <- allSitesFielbook[,c(1:3,9,10,4:8)]
+    allSitesFieldbook <- dplyr::bind_rows(allSites)
+    allSitesFieldbook <- allSitesFieldbook[,c(1:3,9,10,4:8)]
     
     df <- df[,c(1:3,9,10,4:8)]
     df$WHOLE_PLOT <- as.factor(df$WHOLE_PLOT)
@@ -372,5 +372,5 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblock
                            show.key = FALSE, key.cex = 0.7)
     
   }
-  return(list(p1 = p1, p2 = p2, df = df, newBooks = newBooksSelected, allSitesFielbook = allSitesFielbook))
+  return(list(p1 = p1, p2 = p2, df = df, newBooks = newBooksSelected, allSitesFieldbook = allSitesFieldbook))
 }

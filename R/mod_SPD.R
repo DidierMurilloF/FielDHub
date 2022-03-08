@@ -74,16 +74,10 @@ mod_SPD_ui <- function(id){
       
       mainPanel(
         width = 8,
-        fluidRow(
-          column(12, align="center",
-                 tabsetPanel(
-                   tabPanel("Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout_spd"), width = "100%", height = "630px"),
-                                                                         type = 5)),
-                   tabPanel("Field Book", DT::DTOutput(ns("SPD.output")))
-                 )
-          ),
-          column(12,uiOutput(ns("well_panel_layout_SPD")))
-        )
+        fixedRow(
+          column(12, align="center", uiOutput(ns("tabsetSPD"))),
+        ),
+        column(12,uiOutput(ns("well_panel_layout_SPD")))
       )
     )    
   )
@@ -182,6 +176,7 @@ mod_SPD_server <- function(id){
     })
     
     
+    
     output$well_panel_layout_SPD <- renderUI({
       req(spd_reactive()$fieldBook)
       obj_spd <- spd_reactive()
@@ -196,7 +191,8 @@ mod_SPD_server <- function(id){
         column(2,
                radioButtons(ns("typlotspd"), "Type of Plot:",
                             c("Entries/Treatments" = 1,
-                              "Plots" = 2))
+                              "Plots" = 2,
+                              "Heatmap" = 3))
         ),
         fluidRow(
           column(3,
@@ -311,22 +307,104 @@ mod_SPD_server <- function(id){
     })
     
     simuData_spd <- reactive({
+      set.seed(input$myseed.spd)
       req(spd_reactive()$fieldBook)
       
       if(!is.null(valspd$maxV.spd) && !is.null(valspd$minV.spd) && !is.null(valspd$trail.spd)) {
         max <- as.numeric(valspd$maxV.spd)
         min <- as.numeric(valspd$minV.spd)
         #df.spd <- spd_reactive()$fieldBook
-        df.spd <- reactive_layoutSPD()$fieldBookXY
+        df.spd <- reactive_layoutSPD()$allSitesFieldbook
         cnamesdf.spd <- colnames(df.spd)
         df.spd <- norm_trunc(a = min, b = max, data = df.spd)
         colnames(df.spd) <- c(cnamesdf.spd[1:(ncol(df.spd) - 1)], valspd$trail.spd)
         df.spd <- df.spd[order(df.spd$ID),]
       }else {
         #df.spd <- spd_reactive()$fieldBook 
-        df.spd <- reactive_layoutSPD()$fieldBookXY
+        df.spd <- reactive_layoutSPD()$allSitesFieldbook
       }
       return(list(df = df.spd))
+    })
+    
+    heatmapInfoModal_SPD <- function() {
+      modalDialog(
+        title = div(tags$h3("Important message", style = "color: red;")),
+        h4("Simulate some data to see a heatmap!"),
+        easyClose = TRUE
+      )
+    }
+    
+    output$tabsetSPD <- renderUI({
+      req(input$typlotspd)
+      tabsetPanel(
+        if (input$typlotspd != 3) {
+          tabPanel("Split Plot Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.spd"), width = "100%", height = "650px"),
+                                                                                      type = 5))
+        } else {
+          tabPanel("Split Plot Field Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapSPD"), width = "100%", height = "650px"),
+                                                                                      type = 5))
+        },
+        tabPanel("Split Plot Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("SPD.output")), type = 5))
+      )
+      
+    })
+    
+    locNum <- reactive(
+      return(as.numeric(input$locLayout_spd))
+    )
+    
+    heatmap_obj <- reactive({
+      req(simuData_spd()$df)
+      if (ncol(simuData_spd()$df) == 10) {
+        locs <- factor(simuData_spd()$df$LOCATION, levels = unique(simuData_spd()$df$LOCATION))
+        locLevels <- levels(locs)
+        df = subset(simuData_spd()$df, LOCATION == locLevels[locNum()])
+        loc <- levels(factor(df$LOCATION))
+        trail <- as.character(valspd$trail.spd)
+        label_trail <- paste(trail, ": ")
+        heatmapTitle <- paste("Heatmap for ", trail)
+        new_df <- df %>%
+          dplyr::mutate(text = paste0("Site: ", loc, "\n", "Row: ", df$ROW, "\n", "Col: ", df$COLUMN, "\n", "Entry: ", 
+                                      df$ENTRY, "\n", label_trail, round(df[,10],2)))
+        w <- as.character(valspd$trail.spd)
+        new_df$ROW <- as.factor(new_df$ROW) # Set up ROWS as factors
+        new_df$COLUMN <- as.factor(new_df$COLUMN) # Set up COLUMNS as factors
+        p1 <- ggplot2::ggplot(new_df, ggplot2::aes(x = new_df[,5], y = new_df[,4], fill = new_df[,10], text = text)) +
+          ggplot2::geom_tile() +
+          ggplot2::xlab("COLUMN") +
+          ggplot2::ylab("ROW") +
+          ggplot2::labs(fill = w) +
+          viridis::scale_fill_viridis(discrete = FALSE) +
+          ggplot2::ggtitle(heatmapTitle) +
+          ggplot2::theme_minimal() + # I added this option 
+          ggplot2::theme(plot.title = ggplot2::element_text(family="Calibri", face="bold", size=13, hjust=0.5))
+        
+        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 640)
+        return(p2)
+      } else {
+        showModal(
+          shinyjqui::jqui_draggable(
+            heatmapInfoModal_SPD()
+          )
+        )
+        return(NULL)
+      }
+    })
+    
+    output$heatmapSPD <- plotly::renderPlotly({
+      req(heatmap_obj())
+      heatmap_obj()
+    })
+    
+    output$layout.spd <- renderPlot({
+      #reactive_layoutSPD()$out_layout
+      req(spd_reactive())
+      req(input$typlotspd)
+      if (input$typlotspd == 1) {
+        reactive_layoutSPD()$out_layout
+      } else if (input$typlotspd == 2) {
+        reactive_layoutSPD()$out_layoutPlots
+      }
     })
     
     

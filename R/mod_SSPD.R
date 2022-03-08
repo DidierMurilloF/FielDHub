@@ -223,19 +223,21 @@ mod_SSPD_server <- function(id){
       allBooks_sspd<- plot_layout(x = obj_sspd, optionLayout = 1)$newBooks
       nBooks_sspd <- length(allBooks_sspd)
       layoutOptions_sspd <- 1:nBooks_sspd
-      loc <-  as.vector(unlist(strsplit(input$Location.sspd, ",")))
+      sites <- as.numeric(input$l.sspd)
+      #loc <-  as.vector(unlist(strsplit(input$Location.sspd, ",")))
       wellPanel(
         fluidRow(
           column(2,
                  radioButtons(ns("typlotsspd"), "Type of Plot:",
                               c("Entries/Treatments" = 1,
-                                "Plots" = 2))
+                                "Plots" = 2,
+                                "Heatmap" = 3), selected = 1)
           ),
           column(3, #align="center",
                  selectInput(inputId = ns("layoutO_sspd"), label = "Layout option:", choices = layoutOptions_sspd)
           ),
           column(3, #align="center",
-                 selectInput(inputId = ns("locLayout_sspd"), label = "Location:", choices = loc)
+                 selectInput(inputId = ns("locLayout_sspd"), label = "Location:", choices = 1:sites)
           )
         )
       )
@@ -255,7 +257,9 @@ mod_SSPD_server <- function(id){
       req(input$typlotsspd)
       if (input$typlotsspd == 1) {
         reactive_layoutSSPD()$out_layout
-      } else reactive_layoutSSPD()$out_layoutPlots
+      } else if (input$typlotsspd == 2) {
+        reactive_layoutSSPD()$out_layoutPlots
+      }
     })
     
     
@@ -324,21 +328,96 @@ mod_SSPD_server <- function(id){
     })
     
     simuData_sspd <- reactive({
+      set.seed(input$myseed.sspd)
       req(sspd_reactive()$fieldBook)
       
       if(!is.null(valsspd$maxV.sspd) && !is.null(valsspd$minV.sspd) && !is.null(valsspd$Trial.sspd)) {
         max <- as.numeric(valsspd$maxV.sspd)
         min <- as.numeric(valsspd$minV.sspd)
-        df.sspd <- reactive_layoutSSPD()$fieldBookXY
+        df.sspd <- reactive_layoutSSPD()$allSitesFieldbook
         cnamesdf.sspd <- colnames(df.sspd)
         df.sspd <- norm_trunc(a = min, b = max, data = df.sspd)
         colnames(df.sspd) <- c(cnamesdf.sspd[1:(ncol(df.sspd) - 1)], valsspd$Trial.sspd)
         df.sspd <- df.sspd[order(df.sspd$ID),]
       }else {
-        df.sspd <- reactive_layoutSSPD()$fieldBookXY
+        df.sspd <- reactive_layoutSSPD()$allSitesFieldbook
       }
       return(list(df = df.sspd, a = a))
     })
+    
+    
+    heatmapInfoModal_SSPD <- function() {
+      modalDialog(
+        title = div(tags$h3("Important message", style = "color: red;")),
+        h4("Simulate some data to see a heatmap!"),
+        easyClose = TRUE
+      )
+    }
+    
+    output$tabsetSSPD <- renderUI({
+      req(input$typlotsspd)
+      tabsetPanel(
+        if (input$typlotsspd != 3) {
+          tabPanel("Split Split Plot Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout_sspd"), width = "100%", height = "650px"),
+                                                                              type = 5))
+        } else {
+          tabPanel("Split Split Plot Field Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapSSPD"), width = "100%", height = "650px"),
+                                                                              type = 5))
+        },
+        # tabPanel("Alpha Lattice Field Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapAlpha"), width = "100%", height = "650px"),
+        #                                                                       type = 5)),
+        tabPanel("Split Split Plot Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("SSPD.output")), type = 5))
+      )
+      
+    })
+    
+    locNum <- reactive(
+      return(as.numeric(input$locLayout_sspd))
+    )
+    
+    heatmap_obj <- reactive({
+     # req(simuData_sspd()$df)
+      if (ncol(simuData_sspd()$df) == 11) {
+        locs <- factor(simuData_sspd()$df$LOCATION, levels = unique(simuData_sspd()$df$LOCATION))
+        locLevels <- levels(locs)
+        df = subset(simuData_sspd()$df, LOCATION == locLevels[1])
+        loc <- levels(factor(df$LOCATION))
+        trail <- as.character(valsspd$Trial.sspd)
+        label_trail <- paste(trail, ": ")
+        heatmapTitle <- paste("Heatmap for ", trail)
+        new_df <- df %>%
+          dplyr::mutate(text = paste0("Site: ", loc, "\n", "Row: ", df$ROW, "\n", "Col: ", df$COLUMN, "\n", "TRT_COMB: ", 
+                                      df$TRT_COMB, "\n", label_trail, round(df[,11],2)))
+        w <- as.character(valsspd$Trial.sspd)
+        new_df$ROW <- as.factor(new_df$ROW) # Set up ROWS as factors
+        new_df$COLUMN <- as.factor(new_df$COLUMN) # Set up COLUMNS as factors
+        p1 <- ggplot2::ggplot(new_df, ggplot2::aes(x = new_df[,5], y = new_df[,4], fill = new_df[,11], text = text)) +
+          ggplot2::geom_tile() +
+          ggplot2::xlab("COLUMN") +
+          ggplot2::ylab("ROW") +
+          ggplot2::labs(fill = w) +
+          viridis::scale_fill_viridis(discrete = FALSE) +
+          ggplot2::ggtitle(heatmapTitle) +
+          ggplot2::theme_minimal() + # I added this option 
+          ggplot2::theme(plot.title = ggplot2::element_text(family="Calibri", face="bold", size=13, hjust=0.5))
+        
+        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 640)
+        return(p2)
+      } else {
+        showModal(
+          shinyjqui::jqui_draggable(
+            heatmapInfoModal_SSPD()
+          )
+        )
+        return(NULL)
+      }
+    })
+    
+    output$heatmapSSPD <- plotly::renderPlotly({
+      req(heatmap_obj())
+      heatmap_obj()
+    })
+    
     
     output$SSPD.output  <- DT::renderDataTable({
       

@@ -77,16 +77,10 @@ mod_RowCol_ui <- function(id){
 
       mainPanel(
         width = 8,
-        fluidRow(
-          column(12, align="center",
-                 tabsetPanel(
-                   tabPanel("Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout_rowcol"), width = "100%", height = "630px"),
-                                                                         type = 5)),
-                   tabPanel("Field Book", DT::DTOutput(ns("rowcolD")))
-                 )
-          ),
-          column(12,uiOutput(ns("well_panel_layout_ROWCOL")))
-        )
+        fixedRow(
+          column(12, align="center", uiOutput(ns("tabsetRCD"))),
+        ),
+        column(12,uiOutput(ns("well_panel_layout_ROWCOL")))
       )
     )
   )
@@ -175,7 +169,7 @@ mod_RowCol_server <- function(id){
       req(input$t.rcd)
       req(input$k.rcd)
       req(input$r.rcd)
-      
+      req(input$seed.rcd)
       req(input$plot_start.rcd)
       req(input$Location.rcd)
       
@@ -222,7 +216,8 @@ mod_RowCol_server <- function(id){
         column(2,
                radioButtons(ns("typlotrcd"), "Type of Plot:",
                             c("Entries/Treatments" = 1,
-                              "Plots" = 2))
+                              "Plots" = 2,
+                              "Heatmap" = 3))
         ),
         fluidRow(
  
@@ -340,6 +335,7 @@ mod_RowCol_server <- function(id){
     })
     
     simuData_RowCol <- reactive({
+      set.seed(input$seed.rcd)
       req(RowCol_reactive()$fieldBook)
       if(!is.null(valsRowColD$maxV.RowCol) && !is.null(valsRowColD$minV.RowCol) && !is.null(valsRowColD$trail.RowCol)) {
         max <- as.numeric(valsRowColD$maxV.RowCol)
@@ -356,6 +352,87 @@ mod_RowCol_server <- function(id){
         a <- ncol(df.RowCol)
       }
       return(list(df = df.RowCol, a = a))
+    })
+    
+    heatmapInfoModal_RCD <- function() {
+      modalDialog(
+        title = div(tags$h3("Important message", style = "color: red;")),
+        h4("Simulate some data to see a heatmap!"),
+        easyClose = TRUE
+      )
+    }
+    
+    output$tabsetRCD <- renderUI({
+      req(input$typlotrcd)
+      tabsetPanel(
+        if (input$typlotrcd != 3) {
+          tabPanel("Split Plot Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.rcd"), width = "100%", height = "650px"),
+                                                                           type = 5))
+        } else {
+          tabPanel("Split Plot Field Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapRCD"), width = "100%", height = "650px"),
+                                                                           type = 5))
+        },
+        tabPanel("Split Plot Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("rowcolD")), type = 5))
+      )
+      
+    })
+    
+    locNum <- reactive(
+      return(as.numeric(input$locLayout_rcd))
+    )
+    
+    heatmap_obj <- reactive({
+      req(simuData_RowCol()$df)
+      if (ncol(simuData_RowCol()$df) == 10) {
+        locs <- factor(simuData_RowCol()$df$LOCATION, levels = unique(simuData_RowCol()$df$LOCATION))
+        locLevels <- levels(locs)
+        df = subset(simuData_RowCol()$df, LOCATION == locLevels[locNum()])
+        loc <- levels(factor(df$LOCATION))
+        trail <- as.character(valsRowColD$trail.RowCol)
+        label_trail <- paste(trail, ": ")
+        heatmapTitle <- paste("Heatmap for ", trail)
+        new_df <- df %>%
+          dplyr::mutate(text = paste0("Site: ", loc, "\n", "Row: ", df$ROW, "\n", "Col: ", df$COLUMN, "\n", "Entry: ", 
+                                      df$ENTRY, "\n", label_trail, round(df[,10],2)))
+        w <- as.character(valsRowColD$trail.RowCol)
+        new_df$ROW <- as.factor(new_df$ROW) # Set up ROWS as factors
+        new_df$COLUMN <- as.factor(new_df$COLUMN) # Set up COLUMNS as factors
+        p1 <- ggplot2::ggplot(new_df, ggplot2::aes(x = new_df[,5], y = new_df[,4], fill = new_df[,10], text = text)) +
+          ggplot2::geom_tile() +
+          ggplot2::xlab("COLUMN") +
+          ggplot2::ylab("ROW") +
+          ggplot2::labs(fill = w) +
+          viridis::scale_fill_viridis(discrete = FALSE) +
+          ggplot2::ggtitle(heatmapTitle) +
+          ggplot2::theme_minimal() + # I added this option 
+          ggplot2::theme(plot.title = ggplot2::element_text(family="Calibri", face="bold", size=13, hjust=0.5))
+        
+        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 640)
+        return(p2)
+      } else {
+        showModal(
+          shinyjqui::jqui_draggable(
+            heatmapInfoModal_RCD()
+          )
+        )
+        return(NULL)
+      }
+    })
+    
+    output$heatmapRCD <- plotly::renderPlotly({
+      req(heatmap_obj())
+      heatmap_obj()
+    })
+    
+    output$layout.rcd <- renderPlot({
+      #reactive_layoutSPD()$out_layout
+      req(RowCol_reactive())
+      req(input$typlotrcd)
+      if (input$typlotrcd == 1) {
+        reactive_layoutROWCOL()$out_layout
+      } else if (input$typlotrcd == 2) {
+        reactive_layoutROWCOL()$out_layoutPlots
+      }
     })
     
     output$rowcolD <- DT::renderDataTable({

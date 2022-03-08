@@ -310,6 +310,7 @@ mod_FD_server <- function(id) {
     })
     
     simuData_fd <- reactive({
+      set.seed(input$myseed.reps)
       req(fd_reactive()$fieldBook)
       if(!is.null(valsfd$maxV.fd) && !is.null(valsfd$minV.fd) && !is.null(valsfd$trail.fd)) {
         max <- as.numeric(valsfd$maxV.fd)
@@ -351,12 +352,13 @@ mod_FD_server <- function(id) {
       
     })
     
-    kindNum <- reactive(
-      if (input$kindFD == "FD_RCBD") {
-        return(10)
-      } else {
-        return(8)
-      }
+    kindNum <- reactive({
+      req(input$setfactors)
+      setfactors.fd <- as.numeric(as.vector(unlist(strsplit(input$setfactors, ","))))
+      lengthfactors <- length(setfactors.fd)
+      #additionalColumns <- lengthfactors - 2
+      return(lengthfactors+8)
+    }
     )
     
     locNum <- reactive(
