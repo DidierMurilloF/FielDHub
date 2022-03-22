@@ -54,6 +54,16 @@ mod_pREPS_ui <- function(id){
                                       )
                                     )
                    ),
+                   fluidRow(
+                     column(6,style=list("padding-right: 28px;"),
+                            numericInput(inputId = ns("l.preps"), label = "Input # of Locations:", value = 1, min = 1)
+                     ),
+                     column(6,style=list("padding-left: 5px;"),
+                            selectInput(inputId = ns("locView.preps"), label = "Choose location to view:", choices = 1:1, selected = 1, multiple = FALSE)
+                     ),
+                     # column(6,style=list("padding-left: 5px;"),
+                     #        selectInput(inputId = ns("locView.preps"),label = "Choose location to view:", choices = 1:1, selected = 1, multiple = FALSE)
+                     # ),
                    selectInput(ns("planter_mov.preps"), label = "Plot Order Layout:",
                                choices = c("serpentine", "cartesian"), multiple = FALSE,
                                selected = "serpentine"),
@@ -83,7 +93,7 @@ mod_pREPS_ui <- function(id){
                      )
                    )
       ),
-      
+      ),
       mainPanel(
         width = 8,
         tabsetPanel(
@@ -97,6 +107,7 @@ mod_pREPS_ui <- function(id){
       )
     )
   )
+  
 }
     
 #' pREPS Server Functions
@@ -105,6 +116,20 @@ mod_pREPS_ui <- function(id){
 mod_pREPS_server <- function(id){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
+    # 
+    # # numberLocs <- NULL
+    # # updateNumericInput(session, "numberLocs", value = input$l.preps)
+    # 
+    # output$numberLocs <- reactive({
+    #   require(input$l.preps)
+    #   input$l.preps
+    # })
+    # outputOptions(output, 'numberLocs', suspendWhenHidden = FALSE)
+    # 
+    observeEvent(input$l.preps, {
+      loc_user_view <- 1:as.numeric(input$l.preps)
+      updateSelectInput(inputId = "locView.preps", choices = loc_user_view, selected = loc_user_view[1])
+    })
     
     getDataup <- reactive({
       if (input$owndataPREPS == 'Yes') {
@@ -192,17 +217,33 @@ mod_pREPS_server <- function(id){
       n.checks  <- NULL
       r.checks <- NULL
       niter <- 10000
+      locs <- as.numeric(input$l.preps)
+      pREPS <- vector(mode = "list", length = locs)
       
       OPTIM <- input$Optim.pREPS
       set.seed(preps.seed)
-      pREPS <- pREP(nrows = nrows, ncols = ncols, RepChecks = r.checks, checks = n.checks, seed = NULL,
-                    optim = OPTIM, niter = niter, data = gen.list) 
       
+      for (s in 1:locs) {
+      pREPS[[s]] <- pREP(nrows = nrows, ncols = ncols, RepChecks = r.checks, checks = n.checks, seed = NULL,
+                    optim = OPTIM, niter = niter, data = gen.list) 
+      }
+      return(pREPS)
+    })
+    
+    user_location <- reactive({
+      user_site <- as.numeric(input$locView.preps)
+      #user_site <- 1
+      loc_user_out <- pREPS_reactive()[[user_site]]
+      w_map <- loc_user_out$field.map
+      binary_field <- loc_user_out$binary.field
+      gen.entries <- loc_user_out$gen.entries
+      return(list(field.map = w_map, binary.field = binary_field, gen.entries = gen.entries, user_site = user_site))
     })
     
     
     output$BINARYpREPS <- DT::renderDT({
-      B <- pREPS_reactive()$binary.field
+      req(user_location()$binary.field)
+      B <- user_location()$binary.field
       df <- as.data.frame(B)
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
       DT::datatable(df,
@@ -217,16 +258,20 @@ mod_pREPS_server <- function(id){
                                                          c("gray",'yellow')))
     })
     
+  
+    
     output$dtpREPS <- DT::renderDataTable({
-      
-      w_map <- pREPS_reactive()$field.map
-      checks = as.vector(unlist(pREPS_reactive()$gen.entries[[1]]))
+      # user_site <- 1
+      # loc_user <- pREPS_reactive()[[user_site]]
+      # w_map <- loc_user$field.map
+      w_map <- user_location()$field.map
+      checks = as.vector(unlist(user_location()$gen.entries[[1]]))
       len_checks <- length(checks)
       colores <- c('royalblue','salmon', 'green', 'orange','orchid', 'slategrey',
                    'greenyellow', 'blueviolet','deepskyblue','gold','blue', 'red')
       
       df <- as.data.frame(w_map)
-      gens <- as.vector(unlist(pREPS_reactive()$gen.entries[[2]]))
+      gens <- as.vector(unlist(user_location()$gen.entries[[2]]))
       
       rownames(df) <- nrow(df):1
       # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE))
@@ -250,7 +295,9 @@ mod_pREPS_server <- function(id){
     
     
     split_name_PREPS <- reactive({
-      req(pREPS_reactive()$field.map)
+      first_loc <- pREPS_reactive()[[1]]
+      w_map <- first_loc$field.map
+      req(first_loc$field.map)
       req(input$nrows.preps, input$ncols.preps)
       nrows <- as.numeric(input$nrows.preps)
       ncols <- as.numeric(input$ncols.preps)
@@ -332,9 +379,6 @@ mod_pREPS_server <- function(id){
       len_a <- length(a)
       df <- as.data.frame(plot_num)
       rownames(df) <- nrow(df):1
-      # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-      #                           scrollX = TRUE, scrollY = "1000px"))
-      # DT::datatable(df) %>%
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "600px"))
       DT::datatable(df,
                     extensions = 'FixedColumns',
@@ -356,31 +400,51 @@ mod_pREPS_server <- function(id){
       req(input$planter_mov.preps)
       movement_planter <- input$planter_mov.preps
       
-      req(pREPS_reactive()$field.map)
-      req(pREPS_reactive()$binary.field)
+      # req(pREPS_reactive()$field.map)
+      # req(pREPS_reactive()$binary.field)
+      # req(user_location()$field.map)
+      # req(user_location()$binary.field)
       req(split_name_PREPS()$my_names)
       req(plot_number_PREPS()$w_map_letters1)
       
+      
+      
+      
       loc <- input$Location.preps
-      
-      random_entries_map <- as.matrix(pREPS_reactive()$field.map)
-      plot_number <- as.matrix(plot_number_PREPS()$w_map_letters1)
-      Col_checks <- as.matrix(pREPS_reactive()$binary.field)
-      my_names <- as.matrix(split_name_PREPS()$my_names)
-      
       my_data_VLOOKUP <- getDataup()$data_up.preps
+      ######## for #####
+      locs <- as.numeric(input$l.preps)
+      final_expt_fieldbook <- vector(mode = "list",length = locs)
+      location_names <- as.vector(unlist(strsplit(input$Location.preps, ",")))
+      if (length(location_names) != locs) location_names <- 1:locs
       
-      results_to_export <- list(random_entries_map, plot_number, Col_checks, my_names)
+      for (user_site in 1:locs) {
+        loc_user_out <- pREPS_reactive()[[user_site]]
+        
+        random_entries_map <- as.matrix(loc_user_out$field.map)
+        #random_entries_map <- as.matrix(user_location()$field.map)
+        plot_number <- as.matrix(plot_number_PREPS()$w_map_letters1)
+        Col_checks <- as.matrix(loc_user_out$binary.field)
+        #Col_checks <- as.matrix(user_location()$binary.field)
+        my_names <- as.matrix(split_name_PREPS()$my_names)
+        
+        results_to_export <- list(random_entries_map, plot_number, Col_checks, my_names)
+        
+        final_expt_export <- export_design(G = results_to_export, movement_planter =  movement_planter,
+                                           location = location_names[user_site], Year = 2020, data_file = my_data_VLOOKUP,
+                                           reps = FALSE)
+        
+        final_expt_export <- as.data.frame(final_expt_export)
+        final_expt_fieldbook[[user_site]] <- final_expt_export[, -11]
+        print(user_site)
+      }
       
-      final_expt_export <- export_design(G = results_to_export, movement_planter =  movement_planter,
-                                         location = loc, Year = 2020, data_file = my_data_VLOOKUP,
-                                         reps = FALSE)
+      final_fieldbook <- dplyr::bind_rows(final_expt_fieldbook)
       
-      final_expt_export <- as.data.frame(final_expt_export)
-      final_expt_export <- final_expt_export[, -11]
+      ######### end for #################################
       
-      ID <- 1:nrow(final_expt_export)
-      final_expt_export <- final_expt_export[, c(6,7,9,4,2,3,5,1,10)]
+      ID <- 1:nrow(final_fieldbook )
+      final_expt_export <- final_fieldbook[, c(6,7,9,4,2,3,5,1,10)]
       final_expt_export_F <- cbind(ID, final_expt_export)
       colnames(final_expt_export_F)[10] <- "TREATMENT"
       
@@ -478,6 +542,9 @@ mod_pREPS_server <- function(id){
         ROX_PREP <- as.numeric(valsPREP$ROX)
         ROY_PREP <- as.numeric(valsPREP$ROY)
         df.prep <- export_PREPS()$final_expt
+        loc_levels_factors <- levels(factor(df.prep$LOCATION, unique(df.prep$LOCATION)))
+        loc_user <- user_location()$user_site
+        df.prep <- subset(df.prep, LOCATION == loc_levels_factors[loc_user])
         fieldBook <- df.prep[, c(1,6,7,9)]
         req(input$nrows.preps)
         req(input$ncols.preps)
@@ -487,20 +554,31 @@ mod_pREPS_server <- function(id){
         nrows_prep <- as.numeric(input$nrows.preps)
         ncols_prep <- as.numeric(input$ncols.preps)
         seed_prep <- as.numeric(input$s.seed.preps)
-        dfSimulation <- AR1xAR1_simulation(nrows = nrows_prep, ncols = ncols_prep, ROX = ROX_PREP, ROY = ROY_PREP, 
-                                           minValue = minVal, maxValue = maxVal, fieldbook = fieldBook, 
-                                           trail = valsPREP$trail.prep, seed = seed_prep)
-        dfSimulation <- dfSimulation$outOrder
-        dataPrep <- export_PREPS()$final_expt
-        df.prep <- cbind(dataPrep, round(dfSimulation[,7],2))
-        colnames(df.prep)[11] <- as.character(valsPREP$trail.prep)
+        
+        locs <- as.numeric(input$l.preps)
+        df.prep_list <- vector(mode = "list", length = locs)
+        dfSimulationList <- vector(mode = "list", length = locs)
+        set.seed(seed_prep)
+        for (sites in 1:locs) {
+          dfSimulation <- AR1xAR1_simulation(nrows = nrows_prep, ncols = ncols_prep, ROX = ROX_PREP, ROY = ROY_PREP, 
+                                             minValue = minVal, maxValue = maxVal, fieldbook = fieldBook, 
+                                             trail = valsPREP$trail.prep, seed = NULL)
+          
+          dfSimulation <- dfSimulation$outOrder
+          dfSimulationList[[sites]] <- dfSimulation
+          dataPrep <- export_PREPS()$final_expt
+          df.prep <- cbind(dataPrep, round(dfSimulation[,7],2))
+          colnames(df.prep)[11] <- as.character(valsPREP$trail.prep)
+          df.prep_list[[sites]] <- df.prep
+        }
+        df.prep_locs <- dplyr::bind_rows(df.prep_list)
         v <- 1
       }else {
         dataPrep <- export_PREPS()$final_expt
         v <- 2
       }
       if (v == 1) {
-        return(list(df = df.prep, dfSimulation = dfSimulation))
+        return(list(df = df.prep_locs, dfSimulationList = dfSimulationList))
       }else if (v == 2) {
         return(list(df = dataPrep))
       }
@@ -517,10 +595,16 @@ mod_pREPS_server <- function(id){
     
     
     heatmap_obj <- reactive({
-      req(simuDataPREP()$dfSimulation)
+      req(simuDataPREP()$dfSimulationList)
+     # locs <- as.numeric(input$locView.preps)
+      loc_user <- user_location()$user_site
       if(input$heatmap_PREP){
+        #for (sites in 1:locs) {
         w <- as.character(valsPREP$trail.prep)
-        df <- simuDataPREP()$dfSimulation
+        df <- simuDataPREP()$dfSimulationList[[loc_user]]
+        df <- as.data.frame(df)
+        print(head(df))
+        print(simuDataPREP()$dfSimulationList)
         p1 <- ggplot2::ggplot(df, ggplot2::aes(x = df[,4], y = df[,3], fill = df[,7], text = df[,8])) + 
           ggplot2::geom_tile() +
           ggplot2::xlab("COLUMN") +
@@ -529,7 +613,7 @@ mod_pREPS_server <- function(id){
           viridis::scale_fill_viridis(discrete = FALSE)
         
         p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 710)
-        
+        #}
         return(p2)
       }
     })
@@ -537,6 +621,8 @@ mod_pREPS_server <- function(id){
     output$heatmap_prep <- plotly::renderPlotly({
       req(heatmap_obj())
       heatmap_obj()
+      # locs <- user_location()$user_site
+      # heatmap_obj()[locs]
     })
     
     output$downloadData.preps <- downloadHandler(

@@ -1,7 +1,7 @@
 #' @importFrom stats runif
 AR1xAR1_simulation <- function(nrows = NULL, ncols = NULL, ROX = NULL, ROY = NULL, minValue = NULL, 
                                maxValue = NULL, fieldbook = NULL, trail = NULL, seed = NULL) {
-  set.seed(seed)
+  if (!is.null(seed)) set.seed(seed) else set.seed(runif(1))
   rag <- diff(c(minValue, maxValue))
   sigma <- rag*0.15
   Beta <- sum(minValue, maxValue)/2
