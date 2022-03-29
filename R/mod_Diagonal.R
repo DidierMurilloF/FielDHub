@@ -23,6 +23,15 @@ mod_Diagonal_ui <- function(id){
                                 choices = c("Yes", "No"), selected = "No",
                                 inline = TRUE, width = NULL, choiceNames = NULL, choiceValues = NULL),
                    
+                   
+                   conditionalPanel(condition = "input.kindExpt == 'DBUDC'", ns = ns,
+                                    conditionalPanel("input.owndataDIAGONALS == 'No'", ns = ns,
+                                                     checkboxInput(inputId = ns("sameEntries"), 
+                                                                   label = "Use the same entries across experiments!", 
+                                                                   value = FALSE)
+                                                    ),
+                                    ),
+                   
                    conditionalPanel("input.owndataDIAGONALS == 'Yes'", ns = ns,
                                     fluidRow(
                                       column(7, style=list("padding-right: 28px;"),
@@ -233,6 +242,21 @@ mod_Diagonal_server <- function(id) {
           if (lines.db != sum(blocks)) shiny::validate('Sum of blocks may be equal to number of lines.')
           data_entry_UP$BLOCK <- c(rep("ALL", checks), rep(1:length(blocks), times = blocks))
           colnames(data_entry_UP) <- c("ENTRY", "NAME", "BLOCK")
+          
+          if (input$sameEntries) {
+            if (any(blocks != blocks[1])) shiny::validate("Blocks should have the same size")
+            # Names
+            ChecksNames <- paste(rep("CH", checks), 1:checks, sep = "")
+            nameLines <- rep(c(paste(rep("G", blocks[1]), (2 + 1):(blocks[1] + 2), sep = "")), times = length(blocks))
+            NAMES <- c(ChecksNames, nameLines)
+            # Entries
+            ChecksENTRIS <- 1:checks
+            nameEntries <- rep((checks + 1):(blocks[1] + checks), times = length(blocks))
+            ENTRIES <- c(ChecksENTRIS, nameEntries)
+            data_entry_UP$NAME <- NAMES
+            data_entry_UP$ENTRY <- ENTRIES
+          }
+          
           if (Option_NCD == TRUE) {
             data_entry1 <- data_entry_UP[(checks + 1):nrow(data_entry_UP), ]
             Block_levels <- suppressWarnings(as.numeric(levels(as.factor(data_entry1$BLOCK))))
