@@ -14,11 +14,11 @@ planter_transform <- function(plots = NULL, planter = "serpentine", cols = NULL,
       repCols <- cols/units
     }else repCols <- cols/n_Reps
     nt <- length(PLOTS)/n_Reps
-    RPLOTS <- FielDHub:::split_vectors(x = PLOTS, len_cuts = rep(rep(nt, n_Reps), each = 1))
+    RPLOTS <- split_vectors(x = PLOTS, len_cuts = rep(rep(nt, n_Reps), each = 1))
     rep_breaks <- vector(mode = "list", length = n_Reps)
     for (nreps in 1:n_Reps) {
       nCuts <- length(RPLOTS[[nreps]]) / repCols
-      rep_breaks[[nreps]] <- FielDHub:::split_vectors(x = RPLOTS[[nreps]], len_cuts = rep(repCols, each = nCuts))
+      rep_breaks[[nreps]] <- split_vectors(x = RPLOTS[[nreps]], len_cuts = rep(repCols, each = nCuts))
     }
     lngt1 <- 1:length(rep_breaks)
     lngt2 <- 1:length(rep_breaks[[1]])
@@ -34,7 +34,7 @@ planter_transform <- function(plots = NULL, planter = "serpentine", cols = NULL,
     }
   } else {
     nCuts <- length(PLOTS) / cols
-    breaks <- FielDHub:::split_vectors(x = PLOTS, len_cuts = rep(cols, each = nCuts))
+    breaks <- split_vectors(x = PLOTS, len_cuts = rep(cols, each = nCuts))
     lngt <- 1:length(breaks)
     new_breaks <- vector(mode = "list", length = nCuts)
     for (n in lngt) {

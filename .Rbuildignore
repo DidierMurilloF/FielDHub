@@ -19,3 +19,5 @@ $run_dev.*
 ^DExample.PNG$
 ^CONTRIBUTING\.md$
 ^rsconnect$
+^Dockerfile$
+^\.dockerignore$
