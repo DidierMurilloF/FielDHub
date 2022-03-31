@@ -54,8 +54,18 @@ mod_RCBD_augmented_ui <- function(id){
                      )
                      
                    ),
-                   numericInput(inputId = ns("l.arcbd"), label = "Input # of Locations:",
-                                value = 1, min = 1, max = 100),
+                   fluidRow(
+                     column(6,style=list("padding-right: 28px;"),
+                            numericInput(inputId = ns("l.arcbd"), label = "Input # of Locations:",
+                                         value = 1, min = 1, max = 100),
+                     ),
+                     column(6,style=list("padding-left: 5px;"),
+                            selectInput(inputId = ns("locView.arcbd"), label = "Choose location to view:",
+                                        choices = 1:1, selected = 1, multiple = FALSE),
+                     )
+                     
+                   ),
+                   
                    
                    selectInput(inputId = ns("planter_mov1_a_rcbd"), label = "Plot Order Layout:",
                                choices = c("serpentine", "cartesian"), multiple = FALSE,
@@ -109,6 +119,11 @@ mod_RCBD_augmented_ui <- function(id){
 mod_RCBD_augmented_server <- function(id) {
   moduleServer( id, function(input, output, session) {
     ns <- session$ns
+    
+    observeEvent(input$l.arcbd, {
+      loc_user_view <- 1:as.numeric(input$l.arcbd)
+      updateSelectInput(inputId = "locView.arcbd", choices = loc_user_view, selected = loc_user_view[1])
+    })
     
     observeEvent(input$random, {
       # Show a modal when the button is pressed
@@ -234,11 +249,18 @@ mod_RCBD_augmented_server <- function(id) {
 
     })
     
+    locNum <- reactive(
+      return(as.numeric(input$locView.arcbd))
+    )
+    
     output$dt2_a_rcbd <- DT::renderDT({
+      print(locNum())
        
        req(getDataup_a_rcbd()$dataUp_a_rcbd)
        req(input$blocks_a_rcbd)
-       r_map <- rcbd_augmented_reactive()$layoutRandom
+       #r_map <- rcbd_augmented_reactive()$layoutRandom
+       r_map <- rcbd_augmented_reactive()$layout_random_sites[[locNum()]]
+       #r_mapLoc <- r_map$L
        checks <- 1:input$checks_a_rcbd
        b <- as.numeric(input$blocks_a_rcbd)
        len_checks <- length(checks)

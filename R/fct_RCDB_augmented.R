@@ -80,7 +80,7 @@
 RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter = "serpentine", 
                            plotNumber = 101, exptName  = NULL, seed = NULL, locationNames = NULL,
                            repsExpt = 1, random = TRUE, data = NULL) {
-
+  
   if (all(c("serpentine", "cartesian") != planter)) {
     stop("Input planter choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
   }
@@ -130,6 +130,7 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
   expt <- 1:repsExpt
   layout1_loc1 <- vector(mode = "list", length = 1)
   plot_loc1 <- vector(mode = "list", length = 1)
+  layout_random_sites <- vector(mode = "list", length = l)
   for (locations in loc) {
     sky <- length(expt)
     layout1_expt <- vector(mode = "list", length = repsExpt)
@@ -309,6 +310,7 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
     }
     
     outputDesign_loc[[locations]] <- as.data.frame(outputDesign)
+    layout_random_sites[[locations]] <- layout1
   }
   ##########################################################################################
   fieldbook <- dplyr::bind_rows(outputDesign_loc)
@@ -331,7 +333,7 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
   infoDesign <- list(Blocks = b, plotsPerBlock = plotsPerBlock, Checks = DataChecks, 
                      entries = entries, repsExpt = repsExpt, numberLocations = l, 
                      Fillers = Fillers, seed = seed, idDesign = 14)
-  output <- list(infoDesign = infoDesign, layoutRandom = layout_loc1,
+  output <- list(infoDesign = infoDesign, layoutRandom = layout_loc1, layout_random_sites = layout_random_sites,
                  plotNumber = Plot_loc1, exptNames = my_names, data_entry = data, 
                  fieldBook = fieldbook)
   class(output) <- "FielDHub"
