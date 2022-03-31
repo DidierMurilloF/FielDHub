@@ -36,7 +36,6 @@ mod_Diagonal_ui <- function(id){
                                     )              
                    ),
                    
-                   #numericInput(inputId = ns("myseed"), label = "Seed Number:", value = 1, min = 1),
                    conditionalPanel("input.owndataDIAGONALS == 'No'", ns = ns,
                                     conditionalPanel(condition = "input.kindExpt !='DBUDC'", ns = ns,
                                                      numericInput(inputId = ns("lines.d"), label = "Input # of Entries:",
@@ -56,8 +55,6 @@ mod_Diagonal_ui <- function(id){
                                     )
                    ),
                    
-                   #textInput(ns("expt_name"), "Input Experiment Name:", value = "Expt1"),
-                   
                    fluidRow(
                      column(6,style=list("padding-right: 28px;"),
                             numericInput(inputId = ns("n_rows"), label = "Input # of Rows:",
@@ -71,7 +68,8 @@ mod_Diagonal_ui <- function(id){
 
                    fluidRow(
                      column(6,style=list("padding-right: 28px;"),
-                            selectInput(inputId = ns("Dropdown"), label = "Choose of diagonal checks:", choices = "")
+                            selectInput(inputId = ns("Dropdown"), label = "Choose of diagonal checks:", 
+                                        choices = "")
                      ),
                      column(6,style=list("padding-left: 5px;"),
                             selectInput(inputId = ns("checks"), label = "Input # of Checks:",
@@ -80,35 +78,37 @@ mod_Diagonal_ui <- function(id){
                    ),
                    fluidRow(
                      column(6,style=list("padding-right: 28px;"),
-                            numericInput(inputId = ns("l.diagonal"), label = "Input # of Locations:", value = 1, min = 1)
+                            numericInput(inputId = ns("l.diagonal"), label = "Input # of Locations:", 
+                                         value = 1, min = 1)
                      ),
                      column(6,style=list("padding-left: 5px;"),
-                            selectInput(inputId = ns("locView.diagonal"), label = "Choose location to view:", choices = 1:1, selected = 1, multiple = FALSE)
+                            selectInput(inputId = ns("locView.diagonal"), label = "Choose location to view:", 
+                                        choices = 1:1, selected = 1, multiple = FALSE)
                      )
                    ),
                    conditionalPanel(condition = "input.kindExpt !='SUDC'", ns = ns,
                                     
-                                    fluidRow(
-                                      column(6,style=list("padding-right: 28px;"),
-                                             selectInput(inputId = ns("myWay"), label = "Blocks Layout:",
-                                                         choices = c("By Column", "By Row"), multiple = FALSE,
-                                                         selected = "By Row")
-                                      ),
-                                      column(6,style=list("padding-left: 5px;"),
-                                             selectInput(inputId = ns("planter_mov"), label = "Plot Order Layout:",
-                                                         choices = c("serpentine", "cartesian"), multiple = FALSE,
-                                                         selected = "serpentine")
-                                      )
-                                      
-                                    ),
-                                    conditionalPanel(condition = "input.kindExpt == 'DBUDC'", ns = ns,
-                                                     
-                                                     conditionalPanel(condition = "input.myWay == 'By Row'", ns = ns,
-                                                                      
-                                                                      selectInput(inputId = ns("Block_Fillers"), label = "Which Blocks:",
-                                                                                  choices = "Block_Fillers", multiple = TRUE, selected = "")               
-                                                     )
-                                    )
+                      fluidRow(
+                        column(6,style=list("padding-right: 28px;"),
+                               selectInput(inputId = ns("myWay"), label = "Blocks Layout:",
+                                           choices = c("By Column", "By Row"), multiple = FALSE,
+                                           selected = "By Row")
+                        ),
+                        column(6,style=list("padding-left: 5px;"),
+                               selectInput(inputId = ns("planter_mov"), label = "Plot Order Layout:",
+                                           choices = c("serpentine", "cartesian"), multiple = FALSE,
+                                           selected = "serpentine")
+                        )
+                        
+                      ),
+                      # conditionalPanel(condition = "input.kindExpt == 'DBUDC'", ns = ns,
+                      #                  
+                      #                  conditionalPanel(condition = "input.myWay == 'By Row'", ns = ns,
+                      #                                   
+                      #                                   selectInput(inputId = ns("Block_Fillers"), label = "Which Blocks:",
+                      #                                               choices = "Block_Fillers", multiple = TRUE, selected = "")               
+                      #                  )
+                      # )
                    ),
                    conditionalPanel(condition = "input.kindExpt == 'SUDC'", ns = ns,
                                     selectInput(inputId = ns("planter_mov1"), label = "Plot Order Layout:",
@@ -136,29 +136,29 @@ mod_Diagonal_ui <- function(id){
                    ),
                    
                    
-                   fluidRow(
-                     column(6,
-                            actionButton(inputId = ns("RUN.diagonal"), "Run!", icon = icon("cocktail"), width = '100%'),
-                     ),
-                     column(6,
-                            actionButton(ns("Simulate_Diagonal"), "Simulate!", icon = icon("cocktail"), 
-                                         width = '100%')
-                     )
-                     
-                   ), 
-                   br(),
-                   downloadButton(ns("downloadData_Diagonal"), "Save Experiment", style = "width:100%"),
-                   
                    # fluidRow(
                    #   column(6,
-                   #          downloadButton(ns("downloadData_Diagonal"), "Save Experiment", style = "width:100%")
+                   #          actionButton(inputId = ns("RUN.diagonal"), "Run!", icon = icon("cocktail"), width = '100%'),
                    #   ),
                    #   column(6,
                    #          actionButton(ns("Simulate_Diagonal"), "Simulate!", icon = icon("cocktail"), 
                    #                       width = '100%')
                    #   )
-                   # 
-                   # ),          
+                   #   
+                   # ), 
+                   # br(),
+                   # downloadButton(ns("downloadData_Diagonal"), "Save Experiment", style = "width:100%"),
+                   
+                   fluidRow(
+                     column(6,
+                            downloadButton(ns("downloadData_Diagonal"), "Save Experiment", style = "width:100%")
+                     ),
+                     column(6,
+                            actionButton(ns("Simulate_Diagonal"), "Simulate!", icon = icon("cocktail"),
+                                         width = '100%')
+                     )
+
+                   ),
       ),
       
       mainPanel(
@@ -172,9 +172,7 @@ mod_Diagonal_ui <- function(id){
                    )
           ),
           tabPanel("Diagonal Checks Layout", DT::DTOutput(ns("checks_layout"))),
-          tabPanel("Randomized Field",
-                   #column(width = 3, downloadButton(ns("reportRandom"))),
-                   DT::DTOutput(ns("randomized_layout"))),
+          tabPanel("Randomized Field", DT::DTOutput(ns("randomized_layout"))),
           tabPanel("Plot Number Field", DT::DTOutput(ns("plot_number_layout"))),
           tabPanel("Expt Name", DT::DTOutput(ns("name_layout"))),
           tabPanel("Field Book", DT::DTOutput(ns("dt5"))),
@@ -222,8 +220,8 @@ mod_Diagonal_server <- function(id) {
             }
             dim_data <- sum(data_dim_each_block)
             selected <- length(Block_levels)
-            updateSelectInput(session, inputId = 'Block_Fillers', label = "Which Blocks will have Fil:",
-                              choices = Block_levels, selected = Block_levels[selected])
+            # updateSelectInput(session, inputId = 'Block_Fillers', label = "Which Blocks will have Fil:",
+            #                   choices = Block_levels, selected = Block_levels[selected])
           }
         }
       }else {
@@ -262,8 +260,8 @@ mod_Diagonal_server <- function(id) {
             }
             dim_data <- sum(data_dim_each_block)
             selected <- length(Block_levels)
-            updateSelectInput(session, inputId = 'Block_Fillers', label = "Which Blocks will have Fil:",
-                              choices = Block_levels, selected = Block_levels[selected])
+            # updateSelectInput(session, inputId = 'Block_Fillers', label = "Which Blocks will have Fil:",
+            #                   choices = Block_levels, selected = Block_levels[selected])
           }
         }
         
@@ -275,6 +273,19 @@ mod_Diagonal_server <- function(id) {
       list(data_entry = data_entry_UP, dim_data_entry = dim_data_entry, dim_data_1 = dim_data_1)
       
     })
+    
+    blocks_length <- reactive({
+      req(getData()$data_entry)
+      if (input$kindExpt == "DBUDC") {
+        df <- getData()$data_entry
+        Block_levels <- suppressWarnings(as.numeric(levels(as.factor(df$BLOCK))))
+        Block_levels <- na.omit(Block_levels)
+        len_blocks <- length(Block_levels)
+        return(len_blocks)
+      } else return(NULL)
+    })
+    
+    # blocks_to_fillers <- as.numeric(blocks_length())
     
     entryListFormat_SUDC <- data.frame(ENTRY = 1:9, NAME = c(c("CHECK1", "CHECK2","CHECK3"), paste("Genotype", LETTERS[1:6], sep = "")))
     entryListFormat_DBUDC <- data.frame(ENTRY = 1:9, NAME = c(c("CHECK1", "CHECK2","CHECK3"), paste("Genotype", LETTERS[1:6], sep = "")),
@@ -350,7 +361,7 @@ mod_Diagonal_server <- function(id) {
                         Option_NCD = Option_NCD, Visual_ch = input$Visual_ch, visualCheck = FALSE, 
                         kindExpt = input$kindExpt, myWay = input$myWay, planter_mov1 = planter_mov, 
                         data = getData()$data_entry, dim_data = getData()$dim_data_entry,
-                        dim_data_1 = getData()$dim_data_1, Block_Fillers = input$Block_Fillers)
+                        dim_data_1 = getData()$dim_data_1, Block_Fillers = blocks_length())
     }) 
     
     rand_checks <- reactive({
@@ -412,7 +423,7 @@ mod_Diagonal_server <- function(id) {
       if (multi) req(getData()$data_entry)
       req(user_location()$map_checks)
       w_map <- user_location()$map_checks
-      print(w_map)
+      # print(w_map)
       if (is.null(w_map))
         return(NULL)
       
@@ -477,8 +488,8 @@ mod_Diagonal_server <- function(id) {
       }
     })
     
-    rand_lines <- eventReactive(input$RUN.diagonal, {
-    #rand_lines <- reactive({ 
+    # rand_lines <- eventReactive(input$RUN.diagonal, {
+    rand_lines <- reactive({ 
       Option_NCD <- TRUE
       req(input$n_rows, input$n_cols)
       req(available_percent_table()$dt)
@@ -545,7 +556,7 @@ mod_Diagonal_server <- function(id) {
                                           planter = input$planter_mov)
             }else if(input$kindExpt == "DBUDC" && Option_NCD == TRUE) {
               req(available_percent_table()$data_dim_each_block)
-              Block_Fillers <- as.numeric(input$Block_Fillers)
+              Block_Fillers <- as.numeric(blocks_length())
               data_random <- get_random(n_rows = input$n_rows, n_cols = input$n_cols, d_checks = my_split_r,
                                         reps = NULL, Fillers = FALSE, col_sets = NULL, row_sets = my_row_sets,
                                         checks = checksEntries, data = data_entry, planter_mov  = input$planter_mov,
@@ -576,7 +587,7 @@ mod_Diagonal_server <- function(id) {
       user_site <- as.numeric(input$locView.diagonal)
       loc_view_user <- rand_lines()[[user_site]]
       r_map <- loc_view_user$rand
-      print(r_map)
+      # print(r_map)
       checksEntries <- getChecks()$checksEntries
       if (is.null(r_map))
         return(NULL)
@@ -935,7 +946,7 @@ mod_Diagonal_server <- function(id) {
             datos_name <- split_name_reactive()$my_names 
             plot_n_start <- as.numeric(as.vector(unlist(strsplit(input$plot_start, ",")))) 
             data.dim.each <- available_percent_table()$data_dim_each_block
-            Block_Fillers <- as.numeric(input$Block_Fillers) 
+            Block_Fillers <- as.numeric(blocks_length()) 
             
             my_split_plot_nub <- plot_number_fillers(movement_planter = movement_planter, plot_n_start = plot_n_start,
                                                      datos = datos_name, expe_names = expe_names, ByRow = TRUE,
@@ -973,7 +984,7 @@ mod_Diagonal_server <- function(id) {
           datos_name <- split_name_reactive()$my_names 
           plot_n_start <- as.numeric(as.vector(unlist(strsplit(input$plot_start, ",")))) 
           data.dim.each <- available_percent_table()$data_dim_each_block
-          Block_Fillers <- as.numeric(input$Block_Fillers) 
+          Block_Fillers <- as.numeric(blocks_length()) 
           
           my_split_plot_nub <- plot_number_fillers(movement_planter = input$planter_mov, plot_n_start = plot_n_start,
                                                    datos = datos_name, expe_names = expe_names, ByRow = TRUE,
@@ -1217,7 +1228,7 @@ mod_Diagonal_server <- function(id) {
       final_fieldbook_all_sites <- cbind(ID, final_fieldbook)
       colnames(final_fieldbook_all_sites)[10] <- "TREATMENT"
       
-      print(head(final_fieldbook_all_sites, 6))
+      # print(head(final_fieldbook_all_sites, 6))
 
       return(list(final_expt = final_fieldbook_all_sites))
       
