@@ -16,6 +16,7 @@ optimized_arrangement(
   seed = NULL,
   exptName = NULL,
   locationNames = NULL,
+  optim = TRUE,
   data = NULL
 )
 }
@@ -41,6 +42,8 @@ optimized_arrangement(
 \item{exptName}{(optional) Name of the experiment.}
 
 \item{locationNames}{(optional) Name for each location.}
+
+\item{optim}{By default \code{optim = TRUE}.}
 
 \item{data}{(optional) Data frame with 3 columns: \code{ENTRY | NAME | REPS}.}
 }

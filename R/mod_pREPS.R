@@ -588,7 +588,7 @@ mod_pREPS_server <- function(id){
     heatmap_obj <- reactive({
       req(simuDataPREP()$dfSimulationList)
       loc_user <- user_location()$user_site
-      if(input$heatmap_PREP){
+      if(input$heatmap_PREP) {
         w <- as.character(valsPREP$trail.prep)
         df <- simuDataPREP()$dfSimulationList[[loc_user]]
         df <- as.data.frame(df)

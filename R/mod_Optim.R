@@ -26,7 +26,7 @@ mod_Optim_ui <- function(id) {
                                                           selected = ","))
                                     )            
                    ),
-                   checkboxInput(inputId = ns("Optim.spatial"), label = "Get Optim :)", value = TRUE),
+                   # checkboxInput(inputId = ns("Optim.spatial"), label = "Get Optim :)", value = TRUE),
                    
                    numericInput(ns("checks.s"), label = "Input # of Checks:", value = 3, min = 1),
                    
@@ -59,6 +59,16 @@ mod_Optim_ui <- function(id) {
                    
                    selectInput(ns("planter_mov.spatial"), label = "Plot Order Layout:",
                                choices = c("serpentine", "cartesian"), multiple = FALSE, selected = "serpentine"),
+                   fluidRow(
+                     column(6,style=list("padding-right: 28px;"),
+                            numericInput(inputId = ns("l.optim"), label = "Input # of Locations:", 
+                                         value = 1, min = 1)
+                     ),
+                     column(6,style=list("padding-left: 5px;"),
+                            selectInput(inputId = ns("locView.optim"), label = "Choose location to view:", 
+                                        choices = 1:1, selected = 1, multiple = FALSE)
+                     )
+                   ),
                    fluidRow(
                      column(6,style=list("padding-right: 28px;"),
                             numericInput(ns("seed.spatial"), label = "Seed Number:", value = 1, min = 1)
@@ -110,9 +120,14 @@ mod_Optim_ui <- function(id) {
 #' Optim Server Functions
 #'
 #' @noRd 
-mod_Optim_server <- function(id){
+mod_Optim_server <- function(id) {
   moduleServer(id, function(input, output, session){
     ns <- session$ns
+    
+    observeEvent(input$l.optim, {
+      loc_user_view <- 1:as.numeric(input$l.optim)
+      updateSelectInput(inputId = "locView.optim", choices = loc_user_view, selected = loc_user_view[1])
+    })
     
     getDataup.spatiaL <- reactive({
       if (input$owndataOPTIM == "Yes") {
@@ -214,29 +229,47 @@ mod_Optim_server <- function(id){
     Spatial_Checks <- reactive({
       
       req(getDataup.spatiaL()$data_up.spatial)
+      req(input$plot_start.spatial)
       req(input$nrows.s, input$ncols.s)
       req(input$seed.spatial)
       seed.spatial <- as.numeric(input$seed.spatial)
       nrows <- input$nrows.s
       ncols <- input$ncols.s
       niter <- 1000
+      plotNumber <- as.numeric(input$plot_start.spatial)
+      movement_planter <- input$planter_mov.spatial
       
       data.spatial <- getDataup.spatiaL()$data_up.spatial
+      l.optim <- as.numeric(input$l.optim)
+      expt_name <- as.character(input$expt_name.spatial)
       
-      OPTIM <- input$Optim.spatial
-      
-      mydesign <- pREP(nrows = nrows, ncols = ncols, RepChecks = r.checks, checks = n.checks,
-                       seed = seed.spatial, optim = OPTIM, niter = niter, data = data.spatial)
+      plotNumber <- as.numeric(as.vector(unlist(strsplit(input$plot_start.spatial, ","))))
+      print(plotNumber)
+      site_names <- as.character(as.vector(unlist(strsplit(input$Location.spatial, ","))))
 
+      optimized <- optimized_arrangement(nrows = nrows,
+                                         ncols = ncols, 
+                                         amountChecks = r.checks, 
+                                         checks = n.checks,
+                                         locationNames = site_names,
+                                         planter = movement_planter,
+                                         plotNumber = plotNumber,
+                                         l = l.optim, 
+                                         exptName = expt_name,
+                                         optim = TRUE,
+                                         seed = seed.spatial, 
+                                         data = data.spatial)
+    })
+    
+    user_site_selection <- reactive({
+      return(as.numeric(input$locView.optim))
     })
 
     output$BINARY <- DT::renderDT({
-      B <- Spatial_Checks()$binary.field
+      req(Spatial_Checks())
+      B <- Spatial_Checks()$binaryField[[user_site_selection()]]
       df <- as.data.frame(B)
-      # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-      #                           scrollX = TRUE, scrollY = "650px"))
-      # #DT::datatable(df)
-      # DT::datatable(df) %>%
+      rownames(df) <- nrow(df):1
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
       DT::datatable(df,
                     extensions = 'FixedColumns',
@@ -251,18 +284,17 @@ mod_Optim_server <- function(id){
     })
     
     output$RFIELD <- DT::renderDT({
-      w_map <- Spatial_Checks()$field.map
-      checks = as.vector(Spatial_Checks()$gen.entries[[1]])
+      req(Spatial_Checks())
+      w_map <- Spatial_Checks()$layoutRandom[[user_site_selection()]]
+      #print(w_map)
+      checks = as.vector(Spatial_Checks()$genEntries[[1]])
       len_checks <- length(checks)
       colores <- c('royalblue','salmon', 'green', 'orange','orchid', 'slategrey',
                    'greenyellow', 'blueviolet','deepskyblue','gold','blue', 'red')
-      gens <- as.vector(Spatial_Checks()$gen.entries[[2]])
+      gens <- as.vector(Spatial_Checks()$genEntries[[2]])
       df <- as.data.frame(w_map)
       rownames(df) <- nrow(df):1
-      # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-      #                           scrollX = TRUE, scrollY = "650px"))
-      # 
-      # DT::datatable(df) %>%
+      colnames(df) <- paste0('V', 1:ncol(df))
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
       DT::datatable(df,
                     extensions = 'FixedColumns',
@@ -280,7 +312,7 @@ mod_Optim_server <- function(id){
     
     
     split_name_spatial <- reactive({
-      req(Spatial_Checks()$field.map)
+      req(Spatial_Checks())
       req(input$nrows.s, input$ncols.s)
       nrows <- as.numeric(input$nrows.s)
       ncols <- as.numeric(input$ncols.s)
@@ -304,9 +336,6 @@ mod_Optim_server <- function(id){
       }else Name_expt = paste0(rep("Expt1", times = blocks), 1:blocks)
       df <- as.data.frame(my_names)
       rownames(df) <- nrow(df):1
-      # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-      #                           scrollX = TRUE, scrollY = scrollY(input$nrows.s)))
-      # DT::datatable(df) %>%
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
       DT::datatable(df,
                     extensions = 'FixedColumns',
@@ -320,38 +349,13 @@ mod_Optim_server <- function(id){
       
     })
     
-    plot_number_spatial <- reactive({
-      req(input$plot_start.spatial)
-      req(input$nrows.s, input$ncols.s)
-      req(split_name_spatial()$my_names)
-      datos_name <- split_name_spatial()$my_names
-      datos_name < as.matrix(datos_name)
-      nrows <- input$nrows.s; ncols <- input$ncols.s
-      plot_n_start <- as.numeric(input$plot_start.spatial)
-      movement_planter <- input$planter_mov.spatial
-      blocks = 1
-      if (input$expt_name.spatial != "") {
-        Name_expt <- input$expt_name.spatial 
-      }else Name_expt = paste0(rep("Expt1", times = blocks), 1:blocks)
-      
-      my_split_plot_nub <- plot_number(movement_planter = movement_planter, n_blocks = blocks,
-                                         n_rows = nrows, n_cols = ncols, plot_n_start = plot_n_start,
-                                         datos = datos_name, expe_name = Name_expt, ByRow = FALSE,
-                                         my_row_sets = NULL, ByCol = TRUE, my_col_sets = ncols)
-  
-    })
-    
-    
     output$PLOTFIELD <- DT::renderDT({
-      req(plot_number_spatial()$w_map_letters1)
-      plot_num <- plot_number_spatial()$w_map_letters1
+      req(Spatial_Checks())
+      plot_num <- Spatial_Checks()$plotNumber[[user_site_selection()]]
       a <- as.vector(as.matrix(plot_num))
       len_a <- length(a)
       df <- as.data.frame(plot_num)
       rownames(df) <- nrow(df):1
-      # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-      #                           scrollX = TRUE, scrollY = "650px"))
-      # DT::datatable(df) %>%
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
       DT::datatable(df,
                     extensions = 'FixedColumns',
@@ -364,39 +368,6 @@ mod_Optim_server <- function(id){
                     backgroundColor = DT::styleEqual(a, 
                                                  rep('yellow', length(a)))
         )
-    })
-    
-    ####### Export the experiment ############################
-    
-    export_spatial <- reactive({
-      req(getDataup.spatiaL()$data_up.spatial)
-      req(input$Location.spatial)
-      req(input$planter_mov.spatial)
-      movement_planter <- input$planter_mov.spatial
-      req(Spatial_Checks()$field.map)
-      req(Spatial_Checks()$binary.field)
-      req(split_name_spatial()$my_names)
-      req(plot_number_spatial()$w_map_letters1)
-      loc <- input$Location.spatial
-      random_entries_map <- as.matrix(Spatial_Checks()$field.map)
-      plot_number <- as.matrix(plot_number_spatial()$w_map_letters1)
-      Col_checks <- as.matrix(Spatial_Checks()$binary.field)
-      my_names <- as.matrix(split_name_spatial()$my_names)
-    
-      my_data_VLOOKUP <- getDataup.spatiaL()$data_up.spatial
-      results_to_export <- list(random_entries_map, plot_number, Col_checks, my_names)
-      final_expt_export <- export_design(G = results_to_export, movement_planter =  movement_planter,
-                                             location = loc, Year = 2020,
-                                             data_file = my_data_VLOOKUP, reps = FALSE)
-      final_expt_export <- as.data.frame(final_expt_export)
-      final_expt_export <- final_expt_export[, -11]
-      ID <- 1:nrow(final_expt_export)
-      final_expt_export <- final_expt_export[, c(6,7,9,4,2,3,5,1,10)]
-      final_expt_export_F <- cbind(ID, final_expt_export)
-      colnames(final_expt_export_F)[10] <- "TREATMENT"
-      
-      list(final_expt = final_expt_export_F)
-      
     })
     
     valsOPTIM <- reactiveValues(ROX = NULL, ROY = NULL, trail.optim = NULL, minValue = NULL,
@@ -446,7 +417,7 @@ mod_Optim_server <- function(id){
     }
     
     observeEvent(input$Simulate.optim, {
-      req(export_spatial()$final_expt)
+      req(Spatial_Checks()$fieldBook)
       showModal(
         shinyjqui::jqui_draggable(
           simuModal.OPTIM()
@@ -480,31 +451,49 @@ mod_Optim_server <- function(id){
     })
     
     simuDataOPTIM <- reactive({
-      req(export_spatial()$final_expt)
+      req(Spatial_Checks()$fieldBook)
       if(!is.null(valsOPTIM$maxValue) && !is.null(valsOPTIM$minValue) && !is.null(valsOPTIM$trail.optim)) {
         maxVal <- as.numeric(valsOPTIM$maxValue)
         minVal <- as.numeric(valsOPTIM$minValue)
         ROX_O <- as.numeric(valsOPTIM$ROX)
         ROY_O <- as.numeric(valsOPTIM$ROY)
-        df.optim <- export_spatial()$final_expt
-        fieldBook <- df.optim[, c(1,6,7,9)]
+        locs <- as.numeric(input$l.optim)
+        df_optim <- Spatial_Checks()$fieldBook
+        loc_levels_factors <- levels(factor(df_optim$LOCATION, unique(df_optim$LOCATION)))
+        print(loc_levels_factors)
         nrows.s <- as.numeric(input$nrows.s)
         ncols.s <- as.numeric(input$ncols.s)
         seed.s <- as.numeric(input$seed.spatial)
-        dfSimulation <- AR1xAR1_simulation(nrows = nrows.s, ncols = ncols.s, ROX = ROX_O, ROY = ROY_O, minValue = minVal, 
-                                           maxValue = maxVal, fieldbook = fieldBook, trail = valsOPTIM$trail.optim, 
-                                           seed = seed.s)
-        dfSimulation <- dfSimulation$outOrder
-        dataOptim <- export_spatial()$final_expt
-        df.optim <- cbind(dataOptim, round(dfSimulation[,7],2))
-        colnames(df.optim)[11] <- as.character(valsOPTIM$trail.optim)
+        
+        df_optim_list <- vector(mode = "list", length = locs)
+        dfSimulationList <- vector(mode = "list", length = locs)
+        do_sites <- 1:locs
+        z <- 1
+        set.seed(seed.s)
+        for (sites in do_sites) {
+          df_loc <- subset(df_optim, LOCATION == loc_levels_factors[z])
+          fieldBook <- df_loc[, c(1,6,7,9)]
+          dfSimulation <- AR1xAR1_simulation(nrows = nrows.s, ncols = ncols.s, ROX = ROX_O, ROY = ROY_O, minValue = minVal, 
+                                             maxValue = maxVal, fieldbook = fieldBook, trail = valsOPTIM$trail.optim, 
+                                             seed = NULL)
+          dfSimulation <- dfSimulation$outOrder
+          dfSimulationList[[sites]] <- dfSimulation
+          # print(dfSimulationList[[sites]])
+          dataOptim <- Spatial_Checks()$fieldBook
+          df_optim_simu <- cbind(dataOptim, round(dfSimulation[,7],2))
+          colnames(df_optim_simu)[11] <- as.character(valsOPTIM$trail.optim)
+          df_optim_list[[sites]] <- df_optim_simu 
+          z <- z + 1
+        }
+        df_optim_locs <- dplyr::bind_rows(df_optim_list)
         v <- 1
       }else {
-        dataOptim <- export_spatial()$final_expt
+        dataOptim <- Spatial_Checks()$fieldBook
         v <- 2
       }
+      #print(dfSimulationList[[user_site_selection()]])
       if (v == 1) {
-        return(list(df = df.optim, dfSimulation = dfSimulation))
+        return(list(df = df_optim_locs, dfSimulation = dfSimulationList))
       }else if (v == 2) {
         return(list(df = dataOptim))
       }
@@ -522,10 +511,11 @@ mod_Optim_server <- function(id){
     
     heatmap_obj <- reactive({
       req(simuDataOPTIM()$dfSimulation)
-      
       if(input$heatmap_s){
-        df <- simuDataOPTIM()$dfSimulation
         w <- as.character(valsOPTIM$trail.optim)
+        df <- simuDataOPTIM()$dfSimulation[[user_site_selection()]]
+        df <- as.data.frame(df)
+        print(head(df))
         p1 <- ggplot2::ggplot(df, ggplot2::aes(x = df[,4], y = df[,3], fill = df[,7], text = df[,8])) + 
           ggplot2::geom_tile() +
           ggplot2::xlab("COLUMN") +
@@ -559,9 +549,3 @@ mod_Optim_server <- function(id){
     
   })
 }
-    
-## To be copied in the UI
-# mod_Optim_ui("Optim_ui_1")
-    
-## To be copied in the server
-# mod_Optim_server("Optim_ui_1")

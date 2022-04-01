@@ -387,6 +387,7 @@ mod_Diagonal_server <- function(id) {
                                                      data = getData()$data_entry, data_dim_each_block = available_percent_table()$data_dim_each_block,
                                                      n_reps = input$n_reps, seed = NULL)
       }
+      # print(random_checks_locs[[1]])
       return(random_checks_locs)
     }) 
     
@@ -417,6 +418,16 @@ mod_Diagonal_server <- function(id) {
       
     })
     
+    output$data_input <- DT::renderDT({
+      my_data <- getData()$data_entry
+      df <- my_data
+      a <- ncol(df) - 1
+      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
+                                scrollX = TRUE, scrollY = "800px"))
+      DT::datatable(df, rownames = FALSE, caption = 'List of Entries.', options = list(
+        columnDefs = list(list(className = 'dt-center', targets = "_all"))))
+    })
+    
     output$checks_layout <- DT::renderDT({
       Option_NCD <- TRUE
       multi <- input$kindExpt == "RDC" || input$kindExpt == "DBUDC"
@@ -445,16 +456,6 @@ mod_Diagonal_server <- function(id) {
       DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
                       backgroundColor = DT::styleEqual(c(checks,0,"Filler"), 
                                                        c(colores[1:len_checks],'yellow', 'snow')))
-    })
-    
-    output$data_input <- DT::renderDT({
-      my_data <- getData()$data_entry
-      df <- my_data
-      a <- ncol(df) - 1
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                scrollX = TRUE, scrollY = "800px"))
-      DT::datatable(df, rownames = FALSE, caption = 'List of Entries.', options = list(
-        columnDefs = list(list(className = 'dt-center', targets = "_all"))))
     })
     
     output$checks_table <- DT::renderDT({
@@ -496,14 +497,17 @@ mod_Diagonal_server <- function(id) {
       req(available_percent_table()$d_checks)
       # req(rand_checks()$map_checks)
       # req(rand_checks())
-      req(user_location()$map_checks)
+      
+      # req(user_location()$map_checks)
       req(getData()$data_entry)
       data_entry <- getData()$data_entry
       # w_map <- rand_checks()$map_checks
-      w_map <- user_location()$map_checks
+      #w_map <- user_location()$map_checks
+    
       n_rows <- input$n_rows; n_cols <- input$n_cols
       # my_split_r <- rand_checks()$map_checks
-      my_split_r <- user_location()$map_checks
+      # my_split_r <- user_location()$map_checks
+      
       checksEntries <- getChecks()$checksEntries
       checks <- as.numeric(input$checks)
       if(input$kindExpt == "DBUDC") multi <- TRUE else multi <- FALSE
@@ -513,10 +517,12 @@ mod_Diagonal_server <- function(id) {
       random_entries_locs <- vector(mode = "list", length = locs)
       
       for (sites in 1:locs) {
-        
+        map_checks <- rand_checks()[[sites]]$map_checks
+        w_map <- rand_checks()[[sites]]$map_checks
+        my_split_r <- rand_checks()[[sites]]$map_checks
         if (multi == TRUE) {
           # map_checks <- rand_checks()$map_checks
-          map_checks <- user_location()$map_checks
+          # map_checks <- user_location()$map_checks
           req(getData()$data_entry)
           data_entry <- getData()$data_entry
           #req(available_percent_table()$data_dim_each_block)
@@ -577,7 +583,7 @@ mod_Diagonal_server <- function(id) {
         }
         random_entries_locs[[sites]] <- data_random
       }
-      #print(random_entries_locs)
+      print(random_entries_locs[[1]])
       return(random_entries_locs)
     })
     
@@ -681,8 +687,10 @@ mod_Diagonal_server <- function(id) {
       #req(rand_checks()$map_checks)
       data_entry <- getData()$data_entry
       #w_map <- rand_checks()$map_checks
-      req(user_location()$map_checks)
-      w_map <- user_location()$map_checks
+      
+      # req(user_location()$map_checks)
+      # w_map <- user_location()$map_checks
+      w_map <- rand_checks()[[1]]$map_checks
       if ("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE
       n_rows = input$n_rows; n_cols = input$n_cols
       
@@ -777,7 +785,8 @@ mod_Diagonal_server <- function(id) {
         return(NULL)
       
       # w_map <- rand_checks()$map_checks
-      w_map <- user_location()$map_checks
+      # w_map <- user_location()$map_checks
+      w_map <- rand_checks()[[1]]$map_checks
       if("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE
       if(input$kindExpt == "DBUDC") multi <- TRUE else multi <- FALSE
       
@@ -790,9 +799,6 @@ mod_Diagonal_server <- function(id) {
           }else Name_expt = paste0(rep("Expt1", times = blocks), 1:blocks)
           df <- as.data.frame(my_names)
           rownames(df) <- nrow(df):1
-          # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-          #                           scrollX = TRUE, scrollY = scrollY(input$n_rows)))
-          # DT::datatable(df) %>%
           options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
           DT::datatable(df,
                         extensions = 'FixedColumns',
@@ -896,7 +902,8 @@ mod_Diagonal_server <- function(id) {
       req(rand_lines())
       req(input$plot_start)
       # req(rand_checks()$map_checks)
-      req(user_location()$map_checks)
+      
+      # req(user_location()$map_checks)
       req(input$n_rows, input$n_cols)
       req(split_name_reactive()$my_names)
       
@@ -906,7 +913,8 @@ mod_Diagonal_server <- function(id) {
       movement_planter = input$planter_mov
       
      # w_map <- rand_checks()$map_checks 
-      w_map <- user_location()$map_checks
+      # w_map <- user_location()$map_checks
+      w_map <- rand_checks()[[1]]$map_checks
       if("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE
       if(input$kindExpt == "DBUDC") multi <- TRUE else multi <- FALSE
       
@@ -1001,7 +1009,8 @@ mod_Diagonal_server <- function(id) {
           Name_expt <- input$expt_name  
         }else Name_expt = paste0(rep("Expt", times = n_blocks), 1:n_blocks)
         # w_map <- rand_checks()$map_checks #############
-        w_map <- user_location()$map_checks
+        # w_map <- user_location()$map_checks
+        w_map <- rand_checks()[[1]]$map_checks
         if("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE #############
         my_split_plot_nub <- plot_number(movement_planter = input$planter_mov1, n_blocks = 1, n_rows = input$n_rows,
                                          n_cols = input$n_cols, plot_n_start = plot_n_start, datos = datos_name,
@@ -1034,7 +1043,8 @@ mod_Diagonal_server <- function(id) {
         return(NULL)
       
       # w_map <- rand_checks()$map_checks 
-      w_map <- user_location()$map_checks
+      # w_map <- user_location()$map_checks
+      w_map <- rand_checks()[[1]]$map_checks
       if("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE
       if(input$kindExpt == "DBUDC") multi <- TRUE else multi <- FALSE
       if (multi == TRUE) {
@@ -1144,36 +1154,6 @@ mod_Diagonal_server <- function(id) {
     
     export_diagonal_design <- reactive({
       
-      if(input$kindExpt == "DBUDC") multi <- TRUE else multi <- FALSE
-      if(multi) req(getData()$data_entry)
-      loc_user_out_rand <- rand_lines()[[1]]
-      w_map <- loc_user_out_rand$rand
-      if("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE
-      # req(rand_lines())
-      # req(rand_checks())
-      req(split_name_reactive()$my_names)
-      req(plot_number_reactive()$w_map_letters1)
-      
-      # if(is.null(loc_user_out_rand$rand)) return(NULL)
-      movement_planter = input$planter_mov
-      my_data_VLOOKUP <- getData()$data_entry
-      COLNAMES_DATA <- colnames(my_data_VLOOKUP)
-      if(Option_NCD == TRUE) {
-        if(input$kindExpt != "DBUDC") {
-          Entry_Fillers <- data.frame(list(0,"Filler"))
-        }else {
-          Entry_Fillers <- data.frame(list(0,"Filler", "NA"))
-        }
-        colnames(Entry_Fillers) <- COLNAMES_DATA
-        my_data_VLOOKUP <- rbind(my_data_VLOOKUP, Entry_Fillers)
-      }
-      
-      plot_number <- as.matrix(plot_number_reactive()$w_map_letters1)
-      plot_number <- apply(plot_number, 2 ,as.numeric)
-      my_names <- split_name_reactive()$my_names
-      if (multi == FALSE && Option_NCD == TRUE) {
-        my_names <- put_Filler_in_name()$name_with_Fillers
-      }
       ## pre for
       locs_diagonal <- as.numeric(input$l.diagonal)
       final_expt_fieldbook <- vector(mode = "list",length = locs_diagonal)
@@ -1181,6 +1161,41 @@ mod_Diagonal_server <- function(id) {
       if (length(location_names) != locs_diagonal) location_names <- 1:locs_diagonal
       ## start for
       for (user_site in 1:locs_diagonal) {
+        
+        
+        if(input$kindExpt == "DBUDC") multi <- TRUE else multi <- FALSE
+        if(multi) req(getData()$data_entry)
+        # loc_user_out_rand <- rand_lines()[[1]]
+        # w_map <- loc_user_out_rand$rand
+        loc_user_out_rand <- rand_checks()[[user_site]]
+        w_map <- as.matrix(loc_user_out_rand$col_checks)
+        
+        if("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE
+        # req(rand_lines())
+        # req(rand_checks())
+        req(split_name_reactive()$my_names)
+        req(plot_number_reactive()$w_map_letters1)
+        
+        # if(is.null(loc_user_out_rand$rand)) return(NULL)
+        movement_planter = input$planter_mov
+        my_data_VLOOKUP <- getData()$data_entry
+        COLNAMES_DATA <- colnames(my_data_VLOOKUP)
+        if(Option_NCD == TRUE) {
+          if(input$kindExpt != "DBUDC") {
+            Entry_Fillers <- data.frame(list(0,"Filler"))
+          }else {
+            Entry_Fillers <- data.frame(list(0,"Filler", "NA"))
+          }
+          colnames(Entry_Fillers) <- COLNAMES_DATA
+          my_data_VLOOKUP <- rbind(my_data_VLOOKUP, Entry_Fillers)
+        }
+        
+        plot_number <- as.matrix(plot_number_reactive()$w_map_letters1)
+        plot_number <- apply(plot_number, 2 ,as.numeric)
+        my_names <- split_name_reactive()$my_names
+        if (multi == FALSE && Option_NCD == TRUE) {
+          my_names <- put_Filler_in_name()$name_with_Fillers
+        }
         
         loc_user_out_checks <- rand_checks()[[user_site]]
         Col_checks <- as.matrix(loc_user_out_checks$col_checks)
@@ -1316,7 +1331,7 @@ mod_Diagonal_server <- function(id) {
     })
     
     simudata_DIAG <- reactive({
-      req(export_diagonal_design()$final_expt)
+      #req(export_diagonal_design()$final_expt)
       if(!is.null(valsDIAG$maxValue) && !is.null(valsDIAG$minValue) && !is.null(valsDIAG$trail)) {
         maxVal <- as.numeric(valsDIAG$maxValue)
         minVal <- as.numeric(valsDIAG$minValue)
