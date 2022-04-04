@@ -295,14 +295,29 @@ mod_Optim_server <- function(id) {
       df <- as.data.frame(w_map)
       rownames(df) <- nrow(df):1
       colnames(df) <- paste0('V', 1:ncol(df))
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
+      options(DT.options = list(dom = 'Blfrtip',
+                     pageLength = nrow(df),
+                     scrollY = "700px",
+                     class = 'compact cell-border stripe',  rownames = FALSE,
+                     server = FALSE,
+                     filter = list( position = 'top', clear = FALSE, plain =TRUE ),
+                     buttons = c('copy', 'excel'),
+                     lengthMenu = list(c(10,25,50,-1),
+                                       c(10,25,50,"All"))))
+      # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
       DT::datatable(df,
-                    extensions = 'FixedColumns',
-                    options = list(
-                      dom = 't',
-                      scrollX = TRUE,
-                      fixedColumns = TRUE
-                    )) %>% 
+                    extensions = c('Buttons', 'FixedColumns'),
+                    options = list(dom = 'Blfrtip',
+                                   scrollX = TRUE,
+                                   fixedColumns = TRUE,
+                                   pageLength = nrow(df),
+                                   scrollY = "700px",
+                                   class = 'compact cell-border stripe',  rownames = FALSE,
+                                   server = FALSE,
+                                   filter = list( position = 'top', clear = FALSE, plain =TRUE ),
+                                   buttons = c('copy', 'excel'),
+                                   lengthMenu = list(c(10,25,50,-1),
+                                                     c(10,25,50,"All")))) %>% 
         DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
                     backgroundColor = DT::styleEqual(c(checks,gens),
                                                  c(colores[1:len_checks], rep('gray', length(gens)))
