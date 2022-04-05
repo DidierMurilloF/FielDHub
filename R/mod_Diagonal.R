@@ -1317,7 +1317,7 @@ mod_Diagonal_server <- function(id) {
         ROX_DIAG <- as.numeric(valsDIAG$ROX)
         ROY_DIAG <- as.numeric(valsDIAG$ROY)
         df_diag <- export_diagonal_design()$final_expt
-        loc_levels_factors <- levels(factor(df_prep$LOCATION, unique(df_prep$LOCATION)))
+        loc_levels_factors <- levels(factor(df_diag$LOCATION, unique(df_diag$LOCATION)))
         nrows_diag <- as.numeric(input$n_rows)
         ncols_diag <- as.numeric(input$n_cols)
         seed_diag <- as.numeric(input$myseed)
