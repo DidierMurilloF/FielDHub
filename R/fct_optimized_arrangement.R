@@ -32,7 +32,8 @@
 #'   \item \code{infoDesign} is a list with information on the design parameters.
 #'   \item \code{layoutRandom} is a matrix with the randomization layout.
 #'   \item \code{plotNumber} is a matrix with the layout plot number.
-#'   \item \code{data_entry} is a data frame with the data input.
+#'   \item \code{dataEntry} is a data frame with the data input.
+#'   \item \code{genEntries} is a list with the entries for replicated and no replicated part.
 #'   \item \code{fieldBook} is a data frame with field book design. This includes the index (Row, Column).
 #' }
 #'
@@ -88,8 +89,12 @@ optimized_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,  amo
     base::stop('Input planter is unknown. Please, choose one: "serpentine" or "cartesian"')
   }
   
-  if(!is.numeric(plotNumber)) {
-    stop("Input plotNumber can be an integer or a numeric vector.")
+  if(!is.numeric(plotNumber) && !is.integer(plotNumber)) {
+    stop("plotNumber should be an integer or a numeric vector.")
+  }
+  
+  if (any(plotNumber %% 1 != 0)) {
+    stop("plotNumber should be integers.")
   }
   
   if (!is.null(l)) {
@@ -100,16 +105,6 @@ optimized_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,  amo
       message(cat("Warning message:", "\n", "Since plotNumber was missing, it was set up to default value of: ", plotNumber))
     }
   }else stop("Number of locations/sites is missing")
-  
-  # if (is.null(plotNumber) || length(plotNumber) != l) {
-  #   if (!is.null(l)) {
-  #     if (l > 1) plotNumber <- seq(1001, 1000*l, 1000) else plotNumber <- 1001
-  #   }else stop("Number of locations/sites is missing")
-    
-  #   warning(paste("Since plotNumber was missing, it was set up to default value of: ", plotNumber))
-  # }else if(!is.numeric(plotNumber)) {
-  #   stop("Input plotNumber can be an integer or a numeric vector.")
-  # }
   
   if (!is.null(data)) {
     arg1 <- list(nrows, ncols, l);arg2 <- c(nrows, ncols, l)

@@ -437,7 +437,7 @@ mod_Optim_server <- function(id) {
     })
     
     simuDataOPTIM <- reactive({
-      # req(Spatial_Checks()$fieldBook)
+      req(Spatial_Checks()$fieldBook)
       if(!is.null(valsOPTIM$maxValue) && !is.null(valsOPTIM$minValue) && !is.null(valsOPTIM$trail.optim)) {
         maxVal <- as.numeric(valsOPTIM$maxValue)
         minVal <- as.numeric(valsOPTIM$minValue)
@@ -487,6 +487,13 @@ mod_Optim_server <- function(id) {
     
     output$OPTIMOUTPUT <- DT::renderDT({
       df <- simuDataOPTIM()$df
+      df$EXPT <- as.factor(df$EXPT)
+      df$LOCATION <- as.factor(df$LOCATION)
+      df$PLOT <- as.factor(df$PLOT)
+      df$ROW <- as.factor(df$ROW)
+      df$COLUMN <- as.factor(df$COLUMN)
+      df$CHECKS <- as.factor(df$CHECKS)
+      df$ENTRY <- as.factor(df$TREATMENT)
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "600px",
               columnDefs = list(list(className = 'dt-center', targets = "_all"))))

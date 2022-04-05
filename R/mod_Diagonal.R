@@ -1359,6 +1359,13 @@ mod_Diagonal_server <- function(id) {
     
     output$fieldBook_diagonal <- DT::renderDT({
       df <- simudata_DIAG()$df
+      df$EXPT <- as.factor(df$EXPT)
+      df$LOCATION <- as.factor(df$LOCATION)
+      df$PLOT <- as.factor(df$PLOT)
+      df$ROW <- as.factor(df$ROW)
+      df$COLUMN <- as.factor(df$COLUMN)
+      df$CHECKS <- as.factor(df$CHECKS)
+      df$ENTRY <- as.factor(df$TREATMENT)
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "600px"))
       DT::datatable(df,

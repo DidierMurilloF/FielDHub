@@ -114,7 +114,6 @@ mod_pREPS_ui <- function(id){
            tabPanel("Randomized Field", DT::DTOutput(ns("dtpREPS"))),
            tabPanel("Plot Number Field", DT::DTOutput(ns("PREPSPLOTFIELD"))),
            tabPanel("Field Book", DT::DTOutput(ns("pREPSOUTPUT"))),
-           #tabPanel("Heatmap", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmap_prep")), type = 5))
            tabPanel("Heatmap", plotly::plotlyOutput(ns("heatmap_prep")))
         )
       )
@@ -173,9 +172,15 @@ mod_pREPS_server <- function(id){
       req(getDataup()$data_up.preps)
       data_entry.preps <- getDataup()$data_up.preps
       df <- as.data.frame(data_entry.preps)
+      df$ENTRY <- as.factor(df$ENTRY)
+      df$NAME <- as.factor(df$NAME)
+      df$REPS <- as.factor(df$REPS)
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "500px"))
-      DT::datatable(df, rownames = FALSE, options = list(
+      DT::datatable(df,
+                    rownames = FALSE, 
+                    filter = 'top',
+                    options = list(
         columnDefs = list(list(className = 'dt-center', targets = "_all"))))
     })
     
@@ -218,36 +223,46 @@ mod_pREPS_server <- function(id){
       gen.list <- getDataup()$data_up.preps
       nrows <- input$nrows.preps
       ncols <- input$ncols.preps
-      n.checks  <- NULL
-      r.checks <- NULL
       niter <- 10000
-      locs <- as.numeric(input$l.preps)
-      pREPS <- vector(mode = "list", length = locs)
-      
       OPTIM <- TRUE
-      set.seed(preps.seed)
-      for (s in 1:locs) {
-      pREPS[[s]] <- pREP(nrows = nrows, ncols = ncols, RepChecks = r.checks, checks = n.checks, seed = NULL,
-                         optim = OPTIM, niter = niter, data = gen.list) 
-      }
-      return(pREPS)
+      planter <- input$planter_mov.preps
+      data_preps <- getDataup()$data_up.preps
+      locs_preps <- as.numeric(input$l.preps)
+      expt_name <- as.character(input$expt_name.preps)
+      plotNumber <- as.numeric(as.vector(unlist(strsplit(input$plot_start.preps, ","))))
+      site_names <- as.character(as.vector(unlist(strsplit(input$Location.preps, ","))))
+      
+      pREPS <- partially_replicated(nrows = nrows, 
+                                    ncols = ncols, 
+                                    l = locs_preps, 
+                                    seed = preps.seed, 
+                                    plotNumber = plotNumber, 
+                                    exptName =  expt_name,
+                                    locationNames = site_names, 
+                                    planter = planter, 
+                                    data = gen.list 
+                                    )
     })
+     
+     user_site_selection <- reactive({
+       return(as.numeric(input$locView.preps))
+     })
     
     user_location <- reactive({
       user_site <- as.numeric(input$locView.preps)
-      #user_site <- 1
       loc_user_out <- pREPS_reactive()[[user_site]]
       w_map <- loc_user_out$field.map
       binary_field <- loc_user_out$binary.field
       gen.entries <- loc_user_out$gen.entries
       return(list(field.map = w_map, binary.field = binary_field, gen.entries = gen.entries, user_site = user_site))
     })
-    
+
     
     output$BINARYpREPS <- DT::renderDT({
-      req(user_location()$binary.field)
-      B <- user_location()$binary.field
+      req(pREPS_reactive())
+      B <- pREPS_reactive()$binaryField[[user_site_selection()]]
       df <- as.data.frame(B)
+      rownames(df) <- nrow(df):1
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
       DT::datatable(df,
                     extensions = 'FixedColumns',
@@ -264,27 +279,36 @@ mod_pREPS_server <- function(id){
   
     
     output$dtpREPS <- DT::renderDataTable({
-      w_map <- user_location()$field.map
-      checks = as.vector(unlist(user_location()$gen.entries[[1]]))
+      req(pREPS_reactive())
+      w_map <- pREPS_reactive()$layoutRandom[[user_site_selection()]]
+      checks = as.vector(pREPS_reactive()$genEntries[[1]])
       len_checks <- length(checks)
       colores <- c('royalblue','salmon', 'green', 'orange','orchid', 'slategrey',
                    'greenyellow', 'blueviolet','deepskyblue','gold','blue', 'red')
       
       df <- as.data.frame(w_map)
+      
       gens <- as.vector(unlist(user_location()$gen.entries[[2]]))
       
       rownames(df) <- nrow(df):1
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "850px"))
+      colnames(df) <- paste0('V', 1:ncol(df))
+      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
       DT::datatable(df,
-                    extensions = 'FixedColumns',
-                    options = list(
-                      dom = 't',
-                      scrollX = TRUE,
-                      fixedColumns = TRUE
-                    )) %>%
+                    extensions = 'Buttons', 
+                     options = list(dom = 'Blfrtip',
+                     scrollX = TRUE,
+                     fixedColumns = TRUE,
+                     pageLength = nrow(df),
+                     scrollY = "700px",
+                     class = 'compact cell-border stripe',  rownames = FALSE,
+                     server = FALSE,
+                     filter = list( position = 'top', clear = FALSE, plain =TRUE ),
+                     buttons = c('copy', 'excel'),
+                     lengthMenu = list(c(10,25,50,-1),
+                                       c(10,25,50,"All")))) %>%
         DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-                    backgroundColor = DT::styleEqual(c(checks,gens), 
-                                                 c(rep(colores[3], len_checks), rep('yellow', length(gens)))
+                    backgroundColor = DT::styleEqual(c(checks), # c(checks,gens)
+                                                 c(rep(colores[3], len_checks)) # , rep('yellow', length(gens))
                     )
         )
       
@@ -292,9 +316,7 @@ mod_pREPS_server <- function(id){
     
     
     split_name_PREPS <- reactive({
-      first_loc <- pREPS_reactive()[[1]]
-      w_map <- first_loc$field.map
-      req(first_loc$field.map)
+      req(pREPS_reactive())
       req(input$nrows.preps, input$ncols.preps)
       nrows <- as.numeric(input$nrows.preps)
       ncols <- as.numeric(input$ncols.preps)
@@ -338,108 +360,31 @@ mod_pREPS_server <- function(id){
       
     })
     
-    plot_number_PREPS <- reactive({
-      
-      req(input$plot_start.preps)
-      req(input$nrows.preps, input$ncols.preps)
-      req(split_name_PREPS()$my_names)
-      
-      datos_name <- split_name_PREPS()$my_names
-      datos_name < as.matrix(datos_name)
-      nrows <- input$nrows.preps; ncols <- input$ncols.preps
-      plot_n_start <- as.numeric(input$plot_start.preps)
-      movement_planter <- input$planter_mov.preps
-      
-      blocks = 1
-      
-      if (input$expt_name.preps != "") {
-        
-        Name_expt <- input$expt_name.preps 
-        
-      }else Name_expt = paste0(rep("Expt1", times = blocks), 1:blocks)
-      
-      
-      
-      my_split_plot_nub <- plot_number(movement_planter = movement_planter, n_blocks = blocks,
-                                       n_rows = nrows, n_cols = ncols, plot_n_start = plot_n_start,
-                                       datos = datos_name, expe_name = Name_expt, ByRow = FALSE,
-                                       my_row_sets = NULL, ByCol = TRUE, my_col_sets = ncols)
-    })
-    
     output$PREPSPLOTFIELD <- DT::renderDT({
-      req(plot_number_PREPS()$w_map_letters1)
-      plot_num <- plot_number_PREPS()$w_map_letters1
+      req(pREPS_reactive())
+      plot_num <- pREPS_reactive()$plotNumber[[user_site_selection()]]
       a <- as.vector(as.matrix(plot_num))
       len_a <- length(a)
       df <- as.data.frame(plot_num)
       rownames(df) <- nrow(df):1
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "600px"))
+      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
       DT::datatable(df,
-                    extensions = 'FixedColumns',
-                    options = list(
-                      dom = 't',
-                      scrollX = TRUE,
-                      fixedColumns = TRUE
-                    )) %>%
-        DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-                    backgroundColor = DT::styleEqual(a, 
-                                                 rep('yellow', length(a)))
-        )
+                    extensions = 'Buttons', 
+                    options = list(dom = 'Blfrtip',
+                                   scrollX = TRUE,
+                                   fixedColumns = TRUE,
+                                   pageLength = nrow(df),
+                                   scrollY = "700px",
+                                   class = 'compact cell-border stripe',  rownames = FALSE,
+                                   server = FALSE,
+                                   filter = list( position = 'top', clear = FALSE, plain =TRUE ),
+                                   buttons = c('copy', 'excel'),
+                                   lengthMenu = list(c(10,25,50,-1),
+                                                     c(10,25,50,"All")))
+                    
+                    )
     })
-    
-    export_PREPS <- reactive({
-      
-      req(getDataup()$data_up.preps)
-      req(input$Location.preps)
-      req(input$planter_mov.preps)
-      movement_planter <- input$planter_mov.preps
-      req(split_name_PREPS()$my_names)
-      req(plot_number_PREPS()$w_map_letters1)
-      
-      loc <- input$Location.preps
-      my_data_VLOOKUP <- getDataup()$data_up.preps
-      ######## for #####
-      locs <- as.numeric(input$l.preps)
-      final_expt_fieldbook <- vector(mode = "list",length = locs)
-      location_names <- as.vector(unlist(strsplit(input$Location.preps, ",")))
-      if (length(location_names) != locs) location_names <- 1:locs
-      
-      for (user_site in 1:locs) {
-        loc_user_out <- pREPS_reactive()[[user_site]]
-        
-        random_entries_map <- as.matrix(loc_user_out$field.map)
-        #random_entries_map <- as.matrix(user_location()$field.map)
-        plot_number <- as.matrix(plot_number_PREPS()$w_map_letters1)
-        Col_checks <- as.matrix(loc_user_out$binary.field)
-        #Col_checks <- as.matrix(user_location()$binary.field)
-        my_names <- as.matrix(split_name_PREPS()$my_names)
-        
-        results_to_export <- list(random_entries_map, plot_number, Col_checks, my_names)
-        
-        final_expt_export <- export_design(G = results_to_export, movement_planter =  movement_planter,
-                                           location = location_names[user_site], Year = NULL, data_file = my_data_VLOOKUP,
-                                           reps = FALSE)
-        
-        final_expt_export <- as.data.frame(final_expt_export)
-        final_expt_fieldbook[[user_site]] <- final_expt_export[, -11]
-        print(user_site)
-      }
-      
-      final_fieldbook <- dplyr::bind_rows(final_expt_fieldbook)
-      
-      ######### end for #################################
-      
-      ID <- 1:nrow(final_fieldbook )
-      final_expt_export <- final_fieldbook[, c(6,7,9,4,2,3,5,1,10)]
-      final_expt_export_F <- cbind(ID, final_expt_export)
-      colnames(final_expt_export_F)[10] <- "TREATMENT"
-      
-      return(list(final_expt = final_expt_export_F))
-      
-    })
-    
-    
-    
+
     valsPREP <- reactiveValues(ROX = NULL, ROY = NULL, trail.prep = NULL, minValue = NULL,
                                 maxValue = NULL)
     
@@ -487,7 +432,7 @@ mod_pREPS_server <- function(id){
     }
     
     observeEvent(input$Simulate.prep, {
-      req(export_PREPS()$final_expt)
+      req(pREPS_reactive()$fieldBook[[1]])
       showModal(
         shinyjqui::jqui_draggable(
           simuModal.PREP()
@@ -521,15 +466,14 @@ mod_pREPS_server <- function(id){
     })
     
     simuDataPREP <- reactive({
-      req(export_PREPS()$final_expt)
+      req(pREPS_reactive()$fieldBook[[1]])
       if(!is.null(valsPREP$maxValue) && !is.null(valsPREP$minValue) && !is.null(valsPREP$trail.prep)) {
         maxVal <- as.numeric(valsPREP$maxValue)
         minVal <- as.numeric(valsPREP$minValue)
         ROX_PREP <- as.numeric(valsPREP$ROX)
         ROY_PREP <- as.numeric(valsPREP$ROY)
-        df.prep <- export_PREPS()$final_expt
+        df.prep <- pREPS_reactive()$fieldBook
         loc_levels_factors <- levels(factor(df.prep$LOCATION, unique(df.prep$LOCATION)))
-        print(loc_levels_factors)
         locs <- as.numeric(input$l.preps)
         req(input$nrows.preps)
         req(input$ncols.preps)
@@ -539,7 +483,6 @@ mod_pREPS_server <- function(id){
         nrows_prep <- as.numeric(input$nrows.preps)
         ncols_prep <- as.numeric(input$ncols.preps)
         seed_prep <- as.numeric(input$s.seed.preps)
-        
         df.prep_list <- vector(mode = "list", length = locs)
         dfSimulationList <- vector(mode = "list", length = locs)
         w <- 1
@@ -562,7 +505,7 @@ mod_pREPS_server <- function(id){
         df.prep_locs <- dplyr::bind_rows(df.prep_list)
         v <- 1
       }else {
-        dataPrep <- export_PREPS()$final_expt
+        dataPrep <- pREPS_reactive()$fieldBook
         v <- 2
       }
       if (v == 1) {
@@ -575,10 +518,21 @@ mod_pREPS_server <- function(id){
     
     output$pREPSOUTPUT <- DT::renderDT({
       df <- simuDataPREP()$df
+      df$EXPT <- as.factor(df$EXPT)
+      df$LOCATION <- as.factor(df$LOCATION)
+      df$PLOT <- as.factor(df$PLOT)
+      df$ROW <- as.factor(df$ROW)
+      df$COLUMN <- as.factor(df$COLUMN)
+      df$CHECKS <- as.factor(df$CHECKS)
+      df$ENTRY <- as.factor(df$TREATMENT)
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "500px"))
-      DT::datatable(df, rownames = FALSE, options = list(
-        columnDefs = list(list(className = 'dt-center', targets = "_all"))))
+      DT::datatable(df, 
+                    filter = "top",
+                    rownames = FALSE, 
+                    options = list(
+        columnDefs = list(list(className = 'dt-center', targets = "_all")))
+        )
     })
     
     
@@ -589,7 +543,6 @@ mod_pREPS_server <- function(id){
         w <- as.character(valsPREP$trail.prep)
         df <- simuDataPREP()$dfSimulationList[[loc_user]]
         df <- as.data.frame(df)
-        print(head(df))
         p1 <- ggplot2::ggplot(df, ggplot2::aes(x = df[,4], y = df[,3], fill = df[,7], text = df[,8])) + 
           ggplot2::geom_tile() +
           ggplot2::xlab("COLUMN") +
