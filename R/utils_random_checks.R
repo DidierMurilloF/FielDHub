@@ -1,6 +1,7 @@
 random_checks <- function(dt = NULL, d_checks = NULL, p = NULL, percent = NULL, exptlines = NULL, kindExpt = NULL, planter_mov = NULL,
                           Checks = NULL, myWay = NULL, data = NULL, data_dim_each_block = NULL, n_reps = NULL, Option_NCD = FALSE,
                           seed = NULL) { 
+  if (is.null(seed) || is.character(seed) || is.factor(seed)) seed <- runif(1, min = -50000, max = 50000)
   set.seed(seed)
   req(dt)
   req(d_checks)

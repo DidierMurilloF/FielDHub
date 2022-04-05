@@ -155,10 +155,9 @@ mod_Optim_server <- function(id) {
         nrows <- as.numeric(input$nrows.s)
         ncols <- as.numeric(input$ncols.s)
         n.checks <- as.numeric(input$checks.s)
-        #lines <- nrows * ncols - total.checks
         lines <- as.numeric(input$lines.s)
         if (lines <= sum(total.checks)) validate("Number of lines should be greater then the number of checks.")
-        NAME <- c(paste(rep("CH", n.checks), 1:n.checks),
+        NAME <- c(paste0(rep("CH", n.checks), 1:n.checks),
                   paste(rep("G", lines), (n.checks + 1):(lines + n.checks), sep = ""))
         reps.checks <- r.checks
         REPS <- c(reps.checks, rep(1, lines))
@@ -177,8 +176,12 @@ mod_Optim_server <- function(id) {
       df <- as.data.frame(data_entry)
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "600px"))
-      DT::datatable(df, rownames = TRUE, options = list(
-        columnDefs = list(list(className = 'dt-left', targets = 0:3))))
+      DT::datatable(df,
+                    filter = "top",
+                    rownames = FALSE, 
+                    caption = 'List of Entries.', 
+                    options = list(columnDefs = list(list(className = 'dt-center', targets = "_all")))
+      )
     })
     
     
@@ -244,7 +247,6 @@ mod_Optim_server <- function(id) {
       expt_name <- as.character(input$expt_name.spatial)
       
       plotNumber <- as.numeric(as.vector(unlist(strsplit(input$plot_start.spatial, ","))))
-      print(plotNumber)
       site_names <- as.character(as.vector(unlist(strsplit(input$Location.spatial, ","))))
 
       optimized <- optimized_arrangement(nrows = nrows,
@@ -279,14 +281,13 @@ mod_Optim_server <- function(id) {
                       fixedColumns = TRUE
                     )) %>% 
         DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-                        backgroundColor = DT::styleEqual(c(1,0), 
-                                                         c("gray",'yellow')))
+                        backgroundColor = DT::styleEqual(1, 
+                                                         c("gray")))
     })
     
     output$RFIELD <- DT::renderDT({
       req(Spatial_Checks())
       w_map <- Spatial_Checks()$layoutRandom[[user_site_selection()]]
-      #print(w_map)
       checks = as.vector(Spatial_Checks()$genEntries[[1]])
       len_checks <- length(checks)
       colores <- c('royalblue','salmon', 'green', 'orange','orchid', 'slategrey',
@@ -295,16 +296,6 @@ mod_Optim_server <- function(id) {
       df <- as.data.frame(w_map)
       rownames(df) <- nrow(df):1
       colnames(df) <- paste0('V', 1:ncol(df))
-      options(DT.options = list(dom = 'Blfrtip',
-                     pageLength = nrow(df),
-                     scrollY = "700px",
-                     class = 'compact cell-border stripe',  rownames = FALSE,
-                     server = FALSE,
-                     filter = list( position = 'top', clear = FALSE, plain =TRUE ),
-                     buttons = c('copy', 'excel'),
-                     lengthMenu = list(c(10,25,50,-1),
-                                       c(10,25,50,"All"))))
-      # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
       DT::datatable(df,
                     extensions = c('Buttons', 'FixedColumns'),
                     options = list(dom = 'Blfrtip',
@@ -319,8 +310,8 @@ mod_Optim_server <- function(id) {
                                    lengthMenu = list(c(10,25,50,-1),
                                                      c(10,25,50,"All")))) %>% 
         DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-                    backgroundColor = DT::styleEqual(c(checks,gens),
-                                                 c(colores[1:len_checks], rep('gray', length(gens)))
+                    backgroundColor = DT::styleEqual(checks,
+                                                 c(colores[1:len_checks])
                     )
         )
     })
@@ -342,28 +333,6 @@ mod_Optim_server <- function(id) {
       return(list(my_names = split_names))
     })
     
-    output$NAMESPATIAL <- DT::renderDT({
-      req(split_name_spatial()$my_names)
-      my_names <- split_name_spatial()$my_names
-      blocks = 1
-      if (input$expt_name.spatial != ""){
-        Name_expt <- input$expt_name.spatial 
-      }else Name_expt = paste0(rep("Expt1", times = blocks), 1:blocks)
-      df <- as.data.frame(my_names)
-      rownames(df) <- nrow(df):1
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
-      DT::datatable(df,
-                    extensions = 'FixedColumns',
-                    options = list(
-                      dom = 't',
-                      scrollX = TRUE,
-                      fixedColumns = TRUE
-                    )) %>%
-        DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-                    backgroundColor = DT::styleEqual(Name_expt, c('yellow')))
-      
-    })
-    
     output$PLOTFIELD <- DT::renderDT({
       req(Spatial_Checks())
       plot_num <- Spatial_Checks()$plotNumber[[user_site_selection()]]
@@ -371,18 +340,20 @@ mod_Optim_server <- function(id) {
       len_a <- length(a)
       df <- as.data.frame(plot_num)
       rownames(df) <- nrow(df):1
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
       DT::datatable(df,
-                    extensions = 'FixedColumns',
-                    options = list(
-                      dom = 't',
-                      scrollX = TRUE,
-                      fixedColumns = TRUE
-                    )) %>%
-        DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-                    backgroundColor = DT::styleEqual(a, 
-                                                 rep('yellow', length(a)))
-        )
+                    extensions = c('Buttons', 'FixedColumns'),
+                    options = list(dom = 'Blfrtip',
+                                   scrollX = TRUE,
+                                   fixedColumns = TRUE,
+                                   pageLength = nrow(df),
+                                   scrollY = "700px",
+                                   class = 'compact cell-border stripe',  rownames = FALSE,
+                                   server = FALSE,
+                                   filter = list( position = 'top', clear = FALSE, plain =TRUE ),
+                                   buttons = c('copy', 'excel'),
+                                   lengthMenu = list(c(10,25,50,-1),
+                                                     c(10,25,50,"All")))
+                    )
     })
     
     valsOPTIM <- reactiveValues(ROX = NULL, ROY = NULL, trail.optim = NULL, minValue = NULL,
@@ -466,7 +437,7 @@ mod_Optim_server <- function(id) {
     })
     
     simuDataOPTIM <- reactive({
-      req(Spatial_Checks()$fieldBook)
+      # req(Spatial_Checks()$fieldBook)
       if(!is.null(valsOPTIM$maxValue) && !is.null(valsOPTIM$minValue) && !is.null(valsOPTIM$trail.optim)) {
         maxVal <- as.numeric(valsOPTIM$maxValue)
         minVal <- as.numeric(valsOPTIM$minValue)
@@ -475,7 +446,6 @@ mod_Optim_server <- function(id) {
         locs <- as.numeric(input$l.optim)
         df_optim <- Spatial_Checks()$fieldBook
         loc_levels_factors <- levels(factor(df_optim$LOCATION, unique(df_optim$LOCATION)))
-        print(loc_levels_factors)
         nrows.s <- as.numeric(input$nrows.s)
         ncols.s <- as.numeric(input$ncols.s)
         seed.s <- as.numeric(input$seed.spatial)
@@ -488,14 +458,15 @@ mod_Optim_server <- function(id) {
         for (sites in do_sites) {
           df_loc <- subset(df_optim, LOCATION == loc_levels_factors[z])
           fieldBook <- df_loc[, c(1,6,7,9)]
-          dfSimulation <- AR1xAR1_simulation(nrows = nrows.s, ncols = ncols.s, ROX = ROX_O, ROY = ROY_O, minValue = minVal, 
-                                             maxValue = maxVal, fieldbook = fieldBook, trail = valsOPTIM$trail.optim, 
+          dfSimulation <- AR1xAR1_simulation(nrows = nrows.s, ncols = ncols.s, 
+                                             ROX = ROX_O, ROY = ROY_O, minValue = minVal, 
+                                             maxValue = maxVal, fieldbook = fieldBook, 
+                                             trail = valsOPTIM$trail.optim, 
                                              seed = NULL)
           dfSimulation <- dfSimulation$outOrder
           dfSimulationList[[sites]] <- dfSimulation
-          # print(dfSimulationList[[sites]])
-          dataOptim <- Spatial_Checks()$fieldBook
-          df_optim_simu <- cbind(dataOptim, round(dfSimulation[,7],2))
+          dataOptim_loc <- df_loc
+          df_optim_simu <- cbind(dataOptim_loc, round(dfSimulation[,7],2))
           colnames(df_optim_simu)[11] <- as.character(valsOPTIM$trail.optim)
           df_optim_list[[sites]] <- df_optim_simu 
           z <- z + 1
@@ -506,7 +477,6 @@ mod_Optim_server <- function(id) {
         dataOptim <- Spatial_Checks()$fieldBook
         v <- 2
       }
-      #print(dfSimulationList[[user_site_selection()]])
       if (v == 1) {
         return(list(df = df_optim_locs, dfSimulation = dfSimulationList))
       }else if (v == 2) {
@@ -518,19 +488,21 @@ mod_Optim_server <- function(id) {
     output$OPTIMOUTPUT <- DT::renderDT({
       df <- simuDataOPTIM()$df
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                scrollX = TRUE, scrollY = "600px"))
-      DT::datatable(df, rownames = FALSE, options = list(
-        columnDefs = list(list(className = 'dt-center', targets = "_all"))))
+                                scrollX = TRUE, scrollY = "600px",
+              columnDefs = list(list(className = 'dt-center', targets = "_all"))))
+      DT::datatable(df,
+        filter = "top",
+        rownames = FALSE
+      )
     })
     
     
     heatmap_obj <- reactive({
       req(simuDataOPTIM()$dfSimulation)
-      if(input$heatmap_s){
+      if(input$heatmap_s) {
         w <- as.character(valsOPTIM$trail.optim)
         df <- simuDataOPTIM()$dfSimulation[[user_site_selection()]]
         df <- as.data.frame(df)
-        print(head(df))
         p1 <- ggplot2::ggplot(df, ggplot2::aes(x = df[,4], y = df[,3], fill = df[,7], text = df[,8])) + 
           ggplot2::geom_tile() +
           ggplot2::xlab("COLUMN") +

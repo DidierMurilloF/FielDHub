@@ -161,7 +161,7 @@ mod_Diagonal_ui <- function(id){
           tabPanel("Randomized Field", DT::DTOutput(ns("randomized_layout"))),
           tabPanel("Plot Number Field", DT::DTOutput(ns("plot_number_layout"))),
           tabPanel("Expt Name", DT::DTOutput(ns("name_layout"))),
-          tabPanel("Field Book", DT::DTOutput(ns("dt5"))),
+          tabPanel("Field Book", DT::DTOutput(ns("fieldBook_diagonal"))),
           tabPanel("Heatmap", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmap_diag")), type = 5))
         )      
       )
@@ -331,7 +331,6 @@ mod_Diagonal_server <- function(id) {
       list(checksEntries = checksEntries, checks = checks)
     })
     
-    #available_percent_table <- eventReactive(input$RUN.diag, {
     available_percent_table <- reactive({
       Option_NCD <- TRUE
       checksEntries <- as.vector(getChecks()$checksEntries)
@@ -365,7 +364,7 @@ mod_Diagonal_server <- function(id) {
       locs <- as.numeric(input$l.diagonal)
       diag_locs <- vector(mode = "list", length = locs)
       random_checks_locs <- vector(mode = "list", length = locs)
-      set.seed(seed )
+      set.seed(seed)
       for (sites in 1:locs) {
         random_checks_locs[[sites]] <- random_checks(dt = available_percent_table()$dt, d_checks = available_percent_table()$d_checks, 
                                                      p = available_percent_table()$P, percent = input$Dropdown, kindExpt = input$kindExpt, 
@@ -373,7 +372,6 @@ mod_Diagonal_server <- function(id) {
                                                      data = getData()$data_entry, data_dim_each_block = available_percent_table()$data_dim_each_block,
                                                      n_reps = input$n_reps, seed = NULL)
       }
-      # print(random_checks_locs[[1]])
       return(random_checks_locs)
     }) 
     
@@ -409,9 +407,13 @@ mod_Diagonal_server <- function(id) {
       df <- my_data
       a <- ncol(df) - 1
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                scrollX = TRUE, scrollY = "800px"))
-      DT::datatable(df, rownames = FALSE, caption = 'List of Entries.', options = list(
-        columnDefs = list(list(className = 'dt-center', targets = "_all"))))
+                                scrollX = TRUE, scrollY = "600px"))
+      DT::datatable(df,
+                    filter = "top",
+                    rownames = FALSE, 
+                    caption = 'List of Entries.', 
+                    options = list(columnDefs = list(list(className = 'dt-center', targets = "_all")))
+                    )
     })
     
     output$checks_layout <- DT::renderDT({
@@ -420,7 +422,6 @@ mod_Diagonal_server <- function(id) {
       if (multi) req(getData()$data_entry)
       req(user_location()$map_checks)
       w_map <- user_location()$map_checks
-      # print(w_map)
       if (is.null(w_map))
         return(NULL)
       
@@ -475,25 +476,14 @@ mod_Diagonal_server <- function(id) {
       }
     })
     
-    # rand_lines <- eventReactive(input$RUN.diagonal, {
     rand_lines <- reactive({ 
       Option_NCD <- TRUE
       req(input$n_rows, input$n_cols)
       req(available_percent_table()$dt)
       req(available_percent_table()$d_checks)
-      # req(rand_checks()$map_checks)
-      # req(rand_checks())
-      
-      # req(user_location()$map_checks)
       req(getData()$data_entry)
       data_entry <- getData()$data_entry
-      # w_map <- rand_checks()$map_checks
-      #w_map <- user_location()$map_checks
-    
       n_rows <- input$n_rows; n_cols <- input$n_cols
-      # my_split_r <- rand_checks()$map_checks
-      # my_split_r <- user_location()$map_checks
-      
       checksEntries <- getChecks()$checksEntries
       checks <- as.numeric(input$checks)
       if(input$kindExpt == "DBUDC") multi <- TRUE else multi <- FALSE
@@ -507,11 +497,8 @@ mod_Diagonal_server <- function(id) {
         w_map <- rand_checks()[[sites]]$map_checks
         my_split_r <- rand_checks()[[sites]]$map_checks
         if (multi == TRUE) {
-          # map_checks <- rand_checks()$map_checks
-          # map_checks <- user_location()$map_checks
           req(getData()$data_entry)
           data_entry <- getData()$data_entry
-          #req(available_percent_table()$data_dim_each_block)
           if (input$kindExpt == "DBUDC" && input$myWay == "By Row") {
             req(available_percent_table()$data_dim_each_block)
             data_dim_each_block <- available_percent_table()$data_dim_each_block
@@ -539,7 +526,7 @@ mod_Diagonal_server <- function(id) {
               req(available_percent_table()$data_dim_each_block)
               data_random <- get_random(n_rows = input$n_rows, n_cols = input$n_cols, d_checks = my_split_r,
                                         reps = NULL, Fillers = TRUE, col_sets = my_col_sets, row_sets = NULL,
-                                        checks = checksEntries,data = data_entry)
+                                        checks = checksEntries, data = data_entry)
             }
           }else {
             if(input$kindExpt == "DBUDC" && Option_NCD == FALSE) {
@@ -569,7 +556,6 @@ mod_Diagonal_server <- function(id) {
         }
         random_entries_locs[[sites]] <- data_random
       }
-      print(random_entries_locs[[1]])
       return(random_entries_locs)
     })
     
@@ -585,37 +571,31 @@ mod_Diagonal_server <- function(id) {
       checks = checksEntries
       len_checks <- length(checks)
       if (input$kindExpt == "DBUDC") multi <- TRUE else multi <- FALSE
-      
       if (multi == FALSE) {
         df <- as.data.frame(r_map)
         colores <- c('royalblue','salmon', 'green', 'orange','orchid', 'slategrey',
                      'greenyellow', 'blueviolet','deepskyblue','gold','blue', 'red')
         s <- unlist(loc_view_user$Entries)
         rownames(df) <- nrow(df):1
-        #options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "800px"))
-        DT::datatable(df,
-                      extensions = c('Buttons', 'FixedColumns'),
+        style_equal <- rep('gray', length(s))
+        DT::datatable(df,#,
+                      extensions = c('Buttons'),# , 'FixedColumns'
                       options = list(dom = 'Blfrtip',
                                      autoWidth = FALSE,
                                      scrollX = TRUE,
                                      fixedColumns = TRUE,
                                      pageLength = nrow(df),
-                                     scrollY = "800px",
+                                     scrollY = "700px",
                                      class = 'compact cell-border stripe',  rownames = FALSE,
                                      server = FALSE,
                                      filter = list( position = 'top', clear = FALSE, plain =TRUE ),
                                      buttons = c('copy', 'excel'),
                                      lengthMenu = list(c(10,25,50,-1),
-                                                       c(10,25,50,"All")))) %>% 
+                                                       c(10,25,50,"All")))
+                      ) %>% 
           DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-                          backgroundColor = DT::styleEqual(c(checks), 
-                                                           colores[1:len_checks])) %>% 
-          DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-                          backgroundColor = DT::styleEqual(s, 
-                                                           rep('gray', length(s)
-                                                           )
-                          )
-          )
+                          backgroundColor = DT::styleEqual(c(checks),
+                                                           colores[1:len_checks]))
       } else {
         req(getData()$data_entry)
         x <- loc_view_user$Entries
@@ -641,21 +621,25 @@ mod_Diagonal_server <- function(id) {
         rownames(df) <- nrow(df):1
         #options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "850px"))
         DT::datatable(df,
-                      extensions = c('Buttons', 'FixedColumns'),
+                      extensions = 'Buttons',
                       options = list(dom = 'Blfrtip',
                                      autoWidth = FALSE,
                                      scrollX = TRUE,
                                      fixedColumns = TRUE,
                                      pageLength = nrow(df),
-                                     scrollY = "840px",
+                                     scrollY = "700px",
                                      class = 'compact cell-border stripe',  rownames = FALSE,
                                      server = FALSE,
                                      filter = list( position = 'top', clear = FALSE, plain =TRUE ),
                                      buttons = c('copy', 'excel'),
                                      lengthMenu = list(c(10,25,50,-1),
-                                                       c(10,25,50,"All")))) %>% 
-        DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-                        backgroundColor = DT::styleEqual(a, my_colors))
+                                                       c(10,25,50,"All")))
+                      ) %>% 
+          DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
+                          backgroundColor = DT::styleEqual(c(checks),
+                                                           colores[1:len_checks]))
+        # DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
+        #                 backgroundColor = DT::styleEqual(a, my_colors))
       }
     })
     
@@ -718,7 +702,6 @@ mod_Diagonal_server <- function(id) {
     put_Filler_in_name <- reactive({
       req(rand_lines())
       req(input$n_rows, input$n_cols)
-      # r_map <- rand_lines()$rand
       r_map <- rand_lines()[[1]]$rand
       if("Filler" %in% r_map) Option_NCD <- TRUE else Option_NCD <- FALSE
       
@@ -729,7 +712,6 @@ mod_Diagonal_server <- function(id) {
         }else Name_expt = paste0(rep("Expt1", times = blocks), 1:blocks)
         
         split_names <- matrix(data = Name_expt, ncol = input$n_cols, nrow = input$n_rows)
-        # r_map <- rand_lines()$rand
         r_map <- rand_lines()[[1]]$rand
         Fillers <- sum(r_map == "Filler")
         if (input$n_rows %% 2 == 0) {
@@ -750,11 +732,7 @@ mod_Diagonal_server <- function(id) {
       Option_NCD <- TRUE
       req(split_name_reactive()$my_names)
       my_names <- split_name_reactive()$my_names
-      if (is.null(my_names))
-        return(NULL)
-      
-      # w_map <- rand_checks()$map_checks
-      # w_map <- user_location()$map_checks
+      if (is.null(my_names)) return(NULL)
       w_map <- rand_checks()[[1]]$map_checks
       if("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE
       if(input$kindExpt == "DBUDC") multi <- TRUE else multi <- FALSE
@@ -785,9 +763,6 @@ mod_Diagonal_server <- function(id) {
           }else Name_expt = paste0(rep("Expt1", times = blocks), 1:blocks)
           df <- as.data.frame(my_names)
           rownames(df) <- nrow(df):1
-          # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-          #                           scrollX = TRUE, scrollY = scrollY(input$n_rows)))
-          # DT::datatable(df) %>%
           options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
           DT::datatable(df,
                         extensions = 'FixedColumns',
@@ -822,9 +797,6 @@ mod_Diagonal_server <- function(id) {
                             'violet', 'thistle') 
           df <- as.data.frame(my_names) 
           rownames(df) <- nrow(df):1
-          # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-          #                           scrollX = TRUE, scrollY = scrollY(input$n_rows)))
-          # DT::datatable(df) %>%
           options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
           DT::datatable(df,
                         extensions = 'FixedColumns',
@@ -849,9 +821,6 @@ mod_Diagonal_server <- function(id) {
                             'violet', 'thistle') 
           df <- as.data.frame(my_names) 
           rownames(df) <- nrow(df):1
-          # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-          #                           scrollX = TRUE, scrollY = scrollY(input$n_rows)))
-          # DT::datatable(df) %>%
           options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
           DT::datatable(df,
                         extensions = 'FixedColumns',
@@ -870,9 +839,6 @@ mod_Diagonal_server <- function(id) {
     plot_number_reactive <- reactive({
       req(rand_lines())
       req(input$plot_start)
-      # req(rand_checks()$map_checks)
-      
-      # req(user_location()$map_checks)
       req(input$n_rows, input$n_cols)
       req(split_name_reactive()$my_names)
       
@@ -880,9 +846,6 @@ mod_Diagonal_server <- function(id) {
       datos_name = as.matrix(datos_name) 
       n_rows = input$n_rows; n_cols = input$n_cols 
       movement_planter = input$planter_mov
-      
-     # w_map <- rand_checks()$map_checks 
-      # w_map <- user_location()$map_checks
       w_map <- rand_checks()[[1]]$map_checks
       if("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE
       if(input$kindExpt == "DBUDC") multi <- TRUE else multi <- FALSE
@@ -949,7 +912,6 @@ mod_Diagonal_server <- function(id) {
           m = diff(cuts_by_c)
           my_col_sets = c(cuts_by_c[1], m) 
         } 
-        # w_map_letters1 <- rand_lines()$w_map_letters1 
         w_map_letters1 <- rand_lines()[[1]]$w_map_letters1 
         Name_expt <- as.vector(unlist(strsplit(input$expt_name, ","))) 
         if (length(Name_expt) == n_blocks) { 
@@ -977,17 +939,14 @@ mod_Diagonal_server <- function(id) {
         if (input$expt_name != "") { 
           Name_expt <- input$expt_name  
         }else Name_expt = paste0(rep("Expt", times = n_blocks), 1:n_blocks)
-        # w_map <- rand_checks()$map_checks #############
-        # w_map <- user_location()$map_checks
         w_map <- rand_checks()[[1]]$map_checks
-        if("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE #############
+        if("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE 
         my_split_plot_nub <- plot_number(movement_planter = input$planter_mov1, n_blocks = 1, n_rows = input$n_rows,
                                          n_cols = input$n_cols, plot_n_start = plot_n_start, datos = datos_name,
                                          expe_name =  Name_expt, ByRow = NULL, my_row_sets = NULL, ByCol = NULL,
                                          my_col_sets = NULL)
         
         if (Option_NCD == TRUE) { 
-          # r_map <- rand_lines()$rand
           r_map <- rand_lines()[[1]]$rand
           Fillers <- sum(r_map == "Filler") 
           if (input$n_rows %% 2 == 0) { 
@@ -1010,9 +969,6 @@ mod_Diagonal_server <- function(id) {
       plot_num <- plot_number_reactive()$w_map_letters1 
       if (is.null(plot_num))
         return(NULL)
-      
-      # w_map <- rand_checks()$map_checks 
-      # w_map <- user_location()$map_checks
       w_map <- rand_checks()[[1]]$map_checks
       if("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE
       if(input$kindExpt == "DBUDC") multi <- TRUE else multi <- FALSE
@@ -1036,16 +992,30 @@ mod_Diagonal_server <- function(id) {
           my_colors <- unlist(my_colors) 
           df <- as.data.frame(plot_num)
           rownames(df) <- nrow(df):1
-          options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
+          #options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
           DT::datatable(df,
-                        extensions = 'FixedColumns',
-                        options = list(
-                          dom = 't',
-                          scrollX = TRUE,
-                          fixedColumns = TRUE
-                        )) %>% 
-            DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-                            backgroundColor = DT::styleEqual(a, my_colors)) 
+                        extensions = c('Buttons'),
+                        options = list(dom = 'Blfrtip',
+                                       autoWidth = FALSE,
+                                       scrollX = TRUE,
+                                       fixedColumns = TRUE,
+                                       pageLength = nrow(df),
+                                       scrollY = "700px",
+                                       class = 'compact cell-border stripe',  rownames = FALSE,
+                                       server = FALSE,
+                                       filter = list( position = 'top', clear = FALSE, plain =TRUE ),
+                                       buttons = c('copy', 'excel'),
+                                       lengthMenu = list(c(10,25,50,-1),
+                                                         c(10,25,50,"All")))
+            #             extensions = 'FixedColumns',
+            #             options = list(
+            #               dom = 't',
+            #               scrollX = TRUE,
+            #               fixedColumns = TRUE
+            #             )) %>% 
+            # DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
+            #                 backgroundColor = DT::styleEqual(a, my_colors)) 
+          )
         }else { 
           w_map_letters1 <- plot_number_reactive()$w_map_letters1 
           x <- plot_number_reactive()$target_num1 
@@ -1068,16 +1038,30 @@ mod_Diagonal_server <- function(id) {
           my_colors <- unlist(my_colors)
           df <- as.data.frame(w_map_letters1)
           rownames(df) <- nrow(df):1
-          options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
+          # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
           DT::datatable(df,
-                        extensions = 'FixedColumns',
-                        options = list(
-                          dom = 't',
-                          scrollX = TRUE,
-                          fixedColumns = TRUE
-                        )) %>% 
-            DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-                            backgroundColor = DT::styleEqual(c(a,0), c(my_colors, "red")))
+                        extensions = c('Buttons'),
+                        options = list(dom = 'Blfrtip',
+                                       autoWidth = FALSE,
+                                       scrollX = TRUE,
+                                       fixedColumns = TRUE,
+                                       pageLength = nrow(df),
+                                       scrollY = "700px",
+                                       class = 'compact cell-border stripe',  rownames = FALSE,
+                                       server = FALSE,
+                                       filter = list( position = 'top', clear = FALSE, plain =TRUE ),
+                                       buttons = c('copy', 'excel'),
+                                       lengthMenu = list(c(10,25,50,-1),
+                                                         c(10,25,50,"All")))
+                        )
+            #             extensions = 'FixedColumns',
+            #             options = list(
+            #               dom = 't',
+            #               scrollX = TRUE,
+            #               fixedColumns = TRUE
+            #             )) %>% 
+            # DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
+            #                 backgroundColor = DT::styleEqual(c(a,0), c(my_colors, "red")))
         }
       }else if (multi == FALSE){
         
@@ -1087,35 +1071,65 @@ mod_Diagonal_server <- function(id) {
           len_a <- length(a)
           df <- as.data.frame(plot_num)
           rownames(df) <- nrow(df):1
-          options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
+          # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
           DT::datatable(df,
-                        extensions = 'FixedColumns',
-                        options = list(
-                          dom = 't',
-                          scrollX = TRUE,
-                          fixedColumns = TRUE
-                        )) %>% 
-          DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-                          backgroundColor = DT::styleEqual(c(a,0), 
-                                                           c(rep(c('yellow'), len_a),"red"))
+                        extensions = c('Buttons'),
+                        options = list(dom = 'Blfrtip',
+                                       autoWidth = FALSE,
+                                       scrollX = TRUE,
+                                       fixedColumns = TRUE,
+                                       pageLength = nrow(df),
+                                       scrollY = "700px",
+                                       class = 'compact cell-border stripe',  rownames = FALSE,
+                                       server = FALSE,
+                                       filter = list( position = 'top', clear = FALSE, plain =TRUE ),
+                                       buttons = c('copy', 'excel'),
+                                       lengthMenu = list(c(10,25,50,-1),
+                                                         c(10,25,50,"All")))
           )
+          # DT::datatable(df,
+          #               extensions = 'FixedColumns',
+          #               options = list(
+          #                 dom = 't',
+          #                 scrollX = TRUE,
+          #                 fixedColumns = TRUE
+          #               )) %>% 
+          # DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
+          #                 backgroundColor = DT::styleEqual(c(a,0), 
+          #                                                  c(rep(c('yellow'), len_a),"red"))
+          # )
         }else{
           a <- as.vector(as.matrix(plot_num))
           len_a <- length(a)
           df <- as.data.frame(plot_num)
           rownames(df) <- nrow(df):1
-          options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
           DT::datatable(df,
-                        extensions = 'FixedColumns',
-                        options = list(
-                          dom = 't',
-                          scrollX = TRUE,
-                          fixedColumns = TRUE
-                        )) %>% 
-          DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-                          backgroundColor = DT::styleEqual(a, 
-                                                           rep('yellow', length(a)))
-            )
+                        extensions = c('Buttons'),
+                        options = list(dom = 'Blfrtip',
+                                       autoWidth = FALSE,
+                                       scrollX = TRUE,
+                                       fixedColumns = TRUE,
+                                       pageLength = nrow(df),
+                                       scrollY = "700px",
+                                       class = 'compact cell-border stripe',  rownames = FALSE,
+                                       server = FALSE,
+                                       filter = list( position = 'top', clear = FALSE, plain =TRUE ),
+                                       buttons = c('copy', 'excel'),
+                                       lengthMenu = list(c(10,25,50,-1),
+                                                         c(10,25,50,"All")))
+          )
+          # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
+          # DT::datatable(df,
+          #               extensions = 'FixedColumns',
+          #               options = list(
+          #                 dom = 't',
+          #                 scrollX = TRUE,
+          #                 fixedColumns = TRUE
+          #               )) %>% 
+          # DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
+          #                 backgroundColor = DT::styleEqual(a, 
+          #                                                  rep('yellow', length(a)))
+          #   )
         }
       }
     })
@@ -1178,7 +1192,6 @@ mod_Diagonal_server <- function(id) {
                                              location = location_names[user_site], Year = NULL,
                                              data_file = my_data_VLOOKUP, reps = FALSE)
           final_expt_fieldbook[[user_site]] <- as.data.frame(final_expt_export)
-          print(user_site)
           
         } else {
           if(is.null(split_name_reactive()$my_reps)) return(NULL)
@@ -1191,7 +1204,6 @@ mod_Diagonal_server <- function(id) {
                                              location = input$Location, Year = NULL,
                                              data_file = my_data_VLOOKUP, reps = TRUE)
           final_expt_fieldbook[[user_site]] <- as.data.frame(final_expt_export)
-          print(user_site)
         }
       }
       
@@ -1211,8 +1223,6 @@ mod_Diagonal_server <- function(id) {
       final_fieldbook <- final_fieldbook[, c(6,7,9,4,2,3,5,1,10)]
       final_fieldbook_all_sites <- cbind(ID, final_fieldbook)
       colnames(final_fieldbook_all_sites)[10] <- "TREATMENT"
-      
-      # print(head(final_fieldbook_all_sites, 6))
 
       return(list(final_expt = final_fieldbook_all_sites))
       
@@ -1300,32 +1310,31 @@ mod_Diagonal_server <- function(id) {
     })
     
     simudata_DIAG <- reactive({
-      #req(export_diagonal_design()$final_expt)
+      req(export_diagonal_design()$final_expt)
       if(!is.null(valsDIAG$maxValue) && !is.null(valsDIAG$minValue) && !is.null(valsDIAG$trail)) {
         maxVal <- as.numeric(valsDIAG$maxValue)
         minVal <- as.numeric(valsDIAG$minValue)
         ROX_DIAG <- as.numeric(valsDIAG$ROX)
         ROY_DIAG <- as.numeric(valsDIAG$ROY)
-        df_prep <- export_diagonal_design()$final_expt
+        df_diag <- export_diagonal_design()$final_expt
         loc_levels_factors <- levels(factor(df_prep$LOCATION, unique(df_prep$LOCATION)))
-        print(loc_levels_factors)
-        # df_DIAG <- export_diagonal_design()$final_expt
-        # fieldBook <- df_DIAG[, c(1,6,7,9)]
         nrows_diag <- as.numeric(input$n_rows)
         ncols_diag <- as.numeric(input$n_cols)
         seed_diag <- as.numeric(input$myseed)
-        
         locs_diag <- as.numeric(input$l.diagonal)
         df_diag_list <- vector(mode = "list", length = locs_diag)
         df_simulation_list <- vector(mode = "list", length = locs_diag)
         w <- 1
         set.seed(seed_diag)
         for (sites in 1:locs_diag) {
-          df_loc <- subset(df_prep, LOCATION == loc_levels_factors[w])
+          df_loc <- subset(df_diag, LOCATION == loc_levels_factors[w])
           fieldBook <- df_loc[, c(1,6,7,9)]
-          dfSimulation <- AR1xAR1_simulation(nrows = nrows_diag, ncols = ncols_diag, ROX = ROX_DIAG, ROY = ROY_DIAG, 
-                                             minValue = minVal, maxValue = maxVal, fieldbook = fieldBook, 
-                                             trail = valsDIAG$trail, seed = NULL)
+          dfSimulation <- AR1xAR1_simulation(nrows = nrows_diag, ncols = ncols_diag, 
+                                             ROX = ROX_DIAG, ROY = ROY_DIAG, 
+                                             minValue = minVal, maxValue = maxVal, 
+                                             fieldbook = fieldBook, 
+                                             trail = valsDIAG$trail, 
+                                             seed = NULL)
           dfSimulation <- dfSimulation$outOrder
           df_simulation_list[[sites]] <- dfSimulation
           dataPrep <- df_loc
@@ -1348,11 +1357,14 @@ mod_Diagonal_server <- function(id) {
     })
 
     
-    output$dt5 <- DT::renderDT({
+    output$fieldBook_diagonal <- DT::renderDT({
       df <- simudata_DIAG()$df
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "600px"))
-      DT::datatable(df, rownames = FALSE, options = list(
+      DT::datatable(df,
+                    filter = "top",
+                    rownames = FALSE, 
+                    options = list(
         columnDefs = list(list(className = 'dt-center', targets = "_all"))))
     })
     
@@ -1381,7 +1393,6 @@ mod_Diagonal_server <- function(id) {
       heatmap_obj_D()
     })
     
-    # Downloadable xlsx of selected dataset ----
     output$downloadData_Diagonal <- downloadHandler(
       filename = function() {
         req(input$Location)
@@ -1394,26 +1405,5 @@ mod_Diagonal_server <- function(id) {
         
       }
     )
-    
-    # output$reportRandom <- downloadHandler(
-    #   filename = "report.pdf",
-    #   content = function(file) {
-    #     params <- list(n = rand_lines()$rand)
-    #     tempReport <- file.path(tempdir(), "report.Rmd")
-    #     file.copy("report.Rmd", tempReport, overwrite = TRUE)
-    #     id <- showNotification(
-    #       "Rendering report...", 
-    #       duration = NULL, 
-    #       closeButton = FALSE
-    #     )
-    #     on.exit(removeNotification(id), add = TRUE)
-    #     
-    #     rmarkdown::render("report.Rmd", 
-    #                       output_file = file,
-    #                       params = params,
-    #                       envir = new.env(parent = globalenv())
-    #     )
-    #   }
-    # )
   })
 }

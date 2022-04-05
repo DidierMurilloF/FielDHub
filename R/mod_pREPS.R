@@ -30,7 +30,7 @@ mod_pREPS_ui <- function(id){
                                                           selected = ","))
                                     ),             
                    ),
-                   checkboxInput(inputId = ns("Optim.pREPS"), label = "Get Optim :)", value = TRUE),
+                   # checkboxInput(inputId = ns("Optim.pREPS"), label = "Get Optim :)", value = TRUE),
                    fluidRow(
                      column(6,style=list("padding-right: 28px;"),
                             numericInput(ns("nrows.preps"), label = "Input # of Rows:",
@@ -62,9 +62,6 @@ mod_pREPS_ui <- function(id){
                             selectInput(inputId = ns("locView.preps"), label = "Choose location to view:", choices = 1:1, selected = 1, multiple = FALSE)
                      )
                     ),
-                     # column(6,style=list("padding-left: 5px;"),
-                     #        selectInput(inputId = ns("locView.preps"),label = "Choose location to view:", choices = 1:1, selected = 1, multiple = FALSE)
-                     # ),
                    selectInput(ns("planter_mov.preps"), label = "Plot Order Layout:",
                                choices = c("serpentine", "cartesian"), multiple = FALSE,
                                selected = "serpentine"),
@@ -227,7 +224,7 @@ mod_pREPS_server <- function(id){
       locs <- as.numeric(input$l.preps)
       pREPS <- vector(mode = "list", length = locs)
       
-      OPTIM <- input$Optim.pREPS
+      OPTIM <- TRUE
       set.seed(preps.seed)
       for (s in 1:locs) {
       pREPS[[s]] <- pREP(nrows = nrows, ncols = ncols, RepChecks = r.checks, checks = n.checks, seed = NULL,

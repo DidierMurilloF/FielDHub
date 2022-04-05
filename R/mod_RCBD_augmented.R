@@ -255,12 +255,9 @@ mod_RCBD_augmented_server <- function(id) {
     
     output$dt2_a_rcbd <- DT::renderDT({
       print(locNum())
-       
        req(getDataup_a_rcbd()$dataUp_a_rcbd)
        req(input$blocks_a_rcbd)
-       #r_map <- rcbd_augmented_reactive()$layoutRandom
        r_map <- rcbd_augmented_reactive()$layout_random_sites[[locNum()]]
-       #r_mapLoc <- r_map$L
        checks <- 1:input$checks_a_rcbd
        b <- as.numeric(input$blocks_a_rcbd)
        len_checks <- length(checks)
@@ -268,7 +265,6 @@ mod_RCBD_augmented_server <- function(id) {
        repsExpt <- as.numeric(input$nExpt_a_rcbd)
        colores <- c('royalblue','salmon', 'green', 'orange','orchid', 'slategrey',
                     'greenyellow', 'blueviolet','deepskyblue','gold','blue', 'red')
-       #s <- unlist(rcbd_augmented_reactive()$entries)
        s <- rcbd_augmented_reactive()$infoDesign$entries
        B <- paste("Block", rep(b:1, repsExpt), sep = "")
        E <- paste("E", rep(repsExpt:1, each = b), sep = "")
@@ -382,6 +378,192 @@ mod_RCBD_augmented_server <- function(id) {
                )
        }
      })
+     
+     
+     
+     
+     
+     
+     
+     # valsOPTIM <- reactiveValues(ROX = NULL, ROY = NULL, trail.optim = NULL, minValue = NULL,
+     #                             maxValue = NULL)
+     # 
+     # simuModal.OPTIM <- function(failed = FALSE) {
+     #   modalDialog(
+     #     fluidRow(
+     #       column(6, 
+     #              selectInput(inputId = ns("trailsOPTIM"), label = "Select One:", 
+     #                          choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
+     #       ),
+     #       column(6, 
+     #              checkboxInput(inputId = ns("heatmap_s"), label = "Include a Heatmap", value = TRUE),
+     #       )
+     #     ),
+     #     conditionalPanel("input.trailsOPTIM == 'Other'", ns = ns,
+     #                      textInput(inputId = ns("OtherOPTIM"), label = "Input Trial Name:", value = NULL)
+     #     ),
+     #     fluidRow(
+     #       column(6, 
+     #              selectInput(inputId = ns("ROX.O"), "Select the Correlation in Rows:", 
+     #                          choices = seq(0.1, 0.9, 0.1), selected = 0.5)
+     #       ),
+     #       column(6, 
+     #              selectInput(inputId = ns("ROY.O"), "Select the Correlation in Cols:", 
+     #                          choices = seq(0.1, 0.9, 0.1), selected = 0.5)
+     #       )
+     #     ),
+     #     fluidRow(
+     #       column(6, 
+     #              numericInput(inputId = ns("min.optim"), "Input the min value:", value = NULL)
+     #       ),
+     #       column(6, 
+     #              numericInput(inputId = ns("max.optim"), "Input the max value:", value = NULL)
+     #              
+     #       )
+     #     ),
+     #     if (failed)
+     #       div(tags$b("Invalid input of data max and min", style = "color: red;")),
+     #     
+     #     footer = tagList(
+     #       modalButton("Cancel"),
+     #       actionButton(inputId = ns("ok.optim"), "GO")
+     #     )
+     #   )
+     # }
+     # 
+     # observeEvent(input$Simulate.optim, {
+     #   req(Spatial_Checks()$fieldBook)
+     #   showModal(
+     #     shinyjqui::jqui_draggable(
+     #       simuModal.OPTIM()
+     #     )
+     #   )
+     # })
+     # 
+     # observeEvent(input$ok.optim, {
+     #   req(input$min.optim, input$max.optim)
+     #   if (input$max.optim > input$min.optim && input$min.optim != input$max.optim) {
+     #     valsOPTIM$maxValue <- input$max.optim
+     #     valsOPTIM$minValue  <- input$min.optim
+     #     valsOPTIM$ROX <- as.numeric(input$ROX.O)
+     #     valsOPTIM$ROY <- as.numeric(input$ROY.O)
+     #     if(input$trailsOPTIM == "Other") {
+     #       req(input$OtherOPTIM)
+     #       if(!is.null(input$OtherOPTIM)) {
+     #         valsOPTIM$trail.optim <- as.character(input$OtherOPTIM)
+     #       }else showModal(simuModal.OPTIM(failed = TRUE))
+     #     }else {
+     #       valsOPTIM$trail.optim <- as.character(input$trailsOPTIM)
+     #     }
+     #     removeModal()
+     #   }else {
+     #     showModal(
+     #       shinyjqui::jqui_draggable(
+     #         simuModal.OPTIM(failed = TRUE)
+     #       )
+     #     )
+     #   }
+     # })
+     # 
+     # simuDataOPTIM <- reactive({
+     #   # req(Spatial_Checks()$fieldBook)
+     #   if(!is.null(valsOPTIM$maxValue) && !is.null(valsOPTIM$minValue) && !is.null(valsOPTIM$trail.optim)) {
+     #     maxVal <- as.numeric(valsOPTIM$maxValue)
+     #     minVal <- as.numeric(valsOPTIM$minValue)
+     #     ROX_O <- as.numeric(valsOPTIM$ROX)
+     #     ROY_O <- as.numeric(valsOPTIM$ROY)
+     #     locs <- as.numeric(input$l.optim)
+     #     df_optim <- Spatial_Checks()$fieldBook
+     #     loc_levels_factors <- levels(factor(df_optim$LOCATION, unique(df_optim$LOCATION)))
+     #     nrows.s <- as.numeric(input$nrows.s)
+     #     ncols.s <- as.numeric(input$ncols.s)
+     #     seed.s <- as.numeric(input$seed.spatial)
+     #     
+     #     df_optim_list <- vector(mode = "list", length = locs)
+     #     dfSimulationList <- vector(mode = "list", length = locs)
+     #     do_sites <- 1:locs
+     #     z <- 1
+     #     set.seed(seed.s)
+     #     for (sites in do_sites) {
+     #       df_loc <- subset(df_optim, LOCATION == loc_levels_factors[z])
+     #       fieldBook <- df_loc[, c(1,6,7,9)]
+     #       dfSimulation <- AR1xAR1_simulation(nrows = nrows.s, ncols = ncols.s, 
+     #                                          ROX = ROX_O, ROY = ROY_O, minValue = minVal, 
+     #                                          maxValue = maxVal, fieldbook = fieldBook, 
+     #                                          trail = valsOPTIM$trail.optim, 
+     #                                          seed = NULL)
+     #       dfSimulation <- dfSimulation$outOrder
+     #       dfSimulationList[[sites]] <- dfSimulation
+     #       dataOptim_loc <- df_loc
+     #       df_optim_simu <- cbind(dataOptim_loc, round(dfSimulation[,7],2))
+     #       colnames(df_optim_simu)[11] <- as.character(valsOPTIM$trail.optim)
+     #       df_optim_list[[sites]] <- df_optim_simu 
+     #       z <- z + 1
+     #     }
+     #     df_optim_locs <- dplyr::bind_rows(df_optim_list)
+     #     v <- 1
+     #   }else {
+     #     dataOptim <- Spatial_Checks()$fieldBook
+     #     v <- 2
+     #   }
+     #   if (v == 1) {
+     #     return(list(df = df_optim_locs, dfSimulation = dfSimulationList))
+     #   }else if (v == 2) {
+     #     return(list(df = dataOptim))
+     #   }
+     # })
+     # 
+     # 
+     # output$OPTIMOUTPUT <- DT::renderDT({
+     #   df <- simuDataOPTIM()$df
+     #   options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
+     #                             scrollX = TRUE, scrollY = "600px",
+     #                             columnDefs = list(list(className = 'dt-center', targets = "_all"))))
+     #   DT::datatable(df,
+     #                 filter = "top",
+     #                 rownames = FALSE
+     #   )
+     # })
+     # 
+     # 
+     # heatmap_obj <- reactive({
+     #   req(simuDataOPTIM()$dfSimulation)
+     #   if(input$heatmap_s) {
+     #     w <- as.character(valsOPTIM$trail.optim)
+     #     df <- simuDataOPTIM()$dfSimulation[[user_site_selection()]]
+     #     df <- as.data.frame(df)
+     #     p1 <- ggplot2::ggplot(df, ggplot2::aes(x = df[,4], y = df[,3], fill = df[,7], text = df[,8])) + 
+     #       ggplot2::geom_tile() +
+     #       ggplot2::xlab("COLUMN") +
+     #       ggplot2::ylab("ROW") +
+     #       ggplot2::labs(fill = w) +
+     #       viridis::scale_fill_viridis(discrete = FALSE)
+     #     
+     #     p2 <- plotly::ggplotly(p1, tooltip="text", width = 1180, height = 740)
+     #     
+     #     return(p2)
+     #   }
+     # })
+     # 
+     # output$heatmap <- plotly::renderPlotly({
+     #   req(heatmap_obj())
+     #   heatmap_obj()
+     # })
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
      
      output$dt5_a <- DT::renderDT({
        if(is.null(rcbd_augmented_reactive()$fieldBook)) return(NULL)
