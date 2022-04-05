@@ -107,14 +107,14 @@ mod_RCBD_augmented_ui <- function(id){
          tabsetPanel(
            tabPanel("Input Data",
                     fluidRow(
-                      column(6,DT::DTOutput(ns("dt8_a_rcbd"))),
-                      column(6,DT::DTOutput(ns("table1_a_rcbd")))
+                      column(6,DT::DTOutput(ns("data_input"))),
+                      column(6,DT::DTOutput(ns("checks_table")))
                     )
            ),
-           tabPanel("Randomized Field", DT::DTOutput(ns("dt2_a_rcbd"))),
-           tabPanel("Plot Number Field", DT::DTOutput(ns("dt4_a_rcbd"))),
-           tabPanel("Name Expt", DT::DTOutput(ns("dt_names_a"))),
-           tabPanel("Field Book", DT::DTOutput(ns("ARCBDOUTPUT"))),
+           tabPanel("Randomized Field", DT::DTOutput(ns("randomized_layout"))),
+           tabPanel("Plot Number Field", DT::DTOutput(ns("plot_number_layout"))),
+           tabPanel("Name Expt", DT::DTOutput(ns("expt_name_layout"))),
+           tabPanel("Field Book", DT::DTOutput(ns("fieldBook_ARCBD"))),
            tabPanel("Heatmap", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmap")), type = 5))
          )      
       )
@@ -168,9 +168,10 @@ mod_RCBD_augmented_server <- function(id) {
       
     })
     
-    output$dt8_a_rcbd <- DT::renderDT({
-      my_data <- getDataup_a_rcbd()$dataUp_a_rcbd
-      df <- my_data
+    output$data_input <- DT::renderDT({
+      df <- getDataup_a_rcbd()$dataUp_a_rcbd
+      df$ENTRY <- as.factor(df$ENTRY)
+      df$NAME <- as.factor(df$NAME)
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "600px"))
       DT::datatable(df,
@@ -209,7 +210,7 @@ mod_RCBD_augmented_server <- function(id) {
       }
     })
     
-    output$table1_a_rcbd <- DT::renderDT({
+    output$checks_table <- DT::renderDT({
       req(input$checks_a_rcbd)
       req(getDataup_a_rcbd()$dataUp_a_rcbd)
         data_entry <- getDataup_a_rcbd()$dataUp_a_rcbd
@@ -231,7 +232,7 @@ mod_RCBD_augmented_server <- function(id) {
       req(input$myseed_a_rcbd)
       req(getDataup_a_rcbd()$dataUp_a_rcbd)
       req(input$Location_a_rcbd)
-      
+      loc <- as.numeric(input$l.arcbd)
       checks <- as.numeric(input$checks_a_rcbd)
       if (input$owndata_a_rcbd == "Yes") {
         gen.list <- getDataup_a_rcbd()$dataUp_a_rcbd
@@ -243,8 +244,6 @@ mod_RCBD_augmented_server <- function(id) {
       b <- as.numeric(input$blocks_a_rcbd)
       seed.number <- as.numeric(input$myseed_a_rcbd)
       planter <- input$planter_mov1_a_rcbd
-      plot.number <- as.numeric(unlist(strsplit(input$plot_start_a_rcbd, ",")))
-      loc <- as.vector(unlist(strsplit(input$Location_a_rcbd, ",")))
       l.arcbd <- as.numeric(input$l.arcbd)
       if (length(loc) > l.arcbd) validate("Length of vector with name of locations is greater than the number of locations.")
       repsExpt <- as.numeric(input$nExpt_a_rcbd)
@@ -253,17 +252,20 @@ mod_RCBD_augmented_server <- function(id) {
         Name_expt <- nameexpt
       }else Name_expt <- paste(rep('Expt', repsExpt), 1:repsExpt, sep = "")
       
-      if (length(plot.number) != length(Name_expt)) plot.number <- 1001
+      #if (length(plot.number) != length(Name_expt)) plot.number <- 1001
+      
+      plotNumber <- as.numeric(as.vector(unlist(strsplit(input$plot_start_a_rcbd, ","))))
+      site_names <- as.character(as.vector(unlist(strsplit(input$Location_a_rcbd, ","))))
       random <- input$random
       ARCBD <- RCBD_augmented(lines = lines,
                               checks = checks,
                               b = b,
                               l = l.arcbd,
                               planter = planter,
-                              plotNumber = plot.number,
+                              plotNumber = plotNumber,
                               exptName = Name_expt,
                               seed = seed.number,
-                              locationNames = loc,
+                              locationNames = site_names,
                               repsExpt = repsExpt,
                               random = random, 
                               data = gen.list)
@@ -273,8 +275,7 @@ mod_RCBD_augmented_server <- function(id) {
       return(as.numeric(input$locView.arcbd))
     )
     
-    output$dt2_a_rcbd <- DT::renderDT({
-     # print(locNum())
+    output$randomized_layout <- DT::renderDT({
        req(getDataup_a_rcbd()$dataUp_a_rcbd)
        req(input$blocks_a_rcbd)
        r_map <- rcbd_augmented_reactive()$layout_random_sites[[locNum()]]
@@ -292,11 +293,6 @@ mod_RCBD_augmented_server <- function(id) {
        colnames(df) <- paste("V", 1:ncol(df), sep = "")
        options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
        DT::datatable(df,
-                     # extensions = 'FixedColumns',
-                     # options = list(
-                     #   dom = 't',
-                     #   scrollX = TRUE,
-                     #   fixedColumns = TRUE
                      extensions = 'Buttons',
                      options = list(dom = 'Blfrtip',
                                     autoWidth = FALSE,
@@ -315,49 +311,40 @@ mod_RCBD_augmented_server <- function(id) {
                          backgroundColor = DT::styleEqual(c(checks),
                                                           colores[1:len_checks]))
      })
-     
-     split_name_reactive_a <- reactive({
-       req(rcbd_augmented_reactive()$infoDesign)
-       req(input$blocks_a_rcbd)
-       req(rcbd_augmented_reactive()$layoutRandom)
-       df <-  rcbd_augmented_reactive()$exptNames
-       
-     })
-     
-     output$dt_names_a <- DT::renderDT({
-       req(rcbd_augmented_reactive()$infoDesign)
-       req(input$blocks_a_rcbd)
-       req(rcbd_augmented_reactive()$layoutRandom)
-       req(input$expt_name_a_rcbd)
-       b <- as.numeric(input$blocks_a_rcbd)
-       repsExpt <- as.numeric(input$nExpt_a_rcbd)
-       nameexpt <- as.vector(unlist(strsplit(input$expt_name_a_rcbd, ",")))
-       if (length(nameexpt) == repsExpt) {
-         Name_expt <- nameexpt
-       }else Name_expt <- paste(rep('Expt', repsExpt), 1:repsExpt, sep = "")
-       df <-  as.data.frame(rcbd_augmented_reactive()$exptNames)
-       B <- paste("Block", rep(b:1, repsExpt), sep = "")
-       E <- paste("E", rep(repsExpt:1, each = b), sep = "")
-       rownames(df) <- paste(B,E)
-       colnames(df) <- paste("V", 1:ncol(df), sep = "")
-       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
-       DT::datatable(df,
-                     extensions = 'FixedColumns',
-                     options = list(
-                       dom = 't',
-                       scrollX = TRUE,
-                       fixedColumns = TRUE
-                     )) %>%
-         DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-                         backgroundColor = DT::styleEqual(Name_expt, rep('yellow', length(Name_expt))
-                                                          )
-                         )
-     })
+    
+    output$expt_name_layout <- DT::renderDT({
+      req(rcbd_augmented_reactive())
+      req(input$blocks_a_rcbd)
+      req(input$expt_name_a_rcbd)
+      b <- as.numeric(input$blocks_a_rcbd)
+      repsExpt <- as.numeric(input$nExpt_a_rcbd)
+      name_expt <- as.vector(unlist(strsplit(input$expt_name_a_rcbd, ",")))
+      if (length(name_expt) == repsExpt) {
+        Name_expt <- name_expt
+      }else Name_expt <- paste(rep('EXPT', repsExpt), 1:repsExpt, sep = "")
+      df <-  as.data.frame(rcbd_augmented_reactive()$exptNames)
+      B <- paste("Block", rep(b:1, repsExpt), sep = "")
+      E <- paste("E", rep(repsExpt:1, each = b), sep = "")
+      rownames(df) <- paste(B,E)
+      colnames(df) <- paste("V", 1:ncol(df), sep = "")
+      colores_back <- c('yellow', 'cadetblue', 'lightgreen', 'grey', 'tan', 'lightcyan',
+                        'violet', 'thistle') 
+      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
+      DT::datatable(df,
+                    extensions = 'FixedColumns',
+                    options = list(
+                      dom = 't',
+                      scrollX = TRUE,
+                      fixedColumns = TRUE
+                    )) %>%
+        DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
+                        backgroundColor = DT::styleEqual(Name_expt, colores_back[1:repsExpt]))
+    })
 
-     output$dt4_a_rcbd <- DT::renderDT({
-       req(rcbd_augmented_reactive()$infoDesign)
+     output$plot_number_layout <- DT::renderDT({
+       req(rcbd_augmented_reactive())
        req(input$blocks_a_rcbd)
-       plot_num1 <- rcbd_augmented_reactive()$plotNumber
+       plot_num1 <- rcbd_augmented_reactive()$layout_plots_sites[[locNum()]]
        b <- as.numeric(input$blocks_a_rcbd)
        infoDesign <- rcbd_augmented_reactive()$infoDesign
        Fillers <- as.numeric(infoDesign$Fillers)
@@ -371,7 +358,6 @@ mod_RCBD_augmented_server <- function(id) {
          E <- paste("E", rep(repsExpt:1, each = b), sep = "")
          rownames(df) <- paste(B,E)
          colnames(df) <- paste("V", 1:ncol(df), sep = "")
-         #options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
          DT::datatable(df,
                        extensions = c('Buttons'),
                        options = list(dom = 'Blfrtip',
@@ -386,17 +372,7 @@ mod_RCBD_augmented_server <- function(id) {
                                       buttons = c('copy', 'excel'),
                                       lengthMenu = list(c(10,25,50,-1),
                                                         c(10,25,50,"All")))
-                       # extensions = 'FixedColumns',
-                       # options = list(
-                       #   dom = 't',
-                       #   scrollX = TRUE,
-                       #   fixedColumns = TRUE
-                       # )
-                       ) 
-           # DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-           #                 backgroundColor = DT::styleEqual(a, 
-           #                                                  rep('yellow', length(a)))
-           # )
+         )
        }else {
          a <- as.vector(as.matrix(plot_num1))
          a <- a[-which(a == 0)]
@@ -406,7 +382,6 @@ mod_RCBD_augmented_server <- function(id) {
          E <- paste("E", rep(repsExpt:1, each = b), sep = "")
          rownames(df) <- paste(B,E)
          colnames(df) <- paste("V", 1:ncol(df), sep = "")
-         #options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
          DT::datatable(df,
                        extensions = c('Buttons'),
                        options = list(dom = 'Blfrtip',
@@ -421,24 +396,9 @@ mod_RCBD_augmented_server <- function(id) {
                                       buttons = c('copy', 'excel'),
                                       lengthMenu = list(c(10,25,50,-1),
                                                         c(10,25,50,"All")))
-                       # extensions = 'FixedColumns',
-                       # options = list(
-                       #   dom = 't',
-                       #   scrollX = TRUE,
-                       #   fixedColumns = TRUE
-                      # )
-                       )
-           # DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-           #                 backgroundColor = DT::styleEqual(c(a,0),c(rep(c('yellow'), len_a),"red"))
-           #     )
+         )
        }
      })
-     
-     
-     
-     
-     
-     
      
      valsARCBD <- reactiveValues(ROX = NULL, ROY = NULL, trail.arcbd = NULL, minValue = NULL,
                                  maxValue = NULL)
@@ -521,7 +481,7 @@ mod_RCBD_augmented_server <- function(id) {
      })
 
      simuDataARCBD <- reactive({
-       # req(Spatial_Checks()$fieldBook)
+       req(rcbd_augmented_reactive()$fieldBook)
        if(!is.null(valsARCBD$maxValue) && !is.null(valsARCBD$minValue) && !is.null(valsARCBD$trail.arcbd)) {
          maxVal <- as.numeric(valsARCBD$maxValue)
          minVal <- as.numeric(valsARCBD$minValue)
@@ -532,9 +492,6 @@ mod_RCBD_augmented_server <- function(id) {
          nrows.s <- length(levels(as.factor(df_arcbd$ROW)))
          ncols.s <- length(levels(as.factor(df_arcbd$COLUMN)))
          loc_levels_factors <- levels(factor(df_arcbd$LOCATION, unique(df_arcbd$LOCATION)))
-         print(loc_levels_factors)
-         # nrows.s <- as.numeric(input$nrows.s)
-         # ncols.s <- as.numeric(input$ncols.s)
          seed.s <- as.numeric(input$myseed_a_rcbd)
 
          df_arcbd_list <- vector(mode = "list", length = locs)
@@ -573,7 +530,7 @@ mod_RCBD_augmented_server <- function(id) {
      })
 
 
-     output$ARCBDOUTPUT <- DT::renderDT({
+     output$fieldBook_ARCBD <- DT::renderDT({
        df <- simuDataARCBD()$df
        df$EXPT <- as.factor(df$EXPT)
        df$LOCATION <- as.factor(df$LOCATION)

@@ -87,6 +87,23 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
   if (is.null(seed)) seed <- runif(1, min=-50000, max=50000)
   set.seed(seed)
   
+  if(!is.numeric(plotNumber) && !is.integer(plotNumber)) {
+    stop("plotNumber should be an integer or a numeric vector.")
+  }
+  
+  if (any(plotNumber %% 1 != 0)) {
+    stop("plotNumber should be integers.")
+  }
+  
+  if (!is.null(l)) {
+    if (is.null(plotNumber) || length(plotNumber) != l) {
+      if (l > 1){
+        plotNumber <- seq(1001, 1000*(l+1), 1000)
+      } else plotNumber <- 1001
+      message(cat("Warning message:", "\n", "Since plotNumber was missing, it was set up to default value of: ", plotNumber))
+    }
+  }else stop("Number of locations/sites is missing")
+  
   if (is.null(lines) || is.null(checks) || is.null(b) || is.null(l)) {
     shiny::validate('Some of the basic design parameters are missing (lines, checks, b, l).')
   }
@@ -96,7 +113,7 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
     shiny::validate('RCBD_augmented() requires input lines, b and l to be possitive integers.')
   }
   if (!is.null(plotNumber) && is.numeric(plotNumber)) {
-    if(any(plotNumber %% 1 != 0) || any(plotNumber < 1) || any(diff(plotNumber) < 0)) {
+    if(any(plotNumber < 1) || any(diff(plotNumber) < 0)) {
       shiny::validate("RCBD_augmented() requires input plotNumber to be possitive integers and sorted.")
     }
   }
@@ -116,7 +133,13 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
   }
   all_genotypes <- lines + checks * b
   plots_per_block <- base::ceiling(all_genotypes/b)
-  if(is.null(locationNames) || length(locationNames) != l) locationNames <- 1:l
+  if (!is.null(locationNames)) {
+    if (length(locationNames) == l) {
+      locationNames <- toupper(locationNames)
+    } else {
+      locationNames <- 1:l
+    }
+  } else locationNames <- 1:l
   lines_per_plot <- plots_per_block - checks
   excedent <- plots_per_block * b
   Fillers <- excedent - all_genotypes
@@ -131,6 +154,7 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
   layout1_loc1 <- vector(mode = "list", length = 1)
   plot_loc1 <- vector(mode = "list", length = 1)
   layout_random_sites <- vector(mode = "list", length = l)
+  layout_plots_sites <- vector(mode = "list", length = l)
   for (locations in loc) {
     sky <- length(expt)
     layout1_expt <- vector(mode = "list", length = repsExpt)
@@ -311,6 +335,7 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
     
     outputDesign_loc[[locations]] <- as.data.frame(outputDesign)
     layout_random_sites[[locations]] <- layout1
+    layout_plots_sites[[locations]] <- plot_number
   }
   ##########################################################################################
   fieldbook <- dplyr::bind_rows(outputDesign_loc)
@@ -334,8 +359,8 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
                      entries = entries, repsExpt = repsExpt, numberLocations = l, 
                      Fillers = Fillers, seed = seed, idDesign = 14)
   output <- list(infoDesign = infoDesign, layoutRandom = layout_loc1, layout_random_sites = layout_random_sites,
-                 plotNumber = Plot_loc1, exptNames = my_names, data_entry = data, 
-                 fieldBook = fieldbook)
+                 layout_plots_sites = layout_plots_sites, plotNumber = Plot_loc1, exptNames = my_names, 
+                 data_entry = data, fieldBook = fieldbook)
   class(output) <- "FielDHub"
   return(invisible(output))
 }

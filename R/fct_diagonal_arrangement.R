@@ -119,17 +119,29 @@ diagonal_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL, check
     base::stop('Input for splitBy is unknown. Please, choose one: "column" or "row"')
   }
   if (!is.null(plotNumber) && is.numeric(plotNumber)) {
-    if(any(plotNumber %% 1 != 0) || any(plotNumber < 1) || any(diff(plotNumber) < 0)) {
+    if(any(plotNumber < 1) || any(diff(plotNumber) < 0)) {
       shiny::validate('diagonal_arrangement() requires plotNumber to be positive and sorted integers.')
     }
   }
-  if (is.null(plotNumber)) {
-    plotNumber <- 1001
-    warning("Since plotNumber was missing, it was set up as: 1001")
-  }else if(!is.numeric(plotNumber)) {
-    stop("Input for plotNumber can only be an integer or a numeric vector.")
-  }
 
+  if(!is.numeric(plotNumber) && !is.integer(plotNumber)) {
+    stop("plotNumber should be an integer or a numeric vector.")
+  }
+  
+  if (any(plotNumber %% 1 != 0)) {
+    stop("plotNumber should be integers.")
+  }
+  
+  if (!is.null(l)) {
+    if (is.null(plotNumber) || length(plotNumber) != l) {
+      if (l > 1){
+        plotNumber <- seq(1001, 1000*(l+1), 1000)
+      } else plotNumber <- 1001
+      message(cat("Warning message:", "\n", "Since plotNumber was missing, it was set up to default value of: ", plotNumber))
+    }
+  }else stop("Number of locations/sites is missing")
+
+  
   if(is.null(data) && !is.null(plotNumber) && kindExpt == "DBUDC") {
     if(length(plotNumber) > 1 && length(blocks) != length(plotNumber)) {
       base::stop('The input plotNumber and blocks need to be of the same length. You can consider plotNumber as an integer.')

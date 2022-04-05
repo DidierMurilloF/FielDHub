@@ -89,7 +89,7 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101, continuous = FA
     } 
   }else {
     plotNumber <- seq(1001, 1000*(l+1), 1000)
-    warning("'plotNumber' was set up to its default value for each site.")
+    message(cat("Warning message:", "\n", "Since plotNumber was missing, it was set up to default value of: ", plotNumber))
   }
   if (!is.null(locationNames)) locationNames <- toupper(locationNames) else locationName <- 1:l
   if (is.null(data)) {
