@@ -23,7 +23,7 @@ mod_FD_ui <- function(id){
                    
                    conditionalPanel("input.owndata != 'Yes'", ns = ns,
                                     textInput(inputId = ns("setfactors"), label = "Input # of Entries for Each Factor: (Separated by Comma)",
-                                              value = NULL)     
+                                              value = "2,2,3")     
                    ),
                    conditionalPanel("input.owndata == 'Yes'", ns = ns,
                                     fluidRow(
@@ -64,23 +64,32 @@ mod_FD_ui <- function(id){
                                 value = 123, min = 1),
                    fluidRow(
                      column(6,
-                            downloadButton(ns("downloadData.fd"), "Save Experiment!", style = "width:100%")
+                            actionButton(inputId = ns("RUN.fd"), "Run!", icon = icon("cocktail"), width = '100%'),
                      ),
                      column(6,
                             actionButton(ns("Simulate.fd"), "Simulate!", icon = icon("cocktail"), width = '100%')
                      )
                      
-                   )
+                   ), 
+                   br(),
+                   downloadButton(ns("downloadData.fd"), "Save Experiment!", style = "width:100%")
       ),
       
-      mainPanel(width = 8,
-                # tabsetPanel(
-                #   tabPanel("Field Book", DT::DTOutput(ns("FD.Output")))
-                # )
-                fixedRow(
-                  column(12, align="center", uiOutput(ns("tabsetFD"))),
-                  column(12, uiOutput(ns("well_panel_layout_FD")))
-                )
+      mainPanel(
+        width = 8,
+        fluidRow(
+          tabsetPanel(
+            tabPanel("Field Layout",
+                     shinycssloaders::withSpinner(
+                       plotly::plotlyOutput(ns("layouts"), width = "100%", height = "650px"),type = 5
+                     ),
+                     column(12, uiOutput(ns("well_panel_layout_FD")))
+            ),
+            tabPanel("Field Book", 
+                     shinycssloaders::withSpinner(DT::DTOutput(ns("FD.Output")), type = 5)
+            )
+          )
+        )
       )
     ) 
   )
@@ -132,7 +141,7 @@ mod_FD_server <- function(id) {
       return(list(dataUp.fd = dataUp.fd))
     })
     
-    fd_reactive <- reactive({
+    fd_reactive <- eventReactive(input$RUN.fd, {
       
       req(input$plot_start.fd)
       req(input$Location.fd)
@@ -179,6 +188,12 @@ mod_FD_server <- function(id) {
       
     })
     
+    upDateSites <- eventReactive(input$RUN.fd, {
+      req(input$l.fd)
+      locs <- as.numeric(input$l.fd)
+      sites <- 1:locs
+      return(list(sites = sites))
+    })
     
     output$well_panel_layout_FD <- renderUI({
       req(fd_reactive()$fieldBook)
@@ -206,7 +221,7 @@ mod_FD_server <- function(id) {
                  selectInput(inputId = ns("layoutO_fd"), label = "Layout option:", choices = layoutOptions_fd)
           ),
           column(3, #align="center",
-                 selectInput(inputId = ns("locLayout_fd"), label = "Location:", choices = 1:sites, selected = 1)
+                 selectInput(inputId = ns("locLayout_fd"), label = "Location:", choices = as.numeric(upDateSites()$sites), selected = 1)
           )
         )
       )
@@ -237,14 +252,15 @@ mod_FD_server <- function(id) {
                       planter = planting_fd , l = locSelected), silent = TRUE)
     })
     
-    output$layout_fd <- renderPlot({
-      req(fd_reactive())
-      req(reactive_layoutFD())
-      req(input$typlotfd)
-      if (input$typlotfd == 1) {
-        reactive_layoutFD()$out_layout
-      } else reactive_layoutFD()$out_layoutPlots
-    })
+    # output$layout_fd <- renderPlot({
+    #   req(fd_reactive())
+    #   req(reactive_layoutFD())
+    #   req(input$typlotfd)
+    #   if (input$typlotfd == 1) {
+    #     reactive_layoutFD()$out_layout
+    #   } else reactive_layoutFD()$out_layoutPlots
+    # })
+    
     
     valsfd <- reactiveValues(maxV.fd = NULL, minV.fd = NULL, trail.fd = NULL)
     
@@ -337,20 +353,20 @@ mod_FD_server <- function(id) {
       )
     }
     
-    output$tabsetFD <- renderUI({
-      req(input$typlotfd)
-      tabsetPanel(
-        if (input$typlotfd != 3) {
-          tabPanel("Factorial Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.output"), width = "100%", height = "650px"),
-                                                                          type = 5))
-        } else {
-          tabPanel("Factorial Field Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapFD"), width = "100%", height = "650px"),
-                                                                          type = 5))
-        },
-        tabPanel("Factorial Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("FD.Output")), type = 5))
-      )
-      
-    })
+    # output$tabsetFD <- renderUI({
+    #   req(input$typlotfd)
+    #   tabsetPanel(
+    #     if (input$typlotfd != 3) {
+    #       tabPanel("Factorial Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.output"), width = "100%", height = "650px"),
+    #                                                                       type = 5))
+    #     } else {
+    #       tabPanel("Factorial Field Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapFD"), width = "100%", height = "650px"),
+    #                                                                       type = 5))
+    #     },
+    #     tabPanel("Factorial Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("FD.Output")), type = 5))
+    #   )
+    #   
+    # })
     
     kindNum <- reactive({
       req(input$setfactors)
@@ -403,13 +419,7 @@ mod_FD_server <- function(id) {
       }
     })
     
-    output$heatmapFD <- plotly::renderPlotly({
-      req(heatmap_obj())
-      heatmap_obj()
-    })
-    
-    
-    output$layout.output <- renderPlot({
+    output$layouts <- plotly::renderPlotly({
       req(reactive_layoutFD())
       req(fd_reactive())
       req(input$typlotfd)
@@ -417,16 +427,41 @@ mod_FD_server <- function(id) {
         reactive_layoutFD()$out_layout
       } else if (input$typlotfd == 2) {
         reactive_layoutFD()$out_layoutPlots
+      } else {
+        req(heatmap_obj())
+        heatmap_obj()
       }
     })
     
+    # output$heatmapFD <- plotly::renderPlotly({
+    #   req(heatmap_obj())
+    #   heatmap_obj()
+    # })
+    
+    
+    # output$layout.output <- renderPlot({
+    #   req(reactive_layoutFD())
+    #   req(fd_reactive())
+    #   req(input$typlotfd)
+    #   if (input$typlotfd == 1) {
+    #     reactive_layoutFD()$out_layout
+    #   } else if (input$typlotfd == 2) {
+    #     reactive_layoutFD()$out_layoutPlots
+    #   }
+    # })
+    
     output$FD.Output <- DT::renderDataTable({
       df <- simuData_fd()$df
+      df$LOCATION <- as.factor(df$LOCATION)
+      df$PLOT <- as.factor(df$PLOT)
+      df$ROW <- as.factor(df$ROW)
+      df$COLUMN <- as.factor(df$COLUMN)
+      df$REP <- as.factor(df$REP)
       a <- as.numeric(simuData_fd()$a)
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "500px"))
       
-      DT::datatable(df, rownames = FALSE, options = list(
+      DT::datatable(df, filter = 'top', rownames = FALSE, options = list(
         columnDefs = list(list(className = 'dt-center', targets = "_all"))))
       
     })

@@ -60,20 +60,32 @@ mod_STRIPD_ui <- function(id){
                    
                    fluidRow(
                      column(6,
-                            downloadButton(ns("downloadData.strip"), "Save Experiment!", style = "width:100%")
+                            actionButton(inputId = ns("RUN.strip"), "Run!", icon = icon("cocktail"), width = '100%'),
                      ),
                      column(6,
                             actionButton(ns("Simulate.strip"), "Simulate!", icon = icon("cocktail"), width = '100%')
                      )
-                   )
+                     
+                   ), 
+                   br(),
+                   downloadButton(ns("downloadData.strip"), "Save Experiment!", style = "width:100%")
       ),
       
       mainPanel(
         width = 8,
-        fixedRow(
-          column(12, align="center", uiOutput(ns("tabsetSTRIP"))),
-        ),
-        column(12,uiOutput(ns("well_panel_layout_STRIP")))
+        fluidRow(
+          tabsetPanel(
+            tabPanel("Field Layout",
+                     shinycssloaders::withSpinner(
+                       plotly::plotlyOutput(ns("layout.strip"), width = "100%", height = "650px"),type = 5
+                     ),
+                     column(12,uiOutput(ns("well_panel_layout_STRIP")))
+            ),
+            tabPanel("Field Book", 
+                     shinycssloaders::withSpinner(DT::DTOutput(ns("STRIP.output")), type = 5)
+            )
+          )
+        )
       )
     ) 
   )
@@ -123,7 +135,7 @@ mod_STRIPD_server <- function(id) {
       return(list(dataUp.strip = dataUp.strip))
     })
     
-    strip_reactive <- reactive({
+    strip_reactive <- eventReactive(input$RUN.strip, {
       
       req(input$plot_start.strip)
       req(input$Location.strip)
@@ -162,6 +174,12 @@ mod_STRIPD_server <- function(id) {
                           data = data.strip)
     })
     
+    upDateSites <- eventReactive(input$RUN.strip, {
+      req(input$l.strip)
+      locs <- as.numeric(input$l.strip)
+      sites <- 1:locs
+      return(list(sites = sites))
+    })
     
     output$well_panel_layout_STRIP <- renderUI({
       req(strip_reactive()$fieldBook)
@@ -189,7 +207,7 @@ mod_STRIPD_server <- function(id) {
                  selectInput(inputId = ns("layoutO_strip"), label = "Layout option:", choices = layoutOptions_strip)
           ),
           column(3, #align="center",
-                 selectInput(inputId = ns("locLayout_strip"), label = "Location:", choices = 1:sites)
+                 selectInput(inputId = ns("locLayout_strip"), label = "Location:", choices = as.numeric(upDateSites()$sites))
           )
         )
       )
@@ -222,13 +240,13 @@ mod_STRIPD_server <- function(id) {
                       l = locSelected), silent = TRUE)
     })
     
-    output$layout_strip <- renderPlot({
-      req(strip_reactive())
-      req(input$typlotstrip)
-      if (input$typlotstrip == 1) {
-        reactive_layoutSTRIP()$out_layout
-      } else reactive_layoutSTRIP()$out_layoutPlots
-    })
+    # output$layout_strip <- renderPlot({
+    #   req(strip_reactive())
+    #   req(input$typlotstrip)
+    #   if (input$typlotstrip == 1) {
+    #     reactive_layoutSTRIP()$out_layout
+    #   } else reactive_layoutSTRIP()$out_layoutPlots
+    # })
     
     valsStrip <- reactiveValues(maxV.strip = NULL, minV.strip = NULL, trail.strip = NULL)
     
@@ -320,20 +338,20 @@ mod_STRIPD_server <- function(id) {
       )
     }
     
-    output$tabsetSTRIP <- renderUI({
-      req(input$typlotstrip)
-      tabsetPanel(
-        if (input$typlotstrip != 3) {
-          tabPanel("Split Plot Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.strip"), width = "100%", height = "650px"),
-                                                                           type = 5))
-        } else {
-          tabPanel("Split Plot Field Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapSTRIP"), width = "100%", height = "650px"),
-                                                                           type = 5))
-        },
-        tabPanel("Split Plot Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("STRIP.output")), type = 5))
-      )
-      
-    })
+    # output$tabsetSTRIP <- renderUI({
+    #   req(input$typlotstrip)
+    #   tabsetPanel(
+    #     if (input$typlotstrip != 3) {
+    #       tabPanel("Split Plot Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.strip"), width = "100%", height = "650px"),
+    #                                                                        type = 5))
+    #     } else {
+    #       tabPanel("Split Plot Field Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapSTRIP"), width = "100%", height = "650px"),
+    #                                                                        type = 5))
+    #     },
+    #     tabPanel("Split Plot Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("STRIP.output")), type = 5))
+    #   )
+    #   
+    # })
     
     locNum <- reactive(
       return(as.numeric(input$locLayout_strip))
@@ -377,12 +395,8 @@ mod_STRIPD_server <- function(id) {
       }
     })
     
-    output$heatmapSTRIP <- plotly::renderPlotly({
-      req(heatmap_obj())
-      heatmap_obj()
-    })
     
-    output$layout.strip <- renderPlot({
+    output$layout.strip <- plotly::renderPlotly({
       #reactive_layoutSPD()$out_layout
       req(strip_reactive())
       req(input$typlotstrip)
@@ -390,6 +404,9 @@ mod_STRIPD_server <- function(id) {
         reactive_layoutSTRIP()$out_layout
       } else if (input$typlotstrip == 2) {
         reactive_layoutSTRIP()$out_layoutPlots
+      } else {
+        req(heatmap_obj())
+        heatmap_obj()
       }
     })
     

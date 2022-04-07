@@ -67,20 +67,32 @@ mod_RowCol_ui <- function(id){
                    
                    fluidRow(
                      column(6,
-                            downloadButton(ns("downloadData.rowcolD"), "Save Experiment!", style = "width:100%")
+                            actionButton(inputId = ns("RUN.rcd"), "Run!", icon = icon("cocktail"), width = '100%'),
                      ),
                      column(6,
                             actionButton(ns("Simulate.RowCol"), "Simulate!", icon = icon("cocktail"), width = '100%')
                      )
-                   )
+                     
+                   ), 
+                   br(),
+                   downloadButton(ns("downloadData.rowcolD"), "Save Experiment!", style = "width:100%")
       ),
 
       mainPanel(
         width = 8,
-        fixedRow(
-          column(12, align="center", uiOutput(ns("tabsetRCD"))),
-        ),
-        column(12,uiOutput(ns("well_panel_layout_ROWCOL")))
+        fluidRow(
+          tabsetPanel(
+            tabPanel("Field Layout",
+                     shinycssloaders::withSpinner(
+                       plotly::plotlyOutput(ns("layouts"), width = "100%", height = "650px"),type = 5
+                     ),
+                     column(12,uiOutput(ns("well_panel_layout_ROWCOL")))
+            ),
+            tabPanel("Field Book", 
+                     shinycssloaders::withSpinner(DT::DTOutput(ns("rowcolD")), type = 5)
+            )
+          )
+        )
       )
     )
   )
@@ -164,7 +176,7 @@ mod_RowCol_server <- function(id){
     
     
     
-    RowCol_reactive <- reactive({
+    RowCol_reactive <- eventReactive(input$RUN.rcd, {
       
       req(input$t.rcd)
       req(input$k.rcd)
@@ -201,6 +213,12 @@ mod_RowCol_server <- function(id){
       
     })
     
+    upDateSites <- eventReactive(input$RUN.rcd, {
+      req(input$l.rcd)
+      locs <- as.numeric(input$l.rcd)
+      sites <- 1:locs
+      return(list(sites = sites))
+    })
     
     output$well_panel_layout_ROWCOL <- renderUI({
       req(RowCol_reactive()$fieldBook)
@@ -229,7 +247,7 @@ mod_RowCol_server <- function(id){
                  selectInput(inputId = ns("layoutO_rcd"), label = "Layout option:", choices = layoutOptions_rcd)
           ),
           column(3, #align="center",
-                 selectInput(inputId = ns("locLayout_rcd"), label = "Location:", choices = 1:sites)
+                 selectInput(inputId = ns("locLayout_rcd"), label = "Location:", choices = as.numeric(upDateSites()$sites))
           )
         )
       )
@@ -261,13 +279,13 @@ mod_RowCol_server <- function(id){
                       orderReps = input$orderRepsRowCol), silent = TRUE)
     })
     
-    output$layout_rowcol <- renderPlot({
-      req(RowCol_reactive())
-      req(input$typlotrcd)
-      if (input$typlotrcd == 1) {
-        reactive_layoutROWCOL()$out_layout
-      } else reactive_layoutROWCOL()$out_layoutPlots
-    })
+    # output$layout_rowcol <- renderPlot({
+    #   req(RowCol_reactive())
+    #   req(input$typlotrcd)
+    #   if (input$typlotrcd == 1) {
+    #     reactive_layoutROWCOL()$out_layout
+    #   } else reactive_layoutROWCOL()$out_layoutPlots
+    # })
     
     
     
@@ -362,20 +380,20 @@ mod_RowCol_server <- function(id){
       )
     }
     
-    output$tabsetRCD <- renderUI({
-      req(input$typlotrcd)
-      tabsetPanel(
-        if (input$typlotrcd != 3) {
-          tabPanel("Split Plot Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.rcd"), width = "100%", height = "650px"),
-                                                                           type = 5))
-        } else {
-          tabPanel("Split Plot Field Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapRCD"), width = "100%", height = "650px"),
-                                                                           type = 5))
-        },
-        tabPanel("Split Plot Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("rowcolD")), type = 5))
-      )
-      
-    })
+    # output$tabsetRCD <- renderUI({
+    #   req(input$typlotrcd)
+    #   tabsetPanel(
+    #     if (input$typlotrcd != 3) {
+    #       tabPanel("Split Plot Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.rcd"), width = "100%", height = "650px"),
+    #                                                                        type = 5))
+    #     } else {
+    #       tabPanel("Split Plot Field Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapRCD"), width = "100%", height = "650px"),
+    #                                                                        type = 5))
+    #     },
+    #     tabPanel("Split Plot Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("rowcolD")), type = 5))
+    #   )
+    #   
+    # })
     
     locNum <- reactive(
       return(as.numeric(input$locLayout_rcd))
@@ -419,12 +437,8 @@ mod_RowCol_server <- function(id){
       }
     })
     
-    output$heatmapRCD <- plotly::renderPlotly({
-      req(heatmap_obj())
-      heatmap_obj()
-    })
     
-    output$layout.rcd <- renderPlot({
+    output$layouts <- plotly::renderPlotly({
       #reactive_layoutSPD()$out_layout
       req(RowCol_reactive())
       req(input$typlotrcd)
@@ -432,15 +446,26 @@ mod_RowCol_server <- function(id){
         reactive_layoutROWCOL()$out_layout
       } else if (input$typlotrcd == 2) {
         reactive_layoutROWCOL()$out_layoutPlots
+      } else {
+        req(heatmap_obj())
+        heatmap_obj()
       }
     })
     
     output$rowcolD <- DT::renderDataTable({
       df <- simuData_RowCol()$df
+      df$LOCATION <- as.factor(df$LOCATION)
+      df$PLOT <- as.factor(df$PLOT)
+      df$ROW <- as.factor(df$ROW)
+      df$COLUMN <- as.factor(df$COLUMN)
+      df$REP <- as.factor(df$REP)
+      df$ROW_REP <- as.factor(df$ROW_REP)
+      df$COLUMN_REP <- as.factor(df$COLUMN_REP)
+      df$ENTRY <- as.factor(df$ENTRY)
       a <- as.numeric(simuData_RowCol()$a)
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "500px"))
-      DT::datatable(df, rownames = FALSE, options = list(
+      DT::datatable(df, filter = 'top', rownames = FALSE, options = list(
         columnDefs = list(list(className = 'dt-center', targets = "_all"))))
       
     })
