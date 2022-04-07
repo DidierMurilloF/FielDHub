@@ -347,11 +347,10 @@ diagonal_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL, check
       }
     }else {
       if (kindExpt == "DBUDC" && Option_NCD == FALSE) {
-        # data_random <- get_random(n_rows = nrows, n_cols = ncols, d_checks = my_split_r,
-        #                           reps = NULL, Fillers = FALSE, col_sets = NULL, row_sets = my_row_sets,
-        #                           checks = 1:checks,data = data_entry, data_dim_each_block = data_dim_each_block)
         data_entry1 <- data_entry[(checks + 1):nrow(data_entry), ]
-        data_random <- get_DBrandom(binaryMap = w_map, data_dim_each_block = data_dim_each_block, data_entries = data_entry1,
+        data_random <- get_DBrandom(binaryMap = w_map, 
+                                    data_dim_each_block = data_dim_each_block, 
+                                    data_entries = data_entry1,
                                     planter = planter)
       }else if(kindExpt == "DBUDC" && Option_NCD == TRUE) {
         Block_Fillers <- as.numeric(getData()$Blocks)
@@ -376,13 +375,18 @@ diagonal_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL, check
   
   if (Way == "By Row" && kindExpt == "DBUDC") {
     map_letters <- data_random$w_map_letters
-    split_name_diagonal1 <- names_dbrows(w_map = w_map, myWay = "By Row", kindExpt = "DBUDC", w_map_letters = map_letters,
-                                         data_dim_each_block = data_dim_each_block, expt_name = exptName, Checks = checksEntries)
+    split_name_diagonal1 <- names_dbrows(w_map = w_map, myWay = "By Row", kindExpt = "DBUDC", 
+                                         w_map_letters = map_letters,
+                                         data_dim_each_block = data_dim_each_block, 
+                                         expt_name = exptName, 
+                                         Checks = checksEntries)
   }else {
     w_map_letters1 <- data_random$w_map_letters
-    split_name_diagonal1 <- names_diagonal(nrows = nrows, ncols = ncols, randomChecksMap = w_map, kindExpt = kindExpt,
-                                           checks = checksEntries,myWay = Way, Option_NCD = Option_NCD, expt_name = exptName, 
-                                           data_entry = data_entry, reps = NULL, data_dim_each_block = data_dim_each_block, 
+    split_name_diagonal1 <- names_diagonal(nrows = nrows, ncols = ncols, randomChecksMap = w_map, 
+                                           kindExpt = kindExpt, checks = checksEntries, myWay = Way, 
+                                           Option_NCD = Option_NCD, expt_name = exptName, 
+                                           data_entry = data_entry, reps = NULL, 
+                                           data_dim_each_block = data_dim_each_block, 
                                            w_map_letters1 = w_map_letters1)
   }
   

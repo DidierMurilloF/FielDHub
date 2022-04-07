@@ -18,7 +18,7 @@ mod_Rectangular_Lattice_ui <- function(id){
                    
                    conditionalPanel("input.owndata_rectangular != 'Yes'", ns = ns,
                                     numericInput(ns("t.rectangular"), label = "Input # of Treatments:",
-                                                 value = NULL, min = 2)
+                                                 value = 30, min = 2)
                    ),
                    conditionalPanel("input.owndata_rectangular == 'Yes'", ns = ns,
                                     fluidRow(
@@ -33,9 +33,9 @@ mod_Rectangular_Lattice_ui <- function(id){
                                     )        
                    ),
                    
-                   numericInput(inputId = ns("r.rectangular"), label = "Input # of Full Reps:", value = NULL, min = 2),
+                   numericInput(inputId = ns("r.rectangular"), label = "Input # of Full Reps:", value = 3, min = 2),
                    selectInput(inputId = ns("k.rectangular"), label = "Input # of Plots per IBlock:", choices = ""),
-                   numericInput(inputId = ns("l.rectangular"), label = "Input # of Locations:", value = NULL, min = 1),
+                   numericInput(inputId = ns("l.rectangular"), label = "Input # of Locations:", value = 1, min = 1),
                    
                    selectInput(inputId = ns("planter_mov_rect"), label = "Plot Order Layout:",
                                choices = c("serpentine", "cartesian"), multiple = FALSE,
@@ -66,13 +66,22 @@ mod_Rectangular_Lattice_ui <- function(id){
       
       mainPanel(
         width = 8,
-        fixedRow(
-          column(12, align="center", uiOutput(ns("tabsetRect"))),
-          ),
-          column(12,uiOutput(ns("well_panel_layout_rt")))
+        fluidRow(
+          tabsetPanel(
+            tabPanel("Field Layout",
+                     shinycssloaders::withSpinner(
+                       plotly::plotlyOutput(ns("random_layout"), width = "100%", height = "650px"),type = 5
+                     ),
+                     column(12,uiOutput(ns("well_panel_layout_rt")))
+            ),
+            tabPanel("Field Book", 
+                     shinycssloaders::withSpinner(DT::DTOutput(ns("rectangular_fieldbook")), type = 5)
+            )
+          )
         )
       )
     )
+  )
 }
     
 #' Rectangular_Lattice Server Functions
@@ -199,10 +208,10 @@ mod_Rectangular_Lattice_server <- function(id) {
     })
     
     output$well_panel_layout_rt <- renderUI({
-      req(RECTANGULAR_reactive())
-      req(input$l.rectangular)
-      locs_rt <- as.numeric(input$l.rectangular)
-      repsRect <- as.numeric(input$r.rectangular)
+      req(RECTANGULAR_reactive()$fieldBook)
+      df <- RECTANGULAR_reactive()$fieldBook
+      locs_rt <- length(levels(as.factor(df$LOCATION)))
+      repsRect <- length(levels(as.factor(df$REP)))
       if ((repsRect >= 4 & repsRect %% 2 == 0) | (repsRect >= 4 & sqrt(repsRect) %% 1 == 0)) {
         orderReps <- c("Vertical Stack Panel" = "vertical_stack_panel", "Horizontal Stack Panel" = "horizontal_stack_panel",  
                        "Grid Panel" = "grid_panel")
@@ -355,21 +364,6 @@ mod_Rectangular_Lattice_server <- function(id) {
       )
     }
     
-    output$tabsetRect <- renderUI({
-      req(input$typlotRT)
-      tabsetPanel(
-        if (input$typlotRT != 3) {
-          tabPanel("Rectangular Lattice Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.output_rt"), width = "100%", height = "650px"),
-                                                                                    type = 5))
-        } else {
-          tabPanel("Rectangular Lattice Field Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapRect"), width = "100%", height = "650px"),
-                                                                                    type = 5))
-        },
-        tabPanel("Rectangular Lattice Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("RECTANGULAR.output")), type = 5))
-      )
-      
-    })
-    
     locNum <- reactive(
       return(as.numeric(input$locLayout_rt))
     )
@@ -412,12 +406,7 @@ mod_Rectangular_Lattice_server <- function(id) {
       }
     })
     
-    output$heatmapRect <- plotly::renderPlotly({
-      req(heatmap_obj())
-      heatmap_obj()
-    })
-    
-    output$layout.output_rt <- renderPlot({
+    output$random_layout <- plotly::renderPlotly({
       req(reactive_layoutRect())
       req(RECTANGULAR_reactive())
       req(input$typlotRT)
@@ -425,21 +414,35 @@ mod_Rectangular_Lattice_server <- function(id) {
         reactive_layoutRect()$out_layout
       } else if (input$typlotRT == 2) {
         reactive_layoutRect()$out_layoutPlots
-      } 
+      } else {
+        req(heatmap_obj())
+        heatmap_obj()
+      }
     })
     
-    output$RECTANGULAR.output <- DT::renderDataTable({
+    output$rectangular_fieldbook <- DT::renderDataTable({
       req(input$k.rectangular)
       k.rect <- input$k.rectangular
       if (k.rect == "No Options Available") {
         validate("A Rectangular Lattice requires t = s*(s-1), where s is the number of iBlock per replicate.")
       }
       df <- simuDataRECT()$df
+      df$LOCATION <- as.factor(df$LOCATION)
+      df$PLOT <- as.factor(df$PLOT)
+      df$ROW <- as.factor(df$ROW)
+      df$COLUMN <- as.factor(df$COLUMN)
+      df$REP <- as.factor(df$REP)
+      df$IBLOCK <- as.factor(df$IBLOCK)
+      df$UNIT <- as.factor(df$UNIT)
+      df$ENTRY <- as.factor(df$ENTRY)
       a <- as.numeric(simuDataRECT()$a)
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "500px"))
       
-      DT::datatable(df, rownames = FALSE, options = list(
+      DT::datatable(df,
+                    filter = 'top',
+                    rownames = FALSE, 
+                    options = list(
         columnDefs = list(list(className = 'dt-center', targets = "_all"))))
       
     })

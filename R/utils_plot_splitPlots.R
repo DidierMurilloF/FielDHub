@@ -322,7 +322,8 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblock
                            text = WHOLE_PLOT, cex = 1, shorten = "no",
                            data = df, xlab = "COLUMNS", ylab = "ROWS",
                            main = main, 
-                           show.key = TRUE)
+                           show.key = TRUE, 
+                           gg = TRUE)
     
     p2 <- desplot::desplot(REP ~ COLUMN + ROW, flip = FALSE,
                            out1 = REP,
@@ -330,7 +331,8 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblock
                            text = PLOT, cex = 1, shorten = "no",
                            data = df, xlab = "COLUMNS", ylab = "ROWS",
                            main = main, 
-                           show.key = FALSE)
+                           show.key = FALSE, 
+                           gg = TRUE)
   } else if (x$infoDesign$idDesign == 6) {
     allSites <- vector(mode = "list", length = nlocs)
     for (st in 1:nlocs) {
@@ -361,7 +363,8 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblock
                            col = SUB_PLOT,
                            data = df,
                            main = main,
-                           show.key = TRUE, key.cex = 0.7)
+                           show.key = TRUE, key.cex = 0.7, 
+                           gg = TRUE)
     
     p2 <- desplot::desplot(REP ~ COLUMN + ROW, flip = FALSE,
                            out1 = REP,
@@ -369,7 +372,8 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblock
                            text = PLOT, cex = 1, shorten = "no",
                            data = df, xlab = "COLUMNS", ylab = "ROWS",
                            main = main, 
-                           show.key = FALSE, key.cex = 0.7)
+                           show.key = FALSE, key.cex = 0.7, 
+                           gg = TRUE)
     
   }
   return(list(p1 = p1, p2 = p2, df = df, newBooks = newBooksSelected, allSitesFieldbook = allSitesFieldbook))

@@ -160,7 +160,8 @@ plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1
                            text = TREATMENT, cex = 1, shorten = "no",
                            data = df, xlab = "COLUMNS", ylab = "ROWS",
                            main = main, 
-                           show.key = FALSE)
+                           show.key = FALSE, 
+                           gg = TRUE)
     #df$PLOT <- as.factor(df$PLOT)
     df$REP <- as.factor(df$REP)
     p2 <- desplot::desplot(REP ~ COLUMN + ROW, flip = FALSE,
@@ -169,7 +170,8 @@ plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1
                            text = PLOT, cex = 1, shorten = "no",
                            data = df, xlab = "COLUMNS", ylab = "ROWS",
                            main = main, 
-                           show.key = FALSE)
+                           show.key = FALSE,
+                           gg = TRUE)
   } else if (x$infoDesign$idDesign == 4) {
     if (x$infoDesign$kind == "RCBD") {
       allSites <- vector(mode = "list", length = nlocs)
@@ -194,7 +196,8 @@ plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1
                              text = TRT_COMB, cex = 1, shorten = "no",
                              data = df, xlab = "COLUMNS", ylab = "ROWS",
                              main = main, 
-                             show.key = FALSE)
+                             show.key = FALSE,
+                             gg = TRUE)
       
       df$PLOT <- as.factor(df$PLOT)
       df$REP <- as.factor(df$REP)
@@ -204,43 +207,10 @@ plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1
                              text = PLOT, cex = 1, shorten = "no",
                              data = df, xlab = "COLUMNS", ylab = "ROWS",
                              main = main,
-                             show.key = FALSE)
+                             show.key = FALSE,
+                             gg = TRUE)
     }
   } 
-  # else if (x$infoDesign$idDesign == 7) {
-  #   allSites <- vector(mode = "list", length = nlocs)
-  #   for (st in 1:nlocs) {
-  #     newBooksSelected_1 <- newBooksLocs[[st]]
-  #     df_1 <- newBooksSelected_1[opt]
-  #     allSites[[st]] <- as.data.frame(df_1)
-  #   }
-  #   allSitesFieldbook <- dplyr::bind_rows(allSites)
-  #   allSitesFieldbook <- allSitesFieldbook[,c(1:3,8,9,4:7)]
-  #   
-  #   
-  #   df <- df[,c(1:3,8,9,4:7)]
-  #   colnames(df) <- c("ID", "LOCATION", "PLOT", "ROW", "COLUMN", "REP", "HSTRIP", "VSTRIP", "TRT_COMB")
-  #   rows <- max(as.numeric(df$ROW))
-  #   cols <- max(as.numeric(df$COLUMN))
-  #   df$TRT_COMB <- as.factor(df$TRT_COMB)
-  #   ds <- "Strip-Plot Design " 
-  #   main <- paste0(ds, rows, "X", cols)
-  #   # Plot field layout
-  #   p1 <- desplot::desplot(TRT_COMB ~ COLUMN + ROW, flip = FALSE,
-  #                          out1 = REP,
-  #                          out2.gpar = list(col = "black", lty = 3), 
-  #                          text = TRT_COMB, cex = 1, shorten = "no",
-  #                          data = df, xlab = "COLUMNS", ylab = "ROWS",
-  #                          main = main, 
-  #                          show.key = FALSE)
-  #   df$REP <- as.factor(df$REP)
-  #   p2 <- desplot::desplot(REP ~  COLUMN + ROW, flip = FALSE,
-  #                          out1 = REP,
-  #                          text = PLOT, cex = 1, shorten = "no",
-  #                          data = df, xlab = "COLUMNS", ylab = "ROWS",
-  #                          main = main,
-  #                          show.key = FALSE)
-  # }
   return(list(p1 = p1, p2 = p2, df = df, newBooks = newBooksSelected, 
               allSitesFieldbook = allSitesFieldbook))
 }

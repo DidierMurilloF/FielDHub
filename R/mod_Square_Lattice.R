@@ -18,7 +18,7 @@ mod_Square_Lattice_ui <- function(id){
                    
                    conditionalPanel("input.owndata_square != 'Yes'", ns = ns,
                                     numericInput(ns("t.square"), label = "Input # of Treatments:",
-                                                 value = NULL, min = 2)
+                                                 value = 49, min = 2)
                    ),
                    conditionalPanel("input.owndata_square == 'Yes'", ns = ns,
                                     fluidRow(
@@ -32,9 +32,9 @@ mod_Square_Lattice_ui <- function(id){
                                                           selected = ","))
                                     )        
                    ),
-                   numericInput(inputId = ns("r.square"), label = "Input # of Full Reps:", value = NULL, min = 2),
+                   numericInput(inputId = ns("r.square"), label = "Input # of Full Reps:", value = 3, min = 2),
                    selectInput(inputId = ns("k.square"), label = "Input # of Plots per IBlock:", choices = ""),
-                   numericInput(inputId = ns("l.square"), label = "Input # of Locations:", value = NULL, min = 1),
+                   numericInput(inputId = ns("l.square"), label = "Input # of Locations:", value = 1, min = 1),
                    
                    selectInput(inputId = ns("planter_mov_square"), label = "Plot Order Layout:",
                                choices = c("serpentine", "cartesian"), multiple = FALSE,
@@ -67,11 +67,20 @@ mod_Square_Lattice_ui <- function(id){
       
       mainPanel(
         width = 8,
-        fixedRow(
-          column(12, align="center", uiOutput(ns("tabsetSquare"))),
-          column(12, uiOutput(ns("well_panel_layout_sq")))
+        fluidRow(
+          tabsetPanel(
+            tabPanel("Field Layout",
+                     shinycssloaders::withSpinner(
+                       plotly::plotlyOutput(ns("random_layout"), width = "100%", height = "650px"),type = 5
+                     ),
+                     column(12, uiOutput(ns("well_panel_layout_sq")))
+            ),
+            tabPanel("Field Book", 
+                     shinycssloaders::withSpinner(DT::DTOutput(ns("square_fieldbook")), type = 5)
+            )
+          )
         )
-    )
+      )
     )
   )
 }
@@ -188,11 +197,10 @@ mod_Square_Lattice_server <- function(id){
     })
     
     output$well_panel_layout_sq <- renderUI({
-      req(SQUARE_reactive())
-      req(input$l.square)
-      req(input$r.square)
-      locs_sq <- as.numeric(input$l.square)
-      repsSquare <- as.numeric(input$r.square)
+      req(SQUARE_reactive()$fieldBook)
+      df <- SQUARE_reactive()$fieldBook
+      locs_sq <- length(levels(as.factor(df$LOCATION)))
+      repsSquare <- length(levels(as.factor(df$REP)))
       if ((repsSquare >= 4 & repsSquare %% 2 == 0) | (repsSquare >= 4 & sqrt(repsSquare) %% 1 == 0)) {
         orderReps <- c("Vertical Stack Panel" = "vertical_stack_panel", "Horizontal Stack Panel" = "horizontal_stack_panel",  
                        "Grid Panel" = "grid_panel")
@@ -245,8 +253,8 @@ mod_Square_Lattice_server <- function(id){
       obj_sq <- SQUARE_reactive()
       opt_sq <- as.numeric(input$layoutO_sq)
       locSelected <- as.numeric(input$locLayout_sq)
-      #plot_layout(x = obj_sq, optionLayout = opt_sq)
-      try(plot_layout(x = obj_sq, optionLayout = opt_sq, planter = input$planter_mov_square, l = locSelected, 
+      try(plot_layout(x = obj_sq, optionLayout = opt_sq, planter = input$planter_mov_square, 
+                      l = locSelected, 
                       orderReps = input$orderReps_sq), silent = TRUE)
     })
     
@@ -359,21 +367,6 @@ mod_Square_Lattice_server <- function(id){
       )
     }
     
-    output$tabsetSquare <- renderUI({
-      req(input$typlotSQ)
-      tabsetPanel(
-        if (input$typlotSQ != 3) {
-          tabPanel("Square Lattice Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.output_sq"), width = "100%", height = "650px"),
-                                                                                    type = 5))
-        } else {
-          tabPanel("Square Lattice Field Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapSquare"), width = "100%", height = "650px"),
-                                                                                    type = 5))
-        },
-        tabPanel("Square Lattice Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("SQUARE.output")), type = 5))
-      )
-      
-    })
-    
     locNum <- reactive(
       return(as.numeric(input$locLayout_sq))
     )
@@ -416,25 +409,44 @@ mod_Square_Lattice_server <- function(id){
       }
     })
     
-    output$heatmapSquare <- plotly::renderPlotly({
-      req(heatmap_obj())
-      heatmap_obj()
+    output$random_layout <- plotly::renderPlotly({
+      req(SQUARE_reactive())
+      req(reactive_layoutSquare())
+      req(input$typlotSQ)
+      if (input$typlotSQ == 1) {
+        reactive_layoutSquare()$out_layout
+      } else if (input$typlotSQ == 2) {
+        reactive_layoutSquare()$out_layoutPlots
+      } else {
+        req(heatmap_obj())
+        heatmap_obj()
+      }
     })
     
-    output$SQUARE.output <- DT::renderDataTable({
+    output$square_fieldbook <- DT::renderDataTable({
       req(input$k.square)
       k.square <- input$k.square
       if (k.square == "No Options Available") {
         validate("A Square Lattice requires the number of treatments to be a square number.")
       }
       df <- simuDataSQUARE()$df
+      df$LOCATION <- as.factor(df$LOCATION)
+      df$PLOT <- as.factor(df$PLOT)
+      df$ROW <- as.factor(df$ROW)
+      df$COLUMN <- as.factor(df$COLUMN)
+      df$REP <- as.factor(df$REP)
+      df$IBLOCK <- as.factor(df$IBLOCK)
+      df$UNIT <- as.factor(df$UNIT)
+      df$ENTRY <- as.factor(df$ENTRY)
       a <- as.numeric(simuDataSQUARE()$a)
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "500px"))
       
-      DT::datatable(df, rownames = FALSE, options = list(
-        columnDefs = list(list(className = 'dt-center', targets = "_all"))))
-      
+      DT::datatable(df,
+                    filter = 'top',
+                    rownames = FALSE, 
+                    options = list(
+                      columnDefs = list(list(className = 'dt-center', targets = "_all"))))
     })
     
     output$downloadData.square <- downloadHandler(
@@ -451,9 +463,3 @@ mod_Square_Lattice_server <- function(id){
     
   })
 }
-    
-## To be copied in the UI
-# mod_Square_Lattice_ui("Square_Lattice_ui_1")
-    
-## To be copied in the server
-# mod_Square_Lattice_server("Square_Lattice_ui_1")

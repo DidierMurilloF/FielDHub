@@ -20,11 +20,11 @@ mod_CRD_ui <- function(id) {
                                     fluidRow(
                                       column(6, style=list("padding-right: 28px;"),
                                              numericInput(ns("t.crd"), label = "Input # of Treatments:",
-                                                          value = NULL, min = 2)
+                                                          value = 15, min = 2)
                                       ),
                                       column(6, style=list("padding-left: 5px;"),
                                              numericInput(ns("reps.crd"), label = "Input # of Full Reps:",
-                                                          value = NULL, min = 1)
+                                                          value = 4, min = 1)
                                       )
                                     )
                    ),
@@ -41,6 +41,9 @@ mod_CRD_ui <- function(id) {
                                     )
                    ),
                    
+                   selectInput(inputId = ns("planter_mov_crd"), label = "Plot Order Layout:",
+                               choices = c("serpentine", "cartesian"), multiple = FALSE,
+                               selected = "serpentine"),
                    fluidRow(
                      column(6, style=list("padding-right: 28px;"),
                             textInput(ns("plot_start.crd"), "Starting Plot Number:", value = 101)
@@ -50,43 +53,48 @@ mod_CRD_ui <- function(id) {
                      )
                    ),
                    
-                   selectInput(inputId = ns("planter_mov_crd"), label = "Plot Order Layout:",
-                               choices = c("serpentine", "cartesian"), multiple = FALSE,
-                               selected = "serpentine"),
-                   
                    numericInput(inputId = ns("myseed.crd"), label = "Seed Number:",
                                 value = 123, min = 1),
+                   
                    fluidRow(
                      column(6,
-                            downloadButton(ns("downloadData.crd"), "Save Experiment!", style = "width:100%")
+                            actionButton(inputId = ns("RUN.crd"), "Run!", icon = icon("cocktail"), width = '100%'),
                      ),
                      column(6,
-                            actionButton(ns("Simulate.crd"), "Simulate!", icon = icon("cocktail"), width = '100%')
+                            actionButton(inputId = ns("Simulate.crd"), "Simulate!", icon = icon("cocktail"), width = '100%')
                      )
-                   )
+                     
+                   ), 
+                   br(),
+                   downloadButton(ns("downloadData.crd"), "Save My Experiment", style = "width:100%")
+                   # fluidRow(
+                   #   column(6,
+                   #          downloadButton(ns("downloadData.crd"), "Save Experiment!", style = "width:100%")
+                   #   ),
+                   #   column(6,
+                   #          actionButton(ns("Simulate.crd"), "Simulate!", icon = icon("cocktail"), width = '100%')
+                   #   )
+                   # )
       ),
       mainPanel(
         width = 8,
-        fixedRow(
-          column(12, align="center", uiOutput(ns("tabsetCRD"))),
-        ),
-        column(12,uiOutput(ns("well_panel_layout_CRD")))
+        fluidRow(
+          tabsetPanel(
+            tabPanel("Field Layout",
+                     shinycssloaders::withSpinner(
+                       plotly::plotlyOutput(ns("layout_random"), width = "100%", height = "650px"),type = 5
+                     ),
+                     column(12,uiOutput(ns("well_panel_layout_CRD")))
+            ),
+            tabPanel("Field Book", 
+                     shinycssloaders::withSpinner(DT::DTOutput(ns("CRD_fieldbook")), type = 5)
+            )
+          )
+        )
       )
     )
   )
 }
-
-# fluidRow(
-#   column(12, align="center",
-#          tabsetPanel(
-#            tabPanel("Completely Randomized Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.crd"), width = "100%", height = "630px"),
-#                                                                                        type = 5)),
-#            tabPanel("Completely Randomized Field Book", DT::DTOutput(ns("CRD.output")))
-#          )
-#   ),
-#   column(12,uiOutput(ns("well_panel_layout")))
-# )
-# "Completely Randomized Field Book", DT::DTOutput(ns("CRD.output"))
 #' CRD Server Function
 #'
 #' @noRd 
@@ -104,8 +112,7 @@ mod_CRD_server <- function(id) {
       return(list(dataUp.crd = dataUp.crd))
     })
     
-    
-    CRD_reactive <- reactive({
+    CRD_reactive <- eventReactive(input$RUN.crd, {
       req(input$plot_start.crd)
       req(input$Location.crd)
       req(input$myseed.crd)
@@ -132,7 +139,6 @@ mod_CRD_server <- function(id) {
     
     output$well_panel_layout_CRD <- renderUI({
       req(CRD_reactive()$fieldBook)
-      #req(input$planter_mov_crd)
       obj_crd <- CRD_reactive()
       planting_crd <- input$planter_mov_crd
       allBooks_crd <- plot_layout(x = obj_crd, optionLayout = 1, planter = planting_crd)$newBooks
@@ -149,12 +155,6 @@ mod_CRD_server <- function(id) {
           column(3, #align="center",
                  selectInput(inputId = ns("layoutO_crd"), label = "Layout option:", choices = layoutOptions_crd)
           )
-          # column(3, #align="center",
-          #        selectInput(inputId = ns("locLayout_crd"), label = "Location:", choices = 1)
-          # )
-          # column(2, #align="center",
-          #        downloadButton(outputId = "downCRDLayout", label = "Download the layout")
-          # ),
         )
       )
     })
@@ -265,14 +265,12 @@ mod_CRD_server <- function(id) {
       if(!is.null(vals$maxV.CRD) && !is.null(vals$minV.CRD) && !is.null(vals$trail.CRD)) {
         max <- as.numeric(vals$maxV.CRD)
         min <- as.numeric(vals$minV.CRD)
-        #df.crd <- CRD_reactive()$fieldBook
         df.crd <- reactive_layoutCRD()$fieldBookXY
         cnamesdf.crd <- colnames(df.crd)
         df.crd <- norm_trunc(a = min, b = max, data = df.crd)
         colnames(df.crd) <- c(cnamesdf.crd[1:(ncol(df.crd) - 1)], vals$trail.CRD)
         df.crd <- df.crd[order(df.crd$ID),]
       }else {
-        #df.crd <-  CRD_reactive()$fieldBook
         df.crd <- reactive_layoutCRD()$fieldBookXY
       }
       
@@ -335,29 +333,36 @@ mod_CRD_server <- function(id) {
         return(NULL)
       }
     })
-    
-    output$heatmapCRD <- plotly::renderPlotly({
-      req(heatmap_obj())
-      heatmap_obj()
-    })
-    
-    output$layout.crd <- renderPlot({
-      #reactive_layoutCRD()$out_layout
+
+    output$layout_random <- plotly::renderPlotly({
       req(CRD_reactive())
       req(input$typlotCRD)
       if (input$typlotCRD == 1) {
         reactive_layoutCRD()$out_layout
       } else if (input$typlotCRD == 2) {
         reactive_layoutCRD()$out_layoutPlots
+      } else {
+        req(heatmap_obj())
+        heatmap_obj()
       }
     })
     
-    output$CRD.output <- DT::renderDT({
+    output$CRD_fieldbook <- DT::renderDT({
       df <- simuDataCRD()$df
+      df$LOCATION <- as.factor(df$LOCATION)
+      df$PLOT <- as.factor(df$PLOT)
+      df$ROW <- as.factor(df$ROW)
+      df$COLUMN <- as.factor(df$COLUMN)
+      df$REP <- as.factor(df$REP)
+      df$TREATMENT <- as.factor(df$TREATMENT)
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "500px"))
-      DT::datatable(df, rownames = FALSE, options = list(
-        columnDefs = list(list(className = 'dt-center', targets = "_all"))))
+      
+      DT::datatable(df,
+                    filter = 'top',
+                    rownames = FALSE, 
+                    options = list(
+                      columnDefs = list(list(className = 'dt-center', targets = "_all"))))
     })
     
     output$downloadData.crd <- downloadHandler(
@@ -371,35 +376,5 @@ mod_CRD_server <- function(id) {
       }
     )
     
-    # # downloadHandler contains 2 arguments as functions, namely filename, content
-    # output$downCRDLayout <- downloadHandler(
-    #   filename =  function() {
-    #     paste("CRD_Layout", "png", sep=".")
-    #   },
-    #   # content is a function with argument file. content writes the plot to the device
-    #   content = function(file) {
-    #     grDevices::png(file)
-    #     
-    #     if (input$typlotCRD == 1) {
-    #       reactive_layoutCRD()$out_layout
-    #     } else reactive_layoutCRD()$out_layoutPlots
-    #     plot(x=x(), y=y(), main = "iris dataset plot", xlab = xl(), ylab = yl()) # draw the plot
-    #     dev.off()  # turn the device off
-    #     # if(input$var3 == "png")
-    #     #   png(file) # open the png device
-    #     # else
-    #     #   pdf(file) # open the pdf device
-    #     # plot(x=x(), y=y(), main = "iris dataset plot", xlab = xl(), ylab = yl()) # draw the plot
-    #     # dev.off()  # turn the device off
-    #     
-    #   } 
-    # )
-    
   })
 }
-    
-## To be copied in the UI
-# mod_CRD_ui("CRD_ui_1")
-    
-## To be copied in the server
-# mod_CRD_server("CRD_ui_1")

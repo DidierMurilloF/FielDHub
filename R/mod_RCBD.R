@@ -49,23 +49,36 @@ mod_RCBD_ui <- function(id) {
                    
                    numericInput(inputId = ns("myseed.rcbd"), label = "Seed Number:",
                                 value = 123, min = 1),
+                   
                    fluidRow(
                      column(6,
-                            downloadButton(ns("downloadData.rcbd"), "Save Experiment!", style = "width:100%")
+                            actionButton(inputId = ns("RUN.rcbd"), "Run!", icon = icon("cocktail"), width = '100%'),
                      ),
                      column(6,
                             actionButton(ns("Simulate.rcbd"), "Simulate!", icon = icon("cocktail"), width = '100%')
                      )
                      
-                   )
+                   ), 
+                   br(),
+                   downloadButton(ns("downloadData.rcbd"), "Save Experiment!", style = "width:100%")
+                   
       ),
 
       mainPanel(
         width = 8,
-        fixedRow(
-          column(12, align="center", uiOutput(ns("tabsetRCBD"))),
-        ),
-        column(12,uiOutput(ns("well_panel_layout_RCBD")))
+        fluidRow(
+          tabsetPanel(
+            tabPanel("Field Layout",
+                     shinycssloaders::withSpinner(
+                       plotly::plotlyOutput(ns("layouts"), width = "100%", height = "650px"),type = 5
+                     ),
+                     column(12,uiOutput(ns("well_panel_layout_RCBD")))
+            ),
+            tabPanel("Field Book", 
+                     shinycssloaders::withSpinner(DT::DTOutput(ns("RCBD_fieldbook")), type = 5)
+            )
+          )
+        )
       )
     )
   )
@@ -115,7 +128,8 @@ mod_RCBD_server <- function(id){
       }
     })
     
-    RCBD_reactive <- reactive({
+    RCBD_reactive <- eventReactive(input$RUN.rcbd, {
+    #RCBD_reactive <- reactive({
       
       req(input$b)
       req(input$myseed.rcbd)
@@ -149,15 +163,14 @@ mod_RCBD_server <- function(id){
     
     output$well_panel_layout_RCBD <- renderUI({
       req(RCBD_reactive()$fieldBook)
-      req(input$l.rcbd)
       obj_rcbd <- RCBD_reactive()
       planting_rcbd <- input$planter_mov_rcbd
       allBooks_rcbd <- plot_layout(x = obj_rcbd, optionLayout = 1, orderReps = "vertical_stack_panel")$newBooks
       nBooks_rcbd <- length(allBooks_rcbd)
       layoutOptions_rcbd <- 1:nBooks_rcbd
+      df <- RCBD_reactive()$fieldBook
       orderReps_rcbd <- c("Vertical Stack Panel" = "vertical_stack_panel", "Horizontal Stack Panel" = "horizontal_stack_panel")
-      #loc <-  as.vector(unlist(strsplit(input$Location.rcbd, ",")))
-      sites <- as.numeric(input$l.rcbd)
+      sites <- length(levels(as.factor(df$LOCATION)))
       wellPanel(
         column(3,
                radioButtons(ns("typlotRCBD"), "Type of Plot:",
@@ -299,20 +312,20 @@ mod_RCBD_server <- function(id){
       )
     }
     
-    output$tabsetRCBD <- renderUI({
-      req(input$typlotRCBD)
-      tabsetPanel(
-        if (input$typlotRCBD != 3) {
-          tabPanel("Randomized Complete Block Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.output_RCBD"), width = "100%", height = "650px"),
-                                                                                    type = 5))
-        } else {
-          tabPanel("Randomized Complete Block Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapRCBD"), width = "100%", height = "650px"),
-                                                                                    type = 5))
-        },
-        tabPanel("Randomized Complete Block Book", shinycssloaders::withSpinner(DT::DTOutput(ns("RCBD.output")), type = 5))
-      )
-      
-    })
+    # output$tabsetRCBD <- renderUI({
+    #   req(input$typlotRCBD)
+    #   tabsetPanel(
+    #     if (input$typlotRCBD != 3) {
+    #       tabPanel("Randomized Complete Block Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.output_RCBD"), width = "100%", height = "650px"),
+    #                                                                                 type = 5))
+    #     } else {
+    #       tabPanel("Randomized Complete Block Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapRCBD"), width = "100%", height = "650px"),
+    #                                                                                 type = 5))
+    #     },
+    #     tabPanel("Randomized Complete Block Book", shinycssloaders::withSpinner(DT::DTOutput(ns("RCBD.output")), type = 5))
+    #   )
+    # 
+    # })
     
     locNum <- reactive(
       return(as.numeric(input$locLayout_rcbd))
@@ -356,12 +369,13 @@ mod_RCBD_server <- function(id){
       }
     })
     
-    output$heatmapRCBD <- plotly::renderPlotly({
-      req(heatmap_obj())
-      heatmap_obj()
-    })
+    # output$heatmapRCBD <- plotly::renderPlotly({
+    #   req(heatmap_obj())
+    #   heatmap_obj()
+    # })
+    # 
     
-    output$layout.output_RCBD <- renderPlot({
+    output$layouts <- plotly::renderPlotly({
       req(reactive_layoutRCBD())
       req(RCBD_reactive())
       req(input$typlotRCBD)
@@ -369,15 +383,26 @@ mod_RCBD_server <- function(id){
         reactive_layoutRCBD()$out_layout
       } else if (input$typlotRCBD == 2) {
         reactive_layoutRCBD()$out_layoutPlots
-      } 
+      } else {
+        req(heatmap_obj())
+        heatmap_obj()
+      }
     })
     
-    output$RCBD.output <- DT::renderDataTable({
+    output$RCBD_fieldbook <- DT::renderDataTable({
       df <- simuDataRCBD()$df
+      df$LOCATION <- as.factor(df$LOCATION)
+      df$PLOT <- as.factor(df$PLOT)
+      df$ROW <- as.factor(df$ROW)
+      df$COLUMN <- as.factor(df$COLUMN)
+      df$REP <- as.factor(df$REP)
+      df$TREATMENT <- as.factor(df$TREATMENT)
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "500px"))
       
-      DT::datatable(df, rownames = FALSE, options = list(
+      DT::datatable(df,
+                    filter = 'top',
+                    rownames = FALSE, options = list(
         columnDefs = list(list(className = 'dt-center', targets = "_all"))))
       
     })

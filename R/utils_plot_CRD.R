@@ -85,7 +85,8 @@ plot_CRD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1,
                            text = TREATMENT, cex = 1, shorten = "no",
                            data = df, xlab = "COLUMNS", ylab = "ROWS",
                            main = main, 
-                           show.key = FALSE)
+                           show.key = FALSE, 
+                           gg=TRUE)
     df$REP <- as.factor(df$REP)
     df$PLOT <- as.character(df$PLOT)
     p2 <- desplot::desplot(PLOT ~ COLUMN + ROW, flip = FALSE,
@@ -95,7 +96,8 @@ plot_CRD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1,
                            cex = 1, shorten = "no",
                            data = df, xlab = "COLUMNS", ylab = "ROWS",
                            main = main, 
-                           show.key = FALSE)
+                           show.key = FALSE, 
+                           gg=TRUE)
   } else if (x$infoDesign$idDesign == 4) {
     allSites <- vector(mode = "list", length = nlocs)
     for (st in 1:nlocs) {
@@ -121,14 +123,16 @@ plot_CRD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1,
                              text = TRT_COMB, cex = 1, shorten = "no",
                              data = df, xlab = "COLUMNS", ylab = "ROWS",
                              main = main, 
-                             show.key = FALSE)
+                             show.key = FALSE, 
+                             gg=TRUE)
       df$REP <- as.factor(df$REP)
       df$PLOT <- as.factor(df$PLOT)
       p2 <- desplot::desplot(PLOT ~ COLUMN + ROW, flip = FALSE,
                              text = PLOT, cex = 1, shorten = "no",
                              data = df, xlab = "COLUMNS", ylab = "ROWS",
                              main = main, 
-                             show.key = FALSE)
+                             show.key = FALSE, 
+                             gg=TRUE)
     }
   } else if (x$infoDesign$idDesign == 5) {
     allSites <- vector(mode = "list", length = nlocs)
@@ -157,7 +161,8 @@ plot_CRD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1,
                              text = WHOLE_PLOT, cex = 1, shorten = "no",
                              data = df, xlab = "COLUMNS", ylab = "ROWS",
                              main = main, 
-                             show.key = TRUE)
+                             show.key = TRUE, 
+                             gg=TRUE)
       
       df$REP <- as.factor(df$REP)
       df$PLOT <- as.factor(df$PLOT)
@@ -165,7 +170,8 @@ plot_CRD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1,
                              text = PLOT, cex = 1, shorten = "no",
                              data = df, xlab = "COLUMNS", ylab = "ROWS",
                              main = main, 
-                             show.key = FALSE)
+                             show.key = FALSE, 
+                             gg=TRUE)
     }
   } else if (x$infoDesign$idDesign == 6) {
     allSites <- vector(mode = "list", length = nlocs)
@@ -196,14 +202,16 @@ plot_CRD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1,
                              col = SUB_PLOT,
                              data = df, xlab = "COLUMNS", ylab = "ROWS",
                              main = main, 
-                             show.key = TRUE)
+                             show.key = TRUE, 
+                             gg=TRUE)
       
       df$PLOT <- as.factor(df$PLOT)
       p2 <- desplot::desplot(PLOT ~ COLUMN + ROW, flip = FALSE,
                              text = PLOT, cex = 1, shorten = "no",
                              data = df, xlab = "COLUMNS", ylab = "ROWS",
                              main = main, 
-                             show.key = FALSE)
+                             show.key = FALSE, 
+                             gg=TRUE)
     }
   }
   return(list(p1 = p1, p2 = p2, df = df, newBooks = newBooksSelected, 

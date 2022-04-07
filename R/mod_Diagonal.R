@@ -157,7 +157,7 @@ mod_Diagonal_ui <- function(id){
                      column(6,DT::DTOutput(ns("checks_table")))
                    )
           ),
-          tabPanel("Diagonal Checks Layout", DT::DTOutput(ns("checks_layout"))),
+          #tabPanel("Diagonal Checks Layout", DT::DTOutput(ns("checks_layout"))),
           tabPanel("Randomized Field", DT::DTOutput(ns("randomized_layout"))),
           tabPanel("Plot Number Field", DT::DTOutput(ns("plot_number_layout"))),
           tabPanel("Expt Name", DT::DTOutput(ns("name_layout"))),
@@ -206,8 +206,6 @@ mod_Diagonal_server <- function(id) {
             }
             dim_data <- sum(data_dim_each_block)
             selected <- length(Block_levels)
-            # updateSelectInput(session, inputId = 'Block_Fillers', label = "Which Blocks will have Fil:",
-            #                   choices = Block_levels, selected = Block_levels[selected])
           }
         }
       }else {
@@ -270,8 +268,6 @@ mod_Diagonal_server <- function(id) {
         return(len_blocks)
       } else return(NULL)
     })
-    
-    # blocks_to_fillers <- as.numeric(blocks_length())
     
     entryListFormat_SUDC <- data.frame(ENTRY = 1:9, NAME = c(c("CHECK1", "CHECK2","CHECK3"), paste("Genotype", LETTERS[1:6], sep = "")))
     entryListFormat_DBUDC <- data.frame(ENTRY = 1:9, NAME = c(c("CHECK1", "CHECK2","CHECK3"), paste("Genotype", LETTERS[1:6], sep = "")),
@@ -387,8 +383,11 @@ mod_Diagonal_server <- function(id) {
     
     output$options_table <- DT::renderDT({
       Option_NCD <- TRUE
-      req(available_percent_table()$dt)
-      if (is.null(available_percent_table()$dt)) shiny::validate(":smth is wromg with 'available_percent_table()$dt'")
+      if (is.null(available_percent_table()$dt)) {
+        shiny::validate("Data input does not fit to field dimensions")
+        return(NULL)
+      }
+      #req(available_percent_table()$dt)
       my_out <- available_percent_table()$dt
       my_percent <- my_out[,2]
       updateSelectInput(session = session, inputId = 'Dropdown', label = "Choose % of Checks:",
@@ -403,8 +402,15 @@ mod_Diagonal_server <- function(id) {
     })
     
     output$data_input <- DT::renderDT({
-      my_data <- getData()$data_entry
-      df <- my_data
+      df <- getData()$data_entry
+      if (input$kindExpt != "DBUDC") {
+        df$ENTRY <- as.factor(df$ENTRY)
+        df$NAME <- as.factor(df$NAME)
+      } else {
+        df$ENTRY <- as.factor(df$ENTRY)
+        df$NAME <- as.factor(df$NAME)
+        df$BLOCK <- as.factor(df$BLOCK)
+      }
       a <- ncol(df) - 1
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "600px"))
@@ -416,34 +422,34 @@ mod_Diagonal_server <- function(id) {
                     )
     })
     
-    output$checks_layout <- DT::renderDT({
-      Option_NCD <- TRUE
-      multi <- input$kindExpt == "RDC" || input$kindExpt == "DBUDC"
-      if (multi) req(getData()$data_entry)
-      req(user_location()$map_checks)
-      w_map <- user_location()$map_checks
-      if (is.null(w_map))
-        return(NULL)
-      
-      checks <- as.vector(getChecks()$checksEntries)
-      len_checks <- length(checks)
-      colores <- c('royalblue','salmon', 'green', 'orange','orchid', 'slategrey',
-                   'greenyellow', 'blueviolet','deepskyblue','gold','blue', 'red')
-      
-      df <- as.data.frame(w_map)
-      rownames(df) <- nrow(df):1
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
-      DT::datatable(df,
-                    extensions = 'FixedColumns',
-                    options = list(
-                      dom = 't',
-                      scrollX = TRUE,
-                      fixedColumns = TRUE
-                    )) %>% 
-      DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-                      backgroundColor = DT::styleEqual(c(checks,0,"Filler"), 
-                                                       c(colores[1:len_checks],'yellow', 'snow')))
-    })
+    # output$checks_layout <- DT::renderDT({
+    #   Option_NCD <- TRUE
+    #   multi <- input$kindExpt == "RDC" || input$kindExpt == "DBUDC"
+    #   if (multi) req(getData()$data_entry)
+    #   req(user_location()$map_checks)
+    #   w_map <- user_location()$map_checks
+    #   if (is.null(w_map))
+    #     return(NULL)
+    #   
+    #   checks <- as.vector(getChecks()$checksEntries)
+    #   len_checks <- length(checks)
+    #   colores <- c('royalblue','salmon', 'green', 'orange','orchid', 'slategrey',
+    #                'greenyellow', 'blueviolet','deepskyblue','gold','blue', 'red')
+    #   
+    #   df <- as.data.frame(w_map)
+    #   rownames(df) <- nrow(df):1
+    #   options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
+    #   DT::datatable(df,
+    #                 extensions = 'FixedColumns',
+    #                 options = list(
+    #                   dom = 't',
+    #                   scrollX = TRUE,
+    #                   fixedColumns = TRUE
+    #                 )) %>% 
+    #   DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
+    #                   backgroundColor = DT::styleEqual(c(checks,0,"Filler"), 
+    #                                                    c(colores[1:len_checks],'yellow', 'snow')))
+    # })
     
     output$checks_table <- DT::renderDT({
       Option_NCD <- TRUE
@@ -619,7 +625,6 @@ mod_Diagonal_server <- function(id) {
         my_colors <- c(my_colors, colores[1:len_checks])
         df <- as.data.frame(r_map)
         rownames(df) <- nrow(df):1
-        #options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "850px"))
         DT::datatable(df,
                       extensions = 'Buttons',
                       options = list(dom = 'Blfrtip',
@@ -638,8 +643,6 @@ mod_Diagonal_server <- function(id) {
           DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
                           backgroundColor = DT::styleEqual(c(checks),
                                                            colores[1:len_checks]))
-        # DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-        #                 backgroundColor = DT::styleEqual(a, my_colors))
       }
     })
     
@@ -836,6 +839,30 @@ mod_Diagonal_server <- function(id) {
       } 
     })
     
+    plot_number_sites <- reactive({
+      if (is.null(input$plot_start) || input$plot_start == " ") validate("Plot starting number is missing.")
+      l <- as.numeric(input$l.diagonal)
+      plotNumber <- as.numeric(as.vector(unlist(strsplit(input$plot_start, ","))))
+      if(!is.numeric(plotNumber) && !is.integer(plotNumber)) {
+        validate("plotNumber should be an integer or a numeric vector.")
+      }
+      
+      if (any(plotNumber %% 1 != 0)) {
+        validate("plotNumber should be integers.")
+      }
+
+      if (!is.null(l)) {
+        if (is.null(plotNumber) || length(plotNumber) != l) {
+          if (l > 1){
+            plotNumber <- seq(1001, 1000*(l+1), 1000)
+          } else plotNumber <- 1001
+        }
+      }else validate("Number of locations/sites is missing")
+      
+      return(plotNumber)
+      
+    })
+    
     plot_number_reactive <- reactive({
       req(rand_lines())
       req(input$plot_start)
@@ -847,13 +874,65 @@ mod_Diagonal_server <- function(id) {
       n_rows = input$n_rows; n_cols = input$n_cols 
       movement_planter = input$planter_mov
       w_map <- rand_checks()[[1]]$map_checks
+      
       if("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE
       if(input$kindExpt == "DBUDC") multi <- TRUE else multi <- FALSE
-      
-      if (multi == TRUE && Option_NCD == FALSE) { 
-        if (input$kindExpt == "DBUDC") { 
+      plot_n_start <- plot_number_sites()
+      locs_diagonal <- as.numeric(input$l.diagonal)
+      plots_number_sites <- vector(mode = "list", length = locs_diagonal)
+      # start for loop
+      for (sites in 1:locs_diagonal) {
+        if (multi == TRUE && Option_NCD == FALSE) { 
+          if (input$kindExpt == "DBUDC") { 
+            req(getData()$data_entry) 
+            req(available_percent_table()$data_dim_each_block) 
+            if (input$myWay == "By Row") { 
+              data_dim_each_block <- available_percent_table()$data_dim_each_block 
+              my_row_sets <- automatically_cuts(data = w_map, planter_mov = input$planter_mov,
+                                                way = "By Row", dim_data = data_dim_each_block)[[1]]
+              n_blocks <- length(my_row_sets) 
+            }else { 
+              data_dim_each_block <- available_percent_table()$data_dim_each_block 
+              cuts_by_c <- automatically_cuts(data = w_map, planter_mov = NULL, way = "By Column",
+                                              dim_data = data_dim_each_block)  
+              n_blocks <- length(cuts_by_c) 
+              m = diff(cuts_by_c) 
+              my_col_sets = c(cuts_by_c[1], m) 
+            } 
+            Name_expt <- as.vector(unlist(strsplit(input$expt_name, ","))) 
+            if (length(Name_expt) == n_blocks) { 
+              expe_names <- Name_expt 
+            }else{ 
+              expe_names = paste0(rep("Block", times = n_blocks), 1:n_blocks) 
+            } 
+            if (length(plot_n_start) > 1 && length(plot_n_start) < n_blocks) return(NULL) 
+            
+            if(input$myWay == "By Column"){
+              
+              my_split_plot_nub <- plot_number(movement_planter = input$planter_mov, n_blocks = n_blocks,
+                                               n_rows = input$n_rows, n_cols = input$n_cols, 
+                                               plot_n_start = plot_n_start[sites],
+                                               datos = datos_name, expe_name = expe_names, ByRow = FALSE,
+                                               my_row_sets = NULL, ByCol = TRUE, my_col_sets = my_col_sets) 
+            }else{
+              req(split_name_reactive()$my_names)
+              datos_name <- split_name_reactive()$my_names 
+              data.dim.each <- available_percent_table()$data_dim_each_block
+              Block_Fillers <- as.numeric(blocks_length()) 
+              
+              my_split_plot_nub <- plot_number_fillers(movement_planter = movement_planter, 
+                                                       plot_n_start = plot_n_start[sites],
+                                                       datos = datos_name, expe_names = expe_names, 
+                                                       ByRow = TRUE, my_row_sets = my_row_sets, ByCol = FALSE, 
+                                                       my_col_sets = NULL,
+                                                       which.blocks = Block_Fillers, 
+                                                       n_blocks = n_blocks,
+                                                       data.dim.each = data.dim.each)
+            }
+          }
+        }else if(multi == TRUE && Option_NCD == TRUE) {
+          
           req(getData()$data_entry) 
-          req(available_percent_table()$data_dim_each_block) 
           if (input$myWay == "By Row") { 
             data_dim_each_block <- available_percent_table()$data_dim_each_block 
             my_row_sets <- automatically_cuts(data = w_map, planter_mov = input$planter_mov,
@@ -864,235 +943,90 @@ mod_Diagonal_server <- function(id) {
             cuts_by_c <- automatically_cuts(data = w_map, planter_mov = NULL, way = "By Column",
                                             dim_data = data_dim_each_block)  
             n_blocks <- length(cuts_by_c) 
-            m = diff(cuts_by_c) 
+            m = diff(cuts_by_c)
             my_col_sets = c(cuts_by_c[1], m) 
           } 
+          w_map_letters1 <- rand_lines()[[1]]$w_map_letters1 
           Name_expt <- as.vector(unlist(strsplit(input$expt_name, ","))) 
           if (length(Name_expt) == n_blocks) { 
             expe_names <- Name_expt 
-          }else{ 
+          }else { 
             expe_names = paste0(rep("Block", times = n_blocks), 1:n_blocks) 
           } 
-          plot_n_start <- as.numeric(as.vector(unlist(strsplit(input$plot_start, ",")))) 
-          if (length(plot_n_start) > 1 && length(plot_n_start) < n_blocks) return(NULL) 
-          if(input$myWay == "By Column"){
-            
-            my_split_plot_nub <- plot_number(movement_planter = input$planter_mov, n_blocks = n_blocks,
-                                             n_rows = input$n_rows, n_cols = input$n_cols, plot_n_start = plot_n_start,
-                                             datos = datos_name, expe_name = expe_names, ByRow = FALSE,
-                                             my_row_sets = NULL, ByCol = TRUE, my_col_sets = my_col_sets) 
-          }else{
-            req(split_name_reactive()$my_names)
+          if(input$myWay == "By Row") { 
             datos_name <- split_name_reactive()$my_names 
-            plot_n_start <- as.numeric(as.vector(unlist(strsplit(input$plot_start, ",")))) 
             data.dim.each <- available_percent_table()$data_dim_each_block
             Block_Fillers <- as.numeric(blocks_length()) 
             
-            my_split_plot_nub <- plot_number_fillers(movement_planter = movement_planter, plot_n_start = plot_n_start,
+            my_split_plot_nub <- plot_number_fillers(movement_planter = input$planter_mov, 
+                                                     plot_n_start = plot_n_start[sites],
                                                      datos = datos_name, expe_names = expe_names, ByRow = TRUE,
                                                      my_row_sets = my_row_sets, ByCol = FALSE, my_col_sets = NULL,
                                                      which.blocks = Block_Fillers, n_blocks = n_blocks,
-                                                     data.dim.each = data.dim.each)
-          }
-          
-        }
-      }else if(multi == TRUE && Option_NCD == TRUE) {
-        
-        req(getData()$data_entry) 
-        if (input$myWay == "By Row") { 
-          data_dim_each_block <- available_percent_table()$data_dim_each_block 
-          my_row_sets <- automatically_cuts(data = w_map, planter_mov = input$planter_mov,
-                                            way = "By Row", dim_data = data_dim_each_block)[[1]]
-          n_blocks <- length(my_row_sets) 
+                                                     data.dim.each = data.dim.each) 
+          }else { 
+            return(NULL) 
+          } 
         }else { 
-          data_dim_each_block <- available_percent_table()$data_dim_each_block 
-          cuts_by_c <- automatically_cuts(data = w_map, planter_mov = NULL, way = "By Column",
-                                          dim_data = data_dim_each_block)  
-          n_blocks <- length(cuts_by_c) 
-          m = diff(cuts_by_c)
-          my_col_sets = c(cuts_by_c[1], m) 
-        } 
-        w_map_letters1 <- rand_lines()[[1]]$w_map_letters1 
-        Name_expt <- as.vector(unlist(strsplit(input$expt_name, ","))) 
-        if (length(Name_expt) == n_blocks) { 
-          expe_names <- Name_expt 
-        }else { 
-          expe_names = paste0(rep("Block", times = n_blocks), 1:n_blocks) 
-        } 
-        if(input$myWay == "By Row") { 
-          datos_name <- split_name_reactive()$my_names 
-          plot_n_start <- as.numeric(as.vector(unlist(strsplit(input$plot_start, ",")))) 
-          data.dim.each <- available_percent_table()$data_dim_each_block
-          Block_Fillers <- as.numeric(blocks_length()) 
-          
-          my_split_plot_nub <- plot_number_fillers(movement_planter = input$planter_mov, plot_n_start = plot_n_start,
-                                                   datos = datos_name, expe_names = expe_names, ByRow = TRUE,
-                                                   my_row_sets = my_row_sets, ByCol = FALSE, my_col_sets = NULL,
-                                                   which.blocks = Block_Fillers, n_blocks = n_blocks,
-                                                   data.dim.each = data.dim.each) 
-        }else { 
-          return(NULL) 
-        } 
-      }else { 
-        plot_n_start <- as.numeric(as.vector(unlist(strsplit(input$plot_start, ",")))) 
-        n_blocks <- 1 
-        if (input$expt_name != "") { 
-          Name_expt <- input$expt_name  
-        }else Name_expt = paste0(rep("Expt", times = n_blocks), 1:n_blocks)
-        w_map <- rand_checks()[[1]]$map_checks
-        if("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE 
-        my_split_plot_nub <- plot_number(movement_planter = input$planter_mov1, n_blocks = 1, n_rows = input$n_rows,
-                                         n_cols = input$n_cols, plot_n_start = plot_n_start, datos = datos_name,
-                                         expe_name =  Name_expt, ByRow = NULL, my_row_sets = NULL, ByCol = NULL,
-                                         my_col_sets = NULL)
-        
-        if (Option_NCD == TRUE) { 
-          r_map <- rand_lines()[[1]]$rand
-          Fillers <- sum(r_map == "Filler") 
-          if (input$n_rows %% 2 == 0) { 
-            if(input$planter_mov1 == "serpentine") { 
-              my_split_plot_nub[[1]][1, 1:Fillers] <- 0 
-            }else{ 
+          n_blocks <- 1 
+          if (input$expt_name != "") { 
+            Name_expt <- input$expt_name  
+          }else Name_expt = paste0(rep("Expt", times = n_blocks), 1:n_blocks)
+          w_map <- rand_checks()[[1]]$map_checks
+          if("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE 
+          my_split_plot_nub <- plot_number(movement_planter = input$planter_mov1, n_blocks = 1, 
+                                           n_rows = input$n_rows, n_cols = input$n_cols, 
+                                           plot_n_start = plot_n_start[sites], datos = datos_name,
+                                           expe_name =  Name_expt, ByRow = NULL, 
+                                           my_row_sets = NULL, ByCol = NULL,
+                                           my_col_sets = NULL)
+          if (Option_NCD == TRUE) { 
+            r_map <- rand_lines()[[1]]$rand
+            Fillers <- sum(r_map == "Filler") 
+            if (input$n_rows %% 2 == 0) { 
+              if(input$planter_mov1 == "serpentine") { 
+                my_split_plot_nub[[1]][1, 1:Fillers] <- 0 
+              }else{ 
+                my_split_plot_nub[[1]][1,((input$n_cols + 1) - Fillers):input$n_cols] <- 0 
+              } 
+            }else { 
               my_split_plot_nub[[1]][1,((input$n_cols + 1) - Fillers):input$n_cols] <- 0 
             } 
-          }else { 
-            my_split_plot_nub[[1]][1,((input$n_cols + 1) - Fillers):input$n_cols] <- 0 
           } 
-        } 
-        my_split_plot_nub 
-      } 
+        }
+        plots_number_sites[[sites]] <- my_split_plot_nub$w_map_letters1
+      }
+      return(list(plots_number_sites = plots_number_sites))
     })
     
     
     output$plot_number_layout <- DT::renderDT({
-      req(plot_number_reactive()$w_map_letters1)
-      plot_num <- plot_number_reactive()$w_map_letters1 
+      req(plot_number_reactive())
+      plot_num <- plot_number_reactive()$plots_number_sites[[user_location()$user_site]]
       if (is.null(plot_num))
         return(NULL)
       w_map <- rand_checks()[[1]]$map_checks
       if("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE
       if(input$kindExpt == "DBUDC") multi <- TRUE else multi <- FALSE
-      if (multi == TRUE) {
-        if(input$myWay == "By Row") Option_NCD <- TRUE else Option_NCD <- FALSE
-        if(Option_NCD == FALSE) { 
-          x <- plot_number_reactive()$l 
-          sub_len <- numeric()
-          for (i in 1:length(x)){
-            sub_len[i] <- length(x[[i]]) 
-          } 
-          a <- as.vector(unlist(x)) 
-          colores_back <- c('yellow', 'cadetblue', 'lightgreen', 'grey', 'tan', 'lightcyan',
-                            'violet', 'thistle') 
-          my_colors <- list() 
-          s = 1 
-          for (i in sub_len) { 
-            my_colors[[s]] <- rep(colores_back[s], i) 
-            s = s + 1 
-          } 
-          my_colors <- unlist(my_colors) 
-          df <- as.data.frame(plot_num)
-          rownames(df) <- nrow(df):1
-          DT::datatable(df,
-                        extensions = c('Buttons'),
-                        options = list(dom = 'Blfrtip',
-                                       autoWidth = FALSE,
-                                       scrollX = TRUE,
-                                       fixedColumns = TRUE,
-                                       pageLength = nrow(df),
-                                       scrollY = "700px",
-                                       class = 'compact cell-border stripe',  rownames = FALSE,
-                                       server = FALSE,
-                                       filter = list( position = 'top', clear = FALSE, plain =TRUE ),
-                                       buttons = c('copy', 'excel'),
-                                       lengthMenu = list(c(10,25,50,-1),
-                                                         c(10,25,50,"All")))
-          )
-        }else { 
-          w_map_letters1 <- plot_number_reactive()$w_map_letters1 
-          x <- plot_number_reactive()$target_num1 
-          sub_len <- numeric()
-          for (i in 1:length(x)){
-            sub_len[i] <- length(x[[i]]) 
-          } 
-          a <- as.vector(unlist(x)) 
-          colores_back <- c('yellow', 'cadetblue', 'lightgreen', 'grey', 'tan', 'lightcyan',
-                            'violet', 'thistle') 
-          my_colors <- list() 
-          b = 1 
-          for (i in sub_len) { 
-            my_colors[[b]] <- rep(colores_back[b], i)
-            b = b + 1 
-          }
-          colores <- c('royalblue','salmon', 'green', 'orange','orchid', 'slategrey',
-                       'greenyellow', 'blueviolet','deepskyblue','gold','blue', 'red')
-          
-          my_colors <- unlist(my_colors)
-          df <- as.data.frame(w_map_letters1)
-          rownames(df) <- nrow(df):1
-          DT::datatable(df,
-                        extensions = c('Buttons'),
-                        options = list(dom = 'Blfrtip',
-                                       autoWidth = FALSE,
-                                       scrollX = TRUE,
-                                       fixedColumns = TRUE,
-                                       pageLength = nrow(df),
-                                       scrollY = "700px",
-                                       class = 'compact cell-border stripe',  rownames = FALSE,
-                                       server = FALSE,
-                                       filter = list( position = 'top', clear = FALSE, plain =TRUE ),
-                                       buttons = c('copy', 'excel'),
-                                       lengthMenu = list(c(10,25,50,-1),
-                                                         c(10,25,50,"All")))
-                        )
-        }
-      }else if (multi == FALSE){
-        
-        if(Option_NCD == TRUE) {
-          a <- as.vector(as.matrix(plot_num))
-          a <- a[-which(a == 0)]
-          len_a <- length(a)
-          df <- as.data.frame(plot_num)
-          rownames(df) <- nrow(df):1
-          DT::datatable(df,
-                        extensions = c('Buttons'),
-                        options = list(dom = 'Blfrtip',
-                                       autoWidth = FALSE,
-                                       scrollX = TRUE,
-                                       fixedColumns = TRUE,
-                                       pageLength = nrow(df),
-                                       scrollY = "700px",
-                                       class = 'compact cell-border stripe',  rownames = FALSE,
-                                       server = FALSE,
-                                       filter = list( position = 'top', clear = FALSE, plain =TRUE ),
-                                       buttons = c('copy', 'excel'),
-                                       lengthMenu = list(c(10,25,50,-1),
-                                                         c(10,25,50,"All")))
-          )
-        }else{
-          a <- as.vector(as.matrix(plot_num))
-          len_a <- length(a)
-          df <- as.data.frame(plot_num)
-          rownames(df) <- nrow(df):1
-          DT::datatable(df,
-                        extensions = c('Buttons'),
-                        options = list(dom = 'Blfrtip',
-                                       autoWidth = FALSE,
-                                       scrollX = TRUE,
-                                       fixedColumns = TRUE,
-                                       pageLength = nrow(df),
-                                       scrollY = "700px",
-                                       class = 'compact cell-border stripe',  rownames = FALSE,
-                                       server = FALSE,
-                                       filter = list( position = 'top', clear = FALSE, plain =TRUE ),
-                                       buttons = c('copy', 'excel'),
-                                       lengthMenu = list(c(10,25,50,-1),
-                                                         c(10,25,50,"All")))
-          )
-        }
-      }
+      df <- as.data.frame(plot_num)
+      rownames(df) <- nrow(df):1
+      DT::datatable(df,
+                    extensions = c('Buttons'),
+                    options = list(dom = 'Blfrtip',
+                                   autoWidth = FALSE,
+                                   scrollX = TRUE,
+                                   fixedColumns = TRUE,
+                                   pageLength = nrow(df),
+                                   scrollY = "700px",
+                                   class = 'compact cell-border stripe',  rownames = FALSE,
+                                   server = FALSE,
+                                   filter = list( position = 'top', clear = FALSE, plain =TRUE ),
+                                   buttons = c('copy', 'excel'),
+                                   lengthMenu = list(c(10,25,50,-1),
+                                                     c(10,25,50,"All")))
+      )
     })
-    
-    
+
     export_diagonal_design <- reactive({
       
       ## pre for
@@ -1110,7 +1044,7 @@ mod_Diagonal_server <- function(id) {
         w_map <- as.matrix(loc_user_out_rand$col_checks)
         if("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE
         req(split_name_reactive()$my_names)
-        req(plot_number_reactive()$w_map_letters1)
+        req(plot_number_reactive())
         movement_planter = input$planter_mov
         my_data_VLOOKUP <- getData()$data_entry
         COLNAMES_DATA <- colnames(my_data_VLOOKUP)
@@ -1123,8 +1057,7 @@ mod_Diagonal_server <- function(id) {
           colnames(Entry_Fillers) <- COLNAMES_DATA
           my_data_VLOOKUP <- rbind(my_data_VLOOKUP, Entry_Fillers)
         }
-        
-        plot_number <- as.matrix(plot_number_reactive()$w_map_letters1)
+        plot_number <- plot_number_reactive()$plots_number_sites[[user_site]]
         plot_number <- apply(plot_number, 2 ,as.numeric)
         my_names <- split_name_reactive()$my_names
         if (multi == FALSE && Option_NCD == TRUE) {
@@ -1316,7 +1249,8 @@ mod_Diagonal_server <- function(id) {
       df$ROW <- as.factor(df$ROW)
       df$COLUMN <- as.factor(df$COLUMN)
       df$CHECKS <- as.factor(df$CHECKS)
-      df$ENTRY <- as.factor(df$TREATMENT)
+      df$ENTRY <- as.factor(df$ENTRY)
+      df$TREATMENT <- as.factor(df$TREATMENT)
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "600px"))
       DT::datatable(df,

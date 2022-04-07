@@ -8,7 +8,7 @@
 #'
 #' @importFrom shiny NS tagList 
 #' @importFrom utils write.csv
-mod_Alpha_Lattice_ui <- function(id){
+mod_Alpha_Lattice_ui <- function(id) {
   ns <- NS(id)
   tagList(
     h4("Alpha Lattice Design"),
@@ -19,7 +19,7 @@ mod_Alpha_Lattice_ui <- function(id){
                    
                    conditionalPanel("input.owndata_alpha != 'Yes'", ns = ns,
                                     numericInput(ns("t.alpha"), label = "Input # of Treatments:",
-                                                 value = NULL, min = 2)
+                                                 value = 36, min = 2)
                                     
                    ),
                    conditionalPanel("input.owndata_alpha == 'Yes'", ns = ns,
@@ -34,9 +34,9 @@ mod_Alpha_Lattice_ui <- function(id){
                                                           selected = ","))
                                     )        
                    ),
-                   numericInput(inputId = ns("r.alpha"), label = "Input # of Full Reps:", value = NULL, min = 2),
+                   numericInput(inputId = ns("r.alpha"), label = "Input # of Full Reps:", value = 3, min = 2),
                    selectInput(inputId = ns("k.alpha"), label = "Input # of Plots per IBlock:", choices = ""),
-                   numericInput(inputId = ns("l.alpha"), label = "Input # of Locations:", value = NULL, min = 1),
+                   numericInput(inputId = ns("l.alpha"), label = "Input # of Locations:", value = 1, min = 1),
                    
                    selectInput(inputId = ns("planter_mov_alpha"), label = "Plot Order Layout:",
                                choices = c("serpentine", "cartesian"), multiple = FALSE,
@@ -67,9 +67,18 @@ mod_Alpha_Lattice_ui <- function(id){
       
       mainPanel(
         width = 8,
-        fixedRow(
-            column(12, align="center", uiOutput(ns("tabsetAlpha"))),
-            column(12, uiOutput(ns("well_panel_layout")))
+        fluidRow(
+          tabsetPanel(
+            tabPanel("Field Layout",
+                     shinycssloaders::withSpinner(
+                       plotly::plotlyOutput(ns("random_layout"), width = "100%", height = "650px"),type = 5
+                     ),
+                     column(12, uiOutput(ns("well_panel_layout")))
+            ),
+            tabPanel("Field Book", 
+                     shinycssloaders::withSpinner(DT::DTOutput(ns("ALPHA_fieldbook")), type = 5)
+            )
+          )
         )
       )
     )
@@ -114,8 +123,10 @@ mod_Alpha_Lattice_server <- function(id){
         w <- 2
       }
       
+      selected_index <- ceiling(length(k)/2)
+      
       updateSelectInput(session = session, inputId = 'k.alpha', label = "Input # of Plots per IBlock:",
-                        choices = k, selected = k[1])
+                        choices = k, selected = k[selected_index])
       
     })
     
@@ -201,10 +212,9 @@ mod_Alpha_Lattice_server <- function(id){
     
     output$well_panel_layout <- renderUI({
       req(ALPHA_reactive()$fieldBook)
-      req(input$l.alpha)
-      req(input$r.alpha)
-      locs <- as.numeric(input$l.alpha)
-      repsAlpha <- as.numeric(input$r.alpha)
+      df <- ALPHA_reactive()$fieldBook
+      locs <- length(levels(as.factor(df$LOCATION)))
+      repsAlpha <- length(levels(as.factor(df$REP)))
       if ((repsAlpha >= 4 & repsAlpha %% 2 == 0) | (repsAlpha >= 4 & sqrt(repsAlpha) %% 1 == 0)) {
         orderReps <- c("Vertical Stack Panel" = "vertical_stack_panel", "Horizontal Stack Panel" = "horizontal_stack_panel",  
                        "Grid Panel" = "grid_panel")
@@ -216,24 +226,25 @@ mod_Alpha_Lattice_server <- function(id){
       nBooks <- length(allBooks)
       layoutOptions <- 1:nBooks
       wellPanel(
-        column(3,
-               radioButtons(ns("typlotALPHA"), "Type of Plot:",
-                            c("Entries/Treatments" = 1,
-                              "Plots" = 2,
-                              "Heatmap" = 3), selected = 1)
-        ),
-        fluidRow(
+        fluidPage(
           column(3,
-                 selectInput(inputId = ns("orderRepsAlpha"), label = "Reps layout:", 
-                             choices = orderReps)
+                 radioButtons(ns("typlotALPHA"), "Type of Plot:",
+                              c("Entries/Treatments" = 1,
+                                "Plots" = 2,
+                                "Heatmap" = 3), selected = 1)
           ),
-          column(2, 
-                 selectInput(inputId = ns("layoutO"), label = "Layout option:", choices = layoutOptions, selected = 1)
-          ),
-          column(2, 
-                 selectInput(inputId = ns("locLayout"), label = 'Location:', choices = as.numeric(upDateSites()$sites))
+        # fluidRow(
+            column(3,
+                   selectInput(inputId = ns("orderRepsAlpha"), label = "Reps layout:", 
+                               choices = orderReps)
+            ),
+            column(2, 
+                   selectInput(inputId = ns("layoutO"), label = "Layout option:", choices = layoutOptions, selected = 1)
+            ),
+            column(2, 
+                   selectInput(inputId = ns("locLayout"), label = 'Location:', choices = as.numeric(upDateSites()$sites))
+            )
           )
-        )
       )
     })
     
@@ -259,8 +270,8 @@ mod_Alpha_Lattice_server <- function(id){
       obj <- ALPHA_reactive()
       opt <- as.numeric(input$layoutO)
       locSelected <- as.numeric(input$locLayout)
-      try(plot_layout(x = obj, optionLayout = opt, planter = input$planter_mov_alpha, l = locSelected, 
-                      orderReps = input$orderRepsAlpha), silent = TRUE)
+      try(plot_layout(x = obj, optionLayout = opt, planter = input$planter_mov_alpha, 
+                      l = locSelected, orderReps = input$orderRepsAlpha), silent = TRUE)
     })
     
     valsALPHA <- reactiveValues(maxV.alpha = NULL, minV.alpha = NULL, trail.alpha = NULL)
@@ -354,23 +365,6 @@ mod_Alpha_Lattice_server <- function(id){
       )
     }
     
-    output$tabsetAlpha <- renderUI({
-      req(input$typlotALPHA)
-      tabsetPanel(
-        if (input$typlotALPHA != 3) {
-          tabPanel("Alpha Lattice Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.output"), width = "100%", height = "650px"),
-                                                                              type = 5))
-        } else {
-          tabPanel("Alpha Lattice Field Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapAlpha"), width = "100%", height = "650px"),
-                                                                              type = 5))
-        },
-        # tabPanel("Alpha Lattice Field Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapAlpha"), width = "100%", height = "650px"),
-        #                                                                       type = 5)),
-        tabPanel("Alpha Lattice Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("ALPHA.output")), type = 5))
-      )
-      
-    })
-    
     locNum <- reactive(
       return(as.numeric(input$locLayout))
     )
@@ -401,7 +395,7 @@ mod_Alpha_Lattice_server <- function(id){
           ggplot2::theme_minimal() + # I added this option 
           ggplot2::theme(plot.title = ggplot2::element_text(family="Calibri", face="bold", size=13, hjust=0.5))
         
-        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 640)
+        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1300, height = 640)
         return(p2)
       } else {
         showModal(
@@ -413,13 +407,7 @@ mod_Alpha_Lattice_server <- function(id){
         }
     })
     
-    output$heatmapAlpha <- plotly::renderPlotly({
-      req(heatmap_obj())
-      heatmap_obj()
-    })
-
-
-    output$layout.output <- renderPlot({
+    output$random_layout <- plotly::renderPlotly({
       req(reactive_layoutAlpha())
       req(ALPHA_reactive())
       req(input$typlotALPHA)
@@ -427,22 +415,13 @@ mod_Alpha_Lattice_server <- function(id){
         reactive_layoutAlpha()$out_layout
       } else if (input$typlotALPHA == 2) {
         reactive_layoutAlpha()$out_layoutPlots
+      } else {
+        req(heatmap_obj())
+        heatmap_obj()
       }
     })
     
-    
-    # output$heatmapAlpha <- plotly::renderPlotly({
-    #   req(reactive_layoutAlpha())
-    #   req(ALPHA_reactive())
-    #   req(input$typlotALPHA)
-    #   if (input$typlotALPHA == 1) {
-    #     reactive_layoutAlpha()$out_layout
-    #   } else if (input$typlotALPHA == 2) {
-    #     reactive_layoutAlpha()$out_layoutPlots
-    #   } #else heatmap_obj()
-    # })
-    
-    output$ALPHA.output <- DT::renderDataTable({
+    output$ALPHA_fieldbook <- DT::renderDataTable({
       req(input$k.alpha)
       k.alpha <- input$k.alpha
       if (k.alpha == "No Options Available") {
@@ -450,11 +429,22 @@ mod_Alpha_Lattice_server <- function(id){
       }
       req(simuDataALPHA()$df)
       df <- simuDataALPHA()$df
+      df$LOCATION <- as.factor(df$LOCATION)
+      df$PLOT <- as.factor(df$PLOT)
+      df$ROW <- as.factor(df$ROW)
+      df$COLUMN <- as.factor(df$COLUMN)
+      df$REP <- as.factor(df$REP)
+      df$IBLOCK <- as.factor(df$IBLOCK)
+      df$UNIT <- as.factor(df$UNIT)
+      df$ENTRY <- as.factor(df$ENTRY)
       a <- as.numeric(simuDataALPHA()$a)
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "500px"))
       
-      DT::datatable(df, rownames = FALSE, options = list(
+      DT::datatable(df,
+                    filter = 'top',
+                    rownames = FALSE, 
+                    options = list(
         columnDefs = list(list(className = 'dt-center', targets = "_all"))))
       
     })

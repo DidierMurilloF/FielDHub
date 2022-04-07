@@ -271,11 +271,6 @@ plot_iblocks <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks, 
             dplyr::mutate(ROW = z0,
                           COLUMN = rep(rep(1:nCols, each = sizeIblocks), s))
           df6 <- x$bookROWCol
-          # df6 <- df6[order(df6$ROW, decreasing = FALSE), ]
-          # nCols <- max(df6$COLUMN)
-          # newPlots <- planter_transform(plots = plots, planter = planter, reps = n_Reps,
-          #                               cols = nCols, mode = "Grid", units = n0)
-          # df6$PLOT <- newPlots
           if (sqrt(n_Reps) %% 1 == 0) {
             books6[[1]] <- NULL
           } else books6[[1]] <- df6
@@ -319,7 +314,8 @@ plot_iblocks <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks, 
                            text = ENTRY, cex = 1, shorten = "no",
                            data = df, xlab = "COLUMNS", ylab = "ROWS",
                            main = main, 
-                           show.key = FALSE, gg=TRUE)
+                           show.key = FALSE, 
+                           gg=TRUE)
     df$REP <- as.factor(df$REP)
     p2 <- desplot::desplot(REP ~ COLUMN + ROW, flip = FALSE,
                            out1 = REP,
@@ -330,7 +326,8 @@ plot_iblocks <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks, 
                            text = PLOT, cex = 1, shorten = "no",
                            data = df, xlab = "COLUMNS", ylab = "ROWS",
                            main = main,
-                           show.key = FALSE, gg=TRUE)
+                           show.key = FALSE, 
+                           gg=TRUE)
   }
   return(list(p1 = p1, p2 = p2, df = df, newBooks = newBooksSelected, allSitesFieldbook = allSitesFieldbook))
 }

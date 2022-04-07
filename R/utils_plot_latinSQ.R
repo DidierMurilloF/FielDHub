@@ -85,11 +85,6 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, optionLayout = 1,
   df1 <- newBooksSelected[opt]
   df <- as.data.frame(df1)
   
-  # books <- c(books0, books1)
-  # newBooks <- books[!sapply(books,is.null)]
-  # opt <- optionLayout
-  # df <- as.data.frame(newBooks[[opt]])
-  
   if (x$infoDesign$idDesign == 9){
     allSites <- vector(mode = "list", length = nlocs)
     for (st in 1:nlocs) {
@@ -116,7 +111,8 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, optionLayout = 1,
                            text = ENTRY, cex = 1, shorten = "no",
                            data = df, xlab = "COLUMNS", ylab = "ROWS",
                            main = main, 
-                           show.key = FALSE)
+                           show.key = FALSE,
+                           gg = TRUE)
     df$REP <- as.factor(df$REP)
     p2 <- desplot::desplot(REP ~  COLUMN + ROW, flip = FALSE,
                            out1 = REP,
@@ -127,7 +123,8 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, optionLayout = 1,
                            text = PLOT, cex = 1, shorten = "no",
                            data = df, xlab = "COLUMNS", ylab = "ROWS",
                            main = main,
-                           show.key = FALSE)
+                           show.key = FALSE,
+                           gg = TRUE)
   } else  if (x$infoDesign$idDesign == 7) {
     allSites <- vector(mode = "list", length = nlocs)
     for (st in 1:nlocs) {
@@ -153,14 +150,16 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, optionLayout = 1,
                            text = TRT_COMB, cex = 1, shorten = "no",
                            data = df, xlab = "COLUMNS", ylab = "ROWS",
                            main = main, 
-                           show.key = FALSE)
+                           show.key = FALSE,
+                           gg = TRUE)
     df$REP <- as.factor(df$REP)
     p2 <- desplot::desplot(REP ~  COLUMN + ROW, flip = FALSE,
                            out1 = REP,
                            text = PLOT, cex = 1, shorten = "no",
                            data = df, xlab = "COLUMNS", ylab = "ROWS",
                            main = main,
-                           show.key = FALSE)
+                           show.key = FALSE,
+                           gg = TRUE)
   } else {
     allSites <- vector(mode = "list", length = nlocs)
     for (st in 1:nlocs) {
@@ -187,14 +186,16 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, optionLayout = 1,
                            text = TREATMENT, cex = 1, shorten = "no",
                            data = df, xlab = "COLUMNS", ylab = "ROWS",
                            main = main, 
-                           show.key = FALSE)
+                           show.key = FALSE,
+                           gg = TRUE)
     df$SQUARE <- as.factor(df$SQUARE)
     p2 <- desplot::desplot(SQUARE ~ COLUMN + ROW, flip = FALSE,
                            out1 = SQUARE,
                            text = PLOT, cex = 1, shorten = "no",
                            data = df, xlab = "COLUMNS", ylab = "ROWS",
                            main = main,
-                           show.key = FALSE)
+                           show.key = FALSE,
+                           gg = TRUE)
   }
   return(list(p1 = p1, p2 = p2, df = df, newBooks = newBooksSelected, 
               allSitesFieldbook = allSitesFieldbook))

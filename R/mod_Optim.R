@@ -102,7 +102,7 @@ mod_Optim_ui <- function(id) {
         tabsetPanel(
           tabPanel("Input Data",
                    fluidRow(
-                     column(6,DT::DTOutput(ns("data_up.s"))),
+                     column(6,DT::DTOutput(ns("data_input"))),
                      column(6,DT::DTOutput(ns("table_checks")))
                    )
           ),
@@ -170,10 +170,13 @@ mod_Optim_server <- function(id) {
     })
     
     
-    output$data_up.s <- DT::renderDT({
+    output$data_input <- DT::renderDT({
       req(getDataup.spatiaL()$data_up.spatial)
       data_entry <- getDataup.spatiaL()$data_up.spatial
       df <- as.data.frame(data_entry)
+      df$ENTRY <- as.factor(df$ENTRY)
+      df$NAME <- as.factor(df$NAME)
+      df$REPS <- as.factor(df$REPS)
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "600px"))
       DT::datatable(df,
