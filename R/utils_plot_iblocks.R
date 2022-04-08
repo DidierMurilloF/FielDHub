@@ -250,7 +250,15 @@ plot_iblocks <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks, 
             dplyr::mutate(ROW = z0,
                           COLUMN = rep(rep(1:nCols, each = sizeIblocks), s))
           df5 <- x$bookROWCol
+          df5 <- df5[order(df5$REP, df5$UNIT),]
+          nRows <- max(df5$ROW)
+          nCols <- max(df5$COLUMN)
+          number_units <- length(levels(as.factor(df5$IBLOCK)))
+          newPlots <- planter_transform(plots = plots, planter = planter, reps = n_Reps, cols = nCols,
+                                        mode = "Grid", units = number_units)
+          df5$PLOT <- newPlots
           books5[[1]] <- df5
+          
           nROWs <- t[2] * sizeIblocks
           s <- t[2]
           nCols <- t[1] * iBlocks
@@ -271,6 +279,13 @@ plot_iblocks <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks, 
             dplyr::mutate(ROW = z0,
                           COLUMN = rep(rep(1:nCols, each = sizeIblocks), s))
           df6 <- x$bookROWCol
+          df6 <- df6[order(df6$REP, df6$UNIT),]
+          nRows <- max(df6$ROW)
+          nCols <- max(df6$COLUMN)
+          number_units <- length(levels(as.factor(df5$IBLOCK)))
+          newPlots <- planter_transform(plots = plots, planter = planter, reps = n_Reps, cols = nCols,
+                                        mode = "Grid", units = number_units)
+          df6$PLOT <- newPlots
           if (sqrt(n_Reps) %% 1 == 0) {
             books6[[1]] <- NULL
           } else books6[[1]] <- df6
@@ -286,7 +301,6 @@ plot_iblocks <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks, 
   newBooksSelected <- newBooksLocs[[site]]
   df1 <- newBooksSelected[opt]
   df <- as.data.frame(df1)
-  #print(df[,1])
   if (x$infoDesign$idDesign %in% c(10, 11, 12, 8)) {
     allSites <- vector(mode = "list", length = nlocs)
     for (st in 1:nlocs) {

@@ -267,6 +267,7 @@ mod_Alpha_Lattice_server <- function(id){
       req(input$planter_mov_alpha)
       req(input$layoutO)
       req(ALPHA_reactive())
+      opt <- input$orderRepsAlpha
       obj <- ALPHA_reactive()
       opt <- as.numeric(input$layoutO)
       locSelected <- as.numeric(input$locLayout)

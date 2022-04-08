@@ -11,7 +11,7 @@ planter_transform <- function(plots = NULL, planter = "serpentine", cols = NULL,
   n_Reps <- reps
   if (!is.null(mode)) {
     if (mode == "Grid") {
-      repCols <- cols/units
+      repCols <- units
     }else repCols <- cols/n_Reps
     nt <- length(PLOTS)/n_Reps
     RPLOTS <- split_vectors(x = PLOTS, len_cuts = rep(rep(nt, n_Reps), each = 1))

@@ -48,9 +48,9 @@ plot_layout <- function(x = NULL, optionLayout = 1, planter = "serpentine", l = 
       sizeIblocks <- dplyr::n_distinct(x$fieldBook$UNIT)
       iBlocks <- n_TrtGen/sizeIblocks
       return0 <- plot_iblocks(x = x, n_TrtGen = n_TrtGen, n_Reps = n_Reps, 
-                             sizeIblocks = sizeIblocks, iBlocks = iBlocks, 
-                             optionLayout = optionLayout, planter = planter,
-                             l = l, orderReps = orderReps)
+                              sizeIblocks = sizeIblocks, iBlocks = iBlocks, 
+                              optionLayout = optionLayout, planter = planter,
+                              l = l, orderReps = orderReps)
     } else if (x$infoDesign$idDesign == 5) {
         if (x$infoDesign$typeDesign == "RCBD") {
           wp <- dplyr::n_distinct(x$fieldBook$WHOLE_PLOT)
