@@ -64,20 +64,32 @@ mod_SPD_ui <- function(id){
                    
                    fluidRow(
                      column(6,
-                            downloadButton(ns("downloadData.spd"), "Save Experiment!", style = "width:100%")
+                            actionButton(inputId = ns("RUN.spd"), "Run!", icon = icon("cocktail"), width = '100%'),
                      ),
                      column(6,
                             actionButton(ns("Simulate.spd"), "Simulate!", icon = icon("cocktail"), width = '100%')
                      )
-                   )
+                     
+                   ), 
+                   br(),
+                   downloadButton(ns("downloadData.spd"), "Save Experiment!", style = "width:100%")
       ),
       
       mainPanel(
         width = 8,
-        fixedRow(
-          column(12, align="center", uiOutput(ns("tabsetSPD"))),
-        ),
-        column(12,uiOutput(ns("well_panel_layout_SPD")))
+        fluidRow(
+          tabsetPanel(
+            tabPanel("Field Layout",
+                     shinycssloaders::withSpinner(
+                       plotly::plotlyOutput(ns("layouts"), width = "100%", height = "650px"),type = 5
+                     ),
+                     column(12,uiOutput(ns("well_panel_layout_SPD")))
+            ),
+            tabPanel("Field Book", 
+                     shinycssloaders::withSpinner(DT::DTOutput(ns("SPD.output")), type = 5)
+            )
+          )
+        )
       )
     )    
   )
@@ -129,7 +141,7 @@ mod_SPD_server <- function(id){
       return(list(dataUp.spd = dataUp.spd))
     })
     
-    spd_reactive <- reactive({
+    spd_reactive <- eventReactive(input$RUN.spd, {
       req(input$plot_start.spd)
       req(input$Location.spd)
       req(input$myseed.spd)
@@ -175,7 +187,12 @@ mod_SPD_server <- function(id){
                         type = type, locationNames = loc.spd, data = data.spd)
     })
     
-    
+    upDateSites <- eventReactive(input$RUN.spd, {
+      req(input$l.spd)
+      locs <- as.numeric(input$l.spd)
+      sites <- 1:locs
+      return(list(sites = sites))
+    })
     
     output$well_panel_layout_SPD <- renderUI({
       req(spd_reactive()$fieldBook)
@@ -203,7 +220,7 @@ mod_SPD_server <- function(id){
                  selectInput(inputId = ns("layoutO_spd"), label = "Layout option:", choices = layoutOptions_spd)
           ),
           column(2, #align="center",
-                 selectInput(inputId = ns("locLayout_spd"), label = "Location:", choices = 1:sites)
+                 selectInput(inputId = ns("locLayout_spd"), label = "Location:", choices = as.numeric(upDateSites()$sites))
           )
         )
       )
@@ -235,13 +252,13 @@ mod_SPD_server <- function(id){
                       l = locSelected_spd), silent = TRUE)
     })
     
-    output$layout_spd <- renderPlot({
-      req(spd_reactive())
-      req(input$typlotspd)
-      if (input$typlotspd == 1) {
-        reactive_layoutSPD()$out_layout
-      } else reactive_layoutSPD()$out_layoutPlots
-    })
+    # output$layout_spd <- renderPlot({
+    #   req(spd_reactive())
+    #   req(input$typlotspd)
+    #   if (input$typlotspd == 1) {
+    #     reactive_layoutSPD()$out_layout
+    #   } else reactive_layoutSPD()$out_layoutPlots
+    # })
     
     valspd <- reactiveValues(maxV.spd = NULL, minV.spd = NULL, trail.spd = NULL)
     
@@ -334,20 +351,20 @@ mod_SPD_server <- function(id){
       )
     }
     
-    output$tabsetSPD <- renderUI({
-      req(input$typlotspd)
-      tabsetPanel(
-        if (input$typlotspd != 3) {
-          tabPanel("Split Plot Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.spd"), width = "100%", height = "650px"),
-                                                                                      type = 5))
-        } else {
-          tabPanel("Split Plot Field Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapSPD"), width = "100%", height = "650px"),
-                                                                                      type = 5))
-        },
-        tabPanel("Split Plot Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("SPD.output")), type = 5))
-      )
-      
-    })
+    # output$tabsetSPD <- renderUI({
+    #   req(input$typlotspd)
+    #   tabsetPanel(
+    #     if (input$typlotspd != 3) {
+    #       tabPanel("Split Plot Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.spd"), width = "100%", height = "650px"),
+    #                                                                                   type = 5))
+    #     } else {
+    #       tabPanel("Split Plot Field Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapSPD"), width = "100%", height = "650px"),
+    #                                                                                   type = 5))
+    #     },
+    #     tabPanel("Split Plot Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("SPD.output")), type = 5))
+    #   )
+    #   
+    # })
     
     locNum <- reactive(
       return(as.numeric(input$locLayout_spd))
@@ -391,19 +408,22 @@ mod_SPD_server <- function(id){
       }
     })
     
-    output$heatmapSPD <- plotly::renderPlotly({
-      req(heatmap_obj())
-      heatmap_obj()
-    })
+    # output$heatmapSPD <- plotly::renderPlotly({
+    #   req(heatmap_obj())
+    #   heatmap_obj()
+    # })
     
-    output$layout.spd <- renderPlot({
-      #reactive_layoutSPD()$out_layout
+    output$layouts <- plotly::renderPlotly({
+      req(reactive_layoutSPD())
       req(spd_reactive())
       req(input$typlotspd)
       if (input$typlotspd == 1) {
         reactive_layoutSPD()$out_layout
       } else if (input$typlotspd == 2) {
         reactive_layoutSPD()$out_layoutPlots
+      } else {
+        req(heatmap_obj())
+        heatmap_obj()
       }
     })
     
@@ -411,10 +431,18 @@ mod_SPD_server <- function(id){
     output$SPD.output <- DT::renderDataTable({
       
       df <- simuData_spd()$df
+      df$LOCATION <- as.factor(df$LOCATION)
+      df$PLOT <- as.factor(df$PLOT)
+      df$ROW <- as.factor(df$ROW)
+      df$COLUMN <- as.factor(df$COLUMN)
+      df$REP <- as.factor(df$REP)
+      df$WHOLE_PLOT <- as.factor(df$WHOLE_PLOT)
+      df$SUB_PLOT <- as.factor(df$SUB_PLOT)
+      df$TRT_COMB <- as.factor(df$TRT_COMB)
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "500px"))
       
-      DT::datatable(df, rownames = FALSE, options = list(
+      DT::datatable(df, filter = 'top', rownames = FALSE, options = list(
         columnDefs = list(list(className = 'dt-center', targets = "_all"))))
       
     })

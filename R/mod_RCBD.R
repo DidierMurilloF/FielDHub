@@ -312,21 +312,6 @@ mod_RCBD_server <- function(id){
       )
     }
     
-    # output$tabsetRCBD <- renderUI({
-    #   req(input$typlotRCBD)
-    #   tabsetPanel(
-    #     if (input$typlotRCBD != 3) {
-    #       tabPanel("Randomized Complete Block Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.output_RCBD"), width = "100%", height = "650px"),
-    #                                                                                 type = 5))
-    #     } else {
-    #       tabPanel("Randomized Complete Block Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapRCBD"), width = "100%", height = "650px"),
-    #                                                                                 type = 5))
-    #     },
-    #     tabPanel("Randomized Complete Block Book", shinycssloaders::withSpinner(DT::DTOutput(ns("RCBD.output")), type = 5))
-    #   )
-    # 
-    # })
-    
     locNum <- reactive(
       return(as.numeric(input$locLayout_rcbd))
     )

@@ -20,7 +20,7 @@ mod_IBD_ui <- function(id) {
                    
                    conditionalPanel("input.owndataibd != 'Yes'", ns = ns,
                                     numericInput(ns("t.ibd"), label = "Input # of Treatments:",
-                                                 value = NULL, min = 2)
+                                                 value = 4, min = 2)
                    ),
                    conditionalPanel("input.owndataibd == 'Yes'", ns = ns,
                                     fluidRow(
@@ -35,11 +35,11 @@ mod_IBD_ui <- function(id) {
                                     )        
                    ),
                    
-                   numericInput(inputId = ns("r.ibd"), label = "Input # of Full Reps:", value = NULL, min = 2),
+                   numericInput(inputId = ns("r.ibd"), label = "Input # of Full Reps:", value = 4, min = 2),
                    
                    selectInput(inputId = ns("k.ibd"), label = "Input # of Plots per IBlock:", choices = ""),
                    
-                   numericInput(inputId = ns("l.ibd"), label = "Input # of Locations:", value = NULL, min = 1),
+                   numericInput(inputId = ns("l.ibd"), label = "Input # of Locations:", value = 1, min = 1),
                    
                    
                    fluidRow(
@@ -60,19 +60,31 @@ mod_IBD_ui <- function(id) {
                    
                    fluidRow(
                      column(6,
-                            downloadButton(ns("downloadData.ibd"), "Save Experiment!", style = "width:100%")
+                            actionButton(inputId = ns("RUN.ibd"), "Run!", icon = icon("cocktail"), width = '100%'),
                      ),
                      column(6,
                             actionButton(ns("Simulate.ibd"), "Simulate!", icon = icon("cocktail"), width = '100%')
                      )
-                   )
+                     
+                   ), 
+                   br(),
+                   downloadButton(ns("downloadData.ibd"), "Save Experiment!", style = "width:100%")
       ),
       
       mainPanel(
         width = 8,
-        fixedRow(
-          column(12, align="center", uiOutput(ns("tabsetIBD"))),
-          column(12, uiOutput(ns("well_panel_layout_IBD")))
+        fluidRow(
+          tabsetPanel(
+            tabPanel("Field Layout",
+                     shinycssloaders::withSpinner(
+                       plotly::plotlyOutput(ns("layouts"), width = "100%", height = "650px"),type = 5
+                     ),
+                     column(12,uiOutput(ns("well_panel_layout_IBD")))
+            ),
+            tabPanel("Field Book", 
+                     shinycssloaders::withSpinner(DT::DTOutput(ns("IBD.output")), type = 5)
+            )
+          )
         )
       )
     )
@@ -156,7 +168,7 @@ mod_IBD_server <- function(id){
     })
     
     #shinybusy::show_modal_spinner() 
-    IBD_reactive <- reactive({
+    IBD_reactive <- eventReactive(input$RUN.ibd, {
       
       req(input$r.ibd)
       req(input$k.ibd)
@@ -192,6 +204,13 @@ mod_IBD_server <- function(id){
       
     })
     
+    upDateSites <- eventReactive(input$RUN.ibd, {
+      req(input$l.ibd)
+      locs <- as.numeric(input$l.ibd)
+      sites <- 1:locs
+      return(list(sites = sites))
+    })
+    
     output$well_panel_layout_IBD <- renderUI({
       req(IBD_reactive()$fieldBook)
       obj_ibd <- IBD_reactive()
@@ -201,7 +220,7 @@ mod_IBD_server <- function(id){
       layoutOptions_ibd <- 1:nBooks_ibd
       orderReps <- c("Vertical Stack Panel" = "vertical_stack_panel", "Horizontal Stack Panel" = "horizontal_stack_panel")
       #loc <-  as.vector(unlist(strsplit(input$Location.ibd, ",")))
-      site <- as.numeric(input$l.ibd)
+      # site <- as.numeric(input$l.ibd)
       wellPanel(
         column(2,
                radioButtons(ns("typlotibd"), "Type of Plot:",
@@ -218,7 +237,7 @@ mod_IBD_server <- function(id){
                  selectInput(inputId = ns("layoutO_ibd"), label = "Layout option:", choices = layoutOptions_ibd)
           ),
           column(3, #align="center",
-                 selectInput(inputId = ns("locLayout_ibd"), label = "Location:", choices = 1:site)
+                 selectInput(inputId = ns("locLayout_ibd"), label = "Location:", choices = as.numeric(upDateSites()$sites))
           )
         )
       )
@@ -227,7 +246,7 @@ mod_IBD_server <- function(id){
     
     observeEvent(input$orderRepsibd, {
       req(input$orderRepsibd)
-      req(input$l.ibd)
+      # req(input$l.ibd)
       obj <- IBD_reactive()
       allBooks <- plot_layout(x = obj, optionLayout = 1, orderReps = input$orderRepsibd)$newBooks
       nBooks <- length(allBooks)
@@ -346,20 +365,20 @@ mod_IBD_server <- function(id){
       )
     }
     
-    output$tabsetIBD <- renderUI({
-      req(input$typlotibd)
-      tabsetPanel(
-        if (input$typlotibd != 3) {
-          tabPanel("Incomplete Block Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.output"), width = "100%", height = "650px"),
-                                                                              type = 5))
-        } else {
-          tabPanel("Incomplete Block Field Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapIBD"), width = "100%", height = "650px"),
-                                                                              type = 5))
-        },
-        tabPanel("Incomplete Block Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("IBD.output")), type = 5))
-      )
-      
-    })
+    # output$tabsetIBD <- renderUI({
+    #   req(input$typlotibd)
+    #   tabsetPanel(
+    #     if (input$typlotibd != 3) {
+    #       tabPanel("Incomplete Block Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.output"), width = "100%", height = "650px"),
+    #                                                                           type = 5))
+    #     } else {
+    #       tabPanel("Incomplete Block Field Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapIBD"), width = "100%", height = "650px"),
+    #                                                                           type = 5))
+    #     },
+    #     tabPanel("Incomplete Block Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("IBD.output")), type = 5))
+    #   )
+    #   
+    # })
     
     locNum <- reactive(
       return(as.numeric(input$locLayout_ibd))
@@ -403,13 +422,13 @@ mod_IBD_server <- function(id){
       }
     })
     
-    output$heatmapIBD <- plotly::renderPlotly({
-      req(heatmap_obj())
-      heatmap_obj()
-    })
+    # output$heatmapIBD <- plotly::renderPlotly({
+    #   req(heatmap_obj())
+    #   heatmap_obj()
+    # })
     
     
-    output$layout.output <- renderPlot({
+    output$layouts <- plotly::renderPlotly({
       req(reactive_layoutIBD())
       req(IBD_reactive())
       req(input$typlotibd)
@@ -417,6 +436,9 @@ mod_IBD_server <- function(id){
         reactive_layoutIBD()$out_layout
       } else if (input$typlotibd == 2) {
         reactive_layoutIBD()$out_layoutPlots
+      } else {
+        req(heatmap_obj())
+        heatmap_obj()
       }
     })
     

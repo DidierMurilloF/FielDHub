@@ -33,7 +33,7 @@ mod_LSD_ui <- function(id){
                    conditionalPanel("input.owndataLSD != 'Yes'", ns = ns,
                                     
                                     numericInput(ns("n.lsd"), label = "Input # of Treatments:",
-                                                 value = NULL, min = 2),             
+                                                 value = 4, min = 2),             
                    ),
                    
                    numericInput(ns("reps.lsd"), label = "Input # of Full Reps (Squares):",
@@ -53,19 +53,45 @@ mod_LSD_ui <- function(id){
                    
                    fluidRow(
                      column(6,
-                            downloadButton(ns("downloadData.lsd"), "Save Experiment!", style = "width:100%")
+                            actionButton(inputId = ns("RUN.lsd"), "Run!", icon = icon("cocktail"), width = '100%'),
                      ),
                      column(6,
                             actionButton(ns("Simulate.lsd"), "Simulate!", icon = icon("cocktail"), width = '100%')
                      )
-                   )
+                     
+                   ), 
+                   br(),
+                   downloadButton(ns("downloadData.lsd"), "Save Experiment!", style = "width:100%")
+                   
+                   # fluidRow(
+                   #   column(6,
+                   #          downloadButton(ns("downloadData.lsd"), "Save Experiment!", style = "width:100%")
+                   #   ),
+                   #   column(6,
+                   #          actionButton(ns("Simulate.lsd"), "Simulate!", icon = icon("cocktail"), width = '100%')
+                   #   )
+                   # )
       ),
-      
+      #plotly::plotlyOutput(ns("layouts_lsd"), width = "100%", height = "650px")
+      # plotOutput(ns("layout_lsd"), width = "100%", height = "650px")
       mainPanel(width = 8,
-                fixedRow(
-                  column(12, align="center", uiOutput(ns("tabsetLSD"))),
-                  column(12, uiOutput(ns("well_panel_layout_LSD")))
-                )
+          fluidRow(
+            tabsetPanel(
+              tabPanel("Field Layout",
+                       shinycssloaders::withSpinner(
+                         plotOutput(ns("layout_lsd"), width = "100%", height = "650px"),type = 5
+                       ),
+                       column(12, uiOutput(ns("well_panel_layout_LSD")))
+              ),
+              tabPanel("Field Book", 
+                       shinycssloaders::withSpinner(DT::DTOutput(ns("LSD_fieldbook")), type = 5)
+              )
+            )
+          )
+                # fixedRow(
+                #   column(12, align="center", uiOutput(ns("tabsetLSD"))),
+                #   column(12, uiOutput(ns("well_panel_layout_LSD")))
+                # )
       )
     ) 
   )
@@ -118,7 +144,8 @@ mod_LSD_server <- function(id){
       return(list(dataUp.lsd = dataUp.lsd))
     })
     
-    latinsquare_reactive <- reactive({
+    latinsquare_reactive <- eventReactive(input$RUN.lsd, {
+    # latinsquare_reactive <- reactive({
       
       req(input$plot_start.lsd)
       req(input$Location.lsd)
@@ -157,6 +184,7 @@ mod_LSD_server <- function(id){
     
     output$well_panel_layout_LSD <- renderUI({
       req(latinsquare_reactive()$fieldBook)
+      req(latinsquare_reactive())
       obj_lsd <- latinsquare_reactive()
       planting_lsd <- input$planter.lsd
       allBooks_lsd<- plot_layout(x = obj_lsd, optionLayout = 1)$newBooks
@@ -185,18 +213,19 @@ mod_LSD_server <- function(id){
       req(input$layoutO_lsd)
       req(latinsquare_reactive())
       obj_lsd <- latinsquare_reactive()
+      # print(obj_lsd)
       opt_lsd <- as.numeric(input$layoutO_lsd)
       planting_lsd <- input$planter.lsd
-      plot_layout(x = obj_lsd, optionLayout = opt_lsd, planter = "cartesian")
+      try(plot_layout(x = obj_lsd, optionLayout = opt_lsd, planter = "cartesian"), silent = TRUE)
     })
     
-    output$layout_lsd <- renderPlot({
-      req(latinsquare_reactive())
-      req(input$typlotlsd)
-      if (input$typlotlsd == 1) {
-        reactive_layoutLSD()$out_layout
-      } else reactive_layoutLSD()$out_layoutPlots
-    })
+    # output$layout_lsd <- renderPlot({
+    #   req(latinsquare_reactive())
+    #   req(input$typlotlsd)
+    #   if (input$typlotlsd == 1) {
+    #     reactive_layoutLSD()$out_layout
+    #   } else reactive_layoutLSD()$out_layoutPlots
+    # })
     
     
     
@@ -291,25 +320,26 @@ mod_LSD_server <- function(id){
       )
     }
     
-    output$tabsetLSD <- renderUI({
-      req(input$typlotlsd)
-      tabsetPanel(
-        if (input$typlotlsd != 3) {
-          tabPanel("Latin Square Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.output"), width = "100%", height = "650px"),
-                                                                              type = 5))
-        } else {
-          tabPanel("Latin Square Field Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapLSD"), width = "100%", height = "650px"),
-                                                                              type = 5))
-        },
-        tabPanel("Latin Square Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("LSD.output")), type = 5))
-      )
-      
-    })
+    # output$tabsetLSD <- renderUI({
+    #   req(input$typlotlsd)
+    #   tabsetPanel(
+    #     if (input$typlotlsd != 3) {
+    #       tabPanel("Latin Square Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.output"), width = "100%", height = "650px"),
+    #                                                                          type = 5))
+    #     } else {
+    #       tabPanel("Latin Square Field Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapLSD"), width = "100%", height = "650px"),
+    #                                                                          type = 5))
+    #     },
+    #     tabPanel("Latin Square Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("LSD.output")), type = 5))
+    #   )
+    #   
+    # })
     
     
     
     heatmap_obj <- reactive({
       req(simuDataLSD()$df)
+      # print(simuDataLSD()$df)
       if (ncol(simuDataLSD()$df) == 10) {
         locs <- factor(simuDataLSD()$df$LOCATION, levels = unique(simuDataLSD()$df$LOCATION))
         locLevels <- levels(locs)
@@ -335,6 +365,7 @@ mod_LSD_server <- function(id){
           ggplot2::theme(plot.title = ggplot2::element_text(family="Calibri", face="bold", size=13, hjust=0.5))
         
         p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 640)
+        p2 
         return(p2)
       } else {
         showModal(
@@ -346,13 +377,29 @@ mod_LSD_server <- function(id){
       }
     })
     
-    output$heatmapLSD <- plotly::renderPlotly({
-      req(heatmap_obj())
-      heatmap_obj()
-    })
+    # output$heatmapLSD <- plotly::renderPlotly({
+    #   req(heatmap_obj())
+    #   heatmap_obj()
+    # })
     
     
-    output$layout.output <- renderPlot({
+    # output$layout_lsd <- plotly::renderPlotly({
+    #   print(simuDataLSD()$df)
+    #   req(reactive_layoutLSD())
+    #   req(latinsquare_reactive())
+    #   req(input$typlotlsd)
+    #   if (input$typlotlsd == 1) {
+    #     reactive_layoutLSD()$out_layout
+    #   } else if (input$typlotlsd == 2) {
+    #     reactive_layoutLSD()$out_layoutPlots
+    #   } else {
+    #     req(heatmap_obj())
+    #     heatmap_obj()
+    #   }
+    # })
+    
+    output$layout_lsd <- renderPlot({
+      print(simuDataLSD()$df)
       req(reactive_layoutLSD())
       req(latinsquare_reactive())
       req(input$typlotlsd)
@@ -360,12 +407,25 @@ mod_LSD_server <- function(id){
         reactive_layoutLSD()$out_layout
       } else if (input$typlotlsd == 2) {
         reactive_layoutLSD()$out_layoutPlots
+      } else {
+        req(heatmap_obj())
+        heatmap_obj()
       }
     })
+        
     
-    output$LSD.output <- DT::renderDataTable({
+    
+    
+    output$LSD_fieldbook <- DT::renderDataTable({
       
       df <- simuDataLSD()$df
+      
+      df$LOCATION <- as.factor(df$LOCATION)
+      df$PLOT <- as.factor(df$PLOT)
+      df$ROW <- as.factor(df$ROW)
+      df$COLUMN <- as.factor(df$COLUMN)
+      df$REP <- as.factor(df$REP)
+      df$TREATMENT <- as.factor(df$TREATMENT)
       a <- as.numeric(simuDataLSD()$a)
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "500px"))
