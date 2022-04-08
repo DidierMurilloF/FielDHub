@@ -22,26 +22,13 @@ plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1
   for (locs in levels(locations)) {
     NewBook <- x$fieldBook %>%
       dplyr::filter(LOCATION == locs)
-    
+    plots <- NewBook$PLOT
     if (orderReps == "vertical_stack_panel") {
       books0 <- list(NULL)
-      cols <- rep(1:n_TrtGen, times = n_Reps)
-      breaks <- split_vectors(x = cols, len_cuts = rep(n_TrtGen, each = n_Reps))
-      lngt <- 1:length(breaks)
-      new_breaks <- vector(mode = "list", length = n_Reps)
-      for (n in lngt) {
-        if (n %% 2 == 0) {
-          new_breaks[[n]] <- rev(breaks[[n]])
-        } else new_breaks[[n]] <- breaks[[n]]
-      }
-      COLUMN_serp <- unlist(new_breaks)
-      if (planter == "serpentine") {
-        COLUMN <- COLUMN_serp
-      } else COLUMN <- rep(1:n_TrtGen, times = n_Reps)
+      COLUMN <- rep(1:n_TrtGen, times = n_Reps)
       books0[[1]] <- NewBook %>% 
         dplyr::mutate(ROW = rep(1:n_Reps, each = n_TrtGen),
                       COLUMN = COLUMN)
-      # books1
       y <- numbers::primeFactors(n_TrtGen)
       if (length(y) >= 2) {
         if (length(y) == 2) {
@@ -60,70 +47,98 @@ plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1
         for (k in 1:dm) {
           s1 <- as.numeric(Y[k,][1])
           s2 <- as.numeric(Y[k,][2])
-          cols <- rep(1:s2, times = s1)
-          breaks <- split_vectors(x = cols, len_cuts = rep(s2, each = s1))
-          lngt <- 1:length(breaks)
-          new_breaks <- vector(mode = "list", length = s1)
-          for (n in lngt) {
-            if (n %% 2 == 0) {
-              new_breaks[[n]] <- rev(breaks[[n]])
-            } else new_breaks[[n]] <- breaks[[n]]
-          }
-          COLUMNS_serp <- rep(unlist(new_breaks), times = n_Reps)
-          if (planter == "serpentine") {
-            COLUMNS <- COLUMNS_serp
-          } else COLUMNS <- rep(rep(1:s2, times = s1), times = n_Reps)
+          COLUMNS <- rep(rep(1:s2, times = s1), times = n_Reps)
           x$bookROWCol <- NewBook %>% 
             dplyr::mutate(ROW = rep(1:(s1*n_Reps), each = s2),
                           COLUMN = COLUMNS)
           df <- x$bookROWCol
+          nCols <- max(df$COLUMN)
+          newPlots <- planter_transform(plots = plots, planter = planter, reps = n_Reps, 
+                                        cols = nCols, units = NULL)
+          df$PLOT <- newPlots
           books1[[k]] <- df
         }
       }
     } else if (orderReps == "horizontal_stack_panel") {
-      books2 <- list(NULL)
       y <- numbers::primeFactors(n_TrtGen)
       if (length(y) >= 2) {
         if (length(y) == 2) {
-          y1 <- y
+          if (sqrt(n_TrtGen) %% 1 == 0) {
+            y1 <- y
+            sq <- sqrt(n_TrtGen)
+            y2 <- c(sq, sq)
+            Y <- unique(data.frame(rbind(y1, y2)))
+            print(Y)
+            dm <- nrow(Y)
+          } else {
+            y1 <- y
+            Y <- data.frame(rbind(y1))
+            print(Y)
+            dm <- nrow(Y)
+          }
+        }else if (length(y) == 3) {
+          if (sqrt(n_TrtGen) %% 1 == 0) {
+            y1 <- c(y[1], prod(y[2:length(y)]))
+            y2 <- c(y[1] * y[2], prod(y[(2+1):length(y)]))
+            sq <- sqrt(n_TrtGen)
+            y3 <- c(sq, sq)
+            Y <- unique(data.frame(rbind(y1, y2, y3)))
+            print(print(Y))
+            dm <- nrow(Y)
+          } else {
+            y1 <- c(y[1], prod(y[2:length(y)]))
+            y2 <- c(y[1] * y[2], prod(y[(2+1):length(y)]))
+            Y <- unique(data.frame(rbind(y1, y2)))
+            dm <- nrow(Y)
+          }
+        } else if (length(y) == 4) {
+          if (sqrt(n_TrtGen) %% 1 == 0) {
+            y1 <- c(y[1], prod(y[2:length(y)]))
+            y2 <- c(y[1] * y[2], prod(y[(2+1):length(y)]))
+            y3 <- rev(c(prod(y[1:3]), y[4]))
+            sq <- sqrt(n_TrtGen)
+            y4 <- c(sq, sq)
+            Y <- unique(data.frame(rbind(y1, y2, y3, y4)))
+            print(print(Y))
+            dm <- nrow(Y)
+          } else {
+            y1 <- c(y[1], prod(y[2:length(y)]))
+            y2 <- c(y[1] * y[2], prod(y[(2+1):length(y)]))
+            y3 <- rev(c(prod(y[1:3]), y[4]))
+            Y <- unique(data.frame(rbind(y1, y2, y3)))
+            dm <- nrow(Y)
+          }
         }
-        if (length(y) > 2) {
-          y1 <- c(y[1], prod(y[2:length(y)]))
-        }
-        rows <- rep(1:y1[2], times = y1[1])
-        breaks <- split_vectors(x = rows, len_cuts = rep(y1[2], each = y1[1]))
-        lngt <- 1:length(breaks)
-        new_breaks <- vector(mode = "list", length = y1[1])
-        for (n in lngt) {
-          if (n %% 2 == 0) {
-            new_breaks[[n]] <- rev(breaks[[n]])
-          } else new_breaks[[n]] <- breaks[[n]]
-        }
-        ROWS_serp <- rep(unlist(new_breaks), times = n_Reps)
-        if (planter == "serpentine") {
-          ROWS <- ROWS_serp
-        } else ROWS <- rep(rep(1:y1[2], times = y1[1]), times = n_Reps)
-        books2[[1]] <- NewBook %>% 
+        books2 <- vector(mode = "list", length = dm)
+        for (h_panel in 1:dm) {
+          s1 <- as.numeric(Y[h_panel,][1])
+          s2 <- as.numeric(Y[h_panel,][2])
+          w <- 1:(s1*n_Reps)
+          u <- seq(1, length(w), by = s1)
+          v <- seq(s1, length(w), by = s1)
+          z <- vector(mode = "list", length = n_Reps)
+          for (j in 1:n_Reps) {
+            z[[j]] <- c(rep(u[j]:v[j], times = s2))
+          }
+          z <- unlist(z)
+          x$bookROWCol <- NewBook %>%
+            dplyr::mutate(ROW = rep(rep(1:s2, each = s1), n_Reps),
+                          COLUMN = z)
+          df2 <- x$bookROWCol
+          nRows <- max(df2$ROW)
+          nCols <- max(df2$COLUMN)
+          newPlots <- planter_transform(plots = plots, planter = planter, reps = n_Reps, cols = nCols,
+                                        mode = "Horizontal", units = NULL)
+          df2$PLOT <- newPlots
+          books2[[h_panel]] <- df2
+        } 
+      }else if (length(y) == 1) {
+        books3 <- list(NULL)
+        ROWS <- rep(1:n_TrtGen, times = n_Reps)
+        books3[[1]] <- NewBook %>% 
           dplyr::mutate(ROW = ROWS,
-                        COLUMN = rep(1:(y1[1]*n_Reps), each = y1[2]))
+                        COLUMN = rep(1:n_Reps, each = n_TrtGen))
       }
-      books3 <- list(NULL)
-      rows <- rep(1:n_TrtGen, times = n_Reps)
-      breaks <- split_vectors(x = rows, len_cuts = rep(n_TrtGen, each = n_Reps))
-      lngt <- 1:length(breaks)
-      new_breaks <- vector(mode = "list", length = n_TrtGen)
-      for (n in lngt) {
-        if (n %% 2 == 0) {
-          new_breaks[[n]] <- rev(breaks[[n]])
-        } else new_breaks[[n]] <- breaks[[n]]
-      }
-      ROWS_serp <- unlist(new_breaks)
-      if (planter == "serpentine") {
-        ROWS <- ROWS_serp
-      } else ROWS <- rep(1:n_TrtGen, times = n_Reps)
-      books3[[1]] <- NewBook %>% 
-        dplyr::mutate(ROW = ROWS,
-                      COLUMN = rep(1:n_Reps, each = n_TrtGen))
     }
     
     books_rcbd <- c(books0, books1, books2, books3, books4, books5, books6)

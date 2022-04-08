@@ -219,7 +219,6 @@ plot_iblocks <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks, 
         dplyr::mutate(ROW = rep(rep(1:iBlocks, each = sizeIblocks), n_Reps),
                       COLUMN = z)
       df4 <- x$bookROWCol
-      #df4 <- df4[order(df4$ROW, decreasing = FALSE), ]
       nRows <- max(df4$ROW)
       nCols <- max(df4$COLUMN)
       newPlots <- planter_transform(plots = plots, planter = planter, reps = n_Reps, cols = nCols,

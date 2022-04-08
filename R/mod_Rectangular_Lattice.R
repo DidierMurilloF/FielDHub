@@ -70,7 +70,7 @@ mod_Rectangular_Lattice_ui <- function(id){
           tabsetPanel(
             tabPanel("Field Layout",
                      shinycssloaders::withSpinner(
-                       plotly::plotlyOutput(ns("random_layout"), width = "100%", height = "650px"),type = 5
+                       plotly::plotlyOutput(ns("random_layout"), width = "98%", height = "650px"),type = 5
                      ),
                      column(12,uiOutput(ns("well_panel_layout_rt")))
             ),

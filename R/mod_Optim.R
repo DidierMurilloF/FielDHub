@@ -520,7 +520,7 @@ mod_Optim_server <- function(id) {
           ggplot2::labs(fill = w) +
           viridis::scale_fill_viridis(discrete = FALSE)
         
-        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1180, height = 740)
+        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1350, height = 740)
         
         return(p2)
       }

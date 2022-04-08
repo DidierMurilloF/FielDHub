@@ -43,9 +43,12 @@ mod_RCBD_ui <- function(id) {
                             textInput(inputId = ns("plot_start.rcbd"), "Starting Plot Number(s):", value = 101)
                      ),
                      column(6,style=list("padding-left: 5px;"),
-                            textInput(inputId = ns("Location.rcbd"), "Input Location:", value = "FARGO")
+                            #textInput(inputId = ns("Location.rcbd"), "Input Location:", value = "FARGO")
+                            checkboxInput(inputId = ns("continuous.plot"), label = "Continuous Plot ", value = TRUE),
                      )
                    ),
+                   
+                   textInput(inputId = ns("Location.rcbd"), "Input Location:", value = "FARGO"),
                    
                    numericInput(inputId = ns("myseed.rcbd"), label = "Seed Number:",
                                 value = 123, min = 1),
@@ -70,7 +73,7 @@ mod_RCBD_ui <- function(id) {
           tabsetPanel(
             tabPanel("Field Layout",
                      shinycssloaders::withSpinner(
-                       plotly::plotlyOutput(ns("layouts"), width = "100%", height = "650px"),type = 5
+                       plotly::plotlyOutput(ns("layouts"), width = "98%", height = "650px"),type = 5
                      ),
                      column(12,uiOutput(ns("well_panel_layout_RCBD")))
             ),
@@ -155,7 +158,8 @@ mod_RCBD_server <- function(id){
       
       l.rcbd <- as.numeric(input$l.rcbd)
       
-      myRCBD <- RCBD(t = t, reps = b, l = l.rcbd, plotNumber = plot_start.rcbd, continuous = FALSE,
+      myRCBD <- RCBD(t = t, reps = b, l = l.rcbd, plotNumber = plot_start.rcbd, 
+                     continuous = input$continuous.plot,
                      planter = planter, seed = seed.rcbd, locationNames = loc, 
                      data = data.rcbd)
       

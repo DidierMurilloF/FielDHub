@@ -17,16 +17,10 @@ mod_CRD_ui <- function(id) {
                    radioButtons(inputId = ns("owndatacrd"), label = "Import entries' list?", choices = c("Yes", "No"), selected = "No",
                                 inline = TRUE, width = NULL, choiceNames = NULL, choiceValues = NULL),
                    conditionalPanel("input.owndatacrd != 'Yes'", ns = ns,
-                                    fluidRow(
-                                      column(6, style=list("padding-right: 28px;"),
-                                             numericInput(ns("t.crd"), label = "Input # of Treatments:",
-                                                          value = 15, min = 2)
-                                      ),
-                                      column(6, style=list("padding-left: 5px;"),
-                                             numericInput(ns("reps.crd"), label = "Input # of Full Reps:",
-                                                          value = 4, min = 1)
-                                      )
-                                    )
+                                    numericInput(ns("t.crd"), label = "Input # of Treatments:",
+                                                 value = 15, min = 2),
+                                    numericInput(ns("reps.crd"), label = "Input # of Full Reps:",
+                                                 value = 4, min = 1)
                    ),
                    conditionalPanel("input.owndatacrd == 'Yes'", ns = ns,
                                     fluidRow(
@@ -82,7 +76,7 @@ mod_CRD_ui <- function(id) {
           tabsetPanel(
             tabPanel("Field Layout",
                      shinycssloaders::withSpinner(
-                       plotly::plotlyOutput(ns("layout_random"), width = "100%", height = "650px"),type = 5
+                       plotly::plotlyOutput(ns("layout_random"), width = "98%", height = "650px"),type = 5
                      ),
                      column(12,uiOutput(ns("well_panel_layout_CRD")))
             ),

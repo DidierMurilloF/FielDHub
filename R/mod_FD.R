@@ -81,7 +81,7 @@ mod_FD_ui <- function(id){
           tabsetPanel(
             tabPanel("Field Layout",
                      shinycssloaders::withSpinner(
-                       plotly::plotlyOutput(ns("layouts"), width = "100%", height = "650px"),type = 5
+                       plotly::plotlyOutput(ns("layouts"), width = "98%", height = "650px"),type = 5
                      ),
                      column(12, uiOutput(ns("well_panel_layout_FD")))
             ),
