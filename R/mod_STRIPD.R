@@ -51,7 +51,7 @@ mod_STRIPD_ui <- function(id){
                      column(6, style=list("padding-right: 28px;"),
                             textInput(ns("plot_start.strip"), "Starting Plot Number:", value = 101)
                      ),
-                     column(6,style=list("padding-left: 5px;"),
+                     column(6, style=list("padding-left: 5px;"),
                             textInput(ns("Location.strip"), "Input Location:", value = "FARGO")
                      )
                    ),

@@ -20,7 +20,7 @@ mod_IBD_ui <- function(id) {
                    
                    conditionalPanel("input.owndataibd != 'Yes'", ns = ns,
                                     numericInput(ns("t.ibd"), label = "Input # of Treatments:",
-                                                 value = 4, min = 2)
+                                                 value = 15, min = 2)
                    ),
                    conditionalPanel("input.owndataibd == 'Yes'", ns = ns,
                                     fluidRow(

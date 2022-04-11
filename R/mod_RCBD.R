@@ -139,8 +139,8 @@ mod_RCBD_server <- function(id){
       req(input$plot_start.rcbd)
       req(input$Location.rcbd)
       req(input$l.rcbd)
-      req(input$planter_mov_rcbd)
-      planter <- as.character(input$planter_mov_rcbd)
+      # req(input$planter_mov_rcbd)
+      # planter <- as.character(input$planter_mov_rcbd)
       b <- as.numeric(input$b)
       plot_start.rcbd <- as.vector(unlist(strsplit(input$plot_start.rcbd, ",")))
       plot_start.rcbd <- as.numeric(plot_start.rcbd)
@@ -160,7 +160,7 @@ mod_RCBD_server <- function(id){
       
       myRCBD <- RCBD(t = t, reps = b, l = l.rcbd, plotNumber = plot_start.rcbd, 
                      continuous = input$continuous.plot,
-                     planter = planter, seed = seed.rcbd, locationNames = loc, 
+                     planter = "cartesian", seed = seed.rcbd, locationNames = loc, 
                      data = data.rcbd)
       
     })
@@ -168,7 +168,7 @@ mod_RCBD_server <- function(id){
     output$well_panel_layout_RCBD <- renderUI({
       req(RCBD_reactive()$fieldBook)
       obj_rcbd <- RCBD_reactive()
-      planting_rcbd <- input$planter_mov_rcbd
+      # planting_rcbd <- input$planter_mov_rcbd
       allBooks_rcbd <- plot_layout(x = obj_rcbd, optionLayout = 1, orderReps = "vertical_stack_panel")$newBooks
       nBooks_rcbd <- length(allBooks_rcbd)
       layoutOptions_rcbd <- 1:nBooks_rcbd

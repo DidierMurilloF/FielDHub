@@ -36,11 +36,11 @@ mod_SSPD_ui <- function(id){
                    
                    conditionalPanel("input.owndataSPD != 'Yes'", ns = ns,
                                     numericInput(ns("mp.sspd"), label = "Whole-plots:",
-                                                 value = NULL, min = 2),
+                                                 value = 2, min = 2),
                                     numericInput(ns("sp.sspd"), label = "Sub-plots Within Whole-plots:",
-                                                 value = NULL, min = 2),
+                                                 value = 2, min = 2),
                                     numericInput(ns("ssp.sspd"), label = "Sub-Sub-plots within Sub-plots:",
-                                                 value = NULL, min = 2) 
+                                                 value = 10, min = 2) 
                    ),
 
                    fluidRow(

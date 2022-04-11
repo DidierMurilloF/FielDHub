@@ -32,17 +32,65 @@ plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1
       y <- numbers::primeFactors(n_TrtGen)
       if (length(y) >= 2) {
         if (length(y) == 2) {
-          y1 <- y
-          Y <- unique(data.frame(rbind(y1)))
-          dm <- nrow(Y)
+          if (sqrt(n_TrtGen) %% 1 == 0) {
+            y1 <- y
+            sq <- sqrt(n_TrtGen)
+            y2 <- c(sq, sq)
+            Y <- unique(data.frame(rbind(y1, y2)))
+            print(Y)
+            dm <- nrow(Y)
+          } else {
+            y1 <- y
+            Y <- data.frame(rbind(y1))
+            print(Y)
+            dm <- nrow(Y)
+          }
+        }else if (length(y) == 3) {
+          if (sqrt(n_TrtGen) %% 1 == 0) {
+            y1 <- c(y[1], prod(y[2:length(y)]))
+            y2 <- c(y[1] * y[2], prod(y[(2+1):length(y)]))
+            sq <- sqrt(n_TrtGen)
+            y3 <- c(sq, sq)
+            Y <- unique(data.frame(rbind(y1, y2, y3)))
+            print(print(Y))
+            dm <- nrow(Y)
+          } else {
+            y1 <- c(y[1], prod(y[2:length(y)]))
+            y2 <- c(y[1] * y[2], prod(y[(2 + 1):length(y)]))
+            Y <- unique(data.frame(rbind(y1, y2)))
+            dm <- nrow(Y)
+          }
+        } else if (length(y) >= 4) {
+          if (sqrt(n_TrtGen) %% 1 == 0) {
+            y1 <- c(y[1], prod(y[2:length(y)]))
+            y2 <- c(y[1] * y[2], prod(y[(2+1):length(y)]))
+            y3 <- rev(c(prod(y[1:3]), y[4]))
+            sq <- sqrt(n_TrtGen)
+            y4 <- c(sq, sq)
+            Y <- unique(data.frame(rbind(y4, y3, y2, y1)))
+            print(print(Y))
+            dm <- nrow(Y)
+          } else {
+            y1 <- c(y[1], prod(y[2:length(y)]))
+            y2 <- c(y[1] * y[2], prod(y[(2+1):length(y)]))
+            y3 <- rev(c(prod(y[1:3]), y[4]))
+            Y <- unique(data.frame(rbind(y3, y2, y1)))
+            dm <- nrow(Y)
+          }
         }
-        if (length(y) > 2) {
-          y1 <- c(y[1], prod(y[2:length(y)]))
-          y2 <- c(prod(y[1:length(y)-1]), y[length(y)])
-          y2 <- sort(y2, decreasing = FALSE)
-          Y <- unique(data.frame(rbind(y1, y2)))
-          dm <- nrow(Y)
-        }
+        # if (length(y) == 2) {
+        #   y1 <- y
+        #   Y <- unique(data.frame(rbind(y1)))
+        #   dm <- nrow(Y)
+        # }
+        # if (length(y) > 2) {
+        #   y1 <- c(y[1], prod(y[2:length(y)]))
+        #   y2 <- c(prod(y[1:length(y)-1]), y[length(y)])
+        #   y2 <- sort(y2, decreasing = FALSE)
+        #   Y <- unique(data.frame(rbind(y1, y2)))
+        #   dm <- nrow(Y)
+        # }
+        print(Y)
         books1 <- vector(mode = "list", length = dm)
         for (k in 1:dm) {
           s1 <- as.numeric(Y[k,][1])
@@ -87,25 +135,25 @@ plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1
             dm <- nrow(Y)
           } else {
             y1 <- c(y[1], prod(y[2:length(y)]))
-            y2 <- c(y[1] * y[2], prod(y[(2+1):length(y)]))
+            y2 <- c(y[1] * y[2], prod(y[(2 + 1):length(y)]))
             Y <- unique(data.frame(rbind(y1, y2)))
             dm <- nrow(Y)
           }
-        } else if (length(y) == 4) {
+        } else if (length(y) >= 4) {
           if (sqrt(n_TrtGen) %% 1 == 0) {
             y1 <- c(y[1], prod(y[2:length(y)]))
             y2 <- c(y[1] * y[2], prod(y[(2+1):length(y)]))
             y3 <- rev(c(prod(y[1:3]), y[4]))
             sq <- sqrt(n_TrtGen)
             y4 <- c(sq, sq)
-            Y <- unique(data.frame(rbind(y1, y2, y3, y4)))
+            Y <- unique(data.frame(rbind(y4, y3, y2, y1)))
             print(print(Y))
             dm <- nrow(Y)
           } else {
             y1 <- c(y[1], prod(y[2:length(y)]))
             y2 <- c(y[1] * y[2], prod(y[(2+1):length(y)]))
             y3 <- rev(c(prod(y[1:3]), y[4]))
-            Y <- unique(data.frame(rbind(y1, y2, y3)))
+            Y <- unique(data.frame(rbind(y3, y2, y1)))
             dm <- nrow(Y)
           }
         }
@@ -140,8 +188,7 @@ plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1
                         COLUMN = rep(1:n_Reps, each = n_TrtGen))
       }
     }
-    
-    books_rcbd <- c(books0, books1, books2, books3, books4, books5, books6)
+    books_rcbd <- c(books3, books2, books1, books4, books5, books6, books0)
     newBooks <- books_rcbd[!sapply(books_rcbd,is.null)]
     newBooksLocs[[countLocs]] <- newBooks
     countLocs <- countLocs + 1
@@ -225,6 +272,41 @@ plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1
                              show.key = FALSE,
                              gg = TRUE)
     }
+  } else if (x$infoDesign$idDesign == 7) {
+      allSites <- vector(mode = "list", length = nlocs)
+      for (st in 1:nlocs) {
+        newBooksSelected_1 <- newBooksLocs[[st]]
+        df_1 <- newBooksSelected_1[opt]
+        allSites[[st]] <- as.data.frame(df_1)
+      }
+      allSitesFieldbook <- dplyr::bind_rows(allSites)
+      allSitesFieldbook <- allSitesFieldbook[,c(1:3,8,9,4:7)]
+      colnames(allSitesFieldbook) <- c("ID", "LOCATION", "PLOT", "ROW", "COLUMN", "REP", "HSTRIP", "VSTRIP", "TRT_COMB")
+      
+      df <- df[,c(1:3,8,9,4:7)]
+      colnames(df) <- c("ID", "LOCATION", "PLOT", "ROW", "COLUMN", "REP", "HSTRIP", "VSTRIP", "TRT_COMB")
+      rows <- max(as.numeric(df$ROW))
+      cols <- max(as.numeric(df$COLUMN))
+      df$TRT_COMB <- as.factor(df$TRT_COMB)
+      ds <- "Strip-Plot Design " 
+      main <- paste0(ds, rows, "X", cols)
+      # Plot field layout
+      p1 <- desplot::desplot(TRT_COMB ~ COLUMN + ROW, flip = FALSE,
+                             out1 = REP,
+                             out2.gpar = list(col = "black", lty = 3), 
+                             text = TRT_COMB, cex = 1, shorten = "no",
+                             data = df, xlab = "COLUMNS", ylab = "ROWS",
+                             main = main, 
+                             show.key = FALSE,
+                             gg = TRUE)
+      df$REP <- as.factor(df$REP)
+      p2 <- desplot::desplot(REP ~  COLUMN + ROW, flip = FALSE,
+                             out1 = REP,
+                             text = PLOT, cex = 1, shorten = "no",
+                             data = df, xlab = "COLUMNS", ylab = "ROWS",
+                             main = main,
+                             show.key = FALSE,
+                             gg = TRUE)
   } 
   return(list(p1 = p1, p2 = p2, df = df, newBooks = newBooksSelected, 
               allSitesFieldbook = allSitesFieldbook))

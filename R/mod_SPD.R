@@ -33,9 +33,9 @@ mod_SPD_ui <- function(id){
                    ),
                    conditionalPanel("input.owndataSPD != 'Yes'", ns = ns,
                                      numericInput(ns("mp.spd"), label = "Whole-plots:",
-                                                  value = NULL, min = 2),
+                                                  value = 4, min = 2),
                                      numericInput(ns("sp.spd"), label = "Sub-plots Within Whole-plots:",
-                                                  value = NULL, min = 2)
+                                                  value = 3, min = 2)
                    ),
                    
                    fluidRow(

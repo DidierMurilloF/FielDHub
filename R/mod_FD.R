@@ -433,23 +433,6 @@ mod_FD_server <- function(id) {
       }
     })
     
-    # output$heatmapFD <- plotly::renderPlotly({
-    #   req(heatmap_obj())
-    #   heatmap_obj()
-    # })
-    
-    
-    # output$layout.output <- renderPlot({
-    #   req(reactive_layoutFD())
-    #   req(fd_reactive())
-    #   req(input$typlotfd)
-    #   if (input$typlotfd == 1) {
-    #     reactive_layoutFD()$out_layout
-    #   } else if (input$typlotfd == 2) {
-    #     reactive_layoutFD()$out_layoutPlots
-    #   }
-    # })
-    
     output$FD.Output <- DT::renderDataTable({
       df <- simuData_fd()$df
       df$LOCATION <- as.factor(df$LOCATION)
@@ -457,6 +440,11 @@ mod_FD_server <- function(id) {
       df$ROW <- as.factor(df$ROW)
       df$COLUMN <- as.factor(df$COLUMN)
       df$REP <- as.factor(df$REP)
+      df$FACTOR_A <- as.factor(df$FACTOR_A)
+      df$FACTOR_B <- as.factor(df$FACTOR_B)
+      if ("FACTOR_C" %in% colnames(df)) df$FACTOR_C <- as.factor(df$FACTOR_C)
+      if ("FACTOR_D" %in% colnames(df)) df$FACTOR_D <- as.factor(df$FACTOR_D)
+      df$TRT_COMB <- as.factor(df$TRT_COMB)
       a <- as.numeric(simuData_fd()$a)
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "500px"))
