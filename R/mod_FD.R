@@ -7,7 +7,7 @@
 #' @param id,input,output,session Internal parameters for {shiny}.
 #'
 #' @noRd 
-#'
+#' 
 #' @importFrom shiny NS tagList 
 mod_FD_ui <- function(id){
   ns <- NS(id)
@@ -15,20 +15,28 @@ mod_FD_ui <- function(id){
     h4("Full Factorial Designs"),
     sidebarLayout(
       sidebarPanel(width = 4,
-                   radioButtons(inputId = ns("owndata"), label = "Import entries' list?", choices = c("Yes", "No"), selected = "No",
-                                inline = TRUE, width = NULL, choiceNames = NULL, choiceValues = NULL),
-                   selectInput(inputId = ns("kindFD"), label = "Select a Factorial Design Type:",
-                               choices = c("Factorial in a RCBD" = "FD_RCBD", "Factorial in a CRD" = "FD_CRD"),
+                   radioButtons(inputId = ns("owndata"), 
+                                label = "Import entries' list?", 
+                                choices = c("Yes", "No"), selected = "No",
+                                inline = TRUE, width = NULL, 
+                                choiceNames = NULL, choiceValues = NULL),
+                   selectInput(inputId = ns("kindFD"), 
+                               label = "Select a Factorial Design Type:",
+                               choices = c("Factorial in a RCBD" = "FD_RCBD", 
+                                           "Factorial in a CRD" = "FD_CRD"),
                                multiple = FALSE),
                    
                    conditionalPanel("input.owndata != 'Yes'", ns = ns,
-                                    textInput(inputId = ns("setfactors"), label = "Input # of Entries for Each Factor: (Separated by Comma)",
+                                    textInput(inputId = ns("setfactors"), 
+                                              label = "Input # of Entries for Each Factor: (Separated by Comma)",
                                               value = "2,2,3")     
                    ),
                    conditionalPanel("input.owndata == 'Yes'", ns = ns,
                                     fluidRow(
                                       column(8, style=list("padding-right: 28px;"),
-                                             fileInput(ns("file.FD"), label = "Upload a CSV File:", multiple = FALSE)),
+                                             fileInput(ns("file.FD"), 
+                                                       label = "Upload a CSV File:", 
+                                                       multiple = FALSE)),
                                       column(4,style=list("padding-left: 5px;"),
                                              radioButtons(ns("sep.fd"), "Separator",
                                                           choices = c(Comma = ",",
@@ -64,15 +72,18 @@ mod_FD_ui <- function(id){
                                 value = 123, min = 1),
                    fluidRow(
                      column(6,
-                            actionButton(inputId = ns("RUN.fd"), "Run!", icon = icon("cocktail"), width = '100%'),
+                            actionButton(inputId = ns("RUN.fd"), "Run!", 
+                                         icon = icon("cocktail"), width = '100%'),
                      ),
                      column(6,
-                            actionButton(ns("Simulate.fd"), "Simulate!", icon = icon("cocktail"), width = '100%')
+                            actionButton(ns("Simulate.fd"), "Simulate!", 
+                                         icon = icon("cocktail"), width = '100%')
                      )
                      
                    ), 
                    br(),
-                   downloadButton(ns("downloadData.fd"), "Save Experiment!", style = "width:100%")
+                   downloadButton(ns("downloadData.fd"), "Save Experiment!", 
+                                  style = "width:100%")
       ),
       
       mainPanel(
@@ -81,7 +92,8 @@ mod_FD_ui <- function(id){
           tabsetPanel(
             tabPanel("Field Layout",
                      shinycssloaders::withSpinner(
-                       plotly::plotlyOutput(ns("layouts"), width = "98%", height = "650px"),type = 5
+                       plotly::plotlyOutput(ns("layouts"), width = "98%", 
+                                            height = "650px"),type = 5
                      ),
                      column(12, uiOutput(ns("well_panel_layout_FD")))
             ),
@@ -114,7 +126,6 @@ mod_FD_server <- function(id) {
                     bordered = TRUE,
                     align = 'c',
                     striped = TRUE),
-        #h4("Note that reps might be unbalanced."),
         easyClose = FALSE
       )
     }
@@ -182,8 +193,9 @@ mod_FD_server <- function(id) {
         
       }
       
-      myfd <- full_factorial(setfactors = setfactors.fd, reps = reps.fd, l = l.fd, type = type,
-                             plotNumber = plot_start.fd, seed = seed.fd, locationNames = loc,
+      myfd <- full_factorial(setfactors = setfactors.fd, reps = reps.fd, 
+                             l = l.fd, type = type, plotNumber = plot_start.fd, 
+                             seed = seed.fd, locationNames = loc,
                              data = data.fd) 
       
     })
@@ -198,12 +210,12 @@ mod_FD_server <- function(id) {
     output$well_panel_layout_FD <- renderUI({
       req(fd_reactive()$fieldBook)
       obj_fd <- fd_reactive()
-      planting_fd <- input$planter_mov_fd
-      allBooks_fd <- plot_layout(x = obj_fd, optionLayout = 1, orderReps = "vertical_stack_panel")$newBooks
+      allBooks_fd <- plot_layout(x = obj_fd, optionLayout = 1, 
+                                 orderReps = "vertical_stack_panel")$newBooks
       nBooks_fd <- length(allBooks_fd)
       layoutOptions_fd <- 1:nBooks_fd
-      orderReps_fd <- c("Vertical Stack Panel" = "vertical_stack_panel", "Horizontal Stack Panel" = "horizontal_stack_panel")
-      #loc <-  as.vector(unlist(strsplit(input$Location.fd, ",")))
+      orderReps_fd <- c("Vertical Stack Panel" = "vertical_stack_panel", 
+                        "Horizontal Stack Panel" = "horizontal_stack_panel")
       sites <- as.numeric(input$l.fd)
       wellPanel(
         column(2,
@@ -214,14 +226,19 @@ mod_FD_server <- function(id) {
         ),
         fluidRow(
           column(3,
-                 selectInput(inputId = ns("orderRepsFD"), label = "Reps layout:", 
+                 selectInput(inputId = ns("orderRepsFD"), 
+                             label = "Reps layout:", 
                              choices = orderReps_fd),
           ),
           column(3, #align="center",
-                 selectInput(inputId = ns("layoutO_fd"), label = "Layout option:", choices = layoutOptions_fd)
+                 selectInput(inputId = ns("layoutO_fd"), 
+                             label = "Layout option:", 
+                             choices = layoutOptions_fd)
           ),
           column(3, #align="center",
-                 selectInput(inputId = ns("locLayout_fd"), label = "Location:", choices = as.numeric(upDateSites()$sites), selected = 1)
+                 selectInput(inputId = ns("locLayout_fd"), label = "Location:", 
+                             choices = as.numeric(upDateSites()$sites), 
+                             selected = 1)
           )
         )
       )
@@ -231,7 +248,8 @@ mod_FD_server <- function(id) {
       req(input$orderRepsFD)
       req(input$l.fd)
       obj_fd <- fd_reactive()
-      allBooks <- plot_layout(x = obj_fd, optionLayout = 1, orderReps = input$orderRepsFD)$newBooks
+      allBooks <- plot_layout(x = obj_fd, optionLayout = 1, 
+                              orderReps = input$orderRepsFD)$newBooks
       nBooks <- length(allBooks)
       NewlayoutOptions <- 1:nBooks
       updateSelectInput(session = session, inputId = 'layoutO_fd',
@@ -248,19 +266,11 @@ mod_FD_server <- function(id) {
       opt_fd <- as.numeric(input$layoutO_fd)
       planting_fd <- input$planter_mov_fd
       locSelected <- as.numeric(input$locLayout_fd)
-      try(plot_layout(x = obj_fd, optionLayout = opt_fd, orderReps = input$orderRepsFD,
-                      planter = planting_fd , l = locSelected), silent = TRUE)
+      try(plot_layout(x = obj_fd, optionLayout = opt_fd, 
+                      orderReps = input$orderRepsFD,
+                      planter = planting_fd , 
+                      l = locSelected), silent = TRUE)
     })
-    
-    # output$layout_fd <- renderPlot({
-    #   req(fd_reactive())
-    #   req(reactive_layoutFD())
-    #   req(input$typlotfd)
-    #   if (input$typlotfd == 1) {
-    #     reactive_layoutFD()$out_layout
-    #   } else reactive_layoutFD()$out_layoutPlots
-    # })
-    
     
     valsfd <- reactiveValues(maxV.fd = NULL, minV.fd = NULL, trail.fd = NULL)
     
@@ -332,14 +342,12 @@ mod_FD_server <- function(id) {
         max <- as.numeric(valsfd$maxV.fd)
         min <- as.numeric(valsfd$minV.fd)
         df.fd <- reactive_layoutFD()$allSitesFieldbook
-        #df.fd <- reactive_layoutFD()$fieldBookXY
         cnamesdf.fd <- colnames(df.fd)
         df.fd <- norm_trunc(a = min, b = max, data = df.fd)
         colnames(df.fd) <- c(cnamesdf.fd[1:(ncol(df.fd) - 1)], valsfd$trail.fd)
         a <- ncol(df.fd)
       }else {
         df.fd <- reactive_layoutFD()$allSitesFieldbook
-        #df.fd <- reactive_layoutFD()$fieldBookXY
         a <- ncol(df.fd)
       }
       return(list(df = df.fd, a = a))
@@ -353,26 +361,10 @@ mod_FD_server <- function(id) {
       )
     }
     
-    # output$tabsetFD <- renderUI({
-    #   req(input$typlotfd)
-    #   tabsetPanel(
-    #     if (input$typlotfd != 3) {
-    #       tabPanel("Factorial Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.output"), width = "100%", height = "650px"),
-    #                                                                       type = 5))
-    #     } else {
-    #       tabPanel("Factorial Field Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapFD"), width = "100%", height = "650px"),
-    #                                                                       type = 5))
-    #     },
-    #     tabPanel("Factorial Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("FD.Output")), type = 5))
-    #   )
-    #   
-    # })
-    
     kindNum <- reactive({
       req(input$setfactors)
       setfactors.fd <- as.numeric(as.vector(unlist(strsplit(input$setfactors, ","))))
       lengthfactors <- length(setfactors.fd)
-      #additionalColumns <- lengthfactors - 2
       return(lengthfactors+8)
     }
     )
@@ -466,9 +458,3 @@ mod_FD_server <- function(id) {
     )
   })
 }
-
-## To be copied in the UI
-# mod_FD_ui("FD_ui_1")
-
-## To be copied in the server
-# mod_FD_server("FD_ui_1")

@@ -173,7 +173,7 @@ plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1
             dplyr::mutate(ROW = rep(rep(1:s2, each = s1), n_Reps),
                           COLUMN = z)
           df2 <- x$bookROWCol
-          nRows <- max(df2$ROW)
+          # nRows <- max(df2$ROW)
           nCols <- max(df2$COLUMN)
           newPlots <- planter_transform(plots = plots, planter = planter, reps = n_Reps, cols = nCols,
                                         mode = "Horizontal", units = NULL)

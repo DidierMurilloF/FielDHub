@@ -12,77 +12,124 @@ mod_STRIPD_ui <- function(id){
   tagList(
     h4("Strip-Plot Design"),
     sidebarLayout(
-      sidebarPanel(width = 4,
-                   radioButtons(inputId = ns("owndataSTRIP"), label = "Import entries' list?", choices = c("Yes", "No"), selected = "No",
-                                inline = TRUE, width = NULL, choiceNames = NULL, choiceValues = NULL),
-                   conditionalPanel("input.owndataSTRIP == 'Yes'", ns = ns,
-                                    fluidRow(
-                                      column(8, style=list("padding-right: 28px;"),
-                                             fileInput(ns("file.STRIP"), label = "Upload a csv File:", multiple = FALSE)),
-                                      
-                                      column(4,style=list("padding-left: 5px;"),
-                                             radioButtons(ns("sep.strip"), "Separator",
-                                                          choices = c(Comma = ",",
-                                                                      Semicolon = ";",
-                                                                      Tab = "\t"),
-                                                          selected = ","))
-                                    )
-                   ),
-                   
-                   conditionalPanel("input.owndataSTRIP != 'Yes'", ns = ns,
-                                    fluidRow(
-                                      column(6, style=list("padding-right: 28px;"),
-                                             numericInput(ns("HStrip.strip"), label = "Input # of Horizontal Strips:",
-                                                          value = 5, min = 2)
-                                      ),
-                                      column(6, style=list("padding-left: 5px;"),
-                                             numericInput(ns("VStrip.strip"), label = "Input # of Vertical Strips:",
-                                                          value = 5, min = 2)
-                                      )
-                                    )           
-                   ),
-                   numericInput(ns("blocks.strip"), label = "Input # of Full Reps:", value = 3, min = 2),
-                   numericInput(ns("l.strip"), label = "Input # of Locations:",
-                                value = 1, min = 1), 
-                   selectInput(inputId = ns("planter.strip"), label = "Plot Order Layout:",
-                               choices = c("serpentine", "cartesian"), multiple = FALSE,
-                               selected = "serpentine"),
-                   fluidRow(
-                     column(6, style=list("padding-right: 28px;"),
-                            textInput(ns("plot_start.strip"), "Starting Plot Number:", value = 101)
-                     ),
-                     column(6, style=list("padding-left: 5px;"),
-                            textInput(ns("Location.strip"), "Input Location:", value = "FARGO")
-                     )
-                   ),
-                   
-                   numericInput(inputId = ns("myseed.strip"), label = "Seed Number:", value = 123, min = 1),
-                   
-                   fluidRow(
-                     column(6,
-                            actionButton(inputId = ns("RUN.strip"), "Run!", icon = icon("cocktail"), width = '100%'),
-                     ),
-                     column(6,
-                            actionButton(ns("Simulate.strip"), "Simulate!", icon = icon("cocktail"), width = '100%')
-                     )
-                     
-                   ), 
-                   br(),
-                   downloadButton(ns("downloadData.strip"), "Save Experiment!", style = "width:100%")
+      sidebarPanel(
+        width = 4,
+        radioButtons(inputId = ns("owndataSTRIP"), 
+                     label = "Import entries' list?", 
+                     choices = c("Yes", "No"), 
+                     selected = "No",
+                     inline = TRUE, 
+                     width = NULL, 
+                     choiceNames = NULL, 
+                     choiceValues = NULL),
+        conditionalPanel(
+          condition = "input.owndataSTRIP == 'Yes'", 
+          ns = ns,
+          fluidRow(
+            column(8, style=list("padding-right: 28px;"),
+                   fileInput(ns("file.STRIP"), 
+                             label = "Upload a csv File:",
+                             multiple = FALSE)),
+            
+            column(4,style=list("padding-left: 5px;"),
+                   radioButtons(ns("sep.strip"), "Separator",
+                                choices = c(Comma = ",",
+                                            Semicolon = ";",
+                                            Tab = "\t"),
+                                selected = ","))
+          )
+        ),
+        
+        conditionalPanel(
+          condition = "input.owndataSTRIP != 'Yes'", 
+          ns = ns,
+          fluidRow(
+            column(6, style=list("padding-right: 28px;"),
+                   numericInput(ns("HStrip.strip"), 
+                                label = "Input # of Horizontal Strips:",
+                                value = 5, 
+                                min = 2)
+            ),
+            column(6, style=list("padding-left: 5px;"),
+                   numericInput(ns("VStrip.strip"), 
+                                label = "Input # of Vertical Strips:",
+                                value = 5, 
+                                min = 2)
+            )
+          )           
+        ),
+        numericInput(ns("blocks.strip"), 
+                     label = "Input # of Full Reps:", 
+                     value = 3, 
+                     min = 2),
+        numericInput(ns("l.strip"), 
+                     label = "Input # of Locations:",
+                     value = 1, 
+                     min = 1), 
+        selectInput(inputId = ns("planter.strip"), 
+                    label = "Plot Order Layout:",
+                    choices = c("serpentine", "cartesian"), 
+                    multiple = FALSE,
+                    selected = "serpentine"),
+        fluidRow(
+          column(6, style=list("padding-right: 28px;"),
+                 textInput(ns("plot_start.strip"),
+                           "Starting Plot Number:", 
+                           value = 101)
+          ),
+          column(6, style=list("padding-left: 5px;"),
+                 textInput(ns("Location.strip"), 
+                           "Input Location:", 
+                           value = "FARGO")
+          )
+        ),
+        
+        numericInput(inputId = ns("myseed.strip"), 
+                     label = "Seed Number:", 
+                     value = 123, 
+                     min = 1),
+        
+        fluidRow(
+          column(6,
+                 actionButton(inputId = ns("RUN.strip"), 
+                              "Run!", 
+                              icon = icon("cocktail"), 
+                              width = '100%'),
+          ),
+          column(6,
+                 actionButton(ns("Simulate.strip"), 
+                              "Simulate!", 
+                              icon = icon("cocktail"), 
+                              width = '100%')
+          )
+          
+        ), 
+        br(),
+        downloadButton(ns("downloadData.strip"), 
+                       "Save Experiment!", 
+                       style = "width:100%")
       ),
       
       mainPanel(
         width = 8,
         fluidRow(
           tabsetPanel(
-            tabPanel("Field Layout",
+            tabPanel(title = "Field Layout",
                      shinycssloaders::withSpinner(
-                       plotly::plotlyOutput(ns("layout.strip"), width = "100%", height = "650px"),type = 5
+                       plotly::plotlyOutput(ns("layout.strip"), 
+                                            width = "98%", 
+                                            height = "650px"),
+                       type = 5
                      ),
-                     column(12,uiOutput(ns("well_panel_layout_STRIP")))
+                     column(12,
+                            uiOutput(ns("well_panel_layout_STRIP"))
+                            )
             ),
-            tabPanel("Field Book", 
-                     shinycssloaders::withSpinner(DT::DTOutput(ns("STRIP.output")), type = 5)
+            tabPanel(title = "Field Book", 
+                     shinycssloaders::withSpinner(
+                       DT::DTOutput(ns("STRIP.output")), 
+                       type = 5
+                       )
             )
           )
         )
@@ -99,8 +146,9 @@ mod_STRIPD_server <- function(id) {
     ns <- session$ns
     Hplots <- LETTERS[1:5]
     Vplots <- LETTERS[1:4]
-    entryListFormat_STRIP <- data.frame(list(HPLOTS = Hplots, VPLOTS = c(Vplots, "")))           
-    
+    entryListFormat_STRIP <- data.frame(
+      list(HPLOTS = Hplots, VPLOTS = c(Vplots, ""))
+      )           
     entriesInfoModal_STRIP <- function() {
       modalDialog(
         title = div(tags$h3("Important message", style = "color: red;")),
@@ -131,7 +179,9 @@ mod_STRIPD_server <- function(id) {
     getData.strip <- reactive({
       req(input$file.STRIP)
       inFile <- input$file.STRIP
-      dataUp.strip <- load_file(name = inFile$name, path = inFile$datapat, sep = input$sep.strip)
+      dataUp.strip <- load_file(name = inFile$name, 
+                                path = inFile$datapat, 
+                                sep = input$sep.strip)
       return(list(dataUp.strip = dataUp.strip))
     })
     
@@ -184,12 +234,13 @@ mod_STRIPD_server <- function(id) {
     output$well_panel_layout_STRIP <- renderUI({
       req(strip_reactive()$fieldBook)
       obj_strip <- strip_reactive()
-      planting_strip <- input$planter.strip
-      allBooks_strip<- plot_layout(x = obj_strip, optionLayout = 1, orderReps = "vertical_stack_panel")$newBooks
+      allBooks_strip<- plot_layout(x = obj_strip, 
+                                   optionLayout = 1, 
+                                   orderReps = "vertical_stack_panel")$newBooks
       nBooks_strip <- length(allBooks_strip)
       layoutOptions_strip <- 1:nBooks_strip
-      orderReps_strips <- c("Vertical Stack Panel" = "vertical_stack_panel", "Horizontal Stack Panel" = "horizontal_stack_panel")
-      #loc <-  as.vector(unlist(strsplit(input$Location.strip, ",")))
+      orderReps_strips <- c("Vertical Stack Panel" = "vertical_stack_panel", 
+                            "Horizontal Stack Panel" = "horizontal_stack_panel")
       sites <- as.numeric(input$l.strip)
       wellPanel(
         fluidRow(
@@ -200,14 +251,19 @@ mod_STRIPD_server <- function(id) {
                                 "Heatmap" = 3))
           ),
           column(3,
-                 selectInput(inputId = ns("orderRepsSTRIP"), label = "Reps layout:", 
+                 selectInput(inputId = ns("orderRepsSTRIP"), 
+                             label = "Reps layout:", 
                              choices = orderReps_strips),
           ),
-          column(3, #align="center",
-                 selectInput(inputId = ns("layoutO_strip"), label = "Layout option:", choices = layoutOptions_strip)
+          column(3,
+                 selectInput(inputId = ns("layoutO_strip"), 
+                             label = "Layout option:", 
+                             choices = layoutOptions_strip)
           ),
-          column(3, #align="center",
-                 selectInput(inputId = ns("locLayout_strip"), label = "Location:", choices = as.numeric(upDateSites()$sites))
+          column(3,
+                 selectInput(inputId = ns("locLayout_strip"), 
+                             label = "Location:", 
+                             choices = as.numeric(upDateSites()$sites))
           )
         )
       )
@@ -218,10 +274,14 @@ mod_STRIPD_server <- function(id) {
       req(input$orderRepsSTRIP)
       req(input$l.strip)
       obj_strips <- strip_reactive()
-      allBooks <- try(plot_layout(x = obj_strips, optionLayout = 1, orderReps = input$orderRepsSTRIP)$newBooks, silent = TRUE)
+      allBooks <- try(plot_layout(x = obj_strips, 
+                                  optionLayout = 1, 
+                                  orderReps = input$orderRepsSTRIP)$newBooks, 
+                      silent = TRUE)
       nBooks <- length(allBooks)
       NewlayoutOptions <- 1:nBooks
-      updateSelectInput(session = session, inputId = 'layoutO_rcbd',
+      updateSelectInput(session = session, 
+                        inputId = 'layoutO_rcbd',
                         label = "Layout option:",
                         choices = NewlayoutOptions,
                         selected = 1
@@ -236,37 +296,45 @@ mod_STRIPD_server <- function(id) {
       opt_strip <- as.numeric(input$layoutO_strip)
       planting_strip <- input$planter.strip
       locSelected <- as.numeric(input$locLayout_strip)
-      try(plot_layout(x = obj_strip, optionLayout = opt_strip, planter = planting_strip, orderReps = input$orderRepsSTRIP,
+      try(plot_layout(x = obj_strip, 
+                      optionLayout = opt_strip, 
+                      planter = planting_strip, 
+                      orderReps = input$orderRepsSTRIP,
                       l = locSelected), silent = TRUE)
     })
     
-    # output$layout_strip <- renderPlot({
-    #   req(strip_reactive())
-    #   req(input$typlotstrip)
-    #   if (input$typlotstrip == 1) {
-    #     reactive_layoutSTRIP()$out_layout
-    #   } else reactive_layoutSTRIP()$out_layoutPlots
-    # })
-    
-    valsStrip <- reactiveValues(maxV.strip = NULL, minV.strip = NULL, trail.strip = NULL)
+    valsStrip <- reactiveValues(maxV.strip = NULL, 
+                                minV.strip = NULL, 
+                                trail.strip = NULL)
     
     simuModal.strip <- function(failed = FALSE) {
       modalDialog(
-        selectInput(inputId = ns("trailsStrip"), label = "Select One:", choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
-        conditionalPanel("input.trailsStrip == 'Other'", ns = ns,
-                         textInput(inputId = ns("OtherStrip"), label = "Input Trial Name:", value = NULL)
+        selectInput(inputId = ns("trailsStrip"), 
+                    label = "Select One:", 
+                    choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
+        conditionalPanel(
+          condition = "input.trailsStrip == 'Other'", 
+          ns = ns,
+          textInput(inputId = ns("OtherStrip"), 
+                    label = "Input Trial Name:", 
+                    value = NULL)
         ),
         fluidRow(
           column(6, 
-                 numericInput(ns("min.strip"), "Input the min value", value = NULL)
+                 numericInput(ns("min.strip"), 
+                              "Input the min value", 
+                              value = NULL)
           ),
           column(6, 
-                 numericInput(ns("max.strip"), "Input the max value", value = NULL)  
+                 numericInput(ns("max.strip"), 
+                              "Input the max value", 
+                              value = NULL)  
           )
         ),
         
         if (failed)
-          div(tags$b("Invalid input of data max and min", style = "color: red;")),
+          div(tags$b("Invalid input of data max and min", 
+                     style = "color: red;")),
         
         footer = tagList(
           modalButton("Cancel"),
@@ -338,21 +406,6 @@ mod_STRIPD_server <- function(id) {
       )
     }
     
-    # output$tabsetSTRIP <- renderUI({
-    #   req(input$typlotstrip)
-    #   tabsetPanel(
-    #     if (input$typlotstrip != 3) {
-    #       tabPanel("Split Plot Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.strip"), width = "100%", height = "650px"),
-    #                                                                        type = 5))
-    #     } else {
-    #       tabPanel("Split Plot Field Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapSTRIP"), width = "100%", height = "650px"),
-    #                                                                        type = 5))
-    #     },
-    #     tabPanel("Split Plot Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("STRIP.output")), type = 5))
-    #   )
-    #   
-    # })
-    
     locNum <- reactive(
       return(as.numeric(input$locLayout_strip))
     )
@@ -383,7 +436,7 @@ mod_STRIPD_server <- function(id) {
           ggplot2::theme_minimal() + # I added this option 
           ggplot2::theme(plot.title = ggplot2::element_text(family="Calibri", face="bold", size=13, hjust=0.5))
         
-        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 640)
+        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1350, height = 640)
         return(p2)
       } else {
         showModal(

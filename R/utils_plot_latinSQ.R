@@ -10,8 +10,6 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, optionLayout = 1,
                          planter = "serpentine", l = 1) {
   rsRep <- dims[1]
   csRep <- dims[2]
-  
-  
   site <- l
   locations <- factor(x$fieldBook$LOCATION, levels = unique(x$fieldBook$LOCATION))
   nlocs <- length(levels(locations))
@@ -25,16 +23,10 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, optionLayout = 1,
     NewBook <- x$fieldBook %>%
       dplyr::filter(LOCATION == locs)
     plots <- NewBook$PLOT
-    
-    #books0 <- list(NULL)
     if (x$infoDesign$idDesign == 9) {
       NewROWS1 <- rep(1:(rsRep*n_Reps), each = csRep)
       NewCOLUMNS1 <- NewBook$COLUMN
       NewROWS2 <- NewBook$ROW
-    } else if (x$infoDesign$idDesign == 7) {
-      NewROWS1 <- rep(1:(rsRep*n_Reps), each = csRep)
-      NewCOLUMNS1 <- rep(rep(1:csRep, times = rsRep), times = n_Reps)
-      NewROWS2 <- rep(rep(1:rsRep, each = csRep), times = n_Reps)
     } else {
       NewROWS1 <- rep(1:(rsRep*n_Reps), each = csRep)
       NewCOLUMNS1 <- rep(rep(1:csRep, times = rsRep), times = n_Reps)
@@ -42,7 +34,6 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, optionLayout = 1,
     }
 
     if (orderReps == "vertical_stack_panel") {
-      
       df1 <- NewBook %>% 
         dplyr::mutate(NewROW = NewROWS1,
                       NewCOLUMNS = NewCOLUMNS1)
@@ -50,11 +41,10 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, optionLayout = 1,
       df1 <- df1[order(df1$NewROW, decreasing = FALSE), ]
       nCols <- max(df1$NewCOLUMNS)
       newPlots <- planter_transform(plots = plots, planter = planter, reps = n_Reps, 
-                                    cols = nCols, units = NULL)
+                                    cols = nCols, units = csRep)
       df1$PLOT <- newPlots
       books0[[1]] <- df1
     } else if (orderReps == "horizontal_stack_panel") {
-      #books1 <- list(NULL)
       w <- 1:(csRep*n_Reps)
       u <- seq(1, length(w), by = csRep)
       v <- seq(csRep, length(w), by = csRep)
@@ -66,11 +56,10 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, optionLayout = 1,
       df2 <- NewBook %>% 
         dplyr::mutate(NewROW = NewROWS2,
                       NewCOLUMNS = z )
-      
-      df2 <- df2[order(df2$NewROW, decreasing = FALSE), ]
       nCols <- max(df2$NewCOLUMNS)
       newPlots <- planter_transform(plots = plots, planter = planter, reps = n_Reps, 
-                                    cols = nCols, units = NULL)
+                                    cols = nCols, units = NULL, 
+                                    mode = "horizontal_stack_panel")
       df2$PLOT <- newPlots
       books1[[1]] <- df2
     }
@@ -86,7 +75,7 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, optionLayout = 1,
   df1 <- newBooksSelected[opt]
   df <- as.data.frame(df1)
   
-  if (x$infoDesign$idDesign == 9){
+  if (x$infoDesign$idDesign == 9) {
     allSites <- vector(mode = "list", length = nlocs)
     for (st in 1:nlocs) {
       newBooksSelected_1 <- newBooksLocs[[st]]
@@ -95,38 +84,36 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, optionLayout = 1,
     }
     allSitesFieldbook <- dplyr::bind_rows(allSites)
     allSitesFieldbook <- allSitesFieldbook[,c(1:3,8,9,4:7)]
-    colnames(allSitesFieldbook) <- c("ID", "LOCATION", "PLOT", "ROW", "COLUMN", "REP", "ROW_REP", 
+    colnames(allSitesFieldbook) <- c("ID", "LOCATION", "PLOT", "ROW", "COLUMN", "REP", "ROW_REP",
                       "COLUMN_REP", "ENTRY")
     df <- df[,c(1:3,8,9,4:7)]
-    colnames(df) <- c("ID", "LOCATION", "PLOT", "ROW", "COLUMN", "REP", "ROW_REP", 
+    colnames(df) <- c("ID", "LOCATION", "PLOT", "ROW", "COLUMN", "REP", "ROW_REP",
                       "COLUMN_REP", "ENTRY")
+    df <- df[ , -c(7,8)]
+    allSitesFieldbook <- allSitesFieldbook[ , -c(7,8)]
     rows <- max(as.numeric(df$ROW))
     cols <- max(as.numeric(df$COLUMN))
     df$ENTRY <- as.factor(df$ENTRY)
-    ds <- "Row-Column Design " 
+    ds <- "Row-Column Design "
     main <- paste0(ds, rows, "X", cols)
     # Plot field layout
     p1 <- desplot::desplot(ENTRY ~ COLUMN + ROW, flip = FALSE,
                            out1 = REP,
-                           out2.gpar = list(col = "black", lty = 3), 
+                           out2.gpar = list(col = "black", lty = 3),
                            text = ENTRY, cex = 1, shorten = "no",
                            data = df, xlab = "COLUMNS", ylab = "ROWS",
-                           main = main, 
+                           main = main,
                            show.key = FALSE,
                            gg = TRUE)
     df$REP <- as.factor(df$REP)
     p2 <- desplot::desplot(REP ~  COLUMN + ROW, flip = FALSE,
                            out1 = REP,
-                           # out2 = IBLOCK,
-                           # col = IBLOCK,
-                           # out2.gpar = list(col = "black", lty = 3),
-                           #out2.gpar = list(col = "black", lty = 3),
                            text = PLOT, cex = 1, shorten = "no",
                            data = df, xlab = "COLUMNS", ylab = "ROWS",
                            main = main,
                            show.key = FALSE,
                            gg = TRUE)
-  }else {
+  } else  if (x$infoDesign$idDesign == 7) {
     allSites <- vector(mode = "list", length = nlocs)
     for (st in 1:nlocs) {
       newBooksSelected_1 <- newBooksLocs[[st]]
@@ -135,8 +122,41 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, optionLayout = 1,
     }
     allSitesFieldbook <- dplyr::bind_rows(allSites)
     allSitesFieldbook <- allSitesFieldbook[,c(1:3,8,9,4:7)]
+    colnames(allSitesFieldbook) <- c("ID", "LOCATION", "PLOT", "ROW", "COLUMN", "REP", "HSTRIP", "VSTRIP", "TRT_COMB")
     
-    
+    df <- df[,c(1:3,8,9,4:7)]
+    colnames(df) <- c("ID", "LOCATION", "PLOT", "ROW", "COLUMN", "REP", "HSTRIP", "VSTRIP", "TRT_COMB")
+    rows <- max(as.numeric(df$ROW))
+    cols <- max(as.numeric(df$COLUMN))
+    df$TRT_COMB <- as.factor(df$TRT_COMB)
+    ds <- "Strip-Plot Design "
+    main <- paste0(ds, rows, "X", cols)
+    # Plot field layout
+    p1 <- desplot::desplot(TRT_COMB ~ COLUMN + ROW, flip = FALSE,
+                           out1 = REP,
+                           out2.gpar = list(col = "black", lty = 3),
+                           text = TRT_COMB, cex = 1, shorten = "no",
+                           data = df, xlab = "COLUMNS", ylab = "ROWS",
+                           main = main,
+                           show.key = FALSE,
+                           gg = TRUE)
+    df$REP <- as.factor(df$REP)
+    p2 <- desplot::desplot(REP ~  COLUMN + ROW, flip = FALSE,
+                           out1 = REP,
+                           text = PLOT, cex = 1, shorten = "no",
+                           data = df, xlab = "COLUMNS", ylab = "ROWS",
+                           main = main,
+                           show.key = FALSE,
+                           gg = TRUE)
+  } else {
+    allSites <- vector(mode = "list", length = nlocs)
+    for (st in 1:nlocs) {
+      newBooksSelected_1 <- newBooksLocs[[st]]
+      df_1 <- newBooksSelected_1[opt]
+      allSites[[st]] <- as.data.frame(df_1)
+    }
+    allSitesFieldbook <- dplyr::bind_rows(allSites)
+    allSitesFieldbook <- allSitesFieldbook[,c(1:3,8,9,4:7)]
     df <- df[,c(1:3,8,9,4:7)]
     colnames(df) <- c("ID", "LOCATION", "PLOT", "ROW", "COLUMN", "SQUARE", "ROW_SQ", 
                       "COLUMN_SQ", "TREATMENT")
@@ -165,42 +185,4 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, optionLayout = 1,
   }
   return(list(p1 = p1, p2 = p2, df = df, newBooks = newBooksSelected, 
               allSitesFieldbook = allSitesFieldbook))
-}
-
-
-# else  if (x$infoDesign$idDesign == 7) {
-#   allSites <- vector(mode = "list", length = nlocs)
-#   for (st in 1:nlocs) {
-#     newBooksSelected_1 <- newBooksLocs[[st]]
-#     df_1 <- newBooksSelected_1[opt]
-#     allSites[[st]] <- as.data.frame(df_1)
-#   }
-#   allSitesFieldbook <- dplyr::bind_rows(allSites)
-#   allSitesFieldbook <- allSitesFieldbook[,c(1:3,8,9,4:7)]
-#   colnames(allSitesFieldbook) <- c("ID", "LOCATION", "PLOT", "ROW", "COLUMN", "REP", "HSTRIP", "VSTRIP", "TRT_COMB")
-#   
-#   df <- df[,c(1:3,8,9,4:7)]
-#   colnames(df) <- c("ID", "LOCATION", "PLOT", "ROW", "COLUMN", "REP", "HSTRIP", "VSTRIP", "TRT_COMB")
-#   rows <- max(as.numeric(df$ROW))
-#   cols <- max(as.numeric(df$COLUMN))
-#   df$TRT_COMB <- as.factor(df$TRT_COMB)
-#   ds <- "Strip-Plot Design " 
-#   main <- paste0(ds, rows, "X", cols)
-#   # Plot field layout
-#   p1 <- desplot::desplot(TRT_COMB ~ COLUMN + ROW, flip = FALSE,
-#                          out1 = REP,
-#                          out2.gpar = list(col = "black", lty = 3), 
-#                          text = TRT_COMB, cex = 1, shorten = "no",
-#                          data = df, xlab = "COLUMNS", ylab = "ROWS",
-#                          main = main, 
-#                          show.key = FALSE,
-#                          gg = TRUE)
-#   df$REP <- as.factor(df$REP)
-#   p2 <- desplot::desplot(REP ~  COLUMN + ROW, flip = FALSE,
-#                          out1 = REP,
-#                          text = PLOT, cex = 1, shorten = "no",
-#                          data = df, xlab = "COLUMNS", ylab = "ROWS",
-#                          main = main,
-#                          show.key = FALSE,
-#                          gg = TRUE)
-# } 
+} 

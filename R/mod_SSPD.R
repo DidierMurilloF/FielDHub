@@ -11,75 +11,119 @@ mod_SSPD_ui <- function(id){
   ns <- NS(id)
   tagList(
     sidebarLayout(
-      
-      sidebarPanel(width = 4,
-                   radioButtons(inputId = ns("owndataSSPD"), label = "Do you have your own data?", choices = c("Yes", "No"), selected = "No",
-                                inline = TRUE, width = NULL, choiceNames = NULL, choiceValues = NULL),
-                   
-                   selectInput(inputId = ns("kindSSPD"), label = "Select SSPD Type:",
-                               choices = c("Split-Split Plot in a RCBD" = "SSPD_RCBD", "Split-Split Plot in a CRD" = "SSPD_CRD"),
-                               multiple = FALSE),
-                   
-                   conditionalPanel("input.owndataSSPD == 'Yes'", ns = ns,
-                                    fluidRow(
-                                      column(8, style=list("padding-right: 28px;"),
-                                             fileInput(ns("file.SSPD"), label = "Upload a csv File:", multiple = FALSE)),
-                                      
-                                      column(4,style=list("padding-left: 5px;"),
-                                             radioButtons(ns("sep.sspd"), "Separator",
-                                                          choices = c(Comma = ",",
-                                                                      Semicolon = ";",
-                                                                      Tab = "\t"),
-                                                          selected = ","))
-                                    )          
-                   ),
-                   
-                   conditionalPanel("input.owndataSPD != 'Yes'", ns = ns,
-                                    numericInput(ns("mp.sspd"), label = "Whole-plots:",
-                                                 value = 2, min = 2),
-                                    numericInput(ns("sp.sspd"), label = "Sub-plots Within Whole-plots:",
-                                                 value = 2, min = 2),
-                                    numericInput(ns("ssp.sspd"), label = "Sub-Sub-plots within Sub-plots:",
-                                                 value = 10, min = 2) 
-                   ),
-
-                   fluidRow(
-                     column(6, style=list("padding-right: 28px;"),
-                       numericInput(ns("reps.sspd"), label = "Input # of Full Reps:",
-                                    value = 3, min = 2)
-                     ),
-                     column(6, style=list("padding-left: 5px;"),
-                       numericInput(ns("l.sspd"), label = "Input # of Locations:",
-                                    value = 1, min = 1)
-                     )
-                   ), 
-                   
-                   selectInput(inputId = ns("planter_mov_sspd"), label = "Plot Order Layout:",
-                               choices = c("serpentine", "cartesian"), multiple = FALSE,
-                               selected = "serpentine"),
-                   
-                   fluidRow(
-                     column(6,style=list("padding-right: 28px;"),
-                            textInput(ns("plot_start.sspd"), "Starting Plot Number:", value = 101)
-                     ),
-                     column(6,style=list("padding-left: 5px;"),
-                            textInput(ns("Location.sspd"), "Input Location:", value = "FARGO")
-                     )
-                   ),
-                   
-                   numericInput(inputId = ns("myseed.sspd"), label = "Seed Number:", value = 123, min = 1),
-                   
-                   fluidRow(
-                     column(6,
-                            actionButton(inputId = ns("RUN.sspd"), "Run!", icon = icon("cocktail"), width = '100%'),
-                     ),
-                     column(6,
-                            actionButton(ns("Simulate.sspd"), "Simulate!", icon = icon("cocktail"), width = '100%')
-                     )
-                     
-                   ), 
-                   br(),
-                   downloadButton(ns("downloadData.sspd"), "Save Experiment!", style = "width:100%")
+      sidebarPanel(
+        width = 4,
+        radioButtons(inputId = ns("owndataSSPD"), 
+                     label = "Do you have your own data?", 
+                     choices = c("Yes", "No"), 
+                     selected = "No",
+                     inline = TRUE, 
+                     width = NULL, 
+                     choiceNames = NULL, 
+                     choiceValues = NULL),
+        
+        selectInput(inputId = ns("kindSSPD"), 
+                    label = "Select SSPD Type:",
+                    choices = c("Split-Split Plot in a RCBD" = "SSPD_RCBD", 
+                                "Split-Split Plot in a CRD" = "SSPD_CRD"),
+                    multiple = FALSE),
+        
+        conditionalPanel(
+          condition = "input.owndataSSPD == 'Yes'", 
+          ns = ns,
+          fluidRow(
+            column(8, style=list("padding-right: 28px;"),
+                   fileInput(ns("file.SSPD"), 
+                             label = "Upload a csv File:", 
+                             multiple = FALSE)),
+            
+            column(4,style=list("padding-left: 5px;"),
+                   radioButtons(ns("sep.sspd"), "Separator",
+                                choices = c(Comma = ",",
+                                            Semicolon = ";",
+                                            Tab = "\t"),
+                                selected = ","))
+          )          
+        ),
+        
+        conditionalPanel(
+          condition = "input.owndataSPD != 'Yes'", 
+          ns = ns,
+          numericInput(ns("mp.sspd"), 
+                       label = "Whole-plots:",
+                       value = 2, 
+                       min = 2),
+          numericInput(ns("sp.sspd"), 
+                       label = "Sub-plots Within Whole-plots:",
+                       value = 2, 
+                       min = 2),
+          numericInput(ns("ssp.sspd"), 
+                       label = "Sub-Sub-plots within Sub-plots:",
+                       value = 5, 
+                       min = 2)
+          ),
+        
+        fluidRow(
+          column(6, style=list("padding-right: 28px;"),
+            numericInput(ns("reps.sspd"), 
+                         label = "Input # of Full Reps:",
+                         value = 3, 
+                         min = 2)
+          ),
+          column(6, style=list("padding-left: 5px;"),
+            numericInput(ns("l.sspd"), 
+                         label = "Input # of Locations:",
+                         value = 1, 
+                         min = 1)
+          )
+        ), 
+        
+        selectInput(inputId = ns("planter_mov_sspd"), 
+                    label = "Plot Order Layout:",
+                    choices = c("serpentine", "cartesian"), 
+                    multiple = FALSE,
+                    selected = "serpentine"),
+        
+        fluidRow(
+          column(6,style=list("padding-right: 28px;"),
+                 textInput(ns("plot_start.sspd"), 
+                           "Starting Plot Number:", 
+                           value = 101)
+          ),
+          column(6,style=list("padding-left: 5px;"),
+                 textInput(ns("Location.sspd"), "
+                           Input Location:", 
+                           value = "FARGO")
+          )
+        ),
+        
+        numericInput(inputId = ns("myseed.sspd"), 
+                     label = "Seed Number:", 
+                     value = 123, 
+                     min = 1),
+        
+        fluidRow(
+          column(6,
+                 actionButton(
+                   inputId = ns("RUN.sspd"), 
+                   "Run!", 
+                   icon = icon("cocktail"), 
+                   width = '100%'),
+          ),
+          column(6,
+                 actionButton(
+                   ns("Simulate.sspd"), 
+                   "Simulate!", 
+                   icon = icon("cocktail"), 
+                   width = '100%')
+          )
+          
+        ), 
+        br(),
+        downloadButton(
+          ns("downloadData.sspd"), 
+          "Save Experiment!", 
+          style = "width:100%")
       ),
       
       mainPanel(
@@ -88,12 +132,19 @@ mod_SSPD_ui <- function(id){
           tabsetPanel(
             tabPanel("Field Layout",
                      shinycssloaders::withSpinner(
-                       plotly::plotlyOutput(ns("layouts"), width = "100%", height = "650px"),type = 5
+                       plotly::plotlyOutput(ns("layouts"), 
+                                            width = "100%", 
+                                            height = "650px"),
+                       type = 5
                      ),
-                     column(12,uiOutput(ns("well_panel_layout_SSPD")))
+                     column(12,
+                            uiOutput(ns("well_panel_layout_SSPD"))
+                            )
             ),
             tabPanel("Field Book", 
-                     shinycssloaders::withSpinner(DT::DTOutput(ns("SSPD.output")), type = 5)
+                     shinycssloaders::withSpinner(
+                       DT::DTOutput(ns("SSPD.output")), 
+                       type = 5)
             )
           )
         )
@@ -101,18 +152,6 @@ mod_SSPD_ui <- function(id){
     )
   )
 }
-
-
-# fluidRow(
-#   column(12, align="center",
-#          tabsetPanel(
-#            tabPanel("Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout_sspd"), width = "100%", height = "630px"),
-#                                                                  type = 5)),
-#            tabPanel("Field Book", DT::DTOutput(ns("SSPD.output")))
-#          )
-#   ),
-#   column(12,uiOutput(ns("well_panel_layout_SSPD")))
-# )
     
 #' SSPD Server Functions
 #'
@@ -159,7 +198,9 @@ mod_SSPD_server <- function(id){
     getData.sspd <- reactive({
       req(input$file.SSPD)
       inFile <- input$file.SSPD
-      dataUp.sspd <- load_file(name = inFile$name, path = inFile$datapat, sep = input$sep.sspd)
+      dataUp.sspd <- load_file(name = inFile$name, 
+                               path = inFile$datapat, 
+                               sep = input$sep.sspd)
       return(list(dataUp.sspd = dataUp.sspd))
     })
     
@@ -211,9 +252,11 @@ mod_SSPD_server <- function(id){
         type <- 1
       }
       
-      SSPD <- split_split_plot(wp = wp.sspd, sp = sp.sspd, ssp = ssp.sspd, reps = reps.sspd, l = l.sspd, 
-                               plotNumber = plot_start.sspd, seed = seed.sspd, type = type, 
-                               locationNames = loc.sspd, data = data.sspd)
+      SSPD <- split_split_plot(wp = wp.sspd, sp = sp.sspd, ssp = ssp.sspd, 
+                               reps = reps.sspd, l = l.sspd, 
+                               plotNumber = plot_start.sspd, seed = seed.sspd, 
+                               type = type, locationNames = loc.sspd, 
+                               data = data.sspd)
       
       
     })
@@ -228,7 +271,7 @@ mod_SSPD_server <- function(id){
     output$well_panel_layout_SSPD <- renderUI({
       req(sspd_reactive()$fieldBook)
       obj_sspd <- sspd_reactive()
-      planting_sspd <- input$planter_mov_sspd
+      # planting_sspd <- input$planter_mov_sspd
       allBooks_sspd<- plot_layout(x = obj_sspd, optionLayout = 1)$newBooks
       nBooks_sspd <- length(allBooks_sspd)
       layoutOptions_sspd <- 1:nBooks_sspd
@@ -243,10 +286,14 @@ mod_SSPD_server <- function(id){
                                 "Heatmap" = 3), selected = 1)
           ),
           column(3, #align="center",
-                 selectInput(inputId = ns("layoutO_sspd"), label = "Layout option:", choices = layoutOptions_sspd)
+                 selectInput(inputId = ns("layoutO_sspd"), 
+                             label = "Layout option:", 
+                             choices = layoutOptions_sspd)
           ),
           column(3, #align="center",
-                 selectInput(inputId = ns("locLayout_sspd"), label = "Location:", choices = as.numeric(upDateSites()$sites))
+                 selectInput(inputId = ns("locLayout_sspd"), 
+                             label = "Location:", 
+                             choices = as.numeric(upDateSites()$sites))
           )
         )
       )
@@ -260,18 +307,6 @@ mod_SSPD_server <- function(id){
       planting_sspd <- input$planter_mov_sspd
       plot_layout(x = obj_sspd, optionLayout = opt_sspd, planter = planting_sspd)
     })
-    
-    # output$layout_sspd <- renderPlot({
-    #   req(sspd_reactive())
-    #   req(input$typlotsspd)
-    #   if (input$typlotsspd == 1) {
-    #     reactive_layoutSSPD()$out_layout
-    #   } else if (input$typlotsspd == 2) {
-    #     reactive_layoutSSPD()$out_layoutPlots
-    #   }
-    # })
-    
-    
     
     valsspd <- reactiveValues(maxV.sspd = NULL, minV.sspd = NULL, Trial.sspd = NULL)
     
@@ -363,29 +398,12 @@ mod_SSPD_server <- function(id){
       )
     }
     
-    # output$tabsetSSPD <- renderUI({
-    #   req(input$typlotsspd)
-    #   tabsetPanel(
-    #     if (input$typlotsspd != 3) {
-    #       tabPanel("Split Split Plot Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout_sspd"), width = "100%", height = "650px"),
-    #                                                                           type = 5))
-    #     } else {
-    #       tabPanel("Split Split Plot Field Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapSSPD"), width = "100%", height = "650px"),
-    #                                                                           type = 5))
-    #     },
-    #     # tabPanel("Alpha Lattice Field Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapAlpha"), width = "100%", height = "650px"),
-    #     #                                                                       type = 5)),
-    #     tabPanel("Split Split Plot Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("SSPD.output")), type = 5))
-    #   )
-    #   
-    # })
-    
     locNum <- reactive(
       return(as.numeric(input$locLayout_sspd))
     )
     
     heatmap_obj <- reactive({
-     # req(simuData_sspd()$df)
+     req(simuData_sspd()$df)
       if (ncol(simuData_sspd()$df) == 11) {
         locs <- factor(simuData_sspd()$df$LOCATION, levels = unique(simuData_sspd()$df$LOCATION))
         locLevels <- levels(locs)
@@ -451,7 +469,10 @@ mod_SSPD_server <- function(id){
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "500px"))
       
-      DT::datatable(df, rownames = FALSE, options = list(
+      DT::datatable(df, 
+                    filter = 'top',
+                    rownames = FALSE, 
+                    options = list(
         columnDefs = list(list(className = 'dt-center', targets = "_all"))))
       
     })

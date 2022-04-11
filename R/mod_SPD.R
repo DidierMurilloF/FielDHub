@@ -7,72 +7,93 @@
 #' @noRd 
 #'
 #' @importFrom shiny NS tagList 
-mod_SPD_ui <- function(id){
+mod_SPD_ui <- function(id) {
   ns <- NS(id)
   tagList(
     h4("Split-Plot Design"),
     sidebarLayout(
-      sidebarPanel(width = 4,
-                   radioButtons(inputId = ns("owndataSPD"), label = "Import entries' list?", choices = c("Yes", "No"), selected = "No",
-                                inline = TRUE, width = NULL, choiceNames = NULL, choiceValues = NULL),
-                   selectInput(inputId = ns("kindSPD"), label = "Select SPD Type:",
-                               choices = c("Split-Plot in a RCBD" = "SPD_RCBD", "Split-Plot in a CRD" = "SPD_CRD"),
-                               multiple = FALSE),
-                   
-                   conditionalPanel("input.owndataSPD == 'Yes'", ns = ns,
-                                    fluidRow(
-                                      column(8, style=list("padding-right: 28px;"),
-                                             fileInput(ns("file.SPD"), label = "Upload a csv File:", multiple = FALSE)),
-                                      column(4,style=list("padding-left: 5px;"),
-                                             radioButtons(ns("sep.spd"), "Separator",
-                                                          choices = c(Comma = ",",
-                                                                      Semicolon = ";",
-                                                                      Tab = "\t"),
-                                                          selected = ","))
-                                    )
-                   ),
-                   conditionalPanel("input.owndataSPD != 'Yes'", ns = ns,
-                                     numericInput(ns("mp.spd"), label = "Whole-plots:",
-                                                  value = 4, min = 2),
-                                     numericInput(ns("sp.spd"), label = "Sub-plots Within Whole-plots:",
-                                                  value = 3, min = 2)
-                   ),
-                   
-                   fluidRow(
-                     column(6, style=list("padding-right: 28px;"),
-                            numericInput(ns("reps.spd"), label = "Input # of Full Reps:",
-                                         value = 3, min = 2), 
-                     ),
-                     column(6,style=list("padding-left: 5px;"),
-                            numericInput(ns("l.spd"), label = "Input # of Locations:",
-                                         value = 1, min = 1)
-                     )
-                   ),
-                   fluidRow(
-                     column(6, style=list("padding-right: 28px;"),
-                            textInput(ns("plot_start.spd"), "Starting Plot Number:", value = 101)
-                     ),
-                     column(6,style=list("padding-left: 5px;"),
-                            textInput(ns("Location.spd"), "Input the Location:", value = "FARGO")
-                     )
-                   ),
-                   selectInput(inputId = ns("planter_mov_spd"), label = "Plot Order Layout:",
-                               choices = c("serpentine", "cartesian"), multiple = FALSE,
-                               selected = "serpentine"),
-                   
-                   numericInput(inputId = ns("myseed.spd"), label = "Seed Number:", value = 123, min = 1),
-                   
-                   fluidRow(
-                     column(6,
-                            actionButton(inputId = ns("RUN.spd"), "Run!", icon = icon("cocktail"), width = '100%'),
-                     ),
-                     column(6,
-                            actionButton(ns("Simulate.spd"), "Simulate!", icon = icon("cocktail"), width = '100%')
-                     )
-                     
-                   ), 
-                   br(),
-                   downloadButton(ns("downloadData.spd"), "Save Experiment!", style = "width:100%")
+      sidebarPanel(
+        width = 4,
+        radioButtons(inputId = ns("owndataSPD"), 
+                     label = "Import entries' list?", 
+                     choices = c("Yes", "No"), 
+                     selected = "No",
+                     inline = TRUE, 
+                     width = NULL, 
+                     choiceNames = NULL, 
+                     choiceValues = NULL),
+        selectInput(inputId = ns("kindSPD"), 
+                    label = "Select SPD Type:",
+                    choices = c("Split-Plot in a RCBD" = "SPD_RCBD", 
+                                "Split-Plot in a CRD" = "SPD_CRD"),
+                    multiple = FALSE),
+        
+        conditionalPanel("input.owndataSPD == 'Yes'", ns = ns,
+                         fluidRow(
+                           column(8, style=list("padding-right: 28px;"),
+                                  fileInput(ns("file.SPD"), 
+                                            label = "Upload a csv File:", 
+                                            multiple = FALSE)),
+                           column(4,style=list("padding-left: 5px;"),
+                                  radioButtons(ns("sep.spd"), "Separator",
+                                               choices = c(Comma = ",",
+                                                           Semicolon = ";",
+                                                           Tab = "\t"),
+                                               selected = ","))
+                         )
+        ),
+        conditionalPanel("input.owndataSPD != 'Yes'", ns = ns,
+                          numericInput(ns("mp.spd"), 
+                                       label = "Whole-plots:",
+                                       value = 4, min = 2),
+                          numericInput(ns("sp.spd"), 
+                                       label = "Sub-plots Within Whole-plots:",
+                                       value = 3, min = 2)
+        ),
+        
+        fluidRow(
+          column(6, style=list("padding-right: 28px;"),
+                 numericInput(ns("reps.spd"), label = "Input # of Full Reps:",
+                              value = 3, min = 2), 
+          ),
+          column(6,style=list("padding-left: 5px;"),
+                 numericInput(ns("l.spd"), label = "Input # of Locations:",
+                              value = 1, min = 1)
+          )
+        ),
+        fluidRow(
+          column(6, style=list("padding-right: 28px;"),
+                 textInput(ns("plot_start.spd"), "Starting Plot Number:", 
+                           value = 101)
+          ),
+          column(6,style=list("padding-left: 5px;"),
+                 textInput(ns("Location.spd"), "Input the Location:", 
+                           value = "FARGO")
+          )
+        ),
+        selectInput(inputId = ns("planter_mov_spd"), 
+                    label = "Plot Order Layout:",
+                    choices = c("serpentine", "cartesian"), 
+                    multiple = FALSE,
+                    selected = "serpentine"),
+        
+        numericInput(inputId = ns("myseed.spd"), label = "Seed Number:", 
+                     value = 118, min = 1),
+        
+        fluidRow(
+          column(6,
+                 actionButton(inputId = ns("RUN.spd"), "Run!", 
+                              icon = icon("cocktail"), width = '100%'),
+          ),
+          column(6,
+                 actionButton(ns("Simulate.spd"), "Simulate!", 
+                              icon = icon("cocktail"), width = '100%')
+          )
+          
+        ), 
+        br(),
+        downloadButton(ns("downloadData.spd"), "Save Experiment!", 
+                      style = "width:100%")
       ),
       
       mainPanel(
@@ -81,12 +102,18 @@ mod_SPD_ui <- function(id){
           tabsetPanel(
             tabPanel("Field Layout",
                      shinycssloaders::withSpinner(
-                       plotly::plotlyOutput(ns("layouts"), width = "100%", height = "650px"),type = 5
+                       plotly::plotlyOutput(ns("layouts"), 
+                                            width = "97%", 
+                                            height = "650px"),
+                       type = 5
                      ),
                      column(12,uiOutput(ns("well_panel_layout_SPD")))
             ),
             tabPanel("Field Book", 
-                     shinycssloaders::withSpinner(DT::DTOutput(ns("SPD.output")), type = 5)
+                     shinycssloaders::withSpinner(
+                       DT::DTOutput(ns("SPD.output")), 
+                       type = 5
+                       )
             )
           )
         )
@@ -105,7 +132,8 @@ mod_SPD_server <- function(id){
     
     wp <- c("NFung", paste("Fung", 1:4, sep = "")) 
     sp <- paste("Beans", 1:10, sep = "")            
-    entryListFormat_SPD <- data.frame(list(WHOLPLOT = c(wp, rep("", 5)), SUBPLOT = sp))
+    entryListFormat_SPD <- data.frame(list(WHOLPLOT = c(wp, rep("", 5)), 
+                                           SUBPLOT = sp))
     
     entriesInfoModal_SPD<- function() {
       modalDialog(
@@ -197,7 +225,7 @@ mod_SPD_server <- function(id){
     output$well_panel_layout_SPD <- renderUI({
       req(spd_reactive()$fieldBook)
       obj_spd <- spd_reactive()
-      planting_spd <- input$planter_mov_spd
+      # planting_spd <- input$planter_mov_spd
       allBooks_spd<- plot_layout(x = obj_spd, optionLayout = 1, orderReps = "vertical_stack_panel")$newBooks
       nBooks_spd <- length(allBooks_spd)
       layoutOptions_spd <- 1:nBooks_spd
@@ -251,15 +279,7 @@ mod_SPD_server <- function(id){
       try(plot_layout(x = obj_spd, optionLayout = opt_spd, planter = planting_spd, orderReps = input$orderRepsSPD,
                       l = locSelected_spd), silent = TRUE)
     })
-    
-    # output$layout_spd <- renderPlot({
-    #   req(spd_reactive())
-    #   req(input$typlotspd)
-    #   if (input$typlotspd == 1) {
-    #     reactive_layoutSPD()$out_layout
-    #   } else reactive_layoutSPD()$out_layoutPlots
-    # })
-    
+
     valspd <- reactiveValues(maxV.spd = NULL, minV.spd = NULL, trail.spd = NULL)
     
     simuModal.spd <- function(failed = FALSE) {
@@ -330,14 +350,12 @@ mod_SPD_server <- function(id){
       if(!is.null(valspd$maxV.spd) && !is.null(valspd$minV.spd) && !is.null(valspd$trail.spd)) {
         max <- as.numeric(valspd$maxV.spd)
         min <- as.numeric(valspd$minV.spd)
-        #df.spd <- spd_reactive()$fieldBook
         df.spd <- reactive_layoutSPD()$allSitesFieldbook
         cnamesdf.spd <- colnames(df.spd)
         df.spd <- norm_trunc(a = min, b = max, data = df.spd)
         colnames(df.spd) <- c(cnamesdf.spd[1:(ncol(df.spd) - 1)], valspd$trail.spd)
         df.spd <- df.spd[order(df.spd$ID),]
       }else {
-        #df.spd <- spd_reactive()$fieldBook 
         df.spd <- reactive_layoutSPD()$allSitesFieldbook
       }
       return(list(df = df.spd))
@@ -350,21 +368,6 @@ mod_SPD_server <- function(id){
         easyClose = TRUE
       )
     }
-    
-    # output$tabsetSPD <- renderUI({
-    #   req(input$typlotspd)
-    #   tabsetPanel(
-    #     if (input$typlotspd != 3) {
-    #       tabPanel("Split Plot Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.spd"), width = "100%", height = "650px"),
-    #                                                                                   type = 5))
-    #     } else {
-    #       tabPanel("Split Plot Field Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapSPD"), width = "100%", height = "650px"),
-    #                                                                                   type = 5))
-    #     },
-    #     tabPanel("Split Plot Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("SPD.output")), type = 5))
-    #   )
-    #   
-    # })
     
     locNum <- reactive(
       return(as.numeric(input$locLayout_spd))
@@ -407,11 +410,6 @@ mod_SPD_server <- function(id){
         return(NULL)
       }
     })
-    
-    # output$heatmapSPD <- plotly::renderPlotly({
-    #   req(heatmap_obj())
-    #   heatmap_obj()
-    # })
     
     output$layouts <- plotly::renderPlotly({
       req(reactive_layoutSPD())
@@ -459,9 +457,3 @@ mod_SPD_server <- function(id){
     )
   })
 }
-    
-## To be copied in the UI
-# mod_SPD_ui("SPD_ui_1")
-    
-## To be copied in the server
-# mod_SPD_server("SPD_ui_1")

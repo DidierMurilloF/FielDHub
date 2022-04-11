@@ -38,8 +38,6 @@ mod_RowCol_ui <- function(id){
                    fluidRow(
                      column(6, style=list("padding-right: 28px;"),
                             selectInput(inputId = ns("k.rcd"), label = "Input # of Rows:", choices = ""),
-                            # numericInput(ns("k.rcd"), label = "Input # of Rows:",
-                            #              value = NULL, min = 2)
                      ),
                      column(6,style=list("padding-left: 5px;"),
                             numericInput(ns("r.rcd"), label = "Input # of Full Reps:",
@@ -84,7 +82,7 @@ mod_RowCol_ui <- function(id){
           tabsetPanel(
             tabPanel("Field Layout",
                      shinycssloaders::withSpinner(
-                       plotly::plotlyOutput(ns("layouts"), width = "100%", height = "650px"),type = 5
+                       plotly::plotlyOutput(ns("layouts"), width = "98%", height = "650px"),type = 5
                      ),
                      column(12,uiOutput(ns("well_panel_layout_ROWCOL")))
             ),
@@ -168,8 +166,12 @@ mod_RowCol_server <- function(id){
         w <- 2
       }
       
+      if (length(k) > 2) {
+        selected <- k[ceiling(length(k)/2)]
+      } else selected <- k[2]
+      
       updateSelectInput(session = session, inputId = 'k.rcd', label = "Input # of Rows:",
-                        choices = k, selected = k[1])
+                        choices = k, selected = selected)
       
     })
     
@@ -223,13 +225,11 @@ mod_RowCol_server <- function(id){
     output$well_panel_layout_ROWCOL <- renderUI({
       req(RowCol_reactive()$fieldBook)
       obj_rcd <- RowCol_reactive()
-      planting_rcd <- input$planter_mov_rcd
       allBooks_rcd<- plot_layout(x = obj_rcd, optionLayout = 1)$newBooks
       nBooks_rcd <- length(allBooks_rcd)
       layoutOptions_rcd <- 1:nBooks_rcd
       orderReps <- c("Vertical Stack Panel" = "vertical_stack_panel", "Horizontal Stack Panel" = "horizontal_stack_panel")
-      #loc <-  as.vector(unlist(strsplit(input$Location.rcd, ",")))
-      sites <- as.numeric(input$l.rcd)
+      # sites <- as.numeric(input$l.rcd)
       wellPanel(
         column(2,
                radioButtons(ns("typlotrcd"), "Type of Plot:",
@@ -240,14 +240,19 @@ mod_RowCol_server <- function(id){
         fluidRow(
  
           column(3,
-                 selectInput(inputId = ns("orderRepsRowCol"), label = "Reps layout:", 
+                 selectInput(inputId = ns("orderRepsRowCol"), 
+                             label = "Reps layout:", 
                              choices = orderReps)
           ),
           column(3, #align="center",
-                 selectInput(inputId = ns("layoutO_rcd"), label = "Layout option:", choices = layoutOptions_rcd)
+                 selectInput(inputId = ns("layoutO_rcd"), 
+                             label = "Layout option:", 
+                             choices = layoutOptions_rcd)
           ),
           column(3, #align="center",
-                 selectInput(inputId = ns("locLayout_rcd"), label = "Location:", choices = as.numeric(upDateSites()$sites))
+                 selectInput(inputId = ns("locLayout_rcd"), 
+                             label = "Location:", 
+                             choices = as.numeric(upDateSites()$sites))
           )
         )
       )
@@ -278,16 +283,6 @@ mod_RowCol_server <- function(id){
       try(plot_layout(x = obj_rcd, optionLayout = opt_rcd, planter = planting_rcd, l = locSelected, 
                       orderReps = input$orderRepsRowCol), silent = TRUE)
     })
-    
-    # output$layout_rowcol <- renderPlot({
-    #   req(RowCol_reactive())
-    #   req(input$typlotrcd)
-    #   if (input$typlotrcd == 1) {
-    #     reactive_layoutROWCOL()$out_layout
-    #   } else reactive_layoutROWCOL()$out_layoutPlots
-    # })
-    
-    
     
     valsRowColD <- reactiveValues(maxV.RowCol = NULL, minV.RowCol = NULL, trail.RowCol = NULL)
     
@@ -358,14 +353,12 @@ mod_RowCol_server <- function(id){
       if(!is.null(valsRowColD$maxV.RowCol) && !is.null(valsRowColD$minV.RowCol) && !is.null(valsRowColD$trail.RowCol)) {
         max <- as.numeric(valsRowColD$maxV.RowCol)
         min <- as.numeric(valsRowColD$minV.RowCol)
-        #df.RowCol <- RowCol_reactive()$fieldBook
         df.RowCol <- reactive_layoutROWCOL()$allSitesFieldbook
         cnamesdf.RowCol <- colnames(df.RowCol)
         df.RowCol <- norm_trunc(a = min, b = max, data = df.RowCol)
         colnames(df.RowCol) <- c(cnamesdf.RowCol[1:(ncol(df.RowCol) - 1)], valsRowColD$trail.RowCol)
         a <- ncol(df.RowCol)
       }else {
-        #df.RowCol <- RowCol_reactive()$fieldBook  
         df.RowCol <- reactive_layoutROWCOL()$allSitesFieldbook
         a <- ncol(df.RowCol)
       }
@@ -380,28 +373,13 @@ mod_RowCol_server <- function(id){
       )
     }
     
-    # output$tabsetRCD <- renderUI({
-    #   req(input$typlotrcd)
-    #   tabsetPanel(
-    #     if (input$typlotrcd != 3) {
-    #       tabPanel("Split Plot Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.rcd"), width = "100%", height = "650px"),
-    #                                                                        type = 5))
-    #     } else {
-    #       tabPanel("Split Plot Field Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapRCD"), width = "100%", height = "650px"),
-    #                                                                        type = 5))
-    #     },
-    #     tabPanel("Split Plot Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("rowcolD")), type = 5))
-    #   )
-    #   
-    # })
-    
     locNum <- reactive(
       return(as.numeric(input$locLayout_rcd))
     )
     
     heatmap_obj <- reactive({
       req(simuData_RowCol()$df)
-      if (ncol(simuData_RowCol()$df) == 10) {
+      if (ncol(simuData_RowCol()$df) == 8) {
         locs <- factor(simuData_RowCol()$df$LOCATION, levels = unique(simuData_RowCol()$df$LOCATION))
         locLevels <- levels(locs)
         df = subset(simuData_RowCol()$df, LOCATION == locLevels[locNum()])
@@ -410,12 +388,18 @@ mod_RowCol_server <- function(id){
         label_trail <- paste(trail, ": ")
         heatmapTitle <- paste("Heatmap for ", trail)
         new_df <- df %>%
-          dplyr::mutate(text = paste0("Site: ", loc, "\n", "Row: ", df$ROW, "\n", "Col: ", df$COLUMN, "\n", "Entry: ", 
-                                      df$ENTRY, "\n", label_trail, round(df[,10],2)))
+          dplyr::mutate(text = paste0("Site: ", loc, "\n", 
+                                      "Row: ", df$ROW, "\n", 
+                                      "Col: ", df$COLUMN, "\n", 
+                                      "Entry: ", df$ENTRY, "\n", 
+                                      label_trail, round(df[,8],2)))
         w <- as.character(valsRowColD$trail.RowCol)
         new_df$ROW <- as.factor(new_df$ROW) # Set up ROWS as factors
         new_df$COLUMN <- as.factor(new_df$COLUMN) # Set up COLUMNS as factors
-        p1 <- ggplot2::ggplot(new_df, ggplot2::aes(x = new_df[,5], y = new_df[,4], fill = new_df[,10], text = text)) +
+        p1 <- ggplot2::ggplot(new_df, ggplot2::aes(x = new_df[,5], 
+                                                   y = new_df[,4], 
+                                                   fill = new_df[,8], 
+                                                   text = text)) +
           ggplot2::geom_tile() +
           ggplot2::xlab("COLUMN") +
           ggplot2::ylab("ROW") +
@@ -423,9 +407,11 @@ mod_RowCol_server <- function(id){
           viridis::scale_fill_viridis(discrete = FALSE) +
           ggplot2::ggtitle(heatmapTitle) +
           ggplot2::theme_minimal() + # I added this option 
-          ggplot2::theme(plot.title = ggplot2::element_text(family="Calibri", face="bold", size=13, hjust=0.5))
+          ggplot2::theme(plot.title = ggplot2::element_text(
+            family="Calibri", face="bold", size=13, hjust=0.5)
+            )
         
-        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 640)
+        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1350, height = 640)
         return(p2)
       } else {
         showModal(
@@ -459,8 +445,8 @@ mod_RowCol_server <- function(id){
       df$ROW <- as.factor(df$ROW)
       df$COLUMN <- as.factor(df$COLUMN)
       df$REP <- as.factor(df$REP)
-      df$ROW_REP <- as.factor(df$ROW_REP)
-      df$COLUMN_REP <- as.factor(df$COLUMN_REP)
+      # df$ROW_REP <- as.factor(df$ROW_REP)
+      # df$COLUMN_REP <- as.factor(df$COLUMN_REP)
       df$ENTRY <- as.factor(df$ENTRY)
       a <- as.numeric(simuData_RowCol()$a)
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,

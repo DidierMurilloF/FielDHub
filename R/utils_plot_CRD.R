@@ -153,12 +153,10 @@ plot_CRD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1,
       ds <- "Split Plot Design (CRD) " 
       main <- paste0(ds, rows, "X", cols)
       df$REP <- as.factor(df$REP)
-      p1 <- desplot::desplot(REP ~ COLUMN + ROW, flip = FALSE,
+      p1 <- desplot::desplot(TRT_COMB ~ COLUMN + ROW, flip = FALSE,
                              out1 = REP,
-                             out2 = WHOLE_PLOT,
-                             col = SUB_PLOT,
                              out2.gpar=list(col = "gray50", lwd = 1, lty = 1),
-                             text = WHOLE_PLOT, cex = 1, shorten = "no",
+                             text = TRT_COMB, cex = 1, shorten = "no",
                              data = df, xlab = "COLUMNS", ylab = "ROWS",
                              main = main, 
                              show.key = TRUE, 

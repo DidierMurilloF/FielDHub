@@ -123,10 +123,13 @@ mod_Alpha_Lattice_server <- function(id){
         w <- 2
       }
       
-      selected_index <- ceiling(length(k)/2)
+      if (length(k) > 2) {
+        selected <- k[ceiling(length(k)/2)]
+      } else selected <- k[2]
       
-      updateSelectInput(session = session, inputId = 'k.alpha', label = "Input # of Plots per IBlock:",
-                        choices = k, selected = k[selected_index])
+      updateSelectInput(session = session, inputId = 'k.alpha', 
+                        label = "Input # of Plots per IBlock:",
+                        choices = k, selected = selected)
       
     })
     

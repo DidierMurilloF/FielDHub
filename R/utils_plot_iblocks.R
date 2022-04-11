@@ -5,8 +5,10 @@
 #' @return The return value, if any, from executing the utility.
 #'
 #' @noRd
-plot_iblocks <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks, iBlocks = NULL,
-                         optionLayout = 1, orderReps = "vertical_stack_panel", planter = "serpentine", 
+plot_iblocks <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks, 
+                         iBlocks = NULL, optionLayout = 1, 
+                         orderReps = "vertical_stack_panel", 
+                         planter = "serpentine", 
                          l = 1) {
   site <- l
   locations <- factor(x$fieldBook$LOCATION, levels = unique(x$fieldBook$LOCATION))
@@ -221,8 +223,10 @@ plot_iblocks <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks, 
       df4 <- x$bookROWCol
       nRows <- max(df4$ROW)
       nCols <- max(df4$COLUMN)
-      newPlots <- planter_transform(plots = plots, planter = planter, reps = n_Reps, cols = nCols,
-                                    mode = "Horizontal", units = NULL)
+      newPlots <- planter_transform(plots = plots, planter = planter, 
+                                    reps = n_Reps, cols = nCols,
+                                    mode = "Horizontal", 
+                                    units = NULL)
       df4$PLOT <- newPlots
       books4[[1]] <- df4
     }else if (orderReps == "grid_panel") {
@@ -308,8 +312,20 @@ plot_iblocks <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks, 
       allSites[[st]] <- as.data.frame(df_1)
     }
     allSitesFieldbook <- dplyr::bind_rows(allSites)
-    allSitesFieldbook <- allSitesFieldbook[,c(1:3,8,9,4:7)]
-    df <- df[,c(1:3,8,9,4:7)]
+    if (x$infoDesign$idDesign != 9) {
+      allSitesFieldbook <- allSitesFieldbook[,c(1:3,8,9,4:7)]
+      df <- df[,c(1:3,8,9,4:7)]
+    } else {
+      allSitesFieldbook <- allSitesFieldbook[,c(1:3,5,6,4,7)]
+      colnames(allSitesFieldbook) <- c("ID", "LOCATION", "PLOT", 
+                                       "ROW", "COLUMN", "REP", #"ROW_REP", 
+                                       "ENTRY") # "COLUMN_REP"
+      df <- df[,c(1:3,8,9,4:7)]
+      colnames(df) <- c("ID", "LOCATION", "PLOT", 
+                        "ROW", "COLUMN", "REP", #"ROW_REP", 
+                        "ENTRY") # "COLUMN_REP"
+    }
+    
     df$ENTRY <- as.factor(df$ENTRY)
     rows <- max(as.numeric(df$ROW))
     cols <- max(as.numeric(df$COLUMN))
@@ -317,6 +333,7 @@ plot_iblocks <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks, 
     if (x$infoDesign$idDesign == 8) ds <- "Incomplete Blocks Design Field Layout "
     if (x$infoDesign$idDesign == 11) ds <- "Rectangular Lattice Design Field Layout "
     if (x$infoDesign$idDesign == 12) ds <- "Alpha Lattice Design Field Layout "
+
     main <- paste0(ds, rows, "X", cols)
     p1 <- desplot::desplot(ENTRY ~ COLUMN + ROW, flip = FALSE,
                            out1 = REP,
@@ -341,6 +358,6 @@ plot_iblocks <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks, 
                            main = main,
                            show.key = FALSE, 
                            gg=TRUE)
-  }
+  } 
   return(list(p1 = p1, p2 = p2, df = df, newBooks = newBooksSelected, allSitesFieldbook = allSitesFieldbook))
 }
