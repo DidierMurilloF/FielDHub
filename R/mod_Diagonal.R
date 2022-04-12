@@ -149,8 +149,8 @@ mod_Diagonal_ui <- function(id){
       
       mainPanel(
         width = 8,
-        tabsetPanel(
-          tabPanel("Expt Design Info", DT::DTOutput(ns("options_table"))),
+        tabsetPanel(id = ns("Tabset"),
+          tabPanel(title = "Expt Design Info", value = "tabPanel1", DT::DTOutput(ns("options_table"))),
           tabPanel("Input Data",
                    fluidRow(
                      column(6,DT::DTOutput(ns("data_input"))),
@@ -180,6 +180,11 @@ mod_Diagonal_server <- function(id) {
       loc_user_view <- 1:as.numeric(input$l.diagonal)
       updateSelectInput(inputId = "locView.diagonal", choices = loc_user_view, selected = loc_user_view[1])
     })
+    
+    observeEvent(eventExpr = input$kindExpt,
+                 handlerExpr = updateTabsetPanel(session,
+                                                 "Tabset",
+                                                 selected = "tabPanel1"))
     
     getData <- reactive({
       Option_NCD <- TRUE
@@ -380,6 +385,7 @@ mod_Diagonal_server <- function(id) {
                   user_site = user_site))
     })
     
+
     
     output$options_table <- DT::renderDT({
       Option_NCD <- TRUE
