@@ -83,14 +83,12 @@ plot_layout <- function(x = NULL, optionLayout = 1, planter = "serpentine", l = 
           n_TrtGen <- dplyr::n_distinct(x$fieldBook$TRT_COMB)
           n_Reps <- dplyr::n_distinct(x$fieldBook$REP)
           sizeIblocks <- ssp
-          #sizeIblocks <- sp * ssp
-          #sizeIblocks <- ssp
           sizeIblocks <- as.numeric(sizeIblocks)
-          #iBlocks <- wp 
           iBlocks <- wp * sp
           return0 <- plot_splitPlots(x = x, n_TrtGen = n_TrtGen, n_Reps = n_Reps, 
                                     sizeIblocks = sizeIblocks, iBlocks = iBlocks, 
-                                    optionLayout = optionLayout, planter = planter)
+                                    optionLayout = optionLayout, planter = planter, 
+                                    l = l)
         } else {
           wp <- dplyr::n_distinct(x$fieldBook$WHOLE_PLOT)
           sp <- dplyr::n_distinct(x$fieldBook$SUB_PLOT)
@@ -140,8 +138,11 @@ plot_layout <- function(x = NULL, optionLayout = 1, planter = "serpentine", l = 
       csRep <- dplyr::n_distinct(x$fieldBook$ROW)
       dims <- c(rsRep, csRep)
       n_Reps <- dplyr::n_distinct(x$fieldBook$SQUARE)
-      return2 <- plot_latinSQ(x = x, dims = dims, n_Reps = n_Reps, optionLayout = optionLayout, 
-                              planter = planter, l = l)
+      print(n_Reps)
+      return2 <- plot_latinSQ(x = x, dims = dims, n_Reps = n_Reps, 
+                              optionLayout = optionLayout, 
+                              planter = planter, l = l, 
+                              orderReps = orderReps)
     } else if (x$infoDesign$idDesign == 7) {
       rsRep <- dplyr::n_distinct(x$fieldBook$HSTRIP)
       csRep <- dplyr::n_distinct(x$fieldBook$VSTRIP)
@@ -153,7 +154,7 @@ plot_layout <- function(x = NULL, optionLayout = 1, planter = "serpentine", l = 
                               planter = planter, 
                               l = l, 
                               orderReps = orderReps)
-    } else {
+    } else if (x$infoDesign$idDesign == 9) {
       rsRep <- dplyr::n_distinct(x$fieldBook$ROW)
       csRep <- dplyr::n_distinct(x$fieldBook$COLUMN)
       dims <- c(rsRep, csRep)
