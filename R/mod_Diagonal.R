@@ -101,14 +101,6 @@ mod_Diagonal_ui <- function(id){
                         )
                         
                       ),
-                      # conditionalPanel(condition = "input.kindExpt == 'DBUDC'", ns = ns,
-                      #                  
-                      #                  conditionalPanel(condition = "input.myWay == 'By Row'", ns = ns,
-                      #                                   
-                      #                                   selectInput(inputId = ns("Block_Fillers"), label = "Which Blocks:",
-                      #                                               choices = "Block_Fillers", multiple = TRUE, selected = "")               
-                      #                  )
-                      # )
                    ),
                    conditionalPanel(condition = "input.kindExpt == 'SUDC'", ns = ns,
                                     selectInput(inputId = ns("planter_mov1"), label = "Plot Order Layout:",
@@ -157,12 +149,14 @@ mod_Diagonal_ui <- function(id){
                      column(6,DT::DTOutput(ns("checks_table")))
                    )
           ),
-          #tabPanel("Diagonal Checks Layout", DT::DTOutput(ns("checks_layout"))),
           tabPanel("Randomized Field", DT::DTOutput(ns("randomized_layout"))),
           tabPanel("Plot Number Field", DT::DTOutput(ns("plot_number_layout"))),
-          tabPanel("Expt Name", DT::DTOutput(ns("name_layout"))),
+          # tabPanel("Expt Name", DT::DTOutput(ns("name_layout"))),
           tabPanel("Field Book", DT::DTOutput(ns("fieldBook_diagonal"))),
-          tabPanel("Heatmap", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmap_diag")), type = 5))
+          tabPanel("Heatmap", shinycssloaders::withSpinner(
+            plotly::plotlyOutput(ns("heatmap_diag")), 
+            type = 5)
+            )
         )      
       )
     )
@@ -181,7 +175,31 @@ mod_Diagonal_server <- function(id) {
       updateSelectInput(inputId = "locView.diagonal", choices = loc_user_view, selected = loc_user_view[1])
     })
     
-    observeEvent(eventExpr = input$kindExpt,
+    observeEvent(input$kindExpt,
+                 handlerExpr = updateTabsetPanel(session,
+                                                 "Tabset",
+                                                 selected = "tabPanel1"))
+    observeEvent(input$n_rows,
+                 handlerExpr = updateTabsetPanel(session,
+                                                 "Tabset",
+                                                 selected = "tabPanel1"))
+    observeEvent(input$n_cols,
+                 handlerExpr = updateTabsetPanel(session,
+                                                 "Tabset",
+                                                 selected = "tabPanel1"))
+    observeEvent(input$planter_mov1,
+                 handlerExpr = updateTabsetPanel(session,
+                                                 "Tabset",
+                                                 selected = "tabPanel1"))
+    observeEvent(input$lines.d,
+                 handlerExpr = updateTabsetPanel(session,
+                                                 "Tabset",
+                                                 selected = "tabPanel1"))
+    observeEvent(input$l.diagonal,
+                 handlerExpr = updateTabsetPanel(session,
+                                                 "Tabset",
+                                                 selected = "tabPanel1"))
+    observeEvent(input$owndataDIAGONALS,
                  handlerExpr = updateTabsetPanel(session,
                                                  "Tabset",
                                                  selected = "tabPanel1"))
@@ -332,6 +350,7 @@ mod_Diagonal_server <- function(id) {
       list(checksEntries = checksEntries, checks = checks)
     })
     
+    # available_percent_table <- eventReactive(input$RUN.diagonal, {
     available_percent_table <- reactive({
       Option_NCD <- TRUE
       checksEntries <- as.vector(getChecks()$checksEntries)
@@ -385,8 +404,6 @@ mod_Diagonal_server <- function(id) {
                   user_site = user_site))
     })
     
-
-    
     output$options_table <- DT::renderDT({
       Option_NCD <- TRUE
       if (is.null(available_percent_table()$dt)) {
@@ -427,35 +444,6 @@ mod_Diagonal_server <- function(id) {
                     options = list(columnDefs = list(list(className = 'dt-center', targets = "_all")))
                     )
     })
-    
-    # output$checks_layout <- DT::renderDT({
-    #   Option_NCD <- TRUE
-    #   multi <- input$kindExpt == "RDC" || input$kindExpt == "DBUDC"
-    #   if (multi) req(getData()$data_entry)
-    #   req(user_location()$map_checks)
-    #   w_map <- user_location()$map_checks
-    #   if (is.null(w_map))
-    #     return(NULL)
-    #   
-    #   checks <- as.vector(getChecks()$checksEntries)
-    #   len_checks <- length(checks)
-    #   colores <- c('royalblue','salmon', 'green', 'orange','orchid', 'slategrey',
-    #                'greenyellow', 'blueviolet','deepskyblue','gold','blue', 'red')
-    #   
-    #   df <- as.data.frame(w_map)
-    #   rownames(df) <- nrow(df):1
-    #   options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
-    #   DT::datatable(df,
-    #                 extensions = 'FixedColumns',
-    #                 options = list(
-    #                   dom = 't',
-    #                   scrollX = TRUE,
-    #                   fixedColumns = TRUE
-    #                 )) %>% 
-    #   DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-    #                   backgroundColor = DT::styleEqual(c(checks,0,"Filler"), 
-    #                                                    c(colores[1:len_checks],'yellow', 'snow')))
-    # })
     
     output$checks_table <- DT::renderDT({
       Option_NCD <- TRUE
