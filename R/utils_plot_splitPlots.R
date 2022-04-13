@@ -12,7 +12,6 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
   site <- l
   locations <- factor(x$fieldBook$LOCATION, levels = unique(x$fieldBook$LOCATION))
   nlocs <- length(levels(locations))
-  print(nlocs)
   newBooksLocs <- vector(mode = "list", length = nlocs)
   countLocs <- 1
   books0 <- list(NULL)
@@ -22,7 +21,6 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
   books4 <- list(NULL)
   books5 <- list(NULL)
   books6 <- list(NULL)
-  print(levels(locations))
   for (locs in levels(locations)) {
     NewBook <- x$fieldBook %>%
       dplyr::filter(LOCATION == locs)
@@ -290,8 +288,6 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
     newBooksLocs[[countLocs]] <- newBooks
     countLocs <- countLocs + 1
   }
-  # print(countLocs)
-  print(newBooksLocs)
   opt <- optionLayout
   newBooksSelected <- newBooksLocs[[site]]
   df1 <- newBooksSelected[opt]

@@ -234,10 +234,10 @@ mod_Rectangular_Lattice_server <- function(id) {
                  selectInput(inputId = ns("orderRepsRT"), label = "Reps layout:", 
                              choices = orderReps)
           ),
-          column(2, #align="center",
+          column(2,
                  selectInput(inputId = ns("layoutO_rt"), label = "Layout option:", choices = layoutOptions_rt, selected = 1)
           ),
-          column(2, #align="center",
+          column(2, 
                  selectInput(inputId = ns("locLayout_rt"), label = "Location:", choices = as.numeric(upDateSites_RT()$sites))
           )
         )
