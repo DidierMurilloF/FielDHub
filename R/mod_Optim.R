@@ -518,11 +518,13 @@ mod_Optim_server <- function(id) {
         minVal <- as.numeric(valsOPTIM$minValue)
         ROX_O <- as.numeric(valsOPTIM$ROX)
         ROY_O <- as.numeric(valsOPTIM$ROY)
-        locs <- as.numeric(input$l.optim)
+        #locs <- as.numeric(input$l.optim)
         df_optim <- Spatial_Checks()$fieldBook
+        locs <- length(levels(factor(df_optim$LOCATION)))
+        nrows.s <- max(as.numeric(df_optim$ROW))
+        ncols.s <- max(as.numeric(df_optim$COLUMN))
         loc_levels_factors <- levels(factor(df_optim$LOCATION, unique(df_optim$LOCATION)))
-        nrows.s <- as.numeric(input$nrows.s)
-        ncols.s <- as.numeric(input$ncols.s)
+        
         seed.s <- as.numeric(input$seed.spatial)
         
         df_optim_list <- vector(mode = "list", length = locs)
@@ -561,6 +563,7 @@ mod_Optim_server <- function(id) {
     
     
     output$OPTIMOUTPUT <- DT::renderDT({
+      req(simuDataOPTIM()$df)
       df <- simuDataOPTIM()$df
       df$EXPT <- as.factor(df$EXPT)
       df$LOCATION <- as.factor(df$LOCATION)
@@ -568,7 +571,8 @@ mod_Optim_server <- function(id) {
       df$ROW <- as.factor(df$ROW)
       df$COLUMN <- as.factor(df$COLUMN)
       df$CHECKS <- as.factor(df$CHECKS)
-      df$ENTRY <- as.factor(df$TREATMENT)
+      df$ENTRY <- as.factor(df$ENTRY)
+      df$TREATMENT <- as.factor(df$TREATMENT)
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "600px",
               columnDefs = list(list(className = 'dt-center', targets = "_all"))))

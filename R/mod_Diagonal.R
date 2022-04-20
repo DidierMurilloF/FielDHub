@@ -28,6 +28,17 @@ mod_Diagonal_ui <- function(id){
                      choiceNames = NULL, 
                      choiceValues = NULL),
         conditionalPanel(
+          condition = "input.kindExpt == 'DBUDC'", 
+          ns = ns,
+           conditionalPanel(
+             condition = "input.owndataDIAGONALS == 'No'", 
+             ns = ns,
+             checkboxInput(inputId = ns("sameEntries"), 
+                            label = "Use the same entries across experiments!", 
+                            value = FALSE)
+           ),
+        ),
+        conditionalPanel(
           condition = "input.owndataDIAGONALS == 'Yes'", 
           ns = ns,
            fluidRow(
@@ -60,10 +71,12 @@ mod_Diagonal_ui <- function(id){
                 column(6,style=list("padding-right: 28px;"),
                        numericInput(inputId = ns("lines.db"), 
                                     label = "Input # of Entries:",
-                                    value = 270, min = 5)
+                                    value = 270, 
+                                    min = 5)
                 ),
                 column(6,style=list("padding-left: 5px;"),
-                       textInput(ns("blocks.db"), "Input # Entries per Expt:",
+                       textInput(ns("blocks.db"), 
+                                 "Input # Entries per Expt:",
                                  value = "100,100,70")
                 )
               )       
@@ -107,7 +120,7 @@ mod_Diagonal_ui <- function(id){
           column(6,style=list("padding-left: 5px;"),
                  selectInput(inputId = ns("locView.diagonal"), 
                              label = "Choose location to view:", 
-                             choices = 1:1, 
+                             choices = "", 
                              selected = 1, 
                              multiple = FALSE)
           )
@@ -182,9 +195,8 @@ mod_Diagonal_ui <- function(id){
                               icon = icon("cocktail"),
                               width = '100%')
           )
-        ),
+        )
       ),
-      
       mainPanel(
         width = 8,
         tabsetPanel(id = ns("Tabset"),
@@ -257,6 +269,7 @@ mod_Diagonal_server <- function(id) {
                  handlerExpr = updateTabsetPanel(session,
                                                  "Tabset",
                                                  selected = "tabPanel1"))
+    
     getData <- reactive({
       Option_NCD <- TRUE
       if (input$owndataDIAGONALS == "Yes") {
@@ -310,6 +323,19 @@ mod_Diagonal_server <- function(id) {
           if (lines.db != sum(blocks)) shiny::validate('Sum of blocks may be equal to number of lines.')
           data_entry_UP$BLOCK <- c(rep("ALL", checks), rep(1:length(blocks), times = blocks))
           colnames(data_entry_UP) <- c("ENTRY", "NAME", "BLOCK")
+          if (input$sameEntries) {
+            if (any(blocks != blocks[1])) shiny::validate("Blocks should have the same size")
+            # Names
+            ChecksNames <- paste(rep("CH", checks), 1:checks, sep = "")
+            nameLines <- rep(c(paste(rep("G", blocks[1]), (2 + 1):(blocks[1] + 2), sep = "")), times = length(blocks))
+            NAMES <- c(ChecksNames, nameLines)
+            # Entries
+            ChecksENTRIS <- 1:checks
+            nameEntries <- rep((checks + 1):(blocks[1] + checks), times = length(blocks))
+            ENTRIES <- c(ChecksENTRIS, nameEntries)
+            data_entry_UP$NAME <- NAMES
+            data_entry_UP$ENTRY <- ENTRIES
+          }
           if (Option_NCD == TRUE) {
             data_entry1 <- data_entry_UP[(checks + 1):nrow(data_entry_UP), ]
             Block_levels <- suppressWarnings(as.numeric(levels(as.factor(data_entry1$BLOCK))))
@@ -1289,6 +1315,8 @@ mod_Diagonal_server <- function(id) {
 
     
     output$fieldBook_diagonal <- DT::renderDT({
+      req(simudata_DIAG()$df)
+      print(simudata_DIAG()$df)
       df <- simudata_DIAG()$df
       df$EXPT <- as.factor(df$EXPT)
       df$LOCATION <- as.factor(df$LOCATION)

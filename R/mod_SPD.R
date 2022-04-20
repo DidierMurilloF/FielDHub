@@ -165,7 +165,9 @@ mod_SPD_server <- function(id){
     getData.spd <- reactive({
       req(input$file.SPD)
       inFile <- input$file.SPD
-      dataUp.spd <- load_file(name = inFile$name, path = inFile$datapat, sep = input$sep.spd)
+      dataUp.spd <- load_file(name = inFile$name, 
+                              path = inFile$datapat, 
+                              sep = input$sep.spd)
       return(list(dataUp.spd = dataUp.spd))
     })
     

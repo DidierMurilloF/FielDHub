@@ -25,12 +25,12 @@ mod_pREPS_ui <- function(id){
         
         conditionalPanel("input.owndataPREPS == 'Yes'", ns = ns,
                          fluidRow(
-                           column(7, style=list("padding-right: 28px;"),
+                           column(7, # style=list("padding-right: 28px;"),
                                   fileInput(ns("file.preps"), 
                                             label = "Upload a CSV File:", 
                                             multiple = FALSE)),
                            
-                           column(5,style=list("padding-left: 5px;"),
+                           column(5, #style=list("padding-left: 5px;"),
                                   radioButtons(ns("sep.preps"), "Separator",
                                                choices = c(Comma = ",",
                                                            Semicolon = ";",
@@ -39,13 +39,13 @@ mod_pREPS_ui <- function(id){
                          ),             
         ),
         fluidRow(
-          column(6,style=list("padding-right: 28px;"),
+          column(6, # style=list("padding-right: 28px;"),
                  numericInput(ns("nrows.preps"), 
                               label = "Input # of Rows:",
                               value = 15, 
                               min = 5)
           ),
-          column(6,style=list("padding-left: 5px;"),
+          column(6, # style=list("padding-left: 5px;"),
                  numericInput(ns("ncols.preps"), 
                               label = "Input # of Columns:",
                               value = 20, 
@@ -56,12 +56,12 @@ mod_pREPS_ui <- function(id){
           condition = "input.owndataPREPS == 'No'", 
           ns = ns,
           fluidRow(
-            column(6, style=list("padding-right: 28px;"),
+            column(6, # style=list("padding-right: 28px;"),
                    textInput(ns("repGens.preps"), 
                              label = "# of Entries per Rep Group:", 
                              value = "75,150")
             ),
-            column(6,style=list("padding-left: 5px;"),
+            column(6, # style=list("padding-left: 5px;"),
                    textInput(inputId = ns("repUnits.preps"), 
                              label = "# of Rep per Group:",
                              value = "2,1")
@@ -69,13 +69,13 @@ mod_pREPS_ui <- function(id){
           )
         ),
         fluidRow(
-          column(6,style=list("padding-right: 28px;"),
+          column(6, # style=list("padding-right: 28px;"),
                  numericInput(inputId = ns("l.preps"), 
                               label = "Input # of Locations:", 
                               value = 1, 
                               min = 1)
           ),
-          column(6,style=list("padding-left: 5px;"),
+          column(6, # style=list("padding-left: 5px;"),
                  selectInput(inputId = ns("locView.preps"), 
                              label = "Choose location to view:", 
                              choices = 1:1, 
@@ -89,25 +89,25 @@ mod_pREPS_ui <- function(id){
                     multiple = FALSE,
                     selected = "serpentine"),
         fluidRow(
-          column(6,style=list("padding-right: 28px;"),
+          column(6, # style=list("padding-right: 28px;"),
                  numericInput(ns("s.seed.preps"), 
                               label = "Seed number:", 
                               value = 1, 
                               min = 1)
           ),
-          column(6,style=list("padding-left: 5px;"),
+          column(6, # style=list("padding-left: 5px;"),
                  textInput(ns("expt_name.preps"), 
                            "Input Experiment Name:", 
                            value = "Expt1")
           )
         ),  
         fluidRow(
-          column(6,style=list("padding-right: 28px;"),
+          column(6, # style=list("padding-right: 28px;"),
                  textInput(ns("plot_start.preps"), 
                            "Starting Plot Number:", 
                            value = 1)
           ),
-          column(6,style=list("padding-left: 5px;"),
+          column(6, # style=list("padding-left: 5px;"),
                  textInput(ns("Location.preps"), 
                            "Input Location Name:", 
                            value = "FARGO")
@@ -189,7 +189,7 @@ mod_pREPS_server <- function(id){
         repGens <- as.numeric(as.vector(unlist(strsplit(input$repGens.preps, ","))))
         repUnits <- as.numeric(as.vector(unlist(strsplit(input$repUnits.preps, ","))))
         if (length(repGens) != length(repUnits)) shiny::validate("Input repGens and repUnits must be of the same length.")
-        if (sum(repGens * repUnits) != nrows*ncols) shiny::validate("Data input does not match withn field dimentions provided.")
+        if (sum(repGens * repUnits) != nrows*ncols) shiny::validate("Data input does not match within field dimensions provided.")
         ENTRY <- 1:sum(repGens)
         NAME <- paste(rep("G", sum(repGens)), 1:sum(repGens), sep = "")
         REPS <- sort(rep(repUnits, times = repGens), decreasing = TRUE)
