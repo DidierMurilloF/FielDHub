@@ -86,7 +86,13 @@ app_ui <- function(request) {
                                   htmltools::includeHTML(
                                     system.file("app/www/aboutUs.html", package = "FielDHub")
                                   )
-                         )
+                         ),
+                         
+                         #img(system.file("app/www/ndsulogo.jpg")),
+                          tags$script(HTML("var header = $('.navbar > .container-fluid');
+                          header.append('<div style=\"float:right\"><img src=\"/www/ndsulogo.jpg\" style=\"float:right;width:360px;height:60px;padding-top:0px;\"> </a></div>');
+                          console.log(header)")
+                          )
               )
     )
   )

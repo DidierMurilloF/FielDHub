@@ -42,12 +42,14 @@ p {
 
 .text-primary1 {
   color: #ffc72a;
+  background: rgba(156, 137, 132, 0.55);
   font-size: 88px;
   font-weight: bold;
 }
 
 .text-primary2 {
   color: #0a5640;
+  background: rgba(156, 137, 132, 0.55);
   font-size: 88px;
   font-weight: bold;
 }
@@ -130,7 +132,7 @@ p {
 #showcase .showcase-content {
   color: #fff;
   text-align: center;
-  padding-top: 170px;
+  padding-top: 210px;
 }
 
 #showcase .showcase-content p {
