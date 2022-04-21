@@ -165,7 +165,9 @@ mod_SPD_server <- function(id){
     getData.spd <- reactive({
       req(input$file.SPD)
       inFile <- input$file.SPD
-      dataUp.spd <- load_file(name = inFile$name, path = inFile$datapat, sep = input$sep.spd)
+      dataUp.spd <- load_file(name = inFile$name, 
+                              path = inFile$datapat, 
+                              sep = input$sep.spd)
       return(list(dataUp.spd = dataUp.spd))
     })
     
@@ -211,8 +213,10 @@ mod_SPD_server <- function(id){
         type <- 1
       }
       
-      SPD <- split_plot(wp = wp, sp = sp, reps = reps.spd, l = l.spd, plotNumber = plot_start.spd, seed = seed.spd,
-                        type = type, locationNames = loc.spd, data = data.spd)
+      SPD <- split_plot(wp = wp, sp = sp, reps = reps.spd, l = l.spd, 
+                        plotNumber = plot_start.spd, seed = seed.spd,
+                        type = type, locationNames = loc.spd, 
+                        data = data.spd)
     })
     
     upDateSites <- eventReactive(input$RUN.spd, {
@@ -225,13 +229,14 @@ mod_SPD_server <- function(id){
     output$well_panel_layout_SPD <- renderUI({
       req(spd_reactive()$fieldBook)
       obj_spd <- spd_reactive()
-      # planting_spd <- input$planter_mov_spd
-      allBooks_spd<- plot_layout(x = obj_spd, optionLayout = 1, orderReps = "vertical_stack_panel")$newBooks
+      allBooks_spd<- plot_layout(x = obj_spd, 
+                                 optionLayout = 1, 
+                                 orderReps = "vertical_stack_panel")$newBooks
       nBooks_spd <- length(allBooks_spd)
       layoutOptions_spd <- 1:nBooks_spd
       sites <- as.numeric(input$l.spd)
-      #loc <-  as.vector(unlist(strsplit(input$Location.spd, ",")))
-      orderReps_spd <- c("Vertical Stack Panel" = "vertical_stack_panel", "Horizontal Stack Panel" = "horizontal_stack_panel")
+      orderReps_spd <- c("Vertical Stack Panel" = "vertical_stack_panel", 
+                         "Horizontal Stack Panel" = "horizontal_stack_panel")
       wellPanel(
         column(2,
                radioButtons(ns("typlotspd"), "Type of Plot:",
@@ -244,11 +249,15 @@ mod_SPD_server <- function(id){
                  selectInput(inputId = ns("orderRepsSPD"), label = "Reps layout:", 
                              choices = orderReps_spd),
           ),
-          column(2, #align="center",
-                 selectInput(inputId = ns("layoutO_spd"), label = "Layout option:", choices = layoutOptions_spd)
+          column(2, 
+                 selectInput(inputId = ns("layoutO_spd"), 
+                             label = "Layout option:", 
+                             choices = layoutOptions_spd)
           ),
-          column(2, #align="center",
-                 selectInput(inputId = ns("locLayout_spd"), label = "Location:", choices = as.numeric(upDateSites()$sites))
+          column(2,
+                 selectInput(inputId = ns("locLayout_spd"), 
+                             label = "Location:", 
+                             choices = as.numeric(upDateSites()$sites))
           )
         )
       )
@@ -399,7 +408,7 @@ mod_SPD_server <- function(id){
           ggplot2::theme_minimal() + # I added this option 
           ggplot2::theme(plot.title = ggplot2::element_text(family="Calibri", face="bold", size=13, hjust=0.5))
         
-        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 640)
+        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1350, height = 640)
         return(p2)
       } else {
         showModal(
@@ -440,7 +449,10 @@ mod_SPD_server <- function(id){
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "500px"))
       
-      DT::datatable(df, filter = 'top', rownames = FALSE, options = list(
+      DT::datatable(df, 
+                    filter = 'top', 
+                    rownames = FALSE, 
+                    options = list(
         columnDefs = list(list(className = 'dt-center', targets = "_all"))))
       
     })

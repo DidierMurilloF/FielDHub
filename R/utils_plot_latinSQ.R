@@ -18,7 +18,6 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, optionLayout = 1,
   books0 <- list(NULL)
   books1 <- list(NULL)
   
-  
   for (locs in levels(locations)) {
     NewBook <- x$fieldBook %>%
       dplyr::filter(LOCATION == locs)
@@ -148,7 +147,7 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, optionLayout = 1,
                            main = main,
                            show.key = FALSE,
                            gg = TRUE)
-  } else {
+  } else  if (x$infoDesign$idDesign == 3) {
     allSites <- vector(mode = "list", length = nlocs)
     for (st in 1:nlocs) {
       newBooksSelected_1 <- newBooksLocs[[st]]
@@ -157,8 +156,12 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, optionLayout = 1,
     }
     allSitesFieldbook <- dplyr::bind_rows(allSites)
     allSitesFieldbook <- allSitesFieldbook[,c(1:3,8,9,4:7)]
+    colnames(allSitesFieldbook) <- c("ID", "LOCATION", "PLOT", "ROW", 
+                                    "COLUMN", "SQUARE", "ROW_SQ", 
+                                    "COLUMN_SQ", "TREATMENT")
     df <- df[,c(1:3,8,9,4:7)]
-    colnames(df) <- c("ID", "LOCATION", "PLOT", "ROW", "COLUMN", "SQUARE", "ROW_SQ", 
+    colnames(df) <- c("ID", "LOCATION", "PLOT", "ROW", 
+                      "COLUMN", "SQUARE", "ROW_SQ", 
                       "COLUMN_SQ", "TREATMENT")
     rows <- max(as.numeric(df$ROW))
     cols <- max(as.numeric(df$COLUMN))
@@ -166,22 +169,42 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, optionLayout = 1,
     main <- paste0(ds, rows, "X", cols)
     # Plot field layout
     df$TREATMENT <- as.factor(df$TREATMENT)
-    p1 <- desplot::desplot(TREATMENT ~ COLUMN + ROW, flip = FALSE,
-                           out1 = SQUARE,
-                           out2.gpar = list(col = "black", lty = 3), 
-                           text = TREATMENT, cex = 1, shorten = "no",
-                           data = df, xlab = "COLUMNS", ylab = "ROWS",
-                           main = main, 
-                           show.key = FALSE,
-                           gg = TRUE)
-    df$SQUARE <- as.factor(df$SQUARE)
-    p2 <- desplot::desplot(SQUARE ~ COLUMN + ROW, flip = FALSE,
-                           out1 = SQUARE,
-                           text = PLOT, cex = 1, shorten = "no",
-                           data = df, xlab = "COLUMNS", ylab = "ROWS",
-                           main = main,
-                           show.key = FALSE,
-                           gg = TRUE)
+    if (n_Reps > 1) {
+      p1 <- desplot::desplot(TREATMENT ~ COLUMN + ROW, flip = FALSE,
+                             out1 = SQUARE,
+                             out2.gpar = list(col = "black", lty = 3), 
+                             text = TREATMENT, cex = 1, shorten = "no",
+                             data = df, xlab = "COLUMNS", ylab = "ROWS",
+                             main = main, 
+                             show.key = FALSE,
+                             gg = TRUE)
+      
+      df$SQUARE <- as.factor(df$SQUARE)
+      p2 <- desplot::desplot(SQUARE ~ COLUMN + ROW, flip = FALSE,
+                             out1 = SQUARE,
+                             text = PLOT, cex = 1, shorten = "no",
+                             data = df, xlab = "COLUMNS", ylab = "ROWS",
+                             main = main,
+                             show.key = FALSE,
+                             gg = TRUE)
+    } else {
+      p1 <- desplot::desplot(TREATMENT ~ COLUMN + ROW, flip = FALSE,
+                             out2.gpar = list(col = "black", lty = 3), 
+                             text = TREATMENT, cex = 1, shorten = "no",
+                             data = df, xlab = "COLUMNS", ylab = "ROWS",
+                             main = main, 
+                             show.key = FALSE,
+                             gg = TRUE)
+      
+      df$SQUARE <- as.factor(df$SQUARE)
+      p2 <- desplot::desplot(SQUARE ~ COLUMN + ROW, flip = FALSE,
+                             text = PLOT, cex = 1, shorten = "no",
+                             data = df, xlab = "COLUMNS", ylab = "ROWS",
+                             main = main,
+                             show.key = FALSE,
+                             gg = TRUE)
+    }
+
   }
   return(list(p1 = p1, p2 = p2, df = df, newBooks = newBooksSelected, 
               allSitesFieldbook = allSitesFieldbook))

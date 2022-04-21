@@ -11,97 +11,144 @@ mod_RCBD_augmented_ui <- function(id){
   ns <- NS(id)
   tagList(
     sidebarLayout(
-      sidebarPanel(width = 4,
-                   radioButtons(inputId = ns("owndata_a_rcbd"), label = "Import entries' list?", 
-                                choices = c("Yes", "No"), selected = "No",
-                                inline = TRUE, width = NULL, choiceNames = NULL, choiceValues = NULL),
-                   
-                   conditionalPanel("input.owndata_a_rcbd == 'Yes'", ns = ns,
-                                    fluidRow(
-                                      column(7, style=list("padding-right: 28px;"),
-                                             fileInput(ns("file1_a_rcbd"), label = "Upload a CSV File:", multiple = FALSE)),
-                                      column(5,style=list("padding-left: 5px;"),
-                                             radioButtons(ns("sep.a_rcbd"), "Separator",
-                                                          choices = c(Comma = ",",
-                                                                      Semicolon = ";",
-                                                                      Tab = "\t"),
-                                                          selected = ","))
-                                    )              
-                   ),
-                   
-                   fluidRow(
-                     column(6,style=list("padding-right: 28px;"),
-                            numericInput(inputId = ns("nExpt_a_rcbd"), label = "Input # of Stacked Expts:",
-                                         value = 1, min = 1, max = 100)
-                     ),
-                     column(6,style=list("padding-left: 5px;"),
-                             checkboxInput(inputId = ns("random"), label = "Randomize Entries?",
-                                           value = TRUE)
-                     )
-                   ),
-                   
-                   conditionalPanel("input.owndata_a_rcbd == 'No'", ns = ns,
-                                    numericInput(inputId = ns("lines_a_rcbd"), label = "Input # of Entries:", value = 50)
-                   ),
-                   fluidRow(
-                     column(6,style=list("padding-right: 28px;"),
-                            numericInput(inputId = ns("checks_a_rcbd"), label = "Checks per Block:",
-                                        value = 4, min = 1, max = 10)
-                     ),
-                     column(6,style=list("padding-left: 5px;"),
-                            numericInput(inputId = ns("blocks_a_rcbd"), label = "Input # of Blocks:",
-                                         value = 10, min = 3, max = 100)
-                     )
-                     
-                   ),
-                   fluidRow(
-                     column(6,style=list("padding-right: 28px;"),
-                            numericInput(inputId = ns("l.arcbd"), label = "Input # of Locations:",
-                                         value = 1, min = 1, max = 100),
-                     ),
-                     column(6,style=list("padding-left: 5px;"),
-                            selectInput(inputId = ns("locView.arcbd"), label = "Choose location to view:",
-                                        choices = 1:1, selected = 1, multiple = FALSE),
-                     )
-                     
-                   ),
-                   
-                   
-                   selectInput(inputId = ns("planter_mov1_a_rcbd"), label = "Plot Order Layout:",
-                               choices = c("serpentine", "cartesian"), multiple = FALSE,
-                               selected = "serpentine"),
-                   fluidRow(
-                     column(6,style=list("padding-right: 28px;"),
-                            numericInput(inputId = ns("myseed_a_rcbd"), label = "Seed Number:",
-                                         value = 1, min = 1)
-                     ),
-                     column(6,style=list("padding-left: 5px;"),
-                            textInput(ns("expt_name_a_rcbd"), "Input Experiment Name:", value = "Expt1")
-                     )
-                   ),  
-                   
-                   fluidRow(
-                     column(6,style=list("padding-right: 28px;"),
-                            textInput(ns("plot_start_a_rcbd"), "Starting Plot Number:", value = 1)
-                     ),
-                     column(6,style=list("padding-left: 5px;"),
-                            textInput(ns("Location_a_rcbd"), "Input Location:", value = "FARGO")
-                     )
-                     
-                   ),
-                   #actionButton("Simulate.crd", "Simulate!")
-                   #downloadButton(ns("downloadData_a_rcbd"), "Save My Experiment")
-                   fluidRow(
-                     column(6,
-                            downloadButton(ns("downloadData_a_rcbd"), "Save Experiment", style = "width:100%")
-                     ),
-                     column(6,
-                            actionButton(ns("Simulate.arcbd"), "Simulate!", icon = icon("cocktail"), width = '100%')
-                     )
-                   )
-                   
+      sidebarPanel(
+        width = 4,
+        radioButtons(inputId = ns("owndata_a_rcbd"), 
+                     label = "Import entries' list?", 
+                     choices = c("Yes", "No"), 
+                     selected = "No",
+                     inline = TRUE, 
+                     width = NULL, 
+                     choiceNames = NULL, 
+                     choiceValues = NULL),
+        conditionalPanel(
+          condition = "input.owndata_a_rcbd == 'Yes'", ns = ns,
+          fluidRow(
+            column(7, style=list("padding-right: 28px;"),
+                   fileInput(ns("file1_a_rcbd"), 
+                             label = "Upload a CSV File:", 
+                             multiple = FALSE)),
+            column(5,style=list("padding-left: 5px;"),
+                   radioButtons(ns("sep.a_rcbd"), "Separator",
+                                choices = c(Comma = ",",
+                                            Semicolon = ";",
+                                            Tab = "\t"),
+                                selected = ","))
+          )              
+        ),
+        fluidRow(
+          column(6,
+                 style=list("padding-right: 28px;"),
+                 numericInput(inputId = ns("nExpt_a_rcbd"), 
+                              label = "Input # of Stacked Expts:",
+                              value = 1, 
+                              min = 1, 
+                              max = 100)
+          ),
+          column(6,
+                 style=list("padding-left: 5px;"),
+                  checkboxInput(inputId = ns("random"), 
+                                label = "Randomize Entries?",
+                                value = TRUE)
+          )
+        ),
+        
+        conditionalPanel(
+          condition = "input.owndata_a_rcbd == 'No'", 
+          ns = ns,
+          numericInput(inputId = ns("lines_a_rcbd"), 
+                       label = "Input # of Entries:", 
+                       value = 50)
+        ),
+        fluidRow(
+          column(6,
+                 style=list("padding-right: 28px;"),
+                 numericInput(inputId = ns("checks_a_rcbd"), 
+                              label = "Checks per Block:",
+                              value = 4,
+                              min = 1, 
+                              max = 10)
+          ),
+          column(6,
+                 style=list("padding-left: 5px;"),
+                 numericInput(inputId = ns("blocks_a_rcbd"), 
+                              label = "Input # of Blocks:",
+                              value = 10,
+                              min = 3, 
+                              max = 100)
+          )
+        ),
+        fluidRow(
+          column(6,
+                 style=list("padding-right: 28px;"),
+                 numericInput(inputId = ns("l.arcbd"), 
+                              label = "Input # of Locations:",
+                              value = 1,
+                              min = 1, 
+                              max = 100),
+          ),
+          column(6,
+                 style=list("padding-left: 5px;"),
+                 selectInput(inputId = ns("locView.arcbd"), 
+                             label = "Choose location to view:",
+                             choices = 1:1, 
+                             selected = 1, 
+                             multiple = FALSE),
+          )
+        ),
+        selectInput(inputId = ns("planter_mov1_a_rcbd"),
+                    label = "Plot Order Layout:",
+                    choices = c("serpentine", "cartesian"), 
+                    multiple = FALSE,
+                    selected = "serpentine"),
+        fluidRow(
+          column(6,
+                 style=list("padding-right: 28px;"),
+                 numericInput(inputId = ns("myseed_a_rcbd"), 
+                              label = "Seed Number:",
+                              value = 1, 
+                              min = 1)
+          ),
+          column(6,
+                 style=list("padding-left: 5px;"),
+                 textInput(ns("expt_name_a_rcbd"), 
+                           label = "Input Experiment Name:", 
+                           value = "Expt1")
+          )
+        ),  
+        fluidRow(
+          column(6,
+                 style=list("padding-right: 28px;"),
+                 textInput(ns("plot_start_a_rcbd"), 
+                           label = "Starting Plot Number:", 
+                           value = 1)
+          ),
+          column(6,style=list("padding-left: 5px;"),
+                 textInput(ns("Location_a_rcbd"), 
+                           label = "Input Location:", 
+                           value = "FARGO")
+          )
+        ),
+        fluidRow(
+          column(6,
+                 actionButton(inputId = ns("RUN.arcbd"), 
+                              "Run!", 
+                              icon = icon("cocktail"), 
+                              width = '100%'),
+          ),
+          column(6,
+                 actionButton(ns("Simulate.arcbd"), 
+                              "Simulate!", 
+                              icon = icon("cocktail"), 
+                              width = '100%')
+          )
+          
+        ), 
+        br(),
+        downloadButton(ns("downloadData_a_rcbd"), 
+                       "Save Experiment!", 
+                       style = "width:100%")
       ),
-      
       mainPanel(
         width = 8,
          tabsetPanel(
@@ -113,9 +160,8 @@ mod_RCBD_augmented_ui <- function(id){
            ),
            tabPanel("Randomized Field", DT::DTOutput(ns("randomized_layout"))),
            tabPanel("Plot Number Field", DT::DTOutput(ns("plot_number_layout"))),
-           tabPanel("Name Expt", DT::DTOutput(ns("expt_name_layout"))),
            tabPanel("Field Book", DT::DTOutput(ns("fieldBook_ARCBD"))),
-           tabPanel("Heatmap", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmap")), type = 5))
+           tabPanel("Heatmap", plotly::plotlyOutput(ns("heatmap")))
          )      
       )
     )
@@ -129,26 +175,25 @@ mod_RCBD_augmented_server <- function(id) {
   moduleServer( id, function(input, output, session) {
     ns <- session$ns
     
-    observeEvent(input$l.arcbd, {
-      loc_user_view <- 1:as.numeric(input$l.arcbd)
-      updateSelectInput(inputId = "locView.arcbd", choices = loc_user_view, selected = loc_user_view[1])
-    })
-    
     observeEvent(input$random, {
-      # Show a modal when the button is pressed
       if (input$random == FALSE) {
-        shinyalert::shinyalert("Warning!!", "By unchecking this option you will only randomized the check plots.", 
-                               type = "warning")
+        shinyalert::shinyalert(
+          "Warning!!", 
+          "By unchecking this option you will only randomized the check plots.", 
+          type = "warning")
       }
-      
     })
     
-    getDataup_a_rcbd <- reactive({
+    getDataup_a_rcbd <- eventReactive(input$RUN.arcbd,{
       if (input$owndata_a_rcbd == "Yes") {
         req(input$file1_a_rcbd)
         inFile <- input$file1_a_rcbd
-        data_up <- load_file(name = inFile$name, path = inFile$datapat, sep = input$sep.a_rcbd)
-        if (ncol(data_up) < 2) shiny::validate("Data input needs at least two columns with: ENTRY and NAME.")
+        data_up <- load_file(name = inFile$name, 
+                             path = inFile$datapat, 
+                             sep = input$sep.a_rcbd)
+        if (ncol(data_up) < 2) {
+          shiny::validate("Data input needs at least two columns with: ENTRY and NAME.")
+        } 
         data_up <- as.data.frame(data_up[,1:2])
         data_up <- na.omit(data_up)
         colnames(data_up) <- c("ENTRY", "NAME")
@@ -178,11 +223,16 @@ mod_RCBD_augmented_server <- function(id) {
                     filter = "top",
                     rownames = FALSE, 
                     caption = 'List of Entries.', 
-                    options = list(columnDefs = list(list(className = 'dt-center', targets = "_all"))))
+                    options = list(
+                      columnDefs = list(list(className = 'dt-center', 
+                                             targets = "_all"))))
     })
     
     entryListFormat_ARCBD <- data.frame(ENTRY = 1:9, 
-                                        NAME = c(c("CHECK1", "CHECK2","CHECK3"), paste("Genotype", LETTERS[1:6], sep = "")))
+                                        NAME = c(c("CHECK1", "CHECK2","CHECK3"), 
+                                                 paste("Genotype", 
+                                                       LETTERS[1:6], 
+                                                       sep = "")))
     entriesInfoModal_ARCBD <- function() {
       modalDialog(
         title = div(tags$h3("Important message", style = "color: red;")),
@@ -210,11 +260,18 @@ mod_RCBD_augmented_server <- function(id) {
       }
     })
     
+    some_inputs <- eventReactive(input$RUN.arcbd,{
+      return(list(blocks = input$blocks_a_rcbd, 
+                  entries = input$lines_a_rcbd, 
+                  checks = input$checks_a_rcbd,
+                  sites = input$l.arcbd,
+                  expts_a_rcbd = input$nExpt_a_rcbd))
+    })
+    
     output$checks_table <- DT::renderDT({
-      req(input$checks_a_rcbd)
       req(getDataup_a_rcbd()$dataUp_a_rcbd)
         data_entry <- getDataup_a_rcbd()$dataUp_a_rcbd
-        df <- data_entry[1:input$checks_a_rcbd,]
+        df <- data_entry[1:some_inputs()$checks,]
         options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                   scrollX = TRUE, scrollY = "350px"))
         a <- ncol(df) - 1
@@ -222,8 +279,7 @@ mod_RCBD_augmented_server <- function(id) {
           columnDefs = list(list(className = 'dt-left', targets = 0:a))))
     })
     
-    rcbd_augmented_reactive <- reactive({
-      
+    rcbd_augmented_reactive <- eventReactive(input$RUN.arcbd,{
       req(input$checks_a_rcbd)
       req(input$lines_a_rcbd)
       req(input$blocks_a_rcbd)
@@ -245,15 +301,14 @@ mod_RCBD_augmented_server <- function(id) {
       seed.number <- as.numeric(input$myseed_a_rcbd)
       planter <- input$planter_mov1_a_rcbd
       l.arcbd <- as.numeric(input$l.arcbd)
-      if (length(loc) > l.arcbd) validate("Length of vector with name of locations is greater than the number of locations.")
-      repsExpt <- as.numeric(input$nExpt_a_rcbd)
+      if (length(loc) > l.arcbd) {
+        validate("Length of vector with name of locations is greater than the number of locations.")
+      } 
+      repsExpt <- some_inputs()$expts_a_rcbd
       nameexpt <- as.vector(unlist(strsplit(input$expt_name_a_rcbd, ",")))
       if (length(nameexpt) != 0) {
         Name_expt <- nameexpt
       }else Name_expt <- paste(rep('Expt', repsExpt), 1:repsExpt, sep = "")
-      
-      #if (length(plot.number) != length(Name_expt)) plot.number <- 1001
-      
       plotNumber <- as.numeric(as.vector(unlist(strsplit(input$plot_start_a_rcbd, ","))))
       site_names <- as.character(as.vector(unlist(strsplit(input$Location_a_rcbd, ","))))
       random <- input$random
@@ -271,19 +326,31 @@ mod_RCBD_augmented_server <- function(id) {
                               data = gen.list)
     })
     
+
+    
+    observeEvent(some_inputs()$sites, {
+      sites <- as.numeric(some_inputs()$sites)
+      sites_to_view <- 1:sites 
+      updateSelectInput(session = session, 
+                        inputId = "locView.arcbd", 
+                        choices = sites_to_view, 
+                        selected = sites_to_view[1])
+      
+    })
+    
     locNum <- reactive(
       return(as.numeric(input$locView.arcbd))
     )
     
     output$randomized_layout <- DT::renderDT({
        req(getDataup_a_rcbd()$dataUp_a_rcbd)
-       req(input$blocks_a_rcbd)
        r_map <- rcbd_augmented_reactive()$layout_random_sites[[locNum()]]
-       checks <- 1:input$checks_a_rcbd
-       b <- as.numeric(input$blocks_a_rcbd)
+       checks <- 1:(as.numeric(some_inputs()$checks))
+       b <- as.numeric(some_inputs()$blocks)
        len_checks <- length(checks)
        df <- as.data.frame(r_map)
-       repsExpt <- as.numeric(input$nExpt_a_rcbd)
+       # repsExpt <- as.numeric(input$nExpt_a_rcbd)
+       repsExpt <- some_inputs()$expts_a_rcbd
        colores <- c('royalblue','salmon', 'green', 'orange','orchid', 'slategrey',
                     'greenyellow', 'blueviolet','deepskyblue','gold','blue', 'red')
        s <- rcbd_augmented_reactive()$infoDesign$entries
@@ -291,7 +358,9 @@ mod_RCBD_augmented_server <- function(id) {
        E <- paste("E", rep(repsExpt:1, each = b), sep = "")
        rownames(df) <- paste(B,E)
        colnames(df) <- paste("V", 1:ncol(df), sep = "")
-       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
+       options(DT.options = list(pageLength = nrow(df), 
+                                 autoWidth = FALSE, 
+                                 scrollY = "700px"))
        DT::datatable(df,
                      extensions = 'Buttons',
                      options = list(dom = 'Blfrtip',
@@ -314,10 +383,11 @@ mod_RCBD_augmented_server <- function(id) {
     
     output$expt_name_layout <- DT::renderDT({
       req(rcbd_augmented_reactive())
-      req(input$blocks_a_rcbd)
-      req(input$expt_name_a_rcbd)
-      b <- as.numeric(input$blocks_a_rcbd)
-      repsExpt <- as.numeric(input$nExpt_a_rcbd)
+      # req(input$expt_name_a_rcbd)
+      b <- as.numeric(some_inputs()$blocks)
+      # repsExpt <- as.numeric(input$nExpt_a_rcbd)
+      repsExpt <- some_inputs()$expts_a_rcbd
+
       name_expt <- as.vector(unlist(strsplit(input$expt_name_a_rcbd, ",")))
       if (length(name_expt) == repsExpt) {
         Name_expt <- name_expt
@@ -343,12 +413,14 @@ mod_RCBD_augmented_server <- function(id) {
 
      output$plot_number_layout <- DT::renderDT({
        req(rcbd_augmented_reactive())
-       req(input$blocks_a_rcbd)
+       # req(input$blocks_a_rcbd)
        plot_num1 <- rcbd_augmented_reactive()$layout_plots_sites[[locNum()]]
-       b <- as.numeric(input$blocks_a_rcbd)
+       # b <- as.numeric(input$blocks_a_rcbd)
+       b <- as.numeric(some_inputs()$blocks)
        infoDesign <- rcbd_augmented_reactive()$infoDesign
        Fillers <- as.numeric(infoDesign$Fillers)
-       repsExpt <- as.numeric(input$nExpt_a_rcbd)
+       # repsExpt <- as.numeric(input$nExpt_a_rcbd)
+       repsExpt <- some_inputs()$expts_a_rcbd
        
        if (Fillers == 0) {
          a <- as.vector(as.matrix(plot_num1))
@@ -366,9 +438,12 @@ mod_RCBD_augmented_server <- function(id) {
                                       fixedColumns = TRUE,
                                       pageLength = nrow(df),
                                       scrollY = "700px",
-                                      class = 'compact cell-border stripe',  rownames = FALSE,
+                                      class = 'compact cell-border stripe',  
+                                      rownames = FALSE,
                                       server = FALSE,
-                                      filter = list( position = 'top', clear = FALSE, plain =TRUE ),
+                                      filter = list( position = 'top', 
+                                                     clear = FALSE, 
+                                                     plain =TRUE ),
                                       buttons = c('copy', 'excel'),
                                       lengthMenu = list(c(10,25,50,-1),
                                                         c(10,25,50,"All")))
@@ -574,30 +649,6 @@ mod_RCBD_augmented_server <- function(id) {
        req(heatmap_obj())
        heatmap_obj()
      })
-     
-     
-     
-     
-     
-     
-     
-     
-     
-     
-     
-     
-     
-     
-     
-     # 
-     # output$dt5_a <- DT::renderDT({
-     #   if(is.null(rcbd_augmented_reactive()$fieldBook)) return(NULL)
-     #   df <- simuDataARCBD()$df
-     #   options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-     #                             scrollX = TRUE, scrollY = "600px"))
-     #   DT::datatable(df, rownames = FALSE, options = list(
-     #     columnDefs = list(list(className = 'dt-center', targets = "_all"))))
-     # })
      
      output$downloadData_a_rcbd <- downloadHandler(
        filename = function() {

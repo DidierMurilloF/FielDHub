@@ -37,12 +37,12 @@ plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1
             sq <- sqrt(n_TrtGen)
             y2 <- c(sq, sq)
             Y <- unique(data.frame(rbind(y1, y2)))
-            print(Y)
+            # print(Y)
             dm <- nrow(Y)
           } else {
             y1 <- y
             Y <- data.frame(rbind(y1))
-            print(Y)
+            # Sprint(Y)
             dm <- nrow(Y)
           }
         }else if (length(y) == 3) {
@@ -52,7 +52,7 @@ plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1
             sq <- sqrt(n_TrtGen)
             y3 <- c(sq, sq)
             Y <- unique(data.frame(rbind(y1, y2, y3)))
-            print(print(Y))
+            # print(print(Y))
             dm <- nrow(Y)
           } else {
             y1 <- c(y[1], prod(y[2:length(y)]))
@@ -68,7 +68,7 @@ plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1
             sq <- sqrt(n_TrtGen)
             y4 <- c(sq, sq)
             Y <- unique(data.frame(rbind(y4, y3, y2, y1)))
-            print(print(Y))
+            # Sprint(print(Y))
             dm <- nrow(Y)
           } else {
             y1 <- c(y[1], prod(y[2:length(y)]))
@@ -90,7 +90,7 @@ plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1
         #   Y <- unique(data.frame(rbind(y1, y2)))
         #   dm <- nrow(Y)
         # }
-        print(Y)
+        # print(Y)
         books1 <- vector(mode = "list", length = dm)
         for (k in 1:dm) {
           s1 <- as.numeric(Y[k,][1])
@@ -116,12 +116,12 @@ plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1
             sq <- sqrt(n_TrtGen)
             y2 <- c(sq, sq)
             Y <- unique(data.frame(rbind(y1, y2)))
-            print(Y)
+            # print(Y)
             dm <- nrow(Y)
           } else {
             y1 <- y
             Y <- data.frame(rbind(y1))
-            print(Y)
+            # print(Y)
             dm <- nrow(Y)
           }
         }else if (length(y) == 3) {
@@ -131,7 +131,7 @@ plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1
             sq <- sqrt(n_TrtGen)
             y3 <- c(sq, sq)
             Y <- unique(data.frame(rbind(y1, y2, y3)))
-            print(print(Y))
+            # Sprint(print(Y))
             dm <- nrow(Y)
           } else {
             y1 <- c(y[1], prod(y[2:length(y)]))
@@ -147,7 +147,7 @@ plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1
             sq <- sqrt(n_TrtGen)
             y4 <- c(sq, sq)
             Y <- unique(data.frame(rbind(y4, y3, y2, y1)))
-            print(print(Y))
+            # print(print(Y))
             dm <- nrow(Y)
           } else {
             y1 <- c(y[1], prod(y[2:length(y)]))

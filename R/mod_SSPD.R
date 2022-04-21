@@ -133,7 +133,7 @@ mod_SSPD_ui <- function(id){
             tabPanel("Field Layout",
                      shinycssloaders::withSpinner(
                        plotly::plotlyOutput(ns("layouts"), 
-                                            width = "100%", 
+                                            width = "98%", 
                                             height = "650px"),
                        type = 5
                      ),
@@ -176,7 +176,6 @@ mod_SSPD_server <- function(id){
                     bordered = TRUE,
                     align = 'c',
                     striped = TRUE),
-        #h4("Note that reps might be unbalanced."),
         easyClose = FALSE
       )
     }
@@ -261,41 +260,63 @@ mod_SSPD_server <- function(id){
       
     })
     
-    upDateSites <- eventReactive(input$RUN.sspd, {
-      req(input$l.sspd)
-      locs <- as.numeric(input$l.sspd)
-      sites <- 1:locs
-      return(list(sites = sites))
-    })
+    # upDateSites <- eventReactive(input$RUN.sspd, {
+    #   req(input$l.sspd)
+    #   locs <- as.numeric(input$l.sspd)
+    #   sites <- 1:locs
+    #   return(list(sites = sites))
+    # })
   
     output$well_panel_layout_SSPD <- renderUI({
       req(sspd_reactive()$fieldBook)
       obj_sspd <- sspd_reactive()
-      # planting_sspd <- input$planter_mov_sspd
       allBooks_sspd<- plot_layout(x = obj_sspd, optionLayout = 1)$newBooks
       nBooks_sspd <- length(allBooks_sspd)
       layoutOptions_sspd <- 1:nBooks_sspd
-      sites <- as.numeric(input$l.sspd)
-      #loc <-  as.vector(unlist(strsplit(input$Location.sspd, ",")))
+      df <- sspd_reactive()$fieldBook
+      orderReps_sspd <- c("Vertical Stack Panel" = "vertical_stack_panel", 
+                          "Horizontal Stack Panel" = "horizontal_stack_panel")
+      sites <- 1:length(levels(as.factor(df$LOCATION)))
       wellPanel(
+        column(2,
+               radioButtons(ns("typlotsspd"), "Type of Plot:",
+                            c("Entries/Treatments" = 1,
+                              "Plots" = 2,
+                              "Heatmap" = 3), selected = 1)
+        ),
         fluidRow(
-          column(2,
-                 radioButtons(ns("typlotsspd"), "Type of Plot:",
-                              c("Entries/Treatments" = 1,
-                                "Plots" = 2,
-                                "Heatmap" = 3), selected = 1)
+          column(3,
+                 selectInput(inputId = ns("orderRepSSPD"), 
+                             label = "Reps layout:", 
+                             choices = orderReps_sspd),
           ),
-          column(3, #align="center",
+          column(3, 
                  selectInput(inputId = ns("layoutO_sspd"), 
                              label = "Layout option:", 
                              choices = layoutOptions_sspd)
           ),
-          column(3, #align="center",
+          column(3, 
                  selectInput(inputId = ns("locLayout_sspd"), 
                              label = "Location:", 
-                             choices = as.numeric(upDateSites()$sites))
+                             choices = sites) #  as.numeric(upDateSites()$sites)
           )
         )
+      )
+    })
+    
+    observeEvent(input$orderRepSSPD, {
+      req(input$orderRepSSPD)
+      obj_sspd <- sspd_reactive()
+      allBooks <- try(plot_layout(x = obj_sspd, 
+                                  optionLayout = 1, 
+                                  orderReps = input$orderRepSSPD)$newBooks, 
+                      silent = TRUE)
+      nBooks <- length(allBooks)
+      NewlayoutOptions <- 1:nBooks
+      updateSelectInput(session = session, inputId = 'layoutO_sspd',
+                        label = "Layout option:",
+                        choices = NewlayoutOptions,
+                        selected = 1
       )
     })
     
@@ -305,8 +326,15 @@ mod_SSPD_server <- function(id){
       obj_sspd <- sspd_reactive()
       opt_sspd <- as.numeric(input$layoutO_sspd)
       planting_sspd <- input$planter_mov_sspd
-      plot_layout(x = obj_sspd, optionLayout = opt_sspd, planter = planting_sspd)
+      locSelected <- as.numeric(input$locLayout_sspd)
+      try(plot_layout(x = obj_sspd, 
+                      optionLayout = opt_sspd, 
+                      orderReps = input$orderRepSSPD,
+                      planter = planting_sspd, 
+                      l = locSelected), 
+          silent = TRUE)
     })
+    
     
     valsspd <- reactiveValues(maxV.sspd = NULL, minV.sspd = NULL, Trial.sspd = NULL)
     
@@ -375,7 +403,8 @@ mod_SSPD_server <- function(id){
       set.seed(input$myseed.sspd)
       req(sspd_reactive()$fieldBook)
       
-      if(!is.null(valsspd$maxV.sspd) && !is.null(valsspd$minV.sspd) && !is.null(valsspd$Trial.sspd)) {
+      if(!is.null(valsspd$maxV.sspd) && !is.null(valsspd$minV.sspd) && 
+         !is.null(valsspd$Trial.sspd)) {
         max <- as.numeric(valsspd$maxV.sspd)
         min <- as.numeric(valsspd$minV.sspd)
         df.sspd <- reactive_layoutSSPD()$allSitesFieldbook
@@ -386,7 +415,7 @@ mod_SSPD_server <- function(id){
       }else {
         df.sspd <- reactive_layoutSSPD()$allSitesFieldbook
       }
-      return(list(df = df.sspd, a = a))
+      return(list(df = df.sspd))
     })
     
     
@@ -405,20 +434,28 @@ mod_SSPD_server <- function(id){
     heatmap_obj <- reactive({
      req(simuData_sspd()$df)
       if (ncol(simuData_sspd()$df) == 11) {
-        locs <- factor(simuData_sspd()$df$LOCATION, levels = unique(simuData_sspd()$df$LOCATION))
+        locs <- factor(simuData_sspd()$df$LOCATION, 
+                       levels = unique(simuData_sspd()$df$LOCATION))
         locLevels <- levels(locs)
-        df = subset(simuData_sspd()$df, LOCATION == locLevels[1])
+        df = subset(simuData_sspd()$df, LOCATION == locLevels[locNum()])
         loc <- levels(factor(df$LOCATION))
         trail <- as.character(valsspd$Trial.sspd)
         label_trail <- paste(trail, ": ")
         heatmapTitle <- paste("Heatmap for ", trail)
         new_df <- df %>%
-          dplyr::mutate(text = paste0("Site: ", loc, "\n", "Row: ", df$ROW, "\n", "Col: ", df$COLUMN, "\n", "TRT_COMB: ", 
-                                      df$TRT_COMB, "\n", label_trail, round(df[,11],2)))
+          dplyr::mutate(text = paste0("Site: ", loc, "\n", 
+                                      "Row: ", df$ROW, "\n", 
+                                      "Col: ", df$COLUMN, "\n", 
+                                      "TRT_COMB: ", df$TRT_COMB,"\n", 
+                                      label_trail, round(df[,11],2)))
         w <- as.character(valsspd$Trial.sspd)
         new_df$ROW <- as.factor(new_df$ROW) # Set up ROWS as factors
         new_df$COLUMN <- as.factor(new_df$COLUMN) # Set up COLUMNS as factors
-        p1 <- ggplot2::ggplot(new_df, ggplot2::aes(x = new_df[,5], y = new_df[,4], fill = new_df[,11], text = text)) +
+        p1 <- ggplot2::ggplot(new_df, 
+                              ggplot2::aes(x = new_df[,5], 
+                                           y = new_df[,4], 
+                                           fill = new_df[,11], 
+                                           text = text)) +
           ggplot2::geom_tile() +
           ggplot2::xlab("COLUMN") +
           ggplot2::ylab("ROW") +
@@ -426,9 +463,14 @@ mod_SSPD_server <- function(id){
           viridis::scale_fill_viridis(discrete = FALSE) +
           ggplot2::ggtitle(heatmapTitle) +
           ggplot2::theme_minimal() + # I added this option 
-          ggplot2::theme(plot.title = ggplot2::element_text(family="Calibri", face="bold", size=13, hjust=0.5))
+          ggplot2::theme(plot.title = ggplot2::element_text(family="Calibri", 
+                                                            face="bold", 
+                                                            size=13, 
+                                                            hjust=0.5))
         
-        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 640)
+        p2 <- plotly::ggplotly(p1, tooltip="text", 
+                               width = 1350, 
+                               height = 640)
         return(p2)
       } else {
         showModal(
@@ -487,12 +529,5 @@ mod_SSPD_server <- function(id){
         write.csv(df, file, row.names = FALSE)
       }
     )
-    #return(list(SSPD.output = SSPD.output))
   })
 }
-    
-## To be copied in the UI
-# mod_SSPD_ui("SSPD_ui_1")
-    
-## To be copied in the server
-# mod_SSPD_server("SSPD_ui_1")

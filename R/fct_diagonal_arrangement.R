@@ -105,9 +105,13 @@
 #' head(spatAB$fieldBook,12)
 #' 
 #' @export
-diagonal_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL, checks = NULL, planter = "serpentine", 
-                                 l = 1, plotNumber = 101, kindExpt = "SUDC", splitBy = "row", seed = NULL, 
-                                 blocks = NULL, exptName = NULL, locationNames = NULL, data = NULL) {
+diagonal_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL, 
+                                 checks = NULL, planter = "serpentine", 
+                                 l = 1, plotNumber = 101, kindExpt = "SUDC", 
+                                 splitBy = "row", seed = NULL, 
+                                 blocks = NULL, exptName = NULL, 
+                                 locationNames = NULL, 
+                                 data = NULL) {
   
   if (all(c("serpentine", "cartesian") != planter)) {
     base::stop('Input for planter is unknown. Please, choose one: "serpentine" or "cartesian"')

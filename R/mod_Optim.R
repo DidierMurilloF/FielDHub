@@ -11,106 +11,182 @@ mod_Optim_ui <- function(id) {
   ns <- NS(id)
   tagList(
     sidebarLayout(
-      sidebarPanel(width = 4,
-                   radioButtons(inputId = ns("owndataOPTIM"), label = "Import Entries' List?", choices = c("Yes", "No"), selected = "No",
-                                inline = TRUE, width = NULL, choiceNames = NULL, choiceValues = NULL),
-                   conditionalPanel("input.owndataOPTIM == 'Yes'", ns = ns,
-                                    fluidRow(
-                                      column(7, style=list("padding-right: 28px;"),
-                                             fileInput(ns("file3"), label = "Upload a CSV File:", multiple = FALSE)),
-                                      column(5,style=list("padding-left: 5px;"),
-                                             radioButtons(ns("sep.OPTIM"), "Separator",
-                                                          choices = c(Comma = ",",
-                                                                      Semicolon = ";",
-                                                                      Tab = "\t"),
-                                                          selected = ","))
-                                    )            
-                   ),
-                   # checkboxInput(inputId = ns("Optim.spatial"), label = "Get Optim :)", value = TRUE),
-                   
-                   numericInput(ns("checks.s"), label = "Input # of Checks:", value = 3, min = 1),
-                   
-                   numericInput(ns("tplots.s"), label = "Input # of Total Check Plots:",
-                                value = 30, min = 1),
-
-                   conditionalPanel("input.owndataOPTIM != 'Yes'", ns = ns,
-                                    
-                                    fluidRow(
-                                      column(6,style=list("padding-right: 28px;"),
-                                             textInput(ns("amount.checks"), "Input # Check's Reps:", value = "10,10,10"),
-                                      ),
-                                      column(6,style=list("padding-left: 5px;"),
-                                             numericInput(ns("lines.s"), label = "Input # of Entries:", value = 270, min = 5)
-                                      )
-                                    )            
-                   ),
-                   
-                   fluidRow(
-                     column(6,style=list("padding-right: 28px;"),
-                            numericInput(ns("nrows.s"), label = "Input # of Rows:",
-                                         value = 15, min = 5)
-                     ),
-                     column(6,style=list("padding-left: 5px;"),
-                            numericInput(ns("ncols.s"), label = "Input # of Columns:",
-                                         value = 20, min = 5)
-                     )
-                   ),
-                   
-                   
-                   selectInput(ns("planter_mov.spatial"), label = "Plot Order Layout:",
-                               choices = c("serpentine", "cartesian"), multiple = FALSE, selected = "serpentine"),
-                   fluidRow(
-                     column(6,style=list("padding-right: 28px;"),
-                            numericInput(inputId = ns("l.optim"), label = "Input # of Locations:", 
-                                         value = 1, min = 1)
-                     ),
-                     column(6,style=list("padding-left: 5px;"),
-                            selectInput(inputId = ns("locView.optim"), label = "Choose location to view:", 
-                                        choices = 1:1, selected = 1, multiple = FALSE)
-                     )
-                   ),
-                   fluidRow(
-                     column(6,style=list("padding-right: 28px;"),
-                            numericInput(ns("seed.spatial"), label = "Seed Number:", value = 1, min = 1)
-                     ),
-                     column(6,style=list("padding-left: 5px;"),
-                            textInput(ns("expt_name.spatial"), "Input Experiment Name:", value = "Expt1")
-                     )
-                   ),  
-                   
-                   fluidRow(
-                     column(6,style=list("padding-right: 28px;"),
-                            textInput(ns("plot_start.spatial"), "Starting Plot Number:", value = 1)
-                     ),
-                     column(6,style=list("padding-left: 5px;"),
-                            textInput(ns("Location.spatial"), "Input Location:", value = "FARGO")
-                     )
-                   ),
-                   
-                   fluidRow(
-                     column(6,
-                            downloadButton(ns("downloadData.spatial"), "Save Experiment", style = "width:100%")
-                     ),
-                     column(6,
-                            actionButton(ns("Simulate.optim"), "Simulate!", icon = icon("cocktail"), width = '100%')
-                     )
-                   )
+      sidebarPanel(
+        width = 4,
+        radioButtons(inputId = ns("owndataOPTIM"), 
+                    label = "Import Entries' List?", 
+                    choices = c("Yes", "No"), 
+                    selected = "No",
+                    inline = TRUE, 
+                    width = NULL, 
+                    choiceNames = NULL, 
+                    choiceValues = NULL),
+       conditionalPanel(
+         condition = "input.owndataOPTIM == 'Yes'", 
+         ns = ns,
+          fluidRow(
+            column(7, style=list("padding-right: 28px;"),
+                   fileInput(ns("file3"), 
+                             label = "Upload a CSV File:", 
+                             multiple = FALSE)),
+            column(5,style=list("padding-left: 5px;"),
+                   radioButtons(ns("sep.OPTIM"), "Separator",
+                                choices = c(Comma = ",",
+                                            Semicolon = ";",
+                                            Tab = "\t"),
+                                selected = ","))
+          )            
+       ),
+       # numericInput(ns("checks.s"),
+       #              label = "Input # of Checks:", 
+       #              value = 3,
+       #              min = 1),
+       # 
+       # numericInput(ns("tplots.s"), 
+       #              label = "Input # of Total Check Plots:",
+       #              value = 30,
+       #              min = 1),
+       conditionalPanel(
+         "input.owndataOPTIM != 'Yes'", 
+          ns = ns,
+          
+          numericInput(ns("checks.s"),
+                        label = "Input # of Checks:", 
+                        value = 3,
+                        min = 1),
+           
+          numericInput(ns("tplots.s"), 
+                        label = "Input # of Total Check Plots:",
+                        value = 30,
+                        min = 1),
+            
+          fluidRow(
+            column(6,
+                   style=list("padding-right: 28px;"),
+                   textInput(ns("amount.checks"), 
+                             "Input # Check's Reps:",
+                             value = "10,10,10"),
+            ),
+            column(6,
+                   style=list("padding-left: 5px;"),
+                   numericInput(ns("lines.s"), 
+                                label = "Input # of Entries:",
+                                value = 270, min = 5)
+            )
+          )            
+       ),
+       
+       fluidRow(
+         column(6,
+                style=list("padding-right: 28px;"),
+                numericInput(ns("nrows.s"), 
+                             label = "Input # of Rows:",
+                             value = 15,
+                             min = 5)
+         ),
+         column(6,
+                style=list("padding-left: 5px;"),
+                numericInput(ns("ncols.s"), 
+                             label = "Input # of Columns:",
+                             value = 20, 
+                             min = 5)
+         )
+       ),
+       
+       
+       selectInput(ns("planter_mov.spatial"), 
+                   label = "Plot Order Layout:",
+                   choices = c("serpentine", "cartesian"),
+                   multiple = FALSE, 
+                   selected = "serpentine"),
+       fluidRow(
+         column(6,
+                style=list("padding-right: 28px;"),
+                numericInput(inputId = ns("l.optim"), 
+                             label = "Input # of Locations:", 
+                             value = 1,
+                             min = 1)
+         ),
+         column(6,style=list("padding-left: 5px;"),
+                selectInput(inputId = ns("locView.optim"), 
+                            label = "Choose location to view:", 
+                            choices = 1:1, 
+                            selected = 1,
+                            multiple = FALSE)
+         )
+       ),
+       fluidRow(
+         column(6,style=list("padding-right: 28px;"),
+                numericInput(ns("seed.spatial"), 
+                             label = "Seed Number:", 
+                             value = 1,
+                             min = 1)
+         ),
+         column(6,style=list("padding-left: 5px;"),
+                textInput(ns("expt_name.spatial"), 
+                          "Input Experiment Name:", 
+                          value = "Expt1")
+         )
+       ),  
+       
+       fluidRow(
+         column(6,style=list("padding-right: 28px;"),
+                textInput(ns("plot_start.spatial"), 
+                          "Starting Plot Number:", 
+                          value = 1)
+         ),
+         column(6,style=list("padding-left: 5px;"),
+                textInput(ns("Location.spatial"), 
+                          "Input Location:", 
+                          value = "FARGO")
+         )
+       ),
+       fluidRow(
+         column(6,
+                actionButton(inputId = ns("RUN.optim"), 
+                             "Run!", 
+                             icon = icon("cocktail"), 
+                             width = '100%'),
+         ),
+         column(6,
+                actionButton(ns("Simulate.optim"), 
+                             "Simulate!", 
+                             icon = icon("cocktail"), 
+                             width = '100%')
+         )
+       ),
+       br(),
+       downloadButton(ns("downloadData.spatial"), 
+                      "Save Experiment", 
+                      style = "width:100%")
+       
+       # fluidRow(
+       #   column(6,
+       #          downloadButton(ns("downloadData.spatial"), "Save Experiment", style = "width:100%")
+       #   ),
+       #   column(6,
+       #          actionButton(ns("Simulate.optim"), "Simulate!", icon = icon("cocktail"), width = '100%')
+       #   )
+       # )
       ),
       
       mainPanel(
         width = 8,
         tabsetPanel(
-          tabPanel("Input Data",
+          tabPanel("Data Input",
                    fluidRow(
                      column(6,DT::DTOutput(ns("data_input"))),
                      column(6,DT::DTOutput(ns("table_checks")))
                    )
           ),
-          tabPanel("Matrix Checks", DT::DTOutput(ns("BINARY"))),
+          tabPanel("Matrix Checks", 
+                   shinycssloaders::withSpinner(
+                     DT::DTOutput(ns("BINARY")), 
+                        type = 5)),
           tabPanel("Randomized Field", DT::DTOutput(ns("RFIELD"))),
           tabPanel("Plot Number Field", DT::DTOutput(ns("PLOTFIELD"))),
           tabPanel("Field Book", DT::DTOutput(ns("OPTIMOUTPUT"))),
-          tabPanel("Heatmap", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmap")), type = 5))
+          tabPanel("Heatmap", plotly::plotlyOutput(ns("heatmap")))
          )
       )
     )
@@ -124,12 +200,17 @@ mod_Optim_server <- function(id) {
   moduleServer(id, function(input, output, session){
     ns <- session$ns
     
-    observeEvent(input$l.optim, {
-      loc_user_view <- 1:as.numeric(input$l.optim)
-      updateSelectInput(inputId = "locView.optim", choices = loc_user_view, selected = loc_user_view[1])
+    some_inputs <- eventReactive(input$RUN.optim,{
+      return(list(sites = input$l.optim))
     })
     
-    getDataup.spatiaL <- reactive({
+    observeEvent(some_inputs()$sites, {
+      loc_user_view <- 1:as.numeric(some_inputs()$sites)
+      updateSelectInput(inputId = "locView.optim", 
+                        choices = loc_user_view, 
+                        selected = loc_user_view[1])
+    })
+    getDataup.spatiaL <- eventReactive(input$RUN.optim, {  
       if (input$owndataOPTIM == "Yes") {
         req(input$file3)
         inFile <- input$file3
@@ -189,7 +270,8 @@ mod_Optim_server <- function(id) {
     
     
     entryListFormat_OPTIM <- data.frame(ENTRY = 1:9, 
-                                        NAME = c(c("CHECK1", "CHECK2","CHECK3"), paste("Genotype", LETTERS[1:6], sep = "")),
+                                        NAME = c(c("CHECK1", "CHECK2","CHECK3"), 
+                                                 paste("Genotype", LETTERS[1:6], sep = "")),
                                         REPS = as.factor(c(rep(10, times = 3), rep(1,6))))
     
     entriesInfoModal_OPTIM <- function() {
@@ -222,9 +304,9 @@ mod_Optim_server <- function(id) {
     output$table_checks <- DT::renderDT({
       req(getDataup.spatiaL()$data_up.spatial)
         data_entry <- getDataup.spatiaL()$data_up.spatial
-        checks_input <- as.numeric(input$checks.s)
-        times_checks <- data_entry[1:checks_input,]
-        df <- as.data.frame(times_checks)
+        print(data_entry)
+        checks_input <- data_entry[data_entry$REPS > 1, ]
+        df <- as.data.frame(checks_input)
         options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                   scrollX = TRUE, scrollY = "350px"))
         a <- ncol(df) - 1
@@ -232,8 +314,8 @@ mod_Optim_server <- function(id) {
           columnDefs = list(list(className = 'dt-left', targets = 0:a))))
     })
     
-    Spatial_Checks <- reactive({
-      
+    Spatial_Checks <- eventReactive(input$RUN.optim, { 
+    # Spatial_Checks <- reactive({
       req(getDataup.spatiaL()$data_up.spatial)
       req(input$plot_start.spatial)
       req(input$nrows.s, input$ncols.s)
@@ -446,11 +528,13 @@ mod_Optim_server <- function(id) {
         minVal <- as.numeric(valsOPTIM$minValue)
         ROX_O <- as.numeric(valsOPTIM$ROX)
         ROY_O <- as.numeric(valsOPTIM$ROY)
-        locs <- as.numeric(input$l.optim)
+        #locs <- as.numeric(input$l.optim)
         df_optim <- Spatial_Checks()$fieldBook
+        locs <- length(levels(factor(df_optim$LOCATION)))
+        nrows.s <- max(as.numeric(df_optim$ROW))
+        ncols.s <- max(as.numeric(df_optim$COLUMN))
         loc_levels_factors <- levels(factor(df_optim$LOCATION, unique(df_optim$LOCATION)))
-        nrows.s <- as.numeric(input$nrows.s)
-        ncols.s <- as.numeric(input$ncols.s)
+        
         seed.s <- as.numeric(input$seed.spatial)
         
         df_optim_list <- vector(mode = "list", length = locs)
@@ -489,6 +573,7 @@ mod_Optim_server <- function(id) {
     
     
     output$OPTIMOUTPUT <- DT::renderDT({
+      req(simuDataOPTIM()$df)
       df <- simuDataOPTIM()$df
       df$EXPT <- as.factor(df$EXPT)
       df$LOCATION <- as.factor(df$LOCATION)
@@ -496,7 +581,8 @@ mod_Optim_server <- function(id) {
       df$ROW <- as.factor(df$ROW)
       df$COLUMN <- as.factor(df$COLUMN)
       df$CHECKS <- as.factor(df$CHECKS)
-      df$ENTRY <- as.factor(df$TREATMENT)
+      df$ENTRY <- as.factor(df$ENTRY)
+      df$TREATMENT <- as.factor(df$TREATMENT)
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "600px",
               columnDefs = list(list(className = 'dt-center', targets = "_all"))))

@@ -12,157 +12,215 @@ mod_Diagonal_ui <- function(id){
   ns <- NS(id)
   tagList(
     sidebarLayout(
-      sidebarPanel(width = 4,
-
-                   selectInput(inputId = ns("kindExpt"), label = "Select Experiment Type:",
-                               choices = c("Single Unreplicated Design with Diagonal Checks" = "SUDC",
-                                           #"Replicated Design with Diagonal Checks" = "RDC",
-                                           "Decision Block Unreplicated Design with Diagonal Checks" = "DBUDC"),
-                               multiple = FALSE),
-                   radioButtons(inputId = ns("owndataDIAGONALS"), label = "Import entries' list?", 
-                                choices = c("Yes", "No"), selected = "No",
-                                inline = TRUE, width = NULL, choiceNames = NULL, choiceValues = NULL),
-                   
-                   conditionalPanel("input.owndataDIAGONALS == 'Yes'", ns = ns,
-                                    fluidRow(
-                                      column(7, style=list("padding-right: 28px;"),
-                                             fileInput(ns("file1"), label = "Upload a CSV File:", multiple = FALSE)),
-                                      column(5,style=list("padding-left: 5px;"),
-                                             radioButtons(ns("sep.DIAGONALS"), "Separator",
-                                                          choices = c(Comma = ",",
-                                                                      Semicolon = ";",
-                                                                      Tab = "\t"),
-                                                          selected = ","))
-                                    )              
-                   ),
-                   
-                   conditionalPanel("input.owndataDIAGONALS == 'No'", ns = ns,
-                                    conditionalPanel(condition = "input.kindExpt !='DBUDC'", ns = ns,
-                                                     numericInput(inputId = ns("lines.d"), label = "Input # of Entries:",
-                                                                  value = 270, min = 5)  
-                                    ),
-                                    conditionalPanel(condition = "input.kindExpt =='DBUDC'", ns = ns,
-                                                     fluidRow(
-                                                       column(6,style=list("padding-right: 28px;"),
-                                                              numericInput(inputId = ns("lines.db"), label = "Input # of Entries:",
-                                                                           value = 270, min = 5)
-                                                       ),
-                                                       column(6,style=list("padding-left: 5px;"),
-                                                              textInput(ns("blocks.db"), "Input # Entries per Expt:",
-                                                                        value = "100,100,70")
-                                                       )
-                                                     )       
-                                    )
-                   ),
-                   
-                   fluidRow(
-                     column(6,style=list("padding-right: 28px;"),
-                            numericInput(inputId = ns("n_rows"), label = "Input # of Rows:",
-                                         value = 15, min = 5)
-                     ),
-                     column(6,style=list("padding-left: 5px;"),
-                            numericInput(inputId = ns("n_cols"), label = "Input # of Columns:",
-                                         value = 20, min = 5)
-                     )
-                   ),
-
-                   fluidRow(
-                     column(6,style=list("padding-right: 28px;"),
-                            selectInput(inputId = ns("Dropdown"), label = "Choose of diagonal checks:", 
-                                        choices = "")
-                     ),
-                     column(6,style=list("padding-left: 5px;"),
-                            selectInput(inputId = ns("checks"), label = "Input # of Checks:",
-                                        choices = c(1:10), multiple = FALSE, selected = 4)
-                     )
-                   ),
-                   fluidRow(
-                     column(6,style=list("padding-right: 28px;"),
-                            numericInput(inputId = ns("l.diagonal"), label = "Input # of Locations:", 
-                                         value = 1, min = 1)
-                     ),
-                     column(6,style=list("padding-left: 5px;"),
-                            selectInput(inputId = ns("locView.diagonal"), label = "Choose location to view:", 
-                                        choices = 1:1, selected = 1, multiple = FALSE)
-                     )
-                   ),
-                   conditionalPanel(condition = "input.kindExpt !='SUDC'", ns = ns,
-                                    
-                      fluidRow(
-                        column(6,style=list("padding-right: 28px;"),
-                               selectInput(inputId = ns("myWay"), label = "Blocks Layout:",
-                                           choices = c("By Column", "By Row"), multiple = FALSE,
-                                           selected = "By Row")
-                        ),
-                        column(6,style=list("padding-left: 5px;"),
-                               selectInput(inputId = ns("planter_mov"), label = "Plot Order Layout:",
-                                           choices = c("serpentine", "cartesian"), multiple = FALSE,
-                                           selected = "serpentine")
-                        )
-                        
-                      ),
-                      # conditionalPanel(condition = "input.kindExpt == 'DBUDC'", ns = ns,
-                      #                  
-                      #                  conditionalPanel(condition = "input.myWay == 'By Row'", ns = ns,
-                      #                                   
-                      #                                   selectInput(inputId = ns("Block_Fillers"), label = "Which Blocks:",
-                      #                                               choices = "Block_Fillers", multiple = TRUE, selected = "")               
-                      #                  )
-                      # )
-                   ),
-                   conditionalPanel(condition = "input.kindExpt == 'SUDC'", ns = ns,
-                                    selectInput(inputId = ns("planter_mov1"), label = "Plot Order Layout:",
-                                                choices = c("serpentine", "cartesian"), multiple = FALSE,
-                                                selected = "serpentine")
-                                    
-                   ),
-                   
-                   fluidRow(
-                     column(6,style=list("padding-right: 28px;"),
-                            numericInput(inputId = ns("myseed"), label = "Seed Number:", value = 17, min = 1)
-                     ),
-                     column(6,style=list("padding-left: 5px;"),
-                            textInput(ns("expt_name"), "Input Experiment Name:", value = "Expt1")
-                     )
-                   ),    
-                   fluidRow(
-                     column(6,style=list("padding-right: 28px;"),
-                            textInput(ns("plot_start"), "Starting Plot Number:", value = 1)
-                     ),
-                     column(6,style=list("padding-left: 5px;"),
-                            textInput(ns("Location"), "Input the Location:", value = "FARGO")
-                     )
-                     
-                   ),
-                   
-                   fluidRow(
-                     column(6,
-                            downloadButton(ns("downloadData_Diagonal"), "Save Experiment", style = "width:100%")
-                     ),
-                     column(6,
-                            actionButton(ns("Simulate_Diagonal"), "Simulate!", icon = icon("cocktail"),
-                                         width = '100%')
-                     )
-
-                   ),
+      sidebarPanel(
+        width = 4,
+        selectInput(inputId = ns("kindExpt"), 
+                    label = "Select Experiment Type:",
+                    choices = c("Single Unreplicated Design with Diagonal Checks" = "SUDC",
+                                "Decision Block Unreplicated Design with Diagonal Checks" = "DBUDC"),
+                    multiple = FALSE),
+        radioButtons(inputId = ns("owndataDIAGONALS"), 
+                     label = "Import entries' list?", 
+                     choices = c("Yes", "No"), 
+                     selected = "No",
+                     inline = TRUE, 
+                     width = NULL, 
+                     choiceNames = NULL, 
+                     choiceValues = NULL),
+        conditionalPanel(
+          condition = "input.kindExpt == 'DBUDC'", 
+          ns = ns,
+           conditionalPanel(
+             condition = "input.owndataDIAGONALS == 'No'", 
+             ns = ns,
+             checkboxInput(inputId = ns("sameEntries"), 
+                            label = "Use the same entries across experiments!", 
+                            value = FALSE)
+           ),
+        ),
+        conditionalPanel(
+          condition = "input.owndataDIAGONALS == 'Yes'", 
+          ns = ns,
+           fluidRow(
+             column(7, style=list("padding-right: 28px;"),
+                    fileInput(ns("file1"), 
+                              label = "Upload a CSV File:", 
+                              multiple = FALSE)),
+             column(5,style=list("padding-left: 5px;"),
+                    radioButtons(ns("sep.DIAGONALS"), "Separator",
+                                 choices = c(Comma = ",",
+                                             Semicolon = ";",
+                                             Tab = "\t"),
+                                 selected = ","))
+           )              
+        ),
+        conditionalPanel(
+          condition = "input.owndataDIAGONALS == 'No'", 
+          ns = ns,
+           conditionalPanel(
+             condition = "input.kindExpt !='DBUDC'", 
+             ns = ns,
+              numericInput(inputId = ns("lines.d"), 
+                           label = "Input # of Entries:",
+                           value = 270, 
+                           min = 5)  
+           ),
+           conditionalPanel(
+             condition = "input.kindExpt =='DBUDC'", ns = ns,
+              fluidRow(
+                column(6,style=list("padding-right: 28px;"),
+                       numericInput(inputId = ns("lines.db"), 
+                                    label = "Input # of Entries:",
+                                    value = 270, 
+                                    min = 5)
+                ),
+                column(6,style=list("padding-left: 5px;"),
+                       textInput(ns("blocks.db"), 
+                                 "Input # Entries per Expt:",
+                                 value = "100,100,70")
+                )
+              )       
+           )
+        ),
+        fluidRow(
+          column(6,style=list("padding-right: 28px;"),
+                 numericInput(inputId = ns("n_rows"), 
+                              label = "Input # of Rows:",
+                              value = 15, 
+                              min = 5)
+          ),
+          column(6,style=list("padding-left: 5px;"),
+                 numericInput(inputId = ns("n_cols"), 
+                              label = "Input # of Columns:",
+                              value = 20, 
+                              min = 5)
+          )
+        ),
+        fluidRow(
+          column(6,style=list("padding-right: 28px;"),
+                 selectInput(inputId = ns("Dropdown"), 
+                             label = "Choose of diagonal checks:", 
+                             choices = "")
+          ),
+          column(6,style=list("padding-left: 5px;"),
+                 selectInput(inputId = ns("checks"), 
+                             label = "Input # of Checks:",
+                             choices = c(1:10), 
+                             multiple = FALSE, 
+                             selected = 4)
+          )
+        ),
+        fluidRow(
+          column(6,style=list("padding-right: 28px;"),
+                 numericInput(inputId = ns("l.diagonal"), 
+                              label = "Input # of Locations:", 
+                              value = 1,
+                              min = 1)
+          ),
+          column(6,style=list("padding-left: 5px;"),
+                 selectInput(inputId = ns("locView.diagonal"), 
+                             label = "Choose location to view:", 
+                             choices = "", 
+                             selected = 1, 
+                             multiple = FALSE)
+          )
+        ),
+        conditionalPanel(
+          condition = "input.kindExpt !='SUDC'", 
+           ns = ns,
+           fluidRow(
+             column(6,style=list("padding-right: 28px;"),
+                    selectInput(inputId = ns("myWay"), 
+                                label = "Blocks Layout:",
+                                choices = c("By Column", "By Row"), 
+                                multiple = FALSE,
+                                selected = "By Row")
+             ),
+             column(6,style=list("padding-left: 5px;"),
+                    selectInput(inputId = ns("planter_mov"), 
+                                label = "Plot Order Layout:",
+                                choices = c("serpentine", "cartesian"), 
+                                multiple = FALSE,
+                                selected = "serpentine")
+             )
+           ),
+        ),
+        conditionalPanel(
+          condition = "input.kindExpt == 'SUDC'", 
+           ns = ns,
+           selectInput(inputId = ns("planter_mov1"), 
+                       label = "Plot Order Layout:",
+                       choices = c("serpentine", "cartesian"), 
+                       multiple = FALSE,
+                       selected = "serpentine")
+        ),
+        fluidRow(
+          column(6,
+                 style=list("padding-right: 28px;"),
+                 numericInput(inputId = ns("myseed"), 
+                              label = "Seed Number:", 
+                              value = 17, 
+                              min = 1)
+          ),
+          column(6,
+                 style=list("padding-left: 5px;"),
+                 textInput(ns("expt_name"), 
+                           "Input Experiment Name:", 
+                           value = "Expt1")
+          )
+        ),    
+        fluidRow(
+          column(6,
+                 style=list("padding-right: 28px;"),
+                 textInput(ns("plot_start"), 
+                           "Starting Plot Number:", 
+                           value = 1)
+          ),
+          column(6,
+                 style=list("padding-left: 5px;"),
+                 textInput(ns("Location"), 
+                           "Input the Location:",
+                           value = "FARGO")
+          )
+        ),
+        fluidRow(
+          column(6,
+                 downloadButton(ns("downloadData_Diagonal"), 
+                                "Save Experiment", 
+                                style = "width:100%")
+          ),
+          column(6,
+                 actionButton(ns("Simulate_Diagonal"), 
+                              "Simulate!", 
+                              icon = icon("cocktail"),
+                              width = '100%')
+          )
+        )
       ),
-      
       mainPanel(
         width = 8,
         tabsetPanel(id = ns("Tabset"),
-          tabPanel(title = "Expt Design Info", value = "tabPanel1", DT::DTOutput(ns("options_table"))),
+          tabPanel(title = "Expt Design Info", value = "tabPanel1", 
+                   DT::DTOutput(ns("options_table"))),
           tabPanel("Input Data",
                    fluidRow(
                      column(6,DT::DTOutput(ns("data_input"))),
                      column(6,DT::DTOutput(ns("checks_table")))
                    )
           ),
-          #tabPanel("Diagonal Checks Layout", DT::DTOutput(ns("checks_layout"))),
           tabPanel("Randomized Field", DT::DTOutput(ns("randomized_layout"))),
           tabPanel("Plot Number Field", DT::DTOutput(ns("plot_number_layout"))),
           tabPanel("Expt Name", DT::DTOutput(ns("name_layout"))),
+          # conditionalPanel(
+          #   condition = "input.kindExpt == 'DBUDC'",
+          #   ns = ns,
+          #   tabPanel("Expt Name", DT::DTOutput(ns("name_layout")))
+          # ),
           tabPanel("Field Book", DT::DTOutput(ns("fieldBook_diagonal"))),
-          tabPanel("Heatmap", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmap_diag")), type = 5))
+          tabPanel("Heatmap", shinycssloaders::withSpinner(
+            plotly::plotlyOutput(ns("heatmap_diag")), 
+            type = 5)
+            )
         )      
       )
     )
@@ -178,10 +236,36 @@ mod_Diagonal_server <- function(id) {
     
     observeEvent(input$l.diagonal, {
       loc_user_view <- 1:as.numeric(input$l.diagonal)
-      updateSelectInput(inputId = "locView.diagonal", choices = loc_user_view, selected = loc_user_view[1])
+      updateSelectInput(inputId = "locView.diagonal", 
+                        choices = loc_user_view, 
+                        selected = loc_user_view[1])
     })
     
-    observeEvent(eventExpr = input$kindExpt,
+    observeEvent(input$kindExpt,
+                 handlerExpr = updateTabsetPanel(session,
+                                                 "Tabset",
+                                                 selected = "tabPanel1"))
+    observeEvent(input$n_rows,
+                 handlerExpr = updateTabsetPanel(session,
+                                                 "Tabset",
+                                                 selected = "tabPanel1"))
+    observeEvent(input$n_cols,
+                 handlerExpr = updateTabsetPanel(session,
+                                                 "Tabset",
+                                                 selected = "tabPanel1"))
+    observeEvent(input$planter_mov1,
+                 handlerExpr = updateTabsetPanel(session,
+                                                 "Tabset",
+                                                 selected = "tabPanel1"))
+    observeEvent(input$lines.d,
+                 handlerExpr = updateTabsetPanel(session,
+                                                 "Tabset",
+                                                 selected = "tabPanel1"))
+    observeEvent(input$l.diagonal,
+                 handlerExpr = updateTabsetPanel(session,
+                                                 "Tabset",
+                                                 selected = "tabPanel1"))
+    observeEvent(input$owndataDIAGONALS,
                  handlerExpr = updateTabsetPanel(session,
                                                  "Tabset",
                                                  selected = "tabPanel1"))
@@ -239,6 +323,19 @@ mod_Diagonal_server <- function(id) {
           if (lines.db != sum(blocks)) shiny::validate('Sum of blocks may be equal to number of lines.')
           data_entry_UP$BLOCK <- c(rep("ALL", checks), rep(1:length(blocks), times = blocks))
           colnames(data_entry_UP) <- c("ENTRY", "NAME", "BLOCK")
+          if (input$sameEntries) {
+            if (any(blocks != blocks[1])) shiny::validate("Blocks should have the same size")
+            # Names
+            ChecksNames <- paste(rep("CH", checks), 1:checks, sep = "")
+            nameLines <- rep(c(paste(rep("G", blocks[1]), (2 + 1):(blocks[1] + 2), sep = "")), times = length(blocks))
+            NAMES <- c(ChecksNames, nameLines)
+            # Entries
+            ChecksENTRIS <- 1:checks
+            nameEntries <- rep((checks + 1):(blocks[1] + checks), times = length(blocks))
+            ENTRIES <- c(ChecksENTRIS, nameEntries)
+            data_entry_UP$NAME <- NAMES
+            data_entry_UP$ENTRY <- ENTRIES
+          }
           if (Option_NCD == TRUE) {
             data_entry1 <- data_entry_UP[(checks + 1):nrow(data_entry_UP), ]
             Block_levels <- suppressWarnings(as.numeric(levels(as.factor(data_entry1$BLOCK))))
@@ -332,6 +429,7 @@ mod_Diagonal_server <- function(id) {
       list(checksEntries = checksEntries, checks = checks)
     })
     
+    # available_percent_table <- eventReactive(input$RUN.diagonal, {
     available_percent_table <- reactive({
       Option_NCD <- TRUE
       checksEntries <- as.vector(getChecks()$checksEntries)
@@ -385,8 +483,6 @@ mod_Diagonal_server <- function(id) {
                   user_site = user_site))
     })
     
-
-    
     output$options_table <- DT::renderDT({
       Option_NCD <- TRUE
       if (is.null(available_percent_table()$dt)) {
@@ -427,35 +523,6 @@ mod_Diagonal_server <- function(id) {
                     options = list(columnDefs = list(list(className = 'dt-center', targets = "_all")))
                     )
     })
-    
-    # output$checks_layout <- DT::renderDT({
-    #   Option_NCD <- TRUE
-    #   multi <- input$kindExpt == "RDC" || input$kindExpt == "DBUDC"
-    #   if (multi) req(getData()$data_entry)
-    #   req(user_location()$map_checks)
-    #   w_map <- user_location()$map_checks
-    #   if (is.null(w_map))
-    #     return(NULL)
-    #   
-    #   checks <- as.vector(getChecks()$checksEntries)
-    #   len_checks <- length(checks)
-    #   colores <- c('royalblue','salmon', 'green', 'orange','orchid', 'slategrey',
-    #                'greenyellow', 'blueviolet','deepskyblue','gold','blue', 'red')
-    #   
-    #   df <- as.data.frame(w_map)
-    #   rownames(df) <- nrow(df):1
-    #   options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
-    #   DT::datatable(df,
-    #                 extensions = 'FixedColumns',
-    #                 options = list(
-    #                   dom = 't',
-    #                   scrollX = TRUE,
-    #                   fixedColumns = TRUE
-    #                 )) %>% 
-    #   DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-    #                   backgroundColor = DT::styleEqual(c(checks,0,"Filler"), 
-    #                                                    c(colores[1:len_checks],'yellow', 'snow')))
-    # })
     
     output$checks_table <- DT::renderDT({
       Option_NCD <- TRUE
@@ -1248,6 +1315,8 @@ mod_Diagonal_server <- function(id) {
 
     
     output$fieldBook_diagonal <- DT::renderDT({
+      req(simudata_DIAG()$df)
+      print(simudata_DIAG()$df)
       df <- simudata_DIAG()$df
       df$EXPT <- as.factor(df$EXPT)
       df$LOCATION <- as.factor(df$LOCATION)

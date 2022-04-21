@@ -5,12 +5,13 @@
 #' @return The return value, if any, from executing the utility.
 #'
 #' @noRd
-plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks, iBlocks = NULL,
-                            optionLayout = 1, orderReps = "vertical_stack_panel", planter = "serpentine", 
-                            l = 1) {
+plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, 
+                            sizeIblocks, iBlocks = NULL, optionLayout = 1,
+                            orderReps = "vertical_stack_panel", 
+                            planter = "serpentine", l = 1) {
   site <- l
   locations <- factor(x$fieldBook$LOCATION, levels = unique(x$fieldBook$LOCATION))
-  nlocs <- length(locations)
+  nlocs <- length(levels(locations))
   newBooksLocs <- vector(mode = "list", length = nlocs)
   countLocs <- 1
   books0 <- list(NULL)
@@ -305,25 +306,13 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblock
     df$WHOLE_PLOT <- as.factor(df$WHOLE_PLOT)
     df$SUB_PLOT <- as.factor(df$SUB_PLOT)
     df$TRT_COMB <- as.factor(df$TRT_COMB)
-    # df[,5] <- as.factor(df[,5])
-    # df[,6] <- as.factor(df[,6])
+    df$REP <- as.factor(df$REP)
     df$REP <- as.factor(df$REP)
     # Plot field layout
     rows <- max(as.numeric(df$ROW))
     cols <- max(as.numeric(df$COLUMN))
     ds <- "Split Plot Design (RCBD) " 
     main <- paste0(ds, rows, "X", cols)
-    # Plot field layout
-    # p1 <- desplot::desplot(TRT_COMB ~ COLUMN + ROW, flip = FALSE, # REP
-    #                        # out1 = REP,
-    #                        # out2 = WHOLE_PLOT,
-    #                        # col = WHOLE_PLOT, # SUB_PLOT,
-    #                        out2.gpar=list(col = "gray50", lwd = 1, lty = 1),
-    #                        text = TRT_COMB, cex = 1, shorten = "no", # WHOLE_PLOT
-    #                        data = df, xlab = "COLUMNS", ylab = "ROWS",
-    #                        main = main, 
-    #                        show.key = TRUE, 
-    #                        gg = TRUE)
     
     p1 <- desplot::desplot(TRT_COMB ~ COLUMN + ROW, flip = FALSE, # TRT_COMB
                            out1 = REP,
@@ -354,28 +343,34 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblock
     allSitesFieldbook <- allSitesFieldbook[,c(1:3,9,10,4:8)]
     
     df <- df[,c(1:3,9,10,4:8)]
-    # df$WHOLE_PLOT <- as.factor(df$WHOLE_PLOT)
-    # df$SUB_PLOT <- as.factor(df$SUB_PLOT)
-    # df$SUB_SUB_PLOT <- as.factor(df$SUB_SUB_PLOT)
-    # df$TRT_COMB <- as.character(df$TRT_COMB)
-    # df$REP <- as.factor(df$REP)
+    df$WHOLE_PLOT <- as.factor(df$WHOLE_PLOT)
+    df$SUB_PLOT <- as.factor(df$SUB_PLOT)
+    df$SUB_SUB_PLOT <- as.factor(df$SUB_SUB_PLOT)
+    df$TRT_COMB <- as.character(df$TRT_COMB)
+    df$REP <- as.factor(df$REP)
     
     # Plot field layout
     rows <- max(as.numeric(df$ROW))
     cols <- max(as.numeric(df$COLUMN))
     ds <- "Split-Split Plot Design (RCBD) " 
     main <- paste0(ds, rows, "X", cols)
+
     
     p1 <- desplot::desplot(TRT_COMB ~ COLUMN + ROW, flip = FALSE,
-                           out1 = REP, 
-                           out2.gpar = list(col = "black", lty = 1, lwd = 2),
-                           text = TRT_COMB, cex = 1,
+                           out1 = REP,
+                           out2 = WHOLE_PLOT,
+                           col = WHOLE_PLOT,
+                           # out2.gpar = list(col = "black", lty = 3),
+                           out2.gpar=list(col = "red", lwd = 2, lty = 1),
+                           text = TRT_COMB, 
+                           cex = 1, 
                            shorten = "no",
-                           data = df, xlab = "COLUMNS", ylab = "ROWS",
-                           main = main,
+                           data = df, 
+                           xlab = "COLUMNS", 
+                           ylab = "ROWS",
+                           main = main, 
                            show.key = FALSE, 
-                           key.cex = 0.7, 
-                           gg = TRUE)
+                           gg=TRUE)
     
     p2 <- desplot::desplot(REP ~ COLUMN + ROW, flip = FALSE,
                            out1 = REP,

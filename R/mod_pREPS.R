@@ -12,105 +12,135 @@ mod_pREPS_ui <- function(id){
   tagList(
     h4("Partially Replicated Designs"),
     sidebarLayout(
-      sidebarPanel(width = 4,
-                   radioButtons(inputId = ns("owndataPREPS"), label = "Import entries' list?", 
-                                choices = c("Yes", "No"), selected = "No",
-                                inline = TRUE, width = NULL, choiceNames = NULL, choiceValues = NULL),
-                   
-                   conditionalPanel("input.owndataPREPS == 'Yes'", ns = ns,
-                                    fluidRow(
-                                      column(7, style=list("padding-right: 28px;"),
-                                             fileInput(ns("file.preps"), label = "Upload a CSV File:", multiple = FALSE)),
-                                      
-                                      column(5,style=list("padding-left: 5px;"),
-                                             radioButtons(ns("sep.preps"), "Separator",
-                                                          choices = c(Comma = ",",
-                                                                      Semicolon = ";",
-                                                                      Tab = "\t"),
-                                                          selected = ","))
-                                    ),             
-                   ),
-                   # checkboxInput(inputId = ns("Optim.pREPS"), label = "Get Optim :)", value = TRUE),
-                   fluidRow(
-                     column(6,style=list("padding-right: 28px;"),
-                            numericInput(ns("nrows.preps"), label = "Input # of Rows:",
-                                         value = 15, min = 5)
-                     ),
-                     column(6,style=list("padding-left: 5px;"),
-                            numericInput(ns("ncols.preps"), label = "Input # of Columns:",
-                                         value = 20, min = 5)
-                     )
-                   ),
-
-                   conditionalPanel("input.owndataPREPS == 'No'", ns = ns,
-                                    fluidRow(
-                                      column(6, style=list("padding-right: 28px;"),
-                                             textInput(ns("repGens.preps"), label = "# of Entries per Rep Group:", 
-                                                       value = "75,150")
-                                      ),
-                                      column(6,style=list("padding-left: 5px;"),
-                                             textInput(inputId = ns("repUnits.preps"), label = "# of Rep per Group:",
-                                                       value = "2,1")
-                                      )
-                                    )
-                   ),
-                   fluidRow(
-                     column(6,style=list("padding-right: 28px;"),
-                            numericInput(inputId = ns("l.preps"), label = "Input # of Locations:", value = 1, min = 1)
-                     ),
-                     column(6,style=list("padding-left: 5px;"),
-                            selectInput(inputId = ns("locView.preps"), label = "Choose location to view:", choices = 1:1, selected = 1, multiple = FALSE)
-                     )
-                    ),
-                   selectInput(ns("planter_mov.preps"), label = "Plot Order Layout:",
-                               choices = c("serpentine", "cartesian"), multiple = FALSE,
-                               selected = "serpentine"),
-                   fluidRow(
-                     column(6,style=list("padding-right: 28px;"),
-                            numericInput(ns("s.seed.preps"), label = "Seed number:", value = 1, min = 1)
-                     ),
-                     column(6,style=list("padding-left: 5px;"),
-                            textInput(ns("expt_name.preps"), "Input Experiment Name:", value = "Expt1")
-                     )
-                   ),  
-                   fluidRow(
-                     column(6,style=list("padding-right: 28px;"),
-                            textInput(ns("plot_start.preps"), "Starting Plot Number:", value = 1)
-                     ),
-                     column(6,style=list("padding-left: 5px;"),
-                            textInput(ns("Location.preps"), "Input Location Name:", value = "FARGO")
-                     )
-                   ),
-                   
-                   # fluidRow(
-                   #   column(6,
-                   #          actionButton(inputId = ns("RUN.prep"), "Run!", icon = icon("cocktail"), width = '100%'),
-                   #   ),
-                   #   column(6,
-                   #          actionButton(ns("Simulate.prep"), "Simulate!", icon = icon("cocktail"), width = '100%')
-                   #   )
-                   #   
-                   # ), 
-                   # br(),
-                   # downloadButton(ns("downloadData.preps"), "Save Experiment", style = "width:100%")
-                   # 
-                   
-                   fluidRow(
-                     column(6,
-                            downloadButton(ns("downloadData.preps"), "Save Experiment", style = "width:100%")
-                     ),
-                     column(6,
-                            actionButton(ns("Simulate.prep"), "Simulate!", icon = icon("cocktail"), width = '100%')
-                     )
-                   )
-      #),
+      sidebarPanel(
+        width = 4,
+        radioButtons(inputId = ns("owndataPREPS"), 
+                     label = "Import entries' list?", 
+                     choices = c("Yes", "No"), 
+                     selected = "No",
+                     inline = TRUE, 
+                     width = NULL, 
+                     choiceNames = NULL, 
+                     choiceValues = NULL),
+        
+        conditionalPanel("input.owndataPREPS == 'Yes'", ns = ns,
+                         fluidRow(
+                           column(7, # style=list("padding-right: 28px;"),
+                                  fileInput(ns("file.preps"), 
+                                            label = "Upload a CSV File:", 
+                                            multiple = FALSE)),
+                           
+                           column(5, #style=list("padding-left: 5px;"),
+                                  radioButtons(ns("sep.preps"), "Separator",
+                                               choices = c(Comma = ",",
+                                                           Semicolon = ";",
+                                                           Tab = "\t"),
+                                               selected = ","))
+                         ),             
+        ),
+        fluidRow(
+          column(6, # style=list("padding-right: 28px;"),
+                 numericInput(ns("nrows.preps"), 
+                              label = "Input # of Rows:",
+                              value = 15, 
+                              min = 5)
+          ),
+          column(6, # style=list("padding-left: 5px;"),
+                 numericInput(ns("ncols.preps"), 
+                              label = "Input # of Columns:",
+                              value = 20, 
+                              min = 5)
+          )
+        ),
+        conditionalPanel(
+          condition = "input.owndataPREPS == 'No'", 
+          ns = ns,
+          fluidRow(
+            column(6, # style=list("padding-right: 28px;"),
+                   textInput(ns("repGens.preps"), 
+                             label = "# of Entries per Rep Group:", 
+                             value = "75,150")
+            ),
+            column(6, # style=list("padding-left: 5px;"),
+                   textInput(inputId = ns("repUnits.preps"), 
+                             label = "# of Rep per Group:",
+                             value = "2,1")
+            )
+          )
+        ),
+        fluidRow(
+          column(6, # style=list("padding-right: 28px;"),
+                 numericInput(inputId = ns("l.preps"), 
+                              label = "Input # of Locations:", 
+                              value = 1, 
+                              min = 1)
+          ),
+          column(6, # style=list("padding-left: 5px;"),
+                 selectInput(inputId = ns("locView.preps"), 
+                             label = "Choose location to view:", 
+                             choices = 1:1, 
+                             selected = 1,
+                             multiple = FALSE)
+          )
+         ),
+        selectInput(ns("planter_mov.preps"), 
+                    label = "Plot Order Layout:",
+                    choices = c("serpentine", "cartesian"), 
+                    multiple = FALSE,
+                    selected = "serpentine"),
+        fluidRow(
+          column(6, # style=list("padding-right: 28px;"),
+                 numericInput(ns("s.seed.preps"), 
+                              label = "Seed number:", 
+                              value = 1, 
+                              min = 1)
+          ),
+          column(6, # style=list("padding-left: 5px;"),
+                 textInput(ns("expt_name.preps"), 
+                           "Input Experiment Name:", 
+                           value = "Expt1")
+          )
+        ),  
+        fluidRow(
+          column(6, # style=list("padding-right: 28px;"),
+                 textInput(ns("plot_start.preps"), 
+                           "Starting Plot Number:", 
+                           value = 1)
+          ),
+          column(6, # style=list("padding-left: 5px;"),
+                 textInput(ns("Location.preps"), 
+                           "Input Location Name:", 
+                           value = "FARGO")
+          )
+        ),
+        
+        fluidRow(
+          column(6,
+                 actionButton(inputId = ns("RUN.prep"), 
+                              "Run!", 
+                              icon = icon("cocktail"), 
+                              width = '100%'),
+          ),
+          column(6,
+                 actionButton(ns("Simulate.prep"), 
+                              "Simulate!", 
+                              icon = icon("cocktail"), 
+                              width = '100%')
+          )
+        ),
+        br(),
+        downloadButton(ns("downloadData.preps"), 
+                       "Save Experiment", 
+                       style = "width:100%")
       ),
       mainPanel(
         width = 8,
         tabsetPanel(
-           tabPanel("Data", DT::DTOutput(ns("dataup.preps"))),
-           # tabPanel("Matrix Checks", DT::DTOutput(ns("BINARYpREPS"))),
-           tabPanel("Matrix Checks", shinycssloaders::withSpinner(DT::DTOutput(ns("BINARYpREPS")), type = 5)),
+           tabPanel("Data Input", DT::DTOutput(ns("dataup.preps"))),
+           tabPanel("Matrix Checks", 
+                    shinycssloaders::withSpinner(
+                      DT::DTOutput(ns("BINARYpREPS")), 
+                      type = 5)),
            tabPanel("Randomized Field", DT::DTOutput(ns("dtpREPS"))),
            tabPanel("Plot Number Field", DT::DTOutput(ns("PREPSPLOTFIELD"))),
            tabPanel("Field Book", DT::DTOutput(ns("pREPSOUTPUT"))),
@@ -119,9 +149,7 @@ mod_pREPS_ui <- function(id){
       )
     )
   )
-  
 }
-    
 #' pREPS Server Functions
 #'
 #' @noRd 
@@ -129,12 +157,18 @@ mod_pREPS_server <- function(id){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     
-    observeEvent(input$l.preps, {
-      loc_user_view <- 1:as.numeric(input$l.preps)
-      updateSelectInput(inputId = "locView.preps", choices = loc_user_view, selected = loc_user_view[1])
+    some_inputs <- eventReactive(input$RUN.prep,{
+      return(list(sites = input$l.preps))
     })
     
-    getDataup <- reactive({
+    observeEvent(some_inputs()$sites, {
+      loc_user_view <- 1:as.numeric(some_inputs()$sites)
+      updateSelectInput(inputId = "locView.preps", 
+                        choices = loc_user_view, 
+                        selected = loc_user_view[1])
+    })
+    
+    getDataup <- eventReactive(input$RUN.prep, {
       if (input$owndataPREPS == 'Yes') {
         req(input$file.preps)
         inFile <- input$file.preps
@@ -155,7 +189,7 @@ mod_pREPS_server <- function(id){
         repGens <- as.numeric(as.vector(unlist(strsplit(input$repGens.preps, ","))))
         repUnits <- as.numeric(as.vector(unlist(strsplit(input$repUnits.preps, ","))))
         if (length(repGens) != length(repUnits)) shiny::validate("Input repGens and repUnits must be of the same length.")
-        if (sum(repGens * repUnits) != nrows*ncols) shiny::validate("Data input does not match withn field dimentions provided.")
+        if (sum(repGens * repUnits) != nrows*ncols) shiny::validate("Data input does not match within field dimensions provided.")
         ENTRY <- 1:sum(repGens)
         NAME <- paste(rep("G", sum(repGens)), 1:sum(repGens), sep = "")
         REPS <- sort(rep(repUnits, times = repGens), decreasing = TRUE)
@@ -214,8 +248,8 @@ mod_pREPS_server <- function(id){
         )
       }
     })
-    # pREPS_reactive <- eventReactive(input$RUN.prep, {
-     pREPS_reactive <- reactive({
+    pREPS_reactive <- eventReactive(input$RUN.prep, {
+     # pREPS_reactive <- reactive({
       
       req(input$nrows.preps, input$ncols.preps)
       req(getDataup()$data_up.preps)
@@ -272,8 +306,7 @@ mod_pREPS_server <- function(id){
                       fixedColumns = TRUE
                     )) %>%
         DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-                        backgroundColor = DT::styleEqual(c(1,0), 
-                                                         c("gray",'yellow')))
+                        backgroundColor = DT::styleEqual(1, "gray"))
     })
     
   
@@ -524,7 +557,8 @@ mod_pREPS_server <- function(id){
       df$ROW <- as.factor(df$ROW)
       df$COLUMN <- as.factor(df$COLUMN)
       df$CHECKS <- as.factor(df$CHECKS)
-      df$ENTRY <- as.factor(df$TREATMENT)
+      df$ENTRY <- as.factor(df$ENTRY)
+      df$TREATMENT <- as.factor(df$TREATMENT)
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "500px"))
       DT::datatable(df, 

@@ -12,58 +12,95 @@ mod_RCBD_ui <- function(id) {
   tagList(
     h4("Randomized Complete Block Designs"),
     sidebarLayout(
-      sidebarPanel(width = 4,
-                   radioButtons(ns("owndatarcbd"), label = "Import entries' list?", choices = c("Yes", "No"), selected = "No",
-                                inline = TRUE, width = NULL, choiceNames = NULL, choiceValues = NULL),
-                   conditionalPanel("input.owndatarcbd != 'Yes'", ns = ns,
-                                    numericInput(ns("t"), label = "Input # of Treatments:",
-                                                 value = 18, min = 2)
-                   ),
-                   conditionalPanel("input.owndatarcbd == 'Yes'", ns = ns,
-                                    fluidRow(
-                                      column(8, style=list("padding-right: 28px;"),
-                                             fileInput(inputId = ns("file.RCBD"), label = "Upload a CSV File:", multiple = FALSE)),
-                                      column(4, style=list("padding-left: 5px;"),
-                                             radioButtons(inputId = ns("sep.rcbd"), "Separator",
-                                                          choices = c(Comma = ",",
-                                                                      Semicolon = ";",
-                                                                      Tab = "\t"),
-                                                          selected = ","))
-                                    )        
-                   ),
-                   
-                   numericInput(inputId = ns("b"), label = "Input # of Full Reps:", value = 3, min = 2),
-                   
-                   numericInput(inputId = ns("l.rcbd"), label = "Input # of Locations:", value = 1, min = 1),
-                   selectInput(inputId = ns("planter_mov_rcbd"), label = "Plot Order Layout:",
-                               choices = c("serpentine", "cartesian"), multiple = FALSE,
-                               selected = "serpentine"),
-                   fluidRow(
-                     column(6, style=list("padding-right: 28px;"),
-                            textInput(inputId = ns("plot_start.rcbd"), "Starting Plot Number(s):", value = 101)
-                     ),
-                     column(6,style=list("padding-left: 5px;"),
-                            #textInput(inputId = ns("Location.rcbd"), "Input Location:", value = "FARGO")
-                            checkboxInput(inputId = ns("continuous.plot"), label = "Continuous Plot ", value = TRUE),
-                     )
-                   ),
-                   
-                   textInput(inputId = ns("Location.rcbd"), "Input Location:", value = "FARGO"),
-                   
-                   numericInput(inputId = ns("myseed.rcbd"), label = "Seed Number:",
-                                value = 123, min = 1),
-                   
-                   fluidRow(
-                     column(6,
-                            actionButton(inputId = ns("RUN.rcbd"), "Run!", icon = icon("cocktail"), width = '100%'),
-                     ),
-                     column(6,
-                            actionButton(ns("Simulate.rcbd"), "Simulate!", icon = icon("cocktail"), width = '100%')
-                     )
-                     
-                   ), 
-                   br(),
-                   downloadButton(ns("downloadData.rcbd"), "Save Experiment!", style = "width:100%")
+      sidebarPanel(
+        width = 4,
+        radioButtons(ns("owndatarcbd"), 
+                     label = "Import entries' list?", 
+                     choices = c("Yes", "No"), 
+                     selected = "No",
+                     inline = TRUE, 
+                     width = NULL, 
+                     choiceNames = NULL, 
+                     choiceValues = NULL),
+        conditionalPanel(
+          condition = "input.owndatarcbd != 'Yes'", 
+          ns = ns,
+          numericInput(ns("t"), 
+                       label = "Input # of Treatments:",
+                       value = 18, 
+                       min = 2)
+        ),
+        conditionalPanel(
+          condition = "input.owndatarcbd == 'Yes'", 
+          ns = ns,
+          fluidRow(
+            column(8, style=list("padding-right: 28px;"),
+                   fileInput(inputId = ns("file.RCBD"), 
+                             label = "Upload a CSV File:", 
+                             multiple = FALSE)),
+            column(4, style=list("padding-left: 5px;"),
+                   radioButtons(inputId = ns("sep.rcbd"), "Separator",
+                                choices = c(Comma = ",",
+                                            Semicolon = ";",
+                                            Tab = "\t"),
+                                selected = ","))
+          )        
+        ),
+        
+        numericInput(inputId = ns("b"), 
+                     label = "Input # of Full Reps:", 
+                     value = 3, min = 2),
+        
+        numericInput(inputId = ns("l.rcbd"), 
+                     label = "Input # of Locations:", 
+                     value = 1, 
+                     min = 1),
+        selectInput(inputId = ns("planter_mov_rcbd"), 
+                    label = "Plot Order Layout:",
+                    choices = c("serpentine", "cartesian"), 
+                    multiple = FALSE,
+                    selected = "serpentine"),
+        fluidRow(
+          column(6, style=list("padding-right: 28px;"),
+                 textInput(inputId = ns("plot_start.rcbd"), 
+                           "Starting Plot Number(s):", 
+                           value = 101)
+          ),
+          column(6,style=list("padding-left: 5px;"),
+                 checkboxInput(inputId = ns("continuous.plot"), 
+                               label = "Continuous Plot ", 
+                               value = TRUE),
+          )
+        ),
+        
+        textInput(inputId = ns("Location.rcbd"), 
+                  "Input Location:",
+                  value = "FARGO"),
+        
+        numericInput(inputId = ns("myseed.rcbd"), 
+                     label = "Seed Number:",
+                     value = 123, 
+                     min = 1),
+        
+        fluidRow(
+          column(6,
+                 actionButton(inputId = ns("RUN.rcbd"), 
+                              "Run!", 
+                              icon = icon("cocktail"), 
+                              width = '100%'),
+          ),
+          column(6,
+                 actionButton(ns("Simulate.rcbd"), 
+                              "Simulate!", 
+                              icon = icon("cocktail"), 
+                              width = '100%')
+          )
+          
+        ), 
+        br(),
+        downloadButton(ns("downloadData.rcbd"), 
+                       "Save Experiment!", 
+                       style = "width:100%")
                    
       ),
 
@@ -73,12 +110,18 @@ mod_RCBD_ui <- function(id) {
           tabsetPanel(
             tabPanel("Field Layout",
                      shinycssloaders::withSpinner(
-                       plotly::plotlyOutput(ns("layouts"), width = "98%", height = "650px"),type = 5
+                       plotly::plotlyOutput(
+                         ns("layouts"), 
+                         width = "98%", 
+                         height = "650px"),
+                       type = 5
                      ),
                      column(12,uiOutput(ns("well_panel_layout_RCBD")))
             ),
             tabPanel("Field Book", 
-                     shinycssloaders::withSpinner(DT::DTOutput(ns("RCBD_fieldbook")), type = 5)
+                     shinycssloaders::withSpinner(
+                       DT::DTOutput(ns("RCBD_fieldbook")), 
+                       type = 5)
             )
           )
         )
@@ -98,12 +141,16 @@ mod_RCBD_server <- function(id){
     getData.rcbd <- reactive({
       req(input$file.RCBD)
       inFile <- input$file.RCBD
-      dataUp.rcbd <- load_file(name = inFile$name, path = inFile$datapat, sep = input$sep.rcbd)
+      dataUp.rcbd <- load_file(name = inFile$name, 
+                               path = inFile$datapat, 
+                               sep = input$sep.rcbd)
       return(list(dataUp.rcbd = dataUp.rcbd))
     })
     
     
-    entryListFormat_RCBD <- data.frame(TREATMENT = c(paste("TRT_", LETTERS[1:9], sep = "")))
+    entryListFormat_RCBD <- data.frame(
+      TREATMENT = c(paste("TRT_", LETTERS[1:9], sep = ""))
+      )
     entriesInfoModal_RCBD <- function() {
       modalDialog(
         title = div(tags$h3("Important message", style = "color: red;")),
@@ -132,15 +179,11 @@ mod_RCBD_server <- function(id){
     })
     
     RCBD_reactive <- eventReactive(input$RUN.rcbd, {
-    #RCBD_reactive <- reactive({
-      
       req(input$b)
       req(input$myseed.rcbd)
       req(input$plot_start.rcbd)
       req(input$Location.rcbd)
       req(input$l.rcbd)
-      # req(input$planter_mov_rcbd)
-      # planter <- as.character(input$planter_mov_rcbd)
       b <- as.numeric(input$b)
       plot_start.rcbd <- as.vector(unlist(strsplit(input$plot_start.rcbd, ",")))
       plot_start.rcbd <- as.numeric(plot_start.rcbd)
@@ -158,22 +201,27 @@ mod_RCBD_server <- function(id){
       
       l.rcbd <- as.numeric(input$l.rcbd)
       
-      myRCBD <- RCBD(t = t, reps = b, l = l.rcbd, plotNumber = plot_start.rcbd, 
-                     continuous = input$continuous.plot,
-                     planter = "cartesian", seed = seed.rcbd, locationNames = loc, 
-                     data = data.rcbd)
       
+      RCBD(t = t, reps = b, l = l.rcbd, plotNumber = plot_start.rcbd, 
+           continuous = input$continuous.plot,
+           planter = "cartesian", 
+           seed = seed.rcbd, 
+           locationNames = loc, 
+           data = data.rcbd)
+
     })
     
     output$well_panel_layout_RCBD <- renderUI({
       req(RCBD_reactive()$fieldBook)
       obj_rcbd <- RCBD_reactive()
-      # planting_rcbd <- input$planter_mov_rcbd
-      allBooks_rcbd <- plot_layout(x = obj_rcbd, optionLayout = 1, orderReps = "vertical_stack_panel")$newBooks
+      allBooks_rcbd <- plot_layout(x = obj_rcbd, 
+                                   optionLayout = 1, 
+                                   orderReps = "vertical_stack_panel")$newBooks
       nBooks_rcbd <- length(allBooks_rcbd)
       layoutOptions_rcbd <- 1:nBooks_rcbd
       df <- RCBD_reactive()$fieldBook
-      orderReps_rcbd <- c("Vertical Stack Panel" = "vertical_stack_panel", "Horizontal Stack Panel" = "horizontal_stack_panel")
+      orderReps_rcbd <- c("Vertical Stack Panel" = "vertical_stack_panel", 
+                          "Horizontal Stack Panel" = "horizontal_stack_panel")
       sites <- length(levels(as.factor(df$LOCATION)))
       wellPanel(
         column(3,
@@ -184,14 +232,20 @@ mod_RCBD_server <- function(id){
         ),
         fluidRow(
           column(3,
-                 selectInput(inputId = ns("orderRepsRCBD"), label = "Reps layout:", 
+                 selectInput(inputId = ns("orderRepsRCBD"), 
+                             label = "Reps layout:", 
                              choices = orderReps_rcbd),
           ),
-          column(2, #align="center",
-                 selectInput(inputId = ns("layoutO_rcbd"), label = "Layout option:", choices = layoutOptions_rcbd, selected = 1)
+          column(2, 
+                 selectInput(inputId = ns("layoutO_rcbd"), 
+                             label = "Layout option:", 
+                             choices = layoutOptions_rcbd, 
+                             selected = 1)
           ),
-          column(2, #align="center",
-                 selectInput(inputId = ns("locLayout_rcbd"), label = "Location:", choices = 1:sites)
+          column(2, 
+                 selectInput(inputId = ns("locLayout_rcbd"), 
+                             label = "Location:", 
+                             choices = 1:sites)
           )
         )
       )
@@ -201,7 +255,10 @@ mod_RCBD_server <- function(id){
       req(input$orderRepsRCBD)
       req(input$l.rcbd)
       obj_rcbd <- RCBD_reactive()
-      allBooks <- try(plot_layout(x = obj_rcbd, optionLayout = 1, orderReps = input$orderRepsRCBD)$newBooks, silent = TRUE)
+      allBooks <- try(plot_layout(x = obj_rcbd, 
+                                  optionLayout = 1, 
+                                  orderReps = input$orderRepsRCBD)$newBooks, 
+                      silent = TRUE)
       nBooks <- length(allBooks)
       NewlayoutOptions <- 1:nBooks
       updateSelectInput(session = session, inputId = 'layoutO_rcbd',
@@ -221,32 +278,49 @@ mod_RCBD_server <- function(id){
       opt_rcbd <- as.numeric(input$layoutO_rcbd)
       planting_rcbd <- input$planter_mov_rcbd
       locSelected <- as.numeric(input$locLayout_rcbd)
-      try(plot_layout(x = obj_rcbd, optionLayout = opt_rcbd, orderReps = input$orderRepsRCBD,
-                      planter = planting_rcbd, l = locSelected), silent = TRUE)
+      try(plot_layout(x = obj_rcbd, 
+                      optionLayout = opt_rcbd, 
+                      orderReps = input$orderRepsRCBD,
+                      planter = planting_rcbd, 
+                      l = locSelected), 
+          silent = TRUE)
     })
 
     
-    valsRCBD <- reactiveValues(maxV.rcbd = NULL, minV.rcbd = NULL, trail.rcbd = NULL)
+    valsRCBD <- reactiveValues(maxV.rcbd = NULL, 
+                               minV.rcbd = NULL, 
+                               trail.rcbd = NULL)
     
     simuModal.rcbd <- function(failed = FALSE) {
       modalDialog(
-        selectInput(inputId = ns("trailsRCBD"), label = "Select One:", choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
-        conditionalPanel("input.trailsRCBD == 'Other'", ns = ns,
-                         textInput(inputId = ns("OtherRCBD"), label = "Input Trial Name:", value = NULL)
+        selectInput(inputId = ns("trailsRCBD"), 
+                    label = "Select One:", 
+                    choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
+        conditionalPanel(
+          condition = "input.trailsRCBD == 'Other'", 
+          ns = ns,
+          textInput(inputId = ns("OtherRCBD"), 
+                    label = "Input Trial Name:", 
+                    value = NULL)
         ),
         fluidRow(
           column(6, 
-                 numericInput(inputId = ns("min.rcbd"), "Input the min value", value = NULL)
+                 numericInput(inputId = ns("min.rcbd"), 
+                              "Input the min value", 
+                              value = NULL)
           ),
           column(6, 
-                 numericInput(inputId = ns("max.rcbd"), "Input the max value", value = NULL)
+                 numericInput(inputId = ns("max.rcbd"), 
+                              "Input the max value", 
+                              value = NULL)
                  
           )
           
         ),
         
         if (failed)
-          div(tags$b("Invalid input of data max and min", style = "color: red;")),
+          div(tags$b("Invalid input of data max and min", 
+                     style = "color: red;")),
         
         footer = tagList(
           modalButton("Cancel"),
@@ -292,17 +366,18 @@ mod_RCBD_server <- function(id){
     
     simuDataRCBD <- reactive({
       req(RCBD_reactive()$fieldBook)
-      if(!is.null(valsRCBD$maxV.rcbd) && !is.null(valsRCBD$minV.rcbd) && !is.null(valsRCBD$trail.rcbd)) {
+      if(!is.null(valsRCBD$maxV.rcbd) && !is.null(valsRCBD$minV.rcbd) && 
+         !is.null(valsRCBD$trail.rcbd)) {
         max <- as.numeric(valsRCBD$maxV.rcbd)
         min <- as.numeric(valsRCBD$minV.rcbd)
-        df.rcbd <- RCBD_reactive()$fieldBook
+        # df.rcbd <- RCBD_reactive()$fieldBook
         df.rcbd <- reactive_layoutRCBD()$allSitesFieldbook
         cnamesdf.rcbd <- colnames(df.rcbd)
         df.rcbd <- norm_trunc(a = min, b = max, data = df.rcbd)
-        colnames(df.rcbd) <- c(cnamesdf.rcbd[1:(ncol(df.rcbd) - 1)], valsRCBD$trail.rcbd)
+        colnames(df.rcbd) <- c(cnamesdf.rcbd[1:(ncol(df.rcbd) - 1)], 
+                               valsRCBD$trail.rcbd)
         df.rcbd <- df.rcbd[order(df.rcbd$ID),]
       }else {
-        #df.rcbd <-  RCBD_reactive()$fieldBook
         df.rcbd <- reactive_layoutRCBD()$allSitesFieldbook
       }
       return(list(df = df.rcbd))
@@ -323,7 +398,8 @@ mod_RCBD_server <- function(id){
     heatmap_obj <- reactive({
       req(simuDataRCBD()$df)
       if (ncol(simuDataRCBD()$df) == 8) {
-        locs <- factor(simuDataRCBD()$df$LOCATION, levels = unique(simuDataRCBD()$df$LOCATION))
+        locs <- factor(simuDataRCBD()$df$LOCATION, 
+                       levels = unique(simuDataRCBD()$df$LOCATION))
         locLevels <- levels(locs)
         df = subset(simuDataRCBD()$df, LOCATION == locLevels[locNum()])
         loc <- levels(factor(df$LOCATION))
@@ -331,12 +407,20 @@ mod_RCBD_server <- function(id){
         label_trail <- paste(trail, ": ")
         heatmapTitle <- paste("Heatmap for ", trail)
         new_df <- df %>%
-          dplyr::mutate(text = paste0("Site: ", loc, "\n", "Row: ", df$ROW, "\n", "Col: ", df$COLUMN, "\n", "Entry: ", 
-                                      df$ENTRY, "\n", label_trail, round(df[,8],2)))
+          dplyr::mutate(text = paste0("Site: ", loc, "\n", 
+                                      "Row: ", df$ROW, "\n", 
+                                      "Col: ", df$COLUMN, "\n", 
+                                      "Entry: ", df$ENTRY, "\n", 
+                                      label_trail, round(df[,8],2)))
         w <- as.character(valsRCBD$trail.rcbd)
         new_df$ROW <- as.factor(new_df$ROW) # Set up ROWS as factors
         new_df$COLUMN <- as.factor(new_df$COLUMN) # Set up COLUMNS as factors
-        p1 <- ggplot2::ggplot(new_df, ggplot2::aes(x = new_df[,5], y = new_df[,4], fill = new_df[,8], text = text)) +
+        p1 <- ggplot2::ggplot(
+          new_df, ggplot2::aes(
+            x = new_df[,5], 
+            y = new_df[,4], 
+            fill = new_df[,8], 
+            text = text)) +
           ggplot2::geom_tile() +
           ggplot2::xlab("COLUMN") +
           ggplot2::ylab("ROW") +
@@ -344,9 +428,15 @@ mod_RCBD_server <- function(id){
           viridis::scale_fill_viridis(discrete = FALSE) +
           ggplot2::ggtitle(heatmapTitle) +
           ggplot2::theme_minimal() + # I added this option 
-          ggplot2::theme(plot.title = ggplot2::element_text(family="Calibri", face="bold", size=13, hjust=0.5))
-        
-        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 640)
+          ggplot2::theme(plot.title = ggplot2::element_text(
+            family="Calibri", 
+            face="bold", 
+            size=13, 
+            hjust=0.5))
+        p2 <- plotly::ggplotly(p1, 
+                               tooltip="text", 
+                               width = 1350, 
+                               height = 640)
         return(p2)
       } else {
         showModal(
@@ -357,14 +447,9 @@ mod_RCBD_server <- function(id){
         return(NULL)
       }
     })
-    
-    # output$heatmapRCBD <- plotly::renderPlotly({
-    #   req(heatmap_obj())
-    #   heatmap_obj()
-    # })
-    # 
-    
+
     output$layouts <- plotly::renderPlotly({
+      print("Hola")
       req(reactive_layoutRCBD())
       req(RCBD_reactive())
       req(input$typlotRCBD)
@@ -386,8 +471,10 @@ mod_RCBD_server <- function(id){
       df$COLUMN <- as.factor(df$COLUMN)
       df$REP <- as.factor(df$REP)
       df$TREATMENT <- as.factor(df$TREATMENT)
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                scrollX = TRUE, scrollY = "500px"))
+      options(DT.options = list(pageLength = nrow(df), 
+                                autoWidth = FALSE,
+                                scrollX = TRUE, 
+                                scrollY = "500px"))
       
       DT::datatable(df,
                     filter = 'top',
