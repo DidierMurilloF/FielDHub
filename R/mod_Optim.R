@@ -37,19 +37,29 @@ mod_Optim_ui <- function(id) {
                                 selected = ","))
           )            
        ),
-       numericInput(ns("checks.s"),
-                    label = "Input # of Checks:", 
-                    value = 3,
-                    min = 1),
-       
-       numericInput(ns("tplots.s"), 
-                    label = "Input # of Total Check Plots:",
-                    value = 30,
-                    min = 1),
+       # numericInput(ns("checks.s"),
+       #              label = "Input # of Checks:", 
+       #              value = 3,
+       #              min = 1),
+       # 
+       # numericInput(ns("tplots.s"), 
+       #              label = "Input # of Total Check Plots:",
+       #              value = 30,
+       #              min = 1),
        conditionalPanel(
          "input.owndataOPTIM != 'Yes'", 
           ns = ns,
           
+          numericInput(ns("checks.s"),
+                        label = "Input # of Checks:", 
+                        value = 3,
+                        min = 1),
+           
+          numericInput(ns("tplots.s"), 
+                        label = "Input # of Total Check Plots:",
+                        value = 30,
+                        min = 1),
+            
           fluidRow(
             column(6,
                    style=list("padding-right: 28px;"),
@@ -294,9 +304,9 @@ mod_Optim_server <- function(id) {
     output$table_checks <- DT::renderDT({
       req(getDataup.spatiaL()$data_up.spatial)
         data_entry <- getDataup.spatiaL()$data_up.spatial
-        checks_input <- as.numeric(input$checks.s)
-        times_checks <- data_entry[1:checks_input,]
-        df <- as.data.frame(times_checks)
+        print(data_entry)
+        checks_input <- data_entry[data_entry$REPS > 1, ]
+        df <- as.data.frame(checks_input)
         options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                   scrollX = TRUE, scrollY = "350px"))
         a <- ncol(df) - 1

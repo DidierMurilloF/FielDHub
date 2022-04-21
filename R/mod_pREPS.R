@@ -557,7 +557,8 @@ mod_pREPS_server <- function(id){
       df$ROW <- as.factor(df$ROW)
       df$COLUMN <- as.factor(df$COLUMN)
       df$CHECKS <- as.factor(df$CHECKS)
-      df$ENTRY <- as.factor(df$TREATMENT)
+      df$ENTRY <- as.factor(df$ENTRY)
+      df$TREATMENT <- as.factor(df$TREATMENT)
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "500px"))
       DT::datatable(df, 
