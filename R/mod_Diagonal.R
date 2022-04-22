@@ -1316,7 +1316,7 @@ mod_Diagonal_server <- function(id) {
     
     output$fieldBook_diagonal <- DT::renderDT({
       req(simudata_DIAG()$df)
-      print(simudata_DIAG()$df)
+      # print(simudata_DIAG()$df)
       df <- simudata_DIAG()$df
       df$EXPT <- as.factor(df$EXPT)
       df$LOCATION <- as.factor(df$LOCATION)

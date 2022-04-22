@@ -449,7 +449,6 @@ mod_RCBD_server <- function(id){
     })
 
     output$layouts <- plotly::renderPlotly({
-      print("Hola")
       req(reactive_layoutRCBD())
       req(RCBD_reactive())
       req(input$typlotRCBD)
@@ -464,6 +463,7 @@ mod_RCBD_server <- function(id){
     })
     
     output$RCBD_fieldbook <- DT::renderDataTable({
+      print(simuDataRCBD()$df)
       df <- simuDataRCBD()$df
       df$LOCATION <- as.factor(df$LOCATION)
       df$PLOT <- as.factor(df$PLOT)

@@ -120,7 +120,7 @@ golem::add_utils("plot_splitPlots")
 
 ## External resources
 ## Creates .js and .css files at inst/app/www
-golem::add_js_file( "script" )
+golem::add_js_file( "corner" )
 golem::add_js_handler( "handlers" )
 golem::add_css_file( "style" )
 golem::add_css_file( "mobile" )

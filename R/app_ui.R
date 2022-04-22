@@ -15,11 +15,10 @@
 app_ui <- function(request) {
   options(spinner.color="#2c7da3", spinner.color.background="#ffffff", spinner.size = 2)
   tagList(
-    # Leave this function for adding external resources
     golem_add_external_resources(),
-    # List the first level UI elements here
-    fluidPage(theme = shinythemes::shinytheme("flatly"), #theme_flatly(), #"shinythemes/css/flatly.min.css",   
-              navbarPage("FielDHub", 
+    tags$head(tags$script(type="text/javascript", src = "corner.js")),
+    fluidPage(theme = shinythemes::shinytheme("flatly"),
+              navbarPage(title = "FielDHub", 
                          tabPanel(" Welcome!", icon = icon("home", lib = "glyphicon"),
                                   htmltools::includeHTML(
                                     system.file("app/www/home.html", package = "FielDHub")
@@ -86,12 +85,16 @@ app_ui <- function(request) {
                                     system.file("app/www/aboutUs.html", package = "FielDHub")
                                   )
                          ),
-                         
-                         #img(system.file("app/www/ndsulogo.jpg")),
-                          tags$script(HTML("var header = $('.navbar > .container-fluid');
-                          header.append('<div style=\"float:right\"><img src=\"/www/ndsulogo.jpg\" style=\"float:right;width:360px;height:60px;padding-top:0px;\"> </a></div>');
-                          console.log(header)")
-                          )
+                         # tabPanel(
+                         #   tags$script(HTML("var header = $('.navbar > .container-fluid');
+                         #  header.append('<div style=\"float:right\"><img src=\"/www/ndsulogo.jpg\" style=\"float:right;width:360px;height:60px;padding-top:0px;\"> </a></div>');
+                         #  console.log(header)")
+                         #   )
+                         # )
+                          # tags$script(HTML("var header = $('.navbar > .container-fluid');
+                          # header.append('<div style=\"float:right\"><img src=\"/www/ndsulogo.jpg\" style=\"float:right;width:360px;height:60px;padding-top:0px;\"> </a></div>');
+                          # console.log(header)")
+                          # )
               )
     )
   )
