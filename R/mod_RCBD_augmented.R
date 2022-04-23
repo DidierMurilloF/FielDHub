@@ -562,16 +562,15 @@ mod_RCBD_augmented_server <- function(id) {
          minVal <- as.numeric(valsARCBD$minValue)
          ROX_O <- as.numeric(valsARCBD$ROX)
          ROY_O <- as.numeric(valsARCBD$ROY)
-         locs <- as.numeric(input$l.arcbd)
          df_arcbd <- rcbd_augmented_reactive()$fieldBook
          nrows.s <- length(levels(as.factor(df_arcbd$ROW)))
          ncols.s <- length(levels(as.factor(df_arcbd$COLUMN)))
          loc_levels_factors <- levels(factor(df_arcbd$LOCATION, unique(df_arcbd$LOCATION)))
          seed.s <- as.numeric(input$myseed_a_rcbd)
-
+         locs <- length(loc_levels_factors)
          df_arcbd_list <- vector(mode = "list", length = locs)
          dfSimulationList <- vector(mode = "list", length = locs)
-         do_sites <- 1:locs
+         do_sites <- 1:(length(loc_levels_factors))
          z <- 1
          set.seed(seed.s)
          for (sites in do_sites) {
@@ -616,14 +615,17 @@ mod_RCBD_augmented_server <- function(id) {
        df$BLOCK <- as.factor(df$BLOCK)
        df$ENTRY <- as.factor(df$ENTRY)
        df$TREATMENT <- as.factor(df$TREATMENT)
+        
        options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                 scrollX = TRUE, scrollY = "600px",
-                                 columnDefs = list(list(className = 'dt-center', targets = "_all"))))
-       DT::datatable(df,
+                                 scrollX = TRUE, scrollCollapse=TRUE, scrollY = "600px"))
+       DT::datatable(df, 
                      filter = "top",
-                     rownames = FALSE
+                     rownames = FALSE, 
+                     options = list(
+                       columnDefs = list(list(className = 'dt-center', targets = "_all")))
        )
      })
+     
 
 
      heatmap_obj <- reactive({
@@ -658,7 +660,7 @@ mod_RCBD_augmented_server <- function(id) {
          paste(loc, Sys.Date(), ".csv", sep = "")
        },
        content = function(file) {
-         df <- as.data.frame(rcbd_augmented_reactive()$fieldBook)
+         df <- as.data.frame(simuDataARCBD()$df)
          write.csv(df, file, row.names = FALSE)
        }
      )

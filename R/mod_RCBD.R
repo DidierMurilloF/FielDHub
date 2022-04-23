@@ -463,7 +463,6 @@ mod_RCBD_server <- function(id){
     })
     
     output$RCBD_fieldbook <- DT::renderDataTable({
-      print(simuDataRCBD()$df)
       df <- simuDataRCBD()$df
       df$LOCATION <- as.factor(df$LOCATION)
       df$PLOT <- as.factor(df$PLOT)
@@ -479,7 +478,8 @@ mod_RCBD_server <- function(id){
       DT::datatable(df,
                     filter = 'top',
                     rownames = FALSE, options = list(
-        columnDefs = list(list(className = 'dt-center', targets = "_all"))))
+        columnDefs = list(list(className = 'dt-center', targets = "_all")))
+        )
       
     })
 

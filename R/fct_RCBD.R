@@ -171,14 +171,14 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101, continuous = FA
     if (planter == "serpentine") {
       for (i in 1:l) {
         D <- plotNumber[[i]]
-        M <- matrix(data = D[i]:(D[i] + (nt * b - 1)), ncol = nt,
+        M <- matrix(data = D[1]:(D[1] + (nt * b - 1)), ncol = nt,
                                     nrow = b, byrow = TRUE)
         p.number.loc[[i]] <- serpentinelayout(M, opt = 2)
       }
     }else {
       for (i in 1:l) {
         D <- plotNumber[[i]]
-        p.number.loc[[i]] <- matrix(data = D[i]:(D[i] + (nt * b - 1)), ncol = nt,
+        p.number.loc[[i]] <- matrix(data = D[1]:(D[1] + (nt * b - 1)), ncol = nt,
                                     nrow = b, byrow = TRUE)
       }
     }
