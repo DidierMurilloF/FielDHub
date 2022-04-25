@@ -71,11 +71,12 @@ mod_RCBD_augmented_ui <- function(id){
           ),
           column(6,
                  style=list("padding-left: 5px;"),
-                 numericInput(inputId = ns("blocks_a_rcbd"), 
-                              label = "Input # of Blocks:",
-                              value = 10,
-                              min = 3, 
-                              max = 100)
+                 # numericInput(inputId = ns("blocks_a_rcbd"), 
+                 #              label = "Input # of Blocks:",
+                 #              value = 10,
+                 #              min = 3, 
+                 #              max = 100)
+                 selectInput(inputId = ns("blocks_a_rcbd"), label = "", choices = c(5))
           )
         ),
         fluidRow(
@@ -184,7 +185,40 @@ mod_RCBD_augmented_server <- function(id) {
       }
     })
     
-    getDataup_a_rcbd <- eventReactive(input$RUN.arcbd,{
+    #  getDataup_a_rcbd <- eventReactive(input$RUN.arcbd,{
+    # getDataup_a_rcbd_1 <- reactive({
+    #   if (input$owndata_a_rcbd == "Yes") {
+    #     req(input$file1_a_rcbd)
+    #     inFile <- input$file1_a_rcbd
+    #     data_up <- load_file(name = inFile$name, 
+    #                          path = inFile$datapat, 
+    #                          sep = input$sep.a_rcbd)
+    #     if (ncol(data_up) < 2) {
+    #       shiny::validate("Data input needs at least two columns with: ENTRY and NAME.")
+    #     } 
+    #     checks <- as.numeric(input$checks_a_rcbd)
+    #     data_up <- as.data.frame(data_up[,1:2])
+    #     data_up <- na.omit(data_up)
+    #     colnames(data_up) <- c("ENTRY", "NAME")
+    #     lines <- nrow(data_up) - checks
+    #   }else {
+    #     req(input$checks_a_rcbd)
+    #     req(input$lines_a_rcbd)
+    #     lines <- as.numeric(input$lines_a_rcbd)
+    #     checks <- as.numeric(input$checks_a_rcbd)
+    #     if(lines < 1 || checks <= 0) validate("Number of lines and checks should be greater than 1.")
+    #     NAME <- c(paste(rep("CH", checks), 1:checks, sep = ""),
+    #               paste(rep("G", lines), (checks + 1):(lines + checks), sep = ""))
+    #     gen.list <- data.frame(list(ENTRY = 1:(lines + checks),	NAME = NAME))
+    #     data_up <- gen.list
+    #   }
+    #   
+    #   return(list(dataUp_a_rcbd = data_up, entries = lines))
+    #   
+    # })
+    
+   # getDataup_a_rcbd <- eventReactive(input$RUN.arcbd,{
+    getDataup_a_rcbd <- reactive({
       if (input$owndata_a_rcbd == "Yes") {
         req(input$file1_a_rcbd)
         inFile <- input$file1_a_rcbd
@@ -194,9 +228,11 @@ mod_RCBD_augmented_server <- function(id) {
         if (ncol(data_up) < 2) {
           shiny::validate("Data input needs at least two columns with: ENTRY and NAME.")
         } 
+        checks <- as.numeric(input$checks_a_rcbd)
         data_up <- as.data.frame(data_up[,1:2])
         data_up <- na.omit(data_up)
         colnames(data_up) <- c("ENTRY", "NAME")
+        lines <- nrow(data_up) - checks
       }else {
         req(input$checks_a_rcbd)
         req(input$lines_a_rcbd)
@@ -209,8 +245,40 @@ mod_RCBD_augmented_server <- function(id) {
         data_up <- gen.list
       }
       
-      return(list(dataUp_a_rcbd = data_up))
+      return(list(dataUp_a_rcbd = data_up, entries = lines))
       
+    })
+    
+    
+    list_to_observe <- reactive({
+      list(
+        checks = input$checks_a_rcbd, 
+        entries = getDataup_a_rcbd()$entries
+      )
+    })
+    
+    
+    observeEvent(list_to_observe(), {
+      lines_arcbd <- as.numeric(list_to_observe()$entries)
+      checks_arcbd <- as.numeric(list_to_observe()$checks)
+      blocks_arcbd <- set_augmented_blocks(
+        lines = lines_arcbd, 
+        checks = checks_arcbd
+      )
+      updateSelectInput(session = session,
+                        inputId = "blocks_a_rcbd",
+                        label = "Input # of Blocks:", 
+                        choices = blocks_arcbd, 
+                        selected = blocks_arcbd[1])
+    })
+    
+    some_inputs <- eventReactive(input$RUN.arcbd,{
+      return(list(blocks = input$blocks_a_rcbd, 
+                  entries = input$lines_a_rcbd, 
+                  checks = as.numeric(input$checks_a_rcbd),
+                  sites = input$l.arcbd,
+                  expts_a_rcbd = input$nExpt_a_rcbd)
+      )
     })
     
     output$data_input <- DT::renderDT({
@@ -260,18 +328,10 @@ mod_RCBD_augmented_server <- function(id) {
       }
     })
     
-    some_inputs <- eventReactive(input$RUN.arcbd,{
-      return(list(blocks = input$blocks_a_rcbd, 
-                  entries = input$lines_a_rcbd, 
-                  checks = input$checks_a_rcbd,
-                  sites = input$l.arcbd,
-                  expts_a_rcbd = input$nExpt_a_rcbd))
-    })
-    
     output$checks_table <- DT::renderDT({
       req(getDataup_a_rcbd()$dataUp_a_rcbd)
         data_entry <- getDataup_a_rcbd()$dataUp_a_rcbd
-        df <- data_entry[1:some_inputs()$checks,]
+        df <- data_entry[1:(as.numeric(input$checks_a_rcbd)),]
         options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                   scrollX = TRUE, scrollY = "350px"))
         a <- ncol(df) - 1
@@ -326,8 +386,6 @@ mod_RCBD_augmented_server <- function(id) {
                               data = gen.list)
     })
     
-
-    
     observeEvent(some_inputs()$sites, {
       sites <- as.numeric(some_inputs()$sites)
       sites_to_view <- 1:sites 
@@ -343,7 +401,7 @@ mod_RCBD_augmented_server <- function(id) {
     )
     
     output$randomized_layout <- DT::renderDT({
-       req(getDataup_a_rcbd()$dataUp_a_rcbd)
+       # req(getDataup_a_rcbd()$dataUp_a_rcbd)
        r_map <- rcbd_augmented_reactive()$layout_random_sites[[locNum()]]
        checks <- 1:(as.numeric(some_inputs()$checks))
        b <- as.numeric(some_inputs()$blocks)

@@ -248,6 +248,7 @@ mod_pREPS_server <- function(id){
         )
       }
     })
+    
     pREPS_reactive <- eventReactive(input$RUN.prep, {
      # pREPS_reactive <- reactive({
       
@@ -277,18 +278,29 @@ mod_pREPS_server <- function(id){
                                     data = gen.list 
                                     )
     })
+    
+    some_prep_imputs <- eventReactive(input$RUN.prep, {
+      return(
+        list(
+          nrows = as.numeric(input$nrows.preps),
+          ncols = as.numeric(input$ncols.preps),
+          nlocs = as.numeric(input$l.preps),
+          seed = as.numeric(input$s.seed.preps)
+        )
+      )
+      
+    })
      
      user_site_selection <- reactive({
        return(as.numeric(input$locView.preps))
      })
     
     user_location <- reactive({
-      user_site <- as.numeric(input$locView.preps)
-      loc_user_out <- pREPS_reactive()[[user_site]]
+      loc_user_out <- pREPS_reactive()[[user_site_selection()]]
       w_map <- loc_user_out$field.map
       binary_field <- loc_user_out$binary.field
-      gen.entries <- loc_user_out$gen.entries
-      return(list(field.map = w_map, binary.field = binary_field, gen.entries = gen.entries, user_site = user_site))
+      gen.entries <- loc_user_out$genEntries
+      return(list(field.map = w_map, binary.field = binary_field, gen.entries = gen.entries))
     })
 
     
@@ -313,7 +325,7 @@ mod_pREPS_server <- function(id){
     
     output$dtpREPS <- DT::renderDataTable({
       req(pREPS_reactive())
-      w_map <- pREPS_reactive()$layoutRandom[[user_site_selection()]]
+      w_map <- pREPS_reactive()$layoutRandom[[as.numeric(user_site_selection())]]
       checks = as.vector(pREPS_reactive()$genEntries[[1]])
       len_checks <- length(checks)
       colores <- c('royalblue','salmon', 'green', 'orange','orchid', 'slategrey',
@@ -321,11 +333,12 @@ mod_pREPS_server <- function(id){
       
       df <- as.data.frame(w_map)
       
-      gens <- as.vector(unlist(user_location()$gen.entries[[2]]))
+      gens <- as.vector(unlist(pREPS_reactive()$genEntries[[2]]))
       
       rownames(df) <- nrow(df):1
       colnames(df) <- paste0('V', 1:ncol(df))
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
+      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, 
+                                scrollY = "700px"))
       DT::datatable(df,
                     extensions = 'Buttons', 
                      options = list(dom = 'Blfrtip',
@@ -500,6 +513,7 @@ mod_pREPS_server <- function(id){
     
     simuDataPREP <- reactive({
       req(pREPS_reactive()$fieldBook[[1]])
+      req(some_prep_imputs())
       if(!is.null(valsPREP$maxValue) && !is.null(valsPREP$minValue) && !is.null(valsPREP$trail.prep)) {
         maxVal <- as.numeric(valsPREP$maxValue)
         minVal <- as.numeric(valsPREP$minValue)
@@ -507,15 +521,10 @@ mod_pREPS_server <- function(id){
         ROY_PREP <- as.numeric(valsPREP$ROY)
         df.prep <- pREPS_reactive()$fieldBook
         loc_levels_factors <- levels(factor(df.prep$LOCATION, unique(df.prep$LOCATION)))
-        locs <- as.numeric(input$l.preps)
-        req(input$nrows.preps)
-        req(input$ncols.preps)
-        req(input$repGens.preps)
-        repGens <- as.numeric(as.vector(unlist(strsplit(input$repGens.preps, ","))))
-        lines_prep <- sum(repGens)
-        nrows_prep <- as.numeric(input$nrows.preps)
-        ncols_prep <- as.numeric(input$ncols.preps)
-        seed_prep <- as.numeric(input$s.seed.preps)
+        locs <- some_prep_imputs()$nlocs
+        nrows_prep <- some_prep_imputs()$nrows
+        ncols_prep <- some_prep_imputs()$ncols
+        seed_prep <- some_prep_imputs()$seed
         df.prep_list <- vector(mode = "list", length = locs)
         dfSimulationList <- vector(mode = "list", length = locs)
         w <- 1
@@ -549,30 +558,9 @@ mod_pREPS_server <- function(id){
     })
     
     
-    output$pREPSOUTPUT <- DT::renderDT({
-      df <- simuDataPREP()$df
-      df$EXPT <- as.factor(df$EXPT)
-      df$LOCATION <- as.factor(df$LOCATION)
-      df$PLOT <- as.factor(df$PLOT)
-      df$ROW <- as.factor(df$ROW)
-      df$COLUMN <- as.factor(df$COLUMN)
-      df$CHECKS <- as.factor(df$CHECKS)
-      df$ENTRY <- as.factor(df$ENTRY)
-      df$TREATMENT <- as.factor(df$TREATMENT)
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                scrollX = TRUE, scrollY = "500px"))
-      DT::datatable(df, 
-                    filter = "top",
-                    rownames = FALSE, 
-                    options = list(
-        columnDefs = list(list(className = 'dt-center', targets = "_all")))
-        )
-    })
-    
-    
     heatmap_obj <- reactive({
       req(simuDataPREP()$dfSimulationList)
-      loc_user <- user_location()$user_site
+      loc_user <- user_site_selection()
       if(input$heatmap_PREP) {
         w <- as.character(valsPREP$trail.prep)
         df <- simuDataPREP()$dfSimulationList[[loc_user]]
@@ -593,6 +581,27 @@ mod_pREPS_server <- function(id){
       req(heatmap_obj())
       heatmap_obj()
     }) 
+    
+    
+    output$pREPSOUTPUT <- DT::renderDT({
+      df <- simuDataPREP()$df
+      df$EXPT <- as.factor(df$EXPT)
+      df$LOCATION <- as.factor(df$LOCATION)
+      df$PLOT <- as.factor(df$PLOT)
+      df$ROW <- as.factor(df$ROW)
+      df$COLUMN <- as.factor(df$COLUMN)
+      df$CHECKS <- as.factor(df$CHECKS)
+      df$ENTRY <- as.factor(df$ENTRY)
+      df$TREATMENT <- as.factor(df$TREATMENT)
+      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
+                                scrollX = TRUE, scrollY = "500px"))
+      DT::datatable(df, 
+                    filter = "top",
+                    rownames = FALSE, 
+                    options = list(
+                      columnDefs = list(list(className = 'dt-center', targets = "_all")))
+      )
+    })
     
     output$downloadData.preps <- downloadHandler(
       filename = function() {

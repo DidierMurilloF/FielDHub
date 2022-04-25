@@ -17,4 +17,3 @@ set_augmented_blocks <- function(lines, checks, start = 5){
   }
   return(b)
 }
-set_augmented_blocks(lines = 55, checks = 3)

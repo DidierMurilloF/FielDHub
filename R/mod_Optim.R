@@ -186,7 +186,14 @@ mod_Optim_ui <- function(id) {
           tabPanel("Randomized Field", DT::DTOutput(ns("RFIELD"))),
           tabPanel("Plot Number Field", DT::DTOutput(ns("PLOTFIELD"))),
           tabPanel("Field Book", DT::DTOutput(ns("OPTIMOUTPUT"))),
-          tabPanel("Heatmap", plotly::plotlyOutput(ns("heatmap")))
+          tabPanel(
+            "Heatmap", 
+            # selectInput(inputId = ns("locView.optim1"), 
+            #             label = "Choose location to view:", 
+            #             choices = 1:1, 
+            #             selected = 1,
+            #             multiple = FALSE),
+            plotly::plotlyOutput(ns("heatmap")))
          )
       )
     )
@@ -304,7 +311,6 @@ mod_Optim_server <- function(id) {
     output$table_checks <- DT::renderDT({
       req(getDataup.spatiaL()$data_up.spatial)
         data_entry <- getDataup.spatiaL()$data_up.spatial
-        print(data_entry)
         checks_input <- data_entry[data_entry$REPS > 1, ]
         df <- as.data.frame(checks_input)
         options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
@@ -315,7 +321,6 @@ mod_Optim_server <- function(id) {
     })
     
     Spatial_Checks <- eventReactive(input$RUN.optim, { 
-    # Spatial_Checks <- reactive({
       req(getDataup.spatiaL()$data_up.spatial)
       req(input$plot_start.spatial)
       req(input$nrows.s, input$ncols.s)
@@ -600,6 +605,7 @@ mod_Optim_server <- function(id) {
         df <- simuDataOPTIM()$dfSimulation[[user_site_selection()]]
         df <- as.data.frame(df)
         p1 <- ggplot2::ggplot(df, ggplot2::aes(x = df[,4], y = df[,3], fill = df[,7], text = df[,8])) + 
+          ggplot2::ggtitle("Heat map for yield") + 
           ggplot2::geom_tile() +
           ggplot2::xlab("COLUMN") +
           ggplot2::ylab("ROW") +
