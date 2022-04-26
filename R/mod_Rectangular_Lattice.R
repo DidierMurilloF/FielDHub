@@ -370,7 +370,7 @@ mod_Rectangular_Lattice_server <- function(id) {
     
     heatmap_obj <- reactive({
       req(simuDataRECT()$df)
-      if (ncol(simuDataRECT()$df) == 10) {
+      if (ncol(simuDataRECT()$df) == 11) {
         locs <- factor(simuDataRECT()$df$LOCATION, levels = unique(simuDataRECT()$df$LOCATION))
         locLevels <- levels(locs)
         df = subset(simuDataRECT()$df, LOCATION == locLevels[locNum()])
@@ -379,12 +379,18 @@ mod_Rectangular_Lattice_server <- function(id) {
         label_trail <- paste(trail, ": ")
         heatmapTitle <- paste("Heatmap for ", trail)
         new_df <- df %>%
-          dplyr::mutate(text = paste0("Site: ", loc, "\n", "Row: ", df$ROW, "\n", "Col: ", df$COLUMN, "\n", "Entry: ", 
-                                      df$ENTRY, "\n", label_trail, round(df[,10],2)))
+          dplyr::mutate(text = paste0("Site: ", loc, "\n", 
+                                      "Row: ", df$ROW, "\n",
+                                      "Col: ", df$COLUMN, "\n", 
+                                      "Entry: ", df$ENTRY, "\n", 
+                                      label_trail, round(df[,11],2)))
         w <- as.character(valsRECT$trail.rectangular)
         new_df$ROW <- as.factor(new_df$ROW) # Set up ROWS as factors
         new_df$COLUMN <- as.factor(new_df$COLUMN) # Set up COLUMNS as factors
-        p1 <- ggplot2::ggplot(new_df, ggplot2::aes(x = new_df[,5], y = new_df[,4], fill = new_df[,10], text = text)) +
+        p1 <- ggplot2::ggplot(new_df, ggplot2::aes(x = new_df[,5], 
+                                                   y = new_df[,4], 
+                                                   fill = new_df[,11],
+                                                   text = text)) +
           ggplot2::geom_tile() +
           ggplot2::xlab("COLUMN") +
           ggplot2::ylab("ROW") +
@@ -394,7 +400,7 @@ mod_Rectangular_Lattice_server <- function(id) {
           ggplot2::theme_minimal() + # I added this option 
           ggplot2::theme(plot.title = ggplot2::element_text(family="Calibri", face="bold", size=13, hjust=0.5))
         
-        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 640)
+        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1250, height = 640)
         return(p2)
       } else {
         showModal(

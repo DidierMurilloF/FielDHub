@@ -185,38 +185,6 @@ mod_RCBD_augmented_server <- function(id) {
       }
     })
     
-    #  getDataup_a_rcbd <- eventReactive(input$RUN.arcbd,{
-    # getDataup_a_rcbd_1 <- reactive({
-    #   if (input$owndata_a_rcbd == "Yes") {
-    #     req(input$file1_a_rcbd)
-    #     inFile <- input$file1_a_rcbd
-    #     data_up <- load_file(name = inFile$name, 
-    #                          path = inFile$datapat, 
-    #                          sep = input$sep.a_rcbd)
-    #     if (ncol(data_up) < 2) {
-    #       shiny::validate("Data input needs at least two columns with: ENTRY and NAME.")
-    #     } 
-    #     checks <- as.numeric(input$checks_a_rcbd)
-    #     data_up <- as.data.frame(data_up[,1:2])
-    #     data_up <- na.omit(data_up)
-    #     colnames(data_up) <- c("ENTRY", "NAME")
-    #     lines <- nrow(data_up) - checks
-    #   }else {
-    #     req(input$checks_a_rcbd)
-    #     req(input$lines_a_rcbd)
-    #     lines <- as.numeric(input$lines_a_rcbd)
-    #     checks <- as.numeric(input$checks_a_rcbd)
-    #     if(lines < 1 || checks <= 0) validate("Number of lines and checks should be greater than 1.")
-    #     NAME <- c(paste(rep("CH", checks), 1:checks, sep = ""),
-    #               paste(rep("G", lines), (checks + 1):(lines + checks), sep = ""))
-    #     gen.list <- data.frame(list(ENTRY = 1:(lines + checks),	NAME = NAME))
-    #     data_up <- gen.list
-    #   }
-    #   
-    #   return(list(dataUp_a_rcbd = data_up, entries = lines))
-    #   
-    # })
-    
    # getDataup_a_rcbd <- eventReactive(input$RUN.arcbd,{
     getDataup_a_rcbd <- reactive({
       if (input$owndata_a_rcbd == "Yes") {
@@ -699,7 +667,7 @@ mod_RCBD_augmented_server <- function(id) {
            ggplot2::labs(fill = w) +
            viridis::scale_fill_viridis(discrete = FALSE)
 
-         p2 <- plotly::ggplotly(p1, tooltip="text", width = 1180, height = 740)
+         p2 <- plotly::ggplotly(p1, tooltip="text", width = 1200, height = 740)
 
          return(p2)
        }

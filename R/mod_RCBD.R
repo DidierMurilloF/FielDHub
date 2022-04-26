@@ -159,7 +159,7 @@ mod_RCBD_server <- function(id){
                     bordered = TRUE,
                     align = 'c',
                     striped = TRUE),
-        h4("Note that only the TREATMENT column is requared."),
+        h4("Note that only the TREATMENT column is required."),
         easyClose = FALSE
       )
     }

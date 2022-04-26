@@ -100,7 +100,8 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
     }else if ((length(t) > 1)) {
       nt <- length(t)
     }
-    data_RowCol <- NULL
+    df <- data.frame(list(ENTRY = 1:nt, TREATMENT = paste0("G-", 1:nt)))
+    data_RowCol <- df
   }else if (!is.null(data)) {
     if (is.null(t) || is.null(r) || is.null(k) || is.null(l)) {
       shiny::validate('Some of the basic design parameters are missing (t, r, k or l).')

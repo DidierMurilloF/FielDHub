@@ -114,7 +114,7 @@ mod_IBD_ui <- function(id) {
             tabPanel("Field Layout",
                      shinycssloaders::withSpinner(
                        plotly::plotlyOutput(ns("layouts"), 
-                                            width = "100%", 
+                                            width = "98%", 
                                             height = "650px"),
                        type = 5
                      ),
@@ -142,7 +142,6 @@ mod_IBD_server <- function(id){
   moduleServer( id, function(input, output, session){
     
     ns <- session$ns
-    
     treatments <- paste("TX-", 1:9, sep = "")
     entryListFormat_IBD <- data.frame(ENTRY = 1:9, 
                                       NAME = treatments)
@@ -172,8 +171,6 @@ mod_IBD_server <- function(id){
         )
       }
     })
-    
-    
     
     getData.ibd <- reactive({
       req(input$file.IBD)
@@ -220,7 +217,6 @@ mod_IBD_server <- function(id){
     })
     
     IBD_reactive <- eventReactive(input$RUN.ibd, {
-      
       req(input$r.ibd)
       req(input$k.ibd)
       req(input$myseed.ibd)
@@ -233,15 +229,16 @@ mod_IBD_server <- function(id){
       plot_start.ibd <- as.numeric(plot_start.ibd)
       loc <-  as.vector(unlist(strsplit(input$Location.ibd, ",")))
       seed.rcbd <- as.numeric(input$myseed.ibd)
-      
       if (input$owndataibd == "Yes") {
         req(get_tIBD()$t_ibd)
         t.ibd <- as.numeric(get_tIBD()$t_ibd)
-        data.ibd <- getData.ibd()$dataUp.ibd
+        data_ibd <- getData.ibd()$dataUp.ibd
       }else {
         req(input$t.ibd)
         t.ibd <- as.numeric(input$t.ibd)
-        data.ibd <- NULL
+        b <- input$r.ibd
+        TREATMENT <- paste0("G-", 1:t.ibd)
+        data_ibd <- data.frame(list(ENTRY = 1:t.ibd, TREATMENT = TREATMENT))
       }
       seed.ibd <- as.numeric(input$myseed.ibd)
       l.ibd <- as.numeric(input$l.ibd)
@@ -255,7 +252,7 @@ mod_IBD_server <- function(id){
                         plotNumber = plot_start.ibd,
                         seed = seed.ibd,
                         locationNames = loc,
-                        data = data.ibd) 
+                        data = data_ibd) 
       
     })
     
@@ -301,10 +298,8 @@ mod_IBD_server <- function(id){
       )
     })
     
-    
     observeEvent(input$orderRepsibd, {
       req(input$orderRepsibd)
-      # req(input$l.ibd)
       obj <- IBD_reactive()
       allBooks <- plot_layout(x = obj, 
                               optionLayout = 1, 
@@ -317,7 +312,6 @@ mod_IBD_server <- function(id){
                         selected = 1
       )
     })
-    
     
     reactive_layoutIBD <- reactive({
       req(input$layoutO_ibd)
@@ -425,7 +419,6 @@ mod_IBD_server <- function(id){
                               valsIBD$trail.ibd)
         a <- ncol(df.ibd)
       }else {
-
         df.ibd <- reactive_layoutIBD()$allSitesFieldbook
         a <- ncol(df.ibd)
       }
@@ -446,7 +439,7 @@ mod_IBD_server <- function(id){
     
     heatmap_obj <- reactive({
       req(simuDataIBD()$df)
-      if (ncol(simuDataIBD()$df) == 10) {
+      if (ncol(simuDataIBD()$df) == 11) {
         locs <- factor(simuDataIBD()$df$LOCATION, 
                        levels = unique(simuDataIBD()$df$LOCATION))
         locLevels <- levels(locs)
@@ -462,7 +455,7 @@ mod_IBD_server <- function(id){
                                       df$COLUMN, "\n", "Entry: ", 
                                       df$ENTRY, "\n", 
                                       label_trail, 
-                                      round(df[,10],2)))
+                                      round(df[,11],2)))
         w <- as.character(valsIBD$trail.ibd)
         new_df$ROW <- as.factor(new_df$ROW) # Set up ROWS as factors
         new_df$COLUMN <- as.factor(new_df$COLUMN) # Set up COLUMNS as factors
@@ -470,7 +463,7 @@ mod_IBD_server <- function(id){
           new_df, 
           ggplot2::aes(x = new_df[,5], 
                        y = new_df[,4], 
-                       fill = new_df[,10], 
+                       fill = new_df[,11], 
                        text = text)) +
           ggplot2::geom_tile() +
           ggplot2::xlab("COLUMN") +
@@ -485,7 +478,7 @@ mod_IBD_server <- function(id){
               face="bold", 
               size=13, 
               hjust=0.5))
-        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 640)
+        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1250, height = 660)
         return(p2)
       } else {
         showModal(
@@ -519,13 +512,23 @@ mod_IBD_server <- function(id){
       }
       req(simuDataIBD()$df)
       df <- simuDataIBD()$df
-      a <- as.numeric(simuDataIBD()$a)
+      df$LOCATION <- as.factor(df$LOCATION)
+      df$PLOT <- as.factor(df$PLOT)
+      df$ROW <- as.factor(df$ROW)
+      df$COLUMN <- as.factor(df$COLUMN)
+      df$REP <- as.factor(df$REP)
+      df$IBLOCK <- as.factor(df$IBLOCK)
+      df$UNIT <- as.factor(df$UNIT)
+      df$ENTRY <- as.factor(df$ENTRY)
+      df$TREATMENT <- as.factor(df$TREATMENT)
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "500px"))
-      
-      DT::datatable(df, rownames = FALSE, options = list(
-        columnDefs = list(list(className = 'dt-center', targets = "_all"))
-        ))
+      DT::datatable(df,
+                    filter = 'top',
+                    rownames = FALSE, 
+                    options = list(
+                      columnDefs = list(list(className = 'dt-center', 
+                                             targets = "_all"))))
     })
     
     

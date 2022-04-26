@@ -363,9 +363,10 @@ mod_FD_server <- function(id) {
     
     kindNum <- reactive({
       req(input$setfactors)
-      setfactors.fd <- as.numeric(as.vector(unlist(strsplit(input$setfactors, ","))))
+      setfactors.fd <- fd_reactive()$infoDesign$levels_each_factor
       lengthfactors <- length(setfactors.fd)
-      return(lengthfactors+8)
+      end_columns <- lengthfactors + 7
+      return(end_columns)
     }
     )
     
@@ -375,7 +376,7 @@ mod_FD_server <- function(id) {
     
     heatmap_obj <- reactive({
       req(simuData_fd()$df)
-      if (ncol(simuData_fd()$df) == kindNum()) {
+      if (ncol(simuData_fd()$df) == (kindNum() + 1)) {
         locs <- factor(simuData_fd()$df$LOCATION, levels = unique(simuData_fd()$df$LOCATION))
         locLevels <- levels(locs)
         df = subset(simuData_fd()$df, LOCATION == locLevels[locNum()])
@@ -384,12 +385,20 @@ mod_FD_server <- function(id) {
         label_trail <- paste(trail, ": ")
         heatmapTitle <- paste("Heatmap for ", trail)
         new_df <- df %>%
-          dplyr::mutate(text = paste0("Site: ", loc, "\n", "Row: ", df$ROW, "\n", "Col: ", df$COLUMN, "\n", "Entry: ", 
-                                      df$ENTRY, "\n", label_trail, round(df[,kindNum()],2)))
+          dplyr::mutate(text = paste0("Site: ", loc, "\n", 
+                                      "Row: ", df$ROW, "\n", 
+                                      "Col: ", df$COLUMN, "\n", 
+                                      "Entry: ", df$ENTRY, "\n", 
+                                      label_trail, round(df[,(kindNum() + 1)],2)))
         w <- as.character(valsfd$trail.fd)
         new_df$ROW <- as.factor(new_df$ROW) # Set up ROWS as factors
         new_df$COLUMN <- as.factor(new_df$COLUMN) # Set up COLUMNS as factors
-        p1 <- ggplot2::ggplot(new_df, ggplot2::aes(x = new_df[,5], y = new_df[,4], fill = new_df[,kindNum()], text = text)) +
+        p1 <- ggplot2::ggplot(new_df, 
+                              ggplot2::aes(
+                                x = new_df[,5], 
+                                y = new_df[,4], 
+                                fill = new_df[,(kindNum() + 1)], 
+                                text = text)) +
           ggplot2::geom_tile() +
           ggplot2::xlab("COLUMN") +
           ggplot2::ylab("ROW") +

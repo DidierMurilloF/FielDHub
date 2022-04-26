@@ -373,7 +373,7 @@ mod_Square_Lattice_server <- function(id){
     
     heatmap_obj <- reactive({
       req(simuDataSQUARE()$df)
-      if (ncol(simuDataSQUARE()$df) == 10) {
+      if (ncol(simuDataSQUARE()$df) == 11) {
         locs <- factor(simuDataSQUARE()$df$LOCATION, levels = unique(simuDataSQUARE()$df$LOCATION))
         locLevels <- levels(locs)
         df = subset(simuDataSQUARE()$df, LOCATION == locLevels[locNum()])
@@ -382,22 +382,28 @@ mod_Square_Lattice_server <- function(id){
         label_trail <- paste(trail, ": ")
         heatmapTitle <- paste("Heatmap for ", trail)
         new_df <- df %>%
-          dplyr::mutate(text = paste0("Site: ", loc, "\n", "Row: ", df$ROW, "\n", "Col: ", df$COLUMN, "\n", "Entry: ", 
-                                      df$ENTRY, "\n", label_trail, round(df[,10],2)))
+          dplyr::mutate(text = paste0("Site: ", loc, "\n", 
+                                      "Row: ", df$ROW, "\n", 
+                                      "Col: ", df$COLUMN, "\n", 
+                                      "Entry: ", df$ENTRY, "\n", 
+                                      label_trail, round(df[,11],2)))
         w <- as.character(valsSQUARE$trail.square)
         new_df$ROW <- as.factor(new_df$ROW) # Set up ROWS as factors
         new_df$COLUMN <- as.factor(new_df$COLUMN) # Set up COLUMNS as factors
-        p1 <- ggplot2::ggplot(new_df, ggplot2::aes(x = new_df[,5], y = new_df[,4], fill = new_df[,10], text = text)) +
+        p1 <- ggplot2::ggplot(new_df, ggplot2::aes(x = new_df[,5], 
+                                                   y = new_df[,4],
+                                                   fill = new_df[,11], 
+                                                   text = text)) +
           ggplot2::geom_tile() +
           ggplot2::xlab("COLUMN") +
           ggplot2::ylab("ROW") +
           ggplot2::labs(fill = w) +
           viridis::scale_fill_viridis(discrete = FALSE) +
           ggplot2::ggtitle(heatmapTitle) +
-          ggplot2::theme_minimal() + # I added this option 
+          ggplot2::theme_minimal() + 
           ggplot2::theme(plot.title = ggplot2::element_text(family="Calibri", face="bold", size=13, hjust=0.5))
         
-        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 640)
+        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1250, height = 640)
         return(p2)
       } else {
         showModal(
@@ -438,7 +444,7 @@ mod_Square_Lattice_server <- function(id){
       df$IBLOCK <- as.factor(df$IBLOCK)
       df$UNIT <- as.factor(df$UNIT)
       df$ENTRY <- as.factor(df$ENTRY)
-      a <- as.numeric(simuDataSQUARE()$a)
+      df$TREATMENT <- as.factor(df$TREATMENT)
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "500px"))
       

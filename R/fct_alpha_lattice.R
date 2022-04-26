@@ -96,7 +96,8 @@ alpha_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101,
     }else if ((length(t) > 1)) {
       nt <- length(t)
     }
-    data_alpha <- NULL
+    df <- data.frame(list(ENTRY = 1:nt, TREATMENT = paste0("G-", 1:nt)))
+    data_alpha <- df
   }else if (!is.null(data)) {
     if (is.null(t) || is.null(r) || is.null(k) || is.null(l)) {
       shiny::validate('Basic design parameters missing (t, k, r or l).')
@@ -115,6 +116,7 @@ alpha_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101,
     data_alpha <- data_up
   }
   if (k >= nt) shiny::validate('incomplete_blocks() requires that k < t.')
+  if (!is.null(locationNames)) locationNames <- toupper(locationNames)
   if(is.null(locationNames) || length(locationNames) != l) locationNames <- 1:l
   if (numbers::isPrime(t)) shiny::validate('Combinations for this amount of treatments do not exist.')
   s <- nt / k

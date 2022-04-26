@@ -47,7 +47,7 @@ mod_SSPD_ui <- function(id){
         ),
         
         conditionalPanel(
-          condition = "input.owndataSPD != 'Yes'", 
+          condition = "input.owndataSSPD != 'Yes'", 
           ns = ns,
           numericInput(ns("mp.sspd"), 
                        label = "Whole-plots:",
@@ -166,7 +166,7 @@ mod_SSPD_server <- function(id){
    ssp <- paste("Beans", 1:10, sep = "") 
    entryListFormat_SSPD <- data.frame(list(WHOLPLOT = c(wp, rep("", 8)), 
                                             SUBPLOT = c(sp, rep("", 5)),
-                                            SUB_SUBPLOTS = ssp))            
+                                            SUB_SUBPLOT = ssp))            
   
     entriesInfoModal_SSPD <- function() {
       modalDialog(

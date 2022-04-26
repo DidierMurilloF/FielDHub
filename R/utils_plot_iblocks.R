@@ -312,20 +312,16 @@ plot_iblocks <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks,
       allSites[[st]] <- as.data.frame(df_1)
     }
     allSitesFieldbook <- dplyr::bind_rows(allSites)
-    if (x$infoDesign$idDesign != 9) {
-      allSitesFieldbook <- allSitesFieldbook[,c(1:3,8,9,4:7)]
-      df <- df[,c(1:3,8,9,4:7)]
-    } else {
-      allSitesFieldbook <- allSitesFieldbook[,c(1:3,5,6,4,7)]
-      colnames(allSitesFieldbook) <- c("ID", "LOCATION", "PLOT", 
-                                       "ROW", "COLUMN", "REP", #"ROW_REP", 
-                                       "ENTRY") # "COLUMN_REP"
-      df <- df[,c(1:3,8,9,4:7)]
-      colnames(df) <- c("ID", "LOCATION", "PLOT", 
-                        "ROW", "COLUMN", "REP", #"ROW_REP", 
-                        "ENTRY") # "COLUMN_REP"
-    }
-    
+    print(allSitesFieldbook)
+    allSitesFieldbook <- allSitesFieldbook[,c(1:3,9,10,4:8)]
+    df <- df[,c(1:3,9,10,4:8)]
+    # if ("TREATMENT" %in% colnames(allSitesFieldbook))  {
+    #   allSitesFieldbook <- allSitesFieldbook[,c(1:3,9,10,4:8)]
+    #   df <- df[,c(1:3,9,10,4:8)]
+    # } else {
+    #   allSitesFieldbook <- allSitesFieldbook[,c(1:3,8,9,4:7)]
+    #   df <- df[,c(1:3,8,9,4:7)]
+    # } 
     df$ENTRY <- as.factor(df$ENTRY)
     rows <- max(as.numeric(df$ROW))
     cols <- max(as.numeric(df$COLUMN))
@@ -340,7 +336,6 @@ plot_iblocks <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks,
                            out2 = IBLOCK,
                            col = IBLOCK,
                            out2.gpar = list(col = "black", lty = 3),
-                           #out2.gpar=list(col = "gray50", lwd = 2, lty = 1),
                            text = ENTRY, cex = 1, shorten = "no",
                            data = df, xlab = "COLUMNS", ylab = "ROWS",
                            main = main, 
@@ -349,10 +344,6 @@ plot_iblocks <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks,
     df$REP <- as.factor(df$REP)
     p2 <- desplot::desplot(REP ~ COLUMN + ROW, flip = FALSE,
                            out1 = REP,
-                           # out2 = IBLOCK,
-                           # col = IBLOCK,
-                           # out2.gpar = list(col = "black", lty = 3),
-                           #out2.gpar = list(col = "black", lty = 3),
                            text = PLOT, cex = 1, shorten = "no",
                            data = df, xlab = "COLUMNS", ylab = "ROWS",
                            main = main,

@@ -111,6 +111,7 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
         data <- data.frame(list(factors = rep(levels(as.factor(TRT)), times = setfactors),
                                 levels = unlist(newlevels)))
         levels.by.factor <- as.vector(unlist(newlevels))
+        entries_each_factor <- setfactors
       }else stop("In 'full_factorial()' the input setfactors must be a numeric vector.")
     }
   }else {
@@ -121,9 +122,11 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
     l.factors <- levels(data$factors)
     levels.by.factor <- list()
     data.by.factor <- list()
+    entries_each_factor <- numeric()
     v <- 1
     for(i in l.factors) {
       data.by.factor[[v]] <- subset(data, data$factors == i)
+      entries_each_factor[v] <- nrow(subset(data, data$factors == i))
       levels.by.factor[[v]] <- data.by.factor[[v]][,2]
       v <- v + 1
     }
@@ -186,8 +189,8 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
   allcomb <- as.data.frame(allcomb)
   fullfactorial <- list(factors = levels(TRT), levels = levelsByFactor, runs = nruns, alltreatments = allcomb,
                         Reps = reps, Locations = l, locationNames = locationNames, kind = kind, 
+                        levels_each_factor = entries_each_factor,
                         idDesign = 4)
-  
   output <- list(infoDesign = fullfactorial, fieldBook = design_output)
   class(output) <- "FielDHub"
   return(invisible(output))

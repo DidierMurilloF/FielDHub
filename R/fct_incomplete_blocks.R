@@ -122,7 +122,6 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
   }
   if (k >= nt) shiny::validate('incomplete_blocks() requires that k < t.')
   if(is.null(locationNames) || length(locationNames) != l) locationNames <- 1:l
-  # nrep = r / ntrt = t / nunits = k / t*r/k = b
   nincblock <- nt*r/k
   N <- nt * r
   if (k * nincblock != N) {
@@ -146,7 +145,6 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
     colnames(matdf) <- c("LOCATION","PLOT", "REP", "IBLOCK", "UNIT", "ENTRY")
     outIBD_loc[[i]] <- matdf
   }
-
   OutIBD <- dplyr::bind_rows(outIBD_loc)
   OutIBD <- as.data.frame(OutIBD)
   OutIBD$ENTRY <- as.numeric(OutIBD$ENTRY)

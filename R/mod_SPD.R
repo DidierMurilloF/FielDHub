@@ -132,7 +132,7 @@ mod_SPD_server <- function(id){
     
     wp <- c("NFung", paste("Fung", 1:4, sep = "")) 
     sp <- paste("Beans", 1:10, sep = "")            
-    entryListFormat_SPD <- data.frame(list(WHOLPLOT = c(wp, rep("", 5)), 
+    entryListFormat_SPD <- data.frame(list(WHOLEPLOT = c(wp, rep("", 5)), 
                                            SUBPLOT = sp))
     
     entriesInfoModal_SPD<- function() {
