@@ -82,12 +82,12 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, optionLayout = 1,
       allSites[[st]] <- as.data.frame(df_1)
     }
     allSitesFieldbook <- dplyr::bind_rows(allSites)
-    allSitesFieldbook <- allSitesFieldbook[,c(1:3,8,9,4:7)]
+    allSitesFieldbook <- allSitesFieldbook[,c(1:3,9,10,4:8)]
     colnames(allSitesFieldbook) <- c("ID", "LOCATION", "PLOT", "ROW", "COLUMN", "REP", "ROW_REP",
-                      "COLUMN_REP", "ENTRY")
-    df <- df[,c(1:3,8,9,4:7)]
+                      "COLUMN_REP", "ENTRY", "TREATMENT")
+    df <- df[,c(1:3,9,10,4:8)]
     colnames(df) <- c("ID", "LOCATION", "PLOT", "ROW", "COLUMN", "REP", "ROW_REP",
-                      "COLUMN_REP", "ENTRY")
+                      "COLUMN_REP", "ENTRY", "TREATMENT")
     df <- df[ , -c(7,8)]
     allSitesFieldbook <- allSitesFieldbook[ , -c(7,8)]
     rows <- max(as.numeric(df$ROW))

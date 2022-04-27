@@ -100,7 +100,7 @@ mod_Alpha_Lattice_server <- function(id){
     })
     
     get_tALPHA <- reactive({
-      if(is.null(input$file.alpha)) {
+      if(input$owndata_alpha != "Yes") {
         req(input$t.alpha)
         t_alpha <- input$t.alpha
       }else {

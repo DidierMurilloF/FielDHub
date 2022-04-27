@@ -294,6 +294,12 @@ mod_Diagonal_server <- function(id) {
               data_dim_each_block[i] <- nrow(subset(data_entry_UP, data_entry_UP$BLOCK == i))
             }
             dim_data <- sum(data_dim_each_block)
+            input_blocks <- as.numeric(sort(Block_levels))
+            print(input_blocks)
+            print(any(input_blocks < 1) || any(diff(input_blocks) != 1))
+             if (any(input_blocks < 1) || any(diff(input_blocks) != 1)) {
+               validate("Data input does not fit the requirements!")
+             }
             selected <- length(Block_levels)
           }
         }

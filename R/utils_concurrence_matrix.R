@@ -1,5 +1,4 @@
 concurrence_matrix <- function(df=NULL, trt=NULL, target=NULL) {
-  
   if (is.null(df)) {
     stop('No input dataset provided.')
   }
@@ -22,8 +21,8 @@ concurrence_matrix <- function(df=NULL, trt=NULL, target=NULL) {
   diag(conc.matrix) <- rep(99999999,nrow(conc.matrix))
   summ<-as.data.frame(table(as.vector(conc.matrix)))
   summ$Freq <- summ$Freq/2  # Added
-  colnames(summ)<-c('Concurrence',target)
-  summ<-summ[-nrow(summ),]
+  colnames(summ) <- c('Concurrence',target)
+  summ <- summ[-nrow(summ),]
   
-  return(summ=summ)
+  return(summ = summ)
 }

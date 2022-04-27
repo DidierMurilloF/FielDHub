@@ -61,14 +61,6 @@ mod_CRD_ui <- function(id) {
                    ), 
                    br(),
                    downloadButton(ns("downloadData.crd"), "Save My Experiment", style = "width:100%")
-                   # fluidRow(
-                   #   column(6,
-                   #          downloadButton(ns("downloadData.crd"), "Save Experiment!", style = "width:100%")
-                   #   ),
-                   #   column(6,
-                   #          actionButton(ns("Simulate.crd"), "Simulate!", icon = icon("cocktail"), width = '100%')
-                   #   )
-                   # )
       ),
       mainPanel(
         width = 8,
@@ -116,6 +108,10 @@ mod_CRD_server <- function(id) {
       if (input$owndatacrd == "Yes") {
         t <- NULL; reps <- NULL
         data.crd <- getData.crd()$dataUp.crd
+        n_Reps <- dplyr::n_distinct(data.crd$REP)
+        t <- as.vector(table(data.crd$REP))
+        if (any(t != t[1])) validate("Unbalanced replications are not allowed!", "\n",
+                                     "For unbalanced reps, try the function CRD() in the console.")
       }else {
         req(input$t.crd, input$reps.crd)
         t <- as.numeric(input$t.crd);reps <- as.numeric(input$reps.crd)
@@ -132,7 +128,7 @@ mod_CRD_server <- function(id) {
     })
     
     output$well_panel_layout_CRD <- renderUI({
-      req(CRD_reactive()$fieldBook)
+      req(CRD_reactive())
       obj_crd <- CRD_reactive()
       planting_crd <- input$planter_mov_crd
       allBooks_crd <- plot_layout(x = obj_crd, optionLayout = 1, planter = planting_crd)$newBooks
@@ -172,7 +168,7 @@ mod_CRD_server <- function(id) {
                     bordered = TRUE,
                     align = 'c',
                     striped = TRUE),
-        h4("Note that reps might be unbalanced."),
+        h4("Note that reps must have to be balanced."),
         easyClose = FALSE
       )
     }

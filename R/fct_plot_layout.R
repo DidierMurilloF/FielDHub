@@ -105,7 +105,8 @@ plot_layout <- function(x = NULL, optionLayout = 1, planter = "serpentine", l = 
       if (x$infoDesign$idDesign == 1) {
         n_TrtGen <- dplyr::n_distinct(x$fieldBook$TREATMENT)
         n_Reps <- dplyr::n_distinct(x$fieldBook$REP)
-        return <- plot_CRD(x = x, n_TrtGen = n_TrtGen, n_Reps = n_Reps, optionLayout = optionLayout, 
+        return <- plot_CRD(x = x, n_TrtGen = n_TrtGen, n_Reps = n_Reps, 
+                           optionLayout = optionLayout, 
                            planter = planter, l = 1)
         return(list(out_layout = return$p1, out_layoutPlots = return$p2, fieldBookXY = return$df, 
                     newBooks = return$newBooks, allSitesFieldbook = return$allSitesFieldbook))
@@ -138,7 +139,6 @@ plot_layout <- function(x = NULL, optionLayout = 1, planter = "serpentine", l = 
       csRep <- dplyr::n_distinct(x$fieldBook$ROW)
       dims <- c(rsRep, csRep)
       n_Reps <- dplyr::n_distinct(x$fieldBook$SQUARE)
-      print(n_Reps)
       return2 <- plot_latinSQ(x = x, dims = dims, n_Reps = n_Reps, 
                               optionLayout = optionLayout, 
                               planter = planter, l = l, 

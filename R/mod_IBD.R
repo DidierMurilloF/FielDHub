@@ -182,7 +182,7 @@ mod_IBD_server <- function(id){
     })
     
     get_tIBD <- reactive({
-      if(is.null(input$file.IBD)) {
+      if(input$owndataibd != "Yes") {
         req(input$t.ibd)
         t_ibd <- input$t.ibd
       }else {

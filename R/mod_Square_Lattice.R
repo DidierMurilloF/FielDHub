@@ -100,7 +100,7 @@ mod_Square_Lattice_server <- function(id){
     })
     
     get_tSQUARE <- reactive({
-      if(is.null(input$file.square)) {
+      if(input$owndata_square != "Yes") {
         req(input$t.square)
         t_square <- input$t.square
       }else {

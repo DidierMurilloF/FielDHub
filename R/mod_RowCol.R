@@ -14,80 +14,109 @@ mod_RowCol_ui <- function(id){
     sidebarLayout(
       sidebarPanel(width = 4,
 
-                   radioButtons(inputId = ns("owndataRCD"), label = "Import entries' list?", choices = c("Yes", "No"), selected = "No",
-                                inline = TRUE, width = NULL, choiceNames = NULL, choiceValues = NULL),
+                   radioButtons(inputId = ns("owndataRCD"), 
+                                label = "Import entries' list?",
+                                choices = c("Yes", "No"), 
+                                selected = "No",
+                                inline = TRUE, 
+                                width = NULL, 
+                                choiceNames = NULL, 
+                                choiceValues = NULL),
                    
-                   conditionalPanel("input.owndataRCD == 'Yes'", ns = ns,
-                                    fluidRow(
-                                      column(8, style=list("padding-right: 28px;"),
-                                             fileInput(ns("file.RCD"), label = "Upload a csv File:", multiple = FALSE)),
-                                      column(4,style=list("padding-left: 5px;"),
-                                             radioButtons(ns("sep.rcd"), "Separator",
-                                                          choices = c(Comma = ",",
-                                                                      Semicolon = ";",
-                                                                      Tab = "\t"),
-                                                          selected = ","
-                                             )
-                                      )
-                                    )
+                   conditionalPanel(
+                     condition = "input.owndataRCD == 'Yes'", 
+                     ns = ns,
+                     fluidRow(
+                       column(8, style=list("padding-right: 28px;"),
+                              fileInput(ns("file.RCD"), 
+                                        label = "Upload a csv File:", 
+                                        multiple = FALSE)),
+                       column(4,style=list("padding-left: 5px;"),
+                              radioButtons(ns("sep.rcd"), "Separator",
+                                           choices = c(Comma = ",",
+                                                       Semicolon = ";",
+                                                       Tab = "\t"),
+                                           selected = ","
+                              )
+                       )
+                    )
                    ),
-                   
-                   numericInput(ns("t.rcd"), label = "Input # of Treatments:",
-                                value = 36, min = 2),
-                   
+                   conditionalPanel(
+                     condition = "input.owndataRCD != 'Yes'",
+                     ns = ns,
+                     numericInput(ns("t.rcd"), label = "Input # of Treatments:",
+                                  value = 36, min = 2),
+                   ),
                    fluidRow(
                      column(6, style=list("padding-right: 28px;"),
-                            selectInput(inputId = ns("k.rcd"), label = "Input # of Rows:", choices = ""),
+                            selectInput(inputId = ns("k.rcd"), 
+                                        label = "Input # of Rows:",
+                                        choices = ""),
                      ),
                      column(6,style=list("padding-left: 5px;"),
-                            numericInput(ns("r.rcd"), label = "Input # of Full Reps:",
-                                         value = 3, min = 2)
+                            numericInput(ns("r.rcd"), 
+                                         label = "Input # of Full Reps:",
+                                         value = 3, 
+                                         min = 2)
                      )
                    ),
-                   
-                   numericInput(inputId = ns("l.rcd"), label = "Input # of Locations:", value = 1, min = 1),
-                   
+                   numericInput(inputId = ns("l.rcd"), 
+                                label = "Input # of Locations:", 
+                                value = 1, min = 1),
                    fluidRow(
-
                      column(6, style=list("padding-right: 28px;"),
-                            textInput(ns("plot_start.rcd"), "Starting Plot Number:", value = 101)
+                            textInput(ns("plot_start.rcd"), 
+                                      "Starting Plot Number:", 
+                                      value = 101)
                      ),
                      column(6, style=list("padding-left: 5px;"),
-                            textInput(ns("Location.rcd"), "Input Location:", value = "FARGO")
+                            textInput(ns("Location.rcd"), 
+                                      "Input Location:", 
+                                      value = "FARGO")
                      )
                    ),
-                   
-                   selectInput(inputId = ns("planter_mov_rcd"), label = "Plot Order Layout:",
-                               choices = c("serpentine", "cartesian"), multiple = FALSE,
+                   selectInput(inputId = ns("planter_mov_rcd"),
+                               label = "Plot Order Layout:",
+                               choices = c("serpentine", "cartesian"),
+                               multiple = FALSE,
                                selected = "serpentine"),
-                   
-                   numericInput(ns("seed.rcd"), label = "Seed Number:", value = 1),
-                   
+                   numericInput(ns("seed.rcd"), 
+                                label = "Seed Number:", 
+                                value = 1),
                    fluidRow(
                      column(6,
-                            actionButton(inputId = ns("RUN.rcd"), "Run!", icon = icon("cocktail"), width = '100%'),
+                            actionButton(inputId = ns("RUN.rcd"), 
+                                         "Run!", 
+                                         icon = icon("cocktail"), 
+                                         width = '100%'),
                      ),
                      column(6,
-                            actionButton(ns("Simulate.RowCol"), "Simulate!", icon = icon("cocktail"), width = '100%')
+                            actionButton(ns("Simulate.RowCol"), 
+                                         "Simulate!", 
+                                         icon = icon("cocktail"),
+                                         width = '100%')
                      )
-                     
                    ), 
                    br(),
-                   downloadButton(ns("downloadData.rowcolD"), "Save Experiment!", style = "width:100%")
+                   downloadButton(ns("downloadData.rowcolD"), 
+                                  "Save Experiment!",
+                                  style = "width:100%")
       ),
-
       mainPanel(
         width = 8,
         fluidRow(
           tabsetPanel(
             tabPanel("Field Layout",
                      shinycssloaders::withSpinner(
-                       plotly::plotlyOutput(ns("layouts"), width = "98%", height = "650px"),type = 5
-                     ),
+                       plotly::plotlyOutput(ns("layouts"), 
+                                            width = "98%", 
+                                            height = "650px"),
+                       type = 5),
                      column(12,uiOutput(ns("well_panel_layout_ROWCOL")))
             ),
             tabPanel("Field Book", 
-                     shinycssloaders::withSpinner(DT::DTOutput(ns("rowcolD")), type = 5)
+                     shinycssloaders::withSpinner(DT::DTOutput(ns("rowcolD")), 
+                                                  type = 5)
             )
           )
         )
@@ -105,7 +134,9 @@ mod_RowCol_server <- function(id){
     ns <- session$ns
     
     entryListFormat_RCD <- data.frame(ENTRY = 1:9, 
-                                       NAME = c(paste("Genotype", LETTERS[1:9], sep = "")))
+                                       NAME = c(paste("Genotype", 
+                                                      LETTERS[1:9], 
+                                                      sep = "")))
     entriesInfoModal_RCD <- function() {
       modalDialog(
         title = div(tags$h3("Important message", style = "color: red;")),
@@ -136,12 +167,14 @@ mod_RowCol_server <- function(id){
     getData.rcd <- reactive({
       req(input$file.RCD)
       inFile <- input$file.RCD
-      dataUp.rcd <- load_file(name = inFile$name, path = inFile$datapat, sep = input$sep.rcd)
+      dataUp.rcd <- load_file(name = inFile$name, 
+                              path = inFile$datapat, 
+                              sep = input$sep.rcd)
       return(list(dataUp.rcd = dataUp.rcd))
     })
     
     Get_tROWCOL <- reactive({
-      if(is.null(input$file.RCD)) {
+      if (input$owndataRCD != "Yes") {
         req(input$t.rcd)
         t.ROWCOL <- input$t.rcd
       }else {
@@ -155,7 +188,6 @@ mod_RowCol_server <- function(id){
     
     observeEvent(Get_tROWCOL()$t.ROWCOL, {
       req(Get_tROWCOL()$t.ROWCOL)
-      
       t <- as.numeric(Get_tROWCOL()$t.ROWCOL)
       if (numbers::isPrime(t)) {
         w <- 1
@@ -170,16 +202,15 @@ mod_RowCol_server <- function(id){
         selected <- k[ceiling(length(k)/2)]
       } else selected <- k[2]
       
-      updateSelectInput(session = session, inputId = 'k.rcd', label = "Input # of Rows:",
-                        choices = k, selected = selected)
+      updateSelectInput(session = session, 
+                        inputId = 'k.rcd', 
+                        label = "Input # of Rows:",
+                        choices = k, 
+                        selected = selected)
       
     })
     
-    
-    
-    
     RowCol_reactive <- eventReactive(input$RUN.rcd, {
-      
       req(input$t.rcd)
       req(input$k.rcd)
       req(input$r.rcd)
@@ -228,8 +259,8 @@ mod_RowCol_server <- function(id){
       allBooks_rcd<- plot_layout(x = obj_rcd, optionLayout = 1)$newBooks
       nBooks_rcd <- length(allBooks_rcd)
       layoutOptions_rcd <- 1:nBooks_rcd
-      orderReps <- c("Vertical Stack Panel" = "vertical_stack_panel", "Horizontal Stack Panel" = "horizontal_stack_panel")
-      # sites <- as.numeric(input$l.rcd)
+      orderReps <- c("Vertical Stack Panel" = "vertical_stack_panel", 
+                     "Horizontal Stack Panel" = "horizontal_stack_panel")
       wellPanel(
         column(2,
                radioButtons(ns("typlotrcd"), "Type of Plot:",
@@ -263,7 +294,8 @@ mod_RowCol_server <- function(id){
       req(input$orderRepsRowCol)
       req(input$l.rcd)
       obj <- RowCol_reactive()
-      allBooks <- plot_layout(x = obj, optionLayout = 1, orderReps = input$orderRepsRowCol)$newBooks
+      allBooks <- plot_layout(x = obj, optionLayout = 1, 
+                              orderReps = input$orderRepsRowCol)$newBooks
       nBooks <- length(allBooks)
       NewlayoutOptions <- 1:nBooks
       updateSelectInput(session = session, inputId = 'layoutO_rcd',
@@ -280,31 +312,45 @@ mod_RowCol_server <- function(id){
       opt_rcd <- as.numeric(input$layoutO_rcd)
       planting_rcd <- input$planter_mov_rcd
       locSelected <- as.numeric(input$locLayout_rcd)
-      try(plot_layout(x = obj_rcd, optionLayout = opt_rcd, planter = planting_rcd, l = locSelected, 
-                      orderReps = input$orderRepsRowCol), silent = TRUE)
+      try(plot_layout(x = obj_rcd, optionLayout = opt_rcd,
+                      planter = planting_rcd, l = locSelected, 
+                      orderReps = input$orderRepsRowCol), 
+          silent = TRUE)
     })
     
-    valsRowColD <- reactiveValues(maxV.RowCol = NULL, minV.RowCol = NULL, trail.RowCol = NULL)
+    valsRowColD <- reactiveValues(maxV.RowCol = NULL, 
+                                  minV.RowCol = NULL, 
+                                  trail.RowCol = NULL)
     
     simuModal.RowCol <- function(failed = FALSE) {
       modalDialog(
-        selectInput(inputId = ns("trailsRowCol"), label = "Select One:", choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
-        conditionalPanel("input.trailsRowCol == 'Other'", ns = ns,
-                         textInput(inputId = ns("OtherRowCol"), label = "Input Trial Name:", value = NULL)
+        selectInput(inputId = ns("trailsRowCol"), 
+                    label = "Select One:", 
+                    choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
+        conditionalPanel(
+          condition = "input.trailsRowCol == 'Other'", ns = ns,
+          textInput(inputId = ns("OtherRowCol"), 
+                    label = "Input Trial Name:", 
+                    value = NULL)
         ),
         fluidRow(
           column(6, 
-                 numericInput(ns("min.RowCol"), "Input the min value", value = NULL)
+                 numericInput(ns("min.RowCol"), 
+                              "Input the min value", 
+                              value = NULL)
           ),
           column(6, 
-                 numericInput(ns("max.RowCol"), "Input the max value", value = NULL)
+                 numericInput(ns("max.RowCol"), 
+                              "Input the max value",
+                              value = NULL)
                  
           )
           
         ),
         
         if (failed)
-          div(tags$b("Invalid input of data max and min", style = "color: red;")),
+          div(tags$b("Invalid input of data max and min", 
+                     style = "color: red;")),
         
         footer = tagList(
           modalButton("Cancel"),
@@ -326,7 +372,8 @@ mod_RowCol_server <- function(id){
     
     observeEvent(input$ok.RowCol, {
       req(input$max.RowCol, input$min.RowCol)
-      if (input$max.RowCol > input$min.RowCol && input$min.RowCol != input$max.RowCol) {
+      if (input$max.RowCol > input$min.RowCol && 
+          input$min.RowCol != input$max.RowCol) {
         valsRowColD$maxV.RowCol <- input$max.RowCol
         valsRowColD$minV.RowCol <- input$min.RowCol
         if(input$trailsRowCol == "Other") {
@@ -350,13 +397,16 @@ mod_RowCol_server <- function(id){
     simuData_RowCol <- reactive({
       set.seed(input$seed.rcd)
       req(RowCol_reactive()$fieldBook)
-      if(!is.null(valsRowColD$maxV.RowCol) && !is.null(valsRowColD$minV.RowCol) && !is.null(valsRowColD$trail.RowCol)) {
+      if(!is.null(valsRowColD$maxV.RowCol) && 
+         !is.null(valsRowColD$minV.RowCol) && 
+         !is.null(valsRowColD$trail.RowCol)) {
         max <- as.numeric(valsRowColD$maxV.RowCol)
         min <- as.numeric(valsRowColD$minV.RowCol)
         df.RowCol <- reactive_layoutROWCOL()$allSitesFieldbook
         cnamesdf.RowCol <- colnames(df.RowCol)
         df.RowCol <- norm_trunc(a = min, b = max, data = df.RowCol)
-        colnames(df.RowCol) <- c(cnamesdf.RowCol[1:(ncol(df.RowCol) - 1)], valsRowColD$trail.RowCol)
+        colnames(df.RowCol) <- c(cnamesdf.RowCol[1:(ncol(df.RowCol) - 1)], 
+                                 valsRowColD$trail.RowCol)
         a <- ncol(df.RowCol)
       }else {
         df.RowCol <- reactive_layoutROWCOL()$allSitesFieldbook
@@ -379,8 +429,9 @@ mod_RowCol_server <- function(id){
     
     heatmap_obj <- reactive({
       req(simuData_RowCol()$df)
-      if (ncol(simuData_RowCol()$df) == 8) {
-        locs <- factor(simuData_RowCol()$df$LOCATION, levels = unique(simuData_RowCol()$df$LOCATION))
+      if (ncol(simuData_RowCol()$df) == 9) {
+        locs <- factor(simuData_RowCol()$df$LOCATION, 
+                       levels = unique(simuData_RowCol()$df$LOCATION))
         locLevels <- levels(locs)
         df = subset(simuData_RowCol()$df, LOCATION == locLevels[locNum()])
         loc <- levels(factor(df$LOCATION))
@@ -392,13 +443,13 @@ mod_RowCol_server <- function(id){
                                       "Row: ", df$ROW, "\n", 
                                       "Col: ", df$COLUMN, "\n", 
                                       "Entry: ", df$ENTRY, "\n", 
-                                      label_trail, round(df[,8],2)))
+                                      label_trail, round(df[,9],2)))
         w <- as.character(valsRowColD$trail.RowCol)
         new_df$ROW <- as.factor(new_df$ROW) # Set up ROWS as factors
         new_df$COLUMN <- as.factor(new_df$COLUMN) # Set up COLUMNS as factors
         p1 <- ggplot2::ggplot(new_df, ggplot2::aes(x = new_df[,5], 
                                                    y = new_df[,4], 
-                                                   fill = new_df[,8], 
+                                                   fill = new_df[,9], 
                                                    text = text)) +
           ggplot2::geom_tile() +
           ggplot2::xlab("COLUMN") +
@@ -411,7 +462,7 @@ mod_RowCol_server <- function(id){
             family="Calibri", face="bold", size=13, hjust=0.5)
             )
         
-        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1350, height = 640)
+        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1250, height = 640)
         return(p2)
       } else {
         showModal(
@@ -423,9 +474,7 @@ mod_RowCol_server <- function(id){
       }
     })
     
-    
     output$layouts <- plotly::renderPlotly({
-      #reactive_layoutSPD()$out_layout
       req(RowCol_reactive())
       req(input$typlotrcd)
       if (input$typlotrcd == 1) {
@@ -445,13 +494,14 @@ mod_RowCol_server <- function(id){
       df$ROW <- as.factor(df$ROW)
       df$COLUMN <- as.factor(df$COLUMN)
       df$REP <- as.factor(df$REP)
-      # df$ROW_REP <- as.factor(df$ROW_REP)
-      # df$COLUMN_REP <- as.factor(df$COLUMN_REP)
       df$ENTRY <- as.factor(df$ENTRY)
       a <- as.numeric(simuData_RowCol()$a)
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                scrollX = TRUE, scrollY = "500px"))
-      DT::datatable(df, filter = 'top', rownames = FALSE, options = list(
+                                scrollX = TRUE, scrollY = "600px"))
+      DT::datatable(df, 
+                    filter = 'top', 
+                    rownames = FALSE, 
+                    options = list(
         columnDefs = list(list(className = 'dt-center', targets = "_all"))))
       
     })
@@ -468,9 +518,3 @@ mod_RowCol_server <- function(id){
     )
   })
 }
-    
-## To be copied in the UI
-# mod_RowCol_ui("RowCol_ui_1")
-    
-## To be copied in the server
-# mod_RowCol_server("RowCol_ui_1")

@@ -99,7 +99,7 @@ mod_Rectangular_Lattice_server <- function(id) {
     })
     
     get_tRECT <- reactive({
-      if(is.null(input$file.rectangular)) {
+      if(input$owndata_rectangular != "Yes") {
         req(input$t.rectangular)
         t.rectangular <- input$t.rectangular
       }else {
