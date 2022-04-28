@@ -117,6 +117,7 @@ golem::add_utils("plot_iblocks")
 golem::add_utils("plot_latinSQ")
 golem::add_utils("planter_transform")
 golem::add_utils("plot_splitPlots")
+golem::add_utils("factor_subsets")
 
 ## External resources
 ## Creates .js and .css files at inst/app/www
