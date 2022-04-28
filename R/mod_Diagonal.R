@@ -211,11 +211,6 @@ mod_Diagonal_ui <- function(id){
           tabPanel("Randomized Field", DT::DTOutput(ns("randomized_layout"))),
           tabPanel("Plot Number Field", DT::DTOutput(ns("plot_number_layout"))),
           tabPanel("Expt Name", DT::DTOutput(ns("name_layout"))),
-          # conditionalPanel(
-          #   condition = "input.kindExpt == 'DBUDC'",
-          #   ns = ns,
-          #   tabPanel("Expt Name", DT::DTOutput(ns("name_layout")))
-          # ),
           tabPanel("Field Book", DT::DTOutput(ns("fieldBook_diagonal"))),
           tabPanel("Heatmap", shinycssloaders::withSpinner(
             plotly::plotlyOutput(ns("heatmap_diag")), 
