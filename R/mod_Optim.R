@@ -55,10 +55,10 @@ mod_Optim_ui <- function(id) {
                         value = 3,
                         min = 1),
            
-          numericInput(ns("tplots.s"), 
-                        label = "Input # of Total Check Plots:",
-                        value = 30,
-                        min = 1),
+          # numericInput(ns("tplots.s"), 
+          #               label = "Input # of Total Check Plots:",
+          #               value = 30,
+          #               min = 1),
             
           fluidRow(
             column(6,
@@ -76,22 +76,26 @@ mod_Optim_ui <- function(id) {
           )            
        ),
        
-       fluidRow(
-         column(6,
-                style=list("padding-right: 28px;"),
-                numericInput(ns("nrows.s"), 
-                             label = "Input # of Rows:",
-                             value = 15,
-                             min = 5)
-         ),
-         column(6,
-                style=list("padding-left: 5px;"),
-                numericInput(ns("ncols.s"), 
-                             label = "Input # of Columns:",
-                             value = 20, 
-                             min = 5)
-         )
-       ),
+       # fluidRow(
+       #   column(6,
+       #          style=list("padding-right: 28px;"),
+       #          numericInput(ns("nrows.s"), 
+       #                       label = "Input # of Rows:",
+       #                       value = 15,
+       #                       min = 5)
+       #   ),
+       #   column(6,
+       #          style=list("padding-left: 5px;"),
+       #          numericInput(ns("ncols.s"), 
+       #                       label = "Input # of Columns:",
+       #                       value = 20, 
+       #                       min = 5)
+       #   )
+       # ),
+       
+       selectInput(ns("dimensions.s"),
+                   label = "Select dimensions of field:",
+                   choices = ""),
        
        
        selectInput(ns("planter_mov.spatial"), 
@@ -207,6 +211,8 @@ mod_Optim_server <- function(id) {
   moduleServer(id, function(input, output, session){
     ns <- session$ns
     
+    
+    
     some_inputs <- eventReactive(input$RUN.optim,{
       return(list(sites = input$l.optim))
     })
@@ -217,7 +223,10 @@ mod_Optim_server <- function(id) {
                         choices = loc_user_view, 
                         selected = loc_user_view[1])
     })
-    getDataup.spatiaL <- eventReactive(input$RUN.optim, {  
+    getDataup.spatiaL <- eventReactive(input$RUN.optim, { 
+      if (input$dimensions.s == "No options available"){
+        validate("No options available for this number of treatments")
+      }
       if (input$owndataOPTIM == "Yes") {
         req(input$file3)
         inFile <- input$file3
@@ -231,17 +240,20 @@ mod_Optim_server <- function(id) {
            is.factor(data_up$REPS)) validate("'REPS' must be numeric.")
       }else {
         req(input$checks.s)
-        req(input$tplots.s)
+        #req(input$tplots.s)
         req(input$amount.checks)
-        req(input$nrows.s, input$ncols.s)
-        tplots <- as.numeric(input$tplots.s)
+        #req(input$nrows.s, input$ncols.s)
+        #req(input$dimensions.s)
+        #tplots <- as.numeric(input$tplots.s)
         r.checks <- as.numeric(unlist(strsplit(input$amount.checks, ",")))
-        if (tplots != sum(r.checks)) validate("The number of total checks and the sum of replicates do not match.")
+        #if (tplots != sum(r.checks)) validate("The number of total checks and the sum of replicates do not match.")
         checks.s <- as.numeric(input$checks.s)
         if(checks.s != length(r.checks)) validate("The number of checks and the length of the reps vector must be equal.")
         total.checks <- sum(r.checks)
-        nrows <- as.numeric(input$nrows.s)
-        ncols <- as.numeric(input$ncols.s)
+        nrows <- dimension()$d_row
+        ncols <- dimension()$d_col
+        # nrows <- as.numeric(input$nrows.s)
+        # ncols <- as.numeric(input$ncols.s)
         n.checks <- as.numeric(input$checks.s)
         lines <- as.numeric(input$lines.s)
         if (lines <= sum(total.checks)) validate("Number of lines should be greater then the number of checks.")
@@ -257,6 +269,33 @@ mod_Optim_server <- function(id) {
       
     })
     
+    list_inputs <- reactive({
+      r.checks <- as.numeric(unlist(strsplit(input$amount.checks, ",")))
+      lines <- as.numeric(input$lines.s)
+      list(r.checks=r.checks, lines=lines)
+    })
+    
+    observeEvent(list_inputs(), {
+      r.checks <- as.numeric(unlist(strsplit(input$amount.checks, ",")))
+      lines <- as.numeric(input$lines.s)
+      n <- sum(r.checks,lines)
+      choices <- factor_subsets(n)$labels
+      if(is.null(choices)){
+        choices <- "No options available"
+      } 
+      
+      updateSelectInput(inputId = "dimensions.s", 
+                        choices = choices, 
+                        selected = choices[1])
+    })
+    
+    dimension <- eventReactive(input$RUN.optim, {
+      dims <- unlist(strsplit(input$dimensions.s," x "))
+      d_row <- as.numeric(dims[1])
+      d_col <- as.numeric(dims[2])
+      return(list(d_row=d_row, d_col=d_col))
+    })
+
     
     output$data_input <- DT::renderDT({
       req(getDataup.spatiaL()$data_up.spatial)
@@ -323,11 +362,13 @@ mod_Optim_server <- function(id) {
     Spatial_Checks <- eventReactive(input$RUN.optim, { 
       req(getDataup.spatiaL()$data_up.spatial)
       req(input$plot_start.spatial)
-      req(input$nrows.s, input$ncols.s)
+      #req(input$nrows.s, input$ncols.s)
       req(input$seed.spatial)
       seed.spatial <- as.numeric(input$seed.spatial)
-      nrows <- input$nrows.s
-      ncols <- input$ncols.s
+      nrows <- dimension()$d_row
+      ncols <- dimension()$d_col
+      # nrows <- input$nrows.s
+      # ncols <- input$ncols.s
       niter <- 1000
       plotNumber <- as.numeric(input$plot_start.spatial)
       movement_planter <- input$planter_mov.spatial
@@ -409,9 +450,12 @@ mod_Optim_server <- function(id) {
     
     split_name_spatial <- reactive({
       req(Spatial_Checks())
-      req(input$nrows.s, input$ncols.s)
-      nrows <- as.numeric(input$nrows.s)
-      ncols <- as.numeric(input$ncols.s)
+      #req(input$nrows.s, input$ncols.s)
+      #req(input$dimensions.s)
+      nrows <- dimension()$d_row
+      ncols <- dimension()$d_col
+      # nrows <- as.numeric(input$nrows.s)
+      # ncols <- as.numeric(input$ncols.s)
       my_col_sets <- ncols
       blocks = 1
       if (input$expt_name.spatial != "") {

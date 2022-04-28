@@ -22,6 +22,10 @@ Authors@R:
              family = "Aparicio",
              role = "ctb",
              email = "j.aparicio@cgiar.org"),
+      person(given = "Matthew",
+             family = "Seefeldt",
+             role = "ctb",
+             email = "matthew.seefeldt@ndsu.edu"),
       person(given = "Richard",
              family = "Horsley",
              role = "ctb",
@@ -57,8 +61,8 @@ Imports:
 Encoding: UTF-8
 RoxygenNote: 7.1.2
 Author: Didier Murillo [cre, aut], Salvador Gezan [aut], Ana Heilman [ctb],
- Thomas Walk [ctb], Johan Aparicio [ctb], Richard Horsley [ctb], 
- North Dakota State University [cph]
+ Thomas Walk [ctb], Johan Aparicio [ctb], Matthew Seefeldt [ctb], 
+ Richard Horsley [ctb], North Dakota State University [cph]
 Maintainer: Didier Murillo <didier.murilloflorez@ndsu.edu>
 Suggests: testthat (>= 3.0.0), spelling, rlang
 Config/testthat/edition: 3
