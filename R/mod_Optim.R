@@ -93,7 +93,7 @@ mod_Optim_ui <- function(id) {
        #   )
        # ),
        
-       selectInput(ns("dimensions.s"),
+       selectInput(inputId = ns("dimensions.s"),
                    label = "Select dimensions of field:",
                    choices = ""),
        
@@ -211,8 +211,6 @@ mod_Optim_server <- function(id) {
   moduleServer(id, function(input, output, session){
     ns <- session$ns
     
-    
-    
     some_inputs <- eventReactive(input$RUN.optim,{
       return(list(sites = input$l.optim))
     })
@@ -223,14 +221,14 @@ mod_Optim_server <- function(id) {
                         choices = loc_user_view, 
                         selected = loc_user_view[1])
     })
-    getDataup.spatiaL <- eventReactive(input$RUN.optim, { 
-      if (input$dimensions.s == "No options available"){
-        validate("No options available for this number of treatments")
-      }
+    # getDataup.spatiaL <- eventReactive(input$RUN.optim, { 
+    getDataup.spatiaL <- reactive({ 
       if (input$owndataOPTIM == "Yes") {
         req(input$file3)
         inFile <- input$file3
-        data_up <- load_file(name = inFile$name, path = inFile$datapat, sep = input$sep.OPTIM)
+        data_up <- load_file(name = inFile$name, 
+                             path = inFile$datapat, 
+                             sep = input$sep.OPTIM)
         data_up <- as.data.frame(data_up)
         if (ncol(data_up) < 3) shiny::validate("Data input needs at least three columns with: ENTRY, NAME and REPS.")
         data_up <- as.data.frame(data_up[,1:3])
@@ -238,22 +236,15 @@ mod_Optim_server <- function(id) {
         colnames(data_up) <- c("ENTRY", "NAME", "REPS")
         if(!is.numeric(data_up$REPS) || !is.integer(data_up$REPS) ||
            is.factor(data_up$REPS)) validate("'REPS' must be numeric.")
-      }else {
-        req(input$checks.s)
-        #req(input$tplots.s)
+        total_plots <- sum(data_up$REPS)
+      } else {
         req(input$amount.checks)
-        #req(input$nrows.s, input$ncols.s)
-        #req(input$dimensions.s)
-        #tplots <- as.numeric(input$tplots.s)
+        req(input$lines.s)
+        req(input$checks.s)
         r.checks <- as.numeric(unlist(strsplit(input$amount.checks, ",")))
-        #if (tplots != sum(r.checks)) validate("The number of total checks and the sum of replicates do not match.")
         checks.s <- as.numeric(input$checks.s)
         if(checks.s != length(r.checks)) validate("The number of checks and the length of the reps vector must be equal.")
         total.checks <- sum(r.checks)
-        nrows <- dimension()$d_row
-        ncols <- dimension()$d_col
-        # nrows <- as.numeric(input$nrows.s)
-        # ncols <- as.numeric(input$ncols.s)
         n.checks <- as.numeric(input$checks.s)
         lines <- as.numeric(input$lines.s)
         if (lines <= sum(total.checks)) validate("Number of lines should be greater then the number of checks.")
@@ -263,23 +254,39 @@ mod_Optim_server <- function(id) {
         REPS <- c(reps.checks, rep(1, lines))
         gen.list <- data.frame(list(ENTRY = 1:(lines + n.checks),	NAME = NAME,	REPS = REPS))
         data_up <- gen.list
+        total_plots <- sum(data_up$REPS)
       }
-     
-      return(list(data_up.spatial = data_up))
-      
+      return(list(data_up.spatial = data_up, total_plots = total_plots))
     })
     
     list_inputs <- reactive({
-      r.checks <- as.numeric(unlist(strsplit(input$amount.checks, ",")))
-      lines <- as.numeric(input$lines.s)
-      list(r.checks=r.checks, lines=lines)
+      if (input$owndataOPTIM != 'Yes') {
+        req(input$amount.checks)
+        req(input$lines.s)
+        r.checks <- as.numeric(unlist(strsplit(input$amount.checks, ",")))
+        lines <- as.numeric(input$lines.s)
+        return(list(r.checks=r.checks, lines = lines, input$owndataOPTIM))
+      } else {
+        n_plots <- getDataup.spatiaL()$total_plots
+        return(list(n_plots = n_plots, input$owndataOPTIM))
+      }
     })
     
     observeEvent(list_inputs(), {
-      r.checks <- as.numeric(unlist(strsplit(input$amount.checks, ",")))
-      lines <- as.numeric(input$lines.s)
-      n <- sum(r.checks,lines)
-      choices <- factor_subsets(n)$labels
+      req(input$owndataOPTIM)
+      if (input$owndataOPTIM != 'Yes') {
+        req(input$amount.checks)
+        req(input$lines.s)
+        r.checks <- as.numeric(unlist(strsplit(input$amount.checks, ",")))
+        lines <- as.numeric(input$lines.s)
+        n <- sum(r.checks,lines)
+        choices <- factor_subsets(n)$labels
+      } else {
+        req(getDataup.spatiaL()$total_plots)
+        n <- getDataup.spatiaL()$total_plots
+        choices <- factor_subsets(n)$labels
+      }
+      
       if(is.null(choices)){
         choices <- "No options available"
       } 
@@ -289,15 +296,18 @@ mod_Optim_server <- function(id) {
                         selected = choices[1])
     })
     
-    dimension <- eventReactive(input$RUN.optim, {
+    field_dimensions_prep <- eventReactive(input$RUN.optim, {
       dims <- unlist(strsplit(input$dimensions.s," x "))
       d_row <- as.numeric(dims[1])
       d_col <- as.numeric(dims[2])
-      return(list(d_row=d_row, d_col=d_col))
+      return(list(d_row = d_row, d_col = d_col))
     })
 
     
     output$data_input <- DT::renderDT({
+      if (input$dimensions.s == "No options available"){
+        validate("No options available for this number of treatments")
+      }
       req(getDataup.spatiaL()$data_up.spatial)
       data_entry <- getDataup.spatiaL()$data_up.spatial
       df <- as.data.frame(data_entry)
@@ -348,6 +358,9 @@ mod_Optim_server <- function(id) {
     })
     
     output$table_checks <- DT::renderDT({
+      if (input$dimensions.s == "No options available"){
+        validate("No options available for this number of treatments")
+      }
       req(getDataup.spatiaL()$data_up.spatial)
         data_entry <- getDataup.spatiaL()$data_up.spatial
         checks_input <- data_entry[data_entry$REPS > 1, ]
@@ -360,15 +373,15 @@ mod_Optim_server <- function(id) {
     })
     
     Spatial_Checks <- eventReactive(input$RUN.optim, { 
+      if (input$dimensions.s == "No options available"){
+        validate("No options available for this number of treatments")
+      }
       req(getDataup.spatiaL()$data_up.spatial)
       req(input$plot_start.spatial)
-      #req(input$nrows.s, input$ncols.s)
       req(input$seed.spatial)
       seed.spatial <- as.numeric(input$seed.spatial)
-      nrows <- dimension()$d_row
-      ncols <- dimension()$d_col
-      # nrows <- input$nrows.s
-      # ncols <- input$ncols.s
+      nrows <- field_dimensions_prep()$d_row
+      ncols <- field_dimensions_prep()$d_col
       niter <- 1000
       plotNumber <- as.numeric(input$plot_start.spatial)
       movement_planter <- input$planter_mov.spatial
@@ -452,8 +465,8 @@ mod_Optim_server <- function(id) {
       req(Spatial_Checks())
       #req(input$nrows.s, input$ncols.s)
       #req(input$dimensions.s)
-      nrows <- dimension()$d_row
-      ncols <- dimension()$d_col
+      nrows <- field_dimensions_prep()$d_row
+      ncols <- field_dimensions_prep()$d_col
       # nrows <- as.numeric(input$nrows.s)
       # ncols <- as.numeric(input$ncols.s)
       my_col_sets <- ncols
@@ -577,7 +590,6 @@ mod_Optim_server <- function(id) {
         minVal <- as.numeric(valsOPTIM$minValue)
         ROX_O <- as.numeric(valsOPTIM$ROX)
         ROY_O <- as.numeric(valsOPTIM$ROY)
-        #locs <- as.numeric(input$l.optim)
         df_optim <- Spatial_Checks()$fieldBook
         locs <- length(levels(factor(df_optim$LOCATION)))
         nrows.s <- max(as.numeric(df_optim$ROW))

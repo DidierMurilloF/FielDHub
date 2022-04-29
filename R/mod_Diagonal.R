@@ -82,20 +82,25 @@ mod_Diagonal_ui <- function(id){
               )       
            )
         ),
-        fluidRow(
-          column(6,style=list("padding-right: 28px;"),
-                 numericInput(inputId = ns("n_rows"), 
-                              label = "Input # of Rows:",
-                              value = 15, 
-                              min = 5)
-          ),
-          column(6,style=list("padding-left: 5px;"),
-                 numericInput(inputId = ns("n_cols"), 
-                              label = "Input # of Columns:",
-                              value = 20, 
-                              min = 5)
-          )
-        ),
+        # fluidRow(
+        #   column(6,style=list("padding-right: 28px;"),
+        #          numericInput(inputId = ns("n_rows"), 
+        #                       label = "Input # of Rows:",
+        #                       value = 15, 
+        #                       min = 5)
+        #   ),
+        #   column(6,style=list("padding-left: 5px;"),
+        #          numericInput(inputId = ns("n_cols"), 
+        #                       label = "Input # of Columns:",
+        #                       value = 20, 
+        #                       min = 5)
+        #   )
+        # ),
+        
+        selectInput(inputId = ns("dimensions.d"), 
+                    label = "Select dimensions of field:", 
+                    choices = ""),
+        
         fluidRow(
           column(6,style=list("padding-right: 28px;"),
                  selectInput(inputId = ns("Dropdown"), 
@@ -240,14 +245,14 @@ mod_Diagonal_server <- function(id) {
                  handlerExpr = updateTabsetPanel(session,
                                                  "Tabset",
                                                  selected = "tabPanel1"))
-    observeEvent(input$n_rows,
-                 handlerExpr = updateTabsetPanel(session,
-                                                 "Tabset",
-                                                 selected = "tabPanel1"))
-    observeEvent(input$n_cols,
-                 handlerExpr = updateTabsetPanel(session,
-                                                 "Tabset",
-                                                 selected = "tabPanel1"))
+    # observeEvent(input$n_rows,
+    #              handlerExpr = updateTabsetPanel(session,
+    #                                              "Tabset",
+    #                                              selected = "tabPanel1"))
+    # observeEvent(input$n_cols,
+    #              handlerExpr = updateTabsetPanel(session,
+    #                                              "Tabset",
+    #                                              selected = "tabPanel1"))
     observeEvent(input$planter_mov1,
                  handlerExpr = updateTabsetPanel(session,
                                                  "Tabset",
@@ -347,8 +352,6 @@ mod_Diagonal_server <- function(id) {
             }
             dim_data <- sum(data_dim_each_block)
             selected <- length(Block_levels)
-            # updateSelectInput(session, inputId = 'Block_Fillers', label = "Which Blocks will have Fil:",
-            #                   choices = Block_levels, selected = Block_levels[selected])
           }
         }
         
@@ -372,9 +375,89 @@ mod_Diagonal_server <- function(id) {
       } else return(NULL)
     })
     
-    entryListFormat_SUDC <- data.frame(ENTRY = 1:9, NAME = c(c("CHECK1", "CHECK2","CHECK3"), paste("Genotype", LETTERS[1:6], sep = "")))
-    entryListFormat_DBUDC <- data.frame(ENTRY = 1:9, NAME = c(c("CHECK1", "CHECK2","CHECK3"), paste("Genotype", LETTERS[1:6], sep = "")),
-                                        BLOCK = c(rep("ALL", 3), rep(1:3, each = 2)))
+    
+    
+    
+    
+    list_inputs_diagonal <- reactive({
+      # if (input$owndataDIAGONALS != "Yes") {
+      #   if (input$kindExpt != "DBUDC") {
+      #     req(input$lines.d)
+      #     lines <- as.numeric(input$lines.d)
+      #   } else {
+      #     req(input$lines.db)
+      #     lines <- as.numeric(input$lines.db)
+      #   }
+      #   lines <- getData()$dim_data_entry
+      #   return(list(lines, input$owndataDIAGONALS))
+      # } else {
+      #   if (input$kindExpt != "DBUDC") {
+      #     
+      #   } else {
+      #     
+      #   }
+      # }
+      lines <- as.numeric(getData()$dim_data_entry)
+      
+      return(list(lines, input$owndataDIAGONALS))
+    })
+    
+    observeEvent(list_inputs_diagonal(), {
+      req(getData()$dim_data_entry)
+      lines <- as.numeric(getData()$dim_data_entry)
+      # req(input$owndataOPTIM)
+      # if (input$owndataDIAGONALS != "Yes") {
+      #   req(input$amount.checks)
+      #   req(input$lines.s)
+      #   r.checks <- as.numeric(unlist(strsplit(input$amount.checks, ",")))
+      #   lines <- as.numeric(input$lines.s)
+      #   n <- sum(r.checks,lines)
+      #   choices <- factor_subsets(n)$labels
+      # } else {
+      #   req(getDataup.spatiaL()$total_plots)
+      #   n <- getDataup.spatiaL()$total_plots
+      #   choices <- factor_subsets(n)$labels
+      # }
+      n_plots <- ceiling(lines + (lines * 0.10))
+      while (numbers::isPrime(n_plots)) {
+        n_plots <- n_plots + 1
+      }
+      choices <- factor_subsets(n_plots)$labels
+      if(is.null(choices)){
+        choices <- "No options available"
+      } 
+      
+      updateSelectInput(inputId = "dimensions.d", 
+                        choices = choices, 
+                        selected = choices[1])
+    })
+    
+   # field_dimensions_prep <- eventReactive(input$RUN.optim, {
+    field_dimensions_diagonal <- reactive({
+      dims <- unlist(strsplit(input$dimensions.d, " x "))
+      d_row <- as.numeric(dims[1])
+      d_col <- as.numeric(dims[2])
+      return(list(d_row = d_row, d_col = d_col))
+    })
+    
+
+    
+    
+    
+    
+    
+    
+    
+    entryListFormat_SUDC <- data.frame(
+      ENTRY = 1:9, 
+      NAME = c(c("CHECK1", "CHECK2","CHECK3"), paste("Genotype", LETTERS[1:6], 
+                     sep = ""))
+      )
+    entryListFormat_DBUDC <- data.frame(
+      ENTRY = 1:9, 
+      NAME = c(c("CHECK1", "CHECK2","CHECK3"), paste("Genotype", LETTERS[1:6], sep = "")),
+      BLOCK = c(rep("ALL", 3), rep(1:3, each = 2))
+      )
     
     toListen <- reactive({
       list(input$owndataDIAGONALS,input$kindExpt)
@@ -442,7 +525,10 @@ mod_Diagonal_server <- function(id) {
         planter_mov <- input$planter_mov
       }else planter_mov <- input$planter_mov1
       
-      available_percent(n_rows = input$n_rows, n_cols = input$n_cols, checks = checksEntries, 
+      n_rows <- field_dimensions_diagonal()$d_row
+      n_cols <- field_dimensions_diagonal()$d_col
+      
+      available_percent(n_rows = n_rows, n_cols = n_cols, checks = checksEntries, 
                         Option_NCD = Option_NCD, Visual_ch = input$Visual_ch, visualCheck = FALSE, 
                         kindExpt = input$kindExpt, myWay = input$myWay, planter_mov1 = planter_mov, 
                         data = getData()$data_entry, dim_data = getData()$dim_data_entry,
@@ -558,12 +644,14 @@ mod_Diagonal_server <- function(id) {
     
     rand_lines <- reactive({ 
       Option_NCD <- TRUE
-      req(input$n_rows, input$n_cols)
+      # req(input$n_rows, input$n_cols)
       req(available_percent_table()$dt)
       req(available_percent_table()$d_checks)
       req(getData()$data_entry)
       data_entry <- getData()$data_entry
-      n_rows <- input$n_rows; n_cols <- input$n_cols
+      # n_rows <- input$n_rows; n_cols <- input$n_cols
+      n_rows <- field_dimensions_diagonal()$d_row
+      n_cols <- field_dimensions_diagonal()$d_col
       checksEntries <- getChecks()$checksEntries
       checks <- as.numeric(input$checks)
       if(input$kindExpt == "DBUDC") multi <- TRUE else multi <- FALSE
@@ -597,18 +685,22 @@ mod_Diagonal_server <- function(id) {
             my_col_sets = c(cuts_by_c[1], m)
           }
           if(input$myWay == "By Column") {
+            n_rows <- field_dimensions_diagonal()$d_row
+            n_cols <- field_dimensions_diagonal()$d_col
             Option_NCD <- FALSE
             if (input$kindExpt == "DBUDC" && Option_NCD == FALSE){
-              data_random <- get_random(n_rows = input$n_rows, n_cols = input$n_cols, d_checks = my_split_r,
+              data_random <- get_random(n_rows = n_rows, n_cols = n_cols, d_checks = my_split_r,
                                         reps = NULL, Fillers = FALSE, col_sets = my_col_sets, row_sets = NULL,
                                         checks = checksEntries, data = data_entry, data_dim_each_block = data_dim_each_block)
             }else if(input$kindExpt == "DBUDC" && Option_NCD == TRUE){
               req(available_percent_table()$data_dim_each_block)
-              data_random <- get_random(n_rows = input$n_rows, n_cols = input$n_cols, d_checks = my_split_r,
+              data_random <- get_random(n_rows = n_rows, n_cols = n_cols, d_checks = my_split_r,
                                         reps = NULL, Fillers = TRUE, col_sets = my_col_sets, row_sets = NULL,
                                         checks = checksEntries, data = data_entry)
             }
           }else {
+            n_rows <- field_dimensions_diagonal()$d_row
+            n_cols <- field_dimensions_diagonal()$d_col
             if(input$kindExpt == "DBUDC" && Option_NCD == FALSE) {
               data_entry1 <- data_entry[(checks + 1):nrow(data_entry), ]
               data_random <- get_DBrandom(binaryMap = w_map, data_dim_each_block = data_dim_each_block, data_entries = data_entry1,
@@ -616,21 +708,23 @@ mod_Diagonal_server <- function(id) {
             }else if(input$kindExpt == "DBUDC" && Option_NCD == TRUE) {
               req(available_percent_table()$data_dim_each_block)
               Block_Fillers <- as.numeric(blocks_length())
-              data_random <- get_random(n_rows = input$n_rows, n_cols = input$n_cols, d_checks = my_split_r,
+              data_random <- get_random(n_rows = n_rows, n_cols = n_cols, d_checks = my_split_r,
                                         reps = NULL, Fillers = FALSE, col_sets = NULL, row_sets = my_row_sets,
                                         checks = checksEntries, data = data_entry, planter_mov  = input$planter_mov,
                                         Multi.Fillers = TRUE, which.blocks = Block_Fillers)
             }
           }
         }else {
+          n_rows <- field_dimensions_diagonal()$d_row
+          n_cols <- field_dimensions_diagonal()$d_col
           if("Filler" %in% my_split_r) Option_NCD <- TRUE else Option_NCD <- FALSE
           if(Option_NCD == TRUE) {
-            data_random <- get_random(n_rows = input$n_rows, n_cols = input$n_cols, d_checks = my_split_r,
-                                      reps = NULL, Fillers = TRUE, col_sets = input$n_cols, row_sets = NULL,
+            data_random <- get_random(n_rows = n_rows, n_cols = n_cols, d_checks = my_split_r,
+                                      reps = NULL, Fillers = TRUE, col_sets = n_cols, row_sets = NULL,
                                       checks = checksEntries, data = data_entry, planter_mov  = input$planter_mov)
           }else {
-            data_random <- get_random(n_rows = input$n_rows, n_cols = input$n_cols, d_checks = my_split_r,
-                                      reps = NULL, Fillers = FALSE, col_sets = input$n_cols, row_sets = NULL,
+            data_random <- get_random(n_rows = n_rows, n_cols = n_cols, d_checks = my_split_r,
+                                      reps = NULL, Fillers = FALSE, col_sets = n_cols, row_sets = NULL,
                                       checks = checksEntries, data = data_entry, planter_mov  = input$planter_mov)
           }
         }
@@ -725,11 +819,13 @@ mod_Diagonal_server <- function(id) {
       checksEntries <- getChecks()$checksEntries
       checks <- checksEntries
       req(rand_lines())
-      req(input$n_rows, input$n_cols)
+      # req(input$n_rows, input$n_cols)
       data_entry <- getData()$data_entry
       w_map <- rand_checks()[[1]]$map_checks
       if ("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE
-      n_rows = input$n_rows; n_cols = input$n_cols
+      # n_rows = input$n_rows; n_cols = input$n_cols
+      n_rows <- field_dimensions_diagonal()$d_row
+      n_cols <- field_dimensions_diagonal()$d_col
       if(input$kindExpt == "DBUDC") multi <- TRUE else multi <- FALSE
       if (input$myWay == "By Row" && input$kindExpt == "DBUDC") {
         map_letters <- rand_lines()[[1]]$w_map_letter
@@ -778,7 +874,9 @@ mod_Diagonal_server <- function(id) {
     
     put_Filler_in_name <- reactive({
       req(rand_lines())
-      req(input$n_rows, input$n_cols)
+      n_rows <- field_dimensions_diagonal()$d_row
+      n_cols <- field_dimensions_diagonal()$d_col
+      # req(input$n_rows, input$n_cols)
       r_map <- rand_lines()[[1]]$rand
       if("Filler" %in% r_map) Option_NCD <- TRUE else Option_NCD <- FALSE
       
@@ -788,17 +886,17 @@ mod_Diagonal_server <- function(id) {
           Name_expt <- input$expt_name 
         }else Name_expt = paste0(rep("Expt1", times = blocks), 1:blocks)
         
-        split_names <- matrix(data = Name_expt, ncol = input$n_cols, nrow = input$n_rows)
+        split_names <- matrix(data = Name_expt, ncol = n_cols, nrow = n_rows)
         r_map <- rand_lines()[[1]]$rand
         Fillers <- sum(r_map == "Filler")
         if (input$n_rows %% 2 == 0) {
           if(input$planter_mov1 == "serpentine") {
             split_names[1, 1:Fillers] <- "Filler"
           }else{
-            split_names[1,((input$n_cols + 1) - Fillers):input$n_cols] <- "Filler"
+            split_names[1,((n_cols + 1) - Fillers):n_cols] <- "Filler"
           }
         }else {
-          split_names[1,((input$n_cols + 1) - Fillers):input$n_cols] <- "Filler"
+          split_names[1,((n_cols + 1) - Fillers):n_cols] <- "Filler"
         }
       }
       list(name_with_Fillers = split_names)
@@ -940,12 +1038,14 @@ mod_Diagonal_server <- function(id) {
     plot_number_reactive <- reactive({
       req(rand_lines())
       req(input$plot_start)
-      req(input$n_rows, input$n_cols)
+      # req(input$n_rows, input$n_cols)
       req(split_name_reactive()$my_names)
       
       datos_name <- split_name_reactive()$my_names 
       datos_name = as.matrix(datos_name) 
-      n_rows = input$n_rows; n_cols = input$n_cols 
+      # n_rows = input$n_rows; n_cols = input$n_cols 
+      n_rows <- field_dimensions_diagonal()$d_row
+      n_cols <- field_dimensions_diagonal()$d_col
       movement_planter = input$planter_mov
       w_map <- rand_checks()[[1]]$map_checks
       
@@ -984,7 +1084,7 @@ mod_Diagonal_server <- function(id) {
             if(input$myWay == "By Column"){
               
               my_split_plot_nub <- plot_number(movement_planter = input$planter_mov, n_blocks = n_blocks,
-                                               n_rows = input$n_rows, n_cols = input$n_cols, 
+                                               n_rows = input$n_rows, n_cols = n_cols, 
                                                plot_n_start = plot_n_start[sites],
                                                datos = datos_name, expe_name = expe_names, ByRow = FALSE,
                                                my_row_sets = NULL, ByCol = TRUE, my_col_sets = my_col_sets) 
@@ -1049,7 +1149,7 @@ mod_Diagonal_server <- function(id) {
           w_map <- rand_checks()[[1]]$map_checks
           if("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE 
           my_split_plot_nub <- plot_number(movement_planter = input$planter_mov1, n_blocks = 1, 
-                                           n_rows = input$n_rows, n_cols = input$n_cols, 
+                                           n_rows = input$n_rows, n_cols = n_cols, 
                                            plot_n_start = plot_n_start[sites], datos = datos_name,
                                            expe_name =  Name_expt, ByRow = NULL, 
                                            my_row_sets = NULL, ByCol = NULL,
@@ -1061,10 +1161,10 @@ mod_Diagonal_server <- function(id) {
               if(input$planter_mov1 == "serpentine") { 
                 my_split_plot_nub[[1]][1, 1:Fillers] <- 0 
               }else{ 
-                my_split_plot_nub[[1]][1,((input$n_cols + 1) - Fillers):input$n_cols] <- 0 
+                my_split_plot_nub[[1]][1,((n_cols + 1) - Fillers):n_cols] <- 0 
               } 
             }else { 
-              my_split_plot_nub[[1]][1,((input$n_cols + 1) - Fillers):input$n_cols] <- 0 
+              my_split_plot_nub[[1]][1,((n_cols + 1) - Fillers):n_cols] <- 0 
             } 
           } 
         }
@@ -1276,8 +1376,10 @@ mod_Diagonal_server <- function(id) {
         ROY_DIAG <- as.numeric(valsDIAG$ROY)
         df_diag <- export_diagonal_design()$final_expt
         loc_levels_factors <- levels(factor(df_diag$LOCATION, unique(df_diag$LOCATION)))
-        nrows_diag <- as.numeric(input$n_rows)
-        ncols_diag <- as.numeric(input$n_cols)
+        nrows_diag <- field_dimensions_diagonal()$d_row
+        ncols_diag <- field_dimensions_diagonal()$d_col
+        # nrows_diag <- as.numeric(input$n_rows)
+        # ncols_diag <- as.numeric(input$n_cols)
         seed_diag <- as.numeric(input$myseed)
         locs_diag <- as.numeric(input$l.diagonal)
         df_diag_list <- vector(mode = "list", length = locs_diag)
