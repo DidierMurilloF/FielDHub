@@ -82,21 +82,6 @@ mod_Diagonal_ui <- function(id){
               )       
            )
         ),
-        # fluidRow(
-        #   column(6,style=list("padding-right: 28px;"),
-        #          numericInput(inputId = ns("n_rows"), 
-        #                       label = "Input # of Rows:",
-        #                       value = 15, 
-        #                       min = 5)
-        #   ),
-        #   column(6,style=list("padding-left: 5px;"),
-        #          numericInput(inputId = ns("n_cols"), 
-        #                       label = "Input # of Columns:",
-        #                       value = 20, 
-        #                       min = 5)
-        #   )
-        # ),
-        
         selectInput(inputId = ns("dimensions.d"), 
                     label = "Select dimensions of field:", 
                     choices = ""),
@@ -245,14 +230,14 @@ mod_Diagonal_server <- function(id) {
                  handlerExpr = updateTabsetPanel(session,
                                                  "Tabset",
                                                  selected = "tabPanel1"))
-    # observeEvent(input$n_rows,
-    #              handlerExpr = updateTabsetPanel(session,
-    #                                              "Tabset",
-    #                                              selected = "tabPanel1"))
-    # observeEvent(input$n_cols,
-    #              handlerExpr = updateTabsetPanel(session,
-    #                                              "Tabset",
-    #                                              selected = "tabPanel1"))
+    observeEvent(input$checks,
+                 handlerExpr = updateTabsetPanel(session,
+                                                 "Tabset",
+                                                 selected = "tabPanel1"))
+    observeEvent(input$dimensions.d,
+                 handlerExpr = updateTabsetPanel(session,
+                                                 "Tabset",
+                                                 selected = "tabPanel1"))
     observeEvent(input$planter_mov1,
                  handlerExpr = updateTabsetPanel(session,
                                                  "Tabset",
@@ -295,8 +280,6 @@ mod_Diagonal_server <- function(id) {
             }
             dim_data <- sum(data_dim_each_block)
             input_blocks <- as.numeric(sort(Block_levels))
-            print(input_blocks)
-            print(any(input_blocks < 1) || any(diff(input_blocks) != 1))
              if (any(input_blocks < 1) || any(diff(input_blocks) != 1)) {
                validate("Data input does not fit the requirements!")
              }
@@ -356,12 +339,11 @@ mod_Diagonal_server <- function(id) {
         }
         
       }
-      
       dim_data_entry <- nrow(data_entry_UP)
       dim_data_1 <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
-      
-      list(data_entry = data_entry_UP, dim_data_entry = dim_data_entry, dim_data_1 = dim_data_1)
-      
+      list(data_entry = data_entry_UP, 
+           dim_data_entry = dim_data_entry, 
+           dim_data_1 = dim_data_1)
     })
     
     blocks_length <- reactive({
@@ -375,78 +357,79 @@ mod_Diagonal_server <- function(id) {
       } else return(NULL)
     })
     
-    
-    
-    
-    
     list_inputs_diagonal <- reactive({
-      # if (input$owndataDIAGONALS != "Yes") {
-      #   if (input$kindExpt != "DBUDC") {
-      #     req(input$lines.d)
-      #     lines <- as.numeric(input$lines.d)
-      #   } else {
-      #     req(input$lines.db)
-      #     lines <- as.numeric(input$lines.db)
-      #   }
-      #   lines <- getData()$dim_data_entry
-      #   return(list(lines, input$owndataDIAGONALS))
-      # } else {
-      #   if (input$kindExpt != "DBUDC") {
-      #     
-      #   } else {
-      #     
-      #   }
-      # }
+      req(input$checks)
+      req(getData()$dim_data_entry)
+      checks <- as.numeric(input$checks)
       lines <- as.numeric(getData()$dim_data_entry)
-      
-      return(list(lines, input$owndataDIAGONALS))
+      return(list(lines, input$owndataDIAGONALS, input$kindExpt))
     })
     
     observeEvent(list_inputs_diagonal(), {
       req(getData()$dim_data_entry)
-      lines <- as.numeric(getData()$dim_data_entry)
-      # req(input$owndataOPTIM)
-      # if (input$owndataDIAGONALS != "Yes") {
-      #   req(input$amount.checks)
-      #   req(input$lines.s)
-      #   r.checks <- as.numeric(unlist(strsplit(input$amount.checks, ",")))
-      #   lines <- as.numeric(input$lines.s)
-      #   n <- sum(r.checks,lines)
-      #   choices <- factor_subsets(n)$labels
-      # } else {
-      #   req(getDataup.spatiaL()$total_plots)
-      #   n <- getDataup.spatiaL()$total_plots
-      #   choices <- factor_subsets(n)$labels
-      # }
-      n_plots <- ceiling(lines + (lines * 0.10))
-      while (numbers::isPrime(n_plots)) {
-        n_plots <- n_plots + 1
+      req(input$checks)
+      checks <- as.numeric(input$checks)
+      total_entries <- as.numeric(getData()$dim_data_entry)
+      lines <- total_entries - checks
+      t1 <- floor(lines + lines * 0.090)
+      t2 <- ceiling(lines + lines * 0.20)
+      t <- t1:t2
+      n <- t[-numbers::isPrime(t)]
+      choices_list <- list()
+      i <- 1
+      for (n in t) {
+        choices_list[[i]] <- factor_subsets(n, diagonal = TRUE)$labels
+        i <- i + 1
       }
-      choices <- factor_subsets(n_plots)$labels
-      if(is.null(choices)){
+      choices <- unlist(choices_list[!sapply(choices_list, is.null)])
+      if(is.null(choices)) {
         choices <- "No options available"
       } 
       
+      
+      # Option_NCD <- TRUE
+      # checksEntries <- as.vector(getChecks()$checksEntries)
+      # 
+      # new_choices <- list()
+      # v <- 1
+      # for (dim_options in 1:length(choices)) {
+      #   
+      #   if(input$kindExpt == "DBUDC" && input$myWay == "By Column") {
+      #     Option_NCD <- FALSE
+      #   }
+      #   
+      #   if (input$kindExpt != "SUDC") {
+      #     planter_mov <- input$planter_mov
+      #   }else planter_mov <- input$planter_mov1
+      #   
+      #   dims <- unlist(strsplit(choices[[dim_options]], " x "))
+      #   n_rows <- as.numeric(dims[1])
+      #   n_cols  <- as.numeric(dims[2])
+      # 
+      #   dt_options <- available_percent(n_rows = n_rows, n_cols = n_cols, checks = checksEntries, 
+      #                                   Option_NCD = Option_NCD, Visual_ch = input$Visual_ch, visualCheck = FALSE, 
+      #                                   kindExpt = input$kindExpt, myWay = input$myWay, planter_mov1 = planter_mov, 
+      #                                   data = getData()$data_entry, dim_data = getData()$dim_data_entry,
+      #                                   dim_data_1 = getData()$dim_data_1, Block_Fillers = blocks_length())
+      #   if (!is.null(dt_options$dt)) {
+      #     new_choices[[v]] <- choices[[dim_options]]
+      #     v <- v + 1
+      #   }
+      # }
+      # print(length(choices))
+      # print(length(new_choices))
+
       updateSelectInput(inputId = "dimensions.d", 
                         choices = choices, 
                         selected = choices[1])
     })
     
-   # field_dimensions_prep <- eventReactive(input$RUN.optim, {
     field_dimensions_diagonal <- reactive({
       dims <- unlist(strsplit(input$dimensions.d, " x "))
       d_row <- as.numeric(dims[1])
       d_col <- as.numeric(dims[2])
       return(list(d_row = d_row, d_col = d_col))
     })
-    
-
-    
-    
-    
-    
-    
-    
     
     entryListFormat_SUDC <- data.frame(
       ENTRY = 1:9, 
@@ -576,11 +559,15 @@ mod_Diagonal_server <- function(id) {
         shiny::validate("Data input does not fit to field dimensions")
         return(NULL)
       }
-      #req(available_percent_table()$dt)
       my_out <- available_percent_table()$dt
       my_percent <- my_out[,2]
-      updateSelectInput(session = session, inputId = 'Dropdown', label = "Choose % of Checks:",
-                        choices = my_percent)
+      len <- length(my_percent)
+      selected <- my_percent[len]
+      updateSelectInput(session = session, 
+                        inputId = 'Dropdown', 
+                        label = "Choose % of Checks:",
+                        choices = my_percent, 
+                        selected = selected)
       df <- as.data.frame(my_out)
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "460px"))
@@ -626,7 +613,6 @@ mod_Diagonal_server <- function(id) {
         data_entry <- getData()$data_entry
         req(user_location()$map_checks)
         if(is.null(user_location()$map_checks)) return(NULL)
-        # w_map <- rand_checks()$map_checks
         w_map <- user_location()$map_checks
         table_checks <- data_entry[1:(input$checks),]
         df <- table_checks
@@ -636,7 +622,6 @@ mod_Diagonal_server <- function(id) {
         df <- base::merge(df, times_checks, by.x = "ENTRY")
         options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                   scrollX = TRUE, scrollY = "350px"))
-        #a <- ncol(df) - 1
         DT::datatable(df, rownames = FALSE, caption = 'Table of Checks.', options = list(
           columnDefs = list(list(className = 'dt-center', targets = "_all"))))
       }
@@ -644,12 +629,10 @@ mod_Diagonal_server <- function(id) {
     
     rand_lines <- reactive({ 
       Option_NCD <- TRUE
-      # req(input$n_rows, input$n_cols)
       req(available_percent_table()$dt)
       req(available_percent_table()$d_checks)
       req(getData()$data_entry)
       data_entry <- getData()$data_entry
-      # n_rows <- input$n_rows; n_cols <- input$n_cols
       n_rows <- field_dimensions_diagonal()$d_row
       n_cols <- field_dimensions_diagonal()$d_col
       checksEntries <- getChecks()$checksEntries
@@ -819,11 +802,9 @@ mod_Diagonal_server <- function(id) {
       checksEntries <- getChecks()$checksEntries
       checks <- checksEntries
       req(rand_lines())
-      # req(input$n_rows, input$n_cols)
       data_entry <- getData()$data_entry
       w_map <- rand_checks()[[1]]$map_checks
       if ("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE
-      # n_rows = input$n_rows; n_cols = input$n_cols
       n_rows <- field_dimensions_diagonal()$d_row
       n_cols <- field_dimensions_diagonal()$d_col
       if(input$kindExpt == "DBUDC") multi <- TRUE else multi <- FALSE
@@ -857,6 +838,8 @@ mod_Diagonal_server <- function(id) {
                                                expt_name = name_expt, data_entry = data_entry, reps = NULL,
                                                data_dim_each_block = data_dim_each_block, w_map_letters1 = map_letters)
       }else if (input$kindExpt == "SUDC") {
+        n_rows <- field_dimensions_diagonal()$d_row
+        n_cols <- field_dimensions_diagonal()$d_col
         Name_expt <- as.vector(unlist(strsplit(input$expt_name, ",")))
         blocks <- 1
         if (length(Name_expt) == blocks && !is.null(Name_expt)) {
@@ -889,7 +872,7 @@ mod_Diagonal_server <- function(id) {
         split_names <- matrix(data = Name_expt, ncol = n_cols, nrow = n_rows)
         r_map <- rand_lines()[[1]]$rand
         Fillers <- sum(r_map == "Filler")
-        if (input$n_rows %% 2 == 0) {
+        if (n_rows %% 2 == 0) {
           if(input$planter_mov1 == "serpentine") {
             split_names[1, 1:Fillers] <- "Filler"
           }else{
@@ -1084,7 +1067,7 @@ mod_Diagonal_server <- function(id) {
             if(input$myWay == "By Column"){
               
               my_split_plot_nub <- plot_number(movement_planter = input$planter_mov, n_blocks = n_blocks,
-                                               n_rows = input$n_rows, n_cols = n_cols, 
+                                               n_rows = n_rows, n_cols = n_cols, 
                                                plot_n_start = plot_n_start[sites],
                                                datos = datos_name, expe_name = expe_names, ByRow = FALSE,
                                                my_row_sets = NULL, ByCol = TRUE, my_col_sets = my_col_sets) 
@@ -1149,7 +1132,7 @@ mod_Diagonal_server <- function(id) {
           w_map <- rand_checks()[[1]]$map_checks
           if("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE 
           my_split_plot_nub <- plot_number(movement_planter = input$planter_mov1, n_blocks = 1, 
-                                           n_rows = input$n_rows, n_cols = n_cols, 
+                                           n_rows = n_rows, n_cols = n_cols, 
                                            plot_n_start = plot_n_start[sites], datos = datos_name,
                                            expe_name =  Name_expt, ByRow = NULL, 
                                            my_row_sets = NULL, ByCol = NULL,
@@ -1157,7 +1140,7 @@ mod_Diagonal_server <- function(id) {
           if (Option_NCD == TRUE) { 
             r_map <- rand_lines()[[1]]$rand
             Fillers <- sum(r_map == "Filler") 
-            if (input$n_rows %% 2 == 0) { 
+            if (n_rows %% 2 == 0) { 
               if(input$planter_mov1 == "serpentine") { 
                 my_split_plot_nub[[1]][1, 1:Fillers] <- 0 
               }else{ 

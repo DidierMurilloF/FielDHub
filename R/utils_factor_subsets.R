@@ -6,26 +6,25 @@
 #'
 #' @noRd
 
-factor_subsets <- function(n){
+factor_subsets <- function(n, diagonal = FALSE) {
   
-  prime_factors <- function(x, i=2, factors = NULL){
-    if(x<i) factors
-    else if(! x %% i) prime_factors(x/i, i, c(factors, i))
-    else  prime_factors(x, i+1, factors)
-  }
-  factors <- prime_factors(n)
+  # prime_factors <- function(x, i=2, factors = NULL){
+  #   if(x<i) factors
+  #   else if(! x %% i) prime_factors(x/i, i, c(factors, i))
+  #   else  prime_factors(x, i+1, factors)
+  # }
+  # factors <- prime_factors(n)
+  factors <- numbers::primeFactors(n)
   left <- 1
   right <- 1
   combos <- list()
   labels <- list()
   both <- list()
-  
-  if(length(sq(length(factors)))==2){
+  if(length(sq(length(factors))) == 2){
     return(NULL)
   }else{
       list <- sq(length(factors))[-1,][-(nrow(sq(length(factors)))-1),]
   }
-  
   for (i in 1:nrow(list)) {
     for (n in 1:length(factors)) {
       if (list[i,][n]==1){
@@ -34,22 +33,24 @@ factor_subsets <- function(n){
         right <- right*factors[n]
       }
     }
-    if(left>3 & right>3){
-      combos[[i]] <- c(row = left,col = right)
-      labels[[i]] <- paste(left,"x",right,sep = " ")
-      # both[[i]] <- list(combos[[i]],labels[[i]])
+    cols <- 3
+    rows <- 3
+    if (diagonal) {
+      cols <- 9
+      rows <- 4
     }
-    
+    if(left > rows & right > cols){
+      combos[[i]] <- c(row = left, col = right)
+      labels[[i]] <- paste(left,"x",right,sep = " ")
+    }
     left <- 1
     right <- 1
   }
-  
   combos <- unique(combos[!sapply(combos,is.null)])
   labels <- unique(labels[!sapply(labels,is.null)])
   if (length(combos) == 0) {
     return(NULL)
   } else return(list(combos = combos, labels = labels))
-  
 }
 
 #' sq
