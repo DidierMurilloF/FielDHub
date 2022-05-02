@@ -88,7 +88,7 @@ mod_Diagonal_ui <- function(id){
         
         fluidRow(
           column(6,style=list("padding-right: 28px;"),
-                 selectInput(inputId = ns("Dropdown"), 
+                 selectInput(inputId = ns("percent_checks"), 
                              label = "Choose of diagonal checks:", 
                              choices = "")
           ),
@@ -385,6 +385,8 @@ mod_Diagonal_server <- function(id) {
       if(is.null(choices)) {
         choices <- "No options available"
       } 
+      print("Let's see the length of options")
+      print(length(choices))
       
       
       # Option_NCD <- TRUE
@@ -425,9 +427,11 @@ mod_Diagonal_server <- function(id) {
     })
     
     field_dimensions_diagonal <- reactive({
+      req(input$dimensions.d)
       dims <- unlist(strsplit(input$dimensions.d, " x "))
       d_row <- as.numeric(dims[1])
       d_col <- as.numeric(dims[2])
+      print(c(d_row, d_col))
       return(list(d_row = d_row, d_col = d_col))
     })
     
@@ -526,17 +530,19 @@ mod_Diagonal_server <- function(id) {
       req(available_percent_table()$d_checks)
       req(available_percent_table()$P)
       checksEntries <- as.vector(getChecks()$checksEntries)
+      # print(available_percent_table()$d_checks)
       if (input$kindExpt != "SUDC") {
         planter_mov <- input$planter_mov
       }else planter_mov <- input$planter_mov1
       
       locs <- as.numeric(input$l.diagonal)
+      percent <- as.numeric(input$percent_checks)
       diag_locs <- vector(mode = "list", length = locs)
       random_checks_locs <- vector(mode = "list", length = locs)
       set.seed(seed)
       for (sites in 1:locs) {
         random_checks_locs[[sites]] <- random_checks(dt = available_percent_table()$dt, d_checks = available_percent_table()$d_checks, 
-                                                     p = available_percent_table()$P, percent = input$Dropdown, kindExpt = input$kindExpt, 
+                                                     p = available_percent_table()$P, percent = percent, kindExpt = input$kindExpt, 
                                                      planter_mov = planter_mov, Checks = checksEntries, myWay = input$myWay, 
                                                      data = getData()$data_entry, data_dim_each_block = available_percent_table()$data_dim_each_block,
                                                      n_reps = input$n_reps, seed = NULL)
@@ -560,11 +566,13 @@ mod_Diagonal_server <- function(id) {
         return(NULL)
       }
       my_out <- available_percent_table()$dt
+      print(nrow(my_out))
       my_percent <- my_out[,2]
       len <- length(my_percent)
+      # print(len)
       selected <- my_percent[len]
       updateSelectInput(session = session, 
-                        inputId = 'Dropdown', 
+                        inputId = 'percent_checks', 
                         label = "Choose % of Checks:",
                         choices = my_percent, 
                         selected = selected)
@@ -645,6 +653,7 @@ mod_Diagonal_server <- function(id) {
       
       for (sites in 1:locs) {
         map_checks <- rand_checks()[[sites]]$map_checks
+        print(map_checks)
         w_map <- rand_checks()[[sites]]$map_checks
         my_split_r <- rand_checks()[[sites]]$map_checks
         if (multi == TRUE) {
@@ -713,6 +722,7 @@ mod_Diagonal_server <- function(id) {
         }
         random_entries_locs[[sites]] <- data_random
       }
+      print(random_entries_locs)
       return(random_entries_locs)
     })
     
