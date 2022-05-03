@@ -59,5 +59,7 @@ get_DBrandom <- function(binaryMap = NULL, data_dim_each_block = NULL, data_entr
     w_map[w_map == levels_target[z]] <- sample(entries[[k]])
     z <- z + 1
   }
-  return(list(rand = w_map, Entries = entries, Lines = data_dim_each_block, w_map_letters = w_map_letters))
+  return(list(rand = w_map, Entries = entries, 
+              Lines = data_dim_each_block, 
+              w_map_letters = w_map_letters))
 }

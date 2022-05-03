@@ -120,7 +120,7 @@ mod_Diagonal_ui <- function(id){
            ns = ns,
            fluidRow(
              column(6,style=list("padding-right: 28px;"),
-                    selectInput(inputId = ns("myWay"), 
+                    selectInput(inputId = ns("stacked"), 
                                 label = "Blocks Layout:",
                                 choices = c("By Column", "By Row"), 
                                 multiple = FALSE,
@@ -396,7 +396,7 @@ mod_Diagonal_server <- function(id) {
       # v <- 1
       # for (dim_options in 1:length(choices)) {
       #   
-      #   if(input$kindExpt == "DBUDC" && input$myWay == "By Column") {
+      #   if(input$kindExpt == "DBUDC" && stacked == "By Column") {
       #     Option_NCD <- FALSE
       #   }
       #   
@@ -410,7 +410,7 @@ mod_Diagonal_server <- function(id) {
       # 
       #   dt_options <- available_percent(n_rows = n_rows, n_cols = n_cols, checks = checksEntries, 
       #                                   Option_NCD = Option_NCD, Visual_ch = input$Visual_ch, visualCheck = FALSE, 
-      #                                   kindExpt = input$kindExpt, myWay = input$myWay, planter_mov1 = planter_mov, 
+      #                                   kindExpt = input$kindExpt, myWay = stacked, planter_mov1 = planter_mov, 
       #                                   data = getData()$data_entry, dim_data = getData()$dim_data_entry,
       #                                   dim_data_1 = getData()$dim_data_1, Block_Fillers = blocks_length())
       #   if (!is.null(dt_options$dt)) {
@@ -504,9 +504,9 @@ mod_Diagonal_server <- function(id) {
     available_percent_table <- reactive({
       Option_NCD <- TRUE
       checksEntries <- as.vector(getChecks()$checksEntries)
-      if(input$kindExpt == "DBUDC" && input$myWay == "By Column") {
-        Option_NCD <- FALSE
-      }
+      # if(input$kindExpt == "DBUDC" && input$stacked == "By Column") {
+      #   Option_NCD <- FALSE
+      # }
       
       if (input$kindExpt != "SUDC") {
         planter_mov <- input$planter_mov
@@ -519,10 +519,8 @@ mod_Diagonal_server <- function(id) {
                         n_cols = n_cols, 
                         checks = checksEntries, 
                         Option_NCD = Option_NCD, 
-                        Visual_ch = input$Visual_ch, 
-                        visualCheck = FALSE, 
                         kindExpt = input$kindExpt, 
-                        myWay = input$myWay, 
+                        stacked = input$stacked, 
                         planter_mov1 = planter_mov, 
                         data = getData()$data_entry, 
                         dim_data = getData()$dim_data_entry,
@@ -553,7 +551,7 @@ mod_Diagonal_server <- function(id) {
           dt = available_percent_table()$dt, 
           d_checks = available_percent_table()$d_checks, 
           p = available_percent_table()$P, percent = percent, kindExpt = input$kindExpt, 
-          planter_mov = planter_mov, Checks = checksEntries, myWay = input$myWay, 
+          planter_mov = planter_mov, Checks = checksEntries, stacked = input$stacked, 
           data = getData()$data_entry, data_dim_each_block = available_percent_table()$data_dim_each_block,
           n_reps = input$n_reps, seed = NULL)
       }
@@ -673,7 +671,7 @@ mod_Diagonal_server <- function(id) {
         if (multi == TRUE) {
           req(getData()$data_entry)
           data_entry <- getData()$data_entry
-          if (input$kindExpt == "DBUDC" && input$myWay == "By Row") {
+          if (input$kindExpt == "DBUDC" && input$stacked == "By Row") {
             req(available_percent_table()$data_dim_each_block)
             data_dim_each_block <- available_percent_table()$data_dim_each_block
             my_row_sets <- automatically_cuts(data = map_checks, 
@@ -682,7 +680,7 @@ mod_Diagonal_server <- function(id) {
                                               dim_data = data_dim_each_block)[[1]]
             if(is.null(my_row_sets)) return(NULL)
             n_blocks <- length(my_row_sets)
-          }else if (input$kindExpt == "DBUDC" && input$myWay == "By Column") {
+          }else if (input$kindExpt == "DBUDC" && input$stacked == "By Column") {
             req(available_percent_table()$data_dim_each_block)
             data_dim_each_block <- available_percent_table()$data_dim_each_block
             cuts_by_c <- automatically_cuts(data = map_checks, 
@@ -694,33 +692,41 @@ mod_Diagonal_server <- function(id) {
             m = diff(cuts_by_c)
             my_col_sets = c(cuts_by_c[1], m)
           }
-          if(input$myWay == "By Column") {
+          if(input$stacked == "By Column") {
             n_rows <- field_dimensions_diagonal()$d_row
             n_cols <- field_dimensions_diagonal()$d_col
-            Option_NCD <- FALSE
-            if (input$kindExpt == "DBUDC" && Option_NCD == FALSE){
-              data_random <- get_random(n_rows = n_rows, 
-                                        n_cols = n_cols, 
-                                        d_checks = my_split_r,
-                                        reps = NULL, 
-                                        Fillers = FALSE, 
-                                        col_sets = my_col_sets, 
-                                        row_sets = NULL,
-                                        checks = checksEntries, 
-                                        data = data_entry, 
-                                        data_dim_each_block = data_dim_each_block)
-            }else if(input$kindExpt == "DBUDC" && Option_NCD == TRUE){
-              req(available_percent_table()$data_dim_each_block)
-              data_random <- get_random(n_rows = n_rows, 
-                                        n_cols = n_cols, 
-                                        d_checks = my_split_r,
-                                        reps = NULL, 
-                                        Fillers = TRUE, 
-                                        col_sets = my_col_sets, 
-                                        row_sets = NULL,
-                                        checks = checksEntries, 
-                                        data = data_entry)
-            }
+            data_random <- get_random_stacked(stacked = "By Column", 
+                                              n_rows = n_rows,
+                                              n_cols = n_cols,
+                                              matrix_checks = map_checks,
+                                              Fillers = FALSE,
+                                              checks = checksEntries,
+                                              data = data_entry,
+                                              data_dim_each_block = data_dim_each_block)
+            # Option_NCD <- FALSE
+            # if (input$kindExpt == "DBUDC" && Option_NCD == FALSE){
+            #   data_random <- get_random(n_rows = n_rows, 
+            #                             n_cols = n_cols, 
+            #                             d_checks = my_split_r,
+            #                             reps = NULL, 
+            #                             Fillers = FALSE, 
+            #                             col_sets = my_col_sets, 
+            #                             row_sets = NULL,
+            #                             checks = checksEntries, 
+            #                             data = data_entry, 
+            #                             data_dim_each_block = data_dim_each_block)
+            # }else if(input$kindExpt == "DBUDC" && Option_NCD == TRUE){
+            #   req(available_percent_table()$data_dim_each_block)
+            #   data_random <- get_random(n_rows = n_rows, 
+            #                             n_cols = n_cols, 
+            #                             d_checks = my_split_r,
+            #                             reps = NULL, 
+            #                             Fillers = TRUE, 
+            #                             col_sets = my_col_sets, 
+            #                             row_sets = NULL,
+            #                             checks = checksEntries, 
+            #                             data = data_entry)
+            # }
           }else {
             n_rows <- field_dimensions_diagonal()$d_row
             n_cols <- field_dimensions_diagonal()$d_col
@@ -755,41 +761,9 @@ mod_Diagonal_server <- function(id) {
                                            matrix_checks = map_checks, 
                                            checks = checksEntries, 
                                            data = data_entry) 
-          # if("Filler" %in% my_split_r) Option_NCD <- TRUE else Option_NCD <- FALSE
-          # if(Option_NCD == TRUE) {
-          #   print("from if Option_NCD == TRUE")
-          #   print(map_checks)
-          #   # data_random <- get_random1(n_rows = n_rows, 
-          #   #                           n_cols = n_cols, 
-          #   #                           d_checks = map_checks, #my_split_r,
-          #   #                           reps = NULL, 
-          #   #                           Fillers = TRUE, 
-          #   #                           col_sets = n_cols, 
-          #   #                           row_sets = NULL,
-          #   #                           checks = checksEntries, 
-          #   #                           data = data_entry, 
-          #   #                           planter_mov  = input$planter_mov)
-          #   data_random <- get_single_random(n_rows = NULL, 
-          #                                    n_cols = NULL, 
-          #                                    matrix_checks = NULL, 
-          #                                    data = NULL) 
-          # }else {
-          #   data_random <- get_random1(n_rows = n_rows, 
-          #                             n_cols = n_cols, 
-          #                             d_checks = map_checks, # my_split_r,
-          #                             reps = NULL, 
-          #                             Fillers = FALSE, 
-          #                             col_sets = n_cols, 
-          #                             row_sets = NULL,
-          #                             checks = checksEntries, 
-          #                             data = data_entry, 
-          #                             planter_mov  = input$planter_mov)
-          # }
         }
         random_entries_locs[[sites]] <- data_random
       }
-      # print("random layout from server")
-      # print(random_entries_locs)
       return(random_entries_locs)
     })
     
@@ -885,7 +859,7 @@ mod_Diagonal_server <- function(id) {
       n_rows <- field_dimensions_diagonal()$d_row
       n_cols <- field_dimensions_diagonal()$d_col
       if(input$kindExpt == "DBUDC") multi <- TRUE else multi <- FALSE
-      if (input$myWay == "By Row" && input$kindExpt == "DBUDC") {
+      if (input$stacked == "By Row" && input$kindExpt == "DBUDC") {
         map_letters <- rand_lines()[[1]]$w_map_letter
         data_dim_each_block <- available_percent_table()$data_dim_each_block
         Name_expt <- as.vector(unlist(strsplit(input$expt_name, ",")))
@@ -899,7 +873,7 @@ mod_Diagonal_server <- function(id) {
         checksEntries <- as.vector(getChecks()$checksEntries)
         split_name_diagonal1 <- names_dbrows(w_map = w_map, myWay = "By Row", kindExpt = "DBUDC", data_dim_each_block = data_dim_each_block,
                                              w_map_letters = map_letters, expt_name = name_expt, Checks = checksEntries)
-      }else if (input$myWay == "By Column" && input$kindExpt == "DBUDC") {
+      }else if (input$stacked == "By Column" && input$kindExpt == "DBUDC") {
         map_letters <- rand_lines()[[1]]$w_map_letter
         data_dim_each_block <- available_percent_table()$data_dim_each_block
         Name_expt <- as.vector(unlist(strsplit(input$expt_name, ",")))
@@ -911,7 +885,7 @@ mod_Diagonal_server <- function(id) {
         }
         map_letters <- rand_lines()[[1]]$w_map_letter
         split_name_diagonal1 <- names_diagonal(nrows = n_rows, ncols = n_cols, randomChecksMap = w_map, kindExpt = input$kindExpt, 
-                                               checks = 1:input$checks, myWay = input$myWay, Option_NCD = Option_NCD, 
+                                               checks = 1:input$checks, myWay = input$stacked, Option_NCD = Option_NCD, 
                                                expt_name = name_expt, data_entry = data_entry, reps = NULL,
                                                data_dim_each_block = data_dim_each_block, w_map_letters1 = map_letters)
       }else if (input$kindExpt == "SUDC") {
@@ -926,7 +900,7 @@ mod_Diagonal_server <- function(id) {
         }
         map_letters <- rand_lines()[[1]]$w_map_letter
         split_name_diagonal1 <- names_diagonal(nrows = n_rows, ncols = n_cols, randomChecksMap = w_map, kindExpt = input$kindExpt, 
-                                               checks = 1:input$checks, myWay = input$myWay, Option_NCD = Option_NCD, 
+                                               checks = 1:input$checks, myWay = input$stacked, Option_NCD = Option_NCD, 
                                                expt_name = name_expt, data_entry = data_entry, reps = NULL,
                                                data_dim_each_block = NULL, w_map_letters1 = map_letters)
       }
@@ -1011,7 +985,7 @@ mod_Diagonal_server <- function(id) {
         }
       }else if(multi == TRUE){
         if(input$kindExpt == "DBUDC") { 
-          if (input$myWay == "By Row") { 
+          if (input$stacked == "By Row") { 
             data_dim_each_block <- available_percent_table()$data_dim_each_block 
             my_row_sets <- automatically_cuts(data = w_map, planter_mov = input$planter_mov,
                                               way = "By Row", dim_data = data_dim_each_block)[[1]]
@@ -1120,7 +1094,7 @@ mod_Diagonal_server <- function(id) {
           if (input$kindExpt == "DBUDC") { 
             req(getData()$data_entry) 
             req(available_percent_table()$data_dim_each_block) 
-            if (input$myWay == "By Row") { 
+            if (input$stacked == "By Row") { 
               data_dim_each_block <- available_percent_table()$data_dim_each_block 
               my_row_sets <- automatically_cuts(data = w_map, planter_mov = input$planter_mov,
                                                 way = "By Row", dim_data = data_dim_each_block)[[1]]
@@ -1141,7 +1115,7 @@ mod_Diagonal_server <- function(id) {
             } 
             if (length(plot_n_start) > 1 && length(plot_n_start) < n_blocks) return(NULL) 
             
-            if(input$myWay == "By Column"){
+            if(input$stacked == "By Column"){
               
               my_split_plot_nub <- plot_number(movement_planter = input$planter_mov, n_blocks = n_blocks,
                                                n_rows = n_rows, n_cols = n_cols, 
@@ -1167,7 +1141,7 @@ mod_Diagonal_server <- function(id) {
         }else if(multi == TRUE && Option_NCD == TRUE) {
           
           req(getData()$data_entry) 
-          if (input$myWay == "By Row") { 
+          if (input$stacked == "By Row") { 
             data_dim_each_block <- available_percent_table()$data_dim_each_block 
             my_row_sets <- automatically_cuts(data = w_map, planter_mov = input$planter_mov,
                                               way = "By Row", dim_data = data_dim_each_block)[[1]]
@@ -1187,7 +1161,7 @@ mod_Diagonal_server <- function(id) {
           }else { 
             expe_names = paste0(rep("Block", times = n_blocks), 1:n_blocks) 
           } 
-          if(input$myWay == "By Row") { 
+          if(input$stacked == "By Row") { 
             datos_name <- split_name_reactive()$my_names 
             data.dim.each <- available_percent_table()$data_dim_each_block
             Block_Fillers <- as.numeric(blocks_length()) 

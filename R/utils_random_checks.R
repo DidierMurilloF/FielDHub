@@ -1,14 +1,14 @@
 random_checks <- function(dt = NULL, d_checks = NULL, p = NULL, percent = NULL,
                           exptlines = NULL, kindExpt = NULL, planter_mov = NULL,
-                          Checks = NULL, myWay = NULL, data = NULL, 
+                          Checks = NULL, stacked = NULL, data = NULL, 
                           data_dim_each_block = NULL, n_reps = NULL, 
                           Option_NCD = FALSE,
                           seed = NULL) { 
   if (is.null(seed) || is.character(seed) || is.factor(seed)) seed <- runif(1, min = -50000, max = 50000)
   set.seed(seed)
-  req(dt)
-  req(d_checks)
-  req(p)
+  # req(dt)
+  # req(d_checks)
+  # req(p)
   if (all(c("serpentine", "cartesian") != planter_mov)) {
     stop("Input planter_mov choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
   }
@@ -37,7 +37,7 @@ random_checks <- function(dt = NULL, d_checks = NULL, p = NULL, percent = NULL,
   if (multi == TRUE && kindExpt == "DBUDC"){
     req(data_dim_each_block)
     req(data)
-    if (myWay == "By Row"){
+    if (stacked == "By Row"){
       data_dim_each_block <- data_dim_each_block
       my_row_sets <- automatically_cuts(data = w_map, planter_mov = planter_mov, way = "By Row",
                                         dim_data = data_dim_each_block)[[1]]
@@ -53,7 +53,7 @@ random_checks <- function(dt = NULL, d_checks = NULL, p = NULL, percent = NULL,
       my_col_sets = c(cuts_by_c[1], m)
     }
     
-    if (myWay == "By Column") {
+    if (stacked == "By Column") {
       w_map_split <- turner::matrix_to_blocks(w_map, blocks = my_col_sets, byrow = FALSE)
       Total_checks <- numeric()                                                              
       for (n in 1:length(w_map_split)){
@@ -109,7 +109,7 @@ random_checks <- function(dt = NULL, d_checks = NULL, p = NULL, percent = NULL,
       col_checks <- ifelse(w_map != 0, w_map, 0) 
     }
   }else if (multi == TRUE && kindExpt == "RDC"){
-    if (myWay == "By Column"){
+    if (stacked == "By Column"){
       x <- as.numeric(n_cols)/as.numeric(n_reps)
       reps <- as.numeric(n_reps)
       my_col_sets <- rep(x, reps)
@@ -132,7 +132,7 @@ random_checks <- function(dt = NULL, d_checks = NULL, p = NULL, percent = NULL,
       }
       w_map[w_map == 1] <- unlist(rand_checks)
       col_checks <- ifelse(w_map != 0, w_map, 0) 
-    }else if(myWay == "By Row"){
+    }else if(stacked == "By Row"){
       v <- as.numeric(n_rows)/as.numeric(n_reps)
       if (v %% 1 != 0) return(NULL)
       reps <- as.numeric(n_reps)

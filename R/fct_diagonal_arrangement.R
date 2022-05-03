@@ -262,7 +262,7 @@ diagonal_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,
   }
   
   available_percent1 <- available_percent(n_rows = nrows, n_cols = ncols, checks = checksEntries, Option_NCD = FALSE,
-                                          Visual_ch = NULL, visualCheck = FALSE, kindExpt = kindExpt, myWay = Way,
+                                          Visual_ch = NULL, visualCheck = FALSE, kindExpt = kindExpt, stacked = Way,
                                           planter_mov1 = planter, data = getData()$data_entry, dim_data = getData()$dim_data_entry,
                                           dim_data_1 = getData()$dim_data_1, Block_Fillers = NULL)
   
@@ -286,7 +286,7 @@ diagonal_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,
         
         Block_Fillers <- as.numeric(getData()$Blocks)
         available_percent1 <- available_percent(n_rows = nrows, n_cols = ncols, checks = checksEntries, Option_NCD = Option_NCD,
-                                                Visual_ch = NULL, visualCheck = FALSE, kindExpt = kindExpt, myWay = Way,
+                                                Visual_ch = NULL, visualCheck = FALSE, kindExpt = kindExpt, stacked = Way,
                                                 planter_mov1 = planter, data = getData()$data_entry, dim_data = getData()$dim_data_entry,
                                                 dim_data_1 = getData()$dim_data_1, Block_Fillers = Block_Fillers)
         infoP <- as.data.frame(available_percent1$P)
@@ -294,7 +294,7 @@ diagonal_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,
       }else {
         Block_Fillers <- NULL
         available_percent1 <- available_percent(n_rows = nrows, n_cols = ncols, checks = checksEntries, Option_NCD = Option_NCD,
-                                                Visual_ch = NULL, visualCheck = FALSE, kindExpt = kindExpt, myWay = Way,
+                                                Visual_ch = NULL, visualCheck = FALSE, kindExpt = kindExpt, stacked = Way,
                                                 planter_mov1 = planter, data = getData()$data_entry, dim_data = getData()$dim_data_entry,
                                                 dim_data_1 = getData()$dim_data_1, Block_Fillers = Block_Fillers)
         infoP <- as.data.frame(available_percent1$P)
@@ -310,7 +310,7 @@ diagonal_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,
   }
   
   rand_checks <- random_checks(dt = available_percent1$dt, d_checks = available_percent1$d_checks, p = infoP, percent = NULL,
-                               exptlines = Exptlines, kindExpt = kindExpt, planter_mov = planter, Checks = checksEntries, myWay = Way,
+                               exptlines = Exptlines, kindExpt = kindExpt, planter_mov = planter, Checks = checksEntries, stacked = Way,
                                data = getData()$data_entry, data_dim_each_block = available_percent1$data_dim_each_block,
                                n_reps = NULL, Option_NCD = Option_NCD, seed = seed)
   
