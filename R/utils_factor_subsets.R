@@ -7,13 +7,6 @@
 #' @noRd
 
 factor_subsets <- function(n, diagonal = FALSE) {
-  
-  # prime_factors <- function(x, i=2, factors = NULL){
-  #   if(x<i) factors
-  #   else if(! x %% i) prime_factors(x/i, i, c(factors, i))
-  #   else  prime_factors(x, i+1, factors)
-  # }
-  # factors <- prime_factors(n)
   factors <- numbers::primeFactors(n)
   left <- 1
   right <- 1

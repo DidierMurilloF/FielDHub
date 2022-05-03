@@ -2,12 +2,8 @@
 available_percent <- function(n_rows, n_cols, checks, Option_NCD = FALSE, Visual_ch = NULL, visualCheck = FALSE,
                               kindExpt = NULL, myWay = "By Row", planter_mov1 = "serpentine", data = NULL,
                               dim_data = NULL, dim_data_1 = NULL, Block_Fillers = NULL) {
-  #available_percent
-  # 
-  # if (all(c("serpentine", "cartesian") != planter_mov1)) {
-  #   stop("planter_mov1 choice is unknown. Please, choose one: serpentine or cartesian.")
-  # }
-  req(n_rows, n_cols)
+
+ # req(n_rows, n_cols)
   if(n_rows < 5 || n_cols < 5) return(NULL)
   n_rows <- n_rows; n_cols = n_cols
   checks <- checks
@@ -47,7 +43,7 @@ available_percent <- function(n_rows, n_cols, checks, Option_NCD = FALSE, Visual
   
   if (multi) {
     
-    req(data)
+    # req(data)
     
     data_entry <- data
     
@@ -122,7 +118,7 @@ available_percent <- function(n_rows, n_cols, checks, Option_NCD = FALSE, Visual
   
   for (m in opts) {
     
-    req(w_map_engage)
+   # req(w_map_engage)
     
     w_map <- w_map_engage[[m]] 
     
@@ -169,13 +165,19 @@ available_percent <- function(n_rows, n_cols, checks, Option_NCD = FALSE, Visual
         dim_data_entry <- dim_data
         real_dim_data_entry <- dim_data_entry - length(checks)
         Fillers <- dim_expt - real_dim_data_entry - n_Checks
+        limit_out <- checks + 1
         
-        if(Fillers > (n_cols - 5)) next # change 1  || Fillers < 0)
         
-        if (Fillers > 0){
+        
+        # if(Fillers >= (n_cols - 5)) next # change 1  || Fillers < 0)
+        if (diff(c(Fillers, (n_cols - 5))) <= 2) next # change 1  || Fillers < 0)
+        #print(c(Fillers,(n_cols - limit_out)))
+        print(diff(c(Fillers, (n_cols - 5))))
+        if (Fillers > 0) {
           if (n_rows %% 2 == 0){
             if(planter_mov1 == "serpentine") {
               i <- 1
+              # print(Fillers)
               repeat{
                 w_map[1,i] <- ifelse(w_map[1,i] == 0, "Filler", "-9")
                 if (sum(w_map[1, ] == "Filler") == Fillers) break
@@ -185,7 +187,7 @@ available_percent <- function(n_rows, n_cols, checks, Option_NCD = FALSE, Visual
             }else{
               i <- n_cols
               repeat{
-                w_map[1,i] <- ifelse(w_map[1, i] == 0, "Filler", "-9")
+                w_map[1,i] <- ifelse(w_map[1,i] == 0, "Filler", "-9")
                 if (sum(w_map[1, ] == "Filler") == Fillers) break
                 i <- i - 1
               }
@@ -307,9 +309,9 @@ available_percent <- function(n_rows, n_cols, checks, Option_NCD = FALSE, Visual
         
         #if (Option_NCD == TRUE){
         
-        req(data)
-        
-        req(Block_Fillers)
+        # req(data)
+        # 
+        # req(Block_Fillers)
         
         if (myWay == "By Row"){
           

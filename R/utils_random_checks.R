@@ -15,7 +15,6 @@ random_checks <- function(dt = NULL, d_checks = NULL, p = NULL, percent = NULL,
   my_P <- p
   if (!is.null(percent) && is.null(exptlines)) {
     my_index <- subset(my_P, my_P[,1] == percent)[1,2]
-    print(my_index)
   }else if (is.null(percent) && !is.null(exptlines)) {
     if (Option_NCD == FALSE) {
       my_index <- subset(my_P, my_P[,7] == exptlines)[1,2]
@@ -27,19 +26,7 @@ random_checks <- function(dt = NULL, d_checks = NULL, p = NULL, percent = NULL,
     }
   }
   shiny::req(my_index)
-  # print(my_index)
-  # print(my_P)
-  # print(length(d_checks))
   my_index <- as.numeric(my_index)
-  # new_d_checks <- list()
-  # index_d_checks <- 1
-  # for (reindex in 1:length(d_checks)) {
-  #   new_d_checks[[reindex]] <- d_checks[[index_d_checks]]
-  #   index_d_checks <- index_d_checks + 1
-  # }
-  # w_map <- d_checks[[16]]
-  # print(new_d_checks)
-  # w_map <- new_d_checks[[my_index]]
   w_map <- d_checks[[my_index]]
   if(is.null(w_map)) stop("Input w_map is NULL.")
   n_cols <- ncol(w_map)
@@ -206,8 +193,6 @@ random_checks <- function(dt = NULL, d_checks = NULL, p = NULL, percent = NULL,
     w_map[w_map == 1] <- unlist(rand_checks)
     col_checks <- ifelse(w_map != 0, w_map, 0) 
   }
-  # print("from random_checks function")
-  # print(w_map)
   list(map_checks = w_map, col_checks = col_checks)
   
 }

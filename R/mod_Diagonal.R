@@ -372,7 +372,7 @@ mod_Diagonal_server <- function(id) {
       total_entries <- as.numeric(getData()$dim_data_entry)
       lines <- total_entries - checks
       t1 <- floor(lines + lines * 0.090)
-      t2 <- ceiling(lines + lines * 0.18)
+      t2 <- ceiling(lines + lines * 0.20)
       t <- t1:t2
       n <- t[-numbers::isPrime(t)]
       choices_list <- list()
@@ -574,9 +574,9 @@ mod_Diagonal_server <- function(id) {
         shiny::validate("Data input does not fit to field dimensions")
         return(NULL)
       }
-      print(available_percent_table()$dt)
+      # print(available_percent_table()$dt)
       my_out <- available_percent_table()$dt
-      print(my_out)
+      # print(my_out)
       my_percent <- my_out[,2]
       len <- length(my_percent)
       # print(len)
@@ -666,8 +666,8 @@ mod_Diagonal_server <- function(id) {
       random_entries_locs <- vector(mode = "list", length = locs)
       for (sites in 1:locs) {
         map_checks <- rand_checks()[[sites]]$map_checks
-        print("from shiny server rand_lines")
-        print(map_checks)
+        # print("from shiny server rand_lines")
+        # print(map_checks)
         w_map <- rand_checks()[[sites]]$map_checks
         my_split_r <- rand_checks()[[sites]]$map_checks
         if (multi == TRUE) {
