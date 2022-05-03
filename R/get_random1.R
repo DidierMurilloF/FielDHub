@@ -1,4 +1,4 @@
-get_random <- function(n_rows = NULL, n_cols = NULL, d_checks = NULL, reps = NULL, Fillers = FALSE,
+get_random1 <- function(n_rows = NULL, n_cols = NULL, d_checks = NULL, reps = NULL, Fillers = FALSE,
                        col_sets = NULL, row_sets = NULL, checks = NULL, data = NULL,
                        planter_mov = "serpentine", Multi.Fillers = FALSE, which.blocks = NULL,
                        data_dim_each_block = NULL) {
@@ -35,32 +35,15 @@ get_random <- function(n_rows = NULL, n_cols = NULL, d_checks = NULL, reps = NUL
         any_check[z] <- length(table(as.vector(li_my_split_r[[z]]))) - 2
       }
     }
-    #################################################################################
-    if (!is.null(reps)){
-      my_col_sets <- rep(n_cols/n_reps, n_reps)
-      li_my_split_r <- turner::matrix_to_blocks(my_split_r, blocks = my_col_sets, byrow = FALSE)
-      lines <- numeric()  
-      for (n in 1:length(li_my_split_r)){
-        lines[n] <- sum(li_my_split_r[[n]] == 0)
+    if (length(col_sets) == 1) {
+      if (all(any_check == any_check[1])){
+        data_entries <- data_entries[-(1:any_check[1])]
       }
-      if(Fillers == FALSE){
-        any_check <- numeric()
-        for (z in 1:length(li_my_split_r)){
-          any_check[z] <- length(table(as.vector(li_my_split_r[[z]]))) - 1
-        }
-      }else{
-        any_check <- numeric()
-        for (z in 1:length(li_my_split_r)){
-          any_check[z] <- length(table(as.vector(li_my_split_r[[z]]))) - 2
-        }
-      }
-      entries <- list()
-      for (i in 1:n_reps){
-        entries[[i]] <- data_entries
-      }
+      entries <- split_vectors(data_entries, lines)
+      if (is.null(entries)) return(NULL)
       length_entries <- numeric()
       for (ent in 1:length(entries)){
-        length_entries[ent] <- (length(entries[[ent]]) - any_check[ent])
+        length_entries[ent] <- length(entries[[ent]])# - any_check[ent])
       }
       test_equ <- logical()
       for (v in 1:length(lines)){
@@ -68,78 +51,38 @@ get_random <- function(n_rows = NULL, n_cols = NULL, d_checks = NULL, reps = NUL
       }
       Blocks <- 1:length(lines)
       val <- data.frame(Blocks, lines, length_entries)
-      colnames(val) <- c("Block","Available Plots", "Your Entries")
+      colnames(val) <- c("Block", "Available Plots", "Your Entries")
       if (any(test_equ == TRUE)) return(NULL)
       s <- list()
-      for (k in 1:n_reps){
-        s[[k]] <- sample(entries[[k]][(any_check[k] + 1):length(entries[[k]])],
-                         lines[k], replace = F)
+      for (k in 1:length(entries)){
+        s[[k]] <- sample(entries[[k]], lines[k], replace = F)
       }
-      l = 1
-      for (k in 1:length(s)) {
-        li_my_split_r[[k]][li_my_split_r[[k]] == 0] <- s[[l]]
-        l = l + 1
+      print("list of s ")
+      print(s)
+    }else if(length(col_sets) > 1){
+      if (all(any_check == any_check[1])){
+        data_entries <- data_entries[-(1:any_check[1])]
+      }else data_entries <- data_entries[(length(checks) + 1):length(data_entries)]
+      entries <- split_vectors(data_entries, lines)
+      if (is.null(entries)) {
+        #return(list(data_entries, lines))
+        shiny::validate("Data input does not match in some blocks :(")
+      }#return(NULL)
+      length_entries <- numeric()
+      for (ent in 1:length(entries)){
+        length_entries[ent] <- length(entries[[ent]])# - any_check[ent])
       }
-      if (length(li_my_split_r) > 2){
-        split_rand_entry <- cbind(li_my_split_r[[1]], li_my_split_r[[2]])
-        for (d in 3:length(li_my_split_r)){
-          split_rand_entry <- cbind(split_rand_entry, li_my_split_r[[d]])
-          split_rand_entry <- split_rand_entry
-        }
-      }else if (length(li_my_split_r) == 2){
-        split_rand_entry <- cbind(li_my_split_r[[1]], li_my_split_r[[2]])
-      }else{
-        split_rand_entry <- li_my_split_r[[1]]
+      test_equ <- logical()
+      for (v in 1:length(lines)){
+        test_equ[v] <- (lines[v] != data_dim_each_block[v])
       }
-      return(list(rand = split_rand_entry, Entries = s, Lines = lines))
-    }else {
-      if (length(col_sets) == 1) {
-        if (all(any_check == any_check[1])){
-          data_entries <- data_entries[-(1:any_check[1])]
-        }
-        entries <- split_vectors(data_entries, lines)
-        if (is.null(entries)) return(NULL)
-        length_entries <- numeric()
-        for (ent in 1:length(entries)){
-          length_entries[ent] <- length(entries[[ent]])# - any_check[ent])
-        }
-        test_equ <- logical()
-        for (v in 1:length(lines)){
-          test_equ[v] <- (lines[v] != length_entries[v])
-        }
-        Blocks <- 1:length(lines)
-        val <- data.frame(Blocks, lines, length_entries)
-        colnames(val) <- c("Block", "Available Plots", "Your Entries")
-        if (any(test_equ == TRUE)) return(NULL)
-        s <- list()
-        for (k in 1:length(entries)){
-          s[[k]] <- sample(entries[[k]], lines[k], replace = F)
-        }
-      }else if(length(col_sets) > 1){
-        if (all(any_check == any_check[1])){
-          data_entries <- data_entries[-(1:any_check[1])]
-        }else data_entries <- data_entries[(length(checks) + 1):length(data_entries)]
-        entries <- split_vectors(data_entries, lines)
-        if (is.null(entries)) {
-          #return(list(data_entries, lines))
-          shiny::validate("Data input does not match in some blocks :(")
-        }#return(NULL)
-        length_entries <- numeric()
-        for (ent in 1:length(entries)){
-          length_entries[ent] <- length(entries[[ent]])# - any_check[ent])
-        }
-        test_equ <- logical()
-        for (v in 1:length(lines)){
-          test_equ[v] <- (lines[v] != data_dim_each_block[v])
-        }
-        Blocks <- 1:length(lines)
-        val <- data.frame(Blocks, lines, data_dim_each_block)
-        colnames(val) <- c("Block", "Available Plots", "Your Entries")
-        if (any(test_equ == TRUE)) shiny::validate("Data input does not match in some blocks because number of checks do not match :(")
-        s <- list()
-        for (k in 1:length(entries)){
-          s[[k]] <- sample(entries[[k]], lines[k], replace = F)
-        }
+      Blocks <- 1:length(lines)
+      val <- data.frame(Blocks, lines, data_dim_each_block)
+      colnames(val) <- c("Block", "Available Plots", "Your Entries")
+      if (any(test_equ == TRUE)) shiny::validate("Data input does not match in some blocks because number of checks do not match :(")
+      s <- list()
+      for (k in 1:length(entries)){
+        s[[k]] <- sample(entries[[k]], lines[k], replace = F)
       }
     }
     l = 1
@@ -161,7 +104,7 @@ get_random <- function(n_rows = NULL, n_cols = NULL, d_checks = NULL, reps = NUL
     print("from last part get_random()")
     print(split_rand_entry)
     return(list(rand = split_rand_entry, Entries = s, Lines = lines))
-  }else if (!is.null(row_sets)) {
+  } else if (!is.null(row_sets)) {
     if (!is.null(reps)){
       v <- n_rows/n_reps
       s <- 0

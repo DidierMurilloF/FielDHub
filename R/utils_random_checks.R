@@ -41,7 +41,6 @@ random_checks <- function(dt = NULL, d_checks = NULL, p = NULL, percent = NULL,
   # print(new_d_checks)
   # w_map <- new_d_checks[[my_index]]
   w_map <- d_checks[[my_index]]
-  print(w_map)
   if(is.null(w_map)) stop("Input w_map is NULL.")
   n_cols <- ncol(w_map)
   n_rows <- nrow(w_map)
@@ -207,6 +206,8 @@ random_checks <- function(dt = NULL, d_checks = NULL, p = NULL, percent = NULL,
     w_map[w_map == 1] <- unlist(rand_checks)
     col_checks <- ifelse(w_map != 0, w_map, 0) 
   }
+  # print("from random_checks function")
+  # print(w_map)
   list(map_checks = w_map, col_checks = col_checks)
   
 }

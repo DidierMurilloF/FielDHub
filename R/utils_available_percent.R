@@ -2,7 +2,12 @@
 available_percent <- function(n_rows, n_cols, checks, Option_NCD = FALSE, Visual_ch = NULL, visualCheck = FALSE,
                               kindExpt = NULL, myWay = "By Row", planter_mov1 = "serpentine", data = NULL,
                               dim_data = NULL, dim_data_1 = NULL, Block_Fillers = NULL) {
-  # req(n_rows, n_cols)
+  #available_percent
+  # 
+  # if (all(c("serpentine", "cartesian") != planter_mov1)) {
+  #   stop("planter_mov1 choice is unknown. Please, choose one: serpentine or cartesian.")
+  # }
+  req(n_rows, n_cols)
   if(n_rows < 5 || n_cols < 5) return(NULL)
   n_rows <- n_rows; n_cols = n_cols
   checks <- checks
@@ -25,9 +30,6 @@ available_percent <- function(n_rows, n_cols, checks, Option_NCD = FALSE, Visual
     W[l,6] <- sum(w_map != 0)
     w_map_list[[l]] <- w_map
   }
-  # print("we are here")
-  # print(w_map_list)
-  # w_map_list <- w_map_list[!sapply(w_map_list, is.null)]
   
   W <- as.data.frame(W)
   W <- na.omit(W)
@@ -45,7 +47,7 @@ available_percent <- function(n_rows, n_cols, checks, Option_NCD = FALSE, Visual
   
   if (multi) {
     
-    # req(data)
+    req(data)
     
     data_entry <- data
     
@@ -120,7 +122,7 @@ available_percent <- function(n_rows, n_cols, checks, Option_NCD = FALSE, Visual
   
   for (m in opts) {
     
-    # req(w_map_engage)
+    req(w_map_engage)
     
     w_map <- w_map_engage[[m]] 
     
@@ -163,53 +165,43 @@ available_percent <- function(n_rows, n_cols, checks, Option_NCD = FALSE, Visual
         expt_lines <- pots - n_Checks - vis
         M[m, c(1,2,3,4,5,6)] <- c(m, per, n_Checks, vis, expt_lines, pots)
         
-      } else if (Option_NCD == TRUE) {
-        n_Checks <- sum(w_map != 0)
+      }else if (Option_NCD == TRUE) {
         dim_data_entry <- dim_data
         real_dim_data_entry <- dim_data_entry - length(checks)
         Fillers <- dim_expt - real_dim_data_entry - n_Checks
-        # print(c(dim_expt, real_dim_data_entry, n_Checks))
-        # print(Fillers)
-        # print(Fillers > (n_cols - 5) || Fillers < 0)
-        if(Fillers > (n_cols - 5) || Fillers < 0) next
+        
+        if(Fillers > (n_cols - 5)) next # change 1  || Fillers < 0)
         
         if (Fillers > 0){
-          # print("Hola Fillers")
-          # print(Fillers)
           if (n_rows %% 2 == 0){
             if(planter_mov1 == "serpentine") {
               i <- 1
               repeat{
                 w_map[1,i] <- ifelse(w_map[1,i] == 0, "Filler", "-9")
-                w_map[w_map == "-9"] <- "Filler"
-                if (sum(w_map[1, ] == "Filler") == Fillers) break else i <- i + 1
+                if (sum(w_map[1, ] == "Filler") == Fillers) break
+                i <- i + 1
               }
-              # w_map[w_map == "-9"] <- "Filler"
+              w_map[w_map == "-9"] <- "Filler"
             }else{
               i <- n_cols
               repeat{
                 w_map[1,i] <- ifelse(w_map[1, i] == 0, "Filler", "-9")
-                w_map[w_map == "-9"] <- "Filler"
-                if (sum(w_map[1, ] == "Filler") == Fillers) break else i <- i - 1
+                if (sum(w_map[1, ] == "Filler") == Fillers) break
+                i <- i - 1
               }
-              # w_map[w_map == "-9"] <- "Filler"
+              w_map[w_map == "-9"] <- "Filler"
             }
-          } else {
+          }else{
             i <- 0
             repeat{
-              # print(Fillers)
-              # print(c(n_rows, n_cols))
-              # print("I am stuck")
-              # if (identical(c(n_rows, n_cols), c(15, 57))) print(w_map)
-              # if (i == 0) break
               w_map[1, n_cols - i] <- ifelse(w_map[1, n_cols - i] == 0, "Filler", "-9")
-              w_map[w_map == "-9"] <- "Filler"
-              if (sum(w_map[1, ] == "Filler") == Fillers) break else i <- i + 1
+              if (sum(w_map[1, ] == "Filler") == Fillers) break
+              i <- i + 1
             }
-            # w_map[w_map == "-9"] <- "Filler"
+            w_map[w_map == "-9"] <- "Filler"
           }
         }
-        if (Fillers < 0 || Fillers > n_cols) {
+        if (Fillers < 0 || Fillers > n_cols){
           Fillers <- 0
         }
         n_Checks <- sum(w_map == 1)
@@ -315,13 +307,13 @@ available_percent <- function(n_rows, n_cols, checks, Option_NCD = FALSE, Visual
         
         #if (Option_NCD == TRUE){
         
-        # req(data)
-        # 
-        # req(Block_Fillers)
+        req(data)
+        
+        req(Block_Fillers)
         
         if (myWay == "By Row"){
           
-          # req(w_map)
+          req(w_map)
           
           auto_cuts <- automatically_cuts(data = w_map, planter_mov = planter_mov1,
                                           way = "By Row", dim_data = data_dim_each_block)
@@ -524,13 +516,13 @@ available_percent <- function(n_rows, n_cols, checks, Option_NCD = FALSE, Visual
                       
                       w_map[l,k] <- ifelse(w_map[l,k] == 0, "Filler", "-9")
                       
-                      w_map[w_map[,] == "-9"] <- "Filler"
+                      if (sum(w_map[l, ] == "Filler") == len_Filler) break
                       
-                      if (sum(w_map[l, ] == "Filler") == len_Filler) break else k <- k + 1
+                      k <- k + 1
                       
                     }
                     
-                    # w_map[w_map[,] == "-9"] <- "Filler"
+                    w_map[w_map[,] == "-9"] <- "Filler"
                     
                   }else{
                     
@@ -547,10 +539,10 @@ available_percent <- function(n_rows, n_cols, checks, Option_NCD = FALSE, Visual
                     i <- 0
                     repeat{
                       w_map[l, n_cols - i] <- ifelse(w_map[l, n_cols - i] == 0, "Filler","-9")
-                      w_map[w_map[,] == "-9"] <- "Filler"
-                      if (sum(w_map[l, ] == "Filler") == len_Filler) break else i <- i + 1
+                      if (sum(w_map[l, ] == "Filler") == len_Filler) break
+                      i <- i + 1
                     }
-                    # w_map[w_map[,] == "-9"] <- "Filler"
+                    w_map[w_map[,] == "-9"] <- "Filler"
                   }else{
                     n_Checks_in <- n_Checks_each[j] -  sum(w_map[l,((n_cols + 1) - Fillers_user[j]):n_cols] == 1)
                     new_Fillers <- map_dim_each_block[j] - new_data_dim_each_block[j] - n_Checks_in
@@ -562,10 +554,10 @@ available_percent <- function(n_rows, n_cols, checks, Option_NCD = FALSE, Visual
                   i <- n_cols
                   repeat{
                     w_map[l,i] <- ifelse(w_map[l, i] == 0, "Filler", "-9")
-                    w_map[w_map[,] == "-9"] <- "Filler"
-                    if (sum(w_map[l, ] == "Filler") == len_Filler) break else i <- i - 1
+                    if (sum(w_map[l, ] == "Filler") == len_Filler) break
+                    i <- i - 1
                   }
-                  # w_map[w_map[,] == "-9"] <- "Filler"
+                  w_map[w_map[,] == "-9"] <- "Filler"
                 }else{
                   n_Checks_in <- n_Checks_each[j] -  sum(w_map[l,((n_cols + 1) - Fillers_user[j]):n_cols] == 1)
                   new_Fillers <- map_dim_each_block[j] - new_data_dim_each_block[j] - n_Checks_in
@@ -594,7 +586,7 @@ available_percent <- function(n_rows, n_cols, checks, Option_NCD = FALSE, Visual
         expt_lines <- pots - n_Checks
         M[m, c(1,2,3,4,5)] <- c(m, per, n_Checks, expt_lines, pots)
       }
-     }
+    }
     d_checks[[m]] <- w_map
     W[m,1] <- per
   }
@@ -607,17 +599,14 @@ available_percent <- function(n_rows, n_cols, checks, Option_NCD = FALSE, Visual
   M <- na.omit(M)
   if (length(M) == 0) return(NULL)
   dt <- as.data.frame(M)
+  print(dt)
   dt <- dt[!duplicated(dt[,3]),]
   dt[,1] <- 1:nrow(dt)
-  
-  ###### new #############
-  # d_checks <- d_checks[!sapply(d_checks, is.null)]
-  W <- W[W$V1 > 0,]
-  ##### end new ##########
   
   if (multi && Option_NCD == TRUE){
     list(dt = dt, P = W, d_checks = d_checks, data_dim_each_block = data_dim_each_block)
   }else if (multi){
     list(dt = dt, P = W, d_checks = d_checks, data_dim_each_block = data_dim_each_block)
   }else list(dt = dt, P = W, d_checks = d_checks)
+  
 }
