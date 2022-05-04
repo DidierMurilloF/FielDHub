@@ -230,6 +230,10 @@ mod_Diagonal_server <- function(id) {
                  handlerExpr = updateTabsetPanel(session,
                                                  "Tabset",
                                                  selected = "tabPanel1"))
+    observeEvent(input$stacked,
+                 handlerExpr = updateTabsetPanel(session,
+                                                 "Tabset",
+                                                 selected = "tabPanel1"))
     observeEvent(input$checks,
                  handlerExpr = updateTabsetPanel(session,
                                                  "Tabset",
@@ -362,7 +366,7 @@ mod_Diagonal_server <- function(id) {
       req(getData()$dim_data_entry)
       checks <- as.numeric(input$checks)
       lines <- as.numeric(getData()$dim_data_entry)
-      return(list(lines, input$owndataDIAGONALS, input$kindExpt))
+      return(list(lines, input$owndataDIAGONALS, input$kindExpt, input$stacked))
     })
     
     observeEvent(list_inputs_diagonal(), {
@@ -385,45 +389,40 @@ mod_Diagonal_server <- function(id) {
       if(is.null(choices)) {
         choices <- "No options available"
       } 
-      # print("Let's see the length of options")
-      # print(length(choices))
-      
-      
-      # Option_NCD <- TRUE
-      # checksEntries <- as.vector(getChecks()$checksEntries)
-      # 
-      # new_choices <- list()
-      # v <- 1
-      # for (dim_options in 1:length(choices)) {
-      #   
-      #   if(input$kindExpt == "DBUDC" && stacked == "By Column") {
-      #     Option_NCD <- FALSE
-      #   }
-      #   
-      #   if (input$kindExpt != "SUDC") {
-      #     planter_mov <- input$planter_mov
-      #   }else planter_mov <- input$planter_mov1
-      #   
-      #   dims <- unlist(strsplit(choices[[dim_options]], " x "))
-      #   n_rows <- as.numeric(dims[1])
-      #   n_cols  <- as.numeric(dims[2])
-      # 
-      #   dt_options <- available_percent(n_rows = n_rows, n_cols = n_cols, checks = checksEntries, 
-      #                                   Option_NCD = Option_NCD, Visual_ch = input$Visual_ch, visualCheck = FALSE, 
-      #                                   kindExpt = input$kindExpt, myWay = stacked, planter_mov1 = planter_mov, 
-      #                                   data = getData()$data_entry, dim_data = getData()$dim_data_entry,
-      #                                   dim_data_1 = getData()$dim_data_1, Block_Fillers = blocks_length())
-      #   if (!is.null(dt_options$dt)) {
-      #     new_choices[[v]] <- choices[[dim_options]]
-      #     v <- v + 1
-      #   }
-      # }
-      # print(length(choices))
-      # print(length(new_choices))
+      Option_NCD <- TRUE
+      checksEntries <- as.vector(getChecks()$checksEntries)
+      new_choices <- list()
+      v <- 1
+      for (dim_options in 1:length(choices)) {
+        if (input$kindExpt != "SUDC") {
+          planter_mov <- input$planter_mov
+        }else planter_mov <- input$planter_mov1
 
+        dims <- unlist(strsplit(choices[[dim_options]], " x "))
+        n_rows <- as.numeric(dims[1])
+        n_cols  <- as.numeric(dims[2])
+
+        dt_options <- available_percent(n_rows = n_rows,
+                                        n_cols = n_cols, 
+                                        checks = checksEntries,
+                                        Option_NCD = Option_NCD, 
+                                        kindExpt = input$kindExpt, 
+                                        stacked = input$stacked, 
+                                        planter_mov1 = planter_mov,
+                                        data = getData()$data_entry, 
+                                        dim_data = getData()$dim_data_entry,
+                                        dim_data_1 = getData()$dim_data_1, 
+                                        Block_Fillers = blocks_length())
+        if (!is.null(dt_options$dt)) {
+          new_choices[[v]] <- choices[[dim_options]]
+          v <- v + 1
+        }
+      }
+      new_choices <- unlist(new_choices)
+      print(c(length(choices), length(new_choices)))
       updateSelectInput(inputId = "dimensions.d", 
-                        choices = choices, 
-                        selected = choices[1])
+                        choices = new_choices, 
+                        selected = new_choices[1])
     })
     
     field_dimensions_diagonal <- reactive({
@@ -431,7 +430,6 @@ mod_Diagonal_server <- function(id) {
       dims <- unlist(strsplit(input$dimensions.d, " x "))
       d_row <- as.numeric(dims[1])
       d_col <- as.numeric(dims[2])
-      print(c(d_row, d_col))
       return(list(d_row = d_row, d_col = d_col))
     })
     
@@ -742,9 +740,7 @@ mod_Diagonal_server <- function(id) {
               data_random <- get_random(n_rows = n_rows, 
                                         n_cols = n_cols, 
                                         d_checks = my_split_r,
-                                        reps = NULL, 
                                         Fillers = FALSE, 
-                                        col_sets = NULL, 
                                         row_sets = my_row_sets,
                                         checks = checksEntries, 
                                         data = data_entry, 
