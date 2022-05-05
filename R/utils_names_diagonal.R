@@ -1,7 +1,16 @@
-names_diagonal <- function(nrows = NULL, ncols = NULL, randomChecksMap = NULL, kindExpt = NULL, checks = NULL,
-                           planter = "serpentine", myWay = "By Column", Option_NCD = FALSE, expt_name = NULL,
-                           data_entry = NULL, reps = NULL, data_dim_each_block = NULL, w_map_letters1 = NULL) {
-  
+names_diagonal <- function(nrows = NULL, 
+                           ncols = NULL, 
+                           randomChecksMap = NULL, 
+                           kindExpt = NULL, 
+                           checks = NULL,
+                           planter = "serpentine",
+                           myWay = "By Column",
+                           Option_NCD = FALSE, 
+                           expt_name = NULL,
+                           data_entry = NULL, 
+                           reps = NULL,
+                           data_dim_each_block = NULL, 
+                           w_map_letters1 = NULL) {
   w_map <- randomChecksMap
   n_rows <- nrows; n_cols <- ncols
   

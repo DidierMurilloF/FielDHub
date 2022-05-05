@@ -8,7 +8,6 @@ plot_number_fillers <- function(movement_planter = "serpentine", plot_n_start = 
     stop("Input movement_planter choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
   }
   blocks <- length(data.dim.each)
-  
   Name_expt <- expe_names
   if (length(Name_expt) == blocks || !is.null(Name_expt)) {
     name_blocks <- Name_expt

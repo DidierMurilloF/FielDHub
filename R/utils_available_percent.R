@@ -58,24 +58,21 @@ available_percent <- function(n_rows,
     }
     dim_data <- sum(data_dim_each_block)
   }
-  if(multi == FALSE && visualCheck == TRUE){
-    M <- matrix(data = NA, ncol = 6, nrow = ncols_W, byrow = T)
-    colnames(M) <- c("Options", "Percentage of Checks", 
-                     "Total # of Check Plots", "Visual Checks",
-                     "Total # of Experimental Plots", "Total # of Plots")
-  }else if(multi == TRUE && visualCheck == TRUE){
-    M <- matrix(data = NA, ncol = 6, nrow = ncols_W, byrow = T)
-    colnames(M) <- c("Options", "Percentage of Checks", 
-                     "Total # of Check Plots", "Visual Checks",
-                     "Total # of Experimental Plots", 
-                     "Total # of Plots")
-  }else if(multi == FALSE && Option_NCD == TRUE){
+  if(multi == FALSE) { #  && Option_NCD == TRUE
+    if (Option_NCD == TRUE) {
     M <- matrix(data = NA, ncol = 6, nrow = ncols_W, byrow = T)
     colnames(M) <- c("Options", "Percentage of Checks", 
                      "Total # of Check Plots",
                      "Total # of Fillers",
                      "Total # of Experimental Plots", 
                      "Total # of Plots")
+    } else{
+      M <- matrix(data = NA, ncol = 5, nrow = ncols_W, byrow = T)
+      colnames(M) <- c("Options", "% of Diagonal Checks", 
+                       "Total # of Check Plots",
+                       "Total # of Experimental Plots", 
+                       "Total # of Plots")
+    }
   }else if(multi == TRUE){
     if(Option_NCD == TRUE){
       M <- matrix(data = NA, ncol = 6, nrow = ncols_W, byrow = T)
@@ -91,26 +88,19 @@ available_percent <- function(n_rows,
                        "Total # of Experimental Plots", 
                        "Total # of Plots")
     }
-  } else{
-    M <- matrix(data = NA, ncol = 5, nrow = ncols_W, byrow = T)
-    colnames(M) <- c("Options", "% of Diagonal Checks",
-                     "Total # of Check Plots",
-                     "Total # of Experimental Plots", 
-                     "Total # of Plots")
-  }
+  } 
+  # else {
+  #   M <- matrix(data = NA, ncol = 5, nrow = ncols_W, byrow = T)
+  #   colnames(M) <- c("Options", "% of Diagonal Checks",
+  #                    "Total # of Check Plots",
+  #                    "Total # of Experimental Plots", 
+  #                    "Total # of Plots")
+  # }
   opts <- 1:length(w_map_engage)
   d_checks <- list()
   vis <- 0
   for (m in opts) {
     w_map <- w_map_engage[[m]] 
-    visual <- visualCheck
-    vs <- data.frame(
-      index = 1:4,
-      option = c("1-Top Left", 
-                 "1-Top Left & 1-Top Right",
-                 "1-Top Left & 2-Top Right",
-                 "1-Top Left & 3-Top Right"))
-    visual_index = subset(vs, vs$option == visual)[,1]
     n_Checks <- sum(w_map != 0)
     if (kindExpt == "SUDC") {
       if (Option_NCD == TRUE) {
@@ -120,6 +110,7 @@ available_percent <- function(n_rows,
         limit_out <- checks + 1
         # if(Fillers >= (n_cols - 5)) next # change 1  || Fillers < 0)
         if (diff(c(Fillers, (n_cols - 5))) <= 2) next 
+        if (Fillers > 10) next
         if (Fillers > 0) {
           if (n_rows %% 2 == 0){
             if(planter_mov1 == "serpentine") {
@@ -169,12 +160,11 @@ available_percent <- function(n_rows,
         M[m, c(1,2,3,4,5)] <- c(m, per, n_Checks, f_expt_lines, pots)
       }
     }else if (kindExpt == "DBUDC"){
-      if (visualCheck == TRUE && Option_NCD == TRUE) return(NULL)
       if(dim_data > sum(w_map == 0) || dim_data < sum(w_map[n_rows:2,] == 0)) {
         next
       }
-      if (Option_NCD == TRUE){
-        if (stacked == "By Row"){
+      if (Option_NCD == TRUE) {
+        if (stacked == "By Row") {
           auto_cuts <- automatically_cuts(data = w_map, 
                                           planter_mov = planter_mov1,
                                           way = "By Row", 
@@ -354,12 +344,12 @@ available_percent <- function(n_rows,
         } else if (stacked == "By Column") { # By Column
           if (Option_NCD == TRUE) {
             dim_data_entry <- dim_data
-            real_dim_data_entry <- dim_data_1 # dim_data_entry - length(checks)
+            real_dim_data_entry <- dim_data_1 
             Fillers <- dim_expt - real_dim_data_entry - n_Checks
             limit_out <- checks + 1
-            if (diff(c(Fillers, (n_rows - 5))) <= 2) next 
+            if (diff(c(Fillers, (n_rows - 5))) <= 2) next
             if (Fillers > 0) {
-              print("We are here")
+              next
               i <- 0
               repeat {
                 w_map[1 + i, n_cols] <- ifelse(w_map[1 + i, n_cols] == 0, "Filler", "-9")
@@ -367,57 +357,18 @@ available_percent <- function(n_rows,
                 i <- i + 1
               }
               w_map[w_map == "-9"] <- "Filler"
-              # print(sum(w_map == 0))
-              # print(w_map)
-              # if (n_rows %% 2 == 0){
-              #   if(planter_mov1 == "serpentine") {
-              #     i <- 1
-              #     repeat{
-              #       w_map[1,i] <- ifelse(w_map[1,i] == 0, "Filler", "-9")
-              #       if (sum(w_map[1, ] == "Filler") == Fillers) break
-              #       i <- i + 1
-              #     }
-              #     w_map[w_map == "-9"] <- "Filler"
-              #   }else{
-              #     i <- n_rows
-              #     repeat{
-              #       w_map[1,i] <- ifelse(w_map[1,i] == 0, "Filler", "-9")
-              #       if (sum(w_map[1, ] == "Filler") == Fillers) break
-              #       i <- i - 1
-              #     }
-              #     w_map[w_map == "-9"] <- "Filler"
-              #   }
-              # }else{
-              #   i <- 0
-              #   repeat{
-              #     w_map[1, n_rows - i] <- ifelse(w_map[1, n_rows - i] == 0, "Filler", "-9")
-              #     if (sum(w_map[1, ] == "Filler") == Fillers) break
-              #     i <- i + 1
-              #   }
-              #   w_map[w_map == "-9"] <- "Filler"
-              # }
             }
             if (Fillers < 0 || Fillers > n_rows){
               Fillers <- 0
             }
             n_Checks <- sum(w_map == 1)
-            pots <- nrow(w_map) * ncol(w_map)# - Fillers
-            # print(pots)
+            pots <- nrow(w_map) * ncol(w_map)
             per <- round((n_Checks/pots)*100,2)
             expt_lines <- pots - n_Checks
             Fillers_t <- length(which(w_map == "Filler"))
             f_expt_lines <- expt_lines - Fillers_t
             M[m, c(1,2,3,4,5,6)] <- c(m, per, n_Checks, Fillers_t, f_expt_lines, pots)
-            # print(M)
           }
-          # else {
-          #   n_Checks <- length(which(w_map == 1))
-          #   pots <- nrow(w_map) * ncol(w_map)
-          #   per <- round((n_Checks/pots)*100,1)
-          #   expt_lines <- pots - n_Checks
-          #   f_expt_lines <- expt_lines
-          #   M[m, c(1,2,3,4,5)] <- c(m, per, n_Checks, f_expt_lines, pots)
-          # }
         }
       } else if (Option_NCD == FALSE){
         n_Checks <- length(which(w_map == 1))
@@ -431,13 +382,11 @@ available_percent <- function(n_rows,
     W[m,1] <- per
   }
   realData <- dim_data_1
-  # print(realData)
   if (Option_NCD == TRUE){
     M <- subset(M, M[,4] >= 0 & M[,5] >= realData)
   }
   W[,2] <- 1:nrow(W)
   M <- na.omit(M)
-  # print(length(M) == 0)
   if (length(M) == 0) return(NULL)
   dt <- as.data.frame(M)
   dt <- dt[!duplicated(dt[,3]),]

@@ -37,15 +37,6 @@ mod_Optim_ui <- function(id) {
                                 selected = ","))
           )            
        ),
-       # numericInput(ns("checks.s"),
-       #              label = "Input # of Checks:", 
-       #              value = 3,
-       #              min = 1),
-       # 
-       # numericInput(ns("tplots.s"), 
-       #              label = "Input # of Total Check Plots:",
-       #              value = 30,
-       #              min = 1),
        conditionalPanel(
          "input.owndataOPTIM != 'Yes'", 
           ns = ns,
@@ -54,11 +45,6 @@ mod_Optim_ui <- function(id) {
                         label = "Input # of Checks:", 
                         value = 3,
                         min = 1),
-           
-          # numericInput(ns("tplots.s"), 
-          #               label = "Input # of Total Check Plots:",
-          #               value = 30,
-          #               min = 1),
             
           fluidRow(
             column(6,
@@ -163,15 +149,6 @@ mod_Optim_ui <- function(id) {
        downloadButton(ns("downloadData.spatial"), 
                       "Save Experiment", 
                       style = "width:100%")
-       
-       # fluidRow(
-       #   column(6,
-       #          downloadButton(ns("downloadData.spatial"), "Save Experiment", style = "width:100%")
-       #   ),
-       #   column(6,
-       #          actionButton(ns("Simulate.optim"), "Simulate!", icon = icon("cocktail"), width = '100%')
-       #   )
-       # )
       ),
       
       mainPanel(
@@ -190,13 +167,7 @@ mod_Optim_ui <- function(id) {
           tabPanel("Randomized Field", DT::DTOutput(ns("RFIELD"))),
           tabPanel("Plot Number Field", DT::DTOutput(ns("PLOTFIELD"))),
           tabPanel("Field Book", DT::DTOutput(ns("OPTIMOUTPUT"))),
-          tabPanel(
-            "Heatmap", 
-            # selectInput(inputId = ns("locView.optim1"), 
-            #             label = "Choose location to view:", 
-            #             choices = 1:1, 
-            #             selected = 1,
-            #             multiple = FALSE),
+          tabPanel("Heatmap", 
             plotly::plotlyOutput(ns("heatmap")))
          )
       )
