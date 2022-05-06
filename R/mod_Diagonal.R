@@ -123,7 +123,7 @@ mod_Diagonal_ui <- function(id){
           column(6,style=list("padding-left: 5px;"),
                  selectInput(inputId = ns("locView.diagonal"), 
                              label = "Choose location to view:", 
-                             choices = "", 
+                             choices = 1, 
                              selected = 1, 
                              multiple = FALSE)
           )
@@ -222,16 +222,12 @@ mod_Diagonal_ui <- function(id){
         width = 8,
         tabsetPanel(id = ns("Tabset"),
           tabPanel(title = "Expt Design Info", value = "tabPanel1",
-                   #column(12,uiOutput(ns("well_panel_layout_rt")))
-                   h3("Select one option from the dropdown menu"),
-                   selectInput(inputId = ns("dimensions.d"), 
-                               label = "Select dimensions of field:", 
-                               choices = c("15 x 20"), width = '400px'),
-                   selectInput(inputId = ns("percent_checks"),
-                               label = "Choose of diagonal checks:",
-                               choices = ""),
+                   # shinycssloaders::withSpinner(
+                   #   uiOutput(ns("diomensions_percent")),
+                   #   type = 5),
+                     # Set up shinyjs
+                   uiOutput(ns("diomensions_percent")),
                    DT::DTOutput(ns("options_table")),
-                   
                    ),
           tabPanel("Input Data",
                    fluidRow(
@@ -260,7 +256,11 @@ mod_Diagonal_server <- function(id) {
   moduleServer( id, function(input, output, session) {
     ns <- session$ns
     
-    observeEvent(input$l.diagonal, {
+    loc_inputs <- eventReactive(input$RUN.diagonal, {
+      return(list(sites = input$l.diagonal))
+    })
+    
+    observeEvent(loc_inputs()$sites, {
       loc_user_view <- 1:as.numeric(input$l.diagonal)
       updateSelectInput(inputId = "locView.diagonal", 
                         choices = loc_user_view, 
@@ -299,8 +299,13 @@ mod_Diagonal_server <- function(id) {
                  handlerExpr = updateTabsetPanel(session,
                                                  "Tabset",
                                                  selected = "tabPanel1"))
+    observeEvent(input$RUN.diagonal,
+                 handlerExpr = updateTabsetPanel(session,
+                                                 "Tabset",
+                                                 selected = "tabPanel1"))
     
-    getData <- reactive({
+    getData <- eventReactive(input$RUN.diagonal, {
+    #getData <- reactive({
       Option_NCD <- TRUE
       if (input$owndataDIAGONALS == "Yes") {
         req(input$file1)
@@ -331,7 +336,7 @@ mod_Diagonal_server <- function(id) {
             selected <- length(Block_levels)
           }
         }
-      }else {
+      } else {
         if (input$kindExpt != "DBUDC") {
           req(input$lines.d)
           req(input$checks)
@@ -391,6 +396,21 @@ mod_Diagonal_server <- function(id) {
            dim_data_1 = dim_data_1)
     })
     
+    getChecks <- eventReactive(input$RUN.diagonal, {
+      req(getData()$data_entry)
+      data <- as.data.frame(getData()$data_entry)
+      checksEntries <- as.numeric(data[1:input$checks,1])
+      checks <- as.numeric(input$checks)
+      list(checksEntries = checksEntries, checks = checks)
+    })
+    
+    # update_sites_diagonal <- eventReactive(input$RUN.diagonal, {
+    #   req(input$l.diagonal)
+    #   locs <- as.numeric(input$l.diagonal)
+    #   sites <- 1:locs
+    #   return(list(sites = sites))
+    # })
+    
     blocks_length <- reactive({
       req(getData()$data_entry)
       if (input$kindExpt == "DBUDC") {
@@ -402,21 +422,24 @@ mod_Diagonal_server <- function(id) {
       } else return(NULL)
     })
     
+    counter <- reactiveValues(countervalue = 0)
+    
     list_inputs_diagonal <- eventReactive(input$RUN.diagonal, {
-      print("hola")
-    # list_inputs_diagonal <- reactive({
-      req(input$checks)
-      req(getData()$dim_data_entry)
-      checks <- as.numeric(input$checks)
+      counter$countervalue <- counter$countervalue + 1
+      print(counter$countervalue)
+      # req(input$checks)
+      # req(getData()$dim_data_entry)
+      checks <- as.numeric(getChecks()$checks)
       lines <- as.numeric(getData()$dim_data_entry)
-      return(list(lines, input$owndataDIAGONALS, input$kindExpt, input$stacked))
+      return(list(lines, input$owndataDIAGONALS, input$kindExpt, input$stacked, counter$countervalue))
     })
     
     observeEvent(list_inputs_diagonal(), {
       print("Hola")
-      req(getData()$dim_data_entry)
-      req(input$checks)
-      checks <- as.numeric(input$checks)
+      # req(getData()$dim_data_entry)
+      # req(input$checks)
+      # checks <- as.numeric(input$checks)
+      checks <- as.numeric(getChecks()$checks)
       total_entries <- as.numeric(getData()$dim_data_entry)
       lines <- total_entries - checks
       t1 <- floor(lines + lines * 0.10)
@@ -467,7 +490,26 @@ mod_Diagonal_server <- function(id) {
       updateSelectInput(inputId = "dimensions.d", 
                         choices = new_choices, 
                         selected = new_choices[1])
+      
     })
+    
+    output$diomensions_percent <- renderUI({
+      #shinyjs::useShinyjs()
+        tagList(
+          selectInput(inputId = ns("dimensions.d"),
+                      label = "Select dimensions of field:",
+                      choices = "", width = '400px'),
+          selectInput(inputId = ns("percent_checks"),
+                      label = "Choose of diagonal checks:",
+                      choices = "", width = '400px'),
+        )
+    })
+
+    
+    # observeEvent(input$RUN.diagonal, {
+    #   shinyjs::show("diomensions_percent")
+    # })
+    
     
     field_dimensions_diagonal <- reactive({
       req(input$dimensions.d)
@@ -532,14 +574,6 @@ mod_Diagonal_server <- function(id) {
           )
         )
       }
-    })
-    
-    getChecks <- reactive({
-      req(getData()$data_entry)
-      data <- as.data.frame(getData()$data_entry)
-      checksEntries <- as.numeric(data[1:input$checks,1])
-      checks <- as.numeric(input$checks)
-      list(checksEntries = checksEntries, checks = checks)
     })
     
     # available_percent_table <- eventReactive(input$RUN.diagonal, {

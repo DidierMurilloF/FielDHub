@@ -1,5 +1,5 @@
 lines <- 725
-t1 <- floor(lines + lines * 0.090)
+t1 <- floor(lines + lines * 0.010)
 t2 <- ceiling(lines + lines * 0.20)
 t <- t1:t2
 n <- t[-numbers::isPrime(t)]
@@ -38,51 +38,107 @@ field_dims <- function(n, opt) {
   return(list(d_row = d_row, d_col = d_col, l = l, choices_list = choices_list))
 }
 
-Option_NCD <- TRUE
-way <- "By Column"
-kindExpt <- "SUDC"
-planter_mov <- "serpentine"
-planter_mov1 <- "serpentine"
-checksEntries <- 1:4
-if(kindExpt == "DBUDC" && way == "By Column") {
-  Option_NCD <- FALSE
+
+test_single <- function(n=80, until = NULL) {
+  
+  
+  Option_NCD <- TRUE
+  n <- 80
+  until <- 150
+  N <- until
+  stacked <- "By Row"
+  kindExpt <- "SUDC"
+  planter_mov <- "serpentine"
+  planter_mov1 <- "serpentine"
+  checksEntries <- 1:4
+  if (kindExpt != "SUDC") {
+    planter_mov <- planter_mov
+  }else planter_mov <- planter_mov1
+  owndataDIAGONALS <- "No"
+  checks <- 4
+  kindExpt <- "SUDC"
+  sameEntries <- FALSE
+  lines.d <- n
+  getData()
+  R <- n:N
+  for (lines.d in R) {
+    lines.d <- lines.d
+    opt = 1
+    obj <- field_dims(n = lines.d, opt = opt)
+    l <- obj$l
+    getData()
+    for (j in 1:l) {
+      n_rows <- field_dims(n = lines.d, opt = j)$d_row
+      n_cols <- field_dims(n = lines.d, opt = j)$d_col
+      print(c(n_rows, n_cols))
+      dt_info <- FielDHub:::available_percent(n_rows = n_rows, 
+                                              n_cols = n_cols, 
+                                              checks = checksEntries, 
+                                              Option_NCD = Option_NCD, 
+                                              kindExpt = kindExpt,
+                                              #stacked = way,
+                                              planter_mov1 = planter_mov, 
+                                              data = getData()$data_entry,
+                                              dim_data = getData()$dim_data_entry,
+                                              dim_data_1 = getData()$dim_data_1, 
+                                              Block_Fillers = blocks_length())
+      if (!is.null(dt_info$dt)) {
+        print(dt_info$dt)
+        percentege <- as.vector(dt_info$dt[,2])
+        for (percent in percentege) {
+          random_checks_opt <- FielDHub:::random_checks(
+            dt = dt_info$dt, 
+            d_checks = dt_info$d_checks, 
+            p = dt_info$P, 
+            percent = percent, 
+            kindExpt = kindExpt, 
+            planter_mov = planter_mov, 
+            Checks = checksEntries,
+            stacked = stacked, 
+            data = getData()$data_entry, 
+            data_dim_each_block = dt_info$data_dim_each_block,
+            seed = NULL)$map_checks
+          data_random <- FielDHub:::get_single_random(
+            n_rows = n_rows, 
+            n_cols = n_cols, 
+            matrix_checks = random_checks_opt, 
+            checks = checksEntries, 
+            data = getData()$data_entry
+            )
+          print(data_random)
+        }
+      }
+    }
+  }
+  
+  
+  
 }
 
-if (kindExpt != "SUDC") {
-  planter_mov <- planter_mov
-}else planter_mov <- planter_mov1
-
-n <- 725
-owndataDIAGONALS <- "No"
-checks <- 4
-lines <- n
-kindExpt <- "SUDC"
-lines.d <- lines
-sameEntries <- FALSE
-opt = 1
-obj <- field_dims(n = n, opt = opt)
-l <- obj$l
-l
-choices_list <- obj$choices_list
-choices_list
-for (j in 1:l) {
-  n_rows <- field_dims(n = n, opt = j)$d_row
-  n_cols <- field_dims(n = n, opt = j)$d_col
-  print(c(n_rows, n_cols))
-  print(j)
-  
-  # getData()
-  
-  dt_info <- available_percent(n_rows = n_rows, n_cols = n_cols, checks = checksEntries, 
-                               Option_NCD = Option_NCD, Visual_ch = NULL, visualCheck = FALSE, 
-                               kindExpt = kindExpt, myWay = way, planter_mov1 = planter_mov, 
-                               data = getData()$data_entry, dim_data = getData()$dim_data_entry,
-                               dim_data_1 = getData()$dim_data_1, Block_Fillers = blocks_length())
-  print(dt_info$dt)
-}
+test_single(n = 80, until = 90)
 
 
 dt_info$dt
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

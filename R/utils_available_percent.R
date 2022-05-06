@@ -89,13 +89,6 @@ available_percent <- function(n_rows,
                        "Total # of Plots")
     }
   } 
-  # else {
-  #   M <- matrix(data = NA, ncol = 5, nrow = ncols_W, byrow = T)
-  #   colnames(M) <- c("Options", "% of Diagonal Checks",
-  #                    "Total # of Check Plots",
-  #                    "Total # of Experimental Plots", 
-  #                    "Total # of Plots")
-  # }
   opts <- 1:length(w_map_engage)
   d_checks <- list()
   vis <- 0
@@ -110,7 +103,6 @@ available_percent <- function(n_rows,
         limit_out <- checks + 1
         # if(Fillers >= (n_cols - 5)) next # change 1  || Fillers < 0)
         if (diff(c(Fillers, (n_cols - 5))) <= 2) next 
-        if (Fillers > 10) next
         if (Fillers > 0) {
           if (n_rows %% 2 == 0){
             if(planter_mov1 == "serpentine") {
