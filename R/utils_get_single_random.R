@@ -9,9 +9,11 @@ get_single_random <- function(n_rows = NULL,
   data_entries_no_checks <- data_entries[!(data_entries %in% checks)]
   len_entries_to_random <- length(data_entries_no_checks)
   len_spots_to_fill <- sum(matrix_checks == 0)
-  print(c(len_entries_to_random, len_spots_to_fill))
   if (len_entries_to_random != len_spots_to_fill) {
     stop("data entries do not fit to the plot availables!!")
+  } else {
+    print("Randomization was OK with entries:")
+    print(c(len_entries_to_random, len_spots_to_fill))
   }
   rand_entries <- sample(data_entries_no_checks)
   matrix_checks[matrix_checks == 0] <- rand_entries

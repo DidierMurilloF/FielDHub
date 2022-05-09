@@ -49,16 +49,16 @@ getData <- function() {
       data_entry_UP <- gen.list
       colnames(data_entry_UP) <- c("ENTRY", "NAME")
     }else if (kindExpt == "DBUDC") {
-      req(checks)
-      req(blocks.db)
-      req(lines.db)
+      # req(checks)
+      # req(blocks.db)
+      # req(lines.db)
       lines.db <- as.numeric(lines.db)
       checks <- as.numeric(checks)
       checksEntries <- 1:checks
       NAME <- c(paste(rep("CH", checks), 1:checks, sep = ""),
                 paste(rep("G", lines.db), (checks + 1):(lines.db + checks), sep = ""))
       data_entry_UP <- data.frame(list(ENTRY = 1:(lines.db + checks),	NAME = NAME))
-      blocks <- as.numeric(as.vector(unlist(strsplit(blocks.db, ","))))
+      blocks <- blocks.db
       if (lines.db != sum(blocks)) shiny::validate('Sum of blocks may be equal to number of lines.')
       data_entry_UP$BLOCK <- c(rep("ALL", checks), rep(1:length(blocks), times = blocks))
       colnames(data_entry_UP) <- c("ENTRY", "NAME", "BLOCK")
@@ -97,7 +97,6 @@ getData <- function() {
 }
 
 blocks_length <- function(){
-  #req(getData()$data_entry)
   if (kindExpt == "DBUDC") {
     df <- getData()$data_entry
     Block_levels <- suppressWarnings(as.numeric(levels(as.factor(df$BLOCK))))

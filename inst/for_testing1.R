@@ -39,142 +39,202 @@ field_dims <- function(n, opt) {
 }
 
 
-test_single <- function(n=80, until = NULL) {
+#test_single <- function(n=80, until = NULL) {
   
   
-  Option_NCD <- TRUE
-  n <- 80
-  until <- 150
-  N <- until
-  stacked <- "By Row"
-  kindExpt <- "SUDC"
-  planter_mov <- "serpentine"
-  planter_mov1 <- "serpentine"
-  checksEntries <- 1:4
-  if (kindExpt != "SUDC") {
-    planter_mov <- planter_mov
-  }else planter_mov <- planter_mov1
-  owndataDIAGONALS <- "No"
-  checks <- 4
-  kindExpt <- "SUDC"
-  sameEntries <- FALSE
-  lines.d <- n
+## Single test for diagonal
+Option_NCD <- TRUE
+n <- 80
+until <- 200
+N <- until
+stacked <- "By Row"
+kindExpt <- "SUDC"
+planter_mov <- "serpentine"
+planter_mov1 <- "serpentine"
+checksEntries <- 1:4
+if (kindExpt != "SUDC") {
+  planter_mov <- planter_mov
+}else planter_mov <- planter_mov1
+owndataDIAGONALS <- "No"
+checks <- 4
+kindExpt <- "SUDC"
+sameEntries <- FALSE
+lines.d <- n
+getData()
+R <- n:N
+for (lines.d in R) {
+  lines.d <- lines.d
+  opt = 1
+  obj <- field_dims(n = lines.d, opt = opt)
+  l <- obj$l
   getData()
-  R <- n:N
-  for (lines.d in R) {
-    lines.d <- lines.d
-    opt = 1
-    obj <- field_dims(n = lines.d, opt = opt)
-    l <- obj$l
-    getData()
-    for (j in 1:l) {
-      n_rows <- field_dims(n = lines.d, opt = j)$d_row
-      n_cols <- field_dims(n = lines.d, opt = j)$d_col
-      print(c(n_rows, n_cols))
-      dt_info <- FielDHub:::available_percent(n_rows = n_rows, 
-                                              n_cols = n_cols, 
-                                              checks = checksEntries, 
-                                              Option_NCD = Option_NCD, 
-                                              kindExpt = kindExpt,
-                                              #stacked = way,
-                                              planter_mov1 = planter_mov, 
-                                              data = getData()$data_entry,
-                                              dim_data = getData()$dim_data_entry,
-                                              dim_data_1 = getData()$dim_data_1, 
-                                              Block_Fillers = blocks_length())
-      if (!is.null(dt_info$dt)) {
-        print(dt_info$dt)
-        percentege <- as.vector(dt_info$dt[,2])
-        for (percent in percentege) {
-          random_checks_opt <- FielDHub:::random_checks(
-            dt = dt_info$dt, 
-            d_checks = dt_info$d_checks, 
-            p = dt_info$P, 
-            percent = percent, 
-            kindExpt = kindExpt, 
-            planter_mov = planter_mov, 
-            Checks = checksEntries,
-            stacked = stacked, 
-            data = getData()$data_entry, 
-            data_dim_each_block = dt_info$data_dim_each_block,
-            seed = NULL)$map_checks
-          data_random <- FielDHub:::get_single_random(
-            n_rows = n_rows, 
-            n_cols = n_cols, 
-            matrix_checks = random_checks_opt, 
-            checks = checksEntries, 
-            data = getData()$data_entry
-            )
-          print(data_random)
+  for (j in 1:l) {
+    n_rows <- field_dims(n = lines.d, opt = j)$d_row
+    n_cols <- field_dims(n = lines.d, opt = j)$d_col
+    dt_info <- FielDHub:::available_percent(n_rows = n_rows, 
+                                            n_cols = n_cols, 
+                                            checks = checksEntries, 
+                                            Option_NCD = Option_NCD, 
+                                            kindExpt = kindExpt,
+                                            #stacked = way,
+                                            planter_mov1 = planter_mov, 
+                                            data = getData()$data_entry,
+                                            dim_data = getData()$dim_data_entry,
+                                            dim_data_1 = getData()$dim_data_1, 
+                                            Block_Fillers = blocks_length())
+    if (!is.null(dt_info$dt)) {
+      percentege <- as.vector(dt_info$dt[,2])
+      for (percent in percentege) {
+        random_checks_opt <- FielDHub:::random_checks(
+          dt = dt_info$dt, 
+          d_checks = dt_info$d_checks, 
+          p = dt_info$P, 
+          percent = percent, 
+          kindExpt = kindExpt, 
+          planter_mov = planter_mov, 
+          Checks = checksEntries,
+          stacked = stacked, 
+          data = getData()$data_entry, 
+          data_dim_each_block = dt_info$data_dim_each_block,
+          seed = NULL)$map_checks
+        data_random <- FielDHub:::get_single_random(
+          n_rows = n_rows, 
+          n_cols = n_cols, 
+          matrix_checks = random_checks_opt, 
+          checks = checksEntries, 
+          data = getData()$data_entry
+          )
+      }
+    }
+  }
+}
+
+
+
+
+######################################################
+#####################################################
+break_number <- function(n) {
+  count <- 0
+  options_up <- list()
+  v <- 1
+  for (i in 1:n) {
+    for (j in 1:n) {
+      for (k in 1:n) {
+        if (i + j + k == n) {
+          if (all(c(i, j, k) >= ceiling(n*0.30))) {
+            options_up[[v]] <- c(i, j, k)
+            v <- v + 1
+          }
+          count <- count + 1
         }
       }
     }
   }
-  
-  
-  
+  one_sample <- sample(options_up, size = 1)
+  return(list(possible_combinations = count, 
+              options_up = options_up, 
+              one_sample = one_sample))
 }
 
-test_single(n = 80, until = 90)
 
+## Test for multiple expts in diagonals
+n <- 200
+until <- 200
+N <- until
+stacked <- "By Row"
+kindExpt <- "DBUDC"
+planter_mov <- "serpentine"
+planter_mov1 <- "serpentine"
+checksEntries <- 1:4
+if (kindExpt != "SUDC") {
+  planter_mov <- planter_mov
+}else planter_mov <- planter_mov1
+owndataDIAGONALS <- "No"
+checks <- 4
+sameEntries <- FALSE
+lines.db <- n
+getData()
+R <- n:N
+for (lines.d in R) {
+  blocks.db <- break_number(n = lines.d)$one_sample
+  blocks.db <- unlist(blocks.db)
+  print(blocks.db)
+  lines.db <- lines.d
+  opt = 1
+  obj <- field_dims(n = lines.d, opt = opt)
+  l <- obj$l
+  getData()
+  for (j in 1:l) {
+    Option_NCD <- TRUE
+    n_rows <- field_dims(n = lines.d, opt = j)$d_row
+    n_cols <- field_dims(n = lines.d, opt = j)$d_col
+    dt_info <- FielDHub:::available_percent(n_rows = n_rows, 
+                                            n_cols = n_cols, 
+                                            checks = checksEntries, 
+                                            Option_NCD = Option_NCD, 
+                                            kindExpt = kindExpt,
+                                            stacked = stacked,
+                                            planter_mov1 = planter_mov, 
+                                            data = getData()$data_entry,
+                                            dim_data = getData()$dim_data_entry,
+                                            dim_data_1 = getData()$dim_data_1, 
+                                            Block_Fillers = blocks_length())
+    print(dt_info$dt)
+    if (!is.null(dt_info$dt)) {
+      percentege <- as.vector(dt_info$dt[,2])
+      for (percent in percentege) {
+        random_checks_opt <- FielDHub:::random_checks(
+          dt = dt_info$dt, 
+          d_checks = dt_info$d_checks, 
+          p = dt_info$P, 
+          percent = percent, 
+          kindExpt = kindExpt, 
+          planter_mov = planter_mov, 
+          Checks = checksEntries,
+          stacked = stacked, 
+          data = getData()$data_entry, 
+          data_dim_each_block = dt_info$data_dim_each_block,
+          seed = NULL)$map_checks
 
-dt_info$dt
+        data_dim_each_block <- dt_info$data_dim_each_block
+        my_row_sets <- FielDHub:::automatically_cuts(
+          data = random_checks_opt,
+          planter_mov = planter_mov,
+          way = "By Row",
+          dim_data = data_dim_each_block)[[1]]
 
+        if(is.null(my_row_sets)) return(NULL)
+        n_blocks <- length(my_row_sets)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# req(n_rows, n_cols)
-n_rows <- 79; n_cols <- 10
-if(n_rows < 5 || n_cols < 5) return(NULL)
-n_rows <- n_rows; n_cols = n_cols
-checks <- checks
-dim_expt <- n_rows * n_cols
-
-P <- matrix(c(rep(NA,10),c(1:10), rep(c(14:8,7,6,5),1),
-              c(3,3,7,7,3,2,5,2,7,2)), ncol = 4, byrow = F)
-
-W <- matrix(c(rep(0,50),c(1:50), rep(c(14:8,7,6,5),5),
-              rep(c(3,3,7,7,3,2,5,2,7,2),5), rep(c(0,1,2,3,4),each = 10), rep(NA,50)),
-            ncol = 6, byrow = F)
-
-w_map_list <- list()
-for (l in 1:nrow(W)) {
-  if (n_cols < W[l,3]) next
-  p_start <-  W[l,5]
-  w_map_checks <- diagonals_checks(n_rows = n_rows, n_cols = n_cols, jump_by_cols = W[l,3],
-                                   jump_by_rows = W[l,4], checks = c(1,1,1,1), p_start = p_start)
-  w_map <- w_map_checks[[2]]
-  W[l,6] <- sum(w_map != 0)
-  w_map_list[[l]] <- w_map
+        if ("Filler" %in% random_checks_opt) Option_NCD <- TRUE else Option_NCD <- FALSE
+        data_entry <- getData()$data_entry
+        if(kindExpt == "DBUDC" && Option_NCD == FALSE) {
+          data_entry1 <- data_entry[(checks + 1):nrow(data_entry), ]
+          data_random <- FielDHub:::get_DBrandom(
+            binaryMap = random_checks_opt,
+            data_dim_each_block = dt_info$data_dim_each_block,
+            data_entries = data_entry1,
+            planter = planter_mov
+            )
+        }else if(kindExpt == "DBUDC" && Option_NCD == TRUE) {
+          Block_Fillers <- as.numeric(blocks_length())
+          data_random <- FielDHub:::get_random(
+            n_rows = n_rows,
+            n_cols = n_cols,
+            d_checks = random_checks_opt,
+            Fillers = FALSE,
+            row_sets = my_row_sets,
+            checks = checksEntries,
+            data = data_entry,
+            planter_mov  = planter_mov,
+            Multi.Fillers = TRUE,
+            which.blocks = Block_Fillers
+            )
+        }
+       }
+    }
+  }
 }
-# print("we are here")
-w_test <- w_map_list[[50]]
-sum(w_test == 1)/868
-
-
-
-
-
 
 

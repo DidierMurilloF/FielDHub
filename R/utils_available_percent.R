@@ -58,7 +58,7 @@ available_percent <- function(n_rows,
     }
     dim_data <- sum(data_dim_each_block)
   }
-  if(multi == FALSE) { #  && Option_NCD == TRUE
+  if(multi == FALSE) {
     if (Option_NCD == TRUE) {
     M <- matrix(data = NA, ncol = 6, nrow = ncols_W, byrow = T)
     colnames(M) <- c("Options", "Percentage of Checks", 
@@ -98,16 +98,18 @@ available_percent <- function(n_rows,
     if (kindExpt == "SUDC") {
       if (Option_NCD == TRUE) {
         dim_data_entry <- dim_data
-        real_dim_data_entry <- dim_data_1 # dim_data_entry - length(checks)
+        real_dim_data_entry <- dim_data_1
         Fillers <- dim_expt - real_dim_data_entry - n_Checks
         limit_out <- checks + 1
-        # if(Fillers >= (n_cols - 5)) next # change 1  || Fillers < 0)
         if (diff(c(Fillers, (n_cols - 5))) <= 2) next 
-        if (Fillers > 0) {
-          if (n_rows %% 2 == 0){
+        if (Fillers > 0 && Fillers < n_cols) {
+          checks_in_first_row <- sum(w_map[1, ] != "0")
+          if ((Fillers + checks_in_first_row) >= n_cols) next
+          if (Fillers > ceiling(n_cols/2)) next
+          if (n_rows %% 2 == 0) {
             if(planter_mov1 == "serpentine") {
               i <- 1
-              repeat{
+              repeat {
                 w_map[1,i] <- ifelse(w_map[1,i] == 0, "Filler", "-9")
                 if (sum(w_map[1, ] == "Filler") == Fillers) break
                 i <- i + 1
@@ -132,9 +134,9 @@ available_percent <- function(n_rows,
             w_map[w_map == "-9"] <- "Filler"
           }
         }
-        if (Fillers < 0 || Fillers > n_cols){
-          Fillers <- 0
-        }
+        # if (Fillers < 0 || Fillers > n_cols){
+        #   Fillers <- 0
+        # }
         n_Checks <- sum(w_map == 1)
         pots <- nrow(w_map) * ncol(w_map)# - Fillers
         per <- round((n_Checks/pots)*100,2)
@@ -151,7 +153,7 @@ available_percent <- function(n_rows,
         f_expt_lines <- expt_lines
         M[m, c(1,2,3,4,5)] <- c(m, per, n_Checks, f_expt_lines, pots)
       }
-    }else if (kindExpt == "DBUDC"){
+    } else if (kindExpt == "DBUDC") {
       if(dim_data > sum(w_map == 0) || dim_data < sum(w_map[n_rows:2,] == 0)) {
         next
       }
@@ -238,7 +240,7 @@ available_percent <- function(n_rows,
             new_sort_cuts <- c(new_sort_cuts,1)
             rows_each_block <- c(length(nrow(w_map):new_sort_cuts[1]), 
                                  nrow(w_map) - length(nrow(w_map):new_sort_cuts[1]))
-          }else if(all(Fillers_info[,1] != 0)){
+          }else if(all(Fillers_info[,1] != 0)) {
             if(all(new_sort_cuts != 1)){
               new_sort_cuts <- c(new_sort_cuts,1)
               rows_each_block <- c(rows_each_block, new_sort_cuts[length(new_sort_cuts) - 1] - 1)
@@ -273,14 +275,18 @@ available_percent <- function(n_rows,
           skip_checks <- TRUE
           j <- 1
           new_Fillers <- 1
-          for (l in new_sort_cuts){
+          for (l in new_sort_cuts) {
             len_Filler <- Fillers_user[j]
-            if (Fillers_user[j] > 0){
-              if(planter_mov1 == "serpentine"){
+            if (Fillers_user[j] > 0) {
+              checks_in_first_row <- sum(w_map[1, ] != "0")
+              if (sum(w_map == 1) <= (length(checks) * 2)) next
+              if ((Fillers_user[j]  + checks_in_first_row) >= n_cols) next
+              if (Fillers_user[j]  > ceiling(n_cols/2)) next
+              if(planter_mov1 == "serpentine") {
                 if (rows_each_block[j] %% 2 == 0){
                   if(skip_checks){
                     k <- 1
-                    repeat{
+                    repeat {
                       w_map[l,k] <- ifelse(w_map[l,k] == 0, "Filler", "-9")
                       if (sum(w_map[l, ] == "Filler") == len_Filler) break
                       k <- k + 1
@@ -362,13 +368,14 @@ available_percent <- function(n_rows,
             M[m, c(1,2,3,4,5,6)] <- c(m, per, n_Checks, Fillers_t, f_expt_lines, pots)
           }
         }
-      } else if (Option_NCD == FALSE){
-        n_Checks <- length(which(w_map == 1))
-        pots <- nrow(w_map) * ncol(w_map)
-        per <- round((n_Checks/pots)*100,1)
-        expt_lines <- pots - n_Checks
-        M[m, c(1,2,3,4,5)] <- c(m, per, n_Checks, expt_lines, pots)
-      }
+      } 
+      # else if (Option_NCD == FALSE) {
+      #   n_Checks <- length(which(w_map == 1))
+      #   pots <- nrow(w_map) * ncol(w_map)
+      #   per <- round((n_Checks/pots)*100,1)
+      #   expt_lines <- pots - n_Checks
+      #   M[m, c(1,2,3,4,5)] <- c(m, per, n_Checks, expt_lines, pots)
+      # }
     }
     d_checks[[m]] <- w_map
     W[m,1] <- per

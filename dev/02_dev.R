@@ -121,7 +121,7 @@ golem::add_utils("factor_subsets")
 
 ## External resources
 ## Creates .js and .css files at inst/app/www
-golem::add_js_file( "corner" )
+golem::add_js_file( "shinybusy" )
 golem::add_js_handler( "handlers" )
 golem::add_css_file( "style" )
 golem::add_css_file( "mobile" )

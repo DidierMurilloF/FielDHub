@@ -82,37 +82,11 @@ mod_Diagonal_ui <- function(id){
               )       
            )
         ),
-        # actionButton(inputId = ns("get_dims"), 
-        #              "Generate field dimensions!", 
-        #              icon = icon("cocktail"), 
-        #              width = '100%'),
-        
-        # selectInput(inputId = ns("dimensions.d"), 
-        #             label = "Select dimensions of field:", 
-        #             choices = c("15 x 20")),
-        
          selectInput(inputId = ns("checks"),
                      label = "Input # of Checks:",
                      choices = c(1:10),
                      multiple = FALSE,
                      selected = 4),
-
-        # fluidRow(
-        #   column(6,style=list("padding-right: 28px;"),
-        #          selectInput(inputId = ns("percent_checks"), 
-        #                      label = "Choose of diagonal checks:", 
-        #                      choices = "")
-        #   ),
-        #   column(6,style=list("padding-left: 5px;"),
-        #          selectInput(inputId = ns("checks"), 
-        #                      label = "Input # of Checks:",
-        #                      choices = c(1:10), 
-        #                      multiple = FALSE, 
-        #                      selected = 4)
-        #   )
-        # ),
-        
-        
         fluidRow(
           column(6,style=list("padding-right: 28px;"),
                  numericInput(inputId = ns("l.diagonal"), 
@@ -186,19 +160,6 @@ mod_Diagonal_ui <- function(id){
                            value = "FARGO")
           )
         ),
-        # fluidRow(
-        #   column(6,
-        #          downloadButton(ns("downloadData_Diagonal"), 
-        #                         "Save Experiment", 
-        #                         style = "width:100%")
-        #   ),
-        #   column(6,
-        #          actionButton(ns("Simulate_Diagonal"), 
-        #                       "Simulate!", 
-        #                       icon = icon("cocktail"),
-        #                       width = '100%')
-        #   )
-        # )
         fluidRow(
           column(6,
                  actionButton(inputId = ns("RUN.diagonal"), 
@@ -222,12 +183,8 @@ mod_Diagonal_ui <- function(id){
         width = 8,
         tabsetPanel(id = ns("Tabset"),
           tabPanel(title = "Expt Design Info", value = "tabPanel1",
-                   # shinycssloaders::withSpinner(
-                   #   uiOutput(ns("diomensions_percent")),
-                   #   type = 5),
-                     # Set up shinyjs
-                   uiOutput(ns("diomensions_percent")),
-                   DT::DTOutput(ns("options_table")),
+                   uiOutput(ns("field_dimensions")),
+                   DT::DTOutput(ns("options_table"))
                    ),
           tabPanel("Input Data",
                    fluidRow(
@@ -235,7 +192,8 @@ mod_Diagonal_ui <- function(id){
                      column(6,DT::DTOutput(ns("checks_table")))
                    )
           ),
-          tabPanel("Randomized Field", DT::DTOutput(ns("randomized_layout"))),
+          tabPanel("Randomized Field", 
+                   DT::DTOutput(ns("randomized_layout"))),
           tabPanel("Plot Number Field", DT::DTOutput(ns("plot_number_layout"))),
           tabPanel("Expt Name", DT::DTOutput(ns("name_layout"))),
           tabPanel("Field Book", DT::DTOutput(ns("fieldBook_diagonal"))),
@@ -305,7 +263,7 @@ mod_Diagonal_server <- function(id) {
                                                  selected = "tabPanel1"))
     
     getData <- eventReactive(input$RUN.diagonal, {
-    #getData <- reactive({
+      Sys.sleep(2)
       Option_NCD <- TRUE
       if (input$owndataDIAGONALS == "Yes") {
         req(input$file1)
@@ -404,14 +362,8 @@ mod_Diagonal_server <- function(id) {
       list(checksEntries = checksEntries, checks = checks)
     })
     
-    # update_sites_diagonal <- eventReactive(input$RUN.diagonal, {
-    #   req(input$l.diagonal)
-    #   locs <- as.numeric(input$l.diagonal)
-    #   sites <- 1:locs
-    #   return(list(sites = sites))
-    # })
-    
-    blocks_length <- reactive({
+    blocks_length <- eventReactive(input$RUN.diagonal, {
+    # blocks_length <- reactive({
       req(getData()$data_entry)
       if (input$kindExpt == "DBUDC") {
         df <- getData()$data_entry
@@ -422,79 +374,16 @@ mod_Diagonal_server <- function(id) {
       } else return(NULL)
     })
     
-    counter <- reactiveValues(countervalue = 0)
-    
     list_inputs_diagonal <- eventReactive(input$RUN.diagonal, {
-      counter$countervalue <- counter$countervalue + 1
-      print(counter$countervalue)
-      # req(input$checks)
-      # req(getData()$dim_data_entry)
+      req(getData()$dim_data_entry)
       checks <- as.numeric(getChecks()$checks)
       lines <- as.numeric(getData()$dim_data_entry)
-      return(list(lines, input$owndataDIAGONALS, input$kindExpt, input$stacked, counter$countervalue))
+      return(list(lines, input$owndataDIAGONALS, input$kindExpt, 
+                  input$stacked, input$RUN.diagonal))
     })
     
-    observeEvent(list_inputs_diagonal(), {
-      print("Hola")
-      # req(getData()$dim_data_entry)
-      # req(input$checks)
-      # checks <- as.numeric(input$checks)
-      checks <- as.numeric(getChecks()$checks)
-      total_entries <- as.numeric(getData()$dim_data_entry)
-      lines <- total_entries - checks
-      t1 <- floor(lines + lines * 0.10)
-      t2 <- ceiling(lines + lines * 0.20)
-      t <- t1:t2
-      n <- t[-numbers::isPrime(t)]
-      choices_list <- list()
-      i <- 1
-      for (n in t) {
-        choices_list[[i]] <- factor_subsets(n, diagonal = TRUE)$labels
-        i <- i + 1
-      }
-      choices <- unlist(choices_list[!sapply(choices_list, is.null)])
-      if(is.null(choices)) {
-        choices <- "No options available"
-      } 
-      Option_NCD <- TRUE
-      checksEntries <- as.vector(getChecks()$checksEntries)
-      new_choices <- list()
-      v <- 1
-      for (dim_options in 1:length(choices)) {
-        if (input$kindExpt != "SUDC") {
-          planter_mov <- input$planter_mov
-        }else planter_mov <- input$planter_mov1
-
-        dims <- unlist(strsplit(choices[[dim_options]], " x "))
-        n_rows <- as.numeric(dims[1])
-        n_cols  <- as.numeric(dims[2])
-
-        dt_options <- available_percent(n_rows = n_rows,
-                                        n_cols = n_cols, 
-                                        checks = checksEntries,
-                                        Option_NCD = Option_NCD, 
-                                        kindExpt = input$kindExpt, 
-                                        stacked = input$stacked, 
-                                        planter_mov1 = planter_mov,
-                                        data = getData()$data_entry, 
-                                        dim_data = getData()$dim_data_entry,
-                                        dim_data_1 = getData()$dim_data_1, 
-                                        Block_Fillers = blocks_length())
-        if (!is.null(dt_options$dt)) {
-          new_choices[[v]] <- choices[[dim_options]]
-          v <- v + 1
-        }
-      }
-      new_choices <- unlist(new_choices)
-      print(c(length(choices), length(new_choices)))
-      updateSelectInput(inputId = "dimensions.d", 
-                        choices = new_choices, 
-                        selected = new_choices[1])
-      
-    })
-    
-    output$diomensions_percent <- renderUI({
-      #shinyjs::useShinyjs()
+   # observeEvent(list_inputs_diagonal(), {
+      output$field_dimensions <- renderUI({
         tagList(
           selectInput(inputId = ns("dimensions.d"),
                       label = "Select dimensions of field:",
@@ -503,13 +392,74 @@ mod_Diagonal_server <- function(id) {
                       label = "Choose of diagonal checks:",
                       choices = "", width = '400px'),
         )
-    })
+      })
+    
+    observeEvent(list_inputs_diagonal(), {
+      req(getData()$dim_data_entry)
+      checks <- as.numeric(getChecks()$checks)
+      total_entries <- as.numeric(getData()$dim_data_entry)
+      lines <- total_entries - checks
+      t1 <- floor(lines + lines * 0.10)
+      t2 <- ceiling(lines + lines * 0.20)
+      t <- t1:t2
+      n <- t[-numbers::isPrime(t)]
+      # withProgress(message = 'Calculation in progress', {
+        choices_list <- list()
+        i <- 1
+        for (n in t) {
+          choices_list[[i]] <- factor_subsets(n, diagonal = TRUE)$labels
+          i <- i + 1
+        }
+      #})
+      choices <- unlist(choices_list[!sapply(choices_list, is.null)])
+      if(is.null(choices)) {
+        choices <- "No options available"
+      } 
+      Option_NCD <- TRUE
+      checksEntries <- as.vector(getChecks()$checksEntries)
+      new_choices <- list()
+      v <- 1
+      by_choices <- 1:length(choices)
+     # # withProgress(message = 'Calculation in progress', {
+        for (dim_options in by_choices) {
+          if (input$kindExpt != "SUDC") {
+            planter_mov <- input$planter_mov
+          }else planter_mov <- input$planter_mov1
 
-    
-    # observeEvent(input$RUN.diagonal, {
-    #   shinyjs::show("diomensions_percent")
+          dims <- unlist(strsplit(choices[[dim_options]], " x "))
+          n_rows <- as.numeric(dims[1])
+          n_cols  <- as.numeric(dims[2])
+
+          dt_options <- available_percent(n_rows = n_rows,
+                                          n_cols = n_cols,
+                                          checks = checksEntries,
+                                          Option_NCD = Option_NCD,
+                                          kindExpt = input$kindExpt,
+                                          stacked = input$stacked,
+                                          planter_mov1 = planter_mov,
+                                          data = getData()$data_entry,
+                                          dim_data = getData()$dim_data_entry,
+                                          dim_data_1 = getData()$dim_data_1,
+                                          Block_Fillers = blocks_length())
+          if (!is.null(dt_options$dt)) {
+            new_choices[[v]] <- choices[[dim_options]]
+            v <- v + 1
+          }
+        }
     # })
-    
+
+      # new_choices <- unlist(new_choices)
+      # print(c(length(choices), length(new_choices)))
+
+      updateSelectInput(inputId = "dimensions.d",
+                        choices = new_choices,
+                        selected = new_choices[1])
+
+      # updateSelectInput(inputId = "dimensions.d", 
+      #                   choices = choices, 
+      #                   selected = choices[1])
+      
+    })
     
     field_dimensions_diagonal <- reactive({
       req(input$dimensions.d)
@@ -578,6 +528,8 @@ mod_Diagonal_server <- function(id) {
     
     # available_percent_table <- eventReactive(input$RUN.diagonal, {
     available_percent_table <- reactive({
+      req(input$dimensions.d)
+      req(getData())
       Option_NCD <- TRUE
       checksEntries <- as.vector(getChecks()$checksEntries)
       if (input$kindExpt != "SUDC") {
@@ -601,6 +553,9 @@ mod_Diagonal_server <- function(id) {
     }) 
     
     rand_checks <- reactive({
+      req(input$dimensions.d)
+      req(getData())
+      req(field_dimensions_diagonal())
       Option_NCD <- TRUE
       req(input$myseed)
       seed <- as.numeric(input$myseed)
@@ -722,6 +677,9 @@ mod_Diagonal_server <- function(id) {
     })
     
     rand_lines <- reactive({ 
+      req(input$dimensions.d)
+      req(getData())
+      req(field_dimensions_diagonal())
       Option_NCD <- TRUE
       req(available_percent_table()$dt)
       req(available_percent_table()$d_checks)
@@ -774,30 +732,6 @@ mod_Diagonal_server <- function(id) {
                                               checks = checksEntries,
                                               data = data_entry,
                                               data_dim_each_block = data_dim_each_block)
-            # Option_NCD <- FALSE
-            # if (input$kindExpt == "DBUDC" && Option_NCD == FALSE){
-            #   data_random <- get_random(n_rows = n_rows, 
-            #                             n_cols = n_cols, 
-            #                             d_checks = my_split_r,
-            #                             reps = NULL, 
-            #                             Fillers = FALSE, 
-            #                             col_sets = my_col_sets, 
-            #                             row_sets = NULL,
-            #                             checks = checksEntries, 
-            #                             data = data_entry, 
-            #                             data_dim_each_block = data_dim_each_block)
-            # }else if(input$kindExpt == "DBUDC" && Option_NCD == TRUE){
-            #   req(available_percent_table()$data_dim_each_block)
-            #   data_random <- get_random(n_rows = n_rows, 
-            #                             n_cols = n_cols, 
-            #                             d_checks = my_split_r,
-            #                             reps = NULL, 
-            #                             Fillers = TRUE, 
-            #                             col_sets = my_col_sets, 
-            #                             row_sets = NULL,
-            #                             checks = checksEntries, 
-            #                             data = data_entry)
-            # }
           }else {
             n_rows <- field_dimensions_diagonal()$d_row
             n_cols <- field_dimensions_diagonal()$d_col
@@ -837,6 +771,8 @@ mod_Diagonal_server <- function(id) {
     })
     
     output$randomized_layout <- DT::renderDT({
+      req(input$dimensions.d)
+      req(getData())
       req(rand_lines())
       VisualCheck <- FALSE
       user_site <- as.numeric(input$locView.diagonal)

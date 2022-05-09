@@ -17,6 +17,7 @@ app_ui <- function(request) {
   tagList(
     golem_add_external_resources(),
     tags$head(tags$script(type="text/javascript", src = "corner.js")),
+    tags$head(tags$script(type="text/javascript", src= "shinybusy.js")), 
     fluidPage(theme = shinythemes::shinytheme("flatly"),
               navbarPage(title = "FielDHub", 
                          tabPanel(" Welcome!", icon = icon("home", lib = "glyphicon"),
@@ -84,18 +85,9 @@ app_ui <- function(request) {
                                   htmltools::includeHTML(
                                     system.file("app/www/aboutUs.html", package = "FielDHub")
                                   )
-                         ),
-                         # tabPanel(
-                         #   tags$script(HTML("var header = $('.navbar > .container-fluid');
-                         #  header.append('<div style=\"float:right\"><img src=\"/www/ndsulogo.jpg\" style=\"float:right;width:360px;height:60px;padding-top:0px;\"> </a></div>');
-                         #  console.log(header)")
-                         #   )
-                         # )
-                          # tags$script(HTML("var header = $('.navbar > .container-fluid');
-                          # header.append('<div style=\"float:right\"><img src=\"/www/ndsulogo.jpg\" style=\"float:right;width:360px;height:60px;padding-top:0px;\"> </a></div>');
-                          # console.log(header)")
-                          # )
+                         )
               )
+             # includeScript('shinybusy.js'),
     )
   )
 }

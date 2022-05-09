@@ -61,24 +61,6 @@ mod_Optim_ui <- function(id) {
             )
           )            
        ),
-       
-       # fluidRow(
-       #   column(6,
-       #          style=list("padding-right: 28px;"),
-       #          numericInput(ns("nrows.s"), 
-       #                       label = "Input # of Rows:",
-       #                       value = 15,
-       #                       min = 5)
-       #   ),
-       #   column(6,
-       #          style=list("padding-left: 5px;"),
-       #          numericInput(ns("ncols.s"), 
-       #                       label = "Input # of Columns:",
-       #                       value = 20, 
-       #                       min = 5)
-       #   )
-       # ),
-       
        selectInput(inputId = ns("dimensions.s"),
                    label = "Select dimensions of field:",
                    choices = ""),
@@ -192,7 +174,7 @@ mod_Optim_server <- function(id) {
                         choices = loc_user_view, 
                         selected = loc_user_view[1])
     })
-    # getDataup.spatiaL <- eventReactive(input$RUN.optim, { 
+    
     getDataup.spatiaL <- reactive({ 
       if (input$owndataOPTIM == "Yes") {
         req(input$file3)
