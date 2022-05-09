@@ -7,9 +7,6 @@ sameEntries <- FALSE
 getData <- function() {
   Option_NCD <- TRUE
   if (owndataDIAGONALS == "Yes") {
-    # req(input$file1)
-    # inFile <- input$file1
-    # data_entry <- load_file(name = inFile$name, path = inFile$datapat, sep = input$sep.DIAGONALS)
     data_entry <- NULL
     data_entry <- na.omit(data_entry)
     if (ncol(data_entry) < 2) validate("Data input needs at least two Columns with the ENTRY and NAME.")
@@ -38,8 +35,6 @@ getData <- function() {
     }
   }else {
     if (kindExpt != "DBUDC") {
-      # req(lines.d)
-      # req(checks)
       checks <- as.numeric(checks)
       checksEntries <- 1:checks
       lines <- lines.d
@@ -49,9 +44,6 @@ getData <- function() {
       data_entry_UP <- gen.list
       colnames(data_entry_UP) <- c("ENTRY", "NAME")
     }else if (kindExpt == "DBUDC") {
-      # req(checks)
-      # req(blocks.db)
-      # req(lines.db)
       lines.db <- as.numeric(lines.db)
       checks <- as.numeric(checks)
       checksEntries <- 1:checks

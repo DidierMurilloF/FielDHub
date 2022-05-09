@@ -16,6 +16,14 @@ get_random <- function(n_rows = NULL,
   n_rows <- as.numeric(n_rows)
   n_cols <- as.numeric(n_cols)
   data_entries <- as.vector(data[,1])
+  # len_spots_to_fill <- sum(my_split_r == 0)
+  # len_entries_to_random <- length(data_entries)
+  # if (len_entries_to_random != len_spots_to_fill) {
+  #   stop("data entries do not fit to the availables plot!!")
+  # } else {
+  #   print("Randomization was done with entries: ")
+  #   print(c(len_entries_to_random, len_spots_to_fill))
+  # }
   if ("Filler" %in% my_split_r) Fillers <- TRUE else Fillers <- FALSE
     if (!is.null(row_sets)) {
       if (Multi.Fillers == FALSE){
@@ -265,7 +273,15 @@ get_random <- function(n_rows = NULL,
           z <- z + 1
         }
       }
-      return(list(rand = w_map, 
+      data_entries_no_checks <- as.vector(data_entry1$ENTRY)
+      len_entries_to_random <- length(data_entries_no_checks)
+      treatments_random <- sum(data_entries_no_checks %in% w_map)
+      if (treatments_random == len_entries_to_random) {
+        w_map_ok <- w_map
+        print("Randomization was successful. It passed all tests!")
+        print(c(treatments_random, len_entries_to_random))
+      } else stop("Some entries are missing in the randomization!!")
+      return(list(rand = w_map_ok, 
                   Entries = entries, 
                   Lines = data_dim_each_block, 
                   w_map_letters = w_map_letters))
