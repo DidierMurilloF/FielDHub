@@ -183,8 +183,13 @@ mod_Diagonal_ui <- function(id){
         width = 8,
         tabsetPanel(id = ns("Tabset"),
           tabPanel(title = "Expt Design Info", value = "tabPanel1",
-                   uiOutput(ns("field_dimensions")),
-                   DT::DTOutput(ns("options_table"))
+                    selectInput(inputId = ns("dimensions.d"),
+                                label = "Select dimensions of field:",
+                                choices = "", width = '400px'),
+                    selectInput(inputId = ns("percent_checks"),
+                                label = "Choose of diagonal checks:",
+                                choices = "", width = '400px'),
+                    DT::DTOutput(ns("options_table"))
                    ),
           tabPanel("Input Data",
                    fluidRow(
@@ -382,18 +387,33 @@ mod_Diagonal_server <- function(id) {
                   input$stacked, input$RUN.diagonal))
     })
     
-   # observeEvent(list_inputs_diagonal(), {
-      output$field_dimensions <- renderUI({
-        tagList(
-          selectInput(inputId = ns("dimensions.d"),
-                      label = "Select dimensions of field:",
-                      choices = "", width = '400px'),
-          selectInput(inputId = ns("percent_checks"),
-                      label = "Choose of diagonal checks:",
-                      choices = "", width = '400px'),
-        )
-      })
-    
+
+    # counts <- reactiveValues(trigger = 0)
+    # 
+    # observeEvent(input$RUN.diagonal, {
+    #   counts$trigger <- counts$trigger + 1
+    # })
+    # 
+    # trigger_list <- reactive({
+    #   list(input$RUN.diagonal, counts$trigger)
+    # })
+    # 
+    #  observeEvent(trigger_list(), {
+    #    if (counts$trigger > 0) {
+    #      print(counts$trigger)
+    #      output$field_dimensions <- renderUI({
+    #        tagList(
+    #          selectInput(inputId = ns("dimensions.d"),
+    #                      label = "Select dimensions of field:",
+    #                      choices = "", width = '400px'),
+    #          selectInput(inputId = ns("percent_checks"),
+    #                      label = "Choose of diagonal checks:",
+    #                      choices = "", width = '400px'),
+    #        )
+    #      })
+    #    }
+    #  })
+      
     observeEvent(list_inputs_diagonal(), {
       req(getData()$dim_data_entry)
       checks <- as.numeric(getChecks()$checks)
@@ -446,18 +466,10 @@ mod_Diagonal_server <- function(id) {
             v <- v + 1
           }
         }
-    # })
-
-      # new_choices <- unlist(new_choices)
-      # print(c(length(choices), length(new_choices)))
 
       updateSelectInput(inputId = "dimensions.d",
                         choices = new_choices,
                         selected = new_choices[1])
-
-      # updateSelectInput(inputId = "dimensions.d", 
-      #                   choices = choices, 
-      #                   selected = choices[1])
       
     })
     
