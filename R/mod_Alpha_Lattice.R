@@ -10,6 +10,7 @@
 #' @importFrom utils write.csv
 mod_Alpha_Lattice_ui <- function(id) {
   ns <- NS(id)
+  
   tagList(
     h4("Alpha Lattice Design"),
     sidebarLayout(
@@ -70,6 +71,15 @@ mod_Alpha_Lattice_ui <- function(id) {
         fluidRow(
           tabsetPanel(
             tabPanel("Field Layout",
+                     
+                     # hidden .csv download button
+                     shinyjs::useShinyjs(),
+                     shinyjs::hidden(downloadButton(ns("downloadCsv.alpha"), 
+                                    label =  "Excel",
+                                    icon = icon("file-csv"), 
+                                    width = '10%',
+                                    style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
+                     
                      shinycssloaders::withSpinner(
                        plotly::plotlyOutput(ns("random_layout"), width = "98%", height = "680px"),type = 5
                      ),
@@ -92,12 +102,16 @@ mod_Alpha_Lattice_server <- function(id){
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
+    # for showing .csv button on run
+    shinyjs::useShinyjs()
+    
     getData.alpha <- reactive({
       req(input$file.alpha)
       inFile <- input$file.alpha
       dataUp.alpha <- load_file(name = inFile$name, path = inFile$datapat, sep = input$sep.alpha)
       return(list(dataUp.alpha = dataUp.alpha))
     })
+    
     
     get_tALPHA <- reactive({
       if(input$owndata_alpha != "Yes") {
@@ -163,7 +177,7 @@ mod_Alpha_Lattice_server <- function(id){
       }
     })
     
-    
+
     ALPHA_reactive <- eventReactive(input$RUN.alpha, {
       
       req(input$k.alpha)
@@ -174,6 +188,11 @@ mod_Alpha_Lattice_server <- function(id){
       req(input$r.alpha)
       r.alpha <- as.numeric(input$r.alpha)
       k.alpha <- as.numeric(input$k.alpha)
+      
+      
+      # show .csv download button when run
+      shinyjs::show(id = "downloadCsv.alpha")
+      
       
       plot_start.alpha <- as.vector(unlist(strsplit(input$plot_start.alpha, ",")))
       plot_start.alpha <- as.numeric(plot_start.alpha)
@@ -470,6 +489,33 @@ mod_Alpha_Lattice_server <- function(id){
         write.csv(df, file, row.names = FALSE)
       }
     )
+    
+    csv_data <- reactive({
+      req(simuDataALPHA()$df)
+      df <- simuDataALPHA()$df
+      export_layout(df, locNum())
+    })
+    
+    
+    # Downloadable csv of selected dataset ----
+    output$downloadCsv.alpha <- downloadHandler(
+      filename = function() {
+        loc <- paste("Alpha_Lattice_Layout", sep = "")
+        paste(loc, Sys.Date(), ".csv", sep = "")
+      },
+      content = function(file) {
+        df <- as.data.frame(csv_data()$file)
+        write.csv(df, file, row.names = FALSE)
+      }
+    )
+    
+    
+    # observeEvent(input$downloadCsv.alpha, {
+    #   req(simuDataALPHA()$df)
+    #   df <- simuDataALPHA()$df
+    #   export_layout(df, locNum())
+    #   showNotification("Saved .csv to current R directory.", type = "message")
+    # })
     
   })
 }

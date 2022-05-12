@@ -109,6 +109,12 @@ mod_RCBD_ui <- function(id) {
         fluidRow(
           tabsetPanel(
             tabPanel("Field Layout",
+                     shinyjs::useShinyjs(),
+                     shinyjs::hidden(downloadButton(ns("downloadCsv.rcbd"), 
+                                                    label =  "Excel",
+                                                    icon = icon("file-csv"), 
+                                                    width = '10%',
+                                                    style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
                      shinycssloaders::withSpinner(
                        plotly::plotlyOutput(
                          ns("layouts"), 
@@ -137,6 +143,8 @@ mod_RCBD_server <- function(id){
   moduleServer(id, function(input, output, session){
     
     ns <- session$ns
+    
+    shinyjs::useShinyjs()
 
     getData.rcbd <- reactive({
       req(input$file.RCBD)
@@ -189,6 +197,8 @@ mod_RCBD_server <- function(id){
       plot_start.rcbd <- as.numeric(plot_start.rcbd)
       loc <-  as.vector(unlist(strsplit(input$Location.rcbd, ",")))
       seed.rcbd <- as.numeric(input$myseed.rcbd)
+      
+      shinyjs::show(id = "downloadCsv.rcbd")
 
       if (input$owndatarcbd == "Yes") {
         t <- NULL 
@@ -490,6 +500,24 @@ mod_RCBD_server <- function(id){
       },
       content = function(file) {
         df <- as.data.frame(simuDataRCBD()$df)
+        write.csv(df, file, row.names = FALSE)
+      }
+    )
+    csv_data <- reactive({
+      req(simuDataRCBD()$df)
+      df <- simuDataRCBD()$df
+      export_layout(df, locNum())
+    })
+    
+    
+    # Downloadable csv of selected dataset ----
+    output$downloadCsv.rcbd <- downloadHandler(
+      filename = function() {
+        loc <- paste("Randomized_Complete_Block_Layout", sep = "")
+        paste(loc, Sys.Date(), ".csv", sep = "")
+      },
+      content = function(file) {
+        df <- as.data.frame(csv_data()$file)
         write.csv(df, file, row.names = FALSE)
       }
     )

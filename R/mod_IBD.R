@@ -112,6 +112,12 @@ mod_IBD_ui <- function(id) {
         fluidRow(
           tabsetPanel(
             tabPanel("Field Layout",
+                     shinyjs::useShinyjs(),
+                     shinyjs::hidden(downloadButton(ns("downloadCsv.ibd"), 
+                                                    label =  "Excel",
+                                                    icon = icon("file-csv"), 
+                                                    width = '10%',
+                                                    style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
                      shinycssloaders::withSpinner(
                        plotly::plotlyOutput(ns("layouts"), 
                                             width = "98%", 
@@ -142,6 +148,7 @@ mod_IBD_server <- function(id){
   moduleServer( id, function(input, output, session){
     
     ns <- session$ns
+    shinyjs::useShinyjs()
     treatments <- paste("TX-", 1:9, sep = "")
     entryListFormat_IBD <- data.frame(ENTRY = 1:9, 
                                       NAME = treatments)
@@ -223,6 +230,7 @@ mod_IBD_server <- function(id){
       req(input$plot_start.ibd)
       req(input$Location.ibd)
       req(input$l.ibd)
+      shinyjs::show(id = "downloadCsv.ibd")
       r.ibd <- as.numeric(input$r.ibd)
       k.ibd <- as.numeric(input$k.ibd)
       plot_start.ibd <- as.vector(unlist(strsplit(input$plot_start.ibd, ",")))
@@ -542,6 +550,23 @@ mod_IBD_server <- function(id){
         write.csv(df, file, row.names = FALSE)
       }
     )
+    csv_data <- reactive({
+      req(simuDataIBD()$df)
+      df <- simuDataIBD()$df
+      export_layout(df, locNum())
+    })
     
+    
+    # Downloadable csv of selected dataset ----
+    output$downloadCsv.ibd <- downloadHandler(
+      filename = function() {
+        loc <- paste("Incomplete_Block_Layout", sep = "")
+        paste(loc, Sys.Date(), ".csv", sep = "")
+      },
+      content = function(file) {
+        df <- as.data.frame(csv_data()$file)
+        write.csv(df, file, row.names = FALSE)
+      }
+    )
   })
 }

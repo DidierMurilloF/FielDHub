@@ -115,6 +115,12 @@ mod_STRIPD_ui <- function(id){
         fluidRow(
           tabsetPanel(
             tabPanel(title = "Field Layout",
+                     shinyjs::useShinyjs(),
+                     shinyjs::hidden(downloadButton(ns("downloadCsv.strip"), 
+                                                    label =  "Excel",
+                                                    icon = icon("file-csv"), 
+                                                    width = '10%',
+                                                    style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
                      shinycssloaders::withSpinner(
                        plotly::plotlyOutput(ns("layout.strip"), 
                                             width = "98%", 
@@ -144,6 +150,7 @@ mod_STRIPD_ui <- function(id){
 mod_STRIPD_server <- function(id) {
   moduleServer( id, function(input, output, session) {
     ns <- session$ns
+    shinyjs::useShinyjs()
     Hplots <- LETTERS[1:5]
     Vplots <- LETTERS[1:4]
     entryListFormat_STRIP <- data.frame(
@@ -191,6 +198,8 @@ mod_STRIPD_server <- function(id) {
       req(input$Location.strip)
       req(input$myseed.strip)
       req(input$l.strip)
+      
+      shinyjs::show(id = "downloadCsv.strip")
       
       l.strip <- as.numeric(input$l.strip)
       seed.strip <- as.numeric(input$myseed.strip)
@@ -482,6 +491,24 @@ mod_STRIPD_server <- function(id) {
       },
       content = function(file) {
         df <- as.data.frame(simuData_strip()$df)
+        write.csv(df, file, row.names = FALSE)
+      }
+    )
+    csv_data <- reactive({
+      req(simuData_strip()$df)
+      df <- simuData_strip()$df
+      export_layout(df, locNum())
+    })
+    
+    
+    # Downloadable csv of selected dataset ----
+    output$downloadCsv.strip <- downloadHandler(
+      filename = function() {
+        loc <- paste("Strip_Plot_Layout", sep = "")
+        paste(loc, Sys.Date(), ".csv", sep = "")
+      },
+      content = function(file) {
+        df <- as.data.frame(csv_data()$file)
         write.csv(df, file, row.names = FALSE)
       }
     )

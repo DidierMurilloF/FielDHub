@@ -70,6 +70,12 @@ mod_Square_Lattice_ui <- function(id){
         fluidRow(
           tabsetPanel(
             tabPanel("Field Layout",
+                     shinyjs::useShinyjs(),
+                     shinyjs::hidden(downloadButton(ns("downloadCsv.square"), 
+                                                    label =  "Excel",
+                                                    icon = icon("file-csv"), 
+                                                    width = '10%',
+                                                    style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
                      shinycssloaders::withSpinner(
                        plotly::plotlyOutput(ns("random_layout"), width = "98%", height = "650px"),type = 5
                      ),
@@ -91,6 +97,8 @@ mod_Square_Lattice_ui <- function(id){
 mod_Square_Lattice_server <- function(id){
   moduleServer(id, function(input, output, session){
     ns <- session$ns
+    
+    shinyjs::useShinyjs()
     
     getData.square <- reactive({
       req(input$file.square)
@@ -172,6 +180,8 @@ mod_Square_Lattice_server <- function(id){
       plot_start.square <- as.numeric(plot_start.square)
       loc <- as.vector(unlist(strsplit(input$Location.square, ",")))
       seed.rcbd <- as.numeric(input$myseed.square)
+      
+      shinyjs::show(id = "downloadCsv.square", anim = FALSE)
       
       if (input$owndata_square == "Yes") {
         t.square <- as.numeric(get_tSQUARE()$t_square)
@@ -463,6 +473,25 @@ mod_Square_Lattice_server <- function(id){
       content = function(file) {
         req(simuDataSQUARE()$df)
         df <- as.data.frame(simuDataSQUARE()$df)
+        write.csv(df, file, row.names = FALSE)
+      }
+    )
+    
+    csv_data <- reactive({
+      req(simuDataSQUARE()$df)
+      df <- simuDataSQUARE()$df
+      export_layout(df, locNum())
+    })
+    
+    
+    # Downloadable csv of selected dataset ----
+    output$downloadCsv.square <- downloadHandler(
+      filename = function() {
+        loc <- paste("Square_Lattice_Layout", sep = "")
+        paste(loc, Sys.Date(), ".csv", sep = "")
+      },
+      content = function(file) {
+        df <- as.data.frame(csv_data()$file)
         write.csv(df, file, row.names = FALSE)
       }
     )

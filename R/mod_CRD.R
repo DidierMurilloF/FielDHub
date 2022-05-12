@@ -67,6 +67,12 @@ mod_CRD_ui <- function(id) {
         fluidRow(
           tabsetPanel(
             tabPanel("Field Layout",
+                     shinyjs::useShinyjs(),
+                     shinyjs::hidden(downloadButton(ns("downloadCsv.crd"), 
+                                                    label =  "Excel",
+                                                    icon = icon("file-csv"), 
+                                                    width = '10%',
+                                                    style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
                      shinycssloaders::withSpinner(
                        plotly::plotlyOutput(ns("layout_random"), width = "98%", height = "650px"),type = 5
                      ),
@@ -90,6 +96,8 @@ mod_CRD_server <- function(id) {
     
     ns <- session$ns
     
+    shinyjs::useShinyjs()
+    
     getData.crd <- reactive({
       req(input$file.CRD)
       req(input$sep.crd)
@@ -102,6 +110,8 @@ mod_CRD_server <- function(id) {
       req(input$plot_start.crd)
       req(input$Location.crd)
       req(input$myseed.crd)
+      
+      shinyjs::show(id = "downloadCsv.crd")
       
       myseed.crd <- as.numeric(input$myseed.crd)
       
@@ -362,6 +372,25 @@ mod_CRD_server <- function(id) {
       },
       content = function(file) {
         df <- as.data.frame(simuDataCRD()$df)
+        write.csv(df, file, row.names = FALSE)
+      }
+    )
+    
+    csv_data <- reactive({
+      req(simuDataCRD()$df)
+      df <- simuDataCRD()$df
+      export_layout(df,1)
+    })
+    
+    
+    # Downloadable csv of selected dataset ----
+    output$downloadCsv.crd <- downloadHandler(
+      filename = function() {
+        loc <- paste("Completely_Randomized_Layout", sep = "")
+        paste(loc, Sys.Date(), ".csv", sep = "")
+      },
+      content = function(file) {
+        df <- as.data.frame(csv_data()$file)
         write.csv(df, file, row.names = FALSE)
       }
     )

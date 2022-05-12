@@ -69,6 +69,12 @@ mod_Rectangular_Lattice_ui <- function(id){
         fluidRow(
           tabsetPanel(
             tabPanel("Field Layout",
+                     shinyjs::useShinyjs(),
+                     shinyjs::hidden(downloadButton(ns("downloadCsv.rectangular"), 
+                                                    label =  "Excel",
+                                                    icon = icon("file-csv"), 
+                                                    width = '10%',
+                                                    style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
                      shinycssloaders::withSpinner(
                        plotly::plotlyOutput(ns("random_layout"), width = "98%", height = "650px"),type = 5
                      ),
@@ -90,6 +96,8 @@ mod_Rectangular_Lattice_ui <- function(id){
 mod_Rectangular_Lattice_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+    
+    shinyjs::useShinyjs()
     
     getData.rectangular <- reactive({
       req(input$file.rectangular)
@@ -180,6 +188,8 @@ mod_Rectangular_Lattice_server <- function(id) {
       plot_start.rectangular<- as.numeric(plot_start.rectangular)
       loc <- as.vector(unlist(strsplit(input$Location.rectangular, ",")))
       seed.rcbd <- as.numeric(input$myseed.rectangular)
+      
+      shinyjs::show(id = "downloadCsv.rectangular", anim = FALSE)
       
       if (input$owndata_rectangular == "Yes") {
         t.rectangular <- as.numeric(get_tRECT()$t.rectangular)
@@ -460,6 +470,25 @@ mod_Rectangular_Lattice_server <- function(id) {
       },
       content = function(file) {
         df <- as.data.frame(simuDataRECT()$df)
+        write.csv(df, file, row.names = FALSE)
+      }
+    )
+    
+    csv_data <- reactive({
+      req(simuDataRECT()$df)
+      df <- simuDataRECT()$df
+      export_layout(df, locNum())
+    })
+    
+    
+    # Downloadable csv of selected dataset ----
+    output$downloadCsv.rectangular <- downloadHandler(
+      filename = function() {
+        loc <- paste("Rectangular_Lattice_Layout", sep = "")
+        paste(loc, Sys.Date(), ".csv", sep = "")
+      },
+      content = function(file) {
+        df <- as.data.frame(csv_data()$file)
         write.csv(df, file, row.names = FALSE)
       }
     )

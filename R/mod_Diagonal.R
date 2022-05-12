@@ -63,7 +63,7 @@ mod_Diagonal_ui <- function(id){
               numericInput(inputId = ns("lines.d"), 
                            label = "Input # of Entries:",
                            value = 270, 
-                           min = 5)  
+                           min = 50)  
            ),
            conditionalPanel(
              condition = "input.kindExpt =='DBUDC'", ns = ns,
@@ -72,7 +72,7 @@ mod_Diagonal_ui <- function(id){
                        numericInput(inputId = ns("lines.db"), 
                                     label = "Input # of Entries:",
                                     value = 270, 
-                                    min = 5)
+                                    min = 50)
                 ),
                 column(6,style=list("padding-left: 5px;"),
                        textInput(ns("blocks.db"), 
@@ -298,6 +298,7 @@ mod_Diagonal_server <- function(id) {
           gen.list <- data.frame(list(ENTRY = 1:(lines + checks),	NAME = NAME))
           data_entry_UP <- gen.list
           colnames(data_entry_UP) <- c("ENTRY", "NAME")
+          if (as.numeric(input$lines.db)<50) shiny::validate('Larger field size is recommended for this experiment type')
         }else if (input$kindExpt == "DBUDC") {
           req(input$checks)
           req(input$blocks.db)
@@ -310,6 +311,7 @@ mod_Diagonal_server <- function(id) {
           data_entry_UP <- data.frame(list(ENTRY = 1:(lines.db + checks),	NAME = NAME))
           blocks <- as.numeric(as.vector(unlist(strsplit(input$blocks.db, ","))))
           if (lines.db != sum(blocks)) shiny::validate('Sum of blocks may be equal to number of lines.')
+          if (as.numeric(input$lines.db)<50) shiny::validate('Larger field size is recommended for this experiment type')
           data_entry_UP$BLOCK <- c(rep("ALL", checks), rep(1:length(blocks), times = blocks))
           colnames(data_entry_UP) <- c("ENTRY", "NAME", "BLOCK")
           if (input$sameEntries) {
@@ -428,6 +430,7 @@ mod_Diagonal_server <- function(id) {
     
     field_dimensions_diagonal <- reactive({
       req(input$dimensions.d)
+      Sys.sleep(1)
       dims <- unlist(strsplit(input$dimensions.d, " x "))
       d_row <- as.numeric(dims[1])
       d_col <- as.numeric(dims[2])

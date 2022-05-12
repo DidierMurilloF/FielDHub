@@ -91,6 +91,12 @@ mod_FD_ui <- function(id){
         fluidRow(
           tabsetPanel(
             tabPanel("Field Layout",
+                     shinyjs::useShinyjs(),
+                     shinyjs::hidden(downloadButton(ns("downloadCsv.fd"), 
+                                                    label =  "Excel",
+                                                    icon = icon("file-csv"), 
+                                                    width = '10%',
+                                                    style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
                      shinycssloaders::withSpinner(
                        plotly::plotlyOutput(ns("layouts"), width = "98%", 
                                             height = "650px"),type = 5
@@ -113,6 +119,8 @@ mod_FD_server <- function(id) {
   moduleServer(id, function(input, output, session){
     
     ns <- session$ns
+    
+    shinyjs::useShinyjs()
     
     FACTORS <- rep(c("A", "B", "C"), c(2,3,2))
     LEVELS <- c("a0", "a1", "b0", "b1", "b2", "c0", "c1")
@@ -158,6 +166,8 @@ mod_FD_server <- function(id) {
       req(input$Location.fd)
       req(input$l.fd)
       req(input$myseed.reps)
+      
+      shinyjs::show(id = "downloadCsv.fd")
       l.fd <- as.numeric(input$l.fd)
       plot_start.fd <- as.vector(unlist(strsplit(input$plot_start.fd, ",")))
       plot_start.fd <- as.numeric(plot_start.fd)
@@ -465,5 +475,25 @@ mod_FD_server <- function(id) {
         write.csv(df, file, row.names = FALSE)
       }
     )
+    
+    csv_data <- reactive({
+      req(simuData_fd()$df)
+      df <- simuData_fd()$df
+      export_layout(df, locNum())
+    })
+    
+    
+    # Downloadable csv of selected dataset ----
+    output$downloadCsv.fd <- downloadHandler(
+      filename = function() {
+        loc <- paste("Factorial_Layout", sep = "")
+        paste(loc, Sys.Date(), ".csv", sep = "")
+      },
+      content = function(file) {
+        df <- as.data.frame(csv_data()$file)
+        write.csv(df, file, row.names = FALSE)
+      }
+    )
+    
   })
 }

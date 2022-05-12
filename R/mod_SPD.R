@@ -101,6 +101,12 @@ mod_SPD_ui <- function(id) {
         fluidRow(
           tabsetPanel(
             tabPanel("Field Layout",
+                     shinyjs::useShinyjs(),
+                     shinyjs::hidden(downloadButton(ns("downloadCsv.spd"), 
+                                                    label =  "Excel",
+                                                    icon = icon("file-csv"), 
+                                                    width = '10%',
+                                                    style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
                      shinycssloaders::withSpinner(
                        plotly::plotlyOutput(ns("layouts"), 
                                             width = "97%", 
@@ -129,6 +135,8 @@ mod_SPD_server <- function(id){
   moduleServer( id, function(input, output, session){
     
     ns <- session$ns
+    
+    shinyjs::useShinyjs()
     
     wp <- c("NFung", paste("Fung", 1:4, sep = "")) 
     sp <- paste("Beans", 1:10, sep = "")            
@@ -176,6 +184,8 @@ mod_SPD_server <- function(id){
       req(input$Location.spd)
       req(input$myseed.spd)
       req(input$l.spd)
+      
+      shinyjs::show(id = "downloadCsv.spd")
       
       l.spd <- as.numeric(input$l.spd)
       seed.spd <- as.numeric(input$myseed.spd)
@@ -464,6 +474,24 @@ mod_SPD_server <- function(id){
       },
       content = function(file) {
         df <- as.data.frame(simuData_spd()$df)
+        write.csv(df, file, row.names = FALSE)
+      }
+    )
+    csv_data <- reactive({
+      req(simuData_spd()$df)
+      df <- simuData_spd()$df
+      export_layout(df, locNum())
+    })
+    
+    
+    # Downloadable csv of selected dataset ----
+    output$downloadCsv.spd <- downloadHandler(
+      filename = function() {
+        loc <- paste("Split_Plot_Layout", sep = "")
+        paste(loc, Sys.Date(), ".csv", sep = "")
+      },
+      content = function(file) {
+        df <- as.data.frame(csv_data()$file)
         write.csv(df, file, row.names = FALSE)
       }
     )

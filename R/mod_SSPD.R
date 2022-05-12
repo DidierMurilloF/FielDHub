@@ -131,6 +131,12 @@ mod_SSPD_ui <- function(id){
         fluidRow(
           tabsetPanel(
             tabPanel("Field Layout",
+                     shinyjs::useShinyjs(),
+                     shinyjs::hidden(downloadButton(ns("downloadCsv.sspd"), 
+                                                    label =  "Excel",
+                                                    icon = icon("file-csv"), 
+                                                    width = '10%',
+                                                    style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
                      shinycssloaders::withSpinner(
                        plotly::plotlyOutput(ns("layouts"), 
                                             width = "98%", 
@@ -160,6 +166,7 @@ mod_SSPD_server <- function(id){
   moduleServer( id, function(input, output, session){
     
     ns <- session$ns
+    shinyjs::useShinyjs()
     
    wp <- paste("IRR_", c("NO", "Yes"), sep = "") 
    sp <- c("NFung", paste("Fung", 1:4, sep = "")) 
@@ -209,6 +216,8 @@ mod_SSPD_server <- function(id){
       req(input$Location.sspd)
       req(input$myseed.sspd)
       req(input$l.sspd)
+      
+      shinyjs::show(id = "downloadCsv.sspd")
       
       l.sspd <- as.numeric(input$l.sspd)
       seed.sspd <- as.numeric(input$myseed.sspd)
@@ -526,6 +535,24 @@ mod_SSPD_server <- function(id){
       },
       content = function(file) {
         df <- as.data.frame(simuData_sspd()$df)
+        write.csv(df, file, row.names = FALSE)
+      }
+    )
+    csv_data <- reactive({
+      req(simuData_sspd()$df)
+      df <- simuData_sspd()$df
+      export_layout(df, locNum())
+    })
+    
+    
+    # Downloadable csv of selected dataset ----
+    output$downloadCsv.sspd <- downloadHandler(
+      filename = function() {
+        loc <- paste("Split_Split_Plot_Layout", sep = "")
+        paste(loc, Sys.Date(), ".csv", sep = "")
+      },
+      content = function(file) {
+        df <- as.data.frame(csv_data()$file)
         write.csv(df, file, row.names = FALSE)
       }
     )

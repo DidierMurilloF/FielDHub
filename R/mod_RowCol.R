@@ -107,6 +107,12 @@ mod_RowCol_ui <- function(id){
         fluidRow(
           tabsetPanel(
             tabPanel("Field Layout",
+                     shinyjs::useShinyjs(),
+                     shinyjs::hidden(downloadButton(ns("downloadCsv.rcd"), 
+                                                    label =  "Excel",
+                                                    icon = icon("file-csv"), 
+                                                    width = '10%',
+                                                    style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
                      shinycssloaders::withSpinner(
                        plotly::plotlyOutput(ns("layouts"), 
                                             width = "98%", 
@@ -132,6 +138,7 @@ mod_RowCol_server <- function(id){
   moduleServer( id, function(input, output, session){
     
     ns <- session$ns
+    shinyjs::useShinyjs()
     
     entryListFormat_RCD <- data.frame(ENTRY = 1:9, 
                                        NAME = c(paste("Genotype", 
@@ -513,6 +520,24 @@ mod_RowCol_server <- function(id){
       },
       content = function(file) {
         df <- as.data.frame(simuData_RowCol()$df)
+        write.csv(df, file, row.names = FALSE)
+      }
+    )
+    csv_data <- reactive({
+      req(simuData_RowCol()$df)
+      df <- simuData_RowCol()$df
+      export_layout(df, locNum())
+    })
+    
+    
+    # Downloadable csv of selected dataset ----
+    output$downloadCsv.rcd <- downloadHandler(
+      filename = function() {
+        loc <- paste("Resolvable_Row-Column_Layout", sep = "")
+        paste(loc, Sys.Date(), ".csv", sep = "")
+      },
+      content = function(file) {
+        df <- as.data.frame(csv_data()$file)
         write.csv(df, file, row.names = FALSE)
       }
     )
