@@ -425,8 +425,7 @@ mod_Diagonal_server <- function(id) {
     #  })
       
     observeEvent(list_inputs_diagonal(), {
-      shinyjs::show(id = "dimensions.d")
-      shinyjs::show(id = "percent_checks")
+      
       req(getData()$dim_data_entry)
       checks <- as.numeric(getChecks()$checks)
       total_entries <- as.numeric(getData()$dim_data_entry)
@@ -483,7 +482,8 @@ mod_Diagonal_server <- function(id) {
       updateSelectInput(inputId = "dimensions.d",
                         choices = new_choices,
                         selected = new_choices[1])
-      
+      shinyjs::show(id = "dimensions.d")
+      shinyjs::show(id = "percent_checks")
     })
     
     
