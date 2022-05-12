@@ -76,7 +76,8 @@
 #' treatment_list <- data.frame(list(ENTRY = 1:725, NAME = c(list_checks, treatments), BLOCK = BLOCK))
 #' head(treatment_list, 12) 
 #' tail(treatment_list, 12)
-#' spatDB <- diagonal_arrangement(nrows = 30, ncols = 26,
+#' spatDB <- diagonal_arrangement(nrows = 30, 
+#'                                ncols = 26,
 #'                                checks = 5, 
 #'                                plotNumber = 1, 
 #'                                kindExpt = "DBUDC", 
@@ -261,10 +262,17 @@ diagonal_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,
     
   }
   
-  available_percent1 <- available_percent(n_rows = nrows, n_cols = ncols, checks = checksEntries, Option_NCD = FALSE,
-                                          Visual_ch = NULL, visualCheck = FALSE, kindExpt = kindExpt, myWay = Way,
-                                          planter_mov1 = planter, data = getData()$data_entry, dim_data = getData()$dim_data_entry,
-                                          dim_data_1 = getData()$dim_data_1, Block_Fillers = NULL)
+  available_percent1 <- available_percent(n_rows = nrows, 
+                                          n_cols = ncols,
+                                          checks = checksEntries,
+                                          Option_NCD = FALSE, # FALSE
+                                          kindExpt = kindExpt,
+                                          stacked = Way,
+                                          planter_mov1 = planter, 
+                                          data = getData()$data_entry,
+                                          dim_data = getData()$dim_data_entry,
+                                          dim_data_1 = getData()$dim_data_1,
+                                          Block_Fillers = NULL)
   
   new_lines <- nrow(getData()$data_entry) - checks
   infoP <- as.data.frame(available_percent1$P)
@@ -285,18 +293,34 @@ diagonal_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,
       if (kindExpt == "DBUDC") {
         
         Block_Fillers <- as.numeric(getData()$Blocks)
-        available_percent1 <- available_percent(n_rows = nrows, n_cols = ncols, checks = checksEntries, Option_NCD = Option_NCD,
-                                                Visual_ch = NULL, visualCheck = FALSE, kindExpt = kindExpt, myWay = Way,
-                                                planter_mov1 = planter, data = getData()$data_entry, dim_data = getData()$dim_data_entry,
-                                                dim_data_1 = getData()$dim_data_1, Block_Fillers = Block_Fillers)
+        available_percent1 <- available_percent(n_rows = nrows,
+                                                n_cols = ncols,
+                                                checks = checksEntries, 
+                                                Option_NCD = Option_NCD,
+                                                kindExpt = kindExpt,
+                                                stacked = Way,
+                                                planter_mov1 = planter,
+                                                data = getData()$data_entry,
+                                                dim_data = getData()$dim_data_entry,
+                                                dim_data_1 = getData()$dim_data_1,
+                                                Block_Fillers = Block_Fillers)
         infoP <- as.data.frame(available_percent1$P)
         infoP$V7 <- Exptlines
       }else {
         Block_Fillers <- NULL
-        available_percent1 <- available_percent(n_rows = nrows, n_cols = ncols, checks = checksEntries, Option_NCD = Option_NCD,
-                                                Visual_ch = NULL, visualCheck = FALSE, kindExpt = kindExpt, myWay = Way,
-                                                planter_mov1 = planter, data = getData()$data_entry, dim_data = getData()$dim_data_entry,
-                                                dim_data_1 = getData()$dim_data_1, Block_Fillers = Block_Fillers)
+        available_percent1 <- available_percent(n_rows = nrows, 
+                                                n_cols = ncols,
+                                                checks = checksEntries,
+                                                Option_NCD = Option_NCD,
+                                                Visual_ch = NULL,
+                                                visualCheck = FALSE,
+                                                kindExpt = kindExpt,
+                                                stacked = Way,
+                                                planter_mov1 = planter, 
+                                                data = getData()$data_entry,
+                                                dim_data = getData()$dim_data_entry,
+                                                dim_data_1 = getData()$dim_data_1,
+                                                Block_Fillers = Block_Fillers)
         infoP <- as.data.frame(available_percent1$P)
         infoP$V7 <- Exptlines
       }  
@@ -308,12 +332,19 @@ diagonal_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,
       base::stop('The input plotNumber and blocks need to be of the same length. You can consider plotNumber as an integer.')
     }
   }
-  
-  rand_checks <- random_checks(dt = available_percent1$dt, d_checks = available_percent1$d_checks, p = infoP, percent = NULL,
-                               exptlines = Exptlines, kindExpt = kindExpt, planter_mov = planter, Checks = checksEntries, myWay = Way,
-                               data = getData()$data_entry, data_dim_each_block = available_percent1$data_dim_each_block,
-                               n_reps = NULL, Option_NCD = Option_NCD, seed = seed)
-  
+  rand_checks <- random_checks(dt = available_percent1$dt, 
+                               d_checks = available_percent1$d_checks, 
+                               p = infoP, percent = NULL,
+                               exptlines = Exptlines, 
+                               kindExpt = kindExpt, 
+                               planter_mov = planter, 
+                               Checks = checksEntries, 
+                               stacked = Way,
+                               data = getData()$data_entry, 
+                               data_dim_each_block = available_percent1$data_dim_each_block,
+                               n_reps = NULL, 
+                               Option_NCD = Option_NCD, 
+                               seed = seed)
   data_entry <- getData()$data_entry
   w_map <- rand_checks$map_checks
   n_rows = nrows; n_cols = ncols
@@ -339,16 +370,14 @@ diagonal_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,
       my_col_sets = c(cuts_by_c[1], m)
     }
     if(Way == "By Column") {
-      if(kindExpt == "DBUDC" && Option_NCD == FALSE){
-        data_random <- get_random(n_rows = nrows, n_cols = ncols, d_checks = my_split_r,
-                                  reps = NULL, Fillers = FALSE, col_sets = my_col_sets, row_sets = NULL,
-                                  checks = checksEntries, data = data_entry, data_dim_each_block = data_dim_each_block)
-      }else if(kindExpt == "DBUDC" && Option_NCD == TRUE){
-        req(available_percent1$data_dim_each_block)
-        data_random <- get_random(n_rows = nrows, n_cols = ncols, d_checks = my_split_r,
-                                  reps = NULL, Fillers = TRUE, col_sets = my_col_sets, row_sets = NULL,
-                                  checks = checksEntries,data = data_entry)
-      }
+      data_random <- get_random_stacked(stacked = "By Column", 
+                                        n_rows = n_rows,
+                                        n_cols = n_cols,
+                                        matrix_checks = my_split_r,
+                                        Fillers = FALSE,
+                                        checks = checksEntries,
+                                        data = data_entry,
+                                        data_dim_each_block = data_dim_each_block)
     }else {
       if (kindExpt == "DBUDC" && Option_NCD == FALSE) {
         data_entry1 <- data_entry[(checks + 1):nrow(data_entry), ]
@@ -358,42 +387,50 @@ diagonal_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,
                                     planter = planter)
       }else if(kindExpt == "DBUDC" && Option_NCD == TRUE) {
         Block_Fillers <- as.numeric(getData()$Blocks)
-        data_random <- get_random(n_rows = nrows, n_cols = ncols, d_checks = my_split_r,
-                                  reps = NULL, Fillers = FALSE, col_sets = NULL, row_sets = my_row_sets,
-                                  checks = checksEntries, data = data_entry, planter_mov  = planter,
-                                  Multi.Fillers = TRUE, which.blocks = Block_Fillers)
+        data_random <- get_random(n_rows = nrows, 
+                                  n_cols = ncols, 
+                                  d_checks = my_split_r,
+                                  Fillers = FALSE, 
+                                  row_sets = my_row_sets,
+                                  checks = checksEntries, 
+                                  data = data_entry, 
+                                  planter_mov  = planter,
+                                  Multi.Fillers = TRUE, 
+                                  which.blocks = Block_Fillers)
       }
     }
-  }else {
+  } else {
     n_blocks <- 1
-    if(Option_NCD == TRUE) {
-      data_random <- get_random(n_rows = nrows, n_cols = ncols, d_checks = my_split_r,
-                                reps = NULL, Fillers = TRUE, col_sets = ncols, row_sets = NULL,
-                                checks = checksEntries, data = data_entry, planter_mov  = planter)
-    }else {
-      data_random <- get_random(n_rows = nrows, n_cols = ncols, d_checks = my_split_r,
-                                reps = NULL, Fillers = FALSE, col_sets = ncols, row_sets = NULL,
-                                checks = checksEntries, data = data_entry, planter_mov  = planter)
-    }
+    data_random <- get_single_random(n_rows = n_rows, 
+                                     n_cols = n_cols, 
+                                     matrix_checks = my_split_r, 
+                                     checks = checksEntries, 
+                                     data = data_entry) 
   }
-  
   if (Way == "By Row" && kindExpt == "DBUDC") {
     map_letters <- data_random$w_map_letters
-    split_name_diagonal1 <- names_dbrows(w_map = w_map, myWay = "By Row", kindExpt = "DBUDC", 
+    split_name_diagonal1 <- names_dbrows(w_map = w_map, 
+                                         myWay = "By Row",
+                                         kindExpt = "DBUDC", 
                                          w_map_letters = map_letters,
                                          data_dim_each_block = data_dim_each_block, 
                                          expt_name = exptName, 
                                          Checks = checksEntries)
   }else {
     w_map_letters1 <- data_random$w_map_letters
-    split_name_diagonal1 <- names_diagonal(nrows = nrows, ncols = ncols, randomChecksMap = w_map, 
-                                           kindExpt = kindExpt, checks = checksEntries, myWay = Way, 
-                                           Option_NCD = Option_NCD, expt_name = exptName, 
-                                           data_entry = data_entry, reps = NULL, 
+    split_name_diagonal1 <- names_diagonal(nrows = nrows, 
+                                           ncols = ncols,
+                                           randomChecksMap = w_map, 
+                                           kindExpt = kindExpt,
+                                           checks = checksEntries,
+                                           myWay = Way, 
+                                           Option_NCD = Option_NCD, 
+                                           expt_name = exptName, 
+                                           data_entry = data_entry, 
+                                           reps = NULL, 
                                            data_dim_each_block = data_dim_each_block, 
                                            w_map_letters1 = w_map_letters1)
   }
-  
   put_Filler_in_names <- function() {
     if (multi == FALSE && Option_NCD == TRUE) {
       blocks <- 1

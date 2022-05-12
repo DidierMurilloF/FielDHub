@@ -1,5 +1,5 @@
 * {
-  margin: 0;
+  margin:0;
   padding:0;
   box-sizing: border-box;
 }
@@ -13,6 +13,11 @@ html,body {
 body::-webkit-scrollbar {
   display: none;
 }
+
+.nav a{
+    /*color: white !important;*/
+    font-size: 1.3em !important;
+    }
 
 .navbar {
   margin-bottom: 0;
