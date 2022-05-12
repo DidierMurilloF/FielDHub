@@ -24,7 +24,7 @@ field_dims <- function(n, opt) {
 ## Single test for diagonal
 Option_NCD <- TRUE
 n <- 80
-until <- 200
+until <- 120
 N <- until
 kindExpt <- "SUDC"
 planter_mov <- "serpentine"

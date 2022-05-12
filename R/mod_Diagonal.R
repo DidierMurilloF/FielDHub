@@ -181,14 +181,17 @@ mod_Diagonal_ui <- function(id){
       ),
       mainPanel(
         width = 8,
+        shinyjs::useShinyjs(),
         tabsetPanel(id = ns("Tabset"),
           tabPanel(title = "Expt Design Info", value = "tabPanel1",
-                    selectInput(inputId = ns("dimensions.d"),
-                                label = "Select dimensions of field:",
-                                choices = "", width = '400px'),
-                    selectInput(inputId = ns("percent_checks"),
-                                label = "Choose of diagonal checks:",
-                                choices = "", width = '400px'),
+                   shinyjs::hidden(
+                     selectInput(inputId = ns("dimensions.d"),
+                                 label = "Select dimensions of field:", 
+                                 choices = "", width = '400px'),
+                     selectInput(inputId = ns("percent_checks"),
+                                 label = "Choose % of Checks:", 
+                                 choices = "", width = '400px')
+                   ),
                     DT::DTOutput(ns("options_table"))
                    ),
           tabPanel("Input Data",
@@ -218,6 +221,8 @@ mod_Diagonal_ui <- function(id){
 mod_Diagonal_server <- function(id) {
   moduleServer( id, function(input, output, session) {
     ns <- session$ns
+    
+    shinyjs::useShinyjs()
     
     loc_inputs <- eventReactive(input$RUN.diagonal, {
       return(list(sites = input$l.diagonal))
@@ -266,6 +271,7 @@ mod_Diagonal_server <- function(id) {
                  handlerExpr = updateTabsetPanel(session,
                                                  "Tabset",
                                                  selected = "tabPanel1"))
+    
     
     getData <- eventReactive(input$RUN.diagonal, {
       Sys.sleep(2)
@@ -359,6 +365,8 @@ mod_Diagonal_server <- function(id) {
            dim_data_1 = dim_data_1)
     })
     
+    
+    
     getChecks <- eventReactive(input$RUN.diagonal, {
       req(getData()$data_entry)
       data <- as.data.frame(getData()$data_entry)
@@ -415,6 +423,8 @@ mod_Diagonal_server <- function(id) {
     #  })
       
     observeEvent(list_inputs_diagonal(), {
+      shinyjs::show(id = "dimensions.d")
+      shinyjs::show(id = "percent_checks")
       req(getData()$dim_data_entry)
       checks <- as.numeric(getChecks()$checks)
       total_entries <- as.numeric(getData()$dim_data_entry)
@@ -423,7 +433,7 @@ mod_Diagonal_server <- function(id) {
       t2 <- ceiling(lines + lines * 0.20)
       t <- t1:t2
       n <- t[-numbers::isPrime(t)]
-      # withProgress(message = 'Calculation in progress', {
+      withProgress(message = 'Calculation in progress', {
         choices_list <- list()
         i <- 1
         for (n in t) {
@@ -440,7 +450,7 @@ mod_Diagonal_server <- function(id) {
       new_choices <- list()
       v <- 1
       by_choices <- 1:length(choices)
-     # # withProgress(message = 'Calculation in progress', {
+      # withProgress(message = 'Calculation in progress', {
         for (dim_options in by_choices) {
           if (input$kindExpt != "SUDC") {
             planter_mov <- input$planter_mov
@@ -466,12 +476,20 @@ mod_Diagonal_server <- function(id) {
             v <- v + 1
           }
         }
+     })
 
       updateSelectInput(inputId = "dimensions.d",
                         choices = new_choices,
                         selected = new_choices[1])
       
     })
+    
+    
+    # eventReactive(input$RUN.diagonal, {
+    #   shinyjs::show(id = "dimensions.d")
+    #   shinyjs::show(id = "percent_checks")
+    # })
+  
     
     field_dimensions_diagonal <- reactive({
       req(input$dimensions.d)
