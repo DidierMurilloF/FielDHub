@@ -24,28 +24,26 @@ mod_Optim_ui <- function(id) {
        conditionalPanel(
          condition = "input.owndataOPTIM == 'Yes'", 
          ns = ns,
-          fluidRow(
-            column(7, style=list("padding-right: 28px;"),
-                   fileInput(ns("file3"), 
-                             label = "Upload a CSV File:", 
-                             multiple = FALSE)),
-            column(5,style=list("padding-left: 5px;"),
-                   radioButtons(ns("sep.OPTIM"), "Separator",
-                                choices = c(Comma = ",",
-                                            Semicolon = ";",
-                                            Tab = "\t"),
-                                selected = ","))
-          )            
+         fluidRow(
+          column(7, style=list("padding-right: 28px;"),
+                  fileInput(ns("file3"), 
+                            label = "Upload a CSV File:", 
+                            multiple = FALSE)),
+          column(5,style=list("padding-left: 5px;"),
+                  radioButtons(ns("sep.OPTIM"), "Separator",
+                              choices = c(Comma = ",",
+                                          Semicolon = ";",
+                                          Tab = "\t"),
+                              selected = ","))
+         )
        ),
        conditionalPanel(
          "input.owndataOPTIM != 'Yes'", 
           ns = ns,
-          
           numericInput(ns("checks.s"),
                         label = "Input # of Checks:", 
                         value = 3,
                         min = 1),
-            
           fluidRow(
             column(6,
                    style=list("padding-right: 28px;"),

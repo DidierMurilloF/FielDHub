@@ -44,10 +44,13 @@
 #'
 #' @export
 split_families <- function(l = NULL, data = NULL) {
-  
-  if(!is.data.frame(data)) stop("\n 'split_families()' requires input data to be a data frame.")
-  if (ncol(data) < 3) stop("\n 'split_families()' requires that data have three columns: ENTRY | NAME | FAMILY.")
+  if(!is.data.frame(data)) {
+    stop("\n 'split_families()' requires input data to be a data frame.")
+  } 
+  if (ncol(data) < 3) {
+    stop("\n 'split_families()' requires that data have three columns: ENTRY | NAME | FAMILY.")
   gen.list <- na.omit(data[,1:3])
+  } 
   colnames(gen.list) <- c("ENTRY", "NAME", "FAMILY")
   fmlys <- factor(gen.list$FAMILY)
   familyLevels <- levels(fmlys)
