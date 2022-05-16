@@ -130,10 +130,12 @@ mod_Diagonal_ui <- function(id) {
                                            choices = "", width = '400px')
                              ),
                              shinyjs::hidden(
-                               selectInput(inputId = ns("percent_checks"),
-                                           label = "Choose % of Checks:", 
-                                           choices = "", width = '400px')
+                               actionButton(inputId = ns("get_random"), 
+                                            label = "Randomize!")
                              ),
+                             br(),
+                             br(),
+                             uiOutput(ns("checks_percent")),
                              DT::DTOutput(ns("options_table"))
                     ),
                     tabPanel("Input Data",
@@ -167,10 +169,6 @@ mod_Diagonal_server <- function(id) {
     
     observeEvent(input$RUN.diagonal, {
       counts$trigger <- counts$trigger + 1
-    })
-    
-    trigger_list <- reactive({
-      list(input$RUN.diagonal, counts$trigger)
     })
     
     kindExpt_single <- "SUDC"
@@ -272,7 +270,7 @@ mod_Diagonal_server <- function(id) {
       dim_data_1 <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
       list(data_entry = data_entry_UP, 
            dim_data_entry = dim_data_entry, 
-           dim_data_1 = dim_data_1)
+           dim_without_checks = dim_data_1)
     })
     
     getChecks <- eventReactive(input$RUN.diagonal, {
@@ -334,7 +332,7 @@ mod_Diagonal_server <- function(id) {
                                           planter_mov1 = planter_mov,
                                           data = getData()$data_entry,
                                           dim_data = getData()$dim_data_entry,
-                                          dim_data_1 = getData()$dim_data_1,
+                                          dim_data_1 = getData()$dim_without_checks,
                                           Block_Fillers = blocks_length())
           if (!is.null(dt_options$dt)) {
             new_choices[[v]] <- choices[[dim_options]]
@@ -342,7 +340,6 @@ mod_Diagonal_server <- function(id) {
           }
         }
       })
-      new_choices <- c("Select", new_choices)
       updateSelectInput(inputId = "dimensions.d",
                         choices = new_choices,
                         selected = new_choices[1])
@@ -351,21 +348,17 @@ mod_Diagonal_server <- function(id) {
     observeEvent(input$RUN.diagonal, {
       req(getData()$dim_data_entry)
       shinyjs::show(id = "dimensions.d")
-      shinyjs::show(id = "percent_checks")
+      shinyjs::show(id = "get_random")
     })
     
-    
-    field_dimensions_diagonal <- reactive({
+    field_dimensions_diagonal <- eventReactive(input$get_random, {
       req(input$dimensions.d)
-      if (input$dimensions.d != "Select") {
-        dims <- unlist(strsplit(input$dimensions.d, " x "))
-        d_row <- as.numeric(dims[1])
-        d_col <- as.numeric(dims[2])
-        return(list(d_row = d_row, d_col = d_col))
-      } else return(NULL)
-
+      dims <- unlist(strsplit(input$dimensions.d, " x "))
+      d_row <- as.numeric(dims[1])
+      d_col <- as.numeric(dims[2])
+      return(list(d_row = d_row, d_col = d_col))
     })
-    
+
     entryListFormat_SUDC <- data.frame(
       ENTRY = 1:9, 
       NAME = c(c("CHECK1", "CHECK2","CHECK3"), paste("Genotype", LETTERS[1:6], 
@@ -399,18 +392,15 @@ mod_Diagonal_server <- function(id) {
       }
     })
 
-    available_percent_table <- reactive({
+    available_percent_table <- eventReactive(input$get_random, {
       req(input$dimensions.d)
       req(getData())
       req(field_dimensions_diagonal())
       Option_NCD <- TRUE
       checksEntries <- as.vector(getChecks()$checksEntries)
-      
       planter_mov <- single_inputs()$planter_mov
-      
       n_rows <- field_dimensions_diagonal()$d_row
       n_cols <- field_dimensions_diagonal()$d_col
-      
       available_percent(n_rows = n_rows, 
                         n_cols = n_cols, 
                         checks = checksEntries, 
@@ -420,11 +410,44 @@ mod_Diagonal_server <- function(id) {
                         planter_mov1 = planter_mov,
                         data = getData()$data_entry, 
                         dim_data = getData()$dim_data_entry,
-                        dim_data_1 = getData()$dim_data_1, 
+                        dim_data_1 = getData()$dim_without_checks, 
                         Block_Fillers = blocks_length())
     }) 
-    
-    rand_checks <- reactive({
+
+    observeEvent(available_percent_table()$dt, {
+          my_out <- available_percent_table()$dt
+          my_percent <- my_out[,2]
+          len <- length(my_percent)
+          selected <- my_percent[len]
+          updateSelectInput(session = session, 
+                            inputId = 'percent_checks', 
+                            label = "Choose % of Checks:",
+                            choices = my_percent, 
+                            selected = selected)
+    })
+
+    randomize_hit <- reactiveValues(times = 0)
+ 
+    observeEvent(input$RUN.diagonal, {
+      randomize_hit$times <- 0
+    })
+
+    observeEvent(input$get_random, {
+      randomize_hit$times <- randomize_hit$times + 1
+    })
+
+    observeEvent(randomize_hit$times, {
+      print(randomize_hit$times)
+      output$checks_percent <- renderUI({
+        if (randomize_hit$times > 0) {
+        selectInput(inputId = ns("percent_checks"),
+                    label = "Choose % of Checks:", 
+                    choices = "", width = '400px')
+        }
+      })
+    })
+
+    rand_checks <- eventReactive(input$get_random, {
       req(input$dimensions.d)
       req(getData())
       req(field_dimensions_diagonal())
@@ -447,7 +470,8 @@ mod_Diagonal_server <- function(id) {
             dt = available_percent_table()$dt, 
             d_checks = available_percent_table()$d_checks, 
             p = available_percent_table()$P, 
-            percent = percent, kindExpt = kindExpt_single, 
+            percent = percent, 
+            kindExpt = kindExpt_single, 
             planter_mov = planter_mov, 
             Checks = checksEntries,
             stacked = input$stacked, 
@@ -467,31 +491,26 @@ mod_Diagonal_server <- function(id) {
                   user_site = user_site))
     })
     
-    output$options_table <- DT::renderDT({
-      Option_NCD <- TRUE
-      if (is.null(available_percent_table()$dt)) {
-        shiny::validate("Data input does not fit to field dimensions")
-        return(NULL)
-      }
-      my_out <- available_percent_table()$dt
-      my_percent <- my_out[,2]
-      len <- length(my_percent)
-      selected <- my_percent[len]
-      updateSelectInput(session = session, 
-                        inputId = 'percent_checks', 
-                        label = "Choose % of Checks:",
-                        choices = my_percent, 
-                        selected = selected)
-      df <- as.data.frame(my_out)
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                scrollX = TRUE, scrollY = "460px"))
-      DT::datatable(
-        df, rownames = FALSE, 
-        caption = 'Reference guide to design your experiment. Choose the percentage (%)
-      of checks based on the total number of plots you want to have in the final layout.', 
-        options = list(
-          columnDefs = list(list(className = 'dt-center', targets = "_all"))))
-      
+    eventReactive(input$get_random, {
+      output$options_table <- DT::renderDT({
+        if (randomize_hit$times > 0) {
+          Option_NCD <- TRUE
+          if (is.null(available_percent_table()$dt)) {
+            shiny::validate("Data input does not fit to field dimensions")
+            return(NULL)
+          }
+          my_out <- available_percent_table()$dt
+          df <- as.data.frame(my_out)
+          options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
+                                    scrollX = TRUE, scrollY = "460px"))
+          DT::datatable(
+            df, rownames = FALSE, 
+            caption = 'Reference guide to design your experiment. Choose the percentage (%)
+          of checks based on the total number of plots you want to have in the final layout.', 
+            options = list(
+              columnDefs = list(list(className = 'dt-center', targets = "_all"))))
+        }
+      })
     })
     
     output$data_input <- DT::renderDT({
@@ -531,7 +550,8 @@ mod_Diagonal_server <- function(id) {
 
     })
     
-    rand_lines <- reactive({ 
+    rand_lines <- eventReactive(input$get_random, {
+    # rand_lines <- reactive({ 
       req(input$dimensions.d)
       req(getData())
       req(field_dimensions_diagonal())
@@ -606,7 +626,8 @@ mod_Diagonal_server <- function(id) {
                                                           colores[1:len_checks]))
     })
     
-    split_name_reactive <- reactive({
+    split_name_reactive <- eventReactive(input$get_random, {
+    # split_name_reactive <- reactive({
       req(rand_lines())
       checksEntries <- getChecks()$checksEntries
       checks <- checksEntries
@@ -744,7 +765,8 @@ mod_Diagonal_server <- function(id) {
       
     })
     
-    plot_number_reactive <- reactive({
+    plot_number_reactive <- eventReactive(input$get_random, {
+    # plot_number_reactive <- reactive({
       req(rand_lines())
       req(split_name_reactive()$my_names)
       datos_name <- split_name_reactive()$my_names 
@@ -814,7 +836,11 @@ mod_Diagonal_server <- function(id) {
       )
     })
 
-    export_diagonal_design <- reactive({
+    export_diagonal_design <- eventReactive(input$get_random, {
+    # export_diagonal_design <- reactive({
+      if (input$percent_checks == "--Select--") {
+        return(NULL)
+      }
       locs_diagonal <- single_inputs()$sites
       final_expt_fieldbook <- vector(mode = "list",length = locs_diagonal)
       location_names <- single_inputs()$location_names
