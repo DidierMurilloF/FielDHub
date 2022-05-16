@@ -22,7 +22,6 @@ random_checks <- function(dt = NULL, d_checks = NULL, p = NULL, percent = NULL,
       my_index <- k
     }
   }
-  # shiny::req(my_index)
   my_index <- as.numeric(my_index)
   w_map <- d_checks[[my_index]]
   if(is.null(w_map)) stop("Input w_map is NULL.")
