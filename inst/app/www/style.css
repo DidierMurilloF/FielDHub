@@ -14,10 +14,10 @@ body::-webkit-scrollbar {
   display: none;
 }
 
-.nav a{
+.nav a {
     /*color: white !important;*/
     font-size: 1.3em !important;
-    }
+}
 
 .navbar {
   margin-bottom: 0;
