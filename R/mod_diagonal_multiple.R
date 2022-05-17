@@ -142,9 +142,10 @@ mod_diagonal_multiple_ui <- function(id) {
           )
         ),
         br(),
-        downloadButton(ns("download_fieldbook_multiple"),
-                       "Save Experiment",
-                       style = "width:100%")
+        # downloadButton(ns("download_fieldbook_multiple"),
+        #                "Save Experiment",
+        #                style = "width:100%")
+        uiOutput(ns("download_multi"))        
       ),
       mainPanel(
         width = 8,
@@ -192,10 +193,11 @@ mod_diagonal_multiple_server <- function(id) {
   moduleServer( id, function(input, output, session) {
     ns <- session$ns
 
-    counts <- reactiveValues(trigger = 0)
+    counts_multi <- reactiveValues(trigger_multi = 0)
     
     observeEvent(input$RUN_multiple, {
-      counts$trigger <- counts$trigger + 1
+      counts_multi$trigger_multi <- counts_multi$trigger_multi + 1
+      print(counts_multi$trigger_multi)
     })
     
     kindExpt = "DBUDC"
@@ -472,7 +474,7 @@ mod_diagonal_multiple_server <- function(id) {
       }
     })
 
-    available_percent_table <- eventReactive(input$get_random_multi, {
+    available_percent_multi <- eventReactive(input$get_random_multi, {
       req(input$dimensions_multiple)
       req(get_data_multiple())
       Option_NCD <- TRUE
@@ -493,8 +495,8 @@ mod_diagonal_multiple_server <- function(id) {
                         Block_Fillers = blocks_length())
     }) 
 
-    observeEvent(available_percent_table()$dt, {
-      my_out <- available_percent_table()$dt
+    observeEvent(available_percent_multi()$dt, {
+      my_out <- available_percent_multi()$dt
       my_percent <- my_out[,2]
       len <- length(my_percent)
       selected <- my_percent[len]
@@ -505,23 +507,44 @@ mod_diagonal_multiple_server <- function(id) {
                         selected = selected)
     })
 
-    randomize_hit <- reactiveValues(times = 0)
+    randomize_hit_multi <- reactiveValues(times_multi = 0)
  
     observeEvent(input$RUN_multiple, {
-      randomize_hit$times <- 0
+      randomize_hit_multi$times_multi <- 0
     })
 
-    observeEvent(input$get_random, {
-      randomize_hit$times <- randomize_hit$times + 1
+    user_tries_multi <- reactiveValues(tries = 1)
+
+    observeEvent(input$get_random_multi, {
+      randomize_hit_multi$times_multi <- randomize_hit_multi$times_multi + 1
+      user_tries_multi$tries <- user_tries_multi$tries + 1
     })
 
-    observeEvent(randomize_hit$times, {
-      print(randomize_hit$times)
+    observeEvent(input$dimensions_multiple, {
+      user_tries_multi$tries <- 0
+    })
+
+    list_to_observe_multi <- reactive({
+      list(randomize_hit_multi$times_multi, user_tries_multi$tries)
+    })
+
+    observeEvent(list_to_observe_multi(), {
+      print(randomize_hit_multi$times_multi)
       output$checks_percent_input <- renderUI({
-        if (randomize_hit$times > 0) {
-        selectInput(inputId = ns("percent_checks_multi"),
-                    label = "Choose % of Checks:", 
-                    choices = "", width = '400px')
+        if (randomize_hit_multi$times_multi > 0 & user_tries_multi$tries > 0) {
+          selectInput(inputId = ns("percent_checks_multi"),
+                      label = "Choose % of Checks:", 
+                      choices = "", width = '400px')
+        }
+      })
+    })
+
+   observeEvent(user_tries_multi$tries, {
+      output$download_multi <- renderUI({
+        if (user_tries_multi$tries > 0) {
+          downloadButton(ns("download_fieldbook_multiple"),
+                          "Save Experiment",
+                          style = "width:100%")
         }
       })
     })
@@ -533,29 +556,29 @@ mod_diagonal_multiple_server <- function(id) {
       Option_NCD <- TRUE
       req(multiple_inputs()$seed_number)
       seed <- as.numeric(multiple_inputs()$seed_number)
-      req(available_percent_table()$dt)
-      req(available_percent_table()$d_checks)
-      req(available_percent_table()$P)
+      req(available_percent_multi()$dt)
+      req(available_percent_multi()$d_checks)
+      req(available_percent_multi()$P)
       checksEntries <- as.vector(getChecks()$checksEntries)
       planter_multiple <- multiple_inputs()$planter_mov
       locs <- as.numeric(multiple_inputs()$sites)
       percent <- as.numeric(input$percent_checks_multi)
       diag_locs <- vector(mode = "list", length = locs)
       random_checks_locs <- vector(mode = "list", length = locs)
-      if (isTruthy(available_percent_table()$d_checks)) {
+      if (isTruthy(available_percent_multi()$d_checks)) {
         set.seed(seed)
         for (sites in 1:locs) {
           random_checks_locs[[sites]] <- random_checks(
-            dt = available_percent_table()$dt, 
-            d_checks = available_percent_table()$d_checks, 
-            p = available_percent_table()$P, 
+            dt = available_percent_multi()$dt, 
+            d_checks = available_percent_multi()$d_checks, 
+            p = available_percent_multi()$P, 
             percent = percent, 
             kindExpt = kindExpt, 
             planter_mov = planter_multiple, 
             Checks = checksEntries,
             stacked = multiple_inputs()$stacked, 
             data = get_data_multiple()$data_entry, 
-            data_dim_each_block = available_percent_table()$data_dim_each_block,
+            data_dim_each_block = available_percent_multi()$data_dim_each_block,
             n_reps = input$n_reps, seed = NULL)
         }
       }
@@ -570,29 +593,29 @@ mod_diagonal_multiple_server <- function(id) {
                   user_site = user_site))
     })
     
-    eventReactive(input$get_random_multi, {
+    #eventReactive(input$get_random_multi, {
       output$options_table_multi <- DT::renderDT({
-        if (randomize_hit$times > 0) {
-          Option_NCD <- TRUE
-          if (is.null(available_percent_table()$dt)) {
-            shiny::validate("Data input does not fit to field dimensions")
-            return(NULL)
-          }
-          my_out <- available_percent_table()$dt
-          df <- as.data.frame(my_out)
-          options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                    scrollX = TRUE, scrollY = "460px"))
-          DT::datatable(
-            df, rownames = FALSE, 
-            caption = 'Reference guide to design your experiment. Choose the percentage (%)
-          of checks based on the total number of plots you want to have in the final layout.', 
-            options = list(
-              columnDefs = list(list(className = 'dt-center', targets = "_all"))))
+        if (user_tries_multi$tries < 1) return(NULL)
+        Option_NCD <- TRUE
+        if (is.null(available_percent_multi()$dt)) {
+          shiny::validate("Data input does not fit to field dimensions")
+          return(NULL)
         }
+        my_out <- available_percent_multi()$dt
+        df <- as.data.frame(my_out)
+        options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
+                                  scrollX = TRUE, scrollY = "460px"))
+        DT::datatable(
+          df, rownames = FALSE, 
+          caption = 'Reference guide to design your experiment. Choose the percentage (%)
+        of checks based on the total number of plots you want to have in the final layout.', 
+          options = list(
+            columnDefs = list(list(className = 'dt-center', targets = "_all"))))
       })
-    })
+    #})
     
     output$data_input <- DT::renderDT({
+      if (user_tries_multi$tries < 1) return(NULL)
       df <- get_data_multiple()$data_entry
       df$ENTRY <- as.factor(df$ENTRY)
       df$NAME <- as.factor(df$NAME)
@@ -611,6 +634,7 @@ mod_diagonal_multiple_server <- function(id) {
     })
     
     output$checks_table <- DT::renderDT({
+      if (user_tries_multi$tries < 1) return(NULL)
       Option_NCD <- TRUE
       req(get_data_multiple()$data_entry)
       data_entry <- get_data_multiple()$data_entry
@@ -627,8 +651,8 @@ mod_diagonal_multiple_server <- function(id) {
       req(get_data_multiple())
       req(field_dimensions_diagonal())
       Option_NCD <- TRUE
-      req(available_percent_table()$dt)
-      req(available_percent_table()$d_checks)
+      req(available_percent_multi()$dt)
+      req(available_percent_multi()$d_checks)
       req(get_data_multiple()$data_entry)
       data_entry <- get_data_multiple()$data_entry
       n_rows <- field_dimensions_diagonal()$d_row
@@ -645,8 +669,8 @@ mod_diagonal_multiple_server <- function(id) {
         req(get_data_multiple()$data_entry)
         data_entry <- get_data_multiple()$data_entry
         if (multiple_inputs()$stacked == "By Row") {
-          req(available_percent_table()$data_dim_each_block)
-          data_dim_each_block <- available_percent_table()$data_dim_each_block
+          req(available_percent_multi()$data_dim_each_block)
+          data_dim_each_block <- available_percent_multi()$data_dim_each_block
           my_row_sets <- automatically_cuts(data = map_checks, 
                                             planter_mov = multiple_inputs()$planter_mov,
                                             way = "By Row", 
@@ -654,8 +678,8 @@ mod_diagonal_multiple_server <- function(id) {
           if(is.null(my_row_sets)) return(NULL)
           n_blocks <- length(my_row_sets)
         }else if (multiple_inputs()$stacked == "By Column") {
-          req(available_percent_table()$data_dim_each_block)
-          data_dim_each_block <- available_percent_table()$data_dim_each_block
+          req(available_percent_multi()$data_dim_each_block)
+          data_dim_each_block <- available_percent_multi()$data_dim_each_block
           cuts_by_c <- automatically_cuts(data = map_checks, 
                                           planter_mov = multiple_inputs()$planter_mov, 
                                           way = "By Column",
@@ -686,7 +710,7 @@ mod_diagonal_multiple_server <- function(id) {
                                         data_entries = data_entry1,
                                         planter = multiple_inputs()$planter_mov)
           }else if(Option_NCD == TRUE) {
-            req(available_percent_table()$data_dim_each_block)
+            req(available_percent_multi()$data_dim_each_block)
             Block_Fillers <- as.numeric(blocks_length())
             data_random <- get_random(n_rows = n_rows, 
                                       n_cols = n_cols, 
@@ -706,6 +730,7 @@ mod_diagonal_multiple_server <- function(id) {
     })
     
     output$randomized_layout <- DT::renderDT({
+      if (user_tries_multi$tries < 1) return(NULL)
       req(input$dimensions_multiple)
       req(get_data_multiple())
       req(rand_lines())
@@ -771,7 +796,7 @@ mod_diagonal_multiple_server <- function(id) {
       n_cols <- field_dimensions_diagonal()$d_col
       if (multiple_inputs()$stacked == "By Row") {
         map_letters <- rand_lines()[[1]]$w_map_letter
-        data_dim_each_block <- available_percent_table()$data_dim_each_block
+        data_dim_each_block <- available_percent_multi()$data_dim_each_block
         # Name_expt <- as.vector(unlist(strsplit(input$expt_name_multiple, ",")))
         Name_expt <- multiple_inputs()$expt_name
         blocks <- length(data_dim_each_block)
@@ -791,7 +816,7 @@ mod_diagonal_multiple_server <- function(id) {
                                              Checks = checksEntries)
       }else if (multiple_inputs()$stacked == "By Column") {
         map_letters <- rand_lines()[[1]]$w_map_letter
-        data_dim_each_block <- available_percent_table()$data_dim_each_block
+        data_dim_each_block <- available_percent_multi()$data_dim_each_block
         # Name_expt <- as.vector(unlist(strsplit(input$expt_name_multiple, ",")))
         Name_expt <- multiple_inputs()$expt_name
         blocks <- length(data_dim_each_block)
@@ -817,6 +842,7 @@ mod_diagonal_multiple_server <- function(id) {
     })
     
     output$name_layout <- DT::renderDT({
+      if (user_tries_multi$tries < 1) return(NULL)
       Option_NCD <- TRUE
       req(split_name_reactive()$my_names)
       my_names <- split_name_reactive()$my_names
@@ -824,14 +850,14 @@ mod_diagonal_multiple_server <- function(id) {
       w_map <- rand_checks()[[1]]$map_checks
       if("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE
       if (multiple_inputs()$stacked == "By Row") { 
-        data_dim_each_block <- available_percent_table()$data_dim_each_block 
+        data_dim_each_block <- available_percent_multi()$data_dim_each_block 
         my_row_sets <- automatically_cuts(data = w_map, 
                                           planter_mov = multiple_inputs()$planter_mov,
                                           way = "By Row", 
                                           dim_data = data_dim_each_block)[[1]]
         blocks <- length(my_row_sets) 
       }else { 
-        data_dim_each_block <- available_percent_table()$data_dim_each_block 
+        data_dim_each_block <- available_percent_multi()$data_dim_each_block 
         cuts_by_c <- automatically_cuts(data = w_map,
                                         planter_mov = NULL,
                                         way = "By Column",
@@ -909,16 +935,16 @@ mod_diagonal_multiple_server <- function(id) {
       for (sites in 1:locs_diagonal) {
         if (Option_NCD == FALSE) { 
           req(get_data_multiple()$data_entry) 
-          req(available_percent_table()$data_dim_each_block) 
+          req(available_percent_multi()$data_dim_each_block) 
           if (multiple_inputs()$stacked == "By Row") { 
-            data_dim_each_block <- available_percent_table()$data_dim_each_block 
+            data_dim_each_block <- available_percent_multi()$data_dim_each_block 
             my_row_sets <- automatically_cuts(data = w_map, 
                                               planter_mov = multiple_inputs()$planter_mov,
                                               way = "By Row", 
                                               dim_data = data_dim_each_block)[[1]]
             n_blocks <- length(my_row_sets) 
           }else { 
-            data_dim_each_block <- available_percent_table()$data_dim_each_block 
+            data_dim_each_block <- available_percent_multi()$data_dim_each_block 
             cuts_by_c <- automatically_cuts(data = w_map, 
                                             planter_mov = NULL,
                                             way = "By Column",
@@ -951,7 +977,7 @@ mod_diagonal_multiple_server <- function(id) {
           }else{
             req(split_name_reactive()$my_names)
             datos_name <- split_name_reactive()$my_names 
-            data.dim.each <- available_percent_table()$data_dim_each_block
+            data.dim.each <- available_percent_multi()$data_dim_each_block
             Block_Fillers <- as.numeric(blocks_length()) 
             
             my_split_plot_nub <- plot_number_fillers(movement_planter = movement_planter, 
@@ -969,13 +995,13 @@ mod_diagonal_multiple_server <- function(id) {
         } else if (Option_NCD == TRUE) {
           req(get_data_multiple()$data_entry) 
           if (multiple_inputs()$stacked == "By Row") { 
-            data_dim_each_block <- available_percent_table()$data_dim_each_block 
+            data_dim_each_block <- available_percent_multi()$data_dim_each_block 
             my_row_sets <- automatically_cuts(data = w_map, 
                                               planter_mov = multiple_inputs()$planter_mov,
                                               way = "By Row", dim_data = data_dim_each_block)[[1]]
             n_blocks <- length(my_row_sets) 
           }else { 
-            data_dim_each_block <- available_percent_table()$data_dim_each_block 
+            data_dim_each_block <- available_percent_multi()$data_dim_each_block 
             cuts_by_c <- automatically_cuts(data = w_map, 
                                             planter_mov = NULL, 
                                             way = "By Column",
@@ -994,7 +1020,7 @@ mod_diagonal_multiple_server <- function(id) {
           } 
           if(multiple_inputs()$stacked == "By Row") { 
             datos_name <- split_name_reactive()$my_names 
-            data.dim.each <- available_percent_table()$data_dim_each_block
+            data.dim.each <- available_percent_multi()$data_dim_each_block
             Block_Fillers <- as.numeric(blocks_length()) 
             
             my_split_plot_nub <- plot_number_fillers(movement_planter = multiple_inputs()$planter_mov, 
@@ -1013,6 +1039,7 @@ mod_diagonal_multiple_server <- function(id) {
     })
     
     output$plot_number_layout <- DT::renderDT({
+      if (user_tries_multi$tries < 1) return(NULL)
       req(plot_number_reactive())
       plot_num <- plot_number_reactive()$plots_number_sites[[user_location()$user_site]]
       if (is.null(plot_num))
@@ -1242,6 +1269,7 @@ mod_diagonal_multiple_server <- function(id) {
     })
     
     output$fieldBook_diagonal <- DT::renderDT({
+      if (user_tries_multi$tries < 1) return(NULL)
       req(simudata_DIAG()$df)
       df <- simudata_DIAG()$df
       df$EXPT <- as.factor(df$EXPT)
@@ -1279,6 +1307,7 @@ mod_diagonal_multiple_server <- function(id) {
     })
     
     output$heatmap_diag <- plotly::renderPlotly({
+      if (user_tries_multi$tries < 1) return(NULL)
       req(heatmap_obj_D())
       heatmap_obj_D()
     })

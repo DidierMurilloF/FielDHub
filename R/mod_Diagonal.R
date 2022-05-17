@@ -115,9 +115,10 @@ mod_Diagonal_ui <- function(id) {
           )
         ),
         br(),
-        downloadButton(ns("downloadData_Diagonal"),
-                       "Save Experiment",
-                       style = "width:100%")
+        # downloadButton(ns("downloadData_Diagonal"),
+        #                "Save Experiment",
+        #                style = "width:100%")
+        uiOutput(ns("download_single"))
       ),
       mainPanel(
         width = 8,
@@ -432,17 +433,42 @@ mod_Diagonal_server <- function(id) {
       randomize_hit$times <- 0
     })
 
+    user_tries <- reactiveValues(tries = 1)
+
     observeEvent(input$get_random, {
       randomize_hit$times <- randomize_hit$times + 1
+      user_tries$tries <- user_tries$tries + 1
     })
 
-    observeEvent(randomize_hit$times, {
+    observeEvent(input$dimensions.d, {
+      user_tries$tries <- 0
+    })
+
+    # observeEvent(input$get_random, {
+    #   user_tries$tries <- user_tries$tries + 1
+    # })
+
+    list_to_observe <- reactive({
+      list(randomize_hit$times, user_tries$tries)
+    })
+
+    observeEvent(list_to_observe(), {
       print(randomize_hit$times)
       output$checks_percent <- renderUI({
-        if (randomize_hit$times > 0) {
+        if (randomize_hit$times > 0 & user_tries$tries > 0) {
         selectInput(inputId = ns("percent_checks"),
                     label = "Choose % of Checks:", 
                     choices = "", width = '400px')
+        }
+      })
+    })
+
+    observeEvent(user_tries$tries, {
+      output$download_single <- renderUI({
+        if (user_tries$tries > 0) {
+          downloadButton(ns("downloadData_Diagonal"),
+                          "Save Experiment",
+                          style = "width:100%")
         }
       })
     })
@@ -491,67 +517,68 @@ mod_Diagonal_server <- function(id) {
                   user_site = user_site))
     })
     
-    eventReactive(input$get_random, {
-      output$options_table <- DT::renderDT({
-        if (randomize_hit$times > 0) {
-          Option_NCD <- TRUE
-          if (is.null(available_percent_table()$dt)) {
-            shiny::validate("Data input does not fit to field dimensions")
-            return(NULL)
-          }
-          my_out <- available_percent_table()$dt
-          df <- as.data.frame(my_out)
-          options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                    scrollX = TRUE, scrollY = "460px"))
-          DT::datatable(
-            df, rownames = FALSE, 
-            caption = 'Reference guide to design your experiment. Choose the percentage (%)
-          of checks based on the total number of plots you want to have in the final layout.', 
-            options = list(
-              columnDefs = list(list(className = 'dt-center', targets = "_all"))))
+    output$options_table <- DT::renderDT({
+      if (randomize_hit$times > 0 & user_tries$tries > 0) {
+        Option_NCD <- TRUE
+        if (is.null(available_percent_table()$dt)) {
+          shiny::validate("Data input does not fit to field dimensions")
+          return(NULL)
         }
-      })
+        my_out <- available_percent_table()$dt
+        df <- as.data.frame(my_out)
+        options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
+                                  scrollX = TRUE, scrollY = "460px"))
+        DT::datatable(
+          df, rownames = FALSE, 
+          caption = 'Reference guide to design your experiment. Choose the percentage (%)
+        of checks based on the total number of plots you want to have in the final layout.', 
+          options = list(
+            columnDefs = list(list(className = 'dt-center', targets = "_all"))))
+      }
     })
     
     output$data_input <- DT::renderDT({
-      df <- getData()$data_entry
-      df$ENTRY <- as.factor(df$ENTRY)
-      df$NAME <- as.factor(df$NAME)
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                scrollX = TRUE, scrollY = "600px"))
-      DT::datatable(df,
-                    filter = "top",
-                    rownames = FALSE, 
-                    caption = 'List of Entries.', 
-                    options = list(
-                      columnDefs = list(
-                        list(className = 'dt-center', targets = "_all")))
-      )
+      if (randomize_hit$times > 0 & user_tries$tries > 0) {
+        df <- getData()$data_entry
+        df$ENTRY <- as.factor(df$ENTRY)
+        df$NAME <- as.factor(df$NAME)
+        options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
+                                  scrollX = TRUE, scrollY = "600px"))
+
+        DT::datatable(df,
+                      filter = "top",
+                      rownames = FALSE, 
+                      caption = 'List of Entries.', 
+                      options = list(
+                        columnDefs = list(
+                          list(className = 'dt-center', targets = "_all")))
+        )
+      }
     })
     
     output$checks_table <- DT::renderDT({
-      Option_NCD <- TRUE
-      req(getData()$data_entry)
-      data_entry <- getData()$data_entry
-      req(user_location()$map_checks)
-      if(is.null(user_location()$map_checks)) return(NULL)
-      w_map <- user_location()$map_checks
-      table_checks <- data_entry[1:(input$checks),]
-      df <- table_checks
-      info_checks <- base::table(w_map[w_map > 0])
-      times_checks <- data.frame(list(ENTRY = base::names(info_checks), 
-                                      TIMES = base::as.matrix(info_checks)))
-      df <- base::merge(df, times_checks, by.x = "ENTRY")
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                scrollX = TRUE, scrollY = "350px"))
-      DT::datatable(df, rownames = FALSE, caption = 'Table of Checks.', 
-                    options = list(
-                      columnDefs = list(list(className = 'dt-center', targets = "_all"))))
-
+      if (randomize_hit$times > 0 & user_tries$tries > 0) {
+        Option_NCD <- TRUE
+        req(getData()$data_entry)
+        data_entry <- getData()$data_entry
+        req(user_location()$map_checks)
+        if(is.null(user_location()$map_checks)) return(NULL)
+        w_map <- user_location()$map_checks
+        table_checks <- data_entry[1:(input$checks),]
+        df <- table_checks
+        info_checks <- base::table(w_map[w_map > 0])
+        times_checks <- data.frame(list(ENTRY = base::names(info_checks), 
+                                        TIMES = base::as.matrix(info_checks)))
+        df <- base::merge(df, times_checks, by.x = "ENTRY")
+        options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
+                                  scrollX = TRUE, scrollY = "350px"))
+        DT::datatable(df, rownames = FALSE, caption = 'Table of Checks.', 
+                      options = list(
+                        columnDefs = list(list(className = 'dt-center', targets = "_all"))))
+    }
     })
     
     rand_lines <- eventReactive(input$get_random, {
-    # rand_lines <- reactive({ 
       req(input$dimensions.d)
       req(getData())
       req(field_dimensions_diagonal())
@@ -585,6 +612,8 @@ mod_Diagonal_server <- function(id) {
     })
     
     output$randomized_layout <- DT::renderDT({
+      #if (randomize_hit$times > 0 & user_tries$tries > 0) {
+      if (user_tries$tries < 1) return(NULL)
       req(input$dimensions.d)
       req(getData())
       req(rand_lines())
@@ -624,6 +653,7 @@ mod_Diagonal_server <- function(id) {
         DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
                         backgroundColor = DT::styleEqual(c(checks),
                                                           colores[1:len_checks]))
+      #}
     })
     
     split_name_reactive <- eventReactive(input$get_random, {
@@ -689,54 +719,54 @@ mod_Diagonal_server <- function(id) {
       list(name_with_Fillers = split_names)
     })
     
-    output$name_layout <- DT::renderDT({
-      Option_NCD <- TRUE
-      req(split_name_reactive()$my_names)
-      my_names <- split_name_reactive()$my_names
-      if (is.null(my_names)) return(NULL)
-      w_map <- rand_checks()[[1]]$map_checks
-      if("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE
-      if(Option_NCD == TRUE) {
-        my_names <- put_Filler_in_name()$name_with_Fillers
-        blocks = 1
-        if (single_inputs()$expt_name != ""){
-          Name_expt <- single_inputs()$expt_name 
-        }else Name_expt = paste0(rep("Expt1", times = blocks), 1:blocks)
-        df <- as.data.frame(my_names)
-        rownames(df) <- nrow(df):1
-        options(DT.options = list(pageLength = nrow(df), 
-                                  autoWidth = FALSE,
-                                  scrollY = "700px"))
-        DT::datatable(df,
-                      extensions = 'FixedColumns',
-                      options = list(
-                        dom = 't',
-                        scrollX = TRUE,
-                        fixedColumns = TRUE
-                      )) %>% 
-          DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-                          backgroundColor = DT::styleEqual(Name_expt, c('yellow')))
-      }else {
-        blocks = 1
-        if (single_inputs()$expt_name != ""){
-          Name_expt <- single_inputs()$expt_name 
-        }else Name_expt = paste0(rep("Expt1", times = blocks), 1:blocks)
-        df <- as.data.frame(my_names)
-        rownames(df) <- nrow(df):1
-        options(DT.options = list(pageLength = nrow(df),
-                                  autoWidth = FALSE,
-                                  scrollY = "700px"))
-        DT::datatable(df,
-                      extensions = 'FixedColumns',
-                      options = list(
-                        dom = 't',
-                        scrollX = TRUE,
-                        fixedColumns = TRUE
-                      )) %>% 
-          DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-                          backgroundColor = DT::styleEqual(Name_expt, c('yellow')))
-      }
-    })
+    # output$name_layout <- DT::renderDT({
+    #   Option_NCD <- TRUE
+    #   req(split_name_reactive()$my_names)
+    #   my_names <- split_name_reactive()$my_names
+    #   if (is.null(my_names)) return(NULL)
+    #   w_map <- rand_checks()[[1]]$map_checks
+    #   if("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE
+    #   if(Option_NCD == TRUE) {
+    #     my_names <- put_Filler_in_name()$name_with_Fillers
+    #     blocks = 1
+    #     if (single_inputs()$expt_name != ""){
+    #       Name_expt <- single_inputs()$expt_name 
+    #     }else Name_expt = paste0(rep("Expt1", times = blocks), 1:blocks)
+    #     df <- as.data.frame(my_names)
+    #     rownames(df) <- nrow(df):1
+    #     options(DT.options = list(pageLength = nrow(df), 
+    #                               autoWidth = FALSE,
+    #                               scrollY = "700px"))
+    #     DT::datatable(df,
+    #                   extensions = 'FixedColumns',
+    #                   options = list(
+    #                     dom = 't',
+    #                     scrollX = TRUE,
+    #                     fixedColumns = TRUE
+    #                   )) %>% 
+    #       DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
+    #                       backgroundColor = DT::styleEqual(Name_expt, c('yellow')))
+    #   }else {
+    #     blocks = 1
+    #     if (single_inputs()$expt_name != ""){
+    #       Name_expt <- single_inputs()$expt_name 
+    #     }else Name_expt = paste0(rep("Expt1", times = blocks), 1:blocks)
+    #     df <- as.data.frame(my_names)
+    #     rownames(df) <- nrow(df):1
+    #     options(DT.options = list(pageLength = nrow(df),
+    #                               autoWidth = FALSE,
+    #                               scrollY = "700px"))
+    #     DT::datatable(df,
+    #                   extensions = 'FixedColumns',
+    #                   options = list(
+    #                     dom = 't',
+    #                     scrollX = TRUE,
+    #                     fixedColumns = TRUE
+    #                   )) %>% 
+    #       DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
+    #                       backgroundColor = DT::styleEqual(Name_expt, c('yellow')))
+    #   }
+    # })
     
     plot_number_sites <- reactive({
       req(single_inputs())
@@ -766,7 +796,6 @@ mod_Diagonal_server <- function(id) {
     })
     
     plot_number_reactive <- eventReactive(input$get_random, {
-    # plot_number_reactive <- reactive({
       req(rand_lines())
       req(split_name_reactive()$my_names)
       datos_name <- split_name_reactive()$my_names 
@@ -811,6 +840,7 @@ mod_Diagonal_server <- function(id) {
     })
     
     output$plot_number_layout <- DT::renderDT({
+      if (user_tries$tries < 1) return(NULL)
       req(plot_number_reactive())
       plot_num <- plot_number_reactive()$plots_number_sites[[user_location()$user_site]]
       if (is.null(plot_num))
@@ -1035,6 +1065,7 @@ mod_Diagonal_server <- function(id) {
     })
 
     output$fieldBook_diagonal <- DT::renderDT({
+      if (user_tries$tries < 1) return(NULL)
       req(simudata_DIAG()$df)
       df <- simudata_DIAG()$df
       df$EXPT <- as.factor(df$EXPT)
@@ -1073,6 +1104,7 @@ mod_Diagonal_server <- function(id) {
     })
     
     output$heatmap_diag <- plotly::renderPlotly({
+      if (user_tries$tries < 1) return(NULL)
       req(heatmap_obj_D())
       heatmap_obj_D()
     })
