@@ -219,7 +219,7 @@ split_plot <- function(wp = NULL, sp = NULL, reps = NULL, type = 2, l = 1, plotN
                      plotNumbers = plot.number,
                      typeDesign = type,
                      seed = seed,
-                     idDesign = 5)
+                     id_design = 5)
   output <- list(infoDesign = info.design, layoutlocations = loc.spd.layout, 
               fieldBook = spd_output)
   class(output) <- "FielDHub"

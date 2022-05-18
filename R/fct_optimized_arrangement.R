@@ -102,7 +102,10 @@ optimized_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,  amo
       if (l > 1){
         plotNumber <- seq(1001, 1000*(l+1), 1000)
       } else plotNumber <- 1001
-      message(cat("Warning message:", "\n", "Since plotNumber was missing, it was set up to default value of: ", plotNumber))
+      message(cat("Warning message:", "\n", 
+      "Since plotNumber was missing, it was set up to default value of: ", plotNumber, "\n",
+      "\n"
+      ))
     }
   }else stop("Number of locations/sites is missing")
   
@@ -266,8 +269,15 @@ optimized_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,  amo
   
   field_book <- dplyr::bind_rows(field_book_sites)
   
-  infoDesign <- list(Lines = lines, checks = checksEntries, RepChecks = RepChecks, seed = seed,
-                     idDesign = 16)
+  infoDesign <- list(
+    field_dimensions = c("rows" = nrows, "columns" = ncols),
+    treatments = lines, 
+    checks = length(RepChecks),
+    entry_checks = checksEntries,
+    rep_checks = RepChecks, 
+    seed = seed,
+    locations = l, planter = planter,
+    id_design = 16)
   output <- list(infoDesign = infoDesign, 
                  layoutRandom = layout_random_sites, 
                  plotNumber = plot_numbers_sites,

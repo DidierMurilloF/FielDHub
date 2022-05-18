@@ -142,9 +142,6 @@ mod_diagonal_multiple_ui <- function(id) {
           )
         ),
         br(),
-        # downloadButton(ns("download_fieldbook_multiple"),
-        #                "Save Experiment",
-        #                style = "width:100%")
         uiOutput(ns("download_multi"))        
       ),
       mainPanel(
@@ -197,7 +194,6 @@ mod_diagonal_multiple_server <- function(id) {
     
     observeEvent(input$RUN_multiple, {
       counts_multi$trigger_multi <- counts_multi$trigger_multi + 1
-      print(counts_multi$trigger_multi)
     })
     
     kindExpt = "DBUDC"
@@ -266,7 +262,6 @@ mod_diagonal_multiple_server <- function(id) {
     
 
     get_data_multiple <- eventReactive(input$RUN_multiple, {
-      #Sys.sleep(2)
       Option_NCD <- TRUE
       if (input$list_entries_multiple == "Yes") {
         req(input$checks.db)
@@ -430,7 +425,6 @@ mod_diagonal_multiple_server <- function(id) {
       req(get_data_multiple()$dim_data_entry)
       shinyjs::show(id = "dimensions_multiple")
       shinyjs::show(id = "get_random_multi")
-      # shinyjs::show(id = "percent_checks_multi")
     })
     
     field_dimensions_diagonal <-  eventReactive(input$get_random_multi, {
@@ -529,7 +523,6 @@ mod_diagonal_multiple_server <- function(id) {
     })
 
     observeEvent(list_to_observe_multi(), {
-      print(randomize_hit_multi$times_multi)
       output$checks_percent_input <- renderUI({
         if (randomize_hit_multi$times_multi > 0 & user_tries_multi$tries > 0) {
           selectInput(inputId = ns("percent_checks_multi"),
@@ -593,26 +586,25 @@ mod_diagonal_multiple_server <- function(id) {
                   user_site = user_site))
     })
     
-    #eventReactive(input$get_random_multi, {
-      output$options_table_multi <- DT::renderDT({
-        if (user_tries_multi$tries < 1) return(NULL)
-        Option_NCD <- TRUE
-        if (is.null(available_percent_multi()$dt)) {
-          shiny::validate("Data input does not fit to field dimensions")
-          return(NULL)
-        }
-        my_out <- available_percent_multi()$dt
-        df <- as.data.frame(my_out)
-        options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                  scrollX = TRUE, scrollY = "460px"))
-        DT::datatable(
-          df, rownames = FALSE, 
-          caption = 'Reference guide to design your experiment. Choose the percentage (%)
-        of checks based on the total number of plots you want to have in the final layout.', 
-          options = list(
-            columnDefs = list(list(className = 'dt-center', targets = "_all"))))
-      })
-    #})
+    output$options_table_multi <- DT::renderDT({
+      if (user_tries_multi$tries < 1) return(NULL)
+      Option_NCD <- TRUE
+      if (is.null(available_percent_multi()$dt)) {
+        shiny::validate("Data input does not fit to field dimensions")
+        return(NULL)
+      }
+      my_out <- available_percent_multi()$dt
+      df <- as.data.frame(my_out)
+      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
+                                scrollX = TRUE, scrollY = "460px"))
+      DT::datatable(
+        df, rownames = FALSE, 
+        caption = 'Reference guide to design your experiment. Choose the percentage (%)
+      of checks based on the total number of plots you want to have in the final layout.', 
+        options = list(
+          columnDefs = list(list(className = 'dt-center', targets = "_all"))))
+    })
+
     
     output$data_input <- DT::renderDT({
       if (user_tries_multi$tries < 1) return(NULL)

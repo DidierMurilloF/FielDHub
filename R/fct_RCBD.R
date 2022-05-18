@@ -204,7 +204,7 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101, continuous = FA
   
   parameters = list(blocks = b, number.of.treatments = nt, treatments = mytreatments,
                     locations = l, plotNumber = plotNumber, locationNames = locationNames,
-                    seed = seed, idDesign = 2)
+                    seed = seed, id_design = 2)
   output <- list(infoDesign = parameters, layoutRandom = RCBD.layout.loc,
                  plotNumber = p.number.loc,
                  fieldBook = RCBD_output)

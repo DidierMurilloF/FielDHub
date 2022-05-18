@@ -38,39 +38,16 @@ mod_pREPS_ui <- function(id){
                                                selected = ","))
                          ),             
         ),
-        # fluidRow(
-        #   column(6, # style=list("padding-right: 28px;"),
-        #          numericInput(ns("nrows.preps"), 
-        #                       label = "Input # of Rows:",
-        #                       value = 15, 
-        #                       min = 5)
-        #   ),
-        #   column(6, # style=list("padding-left: 5px;"),
-        #          numericInput(ns("ncols.preps"), 
-        #                       label = "Input # of Columns:",
-        #                       value = 20, 
-        #                       min = 5)
-        #   )
-        # ),
         conditionalPanel(
           condition = "input.owndataPREPS == 'No'", 
           ns = ns,
-          fluidRow(
-            column(6, # style=list("padding-right: 28px;"),
-                   textInput(ns("repGens.preps"), 
-                             label = "# of Entries per Rep Group:", 
-                             value = "75,150")
-            ),
-            column(6, # style=list("padding-left: 5px;"),
-                   textInput(inputId = ns("repUnits.preps"), 
-                             label = "# of Rep per Group:",
-                             value = "2,1")
-            )
-          )
+          textInput(ns("repGens.preps"), 
+                    label = "# of Entries per Rep Group:", 
+                    value = "75,150"),
+          textInput(inputId = ns("repUnits.preps"), 
+                    label = "# of Rep per Group:",
+                    value = "2,1")
         ),
-        selectInput(inputId = ns("dimensions.preps"), 
-                    label = "Select dimensions of field:", 
-                    choices = ""),
         fluidRow(
           column(6, # style=list("padding-right: 28px;"),
                  numericInput(inputId = ns("l.preps"), 
@@ -93,7 +70,7 @@ mod_pREPS_ui <- function(id){
                     selected = "serpentine"),
         fluidRow(
           column(6, # style=list("padding-right: 28px;"),
-                 numericInput(ns("s.seed.preps"), 
+                 numericInput(ns("seed.preps"), 
                               label = "Seed number:", 
                               value = 1, 
                               min = 1)
@@ -116,7 +93,6 @@ mod_pREPS_ui <- function(id){
                            value = "FARGO")
           )
         ),
-        
         fluidRow(
           column(6,
                  actionButton(inputId = ns("RUN.prep"), 
@@ -132,22 +108,40 @@ mod_pREPS_ui <- function(id){
           )
         ),
         br(),
-        downloadButton(ns("downloadData.preps"), 
-                       "Save Experiment", 
-                       style = "width:100%")
+        uiOutput(ns("download_prep"))
       ),
       mainPanel(
         width = 8,
-        tabsetPanel(
-           tabPanel("Data Input", DT::DTOutput(ns("dataup.preps"))),
-           tabPanel("Matrix Checks", 
-                    shinycssloaders::withSpinner(
-                      DT::DTOutput(ns("BINARYpREPS")), 
-                      type = 5)),
-           tabPanel("Randomized Field", DT::DTOutput(ns("dtpREPS"))),
-           tabPanel("Plot Number Field", DT::DTOutput(ns("PREPSPLOTFIELD"))),
-           tabPanel("Field Book", DT::DTOutput(ns("pREPSOUTPUT"))),
-           tabPanel("Heatmap", plotly::plotlyOutput(ns("heatmap_prep")))
+        shinyjs::useShinyjs(),
+        tabsetPanel(id = ns("tabset_prep"),
+          tabPanel("Get Random",
+            br(),
+            shinyjs::hidden(
+                selectInput(inputId = ns("dimensions.preps"), 
+                            label = "Select dimensions of field:", 
+                            choices = "")
+            ),
+            shinyjs::hidden(
+              actionButton(ns("get_random_prep"), label = "Randomize!")
+            ),
+            br(),
+            br(),
+            shinycssloaders::withSpinner(
+              verbatimTextOutput(outputId = ns("summary_prep"), 
+                                 placeholder = FALSE), 
+              type = 4
+              )
+            
+          ),
+          tabPanel("Data Input", DT::DTOutput(ns("dataup.preps"))),
+          tabPanel("Matrix Checks", 
+                  shinycssloaders::withSpinner(
+                    DT::DTOutput(ns("BINARYpREPS")), 
+                    type = 5)),
+          tabPanel("Randomized Field", DT::DTOutput(ns("dtpREPS"))),
+          tabPanel("Plot Number Field", DT::DTOutput(ns("PREPSPLOTFIELD"))),
+          tabPanel("Field Book", DT::DTOutput(ns("pREPSOUTPUT"))),
+          tabPanel("Heatmap", plotly::plotlyOutput(ns("heatmap_prep")))
         )
       )
     )
@@ -159,8 +153,10 @@ mod_pREPS_ui <- function(id){
 mod_pREPS_server <- function(id){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
+
+    shinyjs::useShinyjs()
     
-    some_inputs <- eventReactive(input$RUN.prep,{
+    some_inputs <- eventReactive(input$RUN.prep, {
       return(list(sites = input$l.preps))
     })
     
@@ -170,9 +166,23 @@ mod_pREPS_server <- function(id){
                         choices = loc_user_view, 
                         selected = loc_user_view[1])
     })
+
+    prep_inputs <- eventReactive(input$RUN.prep, {
+      planter_mov <- input$planter_mov.preps
+      expt_name <- as.character(input$expt_name.preps)
+      plotNumber <- as.numeric(as.vector(unlist(strsplit(input$plot_start.preps, ","))))
+      site_names <- as.character(as.vector(unlist(strsplit(input$Location.preps, ","))))
+      seed_number <- as.numeric(input$seed.preps)
+      sites = as.numeric(input$l.preps)
+      return(list(sites = sites, 
+                  location_names = site_names, 
+                  seed_number = seed_number, 
+                  plotNumber = plotNumber,
+                  planter_mov = planter_mov,
+                  expt_name = expt_name)) 
+    })
     
-    # getDataup <- eventReactive(input$RUN.prep, {
-    getDataup <- reactive({
+    get_data_prep <- eventReactive(input$RUN.prep, {
       if (input$owndataPREPS == 'Yes') {
         req(input$file.preps)
         inFile <- input$file.preps
@@ -185,16 +195,11 @@ mod_pREPS_server <- function(id){
            is.factor(data_up.preps$REPS)) validate("'REPS' must be numeric.")
         total_plots <- sum(data_up.preps$REPS)
       } else {
-        req(input$dimensions.preps)
         req(input$repGens.preps)
         req(input$repUnits.preps)
-        dims <- unlist(strsplit(input$dimensions.preps," x "))
-        nrows <- as.numeric(dims[1])
-        ncols <- as.numeric(dims[2])
         repGens <- as.numeric(as.vector(unlist(strsplit(input$repGens.preps, ","))))
         repUnits <- as.numeric(as.vector(unlist(strsplit(input$repUnits.preps, ","))))
         if (length(repGens) != length(repUnits)) shiny::validate("Input repGens and repUnits must be of the same length.")
-        if (sum(repGens * repUnits) != nrows*ncols) shiny::validate("Data input does not match within field dimensions provided.")
         ENTRY <- 1:sum(repGens)
         NAME <- paste(rep("G", sum(repGens)), 1:sum(repGens), sep = "")
         REPS <- sort(rep(repUnits, times = repGens), decreasing = TRUE)
@@ -207,7 +212,7 @@ mod_pREPS_server <- function(id){
       return(list(data_up.preps = data_up.preps, total_plots = total_plots))
     })
     
-    list_input_plots <- reactive({
+    list_input_plots <- eventReactive(input$RUN.prep, {
       if (input$owndataPREPS != 'Yes') {
         req(input$repGens.preps)
         req(input$repUnits.preps)
@@ -216,7 +221,7 @@ mod_pREPS_server <- function(id){
         n_plots <- sum(repGens * repUnits)
         return(list(n_plots = n_plots, input$owndataPREPS))
       } else {
-        n_plots <- getDataup()$total_plots
+        n_plots <- get_data_prep()$total_plots
         return(list(n_plots = n_plots, input$owndataPREPS))
       }
     })
@@ -229,8 +234,8 @@ mod_pREPS_server <- function(id){
         n <- sum(repGens * repUnits)
         choices <- factor_subsets(n)$labels
       } else {
-        req(getDataup()$total_plots)
-        n <- getDataup()$total_plots
+        req(get_data_prep()$total_plots)
+        n <- get_data_prep()$total_plots
         choices <- factor_subsets(n)$labels
       }
       if(is.null(choices)){
@@ -241,30 +246,33 @@ mod_pREPS_server <- function(id){
                         selected = choices[1])
     })
     
-    field_dimensions <- eventReactive(input$RUN.prep, {
+    field_dimensions_prep <- eventReactive(input$get_random_prep, {
       dims <- unlist(strsplit(input$dimensions.preps," x "))
       d_row <- as.numeric(dims[1])
       d_col <- as.numeric(dims[2])
       return(list(d_row = d_row, d_col = d_col))
     })
 
-    ###### Plotting the data ##############
-    output$dataup.preps <- DT::renderDT({
-      req(getDataup()$data_up.preps)
-      data_entry.preps <- getDataup()$data_up.preps
-      df <- as.data.frame(data_entry.preps)
-      df$ENTRY <- as.factor(df$ENTRY)
-      df$NAME <- as.factor(df$NAME)
-      df$REPS <- as.factor(df$REPS)
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                scrollX = TRUE, scrollY = "500px"))
-      DT::datatable(df,
-                    rownames = FALSE, 
-                    filter = 'top',
-                    options = list(
-        columnDefs = list(list(className = 'dt-center', targets = "_all"))))
+    user_tries_prep <- reactiveValues(tries_prep = 0)
+
+    observeEvent(input$get_random_prep, {
+      user_tries_prep$tries_prep <- user_tries_prep$tries_prep + 1
     })
-    
+
+    observeEvent(input$dimensions.preps, {
+      user_tries_prep$tries_prep <- 0
+    })
+
+    observeEvent(user_tries_prep$tries_prep, {
+      output$download_prep <- renderUI({
+        if (user_tries_prep$tries_prep > 0) {
+          downloadButton(ns("downloadData.preps"),
+                          "Save Experiment",
+                          style = "width:100%")
+        }
+      })
+    })
+
     entryListFormat_pREP <- data.frame(ENTRY = 1:9, 
                                        NAME = c(paste("Genotype", LETTERS[1:9], sep = "")),
                                        REPS = as.factor(c(rep(2, times = 3), rep(1,6))))
@@ -277,7 +285,6 @@ mod_pREPS_server <- function(id){
                     bordered = TRUE,
                     align = 'c',
                     striped = TRUE),
-        #h4("Note that the controls must be in the first rows of the CSV file."),
         easyClose = FALSE
       )
     }
@@ -295,44 +302,67 @@ mod_pREPS_server <- function(id){
         )
       }
     })
+
+    observeEvent(input$RUN.prep, {
+      req(get_data_prep())
+      shinyjs::show(id = "dimensions.preps")
+      shinyjs::show(id = "get_random_prep")
+    })
+
+        ###### Plotting the data ##############
+    output$dataup.preps <- DT::renderDT({
+      if (user_tries_prep$tries_prep < 1) return(NULL)
+      req(get_data_prep()$data_up.preps)
+      data_entry.preps <- get_data_prep()$data_up.preps
+      df <- as.data.frame(data_entry.preps)
+      df$ENTRY <- as.factor(df$ENTRY)
+      df$NAME <- as.factor(df$NAME)
+      df$REPS <- as.factor(df$REPS)
+      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
+                                scrollX = TRUE, scrollY = "500px"))
+      DT::datatable(df,
+                    rownames = FALSE, 
+                    filter = 'top',
+                    options = list(
+        columnDefs = list(list(className = 'dt-center', targets = "_all"))))
+    })
     
-    pREPS_reactive <- eventReactive(input$RUN.prep, {
-      req(getDataup()$data_up.preps)
-      preps.seed <- as.numeric(input$s.seed.preps)
-      gen.list <- getDataup()$data_up.preps
-      nrows <- field_dimensions()$d_row
-      ncols <- field_dimensions()$d_col
+    pREPS_reactive <- eventReactive(input$get_random_prep, {
+      req(get_data_prep()$data_up.preps)
+      gen.list <- get_data_prep()$data_up.preps
+      nrows <- field_dimensions_prep()$d_row
+      ncols <- field_dimensions_prep()$d_col
       niter <- 10000
-      OPTIM <- TRUE
-      planter <- input$planter_mov.preps
-      data_preps <- getDataup()$data_up.preps
-      locs_preps <- as.numeric(input$l.preps)
-      expt_name <- as.character(input$expt_name.preps)
-      plotNumber <- as.numeric(as.vector(unlist(strsplit(input$plot_start.preps, ","))))
-      site_names <- as.character(as.vector(unlist(strsplit(input$Location.preps, ","))))
-      
-      pREPS <- partially_replicated(nrows = nrows, 
-                                    ncols = ncols, 
-                                    l = locs_preps, 
-                                    seed = preps.seed, 
-                                    plotNumber = plotNumber, 
-                                    exptName =  expt_name,
-                                    locationNames = site_names, 
-                                    planter = planter, 
-                                    data = gen.list 
-                                    )
+      prep <- TRUE
+      data_preps <- get_data_prep()$data_up.preps
+      locs_preps <- prep_inputs()$sites
+      site_names <- prep_inputs()$site_names
+      preps.seed <- prep_inputs()$seed_number
+      plotNumber <- prep_inputs()$plotNumber
+      movement_planter <- prep_inputs()$planter_mov
+      expt_name <- prep_inputs()$expt_name
+
+      pREPS <- partially_replicated(
+        nrows = nrows, 
+        ncols = ncols, 
+        l = locs_preps, 
+        seed = preps.seed, 
+        plotNumber = plotNumber, 
+        exptName =  expt_name,
+        locationNames = site_names, 
+        planter = movement_planter, 
+        data = gen.list 
+      )
+    })
+
+    output$summary_prep <- renderPrint({
+      if (user_tries_prep$tries_prep > 0) {
+        cat("Randomization was successful!", "\n", "\n")
+        len <- length(pREPS_reactive()$infoDesign)
+         pREPS_reactive()$infoDesign[1:(len - 1)]
+      }
     })
     
-    some_prep_imputs <- eventReactive(input$RUN.prep, {
-      return(
-        list(
-          nlocs = as.numeric(input$l.preps),
-          seed = as.numeric(input$s.seed.preps)
-        )
-      )
-      
-    })
-     
      user_site_selection <- reactive({
        return(as.numeric(input$locView.preps))
      })
@@ -392,41 +422,31 @@ mod_pREPS_server <- function(id){
                     backgroundColor = DT::styleEqual(c(checks), # c(checks,gens)
                                                  c(rep(colores[3], len_checks)) # , rep('yellow', length(gens))
                     )
-        )
-      
+      )
     })
     
     
     split_name_PREPS <- reactive({
       req(pREPS_reactive())
-      # req(input$nrows.preps, input$ncols.preps)
-      # nrows <- as.numeric(input$nrows.preps)
-      # ncols <- as.numeric(input$ncols.preps)
-      nrows <- field_dimensions()$d_row
-      ncols <- field_dimensions()$d_col
+      nrows <- field_dimensions_prep()$d_row
+      ncols <- field_dimensions_prep()$d_col
       my_col_sets <- ncols
-      
       blocks = 1
-      
-      if (input$expt_name.preps != "") {
-        
-        Name_expt <- input$expt_name.preps 
-        
+      if (prep_inputs()$expt_name != "") {
+        Name_expt <- prep_inputs()$expt_name 
       }else Name_expt = paste0(rep("Expt1", times = blocks), 1:blocks)
       
       split_names <- split_name(n_rows = nrows, n_cols = ncols, Name_expt = Name_expt, by_row = FALSE,
                                 col_sets = my_col_sets, row_sets = NULL)
-      
       return(list(my_names = split_names))
-      
     })
     
     output$pREPSNAMES <- DT::renderDT({
       req(split_name_PREPS()$my_names)
       my_names <- split_name_PREPS()$my_names
       blocks = 1
-      if (input$expt_name.preps != ""){
-        Name_expt <- input$expt_name.preps 
+      if (prep_inputs()$expt_name != ""){
+        Name_expt <- prep_inputs()$expt_name 
       }else Name_expt = paste0(rep("Expt1", times = blocks), 1:blocks)
       df <- as.data.frame(my_names)
       rownames(df) <- nrow(df):1
@@ -550,7 +570,7 @@ mod_pREPS_server <- function(id){
     
     simuDataPREP <- reactive({
       req(pREPS_reactive()$fieldBook[[1]])
-      req(some_prep_imputs())
+      req(prep_inputs())
       if(!is.null(valsPREP$maxValue) && !is.null(valsPREP$minValue) && !is.null(valsPREP$trail.prep)) {
         maxVal <- as.numeric(valsPREP$maxValue)
         minVal <- as.numeric(valsPREP$minValue)
@@ -558,12 +578,10 @@ mod_pREPS_server <- function(id){
         ROY_PREP <- as.numeric(valsPREP$ROY)
         df.prep <- pREPS_reactive()$fieldBook
         loc_levels_factors <- levels(factor(df.prep$LOCATION, unique(df.prep$LOCATION)))
-        locs <- some_prep_imputs()$nlocs
-        # nrows_prep <- some_prep_imputs()$nrows
-        # ncols_prep <- some_prep_imputs()$ncols
-        nrows_prep <- field_dimensions()$d_row
-        ncols_prep <- field_dimensions()$d_col
-        seed_prep <- some_prep_imputs()$seed
+        locs <- prep_inputs()$sites
+        nrows_prep <- field_dimensions_prep()$d_row
+        ncols_prep <- field_dimensions_prep()$d_col
+        seed_prep <- prep_inputs()$seed_number
         df.prep_list <- vector(mode = "list", length = locs)
         dfSimulationList <- vector(mode = "list", length = locs)
         w <- 1
@@ -595,7 +613,23 @@ mod_pREPS_server <- function(id){
         return(list(df = dataPrep))
       }
     })
+
+    heat_map_prep <- reactiveValues(heat_map_option = FALSE)
     
+    observeEvent(input$ok.prep, {
+      req(input$min.prep, input$max.prep)
+      if (input$max.prep > input$min.prep && input$min.prep != input$max.prep) {
+        heat_map_prep$heat_map_option <- TRUE
+      }
+    })
+    
+    observeEvent(heat_map_prep$heat_map_option, {
+      if (heat_map_prep$heat_map_option == FALSE) {
+        hideTab(inputId = "tabset_prep", target = "Heatmap")
+      } else {
+        showTab(inputId = "tabset_prep", target = "Heatmap")
+      }
+    })
     
     heatmap_obj <- reactive({
       req(simuDataPREP()$dfSimulationList)

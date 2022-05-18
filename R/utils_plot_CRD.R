@@ -64,7 +64,7 @@ plot_CRD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1,
   df1 <- newBooksSelected[opt]
   df <- as.data.frame(df1)
   
-  if (x$infoDesign$idDesign == 1) {
+  if (x$infoDesign$id_design == 1) {
     allSites <- vector(mode = "list", length = nlocs)
     for (st in 1:nlocs) {
       newBooksSelected_1 <- newBooksLocs[[st]]
@@ -98,7 +98,7 @@ plot_CRD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1,
                            main = main, 
                            show.key = FALSE, 
                            gg=TRUE)
-  } else if (x$infoDesign$idDesign == 4) {
+  } else if (x$infoDesign$id_design == 4) {
     allSites <- vector(mode = "list", length = nlocs)
     for (st in 1:nlocs) {
       newBooksSelected_1 <- newBooksLocs[[st]]
@@ -134,7 +134,7 @@ plot_CRD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1,
                              show.key = FALSE, 
                              gg=TRUE)
     }
-  } else if (x$infoDesign$idDesign == 5) {
+  } else if (x$infoDesign$id_design == 5) {
     allSites <- vector(mode = "list", length = nlocs)
     for (st in 1:nlocs) {
       newBooksSelected_1 <- newBooksLocs[[st]]
@@ -171,7 +171,7 @@ plot_CRD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1,
                              show.key = FALSE, 
                              gg=TRUE)
     }
-  } else if (x$infoDesign$idDesign == 6) {
+  } else if (x$infoDesign$id_design == 6) {
     allSites <- vector(mode = "list", length = nlocs)
     for (st in 1:nlocs) {
       newBooksSelected_1 <- newBooksLocs[[st]]

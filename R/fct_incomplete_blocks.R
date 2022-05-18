@@ -161,7 +161,7 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
   lambda <- r*(k - 1)/(nt - 1)
   infoDesign <- list(Reps = r, iBlocks = b, NumberTreatments = nt, NumberLocations = l,
                      Locations = locationNames, seed = seed, lambda = lambda, 
-                     idDesign = 8)
+                     id_design = 8)
   output <- list(infoDesign = infoDesign, fieldBook = OutIBD_new)
   class(output) <- "FielDHub"
   return(invisible(output))

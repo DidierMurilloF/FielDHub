@@ -190,7 +190,7 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
   fullfactorial <- list(factors = levels(TRT), levels = levelsByFactor, runs = nruns, alltreatments = allcomb,
                         Reps = reps, Locations = l, locationNames = locationNames, kind = kind, 
                         levels_each_factor = entries_each_factor,
-                        idDesign = 4)
+                        id_design = 4)
   output <- list(infoDesign = fullfactorial, fieldBook = design_output)
   class(output) <- "FielDHub"
   return(invisible(output))

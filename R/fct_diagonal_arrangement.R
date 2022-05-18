@@ -633,7 +633,7 @@ diagonal_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,
     layoutR <- apply(layoutR, c(1,2), as.numeric)
   }
   infoDesign <- list(Lines = linesexpt, checks = checks, RepChecks = RepChecks, percentChecks = percentChecks,
-                     Fillers = Fillers, seed = seed, idDesign = 15)
+                     Fillers = Fillers, seed = seed, id_design = 15)
   output <- list(infoDesign = infoDesign, layoutRandom = layoutR, plotsNumber = plot_num,
                  data_entry = getData()$data_entry, fieldBook = fieldBook)
   class(output) <- "FielDHub"

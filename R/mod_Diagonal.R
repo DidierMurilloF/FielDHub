@@ -444,16 +444,11 @@ mod_Diagonal_server <- function(id) {
       user_tries$tries <- 0
     })
 
-    # observeEvent(input$get_random, {
-    #   user_tries$tries <- user_tries$tries + 1
-    # })
-
     list_to_observe <- reactive({
       list(randomize_hit$times, user_tries$tries)
     })
 
     observeEvent(list_to_observe(), {
-      print(randomize_hit$times)
       output$checks_percent <- renderUI({
         if (randomize_hit$times > 0 & user_tries$tries > 0) {
         selectInput(inputId = ns("percent_checks"),
@@ -612,7 +607,6 @@ mod_Diagonal_server <- function(id) {
     })
     
     output$randomized_layout <- DT::renderDT({
-      #if (randomize_hit$times > 0 & user_tries$tries > 0) {
       if (user_tries$tries < 1) return(NULL)
       req(input$dimensions.d)
       req(getData())
@@ -657,7 +651,6 @@ mod_Diagonal_server <- function(id) {
     })
     
     split_name_reactive <- eventReactive(input$get_random, {
-    # split_name_reactive <- reactive({
       req(rand_lines())
       checksEntries <- getChecks()$checksEntries
       checks <- checksEntries
@@ -669,7 +662,6 @@ mod_Diagonal_server <- function(id) {
       n_rows <- field_dimensions_diagonal()$d_row
       n_cols <- field_dimensions_diagonal()$d_col
       Name_expt <- single_inputs()$expt_name
-      # Name_expt <- as.vector(unlist(strsplit(input$expt_name, ",")))
       blocks <- 1
       if (length(Name_expt) == blocks && !is.null(Name_expt)) {
         name_expt <- Name_expt
@@ -719,61 +711,12 @@ mod_Diagonal_server <- function(id) {
       list(name_with_Fillers = split_names)
     })
     
-    # output$name_layout <- DT::renderDT({
-    #   Option_NCD <- TRUE
-    #   req(split_name_reactive()$my_names)
-    #   my_names <- split_name_reactive()$my_names
-    #   if (is.null(my_names)) return(NULL)
-    #   w_map <- rand_checks()[[1]]$map_checks
-    #   if("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE
-    #   if(Option_NCD == TRUE) {
-    #     my_names <- put_Filler_in_name()$name_with_Fillers
-    #     blocks = 1
-    #     if (single_inputs()$expt_name != ""){
-    #       Name_expt <- single_inputs()$expt_name 
-    #     }else Name_expt = paste0(rep("Expt1", times = blocks), 1:blocks)
-    #     df <- as.data.frame(my_names)
-    #     rownames(df) <- nrow(df):1
-    #     options(DT.options = list(pageLength = nrow(df), 
-    #                               autoWidth = FALSE,
-    #                               scrollY = "700px"))
-    #     DT::datatable(df,
-    #                   extensions = 'FixedColumns',
-    #                   options = list(
-    #                     dom = 't',
-    #                     scrollX = TRUE,
-    #                     fixedColumns = TRUE
-    #                   )) %>% 
-    #       DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-    #                       backgroundColor = DT::styleEqual(Name_expt, c('yellow')))
-    #   }else {
-    #     blocks = 1
-    #     if (single_inputs()$expt_name != ""){
-    #       Name_expt <- single_inputs()$expt_name 
-    #     }else Name_expt = paste0(rep("Expt1", times = blocks), 1:blocks)
-    #     df <- as.data.frame(my_names)
-    #     rownames(df) <- nrow(df):1
-    #     options(DT.options = list(pageLength = nrow(df),
-    #                               autoWidth = FALSE,
-    #                               scrollY = "700px"))
-    #     DT::datatable(df,
-    #                   extensions = 'FixedColumns',
-    #                   options = list(
-    #                     dom = 't',
-    #                     scrollX = TRUE,
-    #                     fixedColumns = TRUE
-    #                   )) %>% 
-    #       DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-    #                       backgroundColor = DT::styleEqual(Name_expt, c('yellow')))
-    #   }
-    # })
-    
     plot_number_sites <- reactive({
       req(single_inputs())
-      if (is.null(single_inputs()$plotNumber) || single_inputs()$plotNumber == " ") validate("Plot starting number is missing.")
-      # l <- as.numeric(input$l.diagonal)
+      if (is.null(single_inputs()$plotNumber) || single_inputs()$plotNumber == " ") {
+        validate("Plot starting number is missing.")
+      } 
       l <- single_inputs()$sites
-      # plotNumber <- as.numeric(as.vector(unlist(strsplit(input$plot_start, ","))))
       plotNumber <- single_inputs()$plotNumber
       if(!is.numeric(plotNumber) && !is.integer(plotNumber)) {
         validate("plotNumber should be an integer or a numeric vector.")
@@ -867,10 +810,6 @@ mod_Diagonal_server <- function(id) {
     })
 
     export_diagonal_design <- eventReactive(input$get_random, {
-    # export_diagonal_design <- reactive({
-      if (input$percent_checks == "--Select--") {
-        return(NULL)
-      }
       locs_diagonal <- single_inputs()$sites
       final_expt_fieldbook <- vector(mode = "list",length = locs_diagonal)
       location_names <- single_inputs()$location_names
@@ -1042,7 +981,7 @@ mod_Diagonal_server <- function(id) {
       }
       if (v == 1) {
         return(list(df = df_diag_locs, dfSimulationList = df_simulation_list))
-      }else if (v == 2) {
+      } else if (v == 2) {
         return(list(df = df_DIAG))
       }
     })

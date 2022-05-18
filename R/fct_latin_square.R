@@ -182,7 +182,7 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
     rep = reps,
     locationName =  locationNames,
     seed =  seed,
-    idDesign = 3
+    id_design = 3
   )
   output <- list(infoDesign =  parameters, squares = lsd.reps,
                  plotSquares = plotSquares, fieldBook = latin_design)

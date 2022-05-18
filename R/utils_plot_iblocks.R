@@ -304,7 +304,7 @@ plot_iblocks <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks,
   newBooksSelected <- newBooksLocs[[site]]
   df1 <- newBooksSelected[opt]
   df <- as.data.frame(df1)
-  if (x$infoDesign$idDesign %in% c(10, 11, 12, 8)) {
+  if (x$infoDesign$id_design %in% c(10, 11, 12, 8)) {
     allSites <- vector(mode = "list", length = nlocs)
     for (st in 1:nlocs) {
       newBooksSelected_1 <- newBooksLocs[[st]]
@@ -318,9 +318,9 @@ plot_iblocks <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks,
     rows <- max(as.numeric(df$ROW))
     cols <- max(as.numeric(df$COLUMN))
     ds <- "Square Lattice Design Field Layout "
-    if (x$infoDesign$idDesign == 8) ds <- "Incomplete Blocks Design Field Layout "
-    if (x$infoDesign$idDesign == 11) ds <- "Rectangular Lattice Design Field Layout "
-    if (x$infoDesign$idDesign == 12) ds <- "Alpha Lattice Design Field Layout "
+    if (x$infoDesign$id_design == 8) ds <- "Incomplete Blocks Design Field Layout "
+    if (x$infoDesign$id_design == 11) ds <- "Rectangular Lattice Design Field Layout "
+    if (x$infoDesign$id_design == 12) ds <- "Alpha Lattice Design Field Layout "
 
     main <- paste0(ds, rows, "X", cols)
     p1 <- desplot::desplot(ENTRY ~ COLUMN + ROW, flip = FALSE,

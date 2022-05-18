@@ -292,7 +292,7 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
   newBooksSelected <- newBooksLocs[[site]]
   df1 <- newBooksSelected[opt]
   df <- as.data.frame(df1)
-  if (x$infoDesign$idDesign == 5) {
+  if (x$infoDesign$id_design == 5) {
     allSites <- vector(mode = "list", length = nlocs)
     for (st in 1:nlocs) {
       newBooksSelected_1 <- newBooksLocs[[st]]
@@ -338,7 +338,7 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
                            show.key = FALSE,
                            key.cex = 0.7, 
                            gg = TRUE)
-  } else if (x$infoDesign$idDesign == 6) {
+  } else if (x$infoDesign$id_design == 6) {
     allSites <- vector(mode = "list", length = nlocs)
     for (st in 1:nlocs) {
       newBooksSelected_1 <- newBooksLocs[[st]]

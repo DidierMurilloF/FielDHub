@@ -109,7 +109,7 @@ split_families <- function(l = NULL, data = NULL) {
   data_locations <- dplyr::bind_rows(Glist_locations)
   data_locations$LOCATION <- rep(paste("Location", 1:l), rowseach)
   output <- list(rowsEachlist = rowsEachlist, data_locations = data_locations,
-                 infoDesign = list(idDesign = 17))
+                 infoDesign = list(id_design = 17))
   class(output) <- "FielDHub"
   return(invisible(output))
 }

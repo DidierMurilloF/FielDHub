@@ -357,7 +357,7 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
   
   infoDesign <- list(Blocks = b, plotsPerBlock = plotsPerBlock, Checks = DataChecks, 
                      entries = entries, repsExpt = repsExpt, numberLocations = l, 
-                     Fillers = Fillers, seed = seed, idDesign = 14)
+                     Fillers = Fillers, seed = seed, id_design = 14)
   output <- list(infoDesign = infoDesign, layoutRandom = layout_loc1, layout_random_sites = layout_random_sites,
                  layout_plots_sites = layout_plots_sites, plotNumber = Plot_loc1, exptNames = my_names, 
                  data_entry = data, fieldBook = fieldbook)
