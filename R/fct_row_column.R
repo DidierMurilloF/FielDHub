@@ -178,7 +178,7 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
   new_summ <- merge(summ, c3, by='Concurrence', all=TRUE)
   infoDesign <- list(nRows = nrows, nCols = ib, Reps = r, NumberTreatments = nt, 
                      NumberLocations = l, Locations = locationNames, seed = seed,
-                     idDesign = 9)
+                     id_design = 9)
   output <- list(infoDesign = infoDesign, resolvableBlocks = NEW_Resolvable, 
                  concurrence = new_summ,
                  fieldBook = OutRowCol)

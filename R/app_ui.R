@@ -26,8 +26,11 @@ app_ui <- function(request) {
                                   )
                          ),
                          navbarMenu("Unreplicated Designs",
-                                    tabPanel("Diagonal Arrangement",
+                                    tabPanel("Single Diagonal Arrangement",
                                              mod_Diagonal_ui("Diagonal_ui_1")
+                                    ),
+                                    tabPanel("Multiple Diagonal Arrangement",
+                                             mod_diagonal_multiple_ui("diagonal_multiple_ui_1")
                                     ),
                                     tabPanel("Optimized Arrangement",
                                              mod_Optim_ui("Optim_ui_1")

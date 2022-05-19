@@ -41,11 +41,11 @@
 plot_layout <- function(x = NULL, optionLayout = 1, planter = "serpentine", l = 1, 
                         orderReps = "vertical_stack_panel") {
   if (class(x) != "FielDHub") stop("x is not a FielDHub class object")
-  if (x$infoDesign$idDesign %in% c(10, 11, 12, 8, 5, 6)) {
-    if (x$infoDesign$idDesign %in% c(10, 11, 12, 8)) {
+  if (x$infoDesign$id_design %in% c(10, 11, 12, 8, 5, 6)) {
+    if (x$infoDesign$id_design %in% c(10, 11, 12, 8)) {
       n_TrtGen <- dplyr::n_distinct(x$fieldBook$ENTRY)
       n_Reps <- dplyr::n_distinct(x$fieldBook$REP)
-      if (x$infoDesign$idDesign != 9) {
+      if (x$infoDesign$id_design != 9) {
         sizeIblocks <- dplyr::n_distinct(x$fieldBook$UNIT)
       } else {
         sizeIblocks <- dplyr::n_distinct(x$fieldBook$ROW)
@@ -55,7 +55,7 @@ plot_layout <- function(x = NULL, optionLayout = 1, planter = "serpentine", l = 
                               sizeIblocks = sizeIblocks, iBlocks = iBlocks, 
                               optionLayout = optionLayout, planter = planter,
                               l = l, orderReps = orderReps)
-    } else if (x$infoDesign$idDesign == 5) {
+    } else if (x$infoDesign$id_design == 5) {
         if (x$infoDesign$typeDesign == "RCBD") {
           wp <- dplyr::n_distinct(x$fieldBook$WHOLE_PLOT)
           sp <- dplyr::n_distinct(x$fieldBook$SUB_PLOT)
@@ -75,7 +75,7 @@ plot_layout <- function(x = NULL, optionLayout = 1, planter = "serpentine", l = 
           return0 <- plot_CRD(x = x, n_TrtGen = n_TrtGen, n_Reps = n_Reps, optionLayout = optionLayout, 
                               planter = planter, l = l)
         }
-    } else if (x$infoDesign$idDesign == 6) {
+    } else if (x$infoDesign$id_design == 6) {
         if (x$infoDesign$typeDesign == "RCBD") {
           wp <- dplyr::n_distinct(x$fieldBook$WHOLE_PLOT)
           sp <- dplyr::n_distinct(x$fieldBook$SUB_PLOT)
@@ -101,8 +101,8 @@ plot_layout <- function(x = NULL, optionLayout = 1, planter = "serpentine", l = 
     }
     return(list(out_layout = return0$p1, out_layoutPlots = return0$p2, fieldBookXY = return0$df, 
                 newBooks = return0$newBooks, allSitesFieldbook = return0$allSitesFieldbook))
-  } else if (x$infoDesign$idDesign %in% c(1, 2, 4)) {
-      if (x$infoDesign$idDesign == 1) {
+  } else if (x$infoDesign$id_design %in% c(1, 2, 4)) {
+      if (x$infoDesign$id_design == 1) {
         n_TrtGen <- dplyr::n_distinct(x$fieldBook$TREATMENT)
         n_Reps <- dplyr::n_distinct(x$fieldBook$REP)
         return <- plot_CRD(x = x, n_TrtGen = n_TrtGen, n_Reps = n_Reps, 
@@ -110,21 +110,21 @@ plot_layout <- function(x = NULL, optionLayout = 1, planter = "serpentine", l = 
                            planter = planter, l = 1)
         return(list(out_layout = return$p1, out_layoutPlots = return$p2, fieldBookXY = return$df, 
                     newBooks = return$newBooks, allSitesFieldbook = return$allSitesFieldbook))
-      } else if (x$infoDesign$idDesign == 2) {
+      } else if (x$infoDesign$id_design == 2) {
         n_TrtGen <- dplyr::n_distinct(x$fieldBook$TREATMENT)
         n_Reps <- dplyr::n_distinct(x$fieldBook$REP)
         return <- plot_RCBD(x = x, n_TrtGen = n_TrtGen, n_Reps = n_Reps, optionLayout = optionLayout, 
                            planter = planter, orderReps = orderReps, l = l)
         return(list(out_layout = return$p1, out_layoutPlots = return$p2, fieldBookXY = return$df, 
                     newBooks = return$newBooks, allSitesFieldbook = return$allSitesFieldbook))
-      } else if (x$infoDesign$idDesign == 4 & x$infoDesign$kind == "RCBD") {
+      } else if (x$infoDesign$id_design == 4 & x$infoDesign$kind == "RCBD") {
         n_TrtGen <- dplyr::n_distinct(x$fieldBook$TRT_COMB)
         n_Reps <- dplyr::n_distinct(x$fieldBook$REP)
         return <- plot_RCBD(x = x, n_TrtGen = n_TrtGen, n_Reps = n_Reps, optionLayout = optionLayout, 
                            planter = planter, orderReps = orderReps, l = l)
         return(list(out_layout = return$p1, out_layoutPlots = return$p2, fieldBookXY = return$df, 
                     newBooks = return$newBooks, allSitesFieldbook = return$allSitesFieldbook))
-      } else if (x$infoDesign$idDesign == 4 & x$infoDesign$kind == "CRD") {
+      } else if (x$infoDesign$id_design == 4 & x$infoDesign$kind == "CRD") {
         n_TrtGen <- dplyr::n_distinct(x$fieldBook$TRT_COMB)
         n_Reps <- dplyr::n_distinct(x$fieldBook$REP)
         return <- plot_CRD(x = x, n_TrtGen = n_TrtGen, n_Reps = n_Reps, optionLayout = optionLayout, 
@@ -133,8 +133,8 @@ plot_layout <- function(x = NULL, optionLayout = 1, planter = "serpentine", l = 
                     newBooks = return$newBooks, allSitesFieldbook = return$allSitesFieldbook))
       }
 
-  } else if (x$infoDesign$idDesign %in% c(3, 7, 9)) { # 7, 9 
-    if (x$infoDesign$idDesign == 3) {
+  } else if (x$infoDesign$id_design %in% c(3, 7, 9)) { # 7, 9 
+    if (x$infoDesign$id_design == 3) {
       rsRep <- dplyr::n_distinct(x$fieldBook$COLUMN)
       csRep <- dplyr::n_distinct(x$fieldBook$ROW)
       dims <- c(rsRep, csRep)
@@ -143,7 +143,7 @@ plot_layout <- function(x = NULL, optionLayout = 1, planter = "serpentine", l = 
                               optionLayout = optionLayout, 
                               planter = planter, l = l, 
                               orderReps = orderReps)
-    } else if (x$infoDesign$idDesign == 7) {
+    } else if (x$infoDesign$id_design == 7) {
       rsRep <- dplyr::n_distinct(x$fieldBook$HSTRIP)
       csRep <- dplyr::n_distinct(x$fieldBook$VSTRIP)
       dims <- c(rsRep, csRep)
@@ -154,7 +154,7 @@ plot_layout <- function(x = NULL, optionLayout = 1, planter = "serpentine", l = 
                               planter = planter, 
                               l = l, 
                               orderReps = orderReps)
-    } else if (x$infoDesign$idDesign == 9) {
+    } else if (x$infoDesign$id_design == 9) {
       rsRep <- dplyr::n_distinct(x$fieldBook$ROW)
       csRep <- dplyr::n_distinct(x$fieldBook$COLUMN)
       dims <- c(rsRep, csRep)

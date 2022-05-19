@@ -206,7 +206,7 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
   stripDesig_output <- as.data.frame(stripDesig_output)
   
   infoDesign <- list(Hplots = nH, Vplots = nV, blocks = b, numberLocations = l,
-                     nameLocations = locationNames, seed = seed, idDesign = 7)
+                     nameLocations = locationNames, seed = seed, id_design = 7)
   output <- list(infoDesign = infoDesign, stripsBlockLoc = strips.b.loc,
                  plotLayouts = NEW_PLOTS, fieldBook = stripDesig_output)
   class(output) <- "FielDHub"

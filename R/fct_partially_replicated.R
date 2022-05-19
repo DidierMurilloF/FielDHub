@@ -113,8 +113,15 @@ partially_replicated <- function(nrows = NULL, ncols = NULL, repGens = NULL, rep
     if (is.null(plotNumber) || length(plotNumber) != l) {
       if (l > 1){
         plotNumber <- seq(1001, 1000*(l+1), 1000)
-      } else plotNumber <- 1001
-      message(cat("Warning message:", "\n", "Since plotNumber was missing, it was set up to default value of: ", plotNumber))
+        message(cat("Warning message:", "\n", 
+                "Since plotNumber was missing, it was set up to default value of: ", plotNumber, 
+                "\n", "\n"))
+      } else {
+        plotNumber <- 1001
+        message(cat("Warning message:", "\n", 
+        "Since plotNumber was missing, it was set up to default value of: ", plotNumber, 
+        "\n", "\n"))
+      } 
     }
   }else stop("Number of locations/sites is missing")
   
@@ -145,7 +152,7 @@ partially_replicated <- function(nrows = NULL, ncols = NULL, repGens = NULL, rep
       checksEntries <- as.vector(my_REPS[,1])
       checks <- length(checksEntries)
       lines <- sum(my_GENS$REPS)
-  }else if (is.null(data)) {
+  } else if (is.null(data)) {
     if (length(repGens) != length(repUnits)) shiny::validate("Input repGens and repUnits need to be of the same length.")
     if (sum(repGens * repUnits) != nrows*ncols) shiny::validate("Data input does not match with field dimentions specified.")
     ENTRY <- 1:sum(repGens)
@@ -231,8 +238,14 @@ partially_replicated <- function(nrows = NULL, ncols = NULL, repGens = NULL, rep
   EntryChecks <- prep$entryChecks
   Checks <- length(EntryChecks)
   
-  infoDesign <- list(Greps = Checks, RepGens = RepChecks, EntryReps = EntryChecks, 
-                     idDesign = 13)
+  infoDesign <- list(
+    field_dimensions = c("rows" = nrows, "columns" = ncols),
+    treatments_with_reps = Checks,
+    treatments_with_no_reps = length(genEntries[[2]]),
+    seed = seed,
+    locations = l,
+    planter = planter,
+    id_design = 13)
   output <- list(infoDesign = infoDesign, 
                  layoutRandom = layout_random_sites, 
                  plotNumber = plot_numbers_sites,

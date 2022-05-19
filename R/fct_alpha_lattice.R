@@ -135,7 +135,7 @@ alpha_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101,
   rownames(OutAlpha) <- 1:nrow(OutAlpha)
   infoDesign <- list(Reps = r, iBlocks = s, NumberTreatments = nt, NumberLocations = l, 
                      Locations = locationNames, seed = seed, lambda = lambda,
-                     idDesign = 12)
+                     id_design = 12)
   output <- list(infoDesign = infoDesign, fieldBook = OutAlpha)
   class(output) <- "FielDHub"
   return(invisible(output))

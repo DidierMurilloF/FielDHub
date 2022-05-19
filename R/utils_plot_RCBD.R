@@ -199,7 +199,7 @@ plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1
   df <- as.data.frame(df1)
   
   
-  if (x$infoDesign$idDesign == 2) {
+  if (x$infoDesign$id_design == 2) {
     allSites <- vector(mode = "list", length = nlocs)
     for (st in 1:nlocs) {
       newBooksSelected_1 <- newBooksLocs[[st]]
@@ -234,7 +234,7 @@ plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1
                            main = main, 
                            show.key = FALSE,
                            gg = TRUE)
-  } else if (x$infoDesign$idDesign == 4) {
+  } else if (x$infoDesign$id_design == 4) {
     if (x$infoDesign$kind == "RCBD") {
       allSites <- vector(mode = "list", length = nlocs)
       for (st in 1:nlocs) {
@@ -272,7 +272,7 @@ plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1
                              show.key = FALSE,
                              gg = TRUE)
     }
-  } else if (x$infoDesign$idDesign == 7) {
+  } else if (x$infoDesign$id_design == 7) {
       allSites <- vector(mode = "list", length = nlocs)
       for (st in 1:nlocs) {
         newBooksSelected_1 <- newBooksLocs[[st]]

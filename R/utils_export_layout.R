@@ -95,5 +95,4 @@ export_layout <- function(Fieldbook, selected) {
   # 
   # write.table(layout_entries2, file = filename, row.names = FALSE, 
   #             col.names = FALSE, sep = ",")
-  
 }

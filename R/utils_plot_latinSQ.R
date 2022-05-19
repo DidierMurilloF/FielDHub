@@ -22,7 +22,7 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, optionLayout = 1,
     NewBook <- x$fieldBook %>%
       dplyr::filter(LOCATION == locs)
     plots <- NewBook$PLOT
-    if (x$infoDesign$idDesign == 9) {
+    if (x$infoDesign$id_design == 9) {
       NewROWS1 <- rep(1:(rsRep*n_Reps), each = csRep)
       NewCOLUMNS1 <- NewBook$COLUMN
       NewROWS2 <- NewBook$ROW
@@ -74,7 +74,7 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, optionLayout = 1,
   df1 <- newBooksSelected[opt]
   df <- as.data.frame(df1)
   
-  if (x$infoDesign$idDesign == 9) {
+  if (x$infoDesign$id_design == 9) {
     allSites <- vector(mode = "list", length = nlocs)
     for (st in 1:nlocs) {
       newBooksSelected_1 <- newBooksLocs[[st]]
@@ -112,7 +112,7 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, optionLayout = 1,
                            main = main,
                            show.key = FALSE,
                            gg = TRUE)
-  } else  if (x$infoDesign$idDesign == 7) {
+  } else  if (x$infoDesign$id_design == 7) {
     allSites <- vector(mode = "list", length = nlocs)
     for (st in 1:nlocs) {
       newBooksSelected_1 <- newBooksLocs[[st]]
@@ -147,7 +147,7 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, optionLayout = 1,
                            main = main,
                            show.key = FALSE,
                            gg = TRUE)
-  } else  if (x$infoDesign$idDesign == 3) {
+  } else  if (x$infoDesign$id_design == 3) {
     allSites <- vector(mode = "list", length = nlocs)
     for (st in 1:nlocs) {
       newBooksSelected_1 <- newBooksLocs[[st]]
