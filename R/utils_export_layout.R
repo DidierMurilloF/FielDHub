@@ -48,6 +48,28 @@ export_layout <- function(Fieldbook, selected) {
                              ncol = length(levels(factor(df_site_one$COLUMN))), 
                              byrow = TRUE)
     df <- as.data.frame(layout_entries)
+  }else{
+    M <- matrix(data = "", 
+                nrow = length(levels(df_site_one$ROW)), 
+                ncol = length(levels(factor(df_site_one$COLUMN))), 
+                byrow = TRUE)
+    layout_entries <- with(
+      df_site_one, 
+      as.matrix(Matrix::sparseMatrix(i = as.numeric(ROW),
+                                     j=as.numeric(COLUMN), 
+                                     x=treats, 
+                                     dimnames=list(levels(ROW), 
+                                                   levels(COLUMN)))))
+    lookup <- dataIn$TRT_COMB
+    names(lookup) <- treats
+    for (index in nrow(dataIn):1) {
+      layout_entries[index] <- unname(lookup[index])
+    }
+    layout_entries <- matrix(data = lookup, 
+                             nrow = length(levels(df_site_one$ROW)), 
+                             ncol = length(levels(factor(df_site_one$COLUMN))), 
+                             byrow = TRUE)
+    df <- as.data.frame(layout_entries)
   }
   
   leftHead <- c("Location",locs[selected],1:(nrow(layout_entries)))
@@ -63,7 +85,9 @@ export_layout <- function(Fieldbook, selected) {
   layout_entries3 <- rbind(blanks2, df)
   
   layout_entries2 <- cbind(leftHead, as.data.frame(layout_entries3))
+  
   rownames(layout_entries2) <- 1:(nrow(layout_entries) + 2)
+  layout_entries2 <- rev(layout_entries2)
   #layout_entries2 <- as.data.frame(layout_entries2)
   return(list(file = layout_entries2))
   
