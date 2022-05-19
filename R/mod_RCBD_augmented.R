@@ -152,7 +152,7 @@ mod_RCBD_augmented_ui <- function(id){
       ),
       mainPanel(
         width = 8,
-         tabsetPanel(
+         tabsetPanel(id = ns("tabset_arcbd"),
            tabPanel("Input Data",
                     fluidRow(
                       column(6,DT::DTOutput(ns("data_input"))),
@@ -627,6 +627,23 @@ mod_RCBD_augmented_server <- function(id) {
          return(list(df = dataArcbd))
        }
        
+     })
+     
+     heat_map_arcbd <- reactiveValues(heat_map_option = FALSE)
+     
+     observeEvent(input$ok.arcbd, {
+       req(input$min.arcbd, input$max.arcbd)
+       if (input$max.arcbd > input$min.arcbd && input$min.arcbd != input$max.arcbd) {
+         heat_map_arcbd$heat_map_option <- TRUE
+       }
+     })
+     
+     observeEvent(heat_map_arcbd$heat_map_option, {
+       if (heat_map_arcbd$heat_map_option == FALSE) {
+         hideTab(inputId = "tabset_arcbd", target = "Heatmap")
+       } else {
+         showTab(inputId = "tabset_arcbd", target = "Heatmap")
+       }
      })
 
 

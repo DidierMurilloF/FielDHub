@@ -334,7 +334,7 @@ mod_Diagonal_server <- function(id) {
                                           data = getData()$data_entry,
                                           dim_data = getData()$dim_data_entry,
                                           dim_data_1 = getData()$dim_without_checks,
-                                          Block_Fillers = blocks_length())
+                                          Block_Fillers = NULL)
           if (!is.null(dt_options$dt)) {
             new_choices[[v]] <- choices[[dim_options]]
             v <- v + 1
@@ -412,7 +412,7 @@ mod_Diagonal_server <- function(id) {
                         data = getData()$data_entry, 
                         dim_data = getData()$dim_data_entry,
                         dim_data_1 = getData()$dim_without_checks, 
-                        Block_Fillers = blocks_length())
+                        Block_Fillers = NULL)
     }) 
 
     observeEvent(available_percent_table()$dt, {

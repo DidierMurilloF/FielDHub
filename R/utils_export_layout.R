@@ -87,7 +87,7 @@ export_layout <- function(Fieldbook, selected) {
   layout_entries2 <- cbind(leftHead, as.data.frame(layout_entries3))
   
   rownames(layout_entries2) <- 1:(nrow(layout_entries) + 2)
-  layout_entries2 <- rev(layout_entries2)
+  #layout_entries2 <- rev(layout_entries2)
   #layout_entries2 <- as.data.frame(layout_entries2)
   return(list(file = layout_entries2))
   
