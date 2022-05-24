@@ -247,7 +247,7 @@ mod_Diagonal_server <- function(id) {
         inFile <- input$file1
         data_entry <- load_file(name = inFile$name, 
                                 path = inFile$datapat, 
-                                sep = input$sep.DIAGONALS)
+                                sep = input$sep.DIAGONALS, check = TRUE, design = "sdiag")
         data_entry <- na.omit(data_entry)
         if (ncol(data_entry) < 2) {
           validate("Data input needs at least two Columns with the ENTRY and NAME.")
