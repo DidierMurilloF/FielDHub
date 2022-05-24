@@ -119,7 +119,7 @@ mod_Optim_ui <- function(id) {
         width = 8,
         shinyjs::useShinyjs(),
         tabsetPanel(id = ns("tabset_optim"),
-        tabPanel("Get Random",
+        tabPanel("Get Random", value = "tabPanel_optim",
           br(),
           shinyjs::hidden(
             selectInput(inputId = ns("dimensions.s"),
@@ -143,10 +143,10 @@ mod_Optim_ui <- function(id) {
                      column(6,DT::DTOutput(ns("table_checks")))
                    )
           ),
-          tabPanel("Matrix Checks", 
-                   shinycssloaders::withSpinner(
-                     DT::DTOutput(ns("BINARY")), 
-                        type = 5)),
+         # tabPanel("Matrix Checks", 
+         #          shinycssloaders::withSpinner(
+         #            DT::DTOutput(ns("BINARY")), 
+         #               type = 5)),
           tabPanel("Randomized Field", DT::DTOutput(ns("RFIELD"))),
           tabPanel("Plot Number Field", DT::DTOutput(ns("PLOTFIELD"))),
           tabPanel("Field Book", DT::DTOutput(ns("OPTIMOUTPUT"))),
@@ -166,17 +166,6 @@ mod_Optim_server <- function(id) {
 
     shinyjs::useShinyjs()
 
-    some_inputs <- eventReactive(input$RUN.optim, {
-      return(list(sites = input$l.optim))
-    })
-    
-    observeEvent(some_inputs()$sites, {
-      loc_user_view <- 1:as.numeric(some_inputs()$sites)
-      updateSelectInput(inputId = "locView.optim", 
-                        choices = loc_user_view, 
-                        selected = loc_user_view[1])
-    })
-
     optim_inputs <- eventReactive(input$RUN.optim, {
       planter_mov <- input$planter_mov.spatial
       expt_name <- as.character(input$expt_name.spatial)
@@ -191,6 +180,22 @@ mod_Optim_server <- function(id) {
                   planter_mov = planter_mov,
                   expt_name = expt_name)) 
     })
+
+    observeEvent(optim_inputs()$sites, {
+      loc_user_view <- 1:as.numeric(optim_inputs()$sites)
+      updateSelectInput(inputId = "locView.optim", 
+                        choices = loc_user_view, 
+                        selected = loc_user_view[1])
+    })
+
+    observeEvent(input$input.owndataOPTIM,
+                 handlerExpr = updateTabsetPanel(session,
+                                                 "tabset_optim",
+                                                 selected = "tabPanel_optim"))
+    observeEvent(input$RUN.optim,
+                 handlerExpr = updateTabsetPanel(session,
+                                                 "tabset_optim",
+                                                 selected = "tabPanel_optim"))
 
     get_data_optim <- eventReactive(input$RUN.optim, {
       if (input$owndataOPTIM == "Yes") {
@@ -271,19 +276,30 @@ mod_Optim_server <- function(id) {
       return(list(d_row = d_row, d_col = d_col))
     })
 
+    randomize_hit_optim <- reactiveValues(times = 0)
+ 
+    observeEvent(input$RUN.optim, {
+      randomize_hit_optim$times <- 0
+    })
+
     user_tries_optim <- reactiveValues(tries_optim = 0)
 
     observeEvent(input$get_random_optim, {
       user_tries_optim$tries_optim <- user_tries_optim$tries_optim + 1
+      randomize_hit_optim$times <- randomize_hit_optim$times + 1
     })
 
     observeEvent(input$dimensions.s, {
       user_tries_optim$tries_optim <- 0
     })
 
-    observeEvent(user_tries_optim$tries_optim, {
+    list_to_observe_optim <- reactive({
+      list(randomize_hit_optim$times, user_tries_optim$tries_optim)
+    })
+
+    observeEvent(list_to_observe_optim(), {
       output$download_expt_optim <- renderUI({
-        if (user_tries_optim$tries_optim > 0) {
+        if (randomize_hit_optim$times > 0 && user_tries_optim$tries_optim > 0) {
           downloadButton(ns("downloadData.spatial"),
                           "Save Experiment",
                           style = "width:100%")
@@ -334,7 +350,8 @@ mod_Optim_server <- function(id) {
       if (input$dimensions.s == "No options available"){
         validate("No options available for this number of treatments")
       }
-      if (user_tries_optim$tries_optim < 1) return(NULL)
+      test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0
+      if (!test) return(NULL)
       req(get_data_optim()$data_up.spatial)
       data_entry <- get_data_optim()$data_up.spatial
       df <- as.data.frame(data_entry)
@@ -352,10 +369,11 @@ mod_Optim_server <- function(id) {
     })
     
     output$table_checks <- DT::renderDT({
-      if (input$dimensions.s == "No options available"){
+      if (input$dimensions.s == "No options available") {
         validate("No options available for this number of treatments")
       }
-      if (user_tries_optim$tries_optim < 1) return(NULL)
+      test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0
+      if (!test) return(NULL)
       req(get_data_optim()$data_up.spatial)
         data_entry <- get_data_optim()$data_up.spatial
         checks_input <- data_entry[data_entry$REPS > 1, ]
@@ -368,19 +386,16 @@ mod_Optim_server <- function(id) {
     })
     
     optimized_arrang <- eventReactive(input$get_random_optim, { 
-      if (input$dimensions.s == "No options available"){
+      if (input$dimensions.s == "No options available") {
         validate("No options available for this number of treatments")
       }
       req(get_data_optim()$data_up.spatial)
-      req(input$plot_start.spatial)
       nrows <- field_dimensions_optim()$d_row
       ncols <- field_dimensions_optim()$d_col
       niter <- 1000
-      plotNumber <- as.numeric(input$plot_start.spatial)
-      movement_planter <- input$planter_mov.spatial
       
       data.spatial <- get_data_optim()$data_up.spatial
-      l.optim <- optim_inputs()$sites
+      sites <- optim_inputs()$sites
       site_names <- optim_inputs()$site_names
       seed.spatial <- optim_inputs()$seed_number
       plotNumber <- optim_inputs()$plotNumber
@@ -395,16 +410,18 @@ mod_Optim_server <- function(id) {
         locationNames = site_names,
         planter = movement_planter,
         plotNumber = plotNumber,
-        l = l.optim, 
+        l = sites, 
         exptName = expt_name,
         optim = TRUE,
         seed = seed.spatial, 
         data = data.spatial
-        )
+      )
     })
 
     output$summary_optim <- renderPrint({
-      if (user_tries_optim$tries_optim > 0) {
+      test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0
+      #if (!test) return(NULL)
+      if (test) {
         cat("Randomization was successful!", "\n", "\n")
         len <- length(optimized_arrang()$infoDesign)
          optimized_arrang()$infoDesign[1:(len - 1)]
@@ -416,7 +433,9 @@ mod_Optim_server <- function(id) {
     })
 
     output$BINARY <- DT::renderDT({
-      if (user_tries_optim$tries_optim < 1) return(NULL)
+      test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0
+      if (!test) return(NULL)
+      # if (user_tries_optim$tries_optim < 1) return(NULL)
       req(optimized_arrang())
       B <- optimized_arrang()$binaryField[[user_site_selection()]]
       df <- as.data.frame(B)
@@ -435,7 +454,9 @@ mod_Optim_server <- function(id) {
     })
     
     output$RFIELD <- DT::renderDT({
-      if (user_tries_optim$tries_optim < 1) return(NULL)
+      test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0
+      if (!test) return(NULL)
+      # if (user_tries_optim$tries_optim < 1) return(NULL)
       req(optimized_arrang())
       w_map <- optimized_arrang()$layoutRandom[[user_site_selection()]]
       checks = as.vector(optimized_arrang()$genEntries[[1]])
@@ -482,7 +503,9 @@ mod_Optim_server <- function(id) {
     })
     
     output$PLOTFIELD <- DT::renderDT({
-      if (user_tries_optim$tries_optim < 1) return(NULL)
+      test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0
+      if (!test) return(NULL)
+      # if (user_tries_optim$tries_optim < 1) return(NULL)
       req(optimized_arrang())
       plot_num <- optimized_arrang()$plotNumber[[user_site_selection()]]
       a <- as.vector(as.matrix(plot_num))
@@ -553,11 +576,14 @@ mod_Optim_server <- function(id) {
     
     observeEvent(input$Simulate.optim, {
       req(optimized_arrang()$fieldBook)
-      showModal(
-        shinyjqui::jqui_draggable(
-          simuModal.OPTIM()
+      test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0
+      if (test) {
+        showModal(
+          shinyjqui::jqui_draggable(
+            simuModal.OPTIM()
+          )
         )
-      )
+      }
     })
     
     observeEvent(input$ok.optim, {
@@ -652,7 +678,9 @@ mod_Optim_server <- function(id) {
     })
     
     output$OPTIMOUTPUT <- DT::renderDT({
-      if (user_tries_optim$tries_optim < 1) return(NULL)
+      test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0
+      if (!test) return(NULL)
+      # if (user_tries_optim$tries_optim < 1) return(NULL)
       req(simuDataOPTIM()$df)
       df <- simuDataOPTIM()$df
       df$EXPT <- as.factor(df$EXPT)
@@ -694,7 +722,8 @@ mod_Optim_server <- function(id) {
     })
     
     output$heatmap <- plotly::renderPlotly({
-      if (user_tries_optim$tries_optim < 1) return(NULL)
+      test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0
+      if (!test) return(NULL)
       req(heatmap_obj())
       heatmap_obj()
     })

@@ -197,6 +197,27 @@ mod_diagonal_multiple_server <- function(id) {
     })
     
     kindExpt = "DBUDC"
+
+    randomize_hit_multi <- reactiveValues(times_multi = 0)
+ 
+    observeEvent(input$RUN_multiple, {
+      randomize_hit_multi$times_multi <- 0
+    })
+
+    user_tries_multi <- reactiveValues(tries = 1)
+
+    observeEvent(input$get_random_multi, {
+      randomize_hit_multi$times_multi <- randomize_hit_multi$times_multi + 1
+      user_tries_multi$tries <- user_tries_multi$tries + 1
+    })
+
+    observeEvent(input$dimensions_multiple, {
+      user_tries_multi$tries <- 0
+    })
+
+    list_to_observe_multi <- reactive({
+      list(randomize_hit_multi$times_multi, user_tries_multi$tries)
+    })
     
     shinyjs::useShinyjs()
 
@@ -501,27 +522,6 @@ mod_diagonal_multiple_server <- function(id) {
                         selected = selected)
     })
 
-    randomize_hit_multi <- reactiveValues(times_multi = 0)
- 
-    observeEvent(input$RUN_multiple, {
-      randomize_hit_multi$times_multi <- 0
-    })
-
-    user_tries_multi <- reactiveValues(tries = 1)
-
-    observeEvent(input$get_random_multi, {
-      randomize_hit_multi$times_multi <- randomize_hit_multi$times_multi + 1
-      user_tries_multi$tries <- user_tries_multi$tries + 1
-    })
-
-    observeEvent(input$dimensions_multiple, {
-      user_tries_multi$tries <- 0
-    })
-
-    list_to_observe_multi <- reactive({
-      list(randomize_hit_multi$times_multi, user_tries_multi$tries)
-    })
-
     observeEvent(list_to_observe_multi(), {
       output$checks_percent_input <- renderUI({
         if (randomize_hit_multi$times_multi > 0 & user_tries_multi$tries > 0) {
@@ -532,9 +532,9 @@ mod_diagonal_multiple_server <- function(id) {
       })
     })
 
-   observeEvent(user_tries_multi$tries, {
+   observeEvent(list_to_observe_multi(), { # user_tries_multi$tries
       output$download_multi <- renderUI({
-        if (user_tries_multi$tries > 0) {
+        if (randomize_hit_multi$times_multi > 0 & user_tries_multi$tries > 0) {
           downloadButton(ns("download_fieldbook_multiple"),
                           "Save Experiment",
                           style = "width:100%")
@@ -587,7 +587,8 @@ mod_diagonal_multiple_server <- function(id) {
     })
     
     output$options_table_multi <- DT::renderDT({
-      if (user_tries_multi$tries < 1) return(NULL)
+      test <- randomize_hit_multi$times_multi > 0 & user_tries_multi$tries > 0
+      if (!test) return(NULL)
       Option_NCD <- TRUE
       if (is.null(available_percent_multi()$dt)) {
         shiny::validate("Data input does not fit to field dimensions")
@@ -607,7 +608,8 @@ mod_diagonal_multiple_server <- function(id) {
 
     
     output$data_input <- DT::renderDT({
-      if (user_tries_multi$tries < 1) return(NULL)
+      test <- randomize_hit_multi$times_multi > 0 & user_tries_multi$tries > 0
+      if (!test) return(NULL)
       df <- get_data_multiple()$data_entry
       df$ENTRY <- as.factor(df$ENTRY)
       df$NAME <- as.factor(df$NAME)
@@ -626,7 +628,8 @@ mod_diagonal_multiple_server <- function(id) {
     })
     
     output$checks_table <- DT::renderDT({
-      if (user_tries_multi$tries < 1) return(NULL)
+      test <- randomize_hit_multi$times_multi > 0 & user_tries_multi$tries > 0
+      if (!test) return(NULL)
       Option_NCD <- TRUE
       req(get_data_multiple()$data_entry)
       data_entry <- get_data_multiple()$data_entry
@@ -722,7 +725,8 @@ mod_diagonal_multiple_server <- function(id) {
     })
     
     output$randomized_layout <- DT::renderDT({
-      if (user_tries_multi$tries < 1) return(NULL)
+      test <- randomize_hit_multi$times_multi > 0 & user_tries_multi$tries > 0
+      if (!test) return(NULL)
       req(input$dimensions_multiple)
       req(get_data_multiple())
       req(rand_lines())
@@ -834,7 +838,8 @@ mod_diagonal_multiple_server <- function(id) {
     })
     
     output$name_layout <- DT::renderDT({
-      if (user_tries_multi$tries < 1) return(NULL)
+      test <- randomize_hit_multi$times_multi > 0 & user_tries_multi$tries > 0
+      if (!test) return(NULL)
       Option_NCD <- TRUE
       req(split_name_reactive()$my_names)
       my_names <- split_name_reactive()$my_names
@@ -1031,7 +1036,8 @@ mod_diagonal_multiple_server <- function(id) {
     })
     
     output$plot_number_layout <- DT::renderDT({
-      if (user_tries_multi$tries < 1) return(NULL)
+      test <- randomize_hit_multi$times_multi > 0 & user_tries_multi$tries > 0
+      if (!test) return(NULL)
       req(plot_number_reactive())
       plot_num <- plot_number_reactive()$plots_number_sites[[user_location()$user_site]]
       if (is.null(plot_num))
@@ -1060,7 +1066,6 @@ mod_diagonal_multiple_server <- function(id) {
     export_diagonal_design <- eventReactive(input$get_random_multi, {
       locs_diagonal <- as.numeric(multiple_inputs()$sites)
       final_expt_fieldbook <- vector(mode = "list",length = locs_diagonal)
-      #location_names <- as.vector(unlist(strsplit(input$location_multiple, ",")))
       location_names <- multiple_inputs()$location_names
       if (length(location_names) != locs_diagonal) location_names <- 1:locs_diagonal
       ## start for
@@ -1261,7 +1266,8 @@ mod_diagonal_multiple_server <- function(id) {
     })
     
     output$fieldBook_diagonal <- DT::renderDT({
-      if (user_tries_multi$tries < 1) return(NULL)
+      test <- randomize_hit_multi$times_multi > 0 & user_tries_multi$tries > 0
+      if (!test) return(NULL)
       req(simudata_DIAG()$df)
       df <- simudata_DIAG()$df
       df$EXPT <- as.factor(df$EXPT)
@@ -1299,7 +1305,8 @@ mod_diagonal_multiple_server <- function(id) {
     })
     
     output$heatmap_diag <- plotly::renderPlotly({
-      if (user_tries_multi$tries < 1) return(NULL)
+      test <- randomize_hit_multi$times_multi > 0 & user_tries_multi$tries > 0
+      if (!test) return(NULL)
       req(heatmap_obj_D())
       heatmap_obj_D()
     })
