@@ -103,7 +103,26 @@ mod_Square_Lattice_server <- function(id){
     getData.square <- reactive({
       req(input$file.square)
       inFile <- input$file.square
-      dataUp.square <- load_file(name = inFile$name, path = inFile$datapat, sep = input$sep.square)
+      dataUp.square <- load_file(name = inFile$name, 
+                                 path = inFile$datapat, 
+                                 sep = input$sep.square, check = TRUE, design = "square")
+      
+      if (is.logical(dataUp.square)) {
+        if (dataUp.square) {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Check input file for duplicate values.", 
+            type = "error")
+          return(NULL)
+        } else {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Invalid file; Please upload a .csv file.", 
+            type = "error")
+          return(NULL)
+        }
+      }
+      
       return(list(dataUp.square = dataUp.square))
     })
     

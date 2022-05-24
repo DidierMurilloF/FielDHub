@@ -172,7 +172,26 @@ mod_LSD_server <- function(id){
       inFile <- input$file.LSD
       dataUp.lsd <- load_file(name = inFile$name, 
                               path = inFile$datapat, 
-                              sep = input$sep.lsd)
+                              sep = input$sep.lsd, check = TRUE, design = "lsd")
+      
+      if (is.logical(dataUp.lsd)) {
+        if (dataUp.lsd) {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Check input file for duplicate values.", 
+            type = "error")
+          #dataUp.lsd <- NULL
+          return(NULL)
+        } else {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Invalid file; Please upload a .csv file.", 
+            type = "error")
+          #dataUp.lsd <- NULL
+          return(NULL)
+        }
+      }
+      
       return(list(dataUp.lsd = dataUp.lsd))
     })
     

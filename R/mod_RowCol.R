@@ -176,7 +176,24 @@ mod_RowCol_server <- function(id){
       inFile <- input$file.RCD
       dataUp.rcd <- load_file(name = inFile$name, 
                               path = inFile$datapat, 
-                              sep = input$sep.rcd)
+                              sep = input$sep.rcd, check = TRUE, design = "rcd")
+      
+      if (is.logical(dataUp.rcd)) {
+        if (dataUp.rcd) {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Check input file for duplicate values.", 
+            type = "error")
+          return(NULL)
+        } else {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Invalid file; Please upload a .csv file.", 
+            type = "error")
+          return(NULL)
+        }
+      }
+      
       return(list(dataUp.rcd = dataUp.rcd))
     })
     

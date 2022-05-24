@@ -102,7 +102,27 @@ mod_CRD_server <- function(id) {
       req(input$file.CRD)
       req(input$sep.crd)
       inFile <- input$file.CRD
-      dataUp.crd <- load_file(name = inFile$name, path = inFile$datapat, sep = input$sep.crd)
+      dataUp.crd <- load_file(name = inFile$name,
+                              path = inFile$datapat,
+                              sep = input$sep.crd,
+                              check = TRUE, design = "crd")
+      
+      if (is.logical(dataUp.crd)) {
+        if (dataUp.crd) {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Check input file for duplicate values.", 
+            type = "error")
+          return(NULL)
+        } else {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Invalid file; Please upload a .csv file.", 
+            type = "error")
+          return(NULL)
+        }
+      }
+      
       return(list(dataUp.crd = dataUp.crd))
     })
     

@@ -175,7 +175,24 @@ mod_SPD_server <- function(id){
       inFile <- input$file.SPD
       dataUp.spd <- load_file(name = inFile$name, 
                               path = inFile$datapat, 
-                              sep = input$sep.spd)
+                              sep = input$sep.spd, check = TRUE, design = "spd")
+      
+      if (is.logical(dataUp.spd)) {
+        if (dataUp.spd) {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Check input file for duplicate values.", 
+            type = "error")
+          return(NULL)
+        } else {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Invalid file; Please upload a .csv file.", 
+            type = "error")
+          return(NULL)
+        }
+      }
+      
       return(list(dataUp.spd = dataUp.spd))
     })
     

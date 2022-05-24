@@ -203,7 +203,24 @@ mod_Optim_server <- function(id) {
         inFile <- input$file3
         data_up <- load_file(name = inFile$name, 
                              path = inFile$datapat, 
-                             sep = input$sep.OPTIM)
+                             sep = input$sep.OPTIM, check = TRUE, design = "optim")
+        
+        if (is.logical(data_up)) {
+          if (data_up) {
+            shinyalert::shinyalert(
+              "Error!!", 
+              "Check input file for duplicate values.", 
+              type = "error")
+            return(NULL)
+          } else {
+            shinyalert::shinyalert(
+              "Error!!", 
+              "Invalid file; Please upload a .csv file.", 
+              type = "error")
+            return(NULL)
+          }
+        }
+        
         data_up <- as.data.frame(data_up)
         if (ncol(data_up) < 3) shiny::validate("Data input needs at least three columns with: ENTRY, NAME and REPS.")
         data_up <- as.data.frame(data_up[,1:3])

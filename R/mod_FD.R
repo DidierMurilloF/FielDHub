@@ -156,7 +156,27 @@ mod_FD_server <- function(id) {
       req(input$file.FD)
       req(input$sep.fd)
       inFile <- input$file.FD
-      dataUp.fd <- load_file(name = inFile$name, path = inFile$datapat, sep = input$sep.fd)
+      dataUp.fd <- load_file(name = inFile$name,
+                             path = inFile$datapat,
+                             sep = input$sep.fd,
+                             check = TRUE, design = "factorial")
+      
+      if (is.logical(dataUp.fd)) {
+        if (dataUp.fd) {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Check input file for duplicate values.", 
+            type = "error")
+          return(NULL)
+        } else {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Invalid file; Please upload a .csv file.", 
+            type = "error")
+          return(NULL)
+        }
+      }
+      
       return(list(dataUp.fd = dataUp.fd))
     })
     

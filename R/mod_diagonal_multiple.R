@@ -290,7 +290,24 @@ mod_diagonal_multiple_server <- function(id) {
         inFile <- input$file_multiple
         data_entry <- load_file(name = inFile$name, 
                                 path = inFile$datapat, 
-                                sep = input$sep.DIAGONALS)
+                                sep = input$sep.DIAGONALS, check = TRUE, design = "mdiag")
+        
+        if (is.logical(data_entry)) {
+          if (data_entry) {
+            shinyalert::shinyalert(
+              "Error!!", 
+              "Check input file for duplicate values.", 
+              type = "error")
+            return(NULL)
+          } else {
+            shinyalert::shinyalert(
+              "Error!!", 
+              "Invalid file; Please upload a .csv file.", 
+              type = "error")
+            return(NULL)
+          }
+        }
+        
         data_entry <- na.omit(data_entry)
         if (ncol(data_entry) < 3) {
           validate("Data input needs at least three Columns with the ENTRY, NAME and BLOCK.")
