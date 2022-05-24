@@ -114,7 +114,7 @@ mod_pREPS_ui <- function(id){
         width = 8,
         shinyjs::useShinyjs(),
         tabsetPanel(id = ns("tabset_prep"),
-          tabPanel("Get Random",
+          tabPanel("Get Random", value = "tabPanel_prep",
             br(),
             shinyjs::hidden(
                 selectInput(inputId = ns("dimensions.preps"), 
@@ -131,14 +131,13 @@ mod_pREPS_ui <- function(id){
                                  placeholder = FALSE), 
               type = 4
               )
-            
           ),
           tabPanel("Data Input", DT::DTOutput(ns("dataup.preps"))),
-          tabPanel("Matrix Checks", 
-                  shinycssloaders::withSpinner(
-                    DT::DTOutput(ns("BINARYpREPS")), 
-                    type = 5)),
-          tabPanel("Randomized Field", DT::DTOutput(ns("dtpREPS"))),
+          tabPanel("Randomized Field",
+                shinycssloaders::withSpinner(
+                    DT::DTOutput(ns("dtpREPS")), 
+                    type = 4)
+                  ),
           tabPanel("Plot Number Field", DT::DTOutput(ns("PREPSPLOTFIELD"))),
           tabPanel("Field Book", DT::DTOutput(ns("pREPSOUTPUT"))),
           tabPanel("Heatmap", plotly::plotlyOutput(ns("heatmap_prep")))
@@ -156,17 +155,6 @@ mod_pREPS_server <- function(id){
 
     shinyjs::useShinyjs()
     
-    some_inputs <- eventReactive(input$RUN.prep, {
-      return(list(sites = input$l.preps))
-    })
-    
-    observeEvent(some_inputs()$sites, {
-      loc_user_view <- 1:as.numeric(some_inputs()$sites)
-      updateSelectInput(inputId = "locView.preps", 
-                        choices = loc_user_view, 
-                        selected = loc_user_view[1])
-    })
-
     prep_inputs <- eventReactive(input$RUN.prep, {
       planter_mov <- input$planter_mov.preps
       expt_name <- as.character(input$expt_name.preps)
@@ -181,6 +169,23 @@ mod_pREPS_server <- function(id){
                   planter_mov = planter_mov,
                   expt_name = expt_name)) 
     })
+
+    observeEvent(prep_inputs()$sites, {
+      loc_user_view <- 1:prep_inputs()$sites
+      updateSelectInput(inputId = "locView.preps", 
+                        choices = loc_user_view, 
+                        selected = loc_user_view[1])
+    })
+
+    observeEvent(input$input.owndataPREPS,
+                 handlerExpr = updateTabsetPanel(session,
+                                                 "tabset_prep",
+                                                 selected = "tabPanel_prep"))
+    observeEvent(input$RUN.prep,
+                 handlerExpr = updateTabsetPanel(session,
+                                                 "tabset_prep",
+                                                 selected = "tabPanel_prep"))
+
     
     get_data_prep <- eventReactive(input$RUN.prep, {
       if (input$owndataPREPS == 'Yes') {
@@ -253,19 +258,30 @@ mod_pREPS_server <- function(id){
       return(list(d_row = d_row, d_col = d_col))
     })
 
+    randomize_hit_prep <- reactiveValues(times = 0)
+ 
+    observeEvent(input$RUN.prep, {
+      randomize_hit_prep$times <- 0
+    })
+
     user_tries_prep <- reactiveValues(tries_prep = 0)
 
     observeEvent(input$get_random_prep, {
       user_tries_prep$tries_prep <- user_tries_prep$tries_prep + 1
+      randomize_hit_prep$times <- randomize_hit_prep$times + 1
     })
 
     observeEvent(input$dimensions.preps, {
       user_tries_prep$tries_prep <- 0
     })
 
-    observeEvent(user_tries_prep$tries_prep, {
+    list_to_observe_prep <- reactive({
+      list(randomize_hit_prep$times, user_tries_prep$tries_prep)
+    })
+
+    observeEvent(list_to_observe_prep(), {
       output$download_prep <- renderUI({
-        if (user_tries_prep$tries_prep > 0) {
+        if (randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0) {
           downloadButton(ns("downloadData.preps"),
                           "Save Experiment",
                           style = "width:100%")
@@ -311,7 +327,8 @@ mod_pREPS_server <- function(id){
 
         ###### Plotting the data ##############
     output$dataup.preps <- DT::renderDT({
-      if (user_tries_prep$tries_prep < 1) return(NULL)
+      test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
+      if (!test) return(NULL)
       req(get_data_prep()$data_up.preps)
       data_entry.preps <- get_data_prep()$data_up.preps
       df <- as.data.frame(data_entry.preps)
@@ -356,7 +373,8 @@ mod_pREPS_server <- function(id){
     })
 
     output$summary_prep <- renderPrint({
-      if (user_tries_prep$tries_prep > 0) {
+      test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
+      if (test) {
         cat("Randomization was successful!", "\n", "\n")
         len <- length(pREPS_reactive()$infoDesign)
          pREPS_reactive()$infoDesign[1:(len - 1)]
@@ -369,6 +387,7 @@ mod_pREPS_server <- function(id){
 
     
     output$BINARYpREPS <- DT::renderDT({
+      if (user_tries_prep$tries_prep < 1) return(NULL)
       req(pREPS_reactive())
       selection <- as.numeric(user_site_selection())
       B <- pREPS_reactive()$binaryField[[selection]]
@@ -386,9 +405,11 @@ mod_pREPS_server <- function(id){
                         backgroundColor = DT::styleEqual(1, "gray"))
     })
     
-  
     
     output$dtpREPS <- DT::renderDataTable({
+      test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
+      if (!test) return(NULL)
+      # if (user_tries_prep$tries_prep < 1) return(NULL)
       req(pREPS_reactive())
       selection <- as.numeric(user_site_selection())
       w_map <- pREPS_reactive()$layoutRandom[[selection]]
@@ -442,6 +463,8 @@ mod_pREPS_server <- function(id){
     })
     
     output$pREPSNAMES <- DT::renderDT({
+      test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
+      if (!test) return(NULL)
       req(split_name_PREPS()$my_names)
       my_names <- split_name_PREPS()$my_names
       blocks = 1
@@ -464,6 +487,9 @@ mod_pREPS_server <- function(id){
     })
     
     output$PREPSPLOTFIELD <- DT::renderDT({
+      test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
+      if (!test) return(NULL)
+      #if (user_tries_prep$tries_prep < 1) return(NULL)
       req(pREPS_reactive())
       plot_num <- pREPS_reactive()$plotNumber[[user_site_selection()]]
       a <- as.vector(as.matrix(plot_num))
@@ -535,12 +561,15 @@ mod_pREPS_server <- function(id){
     }
     
     observeEvent(input$Simulate.prep, {
-      req(pREPS_reactive()$fieldBook[[1]])
-      showModal(
-        shinyjqui::jqui_draggable(
-          simuModal.PREP()
+      req(pREPS_reactive()$fieldBook)
+      test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
+      if (test) {
+        showModal(
+          shinyjqui::jqui_draggable(
+            simuModal.PREP()
+          )
         )
-      )
+      }
     })
     
     observeEvent(input$ok.prep, {
@@ -651,12 +680,16 @@ mod_pREPS_server <- function(id){
     }) 
     
     output$heatmap_prep <- plotly::renderPlotly({
+      test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
+      if (!test) return(NULL)
       req(heatmap_obj())
       heatmap_obj()
     }) 
     
     
     output$pREPSOUTPUT <- DT::renderDT({
+      test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
+      if (!test) return(NULL)
       df <- simuDataPREP()$df
       df$EXPT <- as.factor(df$EXPT)
       df$LOCATION <- as.factor(df$LOCATION)

@@ -126,9 +126,9 @@ mod_Diagonal_ui <- function(id) {
         tabsetPanel(id = ns("tabset_single"),
                     tabPanel(title = "Expt Design Info", value = "tabPanel1",
                              shinyjs::hidden(
-                               selectInput(inputId = ns("dimensions.d"),
-                                           label = "Select dimensions of field:", 
-                                           choices = "", width = '400px')
+                                selectInput(inputId = ns("dimensions.d"),
+                                            label = "Select dimensions of field:", 
+                                            choices = "", width = '400px')
                              ),
                              shinyjs::hidden(
                                actionButton(inputId = ns("get_random"), 
@@ -173,7 +173,28 @@ mod_Diagonal_server <- function(id) {
     })
     
     kindExpt_single <- "SUDC"
-    
+
+    randomize_hit <- reactiveValues(times = 0)
+ 
+    observeEvent(input$RUN.diagonal, {
+      randomize_hit$times <- 0
+    })
+
+    user_tries <- reactiveValues(tries = 0)
+
+    observeEvent(input$get_random, {
+      randomize_hit$times <- randomize_hit$times + 1
+      user_tries$tries <- user_tries$tries + 1
+    })
+
+    observeEvent(input$dimensions.d, {
+      user_tries$tries <- 0
+    })
+
+    list_to_observe <- reactive({
+      list(randomize_hit$times, user_tries$tries)
+    })
+
     shinyjs::useShinyjs()
     
     single_inputs <- eventReactive(input$RUN.diagonal, {
@@ -230,11 +251,7 @@ mod_Diagonal_server <- function(id) {
                  handlerExpr = updateTabsetPanel(session,
                                                  "tabset_single",
                                                  selected = "tabPanel1"))
-    # observeEvent(input$RUN.diagonal,
-    #              handlerExpr = updateTabsetPanel(session,
-    #                                              "tabset_single",
-    #                                              selected = "tabPanel1"))
-    observeEvent(counts$trigger ,
+    observeEvent(input$RUN.diagonal,
                  handlerExpr = updateTabsetPanel(session,
                                                  "tabset_single",
                                                  selected = "tabPanel1"))
@@ -427,27 +444,6 @@ mod_Diagonal_server <- function(id) {
                             selected = selected)
     })
 
-    randomize_hit <- reactiveValues(times = 0)
- 
-    observeEvent(input$RUN.diagonal, {
-      randomize_hit$times <- 0
-    })
-
-    user_tries <- reactiveValues(tries = 1)
-
-    observeEvent(input$get_random, {
-      randomize_hit$times <- randomize_hit$times + 1
-      user_tries$tries <- user_tries$tries + 1
-    })
-
-    observeEvent(input$dimensions.d, {
-      user_tries$tries <- 0
-    })
-
-    list_to_observe <- reactive({
-      list(randomize_hit$times, user_tries$tries)
-    })
-
     observeEvent(list_to_observe(), {
       output$checks_percent <- renderUI({
         if (randomize_hit$times > 0 & user_tries$tries > 0) {
@@ -458,9 +454,9 @@ mod_Diagonal_server <- function(id) {
       })
     })
 
-    observeEvent(user_tries$tries, {
+    observeEvent(list_to_observe(), { #  user_tries$tries
       output$download_single <- renderUI({
-        if (user_tries$tries > 0) {
+        if (randomize_hit$times > 0 & user_tries$tries > 0) {
           downloadButton(ns("downloadData_Diagonal"),
                           "Save Experiment",
                           style = "width:100%")
@@ -513,7 +509,9 @@ mod_Diagonal_server <- function(id) {
     })
     
     output$options_table <- DT::renderDT({
-      if (randomize_hit$times > 0 & user_tries$tries > 0) {
+      test <- randomize_hit$times > 0 & user_tries$tries > 0
+      if (!test) return(NULL)
+      #if (randomize_hit$times > 0 & user_tries$tries > 0) {
         Option_NCD <- TRUE
         if (is.null(available_percent_table()$dt)) {
           shiny::validate("Data input does not fit to field dimensions")
@@ -529,11 +527,13 @@ mod_Diagonal_server <- function(id) {
         of checks based on the total number of plots you want to have in the final layout.', 
           options = list(
             columnDefs = list(list(className = 'dt-center', targets = "_all"))))
-      }
+      #}
     })
     
     output$data_input <- DT::renderDT({
-      if (randomize_hit$times > 0 & user_tries$tries > 0) {
+      test <- randomize_hit$times > 0 & user_tries$tries > 0
+      if (!test) return(NULL)
+      # if (randomize_hit$times > 0 & user_tries$tries > 0) {
         df <- getData()$data_entry
         df$ENTRY <- as.factor(df$ENTRY)
         df$NAME <- as.factor(df$NAME)
@@ -548,11 +548,13 @@ mod_Diagonal_server <- function(id) {
                         columnDefs = list(
                           list(className = 'dt-center', targets = "_all")))
         )
-      }
+      #}
     })
     
     output$checks_table <- DT::renderDT({
-      if (randomize_hit$times > 0 & user_tries$tries > 0) {
+      test <- randomize_hit$times > 0 & user_tries$tries > 0
+      if (!test) return(NULL)
+     # if (randomize_hit$times > 0 & user_tries$tries > 0) {
         Option_NCD <- TRUE
         req(getData()$data_entry)
         data_entry <- getData()$data_entry
@@ -570,7 +572,7 @@ mod_Diagonal_server <- function(id) {
         DT::datatable(df, rownames = FALSE, caption = 'Table of Checks.', 
                       options = list(
                         columnDefs = list(list(className = 'dt-center', targets = "_all"))))
-    }
+      #}
     })
     
     rand_lines <- eventReactive(input$get_random, {
@@ -586,7 +588,6 @@ mod_Diagonal_server <- function(id) {
       n_cols <- field_dimensions_diagonal()$d_col
       checksEntries <- getChecks()$checksEntries
       checks <- as.numeric(input$checks)
-      # locs <- as.numeric(input$l.diagonal)
       locs <- single_inputs()$sites
       diag_locs <- vector(mode = "list", length = locs)
       random_entries_locs <- vector(mode = "list", length = locs)
@@ -607,7 +608,8 @@ mod_Diagonal_server <- function(id) {
     })
     
     output$randomized_layout <- DT::renderDT({
-      if (user_tries$tries < 1) return(NULL)
+      test <- randomize_hit$times > 0 & user_tries$tries > 0
+      if (!test) return(NULL)
       req(input$dimensions.d)
       req(getData())
       req(rand_lines())
@@ -783,7 +785,8 @@ mod_Diagonal_server <- function(id) {
     })
     
     output$plot_number_layout <- DT::renderDT({
-      if (user_tries$tries < 1) return(NULL)
+      test <- randomize_hit$times > 0 & user_tries$tries > 0
+      if (!test) return(NULL)
       req(plot_number_reactive())
       plot_num <- plot_number_reactive()$plots_number_sites[[user_location()$user_site]]
       if (is.null(plot_num))
@@ -1004,7 +1007,8 @@ mod_Diagonal_server <- function(id) {
     })
 
     output$fieldBook_diagonal <- DT::renderDT({
-      if (user_tries$tries < 1) return(NULL)
+      test <- randomize_hit$times > 0 & user_tries$tries > 0
+      if (!test) return(NULL)
       req(simudata_DIAG()$df)
       df <- simudata_DIAG()$df
       df$EXPT <- as.factor(df$EXPT)
@@ -1043,7 +1047,8 @@ mod_Diagonal_server <- function(id) {
     })
     
     output$heatmap_diag <- plotly::renderPlotly({
-      if (user_tries$tries < 1) return(NULL)
+      test <- randomize_hit$times > 0 & user_tries$tries > 0
+      if (!test) return(NULL)
       req(heatmap_obj_D())
       heatmap_obj_D()
     })

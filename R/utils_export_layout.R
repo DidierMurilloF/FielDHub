@@ -5,6 +5,13 @@
 #' @noRd
 export_layout <- function(Fieldbook, selected) {
 
+  if (!requireNamespace("Matrix", quietly = TRUE)) {
+    stop(
+      "Package \"Matrix\" must be installed to use this function.",
+      call. = FALSE
+    )
+  }
+
   dataIn <- Fieldbook
   
   locs <- levels(factor(dataIn$LOCATION))
@@ -15,7 +22,7 @@ export_layout <- function(Fieldbook, selected) {
                                                  decreasing = TRUE)))
   treats <- c(1:nrow(dataIn))
   
-  if("ENTRY" %in% colnames(dataIn)){
+  if ("ENTRY" %in% colnames(dataIn)) {
     layout_entries <- with(
       df_site_one, 
       as.matrix(Matrix::sparseMatrix(i = as.numeric(ROW), 
@@ -26,7 +33,7 @@ export_layout <- function(Fieldbook, selected) {
     df <- as.data.frame(layout_entries)
     df <- as.data.frame(layout_entries)[nrow(df):1,]
     
-  }else if("TREATMENT" %in% colnames(dataIn)){
+  } else if("TREATMENT" %in% colnames(dataIn)) {
     M <- matrix(data = "", 
                 nrow = length(levels(df_site_one$ROW)), 
                 ncol = length(levels(factor(df_site_one$COLUMN))), 
@@ -34,9 +41,9 @@ export_layout <- function(Fieldbook, selected) {
     layout_entries <- with(
       df_site_one, 
       as.matrix(Matrix::sparseMatrix(i = as.numeric(ROW),
-                                     j=as.numeric(COLUMN), 
-                                     x=treats, 
-                                     dimnames=list(levels(ROW), 
+                                     j = as.numeric(COLUMN), 
+                                     x = treats, 
+                                     dimnames = list(levels(ROW), 
                                                    levels(COLUMN)))))
     lookup <- dataIn$TREATMENT
     names(lookup) <- treats
@@ -48,7 +55,7 @@ export_layout <- function(Fieldbook, selected) {
                              ncol = length(levels(factor(df_site_one$COLUMN))), 
                              byrow = TRUE)
     df <- as.data.frame(layout_entries)
-  }else{
+  } else {
     M <- matrix(data = "", 
                 nrow = length(levels(df_site_one$ROW)), 
                 ncol = length(levels(factor(df_site_one$COLUMN))), 
@@ -56,9 +63,9 @@ export_layout <- function(Fieldbook, selected) {
     layout_entries <- with(
       df_site_one, 
       as.matrix(Matrix::sparseMatrix(i = as.numeric(ROW),
-                                     j=as.numeric(COLUMN), 
-                                     x=treats, 
-                                     dimnames=list(levels(ROW), 
+                                     j = as.numeric(COLUMN), 
+                                     x = treats, 
+                                     dimnames = list(levels(ROW), 
                                                    levels(COLUMN)))))
     lookup <- dataIn$TRT_COMB
     names(lookup) <- treats
@@ -76,7 +83,6 @@ export_layout <- function(Fieldbook, selected) {
   blanks <- as.data.frame(matrix("", ncol = ncol(layout_entries)), nrow = 2)
   col_labels <- as.data.frame(matrix(c(1:ncol(layout_entries)), 
                                      ncol = ncol(layout_entries)), nrow = 1)
-  
   
   names(blanks) <- names(df)
   names(col_labels) <- names(df)
