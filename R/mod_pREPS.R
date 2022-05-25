@@ -191,7 +191,26 @@ mod_pREPS_server <- function(id){
       if (input$owndataPREPS == 'Yes') {
         req(input$file.preps)
         inFile <- input$file.preps
-        data_up.preps <- load_file(name = inFile$name, path = inFile$datapat, sep = input$sep.preps)
+        data_up.preps <- load_file(name = inFile$name,
+                                   path = inFile$datapat,
+                                   sep = input$sep.preps, check = TRUE, design = "prep")
+        
+        if (is.logical(data_up.preps)) {
+          if (data_up.preps) {
+            shinyalert::shinyalert(
+              "Error!!", 
+              "Check input file for duplicate values.", 
+              type = "error")
+            return(NULL)
+          } else {
+            shinyalert::shinyalert(
+              "Error!!", 
+              "Invalid file; Please upload a .csv file.", 
+              type = "error")
+            return(NULL)
+          }
+        }
+        
         data_up.preps <- na.omit(data_up.preps)
         if (ncol(data_up.preps) < 3) validate("Data input needs at least three columns with: ENTRY, NAME and REPS.")
         data_up.preps <- as.data.frame(data_up.preps[,1:3])

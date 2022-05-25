@@ -188,7 +188,24 @@ mod_STRIPD_server <- function(id) {
       inFile <- input$file.STRIP
       dataUp.strip <- load_file(name = inFile$name, 
                                 path = inFile$datapat, 
-                                sep = input$sep.strip)
+                                sep = input$sep.strip, check = TRUE, design = "strip")
+      
+      if (is.logical(dataUp.strip)) {
+        if (dataUp.strip) {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Check input file for duplicate values.", 
+            type = "error")
+          return(NULL)
+        } else {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Invalid file; Please upload a .csv file.", 
+            type = "error")
+          return(NULL)
+        }
+      }
+      
       return(list(dataUp.strip = dataUp.strip))
     })
     

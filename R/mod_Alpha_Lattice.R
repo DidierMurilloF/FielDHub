@@ -108,7 +108,27 @@ mod_Alpha_Lattice_server <- function(id){
     getData.alpha <- reactive({
       req(input$file.alpha)
       inFile <- input$file.alpha
-      dataUp.alpha <- load_file(name = inFile$name, path = inFile$datapat, sep = input$sep.alpha)
+      dataUp.alpha <- load_file(name = inFile$name,
+                                path = inFile$datapat,
+                                sep = input$sep.alpha,
+                                check = TRUE, design = "alpha")
+      
+      if (is.logical(dataUp.alpha)) {
+        if (dataUp.alpha) {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Check input file for duplicate values.", 
+            type = "error")
+          return(NULL)
+        } else {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Invalid file; Please upload a .csv file.", 
+            type = "error")
+          return(NULL)
+        }
+      }
+      
       return(list(dataUp.alpha = dataUp.alpha))
     })
     

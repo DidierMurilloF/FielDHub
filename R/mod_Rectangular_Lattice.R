@@ -102,7 +102,27 @@ mod_Rectangular_Lattice_server <- function(id) {
     getData.rectangular <- reactive({
       req(input$file.rectangular)
       inFile <- input$file.rectangular
-      dataUp.rectangular<- load_file(name = inFile$name, path = inFile$datapat, sep = input$sep.rectangular)
+      dataUp.rectangular<- load_file(name = inFile$name,
+                                     path = inFile$datapat,
+                                     sep = input$sep.rectangular,
+                                     check = TRUE, design = "rect")
+      
+      if (is.logical(dataUp.rectangular)) {
+        if (dataUp.rectangular) {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Check input file for duplicate values.", 
+            type = "error")
+          return(NULL)
+        } else {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Invalid file; Please upload a .csv file.", 
+            type = "error")
+          return(NULL)
+        }
+      }
+      
       return(list(dataUp.rectangular= dataUp.rectangular))
     })
     

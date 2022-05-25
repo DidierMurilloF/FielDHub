@@ -192,7 +192,24 @@ mod_RCBD_augmented_server <- function(id) {
         inFile <- input$file1_a_rcbd
         data_up <- load_file(name = inFile$name, 
                              path = inFile$datapat, 
-                             sep = input$sep.a_rcbd)
+                             sep = input$sep.a_rcbd, check = TRUE, design = "arcbd")
+        
+        if (is.logical(data_up)) {
+          if (data_up) {
+            shinyalert::shinyalert(
+              "Error!!", 
+              "Check input file for duplicate values.", 
+              type = "error")
+            return(NULL)
+          } else {
+            shinyalert::shinyalert(
+              "Error!!", 
+              "Invalid file; Please upload a .csv file.", 
+              type = "error")
+            return(NULL)
+          }
+        }
+        
         if (ncol(data_up) < 2) {
           shiny::validate("Data input needs at least two columns with: ENTRY and NAME.")
         } 

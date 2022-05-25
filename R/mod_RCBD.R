@@ -151,7 +151,24 @@ mod_RCBD_server <- function(id){
       inFile <- input$file.RCBD
       dataUp.rcbd <- load_file(name = inFile$name, 
                                path = inFile$datapat, 
-                               sep = input$sep.rcbd)
+                               sep = input$sep.rcbd, check = TRUE, design = "rcbd")
+      
+      if (is.logical(dataUp.rcbd)) {
+        if (dataUp.rcbd) {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Check input file for duplicate values.", 
+            type = "error")
+          return(NULL)
+        } else {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Invalid file; Please upload a .csv file.", 
+            type = "error")
+          return(NULL)
+        }
+      }
+      
       return(list(dataUp.rcbd = dataUp.rcbd))
     })
     

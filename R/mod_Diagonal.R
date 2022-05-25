@@ -257,6 +257,7 @@ mod_Diagonal_server <- function(id) {
                                                  selected = "tabPanel1"))
                                                   
     getData <- eventReactive(input$RUN.diagonal, {
+    # getData <- reactive({
       Sys.sleep(2)
       Option_NCD <- TRUE
       if (input$owndataDIAGONALS == "Yes") {
@@ -264,7 +265,24 @@ mod_Diagonal_server <- function(id) {
         inFile <- input$file1
         data_entry <- load_file(name = inFile$name, 
                                 path = inFile$datapat, 
-                                sep = input$sep.DIAGONALS)
+                                sep = input$sep.DIAGONALS, check = TRUE, design = "sdiag")
+
+        if (is.logical(data_entry)) {
+          if (data_entry) {
+            shinyalert::shinyalert(
+              "Error!!", 
+              "Check input file for duplicate values.", 
+              type = "error")
+            return(NULL)
+          } else {
+            shinyalert::shinyalert(
+              "Error!!", 
+              "Invalid file; Please upload a .csv file.", 
+              type = "error")
+            return(NULL)
+          }
+        }
+
         data_entry <- na.omit(data_entry)
         if (ncol(data_entry) < 2) {
           validate("Data input needs at least two Columns with the ENTRY and NAME.")
