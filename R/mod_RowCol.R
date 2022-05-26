@@ -242,6 +242,8 @@ mod_RowCol_server <- function(id){
       req(input$plot_start.rcd)
       req(input$Location.rcd)
       
+      shinyjs::show(id = "downloadCsv.rcd")
+      
       t.rcd <- as.numeric(input$t.rcd)
       k.rcd <- as.numeric(input$k.rcd)
       r.rcd <- as.numeric(input$r.rcd)

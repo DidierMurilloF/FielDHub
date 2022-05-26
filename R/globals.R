@@ -1,6 +1,8 @@
 utils::globalVariables(c("ENTRY",
                          "IBLOCK",
                          "REP",
+                         "ROW",
+                         "COLUMN",
                          "TREATMENT",
                          "LOCATION",
                          "PLOT", 
