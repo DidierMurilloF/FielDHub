@@ -68,7 +68,6 @@ Suggests:
     testthat (>= 3.0.0),
     spelling,
     rlang,
-    Matrix,
     glue
 Config/testthat/edition: 3
 URL: https://github.com/DidierMurilloF/FielDHub
