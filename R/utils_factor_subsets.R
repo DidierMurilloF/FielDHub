@@ -5,8 +5,7 @@
 #' @return The return value, if any, from executing the utility.
 #'
 #' @noRd
-
-factor_subsets <- function(n, diagonal = FALSE) {
+factor_subsets <- function(n, diagonal = FALSE, augmented = FALSE) {
   factors <- numbers::primeFactors(n)
   left <- 1
   right <- 1
@@ -15,14 +14,14 @@ factor_subsets <- function(n, diagonal = FALSE) {
   both <- list()
   if(length(sq(length(factors))) == 2){
     return(NULL)
-  }else{
+  } else {
       list <- sq(length(factors))[-1,][-(nrow(sq(length(factors)))-1),]
   }
   for (i in 1:nrow(list)) {
     for (n in 1:length(factors)) {
-      if (list[i,][n]==1){
+      if (list[i,][n]==1) {
         left <- left*factors[n]
-      } else{
+      } else {
         right <- right*factors[n]
       }
     }
@@ -31,6 +30,9 @@ factor_subsets <- function(n, diagonal = FALSE) {
     if (diagonal) {
       cols <- 9
       rows <- 4
+    } else if (augmented) {
+      cols <- 3
+      rows <- 0
     }
     if(left > rows & right > cols){
       combos[[i]] <- c(row = left, col = right)
@@ -53,7 +55,6 @@ factor_subsets <- function(n, diagonal = FALSE) {
 #' @return The return value, if any, from executing the utility.
 #'
 #' @noRd
-
 sq <- function (J, s = NULL) 
 {
   M = NULL

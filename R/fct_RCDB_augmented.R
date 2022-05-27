@@ -14,6 +14,8 @@
 #' @param repsExpt (optional) Number of reps of experiment. By default \code{repsExpt = 1}.
 #' @param random Logical value to randomize treatments or not. By default \code{random = TRUE}.
 #' @param data (optional) Data frame with the labels of treatments.
+#' @param nrows (optional) Number of rows in the field.
+#' @param ncols (optional) Number of columns in the field.
 #' 
 #' 
 #' @author Didier Murillo [aut],
@@ -36,8 +38,6 @@
 #'   \item \code{fieldBook} is a data frame with the ARCBD field book.
 #' }
 #' 
-#'
-#'
 #' @references
 #' Federer, W. T. (1955). Experimental Design. Theory and Application. New York, USA. The
 #' Macmillan Company.
@@ -79,42 +79,39 @@
 #' @export
 RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter = "serpentine", 
                            plotNumber = 101, exptName  = NULL, seed = NULL, locationNames = NULL,
-                           repsExpt = 1, random = TRUE, data = NULL) {
+                           repsExpt = 1, random = TRUE, data = NULL, nrows = NULL, ncols = NULL) {
   
   if (all(c("serpentine", "cartesian") != planter)) {
     stop("Input planter choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
   }
   if (is.null(seed)) seed <- runif(1, min=-50000, max=50000)
   set.seed(seed)
-  
   if(!is.numeric(plotNumber) && !is.integer(plotNumber)) {
     stop("plotNumber should be an integer or a numeric vector.")
   }
-  
   if (any(plotNumber %% 1 != 0)) {
     stop("plotNumber should be integers.")
   }
-  
   if (!is.null(l)) {
     if (is.null(plotNumber) || length(plotNumber) != l) {
       if (l > 1){
         plotNumber <- seq(1001, 1000*(l+1), 1000)
       } else plotNumber <- 1001
-      message(cat("Warning message:", "\n", "Since plotNumber was missing, it was set up to default value of: ", plotNumber))
+      message(cat("Warning message:", "\n", 
+      "Since plotNumber was missing, it was set up to default value of: ", plotNumber))
     }
-  }else stop("Number of locations/sites is missing")
-  
+  } else stop("Number of locations/sites is missing")
   if (is.null(lines) || is.null(checks) || is.null(b) || is.null(l)) {
-    shiny::validate('Some of the basic design parameters are missing (lines, checks, b, l).')
+    stop('Some of the basic design parameters are missing (lines, checks, b, l).')
   }
   if(is.null(repsExpt)) repsExpt <- 1
   arg1 <- list(lines, b, l, repsExpt);arg2 <- c(lines, b, l, repsExpt)
   if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
-    shiny::validate('RCBD_augmented() requires input lines, b and l to be possitive integers.')
+    stop('RCBD_augmented() requires input lines, b and l to be possitive integers.')
   }
   if (!is.null(plotNumber) && is.numeric(plotNumber)) {
     if(any(plotNumber < 1) || any(diff(plotNumber) < 0)) {
-      shiny::validate("RCBD_augmented() requires input plotNumber to be possitive integers and sorted.")
+      stop("RCBD_augmented() requires input plotNumber to be possitive integers and sorted.")
     }
   }
   if (!is.null(data)) {
@@ -126,7 +123,7 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
     new_lines <- nrow(data) - checks
     if (lines != new_lines) base::stop("Number of experimental lines do not match with data input provided.")
     lines <- new_lines
-  }else {
+  } else {
     NAME <- c(paste(rep("CH", checks), 1:checks, sep = ""),
               paste(rep("G", lines), (checks + 1):(lines + checks), sep = ""))
     data <- data.frame(list(ENTRY = 1:(lines + checks),	NAME = NAME))
@@ -145,7 +142,7 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
   Fillers <- excedent - all_genotypes
   dim_block <- plots_per_block
   ############################################
-  if(l < 1 || is.null(l)) base::stop("Check the input for the number of locations.")
+  if (l < 1 || is.null(l)) base::stop("Check the input for the number of locations.")
   if (length(plotNumber) != l || is.null(plotNumber)) plotNumber <- seq(1001, 1000*(l+1), 1000)
   outputDesign_loc <- vector(mode = "list", length = l)
   if (is.null(exptName) || length(exptName) != repsExpt) exptName <- paste(rep('Expt', repsExpt), 1:repsExpt, sep = "")
@@ -168,7 +165,7 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
       if (random) {
         if (Fillers > 0) {
           if (Fillers >= (plots_per_block - checks - 2)) {
-            shiny::validate("Number of Filler overcome the amount allowed per block. Please, choose another quantity of blocks.")
+            stop("Number of Filler overcome the amount allowed per block. Please, choose another quantity of blocks.")
           } 
           len_cuts <- rep(lines_per_plot, times = b - 1)
           len_cuts <- c(len_cuts, lines - sum(len_cuts))
@@ -177,12 +174,12 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
           rand_len_cuts <- sample(len_cuts)
           lines_blocks <- split_vectors(x = entries, len_cuts = rand_len_cuts)
           if (b %% 2 == 0) { 
-            if(planter == "serpentine") {
+            if (planter == "serpentine") {
               layout[1,1:Fillers] <- "Filler"
-            }else{ 
+            } else { 
               layout[1,((ncol(layout) + 1) - Fillers):ncol(layout)] <- "Filler" 
             } 
-          }else { 
+          } else { 
             layout[1,((ncol(layout) + 1) - Fillers):ncol(layout)] <- "Filler" 
           }
           z <- b
@@ -219,7 +216,7 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
           }
           plotsPerBlock <- rep(ncol(layout), nrow(layout))
           plotsPerBlock <- c(plotsPerBlock[-length(plotsPerBlock)], ncol(layout) - Fillers)
-        }else {
+        } else {
           datos <- sample(c(rep(0, lines_per_plot), 1:checks))
           len_cuts <- rep(lines_per_plot, times = b)
           z <- b
@@ -249,24 +246,24 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
           }
           plotsPerBlock <- rep(ncol(layout), nrow(layout))
         }
-      }else {
+      } else {
         entries <- as.vector(data[(checks + 1):nrow(data),1])
         if (Fillers > 0) {
           if (Fillers >= (plots_per_block - checks - 2)) {
-            shiny::validate("Number of Filler overcome the amount allowed per block. Please, choose another quantity of blocks.")
+            stop("Number of Filler overcome the amount allowed per block. Please, choose another quantity of blocks.")
           } 
           layout_a <- t(replicate(b,  sample(c(rep(0, plots_per_block - checks), 1:checks))))
           if (b %% 2 == 0) { 
-            if(planter == "serpentine") {
+            if (planter == "serpentine") {
               layout_a[1,] <- c(rep("Filler", Fillers), 
                                 sample(c(1:checks, rep(0, ncol(layout_a) - Fillers - checks)), 
                                        size = ncol(layout_a) - Fillers, replace = FALSE))
-            }else{
+            } else {
               layout_a[1,] <- c(sample(c(1:checks, rep(0, ncol(layout_a) - Fillers - checks)), 
                                        size = ncol(layout_a) - Fillers, replace = FALSE),
                                 rep("Filler", Fillers))
             } 
-          }else {
+          } else {
             layout_a[1,] <- c(sample(c(1:checks, rep(0, ncol(layout_a) - Fillers - checks)), 
                                      size = ncol(layout_a) - Fillers, replace = FALSE),
                               rep("Filler", Fillers))
@@ -276,7 +273,7 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
           layout <- no_randomData$w_map_letters
           len_cuts <- no_randomData$len_cut 
           plotsPerBlock <- c(len_cuts[-length(len_cuts)], ncol(layout_a) - Fillers)
-        }else {
+        } else {
           layout_a <- t(replicate(b,  sample(c(rep(0, plots_per_block - checks), 1:checks))))
           col_checks <- ifelse(layout_a != 0, 1,0)
           no_randomData <- NO_Random(checksMap = layout_a, data_Entry = entries, planter = planter)
@@ -292,7 +289,7 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
       my_data_VLOOKUP <- data
       COLNAMES_DATA <- colnames(my_data_VLOOKUP)
       layout1 <- layout
-      if(Fillers > 0) {
+      if (Fillers > 0) {
         layout1[layout1 == "Filler"] <- 0
         layout1 <- apply(layout1, 2 ,as.numeric)
         Entry_Fillers <- data.frame(list(0,"Filler"))
@@ -329,7 +326,7 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
     year <- format(Sys.Date(), "%Y")
     outputDesign <- export_design(G = results_to_export, movement_planter = planter, location = locationNames[locations],
                                   Year = year, data_file = my_data_VLOOKUP, reps = TRUE)
-    if(Fillers > 0) {
+    if (Fillers > 0) {
       outputDesign$CHECKS <- ifelse(outputDesign$NAME == "Filler", "NA", outputDesign$CHECKS)
     }
     

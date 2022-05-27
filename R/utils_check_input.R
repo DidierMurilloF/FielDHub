@@ -1,5 +1,5 @@
 check_input <- function(design, dataIn) {
-  if (ncol(dataIn)>1) {
+  if (ncol(dataIn) > 1) {
       if (design == "sdiag"||design == "mdiag"||design == "optim"||design == "arcbd"
        ||design == "prep"||design == "square"||design == "rect"||design == "alpha"
        ||design == "spd" ||design == "strip" ||design == "ibd" ||design == "rcd") {

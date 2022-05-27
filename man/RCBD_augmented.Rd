@@ -16,7 +16,9 @@ RCBD_augmented(
   locationNames = NULL,
   repsExpt = 1,
   random = TRUE,
-  data = NULL
+  data = NULL,
+  nrows = NULL,
+  ncols = NULL
 )
 }
 \arguments{
@@ -43,6 +45,10 @@ RCBD_augmented(
 \item{random}{Logical value to randomize treatments or not. By default \code{random = TRUE}.}
 
 \item{data}{(optional) Data frame with the labels of treatments.}
+
+\item{nrows}{(optional) Number of rows in the field.}
+
+\item{ncols}{(optional) Number of columns in the field.}
 }
 \value{
 A list with five elements.

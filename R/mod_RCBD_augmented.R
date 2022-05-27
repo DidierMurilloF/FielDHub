@@ -152,7 +152,26 @@ mod_RCBD_augmented_ui <- function(id){
       ),
       mainPanel(
         width = 8,
+        shinyjs::useShinyjs(),
          tabsetPanel(id = ns("tabset_arcbd"),
+           tabPanel("Get Random", value = "tabPanel_augmented",
+                    br(),
+                    shinyjs::hidden(
+                      selectInput(inputId = ns("field_dims"),
+                                  label = "Select dimensions of field:",
+                                  choices = "")
+                    ),
+                    shinyjs::hidden(
+                      actionButton(ns("get_random_augmented"), label = "Randomize!")
+                    )#,
+                    # br(),
+                    # br(),
+                    # shinycssloaders::withSpinner(
+                    #   verbatimTextOutput(outputId = ns("summary_augmented"), 
+                    #                      placeholder = FALSE), 
+                    #   type = 4
+                    # )
+           ),
            tabPanel("Input Data",
                     fluidRow(
                       column(6,DT::DTOutput(ns("data_input"))),
@@ -176,6 +195,8 @@ mod_RCBD_augmented_server <- function(id) {
   moduleServer( id, function(input, output, session) {
     ns <- session$ns
     
+    shinyjs::useShinyjs()
+    
     observeEvent(input$random, {
       if (input$random == FALSE) {
         shinyalert::shinyalert(
@@ -186,39 +207,44 @@ mod_RCBD_augmented_server <- function(id) {
     })
     
    # getDataup_a_rcbd <- eventReactive(input$RUN.arcbd,{
-    getDataup_a_rcbd <- reactive({
+    init_data <- reactive({
       if (input$owndata_a_rcbd == "Yes") {
         req(input$file1_a_rcbd)
         inFile <- input$file1_a_rcbd
-        data_up <- load_file(name = inFile$name, 
-                             path = inFile$datapat, 
-                             sep = input$sep.a_rcbd, check = TRUE, design = "arcbd")
+        data_ingested <- load_file(name = inFile$name, 
+                                   path = inFile$datapat, 
+                                   sep = input$sep.a_rcbd, check = TRUE, design = "arcbd")
         
-        if (is.logical(data_up)) {
-          if (data_up) {
-            shinyalert::shinyalert(
-              "Error!!", 
-              "Check input file for duplicate values.", 
-              type = "error")
-            return(NULL)
-          } else {
-            shinyalert::shinyalert(
-              "Error!!", 
-              "Invalid file; Please upload a .csv file.", 
-              type = "error")
-            return(NULL)
-          }
+        if (names(data_ingested) == "dataUp") {
+          data_up <- data_ingested$dataUp
+          print(ncol(data_up))
+          if (ncol(data_up) < 2) {
+            shiny::validate("Data input needs at least two columns with: ENTRY and NAME.")
+          } 
+          checks <- as.numeric(input$checks_a_rcbd)
+          data_up <- as.data.frame(data_up[,1:2])
+          data_up <- na.omit(data_up)
+          colnames(data_up) <- c("ENTRY", "NAME")
+          lines <- nrow(data_up) - checks
+          return(list(error = FALSE, 
+                      dataUp_a_rcbd = data_up,
+                      entries = lines))
+        } else if (names(data_ingested) == "bad_format") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Invalid file; Please upload a .csv file.", 
+            type = "error")
+          error_message <- "Invalid file; Please upload a .csv file."
+          return(NULL)
+        } else if (names(data_ingested) == "duplicated_vals") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Check input file for duplicate values.", 
+            type = "error")
+          error_message <- "Check input file for duplicate values."
+          return(NULL)
         }
-        
-        if (ncol(data_up) < 2) {
-          shiny::validate("Data input needs at least two columns with: ENTRY and NAME.")
-        } 
-        checks <- as.numeric(input$checks_a_rcbd)
-        data_up <- as.data.frame(data_up[,1:2])
-        data_up <- na.omit(data_up)
-        colnames(data_up) <- c("ENTRY", "NAME")
-        lines <- nrow(data_up) - checks
-      }else {
+      } else {
         req(input$checks_a_rcbd)
         req(input$lines_a_rcbd)
         lines <- as.numeric(input$lines_a_rcbd)
@@ -228,22 +254,23 @@ mod_RCBD_augmented_server <- function(id) {
                   paste(rep("G", lines), (checks + 1):(lines + checks), sep = ""))
         gen.list <- data.frame(list(ENTRY = 1:(lines + checks),	NAME = NAME))
         data_up <- gen.list
+        return(list(dataUp_a_rcbd = data_up, 
+                    entries = lines))
       }
-      
-      return(list(dataUp_a_rcbd = data_up, entries = lines))
-      
     })
     
     
     list_to_observe <- reactive({
+      req(init_data()$entries)
       list(
         checks = input$checks_a_rcbd, 
-        entries = getDataup_a_rcbd()$entries
+        entries = init_data()$entries
       )
     })
     
     
     observeEvent(list_to_observe(), {
+      req(init_data()$entries)
       lines_arcbd <- as.numeric(list_to_observe()$entries)
       checks_arcbd <- as.numeric(list_to_observe()$checks)
       blocks_arcbd <- set_augmented_blocks(
@@ -257,7 +284,13 @@ mod_RCBD_augmented_server <- function(id) {
                         selected = blocks_arcbd[1])
     })
     
-    some_inputs <- eventReactive(input$RUN.arcbd,{
+    
+    getDataup_a_rcbd <- eventReactive(input$RUN.arcbd, {
+      req(init_data())
+      return(init_data())
+    })
+    
+    some_inputs <- eventReactive(input$RUN.arcbd, {
       return(list(blocks = input$blocks_a_rcbd, 
                   entries = input$lines_a_rcbd, 
                   checks = as.numeric(input$checks_a_rcbd),
@@ -266,7 +299,67 @@ mod_RCBD_augmented_server <- function(id) {
       )
     })
     
+    list_inputs <- eventReactive(input$RUN.arcbd, {
+      if (input$owndata_a_rcbd != 'Yes') {
+        req(input$checks_a_rcbd)
+        req(input$lines_a_rcbd)
+        checks <- as.numeric(input$checks_a_rcbd)
+        lines <- as.numeric(input$lines_a_rcbd)
+        b <- as.numeric(input$blocks_a_rcbd)
+        return(list(b = b, checks = checks, lines = lines, input$owndata_a_rcbd))
+      } else {
+        checks <- as.numeric(input$checks_a_rcbd)
+        lines <- as.numeric(some_inputs()$entries)
+        b <- as.numeric(input$blocks_a_rcbd)
+        return(list(b = b, checks = checks, lines = lines, input$owndata_a_rcbd))
+      }
+    })
+    
+    observeEvent(list_inputs(), {
+      req(input$owndata_a_rcbd)
+      if (input$owndata_a_rcbd != 'Yes') {
+        req(input$checks_a_rcbd)
+        req(input$lines_a_rcbd)
+        checks <- as.numeric(input$checks_a_rcbd)
+        lines <- as.numeric(input$lines_a_rcbd)
+        b <- as.numeric(input$blocks_a_rcbd)
+        all_genotypes <- lines + checks * b
+        plots_per_block <- base::ceiling(all_genotypes / b)
+        dims <- factor_subsets(plots_per_block, augmented = TRUE)$combos
+        print(dims)
+        options_dims <- list(c(row = 1, col = 20))
+        for (i in 1:length(dims)) {options_dims[[i + 1]] <- dims[[i]] * c(b,1)}
+        choices <- options_dims
+      } else {
+        checks <- as.numeric(input$checks_a_rcbd)
+        lines <- as.numeric(some_inputs()$entries)
+        b <- as.numeric(input$blocks_a_rcbd)
+        all_genotypes <- lines + checks * b
+        plots_per_block <- base::ceiling(all_genotypes / b)
+        dims <- factor_subsets(plots_per_block, augmented = TRUE)$combos
+        print(dims)
+        options_dims <- list(c(row = 1, col = 20))
+        for (i in 1:length(dims)) {options_dims[[i + 1]] <- dims[[i]] * c(b,1)}
+        choices <- options_dims
+      }
+      if(is.null(choices)){
+        choices <- "No options available"
+      }
+      choices <- setNames(choices, paste0("option", 1:length(choices)))
+      updateSelectInput(inputId = "field_dims", 
+                        choices = choices) 
+                        #selected = choices[1])
+    })
+    
+    # field_dimensions_optim <- eventReactive(input$get_random_optim, {
+    #   dims <- unlist(strsplit(input$dimensions.s," x "))
+    #   d_row <- as.numeric(dims[1])
+    #   d_col <- as.numeric(dims[2])
+    #   return(list(d_row = d_row, d_col = d_col))
+    # })
+    
     output$data_input <- DT::renderDT({
+      req(getDataup_a_rcbd()$dataUp_a_rcbd)
       df <- getDataup_a_rcbd()$dataUp_a_rcbd
       df$ENTRY <- as.factor(df$ENTRY)
       df$NAME <- as.factor(df$NAME)
@@ -313,6 +406,13 @@ mod_RCBD_augmented_server <- function(id) {
       }
     })
     
+    observeEvent(input$RUN.arcbd, {
+      req(getDataup_a_rcbd())
+      shinyjs::show(id = "field_dims")
+      shinyjs::show(id = "get_random_augmented")
+      
+    })
+    
     output$checks_table <- DT::renderDT({
       req(getDataup_a_rcbd()$dataUp_a_rcbd)
         data_entry <- getDataup_a_rcbd()$dataUp_a_rcbd
@@ -325,13 +425,13 @@ mod_RCBD_augmented_server <- function(id) {
     })
     
     rcbd_augmented_reactive <- eventReactive(input$RUN.arcbd,{
+      req(getDataup_a_rcbd()$dataUp_a_rcbd)
       req(input$checks_a_rcbd)
       req(input$lines_a_rcbd)
       req(input$blocks_a_rcbd)
       req(input$planter_mov1_a_rcbd)
       req(input$plot_start_a_rcbd)
       req(input$myseed_a_rcbd)
-      req(getDataup_a_rcbd()$dataUp_a_rcbd)
       req(input$Location_a_rcbd)
       loc <- as.numeric(input$l.arcbd)
       checks <- as.numeric(input$checks_a_rcbd)
@@ -357,18 +457,20 @@ mod_RCBD_augmented_server <- function(id) {
       plotNumber <- as.numeric(as.vector(unlist(strsplit(input$plot_start_a_rcbd, ","))))
       site_names <- as.character(as.vector(unlist(strsplit(input$Location_a_rcbd, ","))))
       random <- input$random
-      ARCBD <- RCBD_augmented(lines = lines,
-                              checks = checks,
-                              b = b,
-                              l = l.arcbd,
-                              planter = planter,
-                              plotNumber = plotNumber,
-                              exptName = Name_expt,
-                              seed = seed.number,
-                              locationNames = site_names,
-                              repsExpt = repsExpt,
-                              random = random, 
-                              data = gen.list)
+      ARCBD <- new_RCBD_augmented(
+        lines = lines,
+        checks = checks,
+        b = b,
+        l = l.arcbd,
+        planter = planter,
+        plotNumber = plotNumber,
+        exptName = Name_expt,
+        seed = seed.number,
+        locationNames = site_names,
+        repsExpt = repsExpt,
+        random = random, 
+        data = gen.list
+        )
     })
     
     observeEvent(some_inputs()$sites, {
