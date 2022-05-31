@@ -346,7 +346,41 @@ mod_RCBD_augmented_server <- function(id) {
       return(list(d_row = d_row, d_col = d_col))
     })
     
+    randomize_hit_arcbd <- reactiveValues(times = 0)
+    
+    observeEvent(input$RUN.arcbd, {
+      randomize_hit_arcbd$times <- 0
+    })
+    
+    user_tries_arcbd <- reactiveValues(tries_arcbd = 0)
+    
+    observeEvent(input$get_random_augmented, {
+      user_tries_arcbd$tries_arcbd <- user_tries_arcbd$tries_arcbd + 1
+      randomize_hit_arcbd$times <- randomize_hit_arcbd$times + 1
+    })
+    
+    observeEvent(input$field_dims, {
+      user_tries_arcbd$tries_arcbd <- 0
+    })
+    
+    list_to_observe_arcbd <- reactive({
+      list(randomize_hit_arcbd$times, user_tries_arcbd$tries_arcbd)
+    })
+    
+    test_arcbd <- reactive(return(randomize_hit_arcbd$times > 0 & user_tries_arcbd$tries_arcbd > 0))
+    
+    observeEvent(list_to_observe_arcbd(), {
+      output$download_arcbd <- renderUI({
+        if (test_arcbd()) {
+          downloadButton(ns("downloadData_a_rcbd"),
+                         "Save Experiment",
+                         style = "width:100%")
+        }
+      })
+    })
+    
     output$data_input <- DT::renderDT({
+      if(!test_arcbd()) return(NULL)
       req(getDataup_a_rcbd()$dataUp_a_rcbd)
       df <- getDataup_a_rcbd()$dataUp_a_rcbd
       df$ENTRY <- as.factor(df$ENTRY)
@@ -468,11 +502,11 @@ mod_RCBD_augmented_server <- function(id) {
 
     output$summary_augmented <- renderPrint({
       #test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
-      #if (test) {
+      if (test_arcbd()) {
         cat("Randomization was successful!", "\n", "\n")
         len <- length(rcbd_augmented_reactive()$infoDesign)
          rcbd_augmented_reactive()$infoDesign[1:(len - 1)]
-      #}
+      }
     })
     
     observeEvent(some_inputs()$sites, {
@@ -490,6 +524,7 @@ mod_RCBD_augmented_server <- function(id) {
     )
     
     output$randomized_layout <- DT::renderDT({
+      if(!test_arcbd()) return(NULL)
        r_map <- rcbd_augmented_reactive()$layout_random_sites[[locNum()]]
        checks <- 1:(as.numeric(some_inputs()$checks))
        b <- as.numeric(some_inputs()$blocks)
@@ -529,6 +564,7 @@ mod_RCBD_augmented_server <- function(id) {
      })
     
     output$expt_name_layout <- DT::renderDT({
+      if(!test_arcbd()) return(NULL)
       req(rcbd_augmented_reactive())
       # req(input$expt_name_a_rcbd)
       b <- as.numeric(some_inputs()$blocks)
@@ -559,6 +595,7 @@ mod_RCBD_augmented_server <- function(id) {
     })
 
      output$plot_number_layout <- DT::renderDT({
+       if(!test_arcbd()) return(NULL)
        req(rcbd_augmented_reactive())
        # req(input$blocks_a_rcbd)
        plot_num1 <- rcbd_augmented_reactive()$layout_plots_sites[[locNum()]]
@@ -670,11 +707,11 @@ mod_RCBD_augmented_server <- function(id) {
 
      observeEvent(input$Simulate.arcbd, {
        req(rcbd_augmented_reactive()$fieldBook)
-       showModal(
+       if(test_arcbd()) {showModal(
          shinyjqui::jqui_draggable(
            simuModal.ARCBD()
          )
-       )
+       )}
      })
 
      observeEvent(input$ok.arcbd, {
@@ -769,6 +806,7 @@ mod_RCBD_augmented_server <- function(id) {
 
 
      output$fieldBook_ARCBD <- DT::renderDT({
+       if(!test_arcbd()) return(NULL)
        df <- simuDataARCBD()$df
        df$EXPT <- as.factor(df$EXPT)
        df$LOCATION <- as.factor(df$LOCATION)
@@ -813,6 +851,7 @@ mod_RCBD_augmented_server <- function(id) {
 
      output$heatmap <- plotly::renderPlotly({
        req(heatmap_obj())
+       if(!test_arcbd()) return(NULL)
        heatmap_obj()
      })
      
