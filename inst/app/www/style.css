@@ -14,6 +14,10 @@ body::-webkit-scrollbar {
   display: none;
 }
 
+fluid .navbar-brand {
+  margin-left: auto;
+}
+
 .nav a {
     /*color: white !important;*/
     font-size: 1.3em !important;

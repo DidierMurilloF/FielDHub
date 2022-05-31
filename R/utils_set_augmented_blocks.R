@@ -1,4 +1,4 @@
-set_augmented_blocks <- function(lines, checks, start = 5){
+set_augmented_blocks <- function(lines, checks, start = 5) {
   if (lines > 40) div <- 3 else div <- 2
   blocks <- start:ceiling(lines / div)
   b <- vector(mode = "numeric")
