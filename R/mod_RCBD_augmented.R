@@ -71,12 +71,8 @@ mod_RCBD_augmented_ui <- function(id){
           ),
           column(6,
                  style=list("padding-left: 5px;"),
-                 # numericInput(inputId = ns("blocks_a_rcbd"), 
-                 #              label = "Input # of Blocks:",
-                 #              value = 10,
-                 #              min = 3, 
-                 #              max = 100)
-                 selectInput(inputId = ns("blocks_a_rcbd"), label = "", choices = c(5))
+                 selectInput(inputId = ns("blocks_a_rcbd"), 
+                 label = "", choices = c(5))
           )
         ),
         fluidRow(
@@ -162,15 +158,16 @@ mod_RCBD_augmented_ui <- function(id){
                                   choices = "")
                     ),
                     shinyjs::hidden(
-                      actionButton(ns("get_random_augmented"), label = "Randomize!")
-                    )#,
-                    # br(),
-                    # br(),
-                    # shinycssloaders::withSpinner(
-                    #   verbatimTextOutput(outputId = ns("summary_augmented"), 
-                    #                      placeholder = FALSE), 
-                    #   type = 4
-                    # )
+                      actionButton(ns("get_random_augmented"), 
+                      label = "Randomize!")
+                    ),
+                     br(),
+                     br(),
+                     shinycssloaders::withSpinner(
+                       verbatimTextOutput(outputId = ns("summary_augmented"), 
+                                          placeholder = FALSE), 
+                      type = 4
+                    )
            ),
            tabPanel("Input Data",
                     fluidRow(
@@ -206,7 +203,6 @@ mod_RCBD_augmented_server <- function(id) {
       }
     })
     
-   # getDataup_a_rcbd <- eventReactive(input$RUN.arcbd,{
     init_data <- reactive({
       if (input$owndata_a_rcbd == "Yes") {
         req(input$file1_a_rcbd)
@@ -259,7 +255,6 @@ mod_RCBD_augmented_server <- function(id) {
       }
     })
     
-    
     list_to_observe <- reactive({
       req(init_data()$entries)
       list(
@@ -268,15 +263,15 @@ mod_RCBD_augmented_server <- function(id) {
       )
     })
     
-    
     observeEvent(list_to_observe(), {
       req(init_data()$entries)
       lines_arcbd <- as.numeric(list_to_observe()$entries)
       checks_arcbd <- as.numeric(list_to_observe()$checks)
-      blocks_arcbd <- set_augmented_blocks(
+      set_blocks <- set_augmented_blocks(
         lines = lines_arcbd, 
         checks = checks_arcbd
       )
+      blocks_arcbd <- set_blocks$b
       updateSelectInput(session = session,
                         inputId = "blocks_a_rcbd",
                         label = "Input # of Blocks:", 
@@ -323,40 +318,33 @@ mod_RCBD_augmented_server <- function(id) {
         checks <- as.numeric(input$checks_a_rcbd)
         lines <- as.numeric(input$lines_a_rcbd)
         b <- as.numeric(input$blocks_a_rcbd)
-        all_genotypes <- lines + checks * b
-        plots_per_block <- base::ceiling(all_genotypes / b)
-        dims <- factor_subsets(plots_per_block, augmented = TRUE)$combos
-        print(dims)
-        options_dims <- list(c(row = 1, col = 20))
-        for (i in 1:length(dims)) {options_dims[[i + 1]] <- dims[[i]] * c(b,1)}
-        choices <- options_dims
+        set_dims <- set_augmented_blocks(lines = lines, checks = checks)
+        blocks_dims <- as.data.frame(set_dims$blocks_dims)
+        set_choices_dims <- as.vector(subset(blocks_dims, blocks_dims[,1] == b)[,2])
+        choices <- set_choices_dims
       } else {
         checks <- as.numeric(input$checks_a_rcbd)
         lines <- as.numeric(some_inputs()$entries)
         b <- as.numeric(input$blocks_a_rcbd)
-        all_genotypes <- lines + checks * b
-        plots_per_block <- base::ceiling(all_genotypes / b)
-        dims <- factor_subsets(plots_per_block, augmented = TRUE)$combos
-        print(dims)
-        options_dims <- list(c(row = 1, col = 20))
-        for (i in 1:length(dims)) {options_dims[[i + 1]] <- dims[[i]] * c(b,1)}
-        choices <- options_dims
+        set_dims <- set_augmented_blocks(lines = lines, checks = checks)
+        blocks_dims <- as.data.frame(set_dims$blocks_dims)
+        set_choices_dims <- as.vector(subset(blocks_dims, blocks_dims[,1] == b)[,2])
+        choices <- set_choices_dims
       }
-      if(is.null(choices)){
+      if(is.null(choices)) {
         choices <- "No options available"
       }
-      choices <- setNames(choices, paste0("option", 1:length(choices)))
       updateSelectInput(inputId = "field_dims", 
-                        choices = choices) 
-                        #selected = choices[1])
+                        choices = choices, 
+                        selected = choices[1])
     })
     
-    # field_dimensions_optim <- eventReactive(input$get_random_optim, {
-    #   dims <- unlist(strsplit(input$dimensions.s," x "))
-    #   d_row <- as.numeric(dims[1])
-    #   d_col <- as.numeric(dims[2])
-    #   return(list(d_row = d_row, d_col = d_col))
-    # })
+    field_dims_augmented <- eventReactive(input$get_random_augmented, {
+      dims <- unlist(strsplit(input$field_dims, " x "))
+      d_row <- as.numeric(dims[1])
+      d_col <- as.numeric(dims[2])
+      return(list(d_row = d_row, d_col = d_col))
+    })
     
     output$data_input <- DT::renderDT({
       req(getDataup_a_rcbd()$dataUp_a_rcbd)
@@ -424,7 +412,7 @@ mod_RCBD_augmented_server <- function(id) {
           columnDefs = list(list(className = 'dt-left', targets = 0:a))))
     })
     
-    rcbd_augmented_reactive <- eventReactive(input$RUN.arcbd,{
+    rcbd_augmented_reactive <- eventReactive(input$get_random_augmented, {
       req(getDataup_a_rcbd()$dataUp_a_rcbd)
       req(input$checks_a_rcbd)
       req(input$lines_a_rcbd)
@@ -457,6 +445,8 @@ mod_RCBD_augmented_server <- function(id) {
       plotNumber <- as.numeric(as.vector(unlist(strsplit(input$plot_start_a_rcbd, ","))))
       site_names <- as.character(as.vector(unlist(strsplit(input$Location_a_rcbd, ","))))
       random <- input$random
+      nrows <- field_dims_augmented()$d_row
+      ncols <- field_dims_augmented()$d_col
       ARCBD <- new_RCBD_augmented(
         lines = lines,
         checks = checks,
@@ -469,8 +459,20 @@ mod_RCBD_augmented_server <- function(id) {
         locationNames = site_names,
         repsExpt = repsExpt,
         random = random, 
-        data = gen.list
+        data = gen.list,
+        nrows = nrows,
+        ncols = ncols
         )
+    })
+
+
+    output$summary_augmented <- renderPrint({
+      #test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
+      #if (test) {
+        cat("Randomization was successful!", "\n", "\n")
+        len <- length(rcbd_augmented_reactive()$infoDesign)
+         rcbd_augmented_reactive()$infoDesign[1:(len - 1)]
+      #}
     })
     
     observeEvent(some_inputs()$sites, {
@@ -488,20 +490,20 @@ mod_RCBD_augmented_server <- function(id) {
     )
     
     output$randomized_layout <- DT::renderDT({
-       # req(getDataup_a_rcbd()$dataUp_a_rcbd)
        r_map <- rcbd_augmented_reactive()$layout_random_sites[[locNum()]]
        checks <- 1:(as.numeric(some_inputs()$checks))
        b <- as.numeric(some_inputs()$blocks)
        len_checks <- length(checks)
        df <- as.data.frame(r_map)
-       # repsExpt <- as.numeric(input$nExpt_a_rcbd)
        repsExpt <- some_inputs()$expts_a_rcbd
        colores <- c('royalblue','salmon', 'green', 'orange','orchid', 'slategrey',
                     'greenyellow', 'blueviolet','deepskyblue','gold','blue', 'red')
        s <- rcbd_augmented_reactive()$infoDesign$entries
-       B <- paste("Block", rep(b:1, repsExpt), sep = "")
-       E <- paste("E", rep(repsExpt:1, each = b), sep = "")
-       rownames(df) <- paste(B,E)
+       #B <- paste("Block", rep(b:1, repsExpt), sep = "")
+       #nrows <- field_dims_augmented()$d_row
+       #B <- paste("Block", rep(rep(1:b, each = nrows / b), repsExpt), sep = "")
+       #E <- paste("E", rep(repsExpt:1, each = nrows), sep = "")
+       #rownames(df) <- paste(B,E)
        colnames(df) <- paste("V", 1:ncol(df), sep = "")
        options(DT.options = list(pageLength = nrow(df), 
                                  autoWidth = FALSE, 

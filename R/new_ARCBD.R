@@ -101,7 +101,7 @@ new_RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, pla
         entries <- sample(entries)
         rand_len_cuts <- sample(len_cuts)
         lines_blocks <- split_vectors(x = entries, len_cuts = rand_len_cuts)
-        print(lines_blocks)
+        # print(lines_blocks)
         total_rows <- nrows * b
         datos <- sample(c(rep(0, nrows * ncols - checks),
                           rep(1, checks)))
@@ -154,11 +154,9 @@ new_RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, pla
           }
         }
         layout <- dplyr::bind_rows(randomized_blocks)
-        print(layout)
+        #print(layout)
         layout <- as.matrix(layout)
         binary_matrix <- dplyr::bind_rows(spots_for_checks)
-        print("binary_matrix")
-        print(binary_matrix)
         binary_matrix <- as.matrix(binary_matrix)
         col_checks <- ifelse(binary_matrix != "0" & binary_matrix != "Filler", 1, 0)
         plotsPerBlock <- rep(ncol(layout), nrow(layout))
