@@ -599,6 +599,7 @@ mod_RCBD_augmented_server <- function(id) {
        req(rcbd_augmented_reactive())
        # req(input$blocks_a_rcbd)
        plot_num1 <- rcbd_augmented_reactive()$layout_plots_sites[[locNum()]]
+       print(plot_num1)
        # b <- as.numeric(input$blocks_a_rcbd)
        b <- as.numeric(some_inputs()$blocks)
        infoDesign <- rcbd_augmented_reactive()$infoDesign
@@ -610,9 +611,9 @@ mod_RCBD_augmented_server <- function(id) {
          a <- as.vector(as.matrix(plot_num1))
          len_a <- length(a)
          df <- as.data.frame(plot_num1)
-         B <- paste("Block", rep(b:1, repsExpt), sep = "")
-         E <- paste("E", rep(repsExpt:1, each = b), sep = "")
-         rownames(df) <- paste(B,E)
+         # B <- paste("Block", rep(b:1, repsExpt), sep = "")
+         # E <- paste("E", rep(repsExpt:1, each = b), sep = "")
+         # rownames(df) <- paste(B,E)
          colnames(df) <- paste("V", 1:ncol(df), sep = "")
          DT::datatable(df,
                        extensions = c('Buttons'),
