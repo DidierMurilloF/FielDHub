@@ -1,3 +1,81 @@
+#' Generates an Augmented Randomized Complete Block Design (ARCBD)
+#' 
+#' @description It randomly generates an augmented randomized complete block design across locations (ARCBD).
+#'
+#' @param lines Treatments, number of lines for test.
+#' @param checks Number of checks per augmented block.
+#' @param b Number of augmented blocks.
+#' @param l Number of locations. By default \code{l = 1}.
+#' @param plotNumber Numeric vector with the starting plot number for each location. By default \code{plotNumber = 101}.
+#' @param planter Option for \code{serpentine} or \code{cartesian} arrangement. By default \code{planter = 'serpentine'}.
+#' @param seed (optional) Real number that specifies the starting seed to obtain reproducible designs.
+#' @param exptName (optional) Name of experiment.
+#' @param locationNames (optional) Name for each location.
+#' @param repsExpt (optional) Number of reps of experiment. By default \code{repsExpt = 1}.
+#' @param random Logical value to randomize treatments or not. By default \code{random = TRUE}.
+#' @param data (optional) Data frame with the labels of treatments.
+#' @param nrows (optional) Number of rows in the field.
+#' @param ncols (optional) Number of columns in the field.
+#' 
+#' 
+#' @author Didier Murillo [aut],
+#'         Salvador Gezan [aut],
+#'         Ana Heilman [ctb],
+#'         Thomas Walk [ctb], 
+#'         Johan Aparicio [ctb], 
+#'         Richard Horsley [ctb]
+#' 
+#' @importFrom stats runif na.omit
+#' 
+#' 
+#' @return A list with five elements.
+#' \itemize{
+#'   \item \code{infoDesign} is a list with information on the design parameters.
+#'   \item \code{layoutRandom} is the ARCBD layout randomization for the first location.
+#'   \item \code{plotNumber} is the plot number layout for the first location.
+#'   \item \code{exptNames} is the experiment names layout.
+#'   \item \code{data_entry} is a data frame with the data input.
+#'   \item \code{fieldBook} is a data frame with the ARCBD field book.
+#' }
+#' 
+#' @references
+#' Federer, W. T. (1955). Experimental Design. Theory and Application. New York, USA. The
+#' Macmillan Company.
+#' 
+#' @examples
+#' # Example 1: Generates an ARCBD with 6 blocks, 3 checks for each, and 50 treatments 
+#' # in two locations.
+#' ARCBD1 <- RCBD_augmented(lines = 50, checks = 3, b = 6, l = 2, 
+#'                          planter = "cartesian", 
+#'                          plotNumber = c(1,1001),
+#'                          seed = 23, 
+#'                          locationNames = c("FARGO", "MINOT"))
+#' ARCBD1$infoDesign
+#' ARCBD1$layoutRandom
+#' ARCBD1$exptNames
+#' ARCBD1$plotNumber
+#' head(ARCBD1$fieldBook, 12)
+#'                    
+#' # Example 2: Generates an ARCBD with 17 blocks, 4 checks for each, and 350 treatments 
+#' # in 3 locations.
+#' # In this case, we show how to use the option data.
+#' checks <- 4;
+#' list_checks <- paste("CH", 1:checks, sep = "")
+#' treatments <- paste("G", 5:354, sep = "")
+#' treatment_list <- data.frame(list(ENTRY = 1:354, NAME = c(list_checks, treatments)))
+#' head(treatment_list, 12)
+#' ARCBD2 <- RCBD_augmented(lines = 350, checks = 4, b = 17, l = 3, 
+#'                          planter = "serpentine", 
+#'                          plotNumber = c(101,1001,2001), 
+#'                          seed = 24, 
+#'                          locationNames = LETTERS[1:3],
+#'                          data = treatment_list)
+#' ARCBD2$infoDesign
+#' ARCBD2$layoutRandom
+#' ARCBD2$exptNames
+#' ARCBD2$plotNumber
+#' head(ARCBD2$fieldBook, 12)
+#'                                        
 #' @export
 new_RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter = "serpentine", 
                                plotNumber = 101, exptName  = NULL, seed = NULL, locationNames = NULL,
@@ -18,11 +96,17 @@ new_RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, pla
     if (is.null(plotNumber) || length(plotNumber) != l) {
       if (l > 1){
         plotNumber <- seq(1001, 1000*(l+1), 1000)
-      } else plotNumber <- 1001
-      message(cat("Warning message:", "\n", 
-      "Since plotNumber was missing, it was set up to default value of: ", plotNumber))
+        message(cat("Warning message:", "\n", 
+                    "Since plotNumber was missing, it was set up to default value of: ", plotNumber, 
+                    "\n", "\n"))
+      } else {
+        plotNumber <- 1001
+        message(cat("Warning message:", "\n", 
+                    "Since plotNumber was missing, it was set up to default value of: ", plotNumber, 
+                    "\n", "\n"))
+      } 
     }
-  } else stop("Number of locations/sites is missing")
+  }else stop("Number of locations/sites is missing")
   if (is.null(lines) || is.null(checks) || is.null(b) || is.null(l)) {
     stop('Some of the basic design parameters are missing (lines, checks, b, l).')
   }
@@ -67,7 +151,16 @@ new_RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, pla
   if (l < 1 || is.null(l)) base::stop("Check the input for the number of locations.")
   if (length(plotNumber) != l || is.null(plotNumber)) plotNumber <- seq(1001, 1000*(l+1), 1000)
   outputDesign_loc <- vector(mode = "list", length = l)
-  if (is.null(exptName) || length(exptName) != repsExpt) exptName <- paste(rep('Expt', repsExpt), 1:repsExpt, sep = "")
+  if (is.null(exptName) || length(exptName) != repsExpt){
+    exptName <- paste(rep('Expt', repsExpt), 1:repsExpt, sep = "")
+  } 
+  if (any(is.null(c(nrows, ncols)))) {
+    nrows <- 1
+    ncols <- plots_per_block
+  } else {
+    nrows <- nrows / b
+    ncols <- ncols
+  }
   loc <- 1:l
   expt <- 1:repsExpt
   layout1_loc1 <- vector(mode = "list", length = 1)
@@ -82,17 +175,8 @@ new_RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, pla
     plot_number_expt <- vector(mode = "list", length = repsExpt)
     Col_checks_expt <- vector(mode = "list", length = repsExpt)
     for (expts in expt) {
-      if (any(is.null(c(nrows, ncols)))) {
-        nrows <- 1
-        ncols <- plots_per_block
-      } else {
-        nrows <- nrows / b
-        ncols <- ncols
-      }
-      # Blocks <- vector(mode = "list", length = b)
-      # layout <- base::matrix(data = 0, nrow = b, ncol = ncols, byrow = TRUE)
       if (random) {
-        if (Fillers >= (ncols - checks - 2)) {
+        if (Fillers >= (ncols - checks - 1)) {
           stop("Number of Filler overcome the amount allowed per block. Please, choose another quantity of blocks.")
         } 
         len_cuts <- rep(lines_per_plot, times = b - 1)
@@ -101,21 +185,15 @@ new_RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, pla
         entries <- sample(entries)
         rand_len_cuts <- sample(len_cuts)
         lines_blocks <- split_vectors(x = entries, len_cuts = rand_len_cuts)
-        # print(lines_blocks)
         total_rows <- nrows * b
-        datos <- sample(c(rep(0, nrows * ncols - checks),
+        datos <- sample(c(rep(0, times = nrows * ncols - checks),
                           rep(1, checks)))
         randomized_blocks <- setNames(vector(mode = "list", length = b), paste0("Block", 1:b))
         spots_for_checks <- setNames(vector(mode = "list", length = b), paste0("Block", 1:b))
-        # randomized_blocks <- vector(mode = "list", length = b)
-        # spots_for_checks <- vector(mode = "list", length = b)
         for (i in 1:b) {
           block <- matrix(data = sample(datos), nrow = nrows, 
                           ncol = ncols, 
                           byrow = TRUE)
-          # block <- as.data.frame(
-          #   matrix(data = sample(datos), nrow = nrows, ncol = ncols, byrow = TRUE)
-          # )
           if (Fillers > 0 && i == 1) {
             if (total_rows %% 2 == 0) { 
               if (planter == "serpentine") {
@@ -133,19 +211,17 @@ new_RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, pla
             block[block != "Filler"] <- sample(as.character(c(rep(0, zeros), 1:checks)))
             block <- as.data.frame(block)
             colnames(block) <- paste0("col", 1:ncols)
-            spots_for_checks[[i]] <- block #apply(block, c(1,2), as.character)
-            block_with_checks <- block #apply(block, c(1,2), as.character)
+            spots_for_checks[[i]] <- block
+            block_with_checks <- block 
             block_with_checks[block_with_checks == 0] <- sample(as.character(lines_blocks[[i]]))
             block_with_entries_checks <- block_with_checks
-            # block_with_entries_checks <- as.data.frame(block_with_entries_checks)
-            # colnames(block_with_entries_checks) <- paste0("col", 1:ncols)
             randomized_blocks[[i]] <- block_with_entries_checks
           } else {
             block[block == 1] <- sample(as.character(1:checks))
             block <- as.data.frame(block)
             colnames(block) <- paste0("col", 1:ncols)
-            spots_for_checks[[i]] <- block #apply(block, c(1,2), as.character)
-            block_with_checks <- block # apply(block, c(1,2), as.character)
+            spots_for_checks[[i]] <- block
+            block_with_checks <- block
             block_with_checks[block_with_checks == 0] <- sample(as.character(lines_blocks[[i]]))
             block_with_entries_checks <- block_with_checks
             block_with_entries_checks <- as.data.frame(block_with_entries_checks)
@@ -154,21 +230,26 @@ new_RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, pla
           }
         }
         layout <- dplyr::bind_rows(randomized_blocks)
-        #print(layout)
         layout <- as.matrix(layout)
         binary_matrix <- dplyr::bind_rows(spots_for_checks)
         binary_matrix <- as.matrix(binary_matrix)
         col_checks <- ifelse(binary_matrix != "0" & binary_matrix != "Filler", 1, 0)
-        plotsPerBlock <- rep(ncol(layout), nrow(layout))
-        plotsPerBlock <- c(plotsPerBlock[-length(plotsPerBlock)], ncol(layout) - Fillers)
+        plotsPerBlock <- rep(ncol(layout) * nrows, b)
+        plotsPerBlock <- c(plotsPerBlock[-length(plotsPerBlock)], ncol(layout) * nrows - Fillers)
       } else {
+        fun <- function(x) {
+          matrix(data = sample(c(rep(0, (nrows * ncols) - checks), 1:checks)),
+                 nrow  = nrows, 
+                 byrow = TRUE)
+        }
         entries <- as.vector(data[(checks + 1):nrow(data),1])
         if (Fillers > 0) {
-          if (Fillers >= (plots_per_block - checks - 2)) {
+          if (Fillers >= (ncols - checks - 1)) {
             stop("Number of Filler overcome the amount allowed per block. Please, choose another quantity of blocks.")
-          } 
-          layout_a <- t(replicate(b,  sample(c(rep(0, plots_per_block - checks), 1:checks))))
-          if (b %% 2 == 0) { 
+          }
+          blocks_with_checks <- lapply(1:b, fun)
+          layout_a <- paste_by_row(blocks_with_checks)
+          if ((nrows * b) %% 2 == 0) { 
             if (planter == "serpentine") {
               layout_a[1,] <- c(rep("Filler", Fillers), 
                                 sample(c(1:checks, rep(0, ncol(layout_a) - Fillers - checks)), 
@@ -184,30 +265,49 @@ new_RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, pla
                               rep("Filler", Fillers))
           }
           col_checks <- ifelse(layout_a != 0, 1,0)
-          no_randomData <- NO_Random(checksMap = layout_a, data_Entry = entries, planter = planter)
+          no_randomData <- no_random_arcbd(checksMap = layout_a, 
+                                           data_Entry = entries, 
+                                           planter = planter)
           layout <- no_randomData$w_map_letters
           len_cuts <- no_randomData$len_cut 
-          plotsPerBlock <- c(len_cuts[-length(len_cuts)], ncol(layout_a) - Fillers)
+          # plotsPerBlock <- c(len_cuts[-length(len_cuts)], ncol(layout_a) - Fillers)
+          plotsPerBlock <- rep(ncol(layout) * nrows, b)
+          plotsPerBlock <- c(plotsPerBlock[-length(plotsPerBlock)], ncol(layout) * nrows - Fillers)
+          #plotsPerBlock <- no_randomData$len_cut 
         } else {
-          layout_a <- t(replicate(b,  sample(c(rep(0, plots_per_block - checks), 1:checks))))
+          blocks_with_checks <- lapply(1:b, fun)
+          layout_a <- paste_by_row(blocks_with_checks)
           col_checks <- ifelse(layout_a != 0, 1,0)
-          no_randomData <- NO_Random(checksMap = layout_a, data_Entry = entries, planter = planter)
+          no_randomData <- no_random_arcbd(checksMap = layout_a, 
+                                           data_Entry = entries, 
+                                           planter = planter)
           layout <- no_randomData$w_map_letters
-          plotsPerBlock <- no_randomData$len_cut 
+          #plotsPerBlock <- no_randomData$len_cut 
+          plotsPerBlock <- rep(ncol(layout) * nrows, b)
         }
       }
-      Blocks_info <- matrix(data = rep(b:1, each = plots_per_block), nrow = b, ncol = plots_per_block, byrow = TRUE)
+      Blocks_info <- matrix(data = rep(b:1, each = ncols), 
+                            nrow = nrows * b, 
+                            ncol = ncols, 
+                            byrow = TRUE)
       new_exptName <- rev(exptName)
-      nameEXPT <- ARCBD_name(Fillers = Fillers, b = b, layout = layout, name.expt = exptName[expts], planter = planter)
-      plotEXPT <- ARCBD_plot_number(plot.number = plotNumber[locations], planter = planter, b = nrows, name.expt = exptName[expts],
-                                    Fillers = Fillers, nameEXPT = nameEXPT$my_names)
-      print(plotEXPT)
+      nameEXPT <- ARCBD_name(Fillers = Fillers, 
+                             b = nrows * b, 
+                             layout = layout, 
+                             name.expt = exptName[expts], 
+                             planter = planter)
+      plotEXPT <- ARCBD_plot_number(plot.number = plotNumber[locations], 
+                                    planter = planter,
+                                    b = nrows * b, 
+                                    name.expt = exptName[expts],
+                                    Fillers = Fillers, 
+                                    nameEXPT = nameEXPT$my_names)
       my_data_VLOOKUP <- data
       COLNAMES_DATA <- colnames(my_data_VLOOKUP)
       layout1 <- layout
       if (Fillers > 0) {
         layout1[layout1 == "Filler"] <- 0
-        layout1 <- apply(layout1, 2 ,as.numeric)
+        layout1 <- apply(layout1, 2 , as.numeric)
         Entry_Fillers <- data.frame(list(0,"Filler"))
         colnames(Entry_Fillers) <- COLNAMES_DATA
         my_data_VLOOKUP <- rbind(my_data_VLOOKUP, Entry_Fillers)
@@ -271,12 +371,20 @@ new_RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, pla
   
   layout_loc1 <- as.matrix(layout1_loc1[[1]])
   Plot_loc1 <- as.matrix(plot_loc1[[1]])
-  
-  infoDesign <- list(Blocks = b, plotsPerBlock = plotsPerBlock, Checks = DataChecks, 
-                     entries = entries, repsExpt = repsExpt, numberLocations = l, 
-                     Fillers = Fillers, seed = seed, id_design = 14)
-  output <- list(infoDesign = infoDesign, layoutRandom = layout_loc1, layout_random_sites = layout_random_sites,
-                 layout_plots_sites = layout_plots_sites, plotNumber = Plot_loc1, exptNames = my_names, 
+  checks <- as.numeric(nrow(DataChecks))
+  field_dimensions <- c(rows = nrows * b, cols = ncols)
+  blocks_dimensions <-  c(rows = nrows, cols = ncols)
+  infoDesign <- list(field_dimensions = field_dimensions, 
+                     blocks_dimensions = blocks_dimensions,
+                     treatments = lines,
+                     checks = checks,
+                     blocks = b, plots_per_block = plotsPerBlock, 
+                     numberLocations = l, fillers = Fillers, 
+                     seed = seed, id_design = 14)
+  output <- list(infoDesign = infoDesign, layoutRandom = layout_loc1, 
+                 layout_random_sites = layout_random_sites,
+                 layout_plots_sites = layout_plots_sites, 
+                 plotNumber = Plot_loc1, exptNames = my_names, 
                  data_entry = data, fieldBook = fieldbook)
   class(output) <- "FielDHub"
   return(invisible(output))
