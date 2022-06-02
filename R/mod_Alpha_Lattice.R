@@ -513,7 +513,12 @@ mod_Alpha_Lattice_server <- function(id){
     csv_data <- reactive({
       req(simuDataALPHA()$df)
       df <- simuDataALPHA()$df
-      export_layout(df, locNum())
+      req(input$typlotALPHA)
+      if (input$typlotALPHA == 2) {
+        export_layout(df, locNum(), TRUE)
+      } else {
+        export_layout(df, locNum())
+      }
     })
     
     

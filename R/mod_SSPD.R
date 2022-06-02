@@ -558,7 +558,12 @@ mod_SSPD_server <- function(id){
     csv_data <- reactive({
       req(simuData_sspd()$df)
       df <- simuData_sspd()$df
-      export_layout(df, locNum())
+      req(input$typlotsspd)
+      if (input$typlotsspd == 2) {
+        export_layout(df, locNum(), TRUE)
+      } else {
+        export_layout(df, locNum())
+      }
     })
     
     

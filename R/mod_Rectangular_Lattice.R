@@ -497,7 +497,12 @@ mod_Rectangular_Lattice_server <- function(id) {
     csv_data <- reactive({
       req(simuDataRECT()$df)
       df <- simuDataRECT()$df
-      export_layout(df, locNum())
+      req(input$typlotRT)
+      if (input$typlotRT == 2) {
+        export_layout(df, locNum(), TRUE)
+      } else {
+        export_layout(df, locNum())
+      }
     })
     
     

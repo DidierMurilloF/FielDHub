@@ -199,7 +199,7 @@ new_RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, pla
       Blocks_info <- matrix(data = rep(b:1, each = plots_per_block), nrow = b, ncol = plots_per_block, byrow = TRUE)
       new_exptName <- rev(exptName)
       nameEXPT <- ARCBD_name(Fillers = Fillers, b = b, layout = layout, name.expt = exptName[expts], planter = planter)
-      plotEXPT <- ARCBD_plot_number(plot.number = plotNumber[locations], planter = planter, b = nrows, name.expt = exptName[expts],
+      plotEXPT <- ARCBD_plot_number(plot.number = plotNumber[locations], planter = planter, b = b, name.expt = exptName[expts],
                                     Fillers = Fillers, nameEXPT = nameEXPT$my_names)
       print(plotEXPT)
       my_data_VLOOKUP <- data

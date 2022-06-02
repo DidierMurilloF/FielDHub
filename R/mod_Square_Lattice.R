@@ -499,7 +499,12 @@ mod_Square_Lattice_server <- function(id){
     csv_data <- reactive({
       req(simuDataSQUARE()$df)
       df <- simuDataSQUARE()$df
-      export_layout(df, locNum())
+      req(input$typlotSQ)
+      if (input$typlotSQ == 2) {
+        export_layout(df, locNum(), TRUE)
+      } else {
+        export_layout(df, locNum())
+      }
     })
     
     

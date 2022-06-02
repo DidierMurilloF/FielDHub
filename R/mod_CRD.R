@@ -399,7 +399,12 @@ mod_CRD_server <- function(id) {
     csv_data <- reactive({
       req(simuDataCRD()$df)
       df <- simuDataCRD()$df
-      export_layout(df,1)
+      req(input$typlotCRD)
+      if (input$typlotCRD == 2) {
+        export_layout(df, 1, TRUE)
+      } else {
+        export_layout(df, 1)
+      }
     })
     
     

@@ -4,7 +4,7 @@
 #' @param selected A number, to select which location to view.
 #' @importFrom utils tail
 #' @noRd
-export_layout <- function(Fieldbook, selected) {
+export_layout <- function(Fieldbook, selected, plotOn = FALSE) {
   
   dataIn <- Fieldbook
   
@@ -12,7 +12,7 @@ export_layout <- function(Fieldbook, selected) {
   
   df_site_one <- subset(dataIn, dataIn$LOCATION == locs[selected])
   
-  if ("ENTRY" %in% colnames(dataIn)) {
+  if (!plotOn) {if ("ENTRY" %in% colnames(dataIn)) {
     type="ENTRY"
     
   } else if("TREATMENT" %in% colnames(dataIn)) {
@@ -20,16 +20,18 @@ export_layout <- function(Fieldbook, selected) {
     
   } else {
     type="TRT_COMB"
+  }} else {
+    type = "PLOT"
   }
   
-  cols <- length(levels(factor(dataIn$COLUMN)))
-  rows <- length(levels(factor(dataIn$ROW)))
+  cols <- length(levels(factor(df_site_one$COLUMN)))
+  rows <- length(levels(factor(df_site_one$ROW)))
   mtx <- matrix(nrow = rows, ncol = cols)
   # k <- rows
   
   for (i in 1:rows) {
     for (j in 1:cols) {
-      mtx[i,j] <- subset(dataIn, ROW == i & COLUMN == j)[[type]]
+      mtx[i,j] <- subset(df_site_one, ROW == i & COLUMN == j)[[type]]
     }
     # k <- k - 1
   } 

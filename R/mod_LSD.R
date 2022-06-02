@@ -502,7 +502,12 @@ mod_LSD_server <- function(id){
     csv_data <- reactive({
       req(simuDataLSD()$df)
       df <- simuDataLSD()$df
-      export_layout(df, 1)
+      req(input$typlotLSD)
+      if (input$typlotLSD == 2) {
+        export_layout(df, 1, TRUE)
+      } else {
+        export_layout(df, 1)
+      }
     })
     
     

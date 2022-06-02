@@ -545,7 +545,12 @@ mod_RowCol_server <- function(id){
     csv_data <- reactive({
       req(simuData_RowCol()$df)
       df <- simuData_RowCol()$df
-      export_layout(df, locNum())
+      req(input$typlotrcd)
+      if (input$typlotrcd == 2) {
+        export_layout(df, locNum(), TRUE)
+      } else {
+        export_layout(df, locNum())
+      }
     })
     
     
