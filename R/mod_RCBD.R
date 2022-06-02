@@ -523,7 +523,12 @@ mod_RCBD_server <- function(id){
     csv_data <- reactive({
       req(simuDataRCBD()$df)
       df <- simuDataRCBD()$df
-      export_layout(df, locNum())
+      req(input$typlotRCBD)
+      if (input$typlotRCBD == 2) {
+        export_layout(df, locNum(), TRUE)
+      } else {
+        export_layout(df, locNum())
+      }
     })
     
     

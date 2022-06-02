@@ -570,7 +570,12 @@ mod_IBD_server <- function(id){
     csv_data <- reactive({
       req(simuDataIBD()$df)
       df <- simuDataIBD()$df
-      export_layout(df, locNum())
+      req(input$typlotibd)
+      if (input$typlotibd == 2) {
+        export_layout(df, locNum(), TRUE)
+      } else {
+        export_layout(df, locNum())
+      }
     })
     
     

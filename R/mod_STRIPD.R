@@ -514,7 +514,12 @@ mod_STRIPD_server <- function(id) {
     csv_data <- reactive({
       req(simuData_strip()$df)
       df <- simuData_strip()$df
-      export_layout(df, locNum())
+      req(input$typlotstrip)
+      if (input$typlotstrip == 2) {
+        export_layout(df, locNum(), TRUE)
+      } else {
+        export_layout(df, locNum())
+      }
     })
     
     

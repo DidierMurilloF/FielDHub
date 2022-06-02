@@ -302,6 +302,9 @@ new_RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, pla
                                     name.expt = exptName[expts],
                                     Fillers = Fillers, 
                                     nameEXPT = nameEXPT$my_names)
+      # nameEXPT <- ARCBD_name(Fillers = Fillers, b = b, layout = layout, name.expt = exptName[expts], planter = planter)
+      # plotEXPT <- ARCBD_plot_number(plot.number = plotNumber[locations], planter = planter, b = b, name.expt = exptName[expts],
+      #                               Fillers = Fillers, nameEXPT = nameEXPT$my_names)
       my_data_VLOOKUP <- data
       COLNAMES_DATA <- colnames(my_data_VLOOKUP)
       layout1 <- layout

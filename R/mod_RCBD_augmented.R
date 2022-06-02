@@ -142,9 +142,7 @@ mod_RCBD_augmented_ui <- function(id){
           
         ), 
         br(),
-        downloadButton(ns("downloadData_a_rcbd"), 
-                       "Save Experiment!", 
-                       style = "width:100%")
+        uiOutput(ns("download_arcbd"))
       ),
       mainPanel(
         width = 8,

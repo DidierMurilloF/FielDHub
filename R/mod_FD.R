@@ -499,7 +499,12 @@ mod_FD_server <- function(id) {
     csv_data <- reactive({
       req(simuData_fd()$df)
       df <- simuData_fd()$df
-      export_layout(df, locNum())
+      req(input$typlotfd)
+      if (input$typlotfd == 2) {
+        export_layout(df, locNum(), TRUE)
+      } else {
+        export_layout(df, locNum())
+      }
     })
     
     
