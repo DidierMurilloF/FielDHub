@@ -244,6 +244,7 @@ mod_diagonal_multiple_server <- function(id) {
                         choices = loc_user_view, 
                         selected = loc_user_view[1])
     })
+    
     observeEvent(kindExpt,
                  handlerExpr = updateTabsetPanel(session,
                                                  "tabset_multi",
@@ -288,47 +289,55 @@ mod_diagonal_multiple_server <- function(id) {
         req(input$checks.db)
         req(input$file_multiple)
         inFile <- input$file_multiple
-        data_entry <- load_file(name = inFile$name, 
-                                path = inFile$datapat, 
-                                sep = input$sep.DIAGONALS, check = TRUE, design = "mdiag")
-        
-        if (is.logical(data_entry)) {
-          if (data_entry) {
-            shinyalert::shinyalert(
-              "Error!!", 
-              "Check input file for duplicate values.", 
-              type = "error")
-            return(NULL)
-          } else {
-            shinyalert::shinyalert(
-              "Error!!", 
-              "Invalid file; Please upload a .csv file.", 
-              type = "error")
-            return(NULL)
+        data_ingested <- load_file(name = inFile$name, 
+                                  path = inFile$datapat, 
+                                  sep = input$sep.DIAGONALS, 
+                                  check = TRUE, 
+                                  design = "mdiag")
+          
+        if (names(data_ingested) == "dataUp") {
+          data_up <- data_ingested$dataUp
+          data_entry <- na.omit(data_up)
+          if (ncol(data_entry) < 3) {
+            validate("Data input needs at least three Columns with the ENTRY, NAME and BLOCK.")
+          } 
+          data_entry_UP <- data_entry[,1:3] 
+          checksEntries <- as.numeric(data_entry_UP[1:input$checks.db,1])
+          colnames(data_entry_UP) <- c("ENTRY", "NAME", "BLOCK")
+          if (Option_NCD == TRUE) {
+            data_entry1 <- data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ]
+            Block_levels <- suppressWarnings(as.numeric(levels(as.factor(data_entry1$BLOCK))))
+            Block_levels <- na.omit(Block_levels)
+            data_dim_each_block <- numeric()
+            for (i in Block_levels){ 
+              data_dim_each_block[i] <- nrow(subset(data_entry_UP, data_entry_UP$BLOCK == i))
+            }
+            dim_data <- sum(data_dim_each_block)
+            input_blocks <- as.numeric(sort(Block_levels))
+            if (any(input_blocks < 1) || any(diff(input_blocks) != 1)) {
+              validate("Data input does not fit the requirements!")
+            }
+            selected <- length(Block_levels)
           }
-        }
-        
-        data_entry <- na.omit(data_entry)
-        if (ncol(data_entry) < 3) {
-          validate("Data input needs at least three Columns with the ENTRY, NAME and BLOCK.")
-        } 
-        data_entry_UP <- data_entry[,1:3] 
-        checksEntries <- as.numeric(data_entry_UP[1:input$checks.db,1])
-        colnames(data_entry_UP) <- c("ENTRY", "NAME", "BLOCK")
-        if (Option_NCD == TRUE) {
-          data_entry1 <- data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ]
-          Block_levels <- suppressWarnings(as.numeric(levels(as.factor(data_entry1$BLOCK))))
-          Block_levels <- na.omit(Block_levels)
-          data_dim_each_block <- numeric()
-          for (i in Block_levels){ 
-            data_dim_each_block[i] <- nrow(subset(data_entry_UP, data_entry_UP$BLOCK == i))
-          }
-          dim_data <- sum(data_dim_each_block)
-          input_blocks <- as.numeric(sort(Block_levels))
-          if (any(input_blocks < 1) || any(diff(input_blocks) != 1)) {
-            validate("Data input does not fit the requirements!")
-          }
-          selected <- length(Block_levels)
+          dim_data_entry <- nrow(data_entry_UP)
+          dim_data_1 <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
+          return(list(data_entry = data_entry_UP, 
+                      dim_data_entry = dim_data_entry, 
+                      dim_data_1 = dim_data_1))
+        } else if (names(data_ingested) == "bad_format") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Invalid file; Please upload a .csv file.", 
+            type = "error")
+          error_message <- "Invalid file; Please upload a .csv file."
+          return(NULL)
+        } else if (names(data_ingested) == "duplicated_vals") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Check input file for duplicate values.", 
+            type = "error")
+          error_message <- "Check input file for duplicate values."
+          return(NULL)
         }
       } else {
         req(input$checks.db)
@@ -373,16 +382,18 @@ mod_diagonal_multiple_server <- function(id) {
           dim_data <- sum(data_dim_each_block)
           selected <- length(Block_levels)
         }
+        dim_data_entry <- nrow(data_entry_UP)
+        dim_data_1 <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
+        return(list(data_entry = data_entry_UP, 
+             dim_data_entry = dim_data_entry, 
+             dim_data_1 = dim_data_1))
       }
-      dim_data_entry <- nrow(data_entry_UP)
-      dim_data_1 <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
-      list(data_entry = data_entry_UP, 
-           dim_data_entry = dim_data_entry, 
-           dim_data_1 = dim_data_1)
+
     })
     
     getChecks <- eventReactive(input$RUN_multiple, {
       req(get_data_multiple()$data_entry)
+      print(get_data_multiple()$data_entry)
       data <- as.data.frame(get_data_multiple()$data_entry)
       checksEntries <- as.numeric(data[1:input$checks.db,1])
       checks <- as.numeric(input$checks.db)

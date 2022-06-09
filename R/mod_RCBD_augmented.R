@@ -210,6 +210,7 @@ mod_RCBD_augmented_server <- function(id) {
                                                  "tabset_arcbd",
                                                  selected = "tabPanel_augmented"))
     
+    
     init_data <- reactive({
       if (input$owndata_a_rcbd == "Yes") {
         req(input$file1_a_rcbd)
@@ -259,11 +260,13 @@ mod_RCBD_augmented_server <- function(id) {
         return(list(dataUp_a_rcbd = data_up, 
                     entries = lines))
       }
-    })
+    }) 
+
     
     list_to_observe <- reactive({
-      req(init_data()$entries)
+      req(init_data())
       list(
+        entry_list = input$owndata_a_rcbd,
         checks = input$checks_a_rcbd, 
         entries = init_data()$entries
       )
@@ -285,11 +288,49 @@ mod_RCBD_augmented_server <- function(id) {
                         selected = blocks_arcbd[1])
     })
     
+    observeEvent(input$RUN.arcbd, {
+      req(init_data())
+      req(input$owndata_a_rcbd)
+      if (input$owndata_a_rcbd != 'Yes') {
+        req(input$checks_a_rcbd)
+        req(input$lines_a_rcbd)
+        checks <- as.numeric(input$checks_a_rcbd)
+        lines <- as.numeric(input$lines_a_rcbd)
+        b <- as.numeric(input$blocks_a_rcbd)
+        set_dims <- set_augmented_blocks(lines = lines, checks = checks)
+        blocks_dims <- as.data.frame(set_dims$blocks_dims)
+        set_choices_dims <- as.vector(subset(blocks_dims, blocks_dims[,1] == b)[,2])
+        choices <- set_choices_dims
+      } else {
+        checks <- as.numeric(input$checks_a_rcbd)
+        lines <- as.numeric(init_data()$entries)
+        print("print lines")
+        print(lines)
+        b <- as.numeric(input$blocks_a_rcbd)
+        set_dims <- set_augmented_blocks(lines = lines, checks = checks)
+        blocks_dims <- as.data.frame(set_dims$blocks_dims)
+        set_choices_dims <- as.vector(subset(blocks_dims, blocks_dims[,1] == b)[,2])
+        choices <- set_choices_dims
+      }
+      if(is.null(choices)) {
+        choices <- "No options available"
+      }
+      updateSelectInput(inputId = "field_dims",
+                        choices = choices,
+                        selected = choices[1])
+    })
+    
     
     getDataup_a_rcbd <- eventReactive(input$RUN.arcbd, {
-      req(init_data())
-      return(init_data())
+      if (is.null(init_data())) {
+        shinyalert::shinyalert(
+          "Error!!", 
+          "Check input file and try again!", 
+          type = "error")
+        return(NULL)
+      } else return(init_data())
     })
+    
     
     some_inputs <- eventReactive(input$RUN.arcbd, {
       return(list(blocks = input$blocks_a_rcbd, 
@@ -299,6 +340,7 @@ mod_RCBD_augmented_server <- function(id) {
                   expts_a_rcbd = input$nExpt_a_rcbd)
       )
     })
+  
     
     list_inputs <- eventReactive(input$RUN.arcbd, {
       if (input$owndata_a_rcbd != 'Yes') {
@@ -316,34 +358,7 @@ mod_RCBD_augmented_server <- function(id) {
       }
     })
     
-    observeEvent(list_inputs(), {
-      req(input$owndata_a_rcbd)
-      if (input$owndata_a_rcbd != 'Yes') {
-        req(input$checks_a_rcbd)
-        req(input$lines_a_rcbd)
-        checks <- as.numeric(input$checks_a_rcbd)
-        lines <- as.numeric(input$lines_a_rcbd)
-        b <- as.numeric(input$blocks_a_rcbd)
-        set_dims <- set_augmented_blocks(lines = lines, checks = checks)
-        blocks_dims <- as.data.frame(set_dims$blocks_dims)
-        set_choices_dims <- as.vector(subset(blocks_dims, blocks_dims[,1] == b)[,2])
-        choices <- set_choices_dims
-      } else {
-        checks <- as.numeric(input$checks_a_rcbd)
-        lines <- as.numeric(some_inputs()$entries)
-        b <- as.numeric(input$blocks_a_rcbd)
-        set_dims <- set_augmented_blocks(lines = lines, checks = checks)
-        blocks_dims <- as.data.frame(set_dims$blocks_dims)
-        set_choices_dims <- as.vector(subset(blocks_dims, blocks_dims[,1] == b)[,2])
-        choices <- set_choices_dims
-      }
-      if(is.null(choices)) {
-        choices <- "No options available"
-      }
-      updateSelectInput(inputId = "field_dims", 
-                        choices = choices, 
-                        selected = choices[1])
-    })
+
     
     field_dims_augmented <- eventReactive(input$get_random_augmented, {
       dims <- unlist(strsplit(input$field_dims, " x "))

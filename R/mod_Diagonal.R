@@ -115,9 +115,6 @@ mod_Diagonal_ui <- function(id) {
           )
         ),
         br(),
-        # downloadButton(ns("downloadData_Diagonal"),
-        #                "Save Experiment",
-        #                style = "width:100%")
         uiOutput(ns("download_single"))
       ),
       mainPanel(
@@ -263,33 +260,39 @@ mod_Diagonal_server <- function(id) {
       if (input$owndataDIAGONALS == "Yes") {
         req(input$file1)
         inFile <- input$file1
-        data_entry <- load_file(name = inFile$name, 
+        data_ingested <- load_file(name = inFile$name, 
                                 path = inFile$datapat, 
                                 sep = input$sep.DIAGONALS, check = TRUE, design = "sdiag")
-
-        if (is.logical(data_entry)) {
-          if (data_entry) {
-            shinyalert::shinyalert(
-              "Error!!", 
-              "Check input file for duplicate values.", 
-              type = "error")
-            return(NULL)
-          } else {
-            shinyalert::shinyalert(
-              "Error!!", 
-              "Invalid file; Please upload a .csv file.", 
-              type = "error")
-            return(NULL)
-          }
+        
+        if (names(data_ingested) == "dataUp") {
+          data_up <- data_ingested$dataUp
+          data_entry <- na.omit(data_up)
+          if (ncol(data_entry) < 2) {
+            validate("Data input needs at least two Columns with the ENTRY and NAME.")
+          } 
+          data_entry_UP <- data_entry[,1:2]
+          colnames(data_entry_UP) <- c("ENTRY", "NAME")
+          checksEntries <- as.numeric(data_entry_UP[1:input$checks,1])
+          dim_data_entry <- nrow(data_entry_UP)
+          dim_data_1 <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
+          return(list(data_entry = data_entry_UP, 
+                      dim_data_entry = dim_data_entry, 
+                      dim_without_checks = dim_data_1))
+        } else if (names(data_ingested) == "bad_format") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Invalid file; Please upload a .csv file.", 
+            type = "error")
+          error_message <- "Invalid file; Please upload a .csv file."
+          return(NULL)
+        } else if (names(data_ingested) == "duplicated_vals") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Check input file for duplicate values.", 
+            type = "error")
+          error_message <- "Check input file for duplicate values."
+          return(NULL)
         }
-
-        data_entry <- na.omit(data_entry)
-        if (ncol(data_entry) < 2) {
-          validate("Data input needs at least two Columns with the ENTRY and NAME.")
-        } 
-        data_entry_UP <- data_entry[,1:2]
-        colnames(data_entry_UP) <- c("ENTRY", "NAME")
-        checksEntries <- as.numeric(data_entry_UP[1:input$checks,1])
       } else {
           req(input$lines.d)
           req(input$checks)
@@ -301,12 +304,12 @@ mod_Diagonal_server <- function(id) {
           gen.list <- data.frame(list(ENTRY = 1:(lines + checks),	NAME = NAME))
           data_entry_UP <- gen.list
           colnames(data_entry_UP) <- c("ENTRY", "NAME")
+          dim_data_entry <- nrow(data_entry_UP)
+          dim_data_1 <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
+          return(list(data_entry = data_entry_UP, 
+                 dim_data_entry = dim_data_entry, 
+                 dim_without_checks = dim_data_1))
       }
-      dim_data_entry <- nrow(data_entry_UP)
-      dim_data_1 <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
-      list(data_entry = data_entry_UP, 
-           dim_data_entry = dim_data_entry, 
-           dim_without_checks = dim_data_1)
     })
     
     getChecks <- eventReactive(input$RUN.diagonal, {
