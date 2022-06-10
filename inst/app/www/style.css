@@ -4,6 +4,10 @@
   box-sizing: border-box;
 }
 
+.container-fluid .navbar-brand {
+    margin-left: auto;
+ }
+
 html,body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   line-height: 1.7em;
