@@ -26,9 +26,13 @@ get_random_stacked <- function(stacked = "By Column",
       }
     }
   }
+  print(matrix_checks)
+  write.csv(as.data.frame(matrix_checks), file = "example_matrix.csv")
   w_map_letters <- matrix_checks
   levels_target <- levels(as.factor(target))
   split_entries <- split_vectors(data_entries_no_checks, data_dim_each_block)
+  print(data_dim_each_block)
+  print(split_entries)
   z <- 1
   for(k in 1:b){
     matrix_checks[matrix_checks == levels_target[z]] <- sample(split_entries[[k]])

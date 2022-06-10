@@ -54,19 +54,23 @@ mod_diagonal_multiple_ui <- function(id) {
                                 label = "Input # of Entries:",
                                 value = 270, 
                                 min = 50)
-            ),
-            column(6,style=list("padding-left: 5px;"),
-                  textInput(ns("blocks.db"), 
-                            "Input # Entries per Expt:",
-                            value = "100,100,70")
-            )
+            )# ,
+            # column(6,style=list("padding-left: 5px;"),
+            #       textInput(ns("blocks.db"), 
+            #                 "Input # Entries per Expt:",
+            #                 value = "100,100,70")
+            # )
           )
        ),
+       textInput(ns("blocks.db"), 
+                 "Input # Entries per Expt:",
+                 value = "100,100,70"),
+       
         selectInput(inputId = ns("checks.db"),
                     label = "Input # of Checks:",
-                    choices = c(1:10),
-                    multiple = FALSE,
-                    selected = 4),
+                    choices = c(1:20),
+                    multiple = FALSE, 
+                    selected = 4), 
         fluidRow(
           column(6,style=list("padding-right: 28px;"),
                  numericInput(inputId = ns("locs_db"), 
@@ -149,6 +153,7 @@ mod_diagonal_multiple_ui <- function(id) {
         shinyjs::useShinyjs(),
         tabsetPanel(id = ns("tabset_multi"),
                     tabPanel(title = "Expt Design Info", value = "tabPanel1",
+                             br(),
                              shinyjs::hidden(
                                selectInput(inputId = ns("dimensions_multiple"),
                                            label = "Select dimensions of field:", 
@@ -160,7 +165,6 @@ mod_diagonal_multiple_ui <- function(id) {
                              ),
                              br(),
                              br(),
-                             uiOutput(ns("checks_percent_input")),
                              DT::DTOutput(ns("options_table_multi"))
                     ),
                     tabPanel("Input Data",
@@ -169,7 +173,13 @@ mod_diagonal_multiple_ui <- function(id) {
                                column(6,DT::DTOutput(ns("checks_table")))
                              )
                     ),
-                    tabPanel("Randomized Field", 
+                    tabPanel("Randomized Field",
+                             br(),
+                             shinyjs::hidden(
+                               selectInput(inputId = ns("percent_checks_multi"),
+                                           label = "Choose % of Checks:",
+                                           choices = 1:9, width = '400px')
+                             ),
                              DT::DTOutput(ns("randomized_layout"))),
                     tabPanel("Expt Layout", DT::DTOutput(ns("name_layout"))),
                     tabPanel("Plot Number Field", DT::DTOutput(ns("plot_number_layout"))),
@@ -298,11 +308,37 @@ mod_diagonal_multiple_server <- function(id) {
         if (names(data_ingested) == "dataUp") {
           data_up <- data_ingested$dataUp
           data_entry <- na.omit(data_up)
-          if (ncol(data_entry) < 3) {
-            validate("Data input needs at least three Columns with the ENTRY, NAME and BLOCK.")
+          if (ncol(data_entry) < 2) {
+            shinyalert::shinyalert(
+              "Error!!", 
+              "Data input needs at least three Columns with the ENTRY and NAME.", 
+              type = "error")
+            return(NULL)
           } 
-          data_entry_UP <- data_entry[,1:3] 
+          data_entry_UP <- data_entry[,1:2] 
           checksEntries <- as.numeric(data_entry_UP[1:input$checks.db,1])
+          
+          ## ----- NEW ------------------
+          checks <- input$checks.db 
+          lines.db <- nrow(data_entry_UP) - length(checksEntries)
+          blocks <- as.numeric(as.vector(unlist(strsplit(input$blocks.db, ","))))
+          if(sum(blocks) != lines.db) {
+            shinyalert::shinyalert(
+              "Error!!", 
+              "Number of treatments in blocks does not match with the data input file.", 
+              type = "error")
+            return(NULL)
+          }
+          if (as.numeric(lines.db) < 50) {
+            shinyalert::shinyalert(
+              "Error!!", 
+              "Larger field size is recommended for this experiment type", 
+              type = "error")
+            return(NULL)
+          }
+          data_entry_UP$BLOCK <- c(rep("ALL", checks), rep(1:length(blocks), times = blocks))
+          ## ----- NEW ------------------
+          
           colnames(data_entry_UP) <- c("ENTRY", "NAME", "BLOCK")
           if (Option_NCD == TRUE) {
             data_entry1 <- data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ]
@@ -315,7 +351,11 @@ mod_diagonal_multiple_server <- function(id) {
             dim_data <- sum(data_dim_each_block)
             input_blocks <- as.numeric(sort(Block_levels))
             if (any(input_blocks < 1) || any(diff(input_blocks) != 1)) {
-              validate("Data input does not fit the requirements!")
+              shinyalert::shinyalert(
+                "Error!!", 
+                "Data input does not fit the requirements!", 
+                type = "error")
+              return(NULL)
             }
             selected <- length(Block_levels)
           }
@@ -329,14 +369,12 @@ mod_diagonal_multiple_server <- function(id) {
             "Error!!", 
             "Invalid file; Please upload a .csv file.", 
             type = "error")
-          error_message <- "Invalid file; Please upload a .csv file."
           return(NULL)
         } else if (names(data_ingested) == "duplicated_vals") {
           shinyalert::shinyalert(
             "Error!!", 
             "Check input file for duplicate values.", 
             type = "error")
-          error_message <- "Check input file for duplicate values."
           return(NULL)
         }
       } else {
@@ -352,14 +390,30 @@ mod_diagonal_multiple_server <- function(id) {
           list(ENTRY = 1:(lines.db + checks),	NAME = NAME)
         )
         blocks <- as.numeric(as.vector(unlist(strsplit(input$blocks.db, ","))))
-        if (lines.db != sum(blocks)) shiny::validate('Sum of blocks may be equal to number of lines.')
+        if (lines.db != sum(blocks)) {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Number of treatments in blocks does match with the data input file.", 
+            type = "error")
+          return(NULL)
+        }
         if (as.numeric(input$lines.db) < 50) {
-          shiny::validate('Larger field size is recommended for this experiment type')
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Larger field size is recommended for this experiment type", 
+            type = "error")
+          return(NULL)
         }
         data_entry_UP$BLOCK <- c(rep("ALL", checks), rep(1:length(blocks), times = blocks))
         colnames(data_entry_UP) <- c("ENTRY", "NAME", "BLOCK")
         if (input$sameEntries) {
-          if (any(blocks != blocks[1])) shiny::validate("Blocks should have the same size")
+          if (any(blocks != blocks[1])){
+            shinyalert::shinyalert(
+              "Error!!", 
+              "Blocks should have the same size", 
+              type = "error")
+            return(NULL)
+          } 
           # Names
           ChecksNames <- paste(rep("CH", checks), 1:checks, sep = "")
           nameLines <- rep(c(paste(rep("G", blocks[1]), (2 + 1):(blocks[1] + 2), sep = "")), times = length(blocks))
@@ -393,7 +447,6 @@ mod_diagonal_multiple_server <- function(id) {
     
     getChecks <- eventReactive(input$RUN_multiple, {
       req(get_data_multiple()$data_entry)
-      print(get_data_multiple()$data_entry)
       data <- as.data.frame(get_data_multiple()$data_entry)
       checksEntries <- as.numeric(data[1:input$checks.db,1])
       checks <- as.numeric(input$checks.db)
@@ -486,8 +539,7 @@ mod_diagonal_multiple_server <- function(id) {
 
     entryListFormat_DBUDC <- data.frame(
       ENTRY = 1:9, 
-      NAME = c(c("CHECK1", "CHECK2","CHECK3"), paste("Genotype", LETTERS[1:6], sep = "")),
-      BLOCK = c(rep("ALL", 3), rep(1:3, each = 2))
+      NAME = c(c("CHECK1", "CHECK2","CHECK3"), paste("Genotype", LETTERS[1:6], sep = ""))
     )
     
     toListen <- reactive({
@@ -549,16 +601,24 @@ mod_diagonal_multiple_server <- function(id) {
                         choices = my_percent, 
                         selected = selected)
     })
-
+    
     observeEvent(list_to_observe_multi(), {
-      output$checks_percent_input <- renderUI({
-        if (randomize_hit_multi$times_multi > 0 & user_tries_multi$tries > 0) {
-          selectInput(inputId = ns("percent_checks_multi"),
-                      label = "Choose % of Checks:", 
-                      choices = "", width = '400px')
-        }
-      })
+      if (randomize_hit_multi$times_multi > 0 & user_tries_multi$tries > 0) {
+        shinyjs::show(id = "percent_checks_multi")
+      } else {
+        shinyjs::hide(id = "percent_checks_multi")
+      }
     })
+
+    # observeEvent(list_to_observe_multi(), {
+    #   output$checks_percent_input <- renderUI({
+    #     if (randomize_hit_multi$times_multi > 0 & user_tries_multi$tries > 0) {
+    #       selectInput(inputId = ns("percent_checks_multi"),
+    #                   label = "Choose % of Checks:", 
+    #                   choices = "", width = '400px')
+    #     }
+    #   })
+    # })
 
    observeEvent(list_to_observe_multi(), { # user_tries_multi$tries
       output$download_multi <- renderUI({
@@ -570,7 +630,7 @@ mod_diagonal_multiple_server <- function(id) {
       })
     })
     
-    rand_checks <- eventReactive(input$get_random_multi, {
+    rand_checks <- reactive({
       req(input$dimensions_multiple)
       req(get_data_multiple())
       req(field_dimensions_diagonal())
@@ -669,7 +729,7 @@ mod_diagonal_multiple_server <- function(id) {
       DT::datatable(df, rownames = FALSE)
     })
     
-    rand_lines <- eventReactive(input$get_random_multi, {
+    rand_lines <- reactive({
       req(input$dimensions_multiple)
       req(get_data_multiple())
       req(field_dimensions_diagonal())
@@ -809,7 +869,7 @@ mod_diagonal_multiple_server <- function(id) {
                                                           colores[1:len_checks]))
     })
     
-    split_name_reactive <- eventReactive(input$get_random_multi, {
+    split_name_reactive <- reactive({
       checksEntries <- getChecks()$checksEntries
       checks <- checksEntries
       req(rand_lines())
@@ -917,8 +977,10 @@ mod_diagonal_multiple_server <- function(id) {
         ) 
     })
     
-    plot_number_sites <- eventReactive(input$get_random_multi, {
-      if (is.null(multiple_inputs()$plotNumber) || multiple_inputs()$plotNumber == " ") validate("Plot starting number is missing.")
+    plot_number_sites <- reactive({
+      if (is.null(multiple_inputs()$plotNumber) || multiple_inputs()$plotNumber == " ") {
+        validate("Plot starting number is missing.")
+      }
       l <- as.numeric(multiple_inputs()$sites)
       # plotNumber <- as.numeric(as.vector(unlist(strsplit(input$plot_start_multiple, ","))))
       plotNumber <- multiple_inputs()$plotNumber
@@ -1091,7 +1153,7 @@ mod_diagonal_multiple_server <- function(id) {
       )
     })
     
-    export_diagonal_design <- eventReactive(input$get_random_multi, {
+    export_diagonal_design <- reactive({
       locs_diagonal <- as.numeric(multiple_inputs()$sites)
       final_expt_fieldbook <- vector(mode = "list",length = locs_diagonal)
       location_names <- multiple_inputs()$location_names
@@ -1159,9 +1221,6 @@ mod_diagonal_multiple_server <- function(id) {
                  selectInput(inputId = ns("trailsDIAG"), label = "Select One:", 
                              choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
           )
-          # column(6, 
-          #        checkboxInput(inputId = ns("heatmap_Diagonal"), label = "Include a Heatmap", value = TRUE),
-          # )
         ),
         conditionalPanel("input.trailsDIAG == 'Other'", ns = ns,
                          textInput(inputId = ns("OtherDIAG"), label = "Input Trial Name:", value = NULL)
