@@ -342,7 +342,7 @@ mod_Diagonal_server <- function(id) {
       checks <- as.numeric(getChecks()$checks)
       total_entries <- as.numeric(getData()$dim_data_entry)
       lines <- total_entries - checks
-      t1 <- floor(lines + lines * 0.09)
+      t1 <- floor(lines + lines * 0.08)
       t2 <- ceiling(lines + lines * 0.20)
       t <- t1:t2
       n <- t[-numbers::isPrime(t)]

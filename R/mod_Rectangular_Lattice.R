@@ -148,17 +148,6 @@ mod_Rectangular_Lattice_server <- function(id) {
       }
     })
     
-    # get_tRECT <- reactive({
-    #   if(input$owndata_rectangular != "Yes") {
-    #     req(input$t.rectangular)
-    #     t.rectangular <- input$t.rectangular
-    #   }else {
-    #     req(input$file.rectangular)
-    #     t.rectangular <- nrow(getData.rectangular()$dataUp.rectangular)
-    #   }
-    #   return(list(t.rectangular = t.rectangular))
-    # })
-    
     list_to_observe <- reactive({
       req(init_data_rectangular())
       list(
@@ -195,7 +184,7 @@ mod_Rectangular_Lattice_server <- function(id) {
     })
     
     
-    getData.rectangular <- eventReactive(input$RUN.rectangular, {
+    getData.rectangular <- reactive({
       if (is.null(init_data_rectangular())) {
         shinyalert::shinyalert(
           "Error!!", 
@@ -203,7 +192,8 @@ mod_Rectangular_Lattice_server <- function(id) {
           type = "error")
         return(NULL)
       } else return(init_data_rectangular())
-    })
+    }) %>%
+      bindEvent(input$RUN.rectangular)
     
     rectangular_inputs <- reactive({
       req(init_data_rectangular())

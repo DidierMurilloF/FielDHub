@@ -126,8 +126,8 @@ mod_Alpha_Lattice_server <- function(id){
           data_up <- as.data.frame(data_up[,1:2])
           data_alpha <- na.omit(data_up)
           colnames(data_alpha) <- c("ENTRY", "NAME")
-          t_alpha = nrow(data_alpha)
-          return(list(dataUp.alpha = data_alpha, t_alpha = t_alpha))
+          treatments = nrow(data_alpha)
+          return(list(dataUp.alpha = data_alpha, t_alpha = treatments))
         } else if (names(data_ingested) == "bad_format") {
           shinyalert::shinyalert(
             "Error!!", 
@@ -147,8 +147,8 @@ mod_Alpha_Lattice_server <- function(id){
         df <- data.frame(list(ENTRY = 1:nt, NAME = paste0("G-", 1:nt)))
         colnames(df) <- c("ENTRY", "NAME")
         data_alpha <- df
-        t_alpha = nrow(data_alpha)
-        return(list(dataUp.alpha = data_alpha, t_alpha = t_alpha))
+        treatments = nrow(data_alpha)
+        return(list(dataUp.alpha = data_alpha, t_alpha = treatments))
       }
     })
     
@@ -182,7 +182,7 @@ mod_Alpha_Lattice_server <- function(id){
                         choices = k, selected = selected)
     })
     
-    getData.alpha <- eventReactive(input$RUN.alpha, {
+    getData.alpha <- reactive({
       if (is.null(init_data_alpha())) {
         shinyalert::shinyalert(
           "Error!!", 
@@ -190,9 +190,9 @@ mod_Alpha_Lattice_server <- function(id){
           type = "error")
         return(NULL)
       } else return(init_data_alpha())
-    })
+    }) %>%
+      bindEvent(input$RUN.alpha)
     
-    # alpha_inputs <- eventReactive(input$RUN.alpha, {
     alpha_inputs <- reactive({
       req(getData.alpha())
       req(input$k.alpha)
