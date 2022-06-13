@@ -783,7 +783,7 @@ mod_diagonal_multiple_server <- function(id) {
                                             checks = checksEntries,
                                             data = data_entry,
                                             data_dim_each_block = data_dim_each_block)
-        }else {
+        } else {
           n_rows <- field_dimensions_diagonal()$d_row
           n_cols <- field_dimensions_diagonal()$d_col
           if(Option_NCD == FALSE) {

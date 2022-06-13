@@ -222,7 +222,11 @@ mod_RCBD_augmented_server <- function(id) {
         if (names(data_ingested) == "dataUp") {
           data_up <- data_ingested$dataUp
           if (ncol(data_up) < 2) {
-            shiny::validate("Data input needs at least two columns with: ENTRY and NAME.")
+            shinyalert::shinyalert(
+              "Error!!", 
+              "Data input needs at least two columns: ENTRY and NAME.", 
+              type = "error")
+            return(NULL)
           } 
           checks <- as.numeric(input$checks_a_rcbd)
           data_up <- as.data.frame(data_up[,1:2])

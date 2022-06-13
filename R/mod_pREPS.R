@@ -190,33 +190,41 @@ mod_pREPS_server <- function(id){
       if (input$owndataPREPS == 'Yes') {
         req(input$file.preps)
         inFile <- input$file.preps
-        data_up.preps <- load_file(name = inFile$name,
+        data_ingested <- load_file(name = inFile$name,
                                    path = inFile$datapat,
-                                   sep = input$sep.preps, check = TRUE, design = "prep")
+                                   sep = input$sep.preps, 
+                                   check = TRUE, 
+                                   design = "prep")
         
-        if (is.logical(data_up.preps)) {
-          if (data_up.preps) {
+        if (names(data_ingested) == "dataUp") {
+          data_up <- data_ingested$dataUp
+          data_up <- na.omit(data_up)
+          data_preps <- as.data.frame(data_up)
+          if (ncol(data_preps) < 3) {
             shinyalert::shinyalert(
               "Error!!", 
-              "Check input file for duplicate values.", 
+              "Data input needs at least three columns with: ENTRY, NAME and REPS.", 
               type = "error")
             return(NULL)
-          } else {
-            shinyalert::shinyalert(
-              "Error!!", 
-              "Invalid file; Please upload a .csv file.", 
-              type = "error")
-            return(NULL)
-          }
+          } 
+          data_preps <- as.data.frame(data_preps[,1:3])
+          colnames(data_preps) <- c("ENTRY", "NAME", "REPS")
+          if(!is.numeric(data_preps$REPS) || !is.integer(data_preps$REPS) ||
+             is.factor(data_preps$REPS)) validate("'REPS' must be numeric.")
+          total_plots <- sum(data_preps$REPS)
+        } else if (names(data_ingested) == "bad_format") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Invalid file; Please upload a .csv file.", 
+            type = "error")
+          return(NULL)
+        } else if (names(data_ingested) == "duplicated_vals") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Check input file for duplicate values.", 
+            type = "error")
+          return(NULL)
         }
-        
-        data_up.preps <- na.omit(data_up.preps)
-        if (ncol(data_up.preps) < 3) validate("Data input needs at least three columns with: ENTRY, NAME and REPS.")
-        data_up.preps <- as.data.frame(data_up.preps[,1:3])
-        colnames(data_up.preps) <- c("ENTRY", "NAME", "REPS")
-        if(!is.numeric(data_up.preps$REPS) || !is.integer(data_up.preps$REPS) ||
-           is.factor(data_up.preps$REPS)) validate("'REPS' must be numeric.")
-        total_plots <- sum(data_up.preps$REPS)
       } else {
         req(input$repGens.preps)
         req(input$repUnits.preps)
@@ -226,13 +234,13 @@ mod_pREPS_server <- function(id){
         ENTRY <- 1:sum(repGens)
         NAME <- paste(rep("G", sum(repGens)), 1:sum(repGens), sep = "")
         REPS <- sort(rep(repUnits, times = repGens), decreasing = TRUE)
-        data_up.preps <- data.frame(list(ENTRY = ENTRY, 
+        data_preps <- data.frame(list(ENTRY = ENTRY, 
                                          NAME = NAME, 
                                          REPS = REPS))
-        colnames(data_up.preps) <- c("ENTRY", "NAME", "REPS")
-        total_plots <- sum(data_up.preps$REPS)
+        colnames(data_preps) <- c("ENTRY", "NAME", "REPS")
+        total_plots <- sum(data_preps$REPS)
       }
-      return(list(data_up.preps = data_up.preps, total_plots = total_plots))
+      return(list(data_up.preps = data_preps, total_plots = total_plots))
     })
     
     list_input_plots <- eventReactive(input$RUN.prep, {
@@ -369,7 +377,7 @@ mod_pREPS_server <- function(id){
       ncols <- field_dimensions_prep()$d_col
       niter <- 10000
       prep <- TRUE
-      data_preps <- get_data_prep()$data_up.preps
+      #data_preps <- get_data_prep()$data_up.preps
       locs_preps <- prep_inputs()$sites
       site_names <- prep_inputs()$site_names
       preps.seed <- prep_inputs()$seed_number
