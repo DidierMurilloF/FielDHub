@@ -217,7 +217,7 @@ available_percent <- function(n_rows,
           limit_out <- checks + 1
           if (diff(c(Fillers, (n_rows - 5))) <= 2) next
           if (Fillers > 0) {
-            next
+            # next
             i <- 0
             repeat {
               w_map[1 + i, n_cols] <- ifelse(w_map[1 + i, n_cols] == 0, "Filler", "-9")
