@@ -50,7 +50,7 @@ mod_diagonal_multiple_ui <- function(id) {
           ns = ns,
           fluidRow(
             column(6,style=list("padding-right: 28px;"),
-                  numericInput(inputId = ns("lines.db"), 
+                   numericInput(inputId = ns("lines.db"), 
                                 label = "Input # of Entries:",
                                 value = 270, 
                                 min = 50)
@@ -61,11 +61,11 @@ mod_diagonal_multiple_ui <- function(id) {
             #                 value = "100,100,70")
             # )
           )
-       ),
-       textInput(ns("blocks.db"), 
-                 "Input # Entries per Expt:",
-                 value = "100,100,70"),
-       
+        ),
+        textInput(ns("blocks.db"), 
+                  "Input # Entries per Expt:",
+                  value = "100,100,70"),
+        
         selectInput(inputId = ns("checks.db"),
                     label = "Input # of Checks:",
                     choices = c(1:20),
@@ -199,7 +199,7 @@ mod_diagonal_multiple_ui <- function(id) {
 mod_diagonal_multiple_server <- function(id) {
   moduleServer( id, function(input, output, session) {
     ns <- session$ns
-
+    
     counts_multi <- reactiveValues(trigger_multi = 0)
     
     observeEvent(input$RUN_multiple, {
@@ -207,30 +207,30 @@ mod_diagonal_multiple_server <- function(id) {
     })
     
     kindExpt = "DBUDC"
-
+    
     randomize_hit_multi <- reactiveValues(times_multi = 0)
- 
+    
     observeEvent(input$RUN_multiple, {
       randomize_hit_multi$times_multi <- 0
     })
-
+    
     user_tries_multi <- reactiveValues(tries = 1)
-
+    
     observeEvent(input$get_random_multi, {
       randomize_hit_multi$times_multi <- randomize_hit_multi$times_multi + 1
       user_tries_multi$tries <- user_tries_multi$tries + 1
     })
-
+    
     observeEvent(input$dimensions_multiple, {
       user_tries_multi$tries <- 0
     })
-
+    
     list_to_observe_multi <- reactive({
       list(randomize_hit_multi$times_multi, user_tries_multi$tries)
     })
     
     shinyjs::useShinyjs()
-
+    
     multiple_inputs <- eventReactive(input$RUN_multiple, {
       stacked <- input$stacked
       planter_mov <- input$planter_multiple
@@ -292,7 +292,7 @@ mod_diagonal_multiple_server <- function(id) {
                                                  "tabset_multi",
                                                  selected = "tabPanel1"))
     
-
+    
     get_data_multiple <- eventReactive(input$RUN_multiple, {
       Option_NCD <- TRUE
       if (input$list_entries_multiple == "Yes") {
@@ -300,11 +300,11 @@ mod_diagonal_multiple_server <- function(id) {
         req(input$file_multiple)
         inFile <- input$file_multiple
         data_ingested <- load_file(name = inFile$name, 
-                                  path = inFile$datapat, 
-                                  sep = input$sep.DIAGONALS, 
-                                  check = TRUE, 
-                                  design = "mdiag")
-          
+                                   path = inFile$datapat, 
+                                   sep = input$sep.DIAGONALS, 
+                                   check = TRUE, 
+                                   design = "mdiag")
+        
         if (names(data_ingested) == "dataUp") {
           data_up <- data_ingested$dataUp
           data_entry <- na.omit(data_up)
@@ -439,10 +439,10 @@ mod_diagonal_multiple_server <- function(id) {
         dim_data_entry <- nrow(data_entry_UP)
         dim_data_1 <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
         return(list(data_entry = data_entry_UP, 
-             dim_data_entry = dim_data_entry, 
-             dim_data_1 = dim_data_1))
+                    dim_data_entry = dim_data_entry, 
+                    dim_data_1 = dim_data_1))
       }
-
+      
     })
     
     getChecks <- eventReactive(input$RUN_multiple, {
@@ -452,7 +452,7 @@ mod_diagonal_multiple_server <- function(id) {
       checks <- as.numeric(input$checks.db)
       list(checksEntries = checksEntries, checks = checks)
     })
-
+    
     blocks_length <- eventReactive(input$RUN_multiple, {
       req(get_data_multiple()$data_entry)
       df <- get_data_multiple()$data_entry
@@ -536,7 +536,7 @@ mod_diagonal_multiple_server <- function(id) {
       d_col <- as.numeric(dims[2])
       return(list(d_row = d_row, d_col = d_col))
     })
-
+    
     entryListFormat_DBUDC <- data.frame(
       ENTRY = 1:9, 
       NAME = c(c("CHECK1", "CHECK2","CHECK3"), paste("Genotype", LETTERS[1:6], sep = ""))
@@ -545,7 +545,7 @@ mod_diagonal_multiple_server <- function(id) {
     toListen <- reactive({
       list(input$list_entries_multiple)
     })
-
+    
     entriesInfoModal_DBUDC <- function() {
       modalDialog(
         title = div(tags$h3("Important message", style = "color: red;")),
@@ -568,7 +568,7 @@ mod_diagonal_multiple_server <- function(id) {
         )
       }
     })
-
+    
     available_percent_multi <- eventReactive(input$get_random_multi, {
       req(input$dimensions_multiple)
       req(get_data_multiple())
@@ -589,7 +589,7 @@ mod_diagonal_multiple_server <- function(id) {
                         dim_data_1 = get_data_multiple()$dim_data_1, 
                         Block_Fillers = blocks_length())
     }) 
-
+    
     observeEvent(available_percent_multi()$dt, {
       my_out <- available_percent_multi()$dt
       my_percent <- my_out[,2]
@@ -609,7 +609,7 @@ mod_diagonal_multiple_server <- function(id) {
         shinyjs::hide(id = "percent_checks_multi")
       }
     })
-
+    
     # observeEvent(list_to_observe_multi(), {
     #   output$checks_percent_input <- renderUI({
     #     if (randomize_hit_multi$times_multi > 0 & user_tries_multi$tries > 0) {
@@ -619,13 +619,13 @@ mod_diagonal_multiple_server <- function(id) {
     #     }
     #   })
     # })
-
-   observeEvent(list_to_observe_multi(), { # user_tries_multi$tries
+    
+    observeEvent(list_to_observe_multi(), { # user_tries_multi$tries
       output$download_multi <- renderUI({
         if (randomize_hit_multi$times_multi > 0 & user_tries_multi$tries > 0) {
           downloadButton(ns("download_fieldbook_multiple"),
-                          "Save Experiment",
-                          style = "width:100%")
+                         "Save Experiment",
+                         style = "width:100%")
         }
       })
     })
@@ -693,7 +693,7 @@ mod_diagonal_multiple_server <- function(id) {
         options = list(
           columnDefs = list(list(className = 'dt-center', targets = "_all"))))
     })
-
+    
     
     output$data_input <- DT::renderDT({
       test <- randomize_hit_multi$times_multi > 0 & user_tries_multi$tries > 0
@@ -725,7 +725,7 @@ mod_diagonal_multiple_server <- function(id) {
       colnames(table_type) <- c("SUB-BLOCKS", "FREQUENCY")
       df <- table_type
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                  scrollX = TRUE, scrollY = "350px"))
+                                scrollX = TRUE, scrollY = "350px"))
       DT::datatable(df, rownames = FALSE)
     })
     
@@ -783,7 +783,7 @@ mod_diagonal_multiple_server <- function(id) {
                                             checks = checksEntries,
                                             data = data_entry,
                                             data_dim_each_block = data_dim_each_block)
-        }else {
+        } else {
           n_rows <- field_dimensions_diagonal()$d_row
           n_cols <- field_dimensions_diagonal()$d_col
           if(Option_NCD == FALSE) {
@@ -844,7 +844,7 @@ mod_diagonal_multiple_server <- function(id) {
         b = b + 1
       }
       colores <- c('royalblue','salmon', 'green', 'orange','orchid', 'slategrey',
-                    'greenyellow', 'blueviolet','deepskyblue','gold','blue', 'red')
+                   'greenyellow', 'blueviolet','deepskyblue','gold','blue', 'red')
       my_colors <- unlist(my_colors)
       my_colors <- c(my_colors, colores[1:len_checks])
       df <- as.data.frame(r_map)
@@ -852,21 +852,21 @@ mod_diagonal_multiple_server <- function(id) {
       DT::datatable(df,
                     extensions = 'Buttons',
                     options = list(dom = 'Blfrtip',
-                                    autoWidth = FALSE,
-                                    scrollX = TRUE,
-                                    fixedColumns = TRUE,
-                                    pageLength = nrow(df),
-                                    scrollY = "700px",
-                                    class = 'compact cell-border stripe',  rownames = FALSE,
-                                    server = FALSE,
-                                    filter = list( position = 'top', clear = FALSE, plain =TRUE ),
-                                    buttons = c('copy', 'excel'),
-                                    lengthMenu = list(c(10,25,50,-1),
-                                                      c(10,25,50,"All")))
+                                   autoWidth = FALSE,
+                                   scrollX = TRUE,
+                                   fixedColumns = TRUE,
+                                   pageLength = nrow(df),
+                                   scrollY = "700px",
+                                   class = 'compact cell-border stripe',  rownames = FALSE,
+                                   server = FALSE,
+                                   filter = list( position = 'top', clear = FALSE, plain =TRUE ),
+                                   buttons = c('copy', 'excel'),
+                                   lengthMenu = list(c(10,25,50,-1),
+                                                     c(10,25,50,"All")))
       ) %>% 
         DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
                         backgroundColor = DT::styleEqual(c(checks),
-                                                          colores[1:len_checks]))
+                                                         colores[1:len_checks]))
     })
     
     split_name_reactive <- reactive({
@@ -886,7 +886,7 @@ mod_diagonal_multiple_server <- function(id) {
         blocks <- length(data_dim_each_block)
         if (length(Name_expt) == blocks) {
           name_expt <- Name_expt
-        } else {
+        }else{
           name_expt = paste0(rep("Block", times = blocks), 1:blocks)
         }
         map_letters <- rand_lines()[[1]]$w_map_letter
@@ -901,6 +901,7 @@ mod_diagonal_multiple_server <- function(id) {
       }else if (multiple_inputs()$stacked == "By Column") {
         map_letters <- rand_lines()[[1]]$w_map_letter
         data_dim_each_block <- available_percent_multi()$data_dim_each_block
+        # Name_expt <- as.vector(unlist(strsplit(input$expt_name_multiple, ",")))
         Name_expt <- multiple_inputs()$expt_name
         blocks <- length(data_dim_each_block)
         if (length(Name_expt) == blocks) {
@@ -909,26 +910,18 @@ mod_diagonal_multiple_server <- function(id) {
           name_expt = paste0(rep("Block", times = blocks), 1:blocks)
         }
         map_letters <- rand_lines()[[1]]$w_map_letter
-        checksEntries <- as.vector(getChecks()$checksEntries)
-        split_name_diagonal1 <- names_dbrows(w_map = w_map, 
-                                             myWay = "By Column",
-                                             kindExpt = "DBUDC",
-                                             data_dim_each_block = data_dim_each_block,
-                                             w_map_letters = map_letters,
-                                             expt_name = name_expt,
-                                             Checks = checksEntries)
-        # split_name_diagonal1 <- names_diagonal(nrows = n_rows,
-        #                                        ncols = n_cols,
-        #                                        randomChecksMap = w_map,
-        #                                        kindExpt = kindExpt,
-        #                                        checks = 1:getChecks()$checks,
-        #                                        myWay = multiple_inputs()$stacked,
-        #                                        Option_NCD = Option_NCD,
-        #                                        expt_name = name_expt,
-        #                                        data_entry = data_entry,
-        #                                        reps = NULL,
-        #                                        data_dim_each_block = data_dim_each_block,
-        #                                        w_map_letters1 = map_letters)
+        split_name_diagonal1 <- names_diagonal(nrows = n_rows,
+                                               ncols = n_cols,
+                                               randomChecksMap = w_map,
+                                               kindExpt = kindExpt,
+                                               checks = 1:getChecks()$checks,
+                                               myWay = multiple_inputs()$stacked,
+                                               Option_NCD = Option_NCD,
+                                               expt_name = name_expt,
+                                               data_entry = data_entry,
+                                               reps = NULL,
+                                               data_dim_each_block = data_dim_each_block,
+                                               w_map_letters1 = map_letters)
       }
     })
     
@@ -956,6 +949,7 @@ mod_diagonal_multiple_server <- function(id) {
                                         dim_data = data_dim_each_block)  
         blocks <- length(cuts_by_c) 
       }  
+      # Name_expt <- as.vector(unlist(strsplit(input$expt_name_multiple, ","))) 
       Name_expt <- multiple_inputs()$expt_name
       if (length(Name_expt) == blocks) { 
         name_expt <- Name_expt 
@@ -979,7 +973,7 @@ mod_diagonal_multiple_server <- function(id) {
                     )) %>% 
         DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
                         backgroundColor = DT::styleEqual(name_expt, 
-                                                          colores_back[1:blocks])
+                                                         colores_back[1:blocks])
         ) 
     })
     
@@ -988,6 +982,7 @@ mod_diagonal_multiple_server <- function(id) {
         validate("Plot starting number is missing.")
       }
       l <- as.numeric(multiple_inputs()$sites)
+      # plotNumber <- as.numeric(as.vector(unlist(strsplit(input$plot_start_multiple, ","))))
       plotNumber <- multiple_inputs()$plotNumber
       if(!is.numeric(plotNumber) && !is.integer(plotNumber)) {
         validate("plotNumber should be an integer or a numeric vector.")
@@ -1003,7 +998,7 @@ mod_diagonal_multiple_server <- function(id) {
             plotNumber <- seq(1001, 1000*(l+1), 1000)
           } else plotNumber <- 1001
         }
-      } else validate("Number of locations/sites is missing")
+      }else validate("Number of locations/sites is missing")
       
       return(plotNumber)
       
@@ -1023,6 +1018,7 @@ mod_diagonal_multiple_server <- function(id) {
       plot_n_start <- plot_number_sites()
       locs_diagonal <- as.numeric(multiple_inputs()$sites)
       plots_number_sites <- vector(mode = "list", length = locs_diagonal)
+      # start for loop
       for (sites in 1:locs_diagonal) {
         if (Option_NCD == FALSE) { 
           req(get_data_multiple()$data_entry) 
@@ -1034,7 +1030,7 @@ mod_diagonal_multiple_server <- function(id) {
                                               way = "By Row", 
                                               dim_data = data_dim_each_block)[[1]]
             n_blocks <- length(my_row_sets) 
-          } else { 
+          }else { 
             data_dim_each_block <- available_percent_multi()$data_dim_each_block 
             cuts_by_c <- automatically_cuts(data = w_map, 
                                             planter_mov = NULL,
@@ -1055,16 +1051,16 @@ mod_diagonal_multiple_server <- function(id) {
           
           if (multiple_inputs()$stacked == "By Column") {
             my_split_plot_nub <- plot_number(movement_planter = multiple_inputs()$planter_mov, 
-                                              n_blocks = n_blocks,
-                                              n_rows = n_rows,
-                                              n_cols = n_cols, 
-                                              plot_n_start = plot_n_start[sites],
-                                              datos = datos_name,
-                                              expe_name = expe_names,
-                                              ByRow = FALSE,
-                                              my_row_sets = NULL,
-                                              ByCol = TRUE,
-                                              my_col_sets = my_col_sets) 
+                                             n_blocks = n_blocks,
+                                             n_rows = n_rows,
+                                             n_cols = n_cols, 
+                                             plot_n_start = plot_n_start[sites],
+                                             datos = datos_name,
+                                             expe_name = expe_names,
+                                             ByRow = FALSE,
+                                             my_row_sets = NULL,
+                                             ByCol = TRUE,
+                                             my_col_sets = my_col_sets) 
           }else{
             req(split_name_reactive()$my_names)
             datos_name <- split_name_reactive()$my_names 
@@ -1072,16 +1068,16 @@ mod_diagonal_multiple_server <- function(id) {
             Block_Fillers <- as.numeric(blocks_length()) 
             
             my_split_plot_nub <- plot_number_fillers(movement_planter = movement_planter, 
-                                                      plot_n_start = plot_n_start[sites],
-                                                      datos = datos_name,
-                                                      expe_names = expe_names, 
-                                                      ByRow = TRUE, 
-                                                      my_row_sets = my_row_sets,
-                                                      ByCol = FALSE, 
-                                                      my_col_sets = NULL,
-                                                      which.blocks = Block_Fillers, 
-                                                      n_blocks = n_blocks,
-                                                      data.dim.each = data.dim.each)
+                                                     plot_n_start = plot_n_start[sites],
+                                                     datos = datos_name,
+                                                     expe_names = expe_names, 
+                                                     ByRow = TRUE, 
+                                                     my_row_sets = my_row_sets,
+                                                     ByCol = FALSE, 
+                                                     my_col_sets = NULL,
+                                                     which.blocks = Block_Fillers, 
+                                                     n_blocks = n_blocks,
+                                                     data.dim.each = data.dim.each)
           }
         } else if (Option_NCD == TRUE) {
           req(get_data_multiple()$data_entry) 
@@ -1091,7 +1087,7 @@ mod_diagonal_multiple_server <- function(id) {
                                               planter_mov = multiple_inputs()$planter_mov,
                                               way = "By Row", dim_data = data_dim_each_block)[[1]]
             n_blocks <- length(my_row_sets) 
-          } else { 
+          }else { 
             data_dim_each_block <- available_percent_multi()$data_dim_each_block 
             cuts_by_c <- automatically_cuts(data = w_map, 
                                             planter_mov = NULL, 
@@ -1109,42 +1105,19 @@ mod_diagonal_multiple_server <- function(id) {
           }else { 
             expe_names = paste0(rep("Block", times = n_blocks), 1:n_blocks) 
           } 
-          if (multiple_inputs()$stacked == "By Row") { 
+          if(multiple_inputs()$stacked == "By Row") { 
             datos_name <- split_name_reactive()$my_names 
             data.dim.each <- available_percent_multi()$data_dim_each_block
             Block_Fillers <- as.numeric(blocks_length()) 
             
-            my_split_plot_nub <- plot_number_fillers(
-              movement_planter = multiple_inputs()$planter_mov, 
-              plot_n_start = plot_n_start[sites],
-              datos = datos_name, 
-              expe_names = expe_names, 
-              ByRow = TRUE,
-              my_row_sets = my_row_sets, 
-              ByCol = FALSE, 
-              my_col_sets = NULL,
-              which.blocks = Block_Fillers, 
-              n_blocks = n_blocks,
-              data.dim.each = data.dim.each
-              ) 
+            my_split_plot_nub <- plot_number_fillers(movement_planter = multiple_inputs()$planter_mov, 
+                                                     plot_n_start = plot_n_start[sites],
+                                                     datos = datos_name, expe_names = expe_names, ByRow = TRUE,
+                                                     my_row_sets = my_row_sets, ByCol = FALSE, my_col_sets = NULL,
+                                                     which.blocks = Block_Fillers, n_blocks = n_blocks,
+                                                     data.dim.each = data.dim.each) 
           } else { 
-            datos_name <- split_name_reactive()$my_names 
-            data.dim.each <- available_percent_multi()$data_dim_each_block
-            Block_Fillers <- as.numeric(blocks_length()) 
-            my_split_plot_nub <- plot_number_fillers_by_col(
-              movement_planter = multiple_inputs()$planter_mov, 
-              plot_n_start = plot_n_start[sites], 
-              datos = datos_name,
-              expe_names = expe_names,
-              ByRow = FALSE,
-              my_row_sets = NULL,
-              ByCol = TRUE,
-              my_col_sets = NULL, 
-              which.blocks = Block_Fillers,
-              n_blocks = n_blocks,
-              data.dim.each = data.dim.each
-            )
-            # return(NULL) 
+            return(NULL) 
           } 
         }
         plots_number_sites[[sites]] <- my_split_plot_nub$w_map_letters1
@@ -1215,8 +1188,8 @@ mod_diagonal_multiple_server <- function(id) {
         random_entries_map <- apply(random_entries_map, 2 ,as.numeric)
         results_to_export <- list(random_entries_map, plot_number, Col_checks, my_names)
         final_expt_export <- export_design(G = results_to_export, movement_planter = movement_planter,
-                                            location = location_names[user_site], Year = NULL,
-                                            data_file = my_data_VLOOKUP, reps = FALSE)
+                                           location = location_names[user_site], Year = NULL,
+                                           data_file = my_data_VLOOKUP, reps = FALSE)
         final_expt_fieldbook[[user_site]] <- as.data.frame(final_expt_export)
       }
       ## end for
@@ -1361,7 +1334,7 @@ mod_diagonal_multiple_server <- function(id) {
         return(list(df = df_DIAG))
       }
     })
-
+    
     heat_map <- reactiveValues(heat_map_option = FALSE)
     
     observeEvent(input$ok_simu_multi, {
@@ -1400,7 +1373,7 @@ mod_diagonal_multiple_server <- function(id) {
                     options = list(
                       columnDefs = list(list(className = 'dt-center', targets = "_all"))))
     })
-  
+    
     heatmap_obj_D <- reactive({
       req(simudata_DIAG()$dfSimulation)
       loc_user <- user_location()$user_site

@@ -64,8 +64,14 @@
 #' head(alphalattice2$fieldBook, 10)
 #' 
 #' @export
-alpha_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101, locationNames = NULL,
-                          seed = NULL, data = NULL) {
+alpha_lattice <- function(t = NULL, 
+                          k = NULL, 
+                          r = NULL, 
+                          l = 1, 
+                          plotNumber = 101, 
+                          locationNames = NULL,
+                          seed = NULL, 
+                          data = NULL) {
   
   if (is.null(seed)) {seed <- runif(1, min=0, max=10000)}
   set.seed(seed)
