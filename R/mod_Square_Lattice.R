@@ -100,47 +100,64 @@ mod_Square_Lattice_server <- function(id){
     
     shinyjs::useShinyjs()
     
-    getData.square <- reactive({
-      req(input$file.square)
-      inFile <- input$file.square
-      dataUp.square <- load_file(name = inFile$name, 
-                                 path = inFile$datapat, 
-                                 sep = input$sep.square, check = TRUE, design = "square")
+    init_data_square <- reactive({
       
-      if (is.logical(dataUp.square)) {
-        if (dataUp.square) {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Check input file for duplicate values.", 
-            type = "error")
-          return(NULL)
-        } else {
+      if (input$owndata_square == "Yes") {
+        req(input$file.square)
+        inFile <- input$file.square
+        data_ingested <- load_file(name = inFile$name, 
+                                   path = inFile$datapat, 
+                                   sep = input$sep.square, check = TRUE, design = "square")
+        
+        if (names(data_ingested) == "dataUp") {
+          data_up <- data_ingested$dataUp
+          if (ncol(data_up) < 2) {
+            shinyalert::shinyalert(
+              "Error!!", 
+              "Data input needs at least two columns: ENTRY and NAME.", 
+              type = "error")
+            return(NULL)
+          } 
+          data_up <- as.data.frame(data_up[,1:2])
+          data_square <- na.omit(data_up)
+          colnames(data_square) <- c("ENTRY", "NAME")
+          treatments = nrow(data_square)
+          return(list(data_square = data_square, treatments = treatments))
+        } else if (names(data_ingested) == "bad_format") {
           shinyalert::shinyalert(
             "Error!!", 
             "Invalid file; Please upload a .csv file.", 
             type = "error")
           return(NULL)
+        } else if (names(data_ingested) == "duplicated_vals") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Check input file for duplicate values.", 
+            type = "error")
+          return(NULL)
         }
-      }
-      
-      return(list(dataUp.square = dataUp.square))
-    })
-    
-    get_tSQUARE <- reactive({
-      if(input$owndata_square != "Yes") {
+      } else {
         req(input$t.square)
-        t_square <- input$t.square
-      }else {
-        req(input$file.square)
-        t_square <- nrow(getData.square()$dataUp.square)
-      }
-      return(list(t_square = t_square))
+        nt <- as.numeric(input$t.square)
+        df <- data.frame(list(ENTRY = 1:nt, NAME = paste0("G-", 1:nt)))
+        colnames(df) <- c("ENTRY", "NAME")
+        data_square <- df
+        treatments = nrow(data_square)
+        return(list(data_square = data_square, treatments = treatments))
+      }     
     })
     
-    observeEvent(get_tSQUARE()$t_square, {
-      req(get_tSQUARE()$t_square)
+    list_to_observe <- reactive({
+      req(init_data_square())
+      list(
+        entry_list = input$owndata_square,
+        entries = init_data_square()$treatments
+      )
+    })
+    
+    observeEvent(list_to_observe(), {
       
-      t <- as.numeric(get_tSQUARE()$t_square)
+      t <- as.numeric(init_data_square()$treatments)
       if (sqrt(t) %% 1 != 0) {
         w <- 1
         k <- "No Options Available"
@@ -149,9 +166,58 @@ mod_Square_Lattice_server <- function(id){
         w <- 2
       }
 
-      updateSelectInput(session = session, inputId = 'k.square', label = "Input # of Plots per IBlock:",
-                        choices = k, selected = k[1])
+      updateSelectInput(session = session, 
+                        inputId = 'k.square', 
+                        label = "Input # of Plots per IBlock:",
+                        choices = k,
+                        selected = k[1])
     })
+    
+    # getData.square
+    get_data_square <- reactive({
+      if (is.null(init_data_square())) {
+        shinyalert::shinyalert(
+          "Error!!", 
+          "Check input file and try again!", 
+          type = "error")
+        return(NULL)
+      } else return(init_data_square())
+    }) %>%
+      bindEvent(input$RUN.square)
+    
+    square_inputs <- reactive({
+      req(input$k.square)
+      req(input$owndata_square)
+      req(input$myseed.square)
+      req(input$plot_start.square)
+      req(input$Location.square)
+      req(input$l.square)
+      req(input$r.square)
+      r.square <- as.numeric(input$r.square)
+      k.square <- as.numeric(input$k.square)
+      if (input$k.square == "No Options Available") {
+        shinyalert::shinyalert(
+          "Error!!", 
+          "No options for this combination of treatments!", 
+          type = "error")
+        return(NULL)
+      } 
+      plot_start.square <- as.vector(unlist(strsplit(input$plot_start.square, ",")))
+      plot_start <- as.numeric(plot_start.square)
+      site_names <- as.vector(unlist(strsplit(input$Location.square, ",")))
+      seed <- as.numeric(input$myseed.square)
+      sites <- as.numeric(input$l.square)
+      treatments <- get_data_square()$treatments
+      
+      return(list(r = r.square, 
+                  k = k.square, 
+                  t = treatments, 
+                  plot_start = plot_start, 
+                  sites = sites,
+                  sites_names = site_names,
+                  seed = seed))
+    }) %>%
+      bindEvent(input$RUN.square)
     
     
     entryListFormat_SQUARE <- data.frame(ENTRY = 1:9, 
@@ -186,35 +252,22 @@ mod_Square_Lattice_server <- function(id){
     
     SQUARE_reactive <- eventReactive(input$RUN.square,{
       
-      req(input$k.square)
-      req(input$owndata_square)
-      req(input$myseed.square)
-      req(input$plot_start.square)
-      req(input$Location.square)
-      req(input$l.square)
-      req(input$r.square)
-      r.square <- as.numeric(input$r.square)
-      k.square <- as.numeric(input$k.square)
-      plot_start.square <- as.vector(unlist(strsplit(input$plot_start.square, ",")))
-      plot_start.square <- as.numeric(plot_start.square)
-      loc <- as.vector(unlist(strsplit(input$Location.square, ",")))
-      seed.rcbd <- as.numeric(input$myseed.square)
+      req(square_inputs())
       
       shinyjs::show(id = "downloadCsv.square", anim = FALSE)
       
-      if (input$owndata_square == "Yes") {
-        t.square <- as.numeric(get_tSQUARE()$t_square)
-        data.square <- getData.square()$dataUp.square
-      }else {
-        req(input$t.square)
-        t.square <- as.numeric(input$t.square)
-        data.square <- NULL
-      }
-      seed.square <- as.numeric(input$myseed.square)
-      l.square <- as.numeric(input$l.square)
+      data_square <- get_data_square()$data_square
       
-      square_lattice(t = t.square, k = k.square, r = r.square, l = l.square, plotNumber = plot_start.square, 
-                     seed = seed.square, locationNames = loc, data = data.square) 
+      square_lattice(
+        t = square_inputs()$t, 
+        k = square_inputs()$k, 
+        r = square_inputs()$r, 
+        l = square_inputs()$sites, 
+        plotNumber = square_inputs()$plot_start, 
+        seed = square_inputs()$seed, 
+        locationNames = square_inputs()$site_names, 
+        data = data_square
+      ) 
       
     })
     
@@ -459,8 +512,8 @@ mod_Square_Lattice_server <- function(id){
     })
     
     output$square_fieldbook <- DT::renderDataTable({
-      req(input$k.square)
-      k.square <- input$k.square
+      req(square_inputs()$k)
+      k.square <- square_inputs()$k
       if (k.square == "No Options Available") {
         validate("A Square Lattice requires the number of treatments to be a square number.")
       }

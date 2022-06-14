@@ -143,10 +143,6 @@ mod_Optim_ui <- function(id) {
                      column(6,DT::DTOutput(ns("table_checks")))
                    )
           ),
-         # tabPanel("Matrix Checks", 
-         #          shinycssloaders::withSpinner(
-         #            DT::DTOutput(ns("BINARY")), 
-         #               type = 5)),
           tabPanel("Randomized Field", DT::DTOutput(ns("RFIELD"))),
           tabPanel("Plot Number Field", DT::DTOutput(ns("PLOTFIELD"))),
           tabPanel("Field Book", DT::DTOutput(ns("OPTIMOUTPUT"))),
@@ -201,34 +197,42 @@ mod_Optim_server <- function(id) {
       if (input$owndataOPTIM == "Yes") {
         req(input$file3)
         inFile <- input$file3
-        data_up <- load_file(name = inFile$name, 
-                             path = inFile$datapat, 
-                             sep = input$sep.OPTIM, check = TRUE, design = "optim")
+        data_ingested <- load_file(name = inFile$name, 
+                                   path = inFile$datapat, 
+                                   sep = input$sep.OPTIM,
+                                   check = TRUE, 
+                                   design = "optim")
         
-        if (is.logical(data_up)) {
-          if (data_up) {
+        if (names(data_ingested) == "dataUp") {
+          data_up <- data_ingested$dataUp
+          data_up <- na.omit(data_up)
+          data_up <- as.data.frame(data_up)
+          if (ncol(data_up) < 3) {
             shinyalert::shinyalert(
               "Error!!", 
-              "Check input file for duplicate values.", 
+              "Data input needs at least three columns with: ENTRY, NAME and REPS.", 
               type = "error")
             return(NULL)
-          } else {
-            shinyalert::shinyalert(
-              "Error!!", 
-              "Invalid file; Please upload a .csv file.", 
-              type = "error")
-            return(NULL)
-          }
+          } 
+          data_up <- as.data.frame(data_up[,1:3])
+          data_up <- na.omit(data_up)
+          colnames(data_up) <- c("ENTRY", "NAME", "REPS")
+          if(!is.numeric(data_up$REPS) || !is.integer(data_up$REPS) ||
+             is.factor(data_up$REPS)) validate("'REPS' must be numeric.")
+          total_plots <- sum(data_up$REPS)
+        } else if (names(data_ingested) == "bad_format") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Invalid file; Please upload a .csv file.", 
+            type = "error")
+          return(NULL)
+        } else if (names(data_ingested) == "duplicated_vals") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Check input file for duplicate values.", 
+            type = "error")
+          return(NULL)
         }
-        
-        data_up <- as.data.frame(data_up)
-        if (ncol(data_up) < 3) shiny::validate("Data input needs at least three columns with: ENTRY, NAME and REPS.")
-        data_up <- as.data.frame(data_up[,1:3])
-        data_up <- na.omit(data_up)
-        colnames(data_up) <- c("ENTRY", "NAME", "REPS")
-        if(!is.numeric(data_up$REPS) || !is.integer(data_up$REPS) ||
-           is.factor(data_up$REPS)) validate("'REPS' must be numeric.")
-        total_plots <- sum(data_up$REPS)
       } else {
         req(input$amount.checks)
         req(input$lines.s)

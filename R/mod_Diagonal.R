@@ -115,9 +115,6 @@ mod_Diagonal_ui <- function(id) {
           )
         ),
         br(),
-        # downloadButton(ns("downloadData_Diagonal"),
-        #                "Save Experiment",
-        #                style = "width:100%")
         uiOutput(ns("download_single"))
       ),
       mainPanel(
@@ -125,6 +122,7 @@ mod_Diagonal_ui <- function(id) {
         shinyjs::useShinyjs(),
         tabsetPanel(id = ns("tabset_single"),
                     tabPanel(title = "Expt Design Info", value = "tabPanel1",
+                             br(),
                              shinyjs::hidden(
                                 selectInput(inputId = ns("dimensions.d"),
                                             label = "Select dimensions of field:", 
@@ -136,7 +134,7 @@ mod_Diagonal_ui <- function(id) {
                              ),
                              br(),
                              br(),
-                             uiOutput(ns("checks_percent")),
+                             #uiOutput(ns("checks_percent")),
                              DT::DTOutput(ns("options_table"))
                     ),
                     tabPanel("Input Data",
@@ -145,10 +143,18 @@ mod_Diagonal_ui <- function(id) {
                                column(6,DT::DTOutput(ns("checks_table")))
                              )
                     ),
-                    tabPanel("Randomized Field", 
+                    tabPanel("Randomized Field",
+                             br(),
+                             shinyjs::hidden(
+                               selectInput(inputId = ns("percent_checks"),
+                                           label = "Choose % of Checks:",
+                                           choices = 1:9, width = '400px')
+                             ),
                              DT::DTOutput(ns("randomized_layout"))),
-                    tabPanel("Plot Number Field", DT::DTOutput(ns("plot_number_layout"))),
-                    tabPanel("Field Book", DT::DTOutput(ns("fieldBook_diagonal"))),
+                    tabPanel("Plot Number Field", 
+                             DT::DTOutput(ns("plot_number_layout"))),
+                    tabPanel("Field Book", 
+                             DT::DTOutput(ns("fieldBook_diagonal"))),
                     tabPanel("Heatmap", shinycssloaders::withSpinner(
                       plotly::plotlyOutput(ns("heatmap_diag")), 
                       type = 5)
@@ -263,33 +269,39 @@ mod_Diagonal_server <- function(id) {
       if (input$owndataDIAGONALS == "Yes") {
         req(input$file1)
         inFile <- input$file1
-        data_entry <- load_file(name = inFile$name, 
+        data_ingested <- load_file(name = inFile$name, 
                                 path = inFile$datapat, 
                                 sep = input$sep.DIAGONALS, check = TRUE, design = "sdiag")
-
-        if (is.logical(data_entry)) {
-          if (data_entry) {
-            shinyalert::shinyalert(
-              "Error!!", 
-              "Check input file for duplicate values.", 
-              type = "error")
-            return(NULL)
-          } else {
-            shinyalert::shinyalert(
-              "Error!!", 
-              "Invalid file; Please upload a .csv file.", 
-              type = "error")
-            return(NULL)
-          }
+        
+        if (names(data_ingested) == "dataUp") {
+          data_up <- data_ingested$dataUp
+          data_entry <- na.omit(data_up)
+          if (ncol(data_entry) < 2) {
+            validate("Data input needs at least two Columns with the ENTRY and NAME.")
+          } 
+          data_entry_UP <- data_entry[,1:2]
+          colnames(data_entry_UP) <- c("ENTRY", "NAME")
+          checksEntries <- as.numeric(data_entry_UP[1:input$checks,1])
+          dim_data_entry <- nrow(data_entry_UP)
+          dim_data_1 <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
+          return(list(data_entry = data_entry_UP, 
+                      dim_data_entry = dim_data_entry, 
+                      dim_without_checks = dim_data_1))
+        } else if (names(data_ingested) == "bad_format") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Invalid file; Please upload a .csv file.", 
+            type = "error")
+          error_message <- "Invalid file; Please upload a .csv file."
+          return(NULL)
+        } else if (names(data_ingested) == "duplicated_vals") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Check input file for duplicate values.", 
+            type = "error")
+          error_message <- "Check input file for duplicate values."
+          return(NULL)
         }
-
-        data_entry <- na.omit(data_entry)
-        if (ncol(data_entry) < 2) {
-          validate("Data input needs at least two Columns with the ENTRY and NAME.")
-        } 
-        data_entry_UP <- data_entry[,1:2]
-        colnames(data_entry_UP) <- c("ENTRY", "NAME")
-        checksEntries <- as.numeric(data_entry_UP[1:input$checks,1])
       } else {
           req(input$lines.d)
           req(input$checks)
@@ -301,12 +313,12 @@ mod_Diagonal_server <- function(id) {
           gen.list <- data.frame(list(ENTRY = 1:(lines + checks),	NAME = NAME))
           data_entry_UP <- gen.list
           colnames(data_entry_UP) <- c("ENTRY", "NAME")
+          dim_data_entry <- nrow(data_entry_UP)
+          dim_data_1 <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
+          return(list(data_entry = data_entry_UP, 
+                 dim_data_entry = dim_data_entry, 
+                 dim_without_checks = dim_data_1))
       }
-      dim_data_entry <- nrow(data_entry_UP)
-      dim_data_1 <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
-      list(data_entry = data_entry_UP, 
-           dim_data_entry = dim_data_entry, 
-           dim_without_checks = dim_data_1)
     })
     
     getChecks <- eventReactive(input$RUN.diagonal, {
@@ -330,7 +342,7 @@ mod_Diagonal_server <- function(id) {
       checks <- as.numeric(getChecks()$checks)
       total_entries <- as.numeric(getData()$dim_data_entry)
       lines <- total_entries - checks
-      t1 <- floor(lines + lines * 0.10)
+      t1 <- floor(lines + lines * 0.08)
       t2 <- ceiling(lines + lines * 0.20)
       t <- t1:t2
       n <- t[-numbers::isPrime(t)]
@@ -455,22 +467,34 @@ mod_Diagonal_server <- function(id) {
           my_percent <- my_out[,2]
           len <- length(my_percent)
           selected <- my_percent[len]
+
           updateSelectInput(session = session, 
                             inputId = 'percent_checks', 
                             label = "Choose % of Checks:",
                             choices = my_percent, 
                             selected = selected)
     })
-
+    
     observeEvent(list_to_observe(), {
-      output$checks_percent <- renderUI({
-        if (randomize_hit$times > 0 & user_tries$tries > 0) {
-        selectInput(inputId = ns("percent_checks"),
-                    label = "Choose % of Checks:", 
-                    choices = "", width = '400px')
-        }
-      })
+      if (randomize_hit$times > 0 & user_tries$tries > 0) {
+        shinyjs::show(id = "percent_checks")
+      } else {
+        shinyjs::hide(id = "percent_checks")
+      }
     })
+
+    # observeEvent(list_to_observe(), {
+    #   output$checks_percent <- renderUI({
+    #     flag <- FALSE
+    #     if (randomize_hit$times > 0 & user_tries$tries > 0) {
+    #     selectInput(inputId = ns("percent_checks"),
+    #                 label = "Choose % of Checks:",
+    #                 choices = "", width = '400px')
+    # 
+    #     }
+    # 
+    #   })
+    # })
 
     observeEvent(list_to_observe(), { #  user_tries$tries
       output$download_single <- renderUI({
@@ -482,7 +506,7 @@ mod_Diagonal_server <- function(id) {
       })
     })
 
-    rand_checks <- eventReactive(input$get_random, {
+    rand_checks <- reactive({
       req(input$dimensions.d)
       req(getData())
       req(field_dimensions_diagonal())
@@ -516,7 +540,7 @@ mod_Diagonal_server <- function(id) {
         }
       }
       return(random_checks_locs)
-    }) 
+    })
     
     user_location <- reactive({
       user_site <- as.numeric(input$locView.diagonal)
@@ -529,7 +553,6 @@ mod_Diagonal_server <- function(id) {
     output$options_table <- DT::renderDT({
       test <- randomize_hit$times > 0 & user_tries$tries > 0
       if (!test) return(NULL)
-      #if (randomize_hit$times > 0 & user_tries$tries > 0) {
         Option_NCD <- TRUE
         if (is.null(available_percent_table()$dt)) {
           shiny::validate("Data input does not fit to field dimensions")
@@ -545,13 +568,11 @@ mod_Diagonal_server <- function(id) {
         of checks based on the total number of plots you want to have in the final layout.', 
           options = list(
             columnDefs = list(list(className = 'dt-center', targets = "_all"))))
-      #}
     })
     
     output$data_input <- DT::renderDT({
       test <- randomize_hit$times > 0 & user_tries$tries > 0
       if (!test) return(NULL)
-      # if (randomize_hit$times > 0 & user_tries$tries > 0) {
         df <- getData()$data_entry
         df$ENTRY <- as.factor(df$ENTRY)
         df$NAME <- as.factor(df$NAME)
@@ -566,13 +587,11 @@ mod_Diagonal_server <- function(id) {
                         columnDefs = list(
                           list(className = 'dt-center', targets = "_all")))
         )
-      #}
     })
     
     output$checks_table <- DT::renderDT({
       test <- randomize_hit$times > 0 & user_tries$tries > 0
       if (!test) return(NULL)
-     # if (randomize_hit$times > 0 & user_tries$tries > 0) {
         Option_NCD <- TRUE
         req(getData()$data_entry)
         data_entry <- getData()$data_entry
@@ -590,10 +609,10 @@ mod_Diagonal_server <- function(id) {
         DT::datatable(df, rownames = FALSE, caption = 'Table of Checks.', 
                       options = list(
                         columnDefs = list(list(className = 'dt-center', targets = "_all"))))
-      #}
     })
     
-    rand_lines <- eventReactive(input$get_random, {
+    # rand_lines <- eventReactive(input$get_random, {
+    rand_lines <- reactive({
       req(input$dimensions.d)
       req(getData())
       req(field_dimensions_diagonal())
@@ -670,7 +689,8 @@ mod_Diagonal_server <- function(id) {
       #}
     })
     
-    split_name_reactive <- eventReactive(input$get_random, {
+    #split_name_reactive <- eventReactive(input$get_random, {
+    split_name_reactive <- reactive({
       req(rand_lines())
       checksEntries <- getChecks()$checksEntries
       checks <- checksEntries
@@ -758,7 +778,8 @@ mod_Diagonal_server <- function(id) {
       
     })
     
-    plot_number_reactive <- eventReactive(input$get_random, {
+    # plot_number_reactive <- eventReactive(input$get_random, {
+    plot_number_reactive <- reactive({
       req(rand_lines())
       req(split_name_reactive()$my_names)
       datos_name <- split_name_reactive()$my_names 
@@ -830,7 +851,8 @@ mod_Diagonal_server <- function(id) {
       )
     })
 
-    export_diagonal_design <- eventReactive(input$get_random, {
+    # export_diagonal_design <- eventReactive(input$get_random, {
+    export_diagonal_design <- reactive({
       locs_diagonal <- single_inputs()$sites
       final_expt_fieldbook <- vector(mode = "list",length = locs_diagonal)
       location_names <- single_inputs()$location_names

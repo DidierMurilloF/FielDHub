@@ -201,6 +201,16 @@ mod_RCBD_augmented_server <- function(id) {
       }
     })
     
+    observeEvent(input$owndata_a_rcbd,
+                 handlerExpr = updateTabsetPanel(session,
+                                                 "tabset_arcbd",
+                                                 selected = "tabPanel_augmented"))
+    observeEvent(input$RUN.arcbd,
+                 handlerExpr = updateTabsetPanel(session,
+                                                 "tabset_arcbd",
+                                                 selected = "tabPanel_augmented"))
+    
+    
     init_data <- reactive({
       if (input$owndata_a_rcbd == "Yes") {
         req(input$file1_a_rcbd)
@@ -211,9 +221,12 @@ mod_RCBD_augmented_server <- function(id) {
         
         if (names(data_ingested) == "dataUp") {
           data_up <- data_ingested$dataUp
-          print(ncol(data_up))
           if (ncol(data_up) < 2) {
-            shiny::validate("Data input needs at least two columns with: ENTRY and NAME.")
+            shinyalert::shinyalert(
+              "Error!!", 
+              "Data input needs at least two columns: ENTRY and NAME.", 
+              type = "error")
+            return(NULL)
           } 
           checks <- as.numeric(input$checks_a_rcbd)
           data_up <- as.data.frame(data_up[,1:2])
@@ -251,11 +264,13 @@ mod_RCBD_augmented_server <- function(id) {
         return(list(dataUp_a_rcbd = data_up, 
                     entries = lines))
       }
-    })
+    }) 
+
     
     list_to_observe <- reactive({
-      req(init_data()$entries)
+      req(init_data())
       list(
+        entry_list = input$owndata_a_rcbd,
         checks = input$checks_a_rcbd, 
         entries = init_data()$entries
       )
@@ -277,11 +292,49 @@ mod_RCBD_augmented_server <- function(id) {
                         selected = blocks_arcbd[1])
     })
     
+    observeEvent(input$RUN.arcbd, {
+      req(init_data())
+      req(input$owndata_a_rcbd)
+      if (input$owndata_a_rcbd != 'Yes') {
+        req(input$checks_a_rcbd)
+        req(input$lines_a_rcbd)
+        checks <- as.numeric(input$checks_a_rcbd)
+        lines <- as.numeric(input$lines_a_rcbd)
+        b <- as.numeric(input$blocks_a_rcbd)
+        set_dims <- set_augmented_blocks(lines = lines, checks = checks)
+        blocks_dims <- as.data.frame(set_dims$blocks_dims)
+        set_choices_dims <- as.vector(subset(blocks_dims, blocks_dims[,1] == b)[,2])
+        choices <- set_choices_dims
+      } else {
+        checks <- as.numeric(input$checks_a_rcbd)
+        lines <- as.numeric(init_data()$entries)
+        print("print lines")
+        print(lines)
+        b <- as.numeric(input$blocks_a_rcbd)
+        set_dims <- set_augmented_blocks(lines = lines, checks = checks)
+        blocks_dims <- as.data.frame(set_dims$blocks_dims)
+        set_choices_dims <- as.vector(subset(blocks_dims, blocks_dims[,1] == b)[,2])
+        choices <- set_choices_dims
+      }
+      if(is.null(choices)) {
+        choices <- "No options available"
+      }
+      updateSelectInput(inputId = "field_dims",
+                        choices = choices,
+                        selected = choices[1])
+    })
+    
     
     getDataup_a_rcbd <- eventReactive(input$RUN.arcbd, {
-      req(init_data())
-      return(init_data())
+      if (is.null(init_data())) {
+        shinyalert::shinyalert(
+          "Error!!", 
+          "Check input file and try again!", 
+          type = "error")
+        return(NULL)
+      } else return(init_data())
     })
+    
     
     some_inputs <- eventReactive(input$RUN.arcbd, {
       return(list(blocks = input$blocks_a_rcbd, 
@@ -291,6 +344,7 @@ mod_RCBD_augmented_server <- function(id) {
                   expts_a_rcbd = input$nExpt_a_rcbd)
       )
     })
+  
     
     list_inputs <- eventReactive(input$RUN.arcbd, {
       if (input$owndata_a_rcbd != 'Yes') {
@@ -308,34 +362,7 @@ mod_RCBD_augmented_server <- function(id) {
       }
     })
     
-    observeEvent(list_inputs(), {
-      req(input$owndata_a_rcbd)
-      if (input$owndata_a_rcbd != 'Yes') {
-        req(input$checks_a_rcbd)
-        req(input$lines_a_rcbd)
-        checks <- as.numeric(input$checks_a_rcbd)
-        lines <- as.numeric(input$lines_a_rcbd)
-        b <- as.numeric(input$blocks_a_rcbd)
-        set_dims <- set_augmented_blocks(lines = lines, checks = checks)
-        blocks_dims <- as.data.frame(set_dims$blocks_dims)
-        set_choices_dims <- as.vector(subset(blocks_dims, blocks_dims[,1] == b)[,2])
-        choices <- set_choices_dims
-      } else {
-        checks <- as.numeric(input$checks_a_rcbd)
-        lines <- as.numeric(some_inputs()$entries)
-        b <- as.numeric(input$blocks_a_rcbd)
-        set_dims <- set_augmented_blocks(lines = lines, checks = checks)
-        blocks_dims <- as.data.frame(set_dims$blocks_dims)
-        set_choices_dims <- as.vector(subset(blocks_dims, blocks_dims[,1] == b)[,2])
-        choices <- set_choices_dims
-      }
-      if(is.null(choices)) {
-        choices <- "No options available"
-      }
-      updateSelectInput(inputId = "field_dims", 
-                        choices = choices, 
-                        selected = choices[1])
-    })
+
     
     field_dims_augmented <- eventReactive(input$get_random_augmented, {
       dims <- unlist(strsplit(input$field_dims, " x "))
@@ -499,7 +526,6 @@ mod_RCBD_augmented_server <- function(id) {
 
 
     output$summary_augmented <- renderPrint({
-      #test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
       if (test_arcbd()) {
         cat("Randomization was successful!", "\n", "\n")
         len <- length(rcbd_augmented_reactive()$infoDesign)
@@ -528,15 +554,10 @@ mod_RCBD_augmented_server <- function(id) {
        b <- as.numeric(some_inputs()$blocks)
        len_checks <- length(checks)
        df <- as.data.frame(r_map)
+       rownames(df) <- paste0("Row", nrow(df):1)
        repsExpt <- some_inputs()$expts_a_rcbd
        colores <- c('royalblue','salmon', 'green', 'orange','orchid', 'slategrey',
                     'greenyellow', 'blueviolet','deepskyblue','gold','blue', 'red')
-       s <- rcbd_augmented_reactive()$infoDesign$entries
-       #B <- paste("Block", rep(b:1, repsExpt), sep = "")
-       #nrows <- field_dims_augmented()$d_row
-       #B <- paste("Block", rep(rep(1:b, each = nrows / b), repsExpt), sep = "")
-       #E <- paste("E", rep(repsExpt:1, each = nrows), sep = "")
-       #rownames(df) <- paste(B,E)
        colnames(df) <- paste("V", 1:ncol(df), sep = "")
        options(DT.options = list(pageLength = nrow(df), 
                                  autoWidth = FALSE, 
@@ -564,19 +585,13 @@ mod_RCBD_augmented_server <- function(id) {
     output$expt_name_layout <- DT::renderDT({
       if(!test_arcbd()) return(NULL)
       req(rcbd_augmented_reactive())
-      # req(input$expt_name_a_rcbd)
       b <- as.numeric(some_inputs()$blocks)
-      # repsExpt <- as.numeric(input$nExpt_a_rcbd)
       repsExpt <- some_inputs()$expts_a_rcbd
-
       name_expt <- as.vector(unlist(strsplit(input$expt_name_a_rcbd, ",")))
       if (length(name_expt) == repsExpt) {
         Name_expt <- name_expt
       }else Name_expt <- paste(rep('EXPT', repsExpt), 1:repsExpt, sep = "")
       df <-  as.data.frame(rcbd_augmented_reactive()$exptNames)
-      B <- paste("Block", rep(b:1, repsExpt), sep = "")
-      E <- paste("E", rep(repsExpt:1, each = b), sep = "")
-      rownames(df) <- paste(B,E)
       colnames(df) <- paste("V", 1:ncol(df), sep = "")
       colores_back <- c('yellow', 'cadetblue', 'lightgreen', 'grey', 'tan', 'lightcyan',
                         'violet', 'thistle') 
@@ -595,23 +610,16 @@ mod_RCBD_augmented_server <- function(id) {
      output$plot_number_layout <- DT::renderDT({
        if(!test_arcbd()) return(NULL)
        req(rcbd_augmented_reactive())
-       # req(input$blocks_a_rcbd)
        plot_num1 <- rcbd_augmented_reactive()$layout_plots_sites[[locNum()]]
-       print(plot_num1)
-       # b <- as.numeric(input$blocks_a_rcbd)
        b <- as.numeric(some_inputs()$blocks)
        infoDesign <- rcbd_augmented_reactive()$infoDesign
-       Fillers <- as.numeric(infoDesign$Fillers)
-       # repsExpt <- as.numeric(input$nExpt_a_rcbd)
+       Fillers <- as.numeric(infoDesign$fillers)
        repsExpt <- some_inputs()$expts_a_rcbd
-       
+       rownames(plot_num1) <- paste0("Row",nrow(plot_num1):1)
        if (Fillers == 0) {
          a <- as.vector(as.matrix(plot_num1))
          len_a <- length(a)
          df <- as.data.frame(plot_num1)
-         # B <- paste("Block", rep(b:1, repsExpt), sep = "")
-         # E <- paste("E", rep(repsExpt:1, each = b), sep = "")
-         # rownames(df) <- paste(B,E)
          colnames(df) <- paste("V", 1:ncol(df), sep = "")
          DT::datatable(df,
                        extensions = c('Buttons'),
@@ -636,9 +644,7 @@ mod_RCBD_augmented_server <- function(id) {
          a <- a[-which(a == 0)]
          len_a <- length(a)
          df <- as.data.frame(plot_num1)
-         B <- paste("Block", rep(b:1, repsExpt), sep = "")
-         E <- paste("E", rep(repsExpt:1, each = b), sep = "")
-         rownames(df) <- paste(B,E)
+         rownames(df) <- paste0("Row",nrow(df):1)
          colnames(df) <- paste("V", 1:ncol(df), sep = "")
          DT::datatable(df,
                        extensions = c('Buttons'),
