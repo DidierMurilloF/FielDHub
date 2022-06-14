@@ -68,8 +68,11 @@ Suggests:
     testthat (>= 3.0.0),
     spelling,
     rlang,
-    glue
+    glue,
+    knitr,
+    rmarkdown
 Config/testthat/edition: 3
 URL: https://github.com/DidierMurilloF/FielDHub
 BugReports: https://github.com/DidierMurilloF/FielDHub/issues
 Language: en-US
+VignetteBuilder: knitr
