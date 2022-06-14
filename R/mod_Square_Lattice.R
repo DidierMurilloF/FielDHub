@@ -77,7 +77,7 @@ mod_Square_Lattice_ui <- function(id){
                                                     width = '10%',
                                                     style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
                      shinycssloaders::withSpinner(
-                       plotly::plotlyOutput(ns("random_layout"), width = "98%", height = "650px"),type = 5
+                       plotly::plotlyOutput(ns("random_layout"), width = "98%", height = "550px"),type = 5
                      ),
                      column(12, uiOutput(ns("well_panel_layout_sq")))
             ),
@@ -186,6 +186,7 @@ mod_Square_Lattice_server <- function(id){
       bindEvent(input$RUN.square)
     
     square_inputs <- reactive({
+      req(get_data_square())
       req(input$k.square)
       req(input$owndata_square)
       req(input$myseed.square)
@@ -252,11 +253,20 @@ mod_Square_Lattice_server <- function(id){
     
     SQUARE_reactive <- eventReactive(input$RUN.square,{
       
+      req(get_data_square())
       req(square_inputs())
       
       shinyjs::show(id = "downloadCsv.square", anim = FALSE)
       
       data_square <- get_data_square()$data_square
+      
+      if (square_inputs()$r < 2) {
+        shinyalert::shinyalert(
+          "Error!!", 
+          "Square Lattice Design needs at least 2 replicates.", 
+          type = "error")
+        return(NULL)
+      }
       
       square_lattice(
         t = square_inputs()$t, 
@@ -271,9 +281,9 @@ mod_Square_Lattice_server <- function(id){
       
     })
     
-    upDateSites_SQ <- eventReactive(input$RUN.square, {
-      req(input$l.square)
-      locs <- as.numeric(input$l.square)
+    upDateSites_SQ <- reactive({
+      req(square_inputs())
+      locs <- square_inputs()$sites
       sites <- 1:locs
       return(list(sites = sites))
     })
@@ -422,19 +432,16 @@ mod_Square_Lattice_server <- function(id){
     
     simuDataSQUARE <- reactive({
       set.seed(input$myseed.square)
-      #req(SQUARE_reactive()$fieldBook)
       req(reactive_layoutSquare()$allSitesFieldbook)
       if(!is.null(valsSQUARE$maxV.square) && !is.null(valsSQUARE$minV.square) && !is.null(valsSQUARE$trail.square)) {
         max <- as.numeric(valsSQUARE$maxV.square)
         min <- as.numeric(valsSQUARE$minV.square)
-        #df.square <- SQUARE_reactive()$fieldBook
         df.square <- reactive_layoutSquare()$allSitesFieldbook
         cnamesdf.square <- colnames(df.square)
         df.square <- norm_trunc(a = min, b = max, data = df.square)
         colnames(df.square) <- c(cnamesdf.square[1:(ncol(df.square) - 1)], valsSQUARE$trail.square)
         a <- ncol(df.square)
       }else {
-        #df.square <-  SQUARE_reactive()$fieldBook
         df.square <- reactive_layoutSquare()$allSitesFieldbook
         a <- ncol(df.square)
       }
@@ -512,11 +519,7 @@ mod_Square_Lattice_server <- function(id){
     })
     
     output$square_fieldbook <- DT::renderDataTable({
-      req(square_inputs()$k)
-      k.square <- square_inputs()$k
-      if (k.square == "No Options Available") {
-        validate("A Square Lattice requires the number of treatments to be a square number.")
-      }
+      req(simuDataSQUARE()$df)
       df <- simuDataSQUARE()$df
       df$LOCATION <- as.factor(df$LOCATION)
       df$PLOT <- as.factor(df$PLOT)

@@ -74,7 +74,7 @@ mod_CRD_ui <- function(id) {
                                                     width = '10%',
                                                     style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
                      shinycssloaders::withSpinner(
-                       plotly::plotlyOutput(ns("layout_random"), width = "98%", height = "650px"),type = 5
+                       plotly::plotlyOutput(ns("layout_random"), width = "98%", height = "550px"),type = 5
                      ),
                      column(12,uiOutput(ns("well_panel_layout_CRD")))
             ),

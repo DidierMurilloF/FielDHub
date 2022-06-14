@@ -5,7 +5,10 @@
 #' @return The return value, if any, from executing the utility.
 #'
 #' @noRd
-factor_subsets <- function(n, diagonal = FALSE, augmented = FALSE) {
+factor_subsets <- function(n, 
+                           diagonal = FALSE, 
+                           augmented = FALSE, 
+                           all_factors = FALSE) {
   factors <- numbers::primeFactors(n)
   left <- 1
   right <- 1
@@ -15,7 +18,7 @@ factor_subsets <- function(n, diagonal = FALSE, augmented = FALSE) {
   if(length(sq(length(factors))) == 2){
     return(NULL)
   } else {
-      list <- sq(length(factors))[-1,][-(nrow(sq(length(factors)))-1),]
+    list <- sq(length(factors))[-1,][-(nrow(sq(length(factors)))-1),]
   }
   for (i in 1:nrow(list)) {
     for (n in 1:length(factors)) {
@@ -33,6 +36,9 @@ factor_subsets <- function(n, diagonal = FALSE, augmented = FALSE) {
     } else if (augmented) {
       cols <- 3
       rows <- 0
+    } else if (all_factors) {
+      cols <- 1
+      rows <- 1
     }
     if(left > rows & right > cols){
       combos[[i]] <- c(row = left, col = right)
@@ -43,9 +49,21 @@ factor_subsets <- function(n, diagonal = FALSE, augmented = FALSE) {
   }
   combos <- unique(combos[!sapply(combos,is.null)])
   labels <- unique(labels[!sapply(labels,is.null)])
+  
+  if (all_factors) {
+    c_factors <- labels
+    n_labels <- length(labels)
+    comb_factors <- matrix(data = NA, nrow = n_labels, ncol = 2)
+    for (i in 1:n_labels) {
+      comb_factors[i,] <- as.numeric(unlist(strsplit(c_factors[[i]],  " x ")))
+    }
+  } else comb_factors <- NULL
+  
   if (length(combos) == 0) {
     return(NULL)
-  } else return(list(combos = combos, labels = labels))
+  } else return(list(combos = combos, 
+                     labels = labels, 
+                     comb_factors = comb_factors))
 }
 
 #' sq

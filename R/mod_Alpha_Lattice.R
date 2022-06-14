@@ -81,7 +81,7 @@ mod_Alpha_Lattice_ui <- function(id) {
                                     style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
                      
                      shinycssloaders::withSpinner(
-                       plotly::plotlyOutput(ns("random_layout"), width = "98%", height = "680px"),type = 5
+                       plotly::plotlyOutput(ns("random_layout"), width = "98%", height = "550px"),type = 5
                      ),
                      column(12, uiOutput(ns("well_panel_layout")))
             ),
@@ -105,7 +105,7 @@ mod_Alpha_Lattice_server <- function(id){
     # for showing .csv button on run
     shinyjs::useShinyjs()
     
-    init_data_alpha <- reactive({ #getData.alpha
+    init_data_alpha <- reactive({ #get_data_alpha
       if (input$owndata_alpha == "Yes") {
         req(input$file.alpha)
         inFile <- input$file.alpha
@@ -127,7 +127,7 @@ mod_Alpha_Lattice_server <- function(id){
           data_alpha <- na.omit(data_up)
           colnames(data_alpha) <- c("ENTRY", "NAME")
           treatments = nrow(data_alpha)
-          return(list(dataUp.alpha = data_alpha, t_alpha = treatments))
+          return(list(data_alpha = data_alpha, treatments = treatments))
         } else if (names(data_ingested) == "bad_format") {
           shinyalert::shinyalert(
             "Error!!", 
@@ -148,7 +148,7 @@ mod_Alpha_Lattice_server <- function(id){
         colnames(df) <- c("ENTRY", "NAME")
         data_alpha <- df
         treatments = nrow(data_alpha)
-        return(list(dataUp.alpha = data_alpha, t_alpha = treatments))
+        return(list(data_alpha = data_alpha, treatments = treatments))
       }
     })
     
@@ -157,13 +157,13 @@ mod_Alpha_Lattice_server <- function(id){
       req(init_data_alpha())
       list(
         entry_list = input$owndata_alpha,
-        entries = init_data_alpha()$t_alpha
+        entries = init_data_alpha()$treatments
       )
     })
     
     observeEvent(list_to_observe(), {
       req(init_data_alpha())
-      t <- as.numeric(init_data_alpha()$t_alpha)
+      t <- as.numeric(init_data_alpha()$treatments)
       if (numbers::isPrime(t)) {
         w <- 1
         k <- "No Options Available"
@@ -182,7 +182,7 @@ mod_Alpha_Lattice_server <- function(id){
                         choices = k, selected = selected)
     })
     
-    getData.alpha <- reactive({
+    get_data_alpha <- reactive({
       if (is.null(init_data_alpha())) {
         shinyalert::shinyalert(
           "Error!!", 
@@ -194,7 +194,7 @@ mod_Alpha_Lattice_server <- function(id){
       bindEvent(input$RUN.alpha)
     
     alpha_inputs <- reactive({
-      req(getData.alpha())
+      req(get_data_alpha())
       req(input$k.alpha)
       req(input$r.alpha)
       req(input$plot_start.alpha)
@@ -208,32 +208,32 @@ mod_Alpha_Lattice_server <- function(id){
           type = "error")
         return(NULL)
       } 
-      l.alpha <- as.numeric(input$l.alpha)
+      sites <- as.numeric(input$l.alpha)
       r.alpha <- as.numeric(input$r.alpha)
       k.alpha <- as.numeric(input$k.alpha)
-      t_alpha <- getData.alpha()$t_alpha
-      plot_start_alpha <- as.vector(unlist(strsplit(input$plot_start.alpha, ",")))
-      plot_start <- as.numeric(plot_start_alpha)
-      sites_names <-  as.vector(unlist(strsplit(input$Location.alpha, ",")))
+      treatments <- as.numeric(get_data_alpha()$treatments)
+      plot_startreatments <- as.vector(unlist(strsplit(input$plot_start.alpha, ",")))
+      plot_start <- as.numeric(plot_startreatments)
+      site_names <-  as.vector(unlist(strsplit(input$Location.alpha, ",")))
       seed <- as.numeric(input$myseed.alpha)
-      return(list(r.alpha = r.alpha, 
-                  k.alpha = k.alpha, 
-                  t_alpha = t_alpha, 
+      return(list(r = r.alpha, 
+                  k = k.alpha, 
+                  t = treatments, 
                   plot_start = plot_start, 
-                  sites = l.alpha,
-                  sites_names = sites_names,
+                  sites = sites,
+                  site_names = site_names,
                   seed = seed))
     }) %>%
       bindEvent(input$RUN.alpha)
 
 
-    entryListFormat_ALPHA <- data.frame(ENTRY = 1:9, 
+    entryListFormatreatments <- data.frame(ENTRY = 1:9, 
                                         NAME = c(paste("Genotype", LETTERS[1:9], sep = "")))
     entriesInfoModal_ALPHA <- function() {
       modalDialog(
         title = div(tags$h3("Important message", style = "color: red;")),
         h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
-        renderTable(entryListFormat_ALPHA,
+        renderTable(entryListFormatreatments,
                     bordered = TRUE,
                     align = 'c',
                     striped = TRUE),
@@ -258,52 +258,37 @@ mod_Alpha_Lattice_server <- function(id){
     
 
     ALPHA_reactive <- eventReactive(input$RUN.alpha, {
-      req(getData.alpha())
+      req(get_data_alpha())
       req(alpha_inputs())
 
       # show .csv download button when run
       shinyjs::show(id = "downloadCsv.alpha")
+    
+      data_alpha <- get_data_alpha()$data_alpha
       
-      r.alpha <- as.numeric(alpha_inputs()$r.alpha)
-      k.alpha <- as.numeric(alpha_inputs()$k.alpha)
-      plot_start.alpha <- alpha_inputs()$plot_start
-      l.alpha <-  alpha_inputs()$sites
-      seed.alpha <- as.numeric(alpha_inputs()$seed)
-      l.alpha <- as.numeric(alpha_inputs()$sites)
-      locs <- alpha_inputs()$sites_names
-
-      if (input$owndata_alpha == "Yes") {
-        t.alpha <- as.numeric(init_data_alpha()$t_alpha)
-        data_alpha <- as.data.frame(getData.alpha()$dataUp.alpha)
-      }else {
-        t.alpha <- as.numeric(init_data_alpha()$t_alpha)
-        data_alpha <- as.data.frame(getData.alpha()$dataUp.alpha)
-      }
-      if (r.alpha < 2) {
+      if (alpha_inputs()$r < 2) {
         shinyalert::shinyalert(
           "Error!!", 
-          "Alpha Design needs at least 2 replicates.", 
+          "Alpha Lattice Design needs at least 2 replicates.", 
           type = "error")
         return(NULL)
       }
       
-      if(k.alpha == "No Options Available") shiny::validate("No Options Available.")
-      s <- t.alpha / k.alpha
-      if (s %% 1 != 0) validate("No Options Available.")
-      
-      alpha_lattice(t = t.alpha, 
-                    k = k.alpha, 
-                    r = r.alpha, 
-                    l = l.alpha, 
-                    plotNumber = plot_start.alpha, 
-                    seed = seed.alpha,
-                    locationNames = locs, 
-                    data = data_alpha)
+      alpha_lattice(
+        t = alpha_inputs()$t, 
+        k = alpha_inputs()$k, 
+        r = alpha_inputs()$r, 
+        l = alpha_inputs()$sites, 
+        plotNumber = alpha_inputs()$plot_start, 
+        seed = alpha_inputs()$seed,
+        locationNames = alpha_inputs()$site_names, 
+        data = data_alpha
+      )
     })
     
-    upDateSites <- eventReactive(input$RUN.alpha, {
-      req(input$l.alpha)
-      locs <- as.numeric(input$l.alpha)
+    upDateSites <- reactive({
+      req(alpha_inputs())
+      locs <- alpha_inputs()$sites
       sites <- 1:locs
       return(list(sites = sites))
     })
@@ -532,11 +517,11 @@ mod_Alpha_Lattice_server <- function(id){
     })
     
     output$ALPHA_fieldbook <- DT::renderDataTable({
-      req(alpha_inputs()$k.alpha)
-      k.alpha <- as.numeric(alpha_inputs()$k.alpha)
-      if (k.alpha == "No Options Available") {
-        validate("No options for these amout of treatments ):")
-      }
+      # req(alpha_inputs()$k)
+      # k.alpha <- as.numeric(alpha_inputs()$k)
+      # if (k.alpha == "No Options Available") {
+      #   validate("No options for these amout of treatments ):")
+      # }
       req(simuDataALPHA()$df)
       df <- simuDataALPHA()$df
       df$LOCATION <- as.factor(df$LOCATION)

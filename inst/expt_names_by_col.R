@@ -1,6 +1,6 @@
-example_matrix <- read.csv("example_matrix.csv")
-example_matrix <- as.matrix(example_matrix)
-test_matrix <- example_matrix[,-1]
+# example_matrix <- read.csv("example_matrix.csv")
+# example_matrix <- as.matrix(example_matrix)
+# test_matrix <- example_matrix[,-1]
 
 
 

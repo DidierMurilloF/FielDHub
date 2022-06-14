@@ -10,7 +10,7 @@
 mod_pREPS_ui <- function(id){
   ns <- NS(id)
   tagList(
-    h4("Partially Replicated Designs"),
+    h4("Partially Replicated Design"),
     sidebarLayout(
       sidebarPanel(
         width = 4,

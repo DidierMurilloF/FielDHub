@@ -11,6 +11,7 @@
 mod_diagonal_multiple_ui <- function(id) {
   ns <- NS(id)
   tagList(
+    h4("Unreplicated Multiple Diagonal Arrangement"),
     sidebarLayout(
       sidebarPanel(
         width = 4,
@@ -48,19 +49,10 @@ mod_diagonal_multiple_ui <- function(id) {
         conditionalPanel(
           condition = "input.list_entries_multiple == 'No'", 
           ns = ns,
-          fluidRow(
-            column(6,style=list("padding-right: 28px;"),
-                   numericInput(inputId = ns("lines.db"), 
-                                label = "Input # of Entries:",
-                                value = 270, 
-                                min = 50)
-            )# ,
-            # column(6,style=list("padding-left: 5px;"),
-            #       textInput(ns("blocks.db"), 
-            #                 "Input # Entries per Expt:",
-            #                 value = "100,100,70")
-            # )
-          )
+          numericInput(inputId = ns("lines.db"), 
+                      label = "Input # of Entries:",
+                      value = 270, 
+                      min = 50)
         ),
         textInput(ns("blocks.db"), 
                   "Input # Entries per Expt:",

@@ -10,6 +10,7 @@
 mod_Optim_ui <- function(id) {
   ns <- NS(id)
   tagList(
+    h4("Unreplicated Optimized Arrangement"),
     sidebarLayout(
       sidebarPanel(
         width = 4,

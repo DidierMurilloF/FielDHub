@@ -10,6 +10,7 @@
 mod_RCBD_augmented_ui <- function(id){
   ns <- NS(id)
   tagList(
+    h4("Augmented RCBD"),
     sidebarLayout(
       sidebarPanel(
         width = 4,

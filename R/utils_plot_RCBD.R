@@ -5,8 +5,11 @@
 #' @return The return value, if any, from executing the utility.
 #'
 #' @noRd
-plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1, orderReps = "horizontal_stack_panel", 
-                      planter = "serpentine", l = 1) {
+plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, 
+                      optionLayout = 1, 
+                      orderReps = "horizontal_stack_panel", 
+                      planter = "serpentine", 
+                      l = 1) {
   site <- l
   locations <- factor(x$fieldBook$LOCATION, levels = unique(x$fieldBook$LOCATION))
   nlocs <- length(locations)
@@ -31,66 +34,9 @@ plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1
                       COLUMN = COLUMN)
       y <- numbers::primeFactors(n_TrtGen)
       if (length(y) >= 2) {
-        if (length(y) == 2) {
-          if (sqrt(n_TrtGen) %% 1 == 0) {
-            y1 <- y
-            sq <- sqrt(n_TrtGen)
-            y2 <- c(sq, sq)
-            Y <- unique(data.frame(rbind(y1, y2)))
-            # print(Y)
-            dm <- nrow(Y)
-          } else {
-            y1 <- y
-            Y <- data.frame(rbind(y1))
-            # Sprint(Y)
-            dm <- nrow(Y)
-          }
-        }else if (length(y) == 3) {
-          if (sqrt(n_TrtGen) %% 1 == 0) {
-            y1 <- c(y[1], prod(y[2:length(y)]))
-            y2 <- c(y[1] * y[2], prod(y[(2+1):length(y)]))
-            sq <- sqrt(n_TrtGen)
-            y3 <- c(sq, sq)
-            Y <- unique(data.frame(rbind(y1, y2, y3)))
-            # print(print(Y))
-            dm <- nrow(Y)
-          } else {
-            y1 <- c(y[1], prod(y[2:length(y)]))
-            y2 <- c(y[1] * y[2], prod(y[(2 + 1):length(y)]))
-            Y <- unique(data.frame(rbind(y1, y2)))
-            dm <- nrow(Y)
-          }
-        } else if (length(y) >= 4) {
-          if (sqrt(n_TrtGen) %% 1 == 0) {
-            y1 <- c(y[1], prod(y[2:length(y)]))
-            y2 <- c(y[1] * y[2], prod(y[(2+1):length(y)]))
-            y3 <- rev(c(prod(y[1:3]), y[4]))
-            sq <- sqrt(n_TrtGen)
-            y4 <- c(sq, sq)
-            Y <- unique(data.frame(rbind(y4, y3, y2, y1)))
-            # Sprint(print(Y))
-            dm <- nrow(Y)
-          } else {
-            y1 <- c(y[1], prod(y[2:length(y)]))
-            y2 <- c(y[1] * y[2], prod(y[(2+1):length(y)]))
-            y3 <- rev(c(prod(y[1:3]), y[4]))
-            Y <- unique(data.frame(rbind(y3, y2, y1)))
-            dm <- nrow(Y)
-          }
-        }
-        # if (length(y) == 2) {
-        #   y1 <- y
-        #   Y <- unique(data.frame(rbind(y1)))
-        #   dm <- nrow(Y)
-        # }
-        # if (length(y) > 2) {
-        #   y1 <- c(y[1], prod(y[2:length(y)]))
-        #   y2 <- c(prod(y[1:length(y)-1]), y[length(y)])
-        #   y2 <- sort(y2, decreasing = FALSE)
-        #   Y <- unique(data.frame(rbind(y1, y2)))
-        #   dm <- nrow(Y)
-        # }
-        # print(Y)
+        Y <- factor_subsets(n_TrtGen, all_factors = TRUE)$comb_factors
+        Y <- as.data.frame(Y)
+        dm <- nrow(Y)
         books1 <- vector(mode = "list", length = dm)
         for (k in 1:dm) {
           s1 <- as.numeric(Y[k,][1])
@@ -110,53 +56,9 @@ plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1
     } else if (orderReps == "horizontal_stack_panel") {
       y <- numbers::primeFactors(n_TrtGen)
       if (length(y) >= 2) {
-        if (length(y) == 2) {
-          if (sqrt(n_TrtGen) %% 1 == 0) {
-            y1 <- y
-            sq <- sqrt(n_TrtGen)
-            y2 <- c(sq, sq)
-            Y <- unique(data.frame(rbind(y1, y2)))
-            # print(Y)
-            dm <- nrow(Y)
-          } else {
-            y1 <- y
-            Y <- data.frame(rbind(y1))
-            # print(Y)
-            dm <- nrow(Y)
-          }
-        }else if (length(y) == 3) {
-          if (sqrt(n_TrtGen) %% 1 == 0) {
-            y1 <- c(y[1], prod(y[2:length(y)]))
-            y2 <- c(y[1] * y[2], prod(y[(2+1):length(y)]))
-            sq <- sqrt(n_TrtGen)
-            y3 <- c(sq, sq)
-            Y <- unique(data.frame(rbind(y1, y2, y3)))
-            # Sprint(print(Y))
-            dm <- nrow(Y)
-          } else {
-            y1 <- c(y[1], prod(y[2:length(y)]))
-            y2 <- c(y[1] * y[2], prod(y[(2 + 1):length(y)]))
-            Y <- unique(data.frame(rbind(y1, y2)))
-            dm <- nrow(Y)
-          }
-        } else if (length(y) >= 4) {
-          if (sqrt(n_TrtGen) %% 1 == 0) {
-            y1 <- c(y[1], prod(y[2:length(y)]))
-            y2 <- c(y[1] * y[2], prod(y[(2+1):length(y)]))
-            y3 <- rev(c(prod(y[1:3]), y[4]))
-            sq <- sqrt(n_TrtGen)
-            y4 <- c(sq, sq)
-            Y <- unique(data.frame(rbind(y4, y3, y2, y1)))
-            # print(print(Y))
-            dm <- nrow(Y)
-          } else {
-            y1 <- c(y[1], prod(y[2:length(y)]))
-            y2 <- c(y[1] * y[2], prod(y[(2+1):length(y)]))
-            y3 <- rev(c(prod(y[1:3]), y[4]))
-            Y <- unique(data.frame(rbind(y3, y2, y1)))
-            dm <- nrow(Y)
-          }
-        }
+        Y <- factor_subsets(n_TrtGen, all_factors = TRUE)$comb_factors
+        Y <- as.data.frame(Y)
+        dm <- nrow(Y)
         books2 <- vector(mode = "list", length = dm)
         for (h_panel in 1:dm) {
           s1 <- as.numeric(Y[h_panel,][1])
@@ -173,14 +75,13 @@ plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1
             dplyr::mutate(ROW = rep(rep(1:s2, each = s1), n_Reps),
                           COLUMN = z)
           df2 <- x$bookROWCol
-          # nRows <- max(df2$ROW)
           nCols <- max(df2$COLUMN)
           newPlots <- planter_transform(plots = plots, planter = planter, reps = n_Reps, cols = nCols,
                                         mode = "Horizontal", units = NULL)
           df2$PLOT <- newPlots
           books2[[h_panel]] <- df2
         } 
-      }else if (length(y) == 1) {
+      } else if (length(y) == 1) {
         books3 <- list(NULL)
         ROWS <- rep(1:n_TrtGen, times = n_Reps)
         books3[[1]] <- NewBook %>% 
@@ -197,7 +98,6 @@ plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1
   newBooksSelected <- newBooksLocs[[site]]
   df1 <- newBooksSelected[opt]
   df <- as.data.frame(df1)
-  
   
   if (x$infoDesign$id_design == 2) {
     allSites <- vector(mode = "list", length = nlocs)

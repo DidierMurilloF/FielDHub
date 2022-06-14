@@ -4,9 +4,9 @@
   box-sizing: border-box;
 }
 
-.container-fluid .navbar-brand {
-    margin-left: auto;
- }
+.navbar>.container .navbar-brand, .navbar>.container-fluid .navbar-brand {
+  margin-left: auto;
+}
 
 html,body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -18,13 +18,14 @@ body::-webkit-scrollbar {
   display: none;
 }
 
+/*
 fluid .navbar-brand {
   margin-left: auto;
 }
+*/
 
 .nav a {
-    /*color: white !important;*/
-    font-size: 1.3em !important;
+    font-size: 1.1em !important;
 }
 
 .navbar {
@@ -32,12 +33,14 @@ fluid .navbar-brand {
   padding: 0;
 }
 
+/*
 .selectize-input {
   height: 43px;
 }
+*/
  
 li a {
-  font-size: 20px;
+  font-size: 40px;
 }
 
 .container {
@@ -102,11 +105,13 @@ p {
 
 .btn {
   display: inline-block;
-  font-size: 18px;
+  height: 40px;
+  font-size: 15px;
   font-weight: bold;
   color: #474747;
   background: #95a5a6;
-  padding: 13px 20px;
+  /*padding: 13px 20px;*/
+  padding: 6px 12px;
   border: none;
   cursor: pointer;
 }
@@ -272,4 +277,42 @@ a {
   background: #444;
   color: #fff;
   padding: 20px;
+}
+
+.selectize-input {
+  height: 38px;
+  font-size: 14px;
+  display: flex;
+  /*border: none;*/
+  border: 1px solid rgb(226, 224, 224);
+}
+
+input[type=text], input[type=number] {
+  width: 100%;
+  height: 36px;
+  font-size: 14px;
+  padding: 6px 12px;
+  box-sizing: border-box;
+  border: 1px solid rgb(226, 224, 224);
+}
+
+
+.well {
+  min-height: 20px;
+  padding: 19px;
+  margin-bottom: 40px;
+  margin-left: 5px;
+  margin-right: 10px;
+  background-color: #ecf0f1;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  box-shadow: inset 0 1px 1px rgba(0,0,0,0.05);
+}
+
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+  font-family: "Lato","Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-weight: 400;
+  line-height: 1.1;
+  color: inherit;
+  margin-left: 5px;
 }

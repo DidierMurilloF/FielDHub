@@ -119,7 +119,7 @@ mod_RCBD_ui <- function(id) {
                        plotly::plotlyOutput(
                          ns("layouts"), 
                          width = "98%", 
-                         height = "650px"),
+                         height = "550px"),
                        type = 5
                      ),
                      column(12,uiOutput(ns("well_panel_layout_RCBD")))
@@ -151,7 +151,9 @@ mod_RCBD_server <- function(id){
       inFile <- input$file.RCBD
       dataUp.rcbd <- load_file(name = inFile$name, 
                                path = inFile$datapat, 
-                               sep = input$sep.rcbd, check = TRUE, design = "rcbd")
+                               sep = input$sep.rcbd, 
+                               check = TRUE, 
+                               design = "rcbd")
       
       if (is.logical(dataUp.rcbd)) {
         if (dataUp.rcbd) {

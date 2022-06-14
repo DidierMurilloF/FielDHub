@@ -99,7 +99,7 @@ mod_FD_ui <- function(id){
                                                     style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
                      shinycssloaders::withSpinner(
                        plotly::plotlyOutput(ns("layouts"), width = "98%", 
-                                            height = "650px"),type = 5
+                                            height = "550px"),type = 5
                      ),
                      column(12, uiOutput(ns("well_panel_layout_FD")))
             ),
