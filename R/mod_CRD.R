@@ -14,53 +14,86 @@ mod_CRD_ui <- function(id) {
     h4("Completely Randomized Design"),
     sidebarLayout(
       sidebarPanel(width = 4,
-                   radioButtons(inputId = ns("owndatacrd"), label = "Import entries' list?", choices = c("Yes", "No"), selected = "No",
-                                inline = TRUE, width = NULL, choiceNames = NULL, choiceValues = NULL),
-                   conditionalPanel("input.owndatacrd != 'Yes'", ns = ns,
-                                    numericInput(ns("t.crd"), label = "Input # of Treatments:",
-                                                 value = 15, min = 2),
-                                    numericInput(ns("reps.crd"), label = "Input # of Full Reps:",
-                                                 value = 4, min = 1)
+                   radioButtons(inputId = ns("owndatacrd"), 
+                                label = "Import entries' list?",
+                                choices = c("Yes", "No"), 
+                                selected = "No",
+                                inline = TRUE, 
+                                width = NULL,
+                                choiceNames = NULL, 
+                                choiceValues = NULL),
+                   conditionalPanel(
+                     "input.owndatacrd != 'Yes'", 
+                     ns = ns,
+                     numericInput(ns("t.crd"), 
+                                  label = "Input # of Treatments:",
+                                  value = 15, 
+                                  min = 2),
+                     numericInput(ns("reps.crd"), 
+                                  label = "Input # of Full Reps:",
+                                  value = 4, 
+                                  min = 1)
                    ),
-                   conditionalPanel("input.owndatacrd == 'Yes'", ns = ns,
-                                    fluidRow(
-                                      column(7, style=list("padding-right: 28px;"),
-                                             fileInput(ns("file.CRD"), label = "Upload a CSV File:", multiple = FALSE)),
-                                      column(5,style=list("padding-left: 5px;"),
-                                             radioButtons(ns("sep.crd"), "Separator",
-                                                          choices = c(Comma = ",",
-                                                                      Semicolon = ";",
-                                                                      Tab = "\t"),
-                                                          selected = ","))
-                                    )
+                   conditionalPanel(
+                     "input.owndatacrd == 'Yes'", 
+                     ns = ns,
+                     fluidRow(
+                      column(7, style=list("padding-right: 28px;"),
+                             fileInput(ns("file.CRD"), 
+                                       label = "Upload a CSV File:",
+                                       multiple = FALSE)),
+                      column(5,style=list("padding-left: 5px;"),
+                             radioButtons(ns("sep.crd"), 
+                                          "Separator",
+                                          choices = c(Comma = ",",
+                                                      Semicolon = ";",
+                                                      Tab = "\t"),
+                                          selected = ","))
+                    )
                    ),
                    
-                   selectInput(inputId = ns("planter_mov_crd"), label = "Plot Order Layout:",
-                               choices = c("serpentine", "cartesian"), multiple = FALSE,
+                   selectInput(inputId = ns("planter_mov_crd"), 
+                               label = "Plot Order Layout:",
+                               choices = c("serpentine", "cartesian"),
+                               multiple = FALSE,
                                selected = "serpentine"),
                    fluidRow(
                      column(6, style=list("padding-right: 28px;"),
-                            textInput(ns("plot_start.crd"), "Starting Plot Number:", value = 101)
+                            textInput(ns("plot_start.crd"), 
+                                      "Starting Plot Number:", 
+                                      value = 101)
                      ),
                      column(6,style=list("padding-left: 5px;"),
-                            textInput(ns("Location.crd"), "Input Location:", value = "FARGO")
+                            textInput(ns("Location.crd"), 
+                                      "Input Location:", 
+                                      value = "FARGO")
                      )
                    ),
                    
-                   numericInput(inputId = ns("myseed.crd"), label = "Seed Number:",
-                                value = 123, min = 1),
+                   numericInput(inputId = ns("myseed.crd"), 
+                                label = "Seed Number:",
+                                value = 123,
+                                min = 1),
                    
                    fluidRow(
                      column(6,
-                            actionButton(inputId = ns("RUN.crd"), "Run!", icon = icon("cocktail"), width = '100%'),
+                            actionButton(inputId = ns("RUN.crd"), 
+                                         "Run!",
+                                         icon = icon("cocktail"),
+                                         width = '100%'),
                      ),
                      column(6,
-                            actionButton(inputId = ns("Simulate.crd"), "Simulate!", icon = icon("cocktail"), width = '100%')
+                            actionButton(inputId = ns("Simulate.crd"),
+                                         "Simulate!", 
+                                         icon = icon("cocktail"),
+                                         width = '100%')
                      )
                      
                    ), 
                    br(),
-                   downloadButton(ns("downloadData.crd"), "Save My Experiment", style = "width:100%")
+                   downloadButton(ns("downloadData.crd"), 
+                                  "Save My Experiment",
+                                  style = "width:100%")
       ),
       mainPanel(
         width = 8,
@@ -68,18 +101,27 @@ mod_CRD_ui <- function(id) {
           tabsetPanel(
             tabPanel("Field Layout",
                      shinyjs::useShinyjs(),
-                     shinyjs::hidden(downloadButton(ns("downloadCsv.crd"), 
-                                                    label =  "Excel",
-                                                    icon = icon("file-csv"), 
-                                                    width = '10%',
-                                                    style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
-                     shinycssloaders::withSpinner(
-                       plotly::plotlyOutput(ns("layout_random"), width = "98%", height = "550px"),type = 5
+                     shinyjs::hidden(
+                       downloadButton(
+                         ns("downloadCsv.crd"), 
+                         label =  "Excel",
+                         icon = icon("file-csv"), 
+                         width = '10%',
+                         style="color: #337ab7; background-color: #fff; border-color: #2e6da4")
+                      ),
+                      shinycssloaders::withSpinner(
+                       plotly::plotlyOutput(ns("layout_random"), 
+                                            width = "98%", 
+                                            height = "550px"),
+                       type = 5
                      ),
                      column(12,uiOutput(ns("well_panel_layout_CRD")))
             ),
             tabPanel("Field Book", 
-                     shinycssloaders::withSpinner(DT::DTOutput(ns("CRD_fieldbook")), type = 5)
+                     shinycssloaders::withSpinner(
+                       DT::DTOutput(ns("CRD_fieldbook")), 
+                       type = 5
+                    )
             )
           )
         )
@@ -98,35 +140,51 @@ mod_CRD_server <- function(id) {
     
     shinyjs::useShinyjs()
     
-    getData.crd <- reactive({
-      req(input$file.CRD)
-      req(input$sep.crd)
-      inFile <- input$file.CRD
-      dataUp.crd <- load_file(name = inFile$name,
-                              path = inFile$datapat,
-                              sep = input$sep.crd,
-                              check = TRUE, design = "crd")
+    get_data_crd <- reactive({
       
-      if (is.logical(dataUp.crd)) {
-        if (dataUp.crd) {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Check input file for duplicate values.", 
-            type = "error")
-          return(NULL)
-        } else {
+      if (input$owndatacrd == "Yes") {
+        req(input$file.CRD)
+        req(input$sep.crd)
+        inFile <- input$file.CRD
+        data_ingested <- load_file(name = inFile$name,
+                                   path = inFile$datapat,
+                                   sep = input$sep.crd,
+                                   check = TRUE, 
+                                   design = "crd")
+        
+        if (names(data_ingested) == "dataUp") {
+          data_up <- data_ingested$dataUp
+          data_up <- as.data.frame(data_up[,1:2])
+          data_crd <- na.omit(data_up)
+          colnames(data_crd) <- c("TREATMENT", "REP")
+          treatments = nrow(data_crd)
+          return(list(data_crd = data_crd))
+        } else if (names(data_ingested) == "bad_format") {
           shinyalert::shinyalert(
             "Error!!", 
             "Invalid file; Please upload a .csv file.", 
             type = "error")
           return(NULL)
+        } else if (names(data_ingested) == "duplicated_vals") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Check input file for duplicate values.", 
+            type = "error")
+          return(NULL)
+        } else if (names(data_ingested) == "missing_cols") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Data input needs at least two columns: TREATMENT and REP.", 
+            type = "error")
+          return(NULL)
         }
       }
-      
-      return(list(dataUp.crd = dataUp.crd))
-    })
+
+    }) %>%
+      bindEvent(input$RUN.crd)
     
     CRD_reactive <- eventReactive(input$RUN.crd, {
+      
       req(input$plot_start.crd)
       req(input$Location.crd)
       req(input$myseed.crd)
@@ -136,13 +194,20 @@ mod_CRD_server <- function(id) {
       myseed.crd <- as.numeric(input$myseed.crd)
       
       if (input$owndatacrd == "Yes") {
+        req(get_data_crd())
         t <- NULL; reps <- NULL
-        data.crd <- getData.crd()$dataUp.crd
+        data.crd <- get_data_crd()$data_crd
         n_Reps <- dplyr::n_distinct(data.crd$REP)
         t <- as.vector(table(data.crd$REP))
-        if (any(t != t[1])) validate("Unbalanced replications are not allowed!", "\n",
-                                     "For unbalanced reps, try the function CRD() in the console.")
-      }else {
+        if (any(t != t[1])) {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Unbalanced replications are not allowed!
+             For unbalanced reps, try the function CRD() in the console.", 
+            type = "error")
+          return(NULL)
+        } 
+      } else {
         req(input$t.crd, input$reps.crd)
         t <- as.numeric(input$t.crd);reps <- as.numeric(input$reps.crd)
         data.crd <- NULL
@@ -161,19 +226,23 @@ mod_CRD_server <- function(id) {
       req(CRD_reactive())
       obj_crd <- CRD_reactive()
       planting_crd <- input$planter_mov_crd
-      allBooks_crd <- plot_layout(x = obj_crd, optionLayout = 1, planter = planting_crd)$newBooks
+      allBooks_crd <- plot_layout(x = obj_crd, 
+                                  optionLayout = 1, 
+                                  planter = planting_crd)$newBooks
       nBooks_crd <- length(allBooks_crd)
       layoutOptions_crd <- 1:nBooks_crd
       wellPanel(
         fluidRow(
-          column(2,
+          column(3,
                  radioButtons(ns("typlotCRD"), "Type of Plot:",
                               c("Entries/Treatments" = 1,
                                 "Plots" = 2,
                                 "Heatmap" = 3))
           ),
-          column(3, #align="center",
-                 selectInput(inputId = ns("layoutO_crd"), label = "Layout option:", choices = layoutOptions_crd)
+          column(3, 
+                 selectInput(inputId = ns("layoutO_crd"), 
+                             label = "Layout option:", 
+                             choices = layoutOptions_crd)
           )
         )
       )

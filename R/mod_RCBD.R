@@ -110,11 +110,14 @@ mod_RCBD_ui <- function(id) {
           tabsetPanel(
             tabPanel("Field Layout",
                      shinyjs::useShinyjs(),
-                     shinyjs::hidden(downloadButton(ns("downloadCsv.rcbd"), 
-                                                    label =  "Excel",
-                                                    icon = icon("file-csv"), 
-                                                    width = '10%',
-                                                    style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
+                     shinyjs::hidden(
+                       downloadButton(
+                         ns("downloadCsv.rcbd"), 
+                         label =  "Excel",
+                         icon = icon("file-csv"), 
+                         width = '10%',
+                         style="color: #337ab7; background-color: #fff; border-color: #2e6da4")
+                      ),
                      shinycssloaders::withSpinner(
                        plotly::plotlyOutput(
                          ns("layouts"), 
@@ -138,41 +141,52 @@ mod_RCBD_ui <- function(id) {
 #' RCBD Server Functions
 #'
 #' @noRd 
-mod_RCBD_server <- function(id){
+mod_RCBD_server <- function(id) {
   
-  moduleServer(id, function(input, output, session){
+  moduleServer(id, function(input, output, session) {
     
     ns <- session$ns
     
     shinyjs::useShinyjs()
 
-    getData.rcbd <- reactive({
-      req(input$file.RCBD)
-      inFile <- input$file.RCBD
-      dataUp.rcbd <- load_file(name = inFile$name, 
-                               path = inFile$datapat, 
-                               sep = input$sep.rcbd, 
-                               check = TRUE, 
-                               design = "rcbd")
-      
-      if (is.logical(dataUp.rcbd)) {
-        if (dataUp.rcbd) {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Check input file for duplicate values.", 
-            type = "error")
-          return(NULL)
-        } else {
+    get_data_rcbd <- reactive({
+      if (input$owndatarcbd == "Yes") {
+        req(input$file.RCBD)
+        inFile <- input$file.RCBD
+        data_ingested <- load_file(name = inFile$name, 
+                                   path = inFile$datapat, 
+                                   sep = input$sep.rcbd, 
+                                   check = TRUE, 
+                                   design = "rcbd")
+        
+        if (names(data_ingested) == "dataUp") {
+          data_up <- data_ingested$dataUp
+          data_up <- as.data.frame(data_up[,1])
+          data_rcbd <- na.omit(data_up)
+          colnames(data_rcbd) <- "TREATMENT"
+          return(list(data_rcbd = data_rcbd))
+        } else if (names(data_ingested) == "bad_format") {
           shinyalert::shinyalert(
             "Error!!", 
             "Invalid file; Please upload a .csv file.", 
             type = "error")
           return(NULL)
+        } else if (names(data_ingested) == "duplicated_vals") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Check input file for duplicate values.", 
+            type = "error")
+          return(NULL)
+        } else if (names(data_ingested) == "missing_cols") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Data input needs at least one column: TREATMENT", 
+            type = "error")
+          return(NULL)
         }
       }
-      
-      return(list(dataUp.rcbd = dataUp.rcbd))
-    })
+    }) %>%
+      bindEvent(input$RUN.rcbd)
     
     
     entryListFormat_RCBD <- data.frame(
@@ -204,8 +218,9 @@ mod_RCBD_server <- function(id){
         )
       }
     })
-    
-    RCBD_reactive <- eventReactive(input$RUN.rcbd, {
+
+        
+    RCBD_reactive <- reactive({
       req(input$b)
       req(input$myseed.rcbd)
       req(input$plot_start.rcbd)
@@ -216,29 +231,34 @@ mod_RCBD_server <- function(id){
       plot_start.rcbd <- as.numeric(plot_start.rcbd)
       loc <-  as.vector(unlist(strsplit(input$Location.rcbd, ",")))
       seed.rcbd <- as.numeric(input$myseed.rcbd)
+      l.rcbd <- as.numeric(input$l.rcbd)
       
       shinyjs::show(id = "downloadCsv.rcbd")
 
       if (input$owndatarcbd == "Yes") {
+        req(get_data_rcbd())
         t <- NULL 
-        data.rcbd <- getData.rcbd()$dataUp.rcbd
+        data.rcbd <- get_data_rcbd()$data_rcbd
       }else {
         req(input$t)
         t <- as.numeric(input$t)
         data.rcbd <- NULL
       }
       
-      l.rcbd <- as.numeric(input$l.rcbd)
-      
-      
-      RCBD(t = t, reps = b, l = l.rcbd, plotNumber = plot_start.rcbd, 
-           continuous = input$continuous.plot,
-           planter = "cartesian", 
-           seed = seed.rcbd, 
-           locationNames = loc, 
-           data = data.rcbd)
+      RCBD(
+        t = t, 
+        reps = b, 
+        l = l.rcbd, 
+        plotNumber = plot_start.rcbd, 
+        continuous = input$continuous.plot,
+        planter = "cartesian", 
+        seed = seed.rcbd, 
+        locationNames = loc, 
+        data = data.rcbd
+      )
 
-    })
+    })  %>%
+      bindEvent(input$RUN.rcbd)
     
     output$well_panel_layout_RCBD <- renderUI({
       req(RCBD_reactive()$fieldBook)

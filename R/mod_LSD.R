@@ -54,8 +54,10 @@ mod_LSD_ui <- function(id){
                      label = "Input # of Full Reps (Squares):",
                      value = 1, 
                      min = 1),
-        selectInput(inputId = ns("planter.lsd"), label = "Plot Order Layout:",
-                    choices = c("serpentine", "cartesian"), multiple = FALSE,
+        selectInput(inputId = ns("planter.lsd"), 
+                    label = "Plot Order Layout:",
+                    choices = c("serpentine", "cartesian"), 
+                    multiple = FALSE,
                     selected = "serpentine"),
         fluidRow(
           column(6, style=list("padding-right: 28px;"),
@@ -100,14 +102,17 @@ mod_LSD_ui <- function(id){
             tabsetPanel(
               tabPanel("Field Layout",
                        shinyjs::useShinyjs(),
-                       shinyjs::hidden(downloadButton(ns("downloadCsv.lsd"), 
-                                                      label =  "Excel",
-                                                      icon = icon("file-csv"), 
-                                                      width = '10%',
-                                                      style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
+                       shinyjs::hidden(
+                         downloadButton(
+                           ns("downloadCsv.lsd"), 
+                           label =  "Excel",
+                           icon = icon("file-csv"), 
+                           width = '10%',
+                           style="color: #337ab7; background-color: #fff; border-color: #2e6da4")
+                        ),
                        plotly::plotlyOutput(ns("layout_lsd"),
                                             width = "98%",
-                                            height = "650px"),
+                                            height = "550px"),
                        column(12, uiOutput(ns("well_panel_layout_LSD")))
               ),
               tabPanel("Field Book", 
@@ -166,36 +171,48 @@ mod_LSD_server <- function(id){
     })
     
     
-    getData.lsd <- reactive({
-      req(input$file.LSD)
-      req(input$sep.lsd)
-      inFile <- input$file.LSD
-      dataUp.lsd <- load_file(name = inFile$name, 
-                              path = inFile$datapat, 
-                              sep = input$sep.lsd, check = TRUE, design = "lsd")
+    get_data_lsd <- reactive({
       
-      if (is.logical(dataUp.lsd)) {
-        if (dataUp.lsd) {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Check input file for duplicate values.", 
-            type = "error")
-          #dataUp.lsd <- NULL
-          return(NULL)
-        } else {
+      if (input$owndataLSD == "Yes") {
+        req(input$file.LSD)
+        req(input$sep.lsd)
+        inFile <- input$file.LSD
+        data_ingested <- load_file(name = inFile$name, 
+                                path = inFile$datapat, 
+                                sep = input$sep.lsd,
+                                check = TRUE, 
+                                design = "lsd")
+        
+        if (names(data_ingested) == "dataUp") {
+          data_up <- data_ingested$dataUp
+          data_up <- as.data.frame(data_up[,1:3])
+          data_lsd <- na.omit(data_up)
+          colnames(data_lsd) <- c("ROW", "COLUMN", "TREATMENT")
+          return(list(data_lsd = data_lsd))
+        } else if (names(data_ingested) == "bad_format") {
           shinyalert::shinyalert(
             "Error!!", 
             "Invalid file; Please upload a .csv file.", 
             type = "error")
-          #dataUp.lsd <- NULL
+          return(NULL)
+        } else if (names(data_ingested) == "duplicated_vals") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Check input file for duplicate values.", 
+            type = "error")
+          return(NULL)
+        } else if (names(data_ingested) == "missing_cols") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Data input needs at least one column: ROW, COLUMN, and  TREATMENT", 
+            type = "error")
           return(NULL)
         }
       }
-      
-      return(list(dataUp.lsd = dataUp.lsd))
     })
     
-    latinsquare_reactive <- eventReactive(input$RUN.lsd, {
+    latinsquare_reactive <- reactive({
+      
       req(input$plot_start.lsd)
       req(input$Location.lsd)
       req(input$reps.lsd)
@@ -209,27 +226,45 @@ mod_LSD_server <- function(id){
       seed.number.lsd <- as.numeric(input$seed.lsd)
       
       if (input$owndataLSD == "Yes") {
+        req(get_data_lsd())
         n.lsd <- NULL
         reps.lsd <- as.numeric(input$reps.lsd)
-        data.lsd <- getData.lsd()$dataUp.lsd
+        data.lsd <- get_data_lsd()$data_lsd
         n <- as.numeric(nrow(data.lsd))
-        if (n > 10) validate("Only up to 10 treatments are allowed.")
+        if (n > 10) {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Only up to 10 treatments are allowed.", 
+            type = "error")
+          return(NULL)
+        }
       }else {
         req(input$n.lsd)
         n <- as.numeric(input$n.lsd)
-        if (n > 10) validate("Only up to 10 treatments are allowed.")
+        if (n > 10) {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Only up to 10 treatments are allowed.", 
+            type = "error")
+          return(NULL)
+        }
         n.lsd <- n
         reps.lsd <- as.numeric(input$reps.lsd)
         data.lsd <- NULL
       }
-      LSD.design <- latin_square(t = n.lsd, 
-                                 reps = reps.lsd, 
-                                 plotNumber = plot_start.lsd[1],
-                                 planter = "cartesian",
-                                 seed = seed.number.lsd, 
-                                 locationNames = loc.lsd[1], 
-                                 data = data.lsd)
-    })
+      
+      latin_square(
+        t = n.lsd, 
+        reps = reps.lsd, 
+        plotNumber = plot_start.lsd[1],
+        planter = "cartesian",
+        seed = seed.number.lsd, 
+        locationNames = loc.lsd[1], 
+        data = data.lsd
+      )
+      
+    }) %>% 
+      bindEvent(input$RUN.lsd)
     
     
     output$well_panel_layout_LSD <- renderUI({

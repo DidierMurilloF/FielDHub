@@ -121,7 +121,7 @@ mod_IBD_ui <- function(id) {
                      shinycssloaders::withSpinner(
                        plotly::plotlyOutput(ns("layouts"), 
                                             width = "98%", 
-                                            height = "650px"),
+                                            height = "550px"),
                        type = 5
                      ),
                      column(12,
@@ -144,7 +144,7 @@ mod_IBD_ui <- function(id) {
 #' IBD Server Functions
 #'
 #' @noRd 
-mod_IBD_server <- function(id){
+mod_IBD_server <- function(id) {
   moduleServer( id, function(input, output, session){
     
     ns <- session$ns
@@ -179,47 +179,65 @@ mod_IBD_server <- function(id){
       }
     })
     
-    getData.ibd <- reactive({
-      req(input$file.IBD)
-      inFile <- input$file.IBD
-      dataUp.ibd <- load_file(name = inFile$name, 
-                              path = inFile$datapat, 
-                              sep = input$sep.ibd, check = TRUE, design = "ibd")
+    init_data_ibd <- reactive({
       
-      if (is.logical(dataUp.ibd)) {
-        if (dataUp.ibd) {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Check input file for duplicate values.", 
-            type = "error")
-          return(NULL)
-        } else {
+      if(input$owndataibd == "Yes") {
+        req(input$file.IBD)
+        inFile <- input$file.IBD
+        data_ingested <- load_file(name = inFile$name, 
+                                   path = inFile$datapat, 
+                                   sep = input$sep.ibd, 
+                                   check = TRUE, 
+                                   design = "ibd")
+        
+        if (names(data_ingested) == "dataUp") {
+          data_up <- data_ingested$dataUp
+          data_up <- as.data.frame(data_up[,1:2])
+          data_ibd <- na.omit(data_up)
+          colnames(data_ibd) <- c("ENTRY", "NAME")
+          treatments = nrow(data_ibd)
+          return(list(data_ibd = data_ibd, treatments = treatments))
+        } else if (names(data_ingested) == "bad_format") {
           shinyalert::shinyalert(
             "Error!!", 
             "Invalid file; Please upload a .csv file.", 
             type = "error")
           return(NULL)
+        } else if (names(data_ingested) == "duplicated_vals") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Check input file for duplicate values.", 
+            type = "error")
+          return(NULL)
+        } else if (names(data_ingested) == "missing_cols") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Data input needs at least two columns: ENTRY and NAME",
+            type = "error")
+          return(NULL)
         }
-      }
-      
-      return(list(dataUp.ibd = dataUp.ibd))
-    })
-    
-    get_tIBD <- reactive({
-      if(input$owndataibd != "Yes") {
+      } else {
         req(input$t.ibd)
-        t_ibd <- input$t.ibd
-      }else {
-        req(input$file.IBD)
-        t_ibd <- nrow(getData.ibd()$dataUp.ibd)
+        nt <- as.numeric(input$t.ibd)
+        df <- data.frame(list(ENTRY = 1:nt, NAME = paste0("G-", 1:nt)))
+        colnames(df) <- c("ENTRY", "NAME")
+        data_ibd <- df
+        treatments = nrow(data_ibd)
+        return(list(data_ibd = data_ibd, treatments = treatments))
       }
-      return(list(t_ibd = t_ibd))
     })
     
-    observeEvent(get_tIBD()$t_ibd, {
-      
-      req(get_tIBD()$t_ibd)
-      t <- as.numeric(get_tIBD()$t_ibd)
+    list_to_observe <- reactive({
+      req(init_data_ibd())
+      list(
+        entry_list = input$owndataibd,
+        entries = init_data_ibd()$treatments
+      )
+    })
+    
+    observeEvent(list_to_observe(), {
+      req(init_data_ibd())
+      t <- as.numeric(req(init_data_ibd())$treatments)
       if (numbers::isPrime(t)) {
         w <- 1
         k <- "No Options Available"
@@ -231,7 +249,7 @@ mod_IBD_server <- function(id){
       
       if (length(k) > 2) {
         selected <- k[ceiling(length(k)/2)]
-      } else selected <- k[2]
+      } else selected <- k[1]
       
       updateSelectInput(session = session, 
                         inputId = 'k.ibd', 
@@ -240,46 +258,82 @@ mod_IBD_server <- function(id){
       
     })
     
-    IBD_reactive <- eventReactive(input$RUN.ibd, {
+    get_data_ibd <- reactive({
+      if (is.null(init_data_ibd())) {
+        shinyalert::shinyalert(
+          "Error!!", 
+          "Check input file and try again!", 
+          type = "error")
+        return(NULL)
+      } else return(init_data_ibd())
+    }) %>%
+      bindEvent(input$RUN.ibd)
+    
+    ibd_inputs <- reactive({
+      
+      req(get_data_ibd())
+      
       req(input$r.ibd)
       req(input$k.ibd)
       req(input$myseed.ibd)
       req(input$plot_start.ibd)
       req(input$Location.ibd)
       req(input$l.ibd)
-      shinyjs::show(id = "downloadCsv.ibd")
+      
       r.ibd <- as.numeric(input$r.ibd)
       k.ibd <- as.numeric(input$k.ibd)
+      treatments <- as.numeric(get_data_ibd()$treatments)
       plot_start.ibd <- as.vector(unlist(strsplit(input$plot_start.ibd, ",")))
-      plot_start.ibd <- as.numeric(plot_start.ibd)
-      loc <-  as.vector(unlist(strsplit(input$Location.ibd, ",")))
-      seed.rcbd <- as.numeric(input$myseed.ibd)
-      if (input$owndataibd == "Yes") {
-        req(get_tIBD()$t_ibd)
-        t.ibd <- as.numeric(get_tIBD()$t_ibd)
-        data_ibd <- getData.ibd()$dataUp.ibd
-      }else {
-        req(input$t.ibd)
-        t.ibd <- as.numeric(input$t.ibd)
-        b <- input$r.ibd
-        TREATMENT <- paste0("G-", 1:t.ibd)
-        data_ibd <- data.frame(list(ENTRY = 1:t.ibd, TREATMENT = TREATMENT))
-      }
-      seed.ibd <- as.numeric(input$myseed.ibd)
-      l.ibd <- as.numeric(input$l.ibd)
-      
-      if (r.ibd < 2) {
-        validate("Incomplete Blocks Design needs at least 2 replicates.")
+      plot_start <- as.numeric(plot_start.ibd)
+      site_names <-  as.vector(unlist(strsplit(input$Location.ibd, ",")))
+      seed <- as.numeric(input$myseed.ibd)
+      sites <- as.numeric(input$l.ibd)
+      if (input$k.ibd == "No Options Available") {
+        shinyalert::shinyalert(
+          "Error!!", 
+          "No options for this combination of treatments!", 
+          type = "error")
+        return(NULL)
       } 
+      return(list(r = r.ibd, 
+                  k = k.ibd, 
+                  t = treatments, 
+                  plot_start = plot_start, 
+                  sites = sites,
+                  site_names = site_names,
+                  seed = seed))
+    }) %>%
+      bindEvent(input$RUN.ibd)
+    
+    
+    IBD_reactive <- reactive({
+      req(get_data_ibd())
       
-      incomplete_blocks(t = t.ibd, k = k.ibd, 
-                        r = r.ibd, l = l.ibd, 
-                        plotNumber = plot_start.ibd,
-                        seed = seed.ibd,
-                        locationNames = loc,
-                        data = data_ibd) 
+      shinyjs::show(id = "downloadCsv.ibd")
       
-    })
+      data_ibd <- get_data_ibd()$data_ibd
+      
+      if (ibd_inputs()$r < 2) {
+        shinyalert::shinyalert(
+          "Error!!", 
+          "Incomplete Blocks Design needs at least 2 replicates.", 
+          type = "error")
+        return(NULL)
+      }
+      
+      incomplete_blocks(
+        t = ibd_inputs()$t, 
+        k = ibd_inputs()$k, 
+        r = ibd_inputs()$r, 
+        l = ibd_inputs()$sites, 
+        plotNumber = ibd_inputs()$plot_start, 
+        seed = ibd_inputs()$seed,
+        locationNames = ibd_inputs()$site_names, 
+        data = data_ibd
+      ) 
+      
+    }) %>%
+      bindEvent(input$RUN.ibd)
     
     upDateSites <- eventReactive(input$RUN.ibd, {
       req(input$l.ibd)
@@ -530,11 +584,7 @@ mod_IBD_server <- function(id){
     })
     
     output$IBD.output <- DT::renderDataTable({
-      req(input$k.ibd)
-      k.ibd <- input$k.ibd
-      if (k.ibd == "No Options Available") {
-        validate("No options for these amout of treatments ):")
-      }
+      
       req(simuDataIBD()$df)
       df <- simuDataIBD()$df
       df$LOCATION <- as.factor(df$LOCATION)

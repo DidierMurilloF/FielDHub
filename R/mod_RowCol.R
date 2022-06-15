@@ -44,8 +44,10 @@ mod_RowCol_ui <- function(id){
                    conditionalPanel(
                      condition = "input.owndataRCD != 'Yes'",
                      ns = ns,
-                     numericInput(ns("t.rcd"), label = "Input # of Treatments:",
-                                  value = 36, min = 2),
+                     numericInput(ns("t.rcd"), 
+                                  label = "Input # of Treatments:",
+                                  value = 36,
+                                  min = 2),
                    ),
                    fluidRow(
                      column(6, style=list("padding-right: 28px;"),
@@ -116,8 +118,9 @@ mod_RowCol_ui <- function(id){
                      shinycssloaders::withSpinner(
                        plotly::plotlyOutput(ns("layouts"), 
                                             width = "98%", 
-                                            height = "650px"),
+                                            height = "550px"),
                        type = 5),
+                     br(),
                      column(12,uiOutput(ns("well_panel_layout_ROWCOL")))
             ),
             tabPanel("Field Book", 
@@ -171,48 +174,66 @@ mod_RowCol_server <- function(id){
       }
     })
     
-    getData.rcd <- reactive({
-      req(input$file.RCD)
-      inFile <- input$file.RCD
-      dataUp.rcd <- load_file(name = inFile$name, 
-                              path = inFile$datapat, 
-                              sep = input$sep.rcd, check = TRUE, design = "rcd")
+    init_data_rcd <- reactive({
       
-      if (is.logical(dataUp.rcd)) {
-        if (dataUp.rcd) {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Check input file for duplicate values.", 
-            type = "error")
-          return(NULL)
-        } else {
+      if (input$owndataRCD == "Yes") {
+        req(input$file.RCD)
+        inFile <- input$file.RCD
+        data_ingested <- load_file(name = inFile$name, 
+                                   path = inFile$datapat, 
+                                   sep = input$sep.rcd, 
+                                   check = TRUE, 
+                                   design = "rcd")
+        
+        if (names(data_ingested) == "dataUp") {
+          data_up <- data_ingested$dataUp
+          data_up <- as.data.frame(data_up[,1:2])
+          data_rcd <- na.omit(data_up)
+          colnames(data_rcd) <- c("ENTRY", "NAME")
+          treatments = nrow(data_rcd)
+          return(list(data_rcd = data_rcd, treatments = treatments))
+        } else if (names(data_ingested) == "bad_format") {
           shinyalert::shinyalert(
             "Error!!", 
             "Invalid file; Please upload a .csv file.", 
             type = "error")
           return(NULL)
+        } else if (names(data_ingested) == "duplicated_vals") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Check input file for duplicate values.", 
+            type = "error")
+          return(NULL)
+        } else if (names(data_ingested) == "missing_cols") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Data input needs at least two columns: ENTRY and NAME",
+            type = "error")
+          return(NULL)
         }
-      }
-      
-      return(list(dataUp.rcd = dataUp.rcd))
-    })
-    
-    Get_tROWCOL <- reactive({
-      if (input$owndataRCD != "Yes") {
+      } else {
         req(input$t.rcd)
-        t.ROWCOL <- input$t.rcd
-      }else {
-        req(input$file.RCD)
-        t.ROWCOL <- nrow(getData.rcd()$dataUp.rcd)
+        nt <- as.numeric(input$t.rcd)
+        df <- data.frame(list(ENTRY = 1:nt, NAME = paste0("G-", 1:nt)))
+        colnames(df) <- c("ENTRY", "NAME")
+        data_rcd <- df
+        #print(data_rcd)
+        treatments = nrow(data_rcd)
+        return(list(data_rcd = data_rcd, treatments = treatments))
       }
-      return(list(t.ROWCOL = t.ROWCOL))
     })
     
+    list_to_observe <- reactive({
+      req(init_data_rcd())
+      list(
+        entry_list = input$owndataRCD,
+        entries = init_data_rcd()$treatments
+      )
+    })
     
-    
-    observeEvent(Get_tROWCOL()$t.ROWCOL, {
-      req(Get_tROWCOL()$t.ROWCOL)
-      t <- as.numeric(Get_tROWCOL()$t.ROWCOL)
+    observeEvent(list_to_observe(), {
+      req(init_data_rcd())
+      t <- as.numeric(init_data_rcd()$treatments)
       if (numbers::isPrime(t)) {
         w <- 1
         k <- "No Options Available"
@@ -224,7 +245,7 @@ mod_RowCol_server <- function(id){
       
       if (length(k) > 2) {
         selected <- k[ceiling(length(k)/2)]
-      } else selected <- k[2]
+      } else selected <- k[1]
       
       updateSelectInput(session = session, 
                         inputId = 'k.rcd', 
@@ -234,50 +255,90 @@ mod_RowCol_server <- function(id){
       
     })
     
-    RowCol_reactive <- eventReactive(input$RUN.rcd, {
-      req(input$t.rcd)
+    
+    get_data_rcd <- reactive({
+      if (is.null(init_data_rcd())) {
+        shinyalert::shinyalert(
+          "Error!!", 
+          "Check input file and try again!", 
+          type = "error")
+        return(NULL)
+      } else return(init_data_rcd())
+    }) %>%
+      bindEvent(input$RUN.rcd)
+    
+    
+    rcd_inputs <- reactive({
+      req(get_data_rcd())
       req(input$k.rcd)
       req(input$r.rcd)
-      req(input$seed.rcd)
       req(input$plot_start.rcd)
       req(input$Location.rcd)
+      req(input$seed.rcd)
+      req(input$l.rcd)
+      if (input$k.rcd == "No Options Available") {
+        shinyalert::shinyalert(
+          "Error!!", 
+          "No options for this combination of treatments!", 
+          type = "error")
+        return(NULL)
+      } 
+      sites <- as.numeric(input$l.rcd)
+      r.rcd <- as.numeric(input$r.rcd)
+      k.rcd <- as.numeric(input$k.rcd)
+      treatments <- as.numeric(get_data_rcd()$treatments)
+      plot_start.rcd <- as.vector(unlist(strsplit(input$plot_start.rcd, ",")))
+      plot_start <- as.numeric(plot_start.rcd)
+      site_names <-  as.vector(unlist(strsplit(input$Location.rcd, ",")))
+      seed <- as.numeric(input$seed.rcd)
+      return(list(r = r.rcd, 
+                  k = k.rcd, 
+                  t = treatments, 
+                  plot_start = plot_start, 
+                  sites = sites,
+                  site_names = site_names,
+                  seed = seed))
+    }) %>%
+      bindEvent(input$RUN.rcd)
+    
+    RowCol_reactive <- reactive({
+      
+      req(rcd_inputs())
+      req(get_data_rcd())
       
       shinyjs::show(id = "downloadCsv.rcd")
       
-      t.rcd <- as.numeric(input$t.rcd)
-      k.rcd <- as.numeric(input$k.rcd)
-      r.rcd <- as.numeric(input$r.rcd)
+      data_rcd <- get_data_rcd()$data_rcd
       
-      
-      plot_start.rcd <- as.vector(unlist(strsplit(input$plot_start.rcd, ",")))
-      plot_start.rcd <- as.numeric(plot_start.rcd)
-      loc.rcd <-  as.vector(unlist(strsplit(input$Location.rcd, ",")))
-      
-      if (input$owndataRCD == "Yes") {
-        t.rcd <- as.numeric(Get_tROWCOL()$t.ROWCOL)
-        data.rcd <- getData.rcd()$dataUp.rcd
-      }else {
-        req(input$t.rcd)
-        t.rcd <- as.numeric(input$t.rcd)
-        data.rcd <- NULL
+      if (rcd_inputs()$r < 2) {
+        shinyalert::shinyalert(
+          "Error!!", 
+          "Resolvable Row Columns Design needs at least 2 replicates.", 
+          type = "error")
+        return(NULL)
       }
-      seed.rcd <- as.numeric(input$seed.rcd)
-      l.rcd <- as.numeric(input$l.rcd)
 
-      row_column(t = t.rcd, nrows = k.rcd, r = r.rcd, l = l.rcd,
-                 plotNumber = plot_start.rcd, 
-                 locationNames = loc.rcd,
-                 seed = seed.rcd, 
-                 data = data.rcd)
+      row_column(
+        t = rcd_inputs()$t, 
+        nrows = rcd_inputs()$k, 
+        r = rcd_inputs()$r, 
+        l = rcd_inputs()$sites, 
+        plotNumber = rcd_inputs()$plot_start, 
+        seed = rcd_inputs()$seed,
+        locationNames = rcd_inputs()$site_names, 
+        data = data_rcd
+      )
       
-    })
+    }) %>%
+      bindEvent(input$RUN.rcd)
     
-    upDateSites <- eventReactive(input$RUN.rcd, {
+    upDateSites <- reactive({
       req(input$l.rcd)
       locs <- as.numeric(input$l.rcd)
       sites <- 1:locs
       return(list(sites = sites))
-    })
+    }) %>%
+      bindEvent(input$RUN.rcd)
     
     output$well_panel_layout_ROWCOL <- renderUI({
       req(RowCol_reactive()$fieldBook)
@@ -369,7 +430,6 @@ mod_RowCol_server <- function(id){
                  numericInput(ns("max.RowCol"), 
                               "Input the max value",
                               value = NULL)
-                 
           )
           
         ),
@@ -542,6 +602,7 @@ mod_RowCol_server <- function(id){
         write.csv(df, file, row.names = FALSE)
       }
     )
+    
     csv_data <- reactive({
       req(simuData_RowCol()$df)
       df <- simuData_RowCol()$df

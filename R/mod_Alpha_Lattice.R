@@ -116,13 +116,6 @@ mod_Alpha_Lattice_server <- function(id){
         
         if (names(data_ingested) == "dataUp") {
           data_up <- data_ingested$dataUp
-          if (ncol(data_up) < 2) {
-            shinyalert::shinyalert(
-              "Error!!", 
-              "Data input needs at least two columns: ENTRY and NAME.", 
-              type = "error")
-            return(NULL)
-          } 
           data_up <- as.data.frame(data_up[,1:2])
           data_alpha <- na.omit(data_up)
           colnames(data_alpha) <- c("ENTRY", "NAME")
@@ -138,6 +131,12 @@ mod_Alpha_Lattice_server <- function(id){
           shinyalert::shinyalert(
             "Error!!", 
             "Check input file for duplicate values.", 
+            type = "error")
+          return(NULL)
+        } else if (names(data_ingested) == "missing_cols") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Data input needs at least two columns: ENTRY and NAME",
             type = "error")
           return(NULL)
         }

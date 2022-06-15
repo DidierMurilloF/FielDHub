@@ -104,11 +104,10 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
         stop("\n 'strip_plot()' requires an 1-dimensional array for input Hplots and Vplots.")
       }
     }else stop("\n 'strip_plot()' requires arguments to be differents than NULL")
-  }else {
+  } else {
     if(!is.data.frame(data)) stop("Data must be a data frame.")
     if (ncol(data) < 2) base::stop("Data input needs at least two columns.")
     data <- as.data.frame(data[,1:2])
-    data <- na.omit(data)
     colnames(data) <- c("Hplot", "Vplot")
     Hplots <- as.vector(na.omit(data$Hplot))
     Vplots <- as.vector(na.omit(data$Vplot))
@@ -178,7 +177,6 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
   }
   stripDesig.output <- paste_by_row(stripDesig.out.l)
   stripDesig.out.loc <- vector(mode = "list", length = l)
-  #strips.b.loc <- vector(mode = "list", length = l)
   strips.b.loc <- setNames(vector(mode = "list", length = l),
                            paste0("Loc_", locationNames))
   NEW_PLOTS <- setNames(vector(mode = "list", length = l),
