@@ -77,9 +77,11 @@
 #' head(ARCBD2$fieldBook, 12)
 #'                                        
 #' @export
-RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter = "serpentine", 
-                           plotNumber = 101, exptName  = NULL, seed = NULL, locationNames = NULL,
-                           repsExpt = 1, random = TRUE, data = NULL, nrows = NULL, ncols = NULL) {
+RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, 
+                           planter = "serpentine", plotNumber = 101, 
+                           exptName  = NULL, seed = NULL, locationNames = NULL,
+                           repsExpt = 1, random = TRUE, data = NULL, 
+                           nrows = NULL, ncols = NULL) {
   
   if (all(c("serpentine", "cartesian") != planter)) {
     stop("Input planter choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
@@ -269,14 +271,14 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
                               rep("Filler", Fillers))
           }
           col_checks <- ifelse(layout_a != 0, 1,0)
-          no_randomData <- NO_Random(checksMap = layout_a, data_Entry = entries, planter = planter)
+          no_randomData <- no_random_arcbd(checksMap = layout_a, data_Entry = entries, planter = planter)
           layout <- no_randomData$w_map_letters
           len_cuts <- no_randomData$len_cut 
           plotsPerBlock <- c(len_cuts[-length(len_cuts)], ncol(layout_a) - Fillers)
         } else {
           layout_a <- t(replicate(b,  sample(c(rep(0, plots_per_block - checks), 1:checks))))
           col_checks <- ifelse(layout_a != 0, 1,0)
-          no_randomData <- NO_Random(checksMap = layout_a, data_Entry = entries, planter = planter)
+          no_randomData <- no_random_arcbd(checksMap = layout_a, data_Entry = entries, planter = planter)
           layout <- no_randomData$w_map_letters
           plotsPerBlock <- no_randomData$len_cut 
         }

@@ -10,6 +10,7 @@
 mod_Optim_ui <- function(id) {
   ns <- NS(id)
   tagList(
+    h4("Unreplicated Optimized Arrangement"),
     sidebarLayout(
       sidebarPanel(
         width = 4,
@@ -230,6 +231,12 @@ mod_Optim_server <- function(id) {
           shinyalert::shinyalert(
             "Error!!", 
             "Check input file for duplicate values.", 
+            type = "error")
+          return(NULL)
+        } else if (names(data_ingested) == "missing_cols") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Data input needs at least three columns with: ENTRY, NAME and REPS.",
             type = "error")
           return(NULL)
         }

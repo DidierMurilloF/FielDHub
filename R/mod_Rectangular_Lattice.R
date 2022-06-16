@@ -76,7 +76,7 @@ mod_Rectangular_Lattice_ui <- function(id){
                                                     width = '10%',
                                                     style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
                      shinycssloaders::withSpinner(
-                       plotly::plotlyOutput(ns("random_layout"), width = "98%", height = "650px"),type = 5
+                       plotly::plotlyOutput(ns("random_layout"), width = "98%", height = "550px"),type = 5
                      ),
                      column(12,uiOutput(ns("well_panel_layout_rt")))
             ),
@@ -122,8 +122,8 @@ mod_Rectangular_Lattice_server <- function(id) {
         data_up <- as.data.frame(data_up[,1:2])
         data_rectangular <- na.omit(data_up)
         colnames(data_rectangular) <- c("ENTRY", "NAME")
-        t_rectagular = nrow(data_rectangular)
-        return(list(dataUp.rectangular = data_rectangular, treatments = t_rectagular))
+        treatments = nrow(data_rectangular)
+        return(list(data_rectangular = data_rectangular, treatments = treatments))
       } else if (names(data_ingested) == "bad_format") {
         shinyalert::shinyalert(
           "Error!!", 
@@ -136,15 +136,21 @@ mod_Rectangular_Lattice_server <- function(id) {
           "Check input file for duplicate values.", 
           type = "error")
         return(NULL)
-      }
+      } else if (names(data_ingested) == "missing_cols") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Data input needs at least two columns: ENTRY and NAME",
+            type = "error")
+          return(NULL)
+        }
     } else {
       req(input$t.rectangular)
       nt <- as.numeric(input$t.rectangular)
       df <- data.frame(list(ENTRY = 1:nt, NAME = paste0("G-", 1:nt)))
       colnames(df) <- c("ENTRY", "NAME")
       data_rectangular <- df
-      t_rectangular = nrow(data_rectangular)
-      return(list(dataUp.rectangular = data_rectangular, treatments = t_rectangular))
+      treatments = nrow(data_rectangular)
+      return(list(data_rectangular = data_rectangular, treatments = treatments))
       }
     })
     
@@ -157,7 +163,7 @@ mod_Rectangular_Lattice_server <- function(id) {
     })
     
     observeEvent(list_to_observe(), {
-      
+      req(init_data_rectangular())
       t <- as.numeric(init_data_rectangular()$treatments)
       D <- numbers::divisors(t)
       D <- D[2:(length(D)-1)]
@@ -184,7 +190,7 @@ mod_Rectangular_Lattice_server <- function(id) {
     })
     
     
-    getData.rectangular <- reactive({
+    get_data_rectangular <- reactive({
       if (is.null(init_data_rectangular())) {
         shinyalert::shinyalert(
           "Error!!", 
@@ -211,20 +217,20 @@ mod_Rectangular_Lattice_server <- function(id) {
         return(NULL)
       }
       
-      treatments <- getData.rectangular()$treatments
+      treatments <- get_data_rectangular()$treatments
       r.rectangular <- as.numeric(input$r.rectangular)
       k.rectangular <- as.numeric(input$k.rectangular)
       plot_start.rectangular <- as.vector(unlist(strsplit(input$plot_start.rectangular, ",")))
       plot_start <- as.numeric(plot_start.rectangular)
-      sites_names <- as.vector(unlist(strsplit(input$Location.rectangular, ",")))
+      site_names <- as.vector(unlist(strsplit(input$Location.rectangular, ",")))
       seed <- as.numeric(input$myseed.rectangular)
       sites <- as.numeric(input$l.rectangular)
       return(list(r = r.rectangular,
                   k = k.rectangular,
-                  treatments = treatments,
+                  t = treatments,
                   plot_start = plot_start,
                   sites = sites,
-                  sites_names = sites_names,
+                  site_names = site_names,
                   seed = seed))
     }) %>%
       bindEvent(input$RUN.rectangular)
@@ -260,43 +266,40 @@ mod_Rectangular_Lattice_server <- function(id) {
     })
     
     
-    RECTANGULAR_reactive <- eventReactive(input$RUN.rectangular,{
+    RECTANGULAR_reactive <- reactive({
       
+      req(get_data_rectangular())
       req(rectangular_inputs())
-      
-      rectangular_inputs()$r
-      rectangular_inputs()$k
-      rectangular_inputs()$treatments
-      rectangular_inputs()$plot_start
-      rectangular_inputs()$sites
-      rectangular_inputs()$site_names
-      rectangular_inputs()$seed
       
       shinyjs::show(id = "downloadCsv.rectangular", anim = FALSE)
       
-      data <- getData.rectangular()$dataUp.rectangular
-      # if (input$owndata_rectangular == "Yes") {
-      #   t.rectangular <- as.numeric(get_tRECT()$treatments)
-      #   data.rectangular <- getData.rectangular()$dataUp.rectangular
-      # }else {
-      #   req(input$t.rectangular)
-      #   t.rectangular <- as.numeric(input$t.rectangular)
-      #   data.rectangular <- NULL
-      # }
+      if (rectangular_inputs()$r < 2) {
+        shinyalert::shinyalert(
+          "Error!!", 
+          "Alpha Lattice Design needs at least 2 replicates.", 
+          type = "error")
+        return(NULL)
+      }
+      
+      data <- get_data_rectangular()$data_rectangular
 
-      rectangular_lattice(t = rectangular_inputs()$treatments, 
-                          k = rectangular_inputs()$k, 
-                          r = rectangular_inputs()$r, 
-                          l = rectangular_inputs()$sites, 
-                          plotNumber = rectangular_inputs()$plot_start,
-                          seed = rectangular_inputs()$seed, 
-                          locationNames = rectangular_inputs()$site_names, 
-                          data = data) 
-    })
+      rectangular_lattice(
+        t = rectangular_inputs()$t, 
+        k = rectangular_inputs()$k, 
+        r = rectangular_inputs()$r, 
+        l = rectangular_inputs()$sites, 
+        plotNumber = rectangular_inputs()$plot_start,
+        seed = rectangular_inputs()$seed, 
+        locationNames = rectangular_inputs()$site_names, 
+        data = data
+      ) 
+    }) %>%
+      bindEvent(input$RUN.rectangular)
     
-    upDateSites_RT <- eventReactive(input$RUN.rectangular, {
-      req(input$l.rectangular)
-      locs <- as.numeric(input$l.rectangular)
+    
+    upDateSites_RT <- reactive({
+      req(rectangular_inputs())
+      locs <- rectangular_inputs()$sites
       sites <- 1:locs
       return(list(sites = sites))
     })
@@ -521,11 +524,7 @@ mod_Rectangular_Lattice_server <- function(id) {
     })
     
     output$rectangular_fieldbook <- DT::renderDataTable({
-      req(rectangular_inputs())
-      k.rect <- rectangular_inputs()$k
-      if (k.rect == "No Options Available") {
-        validate("A Rectangular Lattice requires t = s*(s-1), where s is the number of iBlock per replicate.")
-      }
+      req(simuDataRECT())
       df <- simuDataRECT()$df
       df$LOCATION <- as.factor(df$LOCATION)
       df$PLOT <- as.factor(df$PLOT)

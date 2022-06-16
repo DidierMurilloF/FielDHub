@@ -11,6 +11,7 @@
 mod_Diagonal_ui <- function(id) {
   ns <- NS(id)
   tagList(
+    h5("Unreplicated Single Diagonal Arrangement"),
     sidebarLayout(
       sidebarPanel(
         width = 4,
@@ -301,6 +302,12 @@ mod_Diagonal_server <- function(id) {
             type = "error")
           error_message <- "Check input file for duplicate values."
           return(NULL)
+        } else if (names(data_ingested) == "missing_cols") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Data input needs at least two columns: ENTRY and NAME",
+            type = "error")
+          return(NULL)
         }
       } else {
           req(input$lines.d)
@@ -483,19 +490,6 @@ mod_Diagonal_server <- function(id) {
       }
     })
 
-    # observeEvent(list_to_observe(), {
-    #   output$checks_percent <- renderUI({
-    #     flag <- FALSE
-    #     if (randomize_hit$times > 0 & user_tries$tries > 0) {
-    #     selectInput(inputId = ns("percent_checks"),
-    #                 label = "Choose % of Checks:",
-    #                 choices = "", width = '400px')
-    # 
-    #     }
-    # 
-    #   })
-    # })
-
     observeEvent(list_to_observe(), { #  user_tries$tries
       output$download_single <- renderUI({
         if (randomize_hit$times > 0 & user_tries$tries > 0) {
@@ -611,7 +605,6 @@ mod_Diagonal_server <- function(id) {
                         columnDefs = list(list(className = 'dt-center', targets = "_all"))))
     })
     
-    # rand_lines <- eventReactive(input$get_random, {
     rand_lines <- reactive({
       req(input$dimensions.d)
       req(getData())
@@ -672,7 +665,7 @@ mod_Diagonal_server <- function(id) {
                                     scrollX = TRUE,
                                     fixedColumns = TRUE,
                                     pageLength = nrow(df),
-                                    scrollY = "700px",
+                                    scrollY = "590px",
                                     class = 'compact cell-border stripe',  
                                     rownames = FALSE,
                                     server = FALSE,
@@ -689,7 +682,6 @@ mod_Diagonal_server <- function(id) {
       #}
     })
     
-    #split_name_reactive <- eventReactive(input$get_random, {
     split_name_reactive <- reactive({
       req(rand_lines())
       checksEntries <- getChecks()$checksEntries

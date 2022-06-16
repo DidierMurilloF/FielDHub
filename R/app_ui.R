@@ -90,7 +90,6 @@ app_ui <- function(request) {
                                   )
                          )
               )
-             # includeScript('shinybusy.js'),
     )
   )
 }

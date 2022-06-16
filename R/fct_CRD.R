@@ -92,7 +92,7 @@ CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL,
       }else if(is.character(t) & length(t) > 1) {
         shiny::validate('"CRD()" requires more than one treatment.')
       }
-    }else {
+    } else {
       stop("Inputs t and reps are missing.")
     }
     N <- nt * reps

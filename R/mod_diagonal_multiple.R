@@ -11,6 +11,7 @@
 mod_diagonal_multiple_ui <- function(id) {
   ns <- NS(id)
   tagList(
+    h5("Unreplicated Multiple Diagonal Arrangement"),
     sidebarLayout(
       sidebarPanel(
         width = 4,
@@ -22,13 +23,9 @@ mod_diagonal_multiple_ui <- function(id) {
                      width = NULL, 
                      choiceNames = NULL, 
                      choiceValues = NULL),
-        conditionalPanel(
-          condition = "input.list_entries_multiple == 'No'", 
-          ns = ns,
-          checkboxInput(inputId = ns("sameEntries"), 
-                        label = "Use the same entries across experiments!", 
-                        value = FALSE)
-        ),
+        checkboxInput(inputId = ns("sameEntries"), 
+                      label = "Use the same entries across experiments!", 
+                      value = FALSE),
         conditionalPanel(
           condition = "input.list_entries_multiple == 'Yes'", 
           ns = ns,
@@ -48,19 +45,10 @@ mod_diagonal_multiple_ui <- function(id) {
         conditionalPanel(
           condition = "input.list_entries_multiple == 'No'", 
           ns = ns,
-          fluidRow(
-            column(6,style=list("padding-right: 28px;"),
-                   numericInput(inputId = ns("lines.db"), 
-                                label = "Input # of Entries:",
-                                value = 270, 
-                                min = 50)
-            )# ,
-            # column(6,style=list("padding-left: 5px;"),
-            #       textInput(ns("blocks.db"), 
-            #                 "Input # Entries per Expt:",
-            #                 value = "100,100,70")
-            # )
-          )
+          numericInput(inputId = ns("lines.db"), 
+                      label = "Input # of Entries:",
+                      value = 270, 
+                      min = 50)
         ),
         textInput(ns("blocks.db"), 
                   "Input # Entries per Expt:",
@@ -296,13 +284,18 @@ mod_diagonal_multiple_server <- function(id) {
     get_data_multiple <- eventReactive(input$RUN_multiple, {
       Option_NCD <- TRUE
       if (input$list_entries_multiple == "Yes") {
+        
+        checking_entry_list = TRUE
+        if (input$sameEntries) {
+          checking_entry_list = FALSE
+        }
         req(input$checks.db)
         req(input$file_multiple)
         inFile <- input$file_multiple
         data_ingested <- load_file(name = inFile$name, 
                                    path = inFile$datapat, 
                                    sep = input$sep.DIAGONALS, 
-                                   check = TRUE, 
+                                   check = checking_entry_list, 
                                    design = "mdiag")
         
         if (names(data_ingested) == "dataUp") {
@@ -374,6 +367,12 @@ mod_diagonal_multiple_server <- function(id) {
           shinyalert::shinyalert(
             "Error!!", 
             "Check input file for duplicate values.", 
+            type = "error")
+          return(NULL)
+        } else if (names(data_ingested) == "missing_cols") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Data input needs at least two columns: ENTRY and NAME",
             type = "error")
           return(NULL)
         }
@@ -610,17 +609,7 @@ mod_diagonal_multiple_server <- function(id) {
       }
     })
     
-    # observeEvent(list_to_observe_multi(), {
-    #   output$checks_percent_input <- renderUI({
-    #     if (randomize_hit_multi$times_multi > 0 & user_tries_multi$tries > 0) {
-    #       selectInput(inputId = ns("percent_checks_multi"),
-    #                   label = "Choose % of Checks:", 
-    #                   choices = "", width = '400px')
-    #     }
-    #   })
-    # })
-    
-    observeEvent(list_to_observe_multi(), { # user_tries_multi$tries
+    observeEvent(list_to_observe_multi(), {
       output$download_multi <- renderUI({
         if (randomize_hit_multi$times_multi > 0 & user_tries_multi$tries > 0) {
           downloadButton(ns("download_fieldbook_multiple"),
@@ -856,7 +845,7 @@ mod_diagonal_multiple_server <- function(id) {
                                    scrollX = TRUE,
                                    fixedColumns = TRUE,
                                    pageLength = nrow(df),
-                                   scrollY = "700px",
+                                   scrollY = "600px",
                                    class = 'compact cell-border stripe',  rownames = FALSE,
                                    server = FALSE,
                                    filter = list( position = 'top', clear = FALSE, plain =TRUE ),

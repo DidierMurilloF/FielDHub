@@ -110,7 +110,7 @@ mod_SPD_ui <- function(id) {
                      shinycssloaders::withSpinner(
                        plotly::plotlyOutput(ns("layouts"), 
                                             width = "97%", 
-                                            height = "650px"),
+                                            height = "560px"),
                        type = 5
                      ),
                      column(12,uiOutput(ns("well_panel_layout_SPD")))
@@ -170,33 +170,45 @@ mod_SPD_server <- function(id){
       }
     })
     
-    getData.spd <- reactive({
+    get_data_spd <- reactive({
       req(input$file.SPD)
       inFile <- input$file.SPD
-      dataUp.spd <- load_file(name = inFile$name, 
-                              path = inFile$datapat, 
-                              sep = input$sep.spd, check = TRUE, design = "spd")
+      data_ingested <- load_file(name = inFile$name, 
+                                 path = inFile$datapat, 
+                                 sep = input$sep.spd, 
+                                 check = TRUE, 
+                                 design = "spd")
       
-      if (is.logical(dataUp.spd)) {
-        if (dataUp.spd) {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Check input file for duplicate values.", 
-            type = "error")
-          return(NULL)
-        } else {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Invalid file; Please upload a .csv file.", 
-            type = "error")
-          return(NULL)
-        }
+      if (names(data_ingested) == "dataUp") {
+        data_up <- data_ingested$dataUp
+        data_spd <- as.data.frame(data_up[,1:2])
+        colnames(data_spd) <- c("WHOLEPLOT", "SUBPLOT")
+        return(list(data_spd = data_spd))
+      } else if (names(data_ingested) == "bad_format") {
+        shinyalert::shinyalert(
+          "Error!!", 
+          "Invalid file; Please upload a .csv file.", 
+          type = "error")
+        return(NULL)
+      } else if (names(data_ingested) == "duplicated_vals") {
+        shinyalert::shinyalert(
+          "Error!!", 
+          "Check input file for duplicate values.", 
+          type = "error")
+        return(NULL)
+      } else if (names(data_ingested) == "missing_cols") {
+        shinyalert::shinyalert(
+          "Error!!", 
+          "Data input needs at least two column: WHOLEPLOT and SUBPLOT", 
+          type = "error")
+        return(NULL)
       }
-      
-      return(list(dataUp.spd = dataUp.spd))
-    })
+    }) %>% 
+      bindEvent(input$RUN.spd)
     
-    spd_reactive <- eventReactive(input$RUN.spd, {
+    
+    spd_reactive <- reactive({
+      
       req(input$plot_start.spd)
       req(input$Location.spd)
       req(input$myseed.spd)
@@ -214,9 +226,10 @@ mod_SPD_server <- function(id){
       
       if (input$kindSPD == "SPD_RCBD") {
         if (input$owndataSPD == "Yes") {
+          req(get_data_spd())
           wp <- NULL
           sp <- NULL
-          data.spd <- getData.spd()$dataUp.spd
+          data.spd <- get_data_spd()$data_spd
         }else {
           req(input$mp.spd, input$sp.spd)
           wp <- as.numeric(input$mp.spd)
@@ -227,9 +240,10 @@ mod_SPD_server <- function(id){
         
       }else {
         if (input$owndataSPD == "Yes") {
+          req(get_data_spd())
           wp <- NULL
           sp <- NULL
-          data.spd <- getData.spd()$dataUp.spd
+          data.spd <- get_data_spd()$data_spd
         }else {
           
           req(input$mp.spd, input$sp.spd)
@@ -240,11 +254,21 @@ mod_SPD_server <- function(id){
         type <- 1
       }
       
-      SPD <- split_plot(wp = wp, sp = sp, reps = reps.spd, l = l.spd, 
-                        plotNumber = plot_start.spd, seed = seed.spd,
-                        type = type, locationNames = loc.spd, 
-                        data = data.spd)
-    })
+      split_plot(
+        wp = wp, 
+        sp = sp, 
+        reps = reps.spd, 
+        l = l.spd, 
+        plotNumber = plot_start.spd,
+        seed = seed.spd,
+        type = type, 
+        locationNames = loc.spd, 
+        data = data.spd
+      )
+      
+    }) %>% 
+      bindEvent(input$RUN.spd)
+    
     
     upDateSites <- eventReactive(input$RUN.spd, {
       req(input$l.spd)
@@ -252,6 +276,7 @@ mod_SPD_server <- function(id){
       sites <- 1:locs
       return(list(sites = sites))
     })
+    
     
     output$well_panel_layout_SPD <- renderUI({
       req(spd_reactive()$fieldBook)

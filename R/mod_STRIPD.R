@@ -124,7 +124,7 @@ mod_STRIPD_ui <- function(id){
                      shinycssloaders::withSpinner(
                        plotly::plotlyOutput(ns("layout.strip"), 
                                             width = "98%", 
-                                            height = "650px"),
+                                            height = "560px"),
                        type = 5
                      ),
                      column(12,
@@ -164,7 +164,6 @@ mod_STRIPD_server <- function(id) {
                     bordered = TRUE,
                     align = 'c',
                     striped = TRUE),
-        #h4("Note that reps might be unbalanced."),
         easyClose = FALSE
       )
     }
@@ -183,33 +182,43 @@ mod_STRIPD_server <- function(id) {
       }
     })
     
-    getData.strip <- reactive({
+    get_data_strip <- reactive({
       req(input$file.STRIP)
       inFile <- input$file.STRIP
-      dataUp.strip <- load_file(name = inFile$name, 
-                                path = inFile$datapat, 
-                                sep = input$sep.strip, check = TRUE, design = "strip")
+      data_ingested <- load_file(name = inFile$name, 
+                                 path = inFile$datapat, 
+                                 sep = input$sep.strip, 
+                                 check = TRUE,
+                                 design = "strip")
       
-      if (is.logical(dataUp.strip)) {
-        if (dataUp.strip) {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Check input file for duplicate values.", 
-            type = "error")
-          return(NULL)
-        } else {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Invalid file; Please upload a .csv file.", 
-            type = "error")
-          return(NULL)
-        }
+      if (names(data_ingested) == "dataUp") {
+        data_up <- data_ingested$dataUp
+        data_strip <- as.data.frame(data_up[,1:2])
+        colnames(data_strip) <- c("WHOLEPLOT", "SUBPLOT")
+        return(list(data_strip = data_strip))
+      } else if (names(data_ingested) == "bad_format") {
+        shinyalert::shinyalert(
+          "Error!!", 
+          "Invalid file; Please upload a .csv file.", 
+          type = "error")
+        return(NULL)
+      } else if (names(data_ingested) == "duplicated_vals") {
+        shinyalert::shinyalert(
+          "Error!!", 
+          "Check input file for duplicate values.", 
+          type = "error")
+        return(NULL)
+      } else if (names(data_ingested) == "missing_cols") {
+        shinyalert::shinyalert(
+          "Error!!", 
+          "Data input needs at least two column: WHOLEPLOT and SUBPLOT", 
+          type = "error")
+        return(NULL)
       }
-      
-      return(list(dataUp.strip = dataUp.strip))
-    })
+    }) %>% 
+      bindEvent(input$RUN.strip)
     
-    strip_reactive <- eventReactive(input$RUN.strip, {
+    strip_reactive <- reactive({
       
       req(input$plot_start.strip)
       req(input$Location.strip)
@@ -229,33 +238,38 @@ mod_STRIPD_server <- function(id) {
       reps.strip <- as.numeric(input$blocks.strip)
       
       if (input$owndataSTRIP == "Yes") {
+        req(get_data_strip())
         Hplots.strip <- NULL
         Vplots.strip <- NULL
-        data.strip <- getData.strip()$dataUp.strip
+        data.strip <- get_data_strip()$data_strip
       }else {
         req(input$HStrip.strip, input$VStrip.strip)
         Hplots.strip <- as.numeric(input$HStrip.strip)
         Vplots.strip <- as.numeric(input$VStrip.strip)
         data.strip <- NULL
       }
-      # input$planter.strip
-      STRIP <- strip_plot(Hplots = Hplots.strip, 
-                          Vplots = Vplots.strip, 
-                          b = reps.strip, 
-                          l = l.strip,
-                          seed = seed.strip,
-                          planter = "cartesian",
-                          plotNumber = plot_start.strip,
-                          locationNames = loc.strip, 
-                          data = data.strip)
-    })
+
+      strip_plot(
+        Hplots = Hplots.strip, 
+        Vplots = Vplots.strip, 
+        b = reps.strip, 
+        l = l.strip,
+        seed = seed.strip,
+        planter = "cartesian",
+        plotNumber = plot_start.strip,
+        locationNames = loc.strip, 
+        data = data.strip
+      )
+    }) %>% 
+      bindEvent(input$RUN.strip)
     
-    upDateSites <- eventReactive(input$RUN.strip, {
+    upDateSites <- reactive({
       req(input$l.strip)
       locs <- as.numeric(input$l.strip)
       sites <- 1:locs
       return(list(sites = sites))
-    })
+    }) %>% 
+      bindEvent(input$RUN.strip)
     
     output$well_panel_layout_STRIP <- renderUI({
       req(strip_reactive()$fieldBook)

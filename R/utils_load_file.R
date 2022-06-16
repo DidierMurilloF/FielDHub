@@ -8,13 +8,18 @@ load_file <- function(name, path, sep, check = FALSE, design = NULL) {
     bad_format = TRUE
     return(list(bad_format = bad_format))
   } else {
-    dataUp <- read.csv(path, header = TRUE, sep = sep, na.strings = c("", " ","NA"))
+    dataUp <- read.csv(path,
+                       header = TRUE, 
+                       sep = sep, 
+                       na.strings = c("", " ","NA"))
     dataUp <- as.data.frame(dataUp)
     if (check) {
-      if (!check_input(design, dataUp)) {
-        duplicated_vals = TRUE
-        return(list(duplicated_vals = duplicated_vals))
-      } else return(list(dataUp = dataUp))
+      if (!is.null(check_input(design, dataUp))) {
+        if (!check_input(design, dataUp)) {
+          duplicated_vals = TRUE
+          return(list(duplicated_vals = duplicated_vals))
+        } else return(list(dataUp = dataUp))
+      } else return(list(missing_cols = TRUE))
     } else return(list(dataUp = dataUp))
   }
 }

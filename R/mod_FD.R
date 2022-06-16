@@ -99,7 +99,7 @@ mod_FD_ui <- function(id){
                                                     style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
                      shinycssloaders::withSpinner(
                        plotly::plotlyOutput(ns("layouts"), width = "98%", 
-                                            height = "650px"),type = 5
+                                            height = "550px"),type = 5
                      ),
                      column(12, uiOutput(ns("well_panel_layout_FD")))
             ),
@@ -152,35 +152,46 @@ mod_FD_server <- function(id) {
       }
     })
     
-    getData.fd <- reactive({
+    get_data_factorial <- reactive({
       req(input$file.FD)
       req(input$sep.fd)
       inFile <- input$file.FD
-      dataUp.fd <- load_file(name = inFile$name,
+      
+      data_ingested <- load_file(name = inFile$name,
                              path = inFile$datapat,
                              sep = input$sep.fd,
-                             check = TRUE, design = "factorial")
+                             check = TRUE, 
+                             design = "factorial")
       
-      if (is.logical(dataUp.fd)) {
-        if (dataUp.fd) {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Check input file for duplicate values.", 
-            type = "error")
-          return(NULL)
-        } else {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Invalid file; Please upload a .csv file.", 
-            type = "error")
-          return(NULL)
-        }
+      if (names(data_ingested) == "dataUp") {
+        data_up <- data_ingested$dataUp
+        data_up <- as.data.frame(data_up[,1:2])
+        data_factorial <- na.omit(data_up)
+        colnames(data_factorial) <- c("FACTOR", "LEVEL")
+        return(list(data_factorial = data_factorial))
+      } else if (names(data_ingested) == "bad_format") {
+        shinyalert::shinyalert(
+          "Error!!", 
+          "Invalid file; Please upload a .csv file.", 
+          type = "error")
+        return(NULL)
+      } else if (names(data_ingested) == "duplicated_vals") {
+        shinyalert::shinyalert(
+          "Error!!", 
+          "Check input file for duplicate values.", 
+          type = "error")
+        return(NULL)
+      } else if (names(data_ingested) == "missing_cols") {
+        shinyalert::shinyalert(
+          "Error!!", 
+          "Data input needs at least two column: FACTOR and LEVEL", 
+          type = "error")
+        return(NULL)
       }
-      
-      return(list(dataUp.fd = dataUp.fd))
-    })
+    }) %>% 
+      bindEvent(input$RUN.fd)
     
-    fd_reactive <- eventReactive(input$RUN.fd, {
+    fd_reactive <- reactive({
       
       req(input$plot_start.fd)
       req(input$Location.fd)
@@ -195,12 +206,19 @@ mod_FD_server <- function(id) {
       seed.fd <- as.numeric(input$myseed.reps)
       if (input$kindFD == "FD_RCBD") {
         if (input$owndata == "Yes") {
+          req( get_data_factorial())
           setfactors.fd <- NULL
-          data.fd <- getData.fd()$dataUp.fd
+          data.fd <- get_data_factorial()$data_factorial
         }else {
           req(input$setfactors)
           setfactors.fd <- as.numeric(as.vector(unlist(strsplit(input$setfactors, ","))))
-          if (length(setfactors.fd) < 2) validate("We need more than one factor.")
+          if (length(setfactors.fd) < 2) {
+            shinyalert::shinyalert(
+              "Error!!", 
+              "We need more than one factor.", 
+              type = "error")
+            return(NULL)
+          }
           data.fd <- NULL
         }
         type <- 2
@@ -209,12 +227,19 @@ mod_FD_server <- function(id) {
         
       }else {
         if (input$owndata == "Yes") {
+          req( get_data_factorial())
           setfactors.fd <- NULL
-          data.fd <- getData.fd()$dataUp.fd
+          data.fd <- get_data_factorial()$data_factorial
         }else {
           req(input$setfactors)
           setfactors.fd <- as.numeric(as.vector(unlist(strsplit(input$setfactors, ","))))
-          if (length(setfactors.fd) < 2) validate("We need more than one factor.")
+          if (length(setfactors.fd) < 2) {
+            shinyalert::shinyalert(
+              "Error!!", 
+              "We need more than one factor.", 
+              type = "error")
+            return(NULL)
+          }
           data.fd <- NULL
         }
         type <- 1
@@ -223,19 +248,28 @@ mod_FD_server <- function(id) {
         
       }
       
-      myfd <- full_factorial(setfactors = setfactors.fd, reps = reps.fd, 
-                             l = l.fd, type = type, plotNumber = plot_start.fd, 
-                             seed = seed.fd, locationNames = loc,
-                             data = data.fd) 
+      full_factorial(
+        setfactors = setfactors.fd, 
+        reps = reps.fd, 
+        l = l.fd, 
+        type = type, 
+        plotNumber = plot_start.fd, 
+        seed = seed.fd, 
+        locationNames = loc,
+        data = data.fd
+      ) 
       
-    })
+    }) %>% 
+      bindEvent(input$RUN.fd)
     
-    upDateSites <- eventReactive(input$RUN.fd, {
+    
+    upDateSites <- reactive({
       req(input$l.fd)
       locs <- as.numeric(input$l.fd)
       sites <- 1:locs
       return(list(sites = sites))
-    })
+    })  %>% 
+      bindEvent(input$RUN.fd)
     
     output$well_panel_layout_FD <- renderUI({
       req(fd_reactive()$fieldBook)
