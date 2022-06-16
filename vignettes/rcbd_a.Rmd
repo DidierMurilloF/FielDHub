@@ -1,0 +1,20 @@
+---
+title: "rcbd_a"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{rcbd_a}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+library(FielDHub)
+```
+
+# App
+
+# Function `rcbd_augmented()``

@@ -45,9 +45,9 @@ The **Randomized Field** tab displays a graphical representation of the randomiz
 On the **Plot Number Field** tab, there is a table display of the field with the plots numbered according to the Plot Order Layout specified, either _serpentine_ or _cartesian_. You can see the corresponding entries for each plot number in the field book. Like the Randomized field tab, you can copy the table or save it as an Excel file with the _Copy_ and _Excel_ buttons. 
 
 ### Field Book
-The **Field Book** displays all the information on the experimental design in a table format. It contains the specific plot number and the row and column address of each entry, as well as the corresponding treatment on that plot. This table is searchable, and we can filter the results in every column. 
+The **Field Book** displays all the information on the experimental design in a table format. It contains the specific plot number and the row and column address of each entry, as well as the corresponding treatment on that plot. This table is searchable, and we can filter the data in relevant columns. 
 
-# Function
+# Function : `diagonal_arrangement()`
 
 You can run the same design with a function in the FielDHub package, `diagonal_arrangement()`. We can enter the information describing the above design like this:
 
