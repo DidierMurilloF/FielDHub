@@ -10,22 +10,19 @@
 
 html,body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  line-height: 1.7em;
-  /*overflow-y: hidden;*/
+  line-height: 1.2em;
+  font-size: 14px;
+  line-height: 1.42857143;
+  color: #2c3e50;
+  background-color: #ffffff;
 }
 
 body::-webkit-scrollbar {
   display: none;
 }
 
-/*
-fluid .navbar-brand {
-  margin-left: auto;
-}
-*/
-
 .nav a {
-    font-size: 1.1em !important;
+    font-size: 1.02em !important;
 }
 
 .navbar {
@@ -33,14 +30,8 @@ fluid .navbar-brand {
   padding: 0;
 }
 
-/*
-.selectize-input {
-  height: 43px;
-}
-*/
- 
 li a {
-  font-size: 40px;
+  font-size: 20px;
 }
 
 .container {
@@ -105,8 +96,8 @@ p {
 
 .btn {
   display: inline-block;
-  height: 40px;
-  font-size: 15px;
+  height: 36px;
+  font-size: 14px;
   font-weight: bold;
   color: #474747;
   background: #95a5a6;
@@ -280,8 +271,8 @@ a {
 }
 
 .selectize-input {
-  height: 38px;
-  font-size: 14px;
+  height: 36px;
+  font-size: 13px;
   display: flex;
   /*border: none;*/
   border: 1px solid rgb(226, 224, 224);
@@ -290,18 +281,17 @@ a {
 input[type=text], input[type=number] {
   width: 100%;
   height: 36px;
-  font-size: 14px;
+  font-size: 13px;
   padding: 6px 12px;
   box-sizing: border-box;
   border: 1px solid rgb(226, 224, 224);
 }
 
-
 .well {
   min-height: 20px;
   padding: 19px;
   margin-bottom: 40px;
-  margin-left: 5px;
+  margin-left: 10px;
   margin-right: 10px;
   background-color: #ecf0f1;
   border: 1px solid transparent;
@@ -314,5 +304,5 @@ h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
   font-weight: 400;
   line-height: 1.1;
   color: inherit;
-  margin-left: 5px;
+  margin-left: 10px;
 }

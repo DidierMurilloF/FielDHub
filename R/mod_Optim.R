@@ -233,6 +233,12 @@ mod_Optim_server <- function(id) {
             "Check input file for duplicate values.", 
             type = "error")
           return(NULL)
+        } else if (names(data_ingested) == "missing_cols") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Data input needs at least three columns with: ENTRY, NAME and REPS.",
+            type = "error")
+          return(NULL)
         }
       } else {
         req(input$amount.checks)

@@ -11,7 +11,7 @@
 mod_diagonal_multiple_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    h4("Unreplicated Multiple Diagonal Arrangement"),
+    h5("Unreplicated Multiple Diagonal Arrangement"),
     sidebarLayout(
       sidebarPanel(
         width = 4,
@@ -368,6 +368,12 @@ mod_diagonal_multiple_server <- function(id) {
             "Check input file for duplicate values.", 
             type = "error")
           return(NULL)
+        } else if (names(data_ingested) == "missing_cols") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Data input needs at least two columns: ENTRY and NAME",
+            type = "error")
+          return(NULL)
         }
       } else {
         req(input$checks.db)
@@ -602,17 +608,7 @@ mod_diagonal_multiple_server <- function(id) {
       }
     })
     
-    # observeEvent(list_to_observe_multi(), {
-    #   output$checks_percent_input <- renderUI({
-    #     if (randomize_hit_multi$times_multi > 0 & user_tries_multi$tries > 0) {
-    #       selectInput(inputId = ns("percent_checks_multi"),
-    #                   label = "Choose % of Checks:", 
-    #                   choices = "", width = '400px')
-    #     }
-    #   })
-    # })
-    
-    observeEvent(list_to_observe_multi(), { # user_tries_multi$tries
+    observeEvent(list_to_observe_multi(), {
       output$download_multi <- renderUI({
         if (randomize_hit_multi$times_multi > 0 & user_tries_multi$tries > 0) {
           downloadButton(ns("download_fieldbook_multiple"),
@@ -848,7 +844,7 @@ mod_diagonal_multiple_server <- function(id) {
                                    scrollX = TRUE,
                                    fixedColumns = TRUE,
                                    pageLength = nrow(df),
-                                   scrollY = "700px",
+                                   scrollY = "600px",
                                    class = 'compact cell-border stripe',  rownames = FALSE,
                                    server = FALSE,
                                    filter = list( position = 'top', clear = FALSE, plain =TRUE ),

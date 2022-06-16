@@ -251,6 +251,12 @@ mod_RCBD_augmented_server <- function(id) {
             type = "error")
           error_message <- "Check input file for duplicate values."
           return(NULL)
+        } else if (names(data_ingested) == "missing_cols") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Data input needs at least three columns with: ENTRY and NAME.",
+            type = "error")
+          return(NULL)
         }
       } else {
         req(input$checks_a_rcbd)

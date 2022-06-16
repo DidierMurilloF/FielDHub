@@ -136,7 +136,13 @@ mod_Rectangular_Lattice_server <- function(id) {
           "Check input file for duplicate values.", 
           type = "error")
         return(NULL)
-      }
+      } else if (names(data_ingested) == "missing_cols") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Data input needs at least two columns: ENTRY and NAME",
+            type = "error")
+          return(NULL)
+        }
     } else {
       req(input$t.rectangular)
       nt <- as.numeric(input$t.rectangular)
