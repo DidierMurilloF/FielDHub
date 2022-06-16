@@ -196,7 +196,7 @@ mod_STRIPD_server <- function(id) {
         data_strip <- as.data.frame(data_up[,1:2])
         colnames(data_strip) <- c("WHOLEPLOT", "SUBPLOT")
         return(list(data_strip = data_strip))
-      } else if (names(data_ingested) == "bad_format") {l
+      } else if (names(data_ingested) == "bad_format") {
         shinyalert::shinyalert(
           "Error!!", 
           "Invalid file; Please upload a .csv file.", 

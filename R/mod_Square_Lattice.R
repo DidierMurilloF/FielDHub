@@ -351,7 +351,9 @@ mod_Square_Lattice_server <- function(id){
       obj_sq <- SQUARE_reactive()
       opt_sq <- as.numeric(input$layoutO_sq)
       locSelected <- as.numeric(input$locLayout_sq)
-      try(plot_layout(x = obj_sq, optionLayout = opt_sq, planter = input$planter_mov_square, 
+      try(plot_layout(x = obj_sq, 
+                      optionLayout = opt_sq, 
+                      planter = input$planter_mov_square, 
                       l = locSelected, 
                       orderReps = input$orderReps_sq), silent = TRUE)
     })

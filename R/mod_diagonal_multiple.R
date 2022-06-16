@@ -23,13 +23,9 @@ mod_diagonal_multiple_ui <- function(id) {
                      width = NULL, 
                      choiceNames = NULL, 
                      choiceValues = NULL),
-        conditionalPanel(
-          condition = "input.list_entries_multiple == 'No'", 
-          ns = ns,
-          checkboxInput(inputId = ns("sameEntries"), 
-                        label = "Use the same entries across experiments!", 
-                        value = FALSE)
-        ),
+        checkboxInput(inputId = ns("sameEntries"), 
+                      label = "Use the same entries across experiments!", 
+                      value = FALSE),
         conditionalPanel(
           condition = "input.list_entries_multiple == 'Yes'", 
           ns = ns,
@@ -288,13 +284,18 @@ mod_diagonal_multiple_server <- function(id) {
     get_data_multiple <- eventReactive(input$RUN_multiple, {
       Option_NCD <- TRUE
       if (input$list_entries_multiple == "Yes") {
+        
+        checking_entry_list = TRUE
+        if (input$sameEntries) {
+          checking_entry_list = FALSE
+        }
         req(input$checks.db)
         req(input$file_multiple)
         inFile <- input$file_multiple
         data_ingested <- load_file(name = inFile$name, 
                                    path = inFile$datapat, 
                                    sep = input$sep.DIAGONALS, 
-                                   check = TRUE, 
+                                   check = checking_entry_list, 
                                    design = "mdiag")
         
         if (names(data_ingested) == "dataUp") {
