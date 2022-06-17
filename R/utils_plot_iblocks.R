@@ -41,12 +41,16 @@ plot_iblocks <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks,
       df0 <- x$bookROWCol
       df0 <- df0[order(df0$ROW, decreasing = FALSE), ]
       nCols <- max(df0$COLUMN)
-      newPlots <- planter_transform(plots = plots, planter = planter, reps = n_Reps, 
-                                    cols = nCols, units = NULL)
+      newPlots <- planter_transform(plots = plots, 
+                                    planter = planter, 
+                                    reps = n_Reps, 
+                                    cols = nCols, 
+                                    units = NULL)
       df0$PLOT <- newPlots
       books0[[1]] <- df0
       #books1
-      if ((sizeIblocks %% 2 == 0 || sqrt(sizeIblocks) %% 1 == 0) & iBlocks %% 2 != 0) {
+      if ((sizeIblocks %% 2 == 0 || sqrt(sizeIblocks) %% 1 == 0) & 
+          iBlocks %% 2 != 0) {
         r <- numbers::primeFactors(iBlocks)
         if (length(r) > 2) r <- c(r[1], prod(r[2:length(r)]))
         if (length(r) == 1) r <- c(1,r)
@@ -96,14 +100,18 @@ plot_iblocks <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks,
           df <- x$bookROWCol
           df <- df[order(df$ROW, decreasing = FALSE), ]
           nCols <- max(df$COLUMN)
-          newPlots <- planter_transform(plots = plots, planter = planter, reps = n_Reps, 
-                                        cols = nCols, units = NULL)
+          newPlots <- planter_transform(plots = plots, 
+                                        planter = planter, 
+                                        reps = n_Reps, 
+                                        cols = nCols, 
+                                        units = NULL)
           df$PLOT <- newPlots
           books1[[k]] <- df
         }
       }
       #books2
-      if ((sizeIblocks %% 2 == 0 || sqrt(sizeIblocks) %% 1 == 0) & iBlocks %% 2 == 0) {
+      if ((sizeIblocks %% 2 == 0 || sqrt(sizeIblocks) %% 1 == 0) & 
+          iBlocks %% 2 == 0) {
         r <- numbers::primeFactors(iBlocks)
         if (length(r) > 2) r <- c(prod(r[1:length(r)-1]), r[length(r)])
         if (length(r) == 1) r <- c(1,r)
@@ -153,8 +161,11 @@ plot_iblocks <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks,
           df <- x$bookROWCol
           df <- df[order(df$ROW, decreasing = FALSE), ]
           nCols <- max(df$COLUMN)
-          newPlots <- planter_transform(plots = plots, planter = planter, reps = n_Reps, 
-                                        cols = nCols, units = NULL)
+          newPlots <- planter_transform(plots = plots, 
+                                        planter = planter, 
+                                        reps = n_Reps, 
+                                        cols = nCols, 
+                                        units = NULL)
           df$PLOT <- newPlots
           books2[[k]] <- df
         }
@@ -210,8 +221,11 @@ plot_iblocks <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks,
           df <- x$bookROWCol
           df <- df[order(df$ROW, decreasing = FALSE), ]
           nCols <- max(df$COLUMN)
-          newPlots <- planter_transform(plots = plots, planter = planter, reps = n_Reps, 
-                                        cols = nCols, units = NULL)
+          newPlots <- planter_transform(plots = plots, 
+                                        planter = planter,
+                                        reps = n_Reps, 
+                                        cols = nCols, 
+                                        units = NULL)
           df$PLOT <- newPlots
           books3[[k]] <- df
         }
@@ -257,8 +271,12 @@ plot_iblocks <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks,
           nRows <- max(df5$ROW)
           nCols <- max(df5$COLUMN)
           number_units <- length(levels(as.factor(df5$IBLOCK)))
-          newPlots <- planter_transform(plots = plots, planter = planter, reps = n_Reps, cols = nCols,
-                                        mode = "Grid", units = number_units)
+          newPlots <- planter_transform(plots = plots, 
+                                        planter = planter,
+                                        reps = n_Reps, 
+                                        cols = nCols,
+                                        mode = "Grid",
+                                        units = number_units)
           df5$PLOT <- newPlots
           books5[[1]] <- df5
           
@@ -286,8 +304,12 @@ plot_iblocks <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks,
           nRows <- max(df6$ROW)
           nCols <- max(df6$COLUMN)
           number_units <- length(levels(as.factor(df5$IBLOCK)))
-          newPlots <- planter_transform(plots = plots, planter = planter, reps = n_Reps, cols = nCols,
-                                        mode = "Grid", units = number_units)
+          newPlots <- planter_transform(plots = plots, 
+                                        planter = planter,
+                                        reps = n_Reps,
+                                        cols = nCols,
+                                        mode = "Grid",
+                                        units = number_units)
           df6$PLOT <- newPlots
           if (sqrt(n_Reps) %% 1 == 0) {
             books6[[1]] <- NULL
@@ -342,5 +364,13 @@ plot_iblocks <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks,
                            show.key = FALSE, 
                            gg=TRUE)
   } 
-  return(list(p1 = p1, p2 = p2, df = df, newBooks = newBooksSelected, allSitesFieldbook = allSitesFieldbook))
+  return(
+    list(
+      p1 = p1,
+      p2 = p2, 
+      df = df, 
+      newBooks = newBooksSelected, 
+      allSitesFieldbook = allSitesFieldbook
+    )
+  )
 }
