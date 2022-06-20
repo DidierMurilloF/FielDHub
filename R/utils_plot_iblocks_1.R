@@ -17,6 +17,7 @@ plot_iblocks_1 <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks
   countLocs <- 1
   books0 <- list(NULL)
   books01 <- list(NULL)
+  books02 <- list(NULL)
   books1 <- list(NULL)
   books2 <- list(NULL)
   books3 <- list(NULL)
@@ -40,6 +41,7 @@ plot_iblocks_1 <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks
     if (orderReps == "vertical_stack_panel") {
       
       #######################################################################
+      
       x$bookROWCol <- NewBook %>% 
         dplyr::mutate(ROW = z,
                       COLUMN = rep(rep(1:iBlocks, each = sizeIblocks), n_Reps))
@@ -56,33 +58,47 @@ plot_iblocks_1 <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks
       
       #######################################################################
       
-      w_r <- 1:(iBlocks*n_Reps)
-      u_r <- seq(1, length(w_r), by = sizeIblocks)
-      v_r <- seq(sizeIblocks, length(w_r), by = sizeIblocks)
-      
-      z_rows <- vector(mode = "list", length = n_Reps)
-      for (j in 1:iBlocks) {
-        z_rows[[j]] <- rep(c(rep(u_r[j]:v_r[j], each = sizeIblocks)), times = 1)
-      }
-      z_rows <- unlist(z_rows)
-      z_rows
-      
-      x$bookROWCol <- NewBook %>%
-        dplyr::mutate(ROW = z_rows,
-                      COLUMN = rep(rep(1:sizeIblocks, times = iBlocks), n_Reps))
-      df01 <- x$bookROWCol
-      df01 <- df01[order(df01$ROW, decreasing = FALSE), ]
-      nCols <- max(df01$COLUMN)
-      newPlots <- planter_transform(plots = plots, 
-                                    planter = planter, 
-                                    reps = n_Reps, 
-                                    cols = nCols, 
-                                    units = NULL)
-      df01$PLOT <- newPlots
-      books01[[1]] <- df01
+      if (sizeIblocks %% 2 != 0 & sqrt(sizeIblocks) %% 1 != 0) {
 
-      #########################################################################
+        z_rows <- rep(1:(iBlocks * n_Reps), each = sizeIblocks)
+
+        x$bookROWCol <- NewBook %>%
+          dplyr::mutate(ROW = z_rows,
+                        COLUMN = rep(rep(1:sizeIblocks, times = iBlocks), n_Reps))
+        df01 <- x$bookROWCol
+        df01 <- df01[order(df01$ROW, decreasing = FALSE), ]
+        nCols <- max(df01$COLUMN)
+        newPlots <- planter_transform(plots = plots,
+                                      planter = planter,
+                                      reps = n_Reps,
+                                      cols = nCols,
+                                      units = NULL)
+        df01$PLOT <- newPlots
+        books01[[1]] <- df01
+      }
       
+      #######################################################################
+      
+      if (sizeIblocks %% 2 == 0) {
+        
+        z_rows <- rep(1:(iBlocks * n_Reps), each = sizeIblocks)
+        
+        x$bookROWCol <- NewBook %>%
+          dplyr::mutate(ROW = z_rows,
+                        COLUMN = rep(rep(1:sizeIblocks, times = iBlocks), n_Reps))
+        df02 <- x$bookROWCol
+        df02 <- df02[order(df02$ROW, decreasing = FALSE), ]
+        nCols <- max(df02$COLUMN)
+        newPlots <- planter_transform(plots = plots,
+                                      planter = planter,
+                                      reps = n_Reps,
+                                      cols = nCols,
+                                      units = NULL)
+        df02$PLOT <- newPlots
+        books02[[1]] <- df02
+      }
+      
+      #######################################################################
       
       #books1
       if ((sizeIblocks %% 2 == 0 || sqrt(sizeIblocks) %% 1 == 0) & 
@@ -266,58 +282,7 @@ plot_iblocks_1 <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks
           books3[[k]] <- df
         }
       }
-      
-      ###################################################################
-      
-      # if (sizeIblocks %% 2 == 0 || sqrt(sizeIblocks) %% 1 == 0) {
-      #   r <- numbers::primeFactors(iBlocks)
-      #   if (length(r) > 2) r <- c(r[1], prod(r[2:length(r)]))
-      #   if (length(r) == 1) r <- c(1,r)
-      #   Y <- factor_subsets(sizeIblocks, all_factors = TRUE)$comb_factors
-      #   Y <- as.data.frame(Y)
-      #   print(Y)
-      #   dm <- nrow(Y)
-      #   books1 <- vector(mode = "list", length = dm)
-      #   for (k in 1:dm) {
-      #     s1 <- as.numeric(Y[k,][1])
-      #     s2 <- as.numeric(Y[k,][2])
-      #     w_r <- 1:(r[1]*s1*n_Reps)
-      #     u_r <- seq(1, length(w_r), by = s1)
-      #     v_r <- seq(s1, length(w_r), by = s1)
-      #     z_rows <- vector(mode = "list", length = n_Reps*r[1])
-      #     for (j in 1:(n_Reps*r[1])) {
-      #       z_rows[[j]] <- rep(c(rep(u_r[j]:v_r[j], each = s2)), times = r[2])
-      #     }
-      #     z_rows <- unlist(z_rows)
-      #     # COLUMN:
-      #     w_c <- 1:(r[2]*s2)
-      #     u_c <- seq(1, length(w_c), by = s2)
-      #     v_c <- seq(s2, length(w_c), by = s2)
-      #     z_cols <- vector(mode = "list", length = r[2])
-      #     for (i in 1:r[2]) {
-      #       z_cols[[i]] <- c(rep(u_c[i]:v_c[i], times = s1))
-      #     }
-      #     z_cols <- unlist(z_cols)
-      #     z_cols_new <- rep(z_cols, times = r[1]*n_Reps)
-      #     x$bookROWCol <- NewBook %>%
-      #       dplyr::mutate(ROW = z_rows,
-      #                     COLUMN = z_cols_new)
-      #     
-      #     
-      #     df <- x$bookROWCol
-      #     df <- df[order(df$ROW, decreasing = FALSE), ]
-      #     nCols <- max(df$COLUMN)
-      #     newPlots <- planter_transform(plots = plots,
-      #                                   planter = planter,
-      #                                   reps = n_Reps,
-      #                                   cols = nCols,
-      #                                   units = NULL)
-      #     df$PLOT <- newPlots
-      #     books1[[k]] <- df
-      #   }
-      # }
-
-      ########################################################################
+    ########################################################################
     } else if (orderReps == "horizontal_stack_panel") {
       x$bookROWCol <- NewBook %>%
         dplyr::mutate(ROW = rep(rep(1:iBlocks, each = sizeIblocks), n_Reps),
@@ -333,7 +298,7 @@ plot_iblocks_1 <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks
       books4[[1]] <- df2
       
       
-      books21 <- list()
+      books21 <- list(NULL)
       x$bookROWCol <- x$fieldBook %>%
         dplyr::mutate(ROW = rep(rep(1:sizeIblocks, times = iBlocks), n_Reps),
                       COLUMN = rep(1:(iBlocks * n_Reps), each = sizeIblocks)
@@ -353,7 +318,6 @@ plot_iblocks_1 <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks
       if (sizeIblocks %% 2 == 0 || sqrt(sizeIblocks) %% 1 == 0) {
         Y <- factor_subsets(sizeIblocks, all_factors = TRUE)$comb_factors
         Y <- as.data.frame(Y)
-        print(Y)
         dm <- nrow(Y)
         books5 <- vector(mode = "list", length = dm)
         for (h in 1:dm) {
@@ -468,13 +432,18 @@ plot_iblocks_1 <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks
         }
       }
     }
-    books <- c(books0, books1, books2, books3, books4, books5, books6, books7, books21, books01)
+    books <- c(books1, books2, books0, books3, books4, books5, 
+               books6, books7, books21, books01, books02)
     newBooks <- books[!sapply(books,is.null)]
-    newBooksLocs[[countLocs]] <- newBooks
+    newBooksLocs[[countLocs]] <- unique(newBooks)
     countLocs <- countLocs + 1
   }
   opt <- optionLayout
   newBooksSelected <- newBooksLocs[[site]]
+  opt_available <- 1:length(newBooksSelected)
+  if (all(opt_available != opt)) {
+    stop("Option not available to plot")
+  }
   df1 <- newBooksSelected[opt]
   df <- as.data.frame(df1)
   if (x$infoDesign$id_design %in% c(10, 11, 12, 8)) {

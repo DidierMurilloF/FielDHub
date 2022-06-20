@@ -324,6 +324,10 @@ plot_iblocks <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks,
   }
   opt <- optionLayout
   newBooksSelected <- newBooksLocs[[site]]
+  opt_available <- 1:length(newBooksSelected)
+  if (all(opt_available != opt)) {
+    stop("Option not available to plot")
+  }
   df1 <- newBooksSelected[opt]
   df <- as.data.frame(df1)
   if (x$infoDesign$id_design %in% c(10, 11, 12, 8)) {
