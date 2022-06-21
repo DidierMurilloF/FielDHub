@@ -76,8 +76,12 @@ plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
                           COLUMN = z)
           df2 <- x$bookROWCol
           nCols <- max(df2$COLUMN)
-          newPlots <- planter_transform(plots = plots, planter = planter, reps = n_Reps, cols = nCols,
-                                        mode = "Horizontal", units = NULL)
+          newPlots <- planter_transform(plots = plots, 
+                                        planter = planter, 
+                                        reps = n_Reps, 
+                                        cols = nCols,
+                                        mode = "Horizontal", 
+                                        units = NULL)
           df2$PLOT <- newPlots
           books2[[h_panel]] <- df2
         } 

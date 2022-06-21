@@ -15,8 +15,14 @@ factor_subsets <- function(n,
   combos <- list()
   labels <- list()
   both <- list()
-  if(length(sq(length(factors))) == 2){
-    return(NULL)
+  if(length(sq(length(factors))) == 2) {
+    if (all_factors == TRUE) {
+      comb_factors <- matrix(data = c(1,factors, factors, 1), 
+                             nrow = 2, 
+                             ncol = 2, 
+                             byrow = TRUE)
+      return(list(comb_factors = comb_factors))
+    } else return(NULL)
   } else {
     list <- sq(length(factors))[-1,][-(nrow(sq(length(factors)))-1),]
   }
@@ -40,7 +46,7 @@ factor_subsets <- function(n,
       cols <- 1
       rows <- 1
     }
-    if(left > rows & right > cols){
+    if(left > rows & right > cols) {
       combos[[i]] <- c(row = left, col = right)
       labels[[i]] <- paste(left,"x",right,sep = " ")
     }

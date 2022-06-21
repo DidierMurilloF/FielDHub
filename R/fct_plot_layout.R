@@ -54,7 +54,7 @@ plot_layout <- function(x = NULL,
         sizeIblocks <- dplyr::n_distinct(x$fieldBook$ROW)
       }
       iBlocks <- n_TrtGen/sizeIblocks
-      return0 <- plot_iblocks(x = x, n_TrtGen = n_TrtGen, n_Reps = n_Reps, 
+      return0 <- plot_iblocks_1(x = x, n_TrtGen = n_TrtGen, n_Reps = n_Reps, 
                               sizeIblocks = sizeIblocks, iBlocks = iBlocks, 
                               optionLayout = optionLayout, planter = planter,
                               l = l, orderReps = orderReps)

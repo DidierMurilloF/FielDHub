@@ -551,3 +551,29 @@ print.summary.FielDHub <- function(x, ...) {
     str(x$data_locations)
   }
 }
+#-----------------------------------------------------------------------
+# Plot
+#-----------------------------------------------------------------------
+#' @rdname plot.FielDHub
+#' @method plot FielDHub
+#' @title Plot a \code{FielDHub} object
+#' @usage \method{plot}{FielDHub}(x, ...)
+#' @aliases plot.FielDHub
+#' @description Plot any \code{FielDHub} design.
+#' @return a plot inheriting from class \code{FielDHub}
+#' @param x an object inheriting from class
+#'
+#' @param ... further arguments passed to \code{\link{head}}.
+#' @author Didier Murillo [aut]
+#' @examples
+#' \dontrun{
+#' # Example 1: Plot a RCBD design with 24 treatments and 3 reps.
+#' s <- RCBD(t = 24, reps = 3, continuous = TRUE, 
+#'           l = 1, plotNumber = 101, seed = 12)
+#' plot(s)
+#' }
+#'
+#' @export
+plot.FielDHub <- function(x, ...) {
+  plot_layout(x = x, ...)$out_layout
+}
