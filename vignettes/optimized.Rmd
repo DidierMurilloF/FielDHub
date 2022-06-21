@@ -13,11 +13,12 @@ One kind of unreplicated design you can use in FielDHub is the optimized arrange
 In this vignette, we will show an example of an optimized arrangement design experiment over 3 locations with 3 checks of 12, 10, and 8 reps each, and 405 entries. We will distribute the total 435 plots over a 29 x 15 field. FielDHub will return a and a table with all the field information for all locations, with an entry for every plot. 
 
 ## Inputs
-First, make sure **Import entries' List?** has "No" selected, as we are entering our own information about the entries. We first set the number of checks in the design with the **Input # of Checks** box. Then, for each of the checks, we enter the number of repetitions in the **Input # Check's Reps** box. For instance, if we had 3 checks and wanted 12 repetitions for the first check, 10 for the second, and 8 for the third, we would enter 12,10,8 in the box. 
+First, make sure **Import entries' List** has "No" selected, as we are entering our own information about the experiment. We first set the number of checks in the design with the **Input # of Checks** box. Then, for each of the checks, we enter the number of repetitions in the **Input # Check's Reps** box. For instance, if we had 3 checks and wanted 12 repetitions for the first check, 10 for the second, and 8 for the third, we would enter 12,10,8 in the box. 
 We can set the number of entries with the **Input # of Entries** box. This together with the sum of the check's reps will give the total number of plots in the experiment. We will enter 405 in this box for the example. 
 
-Since this experiment is over 3 locations, set
+Since this experiment is over 3 locations, set **Input # of Locations** to 3.
 To ensure that randomizations are consistent across sessions, we can set a seed number in the box labeled **Seed Number**. For instance, we will set it to 123. 
+For each location, you can set what number you want to start numbering the plots from. In our case, we want the first location to start at 1001, the second at 2001, and the third at 3001, so that each plot number is identifiable to its location. So, enter 1001,2001,3001 in the **Starting Plot Number** box. 
 
 Once we have entered the information for our experiment on the left side panel, click the **Run!** button to run the design. 
 
@@ -53,10 +54,9 @@ optim_expt <- optimized_arrangement(nrows = 29,
                                     amountChecks = c(12,10,8), 
                                     checks = 3,
                                     l = 3,
-                                    plotNumber = 1,
+                                    plotNumber = c(1001,2001,3001),
                                     seed = 123,
-                                    exptName = "Expt1",
-                                    locationNames = "FARGO")
+                                    exptName = "Expt1")
 
 ```
 ```{r, results='hide'}
@@ -68,10 +68,12 @@ optim_expt <- optimized_arrangement(nrows = 29, #number of rows in the field, 29
                                                                #or an integer total number of checks
                                     checks = 3, #number of checks
                                     l = 3, #number of locations
-                                    plotNumber = 1, #
-                                    seed = 123,
-                                    exptName = "Expt1",
-                                    locationNames = "FARGO")
+                                    plotNumber = c(1001,2001,3001), #numeric vector containing 
+                                                                    #the starting plot number 
+                                                                    #for each location respectively, 
+                                                                    #or a single number for 1 location
+                                    seed = 123, #seed number to replicate identical randomizations
+                                    exptName = "Expt1") #optional name for experiment
 ```
 ```{r, comment='',echo=FALSE}
 print(optim_expt)

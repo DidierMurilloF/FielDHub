@@ -11,7 +11,7 @@ vignette: >
 One of the kinds of unreplicated designs you can use in FielDHub is single diagonal arrangement. In this design you can set the number of entries and the number of checks for the experiment. You can also choose to run the same experiment over multiple locations. For this experiment, we have 400 entries in the field and we want to use 6 checks. We will run this experiment in 1 location. 
 
 ## Inputs
-First, make sure **Import entries' list** has "No" selected, as we are entering our own information about the entries. 
+First, make sure **Import entries' list** has "No" selected, as we are entering our own information about the experiment. 
 Then, we can enter the number of entries in the **Input # of Entries** box, which is 400 in our case. Then, select 6 from the drop down on the **Input # of Checks** box. Since we want to run this experiment over 1 location, set **Input # of Locations** to 1. 
 
 To ensure that randomizations are consistent across sessions, we can set a seed number in the box labeled **Seed Number**. For instance, we will set it to 123. 
@@ -19,6 +19,8 @@ To ensure that randomizations are consistent across sessions, we can set a seed 
 Once we have entered the information for our experiment on the left side panel, click the **Run!** button to run the design. 
 
 You will then be prompted to select the dimensions of the field from the list of options in the drop down in the middle of the screen with the box labeled **Select dimensions of field**. In our case, we will select 11 x 40. Click the **Randomize!** button to randomize the experiment with the set field dimensions and to see the output plots. 
+
+If you change any of the inputs on the left side panel after running an experiment initially, you have to click the Run and Randomize buttons again, to re-run with the new inputs.
 
 ## Outputs
 After you run a single diagonal arrangement in FielDHub and set the dimensions of the field, there are several ways to display the information in the field book. The first tab, **Expt Design Info**, shows the option to change the dimensions of the field and re-randomize, as well as a reference guide for experiment design. 
