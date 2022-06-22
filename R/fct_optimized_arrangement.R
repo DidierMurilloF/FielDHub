@@ -204,8 +204,14 @@ optimized_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,  amo
   set.seed(seed)
   for (sites in 1:l) {
     
-    prep <- pREP(nrows = nrows, ncols = ncols, RepChecks = RepChecks, checks = checksEntries, Fillers = Fillers,
-                 seed = NULL, optim = TRUE, niter = 1000, data = data)
+    prep <- pREP(nrows = nrows, ncols = ncols, 
+                 RepChecks = RepChecks, 
+                 checks = checksEntries, 
+                 Fillers = Fillers,
+                 seed = NULL, 
+                 optim = TRUE,
+                 niter = 1000, 
+                 data = data)
     
     dataInput <- prep$gen.list
     BINAY_CHECKS <- prep$binary.field

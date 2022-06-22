@@ -513,7 +513,7 @@ mod_RCBD_augmented_server <- function(id) {
       random <- input$random
       nrows <- field_dims_augmented()$d_row
       ncols <- field_dims_augmented()$d_col
-      ARCBD <- new_RCBD_augmented(
+      ARCBD <- RCBD_augmented(
         lines = lines,
         checks = checks,
         b = b,
@@ -528,7 +528,7 @@ mod_RCBD_augmented_server <- function(id) {
         data = gen.list,
         nrows = nrows,
         ncols = ncols
-        )
+      )
     })
 
 

@@ -227,7 +227,7 @@ mod_CRD_server <- function(id) {
       obj_crd <- CRD_reactive()
       planting_crd <- input$planter_mov_crd
       allBooks_crd <- plot_layout(x = obj_crd, 
-                                  optionLayout = 1, 
+                                  layout = 1, 
                                   planter = planting_crd)$newBooks
       nBooks_crd <- length(allBooks_crd)
       layoutOptions_crd <- 1:nBooks_crd
@@ -254,7 +254,7 @@ mod_CRD_server <- function(id) {
       obj_crd <- CRD_reactive()
       opt_crd <- as.numeric(input$layoutO_crd)
       planting_crd <- input$planter_mov_crd
-      plot_layout(x = obj_crd, optionLayout = opt_crd, planter = planting_crd)
+      plot_layout(x = obj_crd, layout = opt_crd, planter = planting_crd)
     })
     
     entryListFormat_CRD <- data.frame(TREATMENT = c(paste("TRT_", LETTERS[1:9], sep = "")), 

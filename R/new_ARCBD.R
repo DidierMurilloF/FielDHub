@@ -77,9 +77,9 @@
 #' head(ARCBD2$fieldBook, 12)
 #'                                        
 #' @export
-new_RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter = "serpentine", 
-                               plotNumber = 101, exptName  = NULL, seed = NULL, locationNames = NULL,
-                               repsExpt = 1, random = TRUE, data = NULL, nrows = NULL, ncols = NULL) {
+RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter = "serpentine", 
+                           plotNumber = 101, exptName  = NULL, seed = NULL, locationNames = NULL,
+                           repsExpt = 1, random = TRUE, data = NULL, nrows = NULL, ncols = NULL) {
   
   if (all(c("serpentine", "cartesian") != planter)) {
     stop("Input planter choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
@@ -147,7 +147,7 @@ new_RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, pla
   excedent <- plots_per_block * b
   Fillers <- excedent - all_genotypes
   dim_block <- plots_per_block
-  ############################################
+  #############################################################################################
   if (l < 1 || is.null(l)) base::stop("Check the input for the number of locations.")
   if (length(plotNumber) != l || is.null(plotNumber)) plotNumber <- seq(1001, 1000*(l+1), 1000)
   outputDesign_loc <- vector(mode = "list", length = l)
@@ -270,10 +270,8 @@ new_RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, pla
                                            planter = planter)
           layout <- no_randomData$w_map_letters
           len_cuts <- no_randomData$len_cut 
-          # plotsPerBlock <- c(len_cuts[-length(len_cuts)], ncol(layout_a) - Fillers)
           plotsPerBlock <- rep(ncol(layout) * nrows, b)
           plotsPerBlock <- c(plotsPerBlock[-length(plotsPerBlock)], ncol(layout) * nrows - Fillers)
-          #plotsPerBlock <- no_randomData$len_cut 
         } else {
           blocks_with_checks <- lapply(1:b, fun)
           layout_a <- paste_by_row(blocks_with_checks)
@@ -282,11 +280,10 @@ new_RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, pla
                                            data_Entry = entries, 
                                            planter = planter)
           layout <- no_randomData$w_map_letters
-          #plotsPerBlock <- no_randomData$len_cut 
           plotsPerBlock <- rep(ncol(layout) * nrows, b)
         }
       }
-      Blocks_info <- matrix(data = rep(b:1, each = ncols), 
+      Blocks_info <- matrix(data = rep(b:1, each = (ncols * nrows)), 
                             nrow = nrows * b, 
                             ncol = ncols, 
                             byrow = TRUE)
@@ -302,9 +299,6 @@ new_RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, pla
                                     name.expt = exptName[expts],
                                     Fillers = Fillers, 
                                     nameEXPT = nameEXPT$my_names)
-      # nameEXPT <- ARCBD_name(Fillers = Fillers, b = b, layout = layout, name.expt = exptName[expts], planter = planter)
-      # plotEXPT <- ARCBD_plot_number(plot.number = plotNumber[locations], planter = planter, b = b, name.expt = exptName[expts],
-      #                               Fillers = Fillers, nameEXPT = nameEXPT$my_names)
       my_data_VLOOKUP <- data
       COLNAMES_DATA <- colnames(my_data_VLOOKUP)
       layout1 <- layout
@@ -340,7 +334,6 @@ new_RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, pla
       layout1_loc1[[1]] <- layout1
       plot_loc1[[1]] <- plot_number
     } 
-    
     results_to_export <- list(layout1, plot_number, Col_checks, my_names, Blocks_info)
     year <- format(Sys.Date(), "%Y")
     outputDesign <- export_design(G = results_to_export, 

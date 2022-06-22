@@ -264,13 +264,13 @@ mod_RCBD_server <- function(id) {
       req(RCBD_reactive()$fieldBook)
       obj_rcbd <- RCBD_reactive()
       allBooks_rcbd <- plot_layout(x = obj_rcbd, 
-                                   optionLayout = 1, 
-                                   orderReps = "vertical_stack_panel")$newBooks
+                                   layout = 1, 
+                                   stacked = "vertical")$newBooks
       nBooks_rcbd <- length(allBooks_rcbd)
       layoutOptions_rcbd <- 1:nBooks_rcbd
       df <- RCBD_reactive()$fieldBook
-      orderReps_rcbd <- c("Vertical Stack Panel" = "vertical_stack_panel", 
-                          "Horizontal Stack Panel" = "horizontal_stack_panel")
+      stacked_rcbd <- c("Vertical Stack Panel" = "vertical", 
+                          "Horizontal Stack Panel" = "horizontal")
       sites <- length(levels(as.factor(df$LOCATION)))
       wellPanel(
         column(3,
@@ -281,9 +281,9 @@ mod_RCBD_server <- function(id) {
         ),
         fluidRow(
           column(3,
-                 selectInput(inputId = ns("orderRepsRCBD"), 
+                 selectInput(inputId = ns("stackedRCBD"), 
                              label = "Reps layout:", 
-                             choices = orderReps_rcbd),
+                             choices = stacked_rcbd),
           ),
           column(2, 
                  selectInput(inputId = ns("layoutO_rcbd"), 
@@ -300,13 +300,13 @@ mod_RCBD_server <- function(id) {
       )
     })
     
-    observeEvent(input$orderRepsRCBD, {
-      req(input$orderRepsRCBD)
+    observeEvent(input$stackedRCBD, {
+      req(input$stackedRCBD)
       req(input$l.rcbd)
       obj_rcbd <- RCBD_reactive()
       allBooks <- try(plot_layout(x = obj_rcbd, 
-                                  optionLayout = 1, 
-                                  orderReps = input$orderRepsRCBD)$newBooks, 
+                                  layout = 1, 
+                                  stacked = input$stackedRCBD)$newBooks, 
                       silent = TRUE)
       nBooks <- length(allBooks)
       NewlayoutOptions <- 1:nBooks
@@ -318,7 +318,7 @@ mod_RCBD_server <- function(id) {
     })
     
     reactive_layoutRCBD <- reactive({
-      req(input$orderRepsRCBD)
+      req(input$stackedRCBD)
       req(input$layoutO_rcbd)
       req(input$planter_mov_rcbd)
       req(input$locLayout_rcbd)
@@ -328,8 +328,8 @@ mod_RCBD_server <- function(id) {
       planting_rcbd <- input$planter_mov_rcbd
       locSelected <- as.numeric(input$locLayout_rcbd)
       try(plot_layout(x = obj_rcbd, 
-                      optionLayout = opt_rcbd, 
-                      orderReps = input$orderRepsRCBD,
+                      layout = opt_rcbd, 
+                      stacked = input$stackedRCBD,
                       planter = planting_rcbd, 
                       l = locSelected), 
           silent = TRUE)

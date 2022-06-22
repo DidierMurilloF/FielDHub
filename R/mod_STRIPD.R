@@ -275,12 +275,12 @@ mod_STRIPD_server <- function(id) {
       req(strip_reactive()$fieldBook)
       obj_strip <- strip_reactive()
       allBooks_strip<- plot_layout(x = obj_strip, 
-                                   optionLayout = 1, 
-                                   orderReps = "vertical_stack_panel")$newBooks
+                                   layout = 1, 
+                                   stacked = "vertical")$newBooks
       nBooks_strip <- length(allBooks_strip)
       layoutOptions_strip <- 1:nBooks_strip
-      orderReps_strips <- c("Vertical Stack Panel" = "vertical_stack_panel", 
-                            "Horizontal Stack Panel" = "horizontal_stack_panel")
+      stacked_strips <- c("Vertical Stack Panel" = "vertical", 
+                            "Horizontal Stack Panel" = "horizontal")
       sites <- as.numeric(input$l.strip)
       wellPanel(
         fluidRow(
@@ -291,9 +291,9 @@ mod_STRIPD_server <- function(id) {
                                 "Heatmap" = 3))
           ),
           column(3,
-                 selectInput(inputId = ns("orderRepsSTRIP"), 
+                 selectInput(inputId = ns("stackedSTRIP"), 
                              label = "Reps layout:", 
-                             choices = orderReps_strips),
+                             choices = stacked_strips),
           ),
           column(3,
                  selectInput(inputId = ns("layoutO_strip"), 
@@ -310,13 +310,13 @@ mod_STRIPD_server <- function(id) {
     })
     
     
-    observeEvent(input$orderRepsSTRIP, {
-      req(input$orderRepsSTRIP)
+    observeEvent(input$stackedSTRIP, {
+      req(input$stackedSTRIP)
       req(input$l.strip)
       obj_strips <- strip_reactive()
       allBooks <- try(plot_layout(x = obj_strips, 
-                                  optionLayout = 1, 
-                                  orderReps = input$orderRepsSTRIP)$newBooks, 
+                                  layout = 1, 
+                                  stacked = input$stackedSTRIP)$newBooks, 
                       silent = TRUE)
       nBooks <- length(allBooks)
       NewlayoutOptions <- 1:nBooks
@@ -337,9 +337,9 @@ mod_STRIPD_server <- function(id) {
       planting_strip <- input$planter.strip
       locSelected <- as.numeric(input$locLayout_strip)
       try(plot_layout(x = obj_strip, 
-                      optionLayout = opt_strip, 
+                      layout = opt_strip, 
                       planter = planting_strip, 
-                      orderReps = input$orderRepsSTRIP,
+                      stacked = input$stackedSTRIP,
                       l = locSelected), silent = TRUE)
     })
     

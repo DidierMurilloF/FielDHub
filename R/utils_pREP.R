@@ -109,7 +109,7 @@ pREP <- function(nrows = NULL, ncols = NULL, RepChecks = NULL, checks = NULL, Fi
     
   }else field <- field0
   
-  binary_field <- field
+  #binary_field <- field
   
   ################## Setting up the samples for the entries genotypes#############
   entry.gens <- as.vector(my_GENS[,1])
@@ -138,6 +138,7 @@ pREP <- function(nrows = NULL, ncols = NULL, RepChecks = NULL, checks = NULL, Fi
     l <- l + 1
     
   }
+  binary_field <- layout1
   entries <- list(entry.checks = entry.checks, entry.gens = entry.gens)
   if (length(entry.gens) == 1) {
     layout1[layout1 == 0] <- as.vector(entry.gens)
@@ -149,7 +150,8 @@ pREP <- function(nrows = NULL, ncols = NULL, RepChecks = NULL, checks = NULL, Fi
   
   layout <- apply(layout1, c(1,2), as.numeric)
   
-  return(list(field.map = layout, gen.entries = entries, gen.list = gen.list, reps.checks = reps.checks,
+  return(list(field.map = layout, gen.entries = entries, gen.list = gen.list,
+              reps.checks = reps.checks,
               entryChecks = entry.checks, binary.field = binary_field))
   
 }

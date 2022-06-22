@@ -11,6 +11,8 @@ utils::globalVariables(c("ENTRY",
                          "SUB_SUB_PLOT",
                          "TRT_COMB",
                          "WHOLE_PLOT",
-                         "text"))
+                         "text", 
+                         "BLOCK", 
+                         "CHECKS"))
 
 

@@ -345,11 +345,11 @@ mod_IBD_server <- function(id) {
     output$well_panel_layout_IBD <- renderUI({
       req(IBD_reactive()$fieldBook)
       obj_ibd <- IBD_reactive()
-      allBooks_ibd<- plot_layout(x = obj_ibd, optionLayout = 1)$newBooks
+      allBooks_ibd<- plot_layout(x = obj_ibd, layout = 1)$newBooks
       nBooks_ibd <- length(allBooks_ibd)
       layoutOptions_ibd <- 1:nBooks_ibd
-      orderReps <- c("Vertical Stack Panel" = "vertical_stack_panel", 
-                     "Horizontal Stack Panel" = "horizontal_stack_panel")
+      stacked <- c("Vertical Stack Panel" = "vertical", 
+                     "Horizontal Stack Panel" = "horizontal")
       wellPanel(
         column(2,
                radioButtons(ns("typlotibd"), "Type of Plot:",
@@ -359,9 +359,9 @@ mod_IBD_server <- function(id) {
         ),
         fluidRow(
           column(3,
-                 selectInput(inputId = ns("orderRepsibd"), 
+                 selectInput(inputId = ns("stackedibd"), 
                              label = "Reps layout:", 
-                             choices = orderReps)
+                             choices = stacked)
           ),
           column(3, #align="center",
                  selectInput(inputId = ns("layoutO_ibd"), 
@@ -377,12 +377,12 @@ mod_IBD_server <- function(id) {
       )
     })
     
-    observeEvent(input$orderRepsibd, {
-      req(input$orderRepsibd)
+    observeEvent(input$stackedibd, {
+      req(input$stackedibd)
       obj <- IBD_reactive()
       allBooks <- plot_layout(x = obj, 
-                              optionLayout = 1, 
-                              orderReps = input$orderRepsibd)$newBooks
+                              layout = 1, 
+                              stacked = input$stackedibd)$newBooks
       nBooks <- length(allBooks)
       NewlayoutOptions <- 1:nBooks
       updateSelectInput(session = session, inputId = 'layoutO_ibd',
@@ -400,10 +400,10 @@ mod_IBD_server <- function(id) {
       planting_ibd <- input$planter_mov_ibd
       locSelected <- as.numeric(input$locLayout_ibd)
       try(plot_layout(x = obj_ibd, 
-                      optionLayout =  opt_ibd, 
+                      layout =  opt_ibd, 
                       planter = planting_ibd, 
                       l = locSelected, 
-                      orderReps = input$orderRepsibd), 
+                      stacked = input$stackedibd), 
           silent = TRUE)
     })
     

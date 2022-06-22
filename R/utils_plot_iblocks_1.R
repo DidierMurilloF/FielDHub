@@ -6,8 +6,8 @@
 #'
 #' @noRd
 plot_iblocks_1 <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks, 
-                         iBlocks = NULL, optionLayout = 1, 
-                         orderReps = "vertical_stack_panel", 
+                         iBlocks = NULL, layout = 1, 
+                         stacked = "vertical", 
                          planter = "serpentine", 
                          l = 1) {
   site <- l
@@ -38,7 +38,7 @@ plot_iblocks_1 <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks
       z[[j]] <- c(rep(u[j]:v[j], times = iBlocks))
     }
     z <- unlist(z)
-    if (orderReps == "vertical_stack_panel") {
+    if (stacked == "vertical") {
       
       #######################################################################
       
@@ -283,7 +283,7 @@ plot_iblocks_1 <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks
         }
       }
     ########################################################################
-    } else if (orderReps == "horizontal_stack_panel") {
+    } else if (stacked == "horizontal") {
       x$bookROWCol <- NewBook %>%
         dplyr::mutate(ROW = rep(rep(1:iBlocks, each = sizeIblocks), n_Reps),
                       COLUMN = z)
@@ -299,7 +299,7 @@ plot_iblocks_1 <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks
       
       
       books21 <- list(NULL)
-      x$bookROWCol <- x$fieldBook %>%
+      x$bookROWCol <- NewBook %>%
         dplyr::mutate(ROW = rep(rep(1:sizeIblocks, times = iBlocks), n_Reps),
                       COLUMN = rep(1:(iBlocks * n_Reps), each = sizeIblocks)
         )
@@ -358,7 +358,7 @@ plot_iblocks_1 <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks
       }
       ####################################################################
      }
-    }else if (orderReps == "grid_panel") {
+    }else if (stacked == "grid_panel") {
       if (n_Reps > 2) {
         if (n_Reps %% 2 == 0 || sqrt(n_Reps) %% 1 == 0) {
           t <- numbers::primeFactors(n_Reps)
@@ -438,11 +438,18 @@ plot_iblocks_1 <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks
     newBooksLocs[[countLocs]] <- unique(newBooks)
     countLocs <- countLocs + 1
   }
-  opt <- optionLayout
+  opt <- layout
   newBooksSelected <- newBooksLocs[[site]]
   opt_available <- 1:length(newBooksSelected)
   if (all(opt_available != opt)) {
-    stop("Option not available to plot")
+    message(cat(" Option for layout is not available!", "\n", "\n",
+                "*********************************************", "\n",
+                "*********************************************", "\n", "\n",
+                "Layout options available for this design are:", "\n", "\n",
+                opt_available, "\n", "\n",
+                "*********************************************", "\n",
+                "*********************************************"))
+    return(NULL)
   }
   df1 <- newBooksSelected[opt]
   df <- as.data.frame(df1)

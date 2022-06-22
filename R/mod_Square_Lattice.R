@@ -300,13 +300,13 @@ mod_Square_Lattice_server <- function(id){
       locs_sq <- length(levels(as.factor(df$LOCATION)))
       repsSquare <- length(levels(as.factor(df$REP)))
       if ((repsSquare >= 4 & repsSquare %% 2 == 0) | (repsSquare >= 4 & sqrt(repsSquare) %% 1 == 0)) {
-        orderReps <- c("Vertical Stack Panel" = "vertical_stack_panel", "Horizontal Stack Panel" = "horizontal_stack_panel",  
+        stacked <- c("Vertical Stack Panel" = "vertical", "Horizontal Stack Panel" = "horizontal",  
                        "Grid Panel" = "grid_panel")
       } else {
-        orderReps <- c("Vertical Stack Panel" = "vertical_stack_panel", "Horizontal Stack Panel" = "horizontal_stack_panel")
+        stacked <- c("Vertical Stack Panel" = "vertical", "Horizontal Stack Panel" = "horizontal")
       }
       obj_sq <- SQUARE_reactive()
-      allBooks_sq <- plot_layout(x = obj_sq, optionLayout = 1)$newBooks
+      allBooks_sq <- plot_layout(x = obj_sq, layout = 1)$newBooks
       nBooks_sq <- length(allBooks_sq)
       layoutOptions_sq <- 1:nBooks_sq
       wellPanel(
@@ -318,8 +318,8 @@ mod_Square_Lattice_server <- function(id){
         ),
         fluidRow(
           column(3,
-                 selectInput(inputId = ns("orderReps_sq"), label = "Reps layout:", 
-                             choices = orderReps)
+                 selectInput(inputId = ns("stacked_sq"), label = "Reps layout:", 
+                             choices = stacked)
           ),
           column(2, #align="center",
                  selectInput(inputId = ns("layoutO_sq"), label = "Layout option:", choices = layoutOptions_sq, selected = 1)
@@ -331,11 +331,11 @@ mod_Square_Lattice_server <- function(id){
       )
     })
     
-    observeEvent(input$orderReps_sq, {
-      req(input$orderReps_sq)
+    observeEvent(input$stacked_sq, {
+      req(input$stacked_sq)
       req(input$l.square)
       obj_sq <- SQUARE_reactive()
-      allBooks <- plot_layout(x = obj_sq, optionLayout = 1, orderReps = input$orderReps_sq)$newBooks
+      allBooks <- plot_layout(x = obj_sq, layout = 1, stacked = input$stacked_sq)$newBooks
       nBooks <- length(allBooks)
       NewlayoutOptions <- 1:nBooks
       updateSelectInput(session = session, inputId = 'layoutO_sq',
@@ -352,10 +352,10 @@ mod_Square_Lattice_server <- function(id){
       opt_sq <- as.numeric(input$layoutO_sq)
       locSelected <- as.numeric(input$locLayout_sq)
       try(plot_layout(x = obj_sq, 
-                      optionLayout = opt_sq, 
+                      layout = opt_sq, 
                       planter = input$planter_mov_square, 
                       l = locSelected, 
-                      orderReps = input$orderReps_sq), silent = TRUE)
+                      stacked = input$stacked_sq), silent = TRUE)
     })
     
     output$layout.output_sq <- renderPlot({

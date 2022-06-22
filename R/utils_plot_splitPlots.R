@@ -6,8 +6,8 @@
 #'
 #' @noRd
 plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, 
-                            sizeIblocks, iBlocks = NULL, optionLayout = 1,
-                            orderReps = "vertical_stack_panel", 
+                            sizeIblocks, iBlocks = NULL, layout = 1,
+                            stacked = "vertical", 
                             planter = "serpentine", l = 1) {
   site <- l
   locations <- factor(x$fieldBook$LOCATION, levels = unique(x$fieldBook$LOCATION))
@@ -33,7 +33,7 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
       z[[j]] <- c(rep(u[j]:v[j], times = iBlocks))
     }
     z <- unlist(z)
-    if (orderReps == "vertical_stack_panel") {
+    if (stacked == "vertical") {
       x$bookROWCol <- NewBook %>% 
         dplyr::mutate(ROW = z,
                       COLUMN = rep(rep(1:iBlocks, each = sizeIblocks), n_Reps))
@@ -215,7 +215,7 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
           books3[[k]] <- df
         }
       }
-    } else if (orderReps == "horizontal_stack_panel") {
+    } else if (stacked == "horizontal") {
       x$bookROWCol <- NewBook %>%
         dplyr::mutate(ROW = rep(rep(1:iBlocks, each = sizeIblocks), n_Reps),
                       COLUMN = z)
@@ -227,7 +227,7 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
       #                               mode = "Horizontal", units = NULL)
       # df4$PLOT <- newPlots
       books4[[1]] <- df4
-    }else if (orderReps == "grid_panel") {
+    }else if (stacked == "grid_panel") {
       if (n_Reps > 2) {
         if (n_Reps %% 2 == 0 || sqrt(n_Reps) %% 1 == 0) {
           t <- numbers::primeFactors(n_Reps)
@@ -272,11 +272,6 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
             dplyr::mutate(ROW = z0,
                           COLUMN = rep(rep(1:nCols, each = sizeIblocks), s))
           df6 <- x$bookROWCol
-          # df6 <- df6[order(df6$ROW, decreasing = FALSE), ]
-          # nCols <- max(df6$COLUMN)
-          # newPlots <- planter_transform(plots = plots, planter = planter, reps = n_Reps,
-          #                               cols = nCols, mode = "Grid", units = n0)
-          # df6$PLOT <- newPlots
           if (sqrt(n_Reps) %% 1 == 0) {
             books6[[1]] <- NULL
           } else books6[[1]] <- df6
@@ -288,8 +283,20 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
     newBooksLocs[[countLocs]] <- newBooks
     countLocs <- countLocs + 1
   }
-  opt <- optionLayout
+  opt <- layout
   newBooksSelected <- newBooksLocs[[site]]
+  opt_available <- 1:length(newBooksSelected)
+  if (all(opt_available != opt)) {
+    message(cat("\n",
+                " Option for layout is not available!", "\n", "\n",
+                "*********************************************", "\n",
+                "*********************************************", "\n", "\n",
+                "Layout options available for this design are:", "\n", "\n",
+                opt_available, "\n", "\n",
+                "*********************************************", "\n",
+                "*********************************************"))
+    return(NULL)
+  }
   df1 <- newBooksSelected[opt]
   df <- as.data.frame(df1)
   if (x$infoDesign$id_design == 5) {
