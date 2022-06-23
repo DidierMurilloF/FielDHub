@@ -870,7 +870,6 @@ mod_diagonal_multiple_server <- function(id) {
       if (multiple_inputs()$stacked == "By Row") {
         map_letters <- rand_lines()[[1]]$w_map_letter
         data_dim_each_block <- available_percent_multi()$data_dim_each_block
-        # Name_expt <- as.vector(unlist(strsplit(input$expt_name_multiple, ",")))
         Name_expt <- multiple_inputs()$expt_name
         blocks <- length(data_dim_each_block)
         if (length(Name_expt) == blocks) {
@@ -890,7 +889,6 @@ mod_diagonal_multiple_server <- function(id) {
       }else if (multiple_inputs()$stacked == "By Column") {
         map_letters <- rand_lines()[[1]]$w_map_letter
         data_dim_each_block <- available_percent_multi()$data_dim_each_block
-        # Name_expt <- as.vector(unlist(strsplit(input$expt_name_multiple, ",")))
         Name_expt <- multiple_inputs()$expt_name
         blocks <- length(data_dim_each_block)
         if (length(Name_expt) == blocks) {
@@ -899,18 +897,13 @@ mod_diagonal_multiple_server <- function(id) {
           name_expt = paste0(rep("Block", times = blocks), 1:blocks)
         }
         map_letters <- rand_lines()[[1]]$w_map_letter
-        split_name_diagonal1 <- names_diagonal(nrows = n_rows,
-                                               ncols = n_cols,
-                                               randomChecksMap = w_map,
-                                               kindExpt = kindExpt,
-                                               checks = 1:getChecks()$checks,
-                                               myWay = multiple_inputs()$stacked,
-                                               Option_NCD = Option_NCD,
-                                               expt_name = name_expt,
-                                               data_entry = data_entry,
-                                               reps = NULL,
-                                               data_dim_each_block = data_dim_each_block,
-                                               w_map_letters1 = map_letters)
+        split_name_diagonal1 <- names_dbrows(w_map = w_map, 
+                                             myWay = "By Column",
+                                             kindExpt = "DBUDC",
+                                             data_dim_each_block = data_dim_each_block,
+                                             w_map_letters = map_letters,
+                                             expt_name = name_expt,
+                                             Checks = checksEntries)
       }
     })
     
@@ -938,7 +931,6 @@ mod_diagonal_multiple_server <- function(id) {
                                         dim_data = data_dim_each_block)  
         blocks <- length(cuts_by_c) 
       }  
-      # Name_expt <- as.vector(unlist(strsplit(input$expt_name_multiple, ","))) 
       Name_expt <- multiple_inputs()$expt_name
       if (length(Name_expt) == blocks) { 
         name_expt <- Name_expt 
@@ -950,16 +942,21 @@ mod_diagonal_multiple_server <- function(id) {
                         'violet', 'thistle') 
       df <- as.data.frame(my_names) 
       rownames(df) <- nrow(df):1
-      options(DT.options = list(pageLength = nrow(df), 
-                                autoWidth = FALSE,
-                                scrollY = "700px"))
       DT::datatable(df,
-                    extensions = 'FixedColumns',
-                    options = list(
-                      dom = 't',
-                      scrollX = TRUE,
-                      fixedColumns = TRUE
-                    )) %>% 
+                    extensions = 'Buttons',
+                    options = list(dom = 'Blfrtip',
+                                   autoWidth = FALSE,
+                                   scrollX = TRUE,
+                                   fixedColumns = TRUE,
+                                   pageLength = nrow(df),
+                                   scrollY = "600px",
+                                   class = 'compact cell-border stripe',  rownames = FALSE,
+                                   server = FALSE,
+                                   filter = list( position = 'top', clear = FALSE, plain =TRUE ),
+                                   buttons = c('copy', 'excel'),
+                                   lengthMenu = list(c(10,25,50,-1),
+                                                     c(10,25,50,"All")))
+      ) %>% 
         DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
                         backgroundColor = DT::styleEqual(name_expt, 
                                                          colores_back[1:blocks])
@@ -971,7 +968,6 @@ mod_diagonal_multiple_server <- function(id) {
         validate("Plot starting number is missing.")
       }
       l <- as.numeric(multiple_inputs()$sites)
-      # plotNumber <- as.numeric(as.vector(unlist(strsplit(input$plot_start_multiple, ","))))
       plotNumber <- multiple_inputs()$plotNumber
       if(!is.numeric(plotNumber) && !is.integer(plotNumber)) {
         validate("plotNumber should be an integer or a numeric vector.")
@@ -1029,7 +1025,6 @@ mod_diagonal_multiple_server <- function(id) {
             m = diff(cuts_by_c) 
             my_col_sets = c(cuts_by_c[1], m) 
           } 
-          # Name_expt <- as.vector(unlist(strsplit(input$expt_name_multiple, ","))) 
           Name_expt <- multiple_inputs()$expt_name
           if (length(Name_expt) == n_blocks) { 
             expe_names <- Name_expt 
@@ -1101,12 +1096,28 @@ mod_diagonal_multiple_server <- function(id) {
             
             my_split_plot_nub <- plot_number_fillers(movement_planter = multiple_inputs()$planter_mov, 
                                                      plot_n_start = plot_n_start[sites],
-                                                     datos = datos_name, expe_names = expe_names, ByRow = TRUE,
-                                                     my_row_sets = my_row_sets, ByCol = FALSE, my_col_sets = NULL,
-                                                     which.blocks = Block_Fillers, n_blocks = n_blocks,
+                                                     datos = datos_name,
+                                                     expe_names = expe_names, 
+                                                     ByRow = TRUE,
+                                                     my_row_sets = my_row_sets, 
+                                                     ByCol = FALSE, 
+                                                     my_col_sets = NULL,
+                                                     which.blocks = Block_Fillers,
+                                                     n_blocks = n_blocks,
                                                      data.dim.each = data.dim.each) 
           } else { 
-            return(NULL) 
+            my_split_plot_nub <- plot_number_fillers_by_col(movement_planter = multiple_inputs()$planter_mov, 
+                                                            plot_n_start = plot_n_start[sites],
+                                                            datos = datos_name,
+                                                            expe_names = expe_names,
+                                                            ByRow = TRUE,
+                                                            my_row_sets = my_row_sets,
+                                                            ByCol = TRUE, 
+                                                            my_col_sets = NULL,
+                                                            which.blocks = Block_Fillers, 
+                                                            n_blocks = n_blocks,
+                                                            data.dim.each = data.dim.each)  
+            # return(NULL) 
           } 
         }
         plots_number_sites[[sites]] <- my_split_plot_nub$w_map_letters1
