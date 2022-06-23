@@ -105,7 +105,7 @@ mod_Alpha_Lattice_server <- function(id){
     # for showing .csv button on run
     shinyjs::useShinyjs()
     
-    init_data_alpha <- reactive({ #get_data_alpha
+    init_data_alpha <- reactive({
       if (input$owndata_alpha == "Yes") {
         req(input$file.alpha)
         inFile <- input$file.alpha
@@ -299,13 +299,13 @@ mod_Alpha_Lattice_server <- function(id){
       locs <- length(levels(as.factor(df$LOCATION)))
       repsAlpha <- length(levels(as.factor(df$REP)))
       if ((repsAlpha >= 4 & repsAlpha %% 2 == 0) | (repsAlpha >= 4 & sqrt(repsAlpha) %% 1 == 0)) {
-        orderReps <- c("Vertical Stack Panel" = "vertical_stack_panel", "Horizontal Stack Panel" = "horizontal_stack_panel",  
+        stacked <- c("Vertical Stack Panel" = "vertical", "Horizontal Stack Panel" = "horizontal",  
                        "Grid Panel" = "grid_panel")
       } else {
-        orderReps <- c("Vertical Stack Panel" = "vertical_stack_panel", "Horizontal Stack Panel" = "horizontal_stack_panel")
+        stacked <- c("Vertical Stack Panel" = "vertical", "Horizontal Stack Panel" = "horizontal")
       }
       obj <- ALPHA_reactive()
-      allBooks <- plot_layout(x = obj, optionLayout = 1, orderReps = "vertical_stack_panel")$newBooks
+      allBooks <- plot_layout(x = obj, layout = 1, stacked = "vertical")$newBooks
       nBooks <- length(allBooks)
       layoutOptions <- 1:nBooks
       wellPanel(
@@ -316,26 +316,32 @@ mod_Alpha_Lattice_server <- function(id){
                                 "Plots" = 2,
                                 "Heatmap" = 3), selected = 1)
           ),
-        # fluidRow(
-            column(3,
-                   selectInput(inputId = ns("orderRepsAlpha"), label = "Reps layout:", 
-                               choices = orderReps)
-            ),
-            column(2, 
-                   selectInput(inputId = ns("layoutO"), label = "Layout option:", choices = layoutOptions, selected = 1)
-            ),
-            column(2, 
-                   selectInput(inputId = ns("locLayout"), label = 'Location:', choices = as.numeric(upDateSites()$sites))
-            )
+          column(3,
+                 selectInput(inputId = ns("stackedAlpha"),
+                             label = "Reps layout:", 
+                             choices = stacked)
+          ),
+          column(2, 
+                 selectInput(inputId = ns("layoutO"), 
+                             label = "Layout option:",
+                             choices = layoutOptions, 
+                             selected = 1)
+          ),
+          column(2, 
+                 selectInput(inputId = ns("locLayout"),
+                             label = 'Location:', 
+                             choices = as.numeric(upDateSites()$sites))
           )
+        )
       )
     })
     
-    observeEvent(input$orderRepsAlpha, {
-      req(input$orderRepsAlpha)
+    observeEvent(input$stackedAlpha, {
+      req(input$stackedAlpha)
       obj <- ALPHA_reactive()
-      allBooks <- plot_layout(x = obj, optionLayout = 1, 
-                              orderReps = input$orderRepsAlpha)$newBooks
+      allBooks <- plot_layout(x = obj, 
+                              layout = 1, 
+                              stacked = input$stackedAlpha)$newBooks
       nBooks <- length(allBooks)
       NewlayoutOptions <- 1:nBooks
       updateSelectInput(session = session, inputId = 'layoutO',
@@ -345,22 +351,41 @@ mod_Alpha_Lattice_server <- function(id){
       )
     })
     
+    reset_selection <- reactiveValues(reset = 0)
+    
+    observeEvent(input$stackedAlpha, {
+      reset_selection$reset <- 1
+    })
+    
+    observeEvent(input$layoutO, {
+      reset_selection$reset <- 0
+    })
+    
+    list_react <- reactive({
+      return(list(input$stackedAlpha, input$layoutO, input$locLayout))
+    })
+    
     reactive_layoutAlpha <- reactive({
-      req(input$orderRepsAlpha)
+      req(input$stackedAlpha)
       req(input$planter_mov_alpha)
       req(input$layoutO)
       req(ALPHA_reactive())
-      opt <- input$orderRepsAlpha
       obj <- ALPHA_reactive()
-      opt <- as.numeric(input$layoutO)
+      
+      if (reset_selection$reset == 1) {
+        opt <- 1
+      } else opt <- as.numeric(input$layoutO)
+      
       locSelected <- as.numeric(input$locLayout)
       try(plot_layout(x = obj, 
-                      optionLayout = opt, 
+                      layout = opt, 
                       planter = input$planter_mov_alpha, 
                       l = locSelected, 
-                      orderReps = input$orderRepsAlpha), 
+                      stacked = input$stackedAlpha), 
           silent = TRUE)
-    })
+    }) %>% 
+      bindEvent(list_react())
+    
     
     valsALPHA <- reactiveValues(maxV.alpha = NULL, minV.alpha = NULL, trail.alpha = NULL)
     

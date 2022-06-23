@@ -272,13 +272,13 @@ mod_LSD_server <- function(id){
       req(latinsquare_reactive())
       obj_lsd <- latinsquare_reactive()
       allBooks_lsd <- plot_layout(x = obj_lsd, 
-                                 optionLayout = 1,
-                                 orderReps = "vertical_stack_panel")$newBooks
+                                 layout = 1,
+                                 stacked = "vertical")$newBooks
       nBooks_lsd <- length(allBooks_lsd)
       layoutOptions_lsd <- 1:nBooks_lsd
       df <- latinsquare_reactive()$fieldBook
-      orderReps_lsd <- c("Vertical Stack Panel" = "vertical_stack_panel", 
-                          "Horizontal Stack Panel" = "horizontal_stack_panel")
+      stacked_lsd <- c("Vertical Stack Panel" = "vertical", 
+                          "Horizontal Stack Panel" = "horizontal")
       nBooks_lsd <- length(allBooks_lsd)
       wellPanel(
         column(3,
@@ -289,9 +289,9 @@ mod_LSD_server <- function(id){
         ),
         fluidRow(
           column(3,
-                 selectInput(inputId = ns("orderRepsLSD"),
+                 selectInput(inputId = ns("stackedLSD"),
                              label = "Reps layout:",
-                             choices = orderReps_lsd),
+                             choices = stacked_lsd),
           ),
           column(3, 
                  selectInput(inputId = ns("layoutO_lsd"), 
@@ -302,12 +302,12 @@ mod_LSD_server <- function(id){
       )
     })
     
-    observeEvent(input$orderRepsLSD, {
-      req(input$orderRepsLSD)
+    observeEvent(input$stackedLSD, {
+      req(input$stackedLSD)
       obj_lsd <- latinsquare_reactive()
       allBooks <- try(plot_layout(x = obj_lsd, 
-                                  optionLayout = 1, 
-                                  orderReps = input$orderRepsLSD)$newBooks, 
+                                  layout = 1, 
+                                  stacked = input$stackedLSD)$newBooks, 
                       silent = TRUE)
       nBooks <- length(allBooks)
       NewlayoutOptions <- 1:nBooks
@@ -327,8 +327,8 @@ mod_LSD_server <- function(id){
       opt_lsd <- as.numeric(input$layoutO_lsd)
       planting_lsd <- input$planter.lsd
       try(plot_layout(x = obj_lsd,
-                      optionLayout = opt_lsd,
-                      orderReps = input$orderRepsLSD,
+                      layout = opt_lsd,
+                      stacked = input$stackedLSD,
                       planter = planting_lsd,
                       l = 1),
           silent = TRUE)

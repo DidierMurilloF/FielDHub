@@ -343,11 +343,11 @@ mod_RowCol_server <- function(id){
     output$well_panel_layout_ROWCOL <- renderUI({
       req(RowCol_reactive()$fieldBook)
       obj_rcd <- RowCol_reactive()
-      allBooks_rcd<- plot_layout(x = obj_rcd, optionLayout = 1)$newBooks
+      allBooks_rcd<- plot_layout(x = obj_rcd, layout = 1)$newBooks
       nBooks_rcd <- length(allBooks_rcd)
       layoutOptions_rcd <- 1:nBooks_rcd
-      orderReps <- c("Vertical Stack Panel" = "vertical_stack_panel", 
-                     "Horizontal Stack Panel" = "horizontal_stack_panel")
+      stacked <- c("Vertical Stack Panel" = "vertical", 
+                     "Horizontal Stack Panel" = "horizontal")
       wellPanel(
         column(2,
                radioButtons(ns("typlotrcd"), "Type of Plot:",
@@ -358,9 +358,9 @@ mod_RowCol_server <- function(id){
         fluidRow(
  
           column(3,
-                 selectInput(inputId = ns("orderRepsRowCol"), 
+                 selectInput(inputId = ns("stackedRowCol"), 
                              label = "Reps layout:", 
-                             choices = orderReps)
+                             choices = stacked)
           ),
           column(3, #align="center",
                  selectInput(inputId = ns("layoutO_rcd"), 
@@ -377,12 +377,12 @@ mod_RowCol_server <- function(id){
     })
     
     
-    observeEvent(input$orderRepsRowCol, {
-      req(input$orderRepsRowCol)
+    observeEvent(input$stackedRowCol, {
+      req(input$stackedRowCol)
       req(input$l.rcd)
       obj <- RowCol_reactive()
-      allBooks <- plot_layout(x = obj, optionLayout = 1, 
-                              orderReps = input$orderRepsRowCol)$newBooks
+      allBooks <- plot_layout(x = obj, layout = 1, 
+                              stacked = input$stackedRowCol)$newBooks
       nBooks <- length(allBooks)
       NewlayoutOptions <- 1:nBooks
       updateSelectInput(session = session, inputId = 'layoutO_rcd',
@@ -399,9 +399,9 @@ mod_RowCol_server <- function(id){
       opt_rcd <- as.numeric(input$layoutO_rcd)
       planting_rcd <- input$planter_mov_rcd
       locSelected <- as.numeric(input$locLayout_rcd)
-      try(plot_layout(x = obj_rcd, optionLayout = opt_rcd,
+      try(plot_layout(x = obj_rcd, layout = opt_rcd,
                       planter = planting_rcd, l = locSelected, 
-                      orderReps = input$orderRepsRowCol), 
+                      stacked = input$stackedRowCol), 
           silent = TRUE)
     })
     

@@ -9,7 +9,14 @@
 \arguments{
 \item{x}{an object inheriting from class}
 
-\item{...}{further arguments passed to \code{\link{head}}.}
+\item{...}{further arguments passed to \code{\link{head}}.
+\itemize{
+  \item \code{layout} a integer. Options available depend on the 
+  type of design and its characteristics
+  \item \code{l} a integer to specify the location to plot.
+  \item \code{planter} \code{serpentine} or \code{cartesian}.
+  \item \code{stacked} \code{vertical} or \code{horizontal} stacked layout.
+}}
 }
 \value{
 a plot inheriting from class \code{FielDHub}

@@ -104,7 +104,7 @@ alpha_lattice <- function(t = NULL,
     }
     df <- data.frame(list(ENTRY = 1:nt, TREATMENT = paste0("G-", 1:nt)))
     data_alpha <- df
-  }else if (!is.null(data)) {
+  } else if (!is.null(data)) {
     if (is.null(t) || is.null(r) || is.null(k) || is.null(l)) {
       shiny::validate('Basic design parameters missing (t, k, r or l).')
     }

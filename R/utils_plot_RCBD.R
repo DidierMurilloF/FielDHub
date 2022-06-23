@@ -6,8 +6,8 @@
 #'
 #' @noRd
 plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, 
-                      optionLayout = 1, 
-                      orderReps = "horizontal_stack_panel", 
+                      layout = 1, 
+                      stacked = "horizontal", 
                       planter = "serpentine", 
                       l = 1) {
   site <- l
@@ -26,7 +26,7 @@ plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
     NewBook <- x$fieldBook %>%
       dplyr::filter(LOCATION == locs)
     plots <- NewBook$PLOT
-    if (orderReps == "vertical_stack_panel") {
+    if (stacked == "vertical") {
       books0 <- list(NULL)
       COLUMN <- rep(1:n_TrtGen, times = n_Reps)
       books0[[1]] <- NewBook %>% 
@@ -53,7 +53,7 @@ plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
           books1[[k]] <- df
         }
       }
-    } else if (orderReps == "horizontal_stack_panel") {
+    } else if (stacked == "horizontal") {
       y <- numbers::primeFactors(n_TrtGen)
       if (length(y) >= 2) {
         Y <- factor_subsets(n_TrtGen, all_factors = TRUE)$comb_factors
@@ -93,13 +93,25 @@ plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
                         COLUMN = rep(1:n_Reps, each = n_TrtGen))
       }
     }
-    books_rcbd <- c(books3, books2, books1, books4, books5, books6, books0)
+    books_rcbd <- c(books3, books2, books4, books5, books1, books6, books0)
     newBooks <- books_rcbd[!sapply(books_rcbd,is.null)]
     newBooksLocs[[countLocs]] <- newBooks
     countLocs <- countLocs + 1
   }
-  opt <- optionLayout
+  opt <- layout
   newBooksSelected <- newBooksLocs[[site]]
+  opt_available <- 1:length(newBooksSelected)
+  if (all(opt_available != opt)) {
+    message(cat("\n",
+                " Option for layout is not available!", "\n", "\n",
+                "*********************************************", "\n",
+                "*********************************************", "\n", "\n",
+                "Layout options available for this design are:", "\n", "\n",
+                opt_available, "\n", "\n",
+                "*********************************************", "\n",
+                "*********************************************"))
+    return(NULL)
+  }
   df1 <- newBooksSelected[opt]
   df <- as.data.frame(df1)
   

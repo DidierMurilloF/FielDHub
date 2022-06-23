@@ -6,22 +6,22 @@
 \usage{
 plot_layout(
   x = NULL,
-  optionLayout = 1,
+  layout = 1,
   planter = "serpentine",
   l = 1,
-  orderReps = "vertical_stack_panel"
+  stacked = "vertical"
 )
 }
 \arguments{
 \item{x}{An FielDHub object.}
 
-\item{optionLayout}{Type of layout field.}
+\item{layout}{Type of layout field.}
 
 \item{planter}{option to order of planter}
 
 \item{l}{a especific location}
 
-\item{orderReps}{Order of reps in the field layout}
+\item{stacked}{Order of reps in the field layout}
 }
 \value{
 A list with four elements.
@@ -38,7 +38,7 @@ It generates field layout plots for experimental designs.
 # Example 1: Generates a field layout for an alpha lattice designs with 25 treatments and 4 reps.
 \dontrun{
 alpha <- alpha_lattice(t = 20, k = 4, r = 4, l = 1, seed = 101)
-layoutPlot_a <- plot_layout(x = alpha, optionLayout = 1, planter = "serpentine")
+layoutPlot_a <- plot_layout(x = alpha, layout = 1, planter = "serpentine")
 layoutPlot_a$plot_layout
 layoutPlot_a$df
 }

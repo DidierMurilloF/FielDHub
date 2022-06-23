@@ -282,13 +282,13 @@ mod_SPD_server <- function(id){
       req(spd_reactive()$fieldBook)
       obj_spd <- spd_reactive()
       allBooks_spd<- plot_layout(x = obj_spd, 
-                                 optionLayout = 1, 
-                                 orderReps = "vertical_stack_panel")$newBooks
+                                 layout = 1, 
+                                 stacked = "vertical")$newBooks
       nBooks_spd <- length(allBooks_spd)
       layoutOptions_spd <- 1:nBooks_spd
       sites <- as.numeric(input$l.spd)
-      orderReps_spd <- c("Vertical Stack Panel" = "vertical_stack_panel", 
-                         "Horizontal Stack Panel" = "horizontal_stack_panel")
+      stacked_spd <- c("Vertical Stack Panel" = "vertical", 
+                         "Horizontal Stack Panel" = "horizontal")
       wellPanel(
         column(2,
                radioButtons(ns("typlotspd"), "Type of Plot:",
@@ -298,8 +298,8 @@ mod_SPD_server <- function(id){
         ),
         fluidRow(
           column(3,
-                 selectInput(inputId = ns("orderRepsSPD"), label = "Reps layout:", 
-                             choices = orderReps_spd),
+                 selectInput(inputId = ns("stackedSPD"), label = "Reps layout:", 
+                             choices = stacked_spd),
           ),
           column(2, 
                  selectInput(inputId = ns("layoutO_spd"), 
@@ -315,11 +315,11 @@ mod_SPD_server <- function(id){
       )
     })
     
-    observeEvent(input$orderRepsSPD, {
-      req(input$orderRepsSPD)
+    observeEvent(input$stackedSPD, {
+      req(input$stackedSPD)
       req(input$l.spd)
       obj_spd <- spd_reactive()
-      allBooks <- plot_layout(x = obj_spd, optionLayout = 1, orderReps = input$orderRepsSPD)$newBooks
+      allBooks <- plot_layout(x = obj_spd, layout = 1, stacked = input$stackedSPD)$newBooks
       nBooks <- length(allBooks)
       NewlayoutOptions <- 1:nBooks
       updateSelectInput(session = session, inputId = 'layoutO_spd',
@@ -331,13 +331,13 @@ mod_SPD_server <- function(id){
     
     reactive_layoutSPD <- reactive({
       req(input$layoutO_spd)
-      req(input$orderRepsSPD)
+      req(input$stackedSPD)
       req(spd_reactive())
       obj_spd <- spd_reactive()
       opt_spd <- as.numeric(input$layoutO_spd)
       planting_spd <- input$planter_mov_spd
       locSelected_spd <- as.numeric(input$locLayout_spd)
-      try(plot_layout(x = obj_spd, optionLayout = opt_spd, planter = planting_spd, orderReps = input$orderRepsSPD,
+      try(plot_layout(x = obj_spd, layout = opt_spd, planter = planting_spd, stacked = input$stackedSPD,
                       l = locSelected_spd), silent = TRUE)
     })
 

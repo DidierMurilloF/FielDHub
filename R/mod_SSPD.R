@@ -309,12 +309,12 @@ mod_SSPD_server <- function(id){
     output$well_panel_layout_SSPD <- renderUI({
       req(sspd_reactive()$fieldBook)
       obj_sspd <- sspd_reactive()
-      allBooks_sspd<- plot_layout(x = obj_sspd, optionLayout = 1)$newBooks
+      allBooks_sspd<- plot_layout(x = obj_sspd, layout = 1)$newBooks
       nBooks_sspd <- length(allBooks_sspd)
       layoutOptions_sspd <- 1:nBooks_sspd
       df <- sspd_reactive()$fieldBook
-      orderReps_sspd <- c("Vertical Stack Panel" = "vertical_stack_panel", 
-                          "Horizontal Stack Panel" = "horizontal_stack_panel")
+      stacked_sspd <- c("Vertical Stack Panel" = "vertical", 
+                          "Horizontal Stack Panel" = "horizontal")
       sites <- 1:length(levels(as.factor(df$LOCATION)))
       wellPanel(
         column(2,
@@ -325,9 +325,9 @@ mod_SSPD_server <- function(id){
         ),
         fluidRow(
           column(3,
-                 selectInput(inputId = ns("orderRepSSPD"), 
+                 selectInput(inputId = ns("stackedSPD"), 
                              label = "Reps layout:", 
-                             choices = orderReps_sspd),
+                             choices = stacked_sspd),
           ),
           column(3, 
                  selectInput(inputId = ns("layoutO_sspd"), 
@@ -343,12 +343,12 @@ mod_SSPD_server <- function(id){
       )
     })
     
-    observeEvent(input$orderRepSSPD, {
-      req(input$orderRepSSPD)
+    observeEvent(input$stackedSPD, {
+      req(input$stackedSPD)
       obj_sspd <- sspd_reactive()
       allBooks <- try(plot_layout(x = obj_sspd, 
-                                  optionLayout = 1, 
-                                  orderReps = input$orderRepSSPD)$newBooks, 
+                                  layout = 1, 
+                                  stacked = input$stackedSPD)$newBooks, 
                       silent = TRUE)
       nBooks <- length(allBooks)
       NewlayoutOptions <- 1:nBooks
@@ -367,8 +367,8 @@ mod_SSPD_server <- function(id){
       planting_sspd <- input$planter_mov_sspd
       locSelected <- as.numeric(input$locLayout_sspd)
       try(plot_layout(x = obj_sspd, 
-                      optionLayout = opt_sspd, 
-                      orderReps = input$orderRepSSPD,
+                      layout = opt_sspd, 
+                      stacked = input$stackedSPD,
                       planter = planting_sspd, 
                       l = locSelected), 
           silent = TRUE)

@@ -5,7 +5,7 @@
 #' @return The return value, if any, from executing the utility.
 #'
 #' @noRd
-plot_CRD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1, 
+plot_CRD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, layout = 1, 
                      planter = "serpentine", l = 1) {
   
   site <- l
@@ -56,11 +56,21 @@ plot_CRD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, optionLayout = 1,
     newBooksLocs[[countLocs]] <- newBooks
     countLocs <- countLocs + 1
   }
-
-  # opt <- optionLayout
-  # df <- as.data.frame(newBooks[[opt]])
-  opt <- optionLayout
+  
+  opt <- layout
   newBooksSelected <- newBooksLocs[[site]]
+  opt_available <- 1:length(newBooksSelected)
+  if (all(opt_available != opt)) {
+    message(cat("\n",
+                " Option for layout is not available!", "\n", "\n",
+                "*********************************************", "\n",
+                "*********************************************", "\n", "\n",
+                "Layout options available for this design are:", "\n", "\n",
+                opt_available, "\n", "\n",
+                "*********************************************", "\n",
+                "*********************************************"))
+    return(NULL)
+  }
   df1 <- newBooksSelected[opt]
   df <- as.data.frame(df1)
   

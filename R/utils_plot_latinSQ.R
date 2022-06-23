@@ -5,8 +5,8 @@
 #' @return The return value, if any, from executing the utility.
 #'
 #' @noRd
-plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, optionLayout = 1, 
-                         orderReps = "horizontal_stack_panel", 
+plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, layout = 1, 
+                         stacked = "horizontal", 
                          planter = "serpentine", l = 1) {
   rsRep <- dims[1]
   csRep <- dims[2]
@@ -32,7 +32,7 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, optionLayout = 1,
       NewROWS2 <- rep(rep(1:rsRep, each = csRep), times = n_Reps)
     }
 
-    if (orderReps == "vertical_stack_panel") {
+    if (stacked == "vertical") {
       df1 <- NewBook %>% 
         dplyr::mutate(NewROW = NewROWS1,
                       NewCOLUMNS = NewCOLUMNS1)
@@ -43,7 +43,7 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, optionLayout = 1,
                                     cols = nCols, units = csRep)
       df1$PLOT <- newPlots
       books0[[1]] <- df1
-    } else if (orderReps == "horizontal_stack_panel") {
+    } else if (stacked == "horizontal") {
       w <- 1:(csRep*n_Reps)
       u <- seq(1, length(w), by = csRep)
       v <- seq(csRep, length(w), by = csRep)
@@ -58,7 +58,7 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, optionLayout = 1,
       nCols <- max(df2$NewCOLUMNS)
       newPlots <- planter_transform(plots = plots, planter = planter, reps = n_Reps, 
                                     cols = nCols, units = NULL, 
-                                    mode = "horizontal_stack_panel")
+                                    mode = "horizontal")
       df2$PLOT <- newPlots
       books1[[1]] <- df2
     }
@@ -69,8 +69,20 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, optionLayout = 1,
     countLocs <- countLocs + 1
   }
   
-  opt <- optionLayout
+  opt <- layout
   newBooksSelected <- newBooksLocs[[site]]
+  opt_available <- 1:length(newBooksSelected)
+  if (all(opt_available != opt)) {
+    message(cat("\n",
+                " Option for layout is not available!", "\n", "\n",
+                "*********************************************", "\n",
+                "*********************************************", "\n", "\n",
+                "Layout options available for this design are:", "\n", "\n",
+                opt_available, "\n", "\n",
+                "*********************************************", "\n",
+                "*********************************************"))
+    return(NULL)
+  }
   df1 <- newBooksSelected[opt]
   df <- as.data.frame(df1)
   

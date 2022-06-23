@@ -310,13 +310,13 @@ mod_Rectangular_Lattice_server <- function(id) {
       locs_rt <- length(levels(as.factor(df$LOCATION)))
       repsRect <- length(levels(as.factor(df$REP)))
       if ((repsRect >= 4 & repsRect %% 2 == 0) | (repsRect >= 4 & sqrt(repsRect) %% 1 == 0)) {
-        orderReps <- c("Vertical Stack Panel" = "vertical_stack_panel", "Horizontal Stack Panel" = "horizontal_stack_panel",  
+        stacked <- c("Vertical Stack Panel" = "vertical", "Horizontal Stack Panel" = "horizontal",  
                        "Grid Panel" = "grid_panel")
       } else {
-        orderReps <- c("Vertical Stack Panel" = "vertical_stack_panel", "Horizontal Stack Panel" = "horizontal_stack_panel")
+        stacked <- c("Vertical Stack Panel" = "vertical", "Horizontal Stack Panel" = "horizontal")
       }
       obj_rt <- RECTANGULAR_reactive()
-      allBooks_rt <- plot_layout(x = obj_rt, optionLayout = 1, orderReps = "vertical_stack_panel")$newBooks
+      allBooks_rt <- plot_layout(x = obj_rt, layout = 1, stacked = "vertical")$newBooks
       nBooks_rt <- length(allBooks_rt)
       layoutOptions_rt <- 1:nBooks_rt
       wellPanel(
@@ -328,8 +328,8 @@ mod_Rectangular_Lattice_server <- function(id) {
         ),
         fluidRow(
           column(3,
-                 selectInput(inputId = ns("orderRepsRT"), label = "Reps layout:", 
-                             choices = orderReps)
+                 selectInput(inputId = ns("stackedRT"), label = "Reps layout:", 
+                             choices = stacked)
           ),
           column(2,
                  selectInput(inputId = ns("layoutO_rt"), label = "Layout option:", choices = layoutOptions_rt, selected = 1)
@@ -341,11 +341,11 @@ mod_Rectangular_Lattice_server <- function(id) {
       )
     })
     
-    observeEvent(input$orderRepsRT, {
-      req(input$orderRepsRT)
+    observeEvent(input$stackedRT, {
+      req(input$stackedRT)
       req(input$l.rectangular)
       obj_rt <- RECTANGULAR_reactive()
-      allBooks <- plot_layout(x = obj_rt, optionLayout = 1, orderReps = input$orderRepsRT)$newBooks
+      allBooks <- plot_layout(x = obj_rt, layout = 1, stacked = input$stackedRT)$newBooks
       nBooks <- length(allBooks)
       NewlayoutOptions <- 1:nBooks
       updateSelectInput(session = session, inputId = 'layoutO_rt',
@@ -356,7 +356,7 @@ mod_Rectangular_Lattice_server <- function(id) {
     })
     
     reactive_layoutRect <- reactive({
-      req(input$orderRepsRT)
+      req(input$stackedRT)
       req(input$layoutO_rt)
       req(input$locLayout_rt)
       req(input$planter_mov_rect)
@@ -364,8 +364,8 @@ mod_Rectangular_Lattice_server <- function(id) {
       obj_rt <- RECTANGULAR_reactive()
       opt_rt <- as.numeric(input$layoutO_rt)
       locSelected <- as.numeric(input$locLayout_rt)
-      try(plot_layout(x = obj_rt, optionLayout = opt_rt, planter = input$planter_mov_rect, l = locSelected, 
-                      orderReps = input$orderRepsRT), silent = TRUE)
+      try(plot_layout(x = obj_rt, layout = opt_rt, planter = input$planter_mov_rect, l = locSelected, 
+                      stacked = input$stackedRT), silent = TRUE)
     })
     
     

@@ -564,6 +564,13 @@ print.summary.FielDHub <- function(x, ...) {
 #' @param x an object inheriting from class
 #'
 #' @param ... further arguments passed to \code{\link{head}}.
+#' \itemize{
+#'   \item \code{layout} a integer. Options available depend on the 
+#'   type of design and its characteristics
+#'   \item \code{l} a integer to specify the location to plot.
+#'   \item \code{planter} \code{serpentine} or \code{cartesian}.
+#'   \item \code{stacked} \code{vertical} or \code{horizontal} stacked layout.
+#' } 
 #' @author Didier Murillo [aut]
 #' @examples
 #' \dontrun{
@@ -575,5 +582,21 @@ print.summary.FielDHub <- function(x, ...) {
 #'
 #' @export
 plot.FielDHub <- function(x, ...) {
-  plot_layout(x = x, ...)$out_layout
+  if (!missing(x)) {
+    if (is.null(x)) stop("x must be a FielDHub design!")
+    if (class(x) != "FielDHub") {
+      stop("x is not a FielDHub class")
+    }
+    p <- plot_layout(x = x, ...)
+    if (is.null(p)) {
+      img <- ggplot2::ggplot() + ggplot2::theme_minimal()
+      return(img)
+    } else {
+      out <- list(
+        field_book = p$allSitesFieldbook,
+        layout = p$out_layout
+      )
+      return(out)
+    }
+  } else stop("x is missing!")
 }

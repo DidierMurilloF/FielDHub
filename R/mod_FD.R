@@ -274,12 +274,12 @@ mod_FD_server <- function(id) {
     output$well_panel_layout_FD <- renderUI({
       req(fd_reactive()$fieldBook)
       obj_fd <- fd_reactive()
-      allBooks_fd <- plot_layout(x = obj_fd, optionLayout = 1, 
-                                 orderReps = "vertical_stack_panel")$newBooks
+      allBooks_fd <- plot_layout(x = obj_fd, layout = 1, 
+                                 stacked = "vertical")$newBooks
       nBooks_fd <- length(allBooks_fd)
       layoutOptions_fd <- 1:nBooks_fd
-      orderReps_fd <- c("Vertical Stack Panel" = "vertical_stack_panel", 
-                        "Horizontal Stack Panel" = "horizontal_stack_panel")
+      stacked_fd <- c("Vertical Stack Panel" = "vertical", 
+                        "Horizontal Stack Panel" = "horizontal")
       sites <- as.numeric(input$l.fd)
       wellPanel(
         column(2,
@@ -290,9 +290,9 @@ mod_FD_server <- function(id) {
         ),
         fluidRow(
           column(3,
-                 selectInput(inputId = ns("orderRepsFD"), 
+                 selectInput(inputId = ns("stackedFD"), 
                              label = "Reps layout:", 
-                             choices = orderReps_fd),
+                             choices = stacked_fd),
           ),
           column(3, #align="center",
                  selectInput(inputId = ns("layoutO_fd"), 
@@ -308,12 +308,12 @@ mod_FD_server <- function(id) {
       )
     })
     
-    observeEvent(input$orderRepsFD, {
-      req(input$orderRepsFD)
+    observeEvent(input$stackedFD, {
+      req(input$stackedFD)
       req(input$l.fd)
       obj_fd <- fd_reactive()
-      allBooks <- plot_layout(x = obj_fd, optionLayout = 1, 
-                              orderReps = input$orderRepsFD)$newBooks
+      allBooks <- plot_layout(x = obj_fd, layout = 1, 
+                              stacked = input$stackedFD)$newBooks
       nBooks <- length(allBooks)
       NewlayoutOptions <- 1:nBooks
       updateSelectInput(session = session, inputId = 'layoutO_fd',
@@ -330,8 +330,8 @@ mod_FD_server <- function(id) {
       opt_fd <- as.numeric(input$layoutO_fd)
       planting_fd <- input$planter_mov_fd
       locSelected <- as.numeric(input$locLayout_fd)
-      try(plot_layout(x = obj_fd, optionLayout = opt_fd, 
-                      orderReps = input$orderRepsFD,
+      try(plot_layout(x = obj_fd, layout = opt_fd, 
+                      stacked = input$stackedFD,
                       planter = planting_fd , 
                       l = locSelected), silent = TRUE)
     })
