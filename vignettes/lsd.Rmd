@@ -1,0 +1,51 @@
+---
+title: "Latin Square Design"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{lsd}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# App
+
+## Inputs
+First, select "No" in the **Import entries' list** box, as we are entering our own information about the experiment. 
+Then, we input the number of treatments in the **Input # of Treatments** box. Only up to 10 treatments are allowed in the Latin square design. This value sets the size of the Latin square. The number of replications of the squares is set with the **Input # of Full Reps** box. 
+
+As with all the designs, we can set a seed number in the box labeled **Seed Number**. In this example, we will set it to 123. 
+Once we have entered the information for our experiment on the left side panel, click the **Run!** button to run the design. 
+
+## Outputs
+After you run a Latin square design in FielDHub, there are several ways to display the information contained in the field book. 
+
+### Field Layout
+When you first click the run button on a Latin square design, FielDHub displays the Field Layout tab, which shows the entries and their arrangement in the field. In the box below the display, you can change the layout of the field. 
+You can also display a heatmap over the field by changing **Type of Plot** to **Heatmap**. To view a heatmap, you must first simulate an experiment over the described field with the **Simulate!** button. A pop-up window will appear where you can enter what variable you want to simulate along with minimum and maximum values. 
+
+### Field Book
+The **Field Book** displays all the information on the experimental design in a table format. It contains the specific plot number and the row and column address of each entry, as well as the corresponding treatment on that plot. This table is searchable, and we can filter the data in relevant columns. If we have simulated data for a heatmap, an additional column for that variable appears in the Field Book. 
+
+# Function : `latin_square()`
+
+You can run the same design with a function in the FielDHub package, `latin_square()`. We can enter the information describing the above design like this:
+```{r, echo = FALSE, warning=FALSE, comment='', include=FALSE}
+library(knitr)
+library(FielDHub)
+lsd <- latin_square(t = 7,reps = 6,seed = 123)
+
+```
+```{r, results='hide'}
+lsd <- latin_square(t = 7,      # number of treatments
+                    reps = 6,   # number of replications
+                    seed = 123) # seed number
+```
+```{r, comment='', echo=FALSE}
+print(lsd)
+```
+This returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are accessible by the `$` operator, i.e. `lsd$layoutRandom` or `lsd$fieldBook`. 
+
+`lsd$fieldBook` is a list containing information about every plot in the field, with information about the location of the plot and the treatment in each plot. As seen in the output below, the field book has columns for `ID`, `LOCATION`, `PLOT`, `SQUARE`, `ROW`, `COLUMN`, and `TREATMENT`.
+```{r, comment='', echo=FALSE}
+print(head(lsd$fieldBook))
+```

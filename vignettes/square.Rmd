@@ -1,5 +1,5 @@
 ---
-title: "square"
+title: "Square Lattice Design"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{square}
@@ -10,64 +10,49 @@ vignette: >
 # App
 
 ## Inputs
-First, select "No" in the **Import entries' list** box, as we are entering our own information about the experiment. First, we can enter the number of entries per replicate group in the **# of Entries per Rep Group** as a comma separated list. In the same way we enter the number of replications per group in the **# of Rep per Group**. In our example we will have 3 groups with 100, 200, and 300 entries and 2, 2, and 1 replications respectively. So, we enter 100,200,300 in the Entries per Rep Group box and 2,2,1 in the Rep per Group box. 
+First, select "No" in the **Import entries' list** box, as we are entering our own information about the experiment. 
+Then, we input the number of treatments in the **Input # of Treatments** box. The number of treatments must be a square in the square lattice design. The number of replications of these treatments is selected with the **Input # of Full Reps**. The next box, **Input # of Plots per IBlock**, sets the number of plots in each incomplete block.
 Like many of the other designs, you can run the experiment over multiple locations. We will run this experiment over a single location, so make sure **Input # of Locations** is set to 1.
 
 As with all the designs, we can set a seed number in the box labeled **Seed Number**. In this example, we will set it to 123. 
 Once we have entered the information for our experiment on the left side panel, click the **Run!** button to run the design. 
 
-You will then be prompted to select the dimensions of the field from the list of options in the drop down in the middle of the screen with the box labeled **Select dimensions of field**. In our case, we will select 45 x 20. Click the **Randomize!** button to randomize the experiment with the set field dimensions and to see the output plots. If you change the dimensions again, you must re-randomize.
-
-If you change any of the inputs on the left side panel after running an experiment initially, you have to click the Run and Randomize buttons again, to re-run with the new inputs.
-
 ## Outputs
-After you run a single diagonal arrangement in FielDHub and set the dimensions of the field, there are several ways to display the information in the field book. The first tab, **Get Random**, shows the option to change the dimensions of the field and re-randomize, as well as a reference guide for experiment design. 
+After you run a square lattice design in FielDHub, there are several ways to display the information contained in the field book. 
 
-### Data Input
-On the second tab, **Data Input**, you can see all the entries in the randomization in a list, as well as a table of the checks with the number of times they appear in the field. In the list of entries, the reps for each check is included as well.
-
-
-### Randomized Field
-The **Randomized Field** tab displays a graphical representation of the randomization of the entries in a field of the specified dimensions. The checks are the green colored cells, with the  The display includes numbered labels for the rows and columns. You can copy the field as a table or save it directly as an Excel file with the _Copy_ and _Excel_ buttons at the top. 
-
-### Plot Number Field
-On the **Plot Number Field** tab, there is a table display of the field with the plots numbered according to the Plot Order Layout specified, either _serpentine_ or _cartesian_. You can see the corresponding entries for each plot number in the field book. Like the Randomized Field tab, you can copy the table or save it as an Excel file with the _Copy_ and _Excel_ buttons. 
+### Field Layout
+When you first click the run button on a square lattice design, FielDHub displays the Field Layout tab, which shows the entries and their arrangement in the field. In the box below the display, you can change the layout of the field or change the location displayed. 
+You can also display a heatmap over the field by changing **Type of Plot** to **Heatmap**. To view a heatmap, you must first simulate an experiment over the described field with the **Simulate!** button. A pop-up window will appear where you can enter what variable you want to simulate along with minimum and maximum values. 
 
 ### Field Book
-The **Field Book** displays all the information on the experimental design in a table format. It contains the specific plot number and the row and column address of each entry, as well as the corresponding treatment on that plot. This table is searchable, and we can filter the data in relevant columns. 
+The **Field Book** displays all the information on the experimental design in a table format. It contains the specific plot number and the row and column address of each entry, as well as the corresponding treatment on that plot. This table is searchable, and we can filter the data in relevant columns. If we have simulated data for a heatmap, an additional column for that variable appears in the Field Book. 
 
-# Function : `partially_replicated()`
+# Function : `square_lattice()`
 
-You can run the same design with a function in the FielDHub package, `partially_replicated()`. We can enter the information describing the above design like this:
+You can run the same design with a function in the FielDHub package, `square_lattice()`. We can enter the information describing the above design like this:
 ```{r, echo = FALSE, warning=FALSE, comment='', include=FALSE}
 library(knitr)
 library(FielDHub)
-prep <- partially_replicated(nrows = 45,
-                             ncols = 20,
-                             repGens = c(100,200,300),
-                             repUnits = c(2,2,1),
-                             l = 1, 
-                             seed = 123)
+square <- square_lattice(t = 64,
+                         k = 8,
+                         r = 3,
+                         l = 1,
+                         seed = 123)
 
 ```
 ```{r, results='hide'}
-prep <- partially_replicated(nrows = 45,
-                             ncols = 20,
-                             repGens = c(100,200,300),
-                             repUnits = c(2,2,1),
-                             l = 1, 
-                             seed = 123)
+square <- square_lattice(t = 64,     #number of treatments, must be square number
+                         k = 8,      #number of plots per incomplete block
+                         r = 3,      #number of replicates
+                         l = 1,      #number of locations
+                         seed = 123) #seed number
 ```
 ```{r, comment='', echo=FALSE}
-print(prep)
+print(square)
 ```
-This returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are accessible by the `$` operator, i.e. `expt$layoutRandom` or `expt$fieldBook`. 
+This returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are accessible by the `$` operator, i.e. `square$layoutRandom` or `square$fieldBook`. 
 
-`expt$fieldBook` is a list containing information about every plot in the field, with information about the location of the plot and the treatment in each plot. As seen in the output below, the field book has columns for `ID`, `EXPT`, `LOCATION`, `YEAR`, `PLOT`, `ROW`, `COLUMN`, `CHECKS`, `ENTRY`, and `TREATMENT`.
+`square$fieldBook` is a list containing information about every plot in the field, with information about the location of the plot and the treatment in each plot. As seen in the output below, the field book has columns for `ID`, `LOCATION`, `PLOT`, `REP`, `IBLOCK`, `UNIT`, `ENTRY`, and `TREATMENT`.
 ```{r, comment='', echo=FALSE}
-print(prep$fieldBook)
-```
-
-```{r setup}
-library(FielDHub)
+print(head(square$fieldBook))
 ```

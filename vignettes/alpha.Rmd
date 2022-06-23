@@ -1,0 +1,58 @@
+---
+title: "alpha"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{alpha}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# App
+
+## Inputs
+First, select "No" in the **Import entries' list** box, as we are entering our own information about the experiment. 
+Then, we input the number of treatments in the **Input # of Treatments** box. The number of treatments must be a composite number in the alpha lattice design. The number of replications of these treatments is selected with the **Input # of Full Reps**. The next box, **Input # of Plots per IBlock**, sets the number of plots in each incomplete block.
+Like many of the other designs, you can run the experiment over multiple locations. We will run this experiment over a single location, so make sure **Input # of Locations** is set to 1.
+
+As with all the designs, we can set a seed number in the box labeled **Seed Number**. In this example, we will set it to 123. 
+Once we have entered the information for our experiment on the left side panel, click the **Run!** button to run the design. 
+
+## Outputs
+After you run an alpha lattice design in FielDHub, there are several ways to display the information contained in the field book. 
+
+### Field Layout
+When you first click the run button on an alpha lattice design, FielDHub displays the Field Layout tab, which shows the entries and their arrangement in the field. In the box below the display, you can change the layout of the field or change the location displayed. 
+You can also display a heatmap over the field by changing **Type of Plot** to **Heatmap**. To view a heatmap, you must first simulate an experiment over the described field with the **Simulate!** button. A pop-up window will appear where you can enter what variable you want to simulate along with minimum and maximum values. 
+
+### Field Book
+The **Field Book** displays all the information on the experimental design in a table format. It contains the specific plot number and the row and column address of each entry, as well as the corresponding treatment on that plot. This table is searchable, and we can filter the data in relevant columns. If we have simulated data for a heatmap, an additional column for that variable appears in the Field Book. 
+
+# Function : `alpha_lattice()`
+
+You can run the same design with a function in the FielDHub package, `alpha_lattice()`. We can enter the information describing the above design like this:
+```{r, echo = FALSE, warning=FALSE, comment='', include=FALSE}
+library(knitr)
+library(FielDHub)
+alpha <- alpha_lattice(t = 55,
+                       k = 5,
+                       r = 3,
+                       l = 1,
+                       seed = 123)
+
+```
+```{r, results='hide'}
+alpha <- alpha_lattice(t = 55,     # number of treatments
+                       k = 5,      # number of plots per incomplete block
+                       r = 3,      # number of replicates
+                       l = 1,      # number of locations
+                       seed = 123) # seed number
+```
+```{r, comment='', echo=FALSE}
+print(alpha)
+```
+This returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are accessible by the `$` operator, i.e. `alpha$layoutRandom` or `alpha$fieldBook`. 
+
+`alpha$fieldBook` is a list containing information about every plot in the field, with information about the location of the plot and the treatment in each plot. As seen in the output below, the field book has columns for `ID`, `LOCATION`, `PLOT`, `REP`, `IBLOCK`, `UNIT`, `ENTRY`, and `TREATMENT`.
+```{r, comment='', echo=FALSE}
+print(head(alpha$fieldBook))
+```

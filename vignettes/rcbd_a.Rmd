@@ -21,7 +21,7 @@ You will then be prompted to select the dimensions of the field from the list of
 If you change any of the inputs on the left side panel after running an experiment initially, you have to click the Run and Randomize buttons again, to re-run with the new inputs.
 
 ## Outputs
-After you run a single diagonal arrangement in FielDHub and set the dimensions of the field, there are several ways to display the information in the field book. The first tab, **Get Random**, shows the option to change the dimensions of the field and re-randomize, as well as a reference guide for experiment design. 
+After you run a single diagonal arrangement in FielDHub and set the dimensions of the field, there are several ways to display the information contained in the field book. The first tab, **Get Random**, shows the option to change the dimensions of the field and re-randomize, as well as a reference guide for experiment design. 
 
 ### Input Data
 On the second tab, **Input Data**, you can see all the entries in the randomization in a list, as well as a table of the checks with the number of times they appear in the field. In the list of entries, the reps for each check is included as well.
@@ -57,19 +57,19 @@ rcbd_a <- RCBD_augmented(lines = 35,
                          checks = 3,
                          b = 5, 
                          repsExpt = 3, 
-                         nrows = 5, 
-                         ncols = 10,
+                         nrows = 5, #number of rows in the field
+                         ncols = 10, #number of columns in the field
                          seed = 123,
                          random = TRUE)
 ```
 ```{r, comment='',echo=FALSE}
 print(rcbd_a)
 ```
-This returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are accessible by the `$` operator, i.e. `expt$layoutRandom` or `expt$fieldBook`. 
+This returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are accessible by the `$` operator, i.e. `rcbd_a$layoutRandom` or `rcbd_a$fieldBook`. 
 
-`expt$fieldBook` is a list containing information about every plot in the field, with information about the location of the plot and the treatment in each plot. As seen in the output below, the field book has columns for `ID`, `EXPT`, `LOCATION`, `YEAR`, `PLOT`, `ROW`, `COLUMN`, `CHECKS`, `ENTRY`, and `TREATMENT`.
+`rcbd_a$fieldBook` is a list containing information about every plot in the field, with information about the location of the plot and the treatment in each plot. As seen in the output below, the field book has columns for `ID`, `EXPT`, `LOCATION`, `YEAR`, `PLOT`, `ROW`, `COLUMN`, `CHECKS`, `ENTRY`, and `TREATMENT`.
 ```{r, comment='', echo=FALSE}
-print(rcbd_a$fieldBook)
+print(head(rcbd_a$fieldBook))
 ```
 
 ```{r, include = FALSE}

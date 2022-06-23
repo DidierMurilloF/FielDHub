@@ -15,13 +15,13 @@ mod_Diagonal_ui <- function(id) {
     sidebarLayout(
       sidebarPanel(
         width = 4,
-        radioButtons(inputId = ns("owndataDIAGONALS"), 
-                     label = "Import entries' list?", 
+        radioButtons(inputId = ns("owndataDIAGONALS"),
+                     label = "Import entries' list?",
                      choices = c("Yes", "No"), 
                      selected = "No",
-                     inline = TRUE, 
-                     width = NULL, 
-                     choiceNames = NULL, 
+                     inline = TRUE,
+                     width = NULL,
+                     choiceNames = NULL,
                      choiceValues = NULL),
         conditionalPanel(
           condition = "input.owndataDIAGONALS == 'Yes'", 

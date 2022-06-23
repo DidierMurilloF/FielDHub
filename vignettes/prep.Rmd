@@ -10,7 +10,7 @@ vignette: >
 # App
 
 ## Inputs
-First, select "No" in the **Import entries' list** box, as we are entering our own information about the experiment. First, we can enter the number of entries per replicate group in the **# of Entries per Rep Group** as a comma separated list. In the same way we enter the number of replications per group in the **# of Rep per Group**. In our example we will have 3 groups with 100, 200, and 300 entries and 2, 2, and 1 replications respectively. So, we enter 100,200,300 in the Entries per Rep Group box and 2,2,1 in the Rep per Group box. 
+First, select "No" in the **Import entries' list** box, as we are entering our own information about the experiment. Then, we can enter the number of entries per replicate group in the **# of Entries per Rep Group** as a comma separated list. In the same way we enter the number of replications per group in the **# of Rep per Group**. In our example we will have 3 groups with 100, 200, and 300 entries and 2, 2, and 1 replications respectively. So, we enter 100,200,300 in the Entries per Rep Group box and 2,2,1 in the Rep per Group box. 
 Like many of the other designs, you can run the experiment over multiple locations. We will run this experiment over a single location, so make sure **Input # of Locations** is set to 1.
 
 As with all the designs, we can set a seed number in the box labeled **Seed Number**. In this example, we will set it to 123. 
@@ -21,7 +21,7 @@ You will then be prompted to select the dimensions of the field from the list of
 If you change any of the inputs on the left side panel after running an experiment initially, you have to click the Run and Randomize buttons again, to re-run with the new inputs.
 
 ## Outputs
-After you run a single diagonal arrangement in FielDHub and set the dimensions of the field, there are several ways to display the information in the field book. The first tab, **Get Random**, shows the option to change the dimensions of the field and re-randomize, as well as a reference guide for experiment design. 
+After you run a single diagonal arrangement in FielDHub and set the dimensions of the field, there are several ways to display the information contained in the field book. The first tab, **Get Random**, shows the option to change the dimensions of the field and re-randomize, as well as a reference guide for experiment design. 
 
 ### Data Input
 On the second tab, **Data Input**, you can see all the entries in the randomization in a list, as well as a table of the checks with the number of times they appear in the field. In the list of entries, the reps for each check is included as well.
@@ -51,8 +51,8 @@ prep <- partially_replicated(nrows = 45,
 
 ```
 ```{r, results='hide'}
-prep <- partially_replicated(nrows = 45,
-                             ncols = 20,
+prep <- partially_replicated(nrows = 45, #number of rows in the field
+                             ncols = 20, #number of columns in the field
                              repGens = c(100,200,300),
                              repUnits = c(2,2,1),
                              l = 1, 
@@ -61,11 +61,11 @@ prep <- partially_replicated(nrows = 45,
 ```{r, comment='', echo=FALSE}
 print(prep)
 ```
-This returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are accessible by the `$` operator, i.e. `expt$layoutRandom` or `expt$fieldBook`. 
+This returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are accessible by the `$` operator, i.e. `prep$layoutRandom` or `prep$fieldBook`. 
 
-`expt$fieldBook` is a list containing information about every plot in the field, with information about the location of the plot and the treatment in each plot. As seen in the output below, the field book has columns for `ID`, `EXPT`, `LOCATION`, `YEAR`, `PLOT`, `ROW`, `COLUMN`, `CHECKS`, `ENTRY`, and `TREATMENT`.
+`prep$fieldBook` is a list containing information about every plot in the field, with information about the location of the plot and the treatment in each plot. As seen in the output below, the field book has columns for `ID`, `EXPT`, `LOCATION`, `YEAR`, `PLOT`, `ROW`, `COLUMN`, `CHECKS`, `ENTRY`, and `TREATMENT`.
 ```{r, comment='', echo=FALSE}
-print(prep$fieldBook)
+print(head(prep$fieldBook))
 ```
 
 ```{r, include = FALSE}
