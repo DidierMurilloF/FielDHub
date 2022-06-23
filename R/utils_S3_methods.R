@@ -589,7 +589,8 @@ plot.FielDHub <- function(x, ...) {
     }
     p <- plot_layout(x = x, ...)
     if (is.null(p)) {
-      return(ggplot2::ggplot())
+      img <- ggplot2::ggplot() + ggplot2::theme_minimal()
+      return(img)
     } else {
       out <- list(
         field_book = p$allSitesFieldbook,

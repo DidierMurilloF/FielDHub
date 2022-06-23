@@ -44,6 +44,32 @@ plot_layout <- function(x = NULL,
                         l = 1, 
                         stacked = "vertical") {
   if (class(x) != "FielDHub") stop("x is not a FielDHub class object")
+  if (missing(layout)) layout <- 1
+  if (missing(planter)) planter <- "serpentine"
+  if (missing(l)) l <- 1
+  if (missing(stacked)) stacked <- "vertical"
+  locations <- factor(x$fieldBook$LOCATION, levels = unique(x$fieldBook$LOCATION))
+  loc_levels <- levels(locations)
+  locs_available <- length(loc_levels)
+  if (!missing(l)) {
+    if (l < 1 || l %% 1 != 0) {
+      stop("l must be a positive integer!")
+    } 
+  } else stop(" l is missing!")
+  if (locs_available > 1) {
+    message <- "locations!"
+  } else {
+    message <- "location!"
+  }
+  if (l > locs_available) {
+    message(cat("\n", " Option for location is not available!", "\n", "\n",
+                "***************************************************", "\n",
+                "***************************************************", "\n", "\n",
+                "The randomization was done only with:", locs_available, message, "\n", "\n",
+                "***************************************************", "\n",
+                "***************************************************"))
+    return(NULL)
+  }
   if (x$infoDesign$id_design %in% c(10, 11, 12, 8, 5, 6)) {
     if (x$infoDesign$id_design %in% c(10, 11, 12, 8)) {
       n_TrtGen <- dplyr::n_distinct(x$fieldBook$ENTRY)

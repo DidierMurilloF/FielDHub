@@ -11,7 +11,7 @@ diagonal_single <- diagonal_arrangement(nrows = 20,
                                         plotNumber = 1,
                                         planter = "serpentine", 
                                         seed = 16)
-plot(diagonal_single)
+plot(diagonal_single, l = 1)
 
 # Multiple Diagonal Arrangent ---------------------------------------------
 
@@ -49,6 +49,7 @@ augmented <- RCBD_augmented(lines = 121,
 plot(augmented, l = 1)
 plot(augmented, l = 2)
 plot(augmented, l = 3)
+plot(augmented, l = 4)
 
 augmented1 <- RCBD_augmented(lines = 122, 
                              checks = 5, 
@@ -59,7 +60,7 @@ augmented1 <- RCBD_augmented(lines = 122,
                              random = TRUE, 
                              nrows = 10, 
                              ncols = 15)
-plot(augmented1)
+plot(augmented1, l = 1)
 
 augmented2 <- RCBD_augmented(lines = 270, 
                              checks = 6, 
@@ -121,7 +122,6 @@ plot(square, layout = 2, l = 2)
 plot(square, layout = 2, l = 2, stacked = "horizontal")
 
 
-
 # CRD ---------------------------------------------------------------------
 
 crd <- CRD(t = 18, reps = 5, plotNumber = 101, seed = 123)
@@ -136,7 +136,7 @@ rcbd <- RCBD(t = 32,
              plotNumber = 101, 
              continuous = TRUE,
              seed = 4587)
-plot(rcbd)
+plot(rcbd, l = 1)
 plot(rcbd, layout = 2)
 plot(rcbd, layout = 3)
 plot(rcbd, layout = 4)
@@ -215,7 +215,7 @@ plot(ibd, layout = 3)
 # Resolvible Row-Column Design --------------------------------------------
 
 row_col <- row_column(t = 36, 
-                      nrows = 6,
+                      nrows = 4,
                       r = 3, 
                       l = 1, 
                       plotNumber = 101, 

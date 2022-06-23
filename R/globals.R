@@ -13,6 +13,6 @@ utils::globalVariables(c("ENTRY",
                          "WHOLE_PLOT",
                          "text", 
                          "BLOCK", 
-                         "CHECKS"))
+                         "CHECKS", "EXPT"))
 
 
