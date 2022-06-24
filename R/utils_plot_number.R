@@ -1,3 +1,4 @@
+#' @noRd
 plot_number <- function(movement_planter = "serpentine", n_blocks = NULL, n_rows = NULL, n_cols = NULL, 
                         plot_n_start = NULL, datos = NULL, expe_name = NULL, ByRow = FALSE,
                         my_row_sets = NULL, ByCol = TRUE, my_col_sets = NULL ) {
@@ -364,5 +365,97 @@ plot_number <- function(movement_planter = "serpentine", n_blocks = NULL, n_rows
   my_split_plot_nub <- apply(my_split_plot_nub, 2 ,as.numeric)
   
   return(list(w_map_letters1 = my_split_plot_nub, l = plot_num))
-  
 }
+
+
+#' @noRd
+plot_number_by_col <- function(planter = "serpentine", 
+                               plot_number_start = NULL, 
+                               layout_names = NULL, 
+                               fillers) {
+  plot_number <- plot_number_start
+  names_plot <- layout_names
+  Fillers <- FALSE
+  if (fillers > 0) Fillers <- TRUE
+  plots <- prod(dim(names_plot))
+  expts <- as.vector(unlist(names_plot))
+  if (Fillers) {
+    expts <- expts[!expts %in% "Filler"]
+  }
+  dim_each_block <- as.vector(table(expts))
+  b <- length(dim_each_block)
+  expts_ft <- factor(expts, levels = unique(expts))
+  expt_levels <- levels(expts_ft)
+  expt_levels
+  if (length(plot_number) != b) {
+    serie_plot_numbers <- 1:(plots - fillers)
+    plot_number_blocks <- split_vectors(x = serie_plot_numbers, 
+                                        len_cuts = dim_each_block)
+  } else {
+    plot_number_blocks <- vector(mode = "list", length = b)
+    for (i in 1:b) {
+      w <- 0
+      if (i == b) w <- fillers
+      serie<- plot_number[i]:(plot_number[i] + dim_each_block[i] - 1 - w)
+      if (length(serie) == dim_each_block[i]) {
+        plot_number_blocks[[i]] <- serie
+      } else stop("problem in length of the current serie")
+    }
+  }
+  plot_number_layout <- names_plot
+  if(planter == "cartesian") {
+    if (nrow(plot_number_layout) %% 2 != 0) {
+      for (blocks in 1:b) {
+        v <- 1
+        for (i in nrow(plot_number_layout):1) {
+          for (j in 1:ncol(plot_number_layout)) {
+            if (plot_number_layout[i,j] == expt_levels[blocks]) {
+              plot_number_layout[i,j] <- plot_number_blocks[[blocks]][v]
+              v <- v + 1
+            }
+          }
+        }
+      }
+    }
+  } else if (planter == "serpentine") {
+    for (blocks in 1:b) {
+      v <- 1
+      if (nrow(plot_number_layout) %% 2 == 0) {
+        for(i in nrow(plot_number_layout):1) {
+          if (i %% 2 == 0) {
+            A <- 1:ncol(plot_number_layout)
+          } else A <- ncol(plot_number_layout):1
+          for (j in A) {
+            if (plot_number_layout[i,j] == expt_levels[blocks]) {
+              plot_number_layout[i,j] <- plot_number_blocks[[blocks]][v]
+              v <- v + 1
+            }
+          }
+        }
+      } else {
+        for (i in nrow(plot_number_layout):1){
+          if (i %% 2 == 0) {
+            A <- ncol(plot_number_layout):1
+          } else A <- 1:ncol(plot_number_layout)
+          for (j in A) {
+            if (plot_number_layout[i,j] == expt_levels[blocks]) {
+              plot_number_layout[i,j] <- plot_number_blocks[[blocks]][v]
+              v <- v + 1
+            }
+          }
+        }
+      }
+    }
+  }
+  if (Fillers) {
+    plot_number_layout[plot_number_layout == "Filler"] <- 0
+  }
+  plot_number_layout <- apply( plot_number_layout, c(1,2) , as.numeric)
+  return(list(
+    w_map_letters1 = plot_number_layout, 
+    target_num1 = plot_number_blocks
+    )
+  )
+}
+
+

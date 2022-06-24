@@ -60,7 +60,7 @@ plot_number_fillers_by_col <- function(movement_planter = "serpentine",
           }
         }
       } else {
-        for (i in nrow(w_map_letters1):1){
+        for (i in nrow(w_map_letters1):1) {
           if (i %% 2 == 0){
             A <- ncol(w_map_letters1):1
           } else A <- 1:ncol(w_map_letters1)

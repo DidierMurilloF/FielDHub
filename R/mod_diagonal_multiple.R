@@ -879,13 +879,17 @@ mod_diagonal_multiple_server <- function(id) {
         }
         map_letters <- rand_lines()[[1]]$w_map_letter
         checksEntries <- as.vector(getChecks()$checksEntries)
-        split_name_diagonal1 <- names_dbrows(w_map = w_map, 
-                                             myWay = "By Row",
-                                             kindExpt = "DBUDC",
-                                             data_dim_each_block = data_dim_each_block,
-                                             w_map_letters = map_letters,
-                                             expt_name = name_expt,
-                                             Checks = checksEntries)
+        
+        names_dbrows(
+          w_map = w_map, 
+          myWay = "By Row",
+          kindExpt = "DBUDC",
+          data_dim_each_block = data_dim_each_block,
+          w_map_letters = map_letters,
+          expt_name = name_expt,
+          Checks = checksEntries
+        )
+        
       }else if (multiple_inputs()$stacked == "By Column") {
         map_letters <- rand_lines()[[1]]$w_map_letter
         data_dim_each_block <- available_percent_multi()$data_dim_each_block
@@ -893,17 +897,19 @@ mod_diagonal_multiple_server <- function(id) {
         blocks <- length(data_dim_each_block)
         if (length(Name_expt) == blocks) {
           name_expt <- Name_expt
-        }else{
+        } else {
           name_expt = paste0(rep("Block", times = blocks), 1:blocks)
         }
         map_letters <- rand_lines()[[1]]$w_map_letter
-        split_name_diagonal1 <- names_dbrows(w_map = w_map, 
-                                             myWay = "By Column",
-                                             kindExpt = "DBUDC",
-                                             data_dim_each_block = data_dim_each_block,
-                                             w_map_letters = map_letters,
-                                             expt_name = name_expt,
-                                             Checks = checksEntries)
+        names_dbrows(
+          w_map = w_map, 
+          myWay = "By Column",
+          kindExpt = "DBUDC",
+          data_dim_each_block = data_dim_each_block,
+          w_map_letters = map_letters,
+          expt_name = name_expt,
+          Checks = checksEntries
+        )
       }
     })
     
@@ -1007,117 +1013,138 @@ mod_diagonal_multiple_server <- function(id) {
       for (sites in 1:locs_diagonal) {
         if (Option_NCD == FALSE) { 
           req(get_data_multiple()$data_entry) 
-          req(available_percent_multi()$data_dim_each_block) 
-          if (multiple_inputs()$stacked == "By Row") { 
-            data_dim_each_block <- available_percent_multi()$data_dim_each_block 
-            my_row_sets <- automatically_cuts(data = w_map, 
-                                              planter_mov = multiple_inputs()$planter_mov,
-                                              way = "By Row", 
-                                              dim_data = data_dim_each_block)[[1]]
-            n_blocks <- length(my_row_sets) 
-          }else { 
-            data_dim_each_block <- available_percent_multi()$data_dim_each_block 
-            cuts_by_c <- automatically_cuts(data = w_map, 
-                                            planter_mov = NULL,
-                                            way = "By Column",
-                                            dim_data = data_dim_each_block)  
-            n_blocks <- length(cuts_by_c) 
-            m = diff(cuts_by_c) 
-            my_col_sets = c(cuts_by_c[1], m) 
-          } 
-          Name_expt <- multiple_inputs()$expt_name
-          if (length(Name_expt) == n_blocks) { 
-            expe_names <- Name_expt 
-          }else { 
-            expe_names = paste0(rep("Block", times = n_blocks), 1:n_blocks) 
-          } 
-          if (length(plot_n_start) > 1 && length(plot_n_start) < n_blocks) return(NULL) 
+          
+          # req(available_percent_multi()$data_dim_each_block) 
+          # if (multiple_inputs()$stacked == "By Row") { 
+          #   data_dim_each_block <- available_percent_multi()$data_dim_each_block 
+          #   my_row_sets <- automatically_cuts(data = w_map, 
+          #                                     planter_mov = multiple_inputs()$planter_mov,
+          #                                     way = "By Row", 
+          #                                     dim_data = data_dim_each_block)[[1]]
+          #   n_blocks <- length(my_row_sets) 
+          # } else { 
+          #   data_dim_each_block <- available_percent_multi()$data_dim_each_block 
+          #   cuts_by_c <- automatically_cuts(data = w_map, 
+          #                                   planter_mov = NULL,
+          #                                   way = "By Column",
+          #                                   dim_data = data_dim_each_block)  
+          #   n_blocks <- length(cuts_by_c) 
+          #   m = diff(cuts_by_c) 
+          #   my_col_sets = c(cuts_by_c[1], m) 
+          # } 
+          # Name_expt <- multiple_inputs()$expt_name
+          # if (length(Name_expt) == n_blocks) { 
+          #   expe_names <- Name_expt 
+          # }else { 
+          #   expe_names = paste0(rep("Block", times = n_blocks), 1:n_blocks) 
+          # } 
+          # if (length(plot_n_start) > 1 && length(plot_n_start) < n_blocks) return(NULL) 
           
           if (multiple_inputs()$stacked == "By Column") {
-            my_split_plot_nub <- plot_number(movement_planter = multiple_inputs()$planter_mov, 
-                                             n_blocks = n_blocks,
-                                             n_rows = n_rows,
-                                             n_cols = n_cols, 
-                                             plot_n_start = plot_n_start[sites],
-                                             datos = datos_name,
-                                             expe_name = expe_names,
-                                             ByRow = FALSE,
-                                             my_row_sets = NULL,
-                                             ByCol = TRUE,
-                                             my_col_sets = my_col_sets) 
-          }else{
+            # my_split_plot_nub <- plot_number(movement_planter = multiple_inputs()$planter_mov, 
+            #                                  n_blocks = n_blocks,
+            #                                  n_rows = n_rows,
+            #                                  n_cols = n_cols, 
+            #                                  plot_n_start = plot_n_start[sites],
+            #                                  datos = datos_name,
+            #                                  expe_name = expe_names,
+            #                                  ByRow = FALSE,
+            #                                  my_row_sets = NULL,
+            #                                  ByCol = TRUE,
+            #                                  my_col_sets = my_col_sets) 
+            my_split_plot_nub <- plot_number_by_col(
+              planter = multiple_inputs()$planter_mov, 
+              plot_number_start = plot_n_start[sites], 
+              layout_names = datos_name, 
+              fillers = 0
+            )
+          } else {
             req(split_name_reactive()$my_names)
             datos_name <- split_name_reactive()$my_names 
-            data.dim.each <- available_percent_multi()$data_dim_each_block
-            Block_Fillers <- as.numeric(blocks_length()) 
+            # data.dim.each <- available_percent_multi()$data_dim_each_block
+            # Block_Fillers <- as.numeric(blocks_length()) 
             
-            my_split_plot_nub <- plot_number_fillers(movement_planter = movement_planter, 
-                                                     plot_n_start = plot_n_start[sites],
-                                                     datos = datos_name,
-                                                     expe_names = expe_names, 
-                                                     ByRow = TRUE, 
-                                                     my_row_sets = my_row_sets,
-                                                     ByCol = FALSE, 
-                                                     my_col_sets = NULL,
-                                                     which.blocks = Block_Fillers, 
-                                                     n_blocks = n_blocks,
-                                                     data.dim.each = data.dim.each)
+            # my_split_plot_nub <- plot_number_fillers(movement_planter = movement_planter, 
+            #                                          plot_n_start = plot_n_start[sites],
+            #                                          datos = datos_name,
+            #                                          expe_names = expe_names, 
+            #                                          ByRow = TRUE, 
+            #                                          my_row_sets = my_row_sets,
+            #                                          ByCol = FALSE, 
+            #                                          my_col_sets = NULL,
+            #                                          which.blocks = Block_Fillers, 
+            #                                          n_blocks = n_blocks,
+            #                                          data.dim.each = data.dim.each)
+            my_split_plot_nub <- plot_number_by_col(
+              planter = multiple_inputs()$planter_mov, 
+              plot_number_start = plot_n_start[sites], 
+              layout_names = datos_name, 
+              fillers = 0
+            )
           }
         } else if (Option_NCD == TRUE) {
           req(get_data_multiple()$data_entry) 
+          
+          # if (multiple_inputs()$stacked == "By Row") { 
+          #   data_dim_each_block <- available_percent_multi()$data_dim_each_block 
+          #   my_row_sets <- automatically_cuts(data = w_map, 
+          #                                     planter_mov = multiple_inputs()$planter_mov,
+          #                                     way = "By Row", dim_data = data_dim_each_block)[[1]]
+          #   n_blocks <- length(my_row_sets) 
+          # }else { 
+          #   data_dim_each_block <- available_percent_multi()$data_dim_each_block 
+          #   cuts_by_c <- automatically_cuts(data = w_map, 
+          #                                   planter_mov = NULL, 
+          #                                   way = "By Column",
+          #                                   dim_data = data_dim_each_block)  
+          #   n_blocks <- length(cuts_by_c) 
+          #   m = diff(cuts_by_c)
+          #   my_col_sets = c(cuts_by_c[1], m) 
+          # } 
+          
+          w_map_letters1 <- rand_lines()[[1]]$w_map_letters1
+          
+          # Name_expt <- multiple_inputs()$expt_name
+          # if (length(Name_expt) == n_blocks) { 
+          #   expe_names <- Name_expt 
+          # }else { 
+          #   expe_names = paste0(rep("Block", times = n_blocks), 1:n_blocks) 
+          # } 
+          
           if (multiple_inputs()$stacked == "By Row") { 
-            data_dim_each_block <- available_percent_multi()$data_dim_each_block 
-            my_row_sets <- automatically_cuts(data = w_map, 
-                                              planter_mov = multiple_inputs()$planter_mov,
-                                              way = "By Row", dim_data = data_dim_each_block)[[1]]
-            n_blocks <- length(my_row_sets) 
-          }else { 
-            data_dim_each_block <- available_percent_multi()$data_dim_each_block 
-            cuts_by_c <- automatically_cuts(data = w_map, 
-                                            planter_mov = NULL, 
-                                            way = "By Column",
-                                            dim_data = data_dim_each_block)  
-            n_blocks <- length(cuts_by_c) 
-            m = diff(cuts_by_c)
-            my_col_sets = c(cuts_by_c[1], m) 
-          } 
-          w_map_letters1 <- rand_lines()[[1]]$w_map_letters1 
-          # Name_expt <- as.vector(unlist(strsplit(input$expt_name_multiple, ","))) 
-          Name_expt <- multiple_inputs()$expt_name
-          if (length(Name_expt) == n_blocks) { 
-            expe_names <- Name_expt 
-          }else { 
-            expe_names = paste0(rep("Block", times = n_blocks), 1:n_blocks) 
-          } 
-          if(multiple_inputs()$stacked == "By Row") { 
             datos_name <- split_name_reactive()$my_names 
-            data.dim.each <- available_percent_multi()$data_dim_each_block
-            Block_Fillers <- as.numeric(blocks_length()) 
             
-            my_split_plot_nub <- plot_number_fillers(movement_planter = multiple_inputs()$planter_mov, 
-                                                     plot_n_start = plot_n_start[sites],
-                                                     datos = datos_name,
-                                                     expe_names = expe_names, 
-                                                     ByRow = TRUE,
-                                                     my_row_sets = my_row_sets, 
-                                                     ByCol = FALSE, 
-                                                     my_col_sets = NULL,
-                                                     which.blocks = Block_Fillers,
-                                                     n_blocks = n_blocks,
-                                                     data.dim.each = data.dim.each) 
+            # data.dim.each <- available_percent_multi()$data_dim_each_block
+            # Block_Fillers <- as.numeric(blocks_length()) 
+            
+            # my_split_plot_nub <- plot_number_fillers(
+            #   movement_planter = multiple_inputs()$planter_mov, 
+            #   plot_n_start = plot_n_start[sites],
+            #   datos = datos_name,
+            #   expe_names = expe_names, 
+            #   ByRow = TRUE,
+            #   my_row_sets = my_row_sets, 
+            #   ByCol = FALSE, 
+            #   my_col_sets = NULL,
+            #   which.blocks = Block_Fillers,
+            #   n_blocks = n_blocks,
+            #   data.dim.each = data.dim.each
+            # ) 
+            fillers <- sum(datos_name == "Filler")
+            my_split_plot_nub <- plot_number_by_col(
+              planter = multiple_inputs()$planter_mov, 
+              plot_number_start = plot_n_start[sites], 
+              layout_names = datos_name, 
+              fillers = fillers
+            )
           } else { 
-            my_split_plot_nub <- plot_number_fillers_by_col(movement_planter = multiple_inputs()$planter_mov, 
-                                                            plot_n_start = plot_n_start[sites],
-                                                            datos = datos_name,
-                                                            expe_names = expe_names,
-                                                            ByRow = TRUE,
-                                                            my_row_sets = my_row_sets,
-                                                            ByCol = TRUE, 
-                                                            my_col_sets = NULL,
-                                                            which.blocks = Block_Fillers, 
-                                                            n_blocks = n_blocks,
-                                                            data.dim.each = data.dim.each)  
-            # return(NULL) 
+            fillers <- sum(datos_name == "Filler")
+            my_split_plot_nub <- plot_number_by_col(
+              planter = multiple_inputs()$planter_mov, 
+              plot_number_start = plot_n_start[sites], 
+              layout_names = datos_name, 
+              fillers = fillers
+            ) 
           } 
         }
         plots_number_sites[[sites]] <- my_split_plot_nub$w_map_letters1

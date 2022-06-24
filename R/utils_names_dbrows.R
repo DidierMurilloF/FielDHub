@@ -55,19 +55,20 @@ names_dbrows <- function(w_map = NULL, myWay = "By Row", kindExpt = "DBUDC", dat
         w_map_letters1[w_map_letters1 == i] <- name_blocks[z] 
         z <- z + 1 
       } 
-      w_map_letters1
       checks_ch <- as.character(checks) 
-      for(j in 1:ncol(w_map_letters1)) { #ncol(w_map_letters1)
+      for(j in 1:ncol(w_map_letters1)) {
         for(i in nrow(w_map_letters1):1) { 
-          if (any(checks_ch %in% w_map_letters1[i, j]) && w_map_letters1[i,j] != "Filler") {
+          if (any(checks_ch %in% w_map_letters1[i, j]) & w_map_letters1[i,j] != "Filler") {
             if (i != 1) {
               if (w_map_letters1[i - 1, j] == "Filler") {
+                w_map_letters1[i, j] <- w_map_letters1[i + 1, j]
+              } else {
                 w_map_letters1[i, j] <- w_map_letters1[i - 1, j]
-              } else w_map_letters1[i, j] <- w_map_letters1[i - 1, j]
-            } else if (i == 1) {
+              }
+            } else {
               w_map_letters1[i, j] <- w_map_letters1[i + 1, j]
             }
-          }
+          } 
         }
       }
       split_names <- w_map_letters1

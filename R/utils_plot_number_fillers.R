@@ -1,8 +1,14 @@
-plot_number_fillers <- function(movement_planter = "serpentine", plot_n_start = NULL, datos = NULL,
-                                expe_names = NULL, ByRow = TRUE, my_row_sets = NULL, ByCol = FALSE,
-                                my_col_sets = NULL, which.blocks = NULL, n_blocks = NULL,
-                                data.dim.each = NULL){
-  
+plot_number_fillers <- function(movement_planter = "serpentine", 
+                                plot_n_start = NULL, 
+                                datos = NULL,
+                                expe_names = NULL,
+                                ByRow = TRUE,
+                                my_row_sets = NULL,
+                                ByCol = FALSE,
+                                my_col_sets = NULL, 
+                                which.blocks = NULL,
+                                n_blocks = NULL,
+                                data.dim.each = NULL) {
   
   if (all(c("serpentine", "cartesian") != movement_planter)) {
     stop("Input movement_planter choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
@@ -11,7 +17,7 @@ plot_number_fillers <- function(movement_planter = "serpentine", plot_n_start = 
   Name_expt <- expe_names
   if (length(Name_expt) == blocks || !is.null(Name_expt)) {
     name_blocks <- Name_expt
-  }else {
+  } else {
     name_blocks <- paste(rep("Expt", blocks), 1:blocks, sep = "")
   }
   
@@ -170,7 +176,6 @@ plot_number_fillers <- function(movement_planter = "serpentine", plot_n_start = 
     row_sets <- new_r_sets
     
     W_SPLIT <- turner::matrix_to_blocks(w_map_letters1, blocks = rev(row_sets), byrow = TRUE)
-    #W_SPLIT <- turner::matrix_to_blocks(w_map_letters1, blocks = row_sets, byrow = TRUE)
     
     W_SPLIT <- rev(W_SPLIT)
     

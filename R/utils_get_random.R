@@ -16,14 +16,6 @@ get_random <- function(n_rows = NULL,
   n_rows <- as.numeric(n_rows)
   n_cols <- as.numeric(n_cols)
   data_entries <- as.vector(data[,1])
-  # len_spots_to_fill <- sum(my_split_r == 0)
-  # len_entries_to_random <- length(data_entries)
-  # if (len_entries_to_random != len_spots_to_fill) {
-  #   stop("data entries do not fit to the availables plot!!")
-  # } else {
-  #   print("Randomization was done with entries: ")
-  #   print(c(len_entries_to_random, len_spots_to_fill))
-  # }
   if ("Filler" %in% my_split_r) Fillers <- TRUE else Fillers <- FALSE
     if (!is.null(row_sets)) {
       if (Multi.Fillers == FALSE){
