@@ -1,5 +1,5 @@
 #' @noRd
-plot_number <- function(movement_planter = "serpentine", n_blocks = NULL, n_rows = NULL, n_cols = NULL, 
+old_plot_number <- function(movement_planter = "serpentine", n_blocks = NULL, n_rows = NULL, n_cols = NULL, 
                         plot_n_start = NULL, datos = NULL, expe_name = NULL, ByRow = FALSE,
                         my_row_sets = NULL, ByCol = TRUE, my_col_sets = NULL ) {
   
@@ -369,24 +369,24 @@ plot_number <- function(movement_planter = "serpentine", n_blocks = NULL, n_rows
 
 
 #' @noRd
-plot_number_by_col <- function(planter = "serpentine", 
-                               plot_number_start = NULL, 
-                               layout_names = NULL, 
-                               fillers) {
+plot_number <- function(planter = "serpentine", 
+                        plot_number_start = NULL, 
+                        layout_names = NULL,
+                        expe_names, 
+                        fillers) {
   plot_number <- plot_number_start
-  names_plot <- layout_names
+  names_plot <- as.matrix(layout_names)
   Fillers <- FALSE
   if (fillers > 0) Fillers <- TRUE
   plots <- prod(dim(names_plot))
-  expts <- as.vector(unlist(names_plot))
+  expts <- as.vector(names_plot)
   if (Fillers) {
     expts <- expts[!expts %in% "Filler"]
   }
   dim_each_block <- as.vector(table(expts))
-  b <- length(dim_each_block)
-  expts_ft <- factor(expts, levels = unique(expts))
+  b <- length(expe_names)
+  expts_ft <- factor(expe_names, levels = unique(expe_names))
   expt_levels <- levels(expts_ft)
-  expt_levels
   if (length(plot_number) != b) {
     serie_plot_numbers <- 1:(plots - fillers)
     plot_number_blocks <- split_vectors(x = serie_plot_numbers, 
@@ -395,8 +395,9 @@ plot_number_by_col <- function(planter = "serpentine",
     plot_number_blocks <- vector(mode = "list", length = b)
     for (i in 1:b) {
       w <- 0
-      if (i == b) w <- fillers
-      serie<- plot_number[i]:(plot_number[i] + dim_each_block[i] - 1 - w)
+      if (i == b) #w <- fillers
+      serie <- plot_number[i]:(plot_number[i] + dim_each_block[i] - 1 - w)
+      print(c(length(serie), dim_each_block[i]))
       if (length(serie) == dim_each_block[i]) {
         plot_number_blocks[[i]] <- serie
       } else stop("problem in length of the current serie")
