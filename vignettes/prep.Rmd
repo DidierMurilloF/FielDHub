@@ -42,21 +42,25 @@ You can run the same design with a function in the FielDHub package, `partially_
 ```{r, echo = FALSE, warning=FALSE, comment='', include=FALSE}
 library(knitr)
 library(FielDHub)
-prep <- partially_replicated(nrows = 45,
-                             ncols = 20,
-                             repGens = c(100,200,300),
-                             repUnits = c(2,2,1),
-                             l = 1, 
-                             seed = 123)
+prep <- partially_replicated(
+  nrows = 50,
+  ncols = 20,
+  repGens = c(100,200,300),
+  repUnits = c(3,2,1),
+  l = 1, 
+  seed = 123
+)
 
 ```
 ```{r, results='hide'}
-prep <- partially_replicated(nrows = 45, #number of rows in the field
-                             ncols = 20, #number of columns in the field
-                             repGens = c(100,200,300),
-                             repUnits = c(2,2,1),
-                             l = 1, 
-                             seed = 123)
+prep <- partially_replicated(
+  nrows = 50, #number of rows in the field
+  ncols = 20, #number of columns in the field
+  repGens = c(100,200,300),
+  repUnits = c(3,2,1),
+  l = 1, 
+  seed = 123
+)
 ```
 ```{r, comment='', echo=FALSE}
 print(prep)

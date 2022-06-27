@@ -392,18 +392,36 @@ mod_RowCol_server <- function(id){
       )
     })
     
+    
+    reset_selection <- reactiveValues(reset = 0)
+    
+    observeEvent(input$stackedRowCol, {
+      reset_selection$reset <- 1
+    })
+    
+    observeEvent(input$layoutO_rcd, {
+      reset_selection$reset <- 0
+    })
+    
     reactive_layoutROWCOL <- reactive({
       req(input$layoutO_rcd)
       req(RowCol_reactive())
       obj_rcd <- RowCol_reactive()
-      opt_rcd <- as.numeric(input$layoutO_rcd)
+      
       planting_rcd <- input$planter_mov_rcd
+      
+      if (reset_selection$reset == 1) {
+        opt_rcd <- 1
+      } else opt_rcd <- as.numeric(input$layoutO_rcd)
+      
       locSelected <- as.numeric(input$locLayout_rcd)
-      try(plot_layout(x = obj_rcd, layout = opt_rcd,
-                      planter = planting_rcd, l = locSelected, 
+      try(plot_layout(x = obj_rcd, 
+                      layout = opt_rcd,
+                      planter = planting_rcd, 
+                      l = locSelected, 
                       stacked = input$stackedRowCol), 
           silent = TRUE)
-    })
+    }) 
     
     valsRowColD <- reactiveValues(maxV.RowCol = NULL, 
                                   minV.RowCol = NULL, 
@@ -548,7 +566,7 @@ mod_RowCol_server <- function(id){
             family="Calibri", face="bold", size=13, hjust=0.5)
             )
         
-        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1250, height = 640)
+        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1250, height = 560)
         return(p2)
       } else {
         showModal(

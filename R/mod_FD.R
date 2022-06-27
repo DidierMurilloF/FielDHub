@@ -101,6 +101,7 @@ mod_FD_ui <- function(id){
                        plotly::plotlyOutput(ns("layouts"), width = "98%", 
                                             height = "550px"),type = 5
                      ),
+                     br(),
                      column(12, uiOutput(ns("well_panel_layout_FD")))
             ),
             tabPanel("Field Book", 
@@ -323,18 +324,33 @@ mod_FD_server <- function(id) {
       )
     })
     
+    reset_selection <- reactiveValues(reset = 0)
+
+    observeEvent(input$stackedFD, {
+      reset_selection$reset <- 1
+    })
+
+    observeEvent(input$layoutO_fd, {
+      reset_selection$reset <- 0
+    })
+    
     reactive_layoutFD <- reactive({
       req(input$layoutO_fd)
       req(fd_reactive())
       obj_fd <- fd_reactive()
-      opt_fd <- as.numeric(input$layoutO_fd)
       planting_fd <- input$planter_mov_fd
+      
+      if (reset_selection$reset == 1) {
+        opt_fd <- 1
+      } else opt_fd <- as.numeric(input$layoutO_fd)
+      
       locSelected <- as.numeric(input$locLayout_fd)
       try(plot_layout(x = obj_fd, layout = opt_fd, 
                       stacked = input$stackedFD,
                       planter = planting_fd , 
                       l = locSelected), silent = TRUE)
     })
+    
     
     valsfd <- reactiveValues(maxV.fd = NULL, minV.fd = NULL, trail.fd = NULL)
     
@@ -470,9 +486,11 @@ mod_FD_server <- function(id) {
           viridis::scale_fill_viridis(discrete = FALSE) +
           ggplot2::ggtitle(heatmapTitle) +
           ggplot2::theme_minimal() + # I added this option 
-          ggplot2::theme(plot.title = ggplot2::element_text(family="Calibri", face="bold", size=13, hjust=0.5))
+          ggplot2::theme(plot.title = ggplot2::element_text(
+            family="Calibri", face="bold", size=13, hjust=0.5)
+            )
         
-        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 640)
+        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 560)
         return(p2)
       } else {
         showModal(

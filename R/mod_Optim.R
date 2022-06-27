@@ -515,20 +515,20 @@ mod_Optim_server <- function(id) {
         )
     })
     
-    split_name_spatial <- reactive({
-      req(optimized_arrang())
-      nrows <- field_dimensions_optim()$d_row
-      ncols <- field_dimensions_optim()$d_col
-      my_col_sets <- ncols
-      blocks = 1
-      if (optim_inputs()$expt_name != "") {
-        Name_expt <- optim_inputs()$expt_name 
-      }else Name_expt = paste0(rep("Expt1", times = blocks), 1:blocks)
-      
-      split_names <- split_name(n_rows = nrows, n_cols = ncols, Name_expt = Name_expt,
-                                by_row = FALSE, col_sets = my_col_sets, row_sets = NULL)
-      return(list(my_names = split_names))
-    })
+    # split_name_spatial <- reactive({
+    #   req(optimized_arrang())
+    #   nrows <- field_dimensions_optim()$d_row
+    #   ncols <- field_dimensions_optim()$d_col
+    #   my_col_sets <- ncols
+    #   blocks = 1
+    #   if (optim_inputs()$expt_name != "") {
+    #     Name_expt <- optim_inputs()$expt_name 
+    #   }else Name_expt = paste0(rep("Expt1", times = blocks), 1:blocks)
+    #   
+    #   split_names <- split_name(n_rows = nrows, n_cols = ncols, Name_expt = Name_expt,
+    #                             by_row = FALSE, col_sets = my_col_sets, row_sets = NULL)
+    #   return(list(my_names = split_names))
+    # })
     
     output$PLOTFIELD <- DT::renderDT({
       test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0

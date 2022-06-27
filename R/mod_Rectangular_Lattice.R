@@ -76,8 +76,12 @@ mod_Rectangular_Lattice_ui <- function(id){
                                                     width = '10%',
                                                     style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
                      shinycssloaders::withSpinner(
-                       plotly::plotlyOutput(ns("random_layout"), width = "98%", height = "550px"),type = 5
+                       plotly::plotlyOutput(ns("random_layout"), 
+                                            width = "98%", 
+                                            height = "550px"),
+                       type = 5
                      ),
+                     br(),
                      column(12,uiOutput(ns("well_panel_layout_rt")))
             ),
             tabPanel("Field Book", 
@@ -355,6 +359,16 @@ mod_Rectangular_Lattice_server <- function(id) {
       )
     })
     
+    reset_selection <- reactiveValues(reset = 0)
+    
+    observeEvent(input$stackedRT, {
+      reset_selection$reset <- 1
+    })
+    
+    observeEvent( input$layoutO_rt, {
+      reset_selection$reset <- 0
+    })
+    
     reactive_layoutRect <- reactive({
       req(input$stackedRT)
       req(input$layoutO_rt)
@@ -362,10 +376,17 @@ mod_Rectangular_Lattice_server <- function(id) {
       req(input$planter_mov_rect)
       req(RECTANGULAR_reactive())
       obj_rt <- RECTANGULAR_reactive()
-      opt_rt <- as.numeric(input$layoutO_rt)
+      
+      if (reset_selection$reset == 1) {
+        opt_rt <- 1
+      } else opt_rt <- as.numeric(input$layoutO_rt)
+      
       locSelected <- as.numeric(input$locLayout_rt)
-      try(plot_layout(x = obj_rt, layout = opt_rt, planter = input$planter_mov_rect, l = locSelected, 
-                      stacked = input$stackedRT), silent = TRUE)
+      try(plot_layout(x = obj_rt, layout = opt_rt,
+                      planter = input$planter_mov_rect,
+                      l = locSelected, 
+                      stacked = input$stackedRT), 
+          silent = TRUE)
     })
     
     
@@ -497,7 +518,7 @@ mod_Rectangular_Lattice_server <- function(id) {
           ggplot2::theme_minimal() + # I added this option 
           ggplot2::theme(plot.title = ggplot2::element_text(family="Calibri", face="bold", size=13, hjust=0.5))
         
-        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1250, height = 640)
+        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1250, height = 560)
         return(p2)
       } else {
         showModal(

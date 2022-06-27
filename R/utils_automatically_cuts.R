@@ -6,8 +6,8 @@ automatically_cuts <- function(data = NULL, planter_mov = "serpentine",
   data_dim_each_block <- dim_data
   max_v <- length(data_dim_each_block)
   v <- 1;k <- 0
-  if (way == "By Row"){
-    if(planter_mov == "serpentine"){
+  if (way == "By Row") {
+    if(planter_mov == "serpentine") { 
       if (nrow(w_map) %% 2 == 0){
         for(i in nrow(w_map):1){
           if (i %% 2 == 0){

@@ -145,6 +145,7 @@ mod_SSPD_ui <- function(id){
                                             height = "580px"),
                        type = 5
                      ),
+                     br(),
                      column(12,
                             uiOutput(ns("well_panel_layout_SSPD"))
                             )
@@ -325,7 +326,7 @@ mod_SSPD_server <- function(id){
         ),
         fluidRow(
           column(3,
-                 selectInput(inputId = ns("stackedSPD"), 
+                 selectInput(inputId = ns("stackedSSPD"), 
                              label = "Reps layout:", 
                              choices = stacked_sspd),
           ),
@@ -343,7 +344,7 @@ mod_SSPD_server <- function(id){
       )
     })
     
-    observeEvent(input$stackedSPD, {
+    observeEvent(input$stackedSSPD, {
       req(input$stackedSPD)
       obj_sspd <- sspd_reactive()
       allBooks <- try(plot_layout(x = obj_sspd, 
@@ -359,16 +360,30 @@ mod_SSPD_server <- function(id){
       )
     })
     
+    reset_selection <- reactiveValues(reset = 0)
+    
+    observeEvent(input$stackedSSPD, {
+      reset_selection$reset <- 1
+    })
+    
+    observeEvent(input$layoutO_sspd, {
+      reset_selection$reset <- 0
+    })
+    
     reactive_layoutSSPD <- reactive({
       req(input$layoutO_sspd)
       req(sspd_reactive())
       obj_sspd <- sspd_reactive()
-      opt_sspd <- as.numeric(input$layoutO_sspd)
       planting_sspd <- input$planter_mov_sspd
+      
+      if (reset_selection$reset == 1) {
+        opt_sspd <- 1
+      } else opt_sspd <- as.numeric(input$layoutO_sspd)
+      
       locSelected <- as.numeric(input$locLayout_sspd)
       try(plot_layout(x = obj_sspd, 
                       layout = opt_sspd, 
-                      stacked = input$stackedSPD,
+                      stacked = input$stackedSSPD,
                       planter = planting_sspd, 
                       l = locSelected), 
           silent = TRUE)
@@ -379,9 +394,14 @@ mod_SSPD_server <- function(id){
     
     simuModal.sspd <- function(failed = FALSE) {
       modalDialog(
-        selectInput(inputId = ns("TrialsRowCol"), label = "Select One:", choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
-        conditionalPanel("input.TrialsRowCol == 'Other'", ns = ns,
-                         textInput(inputId = ns("Otherspd"), label = "Input Trial Name:", value = NULL)
+        selectInput(inputId = ns("TrialsRowCol"), 
+                    label = "Select One:", 
+                    choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
+        conditionalPanel("input.TrialsRowCol == 'Other'", 
+                         ns = ns,
+                         textInput(inputId = ns("Otherspd"),
+                                   label = "Input Trial Name:",
+                                   value = NULL)
         ),
         fluidRow(
           column(6, 
@@ -509,7 +529,7 @@ mod_SSPD_server <- function(id){
         
         p2 <- plotly::ggplotly(p1, tooltip="text", 
                                width = 1350, 
-                               height = 640)
+                               height = 580)
         return(p2)
       } else {
         showModal(

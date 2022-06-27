@@ -83,6 +83,7 @@ mod_Alpha_Lattice_ui <- function(id) {
                      shinycssloaders::withSpinner(
                        plotly::plotlyOutput(ns("random_layout"), width = "98%", height = "550px"),type = 5
                      ),
+                     br(),
                      column(12, uiOutput(ns("well_panel_layout")))
             ),
             tabPanel("Field Book", 
@@ -361,10 +362,6 @@ mod_Alpha_Lattice_server <- function(id){
       reset_selection$reset <- 0
     })
     
-    list_react <- reactive({
-      return(list(input$stackedAlpha, input$layoutO, input$locLayout))
-    })
-    
     reactive_layoutAlpha <- reactive({
       req(input$stackedAlpha)
       req(input$planter_mov_alpha)
@@ -383,8 +380,7 @@ mod_Alpha_Lattice_server <- function(id){
                       l = locSelected, 
                       stacked = input$stackedAlpha), 
           silent = TRUE)
-    }) %>% 
-      bindEvent(list_react())
+    })
     
     
     valsALPHA <- reactiveValues(maxV.alpha = NULL, minV.alpha = NULL, trail.alpha = NULL)
@@ -512,9 +508,12 @@ mod_Alpha_Lattice_server <- function(id){
           viridis::scale_fill_viridis(discrete = FALSE) +
           ggplot2::ggtitle(heatmapTitle) +
           ggplot2::theme_minimal() + # I added this option 
-          ggplot2::theme(plot.title = ggplot2::element_text(family="Calibri", face="bold", size=13, hjust=0.5))
+          ggplot2::theme(plot.title = ggplot2::element_text(family="Calibri", 
+                                                            face="bold",
+                                                            size=13, 
+                                                            hjust=0.5))
         
-        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1250, height = 640)
+        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1250, height = 560)
         return(p2)
       } else {
         showModal(
@@ -541,11 +540,6 @@ mod_Alpha_Lattice_server <- function(id){
     })
     
     output$ALPHA_fieldbook <- DT::renderDataTable({
-      # req(alpha_inputs()$k)
-      # k.alpha <- as.numeric(alpha_inputs()$k)
-      # if (k.alpha == "No Options Available") {
-      #   validate("No options for these amout of treatments ):")
-      # }
       req(simuDataALPHA()$df)
       df <- simuDataALPHA()$df
       df$LOCATION <- as.factor(df$LOCATION)

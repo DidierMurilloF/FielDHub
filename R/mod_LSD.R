@@ -113,6 +113,7 @@ mod_LSD_ui <- function(id){
                        plotly::plotlyOutput(ns("layout_lsd"),
                                             width = "98%",
                                             height = "550px"),
+                       br(),
                        column(12, uiOutput(ns("well_panel_layout_LSD")))
               ),
               tabPanel("Field Book", 
@@ -318,13 +319,25 @@ mod_LSD_server <- function(id){
       )
     })
     
+    
+    reset_selection <- reactiveValues(reset = 0)
+    
+    observeEvent(input$stackedLSD, {
+      reset_selection$reset <- 1
+    })
+    
+    observeEvent(input$layoutO_lsd, {
+      reset_selection$reset <- 0
+    })
+    
     reactive_layoutLSD <- reactive({
       req(input$layoutO_lsd)
       req(latinsquare_reactive())
       req(input$planter.lsd)
       obj_lsd <- latinsquare_reactive()
-
-      opt_lsd <- as.numeric(input$layoutO_lsd)
+      if (reset_selection$reset == 1) {
+        opt_lsd <- 1
+      } else opt_lsd <- as.numeric(input$layoutO_lsd)
       planting_lsd <- input$planter.lsd
       try(plot_layout(x = obj_lsd,
                       layout = opt_lsd,
@@ -473,8 +486,7 @@ mod_LSD_server <- function(id){
               hjust=0.5)
             )
         
-        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1350, height = 640)
-        # p2 
+        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1350, height = 560)
         return(p2)
       } else {
         showModal(
@@ -487,7 +499,6 @@ mod_LSD_server <- function(id){
     })
     
     output$layout_lsd <- plotly::renderPlotly({
-      # print(simuDataLSD()$df)
       req(reactive_layoutLSD())
       req(latinsquare_reactive())
       req(input$typlotLSD)

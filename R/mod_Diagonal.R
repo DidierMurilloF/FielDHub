@@ -207,6 +207,12 @@ mod_Diagonal_server <- function(id) {
     single_inputs <- eventReactive(input$RUN.diagonal, {
       planter_mov <- input$planter_single
       Name_expt <- as.vector(unlist(strsplit(input$expt_name, ",")))
+      blocks <- 1
+      if (length(Name_expt) == blocks & !missing(Name_expt)) {
+        name_expt <- Name_expt
+      }else{
+        name_expt = paste0(rep("Block", times = blocks), 1:blocks)
+      }
       plotNumber <- as.numeric(as.vector(unlist(strsplit(input$plot_start, ","))))
       seed_number <- as.numeric(input$seed_single)
       location_names <- as.vector(unlist(strsplit(input$Location, ",")))
@@ -216,7 +222,7 @@ mod_Diagonal_server <- function(id) {
                   seed_number = seed_number, 
                   plotNumber = plotNumber,
                   planter_mov = planter_mov,
-                  expt_name = Name_expt))
+                  expt_name = name_expt))
     })
     
     observeEvent(single_inputs()$sites, {
@@ -684,63 +690,29 @@ mod_Diagonal_server <- function(id) {
     
     split_name_reactive <- reactive({
       req(rand_lines())
-      checksEntries <- getChecks()$checksEntries
-      checks <- checksEntries
-      data_entry <- getData()$data_entry
+      
       w_map <- rand_checks()[[1]]$map_checks
-      if ("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE
-      n_rows <- field_dimensions_diagonal()$d_row
-      n_cols <- field_dimensions_diagonal()$d_col
-      n_rows <- field_dimensions_diagonal()$d_row
-      n_cols <- field_dimensions_diagonal()$d_col
-      Name_expt <- single_inputs()$expt_name
-      blocks <- 1
-      if (length(Name_expt) == blocks && !is.null(Name_expt)) {
-        name_expt <- Name_expt
-      }else{
-        name_expt = paste0(rep("Block", times = blocks), 1:blocks)
-      }
-      map_letters <- rand_lines()[[1]]$w_map_letter
-      split_name_diagonal1 <- names_diagonal(nrows = n_rows,
-                                            ncols = n_cols,
-                                            randomChecksMap = w_map, 
-                                            kindExpt = kindExpt_single, 
-                                            checks = 1:input$checks,
-                                            myWay = input$stacked,
-                                            Option_NCD = Option_NCD, 
-                                            expt_name = name_expt,
-                                            data_entry = data_entry,
-                                            reps = NULL,
-                                            data_dim_each_block = NULL,
-                                            w_map_letters1 = map_letters)
-    })
-    
-    put_Filler_in_name <- reactive({
-      req(rand_lines())
-      n_rows <- field_dimensions_diagonal()$d_row
-      n_cols <- field_dimensions_diagonal()$d_col
-      r_map <- rand_lines()[[1]]$rand
-      if("Filler" %in% r_map) Option_NCD <- TRUE else Option_NCD <- FALSE
-      if (Option_NCD == TRUE) {
-        blocks <- 1
-        if (single_inputs()$expt_name != "") {
-          Name_expt <- single_inputs()$expt_name 
-        }else Name_expt = paste0(rep("Expt1", times = blocks), 1:blocks)
-        
-        split_names <- matrix(data = Name_expt, ncol = n_cols, nrow = n_rows)
-        r_map <- rand_lines()[[1]]$rand
-        Fillers <- sum(r_map == "Filler")
-        if (n_rows %% 2 == 0) {
-          if(single_inputs()$planter_mov == "serpentine") {
-            split_names[1, 1:Fillers] <- "Filler"
-          }else{
-            split_names[1,((n_cols + 1) - Fillers):n_cols] <- "Filler"
-          }
-        }else {
-          split_names[1,((n_cols + 1) - Fillers):n_cols] <- "Filler"
-        }
-      }
-      list(name_with_Fillers = split_names)
+      expt_name <- single_inputs()$expt_name
+ 
+      split_name <- names_layout(
+        w_map = w_map, 
+        kindExpt = "SUDC", 
+        planter = single_inputs()$planter_mov, 
+        expt_name = expt_name
+      )
+      
+      # split_name_diagonal1 <- names_diagonal(nrows = n_rows,
+      #                                       ncols = n_cols,
+      #                                       randomChecksMap = w_map, 
+      #                                       kindExpt = kindExpt_single, 
+      #                                       checks = 1:input$checks,
+      #                                       myWay = input$stacked,
+      #                                       Option_NCD = Option_NCD, 
+      #                                       expt_name = name_expt,
+      #                                       data_entry = data_entry,
+      #                                       reps = NULL,
+      #                                       data_dim_each_block = NULL,
+      #                                       w_map_letters1 = map_letters)
     })
     
     plot_number_sites <- reactive({
@@ -770,50 +742,36 @@ mod_Diagonal_server <- function(id) {
       
     })
     
-    # plot_number_reactive <- eventReactive(input$get_random, {
     plot_number_reactive <- reactive({
       req(rand_lines())
       req(split_name_reactive()$my_names)
       datos_name <- split_name_reactive()$my_names 
+      print(datos_name)
       datos_name = as.matrix(datos_name) 
       n_rows <- field_dimensions_diagonal()$d_row
       n_cols <- field_dimensions_diagonal()$d_col
       movement_planter = single_inputs()$planter_mov
-      w_map <- rand_checks()[[1]]$map_checks
-      if("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE
       plot_n_start <- plot_number_sites()
       locs_diagonal <- single_inputs()$sites
       plots_number_sites <- vector(mode = "list", length = locs_diagonal)
       for (sites in 1:locs_diagonal) {
-          n_blocks <- 1 
-          if (single_inputs()$expt_name != "") { 
-            Name_expt <- single_inputs()$expt_name  
-          }else Name_expt = paste0(rep("Expt", times = n_blocks), 1:n_blocks)
-          w_map <- rand_checks()[[1]]$map_checks
-          if("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE 
-          my_split_plot_nub <- plot_number(movement_planter = single_inputs()$planter_mov, n_blocks = 1, 
-                                           n_rows = n_rows, n_cols = n_cols, 
-                                           plot_n_start = plot_n_start[sites], datos = datos_name,
-                                           expe_name =  Name_expt, ByRow = NULL, 
-                                           my_row_sets = NULL, ByCol = NULL,
-                                           my_col_sets = NULL)
-          if (Option_NCD == TRUE) { 
-            r_map <- rand_lines()[[1]]$rand
-            Fillers <- sum(r_map == "Filler") 
-            if (n_rows %% 2 == 0) { 
-              if(single_inputs()$planter_mov == "serpentine") { 
-                my_split_plot_nub[[1]][1, 1:Fillers] <- 0 
-              }else{ 
-                my_split_plot_nub[[1]][1,((n_cols + 1) - Fillers):n_cols] <- 0 
-              } 
-            }else { 
-              my_split_plot_nub[[1]][1,((n_cols + 1) - Fillers):n_cols] <- 0 
-            } 
-          } 
-        plots_number_sites[[sites]] <- my_split_plot_nub$w_map_letters1
+        
+          expe_names <- single_inputs()$expt_name 
+          fillers <- sum(datos_name == "Filler")
+          plot_nub <- plot_number(
+            planter = single_inputs()$planter_mov,
+            plot_number_start = plot_n_start[sites],
+            layout_names = datos_name,
+            expe_names = expe_names,
+            fillers = fillers
+          )
+          
+        plots_number_sites[[sites]] <- plot_nub$w_map_letters1
       }
       return(list(plots_number_sites = plots_number_sites))
     })
+    
+    
     
     output$plot_number_layout <- DT::renderDT({
       test <- randomize_hit$times > 0 & user_tries$tries > 0

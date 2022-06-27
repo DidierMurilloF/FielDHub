@@ -30,18 +30,22 @@ random_checks <- function(dt = NULL, d_checks = NULL, p = NULL, percent = NULL,
   shiny::req(w_map)
   multi <- kindExpt == "DBUDC"
   
-  if (multi == TRUE){
+  if (multi == TRUE) {
     req(data_dim_each_block)
     req(data)
     if (stacked == "By Row"){
       data_dim_each_block <- data_dim_each_block
-      my_row_sets <- automatically_cuts(data = w_map, planter_mov = planter_mov, way = "By Row",
+      my_row_sets <- automatically_cuts(data = w_map, 
+                                        planter_mov = planter_mov,
+                                        way = "By Row",
                                         dim_data = data_dim_each_block)[[1]]
       if(is.null(my_row_sets)) return(NULL)
       blocks <- length(my_row_sets)
     }else {
       data_dim_each_block <- data_dim_each_block
-      cuts_by_c <- automatically_cuts(data = w_map, planter_mov = planter_mov, way = "By Column",
+      cuts_by_c <- automatically_cuts(data = w_map, 
+                                      planter_mov = planter_mov, 
+                                      way = "By Column",
                                       dim_data = data_dim_each_block)
       if(is.null(cuts_by_c)) return(NULL)
       blocks <- length(cuts_by_c)
@@ -50,14 +54,16 @@ random_checks <- function(dt = NULL, d_checks = NULL, p = NULL, percent = NULL,
     }
     
     if (stacked == "By Column") {
-      w_map_split <- turner::matrix_to_blocks(w_map, blocks = my_col_sets, byrow = FALSE)
+      w_map_split <- turner::matrix_to_blocks(w_map, 
+                                              blocks = my_col_sets,
+                                              byrow = FALSE)
       Total_checks <- numeric()                                                              
-      for (n in 1:length(w_map_split)){
+      for (n in 1:length(w_map_split)) {
         Total_checks[n] <- sum(w_map_split[[n]] == 1)
       }
       checks <- Checks
       rand_checks <- list()
-      for (j in 1:length(w_map_split)){
+      for (j in 1:length(w_map_split)) {
         res <- Total_checks[j] %% length(checks)
         if (res == 0){
           s <- rep(checks, Total_checks[j]/length(checks))
@@ -104,7 +110,6 @@ random_checks <- function(dt = NULL, d_checks = NULL, p = NULL, percent = NULL,
         }
       }
       w_map <- t(w_map)
-     # print(sum(w_map == 1) < length(as.vector(unlist(rand_checks))))
       w_map[w_map == 1] <- unlist(rand_checks)
       w_map <- t(w_map)
       col_checks <- ifelse(w_map != 0, w_map, 0) 

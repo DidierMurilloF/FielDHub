@@ -127,6 +127,7 @@ mod_STRIPD_ui <- function(id){
                                             height = "560px"),
                        type = 5
                      ),
+                     br(),
                      column(12,
                             uiOutput(ns("well_panel_layout_STRIP"))
                             )
@@ -329,12 +330,26 @@ mod_STRIPD_server <- function(id) {
     })
     
     
+    reset_selection <- reactiveValues(reset = 0)
+    
+    observeEvent(input$stackedSTRIP, {
+      reset_selection$reset <- 1
+    })
+    
+    observeEvent(input$layoutO_strip, {
+      reset_selection$reset <- 0
+    })
+    
     reactive_layoutSTRIP <- reactive({
       req(input$layoutO_strip)
       req(strip_reactive())
       obj_strip <- strip_reactive()
-      opt_strip <- as.numeric(input$layoutO_strip)
       planting_strip <- input$planter.strip
+      
+      if (reset_selection$reset == 1) {
+        opt_strip <- 1
+      } else opt_strip <- as.numeric(input$layoutO_strip)
+      
       locSelected <- as.numeric(input$locLayout_strip)
       try(plot_layout(x = obj_strip, 
                       layout = opt_strip, 
@@ -476,7 +491,7 @@ mod_STRIPD_server <- function(id) {
           ggplot2::theme_minimal() + # I added this option 
           ggplot2::theme(plot.title = ggplot2::element_text(family="Calibri", face="bold", size=13, hjust=0.5))
         
-        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1350, height = 640)
+        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1350, height = 560)
         return(p2)
       } else {
         showModal(
@@ -488,9 +503,7 @@ mod_STRIPD_server <- function(id) {
       }
     })
     
-    
     output$layout.strip <- plotly::renderPlotly({
-      #reactive_layoutSPD()$out_layout
       req(strip_reactive())
       req(input$typlotstrip)
       if (input$typlotstrip == 1) {

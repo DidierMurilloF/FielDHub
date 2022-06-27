@@ -125,6 +125,7 @@ mod_RCBD_ui <- function(id) {
                          height = "550px"),
                        type = 5
                      ),
+                     br(),
                      column(12,uiOutput(ns("well_panel_layout_RCBD")))
             ),
             tabPanel("Field Book", 
@@ -317,6 +318,17 @@ mod_RCBD_server <- function(id) {
       )
     })
     
+    
+    reset_selection <- reactiveValues(reset = 0)
+    
+    observeEvent(input$stackedRCBD, {
+      reset_selection$reset <- 1
+    })
+    
+    observeEvent(input$layoutO_rcbd, {
+      reset_selection$reset <- 0
+    })
+    
     reactive_layoutRCBD <- reactive({
       req(input$stackedRCBD)
       req(input$layoutO_rcbd)
@@ -324,8 +336,12 @@ mod_RCBD_server <- function(id) {
       req(input$locLayout_rcbd)
       req(RCBD_reactive())
       obj_rcbd <- RCBD_reactive()
-      opt_rcbd <- as.numeric(input$layoutO_rcbd)
       planting_rcbd <- input$planter_mov_rcbd
+      
+      if (reset_selection$reset == 1) {
+        opt_rcbd <- 1
+      } else opt_rcbd <- as.numeric(input$layoutO_rcbd)
+      
       locSelected <- as.numeric(input$locLayout_rcbd)
       try(plot_layout(x = obj_rcbd, 
                       layout = opt_rcbd, 
@@ -485,7 +501,7 @@ mod_RCBD_server <- function(id) {
         p2 <- plotly::ggplotly(p1, 
                                tooltip="text", 
                                width = 1350, 
-                               height = 640)
+                               height = 560)
         return(p2)
       } else {
         showModal(

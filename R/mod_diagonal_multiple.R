@@ -783,13 +783,13 @@ mod_diagonal_multiple_server <- function(id) {
         } else {
           n_rows <- field_dimensions_diagonal()$d_row
           n_cols <- field_dimensions_diagonal()$d_col
-          if(Option_NCD == FALSE) {
+          if (Option_NCD == FALSE) {
             data_entry1 <- data_entry[(checks + 1):nrow(data_entry), ]
             data_random <- get_DBrandom(binaryMap = w_map, 
                                         data_dim_each_block = data_dim_each_block, 
                                         data_entries = data_entry1,
                                         planter = multiple_inputs()$planter_mov)
-          }else if(Option_NCD == TRUE) {
+          } else if (Option_NCD == TRUE) {
             req(available_percent_multi()$data_dim_each_block)
             Block_Fillers <- as.numeric(blocks_length())
             data_random <- get_random(n_rows = n_rows, 
@@ -888,9 +888,9 @@ mod_diagonal_multiple_server <- function(id) {
         map_letters <- rand_lines()[[1]]$w_map_letter
         checksEntries <- as.vector(getChecks()$checksEntries)
         
-        names_dbrows(
+        names_layout(
           w_map = w_map, 
-          myWay = "By Row",
+          stacked = "By Row",
           kindExpt = "DBUDC",
           data_dim_each_block = data_dim_each_block,
           w_map_letters = map_letters,
@@ -909,9 +909,9 @@ mod_diagonal_multiple_server <- function(id) {
           name_expt = paste0(rep("Block", times = blocks), 1:blocks)
         }
         map_letters <- rand_lines()[[1]]$w_map_letter
-        names_dbrows(
+        names_layout(
           w_map = w_map, 
-          myWay = "By Column",
+          stacked = "By Column",
           kindExpt = "DBUDC",
           data_dim_each_block = data_dim_each_block,
           w_map_letters = map_letters,
@@ -1025,7 +1025,7 @@ mod_diagonal_multiple_server <- function(id) {
       plot_n_start <- plot_number_sites()
       locs_diagonal <- as.numeric(multiple_inputs()$sites)
       plots_number_sites <- vector(mode = "list", length = locs_diagonal)
-      # start for loop
+
       for (sites in 1:locs_diagonal) {
         
         w_map_letters1 <- rand_lines()[[1]]$w_map_letters1
@@ -1033,7 +1033,7 @@ mod_diagonal_multiple_server <- function(id) {
         fillers <- sum(datos_name == "Filler")
         
         if (multiple_inputs()$stacked == "By Row") {
-          my_split_plot_nub <- plot_number(
+          plot_nub <- plot_number(
             planter = multiple_inputs()$planter_mov,
             plot_number_start = plot_n_start[[sites]],
             layout_names = datos_name,
@@ -1041,7 +1041,7 @@ mod_diagonal_multiple_server <- function(id) {
             fillers = fillers
           )
         } else {
-          my_split_plot_nub <- plot_number(
+          plot_nub <- plot_number(
             planter = multiple_inputs()$planter_mov,
             plot_number_start = plot_n_start[[sites]],
             layout_names = datos_name,
@@ -1049,7 +1049,7 @@ mod_diagonal_multiple_server <- function(id) {
             fillers = fillers
           )
         }
-        plots_number_sites[[sites]] <- my_split_plot_nub$w_map_letters1
+        plots_number_sites[[sites]] <- plot_nub$w_map_letters1
       }
       
       return(list(plots_number_sites = plots_number_sites))
@@ -1108,9 +1108,7 @@ mod_diagonal_multiple_server <- function(id) {
         plot_number <- plot_number_reactive()$plots_number_sites[[user_site]]
         plot_number <- apply(plot_number, 2 ,as.numeric)
         my_names <- split_name_reactive()$my_names
-        # if (multi == FALSE && Option_NCD == TRUE) {
-        #   my_names <- put_Filler_in_name()$name_with_Fillers
-        # }
+
         loc_user_out_checks <- rand_checks()[[user_site]]
         Col_checks <- as.matrix(loc_user_out_checks$col_checks)
         loc_user_out_rand <- rand_lines()[[user_site]]

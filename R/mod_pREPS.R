@@ -376,14 +376,13 @@ mod_pREPS_server <- function(id){
         columnDefs = list(list(className = 'dt-center', targets = "_all"))))
     })
     
-    pREPS_reactive <- eventReactive(input$get_random_prep, {
+    pREPS_reactive <- reactive({
       req(get_data_prep()$data_up.preps)
       gen.list <- get_data_prep()$data_up.preps
       nrows <- field_dimensions_prep()$d_row
       ncols <- field_dimensions_prep()$d_col
       niter <- 10000
       prep <- TRUE
-      #data_preps <- get_data_prep()$data_up.preps
       locs_preps <- prep_inputs()$sites
       site_names <- prep_inputs()$site_names
       preps.seed <- prep_inputs()$seed_number
@@ -402,7 +401,8 @@ mod_pREPS_server <- function(id){
         planter = movement_planter, 
         data = gen.list 
       )
-    })
+    }) %>% 
+      bindEvent(input$get_random_prep)
 
     output$summary_prep <- renderPrint({
       test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
@@ -441,7 +441,6 @@ mod_pREPS_server <- function(id){
     output$dtpREPS <- DT::renderDataTable({
       test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
       if (!test) return(NULL)
-      # if (user_tries_prep$tries_prep < 1) return(NULL)
       req(pREPS_reactive())
       selection <- as.numeric(user_site_selection())
       w_map <- pREPS_reactive()$layoutRandom[[selection]]
@@ -478,50 +477,9 @@ mod_pREPS_server <- function(id){
       )
     })
     
-    
-    split_name_PREPS <- reactive({
-      req(pREPS_reactive())
-      nrows <- field_dimensions_prep()$d_row
-      ncols <- field_dimensions_prep()$d_col
-      my_col_sets <- ncols
-      blocks = 1
-      if (prep_inputs()$expt_name != "") {
-        Name_expt <- prep_inputs()$expt_name 
-      }else Name_expt = paste0(rep("Expt1", times = blocks), 1:blocks)
-      
-      split_names <- split_name(n_rows = nrows, n_cols = ncols, Name_expt = Name_expt, by_row = FALSE,
-                                col_sets = my_col_sets, row_sets = NULL)
-      return(list(my_names = split_names))
-    })
-    
-    output$pREPSNAMES <- DT::renderDT({
-      test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
-      if (!test) return(NULL)
-      req(split_name_PREPS()$my_names)
-      my_names <- split_name_PREPS()$my_names
-      blocks = 1
-      if (prep_inputs()$expt_name != ""){
-        Name_expt <- prep_inputs()$expt_name 
-      }else Name_expt = paste0(rep("Expt1", times = blocks), 1:blocks)
-      df <- as.data.frame(my_names)
-      rownames(df) <- nrow(df):1
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
-      DT::datatable(df,
-                    extensions = 'FixedColumns',
-                    options = list(
-                      dom = 't',
-                      scrollX = TRUE,
-                      fixedColumns = TRUE
-                    )) %>%
-        DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-                    backgroundColor = DT::styleEqual(Name_expt, c('yellow')))
-      
-    })
-    
     output$PREPSPLOTFIELD <- DT::renderDT({
       test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
       if (!test) return(NULL)
-      #if (user_tries_prep$tries_prep < 1) return(NULL)
       req(pREPS_reactive())
       plot_num <- pREPS_reactive()$plotNumber[[user_site_selection()]]
       a <- as.vector(as.matrix(plot_num))

@@ -124,6 +124,7 @@ mod_IBD_ui <- function(id) {
                                             height = "550px"),
                        type = 5
                      ),
+                     br(),
                      column(12,
                             uiOutput(ns("well_panel_layout_IBD"))
                             )
@@ -392,12 +393,26 @@ mod_IBD_server <- function(id) {
       )
     })
     
+    reset_selection <- reactiveValues(reset = 0)
+    
+    observeEvent(input$stackedibd, {
+      reset_selection$reset <- 1
+    })
+    
+    observeEvent(input$layoutO_ibd, {
+      reset_selection$reset <- 0
+    })
+    
     reactive_layoutIBD <- reactive({
       req(input$layoutO_ibd)
       req(IBD_reactive())
       obj_ibd <- IBD_reactive()
-      opt_ibd <- as.numeric(input$layoutO_ibd)
       planting_ibd <- input$planter_mov_ibd
+      
+      if (reset_selection$reset == 1) {
+        opt_ibd <- 1
+      } else opt_ibd <- as.numeric(input$layoutO_ibd)
+      
       locSelected <- as.numeric(input$locLayout_ibd)
       try(plot_layout(x = obj_ibd, 
                       layout =  opt_ibd, 
@@ -557,7 +572,7 @@ mod_IBD_server <- function(id) {
               face="bold", 
               size=13, 
               hjust=0.5))
-        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1250, height = 660)
+        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1250, height = 560)
         return(p2)
       } else {
         showModal(

@@ -13,7 +13,7 @@ diagonal_arrangement(
   l = 1,
   plotNumber = 101,
   kindExpt = "SUDC",
-  splitBy = "row",
+  stacked = "row",
   seed = NULL,
   blocks = NULL,
   exptName = NULL,
@@ -42,8 +42,8 @@ By default \code{plotNumber = 101}.}
 \code{'SUDC'} and Decision Blocks Un-replicated Design with Diagonal Checks \code{'DBUDC'} 
 for multiple experiments. By default \code{kindExpt = 'SUDC'}.}
 
-\item{splitBy}{Option to split the field when \code{kindExpt = 'DBUDC'} is selected. 
-By default \code{splitBy = 'row'}.}
+\item{stacked}{Option to split the field when \code{kindExpt = 'DBUDC'} is selected. 
+By default \code{stacked = 'row'}.}
 
 \item{seed}{(optional) Real number that specifies the starting seed to obtain reproducible designs.}
 
@@ -105,7 +105,7 @@ spatDB <- diagonal_arrangement(nrows = 30,
                                plotNumber = 1, 
                                kindExpt = "DBUDC", 
                                planter = "serpentine", 
-                               splitBy = "row", 
+                               stacked = "row", 
                                data = treatment_list)
 spatDB$infoDesign
 spatDB$layoutRandom
@@ -122,7 +122,7 @@ spatAB <- diagonal_arrangement(nrows = 20, ncols = 15, lines = 270,
                                planter = "serpentine",
                                exptName = c("20WRA", "20WRB", "20WRC"), 
                                blocks = c(90, 90, 90),
-                               splitBy = "column")
+                               stacked = "column")
 spatAB$infoDesign
 spatAB$layoutRandom
 spatAB$plotsNumber

@@ -113,6 +113,7 @@ mod_SPD_ui <- function(id) {
                                             height = "560px"),
                        type = 5
                      ),
+                     br(),
                      column(12,uiOutput(ns("well_panel_layout_SPD")))
             ),
             tabPanel("Field Book", 
@@ -319,7 +320,9 @@ mod_SPD_server <- function(id){
       req(input$stackedSPD)
       req(input$l.spd)
       obj_spd <- spd_reactive()
-      allBooks <- plot_layout(x = obj_spd, layout = 1, stacked = input$stackedSPD)$newBooks
+      allBooks <- plot_layout(x = obj_spd, 
+                              layout = 1, 
+                              stacked = input$stackedSPD)$newBooks
       nBooks <- length(allBooks)
       NewlayoutOptions <- 1:nBooks
       updateSelectInput(session = session, inputId = 'layoutO_spd',
@@ -329,16 +332,35 @@ mod_SPD_server <- function(id){
       )
     })
     
+    reset_selection <- reactiveValues(reset = 0)
+    
+    observeEvent(input$stackedSPD, {
+      reset_selection$reset <- 1
+    })
+    
+    observeEvent(input$layoutO_spd, {
+      reset_selection$reset <- 0
+    })
+    
     reactive_layoutSPD <- reactive({
       req(input$layoutO_spd)
       req(input$stackedSPD)
       req(spd_reactive())
       obj_spd <- spd_reactive()
-      opt_spd <- as.numeric(input$layoutO_spd)
+      
       planting_spd <- input$planter_mov_spd
+      
+      if (reset_selection$reset == 1) {
+        opt_spd <- 1
+      } else opt_spd <- as.numeric(input$layoutO_spd)
+      
       locSelected_spd <- as.numeric(input$locLayout_spd)
-      try(plot_layout(x = obj_spd, layout = opt_spd, planter = planting_spd, stacked = input$stackedSPD,
-                      l = locSelected_spd), silent = TRUE)
+      try(plot_layout(x = obj_spd, 
+                      layout = opt_spd, 
+                      planter = planting_spd, 
+                      stacked = input$stackedSPD,
+                      l = locSelected_spd), 
+          silent = TRUE)
     })
 
     valspd <- reactiveValues(maxV.spd = NULL, minV.spd = NULL, trail.spd = NULL)
@@ -458,9 +480,14 @@ mod_SPD_server <- function(id){
           viridis::scale_fill_viridis(discrete = FALSE) +
           ggplot2::ggtitle(heatmapTitle) +
           ggplot2::theme_minimal() + # I added this option 
-          ggplot2::theme(plot.title = ggplot2::element_text(family="Calibri", face="bold", size=13, hjust=0.5))
+          ggplot2::theme(plot.title = ggplot2::element_text(
+            family="Calibri", 
+            face="bold", 
+            size=13, 
+            hjust=0.5)
+          )
         
-        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1350, height = 640)
+        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1350, height = 560)
         return(p2)
       } else {
         showModal(

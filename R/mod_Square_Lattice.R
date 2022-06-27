@@ -79,6 +79,7 @@ mod_Square_Lattice_ui <- function(id){
                      shinycssloaders::withSpinner(
                        plotly::plotlyOutput(ns("random_layout"), width = "98%", height = "550px"),type = 5
                      ),
+                     br(),
                      column(12, uiOutput(ns("well_panel_layout_sq")))
             ),
             tabPanel("Field Book", 
@@ -345,11 +346,25 @@ mod_Square_Lattice_server <- function(id){
       )
     })
     
+    reset_selection <- reactiveValues(reset = 0)
+    
+    observeEvent(input$stacked_sq, {
+      reset_selection$reset <- 1
+    })
+    
+    observeEvent(input$layoutO_sq, {
+      reset_selection$reset <- 0
+    })
+    
     reactive_layoutSquare <- reactive({
       req(input$layoutO_sq)
       req(SQUARE_reactive())
       obj_sq <- SQUARE_reactive()
-      opt_sq <- as.numeric(input$layoutO_sq)
+      
+      if (reset_selection$reset == 1) {
+        opt_sq <- 1
+      } else opt_sq <- as.numeric(input$layoutO_sq)
+      
       locSelected <- as.numeric(input$locLayout_sq)
       try(plot_layout(x = obj_sq, 
                       layout = opt_sq, 
@@ -500,7 +515,7 @@ mod_Square_Lattice_server <- function(id){
           ggplot2::theme_minimal() + 
           ggplot2::theme(plot.title = ggplot2::element_text(family="Calibri", face="bold", size=13, hjust=0.5))
         
-        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1250, height = 640)
+        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1250, height = 560)
         return(p2)
       } else {
         showModal(

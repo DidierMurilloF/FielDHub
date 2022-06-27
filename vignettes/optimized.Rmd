@@ -48,33 +48,40 @@ You can run the same design with a function in the FielDHub package, `optimized_
 ```{r, echo = FALSE, warning=FALSE, comment='', include=FALSE}
 library(knitr)
 library(FielDHub)
-optim_expt <- optimized_arrangement(nrows = 29, 
-                                    ncols = 15, 
-                                    lines = 405, 
-                                    amountChecks = c(12,10,8), 
-                                    checks = 3,
-                                    l = 3,
-                                    plotNumber = c(1001,2001,3001),
-                                    seed = 123,
-                                    exptName = "Expt1")
+optim_expt <- optimized_arrangement(
+  nrows = 29, 
+  ncols = 15, 
+  lines = 405, 
+  amountChecks = c(12,10,8), 
+  checks = 3,
+  l = 3,
+  plotNumber = c(1001,2001,3001),
+  seed = 123,
+  exptName = "Expt1"
+)
 
 ```
+
 ```{r, results='hide'}
-optim_expt <- optimized_arrangement(nrows = 29, #number of rows in the field, 29 x 15
-                                    ncols = 15, #number of columns in the field
-                                    lines = 405, #number of entries
-                                    amountChecks = c(12,10,8), #numeric vector representing 
-                                                               #respective replicates of each check, 
-                                                               #or an integer total number of checks
-                                    checks = 3, #number of checks
-                                    l = 3, #number of locations
-                                    plotNumber = c(1001,2001,3001), #numeric vector containing 
-                                                                    #the starting plot number 
-                                                                    #for each location respectively, 
-                                                                    #or a single number for 1 location
-                                    seed = 123, #seed number to replicate identical randomizations
-                                    exptName = "Expt1") #optional name for experiment
+optim_expt <- optimized_arrangement(
+  nrows = 29, #number of rows in the field, 29 x 15
+  ncols = 15, #number of columns in the field
+  lines = 405, #number of entries
+  amountChecks = c(12,10,8), #numeric vector representing 
+                             #respective replicates of each check, 
+                             #or an integer total number of checks
+  checks = 3, #number of checks
+  l = 3, #number of locations
+  plotNumber = c(1001,2001,3001), #numeric vector containing 
+                                  #the starting plot number 
+                                  #for each location respectively, 
+                                  #or a single number for 1 location
+  seed = 123, #seed number to replicate identical randomizations
+  exptName = "Expt1" #optional name for experiment
+)
 ```
+
+
 ```{r, comment='',echo=FALSE}
 print(optim_expt)
 ```

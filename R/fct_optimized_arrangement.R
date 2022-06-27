@@ -220,19 +220,24 @@ optimized_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,  amo
     
     if (!is.null(exptName)) {
       Name_expt <- exptName 
-    }else Name_expt <- "20ExptOptim"
+    }else Name_expt <- "Expt1"
     
     split_name_spat <- function() {
       split_names <- base::matrix(data = Name_expt, nrow = nrows, ncol = ncols, byrow = TRUE)
       return(list(my_names = split_names))
     }
-    
+ 
     plot_number_spat <- function() {
       datos_name <- split_name_spat()$my_names
       plot_n_start <- plotNumber[sites]
-      my_split_plot_nub <- plot_number(movement_planter = planter, n_blocks = 1, n_rows = nrows, n_cols = ncols,
-                                       plot_n_start = plot_n_start, datos = datos_name, expe_name = Name_expt, ByRow = FALSE,
-                                       my_row_sets = NULL, ByCol = TRUE, my_col_sets = ncols)
+      
+      plot_number(
+        planter = planter,
+        plot_number_start = plot_n_start,
+        layout_names = datos_name,
+        expe_names = Name_expt,
+        fillers = 0
+      )
     }
     
     if (is.null(locationNames) || length(locationNames) != l) locationNames <- 1:l
@@ -247,9 +252,14 @@ optimized_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,  amo
       year <- format(Sys.Date(), "%Y")
       my_data_VLOOKUP <- prep$gen.list
       results_to_export <- list(random_entries_map, plot_number_L, Col_checks, my_names)
-      final_expt_export <- export_design(G = results_to_export, movement_planter =  planter,
-                                         location = loc[sites], Year = year, data_file = my_data_VLOOKUP,
-                                         reps = FALSE)
+      final_expt_export <- export_design(
+        G = results_to_export, 
+        movement_planter =  planter,
+        location = loc[sites], 
+        Year = year, 
+        data_file = my_data_VLOOKUP,
+        reps = FALSE
+      )
       
       return(list(final_expt = final_expt_export))
       
@@ -282,7 +292,8 @@ optimized_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,  amo
     entry_checks = checksEntries,
     rep_checks = RepChecks, 
     seed = seed,
-    locations = l, planter = planter,
+    locations = l, 
+    planter = planter,
     id_design = 16)
   output <- list(infoDesign = infoDesign, 
                  layoutRandom = layout_random_sites, 

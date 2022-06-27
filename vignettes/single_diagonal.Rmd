@@ -54,26 +54,30 @@ The **Field Book** displays all the information on the experimental design in a 
 You can run the same design with a function in the FielDHub package, `diagonal_arrangement()`. We can enter the information describing the above design like this:
 
 ```{r, results='hide'}
-diag <- diagonal_arrangement(nrows = 11,
-                     ncols = 40,
-                     lines = 400,
-                     checks = 6,
-                     l = 1,
-                     plotNumber = 1,
-                     seed = 123,
-                     exptName = "Expt1",
-                     locationNames = "FARGO")
+diag <- diagonal_arrangement(
+  nrows = 11,
+  ncols = 40,
+  lines = 400,
+  checks = 6,
+  l = 1,
+  plotNumber = 1,
+  seed = 123,
+  exptName = "Expt1",
+  locationNames = "FARGO"
+)
 ```
 ```{r, echo = FALSE, warning=FALSE, comment='', include=FALSE}
-diag <- diagonal_arrangement(nrows = 11,
-                     ncols = 40,
-                     lines = 400,
-                     checks = 6,
-                     l = 1,
-                     plotNumber = 1,
-                     seed = 123,
-                     exptName = "Expt1",
-                     locationNames = "FARGO")
+diag <- diagonal_arrangement(
+  nrows = 11,
+  ncols = 40,
+  lines = 400,
+  checks = 6,
+  l = 1,
+  plotNumber = 1,
+  seed = 123,
+  exptName = "Expt1",
+  locationNames = "FARGO"
+)
 
 ```
 ```{r, comment='',echo=FALSE}

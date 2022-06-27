@@ -10,6 +10,7 @@ vignette: >
 # App
 
 ## Inputs
+
 First, select "No" in the **Import entries' list** box, as we are entering our own information about the experiment. The first value we enter is the number of stacked experiments we want, in the **Input # of Stacked Expts** box. Below this we set the number of entries, in the **Input # of Entries** box, which is ### in our example experiment. On this experiment we also have the option to choose whether we randomize the entries or not, with the **Randomize Entries** toggle button. 
 
 In the next row of inputs on the left panel, we set the number of blocks and checks per each of these blocks, in the **Input # of Blocks** and **Checks per Block** boxes, respectively.
@@ -28,6 +29,7 @@ On the second tab, **Input Data**, you can see all the entries in the randomizat
 
 
 ### Randomized Field
+
 The **Randomized Field** tab displays a graphical representation of the randomization of the entries in a field of the specified dimensions. The checks are all colored uniquely, showing the number of times they are distributed throughout the field. The display includes numbered labels for the rows and columns. You can copy the field as a table or save it directly as an Excel file with the _Copy_ and _Excel_ buttons at the top. 
 
 ### Plot Number Field
@@ -42,35 +44,44 @@ You can run the same design with a function in the FielDHub package, `RCBD_augme
 ```{r, echo = FALSE, warning=FALSE, comment='', include=FALSE}
 library(knitr)
 library(FielDHub)
-rcbd_a <- RCBD_augmented(lines = 35,
-                         checks = 3,
-                         b = 5, 
-                         repsExpt = 3, 
-                         nrows = 5, 
-                         ncols = 10,
-                         seed = 123,
-                         random = TRUE)
+rcbd_a <- RCBD_augmented(
+  lines = 35,
+  checks = 3,
+  b = 5, 
+  repsExpt = 3, 
+  nrows = 5, 
+  ncols = 10,
+  seed = 123,
+  random = TRUE
+)
+```
 
-```
+
 ```{r, results='hide'}
-rcbd_a <- RCBD_augmented(lines = 35,
-                         checks = 3,
-                         b = 5, 
-                         repsExpt = 3, 
-                         nrows = 5, #number of rows in the field
-                         ncols = 10, #number of columns in the field
-                         seed = 123,
-                         random = TRUE)
+rcbd_a <- RCBD_augmented(
+  lines = 35,
+  checks = 3,
+  b = 5, 
+  repsExpt = 3, 
+  nrows = 5, #number of rows in the field
+  ncols = 10, #number of columns in the field
+  seed = 123,
+  random = TRUE
+)
 ```
+
+
 ```{r, comment='',echo=FALSE}
 print(rcbd_a)
 ```
+
 This returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are accessible by the `$` operator, i.e. `rcbd_a$layoutRandom` or `rcbd_a$fieldBook`. 
 
 `rcbd_a$fieldBook` is a list containing information about every plot in the field, with information about the location of the plot and the treatment in each plot. As seen in the output below, the field book has columns for `ID`, `EXPT`, `LOCATION`, `YEAR`, `PLOT`, `ROW`, `COLUMN`, `CHECKS`, `ENTRY`, and `TREATMENT`.
 ```{r, comment='', echo=FALSE}
 print(head(rcbd_a$fieldBook))
 ```
+
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(

@@ -112,9 +112,10 @@ mod_CRD_ui <- function(id) {
                       shinycssloaders::withSpinner(
                        plotly::plotlyOutput(ns("layout_random"), 
                                             width = "98%", 
-                                            height = "550px"),
+                                            height = "560px"),
                        type = 5
                      ),
+                     br(),
                      column(12,uiOutput(ns("well_panel_layout_CRD")))
             ),
             tabPanel("Field Book", 
@@ -378,13 +379,24 @@ mod_CRD_server <- function(id) {
       req(input$typlotCRD)
       tabsetPanel(
         if (input$typlotCRD != 3) {
-          tabPanel("Completely Randomized Field Layout", shinycssloaders::withSpinner(plotOutput(ns("layout.crd"), width = "100%", height = "650px"),
-                                                                                    type = 5))
+          tabPanel("Completely Randomized Field Layout", 
+                   shinycssloaders::withSpinner(
+                     plotOutput(ns("layout.crd"), 
+                                width = "100%",
+                                height = "650px"),
+                    type = 5))
         } else {
-          tabPanel("Completely Randomized Field Layout", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmapCRD"), width = "100%", height = "650px"),
-                                                                                    type = 5))
+          tabPanel("Completely Randomized Field Layout", 
+                   shinycssloaders::withSpinner(
+                     plotly::plotlyOutput(ns("heatmapCRD"), 
+                                          width = "100%", 
+                                          height = "650px"),
+                     type = 5))
         },
-        tabPanel("Completely Randomized Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("CRD.output")), type = 5))
+        tabPanel("Completely Randomized Field Book", 
+                 shinycssloaders::withSpinner(
+                   DT::DTOutput(ns("CRD.output")), 
+                   type = 5))
       )
       
     })
@@ -411,7 +423,7 @@ mod_CRD_server <- function(id) {
           ggplot2::ggtitle(heatmapTitle) +
           ggplot2::theme_minimal() + # I added this option 
           ggplot2::theme(plot.title = ggplot2::element_text(family="Calibri", face="bold", size=13, hjust=0.5))
-        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 640)
+        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 560)
         return(p2)
       } else {
         showModal(
