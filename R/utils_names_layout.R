@@ -11,7 +11,6 @@ names_layout <- function(w_map = NULL,
   if (kindExpt == "DBUDC") {
     if (myWay == "By Row") {
       blocks <- length(data_dim_each_block)
-      print(blocks)
       w_map_letters1 <- w_map_letters
       Index_block <- LETTERS[1:blocks]
       name_blocks <- expt_name
@@ -24,7 +23,7 @@ names_layout <- function(w_map = NULL,
       checks_ch <- as.character(checks) 
       for(i in nrow(w_map_letters1):1) { 
         for(j in 1:ncol(w_map_letters1)) { 
-          if (any(checks_ch %in% w_map_letters1[i, j]) && w_map_letters1[i,j] != "Filler") {
+          if (any(checks_ch %in% w_map_letters1[i, j]) & w_map_letters1[i,j] != "Filler") {
             if (j != ncol(w_map_letters1)){
               if (w_map_letters1[i, j + 1] == "Filler") {
                 w_map_letters1[i, j] <- w_map_letters1[i, j - 1]

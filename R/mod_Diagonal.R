@@ -688,6 +688,7 @@ mod_Diagonal_server <- function(id) {
       #}
     })
     
+    
     split_name_reactive <- reactive({
       req(rand_lines())
       
@@ -700,24 +701,12 @@ mod_Diagonal_server <- function(id) {
         planter = single_inputs()$planter_mov, 
         expt_name = expt_name
       )
-      
-      # split_name_diagonal1 <- names_diagonal(nrows = n_rows,
-      #                                       ncols = n_cols,
-      #                                       randomChecksMap = w_map, 
-      #                                       kindExpt = kindExpt_single, 
-      #                                       checks = 1:input$checks,
-      #                                       myWay = input$stacked,
-      #                                       Option_NCD = Option_NCD, 
-      #                                       expt_name = name_expt,
-      #                                       data_entry = data_entry,
-      #                                       reps = NULL,
-      #                                       data_dim_each_block = NULL,
-      #                                       w_map_letters1 = map_letters)
     })
+    
     
     plot_number_sites <- reactive({
       req(single_inputs())
-      if (is.null(single_inputs()$plotNumber) || single_inputs()$plotNumber == " ") {
+      if (is.null(single_inputs()$plotNumber)) {
         validate("Plot starting number is missing.")
       } 
       l <- single_inputs()$sites
@@ -746,7 +735,6 @@ mod_Diagonal_server <- function(id) {
       req(rand_lines())
       req(split_name_reactive()$my_names)
       datos_name <- split_name_reactive()$my_names 
-      print(datos_name)
       datos_name = as.matrix(datos_name) 
       n_rows <- field_dimensions_diagonal()$d_row
       n_cols <- field_dimensions_diagonal()$d_col

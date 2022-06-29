@@ -564,7 +564,7 @@ mod_pREPS_server <- function(id){
     
     observeEvent(input$ok.prep, {
       req(input$min.prep, input$max.prep)
-      if (input$max.prep > input$min.prep && input$min.prep != input$max.prep) {
+      if (input$max.prep > input$min.prep & input$min.prep != input$max.prep) {
         valsPREP$maxValue <- input$max.prep
         valsPREP$minValue  <- input$min.prep
         valsPREP$ROX <- as.numeric(input$ROX.PREP)
@@ -590,7 +590,7 @@ mod_pREPS_server <- function(id){
     simuDataPREP <- reactive({
       req(pREPS_reactive()$fieldBook[[1]])
       req(prep_inputs())
-      if(!is.null(valsPREP$maxValue) && !is.null(valsPREP$minValue) && !is.null(valsPREP$trail.prep)) {
+      if(!is.null(valsPREP$maxValue) & !is.null(valsPREP$minValue) & !is.null(valsPREP$trail.prep)) {
         maxVal <- as.numeric(valsPREP$maxValue)
         minVal <- as.numeric(valsPREP$minValue)
         ROX_PREP <- as.numeric(valsPREP$ROX)
@@ -637,7 +637,7 @@ mod_pREPS_server <- function(id){
     
     observeEvent(input$ok.prep, {
       req(input$min.prep, input$max.prep)
-      if (input$max.prep > input$min.prep && input$min.prep != input$max.prep) {
+      if (input$max.prep > input$min.prep & input$min.prep != input$max.prep) {
         heat_map_prep$heat_map_option <- TRUE
       }
     })

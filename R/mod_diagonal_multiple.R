@@ -978,7 +978,7 @@ mod_diagonal_multiple_server <- function(id) {
     })
     
     plot_number_sites <- reactive({
-      if (is.null(multiple_inputs()$plotNumber) || multiple_inputs()$plotNumber == " ") {
+      if (is.null(multiple_inputs()$plotNumber)) {
         validate("Plot starting number is missing.")
       }
       blocks = length(multiple_inputs()$blocks)
@@ -992,8 +992,6 @@ mod_diagonal_multiple_server <- function(id) {
       if (any(plotNumber %% 1 != 0)) {
         validate("plotNumber should be integers.")
       }
-      
-      
       
       if (!is.null(l)) {
         plot_number <- vector(mode = "list", length = l)
