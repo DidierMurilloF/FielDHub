@@ -1,6 +1,6 @@
 Package: FielDHub
 Title: A Shiny App for Design of Experiments in Life Sciences
-Version: 0.1.0
+Version: 1.2.0
 Authors@R: 
     c(person(given = "Didier",
              family = "Murillo",
@@ -42,7 +42,6 @@ Imports:
     golem,
     shiny (>= 1.6.0),
     htmltools,
-    attempt,
     DT,
     shinythemes,
     turner,
