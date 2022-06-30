@@ -90,6 +90,44 @@ This returns a list consisting of all the information displayed in the output ta
 print(head(diag$fieldBook))
 ```
 
+## Multiple Diagonal Arrangement
+
+A variation on the single diagonal arrangement included in the `diagonal_arrangement()` function is the multiple diagonal arrangement, where the experiment is split into blocks of specified size. An example of a multiple diagonal arrangement is as follows:
+
+```{r, results='hide'}
+m_diag <- diagonal_arrangement(
+  kindExpt = "DBUDC", # Decision Blocks Un-replicated Design with Diagonal Checks
+  blocks = c(100,120,180), #blocks in multiple arrangement. required if kindExpt = "DBUDC"
+  nrows = 11,
+  ncols = 40,
+  lines = 400,
+  checks = 6,
+  l = 1,
+  plotNumber = 1,
+  seed = 123,
+  exptName = "Expt1",
+  locationNames = "FARGO"
+)
+```
+```{r, echo = FALSE, warning=FALSE, comment='', include=FALSE}
+m_diag <- diagonal_arrangement(
+  kindExpt = "DBUDC",
+  blocks = c(100,120,180),
+  nrows = 11,
+  ncols = 40,
+  lines = 400,
+  checks = 6,
+  l = 1,
+  plotNumber = 1,
+  seed = 123,
+  exptName = "Expt1",
+  locationNames = "FARGO"
+)
+
+```
+```{r, comment='',echo=FALSE}
+print(m_diag)
+```
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(

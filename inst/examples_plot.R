@@ -283,7 +283,7 @@ spatAB <- diagonal_arrangement(
   planter = "serpentine",
   exptName = c("20WRA", "20WRB", "20WRC"), 
   blocks = c(90, 90, 90),
-  stacked = "column"
+  splitBy = "column"
 )
 
 plot(spatAB, l = 10)
