@@ -1,8 +1,8 @@
 ---
-title: "alpha"
+title: "Alpha Lattice Design"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{alpha}
+  %\VignetteIndexEntry{alpha_lattice}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

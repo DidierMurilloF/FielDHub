@@ -1,0 +1,280 @@
+---
+title: "Unreplicated Diagonal Arrangement Design"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{diagonal_arrangement}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+## Single Diagonal Arrangement in FielDHub App
+
+One of the kinds of unreplicated designs you can use in FielDHub is single diagonal arrangement. In this design you can set the number of entries and the number of checks for the experiment. You can also choose to run the same experiment over multiple locations. For this experiment, we have 300 entries in the field and we want to use 5 checks. We will run this experiment in 1 location. 
+
+## Generate a Single Diagonal Arrangement in FielDHub app
+
+We will show how to generate a Single Diagonal Arrangement in `FielDHub` app step by step through an example. We say a project needs to test 300 genotypes of barley in a field containing 15 rows and 22 columns of plots. In this example, these 300 genotypes are allocated into one experiment. In addition, five checks are included in a systematic diagonal arrangement across field to fill 30 plots representing 9.09% of the total number of experimental plots.
+
+First, go to **Unreplicated Designs** > **Single Diagonal Arrangement**
+
+##  Inputs 
+
+1. **Import entries' list?** Choose whether to import a list with entry numbers and names for genotypes or treatments.
+    * If the selection is `No`, that means the app is going to generate synthetic data for entries and names of the treatment/genotypes based on the user inputs.
+
+    * If the selection is `Yes`, the entries list has to fulfill a specific format and it must be a `.csv` file. The entries list file must have the columns `ENTRY` and `NAME`. The `ENTRY` column is for the unique entry integer number that identifies the treatments/genotypes. The column `NAME` is for the name of the treatments/genotypes. Both ENTRY and NAME must be unique, duplicated are not allowed. As Follow we show an example of data input for the entries list. In this example, we have an entry list with four checks and 8 treatments/genotypes. It is important to allocate the checks in the top part of the file. 
+
+```{r, include=FALSE}
+library(FielDHub)
+ENTRY <- 1:12
+NAME <- c(c("CH1","CH2","CH3","CH4"), paste0("ND-", 5:12))
+df <- data.frame(ENTRY,NAME)
+```
+
+```{r, echo = FALSE, results='asis'}
+library(knitr)
+kable(df)
+```
+
+2. Enter the number of entries/treatments in the **Input # of Entries** box, which is 300 in our case.
+
+3. Select 6 from the drop down on the **Input # of Checks** box. 
+
+4. Since we want to run this experiment over 1 location, set **Input # of Locations** to 1.
+
+5. Select `serpentine` or `cartesian` in the **Plot Order Layout**. For this example we will set the `serpentine` layout.
+
+6. To ensure that randomization are consistent across sessions, we can set a seed number in the box labeled **Seed Number**. For instance, we will set it to 123. 
+
+7. Enter the name for the experiment in the **Input Experiment Name** box. For example, `PYT_BARLEY_2022`.
+
+8. Enter the starting plot number in the **Starting Plot Number** box. In this experiment we want the plot start at `1001`.
+
+9. Enter the name of the site/location in the **Input the Location** box. In this experiment we want the site is `FARGO`.
+
+10. Once we have entered all the information for our experiment on the left side panel, click the **Run!** button to run the design. 
+
+11. You will then be prompted to select the dimensions of the field from the list of options in the drop down in the middle of the screen with the box labeled **Select dimensions of field**. In our case, we will select `15 x 22`. 
+
+12. Click the **Randomize!** button to randomize the experiment with the set field dimensions and to see the output plots. 
+
+
+If you change any of the inputs on the left side panel after running an experiment initially, you have to click the Run and Randomize buttons again, to re-run with the new inputs.
+
+## Outputs
+
+After you run a single diagonal arrangement in FielDHub and set the dimensions of the field, there are several ways to display the information contained in the field book. The first tab, **Expt Design Info**, shows the option to change the dimensions of the field and re-randomize, as well as a reference guide for experiment design. 
+
+### Input Data
+On the second tab, **Input Data**, you can see all the entries in the randomization in a list that was generated with the inputs, as well as a table of the checks with the number of times they appear in the field.
+
+
+### Randomized Field
+The **Randomized Field** tab displays a graphical representation of the randomization of the entries in a field of the specified dimensions. The checks are all colored uniquely, showing the number of times they are distributed throughout the field. The display includes numbered labels for the rows and columns. You can copy the field as a table or save it directly as an Excel file with the _Copy_ and _Excel_ buttons at the top. 
+
+In this tab by the **Choose % of Checks:** box  users can play with different options for the total amount of checks in the field. 
+
+### Plot Number Field
+On the **Plot Number Field** tab, there is a table display of the field with the plots numbered according to the Plot Order Layout specified, either _serpentine_ or _cartesian_. You can see the corresponding entries for each plot number in the field book. Like the Randomized field tab, you can copy the table or save it as an Excel file with the _Copy_ and _Excel_ buttons. 
+
+### Field Book
+The **Field Book** displays all the information on the experimental design in a table format. It contains the specific plot number and the row and column address of each entry, as well as the corresponding treatment on that plot. This table is searchable, and we can filter the data in relevant columns. 
+
+# Function : `diagonal_arrangement()`
+
+## Single Diagonal Arrangement
+
+You can run the same design with a function in the FielDHub package, `diagonal_arrangement()`. We can enter the information describing the above design like this:
+
+```{r, echo = TRUE, warning=FALSE, comment=''}
+single_diag <- diagonal_arrangement(
+  nrows = 15,
+  ncols = 22,
+  lines = 300,
+  checks = 5,
+  l = 1,
+  plotNumber = 1,
+  seed = 123,
+  exptName = "Expt1",
+  locationNames = "FARGO"
+)
+```
+
+### Print `single_diag` output
+
+For printing a summary of the information that is in the object `single_diag`
+
+```{r, comment='', echo=TRUE}
+print(single_diag)
+```
+
+### Acces to `single_diag` output
+
+This returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are accessible by the `$` operator, i.e. `single_diag$layoutRandom` or `single_diag$fieldBook`. 
+
+`single_diag$fieldBook` is a list containing information about every plot in the field, with information about the location of the plot and the treatment in each plot. As seen in the output below, the field book has columns for `ID`, `EXPT`, `LOCATION`, `YEAR`, `PLOT`, `ROW`, `COLUMN`, `CHECKS`, `ENTRY`, and `TREATMENT`.
+
+```{r, comment='', echo=FALSE}
+print(head(single_diag$fieldBook), 10)
+```
+
+### Plot field layout
+
+For ploting the layout that lay onb the cpordanes `ROW` and `COLUMN` in the fielbook object we can use the generic function `plot()` as follow,
+
+```{r, fig.align='center', fig.width=7, fig.height=5}
+p <- plot(single_diag)
+p$layout
+```
+
+<br>
+
+
+
+## Multiple Diagonal Arrangement in FielDHub app
+
+One of the kinds of unreplicated designs you can use in FielDHub is single diagonal arrangement. In this design you can set the number of entries and the number of checks for the experiment. You can also choose to run the same experiment over multiple locations. For this experiment, we have 300 entries in the field and we want to use 5 checks. We will run this experiment in 1 location. 
+
+## Generate a Multiple Diagonal Arrangement in FielDHub app
+
+We will show how to generate a Multiple Diagonal Arrangement in `FielDHub` app step by step through an example. We say a project needs to test 300 genotypes of barley in a field containing 15 rows and 22 columns of plots. In this example, these 300 genotypes are divided among three different experiments in amount of 100, 120 and 80 respectively. In addition, five checks are included in a systematic diagonal arrangement across experiments to fill 30 plots representing 9.1% of the total number of experimental plots.
+
+First, go to **Unreplicated Designs** > **Multiple Diagonal Arrangement**
+
+##  Inputs 
+
+1. **Import entries' list?** Choose whether to import a list with entry numbers and names for genotypes or treatments.
+    * If the selection is `No`, that means the app is going to generate synthetic data for entries and names of the treatment/genotypes based on the user inputs.
+
+    * If the selection is `Yes`, the entries list has to fulfill a specific format and it must be a `.csv` file. The entries list file must have the columns `ENTRY` and `NAME`. The `ENTRY` column is for the unique entry integer number that identifies the treatments/genotypes. The column `NAME` is for the name of the treatments/genotypes. Both ENTRY and NAME must be unique, duplicated are not allowed. As Follow we show an example of data input for the entries list. In this example, we have an entry list with four checks and 8 treatments/genotypes. It is important to allocate the checks in the top part of the file. 
+
+```{r, include=FALSE}
+library(FielDHub)
+ENTRY <- 1:12
+NAME <- c(c("CH1","CH2","CH3","CH4"), paste0("ND-", 5:12))
+df <- data.frame(ENTRY,NAME)
+```
+
+```{r, echo = FALSE, results='asis'}
+library(knitr)
+kable(df)
+```
+
+2. Select the option **Use the same entries across experiments!** box if the purpose is to make replications instead of testing different experiments. Checking this option requires that the size of blocks is the same. For example, 100 treatments will test across 3 blocks. That means we need to set `300` in **Input # of Entries** and  `100, 100, 100` as input in **Input # Entries per Expt**. In our case we will keep unchecked this option.
+
+3. Enter the total number of entries/treatments in the **Input # of Entries** box, which is 300 in our case.
+
+4. Enter the number of entries/treatments by experiment separate by comma in the **Input # Entries per Expt** box. which is `100, 120, 80` in our case.
+
+5. Select 5 from the drop down on the **Input # of Checks** box. 
+
+6. Since we want to run this experiment over 1 location, set **Input # of Locations** to 1.
+
+7. Select `By Row` or `By Column` in the **Blocks Layout:**. For this example we will set the `By Row` experiments/blocks layout.
+
+8. Select `serpentine` or `cartesian` in the **Plot Order Layout**. For this example we will set the `serpentine` layout.
+
+9. To ensure that randomization are consistent across sessions, we can set a seed number in the box labeled **Seed Number**. For instance, we will set it to 17. 
+
+10. Enter the name for each experiment in the **Input Experiment Name** box. For example, `MATURITY1, MATURITY2, MATURITY3`.
+
+11. Enter the starting plot number for each experiment in the **Starting Plot Number** box. In this experiment we want the plot start at `1, 1001, 2001` for each experiment. The app also allows set only one number for all experiment.
+
+12. Enter the name of the site/location in the **Input the Location** box. In this experiment we set the site as `FARGO`.
+
+13. Once we have entered all the information for our experiment on the left side panel, click the **Run!** button to run the design. 
+
+14. You will then be prompted to select the dimensions of the field from the list of options in the drop down in the middle of the screen with the box labeled **Select dimensions of field**. In our case, we will select `15 x 22`. 
+
+15. Click the **Randomize!** button to randomize the experiment with the set field dimensions and to see the output plots. 
+
+
+If you change any of the inputs on the left side panel after running an experiment initially, you have to click the Run and Randomize buttons again, to re-run with the new inputs.
+
+## Outputs
+
+After you run a single diagonal arrangement in FielDHub and set the dimensions of the field, there are several ways to display the information contained in the field book. The first tab, **Expt Design Info**, shows the option to change the dimensions of the field and re-randomize, as well as a reference guide for experiment design. 
+
+### Input Data
+On the second tab, **Input Data**, you can see all the entries in the randomization in a list that was generated with the inputs, as well as a table of the checks with the number of times they appear in the field.
+
+
+### Randomized Field
+The **Randomized Field** tab displays a graphical representation of the randomization of the entries in a field of the specified dimensions. The checks are all colored uniquely, showing the number of times they are distributed throughout the field. The display includes numbered labels for the rows and columns. You can copy the field as a table or save it directly as an Excel file with the _Copy_ and _Excel_ buttons at the top. 
+
+In this tab by the **Choose % of Checks:** box  users can play with different options for the total amount of checks in the field. 
+
+### Plot Number Field
+On the **Plot Number Field** tab, there is a table display of the field with the plots numbered according to the Plot Order Layout specified, either _serpentine_ or _cartesian_. You can see the corresponding entries for each plot number in the field book. Like the Randomized field tab, you can copy the table or save it as an Excel file with the _Copy_ and _Excel_ buttons. 
+
+### Field Book
+The **Field Book** displays all the information on the experimental design in a table format. It contains the specific plot number and the row and column address of each entry, as well as the corresponding treatment on that plot. This table is searchable, and we can filter the data in relevant columns. 
+
+<br>
+
+# Function : `diagonal_arrangement()`
+
+## Multiple Diagonal Arrangement
+
+A variation on the single diagonal arrangement included in the `diagonal_arrangement()` function is the multiple diagonal arrangement, where the experiment is split into blocks of specified size. An example of a multiple diagonal arrangement is as follows:
+
+```{r, comment='', echo=TRUE}
+multi_diag <- diagonal_arrangement(
+  kindExpt = "DBUDC", # Decision Blocks Un-replicated Design with Diagonal Checks
+  blocks = c(100,120,80), #blocks in multiple arrangement. required if kindExpt = "DBUDC"
+  nrows = 15,
+  ncols = 22,
+  lines = 300,
+  checks = 5,
+  l = 1,
+  plotNumber = c(1, 1001, 2001),
+  seed = 17,
+  exptName = c("MATURITY1", "MATURITY2", "MATURITY3"),
+  locationNames = "FARGO"
+)
+```
+
+### Print `multi_diag` output summary
+
+For printing a summary of the information that is in the object `single_diag` 
+
+```{r, comment='', echo=TRUE}
+print(multi_diag)
+```
+
+### Acces to `multi_diag` output
+
+This returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are accessible by the `$` operator, i.e. `multi_diag$layoutRandom` or `multi_diag$fieldBook`. 
+
+`multi_diag$fieldBook` is a data frame containing information about every plot in the field, with information about the location of the plot and the treatment in each plot. As seen in the output below, the field book has columns for `ID`, `EXPT`, `LOCATION`, `YEAR`, `PLOT`, `ROW`, `COLUMN`, `CHECKS`, `ENTRY`, and `TREATMENT`.
+
+We will see the first 10 instances of the field book.
+
+```{r, comment='', echo=TRUE}
+field_book <- multi_diag$fieldBook
+head(field_book, 10)
+```
+
+### Plot field layout
+
+For ploting the layout that lay onb the cpordanes `ROW` and `COLUMN` in the fielbook object we can use the generic function `plot()` as follow,
+
+```{r, fig.align='center', fig.width=7, fig.height=5}
+p <- plot(multi_diag)
+p$layout
+```
+
+The figure above shows a map of an experiment randomized as a Decision Block Unreplicated Design with Checks on Diagonals. gray, salmon, and pink shade the blocks of unreplicated experiments, while distinctively colored check plots are replicated throughout the field in a systematic diagonal arrangement.
+
+<br>
+<br>
+<br>
+
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
