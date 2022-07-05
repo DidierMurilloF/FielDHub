@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 
 ## Single Diagonal Arrangement in FielDHub App
 
-One of the kinds of unreplicated designs you can use in FielDHub is single diagonal arrangement. In this design you can set the number of entries and the number of checks for the experiment. You can also choose to run the same experiment over multiple locations. 
+In some experiments, there is insufficient seed quantity or field space to conduct trials with large numbers of genotypes, so plant breeders must use unreplicated or partially replicated experimental designs, like unreplicated designs with checks allocated in a systematic diagonal distribution. FielDHub includes a function to run such experimental designs, as well as tabs for single and multiple diagonal arrangments on the FielDHub app. 
 
 ## Generate a Single Diagonal Arrangement in FielDHub app
 
@@ -47,9 +47,10 @@ library(knitr)
 kable(df)
 ```
 
+
 2. Enter the number of entries/treatments in the **Input # of Entries** box, which is 300 in our case.
 
-3. Select 6 from the drop down on the **Input # of Checks** box. 
+3. Select 5 from the drop down on the **Input # of Checks** box. 
 
 4. Since we want to run this experiment over 1 location, set **Input # of Locations** to 1.
 
@@ -108,14 +109,14 @@ single_diag <- diagonal_arrangement(
   l = 1,
   plotNumber = 1,
   seed = 123,
-  exptName = "Expt1",
+  exptName = "PYT_BARLEY_2022",
   locationNames = "FARGO"
 )
 ```
 
 ### Print `single_diag` output
 
-For printing a summary of the information that is in the object `single_diag` we can use the generic function `print()`
+To print a summary of the information that is in the object `single_diag`, we can use the generic function `print()`. 
 
 ```{r, comment='', echo=TRUE}
 print(single_diag)
@@ -147,7 +148,7 @@ p$layout
 
 ## Multiple Diagonal Arrangement in FielDHub app
 
-One of the kinds of unreplicated designs you can use in FielDHub is single diagonal arrangement. In this design you can set the number of entries and the number of checks for the experiment. You can also choose to run the same experiment over multiple locations. For this experiment, we have 300 entries in the field and we want to use 5 checks. We will run this experiment in 1 location. 
+One of the kinds of unreplicated designs you can use in FielDHub is the multiple diagonal arrangement. In this design you can set the number of entries and the number of checks for the experiment. You can also choose to run the same experiment over multiple locations. For this experiment, we have 300 entries in the field and we want to use 5 checks. We will run this experiment in 1 location. 
 
 ## Generate a Multiple Diagonal Arrangement in FielDHub app
 
@@ -160,7 +161,7 @@ First, go to **Unreplicated Designs** > **Multiple Diagonal Arrangement**
 1. **Import entries' list?** Choose whether to import a list with entry numbers and names for genotypes or treatments.
     * If the selection is `No`, that means the app is going to generate synthetic data for entries and names of the treatment/genotypes based on the user inputs.
 
-    * If the selection is `Yes`, the entries list must fulfill a specific format and must be a `.csv` file. The file must have the columns `ENTRY` and `NAME`. The `ENTRY` column must have a unique entry integer number for each treatment/genotype. The column `NAME` must have a unique name that identifies each treatment/genotype. Both ENTRY and NAME must be unique, duplicated are not allowed. As follow, we show an example of the entries list format. This example has an entry list with four checks and 8 treatments/genotypes. It is crucial to allocate the checks in the top part of the file.
+    * If the selection is `Yes`, the entries list must fulfill a specific format and must be a `.csv` file. The file must have the columns `ENTRY` and `NAME`. The `ENTRY` column must have a unique entry integer number for each treatment/genotype. The column `NAME` must have a unique name that identifies each treatment/genotype. Both ENTRY and NAME must be unique, duplicates are not allowed. As follow, we show an example of the entries list format. This example has an entry list with four checks and 8 treatments/genotypes. It is crucial to allocate the checks in the top part of the file.
     
     
 ```{r, include=FALSE}
@@ -169,7 +170,7 @@ ENTRY <- 1:12
 NAME <- c(c("CH1","CH2","CH3","CH4"), paste0("ND-", 5:12))
 df <- data.frame(ENTRY,NAME)
 ```
-
+    * **Note:** If you wish to create multiple blocks of different sizes from an imported entries list, for example, a block of size 80, 90, and 100 plots, FielDHub will read the imported entries list as checks, then the 80 entries for the first block, then the 90 entries for the second block, then the 100 entries for the last block. 
 ```{r, echo = FALSE, results='asis'}
 library(knitr)
 kable(df)
@@ -231,7 +232,7 @@ The **Field Book** displays all the information on the experimental design in a 
 
 ## Multiple Diagonal Arrangement
 
-A variation on the single diagonal arrangement included in the `diagonal_arrangement()` function is the multiple diagonal arrangement, where the experiment is split into blocks of specified size. An example of a multiple diagonal arrangement is as follows:
+A variation on the single diagonal arrangement included in the `diagonal_arrangement()` function is the multiple diagonal arrangement, where the experiment is split into blocks of specified size. This allows a breeder to design a field that contains multiple different experiments, for example several different stages of maturity. An example of a multiple diagonal arrangement is as follows:
 
 ```{r, comment='', echo=TRUE}
 multi_diag <- diagonal_arrangement(
