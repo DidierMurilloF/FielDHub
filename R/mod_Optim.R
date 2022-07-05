@@ -327,7 +327,7 @@ mod_Optim_server <- function(id) {
 
     observeEvent(list_to_observe_optim(), {
       output$download_expt_optim <- renderUI({
-        if (randomize_hit_optim$times > 0 && user_tries_optim$tries_optim > 0) {
+        if (randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0) {
           downloadButton(ns("downloadData.spatial"),
                           "Save Experiment",
                           style = "width:100%")
@@ -515,21 +515,6 @@ mod_Optim_server <- function(id) {
         )
     })
     
-    # split_name_spatial <- reactive({
-    #   req(optimized_arrang())
-    #   nrows <- field_dimensions_optim()$d_row
-    #   ncols <- field_dimensions_optim()$d_col
-    #   my_col_sets <- ncols
-    #   blocks = 1
-    #   if (optim_inputs()$expt_name != "") {
-    #     Name_expt <- optim_inputs()$expt_name 
-    #   }else Name_expt = paste0(rep("Expt1", times = blocks), 1:blocks)
-    #   
-    #   split_names <- split_name(n_rows = nrows, n_cols = ncols, Name_expt = Name_expt,
-    #                             by_row = FALSE, col_sets = my_col_sets, row_sets = NULL)
-    #   return(list(my_names = split_names))
-    # })
-    
     output$PLOTFIELD <- DT::renderDT({
       test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0
       if (!test) return(NULL)
@@ -616,7 +601,7 @@ mod_Optim_server <- function(id) {
     
     observeEvent(input$ok.optim, {
       req(input$min.optim, input$max.optim)
-      if (input$max.optim > input$min.optim && input$min.optim != input$max.optim) {
+      if (input$max.optim > input$min.optim & input$min.optim != input$max.optim) {
         valsOPTIM$maxValue <- input$max.optim
         valsOPTIM$minValue  <- input$min.optim
         valsOPTIM$ROX <- as.numeric(input$ROX.O)
@@ -641,7 +626,7 @@ mod_Optim_server <- function(id) {
     
     simuDataOPTIM <- reactive({
       req(optimized_arrang()$fieldBook)
-      if(!is.null(valsOPTIM$maxValue) && !is.null(valsOPTIM$minValue) && !is.null(valsOPTIM$trail.optim)) {
+      if(!is.null(valsOPTIM$maxValue) & !is.null(valsOPTIM$minValue) & !is.null(valsOPTIM$trail.optim)) {
         maxVal <- as.numeric(valsOPTIM$maxValue)
         minVal <- as.numeric(valsOPTIM$minValue)
         ROX_O <- as.numeric(valsOPTIM$ROX)
@@ -692,7 +677,7 @@ mod_Optim_server <- function(id) {
     
     observeEvent(input$ok.optim, {
       req(input$min.optim, input$max.optim)
-      if (input$max.optim > input$min.optim && input$min.optim != input$max.optim) {
+      if (input$max.optim > input$min.optim & input$min.optim != input$max.optim) {
         heat_map_optim$heat_map_option <- TRUE
       }
     })

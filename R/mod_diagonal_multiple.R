@@ -47,12 +47,12 @@ mod_diagonal_multiple_ui <- function(id) {
           ns = ns,
           numericInput(inputId = ns("lines.db"), 
                       label = "Input # of Entries:",
-                      value = 270, 
+                      value = 300, 
                       min = 50)
         ),
         textInput(ns("blocks.db"), 
                   "Input # Entries per Expt:",
-                  value = "100,100,70"),
+                  value = "100,120,80"),
         
         selectInput(inputId = ns("checks.db"),
                     label = "Input # of Checks:",
@@ -102,7 +102,7 @@ mod_diagonal_multiple_ui <- function(id) {
                  style=list("padding-left: 5px;"),
                  textInput(ns("expt_name_multiple"), 
                            "Input Experiment Name:", 
-                           value = "Expt1")
+                           value = c("Expt1, Expt2, Expt3"))
           )
         ),    
         fluidRow(
@@ -225,6 +225,7 @@ mod_diagonal_multiple_server <- function(id) {
       blocks <- as.vector(unlist(strsplit(input$blocks.db, ",")))
       n_blocks <- length(blocks)
       Name_expt <- as.vector(unlist(strsplit(input$expt_name_multiple, ",")))
+      Name_expt <- gsub(" ", "", Name_expt)
       if (length(Name_expt) == n_blocks) {
         expe_names <- Name_expt
       }else {
@@ -978,7 +979,7 @@ mod_diagonal_multiple_server <- function(id) {
     })
     
     plot_number_sites <- reactive({
-      if (is.null(multiple_inputs()$plotNumber) || multiple_inputs()$plotNumber == " ") {
+      if (is.null(multiple_inputs()$plotNumber)) {
         validate("Plot starting number is missing.")
       }
       blocks = length(multiple_inputs()$blocks)
@@ -992,8 +993,6 @@ mod_diagonal_multiple_server <- function(id) {
       if (any(plotNumber %% 1 != 0)) {
         validate("plotNumber should be integers.")
       }
-      
-      
       
       if (!is.null(l)) {
         plot_number <- vector(mode = "list", length = l)

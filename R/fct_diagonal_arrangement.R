@@ -14,15 +14,14 @@
 #' @param l Number of locations or sites. By default  \code{l = 1}.
 #' @param plotNumber Numeric vector with the starting plot number for each location. 
 #' By default \code{plotNumber = 101}.
-#' @param stacked Option to split the field when \code{kindExpt = 'DBUDC'} is selected. 
-#' By default \code{stacked = 'row'}.
+#' @param splitBy Option to split the field when \code{kindExpt = 'DBUDC'} is selected. 
+#' By default \code{splitBy = 'row'}.
 #' @param seed (optional) Real number that specifies the starting seed to obtain reproducible designs.
 #' @param blocks Number of experiments or blocks to generate an \code{DBUDC} design. 
 #' If \code{kindExpt = 'DBUDC'} and data is null, \code{blocks} are mandatory.
 #' @param exptName (optional) Name of the experiment.
 #' @param locationNames (optional) Names each location.
-#' @param data (optional) Data frame with 3 columns: \code{ENTRY | NAME | BLOCK} or only 2 
-#' columns \code{ENTRY | NAME} if \code{kindExpt = 'SUDC'}.
+#' @param data (optional) Data frame with 2 columns: \code{ENTRY | NAME }.
 #' 
 #' @author Didier Murillo [aut],
 #'         Salvador Gezan [aut],
@@ -82,7 +81,7 @@
 #'                                plotNumber = 1, 
 #'                                kindExpt = "DBUDC", 
 #'                                planter = "serpentine", 
-#'                                stacked = "row", 
+#'                                splitBy = "row", 
 #'                                data = treatment_list)
 #' spatDB$infoDesign
 #' spatDB$layoutRandom
@@ -99,20 +98,27 @@
 #'                                planter = "serpentine",
 #'                                exptName = c("20WRA", "20WRB", "20WRC"), 
 #'                                blocks = c(90, 90, 90),
-#'                                stacked = "column")
+#'                                splitBy = "column")
 #' spatAB$infoDesign
 #' spatAB$layoutRandom
 #' spatAB$plotsNumber
 #' head(spatAB$fieldBook,12)
 #' 
 #' @export
-diagonal_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL, 
-                                        checks = NULL, planter = "serpentine", 
-                                        l = 1, plotNumber = 101, kindExpt = "SUDC", 
-                                        stacked = "row", seed = NULL, 
-                                        blocks = NULL, exptName = NULL, 
-                                        locationNames = NULL, 
-                                        data = NULL) {
+diagonal_arrangement <- function(nrows = NULL, 
+                                 ncols = NULL, 
+                                 lines = NULL, 
+                                 checks = NULL, 
+                                 planter = "serpentine", 
+                                 l = 1,
+                                 plotNumber = 101, 
+                                 kindExpt = "SUDC", 
+                                 splitBy = "row",
+                                 seed = NULL, 
+                                 blocks = NULL,
+                                 exptName = NULL, 
+                                 locationNames = NULL, 
+                                 data = NULL) {
   
   if (all(c("serpentine", "cartesian") != planter)) {
     base::stop('Input for planter is unknown. Please, choose one: "serpentine" or "cartesian"')
@@ -120,8 +126,8 @@ diagonal_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,
   if (all(c("SUDC", "DBUDC") != kindExpt)) {
     base::stop('Input for kindExpt is unknown. Please, choose one: "SUDC" or "DBUDC"')
   }
-  if (all(c("column", "row") != stacked)) {
-    base::stop('Input for stacked is unknown. Please, choose one: "column" or "row"')
+  if (all(c("column", "row") != splitBy)) {
+    base::stop('Input for splitBy is unknown. Please, choose one: "column" or "row"')
   }
   if (!is.null(plotNumber) && is.numeric(plotNumber)) {
     if(any(plotNumber < 1) || any(diff(plotNumber) < 0)) {
@@ -145,13 +151,6 @@ diagonal_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,
       message(cat("Warning message:", "\n", "Since plotNumber was missing, it was set up to default value of: ", plotNumber))
     }
   }else stop("Number of locations/sites is missing")
-
-  
-  # if(is.null(data) && !is.null(plotNumber) && kindExpt == "DBUDC") {
-  #   if(length(plotNumber) > 1 && length(blocks) != length(plotNumber)) {
-  #     base::stop('The input plotNumber and blocks need to be of the same length. You can consider plotNumber as an integer.')
-  #   }
-  # }
 
   if (!is.null(checks) && is.numeric(checks) && all(checks %% 1 == 0)) {
     if(!is.null(data)) {
@@ -194,7 +193,7 @@ diagonal_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,
   
   Option_NCD <- TRUE
   
-  if (stacked == "column") {
+  if (splitBy == "column") {
     Way <- "By Column"
   }else {
     Way <- "By Row"
@@ -227,16 +226,16 @@ diagonal_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,
       }
     }else {
       if (kindExpt != "DBUDC") {
-        NAME <- c(paste(rep("Check", checks), 1:checks),
-                  paste(rep("gen", lines), (checksEntries[checks] + 1):(checksEntries[1] + lines + checks - 1)))
+        NAME <- c(paste0(rep("Check-", checks), 1:checks),
+                  paste0(rep("Gen-", lines), (checksEntries[checks] + 1):(checksEntries[1] + lines + checks - 1)))
         data_entry_UP <- data.frame(list(ENTRY = checksEntries[1]:(checksEntries[1] + lines + checks - 1),	NAME = NAME))
         colnames(data_entry_UP) <- c("ENTRY", "NAME")
         if (nrow(data_entry_UP) != (lines + checks)) base::stop("nrows data != of lines + checks")
       }else if (kindExpt == "DBUDC") {
         if(is.null(blocks)) stop("'diagonal_arrangement()' requires blocks when kindExpt = 'DBUDC' and data is null.")
         if(sum(blocks) != lines) stop("In 'diagonal_arrangement()' number of lines and total lines in 'blocks' do not match.")
-        NAME <- c(paste(rep("Check", checks), 1:checks),
-                  paste(rep("gen", lines), (checksEntries[checks] + 1):(checksEntries[1] + lines + checks - 1)))
+        NAME <- c(paste0(rep("Check-", checks), 1:checks),
+                  paste0(rep("Gen-", lines), (checksEntries[checks] + 1):(checksEntries[1] + lines + checks - 1)))
         data_entry_UP <- data.frame(list(ENTRY = checksEntries[1]:(checksEntries[1] + lines + checks - 1),	NAME = NAME))
         data_entry_UP$BLOCK <- c(rep("ALL", checks), rep(1:length(blocks), times = blocks))
         colnames(data_entry_UP) <- c("ENTRY", "NAME", "BLOCK")
@@ -275,8 +274,6 @@ diagonal_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,
     dim_data_1 = getData()$dim_data_1,
     Block_Fillers = NULL
   )
-  
-  
   
   if (is.null(locationNames) || length(locationNames) != l) locationNames <- 1:l
   
@@ -344,15 +341,6 @@ diagonal_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,
         }  
       }
     } else shiny::validate("The total number of entries do not fit into the specified field.")
-    
-    print(c(available_percent1$data_dim_each_block), length(plotNumber))
-    
-    # if(kindExpt == "DBUDC") {
-    #   if(length(plotNumber) > 1 & 
-    #      length(available_percent1$data_dim_each_block) != length(plotNumber)) {
-    #     stop('The input plotNumber and blocks need to be of the same length. You can consider plotNumber as an integer.')
-    #   }
-    # }
     
     rand_checks <- random_checks(
       dt = available_percent1$dt, 

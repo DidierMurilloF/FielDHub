@@ -2,7 +2,7 @@
 title: "Full Factorial Design"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{factorial}
+  %\VignetteIndexEntry{full_factorial}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

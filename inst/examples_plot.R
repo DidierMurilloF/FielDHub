@@ -4,83 +4,97 @@ library(FielDHub)
 
 # Single Unreplicated arrangement  ----------------------------------------
 
-diagonal_single <- diagonal_arrangement(nrows = 20, 
-                                        ncols = 15, 
-                                        lines = 270, 
-                                        checks = 1:4, 
-                                        plotNumber = 1,
-                                        planter = "serpentine", 
-                                        seed = 16)
+diagonal_single <- diagonal_arrangement(
+  nrows = 20, 
+  ncols = 15, 
+  lines = 270, 
+  checks = 1:4, 
+  plotNumber = 1,
+  planter = "serpentine", 
+  seed = 16
+)
 plot(diagonal_single, l = 1)
 
 # Multiple Diagonal Arrangent ---------------------------------------------
 
-diagonal_multi <- diagonal_arrangement(nrows = 15, 
-                                       ncols = 20, 
-                                       lines = 270,
-                                       checks = 4,
-                                       seed = 1, 
-                                       l = 1,
-                                       blocks = c(70, 100, 100),
-                                       kindExpt = "DBUDC")
+diagonal_multi <- diagonal_arrangement(
+  nrows = 15, 
+  ncols = 20, 
+  lines = 270,
+  checks = 4,
+  seed = 1, 
+  l = 1,
+  blocks = c(70, 100, 100),
+  kindExpt = "DBUDC"
+)
 plot(diagonal_multi)
 
 # Optimized Arrangement ---------------------------------------------------
 
-optim_design <- optimized_arrangement(nrows = 15, 
-                                      ncols = 20, 
-                                      lines = 270, 
-                                      amountChecks = 30, 
-                                      checks = 4, 
-                                      seed = 1)
+optim_design <- optimized_arrangement(
+  nrows = 15, 
+  ncols = 20, 
+  lines = 270, 
+  amountChecks = 30, 
+  checks = 4, 
+  seed = 1
+)
 
 plot(optim_design)
 
 
 # Augmented RCBD ----------------------------------------------------------
 
-augmented <- RCBD_augmented(lines = 121, 
-                            checks = 5, 
-                            b = 10, 
-                            l = 3, 
-                            plotNumber = 101, 
-                            seed = 1,
-                            random = TRUE)
+augmented <- RCBD_augmented(
+  lines = 121, 
+  checks = 5, 
+  b = 10, 
+  l = 3, 
+  plotNumber = 101, 
+  seed = 1,
+  random = TRUE
+)
 plot(augmented, l = 1)
 plot(augmented, l = 2)
 plot(augmented, l = 3)
 plot(augmented, l = 4)
 
-augmented1 <- RCBD_augmented(lines = 122, 
-                             checks = 5, 
-                             b = 5, 
-                             l = 1, 
-                             plotNumber = 101, 
-                             seed = 1,
-                             random = TRUE, 
-                             nrows = 10, 
-                             ncols = 15)
+augmented1 <- RCBD_augmented(
+  lines = 122, 
+  checks = 5, 
+  b = 5, 
+  l = 1, 
+  plotNumber = 101, 
+  seed = 1,
+  random = TRUE, 
+  nrows = 10, 
+  ncols = 15
+)
 plot(augmented1, l = 1)
 
-augmented2 <- RCBD_augmented(lines = 270, 
-                             checks = 6, 
-                             b = 5, 
-                             l = 1, 
-                             plotNumber = 101, 
-                             seed = 1,
-                             random = TRUE, 
-                             nrows = 15, 
-                             ncols = 20, repsExpt = 2)
+augmented2 <- RCBD_augmented(
+  lines = 270, 
+  checks = 6, 
+  b = 5, 
+  l = 1, 
+  plotNumber = 101, 
+  seed = 1,
+  random = TRUE, 
+  nrows = 15, 
+  ncols = 20, repsExpt = 2
+)
 plot(augmented2)
 
 
 #  Partially Replicated Design --------------------------------------------
 
-prep <- partially_replicated(nrows = 15, 
-                             ncols = 20, 
-                             repGens = c(80, 140),
-                             repUnits = c(2, 1), 
-                             seed = 1202)
+prep <- partially_replicated(
+  nrows = 15, 
+  ncols = 20, 
+  repGens = c(80, 140),
+  repUnits = c(2, 1), 
+  seed = 1202)
+
 plot(prep)
 
 # Alpha lattice  ----------------------------------------------------------
@@ -222,5 +236,96 @@ row_col <- row_column(t = 36,
                       seed = 1247)
 plot(row_col)
 plot(row_col, stacked = "horizontal")
+##########################################################################
+##########################################################################
+
+library(FielDHub)
+
+diag_single <- diagonal_arrangement(
+  nrows = 11,
+  ncols = 40,
+  lines = 400,
+  checks = 6,
+  l = 2,
+  plotNumber = 1,
+  seed = 123,
+  exptName = "Expt1",
+  locationNames = "FARGO"
+)
+
+plot(diag_single, l = 1)
+
+diag_multi <- diagonal_arrangement(
+  nrows = 11,
+  ncols = 40,
+  lines = 400,
+  checks = 6,
+  l = 1,
+  plotNumber = 1,
+  seed = 123,
+  exptName = "Expt1",
+  locationNames = "FARGO", 
+  kindExpt = "DBUDC",
+  blocks = c(120, 130, 150)
+)
+
+plot(diag_multi)
+
+
+spatAB <- diagonal_arrangement(
+  nrows = 20, 
+  ncols = 15, 
+  lines = 270, 
+  checks = 4, 
+  plotNumber = c(1,1001,2001), 
+  l = 10,
+  kindExpt = "DBUDC", 
+  planter = "serpentine",
+  exptName = c("20WRA", "20WRB", "20WRC"), 
+  blocks = c(90, 90, 90),
+  splitBy = "column"
+)
+
+plot(spatAB, l = 10)
+
+
+
+optim_expt <- optimized_arrangement(
+  nrows = 29, 
+  ncols = 15, 
+  lines = 405, 
+  amountChecks = c(12,10,8), 
+  checks = 3,
+  l = 3,
+  plotNumber = c(1001,2001,3001),
+  seed = 123,
+  exptName = "Expt1"
+)
+
+plot(optim_expt)
+
+prep <- partially_replicated(
+  nrows = 20, 
+  ncols = 20, 
+  repGens = c(100,200),
+  repUnits = c(2,1),
+  l = 1, 
+  seed = 123
+)
+
+plot(prep)
+
+rcbd_a <- RCBD_augmented(
+  lines = 35,
+  checks = 3,
+  b = 5, 
+  repsExpt = 2, 
+  nrows = 5, 
+  ncols = 10,
+  seed = 123,
+  random = F
+)
+
+plot(rcbd_a)
 
 

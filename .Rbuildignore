@@ -24,3 +24,5 @@ $run_dev.*
 ^rsconnect$
 ^Dockerfile$
 ^\.dockerignore$
+^doc$
+^Meta$

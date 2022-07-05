@@ -2,7 +2,7 @@
 title: "Latin Square Design"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{lsd}
+  %\VignetteIndexEntry{Latin Square Design}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

@@ -25,9 +25,8 @@ plot_number <- function(planter = "serpentine",
     plot_number_blocks <- vector(mode = "list", length = b)
     for (i in 1:b) {
       w <- 0
-      #if (i == b) w <- fillers
+      # if (i == b) w <- fillers
       serie <- plot_number[i]:(plot_number[i] + dim_each_block[i] - 1 - w)
-      #print(c(length(serie), dim_each_block[i]))
       if (length(serie) == dim_each_block[i]) {
         plot_number_blocks[[i]] <- serie
       } else stop("problem in length of the current serie")
