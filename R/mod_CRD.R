@@ -268,7 +268,7 @@ mod_CRD_server <- function(id) {
                     bordered = TRUE,
                     align = 'c',
                     striped = TRUE),
-        h4("Note that reps must have to be balanced."),
+        h4("Note: reps must be balanced."),
         easyClose = FALSE
       )
     }

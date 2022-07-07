@@ -8,6 +8,15 @@ vignette: >
   options(rmarkdown.html_vignette.check_title = FALSE)
 ---
 
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  warning = FALSE, 
+  message = FALSE
+)
+```
+
 # Optimized Arrangement in FielDHub App
 One kind of unreplicated design you can use in FielDHub is the optimized arrangement. In this design you can set the number of entries and the number of checks for the experiment. You can also choose to run the same experiment over multiple locations. 
 In this vignette, we will show an example of an optimized arrangement design experiment over 3 locations with 3 checks of 12, 10, and 8 reps each, and 405 entries. We will distribute the total 435 plots over a 29 x 15 field. FielDHub will return a and a table with all the field information for all locations, with an entry for every plot. 
@@ -19,11 +28,24 @@ First, go to **Unreplicated Designs** > **Optimized Arrangement**
 1. **Import entries' list?** Choose whether to import a list with entry numbers and names for genotypes or treatments.
     * If the selection is `No`, that means the app is going to generate synthetic data for entries and names of the treatment/genotypes based on the user inputs.
 
-    * If the selection is `Yes`, the entries list must fulfill a specific format and must be a `.csv` file. The file must have the columns `ENTRY` and `NAME`. The `ENTRY` column must have a unique entry integer number for each treatment/genotype. The column `NAME` must have a unique name that identifies each treatment/genotype. Both ENTRY and NAME must be unique, duplicated are not allowed. As follow, we show an example of the entries list format. This example has an entry list with four checks and 8 treatments/genotypes. It is crucial to allocate the checks in the top part of the file.
+    * If the selection is `Yes`, the entries list must fulfill a specific format and must be a `.csv` file. The file must have the columns `ENTRY`, `NAME`, and `REPS`. The `ENTRY` column must have a unique entry integer number for each treatment/genotype. The column `NAME` must have a unique name that identifies each treatment/genotype. The `REPS` column must have an integer entry for the replications of the checks and other entries. Both ENTRY and NAME must be unique, duplicates are not allowed. In the following, we show an example of the entries list format. This example has an entry list with four checks and 8 treatments/genotypes. It is crucial to allocate the checks in the top part of the file.
+
+```{r, include=FALSE}
+library(FielDHub)
+ENTRY <- 1:12
+NAME <- c(c("CHECK1","CHECK2","CHECK3"), paste0("G-", 4:12))
+REPS <- c(rep(10,3),rep(1,9))
+df <- data.frame(ENTRY,NAME,REPS)
+```
+
+```{r, echo = FALSE, results='asis'}
+library(knitr)
+kable(df)
+```
 
 2. Enter the number of checks in the **Input # of Checks** box, which is 3 in our case.
 
-3. Enter the number of replications of the checks in a comma separated list containing a number for each check in the **Input # Check's Reps** box. For our example experiment, we will enter 10,10,10.
+3. Enter the number of replications of the checks in a comma separated list containing a number for each check in the **Input # Check's Reps** box. For our example experiment, we will enter 12,10,8.
 
 4. Enter the number of entries/treatments in the **Input # of Entries** box, which is 300 in our case.
 
@@ -31,17 +53,19 @@ First, go to **Unreplicated Designs** > **Optimized Arrangement**
 
 6. Since we want to run this experiment over 3 locations, set **Input # of Locations** to 3.
 
-7. Enter the name of the site/location in the **Input the Location** box. For this experiment we will set the site as `FARGO`. In the case of users will run the experiment in multiple locations, the name for each location must be enter separete by comma, for example: `FARGO, CASSELTON, MINOT`.
+7. To ensure that randomizations are consistent across sessions, we can set a seed number in the box labeled **Seed Number**. For instance, we will set it to 123. 
 
-8. To ensure that randomizations are consistent across sessions, we can set a seed number in the box labeled **Seed Number**. For instance, we will set it to 123. 
+8. Enter the name for the experiment in the **Input Experiment Name** box. For example, `Expt1`.
 
-9. Enter the starting plot number in the **Starting Plot Number** box. In this experiment we want the plot start at `1001`.
+9. Enter the starting plot number in the **Starting Plot Number** box. If the experiment has multiple locations, you must enter a comma separated list of numbers the length of the number of locations for the input to be valid. Since we have 3 locations in this experiment, we will enter `1001,2001,3001`.
 
-10. Once we have entered the information for our experiment on the left side panel, click the **Run!** button to run the design. 
+10. Enter the name of the site/location in the **Input the Location** box. For this experiment we will set the site as `FARGO`. In the case of users will run the experiment in multiple locations, the name for each location must be enter separete by comma, for example: `FARGO, CASSELTON, MINOT`.
 
-11. You will then be prompted to select the dimensions of the field from the list of options in the drop down in the middle of the screen with the box labeled **Select dimensions of field**. In our case, we will select 29 x 15. 
+11. Once we have entered the information for our experiment on the left side panel, click the **Run!** button to run the design. 
 
-12. Click the **Randomize!** button to randomize the experiment with the set field dimensions and to see the output plots. If you change the dimensions again, you must re-randomize.
+12. You will then be prompted to select the dimensions of the field from the list of options in the drop down in the middle of the screen with the box labeled **Select dimensions of field**. In our case, we will select `29 x 15`. 
+
+13. Click the **Randomize!** button to randomize the experiment with the set field dimensions and to see the output plots. If you change the dimensions again, you must re-randomize.
 
 If you change any of the inputs on the left side panel after running an experiment initially, you have to click the Run and Randomize buttons again, to re-run with the new inputs.
 
@@ -61,27 +85,13 @@ On the **Plot Number Field** tab, there is a table display of the field with the
 ### Field Book
 The **Field Book** displays all the information on the experimental design in a table format. It contains the specific plot number and the row and column address of each entry, as well as the corresponding treatment on that plot. This table is searchable, and we can filter the data in relevant columns. 
 
+<br>
+
 # Function : `optimized_arrangement()`
 
 You can run the same design with a function in the FielDHub package, `optimized_arrangement()`. We can enter the information describing the above design like this:
-```{r, echo = FALSE, warning=FALSE, comment='', include=FALSE}
-library(knitr)
-library(FielDHub)
-optim_expt <- optimized_arrangement(
-  nrows = 29, 
-  ncols = 15, 
-  lines = 405, 
-  amountChecks = c(12,10,8), 
-  checks = 3,
-  l = 3,
-  plotNumber = c(1001,2001,3001),
-  seed = 123,
-  exptName = "Expt1"
-)
 
-```
-
-```{r, results='hide'}
+```{r, echo = TRUE, warning=FALSE, comment=''}
 optim_expt <- optimized_arrangement(
   nrows = 29, #number of rows in the field, 29 x 15
   ncols = 15, #number of columns in the field

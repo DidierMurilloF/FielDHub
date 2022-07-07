@@ -7,15 +7,51 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  warning = FALSE, 
+  message = FALSE
+)
+```
+
 # App
 
 ## Inputs
-First, select "No" in the **Import entries' list** box, as we are entering our own information about the experiment. We can choose whether to use the factorial design in a RCBD or CRD with the **Select a Factorial Design Type** box.
-Then, we set the number of entries for each factor in a comma separated list in the **Input # of Entries for Each Factor** box. If we want our example experiment to have 3 factors with 2, 3, and 4 entries respectively, we would enter 2,3,4.  The number of replications of the squares is set with the **Input # of Full Reps** box. 
-Like many of the other designs, you can run the experiment over multiple locations. We will run this experiment over a single location, so make sure **Input # of Locations** is set to 1.
+1. **Import entries' list?** Choose whether to import a list with entry numbers and names for genotypes or treatments.
+    * If the selection is `No`, that means the app is going to generate synthetic data for entries and names of the treatment/genotypes based on the user inputs.
 
-As with all the designs, we can set a seed number in the box labeled **Seed Number**. In this example, we will set it to 123. 
-Once we have entered the information for our experiment on the left side panel, click the **Run!** button to run the design. 
+    * If the selection is `Yes`, the entries list must fulfill a specific format and must be a `.csv` file. The file must have the single column `TREATMENT`, containing a list of unique names that identify each treatment/genotype. Duplicate values are not allowed, all entries must be unique. In the following, we show an example of the entries list format. This example has an entry list with four checks and 8 treatments/genotypes. It is crucial to allocate the checks in the top part of the file.
+
+```{r, include=FALSE}
+library(FielDHub)
+TREATMENT <- c(paste0("TRT_", LETTERS[1:10]))
+df <- data.frame(TREATMENT)
+```
+
+```{r, echo = FALSE, results='asis'}
+library(knitr)
+kable(df)
+```
+
+2. Choose whether to use the factorial design in a RCBD or CRD with the **Select a Factorial Design Type** box.
+
+3. Set the number of entries for each factor in a comma separated list in the **Input # of Entries for Each Factor** box. We want our example experiment to have 3 factors with 2, 3, and 4 entries respectively, so enter 2,3,4 in the box. 
+
+4. Set the number of replications of the squares with the **Input # of Full Reps** box. 
+
+5. Enter the number of locations in **Input # of Locations**. 
+
+6. Enter the starting plot number in the **Starting Plot Number** box. If the experiment has multiple locations, you must enter a comma separated list of numbers the length of the number of locations for the input to be valid. 
+
+7. Optionally, you may enter a name for the location of the experiment in the **Input Location** box. 
+
+8. Select `serpentine` or `cartesian` in the **Plot Order Layout**. For this example we will use the default `serpentine` layout.
+
+9. As with all the designs, we can set a seed number in the box labeled **Seed Number**. In this example, we will set it to 123. 
+
+10. Once we have entered the information for our experiment on the left side panel, click the **Run!** button to run the design. 
 
 ## Outputs
 After you run a full factorial design in FielDHub, there are several ways to display the information contained in the field book. 
@@ -30,17 +66,14 @@ The **Field Book** displays all the information on the experimental design in a 
 # Function : `full_factorial()`
 
 You can run the same design with a function in the FielDHub package, `full_factorial()`. We can enter the information describing the above design like this:
-```{r, echo = FALSE, warning=FALSE, comment='', include=FALSE}
-library(knitr)
-library(FielDHub)
-factorial <- full_factorial(setfactors = c(2,3,4),reps = 3,l = 1,type = 2,seed = 123)
-
-```
-```{r, results='hide'}
+```{r, echo = TRUE, warning=FALSE, comment=''}
 factorial <- full_factorial(setfactors = c(2,3,4), #numeric vector with levels of each factor
                             reps = 3, #number of replicates
                             l = 1, #number of locations
                             type = 2, #CRD or RCBD, 1 or 2 respectively
+                            plotNumber = 101,
+                            planter = "serpentine",
+                            locationNames = "FARGO"
                             seed = 123) #seed number
 ```
 ```{r, comment='', echo=FALSE}
