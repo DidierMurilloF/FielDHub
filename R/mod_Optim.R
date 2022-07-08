@@ -451,8 +451,9 @@ mod_Optim_server <- function(id) {
       #if (!test) return(NULL)
       if (test) {
         cat("Randomization was successful!", "\n", "\n")
-        len <- length(optimized_arrang()$infoDesign)
-         optimized_arrang()$infoDesign[1:(len - 1)]
+        # len <- length(optimized_arrang()$infoDesign)
+        #  optimized_arrang()$infoDesign[1:(len - 1)]
+        print(optimized_arrang())
       }
     })
 

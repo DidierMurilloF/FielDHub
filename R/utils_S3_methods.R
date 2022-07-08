@@ -34,7 +34,9 @@ print.FielDHub <- function(x, n=10, ...){
   if (x$infoDesign$id_design == 1) {
     cat("Completely Randomized Design (CRD)", "\n\n")
     cat("Information on the design parameters:", "\n")
-    str(x$infoDesign)
+    len <- length(x$infoDesign)
+    str(x$infoDesign[1:(len-1)])
+    # str(x$infoDesign)
     #---------------------------------------------------------------------
     # Head
     #---------------------------------------------------------------------
@@ -48,7 +50,9 @@ print.FielDHub <- function(x, n=10, ...){
     cat("Randomized Complete Block Design (RCBD):", "\n\n")
     #-----------------------------------------------------------
     cat("Information on the design parameters:", "\n")
-    str(x$infoDesign)
+    len <- length(x$infoDesign)
+    str(x$infoDesign[1:(len-1)])
+    # str(x$infoDesign)
     #---------------------------------------------------------------------
     # Head
     #---------------------------------------------------------------------
@@ -61,7 +65,9 @@ print.FielDHub <- function(x, n=10, ...){
   }else if (x$infoDesign$id_design == 3){
     cat("Latin Square Design:", "\n\n")
     cat("Information on the design parameters:", "\n")
-    str(x$infoDesign)
+    len <- length(x$infoDesign)
+    str(x$infoDesign[1:(len-1)])
+    # str(x$infoDesign)
     #---------------------------------------------------------------------
     # Head
     #---------------------------------------------------------------------
@@ -74,7 +80,9 @@ print.FielDHub <- function(x, n=10, ...){
   }else if (x$infoDesign$id_design == 4) {
     cat("Full Factorial Design", "\n\n")
     cat("Information on the design parameters:", "\n")
-    str(x$infoDesign)
+    len <- length(x$infoDesign)
+    str(x$infoDesign[1:(len-1)])
+    # str(x$infoDesign)
     #---------------------------------------------------------------------
     # Head
     #---------------------------------------------------------------------
@@ -87,7 +95,9 @@ print.FielDHub <- function(x, n=10, ...){
   }else if (x$infoDesign$id_design == 5) {
     cat("Split Plot Design", "\n\n")
     cat("Information on the design parameters:", "\n")
-    str(x$infoDesign)
+    len <- length(x$infoDesign)
+    str(x$infoDesign[1:(len-1)])
+    # str(x$infoDesign)
     #---------------------------------------------------------------------
     # Head
     #---------------------------------------------------------------------
@@ -100,7 +110,9 @@ print.FielDHub <- function(x, n=10, ...){
   }else if (x$infoDesign$id_design == 6) {
     cat("Split-Split Plot Design", "\n\n")
     cat("Information on the design parameters:", "\n")
-    str(x$infoDesign)
+    len <- length(x$infoDesign)
+    str(x$infoDesign[1:(len-1)])
+    # str(x$infoDesign)
     #---------------------------------------------------------------------
     # Head
     #---------------------------------------------------------------------
@@ -113,7 +125,9 @@ print.FielDHub <- function(x, n=10, ...){
   }else if (x$infoDesign$id_design == 7) {
     cat("Strip Plot Design", "\n\n")
     cat("Information on the design parameters:", "\n")
-    str(x$infoDesign)
+    len <- length(x$infoDesign)
+    str(x$infoDesign[1:(len-1)])
+    # str(x$infoDesign)
     #---------------------------------------------------------------------
     # Head
     #---------------------------------------------------------------------
@@ -126,7 +140,9 @@ print.FielDHub <- function(x, n=10, ...){
   }else if (x$infoDesign$id_design == 8) {
     cat("Incomplete Blocks Design", "\n\n")
     cat("Information on the design parameters:", "\n")
-    str(x$infoDesign)
+    len <- length(x$infoDesign)
+    str(x$infoDesign[1:(len-1)])
+    # str(x$infoDesign)
     #---------------------------------------------------------------------
     # Head
     #---------------------------------------------------------------------
@@ -139,7 +155,9 @@ print.FielDHub <- function(x, n=10, ...){
   }else if (x$infoDesign$id_design == 9) {
     cat("Row Column Design", "\n\n")
     cat("Information on the design parameters:", "\n")
-    str(x$infoDesign)
+    len <- length(x$infoDesign)
+    str(x$infoDesign[1:(len-1)])
+    # str(x$infoDesign)
     #---------------------------------------------------------------------
     # Head
     #---------------------------------------------------------------------
@@ -152,7 +170,9 @@ print.FielDHub <- function(x, n=10, ...){
   }else if (x$infoDesign$id_design == 10) {
     cat("Square Lattice Design", "\n\n")
     cat("Information on the design parameters:", "\n")
-    str(x$infoDesign)
+    len <- length(x$infoDesign)
+    str(x$infoDesign[1:(len-1)])
+    # str(x$infoDesign)
     #---------------------------------------------------------------------
     # Head
     #---------------------------------------------------------------------
@@ -165,7 +185,9 @@ print.FielDHub <- function(x, n=10, ...){
   }else if (x$infoDesign$id_design == 11) {
     cat("Rectangular Lattice Design", "\n\n")
     cat("Information on the design parameters:", "\n")
-    str(x$infoDesign)
+    len <- length(x$infoDesign)
+    str(x$infoDesign[1:(len-1)])
+    # str(x$infoDesign)
     #---------------------------------------------------------------------
     # Head
     #---------------------------------------------------------------------
@@ -178,7 +200,9 @@ print.FielDHub <- function(x, n=10, ...){
   }else if (x$infoDesign$id_design == 12) {
     cat("Alpha Lattice Design", "\n\n")
     cat("Information on the design parameters:", "\n")
-    str(x$infoDesign)
+    len <- length(x$infoDesign)
+    str(x$infoDesign[1:(len-1)])
+    # str(x$infoDesign)
     #---------------------------------------------------------------------
     # Head
     #---------------------------------------------------------------------
@@ -191,7 +215,9 @@ print.FielDHub <- function(x, n=10, ...){
   }else if (x$infoDesign$id_design == 13) {
     cat("Partially Replicated Design", "\n\n")
     cat("Information on the design parameters:", "\n")
-    str(x$infoDesign)
+    len <- length(x$infoDesign)
+    str(x$infoDesign[1:(len-1)])
+    # str(x$infoDesign)
     #---------------------------------------------------------------------
     # Head
     #---------------------------------------------------------------------
@@ -204,7 +230,9 @@ print.FielDHub <- function(x, n=10, ...){
   }else if (x$infoDesign$id_design == 14) {
     cat("Augmented Randomized Complete Block Design:", "\n\n")
     cat("Information on the design parameters:", "\n")
-    str(x$infoDesign)
+    len <- length(x$infoDesign)
+    str(x$infoDesign[1:(len-1)])
+    # str(x$infoDesign)
     #---------------------------------------------------------------------
     # Head
     #---------------------------------------------------------------------
@@ -217,7 +245,9 @@ print.FielDHub <- function(x, n=10, ...){
   }else if (x$infoDesign$id_design == 15) {
     cat("Un-replicated Diagonal Arrangement Design", "\n\n")
     cat("Information on the design parameters:", "\n")
-    str(x$infoDesign)
+    len <- length(x$infoDesign)
+    str(x$infoDesign[1:(len-1)])
+    # str(x$infoDesign)
     #---------------------------------------------------------------------
     # Head
     #---------------------------------------------------------------------
@@ -230,7 +260,9 @@ print.FielDHub <- function(x, n=10, ...){
   }else if (x$infoDesign$id_design == 16) {
     cat("Un-replicated Optimized Arrangement Design", "\n\n")
     cat("Information on the design parameters:", "\n")
-    str(x$infoDesign)
+    len <- length(x$infoDesign)
+    str(x$infoDesign[1:(len-1)])
+    # str(x$infoDesign)
     #---------------------------------------------------------------------
     # Head
     #---------------------------------------------------------------------
@@ -525,7 +557,8 @@ print.summary.FielDHub <- function(x, ...) {
     cat("Un-replicated Optimized Arrangement Design:", "\n\n")
     #---------------------------------------------------------------------
     cat("1. Information on the design parameters:", "\n")
-    str(x$infoDesign)
+    len <- length(x$infoDesign)
+    str(x$infoDesign[1:(len-1)])
     cat("\n")
     #----------------------------------------------------------------------
     cat("2. Layout randomization:", "\n")

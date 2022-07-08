@@ -16,7 +16,11 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Partially Replicated Design in FielDHub App
+## Partially Replicated Design in FielDHub App
+
+In this design you can set the number of entries with reps. You can also choose to run the same experiment over multiple locations. 
+
+## Generate a Partially Replicated Design in FielDHub App
 
 ## Inputs
 1. **Import entries' list?** Choose whether to import a list with entry numbers and names for genotypes or treatments.

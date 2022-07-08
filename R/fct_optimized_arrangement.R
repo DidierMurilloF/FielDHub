@@ -286,14 +286,16 @@ optimized_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,  amo
   field_book <- dplyr::bind_rows(field_book_sites)
   
   infoDesign <- list(
-    field_dimensions = c("rows" = nrows, "columns" = ncols),
+    # field_dimensions = c("rows" = nrows, "columns" = ncols),
+    rows = nrows,
+    columns = ncols,
     treatments = lines, 
     checks = length(RepChecks),
     entry_checks = checksEntries,
     rep_checks = RepChecks, 
-    seed = seed,
     locations = l, 
     planter = planter,
+    seed = seed,
     id_design = 16)
   output <- list(infoDesign = infoDesign, 
                  layoutRandom = layout_random_sites, 

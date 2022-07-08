@@ -131,12 +131,12 @@ This returns a list consisting of all the information displayed in the output ta
 
 ```{r, comment='', echo=TRUE}
 field_book <- single_diag$fieldBook
-head(field_book, 12)
+head(field_book, 10)
 ```
 
 ### Plot field layout
 
-For plotting the layout in function of the coordinates ROW and COLUMN in the field book object we can use the generic function `plot()` as follow,
+For plotting the layout in function of the coordinates `ROW` and `COLUMN` in the field book object we can use the generic function `plot()` as follow,
 
 ```{r, fig.align='center', fig.width=7.2, fig.height=5}
 p <- plot(single_diag)

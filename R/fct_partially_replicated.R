@@ -249,12 +249,13 @@ partially_replicated <- function(nrows = NULL, ncols = NULL, repGens = NULL, rep
   Checks <- length(EntryChecks)
   
   infoDesign <- list(
-    field_dimensions = c("rows" = nrows, "columns" = ncols),
+    rows = nrows,
+    columns = ncols,
     treatments_with_reps = Checks,
     treatments_with_no_reps = length(genEntries[[2]]),
-    seed = seed,
     locations = l,
     planter = planter,
+    seed = seed,
     id_design = 13)
   output <- list(infoDesign = infoDesign, 
                  layoutRandom = layout_random_sites, 

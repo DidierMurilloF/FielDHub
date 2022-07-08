@@ -535,8 +535,9 @@ mod_RCBD_augmented_server <- function(id) {
     output$summary_augmented <- renderPrint({
       if (test_arcbd()) {
         cat("Randomization was successful!", "\n", "\n")
-        len <- length(rcbd_augmented_reactive()$infoDesign)
-         rcbd_augmented_reactive()$infoDesign[1:(len - 1)]
+        # len <- length(rcbd_augmented_reactive()$infoDesign)
+        #  rcbd_augmented_reactive()$infoDesign[1:(len - 1)]
+        print(rcbd_augmented_reactive())
       }
     })
     

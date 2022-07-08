@@ -584,12 +584,17 @@ diagonal_arrangement <- function(nrows = NULL,
   field_book <- dplyr::bind_rows(field_book_sites)
   
   infoDesign <- list(
-    field_dimensions = c("rows" = nrows, "columns" = ncols),
-    Lines = linesexpt,
-    checks = checks, 
-    RepChecks = RepChecks, 
-    percentChecks = percentChecks,
-    Fillers = Fillers, 
+    # field_dimensions = c("rows" = nrows, "columns" = ncols),
+    rows = nrows,
+    columns = ncols,
+    treatments = linesexpt,
+    checks = length(checksEntries),
+    entry_checks = checksEntries, # checks, 
+    rep_checks = as.vector(as.numeric(RepChecks)),
+    locations = l,
+    planter = planter,
+    percent_checks = percentChecks,
+    fillers = Fillers, 
     seed = seed, 
     id_design = 15
   )
