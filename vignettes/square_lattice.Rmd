@@ -2,7 +2,7 @@
 title: "Square Lattice Design"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{square}
+  %\VignetteIndexEntry{Square Lattice Design}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -10,19 +10,27 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>",
+  comment = NA,
   warning = FALSE, 
   message = FALSE
 )
 ```
 
-# Square Lattice Design in FielDHub App
+## 1. Generate a Square Lattice Design in FielDHub App
+
+To generate an alpha lattice design using the FielDHub app:
+
+First, go to **Lattice Designs** > **Square Lattice**
+
+Then, follow the following steps where we will show how to generate an alpha lattice design with 55 treatments and 3 reps.
 
 ## Inputs
+
 1. **Import entries' list?** Choose whether to import a list with entry numbers and names for genotypes or treatments.
     * If the selection is `No`, that means the app is going to generate synthetic data for entries and names of the treatment/genotypes based on the user inputs.
 
     * If the selection is `Yes`, the entries list must fulfill a specific format and must be a `.csv` file. The file must have the columns `ENTRY` and `NAME`. The `ENTRY` column must have a unique entry integer number for each treatment/genotype. The column `NAME` must have a unique name that identifies each treatment/genotype. Both ENTRY and NAME must be unique, duplicates are not allowed. In the following, we show an example of the entries list format. This example has an entry list with four checks and 8 treatments/genotypes. It is crucial to allocate the checks in the top part of the file.
+    
 
 ```{r, include=FALSE}
 library(FielDHub)
@@ -53,33 +61,78 @@ kable(df)
 9. Once we have entered the information for our experiment on the left side panel, click the **Run!** button to run the design. 
 
 ## Outputs
+
 After you run a square lattice design in FielDHub, there are several ways to display the information contained in the field book. 
 
 ### Field Layout
+
 When you first click the run button on a square lattice design, FielDHub displays the Field Layout tab, which shows the entries and their arrangement in the field. In the box below the display, you can change the layout of the field or change the location displayed. 
 You can also display a heatmap over the field by changing **Type of Plot** to **Heatmap**. To view a heatmap, you must first simulate an experiment over the described field with the **Simulate!** button. A pop-up window will appear where you can enter what variable you want to simulate along with minimum and maximum values. 
 
 ### Field Book
+
 The **Field Book** displays all the information on the experimental design in a table format. It contains the specific plot number and the row and column address of each entry, as well as the corresponding treatment on that plot. This table is searchable, and we can filter the data in relevant columns. If we have simulated data for a heatmap, an additional column for that variable appears in the Field Book. 
 
-# Function : `square_lattice()`
+## 2. Generate the design by the `square_lattice()` function.
 
 You can run the same design with a function in the FielDHub package, `square_lattice()`. We can enter the information describing the above design like this:
-```{r, echo = TRUE, warning=FALSE, comment=''}
-square <- square_lattice(t = 64,     #number of treatments, must be square number
-                         k = 8,      #number of plots per incomplete block
-                         r = 3,      #number of replicates
-                         l = 1,      #number of locations
-                         plotNumber = 101, #starting plot number
-                         locationNames = "FARGO", #optional name for each location
-                         seed = 123) #seed number
+
+```{r, echo = TRUE}
+square <- square_lattice(
+  t = 64,    
+  k = 8,      
+  r = 3,      
+  l = 1,     
+  plotNumber = 101, 
+  locationNames = "FARGO", 
+  seed = 123
+  )
 ```
-```{r, comment='', echo=FALSE}
+
+#### Details on the inputs entered in `square_lattice()` above
+
+The description for the inputs that we used to generate the design,
+
+  `t = 64` is the number of treatments, must be square number.
+  `k = 8` is the number of plots per incomplete block.
+  `r=3` is the number of replicates.
+  `l = 1` is the number of locations.
+  `plotNumber = 101` is the starting plot number.
+  `locationNames = "FARGO"` optional name for each location
+  `seed = 123` is the seed number to replicate identical randomizations.
+
+### Print `square` output
+
+To print a summary of the information that is in the object `alpha`, we can use the generic function `print()`. 
+
+```{r, echo=TRUE}
 print(square)
 ```
+
+### Access to `square` output
+
 This returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are accessible by the `$` operator, i.e. `square$layoutRandom` or `square$fieldBook`. 
 
 `square$fieldBook` is a list containing information about every plot in the field, with information about the location of the plot and the treatment in each plot. As seen in the output below, the field book has columns for `ID`, `LOCATION`, `PLOT`, `REP`, `IBLOCK`, `UNIT`, `ENTRY`, and `TREATMENT`.
-```{r, comment='', echo=FALSE}
-print(head(square$fieldBook))
+
+
+```{r, echo=TRUE}
+field_book <- square$fieldBook
+head(field_book, 10)
 ```
+
+
+### Plot the field layout
+
+For plotting the layout in function of the coordinates `ROW` and `COLUMN`, you can use the the generic function `plot()` as follow,
+
+
+```{r, fig.align='center', fig.width=7.2, fig.height=5.5}
+p <- plot(square)
+p$layout
+```
+
+
+<br>
+<br>
+<br>

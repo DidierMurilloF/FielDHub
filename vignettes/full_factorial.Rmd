@@ -2,7 +2,7 @@
 title: "Full Factorial Design"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{full_factorial}
+  %\VignetteIndexEntry{Full Factorial Design}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -10,7 +10,7 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>",
+  comment = NA,
   warning = FALSE, 
   message = FALSE
 )
@@ -19,6 +19,7 @@ knitr::opts_chunk$set(
 # App
 
 ## Inputs
+
 1. **Import entries' list?** Choose whether to import a list with entry numbers and names for genotypes or treatments.
     * If the selection is `No`, that means the app is going to generate synthetic data for entries and names of the treatment/genotypes based on the user inputs.
 
@@ -66,6 +67,7 @@ The **Field Book** displays all the information on the experimental design in a 
 # Function : `full_factorial()`
 
 You can run the same design with a function in the FielDHub package, `full_factorial()`. We can enter the information describing the above design like this:
+
 ```{r, echo = TRUE, warning=FALSE, comment=''}
 factorial <- full_factorial(setfactors = c(2,3,4), #numeric vector with levels of each factor
                             reps = 3, #number of replicates
@@ -73,7 +75,7 @@ factorial <- full_factorial(setfactors = c(2,3,4), #numeric vector with levels o
                             type = 2, #CRD or RCBD, 1 or 2 respectively
                             plotNumber = 101,
                             planter = "serpentine",
-                            locationNames = "FARGO"
+                            locationNames = "FARGO",
                             seed = 123) #seed number
 ```
 ```{r, comment='', echo=FALSE}

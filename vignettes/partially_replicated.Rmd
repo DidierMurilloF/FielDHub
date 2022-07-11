@@ -2,32 +2,38 @@
 title: "Partially Replicated Design"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{prep}
+  %\VignetteIndexEntry{Partially Replicated Design}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include = FALSE}
+options(rmarkdown.html_vignette.check_title = FALSE)
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>",
+  comment = NA,
   warning = FALSE, 
   message = FALSE
 )
 ```
 
-## Partially Replicated Design in FielDHub App
+## Partially Replicated Design (prep)
 
-In this design you can set the number of entries with reps. You can also choose to run the same experiment over multiple locations. 
+Partially replicated designs are commonly employed in early generation field trials. This type of design is characterized by replication of a portion of the entries, with the remaining entries only appearing once in the experiment. 
 
-## Generate a Partially Replicated Design in FielDHub App
+In this design you can set the number of entries that will have reps, as well as the number of entries that will only appear once. You can also choose to run the same experiment over multiple locations. 
+
+## 1. Generate a Partially Replicated Design in FielDHub App
+
+As an example, considered a field trial with 300 plots containing 85 entries appearing two times each, and 130 entries only appearing once. This field trials is arranged in a field of 15 rows by 20 columns.
 
 ## Inputs
+
 1. **Import entries' list?** Choose whether to import a list with entry numbers and names for genotypes or treatments.
     * If the selection is `No`, that means the app is going to generate synthetic data for entries and names of the treatment/genotypes based on the user inputs.
 
-    * If the selection is `Yes`, the entries list must fulfill a specific format and must be a `.csv` file. The file must have the columns `ENTRY`, `NAME`, and `REPS`. The `ENTRY` column must have a unique entry integer number for each treatment/genotype. The column `NAME` must have a unique name that identifies each treatment/genotype. The `REPS` column must have an integer entry for the replications of the checks and other entries. Both ENTRY and NAME must be unique, duplicates are not allowed. In the following, we show an example of the entries list format. This example has an entry list with four checks and 8 treatments/genotypes. It is crucial to allocate the checks in the top part of the file.
-
+    * If the selection is `Yes`, the entries list must fulfill a specific format and must be a `.csv` file. The file must have the columns `ENTRY`, `NAME`, and `REPS`. The `ENTRY` column must have a unique entry integer number for each treatment/genotype. The column `NAME` must have a unique name that identifies each treatment/genotype. The `REPS` column must have an integer number for the replications of the groups. Both ENTRY and NAME must be unique, duplicates are not allowed. In the following table, we show an example of the entries list format. This example has an entry list with four treatments/genotypes that will appear twice and 8 that appear just once. 
+    
 ```{r, include=FALSE}
 library(FielDHub)
 ENTRY <- 1:12
@@ -41,9 +47,9 @@ library(knitr)
 kable(df)
 ```
 
-2. Enter the number of entries per replicate group in the **# of Entries per Rep Group** box as a comma separated list. In our example we will have 3 groups with 100, 200, and 300 entries. So, we enter `100,200,300` in the box for our sample experiment. 
+2. Enter the number of entries per replicate group in the **# of Entries per Rep Group** box as a comma separated list. In our example we will have 2 groups with 85 and 130 entries. So, we enter `75, 130` in the box for our sample experiment. 
 
-3. Enter the number of replications per group in the **# of Rep per Group** box. In our example we will 2, 2, and 1 replications for the 3 groups, so we enter `2,2,1` in this box. 
+3. Enter the number of replications per group in the **# of Rep per Group** box. In our example we will have 2 and 1 replications for the 2 groups, so we enter `2, 1` in this box. 
 
 4. Enter the number of locations in **Input # of Locations**. We will run this experiment over a single location, so set **Input # of Locations** to 1.
 
@@ -62,49 +68,92 @@ kable(df)
 If you change any of the inputs on the left side panel after running an experiment initially, you have to click the Run and Randomize buttons again, to re-run with the new inputs.
 
 ## Outputs
+
 After you run a single diagonal arrangement in FielDHub and set the dimensions of the field, there are several ways to display the information contained in the field book. The first tab, **Get Random**, shows the option to change the dimensions of the field and re-randomize, as well as a reference guide for experiment design. 
 
 ### Data Input
+
 On the second tab, **Data Input**, you can see all the entries in the randomization in a list, as well as a table of the checks with the number of times they appear in the field. In the list of entries, the reps for each check is included as well.
 
 
 ### Randomized Field
+
 The **Randomized Field** tab displays a graphical representation of the randomization of the entries in a field of the specified dimensions. The checks are the green colored cells, with the  The display includes numbered labels for the rows and columns. You can copy the field as a table or save it directly as an Excel file with the _Copy_ and _Excel_ buttons at the top. 
 
 ### Plot Number Field
+
 On the **Plot Number Field** tab, there is a table display of the field with the plots numbered according to the Plot Order Layout specified, either _serpentine_ or _cartesian_. You can see the corresponding entries for each plot number in the field book. Like the Randomized Field tab, you can copy the table or save it as an Excel file with the _Copy_ and _Excel_ buttons. 
 
 ### Field Book
+
 The **Field Book** displays all the information on the experimental design in a table format. It contains the specific plot number and the row and column address of each entry, as well as the corresponding treatment on that plot. This table is searchable, and we can filter the data in relevant columns. 
 
-# Function : `partially_replicated()`
+## 2. Generate a prep design by the `partially_replicated()` function
 
 You can run the same design with a function in the FielDHub package, `partially_replicated()`. We can enter the information describing the above design like this:
 
-```{r, echo = TRUE, warning=FALSE, comment=''}
+```{r, echo = TRUE}
 prep <- partially_replicated(
-  nrows = 50, #number of rows in the field
-  ncols = 20, #number of columns in the field
-  repGens = c(100,200,300),
-  repUnits = c(3,2,1),
+  nrows = 15,
+  ncols = 20, 
+  repGens = c(75,150),
+  repUnits = c(2,1), 
+  planter = "serpentine", 
+  plotNumber = 101,
   l = 1, 
-  seed = 123, #seed number to replicate identical randomizations
-  exptName = "Expt1" #optional name for experiment
+  exptName = "Expt1",
+  locationNames = "PALMIRA",
+  seed = 1245, 
 )
 ```
-```{r, comment='', echo=FALSE}
+
+#### Details on the inputs entered in `optimized_arrangement()` above
+
+The description for the inputs that we used to generate the design,
+
+*   `nrows = 15` is the number of rows in the field.
+*   `ncols = 20` is the number of columns in the field.
+*   `repGens = c(75,150)` are the values for the groups to replicate
+*   `repUnits = c(2,1)` are the values for representing respective replicates of each group.
+*   `planter = "serpentine"` is the layout order. 
+*   `plotNumber = 101` is the starting plot number for the experiment.
+*   `l = 1` is the number of locations.
+*   `exptName = "Expt1"` is an optional name for experiment.
+*   `locationNames = "PALMIRA"` is the name for the location
+*   `seed = 1245` is the seed number to replicate identical randomizations.
+
+### Print `prep` output
+
+To print a summary of the information that is in the object `prep`, we can use the generic function `print()`.
+
+```{r, echo = TRUE}
 print(prep)
 ```
-This returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are accessible by the `$` operator, i.e. `prep$layoutRandom` or `prep$fieldBook`. 
+
+### Access to `prep` output
+
+The `partially_replicated()` function returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are Accessible by the `$` operator, i.e. `prep$layoutRandom` or `prep$fieldBook`. 
 
 `prep$fieldBook` is a list containing information about every plot in the field, with information about the location of the plot and the treatment in each plot. As seen in the output below, the field book has columns for `ID`, `EXPT`, `LOCATION`, `YEAR`, `PLOT`, `ROW`, `COLUMN`, `CHECKS`, `ENTRY`, and `TREATMENT`.
-```{r, comment='', echo=FALSE}
-print(head(prep$fieldBook))
+
+```{r, echo=TRUE}
+field_book <- prep$fieldBook
+head(field_book, 10)
 ```
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
+### Plot field layout
+
+For plotting the layout in function of the coordinates `ROW` and `COLUMN` in the field book object we can use the generic function `plot()` as follow,
+
+
+```{r, fig.align='center', fig.width=7.2, fig.height=5.5}
+p <- plot(prep)
+p$layout
 ```
+
+In the figure above, green plots contain replicated entries, and gray plots contain entries that only appear once.
+
+<br>
+<br>
+<br>
+

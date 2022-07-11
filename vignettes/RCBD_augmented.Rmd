@@ -2,7 +2,7 @@
 title: "Augmented Randomized Complete Block Design"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{augmented_RCBD}
+  %\VignetteIndexEntry{Augmented Randomized Complete Block Design}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -147,7 +147,7 @@ print(aug_RCBD)
 ```
 
 
-### Acces to `aug_RCBD` output
+### Access to `aug_RCBD` output
 
 The function `RCBD_augmented()` returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are accessible by the `$` operator, i.e. `aug_RCBD$layoutRandom` or `aug_RCBD$fieldBook`. 
 

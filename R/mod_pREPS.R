@@ -383,8 +383,9 @@ mod_pREPS_server <- function(id){
       ncols <- field_dimensions_prep()$d_col
       niter <- 10000
       prep <- TRUE
+  
       locs_preps <- prep_inputs()$sites
-      site_names <- prep_inputs()$site_names
+      site_names <- prep_inputs()$location_names
       preps.seed <- prep_inputs()$seed_number
       plotNumber <- prep_inputs()$plotNumber
       movement_planter <- prep_inputs()$planter_mov
@@ -408,8 +409,9 @@ mod_pREPS_server <- function(id){
       test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
       if (test) {
         cat("Randomization was successful!", "\n", "\n")
-        len <- length(pREPS_reactive()$infoDesign)
-         pREPS_reactive()$infoDesign[1:(len - 1)]
+        # len <- length(pREPS_reactive()$infoDesign)
+        #  pREPS_reactive()$infoDesign[1:(len - 1)]
+        print(pREPS_reactive())
       }
     })
     

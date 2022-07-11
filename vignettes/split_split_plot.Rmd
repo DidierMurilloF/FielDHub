@@ -1,8 +1,8 @@
 ---
-title: "Split-Split-Plot Design"
+title: "Split-Split Plot Design"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{sspd}
+  %\VignetteIndexEntry{Split-Split Plot Design}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

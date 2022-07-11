@@ -2,16 +2,16 @@
 title: "Unreplicated Diagonal Arrangement Design"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{diagonal_arrangement}
+  %\VignetteIndexEntry{Unreplicated Diagonal Arrangement Design}
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+  %\VignetteEncoding{UTF-8} 
 ---
 
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>",
+  comment = NA,
   warning = FALSE, 
   message = FALSE
 )
@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 
 ## Single Diagonal Arrangement in FielDHub App
 
-In some experiments, there is insufficient seed quantity or field space to conduct trials with large numbers of genotypes, so plant breeders must use unreplicated or partially replicated experimental designs, like unreplicated designs with checks allocated in a systematic diagonal distribution. FielDHub includes a function to run such experimental designs, as well as tabs for single and multiple diagonal arrangments on the FielDHub app. 
+In some experiments, there is insufficient seed quantity or field space to conduct trials with large numbers of genotypes, so plant breeders must use unreplicated or partially replicated experimental designs, like unreplicated designs with checks allocated in a systematic diagonal distribution. FielDHub includes a function to run such experimental designs, as well as tabs for single and multiple diagonal arrangement on the FielDHub app. 
 
 ## Generate a Single Diagonal Arrangement in FielDHub app
 
@@ -62,7 +62,7 @@ kable(df)
 
 8. Enter the starting plot number in the **Starting Plot Number** box. In this experiment we want the plot start at `1001`.
 
-9. Enter the name of the site/location in the **Input the Location** box. For this experiment we will set the site as `FARGO`. In the case of users will run the experiment in multiple locations, the name for each location must be enter separete by comma, for example: `FARGO, CASSELTON, MINOT`.
+9. Enter the name of the site/location in the **Input the Location** box. For this experiment we will set the site as `FARGO`. In the case of users will run the experiment in multiple locations, the name for each location must be enter separate by comma, for example: `FARGO, CASSELTON, MINOT`.
 
 10. Once we have entered all the information for our experiment on the left side panel, click the **Run!** button to run the design. 
 
@@ -122,7 +122,7 @@ To print a summary of the information that is in the object `single_diag`, we ca
 print(single_diag)
 ```
 
-### Acces to `single_diag` output
+### Access to `single_diag` output
 
 This returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are accessible by the `$` operator, i.e. `single_diag$layoutRandom` or `single_diag$fieldBook`. 
 
@@ -196,7 +196,7 @@ kable(df)
 
 11. Enter the starting plot number for each experiment in the **Starting Plot Number** box. In this experiment we want the plot start at `1, 1001, 2001` for each experiment. The app also allows set only one number for all experiment.
 
-12. Enter the name of the site/location in the **Input the Location** box. For this experiment we will set the site as `FARGO`. In the case of users will run the experiment in multiple locations, the name for each location must be enter separete by comma, for example: `FARGO, CASSELTON, MINOT`.
+12. Enter the name of the site/location in the **Input the Location** box. For this experiment we will set the site as `FARGO`. In the case of users will run the experiment in multiple locations, the name for each location must be enter separate by comma, for example: `FARGO, CASSELTON, MINOT`.
 
 13. Once we have entered all the information for our experiment on the left side panel, click the **Run!** button to run the design. 
 
@@ -258,7 +258,7 @@ For printing a summary of the information that is in the object `single_diag` we
 print(multi_diag)
 ```
 
-### Acces to `multi_diag` output
+### Access to `multi_diag` output
 
 This returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are accessible by the `$` operator, i.e. `multi_diag$layoutRandom` or `multi_diag$fieldBook`. 
 

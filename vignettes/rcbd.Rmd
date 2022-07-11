@@ -2,7 +2,7 @@
 title: "Randomized Complete Block Design"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{rcbd}
+  %\VignetteIndexEntry{Randomized Complete Block Design}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

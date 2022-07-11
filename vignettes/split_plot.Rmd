@@ -2,7 +2,7 @@
 title: "Split-Plot Design"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{spd}
+  %\VignetteIndexEntry{Split-Plot Design}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

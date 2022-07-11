@@ -2,7 +2,7 @@
 title: "Row-Column Design"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{rcd}
+  %\VignetteIndexEntry{Row-Column Design}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

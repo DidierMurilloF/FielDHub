@@ -2,7 +2,7 @@
 title: "Strip-Plot Design"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{strip}
+  %\VignetteIndexEntry{Strip-Plot Design}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

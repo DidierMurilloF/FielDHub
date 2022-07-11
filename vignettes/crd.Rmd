@@ -2,7 +2,7 @@
 title: "Completely Randomized Design"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{crd}
+  %\VignetteIndexEntry{Completely Randomized Design}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

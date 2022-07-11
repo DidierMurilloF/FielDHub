@@ -2,7 +2,7 @@
 title: "Rectangular Lattice Design"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{rectangular}
+  %\VignetteIndexEntry{Rectangular Lattice Design}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

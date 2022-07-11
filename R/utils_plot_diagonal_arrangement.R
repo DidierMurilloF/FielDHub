@@ -48,9 +48,11 @@ plot_prep <- function(x, l) {
   cols <- max(as.numeric(loc_field_book$COLUMN))
   rows <- max(as.numeric(loc_field_book$ROW))
   
+  loc_field_book$binay_checks <- ifelse(loc_field_book$CHECKS != 0, 1, 0)
+  
   main <- paste0("Partially Replicated Design ", rows, " x ", cols)
   p1 <- desplot::ggdesplot(loc_field_book, 
-                           CHECKS ~ COLUMN + ROW,  
+                           binay_checks ~ COLUMN + ROW,  
                            text = ENTRY,  
                            xlab = "COLUMNS", 
                            ylab = "ROWS",
@@ -58,7 +60,7 @@ plot_prep <- function(x, l) {
                            cex = 1,
                            show.key = FALSE, 
                            gg = TRUE,
-                           col.regions = c("gray", "dodgerblue"))
+                           col.regions = c("gray", "seagreen"))
   
   return(list(p1 = p1, allSitesFieldbook = fieldbook))
 }
