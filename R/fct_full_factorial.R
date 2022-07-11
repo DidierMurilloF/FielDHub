@@ -187,10 +187,17 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
   levelsByFactor <- levels.by.factor
   #newlevels
   allcomb <- as.data.frame(allcomb)
-  fullfactorial <- list(factors = levels(TRT), levels = levelsByFactor, runs = nruns, alltreatments = allcomb,
-                        Reps = reps, Locations = l, locationNames = locationNames, kind = kind, 
-                        levels_each_factor = entries_each_factor,
-                        id_design = 4)
+  fullfactorial <- list(
+    factors = levels(TRT), 
+    levels = levelsByFactor, 
+    runs = nruns, 
+    all_treatments = allcomb,
+    reps = reps, 
+    locations = l, 
+    location_names = locationNames, 
+    kind = kind, 
+    levels_each_factor = entries_each_factor,
+    id_design = 4)
   output <- list(infoDesign = fullfactorial, fieldBook = design_output)
   class(output) <- "FielDHub"
   return(invisible(output))

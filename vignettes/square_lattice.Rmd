@@ -16,24 +16,25 @@ knitr::opts_chunk$set(
 )
 ```
 
-## 1. Generate a Square Lattice Design in FielDHub App
+This vignette shows how to generate a **rectangular lattice design** using both the FielDHub Shiny App and the scripting function `square_lattice()` from the `FielDHub` package.
 
-To generate an alpha lattice design using the FielDHub app:
+## 1. Using the FielDHub Shiny App
+
+To generate a square lattice design using the FielDHub app:
 
 First, go to **Lattice Designs** > **Square Lattice**
 
-Then, follow the following steps where we will show how to generate an alpha lattice design with 55 treatments and 3 reps.
+Then, follow the following steps where we will show how to generate an square lattice design with 64 treatments and 3 reps.
 
 ## Inputs
 
 1. **Import entries' list?** Choose whether to import a list with entry numbers and names for genotypes or treatments.
     * If the selection is `No`, that means the app is going to generate synthetic data for entries and names of the treatment/genotypes based on the user inputs.
 
-    * If the selection is `Yes`, the entries list must fulfill a specific format and must be a `.csv` file. The file must have the columns `ENTRY` and `NAME`. The `ENTRY` column must have a unique entry integer number for each treatment/genotype. The column `NAME` must have a unique name that identifies each treatment/genotype. Both ENTRY and NAME must be unique, duplicates are not allowed. In the following, we show an example of the entries list format. This example has an entry list with four checks and 8 treatments/genotypes. It is crucial to allocate the checks in the top part of the file.
+    * If the selection is `Yes`, the entries list must fulfill a specific format and must be a `.csv` file. The file must have the columns `ENTRY` and `NAME`. The `ENTRY` column must have a unique entry integer number for each treatment. The column `NAME` must have a unique name that identifies each treatment. Both ENTRY and NAME must be unique, duplicates are not allowed. In the following table, we show an example of the entries list format. This example has an entry list with 12 treatments. 
     
 
 ```{r, include=FALSE}
-library(FielDHub)
 ENTRY <- 1:12
 NAME <- c(paste0("Genotype", LETTERS[1:12]))
 df <- data.frame(ENTRY,NAME)
@@ -44,21 +45,23 @@ library(knitr)
 kable(df)
 ```
 
-2.Input the number of treatments in the **Input # of Treatments** box. The number of treatments must be a square number in the square lattice design. We will enter 64 for our sample experiment. 
+2. Input the number of treatments in the **Input # of Treatments** box. The number of treatments must be a square number in the square lattice design. We will enter `64` for our sample experiment. 
 
-3. Select the number of replications of these treatments with the **Input # of Full Reps** box. 
+3. Select the number of replications of these treatments with the **Input # of Full Reps** box. In this examples, set it to `3`.
 
-4. Set the number of plots in each incomplete block with the **Input # of Plots per IBlock** box.
+4. Set the number of plots in each incomplete block with the **Input # of Plots per IBlock** box. In this examples, set it to `8`.
 
-5. Enter the number of locations in **Input # of Locations**. We will run this experiment over a single location, so set it to 1.
+5. Enter the number of locations in **Input # of Locations**. We will run this experiment over a single location, so set it to `1`.
 
 6. Select `serpentine` or `cartesian` in the **Plot Order Layout**. For this example we will use the default `serpentine` layout.
 
-7. Enter the starting plot number in the **Starting Plot Number** box. If the experiment has multiple locations, you must enter a comma separated list of numbers the length of the number of locations for the input to be valid. 
+7. Enter the starting plot number in the **Starting Plot Number** box. If the experiment has multiple locations, you must enter a comma separated list of numbers the length of the number of locations for the input to be valid. Set it to `101`.
 
-8. To ensure that randomizations are consistent across sessions, we can set a seed number in the box labeled **Seed Number**. In this example, we will set it to 123. 
+8. Enter a name for the location of the experiment in the **Input Location** box. If there are multiple locations, each name must be in a comma separated list. For this example, set it to `"FARGO"`.
 
-9. Once we have entered the information for our experiment on the left side panel, click the **Run!** button to run the design. 
+9. To ensure that randomizations are consistent across sessions, we can set a seed number in the box labeled **Seed Number**. In this example, we will set it to 1233. 
+
+10. Once we have entered the information for our experiment on the left side panel, click the **Run!** button to run the design. 
 
 ## Outputs
 
@@ -73,19 +76,27 @@ You can also display a heatmap over the field by changing **Type of Plot** to **
 
 The **Field Book** displays all the information on the experimental design in a table format. It contains the specific plot number and the row and column address of each entry, as well as the corresponding treatment on that plot. This table is searchable, and we can filter the data in relevant columns. If we have simulated data for a heatmap, an additional column for that variable appears in the Field Book. 
 
-## 2. Generate the design by the `square_lattice()` function.
+## 2. Using the `FielDHub` function: `square_lattice()`
 
-You can run the same design with a function in the FielDHub package, `square_lattice()`. We can enter the information describing the above design like this:
+You can run the same design with a function in the FielDHub package, `square_lattice()`.
+
+First, you need to load the `FielDHub` package typing,
+
+```{r, echo = TRUE}
+library(FielDHub)
+```
+
+Then, you can enter the information describing the above design like this:
 
 ```{r, echo = TRUE}
 square <- square_lattice(
-  t = 64,    
+  t = 64,
+  r = 3, 
   k = 8,      
-  r = 3,      
   l = 1,     
   plotNumber = 101, 
   locationNames = "FARGO", 
-  seed = 123
+  seed = 1233
   )
 ```
 
@@ -93,23 +104,23 @@ square <- square_lattice(
 
 The description for the inputs that we used to generate the design,
 
-  `t = 64` is the number of treatments, must be square number.
-  `k = 8` is the number of plots per incomplete block.
-  `r=3` is the number of replicates.
-  `l = 1` is the number of locations.
-  `plotNumber = 101` is the starting plot number.
-  `locationNames = "FARGO"` optional name for each location
-  `seed = 123` is the seed number to replicate identical randomizations.
+*   `t = 64` is the number of treatments, must be square number.
+*   `r=3` is the number of replicates.
+*   `k = 8` is the number of plots per incomplete block.
+*   `l = 1` is the number of locations.
+*   `plotNumber = 101` is the starting plot number.
+*   `locationNames = "FARGO"` optional name for each location.
+*   `seed = 1233` is the seed number to replicate identical randomizations.
 
-### Print `square` output
+### Print `square` object
 
-To print a summary of the information that is in the object `alpha`, we can use the generic function `print()`. 
+To print a summary of the information that is in the object `square`, we can use the generic function `print()`. 
 
 ```{r, echo=TRUE}
 print(square)
 ```
 
-### Access to `square` output
+### Access to `square` object
 
 This returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are accessible by the `$` operator, i.e. `square$layoutRandom` or `square$fieldBook`. 
 

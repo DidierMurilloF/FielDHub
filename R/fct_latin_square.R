@@ -176,10 +176,8 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
   latin_design <- cbind(ID = 1:nrow(ls.output.order), ls.output.order)
   lsd.reps <- setNames(lsd.reps, paste0("rep", seq(1:reps))) # set names
   parameters <- list(
-    numberofTreatments = length(unique(ls.output$ROW)),
-    numberofRowns = length(unique(ls.output$ROW)),
-    numberofColumns =  length(unique(ls.output$COLUMN)),
-    rep = reps,
+    treatments = length(unique(ls.output$ROW)),
+    squares = reps,
     locationName =  locationNames,
     seed =  seed,
     id_design = 3

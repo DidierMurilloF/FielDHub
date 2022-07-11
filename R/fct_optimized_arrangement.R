@@ -81,9 +81,12 @@
 #' head(OptimAd2$fieldBook,12)
 #'                   
 #' @export
-optimized_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,  amountChecks = NULL, checks = NULL,
-                                  planter = "serpentine", l = 1, plotNumber = 101, seed = NULL, exptName = NULL,
-                                  locationNames = NULL, optim = TRUE, data = NULL) {
+optimized_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,  
+                                  amountChecks = NULL, checks = NULL,
+                                  planter = "serpentine", l = 1, 
+                                  plotNumber = 101, seed = NULL, exptName = NULL,
+                                  locationNames = NULL, optim = TRUE, 
+                                  data = NULL) {
   if (is.null(seed) || !is.numeric(seed)) seed <- runif(1, min = -50000, max = 50000)
   if (all(c("serpentine", "cartesian") != planter)) {
     base::stop('Input planter is unknown. Please, choose one: "serpentine" or "cartesian"')
