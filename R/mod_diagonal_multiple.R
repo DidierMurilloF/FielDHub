@@ -93,10 +93,9 @@ mod_diagonal_multiple_ui <- function(id) {
         fluidRow(
           column(6,
                  style=list("padding-right: 28px;"),
-                 numericInput(inputId = ns("seed_multiple"), 
-                              label = "Seed Number:", 
-                              value = 17, 
-                              min = 1)
+                  textInput(ns("plot_start_multiple"), 
+                            "Starting Plot Number:", 
+                            value = 1)
           ),
           column(6,
                  style=list("padding-left: 5px;"),
@@ -108,9 +107,10 @@ mod_diagonal_multiple_ui <- function(id) {
         fluidRow(
           column(6,
                  style=list("padding-right: 28px;"),
-                 textInput(ns("plot_start_multiple"), 
-                           "Starting Plot Number:", 
-                           value = 1)
+                  numericInput(inputId = ns("seed_multiple"), 
+                              label = "Seed Number:", 
+                              value = 17, 
+                              min = 1)
           ),
           column(6,
                  style=list("padding-left: 5px;"),

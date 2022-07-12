@@ -97,7 +97,7 @@ square <- square_lattice(
   plotNumber = 101, 
   locationNames = "FARGO", 
   seed = 1233
-  )
+)
 ```
 
 #### Details on the inputs entered in `square_lattice()` above
@@ -116,7 +116,11 @@ The description for the inputs that we used to generate the design,
 
 To print a summary of the information that is in the object `square`, we can use the generic function `print()`. 
 
-```{r, echo=TRUE}
+```{r, echo=TRUE, eval=FALSE}
+print(square)
+```
+
+```{r, echo=FALSE, eval=TRUE}
 print(square)
 ```
 
@@ -127,9 +131,14 @@ This returns a list consisting of all the information displayed in the output ta
 `square$fieldBook` is a list containing information about every plot in the field, with information about the location of the plot and the treatment in each plot. As seen in the output below, the field book has columns for `ID`, `LOCATION`, `PLOT`, `REP`, `IBLOCK`, `UNIT`, `ENTRY`, and `TREATMENT`.
 
 
-```{r, echo=TRUE}
+```{r, echo=TRUE, eval=FALSE}
 field_book <- square$fieldBook
-head(field_book, 10)
+head(square$fieldBook, 10)
+```
+
+```{r, echo=FALSE, eval=TRUE}
+field_book <- square$fieldBook
+head(square$fieldBook, 10)
 ```
 
 

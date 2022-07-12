@@ -18,7 +18,10 @@ plot_number <- function(planter = "serpentine",
   expts_ft <- factor(expe_names, levels = unique(expe_names))
   expt_levels <- levels(expts_ft)
   if (length(plot_number) != b) {
-    serie_plot_numbers <- 1:(plots - fillers)
+    start_plot <-  as.numeric(plot_number)
+    serie_plot_numbers <- start_plot:(plots + start_plot - fillers)
+    max_len_plots <- sum(dim_each_block)
+    serie_plot_numbers <- serie_plot_numbers[1:max_len_plots]
     plot_number_blocks <- split_vectors(x = serie_plot_numbers, 
                                         len_cuts = dim_each_block)
   } else {

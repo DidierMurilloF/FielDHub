@@ -125,7 +125,11 @@ The description for the inputs that we used to generate the design,
 
 ### Print `ibd` object
 
-```{r, echo=TRUE}
+```{r, echo=TRUE, eval=FALSE}
+print(ibd)
+```
+
+```{r, echo=FALSE, eval=TRUE}
 print(ibd)
 ```
 
@@ -136,9 +140,14 @@ This returns a list consisting of all the information displayed in the output ta
 `ibd$fieldBook` is a list containing information about every plot in the field, with information about the location of the plot and the treatment in each plot. As seen in the output below, the field book has columns for `ID`, `LOCATION`, `PLOT`, `REP`, `IBLOCK`, `UNIT`, `ENTRY`, and `TREATMENT`.
 
 
-```{r, echo=TRUE}
+```{r, echo=TRUE, eval=FALSE}
 field_book <- ibd$fieldBook
-head(field_book, 10)
+head(ibd$fieldBook, 10)
+```
+
+```{r, echo=FALSE, eval=TRUE}
+field_book <- ibd$fieldBook
+head(ibd$fieldBook, 10)
 ```
 
 ### Plot the field layout

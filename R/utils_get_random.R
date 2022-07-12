@@ -270,8 +270,8 @@ get_random <- function(n_rows = NULL,
       treatments_random <- sum(data_entries_no_checks %in% w_map)
       if (treatments_random == len_entries_to_random) {
         w_map_ok <- w_map
-        print("Randomization was successful. It passed all tests!")
-        print(c(treatments_random, len_entries_to_random))
+        # print("Randomization was successful. It passed all tests!")
+        # print(c(treatments_random, len_entries_to_random))
       } else stop("Some entries are missing in the randomization!!")
       return(list(rand = w_map_ok, 
                   Entries = entries, 

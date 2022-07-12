@@ -17,8 +17,8 @@ get_single_random <- function(n_rows = NULL,
   treatments_random <- sum(data_entries_no_checks %in% matrix_checks)
   if (treatments_random == len_entries_to_random) {
     matrix_checks_random_entries <- matrix_checks
-    print("Randomization was successful. It passed all tests!")
-    print(c(treatments_random, len_entries_to_random))
+    # print("Randomization was successful. It passed all tests!")
+    # print(c(treatments_random, len_entries_to_random))
   } else stop("Some entries are missing in the randomization!!")
   return(list(rand = matrix_checks_random_entries, 
               Entries = rand_entries, 

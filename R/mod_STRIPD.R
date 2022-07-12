@@ -153,9 +153,9 @@ mod_STRIPD_server <- function(id) {
     ns <- session$ns
     shinyjs::useShinyjs()
     Hplots <- LETTERS[1:5]
-    Vplots <- LETTERS[1:4]
+    Vplots <- LETTERS[1:5]
     entryListFormat_STRIP <- data.frame(
-      list(HPLOTS = Hplots, VPLOTS = c(Vplots, ""))
+      list(HPLOTS = Hplots, VPLOTS = Vplots)
       )           
     entriesInfoModal_STRIP <- function() {
       modalDialog(

@@ -113,7 +113,11 @@ rect <- rectangular_lattice(
 
 ### Print `rect` object
 
-```{r, comment='', echo=TRUE}
+```{r, echo=TRUE, eval=FALSE}
+print(rect)
+```
+
+```{r, echo=FALSE, eval=TRUE}
 print(rect)
 ```
 
@@ -124,9 +128,14 @@ The function `rectangular_lattice()` returns a list consisting of all the inform
 `rect$fieldBook` is a list containing information about every plot in the field, with information about the location of the plot and the treatment in each plot. As seen in the output below, the field book has columns for `ID`, `LOCATION`, `PLOT`, `REP`, `IBLOCK`, `UNIT`, `ENTRY`, and `TREATMENT`.
 
 
-```{r, echo=FALSE}
+```{r, echo=TRUE, eval=FALSE}
 field_book <- rect$fieldBook
-head(field_book, 10)
+head(rect$fieldBook, 10)
+```
+
+```{r, echo=FALSE, eval=TRUE}
+field_book <- rect$fieldBook
+head(rect$fieldBook, 10)
 ```
 
 ### Plot the field layout

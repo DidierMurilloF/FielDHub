@@ -118,7 +118,11 @@ lsd <- latin_square(
 
 ### Print `lsd` object
 
-```{r, echo=TRUE}
+```{r, echo=TRUE, eval=FALSE}
+print(lsd)
+```
+
+```{r, echo=FALSE, eval=TRUE}
 print(lsd)
 ```
 
@@ -128,9 +132,14 @@ This returns a list consisting of all the information displayed in the output ta
 
 `lsd$fieldBook` is a list containing information about every plot in the field, with information about the location of the plot and the treatment in each plot. As seen in the output below, the field book has columns for `ID`, `LOCATION`, `PLOT`, `SQUARE`, `ROW`, `COLUMN`, and `TREATMENT`.
 
-```{r, echo=TRUE}
+```{r, echo=TRUE, eval=FALSE}
 field_book <- lsd$fieldBook
-head(field_book, 10)
+head(lsd$fieldBook, 10)
+```
+
+```{r, echo=FALSE, eval=TRUE}
+field_book <- lsd$fieldBook
+head(lsd$fieldBook, 10)
 ```
 
 ### Plot the field layout

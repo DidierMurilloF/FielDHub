@@ -14,7 +14,6 @@ names_layout <- function(w_map = NULL,
       w_map_letters1 <- w_map_letters
       Index_block <- LETTERS[1:blocks]
       name_blocks <- expt_name
-      print(name_blocks)
       z <- 1
       for(i in Index_block) { 
         w_map_letters1[w_map_letters1 == i] <- name_blocks[z] 

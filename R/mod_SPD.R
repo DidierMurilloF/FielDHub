@@ -61,6 +61,11 @@ mod_SPD_ui <- function(id) {
                               value = 1, min = 1)
           )
         ),
+        selectInput(inputId = ns("planter_mov_spd"), 
+          label = "Plot Order Layout:",
+          choices = c("serpentine", "cartesian"), 
+          multiple = FALSE,
+          selected = "serpentine"),
         fluidRow(
           column(6, style=list("padding-right: 28px;"),
                  textInput(ns("plot_start.spd"), "Starting Plot Number:", 
@@ -71,12 +76,6 @@ mod_SPD_ui <- function(id) {
                            value = "FARGO")
           )
         ),
-        selectInput(inputId = ns("planter_mov_spd"), 
-                    label = "Plot Order Layout:",
-                    choices = c("serpentine", "cartesian"), 
-                    multiple = FALSE,
-                    selected = "serpentine"),
-        
         numericInput(inputId = ns("myseed.spd"), label = "Seed Number:", 
                      value = 118, min = 1),
         

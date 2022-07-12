@@ -129,29 +129,58 @@ diagonal_arrangement <- function(nrows = NULL,
   if (all(c("column", "row") != splitBy)) {
     base::stop('Input for splitBy is unknown. Please, choose one: "column" or "row"')
   }
-  if (!is.null(plotNumber) && is.numeric(plotNumber)) {
-    if(any(plotNumber < 1) || any(diff(plotNumber) < 0)) {
-      shiny::validate('diagonal_arrangement() requires plotNumber to be positive and sorted integers.')
+  
+  if (class(plotNumber) != "list") {
+    if (!is.null(plotNumber) && is.numeric(plotNumber)) {
+      if(any(plotNumber < 1) || any(diff(plotNumber) < 0)) {
+        shiny::validate('diagonal_arrangement() requires plotNumber to be positive and sorted integers.')
+      }
+    }
+    if(!is.numeric(plotNumber) && !is.integer(plotNumber)) {
+      stop("plotNumber should be an integer or a numeric vector.")
+    }
+    if (any(plotNumber %% 1 != 0)) {
+      stop("plotNumber should be integers.")
     }
   }
-
-  if(!is.numeric(plotNumber) && !is.integer(plotNumber)) {
-    stop("plotNumber should be an integer or a numeric vector.")
+  
+  if (kindExpt == "SUDC") {
+    if (!is.null(l)) {
+      if (is.null(plotNumber) || length(plotNumber) != l) {
+        if (l > 1){
+          plotNumber <- as.list(seq(1001, 1000*(l+1), 1000))
+        } else plotNumber <- list(1001)
+        message(cat("Warning message:", "\n", "Since plotNumber was missing, it was set up to default value of: ", plotNumber))
+      }
+    } else stop("Number of locations/sites is missing")
   }
   
-  if (any(plotNumber %% 1 != 0)) {
-    stop("plotNumber should be integers.")
-  }
-  
-  if (!is.null(l)) {
-    if (is.null(plotNumber) || length(plotNumber) != l) {
-      if (l > 1){
-        plotNumber <- seq(1001, 1000*(l+1), 1000)
-      } else plotNumber <- 1001
-      message(cat("Warning message:", "\n", "Since plotNumber was missing, it was set up to default value of: ", plotNumber))
+  if (kindExpt != "SUDC") {
+    num_expts <- length(blocks)
+    if (!is.null(l)) {
+      if (!is.null(plotNumber)) {
+        if (class(plotNumber) == "list") {
+          if (all(lengths(plotNumber) == num_expts) &
+              length(plotNumber) == l) {
+            plotNumber <- plotNumber
+          } else plotNumber <- as.list(seq(1001, 1000*(l+1), 1000))
+        } else {
+          if (l == 1) {
+            if (length(plotNumber) == num_expts) {
+              plotNumber <- list(plotNumber)
+            } else if (length(plotNumber) == 1) {
+              plotNumber <- as.list(plotNumber)
+            }
+          } else {
+            if (length(plotNumber) == l) {
+              plotNumber <- as.list(plotNumber)
+            } else plotNumber <- as.list(seq(1001, 1000*(l+1), 1000))
+          }
+        } 
+      }
     }
-  }else stop("Number of locations/sites is missing")
-
+  }
+  
   if (!is.null(checks) && is.numeric(checks) && all(checks %% 1 == 0)) {
     if(!is.null(data)) {
       if (length(checks) == 1 && checks >= 1) {
@@ -205,7 +234,6 @@ diagonal_arrangement <- function(nrows = NULL,
       data_entry <- data
       data_entry_UP <- na.omit(data_entry[,1:2]) 
       colnames(data_entry_UP) <- c("ENTRY", "NAME")
-      print(nrow(data_entry_UP))
       if (kindExpt == "DBUDC") {
         data_entry_UP <- na.omit(data_entry[,1:3]) 
         colnames(data_entry_UP) <- c("ENTRY", "NAME", "BLOCK")
@@ -475,7 +503,7 @@ diagonal_arrangement <- function(nrows = NULL,
       )
     }
     
-    plot_n_start <- as.numeric(plotNumber)
+    plot_n_start <- as.numeric(plotNumber[[sites]])
     datos_name <- split_name_diagonal1$my_names
     fillers <- sum(datos_name == "Filler")
     if (kindExpt == "DBUDC") { 
