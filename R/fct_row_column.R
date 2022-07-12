@@ -176,9 +176,16 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
   c3 <- concurrence_matrix (df=df, trt=trt, target='COLUMN')
   summ <- merge(c1, c2, by="Concurrence", all=TRUE)
   new_summ <- merge(summ, c3, by='Concurrence', all=TRUE)
-  infoDesign <- list(nRows = nrows, nCols = ib, Reps = r, NumberTreatments = nt, 
-                     NumberLocations = l, Locations = locationNames, seed = seed,
-                     id_design = 9)
+  infoDesign <- list(
+    rows = nrows, 
+    columns = ib, 
+    reps = r, 
+    treatments = nt, 
+    locations = l, 
+    location_names = locationNames, 
+    seed = seed,
+    id_design = 9
+  )
   output <- list(infoDesign = infoDesign, resolvableBlocks = NEW_Resolvable, 
                  concurrence = new_summ,
                  fieldBook = OutRowCol)

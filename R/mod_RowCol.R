@@ -65,6 +65,11 @@ mod_RowCol_ui <- function(id){
                    numericInput(inputId = ns("l.rcd"), 
                                 label = "Input # of Locations:", 
                                 value = 1, min = 1),
+                   selectInput(inputId = ns("planter_mov_rcd"),
+                               label = "Plot Order Layout:",
+                               choices = c("serpentine", "cartesian"),
+                               multiple = FALSE,
+                               selected = "serpentine"),
                    fluidRow(
                      column(6, style=list("padding-right: 28px;"),
                             textInput(ns("plot_start.rcd"), 
@@ -77,11 +82,6 @@ mod_RowCol_ui <- function(id){
                                       value = "FARGO")
                      )
                    ),
-                   selectInput(inputId = ns("planter_mov_rcd"),
-                               label = "Plot Order Layout:",
-                               choices = c("serpentine", "cartesian"),
-                               multiple = FALSE,
-                               selected = "serpentine"),
                    numericInput(ns("seed.rcd"), 
                                 label = "Seed Number:", 
                                 value = 1),
