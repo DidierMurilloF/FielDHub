@@ -124,7 +124,7 @@ The description for the inputs that we used to generate the design,
 *   `seed = 1235` is the seed number to replicate identical randomizations.
 
 
-### Print `alpha` onject
+### Print `alpha` object
 
 To print a summary of the information that is in the object `alpha`, we can use the generic function `print()`. 
 

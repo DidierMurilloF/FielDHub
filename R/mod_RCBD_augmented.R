@@ -234,6 +234,13 @@ mod_RCBD_augmented_server <- function(id) {
           data_up <- na.omit(data_up)
           colnames(data_up) <- c("ENTRY", "NAME")
           lines <- nrow(data_up) - checks
+          if (lines < 8) {
+            shinyalert::shinyalert(
+              "Error!!", 
+              "At least ten treatments are required!!", 
+              type = "error")
+            return(NULL)
+          }
           return(list(error = FALSE, 
                       dataUp_a_rcbd = data_up,
                       entries = lines))
@@ -261,6 +268,13 @@ mod_RCBD_augmented_server <- function(id) {
       } else {
         req(input$checks_a_rcbd)
         req(input$lines_a_rcbd)
+        if (input$lines_a_rcbd < 8) {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "At least ten treatments are required!!", 
+            type = "error")
+          return(NULL)
+        }
         lines <- as.numeric(input$lines_a_rcbd)
         checks <- as.numeric(input$checks_a_rcbd)
         if(lines < 1 || checks <= 0) validate("Number of lines and checks should be greater than 1.")
@@ -292,6 +306,12 @@ mod_RCBD_augmented_server <- function(id) {
         checks = checks_arcbd
       )
       blocks_arcbd <- set_blocks$b
+      if (length(blocks_arcbd) == 0) {
+        shinyalert::shinyalert(
+          "Error!!", 
+          "No options available for that amount of treatments!!.", 
+          type = "error")
+      }
       updateSelectInput(session = session,
                         inputId = "blocks_a_rcbd",
                         label = "Input # of Blocks:", 
@@ -309,7 +329,8 @@ mod_RCBD_augmented_server <- function(id) {
         lines <- as.numeric(input$lines_a_rcbd)
         b <- as.numeric(input$blocks_a_rcbd)
         set_dims <- set_augmented_blocks(lines = lines, checks = checks)
-        blocks_dims <- as.data.frame(set_dims$blocks_dims)
+        dim_options <- set_dims$blocks_dims
+        blocks_dims <- as.data.frame(dim_options)
         set_choices_dims <- as.vector(subset(blocks_dims, blocks_dims[,1] == b)[,2])
         choices <- set_choices_dims
       } else {
@@ -478,7 +499,7 @@ mod_RCBD_augmented_server <- function(id) {
           columnDefs = list(list(className = 'dt-left', targets = 0:a))))
     })
     
-    rcbd_augmented_reactive <- eventReactive(input$get_random_augmented, {
+    rcbd_augmented_reactive <- reactive({
       req(getDataup_a_rcbd()$dataUp_a_rcbd)
       req(input$checks_a_rcbd)
       req(input$lines_a_rcbd)
@@ -492,7 +513,7 @@ mod_RCBD_augmented_server <- function(id) {
       if (input$owndata_a_rcbd == "Yes") {
         gen.list <- getDataup_a_rcbd()$dataUp_a_rcbd
         lines <- as.numeric(nrow(gen.list) - checks)
-      }else {
+      } else {
         lines <- as.numeric(input$lines_a_rcbd)
         gen.list <- getDataup_a_rcbd()$dataUp_a_rcbd
       }
@@ -529,7 +550,8 @@ mod_RCBD_augmented_server <- function(id) {
         nrows = nrows,
         ncols = ncols
       )
-    })
+    }) %>% 
+      bindEvent(input$get_random_augmented)
 
 
     output$summary_augmented <- renderPrint({

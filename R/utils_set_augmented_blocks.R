@@ -3,7 +3,7 @@ set_augmented_blocks <- function(lines, checks, start = 5) {
   blocks <- start:ceiling(lines / div)
   b <- vector(mode = "numeric")
   checked_dims <- list()
-  blocks_dims <- matrix(ncol = 2)
+  blocks_dims <- matrix(ncol = 2, byrow = TRUE)
   n <- 1
   for (i in blocks) {
     all_genotypes <- lines + checks * i
@@ -31,6 +31,9 @@ set_augmented_blocks <- function(lines, checks, start = 5) {
     }
   }
   blocks_and_dims <- blocks_dims[-1,]
+  if (!is.matrix(blocks_and_dims)) {
+    blocks_and_dims <- matrix(data = blocks_and_dims, ncol = 2, byrow = TRUE)
+  }
   return(list(b = b, 
               option_dims = checked_dims, 
               blocks_dims = blocks_and_dims))

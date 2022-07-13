@@ -118,7 +118,7 @@ print(crd)
 print(crd)
 ```
 
-### Access to `crd` outpu
+### Access to `crd` output
 
 The `CRD` function returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are accessible by the `$` operator, i.e. `crd$layoutRandom` or `crd$fieldBook`. 
 
