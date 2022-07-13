@@ -16,16 +16,38 @@ knitr::opts_chunk$set(
 )
 ```
 
-##  Augmented RCBD in FielDHub App
+This vignette shows how to generate an **augmented randomized complete block design ** using both the FielDHub Shiny App and the scripting function `RCBD_augmented()` from the `FielDHub` package.
+
+## Overview
 
 The augmented randomized complete block design is another option to try to overcome the problem of limited facilities or lack of seed when plant breeders want to test a large number of varieties. Same amount of exemplar varieties (checks) are included as controls in every augmented block to try to provide an estimate of experimental error.
 
-In this design you can set the number of entries/treatments, number of checks and the number of augmented blocks for the experiment. You can also choose to run the same experiment over multiple locations. 
+FielDHub includes a function to run such experimental designs, features include options to set the number of entries and the number of checks and augmented blocks for the experiment. Users can also choose to run the same experiment over multiple locations. 
 
+## Use case
 
-## Generate an Augmented RCBD in FielDHub app
+For example, we say a project needs to test 60 genotypes of wheat over two locations with four checks and six augmented blocks. This design setup comes out with 6 blocks of size 24 plots for a total of 144 plots that will be distributed in a field of 12 rows and 12 columns.
 
-In this tutorial, we will show how to use the FielDHub App and the function `RCBD_augmented()` to generate an augmented randomized complete blocks design. For example, we say a project needs to test 60 genotypes of wheat over two locations with four checks and six augmented blocks. This design setup comes out with 6 blocks of size 24 plots for a total of 144 plots that will be distributed in a field of 12 rows and 12 columns.
+## Running the Shiny App
+
+To launch the app you need to run either,
+
+```{r, eval=FALSE}
+FielDHub::run_app()
+```
+
+or
+
+```{r, eval=FALSE}
+library(FielDHub)
+run_app()
+```
+
+## 1. Using the FielDHub Shiny App
+
+Once the app is running, go to  **Augmented Designs** > **RCBD Augmented**
+
+Then, follow the following steps where we will show how to generate an RCBD Augmented.
 
 ## Inputs
 
@@ -97,9 +119,17 @@ The **Field Book** displays all the information on the experimental design in a 
 
 <br>
 
-# Function : `RCBD_augmented()`
+## 2. Using the `FielDHub` function: `RCBD_augmented()`
 
-You can run the same design with a function in the FielDHub package, `RCBD_augmented()`. We can enter the information describing the above design like this:
+You can run the same design with the function `RCBD_augmented()` in the F`ielDHub` package.
+
+First, you need to load the `FielDHub` package typing,
+
+```{r, echo = TRUE}
+library(FielDHub)
+```
+
+Then, you can enter the information describing the above design like this:
 
 ```{r, echo = TRUE}
 aug_RCBD <- RCBD_augmented(
@@ -142,10 +172,14 @@ The description for the inputs that we used to generate the design,
 
 To print a summary of the information that is in the object `aug_RCBD`, we can use the generic function `print()`. 
 
-```{r, echo=TRUE}
+
+```{r, echo=TRUE, eval=FALSE}
 print(aug_RCBD)
 ```
 
+```{r, echo=FALSE, eval=TRUE}
+print(aug_RCBD)
+```
 
 ### Access to `aug_RCBD` output
 
@@ -153,11 +187,18 @@ The function `RCBD_augmented()` returns a list consisting of all the information
 
 `aug_RCBD$fieldBook` is a list containing information about every plot in the field, with information about the location of the plot and the treatment in each plot. As seen in the output below, the field book has columns for `ID`, `EXPT`, `LOCATION`, `YEAR`, `PLOT`, `ROW`, `COLUMN`, `CHECKS`, `ENTRY`, and `TREATMENT`.
 
+Let us see the first 10 rows of the field book for this experiment.
 
-```{r, echo=TRUE}
+```{r, echo=TRUE, eval=FALSE}
 field_book <- aug_RCBD$fieldBook
 head(field_book, 10)
 ```
+
+```{r, echo=FALSE, eval=TRUE}
+field_book <- aug_RCBD$fieldBook
+head(field_book, 10)
+```
+
 
 ### Plot field layout
 
@@ -182,3 +223,4 @@ p2$layout
 <br>
 <br>
 <br>
+

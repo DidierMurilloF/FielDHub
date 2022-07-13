@@ -30,7 +30,7 @@ FielDHub includes a function to run such experimental designs, as well as tabs f
 
 ## Use case
 
-We say a project needs to test 300 genotypes of barley in a preliminary yield trial (PYT) in a field containing 15 rows and 22 columns of plots. In this project, these 300 genotypes are allocated into one experiment. In addition, five checks are included in a systematic diagonal arrangement across field to fill 30 plots representing 9.1% of the total number of experimental plots. We will run this experiment in 1 location. 
+We say a plant breeding project needs to identify superior entries of barley. In this project, a preliminary yield trial (PYT) is carried out with 300 genotypes tested in one experiment and over one location by an unreplicated design. The experiment is lying in a field containing 15 rows and 22 columns of plots. In addition, five checks are included in a systematic diagonal arrangement across the field to fill 30 plots representing 9.1% of the total number of experimental plots.We say a plant breeding project needs to identify superior entries of barley. In this project, a preliminary yield trial (PYT) is carried out with 300 genotypes tested in one experiment and over one location using an unreplicated design. The experiment is lying in a field containing 15 rows and 22 columns of plots. In addition, five checks are included in a systematic diagonal arrangement across the field to fill 30 plots representing 9.1% of the total number of experimental plots.
 
 ## Running the Shiny App
 
@@ -106,14 +106,17 @@ On the second tab, **Input Data**, you can see all the entries in the randomizat
 
 
 ### Randomized Field
+
 The **Randomized Field** tab displays a graphical representation of the randomization of the entries in a field of the specified dimensions. The checks are all colored uniquely, showing the number of times they are distributed throughout the field. The display includes numbered labels for the rows and columns. You can copy the field as a table or save it directly as an Excel file with the _Copy_ and _Excel_ buttons at the top. 
 
 In this tab by the **Choose % of Checks:** box  users can play with different options for the total amount of checks in the field. 
 
 ### Plot Number Field
+
 On the **Plot Number Field** tab, there is a table display of the field with the plots numbered according to the Plot Order Layout specified, either _serpentine_ or _cartesian_. You can see the corresponding entries for each plot number in the field book. Like the Randomized field tab, you can copy the table or save it as an Excel file with the _Copy_ and _Excel_ buttons. 
 
 ### Field Book
+
 The **Field Book** displays all the information on the experimental design in a table format. It contains the specific plot number and the row and column address of each entry, as well as the corresponding treatment on that plot. This table is searchable, and we can filter the data in relevant columns. 
 
 <br>
@@ -177,6 +180,7 @@ This returns a list consisting of all the information displayed in the output ta
 
 `single_diag$fieldBook` is a data frame containing information about every plot in the field, with information about the location of the plot and the treatment in each plot. As seen in the output below, the field book has columns for `ID`, `EXPT`, `LOCATION`, `YEAR`, `PLOT`, `ROW`, `COLUMN`, `CHECKS`, `ENTRY`, and `TREATMENT`.
 
+Let us see the first 10 rows of the field book for this experiment.
 
 ```{r, echo=TRUE, eval=FALSE}
 field_book <- single_diag$fieldBook
@@ -239,7 +243,7 @@ library(knitr)
 kable(df)
 ```
 
-2. Select the option **Use the same entries across experiments!** box if the purpose is to make replications instead of testing different experiments. Checking this option requires that the size of blocks is the same. For example, 100 treatments will test across 3 blocks. That means we need to set `300` in **Input # of Entries** and  `100, 100, 100` as input in **Input # Entries per Expt**. In our case we will keep unchecked this option.
+2. Select the checkbox option **Use the same entries across experiments** if the purpose is to make replications instead of testing different experiments. Checking this option requires the same size for all blocks. For example, testing 100 treatments across 3 blocks require to set `300` in **Input # of Entries** and  `100, 100, 100` as input in **Input # Entries per Expt**. In our case we will keep unchecked this option.
 
 3. Enter the total number of entries/treatments in the **Input # of Entries** box, which is 300 in our case.
 
@@ -253,7 +257,7 @@ kable(df)
 
 8. Select `serpentine` or `cartesian` in the **Plot Order Layout**. For this example we will set the `serpentine` layout.
 
-9. Enter the starting plot number for each experiment in the **Starting Plot Number** box. In this experiment we want the plot start at `1, 1001, 2001` for each experiment. The app also allows set only one number for all experiment.
+9. Enter the starting plot number for each experiment in the **Starting Plot Number** box. In this experiment we want the plot start at `1, 1001, 2001` for each experiment. The app also allows setting only one number for all experiments. For example, the plot number could start at 10.
 
 10. Enter the name for each experiment in the **Input Experiment Name** box. For example, `MATURITY1, MATURITY2, MATURITY3`.
 
@@ -350,7 +354,7 @@ The function `diagonal_arrangement()` returns a list consisting of all the infor
 
 `multi_diag$fieldBook` is a data frame containing information about every plot in the field, with information about the location of the plot and the treatment in each plot. As seen in the output below, the field book has columns for `ID`, `EXPT`, `LOCATION`, `YEAR`, `PLOT`, `ROW`, `COLUMN`, `CHECKS`, `ENTRY`, and `TREATMENT`.
 
-We will see the first 10 instances of the field book.
+Let us see the first 10 rows of the field book for this experiment.
 
 ```{r, echo=TRUE, eval=FALSE}
 field_book <- multi_diag$fieldBook
