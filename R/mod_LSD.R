@@ -225,6 +225,7 @@ mod_LSD_server <- function(id){
       plot_start.lsd <- as.numeric(plot_start.lsd)
       loc.lsd <-  as.vector(unlist(strsplit(input$Location.lsd, ",")))
       seed.number.lsd <- as.numeric(input$seed.lsd)
+      planting_lsd <- input$planter.lsd
       
       if (input$owndataLSD == "Yes") {
         req(get_data_lsd())
@@ -258,7 +259,7 @@ mod_LSD_server <- function(id){
         t = n.lsd, 
         reps = reps.lsd, 
         plotNumber = plot_start.lsd[1],
-        planter = "cartesian",
+        planter = planting_lsd,
         seed = seed.number.lsd, 
         locationNames = loc.lsd[1], 
         data = data.lsd

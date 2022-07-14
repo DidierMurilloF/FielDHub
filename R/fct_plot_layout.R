@@ -178,16 +178,22 @@ plot_layout <- function(x = NULL,
                     newBooks = return$newBooks, allSitesFieldbook = return$allSitesFieldbook))
       }
 
-  } else if (x$infoDesign$id_design %in% c(3, 7, 9)) { # 7, 9 
+  } else if (x$infoDesign$id_design %in% c(3, 7, 9)) {
     if (x$infoDesign$id_design == 3) {
       rsRep <- dplyr::n_distinct(x$fieldBook$COLUMN)
       csRep <- dplyr::n_distinct(x$fieldBook$ROW)
       dims <- c(rsRep, csRep)
       n_Reps <- dplyr::n_distinct(x$fieldBook$SQUARE)
-      return2 <- plot_latinSQ(x = x, dims = dims, n_Reps = n_Reps, 
-                              layout = layout, 
-                              planter = planter, l = l, 
-                              stacked = stacked)
+      print(planter)
+      return2 <- plot_latinSQ(
+        x = x, 
+        dims = dims, 
+        n_Reps = n_Reps, 
+        layout = layout, 
+        planter = planter, 
+        l = l, 
+        stacked = stacked
+      )
       if (is.null(return2)) return(NULL)
     } else if (x$infoDesign$id_design == 7) {
       rsRep <- dplyr::n_distinct(x$fieldBook$HSTRIP)

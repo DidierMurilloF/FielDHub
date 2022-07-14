@@ -120,15 +120,18 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
   lsd.reps <- vector(mode = "list", length = reps)
   out.ls <- vector(mode = "list", length = reps)
   plotSquares <- setNames(vector(mode = "list", length = reps),
-                          paste0("rep", seq(1:reps))) # set names
+                          paste0("rep", seq(1:reps)))
   x <- seq(1, reps * l, reps)
   y <- seq(reps, reps * l, reps)
   for (j in 1:reps) {
     D <- plot.numbs[[l]]
     P <- matrix(data = D[j]:(D[j] + (ls.len*ls.len) - 1), nrow = ls.len, ncol = ls.len,
                 byrow = TRUE)
-    if(planter == "serpentine") P <- serpentinelayout(P, opt = 2)
-    plotSquares[[j]] <- P
+    plot_matrix <- apply(P, 2, rev)
+    if(planter == "serpentine") plot_matrix <- serpentinelayout(plot_matrix, opt = 2)
+    # print(plot_matrix)
+    # print(as.vector(t(plot_matrix)))
+    plotSquares[[j]] <- plot_matrix
     ls.random <- lsq(len = ls.len, reps = 1, seed = NA)
     #get random rows order
     ls.random.r <- ls.random
@@ -151,12 +154,14 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
       w <- w + 1
     }
     new_expt.ls <- order_ls(S = expt.ls, data = data)
+    # print(new_expt.ls)
+    # print(as.vector(t(new_expt.ls)))
     lsd.reps[[j]] <- new_expt.ls
     step.random[[j]] <- list(ls.random, ls.random.r, ls.random.c)
     Row <- rep(rownames(lsd.reps[[j]]), each = ls.len)
     Column <- rep(colnames(lsd.reps[[j]]), times = ls.len)
     out.ls[[j]] <- data.frame(list(LOCATION = locs[l],
-                                   PLOT = as.vector(t(P)),
+                                   PLOT = as.vector(t(plot_matrix)),
                                    SQUARE = j,
                                    ROW = Row,
                                    COLUMN = Column,
@@ -182,6 +187,7 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
     seed =  seed,
     id_design = 3
   )
+  # print(lsd.reps)
   output <- list(infoDesign =  parameters, squares = lsd.reps,
                  plotSquares = plotSquares, fieldBook = latin_design)
   class(output) <- "FielDHub"
