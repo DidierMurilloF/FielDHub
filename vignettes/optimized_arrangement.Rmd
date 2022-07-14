@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette shows how to generate an **unreplicated optimized arrangement design** using both the FielDHub Shiny App and the scripting function `optimized_arrangement()` from the `FielDHub` package.
+This vignette shows how to generate an **unreplicated optimized arrangement design** using both the FielDHub Shiny App and the scripting function `optimized_arrangement()` from the `FielDHub` R package.
 
 ## Overview
 
@@ -165,7 +165,7 @@ The description for the inputs that we used to generate the design,
 *   `seed = 130` is the seed number to replicate identical randomizations.
 
 
-### Print `optim_expt` output
+### Print `optim_expt` object
 
 To print a summary of the information that is in the object `optim_expt`, we can use the generic function `print()`. 
 
@@ -179,7 +179,7 @@ print(optim_expt)
 ```
 
 
-### Access to `optim_expt` output
+### Access to `optim_expt` object
 
 The  `optimized_arrangement()` function returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are Accessible by the `$` operator, i.e. `optim_expt$layoutRandom` or `optim_expt$fieldBook`. 
 

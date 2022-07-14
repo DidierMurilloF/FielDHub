@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 
 ## Single Unreplicated Diagonal Arrangement Design
 
-This vignette shows how to generate a **single and multiple unreplicated diagonal arrangement design** using both the FielDHub Shiny App and the scripting function `diagonal_arrangement()` from the `FielDHub` package.
+This vignette shows how to generate a **single and multiple unreplicated diagonal arrangement design** using both the FielDHub Shiny App and the scripting function `diagonal_arrangement()` from the `FielDHub` R package.
 
 ## Overview
 

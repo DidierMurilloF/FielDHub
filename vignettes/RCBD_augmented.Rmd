@@ -20,13 +20,13 @@ This vignette shows how to generate an **augmented randomized complete block des
 
 ## Overview
 
-The augmented randomized complete block design is another option to try to overcome the problem of limited facilities or lack of seed when plant breeders want to test a large number of varieties. Same amount of exemplar varieties (checks) are included as controls in every augmented block to try to provide an estimate of experimental error.
+The augmented randomized complete block design is another option to overcome the problem of limited facilities or lack of seed when researchers want to test many treatments. In this kind of design, the approach is to build augmented blocks and allocate the same amount of controls in every block along with the treatments. 
 
 FielDHub includes a function to run such experimental designs, features include options to set the number of entries and the number of checks and augmented blocks for the experiment. Users can also choose to run the same experiment over multiple locations. 
 
 ## Use case
 
-For example, we say a project needs to test 60 genotypes of wheat over two locations with four checks and six augmented blocks. This design setup comes out with 6 blocks of size 24 plots for a total of 144 plots that will be distributed in a field of 12 rows and 12 columns.
+For example, we say a project needs to test 120 genotypes of cassava over two locations. In addition, the research  include four checks and six augmented blocks to carry out this experiment. This design setup comes out with 6 blocks of size 24 plots for a total of 144 plots that will be distributed in a field of 12 rows and 12 columns.
 
 ## Running the Shiny App
 
@@ -139,7 +139,7 @@ aug_RCBD <- RCBD_augmented(
   repsExpt = 1, 
   l = 2,
   random = TRUE,
-  exptName = "Wheat_Aug_2022", 
+  exptName = "Cassava_2022", 
   plotNumber = c(1001, 2001),
   locationNames = c("FARGO", "CASSELTON"),
   nrows = 12,
@@ -153,13 +153,13 @@ aug_RCBD <- RCBD_augmented(
 
 The description for the inputs that we used to generate the design,
 
-*   `lines = 405` is the number of entries
-*   `checks = 5` is the number of checks in each augmented block.
+*   `lines = 120` is the number of entries
+*   `checks = 4` is the number of checks in each augmented block.
 *   `b = 6` is the number of augmented blocks.
 *   `repsExpt = 1` is the number of reps for the experiment.
 *   `l = 2` is the number of locations.
 *   `random = TRUE` it means both treatment/entries and checks will be randomized.
-*   `exptName = "Wheat_Aug_2022"` is an optional name for experiment.
+*   `exptName = "Cassava_2022"` is an optional name for experiment.
 *   `plotNumber = c(1001,2001)` are the starting plot number for each location respectively, 
      or a single number for 1 location.
 *   `locationNames = c("FARGO", "CASSELTON")` are the values for representing 
@@ -207,11 +207,11 @@ For plotting the layout in function of the coordinates `ROW` and `COLUMN` in the
 #### Plot layout for location 1
 
 ```{r, fig.align='center', fig.width=7.2, fig.height=5.5}
-p1 <- plot(aug_RCBD, l = 1)
+p1 <- plot(aug_RCBD)
 p1$layout
 ```
 
-As you can see we can pass the specific location to plot the layout. Let us see the plot for the location 2.
+It is possible to pass more arguments to `plot()` such as the specific location. For example, you can plot the layout for location 2. 
 
 #### Plot layout for location 2
 

@@ -17,15 +17,38 @@ knitr::opts_chunk$set(
 )
 ```
 
-## Partially Replicated Design (prep)
+This vignette shows how to generate a **partially replicated design** using both the FielDHub Shiny App and the scripting function `partially_replicated()` from the `FielDHub` R package.
 
-Partially replicated designs are commonly employed in early generation field trials. This type of design is characterized by replication of a portion of the entries, with the remaining entries only appearing once in the experiment. 
+## Overview
+
+Partially replicated designs are commonly employed in early generation field trials. This type of design is characterized by replication of a portion of the entries, with the remaining entries only appearing once in the experiment. Commonly, the part of treatments with reps is due to an arbitrary decision by the research, also in some cases, it is due to technical reasons. In this design, it is recommended to replicate at least 1/3 of the treatments.
 
 In this design you can set the number of entries that will have reps, as well as the number of entries that will only appear once. You can also choose to run the same experiment over multiple locations. 
 
-## 1. Generate a Partially Replicated Design in FielDHub App
+## Use case
 
-As an example, considered a field trial with 300 plots containing 85 entries appearing two times each, and 130 entries only appearing once. This field trials is arranged in a field of 15 rows by 20 columns.
+Considered a plant breeding field trial with 300 plots containing 75 entries appearing two times each, and 130 entries only appearing once. This field trial is arranged in a field of 15 rows by 20 columns. In this case, the breeder decided to replicate the genotypes that do not share significant generic information with each other (75), as well as leave with just one copy the genotypes that are siblings (130).
+
+## Running the Shiny App
+
+To launch the app you need to run either,
+
+```{r, eval=FALSE}
+FielDHub::run_app()
+```
+
+or
+
+```{r, eval=FALSE}
+library(FielDHub)
+run_app()
+```
+
+## 1. Using the FielDHub Shiny App
+
+Once the app is running, go to the tab **Partially Replicated Design**
+
+Then, follow the following steps where we will show how to generate a partially replicated design.
 
 ## Inputs
 
@@ -35,7 +58,6 @@ As an example, considered a field trial with 300 plots containing 85 entries app
     * If the selection is `Yes`, the entries list must fulfill a specific format and must be a `.csv` file. The file must have the columns `ENTRY`, `NAME`, and `REPS`. The `ENTRY` column must have a unique entry integer number for each treatment/genotype. The column `NAME` must have a unique name that identifies each treatment/genotype. The `REPS` column must have an integer number for the replications of the groups. Both ENTRY and NAME must be unique, duplicates are not allowed. In the following table, we show an example of the entries list format. This example has an entry list with four treatments/genotypes that will appear twice and 8 that appear just once. 
     
 ```{r, include=FALSE}
-library(FielDHub)
 ENTRY <- 1:12
 NAME <- c(paste0("Genotype", LETTERS[1:12]))
 REPS <- c(rep(2,4),rep(1,8))
@@ -55,13 +77,13 @@ kable(df)
 
 5. Select `serpentine` or `cartesian` in the **Plot Order Layout**. For this example we will use the default `serpentine` layout.
 
-6. To ensure that randomizations are consistent across sessions, we can set a seed number in the box labeled **Seed Number**. In this example, we will set it to 123. 
+6. To ensure that randomizations are consistent across sessions, we can set a seed number in the box labeled **Seed Number**. In this example, we will set it to `1245`. 
 
 7. Enter the starting plot number in the **Starting Plot Number** box. If the experiment has multiple locations, you must enter a comma separated list of numbers the length of the number of locations for the input to be valid. 
 
 8. Once we have entered the information for our experiment on the left side panel, click the **Run!** button to run the design. 
 
-9. You will then be prompted to select the dimensions of the field from the list of options in the drop down in the middle of the screen with the box labeled **Select dimensions of field**. In our case, we will select `45 x 20`. 
+9. You will then be prompted to select the dimensions of the field from the list of options in the drop down in the middle of the screen with the box labeled **Select dimensions of field**. In our case, we will select `15 x 20`. 
 
 10. Click the **Randomize!** button to randomize the experiment with the set field dimensions and to see the output plots. If you change the dimensions again, you must re-randomize.
 
@@ -88,9 +110,17 @@ On the **Plot Number Field** tab, there is a table display of the field with the
 
 The **Field Book** displays all the information on the experimental design in a table format. It contains the specific plot number and the row and column address of each entry, as well as the corresponding treatment on that plot. This table is searchable, and we can filter the data in relevant columns. 
 
-## 2. Generate a prep design by the `partially_replicated()` function
+## 2. Using the `FielDHub` function: `partially_replicated()`.
 
-You can run the same design with a function in the FielDHub package, `partially_replicated()`. We can enter the information describing the above design like this:
+You can run the same design with the function `partially_replicated()` in the F`ielDHub` package.
+
+First, you need to load the `FielDHub` package typing,
+
+```{r, echo = TRUE}
+library(FielDHub)
+```
+
+Then, you can enter the information describing the above design like this:
 
 ```{r, echo = TRUE}
 prep <- partially_replicated(
@@ -122,11 +152,15 @@ The description for the inputs that we used to generate the design,
 *   `locationNames = "PALMIRA"` is the name for the location
 *   `seed = 1245` is the seed number to replicate identical randomizations.
 
-### Print `prep` output
+### Print `prep` object
 
 To print a summary of the information that is in the object `prep`, we can use the generic function `print()`.
 
-```{r, echo = TRUE}
+```{r, echo=TRUE, eval=FALSE}
+print(prep)
+```
+
+```{r, echo=FALSE, eval=TRUE}
 print(prep)
 ```
 
@@ -136,7 +170,14 @@ The `partially_replicated()` function returns a list consisting of all the infor
 
 `prep$fieldBook` is a list containing information about every plot in the field, with information about the location of the plot and the treatment in each plot. As seen in the output below, the field book has columns for `ID`, `EXPT`, `LOCATION`, `YEAR`, `PLOT`, `ROW`, `COLUMN`, `CHECKS`, `ENTRY`, and `TREATMENT`.
 
-```{r, echo=TRUE}
+Let us see the first 10 rows of the field book for this experiment.
+
+```{r, echo=TRUE, eval=FALSE}
+field_book <- prep$fieldBook
+head(field_book, 10)
+```
+
+```{r, echo=FALSE, eval=TRUE}
 field_book <- prep$fieldBook
 head(field_book, 10)
 ```
