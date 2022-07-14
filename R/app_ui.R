@@ -34,10 +34,8 @@ app_ui <- function(request) {
                                     ),
                                     tabPanel("Optimized Arrangement",
                                              mod_Optim_ui("Optim_ui_1")
-                                    )
-                         ),
-                         navbarMenu("Augmented Designs",
-                                    tabPanel("RCBD Augmented",
+                                    ),
+                                    tabPanel("Augmented RCBD",
                                              mod_RCBD_augmented_ui("RCBD_augmented_ui_1")
                                     )
                          ),
@@ -84,11 +82,15 @@ app_ui <- function(request) {
                                              mod_RowCol_ui("RowCol_ui_1")
                                     )
                          ),
-                         tabPanel("About Us",
-                                  htmltools::includeHTML(
-                                    system.file("app/www/aboutUs.html", package = "FielDHub")
-                                  )
-                         )
+                         navbarMenu("More", tabPanel("Help", href="https://didiermurillof.github.io/FielDHub/index.html", target="_blank")
+                                  ),
+                                  tabPanel("About Us",
+                                           htmltools::includeHTML(
+                                             system.file("app/www/aboutUs.html", package = "FielDHub")
+                                           )
+                                  ),
+                         ),
+                         
               )
     )
   )

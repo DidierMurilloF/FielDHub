@@ -45,7 +45,7 @@ run_app()
 
 ## 1. Using the FielDHub Shiny App
 
-Once the app is running, go to  **Augmented Designs** > **RCBD Augmented**
+Once the app is running, go to  **Unreplicated Designs** > **RCBD Augmented**
 
 Then, follow the following steps where we will show how to generate an RCBD Augmented.
 
