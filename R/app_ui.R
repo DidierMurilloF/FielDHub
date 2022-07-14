@@ -82,18 +82,20 @@ app_ui <- function(request) {
                                              mod_RowCol_ui("RowCol_ui_1")
                                     )
                          ),
-                         navbarMenu("More", tabPanel("Help", href="https://didiermurillof.github.io/FielDHub/index.html", target="_blank")
-                                  ),
-                                  tabPanel("About Us",
-                                           htmltools::includeHTML(
-                                             system.file("app/www/aboutUs.html", package = "FielDHub")
-                                           )
-                                  ),
-                         ),
+                         navbarMenu("More", 
+                           tabPanel("Help", href="https://didiermurillof.github.io/FielDHub/index.html", target="_blank"),
+                           tabPanel("About Us",
+                             htmltools::includeHTML(
+                               system.file("app/www/aboutUs.html", package = "FielDHub")
+                             )
+                           ),
+                        ),
+
+              ),
                          
-              )
+          )
     )
-  )
+#  )
 }
 
 #' Add external Resources to the Application
