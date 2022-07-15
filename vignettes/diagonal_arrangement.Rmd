@@ -74,7 +74,7 @@ kable(df)
 
 2. Enter the number of entries/treatments in the **Input # of Entries** box, which is 300 in our case.
 
-3. Select 5 from the drop down on the **Input # of Checks** box. 
+3. Select 5 from the drop-down on the **Input # of Checks** box. 
 
 4. Since we want to run this experiment over 1 location, set **Input # of Locations** to 1.
 
@@ -90,7 +90,7 @@ kable(df)
 
 10. Once we have entered all the information for our experiment on the left side panel, click the **Run!** button to run the design. 
 
-11. You will then be prompted to select the dimensions of the field from the list of options in the drop down in the middle of the screen with the box labeled **Select dimensions of field**. In our case, we will select `15 x 22`. 
+11. You will then be prompted to select the dimensions of the field from the list of options in the drop-down in the middle of the screen with the box labeled **Select dimensions of field**. In our case, we will select `15 x 22`. 
 
 12. Click the **Randomize!** button to randomize the experiment with the set field dimensions and to see the output plots. 
 
@@ -109,7 +109,7 @@ On the second tab, **Input Data**, you can see all the entries in the randomizat
 
 The **Randomized Field** tab displays a graphical representation of the randomization of the entries in a field of the specified dimensions. The checks are each colored uniquely, showing the number of times they are distributed throughout the field. The display includes numbered labels for the rows and columns. You can copy the field as a table or save it directly as an Excel file with the _Copy_ and _Excel_ buttons at the top. 
 
-In the **Choose % of Checks:** dropdown box users can play with different options for the total amount of checks in the field. 
+In the **Choose % of Checks:** drop-down box, users can play with different options for the total amount of checks in the field. 
 
 ### Plot Number Field
 
@@ -247,7 +247,7 @@ kable(df)
 
 4. Enter the number of entries/treatments by experiment separate by comma in the **Input # Entries per Expt** box, which are `100, 120, 80` in our case.
 
-5. Select 5 from the drop down on the **Input # of Checks** box. 
+5. Select 5 from the drop-down on the **Input # of Checks** box. 
 
 6. Since we want to run this experiment over 1 location, set **Input # of Locations** to `1`.
 
@@ -265,7 +265,7 @@ kable(df)
 
 13. Once we have entered all the information for our experiment on the left side panel, click the **Run!** button to run the design. 
 
-14. You will then be prompted to select the dimensions of the field from the list of options in the drop down in the middle of the screen with the box labeled **Select dimensions of field**. In our case, we will select `15 x 22`. 
+14. You will then be prompted to select the dimensions of the field from the list of options in the drop-down in the middle of the screen with the box labeled **Select dimensions of field**. In our case, we will select `15 x 22`. 
 
 15. Click the **Randomize!** button to randomize the experiment with the set field dimensions and to see the output plots. 
 

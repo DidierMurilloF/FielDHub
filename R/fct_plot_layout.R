@@ -77,9 +77,9 @@ plot_layout <- function(x = NULL,
       sizeIblocks <- dplyr::n_distinct(x$fieldBook$UNIT)
       iBlocks <- n_TrtGen / sizeIblocks
       return0 <- plot_iblocks_1(x = x, n_TrtGen = n_TrtGen, n_Reps = n_Reps, 
-                              sizeIblocks = sizeIblocks, iBlocks = iBlocks, 
-                              layout = layout, planter = planter,
-                              l = l, stacked = stacked)
+                               sizeIblocks = sizeIblocks, iBlocks = iBlocks, 
+                               layout = layout, planter = planter,
+                               l = l, stacked = stacked)
       if (is.null(return0)) return(NULL)
     } else if (x$infoDesign$id_design == 5) {
         if (x$infoDesign$typeDesign == "RCBD") {
@@ -184,7 +184,6 @@ plot_layout <- function(x = NULL,
       csRep <- dplyr::n_distinct(x$fieldBook$ROW)
       dims <- c(rsRep, csRep)
       n_Reps <- dplyr::n_distinct(x$fieldBook$SQUARE)
-      print(planter)
       return2 <- plot_latinSQ(
         x = x, 
         dims = dims, 
@@ -200,6 +199,7 @@ plot_layout <- function(x = NULL,
       csRep <- dplyr::n_distinct(x$fieldBook$VSTRIP)
       dims <- c(rsRep, csRep)
       n_Reps <- dplyr::n_distinct(x$fieldBook$REP)
+      print(planter)
       return2 <- plot_latinSQ(x = x, dims = dims, 
                               n_Reps = n_Reps, 
                               layout = layout,

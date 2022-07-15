@@ -173,7 +173,6 @@ mod_LSD_server <- function(id){
     
     
     get_data_lsd <- reactive({
-      
       if (input$owndataLSD == "Yes") {
         req(input$file.LSD)
         req(input$sep.lsd)
@@ -212,20 +211,13 @@ mod_LSD_server <- function(id){
       }
     })
     
-    latinsquare_reactive <- reactive({
+    
+    lsd_inputs <- reactive({
       
       req(input$plot_start.lsd)
       req(input$Location.lsd)
       req(input$reps.lsd)
       req(input$seed.lsd)
-      
-      shinyjs::show(id = "downloadCsv.lsd")
-      
-      plot_start.lsd <- as.vector(unlist(strsplit(input$plot_start.lsd, ",")))
-      plot_start.lsd <- as.numeric(plot_start.lsd)
-      loc.lsd <-  as.vector(unlist(strsplit(input$Location.lsd, ",")))
-      seed.number.lsd <- as.numeric(input$seed.lsd)
-      planting_lsd <- input$planter.lsd
       
       if (input$owndataLSD == "Yes") {
         req(get_data_lsd())
@@ -233,6 +225,7 @@ mod_LSD_server <- function(id){
         reps.lsd <- as.numeric(input$reps.lsd)
         data.lsd <- get_data_lsd()$data_lsd
         n <- as.numeric(nrow(data.lsd))
+        n.lsd <- n
         if (n > 10) {
           shinyalert::shinyalert(
             "Error!!", 
@@ -240,7 +233,7 @@ mod_LSD_server <- function(id){
             type = "error")
           return(NULL)
         }
-      }else {
+      } else {
         req(input$n.lsd)
         n <- as.numeric(input$n.lsd)
         if (n > 10) {
@@ -255,14 +248,43 @@ mod_LSD_server <- function(id){
         data.lsd <- NULL
       }
       
-      latin_square(
+      plot_start.lsd <- as.vector(unlist(strsplit(input$plot_start.lsd, ",")))
+      plot_number <- as.numeric(plot_start.lsd)
+      site_name <-  as.vector(unlist(strsplit(input$Location.lsd, ",")))
+      seed.number.lsd <- as.numeric(input$seed.lsd)
+      plot_start.lsd <- as.vector(unlist(strsplit(input$plot_start.lsd, ",")))
+      plot_start.lsd <- as.numeric(plot_start.lsd)
+      loc.lsd <-  as.vector(unlist(strsplit(input$Location.lsd, ",")))
+      seed.number.lsd <- as.numeric(input$seed.lsd)
+      planting_lsd <- input$planter.lsd
+
+      return(
+        list(
         t = n.lsd, 
         reps = reps.lsd, 
-        plotNumber = plot_start.lsd[1],
+        plot_number = plot_number[1],
         planter = planting_lsd,
-        seed = seed.number.lsd, 
-        locationNames = loc.lsd[1], 
-        data = data.lsd
+        location_names = loc.lsd[1], 
+        data = data.lsd,
+        seed = seed.number.lsd)
+      )
+    }) %>%
+      bindEvent(input$RUN.lsd)
+    
+    latinsquare_reactive <- reactive({
+      
+      req(lsd_inputs())
+      
+      shinyjs::show(id = "downloadCsv.lsd")
+      
+      latin_square(
+        t = lsd_inputs()$t, 
+        reps = lsd_inputs()$reps, 
+        plotNumber = lsd_inputs()$plot_number,
+        planter = lsd_inputs()$planter,
+        seed = lsd_inputs()$seed, 
+        locationNames = lsd_inputs()$location_names, 
+        data = lsd_inputs()$data
       )
       
     }) %>% 
@@ -306,9 +328,11 @@ mod_LSD_server <- function(id){
     
     observeEvent(input$stackedLSD, {
       req(input$stackedLSD)
+      req(lsd_inputs())
       obj_lsd <- latinsquare_reactive()
       allBooks <- try(plot_layout(x = obj_lsd, 
                                   layout = 1, 
+                                  planter = lsd_inputs()$planter,
                                   stacked = input$stackedLSD)$newBooks, 
                       silent = TRUE)
       nBooks <- length(allBooks)
@@ -334,12 +358,12 @@ mod_LSD_server <- function(id){
     reactive_layoutLSD <- reactive({
       req(input$layoutO_lsd)
       req(latinsquare_reactive())
-      req(input$planter.lsd)
+      req(lsd_inputs()$planter)
       obj_lsd <- latinsquare_reactive()
       if (reset_selection$reset == 1) {
         opt_lsd <- 1
       } else opt_lsd <- as.numeric(input$layoutO_lsd)
-      planting_lsd <- input$planter.lsd
+      planting_lsd <- lsd_inputs()$planter
       try(plot_layout(x = obj_lsd,
                       layout = opt_lsd,
                       stacked = input$stackedLSD,

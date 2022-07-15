@@ -219,50 +219,74 @@ mod_STRIPD_server <- function(id) {
     }) %>% 
       bindEvent(input$RUN.strip)
     
-    strip_reactive <- reactive({
+    
+    strip_inputs <- reactive({
       
       req(input$plot_start.strip)
       req(input$Location.strip)
       req(input$myseed.strip)
       req(input$l.strip)
-      
-      shinyjs::show(id = "downloadCsv.strip")
+      req(input$blocks.strip)
+      req(input$planter.strip)
       
       l.strip <- as.numeric(input$l.strip)
       seed.strip <- as.numeric(input$myseed.strip)
       plot_start.strip <- as.vector(unlist(strsplit(input$plot_start.strip, ",")))
       plot_start.strip <- as.numeric(plot_start.strip)
       loc.strip <-  as.vector(unlist(strsplit(input$Location.strip, ",")))
-      
-      
-      req(input$blocks.strip)
       reps.strip <- as.numeric(input$blocks.strip)
+      planter <- input$planter.strip
       
       if (input$owndataSTRIP == "Yes") {
         req(get_data_strip())
         Hplots.strip <- NULL
         Vplots.strip <- NULL
         data.strip <- get_data_strip()$data_strip
-      }else {
+      } else {
         req(input$HStrip.strip, input$VStrip.strip)
         Hplots.strip <- as.numeric(input$HStrip.strip)
         Vplots.strip <- as.numeric(input$VStrip.strip)
         data.strip <- NULL
       }
-
-      strip_plot(
-        Hplots = Hplots.strip, 
-        Vplots = Vplots.strip, 
-        b = reps.strip, 
-        l = l.strip,
-        seed = seed.strip,
-        planter = "cartesian",
-        plotNumber = plot_start.strip,
-        locationNames = loc.strip, 
-        data = data.strip
+      return(
+        list(
+          Hplots = Hplots.strip, 
+          Vplots = Vplots.strip, 
+          b = reps.strip, 
+          l = l.strip,
+          seed = seed.strip,
+          planter = planter,
+          plot_number = plot_start.strip,
+          location_names = loc.strip, 
+          data = data.strip
+        )
       )
+    }) %>%
+      bindEvent(input$RUN.strip)
+    
+    
+    
+    strip_reactive <- reactive({
+      
+      req(strip_inputs())
+      
+      shinyjs::show(id = "downloadCsv.strip")
+    
+      strip_plot(
+        Hplots = strip_inputs()$Hplots, 
+        Vplots = strip_inputs()$Vplots, 
+        b = strip_inputs()$b, 
+        l = strip_inputs()$l,
+        planter = strip_inputs()$planter,
+        plotNumber = strip_inputs()$plot_number,
+        locationNames = strip_inputs()$location_ames,
+        seed = strip_inputs()$seed,
+        data = strip_inputs()$data
+      )
+      
     }) %>% 
       bindEvent(input$RUN.strip)
+    
     
     upDateSites <- reactive({
       req(input$l.strip)
@@ -316,7 +340,8 @@ mod_STRIPD_server <- function(id) {
       req(input$l.strip)
       obj_strips <- strip_reactive()
       allBooks <- try(plot_layout(x = obj_strips, 
-                                  layout = 1, 
+                                  layout = 1,
+                                  planter = strip_inputs()$planter,
                                   stacked = input$stackedSTRIP)$newBooks, 
                       silent = TRUE)
       nBooks <- length(allBooks)
@@ -344,7 +369,7 @@ mod_STRIPD_server <- function(id) {
       req(input$layoutO_strip)
       req(strip_reactive())
       obj_strip <- strip_reactive()
-      planting_strip <- input$planter.strip
+      planting_strip <- strip_inputs()$planter
       
       if (reset_selection$reset == 1) {
         opt_strip <- 1
@@ -519,12 +544,25 @@ mod_STRIPD_server <- function(id) {
     output$STRIP.output <- DT::renderDataTable({
       
       df <- simuData_strip()$df
-      a <- as.numeric(simuData_strip()$a)
+      
+      df$LOCATION <- as.factor(df$LOCATION)
+      df$PLOT <- as.factor(df$PLOT)
+      df$ROW <- as.factor(df$ROW)
+      df$COLUMN <- as.factor(df$COLUMN)
+      df$REP <- as.factor(df$REP)
+      df$HSTRIP <- as.factor(df$HSTRIP)
+      df$VSTRIP <- as.factor(df$VSTRIP)
+      df$TRT_COMB <- as.factor(df$TRT_COMB)
+      
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "500px"))
       
-      DT::datatable(df, rownames = FALSE, options = list(
-        columnDefs = list(list(className = 'dt-center', targets = "_all"))))
+      DT::datatable(df, 
+                    filter = "top",
+                    rownames = FALSE, 
+                    options = list(
+                      columnDefs = list(
+                        list(className = 'dt-center', targets = "_all"))))
       
     })
     

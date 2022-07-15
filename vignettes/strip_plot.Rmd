@@ -109,7 +109,7 @@ strip <- strip_plot(
   b = 3,
   l = 1,  
   plotNumber = 101, 
-  planter = "cartesian",
+  planter = "serpentine",
   locationNames = "FARGO",
   seed = 1240
 )

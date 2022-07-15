@@ -7,7 +7,9 @@
 #' @noRd
 plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, layout = 1, 
                          stacked = "horizontal", 
-                         planter = "serpentine", l = 1) {
+                         planter = "serpentine", 
+                         l = 1) {
+  print(planter)
   rsRep <- dims[1]
   csRep <- dims[2]
   site <- l
@@ -26,33 +28,44 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, layout = 1,
       NewROWS1 <- rep(1:(rsRep*n_Reps), each = csRep)
       NewCOLUMNS1 <- NewBook$COLUMN
       NewROWS2 <- NewBook$ROW
-    } else {
+    } else if (x$infoDesign$id_design == 7) {
+      t <- split_vectors(x = 1:(rsRep * n_Reps), len_cuts = rep(rsRep, n_Reps))
+      rows <- list()
+      for (k in 1:n_Reps) {
+        rows[[k]] <- rep(t[[k]], times = csRep)
+      }
+      NewROWS1 <- unlist(rows)
+      NewCOLUMNS1 <- rep(rep(1:csRep, each = rsRep), times = n_Reps)
+      NewROWS2 <- rep(rep(1:rsRep, times = csRep), times = n_Reps)
+    } else if (x$infoDesign$id_design == 3) {
       NewROWS1 <- rep((rsRep * n_Reps):1, each = csRep)
-      plots_serie <- rep(1:csRep, times = csRep)
-      y <- split_vectors(x = plots_serie, len_cuts = rep(csRep, times = csRep))
-      new_y <- vector(mode = "list", length = csRep)
       if (planter == "serpentine") {
-        for (i in 1:csRep) {
+        plots_serie <- rep(1:csRep, times = rsRep)
+        y <- split_vectors(x = plots_serie, len_cuts = rep(csRep, times = rsRep))
+        new_y <- vector(mode = "list", length = rsRep)
+        for (i in 1:rsRep) {
           if (i %% 2 == 0) new_y[[i]] <- rev(y[[i]]) else new_y[[i]] <- y[[i]]
         }
-        NewCOLUMNS1 <- unlist(new_y)
-      } else NewCOLUMNS1 <- rep(rep(1:csRep, times = rsRep), times = n_Reps)
+        NewCOLUMNS1 <- rep(unlist(new_y), times = n_Reps)
+      } else if (planter == "cartesian") {
+        NewCOLUMNS1 <- rep(rep(1:csRep, times = rsRep), times = n_Reps)
+      } 
       NewROWS2 <- rep(rep(rsRep:1, each = csRep), times = n_Reps)
     }
-
+    
     if (stacked == "vertical") {
       df1 <- NewBook %>% 
         dplyr::mutate(NewROW = NewROWS1,
                       NewCOLUMNS = NewCOLUMNS1)
       
-      # df1 <- df1[order(df1$NewROW, decreasing = FALSE), ]
-      # nCols <- max(df1$NewCOLUMNS)
-      # newPlots <- planter_transform(plots = plots, planter = planter, reps = n_Reps, 
-      #                               cols = nCols, units = csRep)
-      # df1$PLOT <- newPlots
+      df1 <- df1[order(df1$NewROW, decreasing = FALSE), ]
+      nCols <- max(df1$NewCOLUMNS)
+      newPlots <- planter_transform(plots = plots, planter = planter, reps = n_Reps,
+                                    cols = nCols, units = csRep)
+      df1$PLOT <- newPlots
       books0[[1]] <- df1
     } else if (stacked == "horizontal") {
-      w <- 1:(csRep*n_Reps)
+      w <- 1:(csRep * n_Reps)
       u <- seq(1, length(w), by = csRep)
       v <- seq(csRep, length(w), by = csRep)
       z <- vector(mode = "list", length = n_Reps)
@@ -63,11 +76,11 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, layout = 1,
       df2 <- NewBook %>% 
         dplyr::mutate(NewROW = NewROWS2,
                       NewCOLUMNS = z )
-      # nCols <- max(df2$NewCOLUMNS)
-      # newPlots <- planter_transform(plots = plots, planter = planter, reps = n_Reps, 
-      #                               cols = nCols, units = NULL, 
-      #                               mode = "horizontal")
-      # df2$PLOT <- newPlots
+      nCols <- max(df2$NewCOLUMNS)
+      newPlots <- planter_transform(plots = plots, planter = planter, reps = n_Reps,
+                                    cols = nCols, units = NULL,
+                                    mode = "horizontal")
+      df2$PLOT <- newPlots
       books1[[1]] <- df2
     }
  
@@ -141,10 +154,12 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, layout = 1,
     }
     allSitesFieldbook <- dplyr::bind_rows(allSites)
     allSitesFieldbook <- allSitesFieldbook[,c(1:3,8,9,4:7)]
-    colnames(allSitesFieldbook) <- c("ID", "LOCATION", "PLOT", "ROW", "COLUMN", "REP", "HSTRIP", "VSTRIP", "TRT_COMB")
+    colnames(allSitesFieldbook) <- c("ID", "LOCATION", "PLOT", "ROW", "COLUMN", 
+                                      "REP", "HSTRIP", "VSTRIP", "TRT_COMB")
     
     df <- df[,c(1:3,8,9,4:7)]
-    colnames(df) <- c("ID", "LOCATION", "PLOT", "ROW", "COLUMN", "REP", "HSTRIP", "VSTRIP", "TRT_COMB")
+    colnames(df) <- c("ID", "LOCATION", "PLOT", "ROW", "COLUMN", "REP", 
+                      "HSTRIP", "VSTRIP", "TRT_COMB")
     rows <- max(as.numeric(df$ROW))
     cols <- max(as.numeric(df$COLUMN))
     df$TRT_COMB <- as.factor(df$TRT_COMB)
@@ -189,7 +204,6 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, layout = 1,
     main <- paste0(ds, rows, "X", cols)
     # Plot field layout
     df$TREATMENT <- as.factor(df$TREATMENT)
-    print(df)
     if (n_Reps > 1) {
       p1 <- desplot::desplot(TREATMENT ~ COLUMN + ROW, flip = FALSE,
                              out1 = SQUARE,

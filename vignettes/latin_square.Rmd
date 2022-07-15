@@ -102,7 +102,7 @@ lsd <- latin_square(
   t = 5,
   reps = 2,
   plotNumber = 101,
-  planter = "cartesian",
+  planter = "serpentine",
   seed = 1238
 )
 ```
@@ -114,7 +114,7 @@ lsd <- latin_square(
 *   `plotNumber = 101` is the starting plot number.
 *   `planter = "cartesian"` is the plot order layout.
 *   `locationNames = "FARGO"` optional name for location.
-*   `seed = 1234` is the seed number to replicate identical randomizations.
+*   `seed = 1238` is the seed number to replicate identical randomizations.
 
 ### Print `lsd` object
 

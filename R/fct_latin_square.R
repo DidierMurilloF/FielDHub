@@ -127,7 +127,8 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
     D <- plot.numbs[[l]]
     P <- matrix(data = D[j]:(D[j] + (ls.len*ls.len) - 1), nrow = ls.len, ncol = ls.len,
                 byrow = TRUE)
-    plot_matrix <- apply(P, 2, rev)
+    # plot_matrix <- apply(P, 2, rev)
+    plot_matrix <- P
     if(planter == "serpentine") plot_matrix <- serpentinelayout(plot_matrix, opt = 2)
     # print(plot_matrix)
     # print(as.vector(t(plot_matrix)))
