@@ -65,7 +65,7 @@ df <- data.frame(ENTRY,NAME)
 
 ```{r, echo = FALSE, results='asis'}
 library(knitr)
-kable(df)
+kable(df, format = "html")
 ```
 
 1. Enter the number of stacked experiments in the **Input # of Stacked Expts** box. This means the number of times the experiment will be replicated. In our case we will perform just one experiment.

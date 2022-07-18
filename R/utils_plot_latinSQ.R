@@ -25,32 +25,46 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, layout = 1,
       dplyr::filter(LOCATION == locs)
     plots <- NewBook$PLOT
     if (x$infoDesign$id_design == 9) {
+      plots <- NewBook$PLOT
       NewROWS1 <- rep(1:(rsRep*n_Reps), each = csRep)
       NewCOLUMNS1 <- NewBook$COLUMN
       NewROWS2 <- NewBook$ROW
     } else if (x$infoDesign$id_design == 7) {
+      plots <- sort(NewBook$PLOT)
       t <- split_vectors(x = 1:(rsRep * n_Reps), len_cuts = rep(rsRep, n_Reps))
       rows <- list()
       for (k in 1:n_Reps) {
-        rows[[k]] <- rep(t[[k]], times = csRep)
+        rows[[k]] <- rep(t[[k]], each = csRep)
       }
       NewROWS1 <- unlist(rows)
-      NewCOLUMNS1 <- rep(rep(1:csRep, each = rsRep), times = n_Reps)
-      NewROWS2 <- rep(rep(1:rsRep, times = csRep), times = n_Reps)
+      NewCOLUMNS1 <- rep(rep(1:csRep, times = rsRep), times = n_Reps)
+      NewROWS2 <- rep(rep(1:rsRep, each = csRep), times = n_Reps)
     } else if (x$infoDesign$id_design == 3) {
-      NewROWS1 <- rep((rsRep * n_Reps):1, each = csRep)
-      if (planter == "serpentine") {
-        plots_serie <- rep(1:csRep, times = rsRep)
-        y <- split_vectors(x = plots_serie, len_cuts = rep(csRep, times = rsRep))
-        new_y <- vector(mode = "list", length = rsRep)
-        for (i in 1:rsRep) {
-          if (i %% 2 == 0) new_y[[i]] <- rev(y[[i]]) else new_y[[i]] <- y[[i]]
-        }
-        NewCOLUMNS1 <- rep(unlist(new_y), times = n_Reps)
-      } else if (planter == "cartesian") {
-        NewCOLUMNS1 <- rep(rep(1:csRep, times = rsRep), times = n_Reps)
-      } 
-      NewROWS2 <- rep(rep(rsRep:1, each = csRep), times = n_Reps)
+      plots <- sort(NewBook$PLOT)
+      
+      # plots <- sort(NewBook$PLOT)
+      # NewROWS1 <- rep((rsRep * n_Reps):1, each = csRep)
+      # if (planter == "serpentine") {
+      #   plots_serie <- rep(1:csRep, times = rsRep)
+      #   y <- split_vectors(x = plots_serie, len_cuts = rep(csRep, times = rsRep))
+      #   new_y <- vector(mode = "list", length = rsRep)
+      #   for (i in 1:rsRep) {
+      #     if (i %% 2 == 0) new_y[[i]] <- rev(y[[i]]) else new_y[[i]] <- y[[i]]
+      #   }
+      #   NewCOLUMNS1 <- rep(unlist(new_y), times = n_Reps)
+      # } else if (planter == "cartesian") {
+      #   NewCOLUMNS1 <- rep(rep(1:csRep, times = rsRep), times = n_Reps)
+      # } 
+      # NewROWS2 <- rep(rep(rsRep:1, each = csRep), times = n_Reps)
+      
+      t <- split_vectors(x = 1:(rsRep * n_Reps), len_cuts = rep(rsRep, n_Reps))
+      rows <- list()
+      for (k in 1:n_Reps) {
+        rows[[k]] <- rep(t[[k]], each = csRep)
+      }
+      NewROWS1 <- unlist(rows)
+      NewCOLUMNS1 <- rep(rep(1:csRep, times = rsRep), times = n_Reps)
+      NewROWS2 <- rep(rep(1:rsRep, each = csRep), times = n_Reps)
     }
     
     if (stacked == "vertical") {

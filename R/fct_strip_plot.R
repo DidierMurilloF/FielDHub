@@ -196,7 +196,7 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
     stripDesig.output$LOCATION <- rep(locationNames, each = (nH * nV) * b)
   }
   stripDesig.output$LOCATION <- factor(stripDesig.output$LOCATION, levels = as.character(unique(locationNames)))
-  stripDesig_output <- stripDesig.output[order(stripDesig.output$LOCATION, stripDesig.output$PLOT),]
+  stripDesig_output <- stripDesig.output[order(stripDesig.output$LOCATION),] #, stripDesig.output$PLOT
   
   id <- 1:nrow(stripDesig_output)
   stripDesig_output <- cbind(id, stripDesig_output)

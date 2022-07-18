@@ -83,7 +83,11 @@ app_ui <- function(request) {
                                     )
                          ),
                          navbarMenu("More", 
-                           tabPanel("Help", href="https://didiermurillof.github.io/FielDHub/index.html", target="_blank"),
+                           tabPanel("Help", 
+                                htmltools::includeHTML(
+                                  system.file("app/www/Help.html", package = "FielDHub")
+                                )
+                           ),
                            tabPanel("About Us",
                              htmltools::includeHTML(
                                system.file("app/www/aboutUs.html", package = "FielDHub")

@@ -174,8 +174,9 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
   lsd.reps <- setNames(lsd.reps, paste0("rep", seq(1:reps))) # set names
   ls.output$ROW <- factor(ls.output$ROW, levels = Name.Rows)
   ls.output$COLUMN <- factor(ls.output$COLUMN, levels = Name.Columns)
-  ls.output.order <- ls.output[order(ls.output$PLOT, ls.output$SQUARE, ls.output$ROW), ]
-  if (!is.null(locationNames) && length(locationNames) == l) {
+  #ls.output.order <- ls.output[order(ls.output$PLOT, ls.output$SQUARE, ls.output$ROW), ]
+  ls.output.order <- ls.output[order(ls.output$SQUARE, ls.output$ROW), ]
+  if (!is.null(locationNames) & length(locationNames) == l) {
     ls.output.order$LOCATION <- rep(locationNames, each = (ls.len * ls.len) * reps)
   }
   rownames(ls.output.order) <- 1:nrow(ls.output.order)
@@ -188,7 +189,6 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
     seed =  seed,
     id_design = 3
   )
-  # print(lsd.reps)
   output <- list(infoDesign =  parameters, squares = lsd.reps,
                  plotSquares = plotSquares, fieldBook = latin_design)
   class(output) <- "FielDHub"
