@@ -94,9 +94,7 @@ app_ui <- function(request) {
                              )
                            ),
                         ),
-
               ),
-                         
         )
     )
 }

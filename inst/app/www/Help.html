@@ -7,52 +7,133 @@
     <title>Document</title>
 </head>
 <style>
+    * {
+    box-sizing: border-box;
+    }
     .content-help {
-      max-width: 700px;
+      float: left;
+      max-width: 70%;
       margin: auto;
+      padding-left: 180px;
+    }
+    .column1 {
+    float: left;
+    width: 60%;
+    padding: 10px;
+    }
+    .column2 {
+    float: left;
+    width: 40%;
+    padding: 10px;
     }
 </style>
 <body>
     <div class="content-help">
-            <!-- Page content -->
-        <h2>FielDHub Documentation</h2> 
-        <p>
-            This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. 
-            For more details on using R Markdown. When you click the **Knit** button a document 
-            will be generated that includes both content as well as the output of any embedded R code chunks within the document. 
-            You can embed an R code chunk like this
-        </p>
-        <p>
-            <a href="https://didiermurillof.github.io/FielDHub/reference/diagonal_arrangement.html" target="_blank">Unreplicated Diagonal Arrangement</a>
+        <div class="row">
+            <div class="column1">
+                    <!-- Page content -->
+                <h2>FielDHub Documentation</h2> 
+                <p>
+                    Users can go through the following links to find information on using both the shiny app and the standalone functions included in the R package FielDHub.  
+                </p>
+                <p>
+                    <h3> Unreplicated Designs</h3>
+                    <a href="https://didiermurillof.github.io/FielDHub/articles/diagonal_arrangement.html" target="_blank">Single Unreplicated Diagonal Arrangement</a>
 
-            <br>
+                    <br>
 
-            <a href="https://didiermurillof.github.io/FielDHub/reference/diagonal_arrangement.html" target="_blank">Unreplicated Diagonal Arrangement</a>
-            <br>
+                    <a href="https://didiermurillof.github.io/FielDHub/articles/diagonal_arrangement.html" target="_blank">Multiple Unreplicated Diagonal Arrangement</a>
+                    <br>
 
-            <a href="https://didiermurillof.github.io/FielDHub/reference/diagonal_arrangement.html" target="_blank">Unreplicated Diagonal Arrangement</a>
+                    <a href="https://didiermurillof.github.io/FielDHub/articles/optimized_arrangement.html" target="_blank">Optimized Arrangement </a>
 
-            <br>
+                    <br>
 
-            <a href="https://didiermurillof.github.io/FielDHub/reference/diagonal_arrangement.html" target="_blank">Unreplicated Diagonal Arrangement</a>
+                    <a href="https://didiermurillof.github.io/FielDHub/articles/RCBD_augmented.html" target="_blank">Augmented RCBD</a>
 
-            <br>
+                    <br>
 
-            <a href="https://didiermurillof.github.io/FielDHub/reference/diagonal_arrangement.html" target="_blank">Unreplicated Diagonal Arrangement</a>
-            
-            <br>
+                    <h3>Partially Replicated Designs</h3>
 
-            <a href="https://didiermurillof.github.io/FielDHub/reference/diagonal_arrangement.html" target="_blank">Unreplicated Diagonal Arrangement</a>
+                    <a href="https://didiermurillof.github.io/FielDHub/articles/partially_replicated.html" target="_blank">Partially Replicated Design</a>
+                    
+                    <br>
+                    
+                    <h3>Lattice Designs</h3>
 
-        </p>
-       
+                    <a href="https://didiermurillof.github.io/FielDHub/articles/square_lattice.html" target="_blank">Square Lattice Design</a>
 
+                    <br>
 
+                    <a href="https://didiermurillof.github.io/FielDHub/articles/rectangular_lattice.html" target="_blank">Rectangular Lattice Design</a>
 
+                    <br>
 
-    </div>
-    
+                    <a href="https://didiermurillof.github.io/FielDHub/articles/alpha_lattice.html" target="_blank">Alpha Lattice Design: alpha(0,1)</a>
+                    <br>
+
+                    <h3>Other Designs</h3>
+
+                    <a href="https://didiermurillof.github.io/FielDHub/articles/crd.html" target="_blank">Completely Randomized Design (CRD)</a>
+
+                    <br>
+
+                    <a href="https://didiermurillof.github.io/FielDHub/articles/RCBD.html" target="_blank">Randomized Complete Block Designs (RCBD)</a>
+
+                    <br>
+
+                    <a href="https://didiermurillof.github.io/FielDHub/articles/latin_square.html" target="_blank">Latin Square Design (LSD)</a>
+                    <br>
+
+                    <a href="https://didiermurillof.github.io/FielDHub/articles/full_factorial.html" target="_blank">Full Factorial Design</a>
+
+                    <br>
+
+                    <a href="https://didiermurillof.github.io/FielDHub/articles/split_plot.html" target="_blank">Split-Plot Design</a>
+
+                    <br>
+
+                    <a href="https://didiermurillof.github.io/FielDHub/articles/split_split_plot.html" target="_blank">Split-Split-Plot Design</a>
+
+                    <br>
+
+                    <a href="https://didiermurillof.github.io/FielDHub/articles/strip_plot.html" target="_blank">Strip-Plot Design</a>
+                    <br>
+
+                    <a href="https://didiermurillof.github.io/FielDHub/articles/incomplete_blocks.html" target="_blank">Incomplete Blocks Design (IBD)</a>
+
+                    <br>
+
+                    <a href="https://didiermurillof.github.io/FielDHub/articles/row_column.html" target="_blank">Resolvable Row-Column Design (RCD)</a>
+
+                </p>
+            </div>
+            <div class="column2">
+                <h3>Other Links</h3>
+                <a href="https://didiermurillof.github.io/FielDHub/articles/incomplete_blocks.html" target="_blank">View on CRAN</a>
+                <br>
+                <br>
+                <a href="https://didiermurillof.github.io/FielDHub/articles/row_column.html" target="_blank">Browse source code</a>
+                <br>
+                <br>
+                <a href="https://didiermurillof.github.io/FielDHub/articles/row_column.html" target="_blank">Paper</a>
+                <br>
+                <br>
+                <a href="https://didiermurillof.github.io/FielDHub/articles/row_column.html" target="_blank">Report a bug</a>
+                <br>
+                <br>
+                <a href="https://didiermurillof.github.io/FielDHub/articles/row_column.html" target="_blank">News</a>
+                <br>
+                <br>
+                
+                <h3>Community</h3>
+
+                <a href="https://didiermurillof.github.io/FielDHub/articles/row_column.html" target="_blank">Contributing guide</a>
+                <br>
+                <br>
+                <a href="https://didiermurillof.github.io/FielDHub/articles/row_column.html" target="_blank">Code of conduct</a>
+            </div>
+        </div> 
+    </div> 
 </body>
 </html>
-
-
