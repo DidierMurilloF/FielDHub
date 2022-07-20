@@ -23,17 +23,13 @@ mod_CRD_ui <- function(id) {
                                 choiceNames = NULL, 
                                 choiceValues = NULL),
                    conditionalPanel(
-                     "input.owndatacrd != 'Yes'", 
+                     "input.owndatacrd != 'Yes'",
                      ns = ns,
                      numericInput(ns("t.crd"), 
-                                  label = "Input # of Treatments:",
-                                  value = 15, 
-                                  min = 2),
-                     numericInput(ns("reps.crd"), 
-                                  label = "Input # of Full Reps:",
-                                  value = 4, 
-                                  min = 1)
-                   ),
+                       label = "Input # of Treatments:",
+                       value = 15, 
+                       min = 2),
+                    ),
                    conditionalPanel(
                      "input.owndatacrd == 'Yes'", 
                      ns = ns,
@@ -51,7 +47,10 @@ mod_CRD_ui <- function(id) {
                                           selected = ","))
                     )
                    ),
-                   
+                    numericInput(ns("reps.crd"), 
+                      label = "Input # of Full Reps:",
+                      value = 4, 
+                      min = 1),
                    selectInput(inputId = ns("planter_mov_crd"), 
                                label = "Plot Order Layout:",
                                choices = c("serpentine", "cartesian"),
@@ -155,8 +154,9 @@ mod_CRD_server <- function(id) {
         
         if (names(data_ingested) == "dataUp") {
           data_up <- data_ingested$dataUp
-          data_up <- as.data.frame(data_up[,1:2])
+          data_up <- as.data.frame(data_up[,1])
           data_crd <- na.omit(data_up)
+          data_crd$REP <- rep(input$reps.crd, times = nrow(data_crd))
           colnames(data_crd) <- c("TREATMENT", "REP")
           treatments = nrow(data_crd)
           return(list(data_crd = data_crd))
@@ -218,8 +218,14 @@ mod_CRD_server <- function(id) {
       plot_start.crd <- as.numeric(plot_start.crd)
       loc <-  as.vector(unlist(strsplit(input$Location.crd, ",")))
       
-      my.design <- CRD(t = t, reps = reps, plotNumber = plot_start.crd, seed = myseed.crd,
-                       locationName = loc, data = data.crd)
+      my.design <- CRD(
+        t = t, 
+        reps = reps, 
+        plotNumber = plot_start.crd, 
+        seed = myseed.crd,
+        locationName = loc, 
+        data = data.crd
+      )
       
     })
     
@@ -258,8 +264,7 @@ mod_CRD_server <- function(id) {
       plot_layout(x = obj_crd, layout = opt_crd, planter = planting_crd)
     })
     
-    entryListFormat_CRD <- data.frame(TREATMENT = c(paste("TRT_", LETTERS[1:9], sep = "")), 
-                                      REP = as.factor(rep(5, 9)))
+    entryListFormat_CRD <- data.frame(TREATMENT = c(paste("TRT_", LETTERS[1:9], sep = "")))
     entriesInfoModal_CRD <- function() {
       modalDialog(
         title = div(tags$h3("Important message", style = "color: red;")),
@@ -268,7 +273,7 @@ mod_CRD_server <- function(id) {
                     bordered = TRUE,
                     align = 'c',
                     striped = TRUE),
-        h4("Note: reps must be balanced."),
+        h4("Note that only the TREATMENT column is required."),
         easyClose = FALSE
       )
     }
