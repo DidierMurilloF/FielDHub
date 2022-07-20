@@ -199,7 +199,6 @@ plot_layout <- function(x = NULL,
       csRep <- dplyr::n_distinct(x$fieldBook$VSTRIP)
       dims <- c(rsRep, csRep)
       n_Reps <- dplyr::n_distinct(x$fieldBook$REP)
-      print(planter)
       return2 <- plot_latinSQ(x = x, dims = dims, 
                               n_Reps = n_Reps, 
                               layout = layout,

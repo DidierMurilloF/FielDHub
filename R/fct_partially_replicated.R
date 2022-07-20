@@ -248,11 +248,15 @@ partially_replicated <- function(nrows = NULL, ncols = NULL, repGens = NULL, rep
   EntryChecks <- prep$entryChecks
   Checks <- length(EntryChecks)
   
+  if (sum(genEntries[[2]]) == 0) {
+    rep_treatments <- 0
+  } else rep_treatments <- length(genEntries[[2]])
+  
   infoDesign <- list(
     rows = nrows,
     columns = ncols,
     treatments_with_reps = Checks,
-    treatments_with_no_reps = length(genEntries[[2]]),
+    treatments_with_no_reps = rep_treatments,
     locations = l,
     planter = planter,
     seed = seed,
