@@ -87,16 +87,18 @@ mod_RowCol_ui <- function(id){
                                 value = 1),
                    fluidRow(
                      column(6,
-                            actionButton(inputId = ns("RUN.rcd"), 
-                                         "Run!", 
-                                         icon = icon("cocktail"), 
-                                         width = '100%'),
+                            actionButton(
+                              inputId = ns("RUN.rcd"), 
+                              label = "Run!", 
+                              icon = icon("circle-nodes", verify_fa = FALSE),
+                              width = '100%'),
                      ),
                      column(6,
-                            actionButton(ns("Simulate.RowCol"), 
-                                         "Simulate!", 
-                                         icon = icon("cocktail"),
-                                         width = '100%')
+                            actionButton(
+                              ns("Simulate.RowCol"), 
+                              label = "Simulate!", 
+                              icon = icon("greater-than-equal", verify_fa = FALSE),
+                              width = '100%'),
                      )
                    ), 
                    br(),

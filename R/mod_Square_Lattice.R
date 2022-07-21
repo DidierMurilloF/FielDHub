@@ -13,8 +13,15 @@ mod_Square_Lattice_ui <- function(id){
     h4("Square Lattice Design"),
     sidebarLayout(
       sidebarPanel(width = 4,
-                   radioButtons(ns("owndata_square"), label = "Import entries' list?", choices = c("Yes", "No"), selected = "No",
-                                inline = TRUE, width = NULL, choiceNames = NULL, choiceValues = NULL),
+                   radioButtons(
+                     ns("owndata_square"), 
+                     label = "Import entries' list?",
+                     choices = c("Yes", "No"), 
+                     selected = "No",
+                     inline = TRUE,
+                     width = NULL, 
+                     choiceNames = NULL, 
+                     choiceValues = NULL),
                    
                    conditionalPanel("input.owndata_square != 'Yes'", ns = ns,
                                     numericInput(ns("t.square"), label = "Input # of Treatments:",
@@ -53,11 +60,19 @@ mod_Square_Lattice_ui <- function(id){
                     
                    fluidRow(
                      column(6,# style=list("padding-right: 28px;"),
-                            actionButton(inputId = ns("RUN.square"), "Run!", icon = icon("cocktail"), width = '100%'),
+                            actionButton(
+                              inputId = ns("RUN.square"), 
+                              "Run!", 
+                              icon = icon("circle-nodes", verify_fa = FALSE),
+                              width = '100%'),
                      ),
                      column(6,#style=list("padding-left: 5px;"),
                             
-                            actionButton(inputId = ns("Simulate.square"), "Simulate!", icon = icon("cocktail"), width = '100%')
+                            actionButton(
+                              inputId = ns("Simulate.square"), 
+                              "Simulate!", 
+                              icon = icon("greater-than-equal", verify_fa = FALSE),
+                              width = '100%'),
                      )
                      
                    ), 

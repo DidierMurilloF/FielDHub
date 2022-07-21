@@ -81,12 +81,18 @@ mod_SPD_ui <- function(id) {
         
         fluidRow(
           column(6,
-                 actionButton(inputId = ns("RUN.spd"), "Run!", 
-                              icon = icon("cocktail"), width = '100%'),
+                 actionButton(
+                   inputId = ns("RUN.spd"), 
+                   "Run!", 
+                   icon = icon("circle-nodes", verify_fa = FALSE),
+                   width = '100%'),
           ),
           column(6,
-                 actionButton(ns("Simulate.spd"), "Simulate!", 
-                              icon = icon("cocktail"), width = '100%')
+                 actionButton(
+                   ns("Simulate.spd"), 
+                   "Simulate!", 
+                   icon = icon("greater-than-equal", verify_fa = FALSE),
+                   width = '100%'),
           )
           
         ), 

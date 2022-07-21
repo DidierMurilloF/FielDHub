@@ -55,10 +55,18 @@ mod_Alpha_Lattice_ui <- function(id) {
                                 value = 16, min = 1),
                    fluidRow(
                      column(6,
-                            actionButton(inputId = ns("RUN.alpha"), "Run!", icon = icon("cocktail"), width = '100%'),
+                            actionButton(
+                              inputId = ns("RUN.alpha"), 
+                              "Run!", 
+                              icon = icon("circle-nodes", verify_fa = FALSE),
+                              width = '100%'),
                      ),
                      column(6,
-                            actionButton(inputId = ns("Simulate.alpha"), "Simulate!", icon = icon("cocktail"), width = '100%')
+                            actionButton(
+                              inputId = ns("Simulate.alpha"), 
+                              "Simulate!", 
+                              icon = icon("greater-than-equal", verify_fa = FALSE),
+                              width = '100%'),
                      )
                      
                    ), 

@@ -129,16 +129,18 @@ mod_RCBD_augmented_ui <- function(id){
         ),
         fluidRow(
           column(6,
-                 actionButton(inputId = ns("RUN.arcbd"), 
-                              "Run!", 
-                              icon = icon("cocktail"), 
-                              width = '100%'),
+                 actionButton(
+                   inputId = ns("RUN.arcbd"), 
+                   label = "Run!", 
+                   icon = icon("circle-nodes", verify_fa = FALSE),
+                   width = '100%'),
           ),
           column(6,
-                 actionButton(ns("Simulate.arcbd"), 
-                              "Simulate!", 
-                              icon = icon("cocktail"), 
-                              width = '100%')
+                 actionButton(
+                   ns("Simulate.arcbd"), 
+                   label = "Simulate!", 
+                   icon = icon("greater-than-equal", verify_fa = FALSE),
+                   width = '100%'),
           )
           
         ), 

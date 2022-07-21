@@ -107,15 +107,15 @@ mod_SSPD_ui <- function(id){
                  actionButton(
                    inputId = ns("RUN.sspd"), 
                    "Run!", 
-                   icon = icon("cocktail"), 
+                   icon = icon("circle-nodes", verify_fa = FALSE),
                    width = '100%'),
           ),
           column(6,
                  actionButton(
                    ns("Simulate.sspd"), 
                    "Simulate!", 
-                   icon = icon("cocktail"), 
-                   width = '100%')
+                   icon = icon("greater-than-equal", verify_fa = FALSE),
+                   width = '100%'),
           )
           
         ), 

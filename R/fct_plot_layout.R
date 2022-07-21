@@ -37,7 +37,7 @@
 #' layoutPlot_a$df
 #' }
 #'
-#' @export
+#' @noRd
 plot_layout <- function(x = NULL, 
                         layout = 1,
                         planter = "serpentine", 

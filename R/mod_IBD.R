@@ -83,16 +83,18 @@ mod_IBD_ui <- function(id) {
                      value = 4),
         fluidRow(
           column(6,
-                 actionButton(inputId = ns("RUN.ibd"), 
-                              "Run!", 
-                              icon = icon("cocktail"), 
-                              width = '100%'),
+                 actionButton(
+                   inputId = ns("RUN.ibd"), 
+                   label = "Run!", 
+                   icon = icon("circle-nodes", verify_fa = FALSE),
+                   width = '100%'),
           ),
           column(6,
-                 actionButton(ns("Simulate.ibd"), 
-                              "Simulate!", 
-                              icon = icon("cocktail"), 
-                              width = '100%')
+                 actionButton(
+                   ns("Simulate.ibd"), 
+                   label = "Simulate!", 
+                   icon = icon("greater-than-equal", verify_fa = FALSE),
+                   width = '100%'),
           )
           
         ), 

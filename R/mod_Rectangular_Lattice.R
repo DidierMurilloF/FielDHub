@@ -53,10 +53,18 @@ mod_Rectangular_Lattice_ui <- function(id){
                                 value = 007, min = 1),
                    fluidRow(
                      column(6,
-                            actionButton(inputId = ns("RUN.rectangular"), "Run!", icon = icon("cocktail"), width = '100%'),
+                            actionButton(
+                              inputId = ns("RUN.rectangular"), 
+                              "Run!", 
+                              icon = icon("circle-nodes", verify_fa = FALSE),
+                              width = '100%'),
                      ),
                      column(6,
-                            actionButton(inputId = ns("Simulate.rectangular"), "Simulate!", icon = icon("cocktail"), width = '100%')
+                            actionButton(
+                              inputId = ns("Simulate.rectangular"), 
+                              "Simulate!",
+                              icon = icon("greater-than-equal", verify_fa = FALSE),
+                              width = '100%'),
                      )
                      
                    ), 
