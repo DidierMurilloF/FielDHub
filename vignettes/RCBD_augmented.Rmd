@@ -26,11 +26,11 @@ FielDHub includes a function to run such experimental designs, features include 
 
 ## Use case
 
-For example, we say a project needs to test 120 genotypes of cassava over two locations. In addition, the research  include four checks and six augmented blocks to carry out this experiment. This design setup comes out with 6 blocks of size 24 plots for a total of 144 plots that will be distributed in a field of 12 rows and 12 columns.
+For example, we say a project needs to test 120 genotypes of cassava over two locations. In addition, the research includes four checks and six augmented blocks to carry out this experiment. This design setup comes out with 6 blocks of size 24 plots for a total of 144 plots that will be distributed in a field of 12 rows and 12 columns.
 
 ## Running the Shiny App
 
-To launch the app you need to run either,
+To launch the app you need to run either
 
 ```{r, eval=FALSE}
 FielDHub::run_app()
@@ -54,7 +54,7 @@ Then, follow the following steps where we will show how to generate an RCBD Augm
 1. **Import entries' list?** Choose whether to import a list with entry numbers and names for genotypes or treatments.
     * If the selection is `No`, that means the app is going to generate synthetic data for entries and names of the treatment/genotypes based on the user inputs.
 
-    * If the selection is `Yes`, the entries list must fulfill a specific format and must be a `.csv` file. The file must have the columns `ENTRY` and  `NAME`. The `ENTRY` column must have a unique entry integer number for each treatment/genotype. The column `NAME` must have a unique name that identifies each treatment/genotype. Both ENTRY and NAME must be unique, duplicates are not allowed. In the following table, we show an example of the entries list format. This example has an entry list with four checks and 8 treatments/genotypes. It is crucial to allocate the checks in the top part of the file.
+    * If the selection is `Yes`, the entries list must fulfill a specific format and must be a `.csv` file. The file must have the columns `ENTRY` and  `NAME`. The `ENTRY` column must have a unique entry integer number for each treatment/genotype. The column `NAME` must have a unique name that identifies each treatment/genotype. Both `ENTRY` and `NAME` must be unique, duplicates are not allowed. In the following table, we show an example of the entries list format. This example has an entry list with four checks and 8 treatments/genotypes. It is crucial to allocate the checks in the top part of the file.
 
 ```{r, include=FALSE}
 library(FielDHub)
@@ -68,29 +68,29 @@ library(knitr)
 kable(df, format = "html")
 ```
 
-1. Enter the number of stacked experiments in the **Input # of Stacked Expts** box. This means the number of times the experiment will be replicated. In our case we will perform just one experiment.
+1. Enter the number of stacked experiments in the **Input # of Stacked Expts** box. This means the number of times the experiment will be replicated. In our case we will perform just `1` experiment.
 
 2. On the augmented RCBD we have the option to choose whether we randomize the entries or not, with the **Randomize Entries** toggle button. It is recommended always randomized the treatments/entries but some researchers choose not to randomize treatments, this is often due to logistical issues.
 
-3. Enter the number of entries/treatments in the **Input # of Entries** box, which is 120 in our example experiment. 
+3. Enter the number of entries/treatments in the **Input # of Entries** box, which is `120` in our example experiment. 
 
-4. Set the number of checks per block with the **Checks per Block** box. In our case, it is 5 checks.
+4. Set the number of checks per block with the **Checks per Block** box. In our case, it is `5` checks.
 
-5. Set the number of blocks with **Input # of Blocks** box, which is 6 in our example.
+5. Set the number of blocks with **Input # of Blocks** box, which is `6` in our example.
 
 The total number of plots in our field will be **Input # of Stacked Expts**(**Input # of Entries** + **Input # of Blocks** * **Checks per Block**), per location. 
 
-6. Enter the number of locations in **Input # of Locations**. Set it as 2. 
+6. Enter the number of locations in **Input # of Locations**. Set it as `2`. 
 
 7. Select `serpentine` or `cartesian` in the **Plot Order Layout**. For this example we will set the `serpentine` layout.
 
-8. To ensure that randomizations are consistent across sessions, we can set a seed number in the box labeled **Seed Number**. In this example, we will set it to 1987. 
+8. To ensure that randomizations are consistent across sessions, we can set a seed number in the box labeled **Seed Number**. In this example, we will set it to `1987`. 
 
 9. Enter the starting plot number in the **Starting Plot Number** box. If the experiment has multiple locations, you must enter a comma separated list of numbers the length of the number of locations for the input to be valid. 
 
 10. Once we have entered the information for our experiment on the left side panel, click the **Run!** button to run the design. 
 
-11. You will then be prompted to select the dimensions of the field from the list of options in the drop down in the middle of the screen with the box labeled **Select dimensions of field**. In our case, we will select 12 x 12. 
+11. You will then be prompted to select the dimensions of the field from the list of options in the drop down in the middle of the screen with the box labeled **Select dimensions of field**. In our case, we will select `12 x 12`. 
 
 12. Click the **Randomize!** button to randomize the experiment with the set field dimensions and to see the output plots. If you change the dimensions again, you must re-randomize.
 
@@ -121,7 +121,7 @@ The **Field Book** displays all the information on the experimental design in a 
 
 ## 2. Using the `FielDHub` function: `RCBD_augmented()`
 
-You can run the same design with the function `RCBD_augmented()` in the F`ielDHub` package.
+You can run the same design with the function `RCBD_augmented()` in the `FielDHub` package.
 
 First, you need to load the `FielDHub` package typing,
 
@@ -159,7 +159,7 @@ The description for the inputs that we used to generate the design,
 *   `repsExpt = 1` is the number of reps for the experiment.
 *   `l = 2` is the number of locations.
 *   `random = TRUE` it means both treatment/entries and checks will be randomized.
-*   `exptName = "Cassava_2022"` is an optional name for experiment.
+*   `exptName = "Cassava_2022"` is an optional name for the experiment.
 *   `plotNumber = c(1001,2001)` are the starting plot number for each location respectively, 
      or a single number for 1 location.
 *   `locationNames = c("FARGO", "CASSELTON")` are the values for representing 

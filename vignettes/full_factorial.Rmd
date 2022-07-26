@@ -20,7 +20,7 @@ This vignette shows how to generate a **Full Factorial Design** using both the F
 
 ## 1. Using the FielDHub Shiny App
 
-To launch the app you need to run either,
+To launch the app you need to run either
 
 ```{r, eval=FALSE}
 FielDHub::run_app()
@@ -69,7 +69,7 @@ kable(df)
 
 8. Select `serpentine` or `cartesian` in the **Plot Order Layout**. For this example we will use the default `serpentine` layout.
 
-9. As with all the designs, we can set a seed number in the box labeled **Seed Number**. In this example, we will set it to 1239. 
+9. As with all the designs, we can set a seed number in the box labeled **Seed Number**. In this example, we will set it to `1239`. 
 
 10. Once we have entered the information for our experiment on the left side panel, click the **Run!** button to run the design. 
 
@@ -80,7 +80,7 @@ After you run a full factorial design in FielDHub, there are several ways to dis
 ### Field Layout
 
 When you first click the run button on a full factorial design, FielDHub displays the Field Layout tab, which shows the entries and their arrangement in the field. In the box below the display, you can change the layout of the field or change the location displayed. 
-You can also display a heatmap over the field by changing **Type of Plot** to **Heatmap**. To view a heatmap, you must first simulate an experiment over the described field with the **Simulate!** button. A pop-up window will appear where you can enter what variable you want to simulate along with minimum and maximum values. 
+You can also display a heatmap over the field by changing **Type of Plot** to `Heatmap`. To view a heatmap, you must first simulate an experiment over the described field with the **Simulate!** button. A pop-up window will appear where you can enter what variable you want to simulate along with minimum and maximum values. 
 
 ### Field Book
 
@@ -121,7 +121,7 @@ The description for the inputs that we used to generate the design,
 *   `type = 2` means CRD or RCBD, 1 or 2 respectively.
 *   `plotNumber = 101` is the starting plot number.
 *   `planter = "serpentine"` is the order layout.
-*   `locationNames = "FARGO"` optional name for location.
+*   `locationNames = "FARGO"` is an optional name for each location.
 *   `seed = 1239` is the seed number to replicate identical randomizations.
 
 ### Print `factorial` object
@@ -136,7 +136,7 @@ print(factorial)
 
 ### Access to `factorial` object
 
-This returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are accessible by the `$` operator, i.e. `factorial$layoutRandom` or `factorial$fieldBook`. 
+The `full_factorial()` function returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are accessible by the `$` operator, i.e. `factorial$layoutRandom` or `factorial$fieldBook`. 
 
 `factorial$fieldBook` is a list containing information about every plot in the field, with information about the location of the plot and the treatment in each plot. As seen in the output below, the field book has columns for `ID`, `LOCATION`, `PLOT`, `REP`, and `TRT_COMB`, and columns for each factor individually.
 

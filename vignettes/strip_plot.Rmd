@@ -20,7 +20,7 @@ This vignette shows how to generate a **Strip-Plot Design** using both the FielD
 
 ## 1. Using the FielDHub Shiny App
 
-To launch the app you need to run either,
+To launch the app you need to run either
 
 ```{r, eval=FALSE}
 FielDHub::run_app()
@@ -81,7 +81,7 @@ After you run a strip-plot design in FielDHub, there are several ways to display
 ### Field Layout
 
 When you first click the run button on a strip-plot design, FielDHub displays the Field Layout tab, which shows the entries and their arrangement in the field. In the box below the display, you can change the layout of the field. 
-You can also display a heatmap over the field by changing **Type of Plot** to **Heatmap**. To view a heatmap, you must first simulate an experiment over the described field with the **Simulate!** button. A pop-up window will appear where you can enter what variable you want to simulate along with minimum and maximum values. 
+You can also display a heatmap over the field by changing **Type of Plot** to `Heatmap`. To view a heatmap, you must first simulate an experiment over the described field with the **Simulate!** button. A pop-up window will appear where you can enter what variable you want to simulate along with minimum and maximum values. 
 
 ### Field Book
 
@@ -125,7 +125,7 @@ The description for the inputs that we used to generate the design,
 *   `l = 1` is the number of locations.
 *   `plotNumber = 101` is the starting plot number.
 *   `planter = "cartesian"` is the order layout.
-*   `locationNames = "FARGO"` optional name for location.
+*   `locationNames = "FARGO"` is an optional name for each location.
 *   `seed = 1240` is the seed number to replicate identical randomizations.
 
 ### Print `strip` object
@@ -140,7 +140,7 @@ print(strip)
 
 ### Access to `strip` object
 
-This returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are accessible by the `$` operator, i.e. `strip$layoutRandom` or `strip$fieldBook`. 
+The `strip_plot()` function returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are accessible by the `$` operator, i.e. `strip$layoutRandom` or `strip$fieldBook`. 
 
 `strip$fieldBook` is a list containing information about every plot in the field, with information about the location of the plot and the treatment in each plot. As seen in the output below, the field book has columns for `ID`, `LOCATION`, `PLOT`, `REP`, `HSTRIP`, `VSTRIP`, and `TRT_COMB`.
 

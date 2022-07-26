@@ -31,7 +31,7 @@ Then, follow the following steps where we will show how to generate a rectangula
 1. **Import entries' list?** Choose whether to import a list with entry numbers and names for genotypes or treatments.
     * If the selection is `No`, that means the app is going to generate synthetic data for entries and names of the treatment based on the user inputs.
 
-    * If the selection is `Yes`, the entries list must fulfill a specific format and must be a `.csv` file. The file must have the columns `ENTRY` and `NAME`. The `ENTRY` column must have a unique entry integer number for each treatment. The column `NAME` must have a unique name that identifies each treatment. Both ENTRY and NAME must be unique, duplicates are not allowed. In the following table, we show an example of the entries list format. This example has an entry list with 12 treatments.
+    * If the selection is `Yes`, the entries list must fulfill a specific format and must be a `.csv` file. The file must have the columns `ENTRY` and `NAME`. The `ENTRY` column must have a unique entry integer number for each treatment. The column `NAME` must have a unique name that identifies each treatment. Both `ENTRY` and `NAME` must be unique, duplicates are not allowed. In the following table, we show an example of the entries list format. This example has an entry list with 12 treatments.
 
 ```{r, include=FALSE}
 library(FielDHub)
@@ -70,11 +70,11 @@ After you run a rectangular lattice design in FielDHub, there are several ways t
 ### Field Layout
 
 When you first click the run button on a rectangular lattice design, FielDHub displays the Field Layout tab, which shows the entries and their arrangement in the field. In the box below the display, you can change the layout of the field or change the location displayed. 
-You can also display a heatmap over the field by changing **Type of Plot** to **Heatmap**. To view a heatmap, you must first simulate an experiment over the described field with the **Simulate!** button. A pop-up window will appear where you can enter what variable you want to simulate along with minimum and maximum values. 
+You can also display a heatmap over the field by changing **Type of Plot** to `Heatmap`. To view a heatmap, you must first simulate an experiment over the described field with the **Simulate!** button. A pop-up window will appear where you can enter what variable you want to simulate along with minimum and maximum values. 
 
 ### Field Book
 
-The **Field Book** displays all the information on the experimental design in a table format. It contains the specific plot number and the row and column address of each entry, as well as the corresponding treatment on that plot. This table is searchable, and we can filter the data in relevant columns. If we have simulated data for a heatmap, an additional column for that variable appears in the Field Book. 
+The **Field Book** displays all the information on the experimental design in a table format. It contains the specific plot number and the row and column address of each entry, as well as the corresponding treatment on that plot. This table is searchable, and we can filter the data in relevant columns. If we have simulated data for a heatmap, an additional column for that variable appears in the field book. 
 
 ## 2. Using the `FielDHub` function: `rectangular_lattice()`
 
@@ -108,7 +108,7 @@ rect <- rectangular_lattice(
 *   `k = 7` is the number of plots per incomplete block.
 *   `l = 1` is the number of locations.
 *   `plotNumber = 101` is the starting plot number.
-*   `locationNames = "FARGO"` optional name for each location
+*   `locationNames = "FARGO"` is an optional name for each location
 *   `seed = 1235` is the seed number to replicate identical randomizations.
 
 ### Print `rect` object
@@ -140,7 +140,7 @@ head(rect$fieldBook, 10)
 
 ### Plot the field layout
 
-For plotting the layout in function of the coordinates `ROW` and `COLUMN`, you can use the the generic function `plot()` as follow,
+For plotting the layout in function of the coordinates `ROW` and `COLUMN`, you can use the the generic function `plot()` as follows,
 
 
 ```{r, fig.align='center', fig.width=7.2, fig.height=5.5}

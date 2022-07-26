@@ -21,7 +21,7 @@ This vignette shows how to generate a **completely randomized design** using bot
 ## 1. Using the FielDHub Shiny App
 
 
-To launch the app you need to run either,
+To launch the app you need to run either
 
 ```{r, eval=FALSE}
 FielDHub::run_app()
@@ -55,17 +55,17 @@ library(knitr)
 kable(df)
 ```
 
-2. Input the number of treatments in the **Input # of Treatments** box, which is 15 in this case.
+2. Input the number of treatments in the **Input # of Treatments** box, which is `15` in this case.
 
-3. Select the number of replications of these treatments with the **Input # of Full Reps** box. Set it as 6.
+3. Select the number of replications of these treatments with the **Input # of Full Reps** box. Set it as `6`.
 
 4. Select `serpentine` or `cartesian` in the **Plot Order Layout**. For this example we will use the default `cartesian` layout.
 
-5. Enter the starting plot number in the **Starting Plot Number** box. Set it to 101.
+5. Enter the starting plot number in the **Starting Plot Number** box. Set it to `101`.
 
-6. Enter a name for the location of the experiment in the **Input Location** box. A completely randomized design can only be run in a single location at a time. Set it to "FARGO".
+6. Enter a name for the location of the experiment in the **Input Location** box. A completely randomized design can only be run in a single location at a time. Set it to `FARGO`.
 
-7. To ensure that randomizations are consistent across sessions, we can set a seed number in the box labeled **Seed Number**. In this example, we will set it to 1236. 
+7. To ensure that randomizations are consistent across sessions, we can set a seed number in the box labeled **Seed Number**. In this example, we will set it to `1236`. 
 
 8. Once we have entered the information for our experiment on the left side panel, click the **Run!** button to run the design. 
 
@@ -76,7 +76,7 @@ After you run a completely randomized design in FielDHub, there are several ways
 ### Field Layout
 
 When you first click the run button on a completely randomized design, FielDHub displays the Field Layout tab, which shows the entries and their arrangement in the field. In the box below the display, you can change the layout of the field. 
-You can also display a heatmap over the field by changing **Type of Plot** to **Heatmap**. To view a heatmap, you must first simulate an experiment over the described field with the **Simulate!** button. A pop-up window will appear where you can enter what variable you want to simulate along with minimum and maximum values. 
+You can also display a heatmap over the field by changing **Type of Plot** to `Heatmap`. To view a heatmap, you must first simulate an experiment over the described field with the **Simulate!** button. A pop-up window will appear where you can enter what variable you want to simulate along with minimum and maximum values. 
 
 ### Field Book
 
@@ -103,7 +103,7 @@ The description for the inputs that we used to generate the design,
 *   `t = 15` is the number of treatments.
 *   `reps = 6` is the number of replications for each treatment.
 *   `plotNumber = 101` is the starting plot number.
-*   `locationNames = "FARGO"` optional name for location
+*   `locationNames = "FARGO"` is an optional name for the location.
 *   `seed = 1234` is the seed number to replicate identical randomizations.
 
 ### Print `crd` output
@@ -120,7 +120,7 @@ print(crd)
 
 ### Access to `crd` output
 
-The `CRD` function returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are accessible by the `$` operator, i.e. `crd$layoutRandom` or `crd$fieldBook`. 
+The `CRD()` function returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are accessible by the `$` operator, i.e. `crd$layoutRandom` or `crd$fieldBook`. 
 
 `crd$fieldBook` is a list containing information about every plot in the field, with information about the location of the plot and the treatment in each plot. As seen in the output below, the field book has columns for `ID`, `LOCATION`, `PLOT`, `REP`, `IBLOCK`, `UNIT`, `ENTRY`, and `TREATMENT`.
 

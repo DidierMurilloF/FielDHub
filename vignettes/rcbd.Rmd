@@ -20,7 +20,7 @@ This vignette shows how to generate a **randomized complete block design** using
 
 ## 1. Using the FielDHub Shiny App
 
-To launch the app you need to run either,
+To launch the app you need to run either
 
 ```{r, eval=FALSE}
 FielDHub::run_app()
@@ -77,11 +77,11 @@ After you run a randomized complete block design in FielDHub, there are several 
 ### Field Layout
 
 When you first click the run button on a randomized complete block design, FielDHub displays the Field Layout tab, which shows the entries and their arrangement in the field. In the box below the display, you can change the layout of the field or change the location displayed. 
-You can also display a heatmap over the field by changing **Type of Plot** to **Heatmap**. To view a heatmap, you must first simulate an experiment over the described field with the **Simulate!** button. A pop-up window will appear where you can enter what variable you want to simulate along with minimum and maximum values. 
+You can also display a heatmap over the field by changing **Type of Plot** to `Heatmap`. To view a heatmap, you must first simulate an experiment over the described field with the **Simulate!** button. A pop-up window will appear where you can enter what variable you want to simulate along with minimum and maximum values. 
 
 ### Field Book
 
-The **Field Book** displays all the information on the experimental design in a table format. It contains the specific plot number and the row and column address of each entry, as well as the corresponding treatment on that plot. This table is searchable, and we can filter the data in relevant columns. If we have simulated data for a heatmap, an additional column for that variable appears in the Field Book. 
+The **Field Book** displays all the information on the experimental design in a table format. It contains the specific plot number and the row and column address of each entry, as well as the corresponding treatment on that plot. This table is searchable, and we can filter the data in relevant columns. If we have simulated data for a heatmap, an additional column for that variable appears in the field book. 
 
 ## 2. Using the `FielDHub` function: `RCBD()`
 
@@ -114,7 +114,7 @@ The description for the inputs that we used to generate the design,
 *   `reps = 4` is the number of replications for each treatment.
 *   `l = 1` is the number of locations.
 *   `plotNumber = 101` is the starting plot number.
-*   `locationNames = "FARGO"` optional name for location.
+*   `locationNames = "FARGO"` is an optional name for each location.
 *   `seed = 1234` is the seed number to replicate identical randomizations.
 
 ### Print `rcbd` object
@@ -145,7 +145,7 @@ head(rcbd$fieldBook, 10)
 
 ### Plot the field layout
 
-For plotting the layout in function of the coordinates `ROW` and `COLUMN`, you can use the the generic function `plot()` as follow,
+For plotting the layout in function of the coordinates `ROW` and `COLUMN`, you can use the the generic function `plot()` as follows,
 
 
 ```{r, fig.align='center', fig.width=7.2, fig.height=5.5}

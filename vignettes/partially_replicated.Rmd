@@ -27,11 +27,11 @@ In this design you can set the number of entries that will have reps, as well as
 
 ## Use case
 
-Considered a plant breeding field trial with 300 plots containing 75 entries appearing two times each, and 130 entries only appearing once. This field trial is arranged in a field of 15 rows by 20 columns. In this case, the breeder decided to replicate the genotypes that do not share significant generic information with each other (75), as well as leave with just one copy the genotypes that are siblings (130).
+Consider a plant breeding field trial with 300 plots containing 75 entries appearing two times each, and 130 entries only appearing once. This field trial is arranged in a field of 15 rows by 20 columns. In this case, the breeder decided to replicate the genotypes that do not share significant generic information with each other (75), as well as leave with just one copy the genotypes that are siblings (130).
 
 ## Running the Shiny App
 
-To launch the app you need to run either,
+To launch the app you need to run either
 
 ```{r, eval=FALSE}
 FielDHub::run_app()
@@ -73,7 +73,7 @@ kable(df)
 
 3. Enter the number of replications per group in the **# of Rep per Group** box. In our example we will have 2 and 1 replications for the 2 groups, so we enter `2, 1` in this box. 
 
-4. Enter the number of locations in **Input # of Locations**. We will run this experiment over a single location, so set **Input # of Locations** to 1.
+4. Enter the number of locations in **Input # of Locations**. We will run this experiment over a single location, so set **Input # of Locations** to `1`.
 
 5. Select `serpentine` or `cartesian` in the **Plot Order Layout**. For this example we will use the default `serpentine` layout.
 
@@ -112,7 +112,7 @@ The **Field Book** displays all the information on the experimental design in a 
 
 ## 2. Using the `FielDHub` function: `partially_replicated()`.
 
-You can run the same design with the function `partially_replicated()` in the F`ielDHub` package.
+You can run the same design with the function `partially_replicated()` in the `FielDHub` package.
 
 First, you need to load the `FielDHub` package typing,
 
@@ -149,7 +149,7 @@ The description for the inputs that we used to generate the design,
 *   `plotNumber = 101` is the starting plot number for the experiment.
 *   `l = 1` is the number of locations.
 *   `exptName = "Expt1"` is an optional name for experiment.
-*   `locationNames = "PALMIRA"` is the name for the location
+*   `locationNames = "PALMIRA"` is the optional name for the locations.
 *   `seed = 1245` is the seed number to replicate identical randomizations.
 
 ### Print `prep` object

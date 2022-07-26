@@ -20,7 +20,7 @@ This vignette shows how to generate a **Alpha Lattice Design** using both the Fi
 
 ## 1. Using the FielDHub Shiny App
 
-To launch the app you need to run either,
+To launch the app you need to run either
 
 ```{r, eval=FALSE}
 FielDHub::run_app()
@@ -81,7 +81,7 @@ After you run an alpha lattice design in FielDHub, there are several ways to dis
 ### Field Layout
 
 When you first click the run button on an alpha lattice design, FielDHub displays the Field Layout tab, which shows the entries and their arrangement in the field. In the box below the display, you can change the layout of the field or change the location displayed. 
-You can also display a heatmap over the field by changing **Type of Plot** to **Heatmap**. To view a heatmap, you must first simulate an experiment over the described field with the **Simulate!** button. A pop-up window will appear where you can enter what variable you want to simulate along with minimum and maximum values. 
+You can also display a heatmap over the field by changing **Type of Plot** to `Heatmap`. To view a heatmap, you must first simulate an experiment over the described field with the **Simulate!** button. A pop-up window will appear where you can enter what variable you want to simulate along with minimum and maximum values. 
 
 ### Field Book
 
@@ -120,7 +120,7 @@ The description for the inputs that we used to generate the design,
 *   `k = 5` is the number of plots per incomplete block.
 *   `l = 1` is the number of locations.
 *   `plotNumber = 101` is the starting plot number.
-*   `locationNames = "FARGO"` optional name for each location
+*   `locationNames = "FARGO"` is an optional name for each location.
 *   `seed = 1235` is the seed number to replicate identical randomizations.
 
 
@@ -156,7 +156,7 @@ head(alpha$fieldBook, 10)
 
 ### Plot the field layout
 
-For plotting the layout in function of the coordinates `ROW` and `COLUMN`, you can use the the generic function `plot()` as follow,
+For plotting the layout in function of the coordinates `ROW` and `COLUMN`, you can use the the generic function `plot()` as follows,
 
 
 ```{r, fig.align='center', fig.width=7.2, fig.height=5.5}

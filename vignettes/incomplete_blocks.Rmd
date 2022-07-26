@@ -20,7 +20,7 @@ This vignette shows how to generate a **incomplete block design** using both the
 
 ## 1. Using the FielDHub Shiny App
 
-To launch the app you need to run either,
+To launch the app you need to run either
 
 ```{r, eval=FALSE}
 FielDHub::run_app()
@@ -81,7 +81,7 @@ After you run an incomplete block design in FielDHub, there are several ways to 
 ### Field Layout
 
 When you first click the run button on an incomplete block design, FielDHub displays the Field Layout tab, which shows the entries and their arrangement in the field. In the box below the display, you can change the layout of the field. 
-You can also display a heatmap over the field by changing **Type of Plot** to **Heatmap**. To view a heatmap, you must first simulate an experiment over the described field with the **Simulate!** button. A pop-up window will appear where you can enter what variable you want to simulate along with minimum and maximum values. 
+You can also display a heatmap over the field by changing **Type of Plot** to `Heatmap`. To view a heatmap, you must first simulate an experiment over the described field with the **Simulate!** button. A pop-up window will appear where you can enter what variable you want to simulate along with minimum and maximum values. 
 
 ### Field Book
 
@@ -119,7 +119,7 @@ The description for the inputs that we used to generate the design,
 *   `k = 4` is the number of plots per incomplete block.
 *   `l = 1` is the number of locations
 *   `plotNumber = 101` is the starting plot number.
-*   `locationNames = "FARGO"` optional name for location.
+*   `locationNames = "FARGO"` is an optional name for each location.
 *   `seed = 1243` is the seed number to replicate identical randomizations.
 
 
@@ -135,7 +135,7 @@ print(ibd)
 
 ### Access to `ibd` object
 
-This returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are accessible by the `$` operator, i.e. `ibd$layoutRandom` or `ibd$fieldBook`. 
+The `incomplete_blocks()` function returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are accessible by the `$` operator, i.e. `ibd$layoutRandom` or `ibd$fieldBook`. 
 
 `ibd$fieldBook` is a list containing information about every plot in the field, with information about the location of the plot and the treatment in each plot. As seen in the output below, the field book has columns for `ID`, `LOCATION`, `PLOT`, `REP`, `IBLOCK`, `UNIT`, `ENTRY`, and `TREATMENT`.
 

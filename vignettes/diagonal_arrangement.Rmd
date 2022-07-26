@@ -174,7 +174,7 @@ print(single_diag)
 
 ### Access to `single_diag` object
 
-This returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are accessible by the `$` operator, i.e. `single_diag$layoutRandom` or `single_diag$fieldBook`. 
+The function `diagonal_arrangement()` returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are accessible by the `$` operator, i.e. `single_diag$layoutRandom` or `single_diag$fieldBook`. 
 
 `single_diag$fieldBook` is a data frame containing information about every plot in the field, with information about the location of the plot and the treatment in each plot. As seen in the output below, the field book has columns for `ID`, `EXPT`, `LOCATION`, `YEAR`, `PLOT`, `ROW`, `COLUMN`, `CHECKS`, `ENTRY`, and `TREATMENT`.
 
@@ -243,7 +243,7 @@ kable(df)
 
 2. Select the checkbox option **Use the same entries across experiments** if the purpose is to make replications instead of testing different experiments. Checking this option requires the same size for all blocks. For example, testing 100 treatments across 3 blocks require to set `300` in **Input # of Entries** and  `100, 100, 100` as input in **Input # Entries per Expt**. In our case we will keep unchecked this option.
 
-3. Enter the total number of entries/treatments in the **Input # of Entries** box, which is 300 in our case.
+3. Enter the total number of entries/treatments in the **Input # of Entries** box, which is `300` in our case.
 
 4. Enter the number of entries/treatments by experiment separate by comma in the **Input # Entries per Expt** box, which are `100, 120, 80` in our case.
 
@@ -255,11 +255,11 @@ kable(df)
 
 8. Select `serpentine` or `cartesian` in the **Plot Order Layout**. For this example we will set the `serpentine` layout.
 
-9. Enter the starting plot number for each experiment in the **Starting Plot Number** box. In this experiment we want the plot start at `1, 1001, 2001` for each experiment. The app also allows setting only one number for all experiments. For example, the plot number could start at 10.
+9. Enter the starting plot number for each experiment in the **Starting Plot Number** box. In this experiment we want the plot start at `1, 1001, 2001` for each experiment. The app also allows setting only one number for all experiments. For example, the plot number could start at `10`.
 
 10. Enter the name for each experiment in the **Input Experiment Name** box. For example, `MATURITY1, MATURITY2, MATURITY3`.
 
-11. To ensure that randomization are consistent across sessions, we can set a seed number in the box labeled **Seed Number**. For instance, we will set it to 17. 
+11. To ensure that randomization are consistent across sessions, we can set a seed number in the box labeled **Seed Number**. For instance, we will set it to `17`. 
 
 12. Enter the name of the site/location in the **Input the Location** box. For this experiment we will set the site as `FARGO`. In the case of users will run the experiment in multiple locations, the name for each location must be enter separate by comma, for example: `FARGO, CASSELTON, MINOT`.
 
@@ -330,7 +330,7 @@ The description for the inputs that we used to generate the design,
 *   `checks = 5` is the number of checks.
 *   `l = 1` is the number of locations.
 *   `plotNumber = c(1, 1001, 2001)` is the starting plot number for each experiment. It could be just one number as well.
-*   `exptName = c("MATURITY1", "MATURITY2", "MATURITY3")` optional name for each experiment
+*   `exptName = c("MATURITY1", "MATURITY2", "MATURITY3")` is an optional name for each experiment.
 *   `locationNames = "FARGO"` optional name for each location.
 *   `seed = 17` is the seed number to replicate identical randomizations.
 
@@ -366,7 +366,7 @@ head(field_book, 10)
 
 ### Plot field layout
 
-For plotting the layout in function of the coordinates ROW and COLUMN in the field book object we can use the generic function `plot()` as follow,
+For plotting the layout in function of the coordinates `ROW` and `COLUMN` in the field book object we can use the generic function `plot()` as follow,
 
 ```{r, fig.align='center', fig.width=7.2, fig.height=5}
 p <- plot(multi_diag)

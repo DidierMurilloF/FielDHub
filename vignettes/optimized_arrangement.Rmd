@@ -70,11 +70,11 @@ library(knitr)
 kable(df)
 ```
 
-2. Enter the number of checks in the **Input # of Checks** box, which is 3 in our case.
+2. Enter the number of checks in the **Input # of Checks** box, which is `3` in our case.
 
 3. Enter the number of replications of the checks in a comma separated list containing a number for each check in the **Input # Check's Reps** box. For our example experiment, we will enter `12,11,11`.
 
-4. Enter the number of entries/treatments in the **Input # of Entries** box, which is 300 in our case.
+4. Enter the number of entries/treatments in the **Input # of Entries** box, which is `300` in our case.
 
 5. Select `serpentine` or `cartesian` in the **Plot Order Layout**. For this example we will set the `serpentine` layout.
 
@@ -120,7 +120,7 @@ The **Field Book** displays all the information on the experimental design in a 
 
 ## 2. Using the `FielDHub` function: `optimized_arrangement()`.
 
-You can run the same design with the function `optimized_arrangement()` in the F`ielDHub` package.
+You can run the same design with the function `optimized_arrangement()` in the `FielDHub` package.
 
 First, you need to load the `FielDHub` package typing,
 
@@ -181,7 +181,7 @@ print(optim_expt)
 
 ### Access to `optim_expt` object
 
-The  `optimized_arrangement()` function returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are Accessible by the `$` operator, i.e. `optim_expt$layoutRandom` or `optim_expt$fieldBook`. 
+The `optimized_arrangement()` function returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are Accessible by the `$` operator, i.e. `optim_expt$layoutRandom` or `optim_expt$fieldBook`. 
 
 `optim_expt$fieldBook` is a data frame containing information about every plot in the field, with information about the location of the plot and the treatment in each plot. As seen in the output below, the field book has columns for `ID`, `EXPT`, `LOCATION`, `YEAR`, `PLOT`, `ROW`, `COLUMN`, `CHECKS`, `ENTRY`, and `TREATMENT`.
 
