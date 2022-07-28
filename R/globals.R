@@ -1,1 +1,16 @@
-utils::globalVariables(c("ENTRY"))
+utils::globalVariables(c("ENTRY",
+                         "IBLOCK",
+                         "REP",
+                         "ROW",
+                         "COLUMN",
+                         "TREATMENT",
+                         "LOCATION",
+                         "PLOT", 
+                         "SQUARE",
+                         "SUB_PLOT",
+                         "SUB_SUB_PLOT",
+                         "TRT_COMB",
+                         "WHOLE_PLOT",
+                         "text", 
+                         "BLOCK", 
+                         "CHECKS", "EXPT"))

@@ -201,13 +201,13 @@ split_plot <- function(wp = NULL, sp = NULL, reps = NULL, type = 2, l = 1, plotN
     REPS <- rep(wp.reps, each = sp)
     spd.output <- data.frame(list(LOCATION = LOCATION, PLOT = PLOT, REP = REPS,
                                   wp = wp.d, sp = sp.d, TREATMENT = NA))
-    colnames(spd.output) <- c("LOCATION", "PLOT", "REP", "WHOLE-PLOT", "SUB-PLOT", "TRT_COMB")
+    colnames(spd.output) <- c("LOCATION", "PLOT", "REP", "WHOLE_PLOT", "SUB_PLOT", "TRT_COMB")
   }else {
     PLOT <- rep(plots.n, each = sp)
     Block <- rep(rep(1:b, each = wp * sp), times = l)
     spd.output <- data.frame(list(LOCATION = LOCATION, PLOT = PLOT, BLOCK = Block,
                                   wp = wp.d, sp = sp.d, TREATMENT = NA))
-    colnames(spd.output) <- c("LOCATION", "PLOT", "REP", "WHOLE-PLOT", "SUB-PLOT", "TRT_COMB")
+    colnames(spd.output) <- c("LOCATION", "PLOT", "REP", "WHOLE_PLOT", "SUB_PLOT", "TRT_COMB")
   }
   z <- 1:nrow(spd.output)
   for (j in z) {
@@ -219,7 +219,7 @@ split_plot <- function(wp = NULL, sp = NULL, reps = NULL, type = 2, l = 1, plotN
                      plotNumbers = plot.number,
                      typeDesign = type,
                      seed = seed,
-                     idDesign = 5)
+                     id_design = 5)
   output <- list(infoDesign = info.design, layoutlocations = loc.spd.layout, 
               fieldBook = spd_output)
   class(output) <- "FielDHub"

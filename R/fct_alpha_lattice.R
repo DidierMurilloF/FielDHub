@@ -64,8 +64,14 @@
 #' head(alphalattice2$fieldBook, 10)
 #' 
 #' @export
-alpha_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101, locationNames = NULL,
-                          seed = NULL, data = NULL) {
+alpha_lattice <- function(t = NULL, 
+                          k = NULL, 
+                          r = NULL, 
+                          l = 1, 
+                          plotNumber = 101, 
+                          locationNames = NULL,
+                          seed = NULL, 
+                          data = NULL) {
   
   if (is.null(seed)) {seed <- runif(1, min=0, max=10000)}
   set.seed(seed)
@@ -96,8 +102,9 @@ alpha_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101,
     }else if ((length(t) > 1)) {
       nt <- length(t)
     }
-    data_alpha <- NULL
-  }else if (!is.null(data)) {
+    df <- data.frame(list(ENTRY = 1:nt, TREATMENT = paste0("G-", 1:nt)))
+    data_alpha <- df
+  } else if (!is.null(data)) {
     if (is.null(t) || is.null(r) || is.null(k) || is.null(l)) {
       shiny::validate('Basic design parameters missing (t, k, r or l).')
     }
@@ -115,6 +122,7 @@ alpha_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101,
     data_alpha <- data_up
   }
   if (k >= nt) shiny::validate('incomplete_blocks() requires that k < t.')
+  if (!is.null(locationNames)) locationNames <- toupper(locationNames)
   if(is.null(locationNames) || length(locationNames) != l) locationNames <- 1:l
   if (numbers::isPrime(t)) shiny::validate('Combinations for this amount of treatments do not exist.')
   s <- nt / k
@@ -133,7 +141,7 @@ alpha_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101,
   rownames(OutAlpha) <- 1:nrow(OutAlpha)
   infoDesign <- list(Reps = r, iBlocks = s, NumberTreatments = nt, NumberLocations = l, 
                      Locations = locationNames, seed = seed, lambda = lambda,
-                     idDesign = 12)
+                     id_design = 12)
   output <- list(infoDesign = infoDesign, fieldBook = OutAlpha)
   class(output) <- "FielDHub"
   return(invisible(output))

@@ -1,0 +1,59 @@
+---
+title: "Methods in FielDHub"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{methods}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+  options(rmarkdown.html_vignette.check_title = FALSE)
+  library(FielDHub)
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = NA,
+  warning = FALSE, 
+  message = FALSE
+)
+```
+
+There are three primitive functions included in FielDHub: `print()`, `summary()`, and `plot()`. 
+
+Given an experiment simulation from FielDHub, we can use these functions to display different kinds of information about the experiment. In this example, we will use the following randomized complete block design:
+```{r}
+experiment <- RCBD(
+  t = 12,
+  reps = 3,
+  l = 2, 
+  plotNumber = c(1001, 2001),
+  locationNames = c("A", "B"),
+  seed = 123
+)
+```
+
+# `print()`
+
+The `print()` function prints the design parameters of the experiment and the first 10 rows of the field book. The first 10 rows of the field book are saved if the output of this function is assigned to a variable. 
+```{r}
+print(experiment)
+```
+
+# `summary()`
+
+The `summary()` function outputs a list of the design parameters and the layout randomization with plot numbers.
+```{r}
+summary(experiment)
+```
+
+# `plot()`
+
+The `plot()` function plots the field for the input design, as it would be displayed in FielDHub. This can also be saved to a variable. This function has parameters for location and layout, if applicable.
+
+```{r, fig.align='center', fig.width=7, fig.height=5}
+plot(experiment, l = 2, layout = 2)
+```
+
+<br>
+<br>
+<br>

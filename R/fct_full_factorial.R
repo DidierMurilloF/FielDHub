@@ -75,7 +75,6 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
                            planter = "serpentine", seed = NULL,
                            locationNames = NULL, factorLabels = TRUE,
                            data = NULL) {
-
   if (all(c("serpentine", "cartesian") != planter)) {
     stop("Input for planter choice is unknown. Please, choose one: serpentine or cartesian.")
   }
@@ -84,7 +83,7 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
   get.levels <- function(k = NULL) {
     newlevels <- list();s <- 1
     for (i in k) {
-      newlevels[[s]] <- rep(1:i, 1)
+      newlevels[[s]] <- rep(0:(i-1), 1)
       s <- s + 1
     }
     return(newlevels)
@@ -112,6 +111,7 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
         data <- data.frame(list(factors = rep(levels(as.factor(TRT)), times = setfactors),
                                 levels = unlist(newlevels)))
         levels.by.factor <- as.vector(unlist(newlevels))
+        entries_each_factor <- setfactors
       }else stop("In 'full_factorial()' the input setfactors must be a numeric vector.")
     }
   }else {
@@ -122,9 +122,11 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
     l.factors <- levels(data$factors)
     levels.by.factor <- list()
     data.by.factor <- list()
+    entries_each_factor <- numeric()
     v <- 1
     for(i in l.factors) {
       data.by.factor[[v]] <- subset(data, data$factors == i)
+      entries_each_factor[v] <- nrow(subset(data, data$factors == i))
       levels.by.factor[[v]] <- data.by.factor[[v]][,2]
       v <- v + 1
     }
@@ -152,13 +154,13 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
   design.loc <- list()
   for (locs in 1:l) {
     if (type == 1) {
-      m1 <- CRD(t = trt, reps = reps, plotNumber = plotNumber[locs], seed = seed,
+      m1 <- CRD(t = trt, reps = reps, plotNumber = plotNumber[locs], # seed = seed,
                 data = NULL, locationName = locationNames[1])$fieldBook
       m1 <- m1[,-c(1,2)]
       kind <- "CRD"
     }else {
       m1 <- RCBD(t = trt, reps = reps, l = 1, plotNumber = plotNumber[locs], continuous = continuous,
-                 planter = planter, seed = seed, locationNames = locationNames[locs])$fieldBook
+                 planter = planter, locationNames = locationNames[locs])$fieldBook # seed = seed,
       m1 <- m1[,-c(1,2)]
       kind <- "RCBD"
     }
@@ -185,10 +187,17 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
   levelsByFactor <- levels.by.factor
   #newlevels
   allcomb <- as.data.frame(allcomb)
-  fullfactorial <- list(factors = levels(TRT), levels = levelsByFactor, runs = nruns, alltreatments = allcomb,
-                        Reps = reps, Locations = l, locationNames = locationNames, kind = kind, 
-                        idDesign = 4)
-  
+  fullfactorial <- list(
+    factors = levels(TRT), 
+    levels = levelsByFactor, 
+    runs = nruns, 
+    all_treatments = allcomb,
+    reps = reps, 
+    locations = l, 
+    location_names = locationNames, 
+    kind = kind, 
+    levels_each_factor = entries_each_factor,
+    id_design = 4)
   output <- list(infoDesign = fullfactorial, fieldBook = design_output)
   class(output) <- "FielDHub"
   return(invisible(output))

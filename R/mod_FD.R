@@ -1,3 +1,5 @@
+#FD first try
+
 #' FD UI Function
 #'
 #' @description A shiny Module.
@@ -5,7 +7,7 @@
 #' @param id,input,output,session Internal parameters for {shiny}.
 #'
 #' @noRd 
-#'
+#' 
 #' @importFrom shiny NS tagList 
 mod_FD_ui <- function(id){
   ns <- NS(id)
@@ -13,20 +15,28 @@ mod_FD_ui <- function(id){
     h4("Full Factorial Designs"),
     sidebarLayout(
       sidebarPanel(width = 4,
-                   radioButtons(inputId = ns("owndata"), label = "Import entries' list?", choices = c("Yes", "No"), selected = "No",
-                                inline = TRUE, width = NULL, choiceNames = NULL, choiceValues = NULL),
-                   selectInput(inputId = ns("kindFD"), label = "Select a Factorial Design Type:",
-                               choices = c("Factorial in a CRD" = "FD_CRD", "Factorial in a RCBD" = "FD_RCBD"),
+                   radioButtons(inputId = ns("owndata"), 
+                                label = "Import entries' list?", 
+                                choices = c("Yes", "No"), selected = "No",
+                                inline = TRUE, width = NULL, 
+                                choiceNames = NULL, choiceValues = NULL),
+                   selectInput(inputId = ns("kindFD"), 
+                               label = "Select a Factorial Design Type:",
+                               choices = c("Factorial in a RCBD" = "FD_RCBD", 
+                                           "Factorial in a CRD" = "FD_CRD"),
                                multiple = FALSE),
                    
                    conditionalPanel("input.owndata != 'Yes'", ns = ns,
-                                    textInput(inputId = ns("setfactors"), label = "Input # of Entries for Each Factor: (Separated by Comma)",
-                                              value = NULL)     
+                                    textInput(inputId = ns("setfactors"), 
+                                              label = "Input # of Entries for Each Factor: (Separated by Comma)",
+                                              value = "2,2,3")     
                    ),
                    conditionalPanel("input.owndata == 'Yes'", ns = ns,
                                     fluidRow(
                                       column(8, style=list("padding-right: 28px;"),
-                                             fileInput(ns("file.FD"), label = "Upload a CSV File:", multiple = FALSE)),
+                                             fileInput(ns("file.FD"), 
+                                                       label = "Upload a CSV File:", 
+                                                       multiple = FALSE)),
                                       column(4,style=list("padding-left: 5px;"),
                                              radioButtons(ns("sep.fd"), "Separator",
                                                           choices = c(Comma = ",",
@@ -35,15 +45,15 @@ mod_FD_ui <- function(id){
                                                           selected = ","))
                                     )
                    ),
-               
+                   
                    fluidRow(
                      column(6, style=list("padding-right: 28px;"),
-                       numericInput(inputId = ns("reps.fd"), label = "Input # of Full Reps:",
-                                    value = 2, min = 2)
+                            numericInput(inputId = ns("reps.fd"), label = "Input # of Full Reps:",
+                                         value = 3, min = 2)
                      ),
                      column(6,style=list("padding-left: 5px;"),
-                       numericInput(ns("l.fd"), label = "Input # of Locations:",
-                                    value = 1, min = 1)
+                            numericInput(ns("l.fd"), label = "Input # of Locations:",
+                                         value = 1, min = 1)
                      )
                    ),
                    fluidRow(
@@ -54,28 +64,59 @@ mod_FD_ui <- function(id){
                             textInput(ns("Location.fd"), "Input Location:", value = "FARGO")
                      )
                    ),
+                   selectInput(inputId = ns("planter_mov_fd"), label = "Plot Order Layout:",
+                               choices = c("serpentine", "cartesian"), multiple = FALSE,
+                               selected = "serpentine"),
+                   
                    numericInput(inputId = ns("myseed.reps"), label = "Seed Number:",
                                 value = 123, min = 1),
                    fluidRow(
                      column(6,
-                            downloadButton(ns("downloadData.fd"), "Save Experiment!", style = "width:100%")
+                            actionButton(
+                              inputId = ns("RUN.fd"), "Run!", 
+                              icon = icon("circle-nodes", verify_fa = FALSE),
+                              width = '100%'),
                      ),
                      column(6,
-                            actionButton(ns("Simulate.fd"), "Simulate!", icon = icon("cocktail"), width = '100%')
+                            actionButton(
+                              ns("Simulate.fd"), "Simulate!", 
+                              icon = icon("greater-than-equal", verify_fa = FALSE),
+                              width = '100%'),
                      )
                      
-                   )
+                   ), 
+                   br(),
+                   downloadButton(ns("downloadData.fd"), "Save Experiment!", 
+                                  style = "width:100%")
       ),
       
-      mainPanel(width = 8,
-        tabsetPanel(
-          tabPanel("Field Book", DT::DTOutput(ns("FD.Output")))
+      mainPanel(
+        width = 8,
+        fluidRow(
+          tabsetPanel(
+            tabPanel("Field Layout",
+                     shinyjs::useShinyjs(),
+                     shinyjs::hidden(downloadButton(ns("downloadCsv.fd"), 
+                                                    label =  "Excel",
+                                                    icon = icon("file-csv"), 
+                                                    width = '10%',
+                                                    style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
+                     shinycssloaders::withSpinner(
+                       plotly::plotlyOutput(ns("layouts"), width = "98%", 
+                                            height = "550px"),type = 5
+                     ),
+                     br(),
+                     column(12, uiOutput(ns("well_panel_layout_FD")))
+            ),
+            tabPanel("Field Book", 
+                     shinycssloaders::withSpinner(DT::DTOutput(ns("FD.Output")), type = 5)
+            )
+          )
         )
       )
     ) 
   )
 }
-    
 #' FD Server Functions
 #'
 #' @noRd 
@@ -83,6 +124,8 @@ mod_FD_server <- function(id) {
   moduleServer(id, function(input, output, session){
     
     ns <- session$ns
+    
+    shinyjs::useShinyjs()
     
     FACTORS <- rep(c("A", "B", "C"), c(2,3,2))
     LEVELS <- c("a0", "a1", "b0", "b1", "b2", "c0", "c1")
@@ -96,7 +139,6 @@ mod_FD_server <- function(id) {
                     bordered = TRUE,
                     align = 'c',
                     striped = TRUE),
-        #h4("Note that reps might be unbalanced."),
         easyClose = FALSE
       )
     }
@@ -115,13 +157,44 @@ mod_FD_server <- function(id) {
       }
     })
     
-    getData.fd <- reactive({
+    get_data_factorial <- reactive({
       req(input$file.FD)
       req(input$sep.fd)
       inFile <- input$file.FD
-      dataUp.fd <- load_file(name = inFile$name, path = inFile$datapat, sep = input$sep.fd)
-      return(list(dataUp.fd = dataUp.fd))
-    })
+      
+      data_ingested <- load_file(name = inFile$name,
+                             path = inFile$datapat,
+                             sep = input$sep.fd,
+                             check = TRUE, 
+                             design = "factorial")
+      
+      if (names(data_ingested) == "dataUp") {
+        data_up <- data_ingested$dataUp
+        data_up <- as.data.frame(data_up[,1:2])
+        data_factorial <- na.omit(data_up)
+        colnames(data_factorial) <- c("FACTOR", "LEVEL")
+        return(list(data_factorial = data_factorial))
+      } else if (names(data_ingested) == "bad_format") {
+        shinyalert::shinyalert(
+          "Error!!", 
+          "Invalid file; Please upload a .csv file.", 
+          type = "error")
+        return(NULL)
+      } else if (names(data_ingested) == "duplicated_vals") {
+        shinyalert::shinyalert(
+          "Error!!", 
+          "Check input file for duplicate values.", 
+          type = "error")
+        return(NULL)
+      } else if (names(data_ingested) == "missing_cols") {
+        shinyalert::shinyalert(
+          "Error!!", 
+          "Data input needs at least two column: FACTOR and LEVEL", 
+          type = "error")
+        return(NULL)
+      }
+    }) %>% 
+      bindEvent(input$RUN.fd)
     
     fd_reactive <- reactive({
       
@@ -129,6 +202,8 @@ mod_FD_server <- function(id) {
       req(input$Location.fd)
       req(input$l.fd)
       req(input$myseed.reps)
+      
+      shinyjs::show(id = "downloadCsv.fd")
       l.fd <- as.numeric(input$l.fd)
       plot_start.fd <- as.vector(unlist(strsplit(input$plot_start.fd, ",")))
       plot_start.fd <- as.numeric(plot_start.fd)
@@ -136,12 +211,19 @@ mod_FD_server <- function(id) {
       seed.fd <- as.numeric(input$myseed.reps)
       if (input$kindFD == "FD_RCBD") {
         if (input$owndata == "Yes") {
+          req( get_data_factorial())
           setfactors.fd <- NULL
-          data.fd <- getData.fd()$dataUp.fd
+          data.fd <- get_data_factorial()$data_factorial
         }else {
           req(input$setfactors)
           setfactors.fd <- as.numeric(as.vector(unlist(strsplit(input$setfactors, ","))))
-          if (length(setfactors.fd) < 2) validate("We need more than one factor.")
+          if (length(setfactors.fd) < 2) {
+            shinyalert::shinyalert(
+              "Error!!", 
+              "We need more than one factor.", 
+              type = "error")
+            return(NULL)
+          }
           data.fd <- NULL
         }
         type <- 2
@@ -150,12 +232,19 @@ mod_FD_server <- function(id) {
         
       }else {
         if (input$owndata == "Yes") {
+          req( get_data_factorial())
           setfactors.fd <- NULL
-          data.fd <- getData.fd()$dataUp.fd
+          data.fd <- get_data_factorial()$data_factorial
         }else {
           req(input$setfactors)
           setfactors.fd <- as.numeric(as.vector(unlist(strsplit(input$setfactors, ","))))
-          if (length(setfactors.fd) < 2) validate("We need more than one factor.")
+          if (length(setfactors.fd) < 2) {
+            shinyalert::shinyalert(
+              "Error!!", 
+              "We need more than one factor.", 
+              type = "error")
+            return(NULL)
+          }
           data.fd <- NULL
         }
         type <- 1
@@ -164,11 +253,108 @@ mod_FD_server <- function(id) {
         
       }
       
-      myfd <- full_factorial(setfactors = setfactors.fd, reps = reps.fd, l = l.fd, type = type,
-                             plotNumber = plot_start.fd, seed = seed.fd, locationNames = loc,
-                             data = data.fd) 
+      full_factorial(
+        setfactors = setfactors.fd, 
+        reps = reps.fd, 
+        l = l.fd, 
+        type = type, 
+        plotNumber = plot_start.fd, 
+        seed = seed.fd, 
+        locationNames = loc,
+        data = data.fd
+      ) 
       
+    }) %>% 
+      bindEvent(input$RUN.fd)
+    
+    
+    upDateSites <- reactive({
+      req(input$l.fd)
+      locs <- as.numeric(input$l.fd)
+      sites <- 1:locs
+      return(list(sites = sites))
+    })  %>% 
+      bindEvent(input$RUN.fd)
+    
+    output$well_panel_layout_FD <- renderUI({
+      req(fd_reactive()$fieldBook)
+      obj_fd <- fd_reactive()
+      allBooks_fd <- plot_layout(x = obj_fd, layout = 1, 
+                                 stacked = "vertical")$newBooks
+      nBooks_fd <- length(allBooks_fd)
+      layoutOptions_fd <- 1:nBooks_fd
+      stacked_fd <- c("Vertical Stack Panel" = "vertical", 
+                        "Horizontal Stack Panel" = "horizontal")
+      sites <- as.numeric(input$l.fd)
+      wellPanel(
+        column(2,
+               radioButtons(ns("typlotfd"), "Type of Plot:",
+                            c("Entries/Treatments" = 1,
+                              "Plots" = 2,
+                              "Heatmap" = 3), selected = 1)
+        ),
+        fluidRow(
+          column(3,
+                 selectInput(inputId = ns("stackedFD"), 
+                             label = "Reps layout:", 
+                             choices = stacked_fd),
+          ),
+          column(3, #align="center",
+                 selectInput(inputId = ns("layoutO_fd"), 
+                             label = "Layout option:", 
+                             choices = layoutOptions_fd)
+          ),
+          column(3, #align="center",
+                 selectInput(inputId = ns("locLayout_fd"), label = "Location:", 
+                             choices = as.numeric(upDateSites()$sites), 
+                             selected = 1)
+          )
+        )
+      )
     })
+    
+    observeEvent(input$stackedFD, {
+      req(input$stackedFD)
+      req(input$l.fd)
+      obj_fd <- fd_reactive()
+      allBooks <- plot_layout(x = obj_fd, layout = 1, 
+                              stacked = input$stackedFD)$newBooks
+      nBooks <- length(allBooks)
+      NewlayoutOptions <- 1:nBooks
+      updateSelectInput(session = session, inputId = 'layoutO_fd',
+                        label = "Layout option:",
+                        choices = NewlayoutOptions,
+                        selected = 1
+      )
+    })
+    
+    reset_selection <- reactiveValues(reset = 0)
+
+    observeEvent(input$stackedFD, {
+      reset_selection$reset <- 1
+    })
+
+    observeEvent(input$layoutO_fd, {
+      reset_selection$reset <- 0
+    })
+    
+    reactive_layoutFD <- reactive({
+      req(input$layoutO_fd)
+      req(fd_reactive())
+      obj_fd <- fd_reactive()
+      planting_fd <- input$planter_mov_fd
+      
+      if (reset_selection$reset == 1) {
+        opt_fd <- 1
+      } else opt_fd <- as.numeric(input$layoutO_fd)
+      
+      locSelected <- as.numeric(input$locLayout_fd)
+      try(plot_layout(x = obj_fd, layout = opt_fd, 
+                      stacked = input$stackedFD,
+                      planter = planting_fd , 
+                      l = locSelected), silent = TRUE)
+    })
+    
     
     valsfd <- reactiveValues(maxV.fd = NULL, minV.fd = NULL, trail.fd = NULL)
     
@@ -234,30 +420,123 @@ mod_FD_server <- function(id) {
     })
     
     simuData_fd <- reactive({
+      set.seed(input$myseed.reps)
       req(fd_reactive()$fieldBook)
       if(!is.null(valsfd$maxV.fd) && !is.null(valsfd$minV.fd) && !is.null(valsfd$trail.fd)) {
         max <- as.numeric(valsfd$maxV.fd)
         min <- as.numeric(valsfd$minV.fd)
-        df.fd <- fd_reactive()$fieldBook
+        df.fd <- reactive_layoutFD()$allSitesFieldbook
         cnamesdf.fd <- colnames(df.fd)
         df.fd <- norm_trunc(a = min, b = max, data = df.fd)
         colnames(df.fd) <- c(cnamesdf.fd[1:(ncol(df.fd) - 1)], valsfd$trail.fd)
         a <- ncol(df.fd)
       }else {
-        df.fd <- fd_reactive()$fieldBook  
+        df.fd <- reactive_layoutFD()$allSitesFieldbook
         a <- ncol(df.fd)
       }
       return(list(df = df.fd, a = a))
     })
     
+    heatmapInfoModal_fd <- function() {
+      modalDialog(
+        title = div(tags$h3("Important message", style = "color: red;")),
+        h4("Simulate some data to see a heatmap!"),
+        easyClose = TRUE
+      )
+    }
+    
+    kindNum <- reactive({
+      req(input$setfactors)
+      setfactors.fd <- fd_reactive()$infoDesign$levels_each_factor
+      lengthfactors <- length(setfactors.fd)
+      end_columns <- lengthfactors + 7
+      return(end_columns)
+    }
+    )
+    
+    locNum <- reactive(
+      return(as.numeric(input$locLayout_fd))
+    )
+    
+    heatmap_obj <- reactive({
+      req(simuData_fd()$df)
+      if (ncol(simuData_fd()$df) == (kindNum() + 1)) {
+        locs <- factor(simuData_fd()$df$LOCATION, levels = unique(simuData_fd()$df$LOCATION))
+        locLevels <- levels(locs)
+        df = subset(simuData_fd()$df, LOCATION == locLevels[locNum()])
+        loc <- levels(factor(df$LOCATION))
+        trail <- as.character(valsfd$trail.fd)
+        label_trail <- paste(trail, ": ")
+        heatmapTitle <- paste("Heatmap for ", trail)
+        new_df <- df %>%
+          dplyr::mutate(text = paste0("Site: ", loc, "\n", 
+                                      "Row: ", df$ROW, "\n", 
+                                      "Col: ", df$COLUMN, "\n", 
+                                      "Entry: ", df$ENTRY, "\n", 
+                                      label_trail, round(df[,(kindNum() + 1)],2)))
+        w <- as.character(valsfd$trail.fd)
+        new_df$ROW <- as.factor(new_df$ROW) # Set up ROWS as factors
+        new_df$COLUMN <- as.factor(new_df$COLUMN) # Set up COLUMNS as factors
+        p1 <- ggplot2::ggplot(new_df, 
+                              ggplot2::aes(
+                                x = new_df[,5], 
+                                y = new_df[,4], 
+                                fill = new_df[,(kindNum() + 1)], 
+                                text = text)) +
+          ggplot2::geom_tile() +
+          ggplot2::xlab("COLUMN") +
+          ggplot2::ylab("ROW") +
+          ggplot2::labs(fill = w) +
+          viridis::scale_fill_viridis(discrete = FALSE) +
+          ggplot2::ggtitle(heatmapTitle) +
+          ggplot2::theme_minimal() + # I added this option 
+          ggplot2::theme(plot.title = ggplot2::element_text(
+            family="Calibri", face="bold", size=13, hjust=0.5)
+            )
+        
+        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 560)
+        return(p2)
+      } else {
+        showModal(
+          shinyjqui::jqui_draggable(
+            heatmapInfoModal_fd()
+          )
+        )
+        return(NULL)
+      }
+    })
+    
+    output$layouts <- plotly::renderPlotly({
+      req(reactive_layoutFD())
+      req(fd_reactive())
+      req(input$typlotfd)
+      if (input$typlotfd == 1) {
+        reactive_layoutFD()$out_layout
+      } else if (input$typlotfd == 2) {
+        reactive_layoutFD()$out_layoutPlots
+      } else {
+        req(heatmap_obj())
+        heatmap_obj()
+      }
+    })
     
     output$FD.Output <- DT::renderDataTable({
       df <- simuData_fd()$df
+      df$LOCATION <- as.factor(df$LOCATION)
+      df$PLOT <- as.factor(df$PLOT)
+      df$ROW <- as.factor(df$ROW)
+      df$COLUMN <- as.factor(df$COLUMN)
+      df$REP <- as.factor(df$REP)
+      df$FACTOR_A <- as.factor(df$FACTOR_A)
+      df$FACTOR_B <- as.factor(df$FACTOR_B)
+      if ("FACTOR_C" %in% colnames(df)) df$FACTOR_C <- as.factor(df$FACTOR_C)
+      if ("FACTOR_D" %in% colnames(df)) df$FACTOR_D <- as.factor(df$FACTOR_D)
+      df$TRT_COMB <- as.factor(df$TRT_COMB)
       a <- as.numeric(simuData_fd()$a)
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "500px"))
       
-      DT::datatable(df, rownames = FALSE, options = list(
+      DT::datatable(df, filter = 'top', rownames = FALSE, options = list(
         columnDefs = list(list(className = 'dt-center', targets = "_all"))))
       
     })
@@ -272,11 +551,30 @@ mod_FD_server <- function(id) {
         write.csv(df, file, row.names = FALSE)
       }
     )
+    
+    csv_data <- reactive({
+      req(simuData_fd()$df)
+      df <- simuData_fd()$df
+      req(input$typlotfd)
+      if (input$typlotfd == 2) {
+        export_layout(df, locNum(), TRUE)
+      } else {
+        export_layout(df, locNum())
+      }
+    })
+    
+    
+    # Downloadable csv of selected dataset ----
+    output$downloadCsv.fd <- downloadHandler(
+      filename = function() {
+        loc <- paste("Factorial_Layout", sep = "")
+        paste(loc, Sys.Date(), ".csv", sep = "")
+      },
+      content = function(file) {
+        df <- as.data.frame(csv_data()$file)
+        write.csv(df, file, row.names = FALSE)
+      }
+    )
+    
   })
 }
-    
-## To be copied in the UI
-# mod_FD_ui("FD_ui_1")
-    
-## To be copied in the server
-# mod_FD_server("FD_ui_1")

@@ -54,8 +54,7 @@ If \code{kindExpt = 'DBUDC'} and data is null, \code{blocks} are mandatory.}
 
 \item{locationNames}{(optional) Names each location.}
 
-\item{data}{(optional) Data frame with 3 columns: \code{ENTRY | NAME | BLOCK} or only 2 
-columns \code{ENTRY | NAME} if \code{kindExpt = 'SUDC'}.}
+\item{data}{(optional) Data frame with 2 columns: \code{ENTRY | NAME }.}
 }
 \value{
 A list with five elements.
@@ -99,7 +98,8 @@ BLOCK <- c(rep("ALL", checks), rep(1:expts, c(150,155,95,200,120)))
 treatment_list <- data.frame(list(ENTRY = 1:725, NAME = c(list_checks, treatments), BLOCK = BLOCK))
 head(treatment_list, 12) 
 tail(treatment_list, 12)
-spatDB <- diagonal_arrangement(nrows = 30, ncols = 26,
+spatDB <- diagonal_arrangement(nrows = 30, 
+                               ncols = 26,
                                checks = 5, 
                                plotNumber = 1, 
                                kindExpt = "DBUDC", 

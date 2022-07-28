@@ -118,6 +118,8 @@ export_design <- function(G, movement_planter = NULL, location = NULL, Year = NU
   
   datos_names <- data_file
   # datos_names <- unique(datos_names)
+  # export_full <- merge(my_final_export, datos_names,
+  #                      by.x = 3, by.y = 1, sort = F)
   datos_names_merge <- datos_names %>% dplyr::distinct(ENTRY, .keep_all = TRUE)
   export_full <- merge(my_final_export, datos_names_merge,
                        by.x = 3, by.y = 1, sort = F)

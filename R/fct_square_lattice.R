@@ -89,7 +89,8 @@ square_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101
     }else if ((length(t) > 1)) {
       nt <- length(t)
     }
-    data_alpha <- NULL
+    df <- data.frame(list(ENTRY = 1:nt, TREATMENT = paste0("G-", 1:nt)))
+    data_square <- df
   }else if (!is.null(data)) {
     if (is.null(t) || is.null(r) || is.null(k) || is.null(l)) {
       shiny::validate('Some of the basic design parameters are missing (t, r, k or l).')
@@ -103,15 +104,16 @@ square_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101
     if (t != new_t) base::stop("Number of treatments do not match with data input.")
     TRT <- data_up$TREATMENT
     nt <- length(TRT)
-    data_alpha <- data_up
+    data_square <- data_up
   }
   if (sqrt(nt) %% 1 != 0) shiny::validate('square_lattice() requires t to be a square number.')
+  if (!is.null(locationNames)) locationNames <- toupper(locationNames)
   if(is.null(locationNames) || length(locationNames) != l) locationNames <- 1:l
   s <- k
   nunits <- k
   matdf <- incomplete_blocks(t = nt, k = nunits, r = r, l = l, plotNumber = plotNumber,
                              seed = seed, locationNames = locationNames,
-                             data = data_alpha)
+                             data = data_square)
   matdf <- matdf$fieldBook
   OutSquare_Lattice <- as.data.frame(matdf)
   OutSquare_Lattice$LOCATION <- factor(OutSquare_Lattice$LOCATION, levels = locationNames)
@@ -120,7 +122,7 @@ square_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101
   lambda <- r*(k - 1)/(nt - 1)
   infoDesign <- list(Reps = r, IBlocks = s, NumberTreatments = nt, NumberLocations = l, 
                      Locations = locationNames, seed = seed, lambda = lambda,
-                     idDesign = 10)
+                     id_design = 10)
   output <- list(infoDesign = infoDesign, fieldBook = OutSquare_Lattice)
   class(output) <- "FielDHub"
   return(invisible(output))

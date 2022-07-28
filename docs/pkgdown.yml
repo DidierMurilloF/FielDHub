@@ -1,6 +1,23 @@
-pandoc: 2.7.3
-pkgdown: 1.6.1
+pandoc: 2.17.1.1
+pkgdown: 2.0.6
 pkgdown_sha: ~
-articles: {}
-last_built: 2021-05-17T15:55Z
+articles:
+  alpha_lattice: alpha_lattice.html
+  crd: crd.html
+  diagonal_arrangement: diagonal_arrangement.html
+  full_factorial: full_factorial.html
+  incomplete_blocks: incomplete_blocks.html
+  latin_square: latin_square.html
+  methods: methods.html
+  optimized_arrangement: optimized_arrangement.html
+  partially_replicated: partially_replicated.html
+  RCBD: RCBD.html
+  RCBD_augmented: RCBD_augmented.html
+  rectangular_lattice: rectangular_lattice.html
+  row_column: row_column.html
+  split_plot: split_plot.html
+  split_split_plot: split_split_plot.html
+  square_lattice: square_lattice.html
+  strip_plot: strip_plot.html
+last_built: 2022-07-18T15:34Z
 

@@ -1,8 +1,11 @@
+^renv$
+^renv\.lock$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^data-raw$
 dev_history.R
 ^dev$
+^data$
 $run_dev.*
 ^LICENSE\.md$
 ^README\.Rmd$
@@ -19,3 +22,10 @@ $run_dev.*
 ^DExample.PNG$
 ^CONTRIBUTING\.md$
 ^rsconnect$
+^Dockerfile$
+^\.dockerignore$
+^doc$
+^Meta$
+^00_pkg_src 2$
+^_pkgdown\.yml$
+^pkgdown$

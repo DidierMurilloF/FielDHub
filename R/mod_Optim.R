@@ -10,165 +10,336 @@
 mod_Optim_ui <- function(id) {
   ns <- NS(id)
   tagList(
+    h4("Unreplicated Optimized Arrangement"),
     sidebarLayout(
-      sidebarPanel(width = 4,
-                   radioButtons(inputId = ns("owndataOPTIM"), label = "Import Entries' List?", choices = c("Yes", "No"), selected = "No",
-                                inline = TRUE, width = NULL, choiceNames = NULL, choiceValues = NULL),
-                   conditionalPanel("input.owndataOPTIM == 'Yes'", ns = ns,
-                                    fluidRow(
-                                      column(7, style=list("padding-right: 28px;"),
-                                             fileInput(ns("file3"), label = "Upload a CSV File:", multiple = FALSE)),
-                                      column(5,style=list("padding-left: 5px;"),
-                                             radioButtons(ns("sep.OPTIM"), "Separator",
-                                                          choices = c(Comma = ",",
-                                                                      Semicolon = ";",
-                                                                      Tab = "\t"),
-                                                          selected = ","))
-                                    )            
-                   ),
-                   checkboxInput(inputId = ns("Optim.spatial"), label = "Get Optim :)", value = TRUE),
-                   
-                   numericInput(ns("checks.s"), label = "Input # of Checks:", value = 3, min = 1),
-                   
-                   numericInput(ns("tplots.s"), label = "Input # of Total Check Plots:",
-                                value = 30, min = 1),
-
-                   conditionalPanel("input.owndataOPTIM != 'Yes'", ns = ns,
-                                    
-                                    fluidRow(
-                                      column(6,style=list("padding-right: 28px;"),
-                                             textInput(ns("amount.checks"), "Input # Check's Reps:", value = "10,10,10"),
-                                      ),
-                                      column(6,style=list("padding-left: 5px;"),
-                                             numericInput(ns("lines.s"), label = "Input # of Entries:", value = 270, min = 5)
-                                      )
-                                    )            
-                   ),
-                   
-                   fluidRow(
-                     column(6,style=list("padding-right: 28px;"),
-                            numericInput(ns("nrows.s"), label = "Input # of Rows:",
-                                         value = 15, min = 5)
-                     ),
-                     column(6,style=list("padding-left: 5px;"),
-                            numericInput(ns("ncols.s"), label = "Input # of Columns:",
-                                         value = 20, min = 5)
-                     )
-                   ),
-                   
-                   
-                   selectInput(ns("planter_mov.spatial"), label = "Plot Order Layout:",
-                               choices = c("serpentine", "cartesian"), multiple = FALSE, selected = "serpentine"),
-                   fluidRow(
-                     column(6,style=list("padding-right: 28px;"),
-                            numericInput(ns("seed.spatial"), label = "Seed Number:", value = 1, min = 1)
-                     ),
-                     column(6,style=list("padding-left: 5px;"),
-                            textInput(ns("expt_name.spatial"), "Input Experiment Name:", value = "Expt1")
-                     )
-                   ),  
-                   
-                   fluidRow(
-                     column(6,style=list("padding-right: 28px;"),
-                            textInput(ns("plot_start.spatial"), "Starting Plot Number:", value = 1)
-                     ),
-                     column(6,style=list("padding-left: 5px;"),
-                            textInput(ns("Location.spatial"), "Input Location:", value = "FARGO")
-                     )
-                   ),
-                   
-                   fluidRow(
-                     column(6,
-                            downloadButton(ns("downloadData.spatial"), "Save Experiment", style = "width:100%")
-                     ),
-                     column(6,
-                            actionButton(ns("Simulate.optim"), "Simulate!", icon = icon("cocktail"), width = '100%')
-                     )
-                   )
+      sidebarPanel(
+        width = 4,
+        radioButtons(inputId = ns("owndataOPTIM"), 
+                    label = "Import Entries' List?", 
+                    choices = c("Yes", "No"), 
+                    selected = "No",
+                    inline = TRUE, 
+                    width = NULL, 
+                    choiceNames = NULL, 
+                    choiceValues = NULL),
+       conditionalPanel(
+         condition = "input.owndataOPTIM == 'Yes'", 
+         ns = ns,
+         fluidRow(
+          column(7, style=list("padding-right: 28px;"),
+                  fileInput(ns("file3"), 
+                            label = "Upload a CSV File:", 
+                            multiple = FALSE)),
+          column(5,style=list("padding-left: 5px;"),
+                  radioButtons(ns("sep.OPTIM"), "Separator",
+                              choices = c(Comma = ",",
+                                          Semicolon = ";",
+                                          Tab = "\t"),
+                              selected = ","))
+         )
+       ),
+       conditionalPanel(
+         "input.owndataOPTIM != 'Yes'", 
+          ns = ns,
+          numericInput(ns("checks.s"),
+                        label = "Input # of Checks:", 
+                        value = 3,
+                        min = 1),
+          textInput(ns("amount.checks"), 
+                    "Input # Check's Reps:",
+                    value = "10,10,10"),
+          numericInput(ns("lines.s"), 
+                      label = "Input # of Entries:",
+                      value = 270, min = 5)           
+       ),
+       selectInput(ns("planter_mov.spatial"), 
+                   label = "Plot Order Layout:",
+                   choices = c("serpentine", "cartesian"),
+                   multiple = FALSE, 
+                   selected = "serpentine"),
+       fluidRow(
+         column(6,
+                style=list("padding-right: 28px;"),
+                numericInput(inputId = ns("l.optim"), 
+                             label = "Input # of Locations:", 
+                             value = 1,
+                             min = 1)
+         ),
+         column(6,style=list("padding-left: 5px;"),
+                selectInput(inputId = ns("locView.optim"), 
+                            label = "Choose location to view:", 
+                            choices = 1:1, 
+                            selected = 1,
+                            multiple = FALSE)
+         )
+       ),
+       fluidRow(
+         column(6,style=list("padding-right: 28px;"),
+                numericInput(ns("seed.spatial"), 
+                             label = "Seed Number:", 
+                             value = 1,
+                             min = 1)
+         ),
+         column(6,style=list("padding-left: 5px;"),
+                textInput(ns("expt_name.spatial"), 
+                          "Input Experiment Name:", 
+                          value = "Expt1")
+         )
+       ),  
+       
+       fluidRow(
+         column(6,style=list("padding-right: 28px;"),
+                textInput(ns("plot_start.spatial"), 
+                          "Starting Plot Number:", 
+                          value = 1)
+         ),
+         column(6,style=list("padding-left: 5px;"),
+                textInput(ns("Location.spatial"), 
+                          "Input Location:", 
+                          value = "FARGO")
+         )
+       ),
+       fluidRow(
+         column(6,
+                actionButton(
+                  inputId = ns("RUN.optim"), 
+                  label = "Run!", 
+                  icon = icon("circle-nodes", verify_fa = FALSE),
+                  width = '100%'),
+         ),
+         column(6,
+                actionButton(
+                  ns("Simulate.optim"), 
+                  label = "Simulate!", 
+                  icon = icon("greater-than-equal", verify_fa = FALSE),
+                  width = '100%'),
+         )
+       ),
+       br(),
+       uiOutput(ns("download_expt_optim"))
       ),
-      
       mainPanel(
         width = 8,
-        tabsetPanel(
-          tabPanel("Input Data",
+        shinyjs::useShinyjs(),
+        tabsetPanel(id = ns("tabset_optim"),
+        tabPanel("Get Random", value = "tabPanel_optim",
+          br(),
+          shinyjs::hidden(
+            selectInput(inputId = ns("dimensions.s"),
+                            label = "Select dimensions of field:",
+                            choices = "")
+          ),
+          shinyjs::hidden(
+            actionButton(ns("get_random_optim"), label = "Randomize!")
+          ),
+          br(),
+          br(),
+          shinycssloaders::withSpinner(
+            verbatimTextOutput(outputId = ns("summary_optim"), 
+                               placeholder = FALSE), 
+              type = 4
+           )
+        ),
+          tabPanel("Data Input",
                    fluidRow(
-                     column(6,DT::DTOutput(ns("data_up.s"))),
+                     column(6,DT::DTOutput(ns("data_input"))),
                      column(6,DT::DTOutput(ns("table_checks")))
                    )
           ),
-          tabPanel("Matrix Checks", DT::DTOutput(ns("BINARY"))),
           tabPanel("Randomized Field", DT::DTOutput(ns("RFIELD"))),
           tabPanel("Plot Number Field", DT::DTOutput(ns("PLOTFIELD"))),
           tabPanel("Field Book", DT::DTOutput(ns("OPTIMOUTPUT"))),
-          tabPanel("Heatmap", shinycssloaders::withSpinner(plotly::plotlyOutput(ns("heatmap")), type = 5))
+          tabPanel("Heatmap", 
+            plotly::plotlyOutput(ns("heatmap")))
          )
       )
     )
   )
 }
-    
 #' Optim Server Functions
 #'
 #' @noRd 
-mod_Optim_server <- function(id){
+mod_Optim_server <- function(id) {
   moduleServer(id, function(input, output, session){
     ns <- session$ns
-    
-    getDataup.spatiaL <- reactive({
+
+    shinyjs::useShinyjs()
+
+    optim_inputs <- eventReactive(input$RUN.optim, {
+      planter_mov <- input$planter_mov.spatial
+      expt_name <- as.character(input$expt_name.spatial)
+      plotNumber <- as.numeric(as.vector(unlist(strsplit(input$plot_start.spatial, ","))))
+      site_names <- as.character(as.vector(unlist(strsplit(input$Location.spatial, ","))))
+      seed_number <- as.numeric(input$seed.spatial)
+      sites = as.numeric(input$l.optim)
+      return(list(sites = sites, 
+                  location_names = site_names, 
+                  seed_number = seed_number, 
+                  plotNumber = plotNumber,
+                  planter_mov = planter_mov,
+                  expt_name = expt_name)) 
+    })
+
+    observeEvent(optim_inputs()$sites, {
+      loc_user_view <- 1:as.numeric(optim_inputs()$sites)
+      updateSelectInput(inputId = "locView.optim", 
+                        choices = loc_user_view, 
+                        selected = loc_user_view[1])
+    })
+
+    observeEvent(input$input.owndataOPTIM,
+                 handlerExpr = updateTabsetPanel(session,
+                                                 "tabset_optim",
+                                                 selected = "tabPanel_optim"))
+    observeEvent(input$RUN.optim,
+                 handlerExpr = updateTabsetPanel(session,
+                                                 "tabset_optim",
+                                                 selected = "tabPanel_optim"))
+
+    get_data_optim <- eventReactive(input$RUN.optim, {
       if (input$owndataOPTIM == "Yes") {
         req(input$file3)
         inFile <- input$file3
-        data_up <- load_file(name = inFile$name, path = inFile$datapat, sep = input$sep.OPTIM)
-        data_up <- as.data.frame(data_up)
-        if (ncol(data_up) < 3) shiny::validate("Data input needs at least three columns with: ENTRY, NAME and REPS.")
-        data_up <- as.data.frame(data_up[,1:3])
-        data_up <- na.omit(data_up)
-        colnames(data_up) <- c("ENTRY", "NAME", "REPS")
-        if(!is.numeric(data_up$REPS) || !is.integer(data_up$REPS) ||
-           is.factor(data_up$REPS)) validate("'REPS' must be numeric.")
-      }else {
-        req(input$checks.s)
-        req(input$tplots.s)
+        data_ingested <- load_file(name = inFile$name, 
+                                   path = inFile$datapat, 
+                                   sep = input$sep.OPTIM,
+                                   check = TRUE, 
+                                   design = "optim")
+        
+        if (names(data_ingested) == "dataUp") {
+          data_up <- data_ingested$dataUp
+          data_up <- na.omit(data_up)
+          data_up <- as.data.frame(data_up)
+          if (ncol(data_up) < 3) {
+            shinyalert::shinyalert(
+              "Error!!", 
+              "Data input needs at least three columns with: ENTRY, NAME and REPS.", 
+              type = "error")
+            return(NULL)
+          } 
+          data_up <- as.data.frame(data_up[,1:3])
+          data_up <- na.omit(data_up)
+          colnames(data_up) <- c("ENTRY", "NAME", "REPS")
+          if(!is.numeric(data_up$REPS) || !is.integer(data_up$REPS) ||
+             is.factor(data_up$REPS)) validate("'REPS' must be numeric.")
+          total_plots <- sum(data_up$REPS)
+        } else if (names(data_ingested) == "bad_format") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Invalid file; Please upload a .csv file.", 
+            type = "error")
+          return(NULL)
+        } else if (names(data_ingested) == "duplicated_vals") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Check input file for duplicate values.", 
+            type = "error")
+          return(NULL)
+        } else if (names(data_ingested) == "missing_cols") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Data input needs at least three columns with: ENTRY, NAME and REPS.",
+            type = "error")
+          return(NULL)
+        }
+      } else {
         req(input$amount.checks)
-        req(input$nrows.s, input$ncols.s)
-        tplots <- as.numeric(input$tplots.s)
+        req(input$lines.s)
+        req(input$checks.s)
         r.checks <- as.numeric(unlist(strsplit(input$amount.checks, ",")))
-        if (tplots != sum(r.checks)) validate("The number of total checks and the sum of replicates do not match.")
         checks.s <- as.numeric(input$checks.s)
         if(checks.s != length(r.checks)) validate("The number of checks and the length of the reps vector must be equal.")
         total.checks <- sum(r.checks)
-        nrows <- as.numeric(input$nrows.s)
-        ncols <- as.numeric(input$ncols.s)
         n.checks <- as.numeric(input$checks.s)
-        #lines <- nrows * ncols - total.checks
         lines <- as.numeric(input$lines.s)
         if (lines <= sum(total.checks)) validate("Number of lines should be greater then the number of checks.")
-        NAME <- c(paste(rep("CH", n.checks), 1:n.checks),
+        NAME <- c(paste0(rep("CH", n.checks), 1:n.checks),
                   paste(rep("G", lines), (n.checks + 1):(lines + n.checks), sep = ""))
         reps.checks <- r.checks
         REPS <- c(reps.checks, rep(1, lines))
         gen.list <- data.frame(list(ENTRY = 1:(lines + n.checks),	NAME = NAME,	REPS = REPS))
         data_up <- gen.list
+        total_plots <- sum(data_up$REPS)
       }
-     
-      return(list(data_up.spatial = data_up))
-      
+      return(list(data_up.spatial = data_up, total_plots = total_plots))
     })
     
-    
-    output$data_up.s <- DT::renderDT({
-      req(getDataup.spatiaL()$data_up.spatial)
-      data_entry <- getDataup.spatiaL()$data_up.spatial
-      df <- as.data.frame(data_entry)
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                scrollX = TRUE, scrollY = "600px"))
-      DT::datatable(df, rownames = TRUE, options = list(
-        columnDefs = list(list(className = 'dt-left', targets = 0:3))))
+    list_inputs <- eventReactive(input$RUN.optim, {
+      if (input$owndataOPTIM != 'Yes') {
+        req(input$amount.checks)
+        req(input$lines.s)
+        r.checks <- as.numeric(unlist(strsplit(input$amount.checks, ",")))
+        lines <- as.numeric(input$lines.s)
+        return(list(r.checks=r.checks, lines = lines, input$owndataOPTIM))
+      } else {
+        n_plots <- get_data_optim()$total_plots
+        return(list(n_plots = n_plots, input$owndataOPTIM))
+      }
     })
     
+    observeEvent(list_inputs(), {
+      req(input$owndataOPTIM)
+      if (input$owndataOPTIM != 'Yes') {
+        req(input$amount.checks)
+        req(input$lines.s)
+        r.checks <- as.numeric(unlist(strsplit(input$amount.checks, ",")))
+        lines <- as.numeric(input$lines.s)
+        n <- sum(r.checks,lines)
+        choices <- factor_subsets(n)$labels
+      } else {
+        req(get_data_optim()$total_plots)
+        n <- get_data_optim()$total_plots
+        choices <- factor_subsets(n)$labels
+      }
+      if(is.null(choices)){
+        choices <- "No options available"
+      } 
+      updateSelectInput(inputId = "dimensions.s", 
+                        choices = choices, 
+                        selected = choices[1])
+    })
     
+    field_dimensions_optim <- eventReactive(input$get_random_optim, {
+      dims <- unlist(strsplit(input$dimensions.s," x "))
+      d_row <- as.numeric(dims[1])
+      d_col <- as.numeric(dims[2])
+      return(list(d_row = d_row, d_col = d_col))
+    })
+
+    randomize_hit_optim <- reactiveValues(times = 0)
+ 
+    observeEvent(input$RUN.optim, {
+      randomize_hit_optim$times <- 0
+    })
+
+    user_tries_optim <- reactiveValues(tries_optim = 0)
+
+    observeEvent(input$get_random_optim, {
+      user_tries_optim$tries_optim <- user_tries_optim$tries_optim + 1
+      randomize_hit_optim$times <- randomize_hit_optim$times + 1
+    })
+
+    observeEvent(input$dimensions.s, {
+      user_tries_optim$tries_optim <- 0
+    })
+
+    list_to_observe_optim <- reactive({
+      list(randomize_hit_optim$times, user_tries_optim$tries_optim)
+    })
+
+    observeEvent(list_to_observe_optim(), {
+      output$download_expt_optim <- renderUI({
+        if (randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0) {
+          downloadButton(ns("downloadData.spatial"),
+                          "Save Experiment",
+                          style = "width:100%")
+        }
+      })
+    })
+
     entryListFormat_OPTIM <- data.frame(ENTRY = 1:9, 
-                                        NAME = c(c("CHECK1", "CHECK2","CHECK3"), paste("Genotype", LETTERS[1:6], sep = "")),
+                                        NAME = c(c("CHECK1", "CHECK2","CHECK3"), 
+                                                 paste("Genotype", LETTERS[1:6], sep = "")),
                                         REPS = as.factor(c(rep(10, times = 3), rep(1,6))))
     
     entriesInfoModal_OPTIM <- function() {
@@ -197,13 +368,46 @@ mod_Optim_server <- function(id){
         )
       }
     })
+
+    observeEvent(input$RUN.optim, {
+      req(get_data_optim())
+      shinyjs::show(id = "dimensions.s")
+      shinyjs::show(id = "get_random_optim")
+
+    })
+
+    output$data_input <- DT::renderDT({
+      if (input$dimensions.s == "No options available"){
+        validate("No options available for this number of treatments")
+      }
+      test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0
+      if (!test) return(NULL)
+      req(get_data_optim()$data_up.spatial)
+      data_entry <- get_data_optim()$data_up.spatial
+      df <- as.data.frame(data_entry)
+      df$ENTRY <- as.factor(df$ENTRY)
+      df$NAME <- as.factor(df$NAME)
+      df$REPS <- as.factor(df$REPS)
+      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
+                                scrollX = TRUE, scrollY = "600px"))
+      DT::datatable(df,
+                    filter = "top",
+                    rownames = FALSE, 
+                    caption = 'List of Entries.', 
+                    options = list(columnDefs = list(list(className = 'dt-center', targets = "_all")))
+      )
+    })
     
     output$table_checks <- DT::renderDT({
-      req(getDataup.spatiaL()$data_up.spatial)
-        data_entry <- getDataup.spatiaL()$data_up.spatial
-        checks_input <- as.numeric(input$checks.s)
-        times_checks <- data_entry[1:checks_input,]
-        df <- as.data.frame(times_checks)
+      if (input$dimensions.s == "No options available") {
+        validate("No options available for this number of treatments")
+      }
+      test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0
+      if (!test) return(NULL)
+      req(get_data_optim()$data_up.spatial)
+        data_entry <- get_data_optim()$data_up.spatial
+        checks_input <- data_entry[data_entry$REPS > 1, ]
+        df <- as.data.frame(checks_input)
         options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                   scrollX = TRUE, scrollY = "350px"))
         a <- ncol(df) - 1
@@ -211,32 +415,62 @@ mod_Optim_server <- function(id){
           columnDefs = list(list(className = 'dt-left', targets = 0:a))))
     })
     
-    Spatial_Checks <- reactive({
-      
-      req(getDataup.spatiaL()$data_up.spatial)
-      req(input$nrows.s, input$ncols.s)
-      req(input$seed.spatial)
-      seed.spatial <- as.numeric(input$seed.spatial)
-      nrows <- input$nrows.s
-      ncols <- input$ncols.s
+    optimized_arrang <- eventReactive(input$get_random_optim, { 
+      if (input$dimensions.s == "No options available") {
+        validate("No options available for this number of treatments")
+      }
+      req(get_data_optim()$data_up.spatial)
+      nrows <- field_dimensions_optim()$d_row
+      ncols <- field_dimensions_optim()$d_col
       niter <- 1000
       
-      data.spatial <- getDataup.spatiaL()$data_up.spatial
-      
-      OPTIM <- input$Optim.spatial
-      
-      mydesign <- pREP(nrows = nrows, ncols = ncols, RepChecks = r.checks, checks = n.checks,
-                       seed = seed.spatial, optim = OPTIM, niter = niter, data = data.spatial)
+      data.spatial <- get_data_optim()$data_up.spatial
+      sites <- optim_inputs()$sites
+      site_names <- optim_inputs()$site_names
+      seed.spatial <- optim_inputs()$seed_number
+      plotNumber <- optim_inputs()$plotNumber
+      movement_planter <- optim_inputs()$planter_mov
+      expt_name <- optim_inputs()$expt_name
 
+      optimized <- optimized_arrangement(
+        nrows = nrows,
+        ncols = ncols, 
+        amountChecks = r.checks, 
+        checks = n.checks,
+        locationNames = site_names,
+        planter = movement_planter,
+        plotNumber = plotNumber,
+        l = sites, 
+        exptName = expt_name,
+        optim = TRUE,
+        seed = seed.spatial, 
+        data = data.spatial
+      )
+    })
+
+    output$summary_optim <- renderPrint({
+      test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0
+      #if (!test) return(NULL)
+      if (test) {
+        cat("Randomization was successful!", "\n", "\n")
+        # len <- length(optimized_arrang()$infoDesign)
+        #  optimized_arrang()$infoDesign[1:(len - 1)]
+        print(optimized_arrang())
+      }
+    })
+
+    user_site_selection <- reactive({
+      return(as.numeric(input$locView.optim))
     })
 
     output$BINARY <- DT::renderDT({
-      B <- Spatial_Checks()$binary.field
+      test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0
+      if (!test) return(NULL)
+      # if (user_tries_optim$tries_optim < 1) return(NULL)
+      req(optimized_arrang())
+      B <- optimized_arrang()$binaryField[[user_site_selection()]]
       df <- as.data.frame(B)
-      # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-      #                           scrollX = TRUE, scrollY = "650px"))
-      # #DT::datatable(df)
-      # DT::datatable(df) %>%
+      rownames(df) <- nrow(df):1
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
       DT::datatable(df,
                     extensions = 'FixedColumns',
@@ -246,157 +480,68 @@ mod_Optim_server <- function(id){
                       fixedColumns = TRUE
                     )) %>% 
         DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-                        backgroundColor = DT::styleEqual(c(1,0), 
-                                                         c("gray",'yellow')))
+                        backgroundColor = DT::styleEqual(1, 
+                                                         c("gray")))
     })
     
     output$RFIELD <- DT::renderDT({
-      w_map <- Spatial_Checks()$field.map
-      checks = as.vector(Spatial_Checks()$gen.entries[[1]])
+      test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0
+      if (!test) return(NULL)
+      # if (user_tries_optim$tries_optim < 1) return(NULL)
+      req(optimized_arrang())
+      w_map <- optimized_arrang()$layoutRandom[[user_site_selection()]]
+      checks = as.vector(optimized_arrang()$genEntries[[1]])
       len_checks <- length(checks)
       colores <- c('royalblue','salmon', 'green', 'orange','orchid', 'slategrey',
                    'greenyellow', 'blueviolet','deepskyblue','gold','blue', 'red')
-      gens <- as.vector(Spatial_Checks()$gen.entries[[2]])
+      gens <- as.vector(optimized_arrang()$genEntries[[2]])
       df <- as.data.frame(w_map)
       rownames(df) <- nrow(df):1
-      # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-      #                           scrollX = TRUE, scrollY = "650px"))
-      # 
-      # DT::datatable(df) %>%
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
+      colnames(df) <- paste0('V', 1:ncol(df))
       DT::datatable(df,
-                    extensions = 'FixedColumns',
-                    options = list(
-                      dom = 't',
-                      scrollX = TRUE,
-                      fixedColumns = TRUE
-                    )) %>% 
+                    extensions = c('Buttons', 'FixedColumns'),
+                    options = list(dom = 'Blfrtip',
+                                   scrollX = TRUE,
+                                   fixedColumns = TRUE,
+                                   pageLength = nrow(df),
+                                   scrollY = "700px",
+                                   class = 'compact cell-border stripe',  rownames = FALSE,
+                                   server = FALSE,
+                                   filter = list( position = 'top', clear = FALSE, plain =TRUE ),
+                                   buttons = c('copy', 'excel'),
+                                   lengthMenu = list(c(10,25,50,-1),
+                                                     c(10,25,50,"All")))) %>% 
         DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-                    backgroundColor = DT::styleEqual(c(checks,gens),
-                                                 c(colores[1:len_checks], rep('gray', length(gens)))
+                    backgroundColor = DT::styleEqual(checks,
+                                                 c(colores[1:len_checks])
                     )
         )
     })
     
-    
-    split_name_spatial <- reactive({
-      req(Spatial_Checks()$field.map)
-      req(input$nrows.s, input$ncols.s)
-      nrows <- as.numeric(input$nrows.s)
-      ncols <- as.numeric(input$ncols.s)
-      my_col_sets <- ncols
-      blocks = 1
-      if (input$expt_name.spatial != "") {
-        Name_expt <- input$expt_name.spatial 
-      }else Name_expt = paste0(rep("Expt1", times = blocks), 1:blocks)
-      
-      split_names <- split_name(n_rows = nrows, n_cols = ncols, Name_expt = Name_expt,
-                                by_row = FALSE, col_sets = my_col_sets, row_sets = NULL)
-      return(list(my_names = split_names))
-    })
-    
-    output$NAMESPATIAL <- DT::renderDT({
-      req(split_name_spatial()$my_names)
-      my_names <- split_name_spatial()$my_names
-      blocks = 1
-      if (input$expt_name.spatial != ""){
-        Name_expt <- input$expt_name.spatial 
-      }else Name_expt = paste0(rep("Expt1", times = blocks), 1:blocks)
-      df <- as.data.frame(my_names)
-      rownames(df) <- nrow(df):1
-      # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-      #                           scrollX = TRUE, scrollY = scrollY(input$nrows.s)))
-      # DT::datatable(df) %>%
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
-      DT::datatable(df,
-                    extensions = 'FixedColumns',
-                    options = list(
-                      dom = 't',
-                      scrollX = TRUE,
-                      fixedColumns = TRUE
-                    )) %>%
-        DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-                    backgroundColor = DT::styleEqual(Name_expt, c('yellow')))
-      
-    })
-    
-    plot_number_spatial <- reactive({
-      req(input$plot_start.spatial)
-      req(input$nrows.s, input$ncols.s)
-      req(split_name_spatial()$my_names)
-      datos_name <- split_name_spatial()$my_names
-      datos_name < as.matrix(datos_name)
-      nrows <- input$nrows.s; ncols <- input$ncols.s
-      plot_n_start <- as.numeric(input$plot_start.spatial)
-      movement_planter <- input$planter_mov.spatial
-      blocks = 1
-      if (input$expt_name.spatial != "") {
-        Name_expt <- input$expt_name.spatial 
-      }else Name_expt = paste0(rep("Expt1", times = blocks), 1:blocks)
-      
-      my_split_plot_nub <- plot_number(movement_planter = movement_planter, n_blocks = blocks,
-                                         n_rows = nrows, n_cols = ncols, plot_n_start = plot_n_start,
-                                         datos = datos_name, expe_name = Name_expt, ByRow = FALSE,
-                                         my_row_sets = NULL, ByCol = TRUE, my_col_sets = ncols)
-  
-    })
-    
-    
     output$PLOTFIELD <- DT::renderDT({
-      req(plot_number_spatial()$w_map_letters1)
-      plot_num <- plot_number_spatial()$w_map_letters1
+      test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0
+      if (!test) return(NULL)
+      # if (user_tries_optim$tries_optim < 1) return(NULL)
+      req(optimized_arrang())
+      plot_num <- optimized_arrang()$plotNumber[[user_site_selection()]]
       a <- as.vector(as.matrix(plot_num))
       len_a <- length(a)
       df <- as.data.frame(plot_num)
       rownames(df) <- nrow(df):1
-      # options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-      #                           scrollX = TRUE, scrollY = "650px"))
-      # DT::datatable(df) %>%
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
       DT::datatable(df,
-                    extensions = 'FixedColumns',
-                    options = list(
-                      dom = 't',
-                      scrollX = TRUE,
-                      fixedColumns = TRUE
-                    )) %>%
-        DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-                    backgroundColor = DT::styleEqual(a, 
-                                                 rep('yellow', length(a)))
-        )
-    })
-    
-    ####### Export the experiment ############################
-    
-    export_spatial <- reactive({
-      req(getDataup.spatiaL()$data_up.spatial)
-      req(input$Location.spatial)
-      req(input$planter_mov.spatial)
-      movement_planter <- input$planter_mov.spatial
-      req(Spatial_Checks()$field.map)
-      req(Spatial_Checks()$binary.field)
-      req(split_name_spatial()$my_names)
-      req(plot_number_spatial()$w_map_letters1)
-      loc <- input$Location.spatial
-      random_entries_map <- as.matrix(Spatial_Checks()$field.map)
-      plot_number <- as.matrix(plot_number_spatial()$w_map_letters1)
-      Col_checks <- as.matrix(Spatial_Checks()$binary.field)
-      my_names <- as.matrix(split_name_spatial()$my_names)
-    
-      my_data_VLOOKUP <- getDataup.spatiaL()$data_up.spatial
-      results_to_export <- list(random_entries_map, plot_number, Col_checks, my_names)
-      final_expt_export <- export_design(G = results_to_export, movement_planter =  movement_planter,
-                                             location = loc, Year = 2020,
-                                             data_file = my_data_VLOOKUP, reps = FALSE)
-      final_expt_export <- as.data.frame(final_expt_export)
-      final_expt_export <- final_expt_export[, -11]
-      ID <- 1:nrow(final_expt_export)
-      final_expt_export <- final_expt_export[, c(6,7,9,4,2,3,5,1,10)]
-      final_expt_export_F <- cbind(ID, final_expt_export)
-      colnames(final_expt_export_F)[10] <- "TREATMENT"
-      
-      list(final_expt = final_expt_export_F)
-      
+                    extensions = c('Buttons', 'FixedColumns'),
+                    options = list(dom = 'Blfrtip',
+                                   scrollX = TRUE,
+                                   fixedColumns = TRUE,
+                                   pageLength = nrow(df),
+                                   scrollY = "700px",
+                                   class = 'compact cell-border stripe',  rownames = FALSE,
+                                   server = FALSE,
+                                   filter = list( position = 'top', clear = FALSE, plain =TRUE ),
+                                   buttons = c('copy', 'excel'),
+                                   lengthMenu = list(c(10,25,50,-1),
+                                                     c(10,25,50,"All")))
+                    )
     })
     
     valsOPTIM <- reactiveValues(ROX = NULL, ROY = NULL, trail.optim = NULL, minValue = NULL,
@@ -446,17 +591,20 @@ mod_Optim_server <- function(id){
     }
     
     observeEvent(input$Simulate.optim, {
-      req(export_spatial()$final_expt)
-      showModal(
-        shinyjqui::jqui_draggable(
-          simuModal.OPTIM()
+      req(optimized_arrang()$fieldBook)
+      test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0
+      if (test) {
+        showModal(
+          shinyjqui::jqui_draggable(
+            simuModal.OPTIM()
+          )
         )
-      )
+      }
     })
     
     observeEvent(input$ok.optim, {
       req(input$min.optim, input$max.optim)
-      if (input$max.optim > input$min.optim && input$min.optim != input$max.optim) {
+      if (input$max.optim > input$min.optim & input$min.optim != input$max.optim) {
         valsOPTIM$maxValue <- input$max.optim
         valsOPTIM$minValue  <- input$min.optim
         valsOPTIM$ROX <- as.numeric(input$ROX.O)
@@ -480,70 +628,121 @@ mod_Optim_server <- function(id){
     })
     
     simuDataOPTIM <- reactive({
-      req(export_spatial()$final_expt)
-      if(!is.null(valsOPTIM$maxValue) && !is.null(valsOPTIM$minValue) && !is.null(valsOPTIM$trail.optim)) {
+      req(optimized_arrang()$fieldBook)
+      if(!is.null(valsOPTIM$maxValue) & !is.null(valsOPTIM$minValue) & !is.null(valsOPTIM$trail.optim)) {
         maxVal <- as.numeric(valsOPTIM$maxValue)
         minVal <- as.numeric(valsOPTIM$minValue)
         ROX_O <- as.numeric(valsOPTIM$ROX)
         ROY_O <- as.numeric(valsOPTIM$ROY)
-        df.optim <- export_spatial()$final_expt
-        fieldBook <- df.optim[, c(1,6,7,9)]
-        nrows.s <- as.numeric(input$nrows.s)
-        ncols.s <- as.numeric(input$ncols.s)
+        df_optim <- optimized_arrang()$fieldBook
+        locs <- length(levels(factor(df_optim$LOCATION)))
+        nrows.s <- max(as.numeric(df_optim$ROW))
+        ncols.s <- max(as.numeric(df_optim$COLUMN))
+        loc_levels_factors <- levels(factor(df_optim$LOCATION, unique(df_optim$LOCATION)))
+        
         seed.s <- as.numeric(input$seed.spatial)
-        dfSimulation <- AR1xAR1_simulation(nrows = nrows.s, ncols = ncols.s, ROX = ROX_O, ROY = ROY_O, minValue = minVal, 
-                                           maxValue = maxVal, fieldbook = fieldBook, trail = valsOPTIM$trail.optim, 
-                                           seed = seed.s)
-        dfSimulation <- dfSimulation$outOrder
-        dataOptim <- export_spatial()$final_expt
-        df.optim <- cbind(dataOptim, round(dfSimulation[,7],2))
-        colnames(df.optim)[11] <- as.character(valsOPTIM$trail.optim)
+        
+        df_optim_list <- vector(mode = "list", length = locs)
+        dfSimulationList <- vector(mode = "list", length = locs)
+        do_sites <- 1:locs
+        z <- 1
+        set.seed(seed.s)
+        for (sites in do_sites) {
+          df_loc <- subset(df_optim, LOCATION == loc_levels_factors[z])
+          fieldBook <- df_loc[, c(1,6,7,9)]
+          dfSimulation <- AR1xAR1_simulation(nrows = nrows.s, ncols = ncols.s, 
+                                             ROX = ROX_O, ROY = ROY_O, minValue = minVal, 
+                                             maxValue = maxVal, fieldbook = fieldBook, 
+                                             trail = valsOPTIM$trail.optim, 
+                                             seed = NULL)
+          dfSimulation <- dfSimulation$outOrder
+          dfSimulationList[[sites]] <- dfSimulation
+          dataOptim_loc <- df_loc
+          df_optim_simu <- cbind(dataOptim_loc, round(dfSimulation[,7],2))
+          colnames(df_optim_simu)[11] <- as.character(valsOPTIM$trail.optim)
+          df_optim_list[[sites]] <- df_optim_simu 
+          z <- z + 1
+        }
+        df_optim_locs <- dplyr::bind_rows(df_optim_list)
         v <- 1
       }else {
-        dataOptim <- export_spatial()$final_expt
+        dataOptim <- optimized_arrang()$fieldBook
         v <- 2
       }
       if (v == 1) {
-        return(list(df = df.optim, dfSimulation = dfSimulation))
+        return(list(df = df_optim_locs, dfSimulation = dfSimulationList))
       }else if (v == 2) {
         return(list(df = dataOptim))
       }
     })
+
+    heat_map_optim <- reactiveValues(heat_map_option = FALSE)
     
+    observeEvent(input$ok.optim, {
+      req(input$min.optim, input$max.optim)
+      if (input$max.optim > input$min.optim & input$min.optim != input$max.optim) {
+        heat_map_optim$heat_map_option <- TRUE
+      }
+    })
+    
+    observeEvent(heat_map_optim$heat_map_option, {
+      if (heat_map_optim$heat_map_option == FALSE) {
+        hideTab(inputId = "tabset_optim", target = "Heatmap")
+      } else {
+        showTab(inputId = "tabset_optim", target = "Heatmap")
+      }
+    })
     
     output$OPTIMOUTPUT <- DT::renderDT({
+      test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0
+      if (!test) return(NULL)
+      # if (user_tries_optim$tries_optim < 1) return(NULL)
+      req(simuDataOPTIM()$df)
       df <- simuDataOPTIM()$df
+      df$EXPT <- as.factor(df$EXPT)
+      df$LOCATION <- as.factor(df$LOCATION)
+      df$PLOT <- as.factor(df$PLOT)
+      df$ROW <- as.factor(df$ROW)
+      df$COLUMN <- as.factor(df$COLUMN)
+      df$CHECKS <- as.factor(df$CHECKS)
+      df$ENTRY <- as.factor(df$ENTRY)
+      df$TREATMENT <- as.factor(df$TREATMENT)
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                scrollX = TRUE, scrollY = "600px"))
-      DT::datatable(df, rownames = FALSE, options = list(
-        columnDefs = list(list(className = 'dt-center', targets = "_all"))))
+                                scrollX = TRUE, scrollY = "600px",
+              columnDefs = list(list(className = 'dt-center', targets = "_all"))))
+      DT::datatable(df,
+        filter = "top",
+        rownames = FALSE
+      )
     })
     
     
     heatmap_obj <- reactive({
       req(simuDataOPTIM()$dfSimulation)
-      
-      if(input$heatmap_s){
-        df <- simuDataOPTIM()$dfSimulation
+      if(input$heatmap_s) {
         w <- as.character(valsOPTIM$trail.optim)
+        df <- simuDataOPTIM()$dfSimulation[[user_site_selection()]]
+        df <- as.data.frame(df)
         p1 <- ggplot2::ggplot(df, ggplot2::aes(x = df[,4], y = df[,3], fill = df[,7], text = df[,8])) + 
+          ggplot2::ggtitle("Heat map for yield") + 
           ggplot2::geom_tile() +
           ggplot2::xlab("COLUMN") +
           ggplot2::ylab("ROW") +
           ggplot2::labs(fill = w) +
           viridis::scale_fill_viridis(discrete = FALSE)
         
-        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1180, height = 740)
+        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1250, height = 740)
         
         return(p2)
       }
     })
     
     output$heatmap <- plotly::renderPlotly({
+      test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0
+      if (!test) return(NULL)
       req(heatmap_obj())
       heatmap_obj()
     })
-    
     
     output$downloadData.spatial <- downloadHandler(
       filename = function() {
@@ -559,9 +758,3 @@ mod_Optim_server <- function(id){
     
   })
 }
-    
-## To be copied in the UI
-# mod_Optim_ui("Optim_ui_1")
-    
-## To be copied in the server
-# mod_Optim_server("Optim_ui_1")

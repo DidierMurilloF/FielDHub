@@ -9,8 +9,10 @@
 run_app <- function(
   ...
 ) {
+  options(shiny.maxRequestSize=100*1024^2)
   with_golem_options(
     app = shinyApp(
+      options = list(launch.browser = TRUE),
       ui = app_ui, 
       server = app_server
     ), 

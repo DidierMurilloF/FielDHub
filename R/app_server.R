@@ -14,8 +14,10 @@
 #' @noRd
 app_server <- function( input, output, session ) {
   ################## Unreplicated Module #########################################
-  ### Diagonal Arrangement
+  ### Diagonal Arrangement single
   mod_Diagonal_server("Diagonal_ui_1")
+    ### Diagonal Arrangement multiple
+  mod_diagonal_multiple_server("diagonal_multiple_ui_1")
   ### Optimized Arrangement
   mod_Optim_server("Optim_ui_1")
   ################## Augmented Designs ###########################################
