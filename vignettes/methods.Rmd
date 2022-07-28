@@ -2,7 +2,7 @@
 title: "Methods in FielDHub"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{methods}
+  %\VignetteIndexEntry{Methods in FielDHub}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
