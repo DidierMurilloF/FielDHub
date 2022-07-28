@@ -1,5 +1,7 @@
 url: https://didiermurillof.github.io/FielDHub/
 template:
   bootstrap: 5
+  bootswatch: flatly
 development:
   mode: auto
+  
