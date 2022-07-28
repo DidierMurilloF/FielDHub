@@ -15,27 +15,27 @@
 app_ui <- function(request) {
   options(spinner.color="#2c7da3", spinner.color.background="#ffffff", spinner.size = 2)
   tagList(
-    # Leave this function for adding external resources
     golem_add_external_resources(),
-    # List the first level UI elements here
+    tags$head(tags$script(type="text/javascript", src = "corner.js")),
+    tags$head(tags$script(type="text/javascript", src= "shinybusy.js")), 
     fluidPage(theme = shinythemes::shinytheme("flatly"),
-              #shinyalert::useShinyalert(), 
-              navbarPage("FielDHub", 
+              navbarPage(title = "FielDHub v1.2.0", 
                          tabPanel(" Welcome!", icon = icon("home", lib = "glyphicon"),
                                   htmltools::includeHTML(
                                     system.file("app/www/home.html", package = "FielDHub")
                                   )
                          ),
                          navbarMenu("Unreplicated Designs",
-                                    tabPanel("Diagonal Arrangement",
+                                    tabPanel("Single Diagonal Arrangement",
                                              mod_Diagonal_ui("Diagonal_ui_1")
+                                    ),
+                                    tabPanel("Multiple Diagonal Arrangement",
+                                             mod_diagonal_multiple_ui("diagonal_multiple_ui_1")
                                     ),
                                     tabPanel("Optimized Arrangement",
                                              mod_Optim_ui("Optim_ui_1")
-                                    )
-                         ),
-                         navbarMenu("Augmented Designs",
-                                    tabPanel("RCBD Augmented",
+                                    ),
+                                    tabPanel("Augmented RCBD",
                                              mod_RCBD_augmented_ui("RCBD_augmented_ui_1")
                                     )
                          ),
@@ -82,14 +82,21 @@ app_ui <- function(request) {
                                              mod_RowCol_ui("RowCol_ui_1")
                                     )
                          ),
-                         tabPanel("About Us",
-                                  htmltools::includeHTML(
-                                    system.file("app/www/aboutUs.html", package = "FielDHub")
-                                  )
-                         )
-              )
+                         navbarMenu("More", 
+                           tabPanel("Help", 
+                                htmltools::includeHTML(
+                                  system.file("app/www/Help.html", package = "FielDHub")
+                                )
+                           ),
+                           tabPanel("About Us",
+                             htmltools::includeHTML(
+                               system.file("app/www/aboutUs.html", package = "FielDHub")
+                             )
+                           ),
+                        ),
+              ),
+        )
     )
-  )
 }
 
 #' Add external Resources to the Application

@@ -8,8 +8,9 @@
 #'
 #' @importFrom shiny NS tagList 
 #' @importFrom utils write.csv
-mod_Alpha_Lattice_ui <- function(id){
+mod_Alpha_Lattice_ui <- function(id) {
   ns <- NS(id)
+  
   tagList(
     h4("Alpha Lattice Design"),
     sidebarLayout(
@@ -19,7 +20,7 @@ mod_Alpha_Lattice_ui <- function(id){
                    
                    conditionalPanel("input.owndata_alpha != 'Yes'", ns = ns,
                                     numericInput(ns("t.alpha"), label = "Input # of Treatments:",
-                                                 value = NULL, min = 2)
+                                                 value = 36, min = 2)
                                     
                    ),
                    conditionalPanel("input.owndata_alpha == 'Yes'", ns = ns,
@@ -34,9 +35,13 @@ mod_Alpha_Lattice_ui <- function(id){
                                                           selected = ","))
                                     )        
                    ),
-                   numericInput(inputId = ns("r.alpha"), label = "Input # of Full Reps:", value = NULL, min = 2),
+                   numericInput(inputId = ns("r.alpha"), label = "Input # of Full Reps:", value = 3, min = 2),
                    selectInput(inputId = ns("k.alpha"), label = "Input # of Plots per IBlock:", choices = ""),
-                   numericInput(inputId = ns("l.alpha"), label = "Input # of Locations:", value = NULL, min = 1),
+                   numericInput(inputId = ns("l.alpha"), label = "Input # of Locations:", value = 1, min = 1),
+                   
+                   selectInput(inputId = ns("planter_mov_alpha"), label = "Plot Order Layout:",
+                               choices = c("serpentine", "cartesian"), multiple = FALSE,
+                               selected = "serpentine"),
                    
                    fluidRow(
                      column(6, style=list("padding-right: 28px;"),
@@ -50,10 +55,18 @@ mod_Alpha_Lattice_ui <- function(id){
                                 value = 16, min = 1),
                    fluidRow(
                      column(6,
-                            actionButton(inputId = ns("RUN.alpha"), "Run!", icon = icon("cocktail"), width = '100%'),
+                            actionButton(
+                              inputId = ns("RUN.alpha"), 
+                              "Run!", 
+                              icon = icon("circle-nodes", verify_fa = FALSE),
+                              width = '100%'),
                      ),
                      column(6,
-                            actionButton(inputId = ns("Simulate.alpha"), "Simulate!", icon = icon("cocktail"), width = '100%')
+                            actionButton(
+                              inputId = ns("Simulate.alpha"), 
+                              "Simulate!", 
+                              icon = icon("greater-than-equal", verify_fa = FALSE),
+                              width = '100%'),
                      )
                      
                    ), 
@@ -63,14 +76,34 @@ mod_Alpha_Lattice_ui <- function(id){
       
       mainPanel(
         width = 8,
-        tabsetPanel(
-          tabPanel("Alpha Lattice Field Book", shinycssloaders::withSpinner(DT::DTOutput(ns("ALPHA.output")), type = 5))
+        fluidRow(
+          tabsetPanel(
+            tabPanel("Field Layout",
+                     
+                     # hidden .csv download button
+                     shinyjs::useShinyjs(),
+                     shinyjs::hidden(downloadButton(ns("downloadCsv.alpha"), 
+                                    label =  "Excel",
+                                    icon = icon("file-csv"), 
+                                    width = '10%',
+                                    style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
+                     
+                     shinycssloaders::withSpinner(
+                       plotly::plotlyOutput(ns("random_layout"), width = "98%", height = "550px"),type = 5
+                     ),
+                     br(),
+                     column(12, uiOutput(ns("well_panel_layout")))
+            ),
+            tabPanel("Field Book", 
+                     shinycssloaders::withSpinner(DT::DTOutput(ns("ALPHA_fieldbook")), type = 5)
+            )
+          )
         )
       )
     )
   )
 }
-    
+
 #' Alpha_Lattice Server Functions
 #'
 #' @noRd 
@@ -78,28 +111,67 @@ mod_Alpha_Lattice_server <- function(id){
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    getData.alpha <- reactive({
-      req(input$file.alpha)
-      inFile <- input$file.alpha
-      dataUp.alpha <- load_file(name = inFile$name, path = inFile$datapat, sep = input$sep.alpha)
-      return(list(dataUp.alpha = dataUp.alpha))
-    })
+    # for showing .csv button on run
+    shinyjs::useShinyjs()
     
-    get_tALPHA <- reactive({
-      if(is.null(input$file.alpha)) {
-        req(input$t.alpha)
-        t_alpha <- input$t.alpha
-      }else {
+    init_data_alpha <- reactive({
+      if (input$owndata_alpha == "Yes") {
         req(input$file.alpha)
-        t_alpha <- nrow(getData.alpha()$dataUp.alpha)
+        inFile <- input$file.alpha
+        data_ingested <- load_file(name = inFile$name,
+                                   path = inFile$datapat,
+                                   sep = input$sep.alpha,
+                                   check = TRUE, design = "alpha")
+        
+        if (names(data_ingested) == "dataUp") {
+          data_up <- data_ingested$dataUp
+          data_up <- as.data.frame(data_up[,1:2])
+          data_alpha <- na.omit(data_up)
+          colnames(data_alpha) <- c("ENTRY", "NAME")
+          treatments = nrow(data_alpha)
+          return(list(data_alpha = data_alpha, treatments = treatments))
+        } else if (names(data_ingested) == "bad_format") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Invalid file; Please upload a .csv file.", 
+            type = "error")
+          return(NULL)
+        } else if (names(data_ingested) == "duplicated_vals") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Check input file for duplicate values.", 
+            type = "error")
+          return(NULL)
+        } else if (names(data_ingested) == "missing_cols") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Data input needs at least two columns: ENTRY and NAME",
+            type = "error")
+          return(NULL)
+        }
+      } else {
+        req(input$t.alpha)
+        nt <- as.numeric(input$t.alpha)
+        df <- data.frame(list(ENTRY = 1:nt, NAME = paste0("G-", 1:nt)))
+        colnames(df) <- c("ENTRY", "NAME")
+        data_alpha <- df
+        treatments = nrow(data_alpha)
+        return(list(data_alpha = data_alpha, treatments = treatments))
       }
-      return(list(t_alpha = t_alpha))
     })
     
-    observeEvent(get_tALPHA()$t_alpha, {
-      req(get_tALPHA()$t_alpha)
-      
-      t <- as.numeric(get_tALPHA()$t_alpha)
+    
+    list_to_observe <- reactive({
+      req(init_data_alpha())
+      list(
+        entry_list = input$owndata_alpha,
+        entries = init_data_alpha()$treatments
+      )
+    })
+    
+    observeEvent(list_to_observe(), {
+      req(init_data_alpha())
+      t <- as.numeric(init_data_alpha()$treatments)
       if (numbers::isPrime(t)) {
         w <- 1
         k <- "No Options Available"
@@ -108,20 +180,68 @@ mod_Alpha_Lattice_server <- function(id){
         k <- k[2:(length(k) - 1)]
         w <- 2
       }
-
-      updateSelectInput(session = session, inputId = 'k.alpha', label = "Input # of Plots per IBlock:",
-                        choices = k, selected = k[1])
-
+      
+      if (length(k) > 2) {
+        selected <- k[ceiling(length(k)/2)]
+      } else selected <- k[1]
+      
+      updateSelectInput(session = session, inputId = 'k.alpha', 
+                        label = "Input # of Plots per IBlock:",
+                        choices = k, selected = selected)
     })
     
+    get_data_alpha <- reactive({
+      if (is.null(init_data_alpha())) {
+        shinyalert::shinyalert(
+          "Error!!", 
+          "Check input file and try again!", 
+          type = "error")
+        return(NULL)
+      } else return(init_data_alpha())
+    }) %>%
+      bindEvent(input$RUN.alpha)
     
-    entryListFormat_ALPHA <- data.frame(ENTRY = 1:9, 
+    alpha_inputs <- reactive({
+      req(get_data_alpha())
+      req(input$k.alpha)
+      req(input$r.alpha)
+      req(input$plot_start.alpha)
+      req(input$Location.alpha)
+      req(input$myseed.alpha)
+      req(input$l.alpha)
+      if (input$k.alpha == "No Options Available") {
+        shinyalert::shinyalert(
+          "Error!!", 
+          "No options for this combination of treatments!", 
+          type = "error")
+        return(NULL)
+      } 
+      sites <- as.numeric(input$l.alpha)
+      r.alpha <- as.numeric(input$r.alpha)
+      k.alpha <- as.numeric(input$k.alpha)
+      treatments <- as.numeric(get_data_alpha()$treatments)
+      plot_startreatments <- as.vector(unlist(strsplit(input$plot_start.alpha, ",")))
+      plot_start <- as.numeric(plot_startreatments)
+      site_names <-  as.vector(unlist(strsplit(input$Location.alpha, ",")))
+      seed <- as.numeric(input$myseed.alpha)
+      return(list(r = r.alpha, 
+                  k = k.alpha, 
+                  t = treatments, 
+                  plot_start = plot_start, 
+                  sites = sites,
+                  site_names = site_names,
+                  seed = seed))
+    }) %>%
+      bindEvent(input$RUN.alpha)
+
+
+    entryListFormatreatments <- data.frame(ENTRY = 1:9, 
                                         NAME = c(paste("Genotype", LETTERS[1:9], sep = "")))
     entriesInfoModal_ALPHA <- function() {
       modalDialog(
         title = div(tags$h3("Important message", style = "color: red;")),
         h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
-        renderTable(entryListFormat_ALPHA,
+        renderTable(entryListFormatreatments,
                     bordered = TRUE,
                     align = 'c',
                     striped = TRUE),
@@ -146,149 +266,309 @@ mod_Alpha_Lattice_server <- function(id){
     
 
     ALPHA_reactive <- eventReactive(input$RUN.alpha, {
-      
-      req(input$k.alpha)
-      req(input$myseed.alpha)
-      req(input$plot_start.alpha)
-      req(input$Location.alpha)
-      req(input$l.alpha)
-      req(input$r.alpha)
-      r.alpha <- as.numeric(input$r.alpha)
-      k.alpha <- as.numeric(input$k.alpha)
+      req(get_data_alpha())
+      req(alpha_inputs())
 
-      plot_start.alpha <- as.vector(unlist(strsplit(input$plot_start.alpha, ",")))
-      plot_start.alpha <- as.numeric(plot_start.alpha)
-      loc <-  as.vector(unlist(strsplit(input$Location.alpha, ",")))
+      # show .csv download button when run
+      shinyjs::show(id = "downloadCsv.alpha")
+    
+      data_alpha <- get_data_alpha()$data_alpha
       
-      if (input$owndata_alpha == "Yes") {
-        t.alpha <- as.numeric(get_tALPHA()$t_alpha)
-        data.alpha <- as.data.frame(getData.alpha()$dataUp.alpha)
-        if (ncol(data.alpha) < 2) shiny::validate("Data input needs at least two columns with: ENTRY and NAME.")
-        data_alpha <- as.data.frame(data.alpha[,c(1,2)])
-      }else {
-        req(input$t.alpha)
-        t.alpha <- as.numeric(input$t.alpha)
-        data_alpha <- NULL
+      if (alpha_inputs()$r < 2) {
+        shinyalert::shinyalert(
+          "Error!!", 
+          "Alpha Lattice Design needs at least 2 replicates.", 
+          type = "error")
+        return(NULL)
       }
-      seed.alpha <- as.numeric(input$myseed.alpha)
-      l.alpha <- as.numeric(input$l.alpha)
-      if (r.alpha < 2) validate("Alpha Design needs at least 2 replicates.")
       
+      alpha_lattice(
+        t = alpha_inputs()$t, 
+        k = alpha_inputs()$k, 
+        r = alpha_inputs()$r, 
+        l = alpha_inputs()$sites, 
+        plotNumber = alpha_inputs()$plot_start, 
+        seed = alpha_inputs()$seed,
+        locationNames = alpha_inputs()$site_names, 
+        data = data_alpha
+      )
+    })
+    
+    upDateSites <- reactive({
+      req(alpha_inputs())
+      locs <- alpha_inputs()$sites
+      sites <- 1:locs
+      return(list(sites = sites))
+    })
+    
+    
+    output$well_panel_layout <- renderUI({
+      req(ALPHA_reactive()$fieldBook)
+      df <- ALPHA_reactive()$fieldBook
+      locs <- length(levels(as.factor(df$LOCATION)))
+      repsAlpha <- length(levels(as.factor(df$REP)))
+      if ((repsAlpha >= 4 & repsAlpha %% 2 == 0) | (repsAlpha >= 4 & sqrt(repsAlpha) %% 1 == 0)) {
+        stacked <- c("Vertical Stack Panel" = "vertical", "Horizontal Stack Panel" = "horizontal",  
+                       "Grid Panel" = "grid_panel")
+      } else {
+        stacked <- c("Vertical Stack Panel" = "vertical", "Horizontal Stack Panel" = "horizontal")
+      }
+      obj <- ALPHA_reactive()
+      allBooks <- plot_layout(x = obj, layout = 1, stacked = "vertical")$newBooks
+      nBooks <- length(allBooks)
+      layoutOptions <- 1:nBooks
+      wellPanel(
+        fluidPage(
+          column(3,
+                 radioButtons(ns("typlotALPHA"), "Type of Plot:",
+                              c("Entries/Treatments" = 1,
+                                "Plots" = 2,
+                                "Heatmap" = 3), selected = 1)
+          ),
+          column(3,
+                 selectInput(inputId = ns("stackedAlpha"),
+                             label = "Reps layout:", 
+                             choices = stacked)
+          ),
+          column(2, 
+                 selectInput(inputId = ns("layoutO"), 
+                             label = "Layout option:",
+                             choices = layoutOptions, 
+                             selected = 1)
+          ),
+          column(2, 
+                 selectInput(inputId = ns("locLayout"),
+                             label = 'Location:', 
+                             choices = as.numeric(upDateSites()$sites))
+          )
+        )
+      )
+    })
+    
+    observeEvent(input$stackedAlpha, {
+      req(input$stackedAlpha)
+      obj <- ALPHA_reactive()
+      allBooks <- plot_layout(x = obj, 
+                              layout = 1, 
+                              stacked = input$stackedAlpha)$newBooks
+      nBooks <- length(allBooks)
+      NewlayoutOptions <- 1:nBooks
+      updateSelectInput(session = session, inputId = 'layoutO',
+                        label = "Layout option:",
+                        choices = NewlayoutOptions,
+                        selected = 1
+      )
+    })
+    
+    reset_selection <- reactiveValues(reset = 0)
+    
+    observeEvent(input$stackedAlpha, {
+      reset_selection$reset <- 1
+    })
+    
+    observeEvent(input$layoutO, {
+      reset_selection$reset <- 0
+    })
+    
+    reactive_layoutAlpha <- reactive({
+      req(input$stackedAlpha)
+      req(input$planter_mov_alpha)
+      req(input$layoutO)
+      req(ALPHA_reactive())
+      obj <- ALPHA_reactive()
       
-      if(k.alpha == "No Options Available") shiny::validate("No Options Available.")
-      s <- t.alpha / k.alpha
-      if (s %% 1 != 0) validate("No Options Available.")
-
-      alpha_lattice(t = t.alpha, k = k.alpha, r = r.alpha, l = l.alpha, 
-                    plotNumber = plot_start.alpha, 
-                    seed = seed.alpha,
-                    locationNames = loc, 
-                    data = data_alpha) 
+      if (reset_selection$reset == 1) {
+        opt <- 1
+      } else opt <- as.numeric(input$layoutO)
       
+      locSelected <- as.numeric(input$locLayout)
+      try(plot_layout(x = obj, 
+                      layout = opt, 
+                      planter = input$planter_mov_alpha, 
+                      l = locSelected, 
+                      stacked = input$stackedAlpha), 
+          silent = TRUE)
     })
     
     
     valsALPHA <- reactiveValues(maxV.alpha = NULL, minV.alpha = NULL, trail.alpha = NULL)
-
-      simuModal.alpha <- function(failed = FALSE) {
-        modalDialog(
-          selectInput(inputId = ns("trailsALPHA"), label = "Select One:", choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
-          conditionalPanel("input.trailsALPHA == 'Other'", ns = ns,
-                           textInput(inputId = ns("OtherALPHA"), label = "Input the Trial Name:", value = NULL)
+    
+    simuModal.alpha <- function(failed = FALSE) {
+      modalDialog(
+        selectInput(inputId = ns("trailsALPHA"), label = "Select One:", choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
+        conditionalPanel("input.trailsALPHA == 'Other'", ns = ns,
+                         textInput(inputId = ns("OtherALPHA"), label = "Input the Trial Name:", value = NULL)
+        ),
+        fluidRow(
+          column(6,
+                 numericInput(inputId = ns("min.alpha"), "Input the min value", value = NULL)
           ),
-          fluidRow(
-            column(6,
-                   numericInput(inputId = ns("min.alpha"), "Input the min value", value = NULL)
-            ),
-            column(6,
-                   numericInput(inputId = ns("max.alpha"), "Input the max value", value = NULL)
-     
-            )
-     
-          ),
-     
-          if (failed)
-            div(tags$b("Invalid input of data max and min", style = "color: red;")),
-     
-          footer = tagList(
-            modalButton("Cancel"),
-            actionButton(inputId = ns("ok.alpha"), "GO")
+          column(6,
+                 numericInput(inputId = ns("max.alpha"), "Input the max value", value = NULL)
+                 
           )
-     
+          
+        ),
+        
+        if (failed)
+          div(tags$b("Invalid input of data max and min", style = "color: red;")),
+        
+        footer = tagList(
+          modalButton("Cancel"),
+          actionButton(inputId = ns("ok.alpha"), "GO")
         )
-     
-      }
-     
-      observeEvent(input$Simulate.alpha, {
-        req(input$k.alpha)
-        req(input$r.alpha)
-        req(ALPHA_reactive()$fieldBook)
+        
+      )
+      
+    }
+    
+    observeEvent(input$Simulate.alpha, {
+      req(input$k.alpha)
+      req(input$r.alpha)
+      req(reactive_layoutAlpha()$fieldBookXY)
+      showModal(
+        shinyjqui::jqui_draggable(
+          simuModal.alpha()
+        )
+      )
+    })
+    
+    observeEvent(input$ok.alpha, {
+      req(input$max.alpha, input$min.alpha)
+      if (input$max.alpha > input$min.alpha && input$min.alpha != input$max.alpha) {
+        valsALPHA$maxV.alpha <- input$max.alpha
+        valsALPHA$minV.alpha <- input$min.alpha
+        if(input$trailsALPHA == "Other") {
+          req(input$OtherALPHA)
+          if(!is.null(input$OtherALPHA)) {
+            valsALPHA$trail.alpha <- as.character(input$OtherALPHA)
+          }else showModal(simuModal.alpha(failed = TRUE))
+        }else {
+          valsALPHA$trail.alpha <- as.character(input$trailsALPHA)
+        }
+        removeModal()
+      }else {
         showModal(
           shinyjqui::jqui_draggable(
-            simuModal.alpha()
+            simuModal.alpha(failed = TRUE)
           )
         )
-      })
-     
-      observeEvent(input$ok.alpha, {
-        req(input$max.alpha, input$min.alpha)
-        if (input$max.alpha > input$min.alpha && input$min.alpha != input$max.alpha) {
-          valsALPHA$maxV.alpha <- input$max.alpha
-          valsALPHA$minV.alpha <- input$min.alpha
-          if(input$trailsALPHA == "Other") {
-            req(input$OtherALPHA)
-            if(!is.null(input$OtherALPHA)) {
-              valsALPHA$trail.alpha <- as.character(input$OtherALPHA)
-            }else showModal(simuModal.alpha(failed = TRUE))
-          }else {
-            valsALPHA$trail.alpha <- as.character(input$trailsALPHA)
-          }
-          removeModal()
-        }else {
-          showModal(
-            shinyjqui::jqui_draggable(
-              simuModal.alpha(failed = TRUE)
-            )
-          )
-        }
-      })
-     
-     
-      simuDataALPHA <- reactive({
-        req(ALPHA_reactive()$fieldBook)
-        if(!is.null(valsALPHA$maxV.alpha) && !is.null(valsALPHA$minV.alpha) && !is.null(valsALPHA$trail.alpha)) {
-          max <- as.numeric(valsALPHA$maxV.alpha)
-          min <- as.numeric(valsALPHA$minV.alpha)
-          df.alpha <- ALPHA_reactive()$fieldBook
-          cnamesdf.alpha <- colnames(df.alpha)
-          df.alpha <- norm_trunc(a = min, b = max, data = df.alpha)
-          colnames(df.alpha) <- c(cnamesdf.alpha[1:(ncol(df.alpha) - 1)], valsALPHA$trail.alpha)
-          a <- ncol(df.alpha)
-        }else {
-          df.alpha <-  ALPHA_reactive()$fieldBook
-          a <- ncol(df.alpha)
-        }
-        return(list(df = df.alpha, a = a))
-      })
-     
-     
-      output$ALPHA.output <- DT::renderDataTable({
-        req(input$k.alpha)
-        k.alpha <- input$k.alpha
-        if (k.alpha == "No Options Available") {
-          validate("No options for these amout of treatments ):")
-        }
-        req(simuDataALPHA()$df)
-        df <- simuDataALPHA()$df
-        a <- as.numeric(simuDataALPHA()$a)
-        options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                  scrollX = TRUE, scrollY = "500px"))
-     
-        DT::datatable(df, rownames = FALSE, options = list(
-          columnDefs = list(list(className = 'dt-center', targets = "_all"))))
-     
-      })
+      }
+    })
     
+    simuDataALPHA <- reactive({
+      set.seed(input$myseed.alpha)
+      req(reactive_layoutAlpha())
+      if(!is.null(valsALPHA$maxV.alpha) && !is.null(valsALPHA$minV.alpha) && !is.null(valsALPHA$trail.alpha)) {
+        max <- as.numeric(valsALPHA$maxV.alpha)
+        min <- as.numeric(valsALPHA$minV.alpha)
+        df.alpha <- reactive_layoutAlpha()$allSitesFieldbook
+        cnamesdf.alpha <- colnames(df.alpha)
+        df.alpha <- norm_trunc(a = min, b = max, data = df.alpha)
+        colnames(df.alpha) <- c(cnamesdf.alpha[1:(ncol(df.alpha) - 1)], valsALPHA$trail.alpha)
+        a <- ncol(df.alpha)
+      }else {
+        df.alpha <- reactive_layoutAlpha()$allSitesFieldbook
+        a <- ncol(df.alpha)
+      }
+      return(list(df = df.alpha, a = a))
+    })
+    
+    heatmapInfoModal_ALPHA <- function() {
+      modalDialog(
+        title = div(tags$h3("Important message", style = "color: red;")),
+        h4("Simulate some data to see a heatmap!"),
+        easyClose = TRUE
+      )
+    }
+    
+    locNum <- reactive(
+      return(as.numeric(input$locLayout))
+    )
+    
+    heatmap_obj <- reactive({
+      req(simuDataALPHA()$df)
+      if (ncol(simuDataALPHA()$df) == 11) {
+        locs <- factor(simuDataALPHA()$df$LOCATION, levels = unique(simuDataALPHA()$df$LOCATION))
+        locLevels <- levels(locs)
+        df = subset(simuDataALPHA()$df, LOCATION == locLevels[locNum()])
+        loc <- levels(factor(df$LOCATION))
+        trail <- as.character(valsALPHA$trail.alpha)
+        label_trail <- paste(trail, ": ")
+        heatmapTitle <- paste("Heatmap for ", trail)
+        new_df <- df %>%
+          dplyr::mutate(text = paste0("Site: ", loc, "\n", 
+                                      "Row: ", df$ROW, "\n", 
+                                      "Col: ", df$COLUMN, "\n", 
+                                      "Entry: ", df$ENTRY, "\n", 
+                                      label_trail, round(df[,11],2)))
+        w <- as.character(valsALPHA$trail.alpha)
+        new_df$ROW <- as.factor(new_df$ROW) # Set up ROWS as factors
+        new_df$COLUMN <- as.factor(new_df$COLUMN) # Set up COLUMNS as factors
+        p1 <- ggplot2::ggplot(new_df, ggplot2::aes(x = new_df[,5], 
+                                                   y = new_df[,4],
+                                                   fill = new_df[,11], 
+                                                   text = text)) +
+          ggplot2::geom_tile() +
+          ggplot2::xlab("COLUMN") +
+          ggplot2::ylab("ROW") +
+          ggplot2::labs(fill = w) +
+          viridis::scale_fill_viridis(discrete = FALSE) +
+          ggplot2::ggtitle(heatmapTitle) +
+          ggplot2::theme_minimal() + # I added this option 
+          ggplot2::theme(plot.title = ggplot2::element_text(family="Calibri", 
+                                                            face="bold",
+                                                            size=13, 
+                                                            hjust=0.5))
+        
+        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1250, height = 560)
+        return(p2)
+      } else {
+        showModal(
+          shinyjqui::jqui_draggable(
+            heatmapInfoModal_ALPHA()
+          )
+        )
+        return(NULL)
+        }
+    })
+    
+    output$random_layout <- plotly::renderPlotly({
+      req(reactive_layoutAlpha())
+      req(ALPHA_reactive())
+      req(input$typlotALPHA)
+      if (input$typlotALPHA == 1) {
+        reactive_layoutAlpha()$out_layout
+      } else if (input$typlotALPHA == 2) {
+        reactive_layoutAlpha()$out_layoutPlots
+      } else {
+        req(heatmap_obj())
+        heatmap_obj()
+      }
+    })
+    
+    output$ALPHA_fieldbook <- DT::renderDataTable({
+      req(simuDataALPHA()$df)
+      df <- simuDataALPHA()$df
+      df$LOCATION <- as.factor(df$LOCATION)
+      df$PLOT <- as.factor(df$PLOT)
+      df$ROW <- as.factor(df$ROW)
+      df$COLUMN <- as.factor(df$COLUMN)
+      df$REP <- as.factor(df$REP)
+      df$IBLOCK <- as.factor(df$IBLOCK)
+      df$UNIT <- as.factor(df$UNIT)
+      df$ENTRY <- as.factor(df$ENTRY)
+      a <- as.numeric(simuDataALPHA()$a)
+      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
+                                scrollX = TRUE, scrollY = "500px"))
+      
+      DT::datatable(df,
+                    filter = 'top',
+                    rownames = FALSE, 
+                    options = list(
+        columnDefs = list(list(className = 'dt-center', targets = "_all"))))
+      
+    })
     
     # Downloadable csv of selected dataset ----
     output$downloadData.alpha <- downloadHandler(
@@ -301,14 +581,30 @@ mod_Alpha_Lattice_server <- function(id){
         write.csv(df, file, row.names = FALSE)
       }
     )
-    #Update_k = Update_k
-    #return(list(ALPHA.output = ALPHA.output))
+    
+    csv_data <- reactive({
+      req(simuDataALPHA()$df)
+      df <- simuDataALPHA()$df
+      req(input$typlotALPHA)
+      if (input$typlotALPHA == 2) {
+        export_layout(df, locNum(), TRUE)
+      } else {
+        export_layout(df, locNum())
+      }
+    })
+    
+    # Downloadable csv of selected dataset ----
+    output$downloadCsv.alpha <- downloadHandler(
+      filename = function() {
+        loc <- paste("Alpha_Lattice_Layout", sep = "")
+        paste(loc, Sys.Date(), ".csv", sep = "")
+      },
+      content = function(file) {
+        df <- as.data.frame(csv_data()$file)
+        write.csv(df, file, row.names = FALSE)
+      }
+    )
+    
     
   })
 }
-    
-## To be copied in the UI
-# mod_Alpha_Lattice_ui("Alpha_Lattice_ui_1")
-    
-## To be copied in the server
-# mod_Alpha_Lattice_server("Alpha_Lattice_ui_1")

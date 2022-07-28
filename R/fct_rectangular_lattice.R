@@ -91,7 +91,8 @@ rectangular_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber 
     }else if ((length(t) > 1)) {
       nt <- length(t)
     }
-    data_alpha <- NULL
+    df <- data.frame(list(ENTRY = 1:nt, TREATMENT = paste0("G-", 1:nt)))
+    data_alpha <- df
   }else if (!is.null(data)) {
     if (is.null(t) || is.null(r) || is.null(k) || is.null(l)) {
       shiny::validate('Some of the basic design parameters are missing (t, k, r).')
@@ -107,6 +108,7 @@ rectangular_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber 
     nt <- length(TRT)
     data_alpha <- data_up
   }
+  if (!is.null(locationNames)) locationNames <- toupper(locationNames)
   s <- nt / k
   if (s %% 1 != 0 || k != (s - 1) || nt != s*(s - 1)) {
     shiny::validate('rectangular_lattice() requires t = s*(s-1), where s is the iBlock numbers per replicate.')
@@ -124,7 +126,7 @@ rectangular_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber 
 
   infoDesign <- list(Reps = r, iBlocks = s, NumberTreatments = nt, NumberLocations = l, 
                      Locations = locationNames, seed = seed, lambda = lambda,
-                     idDesign = 11)
+                     id_design = 11)
   output <- list(infoDesign = infoDesign, fieldBook = OutRectagular_Lattice)
   class(output) <- "FielDHub"
   return(invisible(output))

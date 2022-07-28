@@ -32,7 +32,8 @@
 #'   \item \code{infoDesign} is a list with information on the design parameters.
 #'   \item \code{layoutRandom} is a matrix with the randomization layout.
 #'   \item \code{plotNumber} is a matrix with the layout plot number.
-#'   \item \code{data_entry} is a data frame with the data input.
+#'   \item \code{dataEntry} is a data frame with the data input.
+#'   \item \code{genEntries} is a list with the entries for replicated and no replicated part.
 #'   \item \code{fieldBook} is a data frame with field book design. This includes the index (Row, Column).
 #' }
 #'
@@ -82,9 +83,9 @@
 #' head(SpatpREP2$fieldBook,10)
 #' 
 #' @export
-partially_replicated <- function(nrows = NULL, ncols = NULL, repGens = NULL, repUnits = NULL, planter = "serpentine", 
-                                 l = 1, plotNumber = 101, seed = NULL, exptName = NULL, locationNames = NULL, 
-                                 data = NULL) {
+partially_replicated <- function(nrows = NULL, ncols = NULL, repGens = NULL, repUnits = NULL, 
+                                 planter = "serpentine", l = 1, plotNumber = 101, seed = NULL, 
+                                 exptName = NULL, locationNames = NULL, data = NULL) {
   
   if (all(c("serpentine", "cartesian") != planter)) {
     base::stop('Input "planter" is unknown. Please, choose one: "serpentine" or "cartesian"')
@@ -100,12 +101,29 @@ partially_replicated <- function(nrows = NULL, ncols = NULL, repGens = NULL, rep
     if (sum(repGens * repUnits) != nrows*ncols) base::stop("Data input does not match with field dimentions.")
   }
   
-  if (is.null(plotNumber)) {
-    plotNumber <- 1001
-    warning("Since plotNumber was missing, it was set up to default value 1001.")
-  }else if(!is.numeric(plotNumber)) {
-    stop("Input plotNumber needs to be an integer or a numeric vector.")
+  if(!is.numeric(plotNumber) && !is.integer(plotNumber)) {
+    stop("plotNumber should be an integer or a numeric vector.")
   }
+  
+  if (any(plotNumber %% 1 != 0)) {
+    stop("plotNumber should be integers.")
+  }
+  
+  if (!is.null(l)) {
+    if (is.null(plotNumber) || length(plotNumber) != l) {
+      if (l > 1){
+        plotNumber <- seq(1001, 1000*(l+1), 1000)
+        message(cat("Warning message:", "\n", 
+                "Since plotNumber was missing, it was set up to default value of: ", plotNumber, 
+                "\n", "\n"))
+      } else {
+        plotNumber <- 1001
+        message(cat("Warning message:", "\n", 
+        "Since plotNumber was missing, it was set up to default value of: ", plotNumber, 
+        "\n", "\n"))
+      } 
+    }
+  }else stop("Number of locations/sites is missing")
   
   if (!is.null(data)) {
     arg1 <- list(nrows, ncols, l);arg2 <- c(nrows, ncols, l)
@@ -134,7 +152,7 @@ partially_replicated <- function(nrows = NULL, ncols = NULL, repGens = NULL, rep
       checksEntries <- as.vector(my_REPS[,1])
       checks <- length(checksEntries)
       lines <- sum(my_GENS$REPS)
-  }else if (is.null(data)) {
+  } else if (is.null(data)) {
     if (length(repGens) != length(repUnits)) shiny::validate("Input repGens and repUnits need to be of the same length.")
     if (sum(repGens * repUnits) != nrows*ncols) shiny::validate("Data input does not match with field dimentions specified.")
     ENTRY <- 1:sum(repGens)
@@ -145,74 +163,112 @@ partially_replicated <- function(nrows = NULL, ncols = NULL, repGens = NULL, rep
                             REPS = REPS))
     colnames(data) <- c("ENTRY", "NAME", "REPS")
   }
-  
   if (is.null(seed)) {seed <- runif(1, min = -10000, max = 10000)}
   set.seed(seed)
-  
-  prep <- pREP(nrows = nrows, ncols = ncols, RepChecks = NULL, checks = NULL, Fillers = 0,
-               seed = seed, optim = TRUE, niter = 1000, data = data)
-  
-  BINAY_CHECKS <- prep$binary.field
-  
-  if (!is.null(exptName)) {
-    Name_expt <- exptName 
-  }else Name_expt <- "20ExptpREP"
-  
-  split_name_spat <- function(){
-    split_names <- base::matrix(data = Name_expt, nrow = nrows, ncol = ncols, byrow = TRUE)
-    return(list(my_names = split_names))
-  }
-  
-  plot_number_spat <- function(){
-    datos_name <- split_name_spat()$my_names
-    plot_n_start <- plotNumber
-    my_split_plot_nub <- plot_number(movement_planter = planter, n_blocks = 1, n_rows = nrows, n_cols = ncols,
-                                     plot_n_start = plot_n_start, datos = datos_name, expe_name = Name_expt, 
-                                     ByRow = FALSE, my_row_sets = NULL, ByCol = TRUE, my_col_sets = ncols)
-  }
-  
-  if (is.null(locationNames)) locationNames <- 1:l
-  plot_num <- plot_number_spat()$w_map_letters1
-  plot_num <- apply(plot_num, c(1,2), as.numeric)
-  export_spat <- function(){
-    loc <- locationNames
+  field_book_sites <- vector(mode = "list", length = l)
+  layout_random_sites <- vector(mode = "list", length = l)
+  plot_numbers_sites <- vector(mode = "list", length = l)
+  col_checks_sites <- vector(mode = "list", length = l)
+  for (sites in 1:l) { 
+    prep <- pREP(nrows = nrows, ncols = ncols, RepChecks = NULL, checks = NULL, Fillers = 0,
+                 seed = seed, optim = TRUE, niter = 1000, data = data)
+    dataInput <- prep$gen.list
+    BINAY_CHECKS <- prep$binary.field
     random_entries_map <- as.matrix(prep$field.map)
-    plot_num <- as.matrix(plot_num)
-    Col_checks <- as.matrix(BINAY_CHECKS)
-    my_names <- as.matrix(split_name_spat()$my_names)
-    year <- format(Sys.Date(), "%Y")
-    my_data_VLOOKUP <- prep$gen.list
-    results_to_export <- list(random_entries_map, plot_num, Col_checks, my_names)
-    final_expt_export <- export_design(G = results_to_export, movement_planter =  planter,
-                                       location = loc, Year = year, data_file = my_data_VLOOKUP,
-                                       reps = FALSE)
+    genEntries <- prep$gen.entries
     
-    return(list(final_expt = final_expt_export))
+    if (!is.null(exptName)) {
+      Name_expt <- exptName[1]
+    }else Name_expt <- "Expt1"
     
+    split_name_spat <- function(){
+      split_names <- base::matrix(data = Name_expt, nrow = nrows, ncol = ncols, byrow = TRUE)
+      return(list(my_names = split_names))
+    }
+    
+    plot_number_spat <- function() {
+      datos_name <- split_name_spat()$my_names
+      plot_n_start <- plotNumber[sites]
+      plot_number(
+        planter = planter,
+        plot_number_start = plot_n_start,
+        layout_names = datos_name,
+        expe_names = Name_expt,
+        fillers = 0
+      )
+    }
+    
+    if (is.null(locationNames) || length(locationNames) != l) locationNames <- 1:l
+    plot_num <- plot_number_spat()$w_map_letters1
+    plot_number_L <- apply(plot_num, c(1,2), as.numeric)
+    export_spat <- function() {
+      loc <- locationNames
+      random_entries_map <- as.matrix(prep$field.map)
+      plot_number_L <- as.matrix(plot_number_L)
+      Col_checks <- as.matrix(BINAY_CHECKS)
+      my_names <- as.matrix(split_name_spat()$my_names)
+      year <- format(Sys.Date(), "%Y")
+      my_data_VLOOKUP <- prep$gen.list
+      results_to_export <- list(random_entries_map, 
+                                plot_number_L, 
+                                Col_checks, 
+                                my_names)
+      final_expt_export <- export_design(
+        G = results_to_export, 
+        movement_planter =  planter,
+        location = loc[sites], 
+        Year = year, 
+        data_file = my_data_VLOOKUP,
+        reps = FALSE
+      )
+      return(list(final_expt = final_expt_export))
+    }
+    
+    fieldBook <- as.data.frame(export_spat()$final_expt)
+    fieldBook <- fieldBook[,-11]
+    ID <- 1:nrow(fieldBook)
+    fieldBook <- fieldBook[, c(6,7,9,4,2,3,5,1,10)]
+    fieldBook <- cbind(ID, fieldBook)
+    colnames(fieldBook)[10] <- "TREATMENT"
+    layoutR = prep$field.map
+    rownames(layoutR) <- paste("Row", nrow(layoutR):1, sep = "")
+    colnames(layoutR) <- paste("Col", 1:ncol(layoutR), sep = "")
+    rownames(plot_num) <- paste("Row", nrow(plot_num):1, sep = "")
+    colnames(plot_num) <- paste("Col", 1:ncol(plot_num), sep = "")
+    
+    field_book_sites[[sites]] <- fieldBook
+    layout_random_sites[[sites]] <- layoutR
+    plot_numbers_sites[[sites]] <- plot_number_L
+    col_checks_sites[[sites]] <- as.matrix(BINAY_CHECKS)
   }
   
-  fieldBook <- as.data.frame(export_spat()$final_expt)
-  fieldBook <- fieldBook[,-11]
-  ID <- 1:nrow(fieldBook)
-  fieldBook <- fieldBook[, c(6,7,9,4,2,3,5,1,10)]
-  fieldBook <- cbind(ID, fieldBook)
-  colnames(fieldBook)[10] <- "TREATMENT"
-  layoutR = prep$field.map
-  rownames(layoutR) <- paste("Row", nrow(layoutR):1, sep = "")
-  colnames(layoutR) <- paste("Col", 1:ncol(layoutR), sep = "")
-  rownames(plot_num) <- paste("Row", nrow(plot_num):1, sep = "")
-  colnames(plot_num) <- paste("Col", 1:ncol(plot_num), sep = "")
+  field_book <- dplyr::bind_rows(field_book_sites)
   
   RepChecks <- prep$reps.checks
   EntryChecks <- prep$entryChecks
   Checks <- length(EntryChecks)
-  infoDesign <- list(Greps = Checks, RepGens = RepChecks, EntryReps = EntryChecks, 
-                     idDesign = 13)
+  
+  if (sum(genEntries[[2]]) == 0) {
+    rep_treatments <- 0
+  } else rep_treatments <- length(genEntries[[2]])
+  
+  infoDesign <- list(
+    rows = nrows,
+    columns = ncols,
+    treatments_with_reps = Checks,
+    treatments_with_no_reps = rep_treatments,
+    locations = l,
+    planter = planter,
+    seed = seed,
+    id_design = 13)
   output <- list(infoDesign = infoDesign, 
-                 layoutRandom = layoutR, 
-                 plotNumber = plot_num,
-                 data_entry = data,
-                 fieldBook = fieldBook)
+                 layoutRandom = layout_random_sites, 
+                 plotNumber = plot_numbers_sites,
+                 binaryField = col_checks_sites,
+                 dataEntry = dataInput,
+                 genEntries = genEntries,
+                 fieldBook = field_book)
+
   class(output) <- "FielDHub"
   return(invisible(output))
 }

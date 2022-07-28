@@ -1,6 +1,6 @@
 Package: FielDHub
 Title: A Shiny App for Design of Experiments in Life Sciences
-Version: 0.1.0
+Version: 1.2.0
 Authors@R: 
     c(person(given = "Didier",
              family = "Murillo",
@@ -22,6 +22,10 @@ Authors@R:
              family = "Aparicio",
              role = "ctb",
              email = "j.aparicio@cgiar.org"),
+      person(given = "Matthew",
+             family = "Seefeldt",
+             role = "ctb",
+             email = "matthew.seefeldt@ndsu.edu"),
       person(given = "Richard",
              family = "Horsley",
              role = "ctb",
@@ -37,10 +41,8 @@ Imports:
     config,
     golem,
     shiny (>= 1.6.0),
-    attempt,
-    DT,
-    glue,
     htmltools,
+    DT,
     shinythemes,
     turner,
     dplyr,
@@ -52,15 +54,24 @@ Imports:
     ggplot2,
     plotly,
     viridis,
-    shinyalert
+    shinyalert,
+    desplot,
+    shinyjs
 Encoding: UTF-8
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.1
 Author: Didier Murillo [cre, aut], Salvador Gezan [aut], Ana Heilman [ctb],
- Thomas Walk [ctb], Johan Aparicio [ctb], Richard Horsley [ctb], 
- North Dakota State University [cph]
+ Thomas Walk [ctb], Johan Aparicio [ctb], Matthew Seefeldt [ctb], 
+ Richard Horsley [ctb], North Dakota State University [cph]
 Maintainer: Didier Murillo <didier.murilloflorez@ndsu.edu>
-Suggests: testthat (>= 3.0.0), spelling, rlang
+Suggests: 
+    testthat (>= 3.0.0),
+    spelling,
+    rlang,
+    glue,
+    knitr,
+    rmarkdown
 Config/testthat/edition: 3
 URL: https://github.com/DidierMurilloF/FielDHub
 BugReports: https://github.com/DidierMurilloF/FielDHub/issues
 Language: en-US
+VignetteBuilder: knitr

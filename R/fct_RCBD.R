@@ -69,8 +69,9 @@
 #' 
 #'
 #' @export
-RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101, continuous = FALSE,
-                 planter = "serpentine", seed = NULL, locationNames = NULL,
+RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101, 
+                 continuous = FALSE, planter = "serpentine", 
+                 seed = NULL, locationNames = NULL,
                  data = NULL) {
   b <- reps
   if (all(c("serpentine", "cartesian") != planter)) {
@@ -89,9 +90,13 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101, continuous = FA
     } 
   }else {
     plotNumber <- seq(1001, 1000*(l+1), 1000)
-    warning("'plotNumber' was set up to its default value for each site.")
+    message(cat("Warning message:", "\n", 
+                "Since plotNumber was missing, it was set up to default value of: ",
+                plotNumber))
   }
-  if (!is.null(locationNames)) locationNames <- toupper(locationNames) else locationName <- 1:l
+  if (!is.null(locationNames)) {
+    locationNames <- toupper(locationNames)
+  } else locationName <- 1:l
   if (is.null(data)) {
     if (!is.null(t) & !is.null(b)) {
       if(length(t) == 1 & is.numeric(t)) {
@@ -124,7 +129,6 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101, continuous = FA
   }
   if (length(locationNames) != l) {
     locationNames <- paste("loc", 1:l, sep = "")
-    warning("Number of locations do not match with length of names of them provided.")
   }
   RCBD <- matrix(data = NA, nrow = b * l, ncol = nt, byrow = TRUE)
   RCBD.layout <- matrix(data = NA, nrow = b, ncol = 2, byrow = TRUE)
@@ -144,7 +148,10 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101, continuous = FA
     }
     RCBD.layout.loc[[i]] <- RCBD.layout
   }
-  plotNumber <- seriePlot.numbers(plot.number = plotNumber, reps = b, l = l, t = nt)
+  plotNumber <- seriePlot.numbers(plot.number = plotNumber, 
+                                  reps = b,
+                                  l = l, 
+                                  t = nt)
   p.number.loc <- setNames(vector(mode = "list", length = l),
                            paste0("Loc_", locationNames))
   if (!continuous) {
@@ -171,15 +178,17 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101, continuous = FA
     if (planter == "serpentine") {
       for (i in 1:l) {
         D <- plotNumber[[i]]
-        M <- matrix(data = D[i]:(D[i] + (nt * b - 1)), ncol = nt,
+        M <- matrix(data = D[1]:(D[1] + (nt * b - 1)), ncol = nt,
                                     nrow = b, byrow = TRUE)
         p.number.loc[[i]] <- serpentinelayout(M, opt = 2)
       }
     }else {
       for (i in 1:l) {
         D <- plotNumber[[i]]
-        p.number.loc[[i]] <- matrix(data = D[i]:(D[i] + (nt * b - 1)), ncol = nt,
-                                    nrow = b, byrow = TRUE)
+        p.number.loc[[i]] <- matrix(data = D[1]:(D[1] + (nt * b - 1)), 
+                                    ncol = nt,
+                                    nrow = b, 
+                                    byrow = TRUE)
       }
     }
   }
@@ -188,10 +197,13 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101, continuous = FA
   }else {
     p.number.loc1 <- p.number.loc[[1]]
   }
-  RCBD.output <- data.frame(list(LOCATION = rep(locationNames, each = nt * b), PLOT = as.vector(t(p.number.loc1)),
-                                 REP = rep(1:b, each = nt), TREATMENT = as.vector(t(RCBD))))
+  RCBD.output <- data.frame(list(LOCATION = rep(locationNames, each = nt * b), 
+                                 PLOT = as.vector(t(p.number.loc1)),
+                                 REP = rep(1:b, each = nt), 
+                                 TREATMENT = as.vector(t(RCBD))))
   
-  RCBD.output$LOCATION <- factor(RCBD.output$LOCATION, levels = as.character(unique(locationNames)))
+  RCBD.output$LOCATION <- factor(RCBD.output$LOCATION, 
+                                 levels = as.character(unique(locationNames)))
   RCBD.output <- RCBD.output[order(RCBD.output$LOCATION, RCBD.output$PLOT),]
   
   ID <- 1:nrow(RCBD.output)
@@ -202,10 +214,15 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101, continuous = FA
   
   plotNumber <- as.vector(unlist(plotNumber))
   
-  parameters = list(blocks = b, number.of.treatments = nt, treatments = mytreatments,
-                    locations = l, plotNumber = plotNumber, locationNames = locationNames,
-                    seed = seed, idDesign = 2)
-  output <- list(infoDesign = parameters, layoutRandom = RCBD.layout.loc,
+  parameters = list(blocks = b, 
+                    number.of.treatments = nt, 
+                    treatments = mytreatments,
+                    locations = l, 
+                    plotNumber = plotNumber, 
+                    locationNames = locationNames,
+                    seed = seed, id_design = 2)
+  output <- list(infoDesign = parameters, 
+                 layoutRandom = RCBD.layout.loc,
                  plotNumber = p.number.loc,
                  fieldBook = RCBD_output)
   class(output) <- "FielDHub"

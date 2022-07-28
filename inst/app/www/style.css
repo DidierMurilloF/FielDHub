@@ -1,12 +1,28 @@
 * {
-  margin: 0;
+  margin:0;
   padding:0;
   box-sizing: border-box;
 }
 
+.navbar>.container .navbar-brand, .navbar>.container-fluid .navbar-brand {
+  margin-left: auto;
+}
+
 html,body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  line-height: 1.7em;
+  line-height: 1.2em;
+  font-size: 14px;
+  line-height: 1.42857143;
+  color: #2c3e50;
+  background-color: #ffffff;
+}
+
+body::-webkit-scrollbar {
+  display: none;
+}
+
+.nav a {
+    font-size: 1.05em !important;
 }
 
 .navbar {
@@ -14,10 +30,6 @@ html,body {
   padding: 0;
 }
 
-.selectize-input {
-  height: 43px;
-}
- 
 li a {
   font-size: 20px;
 }
@@ -42,12 +54,14 @@ p {
 
 .text-primary1 {
   color: #ffc72a;
+  background: rgba(156, 137, 132, 0.55);
   font-size: 88px;
   font-weight: bold;
 }
 
 .text-primary2 {
   color: #0a5640;
+  background: rgba(156, 137, 132, 0.55);
   font-size: 88px;
   font-weight: bold;
 }
@@ -82,11 +96,13 @@ p {
 
 .btn {
   display: inline-block;
-  font-size: 18px;
+  height: 36px;
+  font-size: 14px;
   font-weight: bold;
   color: #474747;
   background: #95a5a6;
-  padding: 13px 20px;
+  /*padding: 13px 20px;*/
+  padding: 6px 12px;
   border: none;
   cursor: pointer;
 }
@@ -130,7 +146,7 @@ p {
 #showcase .showcase-content {
   color: #fff;
   text-align: center;
-  padding-top: 170px;
+  padding-top: 210px;
 }
 
 #showcase .showcase-content p {
@@ -252,4 +268,41 @@ a {
   background: #444;
   color: #fff;
   padding: 20px;
+}
+
+.selectize-input {
+  height: 36px;
+  font-size: 13px;
+  display: flex;
+  /*border: none;*/
+  border: 1px solid rgb(226, 224, 224);
+}
+
+input[type=text], input[type=number] {
+  width: 100%;
+  height: 36px;
+  font-size: 13px;
+  padding: 6px 12px;
+  box-sizing: border-box;
+  border: 1px solid rgb(226, 224, 224);
+}
+
+.well {
+  min-height: 20px;
+  padding: 19px;
+  margin-bottom: 40px;
+  margin-left: 10px;
+  margin-right: 10px;
+  background-color: #ecf0f1;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  box-shadow: inset 0 1px 1px rgba(0,0,0,0.05);
+}
+
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+  font-family: "Lato","Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-weight: 400;
+  line-height: 1.1;
+  color: inherit;
+  margin-left: 10px;
 }

@@ -5,7 +5,7 @@ account: fieldhub
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 4650211
-bundleId: 5611207
-url: https://ndsu.shinyapps.io/fieldhub/
-when: 1645647700.01049
-lastSyncTime: 1645647700.01049
+bundleId: 5032284
+url: https://fieldhub.shinyapps.io/fieldhub/
+when: 1631631297.95195
+lastSyncTime: 1631631297.95195

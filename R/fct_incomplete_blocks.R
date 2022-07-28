@@ -64,19 +64,18 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
   set.seed(seed)
   lookup <- FALSE
   if(is.null(data)) {
-    if (is.null(r) || is.null(t) || is.null(k) || is.null(l)) {
-      shiny::validate('Some of the basic design parameters are missing (t, k, r or l).')
+    if (is.null(t) || is.null(k) || is.null(r) || is.null(l)) {
+      shiny::validate('Basic design parameters missing (t, k, r or l).')
     }
     arg1 <- list(k, r, l);arg2 <- c(k, r, l)
     if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
-      shiny::validate('incomplete_blocks() requires k, r and l be possitive integers.')
+      shiny::validate('incomplete_blocks() requires k, r and l to be possitive integers.')
     }
-    if (is.numeric(t) && t %% 1 != 0) shiny::validate('incomplete_blocks() requires t to be a possitive integer.')
     if (is.numeric(t)) {
       if (length(t) == 1) {
         if (t == 1 || t < 1) {
           shiny::validate('incomplete_blocks() requires more than one treatment.')
-        }
+        } 
         nt <- t
       }else if ((length(t) > 1)) {
         nt <- length(t)
@@ -85,18 +84,17 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
     }else if (is.character(t) || is.factor(t)) {
       if (length(t) == 1) {
         shiny::validate('incomplete_blocks() requires more than one treatment.')
-      }
+      } 
       nt <- length(t)
-      TRT <- t
-      lookup <- TRUE
-      dataLookUp <- data.frame(list(ENTRY = 1:nt, LABEL_TREATMENT = TRT))
     }else if ((length(t) > 1)) {
       nt <- length(t)
-      TRT <- t
-      lookup <- TRUE
-      dataLookUp <- data.frame(list(ENTRY = 1:nt, LABEL_TREATMENT = TRT))
     }
-  }else if (!is.null(data)) {
+    data_up <- data.frame(list(ENTRY = 1:nt, TREATMENT = paste0("G-", 1:nt)))
+    colnames(data_up) <- c("ENTRY", "TREATMENT")
+    lookup <- TRUE
+    df <- data.frame(list(ENTRY = 1:nt, LABEL_TREATMENT = paste0("G-", 1:nt)))
+    dataLookUp <- df
+  } else if (!is.null(data)) {
     if (is.null(t) || is.null(r) || is.null(k) || is.null(l)) {
       shiny::validate('Some of the basic design parameters are missing (t, k, r or l)')
     }
@@ -122,7 +120,6 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
   }
   if (k >= nt) shiny::validate('incomplete_blocks() requires that k < t.')
   if(is.null(locationNames) || length(locationNames) != l) locationNames <- 1:l
-  # nrep = r / ntrt = t / nunits = k / t*r/k = b
   nincblock <- nt*r/k
   N <- nt * r
   if (k * nincblock != N) {
@@ -146,7 +143,6 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
     colnames(matdf) <- c("LOCATION","PLOT", "REP", "IBLOCK", "UNIT", "ENTRY")
     outIBD_loc[[i]] <- matdf
   }
-
   OutIBD <- dplyr::bind_rows(outIBD_loc)
   OutIBD <- as.data.frame(OutIBD)
   OutIBD$ENTRY <- as.numeric(OutIBD$ENTRY)
@@ -163,7 +159,7 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
   lambda <- r*(k - 1)/(nt - 1)
   infoDesign <- list(Reps = r, iBlocks = b, NumberTreatments = nt, NumberLocations = l,
                      Locations = locationNames, seed = seed, lambda = lambda, 
-                     idDesign = 8)
+                     id_design = 8)
   output <- list(infoDesign = infoDesign, fieldBook = OutIBD_new)
   class(output) <- "FielDHub"
   return(invisible(output))

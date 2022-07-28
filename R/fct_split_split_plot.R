@@ -235,13 +235,13 @@ split_split_plot <- function(wp = NULL, sp = NULL, ssp = NULL, reps = NULL, type
     REPS <- rep(wp.reps, each = sp * ssp)
     sspd.output <- data.frame(list(LOCATION = LOCATION, PLOT = PLOT, REP = REPS,
                                    wp = wp.d, sp = sp.d, ssp = ssp.d, TREATMENT = NA))
-    colnames(sspd.output) <- c("LOCATION", "PLOT", "REP", "WHOLE-PLOT", "SUB-PLOT", "SUB-SUB-PLOT", "TRT_COMB")
+    colnames(sspd.output) <- c("LOCATION", "PLOT", "REP", "WHOLE_PLOT", "SUB_PLOT", "SUB_SUB_PLOT", "TRT_COMB")
   }else {
     PLOT <- rep(plots.n, each = sp * ssp)
     Block <- rep(rep(1:b, each = wp * sp * ssp), times = l)
     sspd.output <- data.frame(list(LOCATION = LOCATION, PLOT = PLOT, Block = Block,
                                    wp = wp.d, sp = sp.d, ssp = ssp.d, TREATMENT = NA))
-    colnames(sspd.output) <- c("LOCATION", "PLOT", "REP", "WHOLE-PLOT", "SUB-PLOT", "SUB-SUB-PLOT", "TRT_COMB")
+    colnames(sspd.output) <- c("LOCATION", "PLOT", "REP", "WHOLE_PLOT", "SUB_PLOT", "SUB_SUB_PLOT", "TRT_COMB")
   }
   z <- 1:nrow(sspd.output)
   for (j in z) {
@@ -249,7 +249,7 @@ split_split_plot <- function(wp = NULL, sp = NULL, ssp = NULL, reps = NULL, type
   }
   sspd_output <- cbind(ID = 1:nrow(sspd.output), sspd.output)
   info.design <- list(Whole.Plots = WholePlots, Sub.Plots = SubPlots, Sub.Sub.Plots = SubSubPlots,
-                      Locations = l, type.design = type, seed = seed, idDesign = 6)
+                      Locations = l, typeDesign = type, seed = seed, id_design = 6)
   output <- list(infoDesign = info.design, fieldBook = sspd_output)
   class(output) <- "FielDHub"
   return(invisible(output))

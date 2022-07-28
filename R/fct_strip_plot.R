@@ -104,11 +104,10 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
         stop("\n 'strip_plot()' requires an 1-dimensional array for input Hplots and Vplots.")
       }
     }else stop("\n 'strip_plot()' requires arguments to be differents than NULL")
-  }else {
+  } else {
     if(!is.data.frame(data)) stop("Data must be a data frame.")
     if (ncol(data) < 2) base::stop("Data input needs at least two columns.")
     data <- as.data.frame(data[,1:2])
-    data <- na.omit(data)
     colnames(data) <- c("Hplot", "Vplot")
     Hplots <- as.vector(na.omit(data$Hplot))
     Vplots <- as.vector(na.omit(data$Vplot))
@@ -124,7 +123,7 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
     }
   }
   if(!is.null(l) && is.numeric(l) && length(l) == 1) {
-    if (l > 1 && is.null(locationNames)) {
+    if (l >= 1 && is.null(locationNames)) {
       locationNames <- 1:l
     }else if (l > 1 && !is.null(locationNames)) {
       if (length(locationNames) < l) locationNames <- 1:l
@@ -178,7 +177,6 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
   }
   stripDesig.output <- paste_by_row(stripDesig.out.l)
   stripDesig.out.loc <- vector(mode = "list", length = l)
-  #strips.b.loc <- vector(mode = "list", length = l)
   strips.b.loc <- setNames(vector(mode = "list", length = l),
                            paste0("Loc_", locationNames))
   NEW_PLOTS <- setNames(vector(mode = "list", length = l),
@@ -198,7 +196,7 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
     stripDesig.output$LOCATION <- rep(locationNames, each = (nH * nV) * b)
   }
   stripDesig.output$LOCATION <- factor(stripDesig.output$LOCATION, levels = as.character(unique(locationNames)))
-  stripDesig_output <- stripDesig.output[order(stripDesig.output$LOCATION, stripDesig.output$PLOT),]
+  stripDesig_output <- stripDesig.output[order(stripDesig.output$LOCATION),] #, stripDesig.output$PLOT
   
   id <- 1:nrow(stripDesig_output)
   stripDesig_output <- cbind(id, stripDesig_output)
@@ -206,7 +204,7 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
   stripDesig_output <- as.data.frame(stripDesig_output)
   
   infoDesign <- list(Hplots = nH, Vplots = nV, blocks = b, numberLocations = l,
-                     nameLocations = locationNames, seed = seed, idDesign = 7)
+                     nameLocations = locationNames, seed = seed, id_design = 7)
   output <- list(infoDesign = infoDesign, stripsBlockLoc = strips.b.loc,
                  plotLayouts = NEW_PLOTS, fieldBook = stripDesig_output)
   class(output) <- "FielDHub"

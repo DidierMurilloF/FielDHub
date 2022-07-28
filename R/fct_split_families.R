@@ -44,10 +44,13 @@
 #'
 #' @export
 split_families <- function(l = NULL, data = NULL) {
-  
-  if(!is.data.frame(data)) stop("\n 'split_families()' requires input data to be a data frame.")
-  if (ncol(data) < 3) stop("\n 'split_families()' requires that data have three columns: ENTRY | NAME | FAMILY.")
+  if(!is.data.frame(data)) {
+    stop("\n 'split_families()' requires input data to be a data frame.")
+  } 
+  if (ncol(data) < 3) {
+    stop("\n 'split_families()' requires that data have three columns: ENTRY | NAME | FAMILY.")
   gen.list <- na.omit(data[,1:3])
+  } 
   colnames(gen.list) <- c("ENTRY", "NAME", "FAMILY")
   fmlys <- factor(gen.list$FAMILY)
   familyLevels <- levels(fmlys)
@@ -106,7 +109,7 @@ split_families <- function(l = NULL, data = NULL) {
   data_locations <- dplyr::bind_rows(Glist_locations)
   data_locations$LOCATION <- rep(paste("Location", 1:l), rowseach)
   output <- list(rowsEachlist = rowsEachlist, data_locations = data_locations,
-                 infoDesign = list(idDesign = 17))
+                 infoDesign = list(id_design = 17))
   class(output) <- "FielDHub"
   return(invisible(output))
 }

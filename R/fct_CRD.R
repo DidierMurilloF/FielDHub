@@ -92,7 +92,7 @@ CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL,
       }else if(is.character(t) & length(t) > 1) {
         shiny::validate('"CRD()" requires more than one treatment.')
       }
-    }else {
+    } else {
       stop("Inputs t and reps are missing.")
     }
     N <- nt * reps
@@ -129,7 +129,7 @@ CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL,
   rownames(design) <- 1:N
   TRT <- levels(factor(TRT, as.character(unique(TRT))))
   parameters <- list(numberofTreatments = nt, treatments = TRT, Reps = reps, locationName = locationName,
-                     seed = seed, idDesign = 1)
+                     seed = seed, id_design = 1)
   output <- list(infoDesign = parameters, fieldBook = design)
   class(output) <- "FielDHub"
   return(invisible(output))
