@@ -2,7 +2,6 @@ pandoc: '2.18'
 pkgdown: 2.0.6
 pkgdown_sha: ~
 articles:
-  RCBD_augmented: RCBD_augmented.html
   alpha_lattice: alpha_lattice.html
   crd: crd.html
   diagonal_arrangement: diagonal_arrangement.html
@@ -13,11 +12,15 @@ articles:
   optimized_arrangement: optimized_arrangement.html
   partially_replicated: partially_replicated.html
   rcbd: rcbd.html
+  RCBD_augmented: RCBD_augmented.html
   rectangular_lattice: rectangular_lattice.html
   row_column: row_column.html
   split_plot: split_plot.html
   split_split_plot: split_split_plot.html
   square_lattice: square_lattice.html
   strip_plot: strip_plot.html
-last_built: 2022-07-28T01:10Z
+last_built: 2022-07-28T15:16Z
+urls:
+  reference: https://didiermurillof.github.io/FielDHub/reference
+  article: https://didiermurillof.github.io/FielDHub/articles
 
