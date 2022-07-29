@@ -78,7 +78,7 @@ mod_IBD_ui <- function(id) {
                            value = "FARGO")
           )
         ), 
-        numericInput(inputId = ns("myseed.ibd"), 
+        numericInput(inputId = ns("seed.ibd"), 
                      label = "Seed Number:",
                      value = 4),
         fluidRow(
@@ -110,11 +110,14 @@ mod_IBD_ui <- function(id) {
           tabsetPanel(
             tabPanel("Field Layout",
                      shinyjs::useShinyjs(),
-                     shinyjs::hidden(downloadButton(ns("downloadCsv.ibd"), 
-                                                    label =  "Excel",
-                                                    icon = icon("file-csv"), 
-                                                    width = '10%',
-                                                    style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
+                     shinyjs::hidden(
+                       downloadButton(
+                         ns("downloadCsv.ibd"), 
+                         label =  "Excel",
+                         icon = icon("file-csv"), 
+                         width = '10%',
+                         style="color: #337ab7; background-color: #fff; border-color: #2e6da4")
+                      ),
                      shinycssloaders::withSpinner(
                        plotly::plotlyOutput(ns("layouts"), 
                                             width = "98%", 
@@ -273,18 +276,20 @@ mod_IBD_server <- function(id) {
       
       req(input$r.ibd)
       req(input$k.ibd)
-      req(input$myseed.ibd)
+      req(input$seed.ibd)
       req(input$plot_start.ibd)
       req(input$Location.ibd)
       req(input$l.ibd)
+      req(input$planter_mov_ibd)
       
       r.ibd <- as.numeric(input$r.ibd)
       k.ibd <- as.numeric(input$k.ibd)
       treatments <- as.numeric(get_data_ibd()$treatments)
+      planter <- input$planter_mov_ibd
       plot_start.ibd <- as.vector(unlist(strsplit(input$plot_start.ibd, ",")))
       plot_start <- as.numeric(plot_start.ibd)
       site_names <-  as.vector(unlist(strsplit(input$Location.ibd, ",")))
-      seed <- as.numeric(input$myseed.ibd)
+      seed <- as.numeric(input$seed.ibd)
       sites <- as.numeric(input$l.ibd)
       if (input$k.ibd == "No Options Available") {
         shinyalert::shinyalert(
@@ -293,13 +298,15 @@ mod_IBD_server <- function(id) {
           type = "error")
         return(NULL)
       } 
-      return(list(r = r.ibd, 
-                  k = k.ibd, 
-                  t = treatments, 
-                  plot_start = plot_start, 
-                  sites = sites,
-                  site_names = site_names,
-                  seed = seed))
+      return(list(
+        r = r.ibd, 
+        k = k.ibd, 
+        t = treatments, 
+        planter = planter,
+        plot_start = plot_start, 
+        sites = sites,
+        site_names = site_names,
+        seed = seed))
     }) %>%
       bindEvent(input$RUN.ibd)
     
@@ -404,7 +411,7 @@ mod_IBD_server <- function(id) {
       req(input$layoutO_ibd)
       req(IBD_reactive())
       obj_ibd <- IBD_reactive()
-      planting_ibd <- input$planter_mov_ibd
+      planting_ibd <- ibd_inputs()$planter
       
       if (reset_selection$reset == 1) {
         opt_ibd <- 1

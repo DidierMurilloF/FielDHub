@@ -217,6 +217,7 @@ mod_Rectangular_Lattice_server <- function(id) {
       req(init_data_rectangular())
       req(input$k.rectangular)
       req(input$myseed.rectangular)
+      req(input$planter_mov_rect)
       req(input$plot_start.rectangular)
       req(input$Location.rectangular)
       req(input$l.rectangular)
@@ -232,6 +233,7 @@ mod_Rectangular_Lattice_server <- function(id) {
       treatments <- get_data_rectangular()$treatments
       r.rectangular <- as.numeric(input$r.rectangular)
       k.rectangular <- as.numeric(input$k.rectangular)
+      planter <- input$planter_mov_rect
       plot_start.rectangular <- as.vector(unlist(strsplit(input$plot_start.rectangular, ",")))
       plot_start <- as.numeric(plot_start.rectangular)
       site_names <- as.vector(unlist(strsplit(input$Location.rectangular, ",")))
@@ -240,6 +242,7 @@ mod_Rectangular_Lattice_server <- function(id) {
       return(list(r = r.rectangular,
                   k = k.rectangular,
                   t = treatments,
+                  planter = planter,
                   plot_start = plot_start,
                   sites = sites,
                   site_names = site_names,
@@ -381,7 +384,7 @@ mod_Rectangular_Lattice_server <- function(id) {
       req(input$stackedRT)
       req(input$layoutO_rt)
       req(input$locLayout_rt)
-      req(input$planter_mov_rect)
+      req(rectangular_inputs()$planter)
       req(RECTANGULAR_reactive())
       obj_rt <- RECTANGULAR_reactive()
       
@@ -391,7 +394,7 @@ mod_Rectangular_Lattice_server <- function(id) {
       
       locSelected <- as.numeric(input$locLayout_rt)
       try(plot_layout(x = obj_rt, layout = opt_rt,
-                      planter = input$planter_mov_rect,
+                      planter = rectangular_inputs()$planter,
                       l = locSelected, 
                       stacked = input$stackedRT), 
           silent = TRUE)

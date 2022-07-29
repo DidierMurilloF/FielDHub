@@ -1,5 +1,4 @@
 check_input <- function(design, dataIn) {
-  print(dataIn)
   if (design == "sdiag" || design == "mdiag" || design == "optim" || design == "arcbd"
       || design == "prep"|| design == "square" || design == "rect" || design == "alpha"
       || design == "ibd" || design == "rcd") {

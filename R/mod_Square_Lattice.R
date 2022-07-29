@@ -212,6 +212,7 @@ mod_Square_Lattice_server <- function(id){
       req(input$k.square)
       req(input$owndata_square)
       req(input$myseed.square)
+      req(input$planter_mov_square)
       req(input$plot_start.square)
       req(input$Location.square)
       req(input$l.square)
@@ -227,6 +228,7 @@ mod_Square_Lattice_server <- function(id){
       } 
       plot_start.square <- as.vector(unlist(strsplit(input$plot_start.square, ",")))
       plot_start <- as.numeric(plot_start.square)
+      planter <- input$planter_mov_square
       site_names <- as.vector(unlist(strsplit(input$Location.square, ",")))
       seed <- as.numeric(input$myseed.square)
       sites <- as.numeric(input$l.square)
@@ -235,6 +237,7 @@ mod_Square_Lattice_server <- function(id){
       return(list(r = r.square, 
                   k = k.square, 
                   t = treatments, 
+                  planter = planter,
                   plot_start = plot_start, 
                   sites = sites,
                   sites_names = site_names,
@@ -372,6 +375,7 @@ mod_Square_Lattice_server <- function(id){
     })
     
     reactive_layoutSquare <- reactive({
+      req(square_inputs()$planter)
       req(input$layoutO_sq)
       req(SQUARE_reactive())
       obj_sq <- SQUARE_reactive()
@@ -383,7 +387,7 @@ mod_Square_Lattice_server <- function(id){
       locSelected <- as.numeric(input$locLayout_sq)
       try(plot_layout(x = obj_sq, 
                       layout = opt_sq, 
-                      planter = input$planter_mov_square, 
+                      planter = square_inputs()$planter, 
                       l = locSelected, 
                       stacked = input$stacked_sq), silent = TRUE)
     })
@@ -397,7 +401,6 @@ mod_Square_Lattice_server <- function(id){
       } else if (input$typlotSQ == 2) {
         reactive_layoutSquare()$out_layoutPlots
       }
-      
     })
     
     valsSQUARE <- reactiveValues(maxV.square = NULL, minV.square = NULL, trail.square = NULL)

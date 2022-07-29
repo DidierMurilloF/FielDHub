@@ -203,6 +203,7 @@ mod_Alpha_Lattice_server <- function(id){
     
     alpha_inputs <- reactive({
       req(get_data_alpha())
+      req(input$planter_mov_alpha)
       req(input$k.alpha)
       req(input$r.alpha)
       req(input$plot_start.alpha)
@@ -220,6 +221,7 @@ mod_Alpha_Lattice_server <- function(id){
       r.alpha <- as.numeric(input$r.alpha)
       k.alpha <- as.numeric(input$k.alpha)
       treatments <- as.numeric(get_data_alpha()$treatments)
+      planter <- input$planter_mov_alpha
       plot_startreatments <- as.vector(unlist(strsplit(input$plot_start.alpha, ",")))
       plot_start <- as.numeric(plot_startreatments)
       site_names <-  as.vector(unlist(strsplit(input$Location.alpha, ",")))
@@ -227,6 +229,7 @@ mod_Alpha_Lattice_server <- function(id){
       return(list(r = r.alpha, 
                   k = k.alpha, 
                   t = treatments, 
+                  planter = planter,
                   plot_start = plot_start, 
                   sites = sites,
                   site_names = site_names,
@@ -372,7 +375,7 @@ mod_Alpha_Lattice_server <- function(id){
     
     reactive_layoutAlpha <- reactive({
       req(input$stackedAlpha)
-      req(input$planter_mov_alpha)
+      req(alpha_inputs()$planter)
       req(input$layoutO)
       req(ALPHA_reactive())
       obj <- ALPHA_reactive()
@@ -384,7 +387,7 @@ mod_Alpha_Lattice_server <- function(id){
       locSelected <- as.numeric(input$locLayout)
       try(plot_layout(x = obj, 
                       layout = opt, 
-                      planter = input$planter_mov_alpha, 
+                      planter = alpha_inputs()$planter, 
                       l = locSelected, 
                       stacked = input$stackedAlpha), 
           silent = TRUE)

@@ -268,8 +268,6 @@ mod_STRIPD_server <- function(id) {
     }) %>%
       bindEvent(input$RUN.strip)
     
-    
-    
     strip_reactive <- reactive({
       
       req(strip_inputs())

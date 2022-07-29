@@ -80,14 +80,6 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
   }
   if (is.null(seed) || is.character(seed) || is.factor(seed)) seed <- runif(1, min = -50000, max = 50000)
   set.seed(seed)
-  get.levels <- function(k = NULL) {
-    newlevels <- list();s <- 1
-    for (i in k) {
-      newlevels[[s]] <- rep(0:(i-1), 1)
-      s <- s + 1
-    }
-    return(newlevels)
-  }
   if(l < 1 || is.null(l)) stop("Please, check the value for the number of locations.")
   if (!is.null(plotNumber) && length(plotNumber) == l) {
     if (any(!is.numeric(plotNumber)) || any(plotNumber < 1) || any(plotNumber %% 1 != 0) ||
@@ -114,7 +106,7 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
         entries_each_factor <- setfactors
       }else stop("In 'full_factorial()' the input setfactors must be a numeric vector.")
     }
-  }else {
+  } else {
     if(!is.data.frame(data)) stop("Data must be a data frame.")
     data <- as.data.frame(na.omit(data[,1:2]))
     colnames(data) <- c("factors", "levels")

@@ -68,7 +68,7 @@ mod_FD_ui <- function(id){
                                choices = c("serpentine", "cartesian"), multiple = FALSE,
                                selected = "serpentine"),
                    
-                   numericInput(inputId = ns("myseed.reps"), label = "Seed Number:",
+                   numericInput(inputId = ns("seed.fd"), label = "Seed Number:",
                                 value = 123, min = 1),
                    fluidRow(
                      column(6,
@@ -158,110 +158,131 @@ mod_FD_server <- function(id) {
     })
     
     get_data_factorial <- reactive({
-      req(input$file.FD)
-      req(input$sep.fd)
-      inFile <- input$file.FD
       
-      data_ingested <- load_file(name = inFile$name,
-                             path = inFile$datapat,
-                             sep = input$sep.fd,
-                             check = TRUE, 
-                             design = "factorial")
-      
-      if (names(data_ingested) == "dataUp") {
-        data_up <- data_ingested$dataUp
-        data_up <- as.data.frame(data_up[,1:2])
-        data_factorial <- na.omit(data_up)
-        colnames(data_factorial) <- c("FACTOR", "LEVEL")
-        return(list(data_factorial = data_factorial))
-      } else if (names(data_ingested) == "bad_format") {
-        shinyalert::shinyalert(
-          "Error!!", 
-          "Invalid file; Please upload a .csv file.", 
-          type = "error")
-        return(NULL)
-      } else if (names(data_ingested) == "duplicated_vals") {
-        shinyalert::shinyalert(
-          "Error!!", 
-          "Check input file for duplicate values.", 
-          type = "error")
-        return(NULL)
-      } else if (names(data_ingested) == "missing_cols") {
-        shinyalert::shinyalert(
-          "Error!!", 
-          "Data input needs at least two column: FACTOR and LEVEL", 
-          type = "error")
-        return(NULL)
+      if (input$owndata == "Yes") {
+        req(input$file.FD)
+        req(input$sep.fd)
+        inFile <- input$file.FD
+        
+        data_ingested <- load_file(name = inFile$name,
+          path = inFile$datapat,
+          sep = input$sep.fd,
+          check = TRUE, 
+          design = "factorial")
+        
+        if (names(data_ingested) == "dataUp") {
+          data_up <- data_ingested$dataUp
+          data_up <- as.data.frame(data_up[,1:2])
+          data_factorial <- na.omit(data_up)
+          colnames(data_factorial) <- c("FACTOR", "LEVEL")
+          set_factors <- factor(data_factorial$FACTOR, as.character(unique(data_factorial$FACTOR)))
+          set_factors.fd <- levels(set_factors)
+          nt <- length(set_factors.fd)
+          if (nt < 2) {
+            shinyalert::shinyalert(
+              "Error!!", 
+              "More than one factor needs to be specified.", 
+              type = "error")
+            return(NULL)
+          }
+          return(list(data_fd = data_factorial, treatments = set_factors.fd))
+        } else if (names(data_ingested) == "bad_format") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Invalid file; Please upload a .csv file.", 
+            type = "error")
+          return(NULL)
+        } else if (names(data_ingested) == "duplicated_vals") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Check input file for duplicate values.", 
+            type = "error")
+          return(NULL)
+        } else if (names(data_ingested) == "missing_cols") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Data input needs at least two column: FACTOR and LEVEL", 
+            type = "error")
+          return(NULL)
+        }
+      } else {
+        req(input$setfactors)
+        reps <- as.numeric(input$reps.fd)
+        setfactors.fd <- as.numeric(as.vector(unlist(strsplit(input$setfactors, ","))))
+        nt <- length(setfactors.fd)
+        if (nt < 2) {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "More than one factor needs to be specified.", 
+            type = "error")
+          return(NULL)
+        }
+        TRT <- rep(LETTERS[1:nt], each = reps)
+        newlevels <- get.levels(k = setfactors.fd)
+        data_fd <- data.frame(
+          list(
+            factors = rep(levels(as.factor(TRT)), times = setfactors.fd),
+            levels = unlist(newlevels)
+          )
+        )
+        colnames(data_fd) <- c("factors", "levels")
+        return(list(data_fd = data_fd, treatments = setfactors.fd))
       }
     }) %>% 
       bindEvent(input$RUN.fd)
     
-    fd_reactive <- reactive({
-      
+    fd_inputs <- reactive({
+      req(get_data_factorial())
       req(input$plot_start.fd)
       req(input$Location.fd)
       req(input$l.fd)
-      req(input$myseed.reps)
+      req(input$seed.fd)
+      req(input$kindFD)
+      req(input$planter_mov_fd)
+      
+      setfactors.fd <- get_data_factorial()$treatments
+      plot_start.fd <- as.vector(unlist(strsplit(input$plot_start.fd, ",")))
+      plot_start <- as.numeric(plot_start.fd)
+      planter <- input$planter_mov_fd
+      site_names <-  as.vector(unlist(strsplit(input$Location.fd, ",")))
+      seed <- as.numeric(input$seed.fd)
+      reps <- as.numeric(input$reps.fd)
+      sites <- as.numeric(input$l.fd)
+      type_design <- input$kindFD
+      
+      return(
+        list(
+        set_factors = setfactors.fd,
+        r = reps,
+        planter = planter,
+        plot_start = plot_start,
+        sites = sites,
+        site_names = site_names,
+        type_design = type_design,
+        seed = seed))
+    }) %>%
+      bindEvent(input$RUN.fd)
+    
+    
+    fd_reactive <- reactive({
+      
+      req(get_data_factorial())
       
       shinyjs::show(id = "downloadCsv.fd")
-      l.fd <- as.numeric(input$l.fd)
-      plot_start.fd <- as.vector(unlist(strsplit(input$plot_start.fd, ",")))
-      plot_start.fd <- as.numeric(plot_start.fd)
-      loc <-  as.vector(unlist(strsplit(input$Location.fd, ",")))
-      seed.fd <- as.numeric(input$myseed.reps)
-      if (input$kindFD == "FD_RCBD") {
-        if (input$owndata == "Yes") {
-          req( get_data_factorial())
-          setfactors.fd <- NULL
-          data.fd <- get_data_factorial()$data_factorial
-        }else {
-          req(input$setfactors)
-          setfactors.fd <- as.numeric(as.vector(unlist(strsplit(input$setfactors, ","))))
-          if (length(setfactors.fd) < 2) {
-            shinyalert::shinyalert(
-              "Error!!", 
-              "We need more than one factor.", 
-              type = "error")
-            return(NULL)
-          }
-          data.fd <- NULL
-        }
-        type <- 2
-        req(input$reps.fd)
-        reps.fd <- as.numeric(input$reps.fd)
-        
-      }else {
-        if (input$owndata == "Yes") {
-          req( get_data_factorial())
-          setfactors.fd <- NULL
-          data.fd <- get_data_factorial()$data_factorial
-        }else {
-          req(input$setfactors)
-          setfactors.fd <- as.numeric(as.vector(unlist(strsplit(input$setfactors, ","))))
-          if (length(setfactors.fd) < 2) {
-            shinyalert::shinyalert(
-              "Error!!", 
-              "We need more than one factor.", 
-              type = "error")
-            return(NULL)
-          }
-          data.fd <- NULL
-        }
-        type <- 1
-        req(input$reps.fd)
-        reps.fd <- as.numeric(input$reps.fd)
-        
-      }
+      
+      if (fd_inputs()$type_design == "FD_CRD") {
+        type_design <- 1
+      } else type_design <- 2
       
       full_factorial(
-        setfactors = setfactors.fd, 
-        reps = reps.fd, 
-        l = l.fd, 
-        type = type, 
-        plotNumber = plot_start.fd, 
-        seed = seed.fd, 
-        locationNames = loc,
-        data = data.fd
+        reps = fd_inputs()$r, 
+        l = fd_inputs()$sites, 
+        type = type_design, 
+        planter = fd_inputs()$planter,
+        plotNumber = fd_inputs()$plot_start, 
+        seed = fd_inputs()$seed, 
+        locationNames = fd_inputs()$site_names,
+        data = get_data_factorial()$data_fd
       ) 
       
     }) %>% 
@@ -342,7 +363,7 @@ mod_FD_server <- function(id) {
       req(input$layoutO_fd)
       req(fd_reactive())
       obj_fd <- fd_reactive()
-      planting_fd <- input$planter_mov_fd
+      planting_fd <- fd_inputs()$planter
       
       if (reset_selection$reset == 1) {
         opt_fd <- 1
@@ -420,7 +441,7 @@ mod_FD_server <- function(id) {
     })
     
     simuData_fd <- reactive({
-      set.seed(input$myseed.reps)
+      set.seed(input$seed.fd)
       req(fd_reactive()$fieldBook)
       if(!is.null(valsfd$maxV.fd) && !is.null(valsfd$minV.fd) && !is.null(valsfd$trail.fd)) {
         max <- as.numeric(valsfd$maxV.fd)

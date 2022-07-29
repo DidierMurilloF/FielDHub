@@ -69,7 +69,7 @@ mod_CRD_ui <- function(id) {
                      )
                    ),
                    
-                   numericInput(inputId = ns("myseed.crd"), 
+                   numericInput(inputId = ns("seed.crd"), 
                                 label = "Seed Number:",
                                 value = 123,
                                 min = 1),
@@ -161,7 +161,7 @@ mod_CRD_server <- function(id) {
           data_crd$REP <- rep(input$reps.crd, times = nrow(data_crd))
           colnames(data_crd) <- c("TREATMENT", "REP")
           treatments = nrow(data_crd)
-          return(list(data_crd = data_crd))
+          return(list(data_crd = data_crd, treatments = treatments))
         } else if (names(data_ingested) == "bad_format") {
           shinyalert::shinyalert(
             "Error!!", 
@@ -181,60 +181,69 @@ mod_CRD_server <- function(id) {
             type = "error")
           return(NULL)
         }
+      } else {
+        req(input$t.crd)
+        nt <- as.numeric(input$t.crd)
+        reps <- as.numeric(input$reps.crd)
+        data_crd <- data.frame(
+          list(
+            TREATMENT = paste0("T-", 1:nt),
+            REP = rep(reps, times = nt)
+            )
+          )
+        colnames(data_crd) <- c("TREATMENT", "REP")
+        return(list(data_crd = data_crd, treatments = nt))
       }
-
     }) %>%
       bindEvent(input$RUN.crd)
     
-    CRD_reactive <- eventReactive(input$RUN.crd, {
-      
+    crd_inputs <- reactive({
+      req(get_data_crd())
+      req(input$planter_mov_crd)
+      req(input$reps.crd)
       req(input$plot_start.crd)
       req(input$Location.crd)
-      req(input$myseed.crd)
+      req(input$seed.crd)
+      
+      treatments <- as.numeric(get_data_crd()$treatments)
+      reps <- as.numeric(input$reps.crd)
+      planter <- input$planter_mov_crd
+      plot_startreatments <- as.vector(unlist(strsplit(input$plot_start.crd, ",")))
+      plot_start <- as.numeric(plot_startreatments)[1]
+      site_names <-  as.vector(unlist(strsplit(input$Location.crd, ",")))
+      seed <- as.numeric(input$seed.crd)
+      return(list(t = treatments, 
+        r = reps, 
+        planter = planter,
+        plot_start = plot_start, 
+        site_names = site_names,
+        seed = seed))
+    }) %>%
+      bindEvent(input$RUN.crd)
+    
+    
+    CRD_reactive <- reactive({
+      
+      req(get_data_crd())
+      req(crd_inputs())
       
       shinyjs::show(id = "downloadCsv.crd")
       
-      myseed.crd <- as.numeric(input$myseed.crd)
-      
-      if (input$owndatacrd == "Yes") {
-        req(get_data_crd())
-        t <- NULL; reps <- NULL
-        data.crd <- get_data_crd()$data_crd
-        n_Reps <- dplyr::n_distinct(data.crd$REP)
-        t <- as.vector(table(data.crd$REP))
-        if (any(t != t[1])) {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Unbalanced replications are not allowed!
-             For unbalanced reps, try the function CRD() in the console.", 
-            type = "error")
-          return(NULL)
-        } 
-      } else {
-        req(input$t.crd, input$reps.crd)
-        t <- as.numeric(input$t.crd);reps <- as.numeric(input$reps.crd)
-        data.crd <- NULL
-      }
-      
-      plot_start.crd <- as.vector(unlist(strsplit(input$plot_start.crd, ",")))
-      plot_start.crd <- as.numeric(plot_start.crd)
-      loc <-  as.vector(unlist(strsplit(input$Location.crd, ",")))
-      
       my.design <- CRD(
-        t = t, 
-        reps = reps, 
-        plotNumber = plot_start.crd, 
-        seed = myseed.crd,
-        locationName = loc, 
-        data = data.crd
+        reps = crd_inputs()$r, 
+        plotNumber = crd_inputs()$plot_start, 
+        seed = crd_inputs()$seed,
+        locationName = crd_inputs()$site_names, 
+        data = get_data_crd()$data_crd
       )
       
-    })
+    }) %>% 
+      bindEvent(input$RUN.crd)
     
     output$well_panel_layout_CRD <- renderUI({
       req(CRD_reactive())
       obj_crd <- CRD_reactive()
-      planting_crd <- input$planter_mov_crd
+      planting_crd <- crd_inputs()$planter
       allBooks_crd <- plot_layout(x = obj_crd, 
                                   layout = 1, 
                                   planter = planting_crd)$newBooks
@@ -262,7 +271,7 @@ mod_CRD_server <- function(id) {
       req(CRD_reactive())
       obj_crd <- CRD_reactive()
       opt_crd <- as.numeric(input$layoutO_crd)
-      planting_crd <- input$planter_mov_crd
+      planting_crd <- crd_inputs()$planter
       plot_layout(x = obj_crd, layout = opt_crd, planter = planting_crd)
     })
     
