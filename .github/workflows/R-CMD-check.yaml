@@ -28,5 +28,5 @@ jobs:
       - name: Check
         run: |
           options(crayon.enabled = TRUE)
-          devtools::check()
+          devtools::check(vignettes = FALSE)
         shell: Rscript {0}
