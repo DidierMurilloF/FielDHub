@@ -39,6 +39,7 @@ Depends: R (>= 3.6.0)
 License: MIT + file LICENSE
 Imports: 
     config,
+    rmarkdown,
     golem,
     shiny (>= 1.6.0),
     htmltools,
@@ -68,8 +69,7 @@ Suggests:
     spelling,
     rlang,
     glue,
-    knitr,
-    rmarkdown
+    knitr
 Config/testthat/edition: 3
 URL: https://github.com/DidierMurilloF/FielDHub,
     https://didiermurillof.github.io/FielDHub/
