@@ -76,7 +76,7 @@ mod_SPD_ui <- function(id) {
                            value = "FARGO")
           )
         ),
-        numericInput(inputId = ns("myseed.spd"), label = "Seed Number:", 
+        numericInput(inputId = ns("seed.spd"), label = "Seed Number:", 
                      value = 118, min = 1),
         
         fluidRow(
@@ -177,101 +177,111 @@ mod_SPD_server <- function(id){
     })
     
     get_data_spd <- reactive({
-      req(input$file.SPD)
-      inFile <- input$file.SPD
-      data_ingested <- load_file(name = inFile$name, 
-                                 path = inFile$datapat, 
-                                 sep = input$sep.spd, 
-                                 check = TRUE, 
-                                 design = "spd")
-      
-      if (names(data_ingested) == "dataUp") {
-        data_up <- data_ingested$dataUp
-        data_spd <- as.data.frame(data_up[,1:2])
-        colnames(data_spd) <- c("WHOLEPLOT", "SUBPLOT")
-        return(list(data_spd = data_spd))
-      } else if (names(data_ingested) == "bad_format") {
-        shinyalert::shinyalert(
-          "Error!!", 
-          "Invalid file; Please upload a .csv file.", 
-          type = "error")
-        return(NULL)
-      } else if (names(data_ingested) == "duplicated_vals") {
-        shinyalert::shinyalert(
-          "Error!!", 
-          "Check input file for duplicate values.", 
-          type = "error")
-        return(NULL)
-      } else if (names(data_ingested) == "missing_cols") {
-        shinyalert::shinyalert(
-          "Error!!", 
-          "Data input needs at least two column: WHOLEPLOT and SUBPLOT", 
-          type = "error")
-        return(NULL)
+      if (input$owndataSPD == "Yes") {
+        req(input$file.SPD)
+        inFile <- input$file.SPD
+        data_ingested <- load_file(name = inFile$name, 
+                                   path = inFile$datapat, 
+                                   sep = input$sep.spd, 
+                                   check = TRUE, 
+                                   design = "spd")
+        
+        if (names(data_ingested) == "dataUp") {
+          data_up <- data_ingested$dataUp
+          data_spd <- as.data.frame(data_up[,1:2])
+          colnames(data_spd) <- c("WHOLEPLOT", "SUBPLOT")
+          wp <- as.vector(na.omit(data_spd[,1]))
+          sp <- as.vector(na.omit(data_spd[,2]))
+          treatments <- c(wp, sp)
+          return(list(data_spd = data_spd, treatments = treatments))
+        } else if (names(data_ingested) == "bad_format") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Invalid file; Please upload a .csv file.", 
+            type = "error")
+          return(NULL)
+        } else if (names(data_ingested) == "duplicated_vals") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Check input file for duplicate values.", 
+            type = "error")
+          return(NULL)
+        } else if (names(data_ingested) == "missing_cols") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Data input needs at least two column: WHOLEPLOT and SUBPLOT", 
+            type = "error")
+          return(NULL)
+        }
+      } else {
+        req(input$mp.spd, input$sp.spd)
+        wp <- as.numeric(input$mp.spd)
+        sp <- as.numeric(input$sp.spd)
+        treatments <- c(wp, sp)
+        data_spd <- NULL
+        return(list(data_spd = data_spd, treatments = treatments))
       }
     }) %>% 
+      bindEvent(input$RUN.spd)
+    
+    spd_inputs <- reactive({
+      
+      req(get_data_spd())
+      
+      req(input$plot_start.spd)
+      req(input$Location.spd)
+      req(input$seed.spd)
+      req(input$l.spd)
+      req(input$reps.spd)
+      
+      sites <- as.numeric(input$l.spd)
+      seed <- as.numeric(input$seed.spd)
+      plot_start.spd <- as.vector(unlist(strsplit(input$plot_start.spd, ",")))
+      plot_start <- as.numeric(plot_start.spd)
+      site_names <-  as.vector(unlist(strsplit(input$Location.spd, ",")))
+      reps <- as.numeric(input$reps.spd)
+      planter <- input$planter_mov_spd
+      data_spd <- get_data_spd()$data_spd
+      
+      if (input$kindSPD == "SPD_RCBD") {
+        type_design <- 2
+      } else type_design <- 1
+      
+      return(
+        list(
+          wp = get_data_spd()$treatments[1], 
+          sp = get_data_spd()$treatments[2], 
+          r = reps, 
+          sites = sites,
+          seed = seed,
+          planter = planter,
+          plot_start = plot_start,
+          site_names = site_names, 
+          type_design = type_design,
+          data = data_spd
+        )
+      )
+    }) %>%
       bindEvent(input$RUN.spd)
     
     
     spd_reactive <- reactive({
       
-      req(input$plot_start.spd)
-      req(input$Location.spd)
-      req(input$myseed.spd)
-      req(input$l.spd)
+      req(spd_inputs())
       
       shinyjs::show(id = "downloadCsv.spd")
       
-      l.spd <- as.numeric(input$l.spd)
-      seed.spd <- as.numeric(input$myseed.spd)
-      plot_start.spd <- as.vector(unlist(strsplit(input$plot_start.spd, ",")))
-      plot_start.spd <- as.numeric(plot_start.spd)
-      loc.spd <-  as.vector(unlist(strsplit(input$Location.spd, ",")))
-      req(input$reps.spd)
-      reps.spd <- as.numeric(input$reps.spd)
-      
-      if (input$kindSPD == "SPD_RCBD") {
-        if (input$owndataSPD == "Yes") {
-          req(get_data_spd())
-          wp <- NULL
-          sp <- NULL
-          data.spd <- get_data_spd()$data_spd
-        }else {
-          req(input$mp.spd, input$sp.spd)
-          wp <- as.numeric(input$mp.spd)
-          sp <- as.numeric(input$sp.spd)
-          data.spd <- NULL
-        }
-        type <- 2
-        
-      }else {
-        if (input$owndataSPD == "Yes") {
-          req(get_data_spd())
-          wp <- NULL
-          sp <- NULL
-          data.spd <- get_data_spd()$data_spd
-        }else {
-          
-          req(input$mp.spd, input$sp.spd)
-          wp <- as.numeric(input$mp.spd)
-          sp <- as.numeric(input$sp.spd)
-          data.spd <- NULL
-        }
-        type <- 1
-      }
-      
       split_plot(
-        wp = wp, 
-        sp = sp, 
-        reps = reps.spd, 
-        l = l.spd, 
-        plotNumber = plot_start.spd,
-        seed = seed.spd,
-        type = type, 
-        locationNames = loc.spd, 
-        data = data.spd
+        wp = spd_inputs()$wp, 
+        sp = spd_inputs()$sp, 
+        reps = spd_inputs()$r, 
+        l = spd_inputs()$sites,
+        plotNumber = spd_inputs()$plot_start,
+        seed = spd_inputs()$seed,
+        type = spd_inputs()$type_design, 
+        locationNames = spd_inputs()$site_names, 
+        data = spd_inputs()$data
       )
-      
     }) %>% 
       bindEvent(input$RUN.spd)
     
@@ -353,7 +363,7 @@ mod_SPD_server <- function(id){
       req(spd_reactive())
       obj_spd <- spd_reactive()
       
-      planting_spd <- input$planter_mov_spd
+      planting_spd <- spd_inputs()$planter
       
       if (reset_selection$reset == 1) {
         opt_spd <- 1
@@ -432,7 +442,6 @@ mod_SPD_server <- function(id){
     })
     
     simuData_spd <- reactive({
-      set.seed(input$myseed.spd)
       req(spd_reactive()$fieldBook)
       
       if(!is.null(valspd$maxV.spd) && !is.null(valspd$minV.spd) && !is.null(valspd$trail.spd)) {
@@ -440,7 +449,12 @@ mod_SPD_server <- function(id){
         min <- as.numeric(valspd$minV.spd)
         df.spd <- reactive_layoutSPD()$allSitesFieldbook
         cnamesdf.spd <- colnames(df.spd)
-        df.spd <- norm_trunc(a = min, b = max, data = df.spd)
+        df.spd <- norm_trunc(
+          a = min, 
+          b = max, 
+          data = df.spd, 
+          seed = spd_inputs()$seed
+        )
         colnames(df.spd) <- c(cnamesdf.spd[1:(ncol(df.spd) - 1)], valspd$trail.spd)
         df.spd <- df.spd[order(df.spd$ID),]
       }else {
@@ -492,7 +506,7 @@ mod_SPD_server <- function(id){
             hjust=0.5)
           )
         
-        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1350, height = 560)
+        p2 <- plotly::ggplotly(p1, tooltip="text", height = 560)
         return(p2)
       } else {
         showModal(

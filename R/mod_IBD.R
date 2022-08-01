@@ -5,6 +5,7 @@
 #' @param id,input,output,session Internal parameters for {shiny}.
 #'
 #' @noRd 
+#' 
 #'
 #' @importFrom shiny NS tagList 
 mod_IBD_ui <- function(id) {
@@ -120,7 +121,7 @@ mod_IBD_ui <- function(id) {
                       ),
                      shinycssloaders::withSpinner(
                        plotly::plotlyOutput(ns("layouts"), 
-                                            width = "98%", 
+                                            width = "97%", 
                                             height = "550px"),
                        type = 5
                      ),
@@ -576,7 +577,7 @@ mod_IBD_server <- function(id) {
               face="bold", 
               size=13, 
               hjust=0.5))
-        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1250, height = 560)
+        p2 <- plotly::ggplotly(p1, tooltip="text", height = 560)
         return(p2)
       } else {
         showModal(

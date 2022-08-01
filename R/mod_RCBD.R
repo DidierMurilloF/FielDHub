@@ -77,7 +77,7 @@ mod_RCBD_ui <- function(id) {
                   "Input Location:",
                   value = "FARGO"),
         
-        numericInput(inputId = ns("myseed.rcbd"), 
+        numericInput(inputId = ns("seed.rcbd"), 
                      label = "Seed Number:",
                      value = 123, 
                      min = 1),
@@ -123,7 +123,7 @@ mod_RCBD_ui <- function(id) {
                      shinycssloaders::withSpinner(
                        plotly::plotlyOutput(
                          ns("layouts"), 
-                         width = "98%", 
+                         width = "97%", 
                          height = "550px"),
                        type = 5
                      ),
@@ -167,7 +167,8 @@ mod_RCBD_server <- function(id) {
           data_up <- as.data.frame(data_up[,1])
           data_rcbd <- na.omit(data_up)
           colnames(data_rcbd) <- "TREATMENT"
-          return(list(data_rcbd = data_rcbd))
+          nt <- nrow(data_rcbd)
+          return(list(data_rcbd = data_rcbd, treatments = nt))
         } else if (names(data_ingested) == "bad_format") {
           shinyalert::shinyalert(
             "Error!!", 
@@ -187,7 +188,48 @@ mod_RCBD_server <- function(id) {
             type = "error")
           return(NULL)
         }
+      } else {
+        req(input$t)
+        nt <- as.numeric(input$t)
+        df <- data.frame(list(TREATMENT = paste0("G-", 1:nt)))
+        colnames(df) <- "TREATMENT"
+        data_rcbd <- df
+        return(list(data_rcbd = data_rcbd, treatments = nt))
       }
+    }) %>%
+      bindEvent(input$RUN.rcbd)
+    
+    rcbd_inputs <- reactive({
+      
+      req(get_data_rcbd())
+      
+      req(input$b)
+      req(input$seed.rcbd)
+      req(input$plot_start.rcbd)
+      req(input$Location.rcbd)
+      req(input$l.rcbd)
+      req(input$planter_mov_rcbd)
+      
+      r <- as.numeric(input$b)
+      treatments <- as.numeric(get_data_rcbd()$treatments)
+      planter <- input$planter_mov_rcbd
+      plot_start <- as.vector(unlist(strsplit(input$plot_start.rcbd, ",")))
+      plot_start <- as.numeric(plot_start)
+      site_names <-  as.vector(unlist(strsplit(input$Location.rcbd, ",")))
+      seed <- as.numeric(input$seed.rcbd)
+      sites <- as.numeric(input$l.rcbd)
+      continuous <- input$continuous.plot
+
+      return(list(
+        r = r, 
+        t = treatments, 
+        planter = planter,
+        plot_start = plot_start, 
+        sites = sites,
+        site_names = site_names,
+        continuous = continuous,
+        seed = seed)
+        )
     }) %>%
       bindEvent(input$RUN.rcbd)
     
@@ -224,40 +266,22 @@ mod_RCBD_server <- function(id) {
 
         
     RCBD_reactive <- reactive({
-      req(input$b)
-      req(input$myseed.rcbd)
-      req(input$plot_start.rcbd)
-      req(input$Location.rcbd)
-      req(input$l.rcbd)
-      b <- as.numeric(input$b)
-      plot_start.rcbd <- as.vector(unlist(strsplit(input$plot_start.rcbd, ",")))
-      plot_start.rcbd <- as.numeric(plot_start.rcbd)
-      loc <-  as.vector(unlist(strsplit(input$Location.rcbd, ",")))
-      seed.rcbd <- as.numeric(input$myseed.rcbd)
-      l.rcbd <- as.numeric(input$l.rcbd)
+      
+      req(get_data_rcbd())
+      req(rcbd_inputs())
       
       shinyjs::show(id = "downloadCsv.rcbd")
-
-      if (input$owndatarcbd == "Yes") {
-        req(get_data_rcbd())
-        t <- NULL 
-        data.rcbd <- get_data_rcbd()$data_rcbd
-      }else {
-        req(input$t)
-        t <- as.numeric(input$t)
-        data.rcbd <- NULL
-      }
       
       RCBD(
-        t = t, 
-        reps = b, 
-        l = l.rcbd, 
-        plotNumber = plot_start.rcbd, 
-        continuous = input$continuous.plot,
-        planter = "cartesian", 
-        seed = seed.rcbd, 
-        locationNames = loc, 
-        data = data.rcbd
+        t = rcbd_inputs()$t, 
+        reps = rcbd_inputs()$r, 
+        l = rcbd_inputs()$sites, 
+        plotNumber = rcbd_inputs()$plot_start, 
+        continuous = rcbd_inputs()$continuous,
+        planter = rcbd_inputs()$planter, 
+        seed = rcbd_inputs()$seed, 
+        locationNames = rcbd_inputs()$site_names, 
+        data = get_data_rcbd()$data_rcbd
       )
 
     })  %>%
@@ -334,11 +358,10 @@ mod_RCBD_server <- function(id) {
     reactive_layoutRCBD <- reactive({
       req(input$stackedRCBD)
       req(input$layoutO_rcbd)
-      req(input$planter_mov_rcbd)
       req(input$locLayout_rcbd)
       req(RCBD_reactive())
       obj_rcbd <- RCBD_reactive()
-      planting_rcbd <- input$planter_mov_rcbd
+      planting_rcbd <- rcbd_inputs()$planter
       
       if (reset_selection$reset == 1) {
         opt_rcbd <- 1
@@ -437,10 +460,14 @@ mod_RCBD_server <- function(id) {
          !is.null(valsRCBD$trail.rcbd)) {
         max <- as.numeric(valsRCBD$maxV.rcbd)
         min <- as.numeric(valsRCBD$minV.rcbd)
-        # df.rcbd <- RCBD_reactive()$fieldBook
         df.rcbd <- reactive_layoutRCBD()$allSitesFieldbook
         cnamesdf.rcbd <- colnames(df.rcbd)
-        df.rcbd <- norm_trunc(a = min, b = max, data = df.rcbd)
+        df.rcbd <- norm_trunc(
+          a = min, 
+          b = max, 
+          data = df.rcbd, 
+          seed = rcbd_inputs()$seed
+        )
         colnames(df.rcbd) <- c(cnamesdf.rcbd[1:(ncol(df.rcbd) - 1)], 
                                valsRCBD$trail.rcbd)
         df.rcbd <- df.rcbd[order(df.rcbd$ID),]
@@ -502,7 +529,6 @@ mod_RCBD_server <- function(id) {
             hjust=0.5))
         p2 <- plotly::ggplotly(p1, 
                                tooltip="text", 
-                               width = 1350, 
                                height = 560)
         return(p2)
       } else {

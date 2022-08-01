@@ -150,7 +150,7 @@ mod_Optim_ui <- function(id) {
           tabPanel("Plot Number Field", DT::DTOutput(ns("PLOTFIELD"))),
           tabPanel("Field Book", DT::DTOutput(ns("OPTIMOUTPUT"))),
           tabPanel("Heatmap", 
-            plotly::plotlyOutput(ns("heatmap")))
+            plotly::plotlyOutput(ns("heatmap"), width = "97%"))
          )
       )
     )
@@ -731,7 +731,7 @@ mod_Optim_server <- function(id) {
           ggplot2::labs(fill = w) +
           viridis::scale_fill_viridis(discrete = FALSE)
         
-        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1250, height = 740)
+        p2 <- plotly::ggplotly(p1, tooltip="text", height = 740)
         
         return(p2)
       }

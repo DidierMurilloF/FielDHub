@@ -114,7 +114,7 @@ split_split_plot <- function(wp = NULL, sp = NULL, ssp = NULL, reps = NULL, type
               SubSubPlots <- ssp
               ssp <- length(SubSubPlots)
             }
-          }else if (is.character(sp) && is.character(ssp)) {
+          } else if (is.character(sp) && is.character(ssp)) {
             if (all(lengths(list(sp, ssp)) > 1)) {
               WholePlots <- wp
               wp <- length(WholePlots)
