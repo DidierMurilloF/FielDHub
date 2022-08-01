@@ -102,8 +102,8 @@ mod_FD_ui <- function(id){
                                                     width = '10%',
                                                     style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
                      shinycssloaders::withSpinner(
-                       plotly::plotlyOutput(ns("layouts"), width = "98%", 
-                                            height = "550px"),type = 5
+                       plotly::plotlyOutput(ns("layouts"), width = "97%", 
+                                            height = "550px"), type = 5
                      ),
                      br(),
                      column(12, uiOutput(ns("well_panel_layout_FD")))
@@ -441,17 +441,22 @@ mod_FD_server <- function(id) {
     })
     
     simuData_fd <- reactive({
-      set.seed(input$seed.fd)
+      req(fd_inputs()$seed)
       req(fd_reactive()$fieldBook)
       if(!is.null(valsfd$maxV.fd) && !is.null(valsfd$minV.fd) && !is.null(valsfd$trail.fd)) {
         max <- as.numeric(valsfd$maxV.fd)
         min <- as.numeric(valsfd$minV.fd)
         df.fd <- reactive_layoutFD()$allSitesFieldbook
         cnamesdf.fd <- colnames(df.fd)
-        df.fd <- norm_trunc(a = min, b = max, data = df.fd)
+        df.fd <- norm_trunc(
+          a = min, 
+          b = max, 
+          data = df.fd, 
+          seed = fd_inputs()$seed
+        )
         colnames(df.fd) <- c(cnamesdf.fd[1:(ncol(df.fd) - 1)], valsfd$trail.fd)
         a <- ncol(df.fd)
-      }else {
+      } else {
         df.fd <- reactive_layoutFD()$allSitesFieldbook
         a <- ncol(df.fd)
       }
@@ -515,7 +520,7 @@ mod_FD_server <- function(id) {
             family="Calibri", face="bold", size=13, hjust=0.5)
             )
         
-        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 560)
+        p2 <- plotly::ggplotly(p1, tooltip="text", height = 560)
         return(p2)
       } else {
         showModal(

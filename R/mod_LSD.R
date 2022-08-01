@@ -113,7 +113,7 @@ mod_LSD_ui <- function(id){
                            style="color: #337ab7; background-color: #fff; border-color: #2e6da4")
                         ),
                        plotly::plotlyOutput(ns("layout_lsd"),
-                                            width = "98%",
+                                            width = "97%",
                                             height = "550px"),
                        br(),
                        column(12, uiOutput(ns("well_panel_layout_LSD")))
@@ -453,7 +453,12 @@ mod_LSD_server <- function(id){
         min <- as.numeric(valsLSD$minV.lsd)
         df.lsd <- reactive_layoutLSD()$allSitesFieldbook
         cnamesdf.lsd <- colnames(df.lsd)
-        df.lsd <- norm_trunc(a = min, b = max, data = df.lsd)
+        df.lsd <- norm_trunc(
+          a = min, 
+          b = max, 
+          data = df.lsd, 
+          seed = lsd_inputs()$seed
+        )
         colnames(df.lsd) <- c(cnamesdf.lsd[1:(ncol(df.lsd) - 1)], 
                               valsLSD$trail.lsd)
         df.lsd <- df.lsd[order(df.lsd$ID),]
@@ -513,7 +518,7 @@ mod_LSD_server <- function(id){
               hjust=0.5)
             )
         
-        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1350, height = 560)
+        p2 <- plotly::ggplotly(p1, tooltip="text", height = 560)
         return(p2)
       } else {
         showModal(

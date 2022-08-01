@@ -1,5 +1,6 @@
 #' @importFrom stats pnorm qnorm
-norm_trunc <- function(a = NULL, b = NULL, data = NULL) {
+norm_trunc <- function(a = NULL, b = NULL, data = NULL, seed = NULL) {
+  set.seed(seed)
   if (a == b) validate('Error: Truncation range values (a, b) is empty.')
   min <- a;max <- b
   Nc <- ncol(data)

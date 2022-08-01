@@ -89,7 +89,7 @@ mod_Alpha_Lattice_ui <- function(id) {
                                     style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
                      
                      shinycssloaders::withSpinner(
-                       plotly::plotlyOutput(ns("random_layout"), width = "98%", height = "550px"),type = 5
+                       plotly::plotlyOutput(ns("random_layout"), width = "97%", height = "550px"),type = 5
                      ),
                      br(),
                      column(12, uiOutput(ns("well_panel_layout")))
@@ -524,7 +524,7 @@ mod_Alpha_Lattice_server <- function(id){
                                                             size=13, 
                                                             hjust=0.5))
         
-        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1250, height = 560)
+        p2 <- plotly::ggplotly(p1, tooltip="text", height = 560)
         return(p2)
       } else {
         showModal(

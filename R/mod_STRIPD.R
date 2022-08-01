@@ -127,7 +127,7 @@ mod_STRIPD_ui <- function(id){
                                                     style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
                      shinycssloaders::withSpinner(
                        plotly::plotlyOutput(ns("layout.strip"), 
-                                            width = "98%", 
+                                            width = "97%", 
                                             height = "560px"),
                        type = 5
                      ),
@@ -188,43 +188,57 @@ mod_STRIPD_server <- function(id) {
     })
     
     get_data_strip <- reactive({
-      req(input$file.STRIP)
-      inFile <- input$file.STRIP
-      data_ingested <- load_file(name = inFile$name, 
-                                 path = inFile$datapat, 
-                                 sep = input$sep.strip, 
-                                 check = TRUE,
-                                 design = "strip")
-      
-      if (names(data_ingested) == "dataUp") {
-        data_up <- data_ingested$dataUp
-        data_strip <- as.data.frame(data_up[,1:2])
-        colnames(data_strip) <- c("WHOLEPLOT", "SUBPLOT")
-        return(list(data_strip = data_strip))
-      } else if (names(data_ingested) == "bad_format") {
-        shinyalert::shinyalert(
-          "Error!!", 
-          "Invalid file; Please upload a .csv file.", 
-          type = "error")
-        return(NULL)
-      } else if (names(data_ingested) == "duplicated_vals") {
-        shinyalert::shinyalert(
-          "Error!!", 
-          "Check input file for duplicate values.", 
-          type = "error")
-        return(NULL)
-      } else if (names(data_ingested) == "missing_cols") {
-        shinyalert::shinyalert(
-          "Error!!", 
-          "Data input needs at least two column: WHOLEPLOT and SUBPLOT", 
-          type = "error")
-        return(NULL)
+      if (input$owndataSTRIP == "Yes") {
+        req(input$file.STRIP)
+        inFile <- input$file.STRIP
+        data_ingested <- load_file(name = inFile$name, 
+                                   path = inFile$datapat, 
+                                   sep = input$sep.strip, 
+                                   check = TRUE,
+                                   design = "strip")
+        
+        if (names(data_ingested) == "dataUp") {
+          data_up <- data_ingested$dataUp
+          data_strip <- as.data.frame(data_up[,1:2])
+          colnames(data_strip) <- c("Hplot", "Vplot")
+          Hstrip <- length(as.vector(na.omit(data_strip[,1])))
+          Vstrip <- length(as.vector(na.omit(data_strip[,2])))
+          treatments <- c(Hstrip, Vstrip)
+          return(list(data_strip = data_strip, treatments = treatments))
+        } else if (names(data_ingested) == "bad_format") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Invalid file; Please upload a .csv file.", 
+            type = "error")
+          return(NULL)
+        } else if (names(data_ingested) == "duplicated_vals") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Check input file for duplicate values.", 
+            type = "error")
+          return(NULL)
+        } else if (names(data_ingested) == "missing_cols") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Data input needs at least two column: Hplot and Vplot", 
+            type = "error")
+          return(NULL)
+        }
+      } else {
+        req(input$HStrip.strip, input$VStrip.strip)
+        req(input$blocks.strip)
+        Hplots <- as.numeric(input$HStrip.strip)
+        Vplots <- as.numeric(input$VStrip.strip)
+        treatments = c(Hplots, Vplots)
+        return(list(data_strip = NULL, treatments = treatments))
       }
     }) %>% 
       bindEvent(input$RUN.strip)
     
     
     strip_inputs <- reactive({
+      
+      req(get_data_strip())
       
       req(input$plot_start.strip)
       req(input$Location.strip)
@@ -240,29 +254,19 @@ mod_STRIPD_server <- function(id) {
       loc.strip <-  as.vector(unlist(strsplit(input$Location.strip, ",")))
       reps.strip <- as.numeric(input$blocks.strip)
       planter <- input$planter.strip
+      data_strip <- get_data_strip()$data_strip
       
-      if (input$owndataSTRIP == "Yes") {
-        req(get_data_strip())
-        Hplots.strip <- NULL
-        Vplots.strip <- NULL
-        data.strip <- get_data_strip()$data_strip
-      } else {
-        req(input$HStrip.strip, input$VStrip.strip)
-        Hplots.strip <- as.numeric(input$HStrip.strip)
-        Vplots.strip <- as.numeric(input$VStrip.strip)
-        data.strip <- NULL
-      }
       return(
         list(
-          Hplots = Hplots.strip, 
-          Vplots = Vplots.strip, 
+          Hplots = get_data_strip()$treatments[1], 
+          Vplots = get_data_strip()$treatments[2], 
           b = reps.strip, 
           l = l.strip,
           seed = seed.strip,
           planter = planter,
           plot_number = plot_start.strip,
-          location_names = loc.strip, 
-          data = data.strip
+          site_names = loc.strip, 
+          data = data_strip
         )
       )
     }) %>%
@@ -275,13 +279,13 @@ mod_STRIPD_server <- function(id) {
       shinyjs::show(id = "downloadCsv.strip")
     
       strip_plot(
-        Hplots = strip_inputs()$Hplots, 
-        Vplots = strip_inputs()$Vplots, 
+        Hplots = strip_inputs()$Hplots,
+        Vplots = strip_inputs()$Vplots,
         b = strip_inputs()$b, 
         l = strip_inputs()$l,
         planter = strip_inputs()$planter,
         plotNumber = strip_inputs()$plot_number,
-        locationNames = strip_inputs()$location_ames,
+        locationNames = strip_inputs()$site_names,
         seed = strip_inputs()$seed,
         data = strip_inputs()$data
       )
@@ -463,17 +467,22 @@ mod_STRIPD_server <- function(id) {
     simuData_strip <- reactive({
       req(strip_reactive()$fieldBook)
       set.seed(input$seed.strip)
-      if(!is.null(valsStrip$maxV.strip) && !is.null(valsStrip$minV.strip) && !is.null(valsStrip$trail.strip)) {
+      if(!is.null(valsStrip$maxV.strip) && 
+         !is.null(valsStrip$minV.strip) && 
+         !is.null(valsStrip$trail.strip)) {
         max <- as.numeric(valsStrip$maxV.strip)
         min <- as.numeric(valsStrip$minV.strip)
-        #df.strip <- strip_reactive()$fieldBook
         df.strip <- reactive_layoutSTRIP()$allSitesFieldbook
         cnamesdf.strip <- colnames(df.strip)
-        df.strip <- norm_trunc(a = min, b = max, data = df.strip)
+        df.strip <- norm_trunc(
+          a = min, 
+          b = max, 
+          data = df.strip, 
+          seed = strip_inputs()$seed
+         )
         colnames(df.strip) <- c(cnamesdf.strip[1:(ncol(df.strip) - 1)], valsStrip$trail.strip)
         a <- ncol(df.strip)
       }else {
-        #df.strip <- strip_reactive()$fieldBook
         df.strip <- reactive_layoutSTRIP()$allSitesFieldbook
         a <- ncol(df.strip)
       }
@@ -518,7 +527,7 @@ mod_STRIPD_server <- function(id) {
           ggplot2::theme_minimal() + # I added this option 
           ggplot2::theme(plot.title = ggplot2::element_text(family="Calibri", face="bold", size=13, hjust=0.5))
         
-        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1350, height = 560)
+        p2 <- plotly::ggplotly(p1, tooltip="text", height = 560)
         return(p2)
       } else {
         showModal(

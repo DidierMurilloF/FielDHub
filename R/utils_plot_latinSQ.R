@@ -9,7 +9,6 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, layout = 1,
                          stacked = "horizontal", 
                          planter = "serpentine", 
                          l = 1) {
-  print(planter)
   rsRep <- dims[1]
   csRep <- dims[2]
   site <- l

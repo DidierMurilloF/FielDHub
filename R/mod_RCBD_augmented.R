@@ -179,7 +179,7 @@ mod_RCBD_augmented_ui <- function(id){
            tabPanel("Randomized Field", DT::DTOutput(ns("randomized_layout"))),
            tabPanel("Plot Number Field", DT::DTOutput(ns("plot_number_layout"))),
            tabPanel("Field Book", DT::DTOutput(ns("fieldBook_ARCBD"))),
-           tabPanel("Heatmap", plotly::plotlyOutput(ns("heatmap")))
+           tabPanel("Heatmap", plotly::plotlyOutput(ns("heatmap"), width = "97%"))
          )      
       )
     )
@@ -880,7 +880,7 @@ mod_RCBD_augmented_server <- function(id) {
            ggplot2::labs(fill = w) +
            viridis::scale_fill_viridis(discrete = FALSE)
 
-         p2 <- plotly::ggplotly(p1, tooltip="text", width = 1200, height = 740)
+         p2 <- plotly::ggplotly(p1, tooltip="text", height = 740)
 
          return(p2)
        }

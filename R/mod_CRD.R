@@ -112,7 +112,7 @@ mod_CRD_ui <- function(id) {
                       ),
                       shinycssloaders::withSpinner(
                        plotly::plotlyOutput(ns("layout_random"), 
-                                            width = "98%", 
+                                            width = "97%", 
                                             height = "560px"),
                        type = 5
                      ),
@@ -373,13 +373,17 @@ mod_CRD_server <- function(id) {
         min <- as.numeric(vals$minV.CRD)
         df.crd <- reactive_layoutCRD()$fieldBookXY
         cnamesdf.crd <- colnames(df.crd)
-        df.crd <- norm_trunc(a = min, b = max, data = df.crd)
+        df.crd <- norm_trunc(
+          a = min, 
+          b = max, 
+          data = df.crd, 
+          seed = crd_inputs()$seed
+        )
         colnames(df.crd) <- c(cnamesdf.crd[1:(ncol(df.crd) - 1)], vals$trail.CRD)
         df.crd <- df.crd[order(df.crd$ID),]
       }else {
         df.crd <- reactive_layoutCRD()$fieldBookXY
       }
-      
       return(list(df = df.crd))
     })
     
@@ -439,7 +443,7 @@ mod_CRD_server <- function(id) {
           ggplot2::ggtitle(heatmapTitle) +
           ggplot2::theme_minimal() + # I added this option 
           ggplot2::theme(plot.title = ggplot2::element_text(family="Calibri", face="bold", size=13, hjust=0.5))
-        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1150, height = 560)
+        p2 <- plotly::ggplotly(p1, tooltip="text", height = 560)
         return(p2)
       } else {
         showModal(

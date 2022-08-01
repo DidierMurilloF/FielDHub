@@ -174,9 +174,14 @@ mod_diagonal_multiple_ui <- function(id) {
                     tabPanel("Expt Layout", DT::DTOutput(ns("name_layout"))),
                     tabPanel("Plot Number Field", DT::DTOutput(ns("plot_number_layout"))),
                     tabPanel("Field Book", DT::DTOutput(ns("fieldBook_diagonal"))),
-                    tabPanel("Heatmap", shinycssloaders::withSpinner(
-                      plotly::plotlyOutput(ns("heatmap_diag")), 
-                      type = 5)
+                    tabPanel("Heatmap", 
+                             shinycssloaders::withSpinner(
+                               plotly::plotlyOutput(
+                                 ns("heatmap_diag"),
+                                 width = "97%"
+                                 ), 
+                               type = 5
+                               )
                     )
         )      
       )
@@ -1316,7 +1321,7 @@ mod_diagonal_multiple_server <- function(id) {
         ggplot2::labs(fill = w) +
         viridis::scale_fill_viridis(discrete = FALSE)
       
-      p2 <- plotly::ggplotly(p1, tooltip="text", width = 1250, height = 750)
+      p2 <- plotly::ggplotly(p1, tooltip="text", height = 700)
       
       return(p2)
     })

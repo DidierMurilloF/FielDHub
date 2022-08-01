@@ -119,7 +119,7 @@ mod_RowCol_ui <- function(id){
                                                     style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
                      shinycssloaders::withSpinner(
                        plotly::plotlyOutput(ns("layouts"), 
-                                            width = "98%", 
+                                            width = "97%", 
                                             height = "550px"),
                        type = 5),
                      br(),
@@ -219,7 +219,6 @@ mod_RowCol_server <- function(id){
         df <- data.frame(list(ENTRY = 1:nt, NAME = paste0("G-", 1:nt)))
         colnames(df) <- c("ENTRY", "NAME")
         data_rcd <- df
-        #print(data_rcd)
         treatments = nrow(data_rcd)
         return(list(data_rcd = data_rcd, treatments = treatments))
       }
@@ -289,6 +288,7 @@ mod_RowCol_server <- function(id){
       r.rcd <- as.numeric(input$r.rcd)
       k.rcd <- as.numeric(input$k.rcd)
       treatments <- as.numeric(get_data_rcd()$treatments)
+      planter <- input$planter_mov_rcd
       plot_start.rcd <- as.vector(unlist(strsplit(input$plot_start.rcd, ",")))
       plot_start <- as.numeric(plot_start.rcd)
       site_names <-  as.vector(unlist(strsplit(input$Location.rcd, ",")))
@@ -296,7 +296,8 @@ mod_RowCol_server <- function(id){
       return(list(r = r.rcd, 
                   k = k.rcd, 
                   t = treatments, 
-                  plot_start = plot_start, 
+                  plot_start = plot_start,
+                  planter = planter,
                   sites = sites,
                   site_names = site_names,
                   seed = seed))
@@ -410,7 +411,7 @@ mod_RowCol_server <- function(id){
       req(RowCol_reactive())
       obj_rcd <- RowCol_reactive()
       
-      planting_rcd <- input$planter_mov_rcd
+      planting_rcd <- rcd_inputs()$planter
       
       if (reset_selection$reset == 1) {
         opt_rcd <- 1
@@ -510,7 +511,12 @@ mod_RowCol_server <- function(id){
         min <- as.numeric(valsRowColD$minV.RowCol)
         df.RowCol <- reactive_layoutROWCOL()$allSitesFieldbook
         cnamesdf.RowCol <- colnames(df.RowCol)
-        df.RowCol <- norm_trunc(a = min, b = max, data = df.RowCol)
+        df.RowCol <- norm_trunc(
+          a = min, 
+          b = max, 
+          data = df.RowCol, 
+          seed = rcd_inputs()$seed
+        )
         colnames(df.RowCol) <- c(cnamesdf.RowCol[1:(ncol(df.RowCol) - 1)], 
                                  valsRowColD$trail.RowCol)
         a <- ncol(df.RowCol)
@@ -568,7 +574,7 @@ mod_RowCol_server <- function(id){
             family="Calibri", face="bold", size=13, hjust=0.5)
             )
         
-        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1250, height = 560)
+        p2 <- plotly::ggplotly(p1, tooltip="text", height = 560)
         return(p2)
       } else {
         showModal(
@@ -603,7 +609,7 @@ mod_RowCol_server <- function(id){
       df$ENTRY <- as.factor(df$ENTRY)
       a <- as.numeric(simuData_RowCol()$a)
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                scrollX = TRUE, scrollY = "600px"))
+                                scrollX = TRUE, scrollY = "490px"))
       DT::datatable(df, 
                     filter = 'top', 
                     rownames = FALSE, 

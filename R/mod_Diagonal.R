@@ -159,7 +159,7 @@ mod_Diagonal_ui <- function(id) {
                     tabPanel("Field Book", 
                              DT::DTOutput(ns("fieldBook_diagonal"))),
                     tabPanel("Heatmap", shinycssloaders::withSpinner(
-                      plotly::plotlyOutput(ns("heatmap_diag")), 
+                      plotly::plotlyOutput(ns("heatmap_diag"),  width = "97%"), 
                       type = 5)
                     )
         )      
@@ -1021,7 +1021,7 @@ mod_Diagonal_server <- function(id) {
         ggplot2::labs(fill = w) +
         viridis::scale_fill_viridis(discrete = FALSE)
       
-      p2 <- plotly::ggplotly(p1, tooltip="text", width = 1250, height = 750)
+      p2 <- plotly::ggplotly(p1, tooltip="text", height = 720)
       
       return(p2)
     })

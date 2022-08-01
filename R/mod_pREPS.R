@@ -142,7 +142,7 @@ mod_pREPS_ui <- function(id){
                   ),
           tabPanel("Plot Number Field", DT::DTOutput(ns("PREPSPLOTFIELD"))),
           tabPanel("Field Book", DT::DTOutput(ns("pREPSOUTPUT"))),
-          tabPanel("Heatmap", plotly::plotlyOutput(ns("heatmap_prep")))
+          tabPanel("Heatmap", plotly::plotlyOutput(ns("heatmap_prep"), width = "97%"))
         )
       )
     )
@@ -668,7 +668,7 @@ mod_pREPS_server <- function(id){
           ggplot2::labs(fill = w) +
           viridis::scale_fill_viridis(discrete = FALSE)
         
-        p2 <- plotly::ggplotly(p1, tooltip="text", width = 1250, height = 710)
+        p2 <- plotly::ggplotly(p1, tooltip="text", height = 700)
         return(p2)
       }
     }) 

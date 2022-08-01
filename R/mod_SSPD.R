@@ -97,7 +97,7 @@ mod_SSPD_ui <- function(id){
           )
         ),
         
-        numericInput(inputId = ns("myseed.sspd"), 
+        numericInput(inputId = ns("seed.sspd"), 
                      label = "Seed Number:", 
                      value = 123, 
                      min = 1),
@@ -141,7 +141,7 @@ mod_SSPD_ui <- function(id){
                          style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
                      shinycssloaders::withSpinner(
                        plotly::plotlyOutput(ns("layouts"), 
-                                            width = "98%", 
+                                            width = "97%", 
                                             height = "580px"),
                        type = 5
                      ),
@@ -205,104 +205,115 @@ mod_SSPD_server <- function(id){
     })
     
     get_data_sspd <- reactive({
-      req(input$file.SSPD)
-      inFile <- input$file.SSPD
-      data_ingested <- load_file(name = inFile$name, 
-                                 path = inFile$datapat, 
-                                 sep = input$sep.sspd, 
-                                 check = TRUE, 
-                                 design = "sspd")
-      
-      if (names(data_ingested) == "dataUp") {
-        data_up <- data_ingested$dataUp
-        data_sspd <- as.data.frame(data_up[, 1:3])
-        colnames(data_sspd) <- c("WHOLEPLOT", "SUBPLOT", "SUB_SUBPLOT")
-        return(list(data_sspd = data_sspd))
-      } else if (names(data_ingested) == "bad_format") {
-        shinyalert::shinyalert(
-          "Error!!", 
-          "Invalid file; Please upload a .csv file.", 
-          type = "error")
-        return(NULL)
-      } else if (names(data_ingested) == "duplicated_vals") {
-        shinyalert::shinyalert(
-          "Error!!", 
-          "Check input file for duplicate values.", 
-          type = "error")
-        return(NULL)
-      } else if (names(data_ingested) == "missing_cols") {
-        shinyalert::shinyalert(
-          "Error!!", 
-          "Data input needs at least two column: WHOLEPLOT, SUBPLOT, and SUB_SUBPLOT", 
-          type = "error")
-        return(NULL)
+      if (input$owndataSSPD == "Yes") {
+        req(input$file.SSPD)
+        inFile <- input$file.SSPD
+        data_ingested <- load_file(name = inFile$name, 
+                                   path = inFile$datapat, 
+                                   sep = input$sep.sspd, 
+                                   check = TRUE, 
+                                   design = "sspd")
+        
+        if (names(data_ingested) == "dataUp") {
+          data_up <- data_ingested$dataUp
+          data_sspd <- as.data.frame(data_up[, 1:3])
+          colnames(data_sspd) <- c("WHOLEPLOT", "SUBPLOT", "SUB_SUBPLOT")
+          wp <- as.vector(na.omit(data_sspd[,1]))
+          sp <- as.vector(na.omit(data_sspd[,2]))
+          ssp <- as.vector(na.omit(data_sspd[,3]))
+          treatments <- c(wp, sp, ssp)
+          return(list(data_sspd = data_sspd, treatments = treatments))
+        } else if (names(data_ingested) == "bad_format") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Invalid file; Please upload a .csv file.", 
+            type = "error")
+          return(NULL)
+        } else if (names(data_ingested) == "duplicated_vals") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Check input file for duplicate values.", 
+            type = "error")
+          return(NULL)
+        } else if (names(data_ingested) == "missing_cols") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Data input needs at least two column: WHOLEPLOT, SUBPLOT, and SUB_SUBPLOT", 
+            type = "error")
+          return(NULL)
+        }
+      } else {
+        req(input$mp.sspd, input$sp.sspd, input$ssp.sspd)
+        wp <- as.numeric(input$mp.sspd)
+        sp <- as.numeric(input$sp.sspd)
+        ssp <- as.numeric(input$ssp.sspd)
+        treatments <- c(wp, sp, ssp)
+        data_spd <- NULL
+        return(list(data_spd = data_spd, treatments = treatments))
       }
     }) %>% 
+      bindEvent(input$RUN.sspd)
+    
+    sspd_inputs <- reactive({
+      
+      req(get_data_sspd())
+      
+      req(input$plot_start.sspd)
+      req(input$Location.sspd)
+      req(input$seed.sspd)
+      req(input$l.sspd)
+      req(input$reps.sspd)
+      
+      sites <- as.numeric(input$l.sspd)
+      seed <- as.numeric(input$seed.sspd)
+      plot_start.sspd <- as.vector(unlist(strsplit(input$plot_start.sspd, ",")))
+      plot_start <- as.numeric(plot_start.sspd)
+      site_names <-  as.vector(unlist(strsplit(input$Location.sspd, ",")))
+      reps <- as.numeric(input$reps.sspd)
+      planter <- input$planter_mov_sspd
+      data_sspd <- get_data_sspd()$data_sspd
+      
+      if (input$kindSSPD == "SSPD_RCBD") {
+        type_design <- 2
+      } else type_design <- 1
+      
+      return(
+        list(
+          wp = get_data_sspd()$treatments[1], 
+          sp = get_data_sspd()$treatments[2], 
+          ssp = get_data_sspd()$treatments[3], 
+          r = reps, 
+          sites = sites,
+          seed = seed,
+          planter = planter,
+          plot_start = plot_start,
+          site_names = site_names, 
+          type_design = type_design,
+          data = data_sspd
+        )
+      )
+    }) %>%
       bindEvent(input$RUN.sspd)
     
     
     sspd_reactive <- reactive({
       
-      req(input$plot_start.sspd)
-      req(input$Location.sspd)
-      req(input$myseed.sspd)
-      req(input$l.sspd)
+      req(sspd_inputs())
       
       shinyjs::show(id = "downloadCsv.sspd")
       
-      l.sspd <- as.numeric(input$l.sspd)
-      seed.sspd <- as.numeric(input$myseed.sspd)
-      plot_start.sspd <- as.vector(unlist(strsplit(input$plot_start.sspd, ",")))
-      plot_start.sspd <- as.numeric(plot_start.sspd)
-      loc.sspd <-  as.vector(unlist(strsplit(input$Location.sspd, ",")))
-      req(input$reps.sspd)
-      reps.sspd <- as.numeric(input$reps.sspd)
-      
-      if (input$kindSSPD == "SSPD_RCBD") {
-        
-        if (input$owndataSSPD == "Yes") {
-          req(get_data_sspd())
-          wp.sspd <- NULL
-          sp.sspd <- NULL
-          ssp.sspd <- NULL
-          data.sspd <- get_data_sspd()$data_sspd
-        }else {
-          req(input$mp.sspd, input$sp.sspd)
-          req(input$ssp.sspd)
-          wp.sspd <- as.numeric(input$mp.sspd)
-          sp.sspd <- as.numeric(input$sp.sspd)
-          ssp.sspd <- as.numeric(input$ssp.sspd)
-          data.sspd <- NULL
-        }
-        type <- 2
-      }else {
-        if (input$owndataSSPD == "Yes") {
-          req(get_data_sspd())
-          wp.sspd <- NULL
-          sp.sspd <- NULL
-          ssp.sspd <- NULL
-          data.sspd <- get_data_sspd()$data_sspdd
-        }else {
-          req(input$mp.sspd, input$sp.sspd)
-          req(input$ssp.sspd)
-          wp.sspd <- as.numeric(input$mp.sspd)
-          sp.sspd <- as.numeric(input$sp.sspd)
-          ssp.sspd <- as.numeric(input$ssp.sspd)
-          data.sspd <- NULL
-        }
-        type <- 1
-      }
-      
       split_split_plot(
-        wp = wp.sspd, 
-        sp = sp.sspd, 
-        ssp = ssp.sspd, 
-        reps = reps.sspd, l = l.sspd, 
-        plotNumber = plot_start.sspd, seed = seed.sspd, 
-        type = type, locationNames = loc.sspd, 
-        data = data.sspd
+        wp = sspd_inputs()$wp, 
+        sp = sspd_inputs()$sp, 
+        ssp = sspd_inputs()$ssp, 
+        reps = sspd_inputs()$r, 
+        l = sspd_inputs()$sites, 
+        plotNumber = sspd_inputs()$plot_start, 
+        seed = sspd_inputs()$seed, 
+        type = sspd_inputs()$type_design, 
+        locationNames = sspd_inputs()$site_names, 
+        data = sspd_inputs()$data
       )
-      
       
     }) %>% 
       bindEvent(input$RUN.sspd)
@@ -374,7 +385,7 @@ mod_SSPD_server <- function(id){
       req(input$layoutO_sspd)
       req(sspd_reactive())
       obj_sspd <- sspd_reactive()
-      planting_sspd <- input$planter_mov_sspd
+      planting_sspd <- sspd_inputs()$planter
       
       if (reset_selection$reset == 1) {
         opt_sspd <- 1
@@ -459,7 +470,6 @@ mod_SSPD_server <- function(id){
     })
     
     simuData_sspd <- reactive({
-      set.seed(input$myseed.sspd)
       req(sspd_reactive()$fieldBook)
       
       if(!is.null(valsspd$maxV.sspd) && !is.null(valsspd$minV.sspd) && 
@@ -468,7 +478,12 @@ mod_SSPD_server <- function(id){
         min <- as.numeric(valsspd$minV.sspd)
         df.sspd <- reactive_layoutSSPD()$allSitesFieldbook
         cnamesdf.sspd <- colnames(df.sspd)
-        df.sspd <- norm_trunc(a = min, b = max, data = df.sspd)
+        df.sspd <- norm_trunc(
+          a = min, 
+          b = max, 
+          data = df.sspd, 
+          seed = sspd_inputs()$seed
+        )
         colnames(df.sspd) <- c(cnamesdf.sspd[1:(ncol(df.sspd) - 1)], valsspd$Trial.sspd)
         df.sspd <- df.sspd[order(df.sspd$ID),]
       }else {
@@ -528,7 +543,6 @@ mod_SSPD_server <- function(id){
                                                             hjust=0.5))
         
         p2 <- plotly::ggplotly(p1, tooltip="text", 
-                               width = 1350, 
                                height = 580)
         return(p2)
       } else {
