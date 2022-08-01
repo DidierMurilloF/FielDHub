@@ -255,19 +255,19 @@
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/DidierMurilloF/FielDHub" class="external-link">FielDHub</a></span><span class="op">)</span></span></code></pre></div>
 <p>Then, you can enter the information describing the above design like this:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">optim_expt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/optimized_arrangement.html">optimized_arrangement</a></span><span class="op">(</span></span>
-<span>  nrows <span class="op">=</span> <span class="fl">29</span>,</span>
-<span>  ncols <span class="op">=</span> <span class="fl">15</span>,</span>
-<span>  lines <span class="op">=</span> <span class="fl">401</span>, </span>
-<span>  amountChecks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">12</span>,<span class="fl">11</span>,<span class="fl">11</span><span class="op">)</span>,</span>
-<span>  checks <span class="op">=</span> <span class="fl">3</span>, </span>
-<span>  l <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  plotNumber <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1001</span>,<span class="fl">2001</span>,<span class="fl">3001</span><span class="op">)</span>,</span>
-<span>  exptName <span class="op">=</span> <span class="st">"WINTER_WHEAT_22"</span>, </span>
-<span>  locationNames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"FARGO"</span>, <span class="st">"CASSELTON"</span>, <span class="st">"MINOT"</span><span class="op">)</span>,</span>
-<span>  seed <span class="op">=</span> <span class="fl">130</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>optim_expt <span class="ot">&lt;-</span> <span class="fu">optimized_arrangement</span>(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">nrows =</span> <span class="dv">29</span>,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">ncols =</span> <span class="dv">15</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">lines =</span> <span class="dv">401</span>, </span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">amountChecks =</span> <span class="fu">c</span>(<span class="dv">12</span>,<span class="dv">11</span>,<span class="dv">11</span>),</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">checks =</span> <span class="dv">3</span>, </span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">l =</span> <span class="dv">3</span>,</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">plotNumber =</span> <span class="fu">c</span>(<span class="dv">1001</span>,<span class="dv">2001</span>,<span class="dv">3001</span>),</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">exptName =</span> <span class="st">"WINTER_WHEAT_22"</span>, </span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">locationNames =</span> <span class="fu">c</span>(<span class="st">"FARGO"</span>, <span class="st">"CASSELTON"</span>, <span class="st">"MINOT"</span>),</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">130</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">435</span></span></code></pre></div>
 <div class="section level4">
 <h4 id="details-on-the-inputs-entered-in-optimized_arrangement-above">Details on the inputs entered in <code>optimized_arrangement()</code> above<a class="anchor" aria-label="anchor" href="#details-on-the-inputs-entered-in-optimized_arrangement-above"></a>
 </h4>
@@ -354,15 +354,19 @@ List of 9
 </h3>
 <p>For plotting the layout in function of the coordinates <code>ROW</code> and <code>COLUMN</code> in the field book object we can use the generic function <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> as follow,</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">optim_expt</span><span class="op">)</span></span>
-<span><span class="va">p</span><span class="op">$</span><span class="va">layout</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">optim_expt</span><span class="op">)</span></span></code></pre></div>
 <p><img src="optimized_arrangement_files/figure-html/unnamed-chunk-12-1.png" width="691.2" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">p</span><span class="op">$</span><span class="va">layout</span></span></code></pre></div>
+<p><img src="optimized_arrangement_files/figure-html/unnamed-chunk-12-2.png" width="691.2" style="display: block; margin: auto;"></p>
 <p>The figure above shows a map of an experiment randomized as an unreplicated optimized arrangement design. Gray plots represent the unreplicated treatments, while distinctively colored check plots are randomly replicated throughout the field.</p>
 <p>It is possible to pass more arguments to <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> such as the specific location. For example, you can plot specifically the layout for location 2.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">optim_expt</span>, l <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="va">p</span><span class="op">$</span><span class="va">layout</span></span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">optim_expt</span>, l <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <p><img src="optimized_arrangement_files/figure-html/unnamed-chunk-13-1.png" width="691.2" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">p</span><span class="op">$</span><span class="va">layout</span></span></code></pre></div>
+<p><img src="optimized_arrangement_files/figure-html/unnamed-chunk-13-2.png" width="691.2" style="display: block; margin: auto;"></p>
 <p><br><br><br></p>
 </div>
 </div>

@@ -90,7 +90,8 @@
 <div class="section level2">
 <h2 id="fieldhub-a-shiny-app-for-design-of-experiments-in-life-sciences">FielDHub: A Shiny App for Design of Experiments in Life Sciences<a class="anchor" aria-label="anchor" href="#fieldhub-a-shiny-app-for-design-of-experiments-in-life-sciences"></a>
 </h2>
-<p><a href="https://lifecycle.r-lib.org/articles/stages.html" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></p>
+<p><a href="https://github.com/DidierMurillloF/FielDHub/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/DidierMurilloF/FielDHub/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></p>
+<p><a href="https://lifecycle.r-lib.org/articles/stages.html" class="external-link"><img src="https://img.shields.io/badge/lifecycle-stable-brightgreen.svg" alt="Lifecycle: experimental"></a></p>
 <p><a href="https://cran.r-project.org/web//packages/FielDHub/" class="external-link"><img src="https://www.r-pkg.org/badges/version/FielDHub" alt="CRAN status"></a></p>
 <p><a href="https://cranlogs.r-pkg.org/badges/FielDHub" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/FielDHub" alt="cranlogs"></a></p>
 <p><a href="https://cranlogs.r-pkg.org/badges/grand-total/FielDHub" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/grand-total/FielDHub" alt="cranlogs"></a></p>
@@ -99,16 +100,16 @@
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
 <div class="section level3">
-<h3 id="development-version-from-github">Development version from GitHub<a class="anchor" aria-label="anchor" href="#development-version-from-github"></a>
-</h3>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"DidierMurilloF/FielDHub"</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
 <h3 id="stable-version-from-r-cran">Stable version from R CRAN<a class="anchor" aria-label="anchor" href="#stable-version-from-r-cran"></a>
 </h3>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"FielDHub"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="development-version-from-github">Development version from GitHub<a class="anchor" aria-label="anchor" href="#development-version-from-github"></a>
+</h3>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"DidierMurilloF/FielDHub"</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -138,17 +139,19 @@
 <p>The figure above shows a map of an experiment randomized as a Decision Block Unreplicated Design with Checks on Diagonals. Yellow, gray, and green shade the blocks of unreplicated experiments, while distinctively colored check plots are replicated throughout the field in a systematic diagonal arrangement.</p>
 <p>To illustrate using FielDHub to build experimental designs through R code, the design produced in the R Shiny interface described above can also be created using the function <code><a href="reference/diagonal_arrangement.html">diagonal_arrangement()</a></code> in the R script below. Note, that to obtain identical results, users must include the same seed number in the script as was used in the Shiny app. In this case, the seed number is 1249.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">diagonalExample</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/diagonal_arrangement.html">diagonal_arrangement</a></span><span class="op">(</span>nrows <span class="op">=</span> <span class="fl">20</span>, </span>
-<span>                                        ncols <span class="op">=</span> <span class="fl">15</span>, </span>
-<span>                                        lines <span class="op">=</span> <span class="fl">270</span>, </span>
-<span>                                        checks <span class="op">=</span> <span class="fl">4</span>, </span>
-<span>                                        plotNumber <span class="op">=</span> <span class="fl">101</span>, </span>
-<span>                                        splitBy <span class="op">=</span> <span class="st">"row"</span>, </span>
-<span>                                        seed <span class="op">=</span> <span class="fl">1249</span>, </span>
-<span>                                        kindExpt <span class="op">=</span> <span class="st">"DBUDC"</span>, </span>
-<span>                                        blocks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">100</span>, <span class="fl">70</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">diagonal</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/diagonal_arrangement.html">diagonal_arrangement</a></span><span class="op">(</span></span>
+<span>  nrows <span class="op">=</span> <span class="fl">20</span>, </span>
+<span>  ncols <span class="op">=</span> <span class="fl">15</span>, </span>
+<span>  lines <span class="op">=</span> <span class="fl">270</span>, </span>
+<span>  checks <span class="op">=</span> <span class="fl">4</span>, </span>
+<span>  plotNumber <span class="op">=</span> <span class="fl">101</span>, </span>
+<span>  splitBy <span class="op">=</span> <span class="st">"row"</span>, </span>
+<span>  seed <span class="op">=</span> <span class="fl">1249</span>, </span>
+<span>  kindExpt <span class="op">=</span> <span class="st">"DBUDC"</span>, </span>
+<span>  blocks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">100</span>, <span class="fl">70</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <p>Users can access the returned values from <code><a href="reference/diagonal_arrangement.html">diagonal_arrangement()</a></code> as follow,</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span> diagonalExample<span class="sc">$</span>infoDesign</span>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span> diagonal<span class="sc">$</span>infoDesign</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="sc">$</span>Lines</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">100</span> <span class="dv">100</span>  <span class="dv">70</span></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -168,7 +171,7 @@
 <span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="sc">$</span>seed</span>
 <span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">1249</span></span>
 <span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span> diagonalExample<span class="sc">$</span>layoutRandom</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span> diagonal<span class="sc">$</span>layoutRandom</span>
 <span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>      Col1 Col2 Col3 Col4 Col5 Col6 Col7 Col8 Col9 Col10 Col11 Col12 Col13 Col14 Col15</span>
 <span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>Row20  <span class="dv">248</span>    <span class="dv">2</span>  <span class="dv">268</span>  <span class="dv">225</span>  <span class="dv">258</span>  <span class="dv">223</span>  <span class="dv">255</span>  <span class="dv">226</span>  <span class="dv">264</span>   <span class="dv">239</span>   <span class="dv">274</span>     <span class="dv">1</span>   <span class="dv">232</span>   <span class="dv">235</span>   <span class="dv">256</span></span>
 <span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>Row19  <span class="dv">214</span>  <span class="dv">273</span>  <span class="dv">244</span>  <span class="dv">220</span>    <span class="dv">3</span>  <span class="dv">269</span>  <span class="dv">247</span>  <span class="dv">207</span>  <span class="dv">243</span>   <span class="dv">215</span>   <span class="dv">245</span>   <span class="dv">221</span>   <span class="dv">208</span>   <span class="dv">229</span>     <span class="dv">4</span></span>
@@ -191,7 +194,7 @@
 <span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>Row2    <span class="dv">91</span>   <span class="dv">23</span>   <span class="dv">11</span>   <span class="dv">51</span>   <span class="dv">30</span>    <span class="dv">1</span>   <span class="dv">83</span>   <span class="dv">64</span>   <span class="dv">50</span>    <span class="dv">90</span>    <span class="dv">79</span>    <span class="dv">21</span>    <span class="dv">12</span>     <span class="dv">6</span>    <span class="dv">95</span></span>
 <span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>Row1    <span class="dv">48</span>  <span class="dv">102</span>    <span class="dv">9</span>   <span class="dv">94</span>   <span class="dv">52</span>   <span class="dv">80</span>   <span class="dv">76</span>   <span class="dv">60</span>    <span class="dv">4</span>    <span class="dv">61</span>    <span class="dv">32</span>    <span class="dv">58</span>    <span class="dv">67</span>    <span class="dv">27</span>    <span class="dv">81</span></span>
 <span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span> <span class="fu">head</span>(diagonalExample<span class="sc">$</span>fieldBook, <span class="dv">12</span>)</span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span> <span class="fu">head</span>(diagonal<span class="sc">$</span>fieldBook, <span class="dv">12</span>)</span>
 <span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>   ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT</span>
 <span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span>   <span class="dv">1</span> Expt1        <span class="dv">1</span> <span class="dv">2021</span>  <span class="dv">101</span>   <span class="dv">1</span>      <span class="dv">1</span>      <span class="dv">0</span>    <span class="dv">48</span>    gen <span class="dv">48</span></span>
 <span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span>   <span class="dv">2</span> Expt1        <span class="dv">1</span> <span class="dv">2021</span>  <span class="dv">102</span>   <span class="dv">1</span>      <span class="dv">2</span>      <span class="dv">0</span>   <span class="dv">102</span>   gen <span class="dv">102</span></span>
@@ -211,21 +214,23 @@
 <h3 id="partially-replicated-design-example">Partially Replicated Design Example<a class="anchor" aria-label="anchor" href="#partially-replicated-design-example"></a>
 </h3>
 <p>Partially replicated designs are commonly employed in early generation field trials. This type of design is characterized by replication of a portion of the entries, with the remaining entries only appearing once in the experiment. As an example, considered a field trial with 288 plots containing 75 entries appearing two times each, and 138 entries only appearing once. This field trials is arranged in a field of 16 rows by 18 columns.</p>
-<p><img src="pREPExample.PNG"></p>
+<p><img src="pREP.PNG"></p>
 <p>In the figure above, green plots contain replicated entries, and yellow plots contain entries that only appear once.</p>
 <p>Instead of using the Shiny FielDHub app, users can use the standalone FielDHub function <code><a href="reference/partially_replicated.html">partially_replicated()</a></code>. The partially replicated layout described above can be produced through scripting as follows. As noted in the previous example, to obtain identical results between the script and the Shiny app, users need to use the same seed number, which, in this case, is 77.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">pREPexample</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/partially_replicated.html">partially_replicated</a></span><span class="op">(</span>nrows <span class="op">=</span> <span class="fl">16</span>, </span>
-<span>                                    ncols <span class="op">=</span> <span class="fl">18</span>,  </span>
-<span>                                    repGens <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">138</span>,<span class="fl">75</span><span class="op">)</span>,</span>
-<span>                                    repUnits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span>,</span>
-<span>                                    planter <span class="op">=</span> <span class="st">"serpentine"</span>, </span>
-<span>                                    plotNumber <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>                                    exptName <span class="op">=</span> <span class="st">"ExptA"</span>,</span>
-<span>                                    locationNames <span class="op">=</span> <span class="st">"FARGO"</span>,</span>
-<span>                                    seed <span class="op">=</span> <span class="fl">77</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">pREP</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/partially_replicated.html">partially_replicated</a></span><span class="op">(</span></span>
+<span>  nrows <span class="op">=</span> <span class="fl">16</span>, </span>
+<span>  ncols <span class="op">=</span> <span class="fl">18</span>,  </span>
+<span>  repGens <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">138</span>,<span class="fl">75</span><span class="op">)</span>,</span>
+<span>  repUnits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span>,</span>
+<span>  planter <span class="op">=</span> <span class="st">"serpentine"</span>, </span>
+<span>  plotNumber <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  exptName <span class="op">=</span> <span class="st">"ExptA"</span>,</span>
+<span>  locationNames <span class="op">=</span> <span class="st">"FARGO"</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">77</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <p>Users can access returned values from <code><a href="reference/partially_replicated.html">partially_replicated()</a></code> as follows,</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span> pREPexample<span class="sc">$</span>layoutRandom</span>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span> pREP<span class="sc">$</span>layoutRandom</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>      Col1 Col2 Col3 Col4 Col5 Col6 Col7 Col8 Col9 Col10 Col11 Col12 Col13 Col14 Col15 Col16 Col17 Col18</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>Row16  <span class="dv">176</span>   <span class="dv">45</span>  <span class="dv">192</span>  <span class="dv">127</span>   <span class="dv">71</span>   <span class="dv">62</span>  <span class="dv">102</span>  <span class="dv">120</span>   <span class="dv">95</span>    <span class="dv">79</span>    <span class="dv">61</span>   <span class="dv">158</span>   <span class="dv">141</span>    <span class="dv">32</span>    <span class="dv">21</span>    <span class="dv">25</span>    <span class="dv">14</span>    <span class="dv">71</span></span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>Row15   <span class="dv">18</span>  <span class="dv">121</span>    <span class="dv">9</span>  <span class="dv">123</span>  <span class="dv">171</span>   <span class="dv">60</span>   <span class="dv">11</span>  <span class="dv">204</span>    <span class="dv">2</span>   <span class="dv">182</span>   <span class="dv">119</span>    <span class="dv">65</span>   <span class="dv">198</span>    <span class="dv">63</span>   <span class="dv">188</span>    <span class="dv">34</span>   <span class="dv">124</span>    <span class="dv">55</span></span>
@@ -244,7 +249,7 @@
 <span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>Row2    <span class="dv">16</span>   <span class="dv">68</span>  <span class="dv">206</span>   <span class="dv">49</span>   <span class="dv">52</span>  <span class="dv">208</span>   <span class="dv">26</span>  <span class="dv">184</span>  <span class="dv">180</span>   <span class="dv">193</span>   <span class="dv">178</span>    <span class="dv">61</span>    <span class="dv">48</span>   <span class="dv">197</span>    <span class="dv">52</span>    <span class="dv">50</span>   <span class="dv">201</span>   <span class="dv">111</span></span>
 <span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>Row1    <span class="dv">80</span>   <span class="dv">49</span>   <span class="dv">15</span>   <span class="dv">44</span>  <span class="dv">185</span>    <span class="dv">9</span>  <span class="dv">133</span>   <span class="dv">58</span>    <span class="dv">4</span>   <span class="dv">113</span>   <span class="dv">190</span>   <span class="dv">148</span>    <span class="dv">39</span>    <span class="dv">17</span>    <span class="dv">20</span>   <span class="dv">207</span>   <span class="dv">202</span>    <span class="dv">42</span></span>
 <span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span> <span class="fu">head</span>(pREPexample<span class="sc">$</span>fieldBook, <span class="dv">12</span>)</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span> <span class="fu">head</span>(pREP<span class="sc">$</span>fieldBook, <span class="dv">12</span>)</span>
 <span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>   ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT</span>
 <span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span>   <span class="dv">1</span> ExptA    FARGO <span class="dv">2021</span>    <span class="dv">1</span>   <span class="dv">1</span>      <span class="dv">1</span>      <span class="dv">0</span>    <span class="dv">80</span>       G80</span>
 <span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span>   <span class="dv">2</span> ExptA    FARGO <span class="dv">2021</span>    <span class="dv">2</span>   <span class="dv">1</span>      <span class="dv">2</span>      <span class="dv">1</span>    <span class="dv">49</span>       G49</span>
