@@ -130,7 +130,7 @@ diagonal_arrangement <- function(nrows = NULL,
     base::stop('Input for splitBy is unknown. Please, choose one: "column" or "row"')
   }
   
-  if (class(plotNumber) != "list") {
+  if (!inherits(plotNumber,"list")) { 
     if (!is.null(plotNumber) && is.numeric(plotNumber)) {
       if(any(plotNumber < 1) || any(diff(plotNumber) < 0)) {
         shiny::validate('diagonal_arrangement() requires plotNumber to be positive and sorted integers.')
@@ -159,7 +159,7 @@ diagonal_arrangement <- function(nrows = NULL,
     num_expts <- length(blocks)
     if (!is.null(l)) {
       if (!is.null(plotNumber)) {
-        if (class(plotNumber) == "list") {
+        if (inherits(plotNumber,"list")) {
           if (all(lengths(plotNumber) == num_expts) &
               length(plotNumber) == l) {
             plotNumber <- plotNumber
@@ -252,7 +252,7 @@ diagonal_arrangement <- function(nrows = NULL,
           dim_data <- sum(data_dim_each_block)
         }
       }
-    }else {
+    } else {
       if (kindExpt != "DBUDC") {
         NAME <- c(paste0(rep("Check-", checks), 1:checks),
                   paste0(rep("Gen-", lines), (checksEntries[checks] + 1):(checksEntries[1] + lines + checks - 1)))
@@ -280,7 +280,6 @@ diagonal_arrangement <- function(nrows = NULL,
         }
       }
     }
-    
     dim_data_entry <- nrow(data_entry_UP)
     dim_data_1 <- nrow(data_entry_UP[(checks + 1):nrow(data_entry_UP), ])
     
@@ -323,10 +322,10 @@ diagonal_arrangement <- function(nrows = NULL,
       if (exptlines %in% as.vector(infoP[,7])) {
         Option_NCD <- FALSE
         Exptlines <- exptlines
-      }else if (all(as.vector(infoP[,7]) != exptlines)) {
-        if(kindExpt == "DBUDC" && Way != "By Row") {
-          shiny::validate("Fillers are only allowed when you split the field by rows :(")
-        }
+      } else if (all(as.vector(infoP[,7]) != exptlines)) {
+        # if(kindExpt == "DBUDC" && Way != "By Row") {
+        #   shiny::validate("Fillers are only allowed when you split the field by rows :(")
+        # }
         Option_NCD <- TRUE
         Exptlines <- exptlines
         if (kindExpt == "DBUDC") {

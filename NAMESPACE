@@ -2,6 +2,7 @@
 
 S3method(plot,FielDHub)
 S3method(print,FielDHub)
+S3method(print,fieldLayout)
 S3method(print,summary.FielDHub)
 S3method(summary,FielDHub)
 export("%>%")

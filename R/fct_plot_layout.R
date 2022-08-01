@@ -43,7 +43,7 @@ plot_layout <- function(x = NULL,
                         planter = "serpentine", 
                         l = 1, 
                         stacked = "vertical") {
-  if (class(x) != "FielDHub") stop("x is not a FielDHub class object")
+  if (!inherits(x,"FielDHub")) stop("x is not a FielDHub class object") 
   if (missing(layout)) layout <- 1
   if (missing(planter)) planter <- "serpentine"
   if (missing(l)) l <- 1

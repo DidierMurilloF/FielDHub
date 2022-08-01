@@ -585,6 +585,32 @@ print.summary.FielDHub <- function(x, ...) {
   }
 }
 #-----------------------------------------------------------------------
+# Print plot
+#-----------------------------------------------------------------------
+# Print
+#-----------------------------------------------------------------------
+#' @rdname fieldLayout
+#' @method print fieldLayout
+#' @title Print a \code{fieldLayout} object
+#' @usage \method{print}{fieldLayout}(x, ...)
+#' @aliases print.fieldLayout
+#' @description Prints information about any \code{fieldLayout} function.
+#' @return an object inheriting from class \code{fieldLayout}
+#' @param x an object inheriting from class fieldLayout
+#'
+#' @param ... further arguments passed to \code{\link{head}}.
+#' @author Didier Murillo [aut]
+#'
+#' @export
+print.fieldLayout <- function(x, ...) {
+  if (is.null(x)) stop("x must be a fieldLayout object!")
+  if (!inherits(x,"fieldLayout")) {
+    stop("x must be a fieldLayout object!")
+  }
+  print(x$layout)
+}
+
+#-----------------------------------------------------------------------
 # Plot
 #-----------------------------------------------------------------------
 #' @rdname plot.FielDHub
@@ -592,9 +618,9 @@ print.summary.FielDHub <- function(x, ...) {
 #' @title Plot a \code{FielDHub} object
 #' @usage \method{plot}{FielDHub}(x, ...)
 #' @aliases plot.FielDHub
-#' @description Plot any \code{FielDHub} design.
+#' @description Plot any \code{FielDHub} object.
 #' @return a plot inheriting from class \code{FielDHub}
-#' @param x an object inheriting from class
+#' @param x an object inheriting from class \code{FielDHub}
 #'
 #' @param ... further arguments passed to \code{\link{head}}.
 #' \itemize{
@@ -608,16 +634,15 @@ print.summary.FielDHub <- function(x, ...) {
 #' @examples
 #' \dontrun{
 #' # Example 1: Plot a RCBD design with 24 treatments and 3 reps.
-#' s <- RCBD(t = 24, reps = 3, continuous = TRUE, 
-#'           l = 1, plotNumber = 101, seed = 12)
+#' s <- RCBD(t = 24, reps = 3, plotNumber = 101, seed = 12)
 #' plot(s)
 #' }
 #'
 #' @export
 plot.FielDHub <- function(x, ...) {
   if (!missing(x)) {
-    if (is.null(x)) stop("x must be a FielDHub design!")
-    if (class(x) != "FielDHub") {
+    if (is.null(x)) stop("x must be a FielDHub object!")
+    if (!inherits(x,"FielDHub")) {
       stop("x is not a FielDHub class")
     }
     p <- plot_layout(x = x, ...)
@@ -629,7 +654,9 @@ plot.FielDHub <- function(x, ...) {
         field_book = p$allSitesFieldbook,
         layout = p$out_layout
       )
-      return(out)
+      class(out) <- "fieldLayout"
+      print(x = out)
+      return(invisible(out))
     }
   } else stop("x is missing!")
 }

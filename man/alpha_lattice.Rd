@@ -43,9 +43,11 @@ A list with two elements.
 Randomly generates an alpha design like \code{alpha(0,1)} across multiple locations.
 }
 \examples{
-# Example 1: Generates an alpha design with 7 full blocks and 15 treatments.
+# Example 1: Generates an alpha design with 4 full blocks and 15 treatments.
 # Size of IBlocks k = 3.
-alphalattice1 <- alpha_lattice(t = 15, k = 3, r = 7, 
+alphalattice1 <- alpha_lattice(t = 15, 
+                               k = 3, 
+                               r = 4, 
                                l = 1, 
                                plotNumber = 101, 
                                locationNames = "GreenHouse", 
@@ -53,14 +55,16 @@ alphalattice1 <- alpha_lattice(t = 15, k = 3, r = 7,
 alphalattice1$infoDesign
 head(alphalattice1$fieldBook, 10)
 
-# Example 2: Generates an alpha design with 5 full blocks and 50 treatment.
-# Size of IBlocks k = 10. 
+# Example 2: Generates an alpha design with 3 full blocks and 25 treatment.
+# Size of IBlocks k = 5. 
 # In this case, we show how to use the option data.
-treatments <- paste("G-", 1:50, sep = "")
-ENTRY <- 1:50
+treatments <- paste("G-", 1:25, sep = "")
+ENTRY <- 1:25
 treatment_list <- data.frame(list(ENTRY = ENTRY, TREATMENT = treatments))
 head(treatment_list) 
-alphalattice2 <- alpha_lattice(t = 50, k = 10, r = 5, 
+alphalattice2 <- alpha_lattice(t = 25,
+                               k = 5,
+                               r = 3, 
                                l = 1, 
                                plotNumber = 1001, 
                                locationNames = "A", 

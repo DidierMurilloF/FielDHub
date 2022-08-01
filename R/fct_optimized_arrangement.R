@@ -44,37 +44,44 @@
 #'
 #' @examples
 #' # Example 1: Generates a spatial unreplicated optimized arrangement design in one location
-#' # with 362 genotypes + 38 check plots (5 checks) for a field with dimension 20 rows x 20 cols.
-#' OptimAd1 <- optimized_arrangement(nrows = 20, ncols = 20, lines = 362, 
-#'                                   amountChecks = 38, 
-#'                                   checks = 1:5,
-#'                                   planter = "cartesian", 
-#'                                   plotNumber = 101,
-#'                                   seed = 14,
-#'                                   exptName = "20RW1",
-#'                                   locationNames = "CASSELTON")
+#' # with 108 genotypes + 12 check plots (4 checks) for a field with dimension 10 rows x 12 cols.
+#' OptimAd1 <- optimized_arrangement(
+#'   nrows = 10, 
+#'   ncols = 12, 
+#'   lines = 108, 
+#'   amountChecks = 12, 
+#'   checks = 1:4,
+#'   planter = "cartesian", 
+#'   plotNumber = 101,
+#'   seed = 14,
+#'   exptName = "20RW1",
+#'   locationNames = "CASSELTON"
+#'  )
 #' OptimAd1$infoDesign
 #' OptimAd1$layoutRandom
 #' OptimAd1$plotNumber
 #' head(OptimAd1$fieldBook,12)
 #'                   
 #' # Example 2: Generates a spatial unreplicated optimized arrangement design in one location
-#' # with 635 genotypes + 65 check plots (4 checks) for a field with dimension 20 rows x 35 cols.
+#' # with 200 genotypes + 20 check plots (4 checks) for a field with dimension 10 rows x 22 cols.
 #' # As example, we set up the data option with the entries list.
 #' checks <- 4
 #' list_checks <- paste("CH", 1:checks, sep = "")
-#' treatments <- paste("G", 5:639, sep = "")
-#' REPS <- c(17, 16, 16, 16, rep(1, 635))
-#' treatment_list <- data.frame(list(ENTRY = 1:639, NAME = c(list_checks, treatments), REPS = REPS))
+#' treatments <- paste("G", 5:204, sep = "")
+#' REPS <- c(5, 5, 5, 5, rep(1, 200))
+#' treatment_list <- data.frame(list(ENTRY = 1:204, NAME = c(list_checks, treatments), REPS = REPS))
 #' head(treatment_list, 12) 
 #' tail(treatment_list, 12)
-#' OptimAd2 <- optimized_arrangement(nrows = 20, ncols = 35, 
-#'                                   planter = "serpentine", 
-#'                                   plotNumber = 101,
-#'                                   seed = 12,
-#'                                   exptName = "20YWA2",
-#'                                   locationNames = "MINOT",
-#'                                   data = treatment_list)
+#' OptimAd2 <- optimized_arrangement(
+#'   nrows = 10, 
+#'   ncols = 22, 
+#'   planter = "serpentine", 
+#'   plotNumber = 101,
+#'   seed = 120,
+#'   exptName = "20YWA2",
+#'   locationNames = "MINOT",
+#'   data = treatment_list
+#' )
 #' OptimAd2$infoDesign
 #' OptimAd2$layoutRandom
 #' OptimAd2$plotNumber
@@ -117,12 +124,26 @@ optimized_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,
     if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
       base::stop('"diagonal_arrangement()" requires arguments nrows, ncols, and l to be numeric and distint of NULL')
     }
-  }else {
+  } else {
     arg1 <- list(nrows, ncols, lines, l);arg2 <- c(nrows, ncols, lines, l)
     if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
       base::stop('"diagonal_arrangement()" requires arguments nrows, ncols, and l to be numeric and distint of NULL')
     }
   } 
+  
+  if(is.null(data)) {
+    if (length(checks) == 1 && checks > 1) {
+      checksEntries <- 1:checks
+      checks <- checks
+    }else if (length(checks) > 1) {
+      checksEntries <- sort(checks)
+      checks <- length(checks)
+    } else if (length(checks) == 1 && checks == 1) {
+      checksEntries <- checks
+      checks <- length(checks)
+    }
+  }
+  
   if (is.null(data)) {
     if (!is.null(checks) && is.numeric(checks) && all(checks %% 1 == 0) && 
         !is.null(amountChecks) && is.numeric(amountChecks) && all(amountChecks %% 1 == 0) &&
@@ -136,12 +157,12 @@ optimized_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,
           if (res == 0) {
             u <- amountChecks / checks
             RepChecks <- rep(u, checks)
-          }else {
+          } else {
             RepChecks <- rep(divs, checks - 1)
             RepChecks <- sample(c(RepChecks, amountChecks - sum(RepChecks)))
           }
         }
-      }else if (length(checks) > 1) {
+      } else if (length(checks) > 1) {
         if(any(any(checks != sort(checks)) || any(diff(checks) > 1))) {
           base::stop("Input checks must be in consecutive numbers and sorted.")
         } 
@@ -160,8 +181,36 @@ optimized_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,
           }
         }
       }
-    }else base::stop('"diagonal_arrangement()" requires inputs checks and amountChecks to be possitive integers and distinct of NULL.')
-  }else {
+    } else base::stop('"diagonal_arrangement()" requires inputs checks and amountChecks to be possitive integers and distinct of NULL.')
+    t_plots <- as.numeric(sum(RepChecks) + lines)
+    print(t_plots)
+    if (numbers::isPrime(t_plots)) {
+      stop("No options when the total number of plots is a prime number.", call. = FALSE)
+    }
+    if (t_plots != (nrows * ncols)) {
+      choices <- factor_subsets(t_plots)$labels
+      if (!is.null(choices)) {
+        message(cat("\n", "Error message: field dimensions do not fit with the data entered!", "\n",
+          "Try one of the following options: ", "\n"))
+        return(for (i in 1:length(choices)) {print(choices[[i]])})
+      } else {
+        stop("field dimensions do not fit with the data entered", call. = FALSE)
+      }
+    }
+    NAME <- c(paste(rep("CH", checks), 1:checks, sep = ""),
+              paste(rep("G", lines), 
+              (checksEntries[checks] + 1):(checksEntries[1] + lines + checks - 1), sep = ""))
+    reps.checks <- RepChecks
+    REPS <- c(reps.checks, rep(1, lines))
+    gen.list <- data.frame(
+      list(
+        ENTRY = checksEntries[1]:(checksEntries[1] + lines + checks - 1),	
+        NAME = NAME,	
+        REPS = REPS
+      )
+    )
+    colnames(gen.list) <- c("ENTRY", "NAME", "REPS")
+  } else {
     if(!is.data.frame(data)) base::stop("Data must be a data frame.")
     gen.list <- data
     gen.list <- as.data.frame(gen.list)
@@ -176,28 +225,26 @@ optimized_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,
     checksEntries <- as.vector(my_REPS[,1])
     checks <- length(checksEntries)
     lines <- sum(my_GENS$REPS)
-  }
-  
-  if(is.null(data)) {
-    if (length(checks) == 1 && checks > 1) {
-      checksEntries <- 1:checks
-      checks <- checks
-    }else if (length(checks) > 1) {
-      checksEntries <- checks
-      checks <- length(checks)
-    } else if (length(checks) == 1 && checks == 1) {
-      checksEntries <- checks
-      checks <- length(checks)
+    t_plots <- sum(as.numeric(gen.list$REPS))
+    print(t_plots)
+    if (numbers::isPrime(t_plots)) {
+      stop("No options when the total number of plots is a prime number.", call. = FALSE)
+    }
+    if (t_plots != (nrows * ncols)) {
+      choices <- factor_subsets(t_plots)$labels
+      if (!is.null(choices)) {
+        message(cat("\n", "Error message: field dimensions do not fit with the data entered!", "\n",
+          "Try one of the following options: ", "\n"))
+        return(for (i in 1:length(choices)) {print(choices[[i]])})
+      } else {
+        stop("field dimensions do not fit with the data entered", call. = FALSE)
+      }
     }
   }
   
   all_gens <- sum(RepChecks) + lines
   if ((all_gens == nrows*ncols)) {
     Fillers <- 0
-  }else if (all_gens > nrows*ncols) {
-    shiny::validate("Data input exceeds the field dimentions specified.")
-  }else if (all_gens < nrows*ncols) {
-    shiny::validate("Data input is not large enough to completely use the field dimensions specified.")
   }
   
   field_book_sites <- vector(mode = "list", length = l)
@@ -207,14 +254,17 @@ optimized_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,
   set.seed(seed)
   for (sites in 1:l) {
     
-    prep <- pREP(nrows = nrows, ncols = ncols, 
-                 RepChecks = RepChecks, 
-                 checks = checksEntries, 
-                 Fillers = Fillers,
-                 seed = NULL, 
-                 optim = TRUE,
-                 niter = 1000, 
-                 data = data)
+    prep <- pREP(
+      nrows = nrows, 
+      ncols = ncols, 
+      RepChecks = RepChecks, 
+      checks = checksEntries, 
+      Fillers = Fillers,
+      seed = NULL, 
+      optim = TRUE,
+      niter = 1000, 
+      data = data
+    )
     
     dataInput <- prep$gen.list
     BINAY_CHECKS <- prep$binary.field

@@ -2,8 +2,9 @@
 
 ## FielDHub: A Shiny App for Design of Experiments in Life Sciences
 
+[![R-CMD-check](https://github.com/DidierMurilloF/FielDHub/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/DidierMurillloF/FielDHub/actions/workflows/R-CMD-check.yaml)
 
-[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html)
+[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 
 [![CRAN
 status](https://www.r-pkg.org/badges/version/FielDHub)](https://cran.r-project.org/web//packages/FielDHub/)
@@ -14,16 +15,16 @@ status](https://www.r-pkg.org/badges/version/FielDHub)](https://cran.r-project.o
 
 ## Installation
 
-### Development version from GitHub
-
-``` r
-devtools::install_github("DidierMurilloF/FielDHub")
-```
-
 ### Stable version from R CRAN
 
 ``` r
 install.packages("FielDHub")
+```
+
+### Development version from GitHub
+
+``` r
+remotes::install_github("DidierMurilloF/FielDHub")
 ```
 
 ## FielDHub Paper
@@ -58,21 +59,23 @@ The figure above shows a map of an experiment randomized as a Decision Block Unr
 To illustrate using FielDHub to build experimental designs through R code, the design produced in the R Shiny interface described above can also be created using the function `diagonal_arrangement()` in the R script below. Note, that to obtain identical results, users must include the same seed number in the script as was used in the Shiny app. In this case, the seed number is 1249. 
 
 ``` r
-diagonalExample <- diagonal_arrangement(nrows = 20, 
-                                        ncols = 15, 
-                                        lines = 270, 
-                                        checks = 4, 
-                                        plotNumber = 101, 
-                                        splitBy = "row", 
-                                        seed = 1249, 
-                                        kindExpt = "DBUDC", 
-                                        blocks = c(100, 100, 70))
+diagonal <- diagonal_arrangement(
+  nrows = 20, 
+  ncols = 15, 
+  lines = 270, 
+  checks = 4, 
+  plotNumber = 101, 
+  splitBy = "row", 
+  seed = 1249, 
+  kindExpt = "DBUDC", 
+  blocks = c(100, 100, 70)
+)
 ```
 
 Users can access the returned values from `diagonal_arrangement()` as follow,
 
 ``` r
-> diagonalExample$infoDesign
+> diagonal$infoDesign
 $Lines
 [1] 100 100  70
 
@@ -92,7 +95,7 @@ $Fillers
 $seed
 [1] 1249
 
-> diagonalExample$layoutRandom
+> diagonal$layoutRandom
       Col1 Col2 Col3 Col4 Col5 Col6 Col7 Col8 Col9 Col10 Col11 Col12 Col13 Col14 Col15
 Row20  248    2  268  225  258  223  255  226  264   239   274     1   232   235   256
 Row19  214  273  244  220    3  269  247  207  243   215   245   221   208   229     4
@@ -115,7 +118,7 @@ Row3    89   28    3   88   17   20   72   31   35    25    56    74     3    68
 Row2    91   23   11   51   30    1   83   64   50    90    79    21    12     6    95
 Row1    48  102    9   94   52   80   76   60    4    61    32    58    67    27    81
 
-> head(diagonalExample$fieldBook, 12)
+> head(diagonal$fieldBook, 12)
    ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
 1   1 Expt1        1 2021  101   1      1      0    48    gen 48
 2   2 Expt1        1 2021  102   1      2      0   102   gen 102
@@ -137,28 +140,30 @@ The main difference between using the FielDHub Shiny app and using the standalon
 
 Partially replicated designs are commonly employed in early generation field trials. This type of design is characterized by replication of a portion of the entries, with the remaining entries only appearing once in the experiment. As an example, considered a field trial with 288 plots containing 75 entries appearing two times each, and 138 entries only appearing once. This field trials is arranged in a field of 16 rows by 18 columns.
 
-![](pREPExample.PNG)
+![](pREP.PNG)
 
 In the figure above, green plots contain replicated entries, and yellow plots contain entries that only appear once.
 
 Instead of using the Shiny FielDHub app, users can use the standalone FielDHub function `partially_replicated()`. The partially replicated layout described above can be produced through scripting as follows. As noted in the previous example, to obtain identical results between the script and the Shiny app, users need to use the same seed number, which, in this case, is 77.
 
 ``` r
-pREPexample <- partially_replicated(nrows = 16, 
-                                    ncols = 18,  
-                                    repGens = c(138,75),
-                                    repUnits = c(1,2),
-                                    planter = "serpentine", 
-                                    plotNumber = 1,
-                                    exptName = "ExptA",
-                                    locationNames = "FARGO",
-                                    seed = 77)
+pREP <- partially_replicated(
+  nrows = 16, 
+  ncols = 18,  
+  repGens = c(138,75),
+  repUnits = c(1,2),
+  planter = "serpentine", 
+  plotNumber = 1,
+  exptName = "ExptA",
+  locationNames = "FARGO",
+  seed = 77
+)
 
 ```
 Users can access returned values from `partially_replicated()` as follows,
 
 ``` r
-> pREPexample$layoutRandom
+> pREP$layoutRandom
       Col1 Col2 Col3 Col4 Col5 Col6 Col7 Col8 Col9 Col10 Col11 Col12 Col13 Col14 Col15 Col16 Col17 Col18
 Row16  176   45  192  127   71   62  102  120   95    79    61   158   141    32    21    25    14    71
 Row15   18  121    9  123  171   60   11  204    2   182   119    65   198    63   188    34   124    55
@@ -177,7 +182,7 @@ Row3    69   28  196  154  146   75  189   36   54    72    31    33    53    67
 Row2    16   68  206   49   52  208   26  184  180   193   178    61    48   197    52    50   201   111
 Row1    80   49   15   44  185    9  133   58    4   113   190   148    39    17    20   207   202    42
 
-> head(pREPexample$fieldBook, 12)
+> head(pREP$fieldBook, 12)
    ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
 1   1 ExptA    FARGO 2021    1   1      1      0    80       G80
 2   2 ExptA    FARGO 2021    2   1      2      1    49       G49

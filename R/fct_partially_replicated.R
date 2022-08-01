@@ -98,7 +98,6 @@ partially_replicated <- function(nrows = NULL, ncols = NULL, repGens = NULL, rep
   if (is.null(data)) {
     if (is.null(repGens) || is.null(repUnits)) base::stop("Input repGens and repUnits are missing.")
     if (length(repGens) != length(repUnits)) base::stop("Input repGens and repUnits may have the same length.")
-    if (sum(repGens * repUnits) != nrows*ncols) base::stop("Data input does not match with field dimentions.")
   }
   
   if(!is.numeric(plotNumber) && !is.integer(plotNumber)) {
@@ -152,9 +151,37 @@ partially_replicated <- function(nrows = NULL, ncols = NULL, repGens = NULL, rep
       checksEntries <- as.vector(my_REPS[,1])
       checks <- length(checksEntries)
       lines <- sum(my_GENS$REPS)
+      t_plots <- sum(as.numeric(gen.list$REPS))
+      print(t_plots)
+      if (numbers::isPrime(t_plots)) {
+        stop("No options when the total number of plots is a prime number.", call. = FALSE)
+      }
+      if (t_plots != (nrows * ncols)) {
+        choices <- factor_subsets(t_plots)$labels
+        if (!is.null(choices)) {
+          message(cat("\n", "Error message: field dimensions do not fit with the data entered!", "\n",
+            "Try one of the following options: ", "\n"))
+          return(for (i in 1:length(choices)) {print(choices[[i]])})
+        } else {
+          stop("field dimensions do not fit with the data entered", call. = FALSE)
+        }
+      }
   } else if (is.null(data)) {
-    if (length(repGens) != length(repUnits)) shiny::validate("Input repGens and repUnits need to be of the same length.")
-    if (sum(repGens * repUnits) != nrows*ncols) shiny::validate("Data input does not match with field dimentions specified.")
+    if (length(repGens) != length(repUnits)) stop("Input repGens and repUnits need to be of the same length.")
+    t_plots <- sum(repGens * repUnits)
+    if (numbers::isPrime(t_plots)) {
+      stop("No options when the total number of plots is a prime number.", call. = FALSE)
+    }
+    if (t_plots != (nrows * ncols)) {
+      choices <- factor_subsets(t_plots)$labels
+      if (!is.null(choices)) {
+        message(cat("\n", "Error message: field dimensions do not fit with the data entered!", "\n",
+          "Try one of the following options: ", "\n"))
+        return(for (i in 1:length(choices)) {print(choices[[i]])})
+      } else {
+        stop("field dimensions do not fit with the data entered", call. = FALSE)
+      }
+    }
     ENTRY <- 1:sum(repGens)
     NAME <- paste(rep("G", sum(repGens)), 1:sum(repGens), sep = "")
     REPS <- as.numeric(sort(rep(repUnits, times = repGens), decreasing = TRUE))

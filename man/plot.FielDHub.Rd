@@ -7,7 +7,7 @@
 \method{plot}{FielDHub}(x, ...)
 }
 \arguments{
-\item{x}{an object inheriting from class}
+\item{x}{an object inheriting from class \code{FielDHub}}
 
 \item{...}{further arguments passed to \code{\link{head}}.
 \itemize{
@@ -22,13 +22,12 @@
 a plot inheriting from class \code{FielDHub}
 }
 \description{
-Plot any \code{FielDHub} design.
+Plot any \code{FielDHub} object.
 }
 \examples{
 \dontrun{
 # Example 1: Plot a RCBD design with 24 treatments and 3 reps.
-s <- RCBD(t = 24, reps = 3, continuous = TRUE, 
-          l = 1, plotNumber = 101, seed = 12)
+s <- RCBD(t = 24, reps = 3, plotNumber = 101, seed = 12)
 plot(s)
 }
 
