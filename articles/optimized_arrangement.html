@@ -354,19 +354,13 @@ List of 9
 </h3>
 <p>For plotting the layout in function of the coordinates <code>ROW</code> and <code>COLUMN</code> in the field book object we can use the generic function <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> as follow,</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">optim_expt</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">optim_expt</span><span class="op">)</span></span></code></pre></div>
 <p><img src="optimized_arrangement_files/figure-html/unnamed-chunk-12-1.png" width="691.2" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">p</span><span class="op">$</span><span class="va">layout</span></span></code></pre></div>
-<p><img src="optimized_arrangement_files/figure-html/unnamed-chunk-12-2.png" width="691.2" style="display: block; margin: auto;"></p>
 <p>The figure above shows a map of an experiment randomized as an unreplicated optimized arrangement design. Gray plots represent the unreplicated treatments, while distinctively colored check plots are randomly replicated throughout the field.</p>
 <p>It is possible to pass more arguments to <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> such as the specific location. For example, you can plot specifically the layout for location 2.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">optim_expt</span>, l <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">optim_expt</span>, l <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <p><img src="optimized_arrangement_files/figure-html/unnamed-chunk-13-1.png" width="691.2" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">p</span><span class="op">$</span><span class="va">layout</span></span></code></pre></div>
-<p><img src="optimized_arrangement_files/figure-html/unnamed-chunk-13-2.png" width="691.2" style="display: block; margin: auto;"></p>
 <p><br><br><br></p>
 </div>
 </div>

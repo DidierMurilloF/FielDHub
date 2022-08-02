@@ -344,11 +344,8 @@ List of 11
 </h3>
 <p>For plotting the layout in function of the coordinates <code>ROW</code> and <code>COLUMN</code> in the field book object we can use the generic function <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> as follow,</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">single_diag</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">single_diag</span><span class="op">)</span></span></code></pre></div>
 <p><img src="diagonal_arrangement_files/figure-html/unnamed-chunk-12-1.png" width="691.2" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">p</span><span class="op">$</span><span class="va">layout</span></span></code></pre></div>
-<p><img src="diagonal_arrangement_files/figure-html/unnamed-chunk-12-2.png" width="691.2" style="display: block; margin: auto;"></p>
 <p>The figure above shows a map of an experiment randomized as a single unreplicated diagonal arrangement design. Gray plots represent the unreplicated treatments, while distinctively colored check plots are replicated throughout the field in a systematic diagonal arrangement.</p>
 <p><br></p>
 </div>
@@ -489,7 +486,7 @@ List of 11
 <h2 id="using-the-fieldhub-function-diagonal_arrangement-1">2. Using the <code>FielDHub</code> function: <code>diagonal_arrangement()</code><a class="anchor" aria-label="anchor" href="#using-the-fieldhub-function-diagonal_arrangement-1"></a>
 </h2>
 <p>A variation on the single diagonal arrangement included in the <code><a href="../reference/diagonal_arrangement.html">diagonal_arrangement()</a></code> function is the multiple diagonal arrangement, where the experiment is split into blocks of specified size.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">multi_diag</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/diagonal_arrangement.html">diagonal_arrangement</a></span><span class="op">(</span></span>
 <span>  nrows <span class="op">=</span> <span class="fl">15</span>,</span>
 <span>  ncols <span class="op">=</span> <span class="fl">22</span>,</span>
@@ -536,7 +533,7 @@ List of 11
 <h3 id="print-multi_diag-object">Print <code>multi_diag</code> object<a class="anchor" aria-label="anchor" href="#print-multi_diag-object"></a>
 </h3>
 <p>For printing a summary of the information that is in the object <code>multi_diag</code> we can use the generic function <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code></p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">multi_diag</span><span class="op">)</span></span></code></pre></div>
 <pre><code>Un-replicated Diagonal Arrangement Design 
 
@@ -573,7 +570,7 @@ List of 11
 <p>The function <code><a href="../reference/diagonal_arrangement.html">diagonal_arrangement()</a></code> returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are accessible by the <code>$</code> operator, i.e. <code>multi_diag$layoutRandom</code> or <code>multi_diag$fieldBook</code>.</p>
 <p><code>multi_diag$fieldBook</code> is a data frame containing information about every plot in the field, with information about the location of the plot and the treatment in each plot. As seen in the output below, the field book has columns for <code>ID</code>, <code>EXPT</code>, <code>LOCATION</code>, <code>YEAR</code>, <code>PLOT</code>, <code>ROW</code>, <code>COLUMN</code>, <code>CHECKS</code>, <code>ENTRY</code>, and <code>TREATMENT</code>.</p>
 <p>Let us see the first 10 rows of the field book for this experiment.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">field_book</span> <span class="op">&lt;-</span> <span class="va">multi_diag</span><span class="op">$</span><span class="va">fieldBook</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">field_book</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
 <pre><code>   ID      EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
@@ -592,12 +589,9 @@ List of 11
 <h3 id="plot-field-layout-1">Plot field layout<a class="anchor" aria-label="anchor" href="#plot-field-layout-1"></a>
 </h3>
 <p>For plotting the layout in function of the coordinates <code>ROW</code> and <code>COLUMN</code> in the field book object we can use the generic function <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> as follow,</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">multi_diag</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">multi_diag</span><span class="op">)</span></span></code></pre></div>
 <p><img src="diagonal_arrangement_files/figure-html/unnamed-chunk-20-1.png" width="691.2" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">p</span><span class="op">$</span><span class="va">layout</span></span></code></pre></div>
-<p><img src="diagonal_arrangement_files/figure-html/unnamed-chunk-20-2.png" width="691.2" style="display: block; margin: auto;"></p>
 <p>The figure above shows a map of an experiment randomized as a multiple unreplicated diagonal arrangement design. Gray, salmon, and pink shade the blocks of unreplicated experiments, while distinctively colored check plots are replicated throughout the field in a systematic diagonal arrangement.</p>
 <p><br><br><br></p>
 </div>
