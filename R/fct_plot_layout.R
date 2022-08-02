@@ -19,7 +19,7 @@
 #'
 #' @return A list with four elements.
 #' \itemize{
-#'   \item \code{out_layout} is a the layout plot.
+#'   \item \code{out_layout} is the layout plot.
 #'   \item \code{fieldBookXY} is a data frame with the field book design.
 #'   \item \code{newBooks} is a list with the all field books combinations.
 #' }
@@ -28,14 +28,6 @@
 #' Kevin Wright (2020). desplot: Plotting Field Plans for Agricultural Experiments. R package version 1.8.
 #' https://CRAN.R-project.org/package=desplot
 #'
-#' @examples
-#' # Example 1: Generates a field layout for an alpha lattice designs with 25 treatments and 4 reps.
-#' \dontrun{
-#' alpha <- alpha_lattice(t = 20, k = 4, r = 4, l = 1, seed = 101)
-#' layoutPlot_a <- plot_layout(x = alpha, layout = 1, planter = "serpentine")
-#' layoutPlot_a$plot_layout
-#' layoutPlot_a$df
-#' }
 #'
 #' @noRd
 plot_layout <- function(x = NULL, 

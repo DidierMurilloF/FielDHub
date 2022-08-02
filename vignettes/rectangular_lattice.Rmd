@@ -144,8 +144,7 @@ For plotting the layout in function of the coordinates `ROW` and `COLUMN`, you c
 
 
 ```{r, fig.align='center', fig.width=7.2, fig.height=5.5}
-p <- plot(rect)
-p$layout
+plot(rect)
 ```
 
 

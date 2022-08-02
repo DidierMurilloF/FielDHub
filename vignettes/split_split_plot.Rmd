@@ -162,8 +162,7 @@ head(field_book,10)
 For plotting the layout in function of the coordinates `ROW` and `COLUMN`, you can use the the generic function `plot()` as follows,
 
 ```{r, fig.align='center', fig.width=7.2, fig.height=5.5}
-p <- plot(sspd)
-p$layout
+plot(sspd)
 ```
 
 <br>

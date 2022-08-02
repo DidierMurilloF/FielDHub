@@ -589,25 +589,26 @@ print.summary.FielDHub <- function(x, ...) {
 #-----------------------------------------------------------------------
 # Print
 #-----------------------------------------------------------------------
-#' @rdname fieldLayout
+#' @rdname print.fieldLayout
 #' @method print fieldLayout
 #' @title Print a \code{fieldLayout} object
 #' @usage \method{print}{fieldLayout}(x, ...)
 #' @aliases print.fieldLayout
-#' @description Prints information about any \code{fieldLayout} function.
-#' @return an object inheriting from class \code{fieldLayout}
-#' @param x an object inheriting from class fieldLayout
-#'
+#' @description Prints a plot object  of class \code{fieldLayout}.
+#' @return a plot object inheriting from class \code{fieldLayout}
+#' @param x a plot object inheriting from class fieldLayout
 #' @param ... further arguments passed to \code{\link{head}}.
 #' @author Didier Murillo [aut]
 #'
 #' @export
 print.fieldLayout <- function(x, ...) {
-  if (is.null(x)) stop("x must be a fieldLayout object!")
-  if (!inherits(x,"fieldLayout")) {
-    stop("x must be a fieldLayout object!")
-  }
-  print(x$layout)
+  if (!missing(x)) {
+    if (is.null(x)) stop("x must be a fieldLayout object!")
+    if (!inherits(x,"fieldLayout")) {
+      stop("x must be a fieldLayout object!")
+    }
+    return(print(x$layout))
+  } else stop("x is missing!")
 }
 
 #-----------------------------------------------------------------------
@@ -648,7 +649,8 @@ plot.FielDHub <- function(x, ...) {
     p <- plot_layout(x = x, ...)
     if (is.null(p)) {
       img <- ggplot2::ggplot() + ggplot2::theme_minimal()
-      return(img)
+      class(img) <- "fieldLayout"
+      print(x = img)
     } else {
       out <- list(
         field_book = p$allSitesFieldbook,
@@ -656,7 +658,7 @@ plot.FielDHub <- function(x, ...) {
       )
       class(out) <- "fieldLayout"
       print(x = out)
-      return(invisible(out))
+      return(invisible(list(field_book = out$field_book)))
     }
   } else stop("x is missing!")
 }

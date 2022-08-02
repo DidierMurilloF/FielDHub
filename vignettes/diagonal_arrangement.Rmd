@@ -195,8 +195,7 @@ head(field_book, 10)
 For plotting the layout in function of the coordinates `ROW` and `COLUMN` in the field book object we can use the generic function `plot()` as follow,
 
 ```{r, fig.align='center', fig.width=7.2, fig.height=5}
-p <- plot(single_diag)
-p$layout
+plot(single_diag)
 ```
 
 The figure above shows a map of an experiment randomized as a single unreplicated diagonal arrangement design. Gray plots represent the unreplicated treatments, while distinctively colored check plots are replicated throughout the field in a systematic diagonal arrangement.
@@ -369,8 +368,7 @@ head(field_book, 10)
 For plotting the layout in function of the coordinates `ROW` and `COLUMN` in the field book object we can use the generic function `plot()` as follow,
 
 ```{r, fig.align='center', fig.width=7.2, fig.height=5}
-p <- plot(multi_diag)
-p$layout
+plot(multi_diag)
 ```
 
 The figure above shows a map of an experiment randomized as a multiple unreplicated diagonal arrangement design. Gray, salmon, and pink shade the blocks of unreplicated experiments, while distinctively colored check plots are replicated throughout the field in a systematic diagonal arrangement.

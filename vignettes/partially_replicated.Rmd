@@ -188,8 +188,7 @@ For plotting the layout in function of the coordinates `ROW` and `COLUMN` in the
 
 
 ```{r, fig.align='center', fig.width=7.2, fig.height=5.5}
-p <- plot(prep)
-p$layout
+plot(prep)
 ```
 
 In the figure above, green plots contain replicated entries, and gray plots contain entries that only appear once.

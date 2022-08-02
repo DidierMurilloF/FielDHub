@@ -160,8 +160,7 @@ head(strip$fieldBook, 10)
 For plotting the layout in function of the coordinates `ROW` and `COLUMN`, you can use the the generic function `plot()` as follow,
 
 ```{r, fig.align='center', fig.width=7.2, fig.height=5.5}
-p <- plot(strip)
-p$layout
+plot(strip)
 ```
 
 <br>

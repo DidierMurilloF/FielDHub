@@ -7,15 +7,15 @@
 \method{print}{fieldLayout}(x, ...)
 }
 \arguments{
-\item{x}{an object inheriting from class fieldLayout}
+\item{x}{a plot object inheriting from class fieldLayout}
 
 \item{...}{further arguments passed to \code{\link{head}}.}
 }
 \value{
-an object inheriting from class \code{fieldLayout}
+a plot object inheriting from class \code{fieldLayout}
 }
 \description{
-Prints information about any \code{fieldLayout} function.
+Prints a plot object  of class \code{fieldLayout}.
 }
 \author{
 Didier Murillo [aut]

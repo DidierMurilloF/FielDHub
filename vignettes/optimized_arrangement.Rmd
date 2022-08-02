@@ -203,8 +203,7 @@ For plotting the layout in function of the coordinates `ROW` and `COLUMN` in the
 
 
 ```{r, fig.align='center', fig.width=7.2, fig.height=5.9}
-p <- plot(optim_expt)
-p$layout
+plot(optim_expt)
 ```
 
 The figure above shows a map of an experiment randomized as an unreplicated optimized arrangement design. Gray plots represent the unreplicated treatments, while distinctively colored check plots are randomly replicated throughout the field.
@@ -212,8 +211,7 @@ The figure above shows a map of an experiment randomized as an unreplicated opti
 It is possible to pass more arguments to `plot()` such as the specific location. For example, you can plot specifically the layout for location 2. 
 
 ```{r, fig.align='center', fig.width=7.2, fig.height=5.9}
-p <- plot(optim_expt, l = 2)
-p$layout
+plot(optim_expt, l = 2)
 ```
 
 <br>

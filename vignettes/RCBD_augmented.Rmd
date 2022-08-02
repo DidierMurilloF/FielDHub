@@ -207,8 +207,7 @@ For plotting the layout in function of the coordinates `ROW` and `COLUMN` in the
 #### Plot layout for location 1
 
 ```{r, fig.align='center', fig.width=7.2, fig.height=5.5}
-p1 <- plot(aug_RCBD)
-p1$layout
+plot(aug_RCBD)
 ```
 
 It is possible to pass more arguments to `plot()` such as the specific location. For example, you can plot the layout for location 2. 
@@ -216,8 +215,7 @@ It is possible to pass more arguments to `plot()` such as the specific location.
 #### Plot layout for location 2
 
 ```{r, fig.align='center', fig.width=7.2, fig.height=5.5}
-p2 <- plot(aug_RCBD, l = 2)
-p2$layout
+plot(aug_RCBD, l = 2)
 ```
 
 <br>
