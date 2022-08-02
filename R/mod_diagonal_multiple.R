@@ -24,7 +24,7 @@ mod_diagonal_multiple_ui <- function(id) {
                      choiceNames = NULL, 
                      choiceValues = NULL),
         checkboxInput(inputId = ns("sameEntries"), 
-                      label = "Use the same entries across experiments!", 
+                      label = "Repeat entries across experiments", 
                       value = FALSE),
         conditionalPanel(
           condition = "input.list_entries_multiple == 'Yes'", 

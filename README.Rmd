@@ -16,14 +16,16 @@ knitr::opts_chunk$set(
 
 <br>
 
-## FielDHub: A Shiny App for Design of Experiments in Life Sciences
+# FielDHub <a href=''><img src='man/figures/logo.jpg' align="right" height="139" /></a>
 
-[![R-CMD-check](https://github.com/DidierMurilloF/FielDHub/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/DidierMurilloF/FielDHub/actions/workflows/R-CMD-check.yaml)
-[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 [![CRAN
 status](https://www.r-pkg.org/badges/version/FielDHub)](https://cran.r-project.org/web//packages/FielDHub/)
+[![R-CMD-check](https://github.com/DidierMurilloF/FielDHub/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/DidierMurilloF/FielDHub/actions/workflows/R-CMD-check.yaml)
+[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 [![cranlogs](https://cranlogs.r-pkg.org/badges/FielDHub)](https://cranlogs.r-pkg.org/badges/FielDHub)
 [![cranlogs](https://cranlogs.r-pkg.org/badges/grand-total/FielDHub)](https://cranlogs.r-pkg.org/badges/grand-total/FielDHub)
+
+## A Shiny App for Design of Experiments in Life Sciences
 
 ## Installation
 
@@ -48,7 +50,6 @@ remotes::install_github("DidierMurilloF/FielDHub")
 A shiny design of experiments (DOE) app that aids in the creation of traditional, un-replicated, augmented and partially-replicated designs applied to agriculture, plant breeding, forestry, animal and biological sciences. 
 
 For more details and examples of all functions present in the FielDHub package. Please, go to <https://didiermurillof.github.io/FielDHub/reference/index.html>.
-
 
 ![](FielDHub_Overview.png)
 
@@ -97,7 +98,7 @@ head(diagonal$fieldBook, 12)
 
 Users can plot the layout design from `diagonal_arrangement()` using the function `plot()` as follows,
 
-```{r, fig.align='center', fig.width=7, fig.height=4.8}
+```{r, fig.align='center', fig.width=6.8, fig.height=4.7}
 plot(diagonal)
 ```
 
@@ -144,7 +145,7 @@ pREP$infoDesign
 
 Users can plot the layout design from `partially_replicated()` using the function `plot()` as follows,
 
-```{r, fig.align='center', fig.width=7, fig.height=4.8}
+```{r, fig.align='center', fig.width=6.8, fig.height=4.7}
 plot(pREP)
 ```
 
