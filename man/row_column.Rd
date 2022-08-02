@@ -59,13 +59,13 @@ rowcold1$resolvableBlocks
 head(rowcold1$fieldBook,12)
 
 # Example 2: Generates a row-column design with 3 full blocks and 30 treatments
-# and 5 rows, for two locations.
+# and 5 rows, for one location.
 # In this case, we show how to use the option data.
 treatments <- paste("ND-", 1:30, sep = "")
 ENTRY <- 1:30
 treatment_list <- data.frame(list(ENTRY = ENTRY, TREATMENT = treatments))
 head(treatment_list)
-rowcold2 <- row_column(t = 30, nrows = 5, r = 3, l = 2, 
+rowcold2 <- row_column(t = 30, nrows = 5, r = 3, l = 1, 
                        plotNumber= c(101,1001), 
                        locationNames = c("A", "B"),
                        seed = 15,

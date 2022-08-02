@@ -28,7 +28,7 @@ treatment per location.
 # Example 1: Split a population of 3000 and 200 families into 8 locations. 
 # Original dataset is been simulated.
 set.seed(77)
-N <- 3000; families <- 200
+N <- 2000; families <- 100
 ENTRY <- 1:N
 NAME <- paste0("SB-", 1:N)
 FAMILY <- vector(mode = "numeric", length = N)

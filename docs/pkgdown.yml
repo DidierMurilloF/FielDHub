@@ -9,6 +9,8 @@ articles:
   incomplete_blocks: incomplete_blocks.html
   latin_square: latin_square.html
   methods: methods.html
+  fieldhub-0-1-0: news/fieldhub-0-1-0.html
+  fieldhub-1-2-0: news/fieldhub-1-2-0.html
   optimized_arrangement: optimized_arrangement.html
   partially_replicated: partially_replicated.html
   rcbd: rcbd.html
@@ -19,7 +21,7 @@ articles:
   split_split_plot: split_split_plot.html
   square_lattice: square_lattice.html
   strip_plot: strip_plot.html
-last_built: 2022-08-02T14:53Z
+last_built: 2022-08-02T18:38Z
 urls:
   reference: https://didiermurillof.github.io/FielDHub/reference
   article: https://didiermurillof.github.io/FielDHub/articles

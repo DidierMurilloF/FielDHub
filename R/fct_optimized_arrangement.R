@@ -122,12 +122,12 @@ optimized_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,
   if (!is.null(data)) {
     arg1 <- list(nrows, ncols, l);arg2 <- c(nrows, ncols, l)
     if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
-      base::stop('"diagonal_arrangement()" requires arguments nrows, ncols, and l to be numeric and distint of NULL')
+      base::stop('"optimized_arrangement()" requires arguments nrows, ncols, and l to be numeric and distint of NULL')
     }
   } else {
     arg1 <- list(nrows, ncols, lines, l);arg2 <- c(nrows, ncols, lines, l)
     if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
-      base::stop('"diagonal_arrangement()" requires arguments nrows, ncols, and l to be numeric and distint of NULL')
+      base::stop('"optimized_arrangement()" requires arguments nrows, ncols, and l to be numeric and distint of NULL')
     }
   } 
   
@@ -181,7 +181,7 @@ optimized_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,
           }
         }
       }
-    } else base::stop('"diagonal_arrangement()" requires inputs checks and amountChecks to be possitive integers and distinct of NULL.')
+    } else base::stop('"optimized_arrangement()" requires inputs checks and amountChecks to be possitive integers and distinct of NULL.')
     t_plots <- as.numeric(sum(RepChecks) + lines)
     print(t_plots)
     if (numbers::isPrime(t_plots)) {
@@ -190,7 +190,8 @@ optimized_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,
     if (t_plots != (nrows * ncols)) {
       choices <- factor_subsets(t_plots)$labels
       if (!is.null(choices)) {
-        message(cat("\n", "Error message: field dimensions do not fit with the data entered!", "\n",
+        message(cat("\n", "Error in optimized_arrangement(): ", "\n", "\n",
+          "Field dimensions do not fit with the data entered!", "\n",
           "Try one of the following options: ", "\n"))
         return(for (i in 1:length(choices)) {print(choices[[i]])})
       } else {
@@ -233,11 +234,12 @@ optimized_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,
     if (t_plots != (nrows * ncols)) {
       choices <- factor_subsets(t_plots)$labels
       if (!is.null(choices)) {
-        message(cat("\n", "Error message: field dimensions do not fit with the data entered!", "\n",
+        message(cat("\n", "Error in optimized_arrangement(): ", "\n", "\n",
+          "Field dimensions do not fit with the data entered!", "\n",
           "Try one of the following options: ", "\n"))
         return(for (i in 1:length(choices)) {print(choices[[i]])})
       } else {
-        stop("field dimensions do not fit with the data entered", call. = FALSE)
+        stop("Field dimensions do not fit with the data entered. Try another amount of treatments!", call. = FALSE)
       }
     }
   }

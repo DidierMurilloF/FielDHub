@@ -1,0 +1,56 @@
+url: https://didiermurillof.github.io/FielDHub/
+template:
+  bootstrap: 5
+  bootswatch: flatly
+navbar:
+  structure:
+    left:  [FielDHub 1.2.0, reference, articles, news]
+    right: [search, github]
+  components:
+    articles:
+     text: Articles
+     menu:
+     - text: "Unreplicated Diagonal Arrangement Design"
+       href: articles/diagonal_arrangement.html
+     - text: "Unreplicated Optimized Arrangement Design"
+       href: articles/optimized_arrangement.html
+     - text: "Augmented Randomized Complete Block Design"
+       href: articles/RCBD_augmented.html
+     - text: "Partially Replicated Design"
+       href: articles/partially_replicated.html
+     - text: "Square Lattice Design"
+       href: articles/square_lattice.html
+     - text: "Rectangular Lattice Design"
+       href: articles/rectangular_lattice.html
+     - text: "Alpha Lattice Design"
+       href: articles/alpha_lattice.html
+     - text: "Completely Randomized Design"
+       href: articles/crd.html
+     - text: "Randomized Complete Block Design"
+       href: articles/rcbd.html
+     - text: "Latin Square Design"
+       href: articles/latin_square.html
+     - text: "Full Factorial Design"
+       href: articles/full_factorial.html
+     - text: "Split-Plot Design"
+       href: articles/split_plot.html
+     - text: "Split-Split Plot Design"
+       href: articles/split_split_plot.html
+     - text: "Strip-Plot Design"
+       href: articles/strip_plot.html
+     - text: "Incomplete Block Design"
+       href: articles/incomplete_blocks.html
+     - text: "Row-Column Design"
+       href: articles/row_column.html
+     - text: "Methods in FielDHub"
+       href: articles/methods.html
+
+news:
+  releases:
+  - text: "Version 1.2.0"
+    href: articles/news/fieldhub-1-2-0.html
+  - text: "Version 0.1.0"
+    href: articles/news/fieldhub-0-1-0.html
+    
+development:
+  mode: auto

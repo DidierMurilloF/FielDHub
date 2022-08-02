@@ -509,7 +509,7 @@ print.summary.FielDHub <- function(x, ...) {
     #---------------------------------------------------------------------
     cat("5. Structure of the data frame with the partially_replicated field book:", "\n\n")
     str(x$fieldBook)
-  }else if (x$infoDesign$id_design == 14) {
+  } else if (x$infoDesign$id_design == 14) {
     cat("Augmented Randomized Complete Block Design:", "\n\n")
     #---------------------------------------------------------------------
     cat("1. Information on the design parameters:", "\n")
@@ -591,12 +591,12 @@ print.summary.FielDHub <- function(x, ...) {
 #-----------------------------------------------------------------------
 #' @rdname print.fieldLayout
 #' @method print fieldLayout
-#' @title Print a \code{fieldLayout} object
+#' @title Print a \code{fieldLayout} plot object
 #' @usage \method{print}{fieldLayout}(x, ...)
 #' @aliases print.fieldLayout
-#' @description Prints a plot object  of class \code{fieldLayout}.
-#' @return a plot object inheriting from class \code{fieldLayout}
-#' @param x a plot object inheriting from class fieldLayout
+#' @description Prints a plot object of class \code{fieldLayout}.
+#' @return a plot object inheriting from class \code{fieldLayout}.
+#' @param x a plot object inheriting from class fieldLayout.
 #' @param ... further arguments passed to \code{\link{head}}.
 #' @author Didier Murillo [aut]
 #'
@@ -619,9 +619,9 @@ print.fieldLayout <- function(x, ...) {
 #' @title Plot a \code{FielDHub} object
 #' @usage \method{plot}{FielDHub}(x, ...)
 #' @aliases plot.FielDHub
-#' @description Plot any \code{FielDHub} object.
-#' @return a plot inheriting from class \code{FielDHub}
-#' @param x an object inheriting from class \code{FielDHub}
+#' @description Draw a field layout plot for a \code{FielDHub} object.
+#' @return a plot object inheriting from class \code{FielDHub}
+#' @param x a object inheriting from class \code{FielDHub}
 #'
 #' @param ... further arguments passed to \code{\link{head}}.
 #' \itemize{

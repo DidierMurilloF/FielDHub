@@ -74,14 +74,18 @@ Randomly generates an spatial un-replicated diagonal arrangement design.
 # Example 1: Generates a spatial single diagonal arrangement design in one location
 # with 270 treatments and 30 check plots for a field with dimensions 15 rows x 20 cols
 # in a serpentine arrangement.
-spatd <- diagonal_arrangement(nrows = 15, ncols = 20, lines = 270, 
-                              checks = 4, 
-                              plotNumber = 101, 
-                              kindExpt = "SUDC", 
-                              planter = "serpentine", 
-                              seed = 1987,
-                              exptName = "20WRY1", 
-                              locationNames = "MINOT")
+spatd <- diagonal_arrangement(
+  nrows = 15, 
+  ncols = 20, 
+  lines = 270, 
+  checks = 4, 
+  plotNumber = 101, 
+  kindExpt = "SUDC", 
+  planter = "serpentine", 
+  seed = 1987,
+  exptName = "20WRY1", 
+  locationNames = "MINOT"
+)
 spatd$infoDesign
 spatd$layoutRandom
 spatd$plotsNumber
@@ -94,18 +98,20 @@ head(spatd$fieldBook, 12)
 checks <- 5;expts <- 5
 list_checks <- paste("CH", 1:checks, sep = "")
 treatments <- paste("G", 6:725, sep = "")
-BLOCK <- c(rep("ALL", checks), rep(1:expts, c(150,155,95,200,120)))
-treatment_list <- data.frame(list(ENTRY = 1:725, NAME = c(list_checks, treatments), BLOCK = BLOCK))
+treatment_list <- data.frame(list(ENTRY = 1:725, NAME = c(list_checks, treatments)))
 head(treatment_list, 12) 
 tail(treatment_list, 12)
-spatDB <- diagonal_arrangement(nrows = 30, 
-                               ncols = 26,
-                               checks = 5, 
-                               plotNumber = 1, 
-                               kindExpt = "DBUDC", 
-                               planter = "serpentine", 
-                               splitBy = "row", 
-                               data = treatment_list)
+spatDB <- diagonal_arrangement(
+  nrows = 30, 
+  ncols = 26,
+  checks = 5, 
+  plotNumber = 1, 
+  kindExpt = "DBUDC", 
+  planter = "serpentine", 
+  splitBy = "row", 
+  blocks = c(150,155,95,200,120),
+  data = treatment_list
+ )
 spatDB$infoDesign
 spatDB$layoutRandom
 spatDB$plotsNumber

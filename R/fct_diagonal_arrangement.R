@@ -51,14 +51,18 @@
 #' # Example 1: Generates a spatial single diagonal arrangement design in one location
 #' # with 270 treatments and 30 check plots for a field with dimensions 15 rows x 20 cols
 #' # in a serpentine arrangement.
-#' spatd <- diagonal_arrangement(nrows = 15, ncols = 20, lines = 270, 
-#'                               checks = 4, 
-#'                               plotNumber = 101, 
-#'                               kindExpt = "SUDC", 
-#'                               planter = "serpentine", 
-#'                               seed = 1987,
-#'                               exptName = "20WRY1", 
-#'                               locationNames = "MINOT")
+#' spatd <- diagonal_arrangement(
+#'   nrows = 15, 
+#'   ncols = 20, 
+#'   lines = 270, 
+#'   checks = 4, 
+#'   plotNumber = 101, 
+#'   kindExpt = "SUDC", 
+#'   planter = "serpentine", 
+#'   seed = 1987,
+#'   exptName = "20WRY1", 
+#'   locationNames = "MINOT"
+#' )
 #' spatd$infoDesign
 #' spatd$layoutRandom
 #' spatd$plotsNumber
@@ -71,18 +75,20 @@
 #' checks <- 5;expts <- 5
 #' list_checks <- paste("CH", 1:checks, sep = "")
 #' treatments <- paste("G", 6:725, sep = "")
-#' BLOCK <- c(rep("ALL", checks), rep(1:expts, c(150,155,95,200,120)))
-#' treatment_list <- data.frame(list(ENTRY = 1:725, NAME = c(list_checks, treatments), BLOCK = BLOCK))
+#' treatment_list <- data.frame(list(ENTRY = 1:725, NAME = c(list_checks, treatments)))
 #' head(treatment_list, 12) 
 #' tail(treatment_list, 12)
-#' spatDB <- diagonal_arrangement(nrows = 30, 
-#'                                ncols = 26,
-#'                                checks = 5, 
-#'                                plotNumber = 1, 
-#'                                kindExpt = "DBUDC", 
-#'                                planter = "serpentine", 
-#'                                splitBy = "row", 
-#'                                data = treatment_list)
+#' spatDB <- diagonal_arrangement(
+#'   nrows = 30, 
+#'   ncols = 26,
+#'   checks = 5, 
+#'   plotNumber = 1, 
+#'   kindExpt = "DBUDC", 
+#'   planter = "serpentine", 
+#'   splitBy = "row", 
+#'   blocks = c(150,155,95,200,120),
+#'   data = treatment_list
+#'  )
 #' spatDB$infoDesign
 #' spatDB$layoutRandom
 #' spatDB$plotsNumber
@@ -217,9 +223,6 @@ diagonal_arrangement <- function(nrows = NULL,
     }
   } 
   
-  if (is.null(seed)) {seed <- runif(1, min = -10000, max = 10000)}
-  #set.seed(seed)
-  
   Option_NCD <- TRUE
   
   if (splitBy == "column") {
@@ -235,7 +238,8 @@ diagonal_arrangement <- function(nrows = NULL,
       data_entry_UP <- na.omit(data_entry[,1:2]) 
       colnames(data_entry_UP) <- c("ENTRY", "NAME")
       if (kindExpt == "DBUDC") {
-        data_entry_UP <- na.omit(data_entry[,1:3]) 
+        data_entry_UP <- na.omit(data_entry[,1:2]) 
+        data_entry_UP$BLOCK <- c(rep("ALL", checks), rep(1:length(blocks), times = blocks))
         colnames(data_entry_UP) <- c("ENTRY", "NAME", "BLOCK")
         B <- data_entry_UP[(checks + 1):nrow(data_entry_UP),]
         Block_levels <- suppressWarnings(as.numeric(levels(as.factor(B$BLOCK))))
@@ -259,7 +263,7 @@ diagonal_arrangement <- function(nrows = NULL,
         data_entry_UP <- data.frame(list(ENTRY = checksEntries[1]:(checksEntries[1] + lines + checks - 1),	NAME = NAME))
         colnames(data_entry_UP) <- c("ENTRY", "NAME")
         if (nrow(data_entry_UP) != (lines + checks)) base::stop("nrows data != of lines + checks")
-      }else if (kindExpt == "DBUDC") {
+      } else if (kindExpt == "DBUDC") {
         if(is.null(blocks)) stop("'diagonal_arrangement()' requires blocks when kindExpt = 'DBUDC' and data is null.")
         if(sum(blocks) != lines) stop("In 'diagonal_arrangement()' number of lines and total lines in 'blocks' do not match.")
         NAME <- c(paste0(rep("Check-", checks), 1:checks),
@@ -269,7 +273,7 @@ diagonal_arrangement <- function(nrows = NULL,
         colnames(data_entry_UP) <- c("ENTRY", "NAME", "BLOCK")
         Blocks <- length(blocks)
         if (Option_NCD == TRUE) {
-          data_entry1 <- data_entry_UP[(length(checks) + 1):nrow(data_entry_UP), ]
+          data_entry1 <- data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ] # checksEntries intead of checks
           Block_levels <- suppressWarnings(as.numeric(levels(as.factor(data_entry1$BLOCK))))
           Block_levels <- na.omit(Block_levels)
           data_dim_each_block <- numeric()
@@ -302,6 +306,34 @@ diagonal_arrangement <- function(nrows = NULL,
     Block_Fillers = NULL
   )
   
+  if (is.null(available_percent1) & !is.null(getData())) {
+    checks <- as.numeric(checks)
+    total_entries <- as.numeric(getData()$dim_data_entry)
+    lines <- total_entries - checks
+    t1 <- floor(lines + lines * 0.10)
+    t2 <- ceiling(lines + lines * 0.20)
+    t <- t1:t2
+    n <- t[-numbers::isPrime(t)]
+    choices_list <- list()
+    i <- 1
+    for (n in t) {
+      choices_list[[i]] <- factor_subsets(n, diagonal = TRUE)$labels
+      i <- i + 1
+    }
+    choices <- unlist(choices_list[!sapply(choices_list, is.null)])
+    if(is.null(choices)) {
+      stop("Field dimensions do not fit with the data entered. Try another amount of treatments!", call. = FALSE)
+    } 
+    if (!is.null(choices)) {
+      message(cat("\n", "Error in diagonal_arrangement(): ", "\n", "\n",
+        "Field dimensions do not fit with the data entered!", "\n",
+        "Try one of the following options: ", "\n"))
+      return(for (i in 1:length(choices)) {print(choices[[i]])})
+    } else {
+      stop("Field dimensions do not fit with the data entered. Try another amount of treatments!", call. = FALSE)
+    }
+  }
+  
   if (is.null(locationNames) || length(locationNames) != l) locationNames <- 1:l
   
   ## Start for loop
@@ -309,6 +341,8 @@ diagonal_arrangement <- function(nrows = NULL,
   layout_random_sites <- vector(mode = "list", length = l)
   plot_numbers_sites <- vector(mode = "list", length = l)
   col_checks_sites <- vector(mode = "list", length = l)
+  
+  if (is.null(seed)) {seed <- runif(1, min = -10000, max = 10000)}
   set.seed(seed)
   
   for (sites in 1:l) {
@@ -323,9 +357,6 @@ diagonal_arrangement <- function(nrows = NULL,
         Option_NCD <- FALSE
         Exptlines <- exptlines
       } else if (all(as.vector(infoP[,7]) != exptlines)) {
-        # if(kindExpt == "DBUDC" && Way != "By Row") {
-        #   shiny::validate("Fillers are only allowed when you split the field by rows :(")
-        # }
         Option_NCD <- TRUE
         Exptlines <- exptlines
         if (kindExpt == "DBUDC") {
@@ -367,7 +398,7 @@ diagonal_arrangement <- function(nrows = NULL,
           infoP$V7 <- Exptlines
         }  
       }
-    } else shiny::validate("The total number of entries do not fit into the specified field.")
+    } else stop("Field dimensions do not fit with the data entered. Try another amount of treatments!")
     
     rand_checks <- random_checks(
       dt = available_percent1$dt, 
@@ -399,16 +430,16 @@ diagonal_arrangement <- function(nrows = NULL,
                                           way = "By Row", dim_data = data_dim_each_block)[[1]]
         if(is.null(my_row_sets)) return(NULL)
         n_blocks <- length(my_row_sets)
-      }else if (kindExpt == "DBUDC" && Way == "By Column") {
+      } else if (kindExpt == "DBUDC" && Way == "By Column") {
         data_dim_each_block <- available_percent1$data_dim_each_block
         cuts_by_c <- automatically_cuts(data = map_checks, planter_mov = planter, way = "By Column",
                                         dim_data = data_dim_each_block)
-        if(is.null(cuts_by_c)) return(NULL)
+        if (is.null(cuts_by_c)) return(NULL)
         n_blocks <- length(cuts_by_c)
         m = diff(cuts_by_c)
         my_col_sets = c(cuts_by_c[1], m)
       }
-      if(Way == "By Column") {
+      if (Way == "By Column") {
         data_random <- get_random_stacked(
           stacked = "By Column", 
           n_rows = n_rows,
@@ -419,7 +450,7 @@ diagonal_arrangement <- function(nrows = NULL,
           data = data_entry,
           data_dim_each_block = data_dim_each_block
         )
-      }else {
+      } else {
         if (Option_NCD == FALSE) {
           data_entry1 <- data_entry[(checks + 1):nrow(data_entry), ]
           data_random <- get_DBrandom(

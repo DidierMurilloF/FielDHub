@@ -7,7 +7,7 @@
 \method{plot}{FielDHub}(x, ...)
 }
 \arguments{
-\item{x}{an object inheriting from class \code{FielDHub}}
+\item{x}{a object inheriting from class \code{FielDHub}}
 
 \item{...}{further arguments passed to \code{\link{head}}.
 \itemize{
@@ -19,10 +19,10 @@
 }}
 }
 \value{
-a plot inheriting from class \code{FielDHub}
+a plot object inheriting from class \code{FielDHub}
 }
 \description{
-Plot any \code{FielDHub} object.
+Draw a field layout plot for a \code{FielDHub} object.
 }
 \examples{
 \dontrun{

@@ -326,7 +326,6 @@ mod_diagonal_multiple_server <- function(id) {
           } 
           data_entry_UP <- data_entry[,1:2] 
           checksEntries <- as.numeric(data_entry_UP[1:input$checks.db,1])
-          
           ## ----- NEW ------------------
           checks <- input$checks.db 
           lines.db <- nrow(data_entry_UP) - length(checksEntries)
@@ -347,7 +346,6 @@ mod_diagonal_multiple_server <- function(id) {
           }
           data_entry_UP$BLOCK <- c(rep("ALL", checks), rep(1:length(blocks), times = blocks))
           ## ----- NEW ------------------
-          
           colnames(data_entry_UP) <- c("ENTRY", "NAME", "BLOCK")
           if (Option_NCD == TRUE) {
             data_entry1 <- data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ]

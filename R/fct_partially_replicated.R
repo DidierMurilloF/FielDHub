@@ -45,16 +45,18 @@
 #'
 #' @examples
 #' # Example 1: Generates a spatial optimized partially replicated arrangement design in one 
-#' # location with 342 genotypes for a field with dimensions 25 rows x 18 cols. 
-#' # Note that there are 280 genotypes unreplicated (only one time), 50 genotypes replicated 
+#' # location with 312 genotypes for a field with dimensions 15 rows x 28 cols. 
+#' # Note that there are 250 genotypes unreplicated (only one time), 50 genotypes replicated 
 #' # two times, and 10 genotypes replicated three times, and two checks 20 times each one.
-#' SpatpREP1 <- partially_replicated(nrows = 25, 
-#'                                   ncols = 18,  
-#'                                   repGens = c(280,50,10,1,1),
-#'                                   repUnits = c(1,2,3,20,20),
-#'                                   planter = "cartesian", 
-#'                                   plotNumber = 101,
-#'                                   seed = 77)
+#' SpatpREP1 <- partially_replicated(
+#'   nrows = 15, 
+#'   ncols = 28,  
+#'   repGens = c(250,50,10,1,1),
+#'   repUnits = c(1,2,3,20,20),
+#'   planter = "cartesian", 
+#'   plotNumber = 101,
+#'   seed = 77
+#'  )
 #' SpatpREP1$infoDesign
 #' SpatpREP1$layoutRandom
 #' SpatpREP1$plotNumber
@@ -110,7 +112,7 @@ partially_replicated <- function(nrows = NULL, ncols = NULL, repGens = NULL, rep
   
   if (!is.null(l)) {
     if (is.null(plotNumber) || length(plotNumber) != l) {
-      if (l > 1){
+      if (l > 1) {
         plotNumber <- seq(1001, 1000*(l+1), 1000)
         message(cat("Warning message:", "\n", 
                 "Since plotNumber was missing, it was set up to default value of: ", plotNumber, 
@@ -127,12 +129,12 @@ partially_replicated <- function(nrows = NULL, ncols = NULL, repGens = NULL, rep
   if (!is.null(data)) {
     arg1 <- list(nrows, ncols, l);arg2 <- c(nrows, ncols, l)
     if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
-      base::stop('"diagonal_arrangement()" requires input nrows, ncols, and l to be numeric and distint of NULL.')
+      base::stop('"partially_replicated()" requires input nrows, ncols, and l to be numeric and distint of NULL.')
     }
   }else {
     arg1 <- list(nrows, ncols, l);arg2 <- c(nrows, ncols, l)
     if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
-      base::stop('"diagonal_arrangement()" requires input nrows, ncols, and l to be numeric and distint of NULL.')
+      base::stop('"partially_replicated()" requires input nrows, ncols, and l to be numeric and distint of NULL.')
     }
   } 
   
@@ -159,11 +161,12 @@ partially_replicated <- function(nrows = NULL, ncols = NULL, repGens = NULL, rep
       if (t_plots != (nrows * ncols)) {
         choices <- factor_subsets(t_plots)$labels
         if (!is.null(choices)) {
-          message(cat("\n", "Error message: field dimensions do not fit with the data entered!", "\n",
+          message(cat("\n", "Error in partially_replicated(): ", "\n", "\n",
+            "Field dimensions do not fit with the data entered!", "\n",
             "Try one of the following options: ", "\n"))
           return(for (i in 1:length(choices)) {print(choices[[i]])})
         } else {
-          stop("field dimensions do not fit with the data entered", call. = FALSE)
+          stop("Field dimensions do not fit with the data entered. Try another amount of treatments!", call. = FALSE)
         }
       }
   } else if (is.null(data)) {
@@ -175,11 +178,12 @@ partially_replicated <- function(nrows = NULL, ncols = NULL, repGens = NULL, rep
     if (t_plots != (nrows * ncols)) {
       choices <- factor_subsets(t_plots)$labels
       if (!is.null(choices)) {
-        message(cat("\n", "Error message: field dimensions do not fit with the data entered!", "\n",
+        message(cat("\n", "Error in partially_replicated(): ", "\n", "\n",
+          "Field dimensions do not fit with the data entered!", "\n",
           "Try one of the following options: ", "\n"))
         return(for (i in 1:length(choices)) {print(choices[[i]])})
       } else {
-        stop("field dimensions do not fit with the data entered", call. = FALSE)
+        stop("Field dimensions do not fit with the data entered. Try another amount of treatments!", call. = FALSE)
       }
     }
     ENTRY <- 1:sum(repGens)

@@ -59,16 +59,18 @@ Note that design generation needs the dimension of the field (number of rows and
 }
 \examples{
 # Example 1: Generates a spatial optimized partially replicated arrangement design in one 
-# location with 342 genotypes for a field with dimensions 25 rows x 18 cols. 
-# Note that there are 280 genotypes unreplicated (only one time), 50 genotypes replicated 
+# location with 312 genotypes for a field with dimensions 15 rows x 28 cols. 
+# Note that there are 250 genotypes unreplicated (only one time), 50 genotypes replicated 
 # two times, and 10 genotypes replicated three times, and two checks 20 times each one.
-SpatpREP1 <- partially_replicated(nrows = 25, 
-                                  ncols = 18,  
-                                  repGens = c(280,50,10,1,1),
-                                  repUnits = c(1,2,3,20,20),
-                                  planter = "cartesian", 
-                                  plotNumber = 101,
-                                  seed = 77)
+SpatpREP1 <- partially_replicated(
+  nrows = 15, 
+  ncols = 28,  
+  repGens = c(250,50,10,1,1),
+  repUnits = c(1,2,3,20,20),
+  planter = "cartesian", 
+  plotNumber = 101,
+  seed = 77
+ )
 SpatpREP1$infoDesign
 SpatpREP1$layoutRandom
 SpatpREP1$plotNumber

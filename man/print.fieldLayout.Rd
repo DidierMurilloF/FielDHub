@@ -2,20 +2,20 @@
 % Please edit documentation in R/utils_S3_methods.R
 \name{print.fieldLayout}
 \alias{print.fieldLayout}
-\title{Print a \code{fieldLayout} object}
+\title{Print a \code{fieldLayout} plot object}
 \usage{
 \method{print}{fieldLayout}(x, ...)
 }
 \arguments{
-\item{x}{a plot object inheriting from class fieldLayout}
+\item{x}{a plot object inheriting from class fieldLayout.}
 
 \item{...}{further arguments passed to \code{\link{head}}.}
 }
 \value{
-a plot object inheriting from class \code{fieldLayout}
+a plot object inheriting from class \code{fieldLayout}.
 }
 \description{
-Prints a plot object  of class \code{fieldLayout}.
+Prints a plot object of class \code{fieldLayout}.
 }
 \author{
 Didier Murillo [aut]

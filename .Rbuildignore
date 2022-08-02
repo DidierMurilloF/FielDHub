@@ -11,6 +11,7 @@ $run_dev.*
 ^README\.Rmd$
 ^CODE_OF_CONDUCT\.md$
 ^app\.R$
+^news\.md$
 ^rsconnect$
 ^\.travis\.yml$
 ^\.github$
