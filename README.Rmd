@@ -13,7 +13,9 @@ knitr::opts_chunk$set(
   out.width = "100%"
 )
 ```
+
 <br>
+
 ## FielDHub: A Shiny App for Design of Experiments in Life Sciences
 
 [![R-CMD-check](https://github.com/DidierMurilloF/FielDHub/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/DidierMurilloF/FielDHub/actions/workflows/R-CMD-check.yaml)
@@ -60,7 +62,7 @@ run_app()
 ```
 ### Diagonal Arrangement Example
 
-A project needs to test 270 genotypes in a field containing 20 rows and 15 columns of plots. In this example, these 270 genotypes are divided among three different experiments. In addition, four checks are included in a systematic diagonal arrangement across experiments to fill 30 plots representing 10% of the total number of experimental plots. An option to include filler plots is also available for fields where the number of experimental plots does not equal the number of available field plots.
+A project needs to test 280 genotypes in a field containing 16 rows and 20 columns of plots. In this example, these 280 genotypes are divided among three different experiments. In addition, four checks are included in a systematic diagonal arrangement across experiments to fill 40 plots representing 12.5% of the total number of experimental plots. An option to include filler plots is also available for fields where the number of experimental plots does not equal the number of available field plots.
 
 ![](DExample.png)
 
@@ -70,15 +72,15 @@ To illustrate using FielDHub to build experimental designs through R code, the d
 
 ```{r}
 diagonal <- diagonal_arrangement(
-  nrows = 20, 
-  ncols = 15, 
-  lines = 270, 
+  nrows = 16, 
+  ncols = 20, 
+  lines = 280, 
   checks = 4, 
   plotNumber = 101, 
   splitBy = "row", 
   seed = 1249, 
   kindExpt = "DBUDC", 
-  blocks = c(100, 100, 70)
+  blocks = c(100, 100, 80)
 )
 ```
 
@@ -95,7 +97,7 @@ head(diagonal$fieldBook, 12)
 
 Users can plot the layout design from `diagonal_arrangement()` using the function `plot()` as follows,
 
-```{r}
+```{r, fig.align='center', fig.width=7, fig.height=4.8}
 plot(diagonal)
 ```
 
@@ -106,7 +108,7 @@ The main difference between using the FielDHub Shiny app and using the standalon
 
 Partially replicated designs are commonly employed in early generation field trials. This type of design is characterized by replication of a portion of the entries, with the remaining entries only appearing once in the experiment. As an example, considered a field trial with 288 plots containing 75 entries appearing two times each, and 138 entries only appearing once. This field trials is arranged in a field of 16 rows by 18 columns.
 
-![](pREPExample.PNG)
+![](pREPExample.png)
 
 In the figure above, green plots contain replicated entries, and yellow plots contain entries that only appear once.
 
@@ -142,7 +144,7 @@ pREP$infoDesign
 
 Users can plot the layout design from `partially_replicated()` using the function `plot()` as follows,
 
-```{r}
+```{r, fig.align='center', fig.width=7, fig.height=4.8}
 plot(pREP)
 ```
 

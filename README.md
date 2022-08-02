@@ -1,9 +1,11 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
+<br>
+
 ## FielDHub: A Shiny App for Design of Experiments in Life Sciences
 
-[![R-CMD-check](https://github.com/DidierMurilloF/FielDHub/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/DidierMurillloF/FielDHub/actions/workflows/R-CMD-check.yaml)
+[![R-CMD-check](https://github.com/DidierMurilloF/FielDHub/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/DidierMurilloF/FielDHub/actions/workflows/R-CMD-check.yaml)
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 [![CRAN
@@ -13,7 +15,7 @@ status](https://www.r-pkg.org/badges/version/FielDHub)](https://cran.r-project.o
 
 ## Installation
 
-### Stable version from R CRAN
+### Stable version from CRAN
 
 ``` r
 install.packages("FielDHub")
@@ -53,15 +55,15 @@ run_app()
 
 ### Diagonal Arrangement Example
 
-A project needs to test 270 genotypes in a field containing 20 rows and
-15 columns of plots. In this example, these 270 genotypes are divided
+A project needs to test 280 genotypes in a field containing 16 rows and
+20 columns of plots. In this example, these 280 genotypes are divided
 among three different experiments. In addition, four checks are included
-in a systematic diagonal arrangement across experiments to fill 30 plots
-representing 10% of the total number of experimental plots. An option to
-include filler plots is also available for fields where the number of
+in a systematic diagonal arrangement across experiments to fill 40 plots
+representing 12.5% of the total number of experimental plots. An option
+to include filler plots is also available for fields where the number of
 experimental plots does not equal the number of available field plots.
 
-![](DExample.PNG)
+![](DExample.png)
 
 The figure above shows a map of an experiment randomized as a Decision
 Block Unreplicated Design with Checks on Diagonals. Yellow, gray, and
@@ -78,15 +80,15 @@ case, the seed number is 1249.
 
 ``` r
 diagonal <- diagonal_arrangement(
-  nrows = 20, 
-  ncols = 15, 
-  lines = 270, 
+  nrows = 16, 
+  ncols = 20, 
+  lines = 280, 
   checks = 4, 
   plotNumber = 101, 
   splitBy = "row", 
   seed = 1249, 
   kindExpt = "DBUDC", 
-  blocks = c(100, 100, 70)
+  blocks = c(100, 100, 80)
 )
 ```
 
@@ -96,13 +98,13 @@ follow,
 ``` r
 diagonal$infoDesign
 $rows
-[1] 20
+[1] 16
 
 $columns
-[1] 15
+[1] 20
 
 $treatments
-[1] 100 100  70
+[1] 100 100  80
 
 $checks
 [1] 4
@@ -111,7 +113,7 @@ $entry_checks
 [1] 1 2 3 4
 
 $rep_checks
-[1] 7 8 7 8
+[1] 11  9  9 11
 
 $locations
 [1] 1
@@ -120,7 +122,7 @@ $planter
 [1] "serpentine"
 
 $percent_checks
-[1] "10%"
+[1] "12.5%"
 
 $fillers
 [1] 0
@@ -135,18 +137,18 @@ $id_design
 ``` r
 head(diagonal$fieldBook, 12)
    ID   EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 Block1        1 2022  101   1      1      0    31    Gen-31
-2   2 Block1        1 2022  102   1      2      0    87    Gen-87
-3   3 Block1        1 2022  103   1      3      0    85    Gen-85
-4   4 Block1        1 2022  104   1      4      0    39    Gen-39
-5   5 Block1        1 2022  105   1      5      0    26    Gen-26
-6   6 Block1        1 2022  106   1      6      0    11    Gen-11
-7   7 Block1        1 2022  107   1      7      0    58    Gen-58
-8   8 Block1        1 2022  108   1      8      0     5     Gen-5
-9   9 Block1        1 2022  109   1      9      4     4   Check-4
-10 10 Block1        1 2022  110   1     10      0    86    Gen-86
-11 11 Block1        1 2022  111   1     11      0   104   Gen-104
-12 12 Block1        1 2022  112   1     12      0    25    Gen-25
+1   1 Block1        1 2022  101   1      1      0    51    Gen-51
+2   2 Block1        1 2022  102   1      2      0    67    Gen-67
+3   3 Block1        1 2022  103   1      3      0    50    Gen-50
+4   4 Block1        1 2022  104   1      4      0    29    Gen-29
+5   5 Block1        1 2022  105   1      5      0    39    Gen-39
+6   6 Block1        1 2022  106   1      6      0    92    Gen-92
+7   7 Block1        1 2022  107   1      7      1     1   Check-1
+8   8 Block1        1 2022  108   1      8      0    58    Gen-58
+9   9 Block1        1 2022  109   1      9      0    23    Gen-23
+10 10 Block1        1 2022  110   1     10      0    54    Gen-54
+11 11 Block1        1 2022  111   1     11      0    55    Gen-55
+12 12 Block1        1 2022  112   1     12      0     9     Gen-9
 ```
 
 Users can plot the layout design from `diagonal_arrangement()` using the
@@ -156,7 +158,7 @@ function `plot()` as follows,
 plot(diagonal)
 ```
 
-<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" style="display: block; margin: auto;" />
 
 The main difference between using the FielDHub Shiny app and using the
 standalone function `diagonal_arrangement()` is that the standalone
@@ -175,7 +177,7 @@ plots containing 75 entries appearing two times each, and 138 entries
 only appearing once. This field trials is arranged in a field of 16 rows
 by 18 columns.
 
-![](pREPExample.PNG)
+![](pREPExample.png)
 
 In the figure above, green plots contain replicated entries, and yellow
 plots contain entries that only appear once.
@@ -255,7 +257,7 @@ function `plot()` as follows,
 plot(pREP)
 ```
 
-<img src="man/figures/README-unnamed-chunk-9-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-9-1.png" width="100%" style="display: block; margin: auto;" />
 
 To see more examples, please go to
 <https://didiermurillof.github.io/FielDHub/reference/index.html>.
