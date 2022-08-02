@@ -28,27 +28,34 @@ hence, design is suboptimal. The randomization can be done across locations."><!
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/diagonal_arrangement.html">Unreplicated Diagonal Arrangement Design</a>
+    <a class="dropdown-item" href="../articles/optimized_arrangement.html">Unreplicated Optimized Arrangement Design</a>
     <a class="dropdown-item" href="../articles/RCBD_augmented.html">Augmented Randomized Complete Block Design</a>
+    <a class="dropdown-item" href="../articles/partially_replicated.html">Partially Replicated Design</a>
+    <a class="dropdown-item" href="../articles/square_lattice.html">Square Lattice Design</a>
+    <a class="dropdown-item" href="../articles/rectangular_lattice.html">Rectangular Lattice Design</a>
     <a class="dropdown-item" href="../articles/alpha_lattice.html">Alpha Lattice Design</a>
     <a class="dropdown-item" href="../articles/crd.html">Completely Randomized Design</a>
-    <a class="dropdown-item" href="../articles/diagonal_arrangement.html">Unreplicated Diagonal Arrangement Design</a>
-    <a class="dropdown-item" href="../articles/full_factorial.html">Full Factorial Design</a>
-    <a class="dropdown-item" href="../articles/incomplete_blocks.html">Incomplete Block Design</a>
-    <a class="dropdown-item" href="../articles/latin_square.html">Latin Square Design</a>
-    <a class="dropdown-item" href="../articles/methods.html">Methods in FielDHub</a>
-    <a class="dropdown-item" href="../articles/optimized_arrangement.html">Unreplicated Optimized Arrangement Design</a>
-    <a class="dropdown-item" href="../articles/partially_replicated.html">Partially Replicated Design</a>
     <a class="dropdown-item" href="../articles/rcbd.html">Randomized Complete Block Design</a>
-    <a class="dropdown-item" href="../articles/rectangular_lattice.html">Rectangular Lattice Design</a>
-    <a class="dropdown-item" href="../articles/row_column.html">Row-Column Design</a>
+    <a class="dropdown-item" href="../articles/latin_square.html">Latin Square Design</a>
+    <a class="dropdown-item" href="../articles/full_factorial.html">Full Factorial Design</a>
     <a class="dropdown-item" href="../articles/split_plot.html">Split-Plot Design</a>
     <a class="dropdown-item" href="../articles/split_split_plot.html">Split-Split Plot Design</a>
-    <a class="dropdown-item" href="../articles/square_lattice.html">Square Lattice Design</a>
     <a class="dropdown-item" href="../articles/strip_plot.html">Strip-Plot Design</a>
+    <a class="dropdown-item" href="../articles/incomplete_blocks.html">Incomplete Block Design</a>
+    <a class="dropdown-item" href="../articles/row_column.html">Row-Column Design</a>
+    <a class="dropdown-item" href="../articles/methods.html">Methods in FielDHub</a>
   </div>
 </li>
-<li class="nav-item">
-  <a class="nav-link" href="../news/index.html">Changelog</a>
+<li class="nav-item dropdown">
+  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-news">News</a>
+  <div class="dropdown-menu" aria-labelledby="dropdown-news">
+    <h6 class="dropdown-header" data-toc-skip>Releases</h6>
+    <a class="dropdown-item" href="../articles/news/fieldhub-1-2-0.html">Version 1.2.0</a>
+    <a class="dropdown-item" href="../articles/news/fieldhub-0-1-0.html">Version 0.1.0</a>
+    <div class="dropdown-divider"></div>
+    <a class="dropdown-item" href="../news/index.html">Changelog</a>
+  </div>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
@@ -229,7 +236,7 @@ unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 12 12     Loc1  112   1   2      6    19      G-19</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 2: Generates a row-column design with 3 full blocks and 30 treatments</span></span></span>
-<span class="r-in"><span><span class="co"># and 5 rows, for two locations.</span></span></span>
+<span class="r-in"><span><span class="co"># and 5 rows, for one location.</span></span></span>
 <span class="r-in"><span><span class="co"># In this case, we show how to use the option data.</span></span></span>
 <span class="r-in"><span><span class="va">treatments</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"ND-"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">30</span>, sep <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">ENTRY</span> <span class="op">&lt;-</span> <span class="fl">1</span><span class="op">:</span><span class="fl">30</span></span></span>
@@ -242,11 +249,13 @@ unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4     4      ND-4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5     5      ND-5</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6     6      ND-6</span>
-<span class="r-in"><span><span class="va">rowcold2</span> <span class="op">&lt;-</span> <span class="fu">row_column</span><span class="op">(</span>t <span class="op">=</span> <span class="fl">30</span>, nrows <span class="op">=</span> <span class="fl">5</span>, r <span class="op">=</span> <span class="fl">3</span>, l <span class="op">=</span> <span class="fl">2</span>, </span></span>
+<span class="r-in"><span><span class="va">rowcold2</span> <span class="op">&lt;-</span> <span class="fu">row_column</span><span class="op">(</span>t <span class="op">=</span> <span class="fl">30</span>, nrows <span class="op">=</span> <span class="fl">5</span>, r <span class="op">=</span> <span class="fl">3</span>, l <span class="op">=</span> <span class="fl">1</span>, </span></span>
 <span class="r-in"><span>                       plotNumber<span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">101</span>,<span class="fl">1001</span><span class="op">)</span>, </span></span>
 <span class="r-in"><span>                       locationNames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                       seed <span class="op">=</span> <span class="fl">15</span>,</span></span>
 <span class="r-in"><span>                       data <span class="op">=</span> <span class="va">treatment_list</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Since plotNumber was missing, it was set up to default values.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Length of plot numbers is larger than number of locations.</span>
 <span class="r-in"><span><span class="va">rowcold2</span><span class="op">$</span><span class="va">infoDesign</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $rows</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 5</span>
@@ -261,10 +270,10 @@ unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 30</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $locations</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $location_names</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "A" "B"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $seed</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 15</span>
@@ -273,8 +282,8 @@ unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 9</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="va">rowcold2</span><span class="op">$</span><span class="va">resolvableBlocks</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Loc_A</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Loc_A$rep1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $Loc_1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $Loc_1$rep1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      [,1]    [,2]    [,3]    [,4]    [,5]    [,6]   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1,] "ND-28" "ND-1"  "ND-21" "ND-2"  "ND-30" "ND-18"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [2,] "ND-16" "ND-11" "ND-24" "ND-29" "ND-19" "ND-22"</span>
@@ -282,7 +291,7 @@ unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [4,] "ND-5"  "ND-12" "ND-23" "ND-3"  "ND-13" "ND-10"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [5,] "ND-27" "ND-7"  "ND-15" "ND-9"  "ND-6"  "ND-20"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Loc_A$rep2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $Loc_1$rep2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      [,1]    [,2]    [,3]    [,4]    [,5]    [,6]   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1,] "ND-12" "ND-22" "ND-16" "ND-19" "ND-25" "ND-1" </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [2,] "ND-14" "ND-4"  "ND-8"  "ND-9"  "ND-13" "ND-24"</span>
@@ -290,7 +299,7 @@ unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [4,] "ND-17" "ND-15" "ND-7"  "ND-18" "ND-5"  "ND-27"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [5,] "ND-26" "ND-6"  "ND-29" "ND-23" "ND-3"  "ND-2" </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Loc_A$rep3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $Loc_1$rep3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      [,1]    [,2]    [,3]    [,4]    [,5]    [,6]   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1,] "ND-23" "ND-14" "ND-16" "ND-13" "ND-7"  "ND-21"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [2,] "ND-1"  "ND-28" "ND-6"  "ND-29" "ND-9"  "ND-8" </span>
@@ -299,46 +308,20 @@ unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [5,] "ND-17" "ND-2"  "ND-3"  "ND-11" "ND-20" "ND-19"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Loc_B</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Loc_B$rep1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      [,1]    [,2]    [,3]    [,4]    [,5]    [,6]   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] "ND-9"  "ND-20" "ND-7"  "ND-28" "ND-27" "ND-11"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] "ND-29" "ND-16" "ND-4"  "ND-23" "ND-10" "ND-12"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] "ND-22" "ND-24" "ND-26" "ND-13" "ND-14" "ND-19"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] "ND-30" "ND-5"  "ND-1"  "ND-3"  "ND-21" "ND-8" </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] "ND-25" "ND-18" "ND-2"  "ND-6"  "ND-15" "ND-17"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Loc_B$rep2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      [,1]    [,2]    [,3]    [,4]    [,5]    [,6]   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] "ND-9"  "ND-21" "ND-15" "ND-29" "ND-16" "ND-8" </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] "ND-12" "ND-24" "ND-5"  "ND-7"  "ND-10" "ND-2" </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] "ND-20" "ND-17" "ND-4"  "ND-11" "ND-30" "ND-6" </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] "ND-3"  "ND-28" "ND-19" "ND-18" "ND-23" "ND-25"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] "ND-27" "ND-26" "ND-22" "ND-13" "ND-1"  "ND-14"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Loc_B$rep3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      [,1]    [,2]    [,3]    [,4]    [,5]    [,6]   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] "ND-8"  "ND-7"  "ND-29" "ND-5"  "ND-4"  "ND-23"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] "ND-15" "ND-10" "ND-16" "ND-3"  "ND-9"  "ND-25"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] "ND-30" "ND-12" "ND-2"  "ND-11" "ND-18" "ND-20"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] "ND-13" "ND-22" "ND-27" "ND-14" "ND-6"  "ND-26"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] "ND-24" "ND-28" "ND-17" "ND-1"  "ND-21" "ND-19"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">rowcold2</span><span class="op">$</span><span class="va">fieldBook</span>,<span class="fl">12</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    ID LOCATION PLOT REP ROW COLUMN ENTRY TREATMENT</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1   1        A  101   1   1      1    28     ND-28</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2   2        A  102   1   1      2     1      ND-1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3   3        A  103   1   1      3    21     ND-21</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4   4        A  104   1   1      4     2      ND-2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5   5        A  105   1   1      5    30     ND-30</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6   6        A  106   1   1      6    18     ND-18</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7   7        A  107   1   2      1    16     ND-16</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8   8        A  108   1   2      2    11     ND-11</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9   9        A  109   1   2      3    24     ND-24</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10 10        A  110   1   2      4    29     ND-29</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11 11        A  111   1   2      5    19     ND-19</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12 12        A  112   1   2      6    22     ND-22</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1   1        1  101   1   1      1    28     ND-28</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   2        1  102   1   1      2     1      ND-1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3   3        1  103   1   1      3    21     ND-21</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4   4        1  104   1   1      4     2      ND-2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5   5        1  105   1   1      5    30     ND-30</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6   6        1  106   1   1      6    18     ND-18</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7   7        1  107   1   2      1    16     ND-16</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8   8        1  108   1   2      2    11     ND-11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9   9        1  109   1   2      3    24     ND-24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10 10        1  110   1   2      4    29     ND-29</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11 11        1  111   1   2      5    19     ND-19</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12 12        1  112   1   2      6    22     ND-22</span>
 <span class="r-in"><span>  </span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

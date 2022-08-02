@@ -28,27 +28,34 @@ treatment per location."><!-- mathjax --><script src="https://cdnjs.cloudflare.c
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/diagonal_arrangement.html">Unreplicated Diagonal Arrangement Design</a>
+    <a class="dropdown-item" href="../articles/optimized_arrangement.html">Unreplicated Optimized Arrangement Design</a>
     <a class="dropdown-item" href="../articles/RCBD_augmented.html">Augmented Randomized Complete Block Design</a>
+    <a class="dropdown-item" href="../articles/partially_replicated.html">Partially Replicated Design</a>
+    <a class="dropdown-item" href="../articles/square_lattice.html">Square Lattice Design</a>
+    <a class="dropdown-item" href="../articles/rectangular_lattice.html">Rectangular Lattice Design</a>
     <a class="dropdown-item" href="../articles/alpha_lattice.html">Alpha Lattice Design</a>
     <a class="dropdown-item" href="../articles/crd.html">Completely Randomized Design</a>
-    <a class="dropdown-item" href="../articles/diagonal_arrangement.html">Unreplicated Diagonal Arrangement Design</a>
-    <a class="dropdown-item" href="../articles/full_factorial.html">Full Factorial Design</a>
-    <a class="dropdown-item" href="../articles/incomplete_blocks.html">Incomplete Block Design</a>
-    <a class="dropdown-item" href="../articles/latin_square.html">Latin Square Design</a>
-    <a class="dropdown-item" href="../articles/methods.html">Methods in FielDHub</a>
-    <a class="dropdown-item" href="../articles/optimized_arrangement.html">Unreplicated Optimized Arrangement Design</a>
-    <a class="dropdown-item" href="../articles/partially_replicated.html">Partially Replicated Design</a>
     <a class="dropdown-item" href="../articles/rcbd.html">Randomized Complete Block Design</a>
-    <a class="dropdown-item" href="../articles/rectangular_lattice.html">Rectangular Lattice Design</a>
-    <a class="dropdown-item" href="../articles/row_column.html">Row-Column Design</a>
+    <a class="dropdown-item" href="../articles/latin_square.html">Latin Square Design</a>
+    <a class="dropdown-item" href="../articles/full_factorial.html">Full Factorial Design</a>
     <a class="dropdown-item" href="../articles/split_plot.html">Split-Plot Design</a>
     <a class="dropdown-item" href="../articles/split_split_plot.html">Split-Split Plot Design</a>
-    <a class="dropdown-item" href="../articles/square_lattice.html">Square Lattice Design</a>
     <a class="dropdown-item" href="../articles/strip_plot.html">Strip-Plot Design</a>
+    <a class="dropdown-item" href="../articles/incomplete_blocks.html">Incomplete Block Design</a>
+    <a class="dropdown-item" href="../articles/row_column.html">Row-Column Design</a>
+    <a class="dropdown-item" href="../articles/methods.html">Methods in FielDHub</a>
   </div>
 </li>
-<li class="nav-item">
-  <a class="nav-link" href="../news/index.html">Changelog</a>
+<li class="nav-item dropdown">
+  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-news">News</a>
+  <div class="dropdown-menu" aria-labelledby="dropdown-news">
+    <h6 class="dropdown-header" data-toc-skip>Releases</h6>
+    <a class="dropdown-item" href="../articles/news/fieldhub-1-2-0.html">Version 1.2.0</a>
+    <a class="dropdown-item" href="../articles/news/fieldhub-0-1-0.html">Version 0.1.0</a>
+    <div class="dropdown-divider"></div>
+    <a class="dropdown-item" href="../news/index.html">Changelog</a>
+  </div>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
@@ -115,7 +122,7 @@ and number of individuals per family group (FAMILY).</p></dd>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Example 1: Split a population of 3000 and 200 families into 8 locations. </span></span></span>
 <span class="r-in"><span><span class="co"># Original dataset is been simulated.</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">77</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">N</span> <span class="op">&lt;-</span> <span class="fl">3000</span>; <span class="va">families</span> <span class="op">&lt;-</span> <span class="fl">200</span></span></span>
+<span class="r-in"><span><span class="va">N</span> <span class="op">&lt;-</span> <span class="fl">2000</span>; <span class="va">families</span> <span class="op">&lt;-</span> <span class="fl">100</span></span></span>
 <span class="r-in"><span><span class="va">ENTRY</span> <span class="op">&lt;-</span> <span class="fl">1</span><span class="op">:</span><span class="va">N</span></span></span>
 <span class="r-in"><span><span class="va">NAME</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"SB-"</span>, <span class="fl">1</span><span class="op">:</span><span class="va">N</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">FAMILY</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></span><span class="op">(</span>mode <span class="op">=</span> <span class="st">"numeric"</span>, length <span class="op">=</span> <span class="va">N</span><span class="op">)</span></span></span>
@@ -124,9 +131,9 @@ and number of individuals per family group (FAMILY).</p></dd>
 <span class="r-in"><span><span class="va">gen.list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>ENTRY <span class="op">=</span> <span class="va">ENTRY</span>, NAME <span class="op">=</span> <span class="va">NAME</span>, FAMILY <span class="op">=</span> <span class="va">FAMILY</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">gen.list</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ENTRY NAME FAMILY</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1     1 SB-1    146</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2     2 SB-2    173</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3     3 SB-3    197</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     1 SB-1     18</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2     2 SB-2     45</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3     3 SB-3     69</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4     4 SB-4     57</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5     5 SB-5     37</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6     6 SB-6     29</span>

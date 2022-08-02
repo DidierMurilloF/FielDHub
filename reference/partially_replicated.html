@@ -28,27 +28,34 @@ Note that design generation needs the dimension of the field (number of rows and
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/diagonal_arrangement.html">Unreplicated Diagonal Arrangement Design</a>
+    <a class="dropdown-item" href="../articles/optimized_arrangement.html">Unreplicated Optimized Arrangement Design</a>
     <a class="dropdown-item" href="../articles/RCBD_augmented.html">Augmented Randomized Complete Block Design</a>
+    <a class="dropdown-item" href="../articles/partially_replicated.html">Partially Replicated Design</a>
+    <a class="dropdown-item" href="../articles/square_lattice.html">Square Lattice Design</a>
+    <a class="dropdown-item" href="../articles/rectangular_lattice.html">Rectangular Lattice Design</a>
     <a class="dropdown-item" href="../articles/alpha_lattice.html">Alpha Lattice Design</a>
     <a class="dropdown-item" href="../articles/crd.html">Completely Randomized Design</a>
-    <a class="dropdown-item" href="../articles/diagonal_arrangement.html">Unreplicated Diagonal Arrangement Design</a>
-    <a class="dropdown-item" href="../articles/full_factorial.html">Full Factorial Design</a>
-    <a class="dropdown-item" href="../articles/incomplete_blocks.html">Incomplete Block Design</a>
-    <a class="dropdown-item" href="../articles/latin_square.html">Latin Square Design</a>
-    <a class="dropdown-item" href="../articles/methods.html">Methods in FielDHub</a>
-    <a class="dropdown-item" href="../articles/optimized_arrangement.html">Unreplicated Optimized Arrangement Design</a>
-    <a class="dropdown-item" href="../articles/partially_replicated.html">Partially Replicated Design</a>
     <a class="dropdown-item" href="../articles/rcbd.html">Randomized Complete Block Design</a>
-    <a class="dropdown-item" href="../articles/rectangular_lattice.html">Rectangular Lattice Design</a>
-    <a class="dropdown-item" href="../articles/row_column.html">Row-Column Design</a>
+    <a class="dropdown-item" href="../articles/latin_square.html">Latin Square Design</a>
+    <a class="dropdown-item" href="../articles/full_factorial.html">Full Factorial Design</a>
     <a class="dropdown-item" href="../articles/split_plot.html">Split-Plot Design</a>
     <a class="dropdown-item" href="../articles/split_split_plot.html">Split-Split Plot Design</a>
-    <a class="dropdown-item" href="../articles/square_lattice.html">Square Lattice Design</a>
     <a class="dropdown-item" href="../articles/strip_plot.html">Strip-Plot Design</a>
+    <a class="dropdown-item" href="../articles/incomplete_blocks.html">Incomplete Block Design</a>
+    <a class="dropdown-item" href="../articles/row_column.html">Row-Column Design</a>
+    <a class="dropdown-item" href="../articles/methods.html">Methods in FielDHub</a>
   </div>
 </li>
-<li class="nav-item">
-  <a class="nav-link" href="../news/index.html">Changelog</a>
+<li class="nav-item dropdown">
+  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-news">News</a>
+  <div class="dropdown-menu" aria-labelledby="dropdown-news">
+    <h6 class="dropdown-header" data-toc-skip>Releases</h6>
+    <a class="dropdown-item" href="../articles/news/fieldhub-1-2-0.html">Version 1.2.0</a>
+    <a class="dropdown-item" href="../articles/news/fieldhub-0-1-0.html">Version 0.1.0</a>
+    <div class="dropdown-divider"></div>
+    <a class="dropdown-item" href="../news/index.html">Changelog</a>
+  </div>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
@@ -170,28 +177,30 @@ with correlated data. Journal of Agricultural, Biological, and Environmental Sta
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Example 1: Generates a spatial optimized partially replicated arrangement design in one </span></span></span>
-<span class="r-in"><span><span class="co"># location with 342 genotypes for a field with dimensions 25 rows x 18 cols. </span></span></span>
-<span class="r-in"><span><span class="co"># Note that there are 280 genotypes unreplicated (only one time), 50 genotypes replicated </span></span></span>
+<span class="r-in"><span><span class="co"># location with 312 genotypes for a field with dimensions 15 rows x 28 cols. </span></span></span>
+<span class="r-in"><span><span class="co"># Note that there are 250 genotypes unreplicated (only one time), 50 genotypes replicated </span></span></span>
 <span class="r-in"><span><span class="co"># two times, and 10 genotypes replicated three times, and two checks 20 times each one.</span></span></span>
-<span class="r-in"><span><span class="va">SpatpREP1</span> <span class="op">&lt;-</span> <span class="fu">partially_replicated</span><span class="op">(</span>nrows <span class="op">=</span> <span class="fl">25</span>, </span></span>
-<span class="r-in"><span>                                  ncols <span class="op">=</span> <span class="fl">18</span>,  </span></span>
-<span class="r-in"><span>                                  repGens <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">280</span>,<span class="fl">50</span>,<span class="fl">10</span>,<span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                                  repUnits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span>,<span class="fl">3</span>,<span class="fl">20</span>,<span class="fl">20</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                                  planter <span class="op">=</span> <span class="st">"cartesian"</span>, </span></span>
-<span class="r-in"><span>                                  plotNumber <span class="op">=</span> <span class="fl">101</span>,</span></span>
-<span class="r-in"><span>                                  seed <span class="op">=</span> <span class="fl">77</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">SpatpREP1</span> <span class="op">&lt;-</span> <span class="fu">partially_replicated</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  nrows <span class="op">=</span> <span class="fl">15</span>, </span></span>
+<span class="r-in"><span>  ncols <span class="op">=</span> <span class="fl">28</span>,  </span></span>
+<span class="r-in"><span>  repGens <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">250</span>,<span class="fl">50</span>,<span class="fl">10</span>,<span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  repUnits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span>,<span class="fl">3</span>,<span class="fl">20</span>,<span class="fl">20</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  planter <span class="op">=</span> <span class="st">"cartesian"</span>, </span></span>
+<span class="r-in"><span>  plotNumber <span class="op">=</span> <span class="fl">101</span>,</span></span>
+<span class="r-in"><span>  seed <span class="op">=</span> <span class="fl">77</span></span></span>
+<span class="r-in"><span> <span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">SpatpREP1</span><span class="op">$</span><span class="va">infoDesign</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $rows</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 25</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 15</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $columns</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 18</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 28</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $treatments_with_reps</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 62</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $treatments_with_no_reps</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 280</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 250</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $locations</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
@@ -208,127 +217,119 @@ with correlated data. Journal of Agricultural, Biological, and Environmental Sta
 <span class="r-in"><span><span class="va">SpatpREP1</span><span class="op">$</span><span class="va">layoutRandom</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       Col1 Col2 Col3 Col4 Col5 Col6 Col7 Col8 Col9 Col10 Col11 Col12 Col13</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row25  239   12   35   41  158  169   88  292   48   324    46     4   154</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row24   38  281   53  180  338    2  185   50  287   107     2   159   249</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row23   36   70   11  204  247    2  245  280   66    27   182     2     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row22  155   18    2    8   10  303  309   89  106    29    57    76   290</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row21  173  127   19  298  110  135  261   29  294    69   227    34    25</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row20  285    1  216  160  156   60   74   98    9    47    91   231     9</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row19  221   68   53  141   58   28   24   78   39    84    96   257   196</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row18   49   31  125  214  262  342    1   26   32    55   310   260   268</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row17    8  137   48   15  237  276  233  105  277   283   163   109   240</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row16  272   38   22  147   50  117    2  321  332   224   282   279    61</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row15    2    6  242   86    1  152  275  172   90    35    40    21   208</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row14   27    1  111   54  270  198   13   39  197   130   114   222    51</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row13  183   94  184  251   43  191   30   31   47   134    33     1   217</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row12    2  145  146   32   25    6  306  211   17   322    73     6    20</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row11  244   41  341  263  144   42  126    2  334   181   317     4   228</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row10  121   64  210  337   52  284  241  293  194     4    24   335    20</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row9   179  318  278  143  323  325    2  103  133    59   299    17     7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row8   316   95   63   14  122  250   71   59   45   218    46   253    33</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row7   170  161  330   23  291   11    1   85  305    54   189    44   328</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row6    11  295  331  301   37   80  178  139   12   201   320   215   243</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row5   212    3  157  203  312  112   51  118  192    93     2   193   238</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row4    62   72  319  232  138    2   10  286  252   176    56   119   230</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row3   209  113  115    8   87    2  151   61   16    18   162   339   246</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row2   207   52  258   19   21    2  124    1  131   213   190    43   264</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row1   168  297    2  195  308  327  248    2    1     7   226   254    82</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       Col14 Col15 Col16 Col17 Col18</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row25    99   289   315     1   148</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row24     1   116    60    23   288</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row23    67    62   229     7   205</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row22     2    45   314   104   101</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row21   307    16     1   255    56</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row20   199   136    58   187   220</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row19   336     1   219   256   123</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row18   167    42   128    44    30</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row17    75   274   102   108     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row16   259   200    49     1   165</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row15   304    83     1   186   271</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row14     2   329   188   296   273</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row13   223   166   120   206   140</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row12    26   164   100    92    55</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row11     1     3   311   177   149</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row10   234   267   236     5     9</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row9     15   340    79    28   150</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row8    266    13   171    77   129</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row7    265     5     2   326   132</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row6     22     1    36    10    97</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row5     37   153    40   225    14</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row4    269    12   174   202     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row3    333   175     1    34   302</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row2    142   300   313     3     5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row1     57   235    81    65     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row15    2  190  118  200  242  298   45  269  265    33    55    17   248</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row14  257  191    1    2    2  123  171  206  137     1     1   172    40</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row13   22  167    2  244   42   45   67   89  229   117   294   142    70</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row12    8  243   34    2  177  155  267   63   58    75   130    39   146</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row11  106  122   14  310   81  141   60  204  129   144    50    65     9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row10  278  179  199   25   27   32   47   18   48   296   276    53    48</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row9    26  147  115  223  297   13  186  236   54    80     1   143   193</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row8     1    6   79  108  100   73    4   69  224   251   234    35    16</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row7   301  252  250   87    1   34  192    2  295   131   198   238     5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row6   258   40  259  312  280  110  116   12    2   203    19    46   293</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row5    72    2  151   36  256  196  305  148  126     3   274   205     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row4   162    2    6  107   41  218   20   15   24    38    59   134   281</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row3   272  124  173   43  232   62  170   47  201     9   240    84   208</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row2    56   13    3  228    1    2  158  145   46    36   285    33    97</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row1   109   14   11   39  275  254    1   58  157   253   159   185   165</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       Col14 Col15 Col16 Col17 Col18 Col19 Col20 Col21 Col22 Col23 Col24 Col25</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row15   270    44     1    26   120    49   299     1    96   189   184    24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row14    20   182    99    44   219     2   178   261     1   209    23   213</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row13   246    60   222     2   226   188    31   217   181   211    71    32</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row12   140   132   279   160    86   303   197     1    61     2   125    37</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row11   153    94    30    74    57    78     1   210    85    27    68    54</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row10   154   291     1    10   114   287   119   230    21   150   277   249</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row9      2     1     4   290    25    28   156   286     7   247    82   104</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row8      8   311    76   121    90   288    11    30     9   220     1   194</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row7      2     2    93   233   307    15   283    28   212    52   152    66</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row6      7   113   111    41    61   161     8   241   133    55    95   237</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row5    264    51   202    52     2   262   273     1   239    51     6   183</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row4    164   221    23   255    64   139   282     3   207   302   175   214</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row3     10   260     5   102    11    77     1    29   289   300    43     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row2    266   127   187   105     4    29   271   215   195     5    57    98</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row1     88    56   149   227   174    50    12   128    10   180    53    19</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       Col26 Col27 Col28</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row15    35   245   231</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row14     1   268    42</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row13   306    62    37</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row12    16   103    38</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row11   138   292   163</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row10   176   135   136</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row9    304    17   216</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row8    284     2   235</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row7     18    83   168</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row6     49    22     7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row5    101    21   112</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row4    308    31     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row3    309   263    59</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row2    225   169    91</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row1     12    92   166</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="va">SpatpREP1</span><span class="op">$</span><span class="va">plotNumber</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,]  533  534  535  536  537  538  539  540  541   542   543   544   545</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,]  515  516  517  518  519  520  521  522  523   524   525   526   527</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,]  497  498  499  500  501  502  503  504  505   506   507   508   509</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,]  479  480  481  482  483  484  485  486  487   488   489   490   491</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,]  461  462  463  464  465  466  467  468  469   470   471   472   473</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,]  443  444  445  446  447  448  449  450  451   452   453   454   455</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,]  425  426  427  428  429  430  431  432  433   434   435   436   437</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,]  407  408  409  410  411  412  413  414  415   416   417   418   419</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,]  389  390  391  392  393  394  395  396  397   398   399   400   401</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [10,]  371  372  373  374  375  376  377  378  379   380   381   382   383</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [11,]  353  354  355  356  357  358  359  360  361   362   363   364   365</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [12,]  335  336  337  338  339  340  341  342  343   344   345   346   347</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [13,]  317  318  319  320  321  322  323  324  325   326   327   328   329</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [14,]  299  300  301  302  303  304  305  306  307   308   309   310   311</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [15,]  281  282  283  284  285  286  287  288  289   290   291   292   293</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [16,]  263  264  265  266  267  268  269  270  271   272   273   274   275</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [17,]  245  246  247  248  249  250  251  252  253   254   255   256   257</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [18,]  227  228  229  230  231  232  233  234  235   236   237   238   239</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [19,]  209  210  211  212  213  214  215  216  217   218   219   220   221</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [20,]  191  192  193  194  195  196  197  198  199   200   201   202   203</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [21,]  173  174  175  176  177  178  179  180  181   182   183   184   185</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [22,]  155  156  157  158  159  160  161  162  163   164   165   166   167</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [23,]  137  138  139  140  141  142  143  144  145   146   147   148   149</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [24,]  119  120  121  122  123  124  125  126  127   128   129   130   131</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [25,]  101  102  103  104  105  106  107  108  109   110   111   112   113</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       [,14] [,15] [,16] [,17] [,18]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,]   546   547   548   549   550</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,]   528   529   530   531   532</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,]   510   511   512   513   514</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,]   492   493   494   495   496</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,]   474   475   476   477   478</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,]   456   457   458   459   460</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,]   438   439   440   441   442</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,]   420   421   422   423   424</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,]   402   403   404   405   406</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [10,]   384   385   386   387   388</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [11,]   366   367   368   369   370</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [12,]   348   349   350   351   352</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [13,]   330   331   332   333   334</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [14,]   312   313   314   315   316</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [15,]   294   295   296   297   298</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [16,]   276   277   278   279   280</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [17,]   258   259   260   261   262</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [18,]   240   241   242   243   244</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [19,]   222   223   224   225   226</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [20,]   204   205   206   207   208</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [21,]   186   187   188   189   190</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [22,]   168   169   170   171   172</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [23,]   150   151   152   153   154</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [24,]   132   133   134   135   136</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [25,]   114   115   116   117   118</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,]  493  494  495  496  497  498  499  500  501   502   503   504   505</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,]  465  466  467  468  469  470  471  472  473   474   475   476   477</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,]  437  438  439  440  441  442  443  444  445   446   447   448   449</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,]  409  410  411  412  413  414  415  416  417   418   419   420   421</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,]  381  382  383  384  385  386  387  388  389   390   391   392   393</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,]  353  354  355  356  357  358  359  360  361   362   363   364   365</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,]  325  326  327  328  329  330  331  332  333   334   335   336   337</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,]  297  298  299  300  301  302  303  304  305   306   307   308   309</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,]  269  270  271  272  273  274  275  276  277   278   279   280   281</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [10,]  241  242  243  244  245  246  247  248  249   250   251   252   253</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [11,]  213  214  215  216  217  218  219  220  221   222   223   224   225</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [12,]  185  186  187  188  189  190  191  192  193   194   195   196   197</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13,]  157  158  159  160  161  162  163  164  165   166   167   168   169</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [14,]  129  130  131  132  133  134  135  136  137   138   139   140   141</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [15,]  101  102  103  104  105  106  107  108  109   110   111   112   113</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       [,14] [,15] [,16] [,17] [,18] [,19] [,20] [,21] [,22] [,23] [,24] [,25]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,]   506   507   508   509   510   511   512   513   514   515   516   517</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,]   478   479   480   481   482   483   484   485   486   487   488   489</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,]   450   451   452   453   454   455   456   457   458   459   460   461</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,]   422   423   424   425   426   427   428   429   430   431   432   433</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,]   394   395   396   397   398   399   400   401   402   403   404   405</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,]   366   367   368   369   370   371   372   373   374   375   376   377</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,]   338   339   340   341   342   343   344   345   346   347   348   349</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,]   310   311   312   313   314   315   316   317   318   319   320   321</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,]   282   283   284   285   286   287   288   289   290   291   292   293</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [10,]   254   255   256   257   258   259   260   261   262   263   264   265</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [11,]   226   227   228   229   230   231   232   233   234   235   236   237</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [12,]   198   199   200   201   202   203   204   205   206   207   208   209</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13,]   170   171   172   173   174   175   176   177   178   179   180   181</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [14,]   142   143   144   145   146   147   148   149   150   151   152   153</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [15,]   114   115   116   117   118   119   120   121   122   123   124   125</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       [,26] [,27] [,28]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,]   518   519   520</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,]   490   491   492</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,]   462   463   464</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,]   434   435   436</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,]   406   407   408</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,]   378   379   380</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,]   350   351   352</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,]   322   323   324</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,]   294   295   296</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [10,]   266   267   268</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [11,]   238   239   240</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [12,]   210   211   212</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13,]   182   183   184</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [14,]   154   155   156</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [15,]   126   127   128</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">SpatpREP1</span><span class="op">$</span><span class="va">fieldBook</span>,<span class="fl">12</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1   1 Expt1        1 2022  101   1      1      0   168      G168</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2   2 Expt1        1 2022  102   1      2      0   297      G297</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3   3 Expt1        1 2022  103   1      3      2     2        G2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4   4 Expt1        1 2022  104   1      4      0   195      G195</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5   5 Expt1        1 2022  105   1      5      0   308      G308</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6   6 Expt1        1 2022  106   1      6      0   327      G327</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7   7 Expt1        1 2022  107   1      7      0   248      G248</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8   8 Expt1        1 2022  108   1      8      2     2        G2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9   9 Expt1        1 2022  109   1      9      1     1        G1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10 10 Expt1        1 2022  110   1     10      7     7        G7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11 11 Expt1        1 2022  111   1     11      0   226      G226</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12 12 Expt1        1 2022  112   1     12      0   254      G254</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1   1 Expt1        1 2022  101   1      1      0   109      G109</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   2 Expt1        1 2022  102   1      2     14    14       G14</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3   3 Expt1        1 2022  103   1      3     11    11       G11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4   4 Expt1        1 2022  104   1      4     39    39       G39</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5   5 Expt1        1 2022  105   1      5      0   275      G275</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6   6 Expt1        1 2022  106   1      6      0   254      G254</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7   7 Expt1        1 2022  107   1      7      1     1        G1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8   8 Expt1        1 2022  108   1      8     58    58       G58</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9   9 Expt1        1 2022  109   1      9      0   157      G157</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10 10 Expt1        1 2022  110   1     10      0   253      G253</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11 11 Expt1        1 2022  111   1     11      0   159      G159</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12 12 Expt1        1 2022  112   1     12      0   185      G185</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 2: Generates a spatial optimized partially replicated arrangement design with 492 </span></span></span>
 <span class="r-in"><span><span class="co"># genotypes in a field with dimensions 30 rows x 20 cols. Note that there 384 genotypes </span></span></span>
