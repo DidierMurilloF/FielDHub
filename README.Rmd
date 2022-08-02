@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 
 <br>
 
-# FielDHub <a href=''><img src='man/figures/logo.jpg' align="right" height="139" /></a>
+# FielDHub <a href=''><img src='man/figures/logo.gif' align="right" height="139" /></a>
 
 [![CRAN
 status](https://www.r-pkg.org/badges/version/FielDHub)](https://cran.r-project.org/web//packages/FielDHub/)
