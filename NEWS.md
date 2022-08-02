@@ -38,20 +38,10 @@
 
 * Fixed a bug in the CRD factorial design that prevented the option of including all possible factorial combinations. 
 
-* Fixed a restriction in the RCBD mapping layout to allow for the use of more than 25 entries. PS: there are better designs when the number of entries is higher than 25 (for more info go to: https://www.ndsu.edu/faculty/horsley/) 
+* Fixed a restriction in the RCBD mapping layout to allow for the use of more than 25 entries. PS: there are better designs when the number of entries is higher than 25 (for more info go to: [FIELD PLOT DESIGN I](https://www.ndsu.edu/faculty/horsley/)).
 
 
 ## FielDHub 0.1.0
 
-* Added capability for making randomizations across **multiple locations** in unreplicated designs, partially replicated designs, lattice designs, RCBD, factorial, split-plot, split-split-plot, strip-plot, IBD, and RCD experiments.
-
-* Added capability for **heatmap visualization** of simulated data on all designs. 
-
-* Added buttons to **copy and save design output to excel**.
-
-* Added **list of options for dimensions of field** on unreplicated and partially replicated designs.
-
-* Added **vignettes and help documents** for all designs.
-
-* Added **filters and search** for field book tables.
+* Added a `NEWS.md` file to track changes to the package.
 

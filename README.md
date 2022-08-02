@@ -3,7 +3,7 @@
 
 <br>
 
-# FielDHub <a href=''><img src='man/figures/logo.gif' align="right" height="139" /></a>
+# FielDHub <a href=''><img src='man/figures/logo.gif' align="right" height="140" /></a>
 
 [![CRAN
 status](https://www.r-pkg.org/badges/version/FielDHub)](https://cran.r-project.org/web//packages/FielDHub/)
@@ -65,7 +65,7 @@ representing 12.5% of the total number of experimental plots. An option
 to include filler plots is also available for fields where the number of
 experimental plots does not equal the number of available field plots.
 
-![](DExample.png)
+<img src='DExample.PNG' align="center" height="500" />
 
 The figure above shows a map of an experiment randomized as a Decision
 Block Unreplicated Design with Checks on Diagonals. Yellow, gray, and
@@ -179,7 +179,7 @@ plots containing 75 entries appearing two times each, and 138 entries
 only appearing once. This field trials is arranged in a field of 16 rows
 by 18 columns.
 
-![](pREPExample.png)
+<img src='pREPExample.PNG' align="center" height="500" />
 
 In the figure above, green plots contain replicated entries, and yellow
 plots contain entries that only appear once.

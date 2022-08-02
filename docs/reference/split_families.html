@@ -122,7 +122,7 @@ and number of individuals per family group (FAMILY).</p></dd>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Example 1: Split a population of 3000 and 200 families into 8 locations. </span></span></span>
 <span class="r-in"><span><span class="co"># Original dataset is been simulated.</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">77</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">N</span> <span class="op">&lt;-</span> <span class="fl">3000</span>; <span class="va">families</span> <span class="op">&lt;-</span> <span class="fl">200</span></span></span>
+<span class="r-in"><span><span class="va">N</span> <span class="op">&lt;-</span> <span class="fl">2000</span>; <span class="va">families</span> <span class="op">&lt;-</span> <span class="fl">100</span></span></span>
 <span class="r-in"><span><span class="va">ENTRY</span> <span class="op">&lt;-</span> <span class="fl">1</span><span class="op">:</span><span class="va">N</span></span></span>
 <span class="r-in"><span><span class="va">NAME</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"SB-"</span>, <span class="fl">1</span><span class="op">:</span><span class="va">N</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">FAMILY</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></span><span class="op">(</span>mode <span class="op">=</span> <span class="st">"numeric"</span>, length <span class="op">=</span> <span class="va">N</span><span class="op">)</span></span></span>
@@ -131,9 +131,9 @@ and number of individuals per family group (FAMILY).</p></dd>
 <span class="r-in"><span><span class="va">gen.list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>ENTRY <span class="op">=</span> <span class="va">ENTRY</span>, NAME <span class="op">=</span> <span class="va">NAME</span>, FAMILY <span class="op">=</span> <span class="va">FAMILY</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">gen.list</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ENTRY NAME FAMILY</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1     1 SB-1    146</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2     2 SB-2    173</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3     3 SB-3    197</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     1 SB-1     18</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2     2 SB-2     45</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3     3 SB-3     69</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4     4 SB-4     57</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5     5 SB-5     37</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6     6 SB-6     29</span>
