@@ -86,16 +86,17 @@
   </div>
 </nav><div class="container template-home">
 <div class="row">
-  <main id="main" class="col-md-9"><div class="section level2">
+  <main id="main" class="col-md-9"><p><br></p>
+<div class="section level2">
 <h2 id="fieldhub-a-shiny-app-for-design-of-experiments-in-life-sciences">FielDHub: A Shiny App for Design of Experiments in Life Sciences<a class="anchor" aria-label="anchor" href="#fieldhub-a-shiny-app-for-design-of-experiments-in-life-sciences"></a>
 </h2>
-
+<p><a href="https://github.com/DidierMurilloF/FielDHub/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/DidierMurilloF/FielDHub/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a> <a href="https://lifecycle.r-lib.org/articles/stages.html" class="external-link"><img src="https://img.shields.io/badge/lifecycle-stable-brightgreen.svg" alt="Lifecycle: experimental"></a> <a href="https://cran.r-project.org/web//packages/FielDHub/" class="external-link"><img src="https://www.r-pkg.org/badges/version/FielDHub" alt="CRAN status"></a> <a href="https://cranlogs.r-pkg.org/badges/FielDHub" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/FielDHub" alt="cranlogs"></a> <a href="https://cranlogs.r-pkg.org/badges/grand-total/FielDHub" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/grand-total/FielDHub" alt="cranlogs"></a></p>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
 <div class="section level3">
-<h3 id="stable-version-from-r-cran">Stable version from R CRAN<a class="anchor" aria-label="anchor" href="#stable-version-from-r-cran"></a>
+<h3 id="stable-version-from-cran">Stable version from CRAN<a class="anchor" aria-label="anchor" href="#stable-version-from-cran"></a>
 </h3>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"FielDHub"</span><span class="op">)</span></span></code></pre></div>
@@ -129,32 +130,32 @@
 <div class="section level3">
 <h3 id="diagonal-arrangement-example">Diagonal Arrangement Example<a class="anchor" aria-label="anchor" href="#diagonal-arrangement-example"></a>
 </h3>
-<p>A project needs to test 270 genotypes in a field containing 20 rows and 15 columns of plots. In this example, these 270 genotypes are divided among three different experiments. In addition, four checks are included in a systematic diagonal arrangement across experiments to fill 30 plots representing 10% of the total number of experimental plots. An option to include filler plots is also available for fields where the number of experimental plots does not equal the number of available field plots.</p>
-<p><img src="DExample.PNG"></p>
+<p>A project needs to test 280 genotypes in a field containing 16 rows and 20 columns of plots. In this example, these 280 genotypes are divided among three different experiments. In addition, four checks are included in a systematic diagonal arrangement across experiments to fill 40 plots representing 12.5% of the total number of experimental plots. An option to include filler plots is also available for fields where the number of experimental plots does not equal the number of available field plots.</p>
+<p><img src="DExample.png"></p>
 <p>The figure above shows a map of an experiment randomized as a Decision Block Unreplicated Design with Checks on Diagonals. Yellow, gray, and green shade the blocks of unreplicated experiments, while distinctively colored check plots are replicated throughout the field in a systematic diagonal arrangement.</p>
 <p>To illustrate using FielDHub to build experimental designs through R code, the design produced in the R Shiny interface described above can also be created using the function <code><a href="reference/diagonal_arrangement.html">diagonal_arrangement()</a></code> in the R script below. Note, that to obtain identical results, users must include the same seed number in the script as was used in the Shiny app. In this case, the seed number is 1249.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">diagonal</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/diagonal_arrangement.html">diagonal_arrangement</a></span><span class="op">(</span></span>
-<span>  nrows <span class="op">=</span> <span class="fl">20</span>, </span>
-<span>  ncols <span class="op">=</span> <span class="fl">15</span>, </span>
-<span>  lines <span class="op">=</span> <span class="fl">270</span>, </span>
+<span>  nrows <span class="op">=</span> <span class="fl">16</span>, </span>
+<span>  ncols <span class="op">=</span> <span class="fl">20</span>, </span>
+<span>  lines <span class="op">=</span> <span class="fl">280</span>, </span>
 <span>  checks <span class="op">=</span> <span class="fl">4</span>, </span>
 <span>  plotNumber <span class="op">=</span> <span class="fl">101</span>, </span>
 <span>  splitBy <span class="op">=</span> <span class="st">"row"</span>, </span>
 <span>  seed <span class="op">=</span> <span class="fl">1249</span>, </span>
 <span>  kindExpt <span class="op">=</span> <span class="st">"DBUDC"</span>, </span>
-<span>  blocks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">100</span>, <span class="fl">70</span><span class="op">)</span></span>
+<span>  blocks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">100</span>, <span class="fl">80</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Users can access the returned values from <code><a href="reference/diagonal_arrangement.html">diagonal_arrangement()</a></code> as follow,</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>diagonal<span class="sc">$</span>infoDesign</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="sc">$</span>rows</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">20</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">16</span></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="sc">$</span>columns</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">15</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">20</span></span>
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="sc">$</span>treatments</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">100</span> <span class="dv">100</span>  <span class="dv">70</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">100</span> <span class="dv">100</span>  <span class="dv">80</span></span>
 <span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="sc">$</span>checks</span>
 <span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">4</span></span>
@@ -163,7 +164,7 @@
 <span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span> <span class="dv">4</span></span>
 <span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="sc">$</span>rep_checks</span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">7</span> <span class="dv">8</span> <span class="dv">7</span> <span class="dv">8</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">11</span>  <span class="dv">9</span>  <span class="dv">9</span> <span class="dv">11</span></span>
 <span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="sc">$</span>locations</span>
 <span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">1</span></span>
@@ -172,7 +173,7 @@
 <span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"serpentine"</span></span>
 <span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a><span class="sc">$</span>percent_checks</span>
-<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"10%"</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"12.5%"</span></span>
 <span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a><span class="sc">$</span>fillers</span>
 <span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">0</span></span>
@@ -184,29 +185,29 @@
 <span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">15</span></span></code></pre></div>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(diagonal<span class="sc">$</span>fieldBook, <span class="dv">12</span>)</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>   ID   EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span>   <span class="dv">1</span> Block1        <span class="dv">1</span> <span class="dv">2022</span>  <span class="dv">101</span>   <span class="dv">1</span>      <span class="dv">1</span>      <span class="dv">0</span>    <span class="dv">31</span>    Gen<span class="dv">-31</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span>   <span class="dv">2</span> Block1        <span class="dv">1</span> <span class="dv">2022</span>  <span class="dv">102</span>   <span class="dv">1</span>      <span class="dv">2</span>      <span class="dv">0</span>    <span class="dv">87</span>    Gen<span class="dv">-87</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="dv">3</span>   <span class="dv">3</span> Block1        <span class="dv">1</span> <span class="dv">2022</span>  <span class="dv">103</span>   <span class="dv">1</span>      <span class="dv">3</span>      <span class="dv">0</span>    <span class="dv">85</span>    Gen<span class="dv">-85</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="dv">4</span>   <span class="dv">4</span> Block1        <span class="dv">1</span> <span class="dv">2022</span>  <span class="dv">104</span>   <span class="dv">1</span>      <span class="dv">4</span>      <span class="dv">0</span>    <span class="dv">39</span>    Gen<span class="dv">-39</span></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="dv">5</span>   <span class="dv">5</span> Block1        <span class="dv">1</span> <span class="dv">2022</span>  <span class="dv">105</span>   <span class="dv">1</span>      <span class="dv">5</span>      <span class="dv">0</span>    <span class="dv">26</span>    Gen<span class="dv">-26</span></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="dv">6</span>   <span class="dv">6</span> Block1        <span class="dv">1</span> <span class="dv">2022</span>  <span class="dv">106</span>   <span class="dv">1</span>      <span class="dv">6</span>      <span class="dv">0</span>    <span class="dv">11</span>    Gen<span class="dv">-11</span></span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="dv">7</span>   <span class="dv">7</span> Block1        <span class="dv">1</span> <span class="dv">2022</span>  <span class="dv">107</span>   <span class="dv">1</span>      <span class="dv">7</span>      <span class="dv">0</span>    <span class="dv">58</span>    Gen<span class="dv">-58</span></span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="dv">8</span>   <span class="dv">8</span> Block1        <span class="dv">1</span> <span class="dv">2022</span>  <span class="dv">108</span>   <span class="dv">1</span>      <span class="dv">8</span>      <span class="dv">0</span>     <span class="dv">5</span>     Gen<span class="dv">-5</span></span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="dv">9</span>   <span class="dv">9</span> Block1        <span class="dv">1</span> <span class="dv">2022</span>  <span class="dv">109</span>   <span class="dv">1</span>      <span class="dv">9</span>      <span class="dv">4</span>     <span class="dv">4</span>   Check<span class="dv">-4</span></span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="dv">10</span> <span class="dv">10</span> Block1        <span class="dv">1</span> <span class="dv">2022</span>  <span class="dv">110</span>   <span class="dv">1</span>     <span class="dv">10</span>      <span class="dv">0</span>    <span class="dv">86</span>    Gen<span class="dv">-86</span></span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="dv">11</span> <span class="dv">11</span> Block1        <span class="dv">1</span> <span class="dv">2022</span>  <span class="dv">111</span>   <span class="dv">1</span>     <span class="dv">11</span>      <span class="dv">0</span>   <span class="dv">104</span>   Gen<span class="dv">-104</span></span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="dv">12</span> <span class="dv">12</span> Block1        <span class="dv">1</span> <span class="dv">2022</span>  <span class="dv">112</span>   <span class="dv">1</span>     <span class="dv">12</span>      <span class="dv">0</span>    <span class="dv">25</span>    Gen<span class="dv">-25</span></span></code></pre></div>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span>   <span class="dv">1</span> Block1        <span class="dv">1</span> <span class="dv">2022</span>  <span class="dv">101</span>   <span class="dv">1</span>      <span class="dv">1</span>      <span class="dv">0</span>    <span class="dv">51</span>    Gen<span class="dv">-51</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span>   <span class="dv">2</span> Block1        <span class="dv">1</span> <span class="dv">2022</span>  <span class="dv">102</span>   <span class="dv">1</span>      <span class="dv">2</span>      <span class="dv">0</span>    <span class="dv">67</span>    Gen<span class="dv">-67</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="dv">3</span>   <span class="dv">3</span> Block1        <span class="dv">1</span> <span class="dv">2022</span>  <span class="dv">103</span>   <span class="dv">1</span>      <span class="dv">3</span>      <span class="dv">0</span>    <span class="dv">50</span>    Gen<span class="dv">-50</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="dv">4</span>   <span class="dv">4</span> Block1        <span class="dv">1</span> <span class="dv">2022</span>  <span class="dv">104</span>   <span class="dv">1</span>      <span class="dv">4</span>      <span class="dv">0</span>    <span class="dv">29</span>    Gen<span class="dv">-29</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="dv">5</span>   <span class="dv">5</span> Block1        <span class="dv">1</span> <span class="dv">2022</span>  <span class="dv">105</span>   <span class="dv">1</span>      <span class="dv">5</span>      <span class="dv">0</span>    <span class="dv">39</span>    Gen<span class="dv">-39</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="dv">6</span>   <span class="dv">6</span> Block1        <span class="dv">1</span> <span class="dv">2022</span>  <span class="dv">106</span>   <span class="dv">1</span>      <span class="dv">6</span>      <span class="dv">0</span>    <span class="dv">92</span>    Gen<span class="dv">-92</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="dv">7</span>   <span class="dv">7</span> Block1        <span class="dv">1</span> <span class="dv">2022</span>  <span class="dv">107</span>   <span class="dv">1</span>      <span class="dv">7</span>      <span class="dv">1</span>     <span class="dv">1</span>   Check<span class="dv">-1</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="dv">8</span>   <span class="dv">8</span> Block1        <span class="dv">1</span> <span class="dv">2022</span>  <span class="dv">108</span>   <span class="dv">1</span>      <span class="dv">8</span>      <span class="dv">0</span>    <span class="dv">58</span>    Gen<span class="dv">-58</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="dv">9</span>   <span class="dv">9</span> Block1        <span class="dv">1</span> <span class="dv">2022</span>  <span class="dv">109</span>   <span class="dv">1</span>      <span class="dv">9</span>      <span class="dv">0</span>    <span class="dv">23</span>    Gen<span class="dv">-23</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="dv">10</span> <span class="dv">10</span> Block1        <span class="dv">1</span> <span class="dv">2022</span>  <span class="dv">110</span>   <span class="dv">1</span>     <span class="dv">10</span>      <span class="dv">0</span>    <span class="dv">54</span>    Gen<span class="dv">-54</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="dv">11</span> <span class="dv">11</span> Block1        <span class="dv">1</span> <span class="dv">2022</span>  <span class="dv">111</span>   <span class="dv">1</span>     <span class="dv">11</span>      <span class="dv">0</span>    <span class="dv">55</span>    Gen<span class="dv">-55</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="dv">12</span> <span class="dv">12</span> Block1        <span class="dv">1</span> <span class="dv">2022</span>  <span class="dv">112</span>   <span class="dv">1</span>     <span class="dv">12</span>      <span class="dv">0</span>     <span class="dv">9</span>     Gen<span class="dv">-9</span></span></code></pre></div>
 <p>Users can plot the layout design from <code><a href="reference/diagonal_arrangement.html">diagonal_arrangement()</a></code> using the function <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> as follows,</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">diagonal</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-5-1.png" width="100%"></p>
+<p><img src="reference/figures/README-unnamed-chunk-5-1.png" width="100%" style="display: block; margin: auto;"></p>
 <p>The main difference between using the FielDHub Shiny app and using the standalone function <code><a href="reference/diagonal_arrangement.html">diagonal_arrangement()</a></code> is that the standalone function will allocate filler only if it is necessary, while in R Shiny, filler plots are generated automatically. In cases where users include fillers, either between or after experiments, the Shiny app is preferable for filling and visualizing all field plots.</p>
 </div>
 <div class="section level3">
 <h3 id="partially-replicated-design-example">Partially Replicated Design Example<a class="anchor" aria-label="anchor" href="#partially-replicated-design-example"></a>
 </h3>
 <p>Partially replicated designs are commonly employed in early generation field trials. This type of design is characterized by replication of a portion of the entries, with the remaining entries only appearing once in the experiment. As an example, considered a field trial with 288 plots containing 75 entries appearing two times each, and 138 entries only appearing once. This field trials is arranged in a field of 16 rows by 18 columns.</p>
-<p><img src="pREPExample.PNG"></p>
+<p><img src="pREPExample.png"></p>
 <p>In the figure above, green plots contain replicated entries, and yellow plots contain entries that only appear once.</p>
 <p>Instead of using the Shiny FielDHub app, users can use the standalone FielDHub function <code><a href="reference/partially_replicated.html">partially_replicated()</a></code>. The partially replicated layout described above can be produced through scripting as follows. As noted in the previous example, to obtain identical results between the script and the Shiny app, users need to use the same seed number, which, in this case, is 77.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
@@ -263,7 +264,7 @@
 <p>Users can plot the layout design from <code><a href="reference/partially_replicated.html">partially_replicated()</a></code> using the function <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> as follows,</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pREP</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-9-1.png" width="100%"></p>
+<p><img src="reference/figures/README-unnamed-chunk-9-1.png" width="100%" style="display: block; margin: auto;"></p>
 <p>To see more examples, please go to <a href="https://didiermurillof.github.io/FielDHub/reference/index.html" class="uri">https://didiermurillof.github.io/FielDHub/reference/index.html</a>.</p>
 </div>
 </div>
