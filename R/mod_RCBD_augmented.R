@@ -338,8 +338,6 @@ mod_RCBD_augmented_server <- function(id) {
       } else {
         checks <- as.numeric(input$checks_a_rcbd)
         lines <- as.numeric(init_data()$entries)
-        print("print lines")
-        print(lines)
         b <- as.numeric(input$blocks_a_rcbd)
         set_dims <- set_augmented_blocks(lines = lines, checks = checks)
         blocks_dims <- as.data.frame(set_dims$blocks_dims)

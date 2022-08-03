@@ -2,11 +2,11 @@
 #'
 #' @description It generates field layout plots for experimental designs.
 #'
-#' @param x An FielDHub object.
+#' @param x A FielDHub object.
 #' @param layout Type of layout field.
 #' @param planter option to order of planter
-#' @param l a especific location
-#' @param stacked Order of reps in the field layout
+#' @param l a specific location
+#' @param stacked order of reps in the field layout
 #'
 #'
 #' @author Didier Murillo [aut],

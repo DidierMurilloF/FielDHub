@@ -9,17 +9,20 @@
 \arguments{
 \item{x}{a object inheriting from class \code{FielDHub}}
 
-\item{...}{further arguments passed to \code{\link{head}}.
+\item{...}{further arguments passed to utility function \code{plot_layout()}.
 \itemize{
   \item \code{layout} a integer. Options available depend on the 
   type of design and its characteristics
   \item \code{l} a integer to specify the location to plot.
-  \item \code{planter} \code{serpentine} or \code{cartesian}.
-  \item \code{stacked} \code{vertical} or \code{horizontal} stacked layout.
+  \item \code{planter} it can be \code{serpentine} or \code{cartesian}.
+  \item \code{stacked} it can be \code{vertical} or \code{horizontal} stacked layout.
 }}
 }
 \value{
-a plot object inheriting from class \code{FielDHub}
+\itemize{
+  \item a plot object inheriting from class \code{fieldLayout}
+  \item \code{field_book} a dataframe wth the fieldbook that includes the coordinates ROW and COLUMN.
+}
 }
 \description{
 Draw a field layout plot for a \code{FielDHub} object.

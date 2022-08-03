@@ -9,7 +9,7 @@
 \arguments{
 \item{x}{a plot object inheriting from class fieldLayout.}
 
-\item{...}{further arguments passed to \code{\link{head}}.}
+\item{...}{Unused, for extensibility.}
 }
 \value{
 a plot object inheriting from class \code{fieldLayout}.

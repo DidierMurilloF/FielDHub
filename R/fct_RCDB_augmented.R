@@ -155,12 +155,37 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
     exptName <- paste(rep('Expt', repsExpt), 1:repsExpt, sep = "")
   } 
   if (any(is.null(c(nrows, ncols)))) {
-    nrows <- 1
+    nrows_within_block <- 1
     ncols <- plots_per_block
   } else {
-    nrows <- nrows / b
+    nrows_within_block <- nrows / b
     ncols <- ncols
   }
+  ## Start feedback code
+  field_rows <- nrows_within_block * b 
+  field_cols <- ncols
+  lines_arcbd <- lines
+  checks_arcbd <- checks
+  set_blocks <- set_augmented_blocks(
+    lines = lines_arcbd, 
+    checks = checks_arcbd
+  )
+  blocks_arcbd <- set_blocks$b
+  if (length(blocks_arcbd) == 0) {
+    stop("No options available for that amount of treatments!", call. = FALSE)
+  }
+  blocks_dims <- set_blocks$blocks_dims
+  colnames(blocks_dims) <- c("BLOCKS", "DIMENSIONS")
+  feedback <- as.data.frame(blocks_dims)
+  set_dims <- paste(field_rows, field_cols, sep = " x ")
+  inputs_subset <- subset(feedback, feedback[, 1] == b & feedback[, 2] == set_dims)
+  if (nrow(inputs_subset) == 0) {
+    message(cat("\n", "Error in RCBD_augmented(): ", "\n", "\n",
+      "Field dimensions do not fit with the data entered!", "\n",
+      "Try one of the following options: ", "\n"))
+    return(print(feedback))
+  }
+  ## end feedback code
   loc <- 1:l
   expt <- 1:repsExpt
   layout1_loc1 <- vector(mode = "list", length = 1)
@@ -185,13 +210,13 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
         entries <- sample(entries)
         rand_len_cuts <- sample(len_cuts)
         lines_blocks <- split_vectors(x = entries, len_cuts = rand_len_cuts)
-        total_rows <- nrows * b
-        datos <- sample(c(rep(0, times = nrows * ncols - checks),
+        total_rows <- nrows_within_block * b
+        datos <- sample(c(rep(0, times = nrows_within_block * ncols - checks),
                           rep(1, checks)))
         randomized_blocks <- setNames(vector(mode = "list", length = b), paste0("Block", 1:b))
         spots_for_checks <- setNames(vector(mode = "list", length = b), paste0("Block", 1:b))
         for (i in 1:b) {
-          block <- matrix(data = sample(datos), nrow = nrows, 
+          block <- matrix(data = sample(datos), nrow = nrows_within_block, 
                           ncol = ncols, 
                           byrow = TRUE)
           if (Fillers > 0 && i == 1) {
@@ -234,12 +259,12 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
         binary_matrix <- dplyr::bind_rows(spots_for_checks)
         binary_matrix <- as.matrix(binary_matrix)
         col_checks <- ifelse(binary_matrix != "0" & binary_matrix != "Filler", 1, 0)
-        plotsPerBlock <- rep(ncol(layout) * nrows, b)
-        plotsPerBlock <- c(plotsPerBlock[-length(plotsPerBlock)], ncol(layout) * nrows - Fillers)
+        plotsPerBlock <- rep(ncol(layout) * nrows_within_block, b)
+        plotsPerBlock <- c(plotsPerBlock[-length(plotsPerBlock)], ncol(layout) * nrows_within_block - Fillers)
       } else {
         fun <- function(x) {
-          matrix(data = sample(c(rep(0, (nrows * ncols) - checks), 1:checks)),
-                 nrow  = nrows, 
+          matrix(data = sample(c(rep(0, (nrows_within_block * ncols) - checks), 1:checks)),
+                 nrow  = nrows_within_block, 
                  byrow = TRUE)
         }
         entries <- as.vector(data[(checks + 1):nrow(data),1])
@@ -249,7 +274,7 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
           }
           blocks_with_checks <- lapply(1:b, fun)
           layout_a <- paste_by_row(blocks_with_checks)
-          if ((nrows * b) %% 2 == 0) { 
+          if ((nrows_within_block * b) %% 2 == 0) { 
             if (planter == "serpentine") {
               layout_a[1,] <- c(rep("Filler", Fillers), 
                                 sample(c(1:checks, rep(0, ncol(layout_a) - Fillers - checks)), 
@@ -270,8 +295,8 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
                                            planter = planter)
           layout <- no_randomData$w_map_letters
           len_cuts <- no_randomData$len_cut 
-          plotsPerBlock <- rep(ncol(layout) * nrows, b)
-          plotsPerBlock <- c(plotsPerBlock[-length(plotsPerBlock)], ncol(layout) * nrows - Fillers)
+          plotsPerBlock <- rep(ncol(layout) * nrows_within_block, b)
+          plotsPerBlock <- c(plotsPerBlock[-length(plotsPerBlock)], ncol(layout) * nrows_within_block - Fillers)
         } else {
           blocks_with_checks <- lapply(1:b, fun)
           layout_a <- paste_by_row(blocks_with_checks)
@@ -280,22 +305,22 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
                                            data_Entry = entries, 
                                            planter = planter)
           layout <- no_randomData$w_map_letters
-          plotsPerBlock <- rep(ncol(layout) * nrows, b)
+          plotsPerBlock <- rep(ncol(layout) * nrows_within_block, b)
         }
       }
-      Blocks_info <- matrix(data = rep(b:1, each = (ncols * nrows)), 
-                            nrow = nrows * b, 
+      Blocks_info <- matrix(data = rep(b:1, each = (ncols * nrows_within_block)), 
+                            nrow = nrows_within_block * b, 
                             ncol = ncols, 
                             byrow = TRUE)
       new_exptName <- rev(exptName)
       nameEXPT <- ARCBD_name(Fillers = Fillers, 
-                             b = nrows * b, 
+                             b = nrows_within_block * b, 
                              layout = layout, 
                              name.expt = exptName[expts], 
                              planter = planter)
       plotEXPT <- ARCBD_plot_number(plot.number = plotNumber[locations], 
                                     planter = planter,
-                                    b = nrows * b, 
+                                    b = nrows_within_block * b, 
                                     name.expt = exptName[expts],
                                     Fillers = Fillers, 
                                     nameEXPT = nameEXPT$my_names)
@@ -368,8 +393,8 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, planter
   layout_loc1 <- as.matrix(layout1_loc1[[1]])
   Plot_loc1 <- as.matrix(plot_loc1[[1]])
   checks <- as.numeric(nrow(DataChecks))
-  field_dimensions <- c(rows = nrows * b, cols = ncols)
-  blocks_dimensions <-  c(rows = nrows, cols = ncols)
+  field_dimensions <- c(rows = nrows_within_block * b, cols = ncols)
+  blocks_dimensions <-  c(rows = nrows_within_block, cols = ncols)
   infoDesign <- list(
     #field_dimensions = field_dimensions,
     rows = as.numeric(field_dimensions[1]),

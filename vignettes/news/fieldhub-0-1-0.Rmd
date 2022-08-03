@@ -1,3 +1,52 @@
-# FielDHub 0.1.0
+---
+output: github_document
+---
 
-* Added a `NEWS.md` file to track changes to the package.
+<!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = NA,
+  out.width = "100%"
+)
+```
+
+## FielDHub 0.1.0
+
+I am delighted to announce the initial release of FielDHub to CRAN! FielDHub is conceived to make it quick and easy to generate, randomize, and plot complex and standard experimental designs. This initial release is version 0.1.0 in recognition that FielDHub has been in development for more than one year and has already been used for researchers at NDSU, CIAT, as well as for teaching.
+
+Install FielDHub with:
+
+```{r, eval=FALSE}
+install.packages("FielDHub")
+```
+
+### Usage
+
+Get started using only two simple lines of code:
+
+```{r, eval=FALSE}
+library(FielDHub)
+run_app()
+```
+
+### Relevant Features
+
+Unreplicated and partially replicated designs are commonly used in plant breeding and forestry but with a lack of free tools available to researchers to make that randomization.
+
+*   FielDHub provides an easy way to complete designs by using the app or through the standalone functions such as `diagonal_arrangement()`, `optimized_arrangement()` and `RCBD_augmented()`.
+
+*   Partially replicated design can be done using the function `partially_replicated()`. 
+
+*   The app provides novel features to make the randomization along with the field layout or map. 
+
+*   FielDHub's features such as generating synthetic data along with randomization, as well as plotting field layouts make the app suitable to teach statistic courses such as experimental design.
+
+### Acknowledgements
+
+FielDHub has been a long time coming, and it wouldn’t have been possible without a devoted community of users, many of whom have gone on to contribute fixes and new ideas. I would like to particularly thank **Dr. Richard Horsley** (Professor, Department Head & Barley Breeder at Department of Plant Sciences) who sponsored the development of this project. Also, a big thanks go out to **Dr. Ana María Heilman** and **Dr. Andrew Green** for all the support in the plant breeding/biological background. This project could not be the same without all the contributions and knowledge of **Dr. Salvador Gezan**. He came to the project at a critical moment and with his ideas and code, we went beyond what was expected. Thank you to **Johan Aparicio** and **Thomas Walk** for all the contributions to FielDHub.
+
+FielDHub was submitted and published in The Journal of Open Source Software. The peer review process was done by **Thiago de Paula Oliveira** [@Prof-ThiagoOliveira](https://github.com/Prof-ThiagoOliveira) (Reviewer),  **David LeBauer** [@dlebauer](https://github.com/dlebauer) (Reviewer), and **Charlotte Soneson** [@csoneson](https://github.com/csoneson) (Editor). Thank you to all of you for your work, effort, and contributions. 
+
+

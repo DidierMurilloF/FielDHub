@@ -597,7 +597,7 @@ print.summary.FielDHub <- function(x, ...) {
 #' @description Prints a plot object of class \code{fieldLayout}.
 #' @return a plot object inheriting from class \code{fieldLayout}.
 #' @param x a plot object inheriting from class fieldLayout.
-#' @param ... further arguments passed to \code{\link{head}}.
+#' @param ... Unused, for extensibility.
 #' @author Didier Murillo [aut]
 #'
 #' @export
@@ -620,16 +620,19 @@ print.fieldLayout <- function(x, ...) {
 #' @usage \method{plot}{FielDHub}(x, ...)
 #' @aliases plot.FielDHub
 #' @description Draw a field layout plot for a \code{FielDHub} object.
-#' @return a plot object inheriting from class \code{FielDHub}
+#' @return 
+#' \itemize{
+#'   \item a plot object inheriting from class \code{fieldLayout}
+#'   \item \code{field_book} a dataframe wth the fieldbook that includes the coordinates ROW and COLUMN.
+#' } 
 #' @param x a object inheriting from class \code{FielDHub}
-#'
-#' @param ... further arguments passed to \code{\link{head}}.
+#' @param ... further arguments passed to utility function \code{plot_layout()}.
 #' \itemize{
 #'   \item \code{layout} a integer. Options available depend on the 
 #'   type of design and its characteristics
 #'   \item \code{l} a integer to specify the location to plot.
-#'   \item \code{planter} \code{serpentine} or \code{cartesian}.
-#'   \item \code{stacked} \code{vertical} or \code{horizontal} stacked layout.
+#'   \item \code{planter} it can be \code{serpentine} or \code{cartesian}.
+#'   \item \code{stacked} it can be \code{vertical} or \code{horizontal} stacked layout.
 #' } 
 #' @author Didier Murillo [aut]
 #' @examples

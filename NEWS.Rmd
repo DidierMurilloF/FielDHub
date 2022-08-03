@@ -86,8 +86,10 @@ See [plot()](https://didiermurillof.github.io/FielDHub/reference/plot.FielDHub.h
 
 * Fixed a bug in `diagonal_arrangement()` when `kindExpt = DBUDC`. The problem affected merging data between the user data and randomization data when users wanted replicated entries across experiments. 
 
-### Acknowledgements
 
-FielDHub v1.2.0 has been a long time coming, and it wouldn’t have been possible without all the effort and contribution from Matthew Seefeldt [@seefeldtm](https://github.com/seefeldtm). Thank you Johan Aparicio [@AparicioJohan](https://github.com/AparicioJohan) for the bugs you reported. Thank you Ana Maria Heilman [@tatirri](https://github.com/tatirri) for set the conditions to get this done.
+## FielDHub 0.1.0
+
+CRAN release. 
+
 
 
