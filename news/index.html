@@ -75,11 +75,13 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.2.0" id="fieldhub-120">FielDHub 1.2.0<a class="anchor" aria-label="anchor" href="#fieldhub-120"></a></h2>
-<ul><li><p>Added a help menu option in the app that connect you directly to the documentation available in our GitHub repository.</p></li>
+<div class="section level3">
+<h3 id="shiny-app-1-2-0">Shiny App<a class="anchor" aria-label="anchor" href="#shiny-app-1-2-0"></a></h3>
+<ul><li><p>Added a <code>help</code> menu option in the app that connect you directly to the documentation available in our GitHub repository.</p></li>
 <li><p>Added <strong>vignettes and help documentation</strong> for all standard functions and modules available for all designs in the app.</p></li>
 <li><p>Added capability for making multiple randomizations across different <strong>locations</strong> to the unreplicated, partially replicated, lattice, RCBD, factorial, split-plot, split-split-plot, strip-plot, IBD, and RCD designs.</p></li>
 <li><p>Added capability to produce <strong>heatmap visualizations</strong> of simulated data for all experimental designs.</p></li>
-<li><p>Added action buttons to <strong>copy and save field maps and field book outputs to excel.</strong></p></li>
+<li><p>Added action buttons to <strong>copy and save field maps and field book outputs to Excel.</strong></p></li>
 <li><p>Added <strong>factorization options that aid users in the creation of randomizations and mapping layouts</strong> for the unreplicated and partially replicated designs. Previous version required users to do the * mathematical calculation a priori.</p></li>
 <li><p>Added <strong>filters and search</strong> boxes for the field book tables.</p></li>
 <li><p>Updated UI/UX design for home page.</p></li>
@@ -89,16 +91,33 @@
 <li><p>Improved error logging messages. Added features to inform end-users on the utilization of correct input data file formats and associated metadata/columns, checking for duplicate values in input files, as well as data type verification.</p></li>
 <li><p>Added the plot() method to the FielDHub package to display the field layout of the field book for all designs.</p></li>
 <li><p>Added <strong>additional field layout visualization/map options</strong> to all experimental designs. Previous version only had mapping options for unreplicated and p-rep designs.</p></li>
-<li><p>Added a drop-down menu to display a <strong>multiple layout mapping option shown by entry number and by plot</strong> for all experimental designs. This means, that now you can visualize each randomization layout * option for each of the locations you input.</p></li>
-<li><p>Added an option for repeating whole entries/experiments in the unreplicated diagonal arrangement with multiple experiments (previously called decision blocks).</p></li>
-<li><p>Added a check box feature in the Augmented RCB design to allow the creation of nurseries with the option for randomizing experimental entries or not. If user decides to leave this option unchecked, only the checks will be randomized, and the experimental entries will be shown in consecutive order.</p></li>
+<li><p>Added a drop-down menu to display a <strong>multiple layout mapping option shown by entry number and by plot</strong> for all experimental designs. This means, that now you can visualize each randomization layout option for each of the locations you input.</p></li>
+<li><p>Added an option for repeating whole entries/experiments in the unreplicated diagonal arrangement design with multiple experiments (previously called decision blocks).</p></li>
+<li><p>Added a check box feature in the Augmented RCB design to allow for the creation of nurseries with the option of randomizing experimental entries or not. If user decides to leave this option unchecked, only the checks will be randomized, and the experimental entries will be shown in consecutive order.</p></li>
 <li><p>Added a check box option to the RCB design to allow for a continuous plot numbering independently of the rep or block number. Previous version coded the replication into the plot number (i.e., 101 =rep1, 201=rep2, etc.).</p></li>
-<li><p>Fixed a bug in the CRD factorial design that prevented the option of including all possible factorial combinations.</p></li>
-<li><p>Fixed a restriction in the RCBD mapping layout to allow for the use of more than 25 entries. PS: there are better designs when the number of entries is higher than 25 (for more info go to: <a href="https://www.ndsu.edu/faculty/horsley/" class="external-link">FIELD PLOT DESIGN I</a>).</p></li>
+<li><p>Fixed a restriction in the RCBD mapping layout to allow for the use of more than 25 entries. PS: There are better designs when the number of entries is higher than 25 (for more info go to: <a href="https://www.ndsu.edu/faculty/horsley/" class="external-link">FIELD PLOT DESIGN I</a>).</p></li>
 </ul></div>
+<div class="section level3">
+<h3 id="standalone-functions-in-fieldhub-package-1-2-0">Standalone Functions in <code>FielDHub</code> Package<a class="anchor" aria-label="anchor" href="#standalone-functions-in-fieldhub-package-1-2-0"></a></h3>
+<ul><li><p><code><a href="../reference/partially_replicated.html">partially_replicated()</a></code> now generates randomization across multiple locations/sites.</p></li>
+<li><p><code><a href="../reference/diagonal_arrangement.html">diagonal_arrangement()</a></code> now generates randomization across multiple locations/sites.</p></li>
+<li><p><code><a href="../reference/optimized_arrangement.html">optimized_arrangement()</a></code> now generates randomization across multiple locations/sites.</p></li>
+<li><p><code><a href="../reference/partially_replicated.html">partially_replicated()</a></code> now allows that all entries/treatments have replicates. Before, it required at least some unreplicated entries.</p></li>
+<li><p>Functions <code><a href="../reference/optimized_arrangement.html">optimized_arrangement()</a></code>, <code><a href="../reference/diagonal_arrangement.html">diagonal_arrangement()</a></code> and <code><a href="../reference/partially_replicated.html">partially_replicated()</a></code> now return feedback if the input dimensions <code>nrows</code> and <code>ncols</code> are incorrect.</p></li>
+<li><p><code><a href="../reference/RCBD.html">RCBD()</a></code> now includes an argument (<code>continuous</code>) to manage the way it sets up the plotting number.</p></li>
+<li><p><code><a href="../reference/RCBD_augmented.html">RCBD_augmented()</a></code> now allows customization of the field dimensions by inputting the number of rows and columns through <code>nrows</code> and <code>ncols</code> arguments.</p></li>
+<li><p><code><a href="../reference/RCBD_augmented.html">RCBD_augmented()</a></code> when <code>random = FALSE</code> now allows only randomizing the checks/controls if the user wants.</p></li>
+<li><p>Fixed a bug in <code><a href="../reference/full_factorial.html">full_factorial()</a></code> for the CRD factorial design that prevented the option of including all possible factorial combinations.</p></li>
+<li><p>Added a method <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> of class <code>fieldLayout</code>. See <a href="https://didiermurillof.github.io/FielDHub/reference/print.fieldLayout.html">print()</a>.</p></li>
+<li><p>Added a method <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> of class <code>FieldHub</code> that returns an object of class <code>fieldLayout</code>. See <a href="https://didiermurillof.github.io/FielDHub/reference/plot.FielDHub.html">plot()</a>. The method <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> can plot a field layout for any of the designs output. It is possible to pass arguments such as the location, layout order and others. For more detail see <a href="https://didiermurillof.github.io/FielDHub/articles/methods.html">plot(), print() and summary() methods in FielDHub</a>.</p></li>
+<li><p>Fixed a bug in <code><a href="../reference/diagonal_arrangement.html">diagonal_arrangement()</a></code> when <code>kindExpt = DBUDC</code>. The problem affected the random distribution of the checks for the case of unbalanced control plot numbers for each experiment.</p></li>
+<li><p>Fixed a bug in <code><a href="../reference/diagonal_arrangement.html">diagonal_arrangement()</a></code> when <code>kindExpt = DBUDC</code>. The problem affected merging data between the user data and randomization data when users wanted replicated entries across experiments.</p></li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="fieldhub-010">FielDHub 0.1.0<a class="anchor" aria-label="anchor" href="#fieldhub-010"></a></h2><p class="text-muted">CRAN release: 2021-05-19</p>
-<ul><li>Added a <code>NEWS.md</code> file to track changes to the package.</li></ul></div>
+<p>CRAN release.</p>
+</div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 
