@@ -2,7 +2,6 @@
 output: github_document
 ---
 
-<!-- README.md is generated from README.Rmd. Please edit that file -->
 
 ```{r, include = FALSE}
 library(FielDHub)
@@ -13,50 +12,27 @@ knitr::opts_chunk$set(
   out.width = "100%"
 )
 ```
-
+<br>
 <br>
 
-# FielDHub <img src='man/figures/icon.gif' width = "140px" align="right"/>
+<img src='man/figures/icon.gif' width = "140px" align="left"/> 
 
-<!-- badges: start -->
-[![CRAN
-status](https://www.r-pkg.org/badges/version/FielDHub)](https://cran.r-project.org/web//packages/FielDHub/)
-[![R-CMD-check](https://github.com/DidierMurilloF/FielDHub/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/DidierMurilloF/FielDHub/actions/workflows/R-CMD-check.yaml)
-[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html)
-[![cranlogs](https://cranlogs.r-pkg.org/badges/FielDHub)](https://cranlogs.r-pkg.org/badges/FielDHub)
-[![cranlogs](https://cranlogs.r-pkg.org/badges/grand-total/FielDHub)](https://cranlogs.r-pkg.org/badges/grand-total/FielDHub)
-<!-- badges: end -->
+<br>
+<br>
 
+##  FielDHub
+<br>
+<br>
 
-## A Shiny App for Design of Experiments in Life Sciences
+### Overview
 
-## Installation
-
-### Stable version from CRAN
-
-``` r
-install.packages("FielDHub")
-```
-
-### Development version from GitHub
-
-``` r
-remotes::install_github("DidierMurilloF/FielDHub")
-```
-
-## FielDHub Paper
-
-[![DOI](https://joss.theoj.org/papers/10.21105/joss.03122/status.svg)](https://doi.org/10.21105/joss.03122)
-
-## Overview
-
-A shiny design of experiments (DOE) app that aids in the creation of traditional, un-replicated, augmented and partially-replicated designs applied to agriculture, plant breeding, forestry, animal and biological sciences. 
+FielDHub is an R package/shiny design of experiments (DOE) app that aids in the creation of traditional, un-replicated, augmented and partially-replicated designs applied to agriculture, plant breeding, forestry, animal and biological sciences. 
 
 For more details and examples of all functions present in the FielDHub package. Please, go to <https://didiermurillof.github.io/FielDHub/reference/index.html>.
 
 <img src='man/figures/FielDHub_Overview.png' align="center"/>
 
-## Usage
+###  Usage
 
 This is a basic example which shows you how to launch the app:
 

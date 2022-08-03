@@ -2,9 +2,12 @@ url: https://didiermurillof.github.io/FielDHub/
 template:
   bootstrap: 5
   bootswatch: flatly
+home:
+  sidebar:
+    structure: [links, license, community, citation, authors, dev]
 navbar:
   structure:
-    left:  [FielDHub 1.2.0, reference, articles, news]
+    left:  [reference, articles, news]
     right: [search, github]
   components:
     articles:
