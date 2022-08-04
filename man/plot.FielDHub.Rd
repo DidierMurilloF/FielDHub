@@ -21,7 +21,7 @@
 \value{
 \itemize{
   \item a plot object inheriting from class \code{fieldLayout}
-  \item \code{field_book} a dataframe wth the fieldbook that includes the coordinates ROW and COLUMN.
+  \item \code{field_book} a data frame with the fieldbook that includes the coordinates ROW and COLUMN.
 }
 }
 \description{

@@ -32,13 +32,13 @@ status](https://www.r-pkg.org/badges/version/FielDHub)](https://cran.r-project.o
 
 ## Installation
 
-### Stable version from CRAN
+### From CRAN
 
 ``` r
 install.packages("FielDHub")
 ```
 
-### Development version from GitHub
+### From GitHub
 
 ``` r
 remotes::install_github("DidierMurilloF/FielDHub")
@@ -54,7 +54,7 @@ A shiny design of experiments (DOE) app that aids in the creation of traditional
 
 For more details and examples of all functions present in the FielDHub package. Please, go to <https://didiermurillof.github.io/FielDHub/reference/index.html>.
 
-<img src='man/figures/FielDHub_Overview.png' align="center"/>
+<img src='man/figures/FielDHub_Infographic.jpg' align="center"/>
 
 ## Usage
 
@@ -88,12 +88,13 @@ diagonal <- diagonal_arrangement(
 )
 ```
 
-Users can access the returned values from `diagonal_arrangement()` as follow,
+Users can print the returned values from `diagonal_arrangement()` as follow,
 
 ```{r}
-diagonal$infoDesign
+print(diagonal)
 ```
 
+First 12 rows of the fieldbook,
 
 ```{r}
 head(diagonal$fieldBook, 12)
@@ -134,16 +135,16 @@ pREP <- partially_replicated(
 ```
 
 
-Users can access returned values from `partially_replicated()` as follows,
+Users can print returned values from `partially_replicated()` as follows,
 
 ```{r}
-pREP$infoDesign
+print(pREP)
 ```
 
-
+First 12 rows of the fieldbook,
 
 ```{r}
- head(pREP$fieldBook, 12)
+head(pREP$fieldBook, 12)
 ```
 
 

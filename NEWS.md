@@ -103,6 +103,9 @@
     by inputting the number of rows and columns through `nrows` and
     `ncols` arguments.
 
+-   `RCBD_augmented()` now returns feedback if the input dimensions
+    `nrows` and `ncols` do not match the data entered.
+
 -   `RCBD_augmented()` when `random = FALSE` now allows only randomizing
     the checks/controls if the user wants.
 

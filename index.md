@@ -20,9 +20,9 @@ For more details and examples of all functions present in the FielDHub
 package. Please, go to
 <https://didiermurillof.github.io/FielDHub/reference/index.html>.
 
-<img src='man/figures/FielDHub_Overview.png' align="center"/>
+<img src='man/figures/FielDHub_Infographic.jpg' align="center"/>
 
-### Usage
+## Usage
 
 This is a basic example which shows you how to launch the app:
 
@@ -70,47 +70,42 @@ diagonal <- diagonal_arrangement(
 )
 ```
 
-Users can access the returned values from `diagonal_arrangement()` as
+Users can print the returned values from `diagonal_arrangement()` as
 follow,
 
 ``` r
-diagonal$infoDesign
-$rows
-[1] 16
+print(diagonal)
+Un-replicated Diagonal Arrangement Design 
 
-$columns
-[1] 20
+Information on the design parameters: 
+List of 11
+ $ rows          : num 16
+ $ columns       : num 20
+ $ treatments    : num [1:3] 100 100 80
+ $ checks        : int 4
+ $ entry_checks  : int [1:4] 1 2 3 4
+ $ rep_checks    : num [1:4] 11 9 9 11
+ $ locations     : num 1
+ $ planter       : chr "serpentine"
+ $ percent_checks: chr "12.5%"
+ $ fillers       : num 0
+ $ seed          : num 1249
 
-$treatments
-[1] 100 100  80
-
-$checks
-[1] 4
-
-$entry_checks
-[1] 1 2 3 4
-
-$rep_checks
-[1] 11  9  9 11
-
-$locations
-[1] 1
-
-$planter
-[1] "serpentine"
-
-$percent_checks
-[1] "12.5%"
-
-$fillers
-[1] 0
-
-$seed
-[1] 1249
-
-$id_design
-[1] 15
+ 10 First observations of the data frame with the diagonal_arrangement field book: 
+   ID   EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
+1   1 Block1        1 2022  101   1      1      0    51    Gen-51
+2   2 Block1        1 2022  102   1      2      0    67    Gen-67
+3   3 Block1        1 2022  103   1      3      0    50    Gen-50
+4   4 Block1        1 2022  104   1      4      0    29    Gen-29
+5   5 Block1        1 2022  105   1      5      0    39    Gen-39
+6   6 Block1        1 2022  106   1      6      0    92    Gen-92
+7   7 Block1        1 2022  107   1      7      1     1   Check-1
+8   8 Block1        1 2022  108   1      8      0    58    Gen-58
+9   9 Block1        1 2022  109   1      9      0    23    Gen-23
+10 10 Block1        1 2022  110   1     10      0    54    Gen-54
 ```
+
+First 12 rows of the fieldbook,
 
 ``` r
 head(diagonal$fieldBook, 12)
@@ -181,38 +176,41 @@ pREP <- partially_replicated(
 )
 ```
 
-Users can access returned values from `partially_replicated()` as
+Users can print returned values from `partially_replicated()` as
 follows,
 
 ``` r
-pREP$infoDesign
-$rows
-[1] 16
+print(pREP)
+Partially Replicated Design 
 
-$columns
-[1] 18
+Information on the design parameters: 
+List of 7
+ $ rows                   : num 16
+ $ columns                : num 18
+ $ treatments_with_reps   : int 75
+ $ treatments_with_no_reps: int 138
+ $ locations              : num 1
+ $ planter                : chr "serpentine"
+ $ seed                   : num 77
 
-$treatments_with_reps
-[1] 75
-
-$treatments_with_no_reps
-[1] 138
-
-$locations
-[1] 1
-
-$planter
-[1] "serpentine"
-
-$seed
-[1] 77
-
-$id_design
-[1] 13
+ 10 First observations of the data frame with the partially_replicated field book: 
+   ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
+1   1 ExptA    FARGO 2022    1   1      1      0    80       G80
+2   2 ExptA    FARGO 2022    2   1      2     49    49       G49
+3   3 ExptA    FARGO 2022    3   1      3     15    15       G15
+4   4 ExptA    FARGO 2022    4   1      4     44    44       G44
+5   5 ExptA    FARGO 2022    5   1      5      0   185      G185
+6   6 ExptA    FARGO 2022    6   1      6      9     9        G9
+7   7 ExptA    FARGO 2022    7   1      7      0   133      G133
+8   8 ExptA    FARGO 2022    8   1      8     58    58       G58
+9   9 ExptA    FARGO 2022    9   1      9      4     4        G4
+10 10 ExptA    FARGO 2022   10   1     10      0   113      G113
 ```
 
+First 12 rows of the fieldbook,
+
 ``` r
- head(pREP$fieldBook, 12)
+head(pREP$fieldBook, 12)
    ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
 1   1 ExptA    FARGO 2022    1   1      1      0    80       G80
 2   2 ExptA    FARGO 2022    2   1      2     49    49       G49

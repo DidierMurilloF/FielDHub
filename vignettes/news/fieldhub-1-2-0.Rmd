@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 Photo by <a href="https://unsplash.com/@vackground?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Vackground</a> on <a href="https://unsplash.com/s/photos/art-math?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>
 
 ##### <img src="https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/calendar-check.svg" width="20" height="15"> 2022/08/04
-##### <img src="https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/code.svg" width="20" height="15"> [FielDHub](https://github.com/DidierMurilloF/FielDHub)
+##### <img src="https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/code.svg" width="20" height="15">  [FielDHub](https://github.com/DidierMurilloF/FielDHub)
 ##### <img src="https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/chalkboard-user.svg" width="20" height="15"> Didier Murillo
 
 I am very happy to announce the release of FielDHub v1.2.0. It has been more than 12 months of hard work and commitment. This new version comes with many changes, new features, and a better graphical user interface design in the shiny app.
@@ -53,8 +53,6 @@ I am very happy to announce the release of FielDHub v1.2.0. It has been more tha
 
 * Improved error logging messages. Added features to inform end-users on the utilization of correct input data file formats and associated metadata/columns, checking for duplicate values in input files, as well as data type verification. 
 
-* Added the plot() method to the FielDHub package to display the field layout of the field book for all designs. 
-
 * Added **additional field layout visualization/map options** to all experimental designs. Previous version only had mapping options for unreplicated and p-rep designs. 
 
 * Added a drop-down menu to display a **multiple layout mapping option shown by entry number and by plot** for all experimental designs. This means, that now you can visualize each randomization layout option for each of the locations you input. 
@@ -82,6 +80,8 @@ I am very happy to announce the release of FielDHub v1.2.0. It has been more tha
 * `RCBD()` now includes an argument (`continuous`) to manage the way it sets up the plotting number. 
 
 * `RCBD_augmented()` now allows customization of the field dimensions by inputting the number of rows and columns through `nrows` and `ncols` arguments.
+
+* `RCBD_augmented()` now returns feedback if the input dimensions `nrows` and `ncols` do not match the data entered.
 
 * `RCBD_augmented()` when `random = FALSE` now allows only randomizing the checks/controls if the user wants.
 

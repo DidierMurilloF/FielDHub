@@ -30,9 +30,9 @@ FielDHub is an R package/shiny design of experiments (DOE) app that aids in the 
 
 For more details and examples of all functions present in the FielDHub package. Please, go to <https://didiermurillof.github.io/FielDHub/reference/index.html>.
 
-<img src='man/figures/FielDHub_Overview.png' align="center"/>
+<img src='man/figures/FielDHub_Infographic.jpg' align="center"/>
 
-###  Usage
+## Usage
 
 This is a basic example which shows you how to launch the app:
 
@@ -64,12 +64,13 @@ diagonal <- diagonal_arrangement(
 )
 ```
 
-Users can access the returned values from `diagonal_arrangement()` as follow,
+Users can print the returned values from `diagonal_arrangement()` as follow,
 
 ```{r}
-diagonal$infoDesign
+print(diagonal)
 ```
 
+First 12 rows of the fieldbook,
 
 ```{r}
 head(diagonal$fieldBook, 12)
@@ -110,16 +111,16 @@ pREP <- partially_replicated(
 ```
 
 
-Users can access returned values from `partially_replicated()` as follows,
+Users can print returned values from `partially_replicated()` as follows,
 
 ```{r}
-pREP$infoDesign
+print(pREP)
 ```
 
-
+First 12 rows of the fieldbook,
 
 ```{r}
- head(pREP$fieldBook, 12)
+head(pREP$fieldBook, 12)
 ```
 
 
@@ -131,7 +132,6 @@ plot(pREP)
 
 
 To see more examples, please go to <https://didiermurillof.github.io/FielDHub/reference/index.html>.
-
 
 
 
