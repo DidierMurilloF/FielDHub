@@ -13,6 +13,8 @@ knitr::opts_chunk$set(
   out.width = "100%"
 )
 ```
+### [Didier Murillo](https://github.com/DidierMurilloF)
+### 2022-08-04
 
 ## FielDHub 1.2.0
 
@@ -88,6 +90,6 @@ See [plot()](https://didiermurillof.github.io/FielDHub/reference/plot.FielDHub.h
 
 ### Acknowledgements
 
-FielDHub v1.2.0 has been a long time coming, and it wouldn’t have been possible without all the effort and contribution from Matthew Seefeldt [@seefeldtm](https://github.com/seefeldtm). Thank you Johan Aparicio [@AparicioJohan](https://github.com/AparicioJohan) for the bugs you reported. Thank you Ana Maria Heilman [@tatirri](https://github.com/tatirri) for set the conditions to get this done.
+FielDHub v1.2.0 has been a long time coming, and it wouldn’t have been possible without all the effort and contribution from [Matthew Seefeldt](https://github.com/seefeldtm). Thank you [Johan Aparicio](https://github.com/AparicioJohan) for the bugs you reported. Thank you [Ana María Heilman](https://github.com/tatirri) for your support and leadership.
 
 
