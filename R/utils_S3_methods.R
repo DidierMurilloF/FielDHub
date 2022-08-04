@@ -587,8 +587,6 @@ print.summary.FielDHub <- function(x, ...) {
 #-----------------------------------------------------------------------
 # Print plot
 #-----------------------------------------------------------------------
-# Print
-#-----------------------------------------------------------------------
 #' @rdname print.fieldLayout
 #' @method print fieldLayout
 #' @title Print a \code{fieldLayout} plot object
@@ -597,7 +595,7 @@ print.summary.FielDHub <- function(x, ...) {
 #' @description Prints a plot object of class \code{fieldLayout}.
 #' @return a plot object inheriting from class \code{fieldLayout}.
 #' @param x a plot object inheriting from class fieldLayout.
-#' @param ... Unused, for extensibility.
+#' @param ... unused, for extensibility.
 #' @author Didier Murillo [aut]
 #'
 #' @export
@@ -623,7 +621,7 @@ print.fieldLayout <- function(x, ...) {
 #' @return 
 #' \itemize{
 #'   \item a plot object inheriting from class \code{fieldLayout}
-#'   \item \code{field_book} a dataframe wth the fieldbook that includes the coordinates ROW and COLUMN.
+#'   \item \code{field_book} a data frame with the fieldbook that includes the coordinates ROW and COLUMN.
 #' } 
 #' @param x a object inheriting from class \code{FielDHub}
 #' @param ... further arguments passed to utility function \code{plot_layout()}.
