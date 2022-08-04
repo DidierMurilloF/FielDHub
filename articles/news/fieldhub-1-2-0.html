@@ -144,7 +144,6 @@
 <li><p>Added action run button to all experimental designs to prevent reactivity issues with the application.</p></li>
 <li><p>Improved and standardized user experience features and readability access.</p></li>
 <li><p>Improved error logging messages. Added features to inform end-users on the utilization of correct input data file formats and associated metadata/columns, checking for duplicate values in input files, as well as data type verification.</p></li>
-<li><p>Added the plot() method to the FielDHub package to display the field layout of the field book for all designs.</p></li>
 <li><p>Added <strong>additional field layout visualization/map options</strong> to all experimental designs. Previous version only had mapping options for unreplicated and p-rep designs.</p></li>
 <li><p>Added a drop-down menu to display a <strong>multiple layout mapping option shown by entry number and by plot</strong> for all experimental designs. This means, that now you can visualize each randomization layout option for each of the locations you input.</p></li>
 <li><p>Added an option for repeating whole entries/experiments in the unreplicated diagonal arrangement design with multiple experiments (previously called decision blocks).</p></li>
@@ -164,6 +163,7 @@
 <li><p>Functions <code><a href="../../reference/optimized_arrangement.html">optimized_arrangement()</a></code>, <code><a href="../../reference/diagonal_arrangement.html">diagonal_arrangement()</a></code> and <code><a href="../../reference/partially_replicated.html">partially_replicated()</a></code> now return feedback if the input dimensions <code>nrows</code> and <code>ncols</code> are incorrect.</p></li>
 <li><p><code><a href="../../reference/RCBD.html">RCBD()</a></code> now includes an argument (<code>continuous</code>) to manage the way it sets up the plotting number.</p></li>
 <li><p><code><a href="../../reference/RCBD_augmented.html">RCBD_augmented()</a></code> now allows customization of the field dimensions by inputting the number of rows and columns through <code>nrows</code> and <code>ncols</code> arguments.</p></li>
+<li><p><code><a href="../../reference/RCBD_augmented.html">RCBD_augmented()</a></code> now returns feedback if the input dimensions <code>nrows</code> and <code>ncols</code> do not match the data entered.</p></li>
 <li><p><code><a href="../../reference/RCBD_augmented.html">RCBD_augmented()</a></code> when <code>random = FALSE</code> now allows only randomizing the checks/controls if the user wants.</p></li>
 <li><p>Fixed a bug in <code><a href="../../reference/full_factorial.html">full_factorial()</a></code> for the CRD factorial design that prevented the option of including all possible factorial combinations.</p></li>
 <li><p>Added a method <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> of class <code>fieldLayout</code>. See <a href="https://didiermurillof.github.io/FielDHub/reference/print.fieldLayout.html">print()</a>.</p></li>
