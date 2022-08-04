@@ -13,12 +13,21 @@ knitr::opts_chunk$set(
   out.width = "100%"
 )
 ```
-### [Didier Murillo](https://github.com/DidierMurilloF)
-### 2022-08-04
 
-## FielDHub 1.2.0
+### FielDHub 1.2.0
 
-### Shiny App
+<img src="https://raw.githubusercontent.com/DidierMurilloF/unsplash-img/master/img/vackground-up8ooQ1Pm2s-unsplash.jpeg" width="100%" height="400px">
+Photo by <a href="https://unsplash.com/@vackground?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Vackground</a> on <a href="https://unsplash.com/s/photos/art-math?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>
+
+##### <img src="https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/calendar-check.svg" width="20" height="15"> 2022/08/04
+##### <img src="https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/code.svg" width="20" height="15"> [FielDHub](https://github.com/DidierMurilloF/FielDHub)
+##### <img src="https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/chalkboard-user.svg" width="20" height="15"> Didier Murillo
+
+I am very happy to announce the release of FielDHub v1.2.0. It has been more than 12 months of hard work and commitment. This new version comes with many changes, new features, and a better graphical user interface design in the shiny app.
+
+#### Changelog
+
+#### Shiny App
 
 * Added a `help` menu option in the app that connect you directly to the documentation available in our GitHub repository.   
 
@@ -58,7 +67,7 @@ knitr::opts_chunk$set(
 
 * Fixed a restriction in the RCBD mapping layout to allow for the use of more than 25 entries. PS: There are better designs when the number of entries is higher than 25 (for more info go to: [FIELD PLOT DESIGN I](https://www.ndsu.edu/faculty/horsley/)).
 
-### Standalone Functions in `FielDHub` Package
+#### Standalone Functions in `FielDHub` Package
 
 * `partially_replicated()` now generates randomization across multiple locations/sites.
 
@@ -88,7 +97,7 @@ See [plot()](https://didiermurillof.github.io/FielDHub/reference/plot.FielDHub.h
 
 * Fixed a bug in `diagonal_arrangement()` when `kindExpt = DBUDC`. The problem affected merging data between the user data and randomization data when users wanted replicated entries across experiments. 
 
-### Acknowledgements
+#### Acknowledgements
 
 FielDHub v1.2.0 has been a long time coming, and it wouldn’t have been possible without all the effort and contribution from [Matthew Seefeldt](https://github.com/seefeldtm). Thank you [Johan Aparicio](https://github.com/AparicioJohan) for the bugs you reported. Thank you [Ana María Heilman](https://github.com/tatirri) for your support and leadership.
 
