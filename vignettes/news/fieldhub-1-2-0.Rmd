@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 
 ### FielDHub 1.2.0
 
-<img src="https://raw.githubusercontent.com/DidierMurilloF/unsplash-img/master/img/vackground-up8ooQ1Pm2s-unsplash.jpeg" width="100%" height="400px">
+<img src="https://raw.githubusercontent.com/DidierMurilloF/unsplash-img/master/img/vackground-up8ooQ1Pm2s-unsplash.jpeg" width="100%" height="300px">
 Photo by <a href="https://unsplash.com/@vackground?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Vackground</a> on <a href="https://unsplash.com/s/photos/art-math?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>
 
 ##### <img src="https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/calendar-check.svg" width="20" height="15"> 2022/08/04
