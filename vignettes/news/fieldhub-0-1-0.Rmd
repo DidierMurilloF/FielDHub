@@ -12,7 +12,15 @@ knitr::opts_chunk$set(
 )
 ```
 
-## FielDHub 0.1.0
+### FielDHub 0.1.0
+
+<img src="https://raw.githubusercontent.com/DidierMurilloF/unsplash-img/master/img/karsten-wurth-rafblRbne3o-unsplash.jpeg" width="100%" height="350px">
+Photo by <a href="https://unsplash.com/@karsten_wuerth?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Karsten Würth</a> on <a href="https://unsplash.com/s/photos/road?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>
+   
+
+##### <img src="https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/calendar-check.svg" width="20" height="15"> 2021/05/17
+##### <img src="https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/code.svg" width="20" height="15"> [FielDHub](https://github.com/DidierMurilloF/FielDHub)
+##### <img src="https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/chalkboard-user.svg" width="20" height="15"> Didier Murillo
 
 I am delighted to announce the initial release of FielDHub to CRAN! FielDHub is conceived to make it quick and easy to generate, randomize, and plot complex and standard experimental designs. This initial release is version 0.1.0 in recognition that FielDHub has been in development for more than one year and has already been used for researchers at NDSU, CIAT, as well as for teaching.
 
@@ -22,7 +30,7 @@ Install FielDHub with:
 install.packages("FielDHub")
 ```
 
-### Usage
+#### Usage
 
 Get started using only two simple lines of code:
 
@@ -31,7 +39,7 @@ library(FielDHub)
 run_app()
 ```
 
-### Relevant Features
+#### Relevant Features
 
 Unreplicated and partially replicated designs are commonly used in plant breeding and forestry but with a lack of free tools available to researchers to make that randomization.
 
@@ -43,10 +51,10 @@ Unreplicated and partially replicated designs are commonly used in plant breedin
 
 *   FielDHub's features such as generating synthetic data along with randomization, as well as plotting field layouts make the app suitable to teach statistic courses such as experimental design.
 
-### Acknowledgements
+#### Acknowledgements
 
 FielDHub has been a long time coming, and it wouldn’t have been possible without a devoted community of users, many of whom have gone on to contribute fixes and new ideas. I would like to particularly thank **Dr. Richard Horsley** (Professor, Department Head & Barley Breeder at Department of Plant Sciences) who sponsored the development of this project. Also, a big thanks go out to **Dr. Ana María Heilman** and **Dr. Andrew Green** for all the support in the plant breeding/biological background. This project could not be the same without all the contributions and knowledge of **Dr. Salvador Gezan**. He came to the project at a critical moment and with his ideas and code, we went beyond what was expected. Thank you to **Johan Aparicio** and **Thomas Walk** for all the contributions to FielDHub.
 
-FielDHub was submitted and published in The Journal of Open Source Software. The peer review process was done by **Thiago de Paula Oliveira** [@Prof-ThiagoOliveira](https://github.com/Prof-ThiagoOliveira) (Reviewer),  **David LeBauer** [@dlebauer](https://github.com/dlebauer) (Reviewer), and **Charlotte Soneson** [@csoneson](https://github.com/csoneson) (Editor). Thank you to all of you for your work, effort, and contributions. 
+FielDHub was submitted and published in The Journal of Open Source Software. The peer review process was done by [Thiago de Paula Oliveira](https://github.com/Prof-ThiagoOliveira) (Reviewer), [David LeBauer](https://github.com/dlebauer) (Reviewer), and [Charlotte Soneson](https://github.com/csoneson) (Editor). Thank you to all of you for your work, effort, and contributions. 
 
 
