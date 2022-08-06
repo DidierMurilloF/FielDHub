@@ -46,7 +46,13 @@ A project needs to test 280 genotypes in a field containing 16 rows and 20 colum
 
 <img src='man/figures/DExample.PNG' align="center"/>
 
-The figure above shows a map of an experiment randomized as a Decision Block Unreplicated Design with Checks on Diagonals. Yellow, gray, and green shade the blocks of unreplicated experiments, while distinctively colored check plots are replicated throughout the field in a systematic diagonal arrangement.
+The figure above shows a map of an experiment randomized along with multiple experiments (three) and checks on diagonals. Distinctively colored check plots are replicated throughout the field in a systematic diagonal arrangement.
+
+<img src='man/figures/multiple_expts.png' align="center"/>
+
+The figure above shows the layout for the three experiments in the field. 
+
+### Using the FielDHub function `diagonal_arrangement()`
 
 To illustrate using FielDHub to build experimental designs through R code, the design produced in the R Shiny interface described above can also be created using the function `diagonal_arrangement()` in the R script below. Note, that to obtain identical results, users must include the same seed number in the script as was used in the Shiny app. In this case, the seed number is 1249. 
 
@@ -60,7 +66,8 @@ diagonal <- diagonal_arrangement(
   splitBy = "row", 
   seed = 1249, 
   kindExpt = "DBUDC", 
-  blocks = c(100, 100, 80)
+  blocks = c(100, 100, 80), 
+  exptName = c("Expt1", "Expt2", "Expt3")
 )
 ```
 
@@ -82,8 +89,12 @@ Users can plot the layout design from `diagonal_arrangement()` using the functio
 plot(diagonal)
 ```
 
+In the figure, gray, pink, and salmon shade the blocks of unreplicated experiments, while distinctively colored check plots are replicated throughout the field in a systematic diagonal arrangement.
 
-The main difference between using the FielDHub Shiny app and using the standalone function `diagonal_arrangement()` is that the standalone function will allocate filler only if it is necessary, while in R Shiny, filler plots are generated automatically. In cases where users include fillers, either between or after experiments, the Shiny app is preferable for filling and visualizing all field plots.
+
+The main difference between using the FielDHub Shiny app and using the standalone function `diagonal_arrangement()` is that the standalone function will allocate filler only if it is necessary, while in Shiny App, users can customize the number of fillers if it is needed. In cases where users include fillers, either between or after experiments, the Shiny app is preferable for filling and visualizing all field plots.
+
+To see more examples, go to <https://didiermurillof.github.io/FielDHub/articles/diagonal_arrangement.html>
 
 ### Partially Replicated Design Example
 
@@ -92,7 +103,9 @@ Partially replicated designs are commonly employed in early generation field tri
 <img src='man/figures/pREPExample.PNG' align="center"/>
 
 
-In the figure above, green plots contain replicated entries, and yellow plots contain entries that only appear once.
+In the figure above, green plots contain replicated entries, and the other plots contain entries that only appear once.
+
+### Using the FielDHub function `partially_replicated()`
 
 Instead of using the Shiny FielDHub app, users can use the standalone FielDHub function `partially_replicated()`. The partially replicated layout described above can be produced through scripting as follows. As noted in the previous example, to obtain identical results between the script and the Shiny app, users need to use the same seed number, which, in this case, is 77.
 
@@ -123,15 +136,14 @@ First 12 rows of the fieldbook,
 head(pREP$fieldBook, 12)
 ```
 
-
 Users can plot the layout design from `partially_replicated()` using the function `plot()` as follows,
 
 ```{r, fig.align='center', fig.width=6.8, fig.height=4.7}
 plot(pREP)
 ```
 
+To see more examples, please go to <https://didiermurillof.github.io/FielDHub/articles/partially_replicated.html>
 
-To see more examples, please go to <https://didiermurillof.github.io/FielDHub/reference/index.html>.
-
-
+<br>
+<br>
 

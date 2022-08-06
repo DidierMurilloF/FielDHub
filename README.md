@@ -45,7 +45,7 @@ sciences.
 
 For more details and examples of all functions present in the FielDHub
 package. Please, go to
-<https://didiermurillof.github.io/FielDHub/reference/index.html>.
+<https://didiermurillof.github.io/FielDHub/articles/diagonal_arrangement.html>.
 
 <img src='man/figures/FielDHub_Infographic.jpg' align="center"/>
 
@@ -70,11 +70,17 @@ experimental plots does not equal the number of available field plots.
 
 <img src='man/figures/DExample.PNG' align="center"/>
 
-The figure above shows a map of an experiment randomized as a Decision
-Block Unreplicated Design with Checks on Diagonals. Yellow, gray, and
-green shade the blocks of unreplicated experiments, while distinctively
+The figure above shows a map of an experiment randomized along with
+multiple experiments (three) and checks on diagonals. Distinctively
 colored check plots are replicated throughout the field in a systematic
 diagonal arrangement.
+
+<img src='man/figures/multiple_expts.png' align="center"/>
+
+The figure above shows the layout for the three experiments in the
+field.
+
+### Using the FielDHub function `diagonal_arrangement()`
 
 To illustrate using FielDHub to build experimental designs through R
 code, the design produced in the R Shiny interface described above can
@@ -93,7 +99,8 @@ diagonal <- diagonal_arrangement(
   splitBy = "row", 
   seed = 1249, 
   kindExpt = "DBUDC", 
-  blocks = c(100, 100, 80)
+  blocks = c(100, 100, 80), 
+  exptName = c("Expt1", "Expt2", "Expt3")
 )
 ```
 
@@ -119,36 +126,36 @@ List of 11
  $ seed          : num 1249
 
  10 First observations of the data frame with the diagonal_arrangement field book: 
-   ID   EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 Block1        1 2022  101   1      1      0    51    Gen-51
-2   2 Block1        1 2022  102   1      2      0    67    Gen-67
-3   3 Block1        1 2022  103   1      3      0    50    Gen-50
-4   4 Block1        1 2022  104   1      4      0    29    Gen-29
-5   5 Block1        1 2022  105   1      5      0    39    Gen-39
-6   6 Block1        1 2022  106   1      6      0    92    Gen-92
-7   7 Block1        1 2022  107   1      7      1     1   Check-1
-8   8 Block1        1 2022  108   1      8      0    58    Gen-58
-9   9 Block1        1 2022  109   1      9      0    23    Gen-23
-10 10 Block1        1 2022  110   1     10      0    54    Gen-54
+   ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
+1   1 Expt1        1 2022  101   1      1      0    51    Gen-51
+2   2 Expt1        1 2022  102   1      2      0    67    Gen-67
+3   3 Expt1        1 2022  103   1      3      0    50    Gen-50
+4   4 Expt1        1 2022  104   1      4      0    29    Gen-29
+5   5 Expt1        1 2022  105   1      5      0    39    Gen-39
+6   6 Expt1        1 2022  106   1      6      0    92    Gen-92
+7   7 Expt1        1 2022  107   1      7      1     1   Check-1
+8   8 Expt1        1 2022  108   1      8      0    58    Gen-58
+9   9 Expt1        1 2022  109   1      9      0    23    Gen-23
+10 10 Expt1        1 2022  110   1     10      0    54    Gen-54
 ```
 
 First 12 rows of the fieldbook,
 
 ``` r
 head(diagonal$fieldBook, 12)
-   ID   EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 Block1        1 2022  101   1      1      0    51    Gen-51
-2   2 Block1        1 2022  102   1      2      0    67    Gen-67
-3   3 Block1        1 2022  103   1      3      0    50    Gen-50
-4   4 Block1        1 2022  104   1      4      0    29    Gen-29
-5   5 Block1        1 2022  105   1      5      0    39    Gen-39
-6   6 Block1        1 2022  106   1      6      0    92    Gen-92
-7   7 Block1        1 2022  107   1      7      1     1   Check-1
-8   8 Block1        1 2022  108   1      8      0    58    Gen-58
-9   9 Block1        1 2022  109   1      9      0    23    Gen-23
-10 10 Block1        1 2022  110   1     10      0    54    Gen-54
-11 11 Block1        1 2022  111   1     11      0    55    Gen-55
-12 12 Block1        1 2022  112   1     12      0     9     Gen-9
+   ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
+1   1 Expt1        1 2022  101   1      1      0    51    Gen-51
+2   2 Expt1        1 2022  102   1      2      0    67    Gen-67
+3   3 Expt1        1 2022  103   1      3      0    50    Gen-50
+4   4 Expt1        1 2022  104   1      4      0    29    Gen-29
+5   5 Expt1        1 2022  105   1      5      0    39    Gen-39
+6   6 Expt1        1 2022  106   1      6      0    92    Gen-92
+7   7 Expt1        1 2022  107   1      7      1     1   Check-1
+8   8 Expt1        1 2022  108   1      8      0    58    Gen-58
+9   9 Expt1        1 2022  109   1      9      0    23    Gen-23
+10 10 Expt1        1 2022  110   1     10      0    54    Gen-54
+11 11 Expt1        1 2022  111   1     11      0    55    Gen-55
+12 12 Expt1        1 2022  112   1     12      0     9     Gen-9
 ```
 
 Users can plot the layout design from `diagonal_arrangement()` using the
@@ -160,12 +167,19 @@ plot(diagonal)
 
 <img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" style="display: block; margin: auto;" />
 
+In the figure, gray, pink, and salmon shade the blocks of unreplicated
+experiments, while distinctively colored check plots are replicated
+throughout the field in a systematic diagonal arrangement.
+
 The main difference between using the FielDHub Shiny app and using the
 standalone function `diagonal_arrangement()` is that the standalone
-function will allocate filler only if it is necessary, while in R Shiny,
-filler plots are generated automatically. In cases where users include
-fillers, either between or after experiments, the Shiny app is
-preferable for filling and visualizing all field plots.
+function will allocate filler only if it is necessary, while in Shiny
+App, users can customize the number of fillers if it is needed. In cases
+where users include fillers, either between or after experiments, the
+Shiny app is preferable for filling and visualizing all field plots.
+
+To see more examples, go to
+<https://didiermurillof.github.io/FielDHub/articles/diagonal_arrangement.html>
 
 ### Partially Replicated Design Example
 
@@ -179,8 +193,10 @@ by 18 columns.
 
 <img src='man/figures/pREPExample.PNG' align="center"/>
 
-In the figure above, green plots contain replicated entries, and yellow
-plots contain entries that only appear once.
+In the figure above, green plots contain replicated entries, and the
+other plots contain entries that only appear once.
+
+### Using the FielDHub function `partially_replicated()`
 
 Instead of using the Shiny FielDHub app, users can use the standalone
 FielDHub function `partially_replicated()`. The partially replicated
@@ -263,4 +279,6 @@ plot(pREP)
 <img src="man/figures/README-unnamed-chunk-9-1.png" width="100%" style="display: block; margin: auto;" />
 
 To see more examples, please go to
-<https://didiermurillof.github.io/FielDHub/reference/index.html>.
+<https://didiermurillof.github.io/FielDHub/articles/partially_replicated.html>
+
+<br> <br>
