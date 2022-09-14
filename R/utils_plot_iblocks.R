@@ -266,14 +266,15 @@ plot_iblocks <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks,
           x$bookROWCol <- NewBook %>%
             dplyr::mutate(ROW = z0,
                           COLUMN = rep(rep(1:nCols, each = sizeIblocks), s))
+          print(x$bookROWCol)
           df5 <- x$bookROWCol
           df5 <- df5[order(df5$REP, df5$UNIT),]
           nRows <- max(df5$ROW)
           nCols <- max(df5$COLUMN)
           number_units <- length(levels(as.factor(df5$IBLOCK)))
-          newPlots <- planter_transform(plots = plots, 
+          newPlots <- planter_transform(plots = plots,
                                         planter = planter,
-                                        reps = n_Reps, 
+                                        reps = n_Reps,
                                         cols = nCols,
                                         mode = "Grid",
                                         units = number_units)
@@ -303,7 +304,7 @@ plot_iblocks <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, sizeIblocks,
           df6 <- df6[order(df6$REP, df6$UNIT),]
           nRows <- max(df6$ROW)
           nCols <- max(df6$COLUMN)
-          number_units <- length(levels(as.factor(df5$IBLOCK)))
+          number_units <- length(levels(as.factor(df6$IBLOCK)))
           newPlots <- planter_transform(plots = plots, 
                                         planter = planter,
                                         reps = n_Reps,

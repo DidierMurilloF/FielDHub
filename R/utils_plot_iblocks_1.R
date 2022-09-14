@@ -423,7 +423,7 @@ plot_iblocks_1 <- function(x = NULL,
           df7 <- df7[order(df7$REP, df7$UNIT),]
           nRows <- max(df7$ROW)
           nCols <- max(df7$COLUMN)
-          number_units <- length(levels(as.factor(df5$IBLOCK)))
+          number_units <- length(levels(as.factor(df7$IBLOCK)))
           newPlots <- planter_transform(plots = plots, 
                                         planter = planter,
                                         reps = n_Reps,
