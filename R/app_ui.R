@@ -19,7 +19,7 @@ app_ui <- function(request) {
     tags$head(tags$script(type="text/javascript", src = "corner.js")),
     tags$head(tags$script(type="text/javascript", src= "shinybusy.js")), 
     fluidPage(theme = shinythemes::shinytheme("flatly"),
-              navbarPage(title = "FielDHub v1.2.0", 
+              navbarPage(title = "FielDHub v1.2.1", 
                          tabPanel(" Welcome!", icon = icon("home", lib = "glyphicon"),
                                   htmltools::includeHTML(
                                     system.file("app/www/home.html", package = "FielDHub")
