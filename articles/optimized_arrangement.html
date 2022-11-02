@@ -103,17 +103,35 @@
 
     
     
-<p>This vignette shows how to generate an <strong>unreplicated optimized arrangement design</strong> using both the FielDHub Shiny App and the scripting function <code><a href="../reference/optimized_arrangement.html">optimized_arrangement()</a></code> from the <code>FielDHub</code> R package.</p>
+<p>This vignette shows how to generate an <strong>unreplicated optimized
+arrangement design</strong> using both the FielDHub Shiny App and the
+scripting function <code><a href="../reference/optimized_arrangement.html">optimized_arrangement()</a></code> from the
+<code>FielDHub</code> R package.</p>
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p>One kind of unreplicated design you can use in FielDHub is the optimized arrangement. Unlike the diagonal design, the optimized arrangement completely randomizes the positions for the checks instead of putting them in a systematic diagonal pattern. Randomization is subject to some restrictions. These restrictions seek to optimize the distribution of control plots in the field and ensure that they are spread across all rows and columns.</p>
-<p>FielDHub includes a function to run such experimental designs, features include options to set the number of entries and the number of checks for the experiment. Users can also choose to run the same experiment over multiple locations.</p>
+<p>One kind of unreplicated design you can use in FielDHub is the
+optimized arrangement. Unlike the diagonal design, the optimized
+arrangement completely randomizes the positions for the checks instead
+of putting them in a systematic diagonal pattern. Randomization is
+subject to some restrictions. These restrictions seek to optimize the
+distribution of control plots in the field and ensure that they are
+spread across all rows and columns.</p>
+<p>FielDHub includes a function to run such experimental designs,
+features include options to set the number of entries and the number of
+checks for the experiment. Users can also choose to run the same
+experiment over multiple locations.</p>
 </div>
 <div class="section level2">
 <h2 id="use-case">Use case<a class="anchor" aria-label="anchor" href="#use-case"></a>
 </h2>
-<p>An early generation plant breeding project needs to test 401 genotypes of winter wheat. It is planned to carry out this experiment on a field containing 29 rows and 15 columns of plots. In this project, these 401 genotypes are allocated into one experiment and tested over three locations. In addition, three checks are randomly included across field to fill 34 plots representing 7.8% of the total number of experimental plots.</p>
+<p>An early generation plant breeding project needs to test 401
+genotypes of winter wheat. It is planned to carry out this experiment on
+a field containing 29 rows and 15 columns of plots. In this project,
+these 401 genotypes are allocated into one experiment and tested over
+three locations. In addition, three checks are randomly included across
+field to fill 34 plots representing 7.8% of the total number of
+experimental plots.</p>
 </div>
 <div class="section level2">
 <h2 id="running-the-shiny-app">Running the Shiny App<a class="anchor" aria-label="anchor" href="#running-the-shiny-app"></a>
@@ -129,18 +147,34 @@
 <div class="section level2">
 <h2 id="using-the-fieldhub-shiny-app">1. Using the FielDHub Shiny App<a class="anchor" aria-label="anchor" href="#using-the-fieldhub-shiny-app"></a>
 </h2>
-<p>Once the app is running, go to <strong>Unreplicated Designs</strong> &gt; <strong>Optimized Arrangement</strong></p>
-<p>Then, follow the following steps where we will show how to generate an unreplicated optimized arrangement design.</p>
+<p>Once the app is running, go to <strong>Unreplicated Designs</strong>
+&gt; <strong>Optimized Arrangement</strong></p>
+<p>Then, follow the following steps where we will show how to generate
+an unreplicated optimized arrangement design.</p>
 </div>
 <div class="section level2">
 <h2 id="inputs">Inputs<a class="anchor" aria-label="anchor" href="#inputs"></a>
 </h2>
 <ol style="list-style-type: decimal">
 <li>
-<strong>Import entries’ list?</strong> Choose whether to import a list with entry numbers and names for genotypes or treatments.
+<strong>Import entries’ list?</strong> Choose whether to import a
+list with entry numbers and names for genotypes or treatments.
 <ul>
-<li><p>If the selection is <code>No</code>, that means the app is going to generate synthetic data for entries and names of the treatment/genotypes based on the user inputs.</p></li>
-<li><p>If the selection is <code>Yes</code>, the entries list must fulfill a specific format and must be a <code>.csv</code> file. The file must have the columns <code>ENTRY</code>, <code>NAME</code>, and <code>REPS</code>. The <code>ENTRY</code> column must have a unique entry integer number for each treatment/genotype. The column <code>NAME</code> must have a unique name that identifies each treatment/genotype. The <code>REPS</code> column must have an integer entry for the replications of the checks and other entries. Both ENTRY and NAME must be unique, duplicates are not allowed. In the following table, we show an example of the entries list format. This example has an entry list with three checks and nine treatments/genotypes. It is crucial to allocate the checks in the top part of the file.</p></li>
+<li><p>If the selection is <code>No</code>, that means the app is going
+to generate synthetic data for entries and names of the
+treatment/genotypes based on the user inputs.</p></li>
+<li><p>If the selection is <code>Yes</code>, the entries list must
+fulfill a specific format and must be a <code>.csv</code> file. The file
+must have the columns <code>ENTRY</code>, <code>NAME</code>, and
+<code>REPS</code>. The <code>ENTRY</code> column must have a unique
+entry integer number for each treatment/genotype. The column
+<code>NAME</code> must have a unique name that identifies each
+treatment/genotype. The <code>REPS</code> column must have an integer
+entry for the replications of the checks and other entries. Both ENTRY
+and NAME must be unique, duplicates are not allowed. In the following
+table, we show an example of the entries list format. This example has
+an entry list with three checks and nine treatments/genotypes. It is
+crucial to allocate the checks in the top part of the file.</p></li>
 </ul>
 </li>
 </ol>
@@ -214,54 +248,108 @@
 </tbody>
 </table>
 <ol start="2" style="list-style-type: decimal">
-<li><p>Enter the number of checks in the <strong>Input # of Checks</strong> box, which is <code>3</code> in our case.</p></li>
-<li><p>Enter the number of replications of the checks in a comma separated list containing a number for each check in the <strong>Input # Check’s Reps</strong> box. For our example experiment, we will enter <code>12,11,11</code>.</p></li>
-<li><p>Enter the number of entries/treatments in the <strong>Input # of Entries</strong> box, which is <code>300</code> in our case.</p></li>
-<li><p>Select <code>serpentine</code> or <code>cartesian</code> in the <strong>Plot Order Layout</strong>. For this example we will set the <code>serpentine</code> layout.</p></li>
-<li><p>Since we want to run this experiment over 3 locations, set <strong>Input # of Locations</strong> to <code>3</code>.</p></li>
-<li><p>To ensure that randomizations are consistent across sessions, we can set a seed number in the box labeled <strong>Seed Number</strong>. For instance, we will set it to <code>130</code>.</p></li>
-<li><p>Enter the name for the experiment in the <strong>Input Experiment Name</strong> box. For example, <code>PYT_WHEAT_22</code>.</p></li>
-<li><p>Enter the starting plot number in the <strong>Starting Plot Number</strong> box. If the experiment has multiple locations, you must enter a comma separated list of numbers the length of the number of locations for the input to be valid. Since we have 3 locations in this experiment, we will enter <code>1001,2001,3001</code>.</p></li>
-<li><p>Enter the name of the site/location in the <strong>Input the Location</strong> box. In our case we will run the experiment in three locations, the name for each location must be enter separate by comma, for example: <code>FARGO, CASSELTON, MINOT</code>.</p></li>
-<li><p>Once we have entered the information for our experiment on the left side panel, click the <strong>Run!</strong> button to run the design.</p></li>
-<li><p>You will then be prompted to select the dimensions of the field from the list of options in the drop down in the middle of the screen with the box labeled <strong>Select dimensions of field</strong>. In our case, we will select <code>15 x 29</code>.</p></li>
-<li><p>Click the <strong>Randomize!</strong> button to randomize the experiment with the set field dimensions and to see the output plots. If you change the dimensions again, you must re-randomize.</p></li>
+<li><p>Enter the number of checks in the <strong>Input # of
+Checks</strong> box, which is <code>3</code> in our case.</p></li>
+<li><p>Enter the number of replications of the checks in a comma
+separated list containing a number for each check in the <strong>Input #
+Check’s Reps</strong> box. For our example experiment, we will enter
+<code>12,11,11</code>.</p></li>
+<li><p>Enter the number of entries/treatments in the <strong>Input # of
+Entries</strong> box, which is <code>300</code> in our case.</p></li>
+<li><p>Select <code>serpentine</code> or <code>cartesian</code> in the
+<strong>Plot Order Layout</strong>. For this example we will set the
+<code>serpentine</code> layout.</p></li>
+<li><p>Since we want to run this experiment over 3 locations, set
+<strong>Input # of Locations</strong> to <code>3</code>.</p></li>
+<li><p>To ensure that randomizations are consistent across sessions, we
+can set a seed number in the box labeled <strong>Seed Number</strong>.
+For instance, we will set it to <code>130</code>.</p></li>
+<li><p>Enter the name for the experiment in the <strong>Input Experiment
+Name</strong> box. For example, <code>PYT_WHEAT_22</code>.</p></li>
+<li><p>Enter the starting plot number in the <strong>Starting Plot
+Number</strong> box. If the experiment has multiple locations, you must
+enter a comma separated list of numbers the length of the number of
+locations for the input to be valid. Since we have 3 locations in this
+experiment, we will enter <code>1001,2001,3001</code>.</p></li>
+<li><p>Enter the name of the site/location in the <strong>Input the
+Location</strong> box. In our case we will run the experiment in three
+locations, the name for each location must be enter separate by comma,
+for example: <code>FARGO, CASSELTON, MINOT</code>.</p></li>
+<li><p>Once we have entered the information for our experiment on the
+left side panel, click the <strong>Run!</strong> button to run the
+design.</p></li>
+<li><p>You will then be prompted to select the dimensions of the field
+from the list of options in the drop down in the middle of the screen
+with the box labeled <strong>Select dimensions of field</strong>. In our
+case, we will select <code>15 x 29</code>.</p></li>
+<li><p>Click the <strong>Randomize!</strong> button to randomize the
+experiment with the set field dimensions and to see the output plots. If
+you change the dimensions again, you must re-randomize.</p></li>
 </ol>
-<p>If you change any of the inputs on the left side panel after running an experiment initially, you have to click the Run and Randomize buttons again, to re-run with the new inputs.</p>
+<p>If you change any of the inputs on the left side panel after running
+an experiment initially, you have to click the Run and Randomize buttons
+again, to re-run with the new inputs.</p>
 </div>
 <div class="section level2">
 <h2 id="outputs">Outputs<a class="anchor" aria-label="anchor" href="#outputs"></a>
 </h2>
-<p>After you run an unreplicated optimized arrangement design in FielDHub and set the dimensions of the field, there are several ways to display the information contained in the field book. The first tab, <strong>Get Random</strong>, shows the option to change the dimensions of the field and re-randomize, as well as a reference guide for experiment design.</p>
+<p>After you run an unreplicated optimized arrangement design in
+FielDHub and set the dimensions of the field, there are several ways to
+display the information contained in the field book. The first tab,
+<strong>Get Random</strong>, shows the option to change the dimensions
+of the field and re-randomize, as well as a reference guide for
+experiment design.</p>
 <div class="section level3">
 <h3 id="data-input">Data Input<a class="anchor" aria-label="anchor" href="#data-input"></a>
 </h3>
-<p>On the second tab, <strong>Data Input</strong>, you can see all the entries in the randomization in a list, as well as a table of the checks with the number of times they appear in the field. In the list of entries, the reps for each check is included as well.</p>
+<p>On the second tab, <strong>Data Input</strong>, you can see all the
+entries in the randomization in a list, as well as a table of the checks
+with the number of times they appear in the field. In the list of
+entries, the reps for each check is included as well.</p>
 </div>
 <div class="section level3">
 <h3 id="randomized-field">Randomized Field<a class="anchor" aria-label="anchor" href="#randomized-field"></a>
 </h3>
-<p>The <strong>Randomized Field</strong> tab displays a graphical representation of the randomization of the entries in a field of the specified dimensions. The checks are all colored uniquely, showing the number of times they are distributed throughout the field. The display includes numbered labels for the rows and columns. You can copy the field as a table or save it directly as an Excel file with the <em>Copy</em> and <em>Excel</em> buttons at the top.</p>
+<p>The <strong>Randomized Field</strong> tab displays a graphical
+representation of the randomization of the entries in a field of the
+specified dimensions. The checks are all colored uniquely, showing the
+number of times they are distributed throughout the field. The display
+includes numbered labels for the rows and columns. You can copy the
+field as a table or save it directly as an Excel file with the
+<em>Copy</em> and <em>Excel</em> buttons at the top.</p>
 </div>
 <div class="section level3">
 <h3 id="plot-number-field">Plot Number Field<a class="anchor" aria-label="anchor" href="#plot-number-field"></a>
 </h3>
-<p>On the <strong>Plot Number Field</strong> tab, there is a table display of the field with the plots numbered according to the Plot Order Layout specified, either <em>serpentine</em> or <em>cartesian</em>. You can see the corresponding entries for each plot number in the field book. Like the Randomized Field tab, you can copy the table or save it as an Excel file with the <em>Copy</em> and <em>Excel</em> buttons.</p>
+<p>On the <strong>Plot Number Field</strong> tab, there is a table
+display of the field with the plots numbered according to the Plot Order
+Layout specified, either <em>serpentine</em> or <em>cartesian</em>. You
+can see the corresponding entries for each plot number in the field
+book. Like the Randomized Field tab, you can copy the table or save it
+as an Excel file with the <em>Copy</em> and <em>Excel</em> buttons.</p>
 </div>
 <div class="section level3">
 <h3 id="field-book">Field Book<a class="anchor" aria-label="anchor" href="#field-book"></a>
 </h3>
-<p>The <strong>Field Book</strong> displays all the information on the experimental design in a table format. It contains the specific plot number and the row and column address of each entry, as well as the corresponding treatment on that plot. This table is searchable, and we can filter the data in relevant columns. <br></p>
+<p>The <strong>Field Book</strong> displays all the information on the
+experimental design in a table format. It contains the specific plot
+number and the row and column address of each entry, as well as the
+corresponding treatment on that plot. This table is searchable, and we
+can filter the data in relevant columns. <br></p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="using-the-fieldhub-function-optimized_arrangement-">2. Using the <code>FielDHub</code> function: <code>optimized_arrangement()</code>.<a class="anchor" aria-label="anchor" href="#using-the-fieldhub-function-optimized_arrangement-"></a>
+<h2 id="using-the-fieldhub-function-optimized_arrangement-">2. Using the <code>FielDHub</code> function:
+<code>optimized_arrangement()</code>.<a class="anchor" aria-label="anchor" href="#using-the-fieldhub-function-optimized_arrangement-"></a>
 </h2>
-<p>You can run the same design with the function <code><a href="../reference/optimized_arrangement.html">optimized_arrangement()</a></code> in the <code>FielDHub</code> package.</p>
+<p>You can run the same design with the function
+<code><a href="../reference/optimized_arrangement.html">optimized_arrangement()</a></code> in the <code>FielDHub</code>
+package.</p>
 <p>First, you need to load the <code>FielDHub</code> package typing,</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/DidierMurilloF/FielDHub" class="external-link">FielDHub</a></span><span class="op">)</span></span></code></pre></div>
-<p>Then, you can enter the information describing the above design like this:</p>
+<p>Then, you can enter the information describing the above design like
+this:</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>optim_expt <span class="ot">&lt;-</span> <span class="fu">optimized_arrangement</span>(</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">nrows =</span> <span class="dv">29</span>,</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">ncols =</span> <span class="dv">15</span>,</span>
@@ -276,9 +364,11 @@
 <span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">435</span></span></code></pre></div>
 <div class="section level4">
-<h4 id="details-on-the-inputs-entered-in-optimized_arrangement-above">Details on the inputs entered in <code>optimized_arrangement()</code> above<a class="anchor" aria-label="anchor" href="#details-on-the-inputs-entered-in-optimized_arrangement-above"></a>
+<h4 id="details-on-the-inputs-entered-in-optimized_arrangement-above">Details on the inputs entered in
+<code>optimized_arrangement()</code> above<a class="anchor" aria-label="anchor" href="#details-on-the-inputs-entered-in-optimized_arrangement-above"></a>
 </h4>
-<p>The description for the inputs that we used to generate the design,</p>
+<p>The description for the inputs that we used to generate the
+design,</p>
 <ul>
 <li>
 <code>nrows = 29</code> is the number of rows in the field.</li>
@@ -287,25 +377,34 @@
 <li>
 <code>lines = 401</code> is the number of entries</li>
 <li>
-<code>amountChecks = c(12,11,11)</code> are the values for representing respective replicates of each check, or an integer total number of checks.</li>
+<code>amountChecks = c(12,11,11)</code> are the values for
+representing respective replicates of each check, or an integer total
+number of checks.</li>
 <li>
 <code>checks = 3</code> is the number of checks.</li>
 <li>
 <code>l = 3</code> is the number of locations.</li>
 <li>
-<code>plotNumber = c(1001,2001,3001)</code> are the starting plot number for each location respectively, or a single number for 1 location.</li>
+<code>plotNumber = c(1001,2001,3001)</code> are the starting plot
+number for each location respectively, or a single number for 1
+location.</li>
 <li>
-<code>exptName = "WINTER_WHEAT_22"</code> is an optional name for experiment.</li>
+<code>exptName = "WINTER_WHEAT_22"</code> is an optional name for
+experiment.</li>
 <li>
-<code>locationNames = c("FARGO", "CASSELTON", "MINOT")</code> are the values for representing respective name for each location.</li>
+<code>locationNames = c("FARGO", "CASSELTON", "MINOT")</code> are
+the values for representing respective name for each location.</li>
 <li>
-<code>seed = 130</code> is the seed number to replicate identical randomizations.</li>
+<code>seed = 130</code> is the seed number to replicate identical
+randomizations.</li>
 </ul>
 </div>
 <div class="section level3">
 <h3 id="print-optim_expt-object">Print <code>optim_expt</code> object<a class="anchor" aria-label="anchor" href="#print-optim_expt-object"></a>
 </h3>
-<p>To print a summary of the information that is in the object <code>optim_expt</code>, we can use the generic function <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>.</p>
+<p>To print a summary of the information that is in the object
+<code>optim_expt</code>, we can use the generic function
+<code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">optim_expt</span><span class="op">)</span></span></code></pre></div>
 <pre><code>Un-replicated Optimized Arrangement Design 
@@ -338,9 +437,21 @@ List of 9
 <div class="section level3">
 <h3 id="access-to-optim_expt-object">Access to <code>optim_expt</code> object<a class="anchor" aria-label="anchor" href="#access-to-optim_expt-object"></a>
 </h3>
-<p>The <code><a href="../reference/optimized_arrangement.html">optimized_arrangement()</a></code> function returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are Accessible by the <code>$</code> operator, i.e. <code>optim_expt$layoutRandom</code> or <code>optim_expt$fieldBook</code>.</p>
-<p><code>optim_expt$fieldBook</code> is a data frame containing information about every plot in the field, with information about the location of the plot and the treatment in each plot. As seen in the output below, the field book has columns for <code>ID</code>, <code>EXPT</code>, <code>LOCATION</code>, <code>YEAR</code>, <code>PLOT</code>, <code>ROW</code>, <code>COLUMN</code>, <code>CHECKS</code>, <code>ENTRY</code>, and <code>TREATMENT</code>.</p>
-<p>Let us see the first 10 rows of the field book for this experiment.</p>
+<p>The <code><a href="../reference/optimized_arrangement.html">optimized_arrangement()</a></code> function returns a list
+consisting of all the information displayed in the output tabs in the
+FielDHub app: design information, plot layout, plot numbering, entries
+list, and field book. These are Accessible by the <code>$</code>
+operator, i.e. <code>optim_expt$layoutRandom</code> or
+<code>optim_expt$fieldBook</code>.</p>
+<p><code>optim_expt$fieldBook</code> is a data frame containing
+information about every plot in the field, with information about the
+location of the plot and the treatment in each plot. As seen in the
+output below, the field book has columns for <code>ID</code>,
+<code>EXPT</code>, <code>LOCATION</code>, <code>YEAR</code>,
+<code>PLOT</code>, <code>ROW</code>, <code>COLUMN</code>,
+<code>CHECKS</code>, <code>ENTRY</code>, and <code>TREATMENT</code>.</p>
+<p>Let us see the first 10 rows of the field book for this
+experiment.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">field_book</span> <span class="op">&lt;-</span> <span class="va">optim_expt</span><span class="op">$</span><span class="va">fieldBook</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">field_book</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
@@ -359,12 +470,19 @@ List of 9
 <div class="section level3">
 <h3 id="plot-the-field-layout">Plot the field layout<a class="anchor" aria-label="anchor" href="#plot-the-field-layout"></a>
 </h3>
-<p>For plotting the layout in function of the coordinates <code>ROW</code> and <code>COLUMN</code> in the field book object we can use the generic function <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> as follow,</p>
+<p>For plotting the layout in function of the coordinates
+<code>ROW</code> and <code>COLUMN</code> in the field book object we can
+use the generic function <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> as follow,</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">optim_expt</span><span class="op">)</span></span></code></pre></div>
 <p><img src="optimized_arrangement_files/figure-html/unnamed-chunk-12-1.png" width="691.2" style="display: block; margin: auto;"></p>
-<p>The figure above shows a map of an experiment randomized as an unreplicated optimized arrangement design. Gray plots represent the unreplicated treatments, while distinctively colored check plots are randomly replicated throughout the field.</p>
-<p>It is possible to pass more arguments to <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> such as the specific location. For example, you can plot specifically the layout for location 2.</p>
+<p>The figure above shows a map of an experiment randomized as an
+unreplicated optimized arrangement design. Gray plots represent the
+unreplicated treatments, while distinctively colored check plots are
+randomly replicated throughout the field.</p>
+<p>It is possible to pass more arguments to <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> such as
+the specific location. For example, you can plot specifically the layout
+for location 2.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">optim_expt</span>, l <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <p><img src="optimized_arrangement_files/figure-html/unnamed-chunk-13-1.png" width="691.2" style="display: block; margin: auto;"></p>

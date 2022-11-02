@@ -103,17 +103,31 @@
 
     
     
-<p>This vignette shows how to generate an <strong>augmented randomized complete block design </strong> using both the FielDHub Shiny App and the scripting function <code><a href="../reference/RCBD_augmented.html">RCBD_augmented()</a></code> from the <code>FielDHub</code> package.</p>
+<p>This vignette shows how to generate an <strong>augmented randomized
+complete block design </strong> using both the FielDHub Shiny App and
+the scripting function <code><a href="../reference/RCBD_augmented.html">RCBD_augmented()</a></code> from the
+<code>FielDHub</code> package.</p>
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p>The augmented randomized complete block design is another option to overcome the problem of limited facilities or lack of seed when researchers want to test many treatments. In this kind of design, the approach is to build augmented blocks and allocate the same amount of controls in every block along with the treatments.</p>
-<p>FielDHub includes a function to run such experimental designs, features include options to set the number of entries and the number of checks and augmented blocks for the experiment. Users can also choose to run the same experiment over multiple locations.</p>
+<p>The augmented randomized complete block design is another option to
+overcome the problem of limited facilities or lack of seed when
+researchers want to test many treatments. In this kind of design, the
+approach is to build augmented blocks and allocate the same amount of
+controls in every block along with the treatments.</p>
+<p>FielDHub includes a function to run such experimental designs,
+features include options to set the number of entries and the number of
+checks and augmented blocks for the experiment. Users can also choose to
+run the same experiment over multiple locations.</p>
 </div>
 <div class="section level2">
 <h2 id="use-case">Use case<a class="anchor" aria-label="anchor" href="#use-case"></a>
 </h2>
-<p>For example, we say a project needs to test 120 genotypes of cassava over two locations. In addition, the research includes four checks and six augmented blocks to carry out this experiment. This design setup comes out with 6 blocks of size 24 plots for a total of 144 plots that will be distributed in a field of 12 rows and 12 columns.</p>
+<p>For example, we say a project needs to test 120 genotypes of cassava
+over two locations. In addition, the research includes four checks and
+six augmented blocks to carry out this experiment. This design setup
+comes out with 6 blocks of size 24 plots for a total of 144 plots that
+will be distributed in a field of 12 rows and 12 columns.</p>
 </div>
 <div class="section level2">
 <h2 id="running-the-shiny-app">Running the Shiny App<a class="anchor" aria-label="anchor" href="#running-the-shiny-app"></a>
@@ -129,18 +143,33 @@
 <div class="section level2">
 <h2 id="using-the-fieldhub-shiny-app">1. Using the FielDHub Shiny App<a class="anchor" aria-label="anchor" href="#using-the-fieldhub-shiny-app"></a>
 </h2>
-<p>Once the app is running, go to <strong>Unreplicated Designs</strong> &gt; <strong>RCBD Augmented</strong></p>
-<p>Then, follow the following steps where we will show how to generate an RCBD Augmented.</p>
+<p>Once the app is running, go to <strong>Unreplicated Designs</strong>
+&gt; <strong>RCBD Augmented</strong></p>
+<p>Then, follow the following steps where we will show how to generate
+an RCBD Augmented.</p>
 </div>
 <div class="section level2">
 <h2 id="inputs">Inputs<a class="anchor" aria-label="anchor" href="#inputs"></a>
 </h2>
 <ol style="list-style-type: decimal">
 <li>
-<strong>Import entries’ list?</strong> Choose whether to import a list with entry numbers and names for genotypes or treatments.
+<strong>Import entries’ list?</strong> Choose whether to import a
+list with entry numbers and names for genotypes or treatments.
 <ul>
-<li><p>If the selection is <code>No</code>, that means the app is going to generate synthetic data for entries and names of the treatment/genotypes based on the user inputs.</p></li>
-<li><p>If the selection is <code>Yes</code>, the entries list must fulfill a specific format and must be a <code>.csv</code> file. The file must have the columns <code>ENTRY</code> and <code>NAME</code>. The <code>ENTRY</code> column must have a unique entry integer number for each treatment/genotype. The column <code>NAME</code> must have a unique name that identifies each treatment/genotype. Both <code>ENTRY</code> and <code>NAME</code> must be unique, duplicates are not allowed. In the following table, we show an example of the entries list format. This example has an entry list with four checks and 8 treatments/genotypes. It is crucial to allocate the checks in the top part of the file.</p></li>
+<li><p>If the selection is <code>No</code>, that means the app is going
+to generate synthetic data for entries and names of the
+treatment/genotypes based on the user inputs.</p></li>
+<li><p>If the selection is <code>Yes</code>, the entries list must
+fulfill a specific format and must be a <code>.csv</code> file. The file
+must have the columns <code>ENTRY</code> and <code>NAME</code>. The
+<code>ENTRY</code> column must have a unique entry integer number for
+each treatment/genotype. The column <code>NAME</code> must have a unique
+name that identifies each treatment/genotype. Both <code>ENTRY</code>
+and <code>NAME</code> must be unique, duplicates are not allowed. In the
+following table, we show an example of the entries list format. This
+example has an entry list with four checks and 8 treatments/genotypes.
+It is crucial to allocate the checks in the top part of the
+file.</p></li>
 </ul>
 </li>
 </ol>
@@ -253,58 +282,114 @@ G-12
 </tbody>
 </table>
 <ol style="list-style-type: decimal">
-<li><p>Enter the number of stacked experiments in the <strong>Input # of Stacked Expts</strong> box. This means the number of times the experiment will be replicated. In our case we will perform just <code>1</code> experiment.</p></li>
-<li><p>On the augmented RCBD we have the option to choose whether we randomize the entries or not, with the <strong>Randomize Entries</strong> toggle button. It is recommended always randomized the treatments/entries but some researchers choose not to randomize treatments, this is often due to logistical issues.</p></li>
-<li><p>Enter the number of entries/treatments in the <strong>Input # of Entries</strong> box, which is <code>120</code> in our example experiment.</p></li>
-<li><p>Set the number of checks per block with the <strong>Checks per Block</strong> box. In our case, it is <code>5</code> checks.</p></li>
-<li><p>Set the number of blocks with <strong>Input # of Blocks</strong> box, which is <code>6</code> in our example.</p></li>
+<li><p>Enter the number of stacked experiments in the <strong>Input # of
+Stacked Expts</strong> box. This means the number of times the
+experiment will be replicated. In our case we will perform just
+<code>1</code> experiment.</p></li>
+<li><p>On the augmented RCBD we have the option to choose whether we
+randomize the entries or not, with the <strong>Randomize
+Entries</strong> toggle button. It is recommended always randomized the
+treatments/entries but some researchers choose not to randomize
+treatments, this is often due to logistical issues.</p></li>
+<li><p>Enter the number of entries/treatments in the <strong>Input # of
+Entries</strong> box, which is <code>120</code> in our example
+experiment.</p></li>
+<li><p>Set the number of checks per block with the <strong>Checks per
+Block</strong> box. In our case, it is <code>5</code> checks.</p></li>
+<li><p>Set the number of blocks with <strong>Input # of Blocks</strong>
+box, which is <code>6</code> in our example.</p></li>
 </ol>
-<p>The total number of plots in our field will be <strong>Input # of Stacked Expts</strong>(<strong>Input # of Entries</strong> + <strong>Input # of Blocks</strong> * <strong>Checks per Block</strong>), per location.</p>
+<p>The total number of plots in our field will be <strong>Input # of
+Stacked Expts</strong>(<strong>Input # of Entries</strong> +
+<strong>Input # of Blocks</strong> * <strong>Checks per Block</strong>),
+per location.</p>
 <ol start="6" style="list-style-type: decimal">
-<li><p>Enter the number of locations in <strong>Input # of Locations</strong>. Set it as <code>2</code>.</p></li>
-<li><p>Select <code>serpentine</code> or <code>cartesian</code> in the <strong>Plot Order Layout</strong>. For this example we will set the <code>serpentine</code> layout.</p></li>
-<li><p>To ensure that randomizations are consistent across sessions, we can set a seed number in the box labeled <strong>Seed Number</strong>. In this example, we will set it to <code>1987</code>.</p></li>
-<li><p>Enter the starting plot number in the <strong>Starting Plot Number</strong> box. If the experiment has multiple locations, you must enter a comma separated list of numbers the length of the number of locations for the input to be valid.</p></li>
-<li><p>Once we have entered the information for our experiment on the left side panel, click the <strong>Run!</strong> button to run the design.</p></li>
-<li><p>You will then be prompted to select the dimensions of the field from the list of options in the drop down in the middle of the screen with the box labeled <strong>Select dimensions of field</strong>. In our case, we will select <code>12 x 12</code>.</p></li>
-<li><p>Click the <strong>Randomize!</strong> button to randomize the experiment with the set field dimensions and to see the output plots. If you change the dimensions again, you must re-randomize.</p></li>
+<li><p>Enter the number of locations in <strong>Input # of
+Locations</strong>. Set it as <code>2</code>.</p></li>
+<li><p>Select <code>serpentine</code> or <code>cartesian</code> in the
+<strong>Plot Order Layout</strong>. For this example we will set the
+<code>serpentine</code> layout.</p></li>
+<li><p>To ensure that randomizations are consistent across sessions, we
+can set a seed number in the box labeled <strong>Seed Number</strong>.
+In this example, we will set it to <code>1987</code>.</p></li>
+<li><p>Enter the starting plot number in the <strong>Starting Plot
+Number</strong> box. If the experiment has multiple locations, you must
+enter a comma separated list of numbers the length of the number of
+locations for the input to be valid.</p></li>
+<li><p>Once we have entered the information for our experiment on the
+left side panel, click the <strong>Run!</strong> button to run the
+design.</p></li>
+<li><p>You will then be prompted to select the dimensions of the field
+from the list of options in the drop down in the middle of the screen
+with the box labeled <strong>Select dimensions of field</strong>. In our
+case, we will select <code>12 x 12</code>.</p></li>
+<li><p>Click the <strong>Randomize!</strong> button to randomize the
+experiment with the set field dimensions and to see the output plots. If
+you change the dimensions again, you must re-randomize.</p></li>
 </ol>
-<p>If you change any of the inputs on the left side panel after running an experiment initially, you have to click the Run and Randomize buttons again, to re-run with the new inputs.</p>
+<p>If you change any of the inputs on the left side panel after running
+an experiment initially, you have to click the Run and Randomize buttons
+again, to re-run with the new inputs.</p>
 </div>
 <div class="section level2">
 <h2 id="outputs">Outputs<a class="anchor" aria-label="anchor" href="#outputs"></a>
 </h2>
-<p>After you run the augmented RCBD in FielDHub and set the dimensions of the field, there are several ways to display the information contained in the field book. The first tab, <strong>Get Random</strong>, shows the option to change the dimensions of the field and re-randomize, as well as a reference guide for experiment design.</p>
+<p>After you run the augmented RCBD in FielDHub and set the dimensions
+of the field, there are several ways to display the information
+contained in the field book. The first tab, <strong>Get Random</strong>,
+shows the option to change the dimensions of the field and re-randomize,
+as well as a reference guide for experiment design.</p>
 <div class="section level3">
 <h3 id="input-data">Input Data<a class="anchor" aria-label="anchor" href="#input-data"></a>
 </h3>
-<p>On the second tab, <strong>Input Data</strong>, you can see all the entries in the randomization in a list, as well as a table of the checks with the number of times they appear in the field. In the list of entries, the reps for each check is included as well.</p>
+<p>On the second tab, <strong>Input Data</strong>, you can see all the
+entries in the randomization in a list, as well as a table of the checks
+with the number of times they appear in the field. In the list of
+entries, the reps for each check is included as well.</p>
 </div>
 <div class="section level3">
 <h3 id="randomized-field">Randomized Field<a class="anchor" aria-label="anchor" href="#randomized-field"></a>
 </h3>
-<p>The <strong>Randomized Field</strong> tab displays a graphical representation of the randomization of the entries in a field of the specified dimensions. The checks are all colored uniquely, showing the number of times they are distributed throughout the field. The display includes numbered labels for the rows and columns. You can copy the field as a table or save it directly as an Excel file with the <em>Copy</em> and <em>Excel</em> buttons at the top.</p>
+<p>The <strong>Randomized Field</strong> tab displays a graphical
+representation of the randomization of the entries in a field of the
+specified dimensions. The checks are all colored uniquely, showing the
+number of times they are distributed throughout the field. The display
+includes numbered labels for the rows and columns. You can copy the
+field as a table or save it directly as an Excel file with the
+<em>Copy</em> and <em>Excel</em> buttons at the top.</p>
 </div>
 <div class="section level3">
 <h3 id="plot-number-field">Plot Number Field<a class="anchor" aria-label="anchor" href="#plot-number-field"></a>
 </h3>
-<p>On the <strong>Plot Number Field</strong> tab, there is a table display of the field with the plots numbered according to the Plot Order Layout specified, either <em>serpentine</em> or <em>cartesian</em>. You can see the corresponding entries for each plot number in the field book. Like the Randomized Field tab, you can copy the table or save it as an Excel file with the <em>Copy</em> and <em>Excel</em> buttons.</p>
+<p>On the <strong>Plot Number Field</strong> tab, there is a table
+display of the field with the plots numbered according to the Plot Order
+Layout specified, either <em>serpentine</em> or <em>cartesian</em>. You
+can see the corresponding entries for each plot number in the field
+book. Like the Randomized Field tab, you can copy the table or save it
+as an Excel file with the <em>Copy</em> and <em>Excel</em> buttons.</p>
 </div>
 <div class="section level3">
 <h3 id="field-book">Field Book<a class="anchor" aria-label="anchor" href="#field-book"></a>
 </h3>
-<p>The <strong>Field Book</strong> displays all the information on the experimental design in a table format. It contains the specific plot number and the row and column address of each entry, as well as the corresponding treatment on that plot. This table is searchable, and we can filter the data in relevant columns.</p>
+<p>The <strong>Field Book</strong> displays all the information on the
+experimental design in a table format. It contains the specific plot
+number and the row and column address of each entry, as well as the
+corresponding treatment on that plot. This table is searchable, and we
+can filter the data in relevant columns.</p>
 <p><br></p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="using-the-fieldhub-function-rcbd_augmented">2. Using the <code>FielDHub</code> function: <code>RCBD_augmented()</code><a class="anchor" aria-label="anchor" href="#using-the-fieldhub-function-rcbd_augmented"></a>
+<h2 id="using-the-fieldhub-function-rcbd_augmented">2. Using the <code>FielDHub</code> function:
+<code>RCBD_augmented()</code><a class="anchor" aria-label="anchor" href="#using-the-fieldhub-function-rcbd_augmented"></a>
 </h2>
-<p>You can run the same design with the function <code><a href="../reference/RCBD_augmented.html">RCBD_augmented()</a></code> in the <code>FielDHub</code> package.</p>
+<p>You can run the same design with the function
+<code><a href="../reference/RCBD_augmented.html">RCBD_augmented()</a></code> in the <code>FielDHub</code> package.</p>
 <p>First, you need to load the <code>FielDHub</code> package typing,</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/DidierMurilloF/FielDHub" class="external-link">FielDHub</a></span><span class="op">)</span></span></code></pre></div>
-<p>Then, you can enter the information describing the above design like this:</p>
+<p>Then, you can enter the information describing the above design like
+this:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">aug_RCBD</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/RCBD_augmented.html">RCBD_augmented</a></span><span class="op">(</span></span>
 <span>  lines <span class="op">=</span> <span class="fl">120</span>,</span>
@@ -321,40 +406,53 @@ G-12
 <span>  seed <span class="op">=</span> <span class="fl">1987</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <div class="section level4">
-<h4 id="details-on-the-inputs-entered-in-rcbd_augmented-above">Details on the inputs entered in <code>RCBD_augmented()</code> above<a class="anchor" aria-label="anchor" href="#details-on-the-inputs-entered-in-rcbd_augmented-above"></a>
+<h4 id="details-on-the-inputs-entered-in-rcbd_augmented-above">Details on the inputs entered in <code>RCBD_augmented()</code>
+above<a class="anchor" aria-label="anchor" href="#details-on-the-inputs-entered-in-rcbd_augmented-above"></a>
 </h4>
-<p>The description for the inputs that we used to generate the design,</p>
+<p>The description for the inputs that we used to generate the
+design,</p>
 <ul>
 <li>
 <code>lines = 120</code> is the number of entries</li>
 <li>
-<code>checks = 4</code> is the number of checks in each augmented block.</li>
+<code>checks = 4</code> is the number of checks in each augmented
+block.</li>
 <li>
 <code>b = 6</code> is the number of augmented blocks.</li>
 <li>
-<code>repsExpt = 1</code> is the number of reps for the experiment.</li>
+<code>repsExpt = 1</code> is the number of reps for the
+experiment.</li>
 <li>
 <code>l = 2</code> is the number of locations.</li>
 <li>
-<code>random = TRUE</code> it means both treatment/entries and checks will be randomized.</li>
+<code>random = TRUE</code> it means both treatment/entries and
+checks will be randomized.</li>
 <li>
-<code>exptName = "Cassava_2022"</code> is an optional name for the experiment.</li>
+<code>exptName = "Cassava_2022"</code> is an optional name for the
+experiment.</li>
 <li>
-<code>plotNumber = c(1001,2001)</code> are the starting plot number for each location respectively, or a single number for 1 location.</li>
+<code>plotNumber = c(1001,2001)</code> are the starting plot number
+for each location respectively, or a single number for 1 location.</li>
 <li>
-<code>locationNames = c("FARGO", "CASSELTON")</code> are the values for representing respective name for each location.</li>
+<code>locationNames = c("FARGO", "CASSELTON")</code> are the values
+for representing respective name for each location.</li>
 <li>
-<code>nrows = 12</code> is the number of rows in the field. It is optional</li>
+<code>nrows = 12</code> is the number of rows in the field. It is
+optional</li>
 <li>
-<code>ncols = 12</code> is the number of columns in the field. It is optional.</li>
+<code>ncols = 12</code> is the number of columns in the field. It is
+optional.</li>
 <li>
-<code>seed = 1987</code> is the seed number to replicate identical randomizations.</li>
+<code>seed = 1987</code> is the seed number to replicate identical
+randomizations.</li>
 </ul>
 </div>
 <div class="section level3">
 <h3 id="print-aug_rcbd-output">Print <code>aug_RCBD</code> output<a class="anchor" aria-label="anchor" href="#print-aug_rcbd-output"></a>
 </h3>
-<p>To print a summary of the information that is in the object <code>aug_RCBD</code>, we can use the generic function <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>.</p>
+<p>To print a summary of the information that is in the object
+<code>aug_RCBD</code>, we can use the generic function
+<code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">aug_RCBD</span><span class="op">)</span></span></code></pre></div>
 <pre><code>Augmented Randomized Complete Block Design: 
@@ -389,9 +487,21 @@ List of 11
 <div class="section level3">
 <h3 id="access-to-aug_rcbd-output">Access to <code>aug_RCBD</code> output<a class="anchor" aria-label="anchor" href="#access-to-aug_rcbd-output"></a>
 </h3>
-<p>The function <code><a href="../reference/RCBD_augmented.html">RCBD_augmented()</a></code> returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are accessible by the <code>$</code> operator, i.e. <code>aug_RCBD$layoutRandom</code> or <code>aug_RCBD$fieldBook</code>.</p>
-<p><code>aug_RCBD$fieldBook</code> is a list containing information about every plot in the field, with information about the location of the plot and the treatment in each plot. As seen in the output below, the field book has columns for <code>ID</code>, <code>EXPT</code>, <code>LOCATION</code>, <code>YEAR</code>, <code>PLOT</code>, <code>ROW</code>, <code>COLUMN</code>, <code>CHECKS</code>, <code>ENTRY</code>, and <code>TREATMENT</code>.</p>
-<p>Let us see the first 10 rows of the field book for this experiment.</p>
+<p>The function <code><a href="../reference/RCBD_augmented.html">RCBD_augmented()</a></code> returns a list consisting
+of all the information displayed in the output tabs in the FielDHub app:
+design information, plot layout, plot numbering, entries list, and field
+book. These are accessible by the <code>$</code> operator,
+i.e. <code>aug_RCBD$layoutRandom</code> or
+<code>aug_RCBD$fieldBook</code>.</p>
+<p><code>aug_RCBD$fieldBook</code> is a list containing information
+about every plot in the field, with information about the location of
+the plot and the treatment in each plot. As seen in the output below,
+the field book has columns for <code>ID</code>, <code>EXPT</code>,
+<code>LOCATION</code>, <code>YEAR</code>, <code>PLOT</code>,
+<code>ROW</code>, <code>COLUMN</code>, <code>CHECKS</code>,
+<code>ENTRY</code>, and <code>TREATMENT</code>.</p>
+<p>Let us see the first 10 rows of the field book for this
+experiment.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">field_book</span> <span class="op">&lt;-</span> <span class="va">aug_RCBD</span><span class="op">$</span><span class="va">fieldBook</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">field_book</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
@@ -410,14 +520,18 @@ List of 11
 <div class="section level3">
 <h3 id="plot-field-layout">Plot field layout<a class="anchor" aria-label="anchor" href="#plot-field-layout"></a>
 </h3>
-<p>For plotting the layout in function of the coordinates <code>ROW</code> and <code>COLUMN</code> in the field book object we can use the generic function <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> as follow,</p>
+<p>For plotting the layout in function of the coordinates
+<code>ROW</code> and <code>COLUMN</code> in the field book object we can
+use the generic function <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> as follow,</p>
 <div class="section level4">
 <h4 id="plot-layout-for-location-1">Plot layout for location 1<a class="anchor" aria-label="anchor" href="#plot-layout-for-location-1"></a>
 </h4>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">aug_RCBD</span><span class="op">)</span></span></code></pre></div>
 <p><img src="RCBD_augmented_files/figure-html/unnamed-chunk-12-1.png" width="691.2" style="display: block; margin: auto;"></p>
-<p>It is possible to pass more arguments to <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> such as the specific location. For example, you can plot the layout for location 2.</p>
+<p>It is possible to pass more arguments to <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> such as
+the specific location. For example, you can plot the layout for location
+2.</p>
 </div>
 <div class="section level4">
 <h4 id="plot-layout-for-location-2">Plot layout for location 2<a class="anchor" aria-label="anchor" href="#plot-layout-for-location-2"></a>

@@ -103,8 +103,13 @@
 
     
     
-<p>There are three primitive functions included in FielDHub: <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>, <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>, and <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>.</p>
-<p>Given an experiment simulation from FielDHub, we can use these functions to display different kinds of information about the experiment. In this example, we will use the following randomized complete block design:</p>
+<p>There are three primitive functions included in FielDHub:
+<code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>, <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>, and
+<code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>.</p>
+<p>Given an experiment simulation from FielDHub, we can use these
+functions to display different kinds of information about the
+experiment. In this example, we will use the following randomized
+complete block design:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">experiment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/RCBD.html">RCBD</a></span><span class="op">(</span></span>
 <span>  t <span class="op">=</span> <span class="fl">12</span>,</span>
@@ -118,7 +123,10 @@
 <h2 id="print">
 <code>print()</code><a class="anchor" aria-label="anchor" href="#print"></a>
 </h2>
-<p>The <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> function prints the design parameters of the experiment and the first 10 rows of the field book. The first 10 rows of the field book are saved if the output of this function is assigned to a variable.</p>
+<p>The <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> function prints the design parameters of the
+experiment and the first 10 rows of the field book. The first 10 rows of
+the field book are saved if the output of this function is assigned to a
+variable.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(experiment)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>Randomized Complete Block <span class="fu">Design</span> (RCBD)<span class="sc">:</span> </span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -149,7 +157,8 @@
 <h2 id="summary">
 <code>summary()</code><a class="anchor" aria-label="anchor" href="#summary"></a>
 </h2>
-<p>The <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> function outputs a list of the design parameters and the layout randomization with plot numbers.</p>
+<p>The <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> function outputs a list of the design
+parameters and the layout randomization with plot numbers.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(experiment)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>Randomized Complete Block <span class="fu">Design</span> (RCBD)<span class="sc">:</span> </span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -205,7 +214,10 @@
 <h2 id="plot">
 <code>plot()</code><a class="anchor" aria-label="anchor" href="#plot"></a>
 </h2>
-<p>The <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> function plots the field for the input design, as it would be displayed in FielDHub. This can also be saved to a variable. This function has parameters for location and layout, if applicable.</p>
+<p>The <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> function plots the field for the input
+design, as it would be displayed in FielDHub. This can also be saved to
+a variable. This function has parameters for location and layout, if
+applicable.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">experiment</span>, l <span class="op">=</span> <span class="fl">2</span>, layout <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <p><img src="methods_files/figure-html/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;"></p>

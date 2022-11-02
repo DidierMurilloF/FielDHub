@@ -103,7 +103,9 @@
 
     
     
-<p>This vignette shows how to generate a <strong>completely randomized design</strong> using both the FielDHub Shiny App and the scripting function <code><a href="../reference/CRD.html">CRD()</a></code> from the <code>FielDHub</code> package.</p>
+<p>This vignette shows how to generate a <strong>completely randomized
+design</strong> using both the FielDHub Shiny App and the scripting
+function <code><a href="../reference/CRD.html">CRD()</a></code> from the <code>FielDHub</code> package.</p>
 <div class="section level2">
 <h2 id="using-the-fieldhub-shiny-app">1. Using the FielDHub Shiny App<a class="anchor" aria-label="anchor" href="#using-the-fieldhub-shiny-app"></a>
 </h2>
@@ -114,18 +116,29 @@
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/DidierMurilloF/FielDHub" class="external-link">FielDHub</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/run_app.html">run_app</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>Once the app is running, go to <strong>Other Designs</strong> &gt; <strong>Completely Randomized Design (CRD)</strong></p>
-<p>Then, follow the following steps where we show how to generate this kind of design by an example with 15 treatments and 6 reps each.</p>
+<p>Once the app is running, go to <strong>Other Designs</strong> &gt;
+<strong>Completely Randomized Design (CRD)</strong></p>
+<p>Then, follow the following steps where we show how to generate this
+kind of design by an example with 15 treatments and 6 reps each.</p>
 </div>
 <div class="section level2">
 <h2 id="inputs">Inputs<a class="anchor" aria-label="anchor" href="#inputs"></a>
 </h2>
 <ol style="list-style-type: decimal">
 <li>
-<strong>Import entries’ list?</strong> Choose whether to import a list with entry numbers and names for genotypes or treatments.
+<strong>Import entries’ list?</strong> Choose whether to import a
+list with entry numbers and names for genotypes or treatments.
 <ul>
-<li><p>If the selection is <code>No</code>, that means the app is going to generate synthetic data for entries and names of the treatment/genotypes based on the user inputs.</p></li>
-<li><p>If the selection is <code>Yes</code>, the entries list must fulfill a specific format and must be a <code>.csv</code> file. The file must have the single column <code>TREATMENT</code>, containing a list of unique names that identify each treatment. Duplicate values are not allowed, all entries must be unique. In the following table, we show an example of the entries list format. This example has an entry list with ten treatments.</p></li>
+<li><p>If the selection is <code>No</code>, that means the app is going
+to generate synthetic data for entries and names of the
+treatment/genotypes based on the user inputs.</p></li>
+<li><p>If the selection is <code>Yes</code>, the entries list must
+fulfill a specific format and must be a <code>.csv</code> file. The file
+must have the single column <code>TREATMENT</code>, containing a list of
+unique names that identify each treatment. Duplicate values are not
+allowed, all entries must be unique. In the following table, we show an
+example of the entries list format. This example has an entry list with
+ten treatments.</p></li>
 </ul>
 </li>
 </ol>
@@ -167,34 +180,64 @@
 </tbody>
 </table>
 <ol start="2" style="list-style-type: decimal">
-<li><p>Input the number of treatments in the <strong>Input # of Treatments</strong> box, which is <code>15</code> in this case.</p></li>
-<li><p>Select the number of replications of these treatments with the <strong>Input # of Full Reps</strong> box. Set it as <code>6</code>.</p></li>
-<li><p>Select <code>serpentine</code> or <code>cartesian</code> in the <strong>Plot Order Layout</strong>. For this example we will use the default <code>cartesian</code> layout.</p></li>
-<li><p>Enter the starting plot number in the <strong>Starting Plot Number</strong> box. Set it to <code>101</code>.</p></li>
-<li><p>Enter a name for the location of the experiment in the <strong>Input Location</strong> box. A completely randomized design can only be run in a single location at a time. Set it to <code>FARGO</code>.</p></li>
-<li><p>To ensure that randomizations are consistent across sessions, we can set a seed number in the box labeled <strong>Seed Number</strong>. In this example, we will set it to <code>1236</code>.</p></li>
-<li><p>Once we have entered the information for our experiment on the left side panel, click the <strong>Run!</strong> button to run the design.</p></li>
+<li><p>Input the number of treatments in the <strong>Input # of
+Treatments</strong> box, which is <code>15</code> in this case.</p></li>
+<li><p>Select the number of replications of these treatments with the
+<strong>Input # of Full Reps</strong> box. Set it as
+<code>6</code>.</p></li>
+<li><p>Select <code>serpentine</code> or <code>cartesian</code> in the
+<strong>Plot Order Layout</strong>. For this example we will use the
+default <code>cartesian</code> layout.</p></li>
+<li><p>Enter the starting plot number in the <strong>Starting Plot
+Number</strong> box. Set it to <code>101</code>.</p></li>
+<li><p>Enter a name for the location of the experiment in the
+<strong>Input Location</strong> box. A completely randomized design can
+only be run in a single location at a time. Set it to
+<code>FARGO</code>.</p></li>
+<li><p>To ensure that randomizations are consistent across sessions, we
+can set a seed number in the box labeled <strong>Seed Number</strong>.
+In this example, we will set it to <code>1236</code>.</p></li>
+<li><p>Once we have entered the information for our experiment on the
+left side panel, click the <strong>Run!</strong> button to run the
+design.</p></li>
 </ol>
 </div>
 <div class="section level2">
 <h2 id="outputs">Outputs<a class="anchor" aria-label="anchor" href="#outputs"></a>
 </h2>
-<p>After you run a completely randomized design in FielDHub, there are several ways to display the information contained in the field book.</p>
+<p>After you run a completely randomized design in FielDHub, there are
+several ways to display the information contained in the field book.</p>
 <div class="section level3">
 <h3 id="field-layout">Field Layout<a class="anchor" aria-label="anchor" href="#field-layout"></a>
 </h3>
-<p>When you first click the run button on a completely randomized design, FielDHub displays the Field Layout tab, which shows the entries and their arrangement in the field. In the box below the display, you can change the layout of the field. You can also display a heatmap over the field by changing <strong>Type of Plot</strong> to <code>Heatmap</code>. To view a heatmap, you must first simulate an experiment over the described field with the <strong>Simulate!</strong> button. A pop-up window will appear where you can enter what variable you want to simulate along with minimum and maximum values.</p>
+<p>When you first click the run button on a completely randomized
+design, FielDHub displays the Field Layout tab, which shows the entries
+and their arrangement in the field. In the box below the display, you
+can change the layout of the field. You can also display a heatmap over
+the field by changing <strong>Type of Plot</strong> to
+<code>Heatmap</code>. To view a heatmap, you must first simulate an
+experiment over the described field with the <strong>Simulate!</strong>
+button. A pop-up window will appear where you can enter what variable
+you want to simulate along with minimum and maximum values.</p>
 </div>
 <div class="section level3">
 <h3 id="field-book">Field Book<a class="anchor" aria-label="anchor" href="#field-book"></a>
 </h3>
-<p>The <strong>Field Book</strong> displays all the information on the experimental design in a table format. It contains the specific plot number and the row and column address of each entry, as well as the corresponding treatment on that plot. This table is searchable, and we can filter the data in relevant columns. If we have simulated data for a heatmap, an additional column for that variable appears in the Field Book.</p>
+<p>The <strong>Field Book</strong> displays all the information on the
+experimental design in a table format. It contains the specific plot
+number and the row and column address of each entry, as well as the
+corresponding treatment on that plot. This table is searchable, and we
+can filter the data in relevant columns. If we have simulated data for a
+heatmap, an additional column for that variable appears in the Field
+Book.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="using-the-fieldhub-function-crd">2. Using the <code>FielDHub</code> function: <code>CRD()</code><a class="anchor" aria-label="anchor" href="#using-the-fieldhub-function-crd"></a>
 </h2>
-<p>You can run the same design with a function in the FielDHub package, <code><a href="../reference/CRD.html">CRD()</a></code>. We can enter the information describing the above design like this:</p>
+<p>You can run the same design with a function in the FielDHub package,
+<code><a href="../reference/CRD.html">CRD()</a></code>. We can enter the information describing the above
+design like this:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">crd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/CRD.html">CRD</a></span><span class="op">(</span></span>
 <span>  t <span class="op">=</span> <span class="fl">15</span>,</span>
@@ -206,24 +249,30 @@
 <div class="section level4">
 <h4 id="details-on-the-inputs-entered-in-crd-above">Details on the inputs entered in <code>CRD()</code> above<a class="anchor" aria-label="anchor" href="#details-on-the-inputs-entered-in-crd-above"></a>
 </h4>
-<p>The description for the inputs that we used to generate the design,</p>
+<p>The description for the inputs that we used to generate the
+design,</p>
 <ul>
 <li>
 <code>t = 15</code> is the number of treatments.</li>
 <li>
-<code>reps = 6</code> is the number of replications for each treatment.</li>
+<code>reps = 6</code> is the number of replications for each
+treatment.</li>
 <li>
 <code>plotNumber = 101</code> is the starting plot number.</li>
 <li>
-<code>locationNames = "FARGO"</code> is an optional name for the location.</li>
+<code>locationNames = "FARGO"</code> is an optional name for the
+location.</li>
 <li>
-<code>seed = 1234</code> is the seed number to replicate identical randomizations.</li>
+<code>seed = 1234</code> is the seed number to replicate identical
+randomizations.</li>
 </ul>
 </div>
 <div class="section level3">
 <h3 id="print-crd-output">Print <code>crd</code> output<a class="anchor" aria-label="anchor" href="#print-crd-output"></a>
 </h3>
-<p>To print a summary of the information that is in the object <code>crd</code>, we can use the generic function <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>.</p>
+<p>To print a summary of the information that is in the object
+<code>crd</code>, we can use the generic function
+<code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">crd</span><span class="op">)</span></span></code></pre></div>
 <pre><code>Completely Randomized Design (CRD) 
@@ -252,8 +301,17 @@ List of 5
 <div class="section level3">
 <h3 id="access-to-crd-output">Access to <code>crd</code> output<a class="anchor" aria-label="anchor" href="#access-to-crd-output"></a>
 </h3>
-<p>The <code><a href="../reference/CRD.html">CRD()</a></code> function returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are accessible by the <code>$</code> operator, i.e. <code>crd$layoutRandom</code> or <code>crd$fieldBook</code>.</p>
-<p><code>crd$fieldBook</code> is a list containing information about every plot in the field, with information about the location of the plot and the treatment in each plot. As seen in the output below, the field book has columns for <code>ID</code>, <code>LOCATION</code>, <code>PLOT</code>, <code>REP</code>, <code>IBLOCK</code>, <code>UNIT</code>, <code>ENTRY</code>, and <code>TREATMENT</code>.</p>
+<p>The <code><a href="../reference/CRD.html">CRD()</a></code> function returns a list consisting of all the
+information displayed in the output tabs in the FielDHub app: design
+information, plot layout, plot numbering, entries list, and field book.
+These are accessible by the <code>$</code> operator,
+i.e. <code>crd$layoutRandom</code> or <code>crd$fieldBook</code>.</p>
+<p><code>crd$fieldBook</code> is a list containing information about
+every plot in the field, with information about the location of the plot
+and the treatment in each plot. As seen in the output below, the field
+book has columns for <code>ID</code>, <code>LOCATION</code>,
+<code>PLOT</code>, <code>REP</code>, <code>IBLOCK</code>,
+<code>UNIT</code>, <code>ENTRY</code>, and <code>TREATMENT</code>.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">field_book</span> <span class="op">&lt;-</span> <span class="va">crd</span><span class="op">$</span><span class="va">fieldBook</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">crd</span><span class="op">$</span><span class="va">fieldBook</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
@@ -272,7 +330,9 @@ List of 5
 <div class="section level3">
 <h3 id="plot-the-field-layout">Plot the field layout<a class="anchor" aria-label="anchor" href="#plot-the-field-layout"></a>
 </h3>
-<p>For plotting the layout in function of the coordinates <code>ROW</code> and <code>COLUMN</code>, you can use the the generic function <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> as follow,</p>
+<p>For plotting the layout in function of the coordinates
+<code>ROW</code> and <code>COLUMN</code>, you can use the the generic
+function <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> as follow,</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">crd</span><span class="op">)</span></span></code></pre></div>
 <p><img src="crd_files/figure-html/unnamed-chunk-11-1.png" width="691.2" style="display: block; margin: auto;"></p>
