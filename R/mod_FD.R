@@ -548,16 +548,21 @@ mod_FD_server <- function(id) {
     
     output$FD.Output <- DT::renderDataTable({
       df <- simuData_fd()$df
+
       df$LOCATION <- as.factor(df$LOCATION)
       df$PLOT <- as.factor(df$PLOT)
       df$ROW <- as.factor(df$ROW)
       df$COLUMN <- as.factor(df$COLUMN)
       df$REP <- as.factor(df$REP)
-      df$FACTOR_A <- as.factor(df$FACTOR_A)
-      df$FACTOR_B <- as.factor(df$FACTOR_B)
-      if ("FACTOR_C" %in% colnames(df)) df$FACTOR_C <- as.factor(df$FACTOR_C)
-      if ("FACTOR_D" %in% colnames(df)) df$FACTOR_D <- as.factor(df$FACTOR_D)
-      df$TRT_COMB <- as.factor(df$TRT_COMB)
+      colnames_set <- colnames(df)
+      
+      len_colnames_set <- length(colnames_set)
+      if (colnames_set[len_colnames_set] == "TRT_COMB") {
+        df[, 7:len_colnames_set] <- lapply(df[, 7:len_colnames_set], as.factor)
+      } else {
+        df[, 7:(len_colnames_set - 1)] <- lapply(df[, 7:(len_colnames_set - 1)], as.factor)
+      }
+      
       a <- as.numeric(simuData_fd()$a)
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "500px"))
