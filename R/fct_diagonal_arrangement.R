@@ -190,7 +190,7 @@ diagonal_arrangement <- function(nrows = NULL,
   if (!is.null(checks) && is.numeric(checks) && all(checks %% 1 == 0)) {
     if(!is.null(data)) {
       if (length(checks) == 1 && checks >= 1) {
-        checksEntries <- as.numeric(data[1:checks,1])
+        checksEntries <- sort(as.numeric(data[1:checks,1]))
         checks <- checks
       }else if (length(checks) > 1) {
         checksEntries <- checks
