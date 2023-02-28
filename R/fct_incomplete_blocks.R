@@ -131,9 +131,32 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
 
   ibd_plots <- ibd_plot_numbers(nt = nt, plot.number = plotNumber, r = r, l = l)
   b <- nt/k
+  square <- FALSE
+  if (sqrt(nt) == round(sqrt(nt))) square <- TRUE
   outIBD_loc <- vector(mode = "list", length = l)
   for (i in 1:l) {
-    mydes <- blocksdesign::blocks(treatments = nt, replicates = r, blocks = list(r, b), seed = NULL)
+    if (square) {
+        mydes <- blocksdesign::blocks(treatments = nt, replicates = r + 1, blocks = list(r + 1, b), seed = NULL)
+        ##### Dropping the cyclical REP ######
+        rep_to_drop <- mydes$Design %>%
+            dplyr::group_by(Level_1, Level_2) %>%
+            dplyr::mutate(treatments = as.numeric(treatments)) %>%
+            dplyr::summarise(dif = sum(diff(sort(treatments)))/(dplyr::n()-1)) %>%
+            dplyr::filter(dif == 1) %>%
+            dplyr::pull(Level_1) %>%
+            unique()
+        print(rep_to_drop)
+        if (length(rep_to_drop) > 0) {
+            mydes$Design <- mydes$Design %>%
+                dplyr::filter(Level_1 != rep_to_drop) %>%
+                mutate(Level_1 = rep(paste0("B", 1:r), each = nt))
+        } else {
+            mydes$Design <- mydes$Design %>%
+                dplyr::filter(Level_1 != paste0("B", r + 1)) 
+        }
+    } else {
+        mydes <- blocksdesign::blocks(treatments = nt, replicates = r, blocks = list(r, b), seed = NULL)
+    }
     matdf <- base::data.frame(list(LOCATION = rep(locationNames[i], each = N)))
     matdf$PLOT <- as.numeric(unlist(ibd_plots[[i]]))
     matdf$BLOCK <- rep(c(1:r), each = nt)
