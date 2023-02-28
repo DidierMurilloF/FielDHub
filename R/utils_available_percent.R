@@ -25,7 +25,8 @@ available_percent <- function(n_rows,
                 rep(NA,50)),
               ncol = 6, byrow = F)
   w_map_list <- list()
-  for (l in 1:nrow(W)) {
+  range_in_W <- 1:nrow(W)
+  for (l in range_in_W) {
     if (n_cols < W[l,3]) next
     p_start <-  W[l,5]
     w_map_checks <- diagonals_checks(n_rows = n_rows, 
@@ -101,11 +102,12 @@ available_percent <- function(n_rows,
         real_dim_data_entry <- dim_data_1
         Fillers <- dim_expt - real_dim_data_entry - n_Checks
         limit_out <- checks + 1
-        if (diff(c(Fillers, (n_cols - 5))) <= 2) next 
+        #if (diff(c(Fillers, (n_cols - 5))) <= 2) next 
         if (Fillers > 0 && Fillers < n_cols) {
+          #print(Fillers)
           checks_in_first_row <- sum(w_map[1, ] != "0")
           if ((Fillers + checks_in_first_row) >= n_cols) next
-          if (Fillers > ceiling(n_cols/2)) next
+          #if (Fillers > ceiling(n_cols/2)) next
           if (n_rows %% 2 == 0) {
             if(planter_mov1 == "serpentine") {
               i <- 1
@@ -138,7 +140,6 @@ available_percent <- function(n_rows,
         pots <- nrow(w_map) * ncol(w_map)
         per <- round((n_Checks/pots)*100,2)
         expt_lines <- pots - n_Checks
-        
         Fillers_t <- length(which(w_map == "Filler"))
         f_expt_lines <- expt_lines - Fillers_t
         M[m, c(1,2,3,4,5,6)] <- c(m, per, n_Checks, Fillers_t, f_expt_lines, pots)
@@ -258,7 +259,8 @@ available_percent <- function(n_rows,
   dt <- as.data.frame(M)
   dt <- dt[!duplicated(dt[,3]),]
   dt[,1] <- 1:nrow(dt)
-  
+  #dt <- subset(dt, dt[,5] == realData)
+  print(dt)
   if (multi && Option_NCD == TRUE) {
     list(dt = dt, P = W, d_checks = d_checks, 
          data_dim_each_block = data_dim_each_block)
