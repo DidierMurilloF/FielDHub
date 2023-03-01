@@ -13,4 +13,9 @@ utils::globalVariables(c("ENTRY",
                          "WHOLE_PLOT",
                          "text", 
                          "BLOCK", 
-                         "CHECKS", "EXPT"))
+                         "CHECKS", 
+                         "EXPT",
+                         "Level_1",
+                         "Level_2",
+                         "dif",
+                         "treatments"))

@@ -145,11 +145,10 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
             dplyr::filter(dif == 1) %>%
             dplyr::pull(Level_1) %>%
             unique()
-        print(rep_to_drop)
         if (length(rep_to_drop) > 0) {
             mydes$Design <- mydes$Design %>%
                 dplyr::filter(Level_1 != rep_to_drop) %>%
-                mutate(Level_1 = rep(paste0("B", 1:r), each = nt))
+                dplyr::mutate(Level_1 = rep(paste0("B", 1:r), each = nt))
         } else {
             mydes$Design <- mydes$Design %>%
                 dplyr::filter(Level_1 != paste0("B", r + 1)) 
