@@ -357,11 +357,11 @@ mod_Diagonal_server <- function(id) {
       checks <- as.numeric(getChecks()$checks)
       total_entries <- as.numeric(getData()$dim_data_entry)
       lines <- total_entries - checks
-      t1 <- floor(lines + lines * 0.08)
+      t1 <- floor(lines + lines * 0.11)
       t2 <- ceiling(lines + lines * 0.20)
       t <- t1:t2
       n <- t[-numbers::isPrime(t)]
-      withProgress(message = 'Calculation in progress', {
+      #withProgress(message = 'Calculation in progress', {
         choices_list <- list()
         i <- 1
         for (n in t) {
@@ -377,7 +377,6 @@ mod_Diagonal_server <- function(id) {
         new_choices <- list()
         v <- 1
         by_choices <- 1:length(choices)
-        # withProgress(message = 'Calculation in progress', {
         for (dim_options in by_choices) {
           
           planter_mov <- single_inputs()$planter_mov
@@ -400,11 +399,9 @@ mod_Diagonal_server <- function(id) {
           if (!is.null(dt_options$dt)) {
             new_choices[[v]] <- choices[[dim_options]]
             v <- v + 1
-          } else {
-            print(dims)
           }
         }
-      })
+      #})
       updateSelectInput(inputId = "dimensions.d",
                         choices = new_choices,
                         selected = new_choices[1])

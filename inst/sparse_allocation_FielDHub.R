@@ -269,7 +269,7 @@ sparse_allocation <- function(lines, nrows, ncols, l, planter, plotNumber,  plan
     )
     # Create a space in memory for the unrep randomizations
     unrep_designs <- setNames(
-        object = vector(mode = "list", length = loc), 
+        object = vector(mode = "list", length = l), 
         nm = names(unrep$list_locs)
     )
     for (site in names(unrep$list_locs)) {
@@ -277,17 +277,18 @@ sparse_allocation <- function(lines, nrows, ncols, l, planter, plotNumber,  plan
             dplyr::mutate(ENTRY = as.numeric(ENTRY)) %>% 
             dplyr::select(ENTRY, NAME)
         unrep_designs[[site]] <- FielDHub::diagonal_arrangement(nrows = nrows, ncols = ncols, checks = checks, data = df_loc)
+        print(unrep_designs[[site]])
     }
     return(unrep_designs)
 }
 
 sparse <- sparse_allocation(
     lines = 380, 
-    nrows = 15, 
-    ncols = 20, 
+    nrows = 21, 
+    ncols = 21, 
     l = 6, 
     plant_reps = 4, 
-    checks = 5, 
+    checks = 4, 
     locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5", "LOC6"), 
     seed = 1234
 )

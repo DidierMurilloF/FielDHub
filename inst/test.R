@@ -190,3 +190,57 @@ cat("A-efficiency:", A_efficiency, "\n")
 
 y <- 25
 sqrt(y) == round(sqrt(y))
+
+
+#######################################################
+x <- diagonal_arrangement(nrows = 52, ncols = 11, lines = 480, checks = 4)
+
+
+
+
+
+set.seed(1)
+v <- matrix(rbinom(16, 1, 0.5), 4, 4)
+v
+sum(v == 0)
+
+
+ checks <- 5;expts <- 5
+ list_checks <- paste("CH", 1:checks, sep = "")
+ treatments <- paste("G", 6:725, sep = "")
+ treatment_list <- data.frame(list(ENTRY = 1:725, NAME = c(list_checks, treatments)))
+ head(treatment_list, 12) 
+ tail(treatment_list, 12)
+ spatDB <- diagonal_arrangement(
+   nrows = 30, 
+   ncols = 26,
+   checks = 5, 
+   plotNumber = 1, 
+   kindExpt = "DBUDC", 
+   planter = "serpentine", 
+   splitBy = "row", 
+   blocks = c(150,155,95,200,120),
+   data = treatment_list
+  )
+ spatDB$infoDesign
+ spatDB$layoutRandom
+ spatDB$plotsNumber
+ head(spatDB$fieldBook,12)
+ 
+ 
+  spatd <- diagonal_arrangement(
+    nrows = 18, 
+    ncols = 18, 
+    lines = 270, 
+    checks = 4, 
+    plotNumber = 101, 
+    kindExpt = "SUDC", 
+    planter = "serpentine", 
+    seed = 1987,
+    exptName = "20WRY1", 
+    locationNames = "MINOT"
+  )
+  spatd$infoDesign
+  spatd$layoutRandom
+  spatd$plotsNumber
+  head(spatd$fieldBook, 12)
