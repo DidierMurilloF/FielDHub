@@ -50,9 +50,10 @@ mydes$Design
 ############### Using FielDHub ###############
 library(FielDHub)
 library(dplyr)
-nt <- 16
-r <- 4
+nt <- 36
+r <- 3
 sq_lattice <- square_lattice(t = nt, k = 4, r = r, seed = 10)
+plot(sq_lattice)
 
 df <- sq_lattice$fieldBook
 df
