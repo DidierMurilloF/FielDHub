@@ -400,6 +400,8 @@ mod_Diagonal_server <- function(id) {
           if (!is.null(dt_options$dt)) {
             new_choices[[v]] <- choices[[dim_options]]
             v <- v + 1
+          } else {
+            print(dims)
           }
         }
       })
