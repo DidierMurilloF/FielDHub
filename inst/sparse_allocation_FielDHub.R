@@ -361,6 +361,30 @@ plot(unrep_sparse$LOC3)
 
 (324 * 8) %% 6 == 0
 
+prep_average <- FielDHub:::average_prep_allocation(
+  lines = 324, 
+  nrows = 19, 
+  ncols = 24, 
+  l = 6, 
+  plant_reps = 8, 
+  checks = 3, 
+  rep_checks = c(8,8,8),
+  locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5", "LOC6"), 
+  seed = 1234
+)
+
+
+sparse <- FielDHub:::sparse_allocation(
+  lines = 380, 
+  nrows = 14, 
+  ncols = 20, 
+  l = 6, 
+  plant_reps = 5, 
+  checks = 4, 
+  locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5", "LOC6"), 
+  seed = 1234
+)
+
 
 
 

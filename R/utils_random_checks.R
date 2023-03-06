@@ -13,13 +13,14 @@ random_checks <- function(dt = NULL, d_checks = NULL, p = NULL, percent = NULL,
   }
   my_P <- p
   if (!is.null(percent) && is.null(exptlines)) {
+    print(subset(my_P, my_P[,1] == percent)[1,2])
     my_index <- subset(my_P, my_P[,1] == percent)[1,2]
-  }else if (is.null(percent) && !is.null(exptlines)) {
+  } else if (is.null(percent) && !is.null(exptlines)) {
     if (Option_NCD == FALSE) {
       my_index <- subset(my_P, my_P[,7] == exptlines)[1,2]
     }
     if (Option_NCD == TRUE) {
-      d_checks <- d_checks[!sapply(d_checks,is.null)]
+      d_checks <- d_checks[!sapply(d_checks, is.null)]
       k <- 1
       my_index <- k
     }

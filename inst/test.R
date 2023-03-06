@@ -193,8 +193,8 @@ sqrt(y) == round(sqrt(y))
 
 
 #######################################################
-x <- diagonal_arrangement(nrows = 52, ncols = 11, lines = 480, checks = 4)
-
+x <- diagonal_arrangement(nrows = 45, ncols = 50, lines = 1850, checks = 4)
+x
 
 
 

@@ -21,12 +21,12 @@ do_optim <- function(design = "prep", lines, loc, plant_reps, checks, rep_checks
     )
   # Create a long data frame with the allocations per location
   long_allocation <- as.data.frame(allocation) %>%
-    rename_with(~c("ENTRY", "LOCATION", "REPS"), everything()) %>%  # rename columns
+    dplyr::rename_with(~c("ENTRY", "LOCATION", "REPS"), dplyr::everything()) %>%  # rename columns
     dplyr::mutate(
       LOCATION = gsub("B", "LOC", LOCATION),
       NAME = paste0("G-", ENTRY)
     ) %>%  
-    select(LOCATION, ENTRY, NAME, REPS)
+    dplyr::select(LOCATION, ENTRY, NAME, REPS)
   # Create a data frame for the checks
   max_entry <- lines # Checks start at the last entry + 1 in the data frame
   if (design != "prep") {
@@ -53,7 +53,7 @@ do_optim <- function(design = "prep", lines, loc, plant_reps, checks, rep_checks
       dplyr::mutate(ENTRY = as.numeric(ENTRY)) %>% 
       dplyr::select(ENTRY, NAME, REPS) %>%
       dplyr::bind_rows(df_checks) %>%
-      dplyr::arrange(desc(ENTRY))
+      dplyr::arrange(dplyr::desc(ENTRY))
     
     list_locs[[site]] <- df_loc
   }
@@ -79,14 +79,19 @@ sparse_allocation <- function(lines, nrows, ncols, l, planter, plotNumber,  plan
   )
   # Create a space in memory for the unrep randomizations
   unrep_designs <- setNames(
-    object = vector(mode = "list", length = loc), 
+    object = vector(mode = "list", length = l), 
     nm = names(unrep$list_locs)
   )
   for (site in names(unrep$list_locs)) {
     df_loc <- unrep$list_locs[[site]] %>% 
       dplyr::mutate(ENTRY = as.numeric(ENTRY)) %>% 
       dplyr::select(ENTRY, NAME)
-    unrep_designs[[site]] <- diagonal_arrangement(nrows = nrows, ncols = ncols, checks = checks, data = df_loc)
+    unrep_designs[[site]] <- diagonal_arrangement(
+      nrows = nrows, 
+      ncols = ncols, 
+      checks = checks, 
+      data = df_loc
+      )
   }
   return(unrep_designs)
 }
@@ -110,7 +115,7 @@ average_prep_allocation <- function(lines,
     plant_reps <- ceiling(l * desired_avg)
   }
   unrep <- do_optim(
-    desig = "prep",
+    design = "prep",
     lines = lines, 
     loc = l, 
     plant_reps = plant_reps, 
@@ -120,7 +125,7 @@ average_prep_allocation <- function(lines,
   )
   # Create a space in memory for the unrep randomizations
   unrep_designs <- setNames(
-    object = vector(mode = "list", length = loc), 
+    object = vector(mode = "list", length = l), 
     nm = names(unrep$list_locs)
   )
   for (site in names(unrep$list_locs)) {
@@ -130,7 +135,11 @@ average_prep_allocation <- function(lines,
         REPS = as.numeric(REPS)
       ) %>% 
       dplyr::select(ENTRY, NAME, REPS)
-    unrep_designs[[site]] <- partially_replicated(nrows = nrows, ncols = ncols, data = df_loc)
+    unrep_designs[[site]] <- partially_replicated(
+      nrows = nrows, 
+      ncols = ncols, 
+      data = df_loc
+      )
   }
   return(unrep_designs)
 }

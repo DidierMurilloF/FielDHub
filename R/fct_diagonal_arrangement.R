@@ -296,7 +296,7 @@ diagonal_arrangement <- function(nrows = NULL,
     n_rows = nrows, 
     n_cols = ncols,
     checks = checksEntries,
-    Option_NCD = FALSE, # FALSE
+    Option_NCD = TRUE, # FALSE
     kindExpt = kindExpt,
     stacked = Way,
     planter_mov1 = planter, 
@@ -354,7 +354,7 @@ diagonal_arrangement <- function(nrows = NULL,
     exptlines <- new_lines
     if (exptlines >= minLines & exptlines <= maxLines) {
       if (exptlines %in% as.vector(infoP[,7])) {
-        Option_NCD <- FALSE
+        Option_NCD <- TRUE # FALSE
         Exptlines <- exptlines
       } else if (all(as.vector(infoP[,7]) != exptlines)) {
         Option_NCD <- TRUE
@@ -400,11 +400,17 @@ diagonal_arrangement <- function(nrows = NULL,
       }
     } else stop("Field dimensions do not fit with the data entered. Try another amount of treatments!")
     
+    percent_table <- available_percent1$dt
+    percent_col <- percent_table[,2]
+    len <- length(percent_col)
+    selected_percent <- as.numeric(percent_col[len])
+    
     rand_checks <- random_checks(
       dt = available_percent1$dt, 
       d_checks = available_percent1$d_checks, 
-      p = infoP, percent = NULL,
-      exptlines = Exptlines, 
+      p = infoP, 
+      percent = selected_percent,
+      exptlines = NULL, #Exptlines, 
       kindExpt = kindExpt, 
       planter_mov = planter, 
       Checks = checksEntries, 
@@ -642,12 +648,11 @@ diagonal_arrangement <- function(nrows = NULL,
   field_book <- dplyr::bind_rows(field_book_sites)
   
   infoDesign <- list(
-    # field_dimensions = c("rows" = nrows, "columns" = ncols),
     rows = nrows,
     columns = ncols,
     treatments = linesexpt,
     checks = length(checksEntries),
-    entry_checks = checksEntries, # checks, 
+    entry_checks = checksEntries, 
     rep_checks = as.vector(as.numeric(RepChecks)),
     locations = l,
     planter = planter,

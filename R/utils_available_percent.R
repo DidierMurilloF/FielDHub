@@ -148,7 +148,7 @@ available_percent <- function(n_rows,
         Fillers_t <- sum(w_map == "Filler")
         f_expt_lines <- expt_lines - Fillers_t
         M[m, c(1,2,3,4,5,6)] <- c(m, per, n_Checks, Fillers_t, f_expt_lines, pots)
-      } else next
+      } 
       # else {
       #   n_Checks <- length(which(w_map == 1))
       #   pots <- nrow(w_map) * ncol(w_map)
@@ -266,7 +266,7 @@ available_percent <- function(n_rows,
   dt <- dt[!duplicated(dt[,3]),]
   dt[,1] <- 1:nrow(dt)
   #dt <- subset(dt, dt[,5] == realData)
-  #print(dt)
+  print(dt)
   if (multi && Option_NCD == TRUE) {
     list(dt = dt, P = W, d_checks = d_checks, 
          data_dim_each_block = data_dim_each_block)

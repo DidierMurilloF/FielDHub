@@ -18,4 +18,9 @@ utils::globalVariables(c("ENTRY",
                          "Level_1",
                          "Level_2",
                          "dif",
-                         "treatments"))
+                         "treatments",
+                         "NAME",
+                         "REPS",
+                         "loc",
+                         "copies",
+                         "."))

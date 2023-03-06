@@ -37,6 +37,9 @@ app_ui <- function(request) {
                                     ),
                                     tabPanel("Augmented RCBD",
                                              mod_RCBD_augmented_ui("RCBD_augmented_ui_1")
+                                    ),
+                                    tabPanel("Sparse Allocation",
+                                             mod_sparse_allocation_ui("sparse_allocation_ui_1")
                                     )
                          ),
                          tabPanel("Partially Replicated Designs",
