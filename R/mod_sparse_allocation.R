@@ -43,7 +43,7 @@ mod_sparse_allocation_ui <- function(id) {
           ns = ns,
           numericInput(inputId = ns("sparse_lines"), 
                        label = "Input # of Entries:",
-                       value = 270, 
+                       value = 380, 
                        min = 50),
         ),
         selectInput(inputId = ns("checks_allocation"),
@@ -61,7 +61,7 @@ mod_sparse_allocation_ui <- function(id) {
           column(6,style=list("padding-right: 28px;"),
                  numericInput(inputId = ns("sparse_locations"), 
                               label = "Input # of Locations:", 
-                              value = 1,
+                              value = 5,
                               min = 1)
           ),
           column(6,style=list("padding-left: 5px;"),
@@ -71,6 +71,11 @@ mod_sparse_allocation_ui <- function(id) {
                              selected = 1, 
                              multiple = FALSE)
           )
+        ),
+        selectInput(
+            inputId = ns("plant_reps"), 
+            label = "# of Copies per plant:",
+            choices = 1:6
         ),
         selectInput(inputId = ns("sparse_planter"), 
                     label = "Plot Order Layout:",
@@ -145,8 +150,7 @@ mod_sparse_allocation_ui <- function(id) {
                 ),
                 br(),
                 br(),
-                #uiOutput(ns("checks_percent")),
-                DT::DTOutput(ns("options_table"))
+                DT::DTOutput(ns("sparse_allocation"))
             ),
             tabPanel("Input Data",
                         fluidRow(
@@ -216,24 +220,29 @@ mod_sparse_allocation_server <- function(id){
     })
     
     single_inputs <- eventReactive(input$sparse_run, {
-      planter_mov <- input$sparse_planter
-      Name_expt <- as.vector(unlist(strsplit(input$sparse_expt_name, ",")))
-      blocks <- 1
-      if (length(Name_expt) == blocks & !missing(Name_expt)) {
-        name_expt <- Name_expt
-      }else{
-        name_expt = paste0(rep("Block", times = blocks), 1:blocks)
-      }
-      plotNumber <- as.numeric(as.vector(unlist(strsplit(input$sparse_plot_start, ","))))
-      seed_number <- as.numeric(input$seed_single)
-      location_names <- as.vector(unlist(strsplit(input$sparse_loc_names, ",")))
-      sites = as.numeric(input$sparse_locations)
-      return(list(sites = sites, 
-                  location_names = location_names, 
-                  seed_number = seed_number, 
-                  plotNumber = plotNumber,
-                  planter_mov = planter_mov,
-                  expt_name = name_expt))
+        planter_mov <- input$sparse_planter
+        Name_expt <- as.vector(unlist(strsplit(input$sparse_expt_name, ",")))
+        blocks <- 1
+        if (length(Name_expt) == blocks & !missing(Name_expt)) {
+            name_expt <- Name_expt
+        }else{
+            name_expt = paste0(rep("Block", times = blocks), 1:blocks)
+        }
+        plotNumber <- as.numeric(as.vector(unlist(strsplit(input$sparse_plot_start, ","))))
+        seed_number <- as.numeric(input$seed_single)
+        location_names <- as.vector(unlist(strsplit(input$sparse_loc_names, ",")))
+        sites = as.numeric(input$sparse_locations)
+        return(
+            list(
+                sites = sites, 
+                location_names = location_names, 
+                seed_number = seed_number, 
+                plotNumber = plotNumber,
+                planter_mov = planter_mov,
+                expt_name = name_expt,
+                plant_reps = as.numeric(input$plant_reps)
+            )
+        )
     })
     
     observeEvent(single_inputs()$sites, {
@@ -343,11 +352,17 @@ mod_sparse_allocation_server <- function(id){
             colnames(data_entry_UP) <- c("ENTRY", "NAME")
             dim_data_entry <- nrow(data_entry_UP)
             dim_data_1 <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
-            return(list(data_entry = data_entry_UP, 
+            return(
+                list(
+                    data_entry = data_entry_UP, 
                     dim_data_entry = dim_data_entry, 
-                    dim_without_checks = dim_data_1))
+                    dim_without_checks = dim_data_1
+                )
+            )
         }
     })
+
+    
     
     getChecks <- eventReactive(input$sparse_run, {
       req(get_sparse_data()$data_entry)
@@ -426,6 +441,26 @@ mod_sparse_allocation_server <- function(id){
       shinyjs::show(id = "sparse_dims")
       shinyjs::show(id = "sparse_get_random")
     })
+
+
+    sparse_setup <- reactive({
+        lines <- get_sparse_data()$dim_without_checks
+         do_optim(
+            design = "sparse",
+            lines = lines, 
+            l = single_inputs()$sites, 
+            plant_reps = single_inputs()$plant_reps, 
+            checks = 4, 
+            seed = single_inputs()$seed_number
+        )
+    }) 
+
+    output$sparse_allocation <- DT::renderDT({
+        df <- as.data.frame(sparse_setup()$allocation)
+        DT::datatable(df)
+    })
+
+
     
     # field_dimensions_diagonal <- eventReactive(input$sparse_get_random, {
     #   req(input$sparse_dims)
