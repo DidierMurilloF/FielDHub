@@ -187,5 +187,12 @@ average_allocation <- function(
             data = df_loc
         )
     }
-    return(preps_designs)
+    return(
+        list(
+            designs = preps_designs, 
+            list_locs = preps$list_locs, 
+            allocation = preps$allocation, 
+            size_locations = preps$size_locations
+        )
+    )
 }
