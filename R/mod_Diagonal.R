@@ -278,24 +278,36 @@ mod_Diagonal_server <- function(id) {
       if (input$owndataDIAGONALS == "Yes") {
         req(input$file1)
         inFile <- input$file1
-        data_ingested <- load_file(name = inFile$name, 
-                                path = inFile$datapat, 
-                                sep = input$sep.DIAGONALS, check = TRUE, design = "sdiag")
+        data_ingested <- load_file(
+            name = inFile$name, 
+            path = inFile$datapat, 
+            sep = input$sep.DIAGONALS, 
+            check = TRUE, 
+            design = "sdiag"
+        )
         
         if (names(data_ingested) == "dataUp") {
-          data_up <- data_ingested$dataUp
-          data_entry <- na.omit(data_up)
-          if (ncol(data_entry) < 2) {
-            validate("Data input needs at least two Columns with the ENTRY and NAME.")
-          } 
-          data_entry_UP <- data_entry[,1:2]
-          colnames(data_entry_UP) <- c("ENTRY", "NAME")
-          checksEntries <- as.numeric(data_entry_UP[1:input$checks,1])
-          dim_data_entry <- nrow(data_entry_UP)
-          dim_data_1 <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
-          return(list(data_entry = data_entry_UP, 
-                      dim_data_entry = dim_data_entry, 
-                      dim_without_checks = dim_data_1))
+          # data_up <- data_ingested$dataUp
+          # data_entry <- na.omit(data_up)
+          # if (ncol(data_entry) < 2) {
+          #   validate("Data input needs at least two Columns with the ENTRY and NAME.")
+          # } 
+          # data_entry_UP <- data_entry[,1:2]
+
+            data_up <- data_ingested$dataUp
+            print(data_up[,1:2])
+            if (ncol(data_entry) < 2) {
+                validate("Data input needs at least two Columns with the ENTRY and NAME.")
+            } 
+            data_entry_UP <- na.omit(data_up[,1:2])
+            # data_entry_UP <- data_entry
+            colnames(data_entry_UP) <- c("ENTRY", "NAME")
+            checksEntries <- as.numeric(data_entry_UP[1:input$checks,1])
+            dim_data_entry <- nrow(data_entry_UP)
+            dim_data_1 <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
+            return(list(data_entry = data_entry_UP, 
+                        dim_data_entry = dim_data_entry, 
+                        dim_without_checks = dim_data_1))
         } else if (names(data_ingested) == "bad_format") {
           shinyalert::shinyalert(
             "Error!!", 

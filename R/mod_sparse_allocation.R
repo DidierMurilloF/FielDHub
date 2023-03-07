@@ -31,7 +31,7 @@ mod_sparse_allocation_ui <- function(id) {
                              label = "Upload a CSV File:", 
                              multiple = FALSE)),
             column(5,style=list("padding-left: 5px;"),
-                   radioButtons(ns("sep.SPARSE"), "Separator",
+                   radioButtons(ns("sparse_file_sep"), "Separator",
                                 choices = c(Comma = ",",
                                             Semicolon = ";",
                                             Tab = "\t"),
@@ -46,7 +46,7 @@ mod_sparse_allocation_ui <- function(id) {
                        value = 270, 
                        min = 50),
         ),
-        selectInput(inputId = "checks_allocation",
+        selectInput(inputId = ns("checks_allocation"),
                     label = "Way to allocate checks:",
                     choices = c("Diagonal", "Completely Random"),
                     selected = "Diagonal"
@@ -130,21 +130,23 @@ mod_sparse_allocation_ui <- function(id) {
         shinyjs::useShinyjs(),
         tabsetPanel(
             id = ns("sparse_tabset_single"),
-            tabPanel(title = "Expt Design Info", value = "tabPanel1",
-                        br(),
-                        shinyjs::hidden(
-                        selectInput(inputId = ns("dimensions.d"),
-                                    label = "Select dimensions of field:", 
-                                    choices = "", width = '400px')
-                        ),
-                        shinyjs::hidden(
-                        actionButton(inputId = ns("get_random"), 
-                                    label = "Randomize!")
-                        ),
-                        br(),
-                        br(),
-                        #uiOutput(ns("checks_percent")),
-                        DT::DTOutput(ns("options_table"))
+            tabPanel(
+                title = "Expt Design Info", 
+                value = "tabPanel1",
+                br(),
+                shinyjs::hidden(
+                selectInput(inputId = ns("sparse_dims"),
+                            label = "Select dimensions of field:", 
+                            choices = "", width = '400px')
+                ),
+                shinyjs::hidden(
+                actionButton(inputId = ns("sparse_get_random"), 
+                            label = "Randomize!")
+                ),
+                br(),
+                br(),
+                #uiOutput(ns("checks_percent")),
+                DT::DTOutput(ns("options_table"))
             ),
             tabPanel("Input Data",
                         fluidRow(
@@ -181,9 +183,12 @@ mod_sparse_allocation_server <- function(id){
   moduleServer( id, function(input, output, session) {
     ns <- session$ns
 
+    shinyjs::useShinyjs()
+
     counts <- reactiveValues(trigger = 0)
     
     observeEvent(input$sparse_run, {
+      print(counts$trigger)
       counts$trigger <- counts$trigger + 1
     })
     
@@ -197,20 +202,18 @@ mod_sparse_allocation_server <- function(id){
 
     user_tries <- reactiveValues(tries = 0)
 
-    observeEvent(input$get_random, {
+    observeEvent(input$sparse_get_random, {
       randomize_hit$times <- randomize_hit$times + 1
       user_tries$tries <- user_tries$tries + 1
     })
 
-    observeEvent(input$dimensions.d, {
+    observeEvent(input$sparse_dims, {
       user_tries$tries <- 0
     })
 
     list_to_observe <- reactive({
       list(randomize_hit$times, user_tries$tries)
     })
-
-    shinyjs::useShinyjs()
     
     single_inputs <- eventReactive(input$sparse_run, {
       planter_mov <- input$sparse_planter
@@ -252,7 +255,7 @@ mod_sparse_allocation_server <- function(id){
                  handlerExpr = updateTabsetPanel(session,
                                                  "sparse_tabset_single",
                                                  selected = "tabPanel1"))
-    observeEvent(input$dimensions.d,
+    observeEvent(input$sparse_dims,
                  handlerExpr = updateTabsetPanel(session,
                                                  "sparse_tabset_single",
                                                  selected = "tabPanel1"))
@@ -277,91 +280,96 @@ mod_sparse_allocation_server <- function(id){
                                                  "sparse_tabset_single",
                                                  selected = "tabPanel1"))
                                                   
-    getData <- eventReactive(input$sparse_run, {
-    # getData <- reactive({
-      Sys.sleep(2)
-      Option_NCD <- TRUE
-      if (input$input_sparse_data == "Yes") {
-        req(input$sparse_file)
-        inFile <- input$sparse_file
-        data_ingested <- load_file(name = inFile$name, 
-                                path = inFile$datapat, 
-                                sep = input$sep.DIAGONALS, check = TRUE, design = "sdiag")
-        
-        if (names(data_ingested) == "dataUp") {
-          data_up <- data_ingested$dataUp
-          data_entry <- na.omit(data_up)
-          if (ncol(data_entry) < 2) {
-            validate("Data input needs at least two Columns with the ENTRY and NAME.")
-          } 
-          data_entry_UP <- data_entry[,1:2]
-          colnames(data_entry_UP) <- c("ENTRY", "NAME")
-          checksEntries <- as.numeric(data_entry_UP[1:input$sparse_checks,1])
-          dim_data_entry <- nrow(data_entry_UP)
-          dim_data_1 <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
-          return(list(data_entry = data_entry_UP, 
-                      dim_data_entry = dim_data_entry, 
-                      dim_without_checks = dim_data_1))
-        } else if (names(data_ingested) == "bad_format") {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Invalid file; Please upload a .csv file.", 
-            type = "error")
-          error_message <- "Invalid file; Please upload a .csv file."
-          return(NULL)
-        } else if (names(data_ingested) == "duplicated_vals") {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Check input file for duplicate values.", 
-            type = "error")
-          error_message <- "Check input file for duplicate values."
-          return(NULL)
-        } else if (names(data_ingested) == "missing_cols") {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Data input needs at least two columns: ENTRY and NAME",
-            type = "error")
-          return(NULL)
+    get_sparse_data <- eventReactive(input$sparse_run, {
+        Sys.sleep(2)
+        Option_NCD <- TRUE
+        if (input$input_sparse_data == "Yes") {
+            req(input$sparse_file)
+            inFile <- input$sparse_file
+            data_ingested <- load_file(
+                name = inFile$name, 
+                path = inFile$datapat, 
+                sep = input$sparse_file_sep, 
+                check = TRUE, 
+                design = "sdiag"
+            )
+            
+            if (names(data_ingested) == "dataUp") {
+                data_up <- data_ingested$dataUp
+                if (ncol(data_entry) < 2) {
+                    validate("Data input needs at least two Columns with the ENTRY and NAME.")
+                } 
+                data_entry_UP <- na.omit(data_up[,1:2])
+                # data_entry_UP <- data_entry
+                colnames(data_entry_UP) <- c("ENTRY", "NAME")
+                checksEntries <- as.numeric(data_entry_UP[1:input$sparse_checks,1])
+                dim_data_entry <- nrow(data_entry_UP)
+                dim_data_1 <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
+                return(list(data_entry = data_entry_UP, 
+                            dim_data_entry = dim_data_entry, 
+                            dim_without_checks = dim_data_1))
+            } else if (names(data_ingested) == "bad_format") {
+            shinyalert::shinyalert(
+                "Error!!", 
+                "Invalid file; Please upload a .csv file.", 
+                type = "error")
+            error_message <- "Invalid file; Please upload a .csv file."
+            return(NULL)
+            } else if (names(data_ingested) == "duplicated_vals") {
+            shinyalert::shinyalert(
+                "Error!!", 
+                "Check input file for duplicate values.", 
+                type = "error")
+            error_message <- "Check input file for duplicate values."
+            return(NULL)
+            } else if (names(data_ingested) == "missing_cols") {
+            shinyalert::shinyalert(
+                "Error!!", 
+                "Data input needs at least two columns: ENTRY and NAME",
+                type = "error")
+            return(NULL)
+            }
+        } else {
+            req(input$sparse_lines)
+            req(input$sparse_checks)
+            sparse_checks <- as.numeric(input$sparse_checks)
+            print(sparse_checks)
+            checksEntries <- 1:sparse_checks
+            lines <- input$sparse_lines
+            NAME <- c(paste(rep("CH", sparse_checks), 1:sparse_checks, sep = ""),
+                        paste(rep("G", lines), (sparse_checks + 1):(lines + sparse_checks), sep = ""))
+            gen.list <- data.frame(list(ENTRY = 1:(lines + sparse_checks),	NAME = NAME))
+            data_entry_UP <- gen.list
+            colnames(data_entry_UP) <- c("ENTRY", "NAME")
+            dim_data_entry <- nrow(data_entry_UP)
+            dim_data_1 <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
+            return(list(data_entry = data_entry_UP, 
+                    dim_data_entry = dim_data_entry, 
+                    dim_without_checks = dim_data_1))
         }
-      } else {
-          req(input$sparse_lines)
-          req(input$sparse_checks)
-          sparse_checks <- as.numeric(input$sparse_checks)
-          checksEntries <- 1:sparse_checks
-          lines <- input$sparse_lines
-          NAME <- c(paste(rep("CH", sparse_checks), 1:sparse_checks, sep = ""),
-                    paste(rep("G", lines), (sparse_checks + 1):(lines + sparse_checks), sep = ""))
-          gen.list <- data.frame(list(ENTRY = 1:(lines + sparse_checks),	NAME = NAME))
-          data_entry_UP <- gen.list
-          colnames(data_entry_UP) <- c("ENTRY", "NAME")
-          dim_data_entry <- nrow(data_entry_UP)
-          dim_data_1 <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
-          return(list(data_entry = data_entry_UP, 
-                 dim_data_entry = dim_data_entry, 
-                 dim_without_checks = dim_data_1))
-      }
     })
     
     getChecks <- eventReactive(input$sparse_run, {
-      req(getData()$data_entry)
-      data <- as.data.frame(getData()$data_entry)
+      req(get_sparse_data()$data_entry)
+      print(head(get_sparse_data()$data_entry))
+      data <- as.data.frame(get_sparse_data()$data_entry)
       checksEntries <- as.numeric(data[1:input$sparse_checks,1])
       sparse_checks <- as.numeric(input$sparse_checks)
       list(checksEntries = checksEntries, sparse_checks = sparse_checks)
     })
     
     list_inputs_diagonal <- eventReactive(input$sparse_run, {
-      req(getData()$dim_data_entry)
+      req(get_sparse_data()$dim_data_entry)
       sparse_checks <- as.numeric(getChecks()$sparse_checks)
-      lines <- as.numeric(getData()$dim_data_entry)
+      lines <- as.numeric(get_sparse_data()$dim_data_entry)
       return(list(lines, input$input_sparse_data, kindExpt_single, 
                   input$stacked, input$sparse_run))
     })
 
     observeEvent(list_inputs_diagonal(), {
-      req(getData()$dim_data_entry)
+      req(get_sparse_data()$dim_data_entry)
       sparse_checks <- as.numeric(getChecks()$sparse_checks)
-      total_entries <- as.numeric(getData()$dim_data_entry)
+      total_entries <- as.numeric(get_sparse_data()$dim_data_entry)
       lines <- total_entries - sparse_checks
       t1 <- floor(lines + lines * 0.11)
       t2 <- ceiling(lines + lines * 0.20)
@@ -398,9 +406,9 @@ mod_sparse_allocation_server <- function(id){
                                           kindExpt = kindExpt_single,
                                           stacked = input$stacked,
                                           planter_mov1 = planter_mov,
-                                          data = getData()$data_entry,
-                                          dim_data = getData()$dim_data_entry,
-                                          dim_data_1 = getData()$dim_without_checks,
+                                          data = get_sparse_data()$data_entry,
+                                          dim_data = get_sparse_data()$dim_data_entry,
+                                          dim_data_1 = get_sparse_data()$dim_without_checks,
                                           Block_Fillers = NULL)
           if (!is.null(dt_options$dt)) {
             new_choices[[v]] <- choices[[dim_options]]
@@ -408,20 +416,20 @@ mod_sparse_allocation_server <- function(id){
           }
         }
       #})
-      updateSelectInput(inputId = "dimensions.d",
+      updateSelectInput(inputId = "sparse_dims",
                         choices = new_choices,
                         selected = new_choices[1])
     })
     
-    # observeEvent(input$sparse_run, {
-    #   req(getData()$dim_data_entry)
-    #   shinyjs::show(id = "dimensions.d")
-    #   shinyjs::show(id = "get_random")
-    # })
+    observeEvent(input$sparse_run, {
+      req(get_sparse_data()$dim_data_entry)
+      shinyjs::show(id = "sparse_dims")
+      shinyjs::show(id = "sparse_get_random")
+    })
     
-    # field_dimensions_diagonal <- eventReactive(input$get_random, {
-    #   req(input$dimensions.d)
-    #   dims <- unlist(strsplit(input$dimensions.d, " x "))
+    # field_dimensions_diagonal <- eventReactive(input$sparse_get_random, {
+    #   req(input$sparse_dims)
+    #   dims <- unlist(strsplit(input$sparse_dims, " x "))
     #   d_row <- as.numeric(dims[1])
     #   d_col <- as.numeric(dims[2])
     #   return(list(d_row = d_row, d_col = d_col))
@@ -460,9 +468,9 @@ mod_sparse_allocation_server <- function(id){
     #   }
     # })
 
-    # available_percent_table <- eventReactive(input$get_random, {
-    #   req(input$dimensions.d)
-    #   req(getData())
+    # available_percent_table <- eventReactive(input$sparse_get_random, {
+    #   req(input$sparse_dims)
+    #   req(get_sparse_data())
     #   req(field_dimensions_diagonal())
     #   Option_NCD <- TRUE
     #   checksEntries <- as.vector(getChecks()$checksEntries)
@@ -476,9 +484,9 @@ mod_sparse_allocation_server <- function(id){
     #                     kindExpt = kindExpt_single, 
     #                     stacked = input$stacked, 
     #                     planter_mov1 = planter_mov,
-    #                     data = getData()$data_entry, 
-    #                     dim_data = getData()$dim_data_entry,
-    #                     dim_data_1 = getData()$dim_without_checks, 
+    #                     data = get_sparse_data()$data_entry, 
+    #                     dim_data = get_sparse_data()$dim_data_entry,
+    #                     dim_data_1 = get_sparse_data()$dim_without_checks, 
     #                     Block_Fillers = NULL)
     # }) 
 
@@ -514,8 +522,8 @@ mod_sparse_allocation_server <- function(id){
     # })
 
     # rand_checks <- reactive({
-    #   req(input$dimensions.d)
-    #   req(getData())
+    #   req(input$sparse_dims)
+    #   req(get_sparse_data())
     #   req(field_dimensions_diagonal())
     #   Option_NCD <- TRUE
     #   req(single_inputs()$seed_number)
@@ -541,7 +549,7 @@ mod_sparse_allocation_server <- function(id){
     #         planter_mov = planter_mov, 
     #         Checks = checksEntries,
     #         stacked = input$stacked, 
-    #         data = getData()$data_entry, 
+    #         data = get_sparse_data()$data_entry, 
     #         data_dim_each_block = available_percent_table()$data_dim_each_block,
     #         n_reps = input$n_reps, seed = NULL)
     #     }
@@ -580,7 +588,7 @@ mod_sparse_allocation_server <- function(id){
     # output$data_input <- DT::renderDT({
     #   test <- randomize_hit$times > 0 & user_tries$tries > 0
     #   if (!test) return(NULL)
-    #     df <- getData()$data_entry
+    #     df <- get_sparse_data()$data_entry
     #     df$ENTRY <- as.factor(df$ENTRY)
     #     df$NAME <- as.factor(df$NAME)
     #     options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
@@ -600,8 +608,8 @@ mod_sparse_allocation_server <- function(id){
     #   test <- randomize_hit$times > 0 & user_tries$tries > 0
     #   if (!test) return(NULL)
     #     Option_NCD <- TRUE
-    #     req(getData()$data_entry)
-    #     data_entry <- getData()$data_entry
+    #     req(get_sparse_data()$data_entry)
+    #     data_entry <- get_sparse_data()$data_entry
     #     req(user_location()$map_checks)
     #     if(is.null(user_location()$map_checks)) return(NULL)
     #     w_map <- user_location()$map_checks
@@ -619,14 +627,14 @@ mod_sparse_allocation_server <- function(id){
     # })
     
     # rand_lines <- reactive({
-    #   req(input$dimensions.d)
-    #   req(getData())
+    #   req(input$sparse_dims)
+    #   req(get_sparse_data())
     #   req(field_dimensions_diagonal())
     #   Option_NCD <- TRUE
     #   req(available_percent_table()$dt)
     #   req(available_percent_table()$d_checks)
-    #   req(getData()$data_entry)
-    #   data_entry <- getData()$data_entry
+    #   req(get_sparse_data()$data_entry)
+    #   data_entry <- get_sparse_data()$data_entry
     #   n_rows <- field_dimensions_diagonal()$d_row
     #   n_cols <- field_dimensions_diagonal()$d_col
     #   checksEntries <- getChecks()$checksEntries
@@ -653,8 +661,8 @@ mod_sparse_allocation_server <- function(id){
     # output$randomized_layout <- DT::renderDT({
     #   test <- randomize_hit$times > 0 & user_tries$tries > 0
     #   if (!test) return(NULL)
-    #   req(input$dimensions.d)
-    #   req(getData())
+    #   req(input$sparse_dims)
+    #   req(get_sparse_data())
     #   req(rand_lines())
     #   VisualCheck <- FALSE
     #   user_site <- as.numeric(input$sparse_loc_view)
@@ -796,7 +804,7 @@ mod_sparse_allocation_server <- function(id){
     #   )
     # })
 
-    # # export_diagonal_design <- eventReactive(input$get_random, {
+    # # export_diagonal_design <- eventReactive(input$sparse_get_random, {
     # export_diagonal_design <- reactive({
     #   locs_diagonal <- single_inputs()$sites
     #   final_expt_fieldbook <- vector(mode = "list",length = locs_diagonal)
@@ -809,7 +817,7 @@ mod_sparse_allocation_server <- function(id){
     #     req(split_name_reactive()$my_names)
     #     req(plot_number_reactive())
     #     movement_planter = single_inputs()$planter_mov
-    #     my_data_VLOOKUP <- getData()$data_entry
+    #     my_data_VLOOKUP <- get_sparse_data()$data_entry
     #     COLNAMES_DATA <- colnames(my_data_VLOOKUP)
     #     if (Option_NCD == TRUE) {
     #       Entry_Fillers <- data.frame(list(0,"Filler"))
@@ -1054,7 +1062,7 @@ mod_sparse_allocation_server <- function(id){
 }
     
 ## To be copied in the UI
-# mod_sparse_alsparse_loc_names_ui("sparse_alsparse_loc_names_1")
+# mod_sparse_allocation_ui("sparse_allocation_1")
     
 ## To be copied in the server
 # mod_sparse_allocation_server("sparse_allocation_1")

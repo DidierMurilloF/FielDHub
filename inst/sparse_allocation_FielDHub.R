@@ -376,7 +376,7 @@ prep_average <- FielDHub:::average_prep_allocation(
 
 sparse <- FielDHub:::sparse_allocation(
   lines = 380, 
-  nrows = 14, 
+  nrows = 18, 
   ncols = 20, 
   l = 6, 
   plant_reps = 5, 
@@ -384,6 +384,7 @@ sparse <- FielDHub:::sparse_allocation(
   locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5", "LOC6"), 
   seed = 1234
 )
+
 
 
 
