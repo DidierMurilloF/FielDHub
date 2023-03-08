@@ -38,12 +38,17 @@ app_ui <- function(request) {
                                     tabPanel("Augmented RCBD",
                                              mod_RCBD_augmented_ui("RCBD_augmented_ui_1")
                                     ),
-                                    tabPanel("Sparse Allocation",
+                                    tabPanel("New - Sparse Allocation",
                                              mod_sparse_allocation_ui("sparse_allocation_ui_1")
                                     )
                          ),
-                         tabPanel("Partially Replicated Designs",
-                                  mod_pREPS_ui("pREPS_ui_1")
+                         navbarMenu("Partially Replicated Designs",
+                            tabPanel("Augmented preps",
+                                    mod_pREPS_ui("pREPS_ui_1")
+                            ),
+                            tabPanel("preps",
+                                    "Page for preps with average allocation"
+                            )
                          ),
                          navbarMenu("Lattice Designs",
                                     tabPanel("Square Lattice",

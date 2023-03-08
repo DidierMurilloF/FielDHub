@@ -226,3 +226,96 @@ sparse_allocation <- function(
         )
     )
 }
+
+#' @title  average prep allocation
+#' @noRd 
+#' @examples
+#' prep_average <- average_allocation(
+#'   lines = 324, 
+#'   nrows = 19, 
+#'   ncols = 24, 
+#'   l = 6, 
+#'   plant_reps = 8, 
+#'   checks = 3, 
+#'   rep_checks = c(8,8,8),
+#'   locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5", "LOC6"), 
+#'   seed = 1234
+#' )
+average_allocation <- function(
+    lines, 
+    nrows, 
+    ncols, 
+    l, 
+    planter, 
+    plotNumber, 
+    desired_avg, 
+    plant_reps, 
+    checks,
+    rep_checks,
+    exptName, 
+    locationNames,
+    optim_list, 
+    seed) {
+    if (missing(plant_reps)) {
+        plant_reps <- ceiling(l * desired_avg)
+    }
+
+    if (!missing(optim_list)) {
+        if (!inherits(optim_list, "Sparse")) {
+            stop("sparse_list must be an object of class 'Sparse'")
+        }
+        preps <- optim_list
+    } else {
+        preps <- do_optim(
+            design = "prep",
+            lines = lines, 
+            l = l, 
+            plant_reps = plant_reps, 
+            checks = checks, 
+            rep_checks = rep_checks,
+            seed = seed
+        )
+    }
+
+    if (missing(nrows) || missing(ncols)) {
+        lines_within_loc <- as.numeric(preps$size_locations[1])
+        n <- lines_within_loc + sum(rep_checks)
+        choices <- factor_subsets(n)$labels
+        dif <- vector(mode = "numeric", length = length(choices))
+        for (option in 1:length(choices)) {
+            dims <- unlist(strsplit(choices[[option]], " x "))
+            dif[option] <- abs(as.numeric(dims[1]) - as.numeric(dims[2]))
+        }
+        df_choices <- data.frame(choices = unlist(choices), diff_dim = dif)
+        df_choices <- df_choices[order(df_choices$diff_dim, decreasing = FALSE), ]
+        dimensions <- unlist(strsplit(df_choices[1,1], " x "))
+        nrows <- as.numeric(dimensions[1])
+        ncols <- as.numeric(dimensions[2])
+    }
+    # Create a space in memory for the preps randomizations
+    preps_designs <- setNames(
+        object = vector(mode = "list", length = l), 
+        nm = names(preps$list_locs)
+    )
+    for (site in names(preps$list_locs)) {
+        df_loc <- preps$list_locs[[site]] %>% 
+        dplyr::mutate(
+            ENTRY = as.numeric(ENTRY),
+            REPS = as.numeric(REPS)
+        ) %>% 
+        dplyr::select(ENTRY, NAME, REPS)
+        preps_designs[[site]] <- partially_replicated(
+            nrows = nrows, 
+            ncols = ncols, 
+            data = df_loc
+        )
+    }
+    return(
+        list(
+            designs = preps_designs, 
+            list_locs = preps$list_locs, 
+            allocation = preps$allocation, 
+            size_locations = preps$size_locations
+        )
+    )
+}
