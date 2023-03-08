@@ -140,24 +140,24 @@ mod_sparse_allocation_ui <- function(id) {
                 value = "tabPanel1",
                 br(),
                 shinyjs::hidden(
-                selectInput(inputId = ns("sparse_dims"),
-                            label = "Select dimensions of field:", 
-                            choices = "", width = '400px')
+                  selectInput(inputId = ns("sparse_dims"),
+                              label = "Select dimensions of field:", 
+                              choices = "", width = '400px')
                 ),
                 shinyjs::hidden(
-                actionButton(inputId = ns("sparse_get_random"), 
-                            label = "Randomize!")
+                  actionButton(inputId = ns("sparse_get_random"), 
+                               label = "Randomize!")
                 ),
-                br(),
-                br(),
+                tags$br(),
+                tags$br(),
                 DT::DTOutput(ns("sparse_allocation"))
             ),
-            tabPanel("Input Data",
-                        fluidRow(
-                        column(6,DT::DTOutput(ns("data_input"))),
-                        column(6,DT::DTOutput(ns("checks_table")))
-                        )
-            ),
+            # tabPanel("Input Data",
+            #             fluidRow(
+            #             column(6,DT::DTOutput(ns("data_input"))),
+            #             column(6,DT::DTOutput(ns("checks_table")))
+            #             )
+            # ),
             tabPanel("Randomized Field",
                         br(),
                         shinyjs::hidden(
@@ -188,11 +188,20 @@ mod_sparse_allocation_server <- function(id){
     ns <- session$ns
 
     shinyjs::useShinyjs()
+    
+    observe({
+      sparse_locs <- as.numeric(input$sparse_locations)
+      start <- ceiling(sparse_locs / 2)
+      plant_reps <- start:(sparse_locs - 1)
+      updateSelectInput(inputId = "plant_reps", 
+                        choices = plant_reps, 
+                        selected = plant_reps[length(plant_reps)])
+    })
+    
 
     counts <- reactiveValues(trigger = 0)
     
     observeEvent(input$sparse_run, {
-      print(counts$trigger)
       counts$trigger <- counts$trigger + 1
     })
     
@@ -250,6 +259,10 @@ mod_sparse_allocation_server <- function(id){
       updateSelectInput(inputId = "sparse_loc_view", 
                         choices = loc_user_view, 
                         selected = loc_user_view[1])
+      plant_reps <- 1:(as.numeric(input$sparse_locations) - 1)
+      updateSelectInput(inputId = "plant_reps", 
+                        choices = plant_reps, 
+                        selected = plant_reps[length(plant_reps)])
     })
     
     observeEvent(kindExpt_single,
@@ -342,7 +355,6 @@ mod_sparse_allocation_server <- function(id){
             req(input$sparse_lines)
             req(input$sparse_checks)
             sparse_checks <- as.numeric(input$sparse_checks)
-            print(sparse_checks)
             checksEntries <- 1:sparse_checks
             lines <- input$sparse_lines
             NAME <- c(paste(rep("CH", sparse_checks), 1:sparse_checks, sep = ""),
@@ -361,46 +373,59 @@ mod_sparse_allocation_server <- function(id){
             )
         }
     })
+    
+    sparse_setup <- reactive({
+      lines <- get_sparse_data()$dim_without_checks
+      do_optim(
+        design = "sparse",
+        lines = lines, 
+        l = single_inputs()$sites, 
+        plant_reps = single_inputs()$plant_reps, 
+        checks = as.numeric(input$sparse_checks), 
+        seed = single_inputs()$seed_number
+      )
+    }) 
 
-    
-    
     getChecks <- eventReactive(input$sparse_run, {
-      req(get_sparse_data()$data_entry)
-      print(head(get_sparse_data()$data_entry))
-      data <- as.data.frame(get_sparse_data()$data_entry)
+      #req(sparse_setup())
+      data <- sparse_setup()$list_locs[[1]]
+      #data <- as.data.frame(get_sparse_data()$data_entry)
       checksEntries <- as.numeric(data[1:input$sparse_checks,1])
       sparse_checks <- as.numeric(input$sparse_checks)
       list(checksEntries = checksEntries, sparse_checks = sparse_checks)
     })
     
+
+    
     list_inputs_diagonal <- eventReactive(input$sparse_run, {
-      req(get_sparse_data()$dim_data_entry)
+      #req(get_sparse_data()$dim_data_entry)
+      req(sparse_setup()$size_locations)
       sparse_checks <- as.numeric(getChecks()$sparse_checks)
-      lines <- as.numeric(get_sparse_data()$dim_data_entry)
+      lines <- as.numeric(sparse_setup()$size_locations[1])
       return(list(lines, input$input_sparse_data, kindExpt_single, 
-                  input$stacked, input$sparse_run))
+                  input$sparse_run)) #  input$stacked,
     })
 
     observeEvent(list_inputs_diagonal(), {
-      req(get_sparse_data()$dim_data_entry)
-      sparse_checks <- as.numeric(getChecks()$sparse_checks)
-      total_entries <- as.numeric(get_sparse_data()$dim_data_entry)
-      lines <- total_entries - sparse_checks
-      t1 <- floor(lines + lines * 0.11)
-      t2 <- ceiling(lines + lines * 0.20)
-      t <- t1:t2
-      n <- t[-numbers::isPrime(t)]
-      #withProgress(message = 'Calculation in progress', {
+      #req(get_sparse_data()$dim_data_entry)
+        req(sparse_setup()$size_locations)
+        print(sparse_setup()$size_locations)
+        sparse_checks <- as.numeric(getChecks()$sparse_checks)
+        lines_within_loc <- as.numeric(sparse_setup()$size_locations[1])
+        t1 <- floor(lines_within_loc + lines_within_loc * 0.11)
+        t2 <- ceiling(lines_within_loc + lines_within_loc * 0.20)
+        t <- t1:t2
+        non_primes <- t[-numbers::isPrime(t)]
         choices_list <- list()
         i <- 1
-        for (n in t) {
+        for (n in non_primes) {
           choices_list[[i]] <- factor_subsets(n, diagonal = TRUE)$labels
           i <- i + 1
         }
         choices <- unlist(choices_list[!sapply(choices_list, is.null)])
-        if(is.null(choices)) {
-          choices <- "No options available"
-        } 
+        # if(is.null(choices)) {
+        #   choices <- "No options available"
+        # } 
         Option_NCD <- TRUE
         checksEntries <- as.vector(getChecks()$checksEntries)
         new_choices <- list()
@@ -414,26 +439,35 @@ mod_sparse_allocation_server <- function(id){
           n_rows <- as.numeric(dims[1])
           n_cols  <- as.numeric(dims[2])
           
-          dt_options <- available_percent(n_rows = n_rows,
-                                          n_cols = n_cols,
-                                          checks = checksEntries,
-                                          Option_NCD = Option_NCD,
-                                          kindExpt = kindExpt_single,
-                                          stacked = input$stacked,
-                                          planter_mov1 = planter_mov,
-                                          data = get_sparse_data()$data_entry,
-                                          dim_data = get_sparse_data()$dim_data_entry,
-                                          dim_data_1 = get_sparse_data()$dim_without_checks,
-                                          Block_Fillers = NULL)
+          dt_options <- available_percent(
+              n_rows = n_rows,
+              n_cols = n_cols,
+              checks = checksEntries,
+              Option_NCD = Option_NCD,
+              kindExpt = kindExpt_single,
+              planter_mov1 = planter_mov,
+              data = NULL,
+              dim_data = lines_within_loc + sparse_checks,
+              dim_data_1 = lines_within_loc,
+              Block_Fillers = NULL
+          )
           if (!is.null(dt_options$dt)) {
             new_choices[[v]] <- choices[[dim_options]]
             v <- v + 1
           }
         }
+        dif <- vector(mode = "numeric", length = length(new_choices))
+        for (option in 1:length(new_choices)) {
+          dims <- unlist(strsplit(new_choices[[option]], " x "))
+          dif[option] <- abs(as.numeric(dims[1]) - as.numeric(dims[2]))
+        }
+        df_choices <- data.frame(choices = unlist(new_choices), diff_dim = dif)
+        df_choices <- df_choices[order(df_choices$diff_dim, decreasing = FALSE), ]
+        sort_choices <- as.vector(df_choices$choices)
       #})
-      updateSelectInput(inputId = "sparse_dims",
-                        choices = new_choices,
-                        selected = new_choices[1])
+        updateSelectInput(inputId = "sparse_dims",
+                          choices = sort_choices,
+                          selected = sort_choices[1])
     })
     
     observeEvent(input$sparse_run, {
@@ -442,33 +476,30 @@ mod_sparse_allocation_server <- function(id){
       shinyjs::show(id = "sparse_get_random")
     })
 
-
-    sparse_setup <- reactive({
-        lines <- get_sparse_data()$dim_without_checks
-         do_optim(
-            design = "sparse",
-            lines = lines, 
-            l = single_inputs()$sites, 
-            plant_reps = single_inputs()$plant_reps, 
-            checks = 4, 
-            seed = single_inputs()$seed_number
-        )
-    }) 
-
     output$sparse_allocation <- DT::renderDT({
         df <- as.data.frame(sparse_setup()$allocation)
-        DT::datatable(df)
+        DT::datatable(
+          df,
+          caption = 'Table 1: Genotype Allocation Across Environments.',
+          extensions = 'Buttons',
+          options = list(
+            dom = 'Bfrtip',
+            scrollY = "400px",
+            lengthMenu = list(c(5, 15, -1), c('5', '15', 'All')),
+            pageLength = nrow(df),
+            buttons = c('copy', 'excel', 'print')
+          )
+        )
     })
 
-
     
-    # field_dimensions_diagonal <- eventReactive(input$sparse_get_random, {
-    #   req(input$sparse_dims)
-    #   dims <- unlist(strsplit(input$sparse_dims, " x "))
-    #   d_row <- as.numeric(dims[1])
-    #   d_col <- as.numeric(dims[2])
-    #   return(list(d_row = d_row, d_col = d_col))
-    # })
+    field_dimensions_diagonal <- eventReactive(input$sparse_get_random, {
+      req(input$sparse_dims)
+      dims <- unlist(strsplit(input$sparse_dims, " x "))
+      d_row <- as.numeric(dims[1])
+      d_col <- as.numeric(dims[2])
+      return(list(d_row = d_row, d_col = d_col))
+    })
 
     # entryListFormat_SUDC <- data.frame(
     #   ENTRY = 1:9, 
@@ -503,102 +534,106 @@ mod_sparse_allocation_server <- function(id){
     #   }
     # })
 
-    # available_percent_table <- eventReactive(input$sparse_get_random, {
-    #   req(input$sparse_dims)
-    #   req(get_sparse_data())
-    #   req(field_dimensions_diagonal())
-    #   Option_NCD <- TRUE
-    #   checksEntries <- as.vector(getChecks()$checksEntries)
-    #   planter_mov <- single_inputs()$planter_mov
-    #   n_rows <- field_dimensions_diagonal()$d_row
-    #   n_cols <- field_dimensions_diagonal()$d_col
-    #   available_percent(n_rows = n_rows, 
-    #                     n_cols = n_cols, 
-    #                     checks = checksEntries, 
-    #                     Option_NCD = Option_NCD, 
-    #                     kindExpt = kindExpt_single, 
-    #                     stacked = input$stacked, 
-    #                     planter_mov1 = planter_mov,
-    #                     data = get_sparse_data()$data_entry, 
-    #                     dim_data = get_sparse_data()$dim_data_entry,
-    #                     dim_data_1 = get_sparse_data()$dim_without_checks, 
-    #                     Block_Fillers = NULL)
-    # }) 
+    available_percent_table <- eventReactive(input$sparse_get_random, {
+      req(input$sparse_dims)
+      req(sparse_setup()$size_locations)
+      sparse_checks <- as.numeric(getChecks()$sparse_checks)
+      lines_within_loc <- as.numeric(sparse_setup()$size_locations[1])
+      req(field_dimensions_diagonal())
+      Option_NCD <- TRUE
+      checksEntries <- as.vector(getChecks()$checksEntries)
+      planter_mov <- single_inputs()$planter_mov
+      n_rows <- field_dimensions_diagonal()$d_row
+      n_cols <- field_dimensions_diagonal()$d_col
+      print(c(n_rows, n_cols))
+      available_percent(
+          n_rows = n_rows,
+          n_cols = n_cols,
+          checks = checksEntries,
+          Option_NCD = Option_NCD,
+          kindExpt = kindExpt_single,
+          planter_mov1 = planter_mov,
+          data = NULL, 
+          dim_data = lines_within_loc + sparse_checks,
+          dim_data_1 = lines_within_loc,
+          Block_Fillers = NULL
+      )
+    })
 
-    # observeEvent(available_percent_table()$dt, {
-    #       my_out <- available_percent_table()$dt
-    #       my_percent <- my_out[,2]
-    #       len <- length(my_percent)
-    #       selected <- my_percent[len]
-
-    #       updateSelectInput(session = session, 
-    #                         inputId = 'percent_checks', 
-    #                         label = "Choose % of Checks:",
-    #                         choices = my_percent, 
-    #                         selected = selected)
-    # })
+    observeEvent(available_percent_table()$dt, {
+          my_out <- available_percent_table()$dt
+          my_percent <- my_out[,2]
+          len <- length(my_percent)
+          selected <- my_percent[len]
+          
+          updateSelectInput(session = session,
+                            inputId = 'percent_checks',
+                            label = "Choose % of Checks:",
+                            choices = my_percent,
+                            selected = selected)
+    })
     
-    # observeEvent(list_to_observe(), {
-    #   if (randomize_hit$times > 0 & user_tries$tries > 0) {
-    #     shinyjs::show(id = "percent_checks")
-    #   } else {
-    #     shinyjs::hide(id = "percent_checks")
-    #   }
-    # })
+    observeEvent(list_to_observe(), {
+      if (randomize_hit$times > 0 & user_tries$tries > 0) {
+        shinyjs::show(id = "percent_checks")
+      } else {
+        shinyjs::hide(id = "percent_checks")
+      }
+    })
 
-    # observeEvent(list_to_observe(), { #  user_tries$tries
-    #   output$sparse_download <- renderUI({
-    #     if (randomize_hit$times > 0 & user_tries$tries > 0) {
-    #       downloadButton(ns("downloadData_Diagonal"),
-    #                       "Save Experiment",
-    #                       style = "width:100%")
-    #     }
-    #   })
-    # })
+    observeEvent(list_to_observe(), { #  user_tries$tries
+      output$sparse_download <- renderUI({
+        if (randomize_hit$times > 0 & user_tries$tries > 0) {
+          downloadButton(ns("downloadData_Diagonal"),
+                          "Save Experiment",
+                          style = "width:100%")
+        }
+      })
+    })
 
-    # rand_checks <- reactive({
-    #   req(input$sparse_dims)
-    #   req(get_sparse_data())
-    #   req(field_dimensions_diagonal())
-    #   Option_NCD <- TRUE
-    #   req(single_inputs()$seed_number)
-    #   seed <- as.numeric(single_inputs()$seed_number)
-    #   req(available_percent_table()$dt)
-    #   req(available_percent_table()$d_checks)
-    #   req(available_percent_table()$P)
-    #   checksEntries <- as.vector(getChecks()$checksEntries)
-    #   planter_mov <- single_inputs()$planter_mov
-    #   locs <- single_inputs()$sites
-    #   percent <- as.numeric(input$percent_checks)
-    #   diag_locs <- vector(mode = "list", length = locs)
-    #   random_checks_locs <- vector(mode = "list", length = locs)
-    #   if (isTruthy(available_percent_table()$d_checks)) {
-    #     set.seed(seed)
-    #     for (sites in 1:locs) {
-    #       random_checks_locs[[sites]] <- random_checks(
-    #         dt = available_percent_table()$dt, 
-    #         d_checks = available_percent_table()$d_checks, 
-    #         p = available_percent_table()$P, 
-    #         percent = percent, 
-    #         kindExpt = kindExpt_single, 
-    #         planter_mov = planter_mov, 
-    #         Checks = checksEntries,
-    #         stacked = input$stacked, 
-    #         data = get_sparse_data()$data_entry, 
-    #         data_dim_each_block = available_percent_table()$data_dim_each_block,
-    #         n_reps = input$n_reps, seed = NULL)
-    #     }
-    #   }
-    #   return(random_checks_locs)
-    # })
+    rand_checks <- reactive({
+      req(input$sparse_dims)
+      #req(get_sparse_data())
+      req(field_dimensions_diagonal())
+      Option_NCD <- TRUE
+      req(single_inputs()$seed_number)
+      seed <- as.numeric(single_inputs()$seed_number)
+      req(available_percent_table()$dt)
+      req(available_percent_table()$d_checks)
+      req(available_percent_table()$P)
+      checksEntries <- as.vector(getChecks()$checksEntries)
+      planter_mov <- single_inputs()$planter_mov
+      locs <- single_inputs()$sites
+      percent <- as.numeric(input$percent_checks)
+      diag_locs <- vector(mode = "list", length = locs)
+      random_checks_locs <- vector(mode = "list", length = locs)
+      if (isTruthy(available_percent_table()$d_checks)) {
+        set.seed(seed)
+        for (sites in 1:locs) {
+          random_checks_locs[[sites]] <- random_checks(
+            dt = available_percent_table()$dt,
+            d_checks = available_percent_table()$d_checks,
+            p = available_percent_table()$P,
+            percent = percent,
+            kindExpt = kindExpt_single,
+            planter_mov = planter_mov,
+            Checks = checksEntries,
+            #stacked = input$stacked,
+            data = NULL, #get_sparse_data()$data_entry,
+            data_dim_each_block = available_percent_table()$data_dim_each_block,
+            n_reps = input$n_reps, seed = NULL)
+        }
+      }
+      return(random_checks_locs)
+    })
     
-    # user_location <- reactive({
-    #   user_site <- as.numeric(input$sparse_loc_view)
-    #   loc_user_out <- rand_checks()[[user_site]]
-    #   return(list(map_checks = loc_user_out$map_checks, 
-    #               col_checks = loc_user_out$col_checks,
-    #               user_site = user_site))
-    # })
+    user_location <- reactive({
+      user_site <- as.numeric(input$sparse_loc_view)
+      loc_user_out <- rand_checks()[[user_site]]
+      return(list(map_checks = loc_user_out$map_checks,
+                  col_checks = loc_user_out$col_checks,
+                  user_site = user_site))
+    })
     
     # output$options_table <- DT::renderDT({
     #   test <- randomize_hit$times > 0 & user_tries$tries > 0
@@ -661,438 +696,431 @@ mod_sparse_allocation_server <- function(id){
     #                     columnDefs = list(list(className = 'dt-center', targets = "_all"))))
     # })
     
-    # rand_lines <- reactive({
-    #   req(input$sparse_dims)
-    #   req(get_sparse_data())
-    #   req(field_dimensions_diagonal())
-    #   Option_NCD <- TRUE
-    #   req(available_percent_table()$dt)
-    #   req(available_percent_table()$d_checks)
-    #   req(get_sparse_data()$data_entry)
-    #   data_entry <- get_sparse_data()$data_entry
-    #   n_rows <- field_dimensions_diagonal()$d_row
-    #   n_cols <- field_dimensions_diagonal()$d_col
-    #   checksEntries <- getChecks()$checksEntries
-    #   sparse_checks <- as.numeric(input$sparse_checks)
-    #   locs <- single_inputs()$sites
-    #   diag_locs <- vector(mode = "list", length = locs)
-    #   random_entries_locs <- vector(mode = "list", length = locs)
-    #   for (sites in 1:locs) {
-    #     map_checks <- rand_checks()[[sites]]$map_checks
-    #     w_map <- rand_checks()[[sites]]$map_checks
-    #     my_split_r <- rand_checks()[[sites]]$map_checks
-    #       n_rows <- field_dimensions_diagonal()$d_row
-    #       n_cols <- field_dimensions_diagonal()$d_col
-    #       data_random <- get_single_random(n_rows = n_rows, 
-    #                                        n_cols = n_cols, 
-    #                                        matrix_checks = map_checks, 
-    #                                        checks = checksEntries, 
-    #                                        data = data_entry) 
-    #     random_entries_locs[[sites]] <- data_random
-    #   }
-    #   return(random_entries_locs)
-    # })
+    rand_lines <- reactive({
+      req(input$sparse_dims)
+      #req(get_sparse_data())
+      req(sparse_setup())
+      req(field_dimensions_diagonal())
+      Option_NCD <- TRUE
+      req(available_percent_table()$dt)
+      req(available_percent_table()$d_checks)
+      #req(get_sparse_data()$data_entry)
+      data_entry <- sparse_setup()$list_locs
+      n_rows <- field_dimensions_diagonal()$d_row
+      n_cols <- field_dimensions_diagonal()$d_col
+      checksEntries <- getChecks()$checksEntries
+      sparse_checks <- as.numeric(input$sparse_checks)
+      locs <- single_inputs()$sites
+      diag_locs <- vector(mode = "list", length = locs)
+      random_entries_locs <- vector(mode = "list", length = locs)
+      for (sites in 1:locs) {
+        print(sites)
+        map_checks <- rand_checks()[[sites]]$map_checks
+        w_map <- rand_checks()[[sites]]$map_checks
+        my_split_r <- rand_checks()[[sites]]$map_checks
+          n_rows <- field_dimensions_diagonal()$d_row
+          n_cols <- field_dimensions_diagonal()$d_col
+          data_random <- get_single_random(
+             n_rows = n_rows,
+             n_cols = n_cols,
+             matrix_checks = map_checks,
+             checks = checksEntries,
+             data = data_entry[[sites]]
+          )
+        random_entries_locs[[sites]] <- data_random
+      }
+      return(random_entries_locs)
+    })
     
-    # output$randomized_layout <- DT::renderDT({
-    #   test <- randomize_hit$times > 0 & user_tries$tries > 0
-    #   if (!test) return(NULL)
-    #   req(input$sparse_dims)
-    #   req(get_sparse_data())
-    #   req(rand_lines())
-    #   VisualCheck <- FALSE
-    #   user_site <- as.numeric(input$sparse_loc_view)
-    #   loc_view_user <- rand_lines()[[user_site]]
-    #   r_map <- loc_view_user$rand
-    #   checksEntries <- getChecks()$checksEntries
-    #   if (is.null(r_map))
-    #     return(NULL)
-    #   sparse_checks = checksEntries
-    #   len_checks <- length(sparse_checks)
-    #   df <- as.data.frame(r_map)
-    #   colores <- c('royalblue','salmon', 'green', 'orange','orchid', 'slategrey',
-    #                 'greenyellow', 'blueviolet','deepskyblue','gold','blue', 'red')
-    #   s <- unlist(loc_view_user$Entries)
-    #   rownames(df) <- nrow(df):1
-    #   style_equal <- rep('gray', length(s))
-    #   DT::datatable(df,#,
-    #                 extensions = c('Buttons'),# , 'FixedColumns'
-    #                 options = list(dom = 'Blfrtip',
-    #                                 autoWidth = FALSE,
-    #                                 scrollX = TRUE,
-    #                                 fixedColumns = TRUE,
-    #                                 pageLength = nrow(df),
-    #                                 scrollY = "590px",
-    #                                 class = 'compact cell-border stripe',  
-    #                                 rownames = FALSE,
-    #                                 server = FALSE,
-    #                                 filter = list( position = 'top',
-    #                                               clear = FALSE,
-    #                                               plain =TRUE ),
-    #                                 buttons = c('copy', 'excel'),
-    #                                 lengthMenu = list(c(10,25,50,-1),
-    #                                                   c(10,25,50,"All")))
-    #   ) %>% 
-    #     DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-    #                     backgroundColor = DT::styleEqual(c(sparse_checks),
-    #                                                       colores[1:len_checks]))
-    #   #}
-    # })
+    output$randomized_layout <- DT::renderDT({
+      test <- randomize_hit$times > 0 & user_tries$tries > 0
+      if (!test) return(NULL)
+      req(input$sparse_dims)
+      #req(get_sparse_data())
+      req(sparse_setup)
+      req(rand_lines())
+      VisualCheck <- FALSE
+      user_site <- as.numeric(input$sparse_loc_view)
+      loc_view_user <- rand_lines()[[user_site]]
+      r_map <- loc_view_user$rand
+      checksEntries <- getChecks()$checksEntries
+      if (is.null(r_map))
+        return(NULL)
+      sparse_checks = checksEntries
+      len_checks <- length(sparse_checks)
+      df <- as.data.frame(r_map)
+      colores <- c('royalblue','salmon', 'green', 'orange','orchid', 'slategrey',
+                    'greenyellow', 'blueviolet','deepskyblue','gold','blue', 'red')
+      s <- unlist(loc_view_user$Entries)
+      rownames(df) <- nrow(df):1
+      style_equal <- rep('gray', length(s))
+      DT::datatable(df,#,
+                    extensions = c('Buttons'),# , 'FixedColumns'
+                    options = list(dom = 'Blfrtip',
+                                    autoWidth = FALSE,
+                                    scrollX = TRUE,
+                                    fixedColumns = TRUE,
+                                    pageLength = nrow(df),
+                                    scrollY = "590px",
+                                    class = 'compact cell-border stripe',
+                                    rownames = FALSE,
+                                    server = FALSE,
+                                    filter = list( position = 'top',
+                                                  clear = FALSE,
+                                                  plain =TRUE ),
+                                    buttons = c('copy', 'excel'),
+                                    lengthMenu = list(c(10,25,50,-1),
+                                                      c(10,25,50,"All")))
+      ) %>%
+        DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
+                        backgroundColor = DT::styleEqual(c(sparse_checks),
+                                                          colores[1:len_checks]))
+      #}
+    })
     
     
-    # split_name_reactive <- reactive({
-    #   req(rand_lines())
+    split_name_reactive <- reactive({
+      req(rand_lines())
+      w_map <- rand_checks()[[1]]$map_checks
+      expt_name <- single_inputs()$expt_name
+      split_name <- names_layout(
+        w_map = w_map,
+        kindExpt = "SUDC",
+        planter = single_inputs()$planter_mov,
+        expt_name = expt_name
+      )
+    })
+    
+    
+    plot_number_sites <- reactive({
+      req(single_inputs())
+      if (is.null(single_inputs()$plotNumber)) {
+        validate("Plot starting number is missing.")
+      }
+      l <- single_inputs()$sites
+      plotNumber <- single_inputs()$plotNumber
+      if(!is.numeric(plotNumber) && !is.integer(plotNumber)) {
+        validate("plotNumber should be an integer or a numeric vector.")
+      }
       
-    #   w_map <- rand_checks()[[1]]$map_checks
-    #   expt_name <- single_inputs()$expt_name
- 
-    #   split_name <- names_layout(
-    #     w_map = w_map, 
-    #     kindExpt = "SUDC", 
-    #     planter = single_inputs()$planter_mov, 
-    #     expt_name = expt_name
-    #   )
-    # })
-    
-    
-    # plot_number_sites <- reactive({
-    #   req(single_inputs())
-    #   if (is.null(single_inputs()$plotNumber)) {
-    #     validate("Plot starting number is missing.")
-    #   } 
-    #   l <- single_inputs()$sites
-    #   plotNumber <- single_inputs()$plotNumber
-    #   if(!is.numeric(plotNumber) && !is.integer(plotNumber)) {
-    #     validate("plotNumber should be an integer or a numeric vector.")
-    #   }
+      if (any(plotNumber %% 1 != 0)) {
+        validate("plotNumber should be integers.")
+      }
+      if (!is.null(l)) {
+        if (is.null(plotNumber) || length(plotNumber) != l) {
+          if (l > 1){
+            plotNumber <- seq(1001, 1000*(l+1), 1000)
+          } else plotNumber <- 1001
+        }
+      }else validate("Number of locations/sites is missing")
       
-    #   if (any(plotNumber %% 1 != 0)) {
-    #     validate("plotNumber should be integers.")
-    #   }
-      
-    #   if (!is.null(l)) {
-    #     if (is.null(plotNumber) || length(plotNumber) != l) {
-    #       if (l > 1){
-    #         plotNumber <- seq(1001, 1000*(l+1), 1000)
-    #       } else plotNumber <- 1001
-    #     }
-    #   }else validate("Number of locations/sites is missing")
-      
-    #   return(plotNumber)
-      
-    # })
+      return(plotNumber)
+    })
     
-    # plot_number_reactive <- reactive({
-    #   req(rand_lines())
-    #   req(split_name_reactive()$my_names)
-    #   datos_name <- split_name_reactive()$my_names 
-    #   datos_name = as.matrix(datos_name) 
-    #   n_rows <- field_dimensions_diagonal()$d_row
-    #   n_cols <- field_dimensions_diagonal()$d_col
-    #   movement_planter = single_inputs()$planter_mov
-    #   plot_n_start <- plot_number_sites()
-    #   locs_diagonal <- single_inputs()$sites
-    #   plots_number_sites <- vector(mode = "list", length = locs_diagonal)
-    #   for (sites in 1:locs_diagonal) {
-        
-    #       expe_names <- single_inputs()$expt_name 
-    #       fillers <- sum(datos_name == "Filler")
-    #       plot_nub <- plot_number(
-    #         planter = single_inputs()$planter_mov,
-    #         plot_number_start = plot_n_start[sites],
-    #         layout_names = datos_name,
-    #         expe_names = expe_names,
-    #         fillers = fillers
-    #       )
-          
-    #     plots_number_sites[[sites]] <- plot_nub$w_map_letters1
-    #   }
-    #   return(list(plots_number_sites = plots_number_sites))
-    # })
+    plot_number_reactive <- reactive({
+      req(rand_lines())
+      req(split_name_reactive()$my_names)
+      datos_name <- split_name_reactive()$my_names
+      datos_name = as.matrix(datos_name)
+      n_rows <- field_dimensions_diagonal()$d_row
+      n_cols <- field_dimensions_diagonal()$d_col
+      movement_planter = single_inputs()$planter_mov
+      plot_n_start <- plot_number_sites()
+      locs_diagonal <- single_inputs()$sites
+      plots_number_sites <- vector(mode = "list", length = locs_diagonal)
+      for (sites in 1:locs_diagonal) {
+          expe_names <- single_inputs()$expt_name
+          fillers <- sum(datos_name == "Filler")
+          plot_nub <- plot_number(
+            planter = single_inputs()$planter_mov,
+            plot_number_start = plot_n_start[sites],
+            layout_names = datos_name,
+            expe_names = expe_names,
+            fillers = fillers
+          )
+        plots_number_sites[[sites]] <- plot_nub$w_map_letters1
+      }
+      return(list(plots_number_sites = plots_number_sites))
+    })
     
     
     
-    # output$plot_number_layout <- DT::renderDT({
-    #   test <- randomize_hit$times > 0 & user_tries$tries > 0
-    #   if (!test) return(NULL)
-    #   req(plot_number_reactive())
-    #   plot_num <- plot_number_reactive()$plots_number_sites[[user_location()$user_site]]
-    #   if (is.null(plot_num))
-    #     return(NULL)
-    #   w_map <- rand_checks()[[1]]$map_checks
-    #   if("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE
-    #   df <- as.data.frame(plot_num)
-    #   rownames(df) <- nrow(df):1
-    #   DT::datatable(df,
-    #                 extensions = c('Buttons'),
-    #                 options = list(dom = 'Blfrtip',
-    #                                autoWidth = FALSE,
-    #                                scrollX = TRUE,
-    #                                fixedColumns = TRUE,
-    #                                pageLength = nrow(df),
-    #                                scrollY = "700px",
-    #                                class = 'compact cell-border stripe',  rownames = FALSE,
-    #                                server = FALSE,
-    #                                filter = list( position = 'top', clear = FALSE, plain =TRUE ),
-    #                                buttons = c('copy', 'excel'),
-    #                                lengthMenu = list(c(10,25,50,-1),
-    #                                                  c(10,25,50,"All")))
-    #   )
-    # })
+    output$plot_number_layout <- DT::renderDT({
+      test <- randomize_hit$times > 0 & user_tries$tries > 0
+      if (!test) return(NULL)
+      req(plot_number_reactive())
+      plot_num <- plot_number_reactive()$plots_number_sites[[user_location()$user_site]]
+      if (is.null(plot_num))
+        return(NULL)
+      w_map <- rand_checks()[[1]]$map_checks
+      if("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE
+      df <- as.data.frame(plot_num)
+      rownames(df) <- nrow(df):1
+      DT::datatable(df,
+                    extensions = c('Buttons'),
+                    options = list(dom = 'Blfrtip',
+                                   autoWidth = FALSE,
+                                   scrollX = TRUE,
+                                   fixedColumns = TRUE,
+                                   pageLength = nrow(df),
+                                   scrollY = "700px",
+                                   class = 'compact cell-border stripe',  rownames = FALSE,
+                                   server = FALSE,
+                                   filter = list( position = 'top', clear = FALSE, plain =TRUE ),
+                                   buttons = c('copy', 'excel'),
+                                   lengthMenu = list(c(10,25,50,-1),
+                                                     c(10,25,50,"All")))
+      )
+    })
 
     # # export_diagonal_design <- eventReactive(input$sparse_get_random, {
-    # export_diagonal_design <- reactive({
-    #   locs_diagonal <- single_inputs()$sites
-    #   final_expt_fieldbook <- vector(mode = "list",length = locs_diagonal)
-    #   location_names <- single_inputs()$location_names
-    #   if (length(location_names) != locs_diagonal) location_names <- 1:locs_diagonal
-    #   for (user_site in 1:locs_diagonal) {
-    #     loc_user_out_rand <- rand_checks()[[user_site]]
-    #     w_map <- as.matrix(loc_user_out_rand$col_checks)
-    #     if("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE
-    #     req(split_name_reactive()$my_names)
-    #     req(plot_number_reactive())
-    #     movement_planter = single_inputs()$planter_mov
-    #     my_data_VLOOKUP <- get_sparse_data()$data_entry
-    #     COLNAMES_DATA <- colnames(my_data_VLOOKUP)
-    #     if (Option_NCD == TRUE) {
-    #       Entry_Fillers <- data.frame(list(0,"Filler"))
-    #       colnames(Entry_Fillers) <- COLNAMES_DATA
-    #       my_data_VLOOKUP <- rbind(my_data_VLOOKUP, Entry_Fillers)
-    #     }
-    #     plot_number <- plot_number_reactive()$plots_number_sites[[user_site]]
-    #     plot_number <- apply(plot_number, 2 ,as.numeric)
-    #     my_names <- split_name_reactive()$my_names
-    #     loc_user_out_checks <- rand_checks()[[user_site]]
-    #     Col_checks <- as.matrix(loc_user_out_checks$col_checks)
-    #     loc_user_out_rand <- rand_lines()[[user_site]]
-    #     random_entries_map <- loc_user_out_rand$rand
-    #     random_entries_map[random_entries_map == "Filler"] <- 0
-    #     random_entries_map <- apply(random_entries_map, 2 ,as.numeric)
+    export_diagonal_design <- reactive({
+      locs_diagonal <- single_inputs()$sites
+      final_expt_fieldbook <- vector(mode = "list",length = locs_diagonal)
+      location_names <- single_inputs()$location_names
+      if (length(location_names) != locs_diagonal) location_names <- 1:locs_diagonal
+      for (user_site in 1:locs_diagonal) {
+        loc_user_out_rand <- rand_checks()[[user_site]]
+        w_map <- as.matrix(loc_user_out_rand$col_checks)
+        if("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE
+        req(split_name_reactive()$my_names)
+        req(plot_number_reactive())
+        movement_planter = single_inputs()$planter_mov
+        my_data_VLOOKUP <- get_sparse_data()$data_entry
+        COLNAMES_DATA <- colnames(my_data_VLOOKUP)
+        if (Option_NCD == TRUE) {
+          Entry_Fillers <- data.frame(list(0,"Filler"))
+          colnames(Entry_Fillers) <- COLNAMES_DATA
+          my_data_VLOOKUP <- rbind(my_data_VLOOKUP, Entry_Fillers)
+        }
+        plot_number <- plot_number_reactive()$plots_number_sites[[user_site]]
+        plot_number <- apply(plot_number, 2 ,as.numeric)
+        my_names <- split_name_reactive()$my_names
+        loc_user_out_checks <- rand_checks()[[user_site]]
+        Col_checks <- as.matrix(loc_user_out_checks$col_checks)
+        loc_user_out_rand <- rand_lines()[[user_site]]
+        random_entries_map <- loc_user_out_rand$rand
+        random_entries_map[random_entries_map == "Filler"] <- 0
+        random_entries_map <- apply(random_entries_map, 2 ,as.numeric)
+        results_to_export <- list(random_entries_map, plot_number, Col_checks, my_names)
+        final_expt_export <- export_design(
+          G = results_to_export,
+          movement_planter = movement_planter,
+          location = location_names[user_site], 
+          Year = NULL,
+          data_file = my_data_VLOOKUP, 
+          reps = FALSE
+        )
+        final_expt_fieldbook[[user_site]] <- as.data.frame(final_expt_export)
+      }
+      final_fieldbook <- dplyr::bind_rows(final_expt_fieldbook)
+      if(Option_NCD == TRUE) {
+        final_fieldbook$CHECKS <- ifelse(final_fieldbook$NAME == "Filler", 0, final_fieldbook$CHECKS)
+        final_fieldbook$EXPT <- ifelse(final_fieldbook$EXPT == "Filler", 0, final_fieldbook$EXPT)
+      }
+      ID <- 1:nrow(final_fieldbook)
+      final_fieldbook <- final_fieldbook[, c(6,7,9,4,2,3,5,1,10)]
+      final_fieldbook_all_sites <- cbind(ID, final_fieldbook)
+      colnames(final_fieldbook_all_sites)[10] <- "TREATMENT"
+      return(list(final_expt = final_fieldbook_all_sites))
+    })
+    
+    valsDIAG <- reactiveValues(ROX = NULL, ROY = NULL, trail = NULL, minValue = NULL,
+                               maxValue = NULL)
+    
+    simuModal_DIAG <- function(failed = FALSE) {
+      modalDialog(
+        fluidRow(
+          column(6,
+                 selectInput(inputId = ns("trailsDIAG"), label = "Select One:",
+                             choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
+          )
+        ),
+        conditionalPanel("input.trailsDIAG == 'Other'", ns = ns,
+                         textInput(inputId = ns("OtherDIAG"), label = "Input Trial Name:", value = NULL)
+        ),
+        fluidRow(
+          column(6,
+                 selectInput(inputId = ns("ROX.DIAG"), "Select the Correlation in Rows:",
+                             choices = seq(0.1, 0.9, 0.1), selected = 0.5)
+          ),
+          column(6,
+                 selectInput(inputId = ns("ROY.DIAG"), "Select the Correlation in Cols:",
+                             choices = seq(0.1, 0.9, 0.1), selected = 0.5)
+          )
+        ),
+        fluidRow(
+          column(6,
+                 numericInput(inputId = ns("min.diag"), "Input the min value:", value = NULL)
+          ),
+          column(6,
+                 numericInput(inputId = ns("max.diag"), "Input the max value:", value = NULL)
+          )
+        ),
+        if (failed)
+          div(tags$b("Invalid input of data max and min", style = "color: red;")),
+        footer = tagList(
+          modalButton("Cancel"),
+          actionButton(inputId = ns("ok_simu_single"), "GO")
+        )
+      )
+    }
+    
+    observeEvent(input$sparse_simulate, {
+      req(export_diagonal_design()$final_expt)
+      showModal(
+        shinyjqui::jqui_draggable(
+          simuModal_DIAG()
+        )
+      )
+    })
+    
+    observeEvent(input$ok_simu_single, {
+      req(input$min.diag, input$max.diag)
+      if (input$max.diag > input$min.diag && input$min.diag != input$max.diag) {
+        valsDIAG$maxValue <- input$max.diag
+        valsDIAG$minValue  <- input$min.diag
+        valsDIAG$ROX <- as.numeric(input$ROX.DIAG)
+        valsDIAG$ROY <- as.numeric(input$ROY.DIAG)
+        if(input$trailsDIAG == "Other") {
+          req(input$OtherDIAG)
+          if(!is.null(input$OtherDIAG)) {
+            valsDIAG$trail <- as.character(input$OtherDIAG)
+          }else showModal(simuModal_DIAG(failed = TRUE))
+        }else {
+          valsDIAG$trail <- as.character(input$trailsDIAG)
+        }
+        removeModal()
+      }else {
+        showModal(
+          shinyjqui::jqui_draggable(
+            simuModal_DIAG(failed = TRUE)
+          )
+        )
+      }
+    })
+    
+    simudata_DIAG <- reactive({
+      req(export_diagonal_design()$final_expt)
+      if(!is.null(valsDIAG$maxValue) && !is.null(valsDIAG$minValue) && !is.null(valsDIAG$trail)) {
+        maxVal <- as.numeric(valsDIAG$maxValue)
+        minVal <- as.numeric(valsDIAG$minValue)
+        ROX_DIAG <- as.numeric(valsDIAG$ROX)
+        ROY_DIAG <- as.numeric(valsDIAG$ROY)
+        df_diag <- export_diagonal_design()$final_expt
+        loc_levels_factors <- levels(factor(df_diag$LOCATION, unique(df_diag$LOCATION)))
+        nrows_diag <- field_dimensions_diagonal()$d_row
+        ncols_diag <- field_dimensions_diagonal()$d_col
+        seed_diag <- as.numeric(single_inputs()$seed_number)
+        locs_diag <- as.numeric(input$sparse_locations)
+        df_diag_list <- vector(mode = "list", length = locs_diag)
+        df_simulation_list <- vector(mode = "list", length = locs_diag)
+        w <- 1
+        set.seed(seed_diag)
+        for (sites in 1:locs_diag) {
+          df_loc <- subset(df_diag, LOCATION == loc_levels_factors[w])
+          fieldBook <- df_loc[, c(1,6,7,9)]
+          dfSimulation <- AR1xAR1_simulation(nrows = nrows_diag, ncols = ncols_diag,
+                                             ROX = ROX_DIAG, ROY = ROY_DIAG,
+                                             minValue = minVal, maxValue = maxVal,
+                                             fieldbook = fieldBook,
+                                             trail = valsDIAG$trail,
+                                             seed = NULL)
+          dfSimulation <- dfSimulation$outOrder
+          df_simulation_list[[sites]] <- dfSimulation
+          dataPrep <- df_loc
+          df_DIAG <- cbind(dataPrep, round(dfSimulation[,7],2))
+          colnames(df_DIAG)[11] <- as.character(valsDIAG$trail)
+          df_diag_list[[sites]] <- df_DIAG
+          w <- w + 1
+        }
+        df_diag_locs <- dplyr::bind_rows(df_diag_list)
+        v <- 1
+      }else {
+        df_DIAG <- export_diagonal_design()$final_expt
+        v <- 2
+      }
+      if (v == 1) {
+        return(list(df = df_diag_locs, dfSimulationList = df_simulation_list))
+      } else if (v == 2) {
+        return(list(df = df_DIAG))
+      }
+    })
+    
+    heat_map <- reactiveValues(heat_map_option = FALSE)
+    
+    observeEvent(input$ok_simu_single, {
+      req(input$min.diag, input$max.diag)
+      if (input$max.diag > input$min.diag && input$min.diag != input$max.diag) {
+        heat_map$heat_map_option <- TRUE
+      }
+    })
 
-    #     results_to_export <- list(random_entries_map, plot_number, Col_checks, my_names)
-    #     final_expt_export <- export_design(G = results_to_export, 
-    #                                         movement_planter = movement_planter,
-    #                                         location = location_names[user_site], Year = NULL,
-    #                                         data_file = my_data_VLOOKUP, reps = FALSE)
-    #     final_expt_fieldbook[[user_site]] <- as.data.frame(final_expt_export)
-    #   }
+    observeEvent(heat_map$heat_map_option, {
+      if (heat_map$heat_map_option == FALSE) {
+        hideTab(inputId = "sparse_tabset_single", target = "Heatmap")
+      } else {
+        showTab(inputId = "sparse_tabset_single", target = "Heatmap")
+      }
+    })
 
-    #   final_fieldbook <- dplyr::bind_rows(final_expt_fieldbook)
-      
-    #   if(Option_NCD == TRUE) {
-    #     final_fieldbook$CHECKS <- ifelse(final_fieldbook$NAME == "Filler", 0, final_fieldbook$CHECKS)
-    #     final_fieldbook$EXPT <- ifelse(final_fieldbook$EXPT == "Filler", 0, final_fieldbook$EXPT)
-    #   }
-
-    #   ID <- 1:nrow(final_fieldbook)
-    #   final_fieldbook <- final_fieldbook[, c(6,7,9,4,2,3,5,1,10)]
-    #   final_fieldbook_all_sites <- cbind(ID, final_fieldbook)
-    #   colnames(final_fieldbook_all_sites)[10] <- "TREATMENT"
-      
-    #   return(list(final_expt = final_fieldbook_all_sites))
-      
-    # })
-    
-    # valsDIAG <- reactiveValues(ROX = NULL, ROY = NULL, trail = NULL, minValue = NULL,
-    #                            maxValue = NULL)
-    
-    # simuModal_DIAG <- function(failed = FALSE) {
-    #   modalDialog(
-    #     fluidRow(
-    #       column(6, 
-    #              selectInput(inputId = ns("trailsDIAG"), label = "Select One:", 
-    #                          choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
-    #       )
-    #     ),
-    #     conditionalPanel("input.trailsDIAG == 'Other'", ns = ns,
-    #                      textInput(inputId = ns("OtherDIAG"), label = "Input Trial Name:", value = NULL)
-    #     ),
-    #     fluidRow(
-    #       column(6, 
-    #              selectInput(inputId = ns("ROX.DIAG"), "Select the Correlation in Rows:", 
-    #                          choices = seq(0.1, 0.9, 0.1), selected = 0.5)
-    #       ),
-    #       column(6, 
-    #              selectInput(inputId = ns("ROY.DIAG"), "Select the Correlation in Cols:", 
-    #                          choices = seq(0.1, 0.9, 0.1), selected = 0.5)
-    #       )
-    #     ),
-    #     fluidRow(
-    #       column(6, 
-    #              numericInput(inputId = ns("min.diag"), "Input the min value:", value = NULL)
-    #       ),
-    #       column(6, 
-    #              numericInput(inputId = ns("max.diag"), "Input the max value:", value = NULL)
-                 
-    #       )
-    #     ),
-    #     if (failed)
-    #       div(tags$b("Invalid input of data max and min", style = "color: red;")),
-        
-    #     footer = tagList(
-    #       modalButton("Cancel"),
-    #       actionButton(inputId = ns("ok_simu_single"), "GO")
-    #     )
-    #   )
-    # }
-    
-    # observeEvent(input$sparse_simulate, {
-    #   req(export_diagonal_design()$final_expt)
-    #   showModal(
-    #     shinyjqui::jqui_draggable(
-    #       simuModal_DIAG()
-    #     )
-    #   )
-    # })
-    
-    # observeEvent(input$ok_simu_single, {
-    #   req(input$min.diag, input$max.diag)
-    #   if (input$max.diag > input$min.diag && input$min.diag != input$max.diag) {
-    #     valsDIAG$maxValue <- input$max.diag
-    #     valsDIAG$minValue  <- input$min.diag
-    #     valsDIAG$ROX <- as.numeric(input$ROX.DIAG)
-    #     valsDIAG$ROY <- as.numeric(input$ROY.DIAG)
-    #     if(input$trailsDIAG == "Other") {
-    #       req(input$OtherDIAG)
-    #       if(!is.null(input$OtherDIAG)) {
-    #         valsDIAG$trail <- as.character(input$OtherDIAG)
-    #       }else showModal(simuModal_DIAG(failed = TRUE))
-    #     }else {
-    #       valsDIAG$trail <- as.character(input$trailsDIAG)
-    #     }
-    #     removeModal()
-    #   }else {
-    #     showModal(
-    #       shinyjqui::jqui_draggable(
-    #         simuModal_DIAG(failed = TRUE)
-    #       )
-    #     )
-    #   }
-    # })
-    
-    # simudata_DIAG <- reactive({
-    #   req(export_diagonal_design()$final_expt)
-    #   if(!is.null(valsDIAG$maxValue) && !is.null(valsDIAG$minValue) && !is.null(valsDIAG$trail)) {
-    #     maxVal <- as.numeric(valsDIAG$maxValue)
-    #     minVal <- as.numeric(valsDIAG$minValue)
-    #     ROX_DIAG <- as.numeric(valsDIAG$ROX)
-    #     ROY_DIAG <- as.numeric(valsDIAG$ROY)
-    #     df_diag <- export_diagonal_design()$final_expt
-    #     loc_levels_factors <- levels(factor(df_diag$LOCATION, unique(df_diag$LOCATION)))
-    #     nrows_diag <- field_dimensions_diagonal()$d_row
-    #     ncols_diag <- field_dimensions_diagonal()$d_col
-    #     seed_diag <- as.numeric(single_inputs()$seed_number)
-    #     locs_diag <- as.numeric(input$sparse_locations)
-    #     df_diag_list <- vector(mode = "list", length = locs_diag)
-    #     df_simulation_list <- vector(mode = "list", length = locs_diag)
-    #     w <- 1
-    #     set.seed(seed_diag)
-    #     for (sites in 1:locs_diag) {
-    #       df_loc <- subset(df_diag, LOCATION == loc_levels_factors[w])
-    #       fieldBook <- df_loc[, c(1,6,7,9)]
-    #       dfSimulation <- AR1xAR1_simulation(nrows = nrows_diag, ncols = ncols_diag, 
-    #                                          ROX = ROX_DIAG, ROY = ROY_DIAG, 
-    #                                          minValue = minVal, maxValue = maxVal, 
-    #                                          fieldbook = fieldBook, 
-    #                                          trail = valsDIAG$trail, 
-    #                                          seed = NULL)
-    #       dfSimulation <- dfSimulation$outOrder
-    #       df_simulation_list[[sites]] <- dfSimulation
-    #       dataPrep <- df_loc
-    #       df_DIAG <- cbind(dataPrep, round(dfSimulation[,7],2))
-    #       colnames(df_DIAG)[11] <- as.character(valsDIAG$trail)
-    #       df_diag_list[[sites]] <- df_DIAG
-    #       w <- w + 1
-    #     }
-    #     df_diag_locs <- dplyr::bind_rows(df_diag_list)
-    #     v <- 1
-    #   }else {
-    #     df_DIAG <- export_diagonal_design()$final_expt
-    #     v <- 2
-    #   }
-    #   if (v == 1) {
-    #     return(list(df = df_diag_locs, dfSimulationList = df_simulation_list))
-    #   } else if (v == 2) {
-    #     return(list(df = df_DIAG))
-    #   }
-    # })
-    
-    # heat_map <- reactiveValues(heat_map_option = FALSE)
-    
-    # observeEvent(input$ok_simu_single, {
-    #   req(input$min.diag, input$max.diag)
-    #   if (input$max.diag > input$min.diag && input$min.diag != input$max.diag) {
-    #     heat_map$heat_map_option <- TRUE
-    #   }
-    # })
-    
-    # observeEvent(heat_map$heat_map_option, {
-    #   if (heat_map$heat_map_option == FALSE) {
-    #     hideTab(inputId = "sparse_tabset_single", target = "Heatmap")
-    #   } else {
-    #     showTab(inputId = "sparse_tabset_single", target = "Heatmap")
-    #   }
-    # })
-
-    # output$fieldBook_diagonal <- DT::renderDT({
-    #   test <- randomize_hit$times > 0 & user_tries$tries > 0
-    #   if (!test) return(NULL)
-    #   req(simudata_DIAG()$df)
-    #   df <- simudata_DIAG()$df
-    #   df$EXPT <- as.factor(df$EXPT)
-    #   df$LOCATION <- as.factor(df$LOCATION)
-    #   df$PLOT <- as.factor(df$PLOT)
-    #   df$ROW <- as.factor(df$ROW)
-    #   df$COLUMN <- as.factor(df$COLUMN)
-    #   df$CHECKS <- as.factor(df$CHECKS)
-    #   df$ENTRY <- as.factor(df$ENTRY)
-    #   df$TREATMENT <- as.factor(df$TREATMENT)
-    #   options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-    #                             scrollX = TRUE, scrollY = "600px"))
-    #   DT::datatable(df,
-    #                 filter = "top",
-    #                 rownames = FALSE, 
-    #                 options = list(
-    #                   columnDefs = list(list(className = 'dt-center', targets = "_all"))))
-    # })
+    output$fieldBook_diagonal <- DT::renderDT({
+      test <- randomize_hit$times > 0 & user_tries$tries > 0
+      if (!test) return(NULL)
+      req(simudata_DIAG()$df)
+      df <- simudata_DIAG()$df
+      df$EXPT <- as.factor(df$EXPT)
+      df$LOCATION <- as.factor(df$LOCATION)
+      df$PLOT <- as.factor(df$PLOT)
+      df$ROW <- as.factor(df$ROW)
+      df$COLUMN <- as.factor(df$COLUMN)
+      df$CHECKS <- as.factor(df$CHECKS)
+      df$ENTRY <- as.factor(df$ENTRY)
+      df$TREATMENT <- as.factor(df$TREATMENT)
+      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
+                                scrollX = TRUE, scrollY = "600px"))
+      DT::datatable(df,
+                    filter = "top",
+                    rownames = FALSE,
+                    options = list(
+                      columnDefs = list(list(className = 'dt-center', targets = "_all"))))
+    })
     
     
-    # heatmap_obj_D <- reactive({
-    #   req(simudata_DIAG()$dfSimulation)
-    #   loc_user <- user_location()$user_site
-    #   w <- as.character(valsDIAG$trail)
-    #   df <- simudata_DIAG()$dfSimulationList[[loc_user]]
-    #   p1 <- ggplot2::ggplot(df, ggplot2::aes(x = df[,4], y = df[,3], fill = df[,7], text = df[,8])) + 
-    #     ggplot2::geom_tile() +
-    #     ggplot2::xlab("COLUMN") +
-    #     ggplot2::ylab("ROW") +
-    #     ggplot2::labs(fill = w) +
-    #     viridis::scale_fill_viridis(discrete = FALSE)
-      
-    #   p2 <- plotly::ggplotly(p1, tooltip="text", height = 720)
-      
-    #   return(p2)
-    # })
+    heatmap_obj_D <- reactive({
+      req(simudata_DIAG()$dfSimulation)
+      loc_user <- user_location()$user_site
+      w <- as.character(valsDIAG$trail)
+      df <- simudata_DIAG()$dfSimulationList[[loc_user]]
+      p1 <- ggplot2::ggplot(df, ggplot2::aes(x = df[,4], y = df[,3], fill = df[,7], text = df[,8])) +
+        ggplot2::geom_tile() +
+        ggplot2::xlab("COLUMN") +
+        ggplot2::ylab("ROW") +
+        ggplot2::labs(fill = w) +
+        viridis::scale_fill_viridis(discrete = FALSE)
+      p2 <- plotly::ggplotly(p1, tooltip="text", height = 720)
+      return(p2)
+    })
     
-    # output$heatmap_diag <- plotly::renderPlotly({
-    #   test <- randomize_hit$times > 0 & user_tries$tries > 0
-    #   if (!test) return(NULL)
-    #   req(heatmap_obj_D())
-    #   heatmap_obj_D()
-    # })
+    output$heatmap_diag <- plotly::renderPlotly({
+      test <- randomize_hit$times > 0 & user_tries$tries > 0
+      if (!test) return(NULL)
+      req(heatmap_obj_D())
+      heatmap_obj_D()
+    })
     
-    # output$downloadData_Diagonal <- downloadHandler(
-    #   filename = function() {
-    #     req(input$sparse_loc_names)
-    #     loc <- input$sparse_loc_names
-    #     loc <- paste(loc, "_", "Diagonal_", sep = "")
-    #     paste(loc, Sys.Date(), ".csv", sep = "")
-    #   },
-    #   content = function(file) {
-    #     write.csv(simudata_DIAG()$df, file, row.names = FALSE)
-        
-    #   }
-    # )
+    output$downloadData_Diagonal <- downloadHandler(
+      filename = function() {
+        req(input$sparse_loc_names)
+        loc <- input$sparse_loc_names
+        loc <- paste(loc, "_", "Diagonal_", sep = "")
+        paste(loc, Sys.Date(), ".csv", sep = "")
+      },
+      content = function(file) {
+        write.csv(simudata_DIAG()$df, file, row.names = FALSE)
+      }
+    )
+    
   })
 }
     

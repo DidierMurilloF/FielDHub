@@ -265,8 +265,6 @@ available_percent <- function(n_rows,
   dt <- as.data.frame(M)
   dt <- dt[!duplicated(dt[,3]),]
   dt[,1] <- 1:nrow(dt)
-  #dt <- subset(dt, dt[,5] == realData)
-  #print(dt)
   if (multi && Option_NCD == TRUE) {
     list(dt = dt, P = W, d_checks = d_checks, 
          data_dim_each_block = data_dim_each_block)

@@ -2,10 +2,7 @@
 % Please edit documentation in R/utils_do_optim.R
 \name{sparse_allocation}
 \alias{sparse_allocation}
-\title{Sparse allocation 
-Spatial Un-replicated Diagonal Arrangement Design
-
-Randomly generates a spatial un-replicated design using sparse allocation.}
+\title{Sparse allocation}
 \usage{
 sparse_allocation(
   checks_allocation,
@@ -55,10 +52,7 @@ When design is \code{sparse} then \code{plant_reps} < \code{l}}
 \item{seed}{(optional) Real number that specifies the starting seed to obtain reproducible designs.}
 }
 \description{
-Sparse allocation 
-Spatial Un-replicated Diagonal Arrangement Design
-
-Randomly generates a spatial un-replicated design using sparse allocation.
+Sparse allocation
 }
 \examples{
 sparse <- sparse_allocation(

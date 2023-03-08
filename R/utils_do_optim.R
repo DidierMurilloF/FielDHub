@@ -77,6 +77,22 @@ do_optim <- function(design = "prep", lines, l, plant_reps, checks, rep_checks, 
         
         list_locs[[site]] <- df_loc
     }
+    
+    if (design == "sparse") {
+      size_locs <- as.vector(col_sum)
+      if (!all(size_locs == size_locs[1])) {
+        unbalanced_locs <- which(size_locs != size_locs[1])
+        for (unbalanced in unbalanced_locs) {
+          unbalanced_loc <- list_locs[[unbalanced]]
+          sparse_entries <- 1:lines
+          unbalanced_loc_entries <- unbalanced_loc[(checks + 1):nrow(unbalanced_loc), 1]
+          gen_balanced_loc <- sample(sparse_entries[!sparse_entries %in% unbalanced_loc_entries], size = 1)
+          balanced_loc <- rbind(unbalanced_loc, c(gen_balanced_loc, paste0("G-", gen_balanced_loc), 1))
+          list_locs[[unbalanced]] <- balanced_loc
+        }
+      }
+    }
+
     out <- list(
         list_locs = list_locs,
         allocation = allocation_df, 
@@ -87,9 +103,6 @@ do_optim <- function(design = "prep", lines, l, plant_reps, checks, rep_checks, 
 }
 
 #' @title  Sparse allocation 
-#' Spatial Un-replicated Diagonal Arrangement Design
-#' 
-#' Randomly generates a spatial un-replicated design using sparse allocation.
 #'
 #' @param checks_allocation Way to allocate the checks in the field. It can be
 #' \code{diagonal} or \code{randomly}

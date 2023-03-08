@@ -244,3 +244,61 @@ sum(v == 0)
   spatd$layoutRandom
   spatd$plotsNumber
   head(spatd$fieldBook, 12)
+  
+  
+  ########################################################################
+library(FielDHub)
+lines <- 382
+checks <- 4
+sparse_example <- do_optim(
+    design = "sparse",
+    lines = 382, 
+    l = 5, 
+    plant_reps = 4, 
+    checks = 4, 
+    seed = 15
+ )
+
+size_locs <- as.vector(sparse_example$size_locations)
+
+ if (!all(size_locs == size_locs[1])) {
+   unbalanced_locs <- which(size_locs != size_locs[1])
+   for (unbalanced in unbalanced_locs) {
+     unbalanced_loc <- sparse_example$list_locs[[unbalanced]]
+     sparse_entries <- 1:lines
+     unbalanced_loc_entries <- unbalanced_loc[(checks + 1):nrow(unbalanced_loc), 1]
+     gen_balanced_loc <- sample(sparse_entries[!sparse_entries %in% unbalanced_loc_entries], size = 1)
+     balanced_loc <- rbind(unbalanced_loc, c(gen_balanced_loc, paste0("G-", gen_balanced_loc), 1))
+     sparse_example$list_locs[[unbalanced]] <- balanced_loc
+   }
+ }
+
+library(FielDHub)
+sparse <- sparse_allocation(
+   checks_allocation = "diagonal",
+   lines = 450, 
+   l = 5, 
+   plant_reps = 4, 
+   checks = 4, 
+   locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5"), 
+   seed = 1234
+)
+
+sparse$designs$LOC1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
