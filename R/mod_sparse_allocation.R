@@ -398,16 +398,14 @@ mod_sparse_allocation_server <- function(id){
 
     
     list_inputs_diagonal <- eventReactive(input$sparse_run, {
-      #req(get_sparse_data()$dim_data_entry)
-      req(sparse_setup()$size_locations)
-      sparse_checks <- as.numeric(getChecks()$sparse_checks)
-      lines <- as.numeric(sparse_setup()$size_locations[1])
-      return(list(lines, input$input_sparse_data, kindExpt_single, 
-                  input$sparse_run)) #  input$stacked,
+        req(sparse_setup()$size_locations)
+        sparse_checks <- as.numeric(getChecks()$sparse_checks)
+        lines <- as.numeric(sparse_setup()$size_locations[1])
+        return(list(lines, input$input_sparse_data, kindExpt_single, 
+                    input$sparse_run))
     })
 
     observeEvent(list_inputs_diagonal(), {
-      #req(get_sparse_data()$dim_data_entry)
         req(sparse_setup()$size_locations)
         print(sparse_setup()$size_locations)
         sparse_checks <- as.numeric(getChecks()$sparse_checks)
@@ -478,11 +476,13 @@ mod_sparse_allocation_server <- function(id){
 
     output$sparse_allocation <- DT::renderDT({
         df <- as.data.frame(sparse_setup()$allocation)
+        rownames(df) <- paste0("Genotype-", 1:nrow(df))
         DT::datatable(
           df,
           caption = 'Table 1: Genotype Allocation Across Environments.',
           extensions = 'Buttons',
           options = list(
+            columnDefs = list(list(className = 'dt-center', targets = "_all")),
             dom = 'Bfrtip',
             scrollY = "400px",
             lengthMenu = list(c(5, 15, -1), c('5', '15', 'All')),

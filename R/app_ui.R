@@ -42,12 +42,12 @@ app_ui <- function(request) {
                                              mod_sparse_allocation_ui("sparse_allocation_ui_1")
                                     )
                          ),
-                         navbarMenu("Partially Replicated Designs",
-                            tabPanel("Augmented preps",
+                         navbarMenu("Partially Replicated Designs (p-rep)",
+                            tabPanel("Augmented P-rep Designs",
                                     mod_pREPS_ui("pREPS_ui_1")
                             ),
-                            tabPanel("preps",
-                                    "Page for preps with average allocation"
+                            tabPanel("P-rep Designs",
+                                    mod_average_pREPS_ui("average_pREPS_ui_1")
                             )
                          ),
                          navbarMenu("Lattice Designs",

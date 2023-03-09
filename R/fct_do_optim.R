@@ -33,6 +33,7 @@ do_optim <- function(design = "prep", lines, l, plant_reps, checks, rep_checks, 
     allocation_df <- as.data.frame.matrix(allocation)
     colnames(allocation_df) <- paste0("LOC", 1:l)
     col_sum <- base::colSums(allocation_df)
+    print(col_sum)
     # Create a wide data frame with number of copies and average per plant
     wide_allocation <- allocation_df %>%
         dplyr::mutate(

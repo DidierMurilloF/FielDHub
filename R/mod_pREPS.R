@@ -280,6 +280,17 @@ mod_pREPS_server <- function(id){
       if(is.null(choices)){
         choices <- "No options available"
       }
+
+      if (!is.null(choices)) {
+            dif <- vector(mode = "numeric", length = length(choices))
+            for (option in 1:length(choices)) {
+                dims <- unlist(strsplit(choices[[option]], " x "))
+                dif[option] <- abs(as.numeric(dims[1]) - as.numeric(dims[2]))
+            }
+            df_choices <- data.frame(choices = unlist(choices), diff_dim = dif)
+            df_choices <- df_choices[order(df_choices$diff_dim, decreasing = FALSE), ]
+            choices <- as.vector(df_choices$choices)
+      }
       updateSelectInput(inputId = "dimensions.preps",
                         choices = choices,
                         selected = choices[1])
