@@ -150,14 +150,11 @@ mod_sparse_allocation_ui <- function(id) {
                 ),
                 tags$br(),
                 tags$br(),
-                DT::DTOutput(ns("sparse_allocation"))
+                shinycssloaders::withSpinner(
+                    DT::DTOutput(ns("sparse_allocation")),
+                    type = 4
+                )
             ),
-            # tabPanel("Input Data",
-            #             fluidRow(
-            #             column(6,DT::DTOutput(ns("data_input"))),
-            #             column(6,DT::DTOutput(ns("checks_table")))
-            #             )
-            # ),
             tabPanel("Randomized Field",
                         br(),
                         shinyjs::hidden(
