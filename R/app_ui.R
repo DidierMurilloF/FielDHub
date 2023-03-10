@@ -43,10 +43,10 @@ app_ui <- function(request) {
                                     )
                          ),
                          navbarMenu("Partially Replicated Designs (p-rep)",
-                            tabPanel("Augmented P-rep Designs",
+                            tabPanel("Augmented P-rep",
                                     mod_pREPS_ui("pREPS_ui_1")
                             ),
-                            tabPanel("P-rep Designs",
+                            tabPanel("P-rep",
                                     mod_average_pREPS_ui("average_pREPS_ui_1")
                             )
                          ),

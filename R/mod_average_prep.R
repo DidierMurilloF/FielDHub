@@ -14,16 +14,16 @@ mod_average_pREPS_ui <- function(id){
     sidebarLayout(
         sidebarPanel(
             width = 4,
-            radioButtons(
-                inputId = ns("input_prep_data"), 
-                label = "Import entries' list?", 
-                choices = c("Yes", "No"), 
-                selected = "No",
-                inline = TRUE, 
-                width = NULL, 
-                choiceNames = NULL, 
-                choiceValues = NULL
-            ),
+            # radioButtons(
+            #     inputId = ns("input_prep_data"), 
+            #     label = "Import entries' list?", 
+            #     choices = c("Yes", "No"), 
+            #     selected = "No",
+            #     inline = TRUE, 
+            #     width = NULL, 
+            #     choiceNames = NULL, 
+            #     choiceValues = NULL
+            # ),
             # conditionalPanel(
             #     "input.input_prep_data == 'Yes'", ns = ns,
             #     fluidRow(
@@ -57,10 +57,30 @@ mod_average_pREPS_ui <- function(id){
                 value = 360,
                 min = 1
             ),
-            textInput(
-                ns("prep_checks"), 
-                label = "# of Entries per Rep Group:", 
-                value = "8,8,8"
+            radioButtons(
+                inputId = ns("include_checks"), 
+                label = "Include checks?", 
+                choices = c("Yes", "No"), 
+                selected = "Yes",
+                inline = TRUE, 
+                width = NULL, 
+                choiceNames = NULL, 
+                choiceValues = NULL
+            ),
+            conditionalPanel(
+                condition = "input.include_checks  == 'Yes'", ns = ns,
+                numericInput(
+                    inputId = ns("prep_checks_met"),
+                    label = "# of checks:",
+                    min = 1,
+                    max = 10,
+                    value = 4
+                ),
+                textInput(
+                    ns("prep_checks"), 
+                    label = "Input # Check's Reps:", 
+                    value = "8,8,8"
+                )
             ),
             fluidRow(
                 column(6, 
