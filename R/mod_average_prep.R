@@ -14,43 +14,6 @@ mod_average_pREPS_ui <- function(id){
     sidebarLayout(
         sidebarPanel(
             width = 4,
-            # radioButtons(
-            #     inputId = ns("input_prep_data"), 
-            #     label = "Import entries' list?", 
-            #     choices = c("Yes", "No"), 
-            #     selected = "No",
-            #     inline = TRUE, 
-            #     width = NULL, 
-            #     choiceNames = NULL, 
-            #     choiceValues = NULL
-            # ),
-            # conditionalPanel(
-            #     "input.input_prep_data == 'Yes'", ns = ns,
-            #     fluidRow(
-            #         column(7,
-            #                 fileInput(ns("input_file_prep"), 
-            #                         label = "Upload a CSV File:", 
-            #                         multiple = FALSE)),
-                    
-            #         column(5, 
-            #                 radioButtons(
-            #                     ns("input_file_sep"), "Separator",
-            #                     choices = c(Comma = ",",
-            #                                 Semicolon = ";",
-            #                                 Tab = "\t"),
-            #                     selected = ","))
-            #     )            
-            # ),
-            # conditionalPanel(
-            #     condition = "input.input_prep_data == 'No'", 
-            #     ns = ns,
-            #     textInput(ns("gens_prep"), 
-            #                 label = "# of Entries per Rep Group:", 
-            #                 value = "75,150"),
-            #     textInput(inputId = ns("rep_units_prep"), 
-            #                 label = "# of Rep per Group:",
-            #                 value = "2,1")
-            # ),
             numericInput(
                 inputId = ns("gens_prep"), 
                 label = "Input # of genotypes:",
@@ -68,16 +31,17 @@ mod_average_pREPS_ui <- function(id){
                 choiceValues = NULL
             ),
             conditionalPanel(
-                condition = "input.include_checks  == 'Yes'", ns = ns,
+                condition = "input.include_checks  == 'Yes'", 
+                ns = ns,
                 numericInput(
                     inputId = ns("prep_checks_met"),
-                    label = "# of checks:",
+                    label = "Input # of Checks:",
                     min = 1,
                     max = 10,
-                    value = 4
+                    value = 3
                 ),
                 textInput(
-                    ns("prep_checks"), 
+                    inputId = ns("prep_checks"), 
                     label = "Input # Check's Reps:", 
                     value = "8,8,8"
                 )
@@ -207,6 +171,21 @@ mod_average_pREPS_server <- function(id){
     })
 
     prep_inputs <- eventReactive(input$run_prep, {
+        if (input$include_checks == "Yes"){
+            prep_checks <- as.numeric(as.vector(unlist(strsplit(input$prep_checks, ","))))
+            checks <- as.numeric(input$prep_checks_met)
+            if (length(prep_checks) != checks) {
+                shinyalert::shinyalert(
+                    "Error!!", 
+                    "Data input needs at least three Columns with the ENTRY and NAME.", 
+                    type = "error"
+                )
+                return(NULL)
+            }
+        } else {
+            prep_checks <- NULL
+            checks <- NULL
+        }
         planter_mov <- input$planter_preps
         expt_name <- as.character(input$expt_name_preps)
         plotNumber <- as.numeric(as.vector(unlist(strsplit(input$plot_start_preps, ","))))
@@ -220,7 +199,9 @@ mod_average_pREPS_server <- function(id){
                 seed_number = seed_number, 
                 plotNumber = plotNumber,
                 planter_mov = planter_mov,
-                expt_name = expt_name
+                expt_name = expt_name,
+                checks = checks,
+                prep_checks = prep_checks
             )
         ) 
     })
@@ -305,46 +286,56 @@ mod_average_pREPS_server <- function(id){
     #   return(list(data_up.preps = data_preps, total_plots = total_plots))
     # })
     setup_optim_prep <- reactive({
+        req(prep_inputs())
         do_optim(
             design = "prep",
             lines = input$gens_prep, 
             l = as.numeric(input$locs_prep), 
             plant_reps = as.numeric(input$plant_copies_preps), 
-            checks = 3, 
-            rep_checks = c(8,8,8),
-            seed = 87
+            checks = prep_inputs()$checks, 
+            rep_checks = prep_inputs()$prep_checks,
+            seed = prep_inputs()$seed_number,
         )
     }) %>%
         bindEvent(input$run_prep)
 
-    
-    
     list_input_plots <- eventReactive(input$run_prep, {
-        prep_checks <- as.numeric(as.vector(unlist(strsplit(input$prep_checks, ","))))
+        req(prep_inputs())
+        if (!is.null(prep_inputs()$prep_checks)) {
+            prep_checks <- as.numeric(prep_inputs()$prep_checks)
+        } else {
+            prep_checks <- 0
+        }
         plots_for_treatments <- as.numeric(setup_optim_prep()$size_locations[1])
-        print(plots_for_treatments)
         total_plots <- plots_for_treatments + sum(prep_checks)
-        print(total_plots)
         return(
             list(total_plots = total_plots)
         )
     })
     
     observeEvent(list_input_plots(), {
+        req(prep_inputs())
         plots_for_treatments <- as.numeric(setup_optim_prep()$size_locations[1])
-        prep_checks <- as.numeric(as.vector(unlist(strsplit(input$prep_checks, ","))))
-        total_plots <- plots_for_treatments + sum(prep_checks)
-        choices <- factor_subsets(total_plots)$labels
-        dif <- vector(mode = "numeric", length = length(choices))
-        for (option in 1:length(choices)) {
-            dims <- unlist(strsplit(choices[[option]], " x "))
-            dif[option] <- abs(as.numeric(dims[1]) - as.numeric(dims[2]))
+        if (!is.null(prep_inputs()$prep_checks)) {
+            prep_checks <- as.numeric(prep_inputs()$prep_checks)
+        } else {
+            prep_checks <- 0
         }
-        df_choices <- data.frame(choices = unlist(choices), diff_dim = dif)
-        df_choices <- df_choices[order(df_choices$diff_dim, decreasing = FALSE), ]
-        sort_choices <- as.vector(df_choices$choices)
-        if (is.null(sort_choices)) {
+        print(sum(prep_checks))
+        total_plots <- plots_for_treatments + sum(prep_checks)
+        print(total_plots)
+        choices <- factor_subsets(total_plots)$labels
+        if (is.null(choices)) {
             sort_choices <- "No options available"
+        } else {
+            dif <- vector(mode = "numeric", length = length(choices))
+            for (option in 1:length(choices)) {
+                dims <- unlist(strsplit(choices[[option]], " x "))
+                dif[option] <- abs(as.numeric(dims[1]) - as.numeric(dims[2]))
+            }
+            df_choices <- data.frame(choices = unlist(choices), diff_dim = dif)
+            df_choices <- df_choices[order(df_choices$diff_dim, decreasing = FALSE), ]
+            sort_choices <- as.vector(df_choices$choices)
         }
         updateSelectInput(inputId = "dimensions_preps",
                             choices = sort_choices,
@@ -352,10 +343,11 @@ mod_average_pREPS_server <- function(id){
     })
     
     field_dimensions_prep <- eventReactive(input$get_random_prep, {
-      dims <- unlist(strsplit(input$dimensions_preps," x "))
-      d_row <- as.numeric(dims[1])
-      d_col <- as.numeric(dims[2])
-      return(list(d_row = d_row, d_col = d_col))
+        if (input$dimensions_preps == "No options available") return(NULL)
+        dims <- unlist(strsplit(input$dimensions_preps," x "))
+        d_row <- as.numeric(dims[1])
+        d_col <- as.numeric(dims[2])
+        return(list(d_row = d_row, d_col = d_col))
     })
 
     randomize_hit_prep <- reactiveValues(times = 0)
@@ -382,42 +374,13 @@ mod_average_pREPS_server <- function(id){
     observeEvent(list_to_observe_prep(), {
       output$download_prep_avg <- renderUI({
         if (randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0) {
-          downloadButton(ns("downloadData.preps"),
-                          "Save Experiment",
-                          style = "width:100%")
+          downloadButton(
+            ns("downloadData.preps"),
+            "Save Experiment",
+            style = "width:100%")
         }
       })
     })
-
-    # entryListFormat_pREP <- data.frame(ENTRY = 1:9, 
-    #                                    NAME = c(paste("Genotype", LETTERS[1:9], sep = "")),
-    #                                    REPS = as.factor(c(rep(2, times = 3), rep(1,6))))
-    
-    # entriesInfoModal_pREP <- function() {
-    #   modalDialog(
-    #     title = div(tags$h3("Important message", style = "color: red;")),
-    #     h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
-    #     renderTable(entryListFormat_pREP,
-    #                 bordered = TRUE,
-    #                 align = 'c',
-    #                 striped = TRUE),
-    #     easyClose = FALSE
-    #   )
-    # }
-    
-    # toListen <- reactive({
-    #   list(input$input_prep_data)
-    # })
-    
-    # observeEvent(toListen(), {
-    #   if (input$input_prep_data == 'Yes'){
-    #     showModal(
-    #       shinyjqui::jqui_draggable(
-    #         entriesInfoModal_pREP()
-    #       )
-    #     )
-    #   }
-    # })
 
     observeEvent(input$run_prep, {
         req(setup_optim_prep())
@@ -430,10 +393,11 @@ mod_average_pREPS_server <- function(id){
         df <- as.data.frame(setup_optim_prep()$allocation)
         df <- df %>% 
             dplyr::mutate(
-                copies = rowSums(.),
-                avg = round(copies / locs, 1)
-            )
-        rownames(df) <- paste0("Genotype-", 1:nrow(df))
+                Copies = rowSums(.),
+                Avg = round(Copies / locs, 1)
+            ) %>%
+            dplyr::bind_rows(colSums(.))
+        rownames(df) <- c(paste0("Genotype-", 1:(nrow(df) - 1)), "Total")
         DT::datatable(
           df,
           caption = 'Table 1: Genotype Allocation Across Environments.',
@@ -451,13 +415,12 @@ mod_average_pREPS_server <- function(id){
     
     pREPS_reactive <- reactive({
         req(setup_optim_prep())
-        # gen.list <- get_data_prep()$data_up.preps
+        req(field_dimensions_prep())
         gen.list <- setup_optim_prep()$list_locs
         nrows <- field_dimensions_prep()$d_row
         ncols <- field_dimensions_prep()$d_col
         niter <- 10000
         prep <- TRUE
-    
         locs_preps <- prep_inputs()$sites
         site_names <- prep_inputs()$location_names
         preps.seed <- prep_inputs()$seed_number
@@ -465,12 +428,13 @@ mod_average_pREPS_server <- function(id){
         movement_planter <- prep_inputs()$planter_mov
         expt_name <- prep_inputs()$expt_name
         locations_preps <- vector(mode = "list", length = locs_preps)
+        set.seed(preps.seed)
         for (i in 1:locs_preps) {
             locations_preps[[i]] <- partially_replicated(
                 nrows = nrows, 
                 ncols = ncols, 
                 l = 1, 
-                seed = preps.seed, 
+                seed = NULL, 
                 plotNumber = plotNumber, 
                 exptName =  expt_name,
                 locationNames = site_names, 

@@ -30,9 +30,9 @@ Generate the sparse allocation
 \examples{
 sparse_example <- do_optim(
    design = "sparse",
-   lines = 320, 
-   l = 5, 
-   plant_reps = 4, 
+   lines = 240, 
+   l = 4, 
+   plant_reps = 3, 
    checks = 4, 
    seed = 15
 )

@@ -57,9 +57,7 @@ Sparse allocation
 \examples{
 sparse <- sparse_allocation(
 checks_allocation = "diagonal",
-  lines = 380, 
-  nrows = 16, 
-  ncols = 22, 
+  lines = 260, 
   l = 6, 
   plant_reps = 5, 
   checks = 4, 

@@ -72,7 +72,115 @@ head(long_allocation, 10)
 
 unrep_designs$LOC1
 
+do_optim <- function(design = "prep", lines, l, plant_reps, checks, rep_checks, data, seed) {
+    # You can change: searches & jumps
+    optim_blocks <- blocksdesign::blocks(
+        treatments = lines, 
+        replicates = plant_reps, 
+        blocks = l, 
+        searches = 10, 
+        seed = seed
+    )
+    allocation <- table(optim_blocks$Design$treatments, optim_blocks$Design$Level_1)
+    allocation_df <- as.data.frame.matrix(allocation)
+    colnames(allocation_df) <- paste0("LOC", 1:l)
+    allocation_df <- as.matrix(allocation_df)
+    #check for unbalanced locations
+    if (design == "prep") {
+        size_locs <- as.vector(base::colSums(allocation_df))
+        max_size_locs <- max(size_locs)
+        if (!all(size_locs == max_size_locs)) {
+            unbalanced_locs <- which(size_locs != max_size_locs)
+            max_swaps <- length(unbalanced_locs)
+            k <- nrow(allocation_df)
+            init <- 1
+            while (init <= max_swaps) {
+                # Add an additional gen copy to the unbalanced locations
+                add_gen <- as.vector(allocation_df[k, unbalanced_locs])
+                if (length(which(add_gen == 1)) > 0) {
+                    one_index <- sample(which(add_gen == 1), size = 1)
+                    add_gen[one_index] <- 2
+                    allocation_df[k, unbalanced_locs] <- add_gen
+                    unbalanced_locs <- unbalanced_locs[-one_index]
+                    init <- init + 1
+                }
+                k <- k - 1
+            }
+        }
+    }
+    # Create a wide data frame with number of copies and average per plant
+    allocation_df <- as.data.frame(allocation_df)
+    col_sum <- base::colSums(allocation_df)
+    wide_allocation <- allocation_df %>%
+        dplyr::mutate(
+            copies = rowSums(.),
+            avg = copies / l
+        )
+    # Create a long data frame with the allocations per location
+    long_allocation <- as.data.frame(allocation) %>%
+        dplyr::rename_with(~c("ENTRY", "LOCATION", "REPS"), dplyr::everything()) %>%  # rename columns
+        dplyr::mutate(
+            LOCATION = gsub("B", "LOC", LOCATION),
+            NAME = paste0("G-", ENTRY)
+        ) %>%  
+        dplyr::select(LOCATION, ENTRY, NAME, REPS)
+    # Create a data frame for the checks
+    max_entry <- lines # Checks start at the last entry + 1 in the data frame
+    if (design != "prep") {
+        df_checks <- data.frame(
+            ENTRY = (max_entry + 1):((max_entry + checks)), 
+            NAME = paste0("CH-", (max_entry + 1):((max_entry + checks)))
+        )
+    } else {
+        df_checks <- data.frame(
+            ENTRY = (max_entry + 1):((max_entry + checks)), 
+            NAME = paste0("CH-", (max_entry + 1):((max_entry + checks))),
+            REPS = rep_checks
+        )
+    }
+    # Create a space in memory for the locations data entry list
+    list_locs <- setNames(
+        object = vector(mode = "list", length = l), 
+        nm = unique(long_allocation$LOCATION)
+    )
+    # Generate the lists of entries for each location
+    for (site in unique(long_allocation$LOCATION)) {
+        df_loc <- long_allocation %>% 
+            dplyr::filter(LOCATION == site, REPS > 0) %>% 
+            dplyr::mutate(ENTRY = as.numeric(ENTRY)) %>% 
+            dplyr::select(ENTRY, NAME, REPS) %>%
+            dplyr::bind_rows(df_checks) %>%
+            dplyr::arrange(dplyr::desc(ENTRY))
+        if (design == "prep") {
+            df_loc <- df_loc %>% 
+                dplyr::arrange(dplyr::desc(REPS))
+        }
+        list_locs[[site]] <- df_loc
+    }
+    
+    if (design == "sparse") {
+      size_locs <- as.vector(col_sum)
+      if (!all(size_locs == size_locs[1])) {
+        unbalanced_locs <- which(size_locs != size_locs[1])
+        for (unbalanced in unbalanced_locs) {
+          unbalanced_loc <- list_locs[[unbalanced]]
+          sparse_entries <- 1:lines
+          unbalanced_loc_entries <- unbalanced_loc[(checks + 1):nrow(unbalanced_loc), 1]
+          gen_balanced_loc <- sample(sparse_entries[!sparse_entries %in% unbalanced_loc_entries], size = 1)
+          balanced_loc <- rbind(unbalanced_loc, c(gen_balanced_loc, paste0("G-", gen_balanced_loc), 1))
+          list_locs[[unbalanced]] <- balanced_loc
+        }
+      }
+    }
 
+    out <- list(
+        list_locs = list_locs,
+        allocation = allocation_df, 
+        size_locations = col_sum
+    )
+    class(out) <- "Sparse"
+    return(out)
+}
 
 #' @title  average prep allocation
 #' @noRd 
@@ -171,7 +279,6 @@ average_allocation <- function(
 
 
 library(FielDHub)
-
 optim_list <- do_optim(
     design = "prep",
     lines = 360, 
@@ -206,7 +313,7 @@ diag(test) = NA
 
 agriutilities::covcor_heat(test,   corr = FALSE, size = 10)
 
-
+library(FielDHub)
 prep <- average_allocation( 
     lines = 360, 
     l = 6, 
@@ -217,3 +324,109 @@ prep <- average_allocation(
     optim_list = optim_list,
     seed = 1234
 )
+
+
+prep$designs$LOC1
+
+library(FielDHub)
+optim_list <- FielDHub::do_optim(
+    design = "prep",
+    lines = 363, 
+    l = 6, 
+    plant_reps = 9, 
+    checks = 3, 
+    rep_checks = c(8,8,8),
+    seed = 87
+)
+
+optim_list$list_locs
+optim_list$allocation
+optim_list$size_locations
+
+design <- "prep"
+lines <- 363
+plant_reps <- 9
+l <- 6
+seed = 87
+optim_blocks <- blocksdesign::blocks(
+    treatments = lines, 
+    replicates = plant_reps, 
+    blocks = l, 
+    searches = 10, 
+    seed = seed
+)
+allocation <- table(optim_blocks$Design$treatments, optim_blocks$Design$Level_1)
+print(base::colSums(allocation))
+# size_locs <- as.vector(base::colSums(allocation))
+# max_size_locs <- max(size_locs)
+# unbalanced_locs <- which(size_locs != max_size_locs)
+# print(unbalanced_locs)
+# max_swaps <- length(unbalanced_locs)
+# k <- nrow(allocation)
+# k
+# key_value <- 1
+# add_value <- 2
+# add_gen <- as.vector(allocation[k, unbalanced_locs])
+# if (length(which(add_gen == key_value)) > 0) {
+#     add_gen <- as.vector(allocation[k, unbalanced_locs])
+#     one_index <- sample(which(add_gen == key_value), size = 1)
+#     add_gen[one_index] <- add_value
+#     allocation[k, unbalanced_locs] <- add_gen
+#     unbalanced_locs <- unbalanced_locs[-one_index]
+#     init <- init + 1
+# }
+
+# add_gen <- c(2,2,1)
+# which(add_gen == 1)[1]
+
+
+# sample(x = which(add_gen == 1), size = 1)
+
+# add_gen <- c(2, 2, 1)
+# sample(add_gen == 1, size = 1)
+key_value <- 0
+add_value <- 1
+if (design == "prep") {
+    key_value <- 1
+    add_value <- 2
+}
+size_locs <- as.vector(base::colSums(allocation))
+max_size_locs <- max(size_locs)
+if (!all(size_locs == max_size_locs)) {
+    unbalanced_locs <- which(size_locs != max_size_locs)
+    print(unbalanced_locs)
+    max_swaps <- length(unbalanced_locs)
+    k <- nrow(allocation)
+    init <- 1
+    while (init <= max_swaps) {
+        print(unbalanced_locs)
+        # Add an additional gen copy to the unbalanced locations
+        add_gen <- as.vector(allocation[k, unbalanced_locs])
+        if (length(which(add_gen == key_value)) > 0) {
+            one_index <- which(add_gen == 1)[1] #sample(which(add_gen == key_value), size = 1)
+            add_gen[one_index] <- add_value
+            allocation[k, unbalanced_locs] <- add_gen
+            unbalanced_locs <- unbalanced_locs[-one_index]
+            init <- init + 1
+        }
+        k <- k - 1
+    }
+}
+allocation_df <- as.data.frame.matrix(allocation)
+colnames(allocation_df) <- paste0("LOC", 1:l)
+# Create a wide data frame with number of copies and average per plant
+col_sum <- base::colSums(allocation_df)
+print(col_sum)
+wide_allocation <- allocation_df %>%
+    dplyr::mutate(
+        copies = rowSums(.),
+        avg = copies / l
+    )
+# Create a long data frame with the allocations per location
+long_allocation <- as.data.frame(allocation) %>%
+    dplyr::rename_with(~c("ENTRY", "LOCATION", "REPS"), dplyr::everything()) %>%  # rename columns
+    dplyr::mutate(
+        LOCATION = gsub("B", "LOC", LOCATION),
+        NAME = paste0("G-", ENTRY)
+    ) %>%  
+    dplyr::select(LOCATION, ENTRY, NAME, REPS)

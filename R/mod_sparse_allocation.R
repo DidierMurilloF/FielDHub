@@ -472,8 +472,14 @@ mod_sparse_allocation_server <- function(id){
     })
 
     output$sparse_allocation <- DT::renderDT({
+        locs <- single_inputs()$sites
         df <- as.data.frame(sparse_setup()$allocation)
-        rownames(df) <- paste0("Genotype-", 1:nrow(df))
+        df <- df %>% 
+            dplyr::mutate(
+                Copies = rowSums(.)
+            ) %>%
+            dplyr::bind_rows(colSums(.))
+        rownames(df) <- c(paste0("Genotype-", 1:(nrow(df) - 1)), "Total")
         DT::datatable(
           df,
           caption = 'Table 1: Genotype Allocation Across Environments.',

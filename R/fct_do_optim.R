@@ -13,9 +13,9 @@
 #' @examples 
 #' sparse_example <- do_optim(
 #'    design = "sparse",
-#'    lines = 320, 
-#'    l = 5, 
-#'    plant_reps = 4, 
+#'    lines = 240, 
+#'    l = 4, 
+#'    plant_reps = 3, 
 #'    checks = 4, 
 #'    seed = 15
 #' )
@@ -29,23 +29,53 @@ do_optim <- function(design = "prep", lines, l, plant_reps, checks, rep_checks, 
         searches = 10, 
         seed = seed
     )
+    # 
     allocation <- table(optim_blocks$Design$treatments, optim_blocks$Design$Level_1)
+    print(base::colSums(allocation))
+    key_value <- 0
+    add_value <- 1
+    if (design == "prep") {
+        key_value <- 1
+        add_value <- 2
+    }
+    size_locs <- as.vector(base::colSums(allocation))
+    max_size_locs <- max(size_locs)
+    if (!all(size_locs == max_size_locs)) {
+        unbalanced_locs <- which(size_locs != max_size_locs)
+        print(unbalanced_locs)
+        max_swaps <- length(unbalanced_locs)
+        k <- nrow(allocation)
+        init <- 1
+        while (init <= max_swaps) {
+            print(unbalanced_locs)
+            # Add an additional gen copy to the unbalanced locations
+            add_gen <- as.vector(allocation[k, unbalanced_locs])
+            if (length(which(add_gen == key_value)) > 0) {
+                one_index <- which(add_gen == key_value)[1] #sample(which(add_gen == key_value), size = 1)
+                add_gen[one_index] <- add_value
+                allocation[k, unbalanced_locs] <- add_gen
+                unbalanced_locs <- unbalanced_locs[-one_index]
+                init <- init + 1
+            }
+            k <- k - 1
+        }
+    }
     allocation_df <- as.data.frame.matrix(allocation)
     colnames(allocation_df) <- paste0("LOC", 1:l)
+    # Create a wide data frame with number of copies and average per plant
     col_sum <- base::colSums(allocation_df)
     print(col_sum)
-    # Create a wide data frame with number of copies and average per plant
     wide_allocation <- allocation_df %>%
         dplyr::mutate(
-        copies = rowSums(.),
-        avg = copies / l
+            copies = rowSums(.),
+            avg = copies / l
         )
     # Create a long data frame with the allocations per location
     long_allocation <- as.data.frame(allocation) %>%
         dplyr::rename_with(~c("ENTRY", "LOCATION", "REPS"), dplyr::everything()) %>%  # rename columns
         dplyr::mutate(
-        LOCATION = gsub("B", "LOC", LOCATION),
-        NAME = paste0("G-", ENTRY)
+            LOCATION = gsub("B", "LOC", LOCATION),
+            NAME = paste0("G-", ENTRY)
         ) %>%  
         dplyr::select(LOCATION, ENTRY, NAME, REPS)
     # Create a data frame for the checks
@@ -56,11 +86,13 @@ do_optim <- function(design = "prep", lines, l, plant_reps, checks, rep_checks, 
             NAME = paste0("CH-", (max_entry + 1):((max_entry + checks)))
         )
     } else {
-        df_checks <- data.frame(
-            ENTRY = (max_entry + 1):((max_entry + checks)), 
-            NAME = paste0("CH-", (max_entry + 1):((max_entry + checks))),
-            REPS = rep_checks
-        )
+        if (!is.null(rep_checks) && !is.null(checks)) {
+            df_checks <- data.frame(
+                ENTRY = (max_entry + 1):((max_entry + checks)), 
+                NAME = paste0("CH-", (max_entry + 1):((max_entry + checks))),
+                REPS = rep_checks
+            )
+        } else df_checks <- NULL
     }
     # Create a space in memory for the locations data entry list
     list_locs <- setNames(
@@ -70,30 +102,33 @@ do_optim <- function(design = "prep", lines, l, plant_reps, checks, rep_checks, 
     # Generate the lists of entries for each location
     for (site in unique(long_allocation$LOCATION)) {
         df_loc <- long_allocation %>% 
-        dplyr::filter(LOCATION == site, REPS > 0) %>% 
-        dplyr::mutate(ENTRY = as.numeric(ENTRY)) %>% 
-        dplyr::select(ENTRY, NAME, REPS) %>%
-        dplyr::bind_rows(df_checks) %>%
-        dplyr::arrange(dplyr::desc(ENTRY))
-        
+            dplyr::filter(LOCATION == site, REPS > 0) %>% 
+            dplyr::mutate(ENTRY = as.numeric(ENTRY)) %>% 
+            dplyr::select(ENTRY, NAME, REPS) %>%
+            dplyr::bind_rows(df_checks) %>%
+            dplyr::arrange(dplyr::desc(ENTRY)) 
+
+        if (design == "prep") {
+            df_loc <- df_loc %>% 
+                dplyr::arrange(dplyr::desc(REPS))
+        }
         list_locs[[site]] <- df_loc
     }
     
-    if (design == "sparse") {
-      size_locs <- as.vector(col_sum)
-      if (!all(size_locs == size_locs[1])) {
-        unbalanced_locs <- which(size_locs != size_locs[1])
-        for (unbalanced in unbalanced_locs) {
-          unbalanced_loc <- list_locs[[unbalanced]]
-          sparse_entries <- 1:lines
-          unbalanced_loc_entries <- unbalanced_loc[(checks + 1):nrow(unbalanced_loc), 1]
-          gen_balanced_loc <- sample(sparse_entries[!sparse_entries %in% unbalanced_loc_entries], size = 1)
-          balanced_loc <- rbind(unbalanced_loc, c(gen_balanced_loc, paste0("G-", gen_balanced_loc), 1))
-          list_locs[[unbalanced]] <- balanced_loc
-        }
-      }
-    }
-
+    # if (design == "sparse") {
+    #     size_locs <- as.vector(col_sum)
+    #     if (!all(size_locs == size_locs[1])) {
+    #         unbalanced_locs <- which(size_locs != size_locs[1])
+    #         for (unbalanced in unbalanced_locs) {
+    #             unbalanced_loc <- list_locs[[unbalanced]]
+    #             sparse_entries <- 1:lines
+    #             unbalanced_loc_entries <- unbalanced_loc[(checks + 1):nrow(unbalanced_loc), 1]
+    #             gen_balanced_loc <- sample(sparse_entries[!sparse_entries %in% unbalanced_loc_entries], size = 1)
+    #             balanced_loc <- rbind(unbalanced_loc, c(gen_balanced_loc, paste0("G-", gen_balanced_loc), 1))
+    #             list_locs[[unbalanced]] <- balanced_loc
+    #         }
+    #     }
+    # }
     out <- list(
         list_locs = list_locs,
         allocation = allocation_df, 
@@ -132,9 +167,7 @@ do_optim <- function(design = "prep", lines, l, plant_reps, checks, rep_checks, 
 #' @examples
 #' sparse <- sparse_allocation(
 #' checks_allocation = "diagonal",
-#'   lines = 380, 
-#'   nrows = 16, 
-#'   ncols = 22, 
+#'   lines = 260, 
 #'   l = 6, 
 #'   plant_reps = 5, 
 #'   checks = 4, 
