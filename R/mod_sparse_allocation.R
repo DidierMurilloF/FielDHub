@@ -47,7 +47,7 @@ mod_sparse_allocation_ui <- function(id) {
                        min = 50),
         ),
         selectInput(inputId = ns("checks_allocation"),
-                    label = "Way to allocate checks:",
+                    label = "Method for Distributing Checks:",
                     choices = c("Diagonal", "Completely Random"),
                     selected = "Diagonal"
 
@@ -66,7 +66,7 @@ mod_sparse_allocation_ui <- function(id) {
           ),
           column(6,style=list("padding-left: 5px;"),
                  selectInput(inputId = ns("sparse_loc_view"), 
-                             label = "Choose location to view:", 
+                             label = "Choose Location to View:", 
                              choices = 1, 
                              selected = 1, 
                              multiple = FALSE)
@@ -74,14 +74,16 @@ mod_sparse_allocation_ui <- function(id) {
         ),
         selectInput(
             inputId = ns("plant_reps"), 
-            label = "# of Copies per plant:",
+            label = "# of Copies Per Plant:",
             choices = 1:6
         ),
-        selectInput(inputId = ns("sparse_planter"), 
-                    label = "Plot Order Layout:",
-                    choices = c("serpentine", "cartesian"), 
-                    multiple = FALSE,
-                    selected = "serpentine"),
+        selectInput(
+            inputId = ns("sparse_planter"), 
+            label = "Plot Order Layout:",
+            choices = c("serpentine", "cartesian"), 
+            multiple = FALSE,
+            selected = "serpentine"
+        ),
         fluidRow(
           column(6,
                  style=list("padding-right: 28px;"),

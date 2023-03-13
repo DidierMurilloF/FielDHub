@@ -24,7 +24,7 @@ mod_average_pREPS_ui <- function(id){
                 inputId = ns("include_checks"), 
                 label = "Include checks?", 
                 choices = c("Yes", "No"), 
-                selected = "Yes",
+                selected = "No",
                 inline = TRUE, 
                 width = NULL, 
                 choiceNames = NULL, 
@@ -33,37 +33,45 @@ mod_average_pREPS_ui <- function(id){
             conditionalPanel(
                 condition = "input.include_checks  == 'Yes'", 
                 ns = ns,
-                numericInput(
-                    inputId = ns("prep_checks_met"),
-                    label = "Input # of Checks:",
-                    min = 1,
-                    max = 10,
-                    value = 3
-                ),
-                textInput(
-                    inputId = ns("prep_checks"), 
-                    label = "Input # Check's Reps:", 
-                    value = "8,8,8"
+                fluidRow(
+                    column(6,
+                        numericInput(
+                            inputId = ns("prep_checks_met"),
+                            label = "Input # of Checks:",
+                            min = 1,
+                            max = 10,
+                            value = 3
+                        )
+                    ),
+                    column(6,
+                        textInput(
+                            inputId = ns("prep_checks"), 
+                            label = "Input # Check's Reps:", 
+                            value = "8,8,8"
+                        )
+                    )
                 )
             ),
             fluidRow(
                 column(6, 
-                        numericInput(inputId = ns("locs_prep"), 
-                                    label = "Input # of Locations:", 
-                                    value = 6, 
-                                    min = 1)
+                        numericInput(
+                            inputId = ns("locs_prep"), 
+                            label = "Input # of Locations:", 
+                            value = 6, 
+                            min = 1)
                 ),
                 column(6,
-                        selectInput(inputId = ns("loc_to_view_preps"), 
-                                    label = "Choose location to view:", 
-                                    choices = 1:1, 
-                                    selected = 1,
-                                    multiple = FALSE)
+                        selectInput(
+                            inputId = ns("loc_to_view_preps"), 
+                            label = "Choose Location to View:", 
+                            choices = 1:1, 
+                            selected = 1,
+                            multiple = FALSE)
                 )
             ),
             selectInput(
                 inputId = ns("plant_copies_preps"), 
-                label = "# of copies per plant:",
+                label = "# of Copies Per Plant:",
                 choices = 1:6
             ),
             selectInput(

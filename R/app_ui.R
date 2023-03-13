@@ -42,7 +42,7 @@ app_ui <- function(request) {
                                              mod_sparse_allocation_ui("sparse_allocation_ui_1")
                                     )
                          ),
-                         navbarMenu("Partially Replicated Designs (p-rep)",
+                         navbarMenu("Partially Replicated Designs",
                             tabPanel("Augmented P-rep",
                                     mod_pREPS_ui("pREPS_ui_1")
                             ),
