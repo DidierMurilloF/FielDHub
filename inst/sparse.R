@@ -430,3 +430,30 @@ long_allocation <- as.data.frame(allocation) %>%
         NAME = paste0("G-", ENTRY)
     ) %>%  
     dplyr::select(LOCATION, ENTRY, NAME, REPS)
+
+
+
+optim_blocks <- blocksdesign::blocks(
+    treatments = 21, 
+    replicates = 3, 
+    blocks = 9, 
+    searches = 10, 
+    seed = 1
+)
+
+
+library(FielDHub)
+ optim_multi_prep <- multi_location_prep(
+   lines = 240,  
+   l = 6, 
+   plant_reps = 9, 
+   checks = 3, 
+   rep_checks = c(6,6,6),
+   locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5", "LOC6"), 
+   seed = 1234
+ )
+ designs <- optim_multi_prep$designs
+ field_book_loc_1 <- designs$LOC1$fieldBook
+ head(field_book_loc_1, 10)
+
+

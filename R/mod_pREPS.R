@@ -42,10 +42,10 @@ mod_pREPS_ui <- function(id){
           condition = "input.owndataPREPS == 'No'", 
           ns = ns,
           textInput(ns("repGens.preps"), 
-                    label = "# of Entries per Rep Group:", 
+                    label = "# of Entries Per Rep Group:", 
                     value = "75,150"),
           textInput(inputId = ns("repUnits.preps"), 
-                    label = "# of Rep per Group:",
+                    label = "# of Rep Per Group:",
                     value = "2,1")
         ),
         fluidRow(
@@ -57,7 +57,7 @@ mod_pREPS_ui <- function(id){
           ),
           column(6, # style=list("padding-left: 5px;"),
                  selectInput(inputId = ns("locView.preps"), 
-                             label = "Choose location to view:", 
+                             label = "Choose Location to View:", 
                              choices = 1:1, 
                              selected = 1,
                              multiple = FALSE)

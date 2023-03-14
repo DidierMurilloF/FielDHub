@@ -23,4 +23,5 @@ utils::globalVariables(c("ENTRY",
                          "REPS",
                          "loc",
                          "copies",
-                         "."))
+                         ".",
+                         "Copies"))
