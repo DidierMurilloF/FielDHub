@@ -86,10 +86,10 @@ CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL,
         nt <- t
         trts <- paste(rep("T", nt), 1:nt, sep = "")
         TRT <- rep(trts, each = reps)
-      }else if(is.character(t) & length(t) > 1) {
+      } else if(is.character(t) & length(t) > 1) {
         TRT <- t
         nt <- length(t)
-      }else if(is.character(t) & length(t) > 1) {
+      } else if(is.character(t) & length(t) > 1) {
         shiny::validate('"CRD()" requires more than one treatment.')
       }
     } else {
@@ -97,7 +97,7 @@ CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL,
     }
     N <- nt * reps
     REP <- rep(1:reps, times = nt)
-  }else {
+  } else {
     if(!is.data.frame(data)) stop("Data must be a data frame.")
     if (ncol(data) < 2) validate("Data input needs at least two columns with the names: Treatment and Reps.")
     data <- as.data.frame(data[,1:2])
