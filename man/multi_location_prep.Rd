@@ -2,9 +2,7 @@
 % Please edit documentation in R/fct_do_optim.R
 \name{multi_location_prep}
 \alias{multi_location_prep}
-\title{Optimized multi-location partially replicated design
-
-Generates a spatial partially replicated design across multiple locations.}
+\title{Optimized multi-location partially replicated design}
 \usage{
 multi_location_prep(
   lines,
@@ -64,8 +62,6 @@ and one row with the size of the location.
 }
 \description{
 Optimized multi-location partially replicated design
-
-Generates a spatial partially replicated design across multiple locations.
 }
 \examples{
 # Example 1: Generates a spatial optimized multi-location p-rep design with 240 
