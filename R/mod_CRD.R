@@ -14,14 +14,16 @@ mod_CRD_ui <- function(id) {
     h4("Completely Randomized Design"),
     sidebarLayout(
       sidebarPanel(width = 4,
-                   radioButtons(inputId = ns("owndatacrd"), 
-                                label = "Import entries' list?",
-                                choices = c("Yes", "No"), 
-                                selected = "No",
-                                inline = TRUE, 
-                                width = NULL,
-                                choiceNames = NULL, 
-                                choiceValues = NULL),
+                   radioButtons(
+                        inputId = ns("owndatacrd"), 
+                        label = "Import entries' list?",
+                        choices = c("Yes", "No"), 
+                        selected = "No",
+                        inline = TRUE, 
+                        width = NULL,
+                        choiceNames = NULL, 
+                        choiceValues = NULL
+                    ),
                    conditionalPanel(
                      "input.owndatacrd != 'Yes'",
                      ns = ns,
