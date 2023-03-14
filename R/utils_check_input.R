@@ -56,7 +56,7 @@ check_input <- function(design, dataIn) {
       )
     } else return(NULL)
   } else if (design == "crd") {
-    if (ncol(dataIn) >= 2) {
+    if (ncol(dataIn) >= 1) {
       return(isTRUE(all.equal(dataIn[,1],unique(dataIn[,1]))))
     } else return(NULL)
   } else if (design == "factorial") {
