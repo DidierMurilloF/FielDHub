@@ -2,9 +2,19 @@
 % Please edit documentation in R/fct_do_optim.R
 \name{do_optim}
 \alias{do_optim}
-\title{Generate the sparse allocation}
+\title{Generate the sparse allocation.}
 \usage{
-do_optim(design = "prep", lines, l, plant_reps, checks, rep_checks, data, seed)
+do_optim(
+  design = "sparse",
+  lines,
+  l,
+  plant_reps,
+  add_checks = FALSE,
+  checks,
+  rep_checks,
+  data,
+  seed
+)
 }
 \arguments{
 \item{design}{Type of experimental design. It can be \code{prep} or \code{sparse}}
@@ -16,6 +26,8 @@ do_optim(design = "prep", lines, l, plant_reps, checks, rep_checks, data, seed)
 \item{plant_reps}{Number of copies per plant. 
 When design is \code{sparse} then \code{plant_reps} < \code{l}}
 
+\item{add_checks}{Option to add checks. Optional if \code{design = "prep"}}
+
 \item{checks}{Number of genotypes checks.}
 
 \item{rep_checks}{Replication for each check.}
@@ -25,7 +37,7 @@ When design is \code{sparse} then \code{plant_reps} < \code{l}}
 \item{seed}{(optional) Real number that specifies the starting seed to obtain reproducible designs.}
 }
 \description{
-Generate the sparse allocation
+Generate the sparse allocation.
 }
 \examples{
 sparse_example <- do_optim(
@@ -33,7 +45,11 @@ sparse_example <- do_optim(
    lines = 240, 
    l = 4, 
    plant_reps = 3, 
-   checks = 4, 
+   add_checks = TRUE, 
+   checks = 4,
    seed = 15
 )
+}
+\author{
+Didier Murillo, Salvador Gezan
 }

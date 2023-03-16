@@ -1,26 +1,37 @@
-#' @title  Generate the sparse allocation 
-#'
+#' @title  Generate the sparse allocation.
 #' @param design Type of experimental design. It can be \code{prep} or \code{sparse}
 #' @param lines Number of genotypes, experimental lines or treatments.
 #' @param l Number of locations or sites. By default  \code{l = 1}.
 #' @param plant_reps Number of copies per plant. 
 #' When design is \code{sparse} then \code{plant_reps} < \code{l}
+#' @param add_checks Option to add checks. Optional if \code{design = "prep"}
 #' @param checks Number of genotypes checks. 
 #' @param rep_checks Replication for each check.
 #' @param data A dataframe with the ENTRIES and NAMES
 #' @param seed (optional) Real number that specifies the starting seed to obtain reproducible designs.
 #' 
+#' @author Didier Murillo, Salvador Gezan
 #' @examples 
 #' sparse_example <- do_optim(
 #'    design = "sparse",
 #'    lines = 240, 
 #'    l = 4, 
 #'    plant_reps = 3, 
-#'    checks = 4, 
+#'    add_checks = TRUE, 
+#'    checks = 4,
 #'    seed = 15
 #' )
 #' @export 
-do_optim <- function(design = "prep", lines, l, plant_reps, checks, rep_checks, data, seed) {
+do_optim <- function(
+    design = "sparse", 
+    lines, 
+    l, 
+    plant_reps, 
+    add_checks = FALSE, 
+    checks, 
+    rep_checks, 
+    data, 
+    seed) {
     # You can change: searches & jumps
     optim_blocks <- blocksdesign::blocks(
         treatments = lines, 
@@ -81,12 +92,18 @@ do_optim <- function(design = "prep", lines, l, plant_reps, checks, rep_checks, 
     # Create a data frame for the checks
     max_entry <- lines # Checks start at the last entry + 1 in the data frame
     if (design != "prep") {
-        df_checks <- data.frame(
-            ENTRY = (max_entry + 1):((max_entry + checks)), 
-            NAME = paste0("CH-", (max_entry + 1):((max_entry + checks)))
-        )
+        if (!add_checks) stop("Un-replicated designs need checks")
+        if (!missing(checks) & checks > 0) {
+            df_checks <- data.frame(
+                ENTRY = (max_entry + 1):((max_entry + checks)), 
+                NAME = paste0("CH-", (max_entry + 1):((max_entry + checks)))
+            )
+        }
     } else {
-        if (!is.null(rep_checks) && !is.null(checks)) {
+        if (add_checks & !missing(checks) & !missing(rep_checks)) {
+            if (length(rep_checks) != checks) {
+                stop("Length of rep_checks does not match with number of checks")
+            } 
             df_checks <- data.frame(
                 ENTRY = (max_entry + 1):((max_entry + checks)), 
                 NAME = paste0("CH-", (max_entry + 1):((max_entry + checks))),
@@ -112,6 +129,12 @@ do_optim <- function(design = "prep", lines, l, plant_reps, checks, rep_checks, 
             df_loc <- df_loc %>% 
                 dplyr::arrange(dplyr::desc(REPS))
         }
+
+        if (design != "prep") {
+            df_loc <- df_loc %>% 
+                dplyr::select(ENTRY, NAME)
+        }
+
         list_locs[[site]] <- df_loc
     }
     # out object with the allocation and the list of entries per location
@@ -120,7 +143,7 @@ do_optim <- function(design = "prep", lines, l, plant_reps, checks, rep_checks, 
         allocation = allocation_df, 
         size_locations = col_sum
     )
-    # Create the class "Sparse" for the object out
+    # Create the class "SparsePrep" for the object out
     design_class <- "SparsePrep"
     if (design != "prep") design_class <- "Sparse"
     class(out) <- design_class
@@ -129,7 +152,6 @@ do_optim <- function(design = "prep", lines, l, plant_reps, checks, rep_checks, 
 }
 
 #' @title  Sparse allocation 
-#'
 #' @param checks_allocation Way to allocate the checks in the field. It can be
 #' \code{diagonal} or \code{randomly}
 #' @param lines Number of genotypes, experimental lines or treatments.
@@ -158,10 +180,10 @@ do_optim <- function(design = "prep", lines, l, plant_reps, checks, rep_checks, 
 #' sparse <- sparse_allocation(
 #' checks_allocation = "diagonal",
 #'   lines = 260, 
-#'   l = 6, 
+#'   l = 5, 
 #'   plant_reps = 5, 
 #'   checks = 4, 
-#'   locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5", "LOC6"), 
+#'   locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5"), 
 #'   seed = 1234
 #' )
 #' @export 
@@ -194,7 +216,8 @@ sparse_allocation <- function(
             design = "sparse",
             lines = lines, 
             l = l, 
-            plant_reps = plant_reps, 
+            plant_reps = plant_reps,
+            add_checks = TRUE, 
             checks = checks, 
             seed = seed
         )
@@ -252,8 +275,6 @@ sparse_allocation <- function(
 }
 
 #' @title  Optimized multi-location partially replicated design
-#' 
-#' 
 #' @param lines Number of genotypes, experimental lines or treatments.
 #' @param plant_reps Number of total copies per treatment.
 #' @param desired_avg (optional) Desired average of treatments across locations.
@@ -300,11 +321,11 @@ sparse_allocation <- function(
 #' # genotype allocation will be 1.5 plants copies per location. 
 #' optim_multi_prep <- multi_location_prep(
 #'   lines = 240,  
-#'   l = 6, 
-#'   plant_reps = 9, 
+#'   l = 5, 
+#'   plant_reps = 8, 
 #'   checks = 3, 
 #'   rep_checks = c(6,6,6),
-#'   locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5", "LOC6"), 
+#'   locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5"), 
 #'   seed = 1234
 #' )
 #' designs <- optim_multi_prep$designs
@@ -326,10 +347,14 @@ multi_location_prep <- function(
     locationNames,
     optim_list, 
     seed) {
+    if (missing(plant_reps) & missing(desired_avg)) {
+        stop("multi_location_prep() requires either plant_reps or desired_avg.")
+    } 
     if (missing(plant_reps)) {
         plant_reps <- ceiling(l * desired_avg)
     }
-
+    add_checks <- FALSE
+    if (!missing(checks) & !missing(rep_checks)) add_checks <- TRUE
     if (!missing(optim_list)) {
         if (!inherits(optim_list, "SparsePrep")) {
             stop("sparse_list must be an object of class 'SparsePrep'")
@@ -340,7 +365,8 @@ multi_location_prep <- function(
             design = "prep",
             lines = lines, 
             l = l, 
-            plant_reps = plant_reps, 
+            plant_reps = plant_reps,
+            add_checks = add_checks, 
             checks = checks, 
             rep_checks = rep_checks,
             seed = seed

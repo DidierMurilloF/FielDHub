@@ -14,17 +14,3 @@ ggdesplot(data = design, treatments ~ Rows + Cols)
 
 
 
-
-
-
-
-
-set.seed(54)
-rnorm(5)
-
-
-
-
-
-
-

@@ -73,11 +73,11 @@ Optimized multi-location partially replicated design
 # genotype allocation will be 1.5 plants copies per location. 
 optim_multi_prep <- multi_location_prep(
   lines = 240,  
-  l = 6, 
-  plant_reps = 9, 
+  l = 5, 
+  plant_reps = 8, 
   checks = 3, 
   rep_checks = c(6,6,6),
-  locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5", "LOC6"), 
+  locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5"), 
   seed = 1234
 )
 designs <- optim_multi_prep$designs

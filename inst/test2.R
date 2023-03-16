@@ -1,13 +1,18 @@
 library(FielDHub)
 library(blocksdesign)
-nt <- 36
-r <- 3
-k <- 6
+nt <- 16
+r <- 4
+k <- 4
 b <- nt/k
-
 ###  Directly Using blocksdesign ####
-mydes <- blocksdesign::blocks(treatments = nt, replicates = r+1, blocks = list(r+1, b), seed = 10)
-set.seed(7)
+mydes <- blocksdesign::blocks(
+    treatments = nt, 
+    replicates = r, 
+    blocks = list(r, b), 
+    seed = 10)
+
+mydes$Blocks_model
+mydes$
 
 M <- mydes$Design
 
@@ -29,6 +34,15 @@ e_values
 
 E <- (nt - 1) / sum(e_values)
 E
+
+### Turn the IBD into a Row-Column Design ###
+
+
+
+
+
+
+
 
 ##### Dropping the cycling REP ######
 rep_to_drop <- mydes$Design %>%

@@ -58,10 +58,10 @@ Sparse allocation
 sparse <- sparse_allocation(
 checks_allocation = "diagonal",
   lines = 260, 
-  l = 6, 
+  l = 5, 
   plant_reps = 5, 
   checks = 4, 
-  locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5", "LOC6"), 
+  locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5"), 
   seed = 1234
 )
 }
