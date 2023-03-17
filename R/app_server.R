@@ -27,7 +27,7 @@ app_server <- function( input, output, session ) {
   mod_sparse_allocation_server("sparse_allocation_ui_1")
   ################## Partially Replicated Module #################################
   mod_pREPS_server("pREPS_ui_1")
-  mod_average_pREPS_server("average_pREPS_ui_1")
+  mod_multi_loc_preps_server("multi_loc_preps_ui_1")
   ################## Lattice Designs #############################################
   ### Square Lattice
   mod_Square_Lattice_server("Square_Lattice_ui_1")

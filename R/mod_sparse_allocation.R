@@ -14,49 +14,68 @@ mod_sparse_allocation_ui <- function(id) {
     sidebarLayout(
       sidebarPanel(
         width = 4,
-        radioButtons(inputId = ns("input_sparse_data"),
-                     label = "Import entries' list?",
-                     choices = c("Yes", "No"), 
-                     selected = "No",
-                     inline = TRUE,
-                     width = NULL,
-                     choiceNames = NULL,
-                     choiceValues = NULL),
-        conditionalPanel(
-          condition = "input.input_sparse_data == 'Yes'", 
-          ns = ns,
-          fluidRow(
-            column(7, style=list("padding-right: 28px;"),
-                   fileInput(ns("sparse_file"), 
-                             label = "Upload a CSV File:", 
-                             multiple = FALSE)),
-            column(5,style=list("padding-left: 5px;"),
-                   radioButtons(ns("sparse_file_sep"), "Separator",
-                                choices = c(Comma = ",",
-                                            Semicolon = ";",
-                                            Tab = "\t"),
-                                selected = ","))
-          )              
+        radioButtons(
+            inputId = ns("input_sparse_data"),
+            label = "Import entries' list?",
+            choices = c("Yes", "No"), 
+            selected = "No",
+            inline = TRUE,
+            width = NULL,
+            choiceNames = NULL,
+            choiceValues = NULL
         ),
         conditionalPanel(
-          condition = "input.input_sparse_data == 'No'", 
-          ns = ns,
-          numericInput(inputId = ns("sparse_lines"), 
-                       label = "Input # of Entries:",
-                       value = 380, 
-                       min = 50),
+            condition = "input.input_sparse_data == 'Yes'", 
+            ns = ns,
+            fluidRow(
+                column(
+                    width = 7, 
+                    style=list("padding-right: 28px;"),
+                    fileInput(
+                        ns("sparse_file"), 
+                        label = "Upload a CSV File:", 
+                        multiple = FALSE
+                    )
+                ),
+                column(
+                    width = 5,
+                    tyle=list("padding-left: 5px;"),
+                    radioButtons(
+                        ns("sparse_file_sep"), "Separator",
+                        choices = c(Comma = ",",
+                                    Semicolon = ";",
+                                    Tab = "\t"),
+                        selected = ",")
+                )
+            )              
         ),
-        selectInput(inputId = ns("checks_allocation"),
-                    label = "Method for Distributing Checks:",
-                    choices = c("Diagonal", "Completely Random"),
-                    selected = "Diagonal"
-
+        # conditionalPanel(
+        #   condition = "input.input_sparse_data == 'No'", 
+        #   ns = ns,
+        #   numericInput(inputId = ns("sparse_lines"), 
+        #                label = "Input # of Entries:",
+        #                value = 380, 
+        #                min = 50),
+        # ),
+        numericInput(
+            inputId = ns("sparse_lines"), 
+            label = "Input # of Entries:",
+            value = 380, 
+            min = 50
         ),
-        selectInput(inputId = ns("sparse_checks"),
-                    label = "Input # of Checks:",
-                    choices = c(1:10),
-                    multiple = FALSE,
-                    selected = 4),
+        selectInput(
+            inputId = ns("checks_allocation"),
+            label = "Method for Distributing Checks:",
+            choices = c("Diagonal", "Completely Random"),
+            selected = "Diagonal"
+        ),
+        selectInput(
+            inputId = ns("sparse_checks"),
+            label = "Input # of Checks:",
+            choices = c(1:10),
+            multiple = FALSE,
+            selected = 4
+        ),
         fluidRow(
           column(6,style=list("padding-right: 28px;"),
                  numericInput(inputId = ns("sparse_locations"), 
@@ -305,6 +324,8 @@ mod_sparse_allocation_server <- function(id){
         Sys.sleep(2)
         Option_NCD <- TRUE
         if (input$input_sparse_data == "Yes") {
+            req(input$sparse_lines)
+            req(input$sparse_checks)
             req(input$sparse_file)
             inFile <- input$sparse_file
             data_ingested <- load_file(
@@ -325,10 +346,19 @@ mod_sparse_allocation_server <- function(id){
                 colnames(data_entry_UP) <- c("ENTRY", "NAME")
                 checksEntries <- as.numeric(data_entry_UP[1:input$sparse_checks,1])
                 dim_data_entry <- nrow(data_entry_UP)
-                dim_data_1 <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
+                entries_in_file <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
+                input_lines <- as.numeric(input$sparse_lines)
+                if (entries_in_file != input_lines) {
+                    shinyalert::shinyalert(
+                        "Error!!", 
+                        "Number of entries in file does not match with the input value.", 
+                        type = "error"
+                    )
+                    return(NULL)
+                }
                 return(list(data_entry = data_entry_UP, 
                             dim_data_entry = dim_data_entry, 
-                            dim_without_checks = dim_data_1))
+                            dim_without_checks = entries_in_file))
             } else if (names(data_ingested) == "bad_format") {
             shinyalert::shinyalert(
                 "Error!!", 
@@ -362,12 +392,12 @@ mod_sparse_allocation_server <- function(id){
             data_entry_UP <- gen.list
             colnames(data_entry_UP) <- c("ENTRY", "NAME")
             dim_data_entry <- nrow(data_entry_UP)
-            dim_data_1 <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
+            lines <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
             return(
                 list(
                     data_entry = data_entry_UP, 
                     dim_data_entry = dim_data_entry, 
-                    dim_without_checks = dim_data_1
+                    dim_without_checks = lines
                 )
             )
         }
@@ -380,6 +410,7 @@ mod_sparse_allocation_server <- function(id){
         lines = lines, 
         l = single_inputs()$sites, 
         plant_reps = single_inputs()$plant_reps, 
+        add_checks = TRUE,
         checks = as.numeric(input$sparse_checks), 
         seed = single_inputs()$seed_number
       )

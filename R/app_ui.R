@@ -47,7 +47,7 @@ app_ui <- function(request) {
                                     mod_pREPS_ui("pREPS_ui_1")
                             ),
                             tabPanel("Optimized Multi-Location p-rep",
-                                    mod_average_pREPS_ui("average_pREPS_ui_1")
+                                    mod_multi_loc_preps_ui("multi_loc_preps_ui_1")
                             )
                          ),
                          navbarMenu("Lattice Designs",

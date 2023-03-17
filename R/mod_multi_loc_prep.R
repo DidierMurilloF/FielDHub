@@ -1,4 +1,4 @@
-#' average_pREPS UI Function
+#' multi_loc_preps UI Function
 #'
 #' @description A shiny Module.
 #'
@@ -7,7 +7,7 @@
 #' @noRd 
 #'
 #' @importFrom shiny NS tagList 
-mod_average_pREPS_ui <- function(id){
+mod_multi_loc_preps_ui <- function(id){
   ns <- NS(id)
   tagList(
     h4("Partially Replicated Design"),
@@ -17,7 +17,7 @@ mod_average_pREPS_ui <- function(id){
             numericInput(
                 inputId = ns("gens_prep"), 
                 label = "Input # of genotypes:",
-                value = 360,
+                value = 320,
                 min = 1
             ),
             radioButtons(
@@ -34,7 +34,8 @@ mod_average_pREPS_ui <- function(id){
                 condition = "input.include_checks  == 'Yes'", 
                 ns = ns,
                 fluidRow(
-                    column(6,
+                    column(
+                        width = 6,
                         numericInput(
                             inputId = ns("prep_checks_met"),
                             label = "Input # of Checks:",
@@ -43,7 +44,8 @@ mod_average_pREPS_ui <- function(id){
                             value = 3
                         )
                     ),
-                    column(6,
+                    column(
+                        width = 6,
                         textInput(
                             inputId = ns("prep_checks"), 
                             label = "Input # Check's Reps:", 
@@ -53,20 +55,24 @@ mod_average_pREPS_ui <- function(id){
                 )
             ),
             fluidRow(
-                column(6, 
-                        numericInput(
-                            inputId = ns("locs_prep"), 
-                            label = "Input # of Locations:", 
-                            value = 6, 
-                            min = 1)
+                column(
+                    width = 6, 
+                    numericInput(
+                        inputId = ns("locs_prep"), 
+                        label = "Input # of Locations:", 
+                        value = 6, 
+                        min = 1
+                    )
                 ),
-                column(6,
-                        selectInput(
-                            inputId = ns("loc_to_view_preps"), 
-                            label = "Choose Location to View:", 
-                            choices = 1:1, 
-                            selected = 1,
-                            multiple = FALSE)
+                column(
+                    width = 6,
+                    selectInput(
+                        inputId = ns("loc_to_view_preps"), 
+                        label = "Choose Location to View:", 
+                        choices = 1:1, 
+                        selected = 1,
+                        multiple = FALSE
+                    )
                 )
             ),
             selectInput(
@@ -82,44 +88,60 @@ mod_average_pREPS_ui <- function(id){
                 selected = "serpentine"
             ),
             fluidRow(
-                column(6,
-                        numericInput(ns("seed_preps"), 
-                                    label = "Seed number:", 
-                                    value = 1, 
-                                    min = 1)
+                column(
+                    width = 6,
+                    numericInput(
+                        ns("seed_preps"), 
+                        label = "Seed number:", 
+                        value = 1, 
+                        min = 1
+                    )
                 ),
-                column(6, 
-                        textInput(ns("expt_name_preps"), 
-                                "Input Experiment Name:", 
-                                value = "Expt1")
+                column(
+                    width = 6, 
+                    textInput(
+                        ns("expt_name_preps"), 
+                        "Input Experiment Name:", 
+                        value = "Expt1"
+                    )
                 )
             ),  
             fluidRow(
-                column(6, 
-                        textInput(ns("plot_start_preps"), 
-                                "Starting Plot Number:", 
-                                value = 1)
+                column(
+                    width = 6, 
+                    textInput(
+                        ns("plot_start_preps"), 
+                        "Starting Plot Number:", 
+                        value = 1
+                    )
                 ),
-                column(6, 
-                        textInput(ns("loc_name_preps"), 
-                                "Input Location Name:", 
-                                value = "FARGO")
+                column(
+                    width = 6, 
+                    textInput(
+                        ns("loc_name_preps"), 
+                        "Input Location Name:", 
+                        value = "FARGO"
+                    )
                 )
             ),
             fluidRow(
-                column(6,
-                        actionButton(
+                column(
+                    width = 6,
+                    actionButton(
                         inputId = ns("run_prep"), 
                         label = "Run!", 
                         icon = icon("circle-nodes", verify_fa = FALSE),
-                        width = '100%'),
+                        width = '100%'
+                    )
                 ),
-                column(6,
-                        actionButton(
+                column(
+                    width = 6,
+                    actionButton(
                         ns("simulate_prep_data"), 
                         label = "Simulate!", 
                         icon = icon("greater-than-equal", verify_fa = FALSE),
-                        width = '100%'),
+                        width = '100%'
+                    )
                 )
             ),
             br(),
@@ -160,10 +182,10 @@ mod_average_pREPS_ui <- function(id){
     )
   )
 }
-#' average_pREPS Server Functions
+#' multi_loc_preps Server Functions
 #'
 #' @noRd 
-mod_average_pREPS_server <- function(id){
+mod_multi_loc_preps_server <- function(id){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
 
@@ -295,11 +317,14 @@ mod_average_pREPS_server <- function(id){
     # })
     setup_optim_prep <- reactive({
         req(prep_inputs())
+        add_checks <- FALSE
+        if (input$include_checks == "Yes") add_checks <- TRUE
         do_optim(
             design = "prep",
             lines = input$gens_prep, 
             l = as.numeric(input$locs_prep), 
             plant_reps = as.numeric(input$plant_copies_preps), 
+            add_checks = add_checks,
             checks = prep_inputs()$checks, 
             rep_checks = prep_inputs()$prep_checks,
             seed = prep_inputs()$seed_number,

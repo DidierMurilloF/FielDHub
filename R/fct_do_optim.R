@@ -32,7 +32,12 @@ do_optim <- function(
     rep_checks, 
     data, 
     seed) {
-    # You can change: searches & jumps
+    # set a random seed if it is missing
+    if (missing(seed)) seed <- base::sample.int(10000, size = 1) 
+    if (design == "prep" & plant_reps <= l) { 
+        stop("p-reps option requires that plant_reps be greater than the number of locations")
+    }
+    # Generate the optim IBs
     optim_blocks <- blocksdesign::blocks(
         treatments = lines, 
         replicates = plant_reps, 
@@ -42,7 +47,6 @@ do_optim <- function(
     )
     # 
     allocation <- table(optim_blocks$Design$treatments, optim_blocks$Design$Level_1)
-    print(base::colSums(allocation))
     key_value <- 0
     add_value <- 1
     if (design == "prep") {
@@ -53,12 +57,10 @@ do_optim <- function(
     max_size_locs <- max(size_locs)
     if (!all(size_locs == max_size_locs)) {
         unbalanced_locs <- which(size_locs != max_size_locs)
-        print(unbalanced_locs)
         max_swaps <- length(unbalanced_locs)
         k <- nrow(allocation)
         init <- 1
         while (init <= max_swaps) {
-            print(unbalanced_locs)
             # Add an additional gen copy to the unbalanced locations
             add_gen <- as.vector(allocation[k, unbalanced_locs])
             if (length(which(add_gen == key_value)) > 0) {
@@ -75,7 +77,6 @@ do_optim <- function(
     colnames(allocation_df) <- paste0("LOC", 1:l)
     # Create a wide data frame with number of copies and average per plant
     col_sum <- base::colSums(allocation_df)
-    print(col_sum)
     wide_allocation <- allocation_df %>%
         dplyr::mutate(
             copies = rowSums(.),
@@ -100,7 +101,7 @@ do_optim <- function(
             )
         }
     } else {
-        if (add_checks & !missing(checks) & !missing(rep_checks)) {
+        if (add_checks == TRUE & !missing(checks) & !missing(rep_checks)) {
             if (length(rep_checks) != checks) {
                 stop("Length of rep_checks does not match with number of checks")
             } 
@@ -144,7 +145,7 @@ do_optim <- function(
         size_locations = col_sum
     )
     # Create the class "SparsePrep" for the object out
-    design_class <- "SparsePrep"
+    design_class <- "MultiPrep"
     if (design != "prep") design_class <- "Sparse"
     class(out) <- design_class
     #return the object out
@@ -201,6 +202,8 @@ sparse_allocation <- function(
     locationNames,
     sparse_list, 
     seed) {
+    # set a random seed if it is missing
+    if (missing(seed)) seed <- base::sample.int(10000, size = 1)   
     # Check if the reps per plant are mising
     if (missing(plant_reps)) {
         stop("You must specify the number of reps per plant")
@@ -320,7 +323,7 @@ sparse_allocation <- function(
 #' # number of entries per location will be 360. Also, the overal average 
 #' # genotype allocation will be 1.5 plants copies per location. 
 #' optim_multi_prep <- multi_location_prep(
-#'   lines = 240,  
+#'   lines = 180,  
 #'   l = 5, 
 #'   plant_reps = 8, 
 #'   checks = 3, 
@@ -347,6 +350,8 @@ multi_location_prep <- function(
     locationNames,
     optim_list, 
     seed) {
+    # set a random seed if it is missing
+    if (missing(seed)) seed <- base::sample.int(10000, size = 1)  
     if (missing(plant_reps) & missing(desired_avg)) {
         stop("multi_location_prep() requires either plant_reps or desired_avg.")
     } 
@@ -356,7 +361,7 @@ multi_location_prep <- function(
     add_checks <- FALSE
     if (!missing(checks) & !missing(rep_checks)) add_checks <- TRUE
     if (!missing(optim_list)) {
-        if (!inherits(optim_list, "SparsePrep")) {
+        if (!inherits(optim_list, "MultiPrep")) {
             stop("sparse_list must be an object of class 'SparsePrep'")
         }
         preps <- optim_list

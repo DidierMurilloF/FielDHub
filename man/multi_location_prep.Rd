@@ -72,7 +72,7 @@ Optimized multi-location partially replicated design
 # number of entries per location will be 360. Also, the overal average 
 # genotype allocation will be 1.5 plants copies per location. 
 optim_multi_prep <- multi_location_prep(
-  lines = 240,  
+  lines = 180,  
   l = 5, 
   plant_reps = 8, 
   checks = 3, 
