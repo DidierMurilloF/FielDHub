@@ -3,11 +3,10 @@
 #' @param lines Number of genotypes, experimental lines or treatments.
 #' @param l Number of locations or sites. By default  \code{l = 1}.
 #' @param plant_reps Number of copies per plant. 
-#' When design is \code{sparse} then \code{plant_reps} < \code{l}
+#' When design is \code{sparse} then \code{plant_reps} should be less than \code{l}
 #' @param add_checks Option to add checks. Optional if \code{design = "prep"}
 #' @param checks Number of genotypes checks. 
 #' @param rep_checks Replication for each check.
-#' @param data A dataframe with the ENTRIES and NAMES
 #' @param seed (optional) Real number that specifies the starting seed to obtain reproducible designs.
 #' 
 #' @author Didier Murillo, Salvador Gezan
@@ -30,7 +29,6 @@ do_optim <- function(
     add_checks = FALSE, 
     checks, 
     rep_checks, 
-    data, 
     seed) {
     # set a random seed if it is missing
     if (missing(seed)) seed <- base::sample.int(10000, size = 1) 
@@ -45,7 +43,7 @@ do_optim <- function(
         searches = 20, 
         seed = seed
     )
-    # 
+    # Create allocation table
     allocation <- table(optim_blocks$Design$treatments, optim_blocks$Design$Level_1)
     key_value <- 0
     add_value <- 1
@@ -53,6 +51,7 @@ do_optim <- function(
         key_value <- 1
         add_value <- 2
     }
+    # Check if there are unbalanced locations and force them to be balanced
     size_locs <- as.vector(base::colSums(allocation))
     max_size_locs <- max(size_locs)
     if (!all(size_locs == max_size_locs)) {

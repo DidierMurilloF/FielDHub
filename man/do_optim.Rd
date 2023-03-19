@@ -12,7 +12,6 @@ do_optim(
   add_checks = FALSE,
   checks,
   rep_checks,
-  data,
   seed
 )
 }
@@ -24,15 +23,13 @@ do_optim(
 \item{l}{Number of locations or sites. By default  \code{l = 1}.}
 
 \item{plant_reps}{Number of copies per plant. 
-When design is \code{sparse} then \code{plant_reps} < \code{l}}
+When design is \code{sparse} then \code{plant_reps} should be less than \code{l}}
 
 \item{add_checks}{Option to add checks. Optional if \code{design = "prep"}}
 
 \item{checks}{Number of genotypes checks.}
 
 \item{rep_checks}{Replication for each check.}
-
-\item{data}{A dataframe with the ENTRIES and NAMES}
 
 \item{seed}{(optional) Real number that specifies the starting seed to obtain reproducible designs.}
 }

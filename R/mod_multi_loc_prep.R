@@ -327,7 +327,7 @@ mod_multi_loc_preps_server <- function(id){
             add_checks = add_checks,
             checks = prep_inputs()$checks, 
             rep_checks = prep_inputs()$prep_checks,
-            seed = prep_inputs()$seed_number,
+            seed = prep_inputs()$seed_number
         )
     }) %>%
         bindEvent(input$run_prep)

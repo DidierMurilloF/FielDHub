@@ -1,8 +1,7 @@
 library(magrittr)
 library(FielDHub)
-data_input <- read.csv("/data/sparse_entries_list.csv")
-data_input <- read.csv("/data/sparse_entries_list_two.csv")
-View(data_input)
+data_input <- read.csv("data/sparse_entries_list.csv")
+data_input <- read.csv("data/sparse_entries_list_two.csv")
 
 checks <- 4
 input_lines <- 380 + checks
