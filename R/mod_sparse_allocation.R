@@ -320,8 +320,7 @@ mod_sparse_allocation_server <- function(id){
                                                  "sparse_tabset_single",
                                                  selected = "tabPanel1"))
                                                   
-    get_sparse_data <- eventReactive(input$sparse_run, {
-        Sys.sleep(2)
+    get_sparse_data <- reactive({
         Option_NCD <- TRUE
         if (input$input_sparse_data == "Yes") {
             req(input$sparse_lines)
@@ -335,10 +334,9 @@ mod_sparse_allocation_server <- function(id){
                 check = TRUE, 
                 design = "sdiag"
             )
-            
             if (names(data_ingested) == "dataUp") {
                 data_up <- data_ingested$dataUp
-                if (ncol(data_entry) < 2) {
+                if (ncol(data_up) < 2) {
                     validate("Data input needs at least two Columns with the ENTRY and NAME.")
                 } 
                 data_entry_UP <- na.omit(data_up[,1:2])
@@ -360,25 +358,25 @@ mod_sparse_allocation_server <- function(id){
                             dim_data_entry = dim_data_entry, 
                             dim_without_checks = entries_in_file))
             } else if (names(data_ingested) == "bad_format") {
-            shinyalert::shinyalert(
-                "Error!!", 
-                "Invalid file; Please upload a .csv file.", 
-                type = "error")
-            error_message <- "Invalid file; Please upload a .csv file."
-            return(NULL)
+                shinyalert::shinyalert(
+                    "Error!!", 
+                    "Invalid file; Please upload a .csv file.", 
+                    type = "error")
+                error_message <- "Invalid file; Please upload a .csv file."
+                return(NULL)
             } else if (names(data_ingested) == "duplicated_vals") {
-            shinyalert::shinyalert(
-                "Error!!", 
-                "Check input file for duplicate values.", 
-                type = "error")
-            error_message <- "Check input file for duplicate values."
-            return(NULL)
+                shinyalert::shinyalert(
+                    "Error!!", 
+                    "Check input file for duplicate values.", 
+                    type = "error")
+                error_message <- "Check input file for duplicate values."
+                return(NULL)
             } else if (names(data_ingested) == "missing_cols") {
-            shinyalert::shinyalert(
-                "Error!!", 
-                "Data input needs at least two columns: ENTRY and NAME",
-                type = "error")
-            return(NULL)
+                shinyalert::shinyalert(
+                    "Error!!", 
+                    "Data input needs at least two columns: ENTRY and NAME",
+                    type = "error")
+                return(NULL)
             }
         } else {
             req(input$sparse_lines)
@@ -386,10 +384,14 @@ mod_sparse_allocation_server <- function(id){
             sparse_checks <- as.numeric(input$sparse_checks)
             checksEntries <- 1:sparse_checks
             lines <- input$sparse_lines
-            NAME <- c(paste(rep("CH", sparse_checks), 1:sparse_checks, sep = ""),
-                        paste(rep("G", lines), (sparse_checks + 1):(lines + sparse_checks), sep = ""))
-            gen.list <- data.frame(list(ENTRY = 1:(lines + sparse_checks),	NAME = NAME))
-            data_entry_UP <- gen.list
+            max_entry <- lines
+            df_checks <- data.frame(
+                ENTRY = (max_entry + 1):((max_entry + checks)), 
+                NAME = paste0("CH-", (max_entry + 1):((max_entry + checks)))
+            )
+            NAME <- c(paste(rep("G-", lines), (sparse_checks + 1):(lines + sparse_checks), sep = ""))
+            gen.list <- data.frame(list(ENTRY = 1:lines, NAME = NAME))
+            data_entry_UP <- dplyr::bind_rows(df_checks, gen.list)
             colnames(data_entry_UP) <- c("ENTRY", "NAME")
             dim_data_entry <- nrow(data_entry_UP)
             lines <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
@@ -401,20 +403,49 @@ mod_sparse_allocation_server <- function(id){
                 )
             )
         }
-    })
+    }) %>%
+        bindEvent(input$sparse_run)
     
     sparse_setup <- reactive({
-      lines <- get_sparse_data()$dim_without_checks
-      do_optim(
-        design = "sparse",
-        lines = lines, 
-        l = single_inputs()$sites, 
-        plant_reps = single_inputs()$plant_reps, 
-        add_checks = TRUE,
-        checks = as.numeric(input$sparse_checks), 
-        seed = single_inputs()$seed_number
-      )
-    }) 
+        req(input$input_sparse_data)
+        req(get_sparse_data())
+        sparse_data_input <- get_sparse_data()$data_entry
+        lines <- get_sparse_data()$dim_without_checks
+        checks <- as.numeric(input$sparse_checks)
+        lines_plus_checks <- lines + checks
+        locs <- single_inputs()$sites
+        optim_out <- do_optim(
+            design = "sparse",
+            lines = lines, 
+            l = locs,
+            plant_reps = single_inputs()$plant_reps, 
+            add_checks = TRUE,
+            checks = as.numeric(input$sparse_checks), 
+            seed = single_inputs()$seed_number
+        )
+        if (input$input_sparse_data == "Yes") {
+            new_list_locs <- setNames(vector("list", length = locs), nm = paste0("LOC", 1:locs))
+            for (LOC in 1:locs) {
+                iter_loc <- optim_out$list_locs[[LOC]]
+                data_input_mutated <- sparse_data_input %>%
+                    dplyr::mutate(
+                        ENTRY_list = ENTRY,
+                        ENTRY = c((max_entry + 1):((max_entry + checks)), 1:lines)
+                    ) %>%
+                    dplyr::select(ENTRY_list, ENTRY, NAME) %>%
+                    dplyr::left_join(y = iter_loc, by = "ENTRY") %>%
+                    stats::na.omit() %>%
+                    dplyr::select(ENTRY_list, NAME.x) %>%
+                    dplyr::rename(ENTRY = ENTRY_list, NAME = NAME.x)
+                print(head(data_input_mutated))
+                print(nrow(data_input_mutated))
+                new_list_locs[[LOC]] <- data_input_mutated
+            }
+            optim_out$list_locs <- new_list_locs
+        }
+        return(optim_out)
+    }) %>%
+        bindEvent(input$sparse_run)
 
     getChecks <- eventReactive(input$sparse_run, {
       #req(sparse_setup())
@@ -537,38 +568,38 @@ mod_sparse_allocation_server <- function(id){
       return(list(d_row = d_row, d_col = d_col))
     })
 
-    # entryListFormat_SUDC <- data.frame(
-    #   ENTRY = 1:9, 
-    #   NAME = c(c("CHECK1", "CHECK2","CHECK3"), paste("Genotype", LETTERS[1:6], 
-    #                                                  sep = ""))
-    # )
+    entryListFormat_SUDC <- data.frame(
+      ENTRY = 1:9, 
+      NAME = c(c("CHECK1", "CHECK2","CHECK3"), paste("Genotype", LETTERS[1:6], 
+                                                     sep = ""))
+    )
     
-    # toListen <- reactive({
-    #   list(input$input_sparse_data, kindExpt_single)
-    # })
+    toListen <- reactive({
+      list(input$input_sparse_data, kindExpt_single)
+    })
     
-    # entriesInfoModal_SUDC <- function() {
-    #   modalDialog(
-    #     title = div(tags$h3("Important message", style = "color: red;")),
-    #     h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
-    #     renderTable(entryListFormat_SUDC,
-    #                 bordered = TRUE,
-    #                 align  = 'c',
-    #                 striped = TRUE),
-    #     h4("Note that the controls must be in the first rows of the CSV file."),
-    #     easyClose = FALSE
-    #   )
-    # }
+    entriesInfoModal_SUDC <- function() {
+      modalDialog(
+        title = div(tags$h3("Important message", style = "color: red;")),
+        h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
+        renderTable(entryListFormat_SUDC,
+                    bordered = TRUE,
+                    align  = 'c',
+                    striped = TRUE),
+        h4("Note that the controls must be in the first rows of the CSV file."),
+        easyClose = FALSE
+      )
+    }
 
-    # observeEvent(toListen(), {
-    #   if (input$input_sparse_data == "Yes" && kindExpt_single == "SUDC") {
-    #     showModal(
-    #       shinyjqui::jqui_draggable(
-    #         entriesInfoModal_SUDC()
-    #       )
-    #     )
-    #   }
-    # })
+    observeEvent(toListen(), {
+      if (input$input_sparse_data == "Yes" && kindExpt_single == "SUDC") {
+        showModal(
+          shinyjqui::jqui_draggable(
+            entriesInfoModal_SUDC()
+          )
+        )
+      }
+    })
 
     available_percent_table <- eventReactive(input$sparse_get_random, {
       req(input$sparse_dims)
@@ -918,7 +949,7 @@ mod_sparse_allocation_server <- function(id){
       for (user_site in 1:locs_diagonal) {
         loc_user_out_rand <- rand_checks()[[user_site]]
         w_map <- as.matrix(loc_user_out_rand$col_checks)
-        if("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE
+        if ("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE
         req(split_name_reactive()$my_names)
         req(plot_number_reactive())
         movement_planter = single_inputs()$planter_mov

@@ -29,11 +29,23 @@ do_optim <- function(
     add_checks = FALSE, 
     checks, 
     rep_checks, 
-    seed) {
+    seed,
+    data) {
     # set a random seed if it is missing
     if (missing(seed)) seed <- base::sample.int(10000, size = 1) 
     if (design == "prep" & plant_reps <= l) { 
         stop("p-reps option requires that plant_reps be greater than the number of locations")
+    }
+    if (!missing(data)) {
+        data_input <- stats::na.omit(data[,1:2])
+        df_checks <- data_input[1:checks,]
+        df_data <- data_input[(checks + 1):nrow(data_input),]
+        colnames(df_data) <- c("ENTRY", "NAME")
+        ENTRY <- as.vector(df_data$ENTRY)
+        NAME <- as.vector(df_data$NAME)
+        if (nrow(df_data) != lines) {
+            stop("The number of treatments/lines in the data does not match the input value")
+        }
     }
     # Generate the optim IBs
     optim_blocks <- blocksdesign::blocks(

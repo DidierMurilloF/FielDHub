@@ -12,7 +12,8 @@ do_optim(
   add_checks = FALSE,
   checks,
   rep_checks,
-  seed
+  seed,
+  data
 )
 }
 \arguments{
