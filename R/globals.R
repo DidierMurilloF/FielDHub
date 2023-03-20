@@ -24,4 +24,7 @@ utils::globalVariables(c("ENTRY",
                          "loc",
                          "copies",
                          ".",
-                         "Copies"))
+                         "Copies",
+                         "sparse_entry",
+                         "ENTRY_list",
+                         "NAME.x"))

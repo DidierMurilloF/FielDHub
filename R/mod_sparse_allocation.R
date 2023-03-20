@@ -247,6 +247,8 @@ mod_sparse_allocation_server <- function(id){
     })
     
     single_inputs <- eventReactive(input$sparse_run, {
+        req(input$sparse_lines)
+        input_sparse_lines <- as.numeric(input$sparse_lines)
         planter_mov <- input$sparse_planter
         Name_expt <- as.vector(unlist(strsplit(input$sparse_expt_name, ",")))
         blocks <- 1
@@ -261,6 +263,7 @@ mod_sparse_allocation_server <- function(id){
         sites = as.numeric(input$sparse_locations)
         return(
             list(
+                sparse_lines = input_sparse_lines,
                 sites = sites, 
                 location_names = location_names, 
                 seed_number = seed_number, 
@@ -326,6 +329,7 @@ mod_sparse_allocation_server <- function(id){
             req(input$sparse_lines)
             req(input$sparse_checks)
             req(input$sparse_file)
+            sparse_checks <- as.numeric(input$sparse_checks)
             inFile <- input$sparse_file
             data_ingested <- load_file(
                 name = inFile$name, 
@@ -340,12 +344,14 @@ mod_sparse_allocation_server <- function(id){
                     validate("Data input needs at least two Columns with the ENTRY and NAME.")
                 } 
                 data_entry_UP <- na.omit(data_up[,1:2])
-                # data_entry_UP <- data_entry
                 colnames(data_entry_UP) <- c("ENTRY", "NAME")
-                checksEntries <- as.numeric(data_entry_UP[1:input$sparse_checks,1])
+                checksEntries <- as.numeric(data_entry_UP[1:sparse_checks,1])
+                input_entries_column <- data_entry_UP[(sparse_checks + 1):nrow(data_entry_UP),1]
+                input_entries <- as.numeric(input_entries_column)
                 dim_data_entry <- nrow(data_entry_UP)
                 entries_in_file <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
                 input_lines <- as.numeric(input$sparse_lines)
+                data_without_checks <- data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ]
                 if (entries_in_file != input_lines) {
                     shinyalert::shinyalert(
                         "Error!!", 
@@ -354,9 +360,13 @@ mod_sparse_allocation_server <- function(id){
                     )
                     return(NULL)
                 }
-                return(list(data_entry = data_entry_UP, 
-                            dim_data_entry = dim_data_entry, 
-                            dim_without_checks = entries_in_file))
+                return(
+                    list(
+                        data_entry = data_entry_UP,
+                        data_without_checks = data_without_checks,
+                        input_entries = input_entries,
+                        dim_data_entry = dim_data_entry, 
+                        dim_without_checks = entries_in_file))
             } else if (names(data_ingested) == "bad_format") {
                 shinyalert::shinyalert(
                     "Error!!", 
@@ -386,20 +396,24 @@ mod_sparse_allocation_server <- function(id){
             lines <- input$sparse_lines
             max_entry <- lines
             df_checks <- data.frame(
-                ENTRY = (max_entry + 1):((max_entry + checks)), 
-                NAME = paste0("CH-", (max_entry + 1):((max_entry + checks)))
+                ENTRY = (max_entry + 1):((max_entry + sparse_checks)), 
+                NAME = paste0("CH-", (max_entry + 1):((max_entry + sparse_checks)))
             )
-            NAME <- c(paste(rep("G-", lines), (sparse_checks + 1):(lines + sparse_checks), sep = ""))
+            NAME <- c(paste(rep("Gen-", lines), 1:lines, sep = ""))
             gen.list <- data.frame(list(ENTRY = 1:lines, NAME = NAME))
+            input_entries <- as.numeric(gen.list$ENTRY)
             data_entry_UP <- dplyr::bind_rows(df_checks, gen.list)
             colnames(data_entry_UP) <- c("ENTRY", "NAME")
             dim_data_entry <- nrow(data_entry_UP)
-            lines <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
+            entries_in_file <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
+            data_without_checks <- gen.list
             return(
                 list(
-                    data_entry = data_entry_UP, 
+                    data_entry = data_entry_UP,
+                    data_without_checks = data_without_checks, 
+                    input_entries = input_entries,
                     dim_data_entry = dim_data_entry, 
-                    dim_without_checks = lines
+                    dim_without_checks = entries_in_file
                 )
             )
         }
@@ -421,9 +435,12 @@ mod_sparse_allocation_server <- function(id){
             plant_reps = single_inputs()$plant_reps, 
             add_checks = TRUE,
             checks = as.numeric(input$sparse_checks), 
-            seed = single_inputs()$seed_number
+            seed = single_inputs()$seed_number,
+            data = sparse_data_input
         )
         if (input$input_sparse_data == "Yes") {
+        req(get_sparse_data())
+            max_entry <- max(get_sparse_data()$input_entries)
             new_list_locs <- setNames(vector("list", length = locs), nm = paste0("LOC", 1:locs))
             for (LOC in 1:locs) {
                 iter_loc <- optim_out$list_locs[[LOC]]
@@ -437,8 +454,6 @@ mod_sparse_allocation_server <- function(id){
                     stats::na.omit() %>%
                     dplyr::select(ENTRY_list, NAME.x) %>%
                     dplyr::rename(ENTRY = ENTRY_list, NAME = NAME.x)
-                print(head(data_input_mutated))
-                print(nrow(data_input_mutated))
                 new_list_locs[[LOC]] <- data_input_mutated
             }
             optim_out$list_locs <- new_list_locs
@@ -448,15 +463,11 @@ mod_sparse_allocation_server <- function(id){
         bindEvent(input$sparse_run)
 
     getChecks <- eventReactive(input$sparse_run, {
-      #req(sparse_setup())
       data <- sparse_setup()$list_locs[[1]]
-      #data <- as.data.frame(get_sparse_data()$data_entry)
       checksEntries <- as.numeric(data[1:input$sparse_checks,1])
       sparse_checks <- as.numeric(input$sparse_checks)
       list(checksEntries = checksEntries, sparse_checks = sparse_checks)
     })
-    
-
     
     list_inputs_diagonal <- eventReactive(input$sparse_run, {
         req(sparse_setup()$size_locations)
@@ -482,9 +493,6 @@ mod_sparse_allocation_server <- function(id){
           i <- i + 1
         }
         choices <- unlist(choices_list[!sapply(choices_list, is.null)])
-        # if(is.null(choices)) {
-        #   choices <- "No options available"
-        # } 
         Option_NCD <- TRUE
         checksEntries <- as.vector(getChecks()$checksEntries)
         new_choices <- list()
@@ -536,6 +544,18 @@ mod_sparse_allocation_server <- function(id){
     })
 
     output$sparse_allocation <- DT::renderDT({
+        req(get_sparse_data())
+        data_without_checks <- get_sparse_data()$data_without_checks
+        sparse_lines <- single_inputs()$sparse_lines
+        print(sparse_lines)
+        gen_names <- data_without_checks %>%
+            dplyr::mutate(sparse_entry = 1:sparse_lines) %>%
+            dplyr::arrange(sparse_entry) %>%
+            dplyr::select(NAME) %>%
+            dplyr::pull()
+
+        print(gen_names)
+
         locs <- single_inputs()$sites
         df <- as.data.frame(sparse_setup()$allocation)
         df <- df %>% 
@@ -543,7 +563,7 @@ mod_sparse_allocation_server <- function(id){
                 Copies = rowSums(.)
             ) %>%
             dplyr::bind_rows(colSums(.))
-        rownames(df) <- c(paste0("Genotype-", 1:(nrow(df) - 1)), "Total")
+        rownames(df) <- c(gen_names, "Total")
         DT::datatable(
           df,
           caption = 'Table 1: Genotype Allocation Across Environments.',

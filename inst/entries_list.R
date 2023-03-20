@@ -34,7 +34,7 @@ for (LOC in 1:5) {
     new_list_locs[[LOC]] <- data_input_mutated
 }
 new_list_locs
-    
+
 nrow(new_list_locs[[1]])
 
 

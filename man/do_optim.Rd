@@ -33,6 +33,8 @@ When design is \code{sparse} then \code{plant_reps} should be less than \code{l}
 \item{rep_checks}{Replication for each check.}
 
 \item{seed}{(optional) Real number that specifies the starting seed to obtain reproducible designs.}
+
+\item{data}{(optional) Data frame with 2 columns: \code{ENTRY | NAME }. ENTRY must be numeric.}
 }
 \description{
 Generate the sparse allocation.

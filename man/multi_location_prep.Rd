@@ -64,17 +64,17 @@ and one row with the size of the location.
 Optimized multi-location partially replicated design
 }
 \examples{
-# Example 1: Generates a spatial optimized multi-location p-rep design with 240 
+# Example 1: Generates a spatial optimized multi-location p-rep design with 142 
 # genotypes. The number of copies per plant available for this experiment are 9. 
-# The plant is carry out this experiment in 6 locations.
+# The plant is carry out this experiment in 5 locations.
 # In this case we also add 3 controls (checks) with 6 reps each.
-# With this set up, the experiment will have 240 + 3 = 243 entries and the
-# number of entries per location will be 360. Also, the overal average 
-# genotype allocation will be 1.5 plants copies per location. 
+# With this set up, the experiment will have 142 treatments + 3 checks = 145 
+# entries and the number of entries per location will be 196. 
+# Also, the overal average genotype allocation will be 1.5 copies per location. 
 optim_multi_prep <- multi_location_prep(
-  lines = 180,  
+  lines = 142,  
   l = 5, 
-  plant_reps = 8, 
+  plant_reps = 7, 
   checks = 3, 
   rep_checks = c(6,6,6),
   locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5"), 

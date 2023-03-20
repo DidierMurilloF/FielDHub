@@ -7,6 +7,7 @@
 #' @param add_checks Option to add checks. Optional if \code{design = "prep"}
 #' @param checks Number of genotypes checks. 
 #' @param rep_checks Replication for each check.
+#' @param data (optional) Data frame with 2 columns: \code{ENTRY | NAME }. ENTRY must be numeric.
 #' @param seed (optional) Real number that specifies the starting seed to obtain reproducible designs.
 #' 
 #' @author Didier Murillo, Salvador Gezan
@@ -36,13 +37,15 @@ do_optim <- function(
     if (design == "prep" & plant_reps <= l) { 
         stop("p-reps option requires that plant_reps be greater than the number of locations")
     }
+    max_entry <- lines 
     if (!missing(data)) {
         data_input <- stats::na.omit(data[,1:2])
-        df_checks <- data_input[1:checks,]
+        df_data_checks <- data_input[1:checks,]
         df_data <- data_input[(checks + 1):nrow(data_input),]
         colnames(df_data) <- c("ENTRY", "NAME")
         ENTRY <- as.vector(df_data$ENTRY)
         NAME <- as.vector(df_data$NAME)
+        max_entry <- max(ENTRY)
         if (nrow(df_data) != lines) {
             stop("The number of treatments/lines in the data does not match the input value")
         }
@@ -102,7 +105,7 @@ do_optim <- function(
         ) %>%  
         dplyr::select(LOCATION, ENTRY, NAME, REPS)
     # Create a data frame for the checks
-    max_entry <- lines # Checks start at the last entry + 1 in the data frame
+    #max_entry <- lines # Checks start at the last entry + 1 in the data frame
     if (design != "prep") {
         if (!add_checks) stop("Un-replicated designs need checks")
         if (!missing(checks) & checks > 0) {
@@ -326,17 +329,17 @@ sparse_allocation <- function(
 #'
 #'
 #' @examples
-#' # Example 1: Generates a spatial optimized multi-location p-rep design with 240 
+#' # Example 1: Generates a spatial optimized multi-location p-rep design with 142 
 #' # genotypes. The number of copies per plant available for this experiment are 9. 
-#' # The plant is carry out this experiment in 6 locations.
+#' # The plant is carry out this experiment in 5 locations.
 #' # In this case we also add 3 controls (checks) with 6 reps each.
-#' # With this set up, the experiment will have 240 + 3 = 243 entries and the
-#' # number of entries per location will be 360. Also, the overal average 
-#' # genotype allocation will be 1.5 plants copies per location. 
+#' # With this set up, the experiment will have 142 treatments + 3 checks = 145 
+#' # entries and the number of entries per location will be 196. 
+#' # Also, the overal average genotype allocation will be 1.5 copies per location. 
 #' optim_multi_prep <- multi_location_prep(
-#'   lines = 180,  
+#'   lines = 142,  
 #'   l = 5, 
-#'   plant_reps = 8, 
+#'   plant_reps = 7, 
 #'   checks = 3, 
 #'   rep_checks = c(6,6,6),
 #'   locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5"), 
