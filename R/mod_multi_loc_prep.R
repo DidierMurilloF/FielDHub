@@ -10,13 +10,46 @@
 mod_multi_loc_preps_ui <- function(id){
   ns <- NS(id)
   tagList(
-    h4("Partially Replicated Design"),
+    h4("Optimized Multi-Location P-rep Design"),
     sidebarLayout(
         sidebarPanel(
             width = 4,
+            radioButtons(
+                inputId = ns("multi_prep_data"), 
+                label = "Import entries' list?", 
+                choices = c("Yes", "No"), 
+                selected = "No",
+                inline = TRUE, 
+                width = NULL, 
+                choiceNames = NULL, 
+                choiceValues = NULL
+            ),
+            conditionalPanel(
+                condition = "input.multi_prep_data == 'Yes'", 
+                ns = ns,
+                fluidRow(
+                column(
+                    width = 7, # style=list("padding-right: 28px;"),
+                    fileInput(
+                        ns("file_multi_prep"), 
+                        label = "Upload a CSV File:", 
+                        multiple = FALSE
+                    )
+                ),
+                column(
+                    width = 5, #style=list("padding-left: 5px;"),
+                    radioButtons(
+                        ns("sep_multi_prep"), "Separator",
+                        choices = c(Comma = ",",
+                                    Semicolon = ";",
+                                    Tab = "\t"),
+                        selected = ",")
+                    )
+                )             
+            ),
             numericInput(
                 inputId = ns("gens_prep"), 
-                label = "Input # of genotypes:",
+                label = "Input # of Entries:",
                 value = 320,
                 min = 1
             ),
@@ -207,7 +240,7 @@ mod_multi_loc_preps_server <- function(id){
             if (length(prep_checks) != checks) {
                 shinyalert::shinyalert(
                     "Error!!", 
-                    "Data input needs at least three Columns with the ENTRY and NAME.", 
+                    "Length does not match with the input for number of checks!", 
                     type = "error"
                 )
                 return(NULL)
@@ -216,6 +249,7 @@ mod_multi_loc_preps_server <- function(id){
             prep_checks <- NULL
             checks <- NULL
         }
+        input_lines <- as.numeric(input$gens_prep)
         planter_mov <- input$planter_preps
         expt_name <- as.character(input$expt_name_preps)
         plotNumber <- as.numeric(as.vector(unlist(strsplit(input$plot_start_preps, ","))))
@@ -224,6 +258,7 @@ mod_multi_loc_preps_server <- function(id){
         sites = as.numeric(input$locs_prep)
         return(
             list(
+                prep_lines = input_lines,
                 sites = sites, 
                 location_names = site_names, 
                 seed_number = seed_number, 
@@ -243,96 +278,203 @@ mod_multi_loc_preps_server <- function(id){
                             selected = loc_user_view[1])
     })
 
-    # observeEvent(input$input.input_prep_data,
-    #              handlerExpr = updateTabsetPanel(session,
-    #                                              "tabset_prep_avg",
-    #                                              selected = "tabPanel_prep_avg"))
+    observeEvent(input$input.input_prep_data,
+                 handlerExpr = updateTabsetPanel(session,
+                                                 "tabset_prep_avg",
+                                                 selected = "tabPanel_prep_avg"))
 
-    # observeEvent(input$run_prep,
-    #              handlerExpr = updateTabsetPanel(session,
-    #                                              "tabset_prep_avg",
-    #                                              selected = "tabPanel_prep_avg"))
+    observeEvent(input$run_prep,
+                 handlerExpr = updateTabsetPanel(session,
+                                                 "tabset_prep_avg",
+                                                 selected = "tabPanel_prep_avg"))
     
-    # get_data_prep <- eventReactive(input$run_prep, {
-    #   if (input$input_prep_data == 'Yes') {
-    #     req(input$input_file_prep)
-    #     inFile <- input$input_file_prep
-    #     data_ingested <- load_file(name = inFile$name,
-    #                                path = inFile$datapat,
-    #                                sep = input$input_file_sep, 
-    #                                check = TRUE, 
-    #                                design = "prep")
-        
-    #     if (names(data_ingested) == "dataUp") {
-    #       data_up <- data_ingested$dataUp
-    #       data_up <- na.omit(data_up)
-    #       data_preps <- as.data.frame(data_up)
-    #       if (ncol(data_preps) < 3) {
-    #         shinyalert::shinyalert(
-    #           "Error!!", 
-    #           "Data input needs at least three columns with: ENTRY, NAME and REPS.", 
-    #           type = "error")
-    #         return(NULL)
-    #       } 
-    #       data_preps <- as.data.frame(data_preps[,1:3])
-    #       colnames(data_preps) <- c("ENTRY", "NAME", "REPS")
-    #       if(!is.numeric(data_preps$REPS) || !is.integer(data_preps$REPS) ||
-    #          is.factor(data_preps$REPS)) validate("'REPS' must be numeric.")
-    #       total_plots <- sum(data_preps$REPS)
-    #     } else if (names(data_ingested) == "bad_format") {
-    #       shinyalert::shinyalert(
-    #         "Error!!", 
-    #         "Invalid file; Please upload a .csv file.", 
-    #         type = "error")
-    #       return(NULL)
-    #     } else if (names(data_ingested) == "duplicated_vals") {
-    #       shinyalert::shinyalert(
-    #         "Error!!", 
-    #         "Check input file for duplicate values.", 
-    #         type = "error")
-    #       return(NULL)
-    #     } else if (names(data_ingested) == "missing_cols") {
-    #       shinyalert::shinyalert(
-    #         "Error!!", 
-    #         "Data input needs at least three columns with: ENTRY, NAME and REPS.",
-    #         type = "error")
-    #       return(NULL)
-    #     }
-    #   } else {
-    #     req(input$gens_prep)
-    #     req(input$rep_units_prep)
-    #     repGens <- as.numeric(as.vector(unlist(strsplit(input$gens_prep, ","))))
-    #     repUnits <- as.numeric(as.vector(unlist(strsplit(input$rep_units_prep, ","))))
-    #     if (length(repGens) != length(repUnits)) shiny::validate("Input repGens and repUnits must be of the same length.")
-    #     ENTRY <- 1:sum(repGens)
-    #     NAME <- paste(rep("G", sum(repGens)), 1:sum(repGens), sep = "")
-    #     REPS <- sort(rep(repUnits, times = repGens), decreasing = TRUE)
-    #     data_preps <- data.frame(list(ENTRY = ENTRY, 
-    #                                      NAME = NAME, 
-    #                                      REPS = REPS))
-    #     colnames(data_preps) <- c("ENTRY", "NAME", "REPS")
-    #     total_plots <- sum(data_preps$REPS)
-    #   }
-    #   return(list(data_up.preps = data_preps, total_plots = total_plots))
-    # })
-    setup_optim_prep <- reactive({
-        req(prep_inputs())
-        add_checks <- FALSE
-        if (input$include_checks == "Yes") add_checks <- TRUE
-        do_optim(
-            design = "prep",
-            lines = input$gens_prep, 
-            l = as.numeric(input$locs_prep), 
-            plant_reps = as.numeric(input$plant_copies_preps), 
-            add_checks = add_checks,
-            checks = prep_inputs()$checks, 
-            rep_checks = prep_inputs()$prep_checks,
-            seed = prep_inputs()$seed_number
+    get_multi_loc_prep <- reactive({
+      if (input$multi_prep_data == 'Yes') {
+        req(input$file_multi_prep)
+        inFile <- input$file_multi_prep
+        data_ingested <- load_file(
+            name = inFile$name,
+            path = inFile$datapat,
+            sep = input$sep_multi_prep, 
+            check = TRUE, 
+            design = "sdiag"
+        )
+        if (names(data_ingested) == "dataUp") {
+            data_up <- data_ingested$dataUp
+            data_preps <- as.data.frame(data_up)
+            if (ncol(data_preps) < 2) {
+                shinyalert::shinyalert(
+                "Error!!", 
+                "Data input needs at least three columns with: ENTRY, NAME and REPS.", 
+                type = "error")
+                return(NULL)
+            } 
+            data_preps <- na.omit(data_preps[,1:2])
+            colnames(data_preps) <- c("ENTRY", "NAME")
+            if (!is.numeric(data_preps$ENTRY)) {
+                shinyalert::shinyalert(
+                    "Error!!", 
+                    "Column ENTRY should be numeric (integer numbers).", 
+                    type = "error"
+                )
+                return(NULL)
+            }
+            if (input$include_checks == "Yes") {
+                prep_checks <- as.numeric(as.vector(unlist(strsplit(input$prep_checks, ","))))
+                checks <- as.numeric(input$prep_checks_met)
+                if (length(prep_checks) != checks) {
+                    shinyalert::shinyalert(
+                        "Error!!", 
+                        "Length of check's reps does not match with the input for number of checks!", 
+                        type = "error"
+                    )
+                    return(NULL)
+                }
+                entries_in_file <- nrow(data_preps[(length(prep_checks) + 1):nrow(data_preps), ])
+                input_lines <- as.numeric(input$gens_prep)
+                data_without_checks <- data_preps[(length(prep_checks) + 1):nrow(data_preps), ]
+                if (entries_in_file != input_lines) {
+                    shinyalert::shinyalert(
+                        "Error!!", 
+                        "Number of entries in file does not match with the input value.", 
+                        type = "error"
+                    )
+                    return(NULL)
+                }
+            } else {
+                entries_in_file <- nrow(data_preps)
+                input_lines <- as.numeric(input$gens_prep)
+                data_without_checks <- data_preps
+                if (entries_in_file != input_lines) {
+                    shinyalert::shinyalert(
+                        "Error!!", 
+                        "Number of entries in file does not match with the input value.", 
+                        type = "error"
+                    )
+                    return(NULL)
+                }
+            }
+        } else if (names(data_ingested) == "bad_format") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Invalid file; Please upload a .csv file.", 
+            type = "error")
+          return(NULL)
+        } else if (names(data_ingested) == "duplicated_vals") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Check input file for duplicate values.", 
+            type = "error")
+          return(NULL)
+        } else if (names(data_ingested) == "missing_cols") {
+          shinyalert::shinyalert(
+            "Error!!", 
+            "Data input needs at least three columns with: ENTRY, NAME and REPS.",
+            type = "error")
+          return(NULL)
+        }
+      } else {
+        req(input$prep_checks_met)
+        req(input$prep_checks)
+        if (input$include_checks == "Yes") {
+            prep_checks <- as.numeric(as.vector(unlist(strsplit(input$prep_checks, ","))))
+            checks <- as.numeric(input$prep_checks_met)
+            if (length(prep_checks) != checks) {
+                shinyalert::shinyalert(
+                    "Error!!", 
+                    "Length of check's reps does not match with the input for number of checks!", 
+                    type = "error"
+                )
+                return(NULL)
+            }
+            input_lines <- as.numeric(input$gens_prep)
+            max_entry <- input_lines
+            df_checks <- data.frame(
+                ENTRY = (max_entry + 1):((max_entry + checks)), 
+                NAME = paste0("CH-", (max_entry + 1):((max_entry + checks)))
+            )
+            NAME <- c(paste(rep("Gen-", input_lines), 1:input_lines, sep = ""))
+            data_without_checks <- data.frame(list(ENTRY = 1:input_lines, NAME = NAME))
+            input_entries <- as.numeric(data_without_checks$ENTRY)
+            data_preps <- dplyr::bind_rows(df_checks, data_without_checks)
+            colnames(data_preps) <- c("ENTRY", "NAME")
+        } else {
+            input_lines <- as.numeric(input$gens_prep)
+            NAME <- c(paste(rep("Gen-", input_lines), 1:input_lines, sep = ""))
+            data_preps <- data.frame(list(ENTRY = 1:input_lines, NAME = NAME))
+            input_entries <- as.numeric(data_preps$ENTRY)
+            colnames(data_preps) <- c("ENTRY", "NAME")
+            data_without_checks <- data_preps
+        }
+      }
+      return(
+        list(
+            multi_loc_preps_data = data_preps, 
+            data_without_checks = data_without_checks
+            )
         )
     }) %>%
         bindEvent(input$run_prep)
 
+    setup_optim_prep <- reactive({
+        req(get_multi_loc_prep())
+        if (is.null(get_multi_loc_prep())) return(NULL)
+        print(head(get_multi_loc_prep()$multi_loc_preps_data, 6))
+        req(prep_inputs())
+        input_lines <- as.numeric(input$gens_prep)
+        locs <- as.numeric(input$locs_prep)
+        prep_checks <- as.numeric(prep_inputs()$checks)
+        prep_data_input <- get_multi_loc_prep()$multi_loc_preps_data
+        add_checks <- FALSE
+        if (input$include_checks == "Yes") add_checks <- TRUE
+        optim_out <- do_optim(
+            design = "prep",
+            lines = input$gens_prep, 
+            l = locs, 
+            plant_reps = as.numeric(input$plant_copies_preps), 
+            add_checks = add_checks,
+            checks = prep_checks, 
+            rep_checks = prep_inputs()$prep_checks,
+            seed = prep_inputs()$seed_number,
+            data = prep_data_input
+        )
+        ### Do the merge with the user data ###
+        if (input$multi_prep_data == "Yes") {
+            #input_entries <- as.numeric(gen.list$ENTRY) 
+            data_prep_no_checks <- get_multi_loc_prep()$data_without_checks
+            max_entry <- max(data_prep_no_checks$ENTRY)
+            vlookUp_entry <- 1:input_lines
+            if (add_checks) {
+                vlookUp_entry <- c((max_entry + 1):((max_entry + prep_checks)), 1:input_lines)
+            }
+            merged_list_locs <- setNames(
+                vector("list", length = locs), 
+                nm = paste0("LOC", 1:locs)
+            )
+            for (LOC in 1:locs) {
+                iter_loc <- optim_out$list_locs[[LOC]]
+                data_input_mutated <- prep_data_input %>%
+                    dplyr::mutate(
+                        ENTRY_list = ENTRY,
+                        ENTRY = vlookUp_entry
+                    ) %>%
+                    dplyr::select(ENTRY_list, ENTRY, NAME) %>%
+                    dplyr::left_join(y = iter_loc, by = "ENTRY") %>%
+                    dplyr::select(ENTRY_list, NAME.x, REPS) %>%
+                    dplyr::arrange(dplyr::desc(REPS)) %>%
+                    dplyr::rename(ENTRY = ENTRY_list, NAME = NAME.x)
+                print(head(data_input_mutated,8))
+                merged_list_locs[[LOC]] <- data_input_mutated
+            }
+            optim_out$list_locs <- merged_list_locs
+        }
+        return(optim_out)
+    }) %>%
+        bindEvent(input$run_prep)
+
     list_input_plots <- eventReactive(input$run_prep, {
+        req(setup_optim_prep())
+        req(get_multi_loc_prep())
         req(prep_inputs())
         if (!is.null(prep_inputs()$prep_checks)) {
             prep_checks <- as.numeric(prep_inputs()$prep_checks)
@@ -422,6 +564,16 @@ mod_multi_loc_preps_server <- function(id){
     })
 
     output$prep_allocation <- DT::renderDT({
+        req(get_multi_loc_prep())
+        data_without_checks <- get_multi_loc_prep()$data_without_checks
+        prep_lines <- prep_inputs()$prep_lines
+
+        gen_names <- data_without_checks %>%
+            dplyr::mutate(sparse_entry = 1:prep_lines) %>%
+            dplyr::arrange(sparse_entry) %>%
+            dplyr::select(NAME) %>%
+            dplyr::pull()
+
         locs <- prep_inputs()$sites
         df <- as.data.frame(setup_optim_prep()$allocation)
         df <- df %>% 
@@ -430,7 +582,8 @@ mod_multi_loc_preps_server <- function(id){
                 Avg = round(Copies / locs, 1)
             ) %>%
             dplyr::bind_rows(colSums(.))
-        rownames(df) <- c(paste0("Genotype-", 1:(nrow(df) - 1)), "Total")
+        # rownames(df) <- c(paste0("Genotype-", 1:(nrow(df) - 1)), "Total")
+        rownames(df) <- c(gen_names, "Total")
         DT::datatable(
           df,
           caption = 'Table 1: Genotype Allocation Across Environments.',
