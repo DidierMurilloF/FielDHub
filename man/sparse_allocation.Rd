@@ -13,7 +13,7 @@ sparse_allocation(
   planter,
   plotNumber,
   plant_reps,
-  checks,
+  checks = NULL,
   exptName,
   locationNames,
   sparse_list,

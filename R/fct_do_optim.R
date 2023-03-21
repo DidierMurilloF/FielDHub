@@ -28,17 +28,17 @@ do_optim <- function(
     l, 
     plant_reps, 
     add_checks = FALSE, 
-    checks, 
-    rep_checks, 
+    checks = NULL, 
+    rep_checks = NULL, 
     seed,
-    data) {
+    data = NULL) {
     # set a random seed if it is missing
     if (missing(seed)) seed <- base::sample.int(10000, size = 1) 
     if (design == "prep" & plant_reps <= l) { 
         stop("p-reps option requires that plant_reps be greater than the number of locations")
     }
     max_entry <- lines 
-    if (!missing(data)) {
+    if (!is.null(data)) {
         data_input <- stats::na.omit(data[,1:2])
         df_data_checks <- data_input[1:checks,]
         df_data <- data_input[(checks + 1):nrow(data_input),]
@@ -108,14 +108,14 @@ do_optim <- function(
     #max_entry <- lines # Checks start at the last entry + 1 in the data frame
     if (design != "prep") {
         if (!add_checks) stop("Un-replicated designs need checks")
-        if (!missing(checks) & checks > 0) {
+        if (!is.null(checks) & checks > 0) {
             df_checks <- data.frame(
                 ENTRY = (max_entry + 1):((max_entry + checks)), 
                 NAME = paste0("CH-", (max_entry + 1):((max_entry + checks)))
             )
         }
     } else {
-        if (add_checks == TRUE & !missing(checks) & !missing(rep_checks)) {
+        if (add_checks == TRUE & !is.null(checks) & !is.null(rep_checks)) {
             if (length(rep_checks) != checks) {
                 stop("Length of rep_checks does not match with number of checks")
             } 
@@ -211,7 +211,7 @@ sparse_allocation <- function(
     planter, 
     plotNumber,  
     plant_reps, 
-    checks, 
+    checks = NULL, 
     exptName, 
     locationNames,
     sparse_list, 
@@ -222,7 +222,7 @@ sparse_allocation <- function(
     if (missing(plant_reps)) {
         stop("You must specify the number of reps per plant")
     }
-
+    if (is.null(checks)) stop("Please, define the number of checks for this design.")
     if (!missing(sparse_list)) {
         if (!inherits(sparse_list, "Sparse")) {
             stop("sparse_list must be an object of class 'Sparse'")
@@ -239,7 +239,7 @@ sparse_allocation <- function(
             seed = seed
         )
     }
-
+    # Define field dimensions (rows and columns)
     if (missing(nrows) || missing(ncols)) {
         lines_within_loc <- as.numeric(unrep$size_locations[1])
         print(lines_within_loc)
@@ -358,8 +358,8 @@ multi_location_prep <- function(
     plotNumber, 
     desired_avg, 
     plant_reps, 
-    checks,
-    rep_checks,
+    checks = NULL,
+    rep_checks = NULL,
     exptName, 
     locationNames,
     optim_list, 
@@ -373,7 +373,7 @@ multi_location_prep <- function(
         plant_reps <- ceiling(l * desired_avg)
     }
     add_checks <- FALSE
-    if (!missing(checks) & !missing(rep_checks)) add_checks <- TRUE
+    if (!is.null(checks) & !is.null(rep_checks)) add_checks <- TRUE
     if (!missing(optim_list)) {
         if (!inherits(optim_list, "MultiPrep")) {
             stop("sparse_list must be an object of class 'SparsePrep'")

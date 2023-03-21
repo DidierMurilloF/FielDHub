@@ -10,10 +10,10 @@ do_optim(
   l,
   plant_reps,
   add_checks = FALSE,
-  checks,
-  rep_checks,
+  checks = NULL,
+  rep_checks = NULL,
   seed,
-  data
+  data = NULL
 )
 }
 \arguments{

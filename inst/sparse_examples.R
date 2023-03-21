@@ -29,5 +29,18 @@ prep_designs <- optim_multi_prep$designs
 head(prep_designs$LOC1$fieldBook, 10)
 plot(prep_designs$LOC1)
 
+################################# P-rep NO CHECKS example #################################
+multi_prep_no_checks <- multi_location_prep(
+    lines = 240,  
+    l = 6, 
+    plant_reps = 9, 
+    locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5", "LOC6"), 
+    seed = 2458
+)
+
+prep_designs <- multi_prep_no_checks$designs
+head(prep_designs$LOC1$fieldBook, 10)
+plot(prep_designs$LOC1)
+
 
 

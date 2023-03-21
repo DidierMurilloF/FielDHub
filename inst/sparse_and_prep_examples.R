@@ -1,5 +1,6 @@
 library(blocksdesign)
 library(dplyr)
+library(FielDHub)
 ################################# Sparse examples #################################
 # Create a list of 6 locations with their respective entries and names
 # for 450 treatments. We add four checks, these checks are mandatory for
@@ -43,6 +44,6 @@ optim_list_no_checks <- do_optim(
     add_checks = FALSE, 
     seed = 87
 )
-optim_list_with_checks$allocation
-optim_list_with_checks$size_locations
-optim_list_with_checks$list_locs
+optim_list_no_checks$allocation
+optim_list_no_checks$size_locations
+optim_list_no_checks$list_locs
