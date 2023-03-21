@@ -479,7 +479,6 @@ mod_sparse_allocation_server <- function(id){
 
     observeEvent(list_inputs_diagonal(), {
         req(sparse_setup()$size_locations)
-        print(sparse_setup()$size_locations)
         sparse_checks <- as.numeric(getChecks()$sparse_checks)
         lines_within_loc <- as.numeric(sparse_setup()$size_locations[1])
         t1 <- floor(lines_within_loc + lines_within_loc * 0.11)
@@ -547,14 +546,12 @@ mod_sparse_allocation_server <- function(id){
         req(get_sparse_data())
         data_without_checks <- get_sparse_data()$data_without_checks
         sparse_lines <- single_inputs()$sparse_lines
-        print(sparse_lines)
+
         gen_names <- data_without_checks %>%
             dplyr::mutate(sparse_entry = 1:sparse_lines) %>%
             dplyr::arrange(sparse_entry) %>%
             dplyr::select(NAME) %>%
             dplyr::pull()
-
-        print(gen_names)
 
         locs <- single_inputs()$sites
         df <- as.data.frame(sparse_setup()$allocation)
@@ -632,7 +629,6 @@ mod_sparse_allocation_server <- function(id){
       planter_mov <- single_inputs()$planter_mov
       n_rows <- field_dimensions_diagonal()$d_row
       n_cols <- field_dimensions_diagonal()$d_col
-      print(c(n_rows, n_cols))
       available_percent(
           n_rows = n_rows,
           n_cols = n_cols,
@@ -801,7 +797,6 @@ mod_sparse_allocation_server <- function(id){
       diag_locs <- vector(mode = "list", length = locs)
       random_entries_locs <- vector(mode = "list", length = locs)
       for (sites in 1:locs) {
-        print(sites)
         map_checks <- rand_checks()[[sites]]$map_checks
         w_map <- rand_checks()[[sites]]$map_checks
         my_split_r <- rand_checks()[[sites]]$map_checks
