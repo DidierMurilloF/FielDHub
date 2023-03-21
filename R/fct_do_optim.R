@@ -37,17 +37,55 @@ do_optim <- function(
     if (design == "prep" & plant_reps <= l) { 
         stop("p-reps option requires that plant_reps be greater than the number of locations")
     }
+    if (design == "sparse") {
+        if (is.null(checks)) stop("Please, specify the number of checks!")
+    }
+    if (design == "prep") {
+        if (add_checks == TRUE & is.null(checks) & is.null(rep_checks)) {
+            stop("Please, specify the number of checks!")
+        }
+    }
     max_entry <- lines 
     if (!is.null(data)) {
-        data_input <- stats::na.omit(data[,1:2])
-        df_data_checks <- data_input[1:checks,]
-        df_data <- data_input[(checks + 1):nrow(data_input),]
-        colnames(df_data) <- c("ENTRY", "NAME")
-        ENTRY <- as.vector(df_data$ENTRY)
-        NAME <- as.vector(df_data$NAME)
-        max_entry <- max(ENTRY)
-        if (nrow(df_data) != lines) {
-            stop("The number of treatments/lines in the data does not match the input value")
+        if (design == "sparse") {
+            data_input <- stats::na.omit(data[,1:2])
+            df_data_checks <- data_input[1:checks,]
+            df_data <- data_input[(checks + 1):nrow(data_input),]
+            colnames(df_data) <- c("ENTRY", "NAME")
+            ENTRY <- as.vector(df_data$ENTRY)
+            if (!is.numeric(ENTRY)) stop("ENTRY column should be integer numbers!")
+            NAME <- as.vector(df_data$NAME)
+            max_entry <- max(ENTRY)
+            if (nrow(df_data) != lines) {
+                stop("The number of treatments/lines in the data does not match the input value")
+            }
+        } else {
+            if (add_checks == TRUE) {
+                print("Prep with checks")
+                data_input <- stats::na.omit(data[,1:2])
+                df_data_checks <- data_input[1:checks,]
+                df_data <- data_input[(checks + 1):nrow(data_input),]
+                colnames(df_data) <- c("ENTRY", "NAME")
+                ENTRY <- as.vector(df_data$ENTRY)
+                if (!is.numeric(ENTRY)) stop("ENTRY column should be integer numbers!")
+                NAME <- as.vector(df_data$NAME)
+                max_entry <- max(ENTRY)
+                if (nrow(df_data) != lines) {
+                    stop("The number of treatments/lines in the data does not match the input value")
+                }
+            } else {
+                print("Prep with NO checks")
+                data_input <- stats::na.omit(data[,1:2])
+                df_data <- data_input
+                colnames(df_data) <- c("ENTRY", "NAME")
+                ENTRY <- as.vector(df_data$ENTRY)
+                if (!is.numeric(ENTRY)) stop("ENTRY column should be integer numbers!")
+                NAME <- as.vector(df_data$NAME)
+                max_entry <- max(ENTRY)
+                if (nrow(df_data) != lines) {
+                    stop("The number of treatments/lines in the data does not match the input value")
+                }
+            }
         }
     }
     # Generate the optim IBs
