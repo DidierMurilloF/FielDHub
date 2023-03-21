@@ -439,7 +439,7 @@ mod_sparse_allocation_server <- function(id){
             data = sparse_data_input
         )
         if (input$input_sparse_data == "Yes") {
-        req(get_sparse_data())
+            req(get_sparse_data())
             max_entry <- max(get_sparse_data()$input_entries)
             new_list_locs <- setNames(vector("list", length = locs), nm = paste0("LOC", 1:locs))
             for (LOC in 1:locs) {
