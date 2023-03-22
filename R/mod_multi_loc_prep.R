@@ -416,6 +416,19 @@ mod_multi_loc_preps_server <- function(id){
     }) %>%
         bindEvent(input$run_prep)
 
+    # observe({
+    #   req(get_multi_loc_prep())
+    #   req(prep_inputs()$prep_lines)
+    #   input_lines <- prep_inputs()$prep_lines
+    #   if (input_lines >= 450) {
+    #       shinyalert::shinyalert(
+    #         "Message:", 
+    #         "This may take a few minutes!", 
+    #         type = "info"
+    #       )
+    #   }
+    # })
+
     setup_optim_prep <- reactive({
         req(get_multi_loc_prep())
         if (is.null(get_multi_loc_prep())) return(NULL)
