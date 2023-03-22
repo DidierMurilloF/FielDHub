@@ -125,7 +125,7 @@ mod_multi_loc_preps_ui <- function(id){
                     width = 6,
                     numericInput(
                         ns("seed_preps"), 
-                        label = "Seed number:", 
+                        label = "Random Seed:", 
                         value = 1, 
                         min = 1
                     )

@@ -78,7 +78,7 @@ mod_RCBD_ui <- function(id) {
                   value = "FARGO"),
         
         numericInput(inputId = ns("seed.rcbd"), 
-                     label = "Seed Number:",
+                     label = "Random Seed:",
                      value = 123, 
                      min = 1),
         

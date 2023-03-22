@@ -51,7 +51,7 @@ mod_Alpha_Lattice_ui <- function(id) {
                             textInput(inputId = ns("Location.alpha"), "Input Location:", value = "FARGO")
                      )
                    ),  
-                   numericInput(inputId = ns("myseed.alpha"), label = "Seed Number:",
+                   numericInput(inputId = ns("myseed.alpha"), label = "Random Seed:",
                                 value = 16, min = 1),
                    fluidRow(
                      column(6,

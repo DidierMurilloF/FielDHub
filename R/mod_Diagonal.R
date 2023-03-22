@@ -76,7 +76,7 @@ mod_Diagonal_ui <- function(id) {
           column(6,
                  style=list("padding-right: 28px;"),
                  numericInput(inputId = ns("seed_single"), 
-                              label = "Seed Number:", 
+                              label = "Random Seed:", 
                               value = 17, 
                               min = 1)
           ),

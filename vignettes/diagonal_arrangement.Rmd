@@ -80,7 +80,7 @@ kable(df)
 
 5. Select `serpentine` or `cartesian` in the **Plot Order Layout**. For this example we will use the `serpentine` layout.
 
-6. To ensure that randomizations are consistent across sessions, we can set a seed number in the box labeled **Seed Number**. For instance, we will set it to `16`. 
+6. To ensure that randomizations are consistent across sessions, we can set a random seed in the box labeled **random seed**. For instance, we will set it to `16`. 
 
 7. Enter the name for the experiment in the **Input Experiment Name** box. For example, `PYT_BARLEY_2022`.
 
@@ -157,7 +157,7 @@ single_diag <- diagonal_arrangement(
 *   `plotNumber = 1` is the starting plot number.
 *   `exptName = "PYT_BARLEY_2022"` optional name for the experiment
 *   `locationNames = "FARGO"` optional name for each location.
-*   `seed = 16` is the seed number to replicate identical randomizations.
+*   `seed = 16` is the random seed to replicate identical randomizations.
 
 ### Print `single_diag` object
 
@@ -258,7 +258,7 @@ kable(df)
 
 10. Enter the name for each experiment in the **Input Experiment Name** box. For example, `MATURITY1, MATURITY2, MATURITY3`.
 
-11. To ensure that randomization are consistent across sessions, we can set a seed number in the box labeled **Seed Number**. For instance, we will set it to `17`. 
+11. To ensure that randomization are consistent across sessions, we can set a random seed in the box labeled **random seed**. For instance, we will set it to `17`. 
 
 12. Enter the name of the site/location in the **Input the Location** box. For this experiment we will set the site as `FARGO`. In the case of users will run the experiment in multiple locations, the name for each location must be enter separate by comma, for example: `FARGO, CASSELTON, MINOT`.
 
@@ -331,7 +331,7 @@ The description for the inputs that we used to generate the design,
 *   `plotNumber = c(1, 1001, 2001)` is the starting plot number for each experiment. It could be just one number as well.
 *   `exptName = c("MATURITY1", "MATURITY2", "MATURITY3")` is an optional name for each experiment.
 *   `locationNames = "FARGO"` optional name for each location.
-*   `seed = 17` is the seed number to replicate identical randomizations.
+*   `seed = 17` is the random seed to replicate identical randomizations.
 
 ### Print `multi_diag` object
 

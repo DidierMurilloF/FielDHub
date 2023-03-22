@@ -74,7 +74,7 @@ kable(df)
 
 10. Enter a name for the location of the experiment in the **Input Location** box. If there are multiple locations, each name must be in a comma separated list. Set it to `"FARGO"`.
 
-11. To ensure that randomizations are consistent across sessions, we can set a seed number in the box labeled **Seed Number**. In this example, we will set it to `1238`. 
+11. To ensure that randomizations are consistent across sessions, we can set a random seed in the box labeled **random seed**. In this example, we will set it to `1238`. 
 
 12. Once we have entered the information for our experiment on the left side panel, click the **Run!** button to run the design. 
 
@@ -129,7 +129,7 @@ The description for the inputs that we used to generate the design,
 *   `l = 1` is the number of locations.
 *   `plotNumber = 101` is the starting plot number.
 *   `locationNames = "FARGO"` is an optional name for each location.
-*   `seed = 1240` is the seed number to replicate identical randomizations.
+*   `seed = 1240` is the random seed to replicate identical randomizations.
 
 ### Print `sspd` object
 

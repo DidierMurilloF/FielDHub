@@ -70,7 +70,7 @@ mod_CRD_ui <- function(id) {
                    ),
                    
                    numericInput(inputId = ns("seed.crd"), 
-                                label = "Seed Number:",
+                                label = "Random Seed:",
                                 value = 123,
                                 min = 1),
                    

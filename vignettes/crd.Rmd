@@ -65,7 +65,7 @@ kable(df)
 
 6. Enter a name for the location of the experiment in the **Input Location** box. A completely randomized design can only be run in a single location at a time. Set it to `FARGO`.
 
-7. To ensure that randomizations are consistent across sessions, we can set a seed number in the box labeled **Seed Number**. In this example, we will set it to `1236`. 
+7. To ensure that randomizations are consistent across sessions, we can set a random seed in the box labeled **random seed**. In this example, we will set it to `1236`. 
 
 8. Once we have entered the information for our experiment on the left side panel, click the **Run!** button to run the design. 
 
@@ -104,7 +104,7 @@ The description for the inputs that we used to generate the design,
 *   `reps = 6` is the number of replications for each treatment.
 *   `plotNumber = 101` is the starting plot number.
 *   `locationNames = "FARGO"` is an optional name for the location.
-*   `seed = 1234` is the seed number to replicate identical randomizations.
+*   `seed = 1234` is the random seed to replicate identical randomizations.
 
 ### Print `crd` output
 

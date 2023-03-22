@@ -76,7 +76,7 @@ mod_Optim_ui <- function(id) {
        fluidRow(
          column(6,style=list("padding-right: 28px;"),
                 numericInput(ns("seed.spatial"), 
-                             label = "Seed Number:", 
+                             label = "Random Seed:", 
                              value = 1,
                              min = 1)
          ),
