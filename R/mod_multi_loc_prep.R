@@ -419,7 +419,6 @@ mod_multi_loc_preps_server <- function(id){
     setup_optim_prep <- reactive({
         req(get_multi_loc_prep())
         if (is.null(get_multi_loc_prep())) return(NULL)
-        print(head(get_multi_loc_prep()$multi_loc_preps_data, 6))
         req(prep_inputs())
         input_lines <- as.numeric(input$gens_prep)
         locs <- as.numeric(input$locs_prep)
@@ -463,7 +462,6 @@ mod_multi_loc_preps_server <- function(id){
                     dplyr::select(ENTRY_list, NAME.x, REPS) %>%
                     dplyr::arrange(dplyr::desc(REPS)) %>%
                     dplyr::rename(ENTRY = ENTRY_list, NAME = NAME.x)
-                print(head(data_input_mutated,8))
                 merged_list_locs[[LOC]] <- data_input_mutated
             }
             optim_out$list_locs <- merged_list_locs
@@ -496,9 +494,7 @@ mod_multi_loc_preps_server <- function(id){
         } else {
             prep_checks <- 0
         }
-        print(sum(prep_checks))
         total_plots <- plots_for_treatments + sum(prep_checks)
-        print(total_plots)
         choices <- factor_subsets(total_plots)$labels
         if (is.null(choices)) {
             sort_choices <- "No options available"
@@ -523,6 +519,40 @@ mod_multi_loc_preps_server <- function(id){
         d_row <- as.numeric(dims[1])
         d_col <- as.numeric(dims[2])
         return(list(d_row = d_row, d_col = d_col))
+    })
+
+	format_list_no_checks <- data.frame(
+		ENTRY = 1:10, 
+		NAME = c(paste0("Genotype-", LETTERS[1:10]))
+	)
+
+    info_modal_multi_prep <- function() {
+      modalDialog(
+        title = div(tags$h3("Important message", style = "color: red;")),
+        h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
+        renderTable(
+			format_list_no_checks,
+			bordered = TRUE,
+			align = 'c',
+			striped = TRUE
+			),
+		h5("Remark: If you want to include checks, please add them in the first rows of the file."),
+        easyClose = FALSE
+      )
+    }
+    
+    toListen <- reactive({
+      list(input$multi_prep_data)
+    })
+    
+    observeEvent(toListen(), {
+      if (input$multi_prep_data == 'Yes'){
+        showModal(
+          shinyjqui::jqui_draggable(
+            info_modal_multi_prep()
+          )
+        )
+      }
     })
 
     randomize_hit_prep <- reactiveValues(times = 0)
