@@ -2,7 +2,7 @@
 % Please edit documentation in R/fct_do_optim.R
 \name{do_optim}
 \alias{do_optim}
-\title{Generate the sparse allocation.}
+\title{Generate the sparse allocation to multiple locations.}
 \usage{
 do_optim(
   design = "sparse",
@@ -36,8 +36,17 @@ When design is \code{sparse} then \code{plant_reps} should be less than \code{l}
 
 \item{data}{(optional) Data frame with 2 columns: \code{ENTRY | NAME }. ENTRY must be numeric.}
 }
+\value{
+A list with three elements.
+\itemize{
+  \item \code{list_locs} is a list with each location list of entries.
+  \item \code{allocation} is a matrix with the allocation of treatments.
+  \item \code{size_locations} is a data frame with one column for each 
+ location and one row with the size of the location.
+}
+}
 \description{
-Generate the sparse allocation.
+Generate the sparse allocation to multiple locations.
 }
 \examples{
 sparse_example <- do_optim(
@@ -50,6 +59,12 @@ sparse_example <- do_optim(
    seed = 15
 )
 }
+\references{
+Edmondson, R.N. Multi-level Block Designs for Comparative Experiments. JABES 25, 
+500–522 (2020). https://doi.org/10.1007/s13253-020-00416-0
+}
 \author{
-Didier Murillo, Salvador Gezan
+Didier Murillo [aut],
+        Salvador Gezan [aut],
+        Ana Heilman [ctb]
 }

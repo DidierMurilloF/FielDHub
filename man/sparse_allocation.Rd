@@ -2,10 +2,9 @@
 % Please edit documentation in R/fct_do_optim.R
 \name{sparse_allocation}
 \alias{sparse_allocation}
-\title{Sparse allocation}
+\title{Unreplicated designs using the sparse allocation approach}
 \usage{
 sparse_allocation(
-  checks_allocation,
   lines,
   nrows,
   ncols,
@@ -21,9 +20,6 @@ sparse_allocation(
 )
 }
 \arguments{
-\item{checks_allocation}{Way to allocate the checks in the field. It can be
-\code{diagonal} or \code{randomly}}
-
 \item{lines}{Number of genotypes, experimental lines or treatments.}
 
 \item{nrows}{Number of rows in the field.}
@@ -51,12 +47,21 @@ When design is \code{sparse} then \code{plant_reps} < \code{l}}
 
 \item{seed}{(optional) Real number that specifies the starting seed to obtain reproducible designs.}
 }
+\value{
+A list with four elements.
+\itemize{
+  \item \code{designs} is a list with each location unreplicated randomization.
+  \item \code{list_locs} is a list with each location list of entries.
+  \item \code{allocation} is a matrix with the allocation of treatments.
+  \item \code{size_locations} is a data frame with one column for each 
+ location and one row with the size of the location.
+}
+}
 \description{
-Sparse allocation
+Unreplicated designs using the sparse allocation approach
 }
 \examples{
 sparse <- sparse_allocation(
-checks_allocation = "diagonal",
   lines = 260, 
   l = 5, 
   plant_reps = 5, 
@@ -65,11 +70,12 @@ checks_allocation = "diagonal",
   seed = 1234
 )
 }
+\references{
+Edmondson, R.N. Multi-level Block Designs for Comparative Experiments. JABES 25, 
+500–522 (2020). https://doi.org/10.1007/s13253-020-00416-0
+}
 \author{
 Didier Murillo [aut],
         Salvador Gezan [aut],
-        Ana Heilman [ctb],
-        Thomas Walk [ctb], 
-        Johan Aparicio [ctb], 
-        Richard Horsley [ctb]
+        Ana Heilman [ctb]
 }
