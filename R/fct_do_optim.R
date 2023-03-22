@@ -29,7 +29,7 @@
 #' @examples 
 #' sparse_example <- do_optim(
 #'    design = "sparse",
-#'    lines = 240, 
+#'    lines = 180, 
 #'    l = 4, 
 #'    plant_reps = 3, 
 #'    add_checks = TRUE, 
