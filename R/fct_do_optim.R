@@ -76,7 +76,6 @@ do_optim <- function(
             }
         } else {
             if (add_checks == TRUE) {
-                print("Prep with checks")
                 data_input <- stats::na.omit(data[,1:2])
                 df_data_checks <- data_input[1:checks,]
                 df_data <- data_input[(checks + 1):nrow(data_input),]
@@ -89,7 +88,6 @@ do_optim <- function(
                     stop("The number of treatments/lines in the data does not match the input value")
                 }
             } else {
-                print("Prep with NO checks")
                 data_input <- stats::na.omit(data[,1:2])
                 df_data <- data_input
                 colnames(df_data) <- c("ENTRY", "NAME")
@@ -302,7 +300,6 @@ sparse_allocation <- function(
     # Define field dimensions (rows and columns)
     if (missing(nrows) || missing(ncols)) {
         lines_within_loc <- as.numeric(unrep$size_locations[1])
-        print(lines_within_loc)
         t1 <- floor(lines_within_loc + lines_within_loc * 0.11)
         t2 <- ceiling(lines_within_loc + lines_within_loc * 0.20)
         t <- t1:t2

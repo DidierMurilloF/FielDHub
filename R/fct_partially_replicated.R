@@ -154,7 +154,6 @@ partially_replicated <- function(nrows = NULL, ncols = NULL, repGens = NULL, rep
         checks <- length(checksEntries)
         lines <- sum(my_GENS$REPS)
         t_plots <- sum(as.numeric(gen.list$REPS))
-        print(t_plots)
         if (numbers::isPrime(t_plots)) {
             stop("No options when the total number of plots is a prime number.", call. = FALSE)
         }

@@ -334,10 +334,12 @@ mod_pREPS_server <- function(id){
       })
     })
 
-    entryListFormat_pREP <- data.frame(ENTRY = 1:9, 
-                                       NAME = c(paste("Genotype", LETTERS[1:9], sep = "")),
-                                       REPS = as.factor(c(rep(2, times = 3), rep(1,6))))
-    
+    entryListFormat_pREP <- data.frame(
+		ENTRY = 1:9, 
+		NAME = c(paste("Genotype", LETTERS[1:9], sep = "")),
+		REPS = as.factor(c(rep(2, times = 3), rep(1,6)))
+	)
+
     entriesInfoModal_pREP <- function() {
       modalDialog(
         title = div(tags$h3("Important message", style = "color: red;")),
@@ -370,7 +372,7 @@ mod_pREPS_server <- function(id){
       shinyjs::show(id = "get_random_prep")
     })
 
-        ###### Plotting the data ##############
+    ###### Plotting the data ##############
     output$dataup.preps <- DT::renderDT({
       test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
       if (!test) return(NULL)

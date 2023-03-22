@@ -287,15 +287,7 @@ mod_Diagonal_server <- function(id) {
         )
         
         if (names(data_ingested) == "dataUp") {
-          # data_up <- data_ingested$dataUp
-          # data_entry <- na.omit(data_up)
-          # if (ncol(data_entry) < 2) {
-          #   validate("Data input needs at least two Columns with the ENTRY and NAME.")
-          # } 
-          # data_entry_UP <- data_entry[,1:2]
-
             data_up <- data_ingested$dataUp
-            print(data_up[,1:2])
             if (ncol(data_entry) < 2) {
                 validate("Data input needs at least two Columns with the ENTRY and NAME.")
             } 
