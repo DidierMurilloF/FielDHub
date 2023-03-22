@@ -49,26 +49,18 @@ mod_sparse_allocation_ui <- function(id) {
                 )
             )              
         ),
-        # conditionalPanel(
-        #   condition = "input.input_sparse_data == 'No'", 
-        #   ns = ns,
-        #   numericInput(inputId = ns("sparse_lines"), 
-        #                label = "Input # of Entries:",
-        #                value = 380, 
-        #                min = 50),
-        # ),
         numericInput(
             inputId = ns("sparse_lines"), 
             label = "Input # of Entries:",
             value = 380, 
             min = 50
         ),
-        selectInput(
-            inputId = ns("checks_allocation"),
-            label = "Method for Distributing Checks:",
-            choices = c("Diagonal", "Completely Random"),
-            selected = "Diagonal"
-        ),
+        # selectInput(
+        #     inputId = ns("checks_allocation"),
+        #     label = "Method for Distributing Checks:",
+        #     choices = c("Diagonal", "Completely Random"),
+        #     selected = "Diagonal"
+        # ),
         selectInput(
             inputId = ns("sparse_checks"),
             label = "Input # of Checks:",
@@ -107,7 +99,7 @@ mod_sparse_allocation_ui <- function(id) {
           column(6,
                  style=list("padding-right: 28px;"),
                  numericInput(inputId = ns("seed_single"), 
-                              label = "Seed Number:", 
+                              label = "Random Seed:", 
                               value = 17, 
                               min = 1)
           ),
