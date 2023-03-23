@@ -83,7 +83,7 @@ mod_RowCol_ui <- function(id){
                      )
                    ),
                    numericInput(ns("seed.rcd"), 
-                                label = "Seed Number:", 
+                                label = "Random Seed:", 
                                 value = 1),
                    fluidRow(
                      column(6,

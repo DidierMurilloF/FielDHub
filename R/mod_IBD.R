@@ -80,7 +80,7 @@ mod_IBD_ui <- function(id) {
           )
         ), 
         numericInput(inputId = ns("seed.ibd"), 
-                     label = "Seed Number:",
+                     label = "Random Seed:",
                      value = 4),
         fluidRow(
           column(6,

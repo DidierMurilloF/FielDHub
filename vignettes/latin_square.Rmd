@@ -67,7 +67,7 @@ kable(df)
 
 6. Enter a name for the location of the experiment in the **Input Location** box. A completely randomized design can only be run in a single location at a time. 
 
-7. To ensure that randomizations are consistent across sessions, we can set a seed number in the box labeled **Seed Number**. In this example, we will set it to `123`. 
+7. To ensure that randomizations are consistent across sessions, we can set a random seed in the box labeled **random seed**. In this example, we will set it to `123`. 
 
 8. Once we have entered the information for our experiment on the left side panel, click the **Run!** button to run the design. 
 
@@ -113,7 +113,7 @@ lsd <- latin_square(
 *   `plotNumber = 101` is the starting plot number.
 *   `planter = "cartesian"` is the plot order layout.
 *   `locationNames = "FARGO"` is an optional name for the location.
-*   `seed = 1238` is the seed number to replicate identical randomizations.
+*   `seed = 1238` is the random seed to replicate identical randomizations.
 
 ### Print `lsd` object
 

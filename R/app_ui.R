@@ -19,7 +19,7 @@ app_ui <- function(request) {
     tags$head(tags$script(type="text/javascript", src = "corner.js")),
     tags$head(tags$script(type="text/javascript", src= "shinybusy.js")), 
     fluidPage(theme = shinythemes::shinytheme("flatly"),
-              navbarPage(title = "FielDHub v1.2.1", 
+              navbarPage(title = "FielDHub v1.3.0", 
                          tabPanel(" Welcome!", icon = icon("home", lib = "glyphicon"),
                                   htmltools::includeHTML(
                                     system.file("app/www/home.html", package = "FielDHub")
@@ -37,10 +37,18 @@ app_ui <- function(request) {
                                     ),
                                     tabPanel("Augmented RCBD",
                                              mod_RCBD_augmented_ui("RCBD_augmented_ui_1")
+                                    ),
+                                    tabPanel("New - Sparse Allocation",
+                                             mod_sparse_allocation_ui("sparse_allocation_ui_1")
                                     )
                          ),
-                         tabPanel("Partially Replicated Designs",
-                                  mod_pREPS_ui("pREPS_ui_1")
+                         navbarMenu("Partially Replicated Designs",
+                            tabPanel("Multi-Location p-rep",
+                                    mod_pREPS_ui("pREPS_ui_1")
+                            ),
+                            tabPanel("Optimized Multi-Location p-rep",
+                                    mod_multi_loc_preps_ui("multi_loc_preps_ui_1")
+                            )
                          ),
                          navbarMenu("Lattice Designs",
                                     tabPanel("Square Lattice",

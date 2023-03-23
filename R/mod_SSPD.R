@@ -98,7 +98,7 @@ mod_SSPD_ui <- function(id){
         ),
         
         numericInput(inputId = ns("seed.sspd"), 
-                     label = "Seed Number:", 
+                     label = "Random Seed:", 
                      value = 123, 
                      min = 1),
         

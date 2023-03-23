@@ -10,141 +10,177 @@
 mod_pREPS_ui <- function(id){
   ns <- NS(id)
   tagList(
-    h4("Partially Replicated Design"),
+    h4("Single and Multi-Location P-rep Design"),
     sidebarLayout(
       sidebarPanel(
         width = 4,
-        radioButtons(inputId = ns("owndataPREPS"), 
-                     label = "Import entries' list?", 
-                     choices = c("Yes", "No"), 
-                     selected = "No",
-                     inline = TRUE, 
-                     width = NULL, 
-                     choiceNames = NULL, 
-                     choiceValues = NULL),
-        
-        conditionalPanel("input.owndataPREPS == 'Yes'", ns = ns,
-                         fluidRow(
-                           column(7, # style=list("padding-right: 28px;"),
-                                  fileInput(ns("file.preps"), 
-                                            label = "Upload a CSV File:", 
-                                            multiple = FALSE)),
-                           
-                           column(5, #style=list("padding-left: 5px;"),
-                                  radioButtons(ns("sep.preps"), "Separator",
-                                               choices = c(Comma = ",",
-                                                           Semicolon = ";",
-                                                           Tab = "\t"),
-                                               selected = ","))
-                         ),             
+        radioButtons(
+			inputId = ns("owndataPREPS"), 
+			label = "Import entries' list?", 
+			choices = c("Yes", "No"), 
+			selected = "No",
+			inline = TRUE, 
+			width = NULL, 
+			choiceNames = NULL, 
+			choiceValues = NULL
+		),
+        conditionalPanel(
+			condition = "input.owndataPREPS == 'Yes'", 
+			ns = ns,
+			fluidRow(
+			column(
+				width = 7,
+				fileInput(
+					ns("file.preps"), 
+					label = "Upload a CSV File:", 
+					multiple = FALSE
+				)
+			),
+			column(
+				width = 5,
+				radioButtons(
+					ns("sep.preps"), 
+					"Separator",
+					choices = c(Comma = ",",
+								Semicolon = ";",
+								Tab = "\t"),
+					selected = ",")
+				)
+			),             
         ),
         conditionalPanel(
-          condition = "input.owndataPREPS == 'No'", 
-          ns = ns,
-          textInput(ns("repGens.preps"), 
-                    label = "# of Entries per Rep Group:", 
-                    value = "75,150"),
-          textInput(inputId = ns("repUnits.preps"), 
-                    label = "# of Rep per Group:",
-                    value = "2,1")
-        ),
-        fluidRow(
-          column(6, # style=list("padding-right: 28px;"),
-                 numericInput(inputId = ns("l.preps"), 
-                              label = "Input # of Locations:", 
-                              value = 1, 
-                              min = 1)
-          ),
-          column(6, # style=list("padding-left: 5px;"),
-                 selectInput(inputId = ns("locView.preps"), 
-                             label = "Choose location to view:", 
-                             choices = 1:1, 
-                             selected = 1,
-                             multiple = FALSE)
-          )
-         ),
-        selectInput(ns("planter_mov.preps"), 
-                    label = "Plot Order Layout:",
-                    choices = c("serpentine", "cartesian"), 
-                    multiple = FALSE,
-                    selected = "serpentine"),
-        fluidRow(
-          column(6, # style=list("padding-right: 28px;"),
-                 numericInput(ns("seed.preps"), 
-                              label = "Seed number:", 
-                              value = 1, 
-                              min = 1)
-          ),
-          column(6, # style=list("padding-left: 5px;"),
-                 textInput(ns("expt_name.preps"), 
-                           "Input Experiment Name:", 
-                           value = "Expt1")
-          )
-        ),  
-        fluidRow(
-          column(6, # style=list("padding-right: 28px;"),
-                 textInput(ns("plot_start.preps"), 
-                           "Starting Plot Number:", 
-                           value = 1)
-          ),
-          column(6, # style=list("padding-left: 5px;"),
-                 textInput(ns("Location.preps"), 
-                           "Input Location Name:", 
-                           value = "FARGO")
-          )
-        ),
-        fluidRow(
-          column(6,
-                 actionButton(
-                   inputId = ns("RUN.prep"), 
-                   label = "Run!", 
-                   icon = icon("circle-nodes", verify_fa = FALSE),
-                   width = '100%'),
-          ),
-          column(6,
-                 actionButton(
-                   ns("Simulate.prep"), 
-                   label = "Simulate!", 
-                   icon = icon("greater-than-equal", verify_fa = FALSE),
-                   width = '100%'),
-          )
-        ),
-        br(),
-        uiOutput(ns("download_prep"))
-      ),
-      mainPanel(
-        width = 8,
-        shinyjs::useShinyjs(),
-        tabsetPanel(id = ns("tabset_prep"),
-          tabPanel("Get Random", value = "tabPanel_prep",
-            br(),
-            shinyjs::hidden(
-                selectInput(inputId = ns("dimensions.preps"), 
-                            label = "Select dimensions of field:", 
-                            choices = "")
-            ),
-            shinyjs::hidden(
-              actionButton(ns("get_random_prep"), label = "Randomize!")
-            ),
-            br(),
-            br(),
-            shinycssloaders::withSpinner(
-              verbatimTextOutput(outputId = ns("summary_prep"), 
-                                 placeholder = FALSE), 
-              type = 4
-              )
-          ),
-          tabPanel("Data Input", DT::DTOutput(ns("dataup.preps"))),
-          tabPanel("Randomized Field",
-                shinycssloaders::withSpinner(
-                    DT::DTOutput(ns("dtpREPS")), 
-                    type = 4)
-                  ),
-          tabPanel("Plot Number Field", DT::DTOutput(ns("PREPSPLOTFIELD"))),
-          tabPanel("Field Book", DT::DTOutput(ns("pREPSOUTPUT"))),
-          tabPanel("Heatmap", plotly::plotlyOutput(ns("heatmap_prep"), width = "97%"))
-        )
-      )
+			condition = "input.owndataPREPS == 'No'", 
+			ns = ns,
+			textInput(
+				ns("repGens.preps"), 
+				label = "# of Entries Per Rep Group:", 
+				value = "75,150"
+			),
+			textInput(
+				inputId = ns("repUnits.preps"), 
+				label = "# of Rep Per Group:",
+				value = "2,1")
+			),
+			fluidRow(
+				column(
+					width = 6,
+					numericInput(
+						inputId = ns("l.preps"), 
+						label = "Input # of Locations:", 
+						value = 1, 
+						min = 1)
+				),
+				column(
+					width = 6,
+					selectInput(
+						inputId = ns("locView.preps"), 
+						label = "Choose Location to View:", 
+						choices = 1:1, 
+						selected = 1,
+						multiple = FALSE
+					)
+				)
+			),
+			selectInput(
+				ns("planter_mov.preps"), 
+				label = "Plot Order Layout:",
+				choices = c("serpentine", "cartesian"), 
+				multiple = FALSE,
+				selected = "serpentine"
+			),
+			fluidRow(
+				column(
+					width = 6,
+					numericInput(
+						ns("seed.preps"), 
+						label = "Random Seed:", 
+						value = 1, 
+						min = 1)
+				),
+				column(
+					width = 6,
+					textInput(
+						ns("expt_name.preps"), 
+						"Input Experiment Name:", 
+						value = "Expt1"
+					)
+				)
+			),  
+			fluidRow(
+				column(
+					width = 6,
+					textInput(
+						ns("plot_start.preps"), 
+						"Starting Plot Number:", 
+						value = 1
+					)
+				),
+				column(
+					width = 6,
+					textInput(
+						ns("Location.preps"), 
+						"Input Location Name:", 
+						value = "FARGO"
+					)
+				)
+			),
+			fluidRow(
+				column(
+					width = 6,
+					actionButton(
+						inputId = ns("RUN.prep"), 
+						label = "Run!", 
+						icon = icon("circle-nodes", verify_fa = FALSE),
+						width = '100%'
+					),
+				),
+				column(
+					width = 6,
+					actionButton(
+						ns("Simulate.prep"), 
+						label = "Simulate!", 
+						icon = icon("greater-than-equal", verify_fa = FALSE),
+						width = '100%'
+					),
+				)
+			),
+			br(),
+			uiOutput(ns("download_prep"))
+		),
+		mainPanel(
+			width = 8,
+			shinyjs::useShinyjs(),
+			tabsetPanel(
+				id = ns("tabset_prep"),
+				tabPanel("Get Random", value = "tabPanel_prep",
+					br(),
+					shinyjs::hidden(
+						selectInput(inputId = ns("dimensions.preps"), 
+									label = "Select dimensions of field:", 
+									choices = "")
+					),
+					shinyjs::hidden(
+					actionButton(ns("get_random_prep"), label = "Randomize!")
+					),
+					br(),
+					br(),
+					shinycssloaders::withSpinner(
+					verbatimTextOutput(outputId = ns("summary_prep"), 
+										placeholder = FALSE), 
+					type = 4
+					)
+				),
+				tabPanel("Data Input", DT::DTOutput(ns("dataup.preps"))),
+				tabPanel("Randomized Field",
+						shinycssloaders::withSpinner(
+							DT::DTOutput(ns("dtpREPS")), 
+							type = 4)
+						),
+				tabPanel("Plot Number Field", DT::DTOutput(ns("PREPSPLOTFIELD"))),
+				tabPanel("Field Book", DT::DTOutput(ns("pREPSOUTPUT"))),
+				tabPanel("Heatmap", plotly::plotlyOutput(ns("heatmap_prep"), width = "97%"))
+			)
+		)
     )
   )
 }
@@ -280,6 +316,17 @@ mod_pREPS_server <- function(id){
       if(is.null(choices)){
         choices <- "No options available"
       }
+
+      if (!is.null(choices)) {
+            dif <- vector(mode = "numeric", length = length(choices))
+            for (option in 1:length(choices)) {
+                dims <- unlist(strsplit(choices[[option]], " x "))
+                dif[option] <- abs(as.numeric(dims[1]) - as.numeric(dims[2]))
+            }
+            df_choices <- data.frame(choices = unlist(choices), diff_dim = dif)
+            df_choices <- df_choices[order(df_choices$diff_dim, decreasing = FALSE), ]
+            choices <- as.vector(df_choices$choices)
+      }
       updateSelectInput(inputId = "dimensions.preps",
                         choices = choices,
                         selected = choices[1])
@@ -323,10 +370,12 @@ mod_pREPS_server <- function(id){
       })
     })
 
-    entryListFormat_pREP <- data.frame(ENTRY = 1:9, 
-                                       NAME = c(paste("Genotype", LETTERS[1:9], sep = "")),
-                                       REPS = as.factor(c(rep(2, times = 3), rep(1,6))))
-    
+    entryListFormat_pREP <- data.frame(
+		ENTRY = 1:9, 
+		NAME = c(paste("Genotype", LETTERS[1:9], sep = "")),
+		REPS = as.factor(c(rep(2, times = 3), rep(1,6)))
+	)
+
     entriesInfoModal_pREP <- function() {
       modalDialog(
         title = div(tags$h3("Important message", style = "color: red;")),
@@ -359,7 +408,7 @@ mod_pREPS_server <- function(id){
       shinyjs::show(id = "get_random_prep")
     })
 
-        ###### Plotting the data ##############
+    ###### Plotting the data ##############
     output$dataup.preps <- DT::renderDT({
       test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
       if (!test) return(NULL)

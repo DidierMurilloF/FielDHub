@@ -76,7 +76,7 @@ mod_Diagonal_ui <- function(id) {
           column(6,
                  style=list("padding-right: 28px;"),
                  numericInput(inputId = ns("seed_single"), 
-                              label = "Seed Number:", 
+                              label = "Random Seed:", 
                               value = 17, 
                               min = 1)
           ),
@@ -278,24 +278,28 @@ mod_Diagonal_server <- function(id) {
       if (input$owndataDIAGONALS == "Yes") {
         req(input$file1)
         inFile <- input$file1
-        data_ingested <- load_file(name = inFile$name, 
-                                path = inFile$datapat, 
-                                sep = input$sep.DIAGONALS, check = TRUE, design = "sdiag")
+        data_ingested <- load_file(
+            name = inFile$name, 
+            path = inFile$datapat, 
+            sep = input$sep.DIAGONALS, 
+            check = TRUE, 
+            design = "sdiag"
+        )
         
         if (names(data_ingested) == "dataUp") {
-          data_up <- data_ingested$dataUp
-          data_entry <- na.omit(data_up)
-          if (ncol(data_entry) < 2) {
-            validate("Data input needs at least two Columns with the ENTRY and NAME.")
-          } 
-          data_entry_UP <- data_entry[,1:2]
-          colnames(data_entry_UP) <- c("ENTRY", "NAME")
-          checksEntries <- as.numeric(data_entry_UP[1:input$checks,1])
-          dim_data_entry <- nrow(data_entry_UP)
-          dim_data_1 <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
-          return(list(data_entry = data_entry_UP, 
-                      dim_data_entry = dim_data_entry, 
-                      dim_without_checks = dim_data_1))
+            data_up <- data_ingested$dataUp
+            if (ncol(data_entry) < 2) {
+                validate("Data input needs at least two Columns with the ENTRY and NAME.")
+            } 
+            data_entry_UP <- na.omit(data_up[,1:2])
+            # data_entry_UP <- data_entry
+            colnames(data_entry_UP) <- c("ENTRY", "NAME")
+            checksEntries <- as.numeric(data_entry_UP[1:input$checks,1])
+            dim_data_entry <- nrow(data_entry_UP)
+            dim_data_1 <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
+            return(list(data_entry = data_entry_UP, 
+                        dim_data_entry = dim_data_entry, 
+                        dim_without_checks = dim_data_1))
         } else if (names(data_ingested) == "bad_format") {
           shinyalert::shinyalert(
             "Error!!", 
@@ -357,11 +361,11 @@ mod_Diagonal_server <- function(id) {
       checks <- as.numeric(getChecks()$checks)
       total_entries <- as.numeric(getData()$dim_data_entry)
       lines <- total_entries - checks
-      t1 <- floor(lines + lines * 0.08)
+      t1 <- floor(lines + lines * 0.11)
       t2 <- ceiling(lines + lines * 0.20)
       t <- t1:t2
       n <- t[-numbers::isPrime(t)]
-      withProgress(message = 'Calculation in progress', {
+      #withProgress(message = 'Calculation in progress', {
         choices_list <- list()
         i <- 1
         for (n in t) {
@@ -377,7 +381,6 @@ mod_Diagonal_server <- function(id) {
         new_choices <- list()
         v <- 1
         by_choices <- 1:length(choices)
-        # withProgress(message = 'Calculation in progress', {
         for (dim_options in by_choices) {
           
           planter_mov <- single_inputs()$planter_mov
@@ -402,7 +405,7 @@ mod_Diagonal_server <- function(id) {
             v <- v + 1
           }
         }
-      })
+      #})
       updateSelectInput(inputId = "dimensions.d",
                         choices = new_choices,
                         selected = new_choices[1])

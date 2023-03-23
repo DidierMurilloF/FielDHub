@@ -72,7 +72,7 @@ mod_LSD_ui <- function(id){
           )
         ),
         numericInput(ns("seed.lsd"), 
-                     label = "Seed Number:", 
+                     label = "Random Seed:", 
                      value = 123, 
                      min = 1),
         

@@ -68,7 +68,7 @@ mod_FD_ui <- function(id){
                                choices = c("serpentine", "cartesian"), multiple = FALSE,
                                selected = "serpentine"),
                    
-                   numericInput(inputId = ns("seed.fd"), label = "Seed Number:",
+                   numericInput(inputId = ns("seed.fd"), label = "Random Seed:",
                                 value = 123, min = 1),
                    fluidRow(
                      column(6,

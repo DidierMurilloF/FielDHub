@@ -69,7 +69,7 @@ kable(df)
 
 8. Select `serpentine` or `cartesian` in the **Plot Order Layout**. For this example we will use the default `serpentine` layout.
 
-9. As with all the designs, we can set a seed number in the box labeled **Seed Number**. In this example, we will set it to `1239`. 
+9. As with all the designs, we can set a random seed in the box labeled **random seed**. In this example, we will set it to `1239`. 
 
 10. Once we have entered the information for our experiment on the left side panel, click the **Run!** button to run the design. 
 
@@ -122,7 +122,7 @@ The description for the inputs that we used to generate the design,
 *   `plotNumber = 101` is the starting plot number.
 *   `planter = "serpentine"` is the order layout.
 *   `locationNames = "FARGO"` is an optional name for each location.
-*   `seed = 1239` is the seed number to replicate identical randomizations.
+*   `seed = 1239` is the random seed to replicate identical randomizations.
 
 ### Print `factorial` object
 

@@ -77,7 +77,7 @@ kable(df)
 
 5. Select `serpentine` or `cartesian` in the **Plot Order Layout**. For this example we will use the default `serpentine` layout.
 
-6. To ensure that randomizations are consistent across sessions, we can set a seed number in the box labeled **Seed Number**. In this example, we will set it to `1245`. 
+6. To ensure that randomizations are consistent across sessions, we can set a random seed in the box labeled **random seed**. In this example, we will set it to `1245`. 
 
 7. Enter the starting plot number in the **Starting Plot Number** box. If the experiment has multiple locations, you must enter a comma separated list of numbers the length of the number of locations for the input to be valid. 
 
@@ -150,7 +150,7 @@ The description for the inputs that we used to generate the design,
 *   `l = 1` is the number of locations.
 *   `exptName = "Expt1"` is an optional name for experiment.
 *   `locationNames = "PALMIRA"` is the optional name for the locations.
-*   `seed = 1245` is the seed number to replicate identical randomizations.
+*   `seed = 1245` is the random seed to replicate identical randomizations.
 
 ### Print `prep` object
 

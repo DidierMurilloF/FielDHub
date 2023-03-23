@@ -22,7 +22,7 @@ body::-webkit-scrollbar {
 }
 
 .nav a {
-    font-size: 1.05em !important;
+    font-size: 1.0em !important;
 }
 
 .navbar {
@@ -232,6 +232,17 @@ p {
   padding-bottom: 50px;
 }
 
+.grid-container1 {
+  display: grid;
+  justify-content: center;
+  grid-row-gap: 5px;
+  grid-template-columns: 40% 35%;
+  grid-template-rows: auto auto;
+  background-color: #edebeb;
+  padding: 1px;
+  padding-bottom: 50px;
+}
+
 .grid-item {
   padding: 20px;
   font-size: 16px;
@@ -305,4 +316,32 @@ h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
   line-height: 1.1;
   color: inherit;
   margin-left: 10px;
+}
+
+/* * {
+    box-sizing: border-box;
+} */
+.content-help {
+  /* float: left;
+  max-width: 75%;
+  margin: auto;
+  padding-left: 180px; */
+  display: grid;
+  justify-content: center;
+  grid-row-gap: 5px;
+  grid-template-columns: 60% 40%;
+  grid-template-rows: auto auto;
+  background-color: #edebeb;
+  padding: 1px;
+  padding-bottom: 50px;
+}
+.column1 {
+  float: left;
+  width: 60%;
+  padding: 10px;
+}
+.column2 {
+  float: right;
+  width: 40%;
+  padding: 15px;
 }

@@ -59,8 +59,8 @@ To illustrate using FielDHub to build experimental designs through R
 code, the design produced in the R Shiny interface described above can
 also be created using the function `diagonal_arrangement()` in the R
 script below. Note, that to obtain identical results, users must include
-the same seed number in the script as was used in the Shiny app. In this
-case, the seed number is 1249.
+the same random seed in the script as was used in the Shiny app. In this
+case, the random seed is 1249.
 
 ``` r
 diagonal <- diagonal_arrangement(
@@ -175,7 +175,7 @@ Instead of using the Shiny FielDHub app, users can use the standalone
 FielDHub function `partially_replicated()`. The partially replicated
 layout described above can be produced through scripting as follows. As
 noted in the previous example, to obtain identical results between the
-script and the Shiny app, users need to use the same seed number, which,
+script and the Shiny app, users need to use the same random seed, which,
 in this case, is 77.
 
 ``` r

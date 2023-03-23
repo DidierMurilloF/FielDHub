@@ -76,7 +76,7 @@ mod_SPD_ui <- function(id) {
                            value = "FARGO")
           )
         ),
-        numericInput(inputId = ns("seed.spd"), label = "Seed Number:", 
+        numericInput(inputId = ns("seed.spd"), label = "Random Seed:", 
                      value = 118, min = 1),
         
         fluidRow(

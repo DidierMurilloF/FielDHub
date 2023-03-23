@@ -85,7 +85,7 @@ mod_STRIPD_ui <- function(id){
         ),
         
         numericInput(inputId = ns("myseed.strip"), 
-                     label = "Seed Number:", 
+                     label = "Random Seed:", 
                      value = 123, 
                      min = 1),
         

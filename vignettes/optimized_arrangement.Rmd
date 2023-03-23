@@ -80,7 +80,7 @@ kable(df)
 
 6. Since we want to run this experiment over 3 locations, set **Input # of Locations** to `3`.
 
-7. To ensure that randomizations are consistent across sessions, we can set a seed number in the box labeled **Seed Number**. For instance, we will set it to `130`. 
+7. To ensure that randomizations are consistent across sessions, we can set a random seed in the box labeled **random seed**. For instance, we will set it to `130`. 
 
 8. Enter the name for the experiment in the **Input Experiment Name** box. For example, `PYT_WHEAT_22`.
 
@@ -162,7 +162,7 @@ The description for the inputs that we used to generate the design,
 *   `exptName = "WINTER_WHEAT_22"` is an optional name for experiment.
 *   `locationNames = c("FARGO", "CASSELTON", "MINOT")` are the values for representing 
     respective name for each location.
-*   `seed = 130` is the seed number to replicate identical randomizations.
+*   `seed = 130` is the random seed to replicate identical randomizations.
 
 
 ### Print `optim_expt` object

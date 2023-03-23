@@ -39,6 +39,7 @@ usethis::use_spell_check()
 golem::add_module(name = "Diagonal")
 golem::add_module(name = "Optim")
 golem::add_module(name = "RCBD_augmented")
+golem::add_module(name = "sparse_allocation")
 golem::add_module(name = "pREPS")
 ############# Lattice Designs ####################
 golem::add_module(name = "Square_Lattice")

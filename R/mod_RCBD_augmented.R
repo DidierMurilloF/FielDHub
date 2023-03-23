@@ -103,7 +103,7 @@ mod_RCBD_augmented_ui <- function(id){
           column(6,
                  style=list("padding-right: 28px;"),
                  numericInput(inputId = ns("myseed_a_rcbd"), 
-                              label = "Seed Number:",
+                              label = "Random Seed:",
                               value = 1, 
                               min = 1)
           ),

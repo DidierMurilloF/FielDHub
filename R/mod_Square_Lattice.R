@@ -55,7 +55,7 @@ mod_Square_Lattice_ui <- function(id){
                             textInput(inputId = ns("Location.square"), "Input Location:", value = "FARGO")
                      )
                    ),
-                   numericInput(inputId = ns("myseed.square"), label = "Seed Number:",
+                   numericInput(inputId = ns("myseed.square"), label = "Random Seed:",
                                                        value = 5, min = 1),
                     
                    fluidRow(

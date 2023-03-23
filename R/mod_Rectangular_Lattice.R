@@ -49,7 +49,7 @@ mod_Rectangular_Lattice_ui <- function(id){
                             textInput(inputId = ns("Location.rectangular"), "Input Location:", value = "FARGO")
                      )
                    ), 
-                   numericInput(inputId = ns("myseed.rectangular"), label = "Seed Number:",
+                   numericInput(inputId = ns("myseed.rectangular"), label = "Random Seed:",
                                 value = 007, min = 1),
                    fluidRow(
                      column(6,

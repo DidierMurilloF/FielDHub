@@ -183,7 +183,6 @@ optimized_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,
       }
     } else base::stop('"optimized_arrangement()" requires inputs checks and amountChecks to be possitive integers and distinct of NULL.')
     t_plots <- as.numeric(sum(RepChecks) + lines)
-    print(t_plots)
     if (numbers::isPrime(t_plots)) {
       stop("No options when the total number of plots is a prime number.", call. = FALSE)
     }

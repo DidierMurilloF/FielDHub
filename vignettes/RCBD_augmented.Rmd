@@ -84,7 +84,7 @@ The total number of plots in our field will be **Input # of Stacked Expts**(**In
 
 7. Select `serpentine` or `cartesian` in the **Plot Order Layout**. For this example we will set the `serpentine` layout.
 
-8. To ensure that randomizations are consistent across sessions, we can set a seed number in the box labeled **Seed Number**. In this example, we will set it to `1987`. 
+8. To ensure that randomizations are consistent across sessions, we can set a random seed in the box labeled **random seed**. In this example, we will set it to `1987`. 
 
 9. Enter the starting plot number in the **Starting Plot Number** box. If the experiment has multiple locations, you must enter a comma separated list of numbers the length of the number of locations for the input to be valid. 
 
@@ -166,7 +166,7 @@ The description for the inputs that we used to generate the design,
     respective name for each location.
 *   `nrows = 12` is the number of rows in the field. It is optional
 *   `ncols = 12` is the number of columns in the field. It is optional.
-*   `seed = 1987` is the seed number to replicate identical randomizations.
+*   `seed = 1987` is the random seed to replicate identical randomizations.
 
 ### Print `aug_RCBD` output
 
