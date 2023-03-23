@@ -30,7 +30,7 @@
     
     <a class="navbar-brand me-2" href="index.html">FielDHub</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.2.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.3.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -128,7 +128,7 @@
 <h3 id="using-the-fieldhub-function-diagonal_arrangement">Using the FielDHub function <code>diagonal_arrangement()</code>
 <a class="anchor" aria-label="anchor" href="#using-the-fieldhub-function-diagonal_arrangement"></a>
 </h3>
-<p>To illustrate using FielDHub to build experimental designs through R code, the design produced in the R Shiny interface described above can also be created using the function <code><a href="reference/diagonal_arrangement.html">diagonal_arrangement()</a></code> in the R script below. Note, that to obtain identical results, users must include the same seed number in the script as was used in the Shiny app. In this case, the seed number is 1249.</p>
+<p>To illustrate using FielDHub to build experimental designs through R code, the design produced in the R Shiny interface described above can also be created using the function <code><a href="reference/diagonal_arrangement.html">diagonal_arrangement()</a></code> in the R script below. Note, that to obtain identical results, users must include the same random seed in the script as was used in the Shiny app. In this case, the random seed is 1249.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">diagonal</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/diagonal_arrangement.html">diagonal_arrangement</a></span><span class="op">(</span></span>
 <span>  nrows <span class="op">=</span> <span class="fl">16</span>, </span>
@@ -206,7 +206,7 @@
 <h3 id="using-the-fieldhub-function-partially_replicated">Using the FielDHub function <code>partially_replicated()</code>
 <a class="anchor" aria-label="anchor" href="#using-the-fieldhub-function-partially_replicated"></a>
 </h3>
-<p>Instead of using the Shiny FielDHub app, users can use the standalone FielDHub function <code><a href="reference/partially_replicated.html">partially_replicated()</a></code>. The partially replicated layout described above can be produced through scripting as follows. As noted in the previous example, to obtain identical results between the script and the Shiny app, users need to use the same seed number, which, in this case, is 77.</p>
+<p>Instead of using the Shiny FielDHub app, users can use the standalone FielDHub function <code><a href="reference/partially_replicated.html">partially_replicated()</a></code>. The partially replicated layout described above can be produced through scripting as follows. As noted in the previous example, to obtain identical results between the script and the Shiny app, users need to use the same random seed, which, in this case, is 77.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pREP</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/partially_replicated.html">partially_replicated</a></span><span class="op">(</span></span>
 <span>  nrows <span class="op">=</span> <span class="fl">16</span>, </span>
