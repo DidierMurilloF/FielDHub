@@ -209,7 +209,7 @@ do_optim <- function(
         allocation = allocation_df, 
         size_locations = col_sum
     )
-    # Create the class "SparsePrep" for the object out
+    # Create the class "MultiPrep" for the object out
     design_class <- "MultiPrep"
     if (design != "prep") design_class <- "Sparse"
     class(out) <- design_class
@@ -255,7 +255,7 @@ do_optim <- function(
 #' sparse <- sparse_allocation(
 #'   lines = 260, 
 #'   l = 5, 
-#'   plant_reps = 5, 
+#'   plant_reps = 4, 
 #'   checks = 4, 
 #'   locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5"), 
 #'   seed = 1234
