@@ -1,0 +1,208 @@
+---
+title: "Optimized Multi-Location Partially Replicated Design"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Partially Replicated Design}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+options(rmarkdown.html_vignette.check_title = FALSE)
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = NA,
+  warning = FALSE, 
+  message = FALSE
+)
+```
+
+This vignette shows how to generate an **optimized multi-location partially replicated design** using both the FielDHub Shiny App and the scripting function `multi_location_prep()` from the `FielDHub` R package.
+
+## Overview
+
+Partially replicated designs are commonly employed in early generation field trials. This type of design is characterized by replication of a portion of the entries, with the remaining entries only appearing once in the experiment. The optimized p-rep is characterized by a generated genotype allocation matrix defining the distribution of replicated entries over multiple locations, using a similar method to sparse allocation. The average genotype allocation will be 1.5 copies per location. 
+
+## Use case
+
+Consider a plant breeding field trial with 142 entries across 5 locations, with 7 total replications of each entry. There are also 3 checks, each replicated 6 times. We can generate an optimized multi-location partially replicated design with these parameters using both the FielDHub Shiny app or the `multi_location_prep()` function in R. 
+
+## Running the Shiny App
+
+To launch the app you need to run either
+
+```{r, eval=FALSE}
+FielDHub::run_app()
+```
+
+or
+
+```{r, eval=FALSE}
+library(FielDHub)
+run_app()
+```
+
+## 1. Using the FielDHub Shiny App
+
+Once the app is running, click the tab **Partially Replicated Design** and select **Optimized Multi-Location p-rep** from the dropdown. 
+
+Then, follow the following steps where we will show how to generate an optimized partially replicated design.
+
+## Inputs
+
+1. **Import entries' list?** Choose whether to import a list with entry numbers and names for genotypes or treatments.
+    * If the selection is `No`, that means the app is going to generate synthetic data for entries and names of the treatment/genotypes based on the user inputs.
+
+    * If the selection is `Yes`, the entries list must fulfill a specific format and must be a `.csv` file. The file must have the columns `ENTRY` and `NAME`. The `ENTRY` column must have a unique entry integer number for each treatment/genotype. The column `NAME` must have a unique name that identifies each treatment/genotype. Both `ENTRY` and `NAME` must be unique, duplicates are not allowed. In the following table, we show an example of the entries list format. 
+    
+```{r, include=FALSE}
+ENTRY <- 1:10
+NAME <- c(paste0("Genotype", LETTERS[1:10]))
+df <- data.frame(ENTRY,NAME)
+```
+
+```{r, echo = FALSE, results='asis'}
+library(knitr)
+kable(df)
+```
+
+2. Enter the number of entries in the **Input # of Entries** box as a comma separated list. In our example we will have 142 entries, so we enter 142 in the box for our sample experiment. 
+
+3. Select whether or not the experiment will contain checks under the **Include checks?** option. The example experiment does, so set this to `Yes`. 
+
+4. Once we select `Yes` on the above option, two more boxes appear, the first being **Input # of Checks** where we set how many checks to include in the experiment. In our case this is 3. 
+
+5. Next to this option we have **Input # Check's Reps**, where we set the number of replications for each check respectively in a comma seperated list. We are replicating each of the 3 checks 6 times, so enter `6,6,6` in this box. 
+
+6. Enter the number of locations in **Input # of Locations**. We will run this experiment over 5 locations, so set **Input # of Locations** to 5.
+
+7. Set the total number of replications of the entries over all locations in the `# of Copies Per Plant` dropdown box. For this example experiment, seet this to 7. 
+
+8. Select `serpentine` or `cartesian` in the **Plot Order Layout**. For this example we will use the default `serpentine` layout.
+
+9. To ensure that randomizations are consistent across sessions, we can set a random seed in the box labeled **Random Seed**. In this example, we will set it to `1234`. 
+
+10. Enter the starting plot number in the **Starting Plot Number** box. If the experiment has multiple locations, you must enter a comma separated list of numbers the length of the number of locations for the input to be valid. 
+
+11. Once we have entered the information for our experiment on the left side panel, click the **Run!** button to run the design. 
+
+12. You will then be prompted to select the dimensions of the field from the list of options in the drop down in the middle of the screen with the box labeled **Select dimensions of field**. In our case, we will select `31 x 7`. 
+
+13. Click the **Randomize!** button to randomize the experiment with the set field dimensions and to see the output plots. If you change the dimensions again, you must re-randomize.
+
+If you change any of the inputs on the left side panel after running an experiment initially, you have to click the Run and Randomize buttons again, to re-run with the new inputs.
+
+## Outputs
+
+After you run a single diagonal arrangement in FielDHub and set the dimensions of the field, there are several ways to display the information contained in the field book. The first tab, **Get Random**, shows the option to change the dimensions of the field and re-randomize, as well as the genotype allocation matrix generated for the optimized p-rep design, which displays the replications of each genotype over each location, much like the matrix generated in sparse allocation. 
+
+### Randomized Field
+
+The **Randomized Field** tab displays a graphical representation of the randomization of the entries in a field of the specified dimensions. The replicated entries are the green colored cells, with the which cells appearing only once in the location. The display includes numbered labels for the rows and columns. You can copy the field as a table or save it directly as an Excel file with the _Copy_ and _Excel_ buttons at the top. 
+
+### Plot Number Field
+
+On the **Plot Number Field** tab, there is a table display of the field with the plots numbered according to the Plot Order Layout specified, either _serpentine_ or _cartesian_. You can see the corresponding entries for each plot number in the field book. Like the Randomized Field tab, you can copy the table or save it as an Excel file with the _Copy_ and _Excel_ buttons. 
+
+### Field Book
+
+The **Field Book** displays all the information on the experimental design in a table format. It contains the specific plot number and the row and column address of each entry, as well as the corresponding treatment on that plot. This table is searchable, and we can filter the data in relevant columns. 
+
+## 2. Using the `FielDHub` function: `multi_location_prep()`.
+
+You can run the same design with the function `multi_location_prep()` in the `FielDHub` package.
+
+First, you need to load the `FielDHub` package typing,
+
+```{r, echo = TRUE}
+library(FielDHub)
+```
+
+Then, you can enter the information describing the above design like this:
+
+```{r, echo = TRUE}
+optim_multi_prep <- multi_location_prep(
+  lines = 142,  
+  l = 5, 
+  plant_reps = 7, 
+  checks = 3, 
+  rep_checks = c(6,6,6),
+  locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5"), 
+  seed = 1234
+)
+```
+
+#### Details on the inputs entered in `optimized_arrangement()` above
+
+The description for the inputs that we used to generate the design,
+
+*   `lines = 142` is the number of entries in the field.
+*   `l = 1` is the number of locations.
+*   `plant_reps = 7` is the number of copies of each entry. 
+*   `checks = 3` is the number of checks.
+*   `rep_checks = c(6,6,6)` is the nubmer of replications of each check, in a vector the length of the number of checks. 
+*   `locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5")` are optional names for the locations.
+*   `seed = 1234` is the random seed to replicate identical randomizations.
+
+### Print `optim_multi_prep` object
+
+To print a summary of the information that is in the object `optim_multi_prep`, we can use the generic function `print()`. The `multi_location_prep()` function returns a list of 4 objects, `designs`, `list_locs`, `allocation`, and `size_locations`. `designs` contains information about the design parameters, `list_locs` is a list of entries in a location, `allocation` is the binary allocation matrix for a location, and `size_locations` is a data frame with a column for each location and a row indicating the size of the location. The first 3 of these in the list are indexable by location.
+
+For example, we can save the design parameters to an object `designs`, and then index based on location using the dollar sign operator. We can first display the design parameters for LOC1 with the following code:
+
+```{r, echo=TRUE, eval=FALSE}
+designs <- optim_multi_prep$designs
+print(designs$LOC1)
+```
+
+which outputs:
+
+```{r, echo=FALSE, eval=TRUE}
+designs <- optim_multi_prep$designs
+print(designs$LOC1)
+```
+
+And for LOC2 by changing the location to print to LOC2:
+
+```{r, echo=TRUE, eval=FALSE}
+print(designs$LOC2)
+```
+
+which outputs:
+
+```{r, echo=FALSE, eval=TRUE}
+print(designs$LOC2)
+```
+
+### Access to `optim_multi_prep` output
+
+The object `designs` we saved `optim_multi_prep$designs` to is a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book, indexed by each location in the experiment. These are accessible by the `$` operator, i.e. `designs$LOC1$layoutRandom` or `designs$LOC1$fieldBook` for LOC1, etc. 
+
+`designs$LOC1$fieldBook` is a data frame containing information about every plot in the field, with information about the location of the plot and the treatment in each plot. As seen in the output below, the field book has columns for `ID`, `EXPT`, `LOCATION`, `YEAR`, `PLOT`, `ROW`, `COLUMN`, `CHECKS`, `ENTRY`, and `TREATMENT`.
+
+Let us see the first 10 rows of the field book for the first location in this experiment.
+
+```{r, echo=TRUE, eval=FALSE}
+field_book <- designs$LOC1$fieldBook
+head(field_book, 10)
+```
+
+```{r, echo=FALSE, eval=TRUE}
+field_book <- designs$LOC1$fieldBook
+head(field_book, 10)
+```
+
+### Plot field layout
+
+For plotting the layout in function of the coordinates `ROW` and `COLUMN` in the field book object we can use the generic function `plot()` as follows. This plots only the first location, but this is indexable by location using the dollar sign operator as well. 
+
+```{r, fig.align='center', fig.width=7.2, fig.height=5.5}
+plot(designs$LOC1)
+```
+
+In the figure above, green plots contain replicated entries, and gray plots contain entries that only appear once.
+
+<br>
+<br>
+<br>
+
