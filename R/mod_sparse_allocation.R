@@ -424,7 +424,7 @@ mod_sparse_allocation_server <- function(id){
             design = "sparse",
             lines = lines, 
             l = locs,
-            plant_reps = single_inputs()$plant_reps, 
+            copies_per_entry = single_inputs()$plant_reps, 
             add_checks = TRUE,
             checks = as.numeric(input$sparse_checks), 
             seed = single_inputs()$seed_number,

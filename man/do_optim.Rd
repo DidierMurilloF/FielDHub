@@ -8,7 +8,7 @@ do_optim(
   design = "sparse",
   lines,
   l,
-  plant_reps,
+  copies_per_entry,
   add_checks = FALSE,
   checks = NULL,
   rep_checks = NULL,
@@ -23,8 +23,8 @@ do_optim(
 
 \item{l}{Number of locations or sites. By default  \code{l = 1}.}
 
-\item{plant_reps}{Number of copies per plant. 
-When design is \code{sparse} then \code{plant_reps} should be less than \code{l}}
+\item{copies_per_entry}{Number of copies per plant. 
+When design is \code{sparse} then \code{copies_per_entry} should be less than \code{l}}
 
 \item{add_checks}{Option to add checks. Optional if \code{design = "prep"}}
 
@@ -53,7 +53,7 @@ sparse_example <- do_optim(
    design = "sparse",
    lines = 180, 
    l = 4, 
-   plant_reps = 3, 
+   copies_per_entry = 3, 
    add_checks = TRUE, 
    checks = 4,
    seed = 15

@@ -443,7 +443,7 @@ mod_multi_loc_preps_server <- function(id){
             design = "prep",
             lines = input$gens_prep, 
             l = locs, 
-            plant_reps = as.numeric(input$plant_copies_preps), 
+            copies_per_entry = as.numeric(input$plant_copies_preps), 
             add_checks = add_checks,
             checks = prep_checks, 
             rep_checks = prep_inputs()$prep_checks,

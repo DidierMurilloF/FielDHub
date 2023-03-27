@@ -12,7 +12,7 @@ multi_location_prep(
   planter,
   plotNumber,
   desired_avg,
-  plant_reps,
+  copies_per_entry,
   checks = NULL,
   rep_checks = NULL,
   exptName,
@@ -36,7 +36,7 @@ multi_location_prep(
 
 \item{desired_avg}{(optional) Desired average of treatments across locations.}
 
-\item{plant_reps}{Number of total copies per treatment.}
+\item{copies_per_entry}{Number of total copies per treatment.}
 
 \item{checks}{Number of checks.}
 
@@ -76,7 +76,7 @@ Optimized multi-location partially replicated design
 optim_multi_prep <- multi_location_prep(
   lines = 142,  
   l = 5, 
-  plant_reps = 7, 
+  copies_per_entry = 7, 
   checks = 3, 
   rep_checks = c(6,6,6),
   locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5"), 
