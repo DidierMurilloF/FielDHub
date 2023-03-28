@@ -200,12 +200,14 @@ mod_sparse_allocation_server <- function(id){
     shinyjs::useShinyjs()
     
     observe({
-      sparse_locs <- as.numeric(input$sparse_locations)
-      start <- ceiling(sparse_locs / 2)
-      plant_reps <- start:(sparse_locs - 1)
-      updateSelectInput(inputId = "plant_reps", 
-                        choices = plant_reps, 
-                        selected = plant_reps[length(plant_reps)])
+        sparse_locs <- as.numeric(input$sparse_locations)
+        start <- ceiling(sparse_locs / 2)
+        plant_reps <- start:(sparse_locs - 1)
+        updateSelectInput(
+            inputId = "plant_reps", 
+            choices = plant_reps, 
+            selected = plant_reps[length(plant_reps)]
+        )
     })
     
 
@@ -240,19 +242,26 @@ mod_sparse_allocation_server <- function(id){
     
     single_inputs <- eventReactive(input$sparse_run, {
         req(input$sparse_lines)
+        req(input$sparse_plot_start)
+        req(input$sparse_loc_names)
+        req(input$sparse_locations)
         input_sparse_lines <- as.numeric(input$sparse_lines)
         planter_mov <- input$sparse_planter
         Name_expt <- as.vector(unlist(strsplit(input$sparse_expt_name, ",")))
-        blocks <- 1
-        if (length(Name_expt) == blocks & !missing(Name_expt)) {
-            name_expt <- Name_expt
-        }else{
-            name_expt = paste0(rep("Block", times = blocks), 1:blocks)
-        }
         plotNumber <- as.numeric(as.vector(unlist(strsplit(input$sparse_plot_start, ","))))
         seed_number <- as.numeric(input$seed_single)
         location_names <- as.vector(unlist(strsplit(input$sparse_loc_names, ",")))
         sites = as.numeric(input$sparse_locations)
+        if (length(location_names) == 0 || length(location_names) != sites) {
+            location_names <- paste0("LOC", 1:sites)
+        }
+        if (length(plotNumber) == 0 || length(plotNumber) != sites) {
+            plotNumber <- seq(1, 1000 * sites, by = 1000)[1:sites]
+        }
+        name_expt <- Name_expt
+        if (length(Name_expt) == 0) {
+            name_expt <- "expt_sparse"
+        }
         return(
             list(
                 sparse_lines = input_sparse_lines,
@@ -424,7 +433,7 @@ mod_sparse_allocation_server <- function(id){
             design = "sparse",
             lines = lines, 
             l = locs,
-            plant_reps = single_inputs()$plant_reps, 
+            copies_per_entry = single_inputs()$plant_reps, 
             add_checks = TRUE,
             checks = as.numeric(input$sparse_checks), 
             seed = single_inputs()$seed_number,
@@ -668,7 +677,6 @@ mod_sparse_allocation_server <- function(id){
 
     rand_checks <- reactive({
       req(input$sparse_dims)
-      #req(get_sparse_data())
       req(field_dimensions_diagonal())
       Option_NCD <- TRUE
       req(single_inputs()$seed_number)
@@ -693,8 +701,7 @@ mod_sparse_allocation_server <- function(id){
             kindExpt = kindExpt_single,
             planter_mov = planter_mov,
             Checks = checksEntries,
-            #stacked = input$stacked,
-            data = NULL, #get_sparse_data()$data_entry,
+            data = NULL, 
             data_dim_each_block = available_percent_table()$data_dim_each_block,
             n_reps = input$n_reps, seed = NULL)
         }
@@ -710,76 +717,13 @@ mod_sparse_allocation_server <- function(id){
                   user_site = user_site))
     })
     
-    # output$options_table <- DT::renderDT({
-    #   test <- randomize_hit$times > 0 & user_tries$tries > 0
-    #   if (!test) return(NULL)
-    #     Option_NCD <- TRUE
-    #     if (is.null(available_percent_table()$dt)) {
-    #       shiny::validate("Data input does not fit to field dimensions")
-    #       return(NULL)
-    #     }
-    #     my_out <- available_percent_table()$dt
-    #     df <- as.data.frame(my_out)
-    #     options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-    #                               scrollX = TRUE, scrollY = "460px"))
-    #     DT::datatable(
-    #       df, rownames = FALSE, 
-    #       caption = 'Reference guide to design your experiment. Choose the percentage (%)
-    #     of checks based on the total number of plots you want to have in the final layout.', 
-    #       options = list(
-    #         columnDefs = list(list(className = 'dt-center', targets = "_all"))))
-    # })
-    
-    # output$data_input <- DT::renderDT({
-    #   test <- randomize_hit$times > 0 & user_tries$tries > 0
-    #   if (!test) return(NULL)
-    #     df <- get_sparse_data()$data_entry
-    #     df$ENTRY <- as.factor(df$ENTRY)
-    #     df$NAME <- as.factor(df$NAME)
-    #     options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-    #                               scrollX = TRUE, scrollY = "600px"))
-
-    #     DT::datatable(df,
-    #                   filter = "top",
-    #                   rownames = FALSE, 
-    #                   caption = 'List of Entries.', 
-    #                   options = list(
-    #                     columnDefs = list(
-    #                       list(className = 'dt-center', targets = "_all")))
-    #     )
-    # })
-    
-    # output$checks_table <- DT::renderDT({
-    #   test <- randomize_hit$times > 0 & user_tries$tries > 0
-    #   if (!test) return(NULL)
-    #     Option_NCD <- TRUE
-    #     req(get_sparse_data()$data_entry)
-    #     data_entry <- get_sparse_data()$data_entry
-    #     req(user_location()$map_checks)
-    #     if(is.null(user_location()$map_checks)) return(NULL)
-    #     w_map <- user_location()$map_checks
-    #     table_checks <- data_entry[1:(input$sparse_checks),]
-    #     df <- table_checks
-    #     info_checks <- base::table(w_map[w_map > 0])
-    #     times_checks <- data.frame(list(ENTRY = base::names(info_checks), 
-    #                                     TIMES = base::as.matrix(info_checks)))
-    #     df <- base::merge(df, times_checks, by.x = "ENTRY")
-    #     options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-    #                               scrollX = TRUE, scrollY = "350px"))
-    #     DT::datatable(df, rownames = FALSE, caption = 'Table of Checks.', 
-    #                   options = list(
-    #                     columnDefs = list(list(className = 'dt-center', targets = "_all"))))
-    # })
-    
     rand_lines <- reactive({
       req(input$sparse_dims)
-      #req(get_sparse_data())
       req(sparse_setup())
       req(field_dimensions_diagonal())
       Option_NCD <- TRUE
       req(available_percent_table()$dt)
       req(available_percent_table()$d_checks)
-      #req(get_sparse_data()$data_entry)
       data_entry <- sparse_setup()$list_locs
       n_rows <- field_dimensions_diagonal()$d_row
       n_cols <- field_dimensions_diagonal()$d_col
@@ -810,7 +754,6 @@ mod_sparse_allocation_server <- function(id){
       test <- randomize_hit$times > 0 & user_tries$tries > 0
       if (!test) return(NULL)
       req(input$sparse_dims)
-      #req(get_sparse_data())
       req(sparse_setup)
       req(rand_lines())
       VisualCheck <- FALSE
@@ -828,23 +771,24 @@ mod_sparse_allocation_server <- function(id){
       s <- unlist(loc_view_user$Entries)
       rownames(df) <- nrow(df):1
       style_equal <- rep('gray', length(s))
-      DT::datatable(df,#,
-                    extensions = c('Buttons'),# , 'FixedColumns'
-                    options = list(dom = 'Blfrtip',
-                                    autoWidth = FALSE,
-                                    scrollX = TRUE,
-                                    fixedColumns = TRUE,
-                                    pageLength = nrow(df),
-                                    scrollY = "590px",
-                                    class = 'compact cell-border stripe',
-                                    rownames = FALSE,
-                                    server = FALSE,
-                                    filter = list( position = 'top',
-                                                  clear = FALSE,
-                                                  plain =TRUE ),
-                                    buttons = c('copy', 'excel'),
-                                    lengthMenu = list(c(10,25,50,-1),
-                                                      c(10,25,50,"All")))
+      DT::datatable(
+        df,#,
+        extensions = c('Buttons'),# , 'FixedColumns'
+        options = list(dom = 'Blfrtip',
+                        autoWidth = FALSE,
+                        scrollX = TRUE,
+                        fixedColumns = TRUE,
+                        pageLength = nrow(df),
+                        scrollY = "590px",
+                        class = 'compact cell-border stripe',
+                        rownames = FALSE,
+                        server = FALSE,
+                        filter = list( position = 'top',
+                                        clear = FALSE,
+                                        plain =TRUE ),
+                        buttons = c('copy', 'excel'),
+                        lengthMenu = list(c(10,25,50,-1),
+                                            c(10,25,50,"All")))
       ) %>%
         DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
                         backgroundColor = DT::styleEqual(c(sparse_checks),
@@ -947,7 +891,6 @@ mod_sparse_allocation_server <- function(id){
       )
     })
 
-    # # export_diagonal_design <- eventReactive(input$sparse_get_random, {
     export_diagonal_design <- reactive({
       locs_diagonal <- single_inputs()$sites
       final_expt_fieldbook <- vector(mode = "list",length = locs_diagonal)

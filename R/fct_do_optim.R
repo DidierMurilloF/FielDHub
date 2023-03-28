@@ -2,8 +2,8 @@
 #' @param design Type of experimental design. It can be \code{prep} or \code{sparse}
 #' @param lines Number of genotypes, experimental lines or treatments.
 #' @param l Number of locations or sites. By default  \code{l = 1}.
-#' @param plant_reps Number of copies per plant. 
-#' When design is \code{sparse} then \code{plant_reps} should be less than \code{l}
+#' @param copies_per_entry Number of copies per plant. 
+#' When design is \code{sparse} then \code{copies_per_entry} should be less than \code{l}
 #' @param add_checks Option to add checks. Optional if \code{design = "prep"}
 #' @param checks Number of genotypes checks. 
 #' @param rep_checks Replication for each check.
@@ -31,7 +31,7 @@
 #'    design = "sparse",
 #'    lines = 180, 
 #'    l = 4, 
-#'    plant_reps = 3, 
+#'    copies_per_entry = 3, 
 #'    add_checks = TRUE, 
 #'    checks = 4,
 #'    seed = 15
@@ -41,7 +41,7 @@ do_optim <- function(
     design = "sparse", 
     lines, 
     l, 
-    plant_reps, 
+    copies_per_entry, 
     add_checks = FALSE, 
     checks = NULL, 
     rep_checks = NULL, 
@@ -49,8 +49,14 @@ do_optim <- function(
     data = NULL) {
     # set a random seed if it is missing
     if (missing(seed)) seed <- base::sample.int(10000, size = 1) 
-    if (design == "prep" & plant_reps <= l) { 
-        stop("p-reps option requires that plant_reps be greater than the number of locations")
+    if (missing(lines)) stop("Please, define the number of lines/treatments for this design.")
+    if (missing(l)) stop("Please, define the number of locations for this design.")
+    if (missing(design) || is.null(design)) stop("Paramenter design is missing.")
+    if (all(c("prep", "sparse") != design)) {
+        stop("Input design is unknown. Please, choose one: 'sparse' or 'prep'.")
+    } 
+    if (design == "prep" & copies_per_entry <= l) { 
+        stop("p-reps option requires that copies_per_entry be greater than the number of locations")
     }
     if (design == "sparse") {
         if (is.null(checks)) stop("Please, specify the number of checks!")
@@ -104,7 +110,7 @@ do_optim <- function(
     # Generate the optim IBs
     optim_blocks <- blocksdesign::blocks(
         treatments = lines, 
-        replicates = plant_reps, 
+        replicates = copies_per_entry, 
         blocks = l, 
         searches = 20, 
         seed = seed
@@ -225,8 +231,8 @@ do_optim <- function(
 #' @param l Number of locations or sites. By default  \code{l = 1}.
 #' @param plotNumber Numeric vector with the starting plot number for each location. 
 #' By default \code{plotNumber = 101}.
-#' @param plant_reps Number of copies per plant. 
-#' When design is \code{sparse} then \code{plant_reps} < \code{l}
+#' @param copies_per_entry Number of copies per plant. 
+#' When design is \code{sparse} then \code{copies_per_entry} < \code{l}
 #' @param exptName (optional) Name of the experiment.
 #' @param locationNames (optional) Names each location.
 #' @param nrows Number of rows in the field. 
@@ -255,7 +261,7 @@ do_optim <- function(
 #' sparse <- sparse_allocation(
 #'   lines = 260, 
 #'   l = 5, 
-#'   plant_reps = 4, 
+#'   copies_per_entry = 4, 
 #'   checks = 4, 
 #'   locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5"), 
 #'   seed = 1234
@@ -266,18 +272,26 @@ sparse_allocation <- function(
     nrows, 
     ncols, 
     l, 
-    planter, 
+    planter = "serpentine", 
     plotNumber,  
-    plant_reps, 
+    copies_per_entry, 
     checks = NULL, 
-    exptName, 
+    exptName = NULL, 
     locationNames,
     sparse_list, 
     seed) {
     # set a random seed if it is missing
-    if (missing(seed)) seed <- base::sample.int(10000, size = 1)   
+    if (missing(seed)) seed <- base::sample.int(10000, size = 1) 
+    if (missing(l)) stop("Please, define the number of locations for this design.")
+    if (missing(locationNames) || length(locationNames) != l) locationNames <- paste0("LOC", 1:l)
+    if (missing(plotNumber) || length(plotNumber) != l) plotNumber <- seq(1, 1000 * l, by = 1000)[1:l]
+    if (missing(exptName) || length(exptName) != l) exptName <- "sparse_expt"
+    if (missing(planter) || is.null(planter)) planter <- "serpentine"
+    if (all(c("serpentine", "cartesian") != planter)) {
+        stop("Input planter choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
+    }
     # Check if the reps per plant are mising
-    if (missing(plant_reps)) {
+    if (missing(copies_per_entry)) {
         stop("You must specify the number of reps per plant")
     }
     if (is.null(checks)) stop("Please, define the number of checks for this design.")
@@ -291,7 +305,7 @@ sparse_allocation <- function(
             design = "sparse",
             lines = lines, 
             l = l, 
-            plant_reps = plant_reps,
+            copies_per_entry = copies_per_entry,
             add_checks = TRUE, 
             checks = checks, 
             seed = seed
@@ -327,6 +341,7 @@ sparse_allocation <- function(
         object = vector(mode = "list", length = l), 
         nm = names(unrep$list_locs)
     )
+    v <- 1
     for (site in names(unrep$list_locs)) {
         df_loc <- unrep$list_locs[[site]] %>% 
         dplyr::mutate(ENTRY = as.numeric(ENTRY)) %>% 
@@ -334,9 +349,15 @@ sparse_allocation <- function(
         unrep_designs[[site]] <- diagonal_arrangement(
             nrows = nrows, 
             ncols = ncols, 
-            checks = checks, 
+            checks = checks,
+            planter = planter, 
+            plotNumber = plotNumber[v],
+            locationNames = locationNames[v],
+            exptName = exptName,
+            seed = seed,
             data = df_loc
         )
+        v  <- v + 1
     }
     return(
         list(
@@ -350,7 +371,7 @@ sparse_allocation <- function(
 
 #' @title Optimized multi-location partially replicated design
 #' @param lines Number of genotypes, experimental lines or treatments.
-#' @param plant_reps Number of total copies per treatment.
+#' @param copies_per_entry Number of total copies per treatment.
 #' @param desired_avg (optional) Desired average of treatments across locations.
 #' @param checks Number of checks.
 #' @param rep_checks Number of replications per check.
@@ -396,7 +417,7 @@ sparse_allocation <- function(
 #' optim_multi_prep <- multi_location_prep(
 #'   lines = 142,  
 #'   l = 5, 
-#'   plant_reps = 7, 
+#'   copies_per_entry = 7, 
 #'   checks = 3, 
 #'   rep_checks = c(6,6,6),
 #'   locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5"), 
@@ -411,10 +432,10 @@ multi_location_prep <- function(
     nrows, 
     ncols, 
     l, 
-    planter, 
+    planter = "serpentine", 
     plotNumber, 
     desired_avg, 
-    plant_reps, 
+    copies_per_entry, 
     checks = NULL,
     rep_checks = NULL,
     exptName, 
@@ -422,12 +443,20 @@ multi_location_prep <- function(
     optim_list, 
     seed) {
     # set a random seed if it is missing
-    if (missing(seed)) seed <- base::sample.int(10000, size = 1)  
-    if (missing(plant_reps) & missing(desired_avg)) {
-        stop("multi_location_prep() requires either the argument plant_reps or desired_avg.")
+    if (missing(seed)) seed <- base::sample.int(10000, size = 1)
+    if (missing(l)) stop("Please, define the number of locations for this design.")
+    if (missing(locationNames) || length(locationNames) != l) locationNames <- paste0("LOC", 1:l)
+    if (missing(plotNumber) || length(plotNumber) != l) plotNumber <- seq(1, 1000 * l, by = 1000)[1:l]
+    if (missing(exptName) || length(exptName) != l) exptName <- "sparse_expt"
+    if (missing(planter) || is.null(planter)) planter <- "serpentine"
+    if (all(c("serpentine", "cartesian") != planter)) {
+        stop("Input planter choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
+    }  
+    if (missing(copies_per_entry) & missing(desired_avg)) {
+        stop("multi_location_prep() requires either the argument copies_per_entry or desired_avg.")
     } 
-    if (missing(plant_reps)) {
-        plant_reps <- ceiling(l * desired_avg)
+    if (missing(copies_per_entry)) {
+        copies_per_entry <- ceiling(l * desired_avg)
     }
     add_checks <- FALSE
     if (!is.null(checks) & !is.null(rep_checks)) add_checks <- TRUE
@@ -441,7 +470,7 @@ multi_location_prep <- function(
             design = "prep",
             lines = lines, 
             l = l, 
-            plant_reps = plant_reps,
+            copies_per_entry = copies_per_entry,
             add_checks = add_checks, 
             checks = checks, 
             rep_checks = rep_checks,
@@ -472,6 +501,7 @@ multi_location_prep <- function(
         object = vector(mode = "list", length = l), 
         nm = names(preps$list_locs)
     )
+    v <- 1
     for (site in names(preps$list_locs)) {
         df_loc <- preps$list_locs[[site]] %>% 
             dplyr::mutate(
@@ -482,9 +512,15 @@ multi_location_prep <- function(
 
         preps_designs[[site]] <- partially_replicated(
             nrows = nrows, 
-            ncols = ncols, 
+            ncols = ncols,
+            planter = planter,
+            plotNumber = plotNumber[v],
+            locationNames = locationNames[v],
+            exptName = exptName,
+            seed = seed,
             data = df_loc
         )
+        v  <- v + 1
     }
     return(
         list(

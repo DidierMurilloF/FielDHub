@@ -13,6 +13,8 @@ navbar:
     articles:
      text: Articles
      menu:
+     - text: "Sparse Allocation/Testing"
+       href: articles/sparse_allocation.html
      - text: "Unreplicated Diagonal Arrangement Design"
        href: articles/diagonal_arrangement.html
      - text: "Unreplicated Optimized Arrangement Design"
@@ -21,6 +23,8 @@ navbar:
        href: articles/RCBD_augmented.html
      - text: "Partially Replicated Design"
        href: articles/partially_replicated.html
+     - text: "Optimized Multi-Location P-rep"
+       href: articles/multi_location_prep.html
      - text: "Square Lattice Design"
        href: articles/square_lattice.html
      - text: "Rectangular Lattice Design"

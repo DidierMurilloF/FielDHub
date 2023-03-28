@@ -9,11 +9,11 @@ sparse_allocation(
   nrows,
   ncols,
   l,
-  planter,
+  planter = "serpentine",
   plotNumber,
-  plant_reps,
+  copies_per_entry,
   checks = NULL,
-  exptName,
+  exptName = NULL,
   locationNames,
   sparse_list,
   seed
@@ -34,8 +34,8 @@ By default  \code{planter = 'serpentine'}.}
 \item{plotNumber}{Numeric vector with the starting plot number for each location. 
 By default \code{plotNumber = 101}.}
 
-\item{plant_reps}{Number of copies per plant. 
-When design is \code{sparse} then \code{plant_reps} < \code{l}}
+\item{copies_per_entry}{Number of copies per plant. 
+When design is \code{sparse} then \code{copies_per_entry} < \code{l}}
 
 \item{checks}{Number of genotypes checks.}
 
@@ -64,7 +64,7 @@ Unreplicated designs using the sparse allocation approach
 sparse <- sparse_allocation(
   lines = 260, 
   l = 5, 
-  plant_reps = 5, 
+  copies_per_entry = 4, 
   checks = 4, 
   locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5"), 
   seed = 1234
