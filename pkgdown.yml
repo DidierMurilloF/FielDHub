@@ -10,6 +10,7 @@ articles:
   incomplete_blocks: incomplete_blocks.html
   latin_square: latin_square.html
   methods: methods.html
+  multi_location_prep: multi_location_prep.html
   fieldhub-0-1-0: news/fieldhub-0-1-0.html
   fieldhub-1-2-0: news/fieldhub-1-2-0.html
   optimized_arrangement: optimized_arrangement.html
@@ -17,11 +18,12 @@ articles:
   rcbd: rcbd.html
   rectangular_lattice: rectangular_lattice.html
   row_column: row_column.html
+  sparse_allocation: sparse_allocation.html
   split_plot: split_plot.html
   split_split_plot: split_split_plot.html
   square_lattice: square_lattice.html
   strip_plot: strip_plot.html
-last_built: 2023-03-24T02:07Z
+last_built: 2023-03-28T05:49Z
 urls:
   reference: https://didiermurillof.github.io/FielDHub/reference
   article: https://didiermurillof.github.io/FielDHub/articles

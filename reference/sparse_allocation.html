@@ -24,10 +24,12 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/sparse_allocation.html">Sparse Allocation/Testing</a>
     <a class="dropdown-item" href="../articles/diagonal_arrangement.html">Unreplicated Diagonal Arrangement Design</a>
     <a class="dropdown-item" href="../articles/optimized_arrangement.html">Unreplicated Optimized Arrangement Design</a>
     <a class="dropdown-item" href="../articles/RCBD_augmented.html">Augmented Randomized Complete Block Design</a>
     <a class="dropdown-item" href="../articles/partially_replicated.html">Partially Replicated Design</a>
+    <a class="dropdown-item" href="../articles/multi_location_prep.html">Optimized Multi-Location P-rep</a>
     <a class="dropdown-item" href="../articles/square_lattice.html">Square Lattice Design</a>
     <a class="dropdown-item" href="../articles/rectangular_lattice.html">Rectangular Lattice Design</a>
     <a class="dropdown-item" href="../articles/alpha_lattice.html">Alpha Lattice Design</a>
@@ -85,11 +87,11 @@
 <span>  <span class="va">nrows</span>,</span>
 <span>  <span class="va">ncols</span>,</span>
 <span>  <span class="va">l</span>,</span>
-<span>  <span class="va">planter</span>,</span>
+<span>  planter <span class="op">=</span> <span class="st">"serpentine"</span>,</span>
 <span>  <span class="va">plotNumber</span>,</span>
-<span>  <span class="va">plant_reps</span>,</span>
+<span>  <span class="va">copies_per_entry</span>,</span>
 <span>  checks <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  <span class="va">exptName</span>,</span>
+<span>  exptName <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">locationNames</span>,</span>
 <span>  <span class="va">sparse_list</span>,</span>
 <span>  <span class="va">seed</span></span>
@@ -124,9 +126,9 @@ By default  <code>planter = 'serpentine'</code>.</p></dd>
 By default <code>plotNumber = 101</code>.</p></dd>
 
 
-<dt>plant_reps</dt>
+<dt>copies_per_entry</dt>
 <dd><p>Number of copies per plant. 
-When design is <code>sparse</code> then <code>plant_reps</code> &lt; <code>l</code></p></dd>
+When design is <code>sparse</code> then <code>copies_per_entry</code> &lt; <code>l</code></p></dd>
 
 
 <dt>checks</dt>
@@ -176,7 +178,7 @@ When design is <code>sparse</code> then <code>plant_reps</code> &lt; <code>l</co
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">sparse</span> <span class="op">&lt;-</span> <span class="fu">sparse_allocation</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  lines <span class="op">=</span> <span class="fl">260</span>, </span></span>
 <span class="r-in"><span>  l <span class="op">=</span> <span class="fl">5</span>, </span></span>
-<span class="r-in"><span>  plant_reps <span class="op">=</span> <span class="fl">5</span>, </span></span>
+<span class="r-in"><span>  copies_per_entry <span class="op">=</span> <span class="fl">4</span>, </span></span>
 <span class="r-in"><span>  checks <span class="op">=</span> <span class="fl">4</span>, </span></span>
 <span class="r-in"><span>  locationNames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"LOC1"</span>, <span class="st">"LOC2"</span>, <span class="st">"LOC3"</span>, <span class="st">"LOC4"</span>, <span class="st">"LOC5"</span><span class="op">)</span>, </span></span>
 <span class="r-in"><span>  seed <span class="op">=</span> <span class="fl">1234</span></span></span>

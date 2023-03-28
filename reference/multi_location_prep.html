@@ -24,10 +24,12 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/sparse_allocation.html">Sparse Allocation/Testing</a>
     <a class="dropdown-item" href="../articles/diagonal_arrangement.html">Unreplicated Diagonal Arrangement Design</a>
     <a class="dropdown-item" href="../articles/optimized_arrangement.html">Unreplicated Optimized Arrangement Design</a>
     <a class="dropdown-item" href="../articles/RCBD_augmented.html">Augmented Randomized Complete Block Design</a>
     <a class="dropdown-item" href="../articles/partially_replicated.html">Partially Replicated Design</a>
+    <a class="dropdown-item" href="../articles/multi_location_prep.html">Optimized Multi-Location P-rep</a>
     <a class="dropdown-item" href="../articles/square_lattice.html">Square Lattice Design</a>
     <a class="dropdown-item" href="../articles/rectangular_lattice.html">Rectangular Lattice Design</a>
     <a class="dropdown-item" href="../articles/alpha_lattice.html">Alpha Lattice Design</a>
@@ -85,10 +87,10 @@
 <span>  <span class="va">nrows</span>,</span>
 <span>  <span class="va">ncols</span>,</span>
 <span>  <span class="va">l</span>,</span>
-<span>  <span class="va">planter</span>,</span>
+<span>  planter <span class="op">=</span> <span class="st">"serpentine"</span>,</span>
 <span>  <span class="va">plotNumber</span>,</span>
 <span>  <span class="va">desired_avg</span>,</span>
-<span>  <span class="va">plant_reps</span>,</span>
+<span>  <span class="va">copies_per_entry</span>,</span>
 <span>  checks <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  rep_checks <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">exptName</span>,</span>
@@ -128,7 +130,7 @@
 <dd><p>(optional) Desired average of treatments across locations.</p></dd>
 
 
-<dt>plant_reps</dt>
+<dt>copies_per_entry</dt>
 <dd><p>Number of total copies per treatment.</p></dd>
 
 
@@ -192,7 +194,7 @@
 <span class="r-in"><span><span class="va">optim_multi_prep</span> <span class="op">&lt;-</span> <span class="fu">multi_location_prep</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  lines <span class="op">=</span> <span class="fl">142</span>,  </span></span>
 <span class="r-in"><span>  l <span class="op">=</span> <span class="fl">5</span>, </span></span>
-<span class="r-in"><span>  plant_reps <span class="op">=</span> <span class="fl">7</span>, </span></span>
+<span class="r-in"><span>  copies_per_entry <span class="op">=</span> <span class="fl">7</span>, </span></span>
 <span class="r-in"><span>  checks <span class="op">=</span> <span class="fl">3</span>, </span></span>
 <span class="r-in"><span>  rep_checks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">6</span>,<span class="fl">6</span>,<span class="fl">6</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  locationNames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"LOC1"</span>, <span class="st">"LOC2"</span>, <span class="st">"LOC3"</span>, <span class="st">"LOC4"</span>, <span class="st">"LOC5"</span><span class="op">)</span>, </span></span>
@@ -201,17 +203,17 @@
 <span class="r-in"><span><span class="va">designs</span> <span class="op">&lt;-</span> <span class="va">optim_multi_prep</span><span class="op">$</span><span class="va">designs</span></span></span>
 <span class="r-in"><span><span class="va">field_book_loc_1</span> <span class="op">&lt;-</span> <span class="va">designs</span><span class="op">$</span><span class="va">LOC1</span><span class="op">$</span><span class="va">fieldBook</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">field_book_loc_1</span>, <span class="fl">10</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1   1 Expt1        1 2023  101   1      1    143   143    CH-143</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2   2 Expt1        1 2023  102   1      2      0    94      G-94</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3   3 Expt1        1 2023  103   1      3     17    17      G-17</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4   4 Expt1        1 2023  104   1      4      0    85      G-85</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5   5 Expt1        1 2023  105   1      5     71    71      G-71</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6   6 Expt1        1 2023  106   1      6     53    53      G-53</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7   7 Expt1        1 2023  107   1      7    122   122     G-122</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8   8 Expt1        1 2023  108   2      7      0     2       G-2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9   9 Expt1        1 2023  109   2      6     96    96      G-96</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10 10 Expt1        1 2023  110   2      5     25    25      G-25</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    ID        EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1   1 sparse_expt     LOC1 2023    1   1      1      0    37      G-37</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   2 sparse_expt     LOC1 2023    2   1      2     80    80      G-80</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3   3 sparse_expt     LOC1 2023    3   1      3     74    74      G-74</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4   4 sparse_expt     LOC1 2023    4   1      4      0    98      G-98</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5   5 sparse_expt     LOC1 2023    5   1      5    138   138     G-138</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6   6 sparse_expt     LOC1 2023    6   1      6      0   131     G-131</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7   7 sparse_expt     LOC1 2023    7   1      7     74    74      G-74</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8   8 sparse_expt     LOC1 2023    8   2      7     91    91      G-91</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9   9 sparse_expt     LOC1 2023    9   2      6    118   118     G-118</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10 10 sparse_expt     LOC1 2023   10   2      5      0   104     G-104</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
