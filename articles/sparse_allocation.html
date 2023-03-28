@@ -369,9 +369,9 @@ Gen-10
 <p>The table illustrates the allocation of genotypes across different
 environments, with genotypes listed in rows and environments in columns.
 Specifically, it indicates that Genotype 1 (Gen-1) has been assigned to
-locations 1, 2, and 4, but not to environment 3. The allocation process
-for genotypes to locations is achieved through an optimization process
-that employs IBD principles.</p>
+locations 1, 2, 3, and 4, but not to environment 5. The process of
+allocating genotypes to locations is achieved through an optimization
+process that employs IBD principles.</p>
 </div>
 <div class="section level2">
 <h2 id="running-the-shiny-app">Running the Shiny App<a class="anchor" aria-label="anchor" href="#running-the-shiny-app"></a>
@@ -401,9 +401,9 @@ sparse allocation experiment.</p>
 list with entry numbers and names for genotypes<br>
 or treatments.</p>
 <ul>
-<li><p>If the selection is <code>No</code>, that means the app is going
-to generate synthetic data for entries and names of the
-treatment/genotypes based on the user inputs.</p></li>
+<li><p>If the selection is <code>No</code>, the app will generate
+synthetic data for entries and names of the treatment/genotypes based on
+the user inputs.</p></li>
 <li><p>If the selection is <code>Yes</code>, the entries list must
 fulfill a specific format and must be a <code>.csv</code> file. The file
 must have the columns <code>ENTRY</code> and <code>NAME</code>. The
@@ -628,13 +628,13 @@ entry.</li>
 <li>
 <code>checks = 4</code> is the number of checks.</li>
 <li>
-<code>plotNumber = c(1, 1001, 2001, 3001, 4001)</code> Optional
+<code>plotNumber = c(1, 1001, 2001, 3001, 4001)</code> are optional
 starting plot numbers</li>
 <li>
 <code>locationNames = c("FARGO", "CASSELTON", "MINOT", "PROSPER", "WILLISTON")</code>
-Optional name for each location.</li>
+are optional names for each location.</li>
 <li>
-<code>exptName = "SparseTest2023"</code> Optional name of the
+<code>exptName = "SparseTest2023"</code> is an optional name of the
 experiment</li>
 <li>
 <code>seed = 16</code> is the random seed number to replicate
@@ -801,10 +801,10 @@ the experiment, like location 2 in this example:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">design_randomization</span><span class="op">$</span><span class="va">LOC2</span><span class="op">)</span></span></code></pre></div>
 <p><img src="sparse_allocation_files/figure-html/unnamed-chunk-20-1.png" width="691.2" style="display: block; margin: auto;"></p>
 <p>The figure above shows a map of an experiment randomized as an
-unreplicated arrangement design. Salmon plots represent the unreplicated
-treatments, while the yellow-boxed colored check plots are replicated
-throughout the field in a systematic diagonal arrangement. The red plots
-with 0s are are fillers.</p>
+unreplicated arrangement design. The salmon plots represent the
+unreplicated treatments, while the yellow-boxed colored check plots are
+replicated throughout the field in a systematic diagonal arrangement.
+The red plots with 0s are are fillers.</p>
 <p><br><br><br></p>
 </div>
 </div>

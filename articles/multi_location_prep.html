@@ -119,7 +119,7 @@ of the entries, while the remaining entries only appear once in the
 experiment. The optimized partially replicated (p-rep) design utilizes a
 genotype allocation matrix to determine the distribution of replicated
 and non-replicated entries across multiple locations, employing the
-principles of incomplete blocks designs (IBD).</p>
+principles of incomplete block designs (IBD).</p>
 </div>
 <div class="section level2">
 <h2 id="use-case">Use case<a class="anchor" aria-label="anchor" href="#use-case"></a>
@@ -129,10 +129,10 @@ tested across five environments, where up to seven replications of each
 entry are allowed. Additionally, the project includes three checks; each
 replicated six times. We can generate an optimized multi-location
 partially replicated design using these parameters. This strategy
-guaranty that all treatments are present in all environments but in
+guarantees that all treatments are present in all environments but in
 different amounts of replications. We can generate this design using the
-FielDHub Shiny app and the FielDHub multi_location_prep() standalone
-function in R.</p>
+FielDHub Shiny app and the FielDHub <code><a href="../reference/multi_location_prep.html">multi_location_prep()</a></code>
+standalone function in R.</p>
 </div>
 <div class="section level2">
 <h2 id="running-the-shiny-app">Running the Shiny App<a class="anchor" aria-label="anchor" href="#running-the-shiny-app"></a>
@@ -400,9 +400,9 @@ design,</p>
 <code>copies_per_entry = 7</code> is the number of copies of each
 entry.</li>
 <li>
-<code>checks = 3</code> (Optional) is the number of checks.</li>
+<code>checks = 3</code> is the (optional) number of checks.</li>
 <li>
-<code>rep_checks = c(6,6,6)</code> (Optional) is the number of
+<code>rep_checks = c(6,6,6)</code> is the (optional) number of
 replications of each check, in a vector the length of the number of
 checks.</li>
 <li>
@@ -446,10 +446,10 @@ us print the first ten genotypes allocation.</p>
 8     1    2    2    1    1
 9     1    2    1    1    2
 10    2    2    1    1    1</code></pre>
-<p>Let us add two new columns to the allocation table. We can ad the
-number of copies by genotype, it should be 7 for all of them. Also we
-can add the average allocation by genotype, we can see each treatment
-will appear 1.4 times in average.</p>
+<p>Let us add two new columns to the allocation table. We can add the
+number of copies by genotype; it should be 7 for all of them. We can
+also add the average allocation by genotype. Each treatment will appear
+1.4 times in average.</p>
 <table class="table table" style="margin-left: auto; margin-right: auto;">
 <thead><tr>
 <th style="text-align:left;">
