@@ -110,7 +110,7 @@ mod_multi_loc_preps_ui <- function(id){
             ),
             selectInput(
                 inputId = ns("plant_copies_preps"), 
-                label = "# of Copies Per Plant:",
+                label = "# of Copies Per Entry:",
                 choices = 1:6
             ),
             selectInput(

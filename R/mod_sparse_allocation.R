@@ -85,7 +85,7 @@ mod_sparse_allocation_ui <- function(id) {
         ),
         selectInput(
             inputId = ns("plant_reps"), 
-            label = "# of Copies Per Plant:",
+            label = "# of Copies Per Entry:",
             choices = 1:6
         ),
         selectInput(
