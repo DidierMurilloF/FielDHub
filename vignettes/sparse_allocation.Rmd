@@ -58,13 +58,13 @@ The table below illustrates the allocation of the first ten genotypes across the
 
 ```{r, include = FALSE}
 allocation <- data.frame(
-  ENV1 = c(1, 1, 1, 1, 0, 1, 1, 1, 1, 1),
-  ENV2 = c(1, 0, 1, 0, 1, 1, 0, 1, 1, 1),
-  ENV3 = c(0, 1, 1, 1, 1, 1, 1, 1, 1, 1),
-  ENV4 = c(1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
-  ENV5 = c(1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
+  ENV1 = c(1, 0, 1, 1, 1, 1, 1, 0, 1, 1),
+  ENV2 = c(1, 1, 1, 1, 1, 1, 0, 1, 1, 1),
+  ENV3 = c(1, 1, 0, 1, 1, 0, 1, 1, 1, 1),
+  ENV4 = c(1, 1, 1, 1, 1, 1, 1, 1, 0, 0),
+  ENV5 = c(0, 1, 1, 0, 0, 1, 1, 1, 1, 1)
   )
-  rownames(allocation) <- paste0("Gen-", 1:10)
+ rownames(allocation) <- paste0("Gen-", 1:10)
 ```
 
 ```{r, echo = FALSE}
@@ -143,7 +143,7 @@ labeled **Random Seed**. For instance, we will set it to `16`.
 8. Enter the name for the experiment in the **Input Experiment Name** box. For example, `SparseTest2023`.
 
 9. Enter the starting plot number in the **Starting Plot Number** box. In this experiment we want the plot 
-start at `1001`.
+start at `1, 1001, 2001, 3001, 4001` for each location.
 
 10. Enter the name of the site/location in the **Input the Location** box. For this experiment we will 
 set the sites as `FARGO, CASSELTON, MINOT, PROSPER, WILLISTON`. 
@@ -220,7 +220,8 @@ sparse_example <- sparse_allocation(
    copies_per_entry = 4, 
    checks = 4, 
    plotNumber = c(1, 1001, 2001, 3001, 4001),
-   locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5"), 
+   locationNames = c("FARGO", "CASSELTON", "MINOT", "PROSPER", "WILLISTON"), 
+   exptName = "SparseTest2023",
    seed = 16
 )
 ```
@@ -229,10 +230,12 @@ sparse_example <- sparse_allocation(
 
 *   `lines = 260` is the number of genotypes.
 *   `l = 5` is the number of locations.
-*   `plant_reps = 4` is the number of copies of each entry.
-*   `checks = 4` is the number of checks.\
-*   `locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5")` optional name for each location.
-*   `seed = 1234` is the random seed number to replicate identical randomizations.
+*   `copies_per_entry = 4` is the number of copies of each entry.
+*   `checks = 4` is the number of checks.
+*   `plotNumber = c(1, 1001, 2001, 3001, 4001)` Optional starting plot numbers
+*   `locationNames = c("FARGO", "CASSELTON", "MINOT", "PROSPER", "WILLISTON")` Optional name for each location.
+*   `exptName = "SparseTest2023"` Optional name of the experiment
+*   `seed = 16` is the random seed number to replicate identical randomizations.
 
 ### Print `sparse_example` object
 
@@ -310,6 +313,9 @@ head(field_book, 10)
 
 ### Plot field layout
 
+
+#### Plot field layout Location 1
+
 For plotting the layout in function of the coordinates `ROW` and `COLUMN` in the field book object we 
 can use the generic function `plot()` as follows,
 
@@ -318,6 +324,8 @@ plot(design_randomization$LOC1)
 ```
 
 The above plot is for `LOC1`. We can plot any location in the experiment, like location 2 in this example:
+
+#### Plot field layout Location 2
 
 ```{r, fig.align='center', fig.width=7.2, fig.height=5}
 plot(design_randomization$LOC2)
