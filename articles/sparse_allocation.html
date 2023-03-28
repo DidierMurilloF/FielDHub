@@ -175,13 +175,13 @@ Gen-1
 1
 </td>
 <td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
 0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
 </td>
 </tr>
 <tr>
@@ -189,10 +189,10 @@ Gen-1
 Gen-2
 </td>
 <td style="text-align:right;">
-1
+0
 </td>
 <td style="text-align:right;">
-0
+1
 </td>
 <td style="text-align:right;">
 1
@@ -215,7 +215,7 @@ Gen-3
 1
 </td>
 <td style="text-align:right;">
-1
+0
 </td>
 <td style="text-align:right;">
 1
@@ -232,16 +232,16 @@ Gen-4
 1
 </td>
 <td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
 0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
 </td>
 </tr>
 <tr>
@@ -249,19 +249,19 @@ Gen-4
 Gen-5
 </td>
 <td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
 0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
 </td>
 </tr>
 <tr>
@@ -275,7 +275,7 @@ Gen-6
 1
 </td>
 <td style="text-align:right;">
-1
+0
 </td>
 <td style="text-align:right;">
 1
@@ -309,7 +309,7 @@ Gen-7
 Gen-8
 </td>
 <td style="text-align:right;">
-1
+0
 </td>
 <td style="text-align:right;">
 1
@@ -338,7 +338,7 @@ Gen-9
 1
 </td>
 <td style="text-align:right;">
-1
+0
 </td>
 <td style="text-align:right;">
 1
@@ -358,7 +358,7 @@ Gen-10
 1
 </td>
 <td style="text-align:right;">
-1
+0
 </td>
 <td style="text-align:right;">
 1
@@ -519,7 +519,7 @@ For instance, we will set it to <code>16</code>.</p></li>
 Name</strong> box. For example, <code>SparseTest2023</code>.</p></li>
 <li><p>Enter the starting plot number in the <strong>Starting Plot
 Number</strong> box. In this experiment we want the plot start at
-<code>1001</code>.</p></li>
+<code>1, 1001, 2001, 3001, 4001</code> for each location.</p></li>
 <li><p>Enter the name of the site/location in the <strong>Input the
 Location</strong> box. For this experiment we will set the sites as
 <code>FARGO, CASSELTON, MINOT, PROSPER, WILLISTON</code>.</p></li>
@@ -609,7 +609,8 @@ this:</p>
 <span>   copies_per_entry <span class="op">=</span> <span class="fl">4</span>, </span>
 <span>   checks <span class="op">=</span> <span class="fl">4</span>, </span>
 <span>   plotNumber <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1001</span>, <span class="fl">2001</span>, <span class="fl">3001</span>, <span class="fl">4001</span><span class="op">)</span>,</span>
-<span>   locationNames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"LOC1"</span>, <span class="st">"LOC2"</span>, <span class="st">"LOC3"</span>, <span class="st">"LOC4"</span>, <span class="st">"LOC5"</span><span class="op">)</span>, </span>
+<span>   locationNames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"FARGO"</span>, <span class="st">"CASSELTON"</span>, <span class="st">"MINOT"</span>, <span class="st">"PROSPER"</span>, <span class="st">"WILLISTON"</span><span class="op">)</span>, </span>
+<span>   exptName <span class="op">=</span> <span class="st">"SparseTest2023"</span>,</span>
 <span>   seed <span class="op">=</span> <span class="fl">16</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <div class="section level4">
@@ -622,16 +623,21 @@ above:<a class="anchor" aria-label="anchor" href="#details-on-the-inputs-entered
 <li>
 <code>l = 5</code> is the number of locations.</li>
 <li>
-<code>plant_reps = 4</code> is the number of copies of each
+<code>copies_per_entry = 4</code> is the number of copies of each
 entry.</li>
 <li>
-<code>checks = 4</code> is the number of checks.<br>
-</li>
+<code>checks = 4</code> is the number of checks.</li>
 <li>
-<code>locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5")</code>
-optional name for each location.</li>
+<code>plotNumber = c(1, 1001, 2001, 3001, 4001)</code> Optional
+starting plot numbers</li>
 <li>
-<code>seed = 1234</code> is the random seed number to replicate
+<code>locationNames = c("FARGO", "CASSELTON", "MINOT", "PROSPER", "WILLISTON")</code>
+Optional name for each location.</li>
+<li>
+<code>exptName = "SparseTest2023"</code> Optional name of the
+experiment</li>
+<li>
+<code>seed = 16</code> is the random seed number to replicate
 identical randomizations.</li>
 </ul>
 </div>
@@ -695,16 +701,16 @@ List of 11
 
  10 First observations of the data frame with the diagonal_arrangement field book: 
    ID        EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 sparse_expt     LOC1 2023    1   1      1      0    62      G-62
-2   2 sparse_expt     LOC1 2023    2   1      2      0    43      G-43
-3   3 sparse_expt     LOC1 2023    3   1      3      0    96      G-96
-4   4 sparse_expt     LOC1 2023    4   1      4    262   262    CH-262
-5   5 sparse_expt     LOC1 2023    5   1      5      0   199     G-199
-6   6 sparse_expt     LOC1 2023    6   1      6      0   179     G-179
-7   7 sparse_expt     LOC1 2023    7   1      7      0    50      G-50
-8   8 sparse_expt     LOC1 2023    8   1      8      0   253     G-253
-9   9 sparse_expt     LOC1 2023    9   1      9      0   110     G-110
-10 10 sparse_expt     LOC1 2023   10   1     10      0   243     G-243</code></pre>
+1   1 sparse_expt    FARGO 2023    1   1      1      0    62      G-62
+2   2 sparse_expt    FARGO 2023    2   1      2      0    43      G-43
+3   3 sparse_expt    FARGO 2023    3   1      3      0    96      G-96
+4   4 sparse_expt    FARGO 2023    4   1      4    262   262    CH-262
+5   5 sparse_expt    FARGO 2023    5   1      5      0   199     G-199
+6   6 sparse_expt    FARGO 2023    6   1      6      0   179     G-179
+7   7 sparse_expt    FARGO 2023    7   1      7      0    50      G-50
+8   8 sparse_expt    FARGO 2023    8   1      8      0   253     G-253
+9   9 sparse_expt    FARGO 2023    9   1      9      0   110     G-110
+10 10 sparse_expt    FARGO 2023   10   1     10      0   243     G-243</code></pre>
 <p>And for <code>LOC2</code> by changing the location to print to
 <code>LOC2</code>:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
@@ -727,17 +733,17 @@ List of 11
  $ seed          : num 16
 
  10 First observations of the data frame with the diagonal_arrangement field book: 
-   ID        EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 sparse_expt     LOC2 2023 1001   1      1      0    57      G-57
-2   2 sparse_expt     LOC2 2023 1002   1      2      0    37      G-37
-3   3 sparse_expt     LOC2 2023 1003   1      3      0    90      G-90
-4   4 sparse_expt     LOC2 2023 1004   1      4    262   262    CH-262
-5   5 sparse_expt     LOC2 2023 1005   1      5      0   191     G-191
-6   6 sparse_expt     LOC2 2023 1006   1      6      0   177     G-177
-7   7 sparse_expt     LOC2 2023 1007   1      7      0    42      G-42
-8   8 sparse_expt     LOC2 2023 1008   1      8      0   255     G-255
-9   9 sparse_expt     LOC2 2023 1009   1      9      0   105     G-105
-10 10 sparse_expt     LOC2 2023 1010   1     10      0   244     G-244</code></pre>
+   ID        EXPT  LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
+1   1 sparse_expt CASSELTON 2023 1001   1      1      0    57      G-57
+2   2 sparse_expt CASSELTON 2023 1002   1      2      0    37      G-37
+3   3 sparse_expt CASSELTON 2023 1003   1      3      0    90      G-90
+4   4 sparse_expt CASSELTON 2023 1004   1      4    262   262    CH-262
+5   5 sparse_expt CASSELTON 2023 1005   1      5      0   191     G-191
+6   6 sparse_expt CASSELTON 2023 1006   1      6      0   177     G-177
+7   7 sparse_expt CASSELTON 2023 1007   1      7      0    42      G-42
+8   8 sparse_expt CASSELTON 2023 1008   1      8      0   255     G-255
+9   9 sparse_expt CASSELTON 2023 1009   1      9      0   105     G-105
+10 10 sparse_expt CASSELTON 2023 1010   1     10      0   244     G-244</code></pre>
 </div>
 <div class="section level3">
 <h3 id="access-to-sparse_example-object">Access to <code>sparse_example</code> object<a class="anchor" aria-label="anchor" href="#access-to-sparse_example-object"></a>
@@ -762,20 +768,23 @@ in this experiment.</p>
 <code class="sourceCode R"><span><span class="va">field_book</span> <span class="op">&lt;-</span> <span class="va">design_randomization</span><span class="op">$</span><span class="va">LOC1</span><span class="op">$</span><span class="va">fieldBook</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">field_book</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
 <pre><code>   ID        EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 sparse_expt     LOC1 2023    1   1      1      0    62      G-62
-2   2 sparse_expt     LOC1 2023    2   1      2      0    43      G-43
-3   3 sparse_expt     LOC1 2023    3   1      3      0    96      G-96
-4   4 sparse_expt     LOC1 2023    4   1      4    262   262    CH-262
-5   5 sparse_expt     LOC1 2023    5   1      5      0   199     G-199
-6   6 sparse_expt     LOC1 2023    6   1      6      0   179     G-179
-7   7 sparse_expt     LOC1 2023    7   1      7      0    50      G-50
-8   8 sparse_expt     LOC1 2023    8   1      8      0   253     G-253
-9   9 sparse_expt     LOC1 2023    9   1      9      0   110     G-110
-10 10 sparse_expt     LOC1 2023   10   1     10      0   243     G-243</code></pre>
+1   1 sparse_expt    FARGO 2023    1   1      1      0    62      G-62
+2   2 sparse_expt    FARGO 2023    2   1      2      0    43      G-43
+3   3 sparse_expt    FARGO 2023    3   1      3      0    96      G-96
+4   4 sparse_expt    FARGO 2023    4   1      4    262   262    CH-262
+5   5 sparse_expt    FARGO 2023    5   1      5      0   199     G-199
+6   6 sparse_expt    FARGO 2023    6   1      6      0   179     G-179
+7   7 sparse_expt    FARGO 2023    7   1      7      0    50      G-50
+8   8 sparse_expt    FARGO 2023    8   1      8      0   253     G-253
+9   9 sparse_expt    FARGO 2023    9   1      9      0   110     G-110
+10 10 sparse_expt    FARGO 2023   10   1     10      0   243     G-243</code></pre>
 </div>
 <div class="section level3">
 <h3 id="plot-field-layout">Plot field layout<a class="anchor" aria-label="anchor" href="#plot-field-layout"></a>
 </h3>
+<div class="section level4">
+<h4 id="plot-field-layout-location-1">Plot field layout Location 1<a class="anchor" aria-label="anchor" href="#plot-field-layout-location-1"></a>
+</h4>
 <p>For plotting the layout in function of the coordinates
 <code>ROW</code> and <code>COLUMN</code> in the field book object we can
 use the generic function <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> as follows,</p>
@@ -784,6 +793,10 @@ use the generic function <code><a href="https://rdrr.io/r/graphics/plot.default.
 <p><img src="sparse_allocation_files/figure-html/unnamed-chunk-19-1.png" width="691.2" style="display: block; margin: auto;"></p>
 <p>The above plot is for <code>LOC1</code>. We can plot any location in
 the experiment, like location 2 in this example:</p>
+</div>
+<div class="section level4">
+<h4 id="plot-field-layout-location-2">Plot field layout Location 2<a class="anchor" aria-label="anchor" href="#plot-field-layout-location-2"></a>
+</h4>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">design_randomization</span><span class="op">$</span><span class="va">LOC2</span><span class="op">)</span></span></code></pre></div>
 <p><img src="sparse_allocation_files/figure-html/unnamed-chunk-20-1.png" width="691.2" style="display: block; margin: auto;"></p>
@@ -793,6 +806,7 @@ treatments, while the yellow-boxed colored check plots are replicated
 throughout the field in a systematic diagonal arrangement. The red plots
 with 0s are are fillers.</p>
 <p><br><br><br></p>
+</div>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
