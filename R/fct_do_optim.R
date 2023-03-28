@@ -49,6 +49,9 @@ do_optim <- function(
     data = NULL) {
     # set a random seed if it is missing
     if (missing(seed)) seed <- base::sample.int(10000, size = 1) 
+    if (missing(lines)) stop("Please, define the number of lines/treatments for this design.")
+    if (missing(l)) stop("Please, define the number of locations for this design.")
+    if (missing(design) || is.null(design)) stop("Paramenter design is missing.")
     if (all(c("prep", "sparse") != design)) {
         stop("Input design is unknown. Please, choose one: 'sparse' or 'prep'.")
     } 
@@ -269,16 +272,24 @@ sparse_allocation <- function(
     nrows, 
     ncols, 
     l, 
-    planter, 
+    planter = "serpentine", 
     plotNumber,  
     copies_per_entry, 
     checks = NULL, 
-    exptName, 
+    exptName = NULL, 
     locationNames,
     sparse_list, 
     seed) {
     # set a random seed if it is missing
-    if (missing(seed)) seed <- base::sample.int(10000, size = 1)   
+    if (missing(seed)) seed <- base::sample.int(10000, size = 1) 
+    if (missing(l)) stop("Please, define the number of locations for this design.")
+    if (missing(locationNames) || length(locationNames) != l) locationNames <- paste0("LOC", 1:l)
+    if (missing(plotNumber) || length(plotNumber) != l) plotNumber <- seq(1, 1000 * l, by = 1000)[1:l]
+    if (missing(exptName) || length(exptName) != l) exptName <- "sparse_expt"
+    if (missing(planter) || is.null(planter)) planter <- "serpentine"
+    if (all(c("serpentine", "cartesian") != planter)) {
+        stop("Input planter choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
+    }
     # Check if the reps per plant are mising
     if (missing(copies_per_entry)) {
         stop("You must specify the number of reps per plant")
@@ -330,6 +341,7 @@ sparse_allocation <- function(
         object = vector(mode = "list", length = l), 
         nm = names(unrep$list_locs)
     )
+    v <- 1
     for (site in names(unrep$list_locs)) {
         df_loc <- unrep$list_locs[[site]] %>% 
         dplyr::mutate(ENTRY = as.numeric(ENTRY)) %>% 
@@ -337,9 +349,15 @@ sparse_allocation <- function(
         unrep_designs[[site]] <- diagonal_arrangement(
             nrows = nrows, 
             ncols = ncols, 
-            checks = checks, 
+            checks = checks,
+            planter = planter, 
+            plotNumber = plotNumber[v],
+            locationNames = locationNames[v],
+            exptName = exptName,
+            seed = seed,
             data = df_loc
         )
+        v  <- v + 1
     }
     return(
         list(
@@ -414,7 +432,7 @@ multi_location_prep <- function(
     nrows, 
     ncols, 
     l, 
-    planter, 
+    planter = "serpentine", 
     plotNumber, 
     desired_avg, 
     copies_per_entry, 
@@ -425,7 +443,15 @@ multi_location_prep <- function(
     optim_list, 
     seed) {
     # set a random seed if it is missing
-    if (missing(seed)) seed <- base::sample.int(10000, size = 1)  
+    if (missing(seed)) seed <- base::sample.int(10000, size = 1)
+    if (missing(l)) stop("Please, define the number of locations for this design.")
+    if (missing(locationNames) || length(locationNames) != l) locationNames <- paste0("LOC", 1:l)
+    if (missing(plotNumber) || length(plotNumber) != l) plotNumber <- seq(1, 1000 * l, by = 1000)[1:l]
+    if (missing(exptName) || length(exptName) != l) exptName <- "sparse_expt"
+    if (missing(planter) || is.null(planter)) planter <- "serpentine"
+    if (all(c("serpentine", "cartesian") != planter)) {
+        stop("Input planter choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
+    }  
     if (missing(copies_per_entry) & missing(desired_avg)) {
         stop("multi_location_prep() requires either the argument copies_per_entry or desired_avg.")
     } 
@@ -475,6 +501,7 @@ multi_location_prep <- function(
         object = vector(mode = "list", length = l), 
         nm = names(preps$list_locs)
     )
+    v <- 1
     for (site in names(preps$list_locs)) {
         df_loc <- preps$list_locs[[site]] %>% 
             dplyr::mutate(
@@ -485,9 +512,15 @@ multi_location_prep <- function(
 
         preps_designs[[site]] <- partially_replicated(
             nrows = nrows, 
-            ncols = ncols, 
+            ncols = ncols,
+            planter = planter,
+            plotNumber = plotNumber[v],
+            locationNames = locationNames[v],
+            exptName = exptName,
+            seed = seed,
             data = df_loc
         )
+        v  <- v + 1
     }
     return(
         list(

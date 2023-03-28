@@ -234,6 +234,7 @@ mod_multi_loc_preps_server <- function(id){
     })
 
     prep_inputs <- eventReactive(input$run_prep, {
+        req(input$gens_prep)
         if (input$include_checks == "Yes"){
             prep_checks <- as.numeric(as.vector(unlist(strsplit(input$prep_checks, ","))))
             checks <- as.numeric(input$prep_checks_met)
@@ -251,11 +252,20 @@ mod_multi_loc_preps_server <- function(id){
         }
         input_lines <- as.numeric(input$gens_prep)
         planter_mov <- input$planter_preps
-        expt_name <- as.character(input$expt_name_preps)
+        expt_name <- as.vector(unlist(strsplit(input$expt_name_preps, ",")))
         plotNumber <- as.numeric(as.vector(unlist(strsplit(input$plot_start_preps, ","))))
         site_names <- as.character(as.vector(unlist(strsplit(input$loc_name_preps, ","))))
         seed_number <- as.numeric(input$seed_preps)
         sites = as.numeric(input$locs_prep)
+        if (length(site_names) == 0 || length(site_names) != sites) {
+            site_names <- paste0("LOC", 1:sites)
+        }
+        if (length(plotNumber) == 0 || length(plotNumber) != sites) {
+            plotNumber <- seq(1, 1000 * sites, by = 1000)[1:sites]
+        }
+        if (length(expt_name) == 0) {
+            expt_name <- "expt_prep"
+        }
         return(
             list(
                 prep_lines = input_lines,
@@ -416,19 +426,6 @@ mod_multi_loc_preps_server <- function(id){
     }) %>%
         bindEvent(input$run_prep)
 
-    # observe({
-    #   req(get_multi_loc_prep())
-    #   req(prep_inputs()$prep_lines)
-    #   input_lines <- prep_inputs()$prep_lines
-    #   if (input_lines >= 450) {
-    #       shinyalert::shinyalert(
-    #         "Message:", 
-    #         "This may take a few minutes!", 
-    #         type = "info"
-    #       )
-    #   }
-    # })
-
     setup_optim_prep <- reactive({
         req(get_multi_loc_prep())
         if (is.null(get_multi_loc_prep())) return(NULL)
@@ -452,7 +449,6 @@ mod_multi_loc_preps_server <- function(id){
         )
         ### Do the merge with the user data ###
         if (input$multi_prep_data == "Yes") {
-            #input_entries <- as.numeric(gen.list$ENTRY) 
             data_prep_no_checks <- get_multi_loc_prep()$data_without_checks
             max_entry <- max(data_prep_no_checks$ENTRY)
             vlookUp_entry <- 1:input_lines
@@ -654,6 +650,12 @@ mod_multi_loc_preps_server <- function(id){
         site_names <- prep_inputs()$location_names
         preps.seed <- prep_inputs()$seed_number
         plotNumber <- prep_inputs()$plotNumber
+        if (length(site_names) != locs_preps) {
+            site_names <- paste0("LOC", 1:locs_preps)
+        }
+        if (length(plotNumber) != locs_preps) {
+            plotNumber <- seq(1, 1000 * locs_preps, by = 1000)
+        }
         movement_planter <- prep_inputs()$planter_mov
         expt_name <- prep_inputs()$expt_name
         locations_preps <- vector(mode = "list", length = locs_preps)
@@ -664,9 +666,9 @@ mod_multi_loc_preps_server <- function(id){
                 ncols = ncols, 
                 l = 1, 
                 seed = NULL, 
-                plotNumber = plotNumber, 
+                plotNumber = plotNumber[i], 
                 exptName =  expt_name,
-                locationNames = site_names, 
+                locationNames = site_names[i], 
                 planter = movement_planter, 
                 data = gen.list[[i]] 
             )
@@ -700,19 +702,20 @@ mod_multi_loc_preps_server <- function(id){
       colnames(df) <- paste0('V', 1:ncol(df))
       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, 
                                 scrollY = "700px"))
-      DT::datatable(df,
-                    extensions = 'Buttons', 
-                     options = list(dom = 'Blfrtip',
-                     scrollX = TRUE,
-                     fixedColumns = TRUE,
-                     pageLength = nrow(df),
-                     scrollY = "620px",
-                     class = 'compact cell-border stripe',  rownames = FALSE,
-                     server = FALSE,
-                     filter = list( position = 'top', clear = FALSE, plain =TRUE ),
-                     buttons = c('copy', 'excel'),
-                     lengthMenu = list(c(10,25,50,-1),
-                                       c(10,25,50,"All")))) %>%
+      DT::datatable(
+        df,
+        extensions = 'Buttons', 
+            options = list(dom = 'Blfrtip',
+            scrollX = TRUE,
+            fixedColumns = TRUE,
+            pageLength = nrow(df),
+            scrollY = "620px",
+            class = 'compact cell-border stripe',  rownames = FALSE,
+            server = FALSE,
+            filter = list( position = 'top', clear = FALSE, plain =TRUE ),
+            buttons = c('copy', 'excel'),
+            lengthMenu = list(c(10,25,50,-1),
+                            c(10,25,50,"All")))) %>%
         DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
                     backgroundColor = DT::styleEqual(c(checks), # c(checks,gens)
                                                  c(rep(colores[3], len_checks)) # , rep('yellow', length(gens))
@@ -725,8 +728,6 @@ mod_multi_loc_preps_server <- function(id){
       if (!test) return(NULL)
       req(pREPS_reactive())
       plot_num <- pREPS_reactive()[[user_site_selection()]]$plotNumber
-    #   a <- as.vector(as.matrix(plot_num))
-    #   len_a <- length(a)
       df <- as.data.frame(plot_num)
       rownames(df) <- nrow(df):1
       colnames(df) <- paste0("V", 1:ncol(df))
@@ -798,7 +799,6 @@ mod_multi_loc_preps_server <- function(id){
 
 
     get_fieldbook <- reactive({
-        # Fix number of locations in the fieldbook
         req(pREPS_reactive())
         field_book <- vector(mode = "list", length = length(pREPS_reactive()))
         iter_by_site <- 1:length(pREPS_reactive())
@@ -807,7 +807,6 @@ mod_multi_loc_preps_server <- function(id){
         }
         fieldBook <- dplyr::bind_rows(field_book)
         fieldBook$ID <- 1:nrow(fieldBook)
-        fieldBook$LOCATION <- rep(1:length(pREPS_reactive()), each = nrow(fieldBook)/length(pREPS_reactive()))
         return(list(fieldBook = fieldBook))
     })
     

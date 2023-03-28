@@ -111,22 +111,19 @@ default `serpentine` layout.
 9. To ensure that randomizations are consistent across sessions, we can set a random seed in the 
 box labeled **Random Seed**. In this example, we will set it to `2456`. 
 
-10. (Optional) Enter the starting plot number in the **Starting Plot Number** box. Since the experiment has multiple locations, you must enter a comma separated list of numbers the length of the number of locations for 
-the input to be valid. In this example, we will set it as `1,1001,2001,3001,4001`.
+10. (Optional) Enter the starting plot number in the **Starting Plot Number** box. Since the experiment 
+has multiple locations, you must enter a comma separated list of numbers the length of the number of 
+locations for the input to be valid. In this example, we will set it as `1,1001,2001,3001,4001`.
 
 11. (Optional) Enter the location names in the **Input Location Name** box. Since the experiment has six 
 locations, you must enter a comma separated list of strings for the names of the environments. In this 
 example, we will set it as `LOC1,LOC2,LOC3,LOC4,LOC5`.
 
-12. Once we have entered the information for our experiment on the left side panel, click the **Run!** 
-button to run the design. 
-
-13. You will then be prompted to select the dimensions of the field from the list of options in the 
-dropdown in the middle of the screen with the box labeled **Select dimensions of field**. 
-In our case, we will select `12 x 19`. 
-
-14. Click the **Randomize!** button to randomize the experiment with the set field dimensions and 
-to see the output plots. If you change the dimensions again, you must re-randomize.
+Once we have entered the information for our experiment on the left side panel, click the **Run!** 
+button to run the design. You will then be prompted to select the dimensions of the field from the list 
+of options in the dropdown in the middle of the screen with the box labeled **Select dimensions of field**. 
+In our case, we will select `12 x 19`. Click the **Randomize!** button to randomize the experiment with the 
+set field dimensions and to see the output plots. If you change the dimensions again, you must re-randomize.
 
 If you change any of the inputs on the left side panel after running an experiment initially, 
 you have to click the Run and Randomize buttons again, to re-run with the new inputs.
@@ -196,7 +193,7 @@ The description for the inputs that we used to generate the design,
 *   `rep_checks = c(6,6,6)` (Optional) is the number of replications of each check, 
     in a vector the length of the number of checks. 
 *   `locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5")` are optional names for the        locations.
-*   `seed = 1234` is the random seed to replicate identical randomizations.
+*   `seed = 2456` is the random seed to replicate identical randomizations.
 
 ### Print `optim_multi_prep` object
 
@@ -205,7 +202,10 @@ function `print()`.
 
 The `sparse_allocation()` function returns a list of 4 objects, `designs`, `list_locs`, `allocation`, 
 and `size_locations`. The object `designs` contains the randomization and information about the design 
-parameters for each location, while `list_locs` is a list of data frames. Each data frame has two columns; `ENTRY` and `NAME` with the information to randomize to each environment. The object `allocation` is the binary allocation matrix of genotypes to locations, and `size_locations` is a data frame with a column for each location and a row indicating the size of the location (number of field plots). 
+parameters for each location, while `list_locs` is a list of data frames. Each data frame has two columns;
+`ENTRY` and `NAME` with the information to randomize to each environment. The object `allocation` is the 
+binary allocation matrix of genotypes to locations, and `size_locations` is a data frame with a column 
+for each location and a row indicating the size of the location (number of field plots). 
 
 For example, we can display the `allocation` object. Let us print the first ten genotypes allocation.
 
@@ -235,7 +235,7 @@ optim_multi_prep$allocation %>%
 
 We can manipulate the sparse_allocation object as any other list in R. For example, we can save the 
 design randomizations to an object called `designs`, and then index based on location  using the dollar
-sign operator. We can first display the design parameters for LOC1 with the following code:
+sign operator. We can first display the design parameters for `LOC1` with the following code:
 
 ```{r, echo=TRUE, eval=FALSE}
 design_randomization <- optim_multi_prep$designs
@@ -266,7 +266,7 @@ print(design_randomization$LOC2)
 The object `designs` we saved `optim_multi_prep$designs` to is a list consisting of all the information 
 displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, 
 entries list, and field book, indexed by each location in the experiment. These are accessible by 
-the `$` operator, i.e. `designs$LOC1$layoutRandom` or `designs$LOC1$fieldBook` for LOC1, etc. 
+the `$` operator, i.e. `designs$LOC1$layoutRandom` or `designs$LOC1$fieldBook` for `LOC1`, etc. 
 
 `designs$LOC1$fieldBook` is a data frame containing information about every plot in the field, 
 with information about the location of the plot and the treatment in each plot. As seen in the 

@@ -112,17 +112,17 @@ partially_replicated <- function(nrows = NULL, ncols = NULL, repGens = NULL, rep
     
     if (!is.null(l)) {
         if (is.null(plotNumber) || length(plotNumber) != l) {
-        if (l > 1) {
-            plotNumber <- seq(1001, 1000*(l+1), 1000)
-            message(cat("Warning message:", "\n", 
-                    "Since plotNumber was missing, it was set up to default value of: ", plotNumber, 
-                    "\n", "\n"))
-        } else {
-            plotNumber <- 1001
-            message(cat("Warning message:", "\n", 
-            "Since plotNumber was missing, it was set up to default value of: ", plotNumber, 
-            "\n", "\n"))
-        } 
+            if (l > 1) {
+                plotNumber <- seq(1001, 1000*(l+1), 1000)
+                message(cat("Warning message:", "\n", 
+                        "Since plotNumber was missing, it was set up to default value of: ", plotNumber, 
+                        "\n", "\n"))
+            } else {
+                plotNumber <- 1001
+                message(cat("Warning message:", "\n", 
+                "Since plotNumber was missing, it was set up to default value of: ", plotNumber, 
+                "\n", "\n"))
+            } 
         }
     } else stop("Number of locations/sites is missing")
     
@@ -217,15 +217,15 @@ partially_replicated <- function(nrows = NULL, ncols = NULL, repGens = NULL, rep
         }
         
         plot_number_spat <- function() {
-        datos_name <- split_name_spat()$my_names
-        plot_n_start <- plotNumber[sites]
-        plot_number(
-            planter = planter,
-            plot_number_start = plot_n_start,
-            layout_names = datos_name,
-            expe_names = Name_expt,
-            fillers = 0
-        )
+            datos_name <- split_name_spat()$my_names
+            plot_n_start <- plotNumber[sites]
+            plot_number(
+                planter = planter,
+                plot_number_start = plot_n_start,
+                layout_names = datos_name,
+                expe_names = Name_expt,
+                fillers = 0
+            )
         }
         
         if (is.null(locationNames) || length(locationNames) != l) locationNames <- 1:l
@@ -239,10 +239,12 @@ partially_replicated <- function(nrows = NULL, ncols = NULL, repGens = NULL, rep
             my_names <- as.matrix(split_name_spat()$my_names)
             year <- format(Sys.Date(), "%Y")
             my_data_VLOOKUP <- prep$gen.list
-            results_to_export <- list(random_entries_map, 
-                                        plot_number_L, 
-                                        Col_checks, 
-                                        my_names)
+            results_to_export <- list(
+                random_entries_map, 
+                plot_number_L, 
+                Col_checks, 
+                my_names
+            )
             final_expt_export <- export_design(
                 G = results_to_export, 
                 movement_planter =  planter,

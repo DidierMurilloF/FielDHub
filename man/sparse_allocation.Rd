@@ -9,11 +9,11 @@ sparse_allocation(
   nrows,
   ncols,
   l,
-  planter,
+  planter = "serpentine",
   plotNumber,
   copies_per_entry,
   checks = NULL,
-  exptName,
+  exptName = NULL,
   locationNames,
   sparse_list,
   seed

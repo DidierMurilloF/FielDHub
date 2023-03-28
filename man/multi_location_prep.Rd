@@ -9,7 +9,7 @@ multi_location_prep(
   nrows,
   ncols,
   l,
-  planter,
+  planter = "serpentine",
   plotNumber,
   desired_avg,
   copies_per_entry,
