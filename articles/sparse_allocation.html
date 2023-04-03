@@ -700,17 +700,17 @@ List of 11
  $ seed          : num 16
 
  10 First observations of the data frame with the diagonal_arrangement field book: 
-   ID        EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 sparse_expt    FARGO 2023    1   1      1      0    62      G-62
-2   2 sparse_expt    FARGO 2023    2   1      2      0    43      G-43
-3   3 sparse_expt    FARGO 2023    3   1      3      0    96      G-96
-4   4 sparse_expt    FARGO 2023    4   1      4    262   262    CH-262
-5   5 sparse_expt    FARGO 2023    5   1      5      0   199     G-199
-6   6 sparse_expt    FARGO 2023    6   1      6      0   179     G-179
-7   7 sparse_expt    FARGO 2023    7   1      7      0    50      G-50
-8   8 sparse_expt    FARGO 2023    8   1      8      0   253     G-253
-9   9 sparse_expt    FARGO 2023    9   1      9      0   110     G-110
-10 10 sparse_expt    FARGO 2023   10   1     10      0   243     G-243</code></pre>
+   ID           EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
+1   1 SparseTest2023    FARGO 2023    1   1      1      0    62      G-62
+2   2 SparseTest2023    FARGO 2023    2   1      2      0    43      G-43
+3   3 SparseTest2023    FARGO 2023    3   1      3      0    96      G-96
+4   4 SparseTest2023    FARGO 2023    4   1      4    262   262    CH-262
+5   5 SparseTest2023    FARGO 2023    5   1      5      0   199     G-199
+6   6 SparseTest2023    FARGO 2023    6   1      6      0   179     G-179
+7   7 SparseTest2023    FARGO 2023    7   1      7      0    50      G-50
+8   8 SparseTest2023    FARGO 2023    8   1      8      0   253     G-253
+9   9 SparseTest2023    FARGO 2023    9   1      9      0   110     G-110
+10 10 SparseTest2023    FARGO 2023   10   1     10      0   243     G-243</code></pre>
 <p>And for <code>LOC2</code> by changing the location to print to
 <code>LOC2</code>:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
@@ -733,17 +733,17 @@ List of 11
  $ seed          : num 16
 
  10 First observations of the data frame with the diagonal_arrangement field book: 
-   ID        EXPT  LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 sparse_expt CASSELTON 2023 1001   1      1      0    57      G-57
-2   2 sparse_expt CASSELTON 2023 1002   1      2      0    37      G-37
-3   3 sparse_expt CASSELTON 2023 1003   1      3      0    90      G-90
-4   4 sparse_expt CASSELTON 2023 1004   1      4    262   262    CH-262
-5   5 sparse_expt CASSELTON 2023 1005   1      5      0   191     G-191
-6   6 sparse_expt CASSELTON 2023 1006   1      6      0   177     G-177
-7   7 sparse_expt CASSELTON 2023 1007   1      7      0    42      G-42
-8   8 sparse_expt CASSELTON 2023 1008   1      8      0   255     G-255
-9   9 sparse_expt CASSELTON 2023 1009   1      9      0   105     G-105
-10 10 sparse_expt CASSELTON 2023 1010   1     10      0   244     G-244</code></pre>
+   ID           EXPT  LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
+1   1 SparseTest2023 CASSELTON 2023 1001   1      1      0    57      G-57
+2   2 SparseTest2023 CASSELTON 2023 1002   1      2      0    37      G-37
+3   3 SparseTest2023 CASSELTON 2023 1003   1      3      0    90      G-90
+4   4 SparseTest2023 CASSELTON 2023 1004   1      4    262   262    CH-262
+5   5 SparseTest2023 CASSELTON 2023 1005   1      5      0   191     G-191
+6   6 SparseTest2023 CASSELTON 2023 1006   1      6      0   177     G-177
+7   7 SparseTest2023 CASSELTON 2023 1007   1      7      0    42      G-42
+8   8 SparseTest2023 CASSELTON 2023 1008   1      8      0   255     G-255
+9   9 SparseTest2023 CASSELTON 2023 1009   1      9      0   105     G-105
+10 10 SparseTest2023 CASSELTON 2023 1010   1     10      0   244     G-244</code></pre>
 </div>
 <div class="section level3">
 <h3 id="access-to-sparse_example-object">Access to <code>sparse_example</code> object<a class="anchor" aria-label="anchor" href="#access-to-sparse_example-object"></a>
@@ -767,17 +767,17 @@ in this experiment.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">field_book</span> <span class="op">&lt;-</span> <span class="va">design_randomization</span><span class="op">$</span><span class="va">LOC1</span><span class="op">$</span><span class="va">fieldBook</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">field_book</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
-<pre><code>   ID        EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 sparse_expt    FARGO 2023    1   1      1      0    62      G-62
-2   2 sparse_expt    FARGO 2023    2   1      2      0    43      G-43
-3   3 sparse_expt    FARGO 2023    3   1      3      0    96      G-96
-4   4 sparse_expt    FARGO 2023    4   1      4    262   262    CH-262
-5   5 sparse_expt    FARGO 2023    5   1      5      0   199     G-199
-6   6 sparse_expt    FARGO 2023    6   1      6      0   179     G-179
-7   7 sparse_expt    FARGO 2023    7   1      7      0    50      G-50
-8   8 sparse_expt    FARGO 2023    8   1      8      0   253     G-253
-9   9 sparse_expt    FARGO 2023    9   1      9      0   110     G-110
-10 10 sparse_expt    FARGO 2023   10   1     10      0   243     G-243</code></pre>
+<pre><code>   ID           EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
+1   1 SparseTest2023    FARGO 2023    1   1      1      0    62      G-62
+2   2 SparseTest2023    FARGO 2023    2   1      2      0    43      G-43
+3   3 SparseTest2023    FARGO 2023    3   1      3      0    96      G-96
+4   4 SparseTest2023    FARGO 2023    4   1      4    262   262    CH-262
+5   5 SparseTest2023    FARGO 2023    5   1      5      0   199     G-199
+6   6 SparseTest2023    FARGO 2023    6   1      6      0   179     G-179
+7   7 SparseTest2023    FARGO 2023    7   1      7      0    50      G-50
+8   8 SparseTest2023    FARGO 2023    8   1      8      0   253     G-253
+9   9 SparseTest2023    FARGO 2023    9   1      9      0   110     G-110
+10 10 SparseTest2023    FARGO 2023   10   1     10      0   243     G-243</code></pre>
 </div>
 <div class="section level3">
 <h3 id="plot-field-layout">Plot field layout<a class="anchor" aria-label="anchor" href="#plot-field-layout"></a>
