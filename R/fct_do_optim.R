@@ -283,9 +283,13 @@ sparse_allocation <- function(
     # set a random seed if it is missing
     if (missing(seed)) seed <- base::sample.int(10000, size = 1) 
     if (missing(l)) stop("Please, define the number of locations for this design.")
-    if (missing(locationNames) || length(locationNames) != l) locationNames <- paste0("LOC", 1:l)
-    if (missing(plotNumber) || length(plotNumber) != l) plotNumber <- seq(1, 1000 * l, by = 1000)[1:l]
-    if (missing(exptName) || length(exptName) != l) exptName <- "sparse_expt"
+    if (missing(locationNames) || length(locationNames) != l)  {
+        locationNames <- paste0("LOC", 1:l)
+    }
+    if (missing(plotNumber) || length(plotNumber) != l) {
+        plotNumber <- seq(1, 1000 * l, by = 1000)[1:l]
+    }
+    if (missing(exptName)) exptName <- "SparseExpt"
     if (missing(planter) || is.null(planter)) planter <- "serpentine"
     if (all(c("serpentine", "cartesian") != planter)) {
         stop("Input planter choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
@@ -445,9 +449,13 @@ multi_location_prep <- function(
     # set a random seed if it is missing
     if (missing(seed)) seed <- base::sample.int(10000, size = 1)
     if (missing(l)) stop("Please, define the number of locations for this design.")
-    if (missing(locationNames) || length(locationNames) != l) locationNames <- paste0("LOC", 1:l)
-    if (missing(plotNumber) || length(plotNumber) != l) plotNumber <- seq(1, 1000 * l, by = 1000)[1:l]
-    if (missing(exptName) || length(exptName) != l) exptName <- "sparse_expt"
+    if (missing(locationNames) || length(locationNames) != l) {
+        locationNames <- paste0("LOC", 1:l)
+    } 
+    if (missing(plotNumber) || length(plotNumber) != l) {
+        plotNumber <- seq(1, 1000 * l, by = 1000)[1:l]
+    }
+    if (missing(exptName)) exptName <- "PrepExpt"
     if (missing(planter) || is.null(planter)) planter <- "serpentine"
     if (all(c("serpentine", "cartesian") != planter)) {
         stop("Input planter choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
