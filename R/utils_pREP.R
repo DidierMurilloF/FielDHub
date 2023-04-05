@@ -135,9 +135,6 @@ pREP <- function(nrows = NULL, ncols = NULL, RepChecks = NULL, checks = NULL,
       
     }
     
-    #p.plot <- plot(1:length(dists), dists, col = "blue", xlab = "Iterations", 
-    #               ylab = "Euclidean Distance")
-    
     ###################################
     field <- designs[[niter]]          # This is one of the "best designs" according to the euclidean distance.
     ###################################
@@ -182,16 +179,18 @@ pREP <- function(nrows = NULL, ncols = NULL, RepChecks = NULL, checks = NULL,
     layout1 <- field
     layout1[layout1 == 1] <- sample(treatments)
   }
-  
   ###################################################
-  
-  layout <- apply(layout1, c(1,2), as.numeric)
-  #print(sqrt(sum(dim(layout)^2)) / 3)
-  # min_dist <- floor(sqrt(sum(dim(layout)^2)) / 3.5)
-  # print(min_dist)
-  new_layout <- swap_pairs(X = layout, min_dist = 7)
+  ###################################################
+  field_layout <- apply(layout1, c(1,2), as.numeric)
+
+  if (max(table(field_layout)) == 2) {
+    optim_layout <- swap_pairs(X = field_layout, starting_dist = 3)
+  } else {
+    optim_layout <- swap_pairs(X = field_layout, starting_dist = 2)
+  }
+
   return(list(
-    field.map = new_layout, 
+    field.map = optim_layout, 
     gen.entries = entries, 
     gen.list = gen.list,
     reps.checks = reps.checks,
