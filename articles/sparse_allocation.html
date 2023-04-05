@@ -664,16 +664,16 @@ us print the first ten genotypes allocation.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">sparse_example</span><span class="op">$</span><span class="va">allocation</span>, <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code>   LOC1 LOC2 LOC3 LOC4 LOC5
-1     1    1    1    1    0
-2     0    1    1    1    1
+1     1    1    0    1    1
+2     1    1    1    0    1
 3     1    1    0    1    1
 4     1    1    1    1    0
-5     1    1    1    1    0
+5     1    1    1    0    1
 6     1    1    0    1    1
 7     1    0    1    1    1
 8     0    1    1    1    1
 9     1    1    1    0    1
-10    1    1    1    0    1</code></pre>
+10    1    1    1    1    0</code></pre>
 <p>We can manipulate the sparse_allocation object as any other list in
 R. For example, we can save the design randomizations to an object
 called <code>designs</code>, and then index based on location using the
@@ -701,15 +701,15 @@ List of 11
 
  10 First observations of the data frame with the diagonal_arrangement field book: 
    ID           EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 SparseTest2023    FARGO 2023    1   1      1      0    62      G-62
-2   2 SparseTest2023    FARGO 2023    2   1      2      0    43      G-43
-3   3 SparseTest2023    FARGO 2023    3   1      3      0    96      G-96
+1   1 SparseTest2023    FARGO 2023    1   1      1      0    68      G-68
+2   2 SparseTest2023    FARGO 2023    2   1      2      0    44      G-44
+3   3 SparseTest2023    FARGO 2023    3   1      3      0   100     G-100
 4   4 SparseTest2023    FARGO 2023    4   1      4    262   262    CH-262
-5   5 SparseTest2023    FARGO 2023    5   1      5      0   199     G-199
-6   6 SparseTest2023    FARGO 2023    6   1      6      0   179     G-179
-7   7 SparseTest2023    FARGO 2023    7   1      7      0    50      G-50
-8   8 SparseTest2023    FARGO 2023    8   1      8      0   253     G-253
-9   9 SparseTest2023    FARGO 2023    9   1      9      0   110     G-110
+5   5 SparseTest2023    FARGO 2023    5   1      5      0   198     G-198
+6   6 SparseTest2023    FARGO 2023    6   1      6      0   182     G-182
+7   7 SparseTest2023    FARGO 2023    7   1      7      0    52      G-52
+8   8 SparseTest2023    FARGO 2023    8   1      8      0   254     G-254
+9   9 SparseTest2023    FARGO 2023    9   1      9      0   114     G-114
 10 10 SparseTest2023    FARGO 2023   10   1     10      0   243     G-243</code></pre>
 <p>And for <code>LOC2</code> by changing the location to print to
 <code>LOC2</code>:</p>
@@ -734,15 +734,15 @@ List of 11
 
  10 First observations of the data frame with the diagonal_arrangement field book: 
    ID           EXPT  LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 SparseTest2023 CASSELTON 2023 1001   1      1      0    57      G-57
+1   1 SparseTest2023 CASSELTON 2023 1001   1      1      0    55      G-55
 2   2 SparseTest2023 CASSELTON 2023 1002   1      2      0    37      G-37
-3   3 SparseTest2023 CASSELTON 2023 1003   1      3      0    90      G-90
+3   3 SparseTest2023 CASSELTON 2023 1003   1      3      0    86      G-86
 4   4 SparseTest2023 CASSELTON 2023 1004   1      4    262   262    CH-262
-5   5 SparseTest2023 CASSELTON 2023 1005   1      5      0   191     G-191
-6   6 SparseTest2023 CASSELTON 2023 1006   1      6      0   177     G-177
+5   5 SparseTest2023 CASSELTON 2023 1005   1      5      0   189     G-189
+6   6 SparseTest2023 CASSELTON 2023 1006   1      6      0   172     G-172
 7   7 SparseTest2023 CASSELTON 2023 1007   1      7      0    42      G-42
 8   8 SparseTest2023 CASSELTON 2023 1008   1      8      0   255     G-255
-9   9 SparseTest2023 CASSELTON 2023 1009   1      9      0   105     G-105
+9   9 SparseTest2023 CASSELTON 2023 1009   1      9      0    99      G-99
 10 10 SparseTest2023 CASSELTON 2023 1010   1     10      0   244     G-244</code></pre>
 </div>
 <div class="section level3">
@@ -768,15 +768,15 @@ in this experiment.</p>
 <code class="sourceCode R"><span><span class="va">field_book</span> <span class="op">&lt;-</span> <span class="va">design_randomization</span><span class="op">$</span><span class="va">LOC1</span><span class="op">$</span><span class="va">fieldBook</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">field_book</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
 <pre><code>   ID           EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 SparseTest2023    FARGO 2023    1   1      1      0    62      G-62
-2   2 SparseTest2023    FARGO 2023    2   1      2      0    43      G-43
-3   3 SparseTest2023    FARGO 2023    3   1      3      0    96      G-96
+1   1 SparseTest2023    FARGO 2023    1   1      1      0    68      G-68
+2   2 SparseTest2023    FARGO 2023    2   1      2      0    44      G-44
+3   3 SparseTest2023    FARGO 2023    3   1      3      0   100     G-100
 4   4 SparseTest2023    FARGO 2023    4   1      4    262   262    CH-262
-5   5 SparseTest2023    FARGO 2023    5   1      5      0   199     G-199
-6   6 SparseTest2023    FARGO 2023    6   1      6      0   179     G-179
-7   7 SparseTest2023    FARGO 2023    7   1      7      0    50      G-50
-8   8 SparseTest2023    FARGO 2023    8   1      8      0   253     G-253
-9   9 SparseTest2023    FARGO 2023    9   1      9      0   110     G-110
+5   5 SparseTest2023    FARGO 2023    5   1      5      0   198     G-198
+6   6 SparseTest2023    FARGO 2023    6   1      6      0   182     G-182
+7   7 SparseTest2023    FARGO 2023    7   1      7      0    52      G-52
+8   8 SparseTest2023    FARGO 2023    8   1      8      0   254     G-254
+9   9 SparseTest2023    FARGO 2023    9   1      9      0   114     G-114
 10 10 SparseTest2023    FARGO 2023   10   1     10      0   243     G-243</code></pre>
 </div>
 <div class="section level3">
