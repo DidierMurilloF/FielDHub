@@ -48,6 +48,7 @@
 #' # location with 312 genotypes for a field with dimensions 15 rows x 28 cols. 
 #' # Note that there are 250 genotypes unreplicated (only one time), 50 genotypes replicated 
 #' # two times, and 10 genotypes replicated three times, and two checks 20 times each one.
+#'\dontrun{
 #' SpatpREP1 <- partially_replicated(
 #'   nrows = 15, 
 #'   ncols = 28,  
@@ -61,12 +62,14 @@
 #' SpatpREP1$layoutRandom
 #' SpatpREP1$plotNumber
 #' head(SpatpREP1$fieldBook,12)
+#' }
 #' 
 #' # Example 2: Generates a spatial optimized partially replicated arrangement design with 492 
 #' # genotypes in a field with dimensions 30 rows x 20 cols. Note that there 384 genotypes 
 #' # unreplicated (only one time), 108 genotypes replicated two times. 
 #' # In this case we don't have check plots.
 #' # As example, we set up the data option with the entries list.
+#'\dontrun{
 #' NAME <- paste("G", 1:492, sep = "")
 #' repGens = c(108, 384);repUnits = c(2,1)
 #' REPS <- rep(repUnits, repGens)
@@ -83,6 +86,7 @@
 #' SpatpREP2$layoutRandom
 #' SpatpREP2$plotNumber
 #' head(SpatpREP2$fieldBook,10)
+#' }
 #' 
 #' @export
 partially_replicated <- function(nrows = NULL, ncols = NULL, repGens = NULL, repUnits = NULL, 
@@ -202,6 +206,8 @@ partially_replicated <- function(nrows = NULL, ncols = NULL, repGens = NULL, rep
     for (sites in 1:l) { 
         prep <- pREP(nrows = nrows, ncols = ncols, RepChecks = NULL, checks = NULL, Fillers = 0,
                     seed = seed, optim = TRUE, niter = 1000, data = data)
+        min_distance <- prep$min_distance
+        pairs_distance <- prep$pairs_distance
         dataInput <- prep$gen.list
         BINAY_CHECKS <- prep$binary.field
         random_entries_map <- as.matrix(prep$field.map)
@@ -285,6 +291,7 @@ partially_replicated <- function(nrows = NULL, ncols = NULL, repGens = NULL, rep
     } else rep_treatments <- length(genEntries[[2]])
     
     infoDesign <- list(
+        min_distance = min_distance,
         rows = nrows,
         columns = ncols,
         treatments_with_reps = Checks,
@@ -296,6 +303,7 @@ partially_replicated <- function(nrows = NULL, ncols = NULL, repGens = NULL, rep
     output <- list(
         infoDesign = infoDesign, 
         layoutRandom = layout_random_sites, 
+        pairsDistance = pairs_distance,
         plotNumber = plot_numbers_sites,
         binaryField = col_checks_sites,
         dataEntry = dataInput,

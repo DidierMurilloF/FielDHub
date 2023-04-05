@@ -67,6 +67,7 @@ pREP <- function(nrows = NULL, ncols = NULL, RepChecks = NULL, checks = NULL,
   
   ######################some review on the data entry##########################
   #my_REPS <- subset(gen_list_order, REPS > 1)
+  optim <- FALSE
   if (prep == TRUE) {
     freq_reps <- table(my_REPS[,3])
     nREPS <- as.vector(as.numeric((names(freq_reps))))
@@ -134,9 +135,6 @@ pREP <- function(nrows = NULL, ncols = NULL, RepChecks = NULL, checks = NULL,
       
     }
     
-    #p.plot <- plot(1:length(dists), dists, col = "blue", xlab = "Iterations", 
-    #               ylab = "Euclidean Distance")
-    
     ###################################
     field <- designs[[niter]]          # This is one of the "best designs" according to the euclidean distance.
     ###################################
@@ -181,17 +179,29 @@ pREP <- function(nrows = NULL, ncols = NULL, RepChecks = NULL, checks = NULL,
     layout1 <- field
     layout1[layout1 == 1] <- sample(treatments)
   }
-  
   ###################################################
-  
-  layout <- apply(layout1, c(1,2), as.numeric)
-  
-  return(list(
-    field.map = layout, 
-    gen.entries = entries, 
-    gen.list = gen.list,
-    reps.checks = reps.checks,
-    entryChecks = entry.checks, 
-    binary.field = binary_field))
-  
+  ###################################################
+  field_layout <- apply(layout1, c(1,2), as.numeric)
+
+  if (max(table(field_layout)) == 2) {
+    swap <- swap_pairs(X = field_layout, starting_dist = 4)
+  } else {
+    swap <- swap_pairs(X = field_layout, starting_dist = 2)
+  }
+  optim_layout <- swap$optim_design
+  min_distance <- swap$min_distance
+  pairs_distance <- swap$pairs_distance
+
+  return(
+    list(
+      field.map = optim_layout, 
+      min_distance = min_distance,
+      pairs_distance = pairs_distance,
+      gen.entries = entries, 
+      gen.list = gen.list,
+      reps.checks = reps.checks,
+      entryChecks = entry.checks, 
+      binary.field = binary_field
+    )
+  )
 }

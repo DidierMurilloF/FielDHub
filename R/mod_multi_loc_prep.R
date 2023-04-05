@@ -50,7 +50,7 @@ mod_multi_loc_preps_ui <- function(id){
             numericInput(
                 inputId = ns("gens_prep"), 
                 label = "Input # of Entries:",
-                value = 320,
+                value = 312,
                 min = 1
             ),
             radioButtons(
