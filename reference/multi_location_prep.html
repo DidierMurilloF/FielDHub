@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">FielDHub</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.3.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -191,8 +191,9 @@
 <span class="r-in"><span><span class="co"># entries and the number of plots per location after the allocation process </span></span></span>
 <span class="r-in"><span><span class="co"># will be 196. </span></span></span>
 <span class="r-in"><span><span class="co"># The average genotype allocation will be 1.5 copies per location.</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span><span class="va">optim_multi_prep</span> <span class="op">&lt;-</span> <span class="fu">multi_location_prep</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  lines <span class="op">=</span> <span class="fl">142</span>,  </span></span>
+<span class="r-in"><span>  lines <span class="op">=</span> <span class="fl">150</span>,  </span></span>
 <span class="r-in"><span>  l <span class="op">=</span> <span class="fl">5</span>, </span></span>
 <span class="r-in"><span>  copies_per_entry <span class="op">=</span> <span class="fl">7</span>, </span></span>
 <span class="r-in"><span>  checks <span class="op">=</span> <span class="fl">3</span>, </span></span>
@@ -203,17 +204,7 @@
 <span class="r-in"><span><span class="va">designs</span> <span class="op">&lt;-</span> <span class="va">optim_multi_prep</span><span class="op">$</span><span class="va">designs</span></span></span>
 <span class="r-in"><span><span class="va">field_book_loc_1</span> <span class="op">&lt;-</span> <span class="va">designs</span><span class="op">$</span><span class="va">LOC1</span><span class="op">$</span><span class="va">fieldBook</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">field_book_loc_1</span>, <span class="fl">10</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    ID     EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1   1 PrepExpt     LOC1 2023    1   1      1      0    37      G-37</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2   2 PrepExpt     LOC1 2023    2   1      2     80    80      G-80</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3   3 PrepExpt     LOC1 2023    3   1      3     74    74      G-74</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4   4 PrepExpt     LOC1 2023    4   1      4      0    98      G-98</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5   5 PrepExpt     LOC1 2023    5   1      5    138   138     G-138</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6   6 PrepExpt     LOC1 2023    6   1      6      0   131     G-131</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7   7 PrepExpt     LOC1 2023    7   1      7     74    74      G-74</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8   8 PrepExpt     LOC1 2023    8   2      7     91    91      G-91</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9   9 PrepExpt     LOC1 2023    9   2      6    118   118     G-118</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10 10 PrepExpt     LOC1 2023   10   2      5      0   104     G-104</span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
