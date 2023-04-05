@@ -43,9 +43,6 @@ B$distances
 
 
 }
-\seealso{
-\code{\link{pairs_distance}}
-}
 \author{
 Jean-Marc Montpetit, \email{jeanmarc.montpetit@videotron.ca} [aut]
         Didier Murillo, \email{didier.murilloflorez@ndsu.edu} [ctb]

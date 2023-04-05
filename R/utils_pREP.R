@@ -184,16 +184,24 @@ pREP <- function(nrows = NULL, ncols = NULL, RepChecks = NULL, checks = NULL,
   field_layout <- apply(layout1, c(1,2), as.numeric)
 
   if (max(table(field_layout)) == 2) {
-    optim_layout <- swap_pairs(X = field_layout, starting_dist = 3)
+    swap <- swap_pairs(X = field_layout, starting_dist = 4)
   } else {
-    optim_layout <- swap_pairs(X = field_layout, starting_dist = 2)
+    swap <- swap_pairs(X = field_layout, starting_dist = 2)
   }
+  optim_layout <- swap$optim_design
+  min_distance <- swap$min_distance
+  pairs_distance <- swap$pairs_distance
 
-  return(list(
-    field.map = optim_layout, 
-    gen.entries = entries, 
-    gen.list = gen.list,
-    reps.checks = reps.checks,
-    entryChecks = entry.checks, 
-    binary.field = binary_field))
+  return(
+    list(
+      field.map = optim_layout, 
+      min_distance = min_distance,
+      pairs_distance = pairs_distance,
+      gen.entries = entries, 
+      gen.list = gen.list,
+      reps.checks = reps.checks,
+      entryChecks = entry.checks, 
+      binary.field = binary_field
+    )
+  )
 }

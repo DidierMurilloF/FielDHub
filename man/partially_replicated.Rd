@@ -62,6 +62,7 @@ Note that design generation needs the dimension of the field (number of rows and
 # location with 312 genotypes for a field with dimensions 15 rows x 28 cols. 
 # Note that there are 250 genotypes unreplicated (only one time), 50 genotypes replicated 
 # two times, and 10 genotypes replicated three times, and two checks 20 times each one.
+\dontrun{
 SpatpREP1 <- partially_replicated(
   nrows = 15, 
   ncols = 28,  
@@ -75,12 +76,14 @@ SpatpREP1$infoDesign
 SpatpREP1$layoutRandom
 SpatpREP1$plotNumber
 head(SpatpREP1$fieldBook,12)
+}
 
 # Example 2: Generates a spatial optimized partially replicated arrangement design with 492 
 # genotypes in a field with dimensions 30 rows x 20 cols. Note that there 384 genotypes 
 # unreplicated (only one time), 108 genotypes replicated two times. 
 # In this case we don't have check plots.
 # As example, we set up the data option with the entries list.
+\dontrun{
 NAME <- paste("G", 1:492, sep = "")
 repGens = c(108, 384);repUnits = c(2,1)
 REPS <- rep(repUnits, repGens)
@@ -97,6 +100,7 @@ SpatpREP2$infoDesign
 SpatpREP2$layoutRandom
 SpatpREP2$plotNumber
 head(SpatpREP2$fieldBook,10)
+}
 
 }
 \references{

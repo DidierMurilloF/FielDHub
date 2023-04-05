@@ -24,11 +24,11 @@
 #' @noRd 
 pairs_distance <- function(X) {
     # check if the input X is a matrix
-    if (!is.matrix(input_matrix)) {
+    if (!is.matrix(X)) {
         stop("Input must be a matrix")
     }
     # check if the input matrix X is numeric
-    if (!is.numeric(input_matrix)) {
+    if (!is.numeric(X)) {
         stop("Matrix elements must be numeric")
     }
     possPairs <- function(Z) {
@@ -126,22 +126,20 @@ pairs_distance <- function(X) {
 #' 
 #' 
 #' @export
-#' @seealso \code{\link{pairs_distance}}
 swap_pairs <- function(X, starting_dist = 3, stop_iter = 100) {
     # check if the input X is a matrix
-    if (!is.matrix(input_matrix)) {
+    if (!is.matrix(X)) {
         stop("Input must be a matrix")
     }
     # check if the input matrix X is numeric
-    if (!is.numeric(input_matrix)) {
+    if (!is.numeric(X)) {
         stop("Matrix elements must be numeric")
     }
-    field_layout <- X
-    minDist <- sqrt(sum(dim(field_layout)^2))
+    minDist <- sqrt(sum(dim(X)^2))
     designs <- list()
-    designs[[1]] <- field_layout
+    designs[[1]] <- X
     distances <- list()
-    distances[[1]] <- pairs_distance(X = field_layout)
+    distances[[1]] <- pairs_distance(X = X)
     w <- 2
     for (min_dist in seq(starting_dist, minDist, 1)) {
         n_iter <- 1
@@ -165,13 +163,11 @@ swap_pairs <- function(X, starting_dist = 3, stop_iter = 100) {
                     other_indices <- as.data.frame(other_indices)
                     valid_indices <- other_indices[sqrt(dist) >= min_dist, ]
                     if (nrow(valid_indices) == 0) break
-                    if (nrow(valid_indices) > 0) {
-                        # Pick a random cell to swap with
-                        k <- sample(nrow(valid_indices), size = 1)
-                        # Swap the two occurrences
-                        X[indices[i,1], indices[i,2]] <- X[valid_indices[k,1], valid_indices[k,2]]
-                        X[valid_indices[k,1], valid_indices[k,2]] <- genotype
-                    } else break
+                    # Pick a random cell to swap with
+                    k <- sample(nrow(valid_indices), size = 1)
+                    # Swap the two occurrences
+                    X[indices[i,1], indices[i,2]] <- X[valid_indices[k,1], valid_indices[k,2]]
+                    X[valid_indices[k,1], valid_indices[k,2]] <- genotype
                 }
             }
             n_iter <- n_iter + 1
@@ -179,17 +175,22 @@ swap_pairs <- function(X, starting_dist = 3, stop_iter = 100) {
         if (min(pairs_distance(X)$DIST) < min_dist) {
             break
         } else {
-            print(paste0("Maximum distance achieved: ", min_dist))
+            #print(paste0("Minimum distance achieved: ", min_dist))
             designs[[w]] <- X
             distances[[w]] <- pairs_distance(X)
             w <- w + 1
         }
     }
+    optim_design = designs[[length(designs)]] #return the last design
+    pairs_distance <- pairs_distance(optim_design)
+    min_distance = min(pairs_distance$DIST)
     return(
         list(
-            X = designs[length(designs)], 
+            optim_design = optim_design, 
             designs = designs, 
-            distances = distances
+            distances = distances,
+            min_distance = min_distance,
+            pairs_distance = pairs_distance
         )
     )
 }

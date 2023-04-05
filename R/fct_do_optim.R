@@ -418,8 +418,9 @@ sparse_allocation <- function(
 #' # entries and the number of plots per location after the allocation process 
 #' # will be 196. 
 #' # The average genotype allocation will be 1.5 copies per location.
+#'\dontrun{
 #' optim_multi_prep <- multi_location_prep(
-#'   lines = 142,  
+#'   lines = 150,  
 #'   l = 5, 
 #'   copies_per_entry = 7, 
 #'   checks = 3, 
@@ -430,6 +431,7 @@ sparse_allocation <- function(
 #' designs <- optim_multi_prep$designs
 #' field_book_loc_1 <- designs$LOC1$fieldBook
 #' head(field_book_loc_1, 10)
+#' }
 #' @export 
 multi_location_prep <- function(
     lines, 
