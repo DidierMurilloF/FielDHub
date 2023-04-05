@@ -67,6 +67,7 @@ pREP <- function(nrows = NULL, ncols = NULL, RepChecks = NULL, checks = NULL,
   
   ######################some review on the data entry##########################
   #my_REPS <- subset(gen_list_order, REPS > 1)
+  optim <- FALSE
   if (prep == TRUE) {
     freq_reps <- table(my_REPS[,3])
     nREPS <- as.vector(as.numeric((names(freq_reps))))
@@ -185,13 +186,15 @@ pREP <- function(nrows = NULL, ncols = NULL, RepChecks = NULL, checks = NULL,
   ###################################################
   
   layout <- apply(layout1, c(1,2), as.numeric)
-  
+  #print(sqrt(sum(dim(layout)^2)) / 3)
+  # min_dist <- floor(sqrt(sum(dim(layout)^2)) / 3.5)
+  # print(min_dist)
+  new_layout <- swap_pairs(X = layout, min_dist = 7)
   return(list(
-    field.map = layout, 
+    field.map = new_layout, 
     gen.entries = entries, 
     gen.list = gen.list,
     reps.checks = reps.checks,
     entryChecks = entry.checks, 
     binary.field = binary_field))
-  
 }
