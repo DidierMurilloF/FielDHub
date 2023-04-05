@@ -17,9 +17,12 @@ of occurrences of the same integer. Default is 3.}
 \value{
 A list containing the following elements:
 \describe{
-  \item{X}{The modified matrix.}
+  \item{optim_design}{The modified matrix.}
   \item{designs}{A list of all intermediate designs, starting from the input matrix.}
   \item{distances}{A list of all pair distances for each intermediate design.}
+  \item{min_distance}{An integer indicating the minimum distance between pairs 
+   of occurrences of the same integer.}
+  \item{pairs_distance}{A data frame with the pair distances for the final design.}
 }
 }
 \description{
@@ -44,6 +47,5 @@ B$distances
 
 }
 \author{
-Jean-Marc Montpetit, \email{jeanmarc.montpetit@videotron.ca} [aut]
-        Didier Murillo, \email{didier.murilloflorez@ndsu.edu} [ctb]
+Jean-Marc Montpetit [aut], Didier Murillo [aut]
 }

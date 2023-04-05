@@ -104,13 +104,15 @@ pairs_distance <- function(X) {
 #' 
 #' @return A list containing the following elements:
 #' \describe{
-#'   \item{X}{The modified matrix.}
+#'   \item{optim_design}{The modified matrix.}
 #'   \item{designs}{A list of all intermediate designs, starting from the input matrix.}
 #'   \item{distances}{A list of all pair distances for each intermediate design.}
+#'   \item{min_distance}{An integer indicating the minimum distance between pairs 
+#'    of occurrences of the same integer.}
+#'   \item{pairs_distance}{A data frame with the pair distances for the final design.}
 #' }
 #' 
-#' @author Jean-Marc Montpetit, \email{jeanmarc.montpetit@videotron.ca} [aut]
-#'         Didier Murillo, \email{didier.murilloflorez@ndsu.edu} [ctb]
+#' @author Jean-Marc Montpetit [aut], Didier Murillo [aut]
 #' 
 #' @examples
 #' # Create a matrix X with the numbers 1 to 10 are twice and 11 to 50 are once.
