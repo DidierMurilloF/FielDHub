@@ -181,7 +181,7 @@ optim_multi_prep <- multi_location_prep(
 )
 ```
 
-#### Details on the inputs entered in `optimized_arrangement()` above
+#### Details on the inputs entered in `multi_location_prep()` above
 
 The description for the inputs that we used to generate the design,
 
@@ -199,12 +199,11 @@ The description for the inputs that we used to generate the design,
 To print a summary of the information that is in the object `optim_multi_prep`, we can use the generic 
 function `print()`. 
 
-The `sparse_allocation()` function returns a list of 4 objects, `designs`, `list_locs`, `allocation`, 
-and `size_locations`. The object `designs` contains the randomization and information about the design 
-parameters for each location, while `list_locs` is a list of data frames. Each data frame has two columns;
-`ENTRY` and `NAME` with the information to randomize to each environment. The object `allocation` is the 
-binary allocation matrix of genotypes to locations, and `size_locations` is a data frame with a column 
-for each location and a row indicating the size of the location (number of field plots). 
+The `multi_location_prep()` function returns all the same objects as in `partially_replicated()` and in addition
+`list_locs`, `allocation`, and `size_locations`. The object `list_locs` is a list of data frames. Each data frame
+has three columns; `ENTRY`, `NAME` and `REPS` with the information to randomize to each environment. The object 
+`allocation` is the binary allocation matrix of genotypes to locations, and `size_locations` is a data frame with 
+a column for each location and a row indicating the size of the location (number of field plots). 
 
 For example, we can display the `allocation` object. Let us print the first ten genotypes allocation.
 
@@ -231,55 +230,38 @@ optim_multi_prep$allocation %>%
         kable_styling()
 ```
 
-We can manipulate the sparse_allocation object as any other list in R. For example, we can save the 
-design randomizations to an object called `designs`, and then index based on location using the dollar
-sign operator. We can first display the design parameters for `LOC1` with the following code:
+We can manipulate the `optim_multi_prep` object as any other list in R. We can first display the design parameters 
+for the randomizations with the following code:
 
 ```{r, echo=TRUE, eval=FALSE}
-design_randomization <- optim_multi_prep$designs
-print(design_randomization$LOC1)
+print(optim_multi_prep)
 ```
 
 which outputs:
 
 ```{r, echo=FALSE, eval=TRUE}
-design_randomization <- optim_multi_prep$designs
-print(design_randomization$LOC1)
-```
-
-And for environment 2 by changing the location to print to `LOC2`:
-
-```{r, echo=TRUE, eval=FALSE}
-print(design_randomization$LOC2)
-```
-
-which outputs:
-
-```{r, echo=FALSE, eval=TRUE}
-print(design_randomization$LOC2)
+print(optim_multi_prep)
 ```
 
 ### Access to `optim_multi_prep` output
 
-The object `designs` we saved `optim_multi_prep$designs` to is a list consisting of all the information 
-displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, 
-entries list, and field book, indexed by each location in the experiment. These are accessible by 
-the `$` operator, i.e. `designs$LOC1$layoutRandom` or `designs$LOC1$fieldBook` for `LOC1`, etc. 
+All objects are accessible by the `$` operator, i.e. `optim_multi_prep$layoutRandom[[1]]` for `LOC1`,
+`optim_multi_prep$fieldBook` for the `fieldBook` with all locations. 
 
-`designs$LOC1$fieldBook` is a data frame containing information about every plot in the field, 
+`optim_multi_prep$fieldBook` is a data frame containing information about every plot in the field, 
 with information about the location of the plot and the treatment in each plot. As seen in the 
 output below, the field book has columns for `ID`, `EXPT`, `LOCATION`, `YEAR`, `PLOT`, `ROW`, 
 `COLUMN`, `CHECKS`, `ENTRY`, and `TREATMENT`.
 
-Let us see the first 10 rows of the field book for the first location in this experiment.
+Let us see the first 10 rows of the field book for this experiment.
 
 ```{r, echo=TRUE, eval=FALSE}
-field_book <- design_randomization$LOC1$fieldBook
+field_book <- optim_multi_prep$fieldBook
 head(field_book, 10)
 ```
 
 ```{r, echo=FALSE, eval=TRUE}
-field_book <- design_randomization$LOC1$fieldBook
+field_book <- optim_multi_prep$fieldBook
 head(field_book, 10)
 ```
 
@@ -292,7 +274,7 @@ is indexable by location using the dollar sign operator as well.
 #### Field Layout for Location 1
 
 ```{r, fig.align='center', fig.width=7.2, fig.height=5.5}
-plot(design_randomization$LOC1)
+plot(optim_multi_prep, l = 1)
 ```
 
 In the figure above, green plots contain replicated entries, and gray plots contain entries 
@@ -303,8 +285,9 @@ that only appear once.
 Also, for example the location five:
 
 ```{r, fig.align='center', fig.width=7.2, fig.height=5.5}
-plot(design_randomization$LOC5)
+plot(optim_multi_prep, l = 5)
 ```
+
 
 <br>
 <br>

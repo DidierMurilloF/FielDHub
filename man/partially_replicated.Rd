@@ -15,6 +15,7 @@ partially_replicated(
   seed = NULL,
   exptName = NULL,
   locationNames = NULL,
+  multi_location_data = FALSE,
   data = NULL
 )
 }
@@ -39,7 +40,12 @@ partially_replicated(
 
 \item{locationNames}{(optional) Name for each location.}
 
-\item{data}{(optional) Dataframe with 3 columns: \code{ENTRY | NAME | REPS}.}
+\item{multi_location_data}{(optional) Option to pass an entry list for multiple locations. 
+By default \code{multi_location_data = FALSE}.}
+
+\item{data}{(optional) Dataframe with 3 columns: \code{ENTRY | NAME | REPS}. If the 
+\code{multi_location_data = TRUE} then the \code{data} dataframe must have
+4 columns: \code{LOCATION | ENTRY | NAME | REPS}}
 }
 \value{
 A list with five elements.

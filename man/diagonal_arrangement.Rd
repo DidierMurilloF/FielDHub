@@ -18,6 +18,7 @@ diagonal_arrangement(
   blocks = NULL,
   exptName = NULL,
   locationNames = NULL,
+  multi_location_data = FALSE,
   data = NULL
 )
 }
@@ -53,6 +54,9 @@ If \code{kindExpt = 'DBUDC'} and data is null, \code{blocks} are mandatory.}
 \item{exptName}{(optional) Name of the experiment.}
 
 \item{locationNames}{(optional) Names each location.}
+
+\item{multi_location_data}{(optional) Option to pass an entry list for multiple locations. 
+By default \code{multi_location_data = FALSE}.}
 
 \item{data}{(optional) Data frame with 2 columns: \code{ENTRY | NAME }.}
 }

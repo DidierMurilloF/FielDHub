@@ -3,8 +3,12 @@ pREP <- function(nrows = NULL, ncols = NULL, RepChecks = NULL, checks = NULL,
                  Fillers = NULL, seed = NULL, optim = TRUE, niter = 10000, 
                  data = NULL) {
   
-  niter <- 10000
+  niter <- 1000
   gen.list <- data
+  # rep_column <- as.vector(gen.list[,3])
+  # reps_table <- as.numeric(table(rep_column))
+  # unreplicated_treatments <- reps_table[1]
+  # replicated_treatments <- sum(reps_table[2:length(reps_table)])
   prep <- TRUE
   if (!is.null(gen.list)) {
     gen.list <- as.data.frame(gen.list)
@@ -67,7 +71,7 @@ pREP <- function(nrows = NULL, ncols = NULL, RepChecks = NULL, checks = NULL,
   
   ######################some review on the data entry##########################
   #my_REPS <- subset(gen_list_order, REPS > 1)
-  optim <- FALSE
+  #optim <- FALSE
   if (prep == TRUE) {
     freq_reps <- table(my_REPS[,3])
     nREPS <- as.vector(as.numeric((names(freq_reps))))
@@ -85,8 +89,6 @@ pREP <- function(nrows = NULL, ncols = NULL, RepChecks = NULL, checks = NULL,
   }
 
   ########## Setting up the features of the experiment###########################
-
-  
   datos <- sample(c(rep(0, nrows * ncols - total.checks),
                     rep(1, total.checks)))
   ######### Building the binary Matrix ##########################################
@@ -94,51 +96,33 @@ pREP <- function(nrows = NULL, ncols = NULL, RepChecks = NULL, checks = NULL,
   ################## Get optim the design usin a metric distance#################
   
   if (optim) {
-    
     m1 <- as.vector(field0)
     dist_field0 <- sum(dist(field0))
-    
     designs <- vector(mode = "list", length = niter)
     dists <- vector(mode = "numeric", length = niter)
     designs[[1]] <- field0
     dists[1] <- dist_field0
-    
     for(i in 2:niter){
-      
       m <- as.vector(designs[[i-1]])
       k1 <- which(m == 1);k2 <- which(m == 0)
-      
       D <- vector(length = 2)
-      
       D[1] <- sample(k1, 1, replace = FALSE)
       D[2] <- sample(k2, 1, replace = FALSE)
-      
       m1 <- replace(m, D, m[rev(D)])
-      
       iter_designs <- matrix(m1, nrow = nrows, ncol = ncols, byrow = FALSE)
-      
       iter_dist <- sum(dist(iter_designs))
-      
       if(iter_dist > dists[i - 1]){
-        
         designs[[i]] <- iter_designs
-        
-        dists[i] <- iter_dist
-        
-      }else {
-        
+        dists[i] <- iter_dist 
+      } else {
         designs[[i]] <- designs[[i - 1]]
-        
         dists[i] <- dists[i-1]
-        
       }
-      
     }
-    
+    # This is one of the "best designs" according to the euclidean distance.
     ###################################
-    field <- designs[[niter]]          # This is one of the "best designs" according to the euclidean distance.
+    field <- designs[[niter]]          
     ###################################
-    
   } else field <- field0
   
   if (prep == TRUE) {
@@ -166,7 +150,7 @@ pREP <- function(nrows = NULL, ncols = NULL, RepChecks = NULL, checks = NULL,
     entries <- list(entry.checks = entry.checks, entry.gens = entry.gens)
     if (length(entry.gens) == 1) {
       layout1[layout1 == 0] <- as.vector(entry.gens)
-    }else {
+    } else {
       layout1[layout1 == 0] <- sample(entry.gens)
     }
   } else {
@@ -179,8 +163,7 @@ pREP <- function(nrows = NULL, ncols = NULL, RepChecks = NULL, checks = NULL,
     layout1 <- field
     layout1[layout1 == 1] <- sample(treatments)
   }
-  ###################################################
-  ###################################################
+
   field_layout <- apply(layout1, c(1,2), as.numeric)
 
   if (max(table(field_layout)) == 2) {
@@ -189,14 +172,22 @@ pREP <- function(nrows = NULL, ncols = NULL, RepChecks = NULL, checks = NULL,
     swap <- swap_pairs(X = field_layout, starting_dist = 2)
   }
   optim_layout <- swap$optim_design
+  dups <- table(as.vector(optim_layout))
+  replicated_treatments <- as.numeric(rownames(dups)[dups > 1])
+  unreplicated_treatments <- as.numeric(rownames(dups)[dups == 1])
   min_distance <- swap$min_distance
-  pairs_distance <- swap$pairs_distance
-
+  pairswise_distance <- swap$pairswise_distance
+  rows_incidence <- swap$rows_incidence
+  binary_field <- optim_layout
+  binary_field[!binary_field %in% replicated_treatments] <- 0
   return(
     list(
-      field.map = optim_layout, 
+      field.map = optim_layout,
+      rows_incidence = rows_incidence, 
       min_distance = min_distance,
-      pairs_distance = pairs_distance,
+      pairswise_distance = pairswise_distance,
+      replicated_treatments = replicated_treatments,
+      unreplicated_treatments = unreplicated_treatments,
       gen.entries = entries, 
       gen.list = gen.list,
       reps.checks = reps.checks,

@@ -94,7 +94,7 @@ mod_pREPS_ui <- function(id){
 					numericInput(
 						ns("seed.preps"), 
 						label = "Random Seed:", 
-						value = 1, 
+						value = 4091, 
 						min = 1)
 				),
 				column(
@@ -278,9 +278,11 @@ mod_pREPS_server <- function(id){
         ENTRY <- 1:sum(repGens)
         NAME <- paste(rep("G", sum(repGens)), 1:sum(repGens), sep = "")
         REPS <- sort(rep(repUnits, times = repGens), decreasing = TRUE)
-        data_preps <- data.frame(list(ENTRY = ENTRY, 
-                                         NAME = NAME, 
-                                         REPS = REPS))
+        data_preps <- data.frame(
+            ENTRY = ENTRY, 
+            NAME = NAME, 
+            REPS = REPS
+        )
         colnames(data_preps) <- c("ENTRY", "NAME", "REPS")
         total_plots <- sum(data_preps$REPS)
       }
@@ -450,7 +452,7 @@ mod_pREPS_server <- function(id){
         plotNumber = plotNumber, 
         exptName =  expt_name,
         locationNames = site_names, 
-        planter = movement_planter, 
+        planter = movement_planter,
         data = gen.list 
       )
     }) %>% 
@@ -460,8 +462,6 @@ mod_pREPS_server <- function(id){
       test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
       if (test) {
         cat("Randomization was successful!", "\n", "\n")
-        # len <- length(pREPS_reactive()$infoDesign)
-        #  pREPS_reactive()$infoDesign[1:(len - 1)]
         print(pREPS_reactive())
       }
     })
@@ -641,7 +641,7 @@ mod_pREPS_server <- function(id){
     })
     
     simuDataPREP <- reactive({
-      req(pREPS_reactive()$fieldBook[[1]])
+      req(pREPS_reactive()$fieldBook)
       req(prep_inputs())
       if(!is.null(valsPREP$maxValue) & !is.null(valsPREP$minValue) & !is.null(valsPREP$trail.prep)) {
         maxVal <- as.numeric(valsPREP$maxValue)
@@ -659,11 +659,19 @@ mod_pREPS_server <- function(id){
         w <- 1
         set.seed(seed_prep)
         for (sites in 1:locs) {
-          df_loc <- subset(df.prep, LOCATION == loc_levels_factors[w])
-          fieldBook <- df_loc[, c(1,6,7,9)]
-          dfSimulation <- AR1xAR1_simulation(nrows = nrows_prep, ncols = ncols_prep, ROX = ROX_PREP, ROY = ROY_PREP, 
-                                             minValue = minVal, maxValue = maxVal, fieldbook = fieldBook, 
-                                             trail = valsPREP$trail.prep, seed = NULL)
+            df_loc <- subset(df.prep, LOCATION == loc_levels_factors[w])
+            fieldBook <- df_loc[, c(1,6,7,9)]
+            dfSimulation <- AR1xAR1_simulation(
+                nrows = nrows_prep, 
+                ncols = ncols_prep, 
+                ROX = ROX_PREP, 
+                ROY = ROY_PREP, 
+                minValue = minVal, 
+                maxValue = maxVal, 
+                fieldbook = fieldBook, 
+                trail = valsPREP$trail.prep, 
+                seed = NULL
+            )
           
           dfSimulation <- dfSimulation$outOrder
           dfSimulationList[[sites]] <- dfSimulation

@@ -19,7 +19,7 @@
 #'   \item \code{cB}: the column index of the second element in the pair
 #' }
 #' 
-#' @author Jean-Marc Montpetit, \email{jeanmarc.montpetit@videotron.ca}
+#' @author Jean-Marc Montpetit [aut]
 #'  
 #' @noRd 
 pairs_distance <- function(X) {
@@ -91,26 +91,24 @@ pairs_distance <- function(X) {
 
 #' @title Swap pairs in a matrix of integers
 #' 
-#' @description Modifies the input matrix X to ensure that the distance between 
-#' any two occurrences of the same integer is at least min_dist, by swapping 
-#' one of the occurrences with a random occurrence of a different integer that 
-#' is at least min_dist away. Where min_dist starts with starting_dist = 3, and then 
-#' increase it by 1 until the algorithm no longer converges.
+#' @description Modifies the input matrix X to ensure that the distance between any two occurrences
+#' of the same integer is at least min_dist, by swapping one of the occurrences with a
+#' random occurrence of a different integer that is at least min_dist away. The function
+#' starts with starting_dist = 3 and increases it by 1 until the algorithm no longer 
+#' converges or stop_iter iterations have been performed. 
+#' 
 #' 
 #' @param X A matrix of integers.
-#' @param starting_dist The minimum starting distance to enforce between pairs 
-#' of occurrences of the same integer. Default is 3.
+#' @param starting_dist The minimum starting distance to enforce between pairs of occurrences
+#'  of the same integer. Default is 3.
 #' @param stop_iter The maximum number of iterations to perform. Default is 100.
 #' 
 #' @return A list containing the following elements:
-#' \describe{
-#'   \item{optim_design}{The modified matrix.}
-#'   \item{designs}{A list of all intermediate designs, starting from the input matrix.}
-#'   \item{distances}{A list of all pair distances for each intermediate design.}
-#'   \item{min_distance}{An integer indicating the minimum distance between pairs 
-#'    of occurrences of the same integer.}
-#'   \item{pairs_distance}{A data frame with the pair distances for the final design.}
-#' }
+#' \item{optim_design}{The modified matrix.}
+#' \item{designs}{A list of all intermediate designs, starting from the input matrix.}
+#' \item{distances}{A list of all pair distances for each intermediate design.}
+#' \item{min_distance}{An integer indicating the minimum distance between pairs of occurrences of the same integer.}
+#' \item{pairswise_distance}{A data frame with the pairwise distances for the final design.}
 #' 
 #' @author Jean-Marc Montpetit [aut], Didier Murillo [aut]
 #' 
@@ -137,11 +135,15 @@ swap_pairs <- function(X, starting_dist = 3, stop_iter = 100) {
     if (!is.numeric(X)) {
         stop("Matrix elements must be numeric")
     }
+    input_X <- X
     minDist <- sqrt(sum(dim(X)^2))
     designs <- list()
     designs[[1]] <- X
     distances <- list()
-    distances[[1]] <- pairs_distance(X = X)
+    rows_incidence <- numeric()
+    init_dist <- pairs_distance(X = X)
+    genos <- unique(init_dist$geno)
+    distances[[1]] <- init_dist
     w <- 2
     for (min_dist in seq(starting_dist, minDist, 1)) {
         n_iter <- 1
@@ -163,8 +165,10 @@ swap_pairs <- function(X, starting_dist = 3, stop_iter = 100) {
                     # Calculate the Euclidean distances to the fixed point
                     dist <- apply(other_indices, 1, function(x) sum((x - indices[i, ])^2))
                     other_indices <- as.data.frame(other_indices)
+                    # other_indices <- other_indices[order(other_indices[, 1]),]
                     valid_indices <- other_indices[sqrt(dist) >= min_dist, ]
                     if (nrow(valid_indices) == 0) break
+                    valid_indices <- valid_indices[order(valid_indices[, 1]),]
                     # Pick a random cell to swap with
                     k <- sample(nrow(valid_indices), size = 1)
                     # Swap the two occurrences
@@ -177,22 +181,61 @@ swap_pairs <- function(X, starting_dist = 3, stop_iter = 100) {
         if (min(pairs_distance(X)$DIST) < min_dist) {
             break
         } else {
-            #print(paste0("Minimum distance achieved: ", min_dist))
+            frequency_rows <- as.data.frame(search_matrix_values(X = X, values_search = genos))
+            df <- frequency_rows[frequency_rows$Times == 2, ]
+            rows_incidence[w - 1] <- nrow(df)
             designs[[w]] <- X
             distances[[w]] <- pairs_distance(X)
             w <- w + 1
         }
     }
     optim_design = designs[[length(designs)]] #return the last design
-    pairs_distance <- pairs_distance(optim_design)
-    min_distance = min(pairs_distance$DIST)
+    pairswise_distance <- pairs_distance(optim_design)
+    min_distance = min(pairswise_distance$DIST)
     return(
         list(
+            rows_incidence = rows_incidence,
             optim_design = optim_design, 
             designs = designs, 
             distances = distances,
             min_distance = min_distance,
-            pairs_distance = pairs_distance
+            pairswise_distance = pairswise_distance
         )
     )
+}
+
+#' @title Search Matrix Values
+#'
+#' @description Search for values in a matrix and return the row number, value, and frequency.
+#' 
+#' @author Jean-Marc Montpetit [aut], Didier Murillo [aut]
+#'
+#' @param X A matrix.
+#' @param values_search A vector of values to search for in the matrix.
+#' @return A data frame with three columns: Row (the row number where the value is found), Value (the searched value), and Times (the frequency of the searched value in the row).
+#' @examples
+#' A <- matrix(c(1, 2, 3, 2, 3, 4, 3, 4, 5), nrow = 3, byrow = TRUE)
+#' search_matrix_values( X = A, values_search = c(2, 3, 5))
+#' @noRd
+search_matrix_values <- function(X, values_search) {
+    # Initialize an empty list to store the results
+    result <- list()
+    # Loop through each row of X
+    for (i in 1:nrow(X)) {
+        # Get the unique values and their frequency in the current row
+        row_vals <- unique(X[i,])
+        row_counts <- tabulate(match(X[i,], row_vals))
+        # Find the values that are in the search list
+        search_vals <- row_vals[row_vals %in% values_search]
+        # XAd the row number, search values, and their frequency to the result list
+        for (val in search_vals) {
+            freq <- sum(X[i,] == val)
+            result[[length(result)+1]] <- c(i, val, freq)
+        }
+    }
+    # Convert the result list to a data frame
+    result_df <- do.call(rbind, result)
+    colnames(result_df) <- c("Row", "Value", "Times")
+    # Return the final data frame
+    return(result_df)
 }

@@ -15,7 +15,11 @@
 #' @param seed (optional) Real number that specifies the starting seed to obtain reproducible designs.
 #' @param exptName (optional) Name of the experiment.
 #' @param locationNames (optional) Name for each location.
-#' @param data (optional) Dataframe with 3 columns: \code{ENTRY | NAME | REPS}.
+#' @param multi_location_data (optional) Option to pass an entry list for multiple locations. 
+#' By default \code{multi_location_data = FALSE}.
+#' @param data (optional) Dataframe with 3 columns: \code{ENTRY | NAME | REPS}. If the 
+#' \code{multi_location_data = TRUE} then the \code{data} dataframe must have
+#' 4 columns: \code{LOCATION | ENTRY | NAME | REPS}
 #' 
 #' 
 #' @author Didier Murillo [aut],
@@ -89,9 +93,19 @@
 #' }
 #' 
 #' @export
-partially_replicated <- function(nrows = NULL, ncols = NULL, repGens = NULL, repUnits = NULL, 
-                                 planter = "serpentine", l = 1, plotNumber = 101, seed = NULL, 
-                                 exptName = NULL, locationNames = NULL, data = NULL) {
+partially_replicated <- function(
+    nrows = NULL, 
+    ncols = NULL, 
+    repGens = NULL, 
+    repUnits = NULL, 
+    planter = "serpentine", 
+    l = 1, 
+    plotNumber = 101, 
+    seed = NULL, 
+    exptName = NULL, 
+    locationNames = NULL,
+    multi_location_data = FALSE,  
+    data = NULL) {
     
     if (all(c("serpentine", "cartesian") != planter)) {
         base::stop('Input "planter" is unknown. Please, choose one: "serpentine" or "cartesian"')
@@ -102,8 +116,12 @@ partially_replicated <- function(nrows = NULL, ncols = NULL, repGens = NULL, rep
     }
     
     if (is.null(data)) {
-        if (is.null(repGens) || is.null(repUnits)) base::stop("Input repGens and repUnits are missing.")
-        if (length(repGens) != length(repUnits)) base::stop("Input repGens and repUnits may have the same length.")
+        if (is.null(repGens) || is.null(repUnits)) {
+            base::stop("Input repGens and repUnits are missing.")
+        } 
+        if (length(repGens) != length(repUnits)) {
+            base::stop("Input repGens and repUnits should have the same length.")
+        }
     }
     
     if (!is.numeric(plotNumber) && !is.integer(plotNumber)) {
@@ -118,14 +136,8 @@ partially_replicated <- function(nrows = NULL, ncols = NULL, repGens = NULL, rep
         if (is.null(plotNumber) || length(plotNumber) != l) {
             if (l > 1) {
                 plotNumber <- seq(1001, 1000*(l+1), 1000)
-                message(cat("Warning message:", "\n", 
-                        "Since plotNumber was missing, it was set up to default value of: ", plotNumber, 
-                        "\n", "\n"))
             } else {
                 plotNumber <- 1001
-                message(cat("Warning message:", "\n", 
-                "Since plotNumber was missing, it was set up to default value of: ", plotNumber, 
-                "\n", "\n"))
             } 
         }
     } else stop("Number of locations/sites is missing")
@@ -141,35 +153,67 @@ partially_replicated <- function(nrows = NULL, ncols = NULL, repGens = NULL, rep
         base::stop('"partially_replicated()" requires input nrows, ncols, and l to be numeric and distint of NULL.')
         }
     } 
-    
     if (!is.null(data)) {
-        if(!is.data.frame(data)) base::stop("Data must be a data frame.")
-        gen.list <- data
-        gen.list <- as.data.frame(gen.list)
-        gen.list <- na.omit(gen.list[,1:3])
-        colnames(gen.list) <- c("ENTRY", "NAME", "REPS")
-        if (any(gen.list$ENTRY < 1) || any(gen.list$REPS < 1)) base::stop("Negatives number are not allowed in the data.")
-        gen.list.O <- gen.list[order(gen.list$REPS, decreasing = TRUE), ]
-        my_GENS <- subset(gen.list.O, REPS == 1)
-        my_REPS <- subset(gen.list.O, REPS > 1)
-        my_REPS <- my_REPS[order(my_REPS$REPS, decreasing = TRUE),]
-        RepChecks <- as.vector(my_REPS[,3])
-        checksEntries <- as.vector(my_REPS[,1])
-        checks <- length(checksEntries)
-        lines <- sum(my_GENS$REPS)
-        t_plots <- sum(as.numeric(gen.list$REPS))
-        if (numbers::isPrime(t_plots)) {
-            stop("No options when the total number of plots is a prime number.", call. = FALSE)
-        }
-        if (t_plots != (nrows * ncols)) {
-            choices <- factor_subsets(t_plots)$labels
-            if (!is.null(choices)) {
-            message(cat("\n", "Error in partially_replicated(): ", "\n", "\n",
-                "Field dimensions do not fit with the data entered!", "\n",
-                "Try one of the following options: ", "\n"))
-            return(for (i in 1:length(choices)) {print(choices[[i]])})
-            } else {
-            stop("Field dimensions do not fit with the data entered. Try another amount of treatments!", call. = FALSE)
+        if (multi_location_data) {
+            if (is.data.frame(data)) {
+                gen_list <- data
+                gen_list <- as.data.frame(gen_list)
+                gen_list <- na.omit(gen_list[, 1:4])
+                if (ncol(gen_list) < 4) {
+                    base::stop("Input data should have 4 columns: LOCATION, ENTRY, NAME, REPS.")
+                }
+                colnames(gen_list) <- c("LOCATION", "ENTRY", "NAME", "REPS")
+                # Create a space in memory for the locations data entry list
+                list_locs <- setNames(
+                    object = vector(mode = "list", length = l), 
+                    nm = unique(gen_list$LOCATION)
+                )
+                # Generate the lists of entries for each location
+                for (site in unique(gen_list$LOCATION)) {
+                    df_loc <- gen_list %>% 
+                        dplyr::filter(LOCATION == site) %>% 
+                        dplyr::mutate(ENTRY = as.numeric(ENTRY)) %>% 
+                        dplyr::select(ENTRY, NAME, REPS) %>%
+                        dplyr::arrange(dplyr::desc(REPS))
+
+                    list_locs[[site]] <- df_loc
+                }
+            } else if (is.list(data)){
+                list_locs <- data
+            }
+        } else {
+            if (!is.data.frame(data)) base::stop("Data must be a data frame!")
+            gen.list <- data
+            gen.list <- as.data.frame(gen.list)
+            gen.list <- na.omit(gen.list[,1:3])
+            colnames(gen.list) <- c("ENTRY", "NAME", "REPS")
+            if (any(gen.list$ENTRY < 1) || any(gen.list$REPS < 1)) base::stop("Negatives number are not allowed in the data.")
+            gen.list.O <- gen.list[order(gen.list$REPS, decreasing = TRUE), ]
+            my_GENS <- subset(gen.list.O, REPS == 1)
+            my_REPS <- subset(gen.list.O, REPS > 1)
+            my_REPS <- my_REPS[order(my_REPS$REPS, decreasing = TRUE),]
+            RepChecks <- as.vector(my_REPS[,3])
+            checksEntries <- as.vector(my_REPS[,1])
+            checks <- length(checksEntries)
+            lines <- sum(my_GENS$REPS)
+            t_plots <- sum(as.numeric(gen.list$REPS))
+            if (numbers::isPrime(t_plots)) {
+                stop("No options when the total number of plots is a prime number.", call. = FALSE)
+            }
+            if (t_plots != (nrows * ncols)) {
+                choices <- factor_subsets(t_plots)$labels
+                if (!is.null(choices)) {
+                message(cat("\n", "Error in partially_replicated(): ", "\n", "\n",
+                    "Field dimensions do not fit with the data entered!", "\n",
+                    "Try one of the following options: ", "\n"))
+                return(for (i in 1:length(choices)) {print(choices[[i]])})
+                } else {
+                stop("Field dimensions do not fit with the data entered. Try another amount of treatments!", call. = FALSE)
+                }
+            }
+            list_locs <- vector(mode = "list", length = l)
+            for (data_list in 1:l) {
+                list_locs[[data_list]] <- gen.list
             }
         }
     } else if (is.null(data)) {
@@ -196,22 +240,47 @@ partially_replicated <- function(nrows = NULL, ncols = NULL, repGens = NULL, rep
                                 NAME = NAME,
                                 REPS = REPS))
         colnames(data) <- c("ENTRY", "NAME", "REPS")
+        list_locs <- vector(mode = "list", length = l)
+        for (data_list in 1:l) {
+            list_locs[[data_list]] <- data
+        }
     }
-    if (is.null(seed)) {seed <- runif(1, min = -10000, max = 10000)}
+    if (is.null(seed)) seed <- base::sample.int(10000, size = 1)
     set.seed(seed)
     field_book_sites <- vector(mode = "list", length = l)
     layout_random_sites <- vector(mode = "list", length = l)
     plot_numbers_sites <- vector(mode = "list", length = l)
     col_checks_sites <- vector(mode = "list", length = l)
-    for (sites in 1:l) { 
-        prep <- pREP(nrows = nrows, ncols = ncols, RepChecks = NULL, checks = NULL, Fillers = 0,
-                    seed = seed, optim = TRUE, niter = 1000, data = data)
-        min_distance <- prep$min_distance
-        pairs_distance <- prep$pairs_distance
+    pairswise_distance_sites <- vector(mode = "list", length = l)
+    min_distance_sites <- vector(mode = "numeric", length = l)
+    treatments_with_reps = vector(mode = "list", length = l)
+    treatments_with_no_reps = vector(mode = "list", length = l)
+    rows_incidence <- vector(mode = "numeric", length = l)
+    for (sites in 1:l) {
+        prep <- pREP(
+            nrows = nrows, 
+            ncols = ncols, 
+            RepChecks = NULL, 
+            checks = NULL, 
+            Fillers = 0,
+            seed = seed, 
+            optim = TRUE, 
+            niter = 1000, 
+            data = list_locs[[sites]]
+        )
+        rows_incidence[sites] <- prep$rows_incidence[length(prep$rows_incidence)]
+        min_distance_sites[sites] <- prep$min_distance
         dataInput <- prep$gen.list
         BINAY_CHECKS <- prep$binary.field
         random_entries_map <- as.matrix(prep$field.map)
         genEntries <- prep$gen.entries
+
+        EntryChecks <- prep$entryChecks
+        Checks <- length(EntryChecks)
+
+        if (sum(genEntries[[2]]) == 0) {
+            rep_treatments <- 0
+        } else rep_treatments <- length(genEntries[[2]])
         
         if (!is.null(exptName)) {
         Name_expt <- exptName[1]
@@ -234,7 +303,9 @@ partially_replicated <- function(nrows = NULL, ncols = NULL, repGens = NULL, rep
             )
         }
         
-        if (is.null(locationNames) || length(locationNames) != l) locationNames <- 1:l
+        if (is.null(locationNames) || length(locationNames) != l) {
+            locationNames <- paste0("LOC", 1:l)
+        } 
         plot_num <- plot_number_spat()$w_map_letters1
         plot_number_L <- apply(plot_num, c(1,2), as.numeric)
         export_spat <- function() {
@@ -278,39 +349,42 @@ partially_replicated <- function(nrows = NULL, ncols = NULL, repGens = NULL, rep
         layout_random_sites[[sites]] <- layoutR
         plot_numbers_sites[[sites]] <- plot_number_L
         col_checks_sites[[sites]] <- as.matrix(BINAY_CHECKS)
+        pairswise_distance_sites[[sites]] <- prep$pairswise_distance
+        treatments_with_reps[[sites]] = prep$replicated_treatments
+        treatments_with_no_reps[[sites]] = prep$unreplicated_treatments
     }
     
     field_book <- dplyr::bind_rows(field_book_sites)
-    
     RepChecks <- prep$reps.checks
-    EntryChecks <- prep$entryChecks
-    Checks <- length(EntryChecks)
-    
-    if (sum(genEntries[[2]]) == 0) {
-        rep_treatments <- 0
-    } else rep_treatments <- length(genEntries[[2]])
-    
+    reps_info <- data.frame(
+        LOCATION = locationNames,
+        Replicated = lengths(treatments_with_reps),
+        Unreplicated = lengths(treatments_with_no_reps)
+    )
+    min_dist_df <- data.frame(LOCATION = locationNames, DISTANCE = min_distance_sites)
     infoDesign <- list(
-        min_distance = min_distance,
         rows = nrows,
         columns = ncols,
-        treatments_with_reps = Checks,
-        treatments_with_no_reps = rep_treatments,
+        min_distance = min_distance_sites,
+        incidence_in_rows = rows_incidence,
         locations = l,
         planter = planter,
         seed = seed,
         id_design = 13)
     output <- list(
-        infoDesign = infoDesign, 
+        infoDesign = infoDesign,
+        min_pairswise_distance = min_dist_df,
+        reps_info = reps_info,
         layoutRandom = layout_random_sites, 
-        pairsDistance = pairs_distance,
+        pairsDistance = pairswise_distance_sites,
         plotNumber = plot_numbers_sites,
         binaryField = col_checks_sites,
         dataEntry = dataInput,
         genEntries = genEntries,
+        treatments_with_reps = treatments_with_reps,
+        treatments_with_no_reps = treatments_with_no_reps,
         fieldBook = field_book
     )
-
     class(output) <- "FielDHub"
     return(invisible(output))
 }

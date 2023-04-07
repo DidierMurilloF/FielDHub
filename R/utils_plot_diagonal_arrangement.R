@@ -33,36 +33,39 @@ plot_diagonal_arrangement <- function(x, l) {
 }
 
 #' @noRd
-plot_prep <- function(x, l) {
-  
-  fieldbook <- x$fieldBook
-  
-  sites <- factor(fieldbook$LOCATION, levels = unique(fieldbook$LOCATION))
-  
-  site_levels <- levels(sites)
-  
-  loc_field_book <- fieldbook %>% 
-    dplyr::filter(LOCATION == site_levels[l]) %>% 
-    as.data.frame()
-  
-  cols <- max(as.numeric(loc_field_book$COLUMN))
-  rows <- max(as.numeric(loc_field_book$ROW))
-  
-  loc_field_book$binay_checks <- ifelse(loc_field_book$CHECKS != 0, 1, 0)
-  
-  main <- paste0("Partially Replicated Design ", rows, " x ", cols)
-  p1 <- desplot::ggdesplot(loc_field_book, 
-                           binay_checks ~ COLUMN + ROW,  
-                           text = ENTRY,  
-                           xlab = "COLUMNS", 
-                           ylab = "ROWS",
-                           main = main,
-                           cex = 1,
-                           show.key = FALSE, 
-                           gg = TRUE,
-                           col.regions = c("gray", "seagreen"))
-  
-  return(list(p1 = p1, allSitesFieldbook = fieldbook))
+plot_prep <- function(x, l = 1) {
+    fieldbook <- x$fieldBook
+    
+    sites <- factor(fieldbook$LOCATION, levels = unique(fieldbook$LOCATION))
+    
+    site_levels <- levels(sites)
+    
+    loc_field_book <- fieldbook %>% 
+        dplyr::filter(LOCATION == site_levels[l]) %>% 
+        as.data.frame()
+    
+    cols <- max(as.numeric(loc_field_book$COLUMN))
+    rows <- max(as.numeric(loc_field_book$ROW))
+
+    loc_field_book$ENTRY <- as.character(loc_field_book$ENTRY)
+    
+    loc_field_book$binay_checks <- ifelse(loc_field_book$CHECKS != 0, 1, 0)
+    
+    main <- paste0("Partially Replicated Design ", rows, " x ", cols)
+    p1 <- desplot::ggdesplot(
+        data = loc_field_book, 
+        binay_checks ~ COLUMN + ROW,  
+        text = ENTRY,  
+        xlab = "COLUMNS", 
+        ylab = "ROWS",
+        main = main,
+        cex = 1,
+        show.key = FALSE, 
+        gg = TRUE,
+        col.regions = c("gray", "seagreen")
+    )
+    
+    return(list(p1 = p1, allSitesFieldbook = fieldbook))
 }
 
 #' @noRd

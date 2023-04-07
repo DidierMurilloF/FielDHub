@@ -9,28 +9,25 @@ swap_pairs(X, starting_dist = 3, stop_iter = 100)
 \arguments{
 \item{X}{A matrix of integers.}
 
-\item{starting_dist}{The minimum starting distance to enforce between pairs 
-of occurrences of the same integer. Default is 3.}
+\item{starting_dist}{The minimum starting distance to enforce between pairs of occurrences
+of the same integer. Default is 3.}
 
 \item{stop_iter}{The maximum number of iterations to perform. Default is 100.}
 }
 \value{
 A list containing the following elements:
-\describe{
-  \item{optim_design}{The modified matrix.}
-  \item{designs}{A list of all intermediate designs, starting from the input matrix.}
-  \item{distances}{A list of all pair distances for each intermediate design.}
-  \item{min_distance}{An integer indicating the minimum distance between pairs 
-   of occurrences of the same integer.}
-  \item{pairs_distance}{A data frame with the pair distances for the final design.}
-}
+\item{optim_design}{The modified matrix.}
+\item{designs}{A list of all intermediate designs, starting from the input matrix.}
+\item{distances}{A list of all pair distances for each intermediate design.}
+\item{min_distance}{An integer indicating the minimum distance between pairs of occurrences of the same integer.}
+\item{pairswise_distance}{A data frame with the pairwise distances for the final design.}
 }
 \description{
-Modifies the input matrix X to ensure that the distance between 
-any two occurrences of the same integer is at least min_dist, by swapping 
-one of the occurrences with a random occurrence of a different integer that 
-is at least min_dist away. Where min_dist starts with starting_dist = 3, and then 
-increase it by 1 until the algorithm no longer converges.
+Modifies the input matrix X to ensure that the distance between any two occurrences
+of the same integer is at least min_dist, by swapping one of the occurrences with a
+random occurrence of a different integer that is at least min_dist away. The function
+starts with starting_dist = 3 and increases it by 1 until the algorithm no longer 
+converges or stop_iter iterations have been performed.
 }
 \examples{
 # Create a matrix X with the numbers 1 to 10 are twice and 11 to 50 are once.

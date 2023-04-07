@@ -209,8 +209,22 @@ do_optim <- function(
 
         list_locs[[site]] <- df_loc
     }
+    if (design == "prep") {
+        # Combine the data frames into a single data frame with a new column for the list element name
+        multi_location_data <- dplyr::bind_rows(lapply(names(list_locs), function(name) {
+            dplyr::mutate(list_locs[[name]], LOCATION = name)
+        })) %>% 
+            dplyr::select(LOCATION, ENTRY, NAME, REPS)
+    } else {
+         # Combine the data frames into a single data frame with a new column for the list element name
+        multi_location_data <- dplyr::bind_rows(lapply(names(list_locs), function(name) {
+            dplyr::mutate(list_locs[[name]], LOCATION = name)
+        })) %>% 
+            dplyr::select(LOCATION, ENTRY, NAME)
+    }
     # out object with the allocation and the list of entries per location
     out <- list(
+        multi_location_data = multi_location_data,
         list_locs = list_locs,
         allocation = allocation_df, 
         size_locations = col_sum
@@ -506,38 +520,38 @@ multi_location_prep <- function(
         nrows <- as.numeric(dimensions[1])
         ncols <- as.numeric(dimensions[2])
     }
-    # Create a space in memory for the preps randomizations
-    preps_designs <- setNames(
-        object = vector(mode = "list", length = l), 
-        nm = names(preps$list_locs)
+    # Generate the randomization
+    design_randomization <- partially_replicated(
+        nrows = nrows, 
+        ncols = ncols,
+        l = l,
+        planter = planter,
+        plotNumber = plotNumber,
+        locationNames = locationNames,
+        exptName = exptName,
+        seed = seed,
+        multi_location_data = TRUE,
+        data = preps$list_locs
     )
-    v <- 1
-    for (site in names(preps$list_locs)) {
-        df_loc <- preps$list_locs[[site]] %>% 
-            dplyr::mutate(
-                ENTRY = as.numeric(ENTRY),
-                REPS = as.numeric(REPS)
-            ) %>% 
-            dplyr::select(ENTRY, NAME, REPS)
-
-        preps_designs[[site]] <- partially_replicated(
-            nrows = nrows, 
-            ncols = ncols,
-            planter = planter,
-            plotNumber = plotNumber[v],
-            locationNames = locationNames[v],
-            exptName = exptName,
-            seed = seed,
-            data = df_loc
-        )
-        v  <- v + 1
-    }
-    return(
-        list(
-            designs = preps_designs, 
-            list_locs = preps$list_locs, 
-            allocation = preps$allocation, 
-            size_locations = preps$size_locations
-        )
+    design_randomization$infoDesign$id_design <- "MultiPrep"
+    output <- list(
+        infoDesign = design_randomization$infoDesign,
+        min_pairswise_distance = design_randomization$min_dist_df,
+        reps_info = design_randomization$reps_info,
+        layoutRandom = design_randomization$layout_random_sites, 
+        pairsDistance = design_randomization$pairswise_distance_sites,
+        plotNumber = design_randomization$plot_numbers_sites,
+        binaryField = design_randomization$col_checks_sites,
+        dataEntry = design_randomization$dataInput,
+        genEntries = design_randomization$genEntries,
+        treatments_with_reps = design_randomization$treatments_with_reps,
+        treatments_with_no_reps = design_randomization$treatments_with_no_reps,
+        fieldBook = design_randomization$fieldBook,
+        multi_location_data = preps$multi_location_data, 
+        list_locs = preps$list_locs, 
+        allocation = preps$allocation, 
+        size_locations = preps$size_locations
     )
+    class(output) <- "FielDHub"
+    return(invisible(output))
 }

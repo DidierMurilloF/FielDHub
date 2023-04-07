@@ -201,7 +201,7 @@ mod_multi_loc_preps_ui <- function(id){
                     type = 4
                 )
             ),
-            #tabPanel("Data Input", DT::DTOutput(ns("dataup.preps"))),
+            tabPanel("Data Input", DT::DTOutput(ns("multi_prep_data_input"))),
             tabPanel("Randomized Field",
                     shinycssloaders::withSpinner(
                         DT::DTOutput(ns("avg_field_preps")), 
@@ -637,6 +637,26 @@ mod_multi_loc_preps_server <- function(id){
           )
         )
     })
+
+        ###### Plotting the data ##############
+    output$multi_prep_data_input <- DT::renderDT({
+      test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
+      if (!test) return(NULL)
+      req(setup_optim_prep())
+      multi_loc_data <- setup_optim_prep()$multi_location_data
+      df <- as.data.frame(multi_loc_data)
+      df$LOCATION <- as.factor(df$LOCATION)
+      df$ENTRY <- as.factor(df$ENTRY)
+      df$NAME <- as.factor(df$NAME)
+      df$REPS <- as.factor(df$REPS)
+      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
+                                scrollX = TRUE, scrollY = "500px"))
+      DT::datatable(df,
+                    rownames = FALSE, 
+                    filter = 'top',
+                    options = list(
+        columnDefs = list(list(className = 'dt-center', targets = "_all"))))
+    })
     
     pREPS_reactive <- reactive({
         req(setup_optim_prep())
@@ -644,11 +664,11 @@ mod_multi_loc_preps_server <- function(id){
         gen.list <- setup_optim_prep()$list_locs
         nrows <- field_dimensions_prep()$d_row
         ncols <- field_dimensions_prep()$d_col
-        niter <- 10000
+        niter <- 1000
         prep <- TRUE
         locs_preps <- prep_inputs()$sites
         site_names <- prep_inputs()$location_names
-        preps.seed <- prep_inputs()$seed_number
+        preps_seed <- prep_inputs()$seed_number
         plotNumber <- prep_inputs()$plotNumber
         if (length(site_names) != locs_preps) {
             site_names <- paste0("LOC", 1:locs_preps)
@@ -659,20 +679,19 @@ mod_multi_loc_preps_server <- function(id){
         movement_planter <- prep_inputs()$planter_mov
         expt_name <- prep_inputs()$expt_name
         locations_preps <- vector(mode = "list", length = locs_preps)
-        set.seed(preps.seed)
-        for (i in 1:locs_preps) {
-            locations_preps[[i]] <- partially_replicated(
-                nrows = nrows, 
-                ncols = ncols, 
-                l = 1, 
-                seed = NULL, 
-                plotNumber = plotNumber[i], 
-                exptName =  expt_name,
-                locationNames = site_names[i], 
-                planter = movement_planter, 
-                data = gen.list[[i]] 
-            )
-        }
+
+        locations_preps <- partially_replicated(
+            nrows = nrows, 
+            ncols = ncols, 
+            l = locs_preps, 
+            plotNumber = plotNumber, 
+            exptName =  expt_name,
+            locationNames = site_names, 
+            planter = movement_planter,
+            seed = preps_seed, 
+            multi_location_data = TRUE,
+            data = gen.list 
+        )
 
         return(locations_preps)
 
@@ -688,15 +707,13 @@ mod_multi_loc_preps_server <- function(id){
       if (!test) return(NULL)
       req(pREPS_reactive())
       selection <- as.numeric(user_site_selection())
-      w_map <- pREPS_reactive()[[selection]]$layoutRandom
-      checks = as.vector(pREPS_reactive()[[selection]]$genEntries[[1]])
+      w_map <- pREPS_reactive()$layoutRandom[[selection]]
+      checks = as.vector(pREPS_reactive()$treatments_with_reps[[selection]])
       len_checks <- length(checks)
       colores <- c('royalblue','salmon', 'green', 'orange','orchid', 'slategrey',
                    'greenyellow', 'blueviolet','deepskyblue','gold','blue', 'red')
       
       df <- as.data.frame(w_map)
-      
-      gens <- as.vector(unlist(pREPS_reactive()[[selection]]$genEntries[[2]]))
       
       rownames(df) <- nrow(df):1
       colnames(df) <- paste0('V', 1:ncol(df))
@@ -717,8 +734,8 @@ mod_multi_loc_preps_server <- function(id){
             lengthMenu = list(c(10,25,50,-1),
                             c(10,25,50,"All")))) %>%
         DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-                    backgroundColor = DT::styleEqual(c(checks), # c(checks,gens)
-                                                 c(rep(colores[3], len_checks)) # , rep('yellow', length(gens))
+                    backgroundColor = DT::styleEqual(c(checks),
+                                                 c(rep(colores[3], len_checks))
                     )
       )
     })
@@ -727,7 +744,8 @@ mod_multi_loc_preps_server <- function(id){
       test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
       if (!test) return(NULL)
       req(pREPS_reactive())
-      plot_num <- pREPS_reactive()[[user_site_selection()]]$plotNumber
+      selection <- as.numeric(user_site_selection())
+      plot_num <- pREPS_reactive()$plotNumber[[user_site_selection()]]
       df <- as.data.frame(plot_num)
       rownames(df) <- nrow(df):1
       colnames(df) <- paste0("V", 1:ncol(df))
@@ -796,22 +814,9 @@ mod_multi_loc_preps_server <- function(id){
         )
       )
     }
-
-
-    get_fieldbook <- reactive({
-        req(pREPS_reactive())
-        field_book <- vector(mode = "list", length = length(pREPS_reactive()))
-        iter_by_site <- 1:length(pREPS_reactive())
-        for (i in iter_by_site) {
-            field_book[[i]] <- pREPS_reactive()[[i]]$fieldBook
-        }
-        fieldBook <- dplyr::bind_rows(field_book)
-        fieldBook$ID <- 1:nrow(fieldBook)
-        return(list(fieldBook = fieldBook))
-    })
     
     observeEvent(input$simulate_prep_data, {
-      req(get_fieldbook()$fieldBook)
+      req(pREPS_reactive()$fieldBook[[1]])
       test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
       if (test) {
         showModal(
@@ -855,7 +860,7 @@ mod_multi_loc_preps_server <- function(id){
         minVal <- as.numeric(valsPREP$minValue)
         ROX_PREP <- as.numeric(valsPREP$ROX)
         ROY_PREP <- as.numeric(valsPREP$ROY)
-        df.prep <- get_fieldbook()$fieldBook
+        df.prep <- pREPS_reactive()$fieldBook
         loc_levels_factors <- levels(factor(df.prep$LOCATION, unique(df.prep$LOCATION)))
         locs <- prep_inputs()$sites
         nrows_prep <- field_dimensions_prep()$d_row
@@ -866,11 +871,19 @@ mod_multi_loc_preps_server <- function(id){
         w <- 1
         set.seed(seed_prep)
         for (sites in 1:locs) {
-          df_loc <- subset(df.prep, LOCATION == loc_levels_factors[w])
-          fieldBook <- df_loc[, c(1,6,7,9)]
-          dfSimulation <- AR1xAR1_simulation(nrows = nrows_prep, ncols = ncols_prep, ROX = ROX_PREP, ROY = ROY_PREP, 
-                                             minValue = minVal, maxValue = maxVal, fieldbook = fieldBook, 
-                                             trail = valsPREP$trail.prep, seed = NULL)
+            df_loc <- subset(df.prep, LOCATION == loc_levels_factors[w])
+            fieldBook <- df_loc[, c(1,6,7,9)]
+            dfSimulation <- AR1xAR1_simulation(
+                nrows = nrows_prep, 
+                ncols = ncols_prep, 
+                ROX = ROX_PREP, 
+                ROY = ROY_PREP, 
+                minValue = minVal, 
+                maxValue = maxVal, 
+                fieldbook = fieldBook, 
+                trail = valsPREP$trail.prep, 
+                seed = NULL
+            )
           
           dfSimulation <- dfSimulation$outOrder
           dfSimulationList[[sites]] <- dfSimulation
@@ -883,7 +896,7 @@ mod_multi_loc_preps_server <- function(id){
         df.prep_locs <- dplyr::bind_rows(df.prep_list)
         v <- 1
       }else {
-        dataPrep <- get_fieldbook()$fieldBook
+        dataPrep <- pREPS_reactive()$fieldBook
         v <- 2
       }
       if (v == 1) {

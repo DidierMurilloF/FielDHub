@@ -197,7 +197,7 @@ print.FielDHub <- function(x, n=10, ...){
         "First observations of the data frame with the rectangular_lattice field book:",
         "\n")
     print(head(x$fieldBook, n=nhead_print, ...))
-  }else if (x$infoDesign$id_design == 12) {
+  } else if (x$infoDesign$id_design == 12) {
     cat("Alpha Lattice Design", "\n\n")
     cat("Information on the design parameters:", "\n")
     len <- length(x$infoDesign)
@@ -212,9 +212,11 @@ print.FielDHub <- function(x, n=10, ...){
         "First observations of the data frame with the alpha_lattice field book:",
         "\n")
     print(head(x$fieldBook, n=nhead_print, ...))
-  }else if (x$infoDesign$id_design == 13) {
+  } else if (x$infoDesign$id_design == 13) {
     cat("Partially Replicated Design", "\n\n")
-    cat("Information on the design parameters:", "\n")
+    cat("\n", "Replications within location:", "\n")
+    print(x$reps_info)
+    cat("\n", "Information on the design parameters:", "\n")
     len <- length(x$infoDesign)
     str(x$infoDesign[1:(len-1)])
     # str(x$infoDesign)
@@ -227,7 +229,24 @@ print.FielDHub <- function(x, n=10, ...){
         "First observations of the data frame with the partially_replicated field book:",
         "\n")
     print(head(x$fieldBook, n=nhead_print, ...))
-  }else if (x$infoDesign$id_design == 14) {
+  } else if (x$infoDesign$id_design == "MultiPrep") {
+    cat("Multi-Location Partially Replicated Design", "\n")
+    cat("\n", "Replications within location:", "\n")
+    print(x$reps_info)
+    cat("\n", "Information on the design parameters:", "\n")
+    len <- length(x$infoDesign)
+    str(x$infoDesign[1:(len-1)])
+    # str(x$infoDesign)
+    #---------------------------------------------------------------------
+    # Head
+    #---------------------------------------------------------------------
+    nr <- nrow(x$fieldBook)
+    nhead_print <- infoPrint(n, nr)
+    cat("\n",  nhead_print,
+        "First observations of the data frame with the partially_replicated field book:",
+        "\n")
+    print(head(x$fieldBook, n=nhead_print, ...))
+  } else if (x$infoDesign$id_design == 14) {
     cat("Augmented Randomized Complete Block Design:", "\n\n")
     cat("Information on the design parameters:", "\n")
     len <- length(x$infoDesign)
