@@ -99,6 +99,7 @@ Note that design generation needs the dimension of the field (number of rows and
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  exptName <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  locationNames <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  multi_location_data <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  data <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -145,8 +146,15 @@ Note that design generation needs the dimension of the field (number of rows and
 <dd><p>(optional) Name for each location.</p></dd>
 
 
+<dt>multi_location_data</dt>
+<dd><p>(optional) Option to pass an entry list for multiple locations. 
+By default <code>multi_location_data = FALSE</code>.</p></dd>
+
+
 <dt>data</dt>
-<dd><p>(optional) Dataframe with 3 columns: <code>ENTRY | NAME | REPS</code>.</p></dd>
+<dd><p>(optional) Dataframe with 3 columns: <code>ENTRY | NAME | REPS</code>. If the 
+<code>multi_location_data = TRUE</code> then the <code>data</code> dataframe must have
+4 columns: <code>LOCATION | ENTRY | NAME | REPS</code></p></dd>
 
 </dl></div>
     <div class="section level2">

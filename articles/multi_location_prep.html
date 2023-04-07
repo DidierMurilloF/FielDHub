@@ -386,8 +386,8 @@ this:</p>
 <span>  seed <span class="op">=</span> <span class="fl">2456</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <div class="section level4">
-<h4 id="details-on-the-inputs-entered-in-optimized_arrangement-above">Details on the inputs entered in
-<code>optimized_arrangement()</code> above<a class="anchor" aria-label="anchor" href="#details-on-the-inputs-entered-in-optimized_arrangement-above"></a>
+<h4 id="details-on-the-inputs-entered-in-multi_location_prep-above">Details on the inputs entered in <code>multi_location_prep()</code>
+above<a class="anchor" aria-label="anchor" href="#details-on-the-inputs-entered-in-multi_location_prep-above"></a>
 </h4>
 <p>The description for the inputs that we used to generate the
 design,</p>
@@ -419,13 +419,12 @@ randomizations.</li>
 <p>To print a summary of the information that is in the object
 <code>optim_multi_prep</code>, we can use the generic function
 <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>.</p>
-<p>The <code><a href="../reference/sparse_allocation.html">sparse_allocation()</a></code> function returns a list of 4
-objects, <code>designs</code>, <code>list_locs</code>,
-<code>allocation</code>, and <code>size_locations</code>. The object
-<code>designs</code> contains the randomization and information about
-the design parameters for each location, while <code>list_locs</code> is
-a list of data frames. Each data frame has two columns;
-<code>ENTRY</code> and <code>NAME</code> with the information to
+<p>The <code><a href="../reference/multi_location_prep.html">multi_location_prep()</a></code> function returns all the same
+objects as in <code><a href="../reference/partially_replicated.html">partially_replicated()</a></code> and in addition
+<code>list_locs</code>, <code>allocation</code>, and
+<code>size_locations</code>. The object <code>list_locs</code> is a list
+of data frames. Each data frame has three columns; <code>ENTRY</code>,
+<code>NAME</code> and <code>REPS</code> with the information to
 randomize to each environment. The object <code>allocation</code> is the
 binary allocation matrix of genotypes to locations, and
 <code>size_locations</code> is a data frame with a column for each
@@ -436,15 +435,15 @@ us print the first ten genotypes allocation.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">optim_multi_prep</span><span class="op">$</span><span class="va">allocation</span>, <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code>   LOC1 LOC2 LOC3 LOC4 LOC5
-1     2    1    1    1    2
+1     2    1    2    1    1
 2     1    2    1    1    2
-3     2    1    1    1    2
+3     1    1    1    2    2
 4     1    1    2    1    2
-5     1    1    2    2    1
-6     1    2    1    1    2
+5     1    2    1    2    1
+6     2    1    1    2    1
 7     2    1    2    1    1
 8     1    2    2    1    1
-9     1    1    2    1    2
+9     1    2    1    1    2
 10    2    2    1    1    1</code></pre>
 <p>Let us add two new columns to the allocation table. We can add the
 number of copies by genotype; it should be 7 for all of them. We can
@@ -488,13 +487,13 @@ Gen-1
 1
 </td>
 <td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
 2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
 </td>
 <td style="text-align:right;">
 7
@@ -534,16 +533,16 @@ Gen-2
 Gen-3
 </td>
 <td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
 2
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
 </td>
 <td style="text-align:right;">
 2
@@ -589,10 +588,10 @@ Gen-5
 1
 </td>
 <td style="text-align:right;">
-1
+2
 </td>
 <td style="text-align:right;">
-2
+1
 </td>
 <td style="text-align:right;">
 2
@@ -612,9 +611,6 @@ Gen-5
 Gen-6
 </td>
 <td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
 2
 </td>
 <td style="text-align:right;">
@@ -625,6 +621,9 @@ Gen-6
 </td>
 <td style="text-align:right;">
 2
+</td>
+<td style="text-align:right;">
+1
 </td>
 <td style="text-align:right;">
 7
@@ -693,10 +692,10 @@ Gen-9
 1
 </td>
 <td style="text-align:right;">
-1
+2
 </td>
 <td style="text-align:right;">
-2
+1
 </td>
 <td style="text-align:right;">
 1
@@ -739,104 +738,75 @@ Gen-10
 </tr>
 </tbody>
 </table>
-<p>We can manipulate the sparse_allocation object as any other list in
-R. For example, we can save the design randomizations to an object
-called <code>designs</code>, and then index based on location using the
-dollar sign operator. We can first display the design parameters for
-<code>LOC1</code> with the following code:</p>
+<p>We can manipulate the <code>optim_multi_prep</code> object as any
+other list in R. We can first display the design parameters for the
+randomizations with the following code:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">design_randomization</span> <span class="op">&lt;-</span> <span class="va">optim_multi_prep</span><span class="op">$</span><span class="va">designs</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">design_randomization</span><span class="op">$</span><span class="va">LOC1</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">optim_multi_prep</span><span class="op">)</span></span></code></pre></div>
 <p>which outputs:</p>
-<pre><code>Partially Replicated Design 
+<pre><code>Multi-Location Partially Replicated Design 
 
-Information on the design parameters: 
-List of 8
- $ min_distance           : num 4
- $ rows                   : num 19
- $ columns                : num 12
- $ treatments_with_reps   : int 63
- $ treatments_with_no_reps: int 90
- $ locations              : num 1
- $ planter                : chr "serpentine"
- $ seed                   : num 2456
+ Replications within location: 
+  LOCATION Replicated Unreplicated
+1     LOC1         63           90
+2     LOC2         63           90
+3     LOC3         63           90
+4     LOC4         63           90
+5     LOC5         63           90
+
+ Information on the design parameters: 
+List of 7
+ $ rows             : num 19
+ $ columns          : num 12
+ $ min_distance     : num [1:5] 4 4.12 4.12 4 4.12
+ $ incidence_in_rows: num [1:5] 6 8 3 2 3
+ $ locations        : num 5
+ $ planter          : chr "serpentine"
+ $ seed             : num 2456
 
  10 First observations of the data frame with the partially_replicated field book: 
    ID     EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 PrepExpt     LOC1 2023    1   1      1     41    41      G-41
-2   2 PrepExpt     LOC1 2023    2   1      2     43    43      G-43
-3   3 PrepExpt     LOC1 2023    3   1      3      0   101     G-101
-4   4 PrepExpt     LOC1 2023    4   1      4      0   117     G-117
-5   5 PrepExpt     LOC1 2023    5   1      5      3   151    CH-151
-6   6 PrepExpt     LOC1 2023    6   1      6      0   140     G-140
-7   7 PrepExpt     LOC1 2023    7   1      7     76   152    CH-152
-8   8 PrepExpt     LOC1 2023    8   1      8     52    52      G-52
-9   9 PrepExpt     LOC1 2023    9   1      9      0   119     G-119
-10 10 PrepExpt     LOC1 2023   10   1     10     77    77      G-77</code></pre>
-<p>And for environment 2 by changing the location to print to
-<code>LOC2</code>:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">design_randomization</span><span class="op">$</span><span class="va">LOC2</span><span class="op">)</span></span></code></pre></div>
-<p>which outputs:</p>
-<pre><code>Partially Replicated Design 
-
-Information on the design parameters: 
-List of 8
- $ min_distance           : num 4
- $ rows                   : num 19
- $ columns                : num 12
- $ treatments_with_reps   : int 63
- $ treatments_with_no_reps: int 90
- $ locations              : num 1
- $ planter                : chr "serpentine"
- $ seed                   : num 2456
-
- 10 First observations of the data frame with the partially_replicated field book: 
-   ID     EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 PrepExpt     LOC2 2023 1001   1      1     40    40      G-40
-2   2 PrepExpt     LOC2 2023 1002   1      2     46    46      G-46
-3   3 PrepExpt     LOC2 2023 1003   1      3      0   106     G-106
-4   4 PrepExpt     LOC2 2023 1004   1      4      0   109     G-109
-5   5 PrepExpt     LOC2 2023 1005   1      5      6   151    CH-151
-6   6 PrepExpt     LOC2 2023 1006   1      6      0   139     G-139
-7   7 PrepExpt     LOC2 2023 1007   1      7     76   152    CH-152
-8   8 PrepExpt     LOC2 2023 1008   1      8     61    61      G-61
-9   9 PrepExpt     LOC2 2023 1009   1      9      0   116     G-116
-10 10 PrepExpt     LOC2 2023 1010   1     10     78    78      G-78</code></pre>
+1   1 PrepExpt     LOC1 2023    1   1      1     46    46      G-46
+2   2 PrepExpt     LOC1 2023    2   1      2     30    30      G-30
+3   3 PrepExpt     LOC1 2023    3   1      3    118   118     G-118
+4   4 PrepExpt     LOC1 2023    4   1      4      0    62      G-62
+5   5 PrepExpt     LOC1 2023    5   1      5     61    61      G-61
+6   6 PrepExpt     LOC1 2023    6   1      6      0    70      G-70
+7   7 PrepExpt     LOC1 2023    7   1      7     65    65      G-65
+8   8 PrepExpt     LOC1 2023    8   1      8      0   111     G-111
+9   9 PrepExpt     LOC1 2023    9   1      9     15    15      G-15
+10 10 PrepExpt     LOC1 2023   10   1     10    134   134     G-134</code></pre>
 </div>
 <div class="section level3">
 <h3 id="access-to-optim_multi_prep-output">Access to <code>optim_multi_prep</code> output<a class="anchor" aria-label="anchor" href="#access-to-optim_multi_prep-output"></a>
 </h3>
-<p>The object <code>designs</code> we saved
-<code>optim_multi_prep$designs</code> to is a list consisting of all the
-information displayed in the output tabs in the FielDHub app: design
-information, plot layout, plot numbering, entries list, and field book,
-indexed by each location in the experiment. These are accessible by the
-<code>$</code> operator, i.e. <code>designs$LOC1$layoutRandom</code> or
-<code>designs$LOC1$fieldBook</code> for <code>LOC1</code>, etc.</p>
-<p><code>designs$LOC1$fieldBook</code> is a data frame containing
+<p>All objects are accessible by the <code>$</code> operator,
+i.e. <code>optim_multi_prep$layoutRandom[[1]]</code> for
+<code>LOC1</code>, <code>optim_multi_prep$fieldBook</code> for the
+<code>fieldBook</code> with all locations.</p>
+<p><code>optim_multi_prep$fieldBook</code> is a data frame containing
 information about every plot in the field, with information about the
 location of the plot and the treatment in each plot. As seen in the
 output below, the field book has columns for <code>ID</code>,
 <code>EXPT</code>, <code>LOCATION</code>, <code>YEAR</code>,
 <code>PLOT</code>, <code>ROW</code>, <code>COLUMN</code>,
 <code>CHECKS</code>, <code>ENTRY</code>, and <code>TREATMENT</code>.</p>
-<p>Let us see the first 10 rows of the field book for the first location
-in this experiment.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">field_book</span> <span class="op">&lt;-</span> <span class="va">design_randomization</span><span class="op">$</span><span class="va">LOC1</span><span class="op">$</span><span class="va">fieldBook</span></span>
+<p>Let us see the first 10 rows of the field book for this
+experiment.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">field_book</span> <span class="op">&lt;-</span> <span class="va">optim_multi_prep</span><span class="op">$</span><span class="va">fieldBook</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">field_book</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
 <pre><code>   ID     EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 PrepExpt     LOC1 2023    1   1      1     41    41      G-41
-2   2 PrepExpt     LOC1 2023    2   1      2     43    43      G-43
-3   3 PrepExpt     LOC1 2023    3   1      3      0   101     G-101
-4   4 PrepExpt     LOC1 2023    4   1      4      0   117     G-117
-5   5 PrepExpt     LOC1 2023    5   1      5      3   151    CH-151
-6   6 PrepExpt     LOC1 2023    6   1      6      0   140     G-140
-7   7 PrepExpt     LOC1 2023    7   1      7     76   152    CH-152
-8   8 PrepExpt     LOC1 2023    8   1      8     52    52      G-52
-9   9 PrepExpt     LOC1 2023    9   1      9      0   119     G-119
-10 10 PrepExpt     LOC1 2023   10   1     10     77    77      G-77</code></pre>
+1   1 PrepExpt     LOC1 2023    1   1      1     46    46      G-46
+2   2 PrepExpt     LOC1 2023    2   1      2     30    30      G-30
+3   3 PrepExpt     LOC1 2023    3   1      3    118   118     G-118
+4   4 PrepExpt     LOC1 2023    4   1      4      0    62      G-62
+5   5 PrepExpt     LOC1 2023    5   1      5     61    61      G-61
+6   6 PrepExpt     LOC1 2023    6   1      6      0    70      G-70
+7   7 PrepExpt     LOC1 2023    7   1      7     65    65      G-65
+8   8 PrepExpt     LOC1 2023    8   1      8      0   111     G-111
+9   9 PrepExpt     LOC1 2023    9   1      9     15    15      G-15
+10 10 PrepExpt     LOC1 2023   10   1     10    134   134     G-134</code></pre>
 </div>
 <div class="section level3">
 <h3 id="plot-field-layout">Plot field layout<a class="anchor" aria-label="anchor" href="#plot-field-layout"></a>
@@ -849,9 +819,9 @@ sign operator as well.</p>
 <div class="section level4">
 <h4 id="field-layout-for-location-1">Field Layout for Location 1<a class="anchor" aria-label="anchor" href="#field-layout-for-location-1"></a>
 </h4>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">design_randomization</span><span class="op">$</span><span class="va">LOC1</span><span class="op">)</span></span></code></pre></div>
-<p><img src="multi_location_prep_files/figure-html/unnamed-chunk-18-1.png" width="691.2" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">optim_multi_prep</span>, l <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<p><img src="multi_location_prep_files/figure-html/unnamed-chunk-16-1.png" width="691.2" style="display: block; margin: auto;"></p>
 <p>In the figure above, green plots contain replicated entries, and gray
 plots contain entries that only appear once.</p>
 </div>
@@ -859,9 +829,9 @@ plots contain entries that only appear once.</p>
 <h4 id="field-layout-for-location-5">Field Layout for Location 5<a class="anchor" aria-label="anchor" href="#field-layout-for-location-5"></a>
 </h4>
 <p>Also, for example the location five:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">design_randomization</span><span class="op">$</span><span class="va">LOC5</span><span class="op">)</span></span></code></pre></div>
-<p><img src="multi_location_prep_files/figure-html/unnamed-chunk-19-1.png" width="691.2" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">optim_multi_prep</span>, l <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code></pre></div>
+<p><img src="multi_location_prep_files/figure-html/unnamed-chunk-17-1.png" width="691.2" style="display: block; margin: auto;"></p>
 <p><br><br><br></p>
 </div>
 </div>
