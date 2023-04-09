@@ -242,12 +242,12 @@ sparse_example <- sparse_allocation(
 To print a summary of the information that is in the object `sparse_example`, we can use the generic 
 function `print()`. 
 
-The `sparse_allocation()` function returns a list of 4 objects, `designs`, `list_locs`, `allocation`, 
-and `size_locations`. The object `designs` contains the randomization and information about the design 
-parameters for each location, while `list_locs` is a list of data frames. Each data frame has two columns;
-`ENTRY` and `NAME` with the information to randomize to each environment. The object `allocation` is the 
-binary allocation matrix of genotypes to locations, and `size_locations` is a data frame with a column for 
-each location and a row indicating the size of the location (number of field plots). 
+The `sparse_allocation()` function returns a list of objects, includes all the outputs from the function
+diagonal_arrangement() and in addition `list_locs`, `allocation`, and `size_locations`. The `list_locs` object 
+is a list of data frames. Each data frame has two columns; `ENTRY` and `NAME` with the information to randomize 
+to each environment. The object `allocation` is the binary allocation matrix of genotypes to locations, 
+and `size_locations` is a data frame with a column for  each location and a row indicating the size of 
+the location (number of field plots). 
 
 For example, we can display the `allocation` object. Let us print the first ten genotypes allocation.
 
@@ -259,42 +259,28 @@ print(head(sparse_example$allocation, 10))
 print(head(sparse_example$allocation, 10))
 ```
 
-We can manipulate the sparse_allocation object as any other list in R. For example, we can save the 
-design randomizations to an object called `designs`, and then index based on location  using the dollar
-sign operator. We can first display the design parameters for `LOC1` with the following code:
+We can manipulate the sparse_allocation object as any other list in R. For example, we can print the design 
+information as following:
 
 ```{r, echo=TRUE, eval=FALSE}
-design_randomization <- sparse_example$designs
-print(design_randomization$LOC1)
+print(sparse_example)
 ```
 
 which outputs:
 
 ```{r, echo=FALSE, eval=TRUE}
-design_randomization <- sparse_example$designs
-print(design_randomization$LOC1)
-```
-
-And for `LOC2` by changing the location to print to `LOC2`:
-
-```{r, echo=TRUE, eval=FALSE}
-print(design_randomization$LOC2)
-```
-
-which outputs:
-
-```{r, echo=FALSE, eval=TRUE}
-print(design_randomization$LOC2)
+print(sparse_example)
 ```
 
 ### Access to `sparse_example` object
 
-The object `design_randomization` we saved `sparse_example$designs` to is a list consisting of all 
-the information displayed in the output tabs in the FielDHub app: design information, plot layout, 
+The object `sparse_example` is a list consisting of all  the information displayed in the output tabs in 
+the FielDHub app: design information, plot layout, 
 plot numbering, entries list, and field book, indexed by each location in the experiment. These are 
-accessible by  the `$` operator, i.e. `designs$LOC1$layoutRandom` or `designs$LOC1$fieldBook` for `LOC1`, etc. 
+accessible by  the `$` operator, i.e. `designs$layoutRandom[[1]]` for `LOC1` or `designs$fieldBook` for 
+the whole field book.
 
-`designs$LOC1$fieldBook` is a data frame containing information about every plot in the field, with 
+`designs$fieldBook` is a data frame containing information about every plot in the field, with 
 information about the location of the plot and the treatment in each plot. As seen in the output below, 
 the field book has columns for `ID`, `EXPT`, `LOCATION`, `YEAR`, `PLOT`, `ROW`, `COLUMN`, `CHECKS`, 
 `ENTRY`, and `TREATMENT`.
@@ -302,12 +288,12 @@ the field book has columns for `ID`, `EXPT`, `LOCATION`, `YEAR`, `PLOT`, `ROW`, 
 Let us see the first 10 rows of the field book for the first location in this experiment.
 
 ```{r, echo=TRUE, eval=FALSE}
-field_book <- design_randomization$LOC1$fieldBook
+field_book <- sparse_example$fieldBook
 head(field_book, 10)
 ```
 
 ```{r, echo=FALSE, eval=TRUE}
-field_book <- design_randomization$LOC1$fieldBook
+field_book <- sparse_example$fieldBook
 head(field_book, 10)
 ```
 
@@ -319,7 +305,7 @@ For plotting the layout in function of the coordinates `ROW` and `COLUMN` in the
 can use the generic function `plot()` as follows,
 
 ```{r, fig.align='center', fig.width=7.2, fig.height=5}
-plot(design_randomization$LOC1)
+plot(sparse_example, l = 1)
 ```
 
 The above plot is for `LOC1`. We can plot any location in the experiment, like location 2 in this example:
@@ -327,7 +313,7 @@ The above plot is for `LOC1`. We can plot any location in the experiment, like l
 #### Plot field layout Location 2
 
 ```{r, fig.align='center', fig.width=7.2, fig.height=5}
-plot(design_randomization$LOC2)
+plot(sparse_example, l = 2)
 ```
 
 The figure above shows a map of an experiment randomized as an unreplicated arrangement design. 

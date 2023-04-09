@@ -28,34 +28,34 @@ M_data_r <- rbind(m2_r, m1_r)
 M_data_c <- cbind(m2_c, m1_c)
 test_that("automatically_cuts is a list of vectors", {
   expect_equal(automatically_cuts(data = M_data_r, planter_mov = "serpentine", 
-                                  way = "By Row", dim_data = c(45, 45)),
+                                  stacked = "By Row", dim_data = c(45, 45)),
                list(bks = list(1:5, 6:10), cuts = c(5,10)))
   expect_equal(automatically_cuts(data = M_data_r, planter_mov = "cartesian", 
-                                  way = "By Row", dim_data = c(45, 45)),
+                                  stacked = "By Row", dim_data = c(45, 45)),
                list(bks = list(1:5, 6:10), cuts = c(5,10)))
   expect_equal(automatically_cuts(data = M_data_r, planter_mov = "serpentine", 
-                                  way = "By Row", dim_data = c(45, 25, 20)),
+                                  stacked = "By Row", dim_data = c(45, 25, 20)),
                list(bks = list(1:5, 6:8, 9:10), cuts = c(5,8,10)))
   expect_equal(automatically_cuts(data = M_data_r, planter_mov = "cartesian", 
-                                  way = "By Row", dim_data = c(45, 25, 20)),
+                                  stacked = "By Row", dim_data = c(45, 25, 20)),
                list(bks = list(1:5, 6:8, 9:10), cuts = c(5,8,10)))
   expect_equal(automatically_cuts(data = M_data_r, planter_mov = "serpentine", 
-                                  way = "By Row", dim_data = c(45, 27, 18)),
+                                  stacked = "By Row", dim_data = c(45, 27, 18)),
                list(bks = list(1:5, 6:8, 9:10), cuts = c(5,8,10)))
   expect_equal(automatically_cuts(data = M_data_r, planter_mov = "cartesian", 
-                                  way = "By Row", dim_data = c(45, 27, 18)),
+                                  stacked = "By Row", dim_data = c(45, 27, 18)),
                list(bks = list(1:5, 6:8, 9:10), cuts = c(5,8,10)))
   expect_equal(automatically_cuts(data = M_data_c, planter_mov = "serpentine", 
-                                  way = "By Column", dim_data = c(45, 45)),
+                                  stacked = "By Column", dim_data = c(45, 45)),
                c(5,10))
   expect_equal(automatically_cuts(data = M_data_c, planter_mov = "cartesian", 
-                                  way = "By Column", dim_data = c(45, 45)),
+                                  stacked = "By Column", dim_data = c(45, 45)),
                c(5,10))
   expect_equal(automatically_cuts(data = M_data_c, planter_mov = "serpentine", 
-                                  way = "By Column", dim_data = c(45, 27, 18)),
+                                  stacked = "By Column", dim_data = c(45, 27, 18)),
                c(5,8,10))
   expect_equal(automatically_cuts(data = M_data_c, planter_mov = "cartesian", 
-                                  way = "By Column", dim_data = c(45, 27, 18)),
+                                  stacked = "By Column", dim_data = c(45, 27, 18)),
                c(5,8,10))
 })
 

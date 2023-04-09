@@ -759,17 +759,18 @@ mod_diagonal_multiple_server <- function(id) {
           data_dim_each_block <- available_percent_multi()$data_dim_each_block
           my_row_sets <- automatically_cuts(data = map_checks, 
                                             planter_mov = multiple_inputs()$planter_mov,
-                                            way = "By Row", 
+                                            stacked = "By Row", 
                                             dim_data = data_dim_each_block)[[1]]
           if(is.null(my_row_sets)) return(NULL)
           n_blocks <- length(my_row_sets)
         }else if (multiple_inputs()$stacked == "By Column") {
           req(available_percent_multi()$data_dim_each_block)
           data_dim_each_block <- available_percent_multi()$data_dim_each_block
-          cuts_by_c <- automatically_cuts(data = map_checks, 
-                                          planter_mov = multiple_inputs()$planter_mov, 
-                                          way = "By Column",
-                                          dim_data = data_dim_each_block) 
+          cuts_by_c <- automatically_cuts(
+            data = map_checks, 
+            planter_mov = multiple_inputs()$planter_mov, 
+            stacked = "By Column",
+            dim_data = data_dim_each_block) 
           if(is.null(cuts_by_c)) return(NULL)
           n_blocks <- length(cuts_by_c)
           m = diff(cuts_by_c)
@@ -904,7 +905,7 @@ mod_diagonal_multiple_server <- function(id) {
           Checks = checksEntries
         )
         
-      }else if (multiple_inputs()$stacked == "By Column") {
+      } else if (multiple_inputs()$stacked == "By Column") {
         map_letters <- rand_lines()[[1]]$w_map_letter
         data_dim_each_block <- available_percent_multi()$data_dim_each_block
         Name_expt <- multiple_inputs()$expt_name
@@ -938,17 +939,19 @@ mod_diagonal_multiple_server <- function(id) {
       if("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE
       if (multiple_inputs()$stacked == "By Row") { 
         data_dim_each_block <- available_percent_multi()$data_dim_each_block 
-        my_row_sets <- automatically_cuts(data = w_map, 
-                                          planter_mov = multiple_inputs()$planter_mov,
-                                          way = "By Row", 
-                                          dim_data = data_dim_each_block)[[1]]
+        my_row_sets <- automatically_cuts(
+            data = w_map, 
+            planter_mov = multiple_inputs()$planter_mov,
+            stacked = "By Row", 
+            dim_data = data_dim_each_block)[[1]]
         blocks <- length(my_row_sets) 
       }else { 
         data_dim_each_block <- available_percent_multi()$data_dim_each_block 
-        cuts_by_c <- automatically_cuts(data = w_map,
-                                        planter_mov = NULL,
-                                        way = "By Column",
-                                        dim_data = data_dim_each_block)  
+        cuts_by_c <- automatically_cuts(
+            data = w_map,
+            planter_mov = NULL,
+            stacked = "By Column",
+            dim_data = data_dim_each_block)  
         blocks <- length(cuts_by_c) 
       }  
       Name_expt <- multiple_inputs()$expt_name

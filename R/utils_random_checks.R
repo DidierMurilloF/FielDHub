@@ -34,22 +34,22 @@ random_checks <- function(dt = NULL, d_checks = NULL, p = NULL, percent = NULL,
   multi <- kindExpt == "DBUDC"
   
   if (multi == TRUE) {
-    # req(data_dim_each_block)
-    # req(data)
     if (stacked == "By Row"){
       data_dim_each_block <- data_dim_each_block
-      my_row_sets <- automatically_cuts(data = w_map, 
-                                        planter_mov = planter_mov,
-                                        way = "By Row",
-                                        dim_data = data_dim_each_block)[[1]]
+      my_row_sets <- automatically_cuts(
+        data = w_map, 
+        planter_mov = planter_mov,
+        stacked = "By Row",
+        dim_data = data_dim_each_block)[[1]]
       if(is.null(my_row_sets)) return(NULL)
       blocks <- length(my_row_sets)
     }else {
       data_dim_each_block <- data_dim_each_block
-      cuts_by_c <- automatically_cuts(data = w_map, 
-                                      planter_mov = planter_mov, 
-                                      way = "By Column",
-                                      dim_data = data_dim_each_block)
+      cuts_by_c <- automatically_cuts(
+        data = w_map, 
+        planter_mov = planter_mov, 
+        stacked = "By Column",
+        dim_data = data_dim_each_block)
       if(is.null(cuts_by_c)) return(NULL)
       blocks <- length(cuts_by_c)
       m = diff(cuts_by_c)

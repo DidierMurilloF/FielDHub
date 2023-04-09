@@ -276,7 +276,22 @@ print.FielDHub <- function(x, n=10, ...){
         "First observations of the data frame with the diagonal_arrangement field book:",
         "\n")
     print(head(x$fieldBook, n=nhead_print, ...))
-  }else if (x$infoDesign$id_design == 16) {
+  } else if (x$infoDesign$id_design == "Sparse") {
+    cat("Sparse Allocation: Un-replicated Diagonal Arrangement Design", "\n\n")
+    cat("Information on the design parameters:", "\n")
+    len <- length(x$infoDesign)
+    str(x$infoDesign[1:(len-1)])
+    # str(x$infoDesign)
+    #---------------------------------------------------------------------
+    # Head
+    #---------------------------------------------------------------------
+    nr <- nrow(x$fieldBook)
+    nhead_print <- infoPrint(n, nr)
+    cat("\n",  nhead_print,
+        "First observations of the data frame with the diagonal_arrangement field book:",
+        "\n")
+    print(head(x$fieldBook, n=nhead_print, ...))
+  } else if (x$infoDesign$id_design == 16) {
     cat("Un-replicated Optimized Arrangement Design", "\n\n")
     cat("Information on the design parameters:", "\n")
     len <- length(x$infoDesign)

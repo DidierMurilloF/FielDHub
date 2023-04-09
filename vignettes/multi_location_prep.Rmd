@@ -24,17 +24,26 @@ library(knitr)
 library(kableExtra)
 ```
 
-This vignette shows how to generate an **optimized multi-location partially replicated design** 
+This vignette shows how to generate an **optimized multi-location partially replicated (p-rep) design** 
 using both the FielDHub Shiny App and the scripting function `multi_location_prep()` from 
 the `FielDHub` R package.
 
 ## Overview
 
-Partially replicated designs are frequently used in initial generation field trials. This design type involves replicating a portion of the entries, while the remaining entries only appear once in the experiment. The optimized partially replicated (p-rep) design utilizes a genotype allocation matrix to determine the distribution of replicated and non-replicated entries across multiple locations, employing the principles of incomplete block designs (IBD).
+Partially replicated (p-rep) designs are frequently used in early-generation plant breeding field trials. 
+This design typically involves repeating some entries/breeding lines, while the remaining entries only 
+appear once in the experiment. In `FielDHub`, the optimized p-rep design is a variant of the p-rep design 
+that employs the principles of incomplete block designs (IBD) to determine the distribution of replicated 
+and non-replicated treatments across multiple locations. 
 
 ## Use case
 
-Suppose there is a plant breeding field trial with 150 entries to be tested across five environments, where up to seven replications of each entry are allowed. Additionally, the project includes three checks; each replicated six times. We can generate an optimized multi-location partially replicated design using these parameters. This strategy guarantees that all treatments are present in all environments but in different amounts of replications. We can generate this design using the FielDHub Shiny app and the FielDHub `multi_location_prep()` standalone function in R.
+Suppose there is a plant breeding field trial with 150 entries to be tested across five environments, 
+where up to seven replications of each entry are allowed. Additionally, the project includes three 
+checks; each replicated six times. We can generate an optimized multi-location partially replicated 
+design using these parameters. This strategy guarantees that all treatments are present in all 
+environments but in different amounts of replications. We can generate this design using the 
+FielDHub Shiny app and the FielDHub `multi_location_prep()` standalone function in R.
 
 ## Running the Shiny App
 
