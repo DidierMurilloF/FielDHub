@@ -505,9 +505,9 @@ diagonal_arrangement <- function(
             my_data_VLOOKUP <- getData$data_entry[[sites]]
             COLNAMES_DATA <- colnames(my_data_VLOOKUP)
             if (Option_NCD == TRUE) {
-                if(kindExpt != "DBUDC") {
+                if (kindExpt != "DBUDC") {
                 Entry_Fillers <- data.frame(list(0, "Filler"))
-                }else {
+                } else {
                 Entry_Fillers <- data.frame(list(0, "Filler", "NA"))
                 }
                 colnames(Entry_Fillers) <- COLNAMES_DATA
@@ -718,15 +718,7 @@ unrep_data_parameters <- function(
                         checksEntries <- checks
                         checks <- length(checks)
                     } 
-                } else {
-                    if (length(checks) == 1 && checks >= 1) {
-                        checksEntries <- 1:checks
-                        checks <- checks
-                    } else if (length(checks) > 1) {
-                        checksEntries <- checks
-                        checks <- length(checks)
-                    }
-                }
+                } 
             } else base::stop("'diagonal_arrangement()' requires input checks to be an integer greater than 0.")
             if (any(diff(checksEntries) > 1) || any(diff(checksEntries) < 0)) {
                 base::stop(paste("'diagonal_arrangement()' requires input checks to be a continuous range."))
@@ -752,6 +744,19 @@ unrep_data_parameters <- function(
                 }
             }
         } else {
+            # Check if the data entry is a data frame
+            if (!is.null(checks) && is.numeric(checks) && all(checks %% 1 == 0)) {
+                if (length(checks) == 1 && checks >= 1) {
+                  checksEntries <- 1:checks
+                  checks <- checks
+                } else if (length(checks) > 1) {
+                  checksEntries <- checks
+                  checks <- length(checks)
+                }
+            } else base::stop("'diagonal_arrangement()' requires input checks to be an integer greater than 0.")
+            if (any(diff(checksEntries) > 1) || any(diff(checksEntries) < 0)) {
+              base::stop(paste("'diagonal_arrangement()' requires input checks to be a continuous range."))
+            }
             if (kindExpt != "DBUDC") {
                 NAME <- c(paste0(rep("Check-", checks), 1:checks),
                         paste0(rep("Gen-", lines), (checksEntries[checks] + 1):(checksEntries[1] + lines + checks - 1)))
@@ -762,10 +767,10 @@ unrep_data_parameters <- function(
                 colnames(data_entry_UP) <- c("ENTRY", "NAME")
                 if (nrow(data_entry_UP) != (lines + checks)) base::stop("nrows data != of lines + checks")
             } else if (kindExpt == "DBUDC") {
-                if(is.null(blocks)) {
+                if (is.null(blocks)) {
                     stop("'diagonal_arrangement()' requires blocks when kindExpt = 'DBUDC' and data is null.")
                 } 
-                if(sum(blocks) != lines) {
+                if (sum(blocks) != lines) {
                     stop("In 'diagonal_arrangement()' number of lines and total lines in 'blocks' do not match.")
                 }
                 NAME <- c(paste0(rep("Check-", checks), 1:checks),

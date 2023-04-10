@@ -90,8 +90,10 @@ List of 11
  $ columns       : num 20
  $ treatments    : num [1:3] 100 100 80
  $ checks        : int 4
- $ entry_checks  : int [1:4] 1 2 3 4
- $ rep_checks    : num [1:4] 11 9 9 11
+ $ entry_checks  :List of 1
+  ..$ : int [1:4] 1 2 3 4
+ $ rep_checks    :List of 1
+  ..$ : num [1:4] 10 10 10 10
  $ locations     : num 1
  $ planter       : chr "serpentine"
  $ percent_checks: chr "12.5%"
@@ -100,16 +102,16 @@ List of 11
 
  10 First observations of the data frame with the diagonal_arrangement field book: 
    ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 Expt1        1 2022  101   1      1      0    51    Gen-51
-2   2 Expt1        1 2022  102   1      2      0    67    Gen-67
-3   3 Expt1        1 2022  103   1      3      0    50    Gen-50
-4   4 Expt1        1 2022  104   1      4      0    29    Gen-29
-5   5 Expt1        1 2022  105   1      5      0    39    Gen-39
-6   6 Expt1        1 2022  106   1      6      0    92    Gen-92
-7   7 Expt1        1 2022  107   1      7      1     1   Check-1
-8   8 Expt1        1 2022  108   1      8      0    58    Gen-58
-9   9 Expt1        1 2022  109   1      9      0    23    Gen-23
-10 10 Expt1        1 2022  110   1     10      0    54    Gen-54
+1   1 Expt1        1 2023  101   1      1      0    42    Gen-42
+2   2 Expt1        1 2023  102   1      2      0    23    Gen-23
+3   3 Expt1        1 2023  103   1      3      0    10    Gen-10
+4   4 Expt1        1 2023  104   1      4      0    45    Gen-45
+5   5 Expt1        1 2023  105   1      5      0    51    Gen-51
+6   6 Expt1        1 2023  106   1      6      0    13    Gen-13
+7   7 Expt1        1 2023  107   1      7      3     3   Check-3
+8   8 Expt1        1 2023  108   1      8      0    43    Gen-43
+9   9 Expt1        1 2023  109   1      9      0    84    Gen-84
+10 10 Expt1        1 2023  110   1     10      0   102   Gen-102
 ```
 
 First 12 rows of the fieldbook,
@@ -117,18 +119,18 @@ First 12 rows of the fieldbook,
 ``` r
 head(diagonal$fieldBook, 12)
    ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 Expt1        1 2022  101   1      1      0    51    Gen-51
-2   2 Expt1        1 2022  102   1      2      0    67    Gen-67
-3   3 Expt1        1 2022  103   1      3      0    50    Gen-50
-4   4 Expt1        1 2022  104   1      4      0    29    Gen-29
-5   5 Expt1        1 2022  105   1      5      0    39    Gen-39
-6   6 Expt1        1 2022  106   1      6      0    92    Gen-92
-7   7 Expt1        1 2022  107   1      7      1     1   Check-1
-8   8 Expt1        1 2022  108   1      8      0    58    Gen-58
-9   9 Expt1        1 2022  109   1      9      0    23    Gen-23
-10 10 Expt1        1 2022  110   1     10      0    54    Gen-54
-11 11 Expt1        1 2022  111   1     11      0    55    Gen-55
-12 12 Expt1        1 2022  112   1     12      0     9     Gen-9
+1   1 Expt1        1 2023  101   1      1      0    42    Gen-42
+2   2 Expt1        1 2023  102   1      2      0    23    Gen-23
+3   3 Expt1        1 2023  103   1      3      0    10    Gen-10
+4   4 Expt1        1 2023  104   1      4      0    45    Gen-45
+5   5 Expt1        1 2023  105   1      5      0    51    Gen-51
+6   6 Expt1        1 2023  106   1      6      0    13    Gen-13
+7   7 Expt1        1 2023  107   1      7      3     3   Check-3
+8   8 Expt1        1 2023  108   1      8      0    43    Gen-43
+9   9 Expt1        1 2023  109   1      9      0    84    Gen-84
+10 10 Expt1        1 2023  110   1     10      0   102   Gen-102
+11 11 Expt1        1 2023  111   1     11      0    89    Gen-89
+12 12 Expt1        1 2023  112   1     12      0    75    Gen-75
 ```
 
 Users can plot the layout design from `diagonal_arrangement()` using the
@@ -140,11 +142,11 @@ plot(diagonal)
 
 <img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" style="display: block; margin: auto;" />
 
-In the figure, gray, pink, and salmon shade the blocks of unreplicated
+In the figure, salmon, green, and blue shade the blocks of unreplicated
 experiments, while distinctively colored check plots are replicated
 throughout the field in a systematic diagonal arrangement.
 
-The main difference between using the FielDHub Shiny app and using the
+The main difference between using the `FielDHub` Shiny app and using the
 standalone function `diagonal_arrangement()` is that the standalone
 function will allocate filler only if it is necessary, while in Shiny
 App, users can customize the number of fillers if it is needed. In cases
@@ -199,28 +201,33 @@ follows,
 print(pREP)
 Partially Replicated Design 
 
-Information on the design parameters: 
+
+ Replications within location: 
+  LOCATION Replicated Unreplicated
+1    FARGO         75          138
+
+ Information on the design parameters: 
 List of 7
- $ rows                   : num 16
- $ columns                : num 18
- $ treatments_with_reps   : int 75
- $ treatments_with_no_reps: int 138
- $ locations              : num 1
- $ planter                : chr "serpentine"
- $ seed                   : num 77
+ $ rows             : num 16
+ $ columns          : num 18
+ $ min_distance     : num 8.06
+ $ incidence_in_rows: num 1
+ $ locations        : num 1
+ $ planter          : chr "serpentine"
+ $ seed             : num 77
 
  10 First observations of the data frame with the partially_replicated field book: 
    ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 ExptA    FARGO 2022    1   1      1      0    80       G80
-2   2 ExptA    FARGO 2022    2   1      2     49    49       G49
-3   3 ExptA    FARGO 2022    3   1      3     15    15       G15
-4   4 ExptA    FARGO 2022    4   1      4     44    44       G44
-5   5 ExptA    FARGO 2022    5   1      5      0   185      G185
-6   6 ExptA    FARGO 2022    6   1      6      9     9        G9
-7   7 ExptA    FARGO 2022    7   1      7      0   133      G133
-8   8 ExptA    FARGO 2022    8   1      8     58    58       G58
-9   9 ExptA    FARGO 2022    9   1      9      4     4        G4
-10 10 ExptA    FARGO 2022   10   1     10      0   113      G113
+1   1 ExptA    FARGO 2023    1   1      1     24    24       G24
+2   2 ExptA    FARGO 2023    2   1      2     12    12       G12
+3   3 ExptA    FARGO 2023    3   1      3     72    72       G72
+4   4 ExptA    FARGO 2023    4   1      4      0   172      G172
+5   5 ExptA    FARGO 2023    5   1      5     16    16       G16
+6   6 ExptA    FARGO 2023    6   1      6     67    67       G67
+7   7 ExptA    FARGO 2023    7   1      7     55    55       G55
+8   8 ExptA    FARGO 2023    8   1      8     51    51       G51
+9   9 ExptA    FARGO 2023    9   1      9     46    46       G46
+10 10 ExptA    FARGO 2023   10   1     10      8     8        G8
 ```
 
 First 12 rows of the fieldbook,
@@ -228,18 +235,18 @@ First 12 rows of the fieldbook,
 ``` r
 head(pREP$fieldBook, 12)
    ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 ExptA    FARGO 2022    1   1      1      0    80       G80
-2   2 ExptA    FARGO 2022    2   1      2     49    49       G49
-3   3 ExptA    FARGO 2022    3   1      3     15    15       G15
-4   4 ExptA    FARGO 2022    4   1      4     44    44       G44
-5   5 ExptA    FARGO 2022    5   1      5      0   185      G185
-6   6 ExptA    FARGO 2022    6   1      6      9     9        G9
-7   7 ExptA    FARGO 2022    7   1      7      0   133      G133
-8   8 ExptA    FARGO 2022    8   1      8     58    58       G58
-9   9 ExptA    FARGO 2022    9   1      9      4     4        G4
-10 10 ExptA    FARGO 2022   10   1     10      0   113      G113
-11 11 ExptA    FARGO 2022   11   1     11      0   190      G190
-12 12 ExptA    FARGO 2022   12   1     12      0   148      G148
+1   1 ExptA    FARGO 2023    1   1      1     24    24       G24
+2   2 ExptA    FARGO 2023    2   1      2     12    12       G12
+3   3 ExptA    FARGO 2023    3   1      3     72    72       G72
+4   4 ExptA    FARGO 2023    4   1      4      0   172      G172
+5   5 ExptA    FARGO 2023    5   1      5     16    16       G16
+6   6 ExptA    FARGO 2023    6   1      6     67    67       G67
+7   7 ExptA    FARGO 2023    7   1      7     55    55       G55
+8   8 ExptA    FARGO 2023    8   1      8     51    51       G51
+9   9 ExptA    FARGO 2023    9   1      9     46    46       G46
+10 10 ExptA    FARGO 2023   10   1     10      8     8        G8
+11 11 ExptA    FARGO 2023   11   1     11      0   185      G185
+12 12 ExptA    FARGO 2023   12   1     12     64    64       G64
 ```
 
 Users can plot the layout design from `partially_replicated()` using the

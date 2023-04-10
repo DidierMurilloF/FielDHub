@@ -1,6 +1,14 @@
 ---
 title: "Sparse Allocation"
-output: rmarkdown::html_vignette
+author: 
+  - name: Didier Murillo Florez^1^, Matthew Seefeldt
+    affiliation: 
+    - ^1^North Dakota Agricultural Experiment Station, North Dakota State University, USA.
+output:
+  html_document:
+    css: style.css
+    toc: true
+bibliography: references.bib
 vignette: >
   %\VignetteIndexEntry{Sparse Allocation}
   %\VignetteEngine{knitr::rmarkdown}
@@ -33,14 +41,28 @@ R package.
 ## Overview
 
 Sparse allocation is a valuable strategy in plant breeding experiments, as it allows researchers to 
-evaluate a large number of treatments over multiple locations in a single experiment. 
-Sparse allocation can increase efficiency and reduce the number of experimental units required, 
-making it a cost-effective option.
+evaluate a large number of treatments over multiple locations in a single experiment. Sparse allocation 
+can increase efficiency and reduce the number of experimental units required, making it a cost-effective 
+option. One standard method for implementing sparse allocation in plant breeding experiments is 
+incomplete block designs (IBD) [@EdmondsonIBDs]. 
 
-One standard method for implementing sparse allocation in plant breeding experiments is 
-incomplete block designs (IBD). Sparse allocation using an incomplete block design is a 
-powerful tool in plant breeding experiments that can increase efficiency, reduce costs, 
-and provide valuable insights into the performance of treatments across multiple locations. 
+The following key points summarize the advantages and disadvantages of sparse 
+allocation [@MontesinosLopezSparse]:
+
+**Increased efficiency**: By using sparse allocation, breeders can evaluate a large number of genotypes or 
+treatments in a single experiment across multiple environments, which can accelerate the breeding program 
+and reduce the time and resources needed for evaluation.
+
+**Selection intensity**: The large number of genotypes or treatments evaluated in sparse allocation 
+experiments can increase the genetic diversity in the breeding program and increase the chances 
+of identifying superior genotypes or treatments.
+
+**Cost-effective**: Sparse allocation experiments are generally less expensive compared to fully 
+replicated experiments since fewer experimental units are needed.
+
+**Less accurate predictions**: The limited number of experimental units means that the estimates 
+of treatment effects are less precise compared to fully replicated designs. However, an increase 
+in selection intensity may compensate for the loss of accuracy (Trade off problem).
 
 FielDHub includes a function to run the sparse allocation strategy and the multi-location 
 randomization, as well as an interface for creating a sparse allocation design on the 
@@ -317,9 +339,7 @@ plot(sparse_example, l = 2)
 ```
 
 The figure above shows a map of an experiment randomized as an unreplicated arrangement design. 
-The salmon plots represent the unreplicated treatments, while the yellow-boxed colored check plots are 
+The blue plots represent the unreplicated treatments, while the yellow-boxed colored check plots are 
 replicated throughout the field in a systematic diagonal arrangement. The red plots with 0s are are fillers. 
 
-<br>
-<br>
-<br>
+# References

@@ -112,7 +112,7 @@ Users can plot the layout design from `diagonal_arrangement()` using the functio
 plot(diagonal)
 ```
 
-In the figure, gray, pink, and salmon shade the blocks of unreplicated experiments, while distinctively colored check plots are replicated throughout the field in a systematic diagonal arrangement.
+In the figure, salmon, green, and blue shade the blocks of unreplicated experiments, while distinctively colored check plots are replicated throughout the field in a systematic diagonal arrangement.
 
 
 The main difference between using the FielDHub Shiny app and using the standalone function `diagonal_arrangement()` is that the standalone function will allocate filler only if it is necessary, while in Shiny App, users can customize the number of fillers if it is needed. In cases where users include fillers, either between or after experiments, the Shiny app is preferable for filling and visualizing all field plots.
