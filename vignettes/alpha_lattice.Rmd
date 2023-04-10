@@ -1,6 +1,14 @@
 ---
 title: "Alpha Lattice Design"
-output: rmarkdown::html_vignette
+author: 
+  - name: Didier Murillo Florez^1^, Matthew Seefeldt
+    affiliation: 
+    - ^1^North Dakota Agricultural Experiment Station, North Dakota State University, USA.
+output:
+  html_document:
+    css: my_vignette_style.css
+    toc: true
+bibliography: references.bib
 vignette: >
   %\VignetteIndexEntry{Alpha Lattice Design}
   %\VignetteEngine{knitr::rmarkdown}

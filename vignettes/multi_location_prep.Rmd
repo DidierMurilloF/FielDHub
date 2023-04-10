@@ -6,7 +6,7 @@ author:
     - ^1^North Dakota Agricultural Experiment Station, North Dakota State University, USA.
 output:
   html_document:
-    css: style.css
+    css: my_vignette_style.css
     toc: true
 bibliography: references.bib
 vignette: >
@@ -46,49 +46,95 @@ and non-replicated treatments across multiple locations.
 
 ## Optimization
 
-The optimization problem that we try to solve is the following: Given a matrix $X$ of integers (p-rep design within location), we want to ensure that the distance between any two occurrences of the same treatment is at least a minimum distance $d$. More specifically, we want to modify $X$ to ensure that no treatments appears twice within a distance less than $d$ in the resulting matrix.
 
-The goal of the optimization process is to find a modified matrix that satisfies this constraint while minimizing some measure of deviation from the original matrix $X$. In this case, the measure of deviation is the pairwise Euclidean distance between occurrences of the same treatment. The process is done by the function `swap_pairs()` that uses a heuristic algorithm that starts with a minimum distance of $d = 3$ between pairs of occurrences of the same treatment, and increases this minimum distance by $1$ and repeats the process until either the algorithm no longer converges or the maximum number of iterations is reached.
+### Across Location
 
-The algorithm works by first identifying all pairs of occurrences of the same treatment that are closer than $d$. For each such pair, the function selects a random occurrence of a different integer that is at least $d$ away, and swaps the two occurrences. This process is repeated until no further swaps can be made that increase the pairwise Euclidean distances between occurrences of the same treatment. 
+The function `multi_location_prep()` uses the incomplete blocks design approach [@EdmondsonIBDs] 
+to optimize the allocation of replicated and unreplicated treatments across the environments.
 
-### Toy Example
+### Within Location
 
-Consider a p-rep design where ten treatments are twice and 40 are once. The matrix (field layout) for this experiment has 6 rows and 10 columns.
+Each partially replicated (p-rep) design location undergoes an optimization process that involves 
+the following procedure:
+
+The optimization problem that we try to solve is the following: Given a matrix $X$ of integers 
+(p-rep design within location), we want to ensure that the distance between any two occurrences 
+of the same treatment is at least a distance $d$. More specifically, we want to modify 
+$X$ to ensure that no treatments appear twice within a distance less than $d$ in the resulting 
+matrix.
+
+The goal of the optimization process is to find a modified matrix that satisfies this constraint 
+while maximizing some measure of deviation from the original matrix $X$. In this case, the 
+measure of deviation is the pairwise Euclidean distance between occurrences of the same treatment. 
+The process is done by the function `swap_pairs()` that uses a heuristic algorithm that starts 
+with a distance of $d = 3$ between pairs of occurrences of the same treatment, and 
+increases this distance by $1$ and repeats the process until either the algorithm no 
+longer converges or the maximum number of iterations is reached.
+
+The algorithm works by first identifying all pairs of occurrences of the same treatment that 
+are closer than $d$. For each such pair, the function selects a random occurrence of a different 
+integer that is at least $d$ away, and swaps the two occurrences. This process is repeated until 
+no further swaps can be made that increase the pairwise Euclidean distances between occurrences 
+of the same treatment. 
+
+#### Toy Example
+
+Consider a p-rep design where ten treatments are replicated twice and 40 only once. The matrix 
+(field layout) for this experiment has 6 rows and 10 columns.
+
+$X =$
 
 ```{r, echo=FALSE, eval=TRUE}
 set.seed(123)
 X <- matrix(sample(c(rep(1:10, 2), 11:50), replace = FALSE), ncol = 10)
+X[2,2] <- 5
+X[2,3] <- 33
 print(X)
 ```
 
-If we calculate the pairwise distance between the rep treatments 
+In this initial p-rep design, we notice that the two instances of treatment **5** are positioned 
+next to each other. Additionally, treatments **7** and **9** are also situated in adjacent cells. 
+These suboptimal allocations could lead to issues or inaccurate results when analyzing the data 
+from this experiment due to the short distance between replicated treatments and the likely 
+spatial correlation between them.
 
+The following table shows the pairwise distances for the replicated treatments
 
 ```{r, echo=FALSE, eval=TRUE}
 dist_X <- FielDHub:::pairs_distance(X = X)
 print(dist_X)
 ```
 
-
 #### Swap pairs
+
+We can improve the efficiency of the design by swapping  the treatments that are close and 
+next to each other by using the function `swap_pairs()` from `FielDHub` R package.
 
 ```{r}
 library(FielDHub)
 B <- swap_pairs(X, starting_dist = 3)
+```
+
+The new matrix or the optimized p-rep design is,
+
+```{r}
 print(B$optim_design)
 ```
 
-For the optimization designs we can see the new distances for each pairwise of treatments.
-
+The distances for each pairwise of treatments are,
 
 ```{r}
-print(B$distances[[length(B$distances)]])
+print(B$pairswise_distance)
 ```
 
-As we can see the minimum distance that the algorithm reached is $5.0$. This means that no treatments appears twice within a distance less than $5.0$ in the resulting prep design.
+As we can see, the minimum distance that the algorithm reached is `r B$min_distance`. This 
+means no treatments appear twice within a distance less than `r B$min_distance` in the 
+resulting prep design. It is a considerable improvement from the first version of the p-rep design
 
-## Use case
+The `FielDHub` function `multi_location_prep()` does internally all the optimization process 
+and uses the function `swap_pairs()` to maximize the distance between replicated treatments.
+
+## Use case (Multi-Location P-rep Design)
 
 Suppose there is a plant breeding field trial with 150 entries to be tested across five environments, 
 where up to seven replications of each entry are allowed. Additionally, the project includes three 
@@ -349,8 +395,6 @@ Also, for example the location five:
 plot(optim_multi_prep, l = 5)
 ```
 
+# References
 
-<br>
-<br>
-<br>
 

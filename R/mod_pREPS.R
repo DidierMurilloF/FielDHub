@@ -24,7 +24,7 @@ mod_pREPS_ui <- function(id){
 			choiceNames = NULL, 
 			choiceValues = NULL
 		),
-        conditionalPanel(
+    conditionalPanel(
 			condition = "input.owndataPREPS == 'Yes'", 
 			ns = ns,
 			fluidRow(
@@ -94,7 +94,7 @@ mod_pREPS_ui <- function(id){
 					numericInput(
 						ns("seed.preps"), 
 						label = "Random Seed:", 
-						value = 4091, 
+						value = 4095, 
 						min = 1)
 				),
 				column(
