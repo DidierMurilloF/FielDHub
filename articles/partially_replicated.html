@@ -6,12 +6,12 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="description" content="FielDHub">
-<title>Partially Replicated Design • FielDHub</title>
+<title>Partially Replicated (p-rep) Design • FielDHub</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Partially Replicated Design">
+<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Partially Replicated (p-rep) Design">
 <meta property="og:description" content="FielDHub">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -66,6 +66,7 @@
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-news">News</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-news">
     <h6 class="dropdown-header" data-toc-skip>Releases</h6>
+    <a class="dropdown-item" href="../articles/news/fieldhub-1-3-1.html">Version 1.3.1</a>
     <a class="dropdown-item" href="../articles/news/fieldhub-1-2-0.html">Version 1.2.0</a>
     <a class="dropdown-item" href="../articles/news/fieldhub-0-1-0.html">Version 0.1.0</a>
     <div class="dropdown-divider"></div>
@@ -96,18 +97,21 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="" class="logo" alt=""><h1>Partially Replicated Design</h1>
-            
-      
-      <small class="dont-index">Source: <a href="https://github.com/DidierMurilloF/FielDHub/blob/HEAD/vignettes/partially_replicated.Rmd" class="external-link"><code>vignettes/partially_replicated.Rmd</code></a></small>
+      <img src="" class="logo" alt=""><h1>Partially Replicated (p-rep) Design</h1>
+                        <h4 data-toc-skip class="author">Didier Murillo
+Florez<sup>1</sup>, Matthew Seefeldt</h4>
+            <address class="author_afil">
+      <sup>1</sup>North Dakota Agricultural Experiment Station, North
+Dakota State University, USA.<br><small class="dont-index">Source: <a href="https://github.com/DidierMurilloF/FielDHub/blob/HEAD/vignettes/partially_replicated.Rmd" class="external-link"><code>vignettes/partially_replicated.Rmd</code></a></small>
       <div class="d-none name"><code>partially_replicated.Rmd</code></div>
-    </div>
+    </address>
+</div>
 
     
     
 <p>This vignette shows how to generate a <strong>partially replicated
-design</strong> using both the FielDHub Shiny App and the scripting
-function <code><a href="../reference/partially_replicated.html">partially_replicated()</a></code> from the
+(p-rep) design</strong> using both the FielDHub Shiny App and the
+scripting function <code><a href="../reference/partially_replicated.html">partially_replicated()</a></code> from the
 <code>FielDHub</code> R package.</p>
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
@@ -124,6 +128,119 @@ as well as the number of entries that will only appear once. You can
 also choose to run the same experiment over multiple locations.</p>
 </div>
 <div class="section level2">
+<h2 id="optimization">Optimization<a class="anchor" aria-label="anchor" href="#optimization"></a>
+</h2>
+<p>Each partially replicated (p-rep) design location undergoes an
+optimization process that involves the following procedure:</p>
+<p>The optimization problem that we try to solve is the following: Given
+a matrix <span class="math inline">\(X\)</span> of integers (p-rep
+design within location), we want to ensure that the distance between any
+two occurrences of the same treatment is at least a distance <span class="math inline">\(d\)</span>. More specifically, we want to modify
+<span class="math inline">\(X\)</span> to ensure that no treatments
+appear twice within a distance less than <span class="math inline">\(d\)</span> in the resulting matrix.</p>
+<p>The goal of the optimization process is to find a modified matrix
+that satisfies this constraint while maximizing some measure of
+deviation from the original matrix <span class="math inline">\(X\)</span>. In this case, the measure of deviation
+is the pairwise Euclidean distance between occurrences of the same
+treatment. The process is done by the function <code><a href="../reference/swap_pairs.html">swap_pairs()</a></code>
+that uses a heuristic algorithm that starts with a distance of <span class="math inline">\(d = 3\)</span> between pairs of occurrences of the
+same treatment, and increases this distance by <span class="math inline">\(1\)</span> and repeats the process until either
+the algorithm no longer converges or the maximum number of iterations is
+reached.</p>
+<p>The algorithm works by first identifying all pairs of occurrences of
+the same treatment that are closer than <span class="math inline">\(d\)</span>. For each such pair, the function
+selects a random occurrence of a different integer that is at least
+<span class="math inline">\(d\)</span> away, and swaps the two
+occurrences. This process is repeated until no further swaps can be made
+that increase the pairwise Euclidean distances between occurrences of
+the same treatment.</p>
+<div class="section level4">
+<h4 id="toy-example">Toy Example<a class="anchor" aria-label="anchor" href="#toy-example"></a>
+</h4>
+<p>Consider a p-rep design where ten treatments are replicated twice and
+forty only once. The matrix (field layout) for this experiment has 6
+rows and 10 columns.</p>
+<p><span class="math inline">\(X =\)</span></p>
+<pre><code>     [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]
+[1,]   21   40   17   25   26    3   11   31   36     6
+[2,]    5    5   33    8   48   29   43   23    1    45
+[3,]   41   27   38   39    7   28   14   22   24     4
+[4,]    4   47   18    7    2   35    6   20   12    46
+[5,]    3   15    9   34   49   50    2   10   42     8
+[6,]   32   16   19    9   10   13   37    1   44    30</code></pre>
+<p>In this initial p-rep design, we notice that the two instances of
+treatment <strong>5</strong> are positioned next to each other.
+Additionally, treatments <strong>7</strong> and <strong>9</strong> are
+also situated in adjacent cells. These suboptimal allocations could lead
+to issues or inaccurate results when analyzing the data from this
+experiment due to the short distance between replicated treatments and
+the likely spatial correlation between them.</p>
+<p>The following table shows the pairwise distances for the replicated
+treatments</p>
+<pre><code>   geno Pos1 Pos2     DIST rA cA rB cB
+5     5    2    8 1.000000  2  1  2  2
+7     7   22   27 1.414214  4  4  3  5
+9     9   17   24 1.414214  5  3  6  4
+2     2   28   41 2.236068  4  5  5  7
+10   10   30   47 3.162278  6  5  5  8
+1     1   48   50 4.123106  6  8  2  9
+6     6   40   55 4.242641  4  7  1 10
+3     3    5   31 6.403124  5  1  1  6
+8     8   20   59 6.708204  2  4  5 10
+4     4    4   57 9.055385  4  1  3 10</code></pre>
+</div>
+<div class="section level4">
+<h4 id="swap-pairs">Swap pairs<a class="anchor" aria-label="anchor" href="#swap-pairs"></a>
+</h4>
+<p>We can improve the efficiency of the design by swapping the
+treatments that are close and next to each other by using the function
+<code><a href="../reference/swap_pairs.html">swap_pairs()</a></code> from <code>FielDHub</code> R package.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/DidierMurilloF/FielDHub" class="external-link">FielDHub</a></span><span class="op">)</span></span>
+<span><span class="va">B</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/swap_pairs.html">swap_pairs</a></span><span class="op">(</span><span class="va">X</span>, starting_dist <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre></div>
+<p>The new matrix or the optimized p-rep design is,</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(B<span class="sc">$</span>optim_design)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>     [,<span class="dv">1</span>] [,<span class="dv">2</span>] [,<span class="dv">3</span>] [,<span class="dv">4</span>] [,<span class="dv">5</span>] [,<span class="dv">6</span>] [,<span class="dv">7</span>] [,<span class="dv">8</span>] [,<span class="dv">9</span>] [,<span class="dv">10</span>]</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>,]    <span class="dv">8</span>   <span class="dv">35</span>    <span class="dv">6</span>    <span class="dv">2</span>   <span class="dv">33</span>   <span class="dv">44</span>    <span class="dv">3</span>    <span class="dv">4</span>   <span class="dv">37</span>     <span class="dv">6</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>[<span class="dv">2</span>,]   <span class="dv">43</span>   <span class="dv">30</span>   <span class="dv">25</span>    <span class="dv">5</span>   <span class="dv">39</span>   <span class="dv">29</span>   <span class="dv">19</span>   <span class="dv">11</span>   <span class="dv">36</span>    <span class="dv">45</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>[<span class="dv">3</span>,]   <span class="dv">40</span>   <span class="dv">13</span>   <span class="dv">38</span>   <span class="dv">10</span>   <span class="dv">20</span>   <span class="dv">28</span>   <span class="dv">15</span>   <span class="dv">41</span>   <span class="dv">10</span>    <span class="dv">17</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>[<span class="dv">4</span>,]    <span class="dv">1</span>   <span class="dv">27</span>   <span class="dv">18</span>   <span class="dv">31</span>   <span class="dv">32</span>   <span class="dv">22</span>   <span class="dv">24</span>   <span class="dv">21</span>   <span class="dv">12</span>     <span class="dv">5</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>[<span class="dv">5</span>,]   <span class="dv">23</span>   <span class="dv">47</span>    <span class="dv">3</span>   <span class="dv">34</span>   <span class="dv">49</span>   <span class="dv">50</span>   <span class="dv">16</span>   <span class="dv">46</span>   <span class="dv">14</span>    <span class="dv">48</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>[<span class="dv">6</span>,]    <span class="dv">7</span>   <span class="dv">26</span>    <span class="dv">2</span>   <span class="dv">42</span>    <span class="dv">9</span>    <span class="dv">1</span>    <span class="dv">8</span>    <span class="dv">7</span>    <span class="dv">4</span>     <span class="dv">9</span></span></code></pre></div>
+<p>The distances for each pairwise of treatments are,</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(B<span class="sc">$</span>pairswise_distance)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>   geno Pos1 Pos2     DIST rA cA rB cB</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="dv">9</span>     <span class="dv">9</span>   <span class="dv">30</span>   <span class="dv">60</span> <span class="fl">5.000000</span>  <span class="dv">6</span>  <span class="dv">5</span>  <span class="dv">6</span> <span class="dv">10</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="dv">10</span>   <span class="dv">10</span>   <span class="dv">21</span>   <span class="dv">51</span> <span class="fl">5.000000</span>  <span class="dv">3</span>  <span class="dv">4</span>  <span class="dv">3</span>  <span class="dv">9</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span>     <span class="dv">2</span>   <span class="dv">18</span>   <span class="dv">19</span> <span class="fl">5.099020</span>  <span class="dv">6</span>  <span class="dv">3</span>  <span class="dv">1</span>  <span class="dv">4</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="dv">4</span>     <span class="dv">4</span>   <span class="dv">43</span>   <span class="dv">54</span> <span class="fl">5.099020</span>  <span class="dv">1</span>  <span class="dv">8</span>  <span class="dv">6</span>  <span class="dv">9</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span>     <span class="dv">1</span>    <span class="dv">4</span>   <span class="dv">36</span> <span class="fl">5.385165</span>  <span class="dv">4</span>  <span class="dv">1</span>  <span class="dv">6</span>  <span class="dv">6</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="dv">3</span>     <span class="dv">3</span>   <span class="dv">17</span>   <span class="dv">37</span> <span class="fl">5.656854</span>  <span class="dv">5</span>  <span class="dv">3</span>  <span class="dv">1</span>  <span class="dv">7</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="dv">5</span>     <span class="dv">5</span>   <span class="dv">20</span>   <span class="dv">58</span> <span class="fl">6.324555</span>  <span class="dv">2</span>  <span class="dv">4</span>  <span class="dv">4</span> <span class="dv">10</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="dv">6</span>     <span class="dv">6</span>   <span class="dv">13</span>   <span class="dv">55</span> <span class="fl">7.000000</span>  <span class="dv">1</span>  <span class="dv">3</span>  <span class="dv">1</span> <span class="dv">10</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="dv">7</span>     <span class="dv">7</span>    <span class="dv">6</span>   <span class="dv">48</span> <span class="fl">7.000000</span>  <span class="dv">6</span>  <span class="dv">1</span>  <span class="dv">6</span>  <span class="dv">8</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="dv">8</span>     <span class="dv">8</span>    <span class="dv">1</span>   <span class="dv">42</span> <span class="fl">7.810250</span>  <span class="dv">1</span>  <span class="dv">1</span>  <span class="dv">6</span>  <span class="dv">7</span></span></code></pre></div>
+<p>As we can see, the minimum distance that the algorithm reached is 5.
+This means no treatments appear twice within a distance less than 5 in
+the resulting prep design. It is a considerable improvement from the
+first version of the p-rep design</p>
+<p>The <code>FielDHub</code> function <code><a href="../reference/multi_location_prep.html">multi_location_prep()</a></code>
+does internally all the optimization process and uses the function
+<code><a href="../reference/swap_pairs.html">swap_pairs()</a></code> to maximize the distance between replicated
+treatments.</p>
+</div>
+<div class="section level3">
+<h3 id="acknowledge">Acknowledge<a class="anchor" aria-label="anchor" href="#acknowledge"></a>
+</h3>
+<p>We would like to acknowledge Mr. Jean-Marc Montpetit for contributing
+code and ideas for the <code><a href="../reference/swap_pairs.html">swap_pairs()</a></code> and
+<code>pairs_distance()</code> functions. His contributions have had a
+significant impact on improving the partially replicated (p-rep) design
+in the R package <code>FielDHub</code>. We thank him for his valuable
+contributions.</p>
+</div>
+</div>
+<div class="section level2">
 <h2 id="use-case">Use case<a class="anchor" aria-label="anchor" href="#use-case"></a>
 </h2>
 <p>Consider a plant breeding field trial with 300 plots containing 75
@@ -137,10 +254,10 @@ leave with just one copy the genotypes that are siblings (130).</p>
 <h2 id="running-the-shiny-app">Running the Shiny App<a class="anchor" aria-label="anchor" href="#running-the-shiny-app"></a>
 </h2>
 <p>To launch the app you need to run either</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">FielDHub</span><span class="fu">::</span><span class="fu"><a href="../reference/run_app.html">run_app</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>or</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/DidierMurilloF/FielDHub" class="external-link">FielDHub</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/run_app.html">run_app</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -339,11 +456,11 @@ can filter the data in relevant columns.</p>
 <code><a href="../reference/partially_replicated.html">partially_replicated()</a></code> in the <code>FielDHub</code>
 package.</p>
 <p>First, you need to load the <code>FielDHub</code> package typing,</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/DidierMurilloF/FielDHub" class="external-link">FielDHub</a></span><span class="op">)</span></span></code></pre></div>
 <p>Then, you can enter the information describing the above design like
 this:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">prep</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/partially_replicated.html">partially_replicated</a></span><span class="op">(</span></span>
 <span>  nrows <span class="op">=</span> <span class="fl">15</span>,</span>
 <span>  ncols <span class="op">=</span> <span class="fl">20</span>, </span>
@@ -397,7 +514,7 @@ randomizations.</li>
 <p>To print a summary of the information that is in the object
 <code>prep</code>, we can use the generic function
 <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">prep</span><span class="op">)</span></span></code></pre></div>
 <pre><code>Partially Replicated Design 
 
@@ -447,7 +564,7 @@ book has columns for <code>ID</code>, <code>EXPT</code>,
 <code>ENTRY</code>, and <code>TREATMENT</code>.</p>
 <p>Let us see the first 10 rows of the field book for this
 experiment.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">field_book</span> <span class="op">&lt;-</span> <span class="va">prep</span><span class="op">$</span><span class="va">fieldBook</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">field_book</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
 <pre><code>   ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
@@ -468,9 +585,9 @@ experiment.</p>
 <p>For plotting the layout in function of the coordinates
 <code>ROW</code> and <code>COLUMN</code> in the field book object we can
 use the generic function <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> as follow,</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">prep</span><span class="op">)</span></span></code></pre></div>
-<p><img src="partially_replicated_files/figure-html/unnamed-chunk-12-1.png" width="691.2" style="display: block; margin: auto;"></p>
+<p><img src="partially_replicated_files/figure-html/unnamed-chunk-17-1.png" width="691.2" style="display: block; margin: auto;"></p>
 <p>In the figure above, green plots contain replicated entries, and gray
 plots contain entries that only appear once.</p>
 <p><br><br><br></p>

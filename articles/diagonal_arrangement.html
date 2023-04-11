@@ -66,6 +66,7 @@
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-news">News</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-news">
     <h6 class="dropdown-header" data-toc-skip>Releases</h6>
+    <a class="dropdown-item" href="../articles/news/fieldhub-1-3-1.html">Version 1.3.1</a>
     <a class="dropdown-item" href="../articles/news/fieldhub-1-2-0.html">Version 1.2.0</a>
     <a class="dropdown-item" href="../articles/news/fieldhub-0-1-0.html">Version 0.1.0</a>
     <div class="dropdown-divider"></div>
@@ -97,11 +98,14 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Unreplicated Diagonal Arrangement Design</h1>
-            
-      
-      <small class="dont-index">Source: <a href="https://github.com/DidierMurilloF/FielDHub/blob/HEAD/vignettes/diagonal_arrangement.Rmd" class="external-link"><code>vignettes/diagonal_arrangement.Rmd</code></a></small>
+                        <h4 data-toc-skip class="author">Didier Murillo
+Florez<sup>1</sup>, Matthew Seefeldt</h4>
+            <address class="author_afil">
+      <sup>1</sup>North Dakota Agricultural Experiment Station, North
+Dakota State University, USA.<br><small class="dont-index">Source: <a href="https://github.com/DidierMurilloF/FielDHub/blob/HEAD/vignettes/diagonal_arrangement.Rmd" class="external-link"><code>vignettes/diagonal_arrangement.Rmd</code></a></small>
       <div class="d-none name"><code>diagonal_arrangement.Rmd</code></div>
-    </div>
+    </address>
+</div>
 
     
     
@@ -396,8 +400,10 @@ List of 11
  $ columns       : num 22
  $ treatments    : int 300
  $ checks        : int 5
- $ entry_checks  : int [1:5] 1 2 3 4 5
- $ rep_checks    : num [1:5] 6 6 6 6 6
+ $ entry_checks  :List of 1
+  ..$ : int [1:5] 1 2 3 4 5
+ $ rep_checks    :List of 1
+  ..$ : num [1:5] 6 6 6 6 6
  $ locations     : num 1
  $ planter       : chr "serpentine"
  $ percent_checks: chr "9.1%"
@@ -406,16 +412,16 @@ List of 11
 
  10 First observations of the data frame with the diagonal_arrangement field book: 
    ID            EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 PYT_BARLEY_2022    FARGO 2023    1   1      1      0    62    Gen-62
+1   1 PYT_BARLEY_2022    FARGO 2023    1   1      1      0   152   Gen-152
 2   2 PYT_BARLEY_2022    FARGO 2023    2   1      2      0    38    Gen-38
-3   3 PYT_BARLEY_2022    FARGO 2023    3   1      3      0   200   Gen-200
-4   4 PYT_BARLEY_2022    FARGO 2023    4   1      4      0   253   Gen-253
-5   5 PYT_BARLEY_2022    FARGO 2023    5   1      5      0    94    Gen-94
-6   6 PYT_BARLEY_2022    FARGO 2023    6   1      6      0    16    Gen-16
-7   7 PYT_BARLEY_2022    FARGO 2023    7   1      7      0    42    Gen-42
-8   8 PYT_BARLEY_2022    FARGO 2023    8   1      8      0   211   Gen-211
-9   9 PYT_BARLEY_2022    FARGO 2023    9   1      9      0   170   Gen-170
-10 10 PYT_BARLEY_2022    FARGO 2023   10   1     10      0   144   Gen-144</code></pre>
+3   3 PYT_BARLEY_2022    FARGO 2023    3   1      3      0   285   Gen-285
+4   4 PYT_BARLEY_2022    FARGO 2023    4   1      4      0   226   Gen-226
+5   5 PYT_BARLEY_2022    FARGO 2023    5   1      5      0   215   Gen-215
+6   6 PYT_BARLEY_2022    FARGO 2023    6   1      6      0   272   Gen-272
+7   7 PYT_BARLEY_2022    FARGO 2023    7   1      7      0    91    Gen-91
+8   8 PYT_BARLEY_2022    FARGO 2023    8   1      8      0   126   Gen-126
+9   9 PYT_BARLEY_2022    FARGO 2023    9   1      9      0   289   Gen-289
+10 10 PYT_BARLEY_2022    FARGO 2023   10   1     10      0   248   Gen-248</code></pre>
 </div>
 <div class="section level3">
 <h3 id="access-to-single_diag-object">Access to <code>single_diag</code> object<a class="anchor" aria-label="anchor" href="#access-to-single_diag-object"></a>
@@ -439,16 +445,16 @@ experiment.</p>
 <code class="sourceCode R"><span><span class="va">field_book</span> <span class="op">&lt;-</span> <span class="va">single_diag</span><span class="op">$</span><span class="va">fieldBook</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">field_book</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
 <pre><code>   ID            EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 PYT_BARLEY_2022    FARGO 2023    1   1      1      0    62    Gen-62
+1   1 PYT_BARLEY_2022    FARGO 2023    1   1      1      0   152   Gen-152
 2   2 PYT_BARLEY_2022    FARGO 2023    2   1      2      0    38    Gen-38
-3   3 PYT_BARLEY_2022    FARGO 2023    3   1      3      0   200   Gen-200
-4   4 PYT_BARLEY_2022    FARGO 2023    4   1      4      0   253   Gen-253
-5   5 PYT_BARLEY_2022    FARGO 2023    5   1      5      0    94    Gen-94
-6   6 PYT_BARLEY_2022    FARGO 2023    6   1      6      0    16    Gen-16
-7   7 PYT_BARLEY_2022    FARGO 2023    7   1      7      0    42    Gen-42
-8   8 PYT_BARLEY_2022    FARGO 2023    8   1      8      0   211   Gen-211
-9   9 PYT_BARLEY_2022    FARGO 2023    9   1      9      0   170   Gen-170
-10 10 PYT_BARLEY_2022    FARGO 2023   10   1     10      0   144   Gen-144</code></pre>
+3   3 PYT_BARLEY_2022    FARGO 2023    3   1      3      0   285   Gen-285
+4   4 PYT_BARLEY_2022    FARGO 2023    4   1      4      0   226   Gen-226
+5   5 PYT_BARLEY_2022    FARGO 2023    5   1      5      0   215   Gen-215
+6   6 PYT_BARLEY_2022    FARGO 2023    6   1      6      0   272   Gen-272
+7   7 PYT_BARLEY_2022    FARGO 2023    7   1      7      0    91    Gen-91
+8   8 PYT_BARLEY_2022    FARGO 2023    8   1      8      0   126   Gen-126
+9   9 PYT_BARLEY_2022    FARGO 2023    9   1      9      0   289   Gen-289
+10 10 PYT_BARLEY_2022    FARGO 2023   10   1     10      0   248   Gen-248</code></pre>
 </div>
 <div class="section level3">
 <h3 id="plot-field-layout">Plot field layout<a class="anchor" aria-label="anchor" href="#plot-field-layout"></a>
@@ -764,8 +770,10 @@ List of 11
  $ columns       : num 22
  $ treatments    : num [1:3] 100 120 80
  $ checks        : int 5
- $ entry_checks  : int [1:5] 1 2 3 4 5
- $ rep_checks    : num [1:5] 6 7 5 7 5
+ $ entry_checks  :List of 1
+  ..$ : int [1:5] 1 2 3 4 5
+ $ rep_checks    :List of 1
+  ..$ : num [1:5] 7 5 7 5 6
  $ locations     : num 1
  $ planter       : chr "serpentine"
  $ percent_checks: chr "9.1%"
@@ -774,16 +782,16 @@ List of 11
 
  10 First observations of the data frame with the diagonal_arrangement field book: 
    ID      EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 MATURITY1    FARGO 2023    1   1      1      0    39    Gen-39
-2   2 MATURITY1    FARGO 2023    2   1      2      0    37    Gen-37
-3   3 MATURITY1    FARGO 2023    3   1      3      0    30    Gen-30
-4   4 MATURITY1    FARGO 2023    4   1      4      0    68    Gen-68
-5   5 MATURITY1    FARGO 2023    5   1      5      0    29    Gen-29
-6   6 MATURITY1    FARGO 2023    6   1      6      0    46    Gen-46
-7   7 MATURITY1    FARGO 2023    7   1      7      0    93    Gen-93
-8   8 MATURITY1    FARGO 2023    8   1      8      0    28    Gen-28
+1   1 MATURITY1    FARGO 2023    1   1      1      0   104   Gen-104
+2   2 MATURITY1    FARGO 2023    2   1      2      0    65    Gen-65
+3   3 MATURITY1    FARGO 2023    3   1      3      0    70    Gen-70
+4   4 MATURITY1    FARGO 2023    4   1      4      0     8     Gen-8
+5   5 MATURITY1    FARGO 2023    5   1      5      0    51    Gen-51
+6   6 MATURITY1    FARGO 2023    6   1      6      0    17    Gen-17
+7   7 MATURITY1    FARGO 2023    7   1      7      0    11    Gen-11
+8   8 MATURITY1    FARGO 2023    8   1      8      0     6     Gen-6
 9   9 MATURITY1    FARGO 2023    9   1      9      0    53    Gen-53
-10 10 MATURITY1    FARGO 2023   10   1     10      0    58    Gen-58</code></pre>
+10 10 MATURITY1    FARGO 2023   10   1     10      0    50    Gen-50</code></pre>
 </div>
 <div class="section level3">
 <h3 id="access-to-multi_diag-object">Access to <code>multi_diag</code> object<a class="anchor" aria-label="anchor" href="#access-to-multi_diag-object"></a>
@@ -807,16 +815,16 @@ experiment.</p>
 <code class="sourceCode R"><span><span class="va">field_book</span> <span class="op">&lt;-</span> <span class="va">multi_diag</span><span class="op">$</span><span class="va">fieldBook</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">field_book</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
 <pre><code>   ID      EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 MATURITY1    FARGO 2023    1   1      1      0    39    Gen-39
-2   2 MATURITY1    FARGO 2023    2   1      2      0    37    Gen-37
-3   3 MATURITY1    FARGO 2023    3   1      3      0    30    Gen-30
-4   4 MATURITY1    FARGO 2023    4   1      4      0    68    Gen-68
-5   5 MATURITY1    FARGO 2023    5   1      5      0    29    Gen-29
-6   6 MATURITY1    FARGO 2023    6   1      6      0    46    Gen-46
-7   7 MATURITY1    FARGO 2023    7   1      7      0    93    Gen-93
-8   8 MATURITY1    FARGO 2023    8   1      8      0    28    Gen-28
+1   1 MATURITY1    FARGO 2023    1   1      1      0   104   Gen-104
+2   2 MATURITY1    FARGO 2023    2   1      2      0    65    Gen-65
+3   3 MATURITY1    FARGO 2023    3   1      3      0    70    Gen-70
+4   4 MATURITY1    FARGO 2023    4   1      4      0     8     Gen-8
+5   5 MATURITY1    FARGO 2023    5   1      5      0    51    Gen-51
+6   6 MATURITY1    FARGO 2023    6   1      6      0    17    Gen-17
+7   7 MATURITY1    FARGO 2023    7   1      7      0    11    Gen-11
+8   8 MATURITY1    FARGO 2023    8   1      8      0     6     Gen-6
 9   9 MATURITY1    FARGO 2023    9   1      9      0    53    Gen-53
-10 10 MATURITY1    FARGO 2023   10   1     10      0    58    Gen-58</code></pre>
+10 10 MATURITY1    FARGO 2023   10   1     10      0    50    Gen-50</code></pre>
 </div>
 <div class="section level3">
 <h3 id="plot-field-layout-1">Plot field layout<a class="anchor" aria-label="anchor" href="#plot-field-layout-1"></a>

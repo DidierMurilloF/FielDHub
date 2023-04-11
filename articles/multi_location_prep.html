@@ -66,6 +66,7 @@
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-news">News</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-news">
     <h6 class="dropdown-header" data-toc-skip>Releases</h6>
+    <a class="dropdown-item" href="../articles/news/fieldhub-1-3-1.html">Version 1.3.1</a>
     <a class="dropdown-item" href="../articles/news/fieldhub-1-2-0.html">Version 1.2.0</a>
     <a class="dropdown-item" href="../articles/news/fieldhub-0-1-0.html">Version 0.1.0</a>
     <div class="dropdown-divider"></div>
@@ -97,33 +98,152 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Optimized Multi-Location P-rep Design</h1>
-            
-      
-      <small class="dont-index">Source: <a href="https://github.com/DidierMurilloF/FielDHub/blob/HEAD/vignettes/multi_location_prep.Rmd" class="external-link"><code>vignettes/multi_location_prep.Rmd</code></a></small>
+                        <h4 data-toc-skip class="author">Didier Murillo
+Florez<sup>1</sup>, Matthew Seefeldt</h4>
+            <address class="author_afil">
+      <sup>1</sup>North Dakota Agricultural Experiment Station, North
+Dakota State University, USA.<br><small class="dont-index">Source: <a href="https://github.com/DidierMurilloF/FielDHub/blob/HEAD/vignettes/multi_location_prep.Rmd" class="external-link"><code>vignettes/multi_location_prep.Rmd</code></a></small>
       <div class="d-none name"><code>multi_location_prep.Rmd</code></div>
-    </div>
+    </address>
+</div>
 
     
     
 <p>This vignette shows how to generate an <strong>optimized
-multi-location partially replicated design</strong> using both the
-FielDHub Shiny App and the scripting function
+multi-location partially replicated (p-rep) design</strong> using both
+the FielDHub Shiny App and the scripting function
 <code><a href="../reference/multi_location_prep.html">multi_location_prep()</a></code> from the <code>FielDHub</code> R
 package.</p>
-<div class="section level2">
-<h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
-</h2>
-<p>Partially replicated designs are frequently used in initial
-generation field trials. This design type involves replicating a portion
-of the entries, while the remaining entries only appear once in the
-experiment. The optimized partially replicated (p-rep) design utilizes a
-genotype allocation matrix to determine the distribution of replicated
-and non-replicated entries across multiple locations, employing the
-principles of incomplete block designs (IBD).</p>
+<div class="section level3">
+<h3 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
+</h3>
+<p>Partially replicated (p-rep) designs are frequently used in
+early-generation plant breeding field trials. This design typically
+involves repeating some entries/breeding lines, while the remaining
+entries only appear once in the experiment. In <code>FielDHub</code>,
+the optimized p-rep design is a variant of the p-rep design that employs
+the principles of incomplete block designs (IBD) to determine the
+distribution of replicated and non-replicated treatments across multiple
+locations.</p>
 </div>
-<div class="section level2">
-<h2 id="use-case">Use case<a class="anchor" aria-label="anchor" href="#use-case"></a>
-</h2>
+<div class="section level3">
+<h3 id="optimization">Optimization<a class="anchor" aria-label="anchor" href="#optimization"></a>
+</h3>
+<div class="section level4">
+<h4 id="across-location">Across Location<a class="anchor" aria-label="anchor" href="#across-location"></a>
+</h4>
+<p>The function <code><a href="../reference/multi_location_prep.html">multi_location_prep()</a></code> uses the incomplete
+blocks design approach <span class="citation">(Edmondson 2020)</span> to
+optimize the allocation of replicated and unreplicated treatments across
+the environments.</p>
+</div>
+<div class="section level4">
+<h4 id="within-location">Within Location<a class="anchor" aria-label="anchor" href="#within-location"></a>
+</h4>
+<p>Each partially replicated (p-rep) design location undergoes an
+optimization process that involves the following procedure:</p>
+<p>The optimization problem that we try to solve is the following: Given
+a matrix <span class="math inline">\(X\)</span> of integers (p-rep
+design within location), we want to ensure that the distance between any
+two occurrences of the same treatment is at least a distance <span class="math inline">\(d\)</span>. More specifically, we want to modify
+<span class="math inline">\(X\)</span> to ensure that no treatments
+appear twice within a distance less than <span class="math inline">\(d\)</span> in the resulting matrix.</p>
+<p>The goal of the optimization process is to find a modified matrix
+that satisfies this constraint while maximizing some measure of
+deviation from the original matrix <span class="math inline">\(X\)</span>. In this case, the measure of deviation
+is the pairwise Euclidean distance between occurrences of the same
+treatment. The process is done by the function <code><a href="../reference/swap_pairs.html">swap_pairs()</a></code>
+that uses a heuristic algorithm that starts with a distance of <span class="math inline">\(d = 3\)</span> between pairs of occurrences of the
+same treatment, and increases this distance by <span class="math inline">\(1\)</span> and repeats the process until either
+the algorithm no longer converges or the maximum number of iterations is
+reached.</p>
+<p>The algorithm works by first identifying all pairs of occurrences of
+the same treatment that are closer than <span class="math inline">\(d\)</span>. For each such pair, the function
+selects a random occurrence of a different integer that is at least
+<span class="math inline">\(d\)</span> away, and swaps the two
+occurrences. This process is repeated until no further swaps can be made
+that increase the pairwise Euclidean distances between occurrences of
+the same treatment.</p>
+<div class="section level5">
+<h5 id="toy-example">Toy Example<a class="anchor" aria-label="anchor" href="#toy-example"></a>
+</h5>
+<p>Consider a p-rep design where ten treatments are replicated twice and
+40 only once. The matrix (field layout) for this experiment has 6 rows
+and 10 columns.</p>
+<p><span class="math inline">\(X =\)</span></p>
+<pre><code>     [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]
+[1,]   21   40   17   25   26    3   11   31   36     6
+[2,]    5    5   33    8   48   29   43   23    1    45
+[3,]   41   27   38   39    7   28   14   22   24     4
+[4,]    4   47   18    7    2   35    6   20   12    46
+[5,]    3   15    9   34   49   50    2   10   42     8
+[6,]   32   16   19    9   10   13   37    1   44    30</code></pre>
+<p>In this initial p-rep design, we notice that the two instances of
+treatment <strong>5</strong> are positioned next to each other.
+Additionally, treatments <strong>7</strong> and <strong>9</strong> are
+also situated in adjacent cells. These suboptimal allocations could lead
+to issues or inaccurate results when analyzing the data from this
+experiment due to the short distance between replicated treatments and
+the likely spatial correlation between them.</p>
+<p>The following table shows the pairwise distances for the replicated
+treatments</p>
+<pre><code>   geno Pos1 Pos2     DIST rA cA rB cB
+5     5    2    8 1.000000  2  1  2  2
+7     7   22   27 1.414214  4  4  3  5
+9     9   17   24 1.414214  5  3  6  4
+2     2   28   41 2.236068  4  5  5  7
+10   10   30   47 3.162278  6  5  5  8
+1     1   48   50 4.123106  6  8  2  9
+6     6   40   55 4.242641  4  7  1 10
+3     3    5   31 6.403124  5  1  1  6
+8     8   20   59 6.708204  2  4  5 10
+4     4    4   57 9.055385  4  1  3 10</code></pre>
+</div>
+<div class="section level5">
+<h5 id="swap-pairs">Swap pairs<a class="anchor" aria-label="anchor" href="#swap-pairs"></a>
+</h5>
+<p>We can improve the efficiency of the design by swapping the
+treatments that are close and next to each other by using the function
+<code><a href="../reference/swap_pairs.html">swap_pairs()</a></code> from <code>FielDHub</code> R package.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/DidierMurilloF/FielDHub" class="external-link">FielDHub</a></span><span class="op">)</span></span>
+<span><span class="va">B</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/swap_pairs.html">swap_pairs</a></span><span class="op">(</span><span class="va">X</span>, starting_dist <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre></div>
+<p>The new matrix or the optimized p-rep design is,</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(B<span class="sc">$</span>optim_design)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>     [,<span class="dv">1</span>] [,<span class="dv">2</span>] [,<span class="dv">3</span>] [,<span class="dv">4</span>] [,<span class="dv">5</span>] [,<span class="dv">6</span>] [,<span class="dv">7</span>] [,<span class="dv">8</span>] [,<span class="dv">9</span>] [,<span class="dv">10</span>]</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>,]    <span class="dv">8</span>   <span class="dv">35</span>    <span class="dv">6</span>    <span class="dv">2</span>   <span class="dv">33</span>   <span class="dv">44</span>    <span class="dv">3</span>    <span class="dv">4</span>   <span class="dv">37</span>     <span class="dv">6</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>[<span class="dv">2</span>,]   <span class="dv">43</span>   <span class="dv">30</span>   <span class="dv">25</span>    <span class="dv">5</span>   <span class="dv">39</span>   <span class="dv">29</span>   <span class="dv">19</span>   <span class="dv">11</span>   <span class="dv">36</span>    <span class="dv">45</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>[<span class="dv">3</span>,]   <span class="dv">40</span>   <span class="dv">13</span>   <span class="dv">38</span>   <span class="dv">10</span>   <span class="dv">20</span>   <span class="dv">28</span>   <span class="dv">15</span>   <span class="dv">41</span>   <span class="dv">10</span>    <span class="dv">17</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>[<span class="dv">4</span>,]    <span class="dv">1</span>   <span class="dv">27</span>   <span class="dv">18</span>   <span class="dv">31</span>   <span class="dv">32</span>   <span class="dv">22</span>   <span class="dv">24</span>   <span class="dv">21</span>   <span class="dv">12</span>     <span class="dv">5</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>[<span class="dv">5</span>,]   <span class="dv">23</span>   <span class="dv">47</span>    <span class="dv">3</span>   <span class="dv">34</span>   <span class="dv">49</span>   <span class="dv">50</span>   <span class="dv">16</span>   <span class="dv">46</span>   <span class="dv">14</span>    <span class="dv">48</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>[<span class="dv">6</span>,]    <span class="dv">7</span>   <span class="dv">26</span>    <span class="dv">2</span>   <span class="dv">42</span>    <span class="dv">9</span>    <span class="dv">1</span>    <span class="dv">8</span>    <span class="dv">7</span>    <span class="dv">4</span>     <span class="dv">9</span></span></code></pre></div>
+<p>The distances for each pairwise of treatments are,</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(B<span class="sc">$</span>pairswise_distance)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>   geno Pos1 Pos2     DIST rA cA rB cB</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="dv">9</span>     <span class="dv">9</span>   <span class="dv">30</span>   <span class="dv">60</span> <span class="fl">5.000000</span>  <span class="dv">6</span>  <span class="dv">5</span>  <span class="dv">6</span> <span class="dv">10</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="dv">10</span>   <span class="dv">10</span>   <span class="dv">21</span>   <span class="dv">51</span> <span class="fl">5.000000</span>  <span class="dv">3</span>  <span class="dv">4</span>  <span class="dv">3</span>  <span class="dv">9</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span>     <span class="dv">2</span>   <span class="dv">18</span>   <span class="dv">19</span> <span class="fl">5.099020</span>  <span class="dv">6</span>  <span class="dv">3</span>  <span class="dv">1</span>  <span class="dv">4</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="dv">4</span>     <span class="dv">4</span>   <span class="dv">43</span>   <span class="dv">54</span> <span class="fl">5.099020</span>  <span class="dv">1</span>  <span class="dv">8</span>  <span class="dv">6</span>  <span class="dv">9</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span>     <span class="dv">1</span>    <span class="dv">4</span>   <span class="dv">36</span> <span class="fl">5.385165</span>  <span class="dv">4</span>  <span class="dv">1</span>  <span class="dv">6</span>  <span class="dv">6</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="dv">3</span>     <span class="dv">3</span>   <span class="dv">17</span>   <span class="dv">37</span> <span class="fl">5.656854</span>  <span class="dv">5</span>  <span class="dv">3</span>  <span class="dv">1</span>  <span class="dv">7</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="dv">5</span>     <span class="dv">5</span>   <span class="dv">20</span>   <span class="dv">58</span> <span class="fl">6.324555</span>  <span class="dv">2</span>  <span class="dv">4</span>  <span class="dv">4</span> <span class="dv">10</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="dv">6</span>     <span class="dv">6</span>   <span class="dv">13</span>   <span class="dv">55</span> <span class="fl">7.000000</span>  <span class="dv">1</span>  <span class="dv">3</span>  <span class="dv">1</span> <span class="dv">10</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="dv">7</span>     <span class="dv">7</span>    <span class="dv">6</span>   <span class="dv">48</span> <span class="fl">7.000000</span>  <span class="dv">6</span>  <span class="dv">1</span>  <span class="dv">6</span>  <span class="dv">8</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="dv">8</span>     <span class="dv">8</span>    <span class="dv">1</span>   <span class="dv">42</span> <span class="fl">7.810250</span>  <span class="dv">1</span>  <span class="dv">1</span>  <span class="dv">6</span>  <span class="dv">7</span></span></code></pre></div>
+<p>As we can see, the minimum distance that the algorithm reached is 5.
+This means no treatments appear twice within a distance less than 5 in
+the resulting prep design. It is a considerable improvement from the
+first version of the p-rep design</p>
+<p>The <code>FielDHub</code> function <code><a href="../reference/multi_location_prep.html">multi_location_prep()</a></code>
+does internally all the optimization process and uses the function
+<code><a href="../reference/swap_pairs.html">swap_pairs()</a></code> to maximize the distance between replicated
+treatments.</p>
+</div>
+</div>
+</div>
+<div class="section level3">
+<h3 id="use-case-multi-location-p-rep-design">Use case (Multi-Location P-rep Design)<a class="anchor" aria-label="anchor" href="#use-case-multi-location-p-rep-design"></a>
+</h3>
 <p>Suppose there is a plant breeding field trial with 150 entries to be
 tested across five environments, where up to seven replications of each
 entry are allowed. Additionally, the project includes three checks; each
@@ -134,29 +254,29 @@ different amounts of replications. We can generate this design using the
 FielDHub Shiny app and the FielDHub <code><a href="../reference/multi_location_prep.html">multi_location_prep()</a></code>
 standalone function in R.</p>
 </div>
-<div class="section level2">
-<h2 id="running-the-shiny-app">Running the Shiny App<a class="anchor" aria-label="anchor" href="#running-the-shiny-app"></a>
-</h2>
+<div class="section level3">
+<h3 id="running-the-shiny-app">Running the Shiny App<a class="anchor" aria-label="anchor" href="#running-the-shiny-app"></a>
+</h3>
 <p>To launch the app you need to run either</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">FielDHub</span><span class="fu">::</span><span class="fu"><a href="../reference/run_app.html">run_app</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>or</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/DidierMurilloF/FielDHub" class="external-link">FielDHub</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/run_app.html">run_app</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="using-the-fieldhub-shiny-app">1. Using the FielDHub Shiny App<a class="anchor" aria-label="anchor" href="#using-the-fieldhub-shiny-app"></a>
-</h2>
+<div class="section level3">
+<h3 id="using-the-fieldhub-shiny-app">1. Using the FielDHub Shiny App<a class="anchor" aria-label="anchor" href="#using-the-fieldhub-shiny-app"></a>
+</h3>
 <p>Once the app is running, click the tab <strong>Partially Replicated
 Design</strong> and select <strong>Optimized Multi-Location
 p-rep</strong> from the dropdown.</p>
 <p>Then, follow the following steps where we will show how to generate
 an optimized partially replicated design.</p>
 </div>
-<div class="section level2">
-<h2 id="inputs">Inputs<a class="anchor" aria-label="anchor" href="#inputs"></a>
-</h2>
+<div class="section level3">
+<h3 id="inputs">Inputs<a class="anchor" aria-label="anchor" href="#inputs"></a>
+</h3>
 <ol style="list-style-type: decimal">
 <li>
 <p><strong>Import entries’ list?</strong> Choose whether to import a
@@ -320,9 +440,9 @@ re-randomize.</p>
 an experiment initially, you have to click the Run and Randomize buttons
 again, to re-run with the new inputs.</p>
 </div>
-<div class="section level2">
-<h2 id="outputs">Outputs<a class="anchor" aria-label="anchor" href="#outputs"></a>
-</h2>
+<div class="section level3">
+<h3 id="outputs">Outputs<a class="anchor" aria-label="anchor" href="#outputs"></a>
+</h3>
 <p>After you run a <code>Optimized Multi-Location P-rep Design</code> in
 FielDHub and set the dimensions of the field, there are several ways to
 display the information contained in the field book. The first tab,
@@ -331,9 +451,9 @@ of the field and re-randomize, as well as the genotype allocation matrix
 generated for the optimized p-rep design, which displays the
 replications of each genotype over each location, much like the matrix
 generated in sparse allocation.</p>
-<div class="section level3">
-<h3 id="randomized-field">Randomized Field<a class="anchor" aria-label="anchor" href="#randomized-field"></a>
-</h3>
+<div class="section level4">
+<h4 id="randomized-field">Randomized Field<a class="anchor" aria-label="anchor" href="#randomized-field"></a>
+</h4>
 <p>The <strong>Randomized Field</strong> tab displays a graphical
 representation of the randomization of the entries in a field of the
 specified dimensions. The replicated entries are the green colored
@@ -342,9 +462,9 @@ display includes numbered labels for the rows and columns. You can copy
 the field as a table or save it directly as an Excel file with the
 <em>Copy</em> and <em>Excel</em> buttons at the top.</p>
 </div>
-<div class="section level3">
-<h3 id="plot-number-field">Plot Number Field<a class="anchor" aria-label="anchor" href="#plot-number-field"></a>
-</h3>
+<div class="section level4">
+<h4 id="plot-number-field">Plot Number Field<a class="anchor" aria-label="anchor" href="#plot-number-field"></a>
+</h4>
 <p>On the <strong>Plot Number Field</strong> tab, there is a table
 display of the field with the plots numbered according to the Plot Order
 Layout specified, either <em>serpentine</em> or <em>cartesian</em>. You
@@ -352,9 +472,9 @@ can see the corresponding entries for each plot number in the field
 book. Like the Randomized Field tab, you can copy the table or save it
 as an Excel file with the <em>Copy</em> and <em>Excel</em> buttons.</p>
 </div>
-<div class="section level3">
-<h3 id="field-book">Field Book<a class="anchor" aria-label="anchor" href="#field-book"></a>
-</h3>
+<div class="section level4">
+<h4 id="field-book">Field Book<a class="anchor" aria-label="anchor" href="#field-book"></a>
+</h4>
 <p>The <strong>Field Book</strong> displays all the information on the
 experimental design in a table format. It contains the specific plot
 number and the row and column address of each entry, as well as the
@@ -362,19 +482,19 @@ corresponding treatment/genotype on that plot. This table is searchable,
 and we can filter the data in relevant columns.</p>
 </div>
 </div>
-<div class="section level2">
-<h2 id="using-the-fieldhub-function-multi_location_prep-">2. Using the <code>FielDHub</code> function:
+<div class="section level3">
+<h3 id="using-the-fieldhub-function-multi_location_prep-">2. Using the <code>FielDHub</code> function:
 <code>multi_location_prep()</code>.<a class="anchor" aria-label="anchor" href="#using-the-fieldhub-function-multi_location_prep-"></a>
-</h2>
+</h3>
 <p>You can run the same design with the function
 <code><a href="../reference/multi_location_prep.html">multi_location_prep()</a></code> in the <code>FielDHub</code>
 package.</p>
 <p>First, you need to load the <code>FielDHub</code> package typing,</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/DidierMurilloF/FielDHub" class="external-link">FielDHub</a></span><span class="op">)</span></span></code></pre></div>
 <p>Then, you can enter the information describing the above design like
 this:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">optim_multi_prep</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/multi_location_prep.html">multi_location_prep</a></span><span class="op">(</span></span>
 <span>  lines <span class="op">=</span> <span class="fl">150</span>, </span>
 <span>  l <span class="op">=</span> <span class="fl">5</span>, </span>
@@ -385,10 +505,10 @@ this:</p>
 <span>  locationNames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"LOC1"</span>, <span class="st">"LOC2"</span>, <span class="st">"LOC3"</span>, <span class="st">"LOC4"</span>, <span class="st">"LOC5"</span><span class="op">)</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">2456</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<div class="section level4">
-<h4 id="details-on-the-inputs-entered-in-multi_location_prep-above">Details on the inputs entered in <code>multi_location_prep()</code>
+<div class="section level5">
+<h5 id="details-on-the-inputs-entered-in-multi_location_prep-above">Details on the inputs entered in <code>multi_location_prep()</code>
 above<a class="anchor" aria-label="anchor" href="#details-on-the-inputs-entered-in-multi_location_prep-above"></a>
-</h4>
+</h5>
 <p>The description for the inputs that we used to generate the
 design,</p>
 <ul>
@@ -413,9 +533,9 @@ are optional names for the locations.</li>
 randomizations.</li>
 </ul>
 </div>
-<div class="section level3">
-<h3 id="print-optim_multi_prep-object">Print <code>optim_multi_prep</code> object<a class="anchor" aria-label="anchor" href="#print-optim_multi_prep-object"></a>
-</h3>
+<div class="section level4">
+<h4 id="print-optim_multi_prep-object">Print <code>optim_multi_prep</code> object<a class="anchor" aria-label="anchor" href="#print-optim_multi_prep-object"></a>
+</h4>
 <p>To print a summary of the information that is in the object
 <code>optim_multi_prep</code>, we can use the generic function
 <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>.</p>
@@ -432,7 +552,7 @@ location and a row indicating the size of the location (number of field
 plots).</p>
 <p>For example, we can display the <code>allocation</code> object. Let
 us print the first ten genotypes allocation.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">optim_multi_prep</span><span class="op">$</span><span class="va">allocation</span>, <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code>   LOC1 LOC2 LOC3 LOC4 LOC5
 1     2    1    2    1    1
@@ -741,7 +861,7 @@ Gen-10
 <p>We can manipulate the <code>optim_multi_prep</code> object as any
 other list in R. We can first display the design parameters for the
 randomizations with the following code:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">optim_multi_prep</span><span class="op">)</span></span></code></pre></div>
 <p>which outputs:</p>
 <pre><code>Multi-Location Partially Replicated Design 
@@ -777,9 +897,9 @@ List of 7
 9   9 PrepExpt     LOC1 2023    9   1      9     15    15      G-15
 10 10 PrepExpt     LOC1 2023   10   1     10    134   134     G-134</code></pre>
 </div>
-<div class="section level3">
-<h3 id="access-to-optim_multi_prep-output">Access to <code>optim_multi_prep</code> output<a class="anchor" aria-label="anchor" href="#access-to-optim_multi_prep-output"></a>
-</h3>
+<div class="section level4">
+<h4 id="access-to-optim_multi_prep-output">Access to <code>optim_multi_prep</code> output<a class="anchor" aria-label="anchor" href="#access-to-optim_multi_prep-output"></a>
+</h4>
 <p>All objects are accessible by the <code>$</code> operator,
 i.e. <code>optim_multi_prep$layoutRandom[[1]]</code> for
 <code>LOC1</code>, <code>optim_multi_prep$fieldBook</code> for the
@@ -793,7 +913,7 @@ output below, the field book has columns for <code>ID</code>,
 <code>CHECKS</code>, <code>ENTRY</code>, and <code>TREATMENT</code>.</p>
 <p>Let us see the first 10 rows of the field book for this
 experiment.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">field_book</span> <span class="op">&lt;-</span> <span class="va">optim_multi_prep</span><span class="op">$</span><span class="va">fieldBook</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">field_book</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
 <pre><code>   ID     EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
@@ -808,31 +928,42 @@ experiment.</p>
 9   9 PrepExpt     LOC1 2023    9   1      9     15    15      G-15
 10 10 PrepExpt     LOC1 2023   10   1     10    134   134     G-134</code></pre>
 </div>
-<div class="section level3">
-<h3 id="plot-field-layout">Plot field layout<a class="anchor" aria-label="anchor" href="#plot-field-layout"></a>
-</h3>
+<div class="section level4">
+<h4 id="plot-field-layout">Plot field layout<a class="anchor" aria-label="anchor" href="#plot-field-layout"></a>
+</h4>
 <p>For plotting the layout in function of the coordinates
 <code>ROW</code> and <code>COLUMN</code> in the field book object we can
 use the generic function <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> as follows. This plots only
 the first location, but this is indexable by location using the dollar
 sign operator as well.</p>
-<div class="section level4">
-<h4 id="field-layout-for-location-1">Field Layout for Location 1<a class="anchor" aria-label="anchor" href="#field-layout-for-location-1"></a>
-</h4>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="section level5">
+<h5 id="field-layout-for-location-1">Field Layout for Location 1<a class="anchor" aria-label="anchor" href="#field-layout-for-location-1"></a>
+</h5>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">optim_multi_prep</span>, l <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
-<p><img src="multi_location_prep_files/figure-html/unnamed-chunk-16-1.png" width="691.2" style="display: block; margin: auto;"></p>
+<p><img src="multi_location_prep_files/figure-html/unnamed-chunk-21-1.png" width="691.2" style="display: block; margin: auto;"></p>
 <p>In the figure above, green plots contain replicated entries, and gray
 plots contain entries that only appear once.</p>
 </div>
-<div class="section level4">
-<h4 id="field-layout-for-location-5">Field Layout for Location 5<a class="anchor" aria-label="anchor" href="#field-layout-for-location-5"></a>
-</h4>
+<div class="section level5">
+<h5 id="field-layout-for-location-5">Field Layout for Location 5<a class="anchor" aria-label="anchor" href="#field-layout-for-location-5"></a>
+</h5>
 <p>Also, for example the location five:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">optim_multi_prep</span>, l <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code></pre></div>
-<p><img src="multi_location_prep_files/figure-html/unnamed-chunk-17-1.png" width="691.2" style="display: block; margin: auto;"></p>
-<p><br><br><br></p>
+<p><img src="multi_location_prep_files/figure-html/unnamed-chunk-22-1.png" width="691.2" style="display: block; margin: auto;"></p>
+</div>
+</div>
+</div>
+<div class="section level2">
+<h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-EdmondsonIBDs" class="csl-entry">
+Edmondson, Rodney N. 2020. <span>“<span class="nocase">Multi-level Block
+Designs for Comparative Experiments.</span>”</span> <em>Journal of
+Agricultural, Biological and Environmental Statistics</em> 91 (25):
+500–522. <a href="https://doi.org/10.1007/s13253-020-00416-0" class="external-link">https://doi.org/10.1007/s13253-020-00416-0</a>.
 </div>
 </div>
 </div>
