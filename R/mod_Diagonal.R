@@ -272,8 +272,6 @@ mod_Diagonal_server <- function(id) {
                                                  selected = "tabPanel1"))
                                                   
     getData <- eventReactive(input$RUN.diagonal, {
-    # getData <- reactive({
-      Sys.sleep(2)
       Option_NCD <- TRUE
       if (input$owndataDIAGONALS == "Yes") {
         req(input$file1)
@@ -292,7 +290,6 @@ mod_Diagonal_server <- function(id) {
                 validate("Data input needs at least two Columns with the ENTRY and NAME.")
             } 
             data_entry_UP <- na.omit(data_up[,1:2])
-            # data_entry_UP <- data_entry
             colnames(data_entry_UP) <- c("ENTRY", "NAME")
             checksEntries <- as.numeric(data_entry_UP[1:input$checks,1])
             dim_data_entry <- nrow(data_entry_UP)
@@ -365,7 +362,7 @@ mod_Diagonal_server <- function(id) {
       t2 <- ceiling(lines + lines * 0.20)
       t <- t1:t2
       n <- t[-numbers::isPrime(t)]
-      #withProgress(message = 'Calculation in progress', {
+      withProgress(message = 'Getting field dimensions ...', {
         choices_list <- list()
         i <- 1
         for (n in t) {
@@ -389,26 +386,36 @@ mod_Diagonal_server <- function(id) {
           n_rows <- as.numeric(dims[1])
           n_cols  <- as.numeric(dims[2])
           
-          dt_options <- available_percent(n_rows = n_rows,
-                                          n_cols = n_cols,
-                                          checks = checksEntries,
-                                          Option_NCD = Option_NCD,
-                                          kindExpt = kindExpt_single,
-                                          stacked = input$stacked,
-                                          planter_mov1 = planter_mov,
-                                          data = getData()$data_entry,
-                                          dim_data = getData()$dim_data_entry,
-                                          dim_data_1 = getData()$dim_without_checks,
-                                          Block_Fillers = NULL)
+          dt_options <- available_percent(
+            n_rows = n_rows,
+            n_cols = n_cols,
+            checks = checksEntries,
+            Option_NCD = Option_NCD,
+            kindExpt = kindExpt_single,
+            stacked = input$stacked,
+            planter_mov1 = planter_mov,
+            data = getData()$data_entry,
+            dim_data = getData()$dim_data_entry,
+            dim_data_1 = getData()$dim_without_checks,
+            Block_Fillers = NULL
+          )
           if (!is.null(dt_options$dt)) {
             new_choices[[v]] <- choices[[dim_options]]
             v <- v + 1
           }
         }
-      #})
+        dif <- vector(mode = "numeric", length = length(new_choices))
+        for (option in 1:length(new_choices)) {
+          dims <- unlist(strsplit(new_choices[[option]], " x "))
+          dif[option] <- abs(as.numeric(dims[1]) - as.numeric(dims[2]))
+        }
+        df_choices <- data.frame(choices = unlist(new_choices), diff_dim = dif)
+        df_choices <- df_choices[order(df_choices$diff_dim, decreasing = FALSE), ]
+        sort_choices <- as.vector(df_choices$choices)
+      })
       updateSelectInput(inputId = "dimensions.d",
-                        choices = new_choices,
-                        selected = new_choices[1])
+                        choices = sort_choices,
+                        selected = sort_choices[1])
     })
     
     observeEvent(input$RUN.diagonal, {

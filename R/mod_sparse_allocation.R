@@ -429,7 +429,8 @@ mod_sparse_allocation_server <- function(id){
         checks <- as.numeric(input$sparse_checks)
         lines_plus_checks <- lines + checks
         locs <- single_inputs()$sites
-        optim_out <- do_optim(
+        withProgress(message = 'Optimization in progress ...', {
+          optim_out <- do_optim(
             design = "sparse",
             lines = lines, 
             l = locs,
@@ -438,7 +439,8 @@ mod_sparse_allocation_server <- function(id){
             checks = as.numeric(input$sparse_checks), 
             seed = single_inputs()$seed_number,
             data = sparse_data_input
-        )
+          )
+        })
         if (input$input_sparse_data == "Yes") {
             req(get_sparse_data())
             max_entry <- max(get_sparse_data()$input_entries)
@@ -531,7 +533,7 @@ mod_sparse_allocation_server <- function(id){
         df_choices <- data.frame(choices = unlist(new_choices), diff_dim = dif)
         df_choices <- df_choices[order(df_choices$diff_dim, decreasing = FALSE), ]
         sort_choices <- as.vector(df_choices$choices)
-      #})
+
         updateSelectInput(inputId = "sparse_dims",
                           choices = sort_choices,
                           selected = sort_choices[1])
