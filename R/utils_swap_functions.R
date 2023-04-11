@@ -63,26 +63,31 @@ pairs_distance <- function(X) {
                             rB=as.integer(NA),
                             cB=as.integer(NA))
     for (i in seq_along(dupsI)) {
-        minDist <- sqrt(sum(dim(X)^2))
+        #minDist <- sqrt(sum(dim(X)^2))
         id <- which(X==dupsI[i])
+        print(id)
         loopPairs <- possPairs(id)
+        print(loopPairs)
         for (z in 1:nrow(loopPairs)){
             coord.a <- which(
                 matrix((1:length(X))==loopPairs[z,1,drop=TRUE],dim(X),byrow = FALSE),
                 arr.ind = TRUE
             )
+            print(coord.a)
             coord.b <- which(
                 matrix((1:length(X))==loopPairs[z,2,drop=TRUE],dim(X),byrow = FALSE),
                 arr.ind = TRUE
             )
+            print(coord.b)
             loopDist <- sqrt(sum(abs(coord.a-coord.b)^2))
-            if (loopDist < minDist){
-                minDist <- loopDist
-                plotDist$DIST[i] <- loopDist
-                plotDist[i,2:3] <- loopPairs[z,]
-                plotDist[i,5:6] <- coord.a
-                plotDist[i,7:8] <- coord.b
-            }
+            print(loopDist, )
+            #if (loopDist < minDist){
+            #minDist <- loopDist
+            plotDist$DIST[i] <- loopDist
+            plotDist[i,2:3] <- loopPairs[z,]
+            plotDist[i,5:6] <- coord.a
+            plotDist[i,7:8] <- coord.b
+            #}
         }
     }
     plotDist <- plotDist[order(plotDist$DIST),]
