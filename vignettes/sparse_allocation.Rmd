@@ -1,6 +1,14 @@
 ---
 title: "Sparse Allocation"
-output: rmarkdown::html_vignette
+author: 
+  - name: Didier Murillo Florez^1^, Matthew Seefeldt
+    affiliation: 
+    - ^1^North Dakota Agricultural Experiment Station, North Dakota State University, USA.
+output:
+  html_document:
+    css: my_vignette_style.css
+    toc: true
+bibliography: references.bib
 vignette: >
   %\VignetteIndexEntry{Sparse Allocation}
   %\VignetteEngine{knitr::rmarkdown}
@@ -33,14 +41,28 @@ R package.
 ## Overview
 
 Sparse allocation is a valuable strategy in plant breeding experiments, as it allows researchers to 
-evaluate a large number of treatments over multiple locations in a single experiment. 
-Sparse allocation can increase efficiency and reduce the number of experimental units required, 
-making it a cost-effective option.
+evaluate a large number of treatments over multiple locations in a single experiment. Sparse allocation 
+can increase efficiency and reduce the number of experimental units required, making it a cost-effective 
+option. One standard method for implementing sparse allocation in plant breeding experiments is 
+incomplete block designs (IBD) [@EdmondsonIBDs]. 
 
-One standard method for implementing sparse allocation in plant breeding experiments is 
-incomplete block designs (IBD). Sparse allocation using an incomplete block design is a 
-powerful tool in plant breeding experiments that can increase efficiency, reduce costs, 
-and provide valuable insights into the performance of treatments across multiple locations. 
+The following key points summarize the advantages and disadvantages of sparse 
+allocation [@MontesinosLopezSparse]:
+
+**Increased efficiency**: By using sparse allocation, breeders can evaluate a large number of genotypes or 
+treatments in a single experiment across multiple environments, which can accelerate the breeding program 
+and reduce the time and resources needed for evaluation.
+
+**Selection intensity**: The large number of genotypes or treatments evaluated in sparse allocation 
+experiments can increase the genetic diversity in the breeding program and increase the chances 
+of identifying superior genotypes or treatments.
+
+**Cost-effective**: Sparse allocation experiments are generally less expensive compared to fully 
+replicated experiments since fewer experimental units are needed.
+
+**Less accurate predictions**: The limited number of experimental units means that the estimates 
+of treatment effects are less precise compared to fully replicated designs. However, an increase 
+in selection intensity may compensate for the loss of accuracy (Trade off problem).
 
 FielDHub includes a function to run the sparse allocation strategy and the multi-location 
 randomization, as well as an interface for creating a sparse allocation design on the 
@@ -242,12 +264,12 @@ sparse_example <- sparse_allocation(
 To print a summary of the information that is in the object `sparse_example`, we can use the generic 
 function `print()`. 
 
-The `sparse_allocation()` function returns a list of 4 objects, `designs`, `list_locs`, `allocation`, 
-and `size_locations`. The object `designs` contains the randomization and information about the design 
-parameters for each location, while `list_locs` is a list of data frames. Each data frame has two columns;
-`ENTRY` and `NAME` with the information to randomize to each environment. The object `allocation` is the 
-binary allocation matrix of genotypes to locations, and `size_locations` is a data frame with a column for 
-each location and a row indicating the size of the location (number of field plots). 
+The `sparse_allocation()` function returns a list of objects, includes all the outputs from the function
+diagonal_arrangement() and in addition `list_locs`, `allocation`, and `size_locations`. The `list_locs` object 
+is a list of data frames. Each data frame has two columns; `ENTRY` and `NAME` with the information to randomize 
+to each environment. The object `allocation` is the binary allocation matrix of genotypes to locations, 
+and `size_locations` is a data frame with a column for  each location and a row indicating the size of 
+the location (number of field plots). 
 
 For example, we can display the `allocation` object. Let us print the first ten genotypes allocation.
 
@@ -259,42 +281,28 @@ print(head(sparse_example$allocation, 10))
 print(head(sparse_example$allocation, 10))
 ```
 
-We can manipulate the sparse_allocation object as any other list in R. For example, we can save the 
-design randomizations to an object called `designs`, and then index based on location  using the dollar
-sign operator. We can first display the design parameters for `LOC1` with the following code:
+We can manipulate the sparse_allocation object as any other list in R. For example, we can print the design 
+information as following:
 
 ```{r, echo=TRUE, eval=FALSE}
-design_randomization <- sparse_example$designs
-print(design_randomization$LOC1)
+print(sparse_example)
 ```
 
 which outputs:
 
 ```{r, echo=FALSE, eval=TRUE}
-design_randomization <- sparse_example$designs
-print(design_randomization$LOC1)
-```
-
-And for `LOC2` by changing the location to print to `LOC2`:
-
-```{r, echo=TRUE, eval=FALSE}
-print(design_randomization$LOC2)
-```
-
-which outputs:
-
-```{r, echo=FALSE, eval=TRUE}
-print(design_randomization$LOC2)
+print(sparse_example)
 ```
 
 ### Access to `sparse_example` object
 
-The object `design_randomization` we saved `sparse_example$designs` to is a list consisting of all 
-the information displayed in the output tabs in the FielDHub app: design information, plot layout, 
+The object `sparse_example` is a list consisting of all  the information displayed in the output tabs in 
+the FielDHub app: design information, plot layout, 
 plot numbering, entries list, and field book, indexed by each location in the experiment. These are 
-accessible by  the `$` operator, i.e. `designs$LOC1$layoutRandom` or `designs$LOC1$fieldBook` for `LOC1`, etc. 
+accessible by  the `$` operator, i.e. `designs$layoutRandom[[1]]` for `LOC1` or `designs$fieldBook` for 
+the whole field book.
 
-`designs$LOC1$fieldBook` is a data frame containing information about every plot in the field, with 
+`designs$fieldBook` is a data frame containing information about every plot in the field, with 
 information about the location of the plot and the treatment in each plot. As seen in the output below, 
 the field book has columns for `ID`, `EXPT`, `LOCATION`, `YEAR`, `PLOT`, `ROW`, `COLUMN`, `CHECKS`, 
 `ENTRY`, and `TREATMENT`.
@@ -302,12 +310,12 @@ the field book has columns for `ID`, `EXPT`, `LOCATION`, `YEAR`, `PLOT`, `ROW`, 
 Let us see the first 10 rows of the field book for the first location in this experiment.
 
 ```{r, echo=TRUE, eval=FALSE}
-field_book <- design_randomization$LOC1$fieldBook
+field_book <- sparse_example$fieldBook
 head(field_book, 10)
 ```
 
 ```{r, echo=FALSE, eval=TRUE}
-field_book <- design_randomization$LOC1$fieldBook
+field_book <- sparse_example$fieldBook
 head(field_book, 10)
 ```
 
@@ -319,7 +327,7 @@ For plotting the layout in function of the coordinates `ROW` and `COLUMN` in the
 can use the generic function `plot()` as follows,
 
 ```{r, fig.align='center', fig.width=7.2, fig.height=5}
-plot(design_randomization$LOC1)
+plot(sparse_example, l = 1)
 ```
 
 The above plot is for `LOC1`. We can plot any location in the experiment, like location 2 in this example:
@@ -327,13 +335,11 @@ The above plot is for `LOC1`. We can plot any location in the experiment, like l
 #### Plot field layout Location 2
 
 ```{r, fig.align='center', fig.width=7.2, fig.height=5}
-plot(design_randomization$LOC2)
+plot(sparse_example, l = 2)
 ```
 
 The figure above shows a map of an experiment randomized as an unreplicated arrangement design. 
-The salmon plots represent the unreplicated treatments, while the yellow-boxed colored check plots are 
+The blue plots represent the unreplicated treatments, while the yellow-boxed colored check plots are 
 replicated throughout the field in a systematic diagonal arrangement. The red plots with 0s are are fillers. 
 
-<br>
-<br>
-<br>
+# References

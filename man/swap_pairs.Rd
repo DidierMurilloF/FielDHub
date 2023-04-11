@@ -36,8 +36,8 @@ set.seed(123)
 X <- matrix(sample(c(rep(1:10, 2), 11:50), replace = FALSE), ncol = 10)
 X
 # Swap pairs
-B <- swap_pairs(X, starting_dist = 2)
-B$X
+B <- swap_pairs(X, starting_dist = 3)
+B$optim_design
 B$designs
 B$distances
 

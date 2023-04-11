@@ -354,39 +354,33 @@ sparse_allocation <- function(
         nrows <- as.numeric(dimensions[1])
         ncols <- as.numeric(dimensions[2])
     }
-    # Create a space in memory for the unrep randomizations
-    unrep_designs <- setNames(
-        object = vector(mode = "list", length = l), 
-        nm = names(unrep$list_locs)
+    unrep_designs <- diagonal_arrangement(
+        nrows = nrows, 
+        ncols = ncols, 
+        checks = checks,
+        planter = planter, 
+        plotNumber = plotNumber,
+        l = l,
+        locationNames = locationNames,
+        exptName = exptName,
+        seed = seed,
+        multi_location_data= TRUE,
+        data = unrep
     )
-    v <- 1
-    for (site in names(unrep$list_locs)) {
-        df_loc <- unrep$list_locs[[site]] %>% 
-        dplyr::mutate(ENTRY = as.numeric(ENTRY)) %>% 
-        dplyr::select(ENTRY, NAME)
-        unrep_designs[[site]] <- diagonal_arrangement(
-            nrows = nrows, 
-            ncols = ncols, 
-            checks = checks,
-            planter = planter, 
-            plotNumber = plotNumber[v],
-            locationNames = locationNames[v],
-            exptName = exptName,
-            seed = seed,
-            data = df_loc
-        )
-        v  <- v + 1
-    }
-    return(
-        list(
-            designs = unrep_designs, 
-            list_locs = unrep$list_locs, 
-            allocation = unrep$allocation, 
-            size_locations = unrep$size_locations
-        )
+    unrep_designs$infoDesign$id_design <- "Sparse"
+    output <- list(
+        infoDesign = unrep_designs$infoDesign,
+        layoutRandom = unrep_designs$layoutRandom, 
+        plotsNumber = unrep_designs$plotsNumber,
+        data_entry = unrep_designs$data_entry, 
+        fieldBook = unrep_designs$fieldBook,
+        list_locs = unrep$list_locs, 
+        allocation = unrep$allocation, 
+        size_locations = unrep$size_locations
     )
+    class(output) <- "FielDHub"
+    return(invisible(output))
 }
-
 #' @title Optimized multi-location partially replicated design
 #' @param lines Number of genotypes, experimental lines or treatments.
 #' @param copies_per_entry Number of total copies per treatment.
@@ -520,7 +514,7 @@ multi_location_prep <- function(
         nrows <- as.numeric(dimensions[1])
         ncols <- as.numeric(dimensions[2])
     }
-    # Generate the randomization
+    # Generate the p-rep randomization
     design_randomization <- partially_replicated(
         nrows = nrows, 
         ncols = ncols,

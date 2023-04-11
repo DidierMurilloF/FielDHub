@@ -54,6 +54,8 @@ navbar:
 
 news:
   releases:
+  - text: "Version 1.3.1"
+    href: articles/news/fieldhub-1-3-1.html
   - text: "Version 1.2.0"
     href: articles/news/fieldhub-1-2-0.html
   - text: "Version 0.1.0"

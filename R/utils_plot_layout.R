@@ -222,10 +222,14 @@ plot_layout <- function(
         return_arcbd <- plot_augmented_RCBD(x = x, l = l)
         return(list(out_layout = return_arcbd$p1, 
                     allSitesFieldbook = return_arcbd$allSitesFieldbook))
-    } else if (x$infoDesign$id_design == 15) {
+    } else if (x$infoDesign$id_design == 15 || x$infoDesign$id_design == "Sparse") {
         return_diagonal <- plot_diagonal_arrangement(x = x, l = l)
-        return(list(out_layout = return_diagonal$p1, 
-                    allSitesFieldbook = return_diagonal$allSitesFieldbook))
+        return(
+            list(
+                out_layout = return_diagonal$p1, 
+                allSitesFieldbook = return_diagonal$allSitesFieldbook
+            )
+        )
     } else if (x$infoDesign$id_design == 16) {
         return_optim <- plot_optim(x = x, l = l)
         return(list(out_layout = return_optim$p1, 
