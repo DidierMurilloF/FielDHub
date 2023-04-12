@@ -153,8 +153,8 @@ By default <code>multi_location_data = FALSE</code>.</p></dd>
 
 
 <dt>data</dt>
-<dd><p>(optional) Dataframe with 3 columns: <code>ENTRY | NAME | REPS</code>. If the 
-<code>multi_location_data = TRUE</code> then the <code>data</code> dataframe must have
+<dd><p>(optional) Data frame with 3 columns: <code>ENTRY | NAME | REPS</code>. If
+<code>multi_location_data = TRUE</code> then the <code>data</code> must have
 4 columns: <code>LOCATION | ENTRY | NAME | REPS</code></p></dd>
 
 </dl></div>
@@ -188,23 +188,23 @@ with correlated data. Journal of Agricultural, Biological, and Environmental Sta
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Example 1: Generates a spatial optimized partially replicated arrangement design in one </span></span></span>
-<span class="r-in"><span><span class="co"># location with 312 genotypes for a field with dimensions 15 rows x 28 cols. </span></span></span>
-<span class="r-in"><span><span class="co"># Note that there are 250 genotypes unreplicated (only one time), 50 genotypes replicated </span></span></span>
-<span class="r-in"><span><span class="co"># two times, and 10 genotypes replicated three times, and two checks 20 times each one.</span></span></span>
+<span class="r-in"><span><span class="co"># location with 335 genotypes for a field with dimensions 15 rows x 28 cols. </span></span></span>
+<span class="r-in"><span><span class="co"># Note that there are 250 genotypes unreplicated (only one time), 85 genotypes replicated </span></span></span>
+<span class="r-in"><span><span class="co"># two times, and three checks 8 times each.</span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
-<span class="r-in"><span><span class="va">SpatpREP1</span> <span class="op">&lt;-</span> <span class="fu">partially_replicated</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  nrows <span class="op">=</span> <span class="fl">15</span>, </span></span>
-<span class="r-in"><span>  ncols <span class="op">=</span> <span class="fl">28</span>,  </span></span>
-<span class="r-in"><span>  repGens <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">250</span>,<span class="fl">50</span>,<span class="fl">10</span>,<span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  repUnits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span>,<span class="fl">3</span>,<span class="fl">20</span>,<span class="fl">20</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  planter <span class="op">=</span> <span class="st">"cartesian"</span>, </span></span>
-<span class="r-in"><span>  plotNumber <span class="op">=</span> <span class="fl">101</span>,</span></span>
-<span class="r-in"><span>  seed <span class="op">=</span> <span class="fl">77</span></span></span>
-<span class="r-in"><span> <span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">SpatpREP1</span><span class="op">$</span><span class="va">infoDesign</span></span></span>
-<span class="r-in"><span><span class="va">SpatpREP1</span><span class="op">$</span><span class="va">layoutRandom</span></span></span>
-<span class="r-in"><span><span class="va">SpatpREP1</span><span class="op">$</span><span class="va">plotNumber</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">SpatpREP1</span><span class="op">$</span><span class="va">fieldBook</span>,<span class="fl">12</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">prep_deseign1</span> <span class="op">&lt;-</span> <span class="fu">partially_replicated</span><span class="op">(</span></span></span>
+<span class="r-in"><span> nrows <span class="op">=</span> <span class="fl">12</span>, </span></span>
+<span class="r-in"><span> ncols <span class="op">=</span> <span class="fl">37</span>,  </span></span>
+<span class="r-in"><span> repGens <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">250</span>, <span class="fl">85</span>, <span class="fl">3</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span> repUnits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">8</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span> planter <span class="op">=</span> <span class="st">"cartesian"</span>, </span></span>
+<span class="r-in"><span> plotNumber <span class="op">=</span> <span class="fl">101</span>,</span></span>
+<span class="r-in"><span> seed <span class="op">=</span> <span class="fl">77</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">prep_deseign1</span><span class="op">$</span><span class="va">infoDesign</span></span></span>
+<span class="r-in"><span><span class="va">prep_deseign1</span><span class="op">$</span><span class="va">layoutRandom</span></span></span>
+<span class="r-in"><span><span class="va">prep_deseign1</span><span class="op">$</span><span class="va">plotNumber</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">prep_deseign1</span><span class="op">$</span><span class="va">fieldBook</span>, <span class="fl">12</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 2: Generates a spatial optimized partially replicated arrangement design with 492 </span></span></span>
@@ -219,16 +219,18 @@ with correlated data. Journal of Agricultural, Biological, and Environmental Sta
 <span class="r-in"><span><span class="va">treatment_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>ENTRY <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">492</span>, NAME <span class="op">=</span> <span class="va">NAME</span>, REPS <span class="op">=</span> <span class="va">REPS</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">treatment_list</span>, <span class="fl">12</span><span class="op">)</span> </span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail</a></span><span class="op">(</span><span class="va">treatment_list</span>, <span class="fl">12</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">SpatpREP2</span> <span class="op">&lt;-</span> <span class="fu">partially_replicated</span><span class="op">(</span>nrows <span class="op">=</span> <span class="fl">30</span>, </span></span>
-<span class="r-in"><span>                                  ncols <span class="op">=</span> <span class="fl">20</span>, </span></span>
-<span class="r-in"><span>                                  planter <span class="op">=</span> <span class="st">"serpentine"</span>, </span></span>
-<span class="r-in"><span>                                  plotNumber <span class="op">=</span> <span class="fl">101</span>,</span></span>
-<span class="r-in"><span>                                  seed <span class="op">=</span> <span class="fl">41</span>,</span></span>
-<span class="r-in"><span>                                  data <span class="op">=</span> <span class="va">treatment_list</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">SpatpREP2</span><span class="op">$</span><span class="va">infoDesign</span></span></span>
-<span class="r-in"><span><span class="va">SpatpREP2</span><span class="op">$</span><span class="va">layoutRandom</span></span></span>
-<span class="r-in"><span><span class="va">SpatpREP2</span><span class="op">$</span><span class="va">plotNumber</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">SpatpREP2</span><span class="op">$</span><span class="va">fieldBook</span>,<span class="fl">10</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">prep_deseign2</span> <span class="op">&lt;-</span> <span class="fu">partially_replicated</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  nrows <span class="op">=</span> <span class="fl">30</span>, </span></span>
+<span class="r-in"><span>  ncols <span class="op">=</span> <span class="fl">20</span>, </span></span>
+<span class="r-in"><span>  planter <span class="op">=</span> <span class="st">"serpentine"</span>, </span></span>
+<span class="r-in"><span>  plotNumber <span class="op">=</span> <span class="fl">101</span>,</span></span>
+<span class="r-in"><span>  seed <span class="op">=</span> <span class="fl">41</span>,</span></span>
+<span class="r-in"><span>  data <span class="op">=</span> <span class="va">treatment_list</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">prep_deseign2</span><span class="op">$</span><span class="va">infoDesign</span></span></span>
+<span class="r-in"><span><span class="va">prep_deseign2</span><span class="op">$</span><span class="va">layoutRandom</span></span></span>
+<span class="r-in"><span><span class="va">prep_deseign2</span><span class="op">$</span><span class="va">plotNumber</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">prep_deseign2</span><span class="op">$</span><span class="va">fieldBook</span>, <span class="fl">10</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

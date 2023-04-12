@@ -190,28 +190,28 @@ Zealand Journal of Statistics, 53(4), 461–480.</p>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Example 1: Generates a spatial unreplicated optimized arrangement design in one location</span></span></span>
-<span class="r-in"><span><span class="co"># with 108 genotypes + 12 check plots (4 checks) for a field with dimension 10 rows x 12 cols.</span></span></span>
-<span class="r-in"><span><span class="va">OptimAd1</span> <span class="op">&lt;-</span> <span class="fu">optimized_arrangement</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  nrows <span class="op">=</span> <span class="fl">10</span>, </span></span>
-<span class="r-in"><span>  ncols <span class="op">=</span> <span class="fl">12</span>, </span></span>
-<span class="r-in"><span>  lines <span class="op">=</span> <span class="fl">108</span>, </span></span>
-<span class="r-in"><span>  amountChecks <span class="op">=</span> <span class="fl">12</span>, </span></span>
+<span class="r-in"><span><span class="co"># with 120 genotypes + 20 check plots (4 checks) for a field with dimension 14 rows x 10 cols.</span></span></span>
+<span class="r-in"><span><span class="va">optim_unrep1</span> <span class="op">&lt;-</span> <span class="fu">optimized_arrangement</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  nrows <span class="op">=</span> <span class="fl">14</span>, </span></span>
+<span class="r-in"><span>  ncols <span class="op">=</span> <span class="fl">10</span>, </span></span>
+<span class="r-in"><span>  lines <span class="op">=</span> <span class="fl">120</span>, </span></span>
+<span class="r-in"><span>  amountChecks <span class="op">=</span> <span class="fl">20</span>, </span></span>
 <span class="r-in"><span>  checks <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">4</span>,</span></span>
 <span class="r-in"><span>  planter <span class="op">=</span> <span class="st">"cartesian"</span>, </span></span>
 <span class="r-in"><span>  plotNumber <span class="op">=</span> <span class="fl">101</span>,</span></span>
-<span class="r-in"><span>  seed <span class="op">=</span> <span class="fl">14</span>,</span></span>
 <span class="r-in"><span>  exptName <span class="op">=</span> <span class="st">"20RW1"</span>,</span></span>
-<span class="r-in"><span>  locationNames <span class="op">=</span> <span class="st">"CASSELTON"</span></span></span>
-<span class="r-in"><span> <span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">OptimAd1</span><span class="op">$</span><span class="va">infoDesign</span></span></span>
+<span class="r-in"><span>  locationNames <span class="op">=</span> <span class="st">"CASSELTON"</span>,</span></span>
+<span class="r-in"><span>  seed <span class="op">=</span> <span class="fl">14124</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">optim_unrep1</span><span class="op">$</span><span class="va">infoDesign</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $rows</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 14</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $columns</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 12</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 10</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $treatments</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 108</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 120</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $checks</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 4</span>
@@ -220,7 +220,7 @@ Zealand Journal of Statistics, 53(4), 461–480.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1 2 3 4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $rep_checks</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 3 3 3 3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 5 5 5 5</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $locations</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
@@ -229,53 +229,61 @@ Zealand Journal of Statistics, 53(4), 461–480.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "cartesian"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $seed</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 14</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 14124</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $id_design</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 16</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span><span class="va">OptimAd1</span><span class="op">$</span><span class="va">layoutRandom</span></span></span>
+<span class="r-in"><span><span class="va">optim_unrep1</span><span class="op">$</span><span class="va">layoutRandom</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       Col1 Col2 Col3 Col4 Col5 Col6 Col7 Col8 Col9 Col10 Col11 Col12</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row10   74    2   56   19   38  105   97   60   86    45   104    92</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row9   111    3   88   13   90   77   37    1   21    81    50   103</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row8    28   62  110   68   93   43   40   29   32    80     4   107</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row7    15   10   83   63  102   25   52   27   34     6    85    18</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row6    12   14   89   67   79    5  109   84   30   100   108    94</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row5    39   91   59   70   99   49    9   35   17    95    82    51</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row4     4   57   53   55   66  106   69   76   11    78    96    41</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row3    71   23    7   47   16   24   54   31   75   112     8     3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row2    48    3   65   44  101   98   64   73   36     1    33    42</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row1     1    2   87   61   46   72   22   20    2     4    26    58</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       Col1 Col2 Col3 Col4 Col5 Col6 Col7 Col8 Col9 Col10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row14   82   75    4   79   73   70   45   76   41    43</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row13   16   62  118    2   19  100  103    2   53   123</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row12    3   30  104    3  114    1   88   34   68    24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row11   12  117   95   78    7   27  122   84    1    38</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row10   92   13   42  120   28  113  111    3   94   105</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row9   107   90  115   23    2   10   63    6   31    59</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row8    99    8   37  109   55   48  124   56   17   101</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row7    39   15   26   71   61   96  102    1   49    18</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row6    33  116   20    4   64    9   97    4   69   119</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row5    47  110    1   83   44    3   11  112   25     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row4    29   85   32   81   65    5   89   22   91    14</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row3    58   57   60   72   54   98   21   93   35    46</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row2   106  108   87   86    4    2   51   40   50    80</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row1    36   67  121   77   66   52    3   74    4     1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span><span class="va">OptimAd1</span><span class="op">$</span><span class="va">plotNumber</span></span></span>
+<span class="r-in"><span><span class="va">optim_unrep1</span><span class="op">$</span><span class="va">plotNumber</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,]  209  210  211  212  213  214  215  216  217   218   219   220</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,]  197  198  199  200  201  202  203  204  205   206   207   208</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,]  185  186  187  188  189  190  191  192  193   194   195   196</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,]  173  174  175  176  177  178  179  180  181   182   183   184</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,]  161  162  163  164  165  166  167  168  169   170   171   172</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,]  149  150  151  152  153  154  155  156  157   158   159   160</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,]  137  138  139  140  141  142  143  144  145   146   147   148</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,]  125  126  127  128  129  130  131  132  133   134   135   136</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,]  113  114  115  116  117  118  119  120  121   122   123   124</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [10,]  101  102  103  104  105  106  107  108  109   110   111   112</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,]  231  232  233  234  235  236  237  238  239   240</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,]  221  222  223  224  225  226  227  228  229   230</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,]  211  212  213  214  215  216  217  218  219   220</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,]  201  202  203  204  205  206  207  208  209   210</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,]  191  192  193  194  195  196  197  198  199   200</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,]  181  182  183  184  185  186  187  188  189   190</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,]  171  172  173  174  175  176  177  178  179   180</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,]  161  162  163  164  165  166  167  168  169   170</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,]  151  152  153  154  155  156  157  158  159   160</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [10,]  141  142  143  144  145  146  147  148  149   150</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [11,]  131  132  133  134  135  136  137  138  139   140</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [12,]  121  122  123  124  125  126  127  128  129   130</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13,]  111  112  113  114  115  116  117  118  119   120</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [14,]  101  102  103  104  105  106  107  108  109   110</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">OptimAd1</span><span class="op">$</span><span class="va">fieldBook</span>,<span class="fl">12</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">optim_unrep1</span><span class="op">$</span><span class="va">fieldBook</span>, <span class="fl">12</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    ID  EXPT  LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1   1 20RW1 CASSELTON 2023  101   1      1      1     1       CH1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2   2 20RW1 CASSELTON 2023  102   1      2      2     2       CH2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3   3 20RW1 CASSELTON 2023  103   1      3      0    87       G87</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4   4 20RW1 CASSELTON 2023  104   1      4      0    61       G61</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5   5 20RW1 CASSELTON 2023  105   1      5      0    46       G46</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6   6 20RW1 CASSELTON 2023  106   1      6      0    72       G72</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7   7 20RW1 CASSELTON 2023  107   1      7      0    22       G22</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8   8 20RW1 CASSELTON 2023  108   1      8      0    20       G20</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9   9 20RW1 CASSELTON 2023  109   1      9      2     2       CH2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10 10 20RW1 CASSELTON 2023  110   1     10      4     4       CH4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11 11 20RW1 CASSELTON 2023  111   1     11      0    26       G26</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12 12 20RW1 CASSELTON 2023  112   1     12      0    58       G58</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1   1 20RW1 CASSELTON 2023  101   1      1      0    36       G36</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   2 20RW1 CASSELTON 2023  102   1      2      0    67       G67</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3   3 20RW1 CASSELTON 2023  103   1      3      0   121      G121</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4   4 20RW1 CASSELTON 2023  104   1      4      0    77       G77</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5   5 20RW1 CASSELTON 2023  105   1      5      0    66       G66</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6   6 20RW1 CASSELTON 2023  106   1      6      0    52       G52</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7   7 20RW1 CASSELTON 2023  107   1      7      3     3       CH3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8   8 20RW1 CASSELTON 2023  108   1      8      0    74       G74</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9   9 20RW1 CASSELTON 2023  109   1      9      4     4       CH4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10 10 20RW1 CASSELTON 2023  110   1     10      1     1       CH1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11 11 20RW1 CASSELTON 2023  111   2      1      0   106      G106</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12 12 20RW1 CASSELTON 2023  112   2      2      0   108      G108</span>
 <span class="r-in"><span>                  </span></span>
 <span class="r-in"><span><span class="co"># Example 2: Generates a spatial unreplicated optimized arrangement design in one location</span></span></span>
 <span class="r-in"><span><span class="co"># with 200 genotypes + 20 check plots (4 checks) for a field with dimension 10 rows x 22 cols.</span></span></span>
@@ -313,7 +321,7 @@ Zealand Journal of Statistics, 53(4), 461–480.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 202   202 G202    1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 203   203 G203    1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 204   204 G204    1</span>
-<span class="r-in"><span><span class="va">OptimAd2</span> <span class="op">&lt;-</span> <span class="fu">optimized_arrangement</span><span class="op">(</span></span></span>
+<span class="r-in"><span><span class="va">optim_unrep2</span> <span class="op">&lt;-</span> <span class="fu">optimized_arrangement</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  nrows <span class="op">=</span> <span class="fl">10</span>, </span></span>
 <span class="r-in"><span>  ncols <span class="op">=</span> <span class="fl">22</span>, </span></span>
 <span class="r-in"><span>  planter <span class="op">=</span> <span class="st">"serpentine"</span>, </span></span>
@@ -324,7 +332,7 @@ Zealand Journal of Statistics, 53(4), 461–480.</p>
 <span class="r-in"><span>  data <span class="op">=</span> <span class="va">treatment_list</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 220</span>
-<span class="r-in"><span><span class="va">OptimAd2</span><span class="op">$</span><span class="va">infoDesign</span></span></span>
+<span class="r-in"><span><span class="va">optim_unrep2</span><span class="op">$</span><span class="va">infoDesign</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $rows</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 10</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -355,7 +363,7 @@ Zealand Journal of Statistics, 53(4), 461–480.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $id_design</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 16</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span><span class="va">OptimAd2</span><span class="op">$</span><span class="va">layoutRandom</span></span></span>
+<span class="r-in"><span><span class="va">optim_unrep2</span><span class="op">$</span><span class="va">layoutRandom</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       Col1 Col2 Col3 Col4 Col5 Col6 Col7 Col8 Col9 Col10 Col11 Col12 Col13</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Row10  199   94   70  133   40   62   44   99   24    65    33   196   135</span>
@@ -380,7 +388,7 @@ Zealand Journal of Statistics, 53(4), 461–480.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Row2    104    72    36    60   191     9    92     2    64</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Row1    184    46   107   195   117   109    67   163    93</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span><span class="va">OptimAd2</span><span class="op">$</span><span class="va">plotNumber</span></span></span>
+<span class="r-in"><span><span class="va">optim_unrep2</span><span class="op">$</span><span class="va">plotNumber</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1,]  320  319  318  317  316  315  314  313  312   311   310   309   308</span>
@@ -405,7 +413,7 @@ Zealand Journal of Statistics, 53(4), 461–480.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [9,]   131   130   129   128   127   126   125   124   123</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [10,]   114   115   116   117   118   119   120   121   122</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">OptimAd2</span><span class="op">$</span><span class="va">fieldBook</span>,<span class="fl">12</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">optim_unrep2</span><span class="op">$</span><span class="va">fieldBook</span>,<span class="fl">12</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    ID   EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1   1 20YWA2    MINOT 2023  101   1      1      0   160      G160</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2   2 20YWA2    MINOT 2023  102   1      2      1     1       CH1</span>
