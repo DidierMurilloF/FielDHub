@@ -39,7 +39,7 @@ pairs_distance <- function(X) {
         # removing reciprocals 
         # Relying on rownames to remove dups
         rownames(PAIRS) <- 1:nrow(PAIRS)
-        c_id <- as.integer(rownames(unique(t(apply(PAIRS[,1:2],MARGIN = 1,FUN=sort)))))
+        c_id <- as.integer(rownames(unique(t(apply(PAIRS[, 1:2], MARGIN = 1, FUN = sort)))))
         PAIRS <- PAIRS[c_id,]
         # row name reset
         rownames(PAIRS) <- 1:nrow(PAIRS)
@@ -53,39 +53,42 @@ pairs_distance <- function(X) {
         stop("All elements in X appear only once")
     }
     dupsI <- as.numeric(rownames(dups)[dups > 1])
-    #preloop DF creation
-    plotDist <- data.frame(geno=dupsI,
-                            Pos1=as.integer(NA),
-                            Pos2=as.integer(NA),
-                            DIST=as.numeric(NA),
-                            rA=as.integer(NA),
-                            cA=as.integer(NA),
-                            rB=as.integer(NA),
-                            cB=as.integer(NA))
+    pair_points <- matrix(data = NA, nrow = 0, ncol = 2)
+    int_reps <- numeric()
+    colnames(pair_points) <- c("P2", "P1")
     for (i in seq_along(dupsI)) {
-        minDist <- sqrt(sum(dim(X)^2))
+        id <- which(X == dupsI[i])
         id <- which(X==dupsI[i])
         loopPairs <- possPairs(id)
-        for (z in 1:nrow(loopPairs)){
-            coord.a <- which(
-                matrix((1:length(X))==loopPairs[z,1,drop=TRUE],dim(X),byrow = FALSE),
-                arr.ind = TRUE
-            )
-            coord.b <- which(
-                matrix((1:length(X))==loopPairs[z,2,drop=TRUE],dim(X),byrow = FALSE),
-                arr.ind = TRUE
-            )
-            loopDist <- sqrt(sum(abs(coord.a-coord.b)^2))
-            if (loopDist < minDist){
-                minDist <- loopDist
-                plotDist$DIST[i] <- loopDist
-                plotDist[i,2:3] <- loopPairs[z,]
-                plotDist[i,5:6] <- coord.a
-                plotDist[i,7:8] <- coord.b
-            }
-        }
+        int_reps[i] <- nrow(loopPairs)
+        pair_points <- rbind(pair_points, loopPairs)
     }
-    plotDist <- plotDist[order(plotDist$DIST),]
+    #preloop DF creation
+    plotDist <- data.frame(geno = rep(dupsI, times = int_reps),
+                           Pos1=as.integer(NA),
+                           Pos2=as.integer(NA),
+                           DIST=as.numeric(NA),
+                           rA=as.integer(NA),
+                           cA=as.integer(NA),
+                           rB=as.integer(NA),
+                           cB=as.integer(NA)) 
+    loopPairs <- pair_points
+    for (z in 1:nrow(loopPairs)) {
+        coord.a <- which(
+            matrix((1:length(X)) == loopPairs[z, 1, drop = TRUE], dim(X), byrow = FALSE),
+            arr.ind = TRUE
+        )
+        coord.b <- which(
+            matrix((1:length(X)) == loopPairs[z, 2, drop = TRUE], dim(X), byrow = FALSE),
+            arr.ind = TRUE
+        )
+        loopDist <- sqrt(sum(abs(coord.a-coord.b)^2))
+        plotDist[z, 4] <- loopDist
+        plotDist[z, 2:3] <- loopPairs[z,]
+        plotDist[z, 5:6] <- coord.a
+        plotDist[z, 7:8] <- coord.b
+    }
+    plotDist <- plotDist[order(plotDist$DIST), ]
     return(plotDist)
 }
 
@@ -136,6 +139,7 @@ swap_pairs <- function(X, starting_dist = 3, stop_iter = 100) {
         stop("Matrix elements must be numeric")
     }
     input_X <- X
+    input_freq <- table(input_X)
     minDist <- sqrt(sum(dim(X)^2))
     designs <- list()
     designs[[1]] <- X
@@ -181,6 +185,10 @@ swap_pairs <- function(X, starting_dist = 3, stop_iter = 100) {
         if (min(pairs_distance(X)$DIST) < min_dist) {
             break
         } else {
+            output_freq <- table(X)
+            if (!all(input_freq == output_freq)) {
+              stop("The swap function changed the frequency of some integers.")
+            }
             frequency_rows <- as.data.frame(search_matrix_values(X = X, values_search = genos))
             df <- frequency_rows[frequency_rows$Times == 2, ]
             rows_incidence[w - 1] <- nrow(df)
@@ -189,7 +197,7 @@ swap_pairs <- function(X, starting_dist = 3, stop_iter = 100) {
             w <- w + 1
         }
     }
-    optim_design = designs[[length(designs)]] #return the last design
+    optim_design = designs[[length(designs)]] # return the last (better) design
     pairswise_distance <- pairs_distance(optim_design)
     min_distance = min(pairswise_distance$DIST)
     return(

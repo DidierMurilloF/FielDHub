@@ -102,10 +102,9 @@ mod_RCBD_augmented_ui <- function(id){
         fluidRow(
           column(6,
                  style=list("padding-right: 28px;"),
-                 numericInput(inputId = ns("myseed_a_rcbd"), 
-                              label = "Random Seed:",
-                              value = 1, 
-                              min = 1)
+                 textInput(ns("plot_start_a_rcbd"), 
+                           label = "Starting Plot Number:", 
+                           value = 1)
           ),
           column(6,
                  style=list("padding-left: 5px;"),
@@ -117,9 +116,10 @@ mod_RCBD_augmented_ui <- function(id){
         fluidRow(
           column(6,
                  style=list("padding-right: 28px;"),
-                 textInput(ns("plot_start_a_rcbd"), 
-                           label = "Starting Plot Number:", 
-                           value = 1)
+                 numericInput(inputId = ns("myseed_a_rcbd"), 
+                              label = "Random Seed:",
+                              value = 1, 
+                              min = 1)
           ),
           column(6,style=list("padding-left: 5px;"),
                  textInput(ns("Location_a_rcbd"), 

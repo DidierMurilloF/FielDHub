@@ -44,7 +44,7 @@ mod_Diagonal_ui <- function(id) {
           ns = ns,
           numericInput(inputId = ns("lines.d"), 
                        label = "Input # of Entries:",
-                       value = 270, 
+                       value = 287, 
                        min = 50),
         ),
         selectInput(inputId = ns("checks"),
@@ -73,33 +73,37 @@ mod_Diagonal_ui <- function(id) {
                     multiple = FALSE,
                     selected = "serpentine"),
         fluidRow(
-          column(6,
-                 style=list("padding-right: 28px;"),
-                 numericInput(inputId = ns("seed_single"), 
-                              label = "Random Seed:", 
-                              value = 17, 
-                              min = 1)
-          ),
-          column(6,
-                 style=list("padding-left: 5px;"),
-                 textInput(ns("expt_name"), 
-                           "Input Experiment Name:", 
-                           value = "Expt1")
-          )
+            column(
+                width = 6,
+                style=list("padding-right: 28px;"),
+                textInput(
+                    ns("plot_start"), 
+                    "Starting Plot Number:", 
+                    value = 1
+                )
+            ),
+            column(6,
+                    style=list("padding-left: 5px;"),
+                    textInput(ns("expt_name"), 
+                            "Input Experiment Name:", 
+                            value = "Expt1")
+            )
         ),    
         fluidRow(
-          column(6,
-                 style=list("padding-right: 28px;"),
-                 textInput(ns("plot_start"), 
-                           "Starting Plot Number:", 
-                           value = 1)
-          ),
-          column(6,
-                 style=list("padding-left: 5px;"),
-                 textInput(ns("Location"), 
-                           "Input the Location:",
-                           value = "FARGO")
-          )
+            column(6,
+                    style=list("padding-right: 28px;"),
+                    numericInput(
+                        inputId = ns("seed_single"), 
+                        label = "Random Seed:", 
+                        value = 17, 
+                        min = 1)
+            ),
+            column(6,
+                    style=list("padding-left: 5px;"),
+                    textInput(ns("Location"), 
+                            "Input the Location:",
+                            value = "FARGO")
+            )
         ),
         fluidRow(
           column(6,
@@ -272,69 +276,86 @@ mod_Diagonal_server <- function(id) {
                                                  selected = "tabPanel1"))
                                                   
     getData <- eventReactive(input$RUN.diagonal, {
-      Option_NCD <- TRUE
-      if (input$owndataDIAGONALS == "Yes") {
-        req(input$file1)
-        inFile <- input$file1
-        data_ingested <- load_file(
-            name = inFile$name, 
-            path = inFile$datapat, 
-            sep = input$sep.DIAGONALS, 
-            check = TRUE, 
-            design = "sdiag"
-        )
-        
-        if (names(data_ingested) == "dataUp") {
-            data_up <- data_ingested$dataUp
-            if (ncol(data_entry) < 2) {
-                validate("Data input needs at least two Columns with the ENTRY and NAME.")
-            } 
-            data_entry_UP <- na.omit(data_up[,1:2])
+        Option_NCD <- TRUE
+        if (input$owndataDIAGONALS == "Yes") {
+            req(input$file1)
+            inFile <- input$file1
+            data_ingested <- load_file(
+                name = inFile$name, 
+                path = inFile$datapat, 
+                sep = input$sep.DIAGONALS, 
+                check = TRUE, 
+                design = "sdiag"
+            )
+            if (names(data_ingested) == "dataUp") {
+                data_up <- data_ingested$dataUp
+                if (ncol(data_entry) < 2) {
+                    validate("Data input needs at least two Columns with the ENTRY and NAME.")
+                } 
+                data_entry_UP <- na.omit(data_up[,1:2])
+                colnames(data_entry_UP) <- c("ENTRY", "NAME")
+                checksEntries <- as.numeric(data_entry_UP[1:input$checks,1])
+                dim_data_entry <- nrow(data_entry_UP)
+                choices_list <- field_dimensions(lines_within_loc = dim_data_entry)
+                if (length(choices_list) == 0) {
+                    shinyalert::shinyalert(
+                        "Error!!", 
+                        "Insufficient number of entries provided!",
+                        type = "error"
+                    )
+                    return(NULL)
+                }
+                dim_data_1 <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
+                return(list(data_entry = data_entry_UP, 
+                            dim_data_entry = dim_data_entry, 
+                            dim_without_checks = dim_data_1))
+            } else if (names(data_ingested) == "bad_format") {
+            shinyalert::shinyalert(
+                "Error!!", 
+                "Invalid file; Please upload a .csv file.", 
+                type = "error")
+            error_message <- "Invalid file; Please upload a .csv file."
+            return(NULL)
+            } else if (names(data_ingested) == "duplicated_vals") {
+            shinyalert::shinyalert(
+                "Error!!", 
+                "Check input file for duplicate values.", 
+                type = "error")
+            error_message <- "Check input file for duplicate values."
+            return(NULL)
+            } else if (names(data_ingested) == "missing_cols") {
+            shinyalert::shinyalert(
+                "Error!!", 
+                "Data input needs at least two columns: ENTRY and NAME",
+                type = "error")
+            return(NULL)
+            }
+        } else {
+            req(input$lines.d)
+            req(input$checks)
+            checks <- as.numeric(input$checks)
+            checksEntries <- 1:checks
+            lines <- input$lines.d
+            choices_list <- field_dimensions(lines_within_loc = lines)
+            if (length(choices_list) == 0) {
+                shinyalert::shinyalert(
+                    "Error!!", 
+                    "Insufficient number of entries provided!",
+                    type = "error"
+                )
+                return(NULL)
+            }
+            NAME <- c(paste(rep("CH", checks), 1:checks, sep = ""),
+                    paste(rep("G", lines), (checks + 1):(lines + checks), sep = ""))
+            gen.list <- data.frame(list(ENTRY = 1:(lines + checks),	NAME = NAME))
+            data_entry_UP <- gen.list
             colnames(data_entry_UP) <- c("ENTRY", "NAME")
-            checksEntries <- as.numeric(data_entry_UP[1:input$checks,1])
             dim_data_entry <- nrow(data_entry_UP)
             dim_data_1 <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
             return(list(data_entry = data_entry_UP, 
-                        dim_data_entry = dim_data_entry, 
-                        dim_without_checks = dim_data_1))
-        } else if (names(data_ingested) == "bad_format") {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Invalid file; Please upload a .csv file.", 
-            type = "error")
-          error_message <- "Invalid file; Please upload a .csv file."
-          return(NULL)
-        } else if (names(data_ingested) == "duplicated_vals") {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Check input file for duplicate values.", 
-            type = "error")
-          error_message <- "Check input file for duplicate values."
-          return(NULL)
-        } else if (names(data_ingested) == "missing_cols") {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Data input needs at least two columns: ENTRY and NAME",
-            type = "error")
-          return(NULL)
+                    dim_data_entry = dim_data_entry, 
+                    dim_without_checks = dim_data_1))
         }
-      } else {
-          req(input$lines.d)
-          req(input$checks)
-          checks <- as.numeric(input$checks)
-          checksEntries <- 1:checks
-          lines <- input$lines.d
-          NAME <- c(paste(rep("CH", checks), 1:checks, sep = ""),
-                    paste(rep("G", lines), (checks + 1):(lines + checks), sep = ""))
-          gen.list <- data.frame(list(ENTRY = 1:(lines + checks),	NAME = NAME))
-          data_entry_UP <- gen.list
-          colnames(data_entry_UP) <- c("ENTRY", "NAME")
-          dim_data_entry <- nrow(data_entry_UP)
-          dim_data_1 <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
-          return(list(data_entry = data_entry_UP, 
-                 dim_data_entry = dim_data_entry, 
-                 dim_without_checks = dim_data_1))
-      }
     })
     
     getChecks <- eventReactive(input$RUN.diagonal, {

@@ -17,8 +17,8 @@
 #' @param locationNames (optional) Name for each location.
 #' @param multi_location_data (optional) Option to pass an entry list for multiple locations. 
 #' By default \code{multi_location_data = FALSE}.
-#' @param data (optional) Dataframe with 3 columns: \code{ENTRY | NAME | REPS}. If the 
-#' \code{multi_location_data = TRUE} then the \code{data} dataframe must have
+#' @param data (optional) Data frame with 3 columns: \code{ENTRY | NAME | REPS}. If  
+#' \code{multi_location_data = TRUE} then the \code{data} must have
 #' 4 columns: \code{LOCATION | ENTRY | NAME | REPS}
 #' 
 #' 
@@ -49,23 +49,23 @@
 #'
 #' @examples
 #' # Example 1: Generates a spatial optimized partially replicated arrangement design in one 
-#' # location with 312 genotypes for a field with dimensions 15 rows x 28 cols. 
-#' # Note that there are 250 genotypes unreplicated (only one time), 50 genotypes replicated 
-#' # two times, and 10 genotypes replicated three times, and two checks 20 times each one.
+#' # location with 335 genotypes for a field with dimensions 15 rows x 28 cols. 
+#' # Note that there are 250 genotypes unreplicated (only one time), 85 genotypes replicated 
+#' # two times, and three checks 8 times each.
 #'\dontrun{
-#' SpatpREP1 <- partially_replicated(
-#'   nrows = 15, 
-#'   ncols = 28,  
-#'   repGens = c(250,50,10,1,1),
-#'   repUnits = c(1,2,3,20,20),
-#'   planter = "cartesian", 
-#'   plotNumber = 101,
-#'   seed = 77
-#'  )
-#' SpatpREP1$infoDesign
-#' SpatpREP1$layoutRandom
-#' SpatpREP1$plotNumber
-#' head(SpatpREP1$fieldBook,12)
+#' prep_deseign1 <- partially_replicated(
+#'  nrows = 12, 
+#'  ncols = 37,  
+#'  repGens = c(250, 85, 3),
+#'  repUnits = c(1, 2, 8),
+#'  planter = "cartesian", 
+#'  plotNumber = 101,
+#'  seed = 77
+#' )
+#' prep_deseign1$infoDesign
+#' prep_deseign1$layoutRandom
+#' prep_deseign1$plotNumber
+#' head(prep_deseign1$fieldBook, 12)
 #' }
 #' 
 #' # Example 2: Generates a spatial optimized partially replicated arrangement design with 492 
@@ -80,16 +80,18 @@
 #' treatment_list <- data.frame(list(ENTRY = 1:492, NAME = NAME, REPS = REPS))
 #' head(treatment_list, 12) 
 #' tail(treatment_list, 12)
-#' SpatpREP2 <- partially_replicated(nrows = 30, 
-#'                                   ncols = 20, 
-#'                                   planter = "serpentine", 
-#'                                   plotNumber = 101,
-#'                                   seed = 41,
-#'                                   data = treatment_list)
-#' SpatpREP2$infoDesign
-#' SpatpREP2$layoutRandom
-#' SpatpREP2$plotNumber
-#' head(SpatpREP2$fieldBook,10)
+#' prep_deseign2 <- partially_replicated(
+#'   nrows = 30, 
+#'   ncols = 20, 
+#'   planter = "serpentine", 
+#'   plotNumber = 101,
+#'   seed = 41,
+#'   data = treatment_list
+#' )
+#' prep_deseign2$infoDesign
+#' prep_deseign2$layoutRandom
+#' prep_deseign2$plotNumber
+#' head(prep_deseign2$fieldBook, 10)
 #' }
 #' 
 #' @export

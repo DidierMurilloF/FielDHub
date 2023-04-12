@@ -812,3 +812,20 @@ unrep_data_parameters <- function(
         )
     )
 }
+
+#' @noRd 
+#' 
+#' 
+field_dimensions <- function(lines_within_loc) {
+    t1 <- floor(lines_within_loc + lines_within_loc * 0.10)
+    t2 <- ceiling(lines_within_loc + lines_within_loc * 0.20)
+    t <- t1:t2
+    non_primes <- t[-numbers::isPrime(t)]
+    choices_list <- list()
+    i <- 1
+    for (n in non_primes) {
+        choices_list[[i]] <- factor_subsets(n, diagonal = TRUE)$labels
+        i <- i + 1
+    }
+    return(choices_list)
+}
