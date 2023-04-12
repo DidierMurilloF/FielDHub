@@ -43,14 +43,14 @@ mod_Optim_ui <- function(id) {
           ns = ns,
           numericInput(ns("checks.s"),
                         label = "Input # of Checks:", 
-                        value = 3,
+                        value = 4,
                         min = 1),
           textInput(ns("amount.checks"), 
                     "Input # Check's Reps:",
-                    value = "10,10,10"),
+                    value = "8,8,8,8"),
           numericInput(ns("lines.s"), 
                       label = "Input # of Entries:",
-                      value = 270, min = 5)           
+                      value = 280, min = 5)           
        ),
        selectInput(ns("planter_mov.spatial"), 
                    label = "Plot Order Layout:",
@@ -75,10 +75,11 @@ mod_Optim_ui <- function(id) {
        ),
        fluidRow(
          column(6,style=list("padding-right: 28px;"),
-                numericInput(ns("seed.spatial"), 
-                             label = "Random Seed:", 
-                             value = 1,
-                             min = 1)
+                textInput(
+                    ns("plot_start.spatial"), 
+                    "Starting Plot Number:", 
+                    value = 1
+                )
          ),
          column(6,style=list("padding-left: 5px;"),
                 textInput(ns("expt_name.spatial"), 
@@ -88,10 +89,15 @@ mod_Optim_ui <- function(id) {
        ),  
        
        fluidRow(
-         column(6,style=list("padding-right: 28px;"),
-                textInput(ns("plot_start.spatial"), 
-                          "Starting Plot Number:", 
-                          value = 1)
+         column(
+            width = 6,
+            style=list("padding-right: 28px;"),
+            numericInput(
+                ns("seed.spatial"), 
+                label = "Random Seed:", 
+                value = 5,
+                min = 1
+            )
          ),
          column(6,style=list("padding-left: 5px;"),
                 textInput(ns("Location.spatial"), 

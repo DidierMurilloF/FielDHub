@@ -55,12 +55,6 @@ mod_sparse_allocation_ui <- function(id) {
             value = 380, 
             min = 50
         ),
-        # selectInput(
-        #     inputId = ns("checks_allocation"),
-        #     label = "Method for Distributing Checks:",
-        #     choices = c("Diagonal", "Completely Random"),
-        #     selected = "Diagonal"
-        # ),
         selectInput(
             inputId = ns("sparse_checks"),
             label = "Input # of Checks:",
@@ -69,19 +63,27 @@ mod_sparse_allocation_ui <- function(id) {
             selected = 4
         ),
         fluidRow(
-          column(6,style=list("padding-right: 28px;"),
-                 numericInput(inputId = ns("sparse_locations"), 
-                              label = "Input # of Locations:", 
-                              value = 5,
-                              min = 1)
+          column(
+            width = 6,
+            style=list("padding-right: 28px;"),
+            numericInput(
+                inputId = ns("sparse_locations"), 
+                label = "Input # of Locations:", 
+                value = 5,
+                min = 3
+            )
           ),
-          column(6,style=list("padding-left: 5px;"),
-                 selectInput(inputId = ns("sparse_loc_view"), 
-                             label = "Choose Location to View:", 
-                             choices = 1, 
-                             selected = 1, 
-                             multiple = FALSE)
-          )
+          column(
+            width = 6,
+            style=list("padding-left: 5px;"),
+            selectInput(
+                inputId = ns("sparse_loc_view"), 
+                label = "Choose Location to View:", 
+                choices = 1, 
+                selected = 1, 
+                multiple = FALSE
+            )
+        )
         ),
         selectInput(
             inputId = ns("plant_reps"), 
@@ -96,49 +98,65 @@ mod_sparse_allocation_ui <- function(id) {
             selected = "serpentine"
         ),
         fluidRow(
-          column(6,
-                 style=list("padding-right: 28px;"),
-                 numericInput(inputId = ns("seed_single"), 
-                              label = "Random Seed:", 
-                              value = 17, 
-                              min = 1)
-          ),
-          column(6,
-                 style=list("padding-left: 5px;"),
-                 textInput(ns("sparse_expt_name"), 
-                           "Input Experiment Name:", 
-                           value = "Expt1")
-          )
+            column(
+                width = 6,
+                style=list("padding-right: 28px;"),
+                textInput(
+                    ns("sparse_plot_start"), 
+                    "Starting Plot Number:", 
+                    value = 1
+                )
+            ),
+            column(
+                width = 6,
+                style=list("padding-left: 5px;"),
+                textInput(
+                    ns("sparse_expt_name"), 
+                    "Input Experiment Name:", 
+                    value = "Expt1"
+                )
+            )
         ),    
         fluidRow(
-          column(6,
-                 style=list("padding-right: 28px;"),
-                 textInput(ns("sparse_plot_start"), 
-                           "Starting Plot Number:", 
-                           value = 1)
-          ),
-          column(6,
-                 style=list("padding-left: 5px;"),
-                 textInput(ns("sparse_loc_names"), 
-                           "Input the Location:",
-                           value = "FARGO")
-          )
+            column(
+                width = 6,
+                style=list("padding-right: 28px;"),
+                numericInput(
+                    inputId = ns("seed_single"), 
+                    label = "Random Seed:", 
+                    value = 17, 
+                    min = 1
+                )
+            ),
+            column(
+                width = 6,
+                style=list("padding-left: 5px;"),
+                textInput(
+                    ns("sparse_loc_names"), 
+                    "Input the Location:",
+                    value = "FARGO"
+                )
+            )
         ),
         fluidRow(
-          column(6,
-                 actionButton(
-                   inputId = ns("sparse_run"), 
-                   "Run!", 
-                   icon = icon("circle-nodes", verify_fa = FALSE),
-                   width = '100%'),
-          ),
-          column(6,
-                 actionButton(
-                   ns("sparse_simulate"),
-                   "Simulate!",
-                   icon = icon("greater-than-equal", verify_fa = FALSE),
-                   width = '100%')
-          )
+            column(
+                width = 6,
+                actionButton(
+                    inputId = ns("sparse_run"), 
+                    "Run!", 
+                    icon = icon("circle-nodes", verify_fa = FALSE),
+                    width = '100%'
+                )
+            ),
+            column(
+                width = 6,
+                actionButton(
+                    ns("sparse_simulate"),
+                    "Simulate!",
+                    icon = icon("greater-than-equal", verify_fa = FALSE),
+                    width = '100%'
+                )
+            )
         ),
         br(),
         uiOutput(ns("sparse_download"))
@@ -200,6 +218,7 @@ mod_sparse_allocation_server <- function(id){
     shinyjs::useShinyjs()
     
     observe({
+        req(input$sparse_locations)
         sparse_locs <- as.numeric(input$sparse_locations)
         start <- ceiling(sparse_locs / 2)
         plant_reps <- start:(sparse_locs - 1)
@@ -325,6 +344,33 @@ mod_sparse_allocation_server <- function(id){
                                                  selected = "tabPanel1"))
                                                   
     get_sparse_data <- reactive({
+        req(input$sparse_locations)
+        sparse_lines <- as.numeric(input$sparse_lines)
+        if (input$sparse_locations < 3) {
+            shinyalert::shinyalert(
+                "Error!!", 
+                "The system requires at least 3 locations to proceed.",
+                type = "error"
+            )
+            return(NULL)
+        }
+        if (input$sparse_lines < 60) {
+            shinyalert::shinyalert(
+                "Error!!", 
+                "The system requires at least 60 entries/lines to proceed!",
+                type = "error"
+            )
+            return(NULL)
+        }
+        choices_list <- field_dimensions(lines_within_loc = sparse_lines)
+        if (length(choices_list) == 0) {
+            shinyalert::shinyalert(
+                "Error!!", 
+                "Number of entries is too small!",
+                type = "error"
+            )
+            return(NULL)
+        }
         Option_NCD <- TRUE
         if (input$input_sparse_data == "Yes") {
             req(input$sparse_lines)
@@ -444,7 +490,10 @@ mod_sparse_allocation_server <- function(id){
         if (input$input_sparse_data == "Yes") {
             req(get_sparse_data())
             max_entry <- max(get_sparse_data()$input_entries)
-            new_list_locs <- setNames(vector("list", length = locs), nm = paste0("LOC", 1:locs))
+            new_list_locs <- setNames(
+                vector("list", length = locs), 
+                nm = paste0("LOC", 1:locs)
+            )
             for (LOC in 1:locs) {
                 iter_loc <- optim_out$list_locs[[LOC]]
                 data_input_mutated <- sparse_data_input %>%
@@ -484,16 +533,7 @@ mod_sparse_allocation_server <- function(id){
         req(sparse_setup()$size_locations)
         sparse_checks <- as.numeric(getChecks()$sparse_checks)
         lines_within_loc <- as.numeric(sparse_setup()$size_locations[1])
-        t1 <- floor(lines_within_loc + lines_within_loc * 0.11)
-        t2 <- ceiling(lines_within_loc + lines_within_loc * 0.20)
-        t <- t1:t2
-        non_primes <- t[-numbers::isPrime(t)]
-        choices_list <- list()
-        i <- 1
-        for (n in non_primes) {
-          choices_list[[i]] <- factor_subsets(n, diagonal = TRUE)$labels
-          i <- i + 1
-        }
+        choices_list <- field_dimensions(lines_within_loc = lines_within_loc)
         choices <- unlist(choices_list[!sapply(choices_list, is.null)])
         Option_NCD <- TRUE
         checksEntries <- as.vector(getChecks()$checksEntries)
@@ -501,9 +541,7 @@ mod_sparse_allocation_server <- function(id){
         v <- 1
         by_choices <- 1:length(choices)
         for (dim_options in by_choices) {
-          
           planter_mov <- single_inputs()$planter_mov
-          
           dims <- unlist(strsplit(choices[[dim_options]], " x "))
           n_rows <- as.numeric(dims[1])
           n_cols  <- as.numeric(dims[2])

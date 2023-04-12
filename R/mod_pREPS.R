@@ -91,11 +91,11 @@ mod_pREPS_ui <- function(id){
 			fluidRow(
 				column(
 					width = 6,
-					numericInput(
-						ns("seed.preps"), 
-						label = "Random Seed:", 
-						value = 4095, 
-						min = 1)
+					textInput(
+						ns("plot_start.preps"), 
+						"Starting Plot Number:", 
+						value = 1
+					)
 				),
 				column(
 					width = 6,
@@ -109,11 +109,12 @@ mod_pREPS_ui <- function(id){
 			fluidRow(
 				column(
 					width = 6,
-					textInput(
-						ns("plot_start.preps"), 
-						"Starting Plot Number:", 
-						value = 1
-					)
+                    numericInput(
+						ns("seed.preps"), 
+						label = "Random Seed:", 
+						value = 4095, 
+						min = 1
+                    )
 				),
 				column(
 					width = 6,
