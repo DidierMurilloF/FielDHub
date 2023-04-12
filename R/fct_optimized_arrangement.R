@@ -44,23 +44,23 @@
 #'
 #' @examples
 #' # Example 1: Generates a spatial unreplicated optimized arrangement design in one location
-#' # with 108 genotypes + 12 check plots (4 checks) for a field with dimension 10 rows x 12 cols.
-#' OptimAd1 <- optimized_arrangement(
-#'   nrows = 10, 
-#'   ncols = 12, 
-#'   lines = 108, 
-#'   amountChecks = 12, 
+#' # with 120 genotypes + 20 check plots (4 checks) for a field with dimension 14 rows x 10 cols.
+#' optim_unrep1 <- optimized_arrangement(
+#'   nrows = 14, 
+#'   ncols = 10, 
+#'   lines = 120, 
+#'   amountChecks = 20, 
 #'   checks = 1:4,
 #'   planter = "cartesian", 
 #'   plotNumber = 101,
-#'   seed = 14,
 #'   exptName = "20RW1",
-#'   locationNames = "CASSELTON"
-#'  )
-#' OptimAd1$infoDesign
-#' OptimAd1$layoutRandom
-#' OptimAd1$plotNumber
-#' head(OptimAd1$fieldBook,12)
+#'   locationNames = "CASSELTON",
+#'   seed = 14124
+#' )
+#' optim_unrep1$infoDesign
+#' optim_unrep1$layoutRandom
+#' optim_unrep1$plotNumber
+#' head(optim_unrep1$fieldBook, 12)
 #'                   
 #' # Example 2: Generates a spatial unreplicated optimized arrangement design in one location
 #' # with 200 genotypes + 20 check plots (4 checks) for a field with dimension 10 rows x 22 cols.
@@ -72,7 +72,7 @@
 #' treatment_list <- data.frame(list(ENTRY = 1:204, NAME = c(list_checks, treatments), REPS = REPS))
 #' head(treatment_list, 12) 
 #' tail(treatment_list, 12)
-#' OptimAd2 <- optimized_arrangement(
+#' optim_unrep2 <- optimized_arrangement(
 #'   nrows = 10, 
 #'   ncols = 22, 
 #'   planter = "serpentine", 
@@ -82,10 +82,10 @@
 #'   locationNames = "MINOT",
 #'   data = treatment_list
 #' )
-#' OptimAd2$infoDesign
-#' OptimAd2$layoutRandom
-#' OptimAd2$plotNumber
-#' head(OptimAd2$fieldBook,12)
+#' optim_unrep2$infoDesign
+#' optim_unrep2$layoutRandom
+#' optim_unrep2$plotNumber
+#' head(optim_unrep2$fieldBook,12)
 #'                   
 #' @export
 optimized_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,  
