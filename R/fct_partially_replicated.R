@@ -5,8 +5,8 @@
 #' between checks is maximized in such a way that each row and column have control plots. 
 #' Note that design generation needs the dimension of the field (number of rows and columns).
 #'
-#' @param nrows Number of rows field.
-#' @param ncols Number of columns field.
+#' @param nrows Numeric vector with the number of rows field at each location.
+#' @param ncols Numeric vector with the number of columns field at each location.
 #' @param repGens Numeric vector with the amount genotypes to replicate.
 #' @param repUnits Numeric vector with the number of reps of each genotype.
 #' @param planter Option for \code{serpentine} or \code{cartesian} movement. By default  \code{planter = 'serpentine'}. 
@@ -26,19 +26,29 @@
 #'         Salvador Gezan [aut],
 #'         Ana Heilman [ctb],
 #'         Thomas Walk [ctb], 
-#'         Johan Aparicio [ctb], 
+#'         Johan Aparicio [ctb],
+#'         Jean-Marc Montpetit [ctb],
 #'         Richard Horsley [ctb]
 #' 
 #' 
 #' 
-#' @return A list with five elements.
+#' @return A list with several elements.
 #' \itemize{
 #'   \item \code{infoDesign} is a list with information on the design parameters.
 #'   \item \code{layoutRandom} is a matrix with the randomization layout.
 #'   \item \code{plotNumber} is a matrix with the layout plot number.
+#'   \item \code{binaryField} is a matrix with the binary field.
 #'   \item \code{dataEntry} is a data frame with the data input.
-#'   \item \code{genEntries} is a list with the entries for replicated and no replicated part.
+#'   \item \code{genEntries} is a list with the entries for replicated and non-replicated parts.
 #'   \item \code{fieldBook} is a data frame with field book design. This includes the index (Row, Column).
+#'   \item \code{min_pairswise_distance} is a data frame with the minimum pairwise distance between 
+#'           each pair of locations.
+#'   \item \code{reps_info} is a data frame with information on the number of replicated and 
+#'           non-replicated treatments at each location.
+#'   \item \code{pairsDistance} is a data frame with the pairwise distances between each pair of 
+#'           treatments.
+#'   \item \code{treatments_with_reps} is a list with the entries for the replicated part of the design.
+#'   \item \code{treatments_with_no_reps} is a list with the entries for the non-replicated part of the design.
 #' }
 #'
 #' @references
@@ -116,6 +126,28 @@ partially_replicated <- function(
     if (is.null(nrows) || is.null(ncols) || !is.numeric(nrows) || !is.numeric(ncols)) {
         base::stop('Basic design parameters missing (nrows, ncols) or is not numeric.')
     }
+    if (length(nrows) != l) {
+        if (length(nrows) < l) {
+            warning("Number of nrows values not matching number of locations", call. = FALSE)
+            # Filling missing nrows values with last provided value
+            nrows <- c(nrows, rep(nrows[length(nrows)], l - length(nrows)))
+        } else {
+            warning("Number of nrows values not matching number of locations", call. = FALSE)
+            # Filling missing nrows values with last provided value
+            nrows <- nrows[1:l]
+        }
+    }
+    if (length(ncols) != l) {
+        if (length(ncols) < l) {
+            warning("Number of ncols values not matching number of locations", call. = FALSE)
+            # Filling missing nrows values with last provided value
+            ncols <- c(ncols, rep(ncols[length(ncols)], l - length(ncols)))
+        } else  {
+            warning("Number of ncols values not matching number of locations", call. = FALSE)
+            # Filling missing nrows values with last provided value
+            ncols <- ncols[1:l]
+        }
+    }
     
     if (is.null(data)) {
         if (is.null(repGens) || is.null(repUnits)) {
@@ -144,17 +176,17 @@ partially_replicated <- function(
         }
     } else stop("Number of locations/sites is missing")
     
-    if (!is.null(data)) {
-        arg1 <- list(nrows, ncols, l);arg2 <- c(nrows, ncols, l)
-        if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
-        base::stop('"partially_replicated()" requires input nrows, ncols, and l to be numeric and distint of NULL.')
-        }
-    } else {
-        arg1 <- list(nrows, ncols, l);arg2 <- c(nrows, ncols, l)
-        if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
-        base::stop('"partially_replicated()" requires input nrows, ncols, and l to be numeric and distint of NULL.')
-        }
-    } 
+    # if (!is.null(data)) {
+    #     arg1 <- list(nrows, ncols, l);arg2 <- c(nrows, ncols, l)
+    #     if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
+    #     base::stop('"partially_replicated()" requires input nrows, ncols, and l to be numeric and distint of NULL.')
+    #     }
+    # } else {
+    #     arg1 <- list(nrows, ncols, l);arg2 <- c(nrows, ncols, l)
+    #     if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
+    #     base::stop('"partially_replicated()" requires input nrows, ncols, and l to be numeric and distint of NULL.')
+    #     }
+    # } 
     if (!is.null(data)) {
         if (multi_location_data) {
             if (is.data.frame(data)) {
@@ -260,8 +292,8 @@ partially_replicated <- function(
     rows_incidence <- vector(mode = "numeric", length = l)
     for (sites in 1:l) {
         prep <- pREP(
-            nrows = nrows, 
-            ncols = ncols, 
+            nrows = nrows[sites], 
+            ncols = ncols[sites], 
             RepChecks = NULL, 
             checks = NULL, 
             Fillers = 0,

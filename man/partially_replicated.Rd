@@ -20,9 +20,9 @@ partially_replicated(
 )
 }
 \arguments{
-\item{nrows}{Number of rows field.}
+\item{nrows}{Numeric vector with the number of rows field at each location.}
 
-\item{ncols}{Number of columns field.}
+\item{ncols}{Numeric vector with the number of columns field at each location.}
 
 \item{repGens}{Numeric vector with the amount genotypes to replicate.}
 
@@ -48,14 +48,23 @@ By default \code{multi_location_data = FALSE}.}
 4 columns: \code{LOCATION | ENTRY | NAME | REPS}}
 }
 \value{
-A list with five elements.
+A list with several elements.
 \itemize{
   \item \code{infoDesign} is a list with information on the design parameters.
   \item \code{layoutRandom} is a matrix with the randomization layout.
   \item \code{plotNumber} is a matrix with the layout plot number.
+  \item \code{binaryField} is a matrix with the binary field.
   \item \code{dataEntry} is a data frame with the data input.
-  \item \code{genEntries} is a list with the entries for replicated and no replicated part.
+  \item \code{genEntries} is a list with the entries for replicated and non-replicated parts.
   \item \code{fieldBook} is a data frame with field book design. This includes the index (Row, Column).
+  \item \code{min_pairswise_distance} is a data frame with the minimum pairwise distance between 
+          each pair of locations.
+  \item \code{reps_info} is a data frame with information on the number of replicated and 
+          non-replicated treatments at each location.
+  \item \code{pairsDistance} is a data frame with the pairwise distances between each pair of 
+          treatments.
+  \item \code{treatments_with_reps} is a list with the entries for the replicated part of the design.
+  \item \code{treatments_with_no_reps} is a list with the entries for the non-replicated part of the design.
 }
 }
 \description{
@@ -121,6 +130,7 @@ Didier Murillo [aut],
         Salvador Gezan [aut],
         Ana Heilman [ctb],
         Thomas Walk [ctb], 
-        Johan Aparicio [ctb], 
+        Johan Aparicio [ctb],
+        Jean-Marc Montpetit [ctb],
         Richard Horsley [ctb]
 }
