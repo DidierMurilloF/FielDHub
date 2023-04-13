@@ -467,8 +467,10 @@ mod_multi_loc_preps_server <- function(id){
         )
         ### Do the merge with the user data ###
         if (input$multi_prep_data == "Yes") {
-            data_prep_no_checks <- get_multi_loc_prep()$data_without_checks
-            max_entry <- max(data_prep_no_checks$ENTRY)
+            # data_prep_no_checks <- get_multi_loc_prep()$data_without_checks
+            # max_entry <- max(data_prep_no_checks$ENTRY)
+            data_prep <- get_multi_loc_prep()$multi_loc_preps_data
+            max_entry <- max(data_prep$ENTRY)
             vlookUp_entry <- 1:input_lines
             if (add_checks) {
                 vlookUp_entry <- c((max_entry + 1):((max_entry + prep_checks)), 1:input_lines)
