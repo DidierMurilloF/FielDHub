@@ -97,7 +97,8 @@
 <span>  <span class="va">exptName</span>,</span>
 <span>  <span class="va">locationNames</span>,</span>
 <span>  <span class="va">optim_list</span>,</span>
-<span>  <span class="va">seed</span></span>
+<span>  <span class="va">seed</span>,</span>
+<span>  data <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -108,11 +109,11 @@
 
 
 <dt>nrows</dt>
-<dd><p>Number of rows field.</p></dd>
+<dd><p>Numeric vector with the number of rows field at each location.</p></dd>
 
 
 <dt>ncols</dt>
-<dd><p>Number of columns field.</p></dd>
+<dd><p>Numeric vector with the number of columns field at each location.</p></dd>
 
 
 <dt>l</dt>
@@ -158,16 +159,34 @@
 <dt>seed</dt>
 <dd><p>(optional) Real number that specifies the starting seed to obtain reproducible designs.</p></dd>
 
+
+<dt>data</dt>
+<dd><p>(optional) Data frame with 2 columns: <code>ENTRY | NAME </code>. ENTRY must be numeric.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>A list with four elements.</p><ul><li><p><code>designs</code> is a list with each location p-rep randomization.</p></li>
+<p>A list of class <code>FielDHub</code> with several elements.</p><ul><li><p><code>infoDesign</code> is a list with information on the design parameters.</p></li>
+<li><p><code>layoutRandom</code> is a matrix with the randomization layout.</p></li>
+<li><p><code>plotNumber</code> is a matrix with the layout plot number.</p></li>
+<li><p><code>binaryField</code> is a matrix with the binary field.</p></li>
+<li><p><code>dataEntry</code> is a data frame with the data input.</p></li>
+<li><p><code>genEntries</code> is a list with the entries for replicated and non-replicated parts.</p></li>
+<li><p><code>fieldBook</code> is a data frame with field book design. This includes the index (Row, Column).</p></li>
+<li><p><code>min_pairswise_distance</code> is a data frame with the minimum pairwise distance between 
+             each pair of locations.</p></li>
+<li><p><code>reps_info</code> is a data frame with information on the number of replicated and 
+             non-replicated treatments at each location.</p></li>
+<li><p><code>pairsDistance</code> is a data frame with the pairwise distances between each pair of 
+             treatments.</p></li>
+<li><p><code>treatments_with_reps</code> is a list with the entries for the replicated part of the design.</p></li>
+<li><p><code>treatments_with_no_reps</code> is a list with the entries for the non-replicated part of the design.</p></li>
 <li><p><code>list_locs</code> is a list with each location list of entries.</p></li>
 <li><p><code>allocation</code> is a matrix with the allocation of treatments.</p></li>
 <li><p><code>size_locations</code> is a data frame with one column for each 
- location and one row with the size of the location.</p></li>
+             location and one row with the size of the location.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -178,6 +197,7 @@
     <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>
     <p>Didier Murillo [aut],
         Salvador Gezan [aut],
+        Jean-Marc Montpetit [ctb],
         Ana Heilman [ctb]</p>
     </div>
 

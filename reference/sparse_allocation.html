@@ -95,7 +95,8 @@
 <span>  exptName <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">locationNames</span>,</span>
 <span>  <span class="va">sparse_list</span>,</span>
-<span>  <span class="va">seed</span></span>
+<span>  <span class="va">seed</span>,</span>
+<span>  data <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -150,6 +151,10 @@ When design is <code>sparse</code> then <code>copies_per_entry</code> &lt; <code
 
 <dt>seed</dt>
 <dd><p>(optional) Real number that specifies the starting seed to obtain reproducible designs.</p></dd>
+
+
+<dt>data</dt>
+<dd><p>(optional) Data frame with 2 columns: <code>ENTRY | NAME </code>. ENTRY must be numeric.</p></dd>
 
 </dl></div>
     <div class="section level2">
