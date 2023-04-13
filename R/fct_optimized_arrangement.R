@@ -127,7 +127,7 @@ optimized_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,
     } else {
         arg1 <- list(nrows, ncols, lines, l);arg2 <- c(nrows, ncols, lines, l)
         if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
-        base::stop('"optimized_arrangement()" requires arguments nrows, ncols, and l to be numeric and distint of NULL')
+            base::stop('"optimized_arrangement()" requires arguments nrows, ncols, and l to be numeric and distint of NULL')
         }
     } 
     
@@ -135,7 +135,7 @@ optimized_arrangement <- function(nrows = NULL, ncols = NULL, lines = NULL,
         if (length(checks) == 1 && checks > 1) {
         checksEntries <- 1:checks
         checks <- checks
-        }else if (length(checks) > 1) {
+        } else if (length(checks) > 1) {
         checksEntries <- sort(checks)
         checks <- length(checks)
         } else if (length(checks) == 1 && checks == 1) {
