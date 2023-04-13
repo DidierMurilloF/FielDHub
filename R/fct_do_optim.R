@@ -69,12 +69,19 @@ do_optim <- function(
     max_entry <- lines 
     if (!is.null(data)) {
         if (design == "sparse") {
-            data_input <- stats::na.omit(data[,1:2])
-            df_data_checks <- data_input[1:checks,]
+            data_input <- data[, 1:2]
+            data_input <- stats::na.omit(data_input)
+            df_data_checks <- data_input[1:checks, ]
             df_data <- data_input[(checks + 1):nrow(data_input), ]
             colnames(df_data) <- c("ENTRY", "NAME")
+            if (length(df_data$ENTRY) != length(unique(df_data$ENTRY))) {
+                stop("Please ensure all ENTRIES in data are distinct.")
+            }
+            if (length(df_data$NAME) != length(unique(df_data$NAME))) {
+                stop("Please ensure all NAMES in data are distinct.")
+            }
             ENTRY <- as.vector(df_data$ENTRY)
-            if (!is.numeric(ENTRY)) stop("ENTRY column should be integer numbers!")
+            if (!is.numeric(ENTRY)) stop("ENTRY column should have integer numbers!")
             NAME <- as.vector(df_data$NAME)
             max_entry <- max(ENTRY)
             if (nrow(df_data) != lines) {
@@ -82,23 +89,37 @@ do_optim <- function(
             }
         } else {
             if (add_checks == TRUE) {
-                data_input <- stats::na.omit(data[,1:2])
+                data_input <- data[, 1:2]
+                data_input <- stats::na.omit(data_input)
                 df_data_checks <- data_input[1:checks,]
                 df_data <- data_input[(checks + 1):nrow(data_input),]
                 colnames(df_data) <- c("ENTRY", "NAME")
                 ENTRY <- as.vector(df_data$ENTRY)
-                if (!is.numeric(ENTRY)) stop("ENTRY column should be integer numbers!")
+                if (length(df_data$ENTRY) != length(unique(df_data$ENTRY))) {
+                    stop("Please ensure all ENTRIES in data are distinct.")
+                }
+                if (length(df_data$NAME) != length(unique(df_data$NAME))) {
+                    stop("Please ensure all NAMES in data are distinct.")
+                }
                 NAME <- as.vector(df_data$NAME)
+                if (!is.numeric(ENTRY)) stop("ENTRY column should have integer numbers!")
                 max_entry <- max(ENTRY)
                 if (nrow(df_data) != lines) {
                     stop("The number of treatments/lines in the data does not match the input value")
                 }
             } else {
-                data_input <- stats::na.omit(data[,1:2])
+                data_input <- data[, 1:2]
+                data_input <- stats::na.omit(data_input)
                 df_data <- data_input
                 colnames(df_data) <- c("ENTRY", "NAME")
+                if (length(df_data$ENTRY) != length(unique(df_data$ENTRY))) {
+                    stop("Please ensure all ENTRIES in data are distinct.")
+                }
+                if (length(df_data$NAME) != length(unique(df_data$NAME))) {
+                    stop("Please ensure all NAMES in data are distinct.")
+                }
                 ENTRY <- as.vector(df_data$ENTRY)
-                if (!is.numeric(ENTRY)) stop("ENTRY column should be integer numbers!")
+                if (!is.numeric(ENTRY)) stop("ENTRY column should have integer numbers!")
                 NAME <- as.vector(df_data$NAME)
                 max_entry <- max(ENTRY)
                 if (nrow(df_data) != lines) {
@@ -603,8 +624,8 @@ multi_location_prep <- function(
 #' @param data A data frame containing entries and corresponding names.
 #' @param lines Number of entries.
 #' @param add_checks A boolean indicating whether to add checks to the input data.
-#' @param checks A numeric vector containing the check entries.
-#' @param rep_checks A numeric vector containing replicated checks.
+#' @param checks An integer containing the number of checks.
+#' @param rep_checks A numeric vector containing replicates for each checks.
 #'
 #' @return The modified `optim_out` object containing merged data.
 #' @noRd
@@ -619,6 +640,12 @@ merge_user_data <- function(
         data_entry <- data[, 1:2]
         data_entry <- na.omit(data_entry) 
         colnames(data_entry) <- c("ENTRY", "NAME")
+        if (length(data_entry$ENTRY) != length(unique(data_entry$ENTRY))) {
+            stop("Please ensure all ENTRIES in data are distinct.")
+        }
+        if (length(data_entry$NAME) != length(unique(data_entry$NAME))) {
+                stop("Please ensure all NAMES in data are distinct.")
+        }
         vlookUp_entry <- 1:lines
         if (add_checks) input_checks <- checks else input_checks <- 0
         if (!is.null(rep_checks)) {
@@ -632,7 +659,9 @@ merge_user_data <- function(
             stop("Input lines does not match number of lines in input data!")
         }
         max_entry <- max(data_entry$ENTRY)
-        vlookUp_entry <- c((max_entry + 1):((max_entry + input_checks)), 1:lines)
+        if (add_checks) {
+            vlookUp_entry <- c((max_entry + 1):((max_entry + input_checks)), 1:lines)
+        } else vlookUp_entry <- 1:lines
         prep_data_input <- data_entry
         locs <- length(optim_out$list_locs)
         merged_list_locs <- setNames(
@@ -648,22 +677,18 @@ merge_user_data <- function(
                     ENTRY = vlookUp_entry
                 ) %>%
                 dplyr::select(ENTRY_list, ENTRY, NAME) %>%
-                dplyr::left_join(y = iter_loc, by = "ENTRY")
-
-                if (inherits(optim_out, "MultiPrep")) {
-                    data_input_mutated <- data_input_mutated %>% 
-                        dplyr::select(ENTRY_list, NAME.x, REPS) %>%
+                dplyr::left_join(y = iter_loc, by = "ENTRY") %>% 
+                {
+                    if (inherits(optim_out, "MultiPrep")) {
+                        dplyr::select(.data = ., ENTRY_list, NAME.x, REPS) %>%
                         dplyr::arrange(dplyr::desc(REPS)) %>%
                         dplyr::rename(ENTRY = ENTRY_list, NAME = NAME.x)
-                }
-            
-                if (inherits(optim_out, "Sparse")) {
-                    data_input_mutated <- data_input_mutated %>% 
+                    } else if (inherits(optim_out, "Sparse")) {
                         stats::na.omit() %>%
-                        dplyr::select(ENTRY_list, NAME.x) %>%
+                        dplyr::select(.data = ., ENTRY_list, NAME.x) %>%
                         dplyr::rename(ENTRY = ENTRY_list, NAME = NAME.x)
+                    } 
                 }
-                
             merged_list_locs[[LOC]] <- data_input_mutated
         }
         optim_out$list_locs <- merged_list_locs

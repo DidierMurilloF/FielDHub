@@ -38,37 +38,43 @@ It randomly generates a completely randomized design.
 }
 \examples{
 # Example 1: Generates a CRD design with 10 treatments and 5 reps each.
-crd1 <- CRD(t = 10,
-            reps = 5,
-            plotNumber = 101,
-            seed = 1987,
-            locationName = "Fargo")
+crd1 <- CRD(
+  t = 10,
+  reps = 5,
+  plotNumber = 101,
+  seed = 1987,
+  locationName = "Fargo"
+)
 crd1$infoDesign
-head(crd1$fieldBook,10)
+head(crd1$fieldBook, 10)
 
 # Example 2: Generates a CRD design with 15 treatments and 6 reps each.
 Gens <- paste("Wheat", 1:15, sep = "")
-crd2 <- CRD(t = Gens,
-            reps = 6,
-            plotNumber = 1001,
-            seed = 1654,
-            locationName = "Fargo")
+crd2 <- CRD(
+  t = Gens,
+  reps = 6,
+  plotNumber = 1001,
+  seed = 1654,
+  locationName = "Fargo"
+)
 crd2$infoDesign
-head(crd2$fieldBook,10)
+head(crd2$fieldBook, 10)
 
 # Example 3: Generates a CRD design with 12 treatments and 4 reps each.
 # In this case, we show how to use the option data.
 treatments <- paste("ND-", 1:12, sep = "")
 treatment_list <- data.frame(list(TREATMENT = treatments, REP = 4))
 head(treatment_list)
-crd3 <- CRD(t = NULL,
-            reps = NULL,
-            plotNumber = 2001,
-            seed = 1655,
-            locationName = "Cali",
-            data = treatment_list)
+crd3 <- CRD(
+  t = NULL,
+  reps = NULL,
+  plotNumber = 2001,
+  seed = 1655,
+  locationName = "Cali",
+  data = treatment_list
+)
 crd3$infoDesign
-head(crd3$fieldBook,10)
+head(crd3$fieldBook, 10)
 
 }
 \references{
@@ -79,7 +85,7 @@ Macmillan Company.
 Didier Murillo [aut],
         Salvador Gezan [aut],
         Ana Heilman [ctb],
-        Thomas Walk [ctb], 
-        Johan Aparicio [ctb], 
+        Thomas Walk [ctb],
+        Johan Aparicio [ctb],
         Richard Horsley [ctb]
 }

@@ -175,18 +175,6 @@ partially_replicated <- function(
             } 
         }
     } else stop("Number of locations/sites is missing")
-    
-    # if (!is.null(data)) {
-    #     arg1 <- list(nrows, ncols, l);arg2 <- c(nrows, ncols, l)
-    #     if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
-    #     base::stop('"partially_replicated()" requires input nrows, ncols, and l to be numeric and distint of NULL.')
-    #     }
-    # } else {
-    #     arg1 <- list(nrows, ncols, l);arg2 <- c(nrows, ncols, l)
-    #     if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
-    #     base::stop('"partially_replicated()" requires input nrows, ncols, and l to be numeric and distint of NULL.')
-    #     }
-    # } 
     if (!is.null(data)) {
         if (multi_location_data) {
             if (is.data.frame(data)) {
@@ -194,9 +182,18 @@ partially_replicated <- function(
                 gen_list <- as.data.frame(gen_list)
                 gen_list <- na.omit(gen_list[, 1:4])
                 if (ncol(gen_list) < 4) {
-                    base::stop("Input data should have 4 columns: LOCATION, ENTRY, NAME, REPS.")
+                    base::stop("Input data should have 4 columns: LOCATION | ENTRY | NAME | REPS")
                 }
                 colnames(gen_list) <- c("LOCATION", "ENTRY", "NAME", "REPS")
+                if (length(gen_list$ENTRY) != length(unique(gen_list$ENTRY))) {
+                    stop("Please ensure all ENTRIES in data are distinct.")
+                }
+                if (length(gen_list$NAME) != length(unique(gen_list$NAME))) {
+                    stop("Please ensure all NAMES in data are distinct.")
+                }
+                if (any(gen_list$ENTRY < 1) || any(gen_list$REPS < 1)) {
+                    base::stop("Please ensure all ENTRIES and REPS in data are positive integers.")
+                } 
                 # Create a space in memory for the locations data entry list
                 list_locs <- setNames(
                     object = vector(mode = "list", length = l), 
@@ -217,20 +214,30 @@ partially_replicated <- function(
             }
         } else {
             if (!is.data.frame(data)) base::stop("Data must be a data frame!")
-            gen.list <- data
-            gen.list <- as.data.frame(gen.list)
-            gen.list <- na.omit(gen.list[,1:3])
-            colnames(gen.list) <- c("ENTRY", "NAME", "REPS")
-            if (any(gen.list$ENTRY < 1) || any(gen.list$REPS < 1)) base::stop("Negatives number are not allowed in the data.")
-            gen.list.O <- gen.list[order(gen.list$REPS, decreasing = TRUE), ]
-            my_GENS <- subset(gen.list.O, REPS == 1)
-            my_REPS <- subset(gen.list.O, REPS > 1)
-            my_REPS <- my_REPS[order(my_REPS$REPS, decreasing = TRUE),]
-            RepChecks <- as.vector(my_REPS[,3])
-            checksEntries <- as.vector(my_REPS[,1])
+            if (ncol(gen_list) < 3) {
+                base::stop("Input data should have 3 columns: ENTRY | NAME | REPS")
+            }
+            gen_list <- data[, 1:3]
+            gen_list <- na.omit(gen_list)
+            colnames(gen_list) <- c("ENTRY", "NAME", "REPS")
+            if (length(gen_list$ENTRY) != length(unique(gen_list$ENTRY))) {
+                stop("Please ensure all ENTRIES in data are distinct.")
+            }
+            if (length(gen_list$NAME) != length(unique(gen_list$NAME))) {
+                stop("Please ensure all NAMES in data are distinct.")
+            }
+            if (any(gen_list$ENTRY < 1) || any(gen_list$REPS < 1)) {
+                base::stop("Please ensure all ENTRIES and REPS in data are positive integers.")
+            } 
+            gen_list_order <- gen_list[order(gen_list$REPS, decreasing = TRUE), ]
+            GENOS <- subset(gen_list_order, REPS == 1)
+            reps_data <- subset(gen_list_order, REPS > 1)
+            reps_data <- reps_data[order(reps_data$REPS, decreasing = TRUE),]
+            RepChecks <- as.vector(reps_data[,3])
+            checksEntries <- as.vector(reps_data[,1])
             checks <- length(checksEntries)
-            lines <- sum(my_GENS$REPS)
-            t_plots <- sum(as.numeric(gen.list$REPS))
+            lines <- sum(GENOS$REPS)
+            t_plots <- sum(as.numeric(gen_list$REPS))
             if (numbers::isPrime(t_plots)) {
                 stop("No options when the total number of plots is a prime number.", call. = FALSE)
             }
@@ -242,19 +249,21 @@ partially_replicated <- function(
                     "Try one of the following options: ", "\n"))
                 return(for (i in 1:length(choices)) {print(choices[[i]])})
                 } else {
-                stop("Field dimensions do not fit with the data entered. Try another amount of treatments!", call. = FALSE)
+                    stop("Field dimensions do not fit with the data entered. Try another amount of treatments!", call. = FALSE)
                 }
             }
             list_locs <- vector(mode = "list", length = l)
             for (data_list in 1:l) {
-                list_locs[[data_list]] <- gen.list
+                list_locs[[data_list]] <- gen_list
             }
         }
     } else if (is.null(data)) {
-        if (length(repGens) != length(repUnits)) stop("Input repGens and repUnits need to be of the same length.")
+        if (length(repGens) != length(repUnits)) {
+            stop("Input repGens and repUnits need to be of the same length.")
+        } 
         t_plots <- sum(repGens * repUnits)
         if (numbers::isPrime(t_plots)) {
-        stop("No options when the total number of plots is a prime number.", call. = FALSE)
+            stop("No options when the total number of plots is a prime number.", call. = FALSE)
         }
         if (t_plots != (nrows * ncols)) {
         choices <- factor_subsets(t_plots)$labels
@@ -317,12 +326,17 @@ partially_replicated <- function(
         } else rep_treatments <- length(genEntries[[2]])
         
         if (!is.null(exptName)) {
-        Name_expt <- exptName[1]
+            Name_expt <- exptName[1]
         }else Name_expt <- "Expt1"
         
         split_name_spat <- function(){
-        split_names <- base::matrix(data = Name_expt, nrow = nrows, ncol = ncols, byrow = TRUE)
-        return(list(my_names = split_names))
+            split_names <- base::matrix(
+                data = Name_expt, 
+                nrow = nrows, 
+                ncol = ncols, 
+                byrow = TRUE
+            )
+            return(list(my_names = split_names))
         }
         
         plot_number_spat <- function() {
