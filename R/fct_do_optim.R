@@ -101,7 +101,6 @@ do_optim <- function(
                 if (length(df_data$NAME) != length(unique(df_data$NAME))) {
                     stop("Please ensure all NAMES in data are distinct.")
                 }
-                NAME <- as.vector(df_data$NAME)
                 if (!is.numeric(ENTRY)) stop("ENTRY column should have integer numbers!")
                 max_entry <- max(ENTRY)
                 if (nrow(df_data) != lines) {
@@ -120,7 +119,6 @@ do_optim <- function(
                 }
                 ENTRY <- as.vector(df_data$ENTRY)
                 if (!is.numeric(ENTRY)) stop("ENTRY column should have integer numbers!")
-                NAME <- as.vector(df_data$NAME)
                 max_entry <- max(ENTRY)
                 if (nrow(df_data) != lines) {
                     stop("The number of treatments/lines in the data does not match the input value")
@@ -183,7 +181,7 @@ do_optim <- function(
         ) %>%  
         dplyr::select(LOCATION, ENTRY, NAME, REPS)
     # Create a data frame for the checks
-    #max_entry <- lines # Checks start at the last entry + 1 in the data frame
+    #max_entry <- lines # Checks start at the last max_entry + 1 in the data frame
     if (design != "prep") {
         if (!add_checks) stop("Un-replicated designs need checks")
         if (!is.null(checks) & checks > 0) {
@@ -646,7 +644,6 @@ merge_user_data <- function(
         if (length(data_entry$NAME) != length(unique(data_entry$NAME))) {
                 stop("Please ensure all NAMES in data are distinct.")
         }
-        vlookUp_entry <- 1:lines
         if (add_checks) input_checks <- checks else input_checks <- 0
         if (!is.null(rep_checks)) {
             if (length(rep_checks) != input_checks) {
@@ -658,8 +655,8 @@ merge_user_data <- function(
         if (entries_in_file != lines) {
             stop("Input lines does not match number of lines in input data!")
         }
-        max_entry <- max(data_entry$ENTRY)
         if (add_checks) {
+            max_entry <- max(data_prep_no_checks$ENTRY)
             vlookUp_entry <- c((max_entry + 1):((max_entry + input_checks)), 1:lines)
         } else vlookUp_entry <- 1:lines
         prep_data_input <- data_entry

@@ -284,9 +284,10 @@ mod_multi_loc_preps_server <- function(id){
 
     observeEvent(prep_inputs()$sites, {
         loc_user_view <- 1:prep_inputs()$sites
-        updateSelectInput(inputId = "loc_to_view_preps", 
-                            choices = loc_user_view, 
-                            selected = loc_user_view[1])
+        updateSelectInput(
+            inputId = "loc_to_view_preps", 
+            choices = loc_user_view, 
+            selected = loc_user_view[1])
     })
 
     observeEvent(input$input.input_prep_data,
@@ -450,7 +451,8 @@ mod_multi_loc_preps_server <- function(id){
         req(prep_inputs())
         input_lines <- as.numeric(input$gens_prep)
         locs <- as.numeric(input$locs_prep)
-        prep_checks <- as.numeric(prep_inputs()$checks)
+        checks <- as.numeric(prep_inputs()$checks)
+        prep_checks <- prep_inputs()$prep_checks
         prep_data_input <- get_multi_loc_prep()$multi_loc_preps_data
         add_checks <- FALSE
         if (input$include_checks == "Yes") add_checks <- TRUE
@@ -460,20 +462,18 @@ mod_multi_loc_preps_server <- function(id){
             l = locs, 
             copies_per_entry = as.numeric(input$plant_copies_preps), 
             add_checks = add_checks,
-            checks = prep_checks, 
+            checks = checks, 
             rep_checks = prep_inputs()$prep_checks,
             seed = prep_inputs()$seed_number,
             data = prep_data_input
         )
         ### Do the merge with the user data ###
         if (input$multi_prep_data == "Yes") {
-            # data_prep_no_checks <- get_multi_loc_prep()$data_without_checks
-            # max_entry <- max(data_prep_no_checks$ENTRY)
-            data_prep <- get_multi_loc_prep()$multi_loc_preps_data
-            max_entry <- max(data_prep$ENTRY)
+            data_prep_no_checks <- get_multi_loc_prep()$data_without_checks
+            max_entry <- max(data_prep_no_checks$ENTRY)
             vlookUp_entry <- 1:input_lines
             if (add_checks) {
-                vlookUp_entry <- c((max_entry + 1):((max_entry + prep_checks)), 1:input_lines)
+                vlookUp_entry <- c((max_entry + 1):((max_entry + checks)), 1:input_lines)
             }
             merged_list_locs <- setNames(
                 vector("list", length = locs), 
@@ -508,6 +508,7 @@ mod_multi_loc_preps_server <- function(id){
         } else {
             prep_checks <- 0
         }
+        prep_checks <- as.numeric(prep_inputs()$prep_checks)
         plots_for_treatments <- as.numeric(setup_optim_prep()$size_locations[1])
         total_plots <- plots_for_treatments + sum(prep_checks)
         return(
@@ -518,6 +519,7 @@ mod_multi_loc_preps_server <- function(id){
     observeEvent(list_input_plots(), {
         req(prep_inputs())
         plots_for_treatments <- as.numeric(setup_optim_prep()$size_locations[1])
+        prep_checks <- as.numeric(prep_inputs()$prep_checks)
         if (!is.null(prep_inputs()$prep_checks)) {
             prep_checks <- as.numeric(prep_inputs()$prep_checks)
         } else {
@@ -537,9 +539,10 @@ mod_multi_loc_preps_server <- function(id){
             df_choices <- df_choices[order(df_choices$diff_dim, decreasing = FALSE), ]
             sort_choices <- as.vector(df_choices$choices)
         }
-        updateSelectInput(inputId = "dimensions_preps",
-                            choices = sort_choices,
-                            selected = sort_choices[1])
+        updateSelectInput(
+            inputId = "dimensions_preps",
+            choices = sort_choices,
+            selected = sort_choices[1])
     })
     
     field_dimensions_prep <- eventReactive(input$get_random_prep, {
@@ -665,23 +668,37 @@ mod_multi_loc_preps_server <- function(id){
         req(setup_optim_prep())
         multi_loc_data <- setup_optim_prep()$multi_location_data
         df <- as.data.frame(multi_loc_data)
+        # Combine the data frames into a single data frame with 
+        # a new column for the list element name
+        if (input$multi_prep_data == 'Yes') {
+            req(setup_optim_prep())
+            list_locs <- setup_optim_prep()$list_locs
+            df <- dplyr::bind_rows(
+                lapply(names(list_locs), function(name) {
+                    dplyr::mutate(list_locs[[name]], LOCATION = name)
+            })) %>% 
+                dplyr::select(LOCATION, ENTRY, NAME, REPS)
+        }
         df$LOCATION <- as.factor(df$LOCATION)
         df$ENTRY <- as.factor(df$ENTRY)
         df$NAME <- as.factor(df$NAME)
         df$REPS <- as.factor(df$REPS)
-        options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                    scrollX = TRUE, scrollY = "500px"))
-        DT::datatable(df,
-                        rownames = FALSE, 
-                        filter = 'top',
-                        options = list(
+        options(DT.options = list(
+            pageLength = nrow(df), 
+            autoWidth = FALSE,
+            scrollX = TRUE, scrollY = "500px"))
+        DT::datatable(
+            df,
+            rownames = FALSE, 
+            filter = 'top',
+            options = list(
             columnDefs = list(list(className = 'dt-center', targets = "_all"))))
     })
     
     pREPS_reactive <- reactive({
         req(setup_optim_prep())
         req(field_dimensions_prep())
-        gen.list <- setup_optim_prep()$list_locs
+        entry_list <- setup_optim_prep()$list_locs
         nrows <- field_dimensions_prep()$d_row
         ncols <- field_dimensions_prep()$d_col
         niter <- 1000
@@ -699,10 +716,9 @@ mod_multi_loc_preps_server <- function(id){
         movement_planter <- prep_inputs()$planter_mov
         expt_name <- prep_inputs()$expt_name
         locations_preps <- vector(mode = "list", length = locs_preps)
-
         locations_preps <- partially_replicated(
-            nrows = nrows, 
-            ncols = ncols, 
+            nrows = rep(nrows, locs_preps), 
+            ncols = rep(ncols, locs_preps), 
             l = locs_preps, 
             plotNumber = plotNumber, 
             exptName =  expt_name,
@@ -710,7 +726,7 @@ mod_multi_loc_preps_server <- function(id){
             planter = movement_planter,
             seed = preps_seed, 
             multi_location_data = TRUE,
-            data = gen.list 
+            data = entry_list
         )
 
         return(locations_preps)
