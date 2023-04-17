@@ -82,7 +82,8 @@ do_optim <- function(
             df_data_lines <- data_input[(checks + 1):nrow(data_input), ]
             ENTRY <- as.vector(df_data_lines$ENTRY)
             if (!is.numeric(ENTRY)) stop("ENTRY column should have integer numbers!")
-            max_entry <- max(ENTRY)
+            # max_entry <- max(ENTRY)
+            max_entry <- lines
             if (nrow(df_data_lines) != lines) {
                 stop("The number of treatments/lines in the data does not match the input value")
             }
@@ -101,7 +102,8 @@ do_optim <- function(
                 df_data_lines <- data_input[(checks + 1):nrow(data_input), ]
                 ENTRY <- as.vector(df_data_lines$ENTRY)
                 if (!is.numeric(ENTRY)) stop("ENTRY column should have integer numbers!")
-                max_entry <- max(ENTRY)
+                # max_entry <- max(ENTRY)
+                max_entry <- lines
                 if (nrow(df_data_lines) != lines) {
                   stop("The number of treatments/lines in the data does not match the input value")
                 }
@@ -118,7 +120,8 @@ do_optim <- function(
                 }
                 ENTRY <- as.vector(df_data_lines$ENTRY)
                 if (!is.numeric(ENTRY)) stop("ENTRY column should have integer numbers!")
-                max_entry <- max(ENTRY)
+                #max_entry <- max(ENTRY)
+                max_entry <- lines
                 if (nrow(df_data_lines) != lines) {
                     stop("The number of treatments/lines in the data does not match the input value")
                 }
@@ -654,7 +657,8 @@ merge_user_data <- function(
             stop("Input lines does not match number of lines in input data!")
         }
         if (add_checks) {
-            max_entry <- max(df_data_lines$ENTRY)
+            # max_entry <- max(df_data_lines$ENTRY)
+            max_entry <- lines
             vlookup_entry <- c((max_entry + 1):((max_entry + input_checks)), 1:lines)
         } else vlookup_entry <- 1:lines
         user_data_input <- data_entry
@@ -665,8 +669,6 @@ merge_user_data <- function(
             nm = paste0("LOC", 1:locs)
         )
         locs_range <- 1:locs
-        print(optim_out$list_locs[[1]])
-        print(optim_out$size_locations)
         # Merge each optimized location into the user data input
         for (LOC in locs_range) {
             iter_loc <- optim_out$list_locs[[LOC]]
@@ -689,14 +691,16 @@ merge_user_data <- function(
                     } 
                 }
             # Store the number of plots (It does not include checks)
+            df_to_check <- data_input_mutated[(input_checks + 1):nrow(data_input_mutated), ]
             if (inherits(optim_out, "MultiPrep")) {
-                size_location[LOC] <- sum(data_input_mutated$REPS) - input_checks
+                size_location[LOC] <- sum(df_to_check$REPS)
             } else {
-                size_location[LOC] <- nrow(data_input_mutated) - input_checks
+                size_location[LOC] <- nrow(df_to_check)
             }
             # Store the merged data
             merged_list_locs[[LOC]] <- data_input_mutated
         }
+        print(optim_out$size_locations)
         print(size_location)
         # Check if the number of plots are the same after the data merge
         if (!all(size_location == as.numeric(optim_out$size_locations))) {

@@ -470,30 +470,39 @@ mod_multi_loc_preps_server <- function(id){
         ### Do the merge with the user data ###
         if (input$multi_prep_data == "Yes") {
             data_prep_no_checks <- get_multi_loc_prep()$data_without_checks
-            max_entry <- max(data_prep_no_checks$ENTRY)
+            # max_entry <- max(data_prep_no_checks$ENTRY)
+            max_entry <- input_lines
             vlookUp_entry <- 1:input_lines
             if (add_checks) {
                 vlookUp_entry <- c((max_entry + 1):((max_entry + checks)), 1:input_lines)
             }
-            merged_list_locs <- setNames(
-                vector("list", length = locs), 
-                nm = paste0("LOC", 1:locs)
+            optim_out <- merge_user_data(
+                optim_out = optim_out, 
+                data = prep_data_input, 
+                lines = input_lines, 
+                add_checks = add_checks, 
+                checks = checks, 
+                rep_checks = prep_inputs()$prep_checks
             )
-            for (LOC in 1:locs) {
-                iter_loc <- optim_out$list_locs[[LOC]]
-                data_input_mutated <- prep_data_input %>%
-                    dplyr::mutate(
-                        ENTRY_list = ENTRY,
-                        ENTRY = vlookUp_entry
-                    ) %>%
-                    dplyr::select(ENTRY_list, ENTRY, NAME) %>%
-                    dplyr::left_join(y = iter_loc, by = "ENTRY") %>%
-                    dplyr::select(ENTRY_list, NAME.x, REPS) %>%
-                    dplyr::arrange(dplyr::desc(REPS)) %>%
-                    dplyr::rename(ENTRY = ENTRY_list, NAME = NAME.x)
-                merged_list_locs[[LOC]] <- data_input_mutated
-            }
-            optim_out$list_locs <- merged_list_locs
+            # merged_list_locs <- setNames(
+            #     vector("list", length = locs), 
+            #     nm = paste0("LOC", 1:locs)
+            # )
+            # for (LOC in 1:locs) {
+            #     iter_loc <- optim_out$list_locs[[LOC]]
+            #     data_input_mutated <- prep_data_input %>%
+            #         dplyr::mutate(
+            #             ENTRY_list = ENTRY,
+            #             ENTRY = vlookUp_entry
+            #         ) %>%
+            #         dplyr::select(ENTRY_list, ENTRY, NAME) %>%
+            #         dplyr::left_join(y = iter_loc, by = "ENTRY") %>%
+            #         dplyr::select(ENTRY_list, NAME.x, REPS) %>%
+            #         dplyr::arrange(dplyr::desc(REPS)) %>%
+            #         dplyr::rename(ENTRY = ENTRY_list, NAME = NAME.x)
+            #     merged_list_locs[[LOC]] <- data_input_mutated
+            # }
+            # optim_out$list_locs <- merged_list_locs
         }
         return(optim_out)
     }) %>%

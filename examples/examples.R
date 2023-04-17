@@ -1,7 +1,7 @@
 # Examples
 library(FielDHub)
 ## Multi location Prep Example 180 treatments ################################
-entry_list <- read.csv("~/Desktop/entry_list_180_trts.csv", header = TRUE)
+entry_list <- read.csv("data/entry_list_180_trts.csv", header = TRUE)
 optim_multi_prep <- multi_location_prep(
   lines = 180,  
   l = 4, 
@@ -19,7 +19,50 @@ plot(optim_multi_prep, l = 2)
 plot(optim_multi_prep, l = 3)
 plot(optim_multi_prep, l = 4)
 
+## Multi location Prep Example 180 treatments With Checks #####################
+entry_list <- read.csv("data/entry_list_180_trts.csv", header = TRUE)
+optim_multi_prep <- multi_location_prep(
+  lines = 176,  
+  l = 4,
+  checks = 4,
+  rep_checks = c(6,5,5,5),
+  copies_per_entry = 6, 
+  locationNames = c("LOC1", "LOC2", "LOC3", "LOC4"), 
+  nrows = c(15, 19, 19, 19), # rows at each location
+  ncols = c(19, 15, 15, 15), # cols at each location
+  seed = 1234,
+  data = entry_list
+)
+print(optim_multi_prep)
+optim_multi_prep$size_locations
+plot(optim_multi_prep)
+plot(optim_multi_prep, l = 2)
+plot(optim_multi_prep, l = 3)
+plot(optim_multi_prep, l = 4)
+
+## Multi location Prep Example 180 treatments With Checks #####################
+entry_list <- read.csv("data/entry_list_176_trts_2.csv", header = TRUE)
+optim_multi_prep <- multi_location_prep(
+  lines = 176,  
+  l = 4,
+  checks = 4,
+  rep_checks = c(6,5,5,5),
+  copies_per_entry = 6, 
+  locationNames = c("LOC1", "LOC2", "LOC3", "LOC4"), 
+  nrows = c(15, 19, 19, 19), # rows at each location
+  ncols = c(19, 15, 15, 15), # cols at each location
+  seed = 1234,
+  data = entry_list
+)
+print(optim_multi_prep)
+optim_multi_prep$size_locations
+plot(optim_multi_prep)
+plot(optim_multi_prep, l = 2)
+plot(optim_multi_prep, l = 3)
+plot(optim_multi_prep, l = 4)
+
 ## Sparse Allocation Example 180 treatments ################################
+library(FielDHub)
 entry_list_sparse_176_1 <- read.csv("data/entry_list_176_trts_1.csv", header = TRUE)
 sparse_example1 <- sparse_allocation(
   lines = 176,  
@@ -28,8 +71,8 @@ sparse_example1 <- sparse_allocation(
   copies_per_entry = 3, 
   plotNumber = c(1001, 5001, 10001, 15001), 
   locationNames = c("LOC1", "LOC2", "LOC3", "LOC4"), 
-  nrows = 13,
-  ncols = 15,
+  nrows = 11,
+  ncols = 14,
   seed = 1234,
   data = entry_list_sparse_176_1
 )
@@ -41,7 +84,7 @@ plot(sparse_example1, l = 3)
 plot(sparse_example1, l = 4)
 
 ## Sparse Allocation Example 180 treatments ################################
-entry_list_sparse_176_2 <- read.csv("~/Desktop/entry_list_176_trts_2.csv", header = TRUE)
+entry_list_sparse_176_2 <- read.csv("data/entry_list_176_trts_2.csv", header = TRUE)
 sparse_example2 <- sparse_allocation(
   lines = 176,  
   l = 4,
@@ -49,8 +92,8 @@ sparse_example2 <- sparse_allocation(
   copies_per_entry = 3, 
   plotNumber = c(1001, 5001, 10001, 15001), 
   locationNames = c("LOC1", "LOC2", "LOC3", "LOC4"), 
-  nrows = 13,
-  ncols = 15,
+  nrows = 11,
+  ncols = 14,
   seed = 1234,
   data = entry_list_sparse_176_2
 )
@@ -68,8 +111,9 @@ plot(sparse_example2, l = 4)
 # Entry list with 680 treatments
 # Four environments
 # Five copies of each treatment
-# Using user input data
-entry_list_680 <- read.csv("~/Desktop/entry_list_680.csv", header = TRUE)
+# Passin user input data
+# It takes a few minutes
+entry_list_680 <- read.csv("data/entry_list_680.csv", header = TRUE)
 multi_prep1 <- multi_location_prep(
   lines = 680,  
   l = 4, 
@@ -94,7 +138,7 @@ plot(multi_prep1, l = 4)
 # Four environments
 # Five copies of each treatment
 # The function generates the entry list internally
-# Treatments tagged from 1 to 680.
+# Treatments are tagged from 1 to 680.
 multi_prep2 <- multi_location_prep(
   lines = 680,  
   l = 4, 
@@ -116,7 +160,8 @@ plot(multi_prep2, l = 4)
 ################################# FIN #####################################
 ###########################################################################
 ## The following example shows how the merge works for sparse user input data
-entry_list_sparse_176_2 <- read.csv("~/Desktop/entry_list_176_trts_2.csv", header = TRUE)
+entry_list_sparse_176_2 <- read.csv("data/entry_list_176_trts_1.csv", header = TRUE)
+entry_list_sparse_176_2 <- read.csv("data/entry_list_176_trts_2.csv", header = TRUE)
 optim_out <- do_optim(
   design = "sparse", 
   lines = 176, 
@@ -129,15 +174,16 @@ optim_out <- do_optim(
 )
 optim_out$list_locs[[1]]
 optim_out$allocation
+optim_out$size_locations
 lines <- 176
 input_checks = 4
 add_checks <- TRUE
 df_data_lines <- entry_list_sparse_176_2[(input_checks + 1):nrow(entry_list_sparse_176_2), ]
 if (add_checks) {
-  max_entry <- max(df_data_lines$ENTRY)
+  max_entry <- lines
   vlookUp_entry <- c((max_entry + 1):((max_entry + input_checks)), 1:lines)
 } else vlookUp_entry <- 1:lines
-
+vlookUp_entry
 user_data_input <- entry_list_sparse_176_2
 locs <- length(optim_out$list_locs)
 size_location <- vector(mode = "numeric", length = locs)
@@ -158,9 +204,15 @@ for (LOC in locs_range) {
     dplyr::filter(!is.na(NAME.y)) %>% 
     dplyr::select(ENTRY_list, NAME.x) %>%
     dplyr::rename(ENTRY = ENTRY_list, NAME = NAME.x)
-  size_location[LOC] <- nrow(data_input_mutated) - input_checks
-  merged_list_locs[[LOC]] <- data_input_mutated
+ # Store the number of plots (It does not include checks)
+    df_to_check <- data_input_mutated[(input_checks + 1):nrow(data_input_mutated), ]
+    if (inherits(optim_out, "MultiPrep")) {
+        size_location[LOC] <- sum(df_to_check$REPS)
+    } else {
+        size_location[LOC] <- nrow(df_to_check)
+    }
 }
+
 if (!all(size_location == as.numeric(optim_out$size_locations))) {
   stop("After data merge, size of locations does not match!")
 }
