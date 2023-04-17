@@ -214,7 +214,7 @@ partially_replicated <- function(
             }
         } else {
             if (!is.data.frame(data)) base::stop("Data must be a data frame!")
-            if (ncol(gen_list) < 3) {
+            if (ncol(data) < 3) {
                 base::stop("Input data should have 3 columns: ENTRY | NAME | REPS")
             }
             gen_list <- data[, 1:3]
@@ -241,17 +241,6 @@ partially_replicated <- function(
             if (numbers::isPrime(t_plots)) {
                 stop("No options when the total number of plots is a prime number.", call. = FALSE)
             }
-            if (t_plots != (nrows * ncols)) {
-                choices <- factor_subsets(t_plots)$labels
-                if (!is.null(choices)) {
-                message(cat("\n", "Error in partially_replicated(): ", "\n", "\n",
-                    "Field dimensions do not fit with the data entered!", "\n",
-                    "Try one of the following options: ", "\n"))
-                return(for (i in 1:length(choices)) {print(choices[[i]])})
-                } else {
-                    stop("Field dimensions do not fit with the data entered. Try another amount of treatments!", call. = FALSE)
-                }
-            }
             list_locs <- vector(mode = "list", length = l)
             for (data_list in 1:l) {
                 list_locs[[data_list]] <- gen_list
@@ -264,17 +253,6 @@ partially_replicated <- function(
         t_plots <- sum(repGens * repUnits)
         if (numbers::isPrime(t_plots)) {
             stop("No options when the total number of plots is a prime number.", call. = FALSE)
-        }
-        if (t_plots != (nrows * ncols)) {
-        choices <- factor_subsets(t_plots)$labels
-        if (!is.null(choices)) {
-            message(cat("\n", "Error in partially_replicated(): ", "\n", "\n",
-            "Field dimensions do not fit with the data entered!", "\n",
-            "Try one of the following options: ", "\n"))
-            return(for (i in 1:length(choices)) {print(choices[[i]])})
-        } else {
-            stop("Field dimensions do not fit with the data entered. Try another amount of treatments!", call. = FALSE)
-        }
         }
         ENTRY <- 1:sum(repGens)
         NAME <- paste(rep("G", sum(repGens)), 1:sum(repGens), sep = "")
