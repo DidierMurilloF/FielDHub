@@ -11,7 +11,7 @@
 mod_diagonal_multiple_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    h5("Unreplicated Multiple Diagonal Arrangement"),
+    h4("Unreplicated Multiple Diagonal Arrangement"),
     sidebarLayout(
       sidebarPanel(
         width = 4,

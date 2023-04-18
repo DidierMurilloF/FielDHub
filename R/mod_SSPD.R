@@ -10,6 +10,7 @@
 mod_SSPD_ui <- function(id){
   ns <- NS(id)
   tagList(
+    h4("Split-Split-Plot Design"),
     sidebarLayout(
       sidebarPanel(
         width = 4,

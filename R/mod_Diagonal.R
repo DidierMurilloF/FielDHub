@@ -11,7 +11,7 @@
 mod_Diagonal_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    h5("Unreplicated Single Diagonal Arrangement"),
+    h4("Unreplicated Single Diagonal Arrangement"),
     sidebarLayout(
       sidebarPanel(
         width = 4,
