@@ -305,7 +305,7 @@ mod_multi_loc_preps_server <- function(id){
         if (input$locs_prep < 2) {
             shinyalert::shinyalert(
                 "Error!!", 
-                "The system requires at least 3 locations to proceed.",
+                "The system requires at least 2 locations to proceed.",
                 type = "error"
             )
             return(NULL)
