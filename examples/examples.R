@@ -20,7 +20,7 @@ plot(optim_multi_prep, l = 3)
 plot(optim_multi_prep, l = 4)
 
 ## Multi location Prep Example 180 treatments With Checks #####################
-entry_list <- read.csv("data/entry_list_180_trts.csv", header = TRUE)
+entry_list_checks <- read.csv("data/entry_list_180_trts.csv", header = TRUE)
 optim_multi_prep <- multi_location_prep(
   lines = 176,  
   l = 4,
@@ -31,7 +31,7 @@ optim_multi_prep <- multi_location_prep(
   nrows = c(15, 19, 19, 19), # rows at each location
   ncols = c(19, 15, 15, 15), # cols at each location
   seed = 1234,
-  data = entry_list
+  data = entry_list_checks
 )
 print(optim_multi_prep)
 optim_multi_prep$size_locations
@@ -41,7 +41,7 @@ plot(optim_multi_prep, l = 3)
 plot(optim_multi_prep, l = 4)
 
 ## Multi location Prep Example 180 treatments With Checks #####################
-entry_list <- read.csv("data/entry_list_176_trts_2.csv", header = TRUE)
+entry_list_checks2 <- read.csv("data/entry_list_176_trts_2.csv", header = TRUE)
 optim_multi_prep <- multi_location_prep(
   lines = 176,  
   l = 4,
@@ -52,7 +52,7 @@ optim_multi_prep <- multi_location_prep(
   nrows = c(15, 19, 19, 19), # rows at each location
   ncols = c(19, 15, 15, 15), # cols at each location
   seed = 1234,
-  data = entry_list
+  data = entry_list_checks2
 )
 print(optim_multi_prep)
 optim_multi_prep$size_locations
@@ -111,7 +111,7 @@ plot(sparse_example2, l = 4)
 # Entry list with 680 treatments
 # Four environments
 # Five copies of each treatment
-# Passin user input data
+# Passing user input data
 # It takes a few minutes
 entry_list_680 <- read.csv("data/entry_list_680.csv", header = TRUE)
 multi_prep1 <- multi_location_prep(
@@ -192,18 +192,19 @@ merged_list_locs <- setNames(
   nm = paste0("LOC", 1:locs)
 )
 locs_range <- 1:locs
+LOC <- 1
 for (LOC in locs_range) {
   iter_loc <- optim_out$list_locs[[LOC]]
   data_input_mutated <- user_data_input %>%
     dplyr::mutate(
-      ENTRY_list = ENTRY,
+      USER_ENTRY = ENTRY,
       ENTRY = vlookUp_entry
     ) %>%
-    dplyr::select(ENTRY_list, ENTRY, NAME) %>%
+    dplyr::select(USER_ENTRY, ENTRY, NAME) %>%
     dplyr::left_join(y = iter_loc, by = "ENTRY") %>%
     dplyr::filter(!is.na(NAME.y)) %>% 
-    dplyr::select(ENTRY_list, NAME.x) %>%
-    dplyr::rename(ENTRY = ENTRY_list, NAME = NAME.x)
+    dplyr::select(USER_ENTRY, NAME.x) %>%
+    dplyr::rename(ENTRY = USER_ENTRY, NAME = NAME.x)
  # Store the number of plots (It does not include checks)
     df_to_check <- data_input_mutated[(input_checks + 1):nrow(data_input_mutated), ]
     if (inherits(optim_out, "MultiPrep")) {

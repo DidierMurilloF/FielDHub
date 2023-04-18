@@ -1,4 +1,4 @@
-#' @title  Generate the sparse allocation to multiple locations.
+#' @title  Generate the sparse or p-rep allocation to multiple locations.
 #' @param design Type of experimental design. It can be \code{prep} or \code{sparse}
 #' @param lines Number of genotypes, experimental lines or treatments.
 #' @param l Number of locations or sites. By default  \code{l = 1}.
@@ -397,7 +397,7 @@ sparse_allocation <- function(
         locationNames = locationNames,
         exptName = exptName,
         seed = seed,
-        multi_location_data= TRUE,
+        multiLocationData= TRUE,
         data = unrep
     )
     unrep_designs$infoDesign$id_design <- "Sparse"
@@ -586,7 +586,7 @@ multi_location_prep <- function(
         locationNames = locationNames,
         exptName = exptName,
         seed = seed,
-        multi_location_data = TRUE,
+        multiLocationData = TRUE,
         data = preps$list_locs
     )
     design_randomization$infoDesign$id_design <- "MultiPrep"
@@ -657,7 +657,6 @@ merge_user_data <- function(
             stop("Input lines does not match number of lines in input data!")
         }
         if (add_checks) {
-            # max_entry <- max(df_data_lines$ENTRY)
             max_entry <- lines
             vlookup_entry <- c((max_entry + 1):((max_entry + input_checks)), 1:lines)
         } else vlookup_entry <- 1:lines
@@ -674,20 +673,20 @@ merge_user_data <- function(
             iter_loc <- optim_out$list_locs[[LOC]]
             data_input_mutated <- user_data_input %>%
                 dplyr::mutate(
-                    ENTRY_list = ENTRY,
+                    USER_ENTRY = ENTRY,
                     ENTRY = vlookup_entry
                 ) %>%
-                dplyr::select(ENTRY_list, ENTRY, NAME) %>%
+                dplyr::select(USER_ENTRY, ENTRY, NAME) %>%
                 dplyr::left_join(y = iter_loc, by = "ENTRY") %>% 
                 {
                     if (inherits(optim_out, "MultiPrep")) {
-                        dplyr::select(.data = ., ENTRY_list, NAME.x, REPS) %>%
+                        dplyr::select(.data = ., USER_ENTRY, NAME.x, REPS) %>%
                         dplyr::arrange(dplyr::desc(REPS)) %>%
-                        dplyr::rename(ENTRY = ENTRY_list, NAME = NAME.x)
+                        dplyr::rename(ENTRY = USER_ENTRY, NAME = NAME.x)
                     } else if (inherits(optim_out, "Sparse")) {
                         dplyr::filter(.data = ., !is.na(NAME.y)) %>% 
-                        dplyr::select(ENTRY_list, NAME.x) %>%
-                        dplyr::rename(ENTRY = ENTRY_list, NAME = NAME.x)
+                        dplyr::select(USER_ENTRY, NAME.x) %>%
+                        dplyr::rename(ENTRY = USER_ENTRY, NAME = NAME.x)
                     } 
                 }
             # Store the number of plots (It does not include checks)
@@ -700,8 +699,6 @@ merge_user_data <- function(
             # Store the merged data
             merged_list_locs[[LOC]] <- data_input_mutated
         }
-        print(optim_out$size_locations)
-        print(size_location)
         # Check if the number of plots are the same after the data merge
         if (!all(size_location == as.numeric(optim_out$size_locations))) {
             stop("After data merge, size of locations does not match!")

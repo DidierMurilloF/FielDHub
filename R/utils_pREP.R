@@ -1,20 +1,61 @@
+#' @title Partially Replicated Engine Function
+#' 
+#' @description
+#' This function generates and optimizes a partially replicated (p-rep) experimental design 
+#' for a given set of treatments and replication levels. The design is represented by 
+#' a matrix and optimized using a pairwise distance metric. The function outputs 
+#' various information about the optimized design including the field layout, replicated 
+#' and unreplicated treatments, and pairwise distances between treatments.
+#' 
+#' @param nrows Number of rows field.
+#' @param ncols Number of columns field.
+#' @param Fillers An integer
+#' @param seed An optional seed value to set the random number generator.
+#' @param optim A logical value indicating whether or not to optimize the design. Default is TRUE.
+#' @param niter The number of iterations to use in the first step optimization algorithm. 
+#' Default is 1000.
+#' @param data  Data frame with 3 columns: \code{ENTRY | NAME | REPS}.
+#' 
 #' @importFrom stats dist
-pREP <- function(nrows = NULL, ncols = NULL, RepChecks = NULL, checks = NULL, 
-                 Fillers = NULL, seed = NULL, optim = TRUE, niter = 10000, 
-                 data = NULL) {
+#' 
+#' @return A list containing the following elements:
+#' \describe{
+#'   \item{field.map}{The optimized matrix representing the experimental design layout.}
+#'   \item{rows_incidence}{A vector of row indices.}
+#'   \item{min_distance}{The minimum distance achieved during the optimization algorithm.}
+#'   \item{pairswise_distance}{A data frame of pairwise distances between rep treatments.}
+#'   \item{replicated_treatments}{A vector of the replicated treatments in the optimized design.}
+#'   \item{unreplicated_treatments}{A vector of the unreplicated treatments in the optimized design.}
+#'   \item{gen.entries}{A list of the entry treatments.}
+#'   \item{gen.list}{The original input list of treatments and replication levels.}
+#'   \item{reps.checks}{A vector of the number of times each replicated treatment appears in the design.}
+#'   \item{entryChecks}{A vector of the rep entry treatments in the design.}
+#'   \item{binary.field}{The binary matrix representing the experimental design before optimization.}
+#' }
+#' 
+#' 
+#' @noRd
+pREP <- function(
+    nrows = NULL, 
+    ncols = NULL,
+    Fillers = NULL, 
+    seed = NULL, 
+    optim = TRUE, 
+    niter = 10000, 
+    data = NULL) {
+  
     niter <- 1000
-    gen_list <- data
     prep <- TRUE
-    if (!is.null(gen_list)) {
-        gen_list <- as.data.frame(gen_list)
-        gen_list <- na.omit(gen_list[, 1:3])
+    if (!is.null(data)) {
+        gen_list <- data
+        gen_list <- gen_list[, 1:3]
         gen_list <- na.omit(gen_list)
         colnames(gen_list) <- c("ENTRY", "NAME", "REPS")
         if (length(gen_list$ENTRY) != length(unique(gen_list$ENTRY))) {
-          stop("Please ensure all ENTRIES in data are distinct.")
+            stop("Please ensure all ENTRIES in data are distinct.")
         }
         if (length(gen_list$NAME) != length(unique(gen_list$NAME))) {
-          stop("Please ensure all NAMES in data are distinct.")
+            stop("Please ensure all NAMES in data are distinct.")
         }
         reps_one_time <- subset(gen_list, REPS == 1)
         if (nrow(reps_one_time) == 0) {
@@ -107,7 +148,6 @@ pREP <- function(nrows = NULL, ncols = NULL, RepChecks = NULL, checks = NULL,
         ########## Randomize checks to the letters ############################
         trt <- entry_checks
         trts_to_random <- trt  
-        # trt_random <- matrix(c(trt_reps, trts_to_random), nrow = 2, ncol = ch, byrow = TRUE)
         l <- 1
         layout1 <- layout
         for (i in target_check_levels) {

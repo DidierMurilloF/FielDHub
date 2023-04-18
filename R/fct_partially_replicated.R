@@ -1,9 +1,14 @@
 #' Generates a Spatial Partially Replicated Arrangement Design
 #'
-#'
-#' Randomly generates a spatial partially replicated design, where the distance 
-#' between checks is maximized in such a way that each row and column have control plots. 
-#' Note that design generation needs the dimension of the field (number of rows and columns).
+#' @description
+#' Randomly generates a spatial partially replicated (p-rep) design for single or multiple locations. 
+#' 
+#' @details
+#' This function generates and optimizes a partially replicated (p-rep) experimental design for a 
+#' given set of treatments and replication levels. The design is represented by a matrix and optimized 
+#' using a pairwise distance metric. The function outputs various information about the optimized design 
+#' including the field layout, replicated and unreplicated treatments, and pairwise distances between 
+#' treatments. Note that the design generation needs the dimension of the field (number of rows and columns).
 #'
 #' @param nrows Numeric vector with the number of rows field at each location.
 #' @param ncols Numeric vector with the number of columns field at each location.
@@ -15,10 +20,10 @@
 #' @param seed (optional) Real number that specifies the starting seed to obtain reproducible designs.
 #' @param exptName (optional) Name of the experiment.
 #' @param locationNames (optional) Name for each location.
-#' @param multi_location_data (optional) Option to pass an entry list for multiple locations. 
-#' By default \code{multi_location_data = FALSE}.
+#' @param multiLocationData (optional) Option to pass an entry list for multiple locations. 
+#' By default \code{multiLocationData = FALSE}.
 #' @param data (optional) Data frame with 3 columns: \code{ENTRY | NAME | REPS}. If  
-#' \code{multi_location_data = TRUE} then the \code{data} must have
+#' \code{multiLocationData = TRUE} then the \code{data} must have
 #' 4 columns: \code{LOCATION | ENTRY | NAME | REPS}
 #' 
 #' 
@@ -116,7 +121,7 @@ partially_replicated <- function(
     seed = NULL, 
     exptName = NULL, 
     locationNames = NULL,
-    multi_location_data = FALSE,  
+    multiLocationData = FALSE,  
     data = NULL) {
     
     if (all(c("serpentine", "cartesian") != planter)) {
@@ -176,7 +181,7 @@ partially_replicated <- function(
         }
     } else stop("Number of locations/sites is missing")
     if (!is.null(data)) {
-        if (multi_location_data) {
+        if (multiLocationData) {
             if (is.data.frame(data)) {
                 gen_list <- data
                 gen_list <- as.data.frame(gen_list)
@@ -281,8 +286,6 @@ partially_replicated <- function(
         prep <- pREP(
             nrows = nrows[sites], 
             ncols = ncols[sites], 
-            RepChecks = NULL, 
-            checks = NULL, 
             Fillers = 0,
             seed = seed, 
             optim = TRUE, 

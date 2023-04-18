@@ -21,8 +21,8 @@
 #' If \code{kindExpt = 'DBUDC'} and data is null, \code{blocks} are mandatory.
 #' @param exptName (optional) Name of the experiment.
 #' @param locationNames (optional) Names each location.
-#' @param multi_location_data (optional) Option to pass an entry list for multiple locations. 
-#' By default \code{multi_location_data = FALSE}.
+#' @param multiLocationData (optional) Option to pass an entry list for multiple locations. 
+#' By default \code{multiLocationData = FALSE}.
 #' @param data (optional) Data frame with 2 columns: \code{ENTRY | NAME }.
 #' 
 #' @author Didier Murillo [aut],
@@ -127,7 +127,7 @@ diagonal_arrangement <- function(
     blocks = NULL,
     exptName = NULL, 
     locationNames = NULL, 
-    multi_location_data = FALSE,
+    multiLocationData = FALSE,
     data = NULL) {
   
     if (all(c("serpentine", "cartesian") != planter)) {
@@ -220,7 +220,7 @@ diagonal_arrangement <- function(
         stacked = stacked,
         l = l,
         Option_NCD = Option_NCD,
-        multi_location_data = multi_location_data,
+        multiLocationData = multiLocationData,
         data = data
     )
     
@@ -232,7 +232,6 @@ diagonal_arrangement <- function(
     col_checks_sites <- vector(mode = "list", length = l)
     RepChecks_list <- vector(mode = "list", length = l)
     percentChecks_vector <- vector(mode = "numeric", length = l)
-    
     if (is.null(seed)) seed = sample.int(100000, 1)
     set.seed(seed)
     for (sites in 1:l) {
@@ -637,8 +636,8 @@ diagonal_arrangement <- function(
 #' @param Option_NCD Option to pass an entry list for multiple locations.
 #' @param blocks Number of blocks. By default \code{blocks = NULL}.
 #' @param stacked  Option for \code{"By Row"} or \code{"By Column"} stacked of planting.
-#' @param multi_location_data (optional) Option to pass an entry list for multiple locations. 
-#' By default \code{multi_location_data = FALSE}.
+#' @param multiLocationData (optional) Option to pass an entry list for multiple locations. 
+#' By default \code{multiLocationData = FALSE}.
 #' @param data (optional) Data frame with 2 columns: \code{ENTRY | NAME }.
 #' 
 #' @noRd
@@ -653,7 +652,7 @@ unrep_data_parameters <- function(
     blocks = NULL, 
     l = 1,
     Option_NCD = TRUE,
-    multi_location_data = FALSE,
+    multiLocationData = FALSE,
     data = NULL) {
 
     if (inherits(data, "Sparse")) {
@@ -670,7 +669,7 @@ unrep_data_parameters <- function(
     # Iterate through the locations
     for (location in locations) {
         if (!is.null(data)) {
-            if (multi_location_data) {
+            if (multiLocationData) {
                 if (is.data.frame(data)) {
                     gen_list <- data
                     gen_list <- as.data.frame(gen_list)

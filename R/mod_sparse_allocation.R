@@ -186,6 +186,8 @@ mod_sparse_allocation_ui <- function(id) {
                     type = 4
                 )
             ),
+            tabPanel("Data Input",
+                     DT::DTOutput(ns("multi_loc_data_input"))),
             tabPanel("Randomized Field",
                         br(),
                         shinyjs::hidden(
@@ -390,7 +392,7 @@ mod_sparse_allocation_server <- function(id){
                 if (ncol(data_up) < 2) {
                     validate("Data input needs at least two Columns with the ENTRY and NAME.")
                 } 
-                data_entry_UP <- na.omit(data_up[,1:2])
+                data_entry_UP <- na.omit(data_up[, 1:2])
                 colnames(data_entry_UP) <- c("ENTRY", "NAME")
                 checksEntries <- as.numeric(data_entry_UP[1:sparse_checks,1])
                 input_entries_column <- data_entry_UP[(sparse_checks + 1):nrow(data_entry_UP),1]
@@ -471,14 +473,14 @@ mod_sparse_allocation_server <- function(id){
         req(input$input_sparse_data)
         req(get_sparse_data())
         sparse_data_input <- get_sparse_data()$data_entry
-        lines <- get_sparse_data()$dim_without_checks
+        input_lines <- get_sparse_data()$dim_without_checks
         checks <- as.numeric(input$sparse_checks)
-        lines_plus_checks <- lines + checks
+        lines_plus_checks <- input_lines + checks
         locs <- single_inputs()$sites
         withProgress(message = 'Optimization in progress ...', {
           optim_out <- do_optim(
             design = "sparse",
-            lines = lines, 
+            lines = input_lines, 
             l = locs,
             copies_per_entry = single_inputs()$plant_reps, 
             add_checks = TRUE,
@@ -489,26 +491,13 @@ mod_sparse_allocation_server <- function(id){
         })
         if (input$input_sparse_data == "Yes") {
             req(get_sparse_data())
-            max_entry <- max(get_sparse_data()$input_entries)
-            new_list_locs <- setNames(
-                vector("list", length = locs), 
-                nm = paste0("LOC", 1:locs)
+            optim_out <- merge_user_data(
+                optim_out = optim_out, 
+                data = sparse_data_input, 
+                lines = input_lines, 
+                add_checks = TRUE, 
+                checks = checks
             )
-            for (LOC in 1:locs) {
-                iter_loc <- optim_out$list_locs[[LOC]]
-                data_input_mutated <- sparse_data_input %>%
-                    dplyr::mutate(
-                        ENTRY_list = ENTRY,
-                        ENTRY = c((max_entry + 1):((max_entry + checks)), 1:lines)
-                    ) %>%
-                    dplyr::select(ENTRY_list, ENTRY, NAME) %>%
-                    dplyr::left_join(y = iter_loc, by = "ENTRY") %>%
-                    stats::na.omit() %>%
-                    dplyr::select(ENTRY_list, NAME.x) %>%
-                    dplyr::rename(ENTRY = ENTRY_list, NAME = NAME.x)
-                new_list_locs[[LOC]] <- data_input_mutated
-            }
-            optim_out$list_locs <- new_list_locs
         }
         return(optim_out)
     }) %>%
@@ -615,6 +604,39 @@ mod_sparse_allocation_server <- function(id){
             buttons = c('copy', 'excel', 'print')
           )
         )
+    })
+    
+    ###### Display multi-location data ##############
+    output$multi_loc_data_input <- DT::renderDT({
+      test <- randomize_hit$times > 0 & user_tries$tries > 0
+      if (!test) return(NULL)
+      req(sparse_setup())
+      multi_loc_data <- sparse_setup()$multi_location_data
+      df <- as.data.frame(multi_loc_data)
+      # Combine the data frames into a single data frame with 
+      # a new column for the list element name
+      if (input$input_sparse_data == 'Yes') {
+        req(get_sparse_data())
+        list_locs <- sparse_setup()$list_locs
+        df <- dplyr::bind_rows(
+          lapply(names(list_locs), function(name) {
+            dplyr::mutate(list_locs[[name]], LOCATION = name)
+          })) %>% 
+          dplyr::select(LOCATION, ENTRY, NAME)
+      }
+      df$LOCATION <- as.factor(df$LOCATION)
+      df$ENTRY <- as.factor(df$ENTRY)
+      df$NAME <- as.factor(df$NAME)
+      options(DT.options = list(
+        pageLength = nrow(df), 
+        autoWidth = FALSE,
+        scrollX = TRUE, scrollY = "500px"))
+      DT::datatable(
+        df,
+        rownames = FALSE, 
+        filter = 'top',
+        options = list(
+          columnDefs = list(list(className = 'dt-center', targets = "_all"))))
     })
 
     
