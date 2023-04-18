@@ -5,7 +5,7 @@
 
 ## FielDHub 1.3.1
 
-#### New Features in the Shiny App
+### New Features in the Shiny App
 
 - Added a module to generate **Sparse allocation**.
 
@@ -16,7 +16,7 @@
   Sparse Allocations and Optimized Multi-Location Partially Replicated
   (p-rep) Designs in the app.
 
-##### Enhancements:
+### Enhancements:
 
 - Renamed the **Partially Replicated** module to **Single and
   Multi-Location p-rep**
@@ -26,13 +26,13 @@
   between the number of rows and columns for each option. This affects
   unreplicated and partially replicated design modules.
 
-##### Fix bugs:
+### Fix bugs:
 
 - Fixed issue: Upload data in the CRD module.
 
-#### New Features in the `FielDHub` Package:
+### New Features in the `FielDHub` Package:
 
-##### Standalone Functions
+### Standalone Functions
 
 - Created the `do_optim()` function. This function generates the sparse
   or p-rep allocation to multiple locations. It optimized the allocation
@@ -72,7 +72,7 @@
 
 - Added **vignettes and help documentation** for all the new functions.
 
-##### Enhancements:
+### Enhancements:
 
 - Code refactoring on the `diagonal_arrangement()` function.
 
