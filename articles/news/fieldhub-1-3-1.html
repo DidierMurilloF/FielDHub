@@ -117,7 +117,7 @@ Spiske</a> on
 <div class="section level5">
 <h5 id="section">
 <img src="https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/calendar-check.svg" width="20" height="15">
-2023/04/10<a class="anchor" aria-label="anchor" href="#section"></a>
+2023/04/18<a class="anchor" aria-label="anchor" href="#section"></a>
 </h5>
 </div>
 <div class="section level5">
@@ -142,59 +142,108 @@ users.</p>
 </h4>
 </div>
 <div class="section level4">
-<h4 id="shiny-app">Shiny App<a class="anchor" aria-label="anchor" href="#shiny-app"></a>
+<h4 id="new-features-in-the-shiny-app">New Features in the Shiny App<a class="anchor" aria-label="anchor" href="#new-features-in-the-shiny-app"></a>
 </h4>
 <ul>
-<li><p>Added a new module to generate <strong>Sparse
+<li><p>Added a module to generate <strong>Sparse
 allocation</strong>.</p></li>
-<li><p>Added a new module for generating <strong>Optimized
-Multi-Location Partially Replicated (p-rep)</strong>.</p></li>
+<li><p>Added a module for generating <strong>Optimized Multi-Location
+Partially Replicated (p-rep)</strong>.</p></li>
 <li><p>Added <strong>vignettes and help documentation</strong> for all
-the new standard functions and modules; Sparse Allocations and Optimized
-Multi-Location Partially Replicated (p-rep) Designs in the app.</p></li>
+the new modules; Sparse Allocations and Optimized Multi-Location
+Partially Replicated (p-rep) Designs in the app.</p></li>
+</ul>
+<div class="section level5">
+<h5 id="enhancements">Enhancements:<a class="anchor" aria-label="anchor" href="#enhancements"></a>
+</h5>
+<ul>
 <li><p>Renamed the <strong>Partially Replicated</strong> module to
 <strong>Single and Multi-Location p-rep</strong></p></li>
 <li><p>Improved the usability of the field dimensions dropdown menu by
 reordering the options based on the absolute value of the difference
 between the number of rows and columns for each option. This affects
-unreplicated and partially replicated designs modules.</p></li>
-<li><p>Fixed issue: Upload data in the CRD module.</p></li>
+unreplicated and partially replicated design modules.</p></li>
 </ul>
 </div>
-<div class="section level4">
-<h4 id="standalone-functions-in-fieldhub-package">Standalone Functions in <code>FielDHub</code> Package<a class="anchor" aria-label="anchor" href="#standalone-functions-in-fieldhub-package"></a>
-</h4>
+<div class="section level5">
+<h5 id="fix-bugs">Fix bugs:<a class="anchor" aria-label="anchor" href="#fix-bugs"></a>
+</h5>
 <ul>
-<li><p>Created the <code><a href="../../reference/do_optim.html">do_optim()</a></code> function.</p></li>
-<li><p>Created the <code><a href="../../reference/sparse_allocation.html">sparse_allocation()</a></code> function.</p></li>
-<li><p>Created the <code><a href="../../reference/multi_location_prep.html">multi_location_prep()</a></code> function.</p></li>
-<li><p>Created the <code>pairs_distance()</code> function.</p></li>
-<li><p>Created the <code><a href="../../reference/swap_pairs.html">swap_pairs()</a></code> function.</p></li>
-<li><p>Created the <code>search_matrix_values()</code>
-function.</p></li>
-<li><p>Added a new and better optimization process for the partially
-replicated (p-rep) designs.</p></li>
+<li>Fixed issue: Upload data in the CRD module.</li>
+</ul>
+</div>
+</div>
+<div class="section level4">
+<h4 id="new-features-in-the-fieldhub-package">New Features in the <code>FielDHub</code> Package:<a class="anchor" aria-label="anchor" href="#new-features-in-the-fieldhub-package"></a>
+</h4>
+<div class="section level5">
+<h5 id="standalone-functions">Standalone Functions<a class="anchor" aria-label="anchor" href="#standalone-functions"></a>
+</h5>
+<ul>
+<li><p>Created the <code><a href="../../reference/do_optim.html">do_optim()</a></code> function. This function
+generates the sparse or p-rep allocation to multiple locations. It
+optimized the allocation by using incomplete blocks.</p></li>
+<li><p>Created the <code><a href="../../reference/sparse_allocation.html">sparse_allocation()</a></code> function. This new
+function uses the other function, <code><a href="../../reference/do_optim.html">do_optim()</a></code>, to generate
+the sparse allocation, then uses the function
+<code><a href="../../reference/diagonal_arrangement.html">diagonal_arrangement()</a></code> to create unreplicated designs
+across multiple locations.</p></li>
+<li><p>Created the <code><a href="../../reference/multi_location_prep.html">multi_location_prep()</a></code> function. It uses
+within the optimization function <code><a href="../../reference/do_optim.html">do_optim()</a></code> to generate the
+partially replicated (p-rep) allocation, then uses the function
+<code><a href="../../reference/partially_replicated.html">partially_replicated()</a></code> to create the p-rep designs across
+multiple locations.</p></li>
+<li><p>Created the <code>pairs_distance()</code> function. This function
+calculates pairwise distances between all elements in a matrix that
+appears twice or more.</p></li>
+<li><p>Created the <code><a href="../../reference/swap_pairs.html">swap_pairs()</a></code> function. It swaps pairs in
+a matrix of integers and optimizes the p-rep design. This function
+modifies the input matrix <span class="math inline">\(X\)</span> to
+ensure that the distance between any two occurrences of the same integer
+is at least a distance <span class="math inline">\(d\)</span>, by
+swapping one of the occurrences with a random occurrence of a different
+integer that is at least <span class="math inline">\(d\)</span> away.
+The function starts with starting dist at <span class="math inline">\(d
+= 3\)</span> and increases it by <span class="math inline">\(1\)</span>
+until the algorithm no longer converges or the max number of iterations
+have been performed.</p></li>
+<li><p>Created the <code>search_matrix_values()</code> function. It
+looks for values that appear in the same row in a matrix and return the
+row number, value, and frequency.</p></li>
+<li><p>Added optimization process for the partially replicated (p-rep)
+designs. It uses the function <code><a href="../../reference/swap_pairs.html">swap_pairs()</a></code>.</p></li>
+<li><p>Added <strong>vignettes and help documentation</strong> for all
+the new functions.</p></li>
+</ul>
+</div>
+<div class="section level5">
+<h5 id="enhancements-1">Enhancements:<a class="anchor" aria-label="anchor" href="#enhancements-1"></a>
+</h5>
+<ul>
 <li><p>Code refactoring on the <code><a href="../../reference/diagonal_arrangement.html">diagonal_arrangement()</a></code>
 function.</p></li>
-<li><p>Fixed issue: Avoid cyclic reps in incomplete block designs when
-the number of treatments is square.</p></li>
+<li><p>Code refactoring on the utility function
+<code>pREP()</code>.</p></li>
+<li><p>Avoid cyclic reps in incomplete block designs when the number of
+treatments is square.</p></li>
 </ul>
 </div>
-<div class="section level4">
-<h4 id="acknowledgements">Acknowledgements<a class="anchor" aria-label="anchor" href="#acknowledgements"></a>
-</h4>
+</div>
+</div>
+<div class="section level3">
+<h3 id="acknowledgements">Acknowledgements<a class="anchor" aria-label="anchor" href="#acknowledgements"></a>
+</h3>
 <p>FielDHub v1.3.1 results from dedicated effort and contribution from a
 group of individuals who have made this release possible. We want to
-extend our sincere gratitude to Mr. Jean-Marc Montpetit for his
-invaluable contributions to developing the <code><a href="../../reference/swap_pairs.html">swap_pairs()</a></code> and
-<code>pairs_distance()</code> functions. His contributions have had a
-significant impact on improving the partially replicated (p-rep) design.
-We also thank <a href="https://github.com/seefeldtm" class="external-link">Matthew
-Seefeldt</a> for helping write documentation and <a href="https://github.com/AparicioJohan" class="external-link">Johan Aparicio</a> for his ideas
-and reporting bugs. Thanks, <a href="https://github.com/tatirri" class="external-link">Ana
-María Heilman</a>, for the support and leadership throughout the
-development process.</p>
-</div>
+extend our sincere gratitude to Mr. <a href="https://www.linkedin.com/in/jean-marc-montpetit/" class="external-link">Jean-Marc
+Montpetit</a> for his contributions to developing the
+<code><a href="../../reference/swap_pairs.html">swap_pairs()</a></code> and <code>pairs_distance()</code> functions.
+His help enhanced the optimization of the partially replicated (p-rep)
+design. Thank you, Dr. <a href="https://www.linkedin.com/in/salvador-gezan-54768a1a/" class="external-link">Salvador
+Gezan</a>, for your contributions and fresh ideas. We also thank <a href="https://github.com/seefeldtm" class="external-link">Matthew Seefeldt</a> for helping
+write documentation and <a href="https://github.com/AparicioJohan" class="external-link">Johan
+Aparicio</a> for his ideas and reporting bugs. Thanks, <a href="https://github.com/tatirri" class="external-link">Ana María Heilman</a>, for the support
+and leadership throughout the development process.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>
