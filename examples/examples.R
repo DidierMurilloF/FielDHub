@@ -270,5 +270,59 @@ for (LOC in locs_range) {
 # }
 optim_out$list_locs <- merged_list_locs
 
+################################################################################
+search_matrix_values <- function(X, values_search) {
+  # Initialize an empty list to store the results
+  result <- list()
+  # Loop through each row of X
+  for (i in 1:nrow(X)) {
+    # Get the unique values and their frequency in the current row
+    row_vals <- unique(X[i,])
+    row_counts <- tabulate(match(X[i,], row_vals))
+    # Find the values that are in the search list
+    search_vals <- row_vals[row_vals %in% values_search]
+    # XAd the row number, search values, and their frequency to the result list
+    for (val in search_vals) {
+      freq <- sum(X[i,] == val)
+      result[[length(result)+1]] <- c(i, val, freq)
+    }
+  }
+  # Convert the result list to a data frame
+  result_df <- do.call(rbind, result)
+  colnames(result_df) <- c("Row", "Value", "Times")
+  # Return the final data frame
+  return(result_df)
+}
+
+set.seed(1)
+data = sample(c(rep(1:23, each = 2), 24:30, rep(31:33, each = 8)))
+table(data)
+X <- matrix(data = data, nrow = 7, ncol = 11, byrow = FALSE)
+FielDHub:::pairs_distance(X)
+dups <- table(as.vector(X))
+values <- as.numeric(rownames(dups)[dups > 1])
+values
+
+frequency_rows <- as.data.frame(search_matrix_values(X = X, values_search = values))
+df <- frequency_rows %>% 
+  dplyr::filter(Times >= 2)
+
+df
+nrow(df)
+
+
+library(FielDHub)
+prep <- multi_location_prep(
+  lines = 30, 
+  l = 4, 
+  copies_per_entry = 7, 
+  checks = 3, 
+  rep_checks = c(8,8,8),
+  seed = 1)
+
+
+prep$min_pairswise_distance
+prep$pairsDistance
+
 
 

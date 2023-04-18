@@ -364,15 +364,6 @@ mod_sparse_allocation_server <- function(id){
             )
             return(NULL)
         }
-        choices_list <- field_dimensions(lines_within_loc = sparse_lines)
-        if (length(choices_list) == 0) {
-            shinyalert::shinyalert(
-                "Error!!", 
-                "Number of entries is too small!",
-                type = "error"
-            )
-            return(NULL)
-        }
         Option_NCD <- TRUE
         if (input$input_sparse_data == "Yes") {
             req(input$sparse_lines)
@@ -499,18 +490,31 @@ mod_sparse_allocation_server <- function(id){
                 checks = checks
             )
         }
-        return(optim_out)
+        sparse_checks <- as.numeric(input$sparse_checks)
+        lines_within_loc <- as.numeric(optim_out$size_locations[1])
+        choices_list <- field_dimensions(lines_within_loc = lines_within_loc)
+        if (length(choices_list) == 0) {
+          shinyalert::shinyalert(
+            "Error!!",
+            "Number of entries is too small!",
+            type = "error"
+          )
+          return(NULL)
+        } else return(optim_out)
     }) %>%
         bindEvent(input$sparse_run)
-
+    
     getChecks <- eventReactive(input$sparse_run, {
-      data <- sparse_setup()$list_locs[[1]]
-      checksEntries <- as.numeric(data[1:input$sparse_checks,1])
-      sparse_checks <- as.numeric(input$sparse_checks)
-      list(checksEntries = checksEntries, sparse_checks = sparse_checks)
+        req(sparse_setup())
+        data <- sparse_setup()$list_locs[[1]]
+        checksEntries <- as.numeric(data[1:input$sparse_checks,1])
+        sparse_checks <- as.numeric(input$sparse_checks)
+        list(checksEntries = checksEntries, sparse_checks = sparse_checks)
     })
     
     list_inputs_diagonal <- eventReactive(input$sparse_run, {
+        req(sparse_setup())
+        req(getChecks())
         req(sparse_setup()$size_locations)
         sparse_checks <- as.numeric(getChecks()$sparse_checks)
         lines <- as.numeric(sparse_setup()$size_locations[1])
@@ -519,10 +523,20 @@ mod_sparse_allocation_server <- function(id){
     })
 
     observeEvent(list_inputs_diagonal(), {
+        req(sparse_setup())
+        req(get_sparse_data())
         req(sparse_setup()$size_locations)
         sparse_checks <- as.numeric(getChecks()$sparse_checks)
         lines_within_loc <- as.numeric(sparse_setup()$size_locations[1])
         choices_list <- field_dimensions(lines_within_loc = lines_within_loc)
+        if (length(choices_list) == 0) {
+          shinyalert::shinyalert(
+            "Error!!",
+            "Number of entries is too small!",
+            type = "error"
+          )
+          return(NULL)
+        }
         choices <- unlist(choices_list[!sapply(choices_list, is.null)])
         Option_NCD <- TRUE
         checksEntries <- as.vector(getChecks()$checksEntries)
@@ -530,32 +544,32 @@ mod_sparse_allocation_server <- function(id){
         v <- 1
         by_choices <- 1:length(choices)
         for (dim_options in by_choices) {
-          planter_mov <- single_inputs()$planter_mov
-          dims <- unlist(strsplit(choices[[dim_options]], " x "))
-          n_rows <- as.numeric(dims[1])
-          n_cols  <- as.numeric(dims[2])
-          
-          dt_options <- available_percent(
-              n_rows = n_rows,
-              n_cols = n_cols,
-              checks = checksEntries,
-              Option_NCD = Option_NCD,
-              kindExpt = kindExpt_single,
-              planter_mov1 = planter_mov,
-              data = NULL,
-              dim_data = lines_within_loc + sparse_checks,
-              dim_data_1 = lines_within_loc,
-              Block_Fillers = NULL
-          )
-          if (!is.null(dt_options$dt)) {
-            new_choices[[v]] <- choices[[dim_options]]
-            v <- v + 1
-          }
+            planter_mov <- single_inputs()$planter_mov
+            dims <- unlist(strsplit(choices[[dim_options]], " x "))
+            n_rows <- as.numeric(dims[1])
+            n_cols  <- as.numeric(dims[2])
+            
+            dt_options <- available_percent(
+                n_rows = n_rows,
+                n_cols = n_cols,
+                checks = checksEntries,
+                Option_NCD = Option_NCD,
+                kindExpt = kindExpt_single,
+                planter_mov1 = planter_mov,
+                data = NULL,
+                dim_data = lines_within_loc + sparse_checks,
+                dim_data_1 = lines_within_loc,
+                Block_Fillers = NULL
+            )
+            if (!is.null(dt_options$dt)) {
+              new_choices[[v]] <- choices[[dim_options]]
+              v <- v + 1
+            }
         }
         dif <- vector(mode = "numeric", length = length(new_choices))
         for (option in 1:length(new_choices)) {
-          dims <- unlist(strsplit(new_choices[[option]], " x "))
-          dif[option] <- abs(as.numeric(dims[1]) - as.numeric(dims[2]))
+            dims <- unlist(strsplit(new_choices[[option]], " x "))
+            dif[option] <- abs(as.numeric(dims[1]) - as.numeric(dims[2]))
         }
         df_choices <- data.frame(choices = unlist(new_choices), diff_dim = dif)
         df_choices <- df_choices[order(df_choices$diff_dim, decreasing = FALSE), ]
@@ -567,13 +581,15 @@ mod_sparse_allocation_server <- function(id){
     })
     
     observeEvent(input$sparse_run, {
-      req(get_sparse_data()$dim_data_entry)
-      shinyjs::show(id = "sparse_dims")
-      shinyjs::show(id = "sparse_get_random")
+        req(sparse_setup())
+        req(get_sparse_data()$dim_data_entry)
+        shinyjs::show(id = "sparse_dims")
+        shinyjs::show(id = "sparse_get_random")
     })
 
     output$sparse_allocation <- DT::renderDT({
         req(get_sparse_data())
+        req(sparse_setup())
         data_without_checks <- get_sparse_data()$data_without_checks
         sparse_lines <- single_inputs()$sparse_lines
 
@@ -608,6 +624,7 @@ mod_sparse_allocation_server <- function(id){
     
     ###### Display multi-location data ##############
     output$multi_loc_data_input <- DT::renderDT({
+      req(sparse_setup())
       test <- randomize_hit$times > 0 & user_tries$tries > 0
       if (!test) return(NULL)
       req(sparse_setup())
@@ -641,6 +658,7 @@ mod_sparse_allocation_server <- function(id){
 
     
     field_dimensions_diagonal <- eventReactive(input$sparse_get_random, {
+      req(sparse_setup())
       req(input$sparse_dims)
       dims <- unlist(strsplit(input$sparse_dims, " x "))
       d_row <- as.numeric(dims[1])

@@ -190,7 +190,9 @@ swap_pairs <- function(X, starting_dist = 3, stop_iter = 100) {
               stop("The swap function changed the frequency of some integers.")
             }
             frequency_rows <- as.data.frame(search_matrix_values(X = X, values_search = genos))
-            df <- frequency_rows[frequency_rows$Times == 2, ]
+            # df <- frequency_rows[frequency_rows$Times == 2, ]
+            df <- frequency_rows %>% 
+                dplyr::filter(Times >= 2)
             rows_incidence[w - 1] <- nrow(df)
             designs[[w]] <- X
             distances[[w]] <- pairs_distance(X)
