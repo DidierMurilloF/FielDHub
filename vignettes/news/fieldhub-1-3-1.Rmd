@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 Photo by <a href="https://www.pexels.com/@markusspiske/">Markus Spiske</a> on <a href="https://www.pexels.com/photo/close-up-photo-of-matrix-background-1089438/">Pexels</a>
 
 
-##### <img src="https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/calendar-check.svg" width="20" height="15"> 2023/04/10
+##### <img src="https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/calendar-check.svg" width="20" height="15"> 2023/04/18
 ##### <img src="https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/code.svg" width="20" height="15">  [FielDHub](https://github.com/DidierMurilloF/FielDHub)
 ##### <img src="https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/chalkboard-user.svg" width="20" height="15"> Didier Murillo
 
@@ -28,45 +28,58 @@ I am thrilled to announce the release of FielDHub v1.3.1, which is the culminati
 
 #### Changelog
 
-#### Shiny App
+#### New Features in the Shiny App
 
-* Added a new module to generate **Sparse allocation**.
+* Added a module to generate **Sparse allocation**.
 
-* Added a new module for generating **Optimized Multi-Location Partially Replicated (p-rep)**.
+* Added a module for generating **Optimized Multi-Location Partially Replicated (p-rep)**.
 
-* Added **vignettes and help documentation** for all the new standard functions and modules; Sparse Allocations 
-and Optimized Multi-Location Partially Replicated (p-rep) Designs in the app. 
+* Added **vignettes and help documentation** for all the new modules; Sparse Allocations and Optimized Multi-Location Partially Replicated (p-rep) Designs in the app.
+
+##### Enhancements:
 
 * Renamed the **Partially Replicated** module to **Single and Multi-Location p-rep**
 
-* Improved the usability of the field dimensions dropdown menu by reordering the options based on the absolute value of the difference between the number of rows and columns for each option. This affects unreplicated and partially replicated designs modules.
+* Improved the usability of the field dimensions dropdown menu by reordering the options based on the absolute value of the difference between the number of rows and columns for each option. This affects unreplicated and partially replicated design modules.
+
+##### Fix bugs:
 
 * Fixed issue: Upload data in the CRD module.
 
+#### New Features in the `FielDHub` Package:
 
-#### Standalone Functions in `FielDHub` Package
+##### Standalone Functions 
 
-* Created the `do_optim()` function.
+* Created the `do_optim()` function. This function generates the sparse or p-rep allocation to multiple locations. It optimized the allocation by using incomplete blocks.
 
-* Created the `sparse_allocation()` function.
+* Created the `sparse_allocation()` function. This new function uses the other function, `do_optim()`, to generate the sparse allocation, then uses the function `diagonal_arrangement()` to create unreplicated designs across multiple locations.
 
-* Created the `multi_location_prep()` function.
+* Created the `multi_location_prep()` function. It uses within the optimization function 
+`do_optim()` to generate the partially replicated (p-rep) allocation, then uses the function `partially_replicated()` to create the p-rep designs across multiple locations.
 
-* Created the `pairs_distance()` function.
+* Created the `pairs_distance()` function. This function calculates pairwise distances between all elements in a matrix that appears twice or more.
 
-* Created the `swap_pairs()` function.
+* Created the `swap_pairs()` function. It swaps pairs in a matrix of integers and optimizes the p-rep design. This function modifies the input matrix $X$ to ensure that the distance between any two occurrences of the same integer is at least a distance $d$, by swapping one of the occurrences with a random occurrence of a different integer that is at least $d$ away. The function
+starts with starting dist at $d = 3$ and increases it by $1$ until the algorithm no longer 
+converges or the max number of iterations have been performed.
 
-* Created the `search_matrix_values()` function.
+* Created the `search_matrix_values()` function. It looks for values that appear in the same row in a matrix and return the row number, value, and frequency.
 
-* Added a new and better optimization process for the partially replicated (p-rep) designs.
+* Added optimization process for the partially replicated (p-rep) designs. It uses the function `swap_pairs()`.
+
+* Added **vignettes and help documentation** for all the new functions.
+
+##### Enhancements:
 
 * Code refactoring on the `diagonal_arrangement()` function.
 
-* Fixed issue: Avoid cyclic reps in incomplete block designs when the number of treatments is square.
+* Code refactoring on the utility function `pREP()`.
 
-#### Acknowledgements
+* Avoid cyclic reps in incomplete block designs when the number of treatments is square.
 
-FielDHub v1.3.1 results from dedicated effort and contribution from a group of individuals who have made this release possible. We want to extend our sincere gratitude to Mr. Jean-Marc Montpetit for his invaluable contributions to developing the `swap_pairs()` and `pairs_distance()` functions. His contributions have had a significant impact on improving the partially replicated (p-rep) design. We also thank [Matthew Seefeldt](https://github.com/seefeldtm) for helping write documentation and [Johan Aparicio](https://github.com/AparicioJohan) for his ideas and reporting bugs. Thanks, [Ana María Heilman](https://github.com/tatirri), for the support and leadership throughout the development process.
+### Acknowledgements
+
+FielDHub v1.3.1 results from dedicated effort and contribution from a group of individuals who have made this release possible. We want to extend our sincere gratitude to Mr. [Jean-Marc Montpetit](https://www.linkedin.com/in/jean-marc-montpetit/) for his contributions to developing the `swap_pairs()` and `pairs_distance()` functions. His help enhanced the optimization of the partially replicated (p-rep) design. Thank you, Dr. [Salvador Gezan](https://www.linkedin.com/in/salvador-gezan-54768a1a/), for your contributions and fresh ideas. We also thank [Matthew Seefeldt](https://github.com/seefeldtm) for helping write documentation and [Johan Aparicio](https://github.com/AparicioJohan) for his ideas and reporting bugs. Thanks, [Ana María Heilman](https://github.com/tatirri), for the support and leadership throughout the development process.
 
 
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/fct_do_optim.R
 \name{do_optim}
 \alias{do_optim}
-\title{Generate the sparse allocation to multiple locations.}
+\title{Generate the sparse or p-rep allocation to multiple locations.}
 \usage{
 do_optim(
   design = "sparse",
@@ -46,7 +46,7 @@ A list with three elements.
 }
 }
 \description{
-Generate the sparse allocation to multiple locations.
+Generate the sparse or p-rep allocation to multiple locations.
 }
 \examples{
 sparse_example <- do_optim(

@@ -15,7 +15,7 @@ partially_replicated(
   seed = NULL,
   exptName = NULL,
   locationNames = NULL,
-  multi_location_data = FALSE,
+  multiLocationData = FALSE,
   data = NULL
 )
 }
@@ -40,11 +40,11 @@ partially_replicated(
 
 \item{locationNames}{(optional) Name for each location.}
 
-\item{multi_location_data}{(optional) Option to pass an entry list for multiple locations. 
-By default \code{multi_location_data = FALSE}.}
+\item{multiLocationData}{(optional) Option to pass an entry list for multiple locations. 
+By default \code{multiLocationData = FALSE}.}
 
 \item{data}{(optional) Data frame with 3 columns: \code{ENTRY | NAME | REPS}. If
-\code{multi_location_data = TRUE} then the \code{data} must have
+\code{multiLocationData = TRUE} then the \code{data} must have
 4 columns: \code{LOCATION | ENTRY | NAME | REPS}}
 }
 \value{
@@ -68,9 +68,14 @@ A list with several elements.
 }
 }
 \description{
-Randomly generates a spatial partially replicated design, where the distance 
-between checks is maximized in such a way that each row and column have control plots. 
-Note that design generation needs the dimension of the field (number of rows and columns).
+Randomly generates a spatial partially replicated (p-rep) design for single or multiple locations.
+}
+\details{
+This function generates and optimizes a partially replicated (p-rep) experimental design for a 
+given set of treatments and replication levels. The design is represented by a matrix and optimized 
+using a pairwise distance metric. The function outputs various information about the optimized design 
+including the field layout, replicated and unreplicated treatments, and pairwise distances between 
+treatments. Note that the design generation needs the dimension of the field (number of rows and columns).
 }
 \examples{
 # Example 1: Generates a spatial optimized partially replicated arrangement design in one 

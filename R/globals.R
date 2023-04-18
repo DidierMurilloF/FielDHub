@@ -26,5 +26,6 @@ utils::globalVariables(c("ENTRY",
                          ".",
                          "Copies",
                          "sparse_entry",
-                         "ENTRY_list",
-                         "NAME.x"))
+                         "USER_ENTRY",
+                         "NAME.x",
+                         "NAME.y"))

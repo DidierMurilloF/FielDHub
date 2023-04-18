@@ -446,8 +446,8 @@ mod_pREPS_server <- function(id){
       expt_name <- prep_inputs()$expt_name
 
       pREPS <- partially_replicated(
-        nrows = nrows, 
-        ncols = ncols, 
+        nrows = rep(nrows, locs_preps), 
+        ncols = rep(ncols, locs_preps), 
         l = locs_preps, 
         seed = preps.seed, 
         plotNumber = plotNumber, 

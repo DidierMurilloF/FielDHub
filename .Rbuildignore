@@ -6,6 +6,7 @@
 dev_history.R
 ^dev$
 ^data$
+^examples$
 $run_dev.*
 ^LICENSE\.md$
 ^README\.Rmd$
