@@ -14,9 +14,9 @@ knitr::opts_chunk$set(
 )
 ```
 
-#### Changelog
+# Changelog
 
-## FielDHub 1.3.1
+# FielDHub 1.3.1
 
 ### New Features in the Shiny App
 
@@ -67,7 +67,7 @@ converges or the max number of iterations have been performed.
 
 * Avoid cyclic reps in incomplete block designs when the number of treatments is square.
 
-## FielDHub 1.2.0
+# FielDHub 1.2.0
 
 ### Shiny App
 
@@ -142,7 +142,7 @@ See [plot()](https://didiermurillof.github.io/FielDHub/reference/plot.FielDHub.h
 * Fixed a bug in `diagonal_arrangement()` when `kindExpt = DBUDC`. The problem affected merging data between the user data and randomization data when users wanted replicated entries across experiments. 
 
 
-## FielDHub 0.1.0
+# FielDHub 0.1.0
 
 CRAN release. 
 

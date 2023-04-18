@@ -1,9 +1,9 @@
 
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
 
-#### Changelog
+# Changelog
 
-## FielDHub 1.3.1
+# FielDHub 1.3.1
 
 ### New Features in the Shiny App
 
@@ -81,7 +81,7 @@
 - Avoid cyclic reps in incomplete block designs when the number of
   treatments is square.
 
-## FielDHub 1.2.0
+# FielDHub 1.2.0
 
 ### Shiny App
 
@@ -212,6 +212,6 @@
   problem affected merging data between the user data and randomization
   data when users wanted replicated entries across experiments.
 
-## FielDHub 0.1.0
+# FielDHub 0.1.0
 
 CRAN release.
