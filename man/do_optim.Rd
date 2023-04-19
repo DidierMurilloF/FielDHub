@@ -51,7 +51,7 @@ Generate the sparse or p-rep allocation to multiple locations.
 \examples{
 sparse_example <- do_optim(
    design = "sparse",
-   lines = 180, 
+   lines = 120, 
    l = 4, 
    copies_per_entry = 3, 
    add_checks = TRUE, 

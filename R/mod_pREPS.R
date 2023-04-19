@@ -109,12 +109,12 @@ mod_pREPS_ui <- function(id){
 			fluidRow(
 				column(
 					width = 6,
-                    numericInput(
+          numericInput(
 						ns("seed.preps"), 
 						label = "Random Seed:", 
 						value = 4095, 
 						min = 1
-                    )
+          )
 				),
 				column(
 					width = 6,
@@ -229,12 +229,13 @@ mod_pREPS_server <- function(id){
       if (input$owndataPREPS == 'Yes') {
         req(input$file.preps)
         inFile <- input$file.preps
-        data_ingested <- load_file(name = inFile$name,
-                                   path = inFile$datapat,
-                                   sep = input$sep.preps, 
-                                   check = TRUE, 
-                                   design = "prep")
-        
+        data_ingested <- load_file(
+           name = inFile$name,
+           path = inFile$datapat,
+           sep = input$sep.preps, 
+           check = TRUE, 
+           design = "prep"
+        )
         if (names(data_ingested) == "dataUp") {
           data_up <- data_ingested$dataUp
           data_up <- na.omit(data_up)
@@ -287,10 +288,30 @@ mod_pREPS_server <- function(id){
         colnames(data_preps) <- c("ENTRY", "NAME", "REPS")
         total_plots <- sum(data_preps$REPS)
       }
+      prime_factors <- numbers::primeFactors(total_plots)
+      if (length(prime_factors) == 2) {
+        if (prime_factors[1] < 4 & numbers::isPrime(prime_factors[2])) {
+          shinyalert::shinyalert(
+            "Error!!",
+            "There are no options available for field dimensions. Please try a different number of treatments.",
+            type = "error"
+          )
+          return(NULL)
+        }
+      }
+      if (numbers::isPrime(total_plots)) {
+        shinyalert::shinyalert(
+          "Error!!",
+          "The number of field plots results in a prime number. Please try a different number of treatments.",
+          type = "error"
+        )
+        return(NULL)
+      }
       return(list(data_up.preps = data_preps, total_plots = total_plots))
     })
     
     list_input_plots <- eventReactive(input$RUN.prep, {
+      req(get_data_prep())
       if (input$owndataPREPS != 'Yes') {
         req(input$repGens.preps)
         req(input$repUnits.preps)
@@ -305,6 +326,7 @@ mod_pREPS_server <- function(id){
     })
     
     observeEvent(list_input_plots(), {
+      req(get_data_prep())
       req(input$owndataPREPS)
       if (input$owndataPREPS != 'Yes') {
         repGens <- as.numeric(as.vector(unlist(strsplit(input$repGens.preps, ","))))
@@ -336,6 +358,7 @@ mod_pREPS_server <- function(id){
     })
     
     field_dimensions_prep <- eventReactive(input$get_random_prep, {
+      req(get_data_prep())
       dims <- unlist(strsplit(input$dimensions.preps," x "))
       d_row <- as.numeric(dims[1])
       d_col <- as.numeric(dims[2])
@@ -413,6 +436,7 @@ mod_pREPS_server <- function(id){
 
     ###### Plotting the data ##############
     output$dataup.preps <- DT::renderDT({
+      req(get_data_prep())
       test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
       if (!test) return(NULL)
       req(get_data_prep()$data_up.preps)
@@ -431,6 +455,7 @@ mod_pREPS_server <- function(id){
     })
     
     pREPS_reactive <- reactive({
+      req(get_data_prep())
       req(get_data_prep()$data_up.preps)
       gen.list <- get_data_prep()$data_up.preps
       nrows <- field_dimensions_prep()$d_row
@@ -461,6 +486,7 @@ mod_pREPS_server <- function(id){
       bindEvent(input$get_random_prep)
 
     output$summary_prep <- renderPrint({
+      req(get_data_prep())
       test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
       if (test) {
         cat("Randomization was successful!", "\n", "\n")

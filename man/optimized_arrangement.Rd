@@ -66,6 +66,7 @@ Note that design generation needs the dimension of the field (number of rows and
 \examples{
 # Example 1: Generates a spatial unreplicated optimized arrangement design in one location
 # with 120 genotypes + 20 check plots (4 checks) for a field with dimension 14 rows x 10 cols.
+\dontrun{
 optim_unrep1 <- optimized_arrangement(
   nrows = 14, 
   ncols = 10, 
@@ -82,10 +83,12 @@ optim_unrep1$infoDesign
 optim_unrep1$layoutRandom
 optim_unrep1$plotNumber
 head(optim_unrep1$fieldBook, 12)
+}
                   
 # Example 2: Generates a spatial unreplicated optimized arrangement design in one location
 # with 200 genotypes + 20 check plots (4 checks) for a field with dimension 10 rows x 22 cols.
 # As example, we set up the data option with the entries list.
+\dontrun{
 checks <- 4
 list_checks <- paste("CH", 1:checks, sep = "")
 treatments <- paste("G", 5:204, sep = "")
@@ -107,6 +110,7 @@ optim_unrep2$infoDesign
 optim_unrep2$layoutRandom
 optim_unrep2$plotNumber
 head(optim_unrep2$fieldBook,12)
+}
                   
 }
 \references{

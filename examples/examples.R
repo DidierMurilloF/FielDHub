@@ -112,17 +112,17 @@ plot(sparse_example2, l = 4)
 # Four environments
 # Five copies of each treatment
 # Passing user input data
-# It takes a few minutes
-entry_list_680 <- read.csv("data/entry_list_680.csv", header = TRUE)
+# It takes a few minutes (3 to 5 minutes)
+entry_list_680 <- read.csv("~/Desktop/data_680_entries.csv", header = TRUE)
 multi_prep1 <- multi_location_prep(
   lines = 680,  
   l = 4, 
   copies_per_entry = 5, 
   plotNumber = c(1001, 5001, 10001, 15001), 
   locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5"), 
+  nrows = c(34,25,34,50),
+  ncols = c(25,34,25,17),
   seed = 78945,
-  nrows = c(34,17,34,17),
-  ncols = c(25,50,25,50),
   data = entry_list_680
 )
 # Print design info
@@ -139,15 +139,16 @@ plot(multi_prep1, l = 4)
 # Five copies of each treatment
 # The function generates the entry list internally
 # Treatments are tagged from 1 to 680.
+# It takes a few minutes (3 to 5 minutes)
 multi_prep2 <- multi_location_prep(
   lines = 680,  
   l = 4, 
   copies_per_entry = 5, 
   plotNumber = c(1001, 5001, 10001, 15001), 
   locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5"), 
-  seed = 78945,
-  nrows = c(34,17,34,17),
-  ncols = c(25,50,25,50)
+  nrows = c(34,25,34,50),
+  ncols = c(25,34,25,17),
+  seed = 78945
 )
 # Print design info
 print(multi_prep2)
@@ -157,10 +158,63 @@ plot(multi_prep2, l = 2)
 plot(multi_prep2, l = 3)
 plot(multi_prep2, l = 4)
 
-################################# FIN #####################################
-###########################################################################
-## The following example shows how the merge works for sparse user input data
-entry_list_sparse_176_2 <- read.csv("data/entry_list_176_trts_1.csv", header = TRUE)
+
+################################################################################
+# The following example shows how the merge works for multi prep user input data
+# No check plots 
+entry_list_prep <- read.csv("data/entry_list_180_trts.csv", header = TRUE)
+optim_out <- do_optim(
+  design = "prep", 
+  lines = 180, 
+  l = 4, 
+  copies_per_entry = 5, 
+  add_checks = FALSE, 
+  seed = 1, 
+  data = entry_list_prep
+)
+optim_out$list_locs[[1]]
+optim_out$allocation
+lines <- 180
+input_checks = 0
+add_checks <- FALSE
+df_data_lines <- entry_list_prep[(input_checks + 1):nrow(entry_list_prep), ]
+if (add_checks) {
+  max_entry <- lines
+  vlookUp_entry <- c((max_entry + 1):((max_entry + input_checks)), 1:lines)
+} else vlookUp_entry <- 1:lines
+
+user_data_input <- entry_list_prep
+locs <- length(optim_out$list_locs)
+size_location <- vector(mode = "numeric", length = locs)
+merged_list_locs <- setNames(
+  vector("list", length = locs), 
+  nm = paste0("LOC", 1:locs)
+)
+locs_range <- 1:locs
+for (LOC in locs_range) {
+  iter_loc <- optim_out$list_locs[[LOC]]
+  data_input_mutated <- user_data_input %>%
+    dplyr::mutate(
+      USER_ENTRY = ENTRY,
+      ENTRY = vlookUp_entry
+    ) %>%
+    dplyr::select(USER_ENTRY, ENTRY, NAME) %>%
+    dplyr::left_join(y = iter_loc, by = "ENTRY") %>%
+    dplyr::select(.data = ., USER_ENTRY, NAME.x, REPS) %>%
+    dplyr::arrange(dplyr::desc(REPS)) %>%
+    dplyr::rename(ENTRY = USER_ENTRY, NAME = NAME.x)
+  size_location[LOC] <- sum(data_input_mutated$REPS)
+  merged_list_locs[[LOC]] <- data_input_mutated
+}
+if (!all(size_location == as.numeric(optim_out$size_locations))) {
+  stop("After data merge, size of locations does not match!")
+}
+optim_out$list_locs <- merged_list_locs
+
+################################################################################
+################################################################################
+# The following example shows how the merge works for sparse user input data
+# It includes checks plots
 entry_list_sparse_176_2 <- read.csv("data/entry_list_176_trts_2.csv", header = TRUE)
 optim_out <- do_optim(
   design = "sparse", 
@@ -192,7 +246,6 @@ merged_list_locs <- setNames(
   nm = paste0("LOC", 1:locs)
 )
 locs_range <- 1:locs
-LOC <- 1
 for (LOC in locs_range) {
   iter_loc <- optim_out$list_locs[[LOC]]
   data_input_mutated <- user_data_input %>%
@@ -205,151 +258,50 @@ for (LOC in locs_range) {
     dplyr::filter(!is.na(NAME.y)) %>% 
     dplyr::select(USER_ENTRY, NAME.x) %>%
     dplyr::rename(ENTRY = USER_ENTRY, NAME = NAME.x)
- # Store the number of plots (It does not include checks)
+    # Store the number of plots (It does not include checks)
     df_to_check <- data_input_mutated[(input_checks + 1):nrow(data_input_mutated), ]
     if (inherits(optim_out, "MultiPrep")) {
         size_location[LOC] <- sum(df_to_check$REPS)
     } else {
         size_location[LOC] <- nrow(df_to_check)
     }
+    merged_list_locs[[LOC]] <- data_input_mutated
 }
-
 if (!all(size_location == as.numeric(optim_out$size_locations))) {
   stop("After data merge, size of locations does not match!")
 }
 optim_out$list_locs <- merged_list_locs
-
-## The following example shows how the merge works for multi prep user input data
-# No checks 
-entry_list_prep <- read.csv("~/Desktop/entry_list_180_trts.csv", header = TRUE)
-optim_out <- do_optim(
-  design = "prep", 
-  lines = 180, 
-  l = 4, 
-  copies_per_entry = 5, 
-  add_checks = FALSE, 
-  seed = 1, 
-  data = entry_list_prep
-)
-optim_out$list_locs[[1]]
-optim_out$allocation
-lines <- 180
-input_checks = 0
-add_checks <- FALSE
-df_data_lines <- entry_list_prep[(input_checks + 1):nrow(entry_list_prep), ]
-if (add_checks) {
-  max_entry <- max(df_data_lines$ENTRY)
-  vlookUp_entry <- c((max_entry + 1):((max_entry + input_checks)), 1:lines)
-} else vlookUp_entry <- 1:lines
-
-user_data_input <- entry_list_prep
-locs <- length(optim_out$list_locs)
-size_location <- vector(mode = "numeric", length = locs)
-merged_list_locs <- setNames(
-  vector("list", length = locs), 
-  nm = paste0("LOC", 1:locs)
-)
-locs_range <- 1:locs
-for (LOC in locs_range) {
-  iter_loc <- optim_out$list_locs[[LOC]]
-  data_input_mutated <- user_data_input %>%
-    dplyr::mutate(
-      ENTRY_list = ENTRY,
-      ENTRY = vlookUp_entry
-    ) %>%
-    dplyr::select(ENTRY_list, ENTRY, NAME) %>%
-    dplyr::left_join(y = iter_loc, by = "ENTRY") %>%
-    dplyr::select(.data = ., ENTRY_list, NAME.x, REPS) %>%
-    dplyr::arrange(dplyr::desc(REPS)) %>%
-    dplyr::rename(ENTRY = ENTRY_list, NAME = NAME.x)
-  size_location[LOC] <- nrow(data_input_mutated) - input_checks
-  merged_list_locs[[LOC]] <- data_input_mutated
-}
-# if (!all(size_location == as.numeric(optim_out$size_locations))) {
-#   stop("After data merge, size of locations does not match!")
-# }
-optim_out$list_locs <- merged_list_locs
-
+################################# FIN ##########################################
 ################################################################################
-search_matrix_values <- function(X, values_search) {
-  # Initialize an empty list to store the results
-  result <- list()
-  # Loop through each row of X
-  for (i in 1:nrow(X)) {
-    # Get the unique values and their frequency in the current row
-    row_vals <- unique(X[i,])
-    row_counts <- tabulate(match(X[i,], row_vals))
-    # Find the values that are in the search list
-    search_vals <- row_vals[row_vals %in% values_search]
-    # XAd the row number, search values, and their frequency to the result list
-    for (val in search_vals) {
-      freq <- sum(X[i,] == val)
-      result[[length(result)+1]] <- c(i, val, freq)
-    }
-  }
-  # Convert the result list to a data frame
-  result_df <- do.call(rbind, result)
-  colnames(result_df) <- c("Row", "Value", "Times")
-  # Return the final data frame
-  return(result_df)
-}
 
-set.seed(1)
-data = sample(c(rep(1:23, each = 2), 24:30, rep(31:33, each = 8)))
-table(data)
-X <- matrix(data = data, nrow = 7, ncol = 11, byrow = FALSE)
-FielDHub:::pairs_distance(X)
-dups <- table(as.vector(X))
-values <- as.numeric(rownames(dups)[dups > 1])
-values
 
-frequency_rows <- as.data.frame(search_matrix_values(X = X, values_search = values))
-df <- frequency_rows %>% 
-  dplyr::filter(Times >= 2)
 
-df
-nrow(df)
 
 
 library(FielDHub)
-prep <- multi_location_prep(
-  lines = 30, 
-  l = 4, 
-  copies_per_entry = 7, 
-  checks = 3, 
-  rep_checks = c(8,8,8),
-  seed = 1
+df <- read.csv("data/Diagonal_258_treatments_4_checks.csv")
+spatd <- diagonal_arrangement(
+   nrows = 15, 
+   ncols = 19, 
+   checks = 4, 
+   plotNumber = 101, 
+   kindExpt = "SUDC", 
+   planter = "serpentine", 
+   seed = 1987,
+   exptName = "20WRY1", 
+   locationNames = "MINOT",
+   data = df
 )
-prep$infoDesign
-prep$min_pairswise_distance
-prep$pairsDistance
-prep$reps_info
-prep$treatments_with_reps
-prep$plotNumber
-prep$layoutRandom
+plot(spatd)
 
 
-###############################################################################
-X <- matrix(c(2, 10, 29, 1, 33, 31, 20,
-                19, 27, 21, 33, 28, 3, 18,
-                18, 19, 2, 7, 22, 24, 28,
-                32, 26, 33, 26, 23, 32, 31,
-                16, 32, 17, 21, 7, 13, 11,
-                23, 8, 33, 31, 11, 31, 4,
-                32, 33, 12, 10, 16, 5, 33,
-                13, 31, 3, 14, 6, 31, 15,
-                25, 32, 31, 20, 32, 5, 33,
-                32, 6, 22, 14, 30, 29, 32,
-                8, 12, 9, 33, 31, 9, 15), nrow = 11, byrow = TRUE)
-X
-max(table(X))
-
-s <- swap_pairs(X = X, starting_dist = 2, stop_iter = 100)
-s$pairswise_distance
-s$rows_incidence
-s$optim_design
-s$designs
-s$distances
-s$min_distance
-
+ sparse <- sparse_allocation(
+   lines = 120, 
+   l = 4, 
+   copies_per_entry = 3, 
+   checks = 4, 
+   locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5"), 
+   seed = 1234
+ )
+ plot(sparse)
 

@@ -481,6 +481,25 @@ mod_multi_loc_preps_server <- function(id){
           prep_checks <- 0
         }
         total_plots <- plots_for_treatments + sum(prep_checks)
+        prime_factors <- numbers::primeFactors(total_plots)
+        if (length(prime_factors) == 2) {
+          if (prime_factors[1] < 4 & numbers::isPrime(prime_factors[2])) {
+            shinyalert::shinyalert(
+              "Error!!",
+              "There are no options available for field dimensions. Please try a different number of treatments or checks.",
+              type = "error"
+            )
+            return(NULL)
+          }
+        }
+        if (numbers::isPrime(total_plots)) {
+            shinyalert::shinyalert(
+              "Error!!",
+              "The number of field plots results in a prime number. Please try a different number of treatments.",
+              type = "error"
+            )
+            return(NULL)
+        }
         choices <- factor_subsets(total_plots)$labels
         if (length(choices) == 0) {
           shinyalert::shinyalert(

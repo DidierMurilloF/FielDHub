@@ -1175,7 +1175,7 @@ mod_diagonal_multiple_server <- function(id) {
             final_fieldbook <- dplyr::bind_rows(final_expt_fieldbook)
             if (Option_NCD == TRUE) {
                 final_fieldbook$CHECKS <- ifelse(final_fieldbook$NAME == "Filler", 0, final_fieldbook$CHECKS)
-                final_fieldbook$EXPT <- ifelse(final_fieldbook$EXPT == "Filler", 0, final_fieldbook$EXPT)
+                #final_fieldbook$EXPT <- ifelse(final_fieldbook$EXPT == "Filler", 0, final_fieldbook$EXPT)
             }
             if (kindExpt == "DBUDC") {
                 final_fieldbook <- final_fieldbook[,-11]

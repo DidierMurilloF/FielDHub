@@ -289,7 +289,7 @@ mod_Diagonal_server <- function(id) {
             )
             if (names(data_ingested) == "dataUp") {
                 data_up <- data_ingested$dataUp
-                if (ncol(data_entry) < 2) {
+                if (ncol(data_up) < 2) {
                     validate("Data input needs at least two Columns with the ENTRY and NAME.")
                 } 
                 data_entry_UP <- na.omit(data_up[,1:2])
@@ -495,17 +495,19 @@ mod_Diagonal_server <- function(id) {
       planter_mov <- single_inputs()$planter_mov
       n_rows <- field_dimensions_diagonal()$d_row
       n_cols <- field_dimensions_diagonal()$d_col
-      available_percent(n_rows = n_rows, 
-                        n_cols = n_cols, 
-                        checks = checksEntries, 
-                        Option_NCD = Option_NCD, 
-                        kindExpt = kindExpt_single, 
-                        stacked = input$stacked, 
-                        planter_mov1 = planter_mov,
-                        data = getData()$data_entry, 
-                        dim_data = getData()$dim_data_entry,
-                        dim_data_1 = getData()$dim_without_checks, 
-                        Block_Fillers = NULL)
+      available_percent(
+          n_rows = n_rows, 
+          n_cols = n_cols, 
+          checks = checksEntries, 
+          Option_NCD = Option_NCD, 
+          kindExpt = kindExpt_single, 
+          stacked = input$stacked, 
+          planter_mov1 = planter_mov,
+          data = getData()$data_entry, 
+          dim_data = getData()$dim_data_entry,
+          dim_data_1 = getData()$dim_without_checks, 
+          Block_Fillers = NULL
+      )
     }) 
 
     observeEvent(available_percent_table()$dt, {
@@ -666,11 +668,13 @@ mod_Diagonal_server <- function(id) {
         my_split_r <- rand_checks()[[sites]]$map_checks
           n_rows <- field_dimensions_diagonal()$d_row
           n_cols <- field_dimensions_diagonal()$d_col
-          data_random <- get_single_random(n_rows = n_rows, 
-                                           n_cols = n_cols, 
-                                           matrix_checks = map_checks, 
-                                           checks = checksEntries, 
-                                           data = data_entry) 
+          data_random <- get_single_random(
+            n_rows = n_rows, 
+            n_cols = n_cols, 
+            matrix_checks = map_checks, 
+            checks = checksEntries, 
+            data = data_entry
+          ) 
         random_entries_locs[[sites]] <- data_random
       }
       return(random_entries_locs)
@@ -697,28 +701,28 @@ mod_Diagonal_server <- function(id) {
       s <- unlist(loc_view_user$Entries)
       rownames(df) <- nrow(df):1
       style_equal <- rep('gray', length(s))
-      DT::datatable(df,#,
-                    extensions = c('Buttons'),# , 'FixedColumns'
-                    options = list(dom = 'Blfrtip',
-                                    autoWidth = FALSE,
-                                    scrollX = TRUE,
-                                    fixedColumns = TRUE,
-                                    pageLength = nrow(df),
-                                    scrollY = "590px",
-                                    class = 'compact cell-border stripe',  
-                                    rownames = FALSE,
-                                    server = FALSE,
-                                    filter = list( position = 'top',
-                                                  clear = FALSE,
-                                                  plain =TRUE ),
-                                    buttons = c('copy', 'excel'),
-                                    lengthMenu = list(c(10,25,50,-1),
-                                                      c(10,25,50,"All")))
+      DT::datatable(
+        df,
+        extensions = c('Buttons'),
+        options = list(dom = 'Blfrtip',
+                        autoWidth = FALSE,
+                        scrollX = TRUE,
+                        fixedColumns = TRUE,
+                        pageLength = nrow(df),
+                        scrollY = "590px",
+                        class = 'compact cell-border stripe',  
+                        rownames = FALSE,
+                        server = FALSE,
+                        filter = list( position = 'top',
+                                      clear = FALSE,
+                                      plain =TRUE ),
+                        buttons = c('copy', 'excel'),
+                        lengthMenu = list(c(10,25,50,-1),
+                                          c(10,25,50,"All")))
       ) %>% 
         DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
                         backgroundColor = DT::styleEqual(c(checks),
                                                           colores[1:len_checks]))
-      #}
     })
     
     
@@ -776,7 +780,6 @@ mod_Diagonal_server <- function(id) {
       locs_diagonal <- single_inputs()$sites
       plots_number_sites <- vector(mode = "list", length = locs_diagonal)
       for (sites in 1:locs_diagonal) {
-        
           expe_names <- single_inputs()$expt_name 
           fillers <- sum(datos_name == "Filler")
           plot_nub <- plot_number(
@@ -805,24 +808,24 @@ mod_Diagonal_server <- function(id) {
       if("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE
       df <- as.data.frame(plot_num)
       rownames(df) <- nrow(df):1
-      DT::datatable(df,
-                    extensions = c('Buttons'),
-                    options = list(dom = 'Blfrtip',
-                                   autoWidth = FALSE,
-                                   scrollX = TRUE,
-                                   fixedColumns = TRUE,
-                                   pageLength = nrow(df),
-                                   scrollY = "700px",
-                                   class = 'compact cell-border stripe',  rownames = FALSE,
-                                   server = FALSE,
-                                   filter = list( position = 'top', clear = FALSE, plain =TRUE ),
-                                   buttons = c('copy', 'excel'),
-                                   lengthMenu = list(c(10,25,50,-1),
-                                                     c(10,25,50,"All")))
+      DT::datatable(
+        df,
+        extensions = c('Buttons'),
+        options = list(dom = 'Blfrtip',
+                       autoWidth = FALSE,
+                       scrollX = TRUE,
+                       fixedColumns = TRUE,
+                       pageLength = nrow(df),
+                       scrollY = "700px",
+                       class = 'compact cell-border stripe',  rownames = FALSE,
+                       server = FALSE,
+                       filter = list( position = 'top', clear = FALSE, plain =TRUE ),
+                       buttons = c('copy', 'excel'),
+                       lengthMenu = list(c(10,25,50,-1),
+                                         c(10,25,50,"All")))
       )
     })
 
-    # export_diagonal_design <- eventReactive(input$get_random, {
     export_diagonal_design <- reactive({
       locs_diagonal <- single_inputs()$sites
       final_expt_fieldbook <- vector(mode = "list",length = locs_diagonal)
@@ -853,18 +856,22 @@ mod_Diagonal_server <- function(id) {
         random_entries_map <- apply(random_entries_map, 2 ,as.numeric)
 
         results_to_export <- list(random_entries_map, plot_number, Col_checks, my_names)
-        final_expt_export <- export_design(G = results_to_export, 
-                                            movement_planter = movement_planter,
-                                            location = location_names[user_site], Year = NULL,
-                                            data_file = my_data_VLOOKUP, reps = FALSE)
+        final_expt_export <- export_design(
+          G = results_to_export, 
+          movement_planter = movement_planter,
+          location = location_names[user_site], 
+          Year = NULL,
+          data_file = my_data_VLOOKUP, 
+          reps = FALSE
+        )
         final_expt_fieldbook[[user_site]] <- as.data.frame(final_expt_export)
       }
 
       final_fieldbook <- dplyr::bind_rows(final_expt_fieldbook)
       
-      if(Option_NCD == TRUE) {
+      if (Option_NCD == TRUE) {
         final_fieldbook$CHECKS <- ifelse(final_fieldbook$NAME == "Filler", 0, final_fieldbook$CHECKS)
-        final_fieldbook$EXPT <- ifelse(final_fieldbook$EXPT == "Filler", 0, final_fieldbook$EXPT)
+        #final_fieldbook$EXPT <- ifelse(final_fieldbook$EXPT == "Filler", 0, final_fieldbook$EXPT)
       }
 
       ID <- 1:nrow(final_fieldbook)
@@ -973,12 +980,13 @@ mod_Diagonal_server <- function(id) {
         for (sites in 1:locs_diag) {
           df_loc <- subset(df_diag, LOCATION == loc_levels_factors[w])
           fieldBook <- df_loc[, c(1,6,7,9)]
-          dfSimulation <- AR1xAR1_simulation(nrows = nrows_diag, ncols = ncols_diag, 
-                                             ROX = ROX_DIAG, ROY = ROY_DIAG, 
-                                             minValue = minVal, maxValue = maxVal, 
-                                             fieldbook = fieldBook, 
-                                             trail = valsDIAG$trail, 
-                                             seed = NULL)
+          dfSimulation <- AR1xAR1_simulation(
+            nrows = nrows_diag, ncols = ncols_diag, 
+            ROX = ROX_DIAG, ROY = ROY_DIAG, 
+            minValue = minVal, maxValue = maxVal, 
+            fieldbook = fieldBook, 
+            trail = valsDIAG$trail, 
+            seed = NULL)
           dfSimulation <- dfSimulation$outOrder
           df_simulation_list[[sites]] <- dfSimulation
           dataPrep <- df_loc

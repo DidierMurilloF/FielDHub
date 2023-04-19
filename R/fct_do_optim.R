@@ -29,7 +29,7 @@
 #' @examples 
 #' sparse_example <- do_optim(
 #'    design = "sparse",
-#'    lines = 180, 
+#'    lines = 120, 
 #'    l = 4, 
 #'    copies_per_entry = 3, 
 #'    add_checks = TRUE, 
@@ -294,9 +294,9 @@ do_optim <- function(
 #' 
 #' @examples
 #' sparse <- sparse_allocation(
-#'   lines = 260, 
-#'   l = 5, 
-#'   copies_per_entry = 4, 
+#'   lines = 120, 
+#'   l = 4, 
+#'   copies_per_entry = 3, 
 #'   checks = 4, 
 #'   locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5"), 
 #'   seed = 1234

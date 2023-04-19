@@ -90,7 +90,7 @@
 #'   splitBy = "row", 
 #'   blocks = c(150,155,95,200,120),
 #'   data = treatment_list
-#'  )
+#' )
 #' spatDB$infoDesign
 #' spatDB$layoutRandom
 #' spatDB$plotsNumber
@@ -99,14 +99,18 @@
 #' # Example 3: Generates a spatial decision block diagonal arrangement design in one location
 #' # with 270 treatments allocated in 3 experiments or blocks for a field with dimensions
 #' # 20 rows x 15 cols in a serpentine arrangement. Which in turn is an augmented block (3 blocks).
-#' spatAB <- diagonal_arrangement(nrows = 20, ncols = 15, lines = 270, 
-#'                                checks = 4, 
-#'                                plotNumber = c(1,1001,2001), 
-#'                                kindExpt = "DBUDC", 
-#'                                planter = "serpentine",
-#'                                exptName = c("20WRA", "20WRB", "20WRC"), 
-#'                                blocks = c(90, 90, 90),
-#'                                splitBy = "column")
+#' spatAB <- diagonal_arrangement(
+#'   nrows = 20, 
+#'   ncols = 15, 
+#'   lines = 270, 
+#'   checks = 4, 
+#'   plotNumber = c(1,1001,2001), 
+#'   kindExpt = "DBUDC", 
+#'   planter = "serpentine",
+#'   exptName = c("20WRA", "20WRB", "20WRC"), 
+#'   blocks = c(90, 90, 90),
+#'   splitBy = "column"
+#' )
 #' spatAB$infoDesign
 #' spatAB$layoutRandom
 #' spatAB$plotsNumber
@@ -142,9 +146,9 @@ diagonal_arrangement <- function(
     
     if (!inherits(plotNumber,"list")) { 
         if (!is.null(plotNumber) && is.numeric(plotNumber)) {
-        if(any(plotNumber < 1) || any(diff(plotNumber) < 0)) {
-            base::stop('diagonal_arrangement() requires plotNumber to be positive and sorted integers.')
-        }
+          if(any(plotNumber < 1) || any(diff(plotNumber) < 0)) {
+              base::stop('diagonal_arrangement() requires plotNumber to be positive and sorted integers.')
+          }
         }
         if(!is.numeric(plotNumber) && !is.integer(plotNumber)) {
             base::stop("plotNumber should be an integer or a numeric vector.")
@@ -528,18 +532,13 @@ diagonal_arrangement <- function(
                 data_file = my_data_VLOOKUP, 
                 reps = FALSE
             )
-            # if (Option_NCD == TRUE) {
-            #     final_expt_export$CHECKS <- ifelse(
-            #         final_expt_export$NAME == "Filler", 
-            #         "NA", 
-            #         final_expt_export$CHECKS
-            #     )
-            #     final_expt_export$EXPT <- ifelse(
-            #         final_expt_export$EXPT == "Filler", 
-            #         "NA", 
-            #         final_expt_export$EXPT
-            #     )
-            # } 
+            if (Option_NCD == TRUE) {
+                final_expt_export$CHECKS <- ifelse(
+                    final_expt_export$NAME == "Filler",
+                    0,
+                    final_expt_export$CHECKS
+                )
+            }
             return(list(final_expt = final_expt_export))
         }
         
@@ -678,6 +677,12 @@ unrep_data_parameters <- function(
                         base::stop("Input data should have 4 columns: LOCATION, ENTRY, NAME")
                     }
                     colnames(gen_list) <- c("LOCATION", "ENTRY", "NAME")
+                    if (length(gen_list$ENTRY) != length(unique(gen_list$ENTRY))) {
+                      stop("Please ensure all ENTRIES in data are distinct.")
+                    }
+                    if (length(gen_list$NAME) != length(unique(gen_list$NAME))) {
+                      stop("Please ensure all NAMES in data are distinct.")
+                    }
                     # Create a space in memory for the locations data entry list
                     list_locs <- setNames(
                         object = vector(mode = "list", length = l), 
@@ -695,16 +700,34 @@ unrep_data_parameters <- function(
                     data_entry <- list_locs[[location]]
                     data_entry_UP <- na.omit(data_entry[,1:2]) 
                     colnames(data_entry_UP) <- c("ENTRY", "NAME")
+                    if (length(data_entry_UP$ENTRY) != length(unique(data_entry_UP$ENTRY))) {
+                      stop("Please ensure all ENTRIES in data are distinct.")
+                    }
+                    if (length(data_entry_UP$NAME) != length(unique(data_entry_UP$NAME))) {
+                      stop("Please ensure all NAMES in data are distinct.")
+                    }
                 } else if (is.list(data)) {
                     list_locs <- data
                     data_entry <- list_locs[[location]]
                     data_entry_UP <- na.omit(data_entry[ ,1:2]) 
                     colnames(data_entry_UP) <- c("ENTRY", "NAME")
+                    if (length(data_entry_UP$ENTRY) != length(unique(data_entry_UP$ENTRY))) {
+                      stop("Please ensure all ENTRIES in data are distinct.")
+                    }
+                    if (length(data_entry_UP$NAME) != length(unique(data_entry_UP$NAME))) {
+                      stop("Please ensure all NAMES in data are distinct.")
+                    }
                 }
             } else {
                 data_entry <- data
                 data_entry_UP <- na.omit(data_entry[,1:2]) 
                 colnames(data_entry_UP) <- c("ENTRY", "NAME")
+                if (length(data_entry_UP$ENTRY) != length(unique(data_entry_UP$ENTRY))) {
+                  stop("Please ensure all ENTRIES in data are distinct.")
+                }
+                if (length(data_entry_UP$NAME) != length(unique(data_entry_UP$NAME))) {
+                  stop("Please ensure all NAMES in data are distinct.")
+                }
             }
             ##############################################################################################
             # Check if the data entry is a data frame
@@ -727,6 +750,12 @@ unrep_data_parameters <- function(
                 data_entry_UP <- na.omit(data_entry[,1:2]) 
                 data_entry_UP$BLOCK <- c(rep("ALL", checks), rep(1:length(blocks), times = blocks))
                 colnames(data_entry_UP) <- c("ENTRY", "NAME", "BLOCK")
+                if (length(data_entry_UP$ENTRY) != length(unique(data_entry_UP$ENTRY))) {
+                  stop("Please ensure all ENTRIES in data are distinct.")
+                }
+                if (length(data_entry_UP$NAME) != length(unique(data_entry_UP$NAME))) {
+                  stop("Please ensure all NAMES in data are distinct.")
+                }
                 B <- data_entry_UP[(checks + 1):nrow(data_entry_UP),]
                 Block_levels <- suppressWarnings(as.numeric(levels(as.factor(B$BLOCK))))
                 Block_levels <- na.omit(Block_levels)
@@ -764,6 +793,12 @@ unrep_data_parameters <- function(
                     NAME = NAME
                 )
                 colnames(data_entry_UP) <- c("ENTRY", "NAME")
+                if (length(data_entry_UP$ENTRY) != length(unique(data_entry_UP$ENTRY))) {
+                  stop("Please ensure all ENTRIES in data are distinct.")
+                }
+                if (length(data_entry_UP$NAME) != length(unique(data_entry_UP$NAME))) {
+                  stop("Please ensure all NAMES in data are distinct.")
+                }
                 if (nrow(data_entry_UP) != (lines + checks)) base::stop("nrows data != of lines + checks")
             } else if (kindExpt == "DBUDC") {
                 if (is.null(blocks)) {
@@ -780,6 +815,12 @@ unrep_data_parameters <- function(
                 )
                 data_entry_UP$BLOCK <- c(rep("ALL", checks), rep(1:length(blocks), times = blocks))
                 colnames(data_entry_UP) <- c("ENTRY", "NAME", "BLOCK")
+                if (length(data_entry_UP$ENTRY) != length(unique(data_entry_UP$ENTRY))) {
+                  stop("Please ensure all ENTRIES in data are distinct.")
+                }
+                if (length(data_entry_UP$NAME) != length(unique(data_entry_UP$NAME))) {
+                  stop("Please ensure all NAMES in data are distinct.")
+                }
                 Blocks <- length(blocks)
                 if (Option_NCD == TRUE) {
                     data_entry1 <- data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ] # checksEntries intead of checks
