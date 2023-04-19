@@ -527,24 +527,24 @@ randomizations.</li>
 List of 7
  $ rows             : num 15
  $ columns          : num 20
- $ min_distance     : num 8.06
- $ incidence_in_rows: num 2
+ $ min_distance     : num 8
+ $ incidence_in_rows: num 3
  $ locations        : num 1
  $ planter          : chr "serpentine"
  $ seed             : num 1245
 
  10 First observations of the data frame with the partially_replicated field book: 
    ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 Expt1  PALMIRA 2023  101   1      1     38    38       G38
-2   2 Expt1  PALMIRA 2023  102   1      2     59    59       G59
-3   3 Expt1  PALMIRA 2023  103   1      3      0   150      G150
-4   4 Expt1  PALMIRA 2023  104   1      4      0    93       G93
-5   5 Expt1  PALMIRA 2023  105   1      5     17    17       G17
-6   6 Expt1  PALMIRA 2023  106   1      6      0   107      G107
+1   1 Expt1  PALMIRA 2023  101   1      1      0   123      G123
+2   2 Expt1  PALMIRA 2023  102   1      2     33    33       G33
+3   3 Expt1  PALMIRA 2023  103   1      3     59    59       G59
+4   4 Expt1  PALMIRA 2023  104   1      4      0   107      G107
+5   5 Expt1  PALMIRA 2023  105   1      5     74    74       G74
+6   6 Expt1  PALMIRA 2023  106   1      6      0   167      G167
 7   7 Expt1  PALMIRA 2023  107   1      7      0   170      G170
-8   8 Expt1  PALMIRA 2023  108   1      8     62    62       G62
-9   9 Expt1  PALMIRA 2023  109   1      9      1     1        G1
-10 10 Expt1  PALMIRA 2023  110   1     10     46    46       G46</code></pre>
+8   8 Expt1  PALMIRA 2023  108   1      8     18    18       G18
+9   9 Expt1  PALMIRA 2023  109   1      9     57    57       G57
+10 10 Expt1  PALMIRA 2023  110   1     10      0   105      G105</code></pre>
 </div>
 <div class="section level3">
 <h3 id="access-to-prep-output">Access to <code>prep</code> output<a class="anchor" aria-label="anchor" href="#access-to-prep-output"></a>
@@ -568,16 +568,16 @@ experiment.</p>
 <code class="sourceCode R"><span><span class="va">field_book</span> <span class="op">&lt;-</span> <span class="va">prep</span><span class="op">$</span><span class="va">fieldBook</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">field_book</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
 <pre><code>   ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 Expt1  PALMIRA 2023  101   1      1     38    38       G38
-2   2 Expt1  PALMIRA 2023  102   1      2     59    59       G59
-3   3 Expt1  PALMIRA 2023  103   1      3      0   150      G150
-4   4 Expt1  PALMIRA 2023  104   1      4      0    93       G93
-5   5 Expt1  PALMIRA 2023  105   1      5     17    17       G17
-6   6 Expt1  PALMIRA 2023  106   1      6      0   107      G107
+1   1 Expt1  PALMIRA 2023  101   1      1      0   123      G123
+2   2 Expt1  PALMIRA 2023  102   1      2     33    33       G33
+3   3 Expt1  PALMIRA 2023  103   1      3     59    59       G59
+4   4 Expt1  PALMIRA 2023  104   1      4      0   107      G107
+5   5 Expt1  PALMIRA 2023  105   1      5     74    74       G74
+6   6 Expt1  PALMIRA 2023  106   1      6      0   167      G167
 7   7 Expt1  PALMIRA 2023  107   1      7      0   170      G170
-8   8 Expt1  PALMIRA 2023  108   1      8     62    62       G62
-9   9 Expt1  PALMIRA 2023  109   1      9      1     1        G1
-10 10 Expt1  PALMIRA 2023  110   1     10     46    46       G46</code></pre>
+8   8 Expt1  PALMIRA 2023  108   1      8     18    18       G18
+9   9 Expt1  PALMIRA 2023  109   1      9     57    57       G57
+10 10 Expt1  PALMIRA 2023  110   1     10      0   105      G105</code></pre>
 </div>
 <div class="section level3">
 <h3 id="plot-field-layout">Plot field layout<a class="anchor" aria-label="anchor" href="#plot-field-layout"></a>

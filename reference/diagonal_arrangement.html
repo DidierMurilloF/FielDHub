@@ -387,7 +387,7 @@ Zealand Journal of Statistics, 53(4), 461–480.</p>
 <span class="r-in"><span>  splitBy <span class="op">=</span> <span class="st">"row"</span>, </span></span>
 <span class="r-in"><span>  blocks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">150</span>,<span class="fl">155</span>,<span class="fl">95</span>,<span class="fl">200</span>,<span class="fl">120</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  data <span class="op">=</span> <span class="va">treatment_list</span></span></span>
-<span class="r-in"><span> <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">spatDB</span><span class="op">$</span><span class="va">infoDesign</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $rows</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 30</span>
@@ -639,14 +639,18 @@ Zealand Journal of Statistics, 53(4), 461–480.</p>
 <span class="r-in"><span><span class="co"># Example 3: Generates a spatial decision block diagonal arrangement design in one location</span></span></span>
 <span class="r-in"><span><span class="co"># with 270 treatments allocated in 3 experiments or blocks for a field with dimensions</span></span></span>
 <span class="r-in"><span><span class="co"># 20 rows x 15 cols in a serpentine arrangement. Which in turn is an augmented block (3 blocks).</span></span></span>
-<span class="r-in"><span><span class="va">spatAB</span> <span class="op">&lt;-</span> <span class="fu">diagonal_arrangement</span><span class="op">(</span>nrows <span class="op">=</span> <span class="fl">20</span>, ncols <span class="op">=</span> <span class="fl">15</span>, lines <span class="op">=</span> <span class="fl">270</span>, </span></span>
-<span class="r-in"><span>                               checks <span class="op">=</span> <span class="fl">4</span>, </span></span>
-<span class="r-in"><span>                               plotNumber <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">1001</span>,<span class="fl">2001</span><span class="op">)</span>, </span></span>
-<span class="r-in"><span>                               kindExpt <span class="op">=</span> <span class="st">"DBUDC"</span>, </span></span>
-<span class="r-in"><span>                               planter <span class="op">=</span> <span class="st">"serpentine"</span>,</span></span>
-<span class="r-in"><span>                               exptName <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"20WRA"</span>, <span class="st">"20WRB"</span>, <span class="st">"20WRC"</span><span class="op">)</span>, </span></span>
-<span class="r-in"><span>                               blocks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">90</span>, <span class="fl">90</span>, <span class="fl">90</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                               splitBy <span class="op">=</span> <span class="st">"column"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">spatAB</span> <span class="op">&lt;-</span> <span class="fu">diagonal_arrangement</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  nrows <span class="op">=</span> <span class="fl">20</span>, </span></span>
+<span class="r-in"><span>  ncols <span class="op">=</span> <span class="fl">15</span>, </span></span>
+<span class="r-in"><span>  lines <span class="op">=</span> <span class="fl">270</span>, </span></span>
+<span class="r-in"><span>  checks <span class="op">=</span> <span class="fl">4</span>, </span></span>
+<span class="r-in"><span>  plotNumber <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">1001</span>,<span class="fl">2001</span><span class="op">)</span>, </span></span>
+<span class="r-in"><span>  kindExpt <span class="op">=</span> <span class="st">"DBUDC"</span>, </span></span>
+<span class="r-in"><span>  planter <span class="op">=</span> <span class="st">"serpentine"</span>,</span></span>
+<span class="r-in"><span>  exptName <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"20WRA"</span>, <span class="st">"20WRB"</span>, <span class="st">"20WRC"</span><span class="op">)</span>, </span></span>
+<span class="r-in"><span>  blocks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">90</span>, <span class="fl">90</span>, <span class="fl">90</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  splitBy <span class="op">=</span> <span class="st">"column"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">spatAB</span><span class="op">$</span><span class="va">infoDesign</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $rows</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 20</span>
