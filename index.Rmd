@@ -100,7 +100,7 @@ To see more examples, go to <https://didiermurillof.github.io/FielDHub/articles/
 
 Partially replicated designs are commonly employed in early generation field trials. This type of design is characterized by replication of a portion of the entries, with the remaining entries only appearing once in the experiment. As an example, considered a field trial with 288 plots containing 75 entries appearing two times each, and 138 entries only appearing once. This field trials is arranged in a field of 16 rows by 18 columns.
 
-<img src='man/figures/pREPExample1.PNG' align="center"/>
+<img src='man/figures/prep_shiny.png' align="center"/>
 
 
 In the figure above, green plots contain replicated entries, and the other plots contain entries that only appear once.

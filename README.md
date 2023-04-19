@@ -193,7 +193,7 @@ plots containing 75 entries appearing two times each, and 138 entries
 only appearing once. This field trials is arranged in a field of 16 rows
 by 18 columns.
 
-<img src='man/figures/pREPExample1.png' align="center"/>
+<img src='man/figures/prep_shiny.png' align="center"/>
 
 In the figure above, green plots contain replicated entries, and the
 other plots contain entries that only appear once.

@@ -166,7 +166,7 @@ plots containing 75 entries appearing two times each, and 138 entries
 only appearing once. This field trials is arranged in a field of 16 rows
 by 18 columns.
 
-<img src='man/figures/pREPExample1.PNG' align="center"/>
+<img src='man/figures/prep_shiny.png' align="center"/>
 
 In the figure above, green plots contain replicated entries, and the
 other plots contain entries that only appear once.
@@ -210,24 +210,24 @@ Partially Replicated Design
 List of 7
  $ rows             : num 16
  $ columns          : num 18
- $ min_distance     : num 8.06
- $ incidence_in_rows: num 1
+ $ min_distance     : num 8
+ $ incidence_in_rows: num 3
  $ locations        : num 1
  $ planter          : chr "serpentine"
  $ seed             : num 77
 
  10 First observations of the data frame with the partially_replicated field book: 
    ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 ExptA    FARGO 2023    1   1      1     24    24       G24
-2   2 ExptA    FARGO 2023    2   1      2     12    12       G12
-3   3 ExptA    FARGO 2023    3   1      3     72    72       G72
-4   4 ExptA    FARGO 2023    4   1      4      0   172      G172
-5   5 ExptA    FARGO 2023    5   1      5     16    16       G16
-6   6 ExptA    FARGO 2023    6   1      6     67    67       G67
-7   7 ExptA    FARGO 2023    7   1      7     55    55       G55
-8   8 ExptA    FARGO 2023    8   1      8     51    51       G51
-9   9 ExptA    FARGO 2023    9   1      9     46    46       G46
-10 10 ExptA    FARGO 2023   10   1     10      8     8        G8
+1   1 ExptA    FARGO 2023    1   1      1     30    30       G30
+2   2 ExptA    FARGO 2023    2   1      2      0   192      G192
+3   3 ExptA    FARGO 2023    3   1      3     44    44       G44
+4   4 ExptA    FARGO 2023    4   1      4     66    66       G66
+5   5 ExptA    FARGO 2023    5   1      5      0    78       G78
+6   6 ExptA    FARGO 2023    6   1      6      0   186      G186
+7   7 ExptA    FARGO 2023    7   1      7     34    34       G34
+8   8 ExptA    FARGO 2023    8   1      8      0    86       G86
+9   9 ExptA    FARGO 2023    9   1      9     37    37       G37
+10 10 ExptA    FARGO 2023   10   1     10     55    55       G55
 ```
 
 First 12 rows of the fieldbook,
@@ -235,18 +235,18 @@ First 12 rows of the fieldbook,
 ``` r
 head(pREP$fieldBook, 12)
    ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 ExptA    FARGO 2023    1   1      1     24    24       G24
-2   2 ExptA    FARGO 2023    2   1      2     12    12       G12
-3   3 ExptA    FARGO 2023    3   1      3     72    72       G72
-4   4 ExptA    FARGO 2023    4   1      4      0   172      G172
-5   5 ExptA    FARGO 2023    5   1      5     16    16       G16
-6   6 ExptA    FARGO 2023    6   1      6     67    67       G67
-7   7 ExptA    FARGO 2023    7   1      7     55    55       G55
-8   8 ExptA    FARGO 2023    8   1      8     51    51       G51
-9   9 ExptA    FARGO 2023    9   1      9     46    46       G46
-10 10 ExptA    FARGO 2023   10   1     10      8     8        G8
-11 11 ExptA    FARGO 2023   11   1     11      0   185      G185
-12 12 ExptA    FARGO 2023   12   1     12     64    64       G64
+1   1 ExptA    FARGO 2023    1   1      1     30    30       G30
+2   2 ExptA    FARGO 2023    2   1      2      0   192      G192
+3   3 ExptA    FARGO 2023    3   1      3     44    44       G44
+4   4 ExptA    FARGO 2023    4   1      4     66    66       G66
+5   5 ExptA    FARGO 2023    5   1      5      0    78       G78
+6   6 ExptA    FARGO 2023    6   1      6      0   186      G186
+7   7 ExptA    FARGO 2023    7   1      7     34    34       G34
+8   8 ExptA    FARGO 2023    8   1      8      0    86       G86
+9   9 ExptA    FARGO 2023    9   1      9     37    37       G37
+10 10 ExptA    FARGO 2023   10   1     10     55    55       G55
+11 11 ExptA    FARGO 2023   11   1     11      0   125      G125
+12 12 ExptA    FARGO 2023   12   1     12      0   159      G159
 ```
 
 Users can plot the layout design from `partially_replicated()` using the
