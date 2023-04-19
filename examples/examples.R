@@ -318,11 +318,38 @@ prep <- multi_location_prep(
   copies_per_entry = 7, 
   checks = 3, 
   rep_checks = c(8,8,8),
-  seed = 1)
-
-
+  seed = 1
+)
+prep$infoDesign
 prep$min_pairswise_distance
 prep$pairsDistance
+prep$reps_info
+prep$treatments_with_reps
+prep$plotNumber
+prep$layoutRandom
 
+
+###############################################################################
+X <- matrix(c(2, 10, 29, 1, 33, 31, 20,
+                19, 27, 21, 33, 28, 3, 18,
+                18, 19, 2, 7, 22, 24, 28,
+                32, 26, 33, 26, 23, 32, 31,
+                16, 32, 17, 21, 7, 13, 11,
+                23, 8, 33, 31, 11, 31, 4,
+                32, 33, 12, 10, 16, 5, 33,
+                13, 31, 3, 14, 6, 31, 15,
+                25, 32, 31, 20, 32, 5, 33,
+                32, 6, 22, 14, 30, 29, 32,
+                8, 12, 9, 33, 31, 9, 15), nrow = 11, byrow = TRUE)
+X
+max(table(X))
+
+s <- swap_pairs(X = X, starting_dist = 2, stop_iter = 100)
+s$pairswise_distance
+s$rows_incidence
+s$optim_design
+s$designs
+s$distances
+s$min_distance
 
 

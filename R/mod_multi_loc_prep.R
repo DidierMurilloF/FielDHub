@@ -310,14 +310,6 @@ mod_multi_loc_preps_server <- function(id){
             )
             return(NULL)
         }
-        if (input$gens_prep < 30) {
-            shinyalert::shinyalert(
-                "Error!!", 
-                "The system requires at least 30 entries/lines to proceed!",
-                type = "error"
-            )
-            return(NULL)
-        }
         if (input$multi_prep_data == 'Yes') {
             req(input$file_multi_prep)
             inFile <- input$file_multi_prep
@@ -456,17 +448,19 @@ mod_multi_loc_preps_server <- function(id){
         prep_data_input <- get_multi_loc_prep()$multi_loc_preps_data
         add_checks <- FALSE
         if (input$include_checks == "Yes") add_checks <- TRUE
-        optim_out <- do_optim(
-            design = "prep",
-            lines = input$gens_prep, 
-            l = locs, 
-            copies_per_entry = as.numeric(input$plant_copies_preps), 
-            add_checks = add_checks,
-            checks = checks, 
-            rep_checks = prep_inputs()$prep_checks,
-            seed = prep_inputs()$seed_number,
-            data = prep_data_input
-        )
+        withProgress(message = 'Optimization in progress ...', {
+            optim_out <- do_optim(
+                design = "prep",
+                lines = input$gens_prep, 
+                l = locs, 
+                copies_per_entry = as.numeric(input$plant_copies_preps), 
+                add_checks = add_checks,
+                checks = checks, 
+                rep_checks = prep_inputs()$prep_checks,
+                seed = prep_inputs()$seed_number,
+                data = prep_data_input
+            )
+        })
         ### Do the merge with the user data ###
         if (input$multi_prep_data == "Yes") {
             data_prep_no_checks <- get_multi_loc_prep()$data_without_checks
@@ -479,7 +473,25 @@ mod_multi_loc_preps_server <- function(id){
                 rep_checks = prep_inputs()$prep_checks
             )
         }
-        return(optim_out)
+        plots_for_treatments <- as.numeric(optim_out$size_locations[1])
+        prep_checks <- as.numeric(prep_inputs()$prep_checks)
+        if (!is.null(prep_inputs()$prep_checks)) {
+          prep_checks <- as.numeric(prep_inputs()$prep_checks)
+        } else {
+          prep_checks <- 0
+        }
+        total_plots <- plots_for_treatments + sum(prep_checks)
+        choices <- factor_subsets(total_plots)$labels
+        if (length(choices) == 0) {
+          shinyalert::shinyalert(
+            "Error!!",
+            "Number of entries is too small!",
+            type = "error"
+          )
+          return(NULL)
+        } else return(optim_out)
+        
+        #return(optim_out)
     }) %>%
         bindEvent(input$run_prep)
 
@@ -501,6 +513,7 @@ mod_multi_loc_preps_server <- function(id){
     })
     
     observeEvent(list_input_plots(), {
+        req(setup_optim_prep())
         req(prep_inputs())
         plots_for_treatments <- as.numeric(setup_optim_prep()$size_locations[1])
         prep_checks <- as.numeric(prep_inputs()$prep_checks)
@@ -530,6 +543,7 @@ mod_multi_loc_preps_server <- function(id){
     })
     
     field_dimensions_prep <- eventReactive(input$get_random_prep, {
+        req(setup_optim_prep())
         if (input$dimensions_preps == "No options available") return(NULL)
         dims <- unlist(strsplit(input$dimensions_preps," x "))
         d_row <- as.numeric(dims[1])
@@ -610,6 +624,7 @@ mod_multi_loc_preps_server <- function(id){
     })
 
     output$prep_allocation <- DT::renderDT({
+        req(setup_optim_prep())
         req(get_multi_loc_prep())
         data_without_checks <- get_multi_loc_prep()$data_without_checks
         prep_lines <- prep_inputs()$prep_lines
@@ -628,7 +643,6 @@ mod_multi_loc_preps_server <- function(id){
                 Avg = round(Copies / locs, 1)
             ) %>%
             dplyr::bind_rows(colSums(.))
-        # rownames(df) <- c(paste0("Genotype-", 1:(nrow(df) - 1)), "Total")
         rownames(df) <- c(gen_names, "Total")
         df[nrow(df), ncol(df)] <- NA
         DT::datatable(   
@@ -647,6 +661,7 @@ mod_multi_loc_preps_server <- function(id){
     })
     ###### Plotting the data ##############
     output$multi_prep_data_input <- DT::renderDT({
+        req(setup_optim_prep())
         test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
         if (!test) return(NULL)
         req(setup_optim_prep())
@@ -700,21 +715,21 @@ mod_multi_loc_preps_server <- function(id){
         movement_planter <- prep_inputs()$planter_mov
         expt_name <- prep_inputs()$expt_name
         locations_preps <- vector(mode = "list", length = locs_preps)
-        locations_preps <- partially_replicated(
-            nrows = rep(nrows, locs_preps), 
-            ncols = rep(ncols, locs_preps), 
-            l = locs_preps, 
-            plotNumber = plotNumber, 
-            exptName =  expt_name,
-            locationNames = site_names, 
-            planter = movement_planter,
-            seed = preps_seed, 
-            multiLocationData = TRUE,
-            data = entry_list
-        )
-
+        withProgress(message = 'Running p-rep optimization ...', {
+            locations_preps <- partially_replicated(
+                nrows = rep(nrows, locs_preps), 
+                ncols = rep(ncols, locs_preps), 
+                l = locs_preps, 
+                plotNumber = plotNumber, 
+                exptName =  expt_name,
+                locationNames = site_names, 
+                planter = movement_planter,
+                seed = preps_seed, 
+                multiLocationData = TRUE,
+                data = entry_list
+            )
+        })
         return(locations_preps)
-
     }) %>% 
       bindEvent(input$get_random_prep)
     

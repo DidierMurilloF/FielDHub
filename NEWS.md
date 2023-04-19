@@ -74,6 +74,11 @@
 
 ### Enhancements:
 
+- `partially_replicated()` accepts custom field dimensions at each
+  location. For example, `nrows = c(23, 20, 20)` and
+  `ncols = c(20, 23, 23)` are the field rows and columns for the three
+  environments.
+
 - Code refactoring on the `diagonal_arrangement()` function.
 
 - Code refactoring on the utility function `pREP()`.

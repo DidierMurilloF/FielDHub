@@ -23,11 +23,11 @@ A list containing the following elements:
 \item{pairswise_distance}{A data frame with the pairwise distances for the final design.}
 }
 \description{
-Modifies the input matrix X to ensure that the distance between any two occurrences
-of the same integer is at least min_dist, by swapping one of the occurrences with a
-random occurrence of a different integer that is at least min_dist away. The function
-starts with starting_dist = 3 and increases it by 1 until the algorithm no longer 
-converges or stop_iter iterations have been performed.
+Modifies the input matrix \code{X} to ensure that the distance between any two occurrences
+of the same integer is at least a dist \code{d}, by swapping one of the occurrences with a
+random occurrence of a different integer that is at least \code{d} away. The function
+starts with \code{starting_dist = 3} and increases it by \code{1} until the algorithm no longer 
+converges or \code{stop_iter} iterations have been performed.
 }
 \examples{
 # Create a matrix X with the numbers 1 to 10 are twice and 11 to 50 are once.

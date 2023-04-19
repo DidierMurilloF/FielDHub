@@ -292,11 +292,7 @@ partially_replicated <- function(
             niter = 1000, 
             data = list_locs[[sites]]
         )
-        if (length(prep$rows_incidence) == 0) {
-            rows_incidence[sites] <- 0
-        } else {
-            rows_incidence[sites] <- prep$rows_incidence[length(prep$rows_incidence)]
-        } 
+        rows_incidence[sites] <- prep$rows_incidence[length(prep$rows_incidence)]
         min_distance_sites[sites] <- prep$min_distance
         dataInput <- prep$gen.list
         BINAY_CHECKS <- prep$binary.field

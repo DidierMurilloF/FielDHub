@@ -444,18 +444,19 @@ mod_pREPS_server <- function(id){
       plotNumber <- prep_inputs()$plotNumber
       movement_planter <- prep_inputs()$planter_mov
       expt_name <- prep_inputs()$expt_name
-
-      pREPS <- partially_replicated(
-        nrows = rep(nrows, locs_preps), 
-        ncols = rep(ncols, locs_preps), 
-        l = locs_preps, 
-        seed = preps.seed, 
-        plotNumber = plotNumber, 
-        exptName =  expt_name,
-        locationNames = site_names, 
-        planter = movement_planter,
-        data = gen.list 
-      )
+      withProgress(message = 'Running p-rep optimization ...', {
+          pREPS <- partially_replicated(
+            nrows = rep(nrows, locs_preps), 
+            ncols = rep(ncols, locs_preps), 
+            l = locs_preps, 
+            seed = preps.seed, 
+            plotNumber = plotNumber, 
+            exptName =  expt_name,
+            locationNames = site_names, 
+            planter = movement_planter,
+            data = gen.list 
+          )
+      })
     }) %>% 
       bindEvent(input$get_random_prep)
 

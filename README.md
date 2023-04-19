@@ -141,7 +141,7 @@ List of 11
 10 10 Expt1        1 2023  110   1     10      0   102   Gen-102
 ```
 
-First 12 rows of the fieldbook,
+First 12 rows of the field book,
 
 ``` r
 head(diagonal$fieldBook, 12)
@@ -193,7 +193,7 @@ plots containing 75 entries appearing two times each, and 138 entries
 only appearing once. This field trials is arranged in a field of 16 rows
 by 18 columns.
 
-<img src='man/figures/pREPExample.PNG' align="center"/>
+<img src='man/figures/pREPExample1.PNG' align="center"/>
 
 In the figure above, green plots contain replicated entries, and the
 other plots contain entries that only appear once.

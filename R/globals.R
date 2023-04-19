@@ -28,4 +28,5 @@ utils::globalVariables(c("ENTRY",
                          "sparse_entry",
                          "USER_ENTRY",
                          "NAME.x",
-                         "NAME.y"))
+                         "NAME.y",
+                         "Times"))

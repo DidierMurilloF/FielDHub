@@ -59,9 +59,7 @@ I am thrilled to announce the release of FielDHub v1.3.1, which is the culminati
 
 * Created the `pairs_distance()` function. This function calculates pairwise distances between all elements in a matrix that appears twice or more.
 
-* Created the `swap_pairs()` function. It swaps pairs in a matrix of integers and optimizes the p-rep design. This function modifies the input matrix $X$ to ensure that the distance between any two occurrences of the same integer is at least a distance $d$, by swapping one of the occurrences with a random occurrence of a different integer that is at least $d$ away. The function
-starts with starting dist at $d = 3$ and increases it by $1$ until the algorithm no longer 
-converges or the max number of iterations have been performed.
+* Created the `swap_pairs()` function. It swaps pairs in a matrix of integers and optimizes the p-rep design. This function modifies the input matrix $X$ to ensure that the distance between any two occurrences of the same integer is at least a distance $d$, by swapping one of the occurrences with a random occurrence of a different integer that is at least $d$ away. The function starts with starting dist at $d = 3$ and increases it by $1$ until the algorithm no longer converges or the max number of iterations have been performed.
 
 * Created the `search_matrix_values()` function. It looks for values that appear in the same row in a matrix and return the row number, value, and frequency.
 
@@ -70,6 +68,9 @@ converges or the max number of iterations have been performed.
 * Added **vignettes and help documentation** for all the new functions.
 
 ##### Enhancements:
+
+* `partially_replicated()` accepts custom field dimensions at each location. For example,
+`nrows = c(23, 20, 20)` and `ncols = c(20, 23, 23)` are the field rows and columns for the three environments.
 
 * Code refactoring on the `diagonal_arrangement()` function.
 

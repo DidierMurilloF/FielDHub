@@ -94,11 +94,11 @@ pairs_distance <- function(X) {
 
 #' @title Swap pairs in a matrix of integers
 #' 
-#' @description Modifies the input matrix X to ensure that the distance between any two occurrences
-#' of the same integer is at least min_dist, by swapping one of the occurrences with a
-#' random occurrence of a different integer that is at least min_dist away. The function
-#' starts with starting_dist = 3 and increases it by 1 until the algorithm no longer 
-#' converges or stop_iter iterations have been performed. 
+#' @description Modifies the input matrix \code{X} to ensure that the distance between any two occurrences
+#' of the same integer is at least a dist \code{d}, by swapping one of the occurrences with a
+#' random occurrence of a different integer that is at least \code{d} away. The function
+#' starts with \code{starting_dist = 3} and increases it by \code{1} until the algorithm no longer 
+#' converges or \code{stop_iter} iterations have been performed. 
 #' 
 #' 
 #' @param X A matrix of integers.
@@ -138,6 +138,7 @@ swap_pairs <- function(X, starting_dist = 3, stop_iter = 100) {
     if (!is.numeric(X)) {
         stop("Matrix elements must be numeric")
     }
+    swap_succeed <- FALSE
     input_X <- X
     input_freq <- table(input_X)
     minDist <- sqrt(sum(dim(X)^2))
@@ -185,12 +186,12 @@ swap_pairs <- function(X, starting_dist = 3, stop_iter = 100) {
         if (min(pairs_distance(X)$DIST) < min_dist) {
             break
         } else {
+            swap_succeed <- TRUE
             output_freq <- table(X)
             if (!all(input_freq == output_freq)) {
               stop("The swap function changed the frequency of some integers.")
             }
             frequency_rows <- as.data.frame(search_matrix_values(X = X, values_search = genos))
-            # df <- frequency_rows[frequency_rows$Times == 2, ]
             df <- frequency_rows %>% 
                 dplyr::filter(Times >= 2)
             rows_incidence[w - 1] <- nrow(df)
@@ -202,6 +203,16 @@ swap_pairs <- function(X, starting_dist = 3, stop_iter = 100) {
     optim_design = designs[[length(designs)]] # return the last (better) design
     pairswise_distance <- pairs_distance(optim_design)
     min_distance = min(pairswise_distance$DIST)
+    if (!swap_succeed) {
+        optim_design = designs[[1]] # return the last (better) design
+        distances[[1]] <- pairs_distance(optim_design)
+        pairswise_distance <- pairs_distance(optim_design)
+        min_distance = min(pairswise_distance$DIST)
+        frequency_rows <- as.data.frame(search_matrix_values(X = optim_design, values_search = genos))
+        df <- frequency_rows %>% 
+            dplyr::filter(Times >= 2)
+        rows_incidence[1] <- nrow(df)
+    }
     return(
         list(
             rows_incidence = rows_incidence,
@@ -222,7 +233,8 @@ swap_pairs <- function(X, starting_dist = 3, stop_iter = 100) {
 #'
 #' @param X A matrix.
 #' @param values_search A vector of values to search for in the matrix.
-#' @return A data frame with three columns: Row (the row number where the value is found), Value (the searched value), and Times (the frequency of the searched value in the row).
+#' @return A data frame with three columns: Row (the row number where the value is found), 
+#' Value (the searched value), and Times (the frequency of the searched value in the row).
 #' @examples
 #' A <- matrix(c(1, 2, 3, 2, 3, 4, 3, 4, 5), nrow = 3, byrow = TRUE)
 #' search_matrix_values( X = A, values_search = c(2, 3, 5))
@@ -249,3 +261,4 @@ search_matrix_values <- function(X, values_search) {
     # Return the final data frame
     return(result_df)
 }
+
