@@ -34,3 +34,7 @@ $run_dev.*
 ^index\.md$
 ^index\.Rmd$
 ^cran-comments\.md$
+^vignettes/crd\.Rmd$
+^vignettes/methods\.Rmd$
+^vignettes/latin_square\.Rmd$
+^vignettes/strip_plot\.Rmd$

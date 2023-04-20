@@ -5,9 +5,6 @@ author:
     affiliation: 
     - ^1^North Dakota Agricultural Experiment Station, North Dakota State University, USA.
 output: rmarkdown::html_vignette
-  html_document:
-    css: my_vignette_style.css
-    toc: true
 bibliography: references.bib
 vignette: >
   %\VignetteIndexEntry{Unreplicated Diagonal Arrangement Design}

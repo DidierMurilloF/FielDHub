@@ -4,10 +4,7 @@ author:
   - name: Didier Murillo Florez^1^, Matthew Seefeldt
     affiliation: 
     - ^1^North Dakota Agricultural Experiment Station, North Dakota State University, USA.
-output:
-  html_document:
-    css: my_vignette_style.css
-    toc: true
+output: rmarkdown::html_vignette
 bibliography: references.bib
 vignette: >
   %\VignetteIndexEntry{Incomplete Block Design}
