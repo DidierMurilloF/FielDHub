@@ -1,9 +1,6 @@
 ---
 title: "Optimized Multi-Location P-rep Design"
-author: 
-  - name: Didier Murillo Florez^1^, Matthew Seefeldt
-    affiliation: 
-    - ^1^North Dakota Agricultural Experiment Station, North Dakota State University, USA.
+author: Didier Murillo Florez, Matthew Seefeldt
 output: rmarkdown::html_vignette
 bibliography: references.bib
 vignette: >
@@ -388,7 +385,7 @@ that only appear once.
 
 Also, for example the location five:
 
-```{r, fig.align='center', fig.width=7.2, fig.height=5.5}
+```{r, eval=FALSE,fig.align='center', fig.width=7.2, fig.height=5.5}
 plot(optim_multi_prep, l = 5)
 ```
 

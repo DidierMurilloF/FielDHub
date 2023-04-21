@@ -1,9 +1,7 @@
 ---
 title: "Latin Square Design"
 author: 
-  - name: Didier Murillo Florez^1^, Matthew Seefeldt
-    affiliation: 
-    - ^1^North Dakota Agricultural Experiment Station, North Dakota State University, USA.
+  - name: Didier Murillo Florez, Matthew Seefeldt
 output: rmarkdown::html_vignette
 bibliography: references.bib
 vignette: >

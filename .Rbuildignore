@@ -38,3 +38,4 @@ $run_dev.*
 ^vignettes/methods\.Rmd$
 ^vignettes/latin_square\.Rmd$
 ^vignettes/strip_plot\.Rmd$
+^vignettes/split_split_plot\.Rmd$

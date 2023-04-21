@@ -1,9 +1,6 @@
 ---
 title: "Augmented Randomized Complete Block Design"
-author: 
-  - name: Didier Murillo Florez^1^, Matthew Seefeldt
-    affiliation: 
-    - ^1^North Dakota Agricultural Experiment Station, North Dakota State University, USA.
+author: Didier Murillo Florez, Matthew Seefeldt
 output: rmarkdown::html_vignette
 bibliography: references.bib
 vignette: >
@@ -219,7 +216,7 @@ It is possible to pass more arguments to `plot()` such as the specific location.
 
 #### Plot layout for location 2
 
-```{r, fig.align='center', fig.width=7.2, fig.height=5.5}
+```{r, eval=FALSE, fig.align='center', fig.width=7.2, fig.height=5.5}
 plot(aug_RCBD, l = 2)
 ```
 
