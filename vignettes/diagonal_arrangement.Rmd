@@ -1,6 +1,5 @@
 ---
 title: "Unreplicated Diagonal Arrangement Design"
-author: Didier Murillo Florez, Matthew Seefeldt
 output: rmarkdown::html_vignette
 bibliography: references.bib
 vignette: >
@@ -26,7 +25,7 @@ This vignette shows how to generate **single and multiple unreplicated diagonal 
 
 ## Overview
 
-In some experiments, there is insufficient seed quantity or field space to conduct trials with large numbers of genotypes, so plant breeders must use unreplicated or partially replicated experimental designs, like unreplicated designs with checks allocated in a systematic diagonal distribution. In some cases, the experiment is split into blocks of specified size. This allows breeders to design a field that contains multiple different experiments, for example, plants at various stages of maturity.
+In some experiments, there is insufficient seed quantity or field space to conduct trials with large numbers of genotypes, so plant breeders must use unreplicated or partially replicated experimental designs, like unreplicated designs with checks allocated in a systematic diagonal distribution[@estefanova2011]. In some cases, the experiment is split into blocks of specified size. This allows breeders to design a field that contains multiple different experiments, for example, plants at various stages of maturity.
 
 FielDHub includes a function to run such experimental designs, as well as tabs for single and multiple diagonal arrangement on the FielDHub app. 
 
@@ -375,6 +374,4 @@ plot(multi_diag)
 
 The figure above shows a map of an experiment randomized as a multiple unreplicated diagonal arrangement design. Gray, salmon, and pink shade the blocks of unreplicated experiments, while distinctively colored check plots are replicated throughout the field in a systematic diagonal arrangement.
 
-<br>
-<br>
-<br>
+# References

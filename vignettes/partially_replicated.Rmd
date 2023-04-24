@@ -1,6 +1,6 @@
 ---
 title: "Partially Replicated (p-rep) Design"
-author: Didier Murillo Florez, Matthew Seefeldt
+output: rmarkdown::html_vignette
 bibliography: references.bib
 vignette: >
   %\VignetteIndexEntry{Partially Replicated (p-rep) Design}
@@ -33,7 +33,7 @@ repeated twice is p = 25%. However, the design can be adapted to meet specific n
 the values of $p$ and the level of replication. For example, standard varieties (checks) may be 
 included with higher levels of replication than test lines.
 
-In this design you can set the number of entries that will have reps, as well as the number of 
+In `FielDHub`, users can set the number of entries that will have reps, as well as the number of 
 entries that will only appear once. You can also choose to run the same experiment over 
 multiple locations. 
 
@@ -116,13 +116,13 @@ means no treatments appear twice within a distance less than `r B$min_distance` 
 resulting prep design. It is a considerable improvement from the first version of the 
 p-rep design
 
-The `FielDHub` function `multi_location_prep()` does internally all the optimization process 
+The `FielDHub` function `partially_replicated()` does internally all the optimization process 
 and uses the function `swap_pairs()` to maximize the distance between replicated treatments.
 
 ### Acknowledge
 
-We would like to acknowledge Mr. Jean-Marc Montpetit  for contributing code and ideas 
-for the `swap_pairs()` and `pairs_distance()` functions. His contributions have had a 
+We would like to acknowledge Mr. [Jean-Marc Montpetit](https://www.linkedin.com/in/jean-marc-montpetit/)
+for contributing code and ideas for the `swap_pairs()` and `pairs_distance()` functions. His contributions have had a 
 significant impact on improving the partially replicated (p-rep) design in the R 
 package `FielDHub`. We thank him for his valuable contributions.
 

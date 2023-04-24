@@ -1,10 +1,9 @@
 ---
-title: "Unreplicated Optimized Arrangement Design"
-author: Didier Murillo Florez, Matthew Seefeldt
+title: "Un-replicated Optimized Arrangement Design"
 output: rmarkdown::html_vignette
 bibliography: references.bib
 vignette: >
-  %\VignetteIndexEntry{Unreplicated Optimized Arrangement Design}
+  %\VignetteIndexEntry{Un-replicated Optimized Arrangement Design}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
   options(rmarkdown.html_vignette.check_title = FALSE)
@@ -19,13 +18,13 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette shows how to generate an **unreplicated optimized arrangement design** using both the FielDHub Shiny App and the scripting function `optimized_arrangement()` from the `FielDHub` R package.
+This vignette shows how to generate an **un-replicated optimized arrangement design** using both the FielDHub Shiny App and the scripting function `optimized_arrangement()` from the `FielDHub` R package.
 
 ## Overview
 
-One kind of unreplicated design you can use in FielDHub is the optimized arrangement. Unlike the diagonal design, the optimized arrangement completely randomizes the positions for the checks instead of putting them in a systematic diagonal pattern. Randomization is subject to some restrictions. These restrictions seek to optimize the distribution of control plots in the field and ensure that they are spread across all rows and columns.
+One un-replicated design you can use in FielDHub is the optimized arrangement. Unlike the diagonal design, the optimized arrangement completely randomizes the positions for the checks instead of putting them in a systematic diagonal pattern[@estefanova2011]. Randomization is subject to some restrictions. These restrictions seek to optimize the distribution of control plots in the field and ensure they are spread while keeping a minimum distance between them.
 
-FielDHub includes a function to run such experimental designs, features include options to set the number of entries and the number of checks for the experiment. Users can also choose to run the same experiment over multiple locations. 
+`FielDHub` includes a function to run such experimental designs, features include options to set the number of entries and the number of checks for the experiment. Users can also choose to run the same experiment over multiple locations. 
 
 ## Use case
 
@@ -49,9 +48,9 @@ run_app()
 
 ## 1. Using the FielDHub Shiny App
 
-Once the app is running, go to  **Unreplicated Designs** > **Optimized Arrangement**
+Once the app is running, go to  **un-replicated Designs** > **Optimized Arrangement**
 
-Then, follow the following steps where we will show how to generate an unreplicated optimized arrangement design.
+Then, follow the following steps where we will show how to generate an un-replicated optimized arrangement design.
 
 ##  Inputs 
 
@@ -76,7 +75,7 @@ kable(df)
 
 3. Enter the number of replications of the checks in a comma separated list containing a number for each check in the **Input # Check's Reps** box. For our example experiment, we will enter `12,11,11`.
 
-4. Enter the number of entries/treatments in the **Input # of Entries** box, which is `300` in our case.
+4. Enter the number of entries/treatments in the **Input # of Entries** box, which is `401` in our case.
 
 5. Select `serpentine` or `cartesian` in the **Plot Order Layout**. For this example we will set the `serpentine` layout.
 
@@ -100,7 +99,7 @@ If you change any of the inputs on the left side panel after running an experime
 
 ## Outputs
 
-After you run an unreplicated optimized arrangement design in FielDHub and set the dimensions of the field, there are several ways to display the information contained in the field book. The first tab, **Get Random**, shows the option to change the dimensions of the field and re-randomize, as well as a reference guide for experiment design. 
+After you run an un-replicated optimized arrangement design in FielDHub and set the dimensions of the field, there are several ways to display the information contained in the field book. The first tab, **Get Random**, shows the option to change the dimensions of the field and re-randomize, as well as a reference guide for experiment design. 
 
 ### Data Input
 
@@ -208,15 +207,13 @@ For plotting the layout in function of the coordinates `ROW` and `COLUMN` in the
 plot(optim_expt)
 ```
 
-The figure above shows a map of an experiment randomized as an unreplicated optimized arrangement design. Gray plots represent the unreplicated treatments, while distinctively colored check plots are randomly replicated throughout the field.
+The figure above shows a map of an experiment randomized as an un-replicated optimized arrangement design. Gray plots represent the un-replicated treatments, while distinctively colored check plots are randomly replicated throughout the field.
 
 It is possible to pass more arguments to `plot()` such as the specific location. For example, you can plot specifically the layout for location 2. 
 
-```{r, eval=FALSE, fig.align='center', fig.width=7.2, fig.height=5.9}
+```{r, fig.align='center', fig.width=7.2, fig.height=5.9}
 plot(optim_expt, l = 2)
 ```
 
-<br>
-<br>
-<br>
+# References
 

@@ -1,6 +1,5 @@
 ---
 title: "Row-Column Design"
-author: Didier Murillo Florez, Matthew Seefeldt
 output: rmarkdown::html_vignette
 bibliography: references.bib
 vignette: >

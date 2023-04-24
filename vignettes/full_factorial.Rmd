@@ -1,8 +1,6 @@
 ---
 title: "Full Factorial Design"
-author: Didier Murillo Florez, Matthew Seefeldt
 output: rmarkdown::html_vignette
-bibliography: references.bib
 vignette: >
   %\VignetteIndexEntry{Full Factorial Design}
   %\VignetteEngine{knitr::rmarkdown}

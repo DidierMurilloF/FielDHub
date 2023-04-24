@@ -1,8 +1,6 @@
 ---
 title: "Alpha Lattice Design"
-author: Didier Murillo Florez, Matthew Seefeldt
 output: rmarkdown::html_vignette
-bibliography: references.bib
 vignette: >
   %\VignetteIndexEntry{Alpha Lattice Design}
   %\VignetteEngine{knitr::rmarkdown}

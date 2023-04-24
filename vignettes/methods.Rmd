@@ -1,9 +1,6 @@
 ---
 title: "Methods in FielDHub"
-author: 
-  - name: Didier Murillo Florez, Matthew Seefeldt
 output: rmarkdown::html_vignette
-bibliography: references.bib
 vignette: >
   %\VignetteIndexEntry{Methods in FielDHub}
   %\VignetteEngine{knitr::rmarkdown}

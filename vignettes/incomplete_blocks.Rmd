@@ -1,8 +1,6 @@
 ---
 title: "Incomplete Block Design"
-author: Didier Murillo Florez, Matthew Seefeldt
 output: rmarkdown::html_vignette
-bibliography: references.bib
 vignette: >
   %\VignetteIndexEntry{Incomplete Block Design}
   %\VignetteEngine{knitr::rmarkdown}
@@ -162,6 +160,5 @@ plot(ibd)
 
 ```
 
-<br>
 <br>
 <br>

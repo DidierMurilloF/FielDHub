@@ -1,8 +1,6 @@
 ---
 title: "Square Lattice Design"
-author: Didier Murillo Florez, Matthew Seefeldt
 output: rmarkdown::html_vignette
-bibliography: references.bib
 vignette: >
   %\VignetteIndexEntry{Square Lattice Design}
   %\VignetteEngine{knitr::rmarkdown}
@@ -18,7 +16,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette shows how to generate a **square lattice design** using both the FielDHub Shiny App and the scripting function `square_lattice()` from the `FielDHub` package.
+This vignette shows how to generate a **rectangular lattice design** using both the FielDHub Shiny App and the scripting function `square_lattice()` from the `FielDHub` package.
 
 ## 1. Using the FielDHub Shiny App
 

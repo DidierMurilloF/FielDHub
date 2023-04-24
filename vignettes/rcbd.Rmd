@@ -1,8 +1,6 @@
 ---
 title: "Randomized Complete Block Design"
-author: Didier Murillo Florez, Matthew Seefeldt
 output: rmarkdown::html_vignette
-bibliography: references.bib
 vignette: >
   %\VignetteIndexEntry{Randomized Complete Block Design}
   %\VignetteEngine{knitr::rmarkdown}
@@ -154,6 +152,5 @@ For plotting the layout in function of the coordinates `ROW` and `COLUMN`, you c
 plot(rcbd)
 ```
 
-<br>
 <br>
 <br>

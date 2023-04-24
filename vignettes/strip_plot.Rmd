@@ -1,8 +1,6 @@
 ---
 title: "Strip-Plot Design"
-author: Didier Murillo Florez, Matthew Seefeldt
 output: rmarkdown::html_vignette
-bibliography: references.bib
 vignette: >
   %\VignetteIndexEntry{Strip-Plot Design}
   %\VignetteEngine{knitr::rmarkdown}
@@ -165,6 +163,5 @@ For plotting the layout in function of the coordinates `ROW` and `COLUMN`, you c
 plot(strip)
 ```
 
-<br>
 <br>
 <br>

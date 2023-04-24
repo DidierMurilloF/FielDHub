@@ -1,9 +1,6 @@
 ---
 title: "Split-Split Plot Design"
-author: 
-  - name: Didier Murillo Florez, Matthew Seefeldt
 output: rmarkdown::html_vignette
-bibliography: references.bib
 vignette: >
   %\VignetteIndexEntry{Split-Split Plot Design}
   %\VignetteEngine{knitr::rmarkdown}
