@@ -98,44 +98,42 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Unreplicated Diagonal Arrangement Design</h1>
-                        <h4 data-toc-skip class="author">Didier Murillo
-Florez<sup>1</sup>, Matthew Seefeldt</h4>
-            <address class="author_afil">
-      <sup>1</sup>North Dakota Agricultural Experiment Station, North
-Dakota State University, USA.<br><small class="dont-index">Source: <a href="https://github.com/DidierMurilloF/FielDHub/blob/HEAD/vignettes/diagonal_arrangement.Rmd" class="external-link"><code>vignettes/diagonal_arrangement.Rmd</code></a></small>
+            
+      
+      <small class="dont-index">Source: <a href="https://github.com/DidierMurilloF/FielDHub/blob/HEAD/vignettes/diagonal_arrangement.Rmd" class="external-link"><code>vignettes/diagonal_arrangement.Rmd</code></a></small>
       <div class="d-none name"><code>diagonal_arrangement.Rmd</code></div>
-    </address>
-</div>
+    </div>
 
     
     
-<div class="section level2">
-<h2 id="single-unreplicated-diagonal-arrangement-design">Single Unreplicated Diagonal Arrangement Design<a class="anchor" aria-label="anchor" href="#single-unreplicated-diagonal-arrangement-design"></a>
-</h2>
+<div class="section level3">
+<h3 id="single-unreplicated-diagonal-arrangement-design">Single Unreplicated Diagonal Arrangement Design<a class="anchor" aria-label="anchor" href="#single-unreplicated-diagonal-arrangement-design"></a>
+</h3>
 <p>This vignette shows how to generate <strong>single and multiple
 unreplicated diagonal arrangement designs</strong> using both the
 FielDHub Shiny App and the scripting function
 <code><a href="../reference/diagonal_arrangement.html">diagonal_arrangement()</a></code> from the <code>FielDHub</code> R
 package.</p>
 </div>
-<div class="section level2">
-<h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
-</h2>
+<div class="section level3">
+<h3 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
+</h3>
 <p>In some experiments, there is insufficient seed quantity or field
 space to conduct trials with large numbers of genotypes, so plant
 breeders must use unreplicated or partially replicated experimental
 designs, like unreplicated designs with checks allocated in a systematic
-diagonal distribution. In some cases, the experiment is split into
-blocks of specified size. This allows breeders to design a field that
-contains multiple different experiments, for example, plants at various
-stages of maturity.</p>
+diagonal distribution<span class="citation">(Clarke and Stefanova
+2011)</span>. In some cases, the experiment is split into blocks of
+specified size. This allows breeders to design a field that contains
+multiple different experiments, for example, plants at various stages of
+maturity.</p>
 <p>FielDHub includes a function to run such experimental designs, as
 well as tabs for single and multiple diagonal arrangement on the
 FielDHub app.</p>
 </div>
-<div class="section level2">
-<h2 id="use-case">Use Case<a class="anchor" aria-label="anchor" href="#use-case"></a>
-</h2>
+<div class="section level3">
+<h3 id="use-case">Use Case<a class="anchor" aria-label="anchor" href="#use-case"></a>
+</h3>
 <p>Suppose a plant breeding project needs to identify superior entries
 of barley. In this project, a preliminary yield trial (PYT) is carried
 out with 300 genotypes tested in one experiment and over one location by
@@ -144,9 +142,9 @@ rows and 22 columns of plots. In addition, 5 checks are included in a
 systematic diagonal arrangement across the field to fill 30 plots
 representing 9.1% of the total number of experimental plots.</p>
 </div>
-<div class="section level2">
-<h2 id="running-the-shiny-app">Running the Shiny App<a class="anchor" aria-label="anchor" href="#running-the-shiny-app"></a>
-</h2>
+<div class="section level3">
+<h3 id="running-the-shiny-app">Running the Shiny App<a class="anchor" aria-label="anchor" href="#running-the-shiny-app"></a>
+</h3>
 <p>To launch the app you need to run either</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">FielDHub</span><span class="fu">::</span><span class="fu"><a href="../reference/run_app.html">run_app</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
@@ -155,17 +153,17 @@ representing 9.1% of the total number of experimental plots.</p>
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/DidierMurilloF/FielDHub" class="external-link">FielDHub</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/run_app.html">run_app</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="using-the-fieldhub-shiny-app">1. Using the FielDHub Shiny App<a class="anchor" aria-label="anchor" href="#using-the-fieldhub-shiny-app"></a>
-</h2>
+<div class="section level3">
+<h3 id="using-the-fieldhub-shiny-app">1. Using the FielDHub Shiny App<a class="anchor" aria-label="anchor" href="#using-the-fieldhub-shiny-app"></a>
+</h3>
 <p>Once the app is running, go to <strong>Unreplicated Designs</strong>
 &gt; <strong>Single Diagonal Arrangement</strong></p>
 <p>Then, follow the following steps where we will show how to generate a
 single unreplicated diagonal arrangement design.</p>
 </div>
-<div class="section level2">
-<h2 id="inputs">Inputs<a class="anchor" aria-label="anchor" href="#inputs"></a>
-</h2>
+<div class="section level3">
+<h3 id="inputs">Inputs<a class="anchor" aria-label="anchor" href="#inputs"></a>
+</h3>
 <ol style="list-style-type: decimal">
 <li>
 <strong>Import entries’ list?</strong> Choose whether to import a
@@ -281,26 +279,26 @@ plots.</p></li>
 an experiment initially, you have to click the Run and Randomize buttons
 again, to re-run with the new inputs.</p>
 </div>
-<div class="section level2">
-<h2 id="outputs">Outputs<a class="anchor" aria-label="anchor" href="#outputs"></a>
-</h2>
+<div class="section level3">
+<h3 id="outputs">Outputs<a class="anchor" aria-label="anchor" href="#outputs"></a>
+</h3>
 <p>After you run a single diagonal arrangement in FielDHub and set the
 dimensions of the field, there are several ways to display the
 information contained in the field book. The first tab, <strong>Expt
 Design Info</strong>, shows the option to change the dimensions of the
 field and re-randomize, as well as a reference guide for experiment
 design.</p>
-<div class="section level3">
-<h3 id="input-data">Input Data<a class="anchor" aria-label="anchor" href="#input-data"></a>
-</h3>
+<div class="section level4">
+<h4 id="input-data">Input Data<a class="anchor" aria-label="anchor" href="#input-data"></a>
+</h4>
 <p>On the second tab, <strong>Input Data</strong>, you can see all the
 entries in the randomization in a list that was generated with the
 inputs, as well as a table of the checks with the number of times they
 appear in the field.</p>
 </div>
-<div class="section level3">
-<h3 id="randomized-field">Randomized Field<a class="anchor" aria-label="anchor" href="#randomized-field"></a>
-</h3>
+<div class="section level4">
+<h4 id="randomized-field">Randomized Field<a class="anchor" aria-label="anchor" href="#randomized-field"></a>
+</h4>
 <p>The <strong>Randomized Field</strong> tab displays a graphical
 representation of the randomization of the entries in a field of the
 specified dimensions. The checks are each colored uniquely, showing the
@@ -312,9 +310,9 @@ field as a table or save it directly as an Excel file with the
 play with different options for the total amount of checks in the
 field.</p>
 </div>
-<div class="section level3">
-<h3 id="plot-number-field">Plot Number Field<a class="anchor" aria-label="anchor" href="#plot-number-field"></a>
-</h3>
+<div class="section level4">
+<h4 id="plot-number-field">Plot Number Field<a class="anchor" aria-label="anchor" href="#plot-number-field"></a>
+</h4>
 <p>On the <strong>Plot Number Field</strong> tab, there is a table
 display of the field with the plots numbered according to the Plot Order
 Layout specified, either <em>serpentine</em> or <em>cartesian</em>. You
@@ -322,9 +320,9 @@ can see the corresponding entries for each plot number in the field
 book. Like the Randomized Field tab, you can copy the table or save it
 as an Excel file with the <em>Copy</em> and <em>Excel</em> buttons.</p>
 </div>
-<div class="section level3">
-<h3 id="field-book">Field Book<a class="anchor" aria-label="anchor" href="#field-book"></a>
-</h3>
+<div class="section level4">
+<h4 id="field-book">Field Book<a class="anchor" aria-label="anchor" href="#field-book"></a>
+</h4>
 <p>The <strong>Field Book</strong> displays all the information on the
 experimental design in a table format. It contains the specific plot
 number and the row and column address of each entry, as well as the
@@ -333,10 +331,10 @@ can filter the data in relevant columns.</p>
 <p><br></p>
 </div>
 </div>
-<div class="section level2">
-<h2 id="using-the-fieldhub-function-diagonal_arrangement">2. Using the <code>FielDHub</code> function:
+<div class="section level3">
+<h3 id="using-the-fieldhub-function-diagonal_arrangement">2. Using the <code>FielDHub</code> function:
 <code>diagonal_arrangement()</code><a class="anchor" aria-label="anchor" href="#using-the-fieldhub-function-diagonal_arrangement"></a>
-</h2>
+</h3>
 <p>You can run the same design with a function in the FielDHub package,
 <code><a href="../reference/diagonal_arrangement.html">diagonal_arrangement()</a></code>.</p>
 <p>First, you need to load the <code>FielDHub</code> package typing,</p>
@@ -356,10 +354,10 @@ this:</p>
 <span>  locationNames <span class="op">=</span> <span class="st">"FARGO"</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">16</span>,</span>
 <span><span class="op">)</span></span></code></pre></div>
-<div class="section level4">
-<h4 id="details-on-the-inputs-entered-in-diagonal_arrangement-above">Details on the inputs entered in <code>diagonal_arrangement()</code>
+<div class="section level5">
+<h5 id="details-on-the-inputs-entered-in-diagonal_arrangement-above">Details on the inputs entered in <code>diagonal_arrangement()</code>
 above:<a class="anchor" aria-label="anchor" href="#details-on-the-inputs-entered-in-diagonal_arrangement-above"></a>
-</h4>
+</h5>
 <ul>
 <li>
 <code>nrows = 15</code> is the number of columns in the field.</li>
@@ -384,9 +382,9 @@ location.</li>
 randomizations.</li>
 </ul>
 </div>
-<div class="section level3">
-<h3 id="print-single_diag-object">Print <code>single_diag</code> object<a class="anchor" aria-label="anchor" href="#print-single_diag-object"></a>
-</h3>
+<div class="section level4">
+<h4 id="print-single_diag-object">Print <code>single_diag</code> object<a class="anchor" aria-label="anchor" href="#print-single_diag-object"></a>
+</h4>
 <p>To print a summary of the information that is in the object
 <code>single_diag</code>, we can use the generic function
 <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>.</p>
@@ -423,9 +421,9 @@ List of 11
 9   9 PYT_BARLEY_2022    FARGO 2023    9   1      9      0   289   Gen-289
 10 10 PYT_BARLEY_2022    FARGO 2023   10   1     10      0   248   Gen-248</code></pre>
 </div>
-<div class="section level3">
-<h3 id="access-to-single_diag-object">Access to <code>single_diag</code> object<a class="anchor" aria-label="anchor" href="#access-to-single_diag-object"></a>
-</h3>
+<div class="section level4">
+<h4 id="access-to-single_diag-object">Access to <code>single_diag</code> object<a class="anchor" aria-label="anchor" href="#access-to-single_diag-object"></a>
+</h4>
 <p>The function <code><a href="../reference/diagonal_arrangement.html">diagonal_arrangement()</a></code> returns a list
 consisting of all the information displayed in the output tabs in the
 FielDHub app: design information, plot layout, plot numbering, entries
@@ -456,9 +454,9 @@ experiment.</p>
 9   9 PYT_BARLEY_2022    FARGO 2023    9   1      9      0   289   Gen-289
 10 10 PYT_BARLEY_2022    FARGO 2023   10   1     10      0   248   Gen-248</code></pre>
 </div>
-<div class="section level3">
-<h3 id="plot-field-layout">Plot field layout<a class="anchor" aria-label="anchor" href="#plot-field-layout"></a>
-</h3>
+<div class="section level4">
+<h4 id="plot-field-layout">Plot field layout<a class="anchor" aria-label="anchor" href="#plot-field-layout"></a>
+</h4>
 <p>For plotting the layout in function of the coordinates
 <code>ROW</code> and <code>COLUMN</code> in the field book object we can
 use the generic function <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> as follow,</p>
@@ -473,15 +471,15 @@ arrangement.</p>
 <p><br></p>
 </div>
 </div>
-<div class="section level2">
-<h2 id="multiple-unreplicated-diagonal-arrangement-design">Multiple Unreplicated Diagonal Arrangement Design<a class="anchor" aria-label="anchor" href="#multiple-unreplicated-diagonal-arrangement-design"></a>
-</h2>
+<div class="section level3">
+<h3 id="multiple-unreplicated-diagonal-arrangement-design">Multiple Unreplicated Diagonal Arrangement Design<a class="anchor" aria-label="anchor" href="#multiple-unreplicated-diagonal-arrangement-design"></a>
+</h3>
 <p>Now, we show how to generate the same kind of unreplicated design
 with multiple experiments in the same field.</p>
 </div>
-<div class="section level2">
-<h2 id="use-case-1">Use Case<a class="anchor" aria-label="anchor" href="#use-case-1"></a>
-</h2>
+<div class="section level3">
+<h3 id="use-case-1">Use Case<a class="anchor" aria-label="anchor" href="#use-case-1"></a>
+</h3>
 <p>A plant breeding project needs to test 300 genotypes divided among
 three different experiments in amounts of 100, 120, and 80 respectively.
 Each experiment represents different stages of maturity. The 3
@@ -493,9 +491,9 @@ total number of experimental plots.</p>
 the problem explained above. This can be solved either through the app
 or the <code><a href="../reference/diagonal_arrangement.html">diagonal_arrangement()</a></code> function.</p>
 </div>
-<div class="section level2">
-<h2 id="using-the-fieldhub-shiny-app-1">1. Using the FielDHub Shiny App<a class="anchor" aria-label="anchor" href="#using-the-fieldhub-shiny-app-1"></a>
-</h2>
+<div class="section level3">
+<h3 id="using-the-fieldhub-shiny-app-1">1. Using the FielDHub Shiny App<a class="anchor" aria-label="anchor" href="#using-the-fieldhub-shiny-app-1"></a>
+</h3>
 <p>To generate a multiple unreplicated diagonal arrangement design using
 the FielDHub app:</p>
 <p>First, go to <strong>Unreplicated Designs</strong> &gt;
@@ -503,9 +501,9 @@ the FielDHub app:</p>
 <p>Then, follow the following steps where we will show how to generate
 this kind of design.</p>
 </div>
-<div class="section level2">
-<h2 id="inputs-1">Inputs<a class="anchor" aria-label="anchor" href="#inputs-1"></a>
-</h2>
+<div class="section level3">
+<h3 id="inputs-1">Inputs<a class="anchor" aria-label="anchor" href="#inputs-1"></a>
+</h3>
 <ol style="list-style-type: decimal">
 <li>
 <strong>Import entries’ list?</strong> Choose whether to import a
@@ -643,26 +641,26 @@ plots.</p></li>
 an experiment initially, you have to click the Run and Randomize buttons
 again, to re-run with the new inputs.</p>
 </div>
-<div class="section level2">
-<h2 id="outputs-1">Outputs<a class="anchor" aria-label="anchor" href="#outputs-1"></a>
-</h2>
+<div class="section level3">
+<h3 id="outputs-1">Outputs<a class="anchor" aria-label="anchor" href="#outputs-1"></a>
+</h3>
 <p>After you run a single diagonal arrangement in FielDHub and set the
 dimensions of the field, there are several ways to display the
 information contained in the field book. The first tab, <strong>Expt
 Design Info</strong>, shows the option to change the dimensions of the
 field and re-randomize, as well as a reference guide for experiment
 design.</p>
-<div class="section level3">
-<h3 id="input-data-1">Input Data<a class="anchor" aria-label="anchor" href="#input-data-1"></a>
-</h3>
+<div class="section level4">
+<h4 id="input-data-1">Input Data<a class="anchor" aria-label="anchor" href="#input-data-1"></a>
+</h4>
 <p>On the second tab, <strong>Input Data</strong>, you can see all the
 entries in the randomization in a list that was generated with the
 inputs, as well as a table of the checks with the number of times they
 appear in the field.</p>
 </div>
-<div class="section level3">
-<h3 id="randomized-field-1">Randomized Field<a class="anchor" aria-label="anchor" href="#randomized-field-1"></a>
-</h3>
+<div class="section level4">
+<h4 id="randomized-field-1">Randomized Field<a class="anchor" aria-label="anchor" href="#randomized-field-1"></a>
+</h4>
 <p>The <strong>Randomized Field</strong> tab displays a graphical
 representation of the randomization of the entries in a field of the
 specified dimensions. The checks are all colored uniquely, showing the
@@ -674,9 +672,9 @@ field as a table or save it directly as an Excel file with the
 play with different options for the total amount of checks in the
 field.</p>
 </div>
-<div class="section level3">
-<h3 id="plot-number-field-1">Plot Number Field<a class="anchor" aria-label="anchor" href="#plot-number-field-1"></a>
-</h3>
+<div class="section level4">
+<h4 id="plot-number-field-1">Plot Number Field<a class="anchor" aria-label="anchor" href="#plot-number-field-1"></a>
+</h4>
 <p>On the <strong>Plot Number Field</strong> tab, there is a table
 display of the field with the plots numbered according to the Plot Order
 Layout specified, either <em>serpentine</em> or <em>cartesian</em>. You
@@ -684,9 +682,9 @@ can see the corresponding entries for each plot number in the field
 book. Like the Randomized field tab, you can copy the table or save it
 as an Excel file with the <em>Copy</em> and <em>Excel</em> buttons.</p>
 </div>
-<div class="section level3">
-<h3 id="field-book-1">Field Book<a class="anchor" aria-label="anchor" href="#field-book-1"></a>
-</h3>
+<div class="section level4">
+<h4 id="field-book-1">Field Book<a class="anchor" aria-label="anchor" href="#field-book-1"></a>
+</h4>
 <p>The <strong>Field Book</strong> displays all the information on the
 experimental design in a table format. It contains the specific plot
 number and the row and column address of each entry, as well as the
@@ -695,10 +693,10 @@ can filter the data in relevant columns.</p>
 <p><br></p>
 </div>
 </div>
-<div class="section level2">
-<h2 id="using-the-fieldhub-function-diagonal_arrangement-1">2. Using the <code>FielDHub</code> function:
+<div class="section level3">
+<h3 id="using-the-fieldhub-function-diagonal_arrangement-1">2. Using the <code>FielDHub</code> function:
 <code>diagonal_arrangement()</code><a class="anchor" aria-label="anchor" href="#using-the-fieldhub-function-diagonal_arrangement-1"></a>
-</h2>
+</h3>
 <p>A variation on the single diagonal arrangement included in the
 <code><a href="../reference/diagonal_arrangement.html">diagonal_arrangement()</a></code> function is the multiple diagonal
 arrangement, where the experiment is split into blocks of specified
@@ -717,10 +715,10 @@ size.</p>
 <span>  locationNames <span class="op">=</span> <span class="st">"FARGO"</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">17</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<div class="section level4">
-<h4 id="details-on-the-inputs-entered-in-diagonal_arrangement-above-1">Details on the inputs entered in <code>diagonal_arrangement()</code>
+<div class="section level5">
+<h5 id="details-on-the-inputs-entered-in-diagonal_arrangement-above-1">Details on the inputs entered in <code>diagonal_arrangement()</code>
 above:<a class="anchor" aria-label="anchor" href="#details-on-the-inputs-entered-in-diagonal_arrangement-above-1"></a>
-</h4>
+</h5>
 <p>The description for the inputs that we used to generate the
 design,</p>
 <ul>
@@ -754,9 +752,9 @@ location.</li>
 randomizations.</li>
 </ul>
 </div>
-<div class="section level3">
-<h3 id="print-multi_diag-object">Print <code>multi_diag</code> object<a class="anchor" aria-label="anchor" href="#print-multi_diag-object"></a>
-</h3>
+<div class="section level4">
+<h4 id="print-multi_diag-object">Print <code>multi_diag</code> object<a class="anchor" aria-label="anchor" href="#print-multi_diag-object"></a>
+</h4>
 <p>For printing a summary of the information that is in the object
 <code>multi_diag</code> we can use the generic function
 <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code></p>
@@ -793,9 +791,9 @@ List of 11
 9   9 MATURITY1    FARGO 2023    9   1      9      0    53    Gen-53
 10 10 MATURITY1    FARGO 2023   10   1     10      0    50    Gen-50</code></pre>
 </div>
-<div class="section level3">
-<h3 id="access-to-multi_diag-object">Access to <code>multi_diag</code> object<a class="anchor" aria-label="anchor" href="#access-to-multi_diag-object"></a>
-</h3>
+<div class="section level4">
+<h4 id="access-to-multi_diag-object">Access to <code>multi_diag</code> object<a class="anchor" aria-label="anchor" href="#access-to-multi_diag-object"></a>
+</h4>
 <p>The function <code><a href="../reference/diagonal_arrangement.html">diagonal_arrangement()</a></code> returns a list
 consisting of all the information displayed in the output tabs in the
 FielDHub app: design information, plot layout, plot numbering, entries
@@ -826,9 +824,9 @@ experiment.</p>
 9   9 MATURITY1    FARGO 2023    9   1      9      0    53    Gen-53
 10 10 MATURITY1    FARGO 2023   10   1     10      0    50    Gen-50</code></pre>
 </div>
-<div class="section level3">
-<h3 id="plot-field-layout-1">Plot field layout<a class="anchor" aria-label="anchor" href="#plot-field-layout-1"></a>
-</h3>
+<div class="section level4">
+<h4 id="plot-field-layout-1">Plot field layout<a class="anchor" aria-label="anchor" href="#plot-field-layout-1"></a>
+</h4>
 <p>For plotting the layout in function of the coordinates
 <code>ROW</code> and <code>COLUMN</code> in the field book object we can
 use the generic function <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> as follow,</p>
@@ -840,7 +838,18 @@ multiple unreplicated diagonal arrangement design. Gray, salmon, and
 pink shade the blocks of unreplicated experiments, while distinctively
 colored check plots are replicated throughout the field in a systematic
 diagonal arrangement.</p>
-<p><br><br><br></p>
+</div>
+</div>
+<div class="section level2">
+<h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-estefanova2011" class="csl-entry">
+Clarke, G. Peter Y., and Katia T. Stefanova. 2011. <span>“Optimal Design
+for Early-Generation Plant-Breeding Trials with Unreplicated or
+Partially Replicated Test Lines.”</span> <em>Australian &amp; New
+Zealand Journal of Statistics</em> 53 (4): 461–80. <a href="https://doi.org/10.1111/j.1467-842X.2011.00642.x" class="external-link">https://doi.org/10.1111/j.1467-842X.2011.00642.x</a>.
+</div>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
