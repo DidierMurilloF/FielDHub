@@ -186,13 +186,44 @@ mod_multi_loc_preps_ui <- function(id){
             tabsetPanel(id = ns("tabset_prep_avg"),
             tabPanel("Get Random", value = "tabPanel_prep_avg",
                 br(),
-                shinyjs::hidden(
-                    selectInput(inputId = ns("dimensions_preps"), 
-                                label = "Select dimensions of field:", 
-                                choices = "")
+                fluidRow(
+                  column(
+                    width = 4,
+                    shinyjs::hidden(
+                        selectInput(
+                          inputId = ns("dimensions_preps"), 
+                          label = "Select dimensions of field:", 
+                          choices = "")
+                    ),
+                    shinyjs::hidden(
+                        actionButton(
+                          inputId = ns("multi_dimension_button"),
+                          label = "Select multiple dimensions",
+                          width = "80%",
+                          style = "margin-top:25px;
+                                  margin-bottom:15px")
+                    )
+                  ),
+                  column(
+                    4,
+                    br(),
+                    shinyjs::hidden(
+                      checkboxInput(inputId = ns("multi_dimension_toggle"),
+                                    label = "Set different dimensions across locations",
+                                    value = FALSE)
+                    )
+                  )
                 ),
-                shinyjs::hidden(
-                    actionButton(ns("get_random_prep"), label = "Randomize!")
+                fluidRow(
+                  column(
+                    4,
+                    shinyjs::hidden(
+                        actionButton(
+                          ns("get_random_prep"), 
+                          label = "Randomize!",
+                          style = "margin-bottom:12px")
+                    )
+                  )
                 ),
                 br(),
                 br(),
@@ -509,8 +540,6 @@ mod_multi_loc_preps_server <- function(id){
           )
           return(NULL)
         } else return(optim_out)
-        
-        #return(optim_out)
     }) %>%
         bindEvent(input$run_prep)
 
@@ -560,20 +589,47 @@ mod_multi_loc_preps_server <- function(id){
             choices = sort_choices,
             selected = sort_choices[1])
     })
+
+    dimensions <-  reactiveValues()
     
-    field_dimensions_prep <- eventReactive(input$get_random_prep, {
-        req(setup_optim_prep())
-        if (input$dimensions_preps == "No options available") return(NULL)
-        dims <- unlist(strsplit(input$dimensions_preps," x "))
-        d_row <- as.numeric(dims[1])
-        d_col <- as.numeric(dims[2])
-        return(list(d_row = d_row, d_col = d_col))
+    total_dimensions <- reactive({
+      prep_number_of_locs <- input$locs_prep
+      
+      for (i in 1:prep_number_of_locs) {
+        req(input[[paste0("dimensions_loc_", i)]])
+        loc_field_dimension <- input[[paste0("dimensions_loc_", i)]]
+        print(loc_field_dimension)
+        dimensions$i <- loc_field_dimension
+      }
+      return(dimensions)
     })
 
-	format_list_no_checks <- data.frame(
-		ENTRY = 1:10, 
-		NAME = c(paste0("Genotype-", LETTERS[1:10]))
-	)
+    field_dimensions_prep <- eventReactive(input$get_random_prep, {
+      req(setup_optim_prep())
+      if (input$dimensions_preps == "No options available") return(NULL)
+      prep_number_of_locs <- input$locs_prep
+      if (input$multi_dimension_toggle) {
+        req(total_dimensions())
+        d_row <- vector(mode = "numeric", length = prep_number_of_locs)
+        d_col <- vector(mode = "numeric", length = prep_number_of_locs)
+        for (i in 1:prep_number_of_locs) {
+          req(input[[paste0("dimensions_loc_", i)]])
+          dims <- unlist(strsplit(input[[paste0("dimensions_loc_", i)]]," x "))
+          d_row[i] <- as.numeric(dims[1])
+          d_col[i] <- as.numeric(dims[2])
+        }
+      } else {
+        dims <- unlist(strsplit(input$dimensions_preps," x "))
+        d_row <- rep(as.numeric(dims[1]), prep_number_of_locs)
+        d_col <- rep(as.numeric(dims[2]), prep_number_of_locs)
+      }
+      return(list(d_row = d_row, d_col = d_col))
+    })
+
+    format_list_no_checks <- data.frame(
+      ENTRY = 1:10, 
+      NAME = c(paste0("Genotype-", LETTERS[1:10]))
+    )
 
     info_modal_multi_prep <- function() {
       modalDialog(
@@ -602,6 +658,76 @@ mod_multi_loc_preps_server <- function(id){
           )
         )
       }
+    })
+
+    dimension_choices <- function() {
+      req(setup_optim_prep())
+      req(prep_inputs())
+      plots_for_treatments <- as.numeric(setup_optim_prep()$size_locations[1])
+      prep_checks <- as.numeric(prep_inputs()$prep_checks)
+      if (!is.null(prep_inputs()$prep_checks)) {
+          prep_checks <- as.numeric(prep_inputs()$prep_checks)
+      } else {
+          prep_checks <- 0
+      }
+      total_plots <- plots_for_treatments + sum(prep_checks)
+      choices <- factor_subsets(total_plots)$labels
+      if (is.null(choices)) {
+          sort_choices <- "No options available"
+      } else {
+          dif <- vector(mode = "numeric", length = length(choices))
+          for (option in 1:length(choices)) {
+              dims <- unlist(strsplit(choices[[option]], " x "))
+              dif[option] <- abs(as.numeric(dims[1]) - as.numeric(dims[2]))
+          }
+          df_choices <- data.frame(choices = unlist(choices), diff_dim = dif)
+          df_choices <- df_choices[order(df_choices$diff_dim, decreasing = FALSE), ]
+          sort_choices <- as.vector(df_choices$choices)
+      }
+      return(sort_choices)
+    }
+
+    multi_dimension_modal <- function() {
+      modalDialog(
+        title = div(tags$h3("Select different dimensions across multiple locations")),
+        shiny::uiOutput(ns("additional_inputs")),
+        easyClose = FALSE,
+        footer = tagList(
+          modalButton("Cancel"),
+          actionButton(inputId = ns("prep_randomize_multi_loc"), "GO")
+        )
+      )
+    }
+  
+    output$additional_inputs <- shiny::renderUI({
+      prep_number_of_locs <- input$locs_prep
+      req(input$run_prep)
+      # Create a list to store the UI elements
+      ui_list <- lapply(1:prep_number_of_locs, function(i) {
+        div(
+          class = "multi-dimension-container",
+          style = "display: flex; justify-content: left; align-items: left;",
+          div(
+            class = "col-12",
+            style = "padding-top: 0.65em; hover: #f1f1f1;",
+            selectInput(
+              ns(paste0("dimensions_loc_", i)),
+              paste0("Select dimension for location ", i),
+              choices = dimension_choices()
+            )
+          )
+        )
+      })
+      # Return the list of UI elements as a tagList (so that it renders correctly)
+      do.call(tagList, ui_list)
+    })
+
+    observeEvent(input$multi_dimension_button, {
+      showModal(
+        shinyjqui::jqui_draggable(
+            multi_dimension_modal()
+          )
+      )
     })
 
     randomize_hit_prep <- reactiveValues(times = 0)
@@ -640,6 +766,25 @@ mod_multi_loc_preps_server <- function(id){
         req(setup_optim_prep())
         shinyjs::show(id = "dimensions_preps")
         shinyjs::show(id = "get_random_prep")
+    })
+
+
+
+  observeEvent(input$run_prep, {
+        req(setup_optim_prep())
+       #shinyjs::show(id = "dimensions_preps")
+        shinyjs::show(id = "multi_dimension_toggle")
+        shinyjs::show(id = "get_random_prep")
+
+        observeEvent(input$multi_dimension_toggle, {
+          if (input$multi_dimension_toggle == TRUE) {
+            shinyjs::show(id = "multi_dimension_button")
+            shinyjs::hide(id = "dimensions_preps")
+          } else if (input$multi_dimension_toggle == FALSE) {
+            shinyjs::show(id = "dimensions_preps")
+            shinyjs::hide(id = "multi_dimension_button")
+          }
+        })
     })
 
     output$prep_allocation <- DT::renderDT({
@@ -736,8 +881,8 @@ mod_multi_loc_preps_server <- function(id){
         locations_preps <- vector(mode = "list", length = locs_preps)
         withProgress(message = 'Running p-rep optimization ...', {
             locations_preps <- partially_replicated(
-                nrows = rep(nrows, locs_preps), 
-                ncols = rep(ncols, locs_preps), 
+                nrows = nrows, 
+                ncols = ncols, 
                 l = locs_preps, 
                 plotNumber = plotNumber, 
                 exptName =  expt_name,
@@ -750,7 +895,7 @@ mod_multi_loc_preps_server <- function(id){
         })
         return(locations_preps)
     }) %>% 
-      bindEvent(input$get_random_prep)
+      bindEvent(input$get_random_prep, input$prep_randomize_multi_loc)
     
      user_site_selection <- reactive({
        return(as.numeric(input$loc_to_view_preps))
@@ -928,8 +1073,8 @@ mod_multi_loc_preps_server <- function(id){
             df_loc <- subset(df.prep, LOCATION == loc_levels_factors[w])
             fieldBook <- df_loc[, c(1,6,7,9)]
             dfSimulation <- AR1xAR1_simulation(
-                nrows = nrows_prep, 
-                ncols = ncols_prep, 
+                nrows = nrows_prep[sites], 
+                ncols = ncols_prep[sites], 
                 ROX = ROX_PREP, 
                 ROY = ROY_PREP, 
                 minValue = minVal, 
