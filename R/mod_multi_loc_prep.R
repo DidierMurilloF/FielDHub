@@ -225,8 +225,6 @@ mod_multi_loc_preps_ui <- function(id){
                     )
                   )
                 ),
-                # br(),
-                # br(),
                 shinycssloaders::withSpinner(
                     DT::DTOutput(ns("prep_allocation")),
                     type = 4
