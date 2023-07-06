@@ -46,7 +46,7 @@
 #'   \item \code{dataEntry} is a data frame with the data input.
 #'   \item \code{genEntries} is a list with the entries for replicated and non-replicated parts.
 #'   \item \code{fieldBook} is a data frame with field book design. This includes the index (Row, Column).
-#'   \item \code{min_pairswise_distance} is a data frame with the minimum pairwise distance between 
+#'   \item \code{min_pairwise_distance} is a data frame with the minimum pairwise distance between 
 #'           each pair of locations.
 #'   \item \code{reps_info} is a data frame with information on the number of replicated and 
 #'           non-replicated treatments at each location.
@@ -277,7 +277,7 @@ partially_replicated <- function(
     layout_random_sites <- vector(mode = "list", length = l)
     plot_numbers_sites <- vector(mode = "list", length = l)
     col_checks_sites <- vector(mode = "list", length = l)
-    pairswise_distance_sites <- vector(mode = "list", length = l)
+    pairwise_distance_sites <- vector(mode = "list", length = l)
     min_distance_sites <- vector(mode = "numeric", length = l)
     treatments_with_reps = vector(mode = "list", length = l)
     treatments_with_no_reps = vector(mode = "list", length = l)
@@ -378,7 +378,7 @@ partially_replicated <- function(
         layout_random_sites[[sites]] <- layoutR
         plot_numbers_sites[[sites]] <- plot_number_L
         col_checks_sites[[sites]] <- as.matrix(BINAY_CHECKS)
-        pairswise_distance_sites[[sites]] <- prep$pairswise_distance
+        pairwise_distance_sites[[sites]] <- prep$pairwise_distance
         treatments_with_reps[[sites]] = prep$replicated_treatments
         treatments_with_no_reps[[sites]] = prep$unreplicated_treatments
     }
@@ -402,10 +402,10 @@ partially_replicated <- function(
         id_design = 13)
     output <- list(
         infoDesign = infoDesign,
-        min_pairswise_distance = min_dist_df,
+        min_pairwise_distance = min_dist_df,
         reps_info = reps_info,
         layoutRandom = layout_random_sites, 
-        pairsDistance = pairswise_distance_sites,
+        pairsDistance = pairwise_distance_sites,
         plotNumber = plot_numbers_sites,
         binaryField = col_checks_sites,
         dataEntry = dataInput,

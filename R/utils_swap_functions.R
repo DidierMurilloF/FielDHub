@@ -111,7 +111,7 @@ pairs_distance <- function(X) {
 #' \item{designs}{A list of all intermediate designs, starting from the input matrix.}
 #' \item{distances}{A list of all pair distances for each intermediate design.}
 #' \item{min_distance}{An integer indicating the minimum distance between pairs of occurrences of the same integer.}
-#' \item{pairswise_distance}{A data frame with the pairwise distances for the final design.}
+#' \item{pairwise_distance}{A data frame with the pairwise distances for the final design.}
 #' 
 #' @author Jean-Marc Montpetit [aut], Didier Murillo [aut]
 #' 
@@ -129,7 +129,7 @@ pairs_distance <- function(X) {
 #' 
 #' 
 #' @export
-swap_pairs <- function(X, starting_dist = 3, stop_iter = 100) {
+swap_pairs <- function(X, starting_dist = 3, stop_iter = 50) {
     # check if the input X is a matrix
     if (!is.matrix(X)) {
         stop("Input must be a matrix")
@@ -201,13 +201,13 @@ swap_pairs <- function(X, starting_dist = 3, stop_iter = 100) {
         }
     }
     optim_design = designs[[length(designs)]] # return the last (better) design
-    pairswise_distance <- pairs_distance(optim_design)
-    min_distance = min(pairswise_distance$DIST)
+    pairwise_distance <- pairs_distance(optim_design)
+    min_distance = min(pairwise_distance$DIST)
     if (!swap_succeed) {
         optim_design = designs[[1]] # return the last (better) design
         distances[[1]] <- pairs_distance(optim_design)
-        pairswise_distance <- pairs_distance(optim_design)
-        min_distance = min(pairswise_distance$DIST)
+        pairwise_distance <- pairs_distance(optim_design)
+        min_distance = min(pairwise_distance$DIST)
         frequency_rows <- as.data.frame(search_matrix_values(X = optim_design, values_search = genos))
         df <- frequency_rows %>% 
             dplyr::filter(Times >= 2)
@@ -220,7 +220,7 @@ swap_pairs <- function(X, starting_dist = 3, stop_iter = 100) {
             designs = designs, 
             distances = distances,
             min_distance = min_distance,
-            pairswise_distance = pairswise_distance
+            pairwise_distance = pairwise_distance
         )
     )
 }

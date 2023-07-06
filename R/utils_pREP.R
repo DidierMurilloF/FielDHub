@@ -23,7 +23,7 @@
 #'   \item{field.map}{The optimized matrix representing the experimental design layout.}
 #'   \item{rows_incidence}{A vector of row indices.}
 #'   \item{min_distance}{The minimum distance achieved during the optimization algorithm.}
-#'   \item{pairswise_distance}{A data frame of pairwise distances between rep treatments.}
+#'   \item{pairwise_distance}{A data frame of pairwise distances between rep treatments.}
 #'   \item{replicated_treatments}{A vector of the replicated treatments in the optimized design.}
 #'   \item{unreplicated_treatments}{A vector of the unreplicated treatments in the optimized design.}
 #'   \item{gen.entries}{A list of the entry treatments.}
@@ -191,7 +191,7 @@ pREP <- function(
     }
     unreplicated_treatments <- as.numeric(rownames(dups)[dups == 1])
     min_distance <- swap$min_distance
-    pairswise_distance <- swap$pairswise_distance
+    pairwise_distance <- swap$pairwise_distance
     rows_incidence <- swap$rows_incidence
     binary_field <- optim_layout
     binary_field[!binary_field %in% replicated_treatments] <- 0
@@ -200,7 +200,7 @@ pREP <- function(
             field.map = optim_layout,
             rows_incidence = rows_incidence, 
             min_distance = min_distance,
-            pairswise_distance = pairswise_distance,
+            pairwise_distance = pairwise_distance,
             replicated_treatments = replicated_treatments,
             unreplicated_treatments = unreplicated_treatments,
             gen.entries = entries, 

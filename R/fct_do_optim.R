@@ -446,7 +446,7 @@ sparse_allocation <- function(
 #'   \item \code{dataEntry} is a data frame with the data input.
 #'   \item \code{genEntries} is a list with the entries for replicated and non-replicated parts.
 #'   \item \code{fieldBook} is a data frame with field book design. This includes the index (Row, Column).
-#'   \item \code{min_pairswise_distance} is a data frame with the minimum pairwise distance between 
+#'   \item \code{min_pairwise_distance} is a data frame with the minimum pairwise distance between 
 #'              each pair of locations.
 #'   \item \code{reps_info} is a data frame with information on the number of replicated and 
 #'              non-replicated treatments at each location.
@@ -592,7 +592,7 @@ multi_location_prep <- function(
     design_randomization$infoDesign$id_design <- "MultiPrep"
     output <- list(
         infoDesign = design_randomization$infoDesign,
-        min_pairswise_distance = design_randomization$min_pairswise_distance,
+        min_pairwise_distance = design_randomization$min_pairwise_distance,
         reps_info = design_randomization$reps_info,
         layoutRandom = design_randomization$layoutRandom, 
         pairsDistance = design_randomization$pairsDistance,

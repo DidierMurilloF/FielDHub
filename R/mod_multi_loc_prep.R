@@ -225,8 +225,8 @@ mod_multi_loc_preps_ui <- function(id){
                     )
                   )
                 ),
-                br(),
-                br(),
+                # br(),
+                # br(),
                 shinycssloaders::withSpinner(
                     DT::DTOutput(ns("prep_allocation")),
                     type = 4
@@ -591,25 +591,24 @@ mod_multi_loc_preps_server <- function(id){
     })
 
     dimensions <-  reactiveValues()
-    
-    total_dimensions <- reactive({
+
+    observeEvent(input$prep_randomize_multi_loc, {
       prep_number_of_locs <- input$locs_prep
       
       for (i in 1:prep_number_of_locs) {
         req(input[[paste0("dimensions_loc_", i)]])
         loc_field_dimension <- input[[paste0("dimensions_loc_", i)]]
-        print(loc_field_dimension)
         dimensions$i <- loc_field_dimension
       }
-      return(dimensions)
-    })
+      # Close the modal after processing the input values
+       removeModal()
+    }) 
 
     field_dimensions_prep <- eventReactive(input$get_random_prep, {
       req(setup_optim_prep())
       if (input$dimensions_preps == "No options available") return(NULL)
       prep_number_of_locs <- input$locs_prep
       if (input$multi_dimension_toggle) {
-        req(total_dimensions())
         d_row <- vector(mode = "numeric", length = prep_number_of_locs)
         d_col <- vector(mode = "numeric", length = prep_number_of_locs)
         for (i in 1:prep_number_of_locs) {
@@ -895,7 +894,7 @@ mod_multi_loc_preps_server <- function(id){
         })
         return(locations_preps)
     }) %>% 
-      bindEvent(input$get_random_prep, input$prep_randomize_multi_loc)
+      bindEvent(input$get_random_prep)
     
      user_site_selection <- reactive({
        return(as.numeric(input$loc_to_view_preps))
@@ -1093,9 +1092,11 @@ mod_multi_loc_preps_server <- function(id){
           w <- w + 1
         }
         df.prep_locs <- dplyr::bind_rows(df.prep_list)
+        df.prep_locs$ID <- 1:nrow(df.prep_locs)
         v <- 1
       }else {
         dataPrep <- pREPS_reactive()$fieldBook
+        dataPrep$ID <- 1:nrow(dataPrep)
         v <- 2
       }
       if (v == 1) {

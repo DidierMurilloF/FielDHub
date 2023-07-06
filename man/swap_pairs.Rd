@@ -4,7 +4,7 @@
 \alias{swap_pairs}
 \title{Swap pairs in a matrix of integers}
 \usage{
-swap_pairs(X, starting_dist = 3, stop_iter = 100)
+swap_pairs(X, starting_dist = 3, stop_iter = 50)
 }
 \arguments{
 \item{X}{A matrix of integers.}
@@ -20,7 +20,7 @@ A list containing the following elements:
 \item{designs}{A list of all intermediate designs, starting from the input matrix.}
 \item{distances}{A list of all pair distances for each intermediate design.}
 \item{min_distance}{An integer indicating the minimum distance between pairs of occurrences of the same integer.}
-\item{pairswise_distance}{A data frame with the pairwise distances for the final design.}
+\item{pairwise_distance}{A data frame with the pairwise distances for the final design.}
 }
 \description{
 Modifies the input matrix \code{X} to ensure that the distance between any two occurrences

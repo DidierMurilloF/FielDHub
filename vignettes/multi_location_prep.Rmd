@@ -123,7 +123,7 @@ print(B$optim_design)
 The distances for each pairwise of treatments are,
 
 ```{r}
-print(B$pairswise_distance)
+print(B$pairwise_distance)
 ```
 
 As we can see, the minimum distance that the algorithm reached is `r B$min_distance`. This 

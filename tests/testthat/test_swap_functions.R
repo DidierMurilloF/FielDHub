@@ -40,9 +40,9 @@ test_that("swap_pairs returns expected output", {
   res1 <- swap_pairs(X1, starting_dist = 3, stop_iter = 100)
   expect_equal(dim(res1$optim_design), dim(X1))
   expect_equal(length(res1$designs), length(res1$distances))
-  expect_equal(min(res1$pairswise_distance$DIST), res1$min_distance)
+  expect_equal(min(res1$pairwise_distance$DIST), res1$min_distance)
   expect_true(res1$min_distance >= 3)
-  expect_equal(ncol(res1$pairswise_distance), 8)
+  expect_equal(ncol(res1$pairwise_distance), 8)
   
   # Test with a matrix that contains only unique integers
   X2 <- matrix(1:9, ncol = 3)
