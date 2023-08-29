@@ -190,15 +190,13 @@ partially_replicated <- function(
                     base::stop("Input data should have 4 columns: LOCATION | ENTRY | NAME | REPS")
                 }
                 colnames(gen_list) <- c("LOCATION", "ENTRY", "NAME", "REPS")
-                if (length(gen_list$ENTRY) != length(unique(gen_list$ENTRY))) {
-                    stop("Please ensure all ENTRIES in data are distinct.")
-                }
-                if (length(gen_list$NAME) != length(unique(gen_list$NAME))) {
-                    stop("Please ensure all NAMES in data are distinct.")
-                }
                 if (any(gen_list$ENTRY < 1) || any(gen_list$REPS < 1)) {
                     base::stop("Please ensure all ENTRIES and REPS in data are positive integers.")
-                } 
+                }
+                locs_in_data <- length(unique(gen_list$LOCATION))
+                if (locs_in_data != l) {
+                  stop("Number of locations in data do not match with the input value l")
+                }
                 # Create a space in memory for the locations data entry list
                 list_locs <- setNames(
                     object = vector(mode = "list", length = l), 
@@ -212,6 +210,13 @@ partially_replicated <- function(
                         dplyr::select(ENTRY, NAME, REPS) %>%
                         dplyr::arrange(dplyr::desc(REPS))
 
+                    if (length(df_loc$ENTRY) != length(unique(df_loc$ENTRY))) {
+                      stop("Please ensure all ENTRIES in data are distinct.")
+                    }
+                    if (length(df_loc$NAME) != length(unique(df_loc$NAME))) {
+                      stop("Please ensure all NAMES in data are distinct.")
+                    }
+                    
                     list_locs[[site]] <- df_loc
                 }
             } else if (is.list(data)){
@@ -261,7 +266,8 @@ partially_replicated <- function(
         }
         ENTRY <- 1:sum(repGens)
         NAME <- paste(rep("G", sum(repGens)), 1:sum(repGens), sep = "")
-        REPS <- as.numeric(sort(rep(repUnits, times = repGens), decreasing = TRUE))
+        # REPS <- as.numeric(sort(rep(repUnits, times = repGens), decreasing = TRUE))
+        REPS <- as.numeric(rep(repUnits, times = repGens))
         data <- data.frame(list(ENTRY = ENTRY,
                                 NAME = NAME,
                                 REPS = REPS))
