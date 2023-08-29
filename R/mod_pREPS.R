@@ -279,7 +279,8 @@ mod_pREPS_server <- function(id){
         if (length(repGens) != length(repUnits)) shiny::validate("Input repGens and repUnits must be of the same length.")
         ENTRY <- 1:sum(repGens)
         NAME <- paste(rep("G", sum(repGens)), 1:sum(repGens), sep = "")
-        REPS <- sort(rep(repUnits, times = repGens), decreasing = TRUE)
+        # REPS <- sort(rep(repUnits, times = repGens), decreasing = TRUE)
+        REPS <- rep(repUnits, times = repGens)
         data_preps <- data.frame(
             ENTRY = ENTRY, 
             NAME = NAME, 

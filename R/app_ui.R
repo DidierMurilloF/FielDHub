@@ -16,6 +16,7 @@ app_ui <- function(request) {
   options(spinner.color="#2c7da3", spinner.color.background="#ffffff", spinner.size = 2)
   tagList(
     golem_add_external_resources(),
+    #addResourcePath("www", system.file("app/www", package = "FielDHub")),
     tags$head(tags$script(type="text/javascript", src = "corner.js")),
     tags$head(tags$script(type="text/javascript", src= "shinybusy.js")), 
     fluidPage(theme = shinythemes::shinytheme("flatly"),
