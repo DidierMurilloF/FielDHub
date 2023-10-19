@@ -176,9 +176,9 @@ pREP <- function(
     ################### Optimization ##########################################
     # Perform an optimization by using the function swap_pairs()
     if (max(table(field_layout)) == 2) {
-        swap <- swap_pairs(X = field_layout, starting_dist = 3)
+        swap <- swap_pairs(X = field_layout, starting_dist = 3, stop_iter = 50)
     } else {
-        swap <- swap_pairs(X = field_layout, starting_dist = 2)
+        swap <- swap_pairs(X = field_layout, starting_dist = 2, stop_iter = 50)
     }
     optim_layout <- swap$optim_design
     dups <- table(as.vector(optim_layout))

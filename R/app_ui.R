@@ -14,18 +14,32 @@
 #' @noRd
 app_ui <- function(request) {
   options(spinner.color="#2c7da3", spinner.color.background="#ffffff", spinner.size = 2)
+  # Add this at the beginning of your app
+  # Add this line at the beginning of your app, outside of the ui and server functions
+  #shiny::addResourcePath("res", system.file("app/www", package = "FielDHub"))
   tagList(
     golem_add_external_resources(),
-    #addResourcePath("www", system.file("app/www", package = "FielDHub")),
     tags$head(tags$script(type="text/javascript", src = "corner.js")),
     tags$head(tags$script(type="text/javascript", src= "shinybusy.js")), 
+    #includeCSS(system.file("app/www/style.css", package = "FielDHub")),
     fluidPage(theme = shinythemes::shinytheme("flatly"),
               navbarPage(title = "FielDHub v1.3.4", 
-                         tabPanel(" Welcome!", icon = icon("home", lib = "glyphicon"),
-                                  htmltools::includeHTML(
-                                    system.file("app/www/home.html", package = "FielDHub")
-                                  )
+                         tabPanel(
+                           " Welcome!", icon = icon("home", lib = "glyphicon"),
+                            suppressWarnings(
+                              htmltools::includeHTML(
+                                system.file("app/www/home.html", package = "FielDHub")
+                              )
+                            )
                          ),
+                         # tabPanel(" Welcome!",
+                         #          icon = icon("home", lib = "glyphicon"),
+                         #          tags$iframe(
+                         #            src = "res/home.html",
+                         #            width = "100%",  # Adjust width and height as necessary
+                         #            height = "1000px"
+                         #          )
+                         # ),
                          navbarMenu("Unreplicated Designs",
                                     tabPanel("Single Diagonal Arrangement",
                                              mod_Diagonal_ui("Diagonal_ui_1")
@@ -92,15 +106,21 @@ app_ui <- function(request) {
                                     )
                          ),
                          navbarMenu("More", 
-                           tabPanel("Help", 
+                           tabPanel(
+                             "Help",
+                             suppressWarnings(
                                 htmltools::includeHTML(
                                   system.file("app/www/Help.html", package = "FielDHub")
                                 )
+                             )
                            ),
-                           tabPanel("About Us",
+                           tabPanel(
+                             "About Us",
+                            suppressWarnings(
                              htmltools::includeHTML(
                                system.file("app/www/aboutUs.html", package = "FielDHub")
                              )
+                            )
                            ),
                         ),
               ),
