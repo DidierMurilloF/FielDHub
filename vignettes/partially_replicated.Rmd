@@ -121,8 +121,7 @@ and uses the function `swap_pairs()` to maximize the distance between replicated
 
 ### Acknowledge
 
-We would like to acknowledge Mr. [Jean-Marc Montpetit](https://www.linkedin.com/in/jean-marc-montpetit/)
-for contributing code and ideas for the `swap_pairs()` and `pairs_distance()` functions. His contributions have had a 
+We would like to acknowledge Mr. Jean-Marc Montpetit for contributing code and ideas for the `swap_pairs()` and `pairs_distance()` functions. His contributions have had a 
 significant impact on improving the partially replicated (p-rep) design in the R 
 package `FielDHub`. We thank him for his valuable contributions.
 
