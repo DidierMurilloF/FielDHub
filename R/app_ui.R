@@ -19,8 +19,8 @@ app_ui <- function(request) {
   #shiny::addResourcePath("res", system.file("app/www", package = "FielDHub"))
   tagList(
     golem_add_external_resources(),
-    tags$head(tags$script(type="text/javascript", src = "corner.js")),
-    tags$head(tags$script(type="text/javascript", src= "shinybusy.js")), 
+    #tags$head(tags$script(type="text/javascript", src = "corner.js")),
+    #tags$head(tags$script(type="text/javascript", src= "shinybusy.js")), 
     #includeCSS(system.file("app/www/style.css", package = "FielDHub")),
     fluidPage(theme = shinythemes::shinytheme("flatly"),
               navbarPage(title = "FielDHub v1.3.4", 
