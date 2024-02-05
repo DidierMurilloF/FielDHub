@@ -8,8 +8,8 @@
 <meta name="description" content="FielDHub">
 <title>Partially Replicated (p-rep) Design • FielDHub</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
+<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Partially Replicated (p-rep) Design">
 <meta property="og:description" content="FielDHub">
@@ -531,7 +531,7 @@ randomizations.</li>
 List of 7
  $ rows             : num 15
  $ columns          : num 20
- $ min_distance     : num 8
+ $ min_distance     : num 7
  $ incidence_in_rows: num 3
  $ locations        : num 1
  $ planter          : chr "serpentine"
@@ -539,16 +539,16 @@ List of 7
 
  10 First observations of the data frame with the partially_replicated field book: 
    ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 Expt1  PALMIRA 2023  101   1      1      0   123      G123
-2   2 Expt1  PALMIRA 2023  102   1      2     33    33       G33
-3   3 Expt1  PALMIRA 2023  103   1      3     59    59       G59
-4   4 Expt1  PALMIRA 2023  104   1      4      0   107      G107
-5   5 Expt1  PALMIRA 2023  105   1      5     74    74       G74
-6   6 Expt1  PALMIRA 2023  106   1      6      0   167      G167
-7   7 Expt1  PALMIRA 2023  107   1      7      0   170      G170
-8   8 Expt1  PALMIRA 2023  108   1      8     18    18       G18
-9   9 Expt1  PALMIRA 2023  109   1      9     57    57       G57
-10 10 Expt1  PALMIRA 2023  110   1     10      0   105      G105</code></pre>
+1   1 Expt1  PALMIRA 2024  101   1      1     44    44       G44
+2   2 Expt1  PALMIRA 2024  102   1      2      0   102      G102
+3   3 Expt1  PALMIRA 2024  103   1      3     71    71       G71
+4   4 Expt1  PALMIRA 2024  104   1      4      0   107      G107
+5   5 Expt1  PALMIRA 2024  105   1      5      8     8        G8
+6   6 Expt1  PALMIRA 2024  106   1      6     13    13       G13
+7   7 Expt1  PALMIRA 2024  107   1      7      0   170      G170
+8   8 Expt1  PALMIRA 2024  108   1      8     67    67       G67
+9   9 Expt1  PALMIRA 2024  109   1      9      0   123      G123
+10 10 Expt1  PALMIRA 2024  110   1     10      0   105      G105</code></pre>
 </div>
 <div class="section level4">
 <h4 id="access-to-prep-output">Access to <code>prep</code> output<a class="anchor" aria-label="anchor" href="#access-to-prep-output"></a>
@@ -572,16 +572,16 @@ experiment.</p>
 <code class="sourceCode R"><span><span class="va">field_book</span> <span class="op">&lt;-</span> <span class="va">prep</span><span class="op">$</span><span class="va">fieldBook</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">field_book</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
 <pre><code>   ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 Expt1  PALMIRA 2023  101   1      1      0   123      G123
-2   2 Expt1  PALMIRA 2023  102   1      2     33    33       G33
-3   3 Expt1  PALMIRA 2023  103   1      3     59    59       G59
-4   4 Expt1  PALMIRA 2023  104   1      4      0   107      G107
-5   5 Expt1  PALMIRA 2023  105   1      5     74    74       G74
-6   6 Expt1  PALMIRA 2023  106   1      6      0   167      G167
-7   7 Expt1  PALMIRA 2023  107   1      7      0   170      G170
-8   8 Expt1  PALMIRA 2023  108   1      8     18    18       G18
-9   9 Expt1  PALMIRA 2023  109   1      9     57    57       G57
-10 10 Expt1  PALMIRA 2023  110   1     10      0   105      G105</code></pre>
+1   1 Expt1  PALMIRA 2024  101   1      1     44    44       G44
+2   2 Expt1  PALMIRA 2024  102   1      2      0   102      G102
+3   3 Expt1  PALMIRA 2024  103   1      3     71    71       G71
+4   4 Expt1  PALMIRA 2024  104   1      4      0   107      G107
+5   5 Expt1  PALMIRA 2024  105   1      5      8     8        G8
+6   6 Expt1  PALMIRA 2024  106   1      6     13    13       G13
+7   7 Expt1  PALMIRA 2024  107   1      7      0   170      G170
+8   8 Expt1  PALMIRA 2024  108   1      8     67    67       G67
+9   9 Expt1  PALMIRA 2024  109   1      9      0   123      G123
+10 10 Expt1  PALMIRA 2024  110   1     10      0   105      G105</code></pre>
 </div>
 <div class="section level4">
 <h4 id="plot-field-layout">Plot field layout<a class="anchor" aria-label="anchor" href="#plot-field-layout"></a>

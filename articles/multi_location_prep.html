@@ -8,8 +8,8 @@
 <meta name="description" content="FielDHub">
 <title>Optimized Multi-Location P-rep Design • FielDHub</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
+<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Optimized Multi-Location P-rep Design">
 <meta property="og:description" content="FielDHub">
@@ -561,15 +561,15 @@ us print the first ten genotypes allocation.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">optim_multi_prep</span><span class="op">$</span><span class="va">allocation</span>, <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code>   LOC1 LOC2 LOC3 LOC4 LOC5
-1     2    1    2    1    1
+1     2    1    1    1    2
 2     1    2    1    1    2
-3     1    1    1    2    2
+3     2    1    1    1    2
 4     1    1    2    1    2
-5     1    2    1    2    1
-6     2    1    1    2    1
+5     1    1    2    2    1
+6     1    2    1    1    2
 7     2    1    2    1    1
 8     1    2    2    1    1
-9     1    2    1    1    2
+9     1    1    2    1    2
 10    2    2    1    1    1</code></pre>
 <p>Let us add two new columns to the allocation table. We can add the
 number of copies by genotype; it should be 7 for all of them. We can
@@ -613,13 +613,13 @@ Gen-1
 1
 </td>
 <td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
 2
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
 </td>
 <td style="text-align:right;">
 7
@@ -659,16 +659,16 @@ Gen-2
 Gen-3
 </td>
 <td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
 2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
 </td>
 <td style="text-align:right;">
 2
@@ -714,10 +714,10 @@ Gen-5
 1
 </td>
 <td style="text-align:right;">
-2
+1
 </td>
 <td style="text-align:right;">
-1
+2
 </td>
 <td style="text-align:right;">
 2
@@ -737,12 +737,6 @@ Gen-5
 Gen-6
 </td>
 <td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
 1
 </td>
 <td style="text-align:right;">
@@ -750,6 +744,12 @@ Gen-6
 </td>
 <td style="text-align:right;">
 1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
 </td>
 <td style="text-align:right;">
 7
@@ -818,10 +818,10 @@ Gen-9
 1
 </td>
 <td style="text-align:right;">
-2
+1
 </td>
 <td style="text-align:right;">
-1
+2
 </td>
 <td style="text-align:right;">
 1
@@ -884,24 +884,24 @@ randomizations with the following code:</p>
 List of 7
  $ rows             : num [1:5] 19 19 19 19 19
  $ columns          : num [1:5] 12 12 12 12 12
- $ min_distance     : num [1:5] 4 3 3 3 4
- $ incidence_in_rows: num [1:5] 6 5 2 3 4
+ $ min_distance     : num [1:5] 3 4 3 3 3
+ $ incidence_in_rows: num [1:5] 4 5 2 2 4
  $ locations        : num 5
  $ planter          : chr "serpentine"
  $ seed             : num 2456
 
  10 First observations of the data frame with the partially_replicated field book: 
    ID     EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 PrepExpt     LOC1 2023    1   1      1     46    46      G-46
-2   2 PrepExpt     LOC1 2023    2   1      2     30    30      G-30
-3   3 PrepExpt     LOC1 2023    3   1      3    118   118     G-118
-4   4 PrepExpt     LOC1 2023    4   1      4      0    62      G-62
-5   5 PrepExpt     LOC1 2023    5   1      5     61    61      G-61
-6   6 PrepExpt     LOC1 2023    6   1      6      0    70      G-70
-7   7 PrepExpt     LOC1 2023    7   1      7     65    65      G-65
-8   8 PrepExpt     LOC1 2023    8   1      8      0   111     G-111
-9   9 PrepExpt     LOC1 2023    9   1      9     15    15      G-15
-10 10 PrepExpt     LOC1 2023   10   1     10    134   134     G-134</code></pre>
+1   1 PrepExpt     LOC1 2024    1   1      1     76    76      G-76
+2   2 PrepExpt     LOC1 2024    2   1      2      0   111     G-111
+3   3 PrepExpt     LOC1 2024    3   1      3    129   129     G-129
+4   4 PrepExpt     LOC1 2024    4   1      4     45    45      G-45
+5   5 PrepExpt     LOC1 2024    5   1      5      0   133     G-133
+6   6 PrepExpt     LOC1 2024    6   1      6      0    49      G-49
+7   7 PrepExpt     LOC1 2024    7   1      7    123   123     G-123
+8   8 PrepExpt     LOC1 2024    8   1      8      0    57      G-57
+9   9 PrepExpt     LOC1 2024    9   1      9     54    54      G-54
+10 10 PrepExpt     LOC1 2024   10   1     10    125   125     G-125</code></pre>
 </div>
 <div class="section level4">
 <h4 id="access-to-optim_multi_prep-output">Access to <code>optim_multi_prep</code> output<a class="anchor" aria-label="anchor" href="#access-to-optim_multi_prep-output"></a>
@@ -923,16 +923,16 @@ experiment.</p>
 <code class="sourceCode R"><span><span class="va">field_book</span> <span class="op">&lt;-</span> <span class="va">optim_multi_prep</span><span class="op">$</span><span class="va">fieldBook</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">field_book</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
 <pre><code>   ID     EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 PrepExpt     LOC1 2023    1   1      1     46    46      G-46
-2   2 PrepExpt     LOC1 2023    2   1      2     30    30      G-30
-3   3 PrepExpt     LOC1 2023    3   1      3    118   118     G-118
-4   4 PrepExpt     LOC1 2023    4   1      4      0    62      G-62
-5   5 PrepExpt     LOC1 2023    5   1      5     61    61      G-61
-6   6 PrepExpt     LOC1 2023    6   1      6      0    70      G-70
-7   7 PrepExpt     LOC1 2023    7   1      7     65    65      G-65
-8   8 PrepExpt     LOC1 2023    8   1      8      0   111     G-111
-9   9 PrepExpt     LOC1 2023    9   1      9     15    15      G-15
-10 10 PrepExpt     LOC1 2023   10   1     10    134   134     G-134</code></pre>
+1   1 PrepExpt     LOC1 2024    1   1      1     76    76      G-76
+2   2 PrepExpt     LOC1 2024    2   1      2      0   111     G-111
+3   3 PrepExpt     LOC1 2024    3   1      3    129   129     G-129
+4   4 PrepExpt     LOC1 2024    4   1      4     45    45      G-45
+5   5 PrepExpt     LOC1 2024    5   1      5      0   133     G-133
+6   6 PrepExpt     LOC1 2024    6   1      6      0    49      G-49
+7   7 PrepExpt     LOC1 2024    7   1      7    123   123     G-123
+8   8 PrepExpt     LOC1 2024    8   1      8      0    57      G-57
+9   9 PrepExpt     LOC1 2024    9   1      9     54    54      G-54
+10 10 PrepExpt     LOC1 2024   10   1     10    125   125     G-125</code></pre>
 </div>
 <div class="section level4">
 <h4 id="plot-field-layout">Plot field layout<a class="anchor" aria-label="anchor" href="#plot-field-layout"></a>
