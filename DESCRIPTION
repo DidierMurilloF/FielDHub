@@ -60,7 +60,8 @@ Imports:
     viridis,
     shinyalert,
     desplot,
-    shinyjs
+    shinyjs,
+    parallel
 Encoding: UTF-8
 RoxygenNote: 7.2.3
 Author: Didier Murillo [cre, aut], Salvador Gezan [aut], Ana Heilman [ctb],
