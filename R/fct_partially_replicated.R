@@ -279,6 +279,63 @@ partially_replicated <- function(
     }
     if (is.null(seed)) seed <- base::sample.int(10000, size = 1)
     set.seed(seed)
+    # Wrapper function
+    pREP_wrapper <- function(site, nrows, ncols, list_locs, seed) {
+        pREP(nrows = nrows[site], ncols = ncols[site], data = list_locs[[site]], seed = seed)
+    }
+
+
+
+    # Parallel processing function
+    parallel_pREP <- function(l, nrows, ncols, list_locs, seed) {
+        # Detect number of cores
+        chk <- Sys.getenv("_R_CHECK_LIMIT_CORES_", "")
+        if (nzchar(chk) && chk == "TRUE") {
+            # use 2 cores in CRAN/Travis/AppVeyor
+            no_cores <- 2L
+        } else {
+            # use all cores in devtools::test()
+            no_cores <- parallel::detectCores() - 1
+        }
+        env_sites <- 1:l
+        # Check if the system is Windows or Unix-like (Linux/Mac)
+        if (.Platform$OS.type == "windows") {
+            # Windows: Use parLapply
+            cl <- parallel::makeCluster(no_cores)
+            on.exit(parallel::stopCluster(cl))  # Ensure cluster is stopped even if errors occur
+            prep <- parallel::parLapply(
+                cl,
+                env_sites, 
+                function(site) pREP_wrapper(site, nrows, ncols, list_locs, seed = 1)
+            )
+        } else {
+            # Unix-like (Linux/Mac): Use mclapply
+            prep <- parallel::mclapply(
+                env_sites, 
+                function(site) pREP_wrapper(site, nrows, ncols, list_locs, seed = 1), 
+                mc.cores = no_cores
+            )
+        }
+        
+        return(prep)
+    }
+
+    # Main processing
+    if (l > 1) {
+        prep <- parallel_pREP(l, nrows, ncols, list_locs, seed = 1)
+    } else {
+        prep <- vector(mode = "list", length = l)
+        prep[[1]] <- pREP(
+            nrows = nrows[1], 
+            ncols = ncols[1], 
+            Fillers = 0,
+            seed = seed, 
+            optim = TRUE, 
+            niter = 1000, 
+            data = list_locs[[1]]
+        )
+    }
+
     field_book_sites <- vector(mode = "list", length = l)
     layout_random_sites <- vector(mode = "list", length = l)
     plot_numbers_sites <- vector(mode = "list", length = l)
@@ -289,23 +346,15 @@ partially_replicated <- function(
     treatments_with_no_reps = vector(mode = "list", length = l)
     rows_incidence <- vector(mode = "numeric", length = l)
     for (sites in 1:l) {
-        prep <- pREP(
-            nrows = nrows[sites], 
-            ncols = ncols[sites], 
-            Fillers = 0,
-            seed = seed, 
-            optim = TRUE, 
-            niter = 1000, 
-            data = list_locs[[sites]]
-        )
-        rows_incidence[sites] <- prep$rows_incidence[length(prep$rows_incidence)]
-        min_distance_sites[sites] <- prep$min_distance
-        dataInput <- prep$gen.list
-        BINAY_CHECKS <- prep$binary.field
-        random_entries_map <- as.matrix(prep$field.map)
-        genEntries <- prep$gen.entries
+        site_prep <- prep[[sites]]
+        rows_incidence[sites] <- site_prep$rows_incidence[length(site_prep$rows_incidence)]
+        min_distance_sites[sites] <- site_prep$min_distance
+        dataInput <- site_prep$gen.list
+        BINAY_CHECKS <- site_prep$binary.field
+        random_entries_map <- as.matrix(site_prep$field.map)
+        genEntries <- site_prep$gen.entries
 
-        EntryChecks <- prep$entryChecks
+        EntryChecks <- site_prep$entryChecks
         Checks <- length(EntryChecks)
 
         if (sum(genEntries[[2]]) == 0) {
@@ -314,7 +363,7 @@ partially_replicated <- function(
         
         if (!is.null(exptName)) {
             Name_expt <- exptName[1]
-        }else Name_expt <- "Expt1"
+        } else Name_expt <- "Expt1"
         
         split_name_spat <- function(){
             split_names <- base::matrix(
@@ -345,12 +394,12 @@ partially_replicated <- function(
         plot_number_L <- apply(plot_num, c(1,2), as.numeric)
         export_spat <- function() {
             loc <- locationNames
-            random_entries_map <- as.matrix(prep$field.map)
+            random_entries_map <- as.matrix(site_prep$field.map)
             plot_number_L <- as.matrix(plot_number_L)
             Col_checks <- as.matrix(BINAY_CHECKS)
             my_names <- as.matrix(split_name_spat()$my_names)
             year <- format(Sys.Date(), "%Y")
-            my_data_VLOOKUP <- prep$gen.list
+            my_data_VLOOKUP <- site_prep$gen.list
             results_to_export <- list(
                 random_entries_map, 
                 plot_number_L, 
@@ -374,7 +423,7 @@ partially_replicated <- function(
         fieldBook <- fieldBook[, c(6,7,9,4,2,3,5,1,10)]
         fieldBook <- cbind(ID, fieldBook)
         colnames(fieldBook)[10] <- "TREATMENT"
-        layoutR = prep$field.map
+        layoutR = site_prep$field.map
         rownames(layoutR) <- paste("Row", nrow(layoutR):1, sep = "")
         colnames(layoutR) <- paste("Col", 1:ncol(layoutR), sep = "")
         rownames(plot_num) <- paste("Row", nrow(plot_num):1, sep = "")
@@ -384,13 +433,13 @@ partially_replicated <- function(
         layout_random_sites[[sites]] <- layoutR
         plot_numbers_sites[[sites]] <- plot_number_L
         col_checks_sites[[sites]] <- as.matrix(BINAY_CHECKS)
-        pairwise_distance_sites[[sites]] <- prep$pairwise_distance
-        treatments_with_reps[[sites]] = prep$replicated_treatments
-        treatments_with_no_reps[[sites]] = prep$unreplicated_treatments
+        pairwise_distance_sites[[sites]] <- site_prep$pairwise_distance
+        treatments_with_reps[[sites]] = site_prep$replicated_treatments
+        treatments_with_no_reps[[sites]] = site_prep$unreplicated_treatments
     }
     
     field_book <- dplyr::bind_rows(field_book_sites)
-    RepChecks <- prep$reps.checks
+    RepChecks <- site_prep$reps.checks
     reps_info <- data.frame(
         LOCATION = locationNames,
         Replicated = lengths(treatments_with_reps),
@@ -398,27 +447,28 @@ partially_replicated <- function(
     )
     min_dist_df <- data.frame(LOCATION = locationNames, DISTANCE = min_distance_sites)
     infoDesign <- list(
-        rows = nrows,
-        columns = ncols,
-        min_distance = min_distance_sites,
-        incidence_in_rows = rows_incidence,
-        locations = l,
-        planter = planter,
-        seed = seed,
-        id_design = 13)
+      rows = nrows,
+      columns = ncols,
+      min_distance = min_distance_sites,
+      incidence_in_rows = rows_incidence,
+      locations = l,
+      planter = planter,
+      seed = seed,
+      id_design = 13
+    )
     output <- list(
-        infoDesign = infoDesign,
-        min_pairwise_distance = min_dist_df,
-        reps_info = reps_info,
-        layoutRandom = layout_random_sites, 
-        pairsDistance = pairwise_distance_sites,
-        plotNumber = plot_numbers_sites,
-        binaryField = col_checks_sites,
-        dataEntry = dataInput,
-        genEntries = genEntries,
-        treatments_with_reps = treatments_with_reps,
-        treatments_with_no_reps = treatments_with_no_reps,
-        fieldBook = field_book
+      infoDesign = infoDesign,
+      min_pairwise_distance = min_dist_df,
+      reps_info = reps_info,
+      layoutRandom = layout_random_sites, 
+      pairsDistance = pairwise_distance_sites,
+      plotNumber = plot_numbers_sites,
+      binaryField = col_checks_sites,
+      dataEntry = dataInput,
+      genEntries = genEntries,
+      treatments_with_reps = treatments_with_reps,
+      treatments_with_no_reps = treatments_with_no_reps,
+      fieldBook = field_book
     )
     class(output) <- "FielDHub"
     return(invisible(output))
