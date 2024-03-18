@@ -61,7 +61,7 @@ Imports:
     shinyalert,
     desplot,
     shinyjs,
-    parallel
+    future
 Encoding: UTF-8
 RoxygenNote: 7.2.3
 Author: Didier Murillo [cre, aut], Salvador Gezan [aut], Ana Heilman [ctb],

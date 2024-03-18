@@ -279,50 +279,99 @@ partially_replicated <- function(
     }
     if (is.null(seed)) seed <- base::sample.int(10000, size = 1)
     set.seed(seed)
+
     # Wrapper function
+    # pREP_wrapper <- function(site, nrows, ncols, list_locs, seed) {
+    #     pREP(nrows = nrows[site], ncols = ncols[site], data = list_locs[[site]], seed = seed)
+    # }
+
+    # # Parallel processing function
+    # parallel_pREP <- function(l, nrows, ncols, list_locs, seed) {
+    #     # Detect number of cores
+    #     chk <- Sys.getenv("_R_CHECK_LIMIT_CORES_", "")
+    #     if (nzchar(chk) && chk == "TRUE") {
+    #         # use 2 cores in CRAN/Travis/AppVeyor
+    #         no_cores <- 2L
+    #     } else {
+    #         # use all cores in devtools::test()
+    #         no_cores <- parallel::detectCores() - 1
+    #     }
+    #     env_sites <- 1:l
+    #     # Check if the system is Windows or Unix-like (Linux/Mac)
+    #     if (.Platform$OS.type == "windows") {
+    #         # Windows: Use parLapply
+    #         cl <- parallel::makeCluster(no_cores)
+    #         on.exit(parallel::stopCluster(cl))  # Ensure cluster is stopped even if errors occur
+    #         prep <- parallel::parLapply(
+    #             cl,
+    #             env_sites, 
+    #             function(site) pREP_wrapper(site, nrows, ncols, list_locs, seed = 1)
+    #         )
+    #     } else {
+    #         # Unix-like (Linux/Mac): Use mclapply
+    #         prep <- parallel::mclapply(
+    #             env_sites, 
+    #             function(site) pREP_wrapper(site, nrows, ncols, list_locs, seed = 1), 
+    #             mc.cores = no_cores
+    #         )
+    #     }
+        
+    #     return(prep)
+    # }
+
+        # Main processing
+    # if (l > 1) {
+    #     prep <- parallel_pREP(l, nrows, ncols, list_locs, seed = 1)
+    # } else {
+    #     prep <- vector(mode = "list", length = l)
+    #     prep[[1]] <- pREP(
+    #         nrows = nrows[1], 
+    #         ncols = ncols[1], 
+    #         Fillers = 0,
+    #         seed = seed, 
+    #         optim = TRUE, 
+    #         niter = 1000, 
+    #         data = list_locs[[1]]
+    #     )
+    # }
+
+    # Wrapper function remains the same
     pREP_wrapper <- function(site, nrows, ncols, list_locs, seed) {
         pREP(nrows = nrows[site], ncols = ncols[site], data = list_locs[[site]], seed = seed)
     }
 
-
-
-    # Parallel processing function
-    parallel_pREP <- function(l, nrows, ncols, list_locs, seed) {
-        # Detect number of cores
-        chk <- Sys.getenv("_R_CHECK_LIMIT_CORES_", "")
-        if (nzchar(chk) && chk == "TRUE") {
-            # use 2 cores in CRAN/Travis/AppVeyor
-            no_cores <- 2L
-        } else {
-            # use all cores in devtools::test()
-            no_cores <- parallel::detectCores() - 1
-        }
-        env_sites <- 1:l
-        # Check if the system is Windows or Unix-like (Linux/Mac)
+    # Revised parallel processing function with OS-specific future plans
+    future_pREP <- function(l, nrows, ncols, list_locs, seed) {
+        # Set plan based on operating system
         if (.Platform$OS.type == "windows") {
-            # Windows: Use parLapply
-            cl <- parallel::makeCluster(no_cores)
-            on.exit(parallel::stopCluster(cl))  # Ensure cluster is stopped even if errors occur
-            prep <- parallel::parLapply(
-                cl,
-                env_sites, 
-                function(site) pREP_wrapper(site, nrows, ncols, list_locs, seed = 1)
-            )
+            future::plan("multisession")
         } else {
-            # Unix-like (Linux/Mac): Use mclapply
-            prep <- parallel::mclapply(
-                env_sites, 
-                function(site) pREP_wrapper(site, nrows, ncols, list_locs, seed = 1), 
-                mc.cores = no_cores
-            )
+            future::plan("multicore")
         }
+        
+        # Prepare to store future objects
+        future_objects <- vector("list", length = l)
+        env_sites <- 1:l
+        
+        # Generate futures
+        for (i in seq_along(env_sites)) {
+            future_objects[[i]] <- future::future({
+                pREP_wrapper(env_sites[i], nrows, ncols, list_locs, seed = 1)
+            })
+        }
+        
+        # Collect results
+        prep <- lapply(future_objects, future::value)
         
         return(prep)
     }
 
-    # Main processing
+  # Main processing
     if (l > 1) {
-        prep <- parallel_pREP(l, nrows, ncols, list_locs, seed = 1)
+      time_start <- Sys.time()
+        prep <- future_pREP(l, nrows, ncols, list_locs, seed = 1)
+      time_end <- Sys.time()
+      print(time_end - time_start)
     } else {
         prep <- vector(mode = "list", length = l)
         prep[[1]] <- pREP(
@@ -335,6 +384,8 @@ partially_replicated <- function(
             data = list_locs[[1]]
         )
     }
+
+
 
     field_book_sites <- vector(mode = "list", length = l)
     layout_random_sites <- vector(mode = "list", length = l)
