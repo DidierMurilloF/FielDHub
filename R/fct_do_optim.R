@@ -7,6 +7,7 @@
 #' @param add_checks Option to add checks. Optional if \code{design = "prep"}
 #' @param checks Number of genotypes checks. 
 #' @param rep_checks Replication for each check.
+#' @param force_balance Get balanced unbalanced locations. By default \code{force_balance = TRUE}.
 #' @param data (optional) Data frame with 2 columns: \code{ENTRY | NAME }. ENTRY must be numeric.
 #' @param seed (optional) Real number that specifies the starting seed to obtain reproducible designs.
 #' 
@@ -44,7 +45,8 @@ do_optim <- function(
     copies_per_entry, 
     add_checks = FALSE, 
     checks = NULL, 
-    rep_checks = NULL, 
+    rep_checks = NULL,
+    force_balance = TRUE,
     seed,
     data = NULL) {
     # set a random seed if it is missing
@@ -147,7 +149,7 @@ do_optim <- function(
     # Check if there are unbalanced locations and force them to be balanced
     size_locs <- as.vector(base::colSums(allocation))
     max_size_locs <- max(size_locs)
-    if (!all(size_locs == max_size_locs)) {
+    if (!all(size_locs == max_size_locs) & force_balance == TRUE) {
         unbalanced_locs <- which(size_locs != max_size_locs)
         max_swaps <- length(unbalanced_locs)
         k <- nrow(allocation)

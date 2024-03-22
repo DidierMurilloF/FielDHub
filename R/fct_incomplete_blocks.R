@@ -19,7 +19,7 @@
 #'         Johan Aparicio [ctb], 
 #'         Richard Horsley [ctb]
 #'
-#' @importFrom stats runif na.omit
+#' @importFrom stats runif na.omit aggregate
 #'
 #'
 #' @return A list with two elements.
@@ -81,12 +81,12 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
         nt <- length(t)
         TRT <- t
       }
-    }else if (is.character(t) || is.factor(t)) {
+    } else if (is.character(t) || is.factor(t)) {
       if (length(t) == 1) {
         shiny::validate('incomplete_blocks() requires more than one treatment.')
       } 
       nt <- length(t)
-    }else if ((length(t) > 1)) {
+    } else if ((length(t) > 1)) {
       nt <- length(t)
     }
     data_up <- data.frame(list(ENTRY = 1:nt, TREATMENT = paste0("G-", 1:nt)))
@@ -138,20 +138,40 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
     if (square) {
         mydes <- blocksdesign::blocks(treatments = nt, replicates = r + 1, blocks = list(r + 1, b), seed = NULL)
         ##### Dropping the cyclical REP ######
-        rep_to_drop <- mydes$Design %>%
-            dplyr::group_by(Level_1, Level_2) %>%
-            dplyr::mutate(treatments = as.numeric(treatments)) %>%
-            dplyr::summarise(dif = sum(diff(sort(treatments)))/(dplyr::n()-1)) %>%
-            dplyr::filter(dif == 1) %>%
-            dplyr::pull(Level_1) %>%
-            unique()
-        if (length(rep_to_drop) > 0) {
-            mydes$Design <- mydes$Design %>%
-                dplyr::filter(Level_1 != rep_to_drop) %>%
-                dplyr::mutate(Level_1 = rep(paste0("B", 1:r), each = nt))
+        # Function to check if treatments are consecutive
+        check_consecutive <- function(treatments) {
+          sorted_treatments <- sort(treatments)
+          all(diff(sorted_treatments) == 1)
+        }
+        # Apply check_consecutive function to each Level_2 group
+        raw_design <- as.data.frame(mydes$Design)
+        raw_design <- raw_design %>%
+          dplyr::mutate(
+            Level_1 = as.character(Level_1),
+            Level_2 = as.character(Level_2),
+            plots = as.integer(plots),
+            treatments = as.integer(treatments)
+          )
+        results <- raw_design %>%
+          dplyr::group_by(Level_1, Level_2) %>%
+          dplyr::summarise(are_consecutive = check_consecutive(treatments), .groups = "drop") %>%
+          dplyr::group_by(Level_1) %>%
+          dplyr::summarise(all_consecutive = all(are_consecutive))
+        
+        # Filter Level_1 where all Level_2 levels have consecutive treatments
+        consecutive_levels <- results %>%
+          dplyr::filter(all_consecutive) %>%
+          dplyr::pull(Level_1) %>%
+          unique()
+        
+        consecutive_levels_level_1 <- consecutive_levels
+        
+        if (length(consecutive_levels_level_1) > 0) {
+          rep_to_drop <- consecutive_levels_level_1[1]
+          mydes$Design <- dplyr::filter(raw_design, Level_1 != rep_to_drop)
         } else {
-            mydes$Design <- mydes$Design %>%
-                dplyr::filter(Level_1 != paste0("B", r + 1)) 
+          mydes$Design <- raw_design %>%
+            dplyr::filter(Level_1 != paste0("B", r + 1)) 
         }
     } else {
         mydes <- blocksdesign::blocks(treatments = nt, replicates = r, blocks = list(r, b), seed = NULL)
@@ -168,6 +188,8 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
   OutIBD <- dplyr::bind_rows(outIBD_loc)
   OutIBD <- as.data.frame(OutIBD)
   OutIBD$ENTRY <- as.numeric(OutIBD$ENTRY)
+  OutIBD_test <- OutIBD
+  OutIBD_test$ID <- 1:nrow(OutIBD_test)
   if(lookup) {
     OutIBD <- dplyr::inner_join(OutIBD, dataLookUp, by = "ENTRY")
     OutIBD <- OutIBD[,-6]
@@ -178,6 +200,7 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
   }
   ID <- 1:nrow(OutIBD)
   OutIBD_new <- cbind(ID, OutIBD)
+  validateTreatments(OutIBD_new)
   lambda <- r*(k - 1)/(nt - 1)
   infoDesign <- list(Reps = r, iBlocks = b, NumberTreatments = nt, NumberLocations = l,
                      Locations = locationNames, seed = seed, lambda = lambda, 

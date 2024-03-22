@@ -12,6 +12,7 @@ do_optim(
   add_checks = FALSE,
   checks = NULL,
   rep_checks = NULL,
+  force_balance = TRUE,
   seed,
   data = NULL
 )
@@ -31,6 +32,8 @@ When design is \code{sparse} then \code{copies_per_entry} should be less than \c
 \item{checks}{Number of genotypes checks.}
 
 \item{rep_checks}{Replication for each check.}
+
+\item{force_balance}{Get balanced unbalanced locations. By default \code{force_balance = TRUE}.}
 
 \item{seed}{(optional) Real number that specifies the starting seed to obtain reproducible designs.}
 

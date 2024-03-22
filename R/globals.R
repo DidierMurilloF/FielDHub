@@ -29,4 +29,7 @@ utils::globalVariables(c("ENTRY",
                          "USER_ENTRY",
                          "NAME.x",
                          "NAME.y",
-                         "Times"))
+                         "Times", 
+                         "all_consecutive", 
+                         "are_consecutive", 
+                         "plots"))
