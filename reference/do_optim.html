@@ -91,6 +91,7 @@
 <span>  add_checks <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  checks <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  rep_checks <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  force_balance <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">seed</span>,</span>
 <span>  data <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -125,6 +126,10 @@ When design is <code>sparse</code> then <code>copies_per_entry</code> should be 
 
 <dt>rep_checks</dt>
 <dd><p>Replication for each check.</p></dd>
+
+
+<dt>force_balance</dt>
+<dd><p>Get balanced unbalanced locations. By default <code>force_balance = TRUE</code>.</p></dd>
 
 
 <dt>seed</dt>
