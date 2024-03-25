@@ -169,9 +169,7 @@ mod_SPD_server <- function(id){
     observeEvent(toListen(), {
       if (input$owndataSPD == "Yes") {
         showModal(
-          shinyjqui::jqui_draggable(
-            entriesInfoModal_SPD()
-          )
+          entriesInfoModal_SPD()
         )
       }
     })
@@ -221,7 +219,7 @@ mod_SPD_server <- function(id){
         data_spd <- NULL
         return(list(data_spd = data_spd, treatments = treatments))
       }
-    }) %>% 
+    }) |> 
       bindEvent(input$RUN.spd)
     
     spd_inputs <- reactive({
@@ -261,7 +259,7 @@ mod_SPD_server <- function(id){
           data = data_spd
         )
       )
-    }) %>%
+    }) |>
       bindEvent(input$RUN.spd)
     
     
@@ -282,7 +280,7 @@ mod_SPD_server <- function(id){
         locationNames = spd_inputs()$site_names, 
         data = spd_inputs()$data
       )
-    }) %>% 
+    }) |> 
       bindEvent(input$RUN.spd)
     
     
@@ -412,9 +410,7 @@ mod_SPD_server <- function(id){
     observeEvent(input$Simulate.spd, {
       req(spd_reactive()$fieldBook)
       showModal(
-        shinyjqui::jqui_draggable(
-          simuModal.spd()
-        )
+        simuModal.spd()
       )
     })
     
@@ -434,9 +430,7 @@ mod_SPD_server <- function(id){
         removeModal()
       }else {
         showModal(
-          shinyjqui::jqui_draggable(
-            simuModal.spd(failed = TRUE)
-          )
+          simuModal.spd(failed = TRUE)
         )
       }
     })
@@ -485,7 +479,7 @@ mod_SPD_server <- function(id){
         trail <- as.character(valspd$trail.spd)
         label_trail <- paste(trail, ": ")
         heatmapTitle <- paste("Heatmap for ", trail)
-        new_df <- df %>%
+        new_df <- df |>
           dplyr::mutate(text = paste0("Site: ", loc, "\n", "Row: ", df$ROW, "\n", "Col: ", df$COLUMN, "\n", "Entry: ", 
                                       df$ENTRY, "\n", label_trail, round(df[,10],2)))
         w <- as.character(valspd$trail.spd)
@@ -510,9 +504,7 @@ mod_SPD_server <- function(id){
         return(p2)
       } else {
         showModal(
-          shinyjqui::jqui_draggable(
-            heatmapInfoModal_SPD()
-          )
+          heatmapInfoModal_SPD()
         )
         return(NULL)
       }

@@ -33,7 +33,7 @@ plot_iblocks_1 <- function(
   books7 <- list(NULL)
   books21 <- list(NULL)
   for (locs in loc_levels) {
-    NewBook <- x$fieldBook %>%
+    NewBook <- x$fieldBook |>
       dplyr::filter(LOCATION == locs)
     plots <- NewBook$PLOT
     w <- 1:(sizeIblocks * n_Reps)
@@ -47,7 +47,7 @@ plot_iblocks_1 <- function(
     if (stacked == "vertical") {
       #######################################################################
 
-      x$bookROWCol <- NewBook %>%
+      x$bookROWCol <- NewBook |>
         dplyr::mutate(
           ROW = z,
           COLUMN = rep(rep(1:iBlocks, each = sizeIblocks), n_Reps)
@@ -70,7 +70,7 @@ plot_iblocks_1 <- function(
       if (sizeIblocks %% 2 != 0 & sqrt(sizeIblocks) %% 1 != 0) {
         z_rows <- rep(1:(iBlocks * n_Reps), each = sizeIblocks)
 
-        x$bookROWCol <- NewBook %>%
+        x$bookROWCol <- NewBook |>
           dplyr::mutate(
             ROW = z_rows,
             COLUMN = rep(rep(1:sizeIblocks, times = iBlocks), n_Reps)
@@ -94,7 +94,7 @@ plot_iblocks_1 <- function(
       if (sizeIblocks %% 2 == 0) {
         z_rows <- rep(1:(iBlocks * n_Reps), each = sizeIblocks)
 
-        x$bookROWCol <- NewBook %>%
+        x$bookROWCol <- NewBook |>
           dplyr::mutate(
             ROW = z_rows,
             COLUMN = rep(rep(1:sizeIblocks, times = iBlocks), n_Reps)
@@ -161,7 +161,7 @@ plot_iblocks_1 <- function(
           }
           z_cols <- unlist(z_cols)
           z_cols_new <- rep(z_cols, times = r[1] * n_Reps)
-          x$bookROWCol <- NewBook %>%
+          x$bookROWCol <- NewBook |>
             dplyr::mutate(
               ROW = z_rows,
               COLUMN = z_cols_new
@@ -226,7 +226,7 @@ plot_iblocks_1 <- function(
           }
           z_cols <- unlist(z_cols)
           z_cols_new <- rep(z_cols, times = r[1] * n_Reps)
-          x$bookROWCol <- NewBook %>%
+          x$bookROWCol <- NewBook |>
             dplyr::mutate(
               ROW = z_rows,
               COLUMN = z_cols_new
@@ -290,7 +290,7 @@ plot_iblocks_1 <- function(
           }
           z_cols <- as.vector(unlist(z_cols))
           z_cols_new <- z_cols
-          x$bookROWCol <- NewBook %>%
+          x$bookROWCol <- NewBook |>
             dplyr::mutate(
               ROW = z_rows,
               COLUMN = z_cols_new
@@ -311,7 +311,7 @@ plot_iblocks_1 <- function(
       }
       ########################################################################
     } else if (stacked == "horizontal") {
-      x$bookROWCol <- NewBook %>%
+      x$bookROWCol <- NewBook |>
         dplyr::mutate(
           ROW = rep(rep(1:iBlocks, each = sizeIblocks), n_Reps),
           COLUMN = z
@@ -330,7 +330,7 @@ plot_iblocks_1 <- function(
 
 
       books21 <- list(NULL)
-      x$bookROWCol <- NewBook %>%
+      x$bookROWCol <- NewBook |>
         dplyr::mutate(
           ROW = rep(rep(1:sizeIblocks, times = iBlocks), n_Reps),
           COLUMN = rep(1:(iBlocks * n_Reps), each = sizeIblocks)
@@ -376,7 +376,7 @@ plot_iblocks_1 <- function(
             z_cols[[i]] <- c(rep(u_c[i]:v_c[i], times = s1 * iBlocks))
           }
           COLUMNS <- unlist(z_cols)
-          x$bookROWCol <- NewBook %>%
+          x$bookROWCol <- NewBook |>
             dplyr::mutate(
               ROW = ROWS,
               COLUMN = COLUMNS
@@ -416,7 +416,7 @@ plot_iblocks_1 <- function(
             z0[[j]] <- rep(c(rep(u0[j]:v0[j], times = iBlocks)), n0)
           }
           z0 <- unlist(z0)
-          x$bookROWCol <- NewBook %>%
+          x$bookROWCol <- NewBook |>
             dplyr::mutate(
               ROW = z0,
               COLUMN = rep(rep(1:nCols, each = sizeIblocks), s)
@@ -453,7 +453,7 @@ plot_iblocks_1 <- function(
             z0[[j]] <- rep(c(rep(u0[j]:v0[j], times = iBlocks)), n0)
           }
           z0 <- unlist(z0)
-          x$bookROWCol <- NewBook %>%
+          x$bookROWCol <- NewBook |>
             dplyr::mutate(
               ROW = z0,
               COLUMN = rep(rep(1:nCols, each = sizeIblocks), s)

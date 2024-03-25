@@ -171,18 +171,18 @@ do_optim <- function(
     colnames(allocation_df) <- paste0("LOC", 1:l)
     # Create a wide data frame with number of copies and average per plant
     col_sum <- base::colSums(allocation_df)
-    wide_allocation <- allocation_df %>%
+    wide_allocation <- allocation_df |>
         dplyr::mutate(
-            copies = rowSums(.),
+            copies = rowSums(dplyr::across(dplyr::everything())),
             avg = copies / l
         )
     # Create a long data frame with the allocations per location
-    long_allocation <- as.data.frame(allocation) %>%
-        dplyr::rename_with(~c("ENTRY", "LOCATION", "REPS"), dplyr::everything()) %>%  # rename columns
+    long_allocation <- as.data.frame(allocation) |>
+        dplyr::rename_with(~c("ENTRY", "LOCATION", "REPS"), dplyr::everything()) |>  # rename columns
         dplyr::mutate(
             LOCATION = gsub("B", "LOC", LOCATION),
             NAME = paste0("G-", ENTRY)
-        ) %>%  
+        ) |>  
         dplyr::select(LOCATION, ENTRY, NAME, REPS)
     # Create a data frame for the checks
     if (design != "prep") {
@@ -212,20 +212,20 @@ do_optim <- function(
     )
     # Generate the lists of entries for each location
     for (site in unique(long_allocation$LOCATION)) {
-        df_loc <- long_allocation %>% 
-            dplyr::filter(LOCATION == site, REPS > 0) %>% 
-            dplyr::mutate(ENTRY = as.numeric(ENTRY)) %>% 
-            dplyr::select(ENTRY, NAME, REPS) %>%
-            dplyr::bind_rows(df_checks) %>%
+        df_loc <- long_allocation |> 
+            dplyr::filter(LOCATION == site, REPS > 0) |> 
+            dplyr::mutate(ENTRY = as.numeric(ENTRY)) |> 
+            dplyr::select(ENTRY, NAME, REPS) |>
+            dplyr::bind_rows(df_checks) |>
             dplyr::arrange(dplyr::desc(ENTRY)) 
 
         if (design == "prep") {
-            df_loc <- df_loc %>% 
+            df_loc <- df_loc |> 
                 dplyr::arrange(dplyr::desc(REPS))
         }
 
         if (design != "prep") {
-            df_loc <- df_loc %>% 
+            df_loc <- df_loc |> 
                 dplyr::select(ENTRY, NAME)
         }
 
@@ -235,13 +235,13 @@ do_optim <- function(
         # Combine the data frames into a single data frame with a new column for the list element name
         multi_location_data <- dplyr::bind_rows(lapply(names(list_locs), function(name) {
             dplyr::mutate(list_locs[[name]], LOCATION = name)
-        })) %>% 
+        })) |> 
             dplyr::select(LOCATION, ENTRY, NAME, REPS)
     } else {
          # Combine the data frames into a single data frame with a new column for the list element name
         multi_location_data <- dplyr::bind_rows(lapply(names(list_locs), function(name) {
             dplyr::mutate(list_locs[[name]], LOCATION = name)
-        })) %>% 
+        })) |> 
             dplyr::select(LOCATION, ENTRY, NAME)
     }
     # out object with the allocation and the list of entries per location
@@ -673,24 +673,25 @@ merge_user_data <- function(
         # Merge each optimized location into the user data input
         for (LOC in locs_range) {
             iter_loc <- optim_out$list_locs[[LOC]]
-            data_input_mutated <- user_data_input %>%
-                dplyr::mutate(
-                    USER_ENTRY = ENTRY,
-                    ENTRY = vlookup_entry
-                ) %>%
-                dplyr::select(USER_ENTRY, ENTRY, NAME) %>%
-                dplyr::left_join(y = iter_loc, by = "ENTRY") %>% 
-                {
-                    if (inherits(optim_out, "MultiPrep")) {
-                        dplyr::select(.data = ., USER_ENTRY, NAME.x, REPS) %>%
-                        dplyr::arrange(dplyr::desc(REPS)) %>%
-                        dplyr::rename(ENTRY = USER_ENTRY, NAME = NAME.x)
-                    } else if (inherits(optim_out, "Sparse")) {
-                        dplyr::filter(.data = ., !is.na(NAME.y)) %>% 
-                        dplyr::select(USER_ENTRY, NAME.x) %>%
-                        dplyr::rename(ENTRY = USER_ENTRY, NAME = NAME.x)
-                    } 
-                }
+            data_input_mutated <- user_data_input |>
+              dplyr::mutate(
+                USER_ENTRY = ENTRY,
+                ENTRY = vlookup_entry
+              ) |>
+              dplyr::select(USER_ENTRY, ENTRY, NAME) |>
+              dplyr::left_join(y = iter_loc, by = "ENTRY")
+
+            if (inherits(optim_out, "MultiPrep")) {
+              data_input_mutated <- data_input_mutated |> 
+              dplyr::select(.data = ., USER_ENTRY, NAME.x, REPS) |>
+                dplyr::arrange(dplyr::desc(REPS)) |>
+                dplyr::rename(ENTRY = USER_ENTRY, NAME = NAME.x)
+            } else if (inherits(optim_out, "Sparse")) {
+              data_input_mutated <- data_input_mutated |> 
+              dplyr::filter(.data = ., !is.na(NAME.y)) |> 
+                dplyr::select(USER_ENTRY, NAME.x) |>
+                dplyr::rename(ENTRY = USER_ENTRY, NAME = NAME.x)
+            } 
             # Store the number of plots (It does not include checks)
             df_to_check <- data_input_mutated[(input_checks + 1):nrow(data_input_mutated), ]
             if (inherits(optim_out, "MultiPrep")) {

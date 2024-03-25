@@ -23,13 +23,13 @@ plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
   books5 <- list(NULL)
   books6 <- list(NULL)
   for (locs in levels(locations)) {
-    NewBook <- x$fieldBook %>%
+    NewBook <- x$fieldBook |>
       dplyr::filter(LOCATION == locs)
     plots <- NewBook$PLOT
     if (stacked == "vertical") {
       books0 <- list(NULL)
       COLUMN <- rep(1:n_TrtGen, times = n_Reps)
-      books0[[1]] <- NewBook %>% 
+      books0[[1]] <- NewBook |> 
         dplyr::mutate(ROW = rep(1:n_Reps, each = n_TrtGen),
                       COLUMN = COLUMN)
       y <- numbers::primeFactors(n_TrtGen)
@@ -42,7 +42,7 @@ plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
           s1 <- as.numeric(Y[k,][1])
           s2 <- as.numeric(Y[k,][2])
           COLUMNS <- rep(rep(1:s2, times = s1), times = n_Reps)
-          x$bookROWCol <- NewBook %>% 
+          x$bookROWCol <- NewBook |> 
             dplyr::mutate(ROW = rep(1:(s1*n_Reps), each = s2),
                           COLUMN = COLUMNS)
           df <- x$bookROWCol
@@ -71,7 +71,7 @@ plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
             z[[j]] <- c(rep(u[j]:v[j], times = s2))
           }
           z <- unlist(z)
-          x$bookROWCol <- NewBook %>%
+          x$bookROWCol <- NewBook |>
             dplyr::mutate(ROW = rep(rep(1:s2, each = s1), n_Reps),
                           COLUMN = z)
           df2 <- x$bookROWCol
@@ -88,7 +88,7 @@ plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
       } else if (length(y) == 1) {
         books3 <- list(NULL)
         ROWS <- rep(1:n_TrtGen, times = n_Reps)
-        books3[[1]] <- NewBook %>% 
+        books3[[1]] <- NewBook |> 
           dplyr::mutate(ROW = ROWS,
                         COLUMN = rep(1:n_Reps, each = n_TrtGen))
       }

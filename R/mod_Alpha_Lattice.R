@@ -198,7 +198,7 @@ mod_Alpha_Lattice_server <- function(id){
           type = "error")
         return(NULL)
       } else return(init_data_alpha())
-    }) %>%
+    }) |>
       bindEvent(input$RUN.alpha)
     
     alpha_inputs <- reactive({
@@ -234,7 +234,7 @@ mod_Alpha_Lattice_server <- function(id){
                   sites = sites,
                   site_names = site_names,
                   seed = seed))
-    }) %>%
+    }) |>
       bindEvent(input$RUN.alpha)
 
 
@@ -260,9 +260,7 @@ mod_Alpha_Lattice_server <- function(id){
     observeEvent(toListen(), {
       if (input$owndata_alpha == "Yes") {
         showModal(
-          shinyjqui::jqui_draggable(
-            entriesInfoModal_ALPHA()
-          )
+          entriesInfoModal_ALPHA()
         )
       }
     })
@@ -430,9 +428,7 @@ mod_Alpha_Lattice_server <- function(id){
       req(input$r.alpha)
       req(reactive_layoutAlpha()$fieldBookXY)
       showModal(
-        shinyjqui::jqui_draggable(
-          simuModal.alpha()
-        )
+        simuModal.alpha()
       )
     })
     
@@ -452,9 +448,7 @@ mod_Alpha_Lattice_server <- function(id){
         removeModal()
       }else {
         showModal(
-          shinyjqui::jqui_draggable(
-            simuModal.alpha(failed = TRUE)
-          )
+          simuModal.alpha(failed = TRUE)
         )
       }
     })
@@ -499,7 +493,7 @@ mod_Alpha_Lattice_server <- function(id){
         trail <- as.character(valsALPHA$trail.alpha)
         label_trail <- paste(trail, ": ")
         heatmapTitle <- paste("Heatmap for ", trail)
-        new_df <- df %>%
+        new_df <- df |>
           dplyr::mutate(text = paste0("Site: ", loc, "\n", 
                                       "Row: ", df$ROW, "\n", 
                                       "Col: ", df$COLUMN, "\n", 
@@ -528,9 +522,7 @@ mod_Alpha_Lattice_server <- function(id){
         return(p2)
       } else {
         showModal(
-          shinyjqui::jqui_draggable(
-            heatmapInfoModal_ALPHA()
-          )
+          heatmapInfoModal_ALPHA()
         )
         return(NULL)
         }

@@ -196,7 +196,7 @@ mod_RCBD_server <- function(id) {
         data_rcbd <- df
         return(list(data_rcbd = data_rcbd, treatments = nt))
       }
-    }) %>%
+    }) |>
       bindEvent(input$RUN.rcbd)
     
     rcbd_inputs <- reactive({
@@ -230,7 +230,7 @@ mod_RCBD_server <- function(id) {
         continuous = continuous,
         seed = seed)
         )
-    }) %>%
+    }) |>
       bindEvent(input$RUN.rcbd)
     
     
@@ -257,9 +257,7 @@ mod_RCBD_server <- function(id) {
     observeEvent(toListen(), {
       if (input$owndatarcbd == "Yes") {
         showModal(
-          shinyjqui::jqui_draggable(
-            entriesInfoModal_RCBD()
-          )
+          entriesInfoModal_RCBD()
         )
       }
     })
@@ -284,7 +282,7 @@ mod_RCBD_server <- function(id) {
         data = get_data_rcbd()$data_rcbd
       )
 
-    })  %>%
+    })  |>
       bindEvent(input$RUN.rcbd)
     
     output$well_panel_layout_RCBD <- renderUI({
@@ -424,9 +422,7 @@ mod_RCBD_server <- function(id) {
     observeEvent(input$Simulate.rcbd, {
       req(RCBD_reactive()$fieldBook)
       showModal(
-        shinyjqui::jqui_draggable(
-          simuModal.rcbd()
-        )
+        simuModal.rcbd()
       )
     })
     
@@ -446,9 +442,7 @@ mod_RCBD_server <- function(id) {
         removeModal()
       }else {
         showModal(
-          shinyjqui::jqui_draggable(
-            simuModal.rcbd(failed = TRUE)
-          )
+          simuModal.rcbd(failed = TRUE)
         )
       }
     })
@@ -500,7 +494,7 @@ mod_RCBD_server <- function(id) {
         trail <- as.character(valsRCBD$trail.rcbd)
         label_trail <- paste(trail, ": ")
         heatmapTitle <- paste("Heatmap for ", trail)
-        new_df <- df %>%
+        new_df <- df |>
           dplyr::mutate(text = paste0("Site: ", loc, "\n", 
                                       "Row: ", df$ROW, "\n", 
                                       "Col: ", df$COLUMN, "\n", 
@@ -533,9 +527,7 @@ mod_RCBD_server <- function(id) {
         return(p2)
       } else {
         showModal(
-          shinyjqui::jqui_draggable(
-            heatmapInfoModal_RCBD()
-          )
+          heatmapInfoModal_RCBD()
         )
         return(NULL)
       }

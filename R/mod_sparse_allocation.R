@@ -457,7 +457,7 @@ mod_sparse_allocation_server <- function(id){
                 )
             )
         }
-    }) %>%
+    }) |>
         bindEvent(input$sparse_run)
     
     sparse_setup <- reactive({
@@ -501,7 +501,7 @@ mod_sparse_allocation_server <- function(id){
           )
           return(NULL)
         } else return(optim_out)
-    }) %>%
+    }) |>
         bindEvent(input$sparse_run)
     
     getChecks <- eventReactive(input$sparse_run, {
@@ -593,19 +593,20 @@ mod_sparse_allocation_server <- function(id){
         data_without_checks <- get_sparse_data()$data_without_checks
         sparse_lines <- single_inputs()$sparse_lines
 
-        gen_names <- data_without_checks %>%
-            dplyr::mutate(sparse_entry = 1:sparse_lines) %>%
-            dplyr::arrange(sparse_entry) %>%
-            dplyr::select(NAME) %>%
+        gen_names <- data_without_checks |>
+            dplyr::mutate(sparse_entry = 1:sparse_lines) |>
+            dplyr::arrange(sparse_entry) |>
+            dplyr::select(NAME) |>
             dplyr::pull()
 
         locs <- single_inputs()$sites
         df <- as.data.frame(sparse_setup()$allocation)
-        df <- df %>% 
-            dplyr::mutate(
-                Copies = rowSums(.)
-            ) %>%
-            dplyr::bind_rows(colSums(.))
+        df <- df |> 
+          dplyr::mutate(
+            Copies = rowSums(dplyr::across(dplyr::everything()))
+          ) 
+        df_sumCols <- colSums(df) 
+        df <- dplyr::bind_rows(df, df_sumCols) 
         rownames(df) <- c(gen_names, "Total")
         DT::datatable(
           df,
@@ -638,7 +639,7 @@ mod_sparse_allocation_server <- function(id){
         df <- dplyr::bind_rows(
           lapply(names(list_locs), function(name) {
             dplyr::mutate(list_locs[[name]], LOCATION = name)
-          })) %>% 
+          })) |> 
           dplyr::select(LOCATION, ENTRY, NAME)
       }
       df$LOCATION <- as.factor(df$LOCATION)
@@ -692,9 +693,7 @@ mod_sparse_allocation_server <- function(id){
     observeEvent(toListen(), {
       if (input$input_sparse_data == "Yes" && kindExpt_single == "SUDC") {
         showModal(
-          shinyjqui::jqui_draggable(
-            entriesInfoModal_SUDC()
-          )
+          entriesInfoModal_SUDC()
         )
       }
     })
@@ -869,7 +868,7 @@ mod_sparse_allocation_server <- function(id){
                         buttons = c('copy', 'excel'),
                         lengthMenu = list(c(10,25,50,-1),
                                             c(10,25,50,"All")))
-      ) %>%
+      ) |>
         DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
                         backgroundColor = DT::styleEqual(c(sparse_checks),
                                                           colores[1:len_checks]))
@@ -1066,9 +1065,7 @@ mod_sparse_allocation_server <- function(id){
     observeEvent(input$sparse_simulate, {
       req(export_diagonal_design()$final_expt)
       showModal(
-        shinyjqui::jqui_draggable(
-          simuModal_DIAG()
-        )
+        simuModal_DIAG()
       )
     })
     
@@ -1090,9 +1087,7 @@ mod_sparse_allocation_server <- function(id){
         removeModal()
       }else {
         showModal(
-          shinyjqui::jqui_draggable(
-            simuModal_DIAG(failed = TRUE)
-          )
+          simuModal_DIAG(failed = TRUE)
         )
       }
     })

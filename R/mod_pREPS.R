@@ -422,9 +422,7 @@ mod_pREPS_server <- function(id){
     observeEvent(toListen(), {
       if (input$owndataPREPS == 'Yes'){
         showModal(
-          shinyjqui::jqui_draggable(
-            entriesInfoModal_pREP()
-          )
+          entriesInfoModal_pREP()
         )
       }
     })
@@ -483,7 +481,7 @@ mod_pREPS_server <- function(id){
             data = gen.list 
           )
       })
-    }) %>% 
+    }) |> 
       bindEvent(input$get_random_prep)
 
     output$summary_prep <- renderPrint({
@@ -514,7 +512,7 @@ mod_pREPS_server <- function(id){
                       dom = 't',
                       scrollX = TRUE,
                       fixedColumns = TRUE
-                    )) %>%
+                    )) |>
         DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
                         backgroundColor = DT::styleEqual(1, "gray"))
     })
@@ -551,7 +549,7 @@ mod_pREPS_server <- function(id){
                      filter = list( position = 'top', clear = FALSE, plain =TRUE ),
                      buttons = c('copy', 'excel'),
                      lengthMenu = list(c(10,25,50,-1),
-                                       c(10,25,50,"All")))) %>%
+                                       c(10,25,50,"All")))) |>
         DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
                     backgroundColor = DT::styleEqual(c(checks), # c(checks,gens)
                                                  c(rep(colores[3], len_checks)) # , rep('yellow', length(gens))
@@ -637,9 +635,7 @@ mod_pREPS_server <- function(id){
       test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
       if (test) {
         showModal(
-          shinyjqui::jqui_draggable(
-            simuModal.PREP()
-          )
+          simuModal.PREP()
         )
       }
     })
@@ -662,9 +658,7 @@ mod_pREPS_server <- function(id){
         removeModal()
       }else {
         showModal(
-          shinyjqui::jqui_draggable(
-            simuModal.PREP(failed = TRUE)
-          )
+          simuModal.PREP(failed = TRUE)
         )
       }
     })

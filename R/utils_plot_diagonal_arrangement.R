@@ -6,8 +6,8 @@ plot_diagonal_arrangement <- function(x, l) {
     
     site_levels <- levels(sites)
     
-    loc_field_book <- fieldbook %>% 
-        dplyr::filter(LOCATION == site_levels[l]) %>% 
+    loc_field_book <- fieldbook |> 
+        dplyr::filter(LOCATION == site_levels[l]) |> 
         as.data.frame()
     
     cols <- max(as.numeric(loc_field_book$COLUMN))
@@ -44,8 +44,8 @@ plot_prep <- function(x, l) {
     
     site_levels <- levels(sites)
     
-    loc_field_book <- fieldbook %>% 
-        dplyr::filter(LOCATION == site_levels[l]) %>% 
+    loc_field_book <- fieldbook |> 
+        dplyr::filter(LOCATION == site_levels[l]) |> 
         as.data.frame()
     
     cols <- max(as.numeric(loc_field_book$COLUMN))
@@ -81,8 +81,8 @@ plot_optim <- function(x, l) {
     
     site_levels <- levels(sites)
     
-    loc_field_book <- fieldbook %>% 
-        dplyr::filter(LOCATION == site_levels[l]) %>% 
+    loc_field_book <- fieldbook |> 
+        dplyr::filter(LOCATION == site_levels[l]) |> 
         as.data.frame()
     
     cols <- max(as.numeric(loc_field_book$COLUMN))
@@ -116,8 +116,8 @@ plot_augmented_RCBD <- function(x, l) {
     
     site_levels <- levels(sites)
     
-    loc_field_book <- fieldbook %>% 
-        dplyr::filter(LOCATION == site_levels[l]) %>% 
+    loc_field_book <- fieldbook |> 
+        dplyr::filter(LOCATION == site_levels[l]) |> 
         as.data.frame()
     
     cols <- max(as.numeric(loc_field_book$COLUMN))

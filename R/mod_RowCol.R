@@ -169,9 +169,7 @@ mod_RowCol_server <- function(id){
     observeEvent(toListen(), {
       if (input$owndataRCD == "Yes") {
         showModal(
-          shinyjqui::jqui_draggable(
-            entriesInfoModal_RCD()
-          )
+          entriesInfoModal_RCD()
         )
       }
     })
@@ -265,7 +263,7 @@ mod_RowCol_server <- function(id){
           type = "error")
         return(NULL)
       } else return(init_data_rcd())
-    }) %>%
+    }) |>
       bindEvent(input$RUN.rcd)
     
     
@@ -301,7 +299,7 @@ mod_RowCol_server <- function(id){
                   sites = sites,
                   site_names = site_names,
                   seed = seed))
-    }) %>%
+    }) |>
       bindEvent(input$RUN.rcd)
     
     RowCol_reactive <- reactive({
@@ -332,7 +330,7 @@ mod_RowCol_server <- function(id){
         data = data_rcd
       )
       
-    }) %>%
+    }) |>
       bindEvent(input$RUN.rcd)
     
     upDateSites <- reactive({
@@ -340,7 +338,7 @@ mod_RowCol_server <- function(id){
       locs <- as.numeric(input$l.rcd)
       sites <- 1:locs
       return(list(sites = sites))
-    }) %>%
+    }) |>
       bindEvent(input$RUN.rcd)
     
     output$well_panel_layout_ROWCOL <- renderUI({
@@ -471,9 +469,7 @@ mod_RowCol_server <- function(id){
     observeEvent(input$Simulate.RowCol, {
       req(RowCol_reactive()$fieldBook)
       showModal(
-        shinyjqui::jqui_draggable(
-          simuModal.RowCol()
-        )
+        simuModal.RowCol()
       )
     })
     
@@ -494,9 +490,7 @@ mod_RowCol_server <- function(id){
         removeModal()
       }else {
         showModal(
-          shinyjqui::jqui_draggable(
-            simuModal.RowCol(failed = TRUE)
-          )
+          simuModal.RowCol(failed = TRUE)
         )
       }
     })
@@ -550,7 +544,7 @@ mod_RowCol_server <- function(id){
         trail <- as.character(valsRowColD$trail.RowCol)
         label_trail <- paste(trail, ": ")
         heatmapTitle <- paste("Heatmap for ", trail)
-        new_df <- df %>%
+        new_df <- df |>
           dplyr::mutate(text = paste0("Site: ", loc, "\n", 
                                       "Row: ", df$ROW, "\n", 
                                       "Col: ", df$COLUMN, "\n", 
@@ -578,9 +572,7 @@ mod_RowCol_server <- function(id){
         return(p2)
       } else {
         showModal(
-          shinyjqui::jqui_draggable(
-            heatmapInfoModal_RCD()
-          )
+          heatmapInfoModal_RCD()
         )
         return(NULL)
       }

@@ -192,7 +192,7 @@ swap_pairs <- function(X, starting_dist = 3, stop_iter = 50) {
               stop("The swap function changed the frequency of some integers.")
             }
             frequency_rows <- as.data.frame(search_matrix_values(X = X, values_search = genos))
-            df <- frequency_rows %>% 
+            df <- frequency_rows |> 
                 dplyr::filter(Times >= 2)
             rows_incidence[w - 1] <- nrow(df)
             designs[[w]] <- X
@@ -209,7 +209,7 @@ swap_pairs <- function(X, starting_dist = 3, stop_iter = 50) {
         pairwise_distance <- pairs_distance(optim_design)
         min_distance = min(pairwise_distance$DIST)
         frequency_rows <- as.data.frame(search_matrix_values(X = optim_design, values_search = genos))
-        df <- frequency_rows %>% 
+        df <- frequency_rows |> 
             dplyr::filter(Times >= 2)
         rows_incidence[1] <- nrow(df)
     }

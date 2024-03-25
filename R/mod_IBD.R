@@ -174,9 +174,7 @@ mod_IBD_server <- function(id) {
     observeEvent(toListen(), {
       if (input$owndataibd == "Yes") {
         showModal(
-          shinyjqui::jqui_draggable(
-            entriesInfoModal_IBD()
-          )
+          entriesInfoModal_IBD()
         )
       }
     })
@@ -268,7 +266,7 @@ mod_IBD_server <- function(id) {
           type = "error")
         return(NULL)
       } else return(init_data_ibd())
-    }) %>%
+    }) |>
       bindEvent(input$RUN.ibd)
     
     ibd_inputs <- reactive({
@@ -308,7 +306,7 @@ mod_IBD_server <- function(id) {
         sites = sites,
         site_names = site_names,
         seed = seed))
-    }) %>%
+    }) |>
       bindEvent(input$RUN.ibd)
     
     
@@ -338,7 +336,7 @@ mod_IBD_server <- function(id) {
         data = data_ibd
       ) 
       
-    }) %>%
+    }) |>
       bindEvent(input$RUN.ibd)
     
     upDateSites <- eventReactive(input$RUN.ibd, {
@@ -475,9 +473,7 @@ mod_IBD_server <- function(id) {
     observeEvent(input$Simulate.ibd, {
       req(IBD_reactive()$fieldBook)
       showModal(
-        shinyjqui::jqui_draggable(
-          simuModal.ibd()
-        )
+        simuModal.ibd()
       )
     })
     
@@ -497,9 +493,7 @@ mod_IBD_server <- function(id) {
         removeModal()
       }else {
         showModal(
-          shinyjqui::jqui_draggable(
-            simuModal.ibd(failed = TRUE)
-          )
+          simuModal.ibd(failed = TRUE)
         )
       }
     })
@@ -547,7 +541,7 @@ mod_IBD_server <- function(id) {
         trail <- as.character(valsIBD$trail.ibd)
         label_trail <- paste(trail, ": ")
         heatmapTitle <- paste("Heatmap for ", trail)
-        new_df <- df %>%
+        new_df <- df |>
           dplyr::mutate(text = paste0("Site: ",
                                       loc, "\n", "Row: ", 
                                       df$ROW, "\n", "Col: ", 
@@ -581,9 +575,7 @@ mod_IBD_server <- function(id) {
         return(p2)
       } else {
         showModal(
-          shinyjqui::jqui_draggable(
-            heatmapInfoModal_IBD()
-          )
+          heatmapInfoModal_IBD()
         )
         return(NULL)
       }

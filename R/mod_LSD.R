@@ -166,9 +166,7 @@ mod_LSD_server <- function(id){
     observeEvent(toListen(), {
       if (input$owndataLSD == "Yes") {
         showModal(
-          shinyjqui::jqui_draggable(
-            entriesInfoModal_LSD()
-          )
+          entriesInfoModal_LSD()
         )
       }
     })
@@ -270,7 +268,7 @@ mod_LSD_server <- function(id){
         data = data.lsd,
         seed = seed.number.lsd)
       )
-    }) %>%
+    }) |>
       bindEvent(input$RUN.lsd)
     
     latinsquare_reactive <- reactive({
@@ -289,7 +287,7 @@ mod_LSD_server <- function(id){
         data = lsd_inputs()$data
       )
       
-    }) %>% 
+    }) |> 
       bindEvent(input$RUN.lsd)
     
     
@@ -415,9 +413,7 @@ mod_LSD_server <- function(id){
     observeEvent(input$Simulate.lsd, {
       req(latinsquare_reactive()$fieldBook)
       showModal(
-        shinyjqui::jqui_draggable(
-          simuModal.lsd()
-        )
+        simuModal.lsd()
       )
     })
     
@@ -437,9 +433,7 @@ mod_LSD_server <- function(id){
         removeModal()
       }else {
         showModal(
-          shinyjqui::jqui_draggable(
-            simuModal.lsd(failed = TRUE)
-          )
+          simuModal.lsd(failed = TRUE)
         )
       }
     })
@@ -487,7 +481,7 @@ mod_LSD_server <- function(id){
         trail <- as.character(valsLSD$trail.lsd)
         label_trail <- paste(trail, ": ")
         heatmapTitle <- paste("Heatmap for ", trail)
-        new_df <- df %>%
+        new_df <- df |>
           dplyr::mutate(text = paste0("Site: ", loc, "\n", 
                                       "Row: ", df$ROW, "\n", 
                                       "Col: ", df$COLUMN, "\n", 
@@ -522,9 +516,7 @@ mod_LSD_server <- function(id){
         return(p2)
       } else {
         showModal(
-          shinyjqui::jqui_draggable(
-            heatmapInfoModal_LSD()
-          )
+          heatmapInfoModal_LSD()
         )
         return(NULL)
       }

@@ -20,7 +20,7 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, layout = 1,
   books1 <- list(NULL)
   
   for (locs in levels(locations)) {
-    NewBook <- x$fieldBook %>%
+    NewBook <- x$fieldBook |>
       dplyr::filter(LOCATION == locs)
     plots <- NewBook$PLOT
     if (x$infoDesign$id_design == 9) {
@@ -51,7 +51,7 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, layout = 1,
     }
     
     if (stacked == "vertical") {
-      df1 <- NewBook %>% 
+      df1 <- NewBook |> 
         dplyr::mutate(NewROW = NewROWS1,
                       NewCOLUMNS = NewCOLUMNS1)
       
@@ -70,7 +70,7 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, layout = 1,
         z[[j]] <- c(rep(u[j]:v[j], times = rsRep))
       }
       z <- unlist(z)
-      df2 <- NewBook %>% 
+      df2 <- NewBook |> 
         dplyr::mutate(NewROW = NewROWS2,
                       NewCOLUMNS = z )
       nCols <- max(df2$NewCOLUMNS)

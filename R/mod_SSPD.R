@@ -198,9 +198,7 @@ mod_SSPD_server <- function(id){
     observeEvent(toListen(), {
       if (input$owndataSSPD == "Yes") {
         showModal(
-          shinyjqui::jqui_draggable(
-            entriesInfoModal_SSPD()
-          )
+          entriesInfoModal_SSPD()
         )
       }
     })
@@ -252,7 +250,7 @@ mod_SSPD_server <- function(id){
         data_spd <- NULL
         return(list(data_spd = data_spd, treatments = treatments))
       }
-    }) %>% 
+    }) |> 
       bindEvent(input$RUN.sspd)
     
     sspd_inputs <- reactive({
@@ -293,7 +291,7 @@ mod_SSPD_server <- function(id){
           data = data_sspd
         )
       )
-    }) %>%
+    }) |>
       bindEvent(input$RUN.sspd)
     
     
@@ -316,7 +314,7 @@ mod_SSPD_server <- function(id){
         data = sspd_inputs()$data
       )
       
-    }) %>% 
+    }) |> 
       bindEvent(input$RUN.sspd)
   
     output$well_panel_layout_SSPD <- renderUI({
@@ -441,9 +439,7 @@ mod_SSPD_server <- function(id){
     observeEvent(input$Simulate.sspd, {
       req(sspd_reactive()$fieldBook)
       showModal(
-        shinyjqui::jqui_draggable(
-          simuModal.sspd()
-        )
+        simuModal.sspd()
       )
     })
     
@@ -463,9 +459,7 @@ mod_SSPD_server <- function(id){
         removeModal()
       }else {
         showModal(
-          shinyjqui::jqui_draggable(
-            simuModal.sspd(failed = TRUE)
-          )
+          simuModal.sspd(failed = TRUE)
         )
       }
     })
@@ -517,7 +511,7 @@ mod_SSPD_server <- function(id){
         trail <- as.character(valsspd$Trial.sspd)
         label_trail <- paste(trail, ": ")
         heatmapTitle <- paste("Heatmap for ", trail)
-        new_df <- df %>%
+        new_df <- df |>
           dplyr::mutate(text = paste0("Site: ", loc, "\n", 
                                       "Row: ", df$ROW, "\n", 
                                       "Col: ", df$COLUMN, "\n", 
@@ -548,9 +542,7 @@ mod_SSPD_server <- function(id){
         return(p2)
       } else {
         showModal(
-          shinyjqui::jqui_draggable(
-            heatmapInfoModal_SSPD()
-          )
+          heatmapInfoModal_SSPD()
         )
         return(NULL)
       }

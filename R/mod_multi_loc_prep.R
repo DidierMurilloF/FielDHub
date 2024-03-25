@@ -463,7 +463,7 @@ mod_multi_loc_preps_server <- function(id){
                 data_without_checks = data_without_checks
                 )
             )
-    }) %>%
+    }) |>
         bindEvent(input$run_prep)
 
     setup_optim_prep <- reactive({
@@ -538,7 +538,7 @@ mod_multi_loc_preps_server <- function(id){
           )
           return(NULL)
         } else return(optim_out)
-    }) %>%
+    }) |>
         bindEvent(input$run_prep)
 
     list_input_plots <- eventReactive(input$run_prep, {
@@ -650,9 +650,7 @@ mod_multi_loc_preps_server <- function(id){
     observeEvent(toListen(), {
       if (input$multi_prep_data == 'Yes'){
         showModal(
-          shinyjqui::jqui_draggable(
-            info_modal_multi_prep()
-          )
+          info_modal_multi_prep()
         )
       }
     })
@@ -721,9 +719,7 @@ mod_multi_loc_preps_server <- function(id){
 
     observeEvent(input$multi_dimension_button, {
       showModal(
-        shinyjqui::jqui_draggable(
-            multi_dimension_modal()
-          )
+        multi_dimension_modal()
       )
     })
 
@@ -790,20 +786,21 @@ mod_multi_loc_preps_server <- function(id){
         data_without_checks <- get_multi_loc_prep()$data_without_checks
         prep_lines <- prep_inputs()$prep_lines
 
-        gen_names <- data_without_checks %>%
-            dplyr::mutate(sparse_entry = 1:prep_lines) %>%
-            dplyr::arrange(sparse_entry) %>%
-            dplyr::select(NAME) %>%
+        gen_names <- data_without_checks |>
+            dplyr::mutate(sparse_entry = 1:prep_lines) |>
+            dplyr::arrange(sparse_entry) |>
+            dplyr::select(NAME) |>
             dplyr::pull()
 
         locs <- prep_inputs()$sites
         df <- as.data.frame(setup_optim_prep()$allocation)
-        df <- df %>% 
+        df <- df |> 
             dplyr::mutate(
-                Copies = rowSums(.),
+                Copies = rowSums(dplyr::across(dplyr::everything())),
                 Avg = round(Copies / locs, 1)
-            ) %>%
-            dplyr::bind_rows(colSums(.))
+            ) 
+        df_sumCols <- colSums(df) 
+        df <- dplyr::bind_rows(df, df_sumCols) 
         rownames(df) <- c(gen_names, "Total")
         df[nrow(df), ncol(df)] <- NA
         DT::datatable(   
@@ -836,7 +833,7 @@ mod_multi_loc_preps_server <- function(id){
             df <- dplyr::bind_rows(
                 lapply(names(list_locs), function(name) {
                     dplyr::mutate(list_locs[[name]], LOCATION = name)
-            })) %>% 
+            })) |> 
                 dplyr::select(LOCATION, ENTRY, NAME, REPS)
         }
         df$LOCATION <- as.factor(df$LOCATION)
@@ -891,7 +888,7 @@ mod_multi_loc_preps_server <- function(id){
             )
         })
         return(locations_preps)
-    }) %>% 
+    }) |> 
       bindEvent(input$get_random_prep)
     
      user_site_selection <- reactive({
@@ -928,7 +925,7 @@ mod_multi_loc_preps_server <- function(id){
             filter = list( position = 'top', clear = FALSE, plain =TRUE ),
             buttons = c('copy', 'excel'),
             lengthMenu = list(c(10,25,50,-1),
-                            c(10,25,50,"All")))) %>%
+                            c(10,25,50,"All")))) |>
         DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
                     backgroundColor = DT::styleEqual(c(checks),
                                                  c(rep(colores[3], len_checks))
@@ -1016,9 +1013,7 @@ mod_multi_loc_preps_server <- function(id){
       test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
       if (test) {
         showModal(
-          shinyjqui::jqui_draggable(
-            simuModal.PREP()
-          )
+          simuModal.PREP()
         )
       }
     })
@@ -1041,9 +1036,7 @@ mod_multi_loc_preps_server <- function(id){
         removeModal()
       }else {
         showModal(
-          shinyjqui::jqui_draggable(
-            simuModal.PREP(failed = TRUE)
-          )
+          simuModal.PREP(failed = TRUE)
         )
       }
     })

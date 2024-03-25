@@ -193,15 +193,15 @@ merged_list_locs <- setNames(
 locs_range <- 1:locs
 for (LOC in locs_range) {
   iter_loc <- optim_out$list_locs[[LOC]]
-  data_input_mutated <- user_data_input %>%
+  data_input_mutated <- user_data_input |>
     dplyr::mutate(
       USER_ENTRY = ENTRY,
       ENTRY = vlookUp_entry
-    ) %>%
-    dplyr::select(USER_ENTRY, ENTRY, NAME) %>%
-    dplyr::left_join(y = iter_loc, by = "ENTRY") %>%
-    dplyr::select(.data = ., USER_ENTRY, NAME.x, REPS) %>%
-    dplyr::arrange(dplyr::desc(REPS)) %>%
+    ) |>
+    dplyr::select(USER_ENTRY, ENTRY, NAME) |>
+    dplyr::left_join(y = iter_loc, by = "ENTRY") |>
+    dplyr::select(.data = ., USER_ENTRY, NAME.x, REPS) |>
+    dplyr::arrange(dplyr::desc(REPS)) |>
     dplyr::rename(ENTRY = USER_ENTRY, NAME = NAME.x)
   size_location[LOC] <- sum(data_input_mutated$REPS)
   merged_list_locs[[LOC]] <- data_input_mutated
@@ -248,15 +248,15 @@ merged_list_locs <- setNames(
 locs_range <- 1:locs
 for (LOC in locs_range) {
   iter_loc <- optim_out$list_locs[[LOC]]
-  data_input_mutated <- user_data_input %>%
+  data_input_mutated <- user_data_input |>
     dplyr::mutate(
       USER_ENTRY = ENTRY,
       ENTRY = vlookUp_entry
-    ) %>%
-    dplyr::select(USER_ENTRY, ENTRY, NAME) %>%
-    dplyr::left_join(y = iter_loc, by = "ENTRY") %>%
-    dplyr::filter(!is.na(NAME.y)) %>% 
-    dplyr::select(USER_ENTRY, NAME.x) %>%
+    ) |>
+    dplyr::select(USER_ENTRY, ENTRY, NAME) |>
+    dplyr::left_join(y = iter_loc, by = "ENTRY") |>
+    dplyr::filter(!is.na(NAME.y)) |> 
+    dplyr::select(USER_ENTRY, NAME.x) |>
     dplyr::rename(ENTRY = USER_ENTRY, NAME = NAME.x)
     # Store the number of plots (It does not include checks)
     df_to_check <- data_input_mutated[(input_checks + 1):nrow(data_input_mutated), ]

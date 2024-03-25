@@ -19,7 +19,6 @@ knitr::opts_chunk$set(
 
 ```{r, echo = FALSE}
 library(FielDHub)
-library(magrittr)
 library(knitr)
 library(kableExtra)
 ```
@@ -83,8 +82,8 @@ allocation <- data.frame(
 ```
 
 ```{r, echo = FALSE}
-allocation %>%
-  kbl() %>%
+allocation |>
+  kbl() |>
   kable_styling()
 ```
 
@@ -136,8 +135,8 @@ df <- data.frame(ENTRY,NAME)
 ```
 
 ```{r, echo = FALSE, results='asis'}
-df %>%
-  kbl() %>%
+df |>
+  kbl() |>
   kable_styling()
 ```
 

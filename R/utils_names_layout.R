@@ -278,7 +278,7 @@ plot_CRD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, layout = 1,
   books0 <- list(NULL)
   books1 <- list(NULL)
   for (locs in levels(locations)) {
-    NewBook <- x$fieldBook %>%
+    NewBook <- x$fieldBook |>
       dplyr::filter(LOCATION == locs)
     
     cols <- rep(1:n_TrtGen, times = n_Reps)
@@ -294,7 +294,7 @@ plot_CRD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, layout = 1,
     if (planter == "serpentine") {
       COLUMN <- COLUMN_serp
     } else COLUMN <- rep(1:n_TrtGen, times = n_Reps)
-    books0[[1]] <- NewBook %>% 
+    books0[[1]] <- NewBook |> 
       dplyr::mutate(ROW = rep(1:n_Reps, each = n_TrtGen),
                     COLUMN = COLUMN)
     cols <- rep(1:n_Reps, times = n_TrtGen)
@@ -310,7 +310,7 @@ plot_CRD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, layout = 1,
     if (planter == "serpentine") {
       COLUMN <- COLUMN_serp
     } else COLUMN <- rep(1:n_Reps, times = n_TrtGen)
-    books1[[1]] <- NewBook %>% 
+    books1[[1]] <- NewBook |> 
       dplyr::mutate(ROW = rep(1:n_TrtGen, each = n_Reps),
                     COLUMN = COLUMN)
     books_crd <- c(books0, books1)
