@@ -336,7 +336,7 @@ random_checks <- function(dt = NULL, d_checks = NULL, p = NULL, percent = NULL,
     }
     
     if (stacked == "By Column") {
-      w_map_split <- turner::matrix_to_blocks(w_map, 
+      w_map_split <- split_matrix_into_blocks(w_map, 
                                               blocks = my_col_sets,
                                               byrow = FALSE)
       Total_checks <- numeric()                                                              
@@ -365,7 +365,7 @@ random_checks <- function(dt = NULL, d_checks = NULL, p = NULL, percent = NULL,
       w_map[w_map == 1] <- unlist(rand_checks)
       col_checks <- ifelse(w_map != 0, w_map, 0) 
     } else if (stacked == "By Row") {
-      w_map_split <- turner::matrix_to_blocks(w_map, 
+      w_map_split <- split_matrix_into_blocks(w_map, 
                                               blocks = my_row_sets, 
                                               byrow = TRUE)
       Total_checks <- numeric()                                                              

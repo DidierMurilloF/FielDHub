@@ -19,7 +19,7 @@ get_random <- function(n_rows = NULL,
   if ("Filler" %in% my_split_r) Fillers <- TRUE else Fillers <- FALSE
     if (!is.null(row_sets)) {
       if (Multi.Fillers == FALSE){
-        li_my_split_r <- turner::matrix_to_blocks(my_split_r, 
+        li_my_split_r <- split_matrix_into_blocks(my_split_r, 
                                                   rev(row_sets), 
                                                   byrow = TRUE)
         li_my_split_r <- rev(li_my_split_r)
@@ -49,7 +49,7 @@ get_random <- function(n_rows = NULL,
                                                 data_entry$BLOCK == i))
         }
         target <- rep(LETTERS[1:length(data_dim_each_block)], data_dim_each_block)
-        W_SPLIT <- turner::matrix_to_blocks(my_split_r, 
+        W_SPLIT <- split_matrix_into_blocks(my_split_r, 
                                             blocks = rev(row_sets), 
                                             byrow = TRUE)
         W_SPLIT <- rev(W_SPLIT)
@@ -178,7 +178,7 @@ get_random <- function(n_rows = NULL,
             s <- cuts_max[i]
           }
           row_sets <- new_r_sets
-          W_SPLIT <- turner::matrix_to_blocks(my_split_r, 
+          W_SPLIT <- split_matrix_into_blocks(my_split_r, 
                                               blocks = rev(row_sets), 
                                               byrow = TRUE)
           W_SPLIT <- rev(W_SPLIT)

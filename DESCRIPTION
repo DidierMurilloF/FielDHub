@@ -39,7 +39,7 @@ Authors@R:
 Description: A shiny design of experiments (DOE) app that aids in the creation of traditional, 
  un-replicated, augmented and partially-replicated designs applied to agriculture, 
  plant breeding, forestry, animal and biological sciences.
-Depends: R (>= 3.6.0)
+Depends: R (>= 4.1.0)
 License: MIT + file LICENSE
 Imports: 
     config,
@@ -48,7 +48,6 @@ Imports:
     htmltools,
     DT,
     shinythemes,
-    turner,
     dplyr,
     shinyjqui,
     numbers,
