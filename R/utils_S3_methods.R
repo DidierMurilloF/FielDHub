@@ -693,7 +693,7 @@ plot.FielDHub <- function(x, ...) {
       )
       class(out) <- "fieldLayout"
       print(x = out)
-      return(invisible(list(field_book = out$field_book)))
+      return(invisible(list(p = out$layout, field_book = out$field_book)))
     }
   } else stop("x is missing!")
 }
