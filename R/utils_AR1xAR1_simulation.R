@@ -42,7 +42,7 @@ AR1xAR1_simulation <- function(nrows = NULL, ncols = NULL, ROX = NULL,
   outOrder$ROW <- as.factor(outOrder$ROW)
   outOrder$COLUMN <- as.factor(outOrder$COLUMN)
   label_trail <- paste(trail, ": ")
-  new_outOrder <- outOrder %>%
+  new_outOrder <- outOrder |>
     dplyr::mutate(text = paste0("Row: ", outOrder$ROW, "\n", 
                                 "Col: ", outOrder$COLUMN, "\n", 
                                 "Entry: ", outOrder$ENTRY, "\n", 

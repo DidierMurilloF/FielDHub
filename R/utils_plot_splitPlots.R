@@ -22,7 +22,7 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
   books5 <- list(NULL)
   books6 <- list(NULL)
   for (locs in levels(locations)) {
-    NewBook <- x$fieldBook %>%
+    NewBook <- x$fieldBook |>
       dplyr::filter(LOCATION == locs)
     plots <- NewBook$PLOT
     w <- 1:(sizeIblocks*n_Reps)
@@ -34,7 +34,7 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
     }
     z <- unlist(z)
     if (stacked == "vertical") {
-      x$bookROWCol <- NewBook %>% 
+      x$bookROWCol <- NewBook |> 
         dplyr::mutate(ROW = z,
                       COLUMN = rep(rep(1:iBlocks, each = sizeIblocks), n_Reps))
       df0 <- x$bookROWCol
@@ -89,7 +89,7 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
           }
           z_cols <- unlist(z_cols)
           z_cols_new <- rep(z_cols, times = r[1]*n_Reps)
-          x$bookROWCol <- NewBook %>%
+          x$bookROWCol <- NewBook |>
             dplyr::mutate(ROW = z_rows,
                           COLUMN = z_cols_new)
           df <- x$bookROWCol
@@ -146,7 +146,7 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
           }
           z_cols <- unlist(z_cols)
           z_cols_new <- rep(z_cols, times = r[1]*n_Reps)
-          x$bookROWCol <- NewBook %>%
+          x$bookROWCol <- NewBook |>
             dplyr::mutate(ROW = z_rows,
                           COLUMN = z_cols_new)
           df <- x$bookROWCol
@@ -203,7 +203,7 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
           }
           z_cols <- as.vector(unlist(z_cols))
           z_cols_new <- z_cols
-          x$bookROWCol <- NewBook %>%
+          x$bookROWCol <- NewBook |>
             dplyr::mutate(ROW = z_rows,
                           COLUMN = z_cols_new)
           df <- x$bookROWCol
@@ -216,7 +216,7 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
         }
       }
     } else if (stacked == "horizontal") {
-      x$bookROWCol <- NewBook %>%
+      x$bookROWCol <- NewBook |>
         dplyr::mutate(ROW = rep(rep(1:iBlocks, each = sizeIblocks), n_Reps),
                       COLUMN = z)
       df4 <- x$bookROWCol
@@ -247,7 +247,7 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
             z0[[j]] <- rep(c(rep(u0[j]:v0[j], times = iBlocks)), n0)
           }
           z0 <- unlist(z0)
-          x$bookROWCol <- NewBook %>%
+          x$bookROWCol <- NewBook |>
             dplyr::mutate(ROW = z0,
                           COLUMN = rep(rep(1:nCols, each = sizeIblocks), s))
           df5 <- x$bookROWCol
@@ -268,7 +268,7 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
             z0[[j]] <- rep(c(rep(u0[j]:v0[j], times = iBlocks)), n0)
           }
           z0 <- unlist(z0)
-          x$bookROWCol <- NewBook %>%
+          x$bookROWCol <- NewBook |>
             dplyr::mutate(ROW = z0,
                           COLUMN = rep(rep(1:nCols, each = sizeIblocks), s))
           df6 <- x$bookROWCol

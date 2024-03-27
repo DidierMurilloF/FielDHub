@@ -603,9 +603,7 @@ mod_diagonal_multiple_server <- function(id) {
         observeEvent(toListen(), {
         if (input$list_entries_multiple == "Yes") {
             showModal(
-                shinyjqui::jqui_draggable(
-                    entriesInfoModal_DBUDC()
-                )
+              entriesInfoModal_DBUDC()
             )
         }
         })
@@ -906,7 +904,7 @@ mod_diagonal_multiple_server <- function(id) {
                             buttons = c('copy', 'excel'),
                             lengthMenu = list(c(10,25,50,-1),
                                                 c(10,25,50,"All")))
-            ) %>% 
+            ) |> 
                 DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
                                 backgroundColor = DT::styleEqual(c(checks),
                                                                 colores[1:len_checks]))
@@ -1017,7 +1015,7 @@ mod_diagonal_multiple_server <- function(id) {
                                 buttons = c('copy', 'excel'),
                                 lengthMenu = list(c(10,25,50,-1),
                                                     c(10,25,50,"All")))
-            ) %>% 
+            ) |> 
                 DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
                                 backgroundColor = DT::styleEqual(name_expt, 
                                                                 colores_back[1:blocks])
@@ -1236,9 +1234,7 @@ mod_diagonal_multiple_server <- function(id) {
         observeEvent(input$simulate_multiple, {
             req(export_diagonal_design()$final_expt)
             showModal(
-                shinyjqui::jqui_draggable(
-                simuModal_DIAG()
-                )
+              simuModal_DIAG()
             )
         })
         
@@ -1260,9 +1256,7 @@ mod_diagonal_multiple_server <- function(id) {
                 removeModal()
             } else {
                 showModal(
-                    shinyjqui::jqui_draggable(
-                        simuModal_DIAG(failed = TRUE)
-                    )
+                  simuModal_DIAG(failed = TRUE)
                 )
             }
         })

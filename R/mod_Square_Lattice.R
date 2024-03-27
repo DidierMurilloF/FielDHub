@@ -204,7 +204,7 @@ mod_Square_Lattice_server <- function(id){
           type = "error")
         return(NULL)
       } else return(init_data_square())
-    }) %>%
+    }) |>
       bindEvent(input$RUN.square)
     
     square_inputs <- reactive({
@@ -242,7 +242,7 @@ mod_Square_Lattice_server <- function(id){
                   sites = sites,
                   sites_names = site_names,
                   seed = seed))
-    }) %>%
+    }) |>
       bindEvent(input$RUN.square)
     
     
@@ -268,9 +268,7 @@ mod_Square_Lattice_server <- function(id){
     observeEvent(toListen(), {
       if (input$owndata_square == "Yes") {
         showModal(
-          shinyjqui::jqui_draggable(
-            entriesInfoModal_SQUARE()
-          )
+          entriesInfoModal_SQUARE()
         )
       }
     })
@@ -441,9 +439,7 @@ mod_Square_Lattice_server <- function(id){
       req(input$r.square)
       req(reactive_layoutSquare()$fieldBookXY)
       showModal(
-        shinyjqui::jqui_draggable(
-          simuModal.square()
-        )
+        simuModal.square()
       )
     })
     
@@ -463,9 +459,7 @@ mod_Square_Lattice_server <- function(id){
         removeModal()
       }else {
         showModal(
-          shinyjqui::jqui_draggable(
-            simuModal.square(failed = TRUE)
-          )
+          simuModal.square(failed = TRUE)
         )
       }
     })
@@ -511,7 +505,7 @@ mod_Square_Lattice_server <- function(id){
         trail <- as.character(valsSQUARE$trail.square)
         label_trail <- paste(trail, ": ")
         heatmapTitle <- paste("Heatmap for ", trail)
-        new_df <- df %>%
+        new_df <- df |>
           dplyr::mutate(text = paste0("Site: ", loc, "\n", 
                                       "Row: ", df$ROW, "\n", 
                                       "Col: ", df$COLUMN, "\n", 
@@ -537,9 +531,7 @@ mod_Square_Lattice_server <- function(id){
         return(p2)
       } else {
         showModal(
-          shinyjqui::jqui_draggable(
-            heatmapInfoModal_Square()
-          )
+          heatmapInfoModal_Square()
         )
         return(NULL)
       }

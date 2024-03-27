@@ -210,7 +210,7 @@ mod_Rectangular_Lattice_server <- function(id) {
           type = "error")
         return(NULL)
       } else return(init_data_rectangular())
-    }) %>%
+    }) |>
       bindEvent(input$RUN.rectangular)
     
     rectangular_inputs <- reactive({
@@ -247,7 +247,7 @@ mod_Rectangular_Lattice_server <- function(id) {
                   sites = sites,
                   site_names = site_names,
                   seed = seed))
-    }) %>%
+    }) |>
       bindEvent(input$RUN.rectangular)
     
     
@@ -273,9 +273,7 @@ mod_Rectangular_Lattice_server <- function(id) {
     observeEvent(toListen(), {
       if (input$owndata_rectangular == "Yes") {
         showModal(
-          shinyjqui::jqui_draggable(
-            entriesInfoModal_RECT()
-          )
+          entriesInfoModal_RECT()
         )
       }
     })
@@ -308,7 +306,7 @@ mod_Rectangular_Lattice_server <- function(id) {
         locationNames = rectangular_inputs()$site_names, 
         data = data
       ) 
-    }) %>%
+    }) |>
       bindEvent(input$RUN.rectangular)
     
     
@@ -437,9 +435,7 @@ mod_Rectangular_Lattice_server <- function(id) {
       req(input$r.rectangular)
       req(reactive_layoutRect()$fieldBookXY)
       showModal(
-        shinyjqui::jqui_draggable(
-          simuModal.rectangular()
-        )
+        simuModal.rectangular()
       )
     })
     
@@ -459,9 +455,7 @@ mod_Rectangular_Lattice_server <- function(id) {
         removeModal()
       }else {
         showModal(
-          shinyjqui::jqui_draggable(
-            simuModal.rectangular(failed = TRUE)
-          )
+          simuModal.rectangular(failed = TRUE)
         )
       }
     })
@@ -507,7 +501,7 @@ mod_Rectangular_Lattice_server <- function(id) {
         trail <- as.character(valsRECT$trail.rectangular)
         label_trail <- paste(trail, ": ")
         heatmapTitle <- paste("Heatmap for ", trail)
-        new_df <- df %>%
+        new_df <- df |>
           dplyr::mutate(text = paste0("Site: ", loc, "\n", 
                                       "Row: ", df$ROW, "\n",
                                       "Col: ", df$COLUMN, "\n", 
@@ -533,9 +527,7 @@ mod_Rectangular_Lattice_server <- function(id) {
         return(p2)
       } else {
         showModal(
-          shinyjqui::jqui_draggable(
-            heatmapInfoModal_Rect()
-          )
+          heatmapInfoModal_Rect()
         )
         return(NULL)
       }

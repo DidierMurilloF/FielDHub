@@ -690,9 +690,9 @@ unrep_data_parameters <- function(
                     )
                     # Generate the lists of entries for each location
                     for (site in unique(gen_list$LOCATION)) {
-                        df_loc <- gen_list %>% 
-                            dplyr::filter(LOCATION == site) %>% 
-                            dplyr::mutate(ENTRY = as.numeric(ENTRY)) %>% 
+                        df_loc <- gen_list |> 
+                            dplyr::filter(LOCATION == site) |> 
+                            dplyr::mutate(ENTRY = as.numeric(ENTRY)) |> 
                             dplyr::select(ENTRY, NAME) 
 
                         list_locs[[site]] <- df_loc

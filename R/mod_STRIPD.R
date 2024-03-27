@@ -180,9 +180,7 @@ mod_STRIPD_server <- function(id) {
     observeEvent(toListen(), {
       if (input$owndataSTRIP == "Yes") {
         showModal(
-          shinyjqui::jqui_draggable(
-            entriesInfoModal_STRIP()
-          )
+          entriesInfoModal_STRIP()
         )
       }
     })
@@ -232,7 +230,7 @@ mod_STRIPD_server <- function(id) {
         treatments = c(Hplots, Vplots)
         return(list(data_strip = NULL, treatments = treatments))
       }
-    }) %>% 
+    }) |> 
       bindEvent(input$RUN.strip)
     
     
@@ -269,7 +267,7 @@ mod_STRIPD_server <- function(id) {
           data = data_strip
         )
       )
-    }) %>%
+    }) |>
       bindEvent(input$RUN.strip)
     
     strip_reactive <- reactive({
@@ -290,7 +288,7 @@ mod_STRIPD_server <- function(id) {
         data = strip_inputs()$data
       )
       
-    }) %>% 
+    }) |> 
       bindEvent(input$RUN.strip)
     
     
@@ -299,7 +297,7 @@ mod_STRIPD_server <- function(id) {
       locs <- as.numeric(input$l.strip)
       sites <- 1:locs
       return(list(sites = sites))
-    }) %>% 
+    }) |> 
       bindEvent(input$RUN.strip)
     
     output$well_panel_layout_STRIP <- renderUI({
@@ -434,9 +432,7 @@ mod_STRIPD_server <- function(id) {
     observeEvent(input$Simulate.strip, {
       req(strip_reactive()$fieldBook)
       showModal(
-        shinyjqui::jqui_draggable(
-          simuModal.strip()
-        )
+        simuModal.strip()
       )
     })
     
@@ -456,9 +452,7 @@ mod_STRIPD_server <- function(id) {
         removeModal()
       }else {
         showModal(
-          shinyjqui::jqui_draggable(
-            simuModal.strip(failed = TRUE)
-          )
+          simuModal.strip(failed = TRUE)
         )
       }
     })
@@ -511,7 +505,7 @@ mod_STRIPD_server <- function(id) {
         trail <- as.character(valsStrip$trail.strip)
         label_trail <- paste(trail, ": ")
         heatmapTitle <- paste("Heatmap for ", trail)
-        new_df <- df %>%
+        new_df <- df |>
           dplyr::mutate(text = paste0("Site: ", loc, "\n", "Row: ", df$ROW, "\n", "Col: ", df$COLUMN, "\n", "Entry: ", 
                                       df$ENTRY, "\n", label_trail, round(df[,10],2)))
         w <- as.character(valsStrip$trail.strip)
@@ -531,9 +525,7 @@ mod_STRIPD_server <- function(id) {
         return(p2)
       } else {
         showModal(
-          shinyjqui::jqui_draggable(
-            heatmapInfoModal_STRIP()
-          )
+          heatmapInfoModal_STRIP()
         )
         return(NULL)
       }

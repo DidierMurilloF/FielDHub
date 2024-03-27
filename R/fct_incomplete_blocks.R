@@ -145,23 +145,23 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
         }
         # Apply check_consecutive function to each Level_2 group
         raw_design <- as.data.frame(mydes$Design)
-        raw_design <- raw_design %>%
+        raw_design <- raw_design |>
           dplyr::mutate(
             Level_1 = as.character(Level_1),
             Level_2 = as.character(Level_2),
             plots = as.integer(plots),
             treatments = as.integer(treatments)
           )
-        results <- raw_design %>%
-          dplyr::group_by(Level_1, Level_2) %>%
-          dplyr::summarise(are_consecutive = check_consecutive(treatments), .groups = "drop") %>%
-          dplyr::group_by(Level_1) %>%
+        results <- raw_design |>
+          dplyr::group_by(Level_1, Level_2) |>
+          dplyr::summarise(are_consecutive = check_consecutive(treatments), .groups = "drop") |>
+          dplyr::group_by(Level_1) |>
           dplyr::summarise(all_consecutive = all(are_consecutive))
         
         # Filter Level_1 where all Level_2 levels have consecutive treatments
-        consecutive_levels <- results %>%
-          dplyr::filter(all_consecutive) %>%
-          dplyr::pull(Level_1) %>%
+        consecutive_levels <- results |>
+          dplyr::filter(all_consecutive) |>
+          dplyr::pull(Level_1) |>
           unique()
         
         consecutive_levels_level_1 <- consecutive_levels
@@ -170,7 +170,7 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
           rep_to_drop <- consecutive_levels_level_1[1]
           mydes$Design <- dplyr::filter(raw_design, Level_1 != rep_to_drop)
         } else {
-          mydes$Design <- raw_design %>%
+          mydes$Design <- raw_design |>
             dplyr::filter(Level_1 != paste0("B", r + 1)) 
         }
     } else {

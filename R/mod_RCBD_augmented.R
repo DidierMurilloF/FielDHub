@@ -474,9 +474,7 @@ mod_RCBD_augmented_server <- function(id) {
     observeEvent(toListen(), {
       if (input$owndata_a_rcbd == "Yes") {
         showModal(
-          shinyjqui::jqui_draggable(
-            entriesInfoModal_ARCBD()
-          )
+          entriesInfoModal_ARCBD()
         )
       }
     })
@@ -550,7 +548,7 @@ mod_RCBD_augmented_server <- function(id) {
         nrows = nrows,
         ncols = ncols
       )
-    }) %>% 
+    }) |> 
       bindEvent(input$get_random_augmented)
 
 
@@ -606,7 +604,7 @@ mod_RCBD_augmented_server <- function(id) {
                                     buttons = c('copy', 'excel'),
                                     lengthMenu = list(c(10,25,50,-1),
                                                       c(10,25,50,"All")))
-                     ) %>%
+                     ) |>
          DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
                          backgroundColor = DT::styleEqual(c(checks),
                                                           colores[1:len_checks]))
@@ -632,7 +630,7 @@ mod_RCBD_augmented_server <- function(id) {
                       dom = 't',
                       scrollX = TRUE,
                       fixedColumns = TRUE
-                    )) %>%
+                    )) |>
         DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
                         backgroundColor = DT::styleEqual(Name_expt, colores_back[1:repsExpt]))
     })
@@ -743,9 +741,7 @@ mod_RCBD_augmented_server <- function(id) {
      observeEvent(input$Simulate.arcbd, {
        req(rcbd_augmented_reactive()$fieldBook)
        if(test_arcbd()) {showModal(
-         shinyjqui::jqui_draggable(
-           simuModal.ARCBD()
-         )
+         simuModal.ARCBD()
        )}
      })
 
@@ -767,9 +763,7 @@ mod_RCBD_augmented_server <- function(id) {
          removeModal()
        }else {
          showModal(
-           shinyjqui::jqui_draggable(
-             simuModal.ARCBD(failed = TRUE)
-           )
+           simuModal.ARCBD(failed = TRUE)
          )
        }
      })

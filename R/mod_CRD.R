@@ -196,7 +196,7 @@ mod_CRD_server <- function(id) {
         colnames(data_crd) <- c("TREATMENT", "REP")
         return(list(data_crd = data_crd, treatments = nt))
       }
-    }) %>%
+    }) |>
       bindEvent(input$RUN.crd)
     
     crd_inputs <- reactive({
@@ -220,7 +220,7 @@ mod_CRD_server <- function(id) {
         plot_start = plot_start, 
         site_names = site_names,
         seed = seed))
-    }) %>%
+    }) |>
       bindEvent(input$RUN.crd)
     
     
@@ -239,7 +239,7 @@ mod_CRD_server <- function(id) {
         data = get_data_crd()$data_crd
       )
       
-    }) %>% 
+    }) |> 
       bindEvent(input$RUN.crd)
     
     output$well_panel_layout_CRD <- renderUI({
@@ -298,9 +298,7 @@ mod_CRD_server <- function(id) {
     observeEvent(toListen(), {
       if (input$owndatacrd == "Yes") {
         showModal(
-          shinyjqui::jqui_draggable(
-            entriesInfoModal_CRD()
-          )
+          entriesInfoModal_CRD()
         )
       }
     })
@@ -338,9 +336,7 @@ mod_CRD_server <- function(id) {
     observeEvent(input$Simulate.crd, {
       req(CRD_reactive()$fieldBook)
       showModal(
-        shinyjqui::jqui_draggable(
-          simuModal.crd()
-        )
+        simuModal.crd()
       )
     })
     
@@ -361,9 +357,7 @@ mod_CRD_server <- function(id) {
         removeModal()
       }else {
         showModal(
-          shinyjqui::jqui_draggable(
-            simuModal.crd(failed = TRUE)
-          )
+          simuModal.crd(failed = TRUE)
         )
       }
     })
@@ -430,7 +424,7 @@ mod_CRD_server <- function(id) {
         label_trail <- paste(trail, ": ")
         heatmapTitle <- paste("Heatmap for ", trail)
         df <- simuDataCRD()$df
-        new_df <- df %>%
+        new_df <- df |>
           dplyr::mutate(text = paste0("Row: ", df$ROW, "\n", "Col: ", df$COLUMN, "\n", "Entry: ", 
                                       df$TREATMENT, "\n", label_trail, round(df[,8],2)))
         w <- as.character(vals$trail.CRD)
@@ -449,9 +443,7 @@ mod_CRD_server <- function(id) {
         return(p2)
       } else {
         showModal(
-          shinyjqui::jqui_draggable(
-            heatmapInfoModal_CRD()
-          )
+          heatmapInfoModal_CRD()
         )
         return(NULL)
       }

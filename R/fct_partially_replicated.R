@@ -204,10 +204,10 @@ partially_replicated <- function(
                 )
                 # Generate the lists of entries for each location
                 for (site in unique(gen_list$LOCATION)) {
-                    df_loc <- gen_list %>% 
-                        dplyr::filter(LOCATION == site) %>% 
-                        dplyr::mutate(ENTRY = as.numeric(ENTRY)) %>% 
-                        dplyr::select(ENTRY, NAME, REPS) %>%
+                    df_loc <- gen_list |> 
+                        dplyr::filter(LOCATION == site) |> 
+                        dplyr::mutate(ENTRY = as.numeric(ENTRY)) |> 
+                        dplyr::select(ENTRY, NAME, REPS) |>
                         dplyr::arrange(dplyr::desc(REPS))
 
                     if (length(df_loc$ENTRY) != length(unique(df_loc$ENTRY))) {

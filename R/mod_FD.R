@@ -150,9 +150,7 @@ mod_FD_server <- function(id) {
     observeEvent(toListen(), {
       if (input$owndata == "Yes") {
         showModal(
-          shinyjqui::jqui_draggable(
-            entriesInfoModal_FD()
-          )
+          entriesInfoModal_FD()
         )
       }
     })
@@ -228,7 +226,7 @@ mod_FD_server <- function(id) {
         colnames(data_fd) <- c("factors", "levels")
         return(list(data_fd = data_fd, treatments = setfactors.fd))
       }
-    }) %>% 
+    }) |> 
       bindEvent(input$RUN.fd)
     
     fd_inputs <- reactive({
@@ -260,7 +258,7 @@ mod_FD_server <- function(id) {
         site_names = site_names,
         type_design = type_design,
         seed = seed))
-    }) %>%
+    }) |>
       bindEvent(input$RUN.fd)
     
     
@@ -285,7 +283,7 @@ mod_FD_server <- function(id) {
         data = get_data_factorial()$data_fd
       ) 
       
-    }) %>% 
+    }) |> 
       bindEvent(input$RUN.fd)
     
     
@@ -294,7 +292,7 @@ mod_FD_server <- function(id) {
       locs <- as.numeric(input$l.fd)
       sites <- 1:locs
       return(list(sites = sites))
-    })  %>% 
+    })  |> 
       bindEvent(input$RUN.fd)
     
     output$well_panel_layout_FD <- renderUI({
@@ -411,9 +409,7 @@ mod_FD_server <- function(id) {
     observeEvent(input$Simulate.fd, {
       req(fd_reactive()$fieldBook)
       showModal(
-        shinyjqui::jqui_draggable(
-          simuModal.fd()
-        )
+        simuModal.fd()
       )
     })
     
@@ -433,9 +429,7 @@ mod_FD_server <- function(id) {
         removeModal()
       }else {
         showModal(
-          shinyjqui::jqui_draggable(
-            simuModal.fd(failed = TRUE)
-          )
+          simuModal.fd(failed = TRUE)
         )
       }
     })
@@ -494,7 +488,7 @@ mod_FD_server <- function(id) {
         trail <- as.character(valsfd$trail.fd)
         label_trail <- paste(trail, ": ")
         heatmapTitle <- paste("Heatmap for ", trail)
-        new_df <- df %>%
+        new_df <- df |>
           dplyr::mutate(text = paste0("Site: ", loc, "\n", 
                                       "Row: ", df$ROW, "\n", 
                                       "Col: ", df$COLUMN, "\n", 
@@ -524,9 +518,7 @@ mod_FD_server <- function(id) {
         return(p2)
       } else {
         showModal(
-          shinyjqui::jqui_draggable(
-            heatmapInfoModal_fd()
-          )
+          heatmapInfoModal_fd()
         )
         return(NULL)
       }

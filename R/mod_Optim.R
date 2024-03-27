@@ -414,9 +414,7 @@ mod_Optim_server <- function(id) {
     observeEvent(toListen(), {
       if (input$owndataOPTIM == "Yes") {
         showModal(
-          shinyjqui::jqui_draggable(
-            entriesInfoModal_OPTIM()
-          )
+          entriesInfoModal_OPTIM()
         )
       }
     })
@@ -535,7 +533,7 @@ mod_Optim_server <- function(id) {
                       dom = 't',
                       scrollX = TRUE,
                       fixedColumns = TRUE
-                    )) %>% 
+                    )) |> 
         DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
                         backgroundColor = DT::styleEqual(1, 
                                                          c("gray")))
@@ -567,7 +565,7 @@ mod_Optim_server <- function(id) {
                                    filter = list( position = 'top', clear = FALSE, plain =TRUE ),
                                    buttons = c('copy', 'excel'),
                                    lengthMenu = list(c(10,25,50,-1),
-                                                     c(10,25,50,"All")))) %>% 
+                                                     c(10,25,50,"All")))) |> 
         DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
                     backgroundColor = DT::styleEqual(checks,
                                                  c(colores[1:len_checks])
@@ -652,9 +650,7 @@ mod_Optim_server <- function(id) {
       test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0
       if (test) {
         showModal(
-          shinyjqui::jqui_draggable(
-            simuModal.OPTIM()
-          )
+          simuModal.OPTIM()
         )
       }
     })
@@ -677,9 +673,7 @@ mod_Optim_server <- function(id) {
         removeModal()
       }else {
         showModal(
-          shinyjqui::jqui_draggable(
-            simuModal.OPTIM(failed = TRUE)
-          )
+          simuModal.OPTIM(failed = TRUE)
         )
       }
     })

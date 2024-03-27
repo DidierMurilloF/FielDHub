@@ -16,10 +16,8 @@
 ## Dependencies ----
 ## Add one line by package you want to add as dependency
 usethis::use_package("shinythemes")
-usethis::use_package("turner")
 usethis::use_package("DT")
 usethis::use_package("dplyr")
-usethis::use_package("shinyjqui")
 usethis::use_package("numbers")
 usethis::use_package("blocksdesign")
 usethis::use_package("shinycssloaders")
@@ -30,7 +28,6 @@ usethis::use_package("shinyalert")
 usethis::use_package("desplot")
 usethis::use_package("shinyjs")
 usethis::use_package("rlang", "Suggests")
-usethis::use_pipe()
 usethis::use_spell_check()
 
 ## Add modules ----

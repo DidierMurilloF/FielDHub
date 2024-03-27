@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 
 ```{r, echo = FALSE}
 library(FielDHub)
-library(magrittr)
+library(dplyr)
 library(knitr)
 library(kableExtra)
 ```
@@ -187,8 +187,8 @@ df <- data.frame(ENTRY,NAME)
 ```
 
 ```{r, echo = FALSE, results='asis'}
-df %>%
-  kbl() %>%
+df |>
+  kbl() |>
   kable_styling()
 ```
 
@@ -326,15 +326,15 @@ Let us add two new columns to the allocation table. We can add the number of cop
 it should be 7 for all of them. We can also add the average allocation by genotype. Each treatment will appear 1.4 times in average.
 
 ```{r, echo=FALSE, eval=TRUE}
-optim_multi_prep$allocation %>%
-        dplyr::mutate(
-            Copies = rowSums(.),
-            Avg = Copies / 5
-        ) %>%
-        head(10) %>%
-        `rownames<-`(paste0("Gen-", 1:10)) %>%
-        kbl() %>%
-        kable_styling()
+optim_multi_prep$allocation |>
+  dplyr::mutate(
+    Copies = rowSums(across(everything())),
+    Avg = Copies / 5
+  ) |>
+    head(10) |>
+    `rownames<-`(paste0("Gen-", 1:10)) |>
+    kbl() |>
+    kable_styling()
 ```
 
 We can manipulate the `optim_multi_prep` object as any other list in R. We can first display the design parameters 
