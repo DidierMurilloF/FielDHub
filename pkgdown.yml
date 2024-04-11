@@ -1,21 +1,21 @@
 pandoc: 3.1.11
-pkgdown: 2.0.7
+pkgdown: 2.0.8
 pkgdown_sha: ~
 articles:
-  RCBD_augmented: RCBD_augmented.html
   alpha_lattice: alpha_lattice.html
   crd: crd.html
   diagonal_arrangement: diagonal_arrangement.html
+  fieldhub-0-1-0: news/fieldhub-0-1-0.html
+  fieldhub-1-2-0: news/fieldhub-1-2-0.html
+  fieldhub-1-3-1: news/fieldhub-1-3-1.html
   full_factorial: full_factorial.html
   incomplete_blocks: incomplete_blocks.html
   latin_square: latin_square.html
   methods: methods.html
   multi_location_prep: multi_location_prep.html
-  fieldhub-0-1-0: news/fieldhub-0-1-0.html
-  fieldhub-1-2-0: news/fieldhub-1-2-0.html
-  fieldhub-1-3-1: news/fieldhub-1-3-1.html
   optimized_arrangement: optimized_arrangement.html
   partially_replicated: partially_replicated.html
+  RCBD_augmented: RCBD_augmented.html
   rcbd: rcbd.html
   rectangular_lattice: rectangular_lattice.html
   row_column: row_column.html
@@ -24,7 +24,7 @@ articles:
   split_split_plot: split_split_plot.html
   square_lattice: square_lattice.html
   strip_plot: strip_plot.html
-last_built: 2024-03-28T14:51Z
+last_built: 2024-04-11T14:39Z
 urls:
   reference: https://didiermurillof.github.io/FielDHub/reference
   article: https://didiermurillof.github.io/FielDHub/articles
