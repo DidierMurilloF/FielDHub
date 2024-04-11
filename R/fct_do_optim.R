@@ -680,18 +680,19 @@ merge_user_data <- function(
               ) |>
               dplyr::select(USER_ENTRY, ENTRY, NAME) |>
               dplyr::left_join(y = iter_loc, by = "ENTRY")
-
+            
             if (inherits(optim_out, "MultiPrep")) {
               data_input_mutated <- data_input_mutated |> 
-              dplyr::select(.data = ., USER_ENTRY, NAME.x, REPS) |>
-                dplyr::arrange(dplyr::desc(REPS)) |>
-                dplyr::rename(ENTRY = USER_ENTRY, NAME = NAME.x)
+                dplyr::select(USER_ENTRY, NAME.x, REPS) |> # Just specify columns directly
+                dplyr::arrange(dplyr::desc(REPS)) |> # Arrange rows
+                dplyr::rename(ENTRY = USER_ENTRY, NAME = NAME.x) # Rename columns
             } else if (inherits(optim_out, "Sparse")) {
               data_input_mutated <- data_input_mutated |> 
-              dplyr::filter(.data = ., !is.na(NAME.y)) |> 
-                dplyr::select(USER_ENTRY, NAME.x) |>
-                dplyr::rename(ENTRY = USER_ENTRY, NAME = NAME.x)
-            } 
+                dplyr::filter(!is.na(NAME.y)) |> # Filter rows
+                dplyr::select(USER_ENTRY, NAME.x) |> # Select columns
+                dplyr::rename(ENTRY = USER_ENTRY, NAME = NAME.x) # Rename columns
+            }
+
             # Store the number of plots (It does not include checks)
             df_to_check <- data_input_mutated[(input_checks + 1):nrow(data_input_mutated), ]
             if (inherits(optim_out, "MultiPrep")) {
