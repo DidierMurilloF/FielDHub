@@ -116,12 +116,12 @@ total_elements <- function(alist) {
   length(unlist(alist))
 }
 
-#' @title Split Matrix Into Blocks
+#' @title Split matrix Into sub matrices
 #' 
 #' @description
 #' Splits a matrix into a list of blocks, either by rows or by columns, based on the specified sizes of the blocks.
 #'
-#' @param Matrix A matrix to be split.
+#' @param matrix_object A matrix to be split.
 #' @param blocks Either a list or a vector indicating the sizes of the blocks to be split into. 
 #' If \code{blocks} is a list of vectors, each vector's length defines the size of the blocks. 
 #' If \code{blocks} is a vector, each element represents the size of a block.
@@ -129,9 +129,9 @@ total_elements <- function(alist) {
 #' by rows; otherwise, it is split by columns.
 #' @return A list of matrices, each representing a block.
 #' @noRd
-split_matrix_into_blocks <- function(Matrix, blocks, byrow = TRUE) {
+split_matrix_into_blocks <- function(matrix_object, blocks, byrow = TRUE) {
 
-  if (!is.matrix(Matrix)) {
+  if (!is.matrix(matrix_object)) {
     stop("Input must be a matrix.")
   }
     
@@ -156,32 +156,20 @@ split_matrix_into_blocks <- function(Matrix, blocks, byrow = TRUE) {
   blocks_list = vector(mode="list", length=num_blocks)
   
   # Validate the total size against the matrix dimension before the loop
-  if (byrow && size != nrow(Matrix)) {
-    stop("Number of rows in 'Matrix' does not match 'blocks'")
-  } else if (!byrow && size != ncol(Matrix)) {
-    stop("Number of columns in 'Matrix' does not match 'blocks'")
+  if (byrow && size != nrow(matrix_object)) {
+    stop("Number of rows in 'matrix_object' does not match 'blocks'")
+  } else if (!byrow && size != ncol(matrix_object)) {
+    stop("Number of columns in 'matrix_object' does not match 'blocks'")
   }
   
   # Use a loop to populate the blocks_list based on the 'byrow' flag
   for (k in 1:num_blocks) {
     if (byrow) {
-      blocks_list[[k]] = Matrix[from[k]:to[k], , drop = FALSE]  # Ensuring the result is always a matrix
+      blocks_list[[k]] = matrix_object[from[k]:to[k], , drop = FALSE]  # Ensuring the result is always a matrix
     } else {
-      blocks_list[[k]] = Matrix[, from[k]:to[k], drop = FALSE]  # Ensuring the result is always a matrix
+      blocks_list[[k]] = matrix_object[, from[k]:to[k], drop = FALSE]  # Ensuring the result is always a matrix
     }
   }
   
   return(blocks_list)
 }
-
-# for (k in 1:num_blocks) {
-#   if (byrow) {
-#     if (size != nrow(Matrix))
-#       stop("\nNumber of rows in 'Matrix' doesn't match 'blocks'")
-#     blocks_list[[k]] = Matrix[from[k]:to[k],]
-#   } else {
-#     if (size != ncol(Matrix))
-#       stop("\nNumber of columns in 'Matrix' doesn't match 'blocks'")
-#     blocks_list[[k]] = Matrix[,from[k]:to[k]]      
-#   }
-# }
