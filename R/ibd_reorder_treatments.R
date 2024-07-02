@@ -6,8 +6,8 @@
 #' @return List containing design and A efficiencies
 #' @noRd
 blockEstEffics = function(TF, BF) {
-  TM = qr.Q(qr(scale(model.matrix(~TF))[, -1]))
-  BM = qr.Q(qr(scale(model.matrix(~BF))[, -1]))
+  TM = qr.Q(qr(scale(stats::model.matrix(~TF))[, -1]))
+  BM = qr.Q(qr(scale(stats::model.matrix(~BF))[, -1]))
   if (nlevels(TF) <= nlevels(BF)) 
     E = eigen(diag(ncol(TM)) - tcrossprod(crossprod(TM, 
                                                     BM)), symmetric = TRUE, only.values = TRUE)

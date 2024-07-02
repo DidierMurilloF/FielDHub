@@ -39,3 +39,6 @@ $run_dev.*
 ^vignettes/latin_square\.Rmd$
 ^vignettes/strip_plot\.Rmd$
 ^vignettes/split_split_plot\.Rmd$
+^vignettes/incomplete_blocks\.Rmd$
+^vignettes/rectangular_lattice\.Rmd$
+^vignettes/square_lattice\.Rmd$
