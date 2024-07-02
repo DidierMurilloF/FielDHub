@@ -84,6 +84,18 @@ mod_Square_Lattice_ui <- function(id){
         width = 8,
         fluidRow(
           tabsetPanel(
+            tabPanel(
+              "Summary design",
+              br(),
+              div(
+                shinycssloaders::withSpinner(
+                  verbatimTextOutput(outputId = ns("summary_square_lattice"), 
+                                     placeholder = FALSE), 
+                  type = 4
+                ),
+                style = "padding-right: 40px;"
+              )
+            ),
             tabPanel("Field Layout",
                      shinyjs::useShinyjs(),
                      shinyjs::hidden(downloadButton(ns("downloadCsv.square"), 
@@ -302,6 +314,12 @@ mod_Square_Lattice_server <- function(id){
         data = data_square
       ) 
       
+    })
+    
+    output$summary_square_lattice <- renderPrint({
+      req(SQUARE_reactive())
+        cat("Randomization was successful!", "\n", "\n")
+        print(SQUARE_reactive(), n = 6)
     })
     
     upDateSites_SQ <- reactive({

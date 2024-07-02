@@ -134,6 +134,7 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, layout = 1,
                            main = main,
                            show.key = FALSE,
                            gg = TRUE)
+    p1 <- add_gg_features(p1)
     df$REP <- as.factor(df$REP)
     p2 <- desplot::desplot(REP ~  COLUMN + ROW, flip = FALSE,
                            out1 = REP,
@@ -142,6 +143,7 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, layout = 1,
                            main = main,
                            show.key = FALSE,
                            gg = TRUE)
+    p2 <- add_gg_features(p2)
   } else  if (x$infoDesign$id_design == 7) {
     allSites <- vector(mode = "list", length = nlocs)
     for (st in 1:nlocs) {
@@ -171,6 +173,7 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, layout = 1,
                            main = main,
                            show.key = FALSE,
                            gg = TRUE)
+    p1 <- add_gg_features(p1)
     df$REP <- as.factor(df$REP)
     p2 <- desplot::desplot(REP ~  COLUMN + ROW, flip = FALSE,
                            out1 = REP,
@@ -179,6 +182,7 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, layout = 1,
                            main = main,
                            show.key = FALSE,
                            gg = TRUE)
+    p2 <- add_gg_features(p2)
   } else  if (x$infoDesign$id_design == 3) {
     allSites <- vector(mode = "list", length = nlocs)
     for (st in 1:nlocs) {
@@ -210,7 +214,9 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, layout = 1,
                              main = main, 
                              show.key = FALSE,
                              gg = TRUE)
+      p1 <- add_gg_features(p1)
       
+      # Plot number layout
       df$SQUARE <- as.factor(df$SQUARE)
       p2 <- desplot::desplot(SQUARE ~ COLUMN + ROW, flip = FALSE,
                              out1 = SQUARE,
@@ -219,6 +225,7 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, layout = 1,
                              main = main,
                              show.key = FALSE,
                              gg = TRUE)
+      p2 <- add_gg_features(p2)
     } else {
       p1 <- desplot::desplot(TREATMENT ~ COLUMN + ROW, flip = FALSE,
                              out2.gpar = list(col = "black", lty = 3), 
@@ -227,6 +234,7 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, layout = 1,
                              main = main, 
                              show.key = FALSE,
                              gg = TRUE)
+      p1 <- add_gg_features(p1)
       
       df$SQUARE <- as.factor(df$SQUARE)
       p2 <- desplot::desplot(SQUARE ~ COLUMN + ROW, flip = FALSE,
@@ -235,6 +243,7 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, layout = 1,
                              main = main,
                              show.key = FALSE,
                              gg = TRUE)
+      p2 <- add_gg_features(p2)
     }
 
   }

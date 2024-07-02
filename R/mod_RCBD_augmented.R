@@ -59,7 +59,7 @@ mod_RCBD_augmented_ui <- function(id){
           ns = ns,
           numericInput(inputId = ns("lines_a_rcbd"), 
                        label = "Input # of Entries:", 
-                       value = 50)
+                       value = 180)
         ),
         fluidRow(
           column(6,
@@ -73,7 +73,7 @@ mod_RCBD_augmented_ui <- function(id){
           column(6,
                  style=list("padding-left: 5px;"),
                  selectInput(inputId = ns("blocks_a_rcbd"), 
-                 label = "", choices = c(5))
+                 label = "", choices = 5)
           )
         ),
         fluidRow(
@@ -164,10 +164,13 @@ mod_RCBD_augmented_ui <- function(id){
                     ),
                      br(),
                      br(),
+                    div(
                      shinycssloaders::withSpinner(
                        verbatimTextOutput(outputId = ns("summary_augmented"), 
-                                          placeholder = FALSE), 
+                                          placeholder = FALSE),
                       type = 4
+                     ),
+                     style = "padding-right: 40px;"
                     )
            ),
            tabPanel("Input Data",
@@ -176,8 +179,8 @@ mod_RCBD_augmented_ui <- function(id){
                       column(6,DT::DTOutput(ns("checks_table")))
                     )
            ),
-           tabPanel("Randomized Field", DT::DTOutput(ns("randomized_layout"))),
-           tabPanel("Plot Number Field", DT::DTOutput(ns("plot_number_layout"))),
+           tabPanel("Field Layout", br(), plotOutput(ns("field_layout"), width = "97%")),
+           tabPanel("Plot Number Field", br(), plotOutput(ns("plot_number_layout2"), width = "97%")),
            tabPanel("Field Book", DT::DTOutput(ns("fieldBook_ARCBD"))),
            tabPanel("Heatmap", plotly::plotlyOutput(ns("heatmap"), width = "97%"))
          )      
@@ -185,7 +188,7 @@ mod_RCBD_augmented_ui <- function(id){
     )
   )
 }
-    
+
 #' RCBD_augmented Server Functions
 #'
 #' @noRd 
@@ -548,16 +551,101 @@ mod_RCBD_augmented_server <- function(id) {
         nrows = nrows,
         ncols = ncols
       )
+      return(ARCBD)
     }) |> 
       bindEvent(input$get_random_augmented)
+    
+    reactive_layoutARCBD <- reactive({
+      req(rcbd_augmented_reactive())
+      obj_arcbd <- rcbd_augmented_reactive()
+      loc_to_view <- as.numeric(input$locView.arcbd)
+      try(
+        plot_layout(x = obj_arcbd, l = loc_to_view),
+        silent = TRUE
+      )
+    })
 
+    output$field_layout <- renderPlot({
+      req(reactive_layoutARCBD())
+      req(rcbd_augmented_reactive())
+      reactive_layoutARCBD()$out_layout
+    }, height = 620)
+    
+    output$plot_number_layout2 <- renderPlot({
+      req(reactive_layoutARCBD())
+      req(rcbd_augmented_reactive())
+      print(reactive_layoutARCBD()$out_layoutPlots)
+      reactive_layoutARCBD()$out_layoutPlots
+    }, height = 620)
+    
+    # arcbd_plot <- reactive({
+    #   req(rcbd_augmented_reactive())
+    #   loc_to_view <- as.numeric(input$locView.arcbd)
+    #   arcbd_design <- rcbd_augmented_reactive()
+    #   loc_field_book <- arcbd_design$fieldBook
+    # 
+    #   loc_field_book <- loc_field_book |>
+    #     dplyr::mutate(LOC = factor(LOCATION, levels = unique(LOCATION))) |>
+    #     dplyr::mutate(LOC = as.numeric(LOC))
+    # 
+    #   temp_field_book <- loc_field_book |> dplyr::filter(LOC == loc_to_view)
+    # 
+    #   rows <- length(unique(temp_field_book$ROW))
+    #   cols <- length(unique(temp_field_book$COLUMN))
+    #   temp_field_book$BLOCK <- as.factor(temp_field_book$BLOCK)
+    #   main <- paste0("Augmented RCBD Layout ", rows, " x ", cols)
+    #   p1 <- desplot::ggdesplot(
+    #     BLOCK ~ COLUMN + ROW,
+    #     text = ENTRY,
+    #     col = CHECKS,
+    #     cex = 1.2,
+    #     out1 = EXPT,
+    #     out2 = BLOCK,
+    #     data = temp_field_book,
+    #     xlab = "COLUMNS",
+    #     ylab = "ROWS",
+    #     main = main,
+    #     show.key = FALSE,
+    #     gg = TRUE,
+    #     out2.gpar=list(col = "gray50", lwd = 1, lty = 1))
+    #   # Explicitly remove all legends
+    #   p1 <- p1 + ggplot2::guides(
+    #     fill = "none",   # Remove legend for fill
+    #     color = "none",  # Remove legend for color (if used)
+    #     text = "none"    # Remove legend for text labels
+    #   )
+    # 
+    #   # Precompute the breaks based on the data
+    #   x_breaks <- seq(floor(min(temp_field_book$COLUMN)), ceiling(max(temp_field_book$COLUMN)), by = 1)
+    #   y_breaks <- seq(floor(min(temp_field_book$ROW)), ceiling(max(temp_field_book$ROW)), by = 1)
+    # 
+    #   # Apply breaks to the plot
+    #   p1 <- p1 +
+    #     ggplot2::scale_x_continuous(breaks = x_breaks) +
+    #     ggplot2::scale_y_continuous(breaks = y_breaks)
+    # 
+    #   # Apply a minimal theme for better aesthetics
+    #   p1 <- p1 + ggplot2::theme_minimal() +
+    #     ggplot2::theme(
+    #       plot.title = ggplot2::element_text(face = "bold", size = 15),
+    #       axis.title = ggplot2::element_text(size = 12),
+    #       axis.text = ggplot2::element_text(size = 11)
+    #     )
+    #   return(p1)
+    # })
+    # 
+    # output$field_layout <- renderPlot({
+    #   arcbd_plot()
+    # }, height = 650)
 
+    output$randomized_layout2 <- plotly::renderPlotly({
+      arcbd_plot()
+    })
+    
     output$summary_augmented <- renderPrint({
       if (test_arcbd()) {
         cat("Randomization was successful!", "\n", "\n")
-        # len <- length(rcbd_augmented_reactive()$infoDesign)
-        #  rcbd_augmented_reactive()$infoDesign[1:(len - 1)]
-        print(rcbd_augmented_reactive())
+        print(rcbd_augmented_reactive(), n = 6)
       }
     })
     
@@ -635,62 +723,62 @@ mod_RCBD_augmented_server <- function(id) {
                         backgroundColor = DT::styleEqual(Name_expt, colores_back[1:repsExpt]))
     })
 
-     output$plot_number_layout <- DT::renderDT({
-       if(!test_arcbd()) return(NULL)
-       req(rcbd_augmented_reactive())
-       plot_num1 <- rcbd_augmented_reactive()$layout_plots_sites[[locNum()]]
-       b <- as.numeric(some_inputs()$blocks)
-       infoDesign <- rcbd_augmented_reactive()$infoDesign
-       Fillers <- as.numeric(infoDesign$fillers)
-       repsExpt <- some_inputs()$expts_a_rcbd
-       rownames(plot_num1) <- paste0("Row",nrow(plot_num1):1)
-       if (Fillers == 0) {
-         a <- as.vector(as.matrix(plot_num1))
-         len_a <- length(a)
-         df <- as.data.frame(plot_num1)
-         colnames(df) <- paste("V", 1:ncol(df), sep = "")
-         DT::datatable(df,
-                       extensions = c('Buttons'),
-                       options = list(dom = 'Blfrtip',
-                                      autoWidth = FALSE,
-                                      scrollX = TRUE,
-                                      fixedColumns = TRUE,
-                                      pageLength = nrow(df),
-                                      scrollY = "700px",
-                                      class = 'compact cell-border stripe',  
-                                      rownames = FALSE,
-                                      server = FALSE,
-                                      filter = list( position = 'top', 
-                                                     clear = FALSE, 
-                                                     plain =TRUE ),
-                                      buttons = c('copy', 'excel'),
-                                      lengthMenu = list(c(10,25,50,-1),
-                                                        c(10,25,50,"All")))
-         )
-       }else {
-         a <- as.vector(as.matrix(plot_num1))
-         a <- a[-which(a == 0)]
-         len_a <- length(a)
-         df <- as.data.frame(plot_num1)
-         rownames(df) <- paste0("Row",nrow(df):1)
-         colnames(df) <- paste("V", 1:ncol(df), sep = "")
-         DT::datatable(df,
-                       extensions = c('Buttons'),
-                       options = list(dom = 'Blfrtip',
-                                      autoWidth = FALSE,
-                                      scrollX = TRUE,
-                                      fixedColumns = TRUE,
-                                      pageLength = nrow(df),
-                                      scrollY = "700px",
-                                      class = 'compact cell-border stripe',  rownames = FALSE,
-                                      server = FALSE,
-                                      filter = list( position = 'top', clear = FALSE, plain =TRUE ),
-                                      buttons = c('copy', 'excel'),
-                                      lengthMenu = list(c(10,25,50,-1),
-                                                        c(10,25,50,"All")))
-         )
-       }
-     })
+     # output$plot_number_layout <- DT::renderDT({
+     #   if(!test_arcbd()) return(NULL)
+     #   req(rcbd_augmented_reactive())
+     #   plot_num1 <- rcbd_augmented_reactive()$layout_plots_sites[[locNum()]]
+     #   b <- as.numeric(some_inputs()$blocks)
+     #   infoDesign <- rcbd_augmented_reactive()$infoDesign
+     #   Fillers <- as.numeric(infoDesign$fillers)
+     #   repsExpt <- some_inputs()$expts_a_rcbd
+     #   rownames(plot_num1) <- paste0("Row",nrow(plot_num1):1)
+     #   if (Fillers == 0) {
+     #     a <- as.vector(as.matrix(plot_num1))
+     #     len_a <- length(a)
+     #     df <- as.data.frame(plot_num1)
+     #     colnames(df) <- paste("V", 1:ncol(df), sep = "")
+     #     DT::datatable(df,
+     #                   extensions = c('Buttons'),
+     #                   options = list(dom = 'Blfrtip',
+     #                                  autoWidth = FALSE,
+     #                                  scrollX = TRUE,
+     #                                  fixedColumns = TRUE,
+     #                                  pageLength = nrow(df),
+     #                                  scrollY = "700px",
+     #                                  class = 'compact cell-border stripe',  
+     #                                  rownames = FALSE,
+     #                                  server = FALSE,
+     #                                  filter = list( position = 'top', 
+     #                                                 clear = FALSE, 
+     #                                                 plain =TRUE ),
+     #                                  buttons = c('copy', 'excel'),
+     #                                  lengthMenu = list(c(10,25,50,-1),
+     #                                                    c(10,25,50,"All")))
+     #     )
+     #   }else {
+     #     a <- as.vector(as.matrix(plot_num1))
+     #     a <- a[-which(a == 0)]
+     #     len_a <- length(a)
+     #     df <- as.data.frame(plot_num1)
+     #     rownames(df) <- paste0("Row",nrow(df):1)
+     #     colnames(df) <- paste("V", 1:ncol(df), sep = "")
+     #     DT::datatable(df,
+     #                   extensions = c('Buttons'),
+     #                   options = list(dom = 'Blfrtip',
+     #                                  autoWidth = FALSE,
+     #                                  scrollX = TRUE,
+     #                                  fixedColumns = TRUE,
+     #                                  pageLength = nrow(df),
+     #                                  scrollY = "700px",
+     #                                  class = 'compact cell-border stripe',  rownames = FALSE,
+     #                                  server = FALSE,
+     #                                  filter = list( position = 'top', clear = FALSE, plain =TRUE ),
+     #                                  buttons = c('copy', 'excel'),
+     #                                  lengthMenu = list(c(10,25,50,-1),
+     #                                                    c(10,25,50,"All")))
+     #     )
+     #   }
+     # })
      
      valsARCBD <- reactiveValues(ROX = NULL, ROY = NULL, trail.arcbd = NULL, minValue = NULL,
                                  maxValue = NULL)

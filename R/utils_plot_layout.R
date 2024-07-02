@@ -220,7 +220,7 @@ plot_layout <- function(
                     allSitesFieldbook = return_prep$allSitesFieldbook))
     } else if (x$infoDesign$id_design == 14) {
         return_arcbd <- plot_augmented_RCBD(x = x, l = l)
-        return(list(out_layout = return_arcbd$p1, 
+        return(list(out_layout = return_arcbd$p1, out_layoutPlots = return_arcbd$p2,
                     allSitesFieldbook = return_arcbd$allSitesFieldbook))
     } else if (x$infoDesign$id_design == 15 || x$infoDesign$id_design == "Sparse") {
         return_diagonal <- plot_diagonal_arrangement(x = x, l = l)

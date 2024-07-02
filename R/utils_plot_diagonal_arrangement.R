@@ -142,5 +142,24 @@ plot_augmented_RCBD <- function(x, l) {
         gg = TRUE,
         out2.gpar=list(col = "gray50", lwd = 1, lty = 1))
     
-    return(list(p1 = p1, allSitesFieldbook = fieldbook))
+    p1 <- add_gg_features(p1)
+    
+    main_plot <- paste0("Augmented RCBD Plot Number Layout ", rows, " x ", cols)
+    p2 <- desplot::ggdesplot(
+      BLOCK ~ COLUMN + ROW,  
+      text = PLOT, 
+      cex = 1.1, 
+      out1 = EXPT,
+      out2 = BLOCK,
+      data = loc_field_book, 
+      xlab = "COLUMNS", 
+      ylab = "ROWS",
+      main = main_plot,
+      show.key = FALSE, 
+      gg = TRUE,
+      out2.gpar=list(col = "gray50", lwd = 1, lty = 1))
+    
+    p2 <- add_gg_features(p2)
+    
+    return(list(p1 = p1, p2 = p2, allSitesFieldbook = fieldbook))
 }

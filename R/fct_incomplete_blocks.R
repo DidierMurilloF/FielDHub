@@ -134,56 +134,24 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
   square <- FALSE
   if (sqrt(nt) == round(sqrt(nt))) square <- TRUE
   outIBD_loc <- vector(mode = "list", length = l)
+  blocks_model <- list()
   for (i in 1:l) {
-    if (square) {
-        mydes <- blocksdesign::blocks(treatments = nt, replicates = r + 1, blocks = list(r + 1, b), seed = NULL)
-        ##### Dropping the cyclical REP ######
-        # Function to check if treatments are consecutive
-        check_consecutive <- function(treatments) {
-          sorted_treatments <- sort(treatments)
-          all(diff(sorted_treatments) == 1)
-        }
-        # Apply check_consecutive function to each Level_2 group
-        raw_design <- as.data.frame(mydes$Design)
-        raw_design <- raw_design |>
-          dplyr::mutate(
-            Level_1 = as.character(Level_1),
-            Level_2 = as.character(Level_2),
-            plots = as.integer(plots),
-            treatments = as.integer(treatments)
-          )
-        results <- raw_design |>
-          dplyr::group_by(Level_1, Level_2) |>
-          dplyr::summarise(are_consecutive = check_consecutive(treatments), .groups = "drop") |>
-          dplyr::group_by(Level_1) |>
-          dplyr::summarise(all_consecutive = all(are_consecutive))
-        
-        # Filter Level_1 where all Level_2 levels have consecutive treatments
-        consecutive_levels <- results |>
-          dplyr::filter(all_consecutive) |>
-          dplyr::pull(Level_1) |>
-          unique()
-        
-        consecutive_levels_level_1 <- consecutive_levels
-        
-        if (length(consecutive_levels_level_1) > 0) {
-          rep_to_drop <- consecutive_levels_level_1[1]
-          mydes$Design <- dplyr::filter(raw_design, Level_1 != rep_to_drop)
-        } else {
-          mydes$Design <- raw_design |>
-            dplyr::filter(Level_1 != paste0("B", r + 1)) 
-        }
-    } else {
-        mydes <- blocksdesign::blocks(treatments = nt, replicates = r, blocks = list(r, b), seed = NULL)
-    }
+    mydes <- blocksdesign::blocks(treatments = nt, replicates = r, blocks = list(r, b), seed = NULL)
+    # print("---Blocks Model original design:---")
+    # print(mydes$Blocks_model)
+    mydes <- rerandomize_ibd(ibd_design = mydes)
+    # print("---Blocks Model re-randomized design:---")
+    # print(mydes$Blocks_model_new)
     matdf <- base::data.frame(list(LOCATION = rep(locationNames[i], each = N)))
     matdf$PLOT <- as.numeric(unlist(ibd_plots[[i]]))
     matdf$BLOCK <- rep(c(1:r), each = nt)
     matdf$iBLOCK <- rep(c(1:b), each = k)
     matdf$UNIT <- rep(c(1:k), nincblock)
-    matdf$TREATMENT <- mydes$Design[,4]
+    # matdf$TREATMENT <- mydes$Design[,4]
+    matdf$TREATMENT <- mydes$Design_new[,4]
     colnames(matdf) <- c("LOCATION","PLOT", "REP", "IBLOCK", "UNIT", "ENTRY")
     outIBD_loc[[i]] <- matdf
+    blocks_model[[i]] <- mydes$Blocks_model_new
   }
   OutIBD <- dplyr::bind_rows(outIBD_loc)
   OutIBD <- as.data.frame(OutIBD)
@@ -205,7 +173,7 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
   infoDesign <- list(Reps = r, iBlocks = b, NumberTreatments = nt, NumberLocations = l,
                      Locations = locationNames, seed = seed, lambda = lambda, 
                      id_design = 8)
-  output <- list(infoDesign = infoDesign, fieldBook = OutIBD_new)
+  output <- list(infoDesign = infoDesign, fieldBook = OutIBD_new, blocksModel = blocks_model[[1]])
   class(output) <- "FielDHub"
   return(invisible(output))
 }

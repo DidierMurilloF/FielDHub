@@ -260,6 +260,7 @@ planter_transform <- function(plots = NULL, planter = "serpentine", cols = NULL,
   
   return(PLOTS = New_PLOTS)
 }
+
 #' plot_CRD 
 #'
 #' @description A utils function
@@ -359,17 +360,18 @@ plot_CRD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, layout = 1,
                            main = main, 
                            show.key = FALSE, 
                            gg=TRUE)
+    p1 <- add_gg_features(p1)
+    # Plot number layout
     df$REP <- as.factor(df$REP)
     df$PLOT <- as.character(df$PLOT)
     p2 <- desplot::desplot(PLOT ~ COLUMN + ROW, flip = FALSE,
-                           #out1 = REP,
-                           #out2.gpar = list(col = "black", lty = 3), 
                            text = PLOT, 
                            cex = 1, shorten = "no",
                            data = df, xlab = "COLUMNS", ylab = "ROWS",
                            main = main, 
                            show.key = FALSE, 
                            gg=TRUE)
+    p2 <- add_gg_features(p2)
   } else if (x$infoDesign$id_design == 4) {
     allSites <- vector(mode = "list", length = nlocs)
     for (st in 1:nlocs) {
@@ -382,9 +384,6 @@ plot_CRD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, layout = 1,
     allSitesFieldbook <- allSitesFieldbook[,c(1:3,(nc-1),nc,4:(nc-2))]
     df <- df[, c(1:3,(nc-1),nc,4:(nc-2))]
     if (x$infoDesign$kind == "CRD") {
-      # nc <- ncol(df)
-      # df <- df[,c(1:3,(nc-1),nc,4:(nc-2))]
-      # Plot field layout
       rows <- max(as.numeric(df$ROW))
       cols <- max(as.numeric(df$COLUMN))
       ds <- "Full Factorial Design (CRD) " 
@@ -397,6 +396,9 @@ plot_CRD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, layout = 1,
                              main = main, 
                              show.key = FALSE, 
                              gg=TRUE)
+      p1 <- add_gg_features(p1)
+      
+      # Plot number layout
       df$REP <- as.factor(df$REP)
       df$PLOT <- as.factor(df$PLOT)
       p2 <- desplot::desplot(PLOT ~ COLUMN + ROW, flip = FALSE,
@@ -405,6 +407,7 @@ plot_CRD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, layout = 1,
                              main = main, 
                              show.key = FALSE, 
                              gg=TRUE)
+      p2 <- add_gg_features(p2)
     }
   } else if (x$infoDesign$id_design == 5) {
     allSites <- vector(mode = "list", length = nlocs)
@@ -418,8 +421,6 @@ plot_CRD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, layout = 1,
     allSitesFieldbook <- allSitesFieldbook[,c(1:3,(nc-1),nc,4:(nc-2))]
     df <- df[,c(1:3,(nc-1),nc,4:(nc-2))]
     if (x$infoDesign$typeDesign == "CRD") {
-      # nc <- ncol(df)
-      # df <- df[,c(1:3,(nc-1),nc,4:(nc-2))]
       rows <- max(as.numeric(df$ROW))
       cols <- max(as.numeric(df$COLUMN))
       ds <- "Split Plot Design (CRD) " 
@@ -433,7 +434,9 @@ plot_CRD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, layout = 1,
                              main = main, 
                              show.key = TRUE, 
                              gg=TRUE)
+      p1 <- add_gg_features(p1)
       
+      # Plot number layout
       df$REP <- as.factor(df$REP)
       df$PLOT <- as.factor(df$PLOT)
       p2 <- desplot::desplot(PLOT ~ COLUMN + ROW, flip = FALSE,
@@ -442,6 +445,7 @@ plot_CRD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, layout = 1,
                              main = main, 
                              show.key = FALSE, 
                              gg=TRUE)
+      p2 <- add_gg_features(p2)
     }
   } else if (x$infoDesign$id_design == 6) {
     allSites <- vector(mode = "list", length = nlocs)
@@ -474,7 +478,9 @@ plot_CRD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, layout = 1,
                              main = main, 
                              show.key = TRUE, 
                              gg=TRUE)
+      p1 <- add_gg_features(p1)
       
+      # PLot number layout
       df$PLOT <- as.factor(df$PLOT)
       p2 <- desplot::desplot(PLOT ~ COLUMN + ROW, flip = FALSE,
                              text = PLOT, cex = 1, shorten = "no",
@@ -482,6 +488,7 @@ plot_CRD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, layout = 1,
                              main = main, 
                              show.key = FALSE, 
                              gg=TRUE)
+      p2 <- add_gg_features(p2)
     }
   }
   return(list(p1 = p1, p2 = p2, df = df, newBooks = newBooksSelected, 
