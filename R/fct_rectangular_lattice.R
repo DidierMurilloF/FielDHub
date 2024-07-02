@@ -118,6 +118,7 @@ rectangular_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber 
   matdf <- incomplete_blocks(t = nt, k = nunits, r = r, l = l, plotNumber = plotNumber,
                              seed = seed, locationNames = locationNames,
                              data = data_alpha)
+  blocksModel <- matdf$blocksModel
   lambda <- r*(k - 1)/(nt - 1)
   matdf <- matdf$fieldBook
   OutRectagular_Lattice <- as.data.frame(matdf)
@@ -127,7 +128,7 @@ rectangular_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber 
   infoDesign <- list(Reps = r, iBlocks = s, NumberTreatments = nt, NumberLocations = l, 
                      Locations = locationNames, seed = seed, lambda = lambda,
                      id_design = 11)
-  output <- list(infoDesign = infoDesign, fieldBook = OutRectagular_Lattice)
+  output <- list(infoDesign = infoDesign, fieldBook = OutRectagular_Lattice, blocksModel = blocksModel)
   class(output) <- "FielDHub"
   return(invisible(output))
 }

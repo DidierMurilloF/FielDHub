@@ -76,6 +76,16 @@ mod_Rectangular_Lattice_ui <- function(id){
         width = 8,
         fluidRow(
           tabsetPanel(
+            tabPanel(
+              "Summary design",
+              br(),
+              shinycssloaders::withSpinner(
+                verbatimTextOutput(outputId = ns("summary_rectangular_lattice"), 
+                                   placeholder = FALSE), 
+                type = 4
+              ),
+              style = "padding-right: 40px;"
+            ),
             tabPanel("Field Layout",
                      shinyjs::useShinyjs(),
                      shinyjs::hidden(downloadButton(ns("downloadCsv.rectangular"), 
@@ -308,6 +318,12 @@ mod_Rectangular_Lattice_server <- function(id) {
       ) 
     }) |>
       bindEvent(input$RUN.rectangular)
+    
+    output$summary_rectangular_lattice <- renderPrint({
+      req(RECTANGULAR_reactive())
+      cat("Randomization was successful!", "\n", "\n")
+      print(RECTANGULAR_reactive(), n = 6)
+    })
     
     
     upDateSites_RT <- reactive({

@@ -140,7 +140,9 @@ plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
                            main = main, 
                            show.key = FALSE, 
                            gg = TRUE)
-    #df$PLOT <- as.factor(df$PLOT)
+
+    p1 <- add_gg_features(p1)
+    # Plot number layout
     df$REP <- as.factor(df$REP)
     p2 <- desplot::desplot(REP ~ COLUMN + ROW, flip = FALSE,
                            out1 = REP,
@@ -150,6 +152,8 @@ plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
                            main = main, 
                            show.key = FALSE,
                            gg = TRUE)
+    # Explicitly remove all legends
+    p2 <- add_gg_features(p2)
   } else if (x$infoDesign$id_design == 4) {
     if (x$infoDesign$kind == "RCBD") {
       allSites <- vector(mode = "list", length = nlocs)
@@ -176,17 +180,18 @@ plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
                              main = main, 
                              show.key = FALSE,
                              gg = TRUE)
-      
+      p1 <- add_gg_features(p1)
+      # Plot number layout
       df$PLOT <- as.factor(df$PLOT)
       df$REP <- as.factor(df$REP)
       p2 <- desplot::desplot(REP ~ COLUMN + ROW, flip = FALSE,
                              out1 = REP,
-                             #out2.gpar = list(col = "black", lty = 3),
                              text = PLOT, cex = 1, shorten = "no",
                              data = df, xlab = "COLUMNS", ylab = "ROWS",
                              main = main,
                              show.key = FALSE,
                              gg = TRUE)
+      p2 <- add_gg_features(p2)
     }
   } else if (x$infoDesign$id_design == 7) {
       allSites <- vector(mode = "list", length = nlocs)
@@ -215,6 +220,8 @@ plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
                              main = main, 
                              show.key = FALSE,
                              gg = TRUE)
+      p1 <- add_gg_features(p1)
+      # Plot number layout
       df$REP <- as.factor(df$REP)
       p2 <- desplot::desplot(REP ~  COLUMN + ROW, flip = FALSE,
                              out1 = REP,
@@ -223,6 +230,7 @@ plot_RCBD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
                              main = main,
                              show.key = FALSE,
                              gg = TRUE)
+      p2 <- add_gg_features(p2)
   } 
   return(list(p1 = p1, p2 = p2, df = df, newBooks = newBooksSelected, 
               allSitesFieldbook = allSitesFieldbook))

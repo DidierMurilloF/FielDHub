@@ -138,6 +138,7 @@ alpha_lattice <- function(t = NULL,
   matdf <- incomplete_blocks(t = nt, k = nunits, r = r, l = l, plotNumber = plotNumber,
                              seed = seed, locationNames = locationNames,
                              data = data_alpha)
+  blocksModel <- matdf$blocksModel
   lambda <- r*(k - 1)/(nt - 1)
   matdf <- matdf$fieldBook
   OutAlpha <- as.data.frame(matdf)
@@ -146,7 +147,7 @@ alpha_lattice <- function(t = NULL,
   infoDesign <- list(Reps = r, iBlocks = s, NumberTreatments = nt, NumberLocations = l, 
                      Locations = locationNames, seed = seed, lambda = lambda,
                      id_design = 12)
-  output <- list(infoDesign = infoDesign, fieldBook = OutAlpha)
+  output <- list(infoDesign = infoDesign, fieldBook = OutAlpha, blocksModel = blocksModel)
   class(output) <- "FielDHub"
   return(invisible(output))
 }

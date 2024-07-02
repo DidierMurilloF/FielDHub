@@ -114,6 +114,7 @@ square_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101
   matdf <- incomplete_blocks(t = nt, k = nunits, r = r, l = l, plotNumber = plotNumber,
                              seed = seed, locationNames = locationNames,
                              data = data_square)
+  blocksModel <- matdf$blocksModel
   matdf <- matdf$fieldBook
   OutSquare_Lattice <- as.data.frame(matdf)
   OutSquare_Lattice$LOCATION <- factor(OutSquare_Lattice$LOCATION, levels = locationNames)
@@ -123,7 +124,11 @@ square_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101
   infoDesign <- list(Reps = r, IBlocks = s, NumberTreatments = nt, NumberLocations = l, 
                      Locations = locationNames, seed = seed, lambda = lambda,
                      id_design = 10)
-  output <- list(infoDesign = infoDesign, fieldBook = OutSquare_Lattice)
+  output <- list(
+    infoDesign = infoDesign, 
+    fieldBook = OutSquare_Lattice, 
+    blocksModel = blocksModel
+  )
   class(output) <- "FielDHub"
   return(invisible(output))
 }

@@ -38,11 +38,6 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
         dplyr::mutate(ROW = z,
                       COLUMN = rep(rep(1:iBlocks, each = sizeIblocks), n_Reps))
       df0 <- x$bookROWCol
-      # df0 <- df0[order(df0$ROW, decreasing = FALSE), ]
-      # nCols <- max(df0$COLUMN)
-      # newPlots <- planter_transform(plots = plots, planter = planter, reps = n_Reps, 
-      #                               cols = nCols, units = NULL)
-      # df0$PLOT <- newPlots
       books0[[1]] <- df0
       #books1
       if ((sizeIblocks %% 2 == 0 || sqrt(sizeIblocks) %% 1 == 0) & iBlocks %% 2 != 0) {
@@ -150,11 +145,6 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
             dplyr::mutate(ROW = z_rows,
                           COLUMN = z_cols_new)
           df <- x$bookROWCol
-          # df <- df[order(df$ROW, decreasing = FALSE), ]
-          # nCols <- max(df$COLUMN)
-          # newPlots <- planter_transform(plots = plots, planter = planter, reps = n_Reps, 
-          #                               cols = nCols, units = NULL)
-          # df$PLOT <- newPlots
           books2[[k]] <- df
         }
       }
@@ -207,11 +197,6 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
             dplyr::mutate(ROW = z_rows,
                           COLUMN = z_cols_new)
           df <- x$bookROWCol
-          # df <- df[order(df$ROW, decreasing = FALSE), ]
-          # nCols <- max(df$COLUMN)
-          # newPlots <- planter_transform(plots = plots, planter = planter, reps = n_Reps, 
-          #                               cols = nCols, units = NULL)
-          # df$PLOT <- newPlots
           books3[[k]] <- df
         }
       }
@@ -220,12 +205,6 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
         dplyr::mutate(ROW = rep(rep(1:iBlocks, each = sizeIblocks), n_Reps),
                       COLUMN = z)
       df4 <- x$bookROWCol
-      #df4 <- df4[order(df4$ROW, decreasing = FALSE), ]
-      # nRows <- max(df4$ROW)
-      # nCols <- max(df4$COLUMN)
-      # newPlots <- planter_transform(plots = plots, planter = planter, reps = n_Reps, cols = nCols,
-      #                               mode = "Horizontal", units = NULL)
-      # df4$PLOT <- newPlots
       books4[[1]] <- df4
     }else if (stacked == "grid_panel") {
       if (n_Reps > 2) {
@@ -325,9 +304,6 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
                            cex = 1,
                            shorten = "no",
                            out1 = REP,
-                           #out1 = WHOLE_PLOT,
-                           #col = WHOLE_PLOT,
-                           #out1.gpar = list(col = "black"), 
                            out1.gpar = list(col = "grey"),
                            data = df, 
                            xlab = "COLUMNS", 
@@ -335,7 +311,9 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
                            main = main, 
                            show.key = FALSE, 
                            gg = TRUE)
-    
+
+    p1 <- add_gg_features(p1)
+    # Plot number layout
     p2 <- desplot::desplot(REP ~ COLUMN + ROW, flip = FALSE,
                            out1 = REP,
                            out2.gpar=list(col = "gray50", lwd = 1, lty = 1),
@@ -345,6 +323,8 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
                            show.key = FALSE,
                            key.cex = 0.7, 
                            gg = TRUE)
+    # Explicitly remove all legends
+    p2 <- add_gg_features(p2)
   } else if (x$infoDesign$id_design == 6) {
     allSites <- vector(mode = "list", length = nlocs)
     for (st in 1:nlocs) {
@@ -374,7 +354,6 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
                            out2 = WHOLE_PLOT,
                            col = WHOLE_PLOT,
                            out1.gpar = list(col = "black",lwd = 1, lty = 3),
-                           #out2.gpar=list(col = "red", lwd = 2, lty = 1),
                            text = TRT_COMB, 
                            cex = 1, 
                            shorten = "no",
@@ -385,8 +364,9 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
                            show.key = FALSE, 
                            gg=TRUE)
     
-
+    p1 <- add_gg_features(p1)
     
+    # Plot number plot layout
     p2 <- desplot::desplot(REP ~ COLUMN + ROW, flip = FALSE,
                            out1 = REP,
                            out2.gpar=list(col = "gray50", lwd = 1, lty = 1),
@@ -396,6 +376,7 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
                            show.key = FALSE, key.cex = 0.7, 
                            gg = TRUE)
     
+    p2 <- add_gg_features(p2)
   }
   return(list(p1 = p1, p2 = p2, df = df, 
               newBooks = newBooksSelected, 

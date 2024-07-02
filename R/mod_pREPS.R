@@ -165,10 +165,15 @@ mod_pREPS_ui <- function(id){
 					),
 					br(),
 					br(),
-					shinycssloaders::withSpinner(
-					verbatimTextOutput(outputId = ns("summary_prep"), 
-										placeholder = FALSE), 
-					type = 4
+					div(
+					  shinycssloaders::withSpinner(
+					    verbatimTextOutput(
+					      outputId = ns("summary_prep"), 
+					      placeholder = FALSE
+					     ), 
+					    type = 4
+					  ),
+					  style = "padding-right: 40px;"
 					)
 				),
 				tabPanel("Data Input", DT::DTOutput(ns("dataup.preps"))),
@@ -489,7 +494,7 @@ mod_pREPS_server <- function(id){
       test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
       if (test) {
         cat("Randomization was successful!", "\n", "\n")
-        print(pREPS_reactive())
+        print(pREPS_reactive(), n = 6)
       }
     })
     

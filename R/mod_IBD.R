@@ -109,6 +109,16 @@ mod_IBD_ui <- function(id) {
         width = 8,
         fluidRow(
           tabsetPanel(
+            tabPanel(
+              "Summary design",
+              br(),
+              shinycssloaders::withSpinner(
+                verbatimTextOutput(outputId = ns("summary_ibd"), 
+                                   placeholder = FALSE), 
+                type = 4
+              ),
+              style = "padding-right: 40px;"
+            ),
             tabPanel("Field Layout",
                      shinyjs::useShinyjs(),
                      shinyjs::hidden(
@@ -309,7 +319,6 @@ mod_IBD_server <- function(id) {
     }) |>
       bindEvent(input$RUN.ibd)
     
-    
     IBD_reactive <- reactive({
       req(get_data_ibd())
       
@@ -338,6 +347,12 @@ mod_IBD_server <- function(id) {
       
     }) |>
       bindEvent(input$RUN.ibd)
+    
+    output$summary_ibd <- renderPrint({
+      req(IBD_reactive())
+      cat("Randomization was successful!", "\n", "\n")
+      print(IBD_reactive(), n = 6)
+    })
     
     upDateSites <- eventReactive(input$RUN.ibd, {
       req(input$l.ibd)

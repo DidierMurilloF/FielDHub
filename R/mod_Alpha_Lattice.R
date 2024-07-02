@@ -78,6 +78,16 @@ mod_Alpha_Lattice_ui <- function(id) {
         width = 8,
         fluidRow(
           tabsetPanel(
+            tabPanel(
+              "Summary design",
+              br(),
+              shinycssloaders::withSpinner(
+                verbatimTextOutput(outputId = ns("summary_alpha_lattice"), 
+                                   placeholder = FALSE), 
+                type = 4
+              ),
+              style = "padding-right: 40px;"
+            ),
             tabPanel("Field Layout",
                      
                      # hidden .csv download button
@@ -293,6 +303,12 @@ mod_Alpha_Lattice_server <- function(id){
         locationNames = alpha_inputs()$site_names, 
         data = data_alpha
       )
+    })
+    
+    output$summary_alpha_lattice <- renderPrint({
+      req(ALPHA_reactive())
+      cat("Randomization was successful!", "\n", "\n")
+      print(ALPHA_reactive(), n = 6)
     })
     
     upDateSites <- reactive({

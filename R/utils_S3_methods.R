@@ -139,6 +139,10 @@ print.FielDHub <- function(x, n=10, ...){
     print(head(x$fieldBook, n=nhead_print, ...))
   }else if (x$infoDesign$id_design == 8) {
     cat("Incomplete Blocks Design", "\n\n")
+    #---------------------------------------------------------------------
+    cat("Efficiency of design:", "\n")
+    print(x$blocksModel)
+    cat("\n")
     cat("Information on the design parameters:", "\n")
     len <- length(x$infoDesign)
     str(x$infoDesign[1:(len-1)])
@@ -169,6 +173,10 @@ print.FielDHub <- function(x, n=10, ...){
     print(head(x$fieldBook, n=nhead_print, ...))
   }else if (x$infoDesign$id_design == 10) {
     cat("Square Lattice Design", "\n\n")
+    #---------------------------------------------------------------------
+    cat("Efficiency of design:", "\n")
+    print(x$blocksModel)
+    cat("\n")
     cat("Information on the design parameters:", "\n")
     len <- length(x$infoDesign)
     str(x$infoDesign[1:(len-1)])
@@ -184,6 +192,10 @@ print.FielDHub <- function(x, n=10, ...){
     print(head(x$fieldBook, n=nhead_print, ...))
   }else if (x$infoDesign$id_design == 11) {
     cat("Rectangular Lattice Design", "\n\n")
+    #---------------------------------------------------------------------
+    cat("Efficiency of design:", "\n")
+    print(x$blocksModel)
+    cat("\n")
     cat("Information on the design parameters:", "\n")
     len <- length(x$infoDesign)
     str(x$infoDesign[1:(len-1)])
@@ -199,6 +211,10 @@ print.FielDHub <- function(x, n=10, ...){
     print(head(x$fieldBook, n=nhead_print, ...))
   } else if (x$infoDesign$id_design == 12) {
     cat("Alpha Lattice Design", "\n\n")
+    #---------------------------------------------------------------------
+    cat("Efficiency of design:", "\n")
+    print(x$blocksModel)
+    cat("\n")
     cat("Information on the design parameters:", "\n")
     len <- length(x$infoDesign)
     str(x$infoDesign[1:(len-1)])
@@ -214,7 +230,7 @@ print.FielDHub <- function(x, n=10, ...){
     print(head(x$fieldBook, n=nhead_print, ...))
   } else if (x$infoDesign$id_design == 13) {
     cat("Partially Replicated Design", "\n\n")
-    cat("\n", "Replications within location:", "\n")
+    cat("Replications within location:", "\n")
     print(x$reps_info)
     cat("\n", "Information on the design parameters:", "\n")
     len <- length(x$infoDesign)
@@ -498,6 +514,10 @@ print.summary.FielDHub <- function(x, ...) {
     str(x$fieldBook)
   }else if (x$infoDesign$id_design == 10) {
     cat("Square Lattice:", "\n\n")
+    #---------------------------------------------------------------------
+    cat("1. Efficiency of design:", "\n")
+    str(x$blocksModel)
+    cat("\n")
     #---------------------------------------------------------------------
     cat("1. Information on the design parameters:", "\n")
     str(x$infoDesign)
