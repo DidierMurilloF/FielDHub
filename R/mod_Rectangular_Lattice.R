@@ -77,7 +77,7 @@ mod_Rectangular_Lattice_ui <- function(id){
         fluidRow(
           tabsetPanel(
             tabPanel(
-              "Summary design",
+              "Summary Design",
               br(),
               shinycssloaders::withSpinner(
                 verbatimTextOutput(outputId = ns("summary_rectangular_lattice"), 

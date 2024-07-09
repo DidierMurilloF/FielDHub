@@ -85,7 +85,7 @@ mod_Square_Lattice_ui <- function(id){
         fluidRow(
           tabsetPanel(
             tabPanel(
-              "Summary design",
+              "Summary Design",
               br(),
               div(
                 shinycssloaders::withSpinner(
