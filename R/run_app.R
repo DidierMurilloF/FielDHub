@@ -6,6 +6,7 @@
 #' @export
 #' @importFrom shiny shinyApp
 #' @importFrom golem with_golem_options
+
 run_app <- function(
   ...
 ) {
@@ -16,8 +17,6 @@ run_app <- function(
       ui = app_ui, 
       server = app_server
     ), 
-    golem_opts = list(
-      print('Hi, share and enjoy')
-    )
+    golem_opts = list()
   )
 }
