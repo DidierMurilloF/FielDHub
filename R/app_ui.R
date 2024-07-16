@@ -17,7 +17,7 @@ app_ui <- function(request) {
   tagList(
     golem_add_external_resources(),
     fluidPage(theme = shinythemes::shinytheme("flatly"),
-              navbarPage(title = "FielDHub v1.4.0", 
+              navbarPage(title = "FielDHub v1.4.1", 
                          tabPanel(
                            " Welcome!", icon = icon("home", lib = "glyphicon"),
                             suppressWarnings(

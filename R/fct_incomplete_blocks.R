@@ -57,8 +57,8 @@
 #' head(ibd2$fieldBook)
 #'
 #' @export
-incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101, locationNames = NULL,
-                              seed = NULL, data = NULL) {
+incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101, 
+                              locationNames = NULL, seed = NULL, data = NULL) {
 
   if (is.null(seed) || !is.numeric(seed)) seed <- runif(1, min = -50000, max = 50000)
   set.seed(seed)
@@ -137,17 +137,12 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
   blocks_model <- list()
   for (i in 1:l) {
     mydes <- blocksdesign::blocks(treatments = nt, replicates = r, blocks = list(r, b), seed = NULL)
-    # print("---Blocks Model original design:---")
-    # print(mydes$Blocks_model)
     mydes <- rerandomize_ibd(ibd_design = mydes)
-    # print("---Blocks Model re-randomized design:---")
-    # print(mydes$Blocks_model_new)
     matdf <- base::data.frame(list(LOCATION = rep(locationNames[i], each = N)))
     matdf$PLOT <- as.numeric(unlist(ibd_plots[[i]]))
     matdf$BLOCK <- rep(c(1:r), each = nt)
     matdf$iBLOCK <- rep(c(1:b), each = k)
     matdf$UNIT <- rep(c(1:k), nincblock)
-    # matdf$TREATMENT <- mydes$Design[,4]
     matdf$TREATMENT <- mydes$Design_new[,4]
     colnames(matdf) <- c("LOCATION","PLOT", "REP", "IBLOCK", "UNIT", "ENTRY")
     outIBD_loc[[i]] <- matdf

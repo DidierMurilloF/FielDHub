@@ -12,6 +12,7 @@ row_column(
   plotNumber = 101,
   locationNames = NULL,
   seed = NULL,
+  iterations = 1000,
   data = NULL
 )
 }
@@ -29,6 +30,8 @@ row_column(
 \item{locationNames}{(optional) Names for each location.}
 
 \item{seed}{(optional) Real number that specifies the starting seed to obtain reproducible designs.}
+
+\item{iterations}{Number of iterations for design optimization. By default \code{iterations = 1000}.}
 
 \item{data}{(optional) Data frame with label list of treatments}
 }
