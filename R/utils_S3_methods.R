@@ -46,7 +46,7 @@ print.FielDHub <- function(x, n=10, ...){
         "First observations of the data frame with the CRD field book:",
         "\n")
     print(head(x$fieldBook, n=nhead_print, ...))
-  }else if (x$infoDesign$id_design == 2){
+  } else if (x$infoDesign$id_design == 2){
     cat("Randomized Complete Block Design (RCBD):", "\n\n")
     #-----------------------------------------------------------
     cat("Information on the design parameters:", "\n")
@@ -62,7 +62,7 @@ print.FielDHub <- function(x, n=10, ...){
         "First observations of the data frame with the RCBD field book:",
         "\n")
     print(head(x$fieldBook, n=nhead_print, ...))
-  }else if (x$infoDesign$id_design == 3){
+  } else if (x$infoDesign$id_design == 3){
     cat("Latin Square Design:", "\n\n")
     cat("Information on the design parameters:", "\n")
     len <- length(x$infoDesign)
@@ -92,7 +92,7 @@ print.FielDHub <- function(x, n=10, ...){
         "First observations of the data frame with the full_factorial field book:",
         "\n")
     print(head(x$fieldBook, n=nhead_print, ...))
-  }else if (x$infoDesign$id_design == 5) {
+  } else if (x$infoDesign$id_design == 5) {
     cat("Split Plot Design", "\n\n")
     cat("Information on the design parameters:", "\n")
     len <- length(x$infoDesign)
@@ -107,7 +107,7 @@ print.FielDHub <- function(x, n=10, ...){
         "First observations of the data frame with the split_plot field book:",
         "\n")
     print(head(x$fieldBook, n=nhead_print, ...))
-  }else if (x$infoDesign$id_design == 6) {
+  } else if (x$infoDesign$id_design == 6) {
     cat("Split-Split Plot Design", "\n\n")
     cat("Information on the design parameters:", "\n")
     len <- length(x$infoDesign)
@@ -122,7 +122,7 @@ print.FielDHub <- function(x, n=10, ...){
         "First observations of the data frame with the split_split_plot field book:",
         "\n")
     print(head(x$fieldBook, n=nhead_print, ...))
-  }else if (x$infoDesign$id_design == 7) {
+  } else if (x$infoDesign$id_design == 7) {
     cat("Strip Plot Design", "\n\n")
     cat("Information on the design parameters:", "\n")
     len <- length(x$infoDesign)
@@ -137,7 +137,7 @@ print.FielDHub <- function(x, n=10, ...){
         "First observations of the data frame with the strip_plot field book:",
         "\n")
     print(head(x$fieldBook, n=nhead_print, ...))
-  }else if (x$infoDesign$id_design == 8) {
+  } else if (x$infoDesign$id_design == 8) {
     cat("Incomplete Blocks Design", "\n\n")
     #---------------------------------------------------------------------
     cat("Efficiency of design:", "\n")
@@ -156,8 +156,12 @@ print.FielDHub <- function(x, n=10, ...){
         "First observations of the data frame with the incomplete_blocks field book:",
         "\n")
     print(head(x$fieldBook, n=nhead_print, ...))
-  }else if (x$infoDesign$id_design == 9) {
+  } else if (x$infoDesign$id_design == 9) {
     cat("Row Column Design", "\n\n")
+    #---------------------------------------------------------------------
+    cat("First location efficiency of design:", "\n")
+    print(x$blocksModel[[1]])
+    cat("\n")
     cat("Information on the design parameters:", "\n")
     len <- length(x$infoDesign)
     str(x$infoDesign[1:(len-1)])
@@ -171,7 +175,7 @@ print.FielDHub <- function(x, n=10, ...){
         "First observations of the data frame with the row_column field book:",
         "\n")
     print(head(x$fieldBook, n=nhead_print, ...))
-  }else if (x$infoDesign$id_design == 10) {
+  } else if (x$infoDesign$id_design == 10) {
     cat("Square Lattice Design", "\n\n")
     #---------------------------------------------------------------------
     cat("Efficiency of design:", "\n")
@@ -190,7 +194,7 @@ print.FielDHub <- function(x, n=10, ...){
         "First observations of the data frame with the square_lattice field book:",
         "\n")
     print(head(x$fieldBook, n=nhead_print, ...))
-  }else if (x$infoDesign$id_design == 11) {
+  } else if (x$infoDesign$id_design == 11) {
     cat("Rectangular Lattice Design", "\n\n")
     #---------------------------------------------------------------------
     cat("Efficiency of design:", "\n")
@@ -277,7 +281,7 @@ print.FielDHub <- function(x, n=10, ...){
         "First observations of the data frame with the RCBD_augmented field book:",
         "\n")
     print(head(x$fieldBook, n=nhead_print, ...))
-  }else if (x$infoDesign$id_design == 15) {
+  } else if (x$infoDesign$id_design == 15) {
     cat("Un-replicated Diagonal Arrangement Design", "\n\n")
     cat("Information on the design parameters:", "\n")
     len <- length(x$infoDesign)
@@ -322,7 +326,7 @@ print.FielDHub <- function(x, n=10, ...){
         "First observations of the data frame with the optimized_arrangement field book:",
         "\n")
     print(head(x$fieldBook, n=nhead_print, ...))
-  }else if (x$infoDesign$id_design == 17) {
+  } else if (x$infoDesign$id_design == 17) {
     cat("Split families:", "\n\n")
     #---------------------------------------------------------------------
     # Head

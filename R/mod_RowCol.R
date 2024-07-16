@@ -46,7 +46,7 @@ mod_RowCol_ui <- function(id){
                      ns = ns,
                      numericInput(ns("t.rcd"), 
                                   label = "Input # of Treatments:",
-                                  value = 36,
+                                  value = 24,
                                   min = 2),
                    ),
                    fluidRow(
@@ -110,6 +110,16 @@ mod_RowCol_ui <- function(id){
         width = 8,
         fluidRow(
           tabsetPanel(
+            tabPanel(
+              "Summary Design",
+              br(),
+              shinycssloaders::withSpinner(
+                verbatimTextOutput(outputId = ns("summary_row_column"), 
+                                   placeholder = FALSE), 
+                type = 4
+              ),
+              style = "padding-right: 40px;"
+            ),
             tabPanel("Field Layout",
                      shinyjs::useShinyjs(),
                      shinyjs::hidden(downloadButton(ns("downloadCsv.rcd"), 
@@ -332,6 +342,12 @@ mod_RowCol_server <- function(id){
       
     }) |>
       bindEvent(input$RUN.rcd)
+    
+    output$summary_row_column <- renderPrint({
+      req(RowCol_reactive())
+      cat("Randomization was successful!", "\n", "\n")
+      print(RowCol_reactive(), n = 6)
+    })
     
     upDateSites <- reactive({
       req(input$l.rcd)
