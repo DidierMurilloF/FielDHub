@@ -51,11 +51,12 @@ hence, design is suboptimal. The randomization can be done across locations.
 }
 \examples{
 
-# Example 1: Generates a row-column design with 3 full blocks and 36 treatments
+# Example 1: Generates a row-column design with 3 full blocks and 24 treatments
 # and 6 rows. This for one location.
-rowcold1 <- row_column(t = 36, nrows = 6, r = 3, l = 1, 
+rowcold1 <- row_column(t = 24, nrows = 6, r = 3, l = 1, 
                        plotNumber= 101, 
                        locationNames = "Loc1",
+                       iterations = 500,
                        seed = 21)
 rowcold1$infoDesign
 rowcold1$resolvableBlocks
@@ -72,6 +73,7 @@ rowcold2 <- row_column(t = 30, nrows = 5, r = 3, l = 1,
                        plotNumber= c(101,1001), 
                        locationNames = c("A", "B"),
                        seed = 15,
+                       iterations = 500,
                        data = treatment_list)
 rowcold2$infoDesign
 rowcold2$resolvableBlocks

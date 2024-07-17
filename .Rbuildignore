@@ -42,3 +42,6 @@ $run_dev.*
 ^vignettes/incomplete_blocks\.Rmd$
 ^vignettes/rectangular_lattice\.Rmd$
 ^vignettes/square_lattice\.Rmd$
+^vignettes/sparse_allocation\.Rmd$
+^vignettes/optimized_arrangement\.Rmd$
+

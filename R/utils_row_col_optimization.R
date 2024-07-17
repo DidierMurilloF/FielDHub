@@ -1,6 +1,6 @@
 # Function to randomly swap a pair of treatments within a random 
 # level of Level_2 for all levels of Level_1
-#' @export
+#' @noRd
 swap_treatments <- function(df) {
   # Split the dataframe by Level_1
   df_split <- split(df, df$Level_1)
@@ -36,7 +36,7 @@ swap_treatments <- function(df) {
 }
 
 # Function to improve A-Efficiency for Level 2
-#' @export
+#' @noRd
 improve_efficiency <- function(design, iterations, seed) {
   set.seed(seed)
   # Initial design
@@ -76,7 +76,7 @@ improve_efficiency <- function(design, iterations, seed) {
 }
 
 # Function to calculate and return combined BlockEfficiencies
-#' @export
+#' @noRd
 report_efficiency <- function(design) {
   # Calculate row block efficiencies
   row_blocks <- design |> 
