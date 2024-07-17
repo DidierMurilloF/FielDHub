@@ -25,7 +25,7 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, layout = 1,
     plots <- NewBook$PLOT
     if (x$infoDesign$id_design == 9) {
       plots <- NewBook$PLOT
-      NewROWS1 <- rep(1:(rsRep*n_Reps), each = csRep)
+      NewROWS1 <- rep(1:(rsRep * n_Reps), each = csRep)
       NewCOLUMNS1 <- NewBook$COLUMN
       NewROWS2 <- NewBook$ROW
     } else if (x$infoDesign$id_design == 7) {

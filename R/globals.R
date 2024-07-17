@@ -32,4 +32,7 @@ utils::globalVariables(c("ENTRY",
                          "Times", 
                          "all_consecutive", 
                          "are_consecutive", 
-                         "plots", "arcbd_plot", "new_order_treatments"))
+                         "plots", "arcbd_plot", "new_order_treatments", 
+                         "LABEL_TREATMENT",
+                         "Level", 
+                         "Level_3"))

@@ -40,11 +40,12 @@
 #'
 #' @examples
 #' 
-#' # Example 1: Generates a row-column design with 3 full blocks and 36 treatments
+#' # Example 1: Generates a row-column design with 3 full blocks and 24 treatments
 #' # and 6 rows. This for one location.
-#' rowcold1 <- row_column(t = 36, nrows = 6, r = 3, l = 1, 
+#' rowcold1 <- row_column(t = 24, nrows = 6, r = 3, l = 1, 
 #'                        plotNumber= 101, 
 #'                        locationNames = "Loc1",
+#'                        iterations = 500,
 #'                        seed = 21)
 #' rowcold1$infoDesign
 #' rowcold1$resolvableBlocks
@@ -61,6 +62,7 @@
 #'                        plotNumber= c(101,1001), 
 #'                        locationNames = c("A", "B"),
 #'                        seed = 15,
+#'                        iterations = 500,
 #'                        data = treatment_list)
 #' rowcold2$infoDesign
 #' rowcold2$resolvableBlocks
@@ -164,7 +166,10 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
         PLOT = plots, 
         ENTRY = treatments) |>
       dplyr::mutate(
-        REP = as.numeric(factor(REP, levels = unique(REP))),
+        REP = as.numeric(factor(REP, levels = unique(REP)))
+      ) |> 
+      dplyr::group_by(REP) |>
+      dplyr::mutate(
         COLUMN = as.numeric(factor(COLUMN, levels = unique(COLUMN))),
         ROW = as.numeric(factor(ROW, levels = unique(ROW)))
       ) |>
@@ -179,7 +184,7 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
   out_row_col <- dplyr::bind_rows(out_row_col_loc)
   out_row_col$ENTRY <- as.numeric(out_row_col$ENTRY)
   
-  if(lookup) {
+  if (lookup) {
     out_row_col <- dplyr::inner_join(out_row_col, dataLookUp, by = "ENTRY")
     out_row_col <- out_row_col |> 
       dplyr::rename(TREATMENT = LABEL_TREATMENT) |> 
@@ -191,10 +196,9 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
   ID <- 1:nrow(out_row_col)
   out_row_col_id <- cbind(ID, out_row_col)
   
+  out_row_col_id <- out_row_col_id[order(out_row_col_id$LOCATION, out_row_col_id$REP, out_row_col_id$ROW),]
   row_col_plots <- ibd_plot_numbers(nt = nt, plot.number = plotNumber, r = r, l = l)
   out_row_col_id$PLOT <- as.vector(unlist(row_col_plots))
-  
-  # return(list(fieldBook = out_row_col_id, blocks_model = blocks_model))
   
   loc <- levels(out_row_col_id$LOCATION)
   ib <- nt/k
