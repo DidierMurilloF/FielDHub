@@ -1,18 +1,37 @@
 #' Generates a Resolvable Row-Column Design (RowColD)
 #'
 #'
-#' @description It randomly generates a resolvable row-column designs (RowColD). 
-#' Note that design optimization is only done at the level of rows and not columns; 
-#' hence, design is suboptimal. The randomization can be done across locations.
+#' @description It randomly generates a resolvable row-column design (RowColD).
+#'  The design is optimized in both rows and columns blocking factors. The 
+#'  randomization can be done across multiple locations.
+#' 
+#' @details
+#' The Row-Column design in FielDHub is built in two stages. The first step 
+#' constructs the blocking factor \code{Columns} using Incomplete Block Units 
+#' from an incomplete block design that sets the number of incomplete blocks as 
+#' the number of \code{Columns} in the design, each of which has a dimension 
+#' equal to the number of \code{Rows}. Once this design is generated, the 
+#' \code{Rows} are used as the \code{Row} blocking factor that is optimized for 
+#' A-Efficiency, but levels within the original \code{Columns} are fixed.
+#' To optimize the \code{Rows} while maintaining the current optimized \code{Columns}, 
+#' we use a heuristic algorithm that swaps at random treatment positions within 
+#' a given \code{Column (Block)} also selected at random. The algorithm begins 
+#' by calculating the A-Efficiency on the initial design, performs a swap iteration, 
+#' recalculates the A-Efficiency on the resulting design, and compares it with 
+#' the previous one to decide whether to keep or discard the new design. This 
+#' iterative process is repeated, by default, 1,000 times.
 #'
 #' @param t Number of  treatments.
 #' @param nrows Number of rows of a full resolvable replicate. 
 #' @param r Number of blocks (full resolvable replicates).
 #' @param l Number of locations. By default \code{l = 1}.
-#' @param plotNumber Numeric vector with the starting plot number for each location. By default \code{plotNumber = 101}.
-#' @param seed (optional) Real number that specifies the starting seed to obtain reproducible designs.
+#' @param plotNumber Numeric vector with the starting plot number for each 
+#' location. By default \code{plotNumber = 101}.
+#' @param seed (optional) Real number that specifies the starting seed to obtain 
+#' reproducible designs.
 #' @param locationNames (optional) Names for each location.
-#' @param iterations Number of iterations for design optimization. By default \code{iterations = 1000}.
+#' @param iterations Number of iterations for design optimization. By 
+#' default \code{iterations = 1000}.
 #' @param data (optional) Data frame with label list of treatments
 #' 
 #' @author Didier Murillo [aut],
@@ -35,8 +54,8 @@
 #'
 #'
 #' @references
-#' Edmondson., R. N. (2021). blocksdesign: Nested and crossed block designs for factorial and
-#' unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign
+#' Edmondson., R. N. (2021). blocksdesign: Nested and crossed block designs for 
+#' factorial and unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign
 #'
 #' @examples
 #' 
