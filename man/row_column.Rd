@@ -25,13 +25,16 @@ row_column(
 
 \item{l}{Number of locations. By default \code{l = 1}.}
 
-\item{plotNumber}{Numeric vector with the starting plot number for each location. By default \code{plotNumber = 101}.}
+\item{plotNumber}{Numeric vector with the starting plot number for each 
+location. By default \code{plotNumber = 101}.}
 
 \item{locationNames}{(optional) Names for each location.}
 
-\item{seed}{(optional) Real number that specifies the starting seed to obtain reproducible designs.}
+\item{seed}{(optional) Real number that specifies the starting seed to obtain 
+reproducible designs.}
 
-\item{iterations}{Number of iterations for design optimization. By default \code{iterations = 1000}.}
+\item{iterations}{Number of iterations for design optimization. By 
+default \code{iterations = 1000}.}
 
 \item{data}{(optional) Data frame with label list of treatments}
 }
@@ -98,8 +101,8 @@ head(rowcold2$fieldBook,12)
 
 }
 \references{
-Edmondson., R. N. (2021). blocksdesign: Nested and crossed block designs for factorial and
-unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign
+Edmondson., R. N. (2021). blocksdesign: Nested and crossed block designs for 
+factorial and unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign
 }
 \author{
 Didier Murillo [aut],
