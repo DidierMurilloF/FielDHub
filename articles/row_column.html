@@ -98,11 +98,11 @@ Design</strong> using both the FielDHub Shiny App and the scripting
 function <code><a href="../reference/row_column.html">row_column()</a></code> from the <code>FielDHub</code>
 package.</p>
 <div class="section level2">
-<h2 id="row-column-design">Row-Column Design<a class="anchor" aria-label="anchor" href="#row-column-design"></a>
+<h2 id="resolvable-row-column-design-two-stage-generation">Resolvable Row-Column Design (Two Stage Generation)<a class="anchor" aria-label="anchor" href="#resolvable-row-column-design-two-stage-generation"></a>
 </h2>
-<p>It randomly generates a resolvable row-column design (RowColD).The
-design is optimized in both rows and columns blocking factors. The
-randomization can be done across multiple locations.</p>
+<p>It randomly generates a resolvable row-column design.The design is
+optimized in both rows and columns blocking factors. The randomization
+can be done across multiple locations.</p>
 </div>
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
@@ -128,7 +128,7 @@ design. This iterative process is repeated, by default, 1000 times.</p>
 <h2 id="using-the-fieldhub-shiny-app">1. Using the FielDHub Shiny App<a class="anchor" aria-label="anchor" href="#using-the-fieldhub-shiny-app"></a>
 </h2>
 <p>To generate a Row-Column Design using the FielDHub app:</p>
-<p>First, go to <strong>Lattice Designs</strong> &gt; <strong>Resolvable
+<p>First, go to <strong>Other Designs</strong> &gt; <strong>Resolvable
 Row-Column Design (RCD)</strong></p>
 <p>Then, follow the following steps where we will show how to generate a
 Row-Column Design with 45 treatments, 5 rows and 3 reps.</p>
@@ -330,9 +330,9 @@ randomizations.</li>
 <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">rcd</span><span class="op">)</span></span></code></pre></div>
-<pre><code>Row Column Design 
+<pre><code>Resolvable Row-Column Design (Two Stage Generation) 
 
-First location efficiency of design: 
+Efficiency of design: 
    Level Blocks D-Efficiency A-Efficiency   A-Bound
 1    Rep      3    1.0000000    1.0000000 1.0000000
 2    Row     15    0.8940648    0.8767593 0.8842892
