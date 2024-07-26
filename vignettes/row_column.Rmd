@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 
 This vignette shows how to generate a **row-column Design** using both the FielDHub Shiny App and the scripting function `row_column()` from the `FielDHub` package.
 
-## Resolvable Row-Column Design (Two Stage Generation)
+## Resolvable Row-Column Design (Two-Step Optimization)
 
 It randomly generates a resolvable row-column design.The design is  optimized in 
 both rows and columns blocking factors. The randomization can be done across multiple locations.
@@ -45,7 +45,7 @@ iterative process is repeated, by default, 1000 times.
 
 To generate a Row-Column Design using the FielDHub app:
 
-First, go to **Other Designs** > **Resolvable Row-Column Design (RCD)**
+First, go to **Other Designs** > **Resolvable Row-Column Design (RRCD)**
 
 Then, follow the following steps where we will show how to generate a Row-Column Design with 45 treatments, 5 rows and 3 reps.
 

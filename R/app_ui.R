@@ -87,7 +87,7 @@ app_ui <- function(request) {
                                     tabPanel("Incomplete Blocks Design (IBD)",
                                              mod_IBD_ui("IBD_ui_1")
                                     ),
-                                    tabPanel("Resolvable Row-Column Design (RCD)",
+                                    tabPanel("Resolvable Row-Column Design (RRCD)",
                                              mod_RowCol_ui("RowCol_ui_1")
                                     )
                          ),

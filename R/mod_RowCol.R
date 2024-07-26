@@ -46,7 +46,7 @@ mod_RowCol_ui <- function(id){
                      ns = ns,
                      numericInput(ns("t.rcd"), 
                                   label = "Input # of Treatments:",
-                                  value = 24,
+                                  value = 42,
                                   min = 2),
                    ),
                    fluidRow(
@@ -58,7 +58,7 @@ mod_RowCol_ui <- function(id){
                      column(6,style=list("padding-left: 5px;"),
                             numericInput(ns("r.rcd"), 
                                          label = "Input # of Full Reps:",
-                                         value = 3, 
+                                         value = 2, 
                                          min = 2)
                      )
                    ),
@@ -84,7 +84,7 @@ mod_RowCol_ui <- function(id){
                    ),
                    numericInput(ns("seed.rcd"), 
                                 label = "Random Seed:", 
-                                value = 1),
+                                value = 2437),
                    fluidRow(
                      column(6,
                             actionButton(

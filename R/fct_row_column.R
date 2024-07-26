@@ -212,20 +212,22 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
       dplyr::select(LOCATION, PLOT, REP, ROW, COLUMN, ENTRY, TREATMENT)
   }
   
-  ID <- 1:nrow(out_row_col)
-  out_row_col_id <- cbind(ID, out_row_col)
+  out_row_col_id <- out_row_col
   
   out_row_col_id <- out_row_col_id[order(out_row_col_id$LOCATION, out_row_col_id$REP, out_row_col_id$ROW),]
   row_col_plots <- ibd_plot_numbers(nt = nt, plot.number = plotNumber, r = r, l = l)
   out_row_col_id$PLOT <- as.vector(unlist(row_col_plots))
   
-  loc <- levels(out_row_col_id$LOCATION)
+  ID <- 1:nrow(out_row_col_id)
+  out_row_col_fieldbook <- cbind(ID, out_row_col_id)
+  
+  loc <- levels(out_row_col_fieldbook$LOCATION)
   ib <- nt/k
   Resolvable_rc_reps <- vector(mode = "list", length = r*l)
   w <- 1
   for (sites in 1:l) {
     for (j in 1:r) {
-      z <- out_row_col_id
+      z <- out_row_col_fieldbook
       z <- subset(z, z$LOCATION == loc[sites] & z$REP == j)
       if (is.null(data)){
         Resolvable_rc_reps[[w]] <- matrix(data = as.vector(z$ENTRY), nrow = nunits,
@@ -248,7 +250,7 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
     z <- z + 1
   }
 
-  df <- out_row_col_id
+  df <- out_row_col_fieldbook
   trt <- "ENTRY"
   c1 <- concurrence_matrix(df=df, trt=trt, target='REP')
   c2 <- concurrence_matrix (df=df, trt=trt, target='ROW')
@@ -270,7 +272,7 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
     blocksModel = blocks_model,
     resolvableBlocks = NEW_Resolvable,
     concurrence = new_summ,
-    fieldBook = out_row_col_id
+    fieldBook = out_row_col_fieldbook
   )
   class(output) <- "FielDHub"
   return(invisible(output))

@@ -25,6 +25,7 @@ PYT
 RCB
 RCBD
 RCD
+RRCD
 RowColD
 SPD
 SSPD
@@ -40,19 +41,14 @@ approximatelly
 blocksdesign
 cranlogs
 de
-didiermurillof
 doi
 dropdown
 extensibility
 fieldLayout
 fieldbook
-github
 hirizontal
 https
 indexable
-io
-iter
-magrittr
 priori
 suboptimal
 un

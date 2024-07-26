@@ -157,7 +157,7 @@ print.FielDHub <- function(x, n=10, ...){
         "\n")
     print(head(x$fieldBook, n=nhead_print, ...))
   } else if (x$infoDesign$id_design == 9) {
-    cat("Resolvable Row-Column Design (Two Stage Generation)", "\n\n")
+    cat("Resolvable Row-Column Design (Two-Step Optimization)", "\n\n")
     #---------------------------------------------------------------------
     cat("Efficiency of design:", "\n")
     print(x$blocksModel[[1]])
