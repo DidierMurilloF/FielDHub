@@ -173,13 +173,19 @@ factorial and unstructured treatment sets. https://CRAN.R-project.org/package=bl
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Example 1: Generates a row-column design with 3 full blocks and 24 treatments</span></span></span>
-<span class="r-in"><span><span class="co"># and 6 rows. This for one location.</span></span></span>
-<span class="r-in"><span><span class="va">rowcold1</span> <span class="op">&lt;-</span> <span class="fu">row_column</span><span class="op">(</span>t <span class="op">=</span> <span class="fl">24</span>, nrows <span class="op">=</span> <span class="fl">6</span>, r <span class="op">=</span> <span class="fl">3</span>, l <span class="op">=</span> <span class="fl">1</span>, </span></span>
-<span class="r-in"><span>                       plotNumber<span class="op">=</span> <span class="fl">101</span>, </span></span>
-<span class="r-in"><span>                       locationNames <span class="op">=</span> <span class="st">"Loc1"</span>,</span></span>
-<span class="r-in"><span>                       iterations <span class="op">=</span> <span class="fl">500</span>,</span></span>
-<span class="r-in"><span>                       seed <span class="op">=</span> <span class="fl">21</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Example 1: Generates a row-column design with 2 full blocks and 24 treatments</span></span></span>
+<span class="r-in"><span><span class="co"># and 6 rows. This for one location. This example uses 100 iterations for the optimization</span></span></span>
+<span class="r-in"><span><span class="co"># but 1000 is the default and recomended value.</span></span></span>
+<span class="r-in"><span><span class="va">rowcold1</span> <span class="op">&lt;-</span> <span class="fu">row_column</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  t <span class="op">=</span> <span class="fl">24</span>, </span></span>
+<span class="r-in"><span>  nrows <span class="op">=</span> <span class="fl">6</span>, </span></span>
+<span class="r-in"><span>  r <span class="op">=</span> <span class="fl">2</span>, </span></span>
+<span class="r-in"><span>  l <span class="op">=</span> <span class="fl">1</span>, </span></span>
+<span class="r-in"><span>  plotNumber<span class="op">=</span> <span class="fl">101</span>, </span></span>
+<span class="r-in"><span>  locationNames <span class="op">=</span> <span class="st">"Loc1"</span>,</span></span>
+<span class="r-in"><span>  iterations <span class="op">=</span> <span class="fl">100</span>,</span></span>
+<span class="r-in"><span>  seed <span class="op">=</span> <span class="fl">21</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">rowcold1</span><span class="op">$</span><span class="va">infoDesign</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $rows</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 6</span>
@@ -188,7 +194,7 @@ factorial and unstructured treatment sets. https://CRAN.R-project.org/package=bl
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $reps</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $treatments</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 24</span>
@@ -225,33 +231,25 @@ factorial and unstructured treatment sets. https://CRAN.R-project.org/package=bl
 <span class="r-out co"><span class="r-pr">#&gt;</span> [5,]   NA   NA   NA   NA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [6,]   NA   NA   NA   NA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Loc_Loc1$rep3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      [,1] [,2] [,3] [,4]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]   NA   NA   NA   NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]   NA   NA   NA   NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]   NA   NA   NA   NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]   NA   NA   NA   NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5,]   NA   NA   NA   NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [6,]   NA   NA   NA   NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">rowcold1</span><span class="op">$</span><span class="va">fieldBook</span>,<span class="fl">12</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    ID LOCATION PLOT REP ROW COLUMN ENTRY TREATMENT</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1   1     Loc1  101   1   1      1    24      G-24</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7   7     Loc1  102   1   1      2    22      G-22</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13 13     Loc1  103   1   1      3    16      G-16</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 19 19     Loc1  104   1   1      4     4       G-4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2   2     Loc1  105   1   2      1    15      G-15</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8   8     Loc1  106   1   2      2     1       G-1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14 14     Loc1  107   1   2      3     8       G-8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 20 20     Loc1  108   1   2      4     3       G-3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3   3     Loc1  109   1   3      1    21      G-21</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9   9     Loc1  110   1   3      2    11      G-11</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15 15     Loc1  111   1   3      3    10      G-10</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 21 21     Loc1  112   1   3      4     7       G-7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1   1     Loc1  101   1   1      1    13      G-13</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7   2     Loc1  102   1   1      2    23      G-23</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13  3     Loc1  103   1   1      3    10      G-10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19  4     Loc1  104   1   1      4    12      G-12</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   5     Loc1  105   1   2      1    20      G-20</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8   6     Loc1  106   1   2      2     8       G-8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14  7     Loc1  107   1   2      3     6       G-6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20  8     Loc1  108   1   2      4    19      G-19</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3   9     Loc1  109   1   3      1    24      G-24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9  10     Loc1  110   1   3      2    11      G-11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15 11     Loc1  111   1   3      3    21      G-21</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 21 12     Loc1  112   1   3      4     5       G-5</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Example 2: Generates a row-column design with 3 full blocks and 30 treatments</span></span></span>
-<span class="r-in"><span><span class="co"># and 5 rows, for one location.</span></span></span>
+<span class="r-in"><span><span class="co"># Example 2: Generates a row-column design with 2 full blocks and 30 treatments</span></span></span>
+<span class="r-in"><span><span class="co"># and 5 rows, for one location. This example uses 100 iterations for the optimization</span></span></span>
+<span class="r-in"><span><span class="co"># but 1000 is the default and recommended value.</span></span></span>
 <span class="r-in"><span><span class="co"># In this case, we show how to use the option data.</span></span></span>
 <span class="r-in"><span><span class="va">treatments</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"ND-"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">30</span>, sep <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">ENTRY</span> <span class="op">&lt;-</span> <span class="fl">1</span><span class="op">:</span><span class="fl">30</span></span></span>
@@ -264,13 +262,17 @@ factorial and unstructured treatment sets. https://CRAN.R-project.org/package=bl
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4     4      ND-4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5     5      ND-5</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6     6      ND-6</span>
-<span class="r-in"><span><span class="va">rowcold2</span> <span class="op">&lt;-</span> <span class="fu">row_column</span><span class="op">(</span>t <span class="op">=</span> <span class="fl">30</span>, nrows <span class="op">=</span> <span class="fl">5</span>, r <span class="op">=</span> <span class="fl">3</span>, l <span class="op">=</span> <span class="fl">1</span>, </span></span>
-<span class="r-in"><span>                       plotNumber<span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">101</span>,<span class="fl">1001</span><span class="op">)</span>, </span></span>
-<span class="r-in"><span>                       locationNames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                       seed <span class="op">=</span> <span class="fl">15</span>,</span></span>
-<span class="r-in"><span>                       iterations <span class="op">=</span> <span class="fl">500</span>,</span></span>
-<span class="r-in"><span>                       data <span class="op">=</span> <span class="va">treatment_list</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Length of plot numbers is larger than number of locations.</span>
+<span class="r-in"><span><span class="va">rowcold2</span> <span class="op">&lt;-</span> <span class="fu">row_column</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  t <span class="op">=</span> <span class="fl">30</span>, </span></span>
+<span class="r-in"><span>  nrows <span class="op">=</span> <span class="fl">5</span>, </span></span>
+<span class="r-in"><span>  r <span class="op">=</span> <span class="fl">2</span>, </span></span>
+<span class="r-in"><span>  l <span class="op">=</span> <span class="fl">1</span>, </span></span>
+<span class="r-in"><span>  plotNumber<span class="op">=</span> <span class="fl">1001</span>, </span></span>
+<span class="r-in"><span>  locationNames <span class="op">=</span> <span class="st">"A"</span>,</span></span>
+<span class="r-in"><span>  seed <span class="op">=</span> <span class="fl">15</span>,</span></span>
+<span class="r-in"><span>  iterations <span class="op">=</span> <span class="fl">100</span>,</span></span>
+<span class="r-in"><span>  data <span class="op">=</span> <span class="va">treatment_list</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">rowcold2</span><span class="op">$</span><span class="va">infoDesign</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $rows</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 5</span>
@@ -279,7 +281,7 @@ factorial and unstructured treatment sets. https://CRAN.R-project.org/package=bl
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 6</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $reps</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $treatments</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 30</span>
@@ -288,7 +290,7 @@ factorial and unstructured treatment sets. https://CRAN.R-project.org/package=bl
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $location_names</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "A"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $seed</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 15</span>
@@ -297,8 +299,8 @@ factorial and unstructured treatment sets. https://CRAN.R-project.org/package=bl
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 9</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="va">rowcold2</span><span class="op">$</span><span class="va">resolvableBlocks</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Loc_1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Loc_1$rep1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $Loc_A</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $Loc_A$rep1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      [,1] [,2] [,3] [,4] [,5] [,6]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1,] NA   NA   NA   NA   NA   NA  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [2,] NA   NA   NA   NA   NA   NA  </span>
@@ -306,15 +308,7 @@ factorial and unstructured treatment sets. https://CRAN.R-project.org/package=bl
 <span class="r-out co"><span class="r-pr">#&gt;</span> [4,] NA   NA   NA   NA   NA   NA  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [5,] NA   NA   NA   NA   NA   NA  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Loc_1$rep2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      [,1] [,2] [,3] [,4] [,5] [,6]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] NA   NA   NA   NA   NA   NA  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] NA   NA   NA   NA   NA   NA  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] NA   NA   NA   NA   NA   NA  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] NA   NA   NA   NA   NA   NA  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] NA   NA   NA   NA   NA   NA  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Loc_1$rep3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $Loc_A$rep2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      [,1] [,2] [,3] [,4] [,5] [,6]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1,] NA   NA   NA   NA   NA   NA  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [2,] NA   NA   NA   NA   NA   NA  </span>
@@ -325,18 +319,18 @@ factorial and unstructured treatment sets. https://CRAN.R-project.org/package=bl
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">rowcold2</span><span class="op">$</span><span class="va">fieldBook</span>,<span class="fl">12</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    ID LOCATION PLOT REP ROW COLUMN ENTRY TREATMENT</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1   1        1  101   1   1      1    26     ND-26</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6   6        1  102   1   1      2     8      ND-8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11 11        1  103   1   1      3     9      ND-9</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16 16        1  104   1   1      4    18     ND-18</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 21 21        1  105   1   1      5    19     ND-19</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 26 26        1  106   1   1      6    21     ND-21</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2   2        1  107   1   2      1    11     ND-11</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7   7        1  108   1   2      2    15     ND-15</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12 12        1  109   1   2      3    22     ND-22</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 17 17        1  110   1   2      4    24     ND-24</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 22 22        1  111   1   2      5     7      ND-7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 27 27        1  112   1   2      6    28     ND-28</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1   1        A 1001   1   1      1     5      ND-5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6   2        A 1002   1   1      2     7      ND-7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11  3        A 1003   1   1      3    14     ND-14</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16  4        A 1004   1   1      4    23     ND-23</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 21  5        A 1005   1   1      5     9      ND-9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 26  6        A 1006   1   1      6    15     ND-15</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   7        A 1007   1   2      1    10     ND-10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7   8        A 1008   1   2      2    17     ND-17</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12  9        A 1009   1   2      3    13     ND-13</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17 10        A 1010   1   2      4     6      ND-6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 22 11        A 1011   1   2      5    29     ND-29</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 27 12        A 1012   1   2      6    20     ND-20</span>
 <span class="r-in"><span>  </span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

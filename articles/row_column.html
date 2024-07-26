@@ -98,7 +98,7 @@ Design</strong> using both the FielDHub Shiny App and the scripting
 function <code><a href="../reference/row_column.html">row_column()</a></code> from the <code>FielDHub</code>
 package.</p>
 <div class="section level2">
-<h2 id="resolvable-row-column-design-two-stage-generation">Resolvable Row-Column Design (Two Stage Generation)<a class="anchor" aria-label="anchor" href="#resolvable-row-column-design-two-stage-generation"></a>
+<h2 id="resolvable-row-column-design-two-step-optimization">Resolvable Row-Column Design (Two-Step Optimization)<a class="anchor" aria-label="anchor" href="#resolvable-row-column-design-two-step-optimization"></a>
 </h2>
 <p>It randomly generates a resolvable row-column design.The design is
 optimized in both rows and columns blocking factors. The randomization
@@ -129,7 +129,7 @@ design. This iterative process is repeated, by default, 1000 times.</p>
 </h2>
 <p>To generate a Row-Column Design using the FielDHub app:</p>
 <p>First, go to <strong>Other Designs</strong> &gt; <strong>Resolvable
-Row-Column Design (RCD)</strong></p>
+Row-Column Design (RRCD)</strong></p>
 <p>Then, follow the following steps where we will show how to generate a
 Row-Column Design with 45 treatments, 5 rows and 3 reps.</p>
 </div>
@@ -330,7 +330,7 @@ randomizations.</li>
 <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">rcd</span><span class="op">)</span></span></code></pre></div>
-<pre><code>Resolvable Row-Column Design (Two Stage Generation) 
+<pre><code>Resolvable Row-Column Design (Two-Step Optimization) 
 
 Efficiency of design: 
    Level Blocks D-Efficiency A-Efficiency   A-Bound
@@ -351,15 +351,15 @@ List of 7
  10 First observations of the data frame with the row_column field book: 
    ID LOCATION PLOT REP ROW COLUMN ENTRY TREATMENT
 1   1    FARGO  101   1   1      1    23      G-23
-6   6    FARGO  102   1   1      2    22      G-22
-11 11    FARGO  103   1   1      3    28      G-28
-16 16    FARGO  104   1   1      4     1       G-1
-21 21    FARGO  105   1   1      5    13      G-13
-26 26    FARGO  106   1   1      6    15      G-15
-31 31    FARGO  107   1   1      7    37      G-37
-36 36    FARGO  108   1   1      8    42      G-42
-41 41    FARGO  109   1   1      9    39      G-39
-2   2    FARGO  110   1   2      1    11      G-11</code></pre>
+6   2    FARGO  102   1   1      2    22      G-22
+11  3    FARGO  103   1   1      3    28      G-28
+16  4    FARGO  104   1   1      4     1       G-1
+21  5    FARGO  105   1   1      5    13      G-13
+26  6    FARGO  106   1   1      6    15      G-15
+31  7    FARGO  107   1   1      7    37      G-37
+36  8    FARGO  108   1   1      8    42      G-42
+41  9    FARGO  109   1   1      9    39      G-39
+2  10    FARGO  110   1   2      1    11      G-11</code></pre>
 </div>
 <div class="section level3">
 <h3 id="access-to-rcd-object">Access to <code>rcd</code> object<a class="anchor" aria-label="anchor" href="#access-to-rcd-object"></a>
@@ -380,15 +380,15 @@ book has columns for <code>ID</code>, <code>LOCATION</code>,
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">rcd</span><span class="op">$</span><span class="va">fieldBook</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
 <pre><code>   ID LOCATION PLOT REP ROW COLUMN ENTRY TREATMENT
 1   1    FARGO  101   1   1      1    23      G-23
-6   6    FARGO  102   1   1      2    22      G-22
-11 11    FARGO  103   1   1      3    28      G-28
-16 16    FARGO  104   1   1      4     1       G-1
-21 21    FARGO  105   1   1      5    13      G-13
-26 26    FARGO  106   1   1      6    15      G-15
-31 31    FARGO  107   1   1      7    37      G-37
-36 36    FARGO  108   1   1      8    42      G-42
-41 41    FARGO  109   1   1      9    39      G-39
-2   2    FARGO  110   1   2      1    11      G-11</code></pre>
+6   2    FARGO  102   1   1      2    22      G-22
+11  3    FARGO  103   1   1      3    28      G-28
+16  4    FARGO  104   1   1      4     1       G-1
+21  5    FARGO  105   1   1      5    13      G-13
+26  6    FARGO  106   1   1      6    15      G-15
+31  7    FARGO  107   1   1      7    37      G-37
+36  8    FARGO  108   1   1      8    42      G-42
+41  9    FARGO  109   1   1      9    39      G-39
+2  10    FARGO  110   1   2      1    11      G-11</code></pre>
 </div>
 <div class="section level3">
 <h3 id="plot-the-field-layout">Plot the field layout<a class="anchor" aria-label="anchor" href="#plot-the-field-layout"></a>
