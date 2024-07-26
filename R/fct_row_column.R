@@ -59,30 +59,42 @@
 #'
 #' @examples
 #' 
-#' # Example 1: Generates a row-column design with 3 full blocks and 24 treatments
-#' # and 6 rows. This for one location.
-#' rowcold1 <- row_column(t = 24, nrows = 6, r = 3, l = 1, 
-#'                        plotNumber= 101, 
-#'                        locationNames = "Loc1",
-#'                        iterations = 500,
-#'                        seed = 21)
+#' # Example 1: Generates a row-column design with 2 full blocks and 24 treatments
+#' # and 6 rows. This for one location. This example uses 100 iterations for the optimization
+#' # but 1000 is the default and recomended value.
+#' rowcold1 <- row_column(
+#'   t = 24, 
+#'   nrows = 6, 
+#'   r = 2, 
+#'   l = 1, 
+#'   plotNumber= 101, 
+#'   locationNames = "Loc1",
+#'   iterations = 100,
+#'   seed = 21
+#' )
 #' rowcold1$infoDesign
 #' rowcold1$resolvableBlocks
 #' head(rowcold1$fieldBook,12)
 #' 
-#' # Example 2: Generates a row-column design with 3 full blocks and 30 treatments
-#' # and 5 rows, for one location.
+#' # Example 2: Generates a row-column design with 2 full blocks and 30 treatments
+#' # and 5 rows, for one location. This example uses 100 iterations for the optimization
+#' # but 1000 is the default and recommended value.
 #' # In this case, we show how to use the option data.
 #' treatments <- paste("ND-", 1:30, sep = "")
 #' ENTRY <- 1:30
 #' treatment_list <- data.frame(list(ENTRY = ENTRY, TREATMENT = treatments))
 #' head(treatment_list)
-#' rowcold2 <- row_column(t = 30, nrows = 5, r = 3, l = 1, 
-#'                        plotNumber= c(101,1001), 
-#'                        locationNames = c("A", "B"),
-#'                        seed = 15,
-#'                        iterations = 500,
-#'                        data = treatment_list)
+#' rowcold2 <- row_column(
+#'   t = 30, 
+#'   nrows = 5, 
+#'   r = 2, 
+#'   l = 1, 
+#'   plotNumber= 1001, 
+#'   locationNames = "A",
+#'   seed = 15,
+#'   iterations = 100,
+#'   data = treatment_list
+#' )
 #' rowcold2$infoDesign
 #' rowcold2$resolvableBlocks
 #' head(rowcold2$fieldBook,12)
