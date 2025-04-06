@@ -121,7 +121,9 @@ partially_replicated <- function(
     seed = NULL, 
     exptName = NULL, 
     locationNames = NULL,
-    multiLocationData = FALSE,  
+    multiLocationData = FALSE, 
+    dist_method = "euclidean",
+    border_penalization = 0.5,
     data = NULL) {
     
     if (all(c("serpentine", "cartesian") != planter)) {
@@ -296,6 +298,8 @@ partially_replicated <- function(
             seed = seed, 
             optim = TRUE, 
             niter = 1000, 
+            dist_method = dist_method,
+            border_penalization = border_penalization,
             data = list_locs[[sites]]
         )
         rows_incidence[sites] <- prep$rows_incidence[length(prep$rows_incidence)]

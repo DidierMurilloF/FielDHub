@@ -61,6 +61,17 @@ mod_pREPS_ui <- function(id){
 				label = "# of Rep Per Group:",
 				value = "2,1")
 			),
+		sliderInput(ns("border_penalization"), 
+		            label = "Border Penalization", 
+		            min = 0.00, 
+		            max = 1.00, 
+		            value = 0.3),
+		selectInput(
+      ns("optimization_distance_method"), 
+      label = "Optimization Distance Method:", 
+      choices = c("Euclidean" = "euclidean", "Manhattan" = "manhattan"), 
+      selected = "manhattan"
+      ),
 			fluidRow(
 				column(
 					width = 6,
@@ -483,6 +494,8 @@ mod_pREPS_server <- function(id){
             exptName =  expt_name,
             locationNames = site_names, 
             planter = movement_planter,
+            border_penalization = input$border_penalization,
+            dist_method = input$optimization_distance_method,
             data = gen.list 
           )
       })
