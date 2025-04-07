@@ -17,7 +17,7 @@ partially_replicated(
   locationNames = NULL,
   multiLocationData = FALSE,
   dist_method = "euclidean",
-  border_penalization = 0.1,
+  border_penalization = 0.5,
   data = NULL
 )
 }
