@@ -688,7 +688,8 @@ mod_pREPS_server <- function(id){
         set.seed(seed_prep)
         for (sites in 1:locs) {
             df_loc <- subset(df.prep, LOCATION == loc_levels_factors[w])
-            fieldBook <- df_loc[, c(1,6,7,9)]
+            # fieldBook <- df_loc[, c(1,6,7,9)]
+            fieldBook <- df_loc |> dplyr::select(ID, ROW, COLUMN, ENTRY)
             dfSimulation <- AR1xAR1_simulation(
                 nrows = nrows_prep, 
                 ncols = ncols_prep, 
@@ -705,7 +706,7 @@ mod_pREPS_server <- function(id){
           dfSimulationList[[sites]] <- dfSimulation
           dataPrep <- df_loc
           df_prep <- cbind(dataPrep, round(dfSimulation[,7],2))
-          colnames(df_prep)[11] <- as.character(valsPREP$trail.prep)
+          colnames(df_prep)[12] <- as.character(valsPREP$trail.prep)
           df.prep_list[[sites]] <- df_prep
           w <- w + 1
         }
