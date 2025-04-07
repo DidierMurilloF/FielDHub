@@ -35,4 +35,4 @@ utils::globalVariables(c("ENTRY",
                          "plots", "arcbd_plot", "new_order_treatments", 
                          "LABEL_TREATMENT",
                          "Level", 
-                         "Level_3"))
+                         "Level_3", "ID", "YEAR"))

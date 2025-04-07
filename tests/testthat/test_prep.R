@@ -1,6 +1,5 @@
 library(testthat)
 library(dplyr)
-library(stringr)
 library(FielDHub)
 
 
@@ -158,10 +157,10 @@ test_that("For groups with ENTRY between 11 and 30, REP is always 1 (example 2)"
   )
 })
 
-test_that("For groups with ENTRY numeric value between 11 and 30, REP is always 1", {
+test_that("For groups with ENTRY numeric value between 31 and 33, REP is always 5", {
   df_new <- add_rep_column(field_book2) |>
     dplyr::mutate(entry_num = as.numeric(ENTRY))
-
+  
   groups <- df_new |>
     dplyr::group_by(LOCATION, ENTRY, entry_num) |>
     dplyr::summarise(
@@ -169,13 +168,18 @@ test_that("For groups with ENTRY numeric value between 11 and 30, REP is always 
       max_rep = max(REP),
       .groups = "drop"
     )
-
-  groups_medium <- groups |>
+  
+  groups_target <- groups |>
     dplyr::filter(entry_num >= 31, entry_num <= 33)
-
+  
   expect_true(
-    all(groups_medium$max_rep == 5),
-    info = "For ENTRY values between 31 and 33, REP should be max 5."
+    all(groups_target$max_rep == 5),
+    info = "For ENTRY values between 31 and 33, REP should be 5 for each group."
   )
 })
+
+
+
+
+
 
