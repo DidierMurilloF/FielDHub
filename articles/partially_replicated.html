@@ -536,17 +536,19 @@ List of 7
  $ seed             : num 1245
 
  10 First observations of the data frame with the partially_replicated field book: 
-   ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 Expt1  PALMIRA 2025  101   1      1     44    44       G44
-2   2 Expt1  PALMIRA 2025  102   1      2      0   102      G102
-3   3 Expt1  PALMIRA 2025  103   1      3     71    71       G71
-4   4 Expt1  PALMIRA 2025  104   1      4      0   107      G107
-5   5 Expt1  PALMIRA 2025  105   1      5      8     8        G8
-6   6 Expt1  PALMIRA 2025  106   1      6     13    13       G13
-7   7 Expt1  PALMIRA 2025  107   1      7      0   170      G170
-8   8 Expt1  PALMIRA 2025  108   1      8     67    67       G67
-9   9 Expt1  PALMIRA 2025  109   1      9      0   123      G123
-10 10 Expt1  PALMIRA 2025  110   1     10      0   105      G105</code></pre>
+ [38;5;246m# A tibble: 10 × 11 [39m
+      ID EXPT  LOCATION YEAR   PLOT   ROW COLUMN   REP CHECKS ENTRY TREATMENT
+    [3m [38;5;246m&lt;int&gt; [39m [23m  [3m [38;5;246m&lt;chr&gt; [39m [23m  [3m [38;5;246m&lt;chr&gt; [39m [23m     [3m [38;5;246m&lt;chr&gt; [39m [23m  [3m [38;5;246m&lt;dbl&gt; [39m [23m  [3m [38;5;246m&lt;int&gt; [39m [23m   [3m [38;5;246m&lt;int&gt; [39m [23m  [3m [38;5;246m&lt;int&gt; [39m [23m   [3m [38;5;246m&lt;dbl&gt; [39m [23m  [3m [38;5;246m&lt;dbl&gt; [39m [23m  [3m [38;5;246m&lt;chr&gt; [39m [23m    
+ [38;5;250m 1 [39m     1 Expt1 PALMIRA  2025    101     1      1     1     44    44 G44      
+ [38;5;250m 2 [39m     2 Expt1 PALMIRA  2025    102     1      2     1      0   102 G102     
+ [38;5;250m 3 [39m     3 Expt1 PALMIRA  2025    103     1      3     1     71    71 G71      
+ [38;5;250m 4 [39m     4 Expt1 PALMIRA  2025    104     1      4     1      0   107 G107     
+ [38;5;250m 5 [39m     5 Expt1 PALMIRA  2025    105     1      5     1      8     8 G8       
+ [38;5;250m 6 [39m     6 Expt1 PALMIRA  2025    106     1      6     1     13    13 G13      
+ [38;5;250m 7 [39m     7 Expt1 PALMIRA  2025    107     1      7     1      0   170 G170     
+ [38;5;250m 8 [39m     8 Expt1 PALMIRA  2025    108     1      8     1     67    67 G67      
+ [38;5;250m 9 [39m     9 Expt1 PALMIRA  2025    109     1      9     1      0   123 G123     
+ [38;5;250m10 [39m    10 Expt1 PALMIRA  2025    110     1     10     1      0   105 G105     </code></pre>
 </div>
 <div class="section level4">
 <h4 id="access-to-prep-output">Access to <code>prep</code> output<a class="anchor" aria-label="anchor" href="#access-to-prep-output"></a>
@@ -569,17 +571,19 @@ experiment.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">field_book</span> <span class="op">&lt;-</span> <span class="va">prep</span><span class="op">$</span><span class="va">fieldBook</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">field_book</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
-<pre><code>   ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 Expt1  PALMIRA 2025  101   1      1     44    44       G44
-2   2 Expt1  PALMIRA 2025  102   1      2      0   102      G102
-3   3 Expt1  PALMIRA 2025  103   1      3     71    71       G71
-4   4 Expt1  PALMIRA 2025  104   1      4      0   107      G107
-5   5 Expt1  PALMIRA 2025  105   1      5      8     8        G8
-6   6 Expt1  PALMIRA 2025  106   1      6     13    13       G13
-7   7 Expt1  PALMIRA 2025  107   1      7      0   170      G170
-8   8 Expt1  PALMIRA 2025  108   1      8     67    67       G67
-9   9 Expt1  PALMIRA 2025  109   1      9      0   123      G123
-10 10 Expt1  PALMIRA 2025  110   1     10      0   105      G105</code></pre>
+<pre><code> [38;5;246m# A tibble: 10 × 11 [39m
+      ID EXPT  LOCATION YEAR   PLOT   ROW COLUMN   REP CHECKS ENTRY TREATMENT
+    [3m [38;5;246m&lt;int&gt; [39m [23m  [3m [38;5;246m&lt;chr&gt; [39m [23m  [3m [38;5;246m&lt;chr&gt; [39m [23m     [3m [38;5;246m&lt;chr&gt; [39m [23m  [3m [38;5;246m&lt;dbl&gt; [39m [23m  [3m [38;5;246m&lt;int&gt; [39m [23m   [3m [38;5;246m&lt;int&gt; [39m [23m  [3m [38;5;246m&lt;int&gt; [39m [23m   [3m [38;5;246m&lt;dbl&gt; [39m [23m  [3m [38;5;246m&lt;dbl&gt; [39m [23m  [3m [38;5;246m&lt;chr&gt; [39m [23m    
+ [38;5;250m 1 [39m     1 Expt1 PALMIRA  2025    101     1      1     1     44    44 G44      
+ [38;5;250m 2 [39m     2 Expt1 PALMIRA  2025    102     1      2     1      0   102 G102     
+ [38;5;250m 3 [39m     3 Expt1 PALMIRA  2025    103     1      3     1     71    71 G71      
+ [38;5;250m 4 [39m     4 Expt1 PALMIRA  2025    104     1      4     1      0   107 G107     
+ [38;5;250m 5 [39m     5 Expt1 PALMIRA  2025    105     1      5     1      8     8 G8       
+ [38;5;250m 6 [39m     6 Expt1 PALMIRA  2025    106     1      6     1     13    13 G13      
+ [38;5;250m 7 [39m     7 Expt1 PALMIRA  2025    107     1      7     1      0   170 G170     
+ [38;5;250m 8 [39m     8 Expt1 PALMIRA  2025    108     1      8     1     67    67 G67      
+ [38;5;250m 9 [39m     9 Expt1 PALMIRA  2025    109     1      9     1      0   123 G123     
+ [38;5;250m10 [39m    10 Expt1 PALMIRA  2025    110     1     10     1      0   105 G105     </code></pre>
 </div>
 <div class="section level4">
 <h4 id="plot-field-layout">Plot field layout<a class="anchor" aria-label="anchor" href="#plot-field-layout"></a>
