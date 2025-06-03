@@ -13,7 +13,9 @@
 #' @param factorLabels (optional) If \code{TRUE} retain the levels
 #'   labels from the original data set otherwise, numeric labels will be
 #'   assigned. Default is \code{factorLabels =TRUE}.
-#' @param data (optional) data frame with the labels of vertical and hirizontal plots.
+#' @param randomizeH Logical flag: \code{TRUE} to randomize horizontal strips separately in each replicate; \code{FALSE} to randomize once per location and reuse.
+#' @param randomizeV Logical flag: \code{TRUE} to randomize vertical strips separately in each replicate; \code{FALSE} to randomize once per location and reuse.
+#' @param data (optional) data frame with the labels of vertical and horizontal plots.
 #'
 #'
 #' @author Didier Murillo [aut],
