@@ -61,7 +61,7 @@ mod_STRIPD_ui <- function(id){
         numericInput(ns("blocks.strip"), 
                      label = "Input # of Full Reps:", 
                      value = 3, 
-                     min = 2),
+                     min = 1),
         numericInput(ns("l.strip"), 
                      label = "Input # of Locations:",
                      value = 1, 
@@ -83,6 +83,19 @@ mod_STRIPD_ui <- function(id){
                            value = "FARGO")
           )
         ),
+        
+        # ---- Added UI for randomizeH and randomizeV ----
+        checkboxInput(
+          ns("randomizeH.strip"),
+          label = "Randomize Horizontal Strips (Across reps)",
+          value = TRUE
+        ),
+        checkboxInput(
+          ns("randomizeV.strip"),
+          label = "Randomize Vertical Strips (Across reps)",
+          value = TRUE
+        ),
+        # -----------------------------------------------
         
         numericInput(inputId = ns("myseed.strip"), 
                      label = "Random Seed:", 
@@ -156,6 +169,8 @@ mod_STRIPD_server <- function(id) {
   moduleServer( id, function(input, output, session) {
     ns <- session$ns
     shinyjs::useShinyjs()
+
+    
     Hplots <- LETTERS[1:5]
     Vplots <- LETTERS[1:5]
     entryListFormat_STRIP <- data.frame(
@@ -235,7 +250,7 @@ mod_STRIPD_server <- function(id) {
     
     
     strip_inputs <- reactive({
-      
+      req(input$blocks.strip >= 2)
       req(get_data_strip())
       
       req(input$plot_start.strip)
@@ -271,7 +286,6 @@ mod_STRIPD_server <- function(id) {
       bindEvent(input$RUN.strip)
     
     strip_reactive <- reactive({
-      
       req(strip_inputs())
       
       shinyjs::show(id = "downloadCsv.strip")
@@ -285,6 +299,8 @@ mod_STRIPD_server <- function(id) {
         plotNumber = strip_inputs()$plot_number,
         locationNames = strip_inputs()$site_names,
         seed = strip_inputs()$seed,
+        randomizeH = input$randomizeH.strip,
+        randomizeV = input$randomizeV.strip,
         data = strip_inputs()$data
       )
       
