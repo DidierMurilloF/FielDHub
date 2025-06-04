@@ -42,7 +42,10 @@ pREP <- function(
     seed = NULL, 
     optim = TRUE, 
     niter = 10000, 
-    data = NULL) {
+    border_penalization = 0.1,
+    dist_method = "euclidean",
+    data = NULL
+    ) {
   
     niter <- 1000
     prep <- TRUE
@@ -173,12 +176,15 @@ pREP <- function(
     }
     # Make numeric each element in the matrix layout1
     field_layout <- apply(layout1, c(1,2), as.numeric)
+    
     ################### Optimization ##########################################
     # Perform an optimization by using the function swap_pairs()
     if (max(table(field_layout)) == 2) {
-        swap <- swap_pairs(X = field_layout, starting_dist = 3, stop_iter = 18)
+        swap <- swap_pairs(X = field_layout, starting_dist = 3, stop_iter = 5, 
+                           dist_method = dist_method, lambda = border_penalization)
     } else {
-        swap <- swap_pairs(X = field_layout, starting_dist = 2, stop_iter = 18)
+        swap <- swap_pairs(X = field_layout, starting_dist = 2, stop_iter = 5, 
+                           dist_method = dist_method, lambda = border_penalization)
     }
     optim_layout <- swap$optim_design
     dups <- table(as.vector(optim_layout))

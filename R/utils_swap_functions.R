@@ -92,52 +92,50 @@ pairs_distance <- function(X) {
     return(plotDist)
 }
 
+
 #' @title Swap pairs in a matrix of integers
 #' 
 #' @description Modifies the input matrix \code{X} to ensure that the distance between any two occurrences
-#' of the same integer is at least a dist \code{d}, by swapping one of the occurrences with a
-#' random occurrence of a different integer that is at least \code{d} away. The function
-#' starts with \code{starting_dist = 3} and increases it by \code{1} until the algorithm no longer 
-#' converges or \code{stop_iter} iterations have been performed. 
-#' 
+#' of the same integer is at least a distance \code{d}, by swapping one of the occurrences with a
+#' candidate cell of a different integer. The function starts with \code{starting_dist = 3} and increases it
+#' by \code{1} until the algorithm no longer converges or \code{stop_iter} iterations have been performed.
+#' This version evaluates candidate swaps using both the mean pairwise distance and a centrality penalty,
+#' and it uses candidate sampling to reduce computation.
 #' 
 #' @param X A matrix of integers.
-#' @param starting_dist The minimum starting distance to enforce between pairs of occurrences
-#'  of the same integer. Default is 3.
-#' @param stop_iter The maximum number of iterations to perform. Default is 100.
+#' @param starting_dist The minimum starting distance to enforce between pairs of occurrences of the same integer. Default is 3.
+#' @param stop_iter The maximum number of iterations to perform. Default is 50.
+#' @param lambda A tuning parameter for the centrality penalty. Default is 0.1.
+#' @param dist_method The method used for distance calculation. Options are "euclidean" (default) and "manhattan".
+#' @param candidate_sample_size Maximum number of candidate cells to evaluate per swap. Default is 5.
 #' 
-#' @return A list containing the following elements:
+#' @return A list containing:
 #' \item{optim_design}{The modified matrix.}
 #' \item{designs}{A list of all intermediate designs, starting from the input matrix.}
 #' \item{distances}{A list of all pair distances for each intermediate design.}
-#' \item{min_distance}{An integer indicating the minimum distance between pairs of occurrences of the same integer.}
+#' \item{min_distance}{The minimum distance between pairs of occurrences of the same integer in the final design.}
 #' \item{pairwise_distance}{A data frame with the pairwise distances for the final design.}
-#' 
-#' @author Jean-Marc Montpetit [aut], Didier Murillo [aut]
+#' \item{rows_incidence}{A vector recording the number of rows with repeated integers for each iteration.}
 #' 
 #' @examples
-#' # Create a matrix X with the numbers 1 to 10 are twice and 11 to 50 are once.
-#' # The matrix has 6 rows and 10 columns
 #' set.seed(123)
 #' X <- matrix(sample(c(rep(1:10, 2), 11:50), replace = FALSE), ncol = 10)
-#' X
-#' # Swap pairs
-#' B <- swap_pairs(X, starting_dist = 3)
+#' B <- swap_pairs(X, starting_dist = 3, stop_iter = 50, lambda = 0.1, dist_method = "manhattan", candidate_sample_size = 5)
 #' B$optim_design
-#' B$designs
-#' B$distances
-#' 
 #' 
 #' @export
-swap_pairs <- function(X, starting_dist = 3, stop_iter = 50) {
-    # check if the input X is a matrix
+swap_pairs <- function(X, starting_dist = 3, stop_iter = 10, lambda = 0.5,
+                       dist_method = "euclidean", candidate_sample_size = 4) {
+    # Check if the input X is a matrix and numeric.
     if (!is.matrix(X)) {
         stop("Input must be a matrix")
     }
-    # check if the input matrix X is numeric
     if (!is.numeric(X)) {
         stop("Matrix elements must be numeric")
     }
+
+    # lambda <- calculate_lambda(X, lambda_base = lambda)
+
     swap_succeed <- FALSE
     input_X <- X
     input_freq <- table(input_X)
@@ -146,15 +144,18 @@ swap_pairs <- function(X, starting_dist = 3, stop_iter = 50) {
     designs[[1]] <- X
     distances <- list()
     rows_incidence <- numeric()
+
     init_dist <- pairs_distance(X = X)
     genos <- unique(init_dist$geno)
     distances[[1]] <- init_dist
     w <- 2
+
+    # Main loop: Increase the minimum distance from starting_dist to maximum possible.
     for (min_dist in seq(starting_dist, minDist, 1)) {
         n_iter <- 1
         while (n_iter <= stop_iter) {
             plotDist <- pairs_distance(X)
-            rownames(plotDist) <- NULL  #reset for latert use
+            rownames(plotDist) <- NULL  # Reset rownames.
             LowID <- which(plotDist$DIST < min_dist)
             low_dist_gens <- unique(plotDist$geno[LowID])
             LS <- length(LowID)
@@ -162,68 +163,101 @@ swap_pairs <- function(X, starting_dist = 3, stop_iter = 50) {
                 n_iter <- stop_iter + 1
                 break
             }
+
+            # Compute the center of the matrix for the centrality penalty.
+            center <- c(nrow(X) / 2, ncol(X) / 2)
+
             for (genotype in low_dist_gens) {
                 indices <- which(X == genotype, arr.ind = TRUE)
-                # Get the row and column indices of the cells that contain other values
                 other_indices <- which(X != genotype, arr.ind = TRUE)
+
                 for (i in seq_len(nrow(indices))) {
-                    # Calculate the Euclidean distances to the fixed point
-                    dist <- apply(other_indices, 1, function(x) sum((x - indices[i, ])^2))
-                    other_indices <- as.data.frame(other_indices)
-                    # other_indices <- other_indices[order(other_indices[, 1]),]
-                    valid_indices <- other_indices[sqrt(dist) >= min_dist, ]
+                    # Calculate distances from the current occurrence to all other indices.
+                    if (dist_method == "euclidean") {
+                        d <- sqrt(apply(other_indices, 1, function(x) sum((x - indices[i, ])^2)))
+                    } else if (dist_method == "manhattan") {
+                        d <- apply(other_indices, 1, function(x) sum(abs(x - indices[i, ])))
+                    } else {
+                        stop("Invalid distance method specified. Use 'euclidean' or 'manhattan'.")
+                    }
+
+                    other_indices_df <- as.data.frame(other_indices)
+                    valid_indices <- other_indices_df[d >= min_dist, ]
                     if (nrow(valid_indices) == 0) break
-                    valid_indices <- valid_indices[order(valid_indices[, 1]),]
-                    # Pick a random cell to swap with
-                    k <- sample(nrow(valid_indices), size = 1)
-                    # Swap the two occurrences
-                    X[indices[i,1], indices[i,2]] <- X[valid_indices[k,1], valid_indices[k,2]]
-                    X[valid_indices[k,1], valid_indices[k,2]] <- genotype
+
+                    if (nrow(valid_indices) > candidate_sample_size) {
+                        sample_idx <- sample(seq_len(nrow(valid_indices)), candidate_sample_size)
+                        candidate_set <- valid_indices[sample_idx, , drop = FALSE]
+                    } else {
+                        candidate_set <- valid_indices
+                    }
+
+                    candidate_scores <- numeric(nrow(candidate_set))
+                    for (j in seq_len(nrow(candidate_set))) {
+                        X_temp <- X
+                        X_temp[indices[i, 1], indices[i, 2]] <- X_temp[candidate_set[j, 1], candidate_set[j, 2]]
+                        X_temp[candidate_set[j, 1], candidate_set[j, 2]] <- genotype
+
+                        candidate_mean <- mean(pairs_distance(X_temp)$DIST)
+
+                        candidate_center_dist <- sqrt(sum((c(candidate_set[j, 1], candidate_set[j, 2]) - center)^2))
+
+                        candidate_scores[j] <- candidate_mean - lambda * candidate_center_dist
+                    }
+
+                    best_candidate_index <- which.max(candidate_scores)
+                    best_candidate <- as.numeric(unlist(candidate_set[best_candidate_index, , drop = TRUE]))
+
+                    X[indices[i, 1], indices[i, 2]] <- X[best_candidate[1], best_candidate[2]]
+                    X[best_candidate[1], best_candidate[2]] <- genotype
                 }
             }
             n_iter <- n_iter + 1
         }
+
         if (min(pairs_distance(X)$DIST) < min_dist) {
             break
         } else {
             swap_succeed <- TRUE
             output_freq <- table(X)
             if (!all(input_freq == output_freq)) {
-              stop("The swap function changed the frequency of some integers.")
+                stop("The swap function changed the frequency of some integers.")
             }
             frequency_rows <- as.data.frame(search_matrix_values(X = X, values_search = genos))
-            df <- frequency_rows |> 
-                dplyr::filter(Times >= 2)
+            df <- frequency_rows |> dplyr::filter(Times >= 2)
             rows_incidence[w - 1] <- nrow(df)
             designs[[w]] <- X
             distances[[w]] <- pairs_distance(X)
             w <- w + 1
         }
     }
-    optim_design = designs[[length(designs)]] # return the last (better) design
+
+    optim_design <- designs[[length(designs)]]
     pairwise_distance <- pairs_distance(optim_design)
-    min_distance = min(pairwise_distance$DIST)
+    min_distance <- min(pairwise_distance$DIST)
+
     if (!swap_succeed) {
-        optim_design = designs[[1]] # return the last (better) design
+        optim_design <- designs[[1]]
         distances[[1]] <- pairs_distance(optim_design)
         pairwise_distance <- pairs_distance(optim_design)
-        min_distance = min(pairwise_distance$DIST)
+        min_distance <- min(pairwise_distance$DIST)
         frequency_rows <- as.data.frame(search_matrix_values(X = optim_design, values_search = genos))
-        df <- frequency_rows |> 
-            dplyr::filter(Times >= 2)
+        df <- frequency_rows |> dplyr::filter(Times >= 2)
         rows_incidence[1] <- nrow(df)
     }
+
     return(
         list(
             rows_incidence = rows_incidence,
-            optim_design = optim_design, 
-            designs = designs, 
+            optim_design = optim_design,
+            designs = designs,
             distances = distances,
             min_distance = min_distance,
             pairwise_distance = pairwise_distance
         )
     )
 }
+
 
 #' @title Search Matrix Values
 #'

@@ -4,45 +4,49 @@
 \alias{swap_pairs}
 \title{Swap pairs in a matrix of integers}
 \usage{
-swap_pairs(X, starting_dist = 3, stop_iter = 50)
+swap_pairs(
+  X,
+  starting_dist = 3,
+  stop_iter = 10,
+  lambda = 0.5,
+  dist_method = "euclidean",
+  candidate_sample_size = 4
+)
 }
 \arguments{
 \item{X}{A matrix of integers.}
 
-\item{starting_dist}{The minimum starting distance to enforce between pairs of occurrences
-of the same integer. Default is 3.}
+\item{starting_dist}{The minimum starting distance to enforce between pairs of occurrences of the same integer. Default is 3.}
 
-\item{stop_iter}{The maximum number of iterations to perform. Default is 100.}
+\item{stop_iter}{The maximum number of iterations to perform. Default is 50.}
+
+\item{lambda}{A tuning parameter for the centrality penalty. Default is 0.1.}
+
+\item{dist_method}{The method used for distance calculation. Options are "euclidean" (default) and "manhattan".}
+
+\item{candidate_sample_size}{Maximum number of candidate cells to evaluate per swap. Default is 5.}
 }
 \value{
-A list containing the following elements:
+A list containing:
 \item{optim_design}{The modified matrix.}
 \item{designs}{A list of all intermediate designs, starting from the input matrix.}
 \item{distances}{A list of all pair distances for each intermediate design.}
-\item{min_distance}{An integer indicating the minimum distance between pairs of occurrences of the same integer.}
+\item{min_distance}{The minimum distance between pairs of occurrences of the same integer in the final design.}
 \item{pairwise_distance}{A data frame with the pairwise distances for the final design.}
+\item{rows_incidence}{A vector recording the number of rows with repeated integers for each iteration.}
 }
 \description{
 Modifies the input matrix \code{X} to ensure that the distance between any two occurrences
-of the same integer is at least a dist \code{d}, by swapping one of the occurrences with a
-random occurrence of a different integer that is at least \code{d} away. The function
-starts with \code{starting_dist = 3} and increases it by \code{1} until the algorithm no longer 
-converges or \code{stop_iter} iterations have been performed.
+of the same integer is at least a distance \code{d}, by swapping one of the occurrences with a
+candidate cell of a different integer. The function starts with \code{starting_dist = 3} and increases it
+by \code{1} until the algorithm no longer converges or \code{stop_iter} iterations have been performed.
+This version evaluates candidate swaps using both the mean pairwise distance and a centrality penalty,
+and it uses candidate sampling to reduce computation.
 }
 \examples{
-# Create a matrix X with the numbers 1 to 10 are twice and 11 to 50 are once.
-# The matrix has 6 rows and 10 columns
 set.seed(123)
 X <- matrix(sample(c(rep(1:10, 2), 11:50), replace = FALSE), ncol = 10)
-X
-# Swap pairs
-B <- swap_pairs(X, starting_dist = 3)
+B <- swap_pairs(X, starting_dist = 3, stop_iter = 50, lambda = 0.1, dist_method = "manhattan", candidate_sample_size = 5)
 B$optim_design
-B$designs
-B$distances
 
-
-}
-\author{
-Jean-Marc Montpetit [aut], Didier Murillo [aut]
 }
