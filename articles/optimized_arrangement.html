@@ -404,7 +404,7 @@ Information on the design parameters:
 List of 10
  $ rows        : num 29
  $ columns     : num 15
- $ min_distance: num [1:3] 2 3.16 2.24
+ $ min_distance: num [1:3] 1 1 2.24
  $ treatments  : num 401
  $ checks      : int 3
  $ entry_checks: int [1:3] 1 2 3
@@ -415,16 +415,16 @@ List of 10
 
  10 First observations of the data frame with the optimized_arrangement field book: 
    ID            EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 WINTER_WHEAT_22    FARGO 2025 1001   1      1      0    70       G70
+1   1 WINTER_WHEAT_22    FARGO 2025 1001   1      1      0    53       G53
 2   2 WINTER_WHEAT_22    FARGO 2025 1002   1      2      0   357      G357
 3   3 WINTER_WHEAT_22    FARGO 2025 1003   1      3      0   217      G217
-4   4 WINTER_WHEAT_22    FARGO 2025 1004   1      4      0   280      G280
-5   5 WINTER_WHEAT_22    FARGO 2025 1005   1      5      0   259      G259
+4   4 WINTER_WHEAT_22    FARGO 2025 1004   1      4      0   287      G287
+5   5 WINTER_WHEAT_22    FARGO 2025 1005   1      5      3     3       CH3
 6   6 WINTER_WHEAT_22    FARGO 2025 1006   1      6      0    50       G50
-7   7 WINTER_WHEAT_22    FARGO 2025 1007   1      7      0   223      G223
-8   8 WINTER_WHEAT_22    FARGO 2025 1008   1      8      0   348      G348
+7   7 WINTER_WHEAT_22    FARGO 2025 1007   1      7      0   331      G331
+8   8 WINTER_WHEAT_22    FARGO 2025 1008   1      8      0   172      G172
 9   9 WINTER_WHEAT_22    FARGO 2025 1009   1      9      0   180      G180
-10 10 WINTER_WHEAT_22    FARGO 2025 1010   1     10      0   153      G153</code></pre>
+10 10 WINTER_WHEAT_22    FARGO 2025 1010   1     10      0   274      G274</code></pre>
 </div>
 <div class="section level4">
 <h4 id="access-to-optim_expt-object">Access to <code>optim_expt</code> object<a class="anchor" aria-label="anchor" href="#access-to-optim_expt-object"></a>
@@ -448,16 +448,16 @@ experiment.</p>
 <code class="sourceCode R"><span><span class="va">field_book</span> <span class="op">&lt;-</span> <span class="va">optim_expt</span><span class="op">$</span><span class="va">fieldBook</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">field_book</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
 <pre><code>   ID            EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 WINTER_WHEAT_22    FARGO 2025 1001   1      1      0    70       G70
+1   1 WINTER_WHEAT_22    FARGO 2025 1001   1      1      0    53       G53
 2   2 WINTER_WHEAT_22    FARGO 2025 1002   1      2      0   357      G357
 3   3 WINTER_WHEAT_22    FARGO 2025 1003   1      3      0   217      G217
-4   4 WINTER_WHEAT_22    FARGO 2025 1004   1      4      0   280      G280
-5   5 WINTER_WHEAT_22    FARGO 2025 1005   1      5      0   259      G259
+4   4 WINTER_WHEAT_22    FARGO 2025 1004   1      4      0   287      G287
+5   5 WINTER_WHEAT_22    FARGO 2025 1005   1      5      3     3       CH3
 6   6 WINTER_WHEAT_22    FARGO 2025 1006   1      6      0    50       G50
-7   7 WINTER_WHEAT_22    FARGO 2025 1007   1      7      0   223      G223
-8   8 WINTER_WHEAT_22    FARGO 2025 1008   1      8      0   348      G348
+7   7 WINTER_WHEAT_22    FARGO 2025 1007   1      7      0   331      G331
+8   8 WINTER_WHEAT_22    FARGO 2025 1008   1      8      0   172      G172
 9   9 WINTER_WHEAT_22    FARGO 2025 1009   1      9      0   180      G180
-10 10 WINTER_WHEAT_22    FARGO 2025 1010   1     10      0   153      G153</code></pre>
+10 10 WINTER_WHEAT_22    FARGO 2025 1010   1     10      0   274      G274</code></pre>
 </div>
 <div class="section level4">
 <h4 id="plot-the-field-layout">Plot the field layout<a class="anchor" aria-label="anchor" href="#plot-the-field-layout"></a>
