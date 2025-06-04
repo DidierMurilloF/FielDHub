@@ -589,6 +589,8 @@ multi_location_prep <- function(
         exptName = exptName,
         seed = seed,
         multiLocationData = TRUE,
+        dist_method = "euclidean",
+        border_penalization = 0.5,
         data = preps$list_locs
     )
     field_book_with_rep <- add_rep_column(df = design_randomization$fieldBook)

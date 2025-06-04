@@ -42,8 +42,12 @@ partially_replicated(
 
 \item{locationNames}{(optional) Name for each location.}
 
-\item{multiLocationData}{(optional) Option to pass an entry list for multiple locations. 
+\item{multiLocationData}{(optional) Option to pass an entry list for multiple locations.}
+
+\item{dist_method}{The method used for distance calculation. Options are "euclidean" (default) and "manhattan".
 By default \code{multiLocationData = FALSE}.}
+
+\item{border_penalization}{A tuning parameter for the centrality penalty. Default is 0.5.}
 
 \item{data}{(optional) Data frame with 3 columns: \code{ENTRY | NAME | REPS}. If
 \code{multiLocationData = TRUE} then the \code{data} must have

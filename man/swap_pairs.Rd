@@ -46,7 +46,14 @@ and it uses candidate sampling to reduce computation.
 \examples{
 set.seed(123)
 X <- matrix(sample(c(rep(1:10, 2), 11:50), replace = FALSE), ncol = 10)
-B <- swap_pairs(X, starting_dist = 3, stop_iter = 50, lambda = 0.1, dist_method = "manhattan", candidate_sample_size = 5)
+B <- swap_pairs(
+ X, 
+ starting_dist = 3, 
+ stop_iter = 50, 
+ lambda = 0.5, 
+ dist_method = "euclidean", 
+ candidate_sample_size = 3
+)
 B$optim_design
 
 }

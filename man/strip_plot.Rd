@@ -40,7 +40,11 @@ strip_plot(
 labels from the original data set otherwise, numeric labels will be
 assigned. Default is \code{factorLabels =TRUE}.}
 
-\item{data}{(optional) data frame with the labels of vertical and hirizontal plots.}
+\item{randomizeH}{Logical flag: \code{TRUE} to randomize horizontal strips separately in each replicate; \code{FALSE} to randomize once per location and reuse.}
+
+\item{randomizeV}{Logical flag: \code{TRUE} to randomize vertical strips separately in each replicate; \code{FALSE} to randomize once per location and reuse.}
+
+\item{data}{(optional) data frame with the labels of vertical and horizontal plots.}
 }
 \value{
 A list with four elements.

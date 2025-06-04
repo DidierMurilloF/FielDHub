@@ -21,6 +21,8 @@
 #' @param exptName (optional) Name of the experiment.
 #' @param locationNames (optional) Name for each location.
 #' @param multiLocationData (optional) Option to pass an entry list for multiple locations. 
+#' @param border_penalization A tuning parameter for the centrality penalty. Default is 0.5.
+#' @param dist_method The method used for distance calculation. Options are "euclidean" (default) and "manhattan".
 #' By default \code{multiLocationData = FALSE}.
 #' @param data (optional) Data frame with 3 columns: \code{ENTRY | NAME | REPS}. If  
 #' \code{multiLocationData = TRUE} then the \code{data} must have
