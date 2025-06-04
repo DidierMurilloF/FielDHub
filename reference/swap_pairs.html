@@ -149,15 +149,22 @@ and it uses candidate sampling to reduce computation.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, <span class="fl">2</span><span class="op">)</span>, <span class="fl">11</span><span class="op">:</span><span class="fl">50</span><span class="op">)</span>, replace <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">B</span> <span class="op">&lt;-</span> <span class="fu">swap_pairs</span><span class="op">(</span><span class="va">X</span>, starting_dist <span class="op">=</span> <span class="fl">3</span>, stop_iter <span class="op">=</span> <span class="fl">50</span>, lambda <span class="op">=</span> <span class="fl">0.1</span>, dist_method <span class="op">=</span> <span class="st">"manhattan"</span>, candidate_sample_size <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">B</span> <span class="op">&lt;-</span> <span class="fu">swap_pairs</span><span class="op">(</span></span></span>
+<span class="r-in"><span> <span class="va">X</span>, </span></span>
+<span class="r-in"><span> starting_dist <span class="op">=</span> <span class="fl">3</span>, </span></span>
+<span class="r-in"><span> stop_iter <span class="op">=</span> <span class="fl">50</span>, </span></span>
+<span class="r-in"><span> lambda <span class="op">=</span> <span class="fl">0.5</span>, </span></span>
+<span class="r-in"><span> dist_method <span class="op">=</span> <span class="st">"euclidean"</span>, </span></span>
+<span class="r-in"><span> candidate_sample_size <span class="op">=</span> <span class="fl">3</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">B</span><span class="op">$</span><span class="va">optim_design</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]    9    8    5   44   43   28   30   38    2     7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]    1   18   12   41   16   29   17   45    1     6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]    6   24   26   39   19   34   14   42   32     4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]    4   13   46   31   40   35   47   15   50     3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5,]   10    2   20   21   49   22   36    9   25     5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [6,]    7    3   23   27   37   11   33   48    8    10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]    6    1   24   44   27   19   15    3   39     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]    3   45   20   32   48   29   43   33    7     6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]   10    4   36   30   46   28   14    9   22    10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]    7    2    8   31   16   40   47   17   34     5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,]   42   38    5   26   49   50   35   37    1     8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,]    9   21   12   23   25   13   41   11    4    18</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
