@@ -88,17 +88,17 @@ mod_multi_loc_preps_ui <- function(id){
                 )
             ),
             
-            sliderInput(ns("border_penalization_prep"), 
-                        label = "Border Penalization", 
-                        min = 0.00, 
-                        max = 1.00, 
-                        value = 0.3),
-            selectInput(
-              ns("optimization_distance_method_prep"), 
-              label = "Optimization Distance Method:", 
-              choices = c("Euclidean" = "euclidean", "Manhattan" = "manhattan"), 
-              selected = "manhattan"
-            ),
+            # sliderInput(ns("border_penalization_prep"), 
+            #             label = "Border Penalization", 
+            #             min = 0.00, 
+            #             max = 1.00, 
+            #             value = 0.3),
+            # selectInput(
+            #   ns("optimization_distance_method_prep"), 
+            #   label = "Optimization Distance Method:", 
+            #   choices = c("Euclidean" = "euclidean", "Manhattan" = "manhattan"), 
+            #   selected = "manhattan"
+            # ),
             fluidRow(
                 column(
                     width = 6, 
@@ -896,8 +896,8 @@ mod_multi_loc_preps_server <- function(id){
                 planter = movement_planter,
                 seed = preps_seed, 
                 multiLocationData = TRUE,
-                dist_method = input$optimization_distance_method_prep,
-                border_penalization = input$border_penalization_prep,
+                dist_method = "euclidean", #input$optimization_distance_method_prep,
+                border_penalization = 0.5, #input$border_penalization_prep,
                 data = entry_list
             )
         })
