@@ -394,6 +394,9 @@ partially_replicated <- function(
     }
     
     field_book <- dplyr::bind_rows(field_book_sites)
+    
+    field_book_with_rep <- add_rep_column(df = field_book)
+    
     RepChecks <- prep$reps.checks
     reps_info <- data.frame(
         LOCATION = locationNames,
@@ -422,7 +425,7 @@ partially_replicated <- function(
         genEntries = genEntries,
         treatments_with_reps = treatments_with_reps,
         treatments_with_no_reps = treatments_with_no_reps,
-        fieldBook = field_book
+        fieldBook = field_book_with_rep
     )
     class(output) <- "FielDHub"
     return(invisible(output))

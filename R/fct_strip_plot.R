@@ -1,5 +1,5 @@
 #' Strip Plot Design
-#' 
+#'
 #' @description It randomly generates a strip plot design across locations.
 #'
 #' @param Hplots Number of horizontal factors, as an integer or a vector.
@@ -13,19 +13,21 @@
 #' @param factorLabels (optional) If \code{TRUE} retain the levels
 #'   labels from the original data set otherwise, numeric labels will be
 #'   assigned. Default is \code{factorLabels =TRUE}.
-#' @param data (optional) data frame with the labels of vertical and hirizontal plots.
-#' 
-#' 
+#' @param randomizeH Logical flag: \code{TRUE} to randomize horizontal strips separately in each replicate; \code{FALSE} to randomize once per location and reuse.
+#' @param randomizeV Logical flag: \code{TRUE} to randomize vertical strips separately in each replicate; \code{FALSE} to randomize once per location and reuse.
+#' @param data (optional) data frame with the labels of vertical and horizontal plots.
+#'
+#'
 #' @author Didier Murillo [aut],
 #'         Salvador Gezan [aut],
 #'         Ana Heilman [ctb],
-#'         Thomas Walk [ctb], 
-#'         Johan Aparicio [ctb], 
+#'         Thomas Walk [ctb],
+#'         Johan Aparicio [ctb],
 #'         Richard Horsley [ctb]
-#' 
+#'
 #' @importFrom stats runif na.omit
-#' 
-#' 
+#'
+#'
 #' @return A list with four elements.
 #' \itemize{
 #'   \item \code{infoDesign} is a list with information on the design parameters.
@@ -33,55 +35,59 @@
 #'   \item \code{plotLayouts} is a list with the layout plot numbers for each location.
 #'   \item \code{fieldBook} is a data frame  with the strip plot field book.
 #' }
-#' 
-#' 
+#'
+#'
 #' @references
 #' Federer, W. T. (1955). Experimental Design. Theory and Application. New York, USA. The
 #' Macmillan Company.
-#' 
+#'
 #' @examples
 #' # Example 1: Generates a strip plot design with 5 vertical strips and 4 horizontal strips,
 #' # with 3 reps in one location.
 #' H <- paste("H", 1:4, sep = "")
 #' V <- paste("V", 1:5, sep = "")
-#' strip1 <- strip_plot(Hplots = H, 
-#'                      Vplots = V, 
-#'                      b = 3, 
-#'                      l = 1, 
-#'                      plotNumber = 101,
-#'                      planter = "serpentine",
-#'                      locationNames = "A", 
-#'                      seed = 333)
-#' strip1$infoDesign                  
+#' strip1 <- strip_plot(
+#'   Hplots = H,
+#'   Vplots = V,
+#'   b = 3,
+#'   l = 1,
+#'   plotNumber = 101,
+#'   planter = "serpentine",
+#'   locationNames = "A",
+#'   seed = 333
+#' )
+#' strip1$infoDesign
 #' strip1$stripsBlockLoc
 #' strip1$plotLayouts
-#' head(strip1$fieldBook,12)                     
-#' 
+#' head(strip1$fieldBook, 12)
+#'
 #' # Example 2: Generates a strip plot design with 5 vertical strips and 5 horizontal strips,
 #' # with 6 reps across to 3 locations. In this case, we show how to use the option data.
 #' Hplots <- LETTERS[1:5]
 #' Vplots <- LETTERS[1:4]
 #' strip_data <- data.frame(list(HPLOTS = Hplots, VPLOTS = c(Vplots, NA)))
 #' head(strip_data)
-#' strip2 <- strip_plot(Hplots = 5, 
-#'                      Vplots = 5, 
-#'                      b = 6, 
-#'                      l = 3, 
-#'                      plotNumber = c(101,1001,2001),
-#'                      planter = "cartesian",
-#'                      locationNames = c("A", "B", "C"), 
-#'                      seed = 222,
-#'                      data = strip_data)
-#' strip2$infoDesign                  
+#' strip2 <- strip_plot(
+#'   Hplots = 5,
+#'   Vplots = 5,
+#'   b = 6,
+#'   l = 3,
+#'   plotNumber = c(101, 1001, 2001),
+#'   planter = "cartesian",
+#'   locationNames = c("A", "B", "C"),
+#'   seed = 222,
+#'   data = strip_data
+#' )
+#' strip2$infoDesign
 #' strip2$stripsBlockLoc
 #' strip2$plotLayouts
-#' head(strip2$fieldBook,12)
+#' head(strip2$fieldBook, 12)
 #'
 #' @export
 strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = NULL,
-                       planter = "serpentine", locationNames = NULL, seed = NULL, 
-                       factorLabels = TRUE, data = NULL) {
-  
+                       planter = "serpentine", locationNames = NULL, seed = NULL,
+                       factorLabels = TRUE, randomizeH = TRUE, randomizeV = FALSE,
+                       data = NULL) {
   if (is.null(seed) || is.character(seed) || is.factor(seed)) seed <- runif(1, min = -50000, max = 50000)
   set.seed(seed)
   arg0 <- c(Hplots, Vplots)
@@ -151,13 +157,42 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
   y <- seq(b, b * l, b)
   PLOTS <- vector(mode = "list", length = b*l)
   for (sites in 1:l) {
+    # If randomizeH is FALSE, sample horizontal strips once for this location
+    if (!randomizeH) {
+      Hplots.random_loc <- replicate(1, sample(Hplots))
+      # ^ Moved sample(Hplots) outside the replicate loop for fixed order
+    }
+    # If randomizeV is FALSE, sample vertical strips once for this location
+    if (!randomizeV) {
+      Vplots.random_loc <- replicate(1, sample(Vplots))
+      # ^ Moved sample(Vplots) outside the replicate loop for fixed order
+    }
     for (r in 1:b) {
       D <- plot.numbs[[sites]]
       P <- matrix(data = D[r]:(D[r] + (nH*nV) - 1), nrow = nH, ncol = nV, byrow = TRUE)
       if (planter == "serpentine") P <- serpentinelayout(P, opt = 2)
       PLOTS[[z]] <- P
-      Hplots.random <- replicate(1, sample(Hplots))
-      Vplots.random <- replicate(1, sample(Vplots))
+      # Hplots.random <- replicate(1, sample(Hplots))
+      # Vplots.random <- replicate(1, sample(Vplots))
+      
+      # Choose horizontal strips:
+      if (randomizeH) {
+        Hplots.random <- replicate(1, sample(Hplots))
+        # ^ Original behavior: randomize each replicate when randomizeH == TRUE
+      } else {
+        Hplots.random <- Hplots.random_loc
+        # ^ Use the fixed order sampled once above
+      }
+      
+      # Choose vertical strips:
+      if (randomizeV) {
+        Vplots.random <- replicate(1, sample(Vplots))
+        # ^ Original behavior: randomize each replicate when randomizeV == TRUE
+      } else {
+        Vplots.random <- Vplots.random_loc
+        # ^ Use the fixed order sampled once above
+      }
+      
       strips <- paste(rep(Hplots.random[,1], each = nV), 
                       rep(Vplots.random[,1], times = nH), 
                       sep = "|")
@@ -186,7 +221,7 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
     stripDesig.out.loc[[loc]] <- paste_by_row(stripDesig.b[x[w]:y[w]])
     strips.b.loc[[loc]] <- strips.b[x[w]:y[w]]
     strips.b.loc[[loc]] <- setNames(strips.b.loc[[loc]], 
-                                     paste0(rep("rep", b), 1:b))
+                                    paste0(rep("rep", b), 1:b))
     NEW_PLOTS[[loc]] <- setNames(PLOTS[x[w]:y[w]], 
                                  paste0(rep("rep", b), 1:b))
     w <- w + 1

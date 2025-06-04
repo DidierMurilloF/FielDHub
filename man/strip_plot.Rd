@@ -14,6 +14,8 @@ strip_plot(
   locationNames = NULL,
   seed = NULL,
   factorLabels = TRUE,
+  randomizeH = TRUE,
+  randomizeV = FALSE,
   data = NULL
 )
 }
@@ -57,18 +59,20 @@ It randomly generates a strip plot design across locations.
 # with 3 reps in one location.
 H <- paste("H", 1:4, sep = "")
 V <- paste("V", 1:5, sep = "")
-strip1 <- strip_plot(Hplots = H, 
-                     Vplots = V, 
-                     b = 3, 
-                     l = 1, 
-                     plotNumber = 101,
-                     planter = "serpentine",
-                     locationNames = "A", 
-                     seed = 333)
-strip1$infoDesign                  
+strip1 <- strip_plot(
+  Hplots = H,
+  Vplots = V,
+  b = 3,
+  l = 1,
+  plotNumber = 101,
+  planter = "serpentine",
+  locationNames = "A",
+  seed = 333
+)
+strip1$infoDesign
 strip1$stripsBlockLoc
 strip1$plotLayouts
-head(strip1$fieldBook,12)                     
+head(strip1$fieldBook, 12)
 
 # Example 2: Generates a strip plot design with 5 vertical strips and 5 horizontal strips,
 # with 6 reps across to 3 locations. In this case, we show how to use the option data.
@@ -76,19 +80,21 @@ Hplots <- LETTERS[1:5]
 Vplots <- LETTERS[1:4]
 strip_data <- data.frame(list(HPLOTS = Hplots, VPLOTS = c(Vplots, NA)))
 head(strip_data)
-strip2 <- strip_plot(Hplots = 5, 
-                     Vplots = 5, 
-                     b = 6, 
-                     l = 3, 
-                     plotNumber = c(101,1001,2001),
-                     planter = "cartesian",
-                     locationNames = c("A", "B", "C"), 
-                     seed = 222,
-                     data = strip_data)
-strip2$infoDesign                  
+strip2 <- strip_plot(
+  Hplots = 5,
+  Vplots = 5,
+  b = 6,
+  l = 3,
+  plotNumber = c(101, 1001, 2001),
+  planter = "cartesian",
+  locationNames = c("A", "B", "C"),
+  seed = 222,
+  data = strip_data
+)
+strip2$infoDesign
 strip2$stripsBlockLoc
 strip2$plotLayouts
-head(strip2$fieldBook,12)
+head(strip2$fieldBook, 12)
 
 }
 \references{
@@ -99,7 +105,7 @@ Macmillan Company.
 Didier Murillo [aut],
         Salvador Gezan [aut],
         Ana Heilman [ctb],
-        Thomas Walk [ctb], 
-        Johan Aparicio [ctb], 
+        Thomas Walk [ctb],
+        Johan Aparicio [ctb],
         Richard Horsley [ctb]
 }

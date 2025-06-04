@@ -217,3 +217,16 @@ pREP <- function(
         )
     )
 }
+
+#' @title Add REP column in prep fieldbook
+#' @noRd
+add_rep_column <- function(df) {
+  df_new <- df |>
+    dplyr::group_by(LOCATION, ENTRY) |>
+    dplyr::mutate(REP = dplyr::row_number()) |>
+    dplyr::ungroup() |>
+    dplyr::select(ID, EXPT, LOCATION, YEAR, PLOT, ROW, COLUMN, REP, CHECKS, ENTRY, TREATMENT)
+  
+  return(df_new)
+}
+

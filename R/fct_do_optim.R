@@ -591,6 +591,7 @@ multi_location_prep <- function(
         multiLocationData = TRUE,
         data = preps$list_locs
     )
+    field_book_with_rep <- add_rep_column(df = design_randomization$fieldBook)
     design_randomization$infoDesign$id_design <- "MultiPrep"
     output <- list(
         infoDesign = design_randomization$infoDesign,
@@ -604,7 +605,7 @@ multi_location_prep <- function(
         genEntries = design_randomization$genEntries,
         treatments_with_reps = design_randomization$treatments_with_reps,
         treatments_with_no_reps = design_randomization$treatments_with_no_reps,
-        fieldBook = design_randomization$fieldBook,
+        fieldBook = field_book_with_rep,
         multi_location_data = preps$multi_location_data, 
         list_locs = preps$list_locs, 
         allocation = preps$allocation, 
