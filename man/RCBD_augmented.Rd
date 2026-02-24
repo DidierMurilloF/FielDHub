@@ -11,6 +11,7 @@ RCBD_augmented(
   l = 1,
   planter = "serpentine",
   plotNumber = 101,
+  repsStack = c("vertical", "horizontal"),
   exptName = NULL,
   seed = NULL,
   locationNames = NULL,
@@ -34,6 +35,8 @@ RCBD_augmented(
 
 \item{plotNumber}{Numeric vector with the starting plot number for each location. By default \code{plotNumber = 101}.}
 
+\item{repsStack}{Option for \code{horizontal} or \code{vertical} layout By default \code{repsStack = 'vertical'}.}
+
 \item{exptName}{(optional) Name of experiment.}
 
 \item{seed}{(optional) Real number that specifies the starting seed to obtain reproducible designs.}
@@ -50,64 +53,6 @@ RCBD_augmented(
 
 \item{ncols}{(optional) Number of columns in the field.}
 }
-\value{
-A list with five elements.
-\itemize{
-  \item \code{infoDesign} is a list with information on the design parameters.
-  \item \code{layoutRandom} is the ARCBD layout randomization for the first location.
-  \item \code{plotNumber} is the plot number layout for the first location.
-  \item \code{exptNames} is the experiment names layout.
-  \item \code{data_entry} is a data frame with the data input.
-  \item \code{fieldBook} is a data frame with the ARCBD field book.
-}
-}
 \description{
 It randomly generates an augmented randomized complete block design across locations (ARCBD).
-}
-\examples{
-# Example 1: Generates an ARCBD with 6 blocks, 3 checks for each, and 50 treatments 
-# in two locations.
-ARCBD1 <- RCBD_augmented(lines = 50, checks = 3, b = 6, l = 2, 
-                         planter = "cartesian", 
-                         plotNumber = c(1,1001),
-                         seed = 23, 
-                         locationNames = c("FARGO", "MINOT"))
-ARCBD1$infoDesign
-ARCBD1$layoutRandom
-ARCBD1$exptNames
-ARCBD1$plotNumber
-head(ARCBD1$fieldBook, 12)
-                   
-# Example 2: Generates an ARCBD with 17 blocks, 4 checks for each, and 350 treatments 
-# in 3 locations.
-# In this case, we show how to use the option data.
-checks <- 4;
-list_checks <- paste("CH", 1:checks, sep = "")
-treatments <- paste("G", 5:354, sep = "")
-treatment_list <- data.frame(list(ENTRY = 1:354, NAME = c(list_checks, treatments)))
-head(treatment_list, 12)
-ARCBD2 <- RCBD_augmented(lines = 350, checks = 4, b = 17, l = 3, 
-                         planter = "serpentine", 
-                         plotNumber = c(101,1001,2001), 
-                         seed = 24, 
-                         locationNames = LETTERS[1:3],
-                         data = treatment_list)
-ARCBD2$infoDesign
-ARCBD2$layoutRandom
-ARCBD2$exptNames
-ARCBD2$plotNumber
-head(ARCBD2$fieldBook, 12)
-                                       
-}
-\references{
-Federer, W. T. (1955). Experimental Design. Theory and Application. New York, USA. The
-Macmillan Company.
-}
-\author{
-Didier Murillo [aut],
-        Salvador Gezan [aut],
-        Ana Heilman [ctb],
-        Thomas Walk [ctb], 
-        Johan Aparicio [ctb], 
-        Richard Horsley [ctb]
 }

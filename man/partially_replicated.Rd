@@ -12,6 +12,7 @@ partially_replicated(
   planter = "serpentine",
   l = 1,
   plotNumber = 101,
+  spread_reps = TRUE,
   seed = NULL,
   exptName = NULL,
   locationNames = NULL,
@@ -35,6 +36,9 @@ partially_replicated(
 \item{l}{Number of locations. By default \code{l = 1}.}
 
 \item{plotNumber}{Numeric vector with the starting plot number for each location. By default \code{plotNumber = 101}.}
+
+\item{spread_reps}{A logical value indicating whether to maximize the spatial 
+distance between replicated treatments in the field. Default is \code{TRUE}.}
 
 \item{seed}{(optional) Real number that specifies the starting seed to obtain reproducible designs.}
 

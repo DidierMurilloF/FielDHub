@@ -4,10 +4,12 @@
 \alias{run_app}
 \title{Run the Shiny Application}
 \usage{
-run_app(...)
+run_app(..., launch.browser = TRUE)
 }
 \arguments{
 \item{...}{Unused, for extensibility}
+
+\item{launch.browser}{Logical. If `TRUE`, the application is launched in the system's default web browser.}
 }
 \value{
 A shiny app object

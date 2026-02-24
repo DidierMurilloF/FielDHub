@@ -495,7 +495,7 @@ mod_Optim_server <- function(id) {
         plotNumber = plotNumber,
         l = sites, 
         exptName = expt_name,
-        optim = TRUE,
+        spread_reps = TRUE,
         seed = seed.spatial, 
         data = data.spatial
       )

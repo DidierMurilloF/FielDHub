@@ -18,6 +18,8 @@
 #' @param l Number of locations. By default \code{l = 1}.
 #' @param plotNumber Numeric vector with the starting plot number for each location. By default \code{plotNumber = 101}.
 #' @param seed (optional) Real number that specifies the starting seed to obtain reproducible designs.
+#' @param spread_reps A logical value indicating whether to maximize the spatial 
+#'   distance between replicated treatments in the field. Default is \code{TRUE}.
 #' @param exptName (optional) Name of the experiment.
 #' @param locationNames (optional) Name for each location.
 #' @param multiLocationData (optional) Option to pass an entry list for multiple locations. 
@@ -119,7 +121,8 @@ partially_replicated <- function(
     repUnits = NULL, 
     planter = "serpentine", 
     l = 1, 
-    plotNumber = 101, 
+    plotNumber = 101,
+    spread_reps = TRUE,
     seed = NULL, 
     exptName = NULL, 
     locationNames = NULL,
@@ -137,22 +140,22 @@ partially_replicated <- function(
     }
     if (length(nrows) != l) {
         if (length(nrows) < l) {
-            warning("Number of nrows values not matching number of locations", call. = FALSE)
+            # warning("Number of nrows values not matching number of locations", call. = FALSE)
             # Filling missing nrows values with last provided value
             nrows <- c(nrows, rep(nrows[length(nrows)], l - length(nrows)))
         } else {
-            warning("Number of nrows values not matching number of locations", call. = FALSE)
+            # warning("Number of nrows values not matching number of locations", call. = FALSE)
             # Filling missing nrows values with last provided value
             nrows <- nrows[1:l]
         }
     }
     if (length(ncols) != l) {
         if (length(ncols) < l) {
-            warning("Number of ncols values not matching number of locations", call. = FALSE)
+            # warning("Number of ncols values not matching number of locations", call. = FALSE)
             # Filling missing nrows values with last provided value
             ncols <- c(ncols, rep(ncols[length(ncols)], l - length(ncols)))
         } else  {
-            warning("Number of ncols values not matching number of locations", call. = FALSE)
+            # warning("Number of ncols values not matching number of locations", call. = FALSE)
             # Filling missing nrows values with last provided value
             ncols <- ncols[1:l]
         }
@@ -298,12 +301,14 @@ partially_replicated <- function(
             ncols = ncols[sites], 
             Fillers = 0,
             seed = seed, 
-            optim = TRUE, 
-            niter = 1000, 
+            spread_reps = spread_reps,
             dist_method = dist_method,
             border_penalization = border_penalization,
             data = list_locs[[sites]]
         )
+        if (is.null(prep)) {
+          return(invisible(NULL))
+        }
         rows_incidence[sites] <- prep$rows_incidence[length(prep$rows_incidence)]
         min_distance_sites[sites] <- prep$min_distance
         dataInput <- prep$gen.list

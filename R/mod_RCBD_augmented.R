@@ -48,9 +48,22 @@ mod_RCBD_augmented_ui <- function(id){
           ),
           column(6,
                  style=list("padding-left: 5px;"),
-                  checkboxInput(inputId = ns("random"), 
-                                label = "Randomize Entries?",
-                                value = TRUE)
+                 checkboxInput(inputId = ns("random"), 
+                               label = "Randomize Entries?",
+                               value = TRUE)
+          )
+        ),
+        
+        # after the row where you set nExpt_a_rcbd ...
+        
+        conditionalPanel(
+          condition = "input.nExpt_a_rcbd > 1", ns = ns,
+          selectInput(
+            inputId = ns("repsStack_a_rcbd"),
+            label = "Stack experiments:",
+            choices = c("vertical", "horizontal"),
+            selected = "vertical",
+            multiple = FALSE
           )
         ),
         
@@ -73,7 +86,7 @@ mod_RCBD_augmented_ui <- function(id){
           column(6,
                  style=list("padding-left: 5px;"),
                  selectInput(inputId = ns("blocks_a_rcbd"), 
-                 label = "", choices = 5)
+                             label = "", choices = 5)
           )
         ),
         fluidRow(
@@ -150,40 +163,40 @@ mod_RCBD_augmented_ui <- function(id){
       mainPanel(
         width = 8,
         shinyjs::useShinyjs(),
-         tabsetPanel(id = ns("tabset_arcbd"),
-           tabPanel("Get Random", value = "tabPanel_augmented",
-                    br(),
-                    shinyjs::hidden(
-                      selectInput(inputId = ns("field_dims"),
-                                  label = "Select dimensions of field:",
-                                  choices = "")
+        tabsetPanel(id = ns("tabset_arcbd"),
+                    tabPanel("Get Random", value = "tabPanel_augmented",
+                             br(),
+                             shinyjs::hidden(
+                               selectInput(inputId = ns("field_dims"),
+                                           label = "Select dimensions of field:",
+                                           choices = "")
+                             ),
+                             shinyjs::hidden(
+                               actionButton(ns("get_random_augmented"), 
+                                            label = "Randomize!")
+                             ),
+                             br(),
+                             br(),
+                             div(
+                               shinycssloaders::withSpinner(
+                                 verbatimTextOutput(outputId = ns("summary_augmented"), 
+                                                    placeholder = FALSE),
+                                 type = 4
+                               ),
+                               style = "padding-right: 40px;"
+                             )
                     ),
-                    shinyjs::hidden(
-                      actionButton(ns("get_random_augmented"), 
-                      label = "Randomize!")
+                    tabPanel("Input Data",
+                             fluidRow(
+                               column(6,DT::DTOutput(ns("data_input"))),
+                               column(6,DT::DTOutput(ns("checks_table")))
+                             )
                     ),
-                     br(),
-                     br(),
-                    div(
-                     shinycssloaders::withSpinner(
-                       verbatimTextOutput(outputId = ns("summary_augmented"), 
-                                          placeholder = FALSE),
-                      type = 4
-                     ),
-                     style = "padding-right: 40px;"
-                    )
-           ),
-           tabPanel("Input Data",
-                    fluidRow(
-                      column(6,DT::DTOutput(ns("data_input"))),
-                      column(6,DT::DTOutput(ns("checks_table")))
-                    )
-           ),
-           tabPanel("Field Layout", br(), plotOutput(ns("field_layout"), width = "97%")),
-           tabPanel("Plot Number Field", br(), plotOutput(ns("plot_number_layout2"), width = "97%")),
-           tabPanel("Field Book", DT::DTOutput(ns("fieldBook_ARCBD"))),
-           tabPanel("Heatmap", plotly::plotlyOutput(ns("heatmap"), width = "97%"))
-         )      
+                    tabPanel("Field Layout", br(), plotOutput(ns("field_layout"), width = "97%")),
+                    tabPanel("Plot Number Field", br(), plotOutput(ns("plot_number_layout"), width = "97%")),
+                    tabPanel("Field Book", DT::DTOutput(ns("fieldBook_ARCBD"))),
+                    tabPanel("Heatmap", plotly::plotlyOutput(ns("heatmap"), width = "97%"))
+        )      
       )
     )
   )
@@ -241,8 +254,8 @@ mod_RCBD_augmented_server <- function(id) {
           lines <- nrow(data_up) - checks
           if (lines < 8) {
             shinyalert::shinyalert(
-              "Error!!", 
-              "At least ten treatments are required!!", 
+              "Error!!",
+              "At least ten treatments are required!!",
               type = "error")
             return(NULL)
           }
@@ -275,8 +288,8 @@ mod_RCBD_augmented_server <- function(id) {
         req(input$lines_a_rcbd)
         if (input$lines_a_rcbd < 8) {
           shinyalert::shinyalert(
-            "Error!!", 
-            "At least ten treatments are required!!", 
+            "Error!!",
+            "At least ten treatments are required!!",
             type = "error")
           return(NULL)
         }
@@ -291,7 +304,9 @@ mod_RCBD_augmented_server <- function(id) {
                     entries = lines))
       }
     }) 
-
+    # |> 
+    #   bindEvent(input$RUN.arcbd)
+    
     
     list_to_observe <- reactive({
       req(init_data())
@@ -308,8 +323,10 @@ mod_RCBD_augmented_server <- function(id) {
       checks_arcbd <- as.numeric(list_to_observe()$checks)
       set_blocks <- set_augmented_blocks(
         lines = lines_arcbd, 
-        checks = checks_arcbd
+        checks = checks_arcbd, 
+        start = 3
       )
+      # print(set_blocks)
       blocks_arcbd <- set_blocks$b
       if (length(blocks_arcbd) == 0) {
         shinyalert::shinyalert(
@@ -333,7 +350,7 @@ mod_RCBD_augmented_server <- function(id) {
         checks <- as.numeric(input$checks_a_rcbd)
         lines <- as.numeric(input$lines_a_rcbd)
         b <- as.numeric(input$blocks_a_rcbd)
-        set_dims <- set_augmented_blocks(lines = lines, checks = checks)
+        set_dims <- set_augmented_blocks(lines = lines, checks = checks, start = 3)
         dim_options <- set_dims$blocks_dims
         blocks_dims <- as.data.frame(dim_options)
         set_choices_dims <- as.vector(subset(blocks_dims, blocks_dims[,1] == b)[,2])
@@ -342,7 +359,7 @@ mod_RCBD_augmented_server <- function(id) {
         checks <- as.numeric(input$checks_a_rcbd)
         lines <- as.numeric(init_data()$entries)
         b <- as.numeric(input$blocks_a_rcbd)
-        set_dims <- set_augmented_blocks(lines = lines, checks = checks)
+        set_dims <- set_augmented_blocks(lines = lines, checks = checks, start = 3)
         blocks_dims <- as.data.frame(set_dims$blocks_dims)
         set_choices_dims <- as.vector(subset(blocks_dims, blocks_dims[,1] == b)[,2])
         choices <- set_choices_dims
@@ -357,6 +374,7 @@ mod_RCBD_augmented_server <- function(id) {
     
     
     getDataup_a_rcbd <- eventReactive(input$RUN.arcbd, {
+      req(init_data())
       if (is.null(init_data())) {
         shinyalert::shinyalert(
           "Error!!", 
@@ -375,7 +393,7 @@ mod_RCBD_augmented_server <- function(id) {
                   expts_a_rcbd = input$nExpt_a_rcbd)
       )
     })
-  
+    
     
     list_inputs <- eventReactive(input$RUN.arcbd, {
       if (input$owndata_a_rcbd != 'Yes') {
@@ -393,7 +411,7 @@ mod_RCBD_augmented_server <- function(id) {
       }
     })
     
-
+    
     
     field_dims_augmented <- eventReactive(input$get_random_augmented, {
       dims <- unlist(strsplit(input$field_dims, " x "))
@@ -491,13 +509,13 @@ mod_RCBD_augmented_server <- function(id) {
     
     output$checks_table <- DT::renderDT({
       req(getDataup_a_rcbd()$dataUp_a_rcbd)
-        data_entry <- getDataup_a_rcbd()$dataUp_a_rcbd
-        df <- data_entry[1:(as.numeric(input$checks_a_rcbd)),]
-        options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                  scrollX = TRUE, scrollY = "350px"))
-        a <- ncol(df) - 1
-        DT::datatable(df, rownames = FALSE, caption = 'Table of checks.', options = list(
-          columnDefs = list(list(className = 'dt-left', targets = 0:a))))
+      data_entry <- getDataup_a_rcbd()$dataUp_a_rcbd
+      df <- data_entry[1:(as.numeric(input$checks_a_rcbd)),]
+      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
+                                scrollX = TRUE, scrollY = "350px"))
+      a <- ncol(df) - 1
+      DT::datatable(df, rownames = FALSE, caption = 'Table of checks.', options = list(
+        columnDefs = list(list(className = 'dt-left', targets = 0:a))))
     })
     
     rcbd_augmented_reactive <- reactive({
@@ -525,7 +543,12 @@ mod_RCBD_augmented_server <- function(id) {
       if (length(loc) > l.arcbd) {
         validate("Length of vector with name of locations is greater than the number of locations.")
       } 
+      
       repsExpt <- some_inputs()$expts_a_rcbd
+      repsStack <- NULL
+      if (repsExpt > 1) {
+        repsStack <- input$repsStack_a_rcbd
+      }
       nameexpt <- as.vector(unlist(strsplit(input$expt_name_a_rcbd, ",")))
       if (length(nameexpt) != 0) {
         Name_expt <- nameexpt
@@ -547,6 +570,7 @@ mod_RCBD_augmented_server <- function(id) {
         locationNames = site_names,
         repsExpt = repsExpt,
         random = random, 
+        repsStack = repsStack,
         data = gen.list,
         nrows = nrows,
         ncols = ncols
@@ -564,83 +588,19 @@ mod_RCBD_augmented_server <- function(id) {
         silent = TRUE
       )
     })
-
+    
     output$field_layout <- renderPlot({
       req(reactive_layoutARCBD())
       req(rcbd_augmented_reactive())
       reactive_layoutARCBD()$out_layout
-    }, height = 620)
+    }, height = 620, res = 100)
     
-    output$plot_number_layout2 <- renderPlot({
+    output$plot_number_layout <- renderPlot({
       req(reactive_layoutARCBD())
       req(rcbd_augmented_reactive())
       print(reactive_layoutARCBD()$out_layoutPlots)
       reactive_layoutARCBD()$out_layoutPlots
-    }, height = 620)
-    
-    # arcbd_plot <- reactive({
-    #   req(rcbd_augmented_reactive())
-    #   loc_to_view <- as.numeric(input$locView.arcbd)
-    #   arcbd_design <- rcbd_augmented_reactive()
-    #   loc_field_book <- arcbd_design$fieldBook
-    # 
-    #   loc_field_book <- loc_field_book |>
-    #     dplyr::mutate(LOC = factor(LOCATION, levels = unique(LOCATION))) |>
-    #     dplyr::mutate(LOC = as.numeric(LOC))
-    # 
-    #   temp_field_book <- loc_field_book |> dplyr::filter(LOC == loc_to_view)
-    # 
-    #   rows <- length(unique(temp_field_book$ROW))
-    #   cols <- length(unique(temp_field_book$COLUMN))
-    #   temp_field_book$BLOCK <- as.factor(temp_field_book$BLOCK)
-    #   main <- paste0("Augmented RCBD Layout ", rows, " x ", cols)
-    #   p1 <- desplot::ggdesplot(
-    #     BLOCK ~ COLUMN + ROW,
-    #     text = ENTRY,
-    #     col = CHECKS,
-    #     cex = 1.2,
-    #     out1 = EXPT,
-    #     out2 = BLOCK,
-    #     data = temp_field_book,
-    #     xlab = "COLUMNS",
-    #     ylab = "ROWS",
-    #     main = main,
-    #     show.key = FALSE,
-    #     gg = TRUE,
-    #     out2.gpar=list(col = "gray50", lwd = 1, lty = 1))
-    #   # Explicitly remove all legends
-    #   p1 <- p1 + ggplot2::guides(
-    #     fill = "none",   # Remove legend for fill
-    #     color = "none",  # Remove legend for color (if used)
-    #     text = "none"    # Remove legend for text labels
-    #   )
-    # 
-    #   # Precompute the breaks based on the data
-    #   x_breaks <- seq(floor(min(temp_field_book$COLUMN)), ceiling(max(temp_field_book$COLUMN)), by = 1)
-    #   y_breaks <- seq(floor(min(temp_field_book$ROW)), ceiling(max(temp_field_book$ROW)), by = 1)
-    # 
-    #   # Apply breaks to the plot
-    #   p1 <- p1 +
-    #     ggplot2::scale_x_continuous(breaks = x_breaks) +
-    #     ggplot2::scale_y_continuous(breaks = y_breaks)
-    # 
-    #   # Apply a minimal theme for better aesthetics
-    #   p1 <- p1 + ggplot2::theme_minimal() +
-    #     ggplot2::theme(
-    #       plot.title = ggplot2::element_text(face = "bold", size = 15),
-    #       axis.title = ggplot2::element_text(size = 12),
-    #       axis.text = ggplot2::element_text(size = 11)
-    #     )
-    #   return(p1)
-    # })
-    # 
-    # output$field_layout <- renderPlot({
-    #   arcbd_plot()
-    # }, height = 650)
-
-    output$randomized_layout2 <- plotly::renderPlotly({
-      arcbd_plot()
-    })
+    }, height = 620, res = 100)
     
     output$summary_augmented <- renderPrint({
       if (test_arcbd()) {
@@ -665,38 +625,38 @@ mod_RCBD_augmented_server <- function(id) {
     
     output$randomized_layout <- DT::renderDT({
       if(!test_arcbd()) return(NULL)
-       r_map <- rcbd_augmented_reactive()$layout_random_sites[[locNum()]]
-       checks <- 1:(as.numeric(some_inputs()$checks))
-       b <- as.numeric(some_inputs()$blocks)
-       len_checks <- length(checks)
-       df <- as.data.frame(r_map)
-       rownames(df) <- paste0("Row", nrow(df):1)
-       repsExpt <- some_inputs()$expts_a_rcbd
-       colores <- c('royalblue','salmon', 'green', 'orange','orchid', 'slategrey',
-                    'greenyellow', 'blueviolet','deepskyblue','gold','blue', 'red')
-       colnames(df) <- paste("V", 1:ncol(df), sep = "")
-       options(DT.options = list(pageLength = nrow(df), 
-                                 autoWidth = FALSE, 
-                                 scrollY = "700px"))
-       DT::datatable(df,
-                     extensions = 'Buttons',
-                     options = list(dom = 'Blfrtip',
-                                    autoWidth = FALSE,
-                                    scrollX = TRUE,
-                                    fixedColumns = TRUE,
-                                    pageLength = nrow(df),
-                                    scrollY = "700px",
-                                    class = 'compact cell-border stripe',  rownames = FALSE,
-                                    server = FALSE,
-                                    filter = list( position = 'top', clear = FALSE, plain =TRUE ),
-                                    buttons = c('copy', 'excel'),
-                                    lengthMenu = list(c(10,25,50,-1),
-                                                      c(10,25,50,"All")))
-                     ) |>
-         DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
-                         backgroundColor = DT::styleEqual(c(checks),
-                                                          colores[1:len_checks]))
-     })
+      r_map <- rcbd_augmented_reactive()$layout_random_sites[[locNum()]]
+      checks <- 1:(as.numeric(some_inputs()$checks))
+      b <- as.numeric(some_inputs()$blocks)
+      len_checks <- length(checks)
+      df <- as.data.frame(r_map)
+      rownames(df) <- paste0("Row", nrow(df):1)
+      repsExpt <- some_inputs()$expts_a_rcbd
+      colores <- c('royalblue','salmon', 'green', 'orange','orchid', 'slategrey',
+                   'greenyellow', 'blueviolet','deepskyblue','gold','blue', 'red')
+      colnames(df) <- paste("V", 1:ncol(df), sep = "")
+      options(DT.options = list(pageLength = nrow(df), 
+                                autoWidth = FALSE, 
+                                scrollY = "700px"))
+      DT::datatable(df,
+                    extensions = 'Buttons',
+                    options = list(dom = 'Blfrtip',
+                                   autoWidth = FALSE,
+                                   scrollX = TRUE,
+                                   fixedColumns = TRUE,
+                                   pageLength = nrow(df),
+                                   scrollY = "700px",
+                                   class = 'compact cell-border stripe',  rownames = FALSE,
+                                   server = FALSE,
+                                   filter = list( position = 'top', clear = FALSE, plain =TRUE ),
+                                   buttons = c('copy', 'excel'),
+                                   lengthMenu = list(c(10,25,50,-1),
+                                                     c(10,25,50,"All")))
+      ) |>
+        DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
+                        backgroundColor = DT::styleEqual(c(checks),
+                                                         colores[1:len_checks]))
+    })
     
     output$expt_name_layout <- DT::renderDT({
       if(!test_arcbd()) return(NULL)
@@ -722,268 +682,209 @@ mod_RCBD_augmented_server <- function(id) {
         DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
                         backgroundColor = DT::styleEqual(Name_expt, colores_back[1:repsExpt]))
     })
-
-     # output$plot_number_layout <- DT::renderDT({
-     #   if(!test_arcbd()) return(NULL)
-     #   req(rcbd_augmented_reactive())
-     #   plot_num1 <- rcbd_augmented_reactive()$layout_plots_sites[[locNum()]]
-     #   b <- as.numeric(some_inputs()$blocks)
-     #   infoDesign <- rcbd_augmented_reactive()$infoDesign
-     #   Fillers <- as.numeric(infoDesign$fillers)
-     #   repsExpt <- some_inputs()$expts_a_rcbd
-     #   rownames(plot_num1) <- paste0("Row",nrow(plot_num1):1)
-     #   if (Fillers == 0) {
-     #     a <- as.vector(as.matrix(plot_num1))
-     #     len_a <- length(a)
-     #     df <- as.data.frame(plot_num1)
-     #     colnames(df) <- paste("V", 1:ncol(df), sep = "")
-     #     DT::datatable(df,
-     #                   extensions = c('Buttons'),
-     #                   options = list(dom = 'Blfrtip',
-     #                                  autoWidth = FALSE,
-     #                                  scrollX = TRUE,
-     #                                  fixedColumns = TRUE,
-     #                                  pageLength = nrow(df),
-     #                                  scrollY = "700px",
-     #                                  class = 'compact cell-border stripe',  
-     #                                  rownames = FALSE,
-     #                                  server = FALSE,
-     #                                  filter = list( position = 'top', 
-     #                                                 clear = FALSE, 
-     #                                                 plain =TRUE ),
-     #                                  buttons = c('copy', 'excel'),
-     #                                  lengthMenu = list(c(10,25,50,-1),
-     #                                                    c(10,25,50,"All")))
-     #     )
-     #   }else {
-     #     a <- as.vector(as.matrix(plot_num1))
-     #     a <- a[-which(a == 0)]
-     #     len_a <- length(a)
-     #     df <- as.data.frame(plot_num1)
-     #     rownames(df) <- paste0("Row",nrow(df):1)
-     #     colnames(df) <- paste("V", 1:ncol(df), sep = "")
-     #     DT::datatable(df,
-     #                   extensions = c('Buttons'),
-     #                   options = list(dom = 'Blfrtip',
-     #                                  autoWidth = FALSE,
-     #                                  scrollX = TRUE,
-     #                                  fixedColumns = TRUE,
-     #                                  pageLength = nrow(df),
-     #                                  scrollY = "700px",
-     #                                  class = 'compact cell-border stripe',  rownames = FALSE,
-     #                                  server = FALSE,
-     #                                  filter = list( position = 'top', clear = FALSE, plain =TRUE ),
-     #                                  buttons = c('copy', 'excel'),
-     #                                  lengthMenu = list(c(10,25,50,-1),
-     #                                                    c(10,25,50,"All")))
-     #     )
-     #   }
-     # })
-     
-     valsARCBD <- reactiveValues(ROX = NULL, ROY = NULL, trail.arcbd = NULL, minValue = NULL,
-                                 maxValue = NULL)
-
-     simuModal.ARCBD <- function(failed = FALSE) {
-       modalDialog(
-         fluidRow(
-           column(6,
-                  selectInput(inputId = ns("trailsARCBD"), label = "Select One:",
-                              choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
-           ),
-           column(6,
-                  checkboxInput(inputId = ns("heatmap_s"), label = "Include a Heatmap", value = TRUE),
-           )
-         ),
-         conditionalPanel("input.trailsARCBD == 'Other'", ns = ns,
-                          textInput(inputId = ns("OtherARCBD"), label = "Input Trial Name:", value = NULL)
-         ),
-         fluidRow(
-           column(6,
-                  selectInput(inputId = ns("ROX.O"), "Select the Correlation in Rows:",
-                              choices = seq(0.1, 0.9, 0.1), selected = 0.5)
-           ),
-           column(6,
-                  selectInput(inputId = ns("ROY.O"), "Select the Correlation in Cols:",
-                              choices = seq(0.1, 0.9, 0.1), selected = 0.5)
-           )
-         ),
-         fluidRow(
-           column(6,
-                  numericInput(inputId = ns("min.arcbd"), "Input the min value:", value = NULL)
-           ),
-           column(6,
-                  numericInput(inputId = ns("max.arcbd"), "Input the max value:", value = NULL)
-
-           )
-         ),
-         if (failed)
-           div(tags$b("Invalid input of data max and min", style = "color: red;")),
-
-         footer = tagList(
-           modalButton("Cancel"),
-           actionButton(inputId = ns("ok.arcbd"), "GO")
-         )
-       )
-     }
-
-     observeEvent(input$Simulate.arcbd, {
-       req(rcbd_augmented_reactive()$fieldBook)
-       if(test_arcbd()) {showModal(
-         simuModal.ARCBD()
-       )}
-     })
-
-     observeEvent(input$ok.arcbd, {
-       req(input$min.arcbd, input$max.arcbd)
-       if (input$max.arcbd > input$min.arcbd && input$min.arcbd != input$max.arcbd) {
-         valsARCBD$maxValue <- input$max.arcbd
-         valsARCBD$minValue  <- input$min.arcbd
-         valsARCBD$ROX <- as.numeric(input$ROX.O)
-         valsARCBD$ROY <- as.numeric(input$ROY.O)
-         if(input$trailsARCBD == "Other") {
-           req(input$OtherARCBD)
-           if(!is.null(input$OtherARCBD)) {
-             valsARCBD$trail.arcbd <- as.character(input$OtherARCBD)
-           }else showModal(simuModal.ARCBD(failed = TRUE))
-         }else {
-           valsARCBD$trail.arcbd <- as.character(input$trailsARCBD)
-         }
-         removeModal()
-       }else {
-         showModal(
-           simuModal.ARCBD(failed = TRUE)
-         )
-       }
-     })
-
-     simuDataARCBD <- reactive({
-       req(rcbd_augmented_reactive()$fieldBook)
-       if(!is.null(valsARCBD$maxValue) && !is.null(valsARCBD$minValue) && !is.null(valsARCBD$trail.arcbd)) {
-         maxVal <- as.numeric(valsARCBD$maxValue)
-         minVal <- as.numeric(valsARCBD$minValue)
-         ROX_O <- as.numeric(valsARCBD$ROX)
-         ROY_O <- as.numeric(valsARCBD$ROY)
-         df_arcbd <- rcbd_augmented_reactive()$fieldBook
-         nrows.s <- length(levels(as.factor(df_arcbd$ROW)))
-         ncols.s <- length(levels(as.factor(df_arcbd$COLUMN)))
-         loc_levels_factors <- levels(factor(df_arcbd$LOCATION, unique(df_arcbd$LOCATION)))
-         seed.s <- as.numeric(input$myseed_a_rcbd)
-         locs <- length(loc_levels_factors)
-         df_arcbd_list <- vector(mode = "list", length = locs)
-         dfSimulationList <- vector(mode = "list", length = locs)
-         do_sites <- 1:(length(loc_levels_factors))
-         z <- 1
-         set.seed(seed.s)
-         for (sites in do_sites) {
-           df_loc <- subset(df_arcbd, LOCATION == loc_levels_factors[z])
-           fieldBook <- df_loc[, c(1,6,7,10)]
-           dfSimulation <- AR1xAR1_simulation(nrows = nrows.s, ncols = ncols.s,
-                                              ROX = ROX_O, ROY = ROY_O, minValue = minVal,
-                                              maxValue = maxVal, fieldbook = fieldBook,
-                                              trail = valsARCBD$trail.arcbd,
-                                              seed = NULL)
-           dfSimulation <- dfSimulation$outOrder
-           dfSimulationList[[sites]] <- dfSimulation
-           dataArcbd_loc <- df_loc
-           df_arcbd_simu <- cbind(dataArcbd_loc, round(dfSimulation[,7],2))
-           colnames(df_arcbd_simu)[12] <- as.character(valsARCBD$trail.arcbd)
-           df_arcbd_list[[sites]] <- df_arcbd_simu
-           z <- z + 1
-         }
-         df_arcbd_locs <- dplyr::bind_rows(df_arcbd_list)
-         v <- 1
-       }else {
-         dataArcbd <- rcbd_augmented_reactive()$fieldBook
-         v <- 2
-       }
-       if (v == 1) {
-         return(list(df = df_arcbd_locs, dfSimulation = dfSimulationList))
-       }else if (v == 2) {
-         return(list(df = dataArcbd))
-       }
-       
-     })
-     
-     heat_map_arcbd <- reactiveValues(heat_map_option = FALSE)
-     
-     observeEvent(input$ok.arcbd, {
-       req(input$min.arcbd, input$max.arcbd)
-       if (input$max.arcbd > input$min.arcbd && input$min.arcbd != input$max.arcbd) {
-         heat_map_arcbd$heat_map_option <- TRUE
-       }
-     })
-     
-     observeEvent(heat_map_arcbd$heat_map_option, {
-       if (heat_map_arcbd$heat_map_option == FALSE) {
-         hideTab(inputId = "tabset_arcbd", target = "Heatmap")
-       } else {
-         showTab(inputId = "tabset_arcbd", target = "Heatmap")
-       }
-     })
-
-
-     output$fieldBook_ARCBD <- DT::renderDT({
-       if(!test_arcbd()) return(NULL)
-       df <- simuDataARCBD()$df
-       df$EXPT <- as.factor(df$EXPT)
-       df$LOCATION <- as.factor(df$LOCATION)
-       df$PLOT <- as.factor(df$PLOT)
-       df$ROW <- as.factor(df$ROW)
-       df$COLUMN <- as.factor(df$COLUMN)
-       df$CHECKS <- as.factor(df$CHECKS)
-       df$BLOCK <- as.factor(df$BLOCK)
-       df$ENTRY <- as.factor(df$ENTRY)
-       df$TREATMENT <- as.factor(df$TREATMENT)
+    
+    valsARCBD <- reactiveValues(ROX = NULL, ROY = NULL, trail.arcbd = NULL, minValue = NULL,
+                                maxValue = NULL)
+    
+    simuModal.ARCBD <- function(failed = FALSE) {
+      modalDialog(
+        fluidRow(
+          column(6,
+                 selectInput(inputId = ns("trailsARCBD"), label = "Select One:",
+                             choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
+          ),
+          column(6,
+                 checkboxInput(inputId = ns("heatmap_s"), label = "Include a Heatmap", value = TRUE),
+          )
+        ),
+        conditionalPanel("input.trailsARCBD == 'Other'", ns = ns,
+                         textInput(inputId = ns("OtherARCBD"), label = "Input Trial Name:", value = NULL)
+        ),
+        fluidRow(
+          column(6,
+                 selectInput(inputId = ns("ROX.O"), "Select the Correlation in Rows:",
+                             choices = seq(0.1, 0.9, 0.1), selected = 0.5)
+          ),
+          column(6,
+                 selectInput(inputId = ns("ROY.O"), "Select the Correlation in Cols:",
+                             choices = seq(0.1, 0.9, 0.1), selected = 0.5)
+          )
+        ),
+        fluidRow(
+          column(6,
+                 numericInput(inputId = ns("min.arcbd"), "Input the min value:", value = NULL)
+          ),
+          column(6,
+                 numericInput(inputId = ns("max.arcbd"), "Input the max value:", value = NULL)
+                 
+          )
+        ),
+        if (failed)
+          div(tags$b("Invalid input of data max and min", style = "color: red;")),
         
-       options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                 scrollX = TRUE, scrollCollapse=TRUE, scrollY = "600px"))
-       DT::datatable(df, 
-                     filter = "top",
-                     rownames = FALSE, 
-                     options = list(
-                       columnDefs = list(list(className = 'dt-center', targets = "_all")))
-       )
-     })
-     
-
-
-     heatmap_obj <- reactive({
-       req(simuDataARCBD()$dfSimulation)
-       if(input$heatmap_s) {
-         w <- as.character(valsARCBD$trail.arcbd)
-         df <- simuDataARCBD()$dfSimulation[[locNum()]]
-         df <- as.data.frame(df)
-         p1 <- ggplot2::ggplot(df, ggplot2::aes(x = df[,4], y = df[,3], fill = df[,7], text = df[,8])) +
-           ggplot2::geom_tile() +
-           ggplot2::xlab("COLUMN") +
-           ggplot2::ylab("ROW") +
-           ggplot2::labs(fill = w) +
-           viridis::scale_fill_viridis(discrete = FALSE)
-
-         p2 <- plotly::ggplotly(p1, tooltip="text", height = 740)
-
-         return(p2)
-       }
-     })
-
-     output$heatmap <- plotly::renderPlotly({
-       req(heatmap_obj())
-       if(!test_arcbd()) return(NULL)
-       heatmap_obj()
-     })
-     
-     output$downloadData_a_rcbd <- downloadHandler(
-       filename = function() {
-         req(input$Location_a_rcbd)
-         loc <- input$Location_a_rcbd
-         loc <- paste(loc, "_", "ARCBD_", sep = "")
-         paste(loc, Sys.Date(), ".csv", sep = "")
-       },
-       content = function(file) {
-         df <- as.data.frame(simuDataARCBD()$df)
-         write.csv(df, file, row.names = FALSE)
-       }
-     )
- 
+        footer = tagList(
+          modalButton("Cancel"),
+          actionButton(inputId = ns("ok.arcbd"), "GO")
+        )
+      )
+    }
+    
+    observeEvent(input$Simulate.arcbd, {
+      req(rcbd_augmented_reactive()$fieldBook)
+      if(test_arcbd()) {showModal(
+        simuModal.ARCBD()
+      )}
+    })
+    
+    observeEvent(input$ok.arcbd, {
+      req(input$min.arcbd, input$max.arcbd)
+      if (input$max.arcbd > input$min.arcbd && input$min.arcbd != input$max.arcbd) {
+        valsARCBD$maxValue <- input$max.arcbd
+        valsARCBD$minValue  <- input$min.arcbd
+        valsARCBD$ROX <- as.numeric(input$ROX.O)
+        valsARCBD$ROY <- as.numeric(input$ROY.O)
+        if(input$trailsARCBD == "Other") {
+          req(input$OtherARCBD)
+          if(!is.null(input$OtherARCBD)) {
+            valsARCBD$trail.arcbd <- as.character(input$OtherARCBD)
+          }else showModal(simuModal.ARCBD(failed = TRUE))
+        }else {
+          valsARCBD$trail.arcbd <- as.character(input$trailsARCBD)
+        }
+        removeModal()
+      }else {
+        showModal(
+          simuModal.ARCBD(failed = TRUE)
+        )
+      }
+    })
+    
+    simuDataARCBD <- reactive({
+      req(rcbd_augmented_reactive()$fieldBook)
+      if(!is.null(valsARCBD$maxValue) && !is.null(valsARCBD$minValue) && !is.null(valsARCBD$trail.arcbd)) {
+        maxVal <- as.numeric(valsARCBD$maxValue)
+        minVal <- as.numeric(valsARCBD$minValue)
+        ROX_O <- as.numeric(valsARCBD$ROX)
+        ROY_O <- as.numeric(valsARCBD$ROY)
+        df_arcbd <- rcbd_augmented_reactive()$fieldBook
+        nrows.s <- length(levels(as.factor(df_arcbd$ROW)))
+        ncols.s <- length(levels(as.factor(df_arcbd$COLUMN)))
+        loc_levels_factors <- levels(factor(df_arcbd$LOCATION, unique(df_arcbd$LOCATION)))
+        seed.s <- as.numeric(input$myseed_a_rcbd)
+        locs <- length(loc_levels_factors)
+        df_arcbd_list <- vector(mode = "list", length = locs)
+        dfSimulationList <- vector(mode = "list", length = locs)
+        do_sites <- 1:(length(loc_levels_factors))
+        z <- 1
+        set.seed(seed.s)
+        for (sites in do_sites) {
+          df_loc <- subset(df_arcbd, LOCATION == loc_levels_factors[z])
+          fieldBook <- df_loc[, c(1,6,7,10)]
+          dfSimulation <- AR1xAR1_simulation(nrows = nrows.s, ncols = ncols.s,
+                                             ROX = ROX_O, ROY = ROY_O, minValue = minVal,
+                                             maxValue = maxVal, fieldbook = fieldBook,
+                                             trail = valsARCBD$trail.arcbd,
+                                             seed = NULL)
+          dfSimulation <- dfSimulation$outOrder
+          dfSimulationList[[sites]] <- dfSimulation
+          dataArcbd_loc <- df_loc
+          df_arcbd_simu <- cbind(dataArcbd_loc, round(dfSimulation[,7],2))
+          colnames(df_arcbd_simu)[12] <- as.character(valsARCBD$trail.arcbd)
+          df_arcbd_list[[sites]] <- df_arcbd_simu
+          z <- z + 1
+        }
+        df_arcbd_locs <- dplyr::bind_rows(df_arcbd_list)
+        v <- 1
+      }else {
+        dataArcbd <- rcbd_augmented_reactive()$fieldBook
+        v <- 2
+      }
+      if (v == 1) {
+        return(list(df = df_arcbd_locs, dfSimulation = dfSimulationList))
+      }else if (v == 2) {
+        return(list(df = dataArcbd))
+      }
+      
+    })
+    
+    heat_map_arcbd <- reactiveValues(heat_map_option = FALSE)
+    
+    observeEvent(input$ok.arcbd, {
+      req(input$min.arcbd, input$max.arcbd)
+      if (input$max.arcbd > input$min.arcbd && input$min.arcbd != input$max.arcbd) {
+        heat_map_arcbd$heat_map_option <- TRUE
+      }
+    })
+    
+    observeEvent(heat_map_arcbd$heat_map_option, {
+      if (heat_map_arcbd$heat_map_option == FALSE) {
+        hideTab(inputId = "tabset_arcbd", target = "Heatmap")
+      } else {
+        showTab(inputId = "tabset_arcbd", target = "Heatmap")
+      }
+    })
+    
+    
+    output$fieldBook_ARCBD <- DT::renderDT({
+      if(!test_arcbd()) return(NULL)
+      df <- simuDataARCBD()$df
+      df$EXPT <- as.factor(df$EXPT)
+      df$LOCATION <- as.factor(df$LOCATION)
+      df$PLOT <- as.factor(df$PLOT)
+      df$ROW <- as.factor(df$ROW)
+      df$COLUMN <- as.factor(df$COLUMN)
+      df$CHECKS <- as.factor(df$CHECKS)
+      df$BLOCK <- as.factor(df$BLOCK)
+      df$ENTRY <- as.factor(df$ENTRY)
+      df$TREATMENT <- as.factor(df$TREATMENT)
+      
+      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
+                                scrollX = TRUE, scrollCollapse=TRUE, scrollY = "600px"))
+      DT::datatable(df, 
+                    filter = "top",
+                    rownames = FALSE, 
+                    options = list(
+                      columnDefs = list(list(className = 'dt-center', targets = "_all")))
+      )
+    })
+    
+    heatmap_obj <- reactive({
+      req(simuDataARCBD()$dfSimulation)
+      if(input$heatmap_s) {
+        w <- as.character(valsARCBD$trail.arcbd)
+        df <- simuDataARCBD()$dfSimulation[[locNum()]]
+        df <- as.data.frame(df)
+        p1 <- ggplot2::ggplot(df, ggplot2::aes(x = df[,4], y = df[,3], fill = df[,7], text = df[,8])) +
+          ggplot2::geom_tile() +
+          ggplot2::xlab("COLUMN") +
+          ggplot2::ylab("ROW") +
+          ggplot2::labs(fill = w) +
+          viridis::scale_fill_viridis(discrete = FALSE)
+        
+        p2 <- plotly::ggplotly(p1, tooltip="text", height = 740)
+        
+        return(p2)
+      }
+    })
+    
+    output$heatmap <- plotly::renderPlotly({
+      req(heatmap_obj())
+      if(!test_arcbd()) return(NULL)
+      heatmap_obj()
+    })
+    
+    output$downloadData_a_rcbd <- downloadHandler(
+      filename = function() {
+        req(input$Location_a_rcbd)
+        loc <- input$Location_a_rcbd
+        loc <- paste(loc, "_", "ARCBD_", sep = "")
+        paste(loc, Sys.Date(), ".csv", sep = "")
+      },
+      content = function(file) {
+        df <- as.data.frame(simuDataARCBD()$df)
+        write.csv(df, file, row.names = FALSE)
+      }
+    )
+    
   })
 }
