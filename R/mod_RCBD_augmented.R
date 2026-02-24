@@ -323,8 +323,10 @@ mod_RCBD_augmented_server <- function(id) {
       checks_arcbd <- as.numeric(list_to_observe()$checks)
       set_blocks <- set_augmented_blocks(
         lines = lines_arcbd, 
-        checks = checks_arcbd
+        checks = checks_arcbd, 
+        start = 3
       )
+      # print(set_blocks)
       blocks_arcbd <- set_blocks$b
       if (length(blocks_arcbd) == 0) {
         shinyalert::shinyalert(
@@ -348,7 +350,7 @@ mod_RCBD_augmented_server <- function(id) {
         checks <- as.numeric(input$checks_a_rcbd)
         lines <- as.numeric(input$lines_a_rcbd)
         b <- as.numeric(input$blocks_a_rcbd)
-        set_dims <- set_augmented_blocks(lines = lines, checks = checks)
+        set_dims <- set_augmented_blocks(lines = lines, checks = checks, start = 3)
         dim_options <- set_dims$blocks_dims
         blocks_dims <- as.data.frame(dim_options)
         set_choices_dims <- as.vector(subset(blocks_dims, blocks_dims[,1] == b)[,2])
@@ -357,7 +359,7 @@ mod_RCBD_augmented_server <- function(id) {
         checks <- as.numeric(input$checks_a_rcbd)
         lines <- as.numeric(init_data()$entries)
         b <- as.numeric(input$blocks_a_rcbd)
-        set_dims <- set_augmented_blocks(lines = lines, checks = checks)
+        set_dims <- set_augmented_blocks(lines = lines, checks = checks, start = 3)
         blocks_dims <- as.data.frame(set_dims$blocks_dims)
         set_choices_dims <- as.vector(subset(blocks_dims, blocks_dims[,1] == b)[,2])
         choices <- set_choices_dims
