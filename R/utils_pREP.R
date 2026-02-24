@@ -11,9 +11,8 @@
 #' @param ncols Number of columns field.
 #' @param Fillers An integer
 #' @param seed An optional seed value to set the random number generator.
-#' @param optim A logical value indicating whether or not to optimize the design. Default is TRUE.
-#' @param niter The number of iterations to use in the first step optimization algorithm. 
-#' Default is 1000.
+#' @param spread_reps A logical value indicating whether to maximize the spatial 
+#'   distance between replicated treatments in the field. Default is \code{TRUE}.
 #' @param data  Data frame with 3 columns: \code{ENTRY | NAME | REPS}.
 #' 
 #' @importFrom stats dist
@@ -40,14 +39,12 @@ pREP <- function(
     ncols = NULL,
     Fillers = NULL, 
     seed = NULL, 
-    optim = TRUE, 
-    niter = 10000, 
-    border_penalization = 0.1,
+    spread_reps = TRUE, 
+    border_penalization = 0.5,
     dist_method = "euclidean",
     data = NULL
     ) {
   
-    niter <- 1000
     prep <- TRUE
     if (!is.null(data)) {
         gen_list <- data
@@ -89,15 +86,45 @@ pREP <- function(
         total_checks <- sum(freq_reps * nREPS)
         total_plots <- sum(gen_list$REPS)
         if (sum(total_plots) != (nrows * ncols)) {
-            choices <- factor_subsets(n = total_plots)$labels
-            if (!is.null(choices)) {
-                message(cat("\n", "Error in partially_replicated(): ", "\n", "\n",
-                            "Field dimensions do not fit with the data entered!", "\n",
-                            "Try one of the following options: ", "\n"))
-                return(for (i in 1:length(choices)) {print(choices[[i]])})
-            } else {
-                stop("Field dimensions do not fit with the data entered. Try another amount of treatments!", call. = FALSE)
+          choices <- factor_subsets(n = total_plots)$labels
+          width <- 55
+          border <- paste(rep("=", width), collapse = "")
+          thin   <- paste(rep("-", width), collapse = "")
+          
+          cat("\n")
+          cat(border, "\n")
+          cat("  ERROR: partially_replicated()\n")
+          cat(thin, "\n")
+          cat("  Field dimensions do not match the data entered.\n")
+          cat("  Total plots in data:", total_plots, "\n")
+          cat("  Field size provided:", nrows, "x", ncols, "=", nrows * ncols, "plots\n")
+          cat(thin, "\n")
+          
+          if (!is.null(choices)) {
+            # Parse choices into a data frame
+            dims <- do.call(rbind, lapply(choices, function(x) {
+              parts <- as.integer(trimws(strsplit(x, "x")[[1]]))
+              data.frame(rows = parts[1], cols = parts[2])
+            }))
+            
+            # Sort by number of rows ascending
+            dims <- dims[order(dims$rows), ]
+            # Remove duplicates (e.g. 7x72 and 72x7 kept as separate entries)
+            dims <- unique(dims)
+            
+            cat("  Valid dimension options (sorted by rows):\n\n")
+            for (i in seq_len(nrow(dims))) {
+              cat(sprintf("   [%2d ]  %4d rows  x  %4d cols\n", i, dims$rows[i], dims$cols[i]))
             }
+          } else {
+            cat("  No valid rectangular dimensions exist for", total_plots, "plots.\n")
+            cat("  Reason: total plots is a prime number.\n")
+            cat("  Suggestion: adjust lines, checks, or replication levels\n")
+            cat("  so that total plots has more than 2 factors.\n")
+          }
+          
+          cat(border, "\n\n")
+          return(invisible(NULL))
         }
     }
     ########## Init the p-rep data  ##############################################
@@ -110,34 +137,8 @@ pREP <- function(
       ncol = ncols, 
       byrow = FALSE
     )
-    ################## Get optimized the design using a metric distance ##########
-    if (optim) {
-        m1 <- as.vector(field0)
-        dist_field0 <- sum(dist(field0))
-        designs <- vector(mode = "list", length = niter)
-        dists <- vector(mode = "numeric", length = niter)
-        designs[[1]] <- field0
-        dists[1] <- dist_field0
-        for(i in 2:niter) {
-            m <- as.vector(designs[[i-1]])
-            k1 <- which(m == 1);k2 <- which(m == 0)
-            D <- vector(length = 2)
-            D[1] <- sample(k1, 1, replace = FALSE)
-            D[2] <- sample(k2, 1, replace = FALSE)
-            m1 <- replace(m, D, m[rev(D)])
-            iter_designs <- matrix(m1, nrow = nrows, ncol = ncols, byrow = FALSE)
-            iter_dist <- sum(dist(iter_designs))
-          if (iter_dist > dists[i - 1]) {
-              designs[[i]] <- iter_designs
-              dists[i] <- iter_dist 
-          } else {
-              designs[[i]] <- designs[[i - 1]]
-              dists[i] <- dists[i-1]
-          }
-        }
-        # Selecting the 'best' design
-        field <- designs[[niter]]          
-    } else field <- field0
+    
+    field <- field0
     
     if (prep == TRUE) {
         entry_gens <- as.vector(data_unrep_treatments[,1])
@@ -176,31 +177,57 @@ pREP <- function(
     }
     # Make numeric each element in the matrix layout1
     field_layout <- apply(layout1, c(1,2), as.numeric)
-    
-    ################### Optimization ##########################################
-    # Perform an optimization by using the function swap_pairs()
-    if (max(table(field_layout)) == 2) {
-        swap <- swap_pairs(X = field_layout, starting_dist = 3, stop_iter = 5, 
-                           dist_method = dist_method, lambda = border_penalization)
+
+    ################### Spread Reps Optimization ###############################
+    if (spread_reps) {
+      # Perform an optimization by using the function swap_pairs()
+      if (max(table(field_layout)) == 2) {
+        swap <- swap_pairs(
+          X = field_layout, 
+          starting_dist = 3, 
+          stop_iter = 10, 
+          dist_method = dist_method, 
+          lambda = border_penalization
+        )
+      } else {
+        swap <- swap_pairs(
+          X = field_layout, 
+          starting_dist = 2, 
+          stop_iter = 10, 
+          dist_method = dist_method, 
+          lambda = border_penalization
+        )
+      }
+      optim_layout <- swap$optim_design
+      min_distance <- swap$min_distance
+      pairwise_distance <- swap$pairwise_distance
+      rows_incidence <- swap$rows_incidence
     } else {
-        swap <- swap_pairs(X = field_layout, starting_dist = 2, stop_iter = 5, 
-                           dist_method = dist_method, lambda = border_penalization)
+      init_pd <- pairs_distance(field_layout)
+      rows_incidence <- numeric()
+      genos <- unique(init_pd$geno)
+      optim_layout <- field_layout
+      pairwise_distance <- pairs_distance(optim_layout)
+      min_distance <- min(pairwise_distance$DIST)
+      rows_incidence[1L] <- sum(apply(optim_layout, 1L, function(row) {
+        any(tabulate(match(row, genos)) >= 2L)
+      }))
     }
-    optim_layout <- swap$optim_design
+    
     dups <- table(as.vector(optim_layout))
     replicated_treatments <- as.numeric(rownames(dups)[dups > 1])
     treatments <- as.vector(optim_layout)
     rep_trts <- treatments[which(treatments %in% replicated_treatments)]
+    
     # Check if the frequency of rep treatments is the same as the input data
     if (total_plot_reps != length(rep_trts)) {
-      stop("In the final design, rep treatments does not match with imput data")
+      stop("In the final design, rep treatments does not match with input data")
     }
+    
     unreplicated_treatments <- as.numeric(rownames(dups)[dups == 1])
-    min_distance <- swap$min_distance
-    pairwise_distance <- swap$pairwise_distance
-    rows_incidence <- swap$rows_incidence
     binary_field <- optim_layout
     binary_field[!binary_field %in% replicated_treatments] <- 0
+    
     return(
         list(
             field.map = optim_layout,

@@ -17,7 +17,8 @@
 #' @param exptName (optional) Name of the experiment.
 #' @param locationNames (optional) Name for each location.
 #' @param data (optional) Data frame with 3 columns: \code{ENTRY | NAME | REPS}.
-#' @param optim By default \code{optim = TRUE}.
+#' @param spread_reps A logical value indicating whether to maximize the spatial 
+#'   distance between replicated treatments in the field. Default is \code{TRUE}.
 #' 
 #' @author Didier Murillo [aut],
 #'         Salvador Gezan [aut],
@@ -104,7 +105,7 @@ optimized_arrangement <- function(
     seed = NULL, 
     exptName = NULL,
     locationNames = NULL, 
-    optim = TRUE, 
+    spread_reps = TRUE, 
     data = NULL) {
     
     if (is.null(seed) || !is.numeric(seed)) seed <- runif(1, min = -50000, max = 50000)
@@ -191,21 +192,46 @@ optimized_arrangement <- function(
                 }
             }
         } else base::stop('"optimized_arrangement()" requires inputs checks and amountChecks to be possitive integers and distinct of NULL.')
+        
         t_plots <- as.numeric(sum(RepChecks) + lines)
-        if (numbers::isPrime(t_plots)) {
-            stop("No options when the total number of plots is a prime number.", call. = FALSE)
-        }
-        if (t_plots != (nrows * ncols)) {
-            choices <- factor_subsets(t_plots)$labels
-            if (!is.null(choices)) {
-                message(cat("\n", "Error in optimized_arrangement(): ", "\n", "\n",
-                "Field dimensions do not fit with the data entered!", "\n",
-                "Try one of the following options: ", "\n"))
-                return(for (i in 1:length(choices)) {print(choices[[i]])})
+        width  <- 55
+        border <- paste(rep("=", width), collapse = "")
+        thin   <- paste(rep("-", width), collapse = "")
+        
+        if (numbers::isPrime(t_plots) || t_plots != (nrows * ncols)) {
+            choices <- if (!numbers::isPrime(t_plots)) factor_subsets(t_plots)$labels else NULL
+            
+            cat("\n")
+            cat(border, "\n")
+            cat("  ERROR: optimized_arrangement()\n")
+            cat(thin, "\n")
+            cat("  Field dimensions do not match the data entered.\n")
+            cat("  Total plots in data:", t_plots, "\n")
+            cat("  Field size provided:", nrows, "x", ncols, "=", nrows * ncols, "plots\n")
+            cat(thin, "\n")
+            
+            if (!is.null(choices) && length(choices) > 0) {
+                dims <- do.call(rbind, lapply(choices, function(x) {
+                    parts <- as.integer(trimws(strsplit(x, "x")[[1]]))
+                    data.frame(rows = parts[1], cols = parts[2])
+                }))
+                dims <- dims[order(dims$rows), ]
+                dims <- unique(dims)
+                cat("  Valid dimension options (sorted by rows):\n\n")
+                for (i in seq_len(nrow(dims))) {
+                    cat(sprintf("   [%2d ]  %4d rows  x  %4d cols\n", i, dims$rows[i], dims$cols[i]))
+                }
             } else {
-                stop("field dimensions do not fit with the data entered", call. = FALSE)
+                cat("  No valid rectangular dimensions exist for", t_plots, "plots.\n")
+                cat("  Reason: total plots is a prime number.\n")
+                cat("  Suggestion: adjust treatments or replication levels\n")
+                cat("  so that total plots has more than 2 factors.\n")
             }
+            
+            cat(border, "\n\n")
+            return(invisible(NULL))
         }
+        
         NAME <- c(paste(rep("CH", checks), 1:checks, sep = ""),
                 paste(rep("G", lines), 
                 (checksEntries[checks] + 1):(checksEntries[1] + lines + checks - 1), sep = ""))
@@ -274,11 +300,11 @@ optimized_arrangement <- function(
             ncols = ncols, 
             Fillers = 0,
             seed = NULL, 
-            optim = TRUE,
-            niter = 1000, 
+            spread_reps = spread_reps,
             data = gen_list
         )
-        min_distance_sites[sites] <- prep$min_distance
+        # min_distance_sites[sites] <- prep$min_distance
+        min_distance_sites[sites] <- if (!is.null(prep$min_distance)) prep$min_distance else NA
         dataInput <- prep$gen.list
         BINAY_CHECKS <- prep$binary.field
         random_entries_map <- as.matrix(prep$field.map)

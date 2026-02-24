@@ -266,20 +266,43 @@ diagonal_arrangement <- function(
                 choices_list[[i]] <- factor_subsets(n, diagonal = TRUE)$labels
                 i <- i + 1
             }
+            
             choices <- unlist(choices_list[!sapply(choices_list, is.null)])
-            if (is.null(choices)) {
-                stop("Field dimensions do not fit with the data entered. Try another amount of treatments!", 
-                    call. = FALSE)
-            } 
-            if (!is.null(choices)) {
-                message(cat("\n", "Error in diagonal_arrangement(): ", "\n", "\n",
-                    "Field dimensions do not fit with the data entered!", "\n",
-                    "Try one of the following options: ", "\n"))
-                return(for (i in 1:length(choices)) {print(choices[[i]])})
+            
+            width  <- 55
+            border <- paste(rep("=", width), collapse = "")
+            thin   <- paste(rep("-", width), collapse = "")
+            
+            cat("\n")
+            cat(border, "\n")
+            cat("  ERROR: diagonal_arrangement()\n")
+            cat(thin, "\n")
+            cat("  Field dimensions do not match the data entered.\n")
+            cat("  Total entries (lines + checks):", total_entries, "\n")
+            cat("  Field size provided:", nrows, "x", ncols, "=", nrows * ncols, "plots\n")
+            cat("  Searched plot range:", t1, "to", t2, "\n")
+            cat(thin, "\n")
+            
+            if (!is.null(choices) && length(choices) > 0) {
+              dims <- do.call(rbind, lapply(choices, function(x) {
+                parts <- as.integer(trimws(strsplit(x, "x")[[1]]))
+                data.frame(rows = parts[1], cols = parts[2])
+              }))
+              dims <- dims[order(dims$rows), ]
+              dims <- unique(dims)
+              cat("  Valid dimension options (sorted by rows):\n\n")
+              for (i in seq_len(nrow(dims))) {
+                cat(sprintf("   [%2d ]  %4d rows  x  %4d cols\n", i, dims$rows[i], dims$cols[i]))
+              }
             } else {
-                stop("Field dimensions do not fit with the data entered. Try another amount of treatments!", 
-                    call. = FALSE)
+              cat("  No valid rectangular dimensions exist in range", t1, "to", t2, "\n")
+              cat("  Reason: all values in range are prime numbers.\n")
+              cat("  Suggestion: adjust lines or checks so total plots\n")
+              cat("  has more than 2 factors.\n")
             }
+            
+            cat(border, "\n\n")
+            return(invisible(NULL))
         }
         new_lines <- nrow(getData$data_entry[[sites]]) - checks
         infoP <- as.data.frame(checks_percentages$P)

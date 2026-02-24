@@ -59,7 +59,7 @@ Imports:
     desplot,
     shinyjs
 Encoding: UTF-8
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 Author: Didier Murillo [cre, aut], Salvador Gezan [aut], Ana Heilman [ctb],
  Thomas Walk [ctb], Johan Aparicio [ctb], Matthew Seefeldt [ctb], 
  Jean-Marc Montpetit [ctb], Richard Horsley [ctb], 

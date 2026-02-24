@@ -16,7 +16,7 @@ optimized_arrangement(
   seed = NULL,
   exptName = NULL,
   locationNames = NULL,
-  optim = TRUE,
+  spread_reps = TRUE,
   data = NULL
 )
 }
@@ -43,7 +43,8 @@ optimized_arrangement(
 
 \item{locationNames}{(optional) Name for each location.}
 
-\item{optim}{By default \code{optim = TRUE}.}
+\item{spread_reps}{A logical value indicating whether to maximize the spatial 
+distance between replicated treatments in the field. Default is \code{TRUE}.}
 
 \item{data}{(optional) Data frame with 3 columns: \code{ENTRY | NAME | REPS}.}
 }

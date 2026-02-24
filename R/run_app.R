@@ -2,6 +2,7 @@
 #'
 #' @return A shiny app object
 #' @param ... Unused, for extensibility
+#' @param launch.browser Logical. If `TRUE`, the application is launched in the system's default web browser.
 #'
 #' @export
 #' @importFrom shiny shinyApp
