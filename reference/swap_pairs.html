@@ -150,12 +150,12 @@ and it uses candidate sampling to reduce computation.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, <span class="fl">2</span><span class="op">)</span>, <span class="fl">11</span><span class="op">:</span><span class="fl">50</span><span class="op">)</span>, replace <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">B</span> <span class="op">&lt;-</span> <span class="fu">swap_pairs</span><span class="op">(</span></span></span>
-<span class="r-in"><span> <span class="va">X</span>, </span></span>
-<span class="r-in"><span> starting_dist <span class="op">=</span> <span class="fl">3</span>, </span></span>
-<span class="r-in"><span> stop_iter <span class="op">=</span> <span class="fl">50</span>, </span></span>
-<span class="r-in"><span> lambda <span class="op">=</span> <span class="fl">0.5</span>, </span></span>
-<span class="r-in"><span> dist_method <span class="op">=</span> <span class="st">"euclidean"</span>, </span></span>
-<span class="r-in"><span> candidate_sample_size <span class="op">=</span> <span class="fl">3</span></span></span>
+<span class="r-in"><span>  <span class="va">X</span>,</span></span>
+<span class="r-in"><span>  starting_dist <span class="op">=</span> <span class="fl">3</span>,</span></span>
+<span class="r-in"><span>  stop_iter <span class="op">=</span> <span class="fl">50</span>,</span></span>
+<span class="r-in"><span>  lambda <span class="op">=</span> <span class="fl">0.5</span>,</span></span>
+<span class="r-in"><span>  dist_method <span class="op">=</span> <span class="st">"euclidean"</span>,</span></span>
+<span class="r-in"><span>  candidate_sample_size <span class="op">=</span> <span class="fl">3</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">B</span><span class="op">$</span><span class="va">optim_design</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]</span>
@@ -177,7 +177,7 @@ and it uses candidate sampling to reduce computation.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

@@ -404,7 +404,7 @@ Information on the design parameters:
 List of 10
  $ rows        : num 29
  $ columns     : num 15
- $ min_distance: num [1:3] 1 1 2.24
+ $ min_distance: num [1:3] 1.41 1 1
  $ treatments  : num 401
  $ checks      : int 3
  $ entry_checks: int [1:3] 1 2 3
@@ -415,16 +415,16 @@ List of 10
 
  10 First observations of the data frame with the optimized_arrangement field book: 
    ID            EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 WINTER_WHEAT_22    FARGO 2025 1001   1      1      0    53       G53
-2   2 WINTER_WHEAT_22    FARGO 2025 1002   1      2      0   357      G357
-3   3 WINTER_WHEAT_22    FARGO 2025 1003   1      3      0   217      G217
-4   4 WINTER_WHEAT_22    FARGO 2025 1004   1      4      0   287      G287
-5   5 WINTER_WHEAT_22    FARGO 2025 1005   1      5      3     3       CH3
-6   6 WINTER_WHEAT_22    FARGO 2025 1006   1      6      0    50       G50
-7   7 WINTER_WHEAT_22    FARGO 2025 1007   1      7      0   331      G331
-8   8 WINTER_WHEAT_22    FARGO 2025 1008   1      8      0   172      G172
-9   9 WINTER_WHEAT_22    FARGO 2025 1009   1      9      0   180      G180
-10 10 WINTER_WHEAT_22    FARGO 2025 1010   1     10      0   274      G274</code></pre>
+1   1 WINTER_WHEAT_22    FARGO 2026 1001   1      1      0    98       G98
+2   2 WINTER_WHEAT_22    FARGO 2026 1002   1      2      0   190      G190
+3   3 WINTER_WHEAT_22    FARGO 2026 1003   1      3      0     4        G4
+4   4 WINTER_WHEAT_22    FARGO 2026 1004   1      4      0   341      G341
+5   5 WINTER_WHEAT_22    FARGO 2026 1005   1      5      0   286      G286
+6   6 WINTER_WHEAT_22    FARGO 2026 1006   1      6      0     7        G7
+7   7 WINTER_WHEAT_22    FARGO 2026 1007   1      7      0   114      G114
+8   8 WINTER_WHEAT_22    FARGO 2026 1008   1      8      0   185      G185
+9   9 WINTER_WHEAT_22    FARGO 2026 1009   1      9      0   283      G283
+10 10 WINTER_WHEAT_22    FARGO 2026 1010   1     10      0   218      G218</code></pre>
 </div>
 <div class="section level4">
 <h4 id="access-to-optim_expt-object">Access to <code>optim_expt</code> object<a class="anchor" aria-label="anchor" href="#access-to-optim_expt-object"></a>
@@ -448,16 +448,16 @@ experiment.</p>
 <code class="sourceCode R"><span><span class="va">field_book</span> <span class="op">&lt;-</span> <span class="va">optim_expt</span><span class="op">$</span><span class="va">fieldBook</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">field_book</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
 <pre><code>   ID            EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 WINTER_WHEAT_22    FARGO 2025 1001   1      1      0    53       G53
-2   2 WINTER_WHEAT_22    FARGO 2025 1002   1      2      0   357      G357
-3   3 WINTER_WHEAT_22    FARGO 2025 1003   1      3      0   217      G217
-4   4 WINTER_WHEAT_22    FARGO 2025 1004   1      4      0   287      G287
-5   5 WINTER_WHEAT_22    FARGO 2025 1005   1      5      3     3       CH3
-6   6 WINTER_WHEAT_22    FARGO 2025 1006   1      6      0    50       G50
-7   7 WINTER_WHEAT_22    FARGO 2025 1007   1      7      0   331      G331
-8   8 WINTER_WHEAT_22    FARGO 2025 1008   1      8      0   172      G172
-9   9 WINTER_WHEAT_22    FARGO 2025 1009   1      9      0   180      G180
-10 10 WINTER_WHEAT_22    FARGO 2025 1010   1     10      0   274      G274</code></pre>
+1   1 WINTER_WHEAT_22    FARGO 2026 1001   1      1      0    98       G98
+2   2 WINTER_WHEAT_22    FARGO 2026 1002   1      2      0   190      G190
+3   3 WINTER_WHEAT_22    FARGO 2026 1003   1      3      0     4        G4
+4   4 WINTER_WHEAT_22    FARGO 2026 1004   1      4      0   341      G341
+5   5 WINTER_WHEAT_22    FARGO 2026 1005   1      5      0   286      G286
+6   6 WINTER_WHEAT_22    FARGO 2026 1006   1      6      0     7        G7
+7   7 WINTER_WHEAT_22    FARGO 2026 1007   1      7      0   114      G114
+8   8 WINTER_WHEAT_22    FARGO 2026 1008   1      8      0   185      G185
+9   9 WINTER_WHEAT_22    FARGO 2026 1009   1      9      0   283      G283
+10 10 WINTER_WHEAT_22    FARGO 2026 1010   1     10      0   218      G218</code></pre>
 </div>
 <div class="section level4">
 <h4 id="plot-the-field-layout">Plot the field layout<a class="anchor" aria-label="anchor" href="#plot-the-field-layout"></a>
@@ -467,7 +467,7 @@ experiment.</p>
 use the generic function <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> as follow,</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">optim_expt</span><span class="op">)</span></span></code></pre></div>
-<p><img src="optimized_arrangement_files/figure-html/unnamed-chunk-12-1.png" width="691.2" style="display: block; margin: auto;"></p>
+<p><img src="optimized_arrangement_files/figure-html/unnamed-chunk-12-1.png" class="r-plt" alt="" width="691.2" style="display: block; margin: auto;"></p>
 <p>The figure above shows a map of an experiment randomized as an
 un-replicated optimized arrangement design. Gray plots represent the
 un-replicated treatments, while distinctively colored check plots are
@@ -477,7 +477,7 @@ the specific location. For example, you can plot specifically the layout
 for location 2.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">optim_expt</span>, l <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
-<p><img src="optimized_arrangement_files/figure-html/unnamed-chunk-13-1.png" width="691.2" style="display: block; margin: auto;"></p>
+<p><img src="optimized_arrangement_files/figure-html/unnamed-chunk-13-1.png" class="r-plt" alt="" width="691.2" style="display: block; margin: auto;"></p>
 </div>
 </div>
 <div class="section level2">
@@ -503,7 +503,7 @@ Zealand Journal of Statistics</em> 53 (4): 461–80. <a href="https://doi.org/10
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>
