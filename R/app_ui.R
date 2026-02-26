@@ -17,7 +17,7 @@ app_ui <- function(request) {
   tagList(
     golem_add_external_resources(),
     fluidPage(theme = shinythemes::shinytheme("flatly"),
-              navbarPage(title = "FielDHub v1.4.2", 
+              navbarPage(title = "FielDHub v1.5.0", 
                          tabPanel(
                            " Welcome!", icon = icon("home", lib = "glyphicon"),
                             suppressWarnings(
@@ -134,8 +134,6 @@ golem_add_external_resources <- function(){
       path = app_sys('app/www'),
       app_title = 'FielDHub'
     )
-    # Add here other external resources
-    # for example, you can add shinyalert::useShinyalert() 
   )
 }
 

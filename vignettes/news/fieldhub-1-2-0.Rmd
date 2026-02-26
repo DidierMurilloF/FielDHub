@@ -63,7 +63,7 @@ I am very happy to announce the release of FielDHub v1.2.0. It has been more tha
 
 * Added a check box option to the RCB design to allow for a continuous plot numbering independently of the rep or block number. Previous version coded the replication into the plot number (i.e., 101 =rep1, 201=rep2, etc.). 
 
-* Fixed a restriction in the RCBD mapping layout to allow for the use of more than 25 entries. PS: There are better designs when the number of entries is higher than 25 (for more info go to: [FIELD PLOT DESIGN I](https://www.ndsu.edu/faculty/horsley/)).
+* Fixed a restriction in the RCBD mapping layout to allow for the use of more than 25 entries. PS: There are better designs when the number of entries is higher than 25.
 
 #### Standalone Functions in `FielDHub` Package
 

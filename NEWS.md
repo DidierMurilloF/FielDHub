@@ -160,8 +160,7 @@
 
 - Fixed a restriction in the RCBD mapping layout to allow for the use of
   more than 25 entries. PS: There are better designs when the number of
-  entries is higher than 25 (for more info go to: [FIELD PLOT DESIGN
-  I](https://www.ndsu.edu/faculty/horsley/)).
+  entries is higher than 25.
 
 ### Standalone Functions in `FielDHub` Package
 
