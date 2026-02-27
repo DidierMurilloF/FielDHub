@@ -37,7 +37,64 @@ stack_reps <- function(x_list, repsStack = c("vertical", "horizontal")) {
 #' @param data (optional) Data frame with the labels of treatments.
 #' @param nrows (optional) Number of rows in the field.
 #' @param ncols (optional) Number of columns in the field.
-#'
+#' @author Didier Murillo [aut],
+#'         Salvador Gezan [aut],
+#'         Ana Heilman [ctb],
+#'         Thomas Walk [ctb], 
+#'         Johan Aparicio [ctb], 
+#'         Richard Horsley [ctb]
+#' 
+#' @importFrom stats runif na.omit
+#' 
+#' 
+#' @return A list with five elements.
+#' \itemize{
+#'   \item \code{infoDesign} is a list with information on the design parameters.
+#'   \item \code{layoutRandom} is the ARCBD layout randomization for the first location.
+#'   \item \code{plotNumber} is the plot number layout for the first location.
+#'   \item \code{exptNames} is the experiment names layout.
+#'   \item \code{data_entry} is a data frame with the data input.
+#'   \item \code{fieldBook} is a data frame with the ARCBD field book.
+#' }
+#' 
+#' @references
+#' Federer, W. T. (1955). Experimental Design. Theory and Application. New York, USA. The
+#' Macmillan Company.
+#' 
+#' @examples
+#' # Example 1: Generates an ARCBD with 6 blocks, 3 checks for each, and 50 treatments 
+#' # in two locations.
+#' ARCBD1 <- RCBD_augmented(lines = 50, checks = 3, b = 6, l = 2, 
+#'                          planter = "cartesian", 
+#'                          plotNumber = c(1,1001),
+#'                          seed = 23, 
+#'                          locationNames = c("FARGO", "MINOT"))
+#' ARCBD1$infoDesign
+#' ARCBD1$layoutRandom
+#' ARCBD1$exptNames
+#' ARCBD1$plotNumber
+#' head(ARCBD1$fieldBook, 12)
+#'                    
+#' # Example 2: Generates an ARCBD with 17 blocks, 4 checks for each, and 350 treatments 
+#' # in 3 locations.
+#' # In this case, we show how to use the option data.
+#' checks <- 4;
+#' list_checks <- paste("CH", 1:checks, sep = "")
+#' treatments <- paste("G", 5:354, sep = "")
+#' treatment_list <- data.frame(list(ENTRY = 1:354, NAME = c(list_checks, treatments)))
+#' head(treatment_list, 12)
+#' ARCBD2 <- RCBD_augmented(lines = 350, checks = 4, b = 17, l = 3, 
+#'                          planter = "serpentine", 
+#'                          plotNumber = c(101,1001,2001), 
+#'                          seed = 24, 
+#'                          locationNames = LETTERS[1:3],
+#'                          data = treatment_list)
+#' ARCBD2$infoDesign
+#' ARCBD2$layoutRandom
+#' ARCBD2$exptNames
+#' ARCBD2$plotNumber
+#' head(ARCBD2$fieldBook, 12)
+#'                                        
 #' @export
 RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, 
                            planter = "serpentine", plotNumber = 101, 
@@ -192,47 +249,6 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
   # -----------------------------
   # Feedback check (updated to match inferred full field dims)
   # -----------------------------
-  # set_blocks <- set_augmented_blocks(lines = lines, checks = checks)
-  # blocks_arcbd <- set_blocks$b
-  # if (length(blocks_arcbd) == 0) {
-  #   stop("No options available for that amount of treatments!", call. = FALSE)
-  # }
-  # blocks_dims <- set_blocks$blocks_dims
-  # colnames(blocks_dims) <- c("BLOCKS", "DIMENSIONS")
-  # feedback <- as.data.frame(blocks_dims)
-  # set_dims <- paste(field_rows, field_cols, sep = " x ")
-  # inputs_subset <- subset(feedback, feedback[, 1] == b & feedback[, 2] == set_dims)
-  # # if (nrow(inputs_subset) == 0) {
-  # #   message(cat(
-  # #     "\n", "Error in RCBD_augmented(): ", "\n", "\n",
-  # #     "Field dimensions do not fit with the data entered!", "\n",
-  # #     "Try one of the following options: ", "\n"
-  # #   ))
-  # #   return(print(feedback))
-  # # }
-  # 
-  # if (nrow(inputs_subset) == 0) {
-  #   width  <- 55
-  #   border <- paste(rep("=", width), collapse = "")
-  #   thin   <- paste(rep("-", width), collapse = "")
-  #   
-  #   cat("\n")
-  #   cat(border, "\n")
-  #   cat("  ERROR: RCBD_augmented()\n")
-  #   cat(thin, "\n")
-  #   cat("  Field dimensions do not match the data entered.\n")
-  #   cat("  Total plots in data:", lines + checks * b, "\n")
-  #   cat("  Field size provided:", field_rows, "x", field_cols, "=", field_rows * field_cols, "plots\n")
-  #   cat(thin, "\n")
-  #   cat("  Valid dimension options:\n\n")
-  #   for (i in seq_len(nrow(feedback))) {
-  #     cat(sprintf("   [%2d ]  %s blocks  x  %s\n", i, feedback[i, 1], feedback[i, 2]))
-  #   }
-  #   cat(border, "\n\n")
-  #   return(invisible(NULL))
-  # }
-  
-  
   
   set_blocks <- set_augmented_blocks(lines = lines, checks = checks, start = 3)
   blocks_arcbd <- set_blocks$b
