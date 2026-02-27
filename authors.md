@@ -26,13 +26,13 @@ Source:
 [`DESCRIPTION`](https://github.com/DidierMurilloF/FielDHub/blob/master/DESCRIPTION)
 
 Murillo D, Gezan S (2026). *FielDHub: A Shiny App for Design of
-Experiments in Life Sciences*. R package version 1.4.2,
+Experiments in Life Sciences*. R package version 1.5.0,
 <https://github.com/DidierMurilloF/FielDHub>.
 
     @Manual{,
       title = {FielDHub: A Shiny App for Design of Experiments in Life Sciences},
       author = {Didier Murillo and Salvador Gezan},
       year = {2026},
-      note = {R package version 1.4.2},
+      note = {R package version 1.5.0},
       url = {https://github.com/DidierMurilloF/FielDHub},
     }
