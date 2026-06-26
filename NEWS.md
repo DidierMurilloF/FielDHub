@@ -3,6 +3,15 @@
 
 # Changelog
 
+# FielDHub (development version)
+
+### Fix bugs:
+
+- Fixed a bug in `diagonal_arrangement()` and `sparse_allocation()` where the
+  internal non-prime field-size filter `t[-numbers::isPrime(t)]` used a logical
+  vector as a negative index and returned wrong or no field dimensions; it now
+  uses `t[!numbers::isPrime(t)]`.
+
 # FielDHub 1.3.1
 
 ### New Features in the Shiny App
