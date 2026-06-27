@@ -3,6 +3,16 @@
 
 # Changelog
 
+# FielDHub (development version)
+
+### Fix bugs:
+
+- Fixed a bug in `split_split_plot()` where, for the CRD type
+  (`type = 1`), the whole-plot column was built with
+  `rep(WholePlots, each = reps)` instead of `times = reps`, so
+  whole-plots were mis-assigned across replicates; each replicate now
+  contains every whole-plot.
+
 # FielDHub 1.3.1
 
 ### New Features in the Shiny App
