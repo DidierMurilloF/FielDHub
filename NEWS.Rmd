@@ -16,6 +16,12 @@ knitr::opts_chunk$set(
 
 # Changelog
 
+# FielDHub (development version)
+
+### Fix bugs:
+
+* Fixed a bug in `split_families()` where the `gen.list` assignment sat after `stop()` inside the column-count check, so valid three-column input never created `gen.list` and the function errored with "object 'gen.list' not found"; the assignment now runs after the guard.
+
 # FielDHub 1.3.1
 
 ### New Features in the Shiny App
