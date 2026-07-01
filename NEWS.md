@@ -7,6 +7,11 @@
 
 ### Fix bugs:
 
+- Fixed a bug in `swap_pairs()` where on small fields the starting
+  distance could exceed the field diagonal, so the internal threshold
+  sequence `seq(starting_dist, minDist, 1)` errored with "wrong sign in
+  'by' argument"; the distance range is now guarded and the input design
+  is returned unchanged when no swap distance is feasible.
 - Fixed a bug in `CRD()` where a single experimental unit (`t = 1`,
   `reps = 1`) made the plot numbering
   `sample(plotNumber:(plotNumber + N - 1))` collapse to a full
