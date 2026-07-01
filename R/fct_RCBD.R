@@ -111,7 +111,7 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
         nt <- length(t)
         s <- t
         mytreatments <- t
-      }else if(is.character(t) & length(t) > 1) {
+      }else if(is.character(t) & length(t) == 1) {
         shiny::validate("'RCBD()' requires more than one treatment.")
       }
     }else {

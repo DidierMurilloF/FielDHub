@@ -207,10 +207,15 @@ swap_pairs <- function(X,
   genos <- unique(init_pd$geno)
   w <- 2L
 
+  # Guard against a reversed/empty threshold range: on very small fields the
+  # field diagonal (minDist) can be shorter than starting_dist, which would make
+  # seq(starting_dist, minDist, 1) error with "wrong sign in 'by' argument".
+  dist_seq <- if (minDist >= starting_dist) seq(starting_dist, minDist, 1) else numeric(0)
+
   # ------------------------------------------------------------------ #
   #  Main loop over increasing minimum-distance thresholds              #
   # ------------------------------------------------------------------ #
-  for (min_dist in seq(starting_dist, minDist, 1)) {
+  for (min_dist in dist_seq) {
     n_iter <- 1L
 
     while (n_iter <= stop_iter) {

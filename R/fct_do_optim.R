@@ -370,7 +370,7 @@ sparse_allocation <- function(
         t1 <- floor(lines_within_loc + lines_within_loc * 0.11)
         t2 <- ceiling(lines_within_loc + lines_within_loc * 0.20)
         t <- t1:t2
-        non_primes <- t[-numbers::isPrime(t)]
+        non_primes <- t[!numbers::isPrime(t)]
         choices_list <- list()
         i <- 1
         for (n in non_primes) {

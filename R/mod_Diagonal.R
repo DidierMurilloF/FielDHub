@@ -382,7 +382,6 @@ mod_Diagonal_server <- function(id) {
       t1 <- floor(lines + lines * 0.11)
       t2 <- ceiling(lines + lines * 0.20)
       t <- t1:t2
-      n <- t[-numbers::isPrime(t)]
       withProgress(message = 'Getting field dimensions ...', {
         choices_list <- list()
         i <- 1
