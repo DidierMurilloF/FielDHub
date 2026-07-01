@@ -5,6 +5,13 @@
 #### Fix bugs:
 
 - Fixed a bug in
+  [`split_split_plot()`](https://didiermurillof.github.io/FielDHub/reference/split_split_plot.md)
+  where, for the CRD type (`type = 1`), the whole-plot column was built
+  with `rep(WholePlots, each = reps)` instead of `times = reps`, so
+  whole-plots were mis-assigned across replicates; each replicate now
+  contains every whole-plot.
+
+- Fixed a bug in
   [`split_families()`](https://didiermurillof.github.io/FielDHub/reference/split_families.md)
   where the `gen.list` assignment sat after
   [`stop()`](https://rdrr.io/r/base/stop.html) inside the column-count
