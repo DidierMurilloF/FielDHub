@@ -20,6 +20,7 @@ knitr::opts_chunk$set(
 
 ### Fix bugs:
 
+* Fixed a bug in `alpha_lattice()` where the prime-number check was applied to the raw treatment argument `t` instead of the number of treatments, so supplying treatments as a vector (e.g. `t = 1:8`) raised the error "the condition has length > 1"; it now checks `numbers::isPrime(nt)`.
 * Fixed a bug in `swap_pairs()` where on small fields the starting distance could exceed the field diagonal, so the internal threshold sequence `seq(starting_dist, minDist, 1)` errored with "wrong sign in 'by' argument"; the distance range is now guarded and the input design is returned unchanged when no swap distance is feasible.
 * Fixed a bug in `CRD()` where a single experimental unit (`t = 1`, `reps = 1`) made the plot numbering `sample(plotNumber:(plotNumber + N - 1))` collapse to a full permutation and error when building the field book; it now builds the plot numbers with `plotNumber - 1 + sample(seq_len(N))`.
 * Fixed a bug in `CRD()` and `RCBD()` where a single character treatment matched no input branch (the third `else if` duplicated the second), leaving the treatment count `nt` unset and the call failing with "object 'nt' not found"; the branch now triggers the "requires more than one treatment" validation message.

@@ -7,6 +7,11 @@
 
 ### Fix bugs:
 
+- Fixed a bug in `alpha_lattice()` where the prime-number check was
+  applied to the raw treatment argument `t` instead of the number of
+  treatments, so supplying treatments as a vector (e.g. `t = 1:8`)
+  raised the error "the condition has length > 1"; it now checks
+  `numbers::isPrime(nt)`.
 - Fixed a bug in `swap_pairs()` where on small fields the starting
   distance could exceed the field diagonal, so the internal threshold
   sequence `seq(starting_dist, minDist, 1)` errored with "wrong sign in
