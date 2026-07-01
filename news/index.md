@@ -5,6 +5,14 @@
 #### Fix bugs:
 
 - Fixed a bug in
+  [`split_families()`](https://didiermurillof.github.io/FielDHub/reference/split_families.md)
+  where the `gen.list` assignment sat after
+  [`stop()`](https://rdrr.io/r/base/stop.html) inside the column-count
+  check, so valid three-column input never created `gen.list` and the
+  function errored with “object ‘gen.list’ not found”; the assignment
+  now runs after the guard.
+
+- Fixed a bug in
   [`diagonal_arrangement()`](https://didiermurillof.github.io/FielDHub/reference/diagonal_arrangement.md)
   and
   [`sparse_allocation()`](https://didiermurillof.github.io/FielDHub/reference/sparse_allocation.md)

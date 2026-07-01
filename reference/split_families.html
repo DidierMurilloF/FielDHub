@@ -128,13 +128,62 @@ and number of individuals per family group (FAMILY).</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6     6 SB-6     29</span>
 <span class="r-in"><span><span class="co"># Now we are going to use the split_families() function.</span></span></span>
 <span class="r-in"><span><span class="va">split_population</span> <span class="op">&lt;-</span> <span class="fu">split_families</span><span class="op">(</span>l <span class="op">=</span> <span class="fl">8</span>, data <span class="op">=</span> <span class="va">gen.list</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'gen.list' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">split_population</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'split_population' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Split families: </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Data frame with the summary of cases by location: </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     Location   n</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 Location 1 244</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 Location 2 256</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 Location 3 250</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 Location 4 245</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 Location 5 258</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 Location 6 245</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7 Location 7 246</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8 Location 8 256</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  10 First observations of the data frame with the entries for each location: </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    ENTRY    NAME FAMILY   LOCATION</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1    967  SB-967      1 Location 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   1565 SB-1565      2 Location 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3   1030 SB-1030      2 Location 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4   1276 SB-1276      2 Location 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5   1953 SB-1953      3 Location 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6    673  SB-673      3 Location 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7    423  SB-423      4 Location 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8   1977 SB-1977      4 Location 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9    882  SB-882      5 Location 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10  1379 SB-1379      5 Location 1</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">split_population</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'split_population' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Split families: </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1. Structure of the data frame with the summary of entries by location: </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 'data.frame':	8 obs. of  2 variables:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ Location: chr  "Location 1" "Location 2" "Location 3" "Location 4" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ n       : num  244 256 250 245 258 245 246 256</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2. Structure of the data frame with the entries for each location: </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 'data.frame':	2000 obs. of  4 variables:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ ENTRY   : int  967 1565 1030 1276 1953 673 423 1977 882 1379 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ NAME    : chr  "SB-967" "SB-1565" "SB-1030" "SB-1276" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ FAMILY  : num  1 2 2 2 3 3 4 4 5 5 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ LOCATION: chr  "Location 1" "Location 1" "Location 1" "Location 1" ...</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">split_population</span><span class="op">$</span><span class="va">data_locations</span>,<span class="fl">12</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'split_population' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    ENTRY    NAME FAMILY   LOCATION</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1    967  SB-967      1 Location 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   1565 SB-1565      2 Location 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3   1030 SB-1030      2 Location 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4   1276 SB-1276      2 Location 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5   1953 SB-1953      3 Location 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6    673  SB-673      3 Location 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7    423  SB-423      4 Location 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8   1977 SB-1977      4 Location 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9    882  SB-882      5 Location 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10  1379 SB-1379      5 Location 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11   740  SB-740      6 Location 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12   910  SB-910      6 Location 1</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
