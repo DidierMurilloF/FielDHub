@@ -7,6 +7,10 @@
 
 ### Fix bugs:
 
+- Fixed a bug in `split_families()` where the `gen.list` assignment sat
+  after `stop()` inside the column-count check, so valid three-column
+  input never created `gen.list` and the function errored with "object
+  'gen.list' not found"; the assignment now runs after the guard.
 - Fixed a bug in `diagonal_arrangement()` and `sparse_allocation()` where the
   internal non-prime field-size filter `t[-numbers::isPrime(t)]` used a logical
   vector as a negative index and returned wrong or no field dimensions; it now
