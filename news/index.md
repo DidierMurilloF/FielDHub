@@ -5,6 +5,12 @@
 #### Fix bugs:
 
 - Fixed a bug in
+  [`square_lattice()`](https://didiermurillof.github.io/FielDHub/reference/square_lattice.md)
+  where only `t` was required to be a square number but `k` was not
+  checked against `sqrt(t)`, so calls such as
+  `square_lattice(t = 64, k = 4)` silently produced a malformed design;
+  it now validates that `k` equals `sqrt(t)`.
+- Fixed a bug in
   [`row_column()`](https://didiermurillof.github.io/FielDHub/reference/row_column.md)
   where the design optimizer errored with “object ‘best_efficiencies’
   not found” when no treatment swap improved the A-efficiency, because

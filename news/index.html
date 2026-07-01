@@ -66,7 +66,8 @@
 <h2 class="pkg-version" data-toc-text="development version" id="fieldhub-development-version">FielDHub (development version)<a class="anchor" aria-label="anchor" href="#fieldhub-development-version"></a></h2>
 <div class="section level4">
 <h4 id="fix-bugs-development-version">Fix bugs:<a class="anchor" aria-label="anchor" href="#fix-bugs-development-version"></a></h4>
-<ul><li>Fixed a bug in <code><a href="../reference/row_column.html">row_column()</a></code> where the design optimizer errored with “object ‘best_efficiencies’ not found” when no treatment swap improved the A-efficiency, because the best efficiencies were only stored inside the improvement branch; they are now initialized from the starting design.</li>
+<ul><li>Fixed a bug in <code><a href="../reference/square_lattice.html">square_lattice()</a></code> where only <code>t</code> was required to be a square number but <code>k</code> was not checked against <code>sqrt(t)</code>, so calls such as <code>square_lattice(t = 64, k = 4)</code> silently produced a malformed design; it now validates that <code>k</code> equals <code>sqrt(t)</code>.</li>
+<li>Fixed a bug in <code><a href="../reference/row_column.html">row_column()</a></code> where the design optimizer errored with “object ‘best_efficiencies’ not found” when no treatment swap improved the A-efficiency, because the best efficiencies were only stored inside the improvement branch; they are now initialized from the starting design.</li>
 </ul></div>
 </div>
     <div class="section level2">
