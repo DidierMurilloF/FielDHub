@@ -113,16 +113,16 @@ alphalattice1$infoDesign
 #> 
 head(alphalattice1$fieldBook, 10)
 #>    ID   LOCATION PLOT REP IBLOCK UNIT ENTRY TREATMENT
-#> 1   1 GREENHOUSE  101   1      1    1    15      G-15
-#> 2   2 GREENHOUSE  102   1      1    2     6       G-6
-#> 3   3 GREENHOUSE  103   1      1    3     8       G-8
-#> 4   4 GREENHOUSE  104   1      2    1     3       G-3
-#> 5   5 GREENHOUSE  105   1      2    2    10      G-10
-#> 6   6 GREENHOUSE  106   1      2    3    13      G-13
-#> 7   7 GREENHOUSE  107   1      3    1     4       G-4
-#> 8   8 GREENHOUSE  108   1      3    2    14      G-14
+#> 1   1 GREENHOUSE  101   1      1    1     8       G-8
+#> 2   2 GREENHOUSE  102   1      1    2     3       G-3
+#> 3   3 GREENHOUSE  103   1      1    3     2       G-2
+#> 4   4 GREENHOUSE  104   1      2    1     6       G-6
+#> 5   5 GREENHOUSE  105   1      2    2     9       G-9
+#> 6   6 GREENHOUSE  106   1      2    3    12      G-12
+#> 7   7 GREENHOUSE  107   1      3    1    14      G-14
+#> 8   8 GREENHOUSE  108   1      3    2     1       G-1
 #> 9   9 GREENHOUSE  109   1      3    3     5       G-5
-#> 10 10 GREENHOUSE  110   1      4    1    12      G-12
+#> 10 10 GREENHOUSE  110   1      4    1    15      G-15
 
 # Example 2: Generates an alpha design with 3 full blocks and 25 treatment.
 # Size of IBlocks k = 5. 

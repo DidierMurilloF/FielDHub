@@ -184,9 +184,9 @@ print(rcd)
 
     Efficiency of design: 
        Level Blocks D-Efficiency A-Efficiency   A-Bound
-    1    Rep      3     1.000000    1.0000000 1.0000000
-    2    Row     15     0.894054    0.8767216 0.8842892
-    3 Column     27     0.791241    0.7624412 0.7674419
+    1    Rep      3    1.0000000    1.0000000 1.0000000
+    2    Row     15    0.8940648    0.8767593 0.8842892
+    3 Column     27    0.7912269    0.7624155 0.7674419
 
     Information on the design parameters: 
     List of 7
@@ -200,16 +200,16 @@ print(rcd)
 
      10 First observations of the data frame with the row_column field book: 
        ID LOCATION PLOT REP ROW COLUMN ENTRY TREATMENT
-    1   1    FARGO  101   1   1      1    10      G-10
-    6   2    FARGO  102   1   1      2    33      G-33
-    11  3    FARGO  103   1   1      3    18      G-18
-    16  4    FARGO  104   1   1      4    24      G-24
-    21  5    FARGO  105   1   1      5    31      G-31
-    26  6    FARGO  106   1   1      6     9       G-9
-    31  7    FARGO  107   1   1      7     7       G-7
-    36  8    FARGO  108   1   1      8    32      G-32
-    41  9    FARGO  109   1   1      9    15      G-15
-    2  10    FARGO  110   1   2      1    22      G-22
+    1   1    FARGO  101   1   1      1    23      G-23
+    6   2    FARGO  102   1   1      2    22      G-22
+    11  3    FARGO  103   1   1      3    28      G-28
+    16  4    FARGO  104   1   1      4     1       G-1
+    21  5    FARGO  105   1   1      5    13      G-13
+    26  6    FARGO  106   1   1      6    15      G-15
+    31  7    FARGO  107   1   1      7    37      G-37
+    36  8    FARGO  108   1   1      8    42      G-42
+    41  9    FARGO  109   1   1      9    39      G-39
+    2  10    FARGO  110   1   2      1    11      G-11
 
 ### Access to `rcd` object
 
@@ -233,16 +233,16 @@ head(rcd$fieldBook, 10)
 ```
 
        ID LOCATION PLOT REP ROW COLUMN ENTRY TREATMENT
-    1   1    FARGO  101   1   1      1    10      G-10
-    6   2    FARGO  102   1   1      2    33      G-33
-    11  3    FARGO  103   1   1      3    18      G-18
-    16  4    FARGO  104   1   1      4    24      G-24
-    21  5    FARGO  105   1   1      5    31      G-31
-    26  6    FARGO  106   1   1      6     9       G-9
-    31  7    FARGO  107   1   1      7     7       G-7
-    36  8    FARGO  108   1   1      8    32      G-32
-    41  9    FARGO  109   1   1      9    15      G-15
-    2  10    FARGO  110   1   2      1    22      G-22
+    1   1    FARGO  101   1   1      1    23      G-23
+    6   2    FARGO  102   1   1      2    22      G-22
+    11  3    FARGO  103   1   1      3    28      G-28
+    16  4    FARGO  104   1   1      4     1       G-1
+    21  5    FARGO  105   1   1      5    13      G-13
+    26  6    FARGO  106   1   1      6    15      G-15
+    31  7    FARGO  107   1   1      7    37      G-37
+    36  8    FARGO  108   1   1      8    42      G-42
+    41  9    FARGO  109   1   1      9    39      G-39
+    2  10    FARGO  110   1   2      1    11      G-11
 
 ### Plot the field layout
 

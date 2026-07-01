@@ -5,6 +5,15 @@
 #### Fix bugs:
 
 - Fixed a bug in
+  [`diagonal_arrangement()`](https://didiermurillof.github.io/FielDHub/reference/diagonal_arrangement.md)
+  and
+  [`sparse_allocation()`](https://didiermurillof.github.io/FielDHub/reference/sparse_allocation.md)
+  where the internal non-prime field-size filter
+  `t[-numbers::isPrime(t)]` used a logical vector as a negative index
+  and returned wrong or no field dimensions; it now uses
+  `t[!numbers::isPrime(t)]`.
+
+- Fixed a bug in
   [`alpha_lattice()`](https://didiermurillof.github.io/FielDHub/reference/alpha_lattice.md)
   where the prime-number check was applied to the raw treatment argument
   `t` instead of the number of treatments, so supplying treatments as a
