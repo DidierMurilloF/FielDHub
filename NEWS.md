@@ -7,6 +7,10 @@
 
 ### Fix bugs:
 
+- Fixed a bug in `diagonal_arrangement()` and `sparse_allocation()` where the
+  internal non-prime field-size filter `t[-numbers::isPrime(t)]` used a logical
+  vector as a negative index and returned wrong or no field dimensions; it now
+  uses `t[!numbers::isPrime(t)]`.
 - Fixed a bug in `alpha_lattice()` where the prime-number check was
   applied to the raw treatment argument `t` instead of the number of
   treatments, so supplying treatments as a vector (e.g. `t = 1:8`)
