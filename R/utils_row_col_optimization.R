@@ -47,6 +47,7 @@ improve_efficiency <- function(design, iterations, seed) {
     dplyr::select(Level_1, Level_3, plots, treatments)
   efficiencies <- BlockEfficiencies(row_blocks)
   best_a_efficiency <- efficiencies$`A-Efficiency`[efficiencies$Level == 2]
+  best_efficiencies <- efficiencies
   
   # Run iterations to improve A-Efficiency
   for (i in 1:iterations) {
