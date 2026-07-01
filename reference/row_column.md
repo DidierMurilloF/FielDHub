@@ -167,18 +167,18 @@ rowcold1$resolvableBlocks
 #> 
 head(rowcold1$fieldBook,12)
 #>    ID LOCATION PLOT REP ROW COLUMN ENTRY TREATMENT
-#> 1   1     Loc1  101   1   1      1    13      G-13
-#> 7   2     Loc1  102   1   1      2    23      G-23
-#> 13  3     Loc1  103   1   1      3    10      G-10
-#> 19  4     Loc1  104   1   1      4    12      G-12
-#> 2   5     Loc1  105   1   2      1    20      G-20
+#> 1   1     Loc1  101   1   1      1    10      G-10
+#> 7   2     Loc1  102   1   1      2    20      G-20
+#> 13  3     Loc1  103   1   1      3     3       G-3
+#> 19  4     Loc1  104   1   1      4    11      G-11
+#> 2   5     Loc1  105   1   2      1     1       G-1
 #> 8   6     Loc1  106   1   2      2     8       G-8
-#> 14  7     Loc1  107   1   2      3     6       G-6
-#> 20  8     Loc1  108   1   2      4    19      G-19
-#> 3   9     Loc1  109   1   3      1    24      G-24
-#> 9  10     Loc1  110   1   3      2    11      G-11
-#> 15 11     Loc1  111   1   3      3    21      G-21
-#> 21 12     Loc1  112   1   3      4     5       G-5
+#> 14  7     Loc1  107   1   2      3    15      G-15
+#> 20  8     Loc1  108   1   2      4     5       G-5
+#> 3   9     Loc1  109   1   3      1     7       G-7
+#> 9  10     Loc1  110   1   3      2     6       G-6
+#> 15 11     Loc1  111   1   3      3    12      G-12
+#> 21 12     Loc1  112   1   3      4     9       G-9
 
 # Example 2: Generates a row-column design with 2 full blocks and 30 treatments
 # and 5 rows, for one location. This example uses 100 iterations for the optimization
