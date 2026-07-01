@@ -1,4 +1,4 @@
-pandoc: 3.1.11
+pandoc: 3.8.3
 pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
@@ -24,7 +24,7 @@ articles:
   split_split_plot: split_split_plot.html
   square_lattice: square_lattice.html
   strip_plot: strip_plot.html
-last_built: 2026-02-27T15:57Z
+last_built: 2026-07-01T04:26Z
 urls:
   reference: https://didiermurillof.github.io/FielDHub/reference
   article: https://didiermurillof.github.io/FielDHub/articles

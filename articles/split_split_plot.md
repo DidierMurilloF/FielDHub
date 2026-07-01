@@ -10,12 +10,14 @@ from the `FielDHub` package.
 To launch the app you need to run either
 
 ``` r
+
 FielDHub::run_app()
 ```
 
 or
 
 ``` r
+
 library(FielDHub)
 run_app()
 ```
@@ -122,6 +124,7 @@ You can run the same design with a function in the FielDHub package,
 First, you need to load the `FielDHub` package typing,
 
 ``` r
+
 library(FielDHub)
 ```
 
@@ -129,6 +132,7 @@ Then, you can enter the information describing the above design like
 this:
 
 ``` r
+
 sspd <- split_split_plot(
   wp = 3, 
   sp = 2,  
@@ -160,6 +164,7 @@ The description for the inputs that we used to generate the design,
 #### Print `sspd` object
 
 ``` r
+
 print(sspd)
 ```
 
@@ -203,6 +208,7 @@ columns for `ID`, `LOCATION`, `PLOT`, `REP`, `WHOLE_PLOT`, `SUB_PLOT`,
 `SUB_SUB_PLOT`, and `TRT_COMB`.
 
 ``` r
+
 field_book <- sspd$fieldBook
 head(field_book,10)
 ```
@@ -226,6 +232,7 @@ For plotting the layout in function of the coordinates `ROW` and
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) as follows,
 
 ``` r
+
 plot(sspd)
 ```
 

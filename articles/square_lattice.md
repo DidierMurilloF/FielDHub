@@ -112,6 +112,7 @@ You can run the same design with a function in the FielDHub package,
 First, you need to load the `FielDHub` package typing,
 
 ``` r
+
 library(FielDHub)
 ```
 
@@ -119,6 +120,7 @@ Then, you can enter the information describing the above design like
 this:
 
 ``` r
+
 square <- square_lattice(
   t = 64,
   r = 3, 
@@ -150,6 +152,7 @@ can use the generic function
 [`print()`](https://rdrr.io/r/base/print.html).
 
 ``` r
+
 print(square)
 ```
 
@@ -199,6 +202,7 @@ columns for `ID`, `LOCATION`, `PLOT`, `REP`, `IBLOCK`, `UNIT`, `ENTRY`,
 and `TREATMENT`.
 
 ``` r
+
 field_book <- square$fieldBook
 head(square$fieldBook, 10)
 ```
@@ -222,6 +226,7 @@ For plotting the layout in function of the coordinates `ROW` and
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) as follows,
 
 ``` r
+
 plot(square)
 ```
 

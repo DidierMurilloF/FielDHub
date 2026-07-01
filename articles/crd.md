@@ -10,12 +10,14 @@ from the `FielDHub` package.
 To launch the app you need to run either
 
 ``` r
+
 FielDHub::run_app()
 ```
 
 or
 
 ``` r
+
 library(FielDHub)
 run_app()
 ```
@@ -111,6 +113,7 @@ You can run the same design with a function in the FielDHub package,
 We can enter the information describing the above design like this:
 
 ``` r
+
 crd <- CRD(
   t = 15,
   reps = 6,
@@ -138,6 +141,7 @@ can use the generic function
 [`print()`](https://rdrr.io/r/base/print.html).
 
 ``` r
+
 print(crd)
 ```
 
@@ -180,6 +184,7 @@ for `ID`, `LOCATION`, `PLOT`, `REP`, `IBLOCK`, `UNIT`, `ENTRY`, and
 `TREATMENT`.
 
 ``` r
+
 field_book <- crd$fieldBook
 head(crd$fieldBook, 10)
 ```
@@ -203,6 +208,7 @@ For plotting the layout in function of the coordinates `ROW` and
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) as follow,
 
 ``` r
+
 plot(crd)
 ```
 

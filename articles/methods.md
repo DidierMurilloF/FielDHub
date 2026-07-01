@@ -10,6 +10,7 @@ to display different kinds of information about the experiment. In this
 example, we will use the following randomized complete block design:
 
 ``` r
+
 experiment <- RCBD(
   t = 12,
   reps = 3,
@@ -122,6 +123,7 @@ FielDHub. This can also be saved to a variable. This function has
 parameters for location and layout, if applicable.
 
 ``` r
+
 plot(experiment, l = 2, layout = 2)
 ```
 

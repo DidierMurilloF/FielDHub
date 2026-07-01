@@ -16,7 +16,7 @@ reps is due to an arbitrary decision by the research, also in some
 cases, it is due to technical reasons. The replication ratio is
 typically 1:4 (Cullis 2006), which means that the portion of treatment
 repeated twice is p = 25%. However, the design can be adapted to meet
-specific needs by adjusting the values of $p$ and the level of
+specific needs by adjusting the values of $`p`$ and the level of
 replication. For example, standard varieties (checks) may be included
 with higher levels of replication than test lines.
 
@@ -40,29 +40,29 @@ environments.
 Each partially replicated (p-rep) design location undergoes an
 optimization process that involves the following procedure:
 
-Given a matrix $X$ of integers (p-rep design within location), we want
+Given a matrix $`X`$ of integers (p-rep design within location), we want
 to ensure that the distance between any two occurrences of the same
-treatment is at least a distance $d$. More specifically, we want to
-modify $X$ to ensure that no treatments appear twice within a distance
-less than $d$ in the resulting matrix.
+treatment is at least a distance $`d`$. More specifically, we want to
+modify $`X`$ to ensure that no treatments appear twice within a distance
+less than $`d`$ in the resulting matrix.
 
 The goal of the optimization process is to find a modified matrix that
 satisfies this constraint while maximizing some measure of deviation
-from the original matrix $X$. In this case, the measure of deviation is
-the pairwise Euclidean distance between occurrences of the same
+from the original matrix $`X`$. In this case, the measure of deviation
+is the pairwise Euclidean distance between occurrences of the same
 treatment. The process is done by the function
 [`swap_pairs()`](https://didiermurillof.github.io/FielDHub/reference/swap_pairs.md)
-that uses a heuristic algorithm that starts with a distance of $d = 3$
+that uses a heuristic algorithm that starts with a distance of $`d = 3`$
 between pairs of occurrences of the same treatment, and increases this
-distance by $1$ and repeats the process until either the algorithm no
+distance by $`1`$ and repeats the process until either the algorithm no
 longer converges or the maximum number of iterations is reached.
 
 The algorithm works by first identifying all pairs of occurrences of the
-same treatment that are closer than $d$. For each such pair, the
+same treatment that are closer than $`d`$. For each such pair, the
 function selects a random occurrence of a different integer that is at
-least $d$ away, and swaps the two occurrences. This process is repeated
-until no further swaps can be made that increase the pairwise Euclidean
-distances between occurrences of the same treatment.
+least $`d`$ away, and swaps the two occurrences. This process is
+repeated until no further swaps can be made that increase the pairwise
+Euclidean distances between occurrences of the same treatment.
 
 ##### Toy Example
 
@@ -70,7 +70,7 @@ Consider a p-rep design where ten treatments are replicated twice and 40
 only once. The matrix (field layout) for this experiment has 6 rows and
 10 columns.
 
-$X =$
+$`X =`$
 
          [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]
     [1,]   21   40   17   25   26    3   11   31   36     6
@@ -111,6 +111,7 @@ that are close and next to each other by using the function
 from `FielDHub` R package.
 
 ``` r
+
 library(FielDHub)
 B <- swap_pairs(X, starting_dist = 3)
 ```
@@ -176,12 +177,14 @@ standalone function in R.
 To launch the app you need to run either
 
 ``` r
+
 FielDHub::run_app()
 ```
 
 or
 
 ``` r
+
 library(FielDHub)
 run_app()
 ```
@@ -327,6 +330,7 @@ in the `FielDHub` package.
 First, you need to load the `FielDHub` package typing,
 
 ``` r
+
 library(FielDHub)
 ```
 
@@ -334,6 +338,7 @@ Then, you can enter the information describing the above design like
 this:
 
 ``` r
+
 optim_multi_prep <- multi_location_prep(
   lines = 150, 
   l = 5, 
@@ -383,6 +388,7 @@ For example, we can display the `allocation` object. Let us print the
 first ten genotypes allocation.
 
 ``` r
+
 print(head(optim_multi_prep$allocation, 10))
 ```
 
@@ -421,6 +427,7 @@ We can first display the design parameters for the randomizations with
 the following code:
 
 ``` r
+
 print(optim_multi_prep)
 ```
 
@@ -476,6 +483,7 @@ the field book has columns for `ID`, `EXPT`, `LOCATION`, `YEAR`, `PLOT`,
 Let us see the first 10 rows of the field book for this experiment.
 
 ``` r
+
 field_book <- optim_multi_prep$fieldBook
 head(field_book, 10)
 ```
@@ -505,6 +513,7 @@ using the dollar sign operator as well.
 ##### Field Layout for Location 1
 
 ``` r
+
 plot(optim_multi_prep, l = 1)
 ```
 
@@ -518,6 +527,7 @@ plots contain entries that only appear once.
 Also, for example the location five:
 
 ``` r
+
 plot(optim_multi_prep, l = 5)
 ```
 

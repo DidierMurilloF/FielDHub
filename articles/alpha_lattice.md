@@ -10,12 +10,14 @@ from the `FielDHub` package.
 To launch the app you need to run either
 
 ``` r
+
 FielDHub::run_app()
 ```
 
 or
 
 ``` r
+
 library(FielDHub)
 run_app()
 ```
@@ -123,6 +125,7 @@ You can run the same design with a function in the FielDHub package,
 First, you need to load the `FielDHub` package typing,
 
 ``` r
+
 library(FielDHub)
 ```
 
@@ -130,6 +133,7 @@ Then, you can enter the information describing the above design like
 this:
 
 ``` r
+
 alpha <- alpha_lattice(
   t = 55,
   r = 3,  
@@ -161,6 +165,7 @@ can use the generic function
 [`print()`](https://rdrr.io/r/base/print.html).
 
 ``` r
+
 print(alpha)
 ```
 
@@ -210,6 +215,7 @@ columns for `ID`, `LOCATION`, `PLOT`, `REP`, `IBLOCK`, `UNIT`, `ENTRY`,
 and `TREATMENT`.
 
 ``` r
+
 field_book <- alpha$fieldBook
 head(alpha$fieldBook, 10)
 ```
@@ -233,6 +239,7 @@ For plotting the layout in function of the coordinates `ROW` and
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) as follows,
 
 ``` r
+
 plot(alpha)
 ```
 

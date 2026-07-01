@@ -29,6 +29,7 @@ package. Please, go to
 This is a basic example which shows you how to launch the app:
 
 ``` r
+
 library(FielDHub)
 run_app()
 ```
@@ -66,6 +67,7 @@ must include the same random seed in the script as was used in the Shiny
 app. In this case, the random seed is 1249.
 
 ``` r
+
 diagonal <- diagonal_arrangement(
   nrows = 16, 
   ncols = 20, 
@@ -143,6 +145,7 @@ using the function
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) as follows,
 
 ``` r
+
 plot(diagonal)
 ```
 
@@ -190,6 +193,7 @@ identical results between the script and the Shiny app, users need to
 use the same random seed, which, in this case, is 77.
 
 ``` r
+
 pREP <- partially_replicated(
   nrows = 16, 
   ncols = 18,  
@@ -265,6 +269,7 @@ using the function
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) as follows,
 
 ``` r
+
 plot(pREP)
 ```
 

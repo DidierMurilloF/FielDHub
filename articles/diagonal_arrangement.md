@@ -38,12 +38,14 @@ representing 9.1% of the total number of experimental plots.
 To launch the app you need to run either
 
 ``` r
+
 FielDHub::run_app()
 ```
 
 or
 
 ``` r
+
 library(FielDHub)
 run_app()
 ```
@@ -186,6 +188,7 @@ You can run the same design with a function in the FielDHub package,
 First, you need to load the `FielDHub` package typing,
 
 ``` r
+
 library(FielDHub)
 ```
 
@@ -193,6 +196,7 @@ Then, you can enter the information describing the above design like
 this:
 
 ``` r
+
 single_diag <- diagonal_arrangement(
   nrows = 15,
   ncols = 22,
@@ -225,6 +229,7 @@ To print a summary of the information that is in the object
 [`print()`](https://rdrr.io/r/base/print.html).
 
 ``` r
+
 print(single_diag)
 ```
 
@@ -277,6 +282,7 @@ book has columns for `ID`, `EXPT`, `LOCATION`, `YEAR`, `PLOT`, `ROW`,
 Let us see the first 10 rows of the field book for this experiment.
 
 ``` r
+
 field_book <- single_diag$fieldBook
 head(field_book, 10)
 ```
@@ -300,6 +306,7 @@ For plotting the layout in function of the coordinates `ROW` and
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) as follow,
 
 ``` r
+
 plot(single_diag)
 ```
 
@@ -498,6 +505,7 @@ function is the multiple diagonal arrangement, where the experiment is
 split into blocks of specified size.
 
 ``` r
+
 multi_diag <- diagonal_arrangement(
   nrows = 15,
   ncols = 22,
@@ -538,6 +546,7 @@ For printing a summary of the information that is in the object
 [`print()`](https://rdrr.io/r/base/print.html)
 
 ``` r
+
 print(multi_diag)
 ```
 
@@ -590,6 +599,7 @@ book has columns for `ID`, `EXPT`, `LOCATION`, `YEAR`, `PLOT`, `ROW`,
 Let us see the first 10 rows of the field book for this experiment.
 
 ``` r
+
 field_book <- multi_diag$fieldBook
 head(field_book, 10)
 ```
@@ -613,6 +623,7 @@ For plotting the layout in function of the coordinates `ROW` and
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) as follow,
 
 ``` r
+
 plot(multi_diag)
 ```
 

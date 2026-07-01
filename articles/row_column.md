@@ -136,6 +136,7 @@ You can run the same design with a function in the FielDHub package,
 First, you need to load the `FielDHub` package by typing
 
 ``` r
+
 library(FielDHub)
 ```
 
@@ -143,6 +144,7 @@ Then, you can enter the information describing the above design like
 this:
 
 ``` r
+
 rcd <- row_column(
   t = 45,
   nrows = 5,
@@ -174,6 +176,7 @@ can use the generic function
 [`print()`](https://rdrr.io/r/base/print.html).
 
 ``` r
+
 print(rcd)
 ```
 
@@ -224,6 +227,7 @@ for `ID`, `LOCATION`, `PLOT`, `REP`, `ROW`, `COLUMN`, `ENTRY`, and
 `TREATMENT`.
 
 ``` r
+
 field_book <- rcd$fieldBook
 head(rcd$fieldBook, 10)
 ```
@@ -247,6 +251,7 @@ For plotting the layout in function of the coordinates `ROW` and
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) as follows,
 
 ``` r
+
 plot(rcd)
 ```
 

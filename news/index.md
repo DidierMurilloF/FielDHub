@@ -1,5 +1,16 @@
 # Changelog
 
+## FielDHub (development version)
+
+#### Fix bugs:
+
+- Fixed a bug in
+  [`row_column()`](https://didiermurillof.github.io/FielDHub/reference/row_column.md)
+  where the design optimizer errored with “object ‘best_efficiencies’
+  not found” when no treatment swap improved the A-efficiency, because
+  the best efficiencies were only stored inside the improvement branch;
+  they are now initialized from the starting design.
+
 ## FielDHub 1.3.1
 
 CRAN release: 2023-04-20
@@ -63,12 +74,12 @@ CRAN release: 2023-04-20
 - Created the
   [`swap_pairs()`](https://didiermurillof.github.io/FielDHub/reference/swap_pairs.md)
   function. It swaps pairs in a matrix of integers and optimizes the
-  p-rep design. This function modifies the input matrix $X$ to ensure
+  p-rep design. This function modifies the input matrix $`X`$ to ensure
   that the distance between any two occurrences of the same integer is
-  at least a distance $d$, by swapping one of the occurrences with a
-  random occurrence of a different integer that is at least $d$ away.
-  The function starts with starting dist at $d = 3$ and increases it by
-  $1$ until the algorithm no longer converges or the max number of
+  at least a distance $`d`$, by swapping one of the occurrences with a
+  random occurrence of a different integer that is at least $`d`$ away.
+  The function starts with starting dist at $`d = 3`$ and increases it
+  by $`1`$ until the algorithm no longer converges or the max number of
   iterations have been performed.
 
 - Created the `search_matrix_values()` function. It looks for values

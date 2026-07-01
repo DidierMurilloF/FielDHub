@@ -125,6 +125,7 @@ Thomas Walk \[ctb\], Johan Aparicio \[ctb\], Richard Horsley \[ctb\]
 ## Examples
 
 ``` r
+
 # Example 1: Generates a spatial single diagonal arrangement design in one location
 # with 270 treatments and 30 check plots for a field with dimensions 15 rows x 20 cols
 # in a serpentine arrangement.

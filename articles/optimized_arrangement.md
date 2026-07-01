@@ -36,12 +36,14 @@ plots.
 To launch the app you need to run either,
 
 ``` r
+
 FielDHub::run_app()
 ```
 
 or
 
 ``` r
+
 library(FielDHub)
 run_app()
 ```
@@ -191,6 +193,7 @@ in the `FielDHub` package.
 First, you need to load the `FielDHub` package typing,
 
 ``` r
+
 library(FielDHub)
 ```
 
@@ -198,6 +201,7 @@ Then, you can enter the information describing the above design like
 this:
 
 ``` r
+
 optim_expt <- optimized_arrangement(
   nrows = 29,
   ncols = 15,
@@ -238,6 +242,7 @@ To print a summary of the information that is in the object
 [`print()`](https://rdrr.io/r/base/print.html).
 
 ``` r
+
 print(optim_expt)
 ```
 
@@ -288,6 +293,7 @@ book has columns for `ID`, `EXPT`, `LOCATION`, `YEAR`, `PLOT`, `ROW`,
 Let us see the first 10 rows of the field book for this experiment.
 
 ``` r
+
 field_book <- optim_expt$fieldBook
 head(field_book, 10)
 ```
@@ -311,6 +317,7 @@ For plotting the layout in function of the coordinates `ROW` and
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) as follow,
 
 ``` r
+
 plot(optim_expt)
 ```
 
@@ -327,6 +334,7 @@ specific location. For example, you can plot specifically the layout for
 location 2.
 
 ``` r
+
 plot(optim_expt, l = 2)
 ```
 

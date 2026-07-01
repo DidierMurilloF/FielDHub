@@ -32,12 +32,14 @@ will be distributed in a field of 12 rows and 12 columns.
 To launch the app you need to run either
 
 ``` r
+
 FielDHub::run_app()
 ```
 
 or
 
 ``` r
+
 library(FielDHub)
 run_app()
 ```
@@ -191,6 +193,7 @@ in the `FielDHub` package.
 First, you need to load the `FielDHub` package typing,
 
 ``` r
+
 library(FielDHub)
 ```
 
@@ -198,6 +201,7 @@ Then, you can enter the information describing the above design like
 this:
 
 ``` r
+
 aug_RCBD <- RCBD_augmented(
   lines = 120,
   checks = 4,
@@ -242,6 +246,7 @@ we can use the generic function
 [`print()`](https://rdrr.io/r/base/print.html).
 
 ``` r
+
 print(aug_RCBD)
 ```
 
@@ -292,6 +297,7 @@ columns for `ID`, `EXPT`, `LOCATION`, `YEAR`, `PLOT`, `ROW`, `COLUMN`,
 Let us see the first 10 rows of the field book for this experiment.
 
 ``` r
+
 field_book <- aug_RCBD$fieldBook
 head(field_book, 10)
 ```
@@ -317,6 +323,7 @@ For plotting the layout in function of the coordinates `ROW` and
 #### Plot layout for location 1
 
 ``` r
+
 plot(aug_RCBD)
 ```
 
@@ -329,6 +336,7 @@ specific location. For example, you can plot the layout for location 2.
 #### Plot layout for location 2
 
 ``` r
+
 plot(aug_RCBD, l = 2)
 ```
 

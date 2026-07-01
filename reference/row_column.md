@@ -105,6 +105,7 @@ Thomas Walk \[ctb\], Johan Aparicio \[ctb\], Richard Horsley \[ctb\]
 ## Examples
 
 ``` r
+
 # Example 1: Generates a row-column design with 2 full blocks and 24 treatments
 # and 6 rows. This for one location. This example uses 100 iterations for the optimization
 # but 1000 is the default and recomended value.

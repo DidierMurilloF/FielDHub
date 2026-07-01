@@ -24,6 +24,7 @@ NDSU, CIAT, as well as for teaching.
 Install FielDHub with:
 
 ``` r
+
 install.packages("FielDHub")
 ```
 
@@ -32,6 +33,7 @@ install.packages("FielDHub")
 Get started using only two simple lines of code:
 
 ``` r
+
 library(FielDHub)
 run_app()
 ```

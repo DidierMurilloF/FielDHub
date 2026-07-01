@@ -83,12 +83,14 @@ process that employs IBD principles.
 To launch the app you need to run either
 
 ``` r
+
 FielDHub::run_app()
 ```
 
 or
 
 ``` r
+
 library(FielDHub)
 run_app()
 ```
@@ -233,6 +235,7 @@ You can run the same design with a function in the FielDHub package,
 First, you need to load the `FielDHub` package typing,
 
 ``` r
+
 library(FielDHub)
 ```
 
@@ -240,6 +243,7 @@ Then, you can enter the information describing the above design like
 this:
 
 ``` r
+
 sparse_example <- sparse_allocation(
    lines = 260, 
    l = 5, 
@@ -287,6 +291,7 @@ For example, we can display the `allocation` object. Let us print the
 first ten genotypes allocation.
 
 ``` r
+
 print(head(sparse_example$allocation, 10))
 ```
 
@@ -306,6 +311,7 @@ We can manipulate the sparse_allocation object as any other list in R.
 For example, we can print the design information as following:
 
 ``` r
+
 print(sparse_example)
 ```
 
@@ -369,6 +375,7 @@ Let us see the first 10 rows of the field book for the first location in
 this experiment.
 
 ``` r
+
 field_book <- sparse_example$fieldBook
 head(field_book, 10)
 ```
@@ -394,6 +401,7 @@ For plotting the layout in function of the coordinates `ROW` and
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) as follows,
 
 ``` r
+
 plot(sparse_example, l = 1)
 ```
 
@@ -405,6 +413,7 @@ experiment, like location 2 in this example:
 ##### Plot field layout Location 2
 
 ``` r
+
 plot(sparse_example, l = 2)
 ```
 

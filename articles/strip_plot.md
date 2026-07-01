@@ -9,12 +9,14 @@ the FielDHub Shiny App and the scripting function `srip_plot()` from the
 To launch the app you need to run either
 
 ``` r
+
 FielDHub::run_app()
 ```
 
 or
 
 ``` r
+
 library(FielDHub)
 run_app()
 ```
@@ -120,6 +122,7 @@ You can run the same design with a function in the FielDHub package,
 First, you need to load the `FielDHub` package typing,
 
 ``` r
+
 library(FielDHub)
 ```
 
@@ -127,6 +130,7 @@ Then, you can enter the information describing the above design like
 this:
 
 ``` r
+
 strip <- strip_plot(
   Hplots = 6,
   Vplots = 4, 
@@ -156,6 +160,7 @@ The description for the inputs that we used to generate the design,
 ### Print `strip` object
 
 ``` r
+
 print(strip)
 ```
 
@@ -199,6 +204,7 @@ columns for `ID`, `LOCATION`, `PLOT`, `REP`, `HSTRIP`, `VSTRIP`, and
 `TRT_COMB`.
 
 ``` r
+
 field_book <- strip$fieldBook
 head(strip$fieldBook, 10)
 ```
@@ -222,6 +228,7 @@ For plotting the layout in function of the coordinates `ROW` and
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) as follow,
 
 ``` r
+
 plot(strip)
 ```
 
