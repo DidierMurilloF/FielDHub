@@ -7,6 +7,17 @@
 
 ### Fix bugs:
 
+- Fixed a bug in `CRD()` where a single experimental unit (`t = 1`,
+  `reps = 1`) made the plot numbering
+  `sample(plotNumber:(plotNumber + N - 1))` collapse to a full
+  permutation and error when building the field book; it now builds the
+  plot numbers with `plotNumber - 1 + sample(seq_len(N))`.
+
+- Fixed a bug in `CRD()` and `RCBD()` where a single character treatment
+  matched no input branch (the third `else if` duplicated the second),
+  leaving the treatment count `nt` unset and the call failing with
+  "object 'nt' not found"; the branch now triggers the "requires more
+  than one treatment" validation message.
 - Fixed a bug in `square_lattice()` where only `t` was required to be a
   square number but `k` was not checked against `sqrt(t)`, so calls such
   as `square_lattice(t = 64, k = 4)` silently produced a malformed

@@ -94,7 +94,7 @@ CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL,
       } else if (is.character(t) & length(t) > 1) {
         TRT <- t
         nt <- length(t)
-      } else if (is.character(t) & length(t) > 1) {
+      } else if (is.character(t) & length(t) == 1) {
         shiny::validate('"CRD()" requires more than one treatment.')
       }
     } else {
@@ -124,7 +124,7 @@ CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL,
   }
 
   design <- data.frame(list(LOCATION = rep(locationName, N)),
-    PLOT = sample(plotNumber:(plotNumber + N - 1)),
+    PLOT = plotNumber - 1 + sample(seq_len(N)),
     REP = as.factor(REP), TREATMENT = TRT
   )
   design <- design[order(design$PLOT), ]
