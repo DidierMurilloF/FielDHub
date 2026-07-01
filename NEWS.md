@@ -11,6 +11,11 @@
   square number but `k` was not checked against `sqrt(t)`, so calls such
   as `square_lattice(t = 64, k = 4)` silently produced a malformed
   design; it now validates that `k` equals `sqrt(t)`.
+- Fixed a bug in `row_column()` where the design optimizer errored with
+  "object 'best_efficiencies' not found" when no treatment swap improved
+  the A-efficiency, because the best efficiencies were only stored inside
+  the improvement branch; they are now initialized from the starting
+  design.
 
 # FielDHub 1.3.1
 
