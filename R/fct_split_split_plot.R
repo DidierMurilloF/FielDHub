@@ -177,7 +177,7 @@ split_split_plot <- function(wp = NULL, sp = NULL, ssp = NULL, reps = NULL, type
       sspd.layout <- matrix(data = 0, nrow = wp * b, ncol = 5)
       sspd.layout[,1] <- plot.random[,v]
       sspd.layout[,2] <- rep(1:b, each = wp)
-      sspd.layout[,3] <- rep(WholePlots, each = b)
+      sspd.layout[,3] <- rep(WholePlots, times = b)
       sspd.layout <- sspd.layout[order(sspd.layout[,1]),]
       rownames(sspd.layout) <- 1:(wp * b)
       colnames(sspd.layout) <- c("PLOT", "REP", "Whole-plot", "Sub-plot", "Sub-Sub Plot")

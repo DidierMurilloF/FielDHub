@@ -7,6 +7,11 @@
 
 ### Fix bugs:
 
+- Fixed a bug in `split_split_plot()` where, for the CRD type
+  (`type = 1`), the whole-plot column was built with
+  `rep(WholePlots, each = reps)` instead of `times = reps`, so
+  whole-plots were mis-assigned across replicates; each replicate now
+  contains every whole-plot.
 - Fixed a bug in `split_families()` where the `gen.list` assignment sat
   after `stop()` inside the column-count check, so valid three-column
   input never created `gen.list` and the function errored with "object

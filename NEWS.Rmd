@@ -20,6 +20,7 @@ knitr::opts_chunk$set(
 
 ### Fix bugs:
 
+* Fixed a bug in `split_split_plot()` where, for the CRD type (`type = 1`), the whole-plot column was built with `rep(WholePlots, each = reps)` instead of `times = reps`, so whole-plots were mis-assigned across replicates; each replicate now contains every whole-plot.
 * Fixed a bug in `split_families()` where the `gen.list` assignment sat after `stop()` inside the column-count check, so valid three-column input never created `gen.list` and the function errored with "object 'gen.list' not found"; the assignment now runs after the guard.
 * Fixed a bug in `diagonal_arrangement()` and `sparse_allocation()` where the internal non-prime field-size filter `t[-numbers::isPrime(t)]` used a logical vector as a negative index and returned wrong or no field dimensions; it now uses `t[!numbers::isPrime(t)]`.
 * Fixed a bug in `alpha_lattice()` where the prime-number check was applied to the raw treatment argument `t` instead of the number of treatments, so supplying treatments as a vector (e.g. `t = 1:8`) raised the error "the condition has length > 1"; it now checks `numbers::isPrime(nt)`.
