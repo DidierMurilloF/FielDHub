@@ -393,16 +393,16 @@ print(head(optim_multi_prep$allocation, 10))
 ```
 
        LOC1 LOC2 LOC3 LOC4 LOC5
-    1     1    2    2    1    1
-    2     1    1    1    2    2
-    3     1    2    1    1    2
+    1     2    1    1    1    2
+    2     1    2    1    1    2
+    3     2    1    1    1    2
     4     1    1    2    1    2
     5     1    1    2    2    1
-    6     2    1    2    1    1
-    7     2    1    1    1    2
+    6     1    2    1    1    2
+    7     2    1    2    1    1
     8     1    2    2    1    1
-    9     1    2    1    1    2
-    10    2    1    1    2    1
+    9     1    1    2    1    2
+    10    2    2    1    1    1
 
 Let us add two new columns to the allocation table. We can add the
 number of copies by genotype; it should be 7 for all of them. We can
@@ -411,16 +411,16 @@ also add the average allocation by genotype. Each treatment will appear
 
 |        | LOC1 | LOC2 | LOC3 | LOC4 | LOC5 | Copies | Avg |
 |:-------|-----:|-----:|-----:|-----:|-----:|-------:|----:|
-| Gen-1  |    1 |    2 |    2 |    1 |    1 |      7 | 1.4 |
-| Gen-2  |    1 |    1 |    1 |    2 |    2 |      7 | 1.4 |
-| Gen-3  |    1 |    2 |    1 |    1 |    2 |      7 | 1.4 |
+| Gen-1  |    2 |    1 |    1 |    1 |    2 |      7 | 1.4 |
+| Gen-2  |    1 |    2 |    1 |    1 |    2 |      7 | 1.4 |
+| Gen-3  |    2 |    1 |    1 |    1 |    2 |      7 | 1.4 |
 | Gen-4  |    1 |    1 |    2 |    1 |    2 |      7 | 1.4 |
 | Gen-5  |    1 |    1 |    2 |    2 |    1 |      7 | 1.4 |
-| Gen-6  |    2 |    1 |    2 |    1 |    1 |      7 | 1.4 |
-| Gen-7  |    2 |    1 |    1 |    1 |    2 |      7 | 1.4 |
+| Gen-6  |    1 |    2 |    1 |    1 |    2 |      7 | 1.4 |
+| Gen-7  |    2 |    1 |    2 |    1 |    1 |      7 | 1.4 |
 | Gen-8  |    1 |    2 |    2 |    1 |    1 |      7 | 1.4 |
-| Gen-9  |    1 |    2 |    1 |    1 |    2 |      7 | 1.4 |
-| Gen-10 |    2 |    1 |    1 |    2 |    1 |      7 | 1.4 |
+| Gen-9  |    1 |    1 |    2 |    1 |    2 |      7 | 1.4 |
+| Gen-10 |    2 |    2 |    1 |    1 |    1 |      7 | 1.4 |
 
 We can manipulate the `optim_multi_prep` object as any other list in R.
 We can first display the design parameters for the randomizations with
@@ -457,16 +457,16 @@ which outputs:
      [38;5;246m# A tibble: 10 × 11 [39m
           ID EXPT     LOCATION YEAR   PLOT   ROW COLUMN   REP CHECKS ENTRY TREATMENT
         [3m [38;5;246m<int> [39m [23m  [3m [38;5;246m<chr> [39m [23m     [3m [38;5;246m<chr> [39m [23m     [3m [38;5;246m<chr> [39m [23m  [3m [38;5;246m<dbl> [39m [23m  [3m [38;5;246m<int> [39m [23m   [3m [38;5;246m<int> [39m [23m  [3m [38;5;246m<int> [39m [23m   [3m [38;5;246m<dbl> [39m [23m  [3m [38;5;246m<dbl> [39m [23m  [3m [38;5;246m<chr> [39m [23m    
-     [38;5;250m 1 [39m     1 PrepExpt LOC1     2026      1     1      1     1     52    52 G-52     
-     [38;5;250m 2 [39m     2 PrepExpt LOC1     2026      2     1      2     1     54    54 G-54     
-     [38;5;250m 3 [39m     3 PrepExpt LOC1     2026      3     1      3     1      0    98 G-98     
-     [38;5;250m 4 [39m     4 PrepExpt LOC1     2026      4     1      4     1      0   143 G-143    
-     [38;5;250m 5 [39m     5 PrepExpt LOC1     2026      5     1      5     1      7     7 G-7      
-     [38;5;250m 6 [39m     6 PrepExpt LOC1     2026      6     1      6     1      0   142 G-142    
-     [38;5;250m 7 [39m     7 PrepExpt LOC1     2026      7     1      7     1     81    81 G-81     
-     [38;5;250m 8 [39m     8 PrepExpt LOC1     2026      8     1      8     1     65    65 G-65     
-     [38;5;250m 9 [39m     9 PrepExpt LOC1     2026      9     1      9     1      0    71 G-71     
-     [38;5;250m10 [39m    10 PrepExpt LOC1     2026     10     1     10     1     85    85 G-85     
+     [38;5;250m 1 [39m     1 PrepExpt LOC1     2026      1     1      1     1     41    41 G-41     
+     [38;5;250m 2 [39m     2 PrepExpt LOC1     2026      2     1      2     1     43    43 G-43     
+     [38;5;250m 3 [39m     3 PrepExpt LOC1     2026      3     1      3     1      0    99 G-99     
+     [38;5;250m 4 [39m     4 PrepExpt LOC1     2026      4     1      4     1      0   142 G-142    
+     [38;5;250m 5 [39m     5 PrepExpt LOC1     2026      5     1      5     1      3     3 G-3      
+     [38;5;250m 6 [39m     6 PrepExpt LOC1     2026      6     1      6     1      0   140 G-140    
+     [38;5;250m 7 [39m     7 PrepExpt LOC1     2026      7     1      7     1     75    75 G-75     
+     [38;5;250m 8 [39m     8 PrepExpt LOC1     2026      8     1      8     1     52    52 G-52     
+     [38;5;250m 9 [39m     9 PrepExpt LOC1     2026      9     1      9     1      0    79 G-79     
+     [38;5;250m10 [39m    10 PrepExpt LOC1     2026     10     1     10     1     76    76 G-76     
 
 #### Access to `optim_multi_prep` output
 
@@ -491,16 +491,16 @@ head(field_book, 10)
      [38;5;246m# A tibble: 10 × 11 [39m
           ID EXPT     LOCATION YEAR   PLOT   ROW COLUMN   REP CHECKS ENTRY TREATMENT
         [3m [38;5;246m<int> [39m [23m  [3m [38;5;246m<chr> [39m [23m     [3m [38;5;246m<chr> [39m [23m     [3m [38;5;246m<chr> [39m [23m  [3m [38;5;246m<dbl> [39m [23m  [3m [38;5;246m<int> [39m [23m   [3m [38;5;246m<int> [39m [23m  [3m [38;5;246m<int> [39m [23m   [3m [38;5;246m<dbl> [39m [23m  [3m [38;5;246m<dbl> [39m [23m  [3m [38;5;246m<chr> [39m [23m    
-     [38;5;250m 1 [39m     1 PrepExpt LOC1     2026      1     1      1     1     52    52 G-52     
-     [38;5;250m 2 [39m     2 PrepExpt LOC1     2026      2     1      2     1     54    54 G-54     
-     [38;5;250m 3 [39m     3 PrepExpt LOC1     2026      3     1      3     1      0    98 G-98     
-     [38;5;250m 4 [39m     4 PrepExpt LOC1     2026      4     1      4     1      0   143 G-143    
-     [38;5;250m 5 [39m     5 PrepExpt LOC1     2026      5     1      5     1      7     7 G-7      
-     [38;5;250m 6 [39m     6 PrepExpt LOC1     2026      6     1      6     1      0   142 G-142    
-     [38;5;250m 7 [39m     7 PrepExpt LOC1     2026      7     1      7     1     81    81 G-81     
-     [38;5;250m 8 [39m     8 PrepExpt LOC1     2026      8     1      8     1     65    65 G-65     
-     [38;5;250m 9 [39m     9 PrepExpt LOC1     2026      9     1      9     1      0    71 G-71     
-     [38;5;250m10 [39m    10 PrepExpt LOC1     2026     10     1     10     1     85    85 G-85     
+     [38;5;250m 1 [39m     1 PrepExpt LOC1     2026      1     1      1     1     41    41 G-41     
+     [38;5;250m 2 [39m     2 PrepExpt LOC1     2026      2     1      2     1     43    43 G-43     
+     [38;5;250m 3 [39m     3 PrepExpt LOC1     2026      3     1      3     1      0    99 G-99     
+     [38;5;250m 4 [39m     4 PrepExpt LOC1     2026      4     1      4     1      0   142 G-142    
+     [38;5;250m 5 [39m     5 PrepExpt LOC1     2026      5     1      5     1      3     3 G-3      
+     [38;5;250m 6 [39m     6 PrepExpt LOC1     2026      6     1      6     1      0   140 G-140    
+     [38;5;250m 7 [39m     7 PrepExpt LOC1     2026      7     1      7     1     75    75 G-75     
+     [38;5;250m 8 [39m     8 PrepExpt LOC1     2026      8     1      8     1     52    52 G-52     
+     [38;5;250m 9 [39m     9 PrepExpt LOC1     2026      9     1      9     1      0    79 G-79     
+     [38;5;250m10 [39m    10 PrepExpt LOC1     2026     10     1     10     1     76    76 G-76     
 
 #### Plot field layout
 
