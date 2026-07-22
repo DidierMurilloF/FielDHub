@@ -76,6 +76,104 @@ improve_efficiency <- function(design, iterations, seed) {
   )
 }
 
+# Function to build a resolvable row-column layout in a single optimization
+# stage using blocksdesign::design() (Genstat "onestage" method), instead of
+# the default two-stage greedy search. Rows and columns are optimized jointly.
+# Returns a data frame with the same structure as the two-stage best_design
+# (Level_1 = Rep, Level_2 = Column, Level_3 = Row, plots, treatments) so the
+# downstream field book construction is unchanged.
+#' @noRd
+build_row_column_onestage <- function(nt, nrows, ncols, reps, latinize, searches, seed) {
+  N <- nt * reps
+  trt  <- gl(nt, reps, N)      # each treatment replicated reps times
+  Reps <- gl(reps, nt, N)      # replicate blocking factor
+  RowW <- gl(nrows, ncols, N)  # row within replicate (1..nrows)
+  ColW <- gl(ncols, 1, N)      # column within replicate (1..ncols)
+  if (latinize) {
+    # Crossed (latinized) row/column effects shared across replicates
+    Rows <- factor(RowW)
+    Cols <- factor(ColW)
+  } else {
+    # Nested row/column effects within each replicate (standard resolvable RC)
+    Rows <- factor(paste(Reps, RowW, sep = "_"))
+    Cols <- factor(paste(Reps, ColW, sep = "_"))
+  }
+  optd <- tryCatch(
+    blocksdesign::design(
+      treatments = data.frame(treatments = trt),
+      blocks     = data.frame(Reps = Reps, Rows = Rows, Cols = Cols),
+      searches   = searches,
+      seed       = seed
+    ),
+    error = function(e) e
+  )
+  if (inherits(optd, "error")) {
+    # The joint row-and-column model is (most often) over-parameterized for a
+    # design this small. Signal a recoverable, classed condition that carries the
+    # underlying blocksdesign message, so the caller can fall back to the
+    # two-stage method while still surfacing (not masking) an unrelated failure.
+    stop(structure(
+      class = c("onestage_infeasible", "error", "condition"),
+      list(message = conditionMessage(optd), call = NULL)
+    ))
+  }
+  des <- optd$Design
+  # Map to the two-stage layout structure (Level_2 = columns, Level_3 = rows),
+  # keeping the design() ordering (Reps, Rows, Cols).
+  best_design <- data.frame(
+    Level_1    = factor(des$Reps, levels = unique(des$Reps)),
+    Level_2    = factor(des$Cols, levels = unique(des$Cols)),
+    Level_3    = factor(des$Rows, levels = unique(des$Rows)),
+    plots      = des$plots,
+    treatments = des$treatments
+  )
+  return(best_design)
+}
+
+# Function to calculate the joint (combined) row-by-column A- and D-Efficiency
+# of the treatment contrasts, adjusting for the row and column blocking factors
+# simultaneously (unlike the per-factor efficiencies from BlockEfficiencies()).
+# It uses the design's actual row and column factors, Level_3 and Level_2, which
+# are nested within replicates for the two-stage and nested one-stage designs
+# and crossed (shared across replicates) for latinized designs, matching how the
+# marginal row and column efficiencies are reported. The treatment information
+# matrix is built after eliminating those block effects, C = T'(I - P_B)T, via
+# qr.resid() (rank-revealing LINPACK QR, so a rank-deficient additive block model
+# introduces no spurious dimensions), and the canonical efficiency factors of C
+# are returned. The replicate main effect need not be included: for the nested
+# coding the replicate contrasts already lie in the row space (Level_3 is
+# replicate-specific), and for the crossed coding a complete balanced grid in
+# every replicate leaves the replicates orthogonal to the rows, columns and
+# treatments jointly; either way adding Reps does not change the treatment
+# information matrix. (This relies on each replicate being a complete balanced
+# array; it would not hold for unbalanced or partially replicated layouts.) The
+# resulting A-Efficiency equals the A-Efficiency blocksdesign reports for the
+# full ~Reps + Rows + Cols model of the corresponding (nested or crossed) coding.
+# Returns NA when the joint model is not estimable (e.g. a design too small to
+# have residual degrees of freedom for every treatment contrast).
+#' @noRd
+row_column_joint_efficiency <- function(design) {
+  Rows <- factor(design$Level_3)                    # actual row block factor
+  Cols <- factor(design$Level_2)                    # actual column block factor
+  TF <- factor(design$treatments)
+  v <- nlevels(TF)
+  r <- mean(table(TF))
+  Tind <- stats::model.matrix(~ TF - 1)             # full treatment indicators
+  Bind <- stats::model.matrix(~ Rows + Cols)        # row + column block model
+  resid <- qr.resid(qr(Bind), Tind)                 # (I - P_B) T, rank-aware
+  C <- crossprod(resid)                             # treatment info eliminating blocks
+  ev <- sort(eigen(C, symmetric = TRUE, only.values = TRUE)$values,
+             decreasing = TRUE)
+  eff <- ev[seq_len(v - 1)] / r                     # canonical efficiency factors
+  if (anyNA(eff) || min(eff) < 1e-7) {
+    return(list(Deffic = NA_real_, Aeffic = NA_real_))
+  }
+  list(
+    Deffic = round(exp(mean(log(eff))), 7),
+    Aeffic = round((v - 1) / sum(1 / eff), 7)
+  )
+}
+
 # Function to calculate and return combined BlockEfficiencies
 #' @noRd
 report_efficiency <- function(design) {
@@ -100,8 +198,22 @@ report_efficiency <- function(design) {
     dplyr::filter(Level == 1) |> 
     dplyr::mutate(Level = "Rep")
   
+  # Joint (combined) row-by-column efficiency of the standard resolvable
+  # row-column analysis model.
+  joint <- row_column_joint_efficiency(design)
+  joint_efficiency <- data.frame(
+    Level = "Row-by-Column",
+    Blocks = NA_integer_,
+    `D-Efficiency` = joint$Deffic,
+    `A-Efficiency` = joint$Aeffic,
+    `A-Bound` = NA_real_,
+    check.names = FALSE
+  )
+
   # Combine the results
-  combined_efficiencies <- dplyr::bind_rows(rep_efficiencies, row_efficiencies, col_efficiencies)
-  
+  combined_efficiencies <- dplyr::bind_rows(
+    rep_efficiencies, row_efficiencies, col_efficiencies, joint_efficiency
+  )
+
   return(combined_efficiencies)
 }
