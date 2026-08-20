@@ -93,6 +93,21 @@
   the best efficiencies were only stored inside the improvement branch;
   they are now initialized from the starting design.
 
+- Fixed a bug in the layout plots of
+  [`diagonal_arrangement()`](https://didiermurillof.github.io/FielDHub/reference/diagonal_arrangement.md),
+  [`partially_replicated()`](https://didiermurillof.github.io/FielDHub/reference/partially_replicated.md)
+  and
+  [`optimized_arrangement()`](https://didiermurillof.github.io/FielDHub/reference/optimized_arrangement.md)
+  where the cell labels were passed through `desplot`’s default
+  abbreviation (`shorten = "abb"`), so three-digit entry numbers were
+  drawn without their leading digit (entry 108 appeared as `08`); the
+  labels are now drawn verbatim. The augmented RCBD layout, which
+  avoided this by drawing its labels with a
+  [`ggplot2::geom_text()`](https://ggplot2.tidyverse.org/reference/geom_text.html)
+  overlay on top of desplot, now uses the native `desplot` arguments as
+  well, so its check entries are still highlighted in red but no longer
+  in bold.
+
 ## FielDHub 1.3.1
 
 CRAN release: 2023-04-20
