@@ -50,6 +50,27 @@ mod_RCBD_ui <- function(id) {
         numericInput(inputId = ns("b"), 
                      label = "Input # of Full Reps:", 
                      value = 3, min = 2),
+        checkboxInput(inputId = ns("use_checks_rcbd"),
+                      label = "Add repeated checks?",
+                      value = FALSE),
+        conditionalPanel(
+          condition = "input.use_checks_rcbd == true",
+          ns = ns,
+          fluidRow(
+            column(6, style = list("padding-right: 28px;"),
+                   numericInput(inputId = ns("n_checks_rcbd"),
+                                label = "Input # of Checks:",
+                                value = 2, min = 1)),
+            column(6, style = list("padding-left: 5px;"),
+                   textInput(inputId = ns("rep_checks_rcbd"),
+                             label = "Reps per Check:",
+                             value = "2"))
+          ),
+          checkboxInput(inputId = ns("spread_checks_rcbd"),
+                        label = "Spread checks within each block",
+                        value = TRUE),
+          uiOutput(ns("block_size_rcbd"))
+        ),
         
         numericInput(inputId = ns("l.rcbd"), 
                      label = "Input # of Locations:", 
@@ -191,9 +212,15 @@ mod_RCBD_server <- function(id) {
       } else {
         req(input$t)
         nt <- as.numeric(input$t)
-        df <- data.frame(list(TREATMENT = paste0("G-", 1:nt)))
-        colnames(df) <- "TREATMENT"
-        data_rcbd <- df
+        if (isTRUE(input$use_checks_rcbd)) {
+          req(input$n_checks_rcbd)
+          n_ck <- as.numeric(input$n_checks_rcbd)
+          # Checks lead the pool, matching mod_RCBD_augmented.R:299-301.
+          labels <- c(paste0("CH", seq_len(n_ck)), paste0("G-", seq_len(nt)))
+        } else {
+          labels <- paste0("G-", seq_len(nt))
+        }
+        data_rcbd <- data.frame(TREATMENT = labels)
         return(list(data_rcbd = data_rcbd, treatments = nt))
       }
     }) |>
@@ -220,15 +247,33 @@ mod_RCBD_server <- function(id) {
       sites <- as.numeric(input$l.rcbd)
       continuous <- input$continuous.plot
 
+      use_checks <- isTRUE(input$use_checks_rcbd)
+      n_checks <- NULL
+      rep_checks <- NULL
+      spread_checks <- TRUE
+      if (use_checks) {
+        req(input$n_checks_rcbd, input$rep_checks_rcbd)
+        n_checks <- as.numeric(input$n_checks_rcbd)
+        rep_checks <- as.numeric(unlist(strsplit(input$rep_checks_rcbd, ",")))
+        rep_checks <- rep_checks[!is.na(rep_checks)]
+        if (length(rep_checks) == 0) rep_checks <- 1
+        if (length(rep_checks) == 1) rep_checks <- rep(rep_checks, n_checks)
+        spread_checks <- isTRUE(input$spread_checks_rcbd)
+      }
+
       return(list(
-        r = r, 
-        t = treatments, 
+        r = r,
+        t = treatments,
         planter = planter,
-        plot_start = plot_start, 
+        plot_start = plot_start,
         sites = sites,
         site_names = site_names,
         continuous = continuous,
-        seed = seed)
+        seed = seed,
+        use_checks = use_checks,
+        n_checks = n_checks,
+        rep_checks = rep_checks,
+        spread_checks = spread_checks)
         )
     }) |>
       bindEvent(input$RUN.rcbd)
@@ -245,7 +290,7 @@ mod_RCBD_server <- function(id) {
                     bordered = TRUE,
                     align = 'c',
                     striped = TRUE),
-        h4("Note that only the TREATMENT column is required."),
+        h4("Note that only the TREATMENT column is required. When repeated checks are enabled, the first rows of the file are taken as the checks."),
         easyClose = FALSE
       )
     }
@@ -271,20 +316,45 @@ mod_RCBD_server <- function(id) {
       shinyjs::show(id = "downloadCsv.rcbd")
       
       RCBD(
-        t = rcbd_inputs()$t, 
-        reps = rcbd_inputs()$r, 
-        l = rcbd_inputs()$sites, 
-        plotNumber = rcbd_inputs()$plot_start, 
+        t = rcbd_inputs()$t,
+        reps = rcbd_inputs()$r,
+        l = rcbd_inputs()$sites,
+        plotNumber = rcbd_inputs()$plot_start,
         continuous = rcbd_inputs()$continuous,
-        planter = rcbd_inputs()$planter, 
-        seed = rcbd_inputs()$seed, 
-        locationNames = rcbd_inputs()$site_names, 
+        planter = rcbd_inputs()$planter,
+        seed = rcbd_inputs()$seed,
+        locationNames = rcbd_inputs()$site_names,
+        checks = if (rcbd_inputs()$use_checks) rcbd_inputs()$n_checks else NULL,
+        rep_checks = if (rcbd_inputs()$use_checks) rcbd_inputs()$rep_checks else NULL,
+        spread_checks = rcbd_inputs()$spread_checks,
         data = get_data_rcbd()$data_rcbd
       )
 
     })  |>
       bindEvent(input$RUN.rcbd)
-    
+
+    output$block_size_rcbd <- renderUI({
+      req(input$use_checks_rcbd)
+      # On the upload path the pool comes from the file and the checks are carved
+      # out of it, so `input$t` says nothing about the block size. Only predict it
+      # for the manually generated entry list.
+      if (!identical(input$owndatarcbd, "No")) {
+        return(helpText(
+          "Block size depends on the uploaded list: its first rows are taken as the checks."
+        ))
+      }
+      req(input$t, input$b, input$n_checks_rcbd, input$rep_checks_rcbd)
+      reps_ck <- as.numeric(unlist(strsplit(input$rep_checks_rcbd, ",")))
+      reps_ck <- reps_ck[!is.na(reps_ck)]
+      if (length(reps_ck) == 0) return(NULL)
+      if (length(reps_ck) == 1) {
+        reps_ck <- rep(reps_ck, as.numeric(input$n_checks_rcbd))
+      }
+      n_units <- as.numeric(input$t) + sum(reps_ck)
+      helpText(sprintf("Block size: %d plots. Total: %d plots.",
+                       n_units, n_units * as.numeric(input$b)))
+    })
+
     output$well_panel_layout_RCBD <- renderUI({
       req(RCBD_reactive()$fieldBook)
       obj_rcbd <- RCBD_reactive()
@@ -485,29 +555,37 @@ mod_RCBD_server <- function(id) {
     
     heatmap_obj <- reactive({
       req(simuDataRCBD()$df)
-      if (ncol(simuDataRCBD()$df) == 8) {
+      trait <- as.character(valsRCBD$trail.rcbd)
+      # Was `ncol(df) == 8`, which silently failed once the field book widened
+      # for repeated checks. What it always meant was "has simulated data".
+      if (length(trait) == 1 && trait %in% colnames(simuDataRCBD()$df)) {
         locs <- factor(simuDataRCBD()$df$LOCATION, 
                        levels = unique(simuDataRCBD()$df$LOCATION))
         locLevels <- levels(locs)
         df = subset(simuDataRCBD()$df, LOCATION == locLevels[locNum()])
         loc <- levels(factor(df$LOCATION))
-        trail <- as.character(valsRCBD$trail.rcbd)
-        label_trail <- paste(trail, ": ")
-        heatmapTitle <- paste("Heatmap for ", trail)
+        label_trail <- paste(trait, ": ")
+        heatmapTitle <- paste("Heatmap for ", trait)
+        check_txt <- if ("CHECKS" %in% names(df)) {
+          paste0("Check: ", ifelse(df$CHECKS != 0, "yes", "no"), "\n")
+        } else {
+          ""
+        }
         new_df <- df |>
-          dplyr::mutate(text = paste0("Site: ", loc, "\n", 
-                                      "Row: ", df$ROW, "\n", 
-                                      "Col: ", df$COLUMN, "\n", 
-                                      "Entry: ", df$ENTRY, "\n", 
-                                      label_trail, round(df[,8],2)))
-        w <- as.character(valsRCBD$trail.rcbd)
-        new_df$ROW <- as.factor(new_df$ROW) # Set up ROWS as factors
-        new_df$COLUMN <- as.factor(new_df$COLUMN) # Set up COLUMNS as factors
+          dplyr::mutate(text = paste0("Site: ", loc, "\n",
+                                      "Row: ", df$ROW, "\n",
+                                      "Col: ", df$COLUMN, "\n",
+                                      "Treatment: ", df$TREATMENT, "\n",
+                                      check_txt,
+                                      label_trail, round(df[[trait]], 2)))
+        w <- trait
+        new_df$ROW <- as.factor(new_df$ROW)
+        new_df$COLUMN <- as.factor(new_df$COLUMN)
         p1 <- ggplot2::ggplot(
           new_df, ggplot2::aes(
-            x = new_df[,5], 
-            y = new_df[,4], 
-            fill = new_df[,8], 
+            x = new_df$COLUMN,
+            y = new_df$ROW,
+            fill = new_df[[trait]],
             text = text)) +
           ggplot2::geom_tile() +
           ggplot2::xlab("COLUMN") +
