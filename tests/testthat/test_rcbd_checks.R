@@ -303,3 +303,23 @@ test_that("RCBD() keeps data in its 9th positional slot", {
   expect_equal(sort(unique(d$fieldBook$TREATMENT)), paste0("G-", 1:4))
   expect_equal(nrow(d$fieldBook), 12)
 })
+
+test_that("rcbd_resolve_entries() rejects an implausibly large block", {
+  expect_error(
+    rcbd_resolve_entries(t = 10, checks = c("A", "B"), rep_checks = c(1e9, 1e9)),
+    "would build a block of 2,000,000,010 plots",
+    fixed = TRUE
+  )
+  # The size check must win over the (lower-priority) check-density warning:
+  # this input would also trip the density warning, but the error must fire
+  # first and no warning should reach the caller.
+  expect_no_warning(
+    tryCatch(
+      rcbd_resolve_entries(t = 10, checks = c("A", "B"), rep_checks = c(1e9, 1e9)),
+      error = function(e) NULL
+    )
+  )
+  # A block right at a plausible size is unaffected.
+  ok <- rcbd_resolve_entries(t = 10, checks = c("A", "B"), rep_checks = c(2, 2))
+  expect_s3_class(ok, "data.frame")
+})

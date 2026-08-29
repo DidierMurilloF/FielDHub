@@ -162,6 +162,77 @@ mod_RCBD_ui <- function(id) {
     )
   )
 }
+#' Parse the "Input # of Checks" numeric input
+#'
+#' @description
+#' A single, shared validator for `n_checks_rcbd` so the module never hands a
+#' negative or fractional count to `seq_len()` (which errors with an opaque
+#' "argument must be coercible to non-negative integer" message) or to
+#' `rep()`/`rcbd_resolve_entries()` downstream.
+#'
+#' @param x The raw `n_checks_rcbd` input value.
+#' @return A list with `ok` (logical), `value` (an integer when `ok`), and
+#'   `message` (a user-facing string when `!ok`).
+#' @noRd
+parse_n_checks <- function(x) {
+  if (is.null(x) || length(x) == 0 || is.na(x)) {
+    return(list(ok = FALSE, value = NULL,
+                message = "Input # of Checks cannot be blank."))
+  }
+  if (x %% 1 != 0 || x < 1) {
+    return(list(ok = FALSE, value = NULL,
+                message = "Input # of Checks must be a whole number of 1 or more."))
+  }
+  list(ok = TRUE, value = as.integer(x), message = NULL)
+}
+
+#' Parse the "Reps per Check" text input
+#'
+#' @description
+#' Strictly parses a comma-separated list of reps-per-check. A single value is
+#' legal and is recycled across `n_checks`; any other length must match
+#' `n_checks` exactly. A token that does not parse as a number is reported by
+#' name rather than silently dropped (which used to leave one value behind
+#' and silently recycle it). Shared by `rcbd_inputs()` and the block-size
+#' preview so both give the same answer for the same text.
+#'
+#' @param text The raw `rep_checks_rcbd` input value.
+#' @param n_checks Number of checks the value must ultimately cover.
+#' @return A list with `ok` (logical), `value` (a numeric vector of length
+#'   `n_checks` when `ok`), and `message` (a user-facing string when `!ok`).
+#' @noRd
+parse_rep_checks <- function(text, n_checks) {
+  if (is.null(text) || !nzchar(trimws(text))) {
+    return(list(ok = FALSE, value = NULL,
+                message = "Reps per Check cannot be blank."))
+  }
+  tokens <- trimws(strsplit(text, ",")[[1]])
+  if (length(tokens) == 0 || any(!nzchar(tokens))) {
+    return(list(ok = FALSE, value = NULL,
+                message = paste0(
+                  "Reps per Check has an empty value in \"", text, "\". ",
+                  "Use a single number, or one comma-separated number per check.")))
+  }
+  vals <- suppressWarnings(as.numeric(tokens))
+  bad <- tokens[is.na(vals)]
+  if (length(bad) > 0) {
+    return(list(ok = FALSE, value = NULL,
+                message = paste0(
+                  "Reps per Check could not read \"",
+                  paste(bad, collapse = "\", \""), "\" as a number.")))
+  }
+  if (length(vals) == 1) {
+    return(list(ok = TRUE, value = rep(vals, n_checks), message = NULL))
+  }
+  if (length(vals) != n_checks) {
+    return(list(ok = FALSE, value = NULL,
+                message = sprintf(
+                  "Reps per Check must have 1 value or %d values (one per check); got %d.",
+                  n_checks, length(vals))))
+  }
+  list(ok = TRUE, value = vals, message = NULL)
+}
+
 #' RCBD Server Functions
 #'
 #' @noRd 
@@ -213,8 +284,13 @@ mod_RCBD_server <- function(id) {
         req(input$t)
         nt <- as.numeric(input$t)
         if (isTRUE(input$use_checks_rcbd)) {
-          req(input$n_checks_rcbd)
-          n_ck <- as.numeric(input$n_checks_rcbd)
+          if (is.null(input$n_checks_rcbd)) return(NULL)  # UI not rendered yet
+          n_ck_parsed <- parse_n_checks(input$n_checks_rcbd)
+          if (!n_ck_parsed$ok) {
+            shinyalert::shinyalert("Error!!", n_ck_parsed$message, type = "error")
+            return(NULL)
+          }
+          n_ck <- n_ck_parsed$value
           # Checks lead the pool, matching mod_RCBD_augmented.R:299-301.
           labels <- c(paste0("CH", seq_len(n_ck)), paste0("G-", seq_len(nt)))
         } else {
@@ -252,12 +328,21 @@ mod_RCBD_server <- function(id) {
       rep_checks <- NULL
       spread_checks <- TRUE
       if (use_checks) {
-        req(input$n_checks_rcbd, input$rep_checks_rcbd)
-        n_checks <- as.numeric(input$n_checks_rcbd)
-        rep_checks <- as.numeric(unlist(strsplit(input$rep_checks_rcbd, ",")))
-        rep_checks <- rep_checks[!is.na(rep_checks)]
-        if (length(rep_checks) == 0) rep_checks <- 1
-        if (length(rep_checks) == 1) rep_checks <- rep(rep_checks, n_checks)
+        if (is.null(input$n_checks_rcbd) || is.null(input$rep_checks_rcbd)) {
+          req(FALSE)  # UI not rendered yet; nothing to validate
+        }
+        n_ck_parsed <- parse_n_checks(input$n_checks_rcbd)
+        if (!n_ck_parsed$ok) {
+          shinyalert::shinyalert("Error!!", n_ck_parsed$message, type = "error")
+          req(FALSE)
+        }
+        n_checks <- n_ck_parsed$value
+        rep_parsed <- parse_rep_checks(input$rep_checks_rcbd, n_checks)
+        if (!rep_parsed$ok) {
+          shinyalert::shinyalert("Error!!", rep_parsed$message, type = "error")
+          req(FALSE)
+        }
+        rep_checks <- rep_parsed$value
         spread_checks <- isTRUE(input$spread_checks_rcbd)
       }
 
@@ -315,20 +400,29 @@ mod_RCBD_server <- function(id) {
       
       shinyjs::show(id = "downloadCsv.rcbd")
       
-      RCBD(
-        t = rcbd_inputs()$t,
-        reps = rcbd_inputs()$r,
-        l = rcbd_inputs()$sites,
-        plotNumber = rcbd_inputs()$plot_start,
-        continuous = rcbd_inputs()$continuous,
-        planter = rcbd_inputs()$planter,
-        seed = rcbd_inputs()$seed,
-        locationNames = rcbd_inputs()$site_names,
-        checks = if (rcbd_inputs()$use_checks) rcbd_inputs()$n_checks else NULL,
-        rep_checks = if (rcbd_inputs()$use_checks) rcbd_inputs()$rep_checks else NULL,
-        spread_checks = rcbd_inputs()$spread_checks,
-        data = get_data_rcbd()$data_rcbd
+      result <- tryCatch(
+        RCBD(
+          t = rcbd_inputs()$t,
+          reps = rcbd_inputs()$r,
+          l = rcbd_inputs()$sites,
+          plotNumber = rcbd_inputs()$plot_start,
+          continuous = rcbd_inputs()$continuous,
+          planter = rcbd_inputs()$planter,
+          seed = rcbd_inputs()$seed,
+          locationNames = rcbd_inputs()$site_names,
+          checks = if (rcbd_inputs()$use_checks) rcbd_inputs()$n_checks else NULL,
+          rep_checks = if (rcbd_inputs()$use_checks) rcbd_inputs()$rep_checks else NULL,
+          spread_checks = rcbd_inputs()$spread_checks,
+          data = get_data_rcbd()$data_rcbd
+        ),
+        error = function(e) {
+          shinyalert::shinyalert("Error!!", conditionMessage(e), type = "error")
+          NULL
+        }
       )
+      req(result)
+
+      result
 
     })  |>
       bindEvent(input$RUN.rcbd)
@@ -343,14 +437,19 @@ mod_RCBD_server <- function(id) {
           "Block size depends on the uploaded list: its first rows are taken as the checks."
         ))
       }
-      req(input$t, input$b, input$n_checks_rcbd, input$rep_checks_rcbd)
-      reps_ck <- as.numeric(unlist(strsplit(input$rep_checks_rcbd, ",")))
-      reps_ck <- reps_ck[!is.na(reps_ck)]
-      if (length(reps_ck) == 0) return(NULL)
-      if (length(reps_ck) == 1) {
-        reps_ck <- rep(reps_ck, as.numeric(input$n_checks_rcbd))
+      req(input$t, input$b)
+      if (is.null(input$n_checks_rcbd) || is.null(input$rep_checks_rcbd)) {
+        return(NULL)  # UI not rendered yet
       }
-      n_units <- as.numeric(input$t) + sum(reps_ck)
+      n_ck_parsed <- parse_n_checks(input$n_checks_rcbd)
+      if (!n_ck_parsed$ok) {
+        return(helpText(n_ck_parsed$message))
+      }
+      rep_parsed <- parse_rep_checks(input$rep_checks_rcbd, n_ck_parsed$value)
+      if (!rep_parsed$ok) {
+        return(helpText(rep_parsed$message))
+      }
+      n_units <- as.numeric(input$t) + sum(rep_parsed$value)
       helpText(sprintf("Block size: %d plots. Total: %d plots.",
                        n_units, n_units * as.numeric(input$b)))
     })
