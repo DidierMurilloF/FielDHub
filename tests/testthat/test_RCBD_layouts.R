@@ -79,3 +79,34 @@ test_that("generate_horizontal_layout produces extended layouts when available",
     expect_true("PLOT" %in% colnames(ext_layout))
   }
 })
+
+test_that("layouts size themselves by plots-per-block when checks exist", {
+  d <- RCBD(t = 6, reps = 3, checks = c("CK1", "CK2"),
+            rep_checks = c(2, 2), seed = 91)
+  out <- plot_layout(x = d, layout = 1, stacked = "vertical")
+
+  # block size is 10, three blocks
+  expect_equal(nrow(out$fieldBookXY), 30)
+  expect_equal(max(out$fieldBookXY$ROW) * max(out$fieldBookXY$COLUMN), 30)
+})
+
+test_that("the layout field book keeps a name-based column order", {
+  d_plain <- RCBD(t = 4, reps = 3, seed = 92)
+  out_plain <- plot_layout(x = d_plain, layout = 1, stacked = "vertical")
+  expect_equal(names(out_plain$fieldBookXY),
+               c("ID", "LOCATION", "PLOT", "ROW", "COLUMN", "REP", "TREATMENT"))
+
+  d_chk <- RCBD(t = 6, reps = 3, checks = "CK1", rep_checks = 2, seed = 93)
+  out_chk <- plot_layout(x = d_chk, layout = 1, stacked = "vertical")
+  expect_equal(names(out_chk$fieldBookXY),
+               c("ID", "LOCATION", "PLOT", "ROW", "COLUMN", "REP",
+                 "ENTRY", "TREATMENT", "CHECKS"))
+})
+
+test_that("every plot appears exactly once in the layout", {
+  d <- RCBD(t = 6, reps = 3, checks = "CK1", rep_checks = 2, seed = 94)
+  out <- plot_layout(x = d, layout = 1, stacked = "vertical")
+  cells <- paste(out$fieldBookXY$ROW, out$fieldBookXY$COLUMN)
+  expect_equal(anyDuplicated(cells), 0)
+  expect_setequal(out$fieldBookXY$PLOT, d$fieldBook$PLOT)
+})
