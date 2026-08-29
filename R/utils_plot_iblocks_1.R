@@ -14,7 +14,9 @@ plot_iblocks_1 <- function(
     layout = 1,
     stacked = "vertical",
     planter = "serpentine",
-    l = 1) {
+    l = 1,
+    ...) {
+  dots <- list(...)
   site <- l
   locations <- factor(x$fieldBook$LOCATION, levels = unique(x$fieldBook$LOCATION))
   loc_levels <- levels(locations)
@@ -524,39 +526,27 @@ plot_iblocks_1 <- function(
     if (x$infoDesign$id_design == 12) ds <- "Alpha Lattice Design Field Layout "
 
     main <- paste0(ds, rows, "X", cols)
-    p1 <- desplot::desplot(
+    p1 <- plot_desplot(
       ENTRY ~ COLUMN + ROW,
-      flip = FALSE,
-      out1 = REP,
-      out2 = IBLOCK,
-      out2.gpar = list(col = "black", lty = 3),
-      text = ENTRY,
-      cex = 1,
-      shorten = "no",
       data = df,
-      xlab = "COLUMNS",
-      ylab = "ROWS",
+      out1.string = "REP",
+      out2.string = "IBLOCK",
+      out2.gpar = list(col = "black", lty = 3),
+      text.string = "ENTRY",
       main = main,
-      show.key = FALSE,
-      gg = TRUE
+      extra_args = dots
     )
-    
-    p1 <- add_gg_features(p1)
     
     df$REP <- as.factor(df$REP)
 
-    p2 <- desplot::desplot(
+    p2 <- plot_desplot(
       REP ~ COLUMN + ROW,
-      flip = FALSE,
-      out1 = REP,
-      text = PLOT, cex = 1, shorten = "no",
-      data = df, xlab = "COLUMNS", ylab = "ROWS",
+      data = df,
+      out1.string = "REP",
+      text.string = "PLOT",
       main = main,
-      show.key = FALSE,
-      gg = TRUE
+      extra_args = dots
     )
-    
-    p2 <- add_gg_features(p2)
   }
   return(
     list(
@@ -567,29 +557,4 @@ plot_iblocks_1 <- function(
       allSitesFieldbook = allSitesFieldbook
     )
   )
-}
-
-add_gg_features <- function(ggplot2_obj) {
-  p1 <- ggplot2_obj
-  # Explicitly remove all legends
-  p1 <- p1 + ggplot2::guides(
-    fill = "none",   # Remove legend for fill
-    color = "none",  # Remove legend for color (if used)
-    text = "none"    # Remove legend for text labels
-  )
-  
-  # Format the x and y axes to show integer labels
-  p1 <- p1 +
-    ggplot2::scale_x_continuous(breaks = function(x) seq(floor(min(x)), ceiling(max(x)), by = 1)) +
-    ggplot2::scale_y_continuous(breaks = function(x) seq(floor(min(x)), ceiling(max(x)), by = 1))
-  
-  # Apply a minimal theme for better aesthetics
-  p1 <- p1 + ggplot2::theme_minimal() +
-    ggplot2::theme(
-      plot.title = ggplot2::element_text(face = "bold", size = 12),
-      axis.title = ggplot2::element_text(size = 11),
-      axis.text = ggplot2::element_text(size = 10)
-    )
-  
-  return(p1)
 }

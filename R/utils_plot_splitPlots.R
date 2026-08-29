@@ -8,7 +8,8 @@
 plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, 
                             sizeIblocks, iBlocks = NULL, layout = 1,
                             stacked = "vertical", 
-                            planter = "serpentine", l = 1) {
+                            planter = "serpentine", l = 1, ...) {
+  dots <- list(...)
   site <- l
   locations <- factor(x$fieldBook$LOCATION, levels = unique(x$fieldBook$LOCATION))
   nlocs <- length(levels(locations))
@@ -299,32 +300,23 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
     ds <- "Split Plot Design (RCBD) " 
     main <- paste0(ds, rows, "X", cols)
     
-    p1 <- desplot::desplot(TRT_COMB ~ COLUMN + ROW, flip = FALSE, # TRT_COMB
-                           text = TRT_COMB, 
-                           cex = 1,
-                           shorten = "no",
-                           out1 = REP,
+    p1 <- plot_desplot(TRT_COMB ~ COLUMN + ROW,
+                       data = df,
+                       text.string = "TRT_COMB",
+                       out1.string = "REP",
                            out1.gpar = list(col = "grey"),
-                           data = df, 
-                           xlab = "COLUMNS", 
-                           ylab = "ROWS",
-                           main = main, 
-                           show.key = FALSE, 
-                           gg = TRUE)
+                       main = main,
+                       extra_args = dots)
 
-    p1 <- add_gg_features(p1)
     # Plot number layout
-    p2 <- desplot::desplot(REP ~ COLUMN + ROW, flip = FALSE,
-                           out1 = REP,
-                           out2.gpar=list(col = "gray50", lwd = 1, lty = 1),
-                           text = PLOT, cex = 1, shorten = "no",
-                           data = df, xlab = "COLUMNS", ylab = "ROWS",
+    p2 <- plot_desplot(REP ~ COLUMN + ROW,
+                           data = df, 
+                       out1.string = "REP",
+                       out2.gpar = list(col = "gray50", lwd = 1, lty = 1),
+                       text.string = "PLOT",
+                       key.cex = 0.7,
                            main = main, 
-                           show.key = FALSE,
-                           key.cex = 0.7, 
-                           gg = TRUE)
-    # Explicitly remove all legends
-    p2 <- add_gg_features(p2)
+                       extra_args = dots)
   } else if (x$infoDesign$id_design == 6) {
     allSites <- vector(mode = "list", length = nlocs)
     for (st in 1:nlocs) {
@@ -349,34 +341,25 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
     main <- paste0(ds, rows, "X", cols)
 
     
-    p1 <- desplot::desplot(TRT_COMB ~ COLUMN + ROW, flip = FALSE,
-                           out1 = REP,
-                           out2 = WHOLE_PLOT,
-                           col = WHOLE_PLOT,
-                           out1.gpar = list(col = "black",lwd = 1, lty = 3),
-                           text = TRT_COMB, 
-                           cex = 1, 
-                           shorten = "no",
+    p1 <- plot_desplot(TRT_COMB ~ COLUMN + ROW,
                            data = df, 
-                           xlab = "COLUMNS", 
-                           ylab = "ROWS",
+                       out1.string = "REP",
+                       out2.string = "WHOLE_PLOT",
+                       col.string = "WHOLE_PLOT",
+                       out1.gpar = list(col = "black", lwd = 1, lty = 3),
+                       text.string = "TRT_COMB",
                            main = main, 
-                           show.key = FALSE, 
-                           gg=TRUE)
-    
-    p1 <- add_gg_features(p1)
+                       extra_args = dots)
     
     # Plot number plot layout
-    p2 <- desplot::desplot(REP ~ COLUMN + ROW, flip = FALSE,
-                           out1 = REP,
-                           out2.gpar=list(col = "gray50", lwd = 1, lty = 1),
-                           text = PLOT, cex = 1, shorten = "no",
-                           data = df, xlab = "COLUMNS", ylab = "ROWS",
+    p2 <- plot_desplot(REP ~ COLUMN + ROW,
+                       data = df,
+                       out1.string = "REP",
+                       out2.gpar = list(col = "gray50", lwd = 1, lty = 1),
+                       text.string = "PLOT",
+                       key.cex = 0.7,
                            main = main, 
-                           show.key = FALSE, key.cex = 0.7, 
-                           gg = TRUE)
-    
-    p2 <- add_gg_features(p2)
+                       extra_args = dots)
   }
   return(list(p1 = p1, p2 = p2, df = df, 
               newBooks = newBooksSelected, 

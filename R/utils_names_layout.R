@@ -269,8 +269,8 @@ planter_transform <- function(plots = NULL, planter = "serpentine", cols = NULL,
 #'
 #' @noRd
 plot_CRD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, layout = 1, 
-                     planter = "serpentine", l = 1) {
-  
+                     planter = "serpentine", l = 1, ...) {
+  dots <- list(...)
   site <- l
   locations <- factor(x$fieldBook$LOCATION, levels = unique(x$fieldBook$LOCATION))
   nlocs <- length(levels(locations))
@@ -353,25 +353,20 @@ plot_CRD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, layout = 1,
     ds <- "Completely Randomized Design " 
     main <- paste0(ds, rows, "X", cols)
     # Plot field layout
-    p1 <- desplot::desplot(TREATMENT ~ COLUMN + ROW, flip = FALSE,
+    p1 <- plot_desplot(TREATMENT ~ COLUMN + ROW,
+                       data = df,
                            out2.gpar = list(col = "black", lty = 3), 
-                           text = TREATMENT, cex = 1, shorten = "no",
-                           data = df, xlab = "COLUMNS", ylab = "ROWS",
+                       text.string = "TREATMENT",
                            main = main, 
-                           show.key = FALSE, 
-                           gg=TRUE)
-    p1 <- add_gg_features(p1)
+                       extra_args = dots)
     # Plot number layout
     df$REP <- as.factor(df$REP)
     df$PLOT <- as.character(df$PLOT)
-    p2 <- desplot::desplot(PLOT ~ COLUMN + ROW, flip = FALSE,
-                           text = PLOT, 
-                           cex = 1, shorten = "no",
-                           data = df, xlab = "COLUMNS", ylab = "ROWS",
+    p2 <- plot_desplot(PLOT ~ COLUMN + ROW,
+                       data = df,
+                       text.string = "PLOT",
                            main = main, 
-                           show.key = FALSE, 
-                           gg=TRUE)
-    p2 <- add_gg_features(p2)
+                       extra_args = dots)
   } else if (x$infoDesign$id_design == 4) {
     allSites <- vector(mode = "list", length = nlocs)
     for (st in 1:nlocs) {
@@ -389,25 +384,21 @@ plot_CRD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, layout = 1,
       ds <- "Full Factorial Design (CRD) " 
       main <- paste0(ds, rows, "X", cols)
       # Plot field layout
-      p1 <- desplot::desplot(TRT_COMB ~ COLUMN + ROW, flip = FALSE,
+      p1 <- plot_desplot(TRT_COMB ~ COLUMN + ROW,
+                         data = df,
                              out2.gpar = list(col = "black", lty = 3), 
-                             text = TRT_COMB, cex = 1, shorten = "no",
-                             data = df, xlab = "COLUMNS", ylab = "ROWS",
+                         text.string = "TRT_COMB",
                              main = main, 
-                             show.key = FALSE, 
-                             gg=TRUE)
-      p1 <- add_gg_features(p1)
+                         extra_args = dots)
       
       # Plot number layout
       df$REP <- as.factor(df$REP)
       df$PLOT <- as.factor(df$PLOT)
-      p2 <- desplot::desplot(PLOT ~ COLUMN + ROW, flip = FALSE,
-                             text = PLOT, cex = 1, shorten = "no",
-                             data = df, xlab = "COLUMNS", ylab = "ROWS",
+      p2 <- plot_desplot(PLOT ~ COLUMN + ROW,
+                         data = df,
+                         text.string = "PLOT",
                              main = main, 
-                             show.key = FALSE, 
-                             gg=TRUE)
-      p2 <- add_gg_features(p2)
+                         extra_args = dots)
     }
   } else if (x$infoDesign$id_design == 5) {
     allSites <- vector(mode = "list", length = nlocs)
@@ -426,26 +417,22 @@ plot_CRD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, layout = 1,
       ds <- "Split Plot Design (CRD) " 
       main <- paste0(ds, rows, "X", cols)
       df$REP <- as.factor(df$REP)
-      p1 <- desplot::desplot(TRT_COMB ~ COLUMN + ROW, flip = FALSE,
-                             out1 = REP,
-                             out2.gpar=list(col = "gray50", lwd = 1, lty = 1),
-                             text = TRT_COMB, cex = 1, shorten = "no",
-                             data = df, xlab = "COLUMNS", ylab = "ROWS",
+      p1 <- plot_desplot(TRT_COMB ~ COLUMN + ROW,
+                         data = df,
+                         out1.string = "REP",
+                         out2.gpar = list(col = "gray50", lwd = 1, lty = 1),
+                         text.string = "TRT_COMB",
                              main = main, 
-                             show.key = TRUE, 
-                             gg=TRUE)
-      p1 <- add_gg_features(p1)
+                         extra_args = dots)
       
       # Plot number layout
       df$REP <- as.factor(df$REP)
       df$PLOT <- as.factor(df$PLOT)
-      p2 <- desplot::desplot(PLOT ~ COLUMN + ROW, flip = FALSE,
-                             text = PLOT, cex = 1, shorten = "no",
-                             data = df, xlab = "COLUMNS", ylab = "ROWS",
+      p2 <- plot_desplot(PLOT ~ COLUMN + ROW,
+                         data = df,
+                         text.string = "PLOT",
                              main = main, 
-                             show.key = FALSE, 
-                             gg=TRUE)
-      p2 <- add_gg_features(p2)
+                         extra_args = dots)
     }
   } else if (x$infoDesign$id_design == 6) {
     allSites <- vector(mode = "list", length = nlocs)
@@ -468,27 +455,23 @@ plot_CRD <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL, layout = 1,
       cols <- max(as.numeric(df$COLUMN))
       ds <- "Split-Split Plot Design (CRD) " 
       main <- paste0(ds, rows, "X", cols)
-      p1 <- desplot::desplot(REP ~ COLUMN + ROW, flip = FALSE,
-                             out1 = REP,
-                             out2 = WHOLE_PLOT,
-                             out2.gpar=list(col = "gray50", lwd = 1, lty = 1),
-                             text = WHOLE_PLOT, cex = 1, shorten = "no",
-                             col = SUB_PLOT,
-                             data = df, xlab = "COLUMNS", ylab = "ROWS",
+      p1 <- plot_desplot(REP ~ COLUMN + ROW,
+                         data = df,
+                         out1.string = "REP",
+                         out2.string = "WHOLE_PLOT",
+                         out2.gpar = list(col = "gray50", lwd = 1, lty = 1),
+                         text.string = "WHOLE_PLOT",
+                         col.string = "SUB_PLOT",
                              main = main, 
-                             show.key = TRUE, 
-                             gg=TRUE)
-      p1 <- add_gg_features(p1)
+                         extra_args = dots)
       
       # PLot number layout
       df$PLOT <- as.factor(df$PLOT)
-      p2 <- desplot::desplot(PLOT ~ COLUMN + ROW, flip = FALSE,
-                             text = PLOT, cex = 1, shorten = "no",
-                             data = df, xlab = "COLUMNS", ylab = "ROWS",
+      p2 <- plot_desplot(PLOT ~ COLUMN + ROW,
+                         data = df,
+                         text.string = "PLOT",
                              main = main, 
-                             show.key = FALSE, 
-                             gg=TRUE)
-      p2 <- add_gg_features(p2)
+                         extra_args = dots)
     }
   }
   return(list(p1 = p1, p2 = p2, df = df, newBooks = newBooksSelected, 

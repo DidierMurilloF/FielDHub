@@ -22,6 +22,19 @@
   gains a `Row-by-Column` row with the joint A- and D-Efficiency, so it
   has one more row than before.
 
+### Enhancements:
+
+- `plot()` on a design object now passes additional arguments through
+  to `desplot::desplot()`, so the field map can be customized in place -
+  for example `plot(design, col.regions = ...)` to change the fill
+  colors or `plot(design, cex = 1.4)` to resize the plot labels.
+  Previously such arguments were silently ignored. Internally the shared
+  plot styling is now produced by a single `desplot()` call (using the
+  native `ticks` and `panel.border` arguments, hence
+  `desplot (>= 1.11)`) instead of being patched onto the finished plot,
+  which also makes title and axis styling consistent across all design
+  types.
+
 ### Fix bugs:
 
 - Fixed a bug in `split_split_plot()` where, for the CRD type

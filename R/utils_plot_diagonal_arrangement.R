@@ -1,5 +1,6 @@
 #' @noRd
-plot_diagonal_arrangement <- function(x, l) {
+plot_diagonal_arrangement <- function(x, l, ...) {
+    dots <- list(...)
     fieldbook <- x$fieldBook
     
     sites <- factor(fieldbook$LOCATION, levels = unique(fieldbook$LOCATION))
@@ -16,29 +17,29 @@ plot_diagonal_arrangement <- function(x, l) {
     loc_field_book$ENTRY <- as.numeric(loc_field_book$ENTRY)
     
     main <- paste0("Un-replicated Diagonal Arrangement ", rows, " x ", cols)
-    p1 <- desplot::ggdesplot(
-        loc_field_book, 
-        EXPT ~ COLUMN + ROW,  
-        text = ENTRY, 
-        col = CHECKS, 
+    p1 <- do.call(desplot::ggdesplot, utils::modifyList(list(
+        data = loc_field_book,
+        form = EXPT ~ COLUMN + ROW,
+        text.string = "ENTRY",
+        col.string = "CHECKS",
         cex = 1, 
         shorten = "no",
-        out1 = EXPT,
-        out2 = CHECKS, 
+        out1.string = "EXPT",
+        out2.string = "CHECKS",
         xlab = "COLUMNS", 
         ylab = "ROWS",
         main = main,
         show.key = FALSE, 
         gg = TRUE,
-        out2.gpar=list(col = "gray50", lwd = 1, lty = 1)
-    )
+        out2.gpar = list(col = "gray50", lwd = 1, lty = 1)
+    ), dots))
     
     return(list(p1 = p1, allSitesFieldbook = fieldbook))
 }
 
 #' @noRd
-plot_prep <- function(x, l) {
-
+plot_prep <- function(x, l, ...) {
+    dots <- list(...)
     fieldbook <- x$fieldBook
     
     sites <- factor(fieldbook$LOCATION, levels = unique(fieldbook$LOCATION))
@@ -57,10 +58,10 @@ plot_prep <- function(x, l) {
     loc_field_book$binay_checks <- ifelse(loc_field_book$CHECKS != 0, 1, 0)
     
     main <- paste0("Partially Replicated Design ", rows, " x ", cols)
-    p1 <- desplot::ggdesplot(
+    p1 <- do.call(desplot::ggdesplot, utils::modifyList(list(
         data = loc_field_book, 
-        binay_checks ~ COLUMN + ROW,  
-        text = ENTRY,  
+        form = binay_checks ~ COLUMN + ROW,
+        text.string = "ENTRY",
         xlab = "COLUMNS", 
         ylab = "ROWS",
         main = main,
@@ -69,14 +70,14 @@ plot_prep <- function(x, l) {
         show.key = FALSE, 
         gg = TRUE,
         col.regions = c("gray", "seagreen")
-    )
+    ), dots))
     
     return(list(p1 = p1, allSitesFieldbook = fieldbook))
 }
 
 #' @noRd
-plot_optim <- function(x, l) {
-  
+plot_optim <- function(x, l, ...) {
+    dots <- list(...)
     fieldbook <- x$fieldBook
     
     sites <- factor(fieldbook$LOCATION, levels = unique(fieldbook$LOCATION))
@@ -95,25 +96,26 @@ plot_optim <- function(x, l) {
     
     main <- paste0("Un-replicated Optimized Arrangement ", rows, " x ", cols)
     
-    p1 <- desplot::ggdesplot(
-        loc_field_book,
-        CHECKS ~ COLUMN + ROW,
-        text= ENTRY,
-        cex=1,
+    p1 <- do.call(desplot::ggdesplot, utils::modifyList(list(
+        data = loc_field_book,
+        form = CHECKS ~ COLUMN + ROW,
+        text.string = "ENTRY",
+        cex = 1,
         shorten = "no",
         main = main,
-        show.key=FALSE,
+        show.key = FALSE,
         xlab = "COLUMNS",
         ylab = "ROWS",
-        gg = TRUE)
+        gg = TRUE
+    ), dots))
     
     return(list(p1 = p1, allSitesFieldbook = fieldbook))
 }
 
 
 #' @noRd
-plot_augmented_RCBD <- function(x, l) {
-  
+plot_augmented_RCBD <- function(x, l, ...) {
+  dots <- list(...)
   fieldbook <- x$fieldBook
   
   sites <- factor(fieldbook$LOCATION, levels = unique(fieldbook$LOCATION))
@@ -141,11 +143,6 @@ plot_augmented_RCBD <- function(x, l) {
   # -----------------------------
   # Muted palette for BLOCK bg
   # -----------------------------
-  # This is added as a scale_fill_manual() layer instead of being passed to
-  # desplot as 'col.regions': in desplot 1.10 that argument is dropped for
-  # factor fills in the ggplot2 branch. Once a desplot release carrying the fix
-  # is on CRAN, both layers below can be replaced by 'col.regions = fill_vals'
-  # in the ggdesplot() calls.
   block_levels <- sort(unique(loc_field_book$BLOCK))
   muted6 <- c("#F2F2F2", "#E6EEF5", "#E9F2EC", "#F3EEE6", "#EDE7F2", "#F1E9E9")
   if (length(block_levels) > length(muted6)) {
@@ -160,51 +157,55 @@ plot_augmented_RCBD <- function(x, l) {
   # -----------------------------
   main <- paste0("Augmented RCBD Layout ", rows, " x ", cols)
   
-  p1 <- desplot::ggdesplot(
-    BLOCK ~ COLUMN + ROW,
-    text = ENTRY,
+  p1 <- do.call(desplot::ggdesplot, utils::modifyList(list(
+    data = loc_field_book,
+    form = BLOCK ~ COLUMN + ROW,
+    text.string = "ENTRY",
+    col.string = "CHECK_TEXT",
+    col.text = check_text_cols,
     cex = 0.8,
     shorten = "no",
-    col = CHECK_TEXT,
-    col.text = check_text_cols,
-    out1 = EXPT,
-    out2 = BLOCK,
-    data = loc_field_book,
+    out1.string = "EXPT",
+    out2.string = "BLOCK",
     xlab = "COLUMNS",
     ylab = "ROWS",
     main = main,
     show.key = FALSE,
     gg = TRUE,
+    ticks = "all",
+    panel.border = FALSE,
     out2.gpar = list(col = "gray50", lwd = 1, lty = 1)
-  ) +
+  ), dots)) +
     ggplot2::scale_fill_manual(values = fill_vals, guide = "none")
   
-  p1 <- add_gg_features(p1)
+  p1 <- p1 + fieldhub_layout_theme()
   
   # -----------------------------
   # p2: plot numbers (NO check highlighting)
   # -----------------------------
   main_plot <- paste0("Augmented RCBD Plot Number Layout ", rows, " x ", cols)
   
-  p2 <- desplot::ggdesplot(
-    BLOCK ~ COLUMN + ROW,
-    text = PLOT_TXT,
+  p2 <- do.call(desplot::ggdesplot, utils::modifyList(list(
+    data = loc_field_book,
+    form = BLOCK ~ COLUMN + ROW,
+    text.string = "PLOT_TXT",
+    col.text = "gray10",
     cex = 0.8,
     shorten = "no",
-    col.text = "gray10",
-    out1 = EXPT,
-    out2 = BLOCK,
-    data = loc_field_book,
+    out1.string = "EXPT",
+    out2.string = "BLOCK",
     xlab = "COLUMNS",
     ylab = "ROWS",
     main = main_plot,
     show.key = FALSE,
     gg = TRUE,
+    ticks = "all",
+    panel.border = FALSE,
     out2.gpar = list(col = "gray50", lwd = 1, lty = 1)
-  ) +
+  ), dots)) +
     ggplot2::scale_fill_manual(values = fill_vals, guide = "none")
   
-  p2 <- add_gg_features(p2)
+  p2 <- p2 + fieldhub_layout_theme()
   
   return(list(p1 = p1, p2 = p2, allSitesFieldbook = fieldbook))
 }

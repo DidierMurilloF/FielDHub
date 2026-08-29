@@ -56,7 +56,7 @@ Imports:
     plotly,
     viridis,
     shinyalert,
-    desplot,
+    desplot (>= 1.11),
     shinyjs
 Encoding: UTF-8
 RoxygenNote: 7.3.2

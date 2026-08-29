@@ -8,7 +8,8 @@
 plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, layout = 1, 
                          stacked = "horizontal", 
                          planter = "serpentine", 
-                         l = 1) {
+                         l = 1, ...) {
+  dots <- list(...)
   rsRep <- dims[1]
   csRep <- dims[2]
   site <- l
@@ -126,24 +127,20 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, layout = 1,
     ds <- "Row-Column Design "
     main <- paste0(ds, rows, "X", cols)
     # Plot field layout
-    p1 <- desplot::desplot(ENTRY ~ COLUMN + ROW, flip = FALSE,
-                           out1 = REP,
+    p1 <- plot_desplot(ENTRY ~ COLUMN + ROW,
+                       data = df,
+                       out1.string = "REP",
                            out2.gpar = list(col = "black", lty = 3),
-                           text = ENTRY, cex = 1, shorten = "no",
-                           data = df, xlab = "COLUMNS", ylab = "ROWS",
+                       text.string = "ENTRY",
                            main = main,
-                           show.key = FALSE,
-                           gg = TRUE)
-    p1 <- add_gg_features(p1)
+                       extra_args = dots)
     df$REP <- as.factor(df$REP)
-    p2 <- desplot::desplot(REP ~  COLUMN + ROW, flip = FALSE,
-                           out1 = REP,
-                           text = PLOT, cex = 1, shorten = "no",
-                           data = df, xlab = "COLUMNS", ylab = "ROWS",
+    p2 <- plot_desplot(REP ~ COLUMN + ROW,
+                       data = df,
+                       out1.string = "REP",
+                       text.string = "PLOT",
                            main = main,
-                           show.key = FALSE,
-                           gg = TRUE)
-    p2 <- add_gg_features(p2)
+                       extra_args = dots)
   } else  if (x$infoDesign$id_design == 7) {
     allSites <- vector(mode = "list", length = nlocs)
     for (st in 1:nlocs) {
@@ -165,24 +162,20 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, layout = 1,
     ds <- "Strip-Plot Design "
     main <- paste0(ds, rows, "X", cols)
     # Plot field layout
-    p1 <- desplot::desplot(TRT_COMB ~ COLUMN + ROW, flip = FALSE,
-                           out1 = REP,
+    p1 <- plot_desplot(TRT_COMB ~ COLUMN + ROW,
+                       data = df,
+                       out1.string = "REP",
                            out2.gpar = list(col = "black", lty = 3),
-                           text = TRT_COMB, cex = 1, shorten = "no",
-                           data = df, xlab = "COLUMNS", ylab = "ROWS",
+                       text.string = "TRT_COMB",
                            main = main,
-                           show.key = FALSE,
-                           gg = TRUE)
-    p1 <- add_gg_features(p1)
+                       extra_args = dots)
     df$REP <- as.factor(df$REP)
-    p2 <- desplot::desplot(REP ~  COLUMN + ROW, flip = FALSE,
-                           out1 = REP,
-                           text = PLOT, cex = 1, shorten = "no",
-                           data = df, xlab = "COLUMNS", ylab = "ROWS",
+    p2 <- plot_desplot(REP ~ COLUMN + ROW,
+                       data = df,
+                       out1.string = "REP",
+                       text.string = "PLOT",
                            main = main,
-                           show.key = FALSE,
-                           gg = TRUE)
-    p2 <- add_gg_features(p2)
+                       extra_args = dots)
   } else  if (x$infoDesign$id_design == 3) {
     allSites <- vector(mode = "list", length = nlocs)
     for (st in 1:nlocs) {
@@ -206,44 +199,36 @@ plot_latinSQ <- function(x = NULL, dims = NULL, n_Reps = NULL, layout = 1,
     # Plot field layout
     df$TREATMENT <- as.factor(df$TREATMENT)
     if (n_Reps > 1) {
-      p1 <- desplot::desplot(TREATMENT ~ COLUMN + ROW, flip = FALSE,
-                             out1 = SQUARE,
+      p1 <- plot_desplot(TREATMENT ~ COLUMN + ROW,
+                         data = df,
+                         out1.string = "SQUARE",
                              out2.gpar = list(col = "black", lty = 3), 
-                             text = TREATMENT, cex = 1, shorten = "no",
-                             data = df, xlab = "COLUMNS", ylab = "ROWS",
+                         text.string = "TREATMENT",
                              main = main, 
-                             show.key = FALSE,
-                             gg = TRUE)
-      p1 <- add_gg_features(p1)
+                         extra_args = dots)
       
       # Plot number layout
       df$SQUARE <- as.factor(df$SQUARE)
-      p2 <- desplot::desplot(SQUARE ~ COLUMN + ROW, flip = FALSE,
-                             out1 = SQUARE,
-                             text = PLOT, cex = 1, shorten = "no",
-                             data = df, xlab = "COLUMNS", ylab = "ROWS",
+      p2 <- plot_desplot(SQUARE ~ COLUMN + ROW,
+                         data = df,
+                         out1.string = "SQUARE",
+                         text.string = "PLOT",
                              main = main,
-                             show.key = FALSE,
-                             gg = TRUE)
-      p2 <- add_gg_features(p2)
+                         extra_args = dots)
     } else {
-      p1 <- desplot::desplot(TREATMENT ~ COLUMN + ROW, flip = FALSE,
+      p1 <- plot_desplot(TREATMENT ~ COLUMN + ROW,
+                         data = df,
                              out2.gpar = list(col = "black", lty = 3), 
-                             text = TREATMENT, cex = 1, shorten = "no",
-                             data = df, xlab = "COLUMNS", ylab = "ROWS",
+                         text.string = "TREATMENT",
                              main = main, 
-                             show.key = FALSE,
-                             gg = TRUE)
-      p1 <- add_gg_features(p1)
+                         extra_args = dots)
       
       df$SQUARE <- as.factor(df$SQUARE)
-      p2 <- desplot::desplot(SQUARE ~ COLUMN + ROW, flip = FALSE,
-                             text = PLOT, cex = 1, shorten = "no",
-                             data = df, xlab = "COLUMNS", ylab = "ROWS",
+      p2 <- plot_desplot(SQUARE ~ COLUMN + ROW,
+                         data = df,
+                         text.string = "PLOT",
                              main = main,
-                             show.key = FALSE,
-                             gg = TRUE)
-      p2 <- add_gg_features(p2)
+                         extra_args = dots)
     }
 
   }

@@ -176,7 +176,9 @@ plot_RCBD <- function(x = NULL,
                       layout = 1,
                       stacked = "horizontal",
                       planter = "serpentine",
-                      l = 1) {
+                      l = 1,
+                      ...) {
+  dots <- list(...)
   site <- l
   locations <- factor(x$fieldBook$LOCATION, levels = unique(x$fieldBook$LOCATION))
   nlocs <- length(locations)
@@ -261,40 +263,26 @@ plot_RCBD <- function(x = NULL,
     main <- paste0(ds, rows, "X", cols)
 
     # Plot field layout
-    p1 <- desplot::desplot(
+    p1 <- plot_desplot(
       TREATMENT ~ COLUMN + ROW,
-      flip       = FALSE,
-      out1       = REP,
+      data = df,
+      out1.string = "REP",
       out2.gpar  = list(col = "black", lty = 3),
-      text       = TREATMENT,
-      cex        = 1,
-      shorten    = "no",
-      data       = df,
-      xlab       = "COLUMNS",
-      ylab       = "ROWS",
+      text.string = "TREATMENT",
       main       = main,
-      show.key   = FALSE,
-      gg         = TRUE
+      extra_args = dots
     )
-    p1 <- add_gg_features(p1)
 
     # Plot number layout
     df$REP <- as.factor(df$REP)
-    p2 <- desplot::desplot(
+    p2 <- plot_desplot(
       REP ~ COLUMN + ROW,
-      flip     = FALSE,
-      out1     = REP,
-      text     = PLOT,
-      cex      = 1,
-      shorten  = "no",
       data     = df,
-      xlab     = "COLUMNS",
-      ylab     = "ROWS",
+      out1.string = "REP",
+      text.string = "PLOT",
       main     = main,
-      show.key = FALSE,
-      gg       = TRUE
+      extra_args = dots
     )
-    p2 <- add_gg_features(p2)
   } else if (x$infoDesign$id_design == 4) {
     if (x$infoDesign$kind == "RCBD") {
       allSites <- vector(mode = "list", length = nlocs)
@@ -316,30 +304,24 @@ plot_RCBD <- function(x = NULL,
       ds <- "Full Factorial Design (RCBD) "
       main <- paste0(ds, rows, "X", cols)
       # Plot field layout
-      p1 <- desplot::desplot(TRT_COMB ~ COLUMN + ROW,
-        flip = FALSE,
-        out1 = REP,
+      p1 <- plot_desplot(TRT_COMB ~ COLUMN + ROW,
+        data = df,
+        out1.string = "REP",
         out2.gpar = list(col = "black", lty = 3),
-        text = TRT_COMB, cex = 1, shorten = "no",
-        data = df, xlab = "COLUMNS", ylab = "ROWS",
+        text.string = "TRT_COMB",
         main = main,
-        show.key = FALSE,
-        gg = TRUE
+        extra_args = dots
       )
-      p1 <- add_gg_features(p1)
       # Plot number layout
       df$PLOT <- as.factor(df$PLOT)
       df$REP <- as.factor(df$REP)
-      p2 <- desplot::desplot(REP ~ COLUMN + ROW,
-        flip = FALSE,
-        out1 = REP,
-        text = PLOT, cex = 1, shorten = "no",
-        data = df, xlab = "COLUMNS", ylab = "ROWS",
+      p2 <- plot_desplot(REP ~ COLUMN + ROW,
+        data = df,
+        out1.string = "REP",
+        text.string = "PLOT",
         main = main,
-        show.key = FALSE,
-        gg = TRUE
+        extra_args = dots
       )
-      p2 <- add_gg_features(p2)
     }
   }
 
