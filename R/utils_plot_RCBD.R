@@ -264,15 +264,23 @@ plot_RCBD <- function(x = NULL,
     main <- paste0(ds, rows, "X", cols)
 
     # Plot field layout
-    p1 <- plot_desplot(
-      TREATMENT ~ COLUMN + ROW,
-      data = df,
+    p1_args <- list(
+      form        = TREATMENT ~ COLUMN + ROW,
+      data        = df,
       out1.string = "REP",
-      out2.gpar  = list(col = "black", lty = 3),
+      out2.gpar   = list(col = "black", lty = 3),
       text.string = "TREATMENT",
-      main       = main,
-      extra_args = dots
+      main        = main,
+      extra_args  = dots
     )
+    if ("CHECKS" %in% names(df)) {
+      # Same idiom as utils_plot_diagonal_arrangement.R:24-28 - colour the plot
+      # text by check status and outline the check plots.
+      p1_args$data$CHECKS <- as.character(p1_args$data$CHECKS)
+      p1_args$col.string  <- "CHECKS"
+      p1_args$out2.string <- "CHECKS"
+    }
+    p1 <- do.call(plot_desplot, p1_args)
 
     # Plot number layout
     df$REP <- as.factor(df$REP)

@@ -110,3 +110,16 @@ test_that("every plot appears exactly once in the layout", {
   expect_equal(anyDuplicated(cells), 0)
   expect_setequal(out$fieldBookXY$PLOT, d$fieldBook$PLOT)
 })
+
+test_that("the field map renders for both schemas", {
+  d_plain <- RCBD(t = 4, reps = 3, seed = 95)
+  p_plain <- plot_layout(x = d_plain, layout = 1, stacked = "vertical")
+  expect_s3_class(p_plain$out_layout, "ggplot")
+  expect_s3_class(p_plain$out_layoutPlots, "ggplot")
+
+  d_chk <- RCBD(t = 6, reps = 3, checks = c("CK1", "CK2"),
+                rep_checks = c(2, 2), seed = 96)
+  p_chk <- plot_layout(x = d_chk, layout = 1, stacked = "vertical")
+  expect_s3_class(p_chk$out_layout, "ggplot")
+  expect_s3_class(p_chk$out_layoutPlots, "ggplot")
+})
