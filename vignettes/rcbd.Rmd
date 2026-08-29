@@ -154,3 +154,37 @@ plot(rcbd)
 
 <br>
 <br>
+
+## RCBD with repeated checks
+
+In a classical RCBD, the residual is the treatment-by-block interaction, estimated by comparing each treatment's performance across blocks. Repeating one or more checks inside every block gives an additional, within-block estimate of error and a form of local control that a design with each treatment appearing only once per block cannot provide. `RCBD()` supports this through three extra arguments: `checks` (a count or a vector of check labels), `rep_checks` (how many times each check repeats per block), and `spread_checks` (whether the repeated copies are spread across the block or placed with no restriction).
+
+```{r, echo = TRUE}
+rcbd_checks <- RCBD(
+  t = 18,
+  reps = 3,
+  checks = c("CK1", "CK2"),
+  rep_checks = c(2, 2),
+  plotNumber = 101,
+  seed = 1234,
+  locationNames = "FARGO"
+)
+```
+
+Here, `t = 18` test entries are automatically labeled `T1`...`T18`, and the two checks `"CK1"` and `"CK2"` are each repeated twice per block (`rep_checks = c(2, 2)`), so every block has `18 + 2 + 2 = 22` plots.
+
+```{r, echo=TRUE, eval=FALSE}
+head(rcbd_checks$fieldBook, 10)
+```
+
+```{r, echo=FALSE, eval=TRUE}
+head(rcbd_checks$fieldBook, 10)
+```
+
+When `checks` is supplied, the field book gains an `ENTRY` column (a stable entry id for every check and test entry) and a `CHECKS` column (`0` for test entries, and a positive check index for each check) alongside the usual `ID`, `LOCATION`, `PLOT`, `REP` and `TREATMENT` columns.
+
+```{r, fig.align='center', fig.width=7.2, fig.height=5.5}
+plot(rcbd_checks)
+```
+
+With `spread_checks = TRUE` (the default), the repeated copies of each check are placed one per contiguous stratum of the block, which keeps the copies of a check apart within the block rather than letting them land next to each other by chance.

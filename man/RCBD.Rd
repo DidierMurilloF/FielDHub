@@ -13,7 +13,10 @@ RCBD(
   planter = "serpentine",
   seed = NULL,
   locationNames = NULL,
-  data = NULL
+  data = NULL,
+  checks = NULL,
+  rep_checks = NULL,
+  spread_checks = TRUE
 )
 }
 \arguments{
@@ -34,6 +37,25 @@ RCBD(
 \item{locationNames}{(optional) Names for each location.}
 
 \item{data}{(optional) Data frame with the labels of treatments.}
+
+\item{checks}{(optional) Checks to repeat within every block. Either a positive
+integer \code{N}, meaning the first \code{N} entries of \code{data} (or of a
+character vector \code{t}) are the checks, or a character vector of check
+labels. \code{checks} sits after \code{data} in the argument list (rather than
+next to \code{t}, where it might otherwise go) precisely so that \code{data}
+keeps its original positional slot and existing positional calls to
+\code{RCBD()} keep working unchanged. By default \code{checks = NULL}, which
+produces an ordinary RCBD.}
+
+\item{rep_checks}{(optional) Number of times each check is repeated within
+every block. A single value is recycled across all checks, or supply one
+value per check. By default \code{rep_checks = NULL}, which is treated as 1
+for every check.}
+
+\item{spread_checks}{(optional) Logical. When \code{TRUE} (the default), the
+repeated copies of each check are spread across the block by placing one
+copy in each of \code{rep_checks} contiguous strata. When \code{FALSE}, the
+whole block is randomized without restriction.}
 }
 \value{
 A list with five elements.
@@ -41,11 +63,43 @@ A list with five elements.
   \item \code{infoDesign} is a list with information on the design parameters.
   \item \code{layoutRandom} is the RCBD layout randomization for each location.
   \item \code{plotNumber} is the plot number layout for each location.
-  \item \code{fieldBook} is a data frame with the RCBD field book design.
+  \item \code{fieldBook} is a data frame with the RCBD field book design. Without
+  \code{checks} it has columns \code{ID}, \code{LOCATION}, \code{PLOT}, \code{REP} and
+  \code{TREATMENT}. When \code{checks} is supplied it gains \code{ENTRY} and
+  \code{CHECKS} columns, ordered \code{ID}, \code{LOCATION}, \code{PLOT}, \code{REP},
+  \code{ENTRY}, \code{CHECKS}, \code{TREATMENT}.
 }
 }
 \description{
 It randomly generates a randomized complete block design (RCBD) across locations.
+}
+\details{
+When \code{checks} is supplied, one or more checks are repeated multiple times within
+every block, while every test entry still appears exactly once. In a classical RCBD,
+the residual is the treatment-by-block interaction; repeating checks inside a block
+instead supplies a within-block estimate of error and a form of local control.
+
+\code{checks} accepts either a single positive integer \code{N} (the first \code{N}
+entries of \code{data}, or of a character vector \code{t}, are the checks) or a
+character vector of check labels. When a pool of entries is supplied through \code{data}
+or a character \code{t}, every label named in \code{checks} must already exist in that
+pool; an unmatched label is an error that also names the closest case-insensitive match,
+if any. When \code{t} is a bare count (no pool supplied), the check labels are new and
+are appended to the auto-generated test entries.
+
+\code{rep_checks} sets how many times each check repeats within a block: a single value
+is recycled across all checks, or one value can be supplied per check.
+
+A block (test entries plus repeated checks) larger than 10,000 plots is rejected.
+
+With \code{spread_checks = TRUE} (the default), the repeated copies of a check are placed
+one per contiguous stratum of the block, so they are spread across it rather than
+clustered together. At check densities up to about 67 percent of the block this stratified
+placement still leaves room for randomization; from about 78 percent and higher the
+constraint leaves few or no alternative positions, so a repeated check's placement can
+become nearly or fully deterministic rather than random. This is a property of the
+stratified-placement geometry, not a bug, and most field trials use far lower check
+density.
 }
 \examples{
 # Example 1: Generates a RCBD design with 3 blocks and 20 treatments across 3 locations.
@@ -72,16 +126,31 @@ rcbd2 <- RCBD(reps = 6, l = 1,
               seed = 13, 
               locationNames = "IBAGUE",
               data = treatment_list)
-rcbd2$infoDesign                  
+rcbd2$infoDesign
 rcbd2$layoutRandom
 rcbd2$plotNumber
 head(rcbd2$fieldBook)
 
+# Example 3: RCBD with two checks repeated twice in each of 3 blocks,
+# alongside 18 test entries. Block size is 18 + 2 + 2 = 22 plots.
+rcbd3 <- RCBD(t = 18, reps = 3,
+              checks = c("CK1", "CK2"),
+              rep_checks = c(2, 2),
+              plotNumber = 101,
+              seed = 1234,
+              locationNames = "FARGO")
+rcbd3$infoDesign
+head(rcbd3$fieldBook)
+# Each check appears twice per block, every test entry exactly once:
+table(subset(rcbd3$fieldBook, REP == 1)$TREATMENT)
 
 }
 \references{
 Federer, W. T. (1955). Experimental Design. Theory and Application. New York, USA. The
 Macmillan Company.
+
+Lin, C.S., & Poushinsky, G. (1985). A modified augmented design (type 2) for
+rectangular plots. Canadian Journal of Plant Science, 65(3), 743-749.
 }
 \author{
 Didier Murillo [aut],
