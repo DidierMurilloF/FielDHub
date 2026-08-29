@@ -1,23 +1,32 @@
 #' Function to export a formatted .csv table from data in the Fieldbook
 #'
-#' @param Fieldbook A list from a FielDHub design. 
+#' @param Fieldbook A list from a FielDHub design.
 #' @param selected A number, to select which location to view.
+#' @param type_pref (optional) Column name to prefer as the exported cell
+#'   value, when present in \code{Fieldbook} (e.g. \code{"TREATMENT"}). By
+#'   default \code{NULL}, which preserves the original ENTRY-first behaviour.
+#'   Designs whose on-screen map already labels plots by ENTRY (e.g.
+#'   \code{plot_diagonal_arrangement}, which uses \code{text.string = "ENTRY"})
+#'   should leave this at the default so the export keeps matching the map.
 #' @importFrom utils tail
 #' @noRd
-export_layout <- function(Fieldbook, selected, plotOn = FALSE) {
-  
+export_layout <- function(Fieldbook, selected, plotOn = FALSE, type_pref = NULL) {
+
   dataIn <- Fieldbook
-  
+
   locs <- levels(factor(dataIn$LOCATION))
-  
+
   df_site_one <- subset(dataIn, dataIn$LOCATION == locs[selected])
-  
-  if (!plotOn) {if ("ENTRY" %in% colnames(dataIn)) {
+
+  if (!plotOn) {if (!is.null(type_pref) && type_pref %in% colnames(dataIn)) {
+    type <- type_pref
+
+  } else if ("ENTRY" %in% colnames(dataIn)) {
     type="ENTRY"
-    
+
   } else if("TREATMENT" %in% colnames(dataIn)) {
     type="TREATMENT"
-    
+
   } else {
     type="TRT_COMB"
   }} else {

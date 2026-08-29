@@ -94,12 +94,13 @@ A block (test entries plus repeated checks) larger than 10,000 plots is rejected
 
 With \code{spread_checks = TRUE} (the default), the repeated copies of a check are placed
 one per contiguous stratum of the block, so they are spread across it rather than
-clustered together. At check densities up to about 67 percent of the block this stratified
-placement still leaves room for randomization; from about 78 percent and higher the
-constraint leaves few or no alternative positions, so a repeated check's placement can
-become nearly or fully deterministic rather than random. This is a property of the
-stratified-placement geometry, not a bug, and most field trials use far lower check
-density.
+clustered together. Two distinct density facts apply here: as soon as checks occupy more
+than 50 percent of the block, a warning is issued as an early caution, but randomization
+itself remains effectively unconstrained up to about 67 percent check density; only from
+about 78 percent and higher does the stratified-placement constraint leave few or no
+alternative positions, so a repeated check's placement can become nearly or fully
+deterministic rather than random. This is a property of the stratified-placement geometry,
+not a bug, and most field trials use far lower check density than either threshold.
 }
 \examples{
 # Example 1: Generates a RCBD design with 3 blocks and 20 treatments across 3 locations.

@@ -12,13 +12,18 @@
 #' @param rep_checks Times each check repeats within a block; scalar or one
 #'   value per check.
 #' @param data Optional data frame whose first column holds the entry labels.
+#' @param spread_checks Logical. Whether the caller intends to place the
+#'   repeated copies of each check one per stratum (\code{TRUE}, the default)
+#'   or with no restriction (\code{FALSE}). Only affects the wording of the
+#'   high-density warning below; the entry table itself does not depend on it.
 #'
 #' @return A data frame with columns ENTRY, TREATMENT, CHECKS, reps_per_block.
 #' @noRd
 rcbd_resolve_entries <- function(t = NULL,
                                  checks = NULL,
                                  rep_checks = NULL,
-                                 data = NULL) {
+                                 data = NULL,
+                                 spread_checks = TRUE) {
   pool <- NULL
   if (!is.null(data)) {
     if (!is.data.frame(data)) stop("Data must be a data frame.")
@@ -32,7 +37,7 @@ rcbd_resolve_entries <- function(t = NULL,
   }
 
   if (is.numeric(checks) && length(checks) == 1) {
-    if (checks %% 1 != 0 || checks < 1) {
+    if (!is.finite(checks) || checks %% 1 != 0 || checks < 1) {
       stop("RCBD() requires 'checks' to be a positive integer when given as a count.")
     }
     if (is.null(pool)) {
@@ -82,8 +87,6 @@ rcbd_resolve_entries <- function(t = NULL,
       }
       test_names <- setdiff(pool, check_names)
     }
-  } else if (is.na(checks)) {
-    stop("RCBD() requires 'checks' to be a positive integer or a character vector of labels.")
   } else {
     stop("RCBD() requires 'checks' to be a positive integer or a character vector of labels.")
   }
@@ -148,10 +151,19 @@ rcbd_resolve_entries <- function(t = NULL,
          "the number of entries (the limit is 10,000 plots per block).")
   }
   if (sum(rep_checks) > n_units / 2) {
-    warning("Checks occupy more than half of each block (",
-            sum(rep_checks), " of ", n_units, " plots). At this density the stratified ",
-            "placement becomes tightly constrained and the position of a repeated check ",
-            "may be nearly or fully determined rather than random.")
+    if (spread_checks) {
+      warning("Checks occupy more than half of each block (",
+              sum(rep_checks), " of ", n_units, " plots). At this density the stratified ",
+              "placement becomes tightly constrained and the position of a repeated check ",
+              "may be nearly or fully determined rather than random.")
+    } else {
+      # spread_checks = FALSE never stratifies, so the constraint described
+      # above does not apply here; only the density itself is worth flagging.
+      warning("Checks occupy more than half of each block (",
+              sum(rep_checks), " of ", n_units, " plots). Placement is unrestricted ",
+              "('spread_checks = FALSE'), so no per-check position guarantee applies, ",
+              "but more than half of every block will be checks rather than test entries.")
+    }
   }
   entries
 }
@@ -187,9 +199,11 @@ rcbd_strata_bounds <- function(n_units, r) {
 #' Stratified placement is a constraint that reduces the space of valid layouts.
 #' At high check density, the set of valid layouts can collapse to just one or
 #' a very small set. This is not a bug in the algorithm, but a property of the
-#' design itself: when checks occupy ~67% or less of the block, randomization
-#' proceeds normally; at ~78% or higher it approaches determinism. Most field
-#' trials use far lower check density and are unaffected.
+#' design itself. Two distinct facts are worth separating: \code{rcbd_resolve_entries()}
+#' warns as soon as checks occupy more than 50% of the block, as an early caution,
+#' but randomization itself stays effectively unconstrained up to ~67% check density;
+#' only at ~78% or higher does placement approach determinism. Most field trials use
+#' far lower check density and are unaffected by either threshold.
 #' @noRd
 rcbd_randomize_block <- function(entries, spread_checks = TRUE, max_tries = 100) {
   units   <- rep(entries$ENTRY, times = entries$reps_per_block)

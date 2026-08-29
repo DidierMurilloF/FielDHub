@@ -268,7 +268,7 @@ plot_RCBD <- function(x = NULL,
       form        = TREATMENT ~ COLUMN + ROW,
       data        = df,
       out1.string = "REP",
-      out2.gpar   = list(col = "black", lty = 3),
+      out2.gpar   = list(col = "black", lwd = 1, lty = 3),
       text.string = "TREATMENT",
       main        = main,
       extra_args  = dots

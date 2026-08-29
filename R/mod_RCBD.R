@@ -762,7 +762,11 @@ mod_RCBD_server <- function(id) {
       if (input$typlotRCBD == 2) {
         export_layout(df, locNum(), TRUE)
       } else {
-        export_layout(df, locNum())
+        # The on-screen map (plot_RCBD(), utils_plot_RCBD.R) labels plots with
+        # TREATMENT, checks included, so the exported CSV must match it
+        # instead of falling back to ENTRY when a checks design adds that
+        # column.
+        export_layout(df, locNum(), type_pref = "TREATMENT")
       }
     })
     

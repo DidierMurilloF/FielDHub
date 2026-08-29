@@ -11,7 +11,12 @@ test_that("integer checks take the first rows of data", {
 })
 
 test_that("character checks not in the pool are appended as new checks", {
-  e <- rcbd_resolve_entries(t = 4, checks = c("CK1", "CK2"), rep_checks = c(3, 2))
+  # 5 check reps of 9 block plots trips the >50% density warning (Finding 9);
+  # this test asserts only label resolution, so suppress it rather than
+  # silently letting it leak into the test run.
+  e <- suppressWarnings(
+    rcbd_resolve_entries(t = 4, checks = c("CK1", "CK2"), rep_checks = c(3, 2))
+  )
 
   # t = 4 means 4 TEST entries; the checks are additional.
   expect_equal(e$TREATMENT, c("CK1", "CK2", paste0("T", 1:4)))
@@ -36,7 +41,12 @@ test_that("character t is usable as the entry pool", {
 })
 
 test_that("rep_checks recycles from a scalar", {
-  e <- rcbd_resolve_entries(t = 5, checks = c("CK1", "CK2", "CK3"), rep_checks = 2)
+  # 6 check reps of 11 block plots trips the >50% density warning (Finding 9);
+  # this test asserts only recycling, so suppress it rather than silently
+  # letting it leak into the test run.
+  e <- suppressWarnings(
+    rcbd_resolve_entries(t = 5, checks = c("CK1", "CK2", "CK3"), rep_checks = 2)
+  )
   expect_equal(e$reps_per_block[1:3], c(2, 2, 2))
 })
 
@@ -98,6 +108,23 @@ test_that("the high-density warning mentions the randomization consequence", {
     rcbd_resolve_entries(t = 2, checks = "CK1", rep_checks = 4),
     "nearly or fully determined"
   )
+})
+
+test_that("the high-density warning does not mention stratification when spread_checks = FALSE", {
+  # Finding 6: the warning used to always describe the stratified-placement
+  # constraint, even when spread_checks = FALSE means no stratification ever
+  # happens. It should still warn (density is still high), but the wording
+  # must not claim a constraint that is not in effect.
+  expect_warning(
+    rcbd_resolve_entries(t = 2, checks = "CK1", rep_checks = 4, spread_checks = FALSE),
+    "more than half"
+  )
+  w <- tryCatch({
+    rcbd_resolve_entries(t = 2, checks = "CK1", rep_checks = 4, spread_checks = FALSE)
+    NULL
+  }, warning = function(w) conditionMessage(w))
+  expect_false(grepl("stratified", w, fixed = TRUE))
+  expect_false(grepl("nearly or fully determined", w, fixed = TRUE))
 })
 
 test_that("check labels not in the pool are rejected with clear error", {

@@ -24,12 +24,13 @@
 #'
 #' With \code{spread_checks = TRUE} (the default), the repeated copies of a check are placed
 #' one per contiguous stratum of the block, so they are spread across it rather than
-#' clustered together. At check densities up to about 67 percent of the block this stratified
-#' placement still leaves room for randomization; from about 78 percent and higher the
-#' constraint leaves few or no alternative positions, so a repeated check's placement can
-#' become nearly or fully deterministic rather than random. This is a property of the
-#' stratified-placement geometry, not a bug, and most field trials use far lower check
-#' density.
+#' clustered together. Two distinct density facts apply here: as soon as checks occupy more
+#' than 50 percent of the block, a warning is issued as an early caution, but randomization
+#' itself remains effectively unconstrained up to about 67 percent check density; only from
+#' about 78 percent and higher does the stratified-placement constraint leave few or no
+#' alternative positions, so a repeated check's placement can become nearly or fully
+#' deterministic rather than random. This is a property of the stratified-placement geometry,
+#' not a bug, and most field trials use far lower check density than either threshold.
 #'
 #' @param t An integer number with total number of treatments or a vector of dimension t with labels.
 #' @param reps Number of replicates (full blocks) of each treatment.
@@ -164,17 +165,23 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
   if (!is.null(locationNames)) {
     locationNames <- toupper(locationNames)
   } else locationName <- 1:l
+  # 'reps' feeds a matrix nrow(), a plot-number sequence, and (on the checks
+  # path) rcbd_resolve_entries()'s block math alike, so it is validated once,
+  # here, ahead of every path rather than only inside the numeric-t branch
+  # below. For valid input (a whole number >= 2) this changes nothing.
+  if (is.null(reps) || !is.numeric(reps) || length(reps) != 1 || is.na(reps) ||
+      reps %% 1 != 0 || reps < 2) {
+    shiny::validate("RCBD() requires 'reps' to be a single whole number of 2 or more.")
+  }
   entries <- NULL
   if (has_checks) {
-    entries <- rcbd_resolve_entries(t = t, checks = checks,
-                                    rep_checks = rep_checks, data = data)
+    entries <- rcbd_resolve_entries(t = t, checks = checks, rep_checks = rep_checks,
+                                    data = data, spread_checks = spread_checks)
     n_units       <- sum(entries$reps_per_block)
     n_test        <- sum(entries$CHECKS == 0)
     check_names   <- entries$TREATMENT[entries$CHECKS != 0]
     rep_checks    <- entries$reps_per_block[entries$CHECKS != 0]
     mytreatments  <- entries$TREATMENT[entries$CHECKS == 0]
-    nt            <- n_units
-    s             <- NULL
   } else if (is.null(data)) {
     if (!is.null(t) & !is.null(b)) {
       if(length(t) == 1 & is.numeric(t)) {

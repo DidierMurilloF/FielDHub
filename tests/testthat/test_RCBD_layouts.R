@@ -124,6 +124,46 @@ test_that("the field map renders for both schemas", {
   expect_s3_class(p_chk$out_layoutPlots, "ggplot")
 })
 
+test_that("the field map builds without a ggplot2 warning for both schemas", {
+  # expect_s3_class() above passes even on a ggplot object that warns (or
+  # errors) when it is actually drawn, because a ggplot spec is built lazily.
+  # Force the build with ggplot2::ggplot_build() so a bad `gpar` (e.g. a
+  # missing `lwd` feeding an empty `linewidth` aesthetic) cannot hide here.
+  d_plain <- RCBD(t = 4, reps = 3, seed = 990)
+  p_plain <- plot_layout(x = d_plain, layout = 1, stacked = "vertical")
+  expect_no_warning(ggplot2::ggplot_build(p_plain$out_layout))
+  expect_no_warning(ggplot2::ggplot_build(p_plain$out_layoutPlots))
+
+  d_chk <- RCBD(t = 6, reps = 3, checks = c("CK1", "CK2"),
+                rep_checks = c(2, 2), seed = 991)
+  p_chk <- plot_layout(x = d_chk, layout = 1, stacked = "vertical")
+  expect_no_warning(ggplot2::ggplot_build(p_chk$out_layout))
+  expect_no_warning(ggplot2::ggplot_build(p_chk$out_layoutPlots))
+})
+
+test_that("export_layout() TREATMENT preference matches the rendered checks map", {
+  # plot_RCBD() (utils_plot_RCBD.R) always uses text.string = "TREATMENT" on
+  # the rendered map, checks included, so the exported CSV must show the same
+  # labels rather than falling back to ENTRY just because that column exists.
+  d_chk <- RCBD(t = 6, reps = 3, checks = c("CK1", "CK2"),
+                rep_checks = c(2, 2), seed = 993)
+  fb <- plot_layout(x = d_chk, layout = 1, stacked = "vertical")$fieldBookXY
+  expect_true(all(c("ENTRY", "TREATMENT") %in% names(fb)))
+
+  cells <- function(export) unlist(export$file[-(1:2), -1], use.names = FALSE)
+
+  # Default export_layout() behaviour (no type_pref) is untouched: ENTRY wins
+  # whenever it is present, exactly as it did before this fix.
+  default_cells <- cells(export_layout(fb, 1))
+  expect_true(all(default_cells %in% as.character(fb$ENTRY)))
+
+  # RCBD's own csv_data() (mod_RCBD.R) passes type_pref = "TREATMENT", which
+  # must now match what the map shows.
+  rcbd_cells <- cells(export_layout(fb, 1, type_pref = "TREATMENT"))
+  expect_true(all(rcbd_cells %in% fb$TREATMENT))
+  expect_false(all(rcbd_cells %in% as.character(fb$ENTRY)))
+})
+
 test_that("TREATMENT is the last column of the layout for both schemas", {
   d_plain <- RCBD(t = 4, reps = 3, seed = 97)
   lay_plain <- plot_layout(x = d_plain, layout = 1, stacked = "vertical")$allSitesFieldbook
