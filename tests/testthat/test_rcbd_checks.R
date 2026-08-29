@@ -136,3 +136,95 @@ test_that("negative t is rejected", {
     "non-negative"
   )
 })
+
+test_that("rcbd_strata_bounds partitions positions contiguously", {
+  expect_equal(rcbd_strata_bounds(10, 2), list(1:5, 6:10))
+  expect_equal(rcbd_strata_bounds(10, 3), list(1:4, 5:7, 8:10))
+  expect_equal(rcbd_strata_bounds(6, 1), list(1:6))
+  # every position is used exactly once
+  b <- rcbd_strata_bounds(17, 4)
+  expect_equal(sort(unlist(b)), 1:17)
+})
+
+test_that("a randomized block has exact entry counts", {
+  set.seed(11)
+  e <- rcbd_resolve_entries(t = 6, checks = c("CK1", "CK2"), rep_checks = c(2, 2))
+  blk <- rcbd_randomize_block(e, spread_checks = TRUE)
+
+  expect_length(blk, 10)
+  expect_equal(sum(blk == 1L), 2)  # CK1 twice
+  expect_equal(sum(blk == 2L), 2)  # CK2 twice
+  # every test entry exactly once
+  expect_true(all(table(blk[blk > 2L]) == 1))
+  expect_setequal(unique(blk), e$ENTRY)
+})
+
+test_that("spread_checks places copies of one check in distinct strata", {
+  e <- rcbd_resolve_entries(t = 10, checks = "CK1", rep_checks = 3)
+  strata <- rcbd_strata_bounds(13, 3)
+
+  for (s in 1:50) {
+    set.seed(s)
+    blk <- rcbd_randomize_block(e, spread_checks = TRUE)
+    pos <- which(blk == 1L)
+    expect_length(pos, 3)
+    hit <- vapply(pos, function(p) which(vapply(strata, function(z) p %in% z, logical(1))), integer(1))
+    expect_equal(sort(hit), 1:3)  # one copy per stratum
+  }
+})
+
+test_that("spread_checks = FALSE still yields exact counts", {
+  set.seed(5)
+  e <- rcbd_resolve_entries(t = 6, checks = c("CK1", "CK2"), rep_checks = c(2, 3))
+  blk <- rcbd_randomize_block(e, spread_checks = FALSE)
+
+  expect_length(blk, 11)
+  expect_equal(sum(blk == 1L), 2)
+  expect_equal(sum(blk == 2L), 3)
+})
+
+test_that("the retry loop recovers from a stratum collision", {
+  # reps = c(6, 2) in a block of 9 is the smallest configuration where a single
+  # placement attempt can exhaust a stratum: the r=6 check is placed first and
+  # forces positions 7, 8, 9, after which the r=2 check finds its second
+  # stratum [6:9] full roughly half the time. Measured single-attempt success
+  # rate is ~0.49, so with 100 retries the fallback is effectively unreachable
+  # (~1e-29) and every one of these must come back clean and correctly counted.
+  e <- suppressWarnings(
+    rcbd_resolve_entries(t = 1, checks = c("CK1", "CK2"), rep_checks = c(6, 2))
+  )
+  for (s in 1:40) {
+    set.seed(s)
+    blk <- expect_no_warning(rcbd_randomize_block(e, spread_checks = TRUE))
+    expect_length(blk, 9)
+    expect_equal(sum(blk == 1L), 6)
+    expect_equal(sum(blk == 2L), 2)
+    expect_equal(sum(blk == 3L), 1)
+  }
+})
+
+test_that("exhausting the retries falls back with a warning", {
+  # max_tries = 0 makes seq_len(0) empty, so the loop is skipped entirely and
+  # the fallback path is reached deterministically. This is the only practical
+  # way to exercise the warning, per the collision analysis above.
+  e <- suppressWarnings(
+    rcbd_resolve_entries(t = 1, checks = c("CK1", "CK2"), rep_checks = c(6, 2))
+  )
+  set.seed(3)
+  expect_warning(
+    blk <- rcbd_randomize_block(e, spread_checks = TRUE, max_tries = 0),
+    "falling back"
+  )
+  expect_length(blk, 9)
+  expect_equal(sum(blk == 1L), 6)
+  expect_equal(sum(blk == 2L), 2)
+})
+
+test_that("randomization is reproducible under a seed", {
+  e <- rcbd_resolve_entries(t = 8, checks = "CK1", rep_checks = 2)
+  set.seed(42); a <- rcbd_randomize_block(e)
+  set.seed(42); b <- rcbd_randomize_block(e)
+  set.seed(43); c <- rcbd_randomize_block(e)
+  expect_identical(a, b)
+  expect_false(identical(a, c))
+})

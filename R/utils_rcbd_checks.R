@@ -147,3 +147,74 @@ rcbd_resolve_entries <- function(t = NULL,
   }
   entries
 }
+
+#' Partition block positions into near-equal contiguous strata
+#'
+#' @param n_units Block size.
+#' @param r Number of strata.
+#' @return A list of `r` integer vectors covering `1:n_units`.
+#' @noRd
+rcbd_strata_bounds <- function(n_units, r) {
+  base  <- n_units %/% r
+  extra <- n_units %% r
+  sizes <- rep(base, r) + c(rep(1L, extra), rep(0L, r - extra))
+  ends   <- cumsum(sizes)
+  starts <- c(1L, utils::head(ends, -1) + 1L)
+  Map(seq, starts, ends)
+}
+
+#' Randomize a single complete block containing repeated checks
+#'
+#' @description
+#' With `spread_checks = TRUE` the copies of each check are placed one per
+#' stratum, so they span the block regardless of the row-by-column geometry
+#' chosen later by the plotting layer. Checks are placed most-replicated first;
+#' test entries then fill the remaining positions.
+#'
+#' @param entries Entry table from \code{rcbd_resolve_entries()}.
+#' @param spread_checks Stratify the repeated copies. Default TRUE.
+#' @param max_tries Attempts before falling back to unrestricted randomization.
+#' @return An integer vector of ENTRY ids in plot order.
+#' @noRd
+rcbd_randomize_block <- function(entries, spread_checks = TRUE, max_tries = 100) {
+  units   <- rep(entries$ENTRY, times = entries$reps_per_block)
+  n_units <- length(units)
+
+  shuffle_all <- function() units[sample.int(n_units)]
+
+  check_rows <- entries[entries$CHECKS != 0 & entries$reps_per_block > 1, , drop = FALSE]
+  if (!spread_checks || nrow(check_rows) == 0) {
+    return(shuffle_all())
+  }
+
+  ord        <- order(-check_rows$reps_per_block, check_rows$ENTRY)
+  check_rows <- check_rows[ord, , drop = FALSE]
+  rest       <- units[!(units %in% check_rows$ENTRY)]
+
+  for (attempt in seq_len(max_tries)) {
+    slots <- rep(NA_integer_, n_units)
+    ok    <- TRUE
+
+    for (i in seq_len(nrow(check_rows))) {
+      r      <- check_rows$reps_per_block[i]
+      strata <- rcbd_strata_bounds(n_units, r)
+      for (s in seq_len(r)) {
+        free <- strata[[s]][is.na(slots[strata[[s]]])]
+        if (length(free) == 0) { ok <- FALSE; break }
+        slots[free[sample.int(length(free), 1)]] <- check_rows$ENTRY[i]
+      }
+      if (!ok) break
+    }
+
+    if (ok) {
+      empty <- which(is.na(slots))
+      slots[empty] <- rest[sample.int(length(rest))]
+      return(slots)
+    }
+  }
+
+  warning("Could not place the repeated checks into distinct strata after ",
+          max_tries, " attempts; falling back to unrestricted randomization ",
+          "for this block.")
+  shuffle_all()
+}
