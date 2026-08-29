@@ -235,3 +235,71 @@ test_that("randomization is reproducible under a seed", {
   expect_identical(a, b)
   expect_false(identical(a, c))
 })
+
+test_that("RCBD() with checks produces the wide field book", {
+  d <- RCBD(t = 6, reps = 3, checks = c("CK1", "CK2"),
+            rep_checks = c(2, 2), seed = 77)
+
+  expect_named(d$fieldBook,
+               c("ID", "LOCATION", "PLOT", "REP", "ENTRY", "TREATMENT", "CHECKS"))
+  expect_equal(nrow(d$fieldBook), 10 * 3)          # n_units * reps
+  expect_equal(d$infoDesign$plots_per_block, 10)
+  expect_equal(d$infoDesign$checks, 2)
+  expect_equal(d$infoDesign$check_names, c("CK1", "CK2"))
+  expect_equal(d$infoDesign$rep_checks, c(2, 2))
+  expect_true(d$infoDesign$spread_checks)
+  expect_equal(d$infoDesign$number.of.treatments, 6)
+  expect_identical(names(d$infoDesign)[length(d$infoDesign)], "id_design")
+  expect_equal(d$infoDesign$id_design, 2)
+})
+
+test_that("RCBD() repeats each check the requested number of times per block", {
+  d <- RCBD(t = 6, reps = 3, checks = c("CK1", "CK2"),
+            rep_checks = c(2, 3), seed = 78)
+  fb <- d$fieldBook
+
+  for (r in 1:3) {
+    blk <- fb[fb$REP == r, ]
+    expect_equal(sum(blk$TREATMENT == "CK1"), 2)
+    expect_equal(sum(blk$TREATMENT == "CK2"), 3)
+    tests <- blk$TREATMENT[blk$CHECKS == 0]
+    expect_equal(sort(tests), sort(paste0("T", 1:6)))
+  }
+})
+
+test_that("ENTRY and CHECKS are consistent everywhere", {
+  d <- RCBD(t = 5, reps = 2, l = 2, checks = "CK1", rep_checks = 2,
+            locationNames = c("FARGO", "MINOT"), seed = 79)
+  fb <- d$fieldBook
+
+  # one ENTRY id per label, everywhere
+  map <- unique(fb[, c("ENTRY", "TREATMENT", "CHECKS")])
+  expect_equal(nrow(map), 6)
+  expect_equal(map$CHECKS[map$TREATMENT == "CK1"], 1L)
+  expect_true(all(map$CHECKS[map$TREATMENT != "CK1"] == 0L))
+  expect_equal(nrow(fb), 7 * 2 * 2)   # n_units * reps * locations
+})
+
+test_that("RCBD() accepts checks as a count over uploaded data", {
+  pool <- data.frame(TREATMENT = c("CK1", "CK2", paste0("G-", 1:8)))
+  d <- RCBD(reps = 2, checks = 2, rep_checks = 2, data = pool, seed = 80)
+
+  expect_equal(d$infoDesign$plots_per_block, 12)
+  expect_equal(d$infoDesign$check_names, c("CK1", "CK2"))
+  expect_equal(d$infoDesign$number.of.treatments, 8)
+})
+
+test_that("plot numbers step by block size when checks are present", {
+  d <- RCBD(t = 6, reps = 3, checks = "CK1", rep_checks = 2,
+            plotNumber = 101, continuous = TRUE, seed = 81)
+  # block size 8, continuous numbering over 3 blocks
+  expect_equal(sort(d$fieldBook$PLOT), 101:124)
+})
+
+test_that("RCBD() keeps data in its 9th positional slot", {
+  pool <- data.frame(TREATMENT = paste0("G-", 1:4))
+  # 9 positional arguments, the 9th being `data` - the pre-1.5.0 call shape.
+  d <- RCBD(NULL, 3, 1, 101, FALSE, "serpentine", 89076, "FARGO", pool)
+  expect_equal(sort(unique(d$fieldBook$TREATMENT)), paste0("G-", 1:4))
+  expect_equal(nrow(d$fieldBook), 12)
+})

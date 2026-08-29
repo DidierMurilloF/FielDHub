@@ -69,10 +69,14 @@
 #' 
 #'
 #' @export
-RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101, 
-                 continuous = FALSE, planter = "serpentine", 
-                 seed = NULL, locationNames = NULL,
-                 data = NULL) {
+RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
+                 continuous = FALSE, planter = "serpentine",
+                 seed = NULL, locationNames = NULL, data = NULL,
+                 checks = NULL, rep_checks = NULL, spread_checks = TRUE) {
+  has_checks <- !is.null(checks)
+  if (!is.logical(spread_checks) || length(spread_checks) != 1 || is.na(spread_checks)) {
+    stop("RCBD() requires 'spread_checks' to be a single TRUE or FALSE.")
+  }
   b <- reps
   if (all(c("serpentine", "cartesian") != planter)) {
     stop("Input planter choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
@@ -97,7 +101,18 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
   if (!is.null(locationNames)) {
     locationNames <- toupper(locationNames)
   } else locationName <- 1:l
-  if (is.null(data)) {
+  entries <- NULL
+  if (has_checks) {
+    entries <- rcbd_resolve_entries(t = t, checks = checks,
+                                    rep_checks = rep_checks, data = data)
+    n_units       <- sum(entries$reps_per_block)
+    n_test        <- sum(entries$CHECKS == 0)
+    check_names   <- entries$TREATMENT[entries$CHECKS != 0]
+    rep_checks    <- entries$reps_per_block[entries$CHECKS != 0]
+    mytreatments  <- entries$TREATMENT[entries$CHECKS == 0]
+    nt            <- n_units
+    s             <- NULL
+  } else if (is.null(data)) {
     if (!is.null(t) & !is.null(b)) {
       if(length(t) == 1 & is.numeric(t)) {
         arg2 <- c(t, b)
@@ -127,10 +142,11 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
     s <- t
     mytreatments <- data$Treatment
   }
+  if (!has_checks) n_units <- nt
   if (length(locationNames) != l) {
     locationNames <- paste("loc", 1:l, sep = "")
   }
-  RCBD <- matrix(data = NA, nrow = b * l, ncol = nt, byrow = TRUE)
+  RCBD <- matrix(data = NA, nrow = b * l, ncol = n_units, byrow = TRUE)
   RCBD.layout <- matrix(data = NA, nrow = b, ncol = 2, byrow = TRUE)
   RCBD.layout.loc <- setNames(vector(mode = "list", length = l),
                               paste0("Loc_", locationNames)) # set names
@@ -142,34 +158,39 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
     RCBD.layout[,1] <- 1:b
     colnames(RCBD.layout) <- c("Block","--Treatments--")
     for (j in k[i]:m[i]) {
-      RCBD[j,] <- sample(s, size = length(s), replace = FALSE)
+      if (has_checks) {
+        ids <- rcbd_randomize_block(entries, spread_checks = spread_checks)
+        RCBD[j, ] <- entries$TREATMENT[match(ids, entries$ENTRY)]
+      } else {
+        RCBD[j, ] <- sample(s, size = length(s), replace = FALSE)
+      }
       RCBD.layout[v,2] <- paste(RCBD[j,], collapse = " ")
       v <- v + 1
     }
     RCBD.layout.loc[[i]] <- RCBD.layout
   }
-  plotNumber <- seriePlot.numbers(plot.number = plotNumber, 
+  plotNumber <- seriePlot.numbers(plot.number = plotNumber,
                                   reps = b,
-                                  l = l, 
-                                  t = nt)
+                                  l = l,
+                                  t = n_units)
   p.number.loc <- setNames(vector(mode = "list", length = l),
                            paste0("Loc_", locationNames))
   if (!continuous) {
     if (planter == "serpentine") {
       for (i in 1:l) {
-        M <- matrix(data = NA, ncol = nt, nrow = b, byrow = TRUE)
+        M <- matrix(data = NA, ncol = n_units, nrow = b, byrow = TRUE)
         for (k in 1:b) {
           D <- plotNumber[[i]]
-          M[k,] <- D[k]:(D[k] + (nt - 1))
+          M[k,] <- D[k]:(D[k] + (n_units - 1))
         }
         p.number.loc[[i]] <- serpentinelayout(M, opt = 2)
       }
     }else {
       for (i in 1:l) {
-        M <- matrix(data = NA, ncol = nt, nrow = b, byrow = TRUE)
+        M <- matrix(data = NA, ncol = n_units, nrow = b, byrow = TRUE)
         for (k in 1:b) {
           D <- plotNumber[[i]]
-          M[k,] <- D[k]:(D[k] + (nt - 1))
+          M[k,] <- D[k]:(D[k] + (n_units - 1))
         }
         p.number.loc[[i]] <- M
       }
@@ -178,15 +199,15 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
     if (planter == "serpentine") {
       for (i in 1:l) {
         D <- plotNumber[[i]]
-        M <- matrix(data = D[1]:(D[1] + (nt * b - 1)), ncol = nt,
+        M <- matrix(data = D[1]:(D[1] + (n_units * b - 1)), ncol = n_units,
                                     nrow = b, byrow = TRUE)
         p.number.loc[[i]] <- serpentinelayout(M, opt = 2)
       }
     }else {
       for (i in 1:l) {
         D <- plotNumber[[i]]
-        p.number.loc[[i]] <- matrix(data = D[1]:(D[1] + (nt * b - 1)), 
-                                    ncol = nt,
+        p.number.loc[[i]] <- matrix(data = D[1]:(D[1] + (n_units * b - 1)), 
+                                    ncol = n_units,
                                     nrow = b, 
                                     byrow = TRUE)
       }
@@ -197,31 +218,51 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
   }else {
     p.number.loc1 <- p.number.loc[[1]]
   }
-  RCBD.output <- data.frame(list(LOCATION = rep(locationNames, each = nt * b), 
+  RCBD.output <- data.frame(list(LOCATION = rep(locationNames, each = n_units * b),
                                  PLOT = as.vector(t(p.number.loc1)),
-                                 REP = rep(1:b, each = nt), 
+                                 REP = rep(1:b, each = n_units),
                                  TREATMENT = as.vector(t(RCBD))))
-  
-  RCBD.output$LOCATION <- factor(RCBD.output$LOCATION, 
+
+  RCBD.output$LOCATION <- factor(RCBD.output$LOCATION,
                                  levels = as.character(unique(locationNames)))
   RCBD.output <- RCBD.output[order(RCBD.output$LOCATION, RCBD.output$PLOT),]
-  
+
+  if (has_checks) {
+    idx <- match(RCBD.output$TREATMENT, entries$TREATMENT)
+    RCBD.output$ENTRY  <- entries$ENTRY[idx]
+    RCBD.output$CHECKS <- entries$CHECKS[idx]
+  }
+
   ID <- 1:nrow(RCBD.output)
   RCBD_output <- cbind(ID, RCBD.output)
   RCBD_output <- as.data.frame(RCBD_output)
-  
+  RCBD_output <- RCBD_output[, rcbd_fieldbook_cols(has_checks)]
+
   RCBD.layout <- as.data.frame(RCBD.layout)
   
   plotNumber <- as.vector(unlist(plotNumber))
   
-  parameters = list(blocks = b, 
-                    number.of.treatments = nt, 
-                    treatments = mytreatments,
-                    locations = l, 
-                    plotNumber = plotNumber, 
-                    locationNames = locationNames,
-                    seed = seed, id_design = 2)
-  output <- list(infoDesign = parameters, 
+  parameters <- list(blocks = b,
+                     number.of.treatments = if (has_checks) n_test else nt,
+                     treatments = mytreatments,
+                     locations = l,
+                     plotNumber = plotNumber,
+                     locationNames = locationNames,
+                     seed = seed,
+                     id_design = 2)
+
+  if (has_checks) {
+    parameters <- append(
+      parameters,
+      list(checks = length(check_names),
+           check_names = check_names,
+           rep_checks = rep_checks,
+           plots_per_block = n_units,
+           spread_checks = spread_checks),
+      after = which(names(parameters) == "treatments")
+    )
+  }
+  output <- list(infoDesign = parameters,
                  layoutRandom = RCBD.layout.loc,
                  plotNumber = p.number.loc,
                  fieldBook = RCBD_output)

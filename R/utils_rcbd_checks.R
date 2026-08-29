@@ -227,3 +227,16 @@ rcbd_randomize_block <- function(entries, spread_checks = TRUE, max_tries = 100)
           "for this block.")
   shuffle_all()
 }
+
+#' Field book column order for RCBD, with and without checks
+#'
+#' @param has_checks Logical.
+#' @return A character vector of column names in output order.
+#' @noRd
+rcbd_fieldbook_cols <- function(has_checks) {
+  if (has_checks) {
+    c("ID", "LOCATION", "PLOT", "REP", "ENTRY", "TREATMENT", "CHECKS")
+  } else {
+    c("ID", "LOCATION", "PLOT", "REP", "TREATMENT")
+  }
+}
