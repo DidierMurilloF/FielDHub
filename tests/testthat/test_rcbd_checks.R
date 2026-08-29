@@ -241,7 +241,7 @@ test_that("RCBD() with checks produces the wide field book", {
             rep_checks = c(2, 2), seed = 77)
 
   expect_named(d$fieldBook,
-               c("ID", "LOCATION", "PLOT", "REP", "ENTRY", "TREATMENT", "CHECKS"))
+               c("ID", "LOCATION", "PLOT", "REP", "ENTRY", "CHECKS", "TREATMENT"))
   expect_equal(nrow(d$fieldBook), 10 * 3)          # n_units * reps
   expect_equal(d$infoDesign$plots_per_block, 10)
   expect_equal(d$infoDesign$checks, 2)

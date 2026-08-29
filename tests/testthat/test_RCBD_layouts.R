@@ -100,7 +100,7 @@ test_that("the layout field book keeps a name-based column order", {
   out_chk <- plot_layout(x = d_chk, layout = 1, stacked = "vertical")
   expect_equal(names(out_chk$fieldBookXY),
                c("ID", "LOCATION", "PLOT", "ROW", "COLUMN", "REP",
-                 "ENTRY", "TREATMENT", "CHECKS"))
+                 "ENTRY", "CHECKS", "TREATMENT"))
 })
 
 test_that("every plot appears exactly once in the layout", {
@@ -122,4 +122,26 @@ test_that("the field map renders for both schemas", {
   p_chk <- plot_layout(x = d_chk, layout = 1, stacked = "vertical")
   expect_s3_class(p_chk$out_layout, "ggplot")
   expect_s3_class(p_chk$out_layoutPlots, "ggplot")
+})
+
+test_that("TREATMENT is the last column of the layout for both schemas", {
+  d_plain <- RCBD(t = 4, reps = 3, seed = 97)
+  lay_plain <- plot_layout(x = d_plain, layout = 1, stacked = "vertical")$allSitesFieldbook
+  expect_identical(names(lay_plain)[ncol(lay_plain)], "TREATMENT")
+
+  d_chk <- RCBD(t = 6, reps = 3, checks = c("CK1", "CK2"),
+                rep_checks = c(2, 2), seed = 98)
+  lay_chk <- plot_layout(x = d_chk, layout = 1, stacked = "vertical")$allSitesFieldbook
+  expect_identical(names(lay_chk)[ncol(lay_chk)], "TREATMENT")
+})
+
+test_that("simulated data works on a checks design", {
+  d <- RCBD(t = 6, reps = 3, checks = c("CK1", "CK2"), rep_checks = c(2, 2), seed = 96)
+  lay <- plot_layout(x = d, layout = 1, stacked = "vertical")$allSitesFieldbook
+  # norm_trunc() takes the LAST column as the treatment factor, so TREATMENT
+  # must be last or the Simulate! button errors for every checks design.
+  expect_identical(names(lay)[ncol(lay)], "TREATMENT")
+  sim <- norm_trunc(a = 1, b = 10, data = lay, seed = 1)
+  expect_s3_class(sim, "data.frame")
+  expect_equal(nrow(sim), nrow(lay))
 })

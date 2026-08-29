@@ -235,7 +235,7 @@ rcbd_randomize_block <- function(entries, spread_checks = TRUE, max_tries = 100)
 #' @noRd
 rcbd_fieldbook_cols <- function(has_checks) {
   if (has_checks) {
-    c("ID", "LOCATION", "PLOT", "REP", "ENTRY", "TREATMENT", "CHECKS")
+    c("ID", "LOCATION", "PLOT", "REP", "ENTRY", "CHECKS", "TREATMENT")
   } else {
     c("ID", "LOCATION", "PLOT", "REP", "TREATMENT")
   }

@@ -252,7 +252,7 @@ plot_RCBD <- function(x = NULL,
     allSitesFieldbook <- dplyr::bind_rows(allSites)
     # Reorder columns by name so a wider field book cannot scramble them
     layout_order <- c("ID", "LOCATION", "PLOT", "ROW", "COLUMN",
-                      "REP", "ENTRY", "TREATMENT", "CHECKS")
+                      "REP", "ENTRY", "CHECKS", "TREATMENT")
     keep <- intersect(layout_order, names(df))
     allSitesFieldbook <- allSitesFieldbook[, keep]
     df <- df[, keep]
