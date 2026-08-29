@@ -143,7 +143,9 @@ rcbd_resolve_entries <- function(t = NULL,
   n_units <- sum(entries$reps_per_block)
   if (sum(rep_checks) > n_units / 2) {
     warning("Checks occupy more than half of each block (",
-            sum(rep_checks), " of ", n_units, " plots).")
+            sum(rep_checks), " of ", n_units, " plots). At this density the stratified ",
+            "placement becomes tightly constrained and the position of a repeated check ",
+            "may be nearly or fully determined rather than random.")
   }
   entries
 }
@@ -175,6 +177,13 @@ rcbd_strata_bounds <- function(n_units, r) {
 #' @param spread_checks Stratify the repeated copies. Default TRUE.
 #' @param max_tries Attempts before falling back to unrestricted randomization.
 #' @return An integer vector of ENTRY ids in plot order.
+#' @details
+#' Stratified placement is a constraint that reduces the space of valid layouts.
+#' At high check density, the set of valid layouts can collapse to just one or
+#' a very small set. This is not a bug in the algorithm, but a property of the
+#' design itself: when checks occupy ~67% or less of the block, randomization
+#' proceeds normally; at ~78% or higher it approaches determinism. Most field
+#' trials use far lower check density and are unaffected.
 #' @noRd
 rcbd_randomize_block <- function(entries, spread_checks = TRUE, max_tries = 100) {
   units   <- rep(entries$ENTRY, times = entries$reps_per_block)

@@ -93,6 +93,13 @@ test_that("a check-heavy block warns", {
   )
 })
 
+test_that("the high-density warning mentions the randomization consequence", {
+  expect_warning(
+    rcbd_resolve_entries(t = 2, checks = "CK1", rep_checks = 4),
+    "nearly or fully determined"
+  )
+})
+
 test_that("check labels not in the pool are rejected with clear error", {
   pool <- data.frame(TREATMENT = c("CK1", "CK2", "G-1"))
   expect_error(
