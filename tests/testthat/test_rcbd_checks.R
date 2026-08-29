@@ -92,3 +92,47 @@ test_that("a check-heavy block warns", {
     "more than half"
   )
 })
+
+test_that("check labels not in the pool are rejected with clear error", {
+  pool <- data.frame(TREATMENT = c("CK1", "CK2", "G-1"))
+  expect_error(
+    rcbd_resolve_entries(checks = "XYZ", rep_checks = 2, data = pool),
+    "not found in the supplied entries"
+  )
+})
+
+test_that("check labels not in pool suggest case-insensitive near-misses", {
+  pool <- data.frame(TREATMENT = c("t2", "B", "C", "D"))
+  expect_error(
+    rcbd_resolve_entries(checks = "T2", rep_checks = 2, data = pool),
+    "Did you mean"
+  )
+})
+
+test_that("checks = NA is rejected", {
+  expect_error(
+    rcbd_resolve_entries(t = 5, checks = NA, rep_checks = 2),
+    "positive integer or a character vector"
+  )
+})
+
+test_that("rep_checks = Inf is rejected", {
+  expect_error(
+    rcbd_resolve_entries(t = 5, checks = "CK1", rep_checks = Inf),
+    "finite"
+  )
+})
+
+test_that("rep_checks = NA is rejected", {
+  expect_error(
+    rcbd_resolve_entries(t = 5, checks = "CK1", rep_checks = NA),
+    "numeric"
+  )
+})
+
+test_that("negative t is rejected", {
+  expect_error(
+    rcbd_resolve_entries(t = -3, checks = "CK1", rep_checks = 2),
+    "non-negative"
+  )
+})

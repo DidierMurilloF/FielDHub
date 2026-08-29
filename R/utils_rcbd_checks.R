@@ -52,6 +52,9 @@ rcbd_resolve_entries <- function(t = NULL,
       if (is.null(t) || !is.numeric(t) || length(t) != 1) {
         stop("RCBD() requires a numeric 't', 'data', or a character vector 't' alongside character 'checks'.")
       }
+      if (t < 0 || t != as.integer(t)) {
+        stop("RCBD() requires 't' to be a single non-negative integer.")
+      }
       test_names <- paste0("T", seq_len(t))
       clash <- intersect(check_names, test_names)
       if (length(clash) > 0) {
@@ -61,8 +64,26 @@ rcbd_resolve_entries <- function(t = NULL,
              "character vector 't'.")
       }
     } else {
+      # When pool is supplied, all check labels must be in the pool
+      missing_checks <- setdiff(check_names, pool)
+      if (length(missing_checks) > 0) {
+        # Look for case-insensitive near-misses and build the error message
+        msg_parts <- character(0)
+        for (missing in missing_checks) {
+          matches <- pool[tolower(pool) == tolower(missing)]
+          if (length(matches) > 0) {
+            msg_parts <- c(msg_parts, paste0("\"", missing, "\". Did you mean \"", matches[1], "\"?"))
+          } else {
+            msg_parts <- c(msg_parts, paste0("\"", missing, "\""))
+          }
+        }
+        stop("RCBD() check label(s) not found in the supplied entries: ",
+             paste(msg_parts, collapse = ", "))
+      }
       test_names <- setdiff(pool, check_names)
     }
+  } else if (is.na(checks)) {
+    stop("RCBD() requires 'checks' to be a positive integer or a character vector of labels.")
   } else {
     stop("RCBD() requires 'checks' to be a positive integer or a character vector of labels.")
   }
@@ -77,8 +98,14 @@ rcbd_resolve_entries <- function(t = NULL,
     message("'rep_checks' was missing; it was set to 1 for every check. ",
             "This is an ordinary RCBD with the checks included in the entry list.")
   }
-  if (!is.numeric(rep_checks) || anyNA(rep_checks)) {
+  if (!is.numeric(rep_checks)) {
     stop("RCBD() requires 'rep_checks' to be numeric.")
+  }
+  if (anyNA(rep_checks)) {
+    stop("RCBD() requires 'rep_checks' to be numeric.")
+  }
+  if (any(!is.finite(rep_checks))) {
+    stop("RCBD() requires 'rep_checks' to be finite.")
   }
   if (any(rep_checks %% 1 != 0)) {
     stop("RCBD() requires 'rep_checks' to be integers.")
