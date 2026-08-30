@@ -231,3 +231,77 @@ plot(rcbd)
 
   
   
+
+## RCBD with repeated checks
+
+In a classical RCBD, the residual is the treatment-by-block interaction,
+estimated by comparing each treatment’s performance across blocks.
+Repeating one or more checks inside every block gives an additional,
+within-block estimate of error and a form of local control that a design
+with each treatment appearing only once per block cannot provide.
+[`RCBD()`](https://didiermurillof.github.io/FielDHub/reference/RCBD.md)
+supports this through three extra arguments: `checks` (a count or a
+vector of check labels), `rep_checks` (how many times each check repeats
+per block), and `spread_checks` (whether the repeated copies are spread
+across the block or placed with no restriction).
+
+``` r
+
+rcbd_checks <- RCBD(
+  t = 18,
+  reps = 3,
+  checks = c("CK1", "CK2"),
+  rep_checks = c(2, 2),
+  plotNumber = 101,
+  seed = 1234,
+  locationNames = "FARGO"
+)
+```
+
+Here, `t = 18` test entries are automatically labeled `T1`…`T18`, and
+the two checks `"CK1"` and `"CK2"` are each repeated twice per block
+(`rep_checks = c(2, 2)`), so every block has `18 + 2 + 2 = 22` plots.
+
+``` r
+
+head(rcbd_checks$fieldBook, 10)
+```
+
+       ID LOCATION PLOT REP ENTRY CHECKS TREATMENT
+    1   1    FARGO  101   1     7      0        T5
+    2   2    FARGO  102   1     8      0        T6
+    3   3    FARGO  103   1    18      0       T16
+    4   4    FARGO  104   1     6      0        T4
+    5   5    FARGO  105   1     2      2       CK2
+    6   6    FARGO  106   1     4      0        T2
+    7   7    FARGO  107   1     9      0        T7
+    8   8    FARGO  108   1    19      0       T17
+    9   9    FARGO  109   1    12      0       T10
+    10 10    FARGO  110   1     1      1       CK1
+
+When `checks` is supplied, the field book gains an `ENTRY` column (a
+stable entry id for every check and test entry) and a `CHECKS` column
+(`0` for test entries, and a positive check index for each check)
+alongside the usual `ID`, `LOCATION`, `PLOT`, `REP` and `TREATMENT`
+columns.
+
+``` r
+
+plot(rcbd_checks)
+```
+
+![](rcbd_files/figure-html/unnamed-chunk-16-1.png)
+
+With `spread_checks = TRUE` (the default), the repeated copies of each
+check are placed one per contiguous stratum of the block. This greatly
+reduces the odds of two copies landing side by side compared to placing
+the whole block with no restriction (`spread_checks = FALSE`) — measured
+across many simulated blocks, about 21.6% of blocks had two copies of a
+check adjacent with spreading on, versus about 62.1% with spreading off.
+Spreading is not a guarantee, though: because strata are contiguous
+ranges of plots, two copies can still end up next to each other right at
+a stratum boundary. How often that happens depends on check density —
+roughly 1.6% of blocks for this vignette’s own example, rising to
+roughly 22.8% at 33% check density and roughly 69% at 50% check density.
+In short, spreading places one copy per stratum and substantially
+lowers, but does not eliminate, the chance of adjacent copies.

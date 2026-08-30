@@ -15,7 +15,10 @@ RCBD(
   planter = "serpentine",
   seed = NULL,
   locationNames = NULL,
-  data = NULL
+  data = NULL,
+  checks = NULL,
+  rep_checks = NULL,
+  spread_checks = TRUE
 )
 ```
 
@@ -62,6 +65,31 @@ RCBD(
 
   (optional) Data frame with the labels of treatments.
 
+- checks:
+
+  (optional) Checks to repeat within every block. Either a positive
+  integer `N`, meaning the first `N` entries of `data` (or of a
+  character vector `t`) are the checks, or a character vector of check
+  labels. `checks` sits after `data` in the argument list (rather than
+  next to `t`, where it might otherwise go) precisely so that `data`
+  keeps its original positional slot and existing positional calls to
+  `RCBD()` keep working unchanged. By default `checks = NULL`, which
+  produces an ordinary RCBD.
+
+- rep_checks:
+
+  (optional) Number of times each check is repeated within every block.
+  A single value is recycled across all checks, or supply one value per
+  check. By default `rep_checks = NULL`, which is treated as 1 for every
+  check.
+
+- spread_checks:
+
+  (optional) Logical. When `TRUE` (the default), the repeated copies of
+  each check are spread across the block by placing one copy in each of
+  `rep_checks` contiguous strata. When `FALSE`, the whole block is
+  randomized without restriction.
+
 ## Value
 
 A list with five elements.
@@ -72,12 +100,56 @@ A list with five elements.
 
 - `plotNumber` is the plot number layout for each location.
 
-- `fieldBook` is a data frame with the RCBD field book design.
+- `fieldBook` is a data frame with the RCBD field book design. Without
+  `checks` it has columns `ID`, `LOCATION`, `PLOT`, `REP` and
+  `TREATMENT`. When `checks` is supplied it gains `ENTRY` and `CHECKS`
+  columns, ordered `ID`, `LOCATION`, `PLOT`, `REP`, `ENTRY`, `CHECKS`,
+  `TREATMENT`.
+
+## Details
+
+When `checks` is supplied, one or more checks are repeated multiple
+times within every block, while every test entry still appears exactly
+once. In a classical RCBD, the residual is the treatment-by-block
+interaction; repeating checks inside a block instead supplies a
+within-block estimate of error and a form of local control.
+
+`checks` accepts either a single positive integer `N` (the first `N`
+entries of `data`, or of a character vector `t`, are the checks) or a
+character vector of check labels. When a pool of entries is supplied
+through `data` or a character `t`, every label named in `checks` must
+already exist in that pool; an unmatched label is an error that also
+names the closest case-insensitive match, if any. When `t` is a bare
+count (no pool supplied), the check labels are new and are appended to
+the auto-generated test entries.
+
+`rep_checks` sets how many times each check repeats within a block: a
+single value is recycled across all checks, or one value can be supplied
+per check.
+
+A block (test entries plus repeated checks) larger than 10,000 plots is
+rejected.
+
+With `spread_checks = TRUE` (the default), the repeated copies of a
+check are placed one per contiguous stratum of the block, so they are
+spread across it rather than clustered together. Two distinct density
+facts apply here: as soon as checks occupy more than 50 percent of the
+block, a warning is issued as an early caution, but randomization itself
+remains effectively unconstrained up to about 67 percent check density;
+only from about 78 percent and higher does the stratified-placement
+constraint leave few or no alternative positions, so a repeated check's
+placement can become nearly or fully deterministic rather than random.
+This is a property of the stratified-placement geometry, not a bug, and
+most field trials use far lower check density than either threshold.
 
 ## References
 
 Federer, W. T. (1955). Experimental Design. Theory and Application. New
 York, USA. The Macmillan Company.
+
+Lin, C.S., & Poushinsky, G. (1985). A modified augmented design (type 2)
+for rectangular plots. Canadian Journal of Plant Science, 65(3),
+743-749.
 
 ## Author
 
@@ -216,7 +288,7 @@ rcbd2 <- RCBD(reps = 6, l = 1,
               seed = 13, 
               locationNames = "IBAGUE",
               data = treatment_list)
-rcbd2$infoDesign                  
+rcbd2$infoDesign
 #> $blocks
 #> [1] 6
 #> 
@@ -285,4 +357,66 @@ head(rcbd2$fieldBook)
 #> 5  5   IBAGUE  105   1      ND-6
 #> 6  6   IBAGUE  106   1     ND-14
 
+# Example 3: RCBD with two checks repeated twice in each of 3 blocks,
+# alongside 18 test entries. Block size is 18 + 2 + 2 = 22 plots.
+rcbd3 <- RCBD(t = 18, reps = 3,
+              checks = c("CK1", "CK2"),
+              rep_checks = c(2, 2),
+              plotNumber = 101,
+              seed = 1234,
+              locationNames = "FARGO")
+rcbd3$infoDesign
+#> $blocks
+#> [1] 3
+#> 
+#> $number.of.treatments
+#> [1] 18
+#> 
+#> $treatments
+#>  [1] "T1"  "T2"  "T3"  "T4"  "T5"  "T6"  "T7"  "T8"  "T9"  "T10" "T11" "T12"
+#> [13] "T13" "T14" "T15" "T16" "T17" "T18"
+#> 
+#> $checks
+#> [1] 2
+#> 
+#> $check_names
+#> [1] "CK1" "CK2"
+#> 
+#> $rep_checks
+#> [1] 2 2
+#> 
+#> $plots_per_block
+#> [1] 22
+#> 
+#> $spread_checks
+#> [1] TRUE
+#> 
+#> $locations
+#> [1] 1
+#> 
+#> $plotNumber
+#> [1] 101 201 301
+#> 
+#> $locationNames
+#> [1] "FARGO"
+#> 
+#> $seed
+#> [1] 1234
+#> 
+#> $id_design
+#> [1] 2
+#> 
+head(rcbd3$fieldBook)
+#>   ID LOCATION PLOT REP ENTRY CHECKS TREATMENT
+#> 1  1    FARGO  101   1     7      0        T5
+#> 2  2    FARGO  102   1     8      0        T6
+#> 3  3    FARGO  103   1    18      0       T16
+#> 4  4    FARGO  104   1     6      0        T4
+#> 5  5    FARGO  105   1     2      2       CK2
+#> 6  6    FARGO  106   1     4      0        T2
+# Each check appears twice per block, every test entry exactly once:
+table(subset(rcbd3$fieldBook, REP == 1)$TREATMENT)
+#> 
+#> CK1 CK2  T1 T10 T11 T12 T13 T14 T15 T16 T17 T18  T2  T3  T4  T5  T6  T7  T8  T9 
+#>   2   2   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1 
 ```

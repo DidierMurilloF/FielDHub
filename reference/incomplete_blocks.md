@@ -112,12 +112,12 @@ ibd1$infoDesign
 #> 
 head(ibd1$fieldBook)
 #>   ID LOCATION PLOT REP IBLOCK UNIT ENTRY TREATMENT
-#> 1  1        1  101   1      1    1     9       G-9
-#> 2  2        1  102   1      1    2     5       G-5
-#> 3  3        1  103   1      1    3     6       G-6
-#> 4  4        1  104   1      1    4    12      G-12
-#> 5  5        1  105   1      2    1     2       G-2
-#> 6  6        1  106   1      2    2    11      G-11
+#> 1  1        1  101   1      1    1    11      G-11
+#> 2  2        1  102   1      1    2     7       G-7
+#> 3  3        1  103   1      1    3     4       G-4
+#> 4  4        1  104   1      1    4     9       G-9
+#> 5  5        1  105   1      2    1     5       G-5
+#> 6  6        1  106   1      2    2     8       G-8
 
 # Example 2: Generates a balanced resolvable IBD of characteristics (t,k,r) = (15,3,7).
 # In this case, we show how to use the option data.
@@ -164,10 +164,10 @@ ibd2$infoDesign
 #> 
 head(ibd2$fieldBook)
 #>   ID LOCATION PLOT REP IBLOCK UNIT ENTRY TREATMENT
-#> 1  1        1  101   1      1    1     1      TX-1
-#> 2  2        1  102   1      1    2    11     TX-11
-#> 3  3        1  103   1      1    3    13     TX-13
-#> 4  4        1  104   1      2    1     3      TX-3
-#> 5  5        1  105   1      2    2    14     TX-14
-#> 6  6        1  106   1      2    3     4      TX-4
+#> 1  1        1  101   1      1    1     4      TX-4
+#> 2  2        1  102   1      1    2     8      TX-8
+#> 3  3        1  103   1      1    3     5      TX-5
+#> 4  4        1  104   1      2    1    10     TX-10
+#> 5  5        1  105   1      2    2     3      TX-3
+#> 6  6        1  106   1      2    3     9      TX-9
 ```

@@ -347,6 +347,71 @@ function <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="ext
 <p><br><br></p>
 </div>
 </div>
+<div class="section level2">
+<h2 id="rcbd-with-repeated-checks">RCBD with repeated checks<a class="anchor" aria-label="anchor" href="#rcbd-with-repeated-checks"></a>
+</h2>
+<p>In a classical RCBD, the residual is the treatment-by-block
+interaction, estimated by comparing each treatment’s performance across
+blocks. Repeating one or more checks inside every block gives an
+additional, within-block estimate of error and a form of local control
+that a design with each treatment appearing only once per block cannot
+provide. <code><a href="../reference/RCBD.html">RCBD()</a></code> supports this through three extra
+arguments: <code>checks</code> (a count or a vector of check labels),
+<code>rep_checks</code> (how many times each check repeats per block),
+and <code>spread_checks</code> (whether the repeated copies are spread
+across the block or placed with no restriction).</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">rcbd_checks</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/RCBD.html">RCBD</a></span><span class="op">(</span></span>
+<span>  t <span class="op">=</span> <span class="fl">18</span>,</span>
+<span>  reps <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  checks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CK1"</span>, <span class="st">"CK2"</span><span class="op">)</span>,</span>
+<span>  rep_checks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>  plotNumber <span class="op">=</span> <span class="fl">101</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">1234</span>,</span>
+<span>  locationNames <span class="op">=</span> <span class="st">"FARGO"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>Here, <code>t = 18</code> test entries are automatically labeled
+<code>T1</code>…<code>T18</code>, and the two checks <code>"CK1"</code>
+and <code>"CK2"</code> are each repeated twice per block
+(<code>rep_checks = c(2, 2)</code>), so every block has
+<code>18 + 2 + 2 = 22</code> plots.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">rcbd_checks</span><span class="op">$</span><span class="va">fieldBook</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
+<pre><code>   ID LOCATION PLOT REP ENTRY CHECKS TREATMENT
+1   1    FARGO  101   1     7      0        T5
+2   2    FARGO  102   1     8      0        T6
+3   3    FARGO  103   1    18      0       T16
+4   4    FARGO  104   1     6      0        T4
+5   5    FARGO  105   1     2      2       CK2
+6   6    FARGO  106   1     4      0        T2
+7   7    FARGO  107   1     9      0        T7
+8   8    FARGO  108   1    19      0       T17
+9   9    FARGO  109   1    12      0       T10
+10 10    FARGO  110   1     1      1       CK1</code></pre>
+<p>When <code>checks</code> is supplied, the field book gains an
+<code>ENTRY</code> column (a stable entry id for every check and test
+entry) and a <code>CHECKS</code> column (<code>0</code> for test
+entries, and a positive check index for each check) alongside the usual
+<code>ID</code>, <code>LOCATION</code>, <code>PLOT</code>,
+<code>REP</code> and <code>TREATMENT</code> columns.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">rcbd_checks</span><span class="op">)</span></span></code></pre></div>
+<p><img src="rcbd_files/figure-html/unnamed-chunk-16-1.png" class="r-plt" alt="" width="691.2" style="display: block; margin: auto;"></p>
+<p>With <code>spread_checks = TRUE</code> (the default), the repeated
+copies of each check are placed one per contiguous stratum of the block.
+This greatly reduces the odds of two copies landing side by side
+compared to placing the whole block with no restriction
+(<code>spread_checks = FALSE</code>) — measured across many simulated
+blocks, about 21.6% of blocks had two copies of a check adjacent with
+spreading on, versus about 62.1% with spreading off. Spreading is not a
+guarantee, though: because strata are contiguous ranges of plots, two
+copies can still end up next to each other right at a stratum boundary.
+How often that happens depends on check density — roughly 1.6% of blocks
+for this vignette’s own example, rising to roughly 22.8% at 33% check
+density and roughly 69% at 50% check density. In short, spreading places
+one copy per stratum and substantially lowers, but does not eliminate,
+the chance of adjacent copies.</p>
+</div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>

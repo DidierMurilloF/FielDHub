@@ -296,15 +296,15 @@ print(head(sparse_example$allocation, 10))
 ```
 
        LOC1 LOC2 LOC3 LOC4 LOC5
-    1     1    1    0    1    1
-    2     1    1    1    0    1
-    3     1    1    0    1    1
+    1     1    0    1    1    1
+    2     0    1    1    1    1
+    3     0    1    1    1    1
     4     1    1    1    1    0
-    5     1    1    1    0    1
+    5     1    1    1    1    0
     6     1    1    0    1    1
     7     1    0    1    1    1
     8     0    1    1    1    1
-    9     1    1    1    1    0
+    9     1    1    1    0    1
     10    1    1    1    0    1
 
 We can manipulate the sparse_allocation object as any other list in R.
@@ -345,16 +345,16 @@ which outputs:
 
      10 First observations of the data frame with the diagonal_arrangement field book: 
        ID           EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-    1   1 SparseTest2023    FARGO 2026    1   1      1      0    34      G-34
-    2   2 SparseTest2023    FARGO 2026    2   1      2      0    83      G-83
-    3   3 SparseTest2023    FARGO 2026    3   1      3      0    59      G-59
+    1   1 SparseTest2023    FARGO 2026    1   1      1      0    35      G-35
+    2   2 SparseTest2023    FARGO 2026    2   1      2      0    76      G-76
+    3   3 SparseTest2023    FARGO 2026    3   1      3      0    54      G-54
     4   4 SparseTest2023    FARGO 2026    4   1      4    261   261    CH-261
-    5   5 SparseTest2023    FARGO 2026    5   1      5      0   220     G-220
-    6   6 SparseTest2023    FARGO 2026    6   1      6      0    65      G-65
-    7   7 SparseTest2023    FARGO 2026    7   1      7      0   188     G-188
-    8   8 SparseTest2023    FARGO 2026    8   1      8      0    22      G-22
-    9   9 SparseTest2023    FARGO 2026    9   1      9      0   235     G-235
-    10 10 SparseTest2023    FARGO 2026   10   1     10      0   238     G-238
+    5   5 SparseTest2023    FARGO 2026    5   1      5      0   215     G-215
+    6   6 SparseTest2023    FARGO 2026    6   1      6      0    58      G-58
+    7   7 SparseTest2023    FARGO 2026    7   1      7      0   181     G-181
+    8   8 SparseTest2023    FARGO 2026    8   1      8      0    24      G-24
+    9   9 SparseTest2023    FARGO 2026    9   1      9      0   232     G-232
+    10 10 SparseTest2023    FARGO 2026   10   1     10      0   235     G-235
 
 #### Access to `sparse_example` object
 
@@ -381,16 +381,16 @@ head(field_book, 10)
 ```
 
        ID           EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-    1   1 SparseTest2023    FARGO 2026    1   1      1      0    34      G-34
-    2   2 SparseTest2023    FARGO 2026    2   1      2      0    83      G-83
-    3   3 SparseTest2023    FARGO 2026    3   1      3      0    59      G-59
+    1   1 SparseTest2023    FARGO 2026    1   1      1      0    35      G-35
+    2   2 SparseTest2023    FARGO 2026    2   1      2      0    76      G-76
+    3   3 SparseTest2023    FARGO 2026    3   1      3      0    54      G-54
     4   4 SparseTest2023    FARGO 2026    4   1      4    261   261    CH-261
-    5   5 SparseTest2023    FARGO 2026    5   1      5      0   220     G-220
-    6   6 SparseTest2023    FARGO 2026    6   1      6      0    65      G-65
-    7   7 SparseTest2023    FARGO 2026    7   1      7      0   188     G-188
-    8   8 SparseTest2023    FARGO 2026    8   1      8      0    22      G-22
-    9   9 SparseTest2023    FARGO 2026    9   1      9      0   235     G-235
-    10 10 SparseTest2023    FARGO 2026   10   1     10      0   238     G-238
+    5   5 SparseTest2023    FARGO 2026    5   1      5      0   215     G-215
+    6   6 SparseTest2023    FARGO 2026    6   1      6      0    58      G-58
+    7   7 SparseTest2023    FARGO 2026    7   1      7      0   181     G-181
+    8   8 SparseTest2023    FARGO 2026    8   1      8      0    24      G-24
+    9   9 SparseTest2023    FARGO 2026    9   1      9      0   232     G-232
+    10 10 SparseTest2023    FARGO 2026   10   1     10      0   235     G-235
 
 #### Plot field layout
 

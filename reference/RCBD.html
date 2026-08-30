@@ -78,7 +78,10 @@
 <span>  planter <span class="op">=</span> <span class="st">"serpentine"</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  locationNames <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  data <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  data <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  checks <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  rep_checks <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  spread_checks <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -121,18 +124,75 @@
 <dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
 <dd><p>(optional) Data frame with the labels of treatments.</p></dd>
 
+
+<dt id="arg-checks">checks<a class="anchor" aria-label="anchor" href="#arg-checks"></a></dt>
+<dd><p>(optional) Checks to repeat within every block. Either a positive
+integer <code>N</code>, meaning the first <code>N</code> entries of <code>data</code> (or of a
+character vector <code>t</code>) are the checks, or a character vector of check
+labels. <code>checks</code> sits after <code>data</code> in the argument list (rather than
+next to <code>t</code>, where it might otherwise go) precisely so that <code>data</code>
+keeps its original positional slot and existing positional calls to
+<code>RCBD()</code> keep working unchanged. By default <code>checks = NULL</code>, which
+produces an ordinary RCBD.</p></dd>
+
+
+<dt id="arg-rep-checks">rep_checks<a class="anchor" aria-label="anchor" href="#arg-rep-checks"></a></dt>
+<dd><p>(optional) Number of times each check is repeated within
+every block. A single value is recycled across all checks, or supply one
+value per check. By default <code>rep_checks = NULL</code>, which is treated as 1
+for every check.</p></dd>
+
+
+<dt id="arg-spread-checks">spread_checks<a class="anchor" aria-label="anchor" href="#arg-spread-checks"></a></dt>
+<dd><p>(optional) Logical. When <code>TRUE</code> (the default), the
+repeated copies of each check are spread across the block by placing one
+copy in each of <code>rep_checks</code> contiguous strata. When <code>FALSE</code>, the
+whole block is randomized without restriction.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A list with five elements.</p><ul><li><p><code>infoDesign</code> is a list with information on the design parameters.</p></li>
 <li><p><code>layoutRandom</code> is the RCBD layout randomization for each location.</p></li>
 <li><p><code>plotNumber</code> is the plot number layout for each location.</p></li>
-<li><p><code>fieldBook</code> is a data frame with the RCBD field book design.</p></li>
+<li><p><code>fieldBook</code> is a data frame with the RCBD field book design. Without
+  <code>checks</code> it has columns <code>ID</code>, <code>LOCATION</code>, <code>PLOT</code>, <code>REP</code> and
+  <code>TREATMENT</code>. When <code>checks</code> is supplied it gains <code>ENTRY</code> and
+  <code>CHECKS</code> columns, ordered <code>ID</code>, <code>LOCATION</code>, <code>PLOT</code>, <code>REP</code>,
+  <code>ENTRY</code>, <code>CHECKS</code>, <code>TREATMENT</code>.</p></li>
 </ul></div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>When <code>checks</code> is supplied, one or more checks are repeated multiple times within
+every block, while every test entry still appears exactly once. In a classical RCBD,
+the residual is the treatment-by-block interaction; repeating checks inside a block
+instead supplies a within-block estimate of error and a form of local control.</p>
+<p><code>checks</code> accepts either a single positive integer <code>N</code> (the first <code>N</code>
+entries of <code>data</code>, or of a character vector <code>t</code>, are the checks) or a
+character vector of check labels. When a pool of entries is supplied through <code>data</code>
+or a character <code>t</code>, every label named in <code>checks</code> must already exist in that
+pool; an unmatched label is an error that also names the closest case-insensitive match,
+if any. When <code>t</code> is a bare count (no pool supplied), the check labels are new and
+are appended to the auto-generated test entries.</p>
+<p><code>rep_checks</code> sets how many times each check repeats within a block: a single value
+is recycled across all checks, or one value can be supplied per check.</p>
+<p>A block (test entries plus repeated checks) larger than 10,000 plots is rejected.</p>
+<p>With <code>spread_checks = TRUE</code> (the default), the repeated copies of a check are placed
+one per contiguous stratum of the block, so they are spread across it rather than
+clustered together. Two distinct density facts apply here: as soon as checks occupy more
+than 50 percent of the block, a warning is issued as an early caution, but randomization
+itself remains effectively unconstrained up to about 67 percent check density; only from
+about 78 percent and higher does the stratified-placement constraint leave few or no
+alternative positions, so a repeated check's placement can become nearly or fully
+deterministic rather than random. This is a property of the stratified-placement geometry,
+not a bug, and most field trials use far lower check density than either threshold.</p>
+    </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Federer, W. T. (1955). Experimental Design. Theory and Application. New York, USA. The
 Macmillan Company.</p>
+<p>Lin, C.S., &amp; Poushinsky, G. (1985). A modified augmented design (type 2) for
+rectangular plots. Canadian Journal of Plant Science, 65(3), 743-749.</p>
     </div>
     <div class="section level2">
     <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>
@@ -275,7 +335,7 @@ Macmillan Company.</p>
 <span class="r-in"><span>              seed <span class="op">=</span> <span class="fl">13</span>, </span></span>
 <span class="r-in"><span>              locationNames <span class="op">=</span> <span class="st">"IBAGUE"</span>,</span></span>
 <span class="r-in"><span>              data <span class="op">=</span> <span class="va">treatment_list</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">rcbd2</span><span class="op">$</span><span class="va">infoDesign</span>                  </span></span>
+<span class="r-in"><span><span class="va">rcbd2</span><span class="op">$</span><span class="va">infoDesign</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $blocks</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 6</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -344,6 +404,68 @@ Macmillan Company.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5  5   IBAGUE  105   1      ND-6</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6  6   IBAGUE  106   1     ND-14</span>
 <span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Example 3: RCBD with two checks repeated twice in each of 3 blocks,</span></span></span>
+<span class="r-in"><span><span class="co"># alongside 18 test entries. Block size is 18 + 2 + 2 = 22 plots.</span></span></span>
+<span class="r-in"><span><span class="va">rcbd3</span> <span class="op">&lt;-</span> <span class="fu">RCBD</span><span class="op">(</span>t <span class="op">=</span> <span class="fl">18</span>, reps <span class="op">=</span> <span class="fl">3</span>,</span></span>
+<span class="r-in"><span>              checks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CK1"</span>, <span class="st">"CK2"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>              rep_checks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>              plotNumber <span class="op">=</span> <span class="fl">101</span>,</span></span>
+<span class="r-in"><span>              seed <span class="op">=</span> <span class="fl">1234</span>,</span></span>
+<span class="r-in"><span>              locationNames <span class="op">=</span> <span class="st">"FARGO"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">rcbd3</span><span class="op">$</span><span class="va">infoDesign</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $blocks</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $number.of.treatments</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 18</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $treatments</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "T1"  "T2"  "T3"  "T4"  "T5"  "T6"  "T7"  "T8"  "T9"  "T10" "T11" "T12"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13] "T13" "T14" "T15" "T16" "T17" "T18"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $checks</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $check_names</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "CK1" "CK2"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $rep_checks</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $plots_per_block</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 22</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $spread_checks</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $locations</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $plotNumber</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 101 201 301</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $locationNames</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "FARGO"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $seed</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1234</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $id_design</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">rcbd3</span><span class="op">$</span><span class="va">fieldBook</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ID LOCATION PLOT REP ENTRY CHECKS TREATMENT</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1  1    FARGO  101   1     7      0        T5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2  2    FARGO  102   1     8      0        T6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3  3    FARGO  103   1    18      0       T16</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4  4    FARGO  104   1     6      0        T4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5  5    FARGO  105   1     2      2       CK2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6  6    FARGO  106   1     4      0        T2</span>
+<span class="r-in"><span><span class="co"># Each check appears twice per block, every test entry exactly once:</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">rcbd3</span><span class="op">$</span><span class="va">fieldBook</span>, <span class="va">REP</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span><span class="op">$</span><span class="va">TREATMENT</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> CK1 CK2  T1 T10 T11 T12 T13 T14 T15 T16 T17 T18  T2  T3  T4  T5  T6  T7  T8  T9 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   2   2   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1 </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
