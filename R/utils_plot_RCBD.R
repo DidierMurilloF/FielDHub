@@ -9,26 +9,26 @@
 #' @param NewBook A data frame containing the field book data for a single location. Typically, this is a subset
 #'   of the FielDHub fieldBook.
 #' @param plots A numeric or character vector representing the plot identifiers.
-#' @param n_TrtGen An integer specifying the total number of treatments.
+#' @param n_units An integer specifying the number of plots in each block.
 #' @param n_Reps An integer specifying the number of replicates (blocks).
 #' @param planter A character string indicating the plot numbering scheme.
 #' @noRd
-generate_vertical_layout <- function(NewBook, plots, n_TrtGen, n_Reps, planter) {
+generate_vertical_layout <- function(NewBook, plots, n_units, n_Reps, planter) {
   layouts <- list()
 
-  # 1) Basic vertical layout: (n_Reps) rows, (n_TrtGen) columns
+  # 1) Basic vertical layout: (n_Reps) rows, (n_units) columns
   basic_df <- NewBook |>
     dplyr::mutate(
-      ROW = rep(1:n_Reps, each = n_TrtGen),
-      COLUMN = rep(1:n_TrtGen, times = n_Reps)
+      ROW = rep(1:n_Reps, each = n_units),
+      COLUMN = rep(1:n_units, times = n_Reps)
     )
   layouts[["basic_vertical"]] <- basic_df
 
   # 2) Extended vertical factor-based layouts
-  pf <- numbers::primeFactors(n_TrtGen)
+  pf <- numbers::primeFactors(n_units)
   if (length(pf) >= 2) {
     factor_combos <- as.data.frame(
-      factor_subsets(n_TrtGen, all_factors = TRUE)$comb_factors
+      factor_subsets(n_units, all_factors = TRUE)$comb_factors
     )
     for (i in seq_len(nrow(factor_combos))) {
       s1 <- as.numeric(factor_combos[i, 1])
@@ -55,7 +55,7 @@ generate_vertical_layout <- function(NewBook, plots, n_TrtGen, n_Reps, planter) 
   # 3) Single-column layout (all plots in a single column) as the LAST option
   single_column_df <- NewBook |>
     dplyr::mutate(
-      ROW = 1:(n_TrtGen * n_Reps),
+      ROW = 1:(n_units * n_Reps),
       COLUMN = 1
     )
   layouts[["single_column"]] <- single_column_df
@@ -75,24 +75,24 @@ generate_vertical_layout <- function(NewBook, plots, n_TrtGen, n_Reps, planter) 
 #' @param NewBook A data frame containing the field book data for a single location. Typically, this is a subset
 #'   of the FielDHub fieldBook.
 #' @param plots A numeric or character vector representing the plot identifiers.
-#' @param n_TrtGen An integer specifying the total number of treatments.
+#' @param n_units An integer specifying the number of plots in each block.
 #' @param n_Reps An integer specifying the number of replicates (blocks).
 #' @param planter A character string indicating the plot numbering scheme.
 #' @noRd
-generate_horizontal_layout <- function(NewBook, plots, n_TrtGen, n_Reps, planter) {
+generate_horizontal_layout <- function(NewBook, plots, n_units, n_Reps, planter) {
   layouts <- list()
 
   # B. Basic horizontal grid
   basic_horizontal_df <- NewBook |>
     dplyr::mutate(
-      ROW    = rep(1:n_TrtGen, times = n_Reps),
-      COLUMN = rep(1:n_Reps, each = n_TrtGen)
+      ROW    = rep(1:n_units, times = n_Reps),
+      COLUMN = rep(1:n_Reps, each = n_units)
     )
   layouts[["basic_horizontal"]] <- basic_horizontal_df
 
   # C. Extended factor-based layouts
   factor_combos <- as.data.frame(
-    factor_subsets(n_TrtGen, all_factors = TRUE)$comb_factors
+    factor_subsets(n_units, all_factors = TRUE)$comb_factors
   )
   if (nrow(factor_combos) > 0) {
     for (i in seq_len(nrow(factor_combos))) {
@@ -136,7 +136,7 @@ generate_horizontal_layout <- function(NewBook, plots, n_TrtGen, n_Reps, planter
 #' This function generates various row-column layout options for a randomized complete block design (RCBD) using data from a FielDHub object. It then optionally plots the selected layout with \pkg{desplot}, creating both a field layout plot (showing treatments) and a plot-number layout plot (showing plot IDs).
 #'
 #' @param x An object containing the RCBD \code{fieldBook} data. Typically a FielDHub object.
-#' @param n_TrtGen A numeric value specifying the total number of treatments.
+#' @param n_units An integer specifying the number of plots in each block.
 #' @param n_Reps A numeric value specifying the number of replicates (blocks).
 #' @param layout An integer indicating which layout option to select from the generated list of possible layouts.
 #' @param stacked A character string specifying how plots should be arranged.
@@ -150,7 +150,7 @@ generate_horizontal_layout <- function(NewBook, plots, n_TrtGen, n_Reps, planter
 #' Internally, the function generates multiple layout possibilities for each location in the \code{x$fieldBook} data. These layouts can vary based on how treatments and replicates are arranged into rows and columns.
 #'
 #' \itemize{
-#'   \item For \strong{vertical} stacking, the function generates a basic vertical layout plus additional factor-based layouts (if \code{n_TrtGen} has multiple prime factors).
+#'   \item For \strong{vertical} stacking, the function generates a basic vertical layout plus additional factor-based layouts (if the number of plots per block has multiple prime factors).
 #'   \item For \strong{horizontal} stacking, the function includes a single-column layout, a basic grid layout, and any factor-based layouts.
 #' }
 #'
@@ -171,7 +171,7 @@ generate_horizontal_layout <- function(NewBook, plots, n_TrtGen, n_Reps, planter
 #' }
 #' @noRd
 plot_RCBD <- function(x = NULL,
-                      n_TrtGen = NULL,
+                      n_units = NULL,
                       n_Reps = NULL,
                       layout = 1,
                       stacked = "horizontal",
@@ -193,9 +193,9 @@ plot_RCBD <- function(x = NULL,
 
     # Generate all layout possibilities (vertical or horizontal)
     if (stacked == "vertical") {
-      layout_list <- generate_vertical_layout(NewBook, plots, n_TrtGen, n_Reps, planter)
+      layout_list <- generate_vertical_layout(NewBook, plots, n_units, n_Reps, planter)
     } else if (stacked == "horizontal") {
-      layout_list <- generate_horizontal_layout(NewBook, plots, n_TrtGen, n_Reps, planter)
+      layout_list <- generate_horizontal_layout(NewBook, plots, n_units, n_Reps, planter)
     } else {
       stop("Invalid stacking option provided.")
     }
@@ -250,11 +250,12 @@ plot_RCBD <- function(x = NULL,
       }
     }
     allSitesFieldbook <- dplyr::bind_rows(allSites)
-    # Reorder columns (example from your old code)
-    allSitesFieldbook <- allSitesFieldbook[, c(1:3, 6, 7, 4:5)]
-
-    # Also reorder df in the same manner
-    df <- df[, c(1:3, 6, 7, 4:5)]
+    # Reorder columns by name so a wider field book cannot scramble them
+    layout_order <- c("ID", "LOCATION", "PLOT", "ROW", "COLUMN",
+                      "REP", "ENTRY", "CHECKS", "TREATMENT")
+    keep <- intersect(layout_order, names(df))
+    allSitesFieldbook <- allSitesFieldbook[, keep]
+    df <- df[, keep]
 
     # Prepare for desplot
     rows <- max(as.numeric(df$ROW))
@@ -263,15 +264,23 @@ plot_RCBD <- function(x = NULL,
     main <- paste0(ds, rows, "X", cols)
 
     # Plot field layout
-    p1 <- plot_desplot(
-      TREATMENT ~ COLUMN + ROW,
-      data = df,
+    p1_args <- list(
+      form        = TREATMENT ~ COLUMN + ROW,
+      data        = df,
       out1.string = "REP",
-      out2.gpar  = list(col = "black", lty = 3),
+      out2.gpar   = list(col = "black", lwd = 1, lty = 3),
       text.string = "TREATMENT",
-      main       = main,
-      extra_args = dots
+      main        = main,
+      extra_args  = dots
     )
+    if ("CHECKS" %in% names(df)) {
+      # Same idiom as utils_plot_diagonal_arrangement.R:24-28 - colour the plot
+      # text by check status and outline the check plots.
+      p1_args$data$CHECKS <- as.character(p1_args$data$CHECKS)
+      p1_args$col.string  <- "CHECKS"
+      p1_args$out2.string <- "CHECKS"
+    }
+    p1 <- do.call(plot_desplot, p1_args)
 
     # Plot number layout
     df$REP <- as.factor(df$REP)

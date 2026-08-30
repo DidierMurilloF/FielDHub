@@ -143,12 +143,13 @@ plot_layout <- function(
             return(list(out_layout = return$p1, out_layoutPlots = return$p2, fieldBookXY = return$df, 
                         newBooks = return$newBooks, allSitesFieldbook = return$allSitesFieldbook))
         } else if (x$infoDesign$id_design == 2) {
-            n_TrtGen <- dplyr::n_distinct(x$fieldBook$TREATMENT)
-            n_Reps <- dplyr::n_distinct(x$fieldBook$REP)
-            return <- plot_RCBD(..., x = x, n_TrtGen = n_TrtGen, 
-                                n_Reps = n_Reps, 
-                                layout = layout, 
-                                planter = planter, 
+            n_Reps  <- dplyr::n_distinct(x$fieldBook$REP)
+            n_locs  <- dplyr::n_distinct(x$fieldBook$LOCATION)
+            n_units <- nrow(x$fieldBook) / (n_Reps * n_locs)
+            return <- plot_RCBD(..., x = x, n_units = n_units,
+                                n_Reps = n_Reps,
+                                layout = layout,
+                                planter = planter,
                                 stacked = stacked,
                                 l = l)
             if (is.null(return)) return(NULL)
@@ -157,7 +158,7 @@ plot_layout <- function(
         } else if (x$infoDesign$id_design == 4 & x$infoDesign$kind == "RCBD") {
             n_TrtGen <- dplyr::n_distinct(x$fieldBook$TRT_COMB)
             n_Reps <- dplyr::n_distinct(x$fieldBook$REP)
-            return <- plot_RCBD(..., x = x, n_TrtGen = n_TrtGen, n_Reps = n_Reps, layout = layout, 
+            return <- plot_RCBD(..., x = x, n_units = n_TrtGen, n_Reps = n_Reps, layout = layout,
                             planter = planter, stacked = stacked, l = l)
             if (is.null(return)) return(NULL)
             return(list(out_layout = return$p1, out_layoutPlots = return$p2, fieldBookXY = return$df, 

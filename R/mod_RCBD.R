@@ -50,6 +50,27 @@ mod_RCBD_ui <- function(id) {
         numericInput(inputId = ns("b"), 
                      label = "Input # of Full Reps:", 
                      value = 3, min = 2),
+        checkboxInput(inputId = ns("use_checks_rcbd"),
+                      label = "Add repeated checks?",
+                      value = FALSE),
+        conditionalPanel(
+          condition = "input.use_checks_rcbd == true",
+          ns = ns,
+          fluidRow(
+            column(6, style = list("padding-right: 28px;"),
+                   numericInput(inputId = ns("n_checks_rcbd"),
+                                label = "Input # of Checks:",
+                                value = 2, min = 1)),
+            column(6, style = list("padding-left: 5px;"),
+                   textInput(inputId = ns("rep_checks_rcbd"),
+                             label = "Reps per Check:",
+                             value = "2"))
+          ),
+          checkboxInput(inputId = ns("spread_checks_rcbd"),
+                        label = "Spread checks within each block",
+                        value = TRUE),
+          uiOutput(ns("block_size_rcbd"))
+        ),
         
         numericInput(inputId = ns("l.rcbd"), 
                      label = "Input # of Locations:", 
@@ -141,6 +162,77 @@ mod_RCBD_ui <- function(id) {
     )
   )
 }
+#' Parse the "Input # of Checks" numeric input
+#'
+#' @description
+#' A single, shared validator for `n_checks_rcbd` so the module never hands a
+#' negative or fractional count to `seq_len()` (which errors with an opaque
+#' "argument must be coercible to non-negative integer" message) or to
+#' `rep()`/`rcbd_resolve_entries()` downstream.
+#'
+#' @param x The raw `n_checks_rcbd` input value.
+#' @return A list with `ok` (logical), `value` (an integer when `ok`), and
+#'   `message` (a user-facing string when `!ok`).
+#' @noRd
+parse_n_checks <- function(x) {
+  if (is.null(x) || length(x) == 0 || is.na(x)) {
+    return(list(ok = FALSE, value = NULL,
+                message = "Input # of Checks cannot be blank."))
+  }
+  if (x %% 1 != 0 || x < 1) {
+    return(list(ok = FALSE, value = NULL,
+                message = "Input # of Checks must be a whole number of 1 or more."))
+  }
+  list(ok = TRUE, value = as.integer(x), message = NULL)
+}
+
+#' Parse the "Reps per Check" text input
+#'
+#' @description
+#' Strictly parses a comma-separated list of reps-per-check. A single value is
+#' legal and is recycled across `n_checks`; any other length must match
+#' `n_checks` exactly. A token that does not parse as a number is reported by
+#' name rather than silently dropped (which used to leave one value behind
+#' and silently recycle it). Shared by `rcbd_inputs()` and the block-size
+#' preview so both give the same answer for the same text.
+#'
+#' @param text The raw `rep_checks_rcbd` input value.
+#' @param n_checks Number of checks the value must ultimately cover.
+#' @return A list with `ok` (logical), `value` (a numeric vector of length
+#'   `n_checks` when `ok`), and `message` (a user-facing string when `!ok`).
+#' @noRd
+parse_rep_checks <- function(text, n_checks) {
+  if (is.null(text) || !nzchar(trimws(text))) {
+    return(list(ok = FALSE, value = NULL,
+                message = "Reps per Check cannot be blank."))
+  }
+  tokens <- trimws(strsplit(text, ",")[[1]])
+  if (length(tokens) == 0 || any(!nzchar(tokens))) {
+    return(list(ok = FALSE, value = NULL,
+                message = paste0(
+                  "Reps per Check has an empty value in \"", text, "\". ",
+                  "Use a single number, or one comma-separated number per check.")))
+  }
+  vals <- suppressWarnings(as.numeric(tokens))
+  bad <- tokens[is.na(vals)]
+  if (length(bad) > 0) {
+    return(list(ok = FALSE, value = NULL,
+                message = paste0(
+                  "Reps per Check could not read \"",
+                  paste(bad, collapse = "\", \""), "\" as a number.")))
+  }
+  if (length(vals) == 1) {
+    return(list(ok = TRUE, value = rep(vals, n_checks), message = NULL))
+  }
+  if (length(vals) != n_checks) {
+    return(list(ok = FALSE, value = NULL,
+                message = sprintf(
+                  "Reps per Check must have 1 value or %d values (one per check); got %d.",
+                  n_checks, length(vals))))
+  }
+  list(ok = TRUE, value = vals, message = NULL)
+}
+
 #' RCBD Server Functions
 #'
 #' @noRd 
@@ -191,9 +283,20 @@ mod_RCBD_server <- function(id) {
       } else {
         req(input$t)
         nt <- as.numeric(input$t)
-        df <- data.frame(list(TREATMENT = paste0("G-", 1:nt)))
-        colnames(df) <- "TREATMENT"
-        data_rcbd <- df
+        if (isTRUE(input$use_checks_rcbd)) {
+          if (is.null(input$n_checks_rcbd)) return(NULL)  # UI not rendered yet
+          n_ck_parsed <- parse_n_checks(input$n_checks_rcbd)
+          if (!n_ck_parsed$ok) {
+            shinyalert::shinyalert("Error!!", n_ck_parsed$message, type = "error")
+            return(NULL)
+          }
+          n_ck <- n_ck_parsed$value
+          # Checks lead the pool, matching mod_RCBD_augmented.R:299-301.
+          labels <- c(paste0("CH", seq_len(n_ck)), paste0("G-", seq_len(nt)))
+        } else {
+          labels <- paste0("G-", seq_len(nt))
+        }
+        data_rcbd <- data.frame(TREATMENT = labels)
         return(list(data_rcbd = data_rcbd, treatments = nt))
       }
     }) |>
@@ -220,15 +323,42 @@ mod_RCBD_server <- function(id) {
       sites <- as.numeric(input$l.rcbd)
       continuous <- input$continuous.plot
 
+      use_checks <- isTRUE(input$use_checks_rcbd)
+      n_checks <- NULL
+      rep_checks <- NULL
+      spread_checks <- TRUE
+      if (use_checks) {
+        if (is.null(input$n_checks_rcbd) || is.null(input$rep_checks_rcbd)) {
+          req(FALSE)  # UI not rendered yet; nothing to validate
+        }
+        n_ck_parsed <- parse_n_checks(input$n_checks_rcbd)
+        if (!n_ck_parsed$ok) {
+          shinyalert::shinyalert("Error!!", n_ck_parsed$message, type = "error")
+          req(FALSE)
+        }
+        n_checks <- n_ck_parsed$value
+        rep_parsed <- parse_rep_checks(input$rep_checks_rcbd, n_checks)
+        if (!rep_parsed$ok) {
+          shinyalert::shinyalert("Error!!", rep_parsed$message, type = "error")
+          req(FALSE)
+        }
+        rep_checks <- rep_parsed$value
+        spread_checks <- isTRUE(input$spread_checks_rcbd)
+      }
+
       return(list(
-        r = r, 
-        t = treatments, 
+        r = r,
+        t = treatments,
         planter = planter,
-        plot_start = plot_start, 
+        plot_start = plot_start,
         sites = sites,
         site_names = site_names,
         continuous = continuous,
-        seed = seed)
+        seed = seed,
+        use_checks = use_checks,
+        n_checks = n_checks,
+        rep_checks = rep_checks,
+        spread_checks = spread_checks)
         )
     }) |>
       bindEvent(input$RUN.rcbd)
@@ -245,7 +375,7 @@ mod_RCBD_server <- function(id) {
                     bordered = TRUE,
                     align = 'c',
                     striped = TRUE),
-        h4("Note that only the TREATMENT column is required."),
+        h4("Note that only the TREATMENT column is required. When repeated checks are enabled, the first rows of the file are taken as the checks."),
         easyClose = FALSE
       )
     }
@@ -270,21 +400,60 @@ mod_RCBD_server <- function(id) {
       
       shinyjs::show(id = "downloadCsv.rcbd")
       
-      RCBD(
-        t = rcbd_inputs()$t, 
-        reps = rcbd_inputs()$r, 
-        l = rcbd_inputs()$sites, 
-        plotNumber = rcbd_inputs()$plot_start, 
-        continuous = rcbd_inputs()$continuous,
-        planter = rcbd_inputs()$planter, 
-        seed = rcbd_inputs()$seed, 
-        locationNames = rcbd_inputs()$site_names, 
-        data = get_data_rcbd()$data_rcbd
+      result <- tryCatch(
+        RCBD(
+          t = rcbd_inputs()$t,
+          reps = rcbd_inputs()$r,
+          l = rcbd_inputs()$sites,
+          plotNumber = rcbd_inputs()$plot_start,
+          continuous = rcbd_inputs()$continuous,
+          planter = rcbd_inputs()$planter,
+          seed = rcbd_inputs()$seed,
+          locationNames = rcbd_inputs()$site_names,
+          checks = if (rcbd_inputs()$use_checks) rcbd_inputs()$n_checks else NULL,
+          rep_checks = if (rcbd_inputs()$use_checks) rcbd_inputs()$rep_checks else NULL,
+          spread_checks = rcbd_inputs()$spread_checks,
+          data = get_data_rcbd()$data_rcbd
+        ),
+        error = function(e) {
+          shinyalert::shinyalert("Error!!", conditionMessage(e), type = "error")
+          NULL
+        }
       )
+      req(result)
+
+      result
 
     })  |>
       bindEvent(input$RUN.rcbd)
-    
+
+    output$block_size_rcbd <- renderUI({
+      req(input$use_checks_rcbd)
+      # On the upload path the pool comes from the file and the checks are carved
+      # out of it, so `input$t` says nothing about the block size. Only predict it
+      # for the manually generated entry list.
+      if (!identical(input$owndatarcbd, "No")) {
+        return(helpText(
+          "Block size depends on the uploaded list: its first rows are taken as the checks."
+        ))
+      }
+      req(input$t, input$b)
+      if (is.null(input$n_checks_rcbd) || is.null(input$rep_checks_rcbd)) {
+        return(NULL)  # UI not rendered yet
+      }
+      n_ck_parsed <- parse_n_checks(input$n_checks_rcbd)
+      if (!n_ck_parsed$ok) {
+        return(helpText(n_ck_parsed$message))
+      }
+      rep_parsed <- parse_rep_checks(input$rep_checks_rcbd, n_ck_parsed$value)
+      if (!rep_parsed$ok) {
+        return(helpText(rep_parsed$message))
+      }
+      n_units <- as.numeric(input$t) + sum(rep_parsed$value)
+      helpText(sprintf("Block size: %d plots. Total: %d plots.",
+                       n_units, n_units * as.numeric(input$b)))
+    })
+
     output$well_panel_layout_RCBD <- renderUI({
       req(RCBD_reactive()$fieldBook)
       obj_rcbd <- RCBD_reactive()
@@ -485,29 +654,37 @@ mod_RCBD_server <- function(id) {
     
     heatmap_obj <- reactive({
       req(simuDataRCBD()$df)
-      if (ncol(simuDataRCBD()$df) == 8) {
+      trait <- as.character(valsRCBD$trail.rcbd)
+      # Was `ncol(df) == 8`, which silently failed once the field book widened
+      # for repeated checks. What it always meant was "has simulated data".
+      if (length(trait) == 1 && trait %in% colnames(simuDataRCBD()$df)) {
         locs <- factor(simuDataRCBD()$df$LOCATION, 
                        levels = unique(simuDataRCBD()$df$LOCATION))
         locLevels <- levels(locs)
         df = subset(simuDataRCBD()$df, LOCATION == locLevels[locNum()])
         loc <- levels(factor(df$LOCATION))
-        trail <- as.character(valsRCBD$trail.rcbd)
-        label_trail <- paste(trail, ": ")
-        heatmapTitle <- paste("Heatmap for ", trail)
+        label_trail <- paste(trait, ": ")
+        heatmapTitle <- paste("Heatmap for ", trait)
+        check_txt <- if ("CHECKS" %in% names(df)) {
+          paste0("Check: ", ifelse(df$CHECKS != 0, "yes", "no"), "\n")
+        } else {
+          ""
+        }
         new_df <- df |>
-          dplyr::mutate(text = paste0("Site: ", loc, "\n", 
-                                      "Row: ", df$ROW, "\n", 
-                                      "Col: ", df$COLUMN, "\n", 
-                                      "Entry: ", df$ENTRY, "\n", 
-                                      label_trail, round(df[,8],2)))
-        w <- as.character(valsRCBD$trail.rcbd)
-        new_df$ROW <- as.factor(new_df$ROW) # Set up ROWS as factors
-        new_df$COLUMN <- as.factor(new_df$COLUMN) # Set up COLUMNS as factors
+          dplyr::mutate(text = paste0("Site: ", loc, "\n",
+                                      "Row: ", df$ROW, "\n",
+                                      "Col: ", df$COLUMN, "\n",
+                                      "Treatment: ", df$TREATMENT, "\n",
+                                      check_txt,
+                                      label_trail, round(df[[trait]], 2)))
+        w <- trait
+        new_df$ROW <- as.factor(new_df$ROW)
+        new_df$COLUMN <- as.factor(new_df$COLUMN)
         p1 <- ggplot2::ggplot(
           new_df, ggplot2::aes(
-            x = new_df[,5], 
-            y = new_df[,4], 
-            fill = new_df[,8], 
+            x = new_df$COLUMN,
+            y = new_df$ROW,
+            fill = new_df[[trait]],
             text = text)) +
           ggplot2::geom_tile() +
           ggplot2::xlab("COLUMN") +
@@ -585,7 +762,11 @@ mod_RCBD_server <- function(id) {
       if (input$typlotRCBD == 2) {
         export_layout(df, locNum(), TRUE)
       } else {
-        export_layout(df, locNum())
+        # The on-screen map (plot_RCBD(), utils_plot_RCBD.R) labels plots with
+        # TREATMENT, checks included, so the exported CSV must match it
+        # instead of falling back to ENTRY when a checks design adds that
+        # column.
+        export_layout(df, locNum(), type_pref = "TREATMENT")
       }
     })
     

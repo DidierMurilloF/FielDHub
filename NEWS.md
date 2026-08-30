@@ -7,6 +7,18 @@
 
 ### New features:
 
+- `RCBD()` gains `checks`, `rep_checks` and `spread_checks`, generating a
+  randomized complete block design in which a set of checks is repeated more
+  than once inside every block while each test entry still appears exactly
+  once. `checks` accepts either a count (the leading rows of `data`) or a
+  vector of labels; `rep_checks` sets how often each check repeats per block;
+  `spread_checks` (default `TRUE`) places the repeated copies of a check one
+  per contiguous stratum so they span the block whatever row-by-column layout
+  is chosen. When `checks` is supplied, the field book gains `ENTRY` and
+  `CHECKS` columns and, as for the other check-based designs, the app's layout
+  CSV export then shows entry numbers rather than treatment labels. Designs
+  generated without `checks` are unchanged, seeds included.
+
 - `row_column()` now optimizes the rows and columns jointly in a single
   stage by default (`method = "onestage"`, using
   `blocksdesign::design()`), which typically raises the joint
@@ -89,6 +101,10 @@
   drawing its labels with a `ggplot2::geom_text()` overlay on top of
   desplot, now uses the native `desplot` arguments as well, so its check
   entries are still highlighted in red but no longer in bold.
+- Fixed the RCBD heatmap in the Shiny app, which decided whether simulated data
+  existed by counting columns (`ncol(df) == 8`) and so went blank for any wider
+  field book, and whose tooltip read an `ENTRY` column that the RCBD field book
+  never had.
 
 # FielDHub 1.3.1
 
