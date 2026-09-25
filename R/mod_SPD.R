@@ -61,11 +61,15 @@ mod_SPD_ui <- function(id) {
                               value = 1, min = 1)
           )
         ),
-        selectInput(inputId = ns("planter_mov_spd"), 
-          label = "Plot Order Layout:",
-          choices = c("serpentine", "cartesian"), 
-          multiple = FALSE,
-          selected = "serpentine"),
+        # The RCBD-type layouts number whole plots in a fixed order, so the
+        # plot order only applies to the CRD type
+        conditionalPanel("input.kindSPD == 'SPD_CRD'", ns = ns,
+          selectInput(inputId = ns("planter_mov_spd"), 
+            label = "Plot Order Layout:",
+            choices = c("serpentine", "cartesian"), 
+            multiple = FALSE,
+            selected = "serpentine")
+        ),
         fluidRow(
           column(6, style=list("padding-right: 28px;"),
                  textInput(ns("plot_start.spd"), "Starting Plot Number:", 

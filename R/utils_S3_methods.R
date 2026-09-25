@@ -726,6 +726,9 @@ print.fieldLayout <- function(x, ...) {
 #'   type of design and its characteristics
 #'   \item \code{l} a integer to specify the location to plot.
 #'   \item \code{planter} it can be \code{serpentine} or \code{cartesian}.
+#'   It has no effect on split-plot and split-split-plot designs in
+#'   complete blocks (\code{type = 2}), whose whole plots are numbered in a
+#'   fixed order.
 #'   \item \code{stacked} it can be \code{vertical} or \code{horizontal} stacked layout.
 #' } 
 #' @author Didier Murillo [aut]
