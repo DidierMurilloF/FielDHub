@@ -55,3 +55,19 @@ test_that("DBUDC numbers plots in the order of exptName, whatever the names", {
   last_plot <- tapply(fb$PLOT, fb$EXPT, max)[expt_names]
   expect_true(all(last_plot[-length(expt_names)] < first_plot[-1]))
 })
+
+test_that("DBUDC randomizes a block that holds a single entry", {
+  # Regression test: blocks were filled with sample(entries), and for a block
+  # holding one numeric entry such as 5, sample(5) returns a permutation of
+  # 1:5, so the block got the wrong entry and R warned about the length.
+  for (split in c("row", "column")) {
+    diag <- diagonal_arrangement(
+      nrows = 20, ncols = 25, lines = 400, checks = 4, kindExpt = "DBUDC",
+      splitBy = split, blocks = c(1, 399), plotNumber = 1, seed = 1
+    )
+    fb <- diag$fieldBook
+    tests <- fb[fb$CHECKS == 0, ]
+    expect_equal(tests$ENTRY[tests$EXPT == "Block1"], 5, info = split)
+    expect_setequal(tests$ENTRY, 5:404)
+  }
+})

@@ -33,7 +33,7 @@ get_random_stacked <- function(stacked = "By Column",
   split_entries <- split_vectors(data_entries_no_checks, data_dim_each_block)
   z <- 1
   for(k in 1:b){
-    matrix_checks[matrix_checks == levels_target[z]] <- sample(split_entries[[k]])
+    matrix_checks[matrix_checks == levels_target[z]] <- split_entries[[k]][sample.int(length(split_entries[[k]]))]
     z <- z + 1
   }
   
