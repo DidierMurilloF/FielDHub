@@ -47,6 +47,8 @@ stack_reps <- function(x_list, repsStack = c("vertical", "horizontal")) {
 #' @importFrom stats runif na.omit
 #' 
 #' 
+#' @param year (optional) Year recorded in the \code{YEAR} column of the field book.
+#' By default the current year.
 #' @return A list with five elements.
 #' \itemize{
 #'   \item \code{infoDesign} is a list with information on the design parameters.
@@ -101,7 +103,8 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
                            repsStack = c("vertical", "horizontal"),
                            exptName = NULL, seed = NULL, locationNames = NULL, 
                            repsExpt = 1, random = TRUE, data = NULL, 
-                           nrows = NULL, ncols = NULL) {
+                           nrows = NULL, ncols = NULL, year = NULL) {
+  year <- resolve_year(year)
   repsStack <- match.arg(repsStack)
   if (all(c("serpentine", "cartesian") != planter)) {
     stop("Input planter choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
@@ -527,7 +530,6 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
     }
     
     results_to_export <- list(layout1, plot_number, Col_checks, my_names, Blocks_info)
-    year <- format(Sys.Date(), "%Y")
     outputDesign <- export_design(
       G = results_to_export,
       movement_planter = planter,

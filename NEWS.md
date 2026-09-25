@@ -44,6 +44,12 @@
 
 ### Enhancements:
 
+- `diagonal_arrangement()`, `optimized_arrangement()`,
+  `partially_replicated()`, `RCBD_augmented()`, `sparse_allocation()` and
+  `multi_location_prep()` gain a `year` argument that sets the `YEAR` column
+  of the field book. It defaults to the current year, as before; setting it
+  makes the field book independent of the date the design is generated, which
+  the internal field-book builder previously ignored.
 - `plot()` on a design object now passes additional arguments through
   to `desplot::desplot()`, so the field map can be customized in place -
   for example `plot(design, col.regions = ...)` to change the fill

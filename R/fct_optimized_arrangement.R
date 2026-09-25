@@ -28,6 +28,8 @@
 #'         Richard Horsley [ctb]
 #' 
 #' 
+#' @param year (optional) Year recorded in the \code{YEAR} column of the field book.
+#' By default the current year.
 #' @return A list with five elements.
 #' \itemize{
 #'   \item \code{infoDesign} is a list with information on the design parameters.
@@ -106,7 +108,9 @@ optimized_arrangement <- function(
     exptName = NULL,
     locationNames = NULL, 
     spread_reps = TRUE, 
-    data = NULL) {
+    data = NULL,
+    year = NULL) {
+    year <- resolve_year(year)
     
     if (is.null(seed) || !is.numeric(seed)) seed <- runif(1, min = -50000, max = 50000)
     if (all(c("serpentine", "cartesian") != planter)) {
@@ -337,7 +341,6 @@ optimized_arrangement <- function(
             plot_number_L <- as.matrix(plot_number_L)
             Col_checks <- as.matrix(BINAY_CHECKS)
             my_names <- as.matrix(split_name_spat()$my_names)
-            year <- format(Sys.Date(), "%Y")
             my_data_VLOOKUP <- prep$gen.list
             results_to_export <- list(random_entries_map, plot_number_L, Col_checks, my_names)
             final_expt_export <- export_design(

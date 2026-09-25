@@ -44,6 +44,8 @@
 #' 
 #' 
 #' 
+#' @param year (optional) Year recorded in the \code{YEAR} column of the field book.
+#' By default the current year.
 #' @return A list with several elements.
 #' \itemize{
 #'   \item \code{infoDesign} is a list with information on the design parameters.
@@ -134,7 +136,9 @@ partially_replicated <- function(
     dist_method = "euclidean",
     border_penalization = 0.5,
     data = NULL,
-    allow_fillers = FALSE) {
+    allow_fillers = FALSE,
+    year = NULL) {
+    year <- resolve_year(year)
     
     if (all(c("serpentine", "cartesian") != planter)) {
         base::stop('Input "planter" is unknown. Please, choose one: "serpentine" or "cartesian"')
@@ -390,7 +394,6 @@ partially_replicated <- function(
             plot_number_L <- as.matrix(plot_number_L)
             Col_checks <- as.matrix(BINAY_CHECKS)
             my_names <- as.matrix(split_name_spat()$my_names)
-            year <- format(Sys.Date(), "%Y")
             my_data_VLOOKUP <- prep$gen.list
             if (fillers[sites] > 0) {
                 filler_entry <- data.frame(

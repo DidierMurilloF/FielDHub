@@ -20,7 +20,8 @@ partially_replicated(
   dist_method = "euclidean",
   border_penalization = 0.5,
   data = NULL,
-  allow_fillers = FALSE
+  allow_fillers = FALSE,
+  year = NULL
 )
 }
 \arguments{
@@ -41,10 +42,6 @@ partially_replicated(
 \item{spread_reps}{A logical value indicating whether to maximize the spatial 
 distance between replicated treatments in the field. Default is \code{TRUE}.}
 
-\item{allow_fillers}{A logical value indicating whether field dimensions may
-exceed the number of experimental plots. Fillers occupy the terminal cells
-of the selected planter path. Default is \code{FALSE}.}
-
 \item{seed}{(optional) Real number that specifies the starting seed to obtain reproducible designs.}
 
 \item{exptName}{(optional) Name of the experiment.}
@@ -61,6 +58,13 @@ By default \code{multiLocationData = FALSE}.}
 \item{data}{(optional) Data frame with 3 columns: \code{ENTRY | NAME | REPS}. If
 \code{multiLocationData = TRUE} then the \code{data} must have
 4 columns: \code{LOCATION | ENTRY | NAME | REPS}}
+
+\item{allow_fillers}{A logical value indicating whether field dimensions may
+exceed the number of experimental plots. Fillers occupy the terminal cells
+of the selected planter path. Default is \code{FALSE}.}
+
+\item{year}{(optional) Year recorded in the \code{YEAR} column of the field book.
+By default the current year.}
 }
 \value{
 A list with several elements.

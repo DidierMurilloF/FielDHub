@@ -19,7 +19,8 @@ RCBD_augmented(
   random = TRUE,
   data = NULL,
   nrows = NULL,
-  ncols = NULL
+  ncols = NULL,
+  year = NULL
 )
 }
 \arguments{
@@ -52,6 +53,9 @@ RCBD_augmented(
 \item{nrows}{(optional) Number of rows in the field.}
 
 \item{ncols}{(optional) Number of columns in the field.}
+
+\item{year}{(optional) Year recorded in the \code{YEAR} column of the field book.
+By default the current year.}
 }
 \value{
 A list with five elements.

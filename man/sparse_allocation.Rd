@@ -17,7 +17,8 @@ sparse_allocation(
   locationNames,
   sparse_list,
   seed,
-  data = NULL
+  data = NULL,
+  year = NULL
 )
 }
 \arguments{
@@ -49,6 +50,9 @@ When design is \code{sparse} then \code{copies_per_entry} < \code{l}}
 \item{seed}{(optional) Real number that specifies the starting seed to obtain reproducible designs.}
 
 \item{data}{(optional) Data frame with 2 columns: \code{ENTRY | NAME }. ENTRY must be numeric.}
+
+\item{year}{(optional) Year recorded in the \code{YEAR} column of the field book.
+By default the current year.}
 }
 \value{
 A list with eight elements.

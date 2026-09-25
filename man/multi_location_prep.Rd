@@ -22,7 +22,8 @@ multi_location_prep(
   spread_reps = TRUE,
   data = NULL,
   allow_fillers = FALSE,
-  max_fillers = NULL
+  max_fillers = NULL,
+  year = NULL
 )
 }
 \arguments{
@@ -66,6 +67,9 @@ of the selected planter path. Default is \code{FALSE}.}
 \item{max_fillers}{Maximum number of filler plots considered when dimensions
 are selected automatically. When \code{NULL}, up to 10 filler plots are
 considered.}
+
+\item{year}{(optional) Year recorded in the \code{YEAR} column of the field book.
+By default the current year.}
 }
 \value{
 A list of class \code{FielDHub} with several elements.

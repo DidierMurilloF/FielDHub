@@ -33,6 +33,8 @@
 #'         Richard Horsley [ctb]
 #' 
 #' 
+#' @param year (optional) Year recorded in the \code{YEAR} column of the field book.
+#' By default the current year.
 #' @return A list with five elements.
 #' \itemize{
 #'   \item \code{infoDesign} is a list with information on the design parameters.
@@ -132,7 +134,9 @@ diagonal_arrangement <- function(
     exptName = NULL, 
     locationNames = NULL, 
     multiLocationData = FALSE,
-    data = NULL) {
+    data = NULL,
+    year = NULL) {
+    year <- resolve_year(year)
   
     if (all(c("serpentine", "cartesian") != planter)) {
         base::stop('Input for planter is unknown. Please, choose one: "serpentine" or "cartesian"')
@@ -519,7 +523,6 @@ diagonal_arrangement <- function(
         }
         my_export_design <- function(){
 
-            year <- format(Sys.Date(), "%Y")
             
             if (is.null(data_random$rand)) base::stop("Random matrix is missing.")
             if (is.null(rand_checks$col_checks)) base::stop("checks matrix is missing.")

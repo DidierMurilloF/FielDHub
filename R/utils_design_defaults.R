@@ -28,3 +28,17 @@ warn_default_location_names <- function(locationNames, l, default) {
           " location(s); using the default names ",
           paste(default, collapse = ", "), ".", call. = FALSE)
 }
+
+#' Year recorded in the YEAR column of a field book
+#'
+#' @param year Year given by the user, or NULL for the current year.
+#'
+#' @return The year as a character string.
+#' @noRd
+resolve_year <- function(year) {
+  if (is.null(year)) return(format(Sys.Date(), "%Y"))
+  if (length(year) != 1 || is.na(year)) {
+    stop("'year' must be a single value, such as 2026.", call. = FALSE)
+  }
+  as.character(year)
+}

@@ -19,7 +19,8 @@ diagonal_arrangement(
   exptName = NULL,
   locationNames = NULL,
   multiLocationData = FALSE,
-  data = NULL
+  data = NULL,
+  year = NULL
 )
 }
 \arguments{
@@ -59,6 +60,9 @@ If \code{kindExpt = 'DBUDC'} and data is null, \code{blocks} are mandatory.}
 By default \code{multiLocationData = FALSE}.}
 
 \item{data}{(optional) Data frame with 2 columns: \code{ENTRY | NAME }.}
+
+\item{year}{(optional) Year recorded in the \code{YEAR} column of the field book.
+By default the current year.}
 }
 \value{
 A list with five elements.

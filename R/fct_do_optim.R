@@ -267,6 +267,8 @@ do_optim <- function(
 #'         Salvador Gezan [aut],
 #'         Ana Heilman [ctb]
 #' 
+#' @param year (optional) Year recorded in the \code{YEAR} column of the field book.
+#' By default the current year.
 #' @return A list with eight elements.
 #' \itemize{
 #'   \item \code{infoDesign} is a list with information on the design parameters.
@@ -307,7 +309,9 @@ sparse_allocation <- function(
     locationNames,
     sparse_list, 
     seed,
-    data = NULL) {
+    data = NULL,
+    year = NULL) {
+    year <- resolve_year(year)
     # set a random seed if it is missing
     if (missing(seed)) seed <- base::sample.int(10000, size = 1) 
     if (missing(l)) stop("Please, define the number of locations for this design.")
@@ -401,7 +405,8 @@ sparse_allocation <- function(
         exptName = exptName,
         seed = seed,
         multiLocationData= TRUE,
-        data = unrep
+        data = unrep,
+        year = year
     )
     unrep_designs$infoDesign$id_design <- "Sparse"
     output <- list(
@@ -448,6 +453,8 @@ sparse_allocation <- function(
 #'         Jean-Marc Montpetit [ctb],
 #'         Ana Heilman [ctb]
 #' 
+#' @param year (optional) Year recorded in the \code{YEAR} column of the field book.
+#' By default the current year.
 #' @return A list of class \code{FielDHub} with several elements.
 #' \itemize{
 #'   \item \code{infoDesign} is a list with information on the design parameters.
@@ -520,7 +527,9 @@ multi_location_prep <- function(
     spread_reps = TRUE,
     data = NULL,
     allow_fillers = FALSE,
-    max_fillers = NULL) {
+    max_fillers = NULL,
+    year = NULL) {
+    year <- resolve_year(year)
     # set a random seed if it is missing
     if (missing(seed)) seed <- base::sample.int(10000, size = 1)
     if (missing(l)) stop("Please, define the number of locations for this design.")
@@ -624,7 +633,8 @@ multi_location_prep <- function(
         multiLocationData = TRUE,
         dist_method = "euclidean",
         border_penalization = 0.5,
-        data = preps$list_locs
+        data = preps$list_locs,
+        year = year
     )
     # Add this guard immediately after:
     if (is.null(design_randomization) || is.null(design_randomization$fieldBook)) {
