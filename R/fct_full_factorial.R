@@ -143,6 +143,9 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
   for (i in H) {
     trt[i] <- paste(allcomb[i,], collapse = " ")
   }
+  # Levels that contain spaces can make two combinations paste to the same
+  # label; keep the labels unique so each one maps back to its row of allcomb
+  trt <- make.unique(trt)
   design.loc <- list()
   for (locs in 1:l) {
     if (type == 1) {
@@ -157,23 +160,24 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
       kind <- "RCBD"
     }
     m1 <- cbind(m1, matrix(data = 0, nrow = nruns, ncol = nt + 1, byrow = TRUE))
-    t <- nruns * reps
-    z <- 1:t
-    for (j in z) {
-      m1[j, 4:(4 + nt - 1)] <- unlist(strsplit(as.character(m1[j,3]), " "))
-      m1[j, ncol(m1)] <- paste(m1[j, 4:(4 + nt - 1)], collapse = "*")
-    }
+    # Take the factor levels from allcomb instead of splitting the treatment
+    # label on spaces, which broke levels such as "Low N"
+    comb_rows <- allcomb[match(as.character(m1[, 3]), trt), , drop = FALSE]
+    m1[, 4:(4 + nt - 1)] <- lapply(comb_rows, as.character)
+    m1[, ncol(m1)] <- do.call(paste, c(unname(m1[, 4:(4 + nt - 1), drop = FALSE]), sep = "*"))
     design <- m1
     design <- design[,-3]
+    if (kind == "RCBD") {
+      # Sort within the location, so LOCATION can be assigned by position
+      # even when locations share plot numbers
+      design <- design[order(design$PLOT, design$REP),]
+    }
     design.loc[[locs]] <- design
   }
   design <- paste_by_row(design.loc)
   TRT <- factor(TRT, as.character(unique(TRT)))
   ColFactors <- paste("FACTOR_", levels(TRT), sep = "")
   colnames(design) <- c("PLOT", "REP", ColFactors, "TRT_COMB")
-  if (kind == "RCBD") {
-    design <- design[order(design$PLOT, design$REP),]
-  }
   nruns <- nrow(allcomb)
   design_output <- cbind(ID = 1:nrow(design), LOCATION = rep(locationNames, each = nruns * reps), design)
   levelsByFactor <- levels.by.factor
