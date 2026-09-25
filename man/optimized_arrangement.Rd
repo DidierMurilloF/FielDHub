@@ -17,7 +17,8 @@ optimized_arrangement(
   exptName = NULL,
   locationNames = NULL,
   spread_reps = TRUE,
-  data = NULL
+  data = NULL,
+  year = NULL
 )
 }
 \arguments{
@@ -47,6 +48,9 @@ optimized_arrangement(
 distance between replicated treatments in the field. Default is \code{TRUE}.}
 
 \item{data}{(optional) Data frame with 3 columns: \code{ENTRY | NAME | REPS}.}
+
+\item{year}{(optional) Year recorded in the \code{YEAR} column of the field book.
+By default the current year.}
 }
 \value{
 A list with five elements.

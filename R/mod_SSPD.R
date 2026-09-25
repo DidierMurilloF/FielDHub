@@ -79,11 +79,15 @@ mod_SSPD_ui <- function(id){
           )
         ), 
         
-        selectInput(inputId = ns("planter_mov_sspd"), 
-                    label = "Plot Order Layout:",
-                    choices = c("serpentine", "cartesian"), 
-                    multiple = FALSE,
-                    selected = "serpentine"),
+        # The RCBD-type layouts number whole plots in a fixed order, so the
+        # plot order only applies to the CRD type
+        conditionalPanel("input.kindSSPD == 'SSPD_CRD'", ns = ns,
+          selectInput(inputId = ns("planter_mov_sspd"), 
+                      label = "Plot Order Layout:",
+                      choices = c("serpentine", "cartesian"), 
+                      multiple = FALSE,
+                      selected = "serpentine")
+        ),
         
         fluidRow(
           column(6,style=list("padding-right: 28px;"),
@@ -355,11 +359,11 @@ mod_SSPD_server <- function(id){
     })
     
     observeEvent(input$stackedSSPD, {
-      req(input$stackedSPD)
+      req(input$stackedSSPD)
       obj_sspd <- sspd_reactive()
       allBooks <- try(plot_layout(x = obj_sspd, 
                                   layout = 1, 
-                                  stacked = input$stackedSPD)$newBooks, 
+                                  stacked = input$stackedSSPD)$newBooks, 
                       silent = TRUE)
       nBooks <- length(allBooks)
       NewlayoutOptions <- 1:nBooks

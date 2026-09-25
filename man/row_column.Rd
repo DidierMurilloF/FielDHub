@@ -19,7 +19,7 @@ row_column(
 )
 }
 \arguments{
-\item{t}{Number of  treatments.}
+\item{t}{Number of treatments, or a character vector with the treatment labels.}
 
 \item{nrows}{Number of rows of a full resolvable replicate.}
 

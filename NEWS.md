@@ -7,6 +7,11 @@
 
 ### New features:
 
+- `diagonal_arrangement()` gains `checksPercent`, to choose the percentage of
+  checks among the options available for the field (by default the last one,
+  as before), and `sameEntries`, for `"DBUDC"` designs whose blocks all hold
+  the same entries. `sparse_allocation()` gains `checksPercent` too. These are
+  the choices the Shiny app offers.
 - `partially_replicated()` and `multi_location_prep()` gain opt-in filler
   plots through `allow_fillers`. Filler cells follow the selected cartesian or
   serpentine planter path, remain fixed at its edge during spatial
@@ -44,6 +49,12 @@
 
 ### Enhancements:
 
+- `diagonal_arrangement()`, `optimized_arrangement()`,
+  `partially_replicated()`, `RCBD_augmented()`, `sparse_allocation()` and
+  `multi_location_prep()` gain a `year` argument that sets the `YEAR` column
+  of the field book. It defaults to the current year, as before; setting it
+  makes the field book independent of the date the design is generated, which
+  the internal field-book builder previously ignored.
 - `plot()` on a design object now passes additional arguments through
   to `desplot::desplot()`, so the field map can be customized in place -
   for example `plot(design, col.regions = ...)` to change the fill
@@ -113,6 +124,139 @@
   existed by counting columns (`ncol(df) == 8`) and so went blank for any wider
   field book, and whose tooltip read an `ENTRY` column that the RCBD field book
   never had.
+- Fixed a bug in `CRD()` where, with treatments given as a character vector,
+  every copy of a treatment was labeled with the same `REP` (all copies of
+  the first treatment in REP 1, of the second in REP 2, and so on); each
+  treatment now appears once in every replicate.
+- Fixed a bug in `diagonal_arrangement()` (`kindExpt = "DBUDC"`,
+  `splitBy = "column"`) where, with ten or more blocks, the block labels were
+  matched in alphabetical order (B1, B10, B2, ...), so the entries of one
+  block were placed in the region and under the name of another; with unequal
+  block sizes the call failed with "Some entries are missing in the
+  randomization!!".
+- Fixed a bug in `diagonal_arrangement()` (`kindExpt = "DBUDC"`) where, with
+  unequal block sizes and experiment names not in alphabetical order
+  (including the default `Block1`, ..., `Block10`), the plot numbering paired
+  sizes and names wrongly and failed with "missing value where TRUE/FALSE
+  needed".
+- Fixed a bug in `diagonal_arrangement()` (`kindExpt = "DBUDC"`) where a block
+  holding a single entry was filled with `sample(entry)`, a permutation of
+  `1:entry`, giving the block the wrong entry.
+- Fixed two bugs in `full_factorial()`: with the RCBD type, locations sharing
+  plot numbers (e.g. `plotNumber = c(101, 101)`) produced duplicated
+  `LOCATION`/`PLOT` pairs, and level labels containing spaces (e.g. "Low N")
+  were split into two values.
+- Fixed a bug in `row_column()` where every matrix in `resolvableBlocks` was
+  filled with `NA`.
+- `incomplete_blocks()`, `alpha_lattice()`, `square_lattice()`,
+  `rectangular_lattice()` and `row_column()` now keep the labels of a
+  character `t` instead of replacing them with `G-1`, ..., `G-n`, and `CRD()`,
+  `RCBD()` and these functions reject duplicated treatment labels.
+- Fixed `print()`, `summary()` and `plot()` for several designs: `print()`
+  returns the design invisibly, `summary()` shows the data input of
+  `partially_replicated()` and `optimized_arrangement()` designs and now
+  describes `sparse_allocation()` and `multi_location_prep()` designs, and
+  `plot()` explains that `split_families()` results have no field layout.
+- When `plotNumber` or `locationNames` do not have one value per location, the
+  design functions now raise a warning saying which defaults are used. Some
+  replaced them silently, and `RCBD()`, `RCBD_augmented()` and
+  `optimized_arrangement()` printed `"Since plotNumber was missing"` to the
+  console even when `plotNumber` had been supplied.
+- Clearer errors for inputs that failed with unrelated messages:
+  `latin_square(t = 1)`, `split_families()` without `l`, and
+  `sparse_allocation()` when no field dimensions fit. `CRD()` now accepts
+  treatments given as a factor, and `split_plot()` and `split_split_plot()`
+  accept a number of whole plots together with sub-plot labels.
+- Fixed a loop in the location balancing of `sparse_allocation()`,
+  `multi_location_prep()` and `do_optim()` that had no lower bound and could
+  run forever or add copies to the wrong entries; it now stops and warns when
+  some locations cannot be balanced.
+- Fixed the simulated data of the Shiny app: under unequal replication (for
+  example RCBD with repeated checks) a treatment's responses mixed several
+  distributions, the spatial simulation always used seed 0, and several
+  modules discarded or never set the simulation seed. Simulated values for a
+  given seed differ from earlier versions.
+- Fixed the Square Lattice and Optimized Arrangement modules of the Shiny app,
+  which ignored the location names typed by the user.
+- Fixed the single diagonal and sparse allocation modules of the Shiny app,
+  where changing the number of checks after randomizing redrew the entries
+  without the seed, so the layout and the downloaded field book no longer
+  matched the seed.
+- Uploading a file that cannot be read as CSV (e.g. ragged rows or an empty
+  file) now shows an error message instead of ending the Shiny session.
+- Fixed crashes and silent failures in the Shiny app: the IBD module with a
+  prime number of treatments, the strip-plot module with one replicate, and
+  text such as `"abc"` in the starting plot or factor levels of the Latin square
+  and factorial modules.
+- Fixed Shiny modules that watched or updated inputs that do not exist: the
+  split-split-plot and strip-plot layout options did not refresh after
+  changing the stacking, the p-rep, optimized arrangement and multi-location
+  p-rep modules did not return to the first tab when switching the data
+  source, and the multi-location p-rep module added a new observer on every
+  run.
+- The heatmap tooltips of the Latin square, factorial, split-plot and
+  strip-plot modules now show the treatment instead of an empty "Entry", and
+  the strip-plot heatmap follows the selected location.
+- The split-plot and split-split-plot modules now offer "Plot Order Layout"
+  only for the CRD type: the layouts in complete blocks number their whole
+  plots in a fixed order and did not use it.
+- Fixed the multiple diagonal module where, with "Repeat entries", the entry
+  names started at `G3` whatever the number of checks, so `NAME` and `ENTRY`
+  disagreed.
+- Fixed a bug in `RCBD_augmented()` where, with `random = FALSE` and filler
+  plots, the first row of the field was overwritten with the fillers and a new
+  set of all checks regardless of the blocks: a block spanning several rows
+  ended up with two sets of checks (and some lines were left out of the
+  field), and blocks sharing the first row lost most of theirs. Only the block
+  holding the fillers now has its checks redrawn, so every block has each
+  check once.
+- `RCBD_augmented()` now returns numeric `ENTRY` and `CHECKS` columns in every
+  case. `ENTRY` was character for randomized designs without fillers, and
+  `CHECKS` was character, with the string `"NA"` for filler plots, whenever
+  the field had fillers; filler plots now have `CHECKS = NA`.
+- Fixed a bug in `diagonal_arrangement()` and `sparse_allocation()` where,
+  with a cartesian planter, an even number of rows and filler plots, the
+  experiment names placed the fillers at the wrong end of the first row: one
+  check and one entry in each location got `EXPT = "Filler"` and `PLOT = 0`,
+  while the real filler plots got plot numbers. The randomization itself is
+  unchanged.
+- The single diagonal, multiple diagonal and sparse allocation modules of the
+  Shiny app now build their designs with `diagonal_arrangement()` and
+  `sparse_allocation()`, so the app and R give the same design for the same
+  inputs and seed. The modules used to re-implement the randomization and drew
+  the random numbers in a different order, so the same seed gave a different
+  design in the app. As a result, designs made in the app with a given seed
+  differ from earlier versions, generated entries are named as in R,
+  field-book IDs restart at 1 in each location, filler plots of sparse
+  allocations have `EXPT = "Filler"`, and uploaded check entries must be
+  consecutive numbers.
+- The documentation of `swap_pairs()`, `do_optim()`, `sparse_allocation()` and
+  `multi_location_prep()` now matches their defaults and the elements they
+  return.
+
+### Changes to results for a given seed:
+
+Some of the fixes above change the design produced for a given seed. Field
+books generated with FielDHub 1.5.0 or earlier should be checked if they came
+from:
+
+- `CRD()` with treatments given as a character vector (wrong `REP` labels).
+- `diagonal_arrangement()` with `kindExpt = "DBUDC"` and `splitBy = "column"`
+  with ten or more blocks (entries under the wrong experiment).
+- `full_factorial()` of the RCBD type with plot numbers shared or overlapping
+  across locations, or with level labels containing spaces.
+- `incomplete_blocks()`, `alpha_lattice()`, `square_lattice()`,
+  `rectangular_lattice()` or `row_column()` with a character `t` (the labels
+  were replaced by `G-1`, ..., `G-n`; the randomization itself is unchanged).
+- The Square Lattice and Optimized Arrangement modules of the Shiny app with
+  more than one location (the location names were ignored).
+- The single diagonal or sparse allocation modules of the Shiny app when the
+  number of checks was changed after randomizing.
+- `diagonal_arrangement()` or `sparse_allocation()` with
+  `planter = "cartesian"`, an even number of rows and filler plots (one check
+  and one entry per location labeled as fillers).
+- `RCBD_augmented()` with `random = FALSE` when the field has filler plots
+  (blocks with too many or too few checks, and possibly missing lines).
 
 # FielDHub 1.3.1
 

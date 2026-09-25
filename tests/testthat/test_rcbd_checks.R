@@ -296,6 +296,7 @@ test_that("RCBD() repeats each check the requested number of times per block", {
 
 test_that("ENTRY and CHECKS are consistent everywhere", {
   d <- RCBD(t = 5, reps = 2, l = 2, checks = "CK1", rep_checks = 2,
+            plotNumber = c(1001, 2001),
             locationNames = c("FARGO", "MINOT"), seed = 79)
   fb <- d$fieldBook
 

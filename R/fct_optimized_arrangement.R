@@ -28,6 +28,8 @@
 #'         Richard Horsley [ctb]
 #' 
 #' 
+#' @param year (optional) Year recorded in the \code{YEAR} column of the field book.
+#' By default the current year.
 #' @return A list with five elements.
 #' \itemize{
 #'   \item \code{infoDesign} is a list with information on the design parameters.
@@ -106,7 +108,9 @@ optimized_arrangement <- function(
     exptName = NULL,
     locationNames = NULL, 
     spread_reps = TRUE, 
-    data = NULL) {
+    data = NULL,
+    year = NULL) {
+    year <- resolve_year(year)
     
     if (is.null(seed) || !is.numeric(seed)) seed <- runif(1, min = -50000, max = 50000)
     if (all(c("serpentine", "cartesian") != planter)) {
@@ -121,12 +125,10 @@ optimized_arrangement <- function(
     if (!is.null(l)) {
         if (is.null(plotNumber) || length(plotNumber) != l) {
             if (l > 1){
-                plotNumber <- seq(1001, 1000*(l+1), 1000)
-            } else plotNumber <- 1001
-            message(cat("Warning message:", "\n", 
-            "Since plotNumber was missing, it was set up to default value of: ", plotNumber, "\n",
-            "\n"
-            ))
+                default_plots <- seq(1001, 1000*(l+1), 1000)
+            } else default_plots <- 1001
+            warn_default_plot_numbers(plotNumber, l, default_plots)
+            plotNumber <- default_plots
         }
     } else stop("Number of locations/sites is missing")
     
@@ -327,7 +329,10 @@ optimized_arrangement <- function(
                 fillers = 0
             )
         }
-        if (is.null(locationNames) || length(locationNames) != l) locationNames <- 1:l
+        if (is.null(locationNames) || length(locationNames) != l) {
+            if (!is.null(locationNames)) warn_default_location_names(locationNames, l, 1:l)
+            locationNames <- 1:l
+        }
         plot_num <- plot_number_spat()$w_map_letters1
         plot_number_L <- apply(plot_num, c(1,2), as.numeric)
         export_spat <- function() {
@@ -336,7 +341,6 @@ optimized_arrangement <- function(
             plot_number_L <- as.matrix(plot_number_L)
             Col_checks <- as.matrix(BINAY_CHECKS)
             my_names <- as.matrix(split_name_spat()$my_names)
-            year <- format(Sys.Date(), "%Y")
             my_data_VLOOKUP <- prep$gen.list
             results_to_export <- list(random_entries_map, plot_number_L, Col_checks, my_names)
             final_expt_export <- export_design(

@@ -59,7 +59,7 @@
 #' nested within each replicate. \code{latinize} has no effect for
 #' \code{method = "twostage"}, which cannot latinize across replicates.
 #'
-#' @param t Number of  treatments.
+#' @param t Number of treatments, or a character vector with the treatment labels.
 #' @param nrows Number of rows of a full resolvable replicate. 
 #' @param r Number of blocks (full resolvable replicates).
 #' @param l Number of locations. By default \code{l = 1}.
@@ -253,10 +253,11 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
     } else if ((length(t) > 1)) {
       nt <- length(t)
     }
-    data_up <- data.frame(list(ENTRY = 1:nt, TREATMENT = paste0("G-", 1:nt)))
+    trt_labels <- treatment_labels(t, nt, "row_column")
+    data_up <- data.frame(list(ENTRY = 1:nt, TREATMENT = trt_labels))
     colnames(data_up) <- c("ENTRY", "TREATMENT")
     lookup <- TRUE
-    df <- data.frame(list(ENTRY = 1:nt, LABEL_TREATMENT = paste0("G-", 1:nt)))
+    df <- data.frame(list(ENTRY = 1:nt, LABEL_TREATMENT = trt_labels))
     dataLookUp <- df
   } else if (!is.null(data)) {
     if (is.null(t) || is.null(r) || is.null(k) || is.null(l)) {
@@ -278,7 +279,10 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
   if (nt %% k != 0) {
     shiny::validate('Number of treatments can not be fully distributed over the specified incomplete block specification.')
   }
-  if(is.null(locationNames) || length(locationNames) != l) locationNames <- 1:l
+  if(is.null(locationNames) || length(locationNames) != l) {
+    if (!is.null(locationNames)) warn_default_location_names(locationNames, l, 1:l)
+    locationNames <- 1:l
+  }
   nunits <- k
   # For method = "onestage" with latinize = TRUE, full latinization (no treatment
   # repeating a row or a column across the replicates) is only possible when
@@ -393,7 +397,7 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
   ID <- 1:nrow(out_row_col_id)
   out_row_col_fieldbook <- cbind(ID, out_row_col_id)
   
-  loc <- levels(out_row_col_fieldbook$LOCATION)
+  loc <- locationNames
   ib <- nt/k
   Resolvable_rc_reps <- vector(mode = "list", length = r*l)
   w <- 1

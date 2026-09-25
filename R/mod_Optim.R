@@ -193,7 +193,7 @@ mod_Optim_server <- function(id) {
                         selected = loc_user_view[1])
     })
 
-    observeEvent(input$input.owndataOPTIM,
+    observeEvent(input$owndataOPTIM,
                  handlerExpr = updateTabsetPanel(session,
                                                  "tabset_optim",
                                                  selected = "tabPanel_optim"))
@@ -479,7 +479,7 @@ mod_Optim_server <- function(id) {
       
       data.spatial <- get_data_optim()$data_up.spatial
       sites <- optim_inputs()$sites
-      site_names <- optim_inputs()$site_names
+      site_names <- optim_inputs()$location_names
       seed.spatial <- optim_inputs()$seed_number
       plotNumber <- optim_inputs()$plotNumber
       movement_planter <- optim_inputs()$planter_mov
@@ -488,8 +488,6 @@ mod_Optim_server <- function(id) {
       optimized <- optimized_arrangement(
         nrows = nrows,
         ncols = ncols, 
-        amountChecks = r.checks, 
-        checks = n.checks,
         locationNames = site_names,
         planter = movement_planter,
         plotNumber = plotNumber,

@@ -15,12 +15,13 @@
 #'         Salvador Gezan [aut],
 #'         Ana Heilman [ctb]
 #' 
-#' @return A list with three elements.
+#' @return A list with four elements.
 #' \itemize{
+#'   \item \code{multi_location_data} is a data frame with the entries of every
+#'  location: \code{LOCATION | ENTRY | NAME}.
 #'   \item \code{list_locs} is a list with each location list of entries.
 #'   \item \code{allocation} is a matrix with the allocation of treatments.
-#'   \item \code{size_locations} is a data frame with one column for each 
-#'  location and one row with the size of the location.
+#'   \item \code{size_locations} is a named vector with the size of each location.
 #' }
 #' 
 #' @references
@@ -150,22 +151,7 @@ do_optim <- function(
     size_locs <- as.vector(base::colSums(allocation))
     max_size_locs <- max(size_locs)
     if (!all(size_locs == max_size_locs) & force_balance == TRUE) {
-        unbalanced_locs <- which(size_locs != max_size_locs)
-        max_swaps <- length(unbalanced_locs)
-        k <- nrow(allocation)
-        init <- 1
-        while (init <= max_swaps) {
-            # Add an additional gen copy to the unbalanced locations
-            add_gen <- as.vector(allocation[k, unbalanced_locs])
-            if (length(which(add_gen == key_value)) > 0) {
-                one_index <- which(add_gen == key_value)[1] 
-                add_gen[one_index] <- add_value
-                allocation[k, unbalanced_locs] <- add_gen
-                unbalanced_locs <- unbalanced_locs[-one_index]
-                init <- init + 1
-            }
-            k <- k - 1
-        }
+        allocation <- balance_allocation(allocation, key_value, add_value)
     }
     allocation_df <- as.data.frame.matrix(allocation)
     colnames(allocation_df) <- paste0("LOC", 1:l)
@@ -281,13 +267,21 @@ do_optim <- function(
 #'         Salvador Gezan [aut],
 #'         Ana Heilman [ctb]
 #' 
-#' @return A list with four elements.
+#' @param year (optional) Year recorded in the \code{YEAR} column of the field book.
+#' By default the current year.
+#' @param checksPercent (optional) Percentage of checks in each location, one of the
+#' options available for the field. By default the last (largest) option.
+#' @return A list with eight elements.
 #' \itemize{
-#'   \item \code{designs} is a list with each location unreplicated randomization.
+#'   \item \code{infoDesign} is a list with information on the design parameters.
+#'   \item \code{layoutRandom} is a list with the randomization layout of each location.
+#'   \item \code{plotsNumber} is a list with the plot number layout of each location.
+#'   \item \code{data_entry} is a data frame with the data input.
+#'   \item \code{fieldBook} is a data frame with the field book of all locations.
 #'   \item \code{list_locs} is a list with each location list of entries.
 #'   \item \code{allocation} is a matrix with the allocation of treatments.
-#'   \item \code{size_locations} is a data frame with one column for each 
-#'  location and one row with the size of the location.
+#'   \item \code{size_locations} is a named vector with the number of lines
+#'  allocated to each location.
 #' }
 #' 
 #' @references
@@ -300,7 +294,7 @@ do_optim <- function(
 #'   l = 4, 
 #'   copies_per_entry = 3, 
 #'   checks = 4, 
-#'   locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5"), 
+#'   locationNames = c("LOC1", "LOC2", "LOC3", "LOC4"), 
 #'   seed = 1234
 #' )
 #' @export 
@@ -317,15 +311,26 @@ sparse_allocation <- function(
     locationNames,
     sparse_list, 
     seed,
-    data = NULL) {
+    data = NULL,
+    year = NULL,
+    checksPercent = NULL) {
+    year <- resolve_year(year)
     # set a random seed if it is missing
     if (missing(seed)) seed <- base::sample.int(10000, size = 1) 
     if (missing(l)) stop("Please, define the number of locations for this design.")
     if (missing(locationNames) || length(locationNames) != l)  {
-        locationNames <- paste0("LOC", 1:l)
+        default_names <- paste0("LOC", 1:l)
+        if (!missing(locationNames)) {
+            warn_default_location_names(locationNames, l, default_names)
+        }
+        locationNames <- default_names
     }
     if (missing(plotNumber) || length(plotNumber) != l) {
-        plotNumber <- seq(1, 1000 * l, by = 1000)[1:l]
+        default_plots <- seq(1, 1000 * l, by = 1000)[1:l]
+        if (!missing(plotNumber)) {
+            warn_default_plot_numbers(plotNumber, l, default_plots)
+        }
+        plotNumber <- default_plots
     }
     if (missing(exptName)) exptName <- "SparseExpt"
     if (missing(planter) || is.null(planter)) planter <- "serpentine"
@@ -378,6 +383,9 @@ sparse_allocation <- function(
             i <- i + 1
         }
         choices <- unlist(choices_list[!sapply(choices_list, is.null)])
+        if (length(choices) == 0) {
+            stop("There are no field dimension options available. Please specify nrows and ncols.")
+        }
         dif <- vector(mode = "numeric", length = length(choices))
         for (option in 1:length(choices)) {
             dims <- unlist(strsplit(choices[[option]], " x "))
@@ -400,7 +408,9 @@ sparse_allocation <- function(
         exptName = exptName,
         seed = seed,
         multiLocationData= TRUE,
-        data = unrep
+        data = unrep,
+        year = year,
+        checksPercent = checksPercent
     )
     unrep_designs$infoDesign$id_design <- "Sparse"
     output <- list(
@@ -447,6 +457,8 @@ sparse_allocation <- function(
 #'         Jean-Marc Montpetit [ctb],
 #'         Ana Heilman [ctb]
 #' 
+#' @param year (optional) Year recorded in the \code{YEAR} column of the field book.
+#' By default the current year.
 #' @return A list of class \code{FielDHub} with several elements.
 #' \itemize{
 #'   \item \code{infoDesign} is a list with information on the design parameters.
@@ -466,9 +478,10 @@ sparse_allocation <- function(
 #'   \item \code{treatments_with_reps} is a list with the entries for the replicated part of the design.
 #'   \item \code{treatments_with_no_reps} is a list with the entries for the non-replicated part of the design.
 #'   \item \code{list_locs} is a list with each location list of entries.
+#'   \item \code{multi_location_data} is a data frame with the entries of every
+#'              location: \code{LOCATION | ENTRY | NAME | REPS}.
 #'   \item \code{allocation} is a matrix with the allocation of treatments.
-#'   \item \code{size_locations} is a data frame with one column for each 
-#'              location and one row with the size of the location.
+#'   \item \code{size_locations} is a named vector with the size of each location.
 #' }
 #'
 #' @references
@@ -496,9 +509,8 @@ sparse_allocation <- function(
 #'   locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5"), 
 #'   seed = 1234
 #' )
-#' designs <- optim_multi_prep$designs
-#' field_book_loc_1 <- designs$LOC1$fieldBook
-#' head(field_book_loc_1, 10)
+#' field_book <- optim_multi_prep$fieldBook
+#' head(subset(field_book, LOCATION == "LOC1"), 10)
 #' }
 #' @export 
 multi_location_prep <- function(
@@ -519,15 +531,25 @@ multi_location_prep <- function(
     spread_reps = TRUE,
     data = NULL,
     allow_fillers = FALSE,
-    max_fillers = NULL) {
+    max_fillers = NULL,
+    year = NULL) {
+    year <- resolve_year(year)
     # set a random seed if it is missing
     if (missing(seed)) seed <- base::sample.int(10000, size = 1)
     if (missing(l)) stop("Please, define the number of locations for this design.")
     if (missing(locationNames) || length(locationNames) != l) {
-        locationNames <- paste0("LOC", 1:l)
-    } 
+        default_names <- paste0("LOC", 1:l)
+        if (!missing(locationNames)) {
+            warn_default_location_names(locationNames, l, default_names)
+        }
+        locationNames <- default_names
+    }
     if (missing(plotNumber) || length(plotNumber) != l) {
-        plotNumber <- seq(1, 1000 * l, by = 1000)[1:l]
+        default_plots <- seq(1, 1000 * l, by = 1000)[1:l]
+        if (!missing(plotNumber)) {
+            warn_default_plot_numbers(plotNumber, l, default_plots)
+        }
+        plotNumber <- default_plots
     }
     if (missing(exptName)) exptName <- "PrepExpt"
     if (missing(planter) || is.null(planter)) planter <- "serpentine"
@@ -615,7 +637,8 @@ multi_location_prep <- function(
         multiLocationData = TRUE,
         dist_method = "euclidean",
         border_penalization = 0.5,
-        data = preps$list_locs
+        data = preps$list_locs,
+        year = year
     )
     # Add this guard immediately after:
     if (is.null(design_randomization) || is.null(design_randomization$fieldBook)) {
@@ -742,4 +765,44 @@ merge_user_data <- function(
         optim_out$list_locs <- merged_list_locs
         return(optim_out)
     }
+}
+
+#' Give each smaller location one more copy of an entry
+#'
+#' @description Walks up the rows of the allocation table, from the last
+#' entry, and gives each location that is smaller than the largest one an
+#' extra copy of the first entry it holds \code{key_value} copies of.
+#'
+#' @param allocation Table or matrix with the copies of each entry (rows)
+#'   in each location (columns).
+#' @param key_value Number of copies an entry must have in a location to
+#'   receive one more (0 for sparse, 1 for p-rep designs).
+#' @param add_value Number of copies the entry gets instead.
+#'
+#' @return The allocation, with one more copy in each smaller location when
+#'   possible.
+#' @noRd
+balance_allocation <- function(allocation, key_value, add_value) {
+    size_locs <- as.vector(base::colSums(allocation))
+    unbalanced_locs <- which(size_locs != max(size_locs))
+    max_swaps <- length(unbalanced_locs)
+    k <- nrow(allocation)
+    init <- 1
+    while (init <= max_swaps && k >= 1) {
+        # Add an additional gen copy to the unbalanced locations
+        add_gen <- as.vector(allocation[k, unbalanced_locs])
+        if (length(which(add_gen == key_value)) > 0) {
+            one_index <- which(add_gen == key_value)[1] 
+            add_gen[one_index] <- add_value
+            allocation[k, unbalanced_locs] <- add_gen
+            unbalanced_locs <- unbalanced_locs[-one_index]
+            init <- init + 1
+        }
+        k <- k - 1
+    }
+    if (init <= max_swaps) {
+        warning("The locations could not be balanced: no entry could be added to ",
+                length(unbalanced_locs), " of them.", call. = FALSE)
+    }
+    allocation
 }

@@ -336,7 +336,7 @@ mod_multi_loc_preps_server <- function(id){
             selected = loc_user_view[1])
     })
 
-    observeEvent(input$input.input_prep_data,
+    observeEvent(input$multi_prep_data,
                  handlerExpr = updateTabsetPanel(session,
                                                  "tabset_prep_avg",
                                                  selected = "tabPanel_prep_avg"))
@@ -763,21 +763,27 @@ mod_multi_loc_preps_server <- function(id){
 
 
 
+  show_dimension_inputs <- function() {
+    if (isTRUE(input$multi_dimension_toggle)) {
+      shinyjs::show(id = "multi_dimension_button")
+      shinyjs::hide(id = "dimensions_preps")
+    } else {
+      shinyjs::show(id = "dimensions_preps")
+      shinyjs::hide(id = "multi_dimension_button")
+    }
+  }
+
   observeEvent(input$run_prep, {
         req(setup_optim_prep())
        #shinyjs::show(id = "dimensions_preps")
         shinyjs::show(id = "multi_dimension_toggle")
-
-        observeEvent(input$multi_dimension_toggle, {
-          if (input$multi_dimension_toggle == TRUE) {
-            shinyjs::show(id = "multi_dimension_button")
-            shinyjs::hide(id = "dimensions_preps")
-          } else if (input$multi_dimension_toggle == FALSE) {
-            shinyjs::show(id = "dimensions_preps")
-            shinyjs::hide(id = "multi_dimension_button")
-          }
-        })
+        show_dimension_inputs()
     })
+
+  # Registered once; it used to be nested in the run_prep observer, which
+  # added a new copy of it on every click
+  observeEvent(input$multi_dimension_toggle, show_dimension_inputs(),
+               ignoreInit = TRUE)
 
     output$prep_allocation <- DT::renderDT({
         req(setup_optim_prep())

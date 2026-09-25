@@ -61,11 +61,15 @@ mod_SPD_ui <- function(id) {
                               value = 1, min = 1)
           )
         ),
-        selectInput(inputId = ns("planter_mov_spd"), 
-          label = "Plot Order Layout:",
-          choices = c("serpentine", "cartesian"), 
-          multiple = FALSE,
-          selected = "serpentine"),
+        # The RCBD-type layouts number whole plots in a fixed order, so the
+        # plot order only applies to the CRD type
+        conditionalPanel("input.kindSPD == 'SPD_CRD'", ns = ns,
+          selectInput(inputId = ns("planter_mov_spd"), 
+            label = "Plot Order Layout:",
+            choices = c("serpentine", "cartesian"), 
+            multiple = FALSE,
+            selected = "serpentine")
+        ),
         fluidRow(
           column(6, style=list("padding-right: 28px;"),
                  textInput(ns("plot_start.spd"), "Starting Plot Number:", 
@@ -480,8 +484,8 @@ mod_SPD_server <- function(id){
         label_trail <- paste(trail, ": ")
         heatmapTitle <- paste("Heatmap for ", trail)
         new_df <- df |>
-          dplyr::mutate(text = paste0("Site: ", loc, "\n", "Row: ", df$ROW, "\n", "Col: ", df$COLUMN, "\n", "Entry: ", 
-                                      df$ENTRY, "\n", label_trail, round(df[,10],2)))
+          dplyr::mutate(text = paste0("Site: ", loc, "\n", "Row: ", df$ROW, "\n", "Col: ", df$COLUMN, "\n", "Treatment: ", 
+                                      df$TRT_COMB, "\n", label_trail, round(df[,10],2)))
         w <- as.character(valspd$trail.spd)
         new_df$ROW <- as.factor(new_df$ROW) # Set up ROWS as factors
         new_df$COLUMN <- as.factor(new_df$COLUMN) # Set up COLUMNS as factors

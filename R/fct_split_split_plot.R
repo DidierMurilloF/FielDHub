@@ -91,6 +91,20 @@ split_split_plot <- function(wp = NULL, sp = NULL, ssp = NULL, reps = NULL, type
         WholePlots <- 1:wp
         SubPlots <- 1:sp
         SubSubPlots <- 1:ssp
+      }else if(is.numeric(wp) && length(wp) == 1) {
+        WholePlots <- 1:wp
+        if (length(sp) > 1) {
+          SubPlots <- sp
+          sp <- length(SubPlots)
+        } else if (is.numeric(sp)) {
+          SubPlots <- 1:sp
+        } else stop("The sub plots should be more than one.")
+        if (length(ssp) > 1) {
+          SubSubPlots <- ssp
+          ssp <- length(SubSubPlots)
+        } else if (is.numeric(ssp)) {
+          SubSubPlots <- 1:ssp
+        } else stop("The sub sub plots should be more than one.")
       }else if(all(lengths(list(wp, sp, ssp)) > 1)){
         WholePlots <- wp
         wp <- length(WholePlots)

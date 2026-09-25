@@ -44,6 +44,8 @@
 #' 
 #' 
 #' 
+#' @param year (optional) Year recorded in the \code{YEAR} column of the field book.
+#' By default the current year.
 #' @return A list with several elements.
 #' \itemize{
 #'   \item \code{infoDesign} is a list with information on the design parameters.
@@ -134,7 +136,9 @@ partially_replicated <- function(
     dist_method = "euclidean",
     border_penalization = 0.5,
     data = NULL,
-    allow_fillers = FALSE) {
+    allow_fillers = FALSE,
+    year = NULL) {
+    year <- resolve_year(year)
     
     if (all(c("serpentine", "cartesian") != planter)) {
         base::stop('Input "planter" is unknown. Please, choose one: "serpentine" or "cartesian"')
@@ -190,10 +194,12 @@ partially_replicated <- function(
     if (!is.null(l)) {
         if (is.null(plotNumber) || length(plotNumber) != l) {
             if (l > 1) {
-                plotNumber <- seq(1001, 1000*(l+1), 1000)
+                default_plots <- seq(1001, 1000*(l+1), 1000)
             } else {
-                plotNumber <- 1001
-            } 
+                default_plots <- 1001
+            }
+            warn_default_plot_numbers(plotNumber, l, default_plots)
+            plotNumber <- default_plots
         }
     } else stop("Number of locations/sites is missing")
     if (!is.null(data)) {
@@ -374,8 +380,12 @@ partially_replicated <- function(
         }
         
         if (is.null(locationNames) || length(locationNames) != l) {
-            locationNames <- paste0("LOC", 1:l)
-        } 
+            default_names <- paste0("LOC", 1:l)
+            if (!is.null(locationNames)) {
+                warn_default_location_names(locationNames, l, default_names)
+            }
+            locationNames <- default_names
+        }
         plot_num <- plot_number_spat()$w_map_letters1
         plot_number_L <- apply(plot_num, c(1,2), as.numeric)
         export_spat <- function() {
@@ -384,7 +394,6 @@ partially_replicated <- function(
             plot_number_L <- as.matrix(plot_number_L)
             Col_checks <- as.matrix(BINAY_CHECKS)
             my_names <- as.matrix(split_name_spat()$my_names)
-            year <- format(Sys.Date(), "%Y")
             my_data_VLOOKUP <- prep$gen.list
             if (fillers[sites] > 0) {
                 filler_entry <- data.frame(

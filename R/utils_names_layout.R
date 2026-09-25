@@ -708,10 +708,11 @@ plot_number <- function(planter = "serpentine",
   if (Fillers) {
     expts <- expts[!expts %in% "Filler"]
   }
-  dim_each_block <- as.vector(table(expts))
   b <- length(expe_names)
   expts_ft <- factor(expe_names, levels = unique(expe_names))
   expt_levels <- levels(expts_ft)
+  # Count plots per experiment in the order of expe_names, not alphabetically
+  dim_each_block <- as.vector(table(factor(expts, levels = expt_levels)))
   if (length(plot_number) != b) {
     start_plot <-  as.numeric(plot_number)
     serie_plot_numbers <- start_plot:(plots + start_plot - fillers)

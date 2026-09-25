@@ -8,10 +8,19 @@ load_file <- function(name, path, sep, check = FALSE, design = NULL) {
     bad_format = TRUE
     return(list(bad_format = bad_format))
   } else {
-    dataUp <- read.csv(path,
-                       header = TRUE, 
-                       sep = sep, 
-                       na.strings = c("", " ","NA"))
+    # A file read.csv() cannot parse (ragged rows, empty file) is reported
+    # like a wrong format instead of stopping the app session
+    dataUp <- tryCatch(
+      read.csv(path,
+               header = TRUE,
+               sep = sep,
+               na.strings = c("", " ","NA")),
+      error = function(e) NULL
+    )
+    if (is.null(dataUp)) {
+      bad_format = TRUE
+      return(list(bad_format = bad_format))
+    }
     dataUp <- as.data.frame(dataUp)
     if (check) {
       if (!is.null(check_input(design, dataUp))) {

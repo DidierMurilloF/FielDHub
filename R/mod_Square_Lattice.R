@@ -252,7 +252,7 @@ mod_Square_Lattice_server <- function(id){
                   planter = planter,
                   plot_start = plot_start, 
                   sites = sites,
-                  sites_names = site_names,
+                  site_names = site_names,
                   seed = seed))
     }) |>
       bindEvent(input$RUN.square)
@@ -484,14 +484,14 @@ mod_Square_Lattice_server <- function(id){
     
     
     simuDataSQUARE <- reactive({
-      set.seed(input$myseed.square)
       req(reactive_layoutSquare()$allSitesFieldbook)
       if(!is.null(valsSQUARE$maxV.square) && !is.null(valsSQUARE$minV.square) && !is.null(valsSQUARE$trail.square)) {
         max <- as.numeric(valsSQUARE$maxV.square)
         min <- as.numeric(valsSQUARE$minV.square)
         df.square <- reactive_layoutSquare()$allSitesFieldbook
         cnamesdf.square <- colnames(df.square)
-        df.square <- norm_trunc(a = min, b = max, data = df.square)
+        df.square <- norm_trunc(a = min, b = max, data = df.square,
+                                seed = square_inputs()$seed)
         colnames(df.square) <- c(cnamesdf.square[1:(ncol(df.square) - 1)], valsSQUARE$trail.square)
         a <- ncol(df.square)
       }else {

@@ -19,7 +19,10 @@ diagonal_arrangement(
   exptName = NULL,
   locationNames = NULL,
   multiLocationData = FALSE,
-  data = NULL
+  data = NULL,
+  year = NULL,
+  checksPercent = NULL,
+  sameEntries = FALSE
 )
 }
 \arguments{
@@ -59,6 +62,16 @@ If \code{kindExpt = 'DBUDC'} and data is null, \code{blocks} are mandatory.}
 By default \code{multiLocationData = FALSE}.}
 
 \item{data}{(optional) Data frame with 2 columns: \code{ENTRY | NAME }.}
+
+\item{year}{(optional) Year recorded in the \code{YEAR} column of the field book.
+By default the current year.}
+
+\item{checksPercent}{(optional) Percentage of checks, one of the options available
+for the field dimensions. By default the last (largest) option.}
+
+\item{sameEntries}{(optional) Logical. When \code{TRUE} and \code{kindExpt = "DBUDC"},
+every block holds the same entries, and all blocks must have the same size.
+By default \code{sameEntries = FALSE}.}
 }
 \value{
 A list with five elements.

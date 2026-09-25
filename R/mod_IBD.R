@@ -321,6 +321,7 @@ mod_IBD_server <- function(id) {
     
     IBD_reactive <- reactive({
       req(get_data_ibd())
+      req(ibd_inputs())
       
       shinyjs::show(id = "downloadCsv.ibd")
       
@@ -522,7 +523,8 @@ mod_IBD_server <- function(id) {
         min <- as.numeric(valsIBD$minV.ibd)
         df.ibd <- reactive_layoutIBD()$allSitesFieldbook
         cnamesdf.ibd <- colnames(df.ibd)
-        df.ibd <- norm_trunc(a = min, b = max, data = df.ibd)
+        df.ibd <- norm_trunc(a = min, b = max, data = df.ibd,
+                             seed = ibd_inputs()$seed)
         colnames(df.ibd) <- c(cnamesdf.ibd[1:(ncol(df.ibd) - 1)], 
                               valsIBD$trail.ibd)
         a <- ncol(df.ibd)

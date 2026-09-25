@@ -17,7 +17,9 @@ sparse_allocation(
   locationNames,
   sparse_list,
   seed,
-  data = NULL
+  data = NULL,
+  year = NULL,
+  checksPercent = NULL
 )
 }
 \arguments{
@@ -49,15 +51,25 @@ When design is \code{sparse} then \code{copies_per_entry} < \code{l}}
 \item{seed}{(optional) Real number that specifies the starting seed to obtain reproducible designs.}
 
 \item{data}{(optional) Data frame with 2 columns: \code{ENTRY | NAME }. ENTRY must be numeric.}
+
+\item{year}{(optional) Year recorded in the \code{YEAR} column of the field book.
+By default the current year.}
+
+\item{checksPercent}{(optional) Percentage of checks in each location, one of the
+options available for the field. By default the last (largest) option.}
 }
 \value{
-A list with four elements.
+A list with eight elements.
 \itemize{
-  \item \code{designs} is a list with each location unreplicated randomization.
+  \item \code{infoDesign} is a list with information on the design parameters.
+  \item \code{layoutRandom} is a list with the randomization layout of each location.
+  \item \code{plotsNumber} is a list with the plot number layout of each location.
+  \item \code{data_entry} is a data frame with the data input.
+  \item \code{fieldBook} is a data frame with the field book of all locations.
   \item \code{list_locs} is a list with each location list of entries.
   \item \code{allocation} is a matrix with the allocation of treatments.
-  \item \code{size_locations} is a data frame with one column for each 
- location and one row with the size of the location.
+  \item \code{size_locations} is a named vector with the number of lines
+ allocated to each location.
 }
 }
 \description{
@@ -69,7 +81,7 @@ sparse <- sparse_allocation(
   l = 4, 
   copies_per_entry = 3, 
   checks = 4, 
-  locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5"), 
+  locationNames = c("LOC1", "LOC2", "LOC3", "LOC4"), 
   seed = 1234
 )
 }

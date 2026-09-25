@@ -3,7 +3,7 @@ AR1xAR1_simulation <- function(nrows = NULL, ncols = NULL, ROX = NULL,
                                ROY = NULL, minValue = NULL, 
                                maxValue = NULL, fieldbook = NULL, 
                                trail = NULL, seed = NULL) {
-  if (!is.null(seed)) set.seed(seed) else set.seed(runif(1))
+  if (!is.null(seed)) set.seed(seed)
   rag <- diff(c(minValue, maxValue))
   sigma <- rag*0.15
   Beta <- sum(minValue, maxValue)/2
@@ -90,11 +90,10 @@ ZST <- function(n,m,RHOX,RHOY,s20) {
 
 #' @importFrom stats pnorm qnorm
 norm_trunc <- function(a = NULL, b = NULL, data = NULL, seed = NULL) {
-  set.seed(seed)
+  if (!is.null(seed)) set.seed(seed)
   if (a == b) validate('Error: Truncation range values (a, b) is empty.')
   min <- a;max <- b
   Nc <- ncol(data)
-  NameCol <- colnames(data)[Nc]
   trt.f <- factor(data[,Nc]) 
   nt <- length(levels(trt.f))
   reps <- max(table(trt.f))
@@ -107,36 +106,25 @@ norm_trunc <- function(a = NULL, b = NULL, data = NULL, seed = NULL) {
   }else eps <- 0.3
   sigma_by_T <- sigma_by_T + eps
   N <- as.vector(table(trt.f))
+  # Assign the means to the treatments at random, then draw each treatment's
+  # responses with its own number of replicates
+  trt.sample <- sample(levels(trt.f))
+  N.sample <- N[match(trt.sample, levels(trt.f))]
   resp <- vector(mode = "list", length = nt)
   z <- 1
   for (i in xbar_by_T) {
-    U <- runif(N[z], pnorm(min, i, sigma_by_T), pnorm(max, i, sigma_by_T))
+    U <- runif(N.sample[z], pnorm(min, i, sigma_by_T), pnorm(max, i, sigma_by_T))
     X <- round(qnorm(U, i, sigma_by_T),2)
     resp[[z]] <- X
     z <- z + 1
   }
-  resp_v <- unlist(resp)
-  trt.sample <- sample(levels(trt.f))
-  if (NameCol == "TREATMENT") {
-    TREATMENT <- rep(trt.sample, times = N)
-    df <- data.frame(list(TREATMENT = TREATMENT, RESP = resp_v))
-    df <- df[order(df$TREATMENT), ]
-    NEW_EXPT <- data
-    NEW_EXPT <- NEW_EXPT[order(NEW_EXPT$TREATMENT), ]
-  }else if (NameCol == "ENTRY") {
-    ENTRY <- rep(trt.sample, times = N)
-    df <- data.frame(list(ENTRY = ENTRY, RESP = resp_v))
-    df <- df[order(df$ENTRY), ]
-    NEW_EXPT <- data
-    NEW_EXPT <- NEW_EXPT[order(NEW_EXPT$ENTRY), ]
-  }else if (NameCol == "TRT_COMB") {
-    TRT_COMB <- rep(trt.sample, times = N)
-    df <- data.frame(list(TRT_COMB = TRT_COMB, RESP = resp_v))
-    df <- df[order(df$TRT_COMB), ]
-    NEW_EXPT <- data
-    NEW_EXPT <- NEW_EXPT[order(NEW_EXPT$TRT_COMB), ]
+  names(resp) <- trt.sample
+  NEW_EXPT <- data
+  NEW_EXPT$RESP <- NA_real_
+  trt_labels <- as.character(data[,Nc])
+  for (trt in trt.sample) {
+    NEW_EXPT$RESP[trt_labels == trt] <- resp[[trt]]
   }
-  NEW_EXPT$RESP <- df$RESP
   NEW_EXPT$LOCATION <- factor(NEW_EXPT$LOCATION, unique(as.character(NEW_EXPT$LOCATION)))
   NEW_EXPT <- NEW_EXPT[order(NEW_EXPT$LOCATION, NEW_EXPT$PLOT),]
   return(NEW_EXPT)

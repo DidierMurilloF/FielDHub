@@ -219,6 +219,38 @@ mod_sparse_allocation_server <- function(id){
 
     shinyjs::useShinyjs()
     
+    # Evaluate a call to a FielDHub function, showing its errors in an alert
+    # (and returning NULL) and its warnings in an alert after it finishes
+    call_api <- function(expr) {
+      warnings_found <- character(0)
+      out <- tryCatch(
+        withCallingHandlers(
+          expr,
+          warning = function(w) {
+            warnings_found <<- c(warnings_found, conditionMessage(w))
+            invokeRestart("muffleWarning")
+          }
+        ),
+        error = function(e) {
+          if (inherits(e, "shiny.silent.error")) stop(e)
+          shinyalert::shinyalert(
+            "Error!!",
+            conditionMessage(e),
+            type = "error"
+          )
+          NULL
+        }
+      )
+      if (!is.null(out) && length(warnings_found) > 0) {
+        shinyalert::shinyalert(
+          "Warning!",
+          paste(unique(warnings_found), collapse = "\n"),
+          type = "warning"
+        )
+      }
+      out
+    }
+
     observe({
         req(input$sparse_locations)
         sparse_locs <- as.numeric(input$sparse_locations)
@@ -373,7 +405,7 @@ mod_sparse_allocation_server <- function(id){
             inFile <- input$sparse_file
             data_ingested <- load_file(
                 name = inFile$name, 
-                path = inFile$datapat, 
+                path = inFile$datapath, 
                 sep = input$sparse_file_sep, 
                 check = TRUE, 
                 design = "sdiag"
@@ -385,7 +417,20 @@ mod_sparse_allocation_server <- function(id){
                 } 
                 data_entry_UP <- na.omit(data_up[, 1:2])
                 colnames(data_entry_UP) <- c("ENTRY", "NAME")
-                checksEntries <- as.numeric(data_entry_UP[1:sparse_checks,1])
+                checksEntries <- suppressWarnings(as.numeric(data_entry_UP[1:sparse_checks,1]))
+                # sparse_allocation() needs the checks to be a range of
+                # consecutive entries, in any order
+                if (anyNA(checksEntries) || any(diff(sort(checksEntries)) != 1)) {
+                    shinyalert::shinyalert(
+                        "Error!!", 
+                        paste(
+                            "The checks (the first", sparse_checks, "rows of the file)",
+                            "must have consecutive ENTRY numbers, for example 1, 2, 3, 4."
+                        ),
+                        type = "error"
+                    )
+                    return(NULL)
+                }
                 input_entries_column <- data_entry_UP[(sparse_checks + 1):nrow(data_entry_UP),1]
                 input_entries <- as.numeric(input_entries_column)
                 dim_data_entry <- nrow(data_entry_UP)
@@ -406,7 +451,8 @@ mod_sparse_allocation_server <- function(id){
                         data_without_checks = data_without_checks,
                         input_entries = input_entries,
                         dim_data_entry = dim_data_entry, 
-                        dim_without_checks = entries_in_file))
+                        dim_without_checks = entries_in_file,
+                        upload = TRUE))
             } else if (names(data_ingested) == "bad_format") {
                 shinyalert::shinyalert(
                     "Error!!", 
@@ -439,7 +485,8 @@ mod_sparse_allocation_server <- function(id){
                 ENTRY = (max_entry + 1):((max_entry + sparse_checks)), 
                 NAME = paste0("CH-", (max_entry + 1):((max_entry + sparse_checks)))
             )
-            NAME <- c(paste(rep("Gen-", lines), 1:lines, sep = ""))
+            # Same names that do_optim() gives the entries
+            NAME <- paste0("G-", 1:lines)
             gen.list <- data.frame(list(ENTRY = 1:lines, NAME = NAME))
             input_entries <- as.numeric(gen.list$ENTRY)
             data_entry_UP <- dplyr::bind_rows(df_checks, gen.list)
@@ -453,44 +500,45 @@ mod_sparse_allocation_server <- function(id){
                     data_without_checks = data_without_checks, 
                     input_entries = input_entries,
                     dim_data_entry = dim_data_entry, 
-                    dim_without_checks = entries_in_file
+                    dim_without_checks = entries_in_file,
+                    upload = FALSE
                 )
             )
         }
     }) |>
         bindEvent(input$sparse_run)
     
+    # Allocation of the entries to the locations, computed as
+    # sparse_allocation() computes it. The design is built later from this
+    # object (its sparse_list argument), so the allocation can be shown and
+    # the field dimensions offered before randomizing. The uploaded data is
+    # passed only to validate it: it does not change the allocation, and
+    # sparse_allocation() merges it into the locations.
     sparse_setup <- reactive({
         req(input$input_sparse_data)
         req(get_sparse_data())
-        sparse_data_input <- get_sparse_data()$data_entry
+        sparse_data_input <- NULL
+        if (get_sparse_data()$upload) {
+            sparse_data_input <- get_sparse_data()$data_entry
+        }
         input_lines <- get_sparse_data()$dim_without_checks
         checks <- as.numeric(input$sparse_checks)
-        lines_plus_checks <- input_lines + checks
         locs <- single_inputs()$sites
         withProgress(message = 'Optimization in progress ...', {
-          optim_out <- do_optim(
-            design = "sparse",
-            lines = input_lines, 
-            l = locs,
-            copies_per_entry = single_inputs()$plant_reps, 
-            add_checks = TRUE,
-            checks = as.numeric(input$sparse_checks), 
-            seed = single_inputs()$seed_number,
-            data = sparse_data_input
+          optim_out <- call_api(
+            do_optim(
+              design = "sparse",
+              lines = input_lines,
+              l = locs,
+              copies_per_entry = single_inputs()$plant_reps,
+              add_checks = TRUE,
+              checks = checks,
+              seed = single_inputs()$seed_number,
+              data = sparse_data_input
+            )
           )
         })
-        if (input$input_sparse_data == "Yes") {
-            req(get_sparse_data())
-            optim_out <- merge_user_data(
-                optim_out = optim_out, 
-                data = sparse_data_input, 
-                lines = input_lines, 
-                add_checks = TRUE, 
-                checks = checks
-            )
-        }
-        sparse_checks <- as.numeric(input$sparse_checks)
+        if (is.null(optim_out)) return(NULL)
         lines_within_loc <- as.numeric(optim_out$size_locations[1])
         choices_list <- field_dimensions(lines_within_loc = lines_within_loc)
         if (length(choices_list) == 0) {
@@ -506,9 +554,10 @@ mod_sparse_allocation_server <- function(id){
     
     getChecks <- eventReactive(input$sparse_run, {
         req(sparse_setup())
-        data <- sparse_setup()$list_locs[[1]]
-        checksEntries <- as.numeric(data[1:input$sparse_checks,1])
         sparse_checks <- as.numeric(input$sparse_checks)
+        data <- get_sparse_data()$data_entry
+        # The design sorts the check entries, as sparse_allocation() does
+        checksEntries <- sort(as.numeric(data[1:sparse_checks,1]))
         list(checksEntries = checksEntries, sparse_checks = sparse_checks)
     })
     
@@ -625,23 +674,18 @@ mod_sparse_allocation_server <- function(id){
     
     ###### Display multi-location data ##############
     output$multi_loc_data_input <- DT::renderDT({
-      req(sparse_setup())
       test <- randomize_hit$times > 0 & user_tries$tries > 0
       if (!test) return(NULL)
-      req(sparse_setup())
-      multi_loc_data <- sparse_setup()$multi_location_data
-      df <- as.data.frame(multi_loc_data)
-      # Combine the data frames into a single data frame with 
+      req(sparse_design())
+      # Entries of each location, with the uploaded data merged in
+      list_locs <- sparse_design()$list_locs
+      # Combine the data frames into a single data frame with
       # a new column for the list element name
-      if (input$input_sparse_data == 'Yes') {
-        req(get_sparse_data())
-        list_locs <- sparse_setup()$list_locs
-        df <- dplyr::bind_rows(
-          lapply(names(list_locs), function(name) {
-            dplyr::mutate(list_locs[[name]], LOCATION = name)
-          })) |> 
-          dplyr::select(LOCATION, ENTRY, NAME)
-      }
+      df <- dplyr::bind_rows(
+        lapply(names(list_locs), function(name) {
+          dplyr::mutate(list_locs[[name]], LOCATION = name)
+        })) |>
+        dplyr::select(LOCATION, ENTRY, NAME)
       df$LOCATION <- as.factor(df$LOCATION)
       df$ENTRY <- as.factor(df$ENTRY)
       df$NAME <- as.factor(df$NAME)
@@ -754,102 +798,102 @@ mod_sparse_allocation_server <- function(id){
       })
     })
 
-    rand_checks <- reactive({
-      req(input$sparse_dims)
-      req(field_dimensions_diagonal())
-      Option_NCD <- TRUE
-      req(single_inputs()$seed_number)
-      seed <- as.numeric(single_inputs()$seed_number)
-      req(available_percent_table()$dt)
-      req(available_percent_table()$d_checks)
-      req(available_percent_table()$P)
-      checksEntries <- as.vector(getChecks()$checksEntries)
-      planter_mov <- single_inputs()$planter_mov
-      locs <- single_inputs()$sites
-      percent <- as.numeric(input$percent_checks)
-      diag_locs <- vector(mode = "list", length = locs)
-      random_checks_locs <- vector(mode = "list", length = locs)
-      if (isTruthy(available_percent_table()$d_checks)) {
-        set.seed(seed)
-        for (sites in 1:locs) {
-          random_checks_locs[[sites]] <- random_checks(
-            dt = available_percent_table()$dt,
-            d_checks = available_percent_table()$d_checks,
-            p = available_percent_table()$P,
-            percent = percent,
-            kindExpt = kindExpt_single,
-            planter_mov = planter_mov,
-            Checks = checksEntries,
-            data = NULL, 
-            data_dim_each_block = available_percent_table()$data_dim_each_block,
-            n_reps = input$n_reps, seed = NULL)
-        }
+    plot_number_sites <- reactive({
+      req(single_inputs())
+      if (is.null(single_inputs()$plotNumber)) {
+        validate("Plot starting number is missing.")
       }
-      return(random_checks_locs)
+      l <- single_inputs()$sites
+      plotNumber <- single_inputs()$plotNumber
+      if(!is.numeric(plotNumber) && !is.integer(plotNumber)) {
+        validate("plotNumber should be an integer or a numeric vector.")
+      }
+
+      if (anyNA(plotNumber) || any(plotNumber %% 1 != 0)) {
+        validate("plotNumber should be integers.")
+      }
+      if (!is.null(l)) {
+        if (is.null(plotNumber) || length(plotNumber) != l) {
+          if (l > 1){
+            plotNumber <- seq(1001, 1000*(l+1), 1000)
+          } else plotNumber <- 1001
+        }
+      }else validate("Number of locations/sites is missing")
+
+      return(plotNumber)
     })
-    
-    user_location <- reactive({
-      user_site <- as.numeric(input$sparse_loc_view)
-      loc_user_out <- rand_checks()[[user_site]]
-      return(list(map_checks = loc_user_out$map_checks,
-                  col_checks = loc_user_out$col_checks,
-                  user_site = user_site))
-    })
-    
-    rand_lines <- reactive({
+
+    # The design of every location, built by sparse_allocation() from the
+    # allocation computed at Run! and the dimensions and percentage of
+    # checks chosen by the user. Every output is taken from this object.
+    sparse_design <- reactive({
+      # The field dimensions and options table are those of the last
+      # Randomize!, which must come after the last Run!
+      req(randomize_hit$times > 0 & user_tries$tries > 0)
       req(input$sparse_dims)
       req(sparse_setup())
+      req(get_sparse_data())
       req(field_dimensions_diagonal())
-      Option_NCD <- TRUE
       req(available_percent_table()$dt)
-      req(available_percent_table()$d_checks)
-      data_entry <- sparse_setup()$list_locs
-      n_rows <- field_dimensions_diagonal()$d_row
-      n_cols <- field_dimensions_diagonal()$d_col
-      checksEntries <- getChecks()$checksEntries
-      sparse_checks <- as.numeric(input$sparse_checks)
-      locs <- single_inputs()$sites
-      diag_locs <- vector(mode = "list", length = locs)
-      random_entries_locs <- vector(mode = "list", length = locs)
-      for (sites in 1:locs) {
-        map_checks <- rand_checks()[[sites]]$map_checks
-        w_map <- rand_checks()[[sites]]$map_checks
-        my_split_r <- rand_checks()[[sites]]$map_checks
-          n_rows <- field_dimensions_diagonal()$d_row
-          n_cols <- field_dimensions_diagonal()$d_col
-          data_random <- get_single_random(
-             n_rows = n_rows,
-             n_cols = n_cols,
-             matrix_checks = map_checks,
-             checks = checksEntries,
-             data = data_entry[[sites]]
-          )
-        random_entries_locs[[sites]] <- data_random
+      req(single_inputs()$seed_number)
+      # Wait until the percentage selector holds one of the options of the
+      # current field (it is updated after the options table)
+      percent <- suppressWarnings(as.numeric(input$percent_checks))
+      options_percent <- as.numeric(available_percent_table()$dt[,2])
+      req(isTruthy(percent), any(abs(options_percent - percent) < 1e-6))
+      sparse_data_input <- NULL
+      if (get_sparse_data()$upload) {
+        sparse_data_input <- get_sparse_data()$data_entry
       }
-      return(random_entries_locs)
+      plotNumber <- plot_number_sites()
+      sparse_list <- sparse_setup()
+      design <- call_api(
+        sparse_allocation(
+          lines = get_sparse_data()$dim_without_checks,
+          nrows = field_dimensions_diagonal()$d_row,
+          ncols = field_dimensions_diagonal()$d_col,
+          l = single_inputs()$sites,
+          planter = single_inputs()$planter_mov,
+          plotNumber = plotNumber,
+          copies_per_entry = single_inputs()$plant_reps,
+          checks = getChecks()$sparse_checks,
+          exptName = single_inputs()$expt_name[1],
+          locationNames = single_inputs()$location_names,
+          sparse_list = sparse_list,
+          seed = as.numeric(single_inputs()$seed_number),
+          data = sparse_data_input,
+          checksPercent = percent
+        )
+      )
+      if (is.null(design)) return(NULL)
+      if (is.null(design$fieldBook)) {
+        shinyalert::shinyalert(
+          "Error!!",
+          "The field dimensions do not fit the entries. Please, choose other dimensions.",
+          type = "error"
+        )
+        return(NULL)
+      }
+      return(design)
     })
-    
+
     output$randomized_layout <- DT::renderDT({
       test <- randomize_hit$times > 0 & user_tries$tries > 0
       if (!test) return(NULL)
       req(input$sparse_dims)
-      req(sparse_setup)
-      req(rand_lines())
-      VisualCheck <- FALSE
+      req(sparse_design())
       user_site <- as.numeric(input$sparse_loc_view)
-      loc_view_user <- rand_lines()[[user_site]]
-      r_map <- loc_view_user$rand
-      checksEntries <- getChecks()$checksEntries
+      req(user_site <= length(sparse_design()$layoutRandom))
+      r_map <- sparse_design()$layoutRandom[[user_site]]
       if (is.null(r_map))
         return(NULL)
-      sparse_checks = checksEntries
+      sparse_checks <- sparse_design()$infoDesign$entry_checks[[user_site]]
       len_checks <- length(sparse_checks)
       df <- as.data.frame(r_map)
       colores <- c('royalblue','salmon', 'green', 'orange','orchid', 'slategrey',
                     'greenyellow', 'blueviolet','deepskyblue','gold','blue', 'red')
-      s <- unlist(loc_view_user$Entries)
+      colnames(df) <- paste0("V", 1:ncol(df))
       rownames(df) <- nrow(df):1
-      style_equal <- rep('gray', length(s))
       DT::datatable(
         df,#,
         extensions = c('Buttons'),# , 'FixedColumns'
@@ -874,84 +918,18 @@ mod_sparse_allocation_server <- function(id){
                                                           colores[1:len_checks]))
       #}
     })
-    
-    
-    split_name_reactive <- reactive({
-      req(rand_lines())
-      w_map <- rand_checks()[[1]]$map_checks
-      expt_name <- single_inputs()$expt_name
-      split_name <- names_layout(
-        w_map = w_map,
-        kindExpt = "SUDC",
-        planter = single_inputs()$planter_mov,
-        expt_name = expt_name
-      )
-    })
-    
-    
-    plot_number_sites <- reactive({
-      req(single_inputs())
-      if (is.null(single_inputs()$plotNumber)) {
-        validate("Plot starting number is missing.")
-      }
-      l <- single_inputs()$sites
-      plotNumber <- single_inputs()$plotNumber
-      if(!is.numeric(plotNumber) && !is.integer(plotNumber)) {
-        validate("plotNumber should be an integer or a numeric vector.")
-      }
-      
-      if (any(plotNumber %% 1 != 0)) {
-        validate("plotNumber should be integers.")
-      }
-      if (!is.null(l)) {
-        if (is.null(plotNumber) || length(plotNumber) != l) {
-          if (l > 1){
-            plotNumber <- seq(1001, 1000*(l+1), 1000)
-          } else plotNumber <- 1001
-        }
-      }else validate("Number of locations/sites is missing")
-      
-      return(plotNumber)
-    })
-    
-    plot_number_reactive <- reactive({
-      req(rand_lines())
-      req(split_name_reactive()$my_names)
-      datos_name <- split_name_reactive()$my_names
-      datos_name = as.matrix(datos_name)
-      n_rows <- field_dimensions_diagonal()$d_row
-      n_cols <- field_dimensions_diagonal()$d_col
-      movement_planter = single_inputs()$planter_mov
-      plot_n_start <- plot_number_sites()
-      locs_diagonal <- single_inputs()$sites
-      plots_number_sites <- vector(mode = "list", length = locs_diagonal)
-      for (sites in 1:locs_diagonal) {
-          expe_names <- single_inputs()$expt_name
-          fillers <- sum(datos_name == "Filler")
-          plot_nub <- plot_number(
-            planter = single_inputs()$planter_mov,
-            plot_number_start = plot_n_start[sites],
-            layout_names = datos_name,
-            expe_names = expe_names,
-            fillers = fillers
-          )
-        plots_number_sites[[sites]] <- plot_nub$w_map_letters1
-      }
-      return(list(plots_number_sites = plots_number_sites))
-    })
-    
-    
-    
+
     output$plot_number_layout <- DT::renderDT({
       test <- randomize_hit$times > 0 & user_tries$tries > 0
       if (!test) return(NULL)
-      req(plot_number_reactive())
-      plot_num <- plot_number_reactive()$plots_number_sites[[user_location()$user_site]]
+      req(sparse_design())
+      user_site <- as.numeric(input$sparse_loc_view)
+      req(user_site <= length(sparse_design()$plotsNumber))
+      plot_num <- sparse_design()$plotsNumber[[user_site]]
       if (is.null(plot_num))
         return(NULL)
-      w_map <- rand_checks()[[1]]$map_checks
-      if("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE
       df <- as.data.frame(plot_num)
+      colnames(df) <- paste0("V", 1:ncol(df))
       rownames(df) <- nrow(df):1
       DT::datatable(df,
                     extensions = c('Buttons'),
@@ -970,57 +948,6 @@ mod_sparse_allocation_server <- function(id){
       )
     })
 
-    export_diagonal_design <- reactive({
-      locs_diagonal <- single_inputs()$sites
-      final_expt_fieldbook <- vector(mode = "list",length = locs_diagonal)
-      location_names <- single_inputs()$location_names
-      if (length(location_names) != locs_diagonal) location_names <- 1:locs_diagonal
-      for (user_site in 1:locs_diagonal) {
-        loc_user_out_rand <- rand_checks()[[user_site]]
-        w_map <- as.matrix(loc_user_out_rand$col_checks)
-        if ("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE
-        req(split_name_reactive()$my_names)
-        req(plot_number_reactive())
-        movement_planter = single_inputs()$planter_mov
-        my_data_VLOOKUP <- get_sparse_data()$data_entry
-        COLNAMES_DATA <- colnames(my_data_VLOOKUP)
-        if (Option_NCD == TRUE) {
-          Entry_Fillers <- data.frame(list(0,"Filler"))
-          colnames(Entry_Fillers) <- COLNAMES_DATA
-          my_data_VLOOKUP <- rbind(my_data_VLOOKUP, Entry_Fillers)
-        }
-        plot_number <- plot_number_reactive()$plots_number_sites[[user_site]]
-        plot_number <- apply(plot_number, 2 ,as.numeric)
-        my_names <- split_name_reactive()$my_names
-        loc_user_out_checks <- rand_checks()[[user_site]]
-        Col_checks <- as.matrix(loc_user_out_checks$col_checks)
-        loc_user_out_rand <- rand_lines()[[user_site]]
-        random_entries_map <- loc_user_out_rand$rand
-        random_entries_map[random_entries_map == "Filler"] <- 0
-        random_entries_map <- apply(random_entries_map, 2 ,as.numeric)
-        results_to_export <- list(random_entries_map, plot_number, Col_checks, my_names)
-        final_expt_export <- export_design(
-          G = results_to_export,
-          movement_planter = movement_planter,
-          location = location_names[user_site], 
-          Year = NULL,
-          data_file = my_data_VLOOKUP, 
-          reps = FALSE
-        )
-        final_expt_fieldbook[[user_site]] <- as.data.frame(final_expt_export)
-      }
-      final_fieldbook <- dplyr::bind_rows(final_expt_fieldbook)
-      if(Option_NCD == TRUE) {
-        final_fieldbook$CHECKS <- ifelse(final_fieldbook$NAME == "Filler", 0, final_fieldbook$CHECKS)
-        final_fieldbook$EXPT <- ifelse(final_fieldbook$EXPT == "Filler", 0, final_fieldbook$EXPT)
-      }
-      ID <- 1:nrow(final_fieldbook)
-      final_fieldbook <- final_fieldbook[, c(6,7,9,4,2,3,5,1,10)]
-      final_fieldbook_all_sites <- cbind(ID, final_fieldbook)
-      colnames(final_fieldbook_all_sites)[10] <- "TREATMENT"
-      return(list(final_expt = final_fieldbook_all_sites))
-    })
-    
     valsDIAG <- reactiveValues(ROX = NULL, ROY = NULL, trail = NULL, minValue = NULL,
                                maxValue = NULL)
     
@@ -1063,7 +990,7 @@ mod_sparse_allocation_server <- function(id){
     }
     
     observeEvent(input$sparse_simulate, {
-      req(export_diagonal_design()$final_expt)
+      req(sparse_design()$fieldBook)
       showModal(
         simuModal_DIAG()
       )
@@ -1093,18 +1020,18 @@ mod_sparse_allocation_server <- function(id){
     })
     
     simudata_DIAG <- reactive({
-      req(export_diagonal_design()$final_expt)
+      req(sparse_design()$fieldBook)
       if(!is.null(valsDIAG$maxValue) && !is.null(valsDIAG$minValue) && !is.null(valsDIAG$trail)) {
         maxVal <- as.numeric(valsDIAG$maxValue)
         minVal <- as.numeric(valsDIAG$minValue)
         ROX_DIAG <- as.numeric(valsDIAG$ROX)
         ROY_DIAG <- as.numeric(valsDIAG$ROY)
-        df_diag <- export_diagonal_design()$final_expt
+        df_diag <- sparse_design()$fieldBook
         loc_levels_factors <- levels(factor(df_diag$LOCATION, unique(df_diag$LOCATION)))
-        nrows_diag <- field_dimensions_diagonal()$d_row
-        ncols_diag <- field_dimensions_diagonal()$d_col
+        nrows_diag <- sparse_design()$infoDesign$rows
+        ncols_diag <- sparse_design()$infoDesign$columns
         seed_diag <- as.numeric(single_inputs()$seed_number)
-        locs_diag <- as.numeric(input$sparse_locations)
+        locs_diag <- length(loc_levels_factors)
         df_diag_list <- vector(mode = "list", length = locs_diag)
         df_simulation_list <- vector(mode = "list", length = locs_diag)
         w <- 1
@@ -1129,7 +1056,7 @@ mod_sparse_allocation_server <- function(id){
         df_diag_locs <- dplyr::bind_rows(df_diag_list)
         v <- 1
       }else {
-        df_DIAG <- export_diagonal_design()$final_expt
+        df_DIAG <- sparse_design()$fieldBook
         v <- 2
       }
       if (v == 1) {
@@ -1180,8 +1107,8 @@ mod_sparse_allocation_server <- function(id){
     
     
     heatmap_obj_D <- reactive({
-      req(simudata_DIAG()$dfSimulation)
-      loc_user <- user_location()$user_site
+      req(simudata_DIAG()$dfSimulationList)
+      loc_user <- as.numeric(input$sparse_loc_view)
       w <- as.character(valsDIAG$trail)
       df <- simudata_DIAG()$dfSimulationList[[loc_user]]
       p1 <- ggplot2::ggplot(df, ggplot2::aes(x = df[,4], y = df[,3], fill = df[,7], text = df[,8])) +

@@ -61,7 +61,7 @@ mod_STRIPD_ui <- function(id){
         numericInput(ns("blocks.strip"), 
                      label = "Input # of Full Reps:", 
                      value = 3, 
-                     min = 1),
+                     min = 2),
         numericInput(ns("l.strip"), 
                      label = "Input # of Locations:",
                      value = 1, 
@@ -250,7 +250,14 @@ mod_STRIPD_server <- function(id) {
     
     
     strip_inputs <- reactive({
-      req(input$blocks.strip >= 2)
+      req(input$blocks.strip)
+      if (input$blocks.strip < 2) {
+        shinyalert::shinyalert(
+          "Error!!", 
+          "Strip-Plot Design needs at least 2 replicates.", 
+          type = "error")
+        return(NULL)
+      }
       req(get_data_strip())
       
       req(input$plot_start.strip)
@@ -367,7 +374,7 @@ mod_STRIPD_server <- function(id) {
       nBooks <- length(allBooks)
       NewlayoutOptions <- 1:nBooks
       updateSelectInput(session = session, 
-                        inputId = 'layoutO_rcbd',
+                        inputId = 'layoutO_strip',
                         label = "Layout option:",
                         choices = NewlayoutOptions,
                         selected = 1
@@ -476,7 +483,6 @@ mod_STRIPD_server <- function(id) {
     
     simuData_strip <- reactive({
       req(strip_reactive()$fieldBook)
-      set.seed(input$seed.strip)
       if(!is.null(valsStrip$maxV.strip) && 
          !is.null(valsStrip$minV.strip) && 
          !is.null(valsStrip$trail.strip)) {
@@ -516,14 +522,14 @@ mod_STRIPD_server <- function(id) {
       if (ncol(simuData_strip()$df) == 10) {
         locs <- factor(simuData_strip()$df$LOCATION, levels = unique(simuData_strip()$df$LOCATION))
         locLevels <- levels(locs)
-        df = subset(simuData_strip()$df, LOCATION == locLevels[1])
+        df = subset(simuData_strip()$df, LOCATION == locLevels[locNum()])
         loc <- levels(factor(df$LOCATION))
         trail <- as.character(valsStrip$trail.strip)
         label_trail <- paste(trail, ": ")
         heatmapTitle <- paste("Heatmap for ", trail)
         new_df <- df |>
-          dplyr::mutate(text = paste0("Site: ", loc, "\n", "Row: ", df$ROW, "\n", "Col: ", df$COLUMN, "\n", "Entry: ", 
-                                      df$ENTRY, "\n", label_trail, round(df[,10],2)))
+          dplyr::mutate(text = paste0("Site: ", loc, "\n", "Row: ", df$ROW, "\n", "Col: ", df$COLUMN, "\n", "Treatment: ", 
+                                      df$TRT_COMB, "\n", label_trail, round(df[,10],2)))
         w <- as.character(valsStrip$trail.strip)
         new_df$ROW <- as.factor(new_df$ROW) # Set up ROWS as factors
         new_df$COLUMN <- as.factor(new_df$COLUMN) # Set up COLUMNS as factors

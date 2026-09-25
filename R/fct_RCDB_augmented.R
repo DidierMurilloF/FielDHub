@@ -47,6 +47,8 @@ stack_reps <- function(x_list, repsStack = c("vertical", "horizontal")) {
 #' @importFrom stats runif na.omit
 #' 
 #' 
+#' @param year (optional) Year recorded in the \code{YEAR} column of the field book.
+#' By default the current year.
 #' @return A list with five elements.
 #' \itemize{
 #'   \item \code{infoDesign} is a list with information on the design parameters.
@@ -101,7 +103,8 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
                            repsStack = c("vertical", "horizontal"),
                            exptName = NULL, seed = NULL, locationNames = NULL, 
                            repsExpt = 1, random = TRUE, data = NULL, 
-                           nrows = NULL, ncols = NULL) {
+                           nrows = NULL, ncols = NULL, year = NULL) {
+  year <- resolve_year(year)
   repsStack <- match.arg(repsStack)
   if (all(c("serpentine", "cartesian") != planter)) {
     stop("Input planter choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
@@ -118,20 +121,12 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
   if (!is.null(l)) {
     if (is.null(plotNumber) || !(length(plotNumber) %in% c(l, repsExpt, l * repsExpt))) {
       if (l > 1) {
-        plotNumber <- seq(1001, 1000 * (l + 1), 1000)
-        message(cat(
-          "Warning message:", "\n",
-          "Since plotNumber was missing, it was set up to default value of: ", plotNumber,
-          "\n", "\n"
-        ))
+        default_plots <- seq(1001, 1000 * (l + 1), 1000)
       } else {
-        plotNumber <- 1001
-        message(cat(
-          "Warning message:", "\n",
-          "Since plotNumber was missing, it was set up to default value of: ", plotNumber,
-          "\n", "\n"
-        ))
+        default_plots <- 1001
       }
+      warn_default_plot_numbers(plotNumber, l, default_plots)
+      plotNumber <- default_plots
     }
   } else {
     stop("Number of locations/sites is missing")
@@ -179,6 +174,7 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
     if (length(locationNames) == l) {
       locationNames <- toupper(locationNames)
     } else {
+      warn_default_location_names(locationNames, l, 1:l)
       locationNames <- 1:l
     }
   } else {
@@ -411,39 +407,31 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
         
         entries <- as.vector(data[(checks + 1):nrow(data), 1])
         blocks_with_checks <- lapply(1:b, fun)
-        
+
+        if (Fillers > 0) {
+          # The fillers go at the end of the planting path, in the first row of
+          # the field: its left end for serpentine with an even number of rows,
+          # its right end otherwise. Only the block holding them gets its
+          # checks redrawn among its remaining cells, so every block keeps a
+          # single set of checks.
+          if (field_rows %% 2 == 0 && planter == "serpentine") {
+            filler_block <- 1
+            filler_cols <- 1:Fillers
+          } else {
+            filler_block <- blocks_per_row
+            filler_cols <- ((ncols + 1) - Fillers):ncols
+          }
+          block <- blocks_with_checks[[filler_block]]
+          block[1, filler_cols] <- "Filler"
+          block[block != "Filler"] <- sample(c(rep(0, sum(block != "Filler") - checks), 1:checks))
+          blocks_with_checks[[filler_block]] <- block
+        }
+
         layout_a <- assemble_arcbd_blocks(
           block_list = blocks_with_checks,
           blocks_per_col = blocks_per_col,
           blocks_per_row = blocks_per_row
         )
-        
-        if (Fillers > 0) {
-          if (field_rows %% 2 == 0) {
-            if (planter == "serpentine") {
-              layout_a[1, ] <- c(
-                rep("Filler", Fillers),
-                sample(c(1:checks, rep(0, ncol(layout_a) - Fillers - checks)),
-                       size = ncol(layout_a) - Fillers, replace = FALSE
-                )
-              )
-            } else {
-              layout_a[1, ] <- c(
-                sample(c(1:checks, rep(0, ncol(layout_a) - Fillers - checks)),
-                       size = ncol(layout_a) - Fillers, replace = FALSE
-                ),
-                rep("Filler", Fillers)
-              )
-            }
-          } else {
-            layout_a[1, ] <- c(
-              sample(c(1:checks, rep(0, ncol(layout_a) - Fillers - checks)),
-                     size = ncol(layout_a) - Fillers, replace = FALSE
-              ),
-              rep("Filler", Fillers)
-            )
-          }
-        }
         
         col_checks <- ifelse(layout_a != 0, 1, 0)
         
@@ -542,7 +530,6 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
     }
     
     results_to_export <- list(layout1, plot_number, Col_checks, my_names, Blocks_info)
-    year <- format(Sys.Date(), "%Y")
     outputDesign <- export_design(
       G = results_to_export,
       movement_planter = planter,
@@ -553,7 +540,7 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
     )
     
     if (Fillers > 0) {
-      outputDesign$CHECKS <- ifelse(outputDesign$NAME == "Filler", "NA", outputDesign$CHECKS)
+      outputDesign$CHECKS <- ifelse(outputDesign$NAME == "Filler", NA, outputDesign$CHECKS)
     }
     
     outputDesign_loc[[locations]] <- as.data.frame(outputDesign)
@@ -572,6 +559,10 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
   fieldbook$LOCATION <- factor(fieldbook$LOCATION, levels = as.character(locationNames))
   fieldbook <- fieldbook[order(fieldbook$LOCATION, fieldbook$EXPT), ]
   fieldbook <- fieldbook[, -4]
+  # The layouts are character matrices when the entries are randomized, so
+  # keep ENTRY and CHECKS numeric whatever path built them
+  fieldbook$ENTRY <- as.numeric(fieldbook$ENTRY)
+  fieldbook$CHECKS <- as.numeric(fieldbook$CHECKS)
   
   DataChecks <- data[1:checks, ]
   layout_loc1 <- as.matrix(layout1_loc1[[1]])

@@ -68,7 +68,7 @@ get_DBrandom <- function(binaryMap = NULL,
   entries <- split_vectors(data_entries, data_dim_each_block)
   z <- 1
   for(k in 1:length(entries)) {
-    w_map[w_map == levels_target[z]] <- sample(entries[[k]])
+    w_map[w_map == levels_target[z]] <- entries[[k]][sample.int(length(entries[[k]]))]
     z <- z + 1
   }
   

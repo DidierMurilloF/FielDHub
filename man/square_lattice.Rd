@@ -16,7 +16,7 @@ square_lattice(
 )
 }
 \arguments{
-\item{t}{Number of  treatments.}
+\item{t}{Number of treatments, or a character vector with the treatment labels.}
 
 \item{k}{Size of incomplete blocks (number of units per incomplete block).}
 

@@ -40,12 +40,13 @@ When design is \code{sparse} then \code{copies_per_entry} should be less than \c
 \item{data}{(optional) Data frame with 2 columns: \code{ENTRY | NAME }. ENTRY must be numeric.}
 }
 \value{
-A list with three elements.
+A list with four elements.
 \itemize{
+  \item \code{multi_location_data} is a data frame with the entries of every
+ location: \code{LOCATION | ENTRY | NAME}.
   \item \code{list_locs} is a list with each location list of entries.
   \item \code{allocation} is a matrix with the allocation of treatments.
-  \item \code{size_locations} is a data frame with one column for each 
- location and one row with the size of the location.
+  \item \code{size_locations} is a named vector with the size of each location.
 }
 }
 \description{
