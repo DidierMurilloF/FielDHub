@@ -252,7 +252,7 @@ mod_Square_Lattice_server <- function(id){
                   planter = planter,
                   plot_start = plot_start, 
                   sites = sites,
-                  sites_names = site_names,
+                  site_names = site_names,
                   seed = seed))
     }) |>
       bindEvent(input$RUN.square)
