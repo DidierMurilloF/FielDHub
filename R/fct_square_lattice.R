@@ -2,7 +2,7 @@
 #
 #' @description It randomly generates a square lattice design across locations.
 #'
-#' @param t Number of  treatments.
+#' @param t Number of treatments, or a character vector with the treatment labels.
 #' @param r Number of blocks (full resolvable replicates).
 #' @param k Size of incomplete blocks (number of units per incomplete block). 
 #' @param l Number of locations. By default \code{l = 1}.
@@ -89,7 +89,8 @@ square_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101
     }else if ((length(t) > 1)) {
       nt <- length(t)
     }
-    df <- data.frame(list(ENTRY = 1:nt, TREATMENT = paste0("G-", 1:nt)))
+    df <- data.frame(list(ENTRY = 1:nt,
+                          TREATMENT = treatment_labels(t, nt, "square_lattice")))
     data_square <- df
   }else if (!is.null(data)) {
     if (is.null(t) || is.null(r) || is.null(k) || is.null(l)) {

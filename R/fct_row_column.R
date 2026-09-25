@@ -59,7 +59,7 @@
 #' nested within each replicate. \code{latinize} has no effect for
 #' \code{method = "twostage"}, which cannot latinize across replicates.
 #'
-#' @param t Number of  treatments.
+#' @param t Number of treatments, or a character vector with the treatment labels.
 #' @param nrows Number of rows of a full resolvable replicate. 
 #' @param r Number of blocks (full resolvable replicates).
 #' @param l Number of locations. By default \code{l = 1}.
@@ -253,10 +253,11 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
     } else if ((length(t) > 1)) {
       nt <- length(t)
     }
-    data_up <- data.frame(list(ENTRY = 1:nt, TREATMENT = paste0("G-", 1:nt)))
+    trt_labels <- treatment_labels(t, nt, "row_column")
+    data_up <- data.frame(list(ENTRY = 1:nt, TREATMENT = trt_labels))
     colnames(data_up) <- c("ENTRY", "TREATMENT")
     lookup <- TRUE
-    df <- data.frame(list(ENTRY = 1:nt, LABEL_TREATMENT = paste0("G-", 1:nt)))
+    df <- data.frame(list(ENTRY = 1:nt, LABEL_TREATMENT = trt_labels))
     dataLookUp <- df
   } else if (!is.null(data)) {
     if (is.null(t) || is.null(r) || is.null(k) || is.null(l)) {

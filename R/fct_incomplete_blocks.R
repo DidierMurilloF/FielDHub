@@ -3,7 +3,7 @@
 #' @description Randomly generates a resolvable incomplete block design (IBD) of characteristics (t, k, r).
 #' The randomization can be done across locations.
 #'
-#' @param t Number of  treatments.
+#' @param t Number of treatments, or a character vector with the treatment labels.
 #' @param r Number of full blocks (or resolvable replicates) (also number of replicates per treatment).
 #' @param k Size of incomplete blocks (number of units per incomplete block).
 #' @param l Number of locations. By default \code{l = 1}.
@@ -89,10 +89,11 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
     } else if ((length(t) > 1)) {
       nt <- length(t)
     }
-    data_up <- data.frame(list(ENTRY = 1:nt, TREATMENT = paste0("G-", 1:nt)))
+    trt_labels <- treatment_labels(t, nt, "incomplete_blocks")
+    data_up <- data.frame(list(ENTRY = 1:nt, TREATMENT = trt_labels))
     colnames(data_up) <- c("ENTRY", "TREATMENT")
     lookup <- TRUE
-    df <- data.frame(list(ENTRY = 1:nt, LABEL_TREATMENT = paste0("G-", 1:nt)))
+    df <- data.frame(list(ENTRY = 1:nt, LABEL_TREATMENT = trt_labels))
     dataLookUp <- df
   } else if (!is.null(data)) {
     if (is.null(t) || is.null(r) || is.null(k) || is.null(l)) {

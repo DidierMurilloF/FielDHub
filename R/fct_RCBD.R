@@ -193,6 +193,10 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
         mytreatments <- paste(rep("T", each = nt), 1:nt, sep = "")
         s <- paste(rep("T", each = nt), 1:nt, sep = "")
       }else if(is.character(t) & length(t) > 1) {
+        if (anyDuplicated(t) > 0) {
+          stop("RCBD() requires unique entry labels; duplicated: ",
+               paste(unique(t[duplicated(t)]), collapse = ", "))
+        }
         nt <- length(t)
         s <- t
         mytreatments <- t

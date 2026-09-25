@@ -4,7 +4,7 @@
 #' @description  Randomly generates an alpha design like \code{alpha(0,1)} across multiple locations.
 #' 
 #'
-#' @param t Number of  treatments.
+#' @param t Number of treatments, or a character vector with the treatment labels.
 #' @param r Number of full blocks (or resolvable replicates) (also number of replicates per treatment).
 #' @param k Size of incomplete blocks (number of units per incomplete block). 
 #' @param l Number of locations. By default \code{l = 1}.
@@ -106,7 +106,8 @@ alpha_lattice <- function(t = NULL,
     }else if ((length(t) > 1)) {
       nt <- length(t)
     }
-    df <- data.frame(list(ENTRY = 1:nt, TREATMENT = paste0("G-", 1:nt)))
+    df <- data.frame(list(ENTRY = 1:nt,
+                          TREATMENT = treatment_labels(t, nt, "alpha_lattice")))
     data_alpha <- df
   } else if (!is.null(data)) {
     if (is.null(t) || is.null(r) || is.null(k) || is.null(l)) {
