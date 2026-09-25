@@ -151,22 +151,7 @@ do_optim <- function(
     size_locs <- as.vector(base::colSums(allocation))
     max_size_locs <- max(size_locs)
     if (!all(size_locs == max_size_locs) & force_balance == TRUE) {
-        unbalanced_locs <- which(size_locs != max_size_locs)
-        max_swaps <- length(unbalanced_locs)
-        k <- nrow(allocation)
-        init <- 1
-        while (init <= max_swaps) {
-            # Add an additional gen copy to the unbalanced locations
-            add_gen <- as.vector(allocation[k, unbalanced_locs])
-            if (length(which(add_gen == key_value)) > 0) {
-                one_index <- which(add_gen == key_value)[1] 
-                add_gen[one_index] <- add_value
-                allocation[k, unbalanced_locs] <- add_gen
-                unbalanced_locs <- unbalanced_locs[-one_index]
-                init <- init + 1
-            }
-            k <- k - 1
-        }
+        allocation <- balance_allocation(allocation, key_value, add_value)
     }
     allocation_df <- as.data.frame.matrix(allocation)
     colnames(allocation_df) <- paste0("LOC", 1:l)
@@ -766,4 +751,44 @@ merge_user_data <- function(
         optim_out$list_locs <- merged_list_locs
         return(optim_out)
     }
+}
+
+#' Give each smaller location one more copy of an entry
+#'
+#' @description Walks up the rows of the allocation table, from the last
+#' entry, and gives each location that is smaller than the largest one an
+#' extra copy of the first entry it holds \code{key_value} copies of.
+#'
+#' @param allocation Table or matrix with the copies of each entry (rows)
+#'   in each location (columns).
+#' @param key_value Number of copies an entry must have in a location to
+#'   receive one more (0 for sparse, 1 for p-rep designs).
+#' @param add_value Number of copies the entry gets instead.
+#'
+#' @return The allocation, with one more copy in each smaller location when
+#'   possible.
+#' @noRd
+balance_allocation <- function(allocation, key_value, add_value) {
+    size_locs <- as.vector(base::colSums(allocation))
+    unbalanced_locs <- which(size_locs != max(size_locs))
+    max_swaps <- length(unbalanced_locs)
+    k <- nrow(allocation)
+    init <- 1
+    while (init <= max_swaps && k >= 1) {
+        # Add an additional gen copy to the unbalanced locations
+        add_gen <- as.vector(allocation[k, unbalanced_locs])
+        if (length(which(add_gen == key_value)) > 0) {
+            one_index <- which(add_gen == key_value)[1] 
+            add_gen[one_index] <- add_value
+            allocation[k, unbalanced_locs] <- add_gen
+            unbalanced_locs <- unbalanced_locs[-one_index]
+            init <- init + 1
+        }
+        k <- k - 1
+    }
+    if (init <= max_swaps) {
+        warning("The locations could not be balanced: no entry could be added to ",
+                length(unbalanced_locs), " of them.", call. = FALSE)
+    }
+    allocation
 }
