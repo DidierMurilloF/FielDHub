@@ -348,6 +348,7 @@ print.FielDHub <- function(x, n=10, ...){
         "\n")
     print(head(x$data_locations, n=nhead_print, ...))
   }
+  invisible(x)
 }
 #-----------------------------------------------------------------------
 # Summary
@@ -567,7 +568,7 @@ print.summary.FielDHub <- function(x, ...) {
     cat("\n")
     #---------------------------------------------------------------------
     cat("4. Structure of the data frame with the data input:", "\n\n")
-    str(x$data_entry)
+    str(x$dataEntry)
     #---------------------------------------------------------------------
     cat("5. Structure of the data frame with the partially_replicated field book:", "\n\n")
     str(x$fieldBook)
@@ -594,6 +595,38 @@ print.summary.FielDHub <- function(x, ...) {
     str(x$data_entry)
     #---------------------------------------------------------------------
     cat("6. Structure of the data frame with the RCBD_augmented field book:", "\n\n")
+    str(x$fieldBook)
+  }else if (x$infoDesign$id_design == "MultiPrep") {
+    cat("Multi-Location Partially Replicated Design:", "\n\n")
+    #---------------------------------------------------------------------
+    cat("1. Information on the design parameters:", "\n")
+    str(x$infoDesign)
+    cat("\n")
+    #----------------------------------------------------------------------
+    cat("2. Replications within location:", "\n")
+    print(x$reps_info)
+    cat("\n")
+    #---------------------------------------------------------------------
+    cat("3. Structure of the data frame with the data input:", "\n\n")
+    str(x$dataEntry)
+    #---------------------------------------------------------------------
+    cat("4. Structure of the data frame with the multi_location_prep field book:", "\n\n")
+    str(x$fieldBook)
+  }else if (x$infoDesign$id_design == "Sparse") {
+    cat("Sparse Allocation: Un-replicated Diagonal Arrangement Design:", "\n\n")
+    #---------------------------------------------------------------------
+    cat("1. Information on the design parameters:", "\n")
+    str(x$infoDesign)
+    cat("\n")
+    #----------------------------------------------------------------------
+    cat("2. Number of lines allocated to each location:", "\n")
+    print(x$size_locations)
+    cat("\n")
+    #---------------------------------------------------------------------
+    cat("3. Structure of the data frame with the data input:", "\n\n")
+    str(x$data_entry)
+    #---------------------------------------------------------------------
+    cat("4. Structure of the data frame with the sparse_allocation field book:", "\n\n")
     str(x$fieldBook)
   }else if (x$infoDesign$id_design == 15) {
     cat("Un-replicated Diagonal Arrangement Design:", "\n\n")
@@ -632,7 +665,7 @@ print.summary.FielDHub <- function(x, ...) {
     cat("\n")
     #---------------------------------------------------------------------
     cat("4. Structure of the data frame with the data input:", "\n\n")
-    str(x$data_entry)
+    str(x$dataEntry)
     #---------------------------------------------------------------------
     cat("5. Structure of the data frame with the optimized_arrangement field book:", "\n\n")
     str(x$fieldBook)
@@ -645,6 +678,7 @@ print.summary.FielDHub <- function(x, ...) {
     cat("2. Structure of the data frame with the entries for each location:", "\n\n")
     str(x$data_locations)
   }
+  invisible(x)
 }
 #-----------------------------------------------------------------------
 # Print plot
@@ -708,6 +742,9 @@ plot.FielDHub <- function(x, ...) {
     if (is.null(x)) stop("x must be a FielDHub object!")
     if (!inherits(x,"FielDHub")) {
       stop("x is not a FielDHub class")
+    }
+    if (x$infoDesign$id_design == 17) {
+      stop("split_families() results have no field layout to plot.", call. = FALSE)
     }
     p <- plot_layout(x = x, ...)
     if (is.null(p)) {
