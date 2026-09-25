@@ -294,7 +294,22 @@ mod_Diagonal_server <- function(id) {
                 } 
                 data_entry_UP <- na.omit(data_up[,1:2])
                 colnames(data_entry_UP) <- c("ENTRY", "NAME")
-                checksEntries <- as.numeric(data_entry_UP[1:input$checks,1])
+                checks <- as.numeric(input$checks)
+                checksEntries <- suppressWarnings(
+                    sort(as.numeric(data_entry_UP[1:checks,1]), na.last = TRUE)
+                )
+                # diagonal_arrangement() takes the checks from the first rows
+                # of the list and requires them to be consecutive numbers
+                if (any(is.na(checksEntries)) || any(diff(checksEntries) != 1)) {
+                    shinyalert::shinyalert(
+                        "Error!!",
+                        paste0("The check entries (the ENTRY of the first ", checks,
+                               " rows of the file) must be consecutive numbers, ",
+                               "such as 1, 2, 3, 4."),
+                        type = "error"
+                    )
+                    return(NULL)
+                }
                 dim_data_entry <- nrow(data_entry_UP)
                 choices_list <- field_dimensions(lines_within_loc = dim_data_entry)
                 if (length(choices_list) == 0) {
@@ -308,7 +323,8 @@ mod_Diagonal_server <- function(id) {
                 dim_data_1 <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
                 return(list(data_entry = data_entry_UP, 
                             dim_data_entry = dim_data_entry, 
-                            dim_without_checks = dim_data_1))
+                            dim_without_checks = dim_data_1,
+                            uploaded = TRUE))
             } else if (names(data_ingested) == "bad_format") {
             shinyalert::shinyalert(
                 "Error!!", 
@@ -345,8 +361,9 @@ mod_Diagonal_server <- function(id) {
                 )
                 return(NULL)
             }
-            NAME <- c(paste(rep("CH", checks), 1:checks, sep = ""),
-                    paste(rep("G", lines), (checks + 1):(lines + checks), sep = ""))
+            # Same entry list as diagonal_arrangement() generates from lines
+            NAME <- c(paste0(rep("Check-", checks), 1:checks),
+                    paste0(rep("Gen-", lines), (checks + 1):(lines + checks)))
             gen.list <- data.frame(list(ENTRY = 1:(lines + checks),	NAME = NAME))
             data_entry_UP <- gen.list
             colnames(data_entry_UP) <- c("ENTRY", "NAME")
@@ -354,14 +371,16 @@ mod_Diagonal_server <- function(id) {
             dim_data_1 <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
             return(list(data_entry = data_entry_UP, 
                     dim_data_entry = dim_data_entry, 
-                    dim_without_checks = dim_data_1))
+                    dim_without_checks = dim_data_1,
+                    lines = lines,
+                    uploaded = FALSE))
         }
     })
     
     getChecks <- eventReactive(input$RUN.diagonal, {
       req(getData()$data_entry)
       data <- as.data.frame(getData()$data_entry)
-      checksEntries <- as.numeric(data[1:input$checks,1])
+      checksEntries <- sort(as.numeric(data[1:input$checks,1]))
       checks <- as.numeric(input$checks)
       list(checksEntries = checksEntries, checks = checks)
     })
@@ -507,18 +526,33 @@ mod_Diagonal_server <- function(id) {
       )
     }) 
 
+    # Percentage of checks passed to diagonal_arrangement(). Each Randomize
+    # starts from the last option, the API default
+    checks_percent <- reactiveVal(NULL)
+
     observeEvent(available_percent_table()$dt, {
           my_out <- available_percent_table()$dt
           my_percent <- my_out[,2]
           len <- length(my_percent)
           selected <- my_percent[len]
+          checks_percent(as.numeric(selected))
 
           updateSelectInput(session = session, 
                             inputId = 'percent_checks', 
                             label = "Choose % of Checks:",
                             choices = my_percent, 
                             selected = selected)
-    })
+    }, priority = 10)
+
+    observeEvent(input$percent_checks, {
+      req(available_percent_table()$dt)
+      options_percent <- as.numeric(available_percent_table()$dt[,2])
+      percent <- suppressWarnings(as.numeric(input$percent_checks))
+      match_percent <- which(abs(options_percent - percent) < 1e-6)
+      # Ignore a value left from the placeholder or from other field dimensions
+      req(length(match_percent) > 0)
+      checks_percent(options_percent[match_percent[1]])
+    }, ignoreInit = TRUE)
     
     observeEvent(list_to_observe(), {
       if (randomize_hit$times > 0 & user_tries$tries > 0) {
@@ -538,68 +572,93 @@ mod_Diagonal_server <- function(id) {
       })
     })
 
-    rand_design <- reactive({
-      req(input$dimensions.d)
+    # Arguments of diagonal_arrangement(), taken when Randomize is clicked
+    diagonal_inputs <- eventReactive(input$get_random, {
       req(getData())
       req(field_dimensions_diagonal())
-      Option_NCD <- TRUE
       req(single_inputs()$seed_number)
-      seed <- as.numeric(single_inputs()$seed_number)
-      req(available_percent_table()$dt)
-      req(available_percent_table()$d_checks)
-      req(available_percent_table()$P)
-      checksEntries <- as.vector(getChecks()$checksEntries)
-      planter_mov <- single_inputs()$planter_mov
-      locs <- single_inputs()$sites
-      percent <- as.numeric(input$percent_checks)
-      diag_locs <- vector(mode = "list", length = locs)
-      random_checks_locs <- vector(mode = "list", length = locs)
-      random_entries_locs <- vector(mode = "list", length = locs)
-      if (isTruthy(available_percent_table()$d_checks)) {
-        set.seed(seed)
-        for (sites in 1:locs) {
-          random_checks_locs[[sites]] <- random_checks(
-            dt = available_percent_table()$dt, 
-            d_checks = available_percent_table()$d_checks, 
-            p = available_percent_table()$P, 
-            percent = percent, 
-            kindExpt = kindExpt_single, 
-            planter_mov = planter_mov, 
-            Checks = checksEntries,
-            stacked = input$stacked, 
-            data = getData()$data_entry, 
-            data_dim_each_block = available_percent_table()$data_dim_each_block,
-            n_reps = input$n_reps, seed = NULL)
-        }
-        # Draw the entries in the same seeded pass as the checks, so that
-        # changing an input afterwards cannot redraw them unseeded
-        req(getData()$data_entry)
-        data_entry <- getData()$data_entry
-        n_rows <- field_dimensions_diagonal()$d_row
-        n_cols <- field_dimensions_diagonal()$d_col
-        for (sites in 1:locs) {
-          random_entries_locs[[sites]] <- get_single_random(
-            n_rows = n_rows, 
-            n_cols = n_cols, 
-            matrix_checks = random_checks_locs[[sites]]$map_checks, 
-            checks = checksEntries, 
-            data = data_entry
-          )
-        }
+      sites <- single_inputs()$sites
+      plot_starts <- single_inputs()$plotNumber
+      if (any(is.na(plot_starts))) {
+        shinyalert::shinyalert(
+          "Error!!",
+          "The starting plot numbers must be integers separated by commas.",
+          type = "error"
+        )
+        return(NULL)
       }
-      return(list(checks = random_checks_locs, entries = random_entries_locs))
+      # One starting plot per location, otherwise 1001, 2001, ...
+      if (length(plot_starts) != sites) {
+        if (sites > 1) {
+          plot_starts <- seq(1001, 1000*(sites+1), 1000)
+        } else plot_starts <- 1001
+      }
+      # One name per location, otherwise the locations are numbered
+      location_names <- single_inputs()$location_names
+      if (length(location_names) != sites) location_names <- NULL
+      args <- list(
+        nrows = field_dimensions_diagonal()$d_row,
+        ncols = field_dimensions_diagonal()$d_col,
+        checks = as.numeric(getChecks()$checks),
+        planter = single_inputs()$planter_mov,
+        l = sites,
+        plotNumber = plot_starts,
+        kindExpt = kindExpt_single,
+        seed = as.numeric(single_inputs()$seed_number),
+        exptName = single_inputs()$expt_name,
+        locationNames = location_names
+      )
+      if (isTRUE(getData()$uploaded)) {
+        args$data <- getData()$data_entry
+      } else {
+        args$lines <- as.numeric(getData()$lines)
+      }
+      return(args)
+    })
+
+    # The design comes from diagonal_arrangement(), so the app and the R
+    # function give the same design for the same inputs and seed
+    diagonal_design <- reactive({
+      req(diagonal_inputs())
+      req(available_percent_table()$dt)
+      percent <- checks_percent()
+      req(percent)
+      options_percent <- as.numeric(available_percent_table()$dt[,2])
+      req(any(abs(options_percent - percent) < 1e-6))
+      args <- c(diagonal_inputs(), list(checksPercent = percent))
+      design <- NULL
+      # diagonal_arrangement() prints a message and returns NULL when the
+      # field dimensions do not fit the entries
+      console_out <- utils::capture.output(
+        design <- tryCatch(
+          suppressWarnings(do.call(diagonal_arrangement, args)),
+          error = function(e) e
+        )
+      )
+      if (inherits(design, "error")) {
+        shinyalert::shinyalert(
+          "Error!!",
+          conditionMessage(design),
+          type = "error"
+        )
+        return(NULL)
+      }
+      if (is.null(design)) {
+        shinyalert::shinyalert(
+          "Error!!",
+          "The field dimensions do not fit the entries. Please, choose other dimensions.",
+          type = "error"
+        )
+        return(NULL)
+      }
+      return(design)
     })
     
-    rand_checks <- reactive(rand_design()$checks)
-    
-    rand_lines <- reactive(rand_design()$entries)
-    
     user_location <- reactive({
+      req(diagonal_design())
       user_site <- as.numeric(input$locView.diagonal)
-      loc_user_out <- rand_checks()[[user_site]]
-      return(list(map_checks = loc_user_out$map_checks, 
-                  col_checks = loc_user_out$col_checks,
-                  user_site = user_site))
+      req(user_site >= 1, user_site <= length(diagonal_design()$layoutRandom))
+      return(user_site)
     })
     
     output$options_table <- DT::renderDT({
@@ -625,7 +684,8 @@ mod_Diagonal_server <- function(id) {
     output$data_input <- DT::renderDT({
       test <- randomize_hit$times > 0 & user_tries$tries > 0
       if (!test) return(NULL)
-        df <- getData()$data_entry
+        req(diagonal_design())
+        df <- diagonal_design()$data_entry[[user_location()]]
         df$ENTRY <- as.factor(df$ENTRY)
         df$NAME <- as.factor(df$NAME)
         options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
@@ -644,18 +704,16 @@ mod_Diagonal_server <- function(id) {
     output$checks_table <- DT::renderDT({
       test <- randomize_hit$times > 0 & user_tries$tries > 0
       if (!test) return(NULL)
-        Option_NCD <- TRUE
-        req(getData()$data_entry)
-        data_entry <- getData()$data_entry
-        req(user_location()$map_checks)
-        if(is.null(user_location()$map_checks)) return(NULL)
-        w_map <- user_location()$map_checks
-        table_checks <- data_entry[1:(input$checks),]
-        df <- table_checks
-        info_checks <- base::table(w_map[w_map > 0])
-        times_checks <- data.frame(list(ENTRY = base::names(info_checks), 
-                                        TIMES = base::as.matrix(info_checks)))
-        df <- base::merge(df, times_checks, by.x = "ENTRY")
+        req(diagonal_design())
+        user_site <- user_location()
+        info_design <- diagonal_design()$infoDesign
+        data_entry <- diagonal_design()$data_entry[[user_site]]
+        entry_checks <- info_design$entry_checks[[user_site]]
+        df <- data.frame(
+          ENTRY = entry_checks,
+          NAME = data_entry$NAME[match(entry_checks, data_entry$ENTRY)],
+          TIMES = info_design$rep_checks[[user_site]]
+        )
         options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
                                   scrollX = TRUE, scrollY = "350px"))
         DT::datatable(df, rownames = FALSE, caption = 'Table of Checks.', 
@@ -666,24 +724,17 @@ mod_Diagonal_server <- function(id) {
     output$randomized_layout <- DT::renderDT({
       test <- randomize_hit$times > 0 & user_tries$tries > 0
       if (!test) return(NULL)
-      req(input$dimensions.d)
-      req(getData())
-      req(rand_lines())
-      VisualCheck <- FALSE
-      user_site <- as.numeric(input$locView.diagonal)
-      loc_view_user <- rand_lines()[[user_site]]
-      r_map <- loc_view_user$rand
-      checksEntries <- getChecks()$checksEntries
+      req(diagonal_design())
+      user_site <- user_location()
+      r_map <- diagonal_design()$layoutRandom[[user_site]]
       if (is.null(r_map))
         return(NULL)
-      checks = checksEntries
+      checks <- diagonal_design()$infoDesign$entry_checks[[user_site]]
       len_checks <- length(checks)
-      df <- as.data.frame(r_map)
+      df <- as.data.frame(unname(r_map))
       colores <- c('royalblue','salmon', 'green', 'orange','orchid', 'slategrey',
                     'greenyellow', 'blueviolet','deepskyblue','gold','blue', 'red')
-      s <- unlist(loc_view_user$Entries)
       rownames(df) <- nrow(df):1
-      style_equal <- rep('gray', length(s))
       DT::datatable(
         df,
         extensions = c('Buttons'),
@@ -708,88 +759,14 @@ mod_Diagonal_server <- function(id) {
                                                           colores[1:len_checks]))
     })
     
-    
-    split_name_reactive <- reactive({
-      req(rand_lines())
-      
-      w_map <- rand_checks()[[1]]$map_checks
-      expt_name <- single_inputs()$expt_name
- 
-      split_name <- names_layout(
-        w_map = w_map, 
-        kindExpt = "SUDC", 
-        planter = single_inputs()$planter_mov, 
-        expt_name = expt_name
-      )
-    })
-    
-    
-    plot_number_sites <- reactive({
-      req(single_inputs())
-      if (is.null(single_inputs()$plotNumber)) {
-        validate("Plot starting number is missing.")
-      } 
-      l <- single_inputs()$sites
-      plotNumber <- single_inputs()$plotNumber
-      if(!is.numeric(plotNumber) && !is.integer(plotNumber)) {
-        validate("plotNumber should be an integer or a numeric vector.")
-      }
-      
-      if (any(plotNumber %% 1 != 0)) {
-        validate("plotNumber should be integers.")
-      }
-      
-      if (!is.null(l)) {
-        if (is.null(plotNumber) || length(plotNumber) != l) {
-          if (l > 1){
-            plotNumber <- seq(1001, 1000*(l+1), 1000)
-          } else plotNumber <- 1001
-        }
-      }else validate("Number of locations/sites is missing")
-      
-      return(plotNumber)
-      
-    })
-    
-    plot_number_reactive <- reactive({
-      req(rand_lines())
-      req(split_name_reactive()$my_names)
-      datos_name <- split_name_reactive()$my_names 
-      datos_name = as.matrix(datos_name) 
-      n_rows <- field_dimensions_diagonal()$d_row
-      n_cols <- field_dimensions_diagonal()$d_col
-      movement_planter = single_inputs()$planter_mov
-      plot_n_start <- plot_number_sites()
-      locs_diagonal <- single_inputs()$sites
-      plots_number_sites <- vector(mode = "list", length = locs_diagonal)
-      for (sites in 1:locs_diagonal) {
-          expe_names <- single_inputs()$expt_name 
-          fillers <- sum(datos_name == "Filler")
-          plot_nub <- plot_number(
-            planter = single_inputs()$planter_mov,
-            plot_number_start = plot_n_start[sites],
-            layout_names = datos_name,
-            expe_names = expe_names,
-            fillers = fillers
-          )
-          
-        plots_number_sites[[sites]] <- plot_nub$w_map_letters1
-      }
-      return(list(plots_number_sites = plots_number_sites))
-    })
-    
-    
-    
     output$plot_number_layout <- DT::renderDT({
       test <- randomize_hit$times > 0 & user_tries$tries > 0
       if (!test) return(NULL)
-      req(plot_number_reactive())
-      plot_num <- plot_number_reactive()$plots_number_sites[[user_location()$user_site]]
+      req(diagonal_design())
+      plot_num <- diagonal_design()$plotsNumber[[user_location()]]
       if (is.null(plot_num))
         return(NULL)
-      w_map <- rand_checks()[[1]]$map_checks
-      if("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE
-      df <- as.data.frame(plot_num)
+      df <- as.data.frame(unname(plot_num))
       rownames(df) <- nrow(df):1
       DT::datatable(
         df,
@@ -807,63 +784,6 @@ mod_Diagonal_server <- function(id) {
                        lengthMenu = list(c(10,25,50,-1),
                                          c(10,25,50,"All")))
       )
-    })
-
-    export_diagonal_design <- reactive({
-      locs_diagonal <- single_inputs()$sites
-      final_expt_fieldbook <- vector(mode = "list",length = locs_diagonal)
-      location_names <- single_inputs()$location_names
-      if (length(location_names) != locs_diagonal) location_names <- 1:locs_diagonal
-      for (user_site in 1:locs_diagonal) {
-        loc_user_out_rand <- rand_checks()[[user_site]]
-        w_map <- as.matrix(loc_user_out_rand$col_checks)
-        if("Filler" %in% w_map) Option_NCD <- TRUE else Option_NCD <- FALSE
-        req(split_name_reactive()$my_names)
-        req(plot_number_reactive())
-        movement_planter = single_inputs()$planter_mov
-        my_data_VLOOKUP <- getData()$data_entry
-        COLNAMES_DATA <- colnames(my_data_VLOOKUP)
-        if (Option_NCD == TRUE) {
-          Entry_Fillers <- data.frame(list(0,"Filler"))
-          colnames(Entry_Fillers) <- COLNAMES_DATA
-          my_data_VLOOKUP <- rbind(my_data_VLOOKUP, Entry_Fillers)
-        }
-        plot_number <- plot_number_reactive()$plots_number_sites[[user_site]]
-        plot_number <- apply(plot_number, 2 ,as.numeric)
-        my_names <- split_name_reactive()$my_names
-        loc_user_out_checks <- rand_checks()[[user_site]]
-        Col_checks <- as.matrix(loc_user_out_checks$col_checks)
-        loc_user_out_rand <- rand_lines()[[user_site]]
-        random_entries_map <- loc_user_out_rand$rand
-        random_entries_map[random_entries_map == "Filler"] <- 0
-        random_entries_map <- apply(random_entries_map, 2 ,as.numeric)
-
-        results_to_export <- list(random_entries_map, plot_number, Col_checks, my_names)
-        final_expt_export <- export_design(
-          G = results_to_export, 
-          movement_planter = movement_planter,
-          location = location_names[user_site], 
-          Year = NULL,
-          data_file = my_data_VLOOKUP, 
-          reps = FALSE
-        )
-        final_expt_fieldbook[[user_site]] <- as.data.frame(final_expt_export)
-      }
-
-      final_fieldbook <- dplyr::bind_rows(final_expt_fieldbook)
-      
-      if (Option_NCD == TRUE) {
-        final_fieldbook$CHECKS <- ifelse(final_fieldbook$NAME == "Filler", 0, final_fieldbook$CHECKS)
-        #final_fieldbook$EXPT <- ifelse(final_fieldbook$EXPT == "Filler", 0, final_fieldbook$EXPT)
-      }
-
-      ID <- 1:nrow(final_fieldbook)
-      final_fieldbook <- final_fieldbook[, c(6,7,9,4,2,3,5,1,10)]
-      final_fieldbook_all_sites <- cbind(ID, final_fieldbook)
-      colnames(final_fieldbook_all_sites)[10] <- "TREATMENT"
-      
-      return(list(final_expt = final_fieldbook_all_sites))
-      
     })
     
     valsDIAG <- reactiveValues(ROX = NULL, ROY = NULL, trail = NULL, minValue = NULL,
@@ -910,7 +830,7 @@ mod_Diagonal_server <- function(id) {
     }
     
     observeEvent(input$Simulate_Diagonal, {
-      req(export_diagonal_design()$final_expt)
+      req(diagonal_design()$fieldBook)
       showModal(
         simuModal_DIAG()
       )
@@ -940,18 +860,18 @@ mod_Diagonal_server <- function(id) {
     })
     
     simudata_DIAG <- reactive({
-      req(export_diagonal_design()$final_expt)
+      req(diagonal_design()$fieldBook)
       if(!is.null(valsDIAG$maxValue) && !is.null(valsDIAG$minValue) && !is.null(valsDIAG$trail)) {
         maxVal <- as.numeric(valsDIAG$maxValue)
         minVal <- as.numeric(valsDIAG$minValue)
         ROX_DIAG <- as.numeric(valsDIAG$ROX)
         ROY_DIAG <- as.numeric(valsDIAG$ROY)
-        df_diag <- export_diagonal_design()$final_expt
+        df_diag <- diagonal_design()$fieldBook
         loc_levels_factors <- levels(factor(df_diag$LOCATION, unique(df_diag$LOCATION)))
-        nrows_diag <- field_dimensions_diagonal()$d_row
-        ncols_diag <- field_dimensions_diagonal()$d_col
-        seed_diag <- as.numeric(single_inputs()$seed_number)
-        locs_diag <- as.numeric(input$l.diagonal)
+        nrows_diag <- diagonal_design()$infoDesign$rows
+        ncols_diag <- diagonal_design()$infoDesign$columns
+        seed_diag <- as.numeric(diagonal_design()$infoDesign$seed)
+        locs_diag <- as.numeric(diagonal_design()$infoDesign$locations)
         df_diag_list <- vector(mode = "list", length = locs_diag)
         df_simulation_list <- vector(mode = "list", length = locs_diag)
         w <- 1
@@ -977,7 +897,7 @@ mod_Diagonal_server <- function(id) {
         df_diag_locs <- dplyr::bind_rows(df_diag_list)
         v <- 1
       }else {
-        df_DIAG <- export_diagonal_design()$final_expt
+        df_DIAG <- diagonal_design()$fieldBook
         v <- 2
       }
       if (v == 1) {
@@ -1028,8 +948,8 @@ mod_Diagonal_server <- function(id) {
     
     
     heatmap_obj_D <- reactive({
-      req(simudata_DIAG()$dfSimulation)
-      loc_user <- user_location()$user_site
+      req(simudata_DIAG()$dfSimulationList)
+      loc_user <- user_location()
       w <- as.character(valsDIAG$trail)
       df <- simudata_DIAG()$dfSimulationList[[loc_user]]
       p1 <- ggplot2::ggplot(df, ggplot2::aes(x = df[,4], y = df[,3], fill = df[,7], text = df[,8])) + 
