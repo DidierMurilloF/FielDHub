@@ -220,6 +220,16 @@
   check and one entry in each location got `EXPT = "Filler"` and `PLOT = 0`,
   while the real filler plots got plot numbers. The randomization itself is
   unchanged.
+- The single diagonal, multiple diagonal and sparse allocation modules of the
+  Shiny app now build their designs with `diagonal_arrangement()` and
+  `sparse_allocation()`, so the app and R give the same design for the same
+  inputs and seed. The modules used to re-implement the randomization and drew
+  the random numbers in a different order, so the same seed gave a different
+  design in the app. As a result, designs made in the app with a given seed
+  differ from earlier versions, generated entries are named as in R,
+  field-book IDs restart at 1 in each location, filler plots of sparse
+  allocations have `EXPT = "Filler"`, and uploaded check entries must be
+  consecutive numbers.
 - The documentation of `swap_pairs()`, `do_optim()`, `sparse_allocation()` and
   `multi_location_prep()` now matches their defaults and the elements they
   return.
