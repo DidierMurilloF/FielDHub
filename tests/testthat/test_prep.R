@@ -178,8 +178,93 @@ test_that("For groups with ENTRY numeric value between 31 and 33, REP is always 
   )
 })
 
+test_that("prime-sized p-rep designs support opt-in filler plots", {
+  expect_error(
+    partially_replicated(
+      nrows = 6,
+      ncols = 7,
+      repGens = c(5, 31),
+      repUnits = c(2, 1),
+      seed = 123
+    ),
+    "prime number"
+  )
 
+  design <- partially_replicated(
+    nrows = 6,
+    ncols = 7,
+    repGens = c(5, 31),
+    repUnits = c(2, 1),
+    seed = 123,
+    allow_fillers = TRUE
+  )
 
+  expect_equal(design$infoDesign$experimental_plots, 41)
+  expect_equal(design$infoDesign$field_capacity, 42)
+  expect_equal(design$infoDesign$fillers, 1)
+  expect_equal(sum(design$fillerField[[1]]), 1)
+  expect_equal(sum(design$layoutRandom[[1]] == 0), 1)
+  expect_equal(sum(design$plotNumber[[1]] == 0), 1)
+  expect_false(any(design$pairsDistance[[1]]$geno == 0))
+
+  filler_row <- design$fieldBook$TREATMENT == "Filler"
+  expect_equal(sum(filler_row), 1)
+  expect_equal(design$fieldBook$ENTRY[filler_row], 0)
+  expect_equal(design$fieldBook$PLOT[filler_row], 0)
+  expect_equal(design$fieldBook$CHECKS[filler_row], 0)
+  expect_true(is.na(design$fieldBook$REP[filler_row]))
+
+  observed_reps <- table(design$fieldBook$ENTRY[!filler_row])
+  expect_equal(as.numeric(observed_reps[as.character(1:5)]), rep(2, 5))
+  expect_equal(as.numeric(observed_reps[as.character(6:36)]), rep(1, 31))
+})
+
+test_that("p-rep dimension options keep fillers opt-in", {
+  expect_null(FielDHub:::prep_dimension_options(41, allow_fillers = FALSE))
+
+  options <- FielDHub:::prep_dimension_options(41, allow_fillers = TRUE)
+  expect_gt(nrow(options), 0)
+  expect_equal(min(options$fillers), 1)
+  expect_true(all(options$capacity - options$fillers == 41))
+  expect_true(all(grepl("filler", options$label)))
+})
+
+test_that("p-rep dimension options cap offered fillers by default", {
+  options <- FielDHub:::prep_dimension_options(293, allow_fillers = TRUE)
+  expanded <- FielDHub:::prep_dimension_options(
+    293,
+    allow_fillers = TRUE,
+    max_fillers = 12
+  )
+
+  expect_lte(max(options$fillers), 10)
+  expect_true(any(expanded$fillers > 10))
+})
+
+test_that("fillers follow planter direction and row parity", {
+  cartesian_even <- FielDHub:::prep_field_mask(
+    nrows = 6,
+    ncols = 7,
+    fillers = 1,
+    planter = "cartesian"
+  )
+  serpentine_even <- FielDHub:::prep_field_mask(
+    nrows = 6,
+    ncols = 7,
+    fillers = 1,
+    planter = "serpentine"
+  )
+  serpentine_odd <- FielDHub:::prep_field_mask(
+    nrows = 5,
+    ncols = 7,
+    fillers = 1,
+    planter = "serpentine"
+  )
+
+  expect_false(cartesian_even[1, 7])
+  expect_false(serpentine_even[1, 1])
+  expect_false(serpentine_odd[1, 7])
+})
 
 
 

@@ -132,6 +132,11 @@ mod_multi_loc_preps_ui <- function(id){
                 multiple = FALSE,
                 selected = "serpentine"
             ),
+            checkboxInput(
+                inputId = ns("allow_fillers_prep"),
+                label = "Allow filler plots",
+                value = FALSE
+            ),
             fluidRow(
                 column(
                     width = 6,
@@ -514,42 +519,7 @@ mod_multi_loc_preps_server <- function(id){
                 rep_checks = prep_inputs()$prep_checks
             )
         }
-        plots_for_treatments <- as.numeric(optim_out$size_locations[1])
-        prep_checks <- as.numeric(prep_inputs()$prep_checks)
-        if (!is.null(prep_inputs()$prep_checks)) {
-          prep_checks <- as.numeric(prep_inputs()$prep_checks)
-        } else {
-          prep_checks <- 0
-        }
-        total_plots <- plots_for_treatments + sum(prep_checks)
-        prime_factors <- numbers::primeFactors(total_plots)
-        if (length(prime_factors) == 2) {
-          if (prime_factors[1] < 4 & numbers::isPrime(prime_factors[2])) {
-            shinyalert::shinyalert(
-              "Error!!",
-              "There are no options available for field dimensions. Please try a different number of treatments or checks.",
-              type = "error"
-            )
-            return(NULL)
-          }
-        }
-        if (numbers::isPrime(total_plots)) {
-            shinyalert::shinyalert(
-              "Error!!",
-              "The number of field plots results in a prime number. Please try a different number of treatments.",
-              type = "error"
-            )
-            return(NULL)
-        }
-        choices <- factor_subsets(total_plots)$labels
-        if (length(choices) == 0) {
-          shinyalert::shinyalert(
-            "Error!!",
-            "Number of entries is too small!",
-            type = "error"
-          )
-          return(NULL)
-        } else return(optim_out)
+        return(optim_out)
     }) |>
         bindEvent(input$run_prep)
 
@@ -562,42 +532,65 @@ mod_multi_loc_preps_server <- function(id){
         } else {
             prep_checks <- 0
         }
-        prep_checks <- as.numeric(prep_inputs()$prep_checks)
-        plots_for_treatments <- as.numeric(setup_optim_prep()$size_locations[1])
+        plots_for_treatments <- as.numeric(setup_optim_prep()$size_locations)
         total_plots <- plots_for_treatments + sum(prep_checks)
         return(
             list(total_plots = total_plots)
         )
     })
     
-    observeEvent(list_input_plots(), {
+    observeEvent(list(list_input_plots(), input$allow_fillers_prep), {
         req(setup_optim_prep())
         req(prep_inputs())
-        plots_for_treatments <- as.numeric(setup_optim_prep()$size_locations[1])
-        prep_checks <- as.numeric(prep_inputs()$prep_checks)
         if (!is.null(prep_inputs()$prep_checks)) {
             prep_checks <- as.numeric(prep_inputs()$prep_checks)
         } else {
             prep_checks <- 0
         }
+        plots_for_treatments <- as.numeric(setup_optim_prep()$size_locations)
         total_plots <- plots_for_treatments + sum(prep_checks)
-        choices <- factor_subsets(total_plots)$labels
-        if (is.null(choices)) {
+        options <- prep_dimension_options(
+            total_plots = total_plots[1],
+            allow_fillers = isTRUE(input$allow_fillers_prep),
+            max_fillers = .prep_max_fillers
+        )
+        if (is.null(options)) {
             sort_choices <- "No options available"
         } else {
-            dif <- vector(mode = "numeric", length = length(choices))
-            for (option in 1:length(choices)) {
-                dims <- unlist(strsplit(choices[[option]], " x "))
-                dif[option] <- abs(as.numeric(dims[1]) - as.numeric(dims[2]))
-            }
-            df_choices <- data.frame(choices = unlist(choices), diff_dim = dif)
-            df_choices <- df_choices[order(df_choices$diff_dim, decreasing = FALSE), ]
-            sort_choices <- as.vector(df_choices$choices)
+            sort_choices <- stats::setNames(options$value, options$label)
         }
         updateSelectInput(
             inputId = "dimensions_preps",
             choices = sort_choices,
             selected = sort_choices[1])
+        if (is.null(options)) {
+            shinyjs::hide(id = "get_random_prep")
+            if (!isTRUE(input$allow_fillers_prep)) {
+                shinyalert::shinyalert(
+                    "Filler plots required",
+                    sprintf(paste(
+                        "The current design does not fit any supported rectangular",
+                        "field dimensions without unused cells. Select 'Allow filler",
+                        "plots' to continue. FielDHub will then offer nearby valid",
+                        "dimensions requiring no more than %d filler plots and place",
+                        "the fillers at the end of the selected planter path."
+                    ), .prep_max_fillers),
+                    type = "info"
+                )
+            } else {
+                shinyalert::shinyalert(
+                    "No dimensions within the filler limit",
+                    sprintf(paste(
+                        "FielDHub could not find supported rectangular field dimensions",
+                        "requiring %d or fewer filler plots. Adjust the number of entries",
+                        "or replication settings and try again."
+                    ), .prep_max_fillers),
+                    type = "warning"
+                )
+            }
+        } else {
+            shinyjs::show(id = "get_random_prep")
+        }
     })
 
     dimensions <-  reactiveValues()
@@ -667,29 +660,25 @@ mod_multi_loc_preps_server <- function(id){
       }
     })
 
-    dimension_choices <- function() {
+    dimension_choices <- function(site = 1) {
       req(setup_optim_prep())
       req(prep_inputs())
-      plots_for_treatments <- as.numeric(setup_optim_prep()$size_locations[1])
-      prep_checks <- as.numeric(prep_inputs()$prep_checks)
       if (!is.null(prep_inputs()$prep_checks)) {
           prep_checks <- as.numeric(prep_inputs()$prep_checks)
       } else {
           prep_checks <- 0
       }
+      plots_for_treatments <- as.numeric(setup_optim_prep()$size_locations[site])
       total_plots <- plots_for_treatments + sum(prep_checks)
-      choices <- factor_subsets(total_plots)$labels
-      if (is.null(choices)) {
+      options <- prep_dimension_options(
+        total_plots = total_plots,
+        allow_fillers = isTRUE(input$allow_fillers_prep),
+        max_fillers = .prep_max_fillers
+      )
+      if (is.null(options)) {
           sort_choices <- "No options available"
       } else {
-          dif <- vector(mode = "numeric", length = length(choices))
-          for (option in 1:length(choices)) {
-              dims <- unlist(strsplit(choices[[option]], " x "))
-              dif[option] <- abs(as.numeric(dims[1]) - as.numeric(dims[2]))
-          }
-          df_choices <- data.frame(choices = unlist(choices), diff_dim = dif)
-          df_choices <- df_choices[order(df_choices$diff_dim, decreasing = FALSE), ]
-          sort_choices <- as.vector(df_choices$choices)
+          sort_choices <- stats::setNames(options$value, options$label)
       }
       return(sort_choices)
     }
@@ -720,7 +709,7 @@ mod_multi_loc_preps_server <- function(id){
             selectInput(
               ns(paste0("dimensions_loc_", i)),
               paste0("Select dimension for location ", i),
-              choices = dimension_choices()
+              choices = dimension_choices(i)
             )
           )
         )
@@ -770,7 +759,6 @@ mod_multi_loc_preps_server <- function(id){
     observeEvent(input$run_prep, {
         req(setup_optim_prep())
         shinyjs::show(id = "dimensions_preps")
-        shinyjs::show(id = "get_random_prep")
     })
 
 
@@ -779,7 +767,6 @@ mod_multi_loc_preps_server <- function(id){
         req(setup_optim_prep())
        #shinyjs::show(id = "dimensions_preps")
         shinyjs::show(id = "multi_dimension_toggle")
-        shinyjs::show(id = "get_random_prep")
 
         observeEvent(input$multi_dimension_toggle, {
           if (input$multi_dimension_toggle == TRUE) {
@@ -898,7 +885,8 @@ mod_multi_loc_preps_server <- function(id){
                 multiLocationData = TRUE,
                 dist_method = "euclidean", #input$optimization_distance_method_prep,
                 border_penalization = 0.5, #input$border_penalization_prep,
-                data = entry_list
+                data = entry_list,
+                allow_fillers = isTRUE(input$allow_fillers_prep)
             )
         })
         return(locations_preps)
@@ -915,6 +903,7 @@ mod_multi_loc_preps_server <- function(id){
       req(pREPS_reactive())
       selection <- as.numeric(user_site_selection())
       w_map <- pREPS_reactive()$layoutRandom[[selection]]
+      w_map[pREPS_reactive()$fillerField[[selection]]] <- "Filler"
       checks = as.vector(pREPS_reactive()$treatments_with_reps[[selection]])
       len_checks <- length(checks)
       colores <- c('royalblue','salmon', 'green', 'orange','orchid', 'slategrey',

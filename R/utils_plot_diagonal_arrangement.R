@@ -54,6 +54,7 @@ plot_prep <- function(x, l, ...) {
     rows <- max(as.numeric(loc_field_book$ROW))
 
     loc_field_book$ENTRY <- as.character(loc_field_book$ENTRY)
+    loc_field_book$ENTRY[loc_field_book$TREATMENT == "Filler"] <- "Filler"
     
     loc_field_book$binay_checks <- ifelse(loc_field_book$CHECKS != 0, 1, 0)
     

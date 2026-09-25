@@ -20,6 +20,9 @@
 #' @param seed (optional) Real number that specifies the starting seed to obtain reproducible designs.
 #' @param spread_reps A logical value indicating whether to maximize the spatial 
 #'   distance between replicated treatments in the field. Default is \code{TRUE}.
+#' @param allow_fillers A logical value indicating whether field dimensions may
+#'   exceed the number of experimental plots. Fillers occupy the terminal cells
+#'   of the selected planter path. Default is \code{FALSE}.
 #' @param exptName (optional) Name of the experiment.
 #' @param locationNames (optional) Name for each location.
 #' @param multiLocationData (optional) Option to pass an entry list for multiple locations. 
@@ -47,6 +50,7 @@
 #'   \item \code{layoutRandom} is a matrix with the randomization layout.
 #'   \item \code{plotNumber} is a matrix with the layout plot number.
 #'   \item \code{binaryField} is a matrix with the binary field.
+#'   \item \code{fillerField} is a logical matrix identifying filler plots.
 #'   \item \code{dataEntry} is a data frame with the data input.
 #'   \item \code{genEntries} is a list with the entries for replicated and non-replicated parts.
 #'   \item \code{fieldBook} is a data frame with field book design. This includes the index (Row, Column).
@@ -129,12 +133,17 @@ partially_replicated <- function(
     multiLocationData = FALSE, 
     dist_method = "euclidean",
     border_penalization = 0.5,
-    data = NULL) {
+    data = NULL,
+    allow_fillers = FALSE) {
     
     if (all(c("serpentine", "cartesian") != planter)) {
         base::stop('Input "planter" is unknown. Please, choose one: "serpentine" or "cartesian"')
     }
-  
+    if (length(allow_fillers) != 1 || is.na(allow_fillers) ||
+        !is.logical(allow_fillers)) {
+        stop("allow_fillers must be TRUE or FALSE.")
+    }
+
     if (is.null(nrows) || is.null(ncols) || !is.numeric(nrows) || !is.numeric(ncols)) {
         base::stop('Basic design parameters missing (nrows, ncols) or is not numeric.')
     }
@@ -255,7 +264,7 @@ partially_replicated <- function(
             checks <- length(checksEntries)
             lines <- sum(GENOS$REPS)
             t_plots <- sum(as.numeric(gen_list$REPS))
-            if (numbers::isPrime(t_plots)) {
+            if (!allow_fillers && numbers::isPrime(t_plots)) {
                 stop("No options when the total number of plots is a prime number.", call. = FALSE)
             }
             list_locs <- vector(mode = "list", length = l)
@@ -268,7 +277,7 @@ partially_replicated <- function(
             stop("Input repGens and repUnits need to be of the same length.")
         } 
         t_plots <- sum(repGens * repUnits)
-        if (numbers::isPrime(t_plots)) {
+        if (!allow_fillers && numbers::isPrime(t_plots)) {
             stop("No options when the total number of plots is a prime number.", call. = FALSE)
         }
         ENTRY <- 1:sum(repGens)
@@ -284,6 +293,18 @@ partially_replicated <- function(
             list_locs[[data_list]] <- data
         }
     }
+    experimental_plots <- vapply(
+        list_locs[seq_len(l)],
+        function(site_data) sum(as.numeric(site_data$REPS)),
+        numeric(1)
+    )
+    field_capacity <- nrows * ncols
+    fillers <- field_capacity - experimental_plots
+    if (allow_fillers && any(fillers < 0)) {
+        stop("Field dimensions must provide at least one cell per experimental plot.")
+    }
+    if (!allow_fillers) fillers <- rep(0, l)
+
     if (is.null(seed)) seed <- base::sample.int(10000, size = 1)
     set.seed(seed)
     field_book_sites <- vector(mode = "list", length = l)
@@ -294,12 +315,14 @@ partially_replicated <- function(
     min_distance_sites <- vector(mode = "numeric", length = l)
     treatments_with_reps = vector(mode = "list", length = l)
     treatments_with_no_reps = vector(mode = "list", length = l)
+    filler_fields <- vector(mode = "list", length = l)
     rows_incidence <- vector(mode = "numeric", length = l)
     for (sites in 1:l) {
         prep <- pREP(
             nrows = nrows[sites], 
             ncols = ncols[sites], 
-            Fillers = 0,
+            Fillers = fillers[sites],
+            planter = planter,
             seed = seed, 
             spread_reps = spread_reps,
             dist_method = dist_method,
@@ -330,10 +353,11 @@ partially_replicated <- function(
         split_name_spat <- function(){
             split_names <- base::matrix(
                 data = Name_expt, 
-                nrow = nrows, 
-                ncol = ncols, 
+                nrow = nrows[sites],
+                ncol = ncols[sites],
                 byrow = TRUE
             )
+            split_names[prep$filler.field] <- "Filler"
             return(list(my_names = split_names))
         }
         
@@ -345,7 +369,7 @@ partially_replicated <- function(
                 plot_number_start = plot_n_start,
                 layout_names = datos_name,
                 expe_names = Name_expt,
-                fillers = 0
+                fillers = fillers[sites]
             )
         }
         
@@ -362,6 +386,17 @@ partially_replicated <- function(
             my_names <- as.matrix(split_name_spat()$my_names)
             year <- format(Sys.Date(), "%Y")
             my_data_VLOOKUP <- prep$gen.list
+            if (fillers[sites] > 0) {
+                filler_entry <- data.frame(
+                    ENTRY = 0,
+                    NAME = "Filler",
+                    REPS = NA_integer_
+                )
+                my_data_VLOOKUP <- dplyr::bind_rows(
+                    my_data_VLOOKUP,
+                    filler_entry
+                )
+            }
             results_to_export <- list(
                 random_entries_map, 
                 plot_number_L, 
@@ -395,6 +430,7 @@ partially_replicated <- function(
         layout_random_sites[[sites]] <- layoutR
         plot_numbers_sites[[sites]] <- plot_number_L
         col_checks_sites[[sites]] <- as.matrix(BINAY_CHECKS)
+        filler_fields[[sites]] <- prep$filler.field
         pairwise_distance_sites[[sites]] <- prep$pairwise_distance
         treatments_with_reps[[sites]] = prep$replicated_treatments
         treatments_with_no_reps[[sites]] = prep$unreplicated_treatments
@@ -418,6 +454,9 @@ partially_replicated <- function(
         incidence_in_rows = rows_incidence,
         locations = l,
         planter = planter,
+        experimental_plots = experimental_plots,
+        field_capacity = field_capacity,
+        fillers = fillers,
         seed = seed,
         id_design = 13)
     output <- list(
@@ -428,6 +467,7 @@ partially_replicated <- function(
         pairsDistance = pairwise_distance_sites,
         plotNumber = plot_numbers_sites,
         binaryField = col_checks_sites,
+        fillerField = filler_fields,
         dataEntry = dataInput,
         genEntries = genEntries,
         treatments_with_reps = treatments_with_reps,

@@ -7,6 +7,14 @@
 
 ### New features:
 
+- `partially_replicated()` and `multi_location_prep()` gain opt-in filler
+  plots through `allow_fillers`. Filler cells follow the selected cartesian or
+  serpentine planter path, remain fixed at its edge during spatial
+  optimization, and are excluded from treatment distances and replication
+  summaries. Both p-rep modules in the Shiny app now offer the same opt-in
+  dimension choices, display the number of fillers required by each choice,
+  and limit the default suggestions to at most 10 filler plots.
+
 - `RCBD()` gains `checks`, `rep_checks` and `spread_checks`, generating a
   randomized complete block design in which a set of checks is repeated more
   than once inside every block while each test entry still appears exactly

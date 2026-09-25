@@ -19,7 +19,8 @@ partially_replicated(
   multiLocationData = FALSE,
   dist_method = "euclidean",
   border_penalization = 0.5,
-  data = NULL
+  data = NULL,
+  allow_fillers = FALSE
 )
 }
 \arguments{
@@ -39,6 +40,10 @@ partially_replicated(
 
 \item{spread_reps}{A logical value indicating whether to maximize the spatial 
 distance between replicated treatments in the field. Default is \code{TRUE}.}
+
+\item{allow_fillers}{A logical value indicating whether field dimensions may
+exceed the number of experimental plots. Fillers occupy the terminal cells
+of the selected planter path. Default is \code{FALSE}.}
 
 \item{seed}{(optional) Real number that specifies the starting seed to obtain reproducible designs.}
 
@@ -64,6 +69,7 @@ A list with several elements.
   \item \code{layoutRandom} is a matrix with the randomization layout.
   \item \code{plotNumber} is a matrix with the layout plot number.
   \item \code{binaryField} is a matrix with the binary field.
+  \item \code{fillerField} is a logical matrix identifying filler plots.
   \item \code{dataEntry} is a data frame with the data input.
   \item \code{genEntries} is a list with the entries for replicated and non-replicated parts.
   \item \code{fieldBook} is a data frame with field book design. This includes the index (Row, Column).
