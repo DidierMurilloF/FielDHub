@@ -254,18 +254,18 @@ rowcold1$resolvableBlocks
 #> 
 head(rowcold1$fieldBook,12)
 #>    ID LOCATION PLOT REP ROW COLUMN ENTRY TREATMENT
-#> 1   1     Loc1  101   1   1      1     4       G-4
-#> 2   2     Loc1  102   1   1      2    19      G-19
-#> 3   3     Loc1  103   1   1      3    12      G-12
-#> 4   4     Loc1  104   1   1      4    15      G-15
-#> 5   5     Loc1  105   1   2      1     2       G-2
-#> 6   6     Loc1  106   1   2      2    24      G-24
-#> 7   7     Loc1  107   1   2      3     6       G-6
-#> 8   8     Loc1  108   1   2      4    23      G-23
-#> 9   9     Loc1  109   1   3      1     1       G-1
+#> 1   1     Loc1  101   1   1      1    21      G-21
+#> 2   2     Loc1  102   1   1      2     8       G-8
+#> 3   3     Loc1  103   1   1      3     4       G-4
+#> 4   4     Loc1  104   1   1      4     7       G-7
+#> 5   5     Loc1  105   1   2      1    12      G-12
+#> 6   6     Loc1  106   1   2      2     6       G-6
+#> 7   7     Loc1  107   1   2      3    23      G-23
+#> 8   8     Loc1  108   1   2      4    24      G-24
+#> 9   9     Loc1  109   1   3      1    22      G-22
 #> 10 10     Loc1  110   1   3      2     9       G-9
-#> 11 11     Loc1  111   1   3      3    22      G-22
-#> 12 12     Loc1  112   1   3      4    10      G-10
+#> 11 11     Loc1  111   1   3      3     1       G-1
+#> 12 12     Loc1  112   1   3      4    17      G-17
 
 # Example 2: Generates a row-column design with 2 full blocks and 30 treatments
 # and 5 rows, for one location, using the default method = "onestage".
@@ -341,18 +341,18 @@ rowcold2$resolvableBlocks
 #> 
 head(rowcold2$fieldBook,12)
 #>    ID LOCATION PLOT REP ROW COLUMN ENTRY TREATMENT
-#> 1   1        A 1001   1   1      1     2      ND-2
-#> 2   2        A 1002   1   1      2    23     ND-23
-#> 3   3        A 1003   1   1      3    30     ND-30
-#> 4   4        A 1004   1   1      4    15     ND-15
-#> 5   5        A 1005   1   1      5    14     ND-14
-#> 6   6        A 1006   1   1      6    17     ND-17
-#> 7   7        A 1007   1   2      1    19     ND-19
-#> 8   8        A 1008   1   2      2     1      ND-1
-#> 9   9        A 1009   1   2      3     7      ND-7
-#> 10 10        A 1010   1   2      4    24     ND-24
-#> 11 11        A 1011   1   2      5    26     ND-26
-#> 12 12        A 1012   1   2      6    12     ND-12
+#> 1   1        A 1001   1   1      1    21     ND-21
+#> 2   2        A 1002   1   1      2    18     ND-18
+#> 3   3        A 1003   1   1      3    23     ND-23
+#> 4   4        A 1004   1   1      4    12     ND-12
+#> 5   5        A 1005   1   1      5     1      ND-1
+#> 6   6        A 1006   1   1      6     5      ND-5
+#> 7   7        A 1007   1   2      1     2      ND-2
+#> 8   8        A 1008   1   2      2    10     ND-10
+#> 9   9        A 1009   1   2      3    29     ND-29
+#> 10 10        A 1010   1   2      4     9      ND-9
+#> 11 11        A 1011   1   2      5     7      ND-7
+#> 12 12        A 1012   1   2      6    17     ND-17
 
 # Example 3: Same design as Example 1 but using the historical two-stage
 # optimization (method = "twostage"), which reproduces the designs generated
@@ -405,21 +405,21 @@ rowcold3$blocksModel
 #> 1           Rep      2    1.0000000    1.0000000 1.0000000
 #> 2           Row     12    0.7225014    0.6500942 0.6592357
 #> 3        Column      8    0.8304469    0.7804391 0.8070175
-#> 4 Row-by-Column     NA    0.5465871    0.4113822        NA
+#> 4 Row-by-Column     NA    0.5459002    0.3939678        NA
 #> 
 head(rowcold3$fieldBook, 12)
 #>    ID LOCATION PLOT REP ROW COLUMN ENTRY TREATMENT
-#> 1   1     Loc1  101   1   1      1    10      G-10
-#> 7   2     Loc1  102   1   1      2    20      G-20
-#> 13  3     Loc1  103   1   1      3     3       G-3
-#> 19  4     Loc1  104   1   1      4    11      G-11
-#> 2   5     Loc1  105   1   2      1     1       G-1
+#> 1   1     Loc1  101   1   1      1    13      G-13
+#> 7   2     Loc1  102   1   1      2    23      G-23
+#> 13  3     Loc1  103   1   1      3    10      G-10
+#> 19  4     Loc1  104   1   1      4    12      G-12
+#> 2   5     Loc1  105   1   2      1    20      G-20
 #> 8   6     Loc1  106   1   2      2     8       G-8
-#> 14  7     Loc1  107   1   2      3    15      G-15
-#> 20  8     Loc1  108   1   2      4     5       G-5
-#> 3   9     Loc1  109   1   3      1     7       G-7
-#> 9  10     Loc1  110   1   3      2     6       G-6
-#> 15 11     Loc1  111   1   3      3    12      G-12
-#> 21 12     Loc1  112   1   3      4     9       G-9
+#> 14  7     Loc1  107   1   2      3     6       G-6
+#> 20  8     Loc1  108   1   2      4    19      G-19
+#> 3   9     Loc1  109   1   3      1    24      G-24
+#> 9  10     Loc1  110   1   3      2    11      G-11
+#> 15 11     Loc1  111   1   3      3    21      G-21
+#> 21 12     Loc1  112   1   3      4     5       G-5
 
 ```
