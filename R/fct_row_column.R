@@ -393,7 +393,7 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
   ID <- 1:nrow(out_row_col_id)
   out_row_col_fieldbook <- cbind(ID, out_row_col_id)
   
-  loc <- levels(out_row_col_fieldbook$LOCATION)
+  loc <- locationNames
   ib <- nt/k
   Resolvable_rc_reps <- vector(mode = "list", length = r*l)
   w <- 1

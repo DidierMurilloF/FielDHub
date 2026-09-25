@@ -243,3 +243,23 @@ test_that("method = 'onestage' works with a treatment data frame", {
   expect_true("TREATMENT" %in% names(des$fieldBook))
   expect_setequal(unique(des$fieldBook$TREATMENT), treatments)
 })
+
+test_that("row_column() resolvableBlocks holds each replicate's row-by-column layout", {
+  # Regression test: the per-location subsets were taken with
+  # levels(fieldBook$LOCATION), which is NULL because LOCATION is not a
+  # factor, so every subset was empty and every matrix was filled with NA.
+  des <- row_column(t = 12, nrows = 3, r = 2, l = 2, plotNumber = c(101, 201),
+                    locationNames = c("B", "A"), method = "twostage", seed = 1)
+  expect_named(des$resolvableBlocks, c("Loc_B", "Loc_A"))
+  fb <- des$fieldBook
+  for (site in c("B", "A")) {
+    blocks <- des$resolvableBlocks[[paste0("Loc_", site)]]
+    expect_named(blocks, c("rep1", "rep2"))
+    for (j in 1:2) {
+      plots <- fb[fb$LOCATION == site & fb$REP == j, ]
+      expected <- matrix(NA, nrow = 3, ncol = 4)
+      expected[cbind(plots$ROW, plots$COLUMN)] <- plots$ENTRY
+      expect_equal(blocks[[j]], expected)
+    }
+  }
+})
