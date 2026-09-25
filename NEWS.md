@@ -192,6 +192,13 @@
 - Fixed the multiple diagonal module where, with "Repeat entries", the entry
   names started at `G3` whatever the number of checks, so `NAME` and `ENTRY`
   disagreed.
+- Fixed a bug in `RCBD_augmented()` where, with `random = FALSE` and filler
+  plots, the first row of the field was overwritten with the fillers and a new
+  set of all checks regardless of the blocks: a block spanning several rows
+  ended up with two sets of checks (and some lines were left out of the
+  field), and blocks sharing the first row lost most of theirs. Only the block
+  holding the fillers now has its checks redrawn, so every block has each
+  check once.
 - The documentation of `swap_pairs()`, `do_optim()`, `sparse_allocation()` and
   `multi_location_prep()` now matches their defaults and the elements they
   return.
@@ -214,6 +221,8 @@ from:
   more than one location (the location names were ignored).
 - The single diagonal or sparse allocation modules of the Shiny app when the
   number of checks was changed after randomizing.
+- `RCBD_augmented()` with `random = FALSE` when the field has filler plots
+  (blocks with too many or too few checks, and possibly missing lines).
 
 # FielDHub 1.3.1
 

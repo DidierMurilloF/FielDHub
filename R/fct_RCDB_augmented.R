@@ -404,39 +404,31 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
         
         entries <- as.vector(data[(checks + 1):nrow(data), 1])
         blocks_with_checks <- lapply(1:b, fun)
-        
+
+        if (Fillers > 0) {
+          # The fillers go at the end of the planting path, in the first row of
+          # the field: its left end for serpentine with an even number of rows,
+          # its right end otherwise. Only the block holding them gets its
+          # checks redrawn among its remaining cells, so every block keeps a
+          # single set of checks.
+          if (field_rows %% 2 == 0 && planter == "serpentine") {
+            filler_block <- 1
+            filler_cols <- 1:Fillers
+          } else {
+            filler_block <- blocks_per_row
+            filler_cols <- ((ncols + 1) - Fillers):ncols
+          }
+          block <- blocks_with_checks[[filler_block]]
+          block[1, filler_cols] <- "Filler"
+          block[block != "Filler"] <- sample(c(rep(0, sum(block != "Filler") - checks), 1:checks))
+          blocks_with_checks[[filler_block]] <- block
+        }
+
         layout_a <- assemble_arcbd_blocks(
           block_list = blocks_with_checks,
           blocks_per_col = blocks_per_col,
           blocks_per_row = blocks_per_row
         )
-        
-        if (Fillers > 0) {
-          if (field_rows %% 2 == 0) {
-            if (planter == "serpentine") {
-              layout_a[1, ] <- c(
-                rep("Filler", Fillers),
-                sample(c(1:checks, rep(0, ncol(layout_a) - Fillers - checks)),
-                       size = ncol(layout_a) - Fillers, replace = FALSE
-                )
-              )
-            } else {
-              layout_a[1, ] <- c(
-                sample(c(1:checks, rep(0, ncol(layout_a) - Fillers - checks)),
-                       size = ncol(layout_a) - Fillers, replace = FALSE
-                ),
-                rep("Filler", Fillers)
-              )
-            }
-          } else {
-            layout_a[1, ] <- c(
-              sample(c(1:checks, rep(0, ncol(layout_a) - Fillers - checks)),
-                     size = ncol(layout_a) - Fillers, replace = FALSE
-              ),
-              rep("Filler", Fillers)
-            )
-          }
-        }
         
         col_checks <- ifelse(layout_a != 0, 1, 0)
         
