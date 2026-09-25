@@ -92,8 +92,8 @@ CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL,
         trts <- paste(rep("T", nt), 1:nt, sep = "")
         TRT <- rep(trts, each = reps)
       } else if (is.character(t) & length(t) > 1) {
-        TRT <- t
         nt <- length(t)
+        TRT <- rep(t, each = reps)
       } else if (is.character(t) & length(t) == 1) {
         shiny::validate('"CRD()" requires more than one treatment.')
       }
