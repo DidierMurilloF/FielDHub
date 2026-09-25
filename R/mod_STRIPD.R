@@ -476,7 +476,6 @@ mod_STRIPD_server <- function(id) {
     
     simuData_strip <- reactive({
       req(strip_reactive()$fieldBook)
-      set.seed(input$seed.strip)
       if(!is.null(valsStrip$maxV.strip) && 
          !is.null(valsStrip$minV.strip) && 
          !is.null(valsStrip$trail.strip)) {

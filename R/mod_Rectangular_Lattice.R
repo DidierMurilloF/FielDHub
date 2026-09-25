@@ -478,14 +478,14 @@ mod_Rectangular_Lattice_server <- function(id) {
     
     
     simuDataRECT <- reactive({
-      set.seed(input$myseed.rectangular)
       req(reactive_layoutRect()$allSitesFieldbook)
       if(!is.null(valsRECT$maxV.rectangular) && !is.null(valsRECT$minV.rectangular) && !is.null(valsRECT$trail.rectangular)) {
         max <- as.numeric(valsRECT$maxV.rectangular)
         min <- as.numeric(valsRECT$minV.rectangular)
         df.rectangular <- reactive_layoutRect()$allSitesFieldbook
         cnamesdf.rectangular<- colnames(df.rectangular)
-        df.rectangular<- norm_trunc(a = min, b = max, data = df.rectangular)
+        df.rectangular<- norm_trunc(a = min, b = max, data = df.rectangular,
+                                    seed = rectangular_inputs()$seed)
         colnames(df.rectangular) <- c(cnamesdf.rectangular[1:(ncol(df.rectangular) - 1)], valsRECT$trail.rectangular)
         a <- ncol(df.rectangular)
       }else {
