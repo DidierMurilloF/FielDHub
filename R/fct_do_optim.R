@@ -386,6 +386,9 @@ sparse_allocation <- function(
             i <- i + 1
         }
         choices <- unlist(choices_list[!sapply(choices_list, is.null)])
+        if (length(choices) == 0) {
+            stop("There are no field dimension options available. Please specify nrows and ncols.")
+        }
         dif <- vector(mode = "numeric", length = length(choices))
         for (option in 1:length(choices)) {
             dims <- unlist(strsplit(choices[[option]], " x "))

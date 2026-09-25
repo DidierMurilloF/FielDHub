@@ -86,6 +86,10 @@ split_plot <- function(wp = NULL, sp = NULL, reps = NULL, type = 2, l = 1, plotN
       if(all(is.numeric(args0)) && all(lengths(args1) == 1)) {
         WholePlots <- 1:wp
         SubPlots <- 1:sp
+      }else if(is.numeric(wp) && length(wp) == 1 && length(sp) > 1) {
+        WholePlots <- 1:wp
+        SubPlots <- sp
+        sp <- length(SubPlots)
       }else if(is.character(wp)) {
         if (length(wp) > 1) {
           if (is.numeric(sp)) {

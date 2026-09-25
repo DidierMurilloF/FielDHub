@@ -44,6 +44,9 @@
 #'
 #' @export
 split_families <- function(l = NULL, data = NULL) {
+  if (is.null(l) || !is.numeric(l) || length(l) != 1 || l < 1 || l %% 1 != 0) {
+    stop("\n 'split_families()' requires the number of locations 'l' as a whole number of 1 or more.")
+  }
   if(!is.data.frame(data)) {
     stop("\n 'split_families()' requires input data to be a data frame.")
   } 

@@ -78,6 +78,7 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
     if (all(!is.null(c(n, reps))) && all(base::lengths(list(n, reps)) == 1)) {
       if (all(is.numeric(c(n, reps))) && all(c(n, reps) %% 1 == 0) & all(c(n, reps) > 0)) {
         if (n > 10) stop("\n'latinsquare()' allows only up to 10 treatments.")
+        if (n < 2) stop("latin_square() requires more than one treatment.")
         ls.len <- n
         Name.Rows <- paste(rep("Row", ls.len), 1:ls.len)
         Name.Columns <- paste(rep("Column", ls.len), 1:ls.len)
