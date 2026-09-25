@@ -269,6 +269,8 @@ do_optim <- function(
 #' 
 #' @param year (optional) Year recorded in the \code{YEAR} column of the field book.
 #' By default the current year.
+#' @param checksPercent (optional) Percentage of checks in each location, one of the
+#' options available for the field. By default the last (largest) option.
 #' @return A list with eight elements.
 #' \itemize{
 #'   \item \code{infoDesign} is a list with information on the design parameters.
@@ -310,7 +312,8 @@ sparse_allocation <- function(
     sparse_list, 
     seed,
     data = NULL,
-    year = NULL) {
+    year = NULL,
+    checksPercent = NULL) {
     year <- resolve_year(year)
     # set a random seed if it is missing
     if (missing(seed)) seed <- base::sample.int(10000, size = 1) 
@@ -406,7 +409,8 @@ sparse_allocation <- function(
         seed = seed,
         multiLocationData= TRUE,
         data = unrep,
-        year = year
+        year = year,
+        checksPercent = checksPercent
     )
     unrep_designs$infoDesign$id_design <- "Sparse"
     output <- list(

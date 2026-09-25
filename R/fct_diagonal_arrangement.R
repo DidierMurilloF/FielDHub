@@ -35,6 +35,11 @@
 #' 
 #' @param year (optional) Year recorded in the \code{YEAR} column of the field book.
 #' By default the current year.
+#' @param checksPercent (optional) Percentage of checks, one of the options available
+#' for the field dimensions. By default the last (largest) option.
+#' @param sameEntries (optional) Logical. When \code{TRUE} and \code{kindExpt = "DBUDC"},
+#' every block holds the same entries, and all blocks must have the same size.
+#' By default \code{sameEntries = FALSE}.
 #' @return A list with five elements.
 #' \itemize{
 #'   \item \code{infoDesign} is a list with information on the design parameters.
@@ -135,8 +140,28 @@ diagonal_arrangement <- function(
     locationNames = NULL, 
     multiLocationData = FALSE,
     data = NULL,
-    year = NULL) {
+    year = NULL,
+    checksPercent = NULL,
+    sameEntries = FALSE) {
     year <- resolve_year(year)
+    if (!is.null(checksPercent) &&
+        (!is.numeric(checksPercent) || length(checksPercent) != 1 || is.na(checksPercent))) {
+        base::stop("'checksPercent' must be a single number.")
+    }
+    if (!is.logical(sameEntries) || length(sameEntries) != 1 || is.na(sameEntries)) {
+        base::stop("'sameEntries' must be TRUE or FALSE.")
+    }
+    if (sameEntries) {
+        if (kindExpt != "DBUDC") {
+            base::stop("'sameEntries' is only available when kindExpt = 'DBUDC'.")
+        }
+        if (multiLocationData) {
+            base::stop("'sameEntries' cannot be used with multiLocationData = TRUE.")
+        }
+        if (is.null(blocks) || any(blocks != blocks[1])) {
+            base::stop("With 'sameEntries', all blocks must have the same size.")
+        }
+    }
   
     if (all(c("serpentine", "cartesian") != planter)) {
         base::stop('Input for planter is unknown. Please, choose one: "serpentine" or "cartesian"')
@@ -229,7 +254,8 @@ diagonal_arrangement <- function(
         l = l,
         Option_NCD = Option_NCD,
         multiLocationData = multiLocationData,
-        data = data
+        data = data,
+        sameEntries = sameEntries
     )
     
     if (is.null(locationNames) || length(locationNames) != l) {
@@ -365,7 +391,17 @@ diagonal_arrangement <- function(
         percent_table <- checks_percentages$dt
         percent_col <- percent_table[,2]
         len <- length(percent_col)
-        selected_percent <- as.numeric(percent_col[len])
+        if (is.null(checksPercent)) {
+            selected_percent <- as.numeric(percent_col[len])
+        } else {
+            options_percent <- as.numeric(percent_col)
+            match_percent <- which(abs(options_percent - checksPercent) < 1e-6)
+            if (length(match_percent) == 0) {
+                base::stop("'checksPercent' must be one of the percentages available for this field: ",
+                           paste(options_percent, collapse = ", "), ".")
+            }
+            selected_percent <- options_percent[match_percent[1]]
+        }
         rand_checks <- random_checks(
             dt = checks_percentages$dt, 
             d_checks = checks_percentages$d_checks, 
@@ -497,7 +533,8 @@ diagonal_arrangement <- function(
                 w_map = w_map, 
                 stacked = "By Row",
                 kindExpt = "SUDC",
-                expt_name = expe_names 
+                planter = planter,
+                expt_name = expe_names
             )
         }
         plot_n_start <- as.numeric(plotNumber[[sites]])
@@ -680,7 +717,8 @@ unrep_data_parameters <- function(
     l = 1,
     Option_NCD = TRUE,
     multiLocationData = FALSE,
-    data = NULL) {
+    data = NULL,
+    sameEntries = FALSE) {
 
     if (inherits(data, "Sparse")) {
         data <- data$list_locs
@@ -750,10 +788,10 @@ unrep_data_parameters <- function(
                 data_entry <- data
                 data_entry_UP <- na.omit(data_entry[,1:2]) 
                 colnames(data_entry_UP) <- c("ENTRY", "NAME")
-                if (length(data_entry_UP$ENTRY) != length(unique(data_entry_UP$ENTRY))) {
+                if (!sameEntries && length(data_entry_UP$ENTRY) != length(unique(data_entry_UP$ENTRY))) {
                   stop("Please ensure all ENTRIES in data are distinct.")
                 }
-                if (length(data_entry_UP$NAME) != length(unique(data_entry_UP$NAME))) {
+                if (!sameEntries && length(data_entry_UP$NAME) != length(unique(data_entry_UP$NAME))) {
                   stop("Please ensure all NAMES in data are distinct.")
                 }
             }
@@ -778,11 +816,15 @@ unrep_data_parameters <- function(
                 data_entry_UP <- na.omit(data_entry[,1:2]) 
                 data_entry_UP$BLOCK <- c(rep("ALL", checks), rep(1:length(blocks), times = blocks))
                 colnames(data_entry_UP) <- c("ENTRY", "NAME", "BLOCK")
-                if (length(data_entry_UP$ENTRY) != length(unique(data_entry_UP$ENTRY))) {
-                  stop("Please ensure all ENTRIES in data are distinct.")
-                }
-                if (length(data_entry_UP$NAME) != length(unique(data_entry_UP$NAME))) {
-                  stop("Please ensure all NAMES in data are distinct.")
+                if (sameEntries) {
+                    check_same_entries(data_entry_UP, checks)
+                } else {
+                    if (length(data_entry_UP$ENTRY) != length(unique(data_entry_UP$ENTRY))) {
+                      stop("Please ensure all ENTRIES in data are distinct.")
+                    }
+                    if (length(data_entry_UP$NAME) != length(unique(data_entry_UP$NAME))) {
+                      stop("Please ensure all NAMES in data are distinct.")
+                    }
                 }
                 B <- data_entry_UP[(checks + 1):nrow(data_entry_UP),]
                 Block_levels <- suppressWarnings(as.numeric(levels(as.factor(B$BLOCK))))
@@ -835,18 +877,25 @@ unrep_data_parameters <- function(
                 if (sum(blocks) != lines) {
                     stop("In 'diagonal_arrangement()' number of lines and total lines in 'blocks' do not match.")
                 }
+                if (sameEntries) {
+                    # Every block holds the same entries, numbered after the checks
+                    block_entries <- (checksEntries[checks] + 1):(checksEntries[checks] + blocks[1])
+                    ENTRY <- c(checksEntries, rep(block_entries, times = length(blocks)))
+                } else {
+                    ENTRY <- checksEntries[1]:(checksEntries[1] + lines + checks - 1)
+                }
                 NAME <- c(paste0(rep("Check-", checks), 1:checks),
-                        paste0(rep("Gen-", lines), (checksEntries[checks] + 1):(checksEntries[1] + lines + checks - 1)))
+                        paste0(rep("Gen-", lines), ENTRY[-(1:checks)]))
                 data_entry_UP <- data.frame(
-                    ENTRY = checksEntries[1]:(checksEntries[1] + lines + checks - 1), 
+                    ENTRY = ENTRY, 
                     NAME = NAME
                 )
                 data_entry_UP$BLOCK <- c(rep("ALL", checks), rep(1:length(blocks), times = blocks))
                 colnames(data_entry_UP) <- c("ENTRY", "NAME", "BLOCK")
-                if (length(data_entry_UP$ENTRY) != length(unique(data_entry_UP$ENTRY))) {
+                if (!sameEntries && length(data_entry_UP$ENTRY) != length(unique(data_entry_UP$ENTRY))) {
                   stop("Please ensure all ENTRIES in data are distinct.")
                 }
-                if (length(data_entry_UP$NAME) != length(unique(data_entry_UP$NAME))) {
+                if (!sameEntries && length(data_entry_UP$NAME) != length(unique(data_entry_UP$NAME))) {
                   stop("Please ensure all NAMES in data are distinct.")
                 }
                 Blocks <- length(blocks)
@@ -896,4 +945,28 @@ field_dimensions <- function(lines_within_loc) {
         i <- i + 1
     }
     return(choices_list)
+}
+
+#' Check the entries of a DBUDC design whose blocks repeat the same entries
+#'
+#' @param data_entry Data frame with the columns ENTRY, NAME and BLOCK, the
+#'   checks first.
+#' @param checks Number of checks.
+#' @noRd
+check_same_entries <- function(data_entry, checks) {
+    lines <- data_entry[(checks + 1):nrow(data_entry), ]
+    block_entries <- split(lines$ENTRY, lines$BLOCK)
+    same_set <- vapply(block_entries, function(e) setequal(e, block_entries[[1]]), logical(1))
+    repeated <- vapply(block_entries, anyDuplicated, numeric(1)) > 0
+    if (!all(same_set) || any(repeated)) {
+        stop("With 'sameEntries', every block must hold the same entries, each once.")
+    }
+    names_per_entry <- tapply(lines$NAME, lines$ENTRY, function(n) length(unique(n)))
+    if (any(names_per_entry > 1)) {
+        stop("With 'sameEntries', each ENTRY must have the same NAME in every block.")
+    }
+    if (any(data_entry$ENTRY[1:checks] %in% lines$ENTRY)) {
+        stop("With 'sameEntries', checks cannot also be entries of the blocks.")
+    }
+    invisible(data_entry)
 }

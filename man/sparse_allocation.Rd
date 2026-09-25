@@ -18,7 +18,8 @@ sparse_allocation(
   sparse_list,
   seed,
   data = NULL,
-  year = NULL
+  year = NULL,
+  checksPercent = NULL
 )
 }
 \arguments{
@@ -53,6 +54,9 @@ When design is \code{sparse} then \code{copies_per_entry} < \code{l}}
 
 \item{year}{(optional) Year recorded in the \code{YEAR} column of the field book.
 By default the current year.}
+
+\item{checksPercent}{(optional) Percentage of checks in each location, one of the
+options available for the field. By default the last (largest) option.}
 }
 \value{
 A list with eight elements.

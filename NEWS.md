@@ -7,6 +7,11 @@
 
 ### New features:
 
+- `diagonal_arrangement()` gains `checksPercent`, to choose the percentage of
+  checks among the options available for the field (by default the last one,
+  as before), and `sameEntries`, for `"DBUDC"` designs whose blocks all hold
+  the same entries. `sparse_allocation()` gains `checksPercent` too. These are
+  the choices the Shiny app offers.
 - `partially_replicated()` and `multi_location_prep()` gain opt-in filler
   plots through `allow_fillers`. Filler cells follow the selected cartesian or
   serpentine planter path, remain fixed at its edge during spatial
@@ -209,6 +214,12 @@
   case. `ENTRY` was character for randomized designs without fillers, and
   `CHECKS` was character, with the string `"NA"` for filler plots, whenever
   the field had fillers; filler plots now have `CHECKS = NA`.
+- Fixed a bug in `diagonal_arrangement()` and `sparse_allocation()` where,
+  with a cartesian planter, an even number of rows and filler plots, the
+  experiment names placed the fillers at the wrong end of the first row: one
+  check and one entry in each location got `EXPT = "Filler"` and `PLOT = 0`,
+  while the real filler plots got plot numbers. The randomization itself is
+  unchanged.
 - The documentation of `swap_pairs()`, `do_optim()`, `sparse_allocation()` and
   `multi_location_prep()` now matches their defaults and the elements they
   return.
@@ -231,6 +242,9 @@ from:
   more than one location (the location names were ignored).
 - The single diagonal or sparse allocation modules of the Shiny app when the
   number of checks was changed after randomizing.
+- `diagonal_arrangement()` or `sparse_allocation()` with
+  `planter = "cartesian"`, an even number of rows and filler plots (one check
+  and one entry per location labeled as fillers).
 - `RCBD_augmented()` with `random = FALSE` when the field has filler plots
   (blocks with too many or too few checks, and possibly missing lines).
 

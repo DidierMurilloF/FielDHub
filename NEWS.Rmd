@@ -20,6 +20,8 @@ knitr::opts_chunk$set(
 
 ### New features:
 
+* `diagonal_arrangement()` gains `checksPercent`, to choose the percentage of checks among the options available for the field (by default the last one, as before), and `sameEntries`, for `"DBUDC"` designs whose blocks all hold the same entries. `sparse_allocation()` gains `checksPercent` too. These are the choices the Shiny app offers.
+
 * `partially_replicated()` and `multi_location_prep()` gain opt-in filler
   plots through `allow_fillers`. Filler cells follow the selected cartesian or
   serpentine planter path, remain fixed at its edge during spatial
@@ -82,6 +84,7 @@ knitr::opts_chunk$set(
 * Fixed the multiple diagonal module where, with "Repeat entries", the entry names started at `G3` whatever the number of checks, so `NAME` and `ENTRY` disagreed.
 * Fixed a bug in `RCBD_augmented()` where, with `random = FALSE` and filler plots, the first row of the field was overwritten with the fillers and a new set of all checks regardless of the blocks: a block spanning several rows ended up with two sets of checks (and some lines were left out of the field), and blocks sharing the first row lost most of theirs. Only the block holding the fillers now has its checks redrawn, so every block has each check once.
 * `RCBD_augmented()` now returns numeric `ENTRY` and `CHECKS` columns in every case. `ENTRY` was character for randomized designs without fillers, and `CHECKS` was character, with the string `"NA"` for filler plots, whenever the field had fillers; filler plots now have `CHECKS = NA`.
+* Fixed a bug in `diagonal_arrangement()` and `sparse_allocation()` where, with a cartesian planter, an even number of rows and filler plots, the experiment names placed the fillers at the wrong end of the first row: one check and one entry in each location got `EXPT = "Filler"` and `PLOT = 0`, while the real filler plots got plot numbers. The randomization itself is unchanged.
 * The documentation of `swap_pairs()`, `do_optim()`, `sparse_allocation()` and `multi_location_prep()` now matches their defaults and the elements they return.
 
 ### Changes to results for a given seed:
@@ -94,6 +97,7 @@ Some of the fixes above change the design produced for a given seed. Field books
 * `incomplete_blocks()`, `alpha_lattice()`, `square_lattice()`, `rectangular_lattice()` or `row_column()` with a character `t` (the labels were replaced by `G-1`, ..., `G-n`; the randomization itself is unchanged).
 * The Square Lattice and Optimized Arrangement modules of the Shiny app with more than one location (the location names were ignored).
 * The single diagonal or sparse allocation modules of the Shiny app when the number of checks was changed after randomizing.
+* `diagonal_arrangement()` or `sparse_allocation()` with `planter = "cartesian"`, an even number of rows and filler plots (one check and one entry per location labeled as fillers).
 * `RCBD_augmented()` with `random = FALSE` when the field has filler plots (blocks with too many or too few checks, and possibly missing lines).
 
 # FielDHub 1.3.1
