@@ -447,7 +447,7 @@ mod_diagonal_multiple_server <- function(id) {
                     } 
                     # Names
                     ChecksNames <- paste(rep("CH", checks), 1:checks, sep = "")
-                    nameLines <- rep(c(paste(rep("G", blocks[1]), (2 + 1):(blocks[1] + 2), sep = "")), times = length(blocks))
+                    nameLines <- rep(c(paste(rep("G", blocks[1]), (checks + 1):(blocks[1] + checks), sep = "")), times = length(blocks))
                     NAMES <- c(ChecksNames, nameLines)
                     # Entries
                     ChecksENTRIS <- 1:checks
