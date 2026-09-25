@@ -21,7 +21,9 @@ multi_location_prep(
   optim_list,
   seed,
   spread_reps = TRUE,
-  data = NULL
+  data = NULL,
+  allow_fillers = FALSE,
+  max_fillers = NULL
 )
 ```
 
@@ -98,6 +100,17 @@ multi_location_prep(
   (optional) Data frame with 2 columns: `ENTRY | NAME `. ENTRY must be
   numeric.
 
+- allow_fillers:
+
+  A logical value indicating whether field dimensions may exceed the
+  number of experimental plots. Fillers occupy the terminal cells of the
+  selected planter path. Default is `FALSE`.
+
+- max_fillers:
+
+  Maximum number of filler plots considered when dimensions are selected
+  automatically. When `NULL`, up to 10 filler plots are considered.
+
 ## Value
 
 A list of class `FielDHub` with several elements.
@@ -109,6 +122,8 @@ A list of class `FielDHub` with several elements.
 - `plotNumber` is a matrix with the layout plot number.
 
 - `binaryField` is a matrix with the binary field.
+
+- `fillerField` is a logical matrix identifying filler plots.
 
 - `dataEntry` is a data frame with the data input.
 

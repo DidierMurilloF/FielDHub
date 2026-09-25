@@ -366,6 +366,11 @@ The description for the inputs that we used to generate the design,
 - `seed = 2456` is the random seed to replicate identical
   randomizations.
 
+Set `allow_fillers = TRUE` to consider field dimensions with a small
+number of filler plots when a location has no suitable exact dimensions.
+The default is `FALSE`, and the genotype allocation across locations is
+unchanged when fillers are enabled.
+
 #### Print `optim_multi_prep` object
 
 To print a summary of the information that is in the object
@@ -444,14 +449,18 @@ which outputs:
     5     LOC5         63           90
 
      Information on the design parameters: 
-    List of 7
-     $ rows             : num [1:5] 19 19 19 19 19
-     $ columns          : num [1:5] 12 12 12 12 12
-     $ min_distance     : num [1:5] 2 2 1 2 3
-     $ incidence_in_rows: num [1:5] 6 4 3 4 7
-     $ locations        : num 5
-     $ planter          : chr "serpentine"
-     $ seed             : num 2456
+    List of 10
+     $ rows              : num [1:5] 19 19 19 19 19
+     $ columns           : num [1:5] 12 12 12 12 12
+     $ min_distance      : num [1:5] 2 2 1 2 3
+     $ incidence_in_rows : num [1:5] 6 4 3 4 7
+     $ locations         : num 5
+     $ planter           : chr "serpentine"
+     $ experimental_plots: Named num [1:5] 228 228 228 228 228
+      ..- attr(*, "names")= chr [1:5] "LOC1" "LOC2" "LOC3" "LOC4" ...
+     $ field_capacity    : num [1:5] 228 228 228 228 228
+     $ fillers           : num [1:5] 0 0 0 0 0
+     $ seed              : num 2456
 
      10 First observations of the data frame with the partially_replicated field book: 
      [38;5;246m# A tibble: 10 × 11 [39m

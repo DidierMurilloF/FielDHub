@@ -85,7 +85,9 @@
 <span>  <span class="va">optim_list</span>,</span>
 <span>  <span class="va">seed</span>,</span>
 <span>  spread_reps <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  data <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  data <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  allow_fillers <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  max_fillers <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -157,6 +159,18 @@ distance between replicated treatments in the field. Default is <code>TRUE</code
 <dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
 <dd><p>(optional) Data frame with 2 columns: <code>ENTRY | NAME </code>. ENTRY must be numeric.</p></dd>
 
+
+<dt id="arg-allow-fillers">allow_fillers<a class="anchor" aria-label="anchor" href="#arg-allow-fillers"></a></dt>
+<dd><p>A logical value indicating whether field dimensions may
+exceed the number of experimental plots. Fillers occupy the terminal cells
+of the selected planter path. Default is <code>FALSE</code>.</p></dd>
+
+
+<dt id="arg-max-fillers">max_fillers<a class="anchor" aria-label="anchor" href="#arg-max-fillers"></a></dt>
+<dd><p>Maximum number of filler plots considered when dimensions
+are selected automatically. When <code>NULL</code>, up to 10 filler plots are
+considered.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -164,6 +178,7 @@ distance between replicated treatments in the field. Default is <code>TRUE</code
 <li><p><code>layoutRandom</code> is a matrix with the randomization layout.</p></li>
 <li><p><code>plotNumber</code> is a matrix with the layout plot number.</p></li>
 <li><p><code>binaryField</code> is a matrix with the binary field.</p></li>
+<li><p><code>fillerField</code> is a logical matrix identifying filler plots.</p></li>
 <li><p><code>dataEntry</code> is a data frame with the data input.</p></li>
 <li><p><code>genEntries</code> is a list with the entries for replicated and non-replicated parts.</p></li>
 <li><p><code>fieldBook</code> is a data frame with field book design. This includes the index (Row, Column).</p></li>

@@ -21,7 +21,8 @@ partially_replicated(
   multiLocationData = FALSE,
   dist_method = "euclidean",
   border_penalization = 0.5,
-  data = NULL
+  data = NULL,
+  allow_fillers = FALSE
 )
 ```
 
@@ -61,6 +62,12 @@ partially_replicated(
 
   A logical value indicating whether to maximize the spatial distance
   between replicated treatments in the field. Default is `TRUE`.
+
+- allow_fillers:
+
+  A logical value indicating whether field dimensions may exceed the
+  number of experimental plots. Fillers occupy the terminal cells of the
+  selected planter path. Default is `FALSE`.
 
 - seed:
 
@@ -105,6 +112,8 @@ A list with several elements.
 - `plotNumber` is a matrix with the layout plot number.
 
 - `binaryField` is a matrix with the binary field.
+
+- `fillerField` is a logical matrix identifying filler plots.
 
 - `dataEntry` is a data frame with the data input.
 

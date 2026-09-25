@@ -355,6 +355,26 @@ The description for the inputs that we used to generate the design,
 - `seed = 1245` is the random seed to replicate identical
   randomizations.
 
+If the number of experimental plots does not have suitable field
+dimensions, filler plots can be enabled explicitly. The selected field
+dimensions determine the number of fillers. Fillers are placed at the
+end of the planter path, so a Cartesian layout ends on the right, while
+a serpentine layout ends on the left for an even number of rows and on
+the right for an odd number of rows.
+
+``` r
+
+prep_with_filler <- partially_replicated(
+  nrows = 6,
+  ncols = 7,
+  repGens = c(5, 31),
+  repUnits = c(2, 1),
+  planter = "serpentine",
+  allow_fillers = TRUE,
+  seed = 1245
+)
+```
+
 #### Print `prep` object
 
 To print a summary of the information that is in the object `prep`, we
@@ -373,14 +393,17 @@ print(prep)
     1  PALMIRA         75          150
 
      Information on the design parameters: 
-    List of 7
-     $ rows             : num 15
-     $ columns          : num 20
-     $ min_distance     : num 5
-     $ incidence_in_rows: num 4
-     $ locations        : num 1
-     $ planter          : chr "serpentine"
-     $ seed             : num 1245
+    List of 10
+     $ rows              : num 15
+     $ columns           : num 20
+     $ min_distance      : num 5
+     $ incidence_in_rows : num 4
+     $ locations         : num 1
+     $ planter           : chr "serpentine"
+     $ experimental_plots: num 300
+     $ field_capacity    : num 300
+     $ fillers           : num 0
+     $ seed              : num 1245
 
      10 First observations of the data frame with the partially_replicated field book: 
      [38;5;246m# A tibble: 10 × 11 [39m
@@ -445,7 +468,7 @@ For plotting the layout in function of the coordinates `ROW` and
 plot(prep)
 ```
 
-![](partially_replicated_files/figure-html/unnamed-chunk-17-1.png)
+![](partially_replicated_files/figure-html/unnamed-chunk-18-1.png)
 
 In the figure above, green plots contain replicated entries, and gray
 plots contain entries that only appear once.

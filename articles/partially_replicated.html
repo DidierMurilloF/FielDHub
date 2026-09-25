@@ -511,6 +511,22 @@ locations.</li>
 <code>seed = 1245</code> is the random seed to replicate identical
 randomizations.</li>
 </ul>
+<p>If the number of experimental plots does not have suitable field
+dimensions, filler plots can be enabled explicitly. The selected field
+dimensions determine the number of fillers. Fillers are placed at the
+end of the planter path, so a Cartesian layout ends on the right, while
+a serpentine layout ends on the left for an even number of rows and on
+the right for an odd number of rows.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">prep_with_filler</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/partially_replicated.html">partially_replicated</a></span><span class="op">(</span></span>
+<span>  nrows <span class="op">=</span> <span class="fl">6</span>,</span>
+<span>  ncols <span class="op">=</span> <span class="fl">7</span>,</span>
+<span>  repGens <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">31</span><span class="op">)</span>,</span>
+<span>  repUnits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  planter <span class="op">=</span> <span class="st">"serpentine"</span>,</span>
+<span>  allow_fillers <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">1245</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="print-prep-object">Print <code>prep</code> object<a class="anchor" aria-label="anchor" href="#print-prep-object"></a>
@@ -518,7 +534,7 @@ randomizations.</li>
 <p>To print a summary of the information that is in the object
 <code>prep</code>, we can use the generic function
 <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">prep</span><span class="op">)</span></span></code></pre></div>
 <pre><code>Partially Replicated Design 
 
@@ -527,14 +543,17 @@ Replications within location:
 1  PALMIRA         75          150
 
  Information on the design parameters: 
-List of 7
- $ rows             : num 15
- $ columns          : num 20
- $ min_distance     : num 5
- $ incidence_in_rows: num 4
- $ locations        : num 1
- $ planter          : chr "serpentine"
- $ seed             : num 1245
+List of 10
+ $ rows              : num 15
+ $ columns           : num 20
+ $ min_distance      : num 5
+ $ incidence_in_rows : num 4
+ $ locations         : num 1
+ $ planter           : chr "serpentine"
+ $ experimental_plots: num 300
+ $ field_capacity    : num 300
+ $ fillers           : num 0
+ $ seed              : num 1245
 
  10 First observations of the data frame with the partially_replicated field book: 
  [38;5;246m# A tibble: 10 × 11 [39m
@@ -569,7 +588,7 @@ book has columns for <code>ID</code>, <code>EXPT</code>,
 <code>ENTRY</code>, and <code>TREATMENT</code>.</p>
 <p>Let us see the first 10 rows of the field book for this
 experiment.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">field_book</span> <span class="op">&lt;-</span> <span class="va">prep</span><span class="op">$</span><span class="va">fieldBook</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">field_book</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
 <pre><code> [38;5;246m# A tibble: 10 × 11 [39m
@@ -592,9 +611,9 @@ experiment.</p>
 <p>For plotting the layout in function of the coordinates
 <code>ROW</code> and <code>COLUMN</code> in the field book object we can
 use the generic function <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> as follow,</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">prep</span><span class="op">)</span></span></code></pre></div>
-<p><img src="partially_replicated_files/figure-html/unnamed-chunk-17-1.png" class="r-plt" alt="" width="691.2" style="display: block; margin: auto;"></p>
+<p><img src="partially_replicated_files/figure-html/unnamed-chunk-18-1.png" class="r-plt" alt="" width="691.2" style="display: block; margin: auto;"></p>
 <p>In the figure above, green plots contain replicated entries, and gray
 plots contain entries that only appear once.</p>
 </div>
