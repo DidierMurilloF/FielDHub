@@ -199,6 +199,10 @@
   field), and blocks sharing the first row lost most of theirs. Only the block
   holding the fillers now has its checks redrawn, so every block has each
   check once.
+- `RCBD_augmented()` now returns numeric `ENTRY` and `CHECKS` columns in every
+  case. `ENTRY` was character for randomized designs without fillers, and
+  `CHECKS` was character, with the string `"NA"` for filler plots, whenever
+  the field had fillers; filler plots now have `CHECKS = NA`.
 - The documentation of `swap_pairs()`, `do_optim()`, `sparse_allocation()` and
   `multi_location_prep()` now matches their defaults and the elements they
   return.

@@ -538,7 +538,7 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
     )
     
     if (Fillers > 0) {
-      outputDesign$CHECKS <- ifelse(outputDesign$NAME == "Filler", "NA", outputDesign$CHECKS)
+      outputDesign$CHECKS <- ifelse(outputDesign$NAME == "Filler", NA, outputDesign$CHECKS)
     }
     
     outputDesign_loc[[locations]] <- as.data.frame(outputDesign)
@@ -557,6 +557,10 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
   fieldbook$LOCATION <- factor(fieldbook$LOCATION, levels = as.character(locationNames))
   fieldbook <- fieldbook[order(fieldbook$LOCATION, fieldbook$EXPT), ]
   fieldbook <- fieldbook[, -4]
+  # The layouts are character matrices when the entries are randomized, so
+  # keep ENTRY and CHECKS numeric whatever path built them
+  fieldbook$ENTRY <- as.numeric(fieldbook$ENTRY)
+  fieldbook$CHECKS <- as.numeric(fieldbook$CHECKS)
   
   DataChecks <- data[1:checks, ]
   layout_loc1 <- as.matrix(layout1_loc1[[1]])

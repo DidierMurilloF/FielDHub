@@ -137,7 +137,9 @@ plot_augmented_RCBD <- function(x, l, ...) {
   loc_field_book$PLOT_TXT <- sprintf("%d", as.integer(loc_field_book$PLOT))
   
   # text color groups for p1: checks are highlighted, test lines are not
-  loc_field_book$CHECK_TEXT <- ifelse(loc_field_book$CHECKS == "1",
+  # filler plots have CHECKS = NA and are drawn like test lines
+  loc_field_book$CHECK_TEXT <- ifelse(!is.na(loc_field_book$CHECKS) &
+                                        loc_field_book$CHECKS == "1",
                                       "check", "test")
   check_text_cols <- c(check = "red3", test = "gray10")
   

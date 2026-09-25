@@ -38,3 +38,32 @@ test_that("RCBD_augmented() without randomized entries keeps the lines in field 
   bottom_lines <- as.numeric(bottom_row[as.numeric(bottom_row) > 4])
   expect_equal(bottom_lines, sort(bottom_lines))
 })
+
+test_that("RCBD_augmented() returns numeric ENTRY and CHECKS columns", {
+  # Regression test: ENTRY was character for randomized designs without
+  # fillers, and CHECKS was character (with the string "NA" for fillers)
+  # whenever the field had fillers, so numeric comparisons and sorting on
+  # these columns gave wrong results.
+  cases <- list(
+    random_no_fillers = list(lines = 77, checks = 5, b = 7, nrows = 7, ncols = 16, random = TRUE),
+    random_fillers = list(lines = 122, checks = 4, b = 5, nrows = 5, ncols = 29, random = TRUE),
+    fixed_no_fillers = list(lines = 77, checks = 5, b = 7, nrows = 7, ncols = 16, random = FALSE),
+    fixed_fillers = list(lines = 122, checks = 4, b = 5, nrows = 5, ncols = 29, random = FALSE)
+  )
+  for (case in names(cases)) {
+    fb <- do.call(RCBD_augmented, c(cases[[case]], seed = 7))$fieldBook
+    expect_type(fb$ENTRY, "double")
+    expect_type(fb$CHECKS, "double")
+    expect_setequal(stats::na.omit(fb$CHECKS), c(0, 1))
+    expect_true(all(is.na(fb$CHECKS[fb$TREATMENT == "Filler"])), info = case)
+  }
+})
+
+test_that("the augmented RCBD field map draws filler plots like test lines", {
+  arcbd <- RCBD_augmented(lines = 122, checks = 4, b = 5, nrows = 5, ncols = 29,
+                          random = TRUE, seed = 7)
+  p <- plot_augmented_RCBD(arcbd, l = 1)
+  drawn <- ggplot2::ggplot_build(p$p1)$data
+  text <- drawn[[which(vapply(drawn, function(d) "label" %in% names(d), logical(1)))[1]]]
+  expect_setequal(unique(as.character(text$colour)), c("gray10", "red3"))
+})
