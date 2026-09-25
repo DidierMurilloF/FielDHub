@@ -551,7 +551,8 @@ mod_multi_loc_preps_server <- function(id){
         total_plots <- plots_for_treatments + sum(prep_checks)
         options <- prep_dimension_options(
             total_plots = total_plots[1],
-            allow_fillers = isTRUE(input$allow_fillers_prep)
+            allow_fillers = isTRUE(input$allow_fillers_prep),
+            max_fillers = .prep_max_fillers
         )
         if (is.null(options)) {
             sort_choices <- "No options available"
@@ -564,6 +565,29 @@ mod_multi_loc_preps_server <- function(id){
             selected = sort_choices[1])
         if (is.null(options)) {
             shinyjs::hide(id = "get_random_prep")
+            if (!isTRUE(input$allow_fillers_prep)) {
+                shinyalert::shinyalert(
+                    "Filler plots required",
+                    sprintf(paste(
+                        "The current design does not fit any supported rectangular",
+                        "field dimensions without unused cells. Select 'Allow filler",
+                        "plots' to continue. FielDHub will then offer nearby valid",
+                        "dimensions requiring no more than %d filler plots and place",
+                        "the fillers at the end of the selected planter path."
+                    ), .prep_max_fillers),
+                    type = "info"
+                )
+            } else {
+                shinyalert::shinyalert(
+                    "No dimensions within the filler limit",
+                    sprintf(paste(
+                        "FielDHub could not find supported rectangular field dimensions",
+                        "requiring %d or fewer filler plots. Adjust the number of entries",
+                        "or replication settings and try again."
+                    ), .prep_max_fillers),
+                    type = "warning"
+                )
+            }
         } else {
             shinyjs::show(id = "get_random_prep")
         }
@@ -648,7 +672,8 @@ mod_multi_loc_preps_server <- function(id){
       total_plots <- plots_for_treatments + sum(prep_checks)
       options <- prep_dimension_options(
         total_plots = total_plots,
-        allow_fillers = isTRUE(input$allow_fillers_prep)
+        allow_fillers = isTRUE(input$allow_fillers_prep),
+        max_fillers = .prep_max_fillers
       )
       if (is.null(options)) {
           sort_choices <- "No options available"

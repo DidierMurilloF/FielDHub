@@ -320,6 +320,9 @@ add_rep_column <- function(df) {
 }
 
 #' @noRd
+.prep_max_fillers <- 10L
+
+#' @noRd
 prep_dimension_options <- function(
     total_plots,
     allow_fillers = FALSE,
@@ -334,7 +337,7 @@ prep_dimension_options <- function(
         stop("allow_fillers must be TRUE or FALSE.")
     }
     if (is.null(max_fillers)) {
-        max_fillers <- max(3, ceiling(total_plots * 0.10), 16 - total_plots)
+        max_fillers <- .prep_max_fillers
     }
     if (length(max_fillers) != 1 || is.na(max_fillers) ||
         max_fillers < 0 || max_fillers %% 1 != 0) {

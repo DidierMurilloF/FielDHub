@@ -229,6 +229,18 @@ test_that("p-rep dimension options keep fillers opt-in", {
   expect_true(all(grepl("filler", options$label)))
 })
 
+test_that("p-rep dimension options cap offered fillers by default", {
+  options <- FielDHub:::prep_dimension_options(293, allow_fillers = TRUE)
+  expanded <- FielDHub:::prep_dimension_options(
+    293,
+    allow_fillers = TRUE,
+    max_fillers = 12
+  )
+
+  expect_lte(max(options$fillers), 10)
+  expect_true(any(expanded$fillers > 10))
+})
+
 test_that("fillers follow planter direction and row parity", {
   cartesian_even <- FielDHub:::prep_field_mask(
     nrows = 6,
@@ -253,7 +265,6 @@ test_that("fillers follow planter direction and row parity", {
   expect_false(serpentine_even[1, 1])
   expect_false(serpentine_odd[1, 7])
 })
-
 
 
 

@@ -438,8 +438,8 @@ sparse_allocation <- function(
 #'   exceed the number of experimental plots. Fillers occupy the terminal cells
 #'   of the selected planter path. Default is \code{FALSE}.
 #' @param max_fillers Maximum number of filler plots considered when dimensions
-#'   are selected automatically. When \code{NULL}, a size-dependent limit is
-#'   used.
+#'   are selected automatically. When \code{NULL}, up to 10 filler plots are
+#'   considered.
 #' 
 #' 
 #' @author Didier Murillo [aut],

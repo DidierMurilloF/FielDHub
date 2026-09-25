@@ -64,8 +64,8 @@ exceed the number of experimental plots. Fillers occupy the terminal cells
 of the selected planter path. Default is \code{FALSE}.}
 
 \item{max_fillers}{Maximum number of filler plots considered when dimensions
-are selected automatically. When \code{NULL}, a size-dependent limit is
-used.}
+are selected automatically. When \code{NULL}, up to 10 filler plots are
+considered.}
 }
 \value{
 A list of class \code{FielDHub} with several elements.
