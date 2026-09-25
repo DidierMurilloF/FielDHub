@@ -754,8 +754,9 @@ mod_sparse_allocation_server <- function(id){
       })
     })
 
-    rand_checks <- reactive({
+    rand_design <- reactive({
       req(input$sparse_dims)
+      req(sparse_setup())
       req(field_dimensions_diagonal())
       Option_NCD <- TRUE
       req(single_inputs()$seed_number)
@@ -769,6 +770,7 @@ mod_sparse_allocation_server <- function(id){
       percent <- as.numeric(input$percent_checks)
       diag_locs <- vector(mode = "list", length = locs)
       random_checks_locs <- vector(mode = "list", length = locs)
+      random_entries_locs <- vector(mode = "list", length = locs)
       if (isTruthy(available_percent_table()$d_checks)) {
         set.seed(seed)
         for (sites in 1:locs) {
@@ -784,9 +786,27 @@ mod_sparse_allocation_server <- function(id){
             data_dim_each_block = available_percent_table()$data_dim_each_block,
             n_reps = input$n_reps, seed = NULL)
         }
+        # Draw the entries in the same seeded pass as the checks, so that
+        # changing an input afterwards cannot redraw them unseeded
+        data_entry <- sparse_setup()$list_locs
+        n_rows <- field_dimensions_diagonal()$d_row
+        n_cols <- field_dimensions_diagonal()$d_col
+        for (sites in 1:locs) {
+          random_entries_locs[[sites]] <- get_single_random(
+             n_rows = n_rows,
+             n_cols = n_cols,
+             matrix_checks = random_checks_locs[[sites]]$map_checks,
+             checks = checksEntries,
+             data = data_entry[[sites]]
+          )
+        }
       }
-      return(random_checks_locs)
+      return(list(checks = random_checks_locs, entries = random_entries_locs))
     })
+    
+    rand_checks <- reactive(rand_design()$checks)
+    
+    rand_lines <- reactive(rand_design()$entries)
     
     user_location <- reactive({
       user_site <- as.numeric(input$sparse_loc_view)
@@ -794,39 +814,6 @@ mod_sparse_allocation_server <- function(id){
       return(list(map_checks = loc_user_out$map_checks,
                   col_checks = loc_user_out$col_checks,
                   user_site = user_site))
-    })
-    
-    rand_lines <- reactive({
-      req(input$sparse_dims)
-      req(sparse_setup())
-      req(field_dimensions_diagonal())
-      Option_NCD <- TRUE
-      req(available_percent_table()$dt)
-      req(available_percent_table()$d_checks)
-      data_entry <- sparse_setup()$list_locs
-      n_rows <- field_dimensions_diagonal()$d_row
-      n_cols <- field_dimensions_diagonal()$d_col
-      checksEntries <- getChecks()$checksEntries
-      sparse_checks <- as.numeric(input$sparse_checks)
-      locs <- single_inputs()$sites
-      diag_locs <- vector(mode = "list", length = locs)
-      random_entries_locs <- vector(mode = "list", length = locs)
-      for (sites in 1:locs) {
-        map_checks <- rand_checks()[[sites]]$map_checks
-        w_map <- rand_checks()[[sites]]$map_checks
-        my_split_r <- rand_checks()[[sites]]$map_checks
-          n_rows <- field_dimensions_diagonal()$d_row
-          n_cols <- field_dimensions_diagonal()$d_col
-          data_random <- get_single_random(
-             n_rows = n_rows,
-             n_cols = n_cols,
-             matrix_checks = map_checks,
-             checks = checksEntries,
-             data = data_entry[[sites]]
-          )
-        random_entries_locs[[sites]] <- data_random
-      }
-      return(random_entries_locs)
     })
     
     output$randomized_layout <- DT::renderDT({

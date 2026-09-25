@@ -538,7 +538,7 @@ mod_Diagonal_server <- function(id) {
       })
     })
 
-    rand_checks <- reactive({
+    rand_design <- reactive({
       req(input$dimensions.d)
       req(getData())
       req(field_dimensions_diagonal())
@@ -554,6 +554,7 @@ mod_Diagonal_server <- function(id) {
       percent <- as.numeric(input$percent_checks)
       diag_locs <- vector(mode = "list", length = locs)
       random_checks_locs <- vector(mode = "list", length = locs)
+      random_entries_locs <- vector(mode = "list", length = locs)
       if (isTruthy(available_percent_table()$d_checks)) {
         set.seed(seed)
         for (sites in 1:locs) {
@@ -570,9 +571,28 @@ mod_Diagonal_server <- function(id) {
             data_dim_each_block = available_percent_table()$data_dim_each_block,
             n_reps = input$n_reps, seed = NULL)
         }
+        # Draw the entries in the same seeded pass as the checks, so that
+        # changing an input afterwards cannot redraw them unseeded
+        req(getData()$data_entry)
+        data_entry <- getData()$data_entry
+        n_rows <- field_dimensions_diagonal()$d_row
+        n_cols <- field_dimensions_diagonal()$d_col
+        for (sites in 1:locs) {
+          random_entries_locs[[sites]] <- get_single_random(
+            n_rows = n_rows, 
+            n_cols = n_cols, 
+            matrix_checks = random_checks_locs[[sites]]$map_checks, 
+            checks = checksEntries, 
+            data = data_entry
+          )
+        }
       }
-      return(random_checks_locs)
+      return(list(checks = random_checks_locs, entries = random_entries_locs))
     })
+    
+    rand_checks <- reactive(rand_design()$checks)
+    
+    rand_lines <- reactive(rand_design()$entries)
     
     user_location <- reactive({
       user_site <- as.numeric(input$locView.diagonal)
@@ -641,40 +661,6 @@ mod_Diagonal_server <- function(id) {
         DT::datatable(df, rownames = FALSE, caption = 'Table of Checks.', 
                       options = list(
                         columnDefs = list(list(className = 'dt-center', targets = "_all"))))
-    })
-    
-    rand_lines <- reactive({
-      req(input$dimensions.d)
-      req(getData())
-      req(field_dimensions_diagonal())
-      Option_NCD <- TRUE
-      req(available_percent_table()$dt)
-      req(available_percent_table()$d_checks)
-      req(getData()$data_entry)
-      data_entry <- getData()$data_entry
-      n_rows <- field_dimensions_diagonal()$d_row
-      n_cols <- field_dimensions_diagonal()$d_col
-      checksEntries <- getChecks()$checksEntries
-      checks <- as.numeric(input$checks)
-      locs <- single_inputs()$sites
-      diag_locs <- vector(mode = "list", length = locs)
-      random_entries_locs <- vector(mode = "list", length = locs)
-      for (sites in 1:locs) {
-        map_checks <- rand_checks()[[sites]]$map_checks
-        w_map <- rand_checks()[[sites]]$map_checks
-        my_split_r <- rand_checks()[[sites]]$map_checks
-          n_rows <- field_dimensions_diagonal()$d_row
-          n_cols <- field_dimensions_diagonal()$d_col
-          data_random <- get_single_random(
-            n_rows = n_rows, 
-            n_cols = n_cols, 
-            matrix_checks = map_checks, 
-            checks = checksEntries, 
-            data = data_entry
-          ) 
-        random_entries_locs[[sites]] <- data_random
-      }
-      return(random_entries_locs)
     })
     
     output$randomized_layout <- DT::renderDT({
