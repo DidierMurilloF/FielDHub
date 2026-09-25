@@ -18,13 +18,13 @@ swap_pairs(
 
 \item{starting_dist}{The minimum starting distance to enforce between pairs of occurrences of the same integer. Default is 3.}
 
-\item{stop_iter}{The maximum number of iterations to perform. Default is 50.}
+\item{stop_iter}{The maximum number of iterations to perform. Default is 10.}
 
-\item{lambda}{A tuning parameter for the centrality penalty. Default is 0.1.}
+\item{lambda}{A tuning parameter for the centrality penalty. Default is 0.5.}
 
 \item{dist_method}{The method used for distance calculation. Options are "euclidean" (default) and "manhattan".}
 
-\item{candidate_sample_size}{Maximum number of candidate cells to evaluate per swap. Default is 5.}
+\item{candidate_sample_size}{Maximum number of candidate cells to evaluate per swap. Default is 4.}
 }
 \value{
 A list containing:

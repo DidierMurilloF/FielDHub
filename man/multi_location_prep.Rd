@@ -87,9 +87,10 @@ A list of class \code{FielDHub} with several elements.
   \item \code{treatments_with_reps} is a list with the entries for the replicated part of the design.
   \item \code{treatments_with_no_reps} is a list with the entries for the non-replicated part of the design.
   \item \code{list_locs} is a list with each location list of entries.
+  \item \code{multi_location_data} is a data frame with the entries of every
+             location: \code{LOCATION | ENTRY | NAME | REPS}.
   \item \code{allocation} is a matrix with the allocation of treatments.
-  \item \code{size_locations} is a data frame with one column for each 
-             location and one row with the size of the location.
+  \item \code{size_locations} is a named vector with the size of each location.
 }
 }
 \description{
@@ -115,9 +116,8 @@ optim_multi_prep <- multi_location_prep(
   locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5"), 
   seed = 1234
 )
-designs <- optim_multi_prep$designs
-field_book_loc_1 <- designs$LOC1$fieldBook
-head(field_book_loc_1, 10)
+field_book <- optim_multi_prep$fieldBook
+head(subset(field_book, LOCATION == "LOC1"), 10)
 }
 }
 \references{

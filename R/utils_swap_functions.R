@@ -150,10 +150,10 @@ pairs_distance <- function(X) {
 #'
 #' @param X A matrix of integers.
 #' @param starting_dist The minimum starting distance to enforce between pairs of occurrences of the same integer. Default is 3.
-#' @param stop_iter The maximum number of iterations to perform. Default is 50.
-#' @param lambda A tuning parameter for the centrality penalty. Default is 0.1.
+#' @param stop_iter The maximum number of iterations to perform. Default is 10.
+#' @param lambda A tuning parameter for the centrality penalty. Default is 0.5.
 #' @param dist_method The method used for distance calculation. Options are "euclidean" (default) and "manhattan".
-#' @param candidate_sample_size Maximum number of candidate cells to evaluate per swap. Default is 5.
+#' @param candidate_sample_size Maximum number of candidate cells to evaluate per swap. Default is 4.
 #'
 #' @return A list containing:
 #' \item{optim_design}{The modified matrix.}
@@ -313,7 +313,7 @@ swap_pairs <- function(X,
 
       output_freq <- table(X)
       if (!all(input_freq == output_freq)) {
-        stop("swap_pairs_fast changed the frequency of some integers.")
+        stop("swap_pairs() changed the frequency of some integers.")
       }
 
       rows_incidence[w - 1L] <- sum(apply(X, 1L, function(row) {

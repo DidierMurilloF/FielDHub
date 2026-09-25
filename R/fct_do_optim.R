@@ -15,12 +15,13 @@
 #'         Salvador Gezan [aut],
 #'         Ana Heilman [ctb]
 #' 
-#' @return A list with three elements.
+#' @return A list with four elements.
 #' \itemize{
+#'   \item \code{multi_location_data} is a data frame with the entries of every
+#'  location: \code{LOCATION | ENTRY | NAME}.
 #'   \item \code{list_locs} is a list with each location list of entries.
 #'   \item \code{allocation} is a matrix with the allocation of treatments.
-#'   \item \code{size_locations} is a data frame with one column for each 
-#'  location and one row with the size of the location.
+#'   \item \code{size_locations} is a named vector with the size of each location.
 #' }
 #' 
 #' @references
@@ -281,13 +282,17 @@ do_optim <- function(
 #'         Salvador Gezan [aut],
 #'         Ana Heilman [ctb]
 #' 
-#' @return A list with four elements.
+#' @return A list with eight elements.
 #' \itemize{
-#'   \item \code{designs} is a list with each location unreplicated randomization.
+#'   \item \code{infoDesign} is a list with information on the design parameters.
+#'   \item \code{layoutRandom} is a list with the randomization layout of each location.
+#'   \item \code{plotsNumber} is a list with the plot number layout of each location.
+#'   \item \code{data_entry} is a data frame with the data input.
+#'   \item \code{fieldBook} is a data frame with the field book of all locations.
 #'   \item \code{list_locs} is a list with each location list of entries.
 #'   \item \code{allocation} is a matrix with the allocation of treatments.
-#'   \item \code{size_locations} is a data frame with one column for each 
-#'  location and one row with the size of the location.
+#'   \item \code{size_locations} is a named vector with the number of lines
+#'  allocated to each location.
 #' }
 #' 
 #' @references
@@ -477,9 +482,10 @@ sparse_allocation <- function(
 #'   \item \code{treatments_with_reps} is a list with the entries for the replicated part of the design.
 #'   \item \code{treatments_with_no_reps} is a list with the entries for the non-replicated part of the design.
 #'   \item \code{list_locs} is a list with each location list of entries.
+#'   \item \code{multi_location_data} is a data frame with the entries of every
+#'              location: \code{LOCATION | ENTRY | NAME | REPS}.
 #'   \item \code{allocation} is a matrix with the allocation of treatments.
-#'   \item \code{size_locations} is a data frame with one column for each 
-#'              location and one row with the size of the location.
+#'   \item \code{size_locations} is a named vector with the size of each location.
 #' }
 #'
 #' @references
@@ -507,9 +513,8 @@ sparse_allocation <- function(
 #'   locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5"), 
 #'   seed = 1234
 #' )
-#' designs <- optim_multi_prep$designs
-#' field_book_loc_1 <- designs$LOC1$fieldBook
-#' head(field_book_loc_1, 10)
+#' field_book <- optim_multi_prep$fieldBook
+#' head(subset(field_book, LOCATION == "LOC1"), 10)
 #' }
 #' @export 
 multi_location_prep <- function(

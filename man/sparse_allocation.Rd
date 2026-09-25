@@ -51,13 +51,17 @@ When design is \code{sparse} then \code{copies_per_entry} < \code{l}}
 \item{data}{(optional) Data frame with 2 columns: \code{ENTRY | NAME }. ENTRY must be numeric.}
 }
 \value{
-A list with four elements.
+A list with eight elements.
 \itemize{
-  \item \code{designs} is a list with each location unreplicated randomization.
+  \item \code{infoDesign} is a list with information on the design parameters.
+  \item \code{layoutRandom} is a list with the randomization layout of each location.
+  \item \code{plotsNumber} is a list with the plot number layout of each location.
+  \item \code{data_entry} is a data frame with the data input.
+  \item \code{fieldBook} is a data frame with the field book of all locations.
   \item \code{list_locs} is a list with each location list of entries.
   \item \code{allocation} is a matrix with the allocation of treatments.
-  \item \code{size_locations} is a data frame with one column for each 
- location and one row with the size of the location.
+  \item \code{size_locations} is a named vector with the number of lines
+ allocated to each location.
 }
 }
 \description{
