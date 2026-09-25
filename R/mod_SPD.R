@@ -480,8 +480,8 @@ mod_SPD_server <- function(id){
         label_trail <- paste(trail, ": ")
         heatmapTitle <- paste("Heatmap for ", trail)
         new_df <- df |>
-          dplyr::mutate(text = paste0("Site: ", loc, "\n", "Row: ", df$ROW, "\n", "Col: ", df$COLUMN, "\n", "Entry: ", 
-                                      df$ENTRY, "\n", label_trail, round(df[,10],2)))
+          dplyr::mutate(text = paste0("Site: ", loc, "\n", "Row: ", df$ROW, "\n", "Col: ", df$COLUMN, "\n", "Treatment: ", 
+                                      df$TRT_COMB, "\n", label_trail, round(df[,10],2)))
         w <- as.character(valspd$trail.spd)
         new_df$ROW <- as.factor(new_df$ROW) # Set up ROWS as factors
         new_df$COLUMN <- as.factor(new_df$COLUMN) # Set up COLUMNS as factors

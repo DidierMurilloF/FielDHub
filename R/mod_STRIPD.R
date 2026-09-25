@@ -522,14 +522,14 @@ mod_STRIPD_server <- function(id) {
       if (ncol(simuData_strip()$df) == 10) {
         locs <- factor(simuData_strip()$df$LOCATION, levels = unique(simuData_strip()$df$LOCATION))
         locLevels <- levels(locs)
-        df = subset(simuData_strip()$df, LOCATION == locLevels[1])
+        df = subset(simuData_strip()$df, LOCATION == locLevels[locNum()])
         loc <- levels(factor(df$LOCATION))
         trail <- as.character(valsStrip$trail.strip)
         label_trail <- paste(trail, ": ")
         heatmapTitle <- paste("Heatmap for ", trail)
         new_df <- df |>
-          dplyr::mutate(text = paste0("Site: ", loc, "\n", "Row: ", df$ROW, "\n", "Col: ", df$COLUMN, "\n", "Entry: ", 
-                                      df$ENTRY, "\n", label_trail, round(df[,10],2)))
+          dplyr::mutate(text = paste0("Site: ", loc, "\n", "Row: ", df$ROW, "\n", "Col: ", df$COLUMN, "\n", "Treatment: ", 
+                                      df$TRT_COMB, "\n", label_trail, round(df[,10],2)))
         w <- as.character(valsStrip$trail.strip)
         new_df$ROW <- as.factor(new_df$ROW) # Set up ROWS as factors
         new_df$COLUMN <- as.factor(new_df$COLUMN) # Set up COLUMNS as factors

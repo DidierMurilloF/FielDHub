@@ -485,7 +485,7 @@ mod_LSD_server <- function(id){
           dplyr::mutate(text = paste0("Site: ", loc, "\n", 
                                       "Row: ", df$ROW, "\n", 
                                       "Col: ", df$COLUMN, "\n", 
-                                      "Entry: ", df$ENTRY, "\n", 
+                                      "Treatment: ", df$TREATMENT, "\n", 
                                       label_trail, 
                                       round(df[,10],2)))
         w <- as.character(valsLSD$trail.lsd)

@@ -502,7 +502,7 @@ mod_FD_server <- function(id) {
           dplyr::mutate(text = paste0("Site: ", loc, "\n", 
                                       "Row: ", df$ROW, "\n", 
                                       "Col: ", df$COLUMN, "\n", 
-                                      "Entry: ", df$ENTRY, "\n", 
+                                      "Treatment: ", df$TRT_COMB, "\n", 
                                       label_trail, round(df[,(kindNum() + 1)],2)))
         w <- as.character(valsfd$trail.fd)
         new_df$ROW <- as.factor(new_df$ROW) # Set up ROWS as factors
