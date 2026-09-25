@@ -69,7 +69,7 @@ sparse <- sparse_allocation(
   l = 4, 
   copies_per_entry = 3, 
   checks = 4, 
-  locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5"), 
+  locationNames = c("LOC1", "LOC2", "LOC3", "LOC4"), 
   seed = 1234
 )
 }

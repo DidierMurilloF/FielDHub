@@ -110,7 +110,10 @@ square_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101
   if (sqrt(nt) %% 1 != 0) shiny::validate('square_lattice() requires t to be a square number.')
   if (k != sqrt(nt)) shiny::validate('square_lattice() requires k to equal sqrt(t). Use rectangular_lattice() or alpha_lattice() otherwise.')
   if (!is.null(locationNames)) locationNames <- toupper(locationNames)
-  if(is.null(locationNames) || length(locationNames) != l) locationNames <- 1:l
+  if(is.null(locationNames) || length(locationNames) != l) {
+    if (!is.null(locationNames)) warn_default_location_names(locationNames, l, 1:l)
+    locationNames <- 1:l
+  }
   s <- k
   nunits <- k
   matdf <- incomplete_blocks(t = nt, k = nunits, r = r, l = l, plotNumber = plotNumber,

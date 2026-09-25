@@ -128,7 +128,10 @@ alpha_lattice <- function(t = NULL,
   }
   if (k >= nt) shiny::validate('incomplete_blocks() requires that k < t.')
   if (!is.null(locationNames)) locationNames <- toupper(locationNames)
-  if(is.null(locationNames) || length(locationNames) != l) locationNames <- 1:l
+  if(is.null(locationNames) || length(locationNames) != l) {
+    if (!is.null(locationNames)) warn_default_location_names(locationNames, l, 1:l)
+    locationNames <- 1:l
+  }
   if (numbers::isPrime(nt)) shiny::validate('Combinations for this amount of treatments do not exist.')
   s <- nt / k
   if (s %% 1 != 0) shiny::validate('Combinations for this amount of treatments do not exist.')

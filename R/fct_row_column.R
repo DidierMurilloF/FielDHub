@@ -279,7 +279,10 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
   if (nt %% k != 0) {
     shiny::validate('Number of treatments can not be fully distributed over the specified incomplete block specification.')
   }
-  if(is.null(locationNames) || length(locationNames) != l) locationNames <- 1:l
+  if(is.null(locationNames) || length(locationNames) != l) {
+    if (!is.null(locationNames)) warn_default_location_names(locationNames, l, 1:l)
+    locationNames <- 1:l
+  }
   nunits <- k
   # For method = "onestage" with latinize = TRUE, full latinization (no treatment
   # repeating a row or a column across the replicates) is only possible when

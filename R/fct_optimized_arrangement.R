@@ -121,12 +121,10 @@ optimized_arrangement <- function(
     if (!is.null(l)) {
         if (is.null(plotNumber) || length(plotNumber) != l) {
             if (l > 1){
-                plotNumber <- seq(1001, 1000*(l+1), 1000)
-            } else plotNumber <- 1001
-            message(cat("Warning message:", "\n", 
-            "Since plotNumber was missing, it was set up to default value of: ", plotNumber, "\n",
-            "\n"
-            ))
+                default_plots <- seq(1001, 1000*(l+1), 1000)
+            } else default_plots <- 1001
+            warn_default_plot_numbers(plotNumber, l, default_plots)
+            plotNumber <- default_plots
         }
     } else stop("Number of locations/sites is missing")
     
@@ -327,7 +325,10 @@ optimized_arrangement <- function(
                 fillers = 0
             )
         }
-        if (is.null(locationNames) || length(locationNames) != l) locationNames <- 1:l
+        if (is.null(locationNames) || length(locationNames) != l) {
+            if (!is.null(locationNames)) warn_default_location_names(locationNames, l, 1:l)
+            locationNames <- 1:l
+        }
         plot_num <- plot_number_spat()$w_map_letters1
         plot_number_L <- apply(plot_num, c(1,2), as.numeric)
         export_spat <- function() {

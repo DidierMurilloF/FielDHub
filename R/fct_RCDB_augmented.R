@@ -118,20 +118,12 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
   if (!is.null(l)) {
     if (is.null(plotNumber) || !(length(plotNumber) %in% c(l, repsExpt, l * repsExpt))) {
       if (l > 1) {
-        plotNumber <- seq(1001, 1000 * (l + 1), 1000)
-        message(cat(
-          "Warning message:", "\n",
-          "Since plotNumber was missing, it was set up to default value of: ", plotNumber,
-          "\n", "\n"
-        ))
+        default_plots <- seq(1001, 1000 * (l + 1), 1000)
       } else {
-        plotNumber <- 1001
-        message(cat(
-          "Warning message:", "\n",
-          "Since plotNumber was missing, it was set up to default value of: ", plotNumber,
-          "\n", "\n"
-        ))
+        default_plots <- 1001
       }
+      warn_default_plot_numbers(plotNumber, l, default_plots)
+      plotNumber <- default_plots
     }
   } else {
     stop("Number of locations/sites is missing")
@@ -179,6 +171,7 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
     if (length(locationNames) == l) {
       locationNames <- toupper(locationNames)
     } else {
+      warn_default_location_names(locationNames, l, 1:l)
       locationNames <- 1:l
     }
   } else {

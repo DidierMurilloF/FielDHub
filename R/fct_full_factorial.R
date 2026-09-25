@@ -87,8 +87,9 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
       shiny::validate("The input plotNumber must be an integer greater than 0 and sorted.")
     }
   }else {
-    plotNumber <- seq(1001, 1000*(l+1), 1000)
-    warning("'plotNumber' was set up to its default values for each site.")
+    default_plots <- seq(1001, 1000*(l+1), 1000)
+    warn_default_plot_numbers(plotNumber, l, default_plots)
+    plotNumber <- default_plots
   }
   if (is.null(data)) {
     if(!is.null(setfactors)) {
@@ -135,7 +136,10 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
   if (is.null(locationNames)) {
     locationNames <- 1:l
   }else if (!is.null(locationNames)) {
-    if (length(locationNames) < l || length(locationNames) > l) locationNames <- 1:l
+    if (length(locationNames) < l || length(locationNames) > l) {
+      warn_default_location_names(locationNames, l, 1:l)
+      locationNames <- 1:l
+    }
   }
   nruns <- nrow(allcomb)
   trt <- vector(mode = "character", length = nruns)

@@ -132,7 +132,10 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
     if (l >= 1 && is.null(locationNames)) {
       locationNames <- 1:l
     }else if (l > 1 && !is.null(locationNames)) {
-      if (length(locationNames) < l) locationNames <- 1:l
+      if (length(locationNames) < l) {
+        warn_default_location_names(locationNames, l, 1:l)
+        locationNames <- 1:l
+      }
     }
   }else stop("\n'strip_plot()' requires number of locations to be an integer.")
   if (!is.null(plotNumber) && length(plotNumber) == l) {
@@ -141,8 +144,9 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
       shiny::validate("Input plotNumber must be an integer greater than 0, and sorted.")
     } 
   }else {
-    plotNumber <- seq(1001, 1000*(l+1), 1000)
-    warning("'plotNumber' was set up to its default value for each location.")
+    default_plots <- seq(1001, 1000*(l+1), 1000)
+    warn_default_plot_numbers(plotNumber, l, default_plots)
+    plotNumber <- default_plots
   }
   plot.numbs <- seriePlot.numbers(plot.number = plotNumber, reps = b, l = l, t = nH*nV)
   if (!is.null(locationNames) && length(locationNames) == l) {

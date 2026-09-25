@@ -114,7 +114,10 @@ rectangular_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber 
   if (s %% 1 != 0 || k != (s - 1) || nt != s*(s - 1)) {
     shiny::validate('rectangular_lattice() requires t = s*(s-1), where s is the iBlock numbers per replicate.')
   } 
-  if(is.null(locationNames) || length(locationNames) != l) locationNames <- 1:l
+  if(is.null(locationNames) || length(locationNames) != l) {
+    if (!is.null(locationNames)) warn_default_location_names(locationNames, l, 1:l)
+    locationNames <- 1:l
+  }
   nunits <- k
   matdf <- incomplete_blocks(t = nt, k = nunits, r = r, l = l, plotNumber = plotNumber,
                              seed = seed, locationNames = locationNames,

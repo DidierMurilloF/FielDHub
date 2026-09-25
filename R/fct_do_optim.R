@@ -300,7 +300,7 @@ do_optim <- function(
 #'   l = 4, 
 #'   copies_per_entry = 3, 
 #'   checks = 4, 
-#'   locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5"), 
+#'   locationNames = c("LOC1", "LOC2", "LOC3", "LOC4"), 
 #'   seed = 1234
 #' )
 #' @export 
@@ -322,10 +322,18 @@ sparse_allocation <- function(
     if (missing(seed)) seed <- base::sample.int(10000, size = 1) 
     if (missing(l)) stop("Please, define the number of locations for this design.")
     if (missing(locationNames) || length(locationNames) != l)  {
-        locationNames <- paste0("LOC", 1:l)
+        default_names <- paste0("LOC", 1:l)
+        if (!missing(locationNames)) {
+            warn_default_location_names(locationNames, l, default_names)
+        }
+        locationNames <- default_names
     }
     if (missing(plotNumber) || length(plotNumber) != l) {
-        plotNumber <- seq(1, 1000 * l, by = 1000)[1:l]
+        default_plots <- seq(1, 1000 * l, by = 1000)[1:l]
+        if (!missing(plotNumber)) {
+            warn_default_plot_numbers(plotNumber, l, default_plots)
+        }
+        plotNumber <- default_plots
     }
     if (missing(exptName)) exptName <- "SparseExpt"
     if (missing(planter) || is.null(planter)) planter <- "serpentine"
@@ -524,10 +532,18 @@ multi_location_prep <- function(
     if (missing(seed)) seed <- base::sample.int(10000, size = 1)
     if (missing(l)) stop("Please, define the number of locations for this design.")
     if (missing(locationNames) || length(locationNames) != l) {
-        locationNames <- paste0("LOC", 1:l)
-    } 
+        default_names <- paste0("LOC", 1:l)
+        if (!missing(locationNames)) {
+            warn_default_location_names(locationNames, l, default_names)
+        }
+        locationNames <- default_names
+    }
     if (missing(plotNumber) || length(plotNumber) != l) {
-        plotNumber <- seq(1, 1000 * l, by = 1000)[1:l]
+        default_plots <- seq(1, 1000 * l, by = 1000)[1:l]
+        if (!missing(plotNumber)) {
+            warn_default_plot_numbers(plotNumber, l, default_plots)
+        }
+        plotNumber <- default_plots
     }
     if (missing(exptName)) exptName <- "PrepExpt"
     if (missing(planter) || is.null(planter)) planter <- "serpentine"

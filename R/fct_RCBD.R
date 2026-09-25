@@ -157,10 +157,9 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
       shiny::validate("Input plotNumber must be an integer greater than 0 and sorted.")
     } 
   }else {
-    plotNumber <- seq(1001, 1000*(l+1), 1000)
-    message(cat("Warning message:", "\n", 
-                "Since plotNumber was missing, it was set up to default value of: ",
-                plotNumber))
+    default_plots <- seq(1001, 1000*(l+1), 1000)
+    warn_default_plot_numbers(plotNumber, l, default_plots)
+    plotNumber <- default_plots
   }
   if (!is.null(locationNames)) {
     locationNames <- toupper(locationNames)
@@ -218,7 +217,9 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
   }
   if (!has_checks) n_units <- nt
   if (length(locationNames) != l) {
-    locationNames <- paste("loc", 1:l, sep = "")
+    default_names <- paste("loc", 1:l, sep = "")
+    if (!is.null(locationNames)) warn_default_location_names(locationNames, l, default_names)
+    locationNames <- default_names
   }
   RCBD <- matrix(data = NA, nrow = b * l, ncol = n_units, byrow = TRUE)
   RCBD.layout <- matrix(data = NA, nrow = b, ncol = 2, byrow = TRUE)

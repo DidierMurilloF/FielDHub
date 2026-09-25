@@ -190,10 +190,12 @@ partially_replicated <- function(
     if (!is.null(l)) {
         if (is.null(plotNumber) || length(plotNumber) != l) {
             if (l > 1) {
-                plotNumber <- seq(1001, 1000*(l+1), 1000)
+                default_plots <- seq(1001, 1000*(l+1), 1000)
             } else {
-                plotNumber <- 1001
-            } 
+                default_plots <- 1001
+            }
+            warn_default_plot_numbers(plotNumber, l, default_plots)
+            plotNumber <- default_plots
         }
     } else stop("Number of locations/sites is missing")
     if (!is.null(data)) {
@@ -374,8 +376,12 @@ partially_replicated <- function(
         }
         
         if (is.null(locationNames) || length(locationNames) != l) {
-            locationNames <- paste0("LOC", 1:l)
-        } 
+            default_names <- paste0("LOC", 1:l)
+            if (!is.null(locationNames)) {
+                warn_default_location_names(locationNames, l, default_names)
+            }
+            locationNames <- default_names
+        }
         plot_num <- plot_number_spat()$w_map_letters1
         plot_number_L <- apply(plot_num, c(1,2), as.numeric)
         export_spat <- function() {

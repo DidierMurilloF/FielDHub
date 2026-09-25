@@ -228,7 +228,10 @@ diagonal_arrangement <- function(
         data = data
     )
     
-    if (is.null(locationNames) || length(locationNames) != l) locationNames <- 1:l
+    if (is.null(locationNames) || length(locationNames) != l) {
+        if (!is.null(locationNames)) warn_default_location_names(locationNames, l, 1:l)
+        locationNames <- 1:l
+    }
     ## Start for loop
     field_book_sites <- vector(mode = "list", length = l)
     layout_random_sites <- vector(mode = "list", length = l)

@@ -116,11 +116,15 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
     shiny::validate("'incomplete_blocks()' requires plotNumber to be possitive integers and sorted.")
   }
   if (is.null(plotNumber) || length(plotNumber) != l) {
-    if (length(plotNumber) != l || is.null(plotNumber)) plotNumber <- seq(1001, 1000*(l+1), 1000)
-    warning("Since plotNumber was missing, it was set up to default values.")
+    default_plots <- seq(1001, 1000*(l+1), 1000)
+    warn_default_plot_numbers(plotNumber, l, default_plots)
+    plotNumber <- default_plots
   }
   if (k >= nt) shiny::validate('incomplete_blocks() requires that k < t.')
-  if(is.null(locationNames) || length(locationNames) != l) locationNames <- 1:l
+  if(is.null(locationNames) || length(locationNames) != l) {
+    if (!is.null(locationNames)) warn_default_location_names(locationNames, l, 1:l)
+    locationNames <- 1:l
+  }
   nincblock <- nt*r/k
   N <- nt * r
   if (k * nincblock != N) {
