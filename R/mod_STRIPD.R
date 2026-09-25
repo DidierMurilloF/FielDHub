@@ -374,7 +374,7 @@ mod_STRIPD_server <- function(id) {
       nBooks <- length(allBooks)
       NewlayoutOptions <- 1:nBooks
       updateSelectInput(session = session, 
-                        inputId = 'layoutO_rcbd',
+                        inputId = 'layoutO_strip',
                         label = "Layout option:",
                         choices = NewlayoutOptions,
                         selected = 1

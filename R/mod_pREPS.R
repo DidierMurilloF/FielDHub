@@ -237,7 +237,7 @@ mod_pREPS_server <- function(id){
                         selected = loc_user_view[1])
     })
 
-    observeEvent(input$input.owndataPREPS,
+    observeEvent(input$owndataPREPS,
                  handlerExpr = updateTabsetPanel(session,
                                                  "tabset_prep",
                                                  selected = "tabPanel_prep"))

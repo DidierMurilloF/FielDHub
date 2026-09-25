@@ -355,11 +355,11 @@ mod_SSPD_server <- function(id){
     })
     
     observeEvent(input$stackedSSPD, {
-      req(input$stackedSPD)
+      req(input$stackedSSPD)
       obj_sspd <- sspd_reactive()
       allBooks <- try(plot_layout(x = obj_sspd, 
                                   layout = 1, 
-                                  stacked = input$stackedSPD)$newBooks, 
+                                  stacked = input$stackedSSPD)$newBooks, 
                       silent = TRUE)
       nBooks <- length(allBooks)
       NewlayoutOptions <- 1:nBooks

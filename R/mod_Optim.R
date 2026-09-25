@@ -193,7 +193,7 @@ mod_Optim_server <- function(id) {
                         selected = loc_user_view[1])
     })
 
-    observeEvent(input$input.owndataOPTIM,
+    observeEvent(input$owndataOPTIM,
                  handlerExpr = updateTabsetPanel(session,
                                                  "tabset_optim",
                                                  selected = "tabPanel_optim"))
