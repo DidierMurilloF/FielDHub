@@ -134,7 +134,7 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
     # print(plot_matrix)
     # print(as.vector(t(plot_matrix)))
     plotSquares[[j]] <- plot_matrix
-    ls.random <- lsq(len = ls.len, reps = 1, seed = NA)
+    ls.random <- lsq(len = ls.len, reps = 1)
     #get random rows order
     ls.random.r <- ls.random
     row.random <- sample(1:ls.len)
@@ -197,13 +197,7 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
 }
 
 #' @noRd 
-lsq <- function(len, reps = 1, seed = NA) {
-  
-  if (!is.na(seed)) {
-    if (exists(".Random.seed"))  { saved.seed <- .Random.seed }
-    else                         { saved.seed <- NA }
-    set.seed(seed)
-  }
+lsq <- function(len, reps = 1) {
   allsq <- matrix(nrow = reps*len, ncol = len)
   #if (returnstrings) { squareid <- vector(mode = "character", length = reps) }
   sample1 <- function(x) {
@@ -237,7 +231,6 @@ lsq <- function(len, reps = 1, seed = NA) {
     allsqrows <- ((n-1)*len) + 1:len
     allsq[allsqrows,] <- sq
   }
-  if (!is.na(seed) && !is.na(saved.seed)) { .Random.seed <- saved.seed }
   #put LETTERS
   ls4.random <- allsq
   z <- 1
