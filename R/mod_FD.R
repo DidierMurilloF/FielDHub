@@ -206,7 +206,12 @@ mod_FD_server <- function(id) {
       } else {
         req(input$setfactors)
         reps <- as.numeric(input$reps.fd)
-        setfactors.fd <- as.numeric(as.vector(unlist(strsplit(input$setfactors, ","))))
+        setfactors.fd <- parse_whole_numbers(input$setfactors, "# of Entries for Each Factor")
+        if (!setfactors.fd$ok) {
+          shinyalert::shinyalert("Error!!", setfactors.fd$message, type = "error")
+          return(NULL)
+        }
+        setfactors.fd <- setfactors.fd$value
         nt <- length(setfactors.fd)
         if (nt < 2) {
           shinyalert::shinyalert(
@@ -239,8 +244,12 @@ mod_FD_server <- function(id) {
       req(input$planter_mov_fd)
       
       setfactors.fd <- get_data_factorial()$treatments
-      plot_start.fd <- as.vector(unlist(strsplit(input$plot_start.fd, ",")))
-      plot_start <- as.numeric(plot_start.fd)
+      plot_start.fd <- parse_whole_numbers(input$plot_start.fd, "Starting Plot Number")
+      if (!plot_start.fd$ok) {
+        shinyalert::shinyalert("Error!!", plot_start.fd$message, type = "error")
+        return(NULL)
+      }
+      plot_start <- plot_start.fd$value
       planter <- input$planter_mov_fd
       site_names <-  as.vector(unlist(strsplit(input$Location.fd, ",")))
       seed <- as.numeric(input$seed.fd)
@@ -265,6 +274,7 @@ mod_FD_server <- function(id) {
     fd_reactive <- reactive({
       
       req(get_data_factorial())
+      req(fd_inputs())
       
       shinyjs::show(id = "downloadCsv.fd")
       

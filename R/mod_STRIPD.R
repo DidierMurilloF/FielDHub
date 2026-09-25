@@ -61,7 +61,7 @@ mod_STRIPD_ui <- function(id){
         numericInput(ns("blocks.strip"), 
                      label = "Input # of Full Reps:", 
                      value = 3, 
-                     min = 1),
+                     min = 2),
         numericInput(ns("l.strip"), 
                      label = "Input # of Locations:",
                      value = 1, 
@@ -250,7 +250,14 @@ mod_STRIPD_server <- function(id) {
     
     
     strip_inputs <- reactive({
-      req(input$blocks.strip >= 2)
+      req(input$blocks.strip)
+      if (input$blocks.strip < 2) {
+        shinyalert::shinyalert(
+          "Error!!", 
+          "Strip-Plot Design needs at least 2 replicates.", 
+          type = "error")
+        return(NULL)
+      }
       req(get_data_strip())
       
       req(input$plot_start.strip)

@@ -321,6 +321,7 @@ mod_IBD_server <- function(id) {
     
     IBD_reactive <- reactive({
       req(get_data_ibd())
+      req(ibd_inputs())
       
       shinyjs::show(id = "downloadCsv.ibd")
       
