@@ -68,6 +68,18 @@ test_that("partially replicated design draws entry numbers unabbreviated", {
   expect_labels_verbatim(p$p1, p_rep$fieldBook$ENTRY)
 })
 
+test_that("partially replicated design labels filler plots", {
+  p_rep <- partially_replicated(
+    nrows = 6, ncols = 7, repGens = c(5, 31), repUnits = c(2, 1),
+    plotNumber = 101, seed = 1, allow_fillers = TRUE
+  )
+  p <- plot_prep(p_rep, l = 1)
+  labels <- as.character(drawn_text(p$p1)[[1]]$label)
+
+  expect_equal(sum(labels == "Filler"), 1)
+  expect_false("0" %in% labels)
+})
+
 test_that("optimized arrangement draws entry numbers unabbreviated", {
   o <- optimized_arrangement(
     nrows = 12, ncols = 10, lines = 110, amountChecks = 10, checks = 1,

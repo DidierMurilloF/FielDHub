@@ -51,3 +51,19 @@ test_that("swap_pairs returns expected output", {
     "All elements in X appear only once"
   )
 })
+
+test_that("swap_pairs keeps inactive filler cells out of the optimization", {
+  set.seed(321)
+  X <- matrix(c(rep(1:4, each = 2), 5:11, NA), nrow = 4)
+  filler_position <- which(is.na(X))
+  input_frequency <- table(X)
+
+  result <- swap_pairs(X, starting_dist = 2, stop_iter = 10)
+
+  expect_equal(which(is.na(result$optim_design)), filler_position)
+  expect_equal(
+    unname(table(result$optim_design)),
+    unname(input_frequency)
+  )
+  expect_false(any(is.na(result$pairwise_distance$geno)))
+})

@@ -301,6 +301,11 @@ The description for the inputs that we used to generate the design,
 *   `locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5")` are optional names for the locations.
 *   `seed = 2456` is the random seed to replicate identical randomizations.
 
+Set `allow_fillers = TRUE` to consider field dimensions with a small number of
+filler plots when a location has no suitable exact dimensions. The default is
+`FALSE`, and the genotype allocation across locations is unchanged when fillers
+are enabled.
+
 ### Print `optim_multi_prep` object
 
 To print a summary of the information that is in the object `optim_multi_prep`, we can use the generic 
@@ -396,5 +401,4 @@ plot(optim_multi_prep, l = 5)
 ```
 
 # References
-
 

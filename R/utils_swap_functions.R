@@ -27,6 +27,8 @@ pairs_distance <- function(X) {
   if (!is.numeric(X)) stop("Matrix elements must be numeric")
 
   nr <- nrow(X)
+  # NA cells are inactive field positions and must not enter the distance
+  # calculations as an artificial replicated treatment.
   tab <- table(as.vector(X))
   dupsI <- as.integer(names(tab)[tab > 1L])
   if (length(dupsI) == 0L) stop("All elements in X appear only once")
@@ -188,8 +190,17 @@ swap_pairs <- function(X,
   input_freq <- table(input_X)
   nr <- nrow(X)
   nc <- ncol(X)
-  minDist <- sqrt(nr^2 + nc^2)
-  center <- c(nr / 2, nc / 2)
+  active_pos <- which(!is.na(X), arr.ind = TRUE)
+  if (nrow(active_pos) == 0L) stop("X must contain at least one active cell")
+
+  if (anyNA(X)) {
+    center <- colMeans(active_pos)
+    minDist <- if (nrow(active_pos) > 1L) max(stats::dist(active_pos)) else 0
+  } else {
+    # Preserve the historical no-filler calculation exactly.
+    minDist <- sqrt(nr^2 + nc^2)
+    center <- c(nr / 2, nc / 2)
+  }
 
   dist_fn <- if (dist_method == "euclidean") {
     .vec_dist_euclidean
@@ -238,7 +249,8 @@ swap_pairs <- function(X,
       for (genotype in low_dist_gens) {
         geno_rc <- which(X == genotype, arr.ind = TRUE)
 
-        other_mask <- X != genotype
+        # Inactive cells are fixed geometry, not swap candidates.
+        other_mask <- !is.na(X) & X != genotype
         other_r <- row(X)[other_mask]
         other_c <- col(X)[other_mask]
 

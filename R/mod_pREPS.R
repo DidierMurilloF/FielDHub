@@ -57,9 +57,14 @@ mod_pREPS_ui <- function(id){
 				value = "75,150"
 			),
 			textInput(
-				inputId = ns("repUnits.preps"), 
+				inputId = ns("repUnits.preps"),
 				label = "# of Rep Per Group:",
 				value = "2,1")
+			),
+			checkboxInput(
+				inputId = ns("allow_fillers.preps"),
+				label = "Allow filler plots",
+				value = FALSE
 			),
 # 		sliderInput(ns("border_penalization"), 
 # 		            label = "Border Penalization", 
@@ -305,25 +310,6 @@ mod_pREPS_server <- function(id){
         colnames(data_preps) <- c("ENTRY", "NAME", "REPS")
         total_plots <- sum(data_preps$REPS)
       }
-      prime_factors <- numbers::primeFactors(total_plots)
-      if (length(prime_factors) == 2) {
-        if (prime_factors[1] < 4 & numbers::isPrime(prime_factors[2])) {
-          shinyalert::shinyalert(
-            "Error!!",
-            "There are no options available for field dimensions. Please try a different number of treatments.",
-            type = "error"
-          )
-          return(NULL)
-        }
-      }
-      if (numbers::isPrime(total_plots)) {
-        shinyalert::shinyalert(
-          "Error!!",
-          "The number of field plots results in a prime number. Please try a different number of treatments.",
-          type = "error"
-        )
-        return(NULL)
-      }
       return(list(data_up.preps = data_preps, total_plots = total_plots))
     })
     
@@ -342,40 +328,43 @@ mod_pREPS_server <- function(id){
       }
     })
     
-    observeEvent(list_input_plots(), {
+    observeEvent(list(list_input_plots(), input$allow_fillers.preps), {
       req(get_data_prep())
       req(input$owndataPREPS)
       if (input$owndataPREPS != 'Yes') {
         repGens <- as.numeric(as.vector(unlist(strsplit(input$repGens.preps, ","))))
         repUnits <- as.numeric(as.vector(unlist(strsplit(input$repUnits.preps, ","))))
         n <- sum(repGens * repUnits)
-        choices <- factor_subsets(n)$labels
+        options <- prep_dimension_options(
+          total_plots = n,
+          allow_fillers = isTRUE(input$allow_fillers.preps)
+        )
       } else {
         req(get_data_prep()$total_plots)
         n <- get_data_prep()$total_plots
-        choices <- factor_subsets(n)$labels
+        options <- prep_dimension_options(
+          total_plots = n,
+          allow_fillers = isTRUE(input$allow_fillers.preps)
+        )
       }
-      if(is.null(choices)){
+      if (is.null(options)) {
         choices <- "No options available"
-      }
-
-      if (!is.null(choices)) {
-            dif <- vector(mode = "numeric", length = length(choices))
-            for (option in 1:length(choices)) {
-                dims <- unlist(strsplit(choices[[option]], " x "))
-                dif[option] <- abs(as.numeric(dims[1]) - as.numeric(dims[2]))
-            }
-            df_choices <- data.frame(choices = unlist(choices), diff_dim = dif)
-            df_choices <- df_choices[order(df_choices$diff_dim, decreasing = FALSE), ]
-            choices <- as.vector(df_choices$choices)
+      } else {
+        choices <- stats::setNames(options$value, options$label)
       }
       updateSelectInput(inputId = "dimensions.preps",
                         choices = choices,
                         selected = choices[1])
+      if (is.null(options)) {
+        shinyjs::hide(id = "get_random_prep")
+      } else {
+        shinyjs::show(id = "get_random_prep")
+      }
     })
     
     field_dimensions_prep <- eventReactive(input$get_random_prep, {
       req(get_data_prep())
+      if (input$dimensions.preps == "No options available") return(NULL)
       dims <- unlist(strsplit(input$dimensions.preps," x "))
       d_row <- as.numeric(dims[1])
       d_col <- as.numeric(dims[2])
@@ -446,7 +435,6 @@ mod_pREPS_server <- function(id){
     observeEvent(input$RUN.prep, {
       req(get_data_prep())
       shinyjs::show(id = "dimensions.preps")
-      shinyjs::show(id = "get_random_prep")
     })
 
     ###### Plotting the data ##############
@@ -496,7 +484,8 @@ mod_pREPS_server <- function(id){
             planter = movement_planter,
             border_penalization = 0.5, #input$border_penalization,
             dist_method = "euclidean", # input$optimization_distance_method,
-            data = gen.list 
+            data = gen.list,
+            allow_fillers = isTRUE(input$allow_fillers.preps)
           )
       })
     }) |> 
@@ -542,6 +531,7 @@ mod_pREPS_server <- function(id){
       req(pREPS_reactive())
       selection <- as.numeric(user_site_selection())
       w_map <- pREPS_reactive()$layoutRandom[[selection]]
+      w_map[pREPS_reactive()$fillerField[[selection]]] <- "Filler"
       checks = as.vector(pREPS_reactive()$genEntries[[1]])
       len_checks <- length(checks)
       colores <- c('royalblue','salmon', 'green', 'orange','orchid', 'slategrey',
