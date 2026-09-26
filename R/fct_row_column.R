@@ -61,7 +61,8 @@
 #'
 #' @param t Number of treatments, or a character vector with the treatment labels.
 #' @param nrows Number of rows of a full resolvable replicate. 
-#' @param r Number of blocks (full resolvable replicates).
+#' @param r Deprecated alias for \code{reps}; positional calls remain supported.
+#' @param reps Number of full resolvable replicates per location.
 #' @param l Number of locations. By default \code{l = 1}.
 #' @param plotNumber Numeric vector with the starting plot number for each 
 #' location. By default \code{plotNumber = 101}.
@@ -135,7 +136,7 @@
 #' rowcold1 <- row_column(
 #'   t = 24, 
 #'   nrows = 6, 
-#'   r = 2, 
+#'   reps = 2,
 #'   l = 1, 
 #'   plotNumber= 101, 
 #'   locationNames = "Loc1",
@@ -156,7 +157,7 @@
 #' rowcold2 <- row_column(
 #'   t = 30, 
 #'   nrows = 5, 
-#'   r = 2, 
+#'   reps = 2,
 #'   l = 1, 
 #'   plotNumber= 1001, 
 #'   locationNames = "A",
@@ -176,7 +177,7 @@
 #' rowcold3 <- row_column(
 #'   t = 24,
 #'   nrows = 6,
-#'   r = 2,
+#'   reps = 2,
 #'   l = 1,
 #'   plotNumber = 101,
 #'   locationNames = "Loc1",
@@ -194,8 +195,11 @@
 row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
                        locationNames = NULL, seed = NULL, iterations = NULL,
                        data = NULL, method = c("onestage", "twostage"),
-                       latinize = FALSE) {
-
+                       latinize = FALSE, reps = NULL) {
+  r <- resolve_argument_alias(
+    reps, r, new = "reps", old = "r",
+    new_supplied = !missing(reps), old_supplied = !missing(r)
+  )
   method <- match.arg(method)
   # iterations has a method-specific meaning and default: for "onestage" it is
   # the number of blocksdesign::design() searches (a few hundred already

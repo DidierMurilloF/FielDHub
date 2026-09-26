@@ -12,7 +12,8 @@ rectangular_lattice(
   plotNumber = 101,
   locationNames = NULL,
   seed = NULL,
-  data = NULL
+  data = NULL,
+  reps = NULL
 )
 }
 \arguments{
@@ -20,7 +21,7 @@ rectangular_lattice(
 
 \item{k}{Size of incomplete blocks (number of units per incomplete block).}
 
-\item{r}{Number of blocks (full resolvable replicates).}
+\item{r}{Deprecated alias for \code{reps}; positional calls remain supported.}
 
 \item{l}{Number of locations. By default \code{l = 1}.}
 
@@ -31,6 +32,8 @@ rectangular_lattice(
 \item{seed}{(optional) Real number that specifies the starting seed to obtain reproducible designs.}
 
 \item{data}{(optional) Data frame with label list of treatments.}
+
+\item{reps}{Number of full resolvable replicates per location.}
 }
 \value{
 A list with two elements.
@@ -45,7 +48,7 @@ It randomly generates a rectangular lattice design across locations.
 \examples{
 # Example 1: Generates a rectangular lattice design with 6 full blocks, 4 units per IBlock (k)
 # and 20 treatments in one location.
-rectangularLattice1 <- rectangular_lattice(t = 20, k = 4, r = 6, l = 1, 
+rectangularLattice1 <- rectangular_lattice(t = 20, k = 4, reps = 6, l = 1,
                                            plotNumber = 101,
                                            locationNames = "FARGO", 
                                            seed = 126)
@@ -59,7 +62,7 @@ treatments <- paste("ND-", 1:56, sep = "")
 ENTRY <- 1:56
 treatment_list <- data.frame(list(ENTRY = ENTRY, TREATMENT = treatments))
 head(treatment_list) 
-rectangularLattice2 <- rectangular_lattice(t = 56, k = 7, r = 5, l = 2, 
+rectangularLattice2 <- rectangular_lattice(t = 56, k = 7, reps = 5, l = 2,
                                            plotNumber = c(1001,2001),
                                            locationNames = c("Loc1", "Loc2"), 
                                            seed = 127,

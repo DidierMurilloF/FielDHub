@@ -30,8 +30,8 @@ test_that("package functions signal errors through fieldhub_abort", {
 
 test_that("invalid arguments raise a fieldhub_input_error", {
   expect_error(CRD(t = 5, reps = 3, plotNumber = 0), class = "fieldhub_input_error")
-  expect_error(incomplete_blocks(t = 12, k = 12, r = 2), class = "fieldhub_input_error")
-  expect_error(square_lattice(t = 15, k = 4, r = 2), "square number",
+  expect_error(incomplete_blocks(t = 12, k = 12, reps = 2), class = "fieldhub_input_error")
+  expect_error(square_lattice(t = 15, k = 4, reps = 2), "square number",
                class = "fieldhub_error")
   err <- tryCatch(RCBD(t = 4, reps = 1), error = function(e) e)
   expect_false(inherits(err, "shiny.silent.error"))
@@ -45,25 +45,25 @@ test_that("public design functions use the shared input-error contract", {
     full_factorial = quote(full_factorial(setfactors = c(2, 2), planter = "diagonal")),
     split_plot = quote(split_plot(wp = 2, sp = 2, reps = 2, type = 3)),
     split_split_plot = quote(split_split_plot(wp = 2, sp = 2, ssp = 2, reps = 2, type = 3)),
-    strip_plot = quote(strip_plot(Hplots = 2, Vplots = 2, b = 2,
+    strip_plot = quote(strip_plot(Hplots = 2, Vplots = 2, reps = 2,
                                   data = "not a data frame")),
     split_families = quote(split_families(data = data.frame(
       ENTRY = 1:4, NAME = letters[1:4], FAMILY = rep(1:2, 2)
     ))),
     incomplete_blocks = quote(incomplete_blocks(
-      t = 12, k = 3, r = 2, data = "not a data frame"
+      t = 12, k = 3, reps = 2, data = "not a data frame"
     )),
     row_column = quote(row_column(
-      t = 12, nrows = 3, r = 2, data = "not a data frame"
+      t = 12, nrows = 3, reps = 2, data = "not a data frame"
     )),
     square_lattice = quote(square_lattice(
-      t = 16, k = 4, r = 2, data = "not a data frame"
+      t = 16, k = 4, reps = 2, data = "not a data frame"
     )),
     rectangular_lattice = quote(rectangular_lattice(
-      t = 12, k = 3, r = 2, data = "not a data frame"
+      t = 12, k = 3, reps = 2, data = "not a data frame"
     )),
     alpha_lattice = quote(alpha_lattice(
-      t = 12, k = 3, r = 2, data = "not a data frame"
+      t = 12, k = 3, reps = 2, data = "not a data frame"
     )),
     RCBD_augmented = quote(RCBD_augmented(planter = "diagonal")),
     diagonal_arrangement = quote(diagonal_arrangement(planter = "diagonal")),

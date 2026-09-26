@@ -5,7 +5,8 @@
 #' 
 #'
 #' @param t Number of treatments, or a character vector with the treatment labels.
-#' @param r Number of full blocks (or resolvable replicates) (also number of replicates per treatment).
+#' @param r Deprecated alias for \code{reps}; positional calls remain supported.
+#' @param reps Number of full resolvable replicates per location.
 #' @param k Size of incomplete blocks (number of units per incomplete block). 
 #' @param l Number of locations. By default \code{l = 1}.
 #' @param plotNumber Numeric vector with the starting plot number for each location. By default \code{plotNumber = 101}.
@@ -41,7 +42,7 @@
 #' # Size of IBlocks k = 3.
 #' alphalattice1 <- alpha_lattice(t = 15, 
 #'                                k = 3, 
-#'                                r = 4, 
+#'                                reps = 4,
 #'                                l = 1, 
 #'                                plotNumber = 101, 
 #'                                locationNames = "GreenHouse", 
@@ -58,7 +59,7 @@
 #' head(treatment_list) 
 #' alphalattice2 <- alpha_lattice(t = 25,
 #'                                k = 5,
-#'                                r = 3, 
+#'                                reps = 3,
 #'                                l = 1, 
 #'                                plotNumber = 1001, 
 #'                                locationNames = "A", 
@@ -75,8 +76,11 @@ alpha_lattice <- function(t = NULL,
                           plotNumber = 101, 
                           locationNames = NULL,
                           seed = NULL, 
-                          data = NULL) {
-  
+                          data = NULL, reps = NULL) {
+  r <- resolve_argument_alias(
+    reps, r, new = "reps", old = "r",
+    new_supplied = !missing(reps), old_supplied = !missing(r)
+  )
   seed <- resolve_seed(seed, default = function() runif(1, min = 0, max = 10000))
   local_design_seed(seed)
   lookup <- FALSE
@@ -137,7 +141,7 @@ alpha_lattice <- function(t = NULL,
   if (s %% 1 != 0) fieldhub_abort('Combinations for this amount of treatments do not exist.')
   
   nunits <- k
-  matdf <- incomplete_blocks(t = nt, k = nunits, r = r, l = l, plotNumber = plotNumber,
+  matdf <- incomplete_blocks(t = nt, k = nunits, reps = r, l = l, plotNumber = plotNumber,
                              seed = seed, locationNames = locationNames,
                              data = data_alpha)
   blocksModel <- matdf$blocksModel

@@ -4,7 +4,8 @@
 #'
 #' @param Hplots Number of horizontal factors, as an integer or a vector.
 #' @param Vplots Number of vertical factors, as an integer or a vector.
-#' @param b Number of blocks (full replicates).
+#' @param b Deprecated alias for \code{reps}; positional calls remain supported.
+#' @param reps Number of blocks (full replicates) per location. Default is one.
 #' @param l Number of locations. By default \code{l = 1}.
 #' @param plotNumber Numeric vector with the starting plot number for each location. By default \code{plotNumber = 101}.
 #' @param planter Option for \code{serpentine} or \code{cartesian} arrangement. By default \code{planter = 'serpentine'}.
@@ -49,7 +50,7 @@
 #' strip1 <- strip_plot(
 #'   Hplots = H,
 #'   Vplots = V,
-#'   b = 3,
+#'   reps = 3,
 #'   l = 1,
 #'   plotNumber = 101,
 #'   planter = "serpentine",
@@ -70,7 +71,7 @@
 #' strip2 <- strip_plot(
 #'   Hplots = 5,
 #'   Vplots = 5,
-#'   b = 6,
+#'   reps = 6,
 #'   l = 3,
 #'   plotNumber = c(101, 1001, 2001),
 #'   planter = "cartesian",
@@ -87,7 +88,11 @@
 strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = NULL,
                        planter = "serpentine", locationNames = NULL, seed = NULL,
                        factorLabels = TRUE, randomizeH = TRUE, randomizeV = FALSE,
-                       data = NULL) {
+                       data = NULL, reps = 1) {
+  b <- resolve_argument_alias(
+    reps, b, new = "reps", old = "b",
+    new_supplied = !missing(reps), old_supplied = !missing(b)
+  )
   seed <- resolve_seed(seed)
   local_design_seed(seed)
   arg0 <- c(Hplots, Vplots)

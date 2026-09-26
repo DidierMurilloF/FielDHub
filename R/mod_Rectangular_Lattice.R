@@ -296,7 +296,7 @@ mod_Rectangular_Lattice_server <- function(id) {
       validate_design(rectangular_lattice(
         t = rectangular_inputs()$t, 
         k = rectangular_inputs()$k, 
-        r = rectangular_inputs()$r, 
+        reps = rectangular_inputs()$r,
         l = rectangular_inputs()$sites, 
         plotNumber = rectangular_inputs()$plot_start,
         seed = rectangular_inputs()$seed, 

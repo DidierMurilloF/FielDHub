@@ -3,7 +3,8 @@
 #' @description It randomly generates a square lattice design across locations.
 #'
 #' @param t Number of treatments, or a character vector with the treatment labels.
-#' @param r Number of blocks (full resolvable replicates).
+#' @param r Deprecated alias for \code{reps}; positional calls remain supported.
+#' @param reps Number of full resolvable replicates per location.
 #' @param k Size of incomplete blocks (number of units per incomplete block). 
 #' @param l Number of locations. By default \code{l = 1}.
 #' @param plotNumber Numeric vector with the starting plot number for each location. By default \code{plotNumber = 101}.
@@ -34,7 +35,7 @@
 #' @examples
 #' # Example 1: Generates a square lattice design with 5 full blocks, 8 units per IBlock,
 #' # 8 IBlocks for a square number of treatmens of 64 in two locations.
-#' squareLattice1 <- square_lattice(t = 64, k = 8, r = 5, l = 2, 
+#' squareLattice1 <- square_lattice(t = 64, k = 8, reps = 5, l = 2,
 #'                                  plotNumber = c(1001, 2001),
 #'                                  locationNames = c("FARGO", "MINOT"), 
 #'                                  seed = 1986)
@@ -48,7 +49,7 @@
 #' ENTRY <- 1:49
 #' treatment_list <- data.frame(list(ENTRY = ENTRY, TREATMENT = treatments))
 #' head(treatment_list) 
-#' squareLattice2 <- square_lattice(t = 49, k = 7, r = 3, l = 1, 
+#' squareLattice2 <- square_lattice(t = 49, k = 7, reps = 3, l = 1,
 #'                                  plotNumber = 1001,
 #'                                  locationNames = "CASSELTON", 
 #'                                  seed = 1986,
@@ -58,8 +59,11 @@
 #' 
 #' @export
 square_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101, locationNames = NULL,
-                           seed = NULL, data = NULL) {
-  
+                           seed = NULL, data = NULL, reps = NULL) {
+  r <- resolve_argument_alias(
+    reps, r, new = "reps", old = "r",
+    new_supplied = !missing(reps), old_supplied = !missing(r)
+  )
   seed <- resolve_seed(seed)
   local_design_seed(seed)
   lookup <- FALSE
@@ -116,7 +120,7 @@ square_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101
   }
   s <- k
   nunits <- k
-  matdf <- incomplete_blocks(t = nt, k = nunits, r = r, l = l, plotNumber = plotNumber,
+  matdf <- incomplete_blocks(t = nt, k = nunits, reps = r, l = l, plotNumber = plotNumber,
                              seed = seed, locationNames = locationNames,
                              data = data_square)
   blocksModel <- matdf$blocksModel

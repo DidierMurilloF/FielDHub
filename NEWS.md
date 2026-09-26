@@ -7,6 +7,13 @@
 
 ### Breaking changes:
 
+- `incomplete_blocks()`, the three lattice functions, `row_column()` and
+  `strip_plot()` now accept `reps` for full replication. The former `r`
+  argument (or `b` in `strip_plot()`) still works with a
+  `fieldhub_deprecated_warning`, including positional calls. Supplying both
+  names is an error. Seeded results are unchanged. See
+  `help("design_arguments")` for the shared vocabulary and migration guidance.
+
 - `CRD()` now accepts `locationNames`, matching the other design functions.
   The old `locationName` argument still works, including positional calls,
   but signals a `fieldhub_deprecated_warning`. Supplying both spellings is

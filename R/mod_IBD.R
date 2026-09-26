@@ -333,7 +333,7 @@ mod_IBD_server <- function(id) {
       validate_design(incomplete_blocks(
         t = ibd_inputs()$t, 
         k = ibd_inputs()$k, 
-        r = ibd_inputs()$r, 
+        reps = ibd_inputs()$r,
         l = ibd_inputs()$sites, 
         plotNumber = ibd_inputs()$plot_start, 
         seed = ibd_inputs()$seed,

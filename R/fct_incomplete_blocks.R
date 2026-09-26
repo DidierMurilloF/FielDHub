@@ -4,7 +4,8 @@
 #' The randomization can be done across locations.
 #'
 #' @param t Number of treatments, or a character vector with the treatment labels.
-#' @param r Number of full blocks (or resolvable replicates) (also number of replicates per treatment).
+#' @param r Deprecated alias for \code{reps}; positional calls remain supported.
+#' @param reps Number of full resolvable replicates per location.
 #' @param k Size of incomplete blocks (number of units per incomplete block).
 #' @param l Number of locations. By default \code{l = 1}.
 #' @param plotNumber Numeric vector with the starting plot number for each location. By default \code{plotNumber = 101}.
@@ -37,7 +38,7 @@
 #' # 1-resolvable IBDs
 #' ibd1 <- incomplete_blocks(t = 12,
 #'                           k = 4,
-#'                           r = 2,
+#'                           reps = 2,
 #'                           seed = 1984)
 #' ibd1$infoDesign
 #' head(ibd1$fieldBook)
@@ -50,7 +51,7 @@
 #' head(treatment_list)
 #' ibd2 <- incomplete_blocks(t = 15,
 #'                           k = 3,
-#'                           r = 7,
+#'                           reps = 7,
 #'                           seed = 1985,
 #'                           data = treatment_list)
 #' ibd2$infoDesign
@@ -58,8 +59,12 @@
 #'
 #' @export
 incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101, 
-                              locationNames = NULL, seed = NULL, data = NULL) {
-
+                              locationNames = NULL, seed = NULL, data = NULL,
+                              reps = NULL) {
+  r <- resolve_argument_alias(
+    reps, r, new = "reps", old = "r",
+    new_supplied = !missing(reps), old_supplied = !missing(r)
+  )
   seed <- resolve_seed(seed)
   local_design_seed(seed)
   lookup <- FALSE

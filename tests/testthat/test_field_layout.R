@@ -79,7 +79,7 @@ test_that("field_layout() returns the field book that plot() draws", {
 })
 
 test_that("field_layout() puts the identifiers and coordinates first", {
-  book <- field_layout(alpha_lattice(t = 12, k = 4, r = 2, seed = 1))
+  book <- field_layout(alpha_lattice(t = 12, k = 4, reps = 2, seed = 1))
   expect_identical(names(book)[1:5], c("ID", "LOCATION", "PLOT", "ROW", "COLUMN"))
 })
 
@@ -163,7 +163,7 @@ test_that("split-split plots in complete blocks follow the stacking", {
 test_that("plot() explains that a stacking is not available", {
   # Regression test: grid_panel failed with "undefined columns selected" for
   # designs with two reps, and RCBD() designs rejected it with a plain error.
-  alpha <- alpha_lattice(t = 12, k = 4, r = 2, seed = 1)
+  alpha <- alpha_lattice(t = 12, k = 4, reps = 2, seed = 1)
   expect_warning(
     expect_error(plot(alpha, stacked = "grid_panel"), class = "fieldhub_error"),
     "Stacking \"grid_panel\" is not available"

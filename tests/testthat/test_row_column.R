@@ -80,14 +80,14 @@ test_that("row_column() exposes method and latinize with the expected defaults",
 })
 
 test_that("default (onestage) produces a valid resolvable row-column design", {
-  des <- row_column(t = 24, nrows = 6, r = 2, seed = 21, iterations = 30)
+  des <- row_column(t = 24, nrows = 6, reps = 2, seed = 21, iterations = 30)
   expect_valid_row_column(des, t = 24, nrows = 6, r = 2)
   # The default optimization method is onestage.
   expect_equal(des$infoDesign$optimization, "onestage")
 })
 
 test_that("method = 'twostage' produces a valid resolvable row-column design", {
-  des <- row_column(t = 24, nrows = 6, r = 2, seed = 21, iterations = 100,
+  des <- row_column(t = 24, nrows = 6, reps = 2, seed = 21, iterations = 100,
                     method = "twostage")
   expect_valid_row_column(des, t = 24, nrows = 6, r = 2)
   expect_equal(des$infoDesign$optimization, "twostage")
@@ -95,7 +95,7 @@ test_that("method = 'twostage' produces a valid resolvable row-column design", {
 
 test_that("method = 'onestage' produces a valid resolvable row-column design", {
   # onestage defaults to latinize = FALSE (nested), like the two-stage method.
-  des <- row_column(t = 24, nrows = 6, r = 2, seed = 21, iterations = 30,
+  des <- row_column(t = 24, nrows = 6, reps = 2, seed = 21, iterations = 30,
                     method = "onestage")
   expect_valid_row_column(des, t = 24, nrows = 6, r = 2)
 })
@@ -104,7 +104,7 @@ test_that("method = 'onestage' with latinize = TRUE is valid and latinized", {
   # Achieving zero clashes depends on the blocksdesign optimizer converging, so
   # keep this off CRAN where the optimizer version can differ.
   skip_on_cran()
-  des <- row_column(t = 24, nrows = 6, r = 2, seed = 21, iterations = 30,
+  des <- row_column(t = 24, nrows = 6, reps = 2, seed = 21, iterations = 30,
                     method = "onestage", latinize = TRUE)
   expect_valid_row_column(des, t = 24, nrows = 6, r = 2)
   # Latinized: no treatment repeats the same row or the same column across reps.
@@ -119,7 +119,7 @@ test_that("latinize = TRUE is ignored with a warning for method = 'twostage'", {
   # method must be set explicitly here: twostage is no longer the default, so
   # without it the call would run onestage + latinize and not warn.
   expect_warning(
-    des <- row_column(t = 24, nrows = 6, r = 2, seed = 21, iterations = 100,
+    des <- row_column(t = 24, nrows = 6, reps = 2, seed = 21, iterations = 100,
                       method = "twostage", latinize = TRUE),
     'onestage'
   )
@@ -131,7 +131,7 @@ test_that("latinize = TRUE warns when full latinization is infeasible (r > ncols
   # t = 12, nrows = 4 gives ncols = 3; with r = 4 > ncols some treatments must
   # repeat a column across replicates, so a warning is expected.
   expect_warning(
-    des <- row_column(t = 12, nrows = 4, r = 4, seed = 7, iterations = 20,
+    des <- row_column(t = 12, nrows = 4, reps = 4, seed = 7, iterations = 20,
                       method = "onestage", latinize = TRUE),
     "full latinization"
   )
@@ -140,18 +140,18 @@ test_that("latinize = TRUE warns when full latinization is infeasible (r > ncols
 
 test_that("an unknown method is rejected", {
   expect_error(
-    row_column(t = 24, nrows = 6, r = 2, seed = 21, iterations = 30, method = "greedy")
+    row_column(t = 24, nrows = 6, reps = 2, seed = 21, iterations = 30, method = "greedy")
   )
 })
 
 test_that("onestage improves the joint row-by-column A-Efficiency over twostage", {
   # Compares two heuristic optimizer outcomes, so keep off CRAN (version drift).
   skip_on_cran()
-  des_two <- row_column(t = 24, nrows = 6, r = 2, seed = 21, iterations = 200,
+  des_two <- row_column(t = 24, nrows = 6, reps = 2, seed = 21, iterations = 200,
                         method = "twostage")
   # latinize = FALSE: the nested joint optimization targets the same
   # within-replicate criterion that twostage does, so the comparison is fair.
-  des_one <- row_column(t = 24, nrows = 6, r = 2, seed = 21, iterations = 100,
+  des_one <- row_column(t = 24, nrows = 6, reps = 2, seed = 21, iterations = 100,
                         method = "onestage", latinize = FALSE)
   jt <- joint_aeff(des_two)
   jo <- joint_aeff(des_one)
@@ -173,7 +173,7 @@ test_that("reported joint A-Efficiency matches an independent oracle (nested, r 
     list(t = 36, nrows = 6, r = 3, seed = 21)   # r = 3
   )
   for (cfg in configs) {
-    des <- row_column(t = cfg$t, nrows = cfg$nrows, r = cfg$r, seed = cfg$seed,
+    des <- row_column(t = cfg$t, nrows = cfg$nrows, reps = cfg$r, seed = cfg$seed,
                       iterations = 30, method = "onestage", latinize = FALSE)
     reported <- joint_aeff(des)
     oracle <- joint_aeff_oracle(des$fieldBook, crossed = FALSE)
@@ -192,7 +192,7 @@ test_that("reported joint A-Efficiency matches the crossed oracle for latinized 
   # For a latinized design the joint efficiency is computed on the crossed
   # (shared) row and column model that design() actually optimized, so the
   # oracle must use the shared row/column factors too.
-  des <- row_column(t = 24, nrows = 6, r = 2, seed = 21, iterations = 30,
+  des <- row_column(t = 24, nrows = 6, reps = 2, seed = 21, iterations = 30,
                     method = "onestage", latinize = TRUE)
   reported <- joint_aeff(des)
   oracle <- joint_aeff_oracle(des$fieldBook, crossed = TRUE)
@@ -214,7 +214,7 @@ test_that("onestage falls back to twostage (with a warning) when over-parameteri
   # two-stage efficiency report emits for such a degenerate design (pre-existing
   # behaviour, unrelated to the fallback) do not clutter the test output.
   w <- capture_warnings(
-    des <- row_column(t = 8, nrows = 4, r = 2, seed = 21, iterations = 20,
+    des <- row_column(t = 8, nrows = 4, reps = 2, seed = 21, iterations = 20,
                       method = "onestage", latinize = FALSE)
   )
   expect_match(w, "twostage", all = FALSE)
@@ -228,7 +228,7 @@ test_that("the default (onestage) falls back for a small app-style design", {
   # iterations, so the default must not dead-end on such small designs.
   skip_on_cran()
   expect_warning(
-    des <- row_column(t = 8, nrows = 2, r = 2, seed = 21),
+    des <- row_column(t = 8, nrows = 2, reps = 2, seed = 21),
     'twostage'
   )
   expect_valid_row_column(des, t = 8, nrows = 2, r = 2)
@@ -238,7 +238,7 @@ test_that("the default (onestage) falls back for a small app-style design", {
 test_that("method = 'onestage' works with a treatment data frame", {
   treatments <- paste0("ND-", 1:30)
   treatment_list <- data.frame(ENTRY = 1:30, TREATMENT = treatments)
-  des <- row_column(t = 30, nrows = 5, r = 2, seed = 15, iterations = 30,
+  des <- row_column(t = 30, nrows = 5, reps = 2, seed = 15, iterations = 30,
                     method = "onestage", data = treatment_list)
   expect_valid_row_column(des, t = 30, nrows = 5, r = 2)
   expect_true("TREATMENT" %in% names(des$fieldBook))
@@ -249,7 +249,7 @@ test_that("row_column() resolvableBlocks holds each replicate's row-by-column la
   # Regression test: the per-location subsets were taken with
   # levels(fieldBook$LOCATION), which is NULL because LOCATION is not a
   # factor, so every subset was empty and every matrix was filled with NA.
-  des <- row_column(t = 12, nrows = 3, r = 2, l = 2, plotNumber = c(101, 201),
+  des <- row_column(t = 12, nrows = 3, reps = 2, l = 2, plotNumber = c(101, 201),
                     locationNames = c("B", "A"), method = "twostage", seed = 1)
   expect_named(des$resolvableBlocks, c("Loc_B", "Loc_A"))
   fb <- des$fieldBook

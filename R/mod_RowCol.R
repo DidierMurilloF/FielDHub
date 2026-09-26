@@ -327,7 +327,7 @@ mod_RowCol_server <- function(id){
       validate_design(row_column(
         t = rcd_inputs()$t, 
         nrows = rcd_inputs()$k, 
-        r = rcd_inputs()$r, 
+        reps = rcd_inputs()$r,
         l = rcd_inputs()$sites, 
         plotNumber = rcd_inputs()$plot_start, 
         seed = rcd_inputs()$seed,

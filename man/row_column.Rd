@@ -15,7 +15,8 @@ row_column(
   iterations = NULL,
   data = NULL,
   method = c("onestage", "twostage"),
-  latinize = FALSE
+  latinize = FALSE,
+  reps = NULL
 )
 }
 \arguments{
@@ -23,7 +24,7 @@ row_column(
 
 \item{nrows}{Number of rows of a full resolvable replicate.}
 
-\item{r}{Number of blocks (full resolvable replicates).}
+\item{r}{Deprecated alias for \code{reps}; positional calls remain supported.}
 
 \item{l}{Number of locations. By default \code{l = 1}.}
 
@@ -67,6 +68,8 @@ treatment tends to appear in different rows and columns across the replicates.
 By default \code{FALSE}. Only meaningful with \code{method = "onestage"}; it
 is ignored for \code{method = "twostage"} (which cannot latinize across
 replicates), where passing \code{latinize = TRUE} is ignored with a warning.}
+
+\item{reps}{Number of full resolvable replicates per location.}
 }
 \value{
 A list with five elements.
@@ -150,7 +153,7 @@ nested within each replicate. \code{latinize} has no effect for
 rowcold1 <- row_column(
   t = 24, 
   nrows = 6, 
-  r = 2, 
+  reps = 2,
   l = 1, 
   plotNumber= 101, 
   locationNames = "Loc1",
@@ -171,7 +174,7 @@ head(treatment_list)
 rowcold2 <- row_column(
   t = 30, 
   nrows = 5, 
-  r = 2, 
+  reps = 2,
   l = 1, 
   plotNumber= 1001, 
   locationNames = "A",
@@ -191,7 +194,7 @@ head(rowcold2$fieldBook,12)
 rowcold3 <- row_column(
   t = 24,
   nrows = 6,
-  r = 2,
+  reps = 2,
   l = 1,
   plotNumber = 101,
   locationNames = "Loc1",

@@ -16,7 +16,8 @@ strip_plot(
   factorLabels = TRUE,
   randomizeH = TRUE,
   randomizeV = FALSE,
-  data = NULL
+  data = NULL,
+  reps = 1
 )
 }
 \arguments{
@@ -24,7 +25,7 @@ strip_plot(
 
 \item{Vplots}{Number of vertical factors, as an integer or a vector.}
 
-\item{b}{Number of blocks (full replicates).}
+\item{b}{Deprecated alias for \code{reps}; positional calls remain supported.}
 
 \item{l}{Number of locations. By default \code{l = 1}.}
 
@@ -45,6 +46,8 @@ assigned. Default is \code{factorLabels =TRUE}.}
 \item{randomizeV}{Logical flag: \code{TRUE} to randomize vertical strips separately in each replicate; \code{FALSE} to randomize once per location and reuse.}
 
 \item{data}{(optional) data frame with the labels of vertical and horizontal plots.}
+
+\item{reps}{Number of blocks (full replicates) per location. Default is one.}
 }
 \value{
 A list with four elements.
@@ -66,7 +69,7 @@ V <- paste("V", 1:5, sep = "")
 strip1 <- strip_plot(
   Hplots = H,
   Vplots = V,
-  b = 3,
+  reps = 3,
   l = 1,
   plotNumber = 101,
   planter = "serpentine",
@@ -87,7 +90,7 @@ head(strip_data)
 strip2 <- strip_plot(
   Hplots = 5,
   Vplots = 5,
-  b = 6,
+  reps = 6,
   l = 3,
   plotNumber = c(101, 1001, 2001),
   planter = "cartesian",

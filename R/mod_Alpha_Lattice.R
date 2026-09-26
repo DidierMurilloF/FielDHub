@@ -291,7 +291,7 @@ mod_Alpha_Lattice_server <- function(id){
       validate_design(alpha_lattice(
         t = alpha_inputs()$t, 
         k = alpha_inputs()$k, 
-        r = alpha_inputs()$r, 
+        reps = alpha_inputs()$r,
         l = alpha_inputs()$sites, 
         plotNumber = alpha_inputs()$plot_start, 
         seed = alpha_inputs()$seed,

@@ -3,7 +3,8 @@
 #' @description It randomly generates a rectangular lattice design across locations.
 #'
 #' @param t Number of treatments, or a character vector with the treatment labels.
-#' @param r Number of blocks (full resolvable replicates).
+#' @param r Deprecated alias for \code{reps}; positional calls remain supported.
+#' @param reps Number of full resolvable replicates per location.
 #' @param k Size of incomplete blocks (number of units per incomplete block). 
 #' @param l Number of locations. By default \code{l = 1}.
 #' @param plotNumber Numeric vector with the starting plot number for each location. By default \code{plotNumber = 101}.
@@ -36,7 +37,7 @@
 #' @examples
 #' # Example 1: Generates a rectangular lattice design with 6 full blocks, 4 units per IBlock (k)
 #' # and 20 treatments in one location.
-#' rectangularLattice1 <- rectangular_lattice(t = 20, k = 4, r = 6, l = 1, 
+#' rectangularLattice1 <- rectangular_lattice(t = 20, k = 4, reps = 6, l = 1,
 #'                                            plotNumber = 101,
 #'                                            locationNames = "FARGO", 
 #'                                            seed = 126)
@@ -50,7 +51,7 @@
 #' ENTRY <- 1:56
 #' treatment_list <- data.frame(list(ENTRY = ENTRY, TREATMENT = treatments))
 #' head(treatment_list) 
-#' rectangularLattice2 <- rectangular_lattice(t = 56, k = 7, r = 5, l = 2, 
+#' rectangularLattice2 <- rectangular_lattice(t = 56, k = 7, reps = 5, l = 2,
 #'                                            plotNumber = c(1001,2001),
 #'                                            locationNames = c("Loc1", "Loc2"), 
 #'                                            seed = 127,
@@ -60,8 +61,11 @@
 #' 
 #' @export
 rectangular_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101, locationNames = NULL,
-                                seed = NULL, data = NULL) {
-  
+                                seed = NULL, data = NULL, reps = NULL) {
+  r <- resolve_argument_alias(
+    reps, r, new = "reps", old = "r",
+    new_supplied = !missing(reps), old_supplied = !missing(r)
+  )
   seed <- resolve_seed(seed)
   local_design_seed(seed)
   lookup <- FALSE
@@ -119,7 +123,7 @@ rectangular_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber 
     locationNames <- 1:l
   }
   nunits <- k
-  matdf <- incomplete_blocks(t = nt, k = nunits, r = r, l = l, plotNumber = plotNumber,
+  matdf <- incomplete_blocks(t = nt, k = nunits, reps = r, l = l, plotNumber = plotNumber,
                              seed = seed, locationNames = locationNames,
                              data = data_alpha)
   blocksModel <- matdf$blocksModel

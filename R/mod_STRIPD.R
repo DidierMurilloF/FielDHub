@@ -300,7 +300,7 @@ mod_STRIPD_server <- function(id) {
       validate_design(strip_plot(
         Hplots = strip_inputs()$Hplots,
         Vplots = strip_inputs()$Vplots,
-        b = strip_inputs()$b, 
+        reps = strip_inputs()$b,
         l = strip_inputs()$l,
         planter = strip_inputs()$planter,
         plotNumber = strip_inputs()$plot_number,

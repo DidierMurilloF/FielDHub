@@ -57,38 +57,38 @@ catalogue <- list(
     split_split_plot(wp = 2, sp = 3, ssp = 2, reps = 2, type = 1, plotNumber = 101, seed = 14)
   }),
   strip_plot = list(fun = "strip_plot", family = "classic", build = function() {
-    strip_plot(Hplots = 3, Vplots = 2, b = 2, l = 2, plotNumber = c(101, 1001), seed = 15)
+    strip_plot(Hplots = 3, Vplots = 2, reps = 2, l = 2, plotNumber = c(101, 1001), seed = 15)
   }),
   strip_plot_labels = list(fun = "strip_plot", family = "classic", build = function() {
-    strip_plot(Hplots = c("H1", "H2"), Vplots = c("V1", "V2", "V3"), b = 3,
+    strip_plot(Hplots = c("H1", "H2"), Vplots = c("V1", "V2", "V3"), reps = 3,
                plotNumber = 101, planter = "cartesian", seed = 16)
   }),
 
   # Incomplete-block designs -------------------------------------------------
   incomplete_blocks = list(fun = "incomplete_blocks", family = "incomplete", build = function() {
-    incomplete_blocks(t = 12, k = 4, r = 2, plotNumber = 101, seed = 17)
+    incomplete_blocks(t = 12, k = 4, reps = 2, plotNumber = 101, seed = 17)
   }),
   incomplete_blocks_labels = list(fun = "incomplete_blocks", family = "incomplete", build = function() {
-    incomplete_blocks(t = paste0("V", 1:10), k = 5, r = 2, l = 2,
+    incomplete_blocks(t = paste0("V", 1:10), k = 5, reps = 2, l = 2,
                       plotNumber = c(1, 101), seed = 18)
   }),
   alpha_lattice = list(fun = "alpha_lattice", family = "incomplete", build = function() {
-    alpha_lattice(t = 12, k = 4, r = 2, plotNumber = 101, seed = 19)
+    alpha_lattice(t = 12, k = 4, reps = 2, plotNumber = 101, seed = 19)
   }),
   alpha_lattice_six_reps = list(fun = "alpha_lattice", family = "incomplete", build = function() {
-    alpha_lattice(t = 12, k = 3, r = 6, plotNumber = 101, seed = 36)
+    alpha_lattice(t = 12, k = 3, reps = 6, plotNumber = 101, seed = 36)
   }),
   square_lattice = list(fun = "square_lattice", family = "incomplete", build = function() {
-    square_lattice(t = 16, k = 4, r = 2, plotNumber = 101, seed = 20)
+    square_lattice(t = 16, k = 4, reps = 2, plotNumber = 101, seed = 20)
   }),
   rectangular_lattice = list(fun = "rectangular_lattice", family = "incomplete", build = function() {
-    rectangular_lattice(t = 12, k = 3, r = 2, plotNumber = 101, seed = 21)
+    rectangular_lattice(t = 12, k = 3, reps = 2, plotNumber = 101, seed = 21)
   }),
   row_column = list(fun = "row_column", family = "incomplete", build = function() {
-    row_column(t = 12, nrows = 3, r = 2, plotNumber = 101, seed = 22)
+    row_column(t = 12, nrows = 3, reps = 2, plotNumber = 101, seed = 22)
   }),
   row_column_twostage = list(fun = "row_column", family = "incomplete", build = function() {
-    row_column(t = 12, nrows = 3, r = 2, l = 2, plotNumber = c(101, 1001),
+    row_column(t = 12, nrows = 3, reps = 2, l = 2, plotNumber = c(101, 1001),
                method = "twostage", seed = 23)
   }),
 

@@ -302,7 +302,7 @@ mod_Square_Lattice_server <- function(id){
       validate_design(square_lattice(
         t = square_inputs()$t, 
         k = square_inputs()$k, 
-        r = square_inputs()$r, 
+        reps = square_inputs()$r,
         l = square_inputs()$sites, 
         plotNumber = square_inputs()$plot_start, 
         seed = square_inputs()$seed, 

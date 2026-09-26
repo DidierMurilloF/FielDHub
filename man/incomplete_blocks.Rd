@@ -12,7 +12,8 @@ incomplete_blocks(
   plotNumber = 101,
   locationNames = NULL,
   seed = NULL,
-  data = NULL
+  data = NULL,
+  reps = NULL
 )
 }
 \arguments{
@@ -20,7 +21,7 @@ incomplete_blocks(
 
 \item{k}{Size of incomplete blocks (number of units per incomplete block).}
 
-\item{r}{Number of full blocks (or resolvable replicates) (also number of replicates per treatment).}
+\item{r}{Deprecated alias for \code{reps}; positional calls remain supported.}
 
 \item{l}{Number of locations. By default \code{l = 1}.}
 
@@ -31,6 +32,8 @@ incomplete_blocks(
 \item{seed}{(optional) Real number that specifies the starting seed to obtain reproducible designs.}
 
 \item{data}{(optional) Data frame with label list of treatments.}
+
+\item{reps}{Number of full resolvable replicates per location.}
 }
 \value{
 A list with two elements.
@@ -48,7 +51,7 @@ The randomization can be done across locations.
 # 1-resolvable IBDs
 ibd1 <- incomplete_blocks(t = 12,
                           k = 4,
-                          r = 2,
+                          reps = 2,
                           seed = 1984)
 ibd1$infoDesign
 head(ibd1$fieldBook)
@@ -61,7 +64,7 @@ treatment_list <- data.frame(list(ENTRY = ENTRY, TREATMENT = treatments))
 head(treatment_list)
 ibd2 <- incomplete_blocks(t = 15,
                           k = 3,
-                          r = 7,
+                          reps = 7,
                           seed = 1985,
                           data = treatment_list)
 ibd2$infoDesign
