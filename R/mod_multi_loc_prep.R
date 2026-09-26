@@ -860,11 +860,8 @@ mod_multi_loc_preps_server <- function(id){
     pREPS_reactive <- reactive({
         req(setup_optim_prep())
         req(field_dimensions_prep())
-        entry_list <- setup_optim_prep()$list_locs
         nrows <- field_dimensions_prep()$d_row
         ncols <- field_dimensions_prep()$d_col
-        niter <- 1000
-        prep <- TRUE
         locs_preps <- prep_inputs()$sites
         site_names <- prep_inputs()$location_names
         preps_seed <- prep_inputs()$seed_number
@@ -877,9 +874,9 @@ mod_multi_loc_preps_server <- function(id){
         }
         movement_planter <- prep_inputs()$planter_mov
         expt_name <- prep_inputs()$expt_name
-        locations_preps <- vector(mode = "list", length = locs_preps)
         withProgress(message = 'Running p-rep optimization ...', {
-            locations_preps <- validate_design(partially_replicated(
+            locations_preps <- validate_design(multi_location_prep(
+                lines = prep_inputs()$prep_lines,
                 nrows = nrows, 
                 ncols = ncols, 
                 l = locs_preps, 
@@ -888,10 +885,10 @@ mod_multi_loc_preps_server <- function(id){
                 locationNames = site_names, 
                 planter = movement_planter,
                 seed = preps_seed, 
-                multiLocationData = TRUE,
-                dist_method = "euclidean", #input$optimization_distance_method_prep,
-                border_penalization = 0.5, #input$border_penalization_prep,
-                data = entry_list,
+                copies_per_entry = as.numeric(input$plant_copies_preps),
+                checks = prep_inputs()$checks,
+                rep_checks = prep_inputs()$prep_checks,
+                optim_list = setup_optim_prep(),
                 allow_fillers = isTRUE(input$allow_fillers_prep)
             ))
         })
@@ -1087,8 +1084,11 @@ mod_multi_loc_preps_server <- function(id){
           dfSimulation <- dfSimulation$outOrder
           dfSimulationList[[sites]] <- dfSimulation
           dataPrep <- df_loc
-          df_prep <- cbind(dataPrep, round(dfSimulation[,7],2))
-          colnames(df_prep)[12] <- as.character(valsPREP$trail.prep)
+          df_prep <- append_simulated_response(
+            dataPrep,
+            dfSimulation,
+            as.character(valsPREP$trail.prep)
+          )
           df.prep_list[[sites]] <- df_prep
           w <- w + 1
         }

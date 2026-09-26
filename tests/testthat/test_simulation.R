@@ -58,3 +58,16 @@ test_that("AR1xAR1_simulation() with seed = NULL follows the caller's seed", {
   set.seed(1)
   expect_identical(simulate_field(), first)
 })
+
+test_that("a simulated response is appended by name without replacing metadata", {
+  field_book <- data.frame(ID = 1:3, REP = c(1L, 2L, 1L), ENTRY = 11:13)
+  simulation <- data.frame(ID = 1:3, YIELD = c(1.234, 5.678, 9.101))
+
+  out <- append_simulated_response(field_book, simulation, "YIELD")
+
+  expect_identical(out$REP, field_book$REP)
+  expect_identical(out$YIELD, c(1.23, 5.68, 9.1))
+  expect_named(out, c("ID", "REP", "ENTRY", "YIELD"))
+  expect_error(append_simulated_response(field_book, simulation, "REP"),
+               "already has a 'REP' column")
+})

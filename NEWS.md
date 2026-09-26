@@ -108,6 +108,11 @@
 - Field layouts, plot numbering and filler placement now share one tested
   planting-path implementation internally. This refactor preserves the
   existing design output.
+- The multi-location p-rep app now builds its final design through
+  `multi_location_prep()`, the same public function used by R scripts, instead
+  of recreating the workflow from internal helpers. Simulated responses are
+  appended by column name so result metadata cannot be overwritten when the
+  field-book schema grows.
 
 ### Fix bugs:
 

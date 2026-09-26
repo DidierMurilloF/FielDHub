@@ -49,6 +49,41 @@ AR1xAR1_simulation <- function(nrows = NULL, ncols = NULL, ROX = NULL,
                                 label_trail, round(outOrder[,7],2)))
   return(list(outOrder = new_outOrder))
 }
+
+#' Append one simulated response to a field book
+#'
+#' @param field_book Field book whose row order was used for the simulation.
+#' @param simulation Data frame returned in `outOrder` by
+#'   `AR1xAR1_simulation()`.
+#' @param response_name Name of the simulated-response column.
+#' @param digits Number of decimal places retained.
+#'
+#' @return `field_book` with the response appended as its last column.
+#' @noRd
+append_simulated_response <- function(field_book, simulation, response_name,
+                                      digits = 2) {
+  if (!is.data.frame(field_book) || !is.data.frame(simulation)) {
+    fieldhub_abort("The field book and simulation must be data frames.")
+  }
+  if (!is.character(response_name) || length(response_name) != 1L ||
+      is.na(response_name) || !nzchar(response_name)) {
+    fieldhub_abort("The simulated response must have one non-empty name.")
+  }
+  if (response_name %in% names(field_book)) {
+    fieldhub_abort(sprintf("The field book already has a '%s' column.",
+                           response_name))
+  }
+  if (!response_name %in% names(simulation)) {
+    fieldhub_abort(sprintf("The simulation has no '%s' response column.",
+                           response_name))
+  }
+  if (nrow(field_book) != nrow(simulation)) {
+    fieldhub_abort("The field book and simulation must have the same number of rows.")
+  }
+  field_book[[response_name]] <- round(simulation[[response_name]], digits)
+  field_book
+}
+
 #' @importFrom stats rnorm sd
 ZST <- function(n,m,RHOX,RHOY,s20) {
   
