@@ -269,8 +269,8 @@ diagonal_arrangement <- function(
     col_checks_sites <- vector(mode = "list", length = l)
     RepChecks_list <- vector(mode = "list", length = l)
     percentChecks_vector <- vector(mode = "numeric", length = l)
-    if (is.null(seed)) seed = sample.int(100000, 1)
-    set.seed(seed)
+    seed <- resolve_seed(seed, default = function() sample.int(100000, 1))
+    local_design_seed(seed)
     for (sites in 1:l) {
         checks_percentages <- available_percent(
             n_rows = nrows, 

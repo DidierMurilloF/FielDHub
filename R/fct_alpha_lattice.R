@@ -77,8 +77,8 @@ alpha_lattice <- function(t = NULL,
                           seed = NULL, 
                           data = NULL) {
   
-  if (is.null(seed)) {seed <- runif(1, min=0, max=10000)}
-  set.seed(seed)
+  seed <- resolve_seed(seed, default = function() runif(1, min = 0, max = 10000))
+  local_design_seed(seed)
   lookup <- FALSE
   if(is.null(data)) {
     if (is.null(t) || is.null(k) || is.null(r) || is.null(l)) {

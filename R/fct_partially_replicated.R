@@ -311,8 +311,8 @@ partially_replicated <- function(
     }
     if (!allow_fillers) fillers <- rep(0, l)
 
-    if (is.null(seed)) seed <- base::sample.int(10000, size = 1)
-    set.seed(seed)
+    seed <- resolve_seed(seed, default = function() sample.int(10000, size = 1))
+    local_design_seed(seed)
     field_book_sites <- vector(mode = "list", length = l)
     layout_random_sites <- vector(mode = "list", length = l)
     plot_numbers_sites <- vector(mode = "list", length = l)

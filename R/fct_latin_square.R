@@ -67,8 +67,8 @@
 latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpentine",
                          seed = NULL, locationNames = NULL, data = NULL) {
 
-  if (is.null(seed) || !is.numeric(seed)) seed <- runif(1, min = -50000, max = 50000)
-  set.seed(seed)
+  seed <- resolve_seed(seed)
+  local_design_seed(seed)
   if (all(c("serpentine", "cartesian") != planter)) {
     base::stop('Input planter is unknown. Please, choose one: "serpentine" or "cartesian"')
   }

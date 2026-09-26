@@ -74,8 +74,8 @@ split_plot <- function(wp = NULL, sp = NULL, reps = NULL, type = 2, l = 1, plotN
                        seed = NULL, locationNames = NULL, factorLabels = TRUE, 
                        data = NULL) {
   
-  if (is.null(seed) || is.character(seed) || is.factor(seed)) seed <- runif(1, min = -50000, max = 50000)
-  set.seed(seed)
+  seed <- resolve_seed(seed)
+  local_design_seed(seed)
   if (all(c(1,2) != type)) {
     stop("Input type is unknown. Please, choose one: 1 or 2, for CRD or RCBD, respectively.")
   }

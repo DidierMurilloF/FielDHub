@@ -19,6 +19,9 @@
   `options` field holds the valid dimensions. `plot()` raises an error,
   instead of drawing an empty plot, when the layout or location requested is
   not available. The Shiny app shows these errors as before.
+- A `seed` that is not a single number is now an error. `CRD()`,
+  `full_factorial()`, `split_plot()` and `strip_plot()` used to ignore a
+  character seed, such as `"123"`, and pick a random one.
 
 ### New features:
 
@@ -64,6 +67,11 @@
 
 ### Enhancements:
 
+- Creating a design no longer changes the caller's random numbers: the design
+  functions set their seed and restore the random-number state when they
+  finish. Without a seed, they draw an integer seed from the whole range of
+  seeds and record it, so any design can be reproduced from `infoDesign$seed`;
+  `full_factorial()` now records its seed too.
 - `diagonal_arrangement()`, `optimized_arrangement()`,
   `partially_replicated()`, `RCBD_augmented()`, `sparse_allocation()` and
   `multi_location_prep()` gain a `year` argument that sets the `YEAR` column
@@ -245,6 +253,9 @@
   field-book IDs restart at 1 in each location, filler plots of sparse
   allocations have `EXPT = "Filler"`, and uploaded check entries must be
   consecutive numbers.
+- Fixed `optimized_arrangement()` drawing the replication of the checks before
+  setting the seed when `amountChecks` is not a multiple of the number of
+  checks, so the same seed could give different designs.
 - The documentation of `swap_pairs()`, `do_optim()`, `sparse_allocation()` and
   `multi_location_prep()` now matches their defaults and the elements they
   return.
@@ -272,6 +283,8 @@ from:
   and one entry per location labeled as fillers).
 - `RCBD_augmented()` with `random = FALSE` when the field has filler plots
   (blocks with too many or too few checks, and possibly missing lines).
+- `optimized_arrangement()` when `amountChecks` is not a multiple of the
+  number of checks (the design was not reproducible).
 
 # FielDHub 1.3.1
 

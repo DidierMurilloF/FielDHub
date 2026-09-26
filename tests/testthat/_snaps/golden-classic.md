@@ -2091,7 +2091,7 @@
                 "names": {
                   "type": "character",
                   "attributes": {},
-                  "value": ["factors", "levels", "runs", "all_treatments", "reps", "locations", "location_names", "kind", "levels_each_factor", "id_design"]
+                  "value": ["factors", "levels", "runs", "all_treatments", "reps", "locations", "location_names", "kind", "levels_each_factor", "seed", "id_design"]
                 }
               },
               "value": [
@@ -2166,6 +2166,11 @@
                   "type": "double",
                   "attributes": {},
                   "value": [2, 3]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [9]
                 },
                 {
                   "type": "double",
@@ -2336,7 +2341,7 @@
                 "names": {
                   "type": "character",
                   "attributes": {},
-                  "value": ["factors", "levels", "runs", "all_treatments", "reps", "locations", "location_names", "kind", "levels_each_factor", "id_design"]
+                  "value": ["factors", "levels", "runs", "all_treatments", "reps", "locations", "location_names", "kind", "levels_each_factor", "seed", "id_design"]
                 }
               },
               "value": [
@@ -2422,6 +2427,11 @@
                   "type": "double",
                   "attributes": {},
                   "value": [2, 3]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [10]
                 },
                 {
                   "type": "double",

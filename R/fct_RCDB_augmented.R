@@ -109,8 +109,8 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
   if (all(c("serpentine", "cartesian") != planter)) {
     stop("Input planter choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
   }
-  if (is.null(seed)) seed <- runif(1, min = -50000, max = 50000)
-  set.seed(seed)
+  seed <- resolve_seed(seed)
+  local_design_seed(seed)
   if (!is.numeric(plotNumber) && !is.integer(plotNumber)) {
     stop("plotNumber should be an integer or a numeric vector.")
   }

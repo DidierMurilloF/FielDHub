@@ -145,8 +145,8 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
   if (all(c("serpentine", "cartesian") != planter)) {
     stop("Input planter choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
   }
-  if (is.null(seed) || !is.numeric(seed)) seed <- runif(1, min = -50000, max = 50000)
-  set.seed(seed)
+  seed <- resolve_seed(seed)
+  local_design_seed(seed)
   if (is.null(l) || !is.numeric(l) || l %% 1 != 0) {
     fieldhub_abort("'RCBD()' requires that locations number to be an integer greater than 0.")
   }

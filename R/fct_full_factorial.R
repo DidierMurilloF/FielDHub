@@ -78,8 +78,8 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
   if (all(c("serpentine", "cartesian") != planter)) {
     stop("Input for planter choice is unknown. Please, choose one: serpentine or cartesian.")
   }
-  if (is.null(seed) || is.character(seed) || is.factor(seed)) seed <- runif(1, min = -50000, max = 50000)
-  set.seed(seed)
+  seed <- resolve_seed(seed)
+  local_design_seed(seed)
   if(l < 1 || is.null(l)) stop("Please, check the value for the number of locations.")
   if (!is.null(plotNumber) && length(plotNumber) == l) {
     if (any(!is.numeric(plotNumber)) || any(plotNumber < 1) || any(plotNumber %% 1 != 0) ||
@@ -197,6 +197,7 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
     location_names = locationNames, 
     kind = kind, 
     levels_each_factor = entries_each_factor,
+    seed = seed,
     id_design = 4)
   output <- list(infoDesign = fullfactorial, fieldBook = design_output)
   class(output) <- "FielDHub"

@@ -72,8 +72,8 @@
 #' @export
 CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL,
                 seed = NULL, data = NULL) {
-  if (is.null(seed) || is.character(seed) || is.factor(seed)) seed <- runif(1, min = -50000, max = 50000)
-  set.seed(seed)
+  seed <- resolve_seed(seed)
+  local_design_seed(seed)
   if (!is.null(plotNumber)) {
     if (plotNumber < 1 || plotNumber %% 1 != 0) fieldhub_abort("plotNumber must be an integer greater than 0.")
   } else {

@@ -112,7 +112,8 @@ optimized_arrangement <- function(
     year = NULL) {
     year <- resolve_year(year)
     
-    if (is.null(seed) || !is.numeric(seed)) seed <- runif(1, min = -50000, max = 50000)
+    seed <- resolve_seed(seed)
+    local_design_seed(seed)
     if (all(c("serpentine", "cartesian") != planter)) {
         base::stop('Input planter is unknown. Please, choose one: "serpentine" or "cartesian"')
     }
@@ -275,7 +276,6 @@ optimized_arrangement <- function(
     plot_numbers_sites <- vector(mode = "list", length = l)
     col_checks_sites <- vector(mode = "list", length = l)
     min_distance_sites <- vector(mode = "numeric", length = l)
-    set.seed(seed)
     for (sites in 1:l) {
         prep <- pREP(
             nrows = nrows, 

@@ -51,7 +51,9 @@ do_optim <- function(
     seed,
     data = NULL) {
     # set a random seed if it is missing
-    if (missing(seed)) seed <- base::sample.int(10000, size = 1) 
+    if (missing(seed)) seed <- NULL
+    seed <- resolve_seed(seed, default = function() sample.int(10000, size = 1))
+    local_design_seed(seed)
     if (missing(lines)) stop("Please, define the number of lines/treatments for this design.")
     if (missing(l)) stop("Please, define the number of locations for this design.")
     if (missing(design) || is.null(design)) stop("Paramenter design is missing.")
@@ -316,7 +318,9 @@ sparse_allocation <- function(
     checksPercent = NULL) {
     year <- resolve_year(year)
     # set a random seed if it is missing
-    if (missing(seed)) seed <- base::sample.int(10000, size = 1) 
+    if (missing(seed)) seed <- NULL
+    seed <- resolve_seed(seed, default = function() sample.int(10000, size = 1))
+    local_design_seed(seed)
     if (missing(l)) stop("Please, define the number of locations for this design.")
     if (missing(locationNames) || length(locationNames) != l)  {
         default_names <- paste0("LOC", 1:l)
@@ -535,7 +539,9 @@ multi_location_prep <- function(
     year = NULL) {
     year <- resolve_year(year)
     # set a random seed if it is missing
-    if (missing(seed)) seed <- base::sample.int(10000, size = 1)
+    if (missing(seed)) seed <- NULL
+    seed <- resolve_seed(seed, default = function() sample.int(10000, size = 1))
+    local_design_seed(seed)
     if (missing(l)) stop("Please, define the number of locations for this design.")
     if (missing(locationNames) || length(locationNames) != l) {
         default_names <- paste0("LOC", 1:l)

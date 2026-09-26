@@ -43,14 +43,16 @@ test_that("RCBD() without checks keeps its infoDesign shape", {
   expect_equal(d$infoDesign$treatments, c("T1", "T2", "T3", "T4"))
 })
 
-test_that("RCBD() without checks consumes exactly the RNG draws it used to", {
-  # RCBD() calls set.seed(seed) internally, so the stream left behind depends
-  # only on `seed` and on how many draws RCBD() consumes. Pinning the next
-  # draw therefore detects any extra or reordered RNG consumption anywhere in
-  # the function - including after the block loop, which the field-book pin
-  # cannot see.
+test_that("RCBD() without checks leaves the caller's random numbers unchanged", {
+  # This test used to pin the draw that followed RCBD(), which depended on
+  # how many random numbers RCBD() consumed, because RCBD() left its own
+  # stream behind. RCBD() now restores the caller's stream, so its internal
+  # draws can no longer reach the caller: the next draw is the caller's own.
+  set.seed(2024)
   invisible(RCBD(t = 4, reps = 3, seed = 89076))
-  expect_equal(runif(1), 0.6712549932, tolerance = 1e-9)
+  after <- runif(1)
+  set.seed(2024)
+  expect_identical(after, runif(1))
 })
 
 test_that("RCBD() t=4/reps=3/seed=89076 fixture pins layoutRandom and full infoDesign", {

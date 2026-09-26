@@ -88,8 +88,8 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
                        planter = "serpentine", locationNames = NULL, seed = NULL,
                        factorLabels = TRUE, randomizeH = TRUE, randomizeV = FALSE,
                        data = NULL) {
-  if (is.null(seed) || is.character(seed) || is.factor(seed)) seed <- runif(1, min = -50000, max = 50000)
-  set.seed(seed)
+  seed <- resolve_seed(seed)
+  local_design_seed(seed)
   arg0 <- c(Hplots, Vplots)
   arg1 <- list(Hplots, Vplots)
   if (is.null(data)) {

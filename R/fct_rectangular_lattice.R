@@ -62,8 +62,8 @@
 rectangular_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101, locationNames = NULL,
                                 seed = NULL, data = NULL) {
   
-  if (is.null(seed) || !is.numeric(seed)) seed <- runif(1, min = -50000, max = 50000)
-  set.seed(seed)
+  seed <- resolve_seed(seed)
+  local_design_seed(seed)
   lookup <- FALSE
   if(is.null(data)) {
     if (is.null(t) || is.null(k) || is.null(r) || is.null(l)) {
