@@ -113,6 +113,10 @@
   of recreating the workflow from internal helpers. Simulated responses are
   appended by column name so result metadata cannot be overwritten when the
   field-book schema grows.
+- Pull requests now report core (`fct_*` and `utils_*`) test coverage against
+  their base commit and fail if it decreases. A separate gate applies the
+  correctness-oriented `lintr` checks only to changed R lines, so legacy style
+  findings do not block unrelated work.
 
 ### Fix bugs:
 
