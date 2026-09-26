@@ -47,7 +47,7 @@ available_percent <- function(n_rows,
   G <- as.vector(W[,2])
   w_map_engage <- w_map_list[G]
   ncols_W <- nrow(W)
-  multi <- kindExpt == "RDC" || kindExpt == "DBUDC"
+  multi <- kindExpt == "DBUDC"
   if (multi) {
     data_entry <- data
     data_entry1 <- data_entry[(length(checks) + 1):nrow(data_entry), ]
@@ -67,12 +67,6 @@ available_percent <- function(n_rows,
                        "Total # of Fillers",
                        "Total # of Experimental Plots", 
                        "Total # of Plots")
-    } else {
-      M <- matrix(data = NA, ncol = 5, nrow = ncols_W, byrow = T)
-      colnames(M) <- c("Options", "% of Diagonal Checks", 
-                       "Total # of Check Plots",
-                       "Total # of Experimental Plots", 
-                       "Total # of Plots")
     }
   } else if (multi == TRUE) {
     if (Option_NCD == TRUE) {
@@ -82,12 +76,6 @@ available_percent <- function(n_rows,
                        "Total # of Fillers",
                        "Total # of Experimental Plots",
                        "Total #r of Plots")
-    } else {
-      M <- matrix(data = NA, ncol = 5, nrow = ncols_W, byrow = T)
-      colnames(M) <- c("Options", "% of Diagonal Checks", 
-                       "Total # of Check Plots",
-                       "Total # of Experimental Plots", 
-                       "Total # of Plots")
     }
   } 
   opts <- 1:length(w_map_engage)
@@ -209,12 +197,6 @@ available_percent <- function(n_rows,
             Fillers <- NA
           }else Fillers <- Fillers
           M[m, c(1,2,3,4,5,6)] <- c(m, per, n_Checks, Fillers, expt_lines, pots)
-        } else if (Option_NCD == FALSE) {
-          n_Checks <- length(which(w_map == 1))
-          pots <- nrow(w_map) * ncol(w_map)
-          per <- round((n_Checks/pots)*100,1)
-          expt_lines <- pots - n_Checks
-          M[m, c(1,2,3,4,5)] <- c(m, per, n_Checks, expt_lines, pots)
         }
       } else if (stacked == "By Column") {
         if (Option_NCD == TRUE) {
@@ -243,12 +225,6 @@ available_percent <- function(n_rows,
           Fillers_t <- length(which(w_map == "Filler"))
           f_expt_lines <- expt_lines - Fillers_t
           M[m, c(1,2,3,4,5,6)] <- c(m, per, n_Checks, Fillers_t, f_expt_lines, pots)
-        } else if (Option_NCD == FALSE) {
-          n_Checks <- length(which(w_map == 1))
-          pots <- nrow(w_map) * ncol(w_map)
-          per <- round((n_Checks/pots)*100,1)
-          expt_lines <- pots - n_Checks
-          M[m, c(1,2,3,4,5)] <- c(m, per, n_Checks, expt_lines, pots)
         }
       }
     }
@@ -295,9 +271,6 @@ random_checks <- function(dt = NULL, d_checks = NULL, p = NULL, percent = NULL,
     #print(subset(my_P, my_P[,1] == percent)[1,2])
     my_index <- subset(my_P, my_P[,1] == percent)[1,2]
   } else if (is.null(percent) && !is.null(exptlines)) {
-    if (Option_NCD == FALSE) {
-      my_index <- subset(my_P, my_P[,7] == exptlines)[1,2]
-    }
     if (Option_NCD == TRUE) {
       d_checks <- d_checks[!sapply(d_checks, is.null)]
       k <- 1

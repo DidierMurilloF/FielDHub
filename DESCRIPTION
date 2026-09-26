@@ -42,7 +42,6 @@ Description: A shiny design of experiments (DOE) app that aids in the creation o
 Depends: R (>= 4.1.0)
 License: MIT + file LICENSE
 Imports: 
-    config,
     golem,
     shiny (>= 1.7.0),
     htmltools,

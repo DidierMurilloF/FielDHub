@@ -422,7 +422,7 @@ diagonal_arrangement <- function(
         w_map <- rand_checks$map_checks
         n_rows = nrows; n_cols = ncols
         my_split_r <- rand_checks$map_checks
-        multi <- kindExpt == "RDC" || kindExpt == "DBUDC"
+        multi <- kindExpt == "DBUDC"
         if (multi == TRUE) {
             map_checks <- rand_checks$map_checks
             data_entry <- getData$data_entry[[sites]]
@@ -456,29 +456,19 @@ diagonal_arrangement <- function(
                     data_dim_each_block = data_dim_each_block
                 )
             } else {
-                if (Option_NCD == FALSE) {
-                    data_entry1 <- data_entry[(checks + 1):nrow(data_entry), ]
-                    data_random <- get_DBrandom(
-                        binaryMap = w_map, 
-                        data_dim_each_block = data_dim_each_block, 
-                        data_entries = data_entry1,
-                        planter = planter
-                    )
-                } else {
-                    Block_Fillers <- as.numeric(getData$Blocks[[sites]])
-                    data_random <- get_random(
-                        n_rows = nrows, 
-                        n_cols = ncols, 
-                        d_checks = my_split_r,
-                        Fillers = FALSE, 
-                        row_sets = my_row_sets,
-                        checks = getData$checksEntries[[sites]], 
-                        data = data_entry, 
-                        planter_mov  = planter,
-                        Multi.Fillers = TRUE, 
-                        which.blocks = Block_Fillers
-                    )
-                }
+                Block_Fillers <- as.numeric(getData$Blocks[[sites]])
+                data_random <- get_random(
+                    n_rows = nrows, 
+                    n_cols = ncols, 
+                    d_checks = my_split_r,
+                    Fillers = FALSE, 
+                    row_sets = my_row_sets,
+                    checks = getData$checksEntries[[sites]], 
+                    data = data_entry, 
+                    planter_mov  = planter,
+                    Multi.Fillers = TRUE, 
+                    which.blocks = Block_Fillers
+                )
             }
         } else {
             n_blocks <- 1
