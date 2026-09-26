@@ -451,6 +451,6 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
     concurrence = new_summ,
     fieldBook = out_row_col_fieldbook
   )
-  class(output) <- "FielDHub"
+  output <- new_fieldhub_design(output, "row_column")
   return(invisible(output))
 }

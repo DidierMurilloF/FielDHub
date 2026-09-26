@@ -578,7 +578,7 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
     fieldBook = fieldbook
   )
   
-  class(output) <- "FielDHub"
+  output <- new_fieldhub_design(output, "rcbd_augmented")
   return(invisible(output))
 }
 

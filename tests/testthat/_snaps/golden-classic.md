@@ -16,12 +16,12 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["infoDesign", "fieldBook"]
+              "value": ["infoDesign", "fieldBook", "metadata"]
             },
             "class": {
               "type": "character",
               "attributes": {},
-              "value": ["FielDHub"]
+              "value": ["fieldhub_crd", "FielDHub"]
             }
           },
           "value": [
@@ -124,6 +124,38 @@
                   "value": ["T2", "T2", "T3", "T1", "T4", "T4", "T1", "T3", "T1", "T5", "T3", "T4", "T2", "T5", "T5"]
                 }
               ]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                }
+              },
+              "value": [
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["crd"]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [1]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                }
+              ]
             }
           ]
         },
@@ -216,12 +248,12 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["infoDesign", "fieldBook"]
+              "value": ["infoDesign", "fieldBook", "metadata"]
             },
             "class": {
               "type": "character",
               "attributes": {},
-              "value": ["FielDHub"]
+              "value": ["fieldhub_crd", "FielDHub"]
             }
           },
           "value": [
@@ -324,6 +356,38 @@
                   "value": ["B", "D", "D", "C", "A", "B", "A", "C"]
                 }
               ]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                }
+              },
+              "value": [
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["crd"]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [2]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                }
+              ]
             }
           ]
         },
@@ -416,12 +480,12 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["infoDesign", "fieldBook"]
+              "value": ["infoDesign", "fieldBook", "metadata"]
             },
             "class": {
               "type": "character",
               "attributes": {},
-              "value": ["FielDHub"]
+              "value": ["fieldhub_crd", "FielDHub"]
             }
           },
           "value": [
@@ -524,6 +588,38 @@
                   "value": ["T4", "T2", "T2", "T2", "T1", "T4", "T1", "T3", "T3", "T4"]
                 }
               ]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                }
+              },
+              "value": [
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["crd"]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [3]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                }
+              ]
             }
           ]
         },
@@ -553,12 +649,12 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["infoDesign", "layoutRandom", "plotNumber", "fieldBook"]
+              "value": ["infoDesign", "layoutRandom", "plotNumber", "fieldBook", "metadata"]
             },
             "class": {
               "type": "character",
               "attributes": {},
-              "value": ["FielDHub"]
+              "value": ["fieldhub_rcbd", "FielDHub"]
             }
           },
           "value": [
@@ -767,6 +863,38 @@
                   "value": ["T3", "T6", "T5", "T4", "T2", "T1", "T1", "T4", "T3", "T2", "T5", "T6", "T6", "T2", "T4", "T1", "T5", "T3", "T3", "T6", "T5", "T1", "T2", "T4", "T1", "T4", "T3", "T2", "T6", "T5", "T5", "T6", "T4", "T1", "T2", "T3"]
                 }
               ]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                }
+              },
+              "value": [
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["rcbd"]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [4]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                }
+              ]
             }
           ]
         },
@@ -859,12 +987,12 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["infoDesign", "layoutRandom", "plotNumber", "fieldBook"]
+              "value": ["infoDesign", "layoutRandom", "plotNumber", "fieldBook", "metadata"]
             },
             "class": {
               "type": "character",
               "attributes": {},
-              "value": ["FielDHub"]
+              "value": ["fieldhub_rcbd", "FielDHub"]
             }
           },
           "value": [
@@ -1072,6 +1200,38 @@
                   "value": ["CK2", "CK1", "T1", "T8", "T5", "T3", "T6", "T2", "CK1", "CK2", "T4", "T7", "CK2", "T5", "CK1", "T6", "T2", "T7", "T4", "CK1", "T1", "T3", "CK2", "T8", "CK2", "CK1", "T6", "T4", "T5", "T3", "T2", "CK2", "CK1", "T7", "T8", "T1"]
                 }
               ]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                }
+              },
+              "value": [
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["rcbd"]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [5]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                }
+              ]
             }
           ]
         },
@@ -1174,12 +1334,12 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["infoDesign", "layoutRandom", "plotNumber", "fieldBook"]
+              "value": ["infoDesign", "layoutRandom", "plotNumber", "fieldBook", "metadata"]
             },
             "class": {
               "type": "character",
               "attributes": {},
-              "value": ["FielDHub"]
+              "value": ["fieldhub_rcbd", "FielDHub"]
             }
           },
           "value": [
@@ -1352,6 +1512,38 @@
                   "value": ["T5", "T2", "T1", "T4", "T3", "T4", "T5", "T3", "T1", "T2", "T2", "T5", "T4", "T3", "T1"]
                 }
               ]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                }
+              },
+              "value": [
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["rcbd"]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [6]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                }
+              ]
             }
           ]
         },
@@ -1444,12 +1636,12 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["infoDesign", "squares", "plotSquares", "fieldBook"]
+              "value": ["infoDesign", "squares", "plotSquares", "fieldBook", "metadata"]
             },
             "class": {
               "type": "character",
               "attributes": {},
-              "value": ["FielDHub"]
+              "value": ["fieldhub_latin_square", "FielDHub"]
             }
           },
           "value": [
@@ -1666,6 +1858,38 @@
                   "value": ["T4", "T1", "T2", "T3", "T3", "T2", "T1", "T4", "T1", "T3", "T4", "T2", "T2", "T4", "T3", "T1", "T4", "T2", "T3", "T1", "T1", "T3", "T4", "T2", "T3", "T1", "T2", "T4", "T2", "T4", "T1", "T3"]
                 }
               ]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                }
+              },
+              "value": [
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["latin_square"]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [7]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                }
+              ]
             }
           ]
         },
@@ -1779,12 +2003,12 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["infoDesign", "squares", "plotSquares", "fieldBook"]
+              "value": ["infoDesign", "squares", "plotSquares", "fieldBook", "metadata"]
             },
             "class": {
               "type": "character",
               "attributes": {},
-              "value": ["FielDHub"]
+              "value": ["fieldhub_latin_square", "FielDHub"]
             }
           },
           "value": [
@@ -1963,6 +2187,38 @@
                   "value": ["T2", "T1", "T4", "T3", "T5", "T1", "T4", "T5", "T2", "T3", "T4", "T5", "T3", "T1", "T2", "T3", "T2", "T1", "T5", "T4", "T5", "T3", "T2", "T4", "T1"]
                 }
               ]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                }
+              },
+              "value": [
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["latin_square"]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [8]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                }
+              ]
             }
           ]
         },
@@ -2076,12 +2332,12 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["infoDesign", "fieldBook"]
+              "value": ["infoDesign", "fieldBook", "metadata"]
             },
             "class": {
               "type": "character",
               "attributes": {},
-              "value": ["FielDHub"]
+              "value": ["fieldhub_full_factorial", "FielDHub"]
             }
           },
           "value": [
@@ -2235,6 +2491,38 @@
                   "value": ["1*0", "1*2", "1*1", "0*2", "0*0", "0*1", "0*0", "0*2", "1*0", "1*2", "0*1", "1*1", "0*2", "1*0", "1*1", "1*2", "0*1", "0*0", "0*2", "1*0", "1*2", "0*0", "1*1", "0*1"]
                 }
               ]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                }
+              },
+              "value": [
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["full_factorial"]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [9]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                }
+              ]
             }
           ]
         },
@@ -2326,12 +2614,12 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["infoDesign", "fieldBook"]
+              "value": ["infoDesign", "fieldBook", "metadata"]
             },
             "class": {
               "type": "character",
               "attributes": {},
-              "value": ["FielDHub"]
+              "value": ["fieldhub_full_factorial", "FielDHub"]
             }
           },
           "value": [
@@ -2507,6 +2795,38 @@
                   "value": ["1*2", "0*0", "0*2", "1*0", "0*2", "1*1", "1*1", "1*0", "0*1", "0*1", "1*2", "0*0"]
                 }
               ]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                }
+              },
+              "value": [
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["full_factorial"]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [10]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                }
+              ]
             }
           ]
         },
@@ -2609,12 +2929,12 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["infoDesign", "layoutlocations", "fieldBook"]
+              "value": ["infoDesign", "layoutlocations", "fieldBook", "metadata"]
             },
             "class": {
               "type": "character",
               "attributes": {},
-              "value": ["FielDHub"]
+              "value": ["fieldhub_split_plot", "FielDHub"]
             }
           },
           "value": [
@@ -2780,6 +3100,38 @@
                   "value": ["2|2", "2|1", "3|2", "3|1", "1|1", "1|2", "1|1", "1|2", "2|1", "2|2", "3|1", "3|2", "1|2", "1|1", "2|1", "2|2", "3|2", "3|1", "1|1", "1|2", "2|2", "2|1", "3|1", "3|2"]
                 }
               ]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                }
+              },
+              "value": [
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["split_plot"]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [11]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                }
+              ]
             }
           ]
         },
@@ -2871,12 +3223,12 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["infoDesign", "layoutlocations", "fieldBook"]
+              "value": ["infoDesign", "layoutlocations", "fieldBook", "metadata"]
             },
             "class": {
               "type": "character",
               "attributes": {},
-              "value": ["FielDHub"]
+              "value": ["fieldhub_split_plot", "FielDHub"]
             }
           },
           "value": [
@@ -3019,6 +3371,38 @@
                   "value": ["W2|c", "W2|b", "W2|a", "W1|a", "W1|b", "W1|c", "W1|c", "W1|b", "W1|a", "W2|b", "W2|a", "W2|c"]
                 }
               ]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                }
+              },
+              "value": [
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["split_plot"]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [12]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                }
+              ]
             }
           ]
         },
@@ -3110,12 +3494,12 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["infoDesign", "fieldBook"]
+              "value": ["infoDesign", "fieldBook", "metadata"]
             },
             "class": {
               "type": "character",
               "attributes": {},
-              "value": ["FielDHub"]
+              "value": ["fieldhub_split_split_plot", "FielDHub"]
             }
           },
           "value": [
@@ -3227,6 +3611,38 @@
                   "value": ["2|2|2", "2|2|1", "2|1|1", "2|1|2", "1|2|2", "1|2|1", "1|1|1", "1|1|2", "2|2|1", "2|2|2", "2|1|2", "2|1|1", "1|2|2", "1|2|1", "1|1|2", "1|1|1"]
                 }
               ]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                }
+              },
+              "value": [
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["split_split_plot"]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [13]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                }
+              ]
             }
           ]
         },
@@ -3323,12 +3739,12 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["infoDesign", "fieldBook"]
+              "value": ["infoDesign", "fieldBook", "metadata"]
             },
             "class": {
               "type": "character",
               "attributes": {},
-              "value": ["FielDHub"]
+              "value": ["fieldhub_split_split_plot", "FielDHub"]
             }
           },
           "value": [
@@ -3440,6 +3856,38 @@
                   "value": ["1|3|1", "1|3|2", "1|2|1", "1|2|2", "1|1|1", "1|1|2", "2|2|1", "2|2|2", "2|3|1", "2|3|2", "2|1|1", "2|1|2", "1|2|2", "1|2|1", "1|1|2", "1|1|1", "1|3|1", "1|3|2", "2|1|2", "2|1|1", "2|3|2", "2|3|1", "2|2|2", "2|2|1"]
                 }
               ]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                }
+              },
+              "value": [
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["split_split_plot"]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [14]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                }
+              ]
             }
           ]
         },
@@ -3536,12 +3984,12 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["infoDesign", "stripsBlockLoc", "plotLayouts", "fieldBook"]
+              "value": ["infoDesign", "stripsBlockLoc", "plotLayouts", "fieldBook", "metadata"]
             },
             "class": {
               "type": "character",
               "attributes": {},
-              "value": ["FielDHub"]
+              "value": ["fieldhub_strip_plot", "FielDHub"]
             }
           },
           "value": [
@@ -3931,6 +4379,38 @@
                   "value": ["b1|a0", "b1|a1", "b2|a0", "b2|a1", "b0|a0", "b0|a1", "b1|a0", "b1|a1", "b0|a0", "b0|a1", "b2|a0", "b2|a1", "b2|a0", "b2|a1", "b1|a0", "b1|a1", "b0|a0", "b0|a1", "b0|a0", "b0|a1", "b1|a0", "b1|a1", "b2|a0", "b2|a1"]
                 }
               ]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                }
+              },
+              "value": [
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["strip_plot"]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [15]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                }
+              ]
             }
           ]
         },
@@ -4033,12 +4513,12 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["infoDesign", "stripsBlockLoc", "plotLayouts", "fieldBook"]
+              "value": ["infoDesign", "stripsBlockLoc", "plotLayouts", "fieldBook", "metadata"]
             },
             "class": {
               "type": "character",
               "attributes": {},
-              "value": ["FielDHub"]
+              "value": ["fieldhub_strip_plot", "FielDHub"]
             }
           },
           "value": [
@@ -4352,6 +4832,38 @@
                   "type": "character",
                   "attributes": {},
                   "value": ["H1|V1", "H1|V3", "H1|V2", "H2|V1", "H2|V3", "H2|V2", "H1|V1", "H1|V3", "H1|V2", "H2|V1", "H2|V3", "H2|V2", "H2|V1", "H2|V3", "H2|V2", "H1|V1", "H1|V3", "H1|V2"]
+                }
+              ]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                }
+              },
+              "value": [
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["strip_plot"]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [16]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["Mersenne-Twister", "Inversion", "Rejection"]
                 }
               ]
             }

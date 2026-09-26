@@ -150,6 +150,6 @@ alpha_lattice <- function(t = NULL,
                      Locations = locationNames, seed = seed, lambda = lambda,
                      id_design = 12)
   output <- list(infoDesign = infoDesign, fieldBook = OutAlpha, blocksModel = blocksModel)
-  class(output) <- "FielDHub"
+  output <- new_fieldhub_design(output, "alpha_lattice")
   return(invisible(output))
 }

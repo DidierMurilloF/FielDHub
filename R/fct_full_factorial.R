@@ -200,6 +200,6 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
     seed = seed,
     id_design = 4)
   output <- list(infoDesign = fullfactorial, fieldBook = design_output)
-  class(output) <- "FielDHub"
+  output <- new_fieldhub_design(output, "full_factorial")
   return(invisible(output))
 }

@@ -141,6 +141,6 @@ CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL,
     seed = seed, id_design = 1
   )
   output <- list(infoDesign = parameters, fieldBook = design)
-  class(output) <- "FielDHub"
+  output <- new_fieldhub_design(output, "crd")
   return(invisible(output))
 }

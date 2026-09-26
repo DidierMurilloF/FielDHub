@@ -427,7 +427,7 @@ sparse_allocation <- function(
         allocation = unrep$allocation, 
         size_locations = unrep$size_locations
     )
-    class(output) <- "FielDHub"
+    output <- new_fieldhub_design(output, "sparse_allocation")
     return(invisible(output))
 }
 #' @title Optimized multi-location partially replicated design
@@ -670,7 +670,7 @@ multi_location_prep <- function(
         allocation = preps$allocation, 
         size_locations = preps$size_locations
     )
-    class(output) <- "FielDHub"
+    output <- new_fieldhub_design(output, "multi_location_prep")
     return(invisible(output))
 }
 

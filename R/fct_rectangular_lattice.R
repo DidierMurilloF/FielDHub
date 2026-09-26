@@ -133,6 +133,6 @@ rectangular_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber 
                      Locations = locationNames, seed = seed, lambda = lambda,
                      id_design = 11)
   output <- list(infoDesign = infoDesign, fieldBook = OutRectagular_Lattice, blocksModel = blocksModel)
-  class(output) <- "FielDHub"
+  output <- new_fieldhub_design(output, "rectangular_lattice")
   return(invisible(output))
 }

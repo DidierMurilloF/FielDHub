@@ -22,9 +22,18 @@
 - A `seed` that is not a single number is now an error. `CRD()`,
   `full_factorial()`, `split_plot()` and `strip_plot()` used to ignore a
   character seed, such as `"123"`, and pick a random one.
+- The results of the design functions have the class `c("fieldhub_<design>",
+  "FielDHub")` instead of `"FielDHub"`, and a new element, `metadata`. Code
+  that compares `class(x) == "FielDHub"` should use `inherits(x, "FielDHub")`.
 
 ### New features:
 
+- Every design result records how it was built in a new `metadata` element:
+  the design, the version of the structure of the result (`schema_version`),
+  the seed, the random-number generator (`RNGkind()`) and the version of
+  FielDHub. Its class names the design, such as `c("fieldhub_rcbd",
+  "FielDHub")`, so scripts can tell designs apart with `inherits()`. The other
+  elements are unchanged.
 - `diagonal_arrangement()` gains `checksPercent`, to choose the percentage of
   checks among the options available for the field (by default the last one,
   as before), and `sameEntries`, for `"DBUDC"` designs whose blocks all hold

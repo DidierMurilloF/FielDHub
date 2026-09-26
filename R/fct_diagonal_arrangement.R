@@ -648,7 +648,7 @@ diagonal_arrangement <- function(
         fieldBook = field_book
     )
     
-    class(output) <- "FielDHub"
+    output <- new_fieldhub_design(output, "diagonal_arrangement")
     return(invisible(output))
 }
 

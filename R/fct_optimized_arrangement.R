@@ -371,6 +371,6 @@ optimized_arrangement <- function(
         genEntries = genEntries,
         fieldBook = field_book
     )
-    class(output) <- "FielDHub"
+    output <- new_fieldhub_design(output, "optimized_arrangement")
     return(invisible(output))
 }

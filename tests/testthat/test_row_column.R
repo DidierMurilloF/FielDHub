@@ -7,7 +7,8 @@ expect_valid_row_column <- function(des, t, nrows, r) {
   expect_s3_class(des, "FielDHub")
   expect_setequal(
     names(des),
-    c("infoDesign", "blocksModel", "resolvableBlocks", "concurrence", "fieldBook")
+    c("infoDesign", "blocksModel", "resolvableBlocks", "concurrence", "fieldBook",
+      "metadata")
   )
   fb <- des$fieldBook
   expect_true(all(c("ID", "LOCATION", "PLOT", "REP", "ROW", "COLUMN", "ENTRY") %in% names(fb)))

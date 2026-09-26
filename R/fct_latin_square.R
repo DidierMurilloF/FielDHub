@@ -192,7 +192,7 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
   )
   output <- list(infoDesign =  parameters, squares = lsd.reps,
                  plotSquares = plotSquares, fieldBook = latin_design)
-  class(output) <- "FielDHub"
+  output <- new_fieldhub_design(output, "latin_square")
   return(invisible(output))
 }
 

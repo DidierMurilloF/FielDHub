@@ -201,6 +201,8 @@ skip_unless_golden_platform <- function() {
 # field map is built by plot_layout() (id_design 1 to 12), the field book with
 # the ROW and COLUMN coordinates that the app exports.
 golden_view <- function(design) {
+  # The package version changes with every release, not with the design
+  if (is.list(design$metadata)) design$metadata$package_version <- NULL
   view <- list(design = design)
   id <- if (inherits(design, "FielDHub")) design$infoDesign$id_design else NULL
   if (is.numeric(id) && id <= 12) {

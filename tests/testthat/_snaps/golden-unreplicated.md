@@ -16,12 +16,12 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["infoDesign", "layoutRandom", "plotsNumber", "data_entry", "fieldBook"]
+              "value": ["infoDesign", "layoutRandom", "plotsNumber", "data_entry", "fieldBook", "metadata"]
             },
             "class": {
               "type": "character",
               "attributes": {},
-              "value": ["FielDHub"]
+              "value": ["fieldhub_diagonal_arrangement", "FielDHub"]
             }
           },
           "value": [
@@ -284,6 +284,38 @@
                   "value": ["Gen-92", "Gen-197", "Gen-89", "Check-2", "Gen-90", "Gen-63", "Gen-146", "Gen-245", "Gen-250", "Gen-155", "Gen-165", "Gen-185", "Gen-101", "Check-2", "Gen-6", "Gen-121", "Gen-68", "Gen-169", "Gen-261", "Gen-192", "Gen-162", "Gen-54", "Gen-7", "Gen-264", "Gen-21", "Gen-240", "Gen-30", "Gen-191", "Gen-253", "Check-2", "Gen-35", "Gen-110", "Gen-11", "Gen-25", "Gen-251", "Gen-184", "Gen-72", "Gen-16", "Gen-137", "Check-4", "Gen-45", "Gen-195", "Gen-76", "Gen-24", "Gen-36", "Gen-234", "Gen-242", "Check-1", "Gen-81", "Gen-78", "Gen-124", "Gen-119", "Gen-188", "Gen-182", "Gen-266", "Gen-97", "Gen-17", "Check-1", "Gen-102", "Gen-15", "Gen-271", "Gen-9", "Gen-100", "Gen-228", "Gen-235", "Check-1", "Gen-218", "Gen-230", "Gen-104", "Gen-262", "Gen-41", "Gen-132", "Gen-215", "Gen-206", "Gen-248", "Check-1", "Gen-106", "Gen-113", "Gen-18", "Gen-117", "Gen-258", "Check-3", "Gen-257", "Gen-32", "Gen-133", "Gen-207", "Gen-138", "Gen-69", "Gen-53", "Gen-61", "Gen-20", "Check-2", "Gen-135", "Gen-59", "Gen-115", "Gen-70", "Gen-204", "Gen-222", "Gen-154", "Gen-209", "Gen-153", "Check-2", "Gen-174", "Gen-105", "Gen-64", "Gen-122", "Gen-43", "Gen-22", "Gen-134", "Gen-213", "Gen-164", "Check-4", "Gen-166", "Gen-111", "Gen-139", "Gen-178", "Gen-199", "Gen-109", "Gen-114", "Gen-74", "Gen-233", "Gen-256", "Gen-67", "Gen-84", "Gen-267", "Check-1", "Gen-94", "Gen-229", "Gen-179", "Gen-270", "Gen-131", "Gen-247", "Gen-217", "Gen-249", "Gen-214", "Check-3", "Gen-236", "Gen-263", "Gen-112", "Gen-125", "Gen-27", "Gen-238", "Gen-239", "Gen-159", "Gen-10", "Gen-96", "Gen-8", "Check-2", "Gen-49", "Gen-71", "Gen-88", "Gen-225", "Gen-51", "Gen-216", "Gen-5", "Gen-151", "Gen-52", "Check-1", "Gen-208", "Gen-181", "Gen-73", "Gen-141", "Gen-210", "Gen-47", "Gen-252", "Gen-176", "Gen-116", "Gen-14", "Gen-29", "Check-4", "Gen-163", "Gen-220", "Gen-60", "Gen-140", "Gen-57", "Gen-99", "Gen-272", "Gen-80", "Gen-259", "Check-4", "Gen-244", "Gen-37", "Gen-129", "Check-3", "Gen-161", "Gen-226", "Gen-227", "Gen-255", "Gen-28", "Gen-265", "Gen-42", "Gen-232", "Gen-224", "Check-4", "Gen-87", "Gen-48", "Gen-82", "Gen-142", "Gen-172", "Gen-260", "Gen-85", "Gen-23", "Gen-39", "Check-2", "Gen-127", "Gen-83", "Gen-147", "Gen-66", "Gen-193", "Gen-86", "Gen-160", "Gen-93", "Gen-149", "Check-3", "Gen-173", "Gen-55", "Gen-219", "Gen-62", "Gen-198", "Gen-33", "Gen-158", "Gen-202", "Gen-200", "Gen-19", "Gen-50", "Gen-120", "Gen-46", "Gen-130", "Gen-274", "Check-3", "Gen-108", "Gen-103", "Gen-196", "Gen-175", "Gen-157", "Gen-145", "Gen-168", "Gen-269", "Gen-95", "Check-3", "Gen-203", "Gen-241", "Gen-148", "Gen-212", "Gen-189", "Gen-246", "Gen-38", "Check-2", "Gen-170", "Gen-177", "Gen-31", "Gen-126", "Gen-13", "Gen-107", "Gen-221", "Gen-136", "Gen-180", "Check-3", "Gen-98", "Gen-211", "Gen-243", "Gen-171", "Gen-237", "Gen-205", "Gen-40", "Check-4", "Gen-56", "Gen-58", "Gen-26", "Gen-223", "Gen-12", "Gen-65", "Gen-201", "Gen-231", "Gen-273", "Check-4", "Gen-34", "Gen-143", "Gen-79", "Gen-186", "Gen-77", "Check-3", "Gen-187", "Gen-44", "Gen-150", "Gen-75", "Gen-118", "Gen-128", "Gen-152", "Gen-167", "Gen-123", "Check-1", "Gen-144", "Gen-254", "Gen-91", "Gen-194", "Gen-268", "Gen-190", "Gen-183", "Gen-156"]
                 }
               ]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                }
+              },
+              "value": [
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["diagonal_arrangement"]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [24]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                }
+              ]
             }
           ]
         }
@@ -308,12 +340,12 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["infoDesign", "layoutRandom", "plotsNumber", "data_entry", "fieldBook"]
+              "value": ["infoDesign", "layoutRandom", "plotsNumber", "data_entry", "fieldBook", "metadata"]
             },
             "class": {
               "type": "character",
               "attributes": {},
-              "value": ["FielDHub"]
+              "value": ["fieldhub_diagonal_arrangement", "FielDHub"]
             }
           },
           "value": [
@@ -576,6 +608,38 @@
                   "value": ["Gen-95", "Gen-107", "Gen-281", "Gen-239", "Gen-149", "Gen-241", "Gen-139", "Gen-68", "Check-2", "Gen-225", "Gen-41", "Gen-8", "Gen-9", "Gen-54", "Gen-101", "Gen-227", "Gen-168", "Gen-111", "Check-2", "Gen-118", "Gen-232", "Gen-105", "Gen-209", "Gen-64", "Gen-82", "Gen-99", "Gen-144", "Gen-58", "Check-4", "Gen-184", "Gen-191", "Gen-253", "Gen-156", "Gen-261", "Gen-114", "Gen-143", "Gen-106", "Check-3", "Gen-48", "Gen-53", "Gen-145", "Gen-238", "Gen-96", "Gen-175", "Gen-271", "Gen-67", "Gen-121", "Check-3", "Gen-89", "Gen-127", "Gen-112", "Gen-18", "Gen-194", "Gen-142", "Gen-257", "Gen-222", "Gen-240", "Check-3", "Gen-19", "Gen-242", "Gen-251", "Gen-221", "Gen-181", "Gen-171", "Gen-233", "Gen-215", "Check-4", "Gen-153", "Gen-35", "Gen-70", "Gen-97", "Gen-69", "Gen-30", "Gen-162", "Gen-220", "Gen-88", "Check-2", "Gen-228", "Gen-280", "Gen-15", "Gen-283", "Gen-129", "Gen-274", "Gen-31", "Gen-193", "Gen-32", "Check-3", "Gen-157", "Gen-189", "Gen-50", "Gen-236", "Gen-285", "Gen-115", "Gen-34", "Gen-290", "Gen-166", "Gen-108", "Gen-263", "Gen-109", "Gen-148", "Gen-74", "Gen-36", "Gen-141", "Gen-134", "Gen-249", "Check-4", "Gen-43", "Gen-165", "Gen-25", "Gen-13", "Gen-76", "Gen-230", "Gen-282", "Gen-234", "Gen-65", "Check-1", "Gen-56", "Gen-47", "Gen-27", "Gen-270", "Gen-42", "Gen-59", "Gen-200", "Gen-202", "Gen-98", "Check-4", "Gen-272", "Gen-176", "Gen-154", "Gen-219", "Gen-100", "Gen-291", "Gen-267", "Gen-73", "Check-3", "Gen-135", "Gen-122", "Gen-250", "Gen-214", "Gen-94", "Gen-51", "Gen-92", "Gen-75", "Gen-264", "Check-2", "Gen-130", "Gen-197", "Gen-93", "Gen-128", "Gen-255", "Gen-262", "Gen-177", "Gen-164", "Gen-196", "Check-1", "Gen-37", "Gen-211", "Gen-174", "Gen-87", "Gen-216", "Gen-182", "Gen-183", "Gen-85", "Check-1", "Gen-180", "Gen-6", "Gen-186", "Gen-203", "Gen-217", "Gen-66", "Gen-71", "Gen-152", "Gen-269", "Check-4", "Gen-17", "Gen-146", "Gen-26", "Gen-91", "Gen-79", "Gen-78", "Gen-81", "Gen-188", "Gen-113", "Check-3", "Gen-84", "Gen-170", "Gen-278", "Gen-201", "Gen-195", "Gen-158", "Gen-40", "Gen-14", "Check-3", "Gen-16", "Gen-237", "Gen-260", "Gen-120", "Gen-44", "Gen-60", "Gen-163", "Gen-192", "Gen-125", "Check-1", "Gen-226", "Gen-45", "Gen-265", "Gen-247", "Gen-198", "Gen-117", "Gen-254", "Gen-190", "Gen-7", "Check-4", "Gen-159", "Gen-256", "Gen-229", "Gen-224", "Gen-126", "Gen-289", "Gen-284", "Gen-38", "Gen-245", "Check-2", "Gen-57", "Gen-273", "Gen-187", "Gen-123", "Gen-23", "Gen-235", "Gen-39", "Gen-131", "Check-1", "Gen-132", "Gen-104", "Gen-119", "Gen-246", "Gen-287", "Gen-124", "Gen-12", "Gen-252", "Gen-102", "Check-2", "Gen-147", "Gen-208", "Gen-33", "Gen-160", "Gen-199", "Gen-116", "Gen-46", "Gen-20", "Gen-140", "Check-1", "Gen-243", "Gen-161", "Gen-277", "Gen-213", "Gen-72", "Gen-204", "Gen-185", "Gen-5", "Check-1", "Gen-21", "Gen-210", "Gen-206", "Gen-275", "Gen-29", "Gen-103", "Gen-286", "Gen-24", "Gen-151", "Check-1", "Gen-207", "Gen-268", "Gen-173", "Gen-169", "Gen-63", "Gen-52", "Gen-248", "Gen-179", "Gen-55", "Check-4", "Gen-90", "Gen-266", "Gen-11", "Gen-62", "Gen-61", "Gen-167", "Gen-49", "Filler", "Filler", "Gen-279", "Check-4", "Gen-86", "Gen-10", "Gen-83", "Gen-259", "Gen-80", "Gen-288", "Gen-258", "Gen-77", "Gen-136", "Check-2", "Gen-276", "Gen-133", "Gen-22", "Gen-28", "Gen-231", "Gen-150", "Gen-155", "Gen-138", "Gen-244", "Check-2", "Gen-205", "Gen-212", "Gen-110", "Gen-172", "Gen-218", "Gen-137", "Gen-178", "Gen-223"]
                 }
               ]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                }
+              },
+              "value": [
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["diagonal_arrangement"]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [25]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                }
+              ]
             }
           ]
         }
@@ -600,12 +664,12 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["infoDesign", "layoutRandom", "plotsNumber", "data_entry", "fieldBook"]
+              "value": ["infoDesign", "layoutRandom", "plotsNumber", "data_entry", "fieldBook", "metadata"]
             },
             "class": {
               "type": "character",
               "attributes": {},
-              "value": ["FielDHub"]
+              "value": ["fieldhub_diagonal_arrangement", "FielDHub"]
             }
           },
           "value": [
@@ -873,6 +937,38 @@
                   "value": ["Check-2", "Gen-111", "Gen-143", "Gen-44", "Gen-125", "Gen-128", "Gen-104", "Gen-63", "Gen-11", "Gen-56", "Gen-49", "Gen-153", "Gen-17", "Check-2", "Gen-120", "Gen-84", "Gen-148", "Gen-99", "Gen-93", "Gen-9", "Gen-41", "Gen-24", "Gen-65", "Gen-46", "Gen-140", "Gen-144", "Gen-96", "Gen-20", "Gen-80", "Check-1", "Gen-107", "Gen-101", "Gen-27", "Gen-64", "Gen-149", "Gen-115", "Gen-52", "Gen-70", "Gen-85", "Gen-29", "Gen-113", "Gen-92", "Check-2", "Gen-76", "Gen-118", "Gen-43", "Gen-34", "Gen-21", "Gen-79", "Gen-26", "Gen-59", "Gen-66", "Gen-72", "Gen-31", "Gen-32", "Gen-129", "Gen-98", "Check-5", "Gen-10", "Gen-138", "Gen-25", "Gen-75", "Gen-60", "Gen-155", "Gen-69", "Gen-58", "Gen-117", "Gen-141", "Gen-16", "Gen-110", "Check-5", "Gen-73", "Gen-19", "Gen-67", "Gen-90", "Gen-139", "Gen-83", "Gen-119", "Gen-100", "Gen-137", "Gen-106", "Gen-36", "Gen-103", "Gen-51", "Gen-13", "Gen-142", "Gen-114", "Gen-82", "Gen-146", "Check-4", "Gen-145", "Gen-131", "Gen-57", "Gen-54", "Gen-8", "Gen-81", "Gen-42", "Gen-122", "Gen-22", "Gen-47", "Gen-132", "Gen-33", "Check-4", "Gen-94", "Gen-37", "Gen-61", "Gen-48", "Gen-86", "Gen-50", "Gen-135", "Gen-121", "Gen-89", "Gen-35", "Gen-39", "Check-3", "Gen-112", "Gen-53", "Gen-102", "Gen-97", "Gen-28", "Gen-150", "Gen-88", "Gen-78", "Gen-116", "Gen-108", "Gen-109", "Gen-124", "Check-1", "Gen-133", "Gen-77", "Gen-55", "Gen-23", "Gen-130", "Gen-95", "Gen-134", "Gen-12", "Check-1", "Gen-71", "Gen-123", "Gen-62", "Gen-68", "Gen-127", "Gen-74", "Gen-6", "Gen-151", "Gen-30", "Gen-126", "Gen-136", "Gen-87", "Check-3", "Gen-7", "Gen-18", "Gen-40", "Gen-45", "Gen-91", "Gen-154", "Gen-147", "Gen-38", "Check-5", "Gen-14", "Gen-152", "Gen-105", "Gen-15", "Gen-273", "Gen-291", "Gen-214", "Gen-201", "Gen-179", "Gen-156", "Gen-246", "Gen-243", "Check-4", "Gen-257", "Gen-261", "Gen-172", "Gen-301", "Gen-299", "Gen-187", "Gen-160", "Gen-249", "Gen-216", "Gen-251", "Gen-229", "Check-4", "Gen-161", "Gen-260", "Gen-212", "Gen-239", "Gen-178", "Gen-308", "Gen-297", "Gen-270", "Gen-234", "Gen-219", "Gen-292", "Gen-188", "Check-4", "Gen-268", "Gen-290", "Gen-250", "Gen-210", "Gen-193", "Gen-265", "Gen-159", "Gen-289", "Gen-235", "Gen-189", "Gen-164", "Gen-218", "Gen-223", "Gen-284", "Gen-304", "Gen-177", "Gen-256", "Gen-227", "Check-3", "Gen-171", "Gen-252", "Gen-197", "Gen-185", "Gen-232", "Gen-286", "Gen-275", "Gen-266", "Gen-303", "Gen-215", "Gen-296", "Gen-237", "Check-5", "Gen-206", "Gen-205", "Gen-248", "Gen-267", "Gen-184", "Gen-264", "Gen-157", "Gen-283", "Gen-228", "Gen-245", "Gen-258", "Gen-281", "Gen-230", "Gen-196", "Check-2", "Gen-211", "Gen-288", "Gen-207", "Gen-307", "Gen-259", "Gen-255", "Gen-241", "Gen-204", "Gen-167", "Gen-247", "Gen-182", "Gen-262", "Check-1", "Gen-224", "Gen-226", "Gen-306", "Gen-158", "Gen-282", "Gen-294", "Gen-302", "Gen-225", "Gen-208", "Gen-190", "Gen-233", "Gen-236", "Gen-300", "Gen-279", "Gen-220", "Check-5", "Gen-278", "Gen-200", "Gen-194", "Gen-271", "Gen-272", "Gen-217", "Gen-175", "Gen-263", "Gen-295", "Gen-198", "Gen-222", "Gen-298", "Check-3", "Gen-244", "Gen-186", "Gen-165", "Gen-242", "Check-2", "Gen-254", "Gen-240", "Gen-287", "Gen-163", "Gen-170", "Gen-209", "Gen-173", "Gen-269", "Gen-169", "Gen-166", "Gen-199", "Gen-231", "Check-1", "Gen-285", "Gen-238", "Gen-202", "Gen-195", "Gen-274", "Gen-192", "Gen-293", "Gen-183", "Gen-277", "Gen-305", "Gen-253", "Gen-174", "Check-3", "Gen-276", "Gen-191", "Gen-221", "Gen-280", "Gen-203", "Gen-162", "Gen-309", "Gen-181", "Gen-168", "Gen-213", "Gen-310", "Gen-180", "Check-1", "Gen-176", "Gen-371", "Gen-363", "Gen-313", "Gen-343", "Gen-368", "Gen-336", "Gen-365", "Gen-384", "Gen-394", "Gen-390", "Gen-337", "Gen-332", "Gen-325", "Gen-359", "Gen-374", "Gen-382", "Gen-385", "Gen-341", "Gen-381", "Check-5", "Gen-312", "Gen-328", "Gen-351", "Gen-391", "Gen-362", "Gen-388", "Gen-317", "Gen-356", "Gen-387", "Gen-326", "Gen-367", "Gen-400", "Check-4", "Gen-405", "Gen-396", "Gen-354", "Gen-315", "Gen-372", "Gen-318", "Gen-358", "Gen-389", "Gen-345", "Check-2", "Gen-386", "Gen-320", "Gen-338", "Gen-319", "Gen-333", "Gen-322", "Gen-346", "Gen-352", "Gen-311", "Gen-321", "Gen-399", "Gen-395", "Check-2", "Gen-366", "Gen-397", "Gen-369", "Gen-364", "Gen-355", "Gen-339", "Gen-353", "Gen-376", "Gen-348", "Gen-314", "Check-5", "Gen-404", "Gen-323", "Gen-377", "Gen-375", "Gen-379", "Gen-361", "Gen-401", "Gen-398", "Gen-370", "Gen-373", "Gen-360", "Gen-334", "Check-3", "Gen-378", "Gen-329", "Gen-380", "Gen-324", "Gen-331", "Gen-349", "Check-1", "Gen-347", "Gen-392", "Gen-316", "Gen-357", "Gen-383", "Gen-393", "Gen-342", "Gen-402", "Gen-340", "Gen-327", "Gen-344", "Gen-403", "Check-4", "Gen-330", "Gen-350", "Gen-335", "Gen-576", "Gen-418", "Gen-502", "Gen-589", "Gen-477", "Gen-557", "Gen-469", "Gen-498", "Gen-457", "Gen-565", "Check-4", "Gen-437", "Gen-466", "Gen-512", "Gen-535", "Gen-448", "Gen-586", "Gen-488", "Gen-534", "Gen-431", "Gen-413", "Gen-493", "Gen-582", "Check-1", "Gen-509", "Gen-554", "Gen-439", "Gen-421", "Gen-453", "Gen-545", "Gen-491", "Gen-593", "Gen-433", "Gen-532", "Gen-497", "Gen-506", "Gen-507", "Gen-539", "Gen-543", "Gen-597", "Check-2", "Gen-483", "Gen-424", "Gen-451", "Gen-549", "Gen-426", "Gen-515", "Gen-443", "Gen-434", "Gen-552", "Gen-517", "Gen-455", "Gen-553", "Check-4", "Gen-447", "Gen-419", "Gen-495", "Gen-429", "Gen-594", "Gen-519", "Gen-585", "Gen-577", "Gen-518", "Gen-603", "Gen-526", "Gen-445", "Gen-538", "Gen-470", "Gen-480", "Gen-410", "Check-3", "Gen-536", "Gen-537", "Gen-494", "Gen-564", "Gen-527", "Gen-432", "Gen-458", "Gen-461", "Gen-415", "Gen-550", "Gen-484", "Gen-567", "Check-1", "Gen-423", "Gen-574", "Gen-416", "Gen-592", "Gen-511", "Gen-479", "Gen-569", "Gen-456", "Gen-489", "Gen-599", "Gen-580", "Gen-499", "Gen-482", "Check-3", "Gen-481", "Gen-472", "Gen-573", "Gen-438", "Gen-541", "Gen-561", "Gen-465", "Gen-529", "Gen-528", "Gen-407", "Gen-460", "Gen-496", "Check-5", "Gen-501", "Gen-504", "Gen-522", "Gen-468", "Gen-503", "Gen-540", "Check-2", "Gen-428", "Gen-446", "Gen-442", "Gen-430", "Gen-476", "Gen-459", "Gen-560", "Gen-520", "Gen-533", "Gen-471", "Gen-563", "Gen-558", "Check-2", "Gen-584", "Gen-462", "Gen-420", "Gen-572", "Gen-427", "Gen-570", "Gen-474", "Gen-450", "Gen-487", "Gen-548", "Check-2", "Gen-575", "Gen-596", "Gen-579", "Gen-523", "Gen-547", "Gen-436", "Gen-417", "Gen-411", "Gen-587", "Gen-571", "Gen-524", "Gen-485", "Check-1", "Gen-588", "Gen-590", "Gen-454", "Gen-463", "Gen-425", "Gen-486", "Gen-492", "Gen-568", "Gen-408", "Check-4", "Gen-422", "Gen-508", "Gen-556", "Gen-513", "Gen-559", "Gen-505", "Gen-544", "Gen-440", "Gen-595", "Gen-531", "Gen-598", "Gen-490", "Check-3", "Gen-516", "Gen-562", "Gen-601", "Gen-578", "Gen-412", "Gen-530", "Gen-605", "Gen-542", "Gen-514", "Gen-435", "Gen-467", "Gen-546", "Gen-475", "Gen-591", "Gen-449", "Gen-473", "Gen-602", "Gen-500", "Gen-464", "Gen-521", "Check-5", "Gen-406", "Gen-600", "Gen-444", "Gen-566", "Gen-452", "Gen-441", "Gen-604", "Gen-414", "Gen-409", "Gen-478", "Gen-583", "Gen-555", "Check-5", "Gen-551", "Gen-525", "Gen-510", "Gen-581", "Gen-716", "Gen-712", "Gen-619", "Gen-718", "Gen-711", "Gen-708", "Gen-616", "Gen-609", "Check-3", "Gen-642", "Gen-614", "Gen-705", "Gen-630", "Gen-695", "Gen-670", "Gen-720", "Gen-689", "Gen-628", "Gen-715", "Gen-706", "Gen-650", "Check-4", "Gen-697", "Gen-655", "Gen-625", "Gen-611", "Check-1", "Gen-624", "Gen-672", "Gen-626", "Gen-615", "Gen-683", "Gen-717", "Gen-709", "Gen-622", "Gen-701", "Gen-637", "Gen-636", "Gen-656", "Check-4", "Gen-665", "Gen-685", "Gen-610", "Gen-641", "Gen-678", "Gen-620", "Gen-606", "Gen-677", "Gen-679", "Gen-674", "Gen-646", "Gen-693", "Gen-668", "Gen-663", "Gen-617", "Check-5", "Gen-713", "Gen-721", "Gen-722", "Gen-629", "Gen-694", "Gen-671", "Gen-612", "Gen-652", "Gen-647", "Gen-623", "Gen-666", "Gen-613", "Check-1", "Gen-688", "Gen-658", "Gen-651", "Gen-634", "Gen-654", "Gen-627", "Gen-648", "Gen-657", "Gen-632", "Gen-686", "Gen-710", "Gen-618", "Gen-664", "Gen-684", "Check-5", "Gen-691", "Gen-673", "Gen-638", "Gen-635", "Gen-681", "Gen-690", "Gen-707", "Gen-644", "Gen-714", "Gen-645", "Gen-669", "Gen-667", "Check-2", "Gen-704", "Gen-639", "Gen-653", "Gen-660", "Gen-608", "Gen-723", "Gen-702", "Gen-699", "Gen-621", "Gen-682", "Gen-725", "Gen-631", "Gen-640", "Gen-724", "Gen-680", "Gen-643", "Gen-692", "Gen-661", "Check-3", "Gen-696", "Gen-676", "Gen-633", "Gen-607", "Gen-675", "Gen-649", "Gen-700", "Gen-703", "Gen-698", "Gen-687", "Gen-662", "Gen-719", "Check-2", "Gen-659"]
                 }
               ]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                }
+              },
+              "value": [
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["diagonal_arrangement"]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [26]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                }
+              ]
             }
           ]
         }
@@ -897,12 +993,12 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["infoDesign", "layoutRandom", "plotsNumber", "data_entry", "fieldBook"]
+              "value": ["infoDesign", "layoutRandom", "plotsNumber", "data_entry", "fieldBook", "metadata"]
             },
             "class": {
               "type": "character",
               "attributes": {},
-              "value": ["FielDHub"]
+              "value": ["fieldhub_diagonal_arrangement", "FielDHub"]
             }
           },
           "value": [
@@ -1170,6 +1266,38 @@
                   "value": ["Gen-10", "Gen-12", "Gen-36", "Gen-38", "Check-1", "Gen-40", "Gen-20", "Gen-44", "Gen-39", "Check-1", "Gen-7", "Gen-27", "Gen-16", "Gen-41", "Check-4", "Gen-43", "Gen-39", "Gen-22", "Gen-8", "Check-2", "Gen-42", "Gen-26", "Gen-40", "Gen-12", "Check-1", "Check-1", "Gen-37", "Gen-6", "Gen-11", "Gen-7", "Check-3", "Gen-14", "Gen-11", "Gen-40", "Gen-16", "Check-1", "Gen-26", "Gen-9", "Gen-11", "Gen-38", "Check-3", "Gen-5", "Gen-24", "Gen-30", "Gen-21", "Check-4", "Gen-35", "Gen-6", "Gen-36", "Gen-18", "Check-4", "Gen-30", "Gen-34", "Gen-42", "Gen-31", "Check-2", "Gen-25", "Gen-12", "Gen-8", "Gen-10", "Check-1", "Gen-22", "Gen-11", "Gen-23", "Gen-28", "Check-1", "Gen-19", "Gen-6", "Gen-9", "Gen-42", "Check-1", "Gen-31", "Gen-11", "Gen-15", "Gen-26", "Gen-38", "Gen-14", "Gen-28", "Gen-18", "Check-3", "Gen-27", "Gen-19", "Gen-26", "Gen-11", "Check-4", "Gen-44", "Gen-41", "Gen-20", "Gen-29", "Check-1", "Gen-38", "Gen-35", "Gen-26", "Gen-20", "Check-1", "Gen-20", "Gen-25", "Gen-15", "Gen-6", "Check-1", "Gen-22", "Check-2", "Gen-24", "Gen-28", "Gen-25", "Gen-13", "Check-1", "Gen-37", "Gen-29", "Gen-34", "Gen-39", "Check-1", "Gen-31", "Gen-27", "Gen-7", "Gen-32", "Check-2", "Gen-31", "Gen-36", "Gen-6", "Gen-10", "Check-1", "Gen-33", "Gen-25", "Gen-44", "Gen-16", "Gen-9", "Gen-21", "Check-4", "Gen-6", "Gen-32", "Gen-36", "Gen-16", "Check-1", "Gen-26", "Gen-18", "Gen-15", "Gen-21", "Check-4", "Gen-6", "Gen-11", "Gen-40", "Gen-14", "Check-4", "Gen-10", "Gen-8", "Gen-24", "Gen-27", "Check-2", "Gen-33", "Gen-42", "Gen-7", "Check-3", "Gen-29", "Gen-19", "Gen-15", "Gen-6", "Check-2", "Gen-44", "Gen-19", "Gen-5", "Gen-40", "Check-4", "Gen-37", "Gen-12", "Gen-33", "Gen-13", "Check-1", "Gen-18", "Gen-7", "Gen-44", "Gen-32", "Check-3", "Gen-24", "Gen-40", "Gen-23", "Gen-17", "Check-1", "Gen-8", "Gen-30", "Gen-17", "Gen-29", "Check-4", "Gen-31", "Gen-18", "Gen-30", "Gen-37", "Check-3", "Gen-5", "Gen-36", "Gen-15", "Gen-16", "Check-4", "Gen-22", "Gen-16", "Gen-30", "Gen-38", "Check-2", "Gen-5", "Gen-39", "Gen-5", "Gen-39", "Gen-20", "Check-2", "Gen-35", "Gen-34", "Gen-10", "Gen-5", "Check-4", "Gen-36", "Gen-19", "Gen-33", "Gen-17", "Check-1", "Gen-32", "Gen-21", "Gen-29", "Gen-42", "Check-1", "Gen-5", "Gen-5", "Gen-34", "Gen-36", "Check-4", "Gen-16", "Gen-31", "Check-2", "Gen-33", "Gen-36", "Gen-43", "Gen-41", "Check-4", "Gen-22", "Gen-28", "Gen-12", "Gen-10", "Check-3", "Gen-43", "Gen-43", "Gen-18", "Gen-17", "Check-2", "Gen-23", "Gen-15", "Gen-40", "Gen-28", "Check-3", "Gen-18", "Gen-20", "Gen-32", "Gen-40", "Gen-27", "Gen-33", "Gen-32", "Check-1", "Gen-39", "Gen-42", "Gen-25", "Gen-37", "Check-3", "Gen-35", "Gen-24", "Gen-10", "Gen-42", "Check-2", "Gen-10", "Gen-37", "Gen-32", "Gen-33", "Check-2", "Gen-12", "Gen-17", "Gen-23", "Gen-34", "Check-4", "Gen-41", "Gen-13", "Gen-20", "Gen-23", "Check-2", "Gen-31", "Gen-24", "Gen-38", "Gen-43", "Check-2", "Gen-13", "Gen-32", "Gen-13", "Gen-30", "Check-3", "Gen-41", "Gen-7", "Gen-27", "Gen-17", "Check-1", "Gen-19", "Gen-7", "Gen-21", "Gen-17", "Check-3", "Check-3", "Gen-11", "Gen-13", "Gen-26", "Gen-9", "Check-4", "Gen-21", "Gen-27", "Gen-15", "Gen-41", "Check-4", "Gen-8", "Gen-44", "Gen-21", "Gen-20", "Check-2", "Gen-9", "Gen-37", "Gen-12", "Gen-43", "Check-2", "Gen-21", "Gen-9", "Gen-27", "Gen-31", "Gen-29", "Gen-35", "Gen-40", "Check-4", "Gen-5", "Gen-28", "Gen-38", "Gen-7", "Check-2", "Gen-35", "Gen-36", "Gen-25", "Gen-26", "Check-2", "Gen-25", "Gen-36", "Gen-18", "Gen-25", "Check-3", "Gen-31", "Gen-41", "Gen-9", "Gen-38", "Check-3", "Gen-29", "Gen-43", "Check-4", "Gen-12", "Gen-14", "Gen-17", "Gen-43", "Check-3", "Gen-5", "Gen-17", "Gen-9", "Gen-28", "Check-2", "Gen-40", "Gen-19", "Gen-14", "Gen-30", "Check-3", "Gen-13", "Gen-26", "Gen-23", "Gen-43", "Check-4", "Gen-11", "Gen-41", "Gen-42", "Gen-19", "Gen-32", "Check-2", "Gen-39", "Gen-34", "Gen-8", "Gen-23", "Check-3", "Gen-33", "Gen-23", "Gen-29", "Gen-42", "Check-3", "Gen-9", "Gen-34", "Gen-27", "Gen-12", "Check-4", "Gen-44", "Gen-39", "Gen-14", "Gen-39", "Check-3", "Gen-19", "Gen-7", "Gen-25", "Gen-15", "Check-1", "Gen-22", "Gen-21", "Gen-30", "Gen-9", "Check-1", "Gen-22", "Gen-42", "Gen-23", "Gen-6", "Check-2", "Gen-24", "Gen-15", "Gen-44", "Gen-8", "Check-4", "Gen-24", "Gen-14", "Gen-29", "Gen-22", "Check-2", "Gen-22", "Gen-35", "Gen-26", "Check-3", "Gen-41", "Gen-24", "Gen-16", "Gen-7", "Check-3", "Gen-13", "Gen-30", "Gen-21", "Gen-12", "Check-2", "Gen-39", "Gen-31", "Gen-33", "Gen-25", "Check-4", "Gen-19", "Gen-41", "Gen-28", "Gen-13", "Check-4", "Gen-43", "Gen-28", "Gen-10", "Gen-8", "Gen-18", "Gen-15", "Check-3", "Gen-37", "Gen-35", "Gen-33", "Gen-24", "Check-2", "Gen-14", "Gen-14", "Gen-38", "Gen-16", "Check-3", "Gen-22", "Gen-28", "Gen-20", "Gen-29", "Check-3", "Gen-11", "Gen-23", "Gen-16", "Gen-8", "Check-2", "Gen-30", "Check-4", "Gen-44", "Gen-27", "Gen-44", "Gen-10", "Check-1", "Gen-18", "Gen-20", "Gen-6", "Gen-32", "Check-4", "Gen-34", "Gen-35", "Gen-17", "Gen-8", "Check-3", "Gen-34", "Gen-34", "Gen-38", "Gen-35", "Check-1", "Gen-37", "Gen-13", "Gen-14", "Gen-37"]
                 }
               ]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                }
+              },
+              "value": [
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["diagonal_arrangement"]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [27]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                }
+              ]
             }
           ]
         }
@@ -1194,12 +1322,12 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["infoDesign", "layoutRandom", "plotNumber", "binaryField", "dataEntry", "genEntries", "fieldBook"]
+              "value": ["infoDesign", "layoutRandom", "plotNumber", "binaryField", "dataEntry", "genEntries", "fieldBook", "metadata"]
             },
             "class": {
               "type": "character",
               "attributes": {},
-              "value": ["FielDHub"]
+              "value": ["fieldhub_optimized_arrangement", "FielDHub"]
             }
           },
           "value": [
@@ -1467,6 +1595,38 @@
                   "value": ["G18", "G88", "G33", "G87", "G99", "G84", "G22", "G28", "G92", "G82", "G94", "G101", "G31", "G86", "CH5", "G36", "G35", "CH3", "G79", "G39", "G80", "G6", "G38", "CH2", "G46", "G104", "CH2", "G57", "G100", "G56", "G48", "G23", "G75", "G11", "CH3", "G81", "G41", "G61", "G105", "G71", "CH1", "G67", "G69", "G9", "G60", "G58", "CH1", "G43", "G16", "CH4", "G44", "G95", "G50", "G8", "G13", "G77", "G40", "CH2", "G24", "G12", "CH4", "CH5", "G98", "G64", "G97", "G52", "G34", "G53", "CH2", "G70", "G14", "G96", "G59", "CH1", "G66", "CH4", "G45", "G83", "G62", "G85", "CH1", "G25", "G78", "G7", "G76", "G37", "G51", "G73", "G102", "G68", "G72", "G15", "G103", "G19", "G90", "G20", "G47", "G65", "G42", "G10", "G30", "G89", "G93", "G74", "CH3", "G26", "G91", "CH3", "G55", "G54", "CH5", "G17", "G49", "G29", "G63", "G27", "G32", "G21", "CH4", "CH5"]
                 }
               ]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                }
+              },
+              "value": [
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["optimized_arrangement"]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [28]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                }
+              ]
             }
           ]
         }
@@ -1491,12 +1651,12 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["infoDesign", "layoutRandom", "layout_random_sites", "layout_plots_sites", "plotNumber", "exptNames", "data_entry", "fieldBook"]
+              "value": ["infoDesign", "layoutRandom", "layout_random_sites", "layout_plots_sites", "plotNumber", "exptNames", "data_entry", "fieldBook", "metadata"]
             },
             "class": {
               "type": "character",
               "attributes": {},
-              "value": ["FielDHub"]
+              "value": ["fieldhub_rcbd_augmented", "FielDHub"]
             }
           },
           "value": [
@@ -2027,6 +2187,38 @@
                   "value": ["G44", "G43", "G19", "CH3", "G17", "CH1", "G42", "G36", "G32", "G34", "CH2", "G53", "G51", "G12", "G45", "CH2", "G41", "CH1", "G14", "G16", "G23", "G26", "CH3", "G40", "G27", "G9", "G49", "CH2", "CH3", "G7", "G52", "G33", "G30", "CH1", "G46", "G35", "G22", "G38", "G4", "G39", "CH1", "G18", "G20", "G11", "CH2", "G28", "G21", "G50", "G25", "CH3", "G13", "G31", "G37", "G29", "G47", "G8", "CH1", "G15", "CH3", "CH2", "G48", "G24", "G10", "G6", "G5"]
                 }
               ]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                }
+              },
+              "value": [
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["rcbd_augmented"]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [29]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                }
+              ]
             }
           ]
         }
@@ -2051,12 +2243,12 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["infoDesign", "layoutRandom", "layout_random_sites", "layout_plots_sites", "plotNumber", "exptNames", "data_entry", "fieldBook"]
+              "value": ["infoDesign", "layoutRandom", "layout_random_sites", "layout_plots_sites", "plotNumber", "exptNames", "data_entry", "fieldBook", "metadata"]
             },
             "class": {
               "type": "character",
               "attributes": {},
-              "value": ["FielDHub"]
+              "value": ["fieldhub_rcbd_augmented", "FielDHub"]
             }
           },
           "value": [
@@ -2827,6 +3019,38 @@
                   "value": ["G5", "G6", "G7", "G8", "G9", "G10", "CH2", "CH3", "G11", "G12", "G13", "CH1", "G14", "G15", "G16", "G17", "G18", "G19", "G20", "G21", "G22", "G23", "G24", "G25", "CH4", "G26", "G27", "G28", "G29", "G30", "G31", "G32", "G33", "G34", "CH3", "G35", "CH1", "G36", "G37", "G38", "G39", "G40", "G41", "CH2", "G42", "G43", "G44", "G45", "G46", "G47", "G48", "G49", "G50", "CH4", "G51", "G52", "G53", "G54", "G55", "G56", "G57", "G58", "G59", "G60", "G61", "G62", "G63", "G64", "CH1", "G65", "G66", "G67", "G68", "G69", "CH2", "G70", "G71", "G72", "G73", "G74", "CH3", "G75", "G76", "G77", "G78", "G79", "CH4", "CH2", "G80", "CH1", "G81", "G82", "G83", "G84", "G85", "G86", "G87", "G88", "G89", "CH3", "G90", "CH4", "G91", "G92", "G93", "G94", "G95", "G96", "G97", "G98", "G99", "G100", "G101", "G102", "G103", "G104", "Filler", "Filler", "Filler", "G105", "G106", "G107", "G108", "G109", "G110", "G111", "G112", "G113", "G114", "G115", "G116", "CH1", "G117", "G118", "G119", "CH3", "CH4", "G120", "G121", "G122", "G123", "G124", "G125", "CH2", "G126"]
                 }
               ]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                }
+              },
+              "value": [
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["rcbd_augmented"]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [30]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                }
+              ]
             }
           ]
         }
@@ -2851,12 +3075,12 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["infoDesign", "layoutRandom", "layout_random_sites", "layout_plots_sites", "plotNumber", "exptNames", "data_entry", "fieldBook"]
+              "value": ["infoDesign", "layoutRandom", "layout_random_sites", "layout_plots_sites", "plotNumber", "exptNames", "data_entry", "fieldBook", "metadata"]
             },
             "class": {
               "type": "character",
               "attributes": {},
-              "value": ["FielDHub"]
+              "value": ["fieldhub_rcbd_augmented", "FielDHub"]
             }
           },
           "value": [
@@ -3584,6 +3808,38 @@
                   "type": "character",
                   "attributes": {},
                   "value": ["G42", "G40", "G22", "CH4", "G25", "G5", "CH1", "G19", "CH3", "CH2", "G39", "G12", "G43", "G32", "G23", "CH1", "G28", "G8", "CH2", "G7", "CH4", "G41", "G26", "CH3", "G14", "G29", "G38", "G36", "G20", "G9", "G11", "CH1", "G35", "G17", "G34", "G18", "CH4", "G10", "CH3", "G16", "CH2", "G27", "G21", "G13", "CH4", "G33", "G44", "G31", "G37", "CH3", "G15", "G6", "CH2", "G30", "CH1", "G24", "CH1", "CH4", "G32", "CH2", "G9", "G39", "G8", "G10", "CH3", "G22", "G20", "G27", "G19", "G28", "G21", "G31", "G43", "G15", "G35", "G16", "CH3", "CH1", "CH2", "G33", "G24", "G14", "CH4", "G12", "G38", "CH4", "CH2", "CH3", "G29", "G26", "G37", "G42", "G13", "G36", "G6", "G23", "CH1", "G41", "G25", "G30", "G11", "CH1", "G44", "G34", "CH2", "G40", "CH3", "CH4", "G17", "G7", "G18", "G5"]
+                }
+              ]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                }
+              },
+              "value": [
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["rcbd_augmented"]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [31]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["Mersenne-Twister", "Inversion", "Rejection"]
                 }
               ]
             }

@@ -174,7 +174,7 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
                      Locations = locationNames, seed = seed, lambda = lambda, 
                      id_design = 8)
   output <- list(infoDesign = infoDesign, fieldBook = OutIBD_new, blocksModel = blocks_model[[1]])
-  class(output) <- "FielDHub"
+  output <- new_fieldhub_design(output, "incomplete_blocks")
   return(invisible(output))
 }
 

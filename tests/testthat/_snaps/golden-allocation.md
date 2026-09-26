@@ -16,12 +16,12 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["infoDesign", "min_pairwise_distance", "reps_info", "layoutRandom", "pairsDistance", "plotNumber", "binaryField", "fillerField", "dataEntry", "genEntries", "treatments_with_reps", "treatments_with_no_reps", "fieldBook"]
+              "value": ["infoDesign", "min_pairwise_distance", "reps_info", "layoutRandom", "pairsDistance", "plotNumber", "binaryField", "fillerField", "dataEntry", "genEntries", "treatments_with_reps", "treatments_with_no_reps", "fieldBook", "metadata"]
             },
             "class": {
               "type": "character",
               "attributes": {},
-              "value": ["FielDHub"]
+              "value": ["fieldhub_partially_replicated", "FielDHub"]
             }
           },
           "value": [
@@ -470,6 +470,38 @@
                   "value": ["G53", "G14", "G1", "G13", "G54", "G52", "G24", "G7", "G20", "G57", "G2", "G47", "G32", "G16", "G38", "G25", "G51", "G42", "G17", "G26", "G19", "G45", "G56", "G55", "G37", "G34", "G31", "G5", "G39", "G36", "G22", "G51", "G35", "G4", "G50", "G15", "G49", "G41", "G33", "G40", "G52", "G30", "G43", "G18", "G21", "G9", "G10", "G23", "G46", "G8", "G3", "G11", "G53", "G6", "G27", "G57", "G29", "G56", "G55", "G28", "G54", "G48", "G44", "G12"]
                 }
               ]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                }
+              },
+              "value": [
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["partially_replicated"]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [32]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                }
+              ]
             }
           ]
         }
@@ -494,12 +526,12 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["infoDesign", "min_pairwise_distance", "reps_info", "layoutRandom", "pairsDistance", "plotNumber", "binaryField", "fillerField", "dataEntry", "genEntries", "treatments_with_reps", "treatments_with_no_reps", "fieldBook"]
+              "value": ["infoDesign", "min_pairwise_distance", "reps_info", "layoutRandom", "pairsDistance", "plotNumber", "binaryField", "fillerField", "dataEntry", "genEntries", "treatments_with_reps", "treatments_with_no_reps", "fieldBook", "metadata"]
             },
             "class": {
               "type": "character",
               "attributes": {},
-              "value": ["FielDHub"]
+              "value": ["fieldhub_partially_replicated", "FielDHub"]
             }
           },
           "value": [
@@ -948,6 +980,38 @@
                   "value": ["G46", "G54", "G37", "G51", "G4", "G56", "G50", "G11", "G48", "G43", "G52", "G44", "G6", "G45", "G57", "G28", "G53", "G7", "G17", "G12", "G8", "G55", "G49", "G41", "G14", "G2", "G32", "G18", "G42", "G34", "G9", "G1", "G39", "G27", "G22", "G21", "G13", "G31", "G54", "G30", "G36", "G10", "G23", "G20", "G24", "G25", "G5", "G26", "G55", "G40", "G35", "G51", "G29", "G38", "G53", "G47", "G33", "G16", "G3", "G19", "G56", "G57", "G15", "G52", "Filler", "Filler", "Filler", "Filler", "Filler", "Filler", "Filler", "Filler"]
                 }
               ]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                }
+              },
+              "value": [
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["partially_replicated"]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [33]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                }
+              ]
             }
           ]
         }
@@ -972,12 +1036,12 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["infoDesign", "min_pairwise_distance", "reps_info", "layoutRandom", "pairsDistance", "plotNumber", "binaryField", "fillerField", "dataEntry", "genEntries", "treatments_with_reps", "treatments_with_no_reps", "fieldBook", "multi_location_data", "list_locs", "allocation", "size_locations"]
+              "value": ["infoDesign", "min_pairwise_distance", "reps_info", "layoutRandom", "pairsDistance", "plotNumber", "binaryField", "fillerField", "dataEntry", "genEntries", "treatments_with_reps", "treatments_with_no_reps", "fieldBook", "multi_location_data", "list_locs", "allocation", "size_locations", "metadata"]
             },
             "class": {
               "type": "character",
               "attributes": {},
-              "value": ["FielDHub"]
+              "value": ["fieldhub_multi_location_prep", "FielDHub"]
             }
           },
           "value": [
@@ -2089,6 +2153,38 @@
                 }
               },
               "value": [100, 100, 100, 100]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                }
+              },
+              "value": [
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["multi_location_prep"]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [34]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                }
+              ]
             }
           ]
         }
@@ -2113,12 +2209,12 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["infoDesign", "layoutRandom", "plotsNumber", "data_entry", "fieldBook", "list_locs", "allocation", "size_locations"]
+              "value": ["infoDesign", "layoutRandom", "plotsNumber", "data_entry", "fieldBook", "list_locs", "allocation", "size_locations", "metadata"]
             },
             "class": {
               "type": "character",
               "attributes": {},
-              "value": ["FielDHub"]
+              "value": ["fieldhub_sparse_allocation", "FielDHub"]
             }
           },
           "value": [
@@ -2862,6 +2958,38 @@
                 }
               },
               "value": [90, 90, 90, 90]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                }
+              },
+              "value": [
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["sparse_allocation"]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [35]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                }
+              ]
             }
           ]
         }
@@ -3435,12 +3563,12 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["rowsEachlist", "data_locations", "infoDesign"]
+              "value": ["rowsEachlist", "data_locations", "infoDesign", "metadata"]
             },
             "class": {
               "type": "character",
               "attributes": {},
-              "value": ["FielDHub"]
+              "value": ["fieldhub_split_families", "FielDHub"]
             }
           },
           "value": [
@@ -3532,6 +3660,36 @@
                   "type": "double",
                   "attributes": {},
                   "value": [17]
+                }
+              ]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                }
+              },
+              "value": [
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["split_families"]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1]
+                },
+                {
+                  "type": "NULL"
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["Mersenne-Twister", "Inversion", "Rejection"]
                 }
               ]
             }

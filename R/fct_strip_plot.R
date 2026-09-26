@@ -246,6 +246,6 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
                      nameLocations = locationNames, seed = seed, id_design = 7)
   output <- list(infoDesign = infoDesign, stripsBlockLoc = strips.b.loc,
                  plotLayouts = NEW_PLOTS, fieldBook = stripDesig_output)
-  class(output) <- "FielDHub"
+  output <- new_fieldhub_design(output, "strip_plot")
   return(invisible(output))
 }

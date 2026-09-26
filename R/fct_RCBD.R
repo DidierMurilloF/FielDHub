@@ -341,6 +341,6 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
                  layoutRandom = RCBD.layout.loc,
                  plotNumber = p.number.loc,
                  fieldBook = RCBD_output)
-  class(output) <- "FielDHub"
+  output <- new_fieldhub_design(output, "rcbd")
   return(invisible(output))
 }

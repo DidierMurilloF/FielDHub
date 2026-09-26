@@ -480,6 +480,6 @@ partially_replicated <- function(
         treatments_with_no_reps = treatments_with_no_reps,
         fieldBook = field_book_with_rep
     )
-    class(output) <- "FielDHub"
+    output <- new_fieldhub_design(output, "partially_replicated")
     return(invisible(output))
 }

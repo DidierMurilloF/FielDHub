@@ -134,6 +134,6 @@ square_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101
     fieldBook = OutSquare_Lattice, 
     blocksModel = blocksModel
   )
-  class(output) <- "FielDHub"
+  output <- new_fieldhub_design(output, "square_lattice")
   return(invisible(output))
 }
