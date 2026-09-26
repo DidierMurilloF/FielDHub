@@ -282,7 +282,7 @@ mod_FD_server <- function(id) {
         type_design <- 1
       } else type_design <- 2
       
-      full_factorial(
+      validate_design(full_factorial(
         reps = fd_inputs()$r, 
         l = fd_inputs()$sites, 
         type = type_design, 
@@ -291,7 +291,7 @@ mod_FD_server <- function(id) {
         seed = fd_inputs()$seed, 
         locationNames = fd_inputs()$site_names,
         data = get_data_factorial()$data_fd
-      ) 
+      )) 
       
     }) |> 
       bindEvent(input$RUN.fd)
@@ -452,12 +452,12 @@ mod_FD_server <- function(id) {
         min <- as.numeric(valsfd$minV.fd)
         df.fd <- reactive_layoutFD()$allSitesFieldbook
         cnamesdf.fd <- colnames(df.fd)
-        df.fd <- norm_trunc(
+        df.fd <- validate_design(norm_trunc(
           a = min, 
           b = max, 
           data = df.fd, 
           seed = fd_inputs()$seed
-        )
+        ))
         colnames(df.fd) <- c(cnamesdf.fd[1:(ncol(df.fd) - 1)], valsfd$trail.fd)
         a <- ncol(df.fd)
       } else {

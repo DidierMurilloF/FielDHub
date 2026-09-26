@@ -625,12 +625,12 @@ mod_RCBD_server <- function(id) {
         min <- as.numeric(valsRCBD$minV.rcbd)
         df.rcbd <- reactive_layoutRCBD()$allSitesFieldbook
         cnamesdf.rcbd <- colnames(df.rcbd)
-        df.rcbd <- norm_trunc(
+        df.rcbd <- validate_design(norm_trunc(
           a = min, 
           b = max, 
           data = df.rcbd, 
           seed = rcbd_inputs()$seed
-        )
+        ))
         colnames(df.rcbd) <- c(cnamesdf.rcbd[1:(ncol(df.rcbd) - 1)], 
                                valsRCBD$trail.rcbd)
         df.rcbd <- df.rcbd[order(df.rcbd$ID),]

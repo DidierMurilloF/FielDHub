@@ -303,7 +303,7 @@ mod_Square_Lattice_server <- function(id){
         return(NULL)
       }
       
-      square_lattice(
+      validate_design(square_lattice(
         t = square_inputs()$t, 
         k = square_inputs()$k, 
         r = square_inputs()$r, 
@@ -312,7 +312,7 @@ mod_Square_Lattice_server <- function(id){
         seed = square_inputs()$seed, 
         locationNames = square_inputs()$site_names, 
         data = data_square
-      ) 
+      )) 
       
     })
     
@@ -490,8 +490,8 @@ mod_Square_Lattice_server <- function(id){
         min <- as.numeric(valsSQUARE$minV.square)
         df.square <- reactive_layoutSquare()$allSitesFieldbook
         cnamesdf.square <- colnames(df.square)
-        df.square <- norm_trunc(a = min, b = max, data = df.square,
-                                seed = square_inputs()$seed)
+        df.square <- validate_design(norm_trunc(a = min, b = max, data = df.square,
+                                seed = square_inputs()$seed))
         colnames(df.square) <- c(cnamesdf.square[1:(ncol(df.square) - 1)], valsSQUARE$trail.square)
         a <- ncol(df.square)
       }else {

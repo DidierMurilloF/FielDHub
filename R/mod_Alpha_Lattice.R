@@ -293,7 +293,7 @@ mod_Alpha_Lattice_server <- function(id){
         return(NULL)
       }
       
-      alpha_lattice(
+      validate_design(alpha_lattice(
         t = alpha_inputs()$t, 
         k = alpha_inputs()$k, 
         r = alpha_inputs()$r, 
@@ -302,7 +302,7 @@ mod_Alpha_Lattice_server <- function(id){
         seed = alpha_inputs()$seed,
         locationNames = alpha_inputs()$site_names, 
         data = data_alpha
-      )
+      ))
     })
     
     output$summary_alpha_lattice <- renderPrint({
@@ -476,8 +476,8 @@ mod_Alpha_Lattice_server <- function(id){
         min <- as.numeric(valsALPHA$minV.alpha)
         df.alpha <- reactive_layoutAlpha()$allSitesFieldbook
         cnamesdf.alpha <- colnames(df.alpha)
-        df.alpha <- norm_trunc(a = min, b = max, data = df.alpha,
-                               seed = alpha_inputs()$seed)
+        df.alpha <- validate_design(norm_trunc(a = min, b = max, data = df.alpha,
+                               seed = alpha_inputs()$seed))
         colnames(df.alpha) <- c(cnamesdf.alpha[1:(ncol(df.alpha) - 1)], valsALPHA$trail.alpha)
         a <- ncol(df.alpha)
       }else {

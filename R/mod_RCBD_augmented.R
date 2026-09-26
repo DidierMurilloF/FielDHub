@@ -558,7 +558,7 @@ mod_RCBD_augmented_server <- function(id) {
       random <- input$random
       nrows <- field_dims_augmented()$d_row
       ncols <- field_dims_augmented()$d_col
-      ARCBD <- RCBD_augmented(
+      ARCBD <- validate_design(RCBD_augmented(
         lines = lines,
         checks = checks,
         b = b,
@@ -574,7 +574,7 @@ mod_RCBD_augmented_server <- function(id) {
         data = gen.list,
         nrows = nrows,
         ncols = ncols
-      )
+      ))
       return(ARCBD)
     }) |> 
       bindEvent(input$get_random_augmented)

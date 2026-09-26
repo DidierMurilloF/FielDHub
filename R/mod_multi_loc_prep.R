@@ -495,7 +495,7 @@ mod_multi_loc_preps_server <- function(id){
         add_checks <- FALSE
         if (input$include_checks == "Yes") add_checks <- TRUE
         withProgress(message = 'Optimization in progress ...', {
-            optim_out <- do_optim(
+            optim_out <- validate_design(do_optim(
                 design = "prep",
                 lines = input$gens_prep, 
                 l = locs, 
@@ -505,7 +505,7 @@ mod_multi_loc_preps_server <- function(id){
                 rep_checks = prep_inputs()$prep_checks,
                 seed = prep_inputs()$seed_number,
                 data = prep_data_input
-            )
+            ))
         })
         ### Do the merge with the user data ###
         if (input$multi_prep_data == "Yes") {
@@ -879,7 +879,7 @@ mod_multi_loc_preps_server <- function(id){
         expt_name <- prep_inputs()$expt_name
         locations_preps <- vector(mode = "list", length = locs_preps)
         withProgress(message = 'Running p-rep optimization ...', {
-            locations_preps <- partially_replicated(
+            locations_preps <- validate_design(partially_replicated(
                 nrows = nrows, 
                 ncols = ncols, 
                 l = locs_preps, 
@@ -893,7 +893,7 @@ mod_multi_loc_preps_server <- function(id){
                 border_penalization = 0.5, #input$border_penalization_prep,
                 data = entry_list,
                 allow_fillers = isTRUE(input$allow_fillers_prep)
-            )
+            ))
         })
         return(locations_preps)
     }) |> 

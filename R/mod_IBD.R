@@ -335,7 +335,7 @@ mod_IBD_server <- function(id) {
         return(NULL)
       }
       
-      incomplete_blocks(
+      validate_design(incomplete_blocks(
         t = ibd_inputs()$t, 
         k = ibd_inputs()$k, 
         r = ibd_inputs()$r, 
@@ -344,7 +344,7 @@ mod_IBD_server <- function(id) {
         seed = ibd_inputs()$seed,
         locationNames = ibd_inputs()$site_names, 
         data = data_ibd
-      ) 
+      )) 
       
     }) |>
       bindEvent(input$RUN.ibd)
@@ -523,8 +523,8 @@ mod_IBD_server <- function(id) {
         min <- as.numeric(valsIBD$minV.ibd)
         df.ibd <- reactive_layoutIBD()$allSitesFieldbook
         cnamesdf.ibd <- colnames(df.ibd)
-        df.ibd <- norm_trunc(a = min, b = max, data = df.ibd,
-                             seed = ibd_inputs()$seed)
+        df.ibd <- validate_design(norm_trunc(a = min, b = max, data = df.ibd,
+                             seed = ibd_inputs()$seed))
         colnames(df.ibd) <- c(cnamesdf.ibd[1:(ncol(df.ibd) - 1)], 
                               valsIBD$trail.ibd)
         a <- ncol(df.ibd)

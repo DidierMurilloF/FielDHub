@@ -305,7 +305,7 @@ mod_SSPD_server <- function(id){
       
       shinyjs::show(id = "downloadCsv.sspd")
       
-      split_split_plot(
+      validate_design(split_split_plot(
         wp = sspd_inputs()$wp, 
         sp = sspd_inputs()$sp, 
         ssp = sspd_inputs()$ssp, 
@@ -316,7 +316,7 @@ mod_SSPD_server <- function(id){
         type = sspd_inputs()$type_design, 
         locationNames = sspd_inputs()$site_names, 
         data = sspd_inputs()$data
-      )
+      ))
       
     }) |> 
       bindEvent(input$RUN.sspd)
@@ -477,12 +477,12 @@ mod_SSPD_server <- function(id){
         min <- as.numeric(valsspd$minV.sspd)
         df.sspd <- reactive_layoutSSPD()$allSitesFieldbook
         cnamesdf.sspd <- colnames(df.sspd)
-        df.sspd <- norm_trunc(
+        df.sspd <- validate_design(norm_trunc(
           a = min, 
           b = max, 
           data = df.sspd, 
           seed = sspd_inputs()$seed
-        )
+        ))
         colnames(df.sspd) <- c(cnamesdf.sspd[1:(ncol(df.sspd) - 1)], valsspd$Trial.sspd)
         df.sspd <- df.sspd[order(df.sspd$ID),]
       }else {

@@ -498,7 +498,7 @@ mod_pREPS_server <- function(id){
       movement_planter <- prep_inputs()$planter_mov
       expt_name <- prep_inputs()$expt_name
       withProgress(message = 'Running p-rep optimization ...', {
-          pREPS <- partially_replicated(
+          pREPS <- validate_design(partially_replicated(
             nrows = rep(nrows, locs_preps), 
             ncols = rep(ncols, locs_preps), 
             l = locs_preps, 
@@ -511,7 +511,7 @@ mod_pREPS_server <- function(id){
             dist_method = "euclidean", # input$optimization_distance_method,
             data = gen.list,
             allow_fillers = isTRUE(input$allow_fillers.preps)
-          )
+          ))
       })
     }) |> 
       bindEvent(input$get_random_prep)

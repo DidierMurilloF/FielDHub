@@ -273,7 +273,7 @@ mod_SPD_server <- function(id){
       
       shinyjs::show(id = "downloadCsv.spd")
       
-      split_plot(
+      validate_design(split_plot(
         wp = spd_inputs()$wp, 
         sp = spd_inputs()$sp, 
         reps = spd_inputs()$r, 
@@ -283,7 +283,7 @@ mod_SPD_server <- function(id){
         type = spd_inputs()$type_design, 
         locationNames = spd_inputs()$site_names, 
         data = spd_inputs()$data
-      )
+      ))
     }) |> 
       bindEvent(input$RUN.spd)
     
@@ -447,12 +447,12 @@ mod_SPD_server <- function(id){
         min <- as.numeric(valspd$minV.spd)
         df.spd <- reactive_layoutSPD()$allSitesFieldbook
         cnamesdf.spd <- colnames(df.spd)
-        df.spd <- norm_trunc(
+        df.spd <- validate_design(norm_trunc(
           a = min, 
           b = max, 
           data = df.spd, 
           seed = spd_inputs()$seed
-        )
+        ))
         colnames(df.spd) <- c(cnamesdf.spd[1:(ncol(df.spd) - 1)], valspd$trail.spd)
         df.spd <- df.spd[order(df.spd$ID),]
       }else {

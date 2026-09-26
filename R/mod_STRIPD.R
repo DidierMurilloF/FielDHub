@@ -297,7 +297,7 @@ mod_STRIPD_server <- function(id) {
       
       shinyjs::show(id = "downloadCsv.strip")
     
-      strip_plot(
+      validate_design(strip_plot(
         Hplots = strip_inputs()$Hplots,
         Vplots = strip_inputs()$Vplots,
         b = strip_inputs()$b, 
@@ -309,7 +309,7 @@ mod_STRIPD_server <- function(id) {
         randomizeH = input$randomizeH.strip,
         randomizeV = input$randomizeV.strip,
         data = strip_inputs()$data
-      )
+      ))
       
     }) |> 
       bindEvent(input$RUN.strip)
@@ -490,12 +490,12 @@ mod_STRIPD_server <- function(id) {
         min <- as.numeric(valsStrip$minV.strip)
         df.strip <- reactive_layoutSTRIP()$allSitesFieldbook
         cnamesdf.strip <- colnames(df.strip)
-        df.strip <- norm_trunc(
+        df.strip <- validate_design(norm_trunc(
           a = min, 
           b = max, 
           data = df.strip, 
           seed = strip_inputs()$seed
-         )
+         ))
         colnames(df.strip) <- c(cnamesdf.strip[1:(ncol(df.strip) - 1)], valsStrip$trail.strip)
         a <- ncol(df.strip)
       }else {

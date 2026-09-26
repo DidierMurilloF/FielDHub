@@ -277,7 +277,7 @@ mod_LSD_server <- function(id){
       
       shinyjs::show(id = "downloadCsv.lsd")
       
-      latin_square(
+      validate_design(latin_square(
         t = lsd_inputs()$t, 
         reps = lsd_inputs()$reps, 
         plotNumber = lsd_inputs()$plot_number,
@@ -285,7 +285,7 @@ mod_LSD_server <- function(id){
         seed = lsd_inputs()$seed, 
         locationNames = lsd_inputs()$location_names, 
         data = lsd_inputs()$data
-      )
+      ))
       
     }) |> 
       bindEvent(input$RUN.lsd)
@@ -447,12 +447,12 @@ mod_LSD_server <- function(id){
         min <- as.numeric(valsLSD$minV.lsd)
         df.lsd <- reactive_layoutLSD()$allSitesFieldbook
         cnamesdf.lsd <- colnames(df.lsd)
-        df.lsd <- norm_trunc(
+        df.lsd <- validate_design(norm_trunc(
           a = min, 
           b = max, 
           data = df.lsd, 
           seed = lsd_inputs()$seed
-        )
+        ))
         colnames(df.lsd) <- c(cnamesdf.lsd[1:(ncol(df.lsd) - 1)], 
                               valsLSD$trail.lsd)
         df.lsd <- df.lsd[order(df.lsd$ID),]

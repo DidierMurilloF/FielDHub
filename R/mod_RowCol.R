@@ -329,7 +329,7 @@ mod_RowCol_server <- function(id){
         return(NULL)
       }
 
-      row_column(
+      validate_design(row_column(
         t = rcd_inputs()$t, 
         nrows = rcd_inputs()$k, 
         r = rcd_inputs()$r, 
@@ -338,7 +338,7 @@ mod_RowCol_server <- function(id){
         seed = rcd_inputs()$seed,
         locationNames = rcd_inputs()$site_names, 
         data = data_rcd
-      )
+      ))
       
     }) |>
       bindEvent(input$RUN.rcd)
@@ -521,12 +521,12 @@ mod_RowCol_server <- function(id){
         min <- as.numeric(valsRowColD$minV.RowCol)
         df.RowCol <- reactive_layoutROWCOL()$allSitesFieldbook
         cnamesdf.RowCol <- colnames(df.RowCol)
-        df.RowCol <- norm_trunc(
+        df.RowCol <- validate_design(norm_trunc(
           a = min, 
           b = max, 
           data = df.RowCol, 
           seed = rcd_inputs()$seed
-        )
+        ))
         colnames(df.RowCol) <- c(cnamesdf.RowCol[1:(ncol(df.RowCol) - 1)], 
                                  valsRowColD$trail.RowCol)
         a <- ncol(df.RowCol)

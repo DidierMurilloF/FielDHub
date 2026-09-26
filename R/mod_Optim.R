@@ -485,7 +485,7 @@ mod_Optim_server <- function(id) {
       movement_planter <- optim_inputs()$planter_mov
       expt_name <- optim_inputs()$expt_name
 
-      optimized <- optimized_arrangement(
+      optimized <- validate_design(optimized_arrangement(
         nrows = nrows,
         ncols = ncols, 
         locationNames = site_names,
@@ -496,7 +496,7 @@ mod_Optim_server <- function(id) {
         spread_reps = TRUE,
         seed = seed.spatial, 
         data = data.spatial
-      )
+      ))
     })
 
     output$summary_optim <- renderPrint({

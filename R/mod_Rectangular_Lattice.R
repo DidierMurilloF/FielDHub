@@ -306,7 +306,7 @@ mod_Rectangular_Lattice_server <- function(id) {
       
       data <- get_data_rectangular()$data_rectangular
 
-      rectangular_lattice(
+      validate_design(rectangular_lattice(
         t = rectangular_inputs()$t, 
         k = rectangular_inputs()$k, 
         r = rectangular_inputs()$r, 
@@ -315,7 +315,7 @@ mod_Rectangular_Lattice_server <- function(id) {
         seed = rectangular_inputs()$seed, 
         locationNames = rectangular_inputs()$site_names, 
         data = data
-      ) 
+      )) 
     }) |>
       bindEvent(input$RUN.rectangular)
     
@@ -484,8 +484,8 @@ mod_Rectangular_Lattice_server <- function(id) {
         min <- as.numeric(valsRECT$minV.rectangular)
         df.rectangular <- reactive_layoutRect()$allSitesFieldbook
         cnamesdf.rectangular<- colnames(df.rectangular)
-        df.rectangular<- norm_trunc(a = min, b = max, data = df.rectangular,
-                                    seed = rectangular_inputs()$seed)
+        df.rectangular<- validate_design(norm_trunc(a = min, b = max, data = df.rectangular,
+                                    seed = rectangular_inputs()$seed))
         colnames(df.rectangular) <- c(cnamesdf.rectangular[1:(ncol(df.rectangular) - 1)], valsRECT$trail.rectangular)
         a <- ncol(df.rectangular)
       }else {

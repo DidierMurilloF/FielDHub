@@ -231,13 +231,13 @@ mod_CRD_server <- function(id) {
       
       shinyjs::show(id = "downloadCsv.crd")
       
-      my.design <- CRD(
+      my.design <- validate_design(CRD(
         reps = crd_inputs()$r, 
         plotNumber = crd_inputs()$plot_start, 
         seed = crd_inputs()$seed,
         locationName = crd_inputs()$site_names, 
         data = get_data_crd()$data_crd
-      )
+      ))
       
     }) |> 
       bindEvent(input$RUN.crd)
@@ -369,12 +369,12 @@ mod_CRD_server <- function(id) {
         min <- as.numeric(vals$minV.CRD)
         df.crd <- reactive_layoutCRD()$fieldBookXY
         cnamesdf.crd <- colnames(df.crd)
-        df.crd <- norm_trunc(
+        df.crd <- validate_design(norm_trunc(
           a = min, 
           b = max, 
           data = df.crd, 
           seed = crd_inputs()$seed
-        )
+        ))
         colnames(df.crd) <- c(cnamesdf.crd[1:(ncol(df.crd) - 1)], vals$trail.CRD)
         df.crd <- df.crd[order(df.crd$ID),]
       }else {
