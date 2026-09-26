@@ -10,7 +10,8 @@ CRD(
   plotNumber = 101,
   locationName = NULL,
   seed = NULL,
-  data = NULL
+  data = NULL,
+  locationNames = NULL
 )
 }
 \arguments{
@@ -20,11 +21,15 @@ CRD(
 
 \item{plotNumber}{Starting plot number. By default \code{plotNumber = 101}.}
 
-\item{locationName}{(optional) Name of the location.}
+\item{locationName}{Deprecated spelling of \code{locationNames}. Existing
+positional calls remain supported, with a deprecation warning.}
 
 \item{seed}{(optional) Real number that specifies the starting seed to obtain reproducible designs.}
 
 \item{data}{(optional) Data frame with the 2 columns with labels of each treatments and its number of replicates.}
+
+\item{locationNames}{(optional) Name of the single location. Supply only one
+of \code{locationNames} and \code{locationName}.}
 }
 \value{
 A list with two elements.
@@ -43,7 +48,7 @@ crd1 <- CRD(
   reps = 5,
   plotNumber = 101,
   seed = 1987,
-  locationName = "Fargo"
+  locationNames = "Fargo"
 )
 crd1$infoDesign
 head(crd1$fieldBook, 10)
@@ -55,7 +60,7 @@ crd2 <- CRD(
   reps = 6,
   plotNumber = 1001,
   seed = 1654,
-  locationName = "Fargo"
+  locationNames = "Fargo"
 )
 crd2$infoDesign
 head(crd2$fieldBook, 10)
@@ -70,7 +75,7 @@ crd3 <- CRD(
   reps = NULL,
   plotNumber = 2001,
   seed = 1655,
-  locationName = "Cali",
+  locationNames = "Cali",
   data = treatment_list
 )
 crd3$infoDesign

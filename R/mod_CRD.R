@@ -235,7 +235,7 @@ mod_CRD_server <- function(id) {
         reps = crd_inputs()$r, 
         plotNumber = crd_inputs()$plot_start, 
         seed = crd_inputs()$seed,
-        locationName = crd_inputs()$site_names, 
+        locationNames = crd_inputs()$site_names,
         data = get_data_crd()$data_crd
       ))
       

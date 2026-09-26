@@ -24,7 +24,7 @@
 #' @examples
 #' # Example 1: Generates a CRD design with 5 treatments and 5 reps each.
 #' crd1 <- CRD(t = 5, reps = 5, plotNumber = 101,
-#' seed = 1985, locationName = "Fargo")
+#' seed = 1985, locationNames = "Fargo")
 #' crd1$infoDesign
 #' print(crd1)
 #'
@@ -58,7 +58,7 @@ print.FielDHub <- function(x, n=10, ...){
 #' @examples
 #' # Example 1: Generates a CRD design with 5 treatments and 5 reps each.
 #' crd1 <- CRD(t = 5, reps = 5, plotNumber = 101,
-#' seed = 1985, locationName = "Fargo")
+#' seed = 1985, locationNames = "Fargo")
 #' crd1$infoDesign
 #' summary(crd1)
 #'

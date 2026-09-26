@@ -5,7 +5,10 @@
 #' @param t An integer number with total number of treatments or a vector of dimension t with labels.
 #' @param reps Number of replicates of each treatment.
 #' @param plotNumber Starting plot number. By default \code{plotNumber = 101}.
-#' @param locationName (optional) Name of the location.
+#' @param locationName Deprecated spelling of \code{locationNames}. Existing
+#'   positional calls remain supported, with a deprecation warning.
+#' @param locationNames (optional) Name of the single location. Supply only one
+#'   of \code{locationNames} and \code{locationName}.
 #' @param seed (optional) Real number that specifies the starting seed to obtain reproducible designs.
 #' @param data (optional) Data frame with the 2 columns with labels of each treatments and its number of replicates.
 #'
@@ -36,7 +39,7 @@
 #'   reps = 5,
 #'   plotNumber = 101,
 #'   seed = 1987,
-#'   locationName = "Fargo"
+#'   locationNames = "Fargo"
 #' )
 #' crd1$infoDesign
 #' head(crd1$fieldBook, 10)
@@ -48,7 +51,7 @@
 #'   reps = 6,
 #'   plotNumber = 1001,
 #'   seed = 1654,
-#'   locationName = "Fargo"
+#'   locationNames = "Fargo"
 #' )
 #' crd2$infoDesign
 #' head(crd2$fieldBook, 10)
@@ -63,7 +66,7 @@
 #'   reps = NULL,
 #'   plotNumber = 2001,
 #'   seed = 1655,
-#'   locationName = "Cali",
+#'   locationNames = "Cali",
 #'   data = treatment_list
 #' )
 #' crd3$infoDesign
@@ -71,7 +74,11 @@
 #'
 #' @export
 CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL,
-                seed = NULL, data = NULL) {
+                seed = NULL, data = NULL, locationNames = NULL) {
+  locationName <- resolve_argument_alias(
+    locationNames, locationName, new = "locationNames", old = "locationName",
+    new_supplied = !missing(locationNames), old_supplied = !missing(locationName)
+  )
   seed <- resolve_seed(seed)
   local_design_seed(seed)
   if (!is.null(plotNumber)) {

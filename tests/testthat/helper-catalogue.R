@@ -9,7 +9,7 @@
 catalogue <- list(
   # Classic designs ----------------------------------------------------------
   CRD_count = list(fun = "CRD", family = "classic", build = function() {
-    CRD(t = 5, reps = 3, plotNumber = 101, locationName = "FARGO", seed = 1)
+    CRD(t = 5, reps = 3, plotNumber = 101, locationNames = "FARGO", seed = 1)
   }),
   CRD_labels = list(fun = "CRD", family = "classic", build = function() {
     CRD(t = c("A", "B", "C", "D"), reps = 2, seed = 2)

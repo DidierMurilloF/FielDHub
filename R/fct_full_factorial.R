@@ -154,7 +154,7 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
   for (locs in 1:l) {
     if (type == 1) {
       m1 <- CRD(t = trt, reps = reps, plotNumber = plotNumber[locs], # seed = seed,
-                data = NULL, locationName = locationNames[1])$fieldBook
+                data = NULL, locationNames = locationNames[1])$fieldBook
       m1 <- m1[,-c(1,2)]
       kind <- "CRD"
     }else {

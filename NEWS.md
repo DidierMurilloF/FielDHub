@@ -7,6 +7,12 @@
 
 ### Breaking changes:
 
+- `CRD()` now accepts `locationNames`, matching the other design functions.
+  The old `locationName` argument still works, including positional calls,
+  but signals a `fieldhub_deprecated_warning`. Supplying both spellings is
+  an error. Design output and the saved `infoDesign$locationName` field are
+  unchanged.
+
 - The design functions now signal their errors as R conditions of class
   `fieldhub_error`, with the more specific class `fieldhub_input_error` for
   invalid arguments or `fieldhub_dimension_error` for field dimensions that do
