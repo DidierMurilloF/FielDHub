@@ -148,13 +148,13 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
   if (is.null(seed) || !is.numeric(seed)) seed <- runif(1, min = -50000, max = 50000)
   set.seed(seed)
   if (is.null(l) || !is.numeric(l) || l %% 1 != 0) {
-    shiny::validate("'RCBD()' requires that locations number to be an integer greater than 0.")
+    fieldhub_abort("'RCBD()' requires that locations number to be an integer greater than 0.")
   }
   b <- reps
   if (!is.null(plotNumber) && length(plotNumber) == l) {
     if (any(!is.numeric(plotNumber)) || any(plotNumber < 1) || any(plotNumber %% 1 != 0) ||
         any(diff(plotNumber) < 0)) {
-      shiny::validate("Input plotNumber must be an integer greater than 0 and sorted.")
+      fieldhub_abort("Input plotNumber must be an integer greater than 0 and sorted.")
     } 
   }else {
     default_plots <- seq(1001, 1000*(l+1), 1000)
@@ -170,7 +170,7 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
   # below. For valid input (a whole number >= 2) this changes nothing.
   if (is.null(reps) || !is.numeric(reps) || length(reps) != 1 || is.na(reps) ||
       reps %% 1 != 0 || reps < 2) {
-    shiny::validate("RCBD() requires 'reps' to be a single whole number of 2 or more.")
+    fieldhub_abort("RCBD() requires 'reps' to be a single whole number of 2 or more.")
   }
   entries <- NULL
   if (has_checks) {
@@ -186,7 +186,7 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
       if(length(t) == 1 & is.numeric(t)) {
         arg2 <- c(t, b)
         if (base::any(arg2 %% 1 != 0) || base::any(arg2 < 2)) {
-          shiny::validate("RCBD() requires input t and b to be integer > 1.")
+          fieldhub_abort("RCBD() requires input t and b to be integer > 1.")
         }
         nt <- t
         mytreatments <- paste(rep("T", each = nt), 1:nt, sep = "")
@@ -200,7 +200,7 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
         s <- t
         mytreatments <- t
       }else if(is.character(t) & length(t) == 1) {
-        shiny::validate("'RCBD()' requires more than one treatment.")
+        fieldhub_abort("'RCBD()' requires more than one treatment.")
       }
     }else {
       stop("Input t and b are missing.")

@@ -300,41 +300,16 @@ diagonal_arrangement <- function(
             }
             
             choices <- unlist(choices_list[!sapply(choices_list, is.null)])
-            
-            width  <- 55
-            border <- paste(rep("=", width), collapse = "")
-            thin   <- paste(rep("-", width), collapse = "")
-            
-            cat("\n")
-            cat(border, "\n")
-            cat("  ERROR: diagonal_arrangement()\n")
-            cat(thin, "\n")
-            cat("  Field dimensions do not match the data entered.\n")
-            cat("  Total entries (lines + checks):", total_entries, "\n")
-            cat("  Field size provided:", nrows, "x", ncols, "=", nrows * ncols, "plots\n")
-            cat("  Searched plot range:", t1, "to", t2, "\n")
-            cat(thin, "\n")
-            
-            if (!is.null(choices) && length(choices) > 0) {
-              dims <- do.call(rbind, lapply(choices, function(x) {
-                parts <- as.integer(trimws(strsplit(x, "x")[[1]]))
-                data.frame(rows = parts[1], cols = parts[2])
-              }))
-              dims <- dims[order(dims$rows), ]
-              dims <- unique(dims)
-              cat("  Valid dimension options (sorted by rows):\n\n")
-              for (i in seq_len(nrow(dims))) {
-                cat(sprintf("   [%2d ]  %4d rows  x  %4d cols\n", i, dims$rows[i], dims$cols[i]))
-              }
-            } else {
-              cat("  No valid rectangular dimensions exist in range", t1, "to", t2, "\n")
-              cat("  Reason: all values in range are prime numbers.\n")
-              cat("  Suggestion: adjust lines or checks so total plots\n")
-              cat("  has more than 2 factors.\n")
-            }
-            
-            cat(border, "\n\n")
-            return(invisible(NULL))
+            dims <- dimension_options(choices)
+            stop_dimensions(
+                paste0("diagonal_arrangement(): the field dimensions do not match the entries. ",
+                       "Total entries (lines + checks): ", total_entries, "; field size given: ",
+                       nrows, " x ", ncols, " = ", nrows * ncols, " plots."),
+                options = dims,
+                labels = if (!is.null(dims)) paste(dims$rows, "x", dims$cols),
+                no_options = paste0("No rectangular field exists between ", t1, " and ", t2,
+                                    " plots: all those numbers are prime.")
+            )
         }
         new_lines <- nrow(getData$data_entry[[sites]]) - checks
         infoP <- as.data.frame(checks_percentages$P)
@@ -433,13 +408,17 @@ diagonal_arrangement <- function(
                     stacked = "By Row", 
                     dim_data = data_dim_each_block
                 )[[1]]
-                if (is.null(my_row_sets)) return(NULL)
+                if (is.null(my_row_sets)) {
+                    stop_dimensions("diagonal_arrangement(): the blocks do not fit the rows of the field.")
+                }
                 n_blocks <- length(my_row_sets)
             } else if (kindExpt == "DBUDC" && stacked == "By Column") {
                 data_dim_each_block <- checks_percentages$data_dim_each_block
                 cuts_by_c <- automatically_cuts(data = map_checks, planter_mov = planter, stacked = "By Column",
                                                 dim_data = data_dim_each_block)
-                if (is.null(cuts_by_c)) return(NULL)
+                if (is.null(cuts_by_c)) {
+                    stop_dimensions("diagonal_arrangement(): the blocks do not fit the columns of the field.")
+                }
                 n_blocks <- length(cuts_by_c)
                 m = diff(cuts_by_c)
                 my_col_sets = c(cuts_by_c[1], m)

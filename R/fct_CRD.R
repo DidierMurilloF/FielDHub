@@ -75,7 +75,7 @@ CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL,
   if (is.null(seed) || is.character(seed) || is.factor(seed)) seed <- runif(1, min = -50000, max = 50000)
   set.seed(seed)
   if (!is.null(plotNumber)) {
-    if (plotNumber < 1 || plotNumber %% 1 != 0) shiny::validate("plotNumber must be an integer greater than 0.")
+    if (plotNumber < 1 || plotNumber %% 1 != 0) fieldhub_abort("plotNumber must be an integer greater than 0.")
   } else {
     plotNumber <- 101
     warning("Since plotNumber was NULL, default 'plotNumber = 101' is considered.")
@@ -86,7 +86,7 @@ CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL,
       if (length(t) == 1 & is.numeric(t)) {
         arg2 <- c(t, reps)
         if (base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
-          shiny::validate("CRD() requires that t and reps are integers greater than 0.")
+          fieldhub_abort("CRD() requires that t and reps are integers greater than 0.")
         }
         nt <- t
         trts <- paste(rep("T", nt), 1:nt, sep = "")
@@ -97,7 +97,7 @@ CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL,
         nt <- length(t)
         TRT <- rep(t, each = reps)
       } else if ((is.character(t) || is.factor(t)) && length(t) == 1) {
-        shiny::validate('"CRD()" requires more than one treatment.')
+        fieldhub_abort('"CRD()" requires more than one treatment.')
       }
     } else {
       stop("Inputs t and reps are missing.")
@@ -106,11 +106,11 @@ CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL,
     REP <- rep(1:reps, times = nt)
   } else {
     if (!is.data.frame(data)) stop("Data must be a data frame.")
-    if (ncol(data) < 2) validate("Data input needs at least two columns with the names: Treatment and Reps.")
+    if (ncol(data) < 2) fieldhub_abort("Data input needs at least two columns with the names: Treatment and Reps.")
     data <- as.data.frame(data[, 1:2])
     data <- na.omit(data)
     colnames(data) <- c("Treatment", "Reps")
-    if (is.character(data[, 2]) || is.factor(data[, 2])) validate("Reps must be numeric.")
+    if (is.character(data[, 2]) || is.factor(data[, 2])) fieldhub_abort("Reps must be numeric.")
     data$Reps <- as.numeric(data$Reps)
     TRT <- rep(data$Treatment, times = data$Reps)
     N <- sum(data$Reps)

@@ -84,7 +84,7 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
   if (!is.null(plotNumber) && length(plotNumber) == l) {
     if (any(!is.numeric(plotNumber)) || any(plotNumber < 1) || any(plotNumber %% 1 != 0) ||
         any(diff(plotNumber) < 0)) {
-      shiny::validate("The input plotNumber must be an integer greater than 0 and sorted.")
+      fieldhub_abort("The input plotNumber must be an integer greater than 0 and sorted.")
     }
   }else {
     default_plots <- seq(1001, 1000*(l+1), 1000)

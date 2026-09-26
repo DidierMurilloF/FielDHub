@@ -196,42 +196,18 @@ optimized_arrangement <- function(
         } else base::stop('"optimized_arrangement()" requires inputs checks and amountChecks to be possitive integers and distinct of NULL.')
         
         t_plots <- as.numeric(sum(RepChecks) + lines)
-        width  <- 55
-        border <- paste(rep("=", width), collapse = "")
-        thin   <- paste(rep("-", width), collapse = "")
-        
         if (numbers::isPrime(t_plots) || t_plots != (nrows * ncols)) {
             choices <- if (!numbers::isPrime(t_plots)) factor_subsets(t_plots)$labels else NULL
-            
-            cat("\n")
-            cat(border, "\n")
-            cat("  ERROR: optimized_arrangement()\n")
-            cat(thin, "\n")
-            cat("  Field dimensions do not match the data entered.\n")
-            cat("  Total plots in data:", t_plots, "\n")
-            cat("  Field size provided:", nrows, "x", ncols, "=", nrows * ncols, "plots\n")
-            cat(thin, "\n")
-            
-            if (!is.null(choices) && length(choices) > 0) {
-                dims <- do.call(rbind, lapply(choices, function(x) {
-                    parts <- as.integer(trimws(strsplit(x, "x")[[1]]))
-                    data.frame(rows = parts[1], cols = parts[2])
-                }))
-                dims <- dims[order(dims$rows), ]
-                dims <- unique(dims)
-                cat("  Valid dimension options (sorted by rows):\n\n")
-                for (i in seq_len(nrow(dims))) {
-                    cat(sprintf("   [%2d ]  %4d rows  x  %4d cols\n", i, dims$rows[i], dims$cols[i]))
-                }
-            } else {
-                cat("  No valid rectangular dimensions exist for", t_plots, "plots.\n")
-                cat("  Reason: total plots is a prime number.\n")
-                cat("  Suggestion: adjust treatments or replication levels\n")
-                cat("  so that total plots has more than 2 factors.\n")
-            }
-            
-            cat(border, "\n\n")
-            return(invisible(NULL))
+            dims <- dimension_options(choices)
+            stop_dimensions(
+                paste0("optimized_arrangement(): the field dimensions do not match the entries. ",
+                       "Total plots in the data: ", t_plots, "; field size given: ",
+                       nrows, " x ", ncols, " = ", nrows * ncols, " plots."),
+                options = dims,
+                labels = if (!is.null(dims)) paste(dims$rows, "x", dims$cols),
+                no_options = paste0("No rectangular field has ", t_plots,
+                                    " plots: it is a prime number.")
+            )
         }
         
         NAME <- c(paste(rep("CH", checks), 1:checks, sep = ""),
@@ -277,10 +253,14 @@ optimized_arrangement <- function(
         if (t_plots != (nrows * ncols)) {
             choices <- factor_subsets(t_plots)$labels
             if (!is.null(choices)) {
-                message(cat("\n", "Error in optimized_arrangement(): ", "\n", "\n",
-                "Field dimensions do not fit with the data entered!", "\n",
-                "Try one of the following options: ", "\n"))
-                return(for (i in 1:length(choices)) {print(choices[[i]])})
+                dims <- dimension_options(choices)
+                stop_dimensions(
+                    paste0("optimized_arrangement(): the field dimensions do not match the entries. ",
+                           "Total plots in the data: ", t_plots, "; field size given: ",
+                           nrows, " x ", ncols, " = ", nrows * ncols, " plots."),
+                    options = dims,
+                    labels = paste(dims$rows, "x", dims$cols)
+                )
             } else {
                 stop("Field dimensions do not fit with the data entered. Try another amount of treatments!", call. = FALSE)
             }

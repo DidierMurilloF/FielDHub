@@ -141,7 +141,7 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
   if (!is.null(plotNumber) && length(plotNumber) == l) {
     if (any(!is.numeric(plotNumber)) || any(plotNumber < 1) || any(plotNumber %% 1 != 0) ||
         any(diff(plotNumber) < 0)) {
-      shiny::validate("Input plotNumber must be an integer greater than 0, and sorted.")
+      fieldhub_abort("Input plotNumber must be an integer greater than 0, and sorted.")
     } 
   }else {
     default_plots <- seq(1001, 1000*(l+1), 1000)

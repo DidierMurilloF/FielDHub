@@ -3,7 +3,7 @@ automatically_cuts <- function(
     planter_mov = "serpentine",
     stacked = "By Row", 
     dim_data = NULL) {
-    req(data)
+    if (is.null(data)) stop("Internal error: the checks map is missing.")
     w_map <- data
     auto_cuts_by_r <- numeric()
     data_dim_each_block <- dim_data

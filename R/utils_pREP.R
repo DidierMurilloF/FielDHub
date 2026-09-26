@@ -136,44 +136,16 @@ pREP <- function(
         total_checks <- sum(freq_reps * nREPS)
         if (sum(total_plots) != (nrows * ncols - Fillers)) {
           choices <- factor_subsets(n = total_plots)$labels
-          width <- 55
-          border <- paste(rep("=", width), collapse = "")
-          thin   <- paste(rep("-", width), collapse = "")
-          
-          cat("\n")
-          cat(border, "\n")
-          cat("  ERROR: partially_replicated()\n")
-          cat(thin, "\n")
-          cat("  Field dimensions do not match the data entered.\n")
-          cat("  Total plots in data:", total_plots, "\n")
-          cat("  Field size provided:", nrows, "x", ncols, "=", nrows * ncols, "plots\n")
-          cat(thin, "\n")
-          
-          if (!is.null(choices)) {
-            # Parse choices into a data frame
-            dims <- do.call(rbind, lapply(choices, function(x) {
-              parts <- as.integer(trimws(strsplit(x, "x")[[1]]))
-              data.frame(rows = parts[1], cols = parts[2])
-            }))
-            
-            # Sort by number of rows ascending
-            dims <- dims[order(dims$rows), ]
-            # Remove duplicates (e.g. 7x72 and 72x7 kept as separate entries)
-            dims <- unique(dims)
-            
-            cat("  Valid dimension options (sorted by rows):\n\n")
-            for (i in seq_len(nrow(dims))) {
-              cat(sprintf("   [%2d ]  %4d rows  x  %4d cols\n", i, dims$rows[i], dims$cols[i]))
-            }
-          } else {
-            cat("  No valid rectangular dimensions exist for", total_plots, "plots.\n")
-            cat("  Reason: total plots is a prime number.\n")
-            cat("  Suggestion: adjust lines, checks, or replication levels\n")
-            cat("  so that total plots has more than 2 factors.\n")
-          }
-          
-          cat(border, "\n\n")
-          return(invisible(NULL))
+          dims <- dimension_options(choices)
+          stop_dimensions(
+            paste0("partially_replicated(): the field dimensions do not match the entries. ",
+                   "Total plots in the data: ", total_plots, "; field size given: ",
+                   nrows, " x ", ncols, " = ", nrows * ncols, " plots."),
+            options = dims,
+            labels = if (!is.null(dims)) paste(dims$rows, "x", dims$cols),
+            no_options = paste0("No rectangular field has ", total_plots,
+                                " plots: it is a prime number.")
+          )
         }
     }
     active_field <- prep_field_mask(

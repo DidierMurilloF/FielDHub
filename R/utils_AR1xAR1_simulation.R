@@ -91,7 +91,7 @@ ZST <- function(n,m,RHOX,RHOY,s20) {
 #' @importFrom stats pnorm qnorm
 norm_trunc <- function(a = NULL, b = NULL, data = NULL, seed = NULL) {
   if (!is.null(seed)) set.seed(seed)
-  if (a == b) validate('Error: Truncation range values (a, b) is empty.')
+  if (a == b) fieldhub_abort('The range of simulated values (a, b) is empty.')
   min <- a;max <- b
   Nc <- ncol(data)
   trt.f <- factor(data[,Nc]) 

@@ -221,13 +221,12 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
       blocks_dims <- set_blocks$blocks_dims
       colnames(blocks_dims) <- c("BLOCKS", "DIMENSIONS")
       feedback <- as.data.frame(blocks_dims)
-      
-      message(cat(
-        "\n", "Error in RCBD_augmented(): ", "\n", "\n",
-        "Field dimensions do not fit with the data entered!", "\n",
-        "Try one of the following options: ", "\n"
-      ))
-      return(print(feedback))
+      stop_dimensions(
+        paste0("RCBD_augmented(): the field dimensions do not fit ", b, " blocks. ",
+               "Field size given: ", nrows, " x ", ncols, "."),
+        options = feedback,
+        labels = paste0(feedback$BLOCKS, " blocks: ", feedback$DIMENSIONS)
+      )
     }
     
     nrows_within_block <- inferred$rows_within_block
@@ -257,47 +256,28 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
   colnames(blocks_dims) <- c("BLOCKS", "DIMENSIONS")
   feedback <- as.data.frame(blocks_dims)
   
-  width  <- 55
-  border <- paste(rep("=", width), collapse = "")
-  thin   <- paste(rep("-", width), collapse = "")
-  
+  feedback_labels <- paste0(feedback$BLOCKS, " blocks: ", feedback$DIMENSIONS)
   # Check if b is less than the minimum valid number of blocks
   if (b < min(blocks_arcbd)) {
-    cat("\n")
-    cat(border, "\n")
-    cat("  ERROR: RCBD_augmented()\n")
-    cat(thin, "\n")
-    cat("  The number of blocks requested is too small.\n")
-    cat("  Blocks requested:", b, "\n")
-    cat("  Minimum blocks allowed:", min(blocks_arcbd), "\n")
-    cat("  Maximum blocks allowed:", max(blocks_arcbd), "\n")
-    cat(thin, "\n")
-    cat("  Valid dimension options:\n\n")
-    for (i in seq_len(nrow(feedback))) {
-      cat(sprintf("   [%2d ]  %s blocks :  %s\n", i, feedback[i, 1], feedback[i, 2]))
-    }
-    cat(border, "\n\n")
-    return(invisible(NULL))
+    stop_dimensions(
+      paste0("RCBD_augmented(): the number of blocks is too small. Blocks requested: ", b,
+             "; allowed: ", min(blocks_arcbd), " to ", max(blocks_arcbd), "."),
+      options = feedback,
+      labels = feedback_labels
+    )
   }
   
   set_dims <- paste(field_rows, field_cols, sep = " x ")
   inputs_subset <- subset(feedback, feedback[, 1] == b & feedback[, 2] == set_dims)
   
   if (nrow(inputs_subset) == 0) {
-    cat("\n")
-    cat(border, "\n")
-    cat("  ERROR: RCBD_augmented()\n")
-    cat(thin, "\n")
-    cat("  Field dimensions do not match the data entered.\n")
-    cat("  Total plots in data:", lines + checks * b, "\n")
-    cat("  Field size provided:", field_rows, "x", field_cols, "=", field_rows * field_cols, "plots\n")
-    cat(thin, "\n")
-    cat("  Valid dimension options:\n\n")
-    for (i in seq_len(nrow(feedback))) {
-      cat(sprintf("   [%2d ]  %s blocks :  %s\n", i, feedback[i, 1], feedback[i, 2]))
-    }
-    cat(border, "\n\n")
-    return(invisible(NULL))
+    stop_dimensions(
+      paste0("RCBD_augmented(): the field dimensions do not match the entries. ",
+             "Total plots in the data: ", lines + checks * b, "; field size given: ",
+             field_rows, " x ", field_cols, " = ", field_rows * field_cols, " plots."),
+      options = feedback,
+      labels = feedback_labels
+    )
   }
   
   loc <- 1:l

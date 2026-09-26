@@ -5,6 +5,21 @@
 
 # FielDHub (development version)
 
+### Breaking changes:
+
+- The design functions now signal their errors as R conditions of class
+  `fieldhub_error`, with the more specific class `fieldhub_input_error` for
+  invalid arguments or `fieldhub_dimension_error` for field dimensions that do
+  not fit the entries, so scripts can catch them with `tryCatch()`. They no
+  longer raise Shiny validation errors or print to the console. When the field
+  dimensions do not fit, `diagonal_arrangement()`, `optimized_arrangement()`,
+  `partially_replicated()`, `multi_location_prep()` and `RCBD_augmented()`
+  used to print a message and return `NULL` (or, for `RCBD_augmented()`, a
+  data frame of options); they now raise a `fieldhub_dimension_error` whose
+  `options` field holds the valid dimensions. `plot()` raises an error,
+  instead of drawing an empty plot, when the layout or location requested is
+  not available. The Shiny app shows these errors as before.
+
 ### New features:
 
 - `diagonal_arrangement()` gains `checksPercent`, to choose the percentage of

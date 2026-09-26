@@ -82,16 +82,16 @@ alpha_lattice <- function(t = NULL,
   lookup <- FALSE
   if(is.null(data)) {
     if (is.null(t) || is.null(k) || is.null(r) || is.null(l)) {
-      shiny::validate('Basic design parameters missing (t, k, r or l).')
+      fieldhub_abort('Basic design parameters missing (t, k, r or l).')
     }
     arg1 <- list(k, r, l);arg2 <- c(k, r, l)
     if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
-      shiny::validate('incomplete_blocks() requires k, r and l to be possitive integers.')
+      fieldhub_abort('incomplete_blocks() requires k, r and l to be possitive integers.')
     }
     if (is.numeric(t)) {
       if (length(t) == 1) {
         if (t == 1 || t < 1) {
-          shiny::validate('incomplete_blocks() requires more than one treatment.')
+          fieldhub_abort('incomplete_blocks() requires more than one treatment.')
         } 
         nt <- t
       }else if ((length(t) > 1)) {
@@ -100,7 +100,7 @@ alpha_lattice <- function(t = NULL,
       }
     }else if (is.character(t) || is.factor(t)) {
       if (length(t) == 1) {
-        shiny::validate('incomplete_blocks() requires more than one treatment.')
+        fieldhub_abort('incomplete_blocks() requires more than one treatment.')
       } 
       nt <- length(t)
     }else if ((length(t) > 1)) {
@@ -111,9 +111,9 @@ alpha_lattice <- function(t = NULL,
     data_alpha <- df
   } else if (!is.null(data)) {
     if (is.null(t) || is.null(r) || is.null(k) || is.null(l)) {
-      shiny::validate('Basic design parameters missing (t, k, r or l).')
+      fieldhub_abort('Basic design parameters missing (t, k, r or l).')
     }
-    if(!is.data.frame(data)) shiny::validate("Data must be a data frame.")
+    if(!is.data.frame(data)) fieldhub_abort("Data must be a data frame.")
     if (ncol(data) < 2) base::stop("Data input needs at least two columns with: ENTRY and NAME.")
     data_up <- as.data.frame(data[,c(1,2)])
     data_up <- na.omit(data_up)
@@ -123,18 +123,18 @@ alpha_lattice <- function(t = NULL,
     if (t != new_t) base::stop("Number of treatments do not match with data input.")
     TRT <- data_up$TREATMENT
     nt <- length(TRT)
-    if (nt != t) shiny::validate('Number of treatment do not match with data input')
+    if (nt != t) fieldhub_abort('Number of treatment do not match with data input')
     data_alpha <- data_up
   }
-  if (k >= nt) shiny::validate('incomplete_blocks() requires that k < t.')
+  if (k >= nt) fieldhub_abort('incomplete_blocks() requires that k < t.')
   if (!is.null(locationNames)) locationNames <- toupper(locationNames)
   if(is.null(locationNames) || length(locationNames) != l) {
     if (!is.null(locationNames)) warn_default_location_names(locationNames, l, 1:l)
     locationNames <- 1:l
   }
-  if (numbers::isPrime(nt)) shiny::validate('Combinations for this amount of treatments do not exist.')
+  if (numbers::isPrime(nt)) fieldhub_abort('Combinations for this amount of treatments do not exist.')
   s <- nt / k
-  if (s %% 1 != 0) shiny::validate('Combinations for this amount of treatments do not exist.')
+  if (s %% 1 != 0) fieldhub_abort('Combinations for this amount of treatments do not exist.')
   
   nunits <- k
   matdf <- incomplete_blocks(t = nt, k = nunits, r = r, l = l, plotNumber = plotNumber,

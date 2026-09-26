@@ -67,16 +67,16 @@ rectangular_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber 
   lookup <- FALSE
   if(is.null(data)) {
     if (is.null(t) || is.null(k) || is.null(r) || is.null(l)) {
-      shiny::validate('Some of the basic design parameters are missing (t, k, r and l).')
+      fieldhub_abort('Some of the basic design parameters are missing (t, k, r and l).')
     }
     arg1 <- list(k, r, l);arg2 <- c(k, r, l)
     if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
-      shiny::validate('incomplete_blocks() requires t, k, r and l to be possitive integers.')
+      fieldhub_abort('incomplete_blocks() requires t, k, r and l to be possitive integers.')
     }
     if (is.numeric(t)) {
       if (length(t) == 1) {
         if (t == 1 || t < 1) {
-          shiny::validate('incomplete_blocks() requires more than one treatment.')
+          fieldhub_abort('incomplete_blocks() requires more than one treatment.')
         } 
         nt <- t
       }else if ((length(t) > 1)) {
@@ -85,7 +85,7 @@ rectangular_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber 
       }
     }else if (is.character(t) || is.factor(t)) {
       if (length(t) == 1) {
-        shiny::validate('incomplete_blocks() requires more than one treatment.')
+        fieldhub_abort('incomplete_blocks() requires more than one treatment.')
       } 
       nt <- length(t)
     }else if ((length(t) > 1)) {
@@ -96,9 +96,9 @@ rectangular_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber 
     data_alpha <- df
   }else if (!is.null(data)) {
     if (is.null(t) || is.null(r) || is.null(k) || is.null(l)) {
-      shiny::validate('Some of the basic design parameters are missing (t, k, r).')
+      fieldhub_abort('Some of the basic design parameters are missing (t, k, r).')
     }
-    if(!is.data.frame(data)) shiny::validate("Data must be a data frame.")
+    if(!is.data.frame(data)) fieldhub_abort("Data must be a data frame.")
     data_up <- as.data.frame(data[,c(1,2)])
     data_up <- na.omit(data_up)
     colnames(data_up) <- c("ENTRY", "TREATMENT")
@@ -112,7 +112,7 @@ rectangular_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber 
   if (!is.null(locationNames)) locationNames <- toupper(locationNames)
   s <- nt / k
   if (s %% 1 != 0 || k != (s - 1) || nt != s*(s - 1)) {
-    shiny::validate('rectangular_lattice() requires t = s*(s-1), where s is the iBlock numbers per replicate.')
+    fieldhub_abort('rectangular_lattice() requires t = s*(s-1), where s is the iBlock numbers per replicate.')
   } 
   if(is.null(locationNames) || length(locationNames) != l) {
     if (!is.null(locationNames)) warn_default_location_names(locationNames, l, 1:l)

@@ -751,9 +751,8 @@ plot.FielDHub <- function(x, ...) {
     }
     p <- plot_layout(x = x, ...)
     if (is.null(p)) {
-      img <- ggplot2::ggplot() + ggplot2::theme_minimal()
-      class(img) <- "fieldLayout"
-      print(x = img)
+      # plot_layout() warns which layouts or locations are available
+      fieldhub_abort("The layout or location requested is not available for this design.")
     } else {
       out <- list(
         field_book = p$allSitesFieldbook,

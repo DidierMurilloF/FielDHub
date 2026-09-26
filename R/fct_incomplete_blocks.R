@@ -65,16 +65,16 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
   lookup <- FALSE
   if(is.null(data)) {
     if (is.null(t) || is.null(k) || is.null(r) || is.null(l)) {
-      shiny::validate('Basic design parameters missing (t, k, r or l).')
+      fieldhub_abort('Basic design parameters missing (t, k, r or l).')
     }
     arg1 <- list(k, r, l);arg2 <- c(k, r, l)
     if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
-      shiny::validate('incomplete_blocks() requires k, r and l to be possitive integers.')
+      fieldhub_abort('incomplete_blocks() requires k, r and l to be possitive integers.')
     }
     if (is.numeric(t)) {
       if (length(t) == 1) {
         if (t == 1 || t < 1) {
-          shiny::validate('incomplete_blocks() requires more than one treatment.')
+          fieldhub_abort('incomplete_blocks() requires more than one treatment.')
         } 
         nt <- t
       }else if ((length(t) > 1)) {
@@ -83,7 +83,7 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
       }
     } else if (is.character(t) || is.factor(t)) {
       if (length(t) == 1) {
-        shiny::validate('incomplete_blocks() requires more than one treatment.')
+        fieldhub_abort('incomplete_blocks() requires more than one treatment.')
       } 
       nt <- length(t)
     } else if ((length(t) > 1)) {
@@ -97,9 +97,9 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
     dataLookUp <- df
   } else if (!is.null(data)) {
     if (is.null(t) || is.null(r) || is.null(k) || is.null(l)) {
-      shiny::validate('Some of the basic design parameters are missing (t, k, r or l)')
+      fieldhub_abort('Some of the basic design parameters are missing (t, k, r or l)')
     }
-    if(!is.data.frame(data)) shiny::validate("Data must be a data frame.")
+    if(!is.data.frame(data)) fieldhub_abort("Data must be a data frame.")
     if (ncol(data) < 2) base::stop("Data input needs at least two columns with: ENTRY and NAME.")
     data_up <- as.data.frame(data[,c(1,2)])
     data_up <- na.omit(data_up)
@@ -113,14 +113,14 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
     dataLookUp <- data.frame(list(ENTRY = 1:nt, LABEL_TREATMENT = TRT))
   }
   if(any(plotNumber %% 1 != 0) || any(plotNumber < 1) || any(diff(plotNumber) < 0)) {
-    shiny::validate("'incomplete_blocks()' requires plotNumber to be possitive integers and sorted.")
+    fieldhub_abort("'incomplete_blocks()' requires plotNumber to be possitive integers and sorted.")
   }
   if (is.null(plotNumber) || length(plotNumber) != l) {
     default_plots <- seq(1001, 1000*(l+1), 1000)
     warn_default_plot_numbers(plotNumber, l, default_plots)
     plotNumber <- default_plots
   }
-  if (k >= nt) shiny::validate('incomplete_blocks() requires that k < t.')
+  if (k >= nt) fieldhub_abort('incomplete_blocks() requires that k < t.')
   if(is.null(locationNames) || length(locationNames) != l) {
     if (!is.null(locationNames)) warn_default_location_names(locationNames, l, 1:l)
     locationNames <- 1:l
@@ -128,10 +128,10 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
   nincblock <- nt*r/k
   N <- nt * r
   if (k * nincblock != N) {
-    shiny::validate('Size of experiment defined by number of units per incomplete block (nunits) is inconsistent. Check input parameters.')
+    fieldhub_abort('Size of experiment defined by number of units per incomplete block (nunits) is inconsistent. Check input parameters.')
   }
   if (nt %% k != 0) {
-    shiny::validate('Number of treatments can not be fully distributed over the specified incomplete block specification.')
+    fieldhub_abort('Number of treatments can not be fully distributed over the specified incomplete block specification.')
   }
 
   ibd_plots <- ibd_plot_numbers(nt = nt, plot.number = plotNumber, r = r, l = l)

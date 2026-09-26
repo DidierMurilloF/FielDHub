@@ -56,12 +56,8 @@ plot_layout <- function(
         message <- "location!"
     }
     if (l > locs_available) {
-        message(cat("\n", " Option for location is not available!", "\n", "\n",
-                    "***************************************************", "\n",
-                    "***************************************************", "\n", "\n",
-                    "The randomization was done only with:", locs_available, message, "\n", "\n",
-                    "***************************************************", "\n",
-                    "***************************************************"))
+        warning("Location ", l, " is not available: the design has ", locs_available, " ",
+                message, call. = FALSE)
         return(NULL)
     }
     if (x$infoDesign$id_design %in% c(10, 11, 12, 8, 5, 6)) {

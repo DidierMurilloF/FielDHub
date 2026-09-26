@@ -221,13 +221,8 @@ plot_RCBD <- function(x = NULL,
   # Check that requested 'layout' index is valid
   available_layouts <- seq_along(site_layouts)
   if (!layout %in% available_layouts) {
-    message(
-      "\n Option for layout is not available!\n\n",
-      "*********************************************\n",
-      "Layout options available for this design are:\n\n",
-      paste(available_layouts, collapse = ", "), "\n\n",
-      "*********************************************\n"
-    )
+    warning("Layout option ", layout, " is not available for this design. Options: ",
+            paste(available_layouts, collapse = ", "), ".", call. = FALSE)
     return(NULL)
   }
 

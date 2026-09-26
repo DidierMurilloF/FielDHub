@@ -207,7 +207,7 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
   } else {
     if (!is.numeric(iterations) || length(iterations) != 1 || is.na(iterations) ||
         iterations < 1) {
-      shiny::validate('row_column() requires iterations to be a single positive integer.')
+      fieldhub_abort('row_column() requires iterations to be a single positive integer.')
     }
     searches_onestage <- iterations
     iterations_twostage <- iterations
@@ -216,7 +216,7 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
   # search cannot latinize across replicates); for method = "twostage" it is
   # ignored, with a warning if it was explicitly set to TRUE.
   if (!is.logical(latinize) || length(latinize) != 1 || is.na(latinize)) {
-    shiny::validate('row_column() requires latinize to be TRUE or FALSE.')
+    fieldhub_abort('row_column() requires latinize to be TRUE or FALSE.')
   }
   if (latinize && method == "twostage") {
     warning('latinize is only available with method = "onestage"; ',
@@ -229,16 +229,16 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
   lookup <- FALSE
   if (is.null(data)) {
     if (is.null(t) || is.null(k) || is.null(r) || is.null(l)) {
-      shiny::validate('Some of the basic design parameters are missing (t, k, r or l).')
+      fieldhub_abort('Some of the basic design parameters are missing (t, k, r or l).')
     }
     arg1 <- list(k, r, l);arg2 <- c(k, r, l)
     if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
-      shiny::validate('row_column() requires k, r and l to be possitive integers.')
+      fieldhub_abort('row_column() requires k, r and l to be possitive integers.')
     }
     if (is.numeric(t)) {
       if (length(t) == 1) {
         if (t == 1 || t < 1) {
-          shiny::validate('row_column() requires more than one treatment.')
+          fieldhub_abort('row_column() requires more than one treatment.')
         } 
         nt <- t
       }else if ((length(t) > 1)) {
@@ -247,7 +247,7 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
       }
     } else if (is.character(t) || is.factor(t)) {
       if (length(t) == 1) {
-        shiny::validate('incomplete_blocks() requires more than one treatment.')
+        fieldhub_abort('incomplete_blocks() requires more than one treatment.')
       } 
       nt <- length(t)
     } else if ((length(t) > 1)) {
@@ -261,9 +261,9 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
     dataLookUp <- df
   } else if (!is.null(data)) {
     if (is.null(t) || is.null(r) || is.null(k) || is.null(l)) {
-      shiny::validate('Some of the basic design parameters are missing (t, r, k or l).')
+      fieldhub_abort('Some of the basic design parameters are missing (t, r, k or l).')
     }
-    if(!is.data.frame(data)) shiny::validate("Data must be a data frame.")
+    if(!is.data.frame(data)) fieldhub_abort("Data must be a data frame.")
     data_up <- as.data.frame(data[,c(1,2)])
     data_up <- na.omit(data_up)
     colnames(data_up) <- c("ENTRY", "TREATMENT")
@@ -275,9 +275,9 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
     lookup <- TRUE
     dataLookUp <- data.frame(list(ENTRY = 1:nt, LABEL_TREATMENT = TRT))
   }
-  if (k >= nt) shiny::validate('incomplete_blocks() requires k < t.')
+  if (k >= nt) fieldhub_abort('incomplete_blocks() requires k < t.')
   if (nt %% k != 0) {
-    shiny::validate('Number of treatments can not be fully distributed over the specified incomplete block specification.')
+    fieldhub_abort('Number of treatments can not be fully distributed over the specified incomplete block specification.')
   }
   if(is.null(locationNames) || length(locationNames) != l) {
     if (!is.null(locationNames)) warn_default_location_names(locationNames, l, 1:l)

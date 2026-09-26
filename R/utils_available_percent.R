@@ -282,7 +282,7 @@ random_checks <- function(dt = NULL, d_checks = NULL, p = NULL, percent = NULL,
   if(is.null(w_map)) stop("Input w_map is NULL.")
   n_cols <- ncol(w_map)
   n_rows <- nrow(w_map)
-  shiny::req(w_map)
+  if (is.null(w_map)) stop("Internal error: the checks map is missing.")
   multi <- kindExpt == "DBUDC"
   
   if (multi == TRUE) {

@@ -335,9 +335,6 @@ partially_replicated <- function(
             border_penalization = border_penalization,
             data = list_locs[[sites]]
         )
-        if (is.null(prep)) {
-          return(invisible(NULL))
-        }
         rows_incidence[sites] <- prep$rows_incidence[length(prep$rows_incidence)]
         min_distance_sites[sites] <- prep$min_distance
         dataInput <- prep$gen.list

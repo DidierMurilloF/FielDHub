@@ -640,9 +640,8 @@ multi_location_prep <- function(
         data = preps$list_locs,
         year = year
     )
-    # Add this guard immediately after:
-    if (is.null(design_randomization) || is.null(design_randomization$fieldBook)) {
-        return(invisible(NULL))
+    if (is.null(design_randomization$fieldBook)) {
+        fieldhub_abort("multi_location_prep(): the p-rep designs of the locations could not be built.")
     }
     field_book_with_rep <- add_rep_column(df = design_randomization$fieldBook)
     design_randomization$infoDesign$id_design <- "MultiPrep"

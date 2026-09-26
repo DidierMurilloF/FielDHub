@@ -267,14 +267,8 @@ plot_splitPlots <- function(x = NULL, n_TrtGen = NULL, n_Reps = NULL,
   newBooksSelected <- newBooksLocs[[site]]
   opt_available <- 1:length(newBooksSelected)
   if (all(opt_available != opt)) {
-    message(cat("\n",
-                " Option for layout is not available!", "\n", "\n",
-                "*********************************************", "\n",
-                "*********************************************", "\n", "\n",
-                "Layout options available for this design are:", "\n", "\n",
-                opt_available, "\n", "\n",
-                "*********************************************", "\n",
-                "*********************************************"))
+    warning("Layout option ", opt, " is not available for this design. Options: ",
+            paste(opt_available, collapse = ", "), ".", call. = FALSE)
     return(NULL)
   }
   df1 <- newBooksSelected[opt]
