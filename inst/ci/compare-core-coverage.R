@@ -3,7 +3,7 @@ core_coverage_summary <- function(lines) {
     stop("Coverage records must contain filename and value columns.", call. = FALSE)
   }
   filenames <- gsub("\\\\", "/", lines$filename)
-  is_core <- grepl("(^|/)R/(fct_|utils_).*[.]R$", filenames)
+  is_core <- grepl("(^|/)R/(fct_|utils_|render_).*[.]R$", filenames)
   values <- lines$value[is_core]
   if (length(values) == 0L) {
     stop("No core coverage records were produced.", call. = FALSE)

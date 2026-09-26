@@ -126,8 +126,9 @@
   of recreating the workflow from internal helpers. Simulated responses are
   appended by column name so result metadata cannot be overwritten when the
   field-book schema grows.
-- Pull requests now report core (`fct_*` and `utils_*`) test coverage against
-  their base commit and fail if it decreases. A separate gate applies the
+- Pull requests now report core (`fct_*`, `utils_*` and `render_*`) test coverage
+  against their base commit and fail if it decreases. Dedicated renderers
+  remain covered when code moves out of the layout helpers. A separate gate applies the
   correctness-oriented `lintr` checks only to changed R lines, so legacy style
   findings do not block unrelated work.
 - The app's heatmaps now share one scale helper and use the lightweight
