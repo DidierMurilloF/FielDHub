@@ -44,8 +44,8 @@ test_that("diagonal arrangement draws entry numbers unabbreviated", {
     nrows = 15, ncols = 10, lines = 120, checks = 4,
     plotNumber = 101, seed = 1
   )
-  p <- plot_diagonal_arrangement(d, l = 1)
-  expect_labels_verbatim(p$p1, as.numeric(d$fieldBook$ENTRY))
+  p <- plot_layout(d, l = 1)
+  expect_labels_verbatim(p$out_layout, as.numeric(d$fieldBook$ENTRY))
 })
 
 test_that("plot() reaches the same labels through the public API", {
@@ -64,8 +64,8 @@ test_that("partially replicated design draws entry numbers unabbreviated", {
     nrows = 14, ncols = 10, repGens = c(20, 100), repUnits = c(2, 1),
     plotNumber = 101, seed = 1
   )
-  p <- plot_prep(p_rep, l = 1)
-  expect_labels_verbatim(p$p1, p_rep$fieldBook$ENTRY)
+  p <- plot_layout(p_rep, l = 1)
+  expect_labels_verbatim(p$out_layout, p_rep$fieldBook$ENTRY)
 })
 
 test_that("partially replicated design labels filler plots", {
@@ -73,8 +73,8 @@ test_that("partially replicated design labels filler plots", {
     nrows = 6, ncols = 7, repGens = c(5, 31), repUnits = c(2, 1),
     plotNumber = 101, seed = 1, allow_fillers = TRUE
   )
-  p <- plot_prep(p_rep, l = 1)
-  labels <- as.character(drawn_text(p$p1)[[1]]$label)
+  p <- plot_layout(p_rep, l = 1)
+  labels <- as.character(drawn_text(p$out_layout)[[1]]$label)
 
   expect_equal(sum(labels == "Filler"), 1)
   expect_false("0" %in% labels)
@@ -85,8 +85,8 @@ test_that("optimized arrangement draws entry numbers unabbreviated", {
     nrows = 12, ncols = 10, lines = 110, amountChecks = 10, checks = 1,
     plotNumber = 101, seed = 1
   )
-  p <- plot_optim(o, l = 1)
-  expect_labels_verbatim(p$p1, o$fieldBook$ENTRY)
+  p <- plot_layout(o, l = 1)
+  expect_labels_verbatim(p$out_layout, o$fieldBook$ENTRY)
 })
 
 # The augmented RCBD layout used to draw its cell text with ggplot2::geom_text()
@@ -98,11 +98,11 @@ test_that("augmented RCBD layout draws entries natively, checks in red", {
     plotNumber = 101, seed = 1
   )
   fb <- a$fieldBook
-  p <- plot_augmented_RCBD(a, l = 1)
+  p <- plot_layout(a, l = 1)
 
   # p1: entry numbers, verbatim, in a single text layer
-  expect_labels_verbatim(p$p1, fb$ENTRY)
-  d1 <- drawn_text(p$p1)[[1]]
+  expect_labels_verbatim(p$out_layout, fb$ENTRY)
+  d1 <- drawn_text(p$out_layout)[[1]]
 
   # the checks - and only the checks - are red
   is_check <- as.character(fb$CHECKS) == "1"
@@ -115,11 +115,11 @@ test_that("augmented RCBD layout draws entries natively, checks in red", {
 
   # text size and the muted block background are the ones the overlay produced
   expect_equal(unique(as.numeric(d1$size)), 3.2)
-  expect_length(tile_fills(p$p1), length(unique(fb$BLOCK)))
+  expect_length(tile_fills(p$out_layout), length(unique(fb$BLOCK)))
 
   # p2: plot numbers, verbatim, one colour, same size
-  expect_labels_verbatim(p$p2, sprintf("%d", as.integer(fb$PLOT)))
-  d2 <- drawn_text(p$p2)[[1]]
+  expect_labels_verbatim(p$out_layoutPlots, sprintf("%d", as.integer(fb$PLOT)))
+  d2 <- drawn_text(p$out_layoutPlots)[[1]]
   expect_equal(unique(as.character(d2$colour)), "gray10")
   expect_equal(unique(as.numeric(d2$size)), 3.2)
 })

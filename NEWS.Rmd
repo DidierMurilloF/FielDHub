@@ -28,6 +28,8 @@ knitr::opts_chunk$set(
 
 * Every design result records how it was built in a new `metadata` element: the design, the version of the structure of the result (`schema_version`), the seed, the random-number generator (`RNGkind()`) and the version of FielDHub. Its class names the design, such as `c("fieldhub_rcbd", "FielDHub")`, so scripts can tell designs apart with `inherits()`. The other elements are unchanged, and results saved by earlier versions still print and summarise as before. `print()` on a result of a design it does not know now shows its elements instead of nothing.
 
+* `field_layout()` returns the field book of a design with the `ROW` and `COLUMN` of every plot, for the layout, planter and stacking chosen: the field book that `plot()` draws and that the Shiny app exports. The coordinates of CRD, RCBD, latin square, factorial, split-plot, strip-plot, incomplete-block, lattice and row-column designs could only be obtained by drawing them.
+
 * `diagonal_arrangement()` gains `checksPercent`, to choose the percentage of checks among the options available for the field (by default the last one, as before), and `sameEntries`, for `"DBUDC"` designs whose blocks all hold the same entries. `sparse_allocation()` gains `checksPercent` too. These are the choices the Shiny app offers.
 
 * `partially_replicated()` and `multi_location_prep()` gain opt-in filler
@@ -61,6 +63,9 @@ knitr::opts_chunk$set(
 
 ### Fix bugs:
 
+* `plot()` now draws a `CRD()` with unequal replication, which failed with "`ROW` must be size 10 or 1, not 12"; its plots fill every grid that holds them exactly.
+* In `plot()` and the Split-Split Plot module of the Shiny app, split-split plots in complete blocks now follow `stacked`; every stacking gave the vertical layouts.
+* `plot()` now warns that a stacking is not available for a design, such as `stacked = "grid_panel"` with two reps, instead of failing with "undefined columns selected" or "Invalid stacking option provided." An unknown `planter` or `stacked` is now an error instead of being taken as `"cartesian"`, and a `layout` other than 1 is an error for the designs placed when they are built (partially replicated, augmented RCBD, diagonal, sparse and optimized arrangements), which ignored it.
 * Fixed a bug in `split_split_plot()` where, for the CRD type (`type = 1`), the whole-plot column was built with `rep(WholePlots, each = reps)` instead of `times = reps`, so whole-plots were mis-assigned across replicates; each replicate now contains every whole-plot.
 * Fixed a bug in `split_families()` where the `gen.list` assignment sat after `stop()` inside the column-count check, so valid three-column input never created `gen.list` and the function errored with "object 'gen.list' not found"; the assignment now runs after the guard.
 * Fixed a bug in `diagonal_arrangement()` and `sparse_allocation()` where the internal non-prime field-size filter `t[-numbers::isPrime(t)]` used a logical vector as a negative index and returned wrong or no field dimensions; it now uses `t[!numbers::isPrime(t)]`.
@@ -112,6 +117,7 @@ Some of the fixes above change the design produced for a given seed. Field books
 * `diagonal_arrangement()` or `sparse_allocation()` with `planter = "cartesian"`, an even number of rows and filler plots (one check and one entry per location labeled as fillers).
 * `RCBD_augmented()` with `random = FALSE` when the field has filler plots (blocks with too many or too few checks, and possibly missing lines).
 * `optimized_arrangement()` when `amountChecks` is not a multiple of the number of checks (the design was not reproducible).
+* The Split-Split Plot module of the Shiny app with the horizontal reps layout (the exported field book had the vertical layout).
 
 # FielDHub 1.3.1
 

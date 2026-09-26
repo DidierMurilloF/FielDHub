@@ -62,8 +62,8 @@ test_that("RCBD_augmented() returns numeric ENTRY and CHECKS columns", {
 test_that("the augmented RCBD field map draws filler plots like test lines", {
   arcbd <- RCBD_augmented(lines = 122, checks = 4, b = 5, nrows = 5, ncols = 29,
                           random = TRUE, seed = 7)
-  p <- plot_augmented_RCBD(arcbd, l = 1)
-  drawn <- ggplot2::ggplot_build(p$p1)$data
+  p <- plot_layout(arcbd, l = 1)
+  drawn <- ggplot2::ggplot_build(p$out_layout)$data
   text <- drawn[[which(vapply(drawn, function(d) "label" %in% names(d), logical(1)))[1]]]
   expect_setequal(unique(as.character(text$colour)), c("gray10", "red3"))
 })

@@ -160,9 +160,6 @@ plot.FielDHub <- function(x, ...) {
     if (!inherits(x,"FielDHub")) {
       stop("x is not a FielDHub class")
     }
-    if (x$infoDesign$id_design == 17) {
-      stop("split_families() results have no field layout to plot.", call. = FALSE)
-    }
     p <- plot_layout(x = x, ...)
     if (is.null(p)) {
       # plot_layout() warns which layouts or locations are available

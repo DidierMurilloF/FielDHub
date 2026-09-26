@@ -1,8 +1,12 @@
+# Exported functions that take a design instead of building one; the layout
+# goldens cover field_layout()
+design_tools <- c("run_app", "field_layout")
+
 test_that("the catalogue covers every exported function", {
   namespace <- readLines(system.file("NAMESPACE", package = "FielDHub"))
   exports <- sub("^export\\((.*)\\)$", "\\1", grep("^export\\(", namespace, value = TRUE))
   covered <- unique(vapply(catalogue, function(entry) entry$fun, character(1)))
-  expect_setequal(covered, setdiff(exports, "run_app"))
+  expect_setequal(covered, setdiff(exports, design_tools))
 })
 
 test_that("every catalogue entry builds a design", {

@@ -36,6 +36,12 @@
   elements are unchanged, and results saved by earlier versions still print
   and summarise as before. `print()` on a result of a design it does not know
   now shows its elements instead of nothing.
+- `field_layout()` returns the field book of a design with the `ROW` and
+  `COLUMN` of every plot, for the layout, planter and stacking chosen: the
+  field book that `plot()` draws and that the Shiny app exports. The
+  coordinates of CRD, RCBD, latin square, factorial, split-plot, strip-plot,
+  incomplete-block, lattice and row-column designs could only be obtained by
+  drawing them.
 - `diagonal_arrangement()` gains `checksPercent`, to choose the percentage of
   checks among the options available for the field (by default the last one,
   as before), and `sameEntries`, for `"DBUDC"` designs whose blocks all hold
@@ -102,6 +108,19 @@
 
 ### Fix bugs:
 
+- `plot()` now draws a `CRD()` with unequal replication, which failed with
+  "`ROW` must be size 10 or 1, not 12"; its plots fill every grid that holds
+  them exactly.
+- In `plot()` and the Split-Split Plot module of the Shiny app, split-split
+  plots in complete blocks now follow `stacked`; every stacking gave the
+  vertical layouts.
+- `plot()` now warns that a stacking is not available for a design, such as
+  `stacked = "grid_panel"` with two reps, instead of failing with "undefined
+  columns selected" or "Invalid stacking option provided." An unknown
+  `planter` or `stacked` is now an error instead of being taken as
+  `"cartesian"`, and a `layout` other than 1 is an error for the designs
+  placed when they are built (partially replicated, augmented RCBD, diagonal,
+  sparse and optimized arrangements), which ignored it.
 - Fixed a bug in `split_split_plot()` where, for the CRD type
   (`type = 1`), the whole-plot column was built with
   `rep(WholePlots, each = reps)` instead of `times = reps`, so
@@ -296,6 +315,8 @@ from:
   (blocks with too many or too few checks, and possibly missing lines).
 - `optimized_arrangement()` when `amountChecks` is not a multiple of the
   number of checks (the design was not reproducible).
+- The Split-Split Plot module of the Shiny app with the horizontal reps layout
+  (the exported field book had the vertical layout).
 
 # FielDHub 1.3.1
 

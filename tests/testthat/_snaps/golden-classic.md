@@ -624,9 +624,72 @@
           ]
         },
         {
-          "type": "character",
-          "attributes": {},
-          "value": ["plot_layout() fails for this design"]
+          "type": "list",
+          "attributes": {
+            "row.names": {
+              "type": "integer",
+              "attributes": {},
+              "value": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+            },
+            "names": {
+              "type": "character",
+              "attributes": {},
+              "value": ["ID", "LOCATION", "PLOT", "ROW", "COLUMN", "REP", "TREATMENT"]
+            },
+            "class": {
+              "type": "character",
+              "attributes": {},
+              "value": ["data.frame"]
+            }
+          },
+          "value": [
+            {
+              "type": "integer",
+              "attributes": {},
+              "value": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+            },
+            {
+              "type": "double",
+              "attributes": {},
+              "value": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+            },
+            {
+              "type": "double",
+              "attributes": {},
+              "value": [101, 102, 103, 104, 105, 106, 107, 108, 109, 110]
+            },
+            {
+              "type": "integer",
+              "attributes": {},
+              "value": [1, 1, 1, 1, 1, 2, 2, 2, 2, 2]
+            },
+            {
+              "type": "integer",
+              "attributes": {},
+              "value": [1, 2, 3, 4, 5, 5, 4, 3, 2, 1]
+            },
+            {
+              "type": "integer",
+              "attributes": {
+                "levels": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["1", "2", "3"]
+                },
+                "class": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["factor"]
+                }
+              },
+              "value": [3, 2, 3, 1, 1, 1, 2, 1, 2, 2]
+            },
+            {
+              "type": "character",
+              "attributes": {},
+              "value": ["T4", "T2", "T2", "T2", "T1", "T4", "T1", "T3", "T3", "T4"]
+            }
+          ]
         }
       ]
     }
