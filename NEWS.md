@@ -141,6 +141,10 @@
 - RCBD check-count and replication parsing now lives in the tested core
   input-parsing layer rather than in the Shiny module.
 
+- The shared `desplot` renderer and layout theme now live in a dedicated
+  rendering file, and the augmented-RCBD source filename now correctly spells
+  `RCBD`.
+
 ### Fix bugs:
 
 - `plot()` now draws a `CRD()` with unequal replication, which failed with
