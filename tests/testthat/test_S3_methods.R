@@ -8,6 +8,15 @@ summary_section <- function(x, from, to) {
   out[(start + 1):(end - 1)]
 }
 
+# The structure written by FielDHub 1.5.x: one FielDHub class and no metadata.
+legacy_roundtrip <- function(design) {
+  legacy <- structure(
+    unclass(design)[setdiff(names(design), "metadata")],
+    class = "FielDHub"
+  )
+  unserialize(serialize(legacy, NULL, version = 2))
+}
+
 test_that("print() and print(summary()) return the design invisibly", {
   # Regression test: print.FielDHub() returned the head() of the field book
   # instead of invisible(x).
@@ -70,12 +79,25 @@ test_that("results saved by FielDHub 1.5 print and summarise as their design", {
   for (name in names(catalogue)) {
     design <- catalogue_design(name)
     if (!inherits(design, "FielDHub")) next
-    saved <- structure(unclass(design)[setdiff(names(design), "metadata")],
-                       class = "FielDHub")
+    saved <- legacy_roundtrip(design)
     expect_identical(utils::capture.output(print(saved)),
                      utils::capture.output(print(design)), info = name)
     expect_identical(utils::capture.output(print(summary(saved))),
                      utils::capture.output(print(summary(design))), info = name)
+  }
+})
+
+test_that("results serialized in the FielDHub 1.5 format still plot", {
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+
+  for (name in names(catalogue)) {
+    design <- catalogue_design(name)
+    if (!inherits(design, "FielDHub") || inherits(design, "fieldhub_split_families")) next
+
+    saved <- legacy_roundtrip(design)
+    plotted <- suppressWarnings(suppressMessages(plot(saved)))
+    expect_identical(plotted$field_book, field_layout(design), info = name)
   }
 })
 
