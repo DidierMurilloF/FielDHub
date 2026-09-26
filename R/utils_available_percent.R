@@ -101,33 +101,7 @@ available_percent <- function(n_rows,
           # checks_in_first_row <- sum(w_map[1, ] != "0")
           # if ((Fillers + checks_in_first_row) >= n_cols) next
           #if (Fillers > ceiling(n_cols/2)) next
-          if (n_rows %% 2 == 0) {
-            if(planter_mov1 == "serpentine") {
-              i <- 1
-              repeat {
-                w_map[1,i] <- ifelse(w_map[1,i] == 0, "Filler", "-9")
-                if (sum(w_map[1, ] == "Filler") == Fillers) break
-                i <- i + 1
-              }
-              w_map[w_map == "-9"] <- "Filler"
-            }else{
-              i <- n_cols
-              repeat{
-                w_map[1,i] <- ifelse(w_map[1,i] == 0, "Filler", "-9")
-                if (sum(w_map[1, ] == "Filler") == Fillers) break
-                i <- i - 1
-              }
-              w_map[w_map == "-9"] <- "Filler"
-            }
-          }else{
-            i <- 0
-            repeat{
-              w_map[1, n_cols - i] <- ifelse(w_map[1, n_cols - i] == 0, "Filler", "-9")
-              if (sum(w_map[1, ] == "Filler") == Fillers) break
-              i <- i + 1
-            }
-            w_map[w_map == "-9"] <- "Filler"
-          }
+          w_map <- top_row_fillers(w_map, Fillers, planter_mov1)
         }
         n_Checks <- sum(w_map == 1)
         pots <- nrow(w_map) * ncol(w_map)
@@ -160,33 +134,7 @@ available_percent <- function(n_rows,
             checks_in_first_row <- sum(w_map[1, ] != "0")
             if ((Fillers + checks_in_first_row) >= n_cols) next
             if (Fillers > ceiling(n_cols/2)) next
-            if (n_rows %% 2 == 0) {
-              if(planter_mov1 == "serpentine") {
-                i <- 1
-                repeat {
-                  w_map[1,i] <- ifelse(w_map[1,i] == 0, "Filler", "-9")
-                  if (sum(w_map[1, ] == "Filler") == Fillers) break
-                  i <- i + 1
-                }
-                w_map[w_map == "-9"] <- "Filler"
-              } else {
-                i <- n_cols
-                repeat {
-                  w_map[1,i] <- ifelse(w_map[1,i] == 0, "Filler", "-9")
-                  if (sum(w_map[1, ] == "Filler") == Fillers) break
-                  i <- i - 1
-                }
-                w_map[w_map == "-9"] <- "Filler"
-              }
-            } else {
-              i <- 0
-              repeat {
-                w_map[1, n_cols - i] <- ifelse(w_map[1, n_cols - i] == 0, "Filler", "-9")
-                if (sum(w_map[1, ] == "Filler") == Fillers) break
-                i <- i + 1
-              }
-              w_map[w_map == "-9"] <- "Filler"
-            }
+            w_map <- top_row_fillers(w_map, Fillers, planter_mov1)
           }
           n_Checks <- length(which(w_map == 1))
           Fillers <- length(which(w_map == "Filler"))
@@ -400,4 +348,17 @@ random_checks <- function(dt = NULL, d_checks = NULL, p = NULL, percent = NULL,
     col_checks <- ifelse(w_map != 0, w_map, 0) 
   }
   list(map_checks = w_map, col_checks = col_checks)
+}
+
+#' Turn the empty cells of the top row of a checks map into fillers, from the
+#' end of the planting path backward, until there are n; the checks passed on
+#' the way become fillers too
+#' @noRd
+top_row_fillers <- function(w_map, n, planter) {
+  for (col in path_end(nrow(w_map), ncol(w_map), planter, ncol(w_map))[, "col"]) {
+    w_map[1, col] <- ifelse(w_map[1, col] == 0, "Filler", "-9")
+    if (sum(w_map[1, ] == "Filler") == n) break
+  }
+  w_map[w_map == "-9"] <- "Filler"
+  w_map
 }

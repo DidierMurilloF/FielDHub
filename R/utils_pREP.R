@@ -54,20 +54,8 @@ prep_field_mask <- function(
     active_field <- matrix(TRUE, nrow = nrows, ncol = ncols)
     if (fillers == 0) return(active_field)
 
-    path <- vector(mode = "list", length = nrows)
-    path_index <- 1
-    for (i in nrows:1) {
-        columns <- seq_len(ncols)
-        if (planter == "serpentine") {
-            forward <- if (nrows %% 2 == 0) i %% 2 == 0 else i %% 2 != 0
-            if (!forward) columns <- rev(columns)
-        }
-        path[[path_index]] <- cbind(row = i, column = columns)
-        path_index <- path_index + 1
-    }
-    path <- do.call(rbind, path)
-    filler_index <- tail(seq_len(nrow(path)), fillers)
-    active_field[path[filler_index, , drop = FALSE]] <- FALSE
+    # The fillers take the end of the planting path
+    active_field[path_end(nrows, ncols, planter, fillers)] <- FALSE
     active_field
 }
 

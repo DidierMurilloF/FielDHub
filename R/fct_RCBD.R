@@ -250,43 +250,18 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
                                   t = n_units)
   p.number.loc <- setNames(vector(mode = "list", length = l),
                            paste0("Loc_", locationNames))
-  if (!continuous) {
-    if (planter == "serpentine") {
-      for (i in 1:l) {
-        M <- matrix(data = NA, ncol = n_units, nrow = b, byrow = TRUE)
-        for (k in 1:b) {
-          D <- plotNumber[[i]]
-          M[k,] <- D[k]:(D[k] + (n_units - 1))
-        }
-        p.number.loc[[i]] <- serpentinelayout(M, opt = 2)
+  for (i in 1:l) {
+    D <- plotNumber[[i]]
+    if (!continuous) {
+      M <- matrix(data = NA, ncol = n_units, nrow = b, byrow = TRUE)
+      for (k in 1:b) {
+        M[k,] <- D[k]:(D[k] + (n_units - 1))
       }
-    }else {
-      for (i in 1:l) {
-        M <- matrix(data = NA, ncol = n_units, nrow = b, byrow = TRUE)
-        for (k in 1:b) {
-          D <- plotNumber[[i]]
-          M[k,] <- D[k]:(D[k] + (n_units - 1))
-        }
-        p.number.loc[[i]] <- M
-      }
+    } else {
+      M <- matrix(data = D[1]:(D[1] + (n_units * b - 1)), ncol = n_units,
+                  nrow = b, byrow = TRUE)
     }
-  }else {
-    if (planter == "serpentine") {
-      for (i in 1:l) {
-        D <- plotNumber[[i]]
-        M <- matrix(data = D[1]:(D[1] + (n_units * b - 1)), ncol = n_units,
-                                    nrow = b, byrow = TRUE)
-        p.number.loc[[i]] <- serpentinelayout(M, opt = 2)
-      }
-    }else {
-      for (i in 1:l) {
-        D <- plotNumber[[i]]
-        p.number.loc[[i]] <- matrix(data = D[1]:(D[1] + (n_units * b - 1)), 
-                                    ncol = n_units,
-                                    nrow = b, 
-                                    byrow = TRUE)
-      }
-    }
+    p.number.loc[[i]] <- along_rows(M, planter)
   }
   if (l > 1) {
     p.number.loc1 <- paste_by_row(p.number.loc)

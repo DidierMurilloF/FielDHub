@@ -28,15 +28,7 @@ ARCBD_plot_number <- function(plot.number = NULL,
 
   plot_num1 <- my_split_plot_nub
   if (Fillers > 0) {
-    if (nrows %% 2 == 0) {
-      if(planter == "serpentine") {
-        plot_num1[1, 1:Fillers] <- 0
-      }else{
-        plot_num1[1,((ncols + 1) - Fillers):ncols] <- 0
-      }
-    }else {
-      plot_num1[1,((ncols + 1) - Fillers):ncols] <- 0
-    }
+    plot_num1[1, filler_columns(nrows, ncols, planter, Fillers)] <- 0
   }
   return(list(plot_num = plot_num1))
 }

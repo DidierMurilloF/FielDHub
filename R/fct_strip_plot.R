@@ -174,7 +174,7 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
     for (r in 1:b) {
       D <- plot.numbs[[sites]]
       P <- matrix(data = D[r]:(D[r] + (nH*nV) - 1), nrow = nH, ncol = nV, byrow = TRUE)
-      if (planter == "serpentine") P <- serpentinelayout(P, opt = 2)
+      P <- along_rows(P, planter)
       PLOTS[[z]] <- P
       # Hplots.random <- replicate(1, sample(Hplots))
       # Vplots.random <- replicate(1, sample(Vplots))

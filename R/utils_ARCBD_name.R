@@ -12,15 +12,7 @@ ARCBD_name <- function(Fillers = NULL, b = NULL, layout = NULL, name.expt = NULL
   split_names <- matrix(data = Name_expt, ncol = ncols, nrow = nrows)
   if (Fillers > 0) {
     split_names1 <- matrix(data = Name_expt, ncol = ncols, nrow = nrows)
-    if (nrows %% 2 == 0) {
-      if(planter == "serpentine") {
-        split_names1[1, 1:Fillers] <- "Filler"
-      }else{
-        split_names1[1,((ncols + 1) - Fillers):ncols] <- "Filler"
-      }
-    }else{
-      split_names1[1,((ncols + 1) - Fillers):ncols] <- "Filler"
-    }
+    split_names1[1, filler_columns(nrows, ncols, planter, Fillers)] <- "Filler"
   }
   if (Fillers == 0) {
     return(list(my_names = split_names))

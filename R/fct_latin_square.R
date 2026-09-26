@@ -130,7 +130,7 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
                 byrow = TRUE)
     # plot_matrix <- apply(P, 2, rev)
     plot_matrix <- P
-    if(planter == "serpentine") plot_matrix <- serpentinelayout(plot_matrix, opt = 2)
+    plot_matrix <- along_rows(plot_matrix, planter)
     # print(plot_matrix)
     # print(as.vector(t(plot_matrix)))
     plotSquares[[j]] <- plot_matrix

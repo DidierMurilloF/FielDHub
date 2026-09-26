@@ -110,53 +110,7 @@ get_random <- function(n_rows = NULL,
                       data_dim_each_block)
         if(length(which.blocks) == 1 && 
            which.blocks == length(data_dim_each_block)) {
-          v <- 1
-          if( planter_mov == "serpentine") {
-            if (nrow(w_map) %% 2 == 0) {
-              for (i in nrow(w_map):1) {
-                if (i %% 2 == 0) {
-                  A <- 1:ncol(w_map)
-                } else A <- ncol(w_map):1
-                for (j in A) {
-                  if (w_map[i,j] == 0){
-                    w_map[i,j] <- target[v]
-                    v <- v + 1
-                  }else{
-                    w_map[i,j] <-  w_map[i,j]
-                    v <- v
-                  }
-                }
-              }
-            } else {
-              for (i in nrow(w_map):1) {
-                if (i %% 2 == 0){
-                  A <- ncol(w_map):1
-                } else A <- 1:ncol(w_map)
-                for (j in A) { 
-                  if (w_map[i,j] == 0) {
-                    w_map[i,j] <- target[v]
-                    v <- v + 1
-                  } else {
-                    w_map[i,j] <- w_map[i,j]
-                    v <- v
-                  }
-                }
-              }
-            }
-          } else {
-            for (i in nrow(w_map):1) {
-              for (j in 1:ncol(w_map)) {
-                if (w_map[i,j] == 0) {
-                  w_map[i,j] <- target[v]
-                  v <- v + 1
-                } else {
-                  w_map[i,j] <- w_map[i,j]
-                  v <- v
-                }
-              }
-            }
-            v <- 1
-          }
+          w_map <- fill_along_path(w_map, target, planter_mov)
         }else if (length(which.blocks) <= length(data_dim_each_block)) {
           r_sets <- row_sets
           which_b <- sort(which.blocks,decreasing = FALSE)
@@ -189,58 +143,8 @@ get_random <- function(n_rows = NULL,
           }
           split_target <- split_vectors(target, 
                                         dim_each_block_without_Fillers_and_checks)
-          s <- 1;v <- 1
-          z <- 1:length(W_SPLIT)
-          if (planter_mov == "serpentine") {
-            for (s in z){
-              if (nrow(W_SPLIT[[s]]) %% 2 == 0) {
-                for (i in nrow(W_SPLIT[[s]]):1) {
-                  if (i %% 2 == 0) {
-                    A <- 1:ncol(w_map)
-                  } else A <- ncol(w_map):1
-                  for (j in A) {
-                    if (W_SPLIT[[s]][i,j] == 0) {
-                      W_SPLIT[[s]][i,j] <- split_target[[s]][v]
-                      v <- v + 1
-                    } else {
-                      W_SPLIT[[s]][i,j] <-  W_SPLIT[[s]][i,j]
-                      v <- v
-                    }
-                  }
-                }
-              } else {
-                for (i in nrow(W_SPLIT[[s]]):1) {
-                  if (i %% 2 == 0) {
-                    A <- ncol(w_map):1
-                  } else A <- 1:ncol(w_map)
-                  for (j in A) {
-                    if (W_SPLIT[[s]][i,j] == 0) {
-                      W_SPLIT[[s]][i,j] <- split_target[[s]][v]
-                      v <- v + 1
-                    } else {
-                      W_SPLIT[[s]][i,j] <-  W_SPLIT[[s]][i,j] 
-                      v <- v
-                    }
-                  }
-                }
-              }
-              v <- 1
-            }
-          } else {
-            for (s in z) {
-              for (i in nrow(W_SPLIT[[s]]):1) {
-                for (j in 1:ncol(W_SPLIT[[s]])) {
-                  if (W_SPLIT[[s]][i,j] == 0) {
-                    W_SPLIT[[s]][i,j] <- split_target[[s]][v]
-                    v <- v + 1
-                  } else {
-                    W_SPLIT[[s]][i,j] <-  W_SPLIT[[s]][i,j]
-                    v <- v
-                  }
-                }
-              }
-              v <- 1
-            }
+          for (s in seq_along(W_SPLIT)) {
+            W_SPLIT[[s]] <- fill_along_path(W_SPLIT[[s]], split_target[[s]], planter_mov)
           }
           len_list <- length(W_SPLIT)
           if (len_list > 2) {

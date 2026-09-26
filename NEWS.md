@@ -105,6 +105,9 @@
   `desplot (>= 1.11)`) instead of being patched onto the finished plot,
   which also makes title and axis styling consistent across all design
   types.
+- Field layouts, plot numbering and filler placement now share one tested
+  planting-path implementation internally. This refactor preserves the
+  existing design output.
 
 ### Fix bugs:
 

@@ -328,15 +328,7 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
           )
           
           if (Fillers > 0 && i == 1) {
-            if (total_rows %% 2 == 0) {
-              if (planter == "serpentine") {
-                block[1, 1:Fillers] <- "Filler"
-              } else {
-                block[1, ((ncol(block) + 1) - Fillers):ncol(block)] <- "Filler"
-              }
-            } else {
-              block[1, ((ncol(block) + 1) - Fillers):ncol(block)] <- "Filler"
-            }
+            block[1, filler_columns(total_rows, ncol(block), planter, Fillers)] <- "Filler"
             
             v <- which.min(rand_len_cuts)
             lines_blocks <- lines_blocks[unique(c(v, 1:b))]
@@ -394,13 +386,8 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
           # its right end otherwise. Only the block holding them gets its
           # checks redrawn among its remaining cells, so every block keeps a
           # single set of checks.
-          if (field_rows %% 2 == 0 && planter == "serpentine") {
-            filler_block <- 1
-            filler_cols <- 1:Fillers
-          } else {
-            filler_block <- blocks_per_row
-            filler_cols <- ((ncols + 1) - Fillers):ncols
-          }
+          filler_cols <- filler_columns(field_rows, ncols, planter, Fillers)
+          filler_block <- if (1 %in% filler_cols) 1 else blocks_per_row
           block <- blocks_with_checks[[filler_block]]
           block[1, filler_cols] <- "Filler"
           block[block != "Filler"] <- sample(c(rep(0, sum(block != "Filler") - checks), 1:checks))

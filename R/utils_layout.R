@@ -46,6 +46,62 @@ planting_path <- function(nrows, ncols, planter = "serpentine") {
   cbind(ROW = ROW, COLUMN = COLUMN)
 }
 
+#' Cells of a field map in planting order
+#'
+#' @description Field maps are matrices whose last row is planted first: the
+#' planter starts at the bottom-left cell and moves up one row at a time. This
+#' is \code{planting_path()} with the rows of a matrix.
+#'
+#' @return An integer matrix with the columns row and col, which indexes the
+#'   cells of the map in planting order.
+#' @noRd
+field_path <- function(nrows, ncols, planter = "serpentine") {
+  path <- planting_path(nrows, ncols, planter)
+  cbind(row = as.integer(nrows) + 1L - path[, "ROW"], col = path[, "COLUMN"])
+}
+
+#' Fill the empty cells of a field map in planting order
+#'
+#' @param map A matrix.
+#' @param values Values for the empty cells in planting order. When there are
+#'   fewer values than empty cells, the last cells get NA.
+#' @param empty Value of the empty cells.
+#' @noRd
+fill_along_path <- function(map, values, planter, empty = 0) {
+  path <- field_path(nrow(map), ncol(map), planter)
+  free <- path[which(map[path] == empty), , drop = FALSE]
+  map[free] <- values[seq_len(nrow(free))]
+  map
+}
+
+#' The last n cells of the planting path of a field map, from the end
+#' backward; fillers go there
+#' @noRd
+path_end <- function(nrows, ncols, planter, n) {
+  path <- field_path(nrows, ncols, planter)
+  path[rev(seq_len(nrow(path)))[seq_len(n)], , drop = FALSE]
+}
+
+#' Columns of the top row of a field map, the last one planted, that hold n
+#' fillers at the end of the planting path (n at most the number of columns)
+#' @noRd
+filler_columns <- function(nrows, ncols, planter, n) {
+  if (n > ncols) stop("Internal error: more fillers than columns in the last row.")
+  sort(path_end(nrows, ncols, planter, n)[, "col"])
+}
+
+#' Place a sequence along the rows of a matrix in planting order
+#'
+#' @param M A matrix whose rows are planted in order, row 1 first, holding the
+#'   sequence row by row.
+#' @return M with every row that the planter goes back along reversed.
+#' @noRd
+along_rows <- function(M, planter = "serpentine") {
+  path <- planting_path(nrow(M), ncol(M), planter)
+  M[path] <- as.vector(t(M))
+  M
+}
+
 #' Columns of a field book with coordinates: the identifiers, the
 #' coordinates, then the other columns in their order
 #' @noRd

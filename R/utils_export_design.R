@@ -6,6 +6,10 @@ export_design <- function(G, movement_planter = NULL, location = NULL, Year = NU
   }
   if (is.null(Year)) Year <- format(Sys.Date(), "%Y")
   H <- G[[3]]
+  # The field book lists the plots in planting order, starting at the bottom
+  # row of the maps
+  planting <- planting_path(nrow(H), ncol(H), movement_planter)
+  path <- field_path(nrow(H), ncol(H), movement_planter)
   asExport_cordenates <- function(){
     
     if (reps == FALSE){ 
@@ -38,7 +42,7 @@ export_design <- function(G, movement_planter = NULL, location = NULL, Year = NU
     
     location <- toupper(location)
     
-    my_output_cord[,1] <- rep(1:nrow(H), each = ncol(H))
+    my_output_cord[,1] <- planting[, "ROW"]
     my_output_cord[,7] <- rep(location, dim(H)[1]*dim(H)[2])
     
     
@@ -51,59 +55,16 @@ export_design <- function(G, movement_planter = NULL, location = NULL, Year = NU
     
     my_output_cord[,9] <- rep(Year, dim(H)[1]*dim(H)[2])
     
-    if (movement_planter == "cartesian"){
-      my_output_cord[,2] <- rep(1:ncol(H), times = nrow(H))
-    }else if (movement_planter == "serpentine"){
-      if (nrow(H) %% 2 == 0){ ## depend on the numbers of cols 
-        div <- nrow(my_output_cord) / (ncol(H)*2)
-        my_output_cord[,2] <- rep(c(1:ncol(H),ncol(H):1), times = div)
-      }else{
-        remi <- ncol(H)
-        div <- (nrow(my_output_cord) - remi) / (ncol(H)*2)
-        my_output_cord[,2] <- c(rep(c(1:ncol(H),ncol(H):1), times = div), c(1:ncol(H)))
-      }
-    }
+    my_output_cord[,2] <- planting[, "COLUMN"]
     return(my_output_cord)
   }
   asExport <- function(H) {
-    ###### Cartesian movement ############
-    if (movement_planter == "cartesian"){
-      my_output_Carte <- numeric()
-      k = 1
-      for (i in nrow(H):1){
-        for (j in 1:ncol(H)){
-          my_output_Carte[k] <- H[i,j]
-          k = k + 1
-        }
-      }
-      return(my_output_Carte)
-    }else if (movement_planter == "serpentine"){
-      ###### Serpentine movement ############
-      my_temp <- matrix(data = NA, nrow = ncol(H), ncol = nrow(H), byrow = F)
-      for (i in seq(nrow(H), 1, by = -2)){
-        for (j in 1:ncol(H)){
-          my_temp[j,i] <- H[i,j]
-        }
-      }
-      sy <- numeric()
-      l = 1
-      for (i in seq((nrow(H) - 1), 1, by = -2)){
-        for (j in ncol(H):1){
-          sy[l] <- H[i,j]
-          l = l + 1
-        }
-      }
-      my_temp[ ,seq((ncol(my_temp) - 1),1, by = - 2)] <- sy
-      my_output_Serpe <- numeric()
-      s = 1
-      for (j in ncol(my_temp):1){
-        for (i in 1:(nrow(my_temp))){
-          my_output_Serpe[s] <- my_temp[i,j]
-          s = s + 1
-        }
-      }
-      return(my_output_Serpe)
+    # The cells of the map in planting order
+    cells <- numeric()
+    for (k in seq_len(nrow(path))) {
+      cells[k] <- H[path[k, "row"], path[k, "col"]]
     }
+    return(cells)
   }
   
   my_final_export <- asExport_cordenates()

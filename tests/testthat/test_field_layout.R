@@ -11,6 +11,59 @@ test_that("the planting path goes along the rows, every second row back for a se
   )
 })
 
+test_that("field-map helpers use the planting path", {
+  for (planter in c("serpentine", "cartesian")) {
+    path <- field_path(3, 4, planter)
+    planted <- planting_path(3, 4, planter)
+    expect_identical(path[, "row"], 4L - planted[, "ROW"])
+    expect_identical(path[, "col"], planted[, "COLUMN"])
+
+    map <- matrix(0L, nrow = 3, ncol = 4)
+    map[3, 2] <- -1L
+    free <- path[map[path] == 0L, , drop = FALSE]
+    values <- seq_len(nrow(free))
+    filled <- fill_along_path(map, values, planter)
+    expect_identical(filled[free], values)
+    expect_identical(filled[3, 2], -1L)
+
+    for (n in 0:4) {
+      at_end <- path_end(3, 4, planter, n)
+      expected <- if (n == 0) path[integer(), , drop = FALSE] else tail(path, n)[n:1, , drop = FALSE]
+      rownames(expected) <- NULL
+      expect_identical(at_end, expected)
+      expect_identical(filler_columns(3, 4, planter, n), sort(at_end[, "col"]))
+    }
+  }
+})
+
+test_that("along_rows matches the former serpentine layout", {
+  for (nrows in 1:4) {
+    M <- matrix(seq_len(nrows * 5), nrow = nrows, byrow = TRUE)
+    expected <- M
+    for (row in seq_len(nrows)) {
+      if (row %% 2 == 0) expected[row, ] <- rev(expected[row, ])
+    }
+    expect_identical(along_rows(M, "serpentine"), expected)
+    expect_identical(along_rows(M, "cartesian"), M)
+  }
+})
+
+test_that("top-row fillers start at the end of the planting path", {
+  map <- matrix(0, nrow = 3, ncol = 4)
+  map[1, 3] <- 1
+  filled <- top_row_fillers(map, n = 2, planter = "serpentine")
+  expect_identical(as.character(filled[1, ]), c("0", "Filler", "Filler", "Filler"))
+
+  for (nrows in 1:4) {
+    for (planter in c("serpentine", "cartesian")) {
+      map <- matrix(0, nrow = nrows, ncol = 5)
+      filled <- top_row_fillers(map, n = 3, planter = planter)
+      expect_identical(which(filled[1, ] == "Filler"),
+                       filler_columns(nrows, 5, planter, 3))
+    }
+  }
+})
+
 test_that("field_layout() returns the field book that plot() draws", {
   rcbd <- RCBD(t = 6, reps = 3, l = 2, plotNumber = c(101, 1001), seed = 1)
   for (stacked in c("vertical", "horizontal")) {

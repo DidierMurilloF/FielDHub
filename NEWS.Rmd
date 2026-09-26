@@ -61,6 +61,8 @@ knitr::opts_chunk$set(
 
 * `plot()` on a design object now passes additional arguments through to `desplot::desplot()`, so the field map can be customized in place - for example `plot(design, col.regions = ...)` to change the fill colors or `plot(design, cex = 1.4)` to resize the plot labels. Previously such arguments were silently ignored. Internally the shared plot styling is now produced by a single `desplot()` call (using the native `ticks` and `panel.border` arguments, hence `desplot (>= 1.11)`) instead of being patched onto the finished plot, which also makes title and axis styling consistent across all design types.
 
+* Field layouts, plot numbering and filler placement now share one tested planting-path implementation internally. This refactor preserves the existing design output.
+
 ### Fix bugs:
 
 * `plot()` now draws a `CRD()` with unequal replication, which failed with "`ROW` must be size 10 or 1, not 12"; its plots fill every grid that holds them exactly.

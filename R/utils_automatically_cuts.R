@@ -10,52 +10,16 @@ automatically_cuts <- function(
     max_v <- length(data_dim_each_block)
     v <- 1;k <- 0
     if (stacked == "By Row") {
-        if(planter_mov == "serpentine") { 
-        if (nrow(w_map) %% 2 == 0){
-            for(i in nrow(w_map):1){
-            if (i %% 2 == 0){
-                A <- 1:ncol(w_map)
-            }else A <- ncol(w_map):1
-            
-            for(j in A){
-                if(w_map[i,j] == 0) k <- k + 1
-                if(data_dim_each_block[v] == k) {
-                auto_cuts_by_r[v] <- i;k <- 0
-                if(v < max_v){
-                    v <- v + 1
-                }else v <- 1
-                }
-            }
-            }
-        } else{
-            for(i in nrow(w_map):1){
-            if (i %% 2 == 0){
-                A <- ncol(w_map):1
-            }else A <- 1:ncol(w_map)
-    
-            for(j in A){
-                if(w_map[i,j] == 0) k <- k + 1
-                if (data_dim_each_block[v] == k) {
-                auto_cuts_by_r[v] <- i;k <- 0
-                if(v < max_v){
-                    v <- v + 1
-                }else v <- 1 
-                }
-            }
-            }
-        }
-        }else{
-        for (i in nrow(w_map):1) {
-            for (j in 1:ncol(w_map)) {
-            if (w_map[i,j] == 0) k <- k + 1
+        # Walk the planting path and cut a block where its entries are complete
+        path <- field_path(nrow(w_map), ncol(w_map), planter_mov)
+        for (p in seq_len(nrow(path))) {
+            if (w_map[path[p, , drop = FALSE]] == 0) k <- k + 1
             if (data_dim_each_block[v] == k) {
-                auto_cuts_by_r[v] <- i;k <- 0
+                auto_cuts_by_r[v] <- path[p, "row"];k <- 0
                 if (v < max_v) {
-                v <- v + 1 
-                }else v <- 1
+                    v <- v + 1
+                } else v <- 1
             }
-            }
-        }
         }
         
         x <- nrow(w_map):1

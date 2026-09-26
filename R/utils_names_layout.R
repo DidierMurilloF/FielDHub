@@ -77,18 +77,8 @@ names_layout <- function(w_map = NULL,
   } else {
     split_names <- matrix(data = expt_name, ncol = dim(w_map)[2], nrow = dim(w_map)[1])
     Fillers <- sum(w_map == "Filler")
-    n_cols <- ncol(w_map)
-    n_rows <- nrow(w_map)
     if (Fillers > 0) {
-      if (n_rows %% 2 == 0) {
-        if (planter == "serpentine") {
-          split_names[1, 1:Fillers] <- "Filler"
-        } else {
-          split_names[1,((n_cols + 1) - Fillers):n_cols] <- "Filler"
-        }
-      } else {
-        split_names[1,((n_cols + 1) - Fillers):n_cols] <- "Filler"
-      }
+      split_names[1, filler_columns(nrow(w_map), ncol(w_map), planter, Fillers)] <- "Filler"
     }
   }
   return(list(my_names = split_names))
@@ -97,56 +87,7 @@ names_layout <- function(w_map = NULL,
 no_random_arcbd <- function(checksMap = NULL, 
                             data_Entry = NULL, 
                             planter = "serpentine") {
-  w_map <- checksMap
-  dim_w <- dim(w_map)[1]*dim(w_map)[2]
-  target <- as.vector(data_Entry)
-  v <- 1
-  if(planter == "serpentine") {
-    if (nrow(w_map) %% 2 == 0) {
-      for(i in nrow(w_map):1){
-        if (i %% 2 == 0){
-          A <- 1:ncol(w_map)
-        }else A <- ncol(w_map):1
-        for(j in A){
-          if (w_map[i,j] == 0){
-            w_map[i,j] <- target[v]
-            v <- v + 1
-          }else{
-            w_map[i,j] <-  w_map[i,j]
-            v <- v
-          }
-        }
-      }
-    } else {
-      for(i in nrow(w_map):1){
-        if (i %% 2 == 0){
-          A <- ncol(w_map):1
-        }else A <- 1:ncol(w_map)
-        for(j in A){
-          if (w_map[i,j] == 0){
-            w_map[i,j] <- target[v]
-            v <- v + 1
-          }else{
-            w_map[i,j] <-  w_map[i,j]
-            v <- v
-          }
-        }
-      }
-    }
-  } else {
-    for(i in nrow(w_map):1) {
-      for(j in 1:ncol(w_map)) {
-        if (w_map[i,j] == 0) {
-          w_map[i,j] <- target[v]
-          v <- v + 1
-        } else {
-          w_map[i,j] <-  w_map[i,j]
-          v <- v
-        }
-      }
-    }
-    v <- 1
-  }
+  w_map <- fill_along_path(checksMap, as.vector(data_Entry), planter)
   w_map_letters <- w_map
   dim_each_block <- rep(ncol(w_map), nrow(w_map))
   return(list(rand = w_map, 
@@ -418,34 +359,6 @@ split_vectors <- function(x, len_cuts){
   
   return(entris)
 }
-#' @noRd 
-#' 
-#' 
-serpentinelayout <-  function(datos, opt = 1){
-  if (opt == 1) {
-    if (nrow(datos) %% 2 == 0) {
-      for (i in seq(2,nrow(datos),2)) {
-        datos[i,] <- rev(datos[i, ])
-      }
-    }else{
-      for (i in seq(1,nrow(datos),2)) {
-        datos[i,] <- rev(datos[i, ])
-      }
-    }
-  }else if (opt == 2) {
-    if (nrow(datos) %% 2 == 0) {
-      for (i in seq(nrow(datos),1,-2)) {
-        datos[i,] <- rev(datos[i, ])
-      }
-    }else{
-      for (i in seq(2, nrow(datos), 2)) {
-        datos[i,] <- rev(datos[i, ])
-      }
-    }
-  }
-  return(datos)
-}
-
 #' @noRd
 plot_number <- function(planter = "serpentine", 
                         plot_number_start = NULL, 
@@ -485,47 +398,11 @@ plot_number <- function(planter = "serpentine",
     }
   }
   plot_number_layout <- names_plot
-  if(planter == "cartesian") {
-    for (blocks in 1:b) {
-      v <- 1
-      for (i in nrow(plot_number_layout):1) {
-        for (j in 1:ncol(plot_number_layout)) {
-          if (plot_number_layout[i,j] == expt_levels[blocks]) {
-            plot_number_layout[i,j] <- plot_number_blocks[[blocks]][v]
-            v <- v + 1
-          }
-        }
-      }
-    }
-  } else if (planter == "serpentine") {
-    for (blocks in 1:b) {
-      v <- 1
-      if (nrow(plot_number_layout) %% 2 == 0) {
-        for(i in nrow(plot_number_layout):1) {
-          if (i %% 2 == 0) {
-            A <- 1:ncol(plot_number_layout)
-          } else A <- ncol(plot_number_layout):1
-          for (j in A) {
-            if (plot_number_layout[i,j] == expt_levels[blocks]) {
-              plot_number_layout[i,j] <- plot_number_blocks[[blocks]][v]
-              v <- v + 1
-            }
-          }
-        }
-      } else {
-        for (i in nrow(plot_number_layout):1){
-          if (i %% 2 == 0) {
-            A <- ncol(plot_number_layout):1
-          } else A <- 1:ncol(plot_number_layout)
-          for (j in A) {
-            if (plot_number_layout[i,j] == expt_levels[blocks]) {
-              plot_number_layout[i,j] <- plot_number_blocks[[blocks]][v]
-              v <- v + 1
-            }
-          }
-        }
-      }
-    }
+  # Number the plots of each experiment along the planting path
+  path <- field_path(nrow(plot_number_layout), ncol(plot_number_layout), planter)
+  for (blocks in 1:b) {
+    cells <- path[which(plot_number_layout[path] == expt_levels[blocks]), , drop = FALSE]
+    plot_number_layout[cells] <- plot_number_blocks[[blocks]][seq_len(nrow(cells))]
   }
   if (Fillers) {
     plot_number_layout[plot_number_layout == "Filler"] <- 0
