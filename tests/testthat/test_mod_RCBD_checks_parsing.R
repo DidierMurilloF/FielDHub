@@ -1,8 +1,8 @@
 library(testthat)
 library(FielDHub)
 
-# Coverage for the module-level input parsers `parse_n_checks()` and
-# `parse_rep_checks()` (R/mod_RCBD.R). These are the single source of truth
+# Coverage for the core input parsers `parse_n_checks()` and
+# `parse_rep_checks()` (R/utils_parse_inputs.R). These are the single source of truth
 # for turning the "Input # of Checks" and "Reps per Check" Shiny inputs into
 # validated values, shared by rcbd_inputs(), the block-size preview, and
 # get_data_rcbd() so all three agree on what is valid.

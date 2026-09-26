@@ -79,6 +79,8 @@ knitr::opts_chunk$set(
 
 * Generated app entry lists now come from one tested core builder, giving the classic, diagonal, p-rep and optimized modules the same identifier and label construction rules.
 
+* RCBD check-count and replication parsing now lives in the tested core input-parsing layer rather than in the Shiny module.
+
 ### Fix bugs:
 
 * `plot()` now draws a `CRD()` with unequal replication, which failed with "`ROW` must be size 10 or 1, not 12"; its plots fill every grid that holds them exactly.

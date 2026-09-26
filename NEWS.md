@@ -138,6 +138,9 @@
   classic, diagonal, p-rep and optimized modules the same identifier and label
   construction rules.
 
+- RCBD check-count and replication parsing now lives in the tested core
+  input-parsing layer rather than in the Shiny module.
+
 ### Fix bugs:
 
 - `plot()` now draws a `CRD()` with unequal replication, which failed with
