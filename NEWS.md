@@ -122,6 +122,9 @@
   256-colour palette.
 - Prime-factor, divisor, and primality calculations now use small internal
   helpers instead of the `numbers` package.
+- The app now supplies its Flatly Bootstrap 3 theme through `bslib`, which is
+  already part of Shiny's dependency stack, instead of the additional
+  `shinythemes` package.
 
 ### Fix bugs:
 

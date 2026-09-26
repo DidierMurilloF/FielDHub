@@ -46,7 +46,7 @@ Imports:
     shiny (>= 1.7.0),
     htmltools,
     DT,
-    shinythemes,
+    bslib,
     dplyr,
     blocksdesign,
     shinycssloaders,

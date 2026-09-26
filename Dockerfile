@@ -35,7 +35,7 @@ RUN R -e 'install.packages("remotes")'
 RUN R -q -e "install.packages('golem')"
 RUN R -q -e "install.packages('htmltools')"
 RUN R -q -e "install.packages('DT')"
-RUN R -q -e "install.packages('shinythemes')"
+RUN R -q -e "install.packages('bslib')"
 RUN R -q -e "install.packages('dplyr')"
 RUN R -q -e "install.packages('blocksdesign')"
 RUN R -q -e "install.packages('shinycssloaders')"

@@ -7,6 +7,8 @@ test_that("trivial dependencies stay out of Imports", {
   expect_false("viridis" %in% packages)
   expect_false("numbers" %in% packages)
   expect_false("config" %in% packages)
+  expect_false("shinythemes" %in% packages)
+  expect_true("bslib" %in% packages)
   expect_true("ggplot2" %in% packages)
   expect_true("viridisLite" %in% packages)
 })

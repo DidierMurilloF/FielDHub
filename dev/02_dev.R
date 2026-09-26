@@ -15,7 +15,7 @@
 
 ## Dependencies ----
 ## Add one line by package you want to add as dependency
-usethis::use_package("shinythemes")
+usethis::use_package("bslib")
 usethis::use_package("DT")
 usethis::use_package("dplyr")
 usethis::use_package("blocksdesign")
