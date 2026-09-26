@@ -191,14 +191,11 @@ mod_Square_Lattice_server <- function(id){
     
     observeEvent(list_to_observe(), {
       
-      t <- as.numeric(init_data_square()$treatments)
-      if (sqrt(t) %% 1 != 0) {
-        w <- 1
-        k <- "No Options Available"
-      }else {
-        k <- sqrt(t)
-        w <- 2
-      }
+      options <- valid_block_sizes(
+        as.numeric(init_data_square()$treatments),
+        "square_lattice"
+      )
+      k <- if (length(options) == 0L) "No Options Available" else options
 
       updateSelectInput(session = session, 
                         inputId = 'k.square', 

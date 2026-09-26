@@ -130,6 +130,10 @@
   errors. The notice that `rep_checks` defaulted to one is now a classed
   `fieldhub_default_warning` rather than an unstructured message.
 
+- The incomplete-block, row-column and lattice app modules now obtain feasible
+  block sizes from one tested core validator instead of duplicating the rules
+  in each server.
+
 ### Fix bugs:
 
 - `plot()` now draws a `CRD()` with unequal replication, which failed with

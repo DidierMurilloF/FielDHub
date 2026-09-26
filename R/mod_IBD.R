@@ -247,18 +247,14 @@ mod_IBD_server <- function(id) {
     
     observeEvent(list_to_observe(), {
       req(init_data_ibd())
-      t <- as.numeric(req(init_data_ibd())$treatments)
-      if (is_prime(t)) {
-        w <- 1
-        k <- "No Options Available"
-      }else {
-        k <- integer_divisors(t)
-        k <- k[2:(length(k) - 1)]
-        w <- 2
-      }
+      options <- valid_block_sizes(
+        as.numeric(req(init_data_ibd())$treatments),
+        "incomplete_blocks"
+      )
+      k <- if (length(options) == 0L) "No Options Available" else options
       
-      if (length(k) > 2) {
-        selected <- k[ceiling(length(k)/2)]
+      if (length(options) > 2L) {
+        selected <- options[ceiling(length(options) / 2)]
       } else selected <- k[1]
       
       updateSelectInput(session = session, 

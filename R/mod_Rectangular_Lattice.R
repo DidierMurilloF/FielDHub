@@ -186,23 +186,11 @@ mod_Rectangular_Lattice_server <- function(id) {
     
     observeEvent(list_to_observe(), {
       req(init_data_rectangular())
-      t <- as.numeric(init_data_rectangular()$treatments)
-      D <- integer_divisors(t)
-      D <- D[2:(length(D)-1)]
-      pk <- numeric()
-      z <- 1
-      for (i in D) {
-        s <- t / i
-        if (i == s - 1) {
-          pk[z] <- i
-          z <- z + 1
-        }else z <- z
-      }
-      if (length(pk) == 0) {
-        k <- "No Options Available"
-      }else {
-        k <- pk
-      }
+      options <- valid_block_sizes(
+        as.numeric(init_data_rectangular()$treatments),
+        "rectangular_lattice"
+      )
+      k <- if (length(options) == 0L) "No Options Available" else options
       
       updateSelectInput(session = session, 
                         inputId = 'k.rectangular', 
