@@ -168,8 +168,7 @@ mod_Rectangular_Lattice_server <- function(id) {
     } else {
       req(input$t.rectangular)
       nt <- as.numeric(input$t.rectangular)
-      df <- data.frame(list(ENTRY = 1:nt, NAME = paste0("G-", 1:nt)))
-      colnames(df) <- c("ENTRY", "NAME")
+      df <- default_entries(nt)
       data_rectangular <- df
       treatments = nrow(data_rectangular)
       return(list(data_rectangular = data_rectangular, treatments = treatments))

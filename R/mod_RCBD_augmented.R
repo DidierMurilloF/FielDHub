@@ -296,9 +296,10 @@ mod_RCBD_augmented_server <- function(id) {
         lines <- as.numeric(input$lines_a_rcbd)
         checks <- as.numeric(input$checks_a_rcbd)
         if(lines < 1 || checks <= 0) validate("Number of lines and checks should be greater than 1.")
-        NAME <- c(paste(rep("CH", checks), 1:checks, sep = ""),
-                  paste(rep("G", lines), (checks + 1):(lines + checks), sep = ""))
-        gen.list <- data.frame(list(ENTRY = 1:(lines + checks),	NAME = NAME))
+        gen.list <- dplyr::bind_rows(
+          default_entries(checks, prefix = "CH"),
+          default_entries(lines, prefix = "G", start = checks + 1)
+        )
         data_up <- gen.list
         return(list(dataUp_a_rcbd = data_up, 
                     entries = lines))

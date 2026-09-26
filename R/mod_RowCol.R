@@ -224,8 +224,7 @@ mod_RowCol_server <- function(id){
       } else {
         req(input$t.rcd)
         nt <- as.numeric(input$t.rcd)
-        df <- data.frame(list(ENTRY = 1:nt, NAME = paste0("G-", 1:nt)))
-        colnames(df) <- c("ENTRY", "NAME")
+        df <- default_entries(nt)
         data_rcd <- df
         treatments = nrow(data_rcd)
         return(list(data_rcd = data_rcd, treatments = treatments))

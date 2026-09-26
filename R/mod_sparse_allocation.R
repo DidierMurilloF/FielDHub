@@ -481,16 +481,15 @@ mod_sparse_allocation_server <- function(id){
             checksEntries <- 1:sparse_checks
             lines <- input$sparse_lines
             max_entry <- lines
-            df_checks <- data.frame(
-                ENTRY = (max_entry + 1):((max_entry + sparse_checks)), 
-                NAME = paste0("CH-", (max_entry + 1):((max_entry + sparse_checks)))
+            df_checks <- default_entries(
+                sparse_checks,
+                prefix = "CH-",
+                start = max_entry + 1
             )
             # Same names that do_optim() gives the entries
-            NAME <- paste0("G-", 1:lines)
-            gen.list <- data.frame(list(ENTRY = 1:lines, NAME = NAME))
+            gen.list <- default_entries(lines)
             input_entries <- as.numeric(gen.list$ENTRY)
             data_entry_UP <- dplyr::bind_rows(df_checks, gen.list)
-            colnames(data_entry_UP) <- c("ENTRY", "NAME")
             dim_data_entry <- nrow(data_entry_UP)
             entries_in_file <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
             data_without_checks <- gen.list

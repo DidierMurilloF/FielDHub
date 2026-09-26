@@ -162,8 +162,7 @@ mod_Alpha_Lattice_server <- function(id){
       } else {
         req(input$t.alpha)
         nt <- as.numeric(input$t.alpha)
-        df <- data.frame(list(ENTRY = 1:nt, NAME = paste0("G-", 1:nt)))
-        colnames(df) <- c("ENTRY", "NAME")
+        df <- default_entries(nt)
         data_alpha <- df
         treatments = nrow(data_alpha)
         return(list(data_alpha = data_alpha, treatments = treatments))

@@ -173,8 +173,7 @@ mod_Square_Lattice_server <- function(id){
       } else {
         req(input$t.square)
         nt <- as.numeric(input$t.square)
-        df <- data.frame(list(ENTRY = 1:nt, NAME = paste0("G-", 1:nt)))
-        colnames(df) <- c("ENTRY", "NAME")
+        df <- default_entries(nt)
         data_square <- df
         treatments = nrow(data_square)
         return(list(data_square = data_square, treatments = treatments))

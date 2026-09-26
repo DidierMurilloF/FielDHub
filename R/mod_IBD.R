@@ -229,8 +229,7 @@ mod_IBD_server <- function(id) {
       } else {
         req(input$t.ibd)
         nt <- as.numeric(input$t.ibd)
-        df <- data.frame(list(ENTRY = 1:nt, NAME = paste0("G-", 1:nt)))
-        colnames(df) <- c("ENTRY", "NAME")
+        df <- default_entries(nt)
         data_ibd <- df
         treatments = nrow(data_ibd)
         return(list(data_ibd = data_ibd, treatments = treatments))

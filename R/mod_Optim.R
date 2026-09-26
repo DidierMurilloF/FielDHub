@@ -273,11 +273,13 @@ mod_Optim_server <- function(id) {
           )
           return(NULL)
         }
-        NAME <- c(paste0(rep("CH", n.checks), 1:n.checks),
-                  paste(rep("G", lines), (n.checks + 1):(lines + n.checks), sep = ""))
+        entries <- dplyr::bind_rows(
+          default_entries(n.checks, prefix = "CH"),
+          default_entries(lines, prefix = "G", start = n.checks + 1)
+        )
         reps.checks <- r.checks
         REPS <- c(reps.checks, rep(1, lines))
-        gen.list <- data.frame(list(ENTRY = 1:(lines + n.checks),	NAME = NAME,	REPS = REPS))
+        gen.list <- data.frame(entries, REPS = REPS)
         data_up <- gen.list
         total_plots <- sum(data_up$REPS)
       }

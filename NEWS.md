@@ -134,6 +134,10 @@
   block sizes from one tested core validator instead of duplicating the rules
   in each server.
 
+- Generated app entry lists now come from one tested core builder, giving the
+  classic, diagonal, p-rep and optimized modules the same identifier and label
+  construction rules.
+
 ### Fix bugs:
 
 - `plot()` now draws a `CRD()` with unequal replication, which failed with

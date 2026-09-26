@@ -362,11 +362,10 @@ mod_Diagonal_server <- function(id) {
                 return(NULL)
             }
             # Same entry list as diagonal_arrangement() generates from lines
-            NAME <- c(paste0(rep("Check-", checks), 1:checks),
-                    paste0(rep("Gen-", lines), (checks + 1):(lines + checks)))
-            gen.list <- data.frame(list(ENTRY = 1:(lines + checks),	NAME = NAME))
-            data_entry_UP <- gen.list
-            colnames(data_entry_UP) <- c("ENTRY", "NAME")
+            data_entry_UP <- dplyr::bind_rows(
+                default_entries(checks, prefix = "Check-"),
+                default_entries(lines, prefix = "Gen-", start = checks + 1)
+            )
             dim_data_entry <- nrow(data_entry_UP)
             dim_data_1 <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
             return(list(data_entry = data_entry_UP, 

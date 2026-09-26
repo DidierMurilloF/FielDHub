@@ -456,21 +456,18 @@ mod_multi_loc_preps_server <- function(id){
                 }
                 input_lines <- as.numeric(input$gens_prep)
                 max_entry <- input_lines
-                df_checks <- data.frame(
-                    ENTRY = (max_entry + 1):((max_entry + checks)), 
-                    NAME = paste0("CH-", (max_entry + 1):((max_entry + checks)))
+                df_checks <- default_entries(
+                    checks,
+                    prefix = "CH-",
+                    start = max_entry + 1
                 )
-                NAME <- c(paste(rep("Gen-", input_lines), 1:input_lines, sep = ""))
-                data_without_checks <- data.frame(list(ENTRY = 1:input_lines, NAME = NAME))
+                data_without_checks <- default_entries(input_lines, prefix = "Gen-")
                 input_entries <- as.numeric(data_without_checks$ENTRY)
                 data_preps <- dplyr::bind_rows(df_checks, data_without_checks)
-                colnames(data_preps) <- c("ENTRY", "NAME")
             } else {
                 input_lines <- as.numeric(input$gens_prep)
-                NAME <- c(paste(rep("Gen-", input_lines), 1:input_lines, sep = ""))
-                data_preps <- data.frame(list(ENTRY = 1:input_lines, NAME = NAME))
+                data_preps <- default_entries(input_lines, prefix = "Gen-")
                 input_entries <- as.numeric(data_preps$ENTRY)
-                colnames(data_preps) <- c("ENTRY", "NAME")
                 data_without_checks <- data_preps
             }
         }
