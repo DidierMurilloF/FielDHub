@@ -87,7 +87,6 @@ summary.FielDHub <- function(object, ...) {
 #'   \email{thiago.paula.oliveira@@alumni.usp.br} [aut],
 #'   Didier Murillo [aut]
 #' @importFrom utils str
-#' @importFrom dplyr glimpse
 #' @export
 print.summary.FielDHub <- function(x, ...) {
   # Each design has its own method; this one shows results of other designs

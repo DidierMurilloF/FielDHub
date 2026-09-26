@@ -16,7 +16,6 @@
 #'   distance between replicated treatments in the field. Default is \code{TRUE}.
 #' @param data  Data frame with 3 columns: \code{ENTRY | NAME | REPS}.
 #' 
-#' @importFrom stats dist
 #' 
 #' @return A list containing the following elements:
 #' \describe{

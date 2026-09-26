@@ -83,6 +83,8 @@ knitr::opts_chunk$set(
 
 * The shared `desplot` renderer and layout theme now live in a dedicated rendering file, and the augmented-RCBD source filename now correctly spells `RCBD`.
 
+* The generated namespace no longer imports the unused `dplyr::glimpse()`, `golem::activate_js()` and `stats::dist()` symbols.
+
 ### Fix bugs:
 
 * `plot()` now draws a `CRD()` with unequal replication, which failed with "`ROW` must be size 10 or 1, not 12"; its plots fill every grid that holds them exactly.

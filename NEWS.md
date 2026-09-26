@@ -145,6 +145,9 @@
   rendering file, and the augmented-RCBD source filename now correctly spells
   `RCBD`.
 
+- The generated namespace no longer imports the unused `dplyr::glimpse()`,
+  `golem::activate_js()` and `stats::dist()` symbols.
+
 ### Fix bugs:
 
 - `plot()` now draws a `CRD()` with unequal replication, which failed with
