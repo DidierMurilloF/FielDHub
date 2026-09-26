@@ -63,3 +63,27 @@ test_that("plot() explains that split_families() results have no layout", {
   families <- split_families(l = 2, data = gen_list)
   expect_error(plot(families), "split_families\\(\\) results have no field layout")
 })
+
+test_that("results saved by FielDHub 1.5 print and summarise as their design", {
+  # Results saved before the design subclasses have the class "FielDHub" and
+  # no metadata; print() and summary() find their design from id_design.
+  for (name in names(catalogue)) {
+    design <- catalogue_design(name)
+    if (!inherits(design, "FielDHub")) next
+    saved <- structure(unclass(design)[setdiff(names(design), "metadata")],
+                       class = "FielDHub")
+    expect_identical(utils::capture.output(print(saved)),
+                     utils::capture.output(print(design)), info = name)
+    expect_identical(utils::capture.output(print(summary(saved))),
+                     utils::capture.output(print(summary(design))), info = name)
+  }
+})
+
+test_that("print() shows the elements of a result whose design it does not know", {
+  # print() used to print nothing for such results.
+  unknown <- structure(list(infoDesign = list(id_design = 99),
+                            fieldBook = data.frame(PLOT = 1:2)),
+                       class = "FielDHub")
+  expect_output(print(unknown), "fieldBook")
+  expect_output(print(summary(unknown)), "fieldBook")
+})

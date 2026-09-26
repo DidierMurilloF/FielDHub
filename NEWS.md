@@ -33,7 +33,9 @@
   the seed, the random-number generator (`RNGkind()`) and the version of
   FielDHub. Its class names the design, such as `c("fieldhub_rcbd",
   "FielDHub")`, so scripts can tell designs apart with `inherits()`. The other
-  elements are unchanged.
+  elements are unchanged, and results saved by earlier versions still print
+  and summarise as before. `print()` on a result of a design it does not know
+  now shows its elements instead of nothing.
 - `diagonal_arrangement()` gains `checksPercent`, to choose the percentage of
   checks among the options available for the field (by default the last one,
   as before), and `sameEntries`, for `"DBUDC"` designs whose blocks all hold

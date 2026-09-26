@@ -32,6 +32,34 @@ new_fieldhub_design <- function(x, design) {
   validate_fieldhub_design(x)
 }
 
+#' Designs of the id_design values of results saved by FielDHub 1.5 or
+#' earlier, which have the class "FielDHub" only
+#' @noRd
+legacy_designs <- c(
+  "1" = "crd", "2" = "rcbd", "3" = "latin_square", "4" = "full_factorial",
+  "5" = "split_plot", "6" = "split_split_plot", "7" = "strip_plot",
+  "8" = "incomplete_blocks", "9" = "row_column", "10" = "square_lattice",
+  "11" = "rectangular_lattice", "12" = "alpha_lattice",
+  "13" = "partially_replicated", "14" = "rcbd_augmented",
+  "15" = "diagonal_arrangement", "16" = "optimized_arrangement",
+  "17" = "split_families", "Sparse" = "sparse_allocation",
+  "MultiPrep" = "multi_location_prep"
+)
+
+#' Give a result saved by FielDHub 1.5 or earlier the class of its design
+#'
+#' @param x A design result.
+#' @return \code{x}, with the class \code{c("fieldhub_<design>", "FielDHub")}
+#'   when it had the class "FielDHub" only and its id_design is known.
+#' @noRd
+with_design_class <- function(x) {
+  if (!identical(class(x), "FielDHub")) return(x)
+  design <- legacy_designs[as.character(x$infoDesign$id_design)]
+  if (length(design) != 1 || is.na(design)) return(x)
+  class(x) <- c(paste0("fieldhub_", design), "FielDHub")
+  x
+}
+
 #' Check the structure of a design result
 #'
 #' @param x A design result.

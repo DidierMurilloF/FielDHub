@@ -20,7 +20,9 @@ negative, all but the n last/first number of elements of x.}
 an object inheriting from class \code{FielDHub}
 }
 \description{
-Prints information about any \code{FielDHub} function.
+Prints the design parameters and the first rows of the field
+  book of any \code{FielDHub} design, including results saved by earlier
+  versions of FielDHub.
 }
 \examples{
 # Example 1: Generates a CRD design with 5 treatments and 5 reps each.
