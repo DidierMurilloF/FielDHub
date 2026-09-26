@@ -75,6 +75,9 @@ catalogue <- list(
   alpha_lattice = list(fun = "alpha_lattice", family = "incomplete", build = function() {
     alpha_lattice(t = 12, k = 4, r = 2, plotNumber = 101, seed = 19)
   }),
+  alpha_lattice_six_reps = list(fun = "alpha_lattice", family = "incomplete", build = function() {
+    alpha_lattice(t = 12, k = 3, r = 6, plotNumber = 101, seed = 36)
+  }),
   square_lattice = list(fun = "square_lattice", family = "incomplete", build = function() {
     square_lattice(t = 16, k = 4, r = 2, plotNumber = 101, seed = 20)
   }),
