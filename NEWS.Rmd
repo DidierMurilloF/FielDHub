@@ -67,6 +67,8 @@ knitr::opts_chunk$set(
 
 * Pull requests now report core (`fct_*` and `utils_*`) test coverage against their base commit and fail if it decreases. A separate gate applies the correctness-oriented `lintr` checks only to changed R lines, so legacy style findings do not block unrelated work.
 
+* The app's heatmaps now share one scale helper and use the lightweight `viridisLite` package instead of `viridis`, while preserving the existing 256-colour palette.
+
 ### Fix bugs:
 
 * `plot()` now draws a `CRD()` with unequal replication, which failed with "`ROW` must be size 10 or 1, not 12"; its plots fill every grid that holds them exactly.
@@ -257,4 +259,3 @@ See [plot()](https://didiermurillof.github.io/FielDHub/reference/plot.FielDHub.h
 # FielDHub 0.1.0
 
 CRAN release. 
-

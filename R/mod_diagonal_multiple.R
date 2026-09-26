@@ -1112,7 +1112,7 @@ mod_diagonal_multiple_server <- function(id) {
                 ggplot2::xlab("COLUMN") +
                 ggplot2::ylab("ROW") +
                 ggplot2::labs(fill = w) +
-                viridis::scale_fill_viridis(discrete = FALSE)
+                fieldhub_viridis_scale()
             
             p2 <- plotly::ggplotly(p1, tooltip="text", height = 700)
             

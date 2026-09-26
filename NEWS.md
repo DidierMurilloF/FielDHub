@@ -117,6 +117,9 @@
   their base commit and fail if it decreases. A separate gate applies the
   correctness-oriented `lintr` checks only to changed R lines, so legacy style
   findings do not block unrelated work.
+- The app's heatmaps now share one scale helper and use the lightweight
+  `viridisLite` package instead of `viridis`, while preserving the existing
+  256-colour palette.
 
 ### Fix bugs:
 

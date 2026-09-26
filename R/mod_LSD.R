@@ -501,7 +501,7 @@ mod_LSD_server <- function(id){
           ggplot2::xlab("COLUMN") +
           ggplot2::ylab("ROW") +
           ggplot2::labs(fill = w) +
-          viridis::scale_fill_viridis(discrete = FALSE) +
+          fieldhub_viridis_scale() +
           ggplot2::ggtitle(heatmapTitle) +
           ggplot2::theme_minimal() + 
           ggplot2::theme(

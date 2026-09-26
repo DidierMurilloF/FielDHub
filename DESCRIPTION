@@ -53,7 +53,7 @@ Imports:
     shinycssloaders,
     ggplot2,
     plotly,
-    viridis,
+    viridisLite,
     shinyalert,
     desplot (>= 1.11),
     shinyjs
