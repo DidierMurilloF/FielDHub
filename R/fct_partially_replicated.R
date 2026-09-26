@@ -270,7 +270,7 @@ partially_replicated <- function(
             checks <- length(checksEntries)
             lines <- sum(GENOS$REPS)
             t_plots <- sum(as.numeric(gen_list$REPS))
-            if (!allow_fillers && numbers::isPrime(t_plots)) {
+            if (!allow_fillers && is_prime(t_plots)) {
                 stop("No options when the total number of plots is a prime number.", call. = FALSE)
             }
             list_locs <- vector(mode = "list", length = l)
@@ -283,7 +283,7 @@ partially_replicated <- function(
             stop("Input repGens and repUnits need to be of the same length.")
         } 
         t_plots <- sum(repGens * repUnits)
-        if (!allow_fillers && numbers::isPrime(t_plots)) {
+        if (!allow_fillers && is_prime(t_plots)) {
             stop("No options when the total number of plots is a prime number.", call. = FALSE)
         }
         ENTRY <- 1:sum(repGens)

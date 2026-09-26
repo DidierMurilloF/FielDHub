@@ -120,6 +120,8 @@
 - The app's heatmaps now share one scale helper and use the lightweight
   `viridisLite` package instead of `viridis`, while preserving the existing
   256-colour palette.
+- Prime-factor, divisor, and primality calculations now use small internal
+  helpers instead of the `numbers` package.
 
 ### Fix bugs:
 

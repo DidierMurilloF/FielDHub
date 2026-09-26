@@ -187,7 +187,7 @@ mod_Rectangular_Lattice_server <- function(id) {
     observeEvent(list_to_observe(), {
       req(init_data_rectangular())
       t <- as.numeric(init_data_rectangular()$treatments)
-      D <- numbers::divisors(t)
+      D <- integer_divisors(t)
       D <- D[2:(length(D)-1)]
       pk <- numeric()
       z <- 1

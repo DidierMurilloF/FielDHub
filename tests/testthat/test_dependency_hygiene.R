@@ -1,10 +1,12 @@
 library(FielDHub)
 
-test_that("the app uses a lightweight viridis scale without the viridis package", {
+test_that("trivial dependencies stay out of Imports", {
   imports <- utils::packageDescription("FielDHub", fields = "Imports")
   packages <- trimws(sub("\\s*\\(.*$", "", strsplit(imports, ",")[[1L]]))
 
   expect_false("viridis" %in% packages)
+  expect_false("numbers" %in% packages)
+  expect_false("config" %in% packages)
   expect_true("ggplot2" %in% packages)
   expect_true("viridisLite" %in% packages)
 })

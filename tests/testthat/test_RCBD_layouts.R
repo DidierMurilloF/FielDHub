@@ -40,9 +40,9 @@ test_that("generate_vertical_layout produces a single-column layout", {
 test_that("generate_vertical_layout produces extended layouts when prime factors exist", {
   layouts <- generate_vertical_layout(NewBook, plots, n_TrtGen, n_Reps, planter)
 
-  # For n_TrtGen = 4, numbers::primeFactors(4) may return c(2,2) (or similar),
+  # For n_TrtGen = 4, prime_factors(4) returns c(2, 2),
   # so we expect at least one extended vertical layout.
-  if (length(numbers::primeFactors(n_TrtGen)) >= 2) {
+  if (length(prime_factors(n_TrtGen)) >= 2) {
     expect_true(any(grepl("vertical_ext", names(layouts))))
     # Check that the extended layout has a PLOT column computed.
     ext_name <- grep("vertical_ext", names(layouts), value = TRUE)[1]

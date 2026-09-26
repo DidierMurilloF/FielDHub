@@ -197,8 +197,8 @@ optimized_arrangement <- function(
         } else base::stop('"optimized_arrangement()" requires inputs checks and amountChecks to be possitive integers and distinct of NULL.')
         
         t_plots <- as.numeric(sum(RepChecks) + lines)
-        if (numbers::isPrime(t_plots) || t_plots != (nrows * ncols)) {
-            choices <- if (!numbers::isPrime(t_plots)) factor_subsets(t_plots)$labels else NULL
+        if (is_prime(t_plots) || t_plots != (nrows * ncols)) {
+            choices <- if (!is_prime(t_plots)) factor_subsets(t_plots)$labels else NULL
             dims <- dimension_options(choices)
             stop_dimensions(
                 paste0("optimized_arrangement(): the field dimensions do not match the entries. ",
@@ -248,7 +248,7 @@ optimized_arrangement <- function(
         checks <- length(checksEntries)
         lines <- sum(my_GENS$REPS)
         t_plots <- sum(as.numeric(gen_list$REPS))
-        if (numbers::isPrime(t_plots)) {
+        if (is_prime(t_plots)) {
             stop("No options when the total number of plots is a prime number.", call. = FALSE)
         }
         if (t_plots != (nrows * ncols)) {

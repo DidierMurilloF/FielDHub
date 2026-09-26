@@ -243,11 +243,11 @@ mod_RowCol_server <- function(id){
     observeEvent(list_to_observe(), {
       req(init_data_rcd())
       t <- as.numeric(init_data_rcd()$treatments)
-      if (numbers::isPrime(t)) {
+      if (is_prime(t)) {
         w <- 1
         k <- "No Options Available"
       }else {
-        k <- numbers::divisors(t)
+        k <- integer_divisors(t)
         k <- k[2:(length(k) - 1)]
         w <- 2
       }

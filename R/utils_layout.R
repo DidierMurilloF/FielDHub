@@ -374,7 +374,7 @@ generate_vertical_layout <- function(NewBook, plots, n_units, n_Reps, planter) {
   layouts[["basic_vertical"]] <- basic_df
 
   # 2) Extended vertical factor-based layouts
-  pf <- numbers::primeFactors(n_units)
+  pf <- prime_factors(n_units)
   if (length(pf) >= 2) {
     factor_combos <- as.data.frame(
       factor_subsets(n_units, all_factors = TRUE)$comb_factors
@@ -512,7 +512,7 @@ block_panel_rows <- function(sizeIblocks, n_Reps, iBlocks) {
 #' @return A list of data frames with ROW and COLUMN.
 #' @noRd
 block_grid_coordinates <- function(sizeIblocks, n_Reps, iBlocks) {
-  r <- numbers::primeFactors(iBlocks)
+  r <- prime_factors(iBlocks)
   if (length(r) > 2) {
     if (iBlocks %% 2 != 0) {
       r <- c(r[1], prod(r[2:length(r)]))
@@ -521,7 +521,7 @@ block_grid_coordinates <- function(sizeIblocks, n_Reps, iBlocks) {
     }
   }
   if (length(r) == 1) r <- c(1, r)
-  y <- numbers::primeFactors(sizeIblocks)
+  y <- prime_factors(sizeIblocks)
   if (sizeIblocks == 2) y <- c(1, y)
   Y <- factor_splits(y)
   lapply(seq_len(nrow(Y)), function(k) {
@@ -549,7 +549,7 @@ block_grid_coordinates <- function(sizeIblocks, n_Reps, iBlocks) {
 #' into rows of blocks
 #' @noRd
 block_row_coordinates <- function(sizeIblocks, n_Reps, iBlocks) {
-  r <- numbers::primeFactors(iBlocks)
+  r <- prime_factors(iBlocks)
   if (iBlocks == 2) r <- c(1, r)
   r <- rev(r)
   R <- factor_splits(r)
@@ -578,7 +578,7 @@ block_row_coordinates <- function(sizeIblocks, n_Reps, iBlocks) {
 #' @noRd
 panel_grid_coordinates <- function(sizeIblocks, n_Reps, iBlocks) {
   if (n_Reps <= 2 || !(n_Reps %% 2 == 0 || sqrt(n_Reps) %% 1 == 0)) return(list())
-  t <- numbers::primeFactors(n_Reps)
+  t <- prime_factors(n_Reps)
   panel <- function(s, n0, nCols) {
     nROWs <- s * sizeIblocks
     w0 <- 1:(nROWs)

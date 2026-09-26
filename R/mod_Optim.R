@@ -281,9 +281,9 @@ mod_Optim_server <- function(id) {
         data_up <- gen.list
         total_plots <- sum(data_up$REPS)
       }
-      prime_factors <- numbers::primeFactors(total_plots)
-      if (length(prime_factors) == 2) {
-        if (prime_factors[1] < 4 & numbers::isPrime(prime_factors[2])) {
+      plot_factors <- prime_factors(total_plots)
+      if (length(plot_factors) == 2) {
+        if (plot_factors[1] < 4 & is_prime(plot_factors[2])) {
           shinyalert::shinyalert(
             "Error!!",
             "There are no options available for field dimensions. Please try a different number of treatments or checks.",
@@ -292,7 +292,7 @@ mod_Optim_server <- function(id) {
           return(NULL)
         }
       }
-      if (numbers::isPrime(total_plots)) {
+      if (is_prime(total_plots)) {
         shinyalert::shinyalert(
           "Error!!",
           "The number of field plots results in a prime number. Please try a different number of treatments.",

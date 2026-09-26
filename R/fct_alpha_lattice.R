@@ -132,7 +132,7 @@ alpha_lattice <- function(t = NULL,
     if (!is.null(locationNames)) warn_default_location_names(locationNames, l, 1:l)
     locationNames <- 1:l
   }
-  if (numbers::isPrime(nt)) fieldhub_abort('Combinations for this amount of treatments do not exist.')
+  if (is_prime(nt)) fieldhub_abort('Combinations for this amount of treatments do not exist.')
   s <- nt / k
   if (s %% 1 != 0) fieldhub_abort('Combinations for this amount of treatments do not exist.')
   

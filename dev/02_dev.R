@@ -18,12 +18,11 @@
 usethis::use_package("shinythemes")
 usethis::use_package("DT")
 usethis::use_package("dplyr")
-usethis::use_package("numbers")
 usethis::use_package("blocksdesign")
 usethis::use_package("shinycssloaders")
 usethis::use_package("ggplot2")
 usethis::use_package("plotly")
-usethis::use_package("viridis")
+usethis::use_package("viridisLite")
 usethis::use_package("shinyalert")
 usethis::use_package("desplot")
 usethis::use_package("shinyjs")
@@ -149,4 +148,3 @@ usethis::use_appveyor()
 # You're now set! ----
 # go to dev/03_deploy.R
 rstudioapi::navigateToFile("dev/03_deploy.R")
-

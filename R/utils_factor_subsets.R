@@ -13,7 +13,7 @@ factor_subsets <- function(
     augmented = FALSE, 
     all_factors = FALSE) {
     
-    factors <- numbers::primeFactors(n)
+    factors <- prime_factors(n)
     left <- 1
     right <- 1
     combos <- list()

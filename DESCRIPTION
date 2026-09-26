@@ -48,7 +48,6 @@ Imports:
     DT,
     shinythemes,
     dplyr,
-    numbers,
     blocksdesign,
     shinycssloaders,
     ggplot2,
