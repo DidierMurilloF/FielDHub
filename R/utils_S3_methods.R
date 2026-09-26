@@ -111,12 +111,12 @@ print.summary.FielDHub <- function(x, ...) {
 #' @export
 print.fieldLayout <- function(x, ...) {
   if (!missing(x)) {
-    if (is.null(x)) stop("x must be a fieldLayout object!")
+    if (is.null(x)) fieldhub_abort("x must be a fieldLayout object!")
     if (!inherits(x,"fieldLayout")) {
-      stop("x must be a fieldLayout object!")
+      fieldhub_abort("x must be a fieldLayout object!")
     }
     return(print(x$layout))
-  } else stop("x is missing!")
+  } else fieldhub_abort("x is missing!")
 }
 
 #-----------------------------------------------------------------------
@@ -156,9 +156,9 @@ print.fieldLayout <- function(x, ...) {
 #' @export
 plot.FielDHub <- function(x, ...) {
   if (!missing(x)) {
-    if (is.null(x)) stop("x must be a FielDHub object!")
+    if (is.null(x)) fieldhub_abort("x must be a FielDHub object!")
     if (!inherits(x,"FielDHub")) {
-      stop("x is not a FielDHub class")
+      fieldhub_abort("x is not a FielDHub class")
     }
     p <- plot_layout(x = x, ...)
     if (is.null(p)) {
@@ -173,5 +173,5 @@ plot.FielDHub <- function(x, ...) {
       print(x = out)
       return(invisible(list(p = out$layout, field_book = out$field_book)))
     }
-  } else stop("x is missing!")
+  } else fieldhub_abort("x is missing!")
 }

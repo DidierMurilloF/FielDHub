@@ -54,21 +54,21 @@ do_optim <- function(
     if (missing(seed)) seed <- NULL
     seed <- resolve_seed(seed, default = function() sample.int(10000, size = 1))
     local_design_seed(seed)
-    if (missing(lines)) stop("Please, define the number of lines/treatments for this design.")
-    if (missing(l)) stop("Please, define the number of locations for this design.")
-    if (missing(design) || is.null(design)) stop("Paramenter design is missing.")
+    if (missing(lines)) fieldhub_abort("Please, define the number of lines/treatments for this design.")
+    if (missing(l)) fieldhub_abort("Please, define the number of locations for this design.")
+    if (missing(design) || is.null(design)) fieldhub_abort("Paramenter design is missing.")
     if (all(c("prep", "sparse") != design)) {
-        stop("Input design is unknown. Please, choose one: 'sparse' or 'prep'.")
+        fieldhub_abort("Input design is unknown. Please, choose one: 'sparse' or 'prep'.")
     } 
     if (design == "prep" & copies_per_entry <= l) { 
-        stop("p-reps option requires that copies_per_entry be greater than the number of locations")
+        fieldhub_abort("p-reps option requires that copies_per_entry be greater than the number of locations")
     }
     if (design == "sparse") {
-        if (is.null(checks)) stop("Please, specify the number of checks!")
+        if (is.null(checks)) fieldhub_abort("Please, specify the number of checks!")
     }
     if (design == "prep") {
         if (add_checks == TRUE & is.null(checks) & is.null(rep_checks)) {
-            stop("Please, specify the number of checks!")
+            fieldhub_abort("Please, specify the number of checks!")
         }
     }
     max_entry <- lines 
@@ -78,19 +78,19 @@ do_optim <- function(
             data_input <- stats::na.omit(data_input)
             colnames(data_input) <- c("ENTRY", "NAME")
             if (length(data_input$ENTRY) != length(unique(data_input$ENTRY))) {
-              stop("Please ensure all ENTRIES in data are distinct.")
+              fieldhub_abort("Please ensure all ENTRIES in data are distinct.")
             }
             if (length(data_input$NAME) != length(unique(data_input$NAME))) {
-              stop("Please ensure all NAMES in data are distinct.")
+              fieldhub_abort("Please ensure all NAMES in data are distinct.")
             }
             df_data_checks <- data_input[1:checks, ]
             df_data_lines <- data_input[(checks + 1):nrow(data_input), ]
             ENTRY <- as.vector(df_data_lines$ENTRY)
-            if (!is.numeric(ENTRY)) stop("ENTRY column should have integer numbers!")
+            if (!is.numeric(ENTRY)) fieldhub_abort("ENTRY column should have integer numbers!")
             # max_entry <- max(ENTRY)
             max_entry <- lines
             if (nrow(df_data_lines) != lines) {
-                stop("The number of treatments/lines in the data does not match the input value")
+                fieldhub_abort("The number of treatments/lines in the data does not match the input value")
             }
         } else {
             if (add_checks == TRUE) {
@@ -98,19 +98,19 @@ do_optim <- function(
                 data_input <- stats::na.omit(data_input)
                 colnames(data_input) <- c("ENTRY", "NAME")
                 if (length(data_input$ENTRY) != length(unique(data_input$ENTRY))) {
-                  stop("Please ensure all ENTRIES in data are distinct.")
+                  fieldhub_abort("Please ensure all ENTRIES in data are distinct.")
                 }
                 if (length(data_input$NAME) != length(unique(data_input$NAME))) {
-                  stop("Please ensure all NAMES in data are distinct.")
+                  fieldhub_abort("Please ensure all NAMES in data are distinct.")
                 }
                 df_data_checks <- data_input[1:checks, ]
                 df_data_lines <- data_input[(checks + 1):nrow(data_input), ]
                 ENTRY <- as.vector(df_data_lines$ENTRY)
-                if (!is.numeric(ENTRY)) stop("ENTRY column should have integer numbers!")
+                if (!is.numeric(ENTRY)) fieldhub_abort("ENTRY column should have integer numbers!")
                 # max_entry <- max(ENTRY)
                 max_entry <- lines
                 if (nrow(df_data_lines) != lines) {
-                  stop("The number of treatments/lines in the data does not match the input value")
+                  fieldhub_abort("The number of treatments/lines in the data does not match the input value")
                 }
             } else {
                 data_input <- data[, 1:2]
@@ -118,17 +118,17 @@ do_optim <- function(
                 df_data_lines <- data_input
                 colnames(df_data_lines) <- c("ENTRY", "NAME")
                 if (length(df_data_lines$ENTRY) != length(unique(df_data_lines$ENTRY))) {
-                    stop("Please ensure all ENTRIES in data are distinct.")
+                    fieldhub_abort("Please ensure all ENTRIES in data are distinct.")
                 }
                 if (length(df_data_lines$NAME) != length(unique(df_data_lines$NAME))) {
-                    stop("Please ensure all NAMES in data are distinct.")
+                    fieldhub_abort("Please ensure all NAMES in data are distinct.")
                 }
                 ENTRY <- as.vector(df_data_lines$ENTRY)
-                if (!is.numeric(ENTRY)) stop("ENTRY column should have integer numbers!")
+                if (!is.numeric(ENTRY)) fieldhub_abort("ENTRY column should have integer numbers!")
                 #max_entry <- max(ENTRY)
                 max_entry <- lines
                 if (nrow(df_data_lines) != lines) {
-                    stop("The number of treatments/lines in the data does not match the input value")
+                    fieldhub_abort("The number of treatments/lines in the data does not match the input value")
                 }
             }
         }
@@ -174,7 +174,7 @@ do_optim <- function(
         dplyr::select(LOCATION, ENTRY, NAME, REPS)
     # Create a data frame for the checks
     if (design != "prep") {
-        if (!add_checks) stop("Un-replicated designs need checks")
+        if (!add_checks) fieldhub_abort("Un-replicated designs need checks")
         if (!is.null(checks) & checks > 0) {
             df_checks <- data.frame(
                 ENTRY = (max_entry + 1):((max_entry + checks)), 
@@ -184,7 +184,7 @@ do_optim <- function(
     } else {
         if (add_checks == TRUE & !is.null(checks) & !is.null(rep_checks)) {
             if (length(rep_checks) != checks) {
-                stop("Length of rep_checks does not match with number of checks")
+                fieldhub_abort("Length of rep_checks does not match with number of checks")
             } 
             df_checks <- data.frame(
                 ENTRY = (max_entry + 1):((max_entry + checks)), 
@@ -321,7 +321,7 @@ sparse_allocation <- function(
     if (missing(seed)) seed <- NULL
     seed <- resolve_seed(seed, default = function() sample.int(10000, size = 1))
     local_design_seed(seed)
-    if (missing(l)) stop("Please, define the number of locations for this design.")
+    if (missing(l)) fieldhub_abort("Please, define the number of locations for this design.")
     if (missing(locationNames) || length(locationNames) != l)  {
         default_names <- paste0("LOC", 1:l)
         if (!missing(locationNames)) {
@@ -339,17 +339,17 @@ sparse_allocation <- function(
     if (missing(exptName)) exptName <- "SparseExpt"
     if (missing(planter) || is.null(planter)) planter <- "serpentine"
     if (all(c("serpentine", "cartesian") != planter)) {
-        stop("Input planter choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
+        fieldhub_abort("Input planter choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
     }
     # Check if the reps per plant are mising
     if (missing(copies_per_entry)) {
-        stop("You must specify the number of reps per plant")
+        fieldhub_abort("You must specify the number of reps per plant")
     }
-    if (copies_per_entry >= l) stop("Please, enter copies_per_entry < l")
-    if (is.null(checks)) stop("Please, define the number of checks for this design.")
+    if (copies_per_entry >= l) fieldhub_abort("Please, enter copies_per_entry < l")
+    if (is.null(checks)) fieldhub_abort("Please, define the number of checks for this design.")
     if (!missing(sparse_list)) {
         if (!inherits(sparse_list, "Sparse")) {
-            stop("sparse_list must be an object of class 'Sparse'")
+            fieldhub_abort("sparse_list must be an object of class 'Sparse'")
         }
         unrep <- sparse_list
     } else {
@@ -388,7 +388,7 @@ sparse_allocation <- function(
         }
         choices <- unlist(choices_list[!sapply(choices_list, is.null)])
         if (length(choices) == 0) {
-            stop("There are no field dimension options available. Please specify nrows and ncols.")
+            fieldhub_abort("There are no field dimension options available. Please specify nrows and ncols.")
         }
         dif <- vector(mode = "numeric", length = length(choices))
         for (option in 1:length(choices)) {
@@ -542,7 +542,7 @@ multi_location_prep <- function(
     if (missing(seed)) seed <- NULL
     seed <- resolve_seed(seed, default = function() sample.int(10000, size = 1))
     local_design_seed(seed)
-    if (missing(l)) stop("Please, define the number of locations for this design.")
+    if (missing(l)) fieldhub_abort("Please, define the number of locations for this design.")
     if (missing(locationNames) || length(locationNames) != l) {
         default_names <- paste0("LOC", 1:l)
         if (!missing(locationNames)) {
@@ -560,14 +560,14 @@ multi_location_prep <- function(
     if (missing(exptName)) exptName <- "PrepExpt"
     if (missing(planter) || is.null(planter)) planter <- "serpentine"
     if (all(c("serpentine", "cartesian") != planter)) {
-        stop("Input planter choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
+        fieldhub_abort("Input planter choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
     }
     if (length(allow_fillers) != 1 || is.na(allow_fillers) ||
         !is.logical(allow_fillers)) {
-        stop("allow_fillers must be TRUE or FALSE.")
+        fieldhub_abort("allow_fillers must be TRUE or FALSE.")
     }
     if (missing(copies_per_entry) & missing(desired_avg)) {
-        stop("multi_location_prep() requires either the argument copies_per_entry or desired_avg.")
+        fieldhub_abort("multi_location_prep() requires either the argument copies_per_entry or desired_avg.")
     } 
     if (missing(copies_per_entry)) {
         copies_per_entry <- ceiling(l * desired_avg)
@@ -576,7 +576,7 @@ multi_location_prep <- function(
     if (!is.null(checks) & !is.null(rep_checks)) add_checks <- TRUE
     if (!missing(optim_list)) {
         if (!inherits(optim_list, "MultiPrep")) {
-            stop("sparse_list must be an object of class 'MultiPrep'")
+            fieldhub_abort("sparse_list must be an object of class 'MultiPrep'")
         }
         preps <- optim_list
     } else {
@@ -619,7 +619,7 @@ multi_location_prep <- function(
                 max_fillers = max_fillers
             )
             if (is.null(options)) {
-                stop(
+                fieldhub_abort(
                     "There are no field dimension options available. ",
                     "Please specify nrows and ncols or allow filler plots."
                 )
@@ -702,21 +702,21 @@ merge_user_data <- function(
         data_entry <- na.omit(data_entry) 
         colnames(data_entry) <- c("ENTRY", "NAME")
         if (length(data_entry$ENTRY) != length(unique(data_entry$ENTRY))) {
-            stop("Please ensure all ENTRIES in data are distinct.")
+            fieldhub_abort("Please ensure all ENTRIES in data are distinct.")
         }
         if (length(data_entry$NAME) != length(unique(data_entry$NAME))) {
-                stop("Please ensure all NAMES in data are distinct.")
+                fieldhub_abort("Please ensure all NAMES in data are distinct.")
         }
         if (add_checks) input_checks <- checks else input_checks <- 0
         if (!is.null(rep_checks)) {
             if (length(rep_checks) != input_checks) {
-                stop("Length of checks does not match replications!")
+                fieldhub_abort("Length of checks does not match replications!")
             }
         }
         df_data_lines <- data_entry[(input_checks + 1):nrow(data_entry), ]
         entries_in_file <- nrow(df_data_lines)
         if (entries_in_file != lines) {
-            stop("Input lines does not match number of lines in input data!")
+            fieldhub_abort("Input lines does not match number of lines in input data!")
         }
         if (add_checks) {
             max_entry <- lines
@@ -765,7 +765,7 @@ merge_user_data <- function(
         }
         # Check if the number of plots are the same after the data merge
         if (!all(size_location == as.numeric(optim_out$size_locations))) {
-            stop("After data merge, size of locations does not match!")
+            fieldhub_abort("After data merge, size of locations does not match!")
         }
         optim_out$list_locs <- merged_list_locs
         return(optim_out)

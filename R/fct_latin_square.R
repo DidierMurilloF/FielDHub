@@ -70,23 +70,23 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
   seed <- resolve_seed(seed)
   local_design_seed(seed)
   if (all(c("serpentine", "cartesian") != planter)) {
-    base::stop('Input planter is unknown. Please, choose one: "serpentine" or "cartesian"')
+    fieldhub_abort('Input planter is unknown. Please, choose one: "serpentine" or "cartesian"')
   }
   n <- t
   l <- 1
   if (is.null(data)) {
     if (all(!is.null(c(n, reps))) && all(base::lengths(list(n, reps)) == 1)) {
       if (all(is.numeric(c(n, reps))) && all(c(n, reps) %% 1 == 0) & all(c(n, reps) > 0)) {
-        if (n > 10) stop("\n'latinsquare()' allows only up to 10 treatments.")
-        if (n < 2) stop("latin_square() requires more than one treatment.")
+        if (n > 10) fieldhub_abort("\n'latinsquare()' allows only up to 10 treatments.")
+        if (n < 2) fieldhub_abort("latin_square() requires more than one treatment.")
         ls.len <- n
         Name.Rows <- paste(rep("Row", ls.len), 1:ls.len)
         Name.Columns <- paste(rep("Column", ls.len), 1:ls.len)
         Name.Treatments <- paste(rep("T", ls.len), 1:ls.len,  sep = "")
-      }else stop("\n'latinsquare()' requires a possitive integer number for input t")
-    }else stop("\n'latinsquare()' requires an possitive integer number for input t")
+      }else fieldhub_abort("\n'latinsquare()' requires a possitive integer number for input t")
+    }else fieldhub_abort("\n'latinsquare()' requires an possitive integer number for input t")
   }else if (!is.null(reps) && !is.null(data)) {
-    if(!is.data.frame(data)) stop("Data must be a data frame.")
+    if(!is.data.frame(data)) fieldhub_abort("Data must be a data frame.")
     data <- as.data.frame(na.omit(data[,1:3]))
     colnames(data) <- c("Row", "Column", "Treatment")
     Row <- as.vector(na.omit(data$Row))
@@ -98,12 +98,12 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
     n.rows <- length(levels(Row.f))
     n.cols <- length(levels(Column.f))
     n.treatments <- length(levels(Treatment.f))
-    if (any(c(n.rows, n.cols, n.treatments) != n.rows)) stop("\n'latinsquare()' requires a balanced data as input!")
+    if (any(c(n.rows, n.cols, n.treatments) != n.rows)) fieldhub_abort("\n'latinsquare()' requires a balanced data as input!")
     Name.Rows <- as.character(Row.f)
     Name.Columns <- as.character(Column.f)
     Name.Treatments <- as.character(Treatment.f)
     ls.len <- n.treatments
-    if (ls.len > 10) stop("\n'latinsquare()' allows only up to 10 treatments.")
+    if (ls.len > 10) fieldhub_abort("\n'latinsquare()' allows only up to 10 treatments.")
   }
   if(!is.null(l) && is.numeric(l) && length(l) == 1) {
     if (l > 1 && is.null(locationNames)) {
@@ -112,7 +112,7 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
       if (length(locationNames) < l) locationNames <- 1:l
     }
     if (length(plotNumber) < l || is.null(plotNumber)) plotNumber <- seq(1001, 1000*(l+1), 1000)
-  }else stop("\n'latinsquare()' requires a integer for number of locations!")
+  }else fieldhub_abort("\n'latinsquare()' requires a integer for number of locations!")
   plot.numbs <- seriePlot.numbers(plot.number = plotNumber, reps = reps, l = l, t = ls.len*ls.len)
   if (!is.null(locationNames) && length(locationNames) == l) {
     locs <- locationNames

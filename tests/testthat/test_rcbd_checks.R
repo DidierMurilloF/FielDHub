@@ -50,10 +50,10 @@ test_that("rep_checks recycles from a scalar", {
   expect_equal(e$reps_per_block[1:3], c(2, 2, 2))
 })
 
-test_that("rep_checks defaults to 1 with a message", {
-  expect_message(
+test_that("rep_checks defaults to 1 with a classed warning", {
+  expect_warning(
     e <- rcbd_resolve_entries(t = 5, checks = "CK1"),
-    "ordinary RCBD"
+    "ordinary RCBD", class = "fieldhub_default_warning"
   )
   expect_equal(e$reps_per_block[1], 1)
 })

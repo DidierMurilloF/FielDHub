@@ -104,7 +104,7 @@ rectangular_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber 
     colnames(data_up) <- c("ENTRY", "TREATMENT")
     data_up$TREATMENT <- as.character(data_up$TREATMENT)
     new_t <- length(data_up$TREATMENT)
-    if (t != new_t) base::stop("Number of treatments do not match with data input.")
+    if (t != new_t) fieldhub_abort("Number of treatments do not match with data input.")
     TRT <- data_up$TREATMENT
     nt <- length(TRT)
     data_alpha <- data_up

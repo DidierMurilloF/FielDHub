@@ -107,12 +107,12 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
           nV <- length(Vplots)
         }
       }else {
-        stop("\n 'strip_plot()' requires an 1-dimensional array for input Hplots and Vplots.")
+        fieldhub_abort("\n 'strip_plot()' requires an 1-dimensional array for input Hplots and Vplots.")
       }
-    }else stop("\n 'strip_plot()' requires arguments to be differents than NULL")
+    }else fieldhub_abort("\n 'strip_plot()' requires arguments to be differents than NULL")
   } else {
-    if(!is.data.frame(data)) stop("Data must be a data frame.")
-    if (ncol(data) < 2) base::stop("Data input needs at least two columns.")
+    if(!is.data.frame(data)) fieldhub_abort("Data must be a data frame.")
+    if (ncol(data) < 2) fieldhub_abort("Data input needs at least two columns.")
     data <- as.data.frame(data[,1:2])
     colnames(data) <- c("Hplot", "Vplot")
     Hplots <- as.vector(na.omit(data$Hplot))
@@ -137,7 +137,7 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
         locationNames <- 1:l
       }
     }
-  }else stop("\n'strip_plot()' requires number of locations to be an integer.")
+  }else fieldhub_abort("\n'strip_plot()' requires number of locations to be an integer.")
   if (!is.null(plotNumber) && length(plotNumber) == l) {
     if (any(!is.numeric(plotNumber)) || any(plotNumber < 1) || any(plotNumber %% 1 != 0) ||
         any(diff(plotNumber) < 0)) {

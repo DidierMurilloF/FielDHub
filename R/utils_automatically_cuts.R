@@ -3,7 +3,10 @@ automatically_cuts <- function(
     planter_mov = "serpentine",
     stacked = "By Row", 
     dim_data = NULL) {
-    if (is.null(data)) stop("Internal error: the checks map is missing.")
+    if (is.null(data)) {
+        fieldhub_abort("Internal error: the checks map is missing.",
+                       class = "fieldhub_internal_error")
+    }
     w_map <- data
     auto_cuts_by_r <- numeric()
     data_dim_each_block <- dim_data

@@ -78,13 +78,13 @@ split_split_plot <- function(wp = NULL, sp = NULL, ssp = NULL, reps = NULL, type
   seed <- resolve_seed(seed)
   local_design_seed(seed)
   if (all(c(1,2) != type)) {
-    stop("Input type is unknown. Please, choose one: 1 or 2, for CRD or RCBD, respectively.")
+    fieldhub_abort("Input type is unknown. Please, choose one: 1 or 2, for CRD or RCBD, respectively.")
   }
   b <- reps
   args0 <- c(wp, sp, ssp, reps, l)
   args1 <- list(wp, sp, ssp)
-  if (any(lengths(list(reps,l)) >  1))  stop("Number of blocks and locations need to be integers.")
-  if (any(c(reps, l) %% 1 != 0)) stop("Number of blocks and locations need to be integers.")
+  if (any(lengths(list(reps,l)) >  1))  fieldhub_abort("Number of blocks and locations need to be integers.")
+  if (any(c(reps, l) %% 1 != 0)) fieldhub_abort("Number of blocks and locations need to be integers.")
   if (is.null(data)) {
     if(all(!is.null(args0))) {
       if(all(is.numeric(args0)) && all(lengths(args1) == 1)) {
@@ -98,13 +98,13 @@ split_split_plot <- function(wp = NULL, sp = NULL, ssp = NULL, reps = NULL, type
           sp <- length(SubPlots)
         } else if (is.numeric(sp)) {
           SubPlots <- 1:sp
-        } else stop("The sub plots should be more than one.")
+        } else fieldhub_abort("The sub plots should be more than one.")
         if (length(ssp) > 1) {
           SubSubPlots <- ssp
           ssp <- length(SubSubPlots)
         } else if (is.numeric(ssp)) {
           SubSubPlots <- 1:ssp
-        } else stop("The sub sub plots should be more than one.")
+        } else fieldhub_abort("The sub sub plots should be more than one.")
       }else if(all(lengths(list(wp, sp, ssp)) > 1)){
         WholePlots <- wp
         wp <- length(WholePlots)
@@ -137,20 +137,20 @@ split_split_plot <- function(wp = NULL, sp = NULL, ssp = NULL, reps = NULL, type
               SubSubPlots <- ssp
               ssp <- length(SubSubPlots)
             }else {
-              stop("The sub plots and sub sub plots should be more than one.")
+              fieldhub_abort("The sub plots and sub sub plots should be more than one.")
             }
           }
         }else {
-          stop("The whole plots should be more than one.")
+          fieldhub_abort("The whole plots should be more than one.")
         }
       }else {
-        stop("Please, check your input variables.")
+        fieldhub_abort("Please, check your input variables.")
       }
     }else {
-      stop("Input wp, sp, reps and l must be differents of NULL.")
+      fieldhub_abort("Input wp, sp, reps and l must be differents of NULL.")
     }
   }else {
-    if(!is.data.frame(data)) stop("Data must be a data frame.")
+    if(!is.data.frame(data)) fieldhub_abort("Data must be a data frame.")
     data <- as.data.frame(data[,1:3])
     colnames(data) <- c("WholePlot", "SubPlot", "SubSubPlot")
     WholePlots <- as.vector(na.omit(data$WholePlot))

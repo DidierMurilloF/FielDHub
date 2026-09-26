@@ -146,44 +146,44 @@ diagonal_arrangement <- function(
     year <- resolve_year(year)
     if (!is.null(checksPercent) &&
         (!is.numeric(checksPercent) || length(checksPercent) != 1 || is.na(checksPercent))) {
-        base::stop("'checksPercent' must be a single number.")
+        fieldhub_abort("'checksPercent' must be a single number.")
     }
     if (!is.logical(sameEntries) || length(sameEntries) != 1 || is.na(sameEntries)) {
-        base::stop("'sameEntries' must be TRUE or FALSE.")
+        fieldhub_abort("'sameEntries' must be TRUE or FALSE.")
     }
     if (sameEntries) {
         if (kindExpt != "DBUDC") {
-            base::stop("'sameEntries' is only available when kindExpt = 'DBUDC'.")
+            fieldhub_abort("'sameEntries' is only available when kindExpt = 'DBUDC'.")
         }
         if (multiLocationData) {
-            base::stop("'sameEntries' cannot be used with multiLocationData = TRUE.")
+            fieldhub_abort("'sameEntries' cannot be used with multiLocationData = TRUE.")
         }
         if (is.null(blocks) || any(blocks != blocks[1])) {
-            base::stop("With 'sameEntries', all blocks must have the same size.")
+            fieldhub_abort("With 'sameEntries', all blocks must have the same size.")
         }
     }
   
     if (all(c("serpentine", "cartesian") != planter)) {
-        base::stop('Input for planter is unknown. Please, choose one: "serpentine" or "cartesian"')
+        fieldhub_abort('Input for planter is unknown. Please, choose one: "serpentine" or "cartesian"')
     }
     if (all(c("SUDC", "DBUDC") != kindExpt)) {
-        base::stop('Input for kindExpt is unknown. Please, choose one: "SUDC" or "DBUDC"')
+        fieldhub_abort('Input for kindExpt is unknown. Please, choose one: "SUDC" or "DBUDC"')
     }
     if (all(c("column", "row") != splitBy)) {
-        base::stop('Input for splitBy is unknown. Please, choose one: "column" or "row"')
+        fieldhub_abort('Input for splitBy is unknown. Please, choose one: "column" or "row"')
     }
     
     if (!inherits(plotNumber,"list")) { 
         if (!is.null(plotNumber) && is.numeric(plotNumber)) {
           if(any(plotNumber < 1) || any(diff(plotNumber) < 0)) {
-              base::stop('diagonal_arrangement() requires plotNumber to be positive and sorted integers.')
+              fieldhub_abort('diagonal_arrangement() requires plotNumber to be positive and sorted integers.')
           }
         }
         if(!is.numeric(plotNumber) && !is.integer(plotNumber)) {
-            base::stop("plotNumber should be an integer or a numeric vector.")
+            fieldhub_abort("plotNumber should be an integer or a numeric vector.")
         }
         if (any(plotNumber %% 1 != 0)) {
-            base::stop("plotNumber should be integers.")
+            fieldhub_abort("plotNumber should be integers.")
         }
     }
     
@@ -194,7 +194,7 @@ diagonal_arrangement <- function(
             plotNumber <- as.list(seq(1001, 1000*(l+1), 1000))
             } else plotNumber <- list(1001)
         }
-        } else stop("Number of locations/sites is missing")
+        } else fieldhub_abort("Number of locations/sites is missing")
     }
     
     if (kindExpt != "SUDC") {
@@ -226,12 +226,12 @@ diagonal_arrangement <- function(
     if (!is.null(data)) {
         arg1 <- list(nrows, ncols, l);arg2 <- c(nrows, ncols, l)
         if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
-            base::stop("'diagonal_arrangement()' requires input nrows, ncols, and l to be numeric and distint of NULL")
+            fieldhub_abort("'diagonal_arrangement()' requires input nrows, ncols, and l to be numeric and distint of NULL")
         }
     } else {
         arg1 <- list(nrows, ncols, lines, l);arg2 <- c(nrows, ncols, lines, l)
         if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
-            base::stop("'diagonal_arrangement()' requires input nrows, ncols, and l to be numeric and distint of NULL")
+            fieldhub_abort("'diagonal_arrangement()' requires input nrows, ncols, and l to be numeric and distint of NULL")
         }
     } 
     # Set Option_NCD to TRUE
@@ -362,7 +362,7 @@ diagonal_arrangement <- function(
                     infoP$V7 <- Exptlines
                 }  
             }
-        } else stop("Field dimensions do not fit with the data entered!")
+        } else fieldhub_abort("Field dimensions do not fit with the data entered!")
         percent_table <- checks_percentages$dt
         percent_col <- percent_table[,2]
         len <- length(percent_col)
@@ -372,7 +372,7 @@ diagonal_arrangement <- function(
             options_percent <- as.numeric(percent_col)
             match_percent <- which(abs(options_percent - checksPercent) < 1e-6)
             if (length(match_percent) == 0) {
-                base::stop("'checksPercent' must be one of the percentages available for this field: ",
+                fieldhub_abort("'checksPercent' must be one of the percentages available for this field: ",
                            paste(options_percent, collapse = ", "), ".")
             }
             selected_percent <- options_percent[match_percent[1]]
@@ -530,10 +530,10 @@ diagonal_arrangement <- function(
         my_export_design <- function(){
 
             
-            if (is.null(data_random$rand)) base::stop("Random matrix is missing.")
-            if (is.null(rand_checks$col_checks)) base::stop("checks matrix is missing.")
-            if (is.null(plot_nuber_layout$w_map_letters1)) base::stop("Plot numbers matrix is missing.")
-            if (is.null(split_name_diagonal1$my_names)) base::stop("Names matrix is missing.")
+            if (is.null(data_random$rand)) fieldhub_abort("Random matrix is missing.")
+            if (is.null(rand_checks$col_checks)) fieldhub_abort("checks matrix is missing.")
+            if (is.null(plot_nuber_layout$w_map_letters1)) fieldhub_abort("Plot numbers matrix is missing.")
+            if (is.null(split_name_diagonal1$my_names)) fieldhub_abort("Names matrix is missing.")
             
             movement_planter <- planter
             random_entries_map <- data_random$rand
@@ -578,10 +578,10 @@ diagonal_arrangement <- function(
         
         fieldBook <- as.data.frame(my_export_design()$final_expt)
         if (is.null(fieldBook) || !is.data.frame(fieldBook)) {
-            base::stop("fieldBook is NULL or != data frame.")
+            fieldhub_abort("fieldBook is NULL or != data frame.")
         }
         if (dim(fieldBook)[1]*dim(fieldBook)[2] == 0) {
-            base::stop("fieldBook is NULL or != data frame or length 0.")
+            fieldhub_abort("fieldBook is NULL or != data frame or length 0.")
         }
         fieldBook <- fieldBook[,-11]
         
@@ -709,14 +709,14 @@ unrep_data_parameters <- function(
                     gen_list <- as.data.frame(gen_list)
                     gen_list <- na.omit(gen_list[, 1:3])
                     if (ncol(gen_list) < 3) {
-                        base::stop("Input data should have 4 columns: LOCATION, ENTRY, NAME")
+                        fieldhub_abort("Input data should have 4 columns: LOCATION, ENTRY, NAME")
                     }
                     colnames(gen_list) <- c("LOCATION", "ENTRY", "NAME")
                     if (length(gen_list$ENTRY) != length(unique(gen_list$ENTRY))) {
-                      stop("Please ensure all ENTRIES in data are distinct.")
+                      fieldhub_abort("Please ensure all ENTRIES in data are distinct.")
                     }
                     if (length(gen_list$NAME) != length(unique(gen_list$NAME))) {
-                      stop("Please ensure all NAMES in data are distinct.")
+                      fieldhub_abort("Please ensure all NAMES in data are distinct.")
                     }
                     # Create a space in memory for the locations data entry list
                     list_locs <- setNames(
@@ -736,10 +736,10 @@ unrep_data_parameters <- function(
                     data_entry_UP <- na.omit(data_entry[,1:2]) 
                     colnames(data_entry_UP) <- c("ENTRY", "NAME")
                     if (length(data_entry_UP$ENTRY) != length(unique(data_entry_UP$ENTRY))) {
-                      stop("Please ensure all ENTRIES in data are distinct.")
+                      fieldhub_abort("Please ensure all ENTRIES in data are distinct.")
                     }
                     if (length(data_entry_UP$NAME) != length(unique(data_entry_UP$NAME))) {
-                      stop("Please ensure all NAMES in data are distinct.")
+                      fieldhub_abort("Please ensure all NAMES in data are distinct.")
                     }
                 } else if (is.list(data)) {
                     list_locs <- data
@@ -747,10 +747,10 @@ unrep_data_parameters <- function(
                     data_entry_UP <- na.omit(data_entry[ ,1:2]) 
                     colnames(data_entry_UP) <- c("ENTRY", "NAME")
                     if (length(data_entry_UP$ENTRY) != length(unique(data_entry_UP$ENTRY))) {
-                      stop("Please ensure all ENTRIES in data are distinct.")
+                      fieldhub_abort("Please ensure all ENTRIES in data are distinct.")
                     }
                     if (length(data_entry_UP$NAME) != length(unique(data_entry_UP$NAME))) {
-                      stop("Please ensure all NAMES in data are distinct.")
+                      fieldhub_abort("Please ensure all NAMES in data are distinct.")
                     }
                 }
             } else {
@@ -758,10 +758,10 @@ unrep_data_parameters <- function(
                 data_entry_UP <- na.omit(data_entry[,1:2]) 
                 colnames(data_entry_UP) <- c("ENTRY", "NAME")
                 if (!sameEntries && length(data_entry_UP$ENTRY) != length(unique(data_entry_UP$ENTRY))) {
-                  stop("Please ensure all ENTRIES in data are distinct.")
+                  fieldhub_abort("Please ensure all ENTRIES in data are distinct.")
                 }
                 if (!sameEntries && length(data_entry_UP$NAME) != length(unique(data_entry_UP$NAME))) {
-                  stop("Please ensure all NAMES in data are distinct.")
+                  fieldhub_abort("Please ensure all NAMES in data are distinct.")
                 }
             }
             ##############################################################################################
@@ -776,9 +776,9 @@ unrep_data_parameters <- function(
                         checks <- length(checks)
                     } 
                 } 
-            } else base::stop("'diagonal_arrangement()' requires input checks to be an integer greater than 0.")
+            } else fieldhub_abort("'diagonal_arrangement()' requires input checks to be an integer greater than 0.")
             if (any(diff(checksEntries) > 1) || any(diff(checksEntries) < 0)) {
-                base::stop(paste("'diagonal_arrangement()' requires input checks to be a continuous range."))
+                fieldhub_abort(paste("'diagonal_arrangement()' requires input checks to be a continuous range."))
             }
             ###############################################################################################
             if (kindExpt == "DBUDC") {
@@ -789,10 +789,10 @@ unrep_data_parameters <- function(
                     check_same_entries(data_entry_UP, checks)
                 } else {
                     if (length(data_entry_UP$ENTRY) != length(unique(data_entry_UP$ENTRY))) {
-                      stop("Please ensure all ENTRIES in data are distinct.")
+                      fieldhub_abort("Please ensure all ENTRIES in data are distinct.")
                     }
                     if (length(data_entry_UP$NAME) != length(unique(data_entry_UP$NAME))) {
-                      stop("Please ensure all NAMES in data are distinct.")
+                      fieldhub_abort("Please ensure all NAMES in data are distinct.")
                     }
                 }
                 B <- data_entry_UP[(checks + 1):nrow(data_entry_UP),]
@@ -820,9 +820,9 @@ unrep_data_parameters <- function(
                   checksEntries <- checks
                   checks <- length(checks)
                 }
-            } else base::stop("'diagonal_arrangement()' requires input checks to be an integer greater than 0.")
+            } else fieldhub_abort("'diagonal_arrangement()' requires input checks to be an integer greater than 0.")
             if (any(diff(checksEntries) > 1) || any(diff(checksEntries) < 0)) {
-              base::stop(paste("'diagonal_arrangement()' requires input checks to be a continuous range."))
+              fieldhub_abort(paste("'diagonal_arrangement()' requires input checks to be a continuous range."))
             }
             if (kindExpt != "DBUDC") {
                 NAME <- c(paste0(rep("Check-", checks), 1:checks),
@@ -833,18 +833,18 @@ unrep_data_parameters <- function(
                 )
                 colnames(data_entry_UP) <- c("ENTRY", "NAME")
                 if (length(data_entry_UP$ENTRY) != length(unique(data_entry_UP$ENTRY))) {
-                  stop("Please ensure all ENTRIES in data are distinct.")
+                  fieldhub_abort("Please ensure all ENTRIES in data are distinct.")
                 }
                 if (length(data_entry_UP$NAME) != length(unique(data_entry_UP$NAME))) {
-                  stop("Please ensure all NAMES in data are distinct.")
+                  fieldhub_abort("Please ensure all NAMES in data are distinct.")
                 }
-                if (nrow(data_entry_UP) != (lines + checks)) base::stop("nrows data != of lines + checks")
+                if (nrow(data_entry_UP) != (lines + checks)) fieldhub_abort("nrows data != of lines + checks")
             } else if (kindExpt == "DBUDC") {
                 if (is.null(blocks)) {
-                    stop("'diagonal_arrangement()' requires blocks when kindExpt = 'DBUDC' and data is null.")
+                    fieldhub_abort("'diagonal_arrangement()' requires blocks when kindExpt = 'DBUDC' and data is null.")
                 } 
                 if (sum(blocks) != lines) {
-                    stop("In 'diagonal_arrangement()' number of lines and total lines in 'blocks' do not match.")
+                    fieldhub_abort("In 'diagonal_arrangement()' number of lines and total lines in 'blocks' do not match.")
                 }
                 if (sameEntries) {
                     # Every block holds the same entries, numbered after the checks
@@ -862,10 +862,10 @@ unrep_data_parameters <- function(
                 data_entry_UP$BLOCK <- c(rep("ALL", checks), rep(1:length(blocks), times = blocks))
                 colnames(data_entry_UP) <- c("ENTRY", "NAME", "BLOCK")
                 if (!sameEntries && length(data_entry_UP$ENTRY) != length(unique(data_entry_UP$ENTRY))) {
-                  stop("Please ensure all ENTRIES in data are distinct.")
+                  fieldhub_abort("Please ensure all ENTRIES in data are distinct.")
                 }
                 if (!sameEntries && length(data_entry_UP$NAME) != length(unique(data_entry_UP$NAME))) {
-                  stop("Please ensure all NAMES in data are distinct.")
+                  fieldhub_abort("Please ensure all NAMES in data are distinct.")
                 }
                 Blocks <- length(blocks)
                 if (Option_NCD == TRUE) {
@@ -928,14 +928,14 @@ check_same_entries <- function(data_entry, checks) {
     same_set <- vapply(block_entries, function(e) setequal(e, block_entries[[1]]), logical(1))
     repeated <- vapply(block_entries, anyDuplicated, numeric(1)) > 0
     if (!all(same_set) || any(repeated)) {
-        stop("With 'sameEntries', every block must hold the same entries, each once.")
+        fieldhub_abort("With 'sameEntries', every block must hold the same entries, each once.")
     }
     names_per_entry <- tapply(lines$NAME, lines$ENTRY, function(n) length(unique(n)))
     if (any(names_per_entry > 1)) {
-        stop("With 'sameEntries', each ENTRY must have the same NAME in every block.")
+        fieldhub_abort("With 'sameEntries', each ENTRY must have the same NAME in every block.")
     }
     if (any(data_entry$ENTRY[1:checks] %in% lines$ENTRY)) {
-        stop("With 'sameEntries', checks cannot also be entries of the blocks.")
+        fieldhub_abort("With 'sameEntries', checks cannot also be entries of the blocks.")
     }
     invisible(data_entry)
 }

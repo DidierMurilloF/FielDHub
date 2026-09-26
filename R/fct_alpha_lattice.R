@@ -114,13 +114,13 @@ alpha_lattice <- function(t = NULL,
       fieldhub_abort('Basic design parameters missing (t, k, r or l).')
     }
     if(!is.data.frame(data)) fieldhub_abort("Data must be a data frame.")
-    if (ncol(data) < 2) base::stop("Data input needs at least two columns with: ENTRY and NAME.")
+    if (ncol(data) < 2) fieldhub_abort("Data input needs at least two columns with: ENTRY and NAME.")
     data_up <- as.data.frame(data[,c(1,2)])
     data_up <- na.omit(data_up)
     colnames(data_up) <- c("ENTRY", "TREATMENT")
     data_up$TREATMENT <- as.character(data_up$TREATMENT)
     new_t <- length(data_up$TREATMENT)
-    if (t != new_t) base::stop("Number of treatments do not match with data input.")
+    if (t != new_t) fieldhub_abort("Number of treatments do not match with data input.")
     TRT <- data_up$TREATMENT
     nt <- length(TRT)
     if (nt != t) fieldhub_abort('Number of treatment do not match with data input')

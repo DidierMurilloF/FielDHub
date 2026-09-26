@@ -5,7 +5,7 @@ ARCBD_plot_number <- function(plot.number = NULL,
                               Fillers = NULL,
                               nameEXPT = NULL) {
   if (all(c("serpentine", "cartesian") != planter)) {
-    stop("Input planter choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
+    fieldhub_abort("Input planter choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
   }
   datos_name <- nameEXPT
   nrows <- b

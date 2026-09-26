@@ -87,8 +87,8 @@ validate_fieldhub_design <- function(x) {
     }
   }
   if (length(problems) > 0) {
-    stop("Internal error: the design result ", paste(problems, collapse = ", "), ".",
-         call. = FALSE)
+    fieldhub_abort("Internal error: the design result ", paste(problems, collapse = ", "), ".",
+                   class = "fieldhub_internal_error", call. = FALSE)
   }
   invisible(x)
 }

@@ -112,10 +112,12 @@ build_row_column_onestage <- function(nt, nrows, ncols, reps, latinize, searches
     # design this small. Signal a recoverable, classed condition that carries the
     # underlying blocksdesign message, so the caller can fall back to the
     # two-stage method while still surfacing (not masking) an unrelated failure.
-    stop(structure(
-      class = c("onestage_infeasible", "error", "condition"),
-      list(message = conditionMessage(optd), call = NULL)
-    ))
+    fieldhub_abort(
+      conditionMessage(optd),
+      class = c("onestage_infeasible", "fieldhub_optimization_error"),
+      data = list(parent = optd),
+      call = NULL
+    )
   }
   des <- optd$Design
   # Map to the two-stage layout structure (Level_2 = columns, Level_3 = rows),

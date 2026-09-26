@@ -115,13 +115,13 @@ optimized_arrangement <- function(
     seed <- resolve_seed(seed)
     local_design_seed(seed)
     if (all(c("serpentine", "cartesian") != planter)) {
-        base::stop('Input planter is unknown. Please, choose one: "serpentine" or "cartesian"')
+        fieldhub_abort('Input planter is unknown. Please, choose one: "serpentine" or "cartesian"')
     }
     if (!is.numeric(plotNumber) && !is.integer(plotNumber)) {
-        stop("plotNumber should be an integer or a numeric vector.")
+        fieldhub_abort("plotNumber should be an integer or a numeric vector.")
     }
     if (any(plotNumber %% 1 != 0)) {
-        stop("plotNumber should be integers.")
+        fieldhub_abort("plotNumber should be integers.")
     }
     if (!is.null(l)) {
         if (is.null(plotNumber) || length(plotNumber) != l) {
@@ -131,17 +131,17 @@ optimized_arrangement <- function(
             warn_default_plot_numbers(plotNumber, l, default_plots)
             plotNumber <- default_plots
         }
-    } else stop("Number of locations/sites is missing")
+    } else fieldhub_abort("Number of locations/sites is missing")
     
     if (!is.null(data)) {
         arg1 <- list(nrows, ncols, l);arg2 <- c(nrows, ncols, l)
         if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
-            base::stop('"optimized_arrangement()" requires arguments nrows, ncols, and l to be numeric and distint of NULL')
+            fieldhub_abort('"optimized_arrangement()" requires arguments nrows, ncols, and l to be numeric and distint of NULL')
         }
     } else {
         arg1 <- list(nrows, ncols, lines, l);arg2 <- c(nrows, ncols, lines, l)
         if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
-            base::stop('"optimized_arrangement()" requires arguments nrows, ncols, and l to be numeric and distint of NULL')
+            fieldhub_abort('"optimized_arrangement()" requires arguments nrows, ncols, and l to be numeric and distint of NULL')
         }
     } 
     
@@ -177,9 +177,9 @@ optimized_arrangement <- function(
                 }
             } else if (length(checks) > 1) {
                 if (any(any(checks != sort(checks)) || any(diff(checks) > 1))) {
-                    base::stop("Input checks must be in consecutive numbers and sorted.")
+                    fieldhub_abort("Input checks must be in consecutive numbers and sorted.")
                 } 
-                if(length(unique(checks)) != length(checks)) base::stop("Input checks must be different from each other.")
+                if(length(unique(checks)) != length(checks)) fieldhub_abort("Input checks must be different from each other.")
                 if (length(amountChecks) == length(checks)) {
                     RepChecks <- amountChecks
                 } else if (length(amountChecks) == 1 && amountChecks > length(checks)) {
@@ -194,7 +194,7 @@ optimized_arrangement <- function(
                     }
                 }
             }
-        } else base::stop('"optimized_arrangement()" requires inputs checks and amountChecks to be possitive integers and distinct of NULL.')
+        } else fieldhub_abort('"optimized_arrangement()" requires inputs checks and amountChecks to be possitive integers and distinct of NULL.')
         
         t_plots <- as.numeric(sum(RepChecks) + lines)
         if (is_prime(t_plots) || t_plots != (nrows * ncols)) {
@@ -225,19 +225,19 @@ optimized_arrangement <- function(
         )
         colnames(gen_list) <- c("ENTRY", "NAME", "REPS")
     } else {
-        if (!is.data.frame(data)) base::stop("Data must be a data frame.")
+        if (!is.data.frame(data)) fieldhub_abort("Data must be a data frame.")
         gen_list <- data
         gen_list <- gen_list[, 1:3]
         gen_list <- na.omit(gen_list)
         colnames(gen_list) <- c("ENTRY", "NAME", "REPS")
         if (length(gen_list$ENTRY) != length(unique(gen_list$ENTRY))) {
-            stop("Please ensure all ENTRIES in data are distinct.")
+            fieldhub_abort("Please ensure all ENTRIES in data are distinct.")
         }
         if (length(gen_list$NAME) != length(unique(gen_list$NAME))) {
-            stop("Please ensure all NAMES in data are distinct.")
+            fieldhub_abort("Please ensure all NAMES in data are distinct.")
         }
         if (any(gen_list$ENTRY < 1) || any(gen_list$REPS < 1)) {
-            base::stop("Negatives number are not allowed in the data.")
+            fieldhub_abort("Negatives number are not allowed in the data.")
         } 
         gen_list_ordered <- gen_list[order(gen_list$REPS, decreasing = TRUE), ]
         my_GENS <- subset(gen_list_ordered, gen_list_ordered$REPS == 1)
@@ -249,7 +249,7 @@ optimized_arrangement <- function(
         lines <- sum(my_GENS$REPS)
         t_plots <- sum(as.numeric(gen_list$REPS))
         if (is_prime(t_plots)) {
-            stop("No options when the total number of plots is a prime number.", call. = FALSE)
+            fieldhub_abort("No options when the total number of plots is a prime number.", call. = FALSE)
         }
         if (t_plots != (nrows * ncols)) {
             choices <- factor_subsets(t_plots)$labels
@@ -263,7 +263,7 @@ optimized_arrangement <- function(
                     labels = paste(dims$rows, "x", dims$cols)
                 )
             } else {
-                stop("Field dimensions do not fit with the data entered. Try another amount of treatments!", call. = FALSE)
+                fieldhub_abort("Field dimensions do not fit with the data entered. Try another amount of treatments!", call. = FALSE)
             }
         }
     }

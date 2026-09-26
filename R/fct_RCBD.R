@@ -139,11 +139,11 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
                  checks = NULL, rep_checks = NULL, spread_checks = TRUE) {
   has_checks <- !is.null(checks)
   if (!is.logical(spread_checks) || length(spread_checks) != 1 || is.na(spread_checks)) {
-    stop("RCBD() requires 'spread_checks' to be a single TRUE or FALSE.")
+    fieldhub_abort("RCBD() requires 'spread_checks' to be a single TRUE or FALSE.")
   }
   b <- reps
   if (all(c("serpentine", "cartesian") != planter)) {
-    stop("Input planter choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
+    fieldhub_abort("Input planter choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
   }
   seed <- resolve_seed(seed)
   local_design_seed(seed)
@@ -193,7 +193,7 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
         s <- paste(rep("T", each = nt), 1:nt, sep = "")
       }else if(is.character(t) & length(t) > 1) {
         if (anyDuplicated(t) > 0) {
-          stop("RCBD() requires unique entry labels; duplicated: ",
+          fieldhub_abort("RCBD() requires unique entry labels; duplicated: ",
                paste(unique(t[duplicated(t)]), collapse = ", "))
         }
         nt <- length(t)
@@ -203,10 +203,10 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
         fieldhub_abort("'RCBD()' requires more than one treatment.")
       }
     }else {
-      stop("Input t and b are missing.")
+      fieldhub_abort("Input t and b are missing.")
     }
   }else if (!is.null(b) && !is.null(data)) {
-    if(!is.data.frame(data)) stop("Data must be a data frame.")
+    if(!is.data.frame(data)) fieldhub_abort("Data must be a data frame.")
     data <- as.data.frame(na.omit(data[,1]))
     colnames(data) <- "Treatment"
     data$Treatment <- as.character(data$Treatment)

@@ -194,8 +194,8 @@ plot_number_splits <- function(plot.number = NULL, reps = NULL, l = NULL, t = NU
   b <- reps
   wp <- t
   if (!is.null(plot.number)) {
-    if (any(plot.number < 1)) stop ("Plot numbers should be positive values.")
-    if (any(plot.number %% 1 != 0)) stop ("Plot numbers should be integer values.")
+    if (any(plot.number < 1)) fieldhub_abort("Plot numbers should be positive values.")
+    if (any(plot.number %% 1 != 0)) fieldhub_abort("Plot numbers should be integer values.")
     if (length(plot.number) == l) {
       plot.number <- plot.number[1:l]
       plot.number_serie <- seriePlot.numbers(plot.number = plot.number, reps = b, l = l, t = wp)
@@ -293,8 +293,8 @@ seriePlot.numbers <- function(plot.number = NULL, reps = NULL, l = NULL, t = NUL
   overlap <- FALSE
   if (t >= 100) overlap <- TRUE
   if (!is.null(plot.number)) {
-    if (any(plot.number < 1)) stop ("Plot numbers should be possitive values.")
-    if (any(plot.number %% 1 != 0)) stop ("Plot numbers should be integer values.")
+    if (any(plot.number < 1)) fieldhub_abort("Plot numbers should be possitive values.")
+    if (any(plot.number %% 1 != 0)) fieldhub_abort("Plot numbers should be integer values.")
     if (length(plot.number) == l) {
       plot.number <- plot.number[1:l]
     }else if (length(plot.number) < l) {
@@ -394,7 +394,7 @@ plot_number <- function(planter = "serpentine",
       serie <- plot_number[i]:(plot_number[i] + dim_each_block[i] - 1 - w)
       if (length(serie) == dim_each_block[i]) {
         plot_number_blocks[[i]] <- serie
-      } else stop("problem in length of the current serie")
+      } else fieldhub_abort("problem in length of the current serie")
     }
   }
   plot_number_layout <- names_plot

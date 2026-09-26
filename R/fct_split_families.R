@@ -45,13 +45,13 @@
 #' @export
 split_families <- function(l = NULL, data = NULL) {
   if (is.null(l) || !is.numeric(l) || length(l) != 1 || l < 1 || l %% 1 != 0) {
-    stop("\n 'split_families()' requires the number of locations 'l' as a whole number of 1 or more.")
+    fieldhub_abort("\n 'split_families()' requires the number of locations 'l' as a whole number of 1 or more.")
   }
   if(!is.data.frame(data)) {
-    stop("\n 'split_families()' requires input data to be a data frame.")
+    fieldhub_abort("\n 'split_families()' requires input data to be a data frame.")
   } 
   if (ncol(data) < 3) {
-    stop("\n 'split_families()' requires that data have three columns: ENTRY | NAME | FAMILY.")
+    fieldhub_abort("\n 'split_families()' requires that data have three columns: ENTRY | NAME | FAMILY.")
   }
   gen.list <- na.omit(data[,1:3])
   colnames(gen.list) <- c("ENTRY", "NAME", "FAMILY")

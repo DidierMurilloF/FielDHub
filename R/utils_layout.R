@@ -86,7 +86,10 @@ path_end <- function(nrows, ncols, planter, n) {
 #' fillers at the end of the planting path (n at most the number of columns)
 #' @noRd
 filler_columns <- function(nrows, ncols, planter, n) {
-  if (n > ncols) stop("Internal error: more fillers than columns in the last row.")
+  if (n > ncols) {
+    fieldhub_abort("Internal error: more fillers than columns in the last row.",
+                   class = "fieldhub_internal_error")
+  }
   sort(path_end(nrows, ncols, planter, n)[, "col"])
 }
 

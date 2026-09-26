@@ -38,7 +38,7 @@ warn_default_location_names <- function(locationNames, l, default) {
 resolve_year <- function(year) {
   if (is.null(year)) return(format(Sys.Date(), "%Y"))
   if (length(year) != 1 || is.na(year)) {
-    stop("'year' must be a single value, such as 2026.", call. = FALSE)
+    fieldhub_abort("'year' must be a single value, such as 2026.", call. = FALSE)
   }
   as.character(year)
 }

@@ -11,7 +11,7 @@ get_random_stacked <- function(stacked = "By Column",
   b <- length(data_dim_each_block)
   target <- rep(paste0("B", 1:b), times = data_dim_each_block)
   if (sum(matrix_checks == 0) != sum(data_dim_each_block)) {
-    stop("Block dimensions do not fit to the matrix")
+    fieldhub_abort("Block dimensions do not fit to the matrix")
   }
   target <- rep(paste0("B", 1:b), times = data_dim_each_block)
   v <- 1
@@ -43,7 +43,7 @@ get_random_stacked <- function(stacked = "By Column",
     matrix_checks_random_entries <- matrix_checks
     # print("Randomization was successful. It passed all tests! Great!!")
     # print(c(treatments_random, len_entries_to_random))
-  } else stop("Some entries are missing in the randomization!!")
+  } else fieldhub_abort("Some entries are missing in the randomization!!")
   return(list(rand = matrix_checks_random_entries, 
               Entries = split_entries, 
               Lines = data_dim_each_block, 

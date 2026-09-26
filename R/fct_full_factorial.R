@@ -76,11 +76,11 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
                            locationNames = NULL, factorLabels = TRUE,
                            data = NULL) {
   if (all(c("serpentine", "cartesian") != planter)) {
-    stop("Input for planter choice is unknown. Please, choose one: serpentine or cartesian.")
+    fieldhub_abort("Input for planter choice is unknown. Please, choose one: serpentine or cartesian.")
   }
   seed <- resolve_seed(seed)
   local_design_seed(seed)
-  if(l < 1 || is.null(l)) stop("Please, check the value for the number of locations.")
+  if(l < 1 || is.null(l)) fieldhub_abort("Please, check the value for the number of locations.")
   if (!is.null(plotNumber) && length(plotNumber) == l) {
     if (any(!is.numeric(plotNumber)) || any(plotNumber < 1) || any(plotNumber %% 1 != 0) ||
         any(diff(plotNumber) < 0)) {
@@ -94,7 +94,7 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
   if (is.null(data)) {
     if(!is.null(setfactors)) {
       if(is.numeric(setfactors)) {
-        if (length(setfactors) < 2) stop("More than one factor needs to be specified.")
+        if (length(setfactors) < 2) fieldhub_abort("More than one factor needs to be specified.")
         nt <- length(setfactors)
         TRT <- rep(LETTERS[1:nt], each = reps)
         newlevels <- get.levels(k = setfactors)
@@ -105,10 +105,10 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
                                 levels = unlist(newlevels)))
         levels.by.factor <- as.vector(unlist(newlevels))
         entries_each_factor <- setfactors
-      }else stop("In 'full_factorial()' the input setfactors must be a numeric vector.")
+      }else fieldhub_abort("In 'full_factorial()' the input setfactors must be a numeric vector.")
     }
   } else {
-    if(!is.data.frame(data)) stop("Data must be a data frame.")
+    if(!is.data.frame(data)) fieldhub_abort("Data must be a data frame.")
     data <- as.data.frame(na.omit(data[,1:2]))
     colnames(data) <- c("factors", "levels")
     data$factors <- factor(data$factors, as.character(unique(data$factors)))

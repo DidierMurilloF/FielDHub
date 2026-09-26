@@ -141,15 +141,15 @@ partially_replicated <- function(
     year <- resolve_year(year)
     
     if (all(c("serpentine", "cartesian") != planter)) {
-        base::stop('Input "planter" is unknown. Please, choose one: "serpentine" or "cartesian"')
+        fieldhub_abort('Input "planter" is unknown. Please, choose one: "serpentine" or "cartesian"')
     }
     if (length(allow_fillers) != 1 || is.na(allow_fillers) ||
         !is.logical(allow_fillers)) {
-        stop("allow_fillers must be TRUE or FALSE.")
+        fieldhub_abort("allow_fillers must be TRUE or FALSE.")
     }
 
     if (is.null(nrows) || is.null(ncols) || !is.numeric(nrows) || !is.numeric(ncols)) {
-        base::stop('Basic design parameters missing (nrows, ncols) or is not numeric.')
+        fieldhub_abort('Basic design parameters missing (nrows, ncols) or is not numeric.')
     }
     if (length(nrows) != l) {
         if (length(nrows) < l) {
@@ -176,19 +176,19 @@ partially_replicated <- function(
     
     if (is.null(data)) {
         if (is.null(repGens) || is.null(repUnits)) {
-            base::stop("Input repGens and repUnits are missing.")
+            fieldhub_abort("Input repGens and repUnits are missing.")
         } 
         if (length(repGens) != length(repUnits)) {
-            base::stop("Input repGens and repUnits should have the same length.")
+            fieldhub_abort("Input repGens and repUnits should have the same length.")
         }
     }
     
     if (!is.numeric(plotNumber) && !is.integer(plotNumber)) {
-        stop("plotNumber should be an integer or a numeric vector.")
+        fieldhub_abort("plotNumber should be an integer or a numeric vector.")
     }
     
     if (any(plotNumber %% 1 != 0)) {
-        stop("plotNumber should be integers.")
+        fieldhub_abort("plotNumber should be integers.")
     }
     
     if (!is.null(l)) {
@@ -201,7 +201,7 @@ partially_replicated <- function(
             warn_default_plot_numbers(plotNumber, l, default_plots)
             plotNumber <- default_plots
         }
-    } else stop("Number of locations/sites is missing")
+    } else fieldhub_abort("Number of locations/sites is missing")
     if (!is.null(data)) {
         if (multiLocationData) {
             if (is.data.frame(data)) {
@@ -209,15 +209,15 @@ partially_replicated <- function(
                 gen_list <- as.data.frame(gen_list)
                 gen_list <- na.omit(gen_list[, 1:4])
                 if (ncol(gen_list) < 4) {
-                    base::stop("Input data should have 4 columns: LOCATION | ENTRY | NAME | REPS")
+                    fieldhub_abort("Input data should have 4 columns: LOCATION | ENTRY | NAME | REPS")
                 }
                 colnames(gen_list) <- c("LOCATION", "ENTRY", "NAME", "REPS")
                 if (any(gen_list$ENTRY < 1) || any(gen_list$REPS < 1)) {
-                    base::stop("Please ensure all ENTRIES and REPS in data are positive integers.")
+                    fieldhub_abort("Please ensure all ENTRIES and REPS in data are positive integers.")
                 }
                 locs_in_data <- length(unique(gen_list$LOCATION))
                 if (locs_in_data != l) {
-                  stop("Number of locations in data do not match with the input value l")
+                  fieldhub_abort("Number of locations in data do not match with the input value l")
                 }
                 # Create a space in memory for the locations data entry list
                 list_locs <- setNames(
@@ -233,10 +233,10 @@ partially_replicated <- function(
                         dplyr::arrange(dplyr::desc(REPS))
 
                     if (length(df_loc$ENTRY) != length(unique(df_loc$ENTRY))) {
-                      stop("Please ensure all ENTRIES in data are distinct.")
+                      fieldhub_abort("Please ensure all ENTRIES in data are distinct.")
                     }
                     if (length(df_loc$NAME) != length(unique(df_loc$NAME))) {
-                      stop("Please ensure all NAMES in data are distinct.")
+                      fieldhub_abort("Please ensure all NAMES in data are distinct.")
                     }
                     
                     list_locs[[site]] <- df_loc
@@ -245,21 +245,21 @@ partially_replicated <- function(
                 list_locs <- data
             }
         } else {
-            if (!is.data.frame(data)) base::stop("Data must be a data frame!")
+            if (!is.data.frame(data)) fieldhub_abort("Data must be a data frame!")
             if (ncol(data) < 3) {
-                base::stop("Input data should have 3 columns: ENTRY | NAME | REPS")
+                fieldhub_abort("Input data should have 3 columns: ENTRY | NAME | REPS")
             }
             gen_list <- data[, 1:3]
             gen_list <- na.omit(gen_list)
             colnames(gen_list) <- c("ENTRY", "NAME", "REPS")
             if (length(gen_list$ENTRY) != length(unique(gen_list$ENTRY))) {
-                stop("Please ensure all ENTRIES in data are distinct.")
+                fieldhub_abort("Please ensure all ENTRIES in data are distinct.")
             }
             if (length(gen_list$NAME) != length(unique(gen_list$NAME))) {
-                stop("Please ensure all NAMES in data are distinct.")
+                fieldhub_abort("Please ensure all NAMES in data are distinct.")
             }
             if (any(gen_list$ENTRY < 1) || any(gen_list$REPS < 1)) {
-                base::stop("Please ensure all ENTRIES and REPS in data are positive integers.")
+                fieldhub_abort("Please ensure all ENTRIES and REPS in data are positive integers.")
             } 
             gen_list_order <- gen_list[order(gen_list$REPS, decreasing = TRUE), ]
             GENOS <- subset(gen_list_order, REPS == 1)
@@ -271,7 +271,7 @@ partially_replicated <- function(
             lines <- sum(GENOS$REPS)
             t_plots <- sum(as.numeric(gen_list$REPS))
             if (!allow_fillers && is_prime(t_plots)) {
-                stop("No options when the total number of plots is a prime number.", call. = FALSE)
+                fieldhub_abort("No options when the total number of plots is a prime number.", call. = FALSE)
             }
             list_locs <- vector(mode = "list", length = l)
             for (data_list in 1:l) {
@@ -280,11 +280,11 @@ partially_replicated <- function(
         }
     } else if (is.null(data)) {
         if (length(repGens) != length(repUnits)) {
-            stop("Input repGens and repUnits need to be of the same length.")
+            fieldhub_abort("Input repGens and repUnits need to be of the same length.")
         } 
         t_plots <- sum(repGens * repUnits)
         if (!allow_fillers && is_prime(t_plots)) {
-            stop("No options when the total number of plots is a prime number.", call. = FALSE)
+            fieldhub_abort("No options when the total number of plots is a prime number.", call. = FALSE)
         }
         ENTRY <- 1:sum(repGens)
         NAME <- paste(rep("G", sum(repGens)), 1:sum(repGens), sep = "")
@@ -307,7 +307,7 @@ partially_replicated <- function(
     field_capacity <- nrows * ncols
     fillers <- field_capacity - experimental_plots
     if (allow_fillers && any(fillers < 0)) {
-        stop("Field dimensions must provide at least one cell per experimental plot.")
+        fieldhub_abort("Field dimensions must provide at least one cell per experimental plot.")
     }
     if (!allow_fillers) fillers <- rep(0, l)
 

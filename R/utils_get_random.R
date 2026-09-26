@@ -10,7 +10,7 @@ get_random <- function(n_rows = NULL,
                        which.blocks = NULL,
                        data_dim_each_block = NULL) {
   if (all(c("serpentine", "cartesian") != planter_mov)) {
-    stop("Input planter_mov is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
+    fieldhub_abort("Input planter_mov is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
   } 
   my_split_r <- d_checks
   n_rows <- as.numeric(n_rows)
@@ -176,7 +176,7 @@ get_random <- function(n_rows = NULL,
         w_map_ok <- w_map
         # print("Randomization was successful. It passed all tests!")
         # print(c(treatments_random, len_entries_to_random))
-      } else stop("Some entries are missing in the randomization!!")
+      } else fieldhub_abort("Some entries are missing in the randomization!!")
       return(list(rand = w_map_ok, 
                   Entries = entries, 
                   Lines = data_dim_each_block, 

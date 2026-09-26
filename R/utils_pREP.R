@@ -42,13 +42,13 @@ prep_field_mask <- function(
     planter = "serpentine") {
 
     if (all(c("serpentine", "cartesian") != planter)) {
-        stop('Input "planter" is unknown. Please, choose one: "serpentine" or "cartesian"')
+        fieldhub_abort('Input "planter" is unknown. Please, choose one: "serpentine" or "cartesian"')
     }
     if (length(fillers) != 1 || is.na(fillers) || fillers < 0 || fillers %% 1 != 0) {
-        stop("fillers must be a non-negative integer.")
+        fieldhub_abort("fillers must be a non-negative integer.")
     }
     if (fillers >= nrows * ncols) {
-        stop("fillers must leave at least one active field cell.")
+        fieldhub_abort("fillers must leave at least one active field cell.")
     }
 
     active_field <- matrix(TRUE, nrow = nrows, ncol = ncols)
@@ -79,10 +79,10 @@ pREP <- function(
         gen_list <- na.omit(gen_list)
         colnames(gen_list) <- c("ENTRY", "NAME", "REPS")
         if (length(gen_list$ENTRY) != length(unique(gen_list$ENTRY))) {
-            stop("Please ensure all ENTRIES in data are distinct.")
+            fieldhub_abort("Please ensure all ENTRIES in data are distinct.")
         }
         if (length(gen_list$NAME) != length(unique(gen_list$NAME))) {
-            stop("Please ensure all NAMES in data are distinct.")
+            fieldhub_abort("Please ensure all NAMES in data are distinct.")
         }
         reps_one_time <- subset(gen_list, REPS == 1)
         if (nrow(reps_one_time) == 0) {
@@ -112,10 +112,10 @@ pREP <- function(
     field_capacity <- nrows * ncols
     if (length(Fillers) != 1 || is.na(Fillers) ||
         Fillers < 0 || Fillers %% 1 != 0) {
-        stop("Number of fillers must be a non-negative integer.")
+        fieldhub_abort("Number of fillers must be a non-negative integer.")
     }
     if (!prep && Fillers != field_capacity - total_plots) {
-        stop("Number of fillers does not match the available field capacity.")
+        fieldhub_abort("Number of fillers does not match the available field capacity.")
     }
 
     if (prep == TRUE) {
@@ -232,7 +232,7 @@ pREP <- function(
     
     # Check if the frequency of rep treatments is the same as the input data
     if (total_plot_reps != length(rep_trts)) {
-      stop("In the final design, rep treatments does not match with input data")
+      fieldhub_abort("In the final design, rep treatments does not match with input data")
     }
     
     unreplicated_treatments <- as.numeric(rownames(dups)[dups == 1])
@@ -290,18 +290,18 @@ prep_dimension_options <- function(
 
     if (length(total_plots) != 1 || is.na(total_plots) ||
         total_plots < 1 || total_plots %% 1 != 0) {
-        stop("total_plots must be a positive integer.")
+        fieldhub_abort("total_plots must be a positive integer.")
     }
     if (length(allow_fillers) != 1 || is.na(allow_fillers) ||
         !is.logical(allow_fillers)) {
-        stop("allow_fillers must be TRUE or FALSE.")
+        fieldhub_abort("allow_fillers must be TRUE or FALSE.")
     }
     if (is.null(max_fillers)) {
         max_fillers <- .prep_max_fillers
     }
     if (length(max_fillers) != 1 || is.na(max_fillers) ||
         max_fillers < 0 || max_fillers %% 1 != 0) {
-        stop("max_fillers must be a non-negative integer.")
+        fieldhub_abort("max_fillers must be a non-negative integer.")
     }
 
     additional_plots <- if (allow_fillers) 0:max_fillers else 0

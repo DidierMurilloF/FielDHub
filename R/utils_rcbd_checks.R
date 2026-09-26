@@ -26,44 +26,44 @@ rcbd_resolve_entries <- function(t = NULL,
                                  spread_checks = TRUE) {
   pool <- NULL
   if (!is.null(data)) {
-    if (!is.data.frame(data)) stop("Data must be a data frame.")
+    if (!is.data.frame(data)) fieldhub_abort("Data must be a data frame.")
     pool <- as.character(stats::na.omit(data[[1]]))
   } else if (is.character(t) && length(t) > 1) {
     pool <- as.character(t)
   }
   if (!is.null(pool) && anyDuplicated(pool) > 0) {
-    stop("RCBD() requires unique entry labels; duplicated: ",
+    fieldhub_abort("RCBD() requires unique entry labels; duplicated: ",
          paste(unique(pool[duplicated(pool)]), collapse = ", "))
   }
 
   if (is.numeric(checks) && length(checks) == 1) {
     if (!is.finite(checks) || checks %% 1 != 0 || checks < 1) {
-      stop("RCBD() requires 'checks' to be a positive integer when given as a count.")
+      fieldhub_abort("RCBD() requires 'checks' to be a positive integer when given as a count.")
     }
     if (is.null(pool)) {
-      stop("RCBD() requires 'data' (or a character vector 't') when 'checks' is given as a count.")
+      fieldhub_abort("RCBD() requires 'data' (or a character vector 't') when 'checks' is given as a count.")
     }
     if (checks >= length(pool)) {
-      stop("RCBD() requires at least one test entry: 'checks' must be fewer than the entries supplied.")
+      fieldhub_abort("RCBD() requires at least one test entry: 'checks' must be fewer than the entries supplied.")
     }
     check_names <- pool[seq_len(checks)]
     test_names  <- pool[-seq_len(checks)]
   } else if (is.character(checks) && length(checks) >= 1) {
     if (anyDuplicated(checks) > 0) {
-      stop("RCBD() requires 'checks' labels to be unique.")
+      fieldhub_abort("RCBD() requires 'checks' labels to be unique.")
     }
     check_names <- as.character(checks)
     if (is.null(pool)) {
       if (is.null(t) || !is.numeric(t) || length(t) != 1) {
-        stop("RCBD() requires a numeric 't', 'data', or a character vector 't' alongside character 'checks'.")
+        fieldhub_abort("RCBD() requires a numeric 't', 'data', or a character vector 't' alongside character 'checks'.")
       }
       if (t < 0 || t != as.integer(t)) {
-        stop("RCBD() requires 't' to be a single non-negative integer.")
+        fieldhub_abort("RCBD() requires 't' to be a single non-negative integer.")
       }
       test_names <- paste0("T", seq_len(t))
       clash <- intersect(check_names, test_names)
       if (length(clash) > 0) {
-        stop("RCBD() cannot auto-generate test labels: check label(s) ",
+        fieldhub_abort("RCBD() cannot auto-generate test labels: check label(s) ",
              paste(clash, collapse = ", "), " collide with the generated names ",
              "T1..T", t, ". Supply the entries explicitly through 'data' or a ",
              "character vector 't'.")
@@ -82,44 +82,47 @@ rcbd_resolve_entries <- function(t = NULL,
             msg_parts <- c(msg_parts, paste0("\"", missing, "\""))
           }
         }
-        stop("RCBD() check label(s) not found in the supplied entries: ",
+        fieldhub_abort("RCBD() check label(s) not found in the supplied entries: ",
              paste(msg_parts, collapse = ", "))
       }
       test_names <- setdiff(pool, check_names)
     }
   } else {
-    stop("RCBD() requires 'checks' to be a positive integer or a character vector of labels.")
+    fieldhub_abort("RCBD() requires 'checks' to be a positive integer or a character vector of labels.")
   }
 
   if (length(test_names) < 1) {
-    stop("RCBD() requires at least one test entry after resolving 'checks'.")
+    fieldhub_abort("RCBD() requires at least one test entry after resolving 'checks'.")
   }
 
   n_checks <- length(check_names)
   if (is.null(rep_checks)) {
     rep_checks <- rep(1, n_checks)
-    message("'rep_checks' was missing; it was set to 1 for every check. ",
-            "This is an ordinary RCBD with the checks included in the entry list.")
+    fieldhub_warn(
+      "'rep_checks' was missing; it was set to 1 for every check. ",
+      "This is an ordinary RCBD with the checks included in the entry list.",
+      class = "fieldhub_default_warning"
+    )
   }
   if (!is.numeric(rep_checks)) {
-    stop("RCBD() requires 'rep_checks' to be numeric.")
+    fieldhub_abort("RCBD() requires 'rep_checks' to be numeric.")
   }
   if (anyNA(rep_checks)) {
-    stop("RCBD() requires 'rep_checks' to be numeric.")
+    fieldhub_abort("RCBD() requires 'rep_checks' to be numeric.")
   }
   if (any(!is.finite(rep_checks))) {
-    stop("RCBD() requires 'rep_checks' to be finite.")
+    fieldhub_abort("RCBD() requires 'rep_checks' to be finite.")
   }
   if (any(rep_checks %% 1 != 0)) {
-    stop("RCBD() requires 'rep_checks' to be integers.")
+    fieldhub_abort("RCBD() requires 'rep_checks' to be integers.")
   }
   if (any(rep_checks < 1)) {
-    stop("RCBD() requires 'rep_checks' to be greater than or equal to 1.")
+    fieldhub_abort("RCBD() requires 'rep_checks' to be greater than or equal to 1.")
   }
   if (length(rep_checks) == 1) {
     rep_checks <- rep(rep_checks, n_checks)
   } else if (length(rep_checks) != n_checks) {
-    stop(sprintf(
+    fieldhub_abort(sprintf(
       "RCBD() requires 'rep_checks' to be of length 1 or %d (the number of checks); got %d.",
       n_checks, length(rep_checks)))
   }
@@ -138,14 +141,14 @@ rcbd_resolve_entries <- function(t = NULL,
   # The field book is joined back to this table by label (Task 4 Step 7), so a
   # duplicated TREATMENT would silently mislabel an entry. Guard the invariant.
   if (anyDuplicated(entries$TREATMENT) > 0) {
-    stop("RCBD() produced duplicated entry labels: ",
+    fieldhub_abort("RCBD() produced duplicated entry labels: ",
          paste(unique(entries$TREATMENT[duplicated(entries$TREATMENT)]),
                collapse = ", "))
   }
 
   n_units <- sum(entries$reps_per_block)
   if (n_units > 10000) {
-    stop("RCBD() would build a block of ",
+    fieldhub_abort("RCBD() would build a block of ",
          format(n_units, big.mark = ",", scientific = FALSE),
          " plots, which is not a plausible field block. Reduce 'rep_checks' or ",
          "the number of entries (the limit is 10,000 plots per block).")

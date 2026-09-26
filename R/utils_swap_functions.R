@@ -23,15 +23,15 @@
 #'
 #' @noRd
 pairs_distance <- function(X) {
-  if (!is.matrix(X)) stop("Input must be a matrix")
-  if (!is.numeric(X)) stop("Matrix elements must be numeric")
+  if (!is.matrix(X)) fieldhub_abort("Input must be a matrix")
+  if (!is.numeric(X)) fieldhub_abort("Matrix elements must be numeric")
 
   nr <- nrow(X)
   # NA cells are inactive field positions and must not enter the distance
   # calculations as an artificial replicated treatment.
   tab <- table(as.vector(X))
   dupsI <- as.integer(names(tab)[tab > 1L])
-  if (length(dupsI) == 0L) stop("All elements in X appear only once")
+  if (length(dupsI) == 0L) fieldhub_abort("All elements in X appear only once")
 
   out_list <- vector("list", length(dupsI))
   for (i in seq_along(dupsI)) {
@@ -183,15 +183,15 @@ swap_pairs <- function(X,
                        lambda = 0.5,
                        dist_method = "euclidean",
                        candidate_sample_size = 4) {
-  if (!is.matrix(X)) stop("Input must be a matrix")
-  if (!is.numeric(X)) stop("Matrix elements must be numeric")
+  if (!is.matrix(X)) fieldhub_abort("Input must be a matrix")
+  if (!is.numeric(X)) fieldhub_abort("Matrix elements must be numeric")
 
   input_X <- X
   input_freq <- table(input_X)
   nr <- nrow(X)
   nc <- ncol(X)
   active_pos <- which(!is.na(X), arr.ind = TRUE)
-  if (nrow(active_pos) == 0L) stop("X must contain at least one active cell")
+  if (nrow(active_pos) == 0L) fieldhub_abort("X must contain at least one active cell")
 
   if (anyNA(X)) {
     center <- colMeans(active_pos)
@@ -207,7 +207,7 @@ swap_pairs <- function(X,
   } else if (dist_method == "manhattan") {
     .vec_dist_manhattan
   } else {
-    stop("Invalid dist_method. Use 'euclidean' or 'manhattan'.")
+    fieldhub_abort("Invalid dist_method. Use 'euclidean' or 'manhattan'.")
   }
 
   swap_succeed <- FALSE
@@ -313,7 +313,7 @@ swap_pairs <- function(X,
 
       output_freq <- table(X)
       if (!all(input_freq == output_freq)) {
-        stop("swap_pairs() changed the frequency of some integers.")
+        fieldhub_abort("swap_pairs() changed the frequency of some integers.")
       }
 
       rows_incidence[w - 1L] <- sum(apply(X, 1L, function(row) {

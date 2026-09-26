@@ -100,12 +100,12 @@ CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL,
         fieldhub_abort('"CRD()" requires more than one treatment.')
       }
     } else {
-      stop("Inputs t and reps are missing.")
+      fieldhub_abort("Inputs t and reps are missing.")
     }
     N <- nt * reps
     REP <- rep(1:reps, times = nt)
   } else {
-    if (!is.data.frame(data)) stop("Data must be a data frame.")
+    if (!is.data.frame(data)) fieldhub_abort("Data must be a data frame.")
     if (ncol(data) < 2) fieldhub_abort("Data input needs at least two columns with the names: Treatment and Reps.")
     data <- as.data.frame(data[, 1:2])
     data <- na.omit(data)

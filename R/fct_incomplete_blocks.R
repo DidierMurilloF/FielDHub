@@ -100,13 +100,13 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
       fieldhub_abort('Some of the basic design parameters are missing (t, k, r or l)')
     }
     if(!is.data.frame(data)) fieldhub_abort("Data must be a data frame.")
-    if (ncol(data) < 2) base::stop("Data input needs at least two columns with: ENTRY and NAME.")
+    if (ncol(data) < 2) fieldhub_abort("Data input needs at least two columns with: ENTRY and NAME.")
     data_up <- as.data.frame(data[,c(1,2)])
     data_up <- na.omit(data_up)
     colnames(data_up) <- c("ENTRY", "TREATMENT")
     data_up$TREATMENT <- as.character(data_up$TREATMENT)
     new_t <- length(data_up$TREATMENT)
-    if (t != new_t) base::stop("Number of treatments do not match with the data input.")
+    if (t != new_t) fieldhub_abort("Number of treatments do not match with the data input.")
     TRT <- data_up$TREATMENT
     nt <- length(TRT)
     lookup <- TRUE
@@ -183,18 +183,18 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
 #' 
 concurrence_matrix <- function(df=NULL, trt=NULL, target=NULL) {
   if (is.null(df)) {
-    stop('No input dataset provided.')
+    fieldhub_abort('No input dataset provided.')
   }
   if (is.null(trt)) {
-    stop('No input treatment factor provided.')
+    fieldhub_abort('No input treatment factor provided.')
   }
   if (is.null(target)) {
-    stop('No input target design factor provided.')
+    fieldhub_abort('No input target design factor provided.')
   }
   df[,target]<-as.factor(df[,target])
   df[,trt]<-as.factor(df[,trt])
   s <- length(levels(df[,target]))
-  if (s==0) { stop('No levels found for design factor provided.') }
+  if (s==0) { fieldhub_abort('No levels found for design factor provided.') }
   inc <- as.matrix(table(df[,target],df[,trt]))
   for (i in 1:s) {
     inc[inc[,i]>0,i] <- 1

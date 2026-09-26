@@ -95,7 +95,7 @@ compute_index_ranges <- function(x) {
     from = to - lengths + 1
     return(list(from = from, to = to))
   } else {
-    stop("'x' must be a numeric vector or a list of numeric vectors")
+    fieldhub_abort("'x' must be a numeric vector or a list of numeric vectors")
   }
 }
 
@@ -110,7 +110,7 @@ compute_index_ranges <- function(x) {
 #' @noRd
 total_elements <- function(alist) {
   if (!is.list(alist)) {
-    stop("The 'total_elements' function requires a list as input.")
+    fieldhub_abort("The 'total_elements' function requires a list as input.")
   }
   
   length(unlist(alist))
@@ -132,11 +132,11 @@ total_elements <- function(alist) {
 split_matrix_into_blocks <- function(matrix_object, blocks, byrow = TRUE) {
 
   if (!is.matrix(matrix_object)) {
-    stop("Input must be a matrix.")
+    fieldhub_abort("Input must be a matrix.")
   }
     
   if (!is.list(blocks) && !is.numeric(blocks)) {
-    stop("Blocks must be a numeric vector or a list of numeric vectors.")
+    fieldhub_abort("Blocks must be a numeric vector or a list of numeric vectors.")
   }
   
   num_blocks = length(blocks)
@@ -157,9 +157,9 @@ split_matrix_into_blocks <- function(matrix_object, blocks, byrow = TRUE) {
   
   # Validate the total size against the matrix dimension before the loop
   if (byrow && size != nrow(matrix_object)) {
-    stop("Number of rows in 'matrix_object' does not match 'blocks'")
+    fieldhub_abort("Number of rows in 'matrix_object' does not match 'blocks'")
   } else if (!byrow && size != ncol(matrix_object)) {
-    stop("Number of columns in 'matrix_object' does not match 'blocks'")
+    fieldhub_abort("Number of columns in 'matrix_object' does not match 'blocks'")
   }
   
   # Use a loop to populate the blocks_list based on the 'byrow' flag

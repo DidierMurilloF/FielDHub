@@ -6,14 +6,14 @@ validateTreatments <- function(data) {
   duplicates <- treatment_counts[treatment_counts$ID > 1, ]
   
   if (nrow(duplicates) > 0) {
-    stop("There are duplicates within REP for some LOCATIONs:\n")
+    fieldhub_abort("There are duplicates within REP for some LOCATIONs:\n")
   } else {
     # Check if all treatments are present exactly once within each REP for each LOCATION
     unique_treatments_per_location_rep <- aggregate(ENTRY ~ LOCATION + REP, data=data, function(x) length(unique(x)))
     expected_treatments_count <- unique(unique_treatments_per_location_rep$ENTRY)
     
     # if (length(expected_treatments_count) != 1) {
-    #   stop("Not all treatments are present exactly once within each REP for each LOCATION. Here are the details:\n")
+    #   fieldhub_abort("Not all treatments are present exactly once within each REP for each LOCATION. Here are the details:\n")
     # } 
   }
 }

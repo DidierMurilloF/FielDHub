@@ -37,8 +37,8 @@ plot_layout <- function(
     l = 1, 
     stacked = "vertical",
     ...) {
-    if (!inherits(x,"FielDHub")) stop("x is not a FielDHub class object") 
-    if (length(l) != 1 || l < 1 || l %% 1 != 0) stop("l must be a positive integer!")
+    if (!inherits(x,"FielDHub")) fieldhub_abort("x is not a FielDHub class object")
+    if (length(l) != 1 || l < 1 || l %% 1 != 0) fieldhub_abort("l must be a positive integer!")
     x <- with_design_class(x)
     check_layout_arguments(planter, stacked)
     options <- layout_options(x, planter = planter, stacked = stacked)

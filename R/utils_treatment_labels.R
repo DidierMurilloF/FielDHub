@@ -24,7 +24,7 @@ treatment_labels <- function(t, nt, fun) {
 #' @noRd
 check_unique_labels <- function(labels, fun) {
   if (anyDuplicated(labels) > 0) {
-    stop(fun, "() requires unique treatment labels; duplicated: ",
+    fieldhub_abort(fun, "() requires unique treatment labels; duplicated: ",
          paste(unique(labels[duplicated(labels)]), collapse = ", "),
          call. = FALSE)
   }

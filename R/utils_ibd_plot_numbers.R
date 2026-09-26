@@ -1,9 +1,9 @@
 ibd_plot_numbers <- function(nt = NULL, plot.number = NULL, r = NULL, l = NULL) {
   
   if (!is.null(plot.number)) {
-    if (any(plot.number < 1)) stop ("Plot numbers should be possitive values.")
-    if (any(plot.number %% 1 != 0)) stop ("Plot numbers should be integer values.")
-    if (!is.numeric(plot.number)) stop ("Plot numbers should be integer values.")
+    if (any(plot.number < 1)) fieldhub_abort("Plot numbers should be possitive values.")
+    if (any(plot.number %% 1 != 0)) fieldhub_abort("Plot numbers should be integer values.")
+    if (!is.numeric(plot.number)) fieldhub_abort("Plot numbers should be integer values.")
     
     if (length(plot.number) == l) {
       plot.number <- plot.number[1:l]

@@ -125,6 +125,10 @@
 - The app now supplies its Flatly Bootstrap 3 theme through `bslib`, which is
   already part of Shiny's dependency stack, instead of the additional
   `shinythemes` package.
+- Public design functions and core helpers now signal failures through the
+  shared `fieldhub_error` condition hierarchy instead of unclassed base
+  errors. The notice that `rep_checks` defaulted to one is now a classed
+  `fieldhub_default_warning` rather than an unstructured message.
 
 ### Fix bugs:
 

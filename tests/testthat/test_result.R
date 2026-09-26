@@ -65,7 +65,8 @@ test_that("the validator rejects results that break the contract", {
 
   bad <- design
   bad$metadata$design <- "crd"
-  expect_error(validate_fieldhub_design(bad), "class that does not match its design")
+  expect_error(validate_fieldhub_design(bad), "class that does not match its design",
+               class = "fieldhub_internal_error")
 
   bad <- design
   bad$metadata$schema_version <- 2L

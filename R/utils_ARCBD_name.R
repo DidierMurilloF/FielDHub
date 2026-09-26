@@ -1,7 +1,7 @@
 ARCBD_name <- function(Fillers = NULL, b = NULL, layout = NULL, name.expt = NULL,
                        planter = NULL) {
   if (all(c("serpentine", "cartesian") != planter)) {
-    stop("Input planter is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
+    fieldhub_abort("Input planter is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
   }
   r_map <- layout
   nrows <- b

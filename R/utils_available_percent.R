@@ -212,7 +212,7 @@ random_checks <- function(dt = NULL, d_checks = NULL, p = NULL, percent = NULL,
   } 
   set.seed(seed)
   if (all(c("serpentine", "cartesian") != planter_mov)) {
-    stop("Input planter_mov choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
+    fieldhub_abort("Input planter_mov choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
   }
   my_P <- p
   if (!is.null(percent) && is.null(exptlines)) {
@@ -227,10 +227,13 @@ random_checks <- function(dt = NULL, d_checks = NULL, p = NULL, percent = NULL,
   }
   my_index <- as.numeric(my_index)
   w_map <- d_checks[[my_index]]
-  if(is.null(w_map)) stop("Input w_map is NULL.")
+  if(is.null(w_map)) fieldhub_abort("Input w_map is NULL.")
   n_cols <- ncol(w_map)
   n_rows <- nrow(w_map)
-  if (is.null(w_map)) stop("Internal error: the checks map is missing.")
+  if (is.null(w_map)) {
+    fieldhub_abort("Internal error: the checks map is missing.",
+                   class = "fieldhub_internal_error")
+  }
   multi <- kindExpt == "DBUDC"
   
   if (multi == TRUE) {

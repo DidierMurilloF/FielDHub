@@ -107,15 +107,15 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
   year <- resolve_year(year)
   repsStack <- match.arg(repsStack)
   if (all(c("serpentine", "cartesian") != planter)) {
-    stop("Input planter choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
+    fieldhub_abort("Input planter choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
   }
   seed <- resolve_seed(seed)
   local_design_seed(seed)
   if (!is.numeric(plotNumber) && !is.integer(plotNumber)) {
-    stop("plotNumber should be an integer or a numeric vector.")
+    fieldhub_abort("plotNumber should be an integer or a numeric vector.")
   }
   if (any(plotNumber %% 1 != 0)) {
-    stop("plotNumber should be integers.")
+    fieldhub_abort("plotNumber should be integers.")
   }
   
   if (!is.null(l)) {
@@ -129,33 +129,33 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
       plotNumber <- default_plots
     }
   } else {
-    stop("Number of locations/sites is missing")
+    fieldhub_abort("Number of locations/sites is missing")
   }
   
   if (is.null(lines) || is.null(checks) || is.null(b) || is.null(l)) {
-    stop("Some of the basic design parameters are missing (lines, checks, b, l).")
+    fieldhub_abort("Some of the basic design parameters are missing (lines, checks, b, l).")
   }
   if (is.null(repsExpt)) repsExpt <- 1
   
   arg1 <- list(lines, b, l, repsExpt)
   arg2 <- c(lines, b, l, repsExpt)
   if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
-    stop("RCBD_augmented() requires input lines, b and l to be possitive integers.")
+    fieldhub_abort("RCBD_augmented() requires input lines, b and l to be possitive integers.")
   }
   if (!is.null(plotNumber) && is.numeric(plotNumber)) {
     if (any(plotNumber < 1) || any(diff(plotNumber) < 0)) {
-      stop("RCBD_augmented() requires input plotNumber to be possitive integers and sorted.")
+      fieldhub_abort("RCBD_augmented() requires input plotNumber to be possitive integers and sorted.")
     }
   }
   
   if (!is.null(data)) {
     data <- as.data.frame(data)
-    if (ncol(data) < 2) base::stop("Data input needs at least two columns with: ENTRY and NAME.")
+    if (ncol(data) < 2) fieldhub_abort("Data input needs at least two columns with: ENTRY and NAME.")
     data <- data[, 1:2]
     data <- na.omit(data)
     colnames(data) <- c("ENTRY", "NAME")
     new_lines <- nrow(data) - checks
-    if (lines != new_lines) base::stop("Number of experimental lines do not match with data input provided.")
+    if (lines != new_lines) fieldhub_abort("Number of experimental lines do not match with data input provided.")
     lines <- new_lines
   } else {
     NAME <- c(
@@ -181,7 +181,7 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
     locationNames <- 1:l
   }
   
-  if (l < 1 || is.null(l)) base::stop("Check the input for the number of locations.")
+  if (l < 1 || is.null(l)) fieldhub_abort("Check the input for the number of locations.")
   if (is.null(plotNumber) || !(length(plotNumber) %in% c(l, repsExpt, l * repsExpt))) {
     plotNumber <- seq(1001, 1000 * (l + 1), 1000)
   }
@@ -203,7 +203,7 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
     field_cols <- ncols_within_block * blocks_per_row
   } else {
     if (nrows %% 1 != 0 || ncols %% 1 != 0 || nrows < 1 || ncols < 1) {
-      stop("nrows and ncols must be positive integers.")
+      fieldhub_abort("nrows and ncols must be positive integers.")
     }
     # We no longer require nrows %% b == 0 because blocks can be side-by-side.
     # We infer a grid (blocks_per_col x blocks_per_row) where blocks_per_col * blocks_per_row = b.
@@ -249,7 +249,7 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
   blocks_arcbd <- set_blocks$b
   
   if (length(blocks_arcbd) == 0) {
-    stop("No options available for that amount of treatments!", call. = FALSE)
+    fieldhub_abort("No options available for that amount of treatments!", call. = FALSE)
   }
   
   blocks_dims <- set_blocks$blocks_dims
@@ -299,7 +299,7 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
       if (random) {
         # if (Fillers > (ncols - checks - 1)) {
         if (Fillers > 0 && Fillers > (ncols - checks - 1)) {
-          stop("Number of Filler overcome the amount allowed per block. Please, choose another quantity of blocks.")
+          fieldhub_abort("Number of Filler overcome the amount allowed per block. Please, choose another quantity of blocks.")
         }
         
         lines_per_plot <- plots_per_block - checks
@@ -366,7 +366,7 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
       } else {
         # if (Fillers > (ncols - checks - 1)) {
         if (Fillers > 0 && Fillers > (ncols - checks - 1)){
-          stop("Number of Filler overcome the amount allowed per block. Please, choose another quantity of blocks.")
+          fieldhub_abort("Number of Filler overcome the amount allowed per block. Please, choose another quantity of blocks.")
         }
         
         fun <- function(x) {
@@ -725,7 +725,8 @@ assemble_arcbd_blocks <- function(block_list, blocks_per_col, blocks_per_row) {
   blocks <- unname(block_list)
   b <- length(blocks)
   if (blocks_per_col * blocks_per_row != b) {
-    stop("Internal error: blocks_per_col * blocks_per_row must equal b.")
+    fieldhub_abort("Internal error: blocks_per_col * blocks_per_row must equal b.",
+                   class = "fieldhub_internal_error")
   }
   
   # Ensure each block is a matrix
