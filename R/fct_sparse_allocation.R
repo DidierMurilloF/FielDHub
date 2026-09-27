@@ -103,6 +103,7 @@ sparse_allocation <- function(
     if (missing(copies_per_entry)) {
         fieldhub_abort("You must specify the number of reps per plant")
     }
+    validate_iteration_budget(copies_per_entry, "copies_per_entry")
     if (copies_per_entry >= l) fieldhub_abort("Please, enter copies_per_entry < l")
     if (is.null(checks)) fieldhub_abort("Please, define the number of checks for this design.")
     if (!missing(sparse_list)) {

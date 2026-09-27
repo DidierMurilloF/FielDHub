@@ -7,6 +7,12 @@
 
 ### Breaking changes:
 
+- Allocation engines reject malformed line counts, copies per entry, and
+  active check counts/replications before calling the optimizer. Desired
+  averages must be finite positive scalars. Infeasible location-block models
+  and sizes beyond R's integer-index range raise structured input errors.
+  Valid seeded allocations are unchanged.
+
 - Diagonal and optimized designs now reject malformed check counts/ranges
   and incomplete check replication before allocation. Check entry vectors
   must be consecutive and distinct; optimized designs still sort them.
@@ -537,6 +543,9 @@
   `golem::activate_js()` and `stats::dist()` symbols.
 
 ### Fix bugs:
+
+- `do_optim()` now honors its declared `design = "sparse"` default when the
+  argument is omitted; previously it incorrectly reported a missing design.
 
 - Optimizer-backed designs restore the caller's `warn` and `contrasts`
   options on success and error, including multi-location allocation wrappers.

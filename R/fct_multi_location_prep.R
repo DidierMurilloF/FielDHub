@@ -143,6 +143,11 @@ multi_location_prep <- function(
         fieldhub_abort("multi_location_prep() requires either the argument copies_per_entry or desired_avg.")
     }
     if (missing(copies_per_entry)) {
+        if (!is.numeric(desired_avg) || !is.null(dim(desired_avg)) ||
+            length(desired_avg) != 1L || !is.finite(desired_avg) || desired_avg <= 0) {
+            fieldhub_abort("`desired_avg` must be one finite positive number.",
+                           data = list(argument = "desired_avg"))
+        }
         copies_per_entry <- ceiling(l * desired_avg)
     }
     add_checks <- FALSE

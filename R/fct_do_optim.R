@@ -67,22 +67,33 @@ do_optim <- function(
     local_design_seed(seed)
     if (missing(lines)) fieldhub_abort("Please, define the number of lines/treatments for this design.")
     if (missing(l)) fieldhub_abort("Please, define the number of locations for this design.")
-    if (missing(design) || is.null(design)) fieldhub_abort("Paramenter design is missing.")
-    if (all(c("prep", "sparse") != design)) {
+    if ((!is.character(design) && !is.factor(design)) || !is.null(dim(design)) ||
+        length(design) != 1L || is.na(design) || !design %in% c("prep", "sparse")) {
         fieldhub_abort("Input design is unknown. Please, choose one: 'sparse' or 'prep'.")
     }
+    if (missing(copies_per_entry)) fieldhub_abort("Please, define copies_per_entry for this design.")
+    if (design == "prep") validate_iteration_budget(copies_per_entry, "copies_per_entry")
     if (design == "prep" && copies_per_entry <= l) {
         fieldhub_abort("p-reps option requires that copies_per_entry be greater than the number of locations")
     }
     if (design == "sparse") {
         if (is.null(checks)) fieldhub_abort("Please, specify the number of checks!")
+        validate_iteration_budget(checks, "checks")
     }
     if (design == "prep") {
         if (add_checks == TRUE & is.null(checks) & is.null(rep_checks)) {
             fieldhub_abort("Please, specify the number of checks!")
         }
+        if (add_checks && !is.null(checks) && !is.null(rep_checks)) {
+            validate_iteration_budget(checks, "checks")
+            validate_count_vector(rep_checks, "rep_checks")
+            if (length(rep_checks) != checks) {
+                fieldhub_abort("Length of rep_checks does not match with number of checks")
+            }
+        }
     }
     max_entry <- lines
+    validate_iteration_budget(lines, "lines")
     if (!is.null(data)) {
         if (design == "sparse") {
             data_input <- data[, 1:2]
@@ -145,6 +156,18 @@ do_optim <- function(
         }
     }
     # Generate the optim IBs
+    validate_iteration_budget(copies_per_entry, "copies_per_entry")
+    allocation_plots <- validate_design_size(c(lines, copies_per_entry))
+    validate_design_size(c(lines, l))
+    if (2 * as.double(l) > allocation_plots || as.double(lines) + l - 1 > allocation_plots) {
+        fieldhub_abort("There are insufficient entry copies for the requested location blocks.",
+                       data = list(plots = allocation_plots, locations = l, lines = lines))
+    }
+    if (design == "sparse" || (add_checks && !is.null(checks) && !is.null(rep_checks))) {
+        validate_design_size(as.double(lines) + as.double(checks))
+        check_plots <- if (design == "sparse") checks else sum(as.double(rep_checks))
+        validate_design_size(allocation_plots + check_plots * as.double(l))
+    }
     local_optimizer_options()
     optim_blocks <- blocksdesign::blocks(
         treatments = lines,
