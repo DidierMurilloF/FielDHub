@@ -1060,6 +1060,7 @@ mod_sparse_allocation_server <- function(id){
       }
     )
     
+    app_reproduction_outputs(output, sparse_design)
   })
 }
     

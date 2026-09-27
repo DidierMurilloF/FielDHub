@@ -783,5 +783,6 @@ mod_pREPS_server <- function(id){
       }
     )
  
+    app_reproduction_outputs(output, pREPS_reactive)
   })
 }

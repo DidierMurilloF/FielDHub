@@ -140,7 +140,7 @@ mod_SSPD_ui <- function(id){
                      shinyjs::hidden(
                        downloadButton(
                          ns("downloadCsv.sspd"), 
-                         label =  "Excel",
+                         label =  "CSV",
                          icon = icon("file-csv"), 
                          width = '10%',
                          style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
@@ -609,5 +609,6 @@ mod_SSPD_server <- function(id){
         write.csv(df, file, row.names = FALSE)
       }
     )
+    app_reproduction_outputs(output, sspd_reactive)
   })
 }

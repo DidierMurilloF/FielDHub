@@ -1133,5 +1133,6 @@ mod_multi_loc_preps_server <- function(id){
       }
     )
  
+    app_reproduction_outputs(output, pREPS_reactive)
   })
 }

@@ -1060,5 +1060,6 @@ mod_diagonal_multiple_server <- function(id) {
                 write.csv(simudata_DIAG()$df, file, row.names = FALSE)
             }
         )
+        app_reproduction_outputs(output, diagonal_design)
     })
 }

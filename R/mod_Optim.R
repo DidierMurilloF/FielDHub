@@ -735,5 +735,6 @@ mod_Optim_server <- function(id) {
       }
     )
     
+    app_reproduction_outputs(output, optimized_arrang)
   })
 }

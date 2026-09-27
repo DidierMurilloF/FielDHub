@@ -97,7 +97,7 @@ mod_FD_ui <- function(id){
             tabPanel("Field Layout",
                      shinyjs::useShinyjs(),
                      shinyjs::hidden(downloadButton(ns("downloadCsv.fd"), 
-                                                    label =  "Excel",
+                                                    label =  "CSV",
                                                     icon = icon("file-csv"), 
                                                     width = '10%',
                                                     style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
@@ -592,5 +592,6 @@ mod_FD_server <- function(id) {
       }
     )
     
+    app_reproduction_outputs(output, fd_reactive)
   })
 }

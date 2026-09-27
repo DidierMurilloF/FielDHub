@@ -124,7 +124,7 @@ mod_IBD_ui <- function(id) {
                      shinyjs::hidden(
                        downloadButton(
                          ns("downloadCsv.ibd"), 
-                         label =  "Excel",
+                         label =  "CSV",
                          icon = icon("file-csv"), 
                          width = '10%',
                          style="color: #337ab7; background-color: #fff; border-color: #2e6da4")
@@ -651,5 +651,6 @@ mod_IBD_server <- function(id) {
         write.csv(df, file, row.names = FALSE)
       }
     )
+    app_reproduction_outputs(output, IBD_reactive)
   })
 }

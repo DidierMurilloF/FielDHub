@@ -898,5 +898,6 @@ mod_Diagonal_server <- function(id) {
         
       }
     )
+    app_reproduction_outputs(output, diagonal_design)
   })
 }

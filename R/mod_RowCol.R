@@ -123,7 +123,7 @@ mod_RowCol_ui <- function(id){
             tabPanel("Field Layout",
                      shinyjs::useShinyjs(),
                      shinyjs::hidden(downloadButton(ns("downloadCsv.rcd"), 
-                                                    label =  "Excel",
+                                                    label =  "CSV",
                                                     icon = icon("file-csv"), 
                                                     width = '10%',
                                                     style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
@@ -641,5 +641,6 @@ mod_RowCol_server <- function(id){
         write.csv(df, file, row.names = FALSE)
       }
     )
+    app_reproduction_outputs(output, RowCol_reactive)
   })
 }

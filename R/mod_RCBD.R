@@ -136,7 +136,7 @@ mod_RCBD_ui <- function(id) {
                      shinyjs::hidden(
                        downloadButton(
                          ns("downloadCsv.rcbd"), 
-                         label =  "Excel",
+                         label =  "CSV",
                          icon = icon("file-csv"), 
                          width = '10%',
                          style="color: #337ab7; background-color: #fff; border-color: #2e6da4")
@@ -693,6 +693,7 @@ mod_RCBD_server <- function(id) {
       }
     )
  
+    app_reproduction_outputs(output, RCBD_reactive)
   })
 }
     

@@ -50,7 +50,7 @@ fieldhub_design_menus <- function(registry = fieldhub_app_registry()) {
   lapply(unique(groups), function(group) {
     tabs <- lapply(registry[groups == group], function(entry) {
       ui <- get(entry$ui, mode = "function")
-      shiny::tabPanel(entry$label, ui(entry$id))
+      shiny::tabPanel(entry$label, ui(entry$id), app_reproduction_ui(shiny::NS(entry$id)))
     })
     do.call(shiny::navbarMenu, c(list(title = group), tabs))
   })

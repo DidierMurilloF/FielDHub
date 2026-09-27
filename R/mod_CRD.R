@@ -107,7 +107,7 @@ mod_CRD_ui <- function(id) {
                      shinyjs::hidden(
                        downloadButton(
                          ns("downloadCsv.crd"), 
-                         label =  "Excel",
+                         label =  "CSV",
                          icon = icon("file-csv"), 
                          width = '10%',
                          style="color: #337ab7; background-color: #fff; border-color: #2e6da4")
@@ -502,5 +502,6 @@ mod_CRD_server <- function(id) {
       }
     )
     
+    app_reproduction_outputs(output, CRD_reactive)
   })
 }

@@ -845,5 +845,6 @@ mod_RCBD_augmented_server <- function(id) {
       }
     )
     
+    app_reproduction_outputs(output, rcbd_augmented_reactive)
   })
 }

@@ -48,6 +48,13 @@
 
 ### New features:
 
+- Every design page in the app now offers a shared reproducibility panel with
+  a complete RDS design download and R code to reconstruct it. The archive
+  preserves the original result, seed, parameters, RNG settings, and package
+  version. It covers the core design, not later app layout selections or
+  simulated responses; existing CSV downloads are unchanged. Layout download
+  buttons now say CSV instead of Excel, matching their file format.
+
 - `reproduce_design()` rebuilds field designs and allocation plans from their
   recorded parameters and RNG settings. It restores the caller's RNG settings
   and seed state on exit, explains missing legacy parameters, and warns when

@@ -93,7 +93,7 @@ mod_Alpha_Lattice_ui <- function(id) {
                      # hidden .csv download button
                      shinyjs::useShinyjs(),
                      shinyjs::hidden(downloadButton(ns("downloadCsv.alpha"), 
-                                    label =  "Excel",
+                                    label =  "CSV",
                                     icon = icon("file-csv"), 
                                     width = '10%',
                                     style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
@@ -599,5 +599,6 @@ mod_Alpha_Lattice_server <- function(id){
     )
     
     
+    app_reproduction_outputs(output, ALPHA_reactive)
   })
 }

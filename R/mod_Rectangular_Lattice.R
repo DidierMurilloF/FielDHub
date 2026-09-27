@@ -89,7 +89,7 @@ mod_Rectangular_Lattice_ui <- function(id){
             tabPanel("Field Layout",
                      shinyjs::useShinyjs(),
                      shinyjs::hidden(downloadButton(ns("downloadCsv.rectangular"), 
-                                                    label =  "Excel",
+                                                    label =  "CSV",
                                                     icon = icon("file-csv"), 
                                                     width = '10%',
                                                     style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
@@ -595,5 +595,6 @@ mod_Rectangular_Lattice_server <- function(id) {
       }
     )
     
+    app_reproduction_outputs(output, RECTANGULAR_reactive)
   })
 }
