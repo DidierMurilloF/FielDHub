@@ -31,6 +31,14 @@ legacy_result_changes <- c(
     "directly, so the default allocation changes (NEWS, Breaking changes).",
     "seed = 38 reproduces the 1.5.0 set.seed(38); split_families(l, data)",
     "allocation."
+  ),
+  RCBD_augmented = paste(
+    "RCBD_augmented() now returns numeric ENTRY and CHECKS columns in",
+    "every case (NEWS, Fix bugs); 1.5.0 stored ENTRY as character for",
+    "randomized designs without fillers, and CHECKS as character (with",
+    "the string \"NA\" for filler plots) whenever the field had fillers.",
+    "as.numeric() on the 1.5.0 ENTRY/CHECKS columns matches the current",
+    "numeric ones; every other column is unchanged."
   )
 )
 
@@ -42,18 +50,21 @@ main_output <- function(x) {
   x$data_locations
 }
 
-# Aligns two field books' column types before comparing values. 1.5.0 stored
-# some columns (e.g. RCBD_augmented()'s ENTRY) as character where the
-# current version stores them as numeric, and used factors where the
-# current version uses plain character; neither reflects a difference in
-# the generated design, so columns whose type disagrees are coerced to
-# character on both sides before comparing.
+# Aligns two field books' column types before comparing values, for columns
+# whose type genuinely disagrees between them (one factor and the other
+# not, or one numeric and the other not) coerced to character on both
+# sides. A column that is a factor (or numeric) on both sides is left
+# alone: this only papers over a real representation difference between
+# FielDHub versions, never a value difference, so a *new* type change
+# cannot hide behind it uncited - it must instead get its own
+# `legacy_result_changes` entry (see RCBD_augmented()'s ENTRY/CHECKS,
+# cited above and asserted explicitly below).
 align_column_types <- function(old, new) {
   common <- intersect(names(old), names(new))
   old <- old[common]
   new <- new[common]
   for (column in common) {
-    if (is.factor(old[[column]]) || is.factor(new[[column]]) ||
+    if (is.factor(old[[column]]) != is.factor(new[[column]]) ||
           is.numeric(old[[column]]) != is.numeric(new[[column]])) {
       old[[column]] <- as.character(old[[column]])
       new[[column]] <- as.character(new[[column]])
@@ -128,4 +139,24 @@ test_that("split_families() with seed = 38 reproduces the 1.5.0 allocation", {
     as.data.frame(saved$rowsEachlist), as.data.frame(reseeded$rowsEachlist),
     ignore_attr = TRUE
   )
+})
+
+test_that("RCBD_augmented()'s ENTRY/CHECKS are numeric versions of the 1.5.0 columns", {
+  args <- historical_bundle$calls$RCBD_augmented
+  saved <- historical_bundle$designs$RCBD_augmented
+
+  replayed <- expect_only_classed_warnings(do.call(RCBD_augmented, args), "RCBD_augmented")
+
+  old_book <- saved$fieldBook
+  new_book <- replayed$fieldBook[names(old_book)]
+
+  # The cited NEWS change: ENTRY and CHECKS became numeric in every case.
+  # as.numeric() on the 1.5.0 columns (character, with "NA" for filler
+  # CHECKS) must equal the current numeric ones.
+  expect_equal(as.numeric(as.character(old_book$ENTRY)), new_book$ENTRY)
+  expect_equal(as.numeric(as.character(old_book$CHECKS)), new_book$CHECKS)
+
+  # Every other column is asserted unchanged, with no type coercion.
+  other_columns <- setdiff(names(old_book), c("ENTRY", "CHECKS"))
+  expect_identical(new_book[other_columns], old_book[other_columns])
 })

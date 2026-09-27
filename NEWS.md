@@ -971,6 +971,9 @@ from:
   and one entry per location labeled as fillers).
 - `RCBD_augmented()` with `random = FALSE` when the field has filler plots
   (blocks with too many or too few checks, and possibly missing lines).
+- Not a design change: `RCBD_augmented()`'s `ENTRY` and `CHECKS` columns
+  are now numeric in every case instead of character (see Fix bugs);
+  values are unchanged and match `as.numeric()` of the 1.5.0 columns.
 - `optimized_arrangement()` when `amountChecks` is not a multiple of the
   number of checks (the design was not reproducible).
 - The Split-Split Plot module of the Shiny app with the horizontal reps layout
