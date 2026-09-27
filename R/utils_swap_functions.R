@@ -1,11 +1,12 @@
 #' @title Calculate pairwise distances between all elements in a matrix that appears twice or more.
 #'
-#' @description Given a matrix of integers, this function calculates the pairwise Euclidean
+#' @description Given a matrix of integers, this function calculates pairwise
 #' distance between all possible pairs of elements in the matrix that appear two or more times.
 #' If no element appears two or more times, the function will return an error message.
 #'
 #'
 #' @param X a matrix of integers
+#' @param dist_method Coordinate distance: "euclidean" or "manhattan".
 #'
 #' @return A data frame with the following columns:
 #' \itemize{
@@ -22,9 +23,9 @@
 #' @author Jean-Marc Montpetit [aut]
 #'
 #' @noRd
-pairs_distance <- function(X) {
-  if (!is.matrix(X)) fieldhub_abort("Input must be a matrix")
-  if (!is.numeric(X)) fieldhub_abort("Matrix elements must be numeric")
+pairs_distance <- function(X, dist_method = "euclidean") {
+  validate_swap_matrix(X)
+  dist_fn <- swap_distance_function(dist_method)
 
   nr <- nrow(X)
   # NA cells are inactive field positions and must not enter the distance
@@ -44,11 +45,10 @@ pairs_distance <- function(X) {
     cA <- ((p1 - 1L) %/% nr) + 1L
     rB <- ((p2 - 1L) %% nr) + 1L
     cB <- ((p2 - 1L) %/% nr) + 1L
-    dr <- rA - rB
-    dc <- cA - cB
+    distances <- as.numeric(dist_fn(rA, cA, rB, cB))
     out_list[[i]] <- data.frame(
-      geno = rep.int(g, length(dr)),
-      Pos1 = p1, Pos2 = p2, DIST = sqrt(dr * dr + dc * dc),
+      geno = rep.int(g, length(distances)),
+      Pos1 = p1, Pos2 = p2, DIST = distances,
       rA = rA, cA = cA, rB = rB, cB = cB
     )
   }
@@ -73,7 +73,7 @@ pairs_distance <- function(X) {
 
 #' @noRd
 # All pairwise distances for ONE genotype in matrix mat
-.pair_dists_for_geno <- function(mat, g) {
+.pair_dists_for_geno <- function(mat, g, dist_method = "euclidean") {
   pos <- which(mat == g, arr.ind = TRUE)
   if (nrow(pos) < 2L) {
     return(numeric(0))
@@ -81,7 +81,7 @@ pairs_distance <- function(X) {
   pairs <- utils::combn(seq_len(nrow(pos)), 2L)
   dr <- pos[pairs[1L, ], 1L] - pos[pairs[2L, ], 1L]
   dc <- pos[pairs[1L, ], 2L] - pos[pairs[2L, ], 2L]
-  sqrt(dr * dr + dc * dc)
+  if (dist_method == "manhattan") abs(dr) + abs(dc) else sqrt(dr * dr + dc * dc)
 }
 
 # ---- Score a candidate swap ----------------------------------------------------
@@ -104,14 +104,14 @@ pairs_distance <- function(X) {
 #
 #' @noRd
 .score_swap <- function(X, ri, ci, rj, cj,
-                        lambda, center,
-                        base_sum, n_pairs) {
+                        lambda, center, base_sum, n_pairs,
+                        dist_method = "euclidean") {
   g_i <- X[ri, ci]
   g_j <- X[rj, cj]
 
   # old pairwise-distance sums for the two affected genotypes
-  old_i <- .pair_dists_for_geno(X, g_i)
-  old_j <- if (g_j != g_i) .pair_dists_for_geno(X, g_j) else numeric(0)
+  old_i <- .pair_dists_for_geno(X, g_i, dist_method)
+  old_j <- if (g_j != g_i) .pair_dists_for_geno(X, g_j, dist_method) else numeric(0)
   old_contrib <- sum(old_i) + sum(old_j)
 
   # apply swap on a temp copy
@@ -120,8 +120,8 @@ pairs_distance <- function(X) {
   X_tmp[rj, cj] <- g_i
 
   # new pairwise-distance sums for the same genotypes
-  new_i <- .pair_dists_for_geno(X_tmp, g_i)
-  new_j <- if (g_j != g_i) .pair_dists_for_geno(X_tmp, g_j) else numeric(0)
+  new_i <- .pair_dists_for_geno(X_tmp, g_i, dist_method)
+  new_j <- if (g_j != g_i) .pair_dists_for_geno(X_tmp, g_j, dist_method) else numeric(0)
   new_contrib <- sum(new_i) + sum(new_j)
 
   delta <- new_contrib - old_contrib
@@ -129,8 +129,10 @@ pairs_distance <- function(X) {
   # incrementally updated global mean
   adjusted_mean <- (base_sum + delta) / max(n_pairs, 1L)
 
-  # border penalty: penalise far-from-center (= near-border) placement
-  candidate_center_dist <- sqrt((rj - center[1L])^2 + (cj - center[2L])^2)
+  # Use the selected metric for the centrality penalty as well.
+  candidate_center_dist <- if (dist_method == "manhattan") {
+    abs(rj - center[1L]) + abs(cj - center[2L])
+  } else sqrt((rj - center[1L])^2 + (cj - center[2L])^2)
 
   list(
     score = adjusted_mean - lambda * candidate_center_dist,
@@ -141,19 +143,35 @@ pairs_distance <- function(X) {
 
 #' @title Swap pairs in a matrix of integers
 #'
-#' @description Modifies the input matrix \code{X} to ensure that the distance between any two occurrences
-#' of the same integer is at least a distance \code{d}, by swapping one of the occurrences with a
-#' candidate cell of a different integer. The function starts with \code{starting_dist = 3} and increases it
-#' by \code{1} until the algorithm no longer converges or \code{stop_iter} iterations have been performed.
-#' This version evaluates candidate swaps using both the mean pairwise distance and a centrality penalty,
-#' and it uses candidate sampling to reduce computation.
+#' @description Attempts to separate repeated entries by swapping cells of
+#' different entries. Distance thresholds increase from \code{starting_dist}
+#' in steps of one. Candidate sampling, mean pairwise distance, and a centrality
+#' penalty guide the search. The last successful threshold layout is returned;
+#' if none succeeds, the original matrix is returned. A requested minimum
+#' distance is not guaranteed.
 #'
-#' @param X A matrix of integers.
-#' @param starting_dist The minimum starting distance to enforce between pairs of occurrences of the same integer. Default is 3.
-#' @param stop_iter The maximum number of iterations to perform. Default is 10.
-#' @param lambda A tuning parameter for the centrality penalty. Default is 0.5.
-#' @param dist_method The method used for distance calculation. Options are "euclidean" (default) and "manhattan".
-#' @param candidate_sample_size Maximum number of candidate cells to evaluate per swap. Default is 4.
+#' @param X A numeric matrix of whole-number entry identifiers within R's
+#' integer range. Missing cells are inactive positions and never move.
+#' @param starting_dist First distance threshold; a finite nonnegative number.
+#' Default is 3.
+#' @param stop_iter Maximum complete swap sweeps per threshold, as a
+#' nonnegative whole number within R's integer range. Default is 10.
+#' @param lambda Finite nonnegative weight for the centrality penalty.
+#' Default is 0.5.
+#' @param dist_method Coordinate distance used for candidate filtering,
+#' scoring, stopping, and reported distances: "euclidean" (default) or "manhattan".
+#' @param candidate_sample_size Maximum candidates evaluated per swap, as a
+#' positive whole number within R's integer range. Default is 4.
+#'
+#' @details The finite threshold range is bounded by the field geometry. For
+#' Euclidean distance without missing cells, the historical bound is
+#' \code{sqrt(nrow(X)^2 + ncol(X)^2)}; with missing cells it is the maximum
+#' distance between active positions. For Manhattan distance it is the maximum
+#' Manhattan distance between active positions. There are at most
+#' \code{floor(bound - starting_dist) + 1} thresholds when the bound is at least
+#' \code{starting_dist}, and none otherwise. Each threshold permits at most
+#' \code{stop_iter} complete sweeps. Diagnostics distinguish an exhausted
+#' threshold budget from completing or skipping the distance range.
 #'
 #' @return A list containing:
 #' \item{optim_design}{The modified matrix.}
@@ -161,7 +179,14 @@ pairs_distance <- function(X) {
 #' \item{distances}{A list of all pair distances for each intermediate design.}
 #' \item{min_distance}{The minimum distance between pairs of occurrences of the same integer in the final design.}
 #' \item{pairwise_distance}{A data frame with the pairwise distances for the final design.}
-#' \item{rows_incidence}{A vector recording the number of rows with repeated integers for each iteration.}
+#' \item{rows_incidence}{Row-repetition counts for retained threshold steps,
+#' or for the original matrix when no step succeeds.}
+#' \item{diagnostics}{The distance metric, stop reason, total completed sweeps
+#' (\code{iterations}), per-threshold budget, number of attempted thresholds,
+#' last threshold, last attempted minimum distance, and retained minimum distance.
+#' Stop reasons are \code{iteration_limit}, \code{distance_range_complete},
+#' and \code{no_distance_thresholds}. A failed attempt is not retained in
+#' \code{optim_design}.}
 #'
 #' @examples
 #' set.seed(123)
@@ -183,8 +208,8 @@ swap_pairs <- function(X,
                        lambda = 0.5,
                        dist_method = "euclidean",
                        candidate_sample_size = 4) {
-  if (!is.matrix(X)) fieldhub_abort("Input must be a matrix")
-  if (!is.numeric(X)) fieldhub_abort("Matrix elements must be numeric")
+  validate_swap_matrix(X)
+  validate_swap_controls(starting_dist, stop_iter, lambda, dist_method, candidate_sample_size)
 
   input_X <- X
   input_freq <- table(input_X)
@@ -195,24 +220,24 @@ swap_pairs <- function(X,
 
   if (anyNA(X)) {
     center <- colMeans(active_pos)
-    minDist <- if (nrow(active_pos) > 1L) max(stats::dist(active_pos)) else 0
   } else {
-    # Preserve the historical no-filler calculation exactly.
-    minDist <- sqrt(nr^2 + nc^2)
     center <- c(nr / 2, nc / 2)
   }
-
-  dist_fn <- if (dist_method == "euclidean") {
-    .vec_dist_euclidean
-  } else if (dist_method == "manhattan") {
-    .vec_dist_manhattan
+  if (dist_method == "manhattan") {
+    # The maximum L1 distance is a range of row + column or row - column.
+    minDist <- max(diff(range(active_pos[, 1L] + active_pos[, 2L])),
+                   diff(range(active_pos[, 1L] - active_pos[, 2L])))
+  } else if (anyNA(X)) {
+    minDist <- if (nrow(active_pos) > 1L) max(stats::dist(active_pos)) else 0
   } else {
-    fieldhub_abort("Invalid dist_method. Use 'euclidean' or 'manhattan'.")
+    # Preserve the historical Euclidean no-filler calculation exactly.
+    minDist <- sqrt(nr^2 + nc^2)
   }
+  dist_fn <- swap_distance_function(dist_method)
 
   swap_succeed <- FALSE
   designs <- list(X)
-  init_pd <- pairs_distance(X)
+  init_pd <- pairs_distance(X, dist_method)
   distances <- list(init_pd)
   rows_incidence <- numeric()
   genos <- unique(init_pd$geno)
@@ -222,19 +247,26 @@ swap_pairs <- function(X,
   # field diagonal (minDist) can be shorter than starting_dist, which would make
   # seq(starting_dist, minDist, 1) error with "wrong sign in 'by' argument".
   dist_seq <- if (minDist >= starting_dist) seq(starting_dist, minDist, 1) else numeric(0)
+  iterations <- 0
+  thresholds_attempted <- 0L
+  last_threshold <- NA_real_
+  last_attempt_min <- min(init_pd$DIST)
+  stop_reason <- if (length(dist_seq)) "distance_range_complete" else "no_distance_thresholds"
 
   # ------------------------------------------------------------------ #
   #  Main loop over increasing minimum-distance thresholds              #
   # ------------------------------------------------------------------ #
   for (min_dist in dist_seq) {
-    n_iter <- 1L
+    # A double counter avoids integer overflow at the largest accepted limit.
+    n_iter <- 1
+    thresholds_attempted <- thresholds_attempted + 1L
+    last_threshold <- min_dist
 
     while (n_iter <= stop_iter) {
       # ---- (A) pairs_distance() called ONCE per while-iteration ---------
-      plotDist <- pairs_distance(X)
+      plotDist <- pairs_distance(X, dist_method)
       LowID <- which(plotDist$DIST < min_dist)
       if (length(LowID) == 0L) {
-        n_iter <- stop_iter + 1L
         break
       }
 
@@ -281,7 +313,7 @@ swap_pairs <- function(X,
           for (j in seq_len(nv)) {
             res <- .score_swap(
               X, r0, c0, v_r[j], v_c[j],
-              lambda, center, base_sum, n_pairs
+              lambda, center, base_sum, n_pairs, dist_method
             )
             scores[j] <- res$score
             deltas[j] <- res$delta
@@ -302,11 +334,14 @@ swap_pairs <- function(X,
       }
 
       n_iter <- n_iter + 1L
+      iterations <- iterations + 1
     }
 
     # ---- Did we satisfy the current min_dist threshold? -----------------
-    current_min <- min(pairs_distance(X)$DIST)
+    current_min <- min(pairs_distance(X, dist_method)$DIST)
+    last_attempt_min <- current_min
     if (current_min < min_dist) {
+      stop_reason <- "iteration_limit"
       break
     } else {
       swap_succeed <- TRUE
@@ -321,19 +356,19 @@ swap_pairs <- function(X,
       }))
 
       designs[[w]] <- X
-      distances[[w]] <- pairs_distance(X)
+      distances[[w]] <- pairs_distance(X, dist_method)
       w <- w + 1L
     }
   }
 
-  # ---- Assemble output (identical structure to original swap_pairs) ----
+  # ---- Retain the established result fields and append diagnostics ----
   optim_design <- designs[[length(designs)]]
-  pairwise_distance <- pairs_distance(optim_design)
+  pairwise_distance <- pairs_distance(optim_design, dist_method)
   min_distance <- min(pairwise_distance$DIST)
 
   if (!swap_succeed) {
     optim_design <- designs[[1L]]
-    pairwise_distance <- pairs_distance(optim_design)
+    pairwise_distance <- pairs_distance(optim_design, dist_method)
     min_distance <- min(pairwise_distance$DIST)
     rows_incidence[1L] <- sum(apply(optim_design, 1L, function(row) {
       any(tabulate(match(row, genos)) >= 2L)
@@ -347,6 +382,12 @@ swap_pairs <- function(X,
     designs           = designs,
     distances         = distances,
     min_distance      = min_distance,
-    pairwise_distance = pairwise_distance
+    pairwise_distance = pairwise_distance,
+    diagnostics = list(
+      distance_method = dist_method, stop_reason = stop_reason,
+      iterations = iterations, max_iterations_per_threshold = stop_iter,
+      thresholds_attempted = thresholds_attempted, last_threshold = last_threshold,
+      last_attempt_min_distance = last_attempt_min, retained_min_distance = min_distance
+    )
   )
 }

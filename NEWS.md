@@ -55,6 +55,15 @@
 
 ### New features:
 
+- `swap_pairs()` now reports its stop reason, attempted thresholds, completed
+  swap sweeps, and per-threshold budget. Invalid or infinite limits, invalid
+  distance choices, and non-integer or out-of-range entry labels receive classed
+  errors before searching. Successful default Euclidean layouts and RNG draw
+  order are unchanged. The Manhattan option now consistently uses Manhattan
+  distance for filtering, scoring, stopping, and reported distances; its seeded
+  layouts can therefore change. Previously it mixed Manhattan candidate filters
+  with Euclidean scores and distance reports.
+
 - Spatial simulation records now retain the original input field book and all
   effective model parameters, seed, RNG settings, and package version.
   `reproduce_simulation()` replays both spatial and classic simulation records

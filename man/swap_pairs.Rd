@@ -14,17 +14,23 @@ swap_pairs(
 )
 }
 \arguments{
-\item{X}{A matrix of integers.}
+\item{X}{A numeric matrix of whole-number entry identifiers within R's
+integer range. Missing cells are inactive positions and never move.}
 
-\item{starting_dist}{The minimum starting distance to enforce between pairs of occurrences of the same integer. Default is 3.}
+\item{starting_dist}{First distance threshold; a finite nonnegative number.
+Default is 3.}
 
-\item{stop_iter}{The maximum number of iterations to perform. Default is 10.}
+\item{stop_iter}{Maximum complete swap sweeps per threshold, as a
+nonnegative whole number within R's integer range. Default is 10.}
 
-\item{lambda}{A tuning parameter for the centrality penalty. Default is 0.5.}
+\item{lambda}{Finite nonnegative weight for the centrality penalty.
+Default is 0.5.}
 
-\item{dist_method}{The method used for distance calculation. Options are "euclidean" (default) and "manhattan".}
+\item{dist_method}{Coordinate distance used for candidate filtering,
+scoring, stopping, and reported distances: "euclidean" (default) or "manhattan".}
 
-\item{candidate_sample_size}{Maximum number of candidate cells to evaluate per swap. Default is 4.}
+\item{candidate_sample_size}{Maximum candidates evaluated per swap, as a
+positive whole number within R's integer range. Default is 4.}
 }
 \value{
 A list containing:
@@ -33,15 +39,33 @@ A list containing:
 \item{distances}{A list of all pair distances for each intermediate design.}
 \item{min_distance}{The minimum distance between pairs of occurrences of the same integer in the final design.}
 \item{pairwise_distance}{A data frame with the pairwise distances for the final design.}
-\item{rows_incidence}{A vector recording the number of rows with repeated integers for each iteration.}
+\item{rows_incidence}{Row-repetition counts for retained threshold steps,
+or for the original matrix when no step succeeds.}
+\item{diagnostics}{The distance metric, stop reason, total completed sweeps
+(\code{iterations}), per-threshold budget, number of attempted thresholds,
+last threshold, last attempted minimum distance, and retained minimum distance.
+Stop reasons are \code{iteration_limit}, \code{distance_range_complete},
+and \code{no_distance_thresholds}. A failed attempt is not retained in
+\code{optim_design}.}
 }
 \description{
-Modifies the input matrix \code{X} to ensure that the distance between any two occurrences
-of the same integer is at least a distance \code{d}, by swapping one of the occurrences with a
-candidate cell of a different integer. The function starts with \code{starting_dist = 3} and increases it
-by \code{1} until the algorithm no longer converges or \code{stop_iter} iterations have been performed.
-This version evaluates candidate swaps using both the mean pairwise distance and a centrality penalty,
-and it uses candidate sampling to reduce computation.
+Attempts to separate repeated entries by swapping cells of
+different entries. Distance thresholds increase from \code{starting_dist}
+in steps of one. Candidate sampling, mean pairwise distance, and a centrality
+penalty guide the search. The last successful threshold layout is returned;
+if none succeeds, the original matrix is returned. A requested minimum
+distance is not guaranteed.
+}
+\details{
+The finite threshold range is bounded by the field geometry. For
+Euclidean distance without missing cells, the historical bound is
+\code{sqrt(nrow(X)^2 + ncol(X)^2)}; with missing cells it is the maximum
+distance between active positions. For Manhattan distance it is the maximum
+Manhattan distance between active positions. There are at most
+\code{floor(bound - starting_dist) + 1} thresholds when the bound is at least
+\code{starting_dist}, and none otherwise. Each threshold permits at most
+\code{stop_iter} complete sweeps. Diagnostics distinguish an exhausted
+threshold budget from completing or skipping the distance range.
 }
 \examples{
 set.seed(123)

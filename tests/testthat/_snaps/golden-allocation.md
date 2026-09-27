@@ -4321,7 +4321,7 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["rows_incidence", "optim_design", "designs", "distances", "min_distance", "pairwise_distance"]
+              "value": ["rows_incidence", "optim_design", "designs", "distances", "min_distance", "pairwise_distance", "diagnostics"]
             }
           },
           "value": [
@@ -4709,6 +4709,58 @@
                   "type": "integer",
                   "attributes": {},
                   "value": [7, 10, 8, 7, 3, 7, 8, 7, 8, 9]
+                }
+              ]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["distance_method", "stop_reason", "iterations", "max_iterations_per_threshold", "thresholds_attempted", "last_threshold", "last_attempt_min_distance", "retained_min_distance"]
+                }
+              },
+              "value": [
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["euclidean"]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["iteration_limit"]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [21]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [10]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [4]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [6]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [2.23606798]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [5]
                 }
               ]
             }
