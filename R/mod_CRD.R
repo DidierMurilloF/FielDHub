@@ -250,14 +250,11 @@ mod_CRD_server <- function(id) {
       )
     })
     
-    reactive_layoutCRD <- shiny::reactive({
-      shiny::req(input$layoutO_crd)
-      shiny::req(CRD_reactive())
-      obj_crd <- CRD_reactive()
-      opt_crd <- as.numeric(input$layoutO_crd)
-      planting_crd <- crd_inputs()$planter
-      plot_layout(x = obj_crd, layout = opt_crd, planter = planting_crd)
-    })
+    reactive_layoutCRD <- app_layout_selection(input, session,
+      design = function() CRD_reactive(),
+      planter = function() crd_inputs()$planter,
+      ids = c(layout = "layoutO_crd")
+    )
     
     entryListFormat_CRD <- data.frame(TREATMENT = c(paste("TRT_", LETTERS[1:9], sep = "")))
     entriesInfoModal_CRD <- function() {

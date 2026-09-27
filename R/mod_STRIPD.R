@@ -343,49 +343,11 @@ mod_STRIPD_server <- function(id) {
       )
     })
     
-    
-    shiny::observeEvent(input$stackedSTRIP, {
-      shiny::req(input$stackedSTRIP)
-      shiny::req(input$l.strip)
-      obj_strips <- strip_reactive()
-      NewlayoutOptions <- validate_design(layout_choices(
-        x = obj_strips, planter = strip_inputs()$planter, stacked = input$stackedSTRIP))
-      shiny::updateSelectInput(session = session,
-                        inputId = 'layoutO_strip',
-                        label = "Layout option:",
-                        choices = NewlayoutOptions,
-                        selected = 1
-      )
-    })
-    
-    
-    reset_selection <- shiny::reactiveValues(reset = 0)
-    
-    shiny::observeEvent(input$stackedSTRIP, {
-      reset_selection$reset <- 1
-    })
-    
-    shiny::observeEvent(input$layoutO_strip, {
-      reset_selection$reset <- 0
-    })
-    
-    reactive_layoutSTRIP <- shiny::reactive({
-      shiny::req(input$layoutO_strip)
-      shiny::req(strip_reactive())
-      obj_strip <- strip_reactive()
-      planting_strip <- strip_inputs()$planter
-      
-      if (reset_selection$reset == 1) {
-        opt_strip <- 1
-      } else opt_strip <- as.numeric(input$layoutO_strip)
-      
-      locSelected <- as.numeric(input$locLayout_strip)
-      try(plot_layout(x = obj_strip, 
-                      layout = opt_strip, 
-                      planter = planting_strip, 
-                      stacked = input$stackedSTRIP,
-                      l = locSelected), silent = TRUE)
-    })
+    reactive_layoutSTRIP <- app_layout_selection(input, session,
+      design = function() strip_reactive(),
+      planter = function() strip_inputs()$planter,
+      ids = c(layout = "layoutO_strip", stacked = "stackedSTRIP", location = "locLayout_strip")
+    )
     
     simulation_settings <- app_simulation_controls(input, session,
       ids = c(trait = "trailsStrip", other = "OtherStrip", minimum = "min.strip", maximum = "max.strip", submit = "ok.strip"),

@@ -376,45 +376,11 @@ mod_IBD_server <- function(id) {
       )
     })
     
-    shiny::observeEvent(input$stackedibd, {
-      shiny::req(input$stackedibd)
-      obj <- IBD_reactive()
-      NewlayoutOptions <- validate_design(layout_choices(x = obj, stacked = input$stackedibd))
-      shiny::updateSelectInput(session = session, inputId = 'layoutO_ibd',
-                        label = "Layout option:",
-                        choices = NewlayoutOptions,
-                        selected = 1
-      )
-    })
-    
-    reset_selection <- shiny::reactiveValues(reset = 0)
-    
-    shiny::observeEvent(input$stackedibd, {
-      reset_selection$reset <- 1
-    })
-    
-    shiny::observeEvent(input$layoutO_ibd, {
-      reset_selection$reset <- 0
-    })
-    
-    reactive_layoutIBD <- shiny::reactive({
-      shiny::req(input$layoutO_ibd)
-      shiny::req(IBD_reactive())
-      obj_ibd <- IBD_reactive()
-      planting_ibd <- ibd_inputs()$planter
-      
-      if (reset_selection$reset == 1) {
-        opt_ibd <- 1
-      } else opt_ibd <- as.numeric(input$layoutO_ibd)
-      
-      locSelected <- as.numeric(input$locLayout_ibd)
-      try(plot_layout(x = obj_ibd, 
-                      layout =  opt_ibd, 
-                      planter = planting_ibd, 
-                      l = locSelected, 
-                      stacked = input$stackedibd), 
-          silent = TRUE)
-    })
+    reactive_layoutIBD <- app_layout_selection(input, session,
+      design = function() IBD_reactive(),
+      planter = function() ibd_inputs()$planter,
+      ids = c(layout = "layoutO_ibd", stacked = "stackedibd", location = "locLayout_ibd")
+    )
     
     
     simulation_settings <- app_simulation_controls(input, session,

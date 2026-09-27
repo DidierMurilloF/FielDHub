@@ -315,48 +315,11 @@ mod_SPD_server <- function(id){
       )
     })
     
-    shiny::observeEvent(input$stackedSPD, {
-      shiny::req(input$stackedSPD)
-      shiny::req(input$l.spd)
-      obj_spd <- spd_reactive()
-      NewlayoutOptions <- validate_design(layout_choices(x = obj_spd, stacked = input$stackedSPD))
-      shiny::updateSelectInput(session = session, inputId = 'layoutO_spd',
-                        label = "Layout option:",
-                        choices = NewlayoutOptions,
-                        selected = 1
-      )
-    })
-    
-    reset_selection <- shiny::reactiveValues(reset = 0)
-    
-    shiny::observeEvent(input$stackedSPD, {
-      reset_selection$reset <- 1
-    })
-    
-    shiny::observeEvent(input$layoutO_spd, {
-      reset_selection$reset <- 0
-    })
-    
-    reactive_layoutSPD <- shiny::reactive({
-      shiny::req(input$layoutO_spd)
-      shiny::req(input$stackedSPD)
-      shiny::req(spd_reactive())
-      obj_spd <- spd_reactive()
-      
-      planting_spd <- spd_inputs()$planter
-      
-      if (reset_selection$reset == 1) {
-        opt_spd <- 1
-      } else opt_spd <- as.numeric(input$layoutO_spd)
-      
-      locSelected_spd <- as.numeric(input$locLayout_spd)
-      try(plot_layout(x = obj_spd, 
-                      layout = opt_spd, 
-                      planter = planting_spd, 
-                      stacked = input$stackedSPD,
-                      l = locSelected_spd), 
-          silent = TRUE)
-    })
+    reactive_layoutSPD <- app_layout_selection(input, session,
+      design = function() spd_reactive(),
+      planter = function() spd_inputs()$planter,
+      ids = c(layout = "layoutO_spd", stacked = "stackedSPD", location = "locLayout_spd")
+    )
 
     simulation_settings <- app_simulation_controls(input, session,
       ids = c(trait = "trailsspd", other = "Otherspd", minimum = "min.spd", maximum = "max.spd", submit = "ok.spd"),

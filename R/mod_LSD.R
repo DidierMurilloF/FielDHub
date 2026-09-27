@@ -303,46 +303,11 @@ mod_LSD_server <- function(id){
       )
     })
     
-    shiny::observeEvent(input$stackedLSD, {
-      shiny::req(input$stackedLSD)
-      shiny::req(lsd_inputs())
-      obj_lsd <- latinsquare_reactive()
-      NewlayoutOptions <- validate_design(layout_choices(
-        x = obj_lsd, planter = lsd_inputs()$planter, stacked = input$stackedLSD))
-      shiny::updateSelectInput(session = session, inputId = 'layoutO_lsd',
-                        label = "Layout option:",
-                        choices = NewlayoutOptions,
-                        selected = 1
-      )
-    })
-    
-    
-    reset_selection <- shiny::reactiveValues(reset = 0)
-    
-    shiny::observeEvent(input$stackedLSD, {
-      reset_selection$reset <- 1
-    })
-    
-    shiny::observeEvent(input$layoutO_lsd, {
-      reset_selection$reset <- 0
-    })
-    
-    reactive_layoutLSD <- shiny::reactive({
-      shiny::req(input$layoutO_lsd)
-      shiny::req(latinsquare_reactive())
-      shiny::req(lsd_inputs()$planter)
-      obj_lsd <- latinsquare_reactive()
-      if (reset_selection$reset == 1) {
-        opt_lsd <- 1
-      } else opt_lsd <- as.numeric(input$layoutO_lsd)
-      planting_lsd <- lsd_inputs()$planter
-      try(plot_layout(x = obj_lsd,
-                      layout = opt_lsd,
-                      stacked = input$stackedLSD,
-                      planter = planting_lsd,
-                      l = 1),
-          silent = TRUE)
-    })
+    reactive_layoutLSD <- app_layout_selection(input, session,
+      design = function() latinsquare_reactive(),
+      planter = function() lsd_inputs()$planter,
+      ids = c(layout = "layoutO_lsd", stacked = "stackedLSD")
+    )
     
     simulation_settings <- app_simulation_controls(input, session,
       ids = c(trait = "trailsLSD", other = "OtherLSD", minimum = "min.lsd", maximum = "max.lsd", submit = "ok.lsd"),

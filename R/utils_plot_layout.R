@@ -59,12 +59,5 @@ plot_layout <- function(
                 paste(seq_along(site_options), collapse = ", "), ".", call. = FALSE)
         return(NULL)
     }
-    drawn <- draw_layout(x, site_options[[layout]], ...)
-    list(out_layout = drawn$p1,
-         out_layoutPlots = drawn$p2,
-         fieldBookXY = drawn$data,
-         newBooks = site_options,
-         allSitesFieldbook = all_locations_layout(x, options, layout),
-         layout_metadata = list(parameters = list(layout = layout, planter = planter, stacked = stacked),
-                                selected = l))
+    render_layout_view(x, options, layout, planter, l, stacked, ...)
 }

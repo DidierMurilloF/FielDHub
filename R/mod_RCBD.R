@@ -399,49 +399,11 @@ mod_RCBD_server <- function(id) {
       )
     })
     
-    shiny::observeEvent(input$stackedRCBD, {
-      shiny::req(input$stackedRCBD)
-      shiny::req(input$l.rcbd)
-      obj_rcbd <- RCBD_reactive()
-      NewlayoutOptions <- validate_design(layout_choices(x = obj_rcbd, stacked = input$stackedRCBD))
-      shiny::updateSelectInput(session = session, inputId = 'layoutO_rcbd',
-                        label = "Layout option:",
-                        choices = NewlayoutOptions,
-                        selected = 1
-      )
-    })
-    
-    
-    reset_selection <- shiny::reactiveValues(reset = 0)
-    
-    shiny::observeEvent(input$stackedRCBD, {
-      reset_selection$reset <- 1
-    })
-    
-    shiny::observeEvent(input$layoutO_rcbd, {
-      reset_selection$reset <- 0
-    })
-    
-    reactive_layoutRCBD <- shiny::reactive({
-      shiny::req(input$stackedRCBD)
-      shiny::req(input$layoutO_rcbd)
-      shiny::req(input$locLayout_rcbd)
-      shiny::req(RCBD_reactive())
-      obj_rcbd <- RCBD_reactive()
-      planting_rcbd <- rcbd_inputs()$planter
-      
-      if (reset_selection$reset == 1) {
-        opt_rcbd <- 1
-      } else opt_rcbd <- as.numeric(input$layoutO_rcbd)
-      
-      locSelected <- as.numeric(input$locLayout_rcbd)
-      try(plot_layout(x = obj_rcbd, 
-                      layout = opt_rcbd, 
-                      stacked = input$stackedRCBD,
-                      planter = planting_rcbd, 
-                      l = locSelected), 
-          silent = TRUE)
-    })
+    reactive_layoutRCBD <- app_layout_selection(input, session,
+      design = function() RCBD_reactive(),
+      planter = function() rcbd_inputs()$planter,
+      ids = c(layout = "layoutO_rcbd", stacked = "stackedRCBD", location = "locLayout_rcbd")
+    )
 
     
     simulation_settings <- app_simulation_controls(input, session,

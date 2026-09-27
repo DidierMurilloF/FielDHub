@@ -321,44 +321,11 @@ mod_FD_server <- function(id) {
       )
     })
     
-    shiny::observeEvent(input$stackedFD, {
-      shiny::req(input$stackedFD)
-      shiny::req(input$l.fd)
-      obj_fd <- fd_reactive()
-      NewlayoutOptions <- validate_design(layout_choices(x = obj_fd, stacked = input$stackedFD))
-      shiny::updateSelectInput(session = session, inputId = 'layoutO_fd',
-                        label = "Layout option:",
-                        choices = NewlayoutOptions,
-                        selected = 1
-      )
-    })
-    
-    reset_selection <- shiny::reactiveValues(reset = 0)
-
-    shiny::observeEvent(input$stackedFD, {
-      reset_selection$reset <- 1
-    })
-
-    shiny::observeEvent(input$layoutO_fd, {
-      reset_selection$reset <- 0
-    })
-    
-    reactive_layoutFD <- shiny::reactive({
-      shiny::req(input$layoutO_fd)
-      shiny::req(fd_reactive())
-      obj_fd <- fd_reactive()
-      planting_fd <- fd_inputs()$planter
-      
-      if (reset_selection$reset == 1) {
-        opt_fd <- 1
-      } else opt_fd <- as.numeric(input$layoutO_fd)
-      
-      locSelected <- as.numeric(input$locLayout_fd)
-      try(plot_layout(x = obj_fd, layout = opt_fd, 
-                      stacked = input$stackedFD,
-                      planter = planting_fd , 
-                      l = locSelected), silent = TRUE)
-    })
+    reactive_layoutFD <- app_layout_selection(input, session,
+      design = function() fd_reactive(),
+      planter = function() fd_inputs()$planter,
+      ids = c(layout = "layoutO_fd", stacked = "stackedFD", location = "locLayout_fd")
+    )
     
     
     simulation_settings <- app_simulation_controls(input, session,

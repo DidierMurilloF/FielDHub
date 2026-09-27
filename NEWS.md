@@ -270,6 +270,11 @@
 
 ### Enhancements:
 
+- The twelve classic design modules share layout-selection and stacking-reset
+  behavior. Unavailable selections and drawing failures now show validation
+  messages instead of silently leaving a blank layout panel. Existing input
+  identifiers, valid field books, map labels, and layout metadata are retained.
+
 - Field-dimension searches now enumerate distinct divisor pairs instead of
   every subset of repeated prime factors. The established option order,
   filters, numeric values and named-input attributes are retained, while

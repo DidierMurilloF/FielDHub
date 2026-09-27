@@ -341,46 +341,11 @@ mod_Alpha_Lattice_server <- function(id){
       )
     })
     
-    shiny::observeEvent(input$stackedAlpha, {
-      shiny::req(input$stackedAlpha)
-      obj <- ALPHA_reactive()
-      NewlayoutOptions <- validate_design(layout_choices(x = obj, stacked = input$stackedAlpha))
-      shiny::updateSelectInput(session = session, inputId = 'layoutO',
-                        label = "Layout option:",
-                        choices = NewlayoutOptions,
-                        selected = 1
-      )
-    })
-    
-    reset_selection <- shiny::reactiveValues(reset = 0)
-    
-    shiny::observeEvent(input$stackedAlpha, {
-      reset_selection$reset <- 1
-    })
-    
-    shiny::observeEvent(input$layoutO, {
-      reset_selection$reset <- 0
-    })
-    
-    reactive_layoutAlpha <- shiny::reactive({
-      shiny::req(input$stackedAlpha)
-      shiny::req(alpha_inputs()$planter)
-      shiny::req(input$layoutO)
-      shiny::req(ALPHA_reactive())
-      obj <- ALPHA_reactive()
-      
-      if (reset_selection$reset == 1) {
-        opt <- 1
-      } else opt <- as.numeric(input$layoutO)
-      
-      locSelected <- as.numeric(input$locLayout)
-      try(plot_layout(x = obj, 
-                      layout = opt, 
-                      planter = alpha_inputs()$planter, 
-                      l = locSelected, 
-                      stacked = input$stackedAlpha), 
-          silent = TRUE)
-    })
+    reactive_layoutAlpha <- app_layout_selection(input, session,
+      design = function() ALPHA_reactive(),
+      planter = function() alpha_inputs()$planter,
+      ids = c(layout = "layoutO", stacked = "stackedAlpha", location = "locLayout")
+    )
     
     
     simulation_settings <- app_simulation_controls(input, session,

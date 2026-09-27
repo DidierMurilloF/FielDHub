@@ -341,47 +341,11 @@ mod_Rectangular_Lattice_server <- function(id) {
       )
     })
     
-    shiny::observeEvent(input$stackedRT, {
-      shiny::req(input$stackedRT)
-      shiny::req(input$l.rectangular)
-      obj_rt <- RECTANGULAR_reactive()
-      NewlayoutOptions <- validate_design(layout_choices(x = obj_rt, stacked = input$stackedRT))
-      shiny::updateSelectInput(session = session, inputId = 'layoutO_rt',
-                        label = "Layout option:",
-                        choices = NewlayoutOptions,
-                        selected = 1
-      )
-    })
-    
-    reset_selection <- shiny::reactiveValues(reset = 0)
-    
-    shiny::observeEvent(input$stackedRT, {
-      reset_selection$reset <- 1
-    })
-    
-    shiny::observeEvent( input$layoutO_rt, {
-      reset_selection$reset <- 0
-    })
-    
-    reactive_layoutRect <- shiny::reactive({
-      shiny::req(input$stackedRT)
-      shiny::req(input$layoutO_rt)
-      shiny::req(input$locLayout_rt)
-      shiny::req(rectangular_inputs()$planter)
-      shiny::req(RECTANGULAR_reactive())
-      obj_rt <- RECTANGULAR_reactive()
-      
-      if (reset_selection$reset == 1) {
-        opt_rt <- 1
-      } else opt_rt <- as.numeric(input$layoutO_rt)
-      
-      locSelected <- as.numeric(input$locLayout_rt)
-      try(plot_layout(x = obj_rt, layout = opt_rt,
-                      planter = rectangular_inputs()$planter,
-                      l = locSelected, 
-                      stacked = input$stackedRT), 
-          silent = TRUE)
-    })
+    reactive_layoutRect <- app_layout_selection(input, session,
+      design = function() RECTANGULAR_reactive(),
+      planter = function() rectangular_inputs()$planter,
+      ids = c(layout = "layoutO_rt", stacked = "stackedRT", location = "locLayout_rt")
+    )
     
     
     simulation_settings <- app_simulation_controls(input, session,

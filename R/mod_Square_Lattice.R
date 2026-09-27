@@ -346,45 +346,11 @@ mod_Square_Lattice_server <- function(id){
       )
     })
     
-    shiny::observeEvent(input$stacked_sq, {
-      shiny::req(input$stacked_sq)
-      shiny::req(input$l.square)
-      obj_sq <- SQUARE_reactive()
-      NewlayoutOptions <- validate_design(layout_choices(x = obj_sq, stacked = input$stacked_sq))
-      shiny::updateSelectInput(session = session, inputId = 'layoutO_sq',
-                        label = "Layout option:",
-                        choices = NewlayoutOptions,
-                        selected = 1
-      )
-    })
-    
-    reset_selection <- shiny::reactiveValues(reset = 0)
-    
-    shiny::observeEvent(input$stacked_sq, {
-      reset_selection$reset <- 1
-    })
-    
-    shiny::observeEvent(input$layoutO_sq, {
-      reset_selection$reset <- 0
-    })
-    
-    reactive_layoutSquare <- shiny::reactive({
-      shiny::req(square_inputs()$planter)
-      shiny::req(input$layoutO_sq)
-      shiny::req(SQUARE_reactive())
-      obj_sq <- SQUARE_reactive()
-      
-      if (reset_selection$reset == 1) {
-        opt_sq <- 1
-      } else opt_sq <- as.numeric(input$layoutO_sq)
-      
-      locSelected <- as.numeric(input$locLayout_sq)
-      try(plot_layout(x = obj_sq, 
-                      layout = opt_sq, 
-                      planter = square_inputs()$planter, 
-                      l = locSelected, 
-                      stacked = input$stacked_sq), silent = TRUE)
-    })
+    reactive_layoutSquare <- app_layout_selection(input, session,
+      design = function() SQUARE_reactive(),
+      planter = function() square_inputs()$planter,
+      ids = c(layout = "layoutO_sq", stacked = "stacked_sq", location = "locLayout_sq")
+    )
     
     output$layout.output_sq <- shiny::renderPlot({
       shiny::req(reactive_layoutSquare())

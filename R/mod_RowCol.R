@@ -372,49 +372,11 @@ mod_RowCol_server <- function(id){
       )
     })
     
-    
-    shiny::observeEvent(input$stackedRowCol, {
-      shiny::req(input$stackedRowCol)
-      shiny::req(input$l.rcd)
-      obj <- RowCol_reactive()
-      NewlayoutOptions <- validate_design(layout_choices(x = obj, stacked = input$stackedRowCol))
-      shiny::updateSelectInput(session = session, inputId = 'layoutO_rcd',
-                        label = "Layout option:",
-                        choices = NewlayoutOptions,
-                        selected = 1
-      )
-    })
-    
-    
-    reset_selection <- shiny::reactiveValues(reset = 0)
-    
-    shiny::observeEvent(input$stackedRowCol, {
-      reset_selection$reset <- 1
-    })
-    
-    shiny::observeEvent(input$layoutO_rcd, {
-      reset_selection$reset <- 0
-    })
-    
-    reactive_layoutROWCOL <- shiny::reactive({
-      shiny::req(input$layoutO_rcd)
-      shiny::req(RowCol_reactive())
-      obj_rcd <- RowCol_reactive()
-      
-      planting_rcd <- rcd_inputs()$planter
-      
-      if (reset_selection$reset == 1) {
-        opt_rcd <- 1
-      } else opt_rcd <- as.numeric(input$layoutO_rcd)
-      
-      locSelected <- as.numeric(input$locLayout_rcd)
-      try(plot_layout(x = obj_rcd, 
-                      layout = opt_rcd,
-                      planter = planting_rcd, 
-                      l = locSelected, 
-                      stacked = input$stackedRowCol), 
-          silent = TRUE)
-    }) 
+    reactive_layoutROWCOL <- app_layout_selection(input, session,
+      design = function() RowCol_reactive(),
+      planter = function() rcd_inputs()$planter,
+      ids = c(layout = "layoutO_rcd", stacked = "stackedRowCol", location = "locLayout_rcd")
+    )
     
     simulation_settings <- app_simulation_controls(input, session,
       ids = c(trait = "trailsRowCol", other = "OtherRowCol", minimum = "min.RowCol", maximum = "max.RowCol", submit = "ok.RowCol"),

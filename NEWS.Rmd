@@ -190,6 +190,11 @@ knitr::opts_chunk$set(
 
 ### Enhancements:
 
+- The twelve classic design modules share layout-selection and stacking-reset
+  behavior. Unavailable selections and drawing failures now show validation
+  messages instead of silently leaving a blank layout panel. Existing input
+  identifiers, valid field books, map labels, and layout metadata are retained.
+
 * Field-dimension searches now enumerate distinct divisor pairs instead of every subset of repeated prime factors. The established option order, filters, numeric values and named-input attributes are retained, while work stays bounded for counts such as `2^30`. Empty mixed-filter searches now return no choices instead of a subscript error. A repeatable dimension benchmark accompanies the change.
 
 * Field designs, family splits and allocation plans now share one result construction boundary. Schema validation checks design-specific field-book columns and family-split location totals in addition to common keys and metadata. Existing storage types, filler markers, empty family locations and extra user columns are preserved. See `help("design_results")` for the schema and reproducibility contract.

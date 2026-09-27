@@ -48,6 +48,6 @@ test_that("classic layout selectors use shared core choices without rendering", 
   for (module in modules) {
     code <- body(get(paste0("mod_", module, "_server"), asNamespace("FielDHub")))
     expect_false("newBooks" %in% all.names(code), info = module)
-    expect_identical(sum(all.names(code) == "layout_choices"), if (module == "CRD") 1L else 2L)
+    expect_identical(sum(all.names(code) == "layout_choices"), 1L)
   }
 })
