@@ -1064,22 +1064,13 @@ mod_multi_loc_preps_server <- function(id){
     
     heatmap_obj <- shiny::reactive({
       shiny::req(simuDataPREP()$dfSimulationList)
-      loc_user <- user_site_selection()
-      if(input$heatmap_PREP) {
-        w <- as.character(valsPREP$trail.prep)
-        df <- simuDataPREP()$dfSimulationList[[loc_user]]
-        df <- as.data.frame(df)
-        p1 <- ggplot2::ggplot(df, ggplot2::aes(x = df[,4], y = df[,3], fill = df[,7], text = df[,8])) + 
-          ggplot2::geom_tile() +
-          ggplot2::xlab("COLUMN") +
-          ggplot2::ylab("ROW") +
-          ggplot2::labs(fill = w) +
-          fieldhub_viridis_scale()
-        
-        p2 <- plotly::ggplotly(p1, tooltip="text", height = 700)
-        return(p2)
-      }
-    }) 
+      shiny::req(input$heatmap_PREP)
+      validate_design(app_spatial_heatmap(
+        simuDataPREP()$dfSimulationList,
+        response_name = as.character(valsPREP$trail.prep),
+        selected = user_site_selection(), height = 700
+      ))
+    })
     
     output$heatmap_prep <- plotly::renderPlotly({
       test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0

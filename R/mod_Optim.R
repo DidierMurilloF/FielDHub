@@ -688,22 +688,12 @@ mod_Optim_server <- function(id) {
     
     heatmap_obj <- shiny::reactive({
       shiny::req(simuDataOPTIM()$dfSimulation)
-      if(input$heatmap_s) {
-        w <- as.character(valsOPTIM$trail.optim)
-        df <- simuDataOPTIM()$dfSimulation[[user_site_selection()]]
-        df <- as.data.frame(df)
-        p1 <- ggplot2::ggplot(df, ggplot2::aes(x = df[,4], y = df[,3], fill = df[,7], text = df[,8])) + 
-          ggplot2::ggtitle("Heat map for yield") + 
-          ggplot2::geom_tile() +
-          ggplot2::xlab("COLUMN") +
-          ggplot2::ylab("ROW") +
-          ggplot2::labs(fill = w) +
-          fieldhub_viridis_scale()
-        
-        p2 <- plotly::ggplotly(p1, tooltip="text", height = 740)
-        
-        return(p2)
-      }
+      shiny::req(input$heatmap_s)
+      validate_design(app_spatial_heatmap(
+        simuDataOPTIM()$dfSimulation,
+        response_name = as.character(valsOPTIM$trail.optim),
+        selected = user_site_selection(), height = 740, show_title = TRUE
+      ))
     })
     
     output$heatmap <- plotly::renderPlotly({

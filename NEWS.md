@@ -55,6 +55,12 @@
 
 ### New features:
 
+- The seven spatial design pages now share the same named-column tile renderer
+  as the classic pages, with their existing colors, sizes, and unrounded
+  simulation values preserved. Invalid simulation locations receive classed
+  input errors. The optimized-design heatmap title now names the selected
+  response instead of always saying yield.
+
 - All twelve classic design pages now share a heatmap data builder and renderer.
   Locations, coordinates, treatment labels, and responses are selected by name,
   so extra or reordered columns cannot silently change a heatmap. Existing

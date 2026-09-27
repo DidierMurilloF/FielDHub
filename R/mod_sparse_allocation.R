@@ -1018,17 +1018,11 @@ mod_sparse_allocation_server <- function(id){
     
     heatmap_obj_D <- shiny::reactive({
       shiny::req(simudata_DIAG()$dfSimulationList)
-      loc_user <- as.numeric(input$sparse_loc_view)
-      w <- as.character(valsDIAG$trail)
-      df <- simudata_DIAG()$dfSimulationList[[loc_user]]
-      p1 <- ggplot2::ggplot(df, ggplot2::aes(x = df[,4], y = df[,3], fill = df[,7], text = df[,8])) +
-        ggplot2::geom_tile() +
-        ggplot2::xlab("COLUMN") +
-        ggplot2::ylab("ROW") +
-        ggplot2::labs(fill = w) +
-        fieldhub_viridis_scale()
-      p2 <- plotly::ggplotly(p1, tooltip="text", height = 720)
-      return(p2)
+      validate_design(app_spatial_heatmap(
+        simudata_DIAG()$dfSimulationList,
+        response_name = as.character(valsDIAG$trail),
+        selected = as.numeric(input$sparse_loc_view), height = 720
+      ))
     })
     
     output$heatmap_diag <- plotly::renderPlotly({

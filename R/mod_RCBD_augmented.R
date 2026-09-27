@@ -781,21 +781,12 @@ mod_RCBD_augmented_server <- function(id) {
     
     heatmap_obj <- shiny::reactive({
       shiny::req(simuDataARCBD()$dfSimulation)
-      if(input$heatmap_s) {
-        w <- as.character(valsARCBD$trail.arcbd)
-        df <- simuDataARCBD()$dfSimulation[[locNum()]]
-        df <- as.data.frame(df)
-        p1 <- ggplot2::ggplot(df, ggplot2::aes(x = df[,4], y = df[,3], fill = df[,7], text = df[,8])) +
-          ggplot2::geom_tile() +
-          ggplot2::xlab("COLUMN") +
-          ggplot2::ylab("ROW") +
-          ggplot2::labs(fill = w) +
-          fieldhub_viridis_scale()
-        
-        p2 <- plotly::ggplotly(p1, tooltip="text", height = 740)
-        
-        return(p2)
-      }
+      shiny::req(input$heatmap_s)
+      validate_design(app_spatial_heatmap(
+        simuDataARCBD()$dfSimulation,
+        response_name = as.character(valsARCBD$trail.arcbd),
+        selected = locNum(), height = 740
+      ))
     })
     
     output$heatmap <- plotly::renderPlotly({

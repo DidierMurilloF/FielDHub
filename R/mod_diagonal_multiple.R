@@ -1016,20 +1016,12 @@ mod_diagonal_multiple_server <- function(id) {
         })
         
         heatmap_obj_D <- shiny::reactive({
-            shiny::req(simudata_DIAG()$dfSimulation)
-            loc_user <- user_location()$user_site
-            w <- as.character(valsDIAG$trail)
-            df <- simudata_DIAG()$dfSimulationList[[loc_user]]
-            p1 <- ggplot2::ggplot(df, ggplot2::aes(x = df[,4], y = df[,3], fill = df[,7], text = df[,8])) + 
-                ggplot2::geom_tile() +
-                ggplot2::xlab("COLUMN") +
-                ggplot2::ylab("ROW") +
-                ggplot2::labs(fill = w) +
-                fieldhub_viridis_scale()
-            
-            p2 <- plotly::ggplotly(p1, tooltip="text", height = 700)
-            
-            return(p2)
+          shiny::req(simudata_DIAG()$dfSimulationList)
+          validate_design(app_spatial_heatmap(
+            simudata_DIAG()$dfSimulationList,
+            response_name = as.character(valsDIAG$trail),
+            selected = user_location()$user_site, height = 700
+          ))
         })
         
         output$heatmap_diag <- plotly::renderPlotly({
