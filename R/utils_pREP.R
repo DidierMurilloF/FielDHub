@@ -40,9 +40,7 @@ prep_field_mask <- function(
     fillers = 0,
     planter = "serpentine") {
 
-    if (all(c("serpentine", "cartesian") != planter)) {
-        fieldhub_abort('Input "planter" is unknown. Please, choose one: "serpentine" or "cartesian"')
-    }
+    validate_planter(planter)
     if (length(fillers) != 1 || is.na(fillers) || fillers < 0 || fillers %% 1 != 0) {
         fieldhub_abort("fillers must be a non-negative integer.")
     }

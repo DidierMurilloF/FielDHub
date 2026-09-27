@@ -9,9 +9,7 @@ get_random <- function(n_rows = NULL,
                        Multi.Fillers = FALSE, 
                        which.blocks = NULL,
                        data_dim_each_block = NULL) {
-  if (all(c("serpentine", "cartesian") != planter_mov)) {
-    fieldhub_abort("Input planter_mov is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
-  } 
+  validate_planter(planter_mov)
   my_split_r <- d_checks
   n_rows <- as.numeric(n_rows)
   n_cols <- as.numeric(n_cols)

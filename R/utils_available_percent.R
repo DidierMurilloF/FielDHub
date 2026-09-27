@@ -208,9 +208,7 @@ random_checks <- function(dt = NULL, d_checks = NULL, p = NULL, percent = NULL,
     seed <- runif(1, min = -50000, max = 50000)
   } 
   set.seed(seed)
-  if (all(c("serpentine", "cartesian") != planter_mov)) {
-    fieldhub_abort("Input planter_mov choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
-  }
+  validate_planter(planter_mov)
   my_P <- p
   if (!is.null(percent) && is.null(exptlines)) {
     #print(subset(my_P, my_P[,1] == percent)[1,2])

@@ -2,9 +2,7 @@
 #' @noRd
 export_design <- function(G, movement_planter = NULL, location = NULL, Year = NULL,
                           data_file = NULL, reps = FALSE) {
-  if (all(c("serpentine", "cartesian") != movement_planter)) {
-    fieldhub_abort("Input movement_planter is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
-  }
+  validate_planter(movement_planter)
   if (is.null(Year)) Year <- format(Sys.Date(), "%Y")
   rows <- nrow(G[[3]])
   cols <- ncol(G[[3]])
