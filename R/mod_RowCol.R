@@ -292,8 +292,9 @@ mod_RowCol_server <- function(id){
       k.rcd <- as.numeric(input$k.rcd)
       treatments <- as.numeric(get_data_rcd()$treatments)
       planter <- input$planter_mov_rcd
-      plot_start.rcd <- as.vector(unlist(strsplit(input$plot_start.rcd, ",")))
-      plot_start <- as.numeric(plot_start.rcd)
+      plot_start <- validate_design(read_whole_numbers(
+        input$plot_start.rcd, "Starting Plot Number"
+      ))
       site_names <-  as.vector(unlist(strsplit(input$Location.rcd, ",")))
       seed <- as.numeric(input$seed.rcd)
       return(list(r = r.rcd, 

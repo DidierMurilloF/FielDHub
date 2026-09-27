@@ -210,8 +210,9 @@ mod_CRD_server <- function(id) {
       treatments <- as.numeric(get_data_crd()$treatments)
       reps <- as.numeric(input$reps.crd)
       planter <- input$planter_mov_crd
-      plot_startreatments <- as.vector(unlist(strsplit(input$plot_start.crd, ",")))
-      plot_start <- as.numeric(plot_startreatments)[1]
+      plot_start <- validate_design(read_whole_numbers(
+        input$plot_start.crd, "Starting Plot Number"
+      ))[1]
       site_names <-  as.vector(unlist(strsplit(input$Location.crd, ",")))
       seed <- as.numeric(input$seed.crd)
       return(list(t = treatments, 

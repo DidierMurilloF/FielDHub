@@ -244,12 +244,9 @@ mod_FD_server <- function(id) {
       req(input$planter_mov_fd)
       
       setfactors.fd <- get_data_factorial()$treatments
-      plot_start.fd <- parse_whole_numbers(input$plot_start.fd, "Starting Plot Number")
-      if (!plot_start.fd$ok) {
-        shinyalert::shinyalert("Error!!", plot_start.fd$message, type = "error")
-        return(NULL)
-      }
-      plot_start <- plot_start.fd$value
+      plot_start <- validate_design(read_whole_numbers(
+        input$plot_start.fd, "Starting Plot Number"
+      ))
       planter <- input$planter_mov_fd
       site_names <-  as.vector(unlist(strsplit(input$Location.fd, ",")))
       seed <- as.numeric(input$seed.fd)

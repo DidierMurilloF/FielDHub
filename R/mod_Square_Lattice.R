@@ -234,8 +234,9 @@ mod_Square_Lattice_server <- function(id){
           type = "error")
         return(NULL)
       } 
-      plot_start.square <- as.vector(unlist(strsplit(input$plot_start.square, ",")))
-      plot_start <- as.numeric(plot_start.square)
+      plot_start <- validate_design(read_whole_numbers(
+        input$plot_start.square, "Starting Plot Number"
+      ))
       planter <- input$planter_mov_square
       site_names <- as.vector(unlist(strsplit(input$Location.square, ",")))
       seed <- as.numeric(input$myseed.square)

@@ -174,7 +174,9 @@ mod_Optim_server <- function(id) {
     optim_inputs <- eventReactive(input$RUN.optim, {
       planter_mov <- input$planter_mov.spatial
       expt_name <- as.character(input$expt_name.spatial)
-      plotNumber <- as.numeric(as.vector(unlist(strsplit(input$plot_start.spatial, ","))))
+      plotNumber <- validate_design(read_whole_numbers(
+        input$plot_start.spatial, "Starting Plot Number"
+      ))
       site_names <- as.character(as.vector(unlist(strsplit(input$Location.spatial, ","))))
       seed_number <- as.numeric(input$seed.spatial)
       sites = as.numeric(input$l.optim)

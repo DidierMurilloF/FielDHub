@@ -219,7 +219,9 @@ mod_Diagonal_server <- function(id) {
       }else{
         name_expt = paste0(rep("Block", times = blocks), 1:blocks)
       }
-      plotNumber <- as.numeric(as.vector(unlist(strsplit(input$plot_start, ","))))
+      plotNumber <- validate_design(read_whole_numbers(
+        input$plot_start, "Starting Plot Number"
+      ))
       seed_number <- as.numeric(input$seed_single)
       location_names <- as.vector(unlist(strsplit(input$Location, ",")))
       sites = as.numeric(input$l.diagonal)

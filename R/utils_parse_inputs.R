@@ -43,6 +43,18 @@ parse_whole_numbers <- function(text, label) {
   list(ok = TRUE, value = vals, message = NULL)
 }
 
+#' Read whole-number inputs using the shared classed error contract
+#'
+#' @param text The raw comma-separated input.
+#' @param label Input name to include in a validation message.
+#' @return A numeric vector, or a `fieldhub_input_error` for invalid input.
+#' @noRd
+read_whole_numbers <- function(text, label) {
+  parsed <- parse_whole_numbers(text, label)
+  if (!parsed$ok) fieldhub_abort(parsed$message)
+  parsed$value
+}
+
 #' Parse the "Input # of Checks" numeric input
 #'
 #' @description

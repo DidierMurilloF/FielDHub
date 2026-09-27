@@ -554,7 +554,9 @@ mod_RCBD_augmented_server <- function(id) {
       if (length(nameexpt) != 0) {
         Name_expt <- nameexpt
       }else Name_expt <- paste(rep('Expt', repsExpt), 1:repsExpt, sep = "")
-      plotNumber <- as.numeric(as.vector(unlist(strsplit(input$plot_start_a_rcbd, ","))))
+      plotNumber <- validate_design(read_whole_numbers(
+        input$plot_start_a_rcbd, "Starting Plot Number"
+      ))
       site_names <- as.character(as.vector(unlist(strsplit(input$Location_a_rcbd, ","))))
       random <- input$random
       nrows <- field_dims_augmented()$d_row

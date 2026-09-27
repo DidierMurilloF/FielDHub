@@ -245,8 +245,9 @@ mod_RCBD_server <- function(id) {
       r <- as.numeric(input$b)
       treatments <- as.numeric(get_data_rcbd()$treatments)
       planter <- input$planter_mov_rcbd
-      plot_start <- as.vector(unlist(strsplit(input$plot_start.rcbd, ",")))
-      plot_start <- as.numeric(plot_start)
+      plot_start <- validate_design(read_whole_numbers(
+        input$plot_start.rcbd, "Starting Plot Number"
+      ))
       site_names <-  as.vector(unlist(strsplit(input$Location.rcbd, ",")))
       seed <- as.numeric(input$seed.rcbd)
       sites <- as.numeric(input$l.rcbd)

@@ -300,7 +300,9 @@ mod_multi_loc_preps_server <- function(id){
         input_lines <- as.numeric(input$gens_prep)
         planter_mov <- input$planter_preps
         expt_name <- as.vector(unlist(strsplit(input$expt_name_preps, ",")))
-        plotNumber <- as.numeric(as.vector(unlist(strsplit(input$plot_start_preps, ","))))
+        plotNumber <- validate_design(read_whole_numbers(
+          input$plot_start_preps, "Starting Plot Number"
+        ))
         site_names <- as.character(as.vector(unlist(strsplit(input$loc_name_preps, ","))))
         seed_number <- as.numeric(input$seed_preps)
         sites = as.numeric(input$locs_prep)

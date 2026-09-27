@@ -248,12 +248,9 @@ mod_LSD_server <- function(id){
         data.lsd <- NULL
       }
       
-      plot_start.lsd <- parse_whole_numbers(input$plot_start.lsd, "Starting Plot Number")
-      if (!plot_start.lsd$ok) {
-        shinyalert::shinyalert("Error!!", plot_start.lsd$message, type = "error")
-        return(NULL)
-      }
-      plot_number <- plot_start.lsd$value
+      plot_number <- validate_design(read_whole_numbers(
+        input$plot_start.lsd, "Starting Plot Number"
+      ))
       loc.lsd <-  as.vector(unlist(strsplit(input$Location.lsd, ",")))
       seed.number.lsd <- as.numeric(input$seed.lsd)
       planting_lsd <- input$planter.lsd

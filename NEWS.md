@@ -181,6 +181,12 @@
   order are preserved, and the displayed app version now comes from package
   metadata instead of a hard-coded release number.
 
+- Starting plot numbers in all 19 modules now use one strict core reader
+  and the shared validation-message path. Malformed numbers and trailing
+  commas produce a named explanation instead of silently losing values or
+  reaching design generation as missing numbers. Valid starting numbers
+  are unchanged.
+
 - The shared `desplot` renderer and layout theme now live in a dedicated
   rendering file, and the augmented-RCBD source filename now correctly spells
   `RCBD`.

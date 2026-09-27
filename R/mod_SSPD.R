@@ -269,8 +269,9 @@ mod_SSPD_server <- function(id){
       
       sites <- as.numeric(input$l.sspd)
       seed <- as.numeric(input$seed.sspd)
-      plot_start.sspd <- as.vector(unlist(strsplit(input$plot_start.sspd, ",")))
-      plot_start <- as.numeric(plot_start.sspd)
+      plot_start <- validate_design(read_whole_numbers(
+        input$plot_start.sspd, "Starting Plot Number"
+      ))
       site_names <-  as.vector(unlist(strsplit(input$Location.sspd, ",")))
       reps <- as.numeric(input$reps.sspd)
       planter <- input$planter_mov_sspd

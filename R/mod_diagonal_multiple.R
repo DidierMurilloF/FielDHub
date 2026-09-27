@@ -238,7 +238,9 @@ mod_diagonal_multiple_server <- function(id) {
             }else {
                 expe_names = paste0(rep("Block", times = n_blocks), 1:n_blocks)
             }
-            plotNumber <- as.numeric(as.vector(unlist(strsplit(input$plot_start_multiple, ","))))
+            plotNumber <- validate_design(read_whole_numbers(
+              input$plot_start_multiple, "Starting Plot Number"
+            ))
             seed_number <- as.numeric(input$seed_multiple)
             location_names <- trimws(as.vector(unlist(strsplit(input$location_multiple, ","))))
             sites = as.numeric(input$locs_db)

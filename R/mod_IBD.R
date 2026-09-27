@@ -290,8 +290,9 @@ mod_IBD_server <- function(id) {
       k.ibd <- as.numeric(input$k.ibd)
       treatments <- as.numeric(get_data_ibd()$treatments)
       planter <- input$planter_mov_ibd
-      plot_start.ibd <- as.vector(unlist(strsplit(input$plot_start.ibd, ",")))
-      plot_start <- as.numeric(plot_start.ibd)
+      plot_start <- validate_design(read_whole_numbers(
+        input$plot_start.ibd, "Starting Plot Number"
+      ))
       site_names <-  as.vector(unlist(strsplit(input$Location.ibd, ",")))
       seed <- as.numeric(input$seed.ibd)
       sites <- as.numeric(input$l.ibd)

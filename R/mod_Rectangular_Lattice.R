@@ -231,8 +231,9 @@ mod_Rectangular_Lattice_server <- function(id) {
       r.rectangular <- as.numeric(input$r.rectangular)
       k.rectangular <- as.numeric(input$k.rectangular)
       planter <- input$planter_mov_rect
-      plot_start.rectangular <- as.vector(unlist(strsplit(input$plot_start.rectangular, ",")))
-      plot_start <- as.numeric(plot_start.rectangular)
+      plot_start <- validate_design(read_whole_numbers(
+        input$plot_start.rectangular, "Starting Plot Number"
+      ))
       site_names <- as.vector(unlist(strsplit(input$Location.rectangular, ",")))
       seed <- as.numeric(input$myseed.rectangular)
       sites <- as.numeric(input$l.rectangular)

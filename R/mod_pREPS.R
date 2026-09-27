@@ -218,7 +218,9 @@ mod_pREPS_server <- function(id){
     prep_inputs <- eventReactive(input$RUN.prep, {
       planter_mov <- input$planter_mov.preps
       expt_name <- as.character(input$expt_name.preps)
-      plotNumber <- as.numeric(as.vector(unlist(strsplit(input$plot_start.preps, ","))))
+      plotNumber <- validate_design(read_whole_numbers(
+        input$plot_start.preps, "Starting Plot Number"
+      ))
       site_names <- as.character(as.vector(unlist(strsplit(input$Location.preps, ","))))
       seed_number <- as.numeric(input$seed.preps)
       sites = as.numeric(input$l.preps)
