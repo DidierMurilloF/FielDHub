@@ -153,6 +153,10 @@ split_split_plot <- function(wp = NULL, sp = NULL, ssp = NULL, reps = NULL, type
                                    supplied = plotNumber_supplied)
   plot.random <- pred_plots$plots
   p.number.loc <- pred_plots$plots_loc
+  # Record the effective per-location starts plot_number_splits() actually
+  # used, not the raw (possibly length-mismatched or absent) plotNumber
+  # argument, so reproduce_design() replays silently and identically.
+  plotNumber <- pred_plots$plot_number
   if (crd) {
     loc.list <- vector(mode = "list", length = l)
     for (v in 1:l) {

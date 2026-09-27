@@ -55,15 +55,20 @@ warn_default_plot_numbers <- function(plotNumber, l, default, caller_supplied = 
 
 #' Warn that default location names replace the ones supplied
 #'
+#' @description (Ruling R5) Every call site already only calls this when
+#' `locationNames` is non-`NULL` (`if (!is.null(locationNames))
+#' warn_default_location_names(...)`), i.e. only when the caller actually
+#' supplied a value of the wrong length; `locationNames`'s own default is
+#' always `NULL` across every design function, so unlike
+#' `warn_default_plot_numbers()` this needs no separate `caller_supplied`
+#' flag.
+#'
 #' @param locationNames Location names supplied by the user.
 #' @param l Number of locations.
 #' @param default Location names used instead.
-#' @param caller_supplied Whether the caller actually supplied
-#'   `locationNames`; see `warn_default_plot_numbers()` (Ruling R5).
 #'
 #' @noRd
-warn_default_location_names <- function(locationNames, l, default, caller_supplied = TRUE) {
-  if (!caller_supplied) return(invisible(NULL))
+warn_default_location_names <- function(locationNames, l, default) {
   reason <- paste0("'locationNames' has ", length(locationNames), " value(s) for ",
                    l, " location(s)")
   warn_default_values("locationNames", locationNames, default, reason)

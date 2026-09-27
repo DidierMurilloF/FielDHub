@@ -158,7 +158,7 @@ build_incomplete_blocks <- function(t = NULL, k = NULL, l = 1, plotNumber = 101,
     fieldhub_abort('Size of experiment defined by number of units per incomplete block (nunits) is inconsistent. Check input parameters.')
   }
 
-  ibd_plots <- ibd_plot_numbers(nt = nt, plot.number = plotNumber, r = r, l = l)
+  ibd_plots <- ibd_plot_numbers(nt = nt, plot.number = plotNumber, r = r, l = l)$plot.number
   b <- nt/k
   square <- FALSE
   if (sqrt(nt) == round(sqrt(nt))) square <- TRUE

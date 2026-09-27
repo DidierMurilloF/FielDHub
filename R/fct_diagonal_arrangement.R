@@ -149,6 +149,7 @@ diagonal_arrangement <- function(
     year = NULL,
     checksPercent = NULL,
     sameEntries = FALSE) {
+    plotNumber_supplied <- !missing(plotNumber)
     validate_locations(l)
     validate_flag(multiLocationData, "multiLocationData")
     validate_flag(sameEntries, "sameEntries")
@@ -193,13 +194,13 @@ diagonal_arrangement <- function(
     if (kindExpt == "SUDC") {
         if (!is.null(l)) {
         if (is.null(plotNumber) || length(plotNumber) != l) {
-            if (l > 1){
-            plotNumber <- as.list(default_plot_starts(l, 1001))
-            } else plotNumber <- list(1001)
+            default_plots <- default_plot_starts(l, 1001)
+            warn_default_plot_numbers(plotNumber, l, default_plots, caller_supplied = plotNumber_supplied)
+            plotNumber <- as.list(default_plots)
         }
         } else fieldhub_abort("Number of locations/sites is missing")
     }
-    
+
     if (kindExpt != "SUDC") {
         num_expts <- length(blocks)
         if (!is.null(l)) {
@@ -208,7 +209,11 @@ diagonal_arrangement <- function(
             if (all(lengths(plotNumber) == num_expts) &
                 length(plotNumber) == l) {
                 plotNumber <- plotNumber
-            } else plotNumber <- as.list(default_plot_starts(l, 1001))
+            } else {
+                default_plots <- default_plot_starts(l, 1001)
+                warn_default_plot_numbers(plotNumber, l, default_plots, caller_supplied = plotNumber_supplied)
+                plotNumber <- as.list(default_plots)
+            }
             } else {
             if (l == 1) {
                 if (length(plotNumber) == num_expts) {
@@ -219,9 +224,13 @@ diagonal_arrangement <- function(
             } else {
                 if (length(plotNumber) == l) {
                 plotNumber <- as.list(plotNumber)
-                } else plotNumber <- as.list(default_plot_starts(l, 1001))
+                } else {
+                default_plots <- default_plot_starts(l, 1001)
+                warn_default_plot_numbers(plotNumber, l, default_plots, caller_supplied = plotNumber_supplied)
+                plotNumber <- as.list(default_plots)
+                }
             }
-            } 
+            }
         }
         }
     }

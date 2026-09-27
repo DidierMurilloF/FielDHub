@@ -135,6 +135,10 @@ alpha_lattice <- function(t = NULL,
                                    data = data_alpha, caller = "alpha_lattice",
                                    plotNumber_supplied = plotNumber_supplied)
   blocksModel <- matdf$blocksModel
+  # build_incomplete_blocks() already recorded the effective per-location
+  # starts it used (raw plotNumber pre-normalized); record the same value
+  # here so reproduce_design() replays silently and identically.
+  plotNumber <- matdf$metadata$parameters$plotNumber
   lambda <- r*(k - 1)/(nt - 1)
   matdf <- matdf$fieldBook
   OutAlpha <- as.data.frame(matdf)

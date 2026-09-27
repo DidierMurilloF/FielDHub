@@ -229,18 +229,20 @@ plot_number_splits <- function(plot.number = NULL, reps = NULL, l = NULL, t = NU
       plot.random[,k] <- replicate(1, sample(plots))
     }
   }
+  # plot.number holds the effective per-location starting plot numbers used
+  # above (whichever branch ran), for callers that need to record what was
+  # actually built rather than the raw argument they passed in.
   if (crd == TRUE) {
-    return(list(plots = plot.random))
+    return(list(plots = plot.random, plot_number = plot.number))
   }else {
-    return(list(plots = plot.random, plots_loc = p.number.loc))
+    return(list(plots = plot.random, plots_loc = p.number.loc, plot_number = plot.number))
   }
 }
 
 #' @noRd 
 #' 
 #' 
-seriePlot.numbers <- function(plot.number = NULL, reps = NULL, l = NULL, t = NULL,
-                              supplied = TRUE) {
+seriePlot.numbers <- function(plot.number = NULL, reps = NULL, l = NULL, t = NULL) {
   overlap <- FALSE
   if (t >= 100) overlap <- TRUE
   if (!is.null(plot.number)) {
@@ -254,8 +256,12 @@ seriePlot.numbers <- function(plot.number = NULL, reps = NULL, l = NULL, t = NUL
       plot.number <- plot.number[1:l]
     }
   }else {
+    # Every current caller pre-normalizes plot.number to length l before
+    # calling seriePlot.numbers(), so this branch is unreachable in
+    # practice; kept as a defensive fallback (no supplied/caller_supplied
+    # gate needed since it never fires).
     default_plots <- default_plot_starts(l, 1001)
-    warn_default_plot_numbers(plot.number, l, default_plots, caller_supplied = supplied)
+    warn_default_plot_numbers(plot.number, l, default_plots)
     plot.number <- default_plots
   }
   plot.numbs <- list()

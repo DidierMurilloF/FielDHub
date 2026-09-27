@@ -114,6 +114,10 @@ square_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101
                                    data = data_square, caller = "square_lattice",
                                    plotNumber_supplied = plotNumber_supplied)
   blocksModel <- matdf$blocksModel
+  # build_incomplete_blocks() already recorded the effective per-location
+  # starts it used (raw plotNumber pre-normalized); record the same value
+  # here so reproduce_design() replays silently and identically.
+  plotNumber <- matdf$metadata$parameters$plotNumber
   matdf <- matdf$fieldBook
   OutSquare_Lattice <- as.data.frame(matdf)
   OutSquare_Lattice$LOCATION <- factor(OutSquare_Lattice$LOCATION, levels = locationNames)

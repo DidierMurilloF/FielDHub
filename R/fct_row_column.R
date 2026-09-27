@@ -401,9 +401,13 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
   out_row_col_id <- out_row_col
   
   out_row_col_id <- out_row_col_id[order(out_row_col_id$LOCATION, out_row_col_id$REP, out_row_col_id$ROW),]
-  row_col_plots <- ibd_plot_numbers(nt = nt, plot.number = plotNumber, r = r, l = l,
-                                    supplied = plotNumber_supplied)
-  out_row_col_id$PLOT <- as.vector(unlist(row_col_plots))
+  ibd_result <- ibd_plot_numbers(nt = nt, plot.number = plotNumber, r = r, l = l,
+                                 supplied = plotNumber_supplied)
+  out_row_col_id$PLOT <- as.vector(unlist(ibd_result$plot.number))
+  # Record the effective per-location starts actually used, not the raw
+  # (possibly length-mismatched or absent) plotNumber argument, so
+  # reproduce_design() replays silently and identically.
+  plotNumber <- ibd_result$starts
   
   ID <- 1:nrow(out_row_col_id)
   out_row_col_fieldbook <- cbind(ID, out_row_col_id)
