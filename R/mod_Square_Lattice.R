@@ -206,31 +206,31 @@ mod_Square_Lattice_server <- function(id){
       shiny::req(input$Location.square)
       shiny::req(input$l.square)
       shiny::req(input$r.square)
-      r.square <- as.numeric(input$r.square)
-      k.square <- as.numeric(input$k.square)
+      reps <- as.numeric(input$r.square)
+      k <- as.numeric(input$k.square)
       if (input$k.square == "No Options Available") {
         shinyalert::shinyalert(
-          "Error!!", 
-          "No options for this combination of treatments!", 
+          "Error!!",
+          "No options for this combination of treatments!",
           type = "error")
         return(NULL)
-      } 
+      }
       plot_start <- validate_design(read_whole_numbers(
         input$plot_start.square, "Starting Plot Number"
       ))
       planter <- input$planter_mov_square
-      site_names <- as.vector(unlist(strsplit(input$Location.square, ",")))
+      location_names <- as.vector(unlist(strsplit(input$Location.square, ",")))
       seed <- validate_design(app_design_seed(input$myseed.square))
-      sites <- as.numeric(input$l.square)
+      l <- as.numeric(input$l.square)
       treatments <- get_data_square()$treatments
-      
-      return(list(r = r.square, 
-                  k = k.square, 
-                  t = treatments, 
+
+      return(list(reps = reps,
+                  k = k,
+                  t = treatments,
                   planter = planter,
-                  plot_start = plot_start, 
-                  sites = sites,
-                  site_names = site_names,
+                  plot_start = plot_start,
+                  l = l,
+                  location_names = location_names,
                   seed = seed))
     }) |>
       shiny::bindEvent(input$RUN.square)
@@ -269,38 +269,36 @@ mod_Square_Lattice_server <- function(id){
       
       shinyjs::show(id = "downloadCsv.square", anim = FALSE)
       
-      data_square <- get_data_square()$data_square
-      
-      if (square_inputs()$r < 2) {
+      # Task 11a scope note: IBD/RowCol/Alpha_Lattice/Rectangular_Lattice/
+      # STRIPD dropped this app-level reps < 2 check because their engines
+      # already reject an under-replicated design with a classed
+      # fieldhub_input_error. square_lattice() behaves the same way (it also
+      # only requires reps >= 1 up front and then fails downstream for an
+      # infeasible design), but removing the app-level check here was left
+      # out of that task's module list, so it is intentionally kept as-is.
+      if (square_inputs()$reps < 2) {
         shinyalert::shinyalert(
-          "Error!!", 
-          "Square Lattice Design needs at least 2 replicates.", 
+          "Error!!",
+          "Square Lattice Design needs at least 2 replicates.",
           type = "error")
         return(NULL)
       }
-      
-      validate_design(square_lattice(
-        t = square_inputs()$t, 
-        k = square_inputs()$k, 
-        reps = square_inputs()$r,
-        l = square_inputs()$sites, 
-        plotNumber = square_inputs()$plot_start, 
-        seed = square_inputs()$seed, 
-        locationNames = square_inputs()$site_names, 
-        data = data_square
-      )) 
-      
+
+      validate_design(do.call(
+        square_lattice, design_args_Square_Lattice(square_inputs(), get_data_square()$data_square)
+      ))
+
     })
-    
+
     output$summary_square_lattice <- shiny::renderPrint({
       shiny::req(SQUARE_reactive())
         cat("Randomization was successful!", "\n", "\n")
         print(SQUARE_reactive(), n = 6)
     })
-    
+
     upDateSites_SQ <- shiny::reactive({
       shiny::req(square_inputs())
-      locs <- square_inputs()$sites
+      locs <- square_inputs()$l
       sites <- 1:locs
       return(list(sites = sites))
     })

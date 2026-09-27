@@ -162,15 +162,9 @@ mod_CRD_server <- function(id) {
       } else {
         shiny::req(input$t.crd)
         nt <- as.numeric(input$t.crd)
-        reps <- as.numeric(input$reps.crd)
-        data_crd <- data.frame(
-          list(
-            TREATMENT = paste0("T-", 1:nt),
-            REP = rep(reps, times = nt)
-            )
-          )
-        colnames(data_crd) <- c("TREATMENT", "REP")
-        return(list(data_crd = data_crd, treatments = nt))
+        # No entry list is built here: CRD() generates its own "T1".."Tn"
+        # labels from a bare treatment count (design_args_CRD()/CRD(t = )).
+        return(list(data_crd = NULL, treatments = nt))
       }
     }) |>
       shiny::bindEvent(input$RUN.crd)
@@ -188,33 +182,29 @@ mod_CRD_server <- function(id) {
       plot_start <- validate_design(read_whole_numbers(
         input$plot_start.crd, "Starting Plot Number"
       ))[1]
-      site_names <-  as.vector(unlist(strsplit(input$Location.crd, ",")))
+      location_names <-  as.vector(unlist(strsplit(input$Location.crd, ",")))
       seed <- validate_design(app_design_seed(input$seed.crd))
-      return(list(t = treatments, 
-        r = reps, 
+      return(list(t = treatments,
+        reps = reps,
         planter = planter,
-        plot_start = plot_start, 
-        site_names = site_names,
+        plot_start = plot_start,
+        location_names = location_names,
         seed = seed))
     }) |>
       shiny::bindEvent(input$RUN.crd)
 
     CRD_reactive <- shiny::reactive({
-      
+
       shiny::req(get_data_crd())
       shiny::req(crd_inputs())
-      
+
       shinyjs::show(id = "downloadCsv.crd")
-      
-      my.design <- validate_design(CRD(
-        reps = crd_inputs()$r, 
-        plotNumber = crd_inputs()$plot_start, 
-        seed = crd_inputs()$seed,
-        locationNames = crd_inputs()$site_names,
-        data = get_data_crd()$data_crd
+
+      my.design <- validate_design(do.call(
+        CRD, design_args_CRD(crd_inputs(), get_data_crd()$data_crd)
       ))
-      
-    }) |> 
+
+    }) |>
       shiny::bindEvent(input$RUN.crd)
     
     

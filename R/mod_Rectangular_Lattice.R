@@ -208,22 +208,22 @@ mod_Rectangular_Lattice_server <- function(id) {
       }
       
       treatments <- get_data_rectangular()$treatments
-      r.rectangular <- as.numeric(input$r.rectangular)
-      k.rectangular <- as.numeric(input$k.rectangular)
+      reps <- as.numeric(input$r.rectangular)
+      k <- as.numeric(input$k.rectangular)
       planter <- input$planter_mov_rect
       plot_start <- validate_design(read_whole_numbers(
         input$plot_start.rectangular, "Starting Plot Number"
       ))
-      site_names <- as.vector(unlist(strsplit(input$Location.rectangular, ",")))
+      location_names <- as.vector(unlist(strsplit(input$Location.rectangular, ",")))
       seed <- validate_design(app_design_seed(input$myseed.rectangular))
-      sites <- as.numeric(input$l.rectangular)
-      return(list(r = r.rectangular,
-                  k = k.rectangular,
+      l <- as.numeric(input$l.rectangular)
+      return(list(reps = reps,
+                  k = k,
                   t = treatments,
                   planter = planter,
                   plot_start = plot_start,
-                  sites = sites,
-                  site_names = site_names,
+                  l = l,
+                  location_names = location_names,
                   seed = seed))
     }) |>
       shiny::bindEvent(input$RUN.rectangular)
@@ -261,30 +261,17 @@ mod_Rectangular_Lattice_server <- function(id) {
       shiny::req(rectangular_inputs())
       
       shinyjs::show(id = "downloadCsv.rectangular", anim = FALSE)
-      
-      if (rectangular_inputs()$r < 2) {
-        shinyalert::shinyalert(
-          "Error!!", 
-          "Alpha Lattice Design needs at least 2 replicates.", 
-          type = "error")
-        return(NULL)
-      }
-      
-      data <- get_data_rectangular()$data_rectangular
 
-      validate_design(rectangular_lattice(
-        t = rectangular_inputs()$t, 
-        k = rectangular_inputs()$k, 
-        reps = rectangular_inputs()$r,
-        l = rectangular_inputs()$sites, 
-        plotNumber = rectangular_inputs()$plot_start,
-        seed = rectangular_inputs()$seed, 
-        locationNames = rectangular_inputs()$site_names, 
-        data = data
-      )) 
+      # rectangular_lattice() itself rejects an under-replicated design (a
+      # classed fieldhub_input_error surfaced below through
+      # validate_design()); no duplicate reps < 2 check is needed here.
+      validate_design(do.call(
+        rectangular_lattice,
+        design_args_Rectangular_Lattice(rectangular_inputs(), get_data_rectangular()$data_rectangular)
+      ))
     }) |>
       shiny::bindEvent(input$RUN.rectangular)
-    
+
     output$summary_rectangular_lattice <- shiny::renderPrint({
       shiny::req(RECTANGULAR_reactive())
       cat("Randomization was successful!", "\n", "\n")
@@ -293,7 +280,7 @@ mod_Rectangular_Lattice_server <- function(id) {
 
     upDateSites_RT <- shiny::reactive({
       shiny::req(rectangular_inputs())
-      locs <- rectangular_inputs()$sites
+      locs <- rectangular_inputs()$l
       sites <- 1:locs
       return(list(sites = sites))
     })

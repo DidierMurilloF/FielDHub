@@ -196,36 +196,22 @@ mod_LSD_server <- function(id){
       shiny::req(input$Location.lsd)
       shiny::req(input$reps.lsd)
       
+      # latin_square() itself rejects more than 10 treatments (a classed
+      # fieldhub_input_error surfaced below through validate_design()); no
+      # duplicate check is needed here on either path.
       if (input$owndataLSD == "Yes") {
         shiny::req(get_data_lsd())
-        n.lsd <- NULL
         reps.lsd <- as.numeric(input$reps.lsd)
         data.lsd <- get_data_lsd()$data_lsd
-        n <- as.numeric(nrow(data.lsd))
-        n.lsd <- n
-        if (n > 10) {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Only up to 10 treatments are allowed.", 
-            type = "error")
-          return(NULL)
-        }
+        n.lsd <- NULL
       } else {
         shiny::req(input$n.lsd)
-        n <- as.numeric(input$n.lsd)
-        if (n > 10) {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Only up to 10 treatments are allowed.", 
-            type = "error")
-          return(NULL)
-        }
-        n.lsd <- n
+        n.lsd <- as.numeric(input$n.lsd)
         reps.lsd <- as.numeric(input$reps.lsd)
         data.lsd <- NULL
       }
-      
-      plot_number <- validate_design(read_whole_numbers(
+
+      plot_start <- validate_design(read_whole_numbers(
         input$plot_start.lsd, "Starting Plot Number"
       ))
       loc.lsd <-  as.vector(unlist(strsplit(input$Location.lsd, ",")))
@@ -234,34 +220,28 @@ mod_LSD_server <- function(id){
 
       return(
         list(
-        t = n.lsd, 
-        reps = reps.lsd, 
-        plot_number = plot_number[1],
+        t = n.lsd,
+        reps = reps.lsd,
+        plot_start = plot_start[1],
         planter = planting_lsd,
-        location_names = loc.lsd[1], 
+        location_names = loc.lsd[1],
         data = data.lsd,
         seed = seed.number.lsd)
       )
     }) |>
       shiny::bindEvent(input$RUN.lsd)
-    
+
     latinsquare_reactive <- shiny::reactive({
-      
+
       shiny::req(lsd_inputs())
-      
+
       shinyjs::show(id = "downloadCsv.lsd")
-      
-      validate_design(latin_square(
-        t = lsd_inputs()$t, 
-        reps = lsd_inputs()$reps, 
-        plotNumber = lsd_inputs()$plot_number,
-        planter = lsd_inputs()$planter,
-        seed = lsd_inputs()$seed, 
-        locationNames = lsd_inputs()$location_names, 
-        data = lsd_inputs()$data
+
+      validate_design(do.call(
+        latin_square, design_args_LSD(lsd_inputs(), lsd_inputs()$data)
       ))
-      
-    }) |> 
+
+    }) |>
       shiny::bindEvent(input$RUN.lsd)
 
     

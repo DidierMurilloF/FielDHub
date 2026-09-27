@@ -267,62 +267,48 @@ mod_IBD_server <- function(id) {
       shiny::req(input$l.ibd)
       shiny::req(input$planter_mov_ibd)
       
-      r.ibd <- as.numeric(input$r.ibd)
-      k.ibd <- as.numeric(input$k.ibd)
+      reps <- as.numeric(input$r.ibd)
+      k <- as.numeric(input$k.ibd)
       treatments <- as.numeric(get_data_ibd()$treatments)
       planter <- input$planter_mov_ibd
       plot_start <- validate_design(read_whole_numbers(
         input$plot_start.ibd, "Starting Plot Number"
       ))
-      site_names <-  as.vector(unlist(strsplit(input$Location.ibd, ",")))
+      location_names <-  as.vector(unlist(strsplit(input$Location.ibd, ",")))
       seed <- validate_design(app_design_seed(input$seed.ibd))
-      sites <- as.numeric(input$l.ibd)
+      l <- as.numeric(input$l.ibd)
       if (input$k.ibd == "No Options Available") {
         shinyalert::shinyalert(
-          "Error!!", 
-          "No options for this combination of treatments!", 
-          type = "error")
-        return(NULL)
-      } 
-      return(list(
-        r = r.ibd, 
-        k = k.ibd, 
-        t = treatments, 
-        planter = planter,
-        plot_start = plot_start, 
-        sites = sites,
-        site_names = site_names,
-        seed = seed))
-    }) |>
-      shiny::bindEvent(input$RUN.ibd)
-    
-    IBD_reactive <- shiny::reactive({
-      shiny::req(get_data_ibd())
-      shiny::req(ibd_inputs())
-      
-      shinyjs::show(id = "downloadCsv.ibd")
-      
-      data_ibd <- get_data_ibd()$data_ibd
-      
-      if (ibd_inputs()$r < 2) {
-        shinyalert::shinyalert(
-          "Error!!", 
-          "Incomplete Blocks Design needs at least 2 replicates.", 
+          "Error!!",
+          "No options for this combination of treatments!",
           type = "error")
         return(NULL)
       }
-      
-      validate_design(incomplete_blocks(
-        t = ibd_inputs()$t, 
-        k = ibd_inputs()$k, 
-        reps = ibd_inputs()$r,
-        l = ibd_inputs()$sites, 
-        plotNumber = ibd_inputs()$plot_start, 
-        seed = ibd_inputs()$seed,
-        locationNames = ibd_inputs()$site_names, 
-        data = data_ibd
-      )) 
-      
+      return(list(
+        reps = reps,
+        k = k,
+        t = treatments,
+        planter = planter,
+        plot_start = plot_start,
+        l = l,
+        location_names = location_names,
+        seed = seed))
+    }) |>
+      shiny::bindEvent(input$RUN.ibd)
+
+    IBD_reactive <- shiny::reactive({
+      shiny::req(get_data_ibd())
+      shiny::req(ibd_inputs())
+
+      shinyjs::show(id = "downloadCsv.ibd")
+
+      # incomplete_blocks() itself rejects an under-replicated design (a
+      # classed fieldhub_input_error surfaced below through
+      # validate_design()); no duplicate reps < 2 check is needed here.
+      validate_design(do.call(
+        incomplete_blocks, design_args_IBD(ibd_inputs(), get_data_ibd()$data_ibd)
+      ))
+
     }) |>
       shiny::bindEvent(input$RUN.ibd)
     

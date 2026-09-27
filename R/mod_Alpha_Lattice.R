@@ -199,23 +199,23 @@ mod_Alpha_Lattice_server <- function(id){
           type = "error")
         return(NULL)
       } 
-      sites <- as.numeric(input$l.alpha)
-      r.alpha <- as.numeric(input$r.alpha)
-      k.alpha <- as.numeric(input$k.alpha)
+      l <- as.numeric(input$l.alpha)
+      reps <- as.numeric(input$r.alpha)
+      k <- as.numeric(input$k.alpha)
       treatments <- as.numeric(get_data_alpha()$treatments)
       planter <- input$planter_mov_alpha
       plot_start <- validate_design(read_whole_numbers(
         input$plot_start.alpha, "Starting Plot Number"
       ))
-      site_names <-  as.vector(unlist(strsplit(input$Location.alpha, ",")))
+      location_names <-  as.vector(unlist(strsplit(input$Location.alpha, ",")))
       seed <- validate_design(app_design_seed(input$myseed.alpha))
-      return(list(r = r.alpha, 
-                  k = k.alpha, 
-                  t = treatments, 
+      return(list(reps = reps,
+                  k = k,
+                  t = treatments,
                   planter = planter,
-                  plot_start = plot_start, 
-                  sites = sites,
-                  site_names = site_names,
+                  plot_start = plot_start,
+                  l = l,
+                  location_names = location_names,
                   seed = seed))
     }) |>
       shiny::bindEvent(input$RUN.alpha)
@@ -254,25 +254,11 @@ mod_Alpha_Lattice_server <- function(id){
       # show .csv download button when run
       shinyjs::show(id = "downloadCsv.alpha")
     
-      data_alpha <- get_data_alpha()$data_alpha
-      
-      if (alpha_inputs()$r < 2) {
-        shinyalert::shinyalert(
-          "Error!!", 
-          "Alpha Lattice Design needs at least 2 replicates.", 
-          type = "error")
-        return(NULL)
-      }
-      
-      validate_design(alpha_lattice(
-        t = alpha_inputs()$t, 
-        k = alpha_inputs()$k, 
-        reps = alpha_inputs()$r,
-        l = alpha_inputs()$sites, 
-        plotNumber = alpha_inputs()$plot_start, 
-        seed = alpha_inputs()$seed,
-        locationNames = alpha_inputs()$site_names, 
-        data = data_alpha
+      # alpha_lattice() itself rejects an under-replicated design (a classed
+      # fieldhub_input_error surfaced below through validate_design()); no
+      # duplicate reps < 2 check is needed here.
+      validate_design(do.call(
+        alpha_lattice, design_args_Alpha_Lattice(alpha_inputs(), get_data_alpha()$data_alpha)
       ))
     })
     
@@ -284,7 +270,7 @@ mod_Alpha_Lattice_server <- function(id){
     
     upDateSites <- shiny::reactive({
       shiny::req(alpha_inputs())
-      locs <- alpha_inputs()$sites
+      locs <- alpha_inputs()$l
       sites <- 1:locs
       return(list(sites = sites))
     })

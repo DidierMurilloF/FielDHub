@@ -266,55 +266,41 @@ mod_RowCol_server <- function(id){
           type = "error")
         return(NULL)
       } 
-      sites <- as.numeric(input$l.rcd)
-      r.rcd <- as.numeric(input$r.rcd)
-      k.rcd <- as.numeric(input$k.rcd)
+      l <- as.numeric(input$l.rcd)
+      reps <- as.numeric(input$r.rcd)
+      nrows <- as.numeric(input$k.rcd)
       treatments <- as.numeric(get_data_rcd()$treatments)
       planter <- input$planter_mov_rcd
       plot_start <- validate_design(read_whole_numbers(
         input$plot_start.rcd, "Starting Plot Number"
       ))
-      site_names <-  as.vector(unlist(strsplit(input$Location.rcd, ",")))
+      location_names <-  as.vector(unlist(strsplit(input$Location.rcd, ",")))
       seed <- validate_design(app_design_seed(input$seed.rcd))
-      return(list(r = r.rcd, 
-                  k = k.rcd, 
-                  t = treatments, 
+      return(list(reps = reps,
+                  nrows = nrows,
+                  t = treatments,
                   plot_start = plot_start,
                   planter = planter,
-                  sites = sites,
-                  site_names = site_names,
+                  l = l,
+                  location_names = location_names,
                   seed = seed))
     }) |>
       shiny::bindEvent(input$RUN.rcd)
-    
+
     RowCol_reactive <- shiny::reactive({
-      
+
       shiny::req(rcd_inputs())
       shiny::req(get_data_rcd())
-      
-      shinyjs::show(id = "downloadCsv.rcd")
-      
-      data_rcd <- get_data_rcd()$data_rcd
-      
-      if (rcd_inputs()$r < 2) {
-        shinyalert::shinyalert(
-          "Error!!", 
-          "Resolvable Row Columns Design needs at least 2 replicates.", 
-          type = "error")
-        return(NULL)
-      }
 
-      validate_design(row_column(
-        t = rcd_inputs()$t, 
-        nrows = rcd_inputs()$k, 
-        reps = rcd_inputs()$r,
-        l = rcd_inputs()$sites, 
-        plotNumber = rcd_inputs()$plot_start, 
-        seed = rcd_inputs()$seed,
-        locationNames = rcd_inputs()$site_names, 
-        data = data_rcd
+      shinyjs::show(id = "downloadCsv.rcd")
+
+      # row_column() itself rejects an under-replicated design (a classed
+      # fieldhub_input_error surfaced below through validate_design()); no
+      # duplicate reps < 2 check is needed here.
+      validate_design(do.call(
+        row_column, design_args_RowCol(rcd_inputs(), get_data_rcd()$data_rcd)
       ))
-      
+
     }) |>
       shiny::bindEvent(input$RUN.rcd)
     

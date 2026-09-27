@@ -58,9 +58,9 @@ mod_STRIPD_ui <- function(id){
           )           
         ),
         shiny::numericInput(ns("blocks.strip"),
-                     label = "Input # of Full Reps:", 
-                     value = 3, 
-                     min = 2),
+                     label = "Input # of Full Reps:",
+                     value = 3,
+                     min = 1),
         shiny::numericInput(ns("l.strip"),
                      label = "Input # of Locations:",
                      value = 1, 
@@ -229,22 +229,14 @@ mod_STRIPD_server <- function(id) {
       shiny::bindEvent(input$RUN.strip)
 
     strip_inputs <- shiny::reactive({
-      shiny::req(input$blocks.strip)
-      if (input$blocks.strip < 2) {
-        shinyalert::shinyalert(
-          "Error!!", 
-          "Strip-Plot Design needs at least 2 replicates.", 
-          type = "error")
-        return(NULL)
-      }
       shiny::req(get_data_strip())
-      
+
       shiny::req(input$plot_start.strip)
       shiny::req(input$Location.strip)
       shiny::req(input$l.strip)
       shiny::req(input$blocks.strip)
       shiny::req(input$planter.strip)
-      
+
       l.strip <- as.numeric(input$l.strip)
       seed.strip <- validate_design(app_design_seed(input$myseed.strip))
       plot_start.strip <- validate_design(read_whole_numbers(
@@ -253,44 +245,34 @@ mod_STRIPD_server <- function(id) {
       loc.strip <-  as.vector(unlist(strsplit(input$Location.strip, ",")))
       reps.strip <- as.numeric(input$blocks.strip)
       planter <- input$planter.strip
-      data_strip <- get_data_strip()$data_strip
-      
+
       return(
         list(
-          Hplots = get_data_strip()$treatments[1], 
-          Vplots = get_data_strip()$treatments[2], 
-          b = reps.strip, 
+          Hplots = get_data_strip()$treatments[1],
+          Vplots = get_data_strip()$treatments[2],
+          reps = reps.strip,
           l = l.strip,
           seed = seed.strip,
           planter = planter,
-          plot_number = plot_start.strip,
-          site_names = loc.strip, 
-          data = data_strip
+          plot_start = plot_start.strip,
+          location_names = loc.strip,
+          randomizeH = input$randomizeH.strip,
+          randomizeV = input$randomizeV.strip
         )
       )
     }) |>
       shiny::bindEvent(input$RUN.strip)
-    
+
     strip_reactive <- shiny::reactive({
       shiny::req(strip_inputs())
-      
+
       shinyjs::show(id = "downloadCsv.strip")
-    
-      validate_design(strip_plot(
-        Hplots = strip_inputs()$Hplots,
-        Vplots = strip_inputs()$Vplots,
-        reps = strip_inputs()$b,
-        l = strip_inputs()$l,
-        planter = strip_inputs()$planter,
-        plotNumber = strip_inputs()$plot_number,
-        locationNames = strip_inputs()$site_names,
-        seed = strip_inputs()$seed,
-        randomizeH = input$randomizeH.strip,
-        randomizeV = input$randomizeV.strip,
-        data = strip_inputs()$data
+
+      validate_design(do.call(
+        strip_plot, design_args_STRIPD(strip_inputs(), get_data_strip()$data_strip)
       ))
-      
-    }) |> 
+
+    }) |>
       shiny::bindEvent(input$RUN.strip)
 
     upDateSites <- shiny::reactive({

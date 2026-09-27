@@ -247,58 +247,44 @@ mod_SSPD_server <- function(id){
       shiny::req(input$l.sspd)
       shiny::req(input$reps.sspd)
       
-      sites <- as.numeric(input$l.sspd)
+      l <- as.numeric(input$l.sspd)
       seed <- validate_design(app_design_seed(input$seed.sspd))
       plot_start <- validate_design(read_whole_numbers(
         input$plot_start.sspd, "Starting Plot Number"
       ))
-      site_names <-  as.vector(unlist(strsplit(input$Location.sspd, ",")))
+      location_names <-  as.vector(unlist(strsplit(input$Location.sspd, ",")))
       reps <- as.numeric(input$reps.sspd)
       planter <- input$planter_mov_sspd
-      data_sspd <- get_data_sspd()$data_sspd
-      
-      if (input$kindSSPD == "SSPD_RCBD") {
-        type_design <- 2
-      } else type_design <- 1
-      
+      type <- if (input$kindSSPD == "SSPD_RCBD") 2 else 1
+
       return(
         list(
-          wp = get_data_sspd()$treatments[1], 
-          sp = get_data_sspd()$treatments[2], 
-          ssp = get_data_sspd()$treatments[3], 
-          r = reps, 
-          sites = sites,
+          wp = get_data_sspd()$treatments[1],
+          sp = get_data_sspd()$treatments[2],
+          ssp = get_data_sspd()$treatments[3],
+          reps = reps,
+          l = l,
           seed = seed,
           planter = planter,
           plot_start = plot_start,
-          site_names = site_names, 
-          type_design = type_design,
-          data = data_sspd
+          location_names = location_names,
+          type = type
         )
       )
     }) |>
       shiny::bindEvent(input$RUN.sspd)
 
     sspd_reactive <- shiny::reactive({
-      
+
       shiny::req(sspd_inputs())
-      
+
       shinyjs::show(id = "downloadCsv.sspd")
-      
-      validate_design(split_split_plot(
-        wp = sspd_inputs()$wp, 
-        sp = sspd_inputs()$sp, 
-        ssp = sspd_inputs()$ssp, 
-        reps = sspd_inputs()$r, 
-        l = sspd_inputs()$sites, 
-        plotNumber = sspd_inputs()$plot_start, 
-        seed = sspd_inputs()$seed, 
-        type = sspd_inputs()$type_design, 
-        locationNames = sspd_inputs()$site_names, 
-        data = sspd_inputs()$data
+
+      validate_design(do.call(
+        split_split_plot, design_args_SSPD(sspd_inputs(), get_data_sspd()$data_sspd)
       ))
-      
-    }) |> 
+
+    }) |>
       shiny::bindEvent(input$RUN.sspd)
   
     

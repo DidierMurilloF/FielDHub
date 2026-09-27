@@ -169,17 +169,15 @@ mod_FD_server <- function(id) {
           data_up <- as.data.frame(data_up[,1:2])
           data_factorial <- na.omit(data_up)
           colnames(data_factorial) <- c("FACTOR", "LEVEL")
-          set_factors <- factor(data_factorial$FACTOR, as.character(unique(data_factorial$FACTOR)))
-          set_factors.fd <- levels(set_factors)
-          nt <- length(set_factors.fd)
+          nt <- length(unique(data_factorial$FACTOR))
           if (nt < 2) {
             shinyalert::shinyalert(
-              "Error!!", 
-              "More than one factor needs to be specified.", 
+              "Error!!",
+              "More than one factor needs to be specified.",
               type = "error")
             return(NULL)
           }
-          return(list(data_fd = data_factorial, treatments = set_factors.fd))
+          return(list(data_fd = data_factorial, setfactors = NULL))
         } else {
           app_upload_error(data_ingested,
                            missing_columns = "Data input needs at least two column: FACTOR and LEVEL")
@@ -187,33 +185,25 @@ mod_FD_server <- function(id) {
         }
       } else {
         shiny::req(input$setfactors)
-        reps <- as.numeric(input$reps.fd)
         setfactors.fd <- parse_whole_numbers(input$setfactors, "# of Entries for Each Factor")
         if (!setfactors.fd$ok) {
           shinyalert::shinyalert("Error!!", setfactors.fd$message, type = "error")
           return(NULL)
         }
         setfactors.fd <- setfactors.fd$value
-        nt <- length(setfactors.fd)
-        if (nt < 2) {
+        if (length(setfactors.fd) < 2) {
           shinyalert::shinyalert(
-            "Error!!", 
-            "More than one factor needs to be specified.", 
+            "Error!!",
+            "More than one factor needs to be specified.",
             type = "error")
           return(NULL)
         }
-        TRT <- rep(LETTERS[1:nt], each = reps)
-        newlevels <- get.levels(k = setfactors.fd)
-        data_fd <- data.frame(
-          list(
-            factors = rep(levels(as.factor(TRT)), times = setfactors.fd),
-            levels = unlist(newlevels)
-          )
-        )
-        colnames(data_fd) <- c("factors", "levels")
-        return(list(data_fd = data_fd, treatments = setfactors.fd))
+        # No entry list is built here: full_factorial() expands its own
+        # factor/level combinations from a bare per-factor level count
+        # (design_args_FD()/full_factorial(setfactors = )).
+        return(list(data_fd = NULL, setfactors = setfactors.fd))
       }
-    }) |> 
+    }) |>
       shiny::bindEvent(input$RUN.fd)
 
     fd_inputs <- shiny::reactive({
@@ -223,54 +213,42 @@ mod_FD_server <- function(id) {
       shiny::req(input$l.fd)
       shiny::req(input$kindFD)
       shiny::req(input$planter_mov_fd)
-      
-      setfactors.fd <- get_data_factorial()$treatments
+
       plot_start <- validate_design(read_whole_numbers(
         input$plot_start.fd, "Starting Plot Number"
       ))
       planter <- input$planter_mov_fd
-      site_names <-  as.vector(unlist(strsplit(input$Location.fd, ",")))
+      location_names <-  as.vector(unlist(strsplit(input$Location.fd, ",")))
       seed <- validate_design(app_design_seed(input$seed.fd))
       reps <- as.numeric(input$reps.fd)
-      sites <- as.numeric(input$l.fd)
-      type_design <- input$kindFD
-      
+      l <- as.numeric(input$l.fd)
+      type <- if (input$kindFD == "FD_CRD") 1 else 2
+
       return(
         list(
-        set_factors = setfactors.fd,
-        r = reps,
+        setfactors = get_data_factorial()$setfactors,
+        reps = reps,
         planter = planter,
         plot_start = plot_start,
-        sites = sites,
-        site_names = site_names,
-        type_design = type_design,
+        l = l,
+        location_names = location_names,
+        type = type,
         seed = seed))
     }) |>
       shiny::bindEvent(input$RUN.fd)
 
     fd_reactive <- shiny::reactive({
-      
+
       shiny::req(get_data_factorial())
       shiny::req(fd_inputs())
-      
+
       shinyjs::show(id = "downloadCsv.fd")
-      
-      if (fd_inputs()$type_design == "FD_CRD") {
-        type_design <- 1
-      } else type_design <- 2
-      
-      validate_design(full_factorial(
-        reps = fd_inputs()$r, 
-        l = fd_inputs()$sites, 
-        type = type_design, 
-        planter = fd_inputs()$planter,
-        plotNumber = fd_inputs()$plot_start, 
-        seed = fd_inputs()$seed, 
-        locationNames = fd_inputs()$site_names,
-        data = get_data_factorial()$data_fd
-      )) 
-      
-    }) |> 
+
+      validate_design(do.call(
+        full_factorial, design_args_FD(fd_inputs(), get_data_factorial()$data_fd)
+      ))
+
+    }) |>
       shiny::bindEvent(input$RUN.fd)
 
     upDateSites <- shiny::reactive({

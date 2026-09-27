@@ -217,55 +217,42 @@ mod_SPD_server <- function(id){
       shiny::req(input$l.spd)
       shiny::req(input$reps.spd)
       
-      sites <- as.numeric(input$l.spd)
+      l <- as.numeric(input$l.spd)
       seed <- validate_design(app_design_seed(input$seed.spd))
       plot_start <- validate_design(read_whole_numbers(
         input$plot_start.spd, "Starting Plot Number"
       ))
-      site_names <-  as.vector(unlist(strsplit(input$Location.spd, ",")))
+      location_names <-  as.vector(unlist(strsplit(input$Location.spd, ",")))
       reps <- as.numeric(input$reps.spd)
       planter <- input$planter_mov_spd
-      data_spd <- get_data_spd()$data_spd
-      
-      if (input$kindSPD == "SPD_RCBD") {
-        type_design <- 2
-      } else type_design <- 1
-      
+      type <- if (input$kindSPD == "SPD_RCBD") 2 else 1
+
       return(
         list(
-          wp = get_data_spd()$treatments[1], 
-          sp = get_data_spd()$treatments[2], 
-          r = reps, 
-          sites = sites,
+          wp = get_data_spd()$treatments[1],
+          sp = get_data_spd()$treatments[2],
+          reps = reps,
+          l = l,
           seed = seed,
           planter = planter,
           plot_start = plot_start,
-          site_names = site_names, 
-          type_design = type_design,
-          data = data_spd
+          location_names = location_names,
+          type = type
         )
       )
     }) |>
       shiny::bindEvent(input$RUN.spd)
 
     spd_reactive <- shiny::reactive({
-      
+
       shiny::req(spd_inputs())
-      
+
       shinyjs::show(id = "downloadCsv.spd")
-      
-      validate_design(split_plot(
-        wp = spd_inputs()$wp, 
-        sp = spd_inputs()$sp, 
-        reps = spd_inputs()$r, 
-        l = spd_inputs()$sites,
-        plotNumber = spd_inputs()$plot_start,
-        seed = spd_inputs()$seed,
-        type = spd_inputs()$type_design, 
-        locationNames = spd_inputs()$site_names, 
-        data = spd_inputs()$data
+
+      validate_design(do.call(
+        split_plot, design_args_SPD(spd_inputs(), get_data_spd()$data_spd)
       ))
-    }) |> 
+    }) |>
       shiny::bindEvent(input$RUN.spd)
 
     upDateSites <- shiny::eventReactive(input$RUN.spd, {

@@ -192,21 +192,10 @@ mod_RCBD_server <- function(id) {
       } else {
         shiny::req(input$t)
         nt <- as.numeric(input$t)
-        if (isTRUE(input$use_checks_rcbd)) {
-          if (is.null(input$n_checks_rcbd)) return(NULL)  # UI not rendered yet
-          n_ck_parsed <- parse_n_checks(input$n_checks_rcbd)
-          if (!n_ck_parsed$ok) {
-            shinyalert::shinyalert("Error!!", n_ck_parsed$message, type = "error")
-            return(NULL)
-          }
-          n_ck <- n_ck_parsed$value
-          # Checks lead the pool, matching mod_RCBD_augmented.R:299-301.
-          labels <- c(paste0("CH", seq_len(n_ck)), paste0("G-", seq_len(nt)))
-        } else {
-          labels <- paste0("G-", seq_len(nt))
-        }
-        data_rcbd <- data.frame(TREATMENT = labels)
-        return(list(data_rcbd = data_rcbd, treatments = nt))
+        # No entry list is built here: RCBD() generates its own "CH1".."CHk"
+        # and "T1".."Tn" labels from bare counts (design_args_RCBD()/
+        # RCBD(t =, checks = )); checks itself is parsed in rcbd_inputs().
+        return(list(data_rcbd = NULL, treatments = nt))
       }
     }) |>
       shiny::bindEvent(input$RUN.rcbd)
@@ -221,19 +210,19 @@ mod_RCBD_server <- function(id) {
       shiny::req(input$l.rcbd)
       shiny::req(input$planter_mov_rcbd)
       
-      r <- as.numeric(input$b)
+      reps <- as.numeric(input$b)
       treatments <- as.numeric(get_data_rcbd()$treatments)
       planter <- input$planter_mov_rcbd
       plot_start <- validate_design(read_whole_numbers(
         input$plot_start.rcbd, "Starting Plot Number"
       ))
-      site_names <-  as.vector(unlist(strsplit(input$Location.rcbd, ",")))
+      location_names <-  as.vector(unlist(strsplit(input$Location.rcbd, ",")))
       seed <- validate_design(app_design_seed(input$seed.rcbd))
-      sites <- as.numeric(input$l.rcbd)
+      l <- as.numeric(input$l.rcbd)
       continuous <- input$continuous.plot
 
       use_checks <- isTRUE(input$use_checks_rcbd)
-      n_checks <- NULL
+      checks <- NULL
       rep_checks <- NULL
       spread_checks <- TRUE
       if (use_checks) {
@@ -245,8 +234,8 @@ mod_RCBD_server <- function(id) {
           shinyalert::shinyalert("Error!!", n_ck_parsed$message, type = "error")
           shiny::req(FALSE)
         }
-        n_checks <- n_ck_parsed$value
-        rep_parsed <- parse_rep_checks(input$rep_checks_rcbd, n_checks)
+        checks <- n_ck_parsed$value
+        rep_parsed <- parse_rep_checks(input$rep_checks_rcbd, checks)
         if (!rep_parsed$ok) {
           shinyalert::shinyalert("Error!!", rep_parsed$message, type = "error")
           shiny::req(FALSE)
@@ -256,16 +245,15 @@ mod_RCBD_server <- function(id) {
       }
 
       return(list(
-        r = r,
+        reps = reps,
         t = treatments,
         planter = planter,
         plot_start = plot_start,
-        sites = sites,
-        site_names = site_names,
+        l = l,
+        location_names = location_names,
         continuous = continuous,
         seed = seed,
-        use_checks = use_checks,
-        n_checks = n_checks,
+        checks = checks,
         rep_checks = rep_checks,
         spread_checks = spread_checks)
         )
@@ -306,30 +294,10 @@ mod_RCBD_server <- function(id) {
       shiny::req(rcbd_inputs())
       
       shinyjs::show(id = "downloadCsv.rcbd")
-      
-      result <- tryCatch(
-        RCBD(
-          t = rcbd_inputs()$t,
-          reps = rcbd_inputs()$r,
-          l = rcbd_inputs()$sites,
-          plotNumber = rcbd_inputs()$plot_start,
-          continuous = rcbd_inputs()$continuous,
-          planter = rcbd_inputs()$planter,
-          seed = rcbd_inputs()$seed,
-          locationNames = rcbd_inputs()$site_names,
-          checks = if (rcbd_inputs()$use_checks) rcbd_inputs()$n_checks else NULL,
-          rep_checks = if (rcbd_inputs()$use_checks) rcbd_inputs()$rep_checks else NULL,
-          spread_checks = rcbd_inputs()$spread_checks,
-          data = get_data_rcbd()$data_rcbd
-        ),
-        error = function(e) {
-          shinyalert::shinyalert("Error!!", conditionMessage(e), type = "error")
-          NULL
-        }
-      )
-      shiny::req(result)
 
-      result
+      validate_design(do.call(
+        RCBD, design_args_RCBD(rcbd_inputs(), get_data_rcbd()$data_rcbd)
+      ))
 
     })  |>
       shiny::bindEvent(input$RUN.rcbd)
