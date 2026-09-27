@@ -55,6 +55,12 @@
 
 ### New features:
 
+- Classic simulated responses now use the named TREATMENT or TRT_COMB column,
+  so reordered columns or appended user metadata cannot change the treatment
+  distributions. Valid seeded responses are unchanged. The simulator rejects
+  malformed bounds, missing identifiers, ambiguous treatment columns, an
+  existing RESP column, or fewer than two treatments before drawing values.
+
 - The app's Help topics now follow its design registry and include offline
   R help commands. About displays the package version, credits, and license
   from DESCRIPTION while retaining the team profiles. Welcome icons use

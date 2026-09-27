@@ -178,8 +178,8 @@ test_that("TREATMENT is the last column of the layout for both schemas", {
 test_that("simulated data works on a checks design", {
   d <- RCBD(t = 6, reps = 3, checks = c("CK1", "CK2"), rep_checks = c(2, 2), seed = 96)
   lay <- plot_layout(x = d, layout = 1, stacked = "vertical")$allSitesFieldbook
-  # norm_trunc() takes the LAST column as the treatment factor, so TREATMENT
-  # must be last or the Simulate! button errors for every checks design.
+  # Keep the established field-book order, although norm_trunc() now resolves
+  # the treatment column by name and does not depend on its position.
   expect_identical(names(lay)[ncol(lay)], "TREATMENT")
   sim <- norm_trunc(a = 1, b = 10, data = lay, seed = 1)
   expect_s3_class(sim, "data.frame")
