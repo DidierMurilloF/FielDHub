@@ -4,6 +4,24 @@
   box-sizing: border-box;
 }
 
+#fieldhub-app + #fieldhub-status:not(:empty) {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    z-index: 1100;
+    max-width: calc(100% - 2rem);
+    padding: 0.75rem 1rem;
+    background: #213f32;
+    color: #fff;
+    border-radius: 0.25rem;
+}
+
+#fieldhub-app .fieldhub-navbar-logo {
+    float: right;
+    max-width: 100%;
+    height: auto;
+}
+
 #fieldhub-app .navbar>.container .navbar-brand, #fieldhub-app .navbar>.container-fluid .navbar-brand {
   margin-left: auto;
 }

@@ -55,6 +55,10 @@
 
 ### New features:
 
+- App busy feedback now reports activity and lost connections without disabling
+  or re-enabling controls across the document. The navbar logo is scoped to
+  FielDHub, inserted only once, and includes alternative text.
+
 - App data downloads now use ZIP archives containing the unchanged CSV table,
   the complete design and simulation records, displayed field book, layout
   settings, software versions, and reconstruction code. Buttons explicitly

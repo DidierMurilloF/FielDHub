@@ -21,6 +21,7 @@ app_ui <- function(request) {
     golem_add_external_resources(),
     shiny::tags$div(
       id = "fieldhub-app",
+      `aria-busy` = "false",
       shiny::fluidPage(
         theme = fieldhub_theme(),
         do.call(shiny::navbarPage, c(
@@ -41,7 +42,10 @@ app_ui <- function(request) {
           ))
         ))
       )
-    )
+    ),
+    # Keep announcements outside the busy region so they are not deferred.
+    shiny::tags$div(id = "fieldhub-status", role = "status", `aria-live` = "polite",
+                    `aria-atomic` = "true")
   )
 }
 
