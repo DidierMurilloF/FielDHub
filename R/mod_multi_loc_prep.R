@@ -969,16 +969,7 @@ mod_multi_loc_preps_server <- function(id){
         shiny::conditionalPanel("input.trailsPREP == 'Other'", ns = ns,
                          shiny::textInput(inputId = ns("OtherPREP"), label = "Input Trial Name:", value = NULL)
         ),
-        shiny::fluidRow(
-          shiny::column(6,
-                 shiny::selectInput(inputId = ns("ROX.PREP"), "Select the Correlation in Rows:",
-                             choices = seq(0.1, 0.9, 0.1),  selected = 0.5)
-          ),
-          shiny::column(6,
-                 shiny::selectInput(inputId = ns("ROY.PREP"), "Select the Correlation in Cols:",
-                             choices = seq(0.1, 0.9, 0.1),  selected = 0.5)
-          )
-        ),
+        app_spatial_correlations(ns, ".PREP"),
         shiny::fluidRow(
           shiny::column(6,
                  shiny::numericInput(inputId = ns("min.prep"), "Input the min value", value = NULL)

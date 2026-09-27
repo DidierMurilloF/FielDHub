@@ -55,6 +55,11 @@
 
 ### New features:
 
+- The seven spatial-simulation workflows now share their correlation controls.
+  Labels distinguish adjacent columns within a row from adjacent rows within
+  a column. Input identifiers, choices, defaults, and simulation calculations
+  are unchanged.
+
 - Every design page in the app now offers a shared reproducibility panel with
   a complete RDS design download and R code to reconstruct it. The archive
   preserves the original result, seed, parameters, RNG settings, and package

@@ -908,16 +908,7 @@ mod_sparse_allocation_server <- function(id){
         shiny::conditionalPanel("input.trailsDIAG == 'Other'", ns = ns,
                          shiny::textInput(inputId = ns("OtherDIAG"), label = "Input Trial Name:", value = NULL)
         ),
-        shiny::fluidRow(
-          shiny::column(6,
-                 shiny::selectInput(inputId = ns("ROX.DIAG"), "Select the Correlation in Rows:",
-                             choices = seq(0.1, 0.9, 0.1), selected = 0.5)
-          ),
-          shiny::column(6,
-                 shiny::selectInput(inputId = ns("ROY.DIAG"), "Select the Correlation in Cols:",
-                             choices = seq(0.1, 0.9, 0.1), selected = 0.5)
-          )
-        ),
+        app_spatial_correlations(ns, ".DIAG"),
         shiny::fluidRow(
           shiny::column(6,
                  shiny::numericInput(inputId = ns("min.diag"), "Input the min value:", value = NULL)

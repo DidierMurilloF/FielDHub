@@ -571,16 +571,7 @@ mod_Optim_server <- function(id) {
         shiny::conditionalPanel("input.trailsOPTIM == 'Other'", ns = ns,
                          shiny::textInput(inputId = ns("OtherOPTIM"), label = "Input Trial Name:", value = NULL)
         ),
-        shiny::fluidRow(
-          shiny::column(6,
-                 shiny::selectInput(inputId = ns("ROX.O"), "Select the Correlation in Rows:",
-                             choices = seq(0.1, 0.9, 0.1), selected = 0.5)
-          ),
-          shiny::column(6,
-                 shiny::selectInput(inputId = ns("ROY.O"), "Select the Correlation in Cols:",
-                             choices = seq(0.1, 0.9, 0.1), selected = 0.5)
-          )
-        ),
+        app_spatial_correlations(ns, ".O"),
         shiny::fluidRow(
           shiny::column(6,
                  shiny::numericInput(inputId = ns("min.optim"), "Input the min value:", value = NULL)
