@@ -38,6 +38,7 @@ swap_treatments <- function(df) {
 # Function to improve A-Efficiency for Level 2
 #' @noRd
 improve_efficiency <- function(design, iterations, seed) {
+  validate_iteration_budget(iterations)
   set.seed(seed)
   # Initial design
   best_design <- design
@@ -50,7 +51,7 @@ improve_efficiency <- function(design, iterations, seed) {
   best_efficiencies <- efficiencies
   
   # Run iterations to improve A-Efficiency
-  for (i in 1:iterations) {
+  for (i in seq_len(iterations)) {
     # Generate a new design by swapping treatments
     new_design <- swap_treatments(best_design)
     
@@ -84,6 +85,7 @@ improve_efficiency <- function(design, iterations, seed) {
 # downstream field book construction is unchanged.
 #' @noRd
 build_row_column_onestage <- function(nt, nrows, ncols, reps, latinize, searches, seed) {
+  validate_iteration_budget(searches, "searches")
   N <- nt * reps
   trt  <- gl(nt, reps, N)      # each treatment replicated reps times
   Reps <- gl(reps, nt, N)      # replicate blocking factor

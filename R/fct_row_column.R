@@ -69,7 +69,8 @@
 #' @param seed (optional) Real number that specifies the starting seed to obtain 
 #' reproducible designs.
 #' @param locationNames (optional) Names for each location.
-#' @param iterations Number of optimization iterations. Its meaning and default
+#' @param iterations Finite positive whole-number optimization budget, at most
+#' \code{.Machine$integer.max}. Its meaning and default
 #' depend on \code{method}. For \code{method = "onestage"} it is passed to
 #' \code{blocksdesign::design()} as its number of \code{searches} (default 200;
 #' values beyond a few hundred rarely improve the design). For
@@ -216,10 +217,7 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
     searches_onestage <- 200L
     iterations_twostage <- 1000L
   } else {
-    if (!is.numeric(iterations) || length(iterations) != 1 || is.na(iterations) ||
-        iterations < 1) {
-      fieldhub_abort('row_column() requires iterations to be a single positive integer.')
-    }
+    validate_iteration_budget(iterations)
     searches_onestage <- iterations
     iterations_twostage <- iterations
   }

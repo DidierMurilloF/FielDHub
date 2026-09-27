@@ -55,6 +55,12 @@
 
 ### New features:
 
+- Row-column, Latin-square, and pair-swap searches share finite whole-number
+  budget validation. Fractional or infinite row-column budgets now fail with
+  classed input errors before randomization. Pair-swap scoring no longer
+  overflows when squaring distant integer plot coordinates; ordinary-field
+  results are unchanged.
+
 - App busy feedback now reports activity and lost connections without disabling
   or re-enabling controls across the document. The navbar logo is scoped to
   FielDHub, inserted only once, and includes alternative text.

@@ -36,7 +36,8 @@ location. By default \code{plotNumber = 101}.}
 \item{seed}{(optional) Real number that specifies the starting seed to obtain 
 reproducible designs.}
 
-\item{iterations}{Number of optimization iterations. Its meaning and default
+\item{iterations}{Finite positive whole-number optimization budget, at most
+\code{.Machine$integer.max}. Its meaning and default
 depend on \code{method}. For \code{method = "onestage"} it is passed to
 \code{blocksdesign::design()} as its number of \code{searches} (default 200;
 values beyond a few hundred rarely improve the design). For

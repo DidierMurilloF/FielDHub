@@ -35,9 +35,8 @@ validate_swap_controls <- function(starting_dist, stop_iter, lambda,
         length(value) != 1L || !is.finite(value) || value < minimum) {
       fieldhub_abort("`", name, "` must be one finite number at least ", minimum, ".")
     }
-    if (name %in% c("stop_iter", "candidate_sample_size") &&
-        (value != trunc(value) || value > .Machine$integer.max)) {
-      fieldhub_abort("`", name, "` must be a whole number within R's integer range.")
+    if (name %in% c("stop_iter", "candidate_sample_size")) {
+      validate_iteration_budget(value, name, minimum)
     }
   }
   swap_distance_function(dist_method)

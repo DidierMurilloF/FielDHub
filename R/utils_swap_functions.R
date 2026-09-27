@@ -81,7 +81,9 @@ pairs_distance <- function(X, dist_method = "euclidean") {
   pairs <- utils::combn(seq_len(nrow(pos)), 2L)
   dr <- pos[pairs[1L, ], 1L] - pos[pairs[2L, ], 1L]
   dc <- pos[pairs[1L, ], 2L] - pos[pairs[2L, ], 2L]
-  if (dist_method == "manhattan") abs(dr) + abs(dc) else sqrt(dr * dr + dc * dc)
+  # Exponentiation promotes integer coordinates before squaring, avoiding
+  # overflow for distant plots while preserving ordinary-field distances.
+  if (dist_method == "manhattan") abs(dr) + abs(dc) else sqrt(dr^2 + dc^2)
 }
 
 # ---- Score a candidate swap ----------------------------------------------------

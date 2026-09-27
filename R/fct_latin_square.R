@@ -211,12 +211,7 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
 
 #' @noRd 
 lsq <- function(len, reps = 1, max_iterations = 100000L, first_square = 1L) {
-  if (!is.numeric(max_iterations) || is.complex(max_iterations) ||
-      length(max_iterations) != 1L || !is.finite(max_iterations) ||
-      max_iterations < 1 || max_iterations > .Machine$integer.max ||
-      max_iterations != trunc(max_iterations)) {
-    fieldhub_abort("The Latin-square search limit must be a positive finite integer.")
-  }
+  validate_iteration_budget(max_iterations, "Latin-square search limit")
   allsq <- matrix(nrow = reps*len, ncol = len)
   #if (returnstrings) { squareid <- vector(mode = "character", length = reps) }
   sample1 <- function(x) {
