@@ -15,8 +15,10 @@
 #'         Salvador Gezan [aut],
 #'         Ana Heilman [ctb]
 #'
-#' @return A list with five elements, retaining class \code{Sparse} or
-#'   \code{MultiPrep} for compatibility.
+#' @return A list with five elements, classed \code{c("fieldhub_sparse_optimization",
+#'   "Sparse")} or \code{c("fieldhub_multi_prep_optimization", "MultiPrep")}: the
+#'   legacy \code{Sparse}/\code{MultiPrep} class is retained for compatibility,
+#'   with an additional \code{fieldhub_*} class alongside it.
 #' \itemize{
 #'   \item \code{multi_location_data} is a data frame with the entries of every
 #'     location: \code{LOCATION | ENTRY | NAME}, with a \code{REPS} column

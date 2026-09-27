@@ -40,8 +40,10 @@ When design is \code{sparse} then \code{copies_per_entry} should be less than \c
 \item{data}{(optional) Data frame with 2 columns: \code{ENTRY | NAME }. ENTRY must be numeric.}
 }
 \value{
-A list with five elements, retaining class \code{Sparse} or
-  \code{MultiPrep} for compatibility.
+A list with five elements, classed \code{c("fieldhub_sparse_optimization",
+  "Sparse")} or \code{c("fieldhub_multi_prep_optimization", "MultiPrep")}: the
+  legacy \code{Sparse}/\code{MultiPrep} class is retained for compatibility,
+  with an additional \code{fieldhub_*} class alongside it.
 \itemize{
   \item \code{multi_location_data} is a data frame with the entries of every
     location: \code{LOCATION | ENTRY | NAME}, with a \code{REPS} column

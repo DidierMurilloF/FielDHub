@@ -32,3 +32,101 @@ app_functions <- function() {
   )
   functions[grepl("^(app_|mod_)", names(functions))]
 }
+
+# --- Positional `[`/`[[` indexing, found by walking the parsed call tree ---
+#
+# Used by test_design_schema.R to guard "select field-book columns by name,
+# never by position" per expression, not per whole function: a function that
+# is allowed one positional index elsewhere must still fail if a *different*
+# expression in it selects/reorders columns positionally (including a
+# reverted fix). Walking `body(f)` directly (no source text, no srcrefs)
+# works under R CMD check (ruling R2) and is immune to an expression being
+# wrapped across lines, unlike matching on `deparse(body(f))` text.
+
+#' Whether `e` is a bare numeric literal, or a unary-minus of one
+#'
+#' @noRd
+fielddhub_is_numeric_literal <- function(e) {
+  if (is.numeric(e)) return(TRUE)
+  is.call(e) && is.symbol(e[[1]]) && identical(as.character(e[[1]]), "-") &&
+    length(e) == 2 && is.numeric(e[[2]])
+}
+
+#' Whether `e` is a column-index expression built from hard-coded numbers:
+#' a numeric literal, a colon range with a literal endpoint, `c()` of numeric
+#' literals, or `-c()` of numeric literals. Never true for a name or a
+#' variable holding one.
+#'
+#' @noRd
+fielddhub_is_positional_index <- function(e) {
+  if (fielddhub_is_numeric_literal(e)) return(TRUE)
+  if (!is.call(e) || !is.symbol(e[[1]])) return(FALSE)
+  nm <- as.character(e[[1]])
+  if (nm == ":" && length(e) == 3) {
+    return(fielddhub_is_numeric_literal(e[[2]]) || fielddhub_is_numeric_literal(e[[3]]))
+  }
+  if (nm == "c") {
+    args <- as.list(e)[-1]
+    return(length(args) > 0 && all(vapply(args, fielddhub_is_numeric_literal, logical(1))))
+  }
+  if (nm == "-" && length(e) == 2 && is.call(e[[2]]) &&
+      is.symbol(e[[2]][[1]]) && identical(as.character(e[[2]][[1]]), "c")) {
+    args <- as.list(e[[2]])[-1]
+    return(length(args) > 0 && all(vapply(args, fielddhub_is_numeric_literal, logical(1))))
+  }
+  FALSE
+}
+
+#' The position of the first unnamed element of call `e` at or after index
+#' `from`, or `NA_integer_` if none. Reads each element fresh via `e[[i]]`/
+#' `names(e)[i]` and never binds a call element to a plain variable: R's
+#' missing-argument sentinel (the empty row index in `x[, j]`) raises
+#' "argument is missing, with no default" the next time a *variable* holding
+#' it is evaluated, even outside a function call.
+#'
+#' @noRd
+fielddhub_first_unnamed_from <- function(e, from) {
+  if (length(e) < from) return(NA_integer_)
+  nms <- names(e)
+  for (i in from:length(e)) {
+    tag <- if (is.null(nms)) "" else nms[i]
+    if (is.na(tag)) tag <- ""
+    if (!nzchar(tag)) return(i)
+  }
+  NA_integer_
+}
+
+#' Every `[`/`[[` call in `expr` that selects a column by hard-coded
+#' position: `x[, 3]`, `x[, 1:3]`, `x[, c(6, 7, 9)]`, `x[, -1]`,
+#' `x[, -c(1, 2)]`, `x[[3]]`. Matches an assignment target the same as a
+#' read (`x[, 1] <- v` is, in the unevaluated parse tree, a `[` call inside
+#' a `<-` call; R only rewrites it to `` `[<-` `` at evaluation time).
+#'
+#' @return A list of the matching call objects (not their positions).
+#' @noRd
+fielddhub_positional_index_calls <- function(expr) {
+  hits <- list()
+  walk <- function(e) {
+    if (!is.call(e)) return(invisible())
+    if (is.symbol(e[[1]])) {
+      head <- as.character(e[[1]])
+      if (head == "[" && length(e) >= 4 && identical(e[[3]], quote(expr = ))) {
+        col_pos <- fielddhub_first_unnamed_from(e, 4)
+        if (!is.na(col_pos) && fielddhub_is_positional_index(e[[col_pos]])) {
+          hits[[length(hits) + 1]] <<- e
+        }
+      } else if (head == "[[" && length(e) >= 3) {
+        idx_pos <- fielddhub_first_unnamed_from(e, 3)
+        if (!is.na(idx_pos) && fielddhub_is_numeric_literal(e[[idx_pos]])) {
+          hits[[length(hits) + 1]] <<- e
+        }
+      }
+    }
+    n <- length(e)
+    for (i in seq_len(n)) {
+      if (is.call(e[[i]])) walk(e[[i]])
+    }
+  }
+  walk(expr)
+  hits
+}
