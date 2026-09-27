@@ -138,6 +138,7 @@ partially_replicated <- function(
     data = NULL,
     allow_fillers = FALSE,
     year = NULL) {
+    validate_locations(l)
     year <- resolve_year(year)
     
     if (all(c("serpentine", "cartesian") != planter)) {

@@ -62,6 +62,7 @@
 #' @export
 rectangular_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101, locationNames = NULL,
                                 seed = NULL, data = NULL, reps = NULL) {
+  validate_locations(l)
   r <- resolve_argument_alias(
     reps, r, new = "reps", old = "r",
     new_supplied = !missing(reps), old_supplied = !missing(r)

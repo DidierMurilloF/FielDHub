@@ -143,6 +143,7 @@ diagonal_arrangement <- function(
     year = NULL,
     checksPercent = NULL,
     sameEntries = FALSE) {
+    validate_locations(l)
     year <- resolve_year(year)
     if (!is.null(checksPercent) &&
         (!is.numeric(checksPercent) || length(checksPercent) != 1 || is.na(checksPercent))) {

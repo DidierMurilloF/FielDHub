@@ -50,6 +50,7 @@ do_optim <- function(
     force_balance = TRUE,
     seed,
     data = NULL) {
+    validate_locations(l)
     # set a random seed if it is missing
     if (missing(seed)) seed <- NULL
     seed <- resolve_seed(seed, default = function() sample.int(10000, size = 1))

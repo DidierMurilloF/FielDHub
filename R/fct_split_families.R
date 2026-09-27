@@ -44,6 +44,7 @@
 #'
 #' @export
 split_families <- function(l = NULL, data = NULL) {
+  validate_locations(l)
   if (is.null(l) || !is.numeric(l) || length(l) != 1 || l < 1 || l %% 1 != 0) {
     fieldhub_abort("\n 'split_families()' requires the number of locations 'l' as a whole number of 1 or more.")
   }

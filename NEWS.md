@@ -201,6 +201,11 @@
 
 ### Fix bugs:
 
+- All 18 public engines with an `l` argument now validate the location
+  count through one shared rule before allocating fields. Missing,
+  non-finite, fractional, nonnumeric and multi-value counts give a named
+  `fieldhub_input_error`; valid counts and seeded designs are unchanged.
+
 - Result construction and validation now report malformed object shapes
   and missing or empty design names as `fieldhub_internal_error` conditions
   instead of leaking base-R field-access or missing-logical errors. Valid

@@ -110,6 +110,7 @@ optimized_arrangement <- function(
     spread_reps = TRUE, 
     data = NULL,
     year = NULL) {
+    validate_locations(l)
     year <- resolve_year(year)
     
     seed <- resolve_seed(seed)

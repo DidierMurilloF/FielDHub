@@ -137,6 +137,7 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
                  continuous = FALSE, planter = "serpentine",
                  seed = NULL, locationNames = NULL, data = NULL,
                  checks = NULL, rep_checks = NULL, spread_checks = TRUE) {
+  validate_locations(l)
   has_checks <- !is.null(checks)
   if (!is.logical(spread_checks) || length(spread_checks) != 1 || is.na(spread_checks)) {
     fieldhub_abort("RCBD() requires 'spread_checks' to be a single TRUE or FALSE.")

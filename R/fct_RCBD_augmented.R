@@ -104,6 +104,7 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
                            exptName = NULL, seed = NULL, locationNames = NULL, 
                            repsExpt = 1, random = TRUE, data = NULL, 
                            nrows = NULL, ncols = NULL, year = NULL) {
+  validate_locations(l)
   year <- resolve_year(year)
   repsStack <- match.arg(repsStack)
   if (all(c("serpentine", "cartesian") != planter)) {

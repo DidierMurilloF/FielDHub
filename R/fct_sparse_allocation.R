@@ -67,6 +67,7 @@ sparse_allocation <- function(
     data = NULL,
     year = NULL,
     checksPercent = NULL) {
+    validate_locations(l)
     year <- resolve_year(year)
     # set a random seed if it is missing
     if (missing(seed)) seed <- NULL

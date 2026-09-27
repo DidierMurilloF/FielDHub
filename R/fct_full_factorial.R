@@ -75,6 +75,7 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
                            planter = "serpentine", seed = NULL,
                            locationNames = NULL, factorLabels = TRUE,
                            data = NULL) {
+  validate_locations(l)
   if (all(c("serpentine", "cartesian") != planter)) {
     fieldhub_abort("Input for planter choice is unknown. Please, choose one: serpentine or cartesian.")
   }

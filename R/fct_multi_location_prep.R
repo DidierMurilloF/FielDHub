@@ -105,6 +105,7 @@ multi_location_prep <- function(
     allow_fillers = FALSE,
     max_fillers = NULL,
     year = NULL) {
+    validate_locations(l)
     year <- resolve_year(year)
     # set a random seed if it is missing
     if (missing(seed)) seed <- NULL
