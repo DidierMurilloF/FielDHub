@@ -17,6 +17,32 @@ fieldhub_metadata <- function(design, seed) {
   )
 }
 
+#' Check the metadata shared by field designs and allocation plans
+#' @noRd
+fieldhub_metadata_problems <- function(meta) {
+  if (!is.list(meta) || is.data.frame(meta) || is.null(names(meta)) ||
+      anyNA(names(meta)) || any(!nzchar(names(meta))) || anyDuplicated(names(meta)) > 0L) {
+    return("has malformed reproducibility metadata")
+  }
+  problems <- character()
+  if (!identical(meta$schema_version, fieldhub_schema_version)) {
+    problems <- c(problems, "has an unknown schema version")
+  }
+  if (!is.numeric(meta$seed) || is.complex(meta$seed) || length(meta$seed) != 1L ||
+      !is.finite(meta$seed) || abs(trunc(meta$seed)) > .Machine$integer.max) {
+    problems <- c(problems, "has no valid recorded seed")
+  }
+  if (!is.character(meta$rng_kind) || length(meta$rng_kind) != 3L ||
+      anyNA(meta$rng_kind) || any(!nzchar(trimws(meta$rng_kind)))) {
+    problems <- c(problems, "has incomplete random-number settings")
+  }
+  if (!is.character(meta$package_version) || length(meta$package_version) != 1L ||
+      is.na(meta$package_version) || !nzchar(trimws(meta$package_version))) {
+    problems <- c(problems, "has no recorded package version")
+  }
+  c(problems, recorded_parameter_problems(meta))
+}
+
 #' Build the result of a design function
 #'
 #' @description Field designs and family splits return their result through
@@ -101,10 +127,10 @@ validate_fieldhub_design <- function(x) {
     if (!identical(class(x)[1], paste0("fieldhub_", meta$design))) {
       problems <- c(problems, "has a class that does not match its design")
     }
-    if (!identical(meta$schema_version, fieldhub_schema_version)) {
-      problems <- c(problems, "has an unknown schema version")
+    problems <- c(problems, fieldhub_metadata_problems(meta))
+    if (is.list(x$infoDesign) && !identical(meta$seed, x$infoDesign$seed)) {
+      problems <- c(problems, "has a recorded seed that disagrees with infoDesign")
     }
-    problems <- c(problems, recorded_parameter_problems(meta))
     if (meta$design != "split_families") {
       problems <- c(problems, field_book_problems(x$fieldBook))
     }

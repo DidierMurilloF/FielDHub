@@ -36,13 +36,8 @@ validate_fieldhub_allocation <- function(x) {
   }
   prep <- identical(meta$design, "allocation_prep")
   if (!inherits(x, if (prep) "MultiPrep" else "Sparse")) fail("has an inconsistent class")
-  if (!identical(meta$schema_version, fieldhub_schema_version)) fail("has an unknown schema version")
-  if (!is.character(meta$rng_kind) || length(meta$rng_kind) != 3L ||
-      anyNA(meta$rng_kind) || any(!nzchar(meta$rng_kind)) ||
-      !is.character(meta$package_version) || length(meta$package_version) != 1L ||
-      is.na(meta$package_version) || !nzchar(meta$package_version)) {
-    fail("has incomplete RNG or package version metadata")
-  }
+  problems <- fieldhub_metadata_problems(meta)
+  if (length(problems) > 0L) fail(paste(problems, collapse = ", "))
   parameters <- meta$parameters
   if (!is.list(parameters) || !identical(names(parameters), names(formals(do_optim))) ||
       (!is.character(parameters$design) && !is.factor(parameters$design)) ||
@@ -50,8 +45,6 @@ validate_fieldhub_allocation <- function(x) {
       !identical(parameters$seed, meta$seed)) {
     fail("has inconsistent recorded input parameters")
   }
-  if (!is.numeric(meta$seed) || is.complex(meta$seed) || length(meta$seed) != 1L ||
-      !is.finite(meta$seed)) fail("has no recorded seed")
 
   allocation <- x$allocation
   if (!is.data.frame(allocation) || nrow(allocation) == 0L || ncol(allocation) == 0L ||
