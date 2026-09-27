@@ -190,6 +190,12 @@
 
 ### Fix bugs:
 
+- Shared numeric-input parsers now reject trailing commas, malformed scalar
+  inputs and non-finite values without leaking base-R errors. RCBD
+  replication previews require positive whole numbers, and check counts
+  must fit in R's integer range. Valid numeric inputs retain their existing
+  interpretation.
+
 - Multiple diagonal arrangements split by column now skip check patterns
   whose fillers cannot fit in the last column. Those patterns previously
   ran past the field boundary and raised an unclassed "subscript out of

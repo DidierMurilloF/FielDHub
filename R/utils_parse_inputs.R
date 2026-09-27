@@ -13,17 +13,27 @@
 #'   \code{!ok}).
 #' @noRd
 parse_whole_numbers <- function(text, label) {
-  if (is.null(text) || length(text) == 0 || !nzchar(trimws(text))) {
+  if (length(text) == 0L) {
     return(list(ok = FALSE, value = NULL,
                 message = paste0(label, " cannot be blank.")))
   }
-  tokens <- trimws(strsplit(as.character(text), ",")[[1]])
-  if (length(tokens) == 0 || any(!nzchar(tokens))) {
+  if (!(is.character(text) || is.numeric(text)) || length(text) != 1L) {
+    return(list(ok = FALSE, value = NULL,
+                message = paste0(label, " must be one comma-separated text value.")))
+  }
+  if (is.na(text) || !nzchar(trimws(as.character(text)))) {
+    return(list(ok = FALSE, value = NULL,
+                message = paste0(label, " cannot be blank.")))
+  }
+  text <- as.character(text)
+  tokens <- trimws(strsplit(text, ",", fixed = TRUE)[[1]])
+  # strsplit() drops a trailing empty token; do not silently accept it.
+  if (length(tokens) == 0L || any(!nzchar(tokens)) || grepl(",[[:space:]]*$", text)) {
     return(list(ok = FALSE, value = NULL,
                 message = paste0(label, " has an empty value in \"", text, "\".")))
   }
   vals <- suppressWarnings(as.numeric(tokens))
-  bad <- tokens[is.na(vals) | vals %% 1 != 0 | vals < 1]
+  bad <- tokens[!is.finite(vals) | vals %% 1 != 0 | vals < 1]
   if (length(bad) > 0) {
     return(list(ok = FALSE, value = NULL,
                 message = paste0(label, " could not read \"",
@@ -45,13 +55,15 @@ parse_whole_numbers <- function(text, label) {
 #'   `message` (a user-facing string when `!ok`).
 #' @noRd
 parse_n_checks <- function(x) {
-  if (is.null(x) || length(x) == 0 || is.na(x)) {
+  if (length(x) == 0L || (is.atomic(x) && length(x) == 1L && anyNA(x))) {
     return(list(ok = FALSE, value = NULL,
                 message = "Input # of Checks cannot be blank."))
   }
-  if (x %% 1 != 0 || x < 1) {
+  if (!is.numeric(x) || length(x) != 1L || !is.finite(x) ||
+      x %% 1 != 0 || x < 1 || x > .Machine$integer.max) {
     return(list(ok = FALSE, value = NULL,
-                message = "Input # of Checks must be a whole number of 1 or more."))
+                message = paste0("Input # of Checks must be a whole number from 1 to ",
+                                 .Machine$integer.max, ".")))
   }
   list(ok = TRUE, value = as.integer(x), message = NULL)
 }
@@ -61,8 +73,8 @@ parse_n_checks <- function(x) {
 #' @description
 #' Strictly parses a comma-separated list of reps-per-check. A single value is
 #' legal and is recycled across `n_checks`; any other length must match
-#' `n_checks` exactly. A token that does not parse as a number is reported by
-#' name rather than silently dropped. Shared by the RCBD input parser and its
+#' `n_checks` exactly. Values must be finite positive whole numbers. Invalid
+#' tokens are reported by name rather than silently dropped. Shared by the RCBD input parser and its
 #' block-size preview so both give the same answer for the same text.
 #'
 #' @param text The raw `rep_checks_rcbd` input value.
@@ -71,25 +83,12 @@ parse_n_checks <- function(x) {
 #'   `n_checks` when `ok`), and `message` (a user-facing string when `!ok`).
 #' @noRd
 parse_rep_checks <- function(text, n_checks) {
-  if (is.null(text) || !nzchar(trimws(text))) {
-    return(list(ok = FALSE, value = NULL,
-                message = "Reps per Check cannot be blank."))
-  }
-  tokens <- trimws(strsplit(text, ",")[[1]])
-  if (length(tokens) == 0 || any(!nzchar(tokens))) {
-    return(list(ok = FALSE, value = NULL,
-                message = paste0(
-                  "Reps per Check has an empty value in \"", text, "\". ",
-                  "Use a single number, or one comma-separated number per check.")))
-  }
-  vals <- suppressWarnings(as.numeric(tokens))
-  bad <- tokens[is.na(vals)]
-  if (length(bad) > 0) {
-    return(list(ok = FALSE, value = NULL,
-                message = paste0(
-                  "Reps per Check could not read \"",
-                  paste(bad, collapse = "\", \""), "\" as a number.")))
-  }
+  count <- parse_n_checks(n_checks)
+  if (!count$ok) return(count)
+  n_checks <- count$value
+  parsed <- parse_whole_numbers(text, "Reps per Check")
+  if (!parsed$ok) return(parsed)
+  vals <- parsed$value
   if (length(vals) == 1) {
     return(list(ok = TRUE, value = rep(vals, n_checks), message = NULL))
   }
