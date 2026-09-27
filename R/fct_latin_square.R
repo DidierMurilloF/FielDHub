@@ -2,6 +2,12 @@
 #'
 #' Randomly generates a latin square design of up 10 treatments.
 #'
+#' @details The randomized search is limited to 100,000 placement iterations
+#' per square. If it cannot complete a square within that budget, it raises
+#' a \code{fieldhub_search_error} with the square number and iteration limit.
+#' No incomplete design is returned; try a different seed. Designs completed
+#' within the limit retain their existing seeded output.
+#'
 #' @param t Number of treatments.
 #' @param reps Number of full resolvable squares. By default \code{reps = 1}.
 #' @param plotNumber Starting plot number. By default \code{plotNumber = 101}.
@@ -134,7 +140,7 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
     # print(plot_matrix)
     # print(as.vector(t(plot_matrix)))
     plotSquares[[j]] <- plot_matrix
-    ls.random <- lsq(len = ls.len, reps = 1)
+    ls.random <- lsq(len = ls.len, reps = 1, first_square = j)
     #get random rows order
     ls.random.r <- ls.random
     row.random <- sample(1:ls.len)
@@ -197,7 +203,13 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
 }
 
 #' @noRd 
-lsq <- function(len, reps = 1) {
+lsq <- function(len, reps = 1, max_iterations = 100000L, first_square = 1L) {
+  if (!is.numeric(max_iterations) || is.complex(max_iterations) ||
+      length(max_iterations) != 1L || !is.finite(max_iterations) ||
+      max_iterations < 1 || max_iterations > .Machine$integer.max ||
+      max_iterations != trunc(max_iterations)) {
+    fieldhub_abort("The Latin-square search limit must be a positive finite integer.")
+  }
   allsq <- matrix(nrow = reps*len, ncol = len)
   #if (returnstrings) { squareid <- vector(mode = "character", length = reps) }
   sample1 <- function(x) {
@@ -206,7 +218,19 @@ lsq <- function(len, reps = 1) {
   }
   for (n in 1:reps) {
     sq <- matrix(nrow=len, ncol=len) 
+    iterations <- 0L
     while (any(is.na(sq))) {
+      if (iterations >= max_iterations) {
+        square <- first_square + n - 1L
+        fieldhub_abort(
+          "latin_square() reached its placement-iteration limit of ",
+          max_iterations, " for square ", square, ". Try a different seed.",
+          class = "fieldhub_search_error",
+          data = list(design = "latin_square", square = square,
+                      iterations = iterations, max_iterations = max_iterations)
+        )
+      }
+      iterations <- iterations + 1L
       k <- sample1(which(is.na(sq)))
       i <- (k-1) %% len + 1       
       j <- floor((k-1) / len) + 1 
@@ -239,7 +263,7 @@ lsq <- function(len, reps = 1) {
     z <- z + 1
   }
   colnames(ls4.random) <- paste(rep("Column", len), 1:len)
-  rownames(ls4.random) <- paste(rep("Row", len), 1:len)
+  rownames(ls4.random) <- paste("Row", rep(seq_len(len), times = reps))
   
   return(ls4.random)
 }

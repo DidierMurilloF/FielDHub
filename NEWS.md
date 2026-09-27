@@ -215,6 +215,13 @@
 
 ### Fix bugs:
 
+- The Latin-square search now stops with a `fieldhub_search_error` after
+  100,000 placement iterations per square instead of restarting indefinitely.
+  The condition identifies the square and budget, no partial design is
+  returned, and the caller's RNG state is restored. The internal helper also
+  assigns correctly sized row names when building multiple squares. Public
+  designs completed within the limit keep their existing seeded output.
+
 - The spatial export helper now joins entry-label tables on `ENTRY` by
   name. A table with another column before `ENTRY` previously used that
   unrelated column as the join key and could silently lose rows. Existing

@@ -43,6 +43,13 @@ A list with two elements.
 \description{
 Randomly generates a latin square design of up 10 treatments.
 }
+\details{
+The randomized search is limited to 100,000 placement iterations
+per square. If it cannot complete a square within that budget, it raises
+a \code{fieldhub_search_error} with the square number and iteration limit.
+No incomplete design is returned; try a different seed. Designs completed
+within the limit retain their existing seeded output.
+}
 \examples{
 # Example 1: Generates a latin square design with 4 treatments and 2 reps.
 latinSq1 <- latin_square(t = 4,
