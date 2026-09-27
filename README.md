@@ -51,6 +51,17 @@ package. Please, go to
 
 ## Usage
 
+The development version keeps the app dependencies optional. R scripts can
+use the design functions without installing Shiny. To use the app, install
+its additional packages once:
+
+``` r
+install.packages(c("golem", "shiny", "htmltools", "DT", "bslib",
+                   "shinycssloaders", "plotly", "shinyalert", "shinyjs"))
+```
+
+If anything is missing, `run_app()` reports the packages to install.
+
 This is a basic example which shows you how to launch the app:
 
 ``` r

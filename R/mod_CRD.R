@@ -6,15 +6,14 @@
 #'
 #' @noRd 
 #'
-#' @importFrom shiny NS tagList 
 #' @importFrom utils write.csv
 mod_CRD_ui <- function(id) {
-  ns <- NS(id)
-  tagList(
-    h4("Completely Randomized Design"),
-    sidebarLayout(
-      sidebarPanel(width = 4,
-                   radioButtons(
+  ns <- shiny::NS(id)
+  shiny::tagList(
+    shiny::h4("Completely Randomized Design"),
+    shiny::sidebarLayout(
+      shiny::sidebarPanel(width = 4,
+                   shiny::radioButtons(
                         inputId = ns("owndatacrd"), 
                         label = "Import entries' list?",
                         choices = c("Yes", "No"), 
@@ -24,24 +23,24 @@ mod_CRD_ui <- function(id) {
                         choiceNames = NULL, 
                         choiceValues = NULL
                     ),
-                   conditionalPanel(
+                   shiny::conditionalPanel(
                      "input.owndatacrd != 'Yes'",
                      ns = ns,
-                     numericInput(ns("t.crd"), 
+                     shiny::numericInput(ns("t.crd"),
                        label = "Input # of Treatments:",
                        value = 15, 
                        min = 2),
                     ),
-                   conditionalPanel(
+                   shiny::conditionalPanel(
                      "input.owndatacrd == 'Yes'", 
                      ns = ns,
-                     fluidRow(
-                      column(7, style=list("padding-right: 28px;"),
-                             fileInput(ns("file.CRD"), 
+                     shiny::fluidRow(
+                      shiny::column(7, style=list("padding-right: 28px;"),
+                             shiny::fileInput(ns("file.CRD"),
                                        label = "Upload a CSV File:",
                                        multiple = FALSE)),
-                      column(5,style=list("padding-left: 5px;"),
-                             radioButtons(ns("sep.crd"), 
+                      shiny::column(5,style=list("padding-left: 5px;"),
+                             shiny::radioButtons(ns("sep.crd"),
                                           "Separator",
                                           choices = c(Comma = ",",
                                                       Semicolon = ";",
@@ -49,66 +48,66 @@ mod_CRD_ui <- function(id) {
                                           selected = ","))
                     )
                    ),
-                    numericInput(ns("reps.crd"), 
+                    shiny::numericInput(ns("reps.crd"),
                       label = "Input # of Full Reps:",
                       value = 4, 
                       min = 1),
-                   selectInput(inputId = ns("planter_mov_crd"), 
+                   shiny::selectInput(inputId = ns("planter_mov_crd"),
                                label = "Plot Order Layout:",
                                choices = c("serpentine", "cartesian"),
                                multiple = FALSE,
                                selected = "serpentine"),
-                   fluidRow(
-                     column(6, style=list("padding-right: 28px;"),
-                            textInput(ns("plot_start.crd"), 
+                   shiny::fluidRow(
+                     shiny::column(6, style=list("padding-right: 28px;"),
+                            shiny::textInput(ns("plot_start.crd"),
                                       "Starting Plot Number:", 
                                       value = 101)
                      ),
-                     column(6,style=list("padding-left: 5px;"),
-                            textInput(ns("Location.crd"), 
+                     shiny::column(6,style=list("padding-left: 5px;"),
+                            shiny::textInput(ns("Location.crd"),
                                       "Input Location:", 
                                       value = "FARGO")
                      )
                    ),
                    
-                   numericInput(inputId = ns("seed.crd"), 
+                   shiny::numericInput(inputId = ns("seed.crd"),
                                 label = "Random Seed:",
                                 value = 123,
                                 min = 1),
                    
-                   fluidRow(
-                     column(6,
-                            actionButton(
+                   shiny::fluidRow(
+                     shiny::column(6,
+                            shiny::actionButton(
                               inputId = ns("RUN.crd"), 
                               "Run!",
-                              icon = icon("circle-nodes", verify_fa = FALSE),
+                              icon = shiny::icon("circle-nodes", verify_fa = FALSE),
                               width = '100%'),
                      ),
-                     column(6,
-                            actionButton(
+                     shiny::column(6,
+                            shiny::actionButton(
                               inputId = ns("Simulate.crd"),
                               "Simulate!", 
-                              icon = icon("greater-than-equal", verify_fa = FALSE),
+                              icon = shiny::icon("greater-than-equal", verify_fa = FALSE),
                               width = '100%')
                      )
                      
                    ), 
-                   br(),
-                   downloadButton(ns("downloadData.crd"), 
+                   shiny::br(),
+                   shiny::downloadButton(ns("downloadData.crd"),
                                   "Save My Experiment",
                                   style = "width:100%")
       ),
-      mainPanel(
+      shiny::mainPanel(
         width = 8,
-        fluidRow(
-          tabsetPanel(
-            tabPanel("Field Layout",
+        shiny::fluidRow(
+          shiny::tabsetPanel(
+            shiny::tabPanel("Field Layout",
                      shinyjs::useShinyjs(),
                      shinyjs::hidden(
-                       downloadButton(
+                       shiny::downloadButton(
                          ns("downloadCsv.crd"), 
                          label =  "CSV",
-                         icon = icon("file-csv"), 
+                         icon = shiny::icon("file-csv"),
                          width = '10%',
                          style="color: #337ab7; background-color: #fff; border-color: #2e6da4")
                       ),
@@ -118,10 +117,10 @@ mod_CRD_ui <- function(id) {
                                             height = "560px"),
                        type = 5
                      ),
-                     br(),
-                     column(12,uiOutput(ns("well_panel_layout_CRD")))
+                     shiny::br(),
+                     shiny::column(12,shiny::uiOutput(ns("well_panel_layout_CRD")))
             ),
-            tabPanel("Field Book", 
+            shiny::tabPanel("Field Book",
                      fieldhub_spinner(
                        DT::DTOutput(ns("CRD_fieldbook")), 
                        type = 5
@@ -138,17 +137,17 @@ mod_CRD_ui <- function(id) {
 #' @noRd 
 mod_CRD_server <- function(id) {
   
-  moduleServer(id, function(input, output, session) {
+  shiny::moduleServer(id, function(input, output, session) {
     
     ns <- session$ns
     
     shinyjs::useShinyjs()
     
-    get_data_crd <- reactive({
+    get_data_crd <- shiny::reactive({
       
       if (input$owndatacrd == "Yes") {
-        req(input$file.CRD)
-        req(input$sep.crd)
+        shiny::req(input$file.CRD)
+        shiny::req(input$sep.crd)
         inFile <- input$file.CRD
         data_ingested <- load_file(name = inFile$name,
                                    path = inFile[["datapath"]],
@@ -170,7 +169,7 @@ mod_CRD_server <- function(id) {
           return(NULL)
         }
       } else {
-        req(input$t.crd)
+        shiny::req(input$t.crd)
         nt <- as.numeric(input$t.crd)
         reps <- as.numeric(input$reps.crd)
         data_crd <- data.frame(
@@ -183,15 +182,15 @@ mod_CRD_server <- function(id) {
         return(list(data_crd = data_crd, treatments = nt))
       }
     }) |>
-      bindEvent(input$RUN.crd)
+      shiny::bindEvent(input$RUN.crd)
     
-    crd_inputs <- reactive({
-      req(get_data_crd())
-      req(input$planter_mov_crd)
-      req(input$reps.crd)
-      req(input$plot_start.crd)
-      req(input$Location.crd)
-      req(input$seed.crd)
+    crd_inputs <- shiny::reactive({
+      shiny::req(get_data_crd())
+      shiny::req(input$planter_mov_crd)
+      shiny::req(input$reps.crd)
+      shiny::req(input$plot_start.crd)
+      shiny::req(input$Location.crd)
+      shiny::req(input$seed.crd)
       
       treatments <- as.numeric(get_data_crd()$treatments)
       reps <- as.numeric(input$reps.crd)
@@ -208,13 +207,13 @@ mod_CRD_server <- function(id) {
         site_names = site_names,
         seed = seed))
     }) |>
-      bindEvent(input$RUN.crd)
+      shiny::bindEvent(input$RUN.crd)
     
     
-    CRD_reactive <- reactive({
+    CRD_reactive <- shiny::reactive({
       
-      req(get_data_crd())
-      req(crd_inputs())
+      shiny::req(get_data_crd())
+      shiny::req(crd_inputs())
       
       shinyjs::show(id = "downloadCsv.crd")
       
@@ -227,10 +226,10 @@ mod_CRD_server <- function(id) {
       ))
       
     }) |> 
-      bindEvent(input$RUN.crd)
+      shiny::bindEvent(input$RUN.crd)
     
-    output$well_panel_layout_CRD <- renderUI({
-      req(CRD_reactive())
+    output$well_panel_layout_CRD <- shiny::renderUI({
+      shiny::req(CRD_reactive())
       obj_crd <- CRD_reactive()
       planting_crd <- crd_inputs()$planter
       allBooks_crd <- plot_layout(x = obj_crd, 
@@ -238,16 +237,16 @@ mod_CRD_server <- function(id) {
                                   planter = planting_crd)$newBooks
       nBooks_crd <- length(allBooks_crd)
       layoutOptions_crd <- 1:nBooks_crd
-      wellPanel(
-        fluidRow(
-          column(3,
-                 radioButtons(ns("typlotCRD"), "Type of Plot:",
+      shiny::wellPanel(
+        shiny::fluidRow(
+          shiny::column(3,
+                 shiny::radioButtons(ns("typlotCRD"), "Type of Plot:",
                               c("Entries/Treatments" = 1,
                                 "Plots" = 2,
                                 "Heatmap" = 3))
           ),
-          column(3, 
-                 selectInput(inputId = ns("layoutO_crd"), 
+          shiny::column(3,
+                 shiny::selectInput(inputId = ns("layoutO_crd"),
                              label = "Layout option:", 
                              choices = layoutOptions_crd)
           )
@@ -255,9 +254,9 @@ mod_CRD_server <- function(id) {
       )
     })
     
-    reactive_layoutCRD <- reactive({
-      req(input$layoutO_crd)
-      req(CRD_reactive())
+    reactive_layoutCRD <- shiny::reactive({
+      shiny::req(input$layoutO_crd)
+      shiny::req(CRD_reactive())
       obj_crd <- CRD_reactive()
       opt_crd <- as.numeric(input$layoutO_crd)
       planting_crd <- crd_inputs()$planter
@@ -266,63 +265,63 @@ mod_CRD_server <- function(id) {
     
     entryListFormat_CRD <- data.frame(TREATMENT = c(paste("TRT_", LETTERS[1:9], sep = "")))
     entriesInfoModal_CRD <- function() {
-      modalDialog(
-        title = div(tags$h3("Important message", style = "color: red;")),
-        h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
-        renderTable(entryListFormat_CRD,
+      shiny::modalDialog(
+        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
+        shiny::h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
+        shiny::renderTable(entryListFormat_CRD,
                     bordered = TRUE,
                     align = 'c',
                     striped = TRUE),
-        h4("Note that only the TREATMENT column is required."),
+        shiny::h4("Note that only the TREATMENT column is required."),
         easyClose = FALSE
       )
     }
     
-    toListen <- reactive({
+    toListen <- shiny::reactive({
       list(input$owndatacrd)
     })
     
-    observeEvent(toListen(), {
+    shiny::observeEvent(toListen(), {
       if (input$owndatacrd == "Yes") {
-        showModal(
+        shiny::showModal(
           entriesInfoModal_CRD()
         )
       }
     })
     
-    vals <- reactiveValues(maxV.CRD = NULL, minV.CRD = NULL, trail.CRD = NULL)
+    vals <- shiny::reactiveValues(maxV.CRD = NULL, minV.CRD = NULL, trail.CRD = NULL)
     
     simuModal.crd <- function(failed = FALSE) {
-      modalDialog(
-        selectInput(inputId = ns("trailsCRD"), label = "Select One:", choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
-        conditionalPanel("input.trailsCRD == 'Other'", ns = ns,
-                         textInput(inputId = ns("OtherCRD"), label = "Input Trial Name:", value = NULL)
+      shiny::modalDialog(
+        shiny::selectInput(inputId = ns("trailsCRD"), label = "Select One:", choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
+        shiny::conditionalPanel("input.trailsCRD == 'Other'", ns = ns,
+                         shiny::textInput(inputId = ns("OtherCRD"), label = "Input Trial Name:", value = NULL)
         ),
-        fluidRow(
-          column(6, 
-                 numericInput(ns("min.crd"), "Input the min value", value = NULL)
+        shiny::fluidRow(
+          shiny::column(6,
+                 shiny::numericInput(ns("min.crd"), "Input the min value", value = NULL)
           ),
-          column(6, 
-                 numericInput(ns("max.crd"), "Input the max value", value = NULL)
+          shiny::column(6,
+                 shiny::numericInput(ns("max.crd"), "Input the max value", value = NULL)
                  
           )
         ),
         
         if (failed)
-          div(tags$b("Invalid input of data max and min", style = "color: red;")),
+          shiny::div(shiny::tags$b("Invalid input of data max and min", style = "color: red;")),
         
-        footer = tagList(
-          modalButton("Cancel"),
-          actionButton(ns("ok.crd"), "GO")
+        footer = shiny::tagList(
+          shiny::modalButton("Cancel"),
+          shiny::actionButton(ns("ok.crd"), "GO")
         )
         
       )
     }
     
     # Show modal when button is clicked.
-    observeEvent(input$Simulate.crd, {
-      req(CRD_reactive()$fieldBook)
-      showModal(
+    shiny::observeEvent(input$Simulate.crd, {
+      shiny::req(CRD_reactive()$fieldBook)
+      shiny::showModal(
         simuModal.crd()
       )
     })
@@ -330,27 +329,27 @@ mod_CRD_server <- function(id) {
     # When OK button is pressed, attempt to load the data set. If successful,
     # remove the modal. If not show another modal, but this time with a failure
     # message.
-    observeEvent(input$ok.crd, {
-      req(input$max.crd, input$min.crd)
+    shiny::observeEvent(input$ok.crd, {
+      shiny::req(input$max.crd, input$min.crd)
       if (input$max.crd > input$min.crd && input$min.crd != input$max.crd) {
         vals$maxV.CRD <- input$max.crd
         vals$minV.CRD <- input$min.crd
         if(input$trailsCRD == "Other") {
-          req(input$OtherCRD)
+          shiny::req(input$OtherCRD)
           vals$trail.CRD <- as.character(input$OtherCRD)
         }else {
           vals$trail.CRD <- as.character(input$trailsCRD)
         }
-        removeModal()
+        shiny::removeModal()
       }else {
-        showModal(
+        shiny::showModal(
           simuModal.crd(failed = TRUE)
         )
       }
     })
     
-    simuDataCRD <- reactive({
-      req(CRD_reactive()$fieldBook)
+    simuDataCRD <- shiny::reactive({
+      shiny::req(CRD_reactive()$fieldBook)
       if(!is.null(vals$maxV.CRD) && !is.null(vals$minV.CRD) && !is.null(vals$trail.CRD)) {
         max <- as.numeric(vals$maxV.CRD)
         min <- as.numeric(vals$minV.CRD)
@@ -371,32 +370,32 @@ mod_CRD_server <- function(id) {
     })
     
     heatmapInfoModal_CRD <- function() {
-      modalDialog(
-        title = div(tags$h3("Important message", style = "color: red;")),
-        h4("Simulate some data to see a heatmap!"),
+      shiny::modalDialog(
+        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
+        shiny::h4("Simulate some data to see a heatmap!"),
         easyClose = TRUE
       )
     }
     
-    output$tabsetCRD <- renderUI({
-      req(input$typlotCRD)
-      tabsetPanel(
+    output$tabsetCRD <- shiny::renderUI({
+      shiny::req(input$typlotCRD)
+      shiny::tabsetPanel(
         if (input$typlotCRD != 3) {
-          tabPanel("Completely Randomized Field Layout", 
+          shiny::tabPanel("Completely Randomized Field Layout",
                    fieldhub_spinner(
-                     plotOutput(ns("layout.crd"), 
+                     shiny::plotOutput(ns("layout.crd"),
                                 width = "100%",
                                 height = "650px"),
                     type = 5))
         } else {
-          tabPanel("Completely Randomized Field Layout", 
+          shiny::tabPanel("Completely Randomized Field Layout",
                    fieldhub_spinner(
                      plotly::plotlyOutput(ns("heatmapCRD"), 
                                           width = "100%", 
                                           height = "650px"),
                      type = 5))
         },
-        tabPanel("Completely Randomized Field Book", 
+        shiny::tabPanel("Completely Randomized Field Book",
                  fieldhub_spinner(
                    DT::DTOutput(ns("CRD.output")), 
                    type = 5))
@@ -404,8 +403,8 @@ mod_CRD_server <- function(id) {
       
     })
     
-    heatmap_obj <- reactive({
-      req(simuDataCRD()$df)
+    heatmap_obj <- shiny::reactive({
+      shiny::req(simuDataCRD()$df)
       if (ncol(simuDataCRD()$df) == 8) {
         trail <- as.character(vals$trail.CRD)
         label_trail <- paste(trail, ": ")
@@ -429,7 +428,7 @@ mod_CRD_server <- function(id) {
         p2 <- plotly::ggplotly(p1, tooltip="text", height = 560)
         return(p2)
       } else {
-        showModal(
+        shiny::showModal(
           heatmapInfoModal_CRD()
         )
         return(NULL)
@@ -437,14 +436,14 @@ mod_CRD_server <- function(id) {
     })
 
     output$layout_random <- plotly::renderPlotly({
-      req(CRD_reactive())
-      req(input$typlotCRD)
+      shiny::req(CRD_reactive())
+      shiny::req(input$typlotCRD)
       if (input$typlotCRD == 1) {
         reactive_layoutCRD()$out_layout
       } else if (input$typlotCRD == 2) {
         reactive_layoutCRD()$out_layoutPlots
       } else {
-        req(heatmap_obj())
+        shiny::req(heatmap_obj())
         heatmap_obj()
       }
     })
@@ -467,7 +466,7 @@ mod_CRD_server <- function(id) {
                       columnDefs = list(list(className = 'dt-center', targets = "_all")))))
     })
     
-    output$downloadData.crd <- downloadHandler(
+    output$downloadData.crd <- shiny::downloadHandler(
       filename = function() {
         loc <- paste("CRD_", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
@@ -478,10 +477,10 @@ mod_CRD_server <- function(id) {
       }
     )
     
-    csv_data <- reactive({
-      req(simuDataCRD()$df)
+    csv_data <- shiny::reactive({
+      shiny::req(simuDataCRD()$df)
       df <- simuDataCRD()$df
-      req(input$typlotCRD)
+      shiny::req(input$typlotCRD)
       if (input$typlotCRD == 2) {
         export_layout(df, 1, TRUE)
       } else {
@@ -491,7 +490,7 @@ mod_CRD_server <- function(id) {
     
     
     # Downloadable csv of selected dataset ----
-    output$downloadCsv.crd <- downloadHandler(
+    output$downloadCsv.crd <- shiny::downloadHandler(
       filename = function() {
         loc <- paste("Completely_Randomized_Layout", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")

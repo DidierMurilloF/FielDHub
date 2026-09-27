@@ -1,4 +1,5 @@
 test_that("app ui", {
+  for (package in app_dependencies()) skip_if_not_installed(package)
   ui <- app_ui()
   golem::expect_shinytaglist(ui)
   fmls <- formals(app_ui)
@@ -15,7 +16,6 @@ test_that("app server", {
     expect_true(i %in% names(fmls))
   }
 })
-
 
 
 

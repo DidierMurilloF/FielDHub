@@ -6,15 +6,14 @@
 #'
 #' @noRd 
 #'
-#' @importFrom shiny NS tagList 
 mod_pREPS_ui <- function(id){
-  ns <- NS(id)
-  tagList(
-    h4("Single and Multi-Location P-rep Design"),
-    sidebarLayout(
-      sidebarPanel(
+  ns <- shiny::NS(id)
+  shiny::tagList(
+    shiny::h4("Single and Multi-Location P-rep Design"),
+    shiny::sidebarLayout(
+      shiny::sidebarPanel(
         width = 4,
-        radioButtons(
+        shiny::radioButtons(
 			inputId = ns("owndataPREPS"), 
 			label = "Import entries' list?", 
 			choices = c("Yes", "No"), 
@@ -24,21 +23,21 @@ mod_pREPS_ui <- function(id){
 			choiceNames = NULL, 
 			choiceValues = NULL
 		),
-    conditionalPanel(
+    shiny::conditionalPanel(
 			condition = "input.owndataPREPS == 'Yes'", 
 			ns = ns,
-			fluidRow(
-			column(
+			shiny::fluidRow(
+			shiny::column(
 				width = 7,
-				fileInput(
+				shiny::fileInput(
 					ns("file.preps"), 
 					label = "Upload a CSV File:", 
 					multiple = FALSE
 				)
 			),
-			column(
+			shiny::column(
 				width = 5,
-				radioButtons(
+				shiny::radioButtons(
 					ns("sep.preps"), 
 					"Separator",
 					choices = c(Comma = ",",
@@ -48,20 +47,20 @@ mod_pREPS_ui <- function(id){
 				)
 			),             
         ),
-        conditionalPanel(
+        shiny::conditionalPanel(
 			condition = "input.owndataPREPS == 'No'", 
 			ns = ns,
-			textInput(
+			shiny::textInput(
 				ns("repGens.preps"), 
 				label = "# of Entries Per Rep Group:", 
 				value = "75,150"
 			),
-			textInput(
+			shiny::textInput(
 				inputId = ns("repUnits.preps"),
 				label = "# of Rep Per Group:",
 				value = "2,1")
 			),
-			checkboxInput(
+			shiny::checkboxInput(
 				inputId = ns("allow_fillers.preps"),
 				label = "Allow filler plots",
 				value = FALSE
@@ -77,18 +76,18 @@ mod_pREPS_ui <- function(id){
 #       choices = c("Euclidean" = "euclidean", "Manhattan" = "manhattan"), 
 #       selected = "manhattan"
 #       ),
-			fluidRow(
-				column(
+			shiny::fluidRow(
+				shiny::column(
 					width = 6,
-					numericInput(
+					shiny::numericInput(
 						inputId = ns("l.preps"), 
 						label = "Input # of Locations:", 
 						value = 1, 
 						min = 1)
 				),
-				column(
+				shiny::column(
 					width = 6,
-					selectInput(
+					shiny::selectInput(
 						inputId = ns("locView.preps"), 
 						label = "Choose Location to View:", 
 						choices = 1:1, 
@@ -97,93 +96,93 @@ mod_pREPS_ui <- function(id){
 					)
 				)
 			),
-			selectInput(
+			shiny::selectInput(
 				ns("planter_mov.preps"), 
 				label = "Plot Order Layout:",
 				choices = c("serpentine", "cartesian"), 
 				multiple = FALSE,
 				selected = "serpentine"
 			),
-			fluidRow(
-				column(
+			shiny::fluidRow(
+				shiny::column(
 					width = 6,
-					textInput(
+					shiny::textInput(
 						ns("plot_start.preps"), 
 						"Starting Plot Number:", 
 						value = 1
 					)
 				),
-				column(
+				shiny::column(
 					width = 6,
-					textInput(
+					shiny::textInput(
 						ns("expt_name.preps"), 
 						"Input Experiment Name:", 
 						value = "Expt1"
 					)
 				)
 			),  
-			fluidRow(
-				column(
+			shiny::fluidRow(
+				shiny::column(
 					width = 6,
-          numericInput(
+          shiny::numericInput(
 						ns("seed.preps"), 
 						label = "Random Seed:", 
 						value = 4095, 
 						min = 1
           )
 				),
-				column(
+				shiny::column(
 					width = 6,
-					textInput(
+					shiny::textInput(
 						ns("Location.preps"), 
 						"Input Location Name:", 
 						value = "FARGO"
 					)
 				)
 			),
-			fluidRow(
-				column(
+			shiny::fluidRow(
+				shiny::column(
 					width = 6,
-					actionButton(
+					shiny::actionButton(
 						inputId = ns("RUN.prep"), 
 						label = "Run!", 
-						icon = icon("circle-nodes", verify_fa = FALSE),
+						icon = shiny::icon("circle-nodes", verify_fa = FALSE),
 						width = '100%'
 					),
 				),
-				column(
+				shiny::column(
 					width = 6,
-					actionButton(
+					shiny::actionButton(
 						ns("Simulate.prep"), 
 						label = "Simulate!", 
-						icon = icon("greater-than-equal", verify_fa = FALSE),
+						icon = shiny::icon("greater-than-equal", verify_fa = FALSE),
 						width = '100%'
 					),
 				)
 			),
-			br(),
-			uiOutput(ns("download_prep"))
+			shiny::br(),
+			shiny::uiOutput(ns("download_prep"))
 		),
-		mainPanel(
+		shiny::mainPanel(
 			width = 8,
 			shinyjs::useShinyjs(),
-			tabsetPanel(
+			shiny::tabsetPanel(
 				id = ns("tabset_prep"),
-				tabPanel("Get Random", value = "tabPanel_prep",
-					br(),
+				shiny::tabPanel("Get Random", value = "tabPanel_prep",
+					shiny::br(),
 					shinyjs::hidden(
-						selectInput(inputId = ns("dimensions.preps"), 
+						shiny::selectInput(inputId = ns("dimensions.preps"),
 									label = "Select dimensions of field:", 
 									choices = "")
 					),
 					shinyjs::hidden(
-					actionButton(ns("get_random_prep"), label = "Randomize!")
+					shiny::actionButton(ns("get_random_prep"), label = "Randomize!")
 					),
-					br(),
-					br(),
-					div(
+					shiny::br(),
+					shiny::br(),
+					shiny::div(
 					  fieldhub_spinner(
-					    verbatimTextOutput(
+					    shiny::verbatimTextOutput(
 					      outputId = ns("summary_prep"), 
 					      placeholder = FALSE
 					     ), 
@@ -192,15 +191,15 @@ mod_pREPS_ui <- function(id){
 					  style = "padding-right: 40px;"
 					)
 				),
-				tabPanel("Data Input", DT::DTOutput(ns("dataup.preps"))),
-				tabPanel("Randomized Field",
+				shiny::tabPanel("Data Input", DT::DTOutput(ns("dataup.preps"))),
+				shiny::tabPanel("Randomized Field",
 						fieldhub_spinner(
 							DT::DTOutput(ns("dtpREPS")), 
 							type = 4)
 						),
-				tabPanel("Plot Number Field", DT::DTOutput(ns("PREPSPLOTFIELD"))),
-				tabPanel("Field Book", DT::DTOutput(ns("pREPSOUTPUT"))),
-				tabPanel("Heatmap", plotly::plotlyOutput(ns("heatmap_prep"), width = "97%"))
+				shiny::tabPanel("Plot Number Field", DT::DTOutput(ns("PREPSPLOTFIELD"))),
+				shiny::tabPanel("Field Book", DT::DTOutput(ns("pREPSOUTPUT"))),
+				shiny::tabPanel("Heatmap", plotly::plotlyOutput(ns("heatmap_prep"), width = "97%"))
 			)
 		)
     )
@@ -210,12 +209,12 @@ mod_pREPS_ui <- function(id){
 #'
 #' @noRd 
 mod_pREPS_server <- function(id){
-  moduleServer( id, function(input, output, session){
+  shiny::moduleServer( id, function(input, output, session){
     ns <- session$ns
 
     shinyjs::useShinyjs()
     
-    prep_inputs <- eventReactive(input$RUN.prep, {
+    prep_inputs <- shiny::eventReactive(input$RUN.prep, {
       planter_mov <- input$planter_mov.preps
       expt_name <- as.character(input$expt_name.preps)
       plotNumber <- validate_design(read_whole_numbers(
@@ -232,25 +231,25 @@ mod_pREPS_server <- function(id){
                   expt_name = expt_name)) 
     })
 
-    observeEvent(prep_inputs()$sites, {
+    shiny::observeEvent(prep_inputs()$sites, {
       loc_user_view <- 1:prep_inputs()$sites
-      updateSelectInput(inputId = "locView.preps", 
+      shiny::updateSelectInput(inputId = "locView.preps",
                         choices = loc_user_view, 
                         selected = loc_user_view[1])
     })
 
-    observeEvent(input$owndataPREPS,
-                 handlerExpr = updateTabsetPanel(session,
+    shiny::observeEvent(input$owndataPREPS,
+                 handlerExpr = shiny::updateTabsetPanel(session,
                                                  "tabset_prep",
                                                  selected = "tabPanel_prep"))
-    observeEvent(input$RUN.prep,
-                 handlerExpr = updateTabsetPanel(session,
+    shiny::observeEvent(input$RUN.prep,
+                 handlerExpr = shiny::updateTabsetPanel(session,
                                                  "tabset_prep",
                                                  selected = "tabPanel_prep"))
     
-    get_data_prep <- eventReactive(input$RUN.prep, {
+    get_data_prep <- shiny::eventReactive(input$RUN.prep, {
       if (input$owndataPREPS == 'Yes') {
-        req(input$file.preps)
+        shiny::req(input$file.preps)
         inFile <- input$file.preps
         data_ingested <- load_file(
            name = inFile$name,
@@ -273,7 +272,7 @@ mod_pREPS_server <- function(id){
           data_preps <- as.data.frame(data_preps[,1:3])
           colnames(data_preps) <- c("ENTRY", "NAME", "REPS")
           if(!is.numeric(data_preps$REPS) || !is.integer(data_preps$REPS) ||
-             is.factor(data_preps$REPS)) validate("'REPS' must be numeric.")
+             is.factor(data_preps$REPS)) shiny::validate("'REPS' must be numeric.")
           total_plots <- sum(data_preps$REPS)
         } else {
           app_upload_error(data_ingested,
@@ -281,8 +280,8 @@ mod_pREPS_server <- function(id){
           return(NULL)
         }
       } else {
-        req(input$repGens.preps)
-        req(input$repUnits.preps)
+        shiny::req(input$repGens.preps)
+        shiny::req(input$repUnits.preps)
         repGens <- as.numeric(as.vector(unlist(strsplit(input$repGens.preps, ","))))
         repUnits <- as.numeric(as.vector(unlist(strsplit(input$repUnits.preps, ","))))
         if (length(repGens) != length(repUnits)) shiny::validate("Input repGens and repUnits must be of the same length.")
@@ -301,11 +300,11 @@ mod_pREPS_server <- function(id){
       return(list(data_up.preps = data_preps, total_plots = total_plots))
     })
     
-    list_input_plots <- eventReactive(input$RUN.prep, {
-      req(get_data_prep())
+    list_input_plots <- shiny::eventReactive(input$RUN.prep, {
+      shiny::req(get_data_prep())
       if (input$owndataPREPS != 'Yes') {
-        req(input$repGens.preps)
-        req(input$repUnits.preps)
+        shiny::req(input$repGens.preps)
+        shiny::req(input$repUnits.preps)
         repGens <- as.numeric(as.vector(unlist(strsplit(input$repGens.preps, ","))))
         repUnits <- as.numeric(as.vector(unlist(strsplit(input$repUnits.preps, ","))))
         n_plots <- sum(repGens * repUnits)
@@ -316,9 +315,9 @@ mod_pREPS_server <- function(id){
       }
     })
     
-    observeEvent(list(list_input_plots(), input$allow_fillers.preps), {
-      req(get_data_prep())
-      req(input$owndataPREPS)
+    shiny::observeEvent(list(list_input_plots(), input$allow_fillers.preps), {
+      shiny::req(get_data_prep())
+      shiny::req(input$owndataPREPS)
       if (input$owndataPREPS != 'Yes') {
         repGens <- as.numeric(as.vector(unlist(strsplit(input$repGens.preps, ","))))
         repUnits <- as.numeric(as.vector(unlist(strsplit(input$repUnits.preps, ","))))
@@ -329,7 +328,7 @@ mod_pREPS_server <- function(id){
           max_fillers = .prep_max_fillers
         )
       } else {
-        req(get_data_prep()$total_plots)
+        shiny::req(get_data_prep()$total_plots)
         n <- get_data_prep()$total_plots
         options <- prep_dimension_options(
           total_plots = n,
@@ -342,7 +341,7 @@ mod_pREPS_server <- function(id){
       } else {
         choices <- stats::setNames(options$value, options$label)
       }
-      updateSelectInput(inputId = "dimensions.preps",
+      shiny::updateSelectInput(inputId = "dimensions.preps",
                         choices = choices,
                         selected = choices[1])
       if (is.null(options)) {
@@ -375,8 +374,8 @@ mod_pREPS_server <- function(id){
       }
     })
     
-    field_dimensions_prep <- eventReactive(input$get_random_prep, {
-      req(get_data_prep())
+    field_dimensions_prep <- shiny::eventReactive(input$get_random_prep, {
+      shiny::req(get_data_prep())
       if (input$dimensions.preps == "No options available") return(NULL)
       dims <- unlist(strsplit(input$dimensions.preps," x "))
       d_row <- as.numeric(dims[1])
@@ -384,31 +383,31 @@ mod_pREPS_server <- function(id){
       return(list(d_row = d_row, d_col = d_col))
     })
 
-    randomize_hit_prep <- reactiveValues(times = 0)
+    randomize_hit_prep <- shiny::reactiveValues(times = 0)
  
-    observeEvent(input$RUN.prep, {
+    shiny::observeEvent(input$RUN.prep, {
       randomize_hit_prep$times <- 0
     })
 
-    user_tries_prep <- reactiveValues(tries_prep = 0)
+    user_tries_prep <- shiny::reactiveValues(tries_prep = 0)
 
-    observeEvent(input$get_random_prep, {
+    shiny::observeEvent(input$get_random_prep, {
       user_tries_prep$tries_prep <- user_tries_prep$tries_prep + 1
       randomize_hit_prep$times <- randomize_hit_prep$times + 1
     })
 
-    observeEvent(input$dimensions.preps, {
+    shiny::observeEvent(input$dimensions.preps, {
       user_tries_prep$tries_prep <- 0
     })
 
-    list_to_observe_prep <- reactive({
+    list_to_observe_prep <- shiny::reactive({
       list(randomize_hit_prep$times, user_tries_prep$tries_prep)
     })
 
-    observeEvent(list_to_observe_prep(), {
-      output$download_prep <- renderUI({
+    shiny::observeEvent(list_to_observe_prep(), {
+      output$download_prep <- shiny::renderUI({
         if (randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0) {
-          downloadButton(ns("downloadData.preps"),
+          shiny::downloadButton(ns("downloadData.preps"),
                           "Save Experiment",
                           style = "width:100%")
         }
@@ -422,10 +421,10 @@ mod_pREPS_server <- function(id){
 	)
 
     entriesInfoModal_pREP <- function() {
-      modalDialog(
-        title = div(tags$h3("Important message", style = "color: red;")),
-        h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
-        renderTable(entryListFormat_pREP,
+      shiny::modalDialog(
+        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
+        shiny::h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
+        shiny::renderTable(entryListFormat_pREP,
                     bordered = TRUE,
                     align = 'c',
                     striped = TRUE),
@@ -433,29 +432,29 @@ mod_pREPS_server <- function(id){
       )
     }
     
-    toListen <- reactive({
+    toListen <- shiny::reactive({
       list(input$owndataPREPS)
     })
     
-    observeEvent(toListen(), {
+    shiny::observeEvent(toListen(), {
       if (input$owndataPREPS == 'Yes'){
-        showModal(
+        shiny::showModal(
           entriesInfoModal_pREP()
         )
       }
     })
 
-    observeEvent(input$RUN.prep, {
-      req(get_data_prep())
+    shiny::observeEvent(input$RUN.prep, {
+      shiny::req(get_data_prep())
       shinyjs::show(id = "dimensions.preps")
     })
 
     ###### Plotting the data ##############
     output$dataup.preps <- DT::renderDT({
-      req(get_data_prep())
+      shiny::req(get_data_prep())
       test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
       if (!test) return(NULL)
-      req(get_data_prep()$data_up.preps)
+      shiny::req(get_data_prep()$data_up.preps)
       data_entry.preps <- get_data_prep()$data_up.preps
       df <- as.data.frame(data_entry.preps)
       df$ENTRY <- as.factor(df$ENTRY)
@@ -470,9 +469,9 @@ mod_pREPS_server <- function(id){
         columnDefs = list(list(className = 'dt-center', targets = "_all")))))
     })
     
-    pREPS_reactive <- reactive({
-      req(get_data_prep())
-      req(get_data_prep()$data_up.preps)
+    pREPS_reactive <- shiny::reactive({
+      shiny::req(get_data_prep())
+      shiny::req(get_data_prep()$data_up.preps)
       gen.list <- get_data_prep()$data_up.preps
       nrows <- field_dimensions_prep()$d_row
       ncols <- field_dimensions_prep()$d_col
@@ -485,7 +484,7 @@ mod_pREPS_server <- function(id){
       plotNumber <- prep_inputs()$plotNumber
       movement_planter <- prep_inputs()$planter_mov
       expt_name <- prep_inputs()$expt_name
-      withProgress(message = 'Running p-rep optimization ...', {
+      shiny::withProgress(message = 'Running p-rep optimization ...', {
           pREPS <- validate_design(partially_replicated(
             nrows = rep(nrows, locs_preps), 
             ncols = rep(ncols, locs_preps), 
@@ -502,10 +501,10 @@ mod_pREPS_server <- function(id){
           ))
       })
     }) |> 
-      bindEvent(input$get_random_prep)
+      shiny::bindEvent(input$get_random_prep)
 
-    output$summary_prep <- renderPrint({
-      req(get_data_prep())
+    output$summary_prep <- shiny::renderPrint({
+      shiny::req(get_data_prep())
       test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
       if (test) {
         cat("Randomization was successful!", "\n", "\n")
@@ -513,14 +512,14 @@ mod_pREPS_server <- function(id){
       }
     })
     
-     user_site_selection <- reactive({
+     user_site_selection <- shiny::reactive({
        return(as.numeric(input$locView.preps))
      })
 
     
     output$BINARYpREPS <- DT::renderDT({
       if (user_tries_prep$tries_prep < 1) return(NULL)
-      req(pREPS_reactive())
+      shiny::req(pREPS_reactive())
       selection <- as.numeric(user_site_selection())
       B <- pREPS_reactive()$binaryField[[selection]]
       df <- as.data.frame(B)
@@ -541,7 +540,7 @@ mod_pREPS_server <- function(id){
     output$dtpREPS <- DT::renderDataTable({
       test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
       if (!test) return(NULL)
-      req(pREPS_reactive())
+      shiny::req(pREPS_reactive())
       selection <- as.numeric(user_site_selection())
       w_map <- pREPS_reactive()$layoutRandom[[selection]]
       w_map[pREPS_reactive()$fillerField[[selection]]] <- "Filler"
@@ -581,7 +580,7 @@ mod_pREPS_server <- function(id){
     output$PREPSPLOTFIELD <- DT::renderDT({
       test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
       if (!test) return(NULL)
-      req(pREPS_reactive())
+      shiny::req(pREPS_reactive())
       plot_num <- pREPS_reactive()$plotNumber[[user_site_selection()]]
       a <- as.vector(as.matrix(plot_num))
       len_a <- length(a)
@@ -605,88 +604,88 @@ mod_pREPS_server <- function(id){
                     )
     })
 
-    valsPREP <- reactiveValues(ROX = NULL, ROY = NULL, trail.prep = NULL, minValue = NULL,
+    valsPREP <- shiny::reactiveValues(ROX = NULL, ROY = NULL, trail.prep = NULL, minValue = NULL,
                                 maxValue = NULL)
     
     simuModal.PREP <- function(failed = FALSE) {
-      modalDialog(
-        fluidRow(
-          column(6, 
-                 selectInput(inputId = ns("trailsPREP"), label = "Select One:", 
+      shiny::modalDialog(
+        shiny::fluidRow(
+          shiny::column(6,
+                 shiny::selectInput(inputId = ns("trailsPREP"), label = "Select One:",
                              choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
           ),
-          column(6, 
-                 checkboxInput(inputId = ns("heatmap_PREP"), label = "Include a Heatmap", value = TRUE),
+          shiny::column(6,
+                 shiny::checkboxInput(inputId = ns("heatmap_PREP"), label = "Include a Heatmap", value = TRUE),
           )
         ),
-        conditionalPanel("input.trailsPREP == 'Other'", ns = ns,
-                         textInput(inputId = ns("OtherPREP"), label = "Input Trial Name:", value = NULL)
+        shiny::conditionalPanel("input.trailsPREP == 'Other'", ns = ns,
+                         shiny::textInput(inputId = ns("OtherPREP"), label = "Input Trial Name:", value = NULL)
         ),
-        fluidRow(
-          column(6, 
-                 selectInput(inputId = ns("ROX.PREP"), "Select the Correlation in Rows:", 
+        shiny::fluidRow(
+          shiny::column(6,
+                 shiny::selectInput(inputId = ns("ROX.PREP"), "Select the Correlation in Rows:",
                              choices = seq(0.1, 0.9, 0.1),  selected = 0.5)
           ),
-          column(6, 
-                 selectInput(inputId = ns("ROY.PREP"), "Select the Correlation in Cols:", 
+          shiny::column(6,
+                 shiny::selectInput(inputId = ns("ROY.PREP"), "Select the Correlation in Cols:",
                              choices = seq(0.1, 0.9, 0.1),  selected = 0.5)
           )
         ),
-        fluidRow(
-          column(6, 
-                 numericInput(inputId = ns("min.prep"), "Input the min value", value = NULL)
+        shiny::fluidRow(
+          shiny::column(6,
+                 shiny::numericInput(inputId = ns("min.prep"), "Input the min value", value = NULL)
           ),
-          column(6, 
-                 numericInput(inputId = ns("max.prep"), "Input the max value", value = NULL)
+          shiny::column(6,
+                 shiny::numericInput(inputId = ns("max.prep"), "Input the max value", value = NULL)
                  
           )
         ),
         if (failed)
-          div(tags$b("Invalid input of data max and min", style = "color: red;")),
+          shiny::div(shiny::tags$b("Invalid input of data max and min", style = "color: red;")),
         
-        footer = tagList(
-          modalButton("Cancel"),
-          actionButton(inputId = ns("ok.prep"), "GO")
+        footer = shiny::tagList(
+          shiny::modalButton("Cancel"),
+          shiny::actionButton(inputId = ns("ok.prep"), "GO")
         )
       )
     }
     
-    observeEvent(input$Simulate.prep, {
-      req(pREPS_reactive()$fieldBook)
+    shiny::observeEvent(input$Simulate.prep, {
+      shiny::req(pREPS_reactive()$fieldBook)
       test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
       if (test) {
-        showModal(
+        shiny::showModal(
           simuModal.PREP()
         )
       }
     })
     
-    observeEvent(input$ok.prep, {
-      req(input$min.prep, input$max.prep)
+    shiny::observeEvent(input$ok.prep, {
+      shiny::req(input$min.prep, input$max.prep)
       if (input$max.prep > input$min.prep & input$min.prep != input$max.prep) {
         valsPREP$maxValue <- input$max.prep
         valsPREP$minValue  <- input$min.prep
         valsPREP$ROX <- as.numeric(input$ROX.PREP)
         valsPREP$ROY <- as.numeric(input$ROY.PREP)
         if(input$trailsPREP == "Other") {
-          req(input$OtherPREP)
+          shiny::req(input$OtherPREP)
           if(!is.null(input$OtherPREP)) {
             valsPREP$trail.prep <- as.character(input$OtherPREP)
-          }else showModal(simuModal.PREP(failed = TRUE))
+          }else shiny::showModal(simuModal.PREP(failed = TRUE))
         }else {
           valsPREP$trail.prep <- as.character(input$trailsPREP)
         }
-        removeModal()
+        shiny::removeModal()
       }else {
-        showModal(
+        shiny::showModal(
           simuModal.PREP(failed = TRUE)
         )
       }
     })
     
-    simuDataPREP <- reactive({
-      req(pREPS_reactive()$fieldBook)
-      req(prep_inputs())
+    simuDataPREP <- shiny::reactive({
+      shiny::req(pREPS_reactive()$fieldBook)
+      shiny::req(prep_inputs())
       field_book <- pREPS_reactive()$fieldBook
       if (is.null(valsPREP$maxValue) || is.null(valsPREP$minValue) ||
           is.null(valsPREP$trail.prep)) {
@@ -705,25 +704,25 @@ mod_pREPS_server <- function(id){
       list(df = simulation$field_book, dfSimulationList = simulation$simulations)
     })
 
-    heat_map_prep <- reactiveValues(heat_map_option = FALSE)
+    heat_map_prep <- shiny::reactiveValues(heat_map_option = FALSE)
     
-    observeEvent(input$ok.prep, {
-      req(input$min.prep, input$max.prep)
+    shiny::observeEvent(input$ok.prep, {
+      shiny::req(input$min.prep, input$max.prep)
       if (input$max.prep > input$min.prep & input$min.prep != input$max.prep) {
         heat_map_prep$heat_map_option <- TRUE
       }
     })
     
-    observeEvent(heat_map_prep$heat_map_option, {
+    shiny::observeEvent(heat_map_prep$heat_map_option, {
       if (heat_map_prep$heat_map_option == FALSE) {
-        hideTab(inputId = "tabset_prep", target = "Heatmap")
+        shiny::hideTab(inputId = "tabset_prep", target = "Heatmap")
       } else {
-        showTab(inputId = "tabset_prep", target = "Heatmap")
+        shiny::showTab(inputId = "tabset_prep", target = "Heatmap")
       }
     })
     
-    heatmap_obj <- reactive({
-      req(simuDataPREP()$dfSimulationList)
+    heatmap_obj <- shiny::reactive({
+      shiny::req(simuDataPREP()$dfSimulationList)
       loc_user <- user_site_selection()
       if(input$heatmap_PREP) {
         w <- as.character(valsPREP$trail.prep)
@@ -744,7 +743,7 @@ mod_pREPS_server <- function(id){
     output$heatmap_prep <- plotly::renderPlotly({
       test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
       if (!test) return(NULL)
-      req(heatmap_obj())
+      shiny::req(heatmap_obj())
       heatmap_obj()
     }) 
     
@@ -771,9 +770,9 @@ mod_pREPS_server <- function(id){
       )
     })
     
-    output$downloadData.preps <- downloadHandler(
+    output$downloadData.preps <- shiny::downloadHandler(
       filename = function() {
-        req(input$Location.preps)
+        shiny::req(input$Location.preps)
         loc <- input$Location.preps
         loc <- paste(loc, "_", "pREP_", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")

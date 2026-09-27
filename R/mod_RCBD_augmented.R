@@ -6,15 +6,14 @@
 #'
 #' @noRd 
 #'
-#' @importFrom shiny NS tagList 
 mod_RCBD_augmented_ui <- function(id){
-  ns <- NS(id)
-  tagList(
-    h4("Augmented RCBD"),
-    sidebarLayout(
-      sidebarPanel(
+  ns <- shiny::NS(id)
+  shiny::tagList(
+    shiny::h4("Augmented RCBD"),
+    shiny::sidebarLayout(
+      shiny::sidebarPanel(
         width = 4,
-        radioButtons(inputId = ns("owndata_a_rcbd"), 
+        shiny::radioButtons(inputId = ns("owndata_a_rcbd"),
                      label = "Import entries' list?", 
                      choices = c("Yes", "No"), 
                      selected = "No",
@@ -22,33 +21,33 @@ mod_RCBD_augmented_ui <- function(id){
                      width = NULL, 
                      choiceNames = NULL, 
                      choiceValues = NULL),
-        conditionalPanel(
+        shiny::conditionalPanel(
           condition = "input.owndata_a_rcbd == 'Yes'", ns = ns,
-          fluidRow(
-            column(7, style=list("padding-right: 28px;"),
-                   fileInput(ns("file1_a_rcbd"), 
+          shiny::fluidRow(
+            shiny::column(7, style=list("padding-right: 28px;"),
+                   shiny::fileInput(ns("file1_a_rcbd"),
                              label = "Upload a CSV File:", 
                              multiple = FALSE)),
-            column(5,style=list("padding-left: 5px;"),
-                   radioButtons(ns("sep.a_rcbd"), "Separator",
+            shiny::column(5,style=list("padding-left: 5px;"),
+                   shiny::radioButtons(ns("sep.a_rcbd"), "Separator",
                                 choices = c(Comma = ",",
                                             Semicolon = ";",
                                             Tab = "\t"),
                                 selected = ","))
           )              
         ),
-        fluidRow(
-          column(6,
+        shiny::fluidRow(
+          shiny::column(6,
                  style=list("padding-right: 28px;"),
-                 numericInput(inputId = ns("nExpt_a_rcbd"), 
+                 shiny::numericInput(inputId = ns("nExpt_a_rcbd"),
                               label = "Input # of Stacked Expts:",
                               value = 1, 
                               min = 1, 
                               max = 100)
           ),
-          column(6,
+          shiny::column(6,
                  style=list("padding-left: 5px;"),
-                 checkboxInput(inputId = ns("random"), 
+                 shiny::checkboxInput(inputId = ns("random"),
                                label = "Randomize Entries?",
                                value = TRUE)
           )
@@ -56,9 +55,9 @@ mod_RCBD_augmented_ui <- function(id){
         
         # after the row where you set nExpt_a_rcbd ...
         
-        conditionalPanel(
+        shiny::conditionalPanel(
           condition = "input.nExpt_a_rcbd > 1", ns = ns,
-          selectInput(
+          shiny::selectInput(
             inputId = ns("repsStack_a_rcbd"),
             label = "Stack experiments:",
             choices = c("vertical", "horizontal"),
@@ -67,135 +66,135 @@ mod_RCBD_augmented_ui <- function(id){
           )
         ),
         
-        conditionalPanel(
+        shiny::conditionalPanel(
           condition = "input.owndata_a_rcbd == 'No'", 
           ns = ns,
-          numericInput(inputId = ns("lines_a_rcbd"), 
+          shiny::numericInput(inputId = ns("lines_a_rcbd"),
                        label = "Input # of Entries:", 
                        value = 180)
         ),
-        fluidRow(
-          column(6,
+        shiny::fluidRow(
+          shiny::column(6,
                  style=list("padding-right: 28px;"),
-                 numericInput(inputId = ns("checks_a_rcbd"), 
+                 shiny::numericInput(inputId = ns("checks_a_rcbd"),
                               label = "Checks per Block:",
                               value = 4,
                               min = 1, 
                               max = 10)
           ),
-          column(6,
+          shiny::column(6,
                  style=list("padding-left: 5px;"),
-                 selectInput(inputId = ns("blocks_a_rcbd"), 
+                 shiny::selectInput(inputId = ns("blocks_a_rcbd"),
                              label = "", choices = 5)
           )
         ),
-        fluidRow(
-          column(6,
+        shiny::fluidRow(
+          shiny::column(6,
                  style=list("padding-right: 28px;"),
-                 numericInput(inputId = ns("l.arcbd"), 
+                 shiny::numericInput(inputId = ns("l.arcbd"),
                               label = "Input # of Locations:",
                               value = 1,
                               min = 1, 
                               max = 100),
           ),
-          column(6,
+          shiny::column(6,
                  style=list("padding-left: 5px;"),
-                 selectInput(inputId = ns("locView.arcbd"), 
+                 shiny::selectInput(inputId = ns("locView.arcbd"),
                              label = "Choose location to view:",
                              choices = 1:1, 
                              selected = 1, 
                              multiple = FALSE),
           )
         ),
-        selectInput(inputId = ns("planter_mov1_a_rcbd"),
+        shiny::selectInput(inputId = ns("planter_mov1_a_rcbd"),
                     label = "Plot Order Layout:",
                     choices = c("serpentine", "cartesian"), 
                     multiple = FALSE,
                     selected = "serpentine"),
-        fluidRow(
-          column(6,
+        shiny::fluidRow(
+          shiny::column(6,
                  style=list("padding-right: 28px;"),
-                 textInput(ns("plot_start_a_rcbd"), 
+                 shiny::textInput(ns("plot_start_a_rcbd"),
                            label = "Starting Plot Number:", 
                            value = 1)
           ),
-          column(6,
+          shiny::column(6,
                  style=list("padding-left: 5px;"),
-                 textInput(ns("expt_name_a_rcbd"), 
+                 shiny::textInput(ns("expt_name_a_rcbd"),
                            label = "Input Experiment Name:", 
                            value = "Expt1")
           )
         ),  
-        fluidRow(
-          column(6,
+        shiny::fluidRow(
+          shiny::column(6,
                  style=list("padding-right: 28px;"),
-                 numericInput(inputId = ns("myseed_a_rcbd"), 
+                 shiny::numericInput(inputId = ns("myseed_a_rcbd"),
                               label = "Random Seed:",
                               value = 1, 
                               min = 1)
           ),
-          column(6,style=list("padding-left: 5px;"),
-                 textInput(ns("Location_a_rcbd"), 
+          shiny::column(6,style=list("padding-left: 5px;"),
+                 shiny::textInput(ns("Location_a_rcbd"),
                            label = "Input Location:", 
                            value = "FARGO")
           )
         ),
-        fluidRow(
-          column(6,
-                 actionButton(
+        shiny::fluidRow(
+          shiny::column(6,
+                 shiny::actionButton(
                    inputId = ns("RUN.arcbd"), 
                    label = "Run!", 
-                   icon = icon("circle-nodes", verify_fa = FALSE),
+                   icon = shiny::icon("circle-nodes", verify_fa = FALSE),
                    width = '100%'),
           ),
-          column(6,
-                 actionButton(
+          shiny::column(6,
+                 shiny::actionButton(
                    ns("Simulate.arcbd"), 
                    label = "Simulate!", 
-                   icon = icon("greater-than-equal", verify_fa = FALSE),
+                   icon = shiny::icon("greater-than-equal", verify_fa = FALSE),
                    width = '100%'),
           )
           
         ), 
-        br(),
-        uiOutput(ns("download_arcbd"))
+        shiny::br(),
+        shiny::uiOutput(ns("download_arcbd"))
       ),
-      mainPanel(
+      shiny::mainPanel(
         width = 8,
         shinyjs::useShinyjs(),
-        tabsetPanel(id = ns("tabset_arcbd"),
-                    tabPanel("Get Random", value = "tabPanel_augmented",
-                             br(),
+        shiny::tabsetPanel(id = ns("tabset_arcbd"),
+                    shiny::tabPanel("Get Random", value = "tabPanel_augmented",
+                             shiny::br(),
                              shinyjs::hidden(
-                               selectInput(inputId = ns("field_dims"),
+                               shiny::selectInput(inputId = ns("field_dims"),
                                            label = "Select dimensions of field:",
                                            choices = "")
                              ),
                              shinyjs::hidden(
-                               actionButton(ns("get_random_augmented"), 
+                               shiny::actionButton(ns("get_random_augmented"),
                                             label = "Randomize!")
                              ),
-                             br(),
-                             br(),
-                             div(
+                             shiny::br(),
+                             shiny::br(),
+                             shiny::div(
                                fieldhub_spinner(
-                                 verbatimTextOutput(outputId = ns("summary_augmented"), 
+                                 shiny::verbatimTextOutput(outputId = ns("summary_augmented"),
                                                     placeholder = FALSE),
                                  type = 4
                                ),
                                style = "padding-right: 40px;"
                              )
                     ),
-                    tabPanel("Input Data",
-                             fluidRow(
-                               column(6,DT::DTOutput(ns("data_input"))),
-                               column(6,DT::DTOutput(ns("checks_table")))
+                    shiny::tabPanel("Input Data",
+                             shiny::fluidRow(
+                               shiny::column(6,DT::DTOutput(ns("data_input"))),
+                               shiny::column(6,DT::DTOutput(ns("checks_table")))
                              )
                     ),
-                    tabPanel("Field Layout", br(), plotOutput(ns("field_layout"), width = "97%")),
-                    tabPanel("Plot Number Field", br(), plotOutput(ns("plot_number_layout"), width = "97%")),
-                    tabPanel("Field Book", DT::DTOutput(ns("fieldBook_ARCBD"))),
-                    tabPanel("Heatmap", plotly::plotlyOutput(ns("heatmap"), width = "97%"))
+                    shiny::tabPanel("Field Layout", shiny::br(), shiny::plotOutput(ns("field_layout"), width = "97%")),
+                    shiny::tabPanel("Plot Number Field", shiny::br(), shiny::plotOutput(ns("plot_number_layout"), width = "97%")),
+                    shiny::tabPanel("Field Book", DT::DTOutput(ns("fieldBook_ARCBD"))),
+                    shiny::tabPanel("Heatmap", plotly::plotlyOutput(ns("heatmap"), width = "97%"))
         )      
       )
     )
@@ -206,12 +205,12 @@ mod_RCBD_augmented_ui <- function(id){
 #'
 #' @noRd 
 mod_RCBD_augmented_server <- function(id) {
-  moduleServer( id, function(input, output, session) {
+  shiny::moduleServer( id, function(input, output, session) {
     ns <- session$ns
     
     shinyjs::useShinyjs()
     
-    observeEvent(input$random, {
+    shiny::observeEvent(input$random, {
       if (input$random == FALSE) {
         shinyalert::shinyalert(
           "Warning!!", 
@@ -220,19 +219,19 @@ mod_RCBD_augmented_server <- function(id) {
       }
     })
     
-    observeEvent(input$owndata_a_rcbd,
-                 handlerExpr = updateTabsetPanel(session,
+    shiny::observeEvent(input$owndata_a_rcbd,
+                 handlerExpr = shiny::updateTabsetPanel(session,
                                                  "tabset_arcbd",
                                                  selected = "tabPanel_augmented"))
-    observeEvent(input$RUN.arcbd,
-                 handlerExpr = updateTabsetPanel(session,
+    shiny::observeEvent(input$RUN.arcbd,
+                 handlerExpr = shiny::updateTabsetPanel(session,
                                                  "tabset_arcbd",
                                                  selected = "tabPanel_augmented"))
     
     
-    init_data <- reactive({
+    init_data <- shiny::reactive({
       if (input$owndata_a_rcbd == "Yes") {
-        req(input$file1_a_rcbd)
+        shiny::req(input$file1_a_rcbd)
         inFile <- input$file1_a_rcbd
         data_ingested <- load_file(name = inFile$name, 
                                    path = inFile[["datapath"]],
@@ -268,8 +267,8 @@ mod_RCBD_augmented_server <- function(id) {
           return(NULL)
         }
       } else {
-        req(input$checks_a_rcbd)
-        req(input$lines_a_rcbd)
+        shiny::req(input$checks_a_rcbd)
+        shiny::req(input$lines_a_rcbd)
         if (input$lines_a_rcbd < 8) {
           shinyalert::shinyalert(
             "Error!!",
@@ -279,7 +278,7 @@ mod_RCBD_augmented_server <- function(id) {
         }
         lines <- as.numeric(input$lines_a_rcbd)
         checks <- as.numeric(input$checks_a_rcbd)
-        if(lines < 1 || checks <= 0) validate("Number of lines and checks should be greater than 1.")
+        if(lines < 1 || checks <= 0) shiny::validate("Number of lines and checks should be greater than 1.")
         gen.list <- dplyr::bind_rows(
           default_entries(checks, prefix = "CH"),
           default_entries(lines, prefix = "G", start = checks + 1)
@@ -293,8 +292,8 @@ mod_RCBD_augmented_server <- function(id) {
     #   bindEvent(input$RUN.arcbd)
     
     
-    list_to_observe <- reactive({
-      req(init_data())
+    list_to_observe <- shiny::reactive({
+      shiny::req(init_data())
       list(
         entry_list = input$owndata_a_rcbd,
         checks = input$checks_a_rcbd, 
@@ -302,8 +301,8 @@ mod_RCBD_augmented_server <- function(id) {
       )
     })
     
-    observeEvent(list_to_observe(), {
-      req(init_data()$entries)
+    shiny::observeEvent(list_to_observe(), {
+      shiny::req(init_data()$entries)
       lines_arcbd <- as.numeric(list_to_observe()$entries)
       checks_arcbd <- as.numeric(list_to_observe()$checks)
       set_blocks <- set_augmented_blocks(
@@ -319,19 +318,19 @@ mod_RCBD_augmented_server <- function(id) {
           "No options available for that amount of treatments!!.", 
           type = "error")
       }
-      updateSelectInput(session = session,
+      shiny::updateSelectInput(session = session,
                         inputId = "blocks_a_rcbd",
                         label = "Input # of Blocks:", 
                         choices = blocks_arcbd, 
                         selected = blocks_arcbd[1])
     })
     
-    observeEvent(input$RUN.arcbd, {
-      req(init_data())
-      req(input$owndata_a_rcbd)
+    shiny::observeEvent(input$RUN.arcbd, {
+      shiny::req(init_data())
+      shiny::req(input$owndata_a_rcbd)
       if (input$owndata_a_rcbd != 'Yes') {
-        req(input$checks_a_rcbd)
-        req(input$lines_a_rcbd)
+        shiny::req(input$checks_a_rcbd)
+        shiny::req(input$lines_a_rcbd)
         checks <- as.numeric(input$checks_a_rcbd)
         lines <- as.numeric(input$lines_a_rcbd)
         b <- as.numeric(input$blocks_a_rcbd)
@@ -352,14 +351,14 @@ mod_RCBD_augmented_server <- function(id) {
       if(is.null(choices)) {
         choices <- "No options available"
       }
-      updateSelectInput(inputId = "field_dims",
+      shiny::updateSelectInput(inputId = "field_dims",
                         choices = choices,
                         selected = choices[1])
     })
     
     
-    getDataup_a_rcbd <- eventReactive(input$RUN.arcbd, {
-      req(init_data())
+    getDataup_a_rcbd <- shiny::eventReactive(input$RUN.arcbd, {
+      shiny::req(init_data())
       if (is.null(init_data())) {
         shinyalert::shinyalert(
           "Error!!", 
@@ -370,7 +369,7 @@ mod_RCBD_augmented_server <- function(id) {
     })
     
     
-    some_inputs <- eventReactive(input$RUN.arcbd, {
+    some_inputs <- shiny::eventReactive(input$RUN.arcbd, {
       return(list(blocks = input$blocks_a_rcbd, 
                   entries = input$lines_a_rcbd, 
                   checks = as.numeric(input$checks_a_rcbd),
@@ -380,58 +379,40 @@ mod_RCBD_augmented_server <- function(id) {
     })
     
     
-    list_inputs <- eventReactive(input$RUN.arcbd, {
-      if (input$owndata_a_rcbd != 'Yes') {
-        req(input$checks_a_rcbd)
-        req(input$lines_a_rcbd)
-        checks <- as.numeric(input$checks_a_rcbd)
-        lines <- as.numeric(input$lines_a_rcbd)
-        b <- as.numeric(input$blocks_a_rcbd)
-        return(list(b = b, checks = checks, lines = lines, input$owndata_a_rcbd))
-      } else {
-        checks <- as.numeric(input$checks_a_rcbd)
-        lines <- as.numeric(some_inputs()$entries)
-        b <- as.numeric(input$blocks_a_rcbd)
-        return(list(b = b, checks = checks, lines = lines, input$owndata_a_rcbd))
-      }
-    })
-    
-    
-    
-    field_dims_augmented <- eventReactive(input$get_random_augmented, {
+    field_dims_augmented <- shiny::eventReactive(input$get_random_augmented, {
       dims <- unlist(strsplit(input$field_dims, " x "))
       d_row <- as.numeric(dims[1])
       d_col <- as.numeric(dims[2])
       return(list(d_row = d_row, d_col = d_col))
     })
     
-    randomize_hit_arcbd <- reactiveValues(times = 0)
+    randomize_hit_arcbd <- shiny::reactiveValues(times = 0)
     
-    observeEvent(input$RUN.arcbd, {
+    shiny::observeEvent(input$RUN.arcbd, {
       randomize_hit_arcbd$times <- 0
     })
     
-    user_tries_arcbd <- reactiveValues(tries_arcbd = 0)
+    user_tries_arcbd <- shiny::reactiveValues(tries_arcbd = 0)
     
-    observeEvent(input$get_random_augmented, {
+    shiny::observeEvent(input$get_random_augmented, {
       user_tries_arcbd$tries_arcbd <- user_tries_arcbd$tries_arcbd + 1
       randomize_hit_arcbd$times <- randomize_hit_arcbd$times + 1
     })
     
-    observeEvent(input$field_dims, {
+    shiny::observeEvent(input$field_dims, {
       user_tries_arcbd$tries_arcbd <- 0
     })
     
-    list_to_observe_arcbd <- reactive({
+    list_to_observe_arcbd <- shiny::reactive({
       list(randomize_hit_arcbd$times, user_tries_arcbd$tries_arcbd)
     })
     
-    test_arcbd <- reactive(return(randomize_hit_arcbd$times > 0 & user_tries_arcbd$tries_arcbd > 0))
+    test_arcbd <- shiny::reactive(return(randomize_hit_arcbd$times > 0 & user_tries_arcbd$tries_arcbd > 0))
     
-    observeEvent(list_to_observe_arcbd(), {
-      output$download_arcbd <- renderUI({
+    shiny::observeEvent(list_to_observe_arcbd(), {
+      output$download_arcbd <- shiny::renderUI({
         if (test_arcbd()) {
-          downloadButton(ns("downloadData_a_rcbd"),
+          shiny::downloadButton(ns("downloadData_a_rcbd"),
                          "Save Experiment",
                          style = "width:100%")
         }
@@ -440,7 +421,7 @@ mod_RCBD_augmented_server <- function(id) {
     
     output$data_input <- DT::renderDT({
       if(!test_arcbd()) return(NULL)
-      req(getDataup_a_rcbd()$dataUp_a_rcbd)
+      shiny::req(getDataup_a_rcbd()$dataUp_a_rcbd)
       df <- getDataup_a_rcbd()$dataUp_a_rcbd
       df$ENTRY <- as.factor(df$ENTRY)
       df$NAME <- as.factor(df$NAME)
@@ -461,39 +442,39 @@ mod_RCBD_augmented_server <- function(id) {
                                                        LETTERS[1:6], 
                                                        sep = "")))
     entriesInfoModal_ARCBD <- function() {
-      modalDialog(
-        title = div(tags$h3("Important message", style = "color: red;")),
-        h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
-        renderTable(entryListFormat_ARCBD,
+      shiny::modalDialog(
+        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
+        shiny::h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
+        shiny::renderTable(entryListFormat_ARCBD,
                     bordered = TRUE,
                     align = 'c',
                     striped = TRUE),
-        h4("Note that the controls must be in the first rows of the CSV file."),
+        shiny::h4("Note that the controls must be in the first rows of the CSV file."),
         easyClose = FALSE
       )
     }
     
-    toListen <- reactive({
+    toListen <- shiny::reactive({
       list(input$owndata_a_rcbd)
     })
     
-    observeEvent(toListen(), {
+    shiny::observeEvent(toListen(), {
       if (input$owndata_a_rcbd == "Yes") {
-        showModal(
+        shiny::showModal(
           entriesInfoModal_ARCBD()
         )
       }
     })
     
-    observeEvent(input$RUN.arcbd, {
-      req(getDataup_a_rcbd())
+    shiny::observeEvent(input$RUN.arcbd, {
+      shiny::req(getDataup_a_rcbd())
       shinyjs::show(id = "field_dims")
       shinyjs::show(id = "get_random_augmented")
       
     })
     
     output$checks_table <- DT::renderDT({
-      req(getDataup_a_rcbd()$dataUp_a_rcbd)
+      shiny::req(getDataup_a_rcbd()$dataUp_a_rcbd)
       data_entry <- getDataup_a_rcbd()$dataUp_a_rcbd
       df <- data_entry[1:(as.numeric(input$checks_a_rcbd)),]
       table_options <- list(pageLength = nrow(df), autoWidth = FALSE,
@@ -503,15 +484,15 @@ mod_RCBD_augmented_server <- function(id) {
         columnDefs = list(list(className = 'dt-left', targets = 0:a)))))
     })
     
-    rcbd_augmented_reactive <- reactive({
-      req(getDataup_a_rcbd()$dataUp_a_rcbd)
-      req(input$checks_a_rcbd)
-      req(input$lines_a_rcbd)
-      req(input$blocks_a_rcbd)
-      req(input$planter_mov1_a_rcbd)
-      req(input$plot_start_a_rcbd)
-      req(input$myseed_a_rcbd)
-      req(input$Location_a_rcbd)
+    rcbd_augmented_reactive <- shiny::reactive({
+      shiny::req(getDataup_a_rcbd()$dataUp_a_rcbd)
+      shiny::req(input$checks_a_rcbd)
+      shiny::req(input$lines_a_rcbd)
+      shiny::req(input$blocks_a_rcbd)
+      shiny::req(input$planter_mov1_a_rcbd)
+      shiny::req(input$plot_start_a_rcbd)
+      shiny::req(input$myseed_a_rcbd)
+      shiny::req(input$Location_a_rcbd)
       loc <- as.numeric(input$l.arcbd)
       checks <- as.numeric(input$checks_a_rcbd)
       if (input$owndata_a_rcbd == "Yes") {
@@ -526,7 +507,7 @@ mod_RCBD_augmented_server <- function(id) {
       planter <- input$planter_mov1_a_rcbd
       l.arcbd <- as.numeric(input$l.arcbd)
       if (length(loc) > l.arcbd) {
-        validate("Length of vector with name of locations is greater than the number of locations.")
+        shiny::validate("Length of vector with name of locations is greater than the number of locations.")
       } 
       
       repsExpt <- some_inputs()$expts_a_rcbd
@@ -564,10 +545,10 @@ mod_RCBD_augmented_server <- function(id) {
       ))
       return(ARCBD)
     }) |> 
-      bindEvent(input$get_random_augmented)
+      shiny::bindEvent(input$get_random_augmented)
     
-    reactive_layoutARCBD <- reactive({
-      req(rcbd_augmented_reactive())
+    reactive_layoutARCBD <- shiny::reactive({
+      shiny::req(rcbd_augmented_reactive())
       obj_arcbd <- rcbd_augmented_reactive()
       loc_to_view <- as.numeric(input$locView.arcbd)
       try(
@@ -576,37 +557,37 @@ mod_RCBD_augmented_server <- function(id) {
       )
     })
     
-    output$field_layout <- renderPlot({
-      req(reactive_layoutARCBD())
-      req(rcbd_augmented_reactive())
+    output$field_layout <- shiny::renderPlot({
+      shiny::req(reactive_layoutARCBD())
+      shiny::req(rcbd_augmented_reactive())
       reactive_layoutARCBD()$out_layout
     }, height = 620, res = 100)
     
-    output$plot_number_layout <- renderPlot({
-      req(reactive_layoutARCBD())
-      req(rcbd_augmented_reactive())
+    output$plot_number_layout <- shiny::renderPlot({
+      shiny::req(reactive_layoutARCBD())
+      shiny::req(rcbd_augmented_reactive())
       print(reactive_layoutARCBD()$out_layoutPlots)
       reactive_layoutARCBD()$out_layoutPlots
     }, height = 620, res = 100)
     
-    output$summary_augmented <- renderPrint({
+    output$summary_augmented <- shiny::renderPrint({
       if (test_arcbd()) {
         cat("Randomization was successful!", "\n", "\n")
         print(rcbd_augmented_reactive(), n = 6)
       }
     })
     
-    observeEvent(some_inputs()$sites, {
+    shiny::observeEvent(some_inputs()$sites, {
       sites <- as.numeric(some_inputs()$sites)
       sites_to_view <- 1:sites 
-      updateSelectInput(session = session, 
+      shiny::updateSelectInput(session = session,
                         inputId = "locView.arcbd", 
                         choices = sites_to_view, 
                         selected = sites_to_view[1])
       
     })
     
-    locNum <- reactive(
+    locNum <- shiny::reactive(
       return(as.numeric(input$locView.arcbd))
     )
     
@@ -647,7 +628,7 @@ mod_RCBD_augmented_server <- function(id) {
     
     output$expt_name_layout <- DT::renderDT({
       if(!test_arcbd()) return(NULL)
-      req(rcbd_augmented_reactive())
+      shiny::req(rcbd_augmented_reactive())
       b <- as.numeric(some_inputs()$blocks)
       repsExpt <- some_inputs()$expts_a_rcbd
       name_expt <- as.vector(unlist(strsplit(input$expt_name_a_rcbd, ",")))
@@ -670,84 +651,84 @@ mod_RCBD_augmented_server <- function(id) {
                         backgroundColor = DT::styleEqual(Name_expt, colores_back[1:repsExpt]))
     })
     
-    valsARCBD <- reactiveValues(ROX = NULL, ROY = NULL, trail.arcbd = NULL, minValue = NULL,
+    valsARCBD <- shiny::reactiveValues(ROX = NULL, ROY = NULL, trail.arcbd = NULL, minValue = NULL,
                                 maxValue = NULL)
     
     simuModal.ARCBD <- function(failed = FALSE) {
-      modalDialog(
-        fluidRow(
-          column(6,
-                 selectInput(inputId = ns("trailsARCBD"), label = "Select One:",
+      shiny::modalDialog(
+        shiny::fluidRow(
+          shiny::column(6,
+                 shiny::selectInput(inputId = ns("trailsARCBD"), label = "Select One:",
                              choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
           ),
-          column(6,
-                 checkboxInput(inputId = ns("heatmap_s"), label = "Include a Heatmap", value = TRUE),
+          shiny::column(6,
+                 shiny::checkboxInput(inputId = ns("heatmap_s"), label = "Include a Heatmap", value = TRUE),
           )
         ),
-        conditionalPanel("input.trailsARCBD == 'Other'", ns = ns,
-                         textInput(inputId = ns("OtherARCBD"), label = "Input Trial Name:", value = NULL)
+        shiny::conditionalPanel("input.trailsARCBD == 'Other'", ns = ns,
+                         shiny::textInput(inputId = ns("OtherARCBD"), label = "Input Trial Name:", value = NULL)
         ),
-        fluidRow(
-          column(6,
-                 selectInput(inputId = ns("ROX.O"), "Select the Correlation in Rows:",
+        shiny::fluidRow(
+          shiny::column(6,
+                 shiny::selectInput(inputId = ns("ROX.O"), "Select the Correlation in Rows:",
                              choices = seq(0.1, 0.9, 0.1), selected = 0.5)
           ),
-          column(6,
-                 selectInput(inputId = ns("ROY.O"), "Select the Correlation in Cols:",
+          shiny::column(6,
+                 shiny::selectInput(inputId = ns("ROY.O"), "Select the Correlation in Cols:",
                              choices = seq(0.1, 0.9, 0.1), selected = 0.5)
           )
         ),
-        fluidRow(
-          column(6,
-                 numericInput(inputId = ns("min.arcbd"), "Input the min value:", value = NULL)
+        shiny::fluidRow(
+          shiny::column(6,
+                 shiny::numericInput(inputId = ns("min.arcbd"), "Input the min value:", value = NULL)
           ),
-          column(6,
-                 numericInput(inputId = ns("max.arcbd"), "Input the max value:", value = NULL)
+          shiny::column(6,
+                 shiny::numericInput(inputId = ns("max.arcbd"), "Input the max value:", value = NULL)
                  
           )
         ),
         if (failed)
-          div(tags$b("Invalid input of data max and min", style = "color: red;")),
+          shiny::div(shiny::tags$b("Invalid input of data max and min", style = "color: red;")),
         
-        footer = tagList(
-          modalButton("Cancel"),
-          actionButton(inputId = ns("ok.arcbd"), "GO")
+        footer = shiny::tagList(
+          shiny::modalButton("Cancel"),
+          shiny::actionButton(inputId = ns("ok.arcbd"), "GO")
         )
       )
     }
     
-    observeEvent(input$Simulate.arcbd, {
-      req(rcbd_augmented_reactive()$fieldBook)
-      if(test_arcbd()) {showModal(
+    shiny::observeEvent(input$Simulate.arcbd, {
+      shiny::req(rcbd_augmented_reactive()$fieldBook)
+      if(test_arcbd()) {shiny::showModal(
         simuModal.ARCBD()
       )}
     })
     
-    observeEvent(input$ok.arcbd, {
-      req(input$min.arcbd, input$max.arcbd)
+    shiny::observeEvent(input$ok.arcbd, {
+      shiny::req(input$min.arcbd, input$max.arcbd)
       if (input$max.arcbd > input$min.arcbd && input$min.arcbd != input$max.arcbd) {
         valsARCBD$maxValue <- input$max.arcbd
         valsARCBD$minValue  <- input$min.arcbd
         valsARCBD$ROX <- as.numeric(input$ROX.O)
         valsARCBD$ROY <- as.numeric(input$ROY.O)
         if(input$trailsARCBD == "Other") {
-          req(input$OtherARCBD)
+          shiny::req(input$OtherARCBD)
           if(!is.null(input$OtherARCBD)) {
             valsARCBD$trail.arcbd <- as.character(input$OtherARCBD)
-          }else showModal(simuModal.ARCBD(failed = TRUE))
+          }else shiny::showModal(simuModal.ARCBD(failed = TRUE))
         }else {
           valsARCBD$trail.arcbd <- as.character(input$trailsARCBD)
         }
-        removeModal()
+        shiny::removeModal()
       }else {
-        showModal(
+        shiny::showModal(
           simuModal.ARCBD(failed = TRUE)
         )
       }
     })
     
-    simuDataARCBD <- reactive({
-      req(rcbd_augmented_reactive()$fieldBook)
+    simuDataARCBD <- shiny::reactive({
+      shiny::req(rcbd_augmented_reactive()$fieldBook)
       field_book <- rcbd_augmented_reactive()$fieldBook
       if (is.null(valsARCBD$maxValue) || is.null(valsARCBD$minValue) ||
           is.null(valsARCBD$trail.arcbd)) {
@@ -766,20 +747,20 @@ mod_RCBD_augmented_server <- function(id) {
       list(df = simulation$field_book, dfSimulation = simulation$simulations)
     })
 
-    heat_map_arcbd <- reactiveValues(heat_map_option = FALSE)
+    heat_map_arcbd <- shiny::reactiveValues(heat_map_option = FALSE)
     
-    observeEvent(input$ok.arcbd, {
-      req(input$min.arcbd, input$max.arcbd)
+    shiny::observeEvent(input$ok.arcbd, {
+      shiny::req(input$min.arcbd, input$max.arcbd)
       if (input$max.arcbd > input$min.arcbd && input$min.arcbd != input$max.arcbd) {
         heat_map_arcbd$heat_map_option <- TRUE
       }
     })
     
-    observeEvent(heat_map_arcbd$heat_map_option, {
+    shiny::observeEvent(heat_map_arcbd$heat_map_option, {
       if (heat_map_arcbd$heat_map_option == FALSE) {
-        hideTab(inputId = "tabset_arcbd", target = "Heatmap")
+        shiny::hideTab(inputId = "tabset_arcbd", target = "Heatmap")
       } else {
-        showTab(inputId = "tabset_arcbd", target = "Heatmap")
+        shiny::showTab(inputId = "tabset_arcbd", target = "Heatmap")
       }
     })
     
@@ -807,8 +788,8 @@ mod_RCBD_augmented_server <- function(id) {
       )
     })
     
-    heatmap_obj <- reactive({
-      req(simuDataARCBD()$dfSimulation)
+    heatmap_obj <- shiny::reactive({
+      shiny::req(simuDataARCBD()$dfSimulation)
       if(input$heatmap_s) {
         w <- as.character(valsARCBD$trail.arcbd)
         df <- simuDataARCBD()$dfSimulation[[locNum()]]
@@ -827,14 +808,14 @@ mod_RCBD_augmented_server <- function(id) {
     })
     
     output$heatmap <- plotly::renderPlotly({
-      req(heatmap_obj())
+      shiny::req(heatmap_obj())
       if(!test_arcbd()) return(NULL)
       heatmap_obj()
     })
     
-    output$downloadData_a_rcbd <- downloadHandler(
+    output$downloadData_a_rcbd <- shiny::downloadHandler(
       filename = function() {
-        req(input$Location_a_rcbd)
+        shiny::req(input$Location_a_rcbd)
         loc <- input$Location_a_rcbd
         loc <- paste(loc, "_", "ARCBD_", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")

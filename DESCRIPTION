@@ -42,20 +42,11 @@ Description: A shiny design of experiments (DOE) app that aids in the creation o
 Depends: R (>= 4.1.0)
 License: MIT + file LICENSE
 Imports: 
-    golem,
-    shiny (>= 1.7.0),
-    htmltools,
-    DT,
-    bslib,
     dplyr,
     blocksdesign,
-    shinycssloaders,
     ggplot2,
-    plotly,
     viridisLite,
-    shinyalert,
-    desplot (>= 1.11),
-    shinyjs
+    desplot (>= 1.11)
 Encoding: UTF-8
 RoxygenNote: 7.3.2
 Author: Didier Murillo [cre, aut], Salvador Gezan [aut], Ana Heilman [ctb],
@@ -64,6 +55,16 @@ Author: Didier Murillo [cre, aut], Salvador Gezan [aut], Ana Heilman [ctb],
  North Dakota State University [cph]
 Maintainer: Didier Murillo <didier.murilloflorez@ndsu.edu>
 Suggests: 
+    golem,
+    shiny (>= 1.7.0),
+    htmltools,
+    DT,
+    bslib,
+    shinycssloaders,
+    plotly,
+    shinyalert,
+    shinyjs,
+    codetools,
     testthat (>= 3.0.0),
     spelling,
     rlang,

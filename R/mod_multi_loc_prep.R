@@ -6,15 +6,14 @@
 #'
 #' @noRd 
 #'
-#' @importFrom shiny NS tagList 
 mod_multi_loc_preps_ui <- function(id){
-  ns <- NS(id)
-  tagList(
-    h4("Optimized Multi-Location P-rep Design"),
-    sidebarLayout(
-        sidebarPanel(
+  ns <- shiny::NS(id)
+  shiny::tagList(
+    shiny::h4("Optimized Multi-Location P-rep Design"),
+    shiny::sidebarLayout(
+        shiny::sidebarPanel(
             width = 4,
-            radioButtons(
+            shiny::radioButtons(
                 inputId = ns("multi_prep_data"), 
                 label = "Import entries' list?", 
                 choices = c("Yes", "No"), 
@@ -24,21 +23,21 @@ mod_multi_loc_preps_ui <- function(id){
                 choiceNames = NULL, 
                 choiceValues = NULL
             ),
-            conditionalPanel(
+            shiny::conditionalPanel(
                 condition = "input.multi_prep_data == 'Yes'", 
                 ns = ns,
-                fluidRow(
-                column(
+                shiny::fluidRow(
+                shiny::column(
                     width = 7, # style=list("padding-right: 28px;"),
-                    fileInput(
+                    shiny::fileInput(
                         ns("file_multi_prep"), 
                         label = "Upload a CSV File:", 
                         multiple = FALSE
                     )
                 ),
-                column(
+                shiny::column(
                     width = 5, #style=list("padding-left: 5px;"),
-                    radioButtons(
+                    shiny::radioButtons(
                         ns("sep_multi_prep"), "Separator",
                         choices = c(Comma = ",",
                                     Semicolon = ";",
@@ -47,13 +46,13 @@ mod_multi_loc_preps_ui <- function(id){
                     )
                 )             
             ),
-            numericInput(
+            shiny::numericInput(
                 inputId = ns("gens_prep"), 
                 label = "Input # of Entries:",
                 value = 312,
                 min = 1
             ),
-            radioButtons(
+            shiny::radioButtons(
                 inputId = ns("include_checks"), 
                 label = "Include checks?", 
                 choices = c("Yes", "No"), 
@@ -63,13 +62,13 @@ mod_multi_loc_preps_ui <- function(id){
                 choiceNames = NULL, 
                 choiceValues = NULL
             ),
-            conditionalPanel(
+            shiny::conditionalPanel(
                 condition = "input.include_checks  == 'Yes'", 
                 ns = ns,
-                fluidRow(
-                    column(
+                shiny::fluidRow(
+                    shiny::column(
                         width = 6,
-                        numericInput(
+                        shiny::numericInput(
                             inputId = ns("prep_checks_met"),
                             label = "Input # of Checks:",
                             min = 1,
@@ -77,9 +76,9 @@ mod_multi_loc_preps_ui <- function(id){
                             value = 3
                         )
                     ),
-                    column(
+                    shiny::column(
                         width = 6,
-                        textInput(
+                        shiny::textInput(
                             inputId = ns("prep_checks"), 
                             label = "Input # Check's Reps:", 
                             value = "8,8,8"
@@ -99,19 +98,19 @@ mod_multi_loc_preps_ui <- function(id){
             #   choices = c("Euclidean" = "euclidean", "Manhattan" = "manhattan"), 
             #   selected = "manhattan"
             # ),
-            fluidRow(
-                column(
+            shiny::fluidRow(
+                shiny::column(
                     width = 6, 
-                    numericInput(
+                    shiny::numericInput(
                         inputId = ns("locs_prep"), 
                         label = "Input # of Locations:", 
                         value = 6, 
                         min = 2
                     )
                 ),
-                column(
+                shiny::column(
                     width = 6,
-                    selectInput(
+                    shiny::selectInput(
                         inputId = ns("loc_to_view_preps"), 
                         label = "Choose Location to View:", 
                         choices = 1:1, 
@@ -120,100 +119,100 @@ mod_multi_loc_preps_ui <- function(id){
                     )
                 )
             ),
-            selectInput(
+            shiny::selectInput(
                 inputId = ns("plant_copies_preps"), 
                 label = "# of Copies Per Entry:",
                 choices = 1:6
             ),
-            selectInput(
+            shiny::selectInput(
                 ns("planter_preps"), 
                 label = "Plot Order Layout:",
                 choices = c("serpentine", "cartesian"), 
                 multiple = FALSE,
                 selected = "serpentine"
             ),
-            checkboxInput(
+            shiny::checkboxInput(
                 inputId = ns("allow_fillers_prep"),
                 label = "Allow filler plots",
                 value = FALSE
             ),
-            fluidRow(
-                column(
+            shiny::fluidRow(
+                shiny::column(
                     width = 6,
-                    textInput(
+                    shiny::textInput(
                         ns("plot_start_preps"), 
                         "Starting Plot Number:", 
                         value = 1
                     )
                 ),
-                column(
+                shiny::column(
                     width = 6, 
-                    textInput(
+                    shiny::textInput(
                         ns("expt_name_preps"), 
                         "Input Experiment Name:", 
                         value = "Expt1"
                     )
                 )
             ),  
-            fluidRow(
-                column(
+            shiny::fluidRow(
+                shiny::column(
                     width = 6,
-                    numericInput(
+                    shiny::numericInput(
                         ns("seed_preps"), 
                         label = "Random Seed:", 
                         value = 1, 
                         min = 1
                     ) 
                 ),
-                column(
+                shiny::column(
                     width = 6, 
-                    textInput(
+                    shiny::textInput(
                         ns("loc_name_preps"), 
                         "Input Location Name:", 
                         value = "FARGO"
                     )
                 )
             ),
-            fluidRow(
-                column(
+            shiny::fluidRow(
+                shiny::column(
                     width = 6,
-                    actionButton(
+                    shiny::actionButton(
                         inputId = ns("run_prep"), 
                         label = "Run!", 
-                        icon = icon("circle-nodes", verify_fa = FALSE),
+                        icon = shiny::icon("circle-nodes", verify_fa = FALSE),
                         width = '100%'
                     )
                 ),
-                column(
+                shiny::column(
                     width = 6,
-                    actionButton(
+                    shiny::actionButton(
                         ns("simulate_prep_data"), 
                         label = "Simulate!", 
-                        icon = icon("greater-than-equal", verify_fa = FALSE),
+                        icon = shiny::icon("greater-than-equal", verify_fa = FALSE),
                         width = '100%'
                     )
                 )
             ),
-            br(),
-            uiOutput(ns("download_prep_avg"))
+            shiny::br(),
+            shiny::uiOutput(ns("download_prep_avg"))
         ),
-        mainPanel(
+        shiny::mainPanel(
             width = 8,
             shinyjs::useShinyjs(),
-            tabsetPanel(id = ns("tabset_prep_avg"),
-            tabPanel("Get Random", value = "tabPanel_prep_avg",
-                br(),
-                fluidRow(
-                  column(
+            shiny::tabsetPanel(id = ns("tabset_prep_avg"),
+            shiny::tabPanel("Get Random", value = "tabPanel_prep_avg",
+                shiny::br(),
+                shiny::fluidRow(
+                  shiny::column(
                     width = 4,
                     shinyjs::hidden(
-                        selectInput(
+                        shiny::selectInput(
                           inputId = ns("dimensions_preps"), 
                           label = "Select dimensions of field:", 
                           choices = "")
                     ),
                     shinyjs::hidden(
-                        actionButton(
+                        shiny::actionButton(
                           inputId = ns("multi_dimension_button"),
                           label = "Select multiple dimensions",
                           width = "80%",
@@ -221,21 +220,21 @@ mod_multi_loc_preps_ui <- function(id){
                                   margin-bottom:15px")
                     )
                   ),
-                  column(
+                  shiny::column(
                     4,
-                    br(),
+                    shiny::br(),
                     shinyjs::hidden(
-                      checkboxInput(inputId = ns("multi_dimension_toggle"),
+                      shiny::checkboxInput(inputId = ns("multi_dimension_toggle"),
                                     label = "Set different dimensions across locations",
                                     value = FALSE)
                     )
                   )
                 ),
-                fluidRow(
-                  column(
+                shiny::fluidRow(
+                  shiny::column(
                     4,
                     shinyjs::hidden(
-                        actionButton(
+                        shiny::actionButton(
                           ns("get_random_prep"), 
                           label = "Randomize!",
                           style = "margin-bottom:12px")
@@ -247,15 +246,15 @@ mod_multi_loc_preps_ui <- function(id){
                     type = 4
                 )
             ),
-            tabPanel("Data Input", DT::DTOutput(ns("multi_prep_data_input"))),
-            tabPanel("Randomized Field",
+            shiny::tabPanel("Data Input", DT::DTOutput(ns("multi_prep_data_input"))),
+            shiny::tabPanel("Randomized Field",
                     fieldhub_spinner(
                         DT::DTOutput(ns("avg_field_preps")), 
                         type = 4)
                     ),
-            tabPanel("Plot Number Field", DT::DTOutput(ns("PREPSPLOTFIELD"))),
-            tabPanel("Field Book", DT::DTOutput(ns("pREPSOUTPUT"))),
-            tabPanel("Heatmap", plotly::plotlyOutput(ns("heatmap_prep"), width = "97%"))
+            shiny::tabPanel("Plot Number Field", DT::DTOutput(ns("PREPSPLOTFIELD"))),
+            shiny::tabPanel("Field Book", DT::DTOutput(ns("pREPSOUTPUT"))),
+            shiny::tabPanel("Heatmap", plotly::plotlyOutput(ns("heatmap_prep"), width = "97%"))
             )
         )
     )
@@ -265,23 +264,23 @@ mod_multi_loc_preps_ui <- function(id){
 #'
 #' @noRd 
 mod_multi_loc_preps_server <- function(id){
-  moduleServer( id, function(input, output, session){
+  shiny::moduleServer( id, function(input, output, session){
     ns <- session$ns
 
     shinyjs::useShinyjs()
 
-    observe({
-        req(input$locs_prep)
+    shiny::observe({
+        shiny::req(input$locs_prep)
         prep_locs <- as.numeric(input$locs_prep)
         start <- prep_locs + 1
         plant_reps <- start:(prep_locs * 2 - 1)
-        updateSelectInput(inputId = "plant_copies_preps", 
+        shiny::updateSelectInput(inputId = "plant_copies_preps",
                             choices = plant_reps, 
                             selected = plant_reps[2])
     })
 
-    prep_inputs <- eventReactive(input$run_prep, {
-        req(input$gens_prep)
+    prep_inputs <- shiny::eventReactive(input$run_prep, {
+        shiny::req(input$gens_prep)
         if (input$include_checks == "Yes"){
             prep_checks <- as.numeric(as.vector(unlist(strsplit(input$prep_checks, ","))))
             checks <- as.numeric(input$prep_checks_met)
@@ -330,26 +329,26 @@ mod_multi_loc_preps_server <- function(id){
         ) 
     })
 
-    observeEvent(prep_inputs()$sites, {
+    shiny::observeEvent(prep_inputs()$sites, {
         loc_user_view <- 1:prep_inputs()$sites
-        updateSelectInput(
+        shiny::updateSelectInput(
             inputId = "loc_to_view_preps", 
             choices = loc_user_view, 
             selected = loc_user_view[1])
     })
 
-    observeEvent(input$multi_prep_data,
-                 handlerExpr = updateTabsetPanel(session,
+    shiny::observeEvent(input$multi_prep_data,
+                 handlerExpr = shiny::updateTabsetPanel(session,
                                                  "tabset_prep_avg",
                                                  selected = "tabPanel_prep_avg"))
 
-    observeEvent(input$run_prep,
-                 handlerExpr = updateTabsetPanel(session,
+    shiny::observeEvent(input$run_prep,
+                 handlerExpr = shiny::updateTabsetPanel(session,
                                                  "tabset_prep_avg",
                                                  selected = "tabPanel_prep_avg"))
     
-    get_multi_loc_prep <- reactive({
-        req(input$locs_prep)
+    get_multi_loc_prep <- shiny::reactive({
+        shiny::req(input$locs_prep)
         if (input$locs_prep < 2) {
             shinyalert::shinyalert(
                 "Error!!", 
@@ -359,7 +358,7 @@ mod_multi_loc_preps_server <- function(id){
             return(NULL)
         }
         if (input$multi_prep_data == 'Yes') {
-            req(input$file_multi_prep)
+            shiny::req(input$file_multi_prep)
             inFile <- input$file_multi_prep
             data_ingested <- load_file(
                 name = inFile$name,
@@ -429,8 +428,8 @@ mod_multi_loc_preps_server <- function(id){
               return(NULL)
             }
         } else {
-            req(input$prep_checks_met)
-            req(input$prep_checks)
+            shiny::req(input$prep_checks_met)
+            shiny::req(input$prep_checks)
             if (input$include_checks == "Yes") {
                 prep_checks <- as.numeric(as.vector(unlist(strsplit(input$prep_checks, ","))))
                 checks <- as.numeric(input$prep_checks_met)
@@ -466,12 +465,12 @@ mod_multi_loc_preps_server <- function(id){
                 )
             )
     }) |>
-        bindEvent(input$run_prep)
+        shiny::bindEvent(input$run_prep)
 
-    setup_optim_prep <- reactive({
-        req(get_multi_loc_prep())
+    setup_optim_prep <- shiny::reactive({
+        shiny::req(get_multi_loc_prep())
         if (is.null(get_multi_loc_prep())) return(NULL)
-        req(prep_inputs())
+        shiny::req(prep_inputs())
         input_lines <- as.numeric(input$gens_prep)
         locs <- as.numeric(input$locs_prep)
         checks <- as.numeric(prep_inputs()$checks)
@@ -479,7 +478,7 @@ mod_multi_loc_preps_server <- function(id){
         prep_data_input <- get_multi_loc_prep()$multi_loc_preps_data
         add_checks <- FALSE
         if (input$include_checks == "Yes") add_checks <- TRUE
-        withProgress(message = 'Optimization in progress ...', {
+        shiny::withProgress(message = 'Optimization in progress ...', {
             optim_out <- validate_design(do_optim(
                 design = "prep",
                 lines = input$gens_prep, 
@@ -506,12 +505,12 @@ mod_multi_loc_preps_server <- function(id){
         }
         return(optim_out)
     }) |>
-        bindEvent(input$run_prep)
+        shiny::bindEvent(input$run_prep)
 
-    list_input_plots <- eventReactive(input$run_prep, {
-        req(setup_optim_prep())
-        req(get_multi_loc_prep())
-        req(prep_inputs())
+    list_input_plots <- shiny::eventReactive(input$run_prep, {
+        shiny::req(setup_optim_prep())
+        shiny::req(get_multi_loc_prep())
+        shiny::req(prep_inputs())
         if (!is.null(prep_inputs()$prep_checks)) {
             prep_checks <- as.numeric(prep_inputs()$prep_checks)
         } else {
@@ -524,9 +523,9 @@ mod_multi_loc_preps_server <- function(id){
         )
     })
     
-    observeEvent(list(list_input_plots(), input$allow_fillers_prep), {
-        req(setup_optim_prep())
-        req(prep_inputs())
+    shiny::observeEvent(list(list_input_plots(), input$allow_fillers_prep), {
+        shiny::req(setup_optim_prep())
+        shiny::req(prep_inputs())
         if (!is.null(prep_inputs()$prep_checks)) {
             prep_checks <- as.numeric(prep_inputs()$prep_checks)
         } else {
@@ -544,7 +543,7 @@ mod_multi_loc_preps_server <- function(id){
         } else {
             sort_choices <- stats::setNames(options$value, options$label)
         }
-        updateSelectInput(
+        shiny::updateSelectInput(
             inputId = "dimensions_preps",
             choices = sort_choices,
             selected = sort_choices[1])
@@ -578,29 +577,29 @@ mod_multi_loc_preps_server <- function(id){
         }
     })
 
-    dimensions <-  reactiveValues()
+    dimensions <-  shiny::reactiveValues()
 
-    observeEvent(input$prep_randomize_multi_loc, {
+    shiny::observeEvent(input$prep_randomize_multi_loc, {
       prep_number_of_locs <- input$locs_prep
       
       for (i in 1:prep_number_of_locs) {
-        req(input[[paste0("dimensions_loc_", i)]])
+        shiny::req(input[[paste0("dimensions_loc_", i)]])
         loc_field_dimension <- input[[paste0("dimensions_loc_", i)]]
         dimensions$i <- loc_field_dimension
       }
       # Close the modal after processing the input values
-       removeModal()
+       shiny::removeModal()
     }) 
 
-    field_dimensions_prep <- eventReactive(input$get_random_prep, {
-      req(setup_optim_prep())
+    field_dimensions_prep <- shiny::eventReactive(input$get_random_prep, {
+      shiny::req(setup_optim_prep())
       if (input$dimensions_preps == "No options available") return(NULL)
       prep_number_of_locs <- input$locs_prep
       if (input$multi_dimension_toggle) {
         d_row <- vector(mode = "numeric", length = prep_number_of_locs)
         d_col <- vector(mode = "numeric", length = prep_number_of_locs)
         for (i in 1:prep_number_of_locs) {
-          req(input[[paste0("dimensions_loc_", i)]])
+          shiny::req(input[[paste0("dimensions_loc_", i)]])
           dims <- unlist(strsplit(input[[paste0("dimensions_loc_", i)]]," x "))
           d_row[i] <- as.numeric(dims[1])
           d_col[i] <- as.numeric(dims[2])
@@ -619,35 +618,35 @@ mod_multi_loc_preps_server <- function(id){
     )
 
     info_modal_multi_prep <- function() {
-      modalDialog(
-        title = div(tags$h3("Important message", style = "color: red;")),
-        h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
-        renderTable(
+      shiny::modalDialog(
+        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
+        shiny::h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
+        shiny::renderTable(
 			format_list_no_checks,
 			bordered = TRUE,
 			align = 'c',
 			striped = TRUE
 			),
-		h5("Remark: If you want to include checks, please add them in the first rows of the file."),
+		shiny::h5("Remark: If you want to include checks, please add them in the first rows of the file."),
         easyClose = FALSE
       )
     }
     
-    toListen <- reactive({
+    toListen <- shiny::reactive({
       list(input$multi_prep_data)
     })
     
-    observeEvent(toListen(), {
+    shiny::observeEvent(toListen(), {
       if (input$multi_prep_data == 'Yes'){
-        showModal(
+        shiny::showModal(
           info_modal_multi_prep()
         )
       }
     })
 
     dimension_choices <- function(site = 1) {
-      req(setup_optim_prep())
-      req(prep_inputs())
+      shiny::req(setup_optim_prep())
+      shiny::req(prep_inputs())
       if (!is.null(prep_inputs()$prep_checks)) {
           prep_checks <- as.numeric(prep_inputs()$prep_checks)
       } else {
@@ -669,29 +668,29 @@ mod_multi_loc_preps_server <- function(id){
     }
 
     multi_dimension_modal <- function() {
-      modalDialog(
-        title = div(tags$h3("Select different dimensions across multiple locations")),
+      shiny::modalDialog(
+        title = shiny::div(shiny::tags$h3("Select different dimensions across multiple locations")),
         shiny::uiOutput(ns("additional_inputs")),
         easyClose = FALSE,
-        footer = tagList(
-          modalButton("Cancel"),
-          actionButton(inputId = ns("prep_randomize_multi_loc"), "GO")
+        footer = shiny::tagList(
+          shiny::modalButton("Cancel"),
+          shiny::actionButton(inputId = ns("prep_randomize_multi_loc"), "GO")
         )
       )
     }
   
     output$additional_inputs <- shiny::renderUI({
       prep_number_of_locs <- input$locs_prep
-      req(input$run_prep)
+      shiny::req(input$run_prep)
       # Create a list to store the UI elements
       ui_list <- lapply(1:prep_number_of_locs, function(i) {
-        div(
+        shiny::div(
           class = "multi-dimension-container",
           style = "display: flex; justify-content: left; align-items: left;",
-          div(
+          shiny::div(
             class = "col-12",
             style = "padding-top: 0.65em; hover: #f1f1f1;",
-            selectInput(
+            shiny::selectInput(
               ns(paste0("dimensions_loc_", i)),
               paste0("Select dimension for location ", i),
               choices = dimension_choices(i)
@@ -700,40 +699,40 @@ mod_multi_loc_preps_server <- function(id){
         )
       })
       # Return the list of UI elements as a tagList (so that it renders correctly)
-      do.call(tagList, ui_list)
+      do.call(shiny::tagList, ui_list)
     })
 
-    observeEvent(input$multi_dimension_button, {
-      showModal(
+    shiny::observeEvent(input$multi_dimension_button, {
+      shiny::showModal(
         multi_dimension_modal()
       )
     })
 
-    randomize_hit_prep <- reactiveValues(times = 0)
+    randomize_hit_prep <- shiny::reactiveValues(times = 0)
  
-    observeEvent(input$run_prep, {
+    shiny::observeEvent(input$run_prep, {
       randomize_hit_prep$times <- 0
     })
 
-    user_tries_prep <- reactiveValues(tries_prep = 0)
+    user_tries_prep <- shiny::reactiveValues(tries_prep = 0)
 
-    observeEvent(input$get_random_prep, {
+    shiny::observeEvent(input$get_random_prep, {
       user_tries_prep$tries_prep <- user_tries_prep$tries_prep + 1
       randomize_hit_prep$times <- randomize_hit_prep$times + 1
     })
 
-    observeEvent(input$dimensions_preps, {
+    shiny::observeEvent(input$dimensions_preps, {
       user_tries_prep$tries_prep <- 0
     })
 
-    list_to_observe_prep <- reactive({
+    list_to_observe_prep <- shiny::reactive({
       list(randomize_hit_prep$times, user_tries_prep$tries_prep)
     })
 
-    observeEvent(list_to_observe_prep(), {
-      output$download_prep_avg <- renderUI({
+    shiny::observeEvent(list_to_observe_prep(), {
+      output$download_prep_avg <- shiny::renderUI({
         if (randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0) {
-          downloadButton(
+          shiny::downloadButton(
             ns("downloadData.preps"),
             "Save Experiment",
             style = "width:100%")
@@ -741,8 +740,8 @@ mod_multi_loc_preps_server <- function(id){
       })
     })
 
-    observeEvent(input$run_prep, {
-        req(setup_optim_prep())
+    shiny::observeEvent(input$run_prep, {
+        shiny::req(setup_optim_prep())
         shinyjs::show(id = "dimensions_preps")
     })
 
@@ -758,8 +757,8 @@ mod_multi_loc_preps_server <- function(id){
     }
   }
 
-  observeEvent(input$run_prep, {
-        req(setup_optim_prep())
+  shiny::observeEvent(input$run_prep, {
+        shiny::req(setup_optim_prep())
        #shinyjs::show(id = "dimensions_preps")
         shinyjs::show(id = "multi_dimension_toggle")
         show_dimension_inputs()
@@ -767,12 +766,12 @@ mod_multi_loc_preps_server <- function(id){
 
   # Registered once; it used to be nested in the run_prep observer, which
   # added a new copy of it on every click
-  observeEvent(input$multi_dimension_toggle, show_dimension_inputs(),
+  shiny::observeEvent(input$multi_dimension_toggle, show_dimension_inputs(),
                ignoreInit = TRUE)
 
     output$prep_allocation <- DT::renderDT({
-        req(setup_optim_prep())
-        req(get_multi_loc_prep())
+        shiny::req(setup_optim_prep())
+        shiny::req(get_multi_loc_prep())
         data_without_checks <- get_multi_loc_prep()$data_without_checks
         prep_lines <- prep_inputs()$prep_lines
 
@@ -809,16 +808,16 @@ mod_multi_loc_preps_server <- function(id){
     })
     ###### Plotting the data ##############
     output$multi_prep_data_input <- DT::renderDT({
-        req(setup_optim_prep())
+        shiny::req(setup_optim_prep())
         test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
         if (!test) return(NULL)
-        req(setup_optim_prep())
+        shiny::req(setup_optim_prep())
         multi_loc_data <- setup_optim_prep()$multi_location_data
         df <- as.data.frame(multi_loc_data)
         # Combine the data frames into a single data frame with 
         # a new column for the list element name
         if (input$multi_prep_data == 'Yes') {
-            req(setup_optim_prep())
+            shiny::req(setup_optim_prep())
             list_locs <- setup_optim_prep()$list_locs
             df <- dplyr::bind_rows(
                 lapply(names(list_locs), function(name) {
@@ -842,9 +841,9 @@ mod_multi_loc_preps_server <- function(id){
             columnDefs = list(list(className = 'dt-center', targets = "_all")))))
     })
     
-    pREPS_reactive <- reactive({
-        req(setup_optim_prep())
-        req(field_dimensions_prep())
+    pREPS_reactive <- shiny::reactive({
+        shiny::req(setup_optim_prep())
+        shiny::req(field_dimensions_prep())
         nrows <- field_dimensions_prep()$d_row
         ncols <- field_dimensions_prep()$d_col
         locs_preps <- prep_inputs()$sites
@@ -859,7 +858,7 @@ mod_multi_loc_preps_server <- function(id){
         }
         movement_planter <- prep_inputs()$planter_mov
         expt_name <- prep_inputs()$expt_name
-        withProgress(message = 'Running p-rep optimization ...', {
+        shiny::withProgress(message = 'Running p-rep optimization ...', {
             locations_preps <- validate_design(multi_location_prep(
                 lines = prep_inputs()$prep_lines,
                 nrows = nrows, 
@@ -879,16 +878,16 @@ mod_multi_loc_preps_server <- function(id){
         })
         return(locations_preps)
     }) |> 
-      bindEvent(input$get_random_prep)
+      shiny::bindEvent(input$get_random_prep)
     
-     user_site_selection <- reactive({
+     user_site_selection <- shiny::reactive({
        return(as.numeric(input$loc_to_view_preps))
      })
     
     output$avg_field_preps <- DT::renderDataTable({
       test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
       if (!test) return(NULL)
-      req(pREPS_reactive())
+      shiny::req(pREPS_reactive())
       selection <- as.numeric(user_site_selection())
       w_map <- pREPS_reactive()$layoutRandom[[selection]]
       w_map[pREPS_reactive()$fillerField[[selection]]] <- "Filler"
@@ -927,7 +926,7 @@ mod_multi_loc_preps_server <- function(id){
     output$PREPSPLOTFIELD <- DT::renderDT({
       test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
       if (!test) return(NULL)
-      req(pREPS_reactive())
+      shiny::req(pREPS_reactive())
       selection <- as.numeric(user_site_selection())
       plot_num <- pREPS_reactive()$plotNumber[[user_site_selection()]]
       df <- as.data.frame(plot_num)
@@ -953,88 +952,88 @@ mod_multi_loc_preps_server <- function(id){
         )
     })
 
-    valsPREP <- reactiveValues(ROX = NULL, ROY = NULL, trail.prep = NULL, minValue = NULL,
+    valsPREP <- shiny::reactiveValues(ROX = NULL, ROY = NULL, trail.prep = NULL, minValue = NULL,
                                 maxValue = NULL)
     
     simuModal.PREP <- function(failed = FALSE) {
-      modalDialog(
-        fluidRow(
-          column(6, 
-                 selectInput(inputId = ns("trailsPREP"), label = "Select One:", 
+      shiny::modalDialog(
+        shiny::fluidRow(
+          shiny::column(6,
+                 shiny::selectInput(inputId = ns("trailsPREP"), label = "Select One:",
                              choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
           ),
-          column(6, 
-                 checkboxInput(inputId = ns("heatmap_PREP"), label = "Include a Heatmap", value = TRUE),
+          shiny::column(6,
+                 shiny::checkboxInput(inputId = ns("heatmap_PREP"), label = "Include a Heatmap", value = TRUE),
           )
         ),
-        conditionalPanel("input.trailsPREP == 'Other'", ns = ns,
-                         textInput(inputId = ns("OtherPREP"), label = "Input Trial Name:", value = NULL)
+        shiny::conditionalPanel("input.trailsPREP == 'Other'", ns = ns,
+                         shiny::textInput(inputId = ns("OtherPREP"), label = "Input Trial Name:", value = NULL)
         ),
-        fluidRow(
-          column(6, 
-                 selectInput(inputId = ns("ROX.PREP"), "Select the Correlation in Rows:", 
+        shiny::fluidRow(
+          shiny::column(6,
+                 shiny::selectInput(inputId = ns("ROX.PREP"), "Select the Correlation in Rows:",
                              choices = seq(0.1, 0.9, 0.1),  selected = 0.5)
           ),
-          column(6, 
-                 selectInput(inputId = ns("ROY.PREP"), "Select the Correlation in Cols:", 
+          shiny::column(6,
+                 shiny::selectInput(inputId = ns("ROY.PREP"), "Select the Correlation in Cols:",
                              choices = seq(0.1, 0.9, 0.1),  selected = 0.5)
           )
         ),
-        fluidRow(
-          column(6, 
-                 numericInput(inputId = ns("min.prep"), "Input the min value", value = NULL)
+        shiny::fluidRow(
+          shiny::column(6,
+                 shiny::numericInput(inputId = ns("min.prep"), "Input the min value", value = NULL)
           ),
-          column(6, 
-                 numericInput(inputId = ns("max.prep"), "Input the max value", value = NULL)
+          shiny::column(6,
+                 shiny::numericInput(inputId = ns("max.prep"), "Input the max value", value = NULL)
                  
           )
         ),
         if (failed)
-          div(tags$b("Invalid input of data max and min", style = "color: red;")),
+          shiny::div(shiny::tags$b("Invalid input of data max and min", style = "color: red;")),
         
-        footer = tagList(
-          modalButton("Cancel"),
-          actionButton(inputId = ns("ok.prep"), "GO")
+        footer = shiny::tagList(
+          shiny::modalButton("Cancel"),
+          shiny::actionButton(inputId = ns("ok.prep"), "GO")
         )
       )
     }
     
-    observeEvent(input$simulate_prep_data, {
-      req(pREPS_reactive()$fieldBook[[1]])
+    shiny::observeEvent(input$simulate_prep_data, {
+      shiny::req(pREPS_reactive()$fieldBook[[1]])
       test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
       if (test) {
-        showModal(
+        shiny::showModal(
           simuModal.PREP()
         )
       }
     })
     
-    observeEvent(input$ok.prep, {
-      req(input$min.prep, input$max.prep)
+    shiny::observeEvent(input$ok.prep, {
+      shiny::req(input$min.prep, input$max.prep)
       if (input$max.prep > input$min.prep & input$min.prep != input$max.prep) {
         valsPREP$maxValue <- input$max.prep
         valsPREP$minValue  <- input$min.prep
         valsPREP$ROX <- as.numeric(input$ROX.PREP)
         valsPREP$ROY <- as.numeric(input$ROY.PREP)
         if(input$trailsPREP == "Other") {
-          req(input$OtherPREP)
+          shiny::req(input$OtherPREP)
           if(!is.null(input$OtherPREP)) {
             valsPREP$trail.prep <- as.character(input$OtherPREP)
-          }else showModal(simuModal.PREP(failed = TRUE))
+          }else shiny::showModal(simuModal.PREP(failed = TRUE))
         }else {
           valsPREP$trail.prep <- as.character(input$trailsPREP)
         }
-        removeModal()
+        shiny::removeModal()
       }else {
-        showModal(
+        shiny::showModal(
           simuModal.PREP(failed = TRUE)
         )
       }
     })
     
-    simuDataPREP <- reactive({
-      req(pREPS_reactive()$fieldBook)
-      req(prep_inputs())
+    simuDataPREP <- shiny::reactive({
+      shiny::req(pREPS_reactive()$fieldBook)
+      shiny::req(prep_inputs())
       field_book <- pREPS_reactive()$fieldBook
       if (is.null(valsPREP$maxValue) || is.null(valsPREP$minValue) ||
           is.null(valsPREP$trail.prep)) {
@@ -1055,25 +1054,25 @@ mod_multi_loc_preps_server <- function(id){
       list(df = simulation$field_book, dfSimulationList = simulation$simulations)
     })
 
-    heat_map_prep <- reactiveValues(heat_map_option = FALSE)
+    heat_map_prep <- shiny::reactiveValues(heat_map_option = FALSE)
     
-    observeEvent(input$ok.prep, {
-      req(input$min.prep, input$max.prep)
+    shiny::observeEvent(input$ok.prep, {
+      shiny::req(input$min.prep, input$max.prep)
       if (input$max.prep > input$min.prep & input$min.prep != input$max.prep) {
         heat_map_prep$heat_map_option <- TRUE
       }
     })
     
-    observeEvent(heat_map_prep$heat_map_option, {
+    shiny::observeEvent(heat_map_prep$heat_map_option, {
       if (heat_map_prep$heat_map_option == FALSE) {
-        hideTab(inputId = "tabset_prep_avg", target = "Heatmap")
+        shiny::hideTab(inputId = "tabset_prep_avg", target = "Heatmap")
       } else {
-        showTab(inputId = "tabset_prep_avg", target = "Heatmap")
+        shiny::showTab(inputId = "tabset_prep_avg", target = "Heatmap")
       }
     })
     
-    heatmap_obj <- reactive({
-      req(simuDataPREP()$dfSimulationList)
+    heatmap_obj <- shiny::reactive({
+      shiny::req(simuDataPREP()$dfSimulationList)
       loc_user <- user_site_selection()
       if(input$heatmap_PREP) {
         w <- as.character(valsPREP$trail.prep)
@@ -1094,7 +1093,7 @@ mod_multi_loc_preps_server <- function(id){
     output$heatmap_prep <- plotly::renderPlotly({
       test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
       if (!test) return(NULL)
-      req(heatmap_obj())
+      shiny::req(heatmap_obj())
       heatmap_obj()
     }) 
     
@@ -1121,9 +1120,9 @@ mod_multi_loc_preps_server <- function(id){
       )
     })
     
-    output$downloadData.preps <- downloadHandler(
+    output$downloadData.preps <- shiny::downloadHandler(
       filename = function() {
-        req(input$loc_name_preps)
+        shiny::req(input$loc_name_preps)
         loc <- input$loc_name_preps
         loc <- paste(loc, "_", "pREP_", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")

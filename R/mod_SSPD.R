@@ -6,15 +6,14 @@
 #'
 #' @noRd 
 #'
-#' @importFrom shiny NS tagList 
 mod_SSPD_ui <- function(id){
-  ns <- NS(id)
-  tagList(
-    h4("Split-Split-Plot Design"),
-    sidebarLayout(
-      sidebarPanel(
+  ns <- shiny::NS(id)
+  shiny::tagList(
+    shiny::h4("Split-Split-Plot Design"),
+    shiny::sidebarLayout(
+      shiny::sidebarPanel(
         width = 4,
-        radioButtons(inputId = ns("owndataSSPD"), 
+        shiny::radioButtons(inputId = ns("owndataSSPD"),
                      label = "Do you have your own data?", 
                      choices = c("Yes", "No"), 
                      selected = "No",
@@ -23,23 +22,23 @@ mod_SSPD_ui <- function(id){
                      choiceNames = NULL, 
                      choiceValues = NULL),
         
-        selectInput(inputId = ns("kindSSPD"), 
+        shiny::selectInput(inputId = ns("kindSSPD"),
                     label = "Select SSPD Type:",
                     choices = c("Split-Split Plot in a RCBD" = "SSPD_RCBD", 
                                 "Split-Split Plot in a CRD" = "SSPD_CRD"),
                     multiple = FALSE),
         
-        conditionalPanel(
+        shiny::conditionalPanel(
           condition = "input.owndataSSPD == 'Yes'", 
           ns = ns,
-          fluidRow(
-            column(8, style=list("padding-right: 28px;"),
-                   fileInput(ns("file.SSPD"), 
+          shiny::fluidRow(
+            shiny::column(8, style=list("padding-right: 28px;"),
+                   shiny::fileInput(ns("file.SSPD"),
                              label = "Upload a csv File:", 
                              multiple = FALSE)),
             
-            column(4,style=list("padding-left: 5px;"),
-                   radioButtons(ns("sep.sspd"), "Separator",
+            shiny::column(4,style=list("padding-left: 5px;"),
+                   shiny::radioButtons(ns("sep.sspd"), "Separator",
                                 choices = c(Comma = ",",
                                             Semicolon = ";",
                                             Tab = "\t"),
@@ -47,32 +46,32 @@ mod_SSPD_ui <- function(id){
           )          
         ),
         
-        conditionalPanel(
+        shiny::conditionalPanel(
           condition = "input.owndataSSPD != 'Yes'", 
           ns = ns,
-          numericInput(ns("mp.sspd"), 
+          shiny::numericInput(ns("mp.sspd"),
                        label = "Whole-plots:",
                        value = 2, 
                        min = 2),
-          numericInput(ns("sp.sspd"), 
+          shiny::numericInput(ns("sp.sspd"),
                        label = "Sub-plots Within Whole-plots:",
                        value = 2, 
                        min = 2),
-          numericInput(ns("ssp.sspd"), 
+          shiny::numericInput(ns("ssp.sspd"),
                        label = "Sub-Sub-plots within Sub-plots:",
                        value = 5, 
                        min = 2)
           ),
         
-        fluidRow(
-          column(6, style=list("padding-right: 28px;"),
-            numericInput(ns("reps.sspd"), 
+        shiny::fluidRow(
+          shiny::column(6, style=list("padding-right: 28px;"),
+            shiny::numericInput(ns("reps.sspd"),
                          label = "Input # of Full Reps:",
                          value = 3, 
                          min = 2)
           ),
-          column(6, style=list("padding-left: 5px;"),
-            numericInput(ns("l.sspd"), 
+          shiny::column(6, style=list("padding-left: 5px;"),
+            shiny::numericInput(ns("l.sspd"),
                          label = "Input # of Locations:",
                          value = 1, 
                          min = 1)
@@ -81,67 +80,67 @@ mod_SSPD_ui <- function(id){
         
         # The RCBD-type layouts number whole plots in a fixed order, so the
         # plot order only applies to the CRD type
-        conditionalPanel("input.kindSSPD == 'SSPD_CRD'", ns = ns,
-          selectInput(inputId = ns("planter_mov_sspd"), 
+        shiny::conditionalPanel("input.kindSSPD == 'SSPD_CRD'", ns = ns,
+          shiny::selectInput(inputId = ns("planter_mov_sspd"),
                       label = "Plot Order Layout:",
                       choices = c("serpentine", "cartesian"), 
                       multiple = FALSE,
                       selected = "serpentine")
         ),
         
-        fluidRow(
-          column(6,style=list("padding-right: 28px;"),
-                 textInput(ns("plot_start.sspd"), 
+        shiny::fluidRow(
+          shiny::column(6,style=list("padding-right: 28px;"),
+                 shiny::textInput(ns("plot_start.sspd"),
                            "Starting Plot Number:", 
                            value = 101)
           ),
-          column(6,style=list("padding-left: 5px;"),
-                 textInput(ns("Location.sspd"), "
+          shiny::column(6,style=list("padding-left: 5px;"),
+                 shiny::textInput(ns("Location.sspd"), "
                            Input Location:", 
                            value = "FARGO")
           )
         ),
         
-        numericInput(inputId = ns("seed.sspd"), 
+        shiny::numericInput(inputId = ns("seed.sspd"),
                      label = "Random Seed:", 
                      value = 123, 
                      min = 1),
         
-        fluidRow(
-          column(6,
-                 actionButton(
+        shiny::fluidRow(
+          shiny::column(6,
+                 shiny::actionButton(
                    inputId = ns("RUN.sspd"), 
                    "Run!", 
-                   icon = icon("circle-nodes", verify_fa = FALSE),
+                   icon = shiny::icon("circle-nodes", verify_fa = FALSE),
                    width = '100%'),
           ),
-          column(6,
-                 actionButton(
+          shiny::column(6,
+                 shiny::actionButton(
                    ns("Simulate.sspd"), 
                    "Simulate!", 
-                   icon = icon("greater-than-equal", verify_fa = FALSE),
+                   icon = shiny::icon("greater-than-equal", verify_fa = FALSE),
                    width = '100%'),
           )
           
         ), 
-        br(),
-        downloadButton(
+        shiny::br(),
+        shiny::downloadButton(
           ns("downloadData.sspd"), 
           "Save Experiment!", 
           style = "width:100%")
       ),
       
-      mainPanel(
+      shiny::mainPanel(
         width = 8,
-        fluidRow(
-          tabsetPanel(
-            tabPanel("Field Layout",
+        shiny::fluidRow(
+          shiny::tabsetPanel(
+            shiny::tabPanel("Field Layout",
                      shinyjs::useShinyjs(),
                      shinyjs::hidden(
-                       downloadButton(
+                       shiny::downloadButton(
                          ns("downloadCsv.sspd"), 
                          label =  "CSV",
-                         icon = icon("file-csv"), 
+                         icon = shiny::icon("file-csv"),
                          width = '10%',
                          style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
                      fieldhub_spinner(
@@ -150,12 +149,12 @@ mod_SSPD_ui <- function(id){
                                             height = "580px"),
                        type = 5
                      ),
-                     br(),
-                     column(12,
-                            uiOutput(ns("well_panel_layout_SSPD"))
+                     shiny::br(),
+                     shiny::column(12,
+                            shiny::uiOutput(ns("well_panel_layout_SSPD"))
                             )
             ),
-            tabPanel("Field Book", 
+            shiny::tabPanel("Field Book",
                      fieldhub_spinner(
                        DT::DTOutput(ns("SSPD.output")), 
                        type = 5)
@@ -171,7 +170,7 @@ mod_SSPD_ui <- function(id){
 #'
 #' @noRd 
 mod_SSPD_server <- function(id){
-  moduleServer( id, function(input, output, session){
+  shiny::moduleServer( id, function(input, output, session){
     
     ns <- session$ns
     shinyjs::useShinyjs()
@@ -184,10 +183,10 @@ mod_SSPD_server <- function(id){
                                             SUB_SUBPLOT = ssp))            
   
     entriesInfoModal_SSPD <- function() {
-      modalDialog(
-        title = div(tags$h3("Important message", style = "color: red;")),
-        h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
-        renderTable(entryListFormat_SSPD,
+      shiny::modalDialog(
+        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
+        shiny::h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
+        shiny::renderTable(entryListFormat_SSPD,
                     bordered = TRUE,
                     align = 'c',
                     striped = TRUE),
@@ -195,21 +194,21 @@ mod_SSPD_server <- function(id){
       )
     }
     
-    toListen <- reactive({
+    toListen <- shiny::reactive({
       list(input$owndataSSPD)
     })
     
-    observeEvent(toListen(), {
+    shiny::observeEvent(toListen(), {
       if (input$owndataSSPD == "Yes") {
-        showModal(
+        shiny::showModal(
           entriesInfoModal_SSPD()
         )
       }
     })
     
-    get_data_sspd <- reactive({
+    get_data_sspd <- shiny::reactive({
       if (input$owndataSSPD == "Yes") {
-        req(input$file.SSPD)
+        shiny::req(input$file.SSPD)
         inFile <- input$file.SSPD
         data_ingested <- load_file(name = inFile$name, 
                                    path = inFile[["datapath"]],
@@ -232,7 +231,7 @@ mod_SSPD_server <- function(id){
           return(NULL)
         }
       } else {
-        req(input$mp.sspd, input$sp.sspd, input$ssp.sspd)
+        shiny::req(input$mp.sspd, input$sp.sspd, input$ssp.sspd)
         wp <- as.numeric(input$mp.sspd)
         sp <- as.numeric(input$sp.sspd)
         ssp <- as.numeric(input$ssp.sspd)
@@ -241,17 +240,17 @@ mod_SSPD_server <- function(id){
         return(list(data_spd = data_spd, treatments = treatments))
       }
     }) |> 
-      bindEvent(input$RUN.sspd)
+      shiny::bindEvent(input$RUN.sspd)
     
-    sspd_inputs <- reactive({
+    sspd_inputs <- shiny::reactive({
       
-      req(get_data_sspd())
+      shiny::req(get_data_sspd())
       
-      req(input$plot_start.sspd)
-      req(input$Location.sspd)
-      req(input$seed.sspd)
-      req(input$l.sspd)
-      req(input$reps.sspd)
+      shiny::req(input$plot_start.sspd)
+      shiny::req(input$Location.sspd)
+      shiny::req(input$seed.sspd)
+      shiny::req(input$l.sspd)
+      shiny::req(input$reps.sspd)
       
       sites <- as.numeric(input$l.sspd)
       seed <- as.numeric(input$seed.sspd)
@@ -283,12 +282,12 @@ mod_SSPD_server <- function(id){
         )
       )
     }) |>
-      bindEvent(input$RUN.sspd)
+      shiny::bindEvent(input$RUN.sspd)
     
     
-    sspd_reactive <- reactive({
+    sspd_reactive <- shiny::reactive({
       
-      req(sspd_inputs())
+      shiny::req(sspd_inputs())
       
       shinyjs::show(id = "downloadCsv.sspd")
       
@@ -306,10 +305,10 @@ mod_SSPD_server <- function(id){
       ))
       
     }) |> 
-      bindEvent(input$RUN.sspd)
+      shiny::bindEvent(input$RUN.sspd)
   
-    output$well_panel_layout_SSPD <- renderUI({
-      req(sspd_reactive()$fieldBook)
+    output$well_panel_layout_SSPD <- shiny::renderUI({
+      shiny::req(sspd_reactive()$fieldBook)
       obj_sspd <- sspd_reactive()
       allBooks_sspd<- plot_layout(x = obj_sspd, layout = 1)$newBooks
       nBooks_sspd <- length(allBooks_sspd)
@@ -318,26 +317,26 @@ mod_SSPD_server <- function(id){
       stacked_sspd <- c("Vertical Stack Panel" = "vertical", 
                           "Horizontal Stack Panel" = "horizontal")
       sites <- 1:length(levels(as.factor(df$LOCATION)))
-      wellPanel(
-        column(2,
-               radioButtons(ns("typlotsspd"), "Type of Plot:",
+      shiny::wellPanel(
+        shiny::column(2,
+               shiny::radioButtons(ns("typlotsspd"), "Type of Plot:",
                             c("Entries/Treatments" = 1,
                               "Plots" = 2,
                               "Heatmap" = 3), selected = 1)
         ),
-        fluidRow(
-          column(3,
-                 selectInput(inputId = ns("stackedSSPD"), 
+        shiny::fluidRow(
+          shiny::column(3,
+                 shiny::selectInput(inputId = ns("stackedSSPD"),
                              label = "Reps layout:", 
                              choices = stacked_sspd),
           ),
-          column(3, 
-                 selectInput(inputId = ns("layoutO_sspd"), 
+          shiny::column(3,
+                 shiny::selectInput(inputId = ns("layoutO_sspd"),
                              label = "Layout option:", 
                              choices = layoutOptions_sspd)
           ),
-          column(3, 
-                 selectInput(inputId = ns("locLayout_sspd"), 
+          shiny::column(3,
+                 shiny::selectInput(inputId = ns("locLayout_sspd"),
                              label = "Location:", 
                              choices = sites) 
           )
@@ -345,8 +344,8 @@ mod_SSPD_server <- function(id){
       )
     })
     
-    observeEvent(input$stackedSSPD, {
-      req(input$stackedSSPD)
+    shiny::observeEvent(input$stackedSSPD, {
+      shiny::req(input$stackedSSPD)
       obj_sspd <- sspd_reactive()
       allBooks <- try(plot_layout(x = obj_sspd, 
                                   layout = 1, 
@@ -354,26 +353,26 @@ mod_SSPD_server <- function(id){
                       silent = TRUE)
       nBooks <- length(allBooks)
       NewlayoutOptions <- 1:nBooks
-      updateSelectInput(session = session, inputId = 'layoutO_sspd',
+      shiny::updateSelectInput(session = session, inputId = 'layoutO_sspd',
                         label = "Layout option:",
                         choices = NewlayoutOptions,
                         selected = 1
       )
     })
     
-    reset_selection <- reactiveValues(reset = 0)
+    reset_selection <- shiny::reactiveValues(reset = 0)
     
-    observeEvent(input$stackedSSPD, {
+    shiny::observeEvent(input$stackedSSPD, {
       reset_selection$reset <- 1
     })
     
-    observeEvent(input$layoutO_sspd, {
+    shiny::observeEvent(input$layoutO_sspd, {
       reset_selection$reset <- 0
     })
     
-    reactive_layoutSSPD <- reactive({
-      req(input$layoutO_sspd)
-      req(sspd_reactive())
+    reactive_layoutSSPD <- shiny::reactive({
+      shiny::req(input$layoutO_sspd)
+      shiny::req(sspd_reactive())
       obj_sspd <- sspd_reactive()
       planting_sspd <- sspd_inputs()$planter
       
@@ -391,72 +390,72 @@ mod_SSPD_server <- function(id){
     })
     
     
-    valsspd <- reactiveValues(maxV.sspd = NULL, minV.sspd = NULL, Trial.sspd = NULL)
+    valsspd <- shiny::reactiveValues(maxV.sspd = NULL, minV.sspd = NULL, Trial.sspd = NULL)
     
     simuModal.sspd <- function(failed = FALSE) {
-      modalDialog(
-        selectInput(inputId = ns("TrialsRowCol"), 
+      shiny::modalDialog(
+        shiny::selectInput(inputId = ns("TrialsRowCol"),
                     label = "Select One:", 
                     choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
-        conditionalPanel("input.TrialsRowCol == 'Other'", 
+        shiny::conditionalPanel("input.TrialsRowCol == 'Other'",
                          ns = ns,
-                         textInput(inputId = ns("Otherspd"),
+                         shiny::textInput(inputId = ns("Otherspd"),
                                    label = "Input Trial Name:",
                                    value = NULL)
         ),
-        fluidRow(
-          column(6, 
-                 numericInput(ns("min.sspd"), "Input the min value", value = NULL)
+        shiny::fluidRow(
+          shiny::column(6,
+                 shiny::numericInput(ns("min.sspd"), "Input the min value", value = NULL)
           ),
-          column(6, 
-                 numericInput(ns("max.sspd"), "Input the max value", value = NULL)
+          shiny::column(6,
+                 shiny::numericInput(ns("max.sspd"), "Input the max value", value = NULL)
                  
           )
           
         ),
         
         if (failed)
-          div(tags$b("Invalid input of data max and min", style = "color: red;")),
+          shiny::div(shiny::tags$b("Invalid input of data max and min", style = "color: red;")),
         
-        footer = tagList(
-          modalButton("Cancel"),
-          actionButton(ns("ok.sspd"), "GO")
+        footer = shiny::tagList(
+          shiny::modalButton("Cancel"),
+          shiny::actionButton(ns("ok.sspd"), "GO")
         )
         
       )
       
     }
     
-    observeEvent(input$Simulate.sspd, {
-      req(sspd_reactive()$fieldBook)
-      showModal(
+    shiny::observeEvent(input$Simulate.sspd, {
+      shiny::req(sspd_reactive()$fieldBook)
+      shiny::showModal(
         simuModal.sspd()
       )
     })
     
-    observeEvent(input$ok.sspd, {
-      req(input$max.sspd, input$min.sspd)
+    shiny::observeEvent(input$ok.sspd, {
+      shiny::req(input$max.sspd, input$min.sspd)
       if (input$max.sspd > input$min.sspd && input$min.sspd != input$max.sspd) {
         valsspd$maxV.sspd <- input$max.sspd
         valsspd$minV.sspd <- input$min.sspd
         if(input$TrialsRowCol == "Other") {
-          req(input$Otherspd)
+          shiny::req(input$Otherspd)
           if(!is.null(input$Otherspd)) {
             valsspd$Trial.sspd <- input$Otherspd
-          }else showModal(simuModal.sspd(failed = TRUE))
+          }else shiny::showModal(simuModal.sspd(failed = TRUE))
         }else {
           valsspd$Trial.sspd <- as.character(input$TrialsRowCol)
         }
-        removeModal()
+        shiny::removeModal()
       }else {
-        showModal(
+        shiny::showModal(
           simuModal.sspd(failed = TRUE)
         )
       }
     })
     
-    simuData_sspd <- reactive({
-      req(sspd_reactive()$fieldBook)
+    simuData_sspd <- shiny::reactive({
+      shiny::req(sspd_reactive()$fieldBook)
       
       if(!is.null(valsspd$maxV.sspd) && !is.null(valsspd$minV.sspd) && 
          !is.null(valsspd$Trial.sspd)) {
@@ -480,19 +479,19 @@ mod_SSPD_server <- function(id){
     
     
     heatmapInfoModal_SSPD <- function() {
-      modalDialog(
-        title = div(tags$h3("Important message", style = "color: red;")),
-        h4("Simulate some data to see a heatmap!"),
+      shiny::modalDialog(
+        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
+        shiny::h4("Simulate some data to see a heatmap!"),
         easyClose = TRUE
       )
     }
     
-    locNum <- reactive(
+    locNum <- shiny::reactive(
       return(as.numeric(input$locLayout_sspd))
     )
     
-    heatmap_obj <- reactive({
-     req(simuData_sspd()$df)
+    heatmap_obj <- shiny::reactive({
+     shiny::req(simuData_sspd()$df)
       if (ncol(simuData_sspd()$df) == 11) {
         locs <- factor(simuData_sspd()$df$LOCATION, 
                        levels = unique(simuData_sspd()$df$LOCATION))
@@ -532,7 +531,7 @@ mod_SSPD_server <- function(id){
                                height = 580)
         return(p2)
       } else {
-        showModal(
+        shiny::showModal(
           heatmapInfoModal_SSPD()
         )
         return(NULL)
@@ -540,15 +539,15 @@ mod_SSPD_server <- function(id){
     })
     
     output$layouts <- plotly::renderPlotly({
-      req(reactive_layoutSSPD())
-      req(sspd_reactive())
-      req(input$typlotsspd)
+      shiny::req(reactive_layoutSSPD())
+      shiny::req(sspd_reactive())
+      shiny::req(input$typlotsspd)
       if (input$typlotsspd == 1) {
         reactive_layoutSSPD()$out_layout
       } else if (input$typlotsspd == 2) {
         reactive_layoutSSPD()$out_layoutPlots
       } else {
-        req(heatmap_obj())
+        shiny::req(heatmap_obj())
         heatmap_obj()
       }
     })
@@ -576,7 +575,7 @@ mod_SSPD_server <- function(id){
       
     })
     
-    output$downloadData.sspd <- downloadHandler(
+    output$downloadData.sspd <- shiny::downloadHandler(
       filename = function() {
         loc <- paste("Split-Split-Plot_", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
@@ -586,10 +585,10 @@ mod_SSPD_server <- function(id){
         write.csv(df, file, row.names = FALSE)
       }
     )
-    csv_data <- reactive({
-      req(simuData_sspd()$df)
+    csv_data <- shiny::reactive({
+      shiny::req(simuData_sspd()$df)
       df <- simuData_sspd()$df
-      req(input$typlotsspd)
+      shiny::req(input$typlotsspd)
       if (input$typlotsspd == 2) {
         export_layout(df, locNum(), TRUE)
       } else {
@@ -599,7 +598,7 @@ mod_SSPD_server <- function(id){
     
     
     # Downloadable csv of selected dataset ----
-    output$downloadCsv.sspd <- downloadHandler(
+    output$downloadCsv.sspd <- shiny::downloadHandler(
       filename = function() {
         loc <- paste("Split_Split_Plot_Layout", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")

@@ -7,15 +7,14 @@
 #' @noRd 
 #' 
 #'
-#' @importFrom shiny NS tagList 
 mod_IBD_ui <- function(id) {
-  ns <- NS(id)
-  tagList(
-    h4("Incomplete Blocks Design"),
-    sidebarLayout(
-      sidebarPanel(
+  ns <- shiny::NS(id)
+  shiny::tagList(
+    shiny::h4("Incomplete Blocks Design"),
+    shiny::sidebarLayout(
+      shiny::sidebarPanel(
         width = 4,
-        radioButtons(ns("owndataibd"), 
+        shiny::radioButtons(ns("owndataibd"),
                      label = "Import entries' list?", 
                      choices = c("Yes", "No"), 
                      selected = "No",
@@ -24,24 +23,24 @@ mod_IBD_ui <- function(id) {
                      choiceNames = NULL, 
                      choiceValues = NULL),
         
-        conditionalPanel(
+        shiny::conditionalPanel(
           condition = "input.owndataibd != 'Yes'", 
           ns = ns,
-          numericInput(ns("t.ibd"), 
+          shiny::numericInput(ns("t.ibd"),
                        label = "Input # of Treatments:",
                        value = 15, 
                        min = 2)
         ),
-        conditionalPanel(
+        shiny::conditionalPanel(
           condition = "input.owndataibd == 'Yes'", 
           ns = ns,
-          fluidRow(
-            column(8, style=list("padding-right: 28px;"),
-                   fileInput(inputId = ns("file.IBD"), 
+          shiny::fluidRow(
+            shiny::column(8, style=list("padding-right: 28px;"),
+                   shiny::fileInput(inputId = ns("file.IBD"),
                              label = "Upload a CSV File:", 
                              multiple = FALSE)),
-            column(4, style=list("padding-left: 5px;"),
-                   radioButtons(inputId = ns("sep.ibd"), "Separator",
+            shiny::column(4, style=list("padding-left: 5px;"),
+                   shiny::radioButtons(inputId = ns("sep.ibd"), "Separator",
                                 choices = c(Comma = ",",
                                             Semicolon = ";",
                                             Tab = "\t"),
@@ -49,83 +48,83 @@ mod_IBD_ui <- function(id) {
           )        
         ),
         
-        numericInput(inputId = ns("r.ibd"), 
+        shiny::numericInput(inputId = ns("r.ibd"),
                      label = "Input # of Full Reps:", 
                      value = 4, 
                      min = 2),
         
-        selectInput(inputId = ns("k.ibd"), 
+        shiny::selectInput(inputId = ns("k.ibd"),
                     label = "Input # of Plots per IBlock:", 
                     choices = ""),
         
-        numericInput(inputId = ns("l.ibd"), 
+        shiny::numericInput(inputId = ns("l.ibd"),
                      label = "Input # of Locations:",
                      value = 1, 
                      min = 1),
-        selectInput(inputId = ns("planter_mov_ibd"), 
+        shiny::selectInput(inputId = ns("planter_mov_ibd"),
           label = "Plot Order Layout:",
           choices = c("serpentine", "cartesian"), 
           multiple = FALSE,
           selected = "serpentine"),
-        fluidRow(
-          column(6, style=list("padding-right: 28px;"),
-                 textInput(inputId = ns("plot_start.ibd"), 
+        shiny::fluidRow(
+          shiny::column(6, style=list("padding-right: 28px;"),
+                 shiny::textInput(inputId = ns("plot_start.ibd"),
                            "Starting Plot Number:", 
                            value = 101)
           ),
-          column(6,style=list("padding-left: 5px;"),
-                 textInput(inputId = ns("Location.ibd"), 
+          shiny::column(6,style=list("padding-left: 5px;"),
+                 shiny::textInput(inputId = ns("Location.ibd"),
                            "Input Location:", 
                            value = "FARGO")
           )
         ), 
-        numericInput(inputId = ns("seed.ibd"), 
+        shiny::numericInput(inputId = ns("seed.ibd"),
                      label = "Random Seed:",
                      value = 4),
-        fluidRow(
-          column(6,
-                 actionButton(
+        shiny::fluidRow(
+          shiny::column(6,
+                 shiny::actionButton(
                    inputId = ns("RUN.ibd"), 
                    label = "Run!", 
-                   icon = icon("circle-nodes", verify_fa = FALSE),
+                   icon = shiny::icon("circle-nodes", verify_fa = FALSE),
                    width = '100%'),
           ),
-          column(6,
-                 actionButton(
+          shiny::column(6,
+                 shiny::actionButton(
                    ns("Simulate.ibd"), 
                    label = "Simulate!", 
-                   icon = icon("greater-than-equal", verify_fa = FALSE),
+                   icon = shiny::icon("greater-than-equal", verify_fa = FALSE),
                    width = '100%'),
           )
           
         ), 
-        br(),
-        downloadButton(ns("downloadData.ibd"), 
+        shiny::br(),
+        shiny::downloadButton(ns("downloadData.ibd"),
                        "Save Experiment!", 
                        style = "width:100%")
       ),
       
-      mainPanel(
+      shiny::mainPanel(
         width = 8,
-        fluidRow(
-          tabsetPanel(
-            tabPanel(
+        shiny::fluidRow(
+          shiny::tabsetPanel(
+            shiny::tabPanel(
               "Summary Design",
-              br(),
+              shiny::br(),
               fieldhub_spinner(
-                verbatimTextOutput(outputId = ns("summary_ibd"), 
+                shiny::verbatimTextOutput(outputId = ns("summary_ibd"),
                                    placeholder = FALSE), 
                 type = 4
               ),
               style = "padding-right: 40px;"
             ),
-            tabPanel("Field Layout",
+            shiny::tabPanel("Field Layout",
                      shinyjs::useShinyjs(),
                      shinyjs::hidden(
-                       downloadButton(
+                       shiny::downloadButton(
                          ns("downloadCsv.ibd"), 
                          label =  "CSV",
-                         icon = icon("file-csv"), 
+                         icon = shiny::icon("file-csv"),
                          width = '10%',
                          style="color: #337ab7; background-color: #fff; border-color: #2e6da4")
                       ),
@@ -135,12 +134,12 @@ mod_IBD_ui <- function(id) {
                                             height = "550px"),
                        type = 5
                      ),
-                     br(),
-                     column(12,
-                            uiOutput(ns("well_panel_layout_IBD"))
+                     shiny::br(),
+                     shiny::column(12,
+                            shiny::uiOutput(ns("well_panel_layout_IBD"))
                             )
             ),
-            tabPanel("Field Book", 
+            shiny::tabPanel("Field Book",
                      fieldhub_spinner(
                        DT::DTOutput(ns("IBD.output")), 
                        type = 5
@@ -157,7 +156,7 @@ mod_IBD_ui <- function(id) {
 #'
 #' @noRd 
 mod_IBD_server <- function(id) {
-  moduleServer( id, function(input, output, session){
+  shiny::moduleServer( id, function(input, output, session){
     
     ns <- session$ns
     shinyjs::useShinyjs()
@@ -165,34 +164,34 @@ mod_IBD_server <- function(id) {
     entryListFormat_IBD <- data.frame(ENTRY = 1:9, 
                                       NAME = treatments)
     entriesInfoModal_IBD <- function() {
-      modalDialog(
-        title = div(tags$h3("Important message", style = "color: red;")),
-        h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
-        renderTable(entryListFormat_IBD,
+      shiny::modalDialog(
+        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
+        shiny::h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
+        shiny::renderTable(entryListFormat_IBD,
                     bordered = TRUE,
                     align = 'c',
                     striped = TRUE),
-        h4("Entry numbers can be any set of consecutive positive numbers."),
+        shiny::h4("Entry numbers can be any set of consecutive positive numbers."),
         easyClose = FALSE
       )
     }
     
-    toListen <- reactive({
+    toListen <- shiny::reactive({
       list(input$owndataibd)
     })
     
-    observeEvent(toListen(), {
+    shiny::observeEvent(toListen(), {
       if (input$owndataibd == "Yes") {
-        showModal(
+        shiny::showModal(
           entriesInfoModal_IBD()
         )
       }
     })
     
-    init_data_ibd <- reactive({
+    init_data_ibd <- shiny::reactive({
       
       if(input$owndataibd == "Yes") {
-        req(input$file.IBD)
+        shiny::req(input$file.IBD)
         inFile <- input$file.IBD
         data_ingested <- load_file(name = inFile$name, 
                                    path = inFile[["datapath"]],
@@ -213,7 +212,7 @@ mod_IBD_server <- function(id) {
           return(NULL)
         }
       } else {
-        req(input$t.ibd)
+        shiny::req(input$t.ibd)
         nt <- as.numeric(input$t.ibd)
         df <- default_entries(nt)
         data_ibd <- df
@@ -222,18 +221,18 @@ mod_IBD_server <- function(id) {
       }
     })
     
-    list_to_observe <- reactive({
-      req(init_data_ibd())
+    list_to_observe <- shiny::reactive({
+      shiny::req(init_data_ibd())
       list(
         entry_list = input$owndataibd,
         entries = init_data_ibd()$treatments
       )
     })
     
-    observeEvent(list_to_observe(), {
-      req(init_data_ibd())
+    shiny::observeEvent(list_to_observe(), {
+      shiny::req(init_data_ibd())
       options <- valid_block_sizes(
-        as.numeric(req(init_data_ibd())$treatments),
+        as.numeric(shiny::req(init_data_ibd())$treatments),
         "incomplete_blocks"
       )
       k <- if (length(options) == 0L) "No Options Available" else options
@@ -242,14 +241,14 @@ mod_IBD_server <- function(id) {
         selected <- options[ceiling(length(options) / 2)]
       } else selected <- k[1]
       
-      updateSelectInput(session = session, 
+      shiny::updateSelectInput(session = session,
                         inputId = 'k.ibd', 
                         label = "Input # of Plots per IBlock:",
                         choices = k, selected = selected)
       
     })
     
-    get_data_ibd <- reactive({
+    get_data_ibd <- shiny::reactive({
       if (is.null(init_data_ibd())) {
         shinyalert::shinyalert(
           "Error!!", 
@@ -258,19 +257,19 @@ mod_IBD_server <- function(id) {
         return(NULL)
       } else return(init_data_ibd())
     }) |>
-      bindEvent(input$RUN.ibd)
+      shiny::bindEvent(input$RUN.ibd)
     
-    ibd_inputs <- reactive({
+    ibd_inputs <- shiny::reactive({
       
-      req(get_data_ibd())
+      shiny::req(get_data_ibd())
       
-      req(input$r.ibd)
-      req(input$k.ibd)
-      req(input$seed.ibd)
-      req(input$plot_start.ibd)
-      req(input$Location.ibd)
-      req(input$l.ibd)
-      req(input$planter_mov_ibd)
+      shiny::req(input$r.ibd)
+      shiny::req(input$k.ibd)
+      shiny::req(input$seed.ibd)
+      shiny::req(input$plot_start.ibd)
+      shiny::req(input$Location.ibd)
+      shiny::req(input$l.ibd)
+      shiny::req(input$planter_mov_ibd)
       
       r.ibd <- as.numeric(input$r.ibd)
       k.ibd <- as.numeric(input$k.ibd)
@@ -299,11 +298,11 @@ mod_IBD_server <- function(id) {
         site_names = site_names,
         seed = seed))
     }) |>
-      bindEvent(input$RUN.ibd)
+      shiny::bindEvent(input$RUN.ibd)
     
-    IBD_reactive <- reactive({
-      req(get_data_ibd())
-      req(ibd_inputs())
+    IBD_reactive <- shiny::reactive({
+      shiny::req(get_data_ibd())
+      shiny::req(ibd_inputs())
       
       shinyjs::show(id = "downloadCsv.ibd")
       
@@ -329,49 +328,49 @@ mod_IBD_server <- function(id) {
       )) 
       
     }) |>
-      bindEvent(input$RUN.ibd)
+      shiny::bindEvent(input$RUN.ibd)
     
-    output$summary_ibd <- renderPrint({
-      req(IBD_reactive())
+    output$summary_ibd <- shiny::renderPrint({
+      shiny::req(IBD_reactive())
       cat("Randomization was successful!", "\n", "\n")
       print(IBD_reactive(), n = 6)
     })
     
-    upDateSites <- eventReactive(input$RUN.ibd, {
-      req(input$l.ibd)
+    upDateSites <- shiny::eventReactive(input$RUN.ibd, {
+      shiny::req(input$l.ibd)
       locs <- as.numeric(input$l.ibd)
       sites <- 1:locs
       return(list(sites = sites))
     })
     
-    output$well_panel_layout_IBD <- renderUI({
-      req(IBD_reactive()$fieldBook)
+    output$well_panel_layout_IBD <- shiny::renderUI({
+      shiny::req(IBD_reactive()$fieldBook)
       obj_ibd <- IBD_reactive()
       allBooks_ibd<- plot_layout(x = obj_ibd, layout = 1)$newBooks
       nBooks_ibd <- length(allBooks_ibd)
       layoutOptions_ibd <- 1:nBooks_ibd
       stacked <- c("Vertical Stack Panel" = "vertical", 
                      "Horizontal Stack Panel" = "horizontal")
-      wellPanel(
-        column(2,
-               radioButtons(ns("typlotibd"), "Type of Plot:",
+      shiny::wellPanel(
+        shiny::column(2,
+               shiny::radioButtons(ns("typlotibd"), "Type of Plot:",
                             c("Entries/Treatments" = 1,
                               "Plots" = 2,
                               "Heatmap" = 3), selected = 1)
         ),
-        fluidRow(
-          column(3,
-                 selectInput(inputId = ns("stackedibd"), 
+        shiny::fluidRow(
+          shiny::column(3,
+                 shiny::selectInput(inputId = ns("stackedibd"),
                              label = "Reps layout:", 
                              choices = stacked)
           ),
-          column(3, #align="center",
-                 selectInput(inputId = ns("layoutO_ibd"), 
+          shiny::column(3, #align="center",
+                 shiny::selectInput(inputId = ns("layoutO_ibd"),
                              label = "Layout option:", 
                              choices = layoutOptions_ibd)
           ),
-          column(3, #align="center",
-                 selectInput(inputId = ns("locLayout_ibd"), 
+          shiny::column(3, #align="center",
+                 shiny::selectInput(inputId = ns("locLayout_ibd"),
                              label = "Location:", 
                              choices = as.numeric(upDateSites()$sites))
           )
@@ -379,34 +378,34 @@ mod_IBD_server <- function(id) {
       )
     })
     
-    observeEvent(input$stackedibd, {
-      req(input$stackedibd)
+    shiny::observeEvent(input$stackedibd, {
+      shiny::req(input$stackedibd)
       obj <- IBD_reactive()
       allBooks <- plot_layout(x = obj, 
                               layout = 1, 
                               stacked = input$stackedibd)$newBooks
       nBooks <- length(allBooks)
       NewlayoutOptions <- 1:nBooks
-      updateSelectInput(session = session, inputId = 'layoutO_ibd',
+      shiny::updateSelectInput(session = session, inputId = 'layoutO_ibd',
                         label = "Layout option:",
                         choices = NewlayoutOptions,
                         selected = 1
       )
     })
     
-    reset_selection <- reactiveValues(reset = 0)
+    reset_selection <- shiny::reactiveValues(reset = 0)
     
-    observeEvent(input$stackedibd, {
+    shiny::observeEvent(input$stackedibd, {
       reset_selection$reset <- 1
     })
     
-    observeEvent(input$layoutO_ibd, {
+    shiny::observeEvent(input$layoutO_ibd, {
       reset_selection$reset <- 0
     })
     
-    reactive_layoutIBD <- reactive({
-      req(input$layoutO_ibd)
-      req(IBD_reactive())
+    reactive_layoutIBD <- shiny::reactive({
+      shiny::req(input$layoutO_ibd)
+      shiny::req(IBD_reactive())
       obj_ibd <- IBD_reactive()
       planting_ibd <- ibd_inputs()$planter
       
@@ -424,30 +423,30 @@ mod_IBD_server <- function(id) {
     })
     
     
-    valsIBD <- reactiveValues(maxV.ibd = NULL, 
+    valsIBD <- shiny::reactiveValues(maxV.ibd = NULL,
                               minV.ibd = NULL, 
                               trail.ibd = NULL)
     
     simuModal.ibd <- function(failed = FALSE) {
-      modalDialog(
-        selectInput(inputId = ns("trailsIBD"), 
+      shiny::modalDialog(
+        shiny::selectInput(inputId = ns("trailsIBD"),
                     label = "Select One:", 
                     choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
-        conditionalPanel(
+        shiny::conditionalPanel(
           condition = "input.trailsIBD == 'Other'", 
           ns = ns,
-          textInput(inputId = ns("OtherIBD"), 
+          shiny::textInput(inputId = ns("OtherIBD"),
                     label = "Input Trial Name:", 
                     value = NULL)
         ),
-        fluidRow(
-          column(6, 
-                 numericInput(inputId = ns("min.ibd"),
+        shiny::fluidRow(
+          shiny::column(6,
+                 shiny::numericInput(inputId = ns("min.ibd"),
                               "Input the min value", 
                               value = NULL)
           ),
-          column(6, 
-                 numericInput(inputId = ns("max.ibd"), 
+          shiny::column(6,
+                 shiny::numericInput(inputId = ns("max.ibd"),
                               "Input the max value", 
                               value = NULL)
                  
@@ -456,49 +455,49 @@ mod_IBD_server <- function(id) {
         ),
         
         if (failed)
-          div(tags$b("Invalid input of data max and min", 
+          shiny::div(shiny::tags$b("Invalid input of data max and min",
                      style = "color: red;")),
         
-        footer = tagList(
-          modalButton("Cancel"),
-          actionButton(inputId = ns("ok.ibd"), "GO")
+        footer = shiny::tagList(
+          shiny::modalButton("Cancel"),
+          shiny::actionButton(inputId = ns("ok.ibd"), "GO")
         )
         
       )
       
     }
     
-    observeEvent(input$Simulate.ibd, {
-      req(IBD_reactive()$fieldBook)
-      showModal(
+    shiny::observeEvent(input$Simulate.ibd, {
+      shiny::req(IBD_reactive()$fieldBook)
+      shiny::showModal(
         simuModal.ibd()
       )
     })
     
-    observeEvent(input$ok.ibd, {
-      req(input$max.ibd, input$min.ibd)
+    shiny::observeEvent(input$ok.ibd, {
+      shiny::req(input$max.ibd, input$min.ibd)
       if (input$max.ibd > input$min.ibd && input$min.ibd != input$max.ibd) {
         valsIBD$maxV.ibd <- input$max.ibd
         valsIBD$minV.ibd <- input$min.ibd
         if(input$trailsIBD == "Other") {
-          req(input$OtherIBD)
+          shiny::req(input$OtherIBD)
           if(!is.null(input$OtherIBD)) {
             valsIBD$trail.ibd <- as.character(input$OtherIBD)
-          }else showModal(simuModal.ibd(failed = TRUE))
+          }else shiny::showModal(simuModal.ibd(failed = TRUE))
         }else {
           valsIBD$trail.ibd <- as.character(input$trailsIBD)
         }
-        removeModal()
+        shiny::removeModal()
       }else {
-        showModal(
+        shiny::showModal(
           simuModal.ibd(failed = TRUE)
         )
       }
     })
     
     
-    simuDataIBD <- reactive({
-      req(IBD_reactive()$fieldBook)
+    simuDataIBD <- shiny::reactive({
+      shiny::req(IBD_reactive()$fieldBook)
       if(!is.null(valsIBD$maxV.ibd) && !is.null(valsIBD$minV.ibd) && 
          !is.null(valsIBD$trail.ibd)) {
         max <- as.numeric(valsIBD$maxV.ibd)
@@ -518,19 +517,19 @@ mod_IBD_server <- function(id) {
     })
     
     heatmapInfoModal_IBD <- function() {
-      modalDialog(
-        title = div(tags$h3("Important message", style = "color: red;")),
-        h4("Simulate some data to see a heatmap!"),
+      shiny::modalDialog(
+        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
+        shiny::h4("Simulate some data to see a heatmap!"),
         easyClose = TRUE
       )
     }
     
-    locNum <- reactive(
+    locNum <- shiny::reactive(
       return(as.numeric(input$locLayout_ibd))
     )
     
-    heatmap_obj <- reactive({
-      req(simuDataIBD()$df)
+    heatmap_obj <- shiny::reactive({
+      shiny::req(simuDataIBD()$df)
       if (ncol(simuDataIBD()$df) == 11) {
         locs <- factor(simuDataIBD()$df$LOCATION, 
                        levels = unique(simuDataIBD()$df$LOCATION))
@@ -573,7 +572,7 @@ mod_IBD_server <- function(id) {
         p2 <- plotly::ggplotly(p1, tooltip="text", height = 560)
         return(p2)
       } else {
-        showModal(
+        shiny::showModal(
           heatmapInfoModal_IBD()
         )
         return(NULL)
@@ -581,22 +580,22 @@ mod_IBD_server <- function(id) {
     })
     
     output$layouts <- plotly::renderPlotly({
-      req(reactive_layoutIBD())
-      req(IBD_reactive())
-      req(input$typlotibd)
+      shiny::req(reactive_layoutIBD())
+      shiny::req(IBD_reactive())
+      shiny::req(input$typlotibd)
       if (input$typlotibd == 1) {
         reactive_layoutIBD()$out_layout
       } else if (input$typlotibd == 2) {
         reactive_layoutIBD()$out_layoutPlots
       } else {
-        req(heatmap_obj())
+        shiny::req(heatmap_obj())
         heatmap_obj()
       }
     })
     
     output$IBD.output <- DT::renderDataTable({
       
-      req(simuDataIBD()$df)
+      shiny::req(simuDataIBD()$df)
       df <- simuDataIBD()$df
       df$LOCATION <- as.factor(df$LOCATION)
       df$PLOT <- as.factor(df$PLOT)
@@ -618,7 +617,7 @@ mod_IBD_server <- function(id) {
     })
     
     
-    output$downloadData.ibd <- downloadHandler(
+    output$downloadData.ibd <- shiny::downloadHandler(
       filename = function() {
         loc <- paste("IBD_", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
@@ -628,10 +627,10 @@ mod_IBD_server <- function(id) {
         write.csv(df, file, row.names = FALSE)
       }
     )
-    csv_data <- reactive({
-      req(simuDataIBD()$df)
+    csv_data <- shiny::reactive({
+      shiny::req(simuDataIBD()$df)
       df <- simuDataIBD()$df
-      req(input$typlotibd)
+      shiny::req(input$typlotibd)
       if (input$typlotibd == 2) {
         export_layout(df, locNum(), TRUE)
       } else {
@@ -641,7 +640,7 @@ mod_IBD_server <- function(id) {
     
     
     # Downloadable csv of selected dataset ----
-    output$downloadCsv.ibd <- downloadHandler(
+    output$downloadCsv.ibd <- shiny::downloadHandler(
       filename = function() {
         loc <- paste("Incomplete_Block_Layout", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")

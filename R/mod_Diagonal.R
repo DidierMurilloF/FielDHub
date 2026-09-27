@@ -6,16 +6,15 @@
 #'
 #' @noRd 
 #'
-#' @importFrom shiny NS tagList 
 #' @importFrom utils write.csv
 mod_Diagonal_ui <- function(id) {
-  ns <- NS(id)
-  tagList(
-    h4("Unreplicated Single Diagonal Arrangement"),
-    sidebarLayout(
-      sidebarPanel(
+  ns <- shiny::NS(id)
+  shiny::tagList(
+    shiny::h4("Unreplicated Single Diagonal Arrangement"),
+    shiny::sidebarLayout(
+      shiny::sidebarPanel(
         width = 4,
-        radioButtons(inputId = ns("owndataDIAGONALS"),
+        shiny::radioButtons(inputId = ns("owndataDIAGONALS"),
                      label = "Import entries' list?",
                      choices = c("Yes", "No"), 
                      selected = "No",
@@ -23,146 +22,146 @@ mod_Diagonal_ui <- function(id) {
                      width = NULL,
                      choiceNames = NULL,
                      choiceValues = NULL),
-        conditionalPanel(
+        shiny::conditionalPanel(
           condition = "input.owndataDIAGONALS == 'Yes'", 
           ns = ns,
-          fluidRow(
-            column(7, style=list("padding-right: 28px;"),
-                   fileInput(ns("file1"), 
+          shiny::fluidRow(
+            shiny::column(7, style=list("padding-right: 28px;"),
+                   shiny::fileInput(ns("file1"),
                              label = "Upload a CSV File:", 
                              multiple = FALSE)),
-            column(5,style=list("padding-left: 5px;"),
-                   radioButtons(ns("sep.DIAGONALS"), "Separator",
+            shiny::column(5,style=list("padding-left: 5px;"),
+                   shiny::radioButtons(ns("sep.DIAGONALS"), "Separator",
                                 choices = c(Comma = ",",
                                             Semicolon = ";",
                                             Tab = "\t"),
                                 selected = ","))
           )              
         ),
-        conditionalPanel(
+        shiny::conditionalPanel(
           condition = "input.owndataDIAGONALS == 'No'", 
           ns = ns,
-          numericInput(inputId = ns("lines.d"), 
+          shiny::numericInput(inputId = ns("lines.d"),
                        label = "Input # of Entries:",
                        value = 287, 
                        min = 50),
         ),
-        selectInput(inputId = ns("checks"),
+        shiny::selectInput(inputId = ns("checks"),
                     label = "Input # of Checks:",
                     choices = c(1:10),
                     multiple = FALSE,
                     selected = 4),
-        fluidRow(
-          column(6,style=list("padding-right: 28px;"),
-                 numericInput(inputId = ns("l.diagonal"), 
+        shiny::fluidRow(
+          shiny::column(6,style=list("padding-right: 28px;"),
+                 shiny::numericInput(inputId = ns("l.diagonal"),
                               label = "Input # of Locations:", 
                               value = 1,
                               min = 1)
           ),
-          column(6,style=list("padding-left: 5px;"),
-                 selectInput(inputId = ns("locView.diagonal"), 
+          shiny::column(6,style=list("padding-left: 5px;"),
+                 shiny::selectInput(inputId = ns("locView.diagonal"),
                              label = "Choose location to view:", 
                              choices = 1, 
                              selected = 1, 
                              multiple = FALSE)
           )
         ),
-        selectInput(inputId = ns("planter_single"), 
+        shiny::selectInput(inputId = ns("planter_single"),
                     label = "Plot Order Layout:",
                     choices = c("serpentine", "cartesian"), 
                     multiple = FALSE,
                     selected = "serpentine"),
-        fluidRow(
-            column(
+        shiny::fluidRow(
+            shiny::column(
                 width = 6,
                 style=list("padding-right: 28px;"),
-                textInput(
+                shiny::textInput(
                     ns("plot_start"), 
                     "Starting Plot Number:", 
                     value = 1
                 )
             ),
-            column(6,
+            shiny::column(6,
                     style=list("padding-left: 5px;"),
-                    textInput(ns("expt_name"), 
+                    shiny::textInput(ns("expt_name"),
                             "Input Experiment Name:", 
                             value = "Expt1")
             )
         ),    
-        fluidRow(
-            column(6,
+        shiny::fluidRow(
+            shiny::column(6,
                     style=list("padding-right: 28px;"),
-                    numericInput(
+                    shiny::numericInput(
                         inputId = ns("seed_single"), 
                         label = "Random Seed:", 
                         value = 17, 
                         min = 1)
             ),
-            column(6,
+            shiny::column(6,
                     style=list("padding-left: 5px;"),
-                    textInput(ns("Location"), 
+                    shiny::textInput(ns("Location"),
                             "Input the Location:",
                             value = "FARGO")
             )
         ),
-        fluidRow(
-          column(6,
-                 actionButton(
+        shiny::fluidRow(
+          shiny::column(6,
+                 shiny::actionButton(
                    inputId = ns("RUN.diagonal"), 
                    "Run!", 
-                   icon = icon("circle-nodes", verify_fa = FALSE),
+                   icon = shiny::icon("circle-nodes", verify_fa = FALSE),
                    width = '100%'),
           ),
-          column(6,
-                 actionButton(
+          shiny::column(6,
+                 shiny::actionButton(
                    ns("Simulate_Diagonal"),
                    "Simulate!",
-                   icon = icon("greater-than-equal", verify_fa = FALSE),
+                   icon = shiny::icon("greater-than-equal", verify_fa = FALSE),
                    width = '100%')
           )
         ),
-        br(),
-        uiOutput(ns("download_single"))
+        shiny::br(),
+        shiny::uiOutput(ns("download_single"))
       ),
-      mainPanel(
+      shiny::mainPanel(
         width = 8,
         shinyjs::useShinyjs(),
-        tabsetPanel(id = ns("tabset_single"),
-                    tabPanel(title = "Expt Design Info", value = "tabPanel1",
-                             br(),
+        shiny::tabsetPanel(id = ns("tabset_single"),
+                    shiny::tabPanel(title = "Expt Design Info", value = "tabPanel1",
+                             shiny::br(),
                              shinyjs::hidden(
-                                selectInput(inputId = ns("dimensions.d"),
+                                shiny::selectInput(inputId = ns("dimensions.d"),
                                             label = "Select dimensions of field:", 
                                             choices = "", width = '400px')
                              ),
                              shinyjs::hidden(
-                               actionButton(inputId = ns("get_random"), 
+                               shiny::actionButton(inputId = ns("get_random"),
                                             label = "Randomize!")
                              ),
-                             br(),
-                             br(),
+                             shiny::br(),
+                             shiny::br(),
                              #uiOutput(ns("checks_percent")),
                              DT::DTOutput(ns("options_table"))
                     ),
-                    tabPanel("Input Data",
-                             fluidRow(
-                               column(6,DT::DTOutput(ns("data_input"))),
-                               column(6,DT::DTOutput(ns("checks_table")))
+                    shiny::tabPanel("Input Data",
+                             shiny::fluidRow(
+                               shiny::column(6,DT::DTOutput(ns("data_input"))),
+                               shiny::column(6,DT::DTOutput(ns("checks_table")))
                              )
                     ),
-                    tabPanel("Randomized Field",
-                             br(),
+                    shiny::tabPanel("Randomized Field",
+                             shiny::br(),
                              shinyjs::hidden(
-                               selectInput(inputId = ns("percent_checks"),
+                               shiny::selectInput(inputId = ns("percent_checks"),
                                            label = "Choose % of Checks:",
                                            choices = 1:9, width = '400px')
                              ),
                              DT::DTOutput(ns("randomized_layout"))),
-                    tabPanel("Plot Number Field", 
+                    shiny::tabPanel("Plot Number Field",
                              DT::DTOutput(ns("plot_number_layout"))),
-                    tabPanel("Field Book", 
+                    shiny::tabPanel("Field Book",
                              DT::DTOutput(ns("fieldBook_diagonal"))),
-                    tabPanel("Heatmap", fieldhub_spinner(
+                    shiny::tabPanel("Heatmap", fieldhub_spinner(
                       plotly::plotlyOutput(ns("heatmap_diag"),  width = "97%"), 
                       type = 5)
                     )
@@ -176,41 +175,41 @@ mod_Diagonal_ui <- function(id) {
 #'
 #' @noRd 
 mod_Diagonal_server <- function(id) {
-  moduleServer( id, function(input, output, session) {
+  shiny::moduleServer( id, function(input, output, session) {
     ns <- session$ns
 
-    counts <- reactiveValues(trigger = 0)
+    counts <- shiny::reactiveValues(trigger = 0)
     
-    observeEvent(input$RUN.diagonal, {
+    shiny::observeEvent(input$RUN.diagonal, {
       counts$trigger <- counts$trigger + 1
     })
     
     kindExpt_single <- "SUDC"
 
-    randomize_hit <- reactiveValues(times = 0)
+    randomize_hit <- shiny::reactiveValues(times = 0)
  
-    observeEvent(input$RUN.diagonal, {
+    shiny::observeEvent(input$RUN.diagonal, {
       randomize_hit$times <- 0
     })
 
-    user_tries <- reactiveValues(tries = 0)
+    user_tries <- shiny::reactiveValues(tries = 0)
 
-    observeEvent(input$get_random, {
+    shiny::observeEvent(input$get_random, {
       randomize_hit$times <- randomize_hit$times + 1
       user_tries$tries <- user_tries$tries + 1
     })
 
-    observeEvent(input$dimensions.d, {
+    shiny::observeEvent(input$dimensions.d, {
       user_tries$tries <- 0
     })
 
-    list_to_observe <- reactive({
+    list_to_observe <- shiny::reactive({
       list(randomize_hit$times, user_tries$tries)
     })
 
     shinyjs::useShinyjs()
     
-    single_inputs <- eventReactive(input$RUN.diagonal, {
+    single_inputs <- shiny::eventReactive(input$RUN.diagonal, {
       planter_mov <- input$planter_single
       Name_expt <- as.vector(unlist(strsplit(input$expt_name, ",")))
       blocks <- 1
@@ -233,54 +232,54 @@ mod_Diagonal_server <- function(id) {
                   expt_name = name_expt))
     })
     
-    observeEvent(single_inputs()$sites, {
+    shiny::observeEvent(single_inputs()$sites, {
       loc_user_view <- 1:as.numeric(input$l.diagonal)
-      updateSelectInput(inputId = "locView.diagonal", 
+      shiny::updateSelectInput(inputId = "locView.diagonal",
                         choices = loc_user_view, 
                         selected = loc_user_view[1])
     })
     
-    observeEvent(kindExpt_single,
-                 handlerExpr = updateTabsetPanel(session,
+    shiny::observeEvent(kindExpt_single,
+                 handlerExpr = shiny::updateTabsetPanel(session,
                                                  "tabset_single",
                                                  selected = "tabPanel1"))
-    observeEvent(input$stacked,
-                 handlerExpr = updateTabsetPanel(session,
+    shiny::observeEvent(input$stacked,
+                 handlerExpr = shiny::updateTabsetPanel(session,
                                                  "tabset_single",
                                                  selected = "tabPanel1"))
-    observeEvent(input$checks,
-                 handlerExpr = updateTabsetPanel(session,
+    shiny::observeEvent(input$checks,
+                 handlerExpr = shiny::updateTabsetPanel(session,
                                                  "tabset_single",
                                                  selected = "tabPanel1"))
-    observeEvent(input$dimensions.d,
-                 handlerExpr = updateTabsetPanel(session,
+    shiny::observeEvent(input$dimensions.d,
+                 handlerExpr = shiny::updateTabsetPanel(session,
                                                  "tabset_single",
                                                  selected = "tabPanel1"))
-    observeEvent(single_inputs()$planter_mov,
-                 handlerExpr = updateTabsetPanel(session,
+    shiny::observeEvent(single_inputs()$planter_mov,
+                 handlerExpr = shiny::updateTabsetPanel(session,
                                                  "tabset_single",
                                                  selected = "tabPanel1"))
-    observeEvent(input$lines.d,
-                 handlerExpr = updateTabsetPanel(session,
+    shiny::observeEvent(input$lines.d,
+                 handlerExpr = shiny::updateTabsetPanel(session,
                                                  "tabset_single",
                                                  selected = "tabPanel1"))
-    observeEvent(input$l.diagonal,
-                 handlerExpr = updateTabsetPanel(session,
+    shiny::observeEvent(input$l.diagonal,
+                 handlerExpr = shiny::updateTabsetPanel(session,
                                                  "tabset_single",
                                                  selected = "tabPanel1"))
-    observeEvent(input$owndataDIAGONALS,
-                 handlerExpr = updateTabsetPanel(session,
+    shiny::observeEvent(input$owndataDIAGONALS,
+                 handlerExpr = shiny::updateTabsetPanel(session,
                                                  "tabset_single",
                                                  selected = "tabPanel1"))
-    observeEvent(input$RUN.diagonal,
-                 handlerExpr = updateTabsetPanel(session,
+    shiny::observeEvent(input$RUN.diagonal,
+                 handlerExpr = shiny::updateTabsetPanel(session,
                                                  "tabset_single",
                                                  selected = "tabPanel1"))
                                                   
-    getData <- eventReactive(input$RUN.diagonal, {
+    getData <- shiny::eventReactive(input$RUN.diagonal, {
         Option_NCD <- TRUE
         if (input$owndataDIAGONALS == "Yes") {
-            req(input$file1)
+            shiny::req(input$file1)
             inFile <- input$file1
             data_ingested <- load_file(
                 name = inFile$name, 
@@ -292,7 +291,7 @@ mod_Diagonal_server <- function(id) {
             if (names(data_ingested) == "dataUp") {
                 data_up <- data_ingested$dataUp
                 if (ncol(data_up) < 2) {
-                    validate("Data input needs at least two Columns with the ENTRY and NAME.")
+                    shiny::validate("Data input needs at least two Columns with the ENTRY and NAME.")
                 } 
                 data_entry_UP <- na.omit(data_up[,1:2])
                 colnames(data_entry_UP) <- c("ENTRY", "NAME")
@@ -333,8 +332,8 @@ mod_Diagonal_server <- function(id) {
               return(NULL)
             }
         } else {
-            req(input$lines.d)
-            req(input$checks)
+            shiny::req(input$lines.d)
+            shiny::req(input$checks)
             checks <- as.numeric(input$checks)
             checksEntries <- 1:checks
             lines <- input$lines.d
@@ -362,35 +361,35 @@ mod_Diagonal_server <- function(id) {
         }
     })
     
-    getChecks <- eventReactive(input$RUN.diagonal, {
-      req(getData()$data_entry)
+    getChecks <- shiny::eventReactive(input$RUN.diagonal, {
+      shiny::req(getData()$data_entry)
       data <- as.data.frame(getData()$data_entry)
       checksEntries <- sort(as.numeric(data[1:input$checks,1]))
       checks <- as.numeric(input$checks)
       list(checksEntries = checksEntries, checks = checks)
     })
     
-    list_inputs_diagonal <- eventReactive(input$RUN.diagonal, {
-      req(getData()$dim_data_entry)
+    list_inputs_diagonal <- shiny::eventReactive(input$RUN.diagonal, {
+      shiny::req(getData()$dim_data_entry)
       checks <- as.numeric(getChecks()$checks)
       lines <- as.numeric(getData()$dim_data_entry)
       return(list(lines, input$owndataDIAGONALS, kindExpt_single, 
                   input$stacked, input$RUN.diagonal))
     })
 
-    observeEvent(list_inputs_diagonal(), {
-      req(getData()$dim_data_entry)
+    shiny::observeEvent(list_inputs_diagonal(), {
+      shiny::req(getData()$dim_data_entry)
       checks <- as.numeric(getChecks()$checks)
       total_entries <- as.numeric(getData()$dim_data_entry)
       lines <- total_entries - checks
-      withProgress(message = 'Getting field dimensions ...', {
+      shiny::withProgress(message = 'Getting field dimensions ...', {
         sort_choices <- validate_design(diagonal_dimension_choices(
           lines = lines, checks = as.vector(getChecks()$checksEntries),
           kindExpt = kindExpt_single, planter = single_inputs()$planter_mov,
           data = getData()$data_entry, minimum_extra = 0.11
         ))
       })
-      updateSelectInput(inputId = "dimensions.d",
+      shiny::updateSelectInput(inputId = "dimensions.d",
                         choices = sort_choices,
                         selected = head(sort_choices, 1))
       if (length(sort_choices) == 0L) {
@@ -400,14 +399,14 @@ mod_Diagonal_server <- function(id) {
       }
     })
     
-    observeEvent(input$RUN.diagonal, {
-      req(getData()$dim_data_entry)
+    shiny::observeEvent(input$RUN.diagonal, {
+      shiny::req(getData()$dim_data_entry)
       shinyjs::show(id = "dimensions.d")
       shinyjs::show(id = "get_random")
     })
     
-    field_dimensions_diagonal <- eventReactive(input$get_random, {
-      req(input$dimensions.d)
+    field_dimensions_diagonal <- shiny::eventReactive(input$get_random, {
+      shiny::req(input$dimensions.d)
       dims <- unlist(strsplit(input$dimensions.d, " x "))
       d_row <- as.numeric(dims[1])
       d_col <- as.numeric(dims[2])
@@ -420,35 +419,35 @@ mod_Diagonal_server <- function(id) {
                                                      sep = ""))
     )
     
-    toListen <- reactive({
+    toListen <- shiny::reactive({
       list(input$owndataDIAGONALS,kindExpt_single)
     })
     
     entriesInfoModal_SUDC <- function() {
-      modalDialog(
-        title = div(tags$h3("Important message", style = "color: red;")),
-        h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
-        renderTable(entryListFormat_SUDC,
+      shiny::modalDialog(
+        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
+        shiny::h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
+        shiny::renderTable(entryListFormat_SUDC,
                     bordered = TRUE,
                     align  = 'c',
                     striped = TRUE),
-        h4("Note that the controls must be in the first rows of the CSV file."),
+        shiny::h4("Note that the controls must be in the first rows of the CSV file."),
         easyClose = FALSE
       )
     }
 
-    observeEvent(toListen(), {
+    shiny::observeEvent(toListen(), {
       if (input$owndataDIAGONALS == "Yes" && kindExpt_single == "SUDC") {
-        showModal(
+        shiny::showModal(
           entriesInfoModal_SUDC()
         )
       }
     })
 
-    available_percent_table <- eventReactive(input$get_random, {
-      req(input$dimensions.d)
-      req(getData())
-      req(field_dimensions_diagonal())
+    available_percent_table <- shiny::eventReactive(input$get_random, {
+      shiny::req(input$dimensions.d)
+      shiny::req(getData())
+      shiny::req(field_dimensions_diagonal())
       Option_NCD <- TRUE
       checksEntries <- as.vector(getChecks()$checksEntries)
       planter_mov <- single_inputs()$planter_mov
@@ -471,33 +470,33 @@ mod_Diagonal_server <- function(id) {
 
     # Percentage of checks passed to diagonal_arrangement(). Each Randomize
     # starts from the last option, the API default
-    checks_percent <- reactiveVal(NULL)
+    checks_percent <- shiny::reactiveVal(NULL)
 
-    observeEvent(available_percent_table()$dt, {
+    shiny::observeEvent(available_percent_table()$dt, {
           my_out <- available_percent_table()$dt
           my_percent <- my_out[,2]
           len <- length(my_percent)
           selected <- my_percent[len]
           checks_percent(as.numeric(selected))
 
-          updateSelectInput(session = session, 
+          shiny::updateSelectInput(session = session,
                             inputId = 'percent_checks', 
                             label = "Choose % of Checks:",
                             choices = my_percent, 
                             selected = selected)
     }, priority = 10)
 
-    observeEvent(input$percent_checks, {
-      req(available_percent_table()$dt)
+    shiny::observeEvent(input$percent_checks, {
+      shiny::req(available_percent_table()$dt)
       options_percent <- as.numeric(available_percent_table()$dt[,2])
       percent <- suppressWarnings(as.numeric(input$percent_checks))
       match_percent <- which(abs(options_percent - percent) < 1e-6)
       # Ignore a value left from the placeholder or from other field dimensions
-      req(length(match_percent) > 0)
+      shiny::req(length(match_percent) > 0)
       checks_percent(options_percent[match_percent[1]])
     }, ignoreInit = TRUE)
     
-    observeEvent(list_to_observe(), {
+    shiny::observeEvent(list_to_observe(), {
       if (randomize_hit$times > 0 & user_tries$tries > 0) {
         shinyjs::show(id = "percent_checks")
       } else {
@@ -505,10 +504,10 @@ mod_Diagonal_server <- function(id) {
       }
     })
 
-    observeEvent(list_to_observe(), { #  user_tries$tries
-      output$download_single <- renderUI({
+    shiny::observeEvent(list_to_observe(), { #  user_tries$tries
+      output$download_single <- shiny::renderUI({
         if (randomize_hit$times > 0 & user_tries$tries > 0) {
-          downloadButton(ns("downloadData_Diagonal"),
+          shiny::downloadButton(ns("downloadData_Diagonal"),
                           "Save Experiment",
                           style = "width:100%")
         }
@@ -516,10 +515,10 @@ mod_Diagonal_server <- function(id) {
     })
 
     # Arguments of diagonal_arrangement(), taken when Randomize is clicked
-    diagonal_inputs <- eventReactive(input$get_random, {
-      req(getData())
-      req(field_dimensions_diagonal())
-      req(single_inputs()$seed_number)
+    diagonal_inputs <- shiny::eventReactive(input$get_random, {
+      shiny::req(getData())
+      shiny::req(field_dimensions_diagonal())
+      shiny::req(single_inputs()$seed_number)
       sites <- single_inputs()$sites
       plot_starts <- single_inputs()$plotNumber
       if (any(is.na(plot_starts))) {
@@ -561,13 +560,13 @@ mod_Diagonal_server <- function(id) {
 
     # The design comes from diagonal_arrangement(), so the app and the R
     # function give the same design for the same inputs and seed
-    diagonal_design <- reactive({
-      req(diagonal_inputs())
-      req(available_percent_table()$dt)
+    diagonal_design <- shiny::reactive({
+      shiny::req(diagonal_inputs())
+      shiny::req(available_percent_table()$dt)
       percent <- checks_percent()
-      req(percent)
+      shiny::req(percent)
       options_percent <- as.numeric(available_percent_table()$dt[,2])
-      req(any(abs(options_percent - percent) < 1e-6))
+      shiny::req(any(abs(options_percent - percent) < 1e-6))
       args <- c(diagonal_inputs(), list(checksPercent = percent))
       design <- NULL
       # diagonal_arrangement() prints a message and returns NULL when the
@@ -597,10 +596,10 @@ mod_Diagonal_server <- function(id) {
       return(design)
     })
     
-    user_location <- reactive({
-      req(diagonal_design())
+    user_location <- shiny::reactive({
+      shiny::req(diagonal_design())
       user_site <- as.numeric(input$locView.diagonal)
-      req(user_site >= 1, user_site <= length(diagonal_design()$layoutRandom))
+      shiny::req(user_site >= 1, user_site <= length(diagonal_design()$layoutRandom))
       return(user_site)
     })
     
@@ -627,7 +626,7 @@ mod_Diagonal_server <- function(id) {
     output$data_input <- DT::renderDT({
       test <- randomize_hit$times > 0 & user_tries$tries > 0
       if (!test) return(NULL)
-        req(diagonal_design())
+        shiny::req(diagonal_design())
         df <- diagonal_design()$data_entry[[user_location()]]
         df$ENTRY <- as.factor(df$ENTRY)
         df$NAME <- as.factor(df$NAME)
@@ -647,7 +646,7 @@ mod_Diagonal_server <- function(id) {
     output$checks_table <- DT::renderDT({
       test <- randomize_hit$times > 0 & user_tries$tries > 0
       if (!test) return(NULL)
-        req(diagonal_design())
+        shiny::req(diagonal_design())
         user_site <- user_location()
         info_design <- diagonal_design()$infoDesign
         data_entry <- diagonal_design()$data_entry[[user_site]]
@@ -667,7 +666,7 @@ mod_Diagonal_server <- function(id) {
     output$randomized_layout <- DT::renderDT({
       test <- randomize_hit$times > 0 & user_tries$tries > 0
       if (!test) return(NULL)
-      req(diagonal_design())
+      shiny::req(diagonal_design())
       user_site <- user_location()
       r_map <- diagonal_design()$layoutRandom[[user_site]]
       if (is.null(r_map))
@@ -705,7 +704,7 @@ mod_Diagonal_server <- function(id) {
     output$plot_number_layout <- DT::renderDT({
       test <- randomize_hit$times > 0 & user_tries$tries > 0
       if (!test) return(NULL)
-      req(diagonal_design())
+      shiny::req(diagonal_design())
       plot_num <- diagonal_design()$plotsNumber[[user_location()]]
       if (is.null(plot_num))
         return(NULL)
@@ -729,81 +728,81 @@ mod_Diagonal_server <- function(id) {
       )
     })
     
-    valsDIAG <- reactiveValues(ROX = NULL, ROY = NULL, trail = NULL, minValue = NULL,
+    valsDIAG <- shiny::reactiveValues(ROX = NULL, ROY = NULL, trail = NULL, minValue = NULL,
                                maxValue = NULL)
     
     simuModal_DIAG <- function(failed = FALSE) {
-      modalDialog(
-        fluidRow(
-          column(6, 
-                 selectInput(inputId = ns("trailsDIAG"), label = "Select One:", 
+      shiny::modalDialog(
+        shiny::fluidRow(
+          shiny::column(6,
+                 shiny::selectInput(inputId = ns("trailsDIAG"), label = "Select One:",
                              choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
           )
         ),
-        conditionalPanel("input.trailsDIAG == 'Other'", ns = ns,
-                         textInput(inputId = ns("OtherDIAG"), label = "Input Trial Name:", value = NULL)
+        shiny::conditionalPanel("input.trailsDIAG == 'Other'", ns = ns,
+                         shiny::textInput(inputId = ns("OtherDIAG"), label = "Input Trial Name:", value = NULL)
         ),
-        fluidRow(
-          column(6, 
-                 selectInput(inputId = ns("ROX.DIAG"), "Select the Correlation in Rows:", 
+        shiny::fluidRow(
+          shiny::column(6,
+                 shiny::selectInput(inputId = ns("ROX.DIAG"), "Select the Correlation in Rows:",
                              choices = seq(0.1, 0.9, 0.1), selected = 0.5)
           ),
-          column(6, 
-                 selectInput(inputId = ns("ROY.DIAG"), "Select the Correlation in Cols:", 
+          shiny::column(6,
+                 shiny::selectInput(inputId = ns("ROY.DIAG"), "Select the Correlation in Cols:",
                              choices = seq(0.1, 0.9, 0.1), selected = 0.5)
           )
         ),
-        fluidRow(
-          column(6, 
-                 numericInput(inputId = ns("min.diag"), "Input the min value:", value = NULL)
+        shiny::fluidRow(
+          shiny::column(6,
+                 shiny::numericInput(inputId = ns("min.diag"), "Input the min value:", value = NULL)
           ),
-          column(6, 
-                 numericInput(inputId = ns("max.diag"), "Input the max value:", value = NULL)
+          shiny::column(6,
+                 shiny::numericInput(inputId = ns("max.diag"), "Input the max value:", value = NULL)
                  
           )
         ),
         if (failed)
-          div(tags$b("Invalid input of data max and min", style = "color: red;")),
+          shiny::div(shiny::tags$b("Invalid input of data max and min", style = "color: red;")),
         
-        footer = tagList(
-          modalButton("Cancel"),
-          actionButton(inputId = ns("ok_simu_single"), "GO")
+        footer = shiny::tagList(
+          shiny::modalButton("Cancel"),
+          shiny::actionButton(inputId = ns("ok_simu_single"), "GO")
         )
       )
     }
     
-    observeEvent(input$Simulate_Diagonal, {
-      req(diagonal_design()$fieldBook)
-      showModal(
+    shiny::observeEvent(input$Simulate_Diagonal, {
+      shiny::req(diagonal_design()$fieldBook)
+      shiny::showModal(
         simuModal_DIAG()
       )
     })
     
-    observeEvent(input$ok_simu_single, {
-      req(input$min.diag, input$max.diag)
+    shiny::observeEvent(input$ok_simu_single, {
+      shiny::req(input$min.diag, input$max.diag)
       if (input$max.diag > input$min.diag && input$min.diag != input$max.diag) {
         valsDIAG$maxValue <- input$max.diag
         valsDIAG$minValue  <- input$min.diag
         valsDIAG$ROX <- as.numeric(input$ROX.DIAG)
         valsDIAG$ROY <- as.numeric(input$ROY.DIAG)
         if(input$trailsDIAG == "Other") {
-          req(input$OtherDIAG)
+          shiny::req(input$OtherDIAG)
           if(!is.null(input$OtherDIAG)) {
             valsDIAG$trail <- as.character(input$OtherDIAG)
-          }else showModal(simuModal_DIAG(failed = TRUE))
+          }else shiny::showModal(simuModal_DIAG(failed = TRUE))
         }else {
           valsDIAG$trail <- as.character(input$trailsDIAG)
         }
-        removeModal()
+        shiny::removeModal()
       }else {
-        showModal(
+        shiny::showModal(
           simuModal_DIAG(failed = TRUE)
         )
       }
     })
     
-    simudata_DIAG <- reactive({
-      req(diagonal_design()$fieldBook)
+    simudata_DIAG <- shiny::reactive({
+      shiny::req(diagonal_design()$fieldBook)
       field_book <- diagonal_design()$fieldBook
       if (is.null(valsDIAG$maxValue) || is.null(valsDIAG$minValue) ||
           is.null(valsDIAG$trail)) {
@@ -822,27 +821,27 @@ mod_Diagonal_server <- function(id) {
       list(df = simulation$field_book, dfSimulationList = simulation$simulations)
     })
 
-    heat_map <- reactiveValues(heat_map_option = FALSE)
+    heat_map <- shiny::reactiveValues(heat_map_option = FALSE)
     
-    observeEvent(input$ok_simu_single, {
-      req(input$min.diag, input$max.diag)
+    shiny::observeEvent(input$ok_simu_single, {
+      shiny::req(input$min.diag, input$max.diag)
       if (input$max.diag > input$min.diag && input$min.diag != input$max.diag) {
         heat_map$heat_map_option <- TRUE
       }
     })
     
-    observeEvent(heat_map$heat_map_option, {
+    shiny::observeEvent(heat_map$heat_map_option, {
       if (heat_map$heat_map_option == FALSE) {
-        hideTab(inputId = "tabset_single", target = "Heatmap")
+        shiny::hideTab(inputId = "tabset_single", target = "Heatmap")
       } else {
-        showTab(inputId = "tabset_single", target = "Heatmap")
+        shiny::showTab(inputId = "tabset_single", target = "Heatmap")
       }
     })
 
     output$fieldBook_diagonal <- DT::renderDT({
       test <- randomize_hit$times > 0 & user_tries$tries > 0
       if (!test) return(NULL)
-      req(simudata_DIAG()$df)
+      shiny::req(simudata_DIAG()$df)
       df <- simudata_DIAG()$df
       df$EXPT <- as.factor(df$EXPT)
       df$LOCATION <- as.factor(df$LOCATION)
@@ -862,8 +861,8 @@ mod_Diagonal_server <- function(id) {
     })
     
     
-    heatmap_obj_D <- reactive({
-      req(simudata_DIAG()$dfSimulationList)
+    heatmap_obj_D <- shiny::reactive({
+      shiny::req(simudata_DIAG()$dfSimulationList)
       loc_user <- user_location()
       w <- as.character(valsDIAG$trail)
       df <- simudata_DIAG()$dfSimulationList[[loc_user]]
@@ -882,13 +881,13 @@ mod_Diagonal_server <- function(id) {
     output$heatmap_diag <- plotly::renderPlotly({
       test <- randomize_hit$times > 0 & user_tries$tries > 0
       if (!test) return(NULL)
-      req(heatmap_obj_D())
+      shiny::req(heatmap_obj_D())
       heatmap_obj_D()
     })
     
-    output$downloadData_Diagonal <- downloadHandler(
+    output$downloadData_Diagonal <- shiny::downloadHandler(
       filename = function() {
-        req(input$Location)
+        shiny::req(input$Location)
         loc <- input$Location
         loc <- paste(loc, "_", "Diagonal_", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")

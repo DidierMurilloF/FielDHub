@@ -8,37 +8,36 @@
 #'
 #' @noRd 
 #' 
-#' @importFrom shiny NS tagList 
 mod_FD_ui <- function(id){
-  ns <- NS(id)
-  tagList(
-    h4("Full Factorial Designs"),
-    sidebarLayout(
-      sidebarPanel(width = 4,
-                   radioButtons(inputId = ns("owndata"), 
+  ns <- shiny::NS(id)
+  shiny::tagList(
+    shiny::h4("Full Factorial Designs"),
+    shiny::sidebarLayout(
+      shiny::sidebarPanel(width = 4,
+                   shiny::radioButtons(inputId = ns("owndata"),
                                 label = "Import entries' list?", 
                                 choices = c("Yes", "No"), selected = "No",
                                 inline = TRUE, width = NULL, 
                                 choiceNames = NULL, choiceValues = NULL),
-                   selectInput(inputId = ns("kindFD"), 
+                   shiny::selectInput(inputId = ns("kindFD"),
                                label = "Select a Factorial Design Type:",
                                choices = c("Factorial in a RCBD" = "FD_RCBD", 
                                            "Factorial in a CRD" = "FD_CRD"),
                                multiple = FALSE),
                    
-                   conditionalPanel("input.owndata != 'Yes'", ns = ns,
-                                    textInput(inputId = ns("setfactors"), 
+                   shiny::conditionalPanel("input.owndata != 'Yes'", ns = ns,
+                                    shiny::textInput(inputId = ns("setfactors"),
                                               label = "Input # of Entries for Each Factor: (Separated by Comma)",
                                               value = "2,2,3")     
                    ),
-                   conditionalPanel("input.owndata == 'Yes'", ns = ns,
-                                    fluidRow(
-                                      column(8, style=list("padding-right: 28px;"),
-                                             fileInput(ns("file.FD"), 
+                   shiny::conditionalPanel("input.owndata == 'Yes'", ns = ns,
+                                    shiny::fluidRow(
+                                      shiny::column(8, style=list("padding-right: 28px;"),
+                                             shiny::fileInput(ns("file.FD"),
                                                        label = "Upload a CSV File:", 
                                                        multiple = FALSE)),
-                                      column(4,style=list("padding-left: 5px;"),
-                                             radioButtons(ns("sep.fd"), "Separator",
+                                      shiny::column(4,style=list("padding-left: 5px;"),
+                                             shiny::radioButtons(ns("sep.fd"), "Separator",
                                                           choices = c(Comma = ",",
                                                                       Semicolon = ";",
                                                                       Tab = "\t"),
@@ -46,69 +45,69 @@ mod_FD_ui <- function(id){
                                     )
                    ),
                    
-                   fluidRow(
-                     column(6, style=list("padding-right: 28px;"),
-                            numericInput(inputId = ns("reps.fd"), label = "Input # of Full Reps:",
+                   shiny::fluidRow(
+                     shiny::column(6, style=list("padding-right: 28px;"),
+                            shiny::numericInput(inputId = ns("reps.fd"), label = "Input # of Full Reps:",
                                          value = 3, min = 2)
                      ),
-                     column(6,style=list("padding-left: 5px;"),
-                            numericInput(ns("l.fd"), label = "Input # of Locations:",
+                     shiny::column(6,style=list("padding-left: 5px;"),
+                            shiny::numericInput(ns("l.fd"), label = "Input # of Locations:",
                                          value = 1, min = 1)
                      )
                    ),
-                   fluidRow(
-                     column(6, style=list("padding-right: 28px;"),
-                            textInput(ns("plot_start.fd"), "Starting Plot Number:", value = 101)
+                   shiny::fluidRow(
+                     shiny::column(6, style=list("padding-right: 28px;"),
+                            shiny::textInput(ns("plot_start.fd"), "Starting Plot Number:", value = 101)
                      ),
-                     column(6,style=list("padding-left: 5px;"),
-                            textInput(ns("Location.fd"), "Input Location:", value = "FARGO")
+                     shiny::column(6,style=list("padding-left: 5px;"),
+                            shiny::textInput(ns("Location.fd"), "Input Location:", value = "FARGO")
                      )
                    ),
-                   selectInput(inputId = ns("planter_mov_fd"), label = "Plot Order Layout:",
+                   shiny::selectInput(inputId = ns("planter_mov_fd"), label = "Plot Order Layout:",
                                choices = c("serpentine", "cartesian"), multiple = FALSE,
                                selected = "serpentine"),
                    
-                   numericInput(inputId = ns("seed.fd"), label = "Random Seed:",
+                   shiny::numericInput(inputId = ns("seed.fd"), label = "Random Seed:",
                                 value = 123, min = 1),
-                   fluidRow(
-                     column(6,
-                            actionButton(
+                   shiny::fluidRow(
+                     shiny::column(6,
+                            shiny::actionButton(
                               inputId = ns("RUN.fd"), "Run!", 
-                              icon = icon("circle-nodes", verify_fa = FALSE),
+                              icon = shiny::icon("circle-nodes", verify_fa = FALSE),
                               width = '100%'),
                      ),
-                     column(6,
-                            actionButton(
+                     shiny::column(6,
+                            shiny::actionButton(
                               ns("Simulate.fd"), "Simulate!", 
-                              icon = icon("greater-than-equal", verify_fa = FALSE),
+                              icon = shiny::icon("greater-than-equal", verify_fa = FALSE),
                               width = '100%'),
                      )
                      
                    ), 
-                   br(),
-                   downloadButton(ns("downloadData.fd"), "Save Experiment!", 
+                   shiny::br(),
+                   shiny::downloadButton(ns("downloadData.fd"), "Save Experiment!",
                                   style = "width:100%")
       ),
       
-      mainPanel(
+      shiny::mainPanel(
         width = 8,
-        fluidRow(
-          tabsetPanel(
-            tabPanel("Field Layout",
+        shiny::fluidRow(
+          shiny::tabsetPanel(
+            shiny::tabPanel("Field Layout",
                      shinyjs::useShinyjs(),
-                     shinyjs::hidden(downloadButton(ns("downloadCsv.fd"), 
+                     shinyjs::hidden(shiny::downloadButton(ns("downloadCsv.fd"),
                                                     label =  "CSV",
-                                                    icon = icon("file-csv"), 
+                                                    icon = shiny::icon("file-csv"),
                                                     width = '10%',
                                                     style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
                      fieldhub_spinner(
                        plotly::plotlyOutput(ns("layouts"), width = "97%", 
                                             height = "550px"), type = 5
                      ),
-                     br(),
-                     column(12, uiOutput(ns("well_panel_layout_FD")))
+                     shiny::br(),
+                     shiny::column(12, shiny::uiOutput(ns("well_panel_layout_FD")))
             ),
-            tabPanel("Field Book", 
+            shiny::tabPanel("Field Book",
                      fieldhub_spinner(DT::DTOutput(ns("FD.Output")), type = 5)
             )
           )
@@ -121,7 +120,7 @@ mod_FD_ui <- function(id){
 #'
 #' @noRd 
 mod_FD_server <- function(id) {
-  moduleServer(id, function(input, output, session){
+  shiny::moduleServer(id, function(input, output, session){
     
     ns <- session$ns
     
@@ -132,10 +131,10 @@ mod_FD_server <- function(id) {
     entryListFormat_FD <- data.frame(list(FACTOR = FACTORS, LEVEL = LEVELS))
     
     entriesInfoModal_FD <- function() {
-      modalDialog(
-        title = div(tags$h3("Important message", style = "color: red;")),
-        h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
-        renderTable(entryListFormat_FD,
+      shiny::modalDialog(
+        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
+        shiny::h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
+        shiny::renderTable(entryListFormat_FD,
                     bordered = TRUE,
                     align = 'c',
                     striped = TRUE),
@@ -143,23 +142,23 @@ mod_FD_server <- function(id) {
       )
     }
     
-    toListen <- reactive({
+    toListen <- shiny::reactive({
       list(input$owndata)
     })
     
-    observeEvent(toListen(), {
+    shiny::observeEvent(toListen(), {
       if (input$owndata == "Yes") {
-        showModal(
+        shiny::showModal(
           entriesInfoModal_FD()
         )
       }
     })
     
-    get_data_factorial <- reactive({
+    get_data_factorial <- shiny::reactive({
       
       if (input$owndata == "Yes") {
-        req(input$file.FD)
-        req(input$sep.fd)
+        shiny::req(input$file.FD)
+        shiny::req(input$sep.fd)
         inFile <- input$file.FD
         
         data_ingested <- load_file(name = inFile$name,
@@ -190,7 +189,7 @@ mod_FD_server <- function(id) {
           return(NULL)
         }
       } else {
-        req(input$setfactors)
+        shiny::req(input$setfactors)
         reps <- as.numeric(input$reps.fd)
         setfactors.fd <- parse_whole_numbers(input$setfactors, "# of Entries for Each Factor")
         if (!setfactors.fd$ok) {
@@ -218,16 +217,16 @@ mod_FD_server <- function(id) {
         return(list(data_fd = data_fd, treatments = setfactors.fd))
       }
     }) |> 
-      bindEvent(input$RUN.fd)
-    
-    fd_inputs <- reactive({
-      req(get_data_factorial())
-      req(input$plot_start.fd)
-      req(input$Location.fd)
-      req(input$l.fd)
-      req(input$seed.fd)
-      req(input$kindFD)
-      req(input$planter_mov_fd)
+      shiny::bindEvent(input$RUN.fd)
+
+    fd_inputs <- shiny::reactive({
+      shiny::req(get_data_factorial())
+      shiny::req(input$plot_start.fd)
+      shiny::req(input$Location.fd)
+      shiny::req(input$l.fd)
+      shiny::req(input$seed.fd)
+      shiny::req(input$kindFD)
+      shiny::req(input$planter_mov_fd)
       
       setfactors.fd <- get_data_factorial()$treatments
       plot_start <- validate_design(read_whole_numbers(
@@ -251,13 +250,13 @@ mod_FD_server <- function(id) {
         type_design = type_design,
         seed = seed))
     }) |>
-      bindEvent(input$RUN.fd)
+      shiny::bindEvent(input$RUN.fd)
     
     
-    fd_reactive <- reactive({
+    fd_reactive <- shiny::reactive({
       
-      req(get_data_factorial())
-      req(fd_inputs())
+      shiny::req(get_data_factorial())
+      shiny::req(fd_inputs())
       
       shinyjs::show(id = "downloadCsv.fd")
       
@@ -277,19 +276,19 @@ mod_FD_server <- function(id) {
       )) 
       
     }) |> 
-      bindEvent(input$RUN.fd)
+      shiny::bindEvent(input$RUN.fd)
     
     
-    upDateSites <- reactive({
-      req(input$l.fd)
+    upDateSites <- shiny::reactive({
+      shiny::req(input$l.fd)
       locs <- as.numeric(input$l.fd)
       sites <- 1:locs
       return(list(sites = sites))
     })  |> 
-      bindEvent(input$RUN.fd)
+      shiny::bindEvent(input$RUN.fd)
     
-    output$well_panel_layout_FD <- renderUI({
-      req(fd_reactive()$fieldBook)
+    output$well_panel_layout_FD <- shiny::renderUI({
+      shiny::req(fd_reactive()$fieldBook)
       obj_fd <- fd_reactive()
       allBooks_fd <- plot_layout(x = obj_fd, layout = 1, 
                                  stacked = "vertical")$newBooks
@@ -298,26 +297,26 @@ mod_FD_server <- function(id) {
       stacked_fd <- c("Vertical Stack Panel" = "vertical", 
                         "Horizontal Stack Panel" = "horizontal")
       sites <- as.numeric(input$l.fd)
-      wellPanel(
-        column(2,
-               radioButtons(ns("typlotfd"), "Type of Plot:",
+      shiny::wellPanel(
+        shiny::column(2,
+               shiny::radioButtons(ns("typlotfd"), "Type of Plot:",
                             c("Entries/Treatments" = 1,
                               "Plots" = 2,
                               "Heatmap" = 3), selected = 1)
         ),
-        fluidRow(
-          column(3,
-                 selectInput(inputId = ns("stackedFD"), 
+        shiny::fluidRow(
+          shiny::column(3,
+                 shiny::selectInput(inputId = ns("stackedFD"),
                              label = "Reps layout:", 
                              choices = stacked_fd),
           ),
-          column(3, #align="center",
-                 selectInput(inputId = ns("layoutO_fd"), 
+          shiny::column(3, #align="center",
+                 shiny::selectInput(inputId = ns("layoutO_fd"),
                              label = "Layout option:", 
                              choices = layoutOptions_fd)
           ),
-          column(3, #align="center",
-                 selectInput(inputId = ns("locLayout_fd"), label = "Location:", 
+          shiny::column(3, #align="center",
+                 shiny::selectInput(inputId = ns("locLayout_fd"), label = "Location:",
                              choices = as.numeric(upDateSites()$sites), 
                              selected = 1)
           )
@@ -325,34 +324,34 @@ mod_FD_server <- function(id) {
       )
     })
     
-    observeEvent(input$stackedFD, {
-      req(input$stackedFD)
-      req(input$l.fd)
+    shiny::observeEvent(input$stackedFD, {
+      shiny::req(input$stackedFD)
+      shiny::req(input$l.fd)
       obj_fd <- fd_reactive()
       allBooks <- plot_layout(x = obj_fd, layout = 1, 
                               stacked = input$stackedFD)$newBooks
       nBooks <- length(allBooks)
       NewlayoutOptions <- 1:nBooks
-      updateSelectInput(session = session, inputId = 'layoutO_fd',
+      shiny::updateSelectInput(session = session, inputId = 'layoutO_fd',
                         label = "Layout option:",
                         choices = NewlayoutOptions,
                         selected = 1
       )
     })
     
-    reset_selection <- reactiveValues(reset = 0)
+    reset_selection <- shiny::reactiveValues(reset = 0)
 
-    observeEvent(input$stackedFD, {
+    shiny::observeEvent(input$stackedFD, {
       reset_selection$reset <- 1
     })
 
-    observeEvent(input$layoutO_fd, {
+    shiny::observeEvent(input$layoutO_fd, {
       reset_selection$reset <- 0
     })
     
-    reactive_layoutFD <- reactive({
-      req(input$layoutO_fd)
-      req(fd_reactive())
+    reactive_layoutFD <- shiny::reactive({
+      shiny::req(input$layoutO_fd)
+      shiny::req(fd_reactive())
       obj_fd <- fd_reactive()
       planting_fd <- fd_inputs()$planter
       
@@ -368,68 +367,68 @@ mod_FD_server <- function(id) {
     })
     
     
-    valsfd <- reactiveValues(maxV.fd = NULL, minV.fd = NULL, trail.fd = NULL)
+    valsfd <- shiny::reactiveValues(maxV.fd = NULL, minV.fd = NULL, trail.fd = NULL)
     
     simuModal.fd <- function(failed = FALSE) {
-      modalDialog(
-        selectInput(inputId = ns("trailsfd"), label = "Select One:", choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
-        conditionalPanel("input.trailsfd == 'Other'", ns = ns,
-                         textInput(inputId = ns("Otherfd"), label = "Input Trail Name:", value = NULL)
+      shiny::modalDialog(
+        shiny::selectInput(inputId = ns("trailsfd"), label = "Select One:", choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
+        shiny::conditionalPanel("input.trailsfd == 'Other'", ns = ns,
+                         shiny::textInput(inputId = ns("Otherfd"), label = "Input Trail Name:", value = NULL)
         ),
-        fluidRow(
-          column(6, 
-                 numericInput(inputId = ns("min.fd"), "Input the min value", value = NULL)
+        shiny::fluidRow(
+          shiny::column(6,
+                 shiny::numericInput(inputId = ns("min.fd"), "Input the min value", value = NULL)
           ),
-          column(6, 
-                 numericInput(inputId = ns("max.fd"), "Input the max value", value = NULL)
+          shiny::column(6,
+                 shiny::numericInput(inputId = ns("max.fd"), "Input the max value", value = NULL)
                  
           )
           
         ),
         
         if (failed)
-          div(tags$b("Invalid input of data max and min", style = "color: red;")),
+          shiny::div(shiny::tags$b("Invalid input of data max and min", style = "color: red;")),
         
-        footer = tagList(
-          modalButton("Cancel"),
-          actionButton(ns("ok.fd"), "GO")
+        footer = shiny::tagList(
+          shiny::modalButton("Cancel"),
+          shiny::actionButton(ns("ok.fd"), "GO")
         )
         
       )
       
     }
     
-    observeEvent(input$Simulate.fd, {
-      req(fd_reactive()$fieldBook)
-      showModal(
+    shiny::observeEvent(input$Simulate.fd, {
+      shiny::req(fd_reactive()$fieldBook)
+      shiny::showModal(
         simuModal.fd()
       )
     })
     
-    observeEvent(input$ok.fd, {
-      req(input$max.fd, input$min.fd)
+    shiny::observeEvent(input$ok.fd, {
+      shiny::req(input$max.fd, input$min.fd)
       if (input$max.fd > input$min.fd && input$min.fd != input$max.fd) {
         valsfd$maxV.fd <- input$max.fd
         valsfd$minV.fd <- input$min.fd
         if(input$trailsfd == "Other") {
-          req(input$Otherfd)
+          shiny::req(input$Otherfd)
           if(!is.null(input$Otherfd)) {
             valsfd$trail.fd <- input$Otherfd
-          }else showModal(simuModal.fd(failed = TRUE))
+          }else shiny::showModal(simuModal.fd(failed = TRUE))
         }else {
           valsfd$trail.fd <- as.character(input$trailsfd)
         }
-        removeModal()
+        shiny::removeModal()
       }else {
-        showModal(
+        shiny::showModal(
           simuModal.fd(failed = TRUE)
         )
       }
     })
     
-    simuData_fd <- reactive({
-      req(fd_inputs()$seed)
-      req(fd_reactive()$fieldBook)
+    simuData_fd <- shiny::reactive({
+      shiny::req(fd_inputs()$seed)
+      shiny::req(fd_reactive()$fieldBook)
       if(!is.null(valsfd$maxV.fd) && !is.null(valsfd$minV.fd) && !is.null(valsfd$trail.fd)) {
         max <- as.numeric(valsfd$maxV.fd)
         min <- as.numeric(valsfd$minV.fd)
@@ -451,15 +450,15 @@ mod_FD_server <- function(id) {
     })
     
     heatmapInfoModal_fd <- function() {
-      modalDialog(
-        title = div(tags$h3("Important message", style = "color: red;")),
-        h4("Simulate some data to see a heatmap!"),
+      shiny::modalDialog(
+        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
+        shiny::h4("Simulate some data to see a heatmap!"),
         easyClose = TRUE
       )
     }
     
-    kindNum <- reactive({
-      req(input$setfactors)
+    kindNum <- shiny::reactive({
+      shiny::req(input$setfactors)
       setfactors.fd <- fd_reactive()$infoDesign$levels_each_factor
       lengthfactors <- length(setfactors.fd)
       end_columns <- lengthfactors + 7
@@ -467,12 +466,12 @@ mod_FD_server <- function(id) {
     }
     )
     
-    locNum <- reactive(
+    locNum <- shiny::reactive(
       return(as.numeric(input$locLayout_fd))
     )
     
-    heatmap_obj <- reactive({
-      req(simuData_fd()$df)
+    heatmap_obj <- shiny::reactive({
+      shiny::req(simuData_fd()$df)
       if (ncol(simuData_fd()$df) == (kindNum() + 1)) {
         locs <- factor(simuData_fd()$df$LOCATION, levels = unique(simuData_fd()$df$LOCATION))
         locLevels <- levels(locs)
@@ -510,7 +509,7 @@ mod_FD_server <- function(id) {
         p2 <- plotly::ggplotly(p1, tooltip="text", height = 560)
         return(p2)
       } else {
-        showModal(
+        shiny::showModal(
           heatmapInfoModal_fd()
         )
         return(NULL)
@@ -518,15 +517,15 @@ mod_FD_server <- function(id) {
     })
     
     output$layouts <- plotly::renderPlotly({
-      req(reactive_layoutFD())
-      req(fd_reactive())
-      req(input$typlotfd)
+      shiny::req(reactive_layoutFD())
+      shiny::req(fd_reactive())
+      shiny::req(input$typlotfd)
       if (input$typlotfd == 1) {
         reactive_layoutFD()$out_layout
       } else if (input$typlotfd == 2) {
         reactive_layoutFD()$out_layoutPlots
       } else {
-        req(heatmap_obj())
+        shiny::req(heatmap_obj())
         heatmap_obj()
       }
     })
@@ -557,7 +556,7 @@ mod_FD_server <- function(id) {
       
     })
     
-    output$downloadData.fd <- downloadHandler(
+    output$downloadData.fd <- shiny::downloadHandler(
       filename = function() {
         loc <- paste("Full_Factorial_", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
@@ -568,10 +567,10 @@ mod_FD_server <- function(id) {
       }
     )
     
-    csv_data <- reactive({
-      req(simuData_fd()$df)
+    csv_data <- shiny::reactive({
+      shiny::req(simuData_fd()$df)
       df <- simuData_fd()$df
-      req(input$typlotfd)
+      shiny::req(input$typlotfd)
       if (input$typlotfd == 2) {
         export_layout(df, locNum(), TRUE)
       } else {
@@ -581,7 +580,7 @@ mod_FD_server <- function(id) {
     
     
     # Downloadable csv of selected dataset ----
-    output$downloadCsv.fd <- downloadHandler(
+    output$downloadCsv.fd <- shiny::downloadHandler(
       filename = function() {
         loc <- paste("Factorial_Layout", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")

@@ -6,105 +6,104 @@
 #'
 #' @noRd 
 #'
-#' @importFrom shiny NS tagList 
 #' @importFrom utils write.csv
 mod_Alpha_Lattice_ui <- function(id) {
-  ns <- NS(id)
+  ns <- shiny::NS(id)
   
-  tagList(
-    h4("Alpha Lattice Design"),
-    sidebarLayout(
-      sidebarPanel(width = 4,
-                   radioButtons(ns("owndata_alpha"), label = "Import entries' list?", choices = c("Yes", "No"), selected = "No",
+  shiny::tagList(
+    shiny::h4("Alpha Lattice Design"),
+    shiny::sidebarLayout(
+      shiny::sidebarPanel(width = 4,
+                   shiny::radioButtons(ns("owndata_alpha"), label = "Import entries' list?", choices = c("Yes", "No"), selected = "No",
                                 inline = TRUE, width = NULL, choiceNames = NULL, choiceValues = NULL),
                    
-                   conditionalPanel("input.owndata_alpha != 'Yes'", ns = ns,
-                                    numericInput(ns("t.alpha"), label = "Input # of Treatments:",
+                   shiny::conditionalPanel("input.owndata_alpha != 'Yes'", ns = ns,
+                                    shiny::numericInput(ns("t.alpha"), label = "Input # of Treatments:",
                                                  value = 36, min = 2)
                                     
                    ),
-                   conditionalPanel("input.owndata_alpha == 'Yes'", ns = ns,
-                                    fluidRow(
-                                      column(8, style=list("padding-right: 28px;"),
-                                             fileInput(inputId = ns("file.alpha"), label = "Upload a CSV File:", multiple = FALSE)),
-                                      column(4, style=list("padding-left: 5px;"),
-                                             radioButtons(inputId = ns("sep.alpha"), "Separator",
+                   shiny::conditionalPanel("input.owndata_alpha == 'Yes'", ns = ns,
+                                    shiny::fluidRow(
+                                      shiny::column(8, style=list("padding-right: 28px;"),
+                                             shiny::fileInput(inputId = ns("file.alpha"), label = "Upload a CSV File:", multiple = FALSE)),
+                                      shiny::column(4, style=list("padding-left: 5px;"),
+                                             shiny::radioButtons(inputId = ns("sep.alpha"), "Separator",
                                                           choices = c(Comma = ",",
                                                                       Semicolon = ";",
                                                                       Tab = "\t"),
                                                           selected = ","))
                                     )        
                    ),
-                   numericInput(inputId = ns("r.alpha"), label = "Input # of Full Reps:", value = 3, min = 2),
-                   selectInput(inputId = ns("k.alpha"), label = "Input # of Plots per IBlock:", choices = ""),
-                   numericInput(inputId = ns("l.alpha"), label = "Input # of Locations:", value = 1, min = 1),
+                   shiny::numericInput(inputId = ns("r.alpha"), label = "Input # of Full Reps:", value = 3, min = 2),
+                   shiny::selectInput(inputId = ns("k.alpha"), label = "Input # of Plots per IBlock:", choices = ""),
+                   shiny::numericInput(inputId = ns("l.alpha"), label = "Input # of Locations:", value = 1, min = 1),
                    
-                   selectInput(inputId = ns("planter_mov_alpha"), label = "Plot Order Layout:",
+                   shiny::selectInput(inputId = ns("planter_mov_alpha"), label = "Plot Order Layout:",
                                choices = c("serpentine", "cartesian"), multiple = FALSE,
                                selected = "serpentine"),
                    
-                   fluidRow(
-                     column(6, style=list("padding-right: 28px;"),
-                            textInput(inputId = ns("plot_start.alpha"), "Starting Plot Number:", value = 101)
+                   shiny::fluidRow(
+                     shiny::column(6, style=list("padding-right: 28px;"),
+                            shiny::textInput(inputId = ns("plot_start.alpha"), "Starting Plot Number:", value = 101)
                      ),
-                     column(6,style=list("padding-left: 5px;"),
-                            textInput(inputId = ns("Location.alpha"), "Input Location:", value = "FARGO")
+                     shiny::column(6,style=list("padding-left: 5px;"),
+                            shiny::textInput(inputId = ns("Location.alpha"), "Input Location:", value = "FARGO")
                      )
                    ),  
-                   numericInput(inputId = ns("myseed.alpha"), label = "Random Seed:",
+                   shiny::numericInput(inputId = ns("myseed.alpha"), label = "Random Seed:",
                                 value = 16, min = 1),
-                   fluidRow(
-                     column(6,
-                            actionButton(
+                   shiny::fluidRow(
+                     shiny::column(6,
+                            shiny::actionButton(
                               inputId = ns("RUN.alpha"), 
                               "Run!", 
-                              icon = icon("circle-nodes", verify_fa = FALSE),
+                              icon = shiny::icon("circle-nodes", verify_fa = FALSE),
                               width = '100%'),
                      ),
-                     column(6,
-                            actionButton(
+                     shiny::column(6,
+                            shiny::actionButton(
                               inputId = ns("Simulate.alpha"), 
                               "Simulate!", 
-                              icon = icon("greater-than-equal", verify_fa = FALSE),
+                              icon = shiny::icon("greater-than-equal", verify_fa = FALSE),
                               width = '100%'),
                      )
                      
                    ), 
-                   br(),
-                   downloadButton(ns("downloadData.alpha"), "Save My Experiment", style = "width:100%")
+                   shiny::br(),
+                   shiny::downloadButton(ns("downloadData.alpha"), "Save My Experiment", style = "width:100%")
       ),
       
-      mainPanel(
+      shiny::mainPanel(
         width = 8,
-        fluidRow(
-          tabsetPanel(
-            tabPanel(
+        shiny::fluidRow(
+          shiny::tabsetPanel(
+            shiny::tabPanel(
               "Summary Design",
-              br(),
+              shiny::br(),
               fieldhub_spinner(
-                verbatimTextOutput(outputId = ns("summary_alpha_lattice"), 
+                shiny::verbatimTextOutput(outputId = ns("summary_alpha_lattice"),
                                    placeholder = FALSE), 
                 type = 4
               ),
               style = "padding-right: 40px;"
             ),
-            tabPanel("Field Layout",
+            shiny::tabPanel("Field Layout",
                      
                      # hidden .csv download button
                      shinyjs::useShinyjs(),
-                     shinyjs::hidden(downloadButton(ns("downloadCsv.alpha"), 
+                     shinyjs::hidden(shiny::downloadButton(ns("downloadCsv.alpha"),
                                     label =  "CSV",
-                                    icon = icon("file-csv"), 
+                                    icon = shiny::icon("file-csv"),
                                     width = '10%',
                                     style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
                      
                      fieldhub_spinner(
                        plotly::plotlyOutput(ns("random_layout"), width = "97%", height = "550px"),type = 5
                      ),
-                     br(),
-                     column(12, uiOutput(ns("well_panel_layout")))
+                     shiny::br(),
+                     shiny::column(12, shiny::uiOutput(ns("well_panel_layout")))
             ),
-            tabPanel("Field Book", 
+            shiny::tabPanel("Field Book",
                      fieldhub_spinner(DT::DTOutput(ns("ALPHA_fieldbook")), type = 5)
             )
           )
@@ -118,15 +117,15 @@ mod_Alpha_Lattice_ui <- function(id) {
 #'
 #' @noRd 
 mod_Alpha_Lattice_server <- function(id){
-  moduleServer(id, function(input, output, session) {
+  shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
     # for showing .csv button on run
     shinyjs::useShinyjs()
     
-    init_data_alpha <- reactive({
+    init_data_alpha <- shiny::reactive({
       if (input$owndata_alpha == "Yes") {
-        req(input$file.alpha)
+        shiny::req(input$file.alpha)
         inFile <- input$file.alpha
         data_ingested <- load_file(name = inFile$name,
                                    path = inFile[["datapath"]],
@@ -146,7 +145,7 @@ mod_Alpha_Lattice_server <- function(id){
           return(NULL)
         }
       } else {
-        req(input$t.alpha)
+        shiny::req(input$t.alpha)
         nt <- as.numeric(input$t.alpha)
         df <- default_entries(nt)
         data_alpha <- df
@@ -156,16 +155,16 @@ mod_Alpha_Lattice_server <- function(id){
     })
     
     
-    list_to_observe <- reactive({
-      req(init_data_alpha())
+    list_to_observe <- shiny::reactive({
+      shiny::req(init_data_alpha())
       list(
         entry_list = input$owndata_alpha,
         entries = init_data_alpha()$treatments
       )
     })
     
-    observeEvent(list_to_observe(), {
-      req(init_data_alpha())
+    shiny::observeEvent(list_to_observe(), {
+      shiny::req(init_data_alpha())
       options <- valid_block_sizes(
         as.numeric(init_data_alpha()$treatments),
         "alpha_lattice"
@@ -176,12 +175,12 @@ mod_Alpha_Lattice_server <- function(id){
         selected <- options[ceiling(length(options) / 2)]
       } else selected <- k[1]
       
-      updateSelectInput(session = session, inputId = 'k.alpha', 
+      shiny::updateSelectInput(session = session, inputId = 'k.alpha',
                         label = "Input # of Plots per IBlock:",
                         choices = k, selected = selected)
     })
     
-    get_data_alpha <- reactive({
+    get_data_alpha <- shiny::reactive({
       if (is.null(init_data_alpha())) {
         shinyalert::shinyalert(
           "Error!!", 
@@ -190,17 +189,17 @@ mod_Alpha_Lattice_server <- function(id){
         return(NULL)
       } else return(init_data_alpha())
     }) |>
-      bindEvent(input$RUN.alpha)
-    
-    alpha_inputs <- reactive({
-      req(get_data_alpha())
-      req(input$planter_mov_alpha)
-      req(input$k.alpha)
-      req(input$r.alpha)
-      req(input$plot_start.alpha)
-      req(input$Location.alpha)
-      req(input$myseed.alpha)
-      req(input$l.alpha)
+      shiny::bindEvent(input$RUN.alpha)
+
+    alpha_inputs <- shiny::reactive({
+      shiny::req(get_data_alpha())
+      shiny::req(input$planter_mov_alpha)
+      shiny::req(input$k.alpha)
+      shiny::req(input$r.alpha)
+      shiny::req(input$plot_start.alpha)
+      shiny::req(input$Location.alpha)
+      shiny::req(input$myseed.alpha)
+      shiny::req(input$l.alpha)
       if (input$k.alpha == "No Options Available") {
         shinyalert::shinyalert(
           "Error!!", 
@@ -227,40 +226,40 @@ mod_Alpha_Lattice_server <- function(id){
                   site_names = site_names,
                   seed = seed))
     }) |>
-      bindEvent(input$RUN.alpha)
+      shiny::bindEvent(input$RUN.alpha)
 
 
     entryListFormatreatments <- data.frame(ENTRY = 1:9, 
                                         NAME = c(paste("Genotype", LETTERS[1:9], sep = "")))
     entriesInfoModal_ALPHA <- function() {
-      modalDialog(
-        title = div(tags$h3("Important message", style = "color: red;")),
-        h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
-        renderTable(entryListFormatreatments,
+      shiny::modalDialog(
+        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
+        shiny::h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
+        shiny::renderTable(entryListFormatreatments,
                     bordered = TRUE,
                     align = 'c',
                     striped = TRUE),
-        h4("Entry numbers can be any set of consecutive positive numbers."),
+        shiny::h4("Entry numbers can be any set of consecutive positive numbers."),
         easyClose = FALSE
       )
     }
     
-    toListen <- reactive({
+    toListen <- shiny::reactive({
       list(input$owndata_alpha)
     })
     
-    observeEvent(toListen(), {
+    shiny::observeEvent(toListen(), {
       if (input$owndata_alpha == "Yes") {
-        showModal(
+        shiny::showModal(
           entriesInfoModal_ALPHA()
         )
       }
     })
     
 
-    ALPHA_reactive <- eventReactive(input$RUN.alpha, {
-      req(get_data_alpha())
-      req(alpha_inputs())
+    ALPHA_reactive <- shiny::eventReactive(input$RUN.alpha, {
+      shiny::req(get_data_alpha())
+      shiny::req(alpha_inputs())
 
       # show .csv download button when run
       shinyjs::show(id = "downloadCsv.alpha")
@@ -287,22 +286,22 @@ mod_Alpha_Lattice_server <- function(id){
       ))
     })
     
-    output$summary_alpha_lattice <- renderPrint({
-      req(ALPHA_reactive())
+    output$summary_alpha_lattice <- shiny::renderPrint({
+      shiny::req(ALPHA_reactive())
       cat("Randomization was successful!", "\n", "\n")
       print(ALPHA_reactive(), n = 6)
     })
     
-    upDateSites <- reactive({
-      req(alpha_inputs())
+    upDateSites <- shiny::reactive({
+      shiny::req(alpha_inputs())
       locs <- alpha_inputs()$sites
       sites <- 1:locs
       return(list(sites = sites))
     })
     
     
-    output$well_panel_layout <- renderUI({
-      req(ALPHA_reactive()$fieldBook)
+    output$well_panel_layout <- shiny::renderUI({
+      shiny::req(ALPHA_reactive()$fieldBook)
       df <- ALPHA_reactive()$fieldBook
       locs <- length(levels(as.factor(df$LOCATION)))
       repsAlpha <- length(levels(as.factor(df$REP)))
@@ -316,27 +315,27 @@ mod_Alpha_Lattice_server <- function(id){
       allBooks <- plot_layout(x = obj, layout = 1, stacked = "vertical")$newBooks
       nBooks <- length(allBooks)
       layoutOptions <- 1:nBooks
-      wellPanel(
-        fluidPage(
-          column(3,
-                 radioButtons(ns("typlotALPHA"), "Type of Plot:",
+      shiny::wellPanel(
+        shiny::fluidPage(
+          shiny::column(3,
+                 shiny::radioButtons(ns("typlotALPHA"), "Type of Plot:",
                               c("Entries/Treatments" = 1,
                                 "Plots" = 2,
                                 "Heatmap" = 3), selected = 1)
           ),
-          column(3,
-                 selectInput(inputId = ns("stackedAlpha"),
+          shiny::column(3,
+                 shiny::selectInput(inputId = ns("stackedAlpha"),
                              label = "Reps layout:", 
                              choices = stacked)
           ),
-          column(2, 
-                 selectInput(inputId = ns("layoutO"), 
+          shiny::column(2,
+                 shiny::selectInput(inputId = ns("layoutO"),
                              label = "Layout option:",
                              choices = layoutOptions, 
                              selected = 1)
           ),
-          column(2, 
-                 selectInput(inputId = ns("locLayout"),
+          shiny::column(2,
+                 shiny::selectInput(inputId = ns("locLayout"),
                              label = 'Location:', 
                              choices = as.numeric(upDateSites()$sites))
           )
@@ -344,36 +343,36 @@ mod_Alpha_Lattice_server <- function(id){
       )
     })
     
-    observeEvent(input$stackedAlpha, {
-      req(input$stackedAlpha)
+    shiny::observeEvent(input$stackedAlpha, {
+      shiny::req(input$stackedAlpha)
       obj <- ALPHA_reactive()
       allBooks <- plot_layout(x = obj, 
                               layout = 1, 
                               stacked = input$stackedAlpha)$newBooks
       nBooks <- length(allBooks)
       NewlayoutOptions <- 1:nBooks
-      updateSelectInput(session = session, inputId = 'layoutO',
+      shiny::updateSelectInput(session = session, inputId = 'layoutO',
                         label = "Layout option:",
                         choices = NewlayoutOptions,
                         selected = 1
       )
     })
     
-    reset_selection <- reactiveValues(reset = 0)
+    reset_selection <- shiny::reactiveValues(reset = 0)
     
-    observeEvent(input$stackedAlpha, {
+    shiny::observeEvent(input$stackedAlpha, {
       reset_selection$reset <- 1
     })
     
-    observeEvent(input$layoutO, {
+    shiny::observeEvent(input$layoutO, {
       reset_selection$reset <- 0
     })
     
-    reactive_layoutAlpha <- reactive({
-      req(input$stackedAlpha)
-      req(alpha_inputs()$planter)
-      req(input$layoutO)
-      req(ALPHA_reactive())
+    reactive_layoutAlpha <- shiny::reactive({
+      shiny::req(input$stackedAlpha)
+      shiny::req(alpha_inputs()$planter)
+      shiny::req(input$layoutO)
+      shiny::req(ALPHA_reactive())
       obj <- ALPHA_reactive()
       
       if (reset_selection$reset == 1) {
@@ -390,69 +389,69 @@ mod_Alpha_Lattice_server <- function(id){
     })
     
     
-    valsALPHA <- reactiveValues(maxV.alpha = NULL, minV.alpha = NULL, trail.alpha = NULL)
+    valsALPHA <- shiny::reactiveValues(maxV.alpha = NULL, minV.alpha = NULL, trail.alpha = NULL)
     
     simuModal.alpha <- function(failed = FALSE) {
-      modalDialog(
-        selectInput(inputId = ns("trailsALPHA"), label = "Select One:", choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
-        conditionalPanel("input.trailsALPHA == 'Other'", ns = ns,
-                         textInput(inputId = ns("OtherALPHA"), label = "Input the Trial Name:", value = NULL)
+      shiny::modalDialog(
+        shiny::selectInput(inputId = ns("trailsALPHA"), label = "Select One:", choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
+        shiny::conditionalPanel("input.trailsALPHA == 'Other'", ns = ns,
+                         shiny::textInput(inputId = ns("OtherALPHA"), label = "Input the Trial Name:", value = NULL)
         ),
-        fluidRow(
-          column(6,
-                 numericInput(inputId = ns("min.alpha"), "Input the min value", value = NULL)
+        shiny::fluidRow(
+          shiny::column(6,
+                 shiny::numericInput(inputId = ns("min.alpha"), "Input the min value", value = NULL)
           ),
-          column(6,
-                 numericInput(inputId = ns("max.alpha"), "Input the max value", value = NULL)
+          shiny::column(6,
+                 shiny::numericInput(inputId = ns("max.alpha"), "Input the max value", value = NULL)
                  
           )
           
         ),
         
         if (failed)
-          div(tags$b("Invalid input of data max and min", style = "color: red;")),
+          shiny::div(shiny::tags$b("Invalid input of data max and min", style = "color: red;")),
         
-        footer = tagList(
-          modalButton("Cancel"),
-          actionButton(inputId = ns("ok.alpha"), "GO")
+        footer = shiny::tagList(
+          shiny::modalButton("Cancel"),
+          shiny::actionButton(inputId = ns("ok.alpha"), "GO")
         )
         
       )
       
     }
     
-    observeEvent(input$Simulate.alpha, {
-      req(input$k.alpha)
-      req(input$r.alpha)
-      req(reactive_layoutAlpha()$fieldBookXY)
-      showModal(
+    shiny::observeEvent(input$Simulate.alpha, {
+      shiny::req(input$k.alpha)
+      shiny::req(input$r.alpha)
+      shiny::req(reactive_layoutAlpha()$fieldBookXY)
+      shiny::showModal(
         simuModal.alpha()
       )
     })
     
-    observeEvent(input$ok.alpha, {
-      req(input$max.alpha, input$min.alpha)
+    shiny::observeEvent(input$ok.alpha, {
+      shiny::req(input$max.alpha, input$min.alpha)
       if (input$max.alpha > input$min.alpha && input$min.alpha != input$max.alpha) {
         valsALPHA$maxV.alpha <- input$max.alpha
         valsALPHA$minV.alpha <- input$min.alpha
         if(input$trailsALPHA == "Other") {
-          req(input$OtherALPHA)
+          shiny::req(input$OtherALPHA)
           if(!is.null(input$OtherALPHA)) {
             valsALPHA$trail.alpha <- as.character(input$OtherALPHA)
-          }else showModal(simuModal.alpha(failed = TRUE))
+          }else shiny::showModal(simuModal.alpha(failed = TRUE))
         }else {
           valsALPHA$trail.alpha <- as.character(input$trailsALPHA)
         }
-        removeModal()
+        shiny::removeModal()
       }else {
-        showModal(
+        shiny::showModal(
           simuModal.alpha(failed = TRUE)
         )
       }
     })
     
-    simuDataALPHA <- reactive({
-      req(reactive_layoutAlpha())
+    simuDataALPHA <- shiny::reactive({
+      shiny::req(reactive_layoutAlpha())
       if(!is.null(valsALPHA$maxV.alpha) && !is.null(valsALPHA$minV.alpha) && !is.null(valsALPHA$trail.alpha)) {
         max <- as.numeric(valsALPHA$maxV.alpha)
         min <- as.numeric(valsALPHA$minV.alpha)
@@ -470,19 +469,19 @@ mod_Alpha_Lattice_server <- function(id){
     })
     
     heatmapInfoModal_ALPHA <- function() {
-      modalDialog(
-        title = div(tags$h3("Important message", style = "color: red;")),
-        h4("Simulate some data to see a heatmap!"),
+      shiny::modalDialog(
+        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
+        shiny::h4("Simulate some data to see a heatmap!"),
         easyClose = TRUE
       )
     }
     
-    locNum <- reactive(
+    locNum <- shiny::reactive(
       return(as.numeric(input$locLayout))
     )
     
-    heatmap_obj <- reactive({
-      req(simuDataALPHA()$df)
+    heatmap_obj <- shiny::reactive({
+      shiny::req(simuDataALPHA()$df)
       if (ncol(simuDataALPHA()$df) == 11) {
         locs <- factor(simuDataALPHA()$df$LOCATION, levels = unique(simuDataALPHA()$df$LOCATION))
         locLevels <- levels(locs)
@@ -519,7 +518,7 @@ mod_Alpha_Lattice_server <- function(id){
         p2 <- plotly::ggplotly(p1, tooltip="text", height = 560)
         return(p2)
       } else {
-        showModal(
+        shiny::showModal(
           heatmapInfoModal_ALPHA()
         )
         return(NULL)
@@ -527,21 +526,21 @@ mod_Alpha_Lattice_server <- function(id){
     })
     
     output$random_layout <- plotly::renderPlotly({
-      req(reactive_layoutAlpha())
-      req(ALPHA_reactive())
-      req(input$typlotALPHA)
+      shiny::req(reactive_layoutAlpha())
+      shiny::req(ALPHA_reactive())
+      shiny::req(input$typlotALPHA)
       if (input$typlotALPHA == 1) {
         reactive_layoutAlpha()$out_layout
       } else if (input$typlotALPHA == 2) {
         reactive_layoutAlpha()$out_layoutPlots
       } else {
-        req(heatmap_obj())
+        shiny::req(heatmap_obj())
         heatmap_obj()
       }
     })
     
     output$ALPHA_fieldbook <- DT::renderDataTable({
-      req(simuDataALPHA()$df)
+      shiny::req(simuDataALPHA()$df)
       df <- simuDataALPHA()$df
       df$LOCATION <- as.factor(df$LOCATION)
       df$PLOT <- as.factor(df$PLOT)
@@ -564,7 +563,7 @@ mod_Alpha_Lattice_server <- function(id){
     })
     
     # Downloadable csv of selected dataset ----
-    output$downloadData.alpha <- downloadHandler(
+    output$downloadData.alpha <- shiny::downloadHandler(
       filename = function() {
         loc <- paste("Alpha_Lattice_", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
@@ -575,10 +574,10 @@ mod_Alpha_Lattice_server <- function(id){
       }
     )
     
-    csv_data <- reactive({
-      req(simuDataALPHA()$df)
+    csv_data <- shiny::reactive({
+      shiny::req(simuDataALPHA()$df)
       df <- simuDataALPHA()$df
-      req(input$typlotALPHA)
+      shiny::req(input$typlotALPHA)
       if (input$typlotALPHA == 2) {
         export_layout(df, locNum(), TRUE)
       } else {
@@ -587,7 +586,7 @@ mod_Alpha_Lattice_server <- function(id){
     })
     
     # Downloadable csv of selected dataset ----
-    output$downloadCsv.alpha <- downloadHandler(
+    output$downloadCsv.alpha <- shiny::downloadHandler(
       filename = function() {
         loc <- paste("Alpha_Lattice_Layout", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")

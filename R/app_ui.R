@@ -10,7 +10,6 @@
 #'         Johan Aparicio [ctb], 
 #'         Richard Horsley [ctb]     
 #'     
-#' @import shiny
 #' @noRd
 fieldhub_theme <- function() {
   bslib::bs_theme(version = 3, bootswatch = "flatly")
@@ -18,30 +17,30 @@ fieldhub_theme <- function() {
 
 #' @noRd
 app_ui <- function(request) {
-  tagList(
+  shiny::tagList(
     golem_add_external_resources(),
-    fluidPage(
+    shiny::fluidPage(
       theme = fieldhub_theme(),
-      do.call(navbarPage, c(
+      do.call(shiny::navbarPage, c(
         list(
           title = fieldhub_app_title(),
-          tabPanel(
-            " Welcome!", icon = icon("home", lib = "glyphicon"),
+          shiny::tabPanel(
+            " Welcome!", icon = shiny::icon("home", lib = "glyphicon"),
             suppressWarnings(htmltools::includeHTML(
               system.file("app/www/home.html", package = "FielDHub")
             ))
           )
         ),
         fieldhub_design_menus(),
-        list(navbarMenu(
+        list(shiny::navbarMenu(
           "More",
-          tabPanel(
+          shiny::tabPanel(
             "Help",
             suppressWarnings(htmltools::includeHTML(
               system.file("app/www/Help.html", package = "FielDHub")
             ))
           ),
-          tabPanel(
+          shiny::tabPanel(
             "About Us",
             suppressWarnings(htmltools::includeHTML(
               system.file("app/www/aboutUs.html", package = "FielDHub")
@@ -58,18 +57,16 @@ app_ui <- function(request) {
 #' This function is internally used to add external 
 #' resources inside the Shiny application. 
 #' 
-#' @import shiny
-#' @importFrom golem add_resource_path favicon bundle_resources
 #' @noRd
 golem_add_external_resources <- function(){
   
-  add_resource_path(
+  golem::add_resource_path(
     'www', app_sys('app/www')
   )
  
-  tags$head(
-    favicon(),
-    bundle_resources(
+  shiny::tags$head(
+    golem::favicon(),
+    golem::bundle_resources(
       path = app_sys('app/www'),
       app_title = 'FielDHub'
     )

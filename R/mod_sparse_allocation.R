@@ -6,15 +6,14 @@
 #'
 #' @noRd 
 #'
-#' @importFrom shiny NS tagList 
 mod_sparse_allocation_ui <- function(id) {
-  ns <- NS(id)
-  tagList(
-    h4("Unreplicated Designs: Sparse Allocation"),
-    sidebarLayout(
-      sidebarPanel(
+  ns <- shiny::NS(id)
+  shiny::tagList(
+    shiny::h4("Unreplicated Designs: Sparse Allocation"),
+    shiny::sidebarLayout(
+      shiny::sidebarPanel(
         width = 4,
-        radioButtons(
+        shiny::radioButtons(
             inputId = ns("input_sparse_data"),
             label = "Import entries' list?",
             choices = c("Yes", "No"), 
@@ -24,23 +23,23 @@ mod_sparse_allocation_ui <- function(id) {
             choiceNames = NULL,
             choiceValues = NULL
         ),
-        conditionalPanel(
+        shiny::conditionalPanel(
             condition = "input.input_sparse_data == 'Yes'", 
             ns = ns,
-            fluidRow(
-                column(
+            shiny::fluidRow(
+                shiny::column(
                     width = 7, 
                     style=list("padding-right: 28px;"),
-                    fileInput(
+                    shiny::fileInput(
                         ns("sparse_file"), 
                         label = "Upload a CSV File:", 
                         multiple = FALSE
                     )
                 ),
-                column(
+                shiny::column(
                     width = 5,
                     tyle=list("padding-left: 5px;"),
-                    radioButtons(
+                    shiny::radioButtons(
                         ns("sparse_file_sep"), "Separator",
                         choices = c(Comma = ",",
                                     Semicolon = ";",
@@ -49,34 +48,34 @@ mod_sparse_allocation_ui <- function(id) {
                 )
             )              
         ),
-        numericInput(
+        shiny::numericInput(
             inputId = ns("sparse_lines"), 
             label = "Input # of Entries:",
             value = 380, 
             min = 50
         ),
-        selectInput(
+        shiny::selectInput(
             inputId = ns("sparse_checks"),
             label = "Input # of Checks:",
             choices = c(1:10),
             multiple = FALSE,
             selected = 4
         ),
-        fluidRow(
-          column(
+        shiny::fluidRow(
+          shiny::column(
             width = 6,
             style=list("padding-right: 28px;"),
-            numericInput(
+            shiny::numericInput(
                 inputId = ns("sparse_locations"), 
                 label = "Input # of Locations:", 
                 value = 5,
                 min = 3
             )
           ),
-          column(
+          shiny::column(
             width = 6,
             style=list("padding-left: 5px;"),
-            selectInput(
+            shiny::selectInput(
                 inputId = ns("sparse_loc_view"), 
                 label = "Choose Location to View:", 
                 choices = 1, 
@@ -85,122 +84,122 @@ mod_sparse_allocation_ui <- function(id) {
             )
         )
         ),
-        selectInput(
+        shiny::selectInput(
             inputId = ns("plant_reps"), 
             label = "# of Copies Per Entry:",
             choices = 1:6
         ),
-        selectInput(
+        shiny::selectInput(
             inputId = ns("sparse_planter"), 
             label = "Plot Order Layout:",
             choices = c("serpentine", "cartesian"), 
             multiple = FALSE,
             selected = "serpentine"
         ),
-        fluidRow(
-            column(
+        shiny::fluidRow(
+            shiny::column(
                 width = 6,
                 style=list("padding-right: 28px;"),
-                textInput(
+                shiny::textInput(
                     ns("sparse_plot_start"), 
                     "Starting Plot Number:", 
                     value = 1
                 )
             ),
-            column(
+            shiny::column(
                 width = 6,
                 style=list("padding-left: 5px;"),
-                textInput(
+                shiny::textInput(
                     ns("sparse_expt_name"), 
                     "Input Experiment Name:", 
                     value = "Expt1"
                 )
             )
         ),    
-        fluidRow(
-            column(
+        shiny::fluidRow(
+            shiny::column(
                 width = 6,
                 style=list("padding-right: 28px;"),
-                numericInput(
+                shiny::numericInput(
                     inputId = ns("seed_single"), 
                     label = "Random Seed:", 
                     value = 17, 
                     min = 1
                 )
             ),
-            column(
+            shiny::column(
                 width = 6,
                 style=list("padding-left: 5px;"),
-                textInput(
+                shiny::textInput(
                     ns("sparse_loc_names"), 
                     "Input the Location:",
                     value = "FARGO"
                 )
             )
         ),
-        fluidRow(
-            column(
+        shiny::fluidRow(
+            shiny::column(
                 width = 6,
-                actionButton(
+                shiny::actionButton(
                     inputId = ns("sparse_run"), 
                     "Run!", 
-                    icon = icon("circle-nodes", verify_fa = FALSE),
+                    icon = shiny::icon("circle-nodes", verify_fa = FALSE),
                     width = '100%'
                 )
             ),
-            column(
+            shiny::column(
                 width = 6,
-                actionButton(
+                shiny::actionButton(
                     ns("sparse_simulate"),
                     "Simulate!",
-                    icon = icon("greater-than-equal", verify_fa = FALSE),
+                    icon = shiny::icon("greater-than-equal", verify_fa = FALSE),
                     width = '100%'
                 )
             )
         ),
-        br(),
-        uiOutput(ns("sparse_download"))
+        shiny::br(),
+        shiny::uiOutput(ns("sparse_download"))
       ),
-      mainPanel(
+      shiny::mainPanel(
         width = 8,
         shinyjs::useShinyjs(),
-        tabsetPanel(
+        shiny::tabsetPanel(
             id = ns("sparse_tabset_single"),
-            tabPanel(
+            shiny::tabPanel(
                 title = "Expt Design Info", 
                 value = "tabPanel1",
-                br(),
+                shiny::br(),
                 shinyjs::hidden(
-                  selectInput(inputId = ns("sparse_dims"),
+                  shiny::selectInput(inputId = ns("sparse_dims"),
                               label = "Select dimensions of field:", 
                               choices = "", width = '400px')
                 ),
                 shinyjs::hidden(
-                  actionButton(inputId = ns("sparse_get_random"), 
+                  shiny::actionButton(inputId = ns("sparse_get_random"),
                                label = "Randomize!")
                 ),
-                tags$br(),
-                tags$br(),
+                shiny::tags$br(),
+                shiny::tags$br(),
                 fieldhub_spinner(
                     DT::DTOutput(ns("sparse_allocation")),
                     type = 4
                 )
             ),
-            tabPanel("Data Input",
+            shiny::tabPanel("Data Input",
                      DT::DTOutput(ns("multi_loc_data_input"))),
-            tabPanel("Randomized Field",
-                        br(),
+            shiny::tabPanel("Randomized Field",
+                        shiny::br(),
                         shinyjs::hidden(
-                        selectInput(inputId = ns("percent_checks"),
+                        shiny::selectInput(inputId = ns("percent_checks"),
                                     label = "Choose % of Checks:",
                                     choices = 1:9, width = '400px')
                         ),
                         DT::DTOutput(ns("randomized_layout"))),
-            tabPanel("Plot Number Field", 
+            shiny::tabPanel("Plot Number Field",
                         DT::DTOutput(ns("plot_number_layout"))),
-            tabPanel("Field Book", 
+            shiny::tabPanel("Field Book",
                         DT::DTOutput(ns("fieldBook_diagonal"))),
-            tabPanel("Heatmap", fieldhub_spinner(
+            shiny::tabPanel("Heatmap", fieldhub_spinner(
                 plotly::plotlyOutput(ns("heatmap_diag"),  width = "97%"), 
                 type = 5)
             )
@@ -214,7 +213,7 @@ mod_sparse_allocation_ui <- function(id) {
 #'
 #' @noRd 
 mod_sparse_allocation_server <- function(id){
-  moduleServer( id, function(input, output, session) {
+  shiny::moduleServer( id, function(input, output, session) {
     ns <- session$ns
 
     shinyjs::useShinyjs()
@@ -251,12 +250,12 @@ mod_sparse_allocation_server <- function(id){
       out
     }
 
-    observe({
-        req(input$sparse_locations)
+    shiny::observe({
+        shiny::req(input$sparse_locations)
         sparse_locs <- as.numeric(input$sparse_locations)
         start <- ceiling(sparse_locs / 2)
         plant_reps <- start:(sparse_locs - 1)
-        updateSelectInput(
+        shiny::updateSelectInput(
             inputId = "plant_reps", 
             choices = plant_reps, 
             selected = plant_reps[length(plant_reps)]
@@ -264,40 +263,40 @@ mod_sparse_allocation_server <- function(id){
     })
     
 
-    counts <- reactiveValues(trigger = 0)
+    counts <- shiny::reactiveValues(trigger = 0)
     
-    observeEvent(input$sparse_run, {
+    shiny::observeEvent(input$sparse_run, {
       counts$trigger <- counts$trigger + 1
     })
     
     kindExpt_single <- "SUDC"
 
-    randomize_hit <- reactiveValues(times = 0)
+    randomize_hit <- shiny::reactiveValues(times = 0)
  
-    observeEvent(input$sparse_run, {
+    shiny::observeEvent(input$sparse_run, {
       randomize_hit$times <- 0
     })
 
-    user_tries <- reactiveValues(tries = 0)
+    user_tries <- shiny::reactiveValues(tries = 0)
 
-    observeEvent(input$sparse_get_random, {
+    shiny::observeEvent(input$sparse_get_random, {
       randomize_hit$times <- randomize_hit$times + 1
       user_tries$tries <- user_tries$tries + 1
     })
 
-    observeEvent(input$sparse_dims, {
+    shiny::observeEvent(input$sparse_dims, {
       user_tries$tries <- 0
     })
 
-    list_to_observe <- reactive({
+    list_to_observe <- shiny::reactive({
       list(randomize_hit$times, user_tries$tries)
     })
     
-    single_inputs <- eventReactive(input$sparse_run, {
-        req(input$sparse_lines)
-        req(input$sparse_plot_start)
-        req(input$sparse_loc_names)
-        req(input$sparse_locations)
+    single_inputs <- shiny::eventReactive(input$sparse_run, {
+        shiny::req(input$sparse_lines)
+        shiny::req(input$sparse_plot_start)
+        shiny::req(input$sparse_loc_names)
+        shiny::req(input$sparse_locations)
         input_sparse_lines <- as.numeric(input$sparse_lines)
         planter_mov <- input$sparse_planter
         Name_expt <- as.vector(unlist(strsplit(input$sparse_expt_name, ",")))
@@ -331,56 +330,56 @@ mod_sparse_allocation_server <- function(id){
         )
     })
     
-    observeEvent(single_inputs()$sites, {
+    shiny::observeEvent(single_inputs()$sites, {
       loc_user_view <- 1:as.numeric(input$sparse_locations)
-      updateSelectInput(inputId = "sparse_loc_view", 
+      shiny::updateSelectInput(inputId = "sparse_loc_view",
                         choices = loc_user_view, 
                         selected = loc_user_view[1])
       plant_reps <- 1:(as.numeric(input$sparse_locations) - 1)
-      updateSelectInput(inputId = "plant_reps", 
+      shiny::updateSelectInput(inputId = "plant_reps",
                         choices = plant_reps, 
                         selected = plant_reps[length(plant_reps)])
     })
     
-    observeEvent(kindExpt_single,
-                 handlerExpr = updateTabsetPanel(session,
+    shiny::observeEvent(kindExpt_single,
+                 handlerExpr = shiny::updateTabsetPanel(session,
                                                  "sparse_tabset_single",
                                                  selected = "tabPanel1"))
-    observeEvent(input$stacked,
-                 handlerExpr = updateTabsetPanel(session,
+    shiny::observeEvent(input$stacked,
+                 handlerExpr = shiny::updateTabsetPanel(session,
                                                  "sparse_tabset_single",
                                                  selected = "tabPanel1"))
-    observeEvent(input$sparse_checks,
-                 handlerExpr = updateTabsetPanel(session,
+    shiny::observeEvent(input$sparse_checks,
+                 handlerExpr = shiny::updateTabsetPanel(session,
                                                  "sparse_tabset_single",
                                                  selected = "tabPanel1"))
-    observeEvent(input$sparse_dims,
-                 handlerExpr = updateTabsetPanel(session,
+    shiny::observeEvent(input$sparse_dims,
+                 handlerExpr = shiny::updateTabsetPanel(session,
                                                  "sparse_tabset_single",
                                                  selected = "tabPanel1"))
-    observeEvent(single_inputs()$planter_mov,
-                 handlerExpr = updateTabsetPanel(session,
+    shiny::observeEvent(single_inputs()$planter_mov,
+                 handlerExpr = shiny::updateTabsetPanel(session,
                                                  "sparse_tabset_single",
                                                  selected = "tabPanel1"))
-    observeEvent(input$sparse_lines,
-                 handlerExpr = updateTabsetPanel(session,
+    shiny::observeEvent(input$sparse_lines,
+                 handlerExpr = shiny::updateTabsetPanel(session,
                                                  "sparse_tabset_single",
                                                  selected = "tabPanel1"))
-    observeEvent(input$sparse_locations,
-                 handlerExpr = updateTabsetPanel(session,
+    shiny::observeEvent(input$sparse_locations,
+                 handlerExpr = shiny::updateTabsetPanel(session,
                                                  "sparse_tabset_single",
                                                  selected = "tabPanel1"))
-    observeEvent(input$input_sparse_data,
-                 handlerExpr = updateTabsetPanel(session,
+    shiny::observeEvent(input$input_sparse_data,
+                 handlerExpr = shiny::updateTabsetPanel(session,
                                                  "sparse_tabset_single",
                                                  selected = "tabPanel1"))
-    observeEvent(input$sparse_run,
-                 handlerExpr = updateTabsetPanel(session,
+    shiny::observeEvent(input$sparse_run,
+                 handlerExpr = shiny::updateTabsetPanel(session,
                                                  "sparse_tabset_single",
                                                  selected = "tabPanel1"))
                                                   
-    get_sparse_data <- reactive({
-        req(input$sparse_locations)
+    get_sparse_data <- shiny::reactive({
+        shiny::req(input$sparse_locations)
         sparse_lines <- as.numeric(input$sparse_lines)
         if (input$sparse_locations < 3) {
             shinyalert::shinyalert(
@@ -400,9 +399,9 @@ mod_sparse_allocation_server <- function(id){
         }
         Option_NCD <- TRUE
         if (input$input_sparse_data == "Yes") {
-            req(input$sparse_lines)
-            req(input$sparse_checks)
-            req(input$sparse_file)
+            shiny::req(input$sparse_lines)
+            shiny::req(input$sparse_checks)
+            shiny::req(input$sparse_file)
             sparse_checks <- as.numeric(input$sparse_checks)
             inFile <- input$sparse_file
             data_ingested <- load_file(
@@ -415,7 +414,7 @@ mod_sparse_allocation_server <- function(id){
             if (names(data_ingested) == "dataUp") {
                 data_up <- data_ingested$dataUp
                 if (ncol(data_up) < 2) {
-                    validate("Data input needs at least two Columns with the ENTRY and NAME.")
+                    shiny::validate("Data input needs at least two Columns with the ENTRY and NAME.")
                 } 
                 data_entry_UP <- na.omit(data_up[, 1:2])
                 colnames(data_entry_UP) <- c("ENTRY", "NAME")
@@ -461,8 +460,8 @@ mod_sparse_allocation_server <- function(id){
               return(NULL)
             }
         } else {
-            req(input$sparse_lines)
-            req(input$sparse_checks)
+            shiny::req(input$sparse_lines)
+            shiny::req(input$sparse_checks)
             sparse_checks <- as.numeric(input$sparse_checks)
             checksEntries <- 1:sparse_checks
             lines <- input$sparse_lines
@@ -491,7 +490,7 @@ mod_sparse_allocation_server <- function(id){
             )
         }
     }) |>
-        bindEvent(input$sparse_run)
+        shiny::bindEvent(input$sparse_run)
     
     # Allocation of the entries to the locations, computed as
     # sparse_allocation() computes it. The design is built later from this
@@ -499,9 +498,9 @@ mod_sparse_allocation_server <- function(id){
     # the field dimensions offered before randomizing. The uploaded data is
     # passed only to validate it: it does not change the allocation, and
     # sparse_allocation() merges it into the locations.
-    sparse_setup <- reactive({
-        req(input$input_sparse_data)
-        req(get_sparse_data())
+    sparse_setup <- shiny::reactive({
+        shiny::req(input$input_sparse_data)
+        shiny::req(get_sparse_data())
         sparse_data_input <- NULL
         if (get_sparse_data()$upload) {
             sparse_data_input <- get_sparse_data()$data_entry
@@ -509,7 +508,7 @@ mod_sparse_allocation_server <- function(id){
         input_lines <- get_sparse_data()$dim_without_checks
         checks <- as.numeric(input$sparse_checks)
         locs <- single_inputs()$sites
-        withProgress(message = 'Optimization in progress ...', {
+        shiny::withProgress(message = 'Optimization in progress ...', {
           optim_out <- call_api(
             do_optim(
               design = "sparse",
@@ -535,10 +534,10 @@ mod_sparse_allocation_server <- function(id){
           return(NULL)
         } else return(optim_out)
     }) |>
-        bindEvent(input$sparse_run)
+        shiny::bindEvent(input$sparse_run)
     
-    getChecks <- eventReactive(input$sparse_run, {
-        req(sparse_setup())
+    getChecks <- shiny::eventReactive(input$sparse_run, {
+        shiny::req(sparse_setup())
         sparse_checks <- as.numeric(input$sparse_checks)
         data <- get_sparse_data()$data_entry
         # The design sorts the check entries, as sparse_allocation() does
@@ -546,27 +545,27 @@ mod_sparse_allocation_server <- function(id){
         list(checksEntries = checksEntries, sparse_checks = sparse_checks)
     })
     
-    list_inputs_diagonal <- eventReactive(input$sparse_run, {
-        req(sparse_setup())
-        req(getChecks())
-        req(sparse_setup()$size_locations)
+    list_inputs_diagonal <- shiny::eventReactive(input$sparse_run, {
+        shiny::req(sparse_setup())
+        shiny::req(getChecks())
+        shiny::req(sparse_setup()$size_locations)
         sparse_checks <- as.numeric(getChecks()$sparse_checks)
         lines <- as.numeric(sparse_setup()$size_locations[1])
         return(list(lines, input$input_sparse_data, kindExpt_single, 
                     input$sparse_run))
     })
 
-    observeEvent(list_inputs_diagonal(), {
-        req(sparse_setup())
-        req(get_sparse_data())
-        req(sparse_setup()$size_locations)
+    shiny::observeEvent(list_inputs_diagonal(), {
+        shiny::req(sparse_setup())
+        shiny::req(get_sparse_data())
+        shiny::req(sparse_setup()$size_locations)
         lines_within_loc <- as.numeric(sparse_setup()$size_locations[1])
         sort_choices <- validate_design(diagonal_dimension_choices(
             lines = lines_within_loc, checks = as.vector(getChecks()$checksEntries),
             kindExpt = kindExpt_single, planter = single_inputs()$planter_mov
         ))
 
-        updateSelectInput(inputId = "sparse_dims",
+        shiny::updateSelectInput(inputId = "sparse_dims",
                           choices = sort_choices,
                           selected = head(sort_choices, 1))
         if (length(sort_choices) == 0L) {
@@ -576,16 +575,16 @@ mod_sparse_allocation_server <- function(id){
         }
     })
     
-    observeEvent(input$sparse_run, {
-        req(sparse_setup())
-        req(get_sparse_data()$dim_data_entry)
+    shiny::observeEvent(input$sparse_run, {
+        shiny::req(sparse_setup())
+        shiny::req(get_sparse_data()$dim_data_entry)
         shinyjs::show(id = "sparse_dims")
         shinyjs::show(id = "sparse_get_random")
     })
 
     output$sparse_allocation <- DT::renderDT({
-        req(get_sparse_data())
-        req(sparse_setup())
+        shiny::req(get_sparse_data())
+        shiny::req(sparse_setup())
         data_without_checks <- get_sparse_data()$data_without_checks
         sparse_lines <- single_inputs()$sparse_lines
 
@@ -623,7 +622,7 @@ mod_sparse_allocation_server <- function(id){
     output$multi_loc_data_input <- DT::renderDT({
       test <- randomize_hit$times > 0 & user_tries$tries > 0
       if (!test) return(NULL)
-      req(sparse_design())
+      shiny::req(sparse_design())
       # Entries of each location, with the uploaded data merged in
       list_locs <- sparse_design()$list_locs
       # Combine the data frames into a single data frame with
@@ -649,9 +648,9 @@ mod_sparse_allocation_server <- function(id){
     })
 
     
-    field_dimensions_diagonal <- eventReactive(input$sparse_get_random, {
-      req(sparse_setup())
-      req(input$sparse_dims)
+    field_dimensions_diagonal <- shiny::eventReactive(input$sparse_get_random, {
+      shiny::req(sparse_setup())
+      shiny::req(input$sparse_dims)
       dims <- unlist(strsplit(input$sparse_dims, " x "))
       d_row <- as.numeric(dims[1])
       d_col <- as.numeric(dims[2])
@@ -664,37 +663,37 @@ mod_sparse_allocation_server <- function(id){
                                                      sep = ""))
     )
     
-    toListen <- reactive({
+    toListen <- shiny::reactive({
       list(input$input_sparse_data, kindExpt_single)
     })
     
     entriesInfoModal_SUDC <- function() {
-      modalDialog(
-        title = div(tags$h3("Important message", style = "color: red;")),
-        h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
-        renderTable(entryListFormat_SUDC,
+      shiny::modalDialog(
+        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
+        shiny::h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
+        shiny::renderTable(entryListFormat_SUDC,
                     bordered = TRUE,
                     align  = 'c',
                     striped = TRUE),
-        h4("Note that the controls must be in the first rows of the CSV file."),
+        shiny::h4("Note that the controls must be in the first rows of the CSV file."),
         easyClose = FALSE
       )
     }
 
-    observeEvent(toListen(), {
+    shiny::observeEvent(toListen(), {
       if (input$input_sparse_data == "Yes" && kindExpt_single == "SUDC") {
-        showModal(
+        shiny::showModal(
           entriesInfoModal_SUDC()
         )
       }
     })
 
-    available_percent_table <- eventReactive(input$sparse_get_random, {
-      req(input$sparse_dims)
-      req(sparse_setup()$size_locations)
+    available_percent_table <- shiny::eventReactive(input$sparse_get_random, {
+      shiny::req(input$sparse_dims)
+      shiny::req(sparse_setup()$size_locations)
       sparse_checks <- as.numeric(getChecks()$sparse_checks)
       lines_within_loc <- as.numeric(sparse_setup()$size_locations[1])
-      req(field_dimensions_diagonal())
+      shiny::req(field_dimensions_diagonal())
       Option_NCD <- TRUE
       checksEntries <- as.vector(getChecks()$checksEntries)
       planter_mov <- single_inputs()$planter_mov
@@ -714,20 +713,20 @@ mod_sparse_allocation_server <- function(id){
       )
     })
 
-    observeEvent(available_percent_table()$dt, {
+    shiny::observeEvent(available_percent_table()$dt, {
           my_out <- available_percent_table()$dt
           my_percent <- my_out[,2]
           len <- length(my_percent)
           selected <- my_percent[len]
           
-          updateSelectInput(session = session,
+          shiny::updateSelectInput(session = session,
                             inputId = 'percent_checks',
                             label = "Choose % of Checks:",
                             choices = my_percent,
                             selected = selected)
     })
     
-    observeEvent(list_to_observe(), {
+    shiny::observeEvent(list_to_observe(), {
       if (randomize_hit$times > 0 & user_tries$tries > 0) {
         shinyjs::show(id = "percent_checks")
       } else {
@@ -735,29 +734,29 @@ mod_sparse_allocation_server <- function(id){
       }
     })
 
-    observeEvent(list_to_observe(), { #  user_tries$tries
-      output$sparse_download <- renderUI({
+    shiny::observeEvent(list_to_observe(), { #  user_tries$tries
+      output$sparse_download <- shiny::renderUI({
         if (randomize_hit$times > 0 & user_tries$tries > 0) {
-          downloadButton(ns("downloadData_Diagonal"),
+          shiny::downloadButton(ns("downloadData_Diagonal"),
                           "Save Experiment",
                           style = "width:100%")
         }
       })
     })
 
-    plot_number_sites <- reactive({
-      req(single_inputs())
+    plot_number_sites <- shiny::reactive({
+      shiny::req(single_inputs())
       if (is.null(single_inputs()$plotNumber)) {
-        validate("Plot starting number is missing.")
+        shiny::validate("Plot starting number is missing.")
       }
       l <- single_inputs()$sites
       plotNumber <- single_inputs()$plotNumber
       if(!is.numeric(plotNumber) && !is.integer(plotNumber)) {
-        validate("plotNumber should be an integer or a numeric vector.")
+        shiny::validate("plotNumber should be an integer or a numeric vector.")
       }
 
       if (anyNA(plotNumber) || any(plotNumber %% 1 != 0)) {
-        validate("plotNumber should be integers.")
+        shiny::validate("plotNumber should be integers.")
       }
       if (!is.null(l)) {
         if (is.null(plotNumber) || length(plotNumber) != l) {
@@ -765,7 +764,7 @@ mod_sparse_allocation_server <- function(id){
             plotNumber <- seq(1001, 1000*(l+1), 1000)
           } else plotNumber <- 1001
         }
-      }else validate("Number of locations/sites is missing")
+      }else shiny::validate("Number of locations/sites is missing")
 
       return(plotNumber)
     })
@@ -773,21 +772,21 @@ mod_sparse_allocation_server <- function(id){
     # The design of every location, built by sparse_allocation() from the
     # allocation computed at Run! and the dimensions and percentage of
     # checks chosen by the user. Every output is taken from this object.
-    sparse_design <- reactive({
+    sparse_design <- shiny::reactive({
       # The field dimensions and options table are those of the last
       # Randomize!, which must come after the last Run!
-      req(randomize_hit$times > 0 & user_tries$tries > 0)
-      req(input$sparse_dims)
-      req(sparse_setup())
-      req(get_sparse_data())
-      req(field_dimensions_diagonal())
-      req(available_percent_table()$dt)
-      req(single_inputs()$seed_number)
+      shiny::req(randomize_hit$times > 0 & user_tries$tries > 0)
+      shiny::req(input$sparse_dims)
+      shiny::req(sparse_setup())
+      shiny::req(get_sparse_data())
+      shiny::req(field_dimensions_diagonal())
+      shiny::req(available_percent_table()$dt)
+      shiny::req(single_inputs()$seed_number)
       # Wait until the percentage selector holds one of the options of the
       # current field (it is updated after the options table)
       percent <- suppressWarnings(as.numeric(input$percent_checks))
       options_percent <- as.numeric(available_percent_table()$dt[,2])
-      req(isTruthy(percent), any(abs(options_percent - percent) < 1e-6))
+      shiny::req(shiny::isTruthy(percent), any(abs(options_percent - percent) < 1e-6))
       sparse_data_input <- NULL
       if (get_sparse_data()$upload) {
         sparse_data_input <- get_sparse_data()$data_entry
@@ -827,10 +826,10 @@ mod_sparse_allocation_server <- function(id){
     output$randomized_layout <- DT::renderDT({
       test <- randomize_hit$times > 0 & user_tries$tries > 0
       if (!test) return(NULL)
-      req(input$sparse_dims)
-      req(sparse_design())
+      shiny::req(input$sparse_dims)
+      shiny::req(sparse_design())
       user_site <- as.numeric(input$sparse_loc_view)
-      req(user_site <= length(sparse_design()$layoutRandom))
+      shiny::req(user_site <= length(sparse_design()$layoutRandom))
       r_map <- sparse_design()$layoutRandom[[user_site]]
       if (is.null(r_map))
         return(NULL)
@@ -869,9 +868,9 @@ mod_sparse_allocation_server <- function(id){
     output$plot_number_layout <- DT::renderDT({
       test <- randomize_hit$times > 0 & user_tries$tries > 0
       if (!test) return(NULL)
-      req(sparse_design())
+      shiny::req(sparse_design())
       user_site <- as.numeric(input$sparse_loc_view)
-      req(user_site <= length(sparse_design()$plotsNumber))
+      shiny::req(user_site <= length(sparse_design()$plotsNumber))
       plot_num <- sparse_design()$plotsNumber[[user_site]]
       if (is.null(plot_num))
         return(NULL)
@@ -895,79 +894,79 @@ mod_sparse_allocation_server <- function(id){
       )
     })
 
-    valsDIAG <- reactiveValues(ROX = NULL, ROY = NULL, trail = NULL, minValue = NULL,
+    valsDIAG <- shiny::reactiveValues(ROX = NULL, ROY = NULL, trail = NULL, minValue = NULL,
                                maxValue = NULL)
     
     simuModal_DIAG <- function(failed = FALSE) {
-      modalDialog(
-        fluidRow(
-          column(6,
-                 selectInput(inputId = ns("trailsDIAG"), label = "Select One:",
+      shiny::modalDialog(
+        shiny::fluidRow(
+          shiny::column(6,
+                 shiny::selectInput(inputId = ns("trailsDIAG"), label = "Select One:",
                              choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
           )
         ),
-        conditionalPanel("input.trailsDIAG == 'Other'", ns = ns,
-                         textInput(inputId = ns("OtherDIAG"), label = "Input Trial Name:", value = NULL)
+        shiny::conditionalPanel("input.trailsDIAG == 'Other'", ns = ns,
+                         shiny::textInput(inputId = ns("OtherDIAG"), label = "Input Trial Name:", value = NULL)
         ),
-        fluidRow(
-          column(6,
-                 selectInput(inputId = ns("ROX.DIAG"), "Select the Correlation in Rows:",
+        shiny::fluidRow(
+          shiny::column(6,
+                 shiny::selectInput(inputId = ns("ROX.DIAG"), "Select the Correlation in Rows:",
                              choices = seq(0.1, 0.9, 0.1), selected = 0.5)
           ),
-          column(6,
-                 selectInput(inputId = ns("ROY.DIAG"), "Select the Correlation in Cols:",
+          shiny::column(6,
+                 shiny::selectInput(inputId = ns("ROY.DIAG"), "Select the Correlation in Cols:",
                              choices = seq(0.1, 0.9, 0.1), selected = 0.5)
           )
         ),
-        fluidRow(
-          column(6,
-                 numericInput(inputId = ns("min.diag"), "Input the min value:", value = NULL)
+        shiny::fluidRow(
+          shiny::column(6,
+                 shiny::numericInput(inputId = ns("min.diag"), "Input the min value:", value = NULL)
           ),
-          column(6,
-                 numericInput(inputId = ns("max.diag"), "Input the max value:", value = NULL)
+          shiny::column(6,
+                 shiny::numericInput(inputId = ns("max.diag"), "Input the max value:", value = NULL)
           )
         ),
         if (failed)
-          div(tags$b("Invalid input of data max and min", style = "color: red;")),
-        footer = tagList(
-          modalButton("Cancel"),
-          actionButton(inputId = ns("ok_simu_single"), "GO")
+          shiny::div(shiny::tags$b("Invalid input of data max and min", style = "color: red;")),
+        footer = shiny::tagList(
+          shiny::modalButton("Cancel"),
+          shiny::actionButton(inputId = ns("ok_simu_single"), "GO")
         )
       )
     }
     
-    observeEvent(input$sparse_simulate, {
-      req(sparse_design()$fieldBook)
-      showModal(
+    shiny::observeEvent(input$sparse_simulate, {
+      shiny::req(sparse_design()$fieldBook)
+      shiny::showModal(
         simuModal_DIAG()
       )
     })
     
-    observeEvent(input$ok_simu_single, {
-      req(input$min.diag, input$max.diag)
+    shiny::observeEvent(input$ok_simu_single, {
+      shiny::req(input$min.diag, input$max.diag)
       if (input$max.diag > input$min.diag && input$min.diag != input$max.diag) {
         valsDIAG$maxValue <- input$max.diag
         valsDIAG$minValue  <- input$min.diag
         valsDIAG$ROX <- as.numeric(input$ROX.DIAG)
         valsDIAG$ROY <- as.numeric(input$ROY.DIAG)
         if(input$trailsDIAG == "Other") {
-          req(input$OtherDIAG)
+          shiny::req(input$OtherDIAG)
           if(!is.null(input$OtherDIAG)) {
             valsDIAG$trail <- as.character(input$OtherDIAG)
-          }else showModal(simuModal_DIAG(failed = TRUE))
+          }else shiny::showModal(simuModal_DIAG(failed = TRUE))
         }else {
           valsDIAG$trail <- as.character(input$trailsDIAG)
         }
-        removeModal()
+        shiny::removeModal()
       }else {
-        showModal(
+        shiny::showModal(
           simuModal_DIAG(failed = TRUE)
         )
       }
     })
     
-    simudata_DIAG <- reactive({
-      req(sparse_design()$fieldBook)
+    simudata_DIAG <- shiny::reactive({
+      shiny::req(sparse_design()$fieldBook)
       field_book <- sparse_design()$fieldBook
       if (is.null(valsDIAG$maxValue) || is.null(valsDIAG$minValue) ||
           is.null(valsDIAG$trail)) {
@@ -986,27 +985,27 @@ mod_sparse_allocation_server <- function(id){
       list(df = simulation$field_book, dfSimulationList = simulation$simulations)
     })
 
-    heat_map <- reactiveValues(heat_map_option = FALSE)
+    heat_map <- shiny::reactiveValues(heat_map_option = FALSE)
     
-    observeEvent(input$ok_simu_single, {
-      req(input$min.diag, input$max.diag)
+    shiny::observeEvent(input$ok_simu_single, {
+      shiny::req(input$min.diag, input$max.diag)
       if (input$max.diag > input$min.diag && input$min.diag != input$max.diag) {
         heat_map$heat_map_option <- TRUE
       }
     })
 
-    observeEvent(heat_map$heat_map_option, {
+    shiny::observeEvent(heat_map$heat_map_option, {
       if (heat_map$heat_map_option == FALSE) {
-        hideTab(inputId = "sparse_tabset_single", target = "Heatmap")
+        shiny::hideTab(inputId = "sparse_tabset_single", target = "Heatmap")
       } else {
-        showTab(inputId = "sparse_tabset_single", target = "Heatmap")
+        shiny::showTab(inputId = "sparse_tabset_single", target = "Heatmap")
       }
     })
 
     output$fieldBook_diagonal <- DT::renderDT({
       test <- randomize_hit$times > 0 & user_tries$tries > 0
       if (!test) return(NULL)
-      req(simudata_DIAG()$df)
+      shiny::req(simudata_DIAG()$df)
       df <- simudata_DIAG()$df
       df$EXPT <- as.factor(df$EXPT)
       df$LOCATION <- as.factor(df$LOCATION)
@@ -1026,8 +1025,8 @@ mod_sparse_allocation_server <- function(id){
     })
     
     
-    heatmap_obj_D <- reactive({
-      req(simudata_DIAG()$dfSimulationList)
+    heatmap_obj_D <- shiny::reactive({
+      shiny::req(simudata_DIAG()$dfSimulationList)
       loc_user <- as.numeric(input$sparse_loc_view)
       w <- as.character(valsDIAG$trail)
       df <- simudata_DIAG()$dfSimulationList[[loc_user]]
@@ -1044,13 +1043,13 @@ mod_sparse_allocation_server <- function(id){
     output$heatmap_diag <- plotly::renderPlotly({
       test <- randomize_hit$times > 0 & user_tries$tries > 0
       if (!test) return(NULL)
-      req(heatmap_obj_D())
+      shiny::req(heatmap_obj_D())
       heatmap_obj_D()
     })
     
-    output$downloadData_Diagonal <- downloadHandler(
+    output$downloadData_Diagonal <- shiny::downloadHandler(
       filename = function() {
-        req(input$sparse_loc_names)
+        shiny::req(input$sparse_loc_names)
         loc <- input$sparse_loc_names
         loc <- paste(loc, "_", "Diagonal_", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")

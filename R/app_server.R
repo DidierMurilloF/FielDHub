@@ -10,7 +10,6 @@
 #'         Johan Aparicio [ctb], 
 #'         Richard Horsley [ctb]
 #'              
-#' @import shiny
 #' @noRd
 app_server <- function( input, output, session ) {
   registry <- fieldhub_app_registry()

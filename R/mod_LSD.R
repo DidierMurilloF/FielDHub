@@ -6,15 +6,14 @@
 #'
 #' @noRd 
 #'
-#' @importFrom shiny NS tagList 
 mod_LSD_ui <- function(id){
-  ns <- NS(id)
-  tagList(
-    h4("Latin Square Design"),
-    sidebarLayout(
-      sidebarPanel(
+  ns <- shiny::NS(id)
+  shiny::tagList(
+    shiny::h4("Latin Square Design"),
+    shiny::sidebarLayout(
+      shiny::sidebarPanel(
         width = 4,
-        radioButtons(inputId = ns("owndataLSD"), 
+        shiny::radioButtons(inputId = ns("owndataLSD"),
                      label = "Import entries' list?", 
                      choices = c("Yes", "No"), 
                      selected = "No",
@@ -23,17 +22,17 @@ mod_LSD_ui <- function(id){
                      choiceNames = NULL, 
                      choiceValues = NULL), 
         
-        conditionalPanel(
+        shiny::conditionalPanel(
           condition = "input.owndataLSD == 'Yes'", 
           ns = ns,
-          fluidRow(
-            column(8, style=list("padding-right: 28px;"),
-                   fileInput(ns("file.LSD"), 
+          shiny::fluidRow(
+            shiny::column(8, style=list("padding-right: 28px;"),
+                   shiny::fileInput(ns("file.LSD"),
                              label = "Upload a CSV File:", 
                              multiple = FALSE)),
             
-            column(4,style=list("padding-left: 5px;"),
-                   radioButtons(ns("sep.lsd"), "Separator",
+            shiny::column(4,style=list("padding-left: 5px;"),
+                   shiny::radioButtons(ns("sep.lsd"), "Separator",
                                 choices = c(Comma = ",",
                                             Semicolon = ";",
                                             Tab = "\t"),
@@ -41,84 +40,84 @@ mod_LSD_ui <- function(id){
           )             
         ),
         
-        conditionalPanel(
+        shiny::conditionalPanel(
           condition = "input.owndataLSD != 'Yes'", ns = ns,
                          
-          numericInput(ns("n.lsd"), 
+          shiny::numericInput(ns("n.lsd"),
                        label = "Input # of Treatments:",
                        value = 5, 
                        min = 2),             
         ),
         
-        numericInput(ns("reps.lsd"), 
+        shiny::numericInput(ns("reps.lsd"),
                      label = "Input # of Full Reps (Squares):",
                      value = 1, 
                      min = 1),
-        selectInput(inputId = ns("planter.lsd"), 
+        shiny::selectInput(inputId = ns("planter.lsd"),
                     label = "Plot Order Layout:",
                     choices = c("serpentine", "cartesian"), 
                     multiple = FALSE,
                     selected = "serpentine"),
-        fluidRow(
-          column(6, style=list("padding-right: 28px;"),
-                 textInput(ns("plot_start.lsd"), 
+        shiny::fluidRow(
+          shiny::column(6, style=list("padding-right: 28px;"),
+                 shiny::textInput(ns("plot_start.lsd"),
                            "Starting Plot Number:", 
                            value = 101)
           ),
-          column(6,style=list("padding-left: 5px;"),
-                 textInput(ns("Location.lsd"), 
+          shiny::column(6,style=list("padding-left: 5px;"),
+                 shiny::textInput(ns("Location.lsd"),
                            "Input Location:", 
                            value = "FARGO")
           )
         ),
-        numericInput(ns("seed.lsd"), 
+        shiny::numericInput(ns("seed.lsd"),
                      label = "Random Seed:", 
                      value = 123, 
                      min = 1),
         
-        fluidRow(
-          column(6,
-                 actionButton(
+        shiny::fluidRow(
+          shiny::column(6,
+                 shiny::actionButton(
                    inputId = ns("RUN.lsd"), 
                    label = "Run!", 
-                   icon = icon("circle-nodes", verify_fa = FALSE),
+                   icon = shiny::icon("circle-nodes", verify_fa = FALSE),
                    width = '100%'),
           ),
-          column(6,
-                 actionButton(
+          shiny::column(6,
+                 shiny::actionButton(
                    ns("Simulate.lsd"), 
                    label = "Simulate!", 
-                   icon = icon("greater-than-equal", verify_fa = FALSE),
+                   icon = shiny::icon("greater-than-equal", verify_fa = FALSE),
                    width = '100%'),
           )
           
         ), 
-        br(),
-        downloadButton(ns("downloadData.lsd"), 
+        shiny::br(),
+        shiny::downloadButton(ns("downloadData.lsd"),
                        "Save Experiment!", 
                        style = "width:100%")
                    
       ),
-      mainPanel(width = 8,
-          fluidRow(
-            tabsetPanel(
-              tabPanel("Field Layout",
+      shiny::mainPanel(width = 8,
+          shiny::fluidRow(
+            shiny::tabsetPanel(
+              shiny::tabPanel("Field Layout",
                        shinyjs::useShinyjs(),
                        shinyjs::hidden(
-                         downloadButton(
+                         shiny::downloadButton(
                            ns("downloadCsv.lsd"), 
                            label =  "CSV",
-                           icon = icon("file-csv"), 
+                           icon = shiny::icon("file-csv"),
                            width = '10%',
                            style="color: #337ab7; background-color: #fff; border-color: #2e6da4")
                         ),
                        plotly::plotlyOutput(ns("layout_lsd"),
                                             width = "97%",
                                             height = "550px"),
-                       br(),
-                       column(12, uiOutput(ns("well_panel_layout_LSD")))
+                       shiny::br(),
+                       shiny::column(12, shiny::uiOutput(ns("well_panel_layout_LSD")))
               ),
-              tabPanel("Field Book", 
+              shiny::tabPanel("Field Book",
                        fieldhub_spinner(
                          DT::DTOutput(ns("LSD_fieldbook")), 
                          type = 5
@@ -135,7 +134,7 @@ mod_LSD_ui <- function(id){
 #'
 #' @noRd 
 mod_LSD_server <- function(id){
-  moduleServer( id, function(input, output, session){
+  shiny::moduleServer( id, function(input, output, session){
     
     ns <- session$ns
     
@@ -147,11 +146,11 @@ mod_LSD_server <- function(id){
            TREATMENT = paste("Diet", 1:5, sep = ""))
     )
     entriesInfoModal_LSD <- function() {
-      modalDialog(
-        title = div(tags$h3("Important message",
+      shiny::modalDialog(
+        title = shiny::div(shiny::tags$h3("Important message",
                             style = "color: red;")),
-        h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
-        renderTable(entryListFormat_LSD,
+        shiny::h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
+        shiny::renderTable(entryListFormat_LSD,
                     bordered = TRUE,
                     align = 'c',
                     striped = TRUE),
@@ -159,23 +158,23 @@ mod_LSD_server <- function(id){
       )
     }
     
-    toListen <- reactive({
+    toListen <- shiny::reactive({
       list(input$owndataLSD)
     })
     
-    observeEvent(toListen(), {
+    shiny::observeEvent(toListen(), {
       if (input$owndataLSD == "Yes") {
-        showModal(
+        shiny::showModal(
           entriesInfoModal_LSD()
         )
       }
     })
     
     
-    get_data_lsd <- reactive({
+    get_data_lsd <- shiny::reactive({
       if (input$owndataLSD == "Yes") {
-        req(input$file.LSD)
-        req(input$sep.lsd)
+        shiny::req(input$file.LSD)
+        shiny::req(input$sep.lsd)
         inFile <- input$file.LSD
         data_ingested <- load_file(name = inFile$name, 
                                 path = inFile[["datapath"]],
@@ -198,15 +197,15 @@ mod_LSD_server <- function(id){
     })
     
     
-    lsd_inputs <- reactive({
+    lsd_inputs <- shiny::reactive({
       
-      req(input$plot_start.lsd)
-      req(input$Location.lsd)
-      req(input$reps.lsd)
-      req(input$seed.lsd)
+      shiny::req(input$plot_start.lsd)
+      shiny::req(input$Location.lsd)
+      shiny::req(input$reps.lsd)
+      shiny::req(input$seed.lsd)
       
       if (input$owndataLSD == "Yes") {
-        req(get_data_lsd())
+        shiny::req(get_data_lsd())
         n.lsd <- NULL
         reps.lsd <- as.numeric(input$reps.lsd)
         data.lsd <- get_data_lsd()$data_lsd
@@ -220,7 +219,7 @@ mod_LSD_server <- function(id){
           return(NULL)
         }
       } else {
-        req(input$n.lsd)
+        shiny::req(input$n.lsd)
         n <- as.numeric(input$n.lsd)
         if (n > 10) {
           shinyalert::shinyalert(
@@ -252,11 +251,11 @@ mod_LSD_server <- function(id){
         seed = seed.number.lsd)
       )
     }) |>
-      bindEvent(input$RUN.lsd)
+      shiny::bindEvent(input$RUN.lsd)
     
-    latinsquare_reactive <- reactive({
+    latinsquare_reactive <- shiny::reactive({
       
-      req(lsd_inputs())
+      shiny::req(lsd_inputs())
       
       shinyjs::show(id = "downloadCsv.lsd")
       
@@ -271,12 +270,12 @@ mod_LSD_server <- function(id){
       ))
       
     }) |> 
-      bindEvent(input$RUN.lsd)
+      shiny::bindEvent(input$RUN.lsd)
     
     
-    output$well_panel_layout_LSD <- renderUI({
-      req(latinsquare_reactive()$fieldBook)
-      req(latinsquare_reactive())
+    output$well_panel_layout_LSD <- shiny::renderUI({
+      shiny::req(latinsquare_reactive()$fieldBook)
+      shiny::req(latinsquare_reactive())
       obj_lsd <- latinsquare_reactive()
       allBooks_lsd <- plot_layout(x = obj_lsd, 
                                  layout = 1,
@@ -287,21 +286,21 @@ mod_LSD_server <- function(id){
       stacked_lsd <- c("Vertical Stack Panel" = "vertical", 
                           "Horizontal Stack Panel" = "horizontal")
       nBooks_lsd <- length(allBooks_lsd)
-      wellPanel(
-        column(3,
-               radioButtons(ns("typlotLSD"), "Type of Plot:",
+      shiny::wellPanel(
+        shiny::column(3,
+               shiny::radioButtons(ns("typlotLSD"), "Type of Plot:",
                             c("Entries/Treatments" = 1,
                               "Plots" = 2,
                               "Heatmap" = 3))
         ),
-        fluidRow(
-          column(3,
-                 selectInput(inputId = ns("stackedLSD"),
+        shiny::fluidRow(
+          shiny::column(3,
+                 shiny::selectInput(inputId = ns("stackedLSD"),
                              label = "Reps layout:",
                              choices = stacked_lsd),
           ),
-          column(3, 
-                 selectInput(inputId = ns("layoutO_lsd"), 
+          shiny::column(3,
+                 shiny::selectInput(inputId = ns("layoutO_lsd"),
                              label = "Layout option:", 
                              choices = layoutOptions_lsd)
           )
@@ -309,9 +308,9 @@ mod_LSD_server <- function(id){
       )
     })
     
-    observeEvent(input$stackedLSD, {
-      req(input$stackedLSD)
-      req(lsd_inputs())
+    shiny::observeEvent(input$stackedLSD, {
+      shiny::req(input$stackedLSD)
+      shiny::req(lsd_inputs())
       obj_lsd <- latinsquare_reactive()
       allBooks <- try(plot_layout(x = obj_lsd, 
                                   layout = 1, 
@@ -320,7 +319,7 @@ mod_LSD_server <- function(id){
                       silent = TRUE)
       nBooks <- length(allBooks)
       NewlayoutOptions <- 1:nBooks
-      updateSelectInput(session = session, inputId = 'layoutO_lsd',
+      shiny::updateSelectInput(session = session, inputId = 'layoutO_lsd',
                         label = "Layout option:",
                         choices = NewlayoutOptions,
                         selected = 1
@@ -328,20 +327,20 @@ mod_LSD_server <- function(id){
     })
     
     
-    reset_selection <- reactiveValues(reset = 0)
+    reset_selection <- shiny::reactiveValues(reset = 0)
     
-    observeEvent(input$stackedLSD, {
+    shiny::observeEvent(input$stackedLSD, {
       reset_selection$reset <- 1
     })
     
-    observeEvent(input$layoutO_lsd, {
+    shiny::observeEvent(input$layoutO_lsd, {
       reset_selection$reset <- 0
     })
     
-    reactive_layoutLSD <- reactive({
-      req(input$layoutO_lsd)
-      req(latinsquare_reactive())
-      req(lsd_inputs()$planter)
+    reactive_layoutLSD <- shiny::reactive({
+      shiny::req(input$layoutO_lsd)
+      shiny::req(latinsquare_reactive())
+      shiny::req(lsd_inputs()$planter)
       obj_lsd <- latinsquare_reactive()
       if (reset_selection$reset == 1) {
         opt_lsd <- 1
@@ -355,75 +354,75 @@ mod_LSD_server <- function(id){
           silent = TRUE)
     })
     
-    valsLSD <- reactiveValues(maxV.lsd = NULL, 
+    valsLSD <- shiny::reactiveValues(maxV.lsd = NULL,
                               minV.lsd = NULL, 
                               trail.lsd = NULL)
     
     simuModal.lsd <- function(failed = FALSE) {
-      modalDialog(
-        selectInput(inputId = ns("trailsLSD"), 
+      shiny::modalDialog(
+        shiny::selectInput(inputId = ns("trailsLSD"),
                     label = "Select One:", 
                     choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
-        conditionalPanel(
+        shiny::conditionalPanel(
           condition = "input.trailsLSD == 'Other'", ns = ns,
-          textInput(inputId = ns("OtherLSD"), 
+          shiny::textInput(inputId = ns("OtherLSD"),
                     label = "Input Trial Name:", 
                     value = NULL)
         ),
-        fluidRow(
-          column(6, 
-                 numericInput(ns("min.lsd"), 
+        shiny::fluidRow(
+          shiny::column(6,
+                 shiny::numericInput(ns("min.lsd"),
                               "Input the min value", 
                               value = NULL)
           ),
-          column(6, 
-                 numericInput(ns("max.lsd"), 
+          shiny::column(6,
+                 shiny::numericInput(ns("max.lsd"),
                               "Input the max value", 
                               value = NULL)
           )
         ),
         
         if (failed)
-          div(tags$b("Invalid input of data max and min", 
+          shiny::div(shiny::tags$b("Invalid input of data max and min",
                      style = "color: red;")),
         
-        footer = tagList(
-          modalButton("Cancel"),
-          actionButton(ns("ok.lsd"), "GO")
+        footer = shiny::tagList(
+          shiny::modalButton("Cancel"),
+          shiny::actionButton(ns("ok.lsd"), "GO")
         )
       )
     }
-    observeEvent(input$Simulate.lsd, {
-      req(latinsquare_reactive()$fieldBook)
-      showModal(
+    shiny::observeEvent(input$Simulate.lsd, {
+      shiny::req(latinsquare_reactive()$fieldBook)
+      shiny::showModal(
         simuModal.lsd()
       )
     })
     
-    observeEvent(input$ok.lsd, {
-      req(input$max.lsd, input$min.lsd)
+    shiny::observeEvent(input$ok.lsd, {
+      shiny::req(input$max.lsd, input$min.lsd)
       if (input$max.lsd > input$min.lsd && input$min.lsd != input$max.lsd) {
         valsLSD$maxV.lsd <- input$max.lsd
         valsLSD$minV.lsd <- input$min.lsd
         if(input$trailsLSD == "Other") {
-          req(input$OtherLSD)
+          shiny::req(input$OtherLSD)
           if(!is.null(input$OtherLSD)) {
             valsLSD$trail.lsd <- input$OtherLSD
-          }else showModal(simuModal.lsd(failed = TRUE))
+          }else shiny::showModal(simuModal.lsd(failed = TRUE))
         }else {
           valsLSD$trail.lsd <- as.character(input$trailsLSD)
         }
-        removeModal()
+        shiny::removeModal()
       }else {
-        showModal(
+        shiny::showModal(
           simuModal.lsd(failed = TRUE)
         )
       }
     })
     
     
-    simuDataLSD <- reactive({
-      req(latinsquare_reactive()$fieldBook)
+    simuDataLSD <- shiny::reactive({
+      shiny::req(latinsquare_reactive()$fieldBook)
       if(!is.null(valsLSD$maxV.lsd) && !is.null(valsLSD$minV.lsd) && 
          !is.null(valsLSD$trail.lsd)) {
         max <- as.numeric(valsLSD$maxV.lsd)
@@ -446,16 +445,16 @@ mod_LSD_server <- function(id){
     })
     
     heatmapInfoModal_LSD <- function() {
-      modalDialog(
-        title = div(tags$h3("Important message", 
+      shiny::modalDialog(
+        title = shiny::div(shiny::tags$h3("Important message",
                             style = "color: red;")),
-        h4("Simulate some data to see a heatmap!"),
+        shiny::h4("Simulate some data to see a heatmap!"),
         easyClose = TRUE
       )
     }
     
-    heatmap_obj <- reactive({
-      req(simuDataLSD()$df)
+    heatmap_obj <- shiny::reactive({
+      shiny::req(simuDataLSD()$df)
       if (ncol(simuDataLSD()$df) == 10) {
         locs <- factor(simuDataLSD()$df$LOCATION, levels = unique(simuDataLSD()$df$LOCATION))
         locLevels <- levels(locs)
@@ -498,7 +497,7 @@ mod_LSD_server <- function(id){
         p2 <- plotly::ggplotly(p1, tooltip="text", height = 560)
         return(p2)
       } else {
-        showModal(
+        shiny::showModal(
           heatmapInfoModal_LSD()
         )
         return(NULL)
@@ -506,15 +505,15 @@ mod_LSD_server <- function(id){
     })
     
     output$layout_lsd <- plotly::renderPlotly({
-      req(reactive_layoutLSD())
-      req(latinsquare_reactive())
-      req(input$typlotLSD)
+      shiny::req(reactive_layoutLSD())
+      shiny::req(latinsquare_reactive())
+      shiny::req(input$typlotLSD)
       if (input$typlotLSD == 1) {
         reactive_layoutLSD()$out_layout
       } else if (input$typlotLSD == 2) {
         reactive_layoutLSD()$out_layoutPlots
       } else {
-        req(heatmap_obj())
+        shiny::req(heatmap_obj())
         heatmap_obj()
       }
     })
@@ -541,7 +540,7 @@ mod_LSD_server <- function(id){
       
     })
     
-    output$downloadData.lsd <- downloadHandler(
+    output$downloadData.lsd <- shiny::downloadHandler(
       filename = function() {
         loc <- paste("Latin_Square_", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
@@ -552,10 +551,10 @@ mod_LSD_server <- function(id){
       }
     )
     
-    csv_data <- reactive({
-      req(simuDataLSD()$df)
+    csv_data <- shiny::reactive({
+      shiny::req(simuDataLSD()$df)
       df <- simuDataLSD()$df
-      req(input$typlotLSD)
+      shiny::req(input$typlotLSD)
       if (input$typlotLSD == 2) {
         export_layout(df, 1, TRUE)
       } else {
@@ -565,7 +564,7 @@ mod_LSD_server <- function(id){
     
     
     # Downloadable csv of selected dataset ----
-    output$downloadCsv.lsd <- downloadHandler(
+    output$downloadCsv.lsd <- shiny::downloadHandler(
       filename = function() {
         loc <- paste("Latin_Square_Layout", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")

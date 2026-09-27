@@ -6,15 +6,14 @@
 #'
 #' @noRd 
 #'
-#' @importFrom shiny NS tagList 
 mod_RowCol_ui <- function(id){
-  ns <- NS(id)
-  tagList(
-    h4("Row-Column Design"),
-    sidebarLayout(
-      sidebarPanel(width = 4,
+  ns <- shiny::NS(id)
+  shiny::tagList(
+    shiny::h4("Row-Column Design"),
+    shiny::sidebarLayout(
+      shiny::sidebarPanel(width = 4,
 
-                   radioButtons(inputId = ns("owndataRCD"), 
+                   shiny::radioButtons(inputId = ns("owndataRCD"),
                                 label = "Import entries' list?",
                                 choices = c("Yes", "No"), 
                                 selected = "No",
@@ -23,16 +22,16 @@ mod_RowCol_ui <- function(id){
                                 choiceNames = NULL, 
                                 choiceValues = NULL),
                    
-                   conditionalPanel(
+                   shiny::conditionalPanel(
                      condition = "input.owndataRCD == 'Yes'", 
                      ns = ns,
-                     fluidRow(
-                       column(8, style=list("padding-right: 28px;"),
-                              fileInput(ns("file.RCD"), 
+                     shiny::fluidRow(
+                       shiny::column(8, style=list("padding-right: 28px;"),
+                              shiny::fileInput(ns("file.RCD"),
                                         label = "Upload a csv File:", 
                                         multiple = FALSE)),
-                       column(4,style=list("padding-left: 5px;"),
-                              radioButtons(ns("sep.rcd"), "Separator",
+                       shiny::column(4,style=list("padding-left: 5px;"),
+                              shiny::radioButtons(ns("sep.rcd"), "Separator",
                                            choices = c(Comma = ",",
                                                        Semicolon = ";",
                                                        Tab = "\t"),
@@ -41,90 +40,90 @@ mod_RowCol_ui <- function(id){
                        )
                     )
                    ),
-                   conditionalPanel(
+                   shiny::conditionalPanel(
                      condition = "input.owndataRCD != 'Yes'",
                      ns = ns,
-                     numericInput(ns("t.rcd"), 
+                     shiny::numericInput(ns("t.rcd"),
                                   label = "Input # of Treatments:",
                                   value = 42,
                                   min = 2),
                    ),
-                   fluidRow(
-                     column(6, style=list("padding-right: 28px;"),
-                            selectInput(inputId = ns("k.rcd"), 
+                   shiny::fluidRow(
+                     shiny::column(6, style=list("padding-right: 28px;"),
+                            shiny::selectInput(inputId = ns("k.rcd"),
                                         label = "Input # of Rows:",
                                         choices = ""),
                      ),
-                     column(6,style=list("padding-left: 5px;"),
-                            numericInput(ns("r.rcd"), 
+                     shiny::column(6,style=list("padding-left: 5px;"),
+                            shiny::numericInput(ns("r.rcd"),
                                          label = "Input # of Full Reps:",
                                          value = 2, 
                                          min = 2)
                      )
                    ),
-                   numericInput(inputId = ns("l.rcd"), 
+                   shiny::numericInput(inputId = ns("l.rcd"),
                                 label = "Input # of Locations:", 
                                 value = 1, min = 1),
-                   selectInput(inputId = ns("planter_mov_rcd"),
+                   shiny::selectInput(inputId = ns("planter_mov_rcd"),
                                label = "Plot Order Layout:",
                                choices = c("serpentine", "cartesian"),
                                multiple = FALSE,
                                selected = "serpentine"),
-                   fluidRow(
-                     column(6, style=list("padding-right: 28px;"),
-                            textInput(ns("plot_start.rcd"), 
+                   shiny::fluidRow(
+                     shiny::column(6, style=list("padding-right: 28px;"),
+                            shiny::textInput(ns("plot_start.rcd"),
                                       "Starting Plot Number:", 
                                       value = 101)
                      ),
-                     column(6, style=list("padding-left: 5px;"),
-                            textInput(ns("Location.rcd"), 
+                     shiny::column(6, style=list("padding-left: 5px;"),
+                            shiny::textInput(ns("Location.rcd"),
                                       "Input Location:", 
                                       value = "FARGO")
                      )
                    ),
-                   numericInput(ns("seed.rcd"), 
+                   shiny::numericInput(ns("seed.rcd"),
                                 label = "Random Seed:", 
                                 value = 2437),
-                   fluidRow(
-                     column(6,
-                            actionButton(
+                   shiny::fluidRow(
+                     shiny::column(6,
+                            shiny::actionButton(
                               inputId = ns("RUN.rcd"), 
                               label = "Run!", 
-                              icon = icon("circle-nodes", verify_fa = FALSE),
+                              icon = shiny::icon("circle-nodes", verify_fa = FALSE),
                               width = '100%'),
                      ),
-                     column(6,
-                            actionButton(
+                     shiny::column(6,
+                            shiny::actionButton(
                               ns("Simulate.RowCol"), 
                               label = "Simulate!", 
-                              icon = icon("greater-than-equal", verify_fa = FALSE),
+                              icon = shiny::icon("greater-than-equal", verify_fa = FALSE),
                               width = '100%'),
                      )
                    ), 
-                   br(),
-                   downloadButton(ns("downloadData.rowcolD"), 
+                   shiny::br(),
+                   shiny::downloadButton(ns("downloadData.rowcolD"),
                                   "Save Experiment!",
                                   style = "width:100%")
       ),
-      mainPanel(
+      shiny::mainPanel(
         width = 8,
-        fluidRow(
-          tabsetPanel(
-            tabPanel(
+        shiny::fluidRow(
+          shiny::tabsetPanel(
+            shiny::tabPanel(
               "Summary Design",
-              br(),
+              shiny::br(),
               fieldhub_spinner(
-                verbatimTextOutput(outputId = ns("summary_row_column"), 
+                shiny::verbatimTextOutput(outputId = ns("summary_row_column"),
                                    placeholder = FALSE), 
                 type = 4
               ),
               style = "padding-right: 40px;"
             ),
-            tabPanel("Field Layout",
+            shiny::tabPanel("Field Layout",
                      shinyjs::useShinyjs(),
-                     shinyjs::hidden(downloadButton(ns("downloadCsv.rcd"), 
+                     shinyjs::hidden(shiny::downloadButton(ns("downloadCsv.rcd"),
                                                     label =  "CSV",
-                                                    icon = icon("file-csv"), 
+                                                    icon = shiny::icon("file-csv"),
                                                     width = '10%',
                                                     style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
                      fieldhub_spinner(
@@ -132,10 +131,10 @@ mod_RowCol_ui <- function(id){
                                             width = "97%", 
                                             height = "550px"),
                        type = 5),
-                     br(),
-                     column(12,uiOutput(ns("well_panel_layout_ROWCOL")))
+                     shiny::br(),
+                     shiny::column(12,shiny::uiOutput(ns("well_panel_layout_ROWCOL")))
             ),
-            tabPanel("Field Book", 
+            shiny::tabPanel("Field Book",
                      fieldhub_spinner(DT::DTOutput(ns("rowcolD")),
                                                   type = 5)
             )
@@ -150,7 +149,7 @@ mod_RowCol_ui <- function(id){
 #'
 #' @noRd 
 mod_RowCol_server <- function(id){
-  moduleServer( id, function(input, output, session){
+  shiny::moduleServer( id, function(input, output, session){
     
     ns <- session$ns
     shinyjs::useShinyjs()
@@ -160,34 +159,34 @@ mod_RowCol_server <- function(id){
                                                       LETTERS[1:9], 
                                                       sep = "")))
     entriesInfoModal_RCD <- function() {
-      modalDialog(
-        title = div(tags$h3("Important message", style = "color: red;")),
-        h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
-        renderTable(entryListFormat_RCD,
+      shiny::modalDialog(
+        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
+        shiny::h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
+        shiny::renderTable(entryListFormat_RCD,
                     bordered = TRUE,
                     align = 'c',
                     striped = TRUE),
-        h4("Entry numbers can be any set of consecutive positive numbers."),
+        shiny::h4("Entry numbers can be any set of consecutive positive numbers."),
         easyClose = FALSE
       )
     }
     
-    toListen <- reactive({
+    toListen <- shiny::reactive({
       list(input$owndataRCD)
     })
     
-    observeEvent(toListen(), {
+    shiny::observeEvent(toListen(), {
       if (input$owndataRCD == "Yes") {
-        showModal(
+        shiny::showModal(
           entriesInfoModal_RCD()
         )
       }
     })
     
-    init_data_rcd <- reactive({
+    init_data_rcd <- shiny::reactive({
       
       if (input$owndataRCD == "Yes") {
-        req(input$file.RCD)
+        shiny::req(input$file.RCD)
         inFile <- input$file.RCD
         data_ingested <- load_file(name = inFile$name, 
                                    path = inFile[["datapath"]],
@@ -208,7 +207,7 @@ mod_RowCol_server <- function(id){
           return(NULL)
         }
       } else {
-        req(input$t.rcd)
+        shiny::req(input$t.rcd)
         nt <- as.numeric(input$t.rcd)
         df <- default_entries(nt)
         data_rcd <- df
@@ -217,16 +216,16 @@ mod_RowCol_server <- function(id){
       }
     })
     
-    list_to_observe <- reactive({
-      req(init_data_rcd())
+    list_to_observe <- shiny::reactive({
+      shiny::req(init_data_rcd())
       list(
         entry_list = input$owndataRCD,
         entries = init_data_rcd()$treatments
       )
     })
     
-    observeEvent(list_to_observe(), {
-      req(init_data_rcd())
+    shiny::observeEvent(list_to_observe(), {
+      shiny::req(init_data_rcd())
       options <- valid_block_sizes(
         as.numeric(init_data_rcd()$treatments),
         "row_column"
@@ -237,7 +236,7 @@ mod_RowCol_server <- function(id){
         selected <- options[ceiling(length(options) / 2)]
       } else selected <- k[1]
       
-      updateSelectInput(session = session, 
+      shiny::updateSelectInput(session = session,
                         inputId = 'k.rcd', 
                         label = "Input # of Rows:",
                         choices = k, 
@@ -246,7 +245,7 @@ mod_RowCol_server <- function(id){
     })
     
     
-    get_data_rcd <- reactive({
+    get_data_rcd <- shiny::reactive({
       if (is.null(init_data_rcd())) {
         shinyalert::shinyalert(
           "Error!!", 
@@ -255,17 +254,17 @@ mod_RowCol_server <- function(id){
         return(NULL)
       } else return(init_data_rcd())
     }) |>
-      bindEvent(input$RUN.rcd)
+      shiny::bindEvent(input$RUN.rcd)
     
     
-    rcd_inputs <- reactive({
-      req(get_data_rcd())
-      req(input$k.rcd)
-      req(input$r.rcd)
-      req(input$plot_start.rcd)
-      req(input$Location.rcd)
-      req(input$seed.rcd)
-      req(input$l.rcd)
+    rcd_inputs <- shiny::reactive({
+      shiny::req(get_data_rcd())
+      shiny::req(input$k.rcd)
+      shiny::req(input$r.rcd)
+      shiny::req(input$plot_start.rcd)
+      shiny::req(input$Location.rcd)
+      shiny::req(input$seed.rcd)
+      shiny::req(input$l.rcd)
       if (input$k.rcd == "No Options Available") {
         shinyalert::shinyalert(
           "Error!!", 
@@ -292,12 +291,12 @@ mod_RowCol_server <- function(id){
                   site_names = site_names,
                   seed = seed))
     }) |>
-      bindEvent(input$RUN.rcd)
+      shiny::bindEvent(input$RUN.rcd)
     
-    RowCol_reactive <- reactive({
+    RowCol_reactive <- shiny::reactive({
       
-      req(rcd_inputs())
-      req(get_data_rcd())
+      shiny::req(rcd_inputs())
+      shiny::req(get_data_rcd())
       
       shinyjs::show(id = "downloadCsv.rcd")
       
@@ -323,51 +322,51 @@ mod_RowCol_server <- function(id){
       ))
       
     }) |>
-      bindEvent(input$RUN.rcd)
+      shiny::bindEvent(input$RUN.rcd)
     
-    output$summary_row_column <- renderPrint({
-      req(RowCol_reactive())
+    output$summary_row_column <- shiny::renderPrint({
+      shiny::req(RowCol_reactive())
       cat("Randomization was successful!", "\n", "\n")
       print(RowCol_reactive(), n = 6)
     })
     
-    upDateSites <- reactive({
-      req(input$l.rcd)
+    upDateSites <- shiny::reactive({
+      shiny::req(input$l.rcd)
       locs <- as.numeric(input$l.rcd)
       sites <- 1:locs
       return(list(sites = sites))
     }) |>
-      bindEvent(input$RUN.rcd)
+      shiny::bindEvent(input$RUN.rcd)
     
-    output$well_panel_layout_ROWCOL <- renderUI({
-      req(RowCol_reactive()$fieldBook)
+    output$well_panel_layout_ROWCOL <- shiny::renderUI({
+      shiny::req(RowCol_reactive()$fieldBook)
       obj_rcd <- RowCol_reactive()
       allBooks_rcd<- plot_layout(x = obj_rcd, layout = 1)$newBooks
       nBooks_rcd <- length(allBooks_rcd)
       layoutOptions_rcd <- 1:nBooks_rcd
       stacked <- c("Vertical Stack Panel" = "vertical", 
                      "Horizontal Stack Panel" = "horizontal")
-      wellPanel(
-        column(2,
-               radioButtons(ns("typlotrcd"), "Type of Plot:",
+      shiny::wellPanel(
+        shiny::column(2,
+               shiny::radioButtons(ns("typlotrcd"), "Type of Plot:",
                             c("Entries/Treatments" = 1,
                               "Plots" = 2,
                               "Heatmap" = 3))
         ),
-        fluidRow(
+        shiny::fluidRow(
  
-          column(3,
-                 selectInput(inputId = ns("stackedRowCol"), 
+          shiny::column(3,
+                 shiny::selectInput(inputId = ns("stackedRowCol"),
                              label = "Reps layout:", 
                              choices = stacked)
           ),
-          column(3, #align="center",
-                 selectInput(inputId = ns("layoutO_rcd"), 
+          shiny::column(3, #align="center",
+                 shiny::selectInput(inputId = ns("layoutO_rcd"),
                              label = "Layout option:", 
                              choices = layoutOptions_rcd)
           ),
-          column(3, #align="center",
-                 selectInput(inputId = ns("locLayout_rcd"), 
+          shiny::column(3, #align="center",
+                 shiny::selectInput(inputId = ns("locLayout_rcd"),
                              label = "Location:", 
                              choices = as.numeric(upDateSites()$sites))
           )
@@ -376,15 +375,15 @@ mod_RowCol_server <- function(id){
     })
     
     
-    observeEvent(input$stackedRowCol, {
-      req(input$stackedRowCol)
-      req(input$l.rcd)
+    shiny::observeEvent(input$stackedRowCol, {
+      shiny::req(input$stackedRowCol)
+      shiny::req(input$l.rcd)
       obj <- RowCol_reactive()
       allBooks <- plot_layout(x = obj, layout = 1, 
                               stacked = input$stackedRowCol)$newBooks
       nBooks <- length(allBooks)
       NewlayoutOptions <- 1:nBooks
-      updateSelectInput(session = session, inputId = 'layoutO_rcd',
+      shiny::updateSelectInput(session = session, inputId = 'layoutO_rcd',
                         label = "Layout option:",
                         choices = NewlayoutOptions,
                         selected = 1
@@ -392,19 +391,19 @@ mod_RowCol_server <- function(id){
     })
     
     
-    reset_selection <- reactiveValues(reset = 0)
+    reset_selection <- shiny::reactiveValues(reset = 0)
     
-    observeEvent(input$stackedRowCol, {
+    shiny::observeEvent(input$stackedRowCol, {
       reset_selection$reset <- 1
     })
     
-    observeEvent(input$layoutO_rcd, {
+    shiny::observeEvent(input$layoutO_rcd, {
       reset_selection$reset <- 0
     })
     
-    reactive_layoutROWCOL <- reactive({
-      req(input$layoutO_rcd)
-      req(RowCol_reactive())
+    reactive_layoutROWCOL <- shiny::reactive({
+      shiny::req(input$layoutO_rcd)
+      shiny::req(RowCol_reactive())
       obj_rcd <- RowCol_reactive()
       
       planting_rcd <- rcd_inputs()$planter
@@ -422,29 +421,29 @@ mod_RowCol_server <- function(id){
           silent = TRUE)
     }) 
     
-    valsRowColD <- reactiveValues(maxV.RowCol = NULL, 
+    valsRowColD <- shiny::reactiveValues(maxV.RowCol = NULL,
                                   minV.RowCol = NULL, 
                                   trail.RowCol = NULL)
     
     simuModal.RowCol <- function(failed = FALSE) {
-      modalDialog(
-        selectInput(inputId = ns("trailsRowCol"), 
+      shiny::modalDialog(
+        shiny::selectInput(inputId = ns("trailsRowCol"),
                     label = "Select One:", 
                     choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
-        conditionalPanel(
+        shiny::conditionalPanel(
           condition = "input.trailsRowCol == 'Other'", ns = ns,
-          textInput(inputId = ns("OtherRowCol"), 
+          shiny::textInput(inputId = ns("OtherRowCol"),
                     label = "Input Trial Name:", 
                     value = NULL)
         ),
-        fluidRow(
-          column(6, 
-                 numericInput(ns("min.RowCol"), 
+        shiny::fluidRow(
+          shiny::column(6,
+                 shiny::numericInput(ns("min.RowCol"),
                               "Input the min value", 
                               value = NULL)
           ),
-          column(6, 
-                 numericInput(ns("max.RowCol"), 
+          shiny::column(6,
+                 shiny::numericInput(ns("max.RowCol"),
                               "Input the max value",
                               value = NULL)
           )
@@ -452,49 +451,49 @@ mod_RowCol_server <- function(id){
         ),
         
         if (failed)
-          div(tags$b("Invalid input of data max and min", 
+          shiny::div(shiny::tags$b("Invalid input of data max and min",
                      style = "color: red;")),
         
-        footer = tagList(
-          modalButton("Cancel"),
-          actionButton(ns("ok.RowCol"), "GO")
+        footer = shiny::tagList(
+          shiny::modalButton("Cancel"),
+          shiny::actionButton(ns("ok.RowCol"), "GO")
         )
         
       )
       
     }
     
-    observeEvent(input$Simulate.RowCol, {
-      req(RowCol_reactive()$fieldBook)
-      showModal(
+    shiny::observeEvent(input$Simulate.RowCol, {
+      shiny::req(RowCol_reactive()$fieldBook)
+      shiny::showModal(
         simuModal.RowCol()
       )
     })
     
-    observeEvent(input$ok.RowCol, {
-      req(input$max.RowCol, input$min.RowCol)
+    shiny::observeEvent(input$ok.RowCol, {
+      shiny::req(input$max.RowCol, input$min.RowCol)
       if (input$max.RowCol > input$min.RowCol && 
           input$min.RowCol != input$max.RowCol) {
         valsRowColD$maxV.RowCol <- input$max.RowCol
         valsRowColD$minV.RowCol <- input$min.RowCol
         if(input$trailsRowCol == "Other") {
-          req(input$OtherRowCol)
+          shiny::req(input$OtherRowCol)
           if(!is.null(input$OtherRowCol)) {
             valsRowColD$trail.RowCol <- input$OtherRowCol
-          }else showModal(simuModal.RowCol(failed = TRUE))
+          }else shiny::showModal(simuModal.RowCol(failed = TRUE))
         }else {
           valsRowColD$trail.RowCol <- as.character(input$trailsRowCol)
         }
-        removeModal()
+        shiny::removeModal()
       }else {
-        showModal(
+        shiny::showModal(
           simuModal.RowCol(failed = TRUE)
         )
       }
     })
     
-    simuData_RowCol <- reactive({
-      req(RowCol_reactive()$fieldBook)
+    simuData_RowCol <- shiny::reactive({
+      shiny::req(RowCol_reactive()$fieldBook)
       if(!is.null(valsRowColD$maxV.RowCol) && 
          !is.null(valsRowColD$minV.RowCol) && 
          !is.null(valsRowColD$trail.RowCol)) {
@@ -519,19 +518,19 @@ mod_RowCol_server <- function(id){
     })
     
     heatmapInfoModal_RCD <- function() {
-      modalDialog(
-        title = div(tags$h3("Important message", style = "color: red;")),
-        h4("Simulate some data to see a heatmap!"),
+      shiny::modalDialog(
+        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
+        shiny::h4("Simulate some data to see a heatmap!"),
         easyClose = TRUE
       )
     }
     
-    locNum <- reactive(
+    locNum <- shiny::reactive(
       return(as.numeric(input$locLayout_rcd))
     )
     
-    heatmap_obj <- reactive({
-      req(simuData_RowCol()$df)
+    heatmap_obj <- shiny::reactive({
+      shiny::req(simuData_RowCol()$df)
       if (ncol(simuData_RowCol()$df) == 9) {
         locs <- factor(simuData_RowCol()$df$LOCATION, 
                        levels = unique(simuData_RowCol()$df$LOCATION))
@@ -568,7 +567,7 @@ mod_RowCol_server <- function(id){
         p2 <- plotly::ggplotly(p1, tooltip="text", height = 560)
         return(p2)
       } else {
-        showModal(
+        shiny::showModal(
           heatmapInfoModal_RCD()
         )
         return(NULL)
@@ -576,14 +575,14 @@ mod_RowCol_server <- function(id){
     })
     
     output$layouts <- plotly::renderPlotly({
-      req(RowCol_reactive())
-      req(input$typlotrcd)
+      shiny::req(RowCol_reactive())
+      shiny::req(input$typlotrcd)
       if (input$typlotrcd == 1) {
         reactive_layoutROWCOL()$out_layout
       } else if (input$typlotrcd == 2) {
         reactive_layoutROWCOL()$out_layoutPlots
       } else {
-        req(heatmap_obj())
+        shiny::req(heatmap_obj())
         heatmap_obj()
       }
     })
@@ -607,7 +606,7 @@ mod_RowCol_server <- function(id){
       
     })
 
-    output$downloadData.rowcolD <- downloadHandler(
+    output$downloadData.rowcolD <- shiny::downloadHandler(
       filename = function() {
         loc <- paste("Row-Column_", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
@@ -618,10 +617,10 @@ mod_RowCol_server <- function(id){
       }
     )
     
-    csv_data <- reactive({
-      req(simuData_RowCol()$df)
+    csv_data <- shiny::reactive({
+      shiny::req(simuData_RowCol()$df)
       df <- simuData_RowCol()$df
-      req(input$typlotrcd)
+      shiny::req(input$typlotrcd)
       if (input$typlotrcd == 2) {
         export_layout(df, locNum(), TRUE)
       } else {
@@ -631,7 +630,7 @@ mod_RowCol_server <- function(id){
     
     
     # Downloadable csv of selected dataset ----
-    output$downloadCsv.rcd <- downloadHandler(
+    output$downloadCsv.rcd <- shiny::downloadHandler(
       filename = function() {
         loc <- paste("Resolvable_Row-Column_Layout", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")

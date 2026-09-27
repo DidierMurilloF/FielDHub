@@ -7,6 +7,13 @@
 
 ### Breaking changes:
 
+- The Shiny application stack is now optional. Installing FielDHub for R
+  scripts requires only the design and plotting dependencies; the nine
+  app-only packages have moved from Imports to Suggests. `run_app()` checks
+  for them and reports an installation command when any are missing. No
+  packages are installed automatically, and existing app installations keep
+  the same interface and design behavior.
+
 - `split_families()` now accepts `seed`, records it in `infoDesign` and
   `metadata`, and restores the caller's random-number state. When omitted,
   it selects an automatic integer seed using the shared design contract;

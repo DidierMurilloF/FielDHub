@@ -6,15 +6,14 @@
 #'
 #' @noRd 
 #'
-#' @importFrom shiny NS tagList 
 mod_Optim_ui <- function(id) {
-  ns <- NS(id)
-  tagList(
-    h4("Unreplicated Optimized Arrangement"),
-    sidebarLayout(
-      sidebarPanel(
+  ns <- shiny::NS(id)
+  shiny::tagList(
+    shiny::h4("Unreplicated Optimized Arrangement"),
+    shiny::sidebarLayout(
+      shiny::sidebarPanel(
         width = 4,
-        radioButtons(inputId = ns("owndataOPTIM"), 
+        shiny::radioButtons(inputId = ns("owndataOPTIM"),
                     label = "Import Entries' List?", 
                     choices = c("Yes", "No"), 
                     selected = "No",
@@ -22,140 +21,140 @@ mod_Optim_ui <- function(id) {
                     width = NULL, 
                     choiceNames = NULL, 
                     choiceValues = NULL),
-       conditionalPanel(
+       shiny::conditionalPanel(
          condition = "input.owndataOPTIM == 'Yes'", 
          ns = ns,
-         fluidRow(
-          column(7, style=list("padding-right: 28px;"),
-                  fileInput(ns("file3"), 
+         shiny::fluidRow(
+          shiny::column(7, style=list("padding-right: 28px;"),
+                  shiny::fileInput(ns("file3"),
                             label = "Upload a CSV File:", 
                             multiple = FALSE)),
-          column(5,style=list("padding-left: 5px;"),
-                  radioButtons(ns("sep.OPTIM"), "Separator",
+          shiny::column(5,style=list("padding-left: 5px;"),
+                  shiny::radioButtons(ns("sep.OPTIM"), "Separator",
                               choices = c(Comma = ",",
                                           Semicolon = ";",
                                           Tab = "\t"),
                               selected = ","))
          )
        ),
-       conditionalPanel(
+       shiny::conditionalPanel(
          "input.owndataOPTIM != 'Yes'", 
           ns = ns,
-          numericInput(ns("checks.s"),
+          shiny::numericInput(ns("checks.s"),
                         label = "Input # of Checks:", 
                         value = 4,
                         min = 1),
-          textInput(ns("amount.checks"), 
+          shiny::textInput(ns("amount.checks"),
                     "Input # Check's Reps:",
                     value = "8,8,8,8"),
-          numericInput(ns("lines.s"), 
+          shiny::numericInput(ns("lines.s"),
                       label = "Input # of Entries:",
                       value = 280, min = 5)           
        ),
-       selectInput(ns("planter_mov.spatial"), 
+       shiny::selectInput(ns("planter_mov.spatial"),
                    label = "Plot Order Layout:",
                    choices = c("serpentine", "cartesian"),
                    multiple = FALSE, 
                    selected = "serpentine"),
-       fluidRow(
-         column(6,
+       shiny::fluidRow(
+         shiny::column(6,
                 style=list("padding-right: 28px;"),
-                numericInput(inputId = ns("l.optim"), 
+                shiny::numericInput(inputId = ns("l.optim"),
                              label = "Input # of Locations:", 
                              value = 1,
                              min = 1)
          ),
-         column(6,style=list("padding-left: 5px;"),
-                selectInput(inputId = ns("locView.optim"), 
+         shiny::column(6,style=list("padding-left: 5px;"),
+                shiny::selectInput(inputId = ns("locView.optim"),
                             label = "Choose location to view:", 
                             choices = 1:1, 
                             selected = 1,
                             multiple = FALSE)
          )
        ),
-       fluidRow(
-         column(6,style=list("padding-right: 28px;"),
-                textInput(
+       shiny::fluidRow(
+         shiny::column(6,style=list("padding-right: 28px;"),
+                shiny::textInput(
                     ns("plot_start.spatial"), 
                     "Starting Plot Number:", 
                     value = 1
                 )
          ),
-         column(6,style=list("padding-left: 5px;"),
-                textInput(ns("expt_name.spatial"), 
+         shiny::column(6,style=list("padding-left: 5px;"),
+                shiny::textInput(ns("expt_name.spatial"),
                           "Input Experiment Name:", 
                           value = "Expt1")
          )
        ),  
        
-       fluidRow(
-         column(
+       shiny::fluidRow(
+         shiny::column(
             width = 6,
             style=list("padding-right: 28px;"),
-            numericInput(
+            shiny::numericInput(
                 ns("seed.spatial"), 
                 label = "Random Seed:", 
                 value = 5,
                 min = 1
             )
          ),
-         column(6,style=list("padding-left: 5px;"),
-                textInput(ns("Location.spatial"), 
+         shiny::column(6,style=list("padding-left: 5px;"),
+                shiny::textInput(ns("Location.spatial"),
                           "Input Location:", 
                           value = "FARGO")
          )
        ),
-       fluidRow(
-         column(6,
-                actionButton(
+       shiny::fluidRow(
+         shiny::column(6,
+                shiny::actionButton(
                   inputId = ns("RUN.optim"), 
                   label = "Run!", 
-                  icon = icon("circle-nodes", verify_fa = FALSE),
+                  icon = shiny::icon("circle-nodes", verify_fa = FALSE),
                   width = '100%'),
          ),
-         column(6,
-                actionButton(
+         shiny::column(6,
+                shiny::actionButton(
                   ns("Simulate.optim"), 
                   label = "Simulate!", 
-                  icon = icon("greater-than-equal", verify_fa = FALSE),
+                  icon = shiny::icon("greater-than-equal", verify_fa = FALSE),
                   width = '100%'),
          )
        ),
-       br(),
-       uiOutput(ns("download_expt_optim"))
+       shiny::br(),
+       shiny::uiOutput(ns("download_expt_optim"))
       ),
-      mainPanel(
+      shiny::mainPanel(
         width = 8,
         shinyjs::useShinyjs(),
-        tabsetPanel(id = ns("tabset_optim"),
-        tabPanel("Get Random", value = "tabPanel_optim",
-          br(),
+        shiny::tabsetPanel(id = ns("tabset_optim"),
+        shiny::tabPanel("Get Random", value = "tabPanel_optim",
+          shiny::br(),
           shinyjs::hidden(
-            selectInput(inputId = ns("dimensions.s"),
+            shiny::selectInput(inputId = ns("dimensions.s"),
                             label = "Select dimensions of field:",
                             choices = "")
           ),
           shinyjs::hidden(
-            actionButton(ns("get_random_optim"), label = "Randomize!")
+            shiny::actionButton(ns("get_random_optim"), label = "Randomize!")
           ),
-          br(),
-          br(),
+          shiny::br(),
+          shiny::br(),
           fieldhub_spinner(
-            verbatimTextOutput(outputId = ns("summary_optim"), 
+            shiny::verbatimTextOutput(outputId = ns("summary_optim"),
                                placeholder = FALSE), 
               type = 4
            )
         ),
-          tabPanel("Data Input",
-                   fluidRow(
-                     column(6,DT::DTOutput(ns("data_input"))),
-                     column(6,DT::DTOutput(ns("table_checks")))
+          shiny::tabPanel("Data Input",
+                   shiny::fluidRow(
+                     shiny::column(6,DT::DTOutput(ns("data_input"))),
+                     shiny::column(6,DT::DTOutput(ns("table_checks")))
                    )
           ),
-          tabPanel("Randomized Field", DT::DTOutput(ns("RFIELD"))),
-          tabPanel("Plot Number Field", DT::DTOutput(ns("PLOTFIELD"))),
-          tabPanel("Field Book", DT::DTOutput(ns("OPTIMOUTPUT"))),
-          tabPanel("Heatmap", 
+          shiny::tabPanel("Randomized Field", DT::DTOutput(ns("RFIELD"))),
+          shiny::tabPanel("Plot Number Field", DT::DTOutput(ns("PLOTFIELD"))),
+          shiny::tabPanel("Field Book", DT::DTOutput(ns("OPTIMOUTPUT"))),
+          shiny::tabPanel("Heatmap",
             plotly::plotlyOutput(ns("heatmap"), width = "97%"))
          )
       )
@@ -166,12 +165,12 @@ mod_Optim_ui <- function(id) {
 #'
 #' @noRd 
 mod_Optim_server <- function(id) {
-  moduleServer(id, function(input, output, session){
+  shiny::moduleServer(id, function(input, output, session){
     ns <- session$ns
 
     shinyjs::useShinyjs()
 
-    optim_inputs <- eventReactive(input$RUN.optim, {
+    optim_inputs <- shiny::eventReactive(input$RUN.optim, {
       planter_mov <- input$planter_mov.spatial
       expt_name <- as.character(input$expt_name.spatial)
       plotNumber <- validate_design(read_whole_numbers(
@@ -188,25 +187,25 @@ mod_Optim_server <- function(id) {
                   expt_name = expt_name)) 
     })
 
-    observeEvent(optim_inputs()$sites, {
+    shiny::observeEvent(optim_inputs()$sites, {
       loc_user_view <- 1:as.numeric(optim_inputs()$sites)
-      updateSelectInput(inputId = "locView.optim", 
+      shiny::updateSelectInput(inputId = "locView.optim",
                         choices = loc_user_view, 
                         selected = loc_user_view[1])
     })
 
-    observeEvent(input$owndataOPTIM,
-                 handlerExpr = updateTabsetPanel(session,
+    shiny::observeEvent(input$owndataOPTIM,
+                 handlerExpr = shiny::updateTabsetPanel(session,
                                                  "tabset_optim",
                                                  selected = "tabPanel_optim"))
-    observeEvent(input$RUN.optim,
-                 handlerExpr = updateTabsetPanel(session,
+    shiny::observeEvent(input$RUN.optim,
+                 handlerExpr = shiny::updateTabsetPanel(session,
                                                  "tabset_optim",
                                                  selected = "tabPanel_optim"))
 
-    get_data_optim <- eventReactive(input$RUN.optim, {
+    get_data_optim <- shiny::eventReactive(input$RUN.optim, {
       if (input$owndataOPTIM == "Yes") {
-        req(input$file3)
+        shiny::req(input$file3)
         inFile <- input$file3
         data_ingested <- load_file(name = inFile$name, 
                                    path = inFile[["datapath"]],
@@ -229,7 +228,7 @@ mod_Optim_server <- function(id) {
           data_up <- na.omit(data_up)
           colnames(data_up) <- c("ENTRY", "NAME", "REPS")
           if(!is.numeric(data_up$REPS) || !is.integer(data_up$REPS) ||
-             is.factor(data_up$REPS)) validate("'REPS' must be numeric.")
+             is.factor(data_up$REPS)) shiny::validate("'REPS' must be numeric.")
           total_plots <- sum(data_up$REPS)
         } else {
           app_upload_error(data_ingested,
@@ -237,9 +236,9 @@ mod_Optim_server <- function(id) {
           return(NULL)
         }
       } else {
-        req(input$amount.checks)
-        req(input$lines.s)
-        req(input$checks.s)
+        shiny::req(input$amount.checks)
+        shiny::req(input$lines.s)
+        shiny::req(input$checks.s)
         r.checks <- as.numeric(unlist(strsplit(input$amount.checks, ",")))
         checks.s <- as.numeric(input$checks.s)
         if(checks.s != length(r.checks)) {
@@ -273,7 +272,7 @@ mod_Optim_server <- function(id) {
       }
       dimension_choices <- validate_design(optimized_dimension_choices(total_plots))
       if (length(dimension_choices) == 0L) {
-        updateSelectInput(inputId = "dimensions.s", choices = character(),
+        shiny::updateSelectInput(inputId = "dimensions.s", choices = character(),
                           selected = character())
         shinyalert::shinyalert(
           "No field dimensions available",
@@ -286,11 +285,11 @@ mod_Optim_server <- function(id) {
                   dimension_choices = dimension_choices))
     })
     
-    list_inputs <- eventReactive(input$RUN.optim, {
-      req(get_data_optim())
+    list_inputs <- shiny::eventReactive(input$RUN.optim, {
+      shiny::req(get_data_optim())
       if (input$owndataOPTIM != 'Yes') {
-        req(input$amount.checks)
-        req(input$lines.s)
+        shiny::req(input$amount.checks)
+        shiny::req(input$lines.s)
         r.checks <- as.numeric(unlist(strsplit(input$amount.checks, ",")))
         lines <- as.numeric(input$lines.s)
         return(list(r.checks=r.checks, lines = lines, input$owndataOPTIM))
@@ -300,47 +299,47 @@ mod_Optim_server <- function(id) {
       }
     })
     
-    observeEvent(list_inputs(), {
-      req(get_data_optim())
+    shiny::observeEvent(list_inputs(), {
+      shiny::req(get_data_optim())
       choices <- get_data_optim()$dimension_choices
-      updateSelectInput(inputId = "dimensions.s", 
+      shiny::updateSelectInput(inputId = "dimensions.s",
                         choices = choices, 
                         selected = head(choices, 1))
     })
     
-    field_dimensions_optim <- eventReactive(input$get_random_optim, {
-      req(get_data_optim())
+    field_dimensions_optim <- shiny::eventReactive(input$get_random_optim, {
+      shiny::req(get_data_optim())
       dims <- unlist(strsplit(input$dimensions.s," x "))
       d_row <- as.numeric(dims[1])
       d_col <- as.numeric(dims[2])
       return(list(d_row = d_row, d_col = d_col))
     })
 
-    randomize_hit_optim <- reactiveValues(times = 0)
+    randomize_hit_optim <- shiny::reactiveValues(times = 0)
  
-    observeEvent(input$RUN.optim, {
+    shiny::observeEvent(input$RUN.optim, {
       randomize_hit_optim$times <- 0
     })
 
-    user_tries_optim <- reactiveValues(tries_optim = 0)
+    user_tries_optim <- shiny::reactiveValues(tries_optim = 0)
 
-    observeEvent(input$get_random_optim, {
+    shiny::observeEvent(input$get_random_optim, {
       user_tries_optim$tries_optim <- user_tries_optim$tries_optim + 1
       randomize_hit_optim$times <- randomize_hit_optim$times + 1
     })
 
-    observeEvent(input$dimensions.s, {
+    shiny::observeEvent(input$dimensions.s, {
       user_tries_optim$tries_optim <- 0
     })
 
-    list_to_observe_optim <- reactive({
+    list_to_observe_optim <- shiny::reactive({
       list(randomize_hit_optim$times, user_tries_optim$tries_optim)
     })
 
-    observeEvent(list_to_observe_optim(), {
-      output$download_expt_optim <- renderUI({
+    shiny::observeEvent(list_to_observe_optim(), {
+      output$download_expt_optim <- shiny::renderUI({
         if (randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0) {
-          downloadButton(ns("downloadData.spatial"),
+          shiny::downloadButton(ns("downloadData.spatial"),
                           "Save Experiment",
                           style = "width:100%")
         }
@@ -353,45 +352,45 @@ mod_Optim_server <- function(id) {
                                         REPS = as.factor(c(rep(10, times = 3), rep(1,6))))
     
     entriesInfoModal_OPTIM <- function() {
-      modalDialog(
-        title = div(tags$h3("Important message", style = "color: red;")),
-        h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
-        renderTable(entryListFormat_OPTIM,
+      shiny::modalDialog(
+        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
+        shiny::h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
+        shiny::renderTable(entryListFormat_OPTIM,
                     bordered = TRUE,
                     align = 'c',
                     striped = TRUE),
-        h4("Note that the controls must be in the first rows of the CSV file."),
+        shiny::h4("Note that the controls must be in the first rows of the CSV file."),
         easyClose = FALSE
       )
     }
     
-    toListen <- reactive({
+    toListen <- shiny::reactive({
       list(input$owndataOPTIM)
     })
     
-    observeEvent(toListen(), {
+    shiny::observeEvent(toListen(), {
       if (input$owndataOPTIM == "Yes") {
-        showModal(
+        shiny::showModal(
           entriesInfoModal_OPTIM()
         )
       }
     })
 
-    observeEvent(input$RUN.optim, {
-      req(get_data_optim())
+    shiny::observeEvent(input$RUN.optim, {
+      shiny::req(get_data_optim())
       shinyjs::show(id = "dimensions.s")
       shinyjs::show(id = "get_random_optim")
 
     })
 
     output$data_input <- DT::renderDT({
-      req(get_data_optim())
+      shiny::req(get_data_optim())
       if (input$dimensions.s == "No options available"){
-        validate("No options available for this number of treatments")
+        shiny::validate("No options available for this number of treatments")
       }
       test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0
       if (!test) return(NULL)
-      req(get_data_optim()$data_up.spatial)
+      shiny::req(get_data_optim()$data_up.spatial)
       data_entry <- get_data_optim()$data_up.spatial
       df <- as.data.frame(data_entry)
       df$ENTRY <- as.factor(df$ENTRY)
@@ -408,13 +407,13 @@ mod_Optim_server <- function(id) {
     })
     
     output$table_checks <- DT::renderDT({
-      req(get_data_optim())
+      shiny::req(get_data_optim())
       if (input$dimensions.s == "No options available") {
-        validate("No options available for this number of treatments")
+        shiny::validate("No options available for this number of treatments")
       }
       test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0
       if (!test) return(NULL)
-      req(get_data_optim()$data_up.spatial)
+      shiny::req(get_data_optim()$data_up.spatial)
         data_entry <- get_data_optim()$data_up.spatial
         checks_input <- data_entry[data_entry$REPS > 1, ]
         df <- as.data.frame(checks_input)
@@ -425,12 +424,12 @@ mod_Optim_server <- function(id) {
           columnDefs = list(list(className = 'dt-left', targets = 0:a)))))
     })
     
-    optimized_arrang <- eventReactive(input$get_random_optim, { 
-      req(get_data_optim())
+    optimized_arrang <- shiny::eventReactive(input$get_random_optim, {
+      shiny::req(get_data_optim())
       if (input$dimensions.s == "No options available") {
-        validate("No options available for this number of treatments")
+        shiny::validate("No options available for this number of treatments")
       }
-      req(get_data_optim()$data_up.spatial)
+      shiny::req(get_data_optim()$data_up.spatial)
       nrows <- field_dimensions_optim()$d_row
       ncols <- field_dimensions_optim()$d_col
       niter <- 1000
@@ -457,8 +456,8 @@ mod_Optim_server <- function(id) {
       ))
     })
 
-    output$summary_optim <- renderPrint({
-      req(get_data_optim())
+    output$summary_optim <- shiny::renderPrint({
+      shiny::req(get_data_optim())
       test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0
       #if (!test) return(NULL)
       if (test) {
@@ -469,16 +468,16 @@ mod_Optim_server <- function(id) {
       }
     })
 
-    user_site_selection <- reactive({
+    user_site_selection <- shiny::reactive({
       return(as.numeric(input$locView.optim))
     })
 
     output$BINARY <- DT::renderDT({
-      req(get_data_optim())
+      shiny::req(get_data_optim())
       test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0
       if (!test) return(NULL)
       # if (user_tries_optim$tries_optim < 1) return(NULL)
-      req(optimized_arrang())
+      shiny::req(optimized_arrang())
       B <- optimized_arrang()$binaryField[[user_site_selection()]]
       df <- as.data.frame(B)
       rownames(df) <- nrow(df):1
@@ -499,7 +498,7 @@ mod_Optim_server <- function(id) {
       test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0
       if (!test) return(NULL)
       # if (user_tries_optim$tries_optim < 1) return(NULL)
-      req(optimized_arrang())
+      shiny::req(optimized_arrang())
       w_map <- optimized_arrang()$layoutRandom[[user_site_selection()]]
       checks = as.vector(optimized_arrang()$genEntries[[1]])
       len_checks <- length(checks)
@@ -533,7 +532,7 @@ mod_Optim_server <- function(id) {
       test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0
       if (!test) return(NULL)
       # if (user_tries_optim$tries_optim < 1) return(NULL)
-      req(optimized_arrang())
+      shiny::req(optimized_arrang())
       plot_num <- optimized_arrang()$plotNumber[[user_site_selection()]]
       a <- as.vector(as.matrix(plot_num))
       len_a <- length(a)
@@ -555,87 +554,87 @@ mod_Optim_server <- function(id) {
                     )
     })
     
-    valsOPTIM <- reactiveValues(ROX = NULL, ROY = NULL, trail.optim = NULL, minValue = NULL,
+    valsOPTIM <- shiny::reactiveValues(ROX = NULL, ROY = NULL, trail.optim = NULL, minValue = NULL,
                                 maxValue = NULL)
     
     simuModal.OPTIM <- function(failed = FALSE) {
-      modalDialog(
-        fluidRow(
-          column(6, 
-                 selectInput(inputId = ns("trailsOPTIM"), label = "Select One:", 
+      shiny::modalDialog(
+        shiny::fluidRow(
+          shiny::column(6,
+                 shiny::selectInput(inputId = ns("trailsOPTIM"), label = "Select One:",
                              choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
           ),
-          column(6, 
-                 checkboxInput(inputId = ns("heatmap_s"), label = "Include a Heatmap", value = TRUE),
+          shiny::column(6,
+                 shiny::checkboxInput(inputId = ns("heatmap_s"), label = "Include a Heatmap", value = TRUE),
           )
         ),
-        conditionalPanel("input.trailsOPTIM == 'Other'", ns = ns,
-                         textInput(inputId = ns("OtherOPTIM"), label = "Input Trial Name:", value = NULL)
+        shiny::conditionalPanel("input.trailsOPTIM == 'Other'", ns = ns,
+                         shiny::textInput(inputId = ns("OtherOPTIM"), label = "Input Trial Name:", value = NULL)
         ),
-        fluidRow(
-          column(6, 
-                 selectInput(inputId = ns("ROX.O"), "Select the Correlation in Rows:", 
+        shiny::fluidRow(
+          shiny::column(6,
+                 shiny::selectInput(inputId = ns("ROX.O"), "Select the Correlation in Rows:",
                              choices = seq(0.1, 0.9, 0.1), selected = 0.5)
           ),
-          column(6, 
-                 selectInput(inputId = ns("ROY.O"), "Select the Correlation in Cols:", 
+          shiny::column(6,
+                 shiny::selectInput(inputId = ns("ROY.O"), "Select the Correlation in Cols:",
                              choices = seq(0.1, 0.9, 0.1), selected = 0.5)
           )
         ),
-        fluidRow(
-          column(6, 
-                 numericInput(inputId = ns("min.optim"), "Input the min value:", value = NULL)
+        shiny::fluidRow(
+          shiny::column(6,
+                 shiny::numericInput(inputId = ns("min.optim"), "Input the min value:", value = NULL)
           ),
-          column(6, 
-                 numericInput(inputId = ns("max.optim"), "Input the max value:", value = NULL)
+          shiny::column(6,
+                 shiny::numericInput(inputId = ns("max.optim"), "Input the max value:", value = NULL)
                  
           )
         ),
         if (failed)
-          div(tags$b("Invalid input of data max and min", style = "color: red;")),
+          shiny::div(shiny::tags$b("Invalid input of data max and min", style = "color: red;")),
         
-        footer = tagList(
-          modalButton("Cancel"),
-          actionButton(inputId = ns("ok.optim"), "GO")
+        footer = shiny::tagList(
+          shiny::modalButton("Cancel"),
+          shiny::actionButton(inputId = ns("ok.optim"), "GO")
         )
       )
     }
     
-    observeEvent(input$Simulate.optim, {
-      req(optimized_arrang()$fieldBook)
+    shiny::observeEvent(input$Simulate.optim, {
+      shiny::req(optimized_arrang()$fieldBook)
       test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0
       if (test) {
-        showModal(
+        shiny::showModal(
           simuModal.OPTIM()
         )
       }
     })
     
-    observeEvent(input$ok.optim, {
-      req(input$min.optim, input$max.optim)
+    shiny::observeEvent(input$ok.optim, {
+      shiny::req(input$min.optim, input$max.optim)
       if (input$max.optim > input$min.optim & input$min.optim != input$max.optim) {
         valsOPTIM$maxValue <- input$max.optim
         valsOPTIM$minValue  <- input$min.optim
         valsOPTIM$ROX <- as.numeric(input$ROX.O)
         valsOPTIM$ROY <- as.numeric(input$ROY.O)
         if(input$trailsOPTIM == "Other") {
-          req(input$OtherOPTIM)
+          shiny::req(input$OtherOPTIM)
           if(!is.null(input$OtherOPTIM)) {
             valsOPTIM$trail.optim <- as.character(input$OtherOPTIM)
-          }else showModal(simuModal.OPTIM(failed = TRUE))
+          }else shiny::showModal(simuModal.OPTIM(failed = TRUE))
         }else {
           valsOPTIM$trail.optim <- as.character(input$trailsOPTIM)
         }
-        removeModal()
+        shiny::removeModal()
       }else {
-        showModal(
+        shiny::showModal(
           simuModal.OPTIM(failed = TRUE)
         )
       }
     })
     
-    simuDataOPTIM <- reactive({
-      req(optimized_arrang()$fieldBook)
+    simuDataOPTIM <- shiny::reactive({
+      shiny::req(optimized_arrang()$fieldBook)
       field_book <- optimized_arrang()$fieldBook
       if (is.null(valsOPTIM$maxValue) || is.null(valsOPTIM$minValue) ||
           is.null(valsOPTIM$trail.optim)) {
@@ -654,20 +653,20 @@ mod_Optim_server <- function(id) {
       list(df = simulation$field_book, dfSimulation = simulation$simulations)
     })
 
-    heat_map_optim <- reactiveValues(heat_map_option = FALSE)
+    heat_map_optim <- shiny::reactiveValues(heat_map_option = FALSE)
     
-    observeEvent(input$ok.optim, {
-      req(input$min.optim, input$max.optim)
+    shiny::observeEvent(input$ok.optim, {
+      shiny::req(input$min.optim, input$max.optim)
       if (input$max.optim > input$min.optim & input$min.optim != input$max.optim) {
         heat_map_optim$heat_map_option <- TRUE
       }
     })
     
-    observeEvent(heat_map_optim$heat_map_option, {
+    shiny::observeEvent(heat_map_optim$heat_map_option, {
       if (heat_map_optim$heat_map_option == FALSE) {
-        hideTab(inputId = "tabset_optim", target = "Heatmap")
+        shiny::hideTab(inputId = "tabset_optim", target = "Heatmap")
       } else {
-        showTab(inputId = "tabset_optim", target = "Heatmap")
+        shiny::showTab(inputId = "tabset_optim", target = "Heatmap")
       }
     })
     
@@ -675,7 +674,7 @@ mod_Optim_server <- function(id) {
       test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0
       if (!test) return(NULL)
       # if (user_tries_optim$tries_optim < 1) return(NULL)
-      req(simuDataOPTIM()$df)
+      shiny::req(simuDataOPTIM()$df)
       df <- simuDataOPTIM()$df
       df$EXPT <- as.factor(df$EXPT)
       df$LOCATION <- as.factor(df$LOCATION)
@@ -696,8 +695,8 @@ mod_Optim_server <- function(id) {
     })
     
     
-    heatmap_obj <- reactive({
-      req(simuDataOPTIM()$dfSimulation)
+    heatmap_obj <- shiny::reactive({
+      shiny::req(simuDataOPTIM()$dfSimulation)
       if(input$heatmap_s) {
         w <- as.character(valsOPTIM$trail.optim)
         df <- simuDataOPTIM()$dfSimulation[[user_site_selection()]]
@@ -719,13 +718,13 @@ mod_Optim_server <- function(id) {
     output$heatmap <- plotly::renderPlotly({
       test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0
       if (!test) return(NULL)
-      req(heatmap_obj())
+      shiny::req(heatmap_obj())
       heatmap_obj()
     })
     
-    output$downloadData.spatial <- downloadHandler(
+    output$downloadData.spatial <- shiny::downloadHandler(
       filename = function() {
-        req(input$Location.spatial)
+        shiny::req(input$Location.spatial)
         loc <- input$Location.spatial
         loc <- paste(loc, "_", "Optim_", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")

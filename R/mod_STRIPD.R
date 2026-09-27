@@ -6,15 +6,14 @@
 #'
 #' @noRd 
 #'
-#' @importFrom shiny NS tagList 
 mod_STRIPD_ui <- function(id){
-  ns <- NS(id)
-  tagList(
-    h4("Strip-Plot Design"),
-    sidebarLayout(
-      sidebarPanel(
+  ns <- shiny::NS(id)
+  shiny::tagList(
+    shiny::h4("Strip-Plot Design"),
+    shiny::sidebarLayout(
+      shiny::sidebarPanel(
         width = 4,
-        radioButtons(inputId = ns("owndataSTRIP"), 
+        shiny::radioButtons(inputId = ns("owndataSTRIP"),
                      label = "Import entries' list?", 
                      choices = c("Yes", "No"), 
                      selected = "No",
@@ -22,17 +21,17 @@ mod_STRIPD_ui <- function(id){
                      width = NULL, 
                      choiceNames = NULL, 
                      choiceValues = NULL),
-        conditionalPanel(
+        shiny::conditionalPanel(
           condition = "input.owndataSTRIP == 'Yes'", 
           ns = ns,
-          fluidRow(
-            column(8, style=list("padding-right: 28px;"),
-                   fileInput(ns("file.STRIP"), 
+          shiny::fluidRow(
+            shiny::column(8, style=list("padding-right: 28px;"),
+                   shiny::fileInput(ns("file.STRIP"),
                              label = "Upload a csv File:",
                              multiple = FALSE)),
             
-            column(4,style=list("padding-left: 5px;"),
-                   radioButtons(ns("sep.strip"), "Separator",
+            shiny::column(4,style=list("padding-left: 5px;"),
+                   shiny::radioButtons(ns("sep.strip"), "Separator",
                                 choices = c(Comma = ",",
                                             Semicolon = ";",
                                             Tab = "\t"),
@@ -40,102 +39,102 @@ mod_STRIPD_ui <- function(id){
           )
         ),
         
-        conditionalPanel(
+        shiny::conditionalPanel(
           condition = "input.owndataSTRIP != 'Yes'", 
           ns = ns,
-          fluidRow(
-            column(6, style=list("padding-right: 28px;"),
-                   numericInput(ns("HStrip.strip"), 
+          shiny::fluidRow(
+            shiny::column(6, style=list("padding-right: 28px;"),
+                   shiny::numericInput(ns("HStrip.strip"),
                                 label = "Input # of Horizontal Strips:",
                                 value = 5, 
                                 min = 2)
             ),
-            column(6, style=list("padding-left: 5px;"),
-                   numericInput(ns("VStrip.strip"), 
+            shiny::column(6, style=list("padding-left: 5px;"),
+                   shiny::numericInput(ns("VStrip.strip"),
                                 label = "Input # of Vertical Strips:",
                                 value = 5, 
                                 min = 2)
             )
           )           
         ),
-        numericInput(ns("blocks.strip"), 
+        shiny::numericInput(ns("blocks.strip"),
                      label = "Input # of Full Reps:", 
                      value = 3, 
                      min = 2),
-        numericInput(ns("l.strip"), 
+        shiny::numericInput(ns("l.strip"),
                      label = "Input # of Locations:",
                      value = 1, 
                      min = 1), 
-        selectInput(inputId = ns("planter.strip"), 
+        shiny::selectInput(inputId = ns("planter.strip"),
                     label = "Plot Order Layout:",
                     choices = c("serpentine", "cartesian"), 
                     multiple = FALSE,
                     selected = "serpentine"),
-        fluidRow(
-          column(6, style=list("padding-right: 28px;"),
-                 textInput(ns("plot_start.strip"),
+        shiny::fluidRow(
+          shiny::column(6, style=list("padding-right: 28px;"),
+                 shiny::textInput(ns("plot_start.strip"),
                            "Starting Plot Number:", 
                            value = 101)
           ),
-          column(6, style=list("padding-left: 5px;"),
-                 textInput(ns("Location.strip"), 
+          shiny::column(6, style=list("padding-left: 5px;"),
+                 shiny::textInput(ns("Location.strip"),
                            "Input Location:", 
                            value = "FARGO")
           )
         ),
         
         # ---- Added UI for randomizeH and randomizeV ----
-        checkboxInput(
+        shiny::checkboxInput(
           ns("randomizeH.strip"),
           label = "Randomize Horizontal Strips (Across reps)",
           value = TRUE
         ),
-        checkboxInput(
+        shiny::checkboxInput(
           ns("randomizeV.strip"),
           label = "Randomize Vertical Strips (Across reps)",
           value = TRUE
         ),
         # -----------------------------------------------
         
-        numericInput(inputId = ns("myseed.strip"), 
+        shiny::numericInput(inputId = ns("myseed.strip"),
                      label = "Random Seed:", 
                      value = 123, 
                      min = 1),
         
-        fluidRow(
-          column(6,
-                 actionButton(
+        shiny::fluidRow(
+          shiny::column(6,
+                 shiny::actionButton(
                    inputId = ns("RUN.strip"), 
                    "Run!", 
-                   icon = icon("circle-nodes", verify_fa = FALSE),
+                   icon = shiny::icon("circle-nodes", verify_fa = FALSE),
                    width = '100%'
                    ),
           ),
-          column(6,
-                 actionButton(
+          shiny::column(6,
+                 shiny::actionButton(
                    ns("Simulate.strip"), 
                    "Simulate!", 
-                   icon = icon("greater-than-equal", verify_fa = FALSE),
+                   icon = shiny::icon("greater-than-equal", verify_fa = FALSE),
                    width = '100%'
                    ),
           )
           
         ), 
-        br(),
-        downloadButton(ns("downloadData.strip"), 
+        shiny::br(),
+        shiny::downloadButton(ns("downloadData.strip"),
                        "Save Experiment!", 
                        style = "width:100%")
       ),
       
-      mainPanel(
+      shiny::mainPanel(
         width = 8,
-        fluidRow(
-          tabsetPanel(
-            tabPanel(title = "Field Layout",
+        shiny::fluidRow(
+          shiny::tabsetPanel(
+            shiny::tabPanel(title = "Field Layout",
                      shinyjs::useShinyjs(),
-                     shinyjs::hidden(downloadButton(ns("downloadCsv.strip"), 
+                     shinyjs::hidden(shiny::downloadButton(ns("downloadCsv.strip"),
                                                     label =  "CSV",
-                                                    icon = icon("file-csv"), 
+                                                    icon = shiny::icon("file-csv"),
                                                     width = '10%',
                                                     style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
                      fieldhub_spinner(
@@ -144,12 +143,12 @@ mod_STRIPD_ui <- function(id){
                                             height = "560px"),
                        type = 5
                      ),
-                     br(),
-                     column(12,
-                            uiOutput(ns("well_panel_layout_STRIP"))
+                     shiny::br(),
+                     shiny::column(12,
+                            shiny::uiOutput(ns("well_panel_layout_STRIP"))
                             )
             ),
-            tabPanel(title = "Field Book", 
+            shiny::tabPanel(title = "Field Book",
                      fieldhub_spinner(
                        DT::DTOutput(ns("STRIP.output")), 
                        type = 5
@@ -166,7 +165,7 @@ mod_STRIPD_ui <- function(id){
 #'
 #' @noRd 
 mod_STRIPD_server <- function(id) {
-  moduleServer( id, function(input, output, session) {
+  shiny::moduleServer( id, function(input, output, session) {
     ns <- session$ns
     shinyjs::useShinyjs()
 
@@ -177,10 +176,10 @@ mod_STRIPD_server <- function(id) {
       list(HPLOTS = Hplots, VPLOTS = Vplots)
       )           
     entriesInfoModal_STRIP <- function() {
-      modalDialog(
-        title = div(tags$h3("Important message", style = "color: red;")),
-        h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
-        renderTable(entryListFormat_STRIP,
+      shiny::modalDialog(
+        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
+        shiny::h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
+        shiny::renderTable(entryListFormat_STRIP,
                     bordered = TRUE,
                     align = 'c',
                     striped = TRUE),
@@ -188,21 +187,21 @@ mod_STRIPD_server <- function(id) {
       )
     }
     
-    toListen <- reactive({
+    toListen <- shiny::reactive({
       list(input$owndataSTRIP)
     })
     
-    observeEvent(toListen(), {
+    shiny::observeEvent(toListen(), {
       if (input$owndataSTRIP == "Yes") {
-        showModal(
+        shiny::showModal(
           entriesInfoModal_STRIP()
         )
       }
     })
     
-    get_data_strip <- reactive({
+    get_data_strip <- shiny::reactive({
       if (input$owndataSTRIP == "Yes") {
-        req(input$file.STRIP)
+        shiny::req(input$file.STRIP)
         inFile <- input$file.STRIP
         data_ingested <- load_file(name = inFile$name, 
                                    path = inFile[["datapath"]],
@@ -224,19 +223,19 @@ mod_STRIPD_server <- function(id) {
           return(NULL)
         }
       } else {
-        req(input$HStrip.strip, input$VStrip.strip)
-        req(input$blocks.strip)
+        shiny::req(input$HStrip.strip, input$VStrip.strip)
+        shiny::req(input$blocks.strip)
         Hplots <- as.numeric(input$HStrip.strip)
         Vplots <- as.numeric(input$VStrip.strip)
         treatments = c(Hplots, Vplots)
         return(list(data_strip = NULL, treatments = treatments))
       }
     }) |> 
-      bindEvent(input$RUN.strip)
+      shiny::bindEvent(input$RUN.strip)
     
     
-    strip_inputs <- reactive({
-      req(input$blocks.strip)
+    strip_inputs <- shiny::reactive({
+      shiny::req(input$blocks.strip)
       if (input$blocks.strip < 2) {
         shinyalert::shinyalert(
           "Error!!", 
@@ -244,14 +243,14 @@ mod_STRIPD_server <- function(id) {
           type = "error")
         return(NULL)
       }
-      req(get_data_strip())
+      shiny::req(get_data_strip())
       
-      req(input$plot_start.strip)
-      req(input$Location.strip)
-      req(input$myseed.strip)
-      req(input$l.strip)
-      req(input$blocks.strip)
-      req(input$planter.strip)
+      shiny::req(input$plot_start.strip)
+      shiny::req(input$Location.strip)
+      shiny::req(input$myseed.strip)
+      shiny::req(input$l.strip)
+      shiny::req(input$blocks.strip)
+      shiny::req(input$planter.strip)
       
       l.strip <- as.numeric(input$l.strip)
       seed.strip <- as.numeric(input$myseed.strip)
@@ -277,10 +276,10 @@ mod_STRIPD_server <- function(id) {
         )
       )
     }) |>
-      bindEvent(input$RUN.strip)
+      shiny::bindEvent(input$RUN.strip)
     
-    strip_reactive <- reactive({
-      req(strip_inputs())
+    strip_reactive <- shiny::reactive({
+      shiny::req(strip_inputs())
       
       shinyjs::show(id = "downloadCsv.strip")
     
@@ -299,19 +298,19 @@ mod_STRIPD_server <- function(id) {
       ))
       
     }) |> 
-      bindEvent(input$RUN.strip)
+      shiny::bindEvent(input$RUN.strip)
     
     
-    upDateSites <- reactive({
-      req(input$l.strip)
+    upDateSites <- shiny::reactive({
+      shiny::req(input$l.strip)
       locs <- as.numeric(input$l.strip)
       sites <- 1:locs
       return(list(sites = sites))
     }) |> 
-      bindEvent(input$RUN.strip)
+      shiny::bindEvent(input$RUN.strip)
     
-    output$well_panel_layout_STRIP <- renderUI({
-      req(strip_reactive()$fieldBook)
+    output$well_panel_layout_STRIP <- shiny::renderUI({
+      shiny::req(strip_reactive()$fieldBook)
       obj_strip <- strip_reactive()
       allBooks_strip<- plot_layout(x = obj_strip, 
                                    layout = 1, 
@@ -321,26 +320,26 @@ mod_STRIPD_server <- function(id) {
       stacked_strips <- c("Vertical Stack Panel" = "vertical", 
                             "Horizontal Stack Panel" = "horizontal")
       sites <- as.numeric(input$l.strip)
-      wellPanel(
-        fluidRow(
-          column(2,
-                 radioButtons(ns("typlotstrip"), "Type of Plot:",
+      shiny::wellPanel(
+        shiny::fluidRow(
+          shiny::column(2,
+                 shiny::radioButtons(ns("typlotstrip"), "Type of Plot:",
                               c("Entries/Treatments" = 1,
                                 "Plots" = 2,
                                 "Heatmap" = 3))
           ),
-          column(3,
-                 selectInput(inputId = ns("stackedSTRIP"), 
+          shiny::column(3,
+                 shiny::selectInput(inputId = ns("stackedSTRIP"),
                              label = "Reps layout:", 
                              choices = stacked_strips),
           ),
-          column(3,
-                 selectInput(inputId = ns("layoutO_strip"), 
+          shiny::column(3,
+                 shiny::selectInput(inputId = ns("layoutO_strip"),
                              label = "Layout option:", 
                              choices = layoutOptions_strip)
           ),
-          column(3,
-                 selectInput(inputId = ns("locLayout_strip"), 
+          shiny::column(3,
+                 shiny::selectInput(inputId = ns("locLayout_strip"),
                              label = "Location:", 
                              choices = as.numeric(upDateSites()$sites))
           )
@@ -349,9 +348,9 @@ mod_STRIPD_server <- function(id) {
     })
     
     
-    observeEvent(input$stackedSTRIP, {
-      req(input$stackedSTRIP)
-      req(input$l.strip)
+    shiny::observeEvent(input$stackedSTRIP, {
+      shiny::req(input$stackedSTRIP)
+      shiny::req(input$l.strip)
       obj_strips <- strip_reactive()
       allBooks <- try(plot_layout(x = obj_strips, 
                                   layout = 1,
@@ -360,7 +359,7 @@ mod_STRIPD_server <- function(id) {
                       silent = TRUE)
       nBooks <- length(allBooks)
       NewlayoutOptions <- 1:nBooks
-      updateSelectInput(session = session, 
+      shiny::updateSelectInput(session = session,
                         inputId = 'layoutO_strip',
                         label = "Layout option:",
                         choices = NewlayoutOptions,
@@ -369,19 +368,19 @@ mod_STRIPD_server <- function(id) {
     })
     
     
-    reset_selection <- reactiveValues(reset = 0)
+    reset_selection <- shiny::reactiveValues(reset = 0)
     
-    observeEvent(input$stackedSTRIP, {
+    shiny::observeEvent(input$stackedSTRIP, {
       reset_selection$reset <- 1
     })
     
-    observeEvent(input$layoutO_strip, {
+    shiny::observeEvent(input$layoutO_strip, {
       reset_selection$reset <- 0
     })
     
-    reactive_layoutSTRIP <- reactive({
-      req(input$layoutO_strip)
-      req(strip_reactive())
+    reactive_layoutSTRIP <- shiny::reactive({
+      shiny::req(input$layoutO_strip)
+      shiny::req(strip_reactive())
       obj_strip <- strip_reactive()
       planting_strip <- strip_inputs()$planter
       
@@ -397,79 +396,79 @@ mod_STRIPD_server <- function(id) {
                       l = locSelected), silent = TRUE)
     })
     
-    valsStrip <- reactiveValues(maxV.strip = NULL, 
+    valsStrip <- shiny::reactiveValues(maxV.strip = NULL,
                                 minV.strip = NULL, 
                                 trail.strip = NULL)
     
     simuModal.strip <- function(failed = FALSE) {
-      modalDialog(
-        selectInput(inputId = ns("trailsStrip"), 
+      shiny::modalDialog(
+        shiny::selectInput(inputId = ns("trailsStrip"),
                     label = "Select One:", 
                     choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
-        conditionalPanel(
+        shiny::conditionalPanel(
           condition = "input.trailsStrip == 'Other'", 
           ns = ns,
-          textInput(inputId = ns("OtherStrip"), 
+          shiny::textInput(inputId = ns("OtherStrip"),
                     label = "Input Trial Name:", 
                     value = NULL)
         ),
-        fluidRow(
-          column(6, 
-                 numericInput(ns("min.strip"), 
+        shiny::fluidRow(
+          shiny::column(6,
+                 shiny::numericInput(ns("min.strip"),
                               "Input the min value", 
                               value = NULL)
           ),
-          column(6, 
-                 numericInput(ns("max.strip"), 
+          shiny::column(6,
+                 shiny::numericInput(ns("max.strip"),
                               "Input the max value", 
                               value = NULL)  
           )
         ),
         
         if (failed)
-          div(tags$b("Invalid input of data max and min", 
+          shiny::div(shiny::tags$b("Invalid input of data max and min",
                      style = "color: red;")),
         
-        footer = tagList(
-          modalButton("Cancel"),
-          actionButton(ns("ok.strip"), "GO")
+        footer = shiny::tagList(
+          shiny::modalButton("Cancel"),
+          shiny::actionButton(ns("ok.strip"), "GO")
         )
         
       )
       
     }
     
-    observeEvent(input$Simulate.strip, {
-      req(strip_reactive()$fieldBook)
-      showModal(
+    shiny::observeEvent(input$Simulate.strip, {
+      shiny::req(strip_reactive()$fieldBook)
+      shiny::showModal(
         simuModal.strip()
       )
     })
     
-    observeEvent(input$ok.strip, {
-      req(input$max.strip, input$min.strip)
+    shiny::observeEvent(input$ok.strip, {
+      shiny::req(input$max.strip, input$min.strip)
       if (input$max.strip > input$min.strip && input$min.strip != input$max.strip) {
         valsStrip$maxV.strip <- input$max.strip
         valsStrip$minV.strip <- input$min.strip
         if(input$trailsStrip == "Other") {
-          req(input$OtherStrip)
+          shiny::req(input$OtherStrip)
           if(!is.null(input$OtherStrip)) {
             valsStrip$trail.strip <- input$OtherStrip
-          }else showModal(simuModal.strip(failed = TRUE))
+          }else shiny::showModal(simuModal.strip(failed = TRUE))
         }else {
           valsStrip$trail.strip <- as.character(input$trailsStrip)
         }
-        removeModal()
+        shiny::removeModal()
       }else {
-        showModal(
+        shiny::showModal(
           simuModal.strip(failed = TRUE)
         )
       }
     })
     
     
-    simuData_strip <- reactive({
-      req(strip_reactive()$fieldBook)
+    simuData_strip <- shiny::reactive({
+      shiny::req(strip_reactive()$fieldBook)
       if(!is.null(valsStrip$maxV.strip) && 
          !is.null(valsStrip$minV.strip) && 
          !is.null(valsStrip$trail.strip)) {
@@ -493,19 +492,19 @@ mod_STRIPD_server <- function(id) {
     })
     
     heatmapInfoModal_STRIP <- function() {
-      modalDialog(
-        title = div(tags$h3("Important message", style = "color: red;")),
-        h4("Simulate some data to see a heatmap!"),
+      shiny::modalDialog(
+        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
+        shiny::h4("Simulate some data to see a heatmap!"),
         easyClose = TRUE
       )
     }
     
-    locNum <- reactive(
+    locNum <- shiny::reactive(
       return(as.numeric(input$locLayout_strip))
     )
     
-    heatmap_obj <- reactive({
-      req(simuData_strip()$df)
+    heatmap_obj <- shiny::reactive({
+      shiny::req(simuData_strip()$df)
       if (ncol(simuData_strip()$df) == 10) {
         locs <- factor(simuData_strip()$df$LOCATION, levels = unique(simuData_strip()$df$LOCATION))
         locLevels <- levels(locs)
@@ -533,7 +532,7 @@ mod_STRIPD_server <- function(id) {
         p2 <- plotly::ggplotly(p1, tooltip="text", height = 560)
         return(p2)
       } else {
-        showModal(
+        shiny::showModal(
           heatmapInfoModal_STRIP()
         )
         return(NULL)
@@ -541,14 +540,14 @@ mod_STRIPD_server <- function(id) {
     })
     
     output$layout.strip <- plotly::renderPlotly({
-      req(strip_reactive())
-      req(input$typlotstrip)
+      shiny::req(strip_reactive())
+      shiny::req(input$typlotstrip)
       if (input$typlotstrip == 1) {
         reactive_layoutSTRIP()$out_layout
       } else if (input$typlotstrip == 2) {
         reactive_layoutSTRIP()$out_layoutPlots
       } else {
-        req(heatmap_obj())
+        shiny::req(heatmap_obj())
         heatmap_obj()
       }
     })
@@ -578,7 +577,7 @@ mod_STRIPD_server <- function(id) {
       
     })
     
-    output$downloadData.strip <- downloadHandler(
+    output$downloadData.strip <- shiny::downloadHandler(
       filename = function() {
         loc <- paste("Strip-Plot_", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
@@ -588,10 +587,10 @@ mod_STRIPD_server <- function(id) {
         write.csv(df, file, row.names = FALSE)
       }
     )
-    csv_data <- reactive({
-      req(simuData_strip()$df)
+    csv_data <- shiny::reactive({
+      shiny::req(simuData_strip()$df)
       df <- simuData_strip()$df
-      req(input$typlotstrip)
+      shiny::req(input$typlotstrip)
       if (input$typlotstrip == 2) {
         export_layout(df, locNum(), TRUE)
       } else {
@@ -601,7 +600,7 @@ mod_STRIPD_server <- function(id) {
     
     
     # Downloadable csv of selected dataset ----
-    output$downloadCsv.strip <- downloadHandler(
+    output$downloadCsv.strip <- shiny::downloadHandler(
       filename = function() {
         loc <- paste("Strip_Plot_Layout", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")

@@ -6,14 +6,13 @@
 #'
 #' @noRd 
 #'
-#' @importFrom shiny NS tagList 
 mod_Square_Lattice_ui <- function(id){
-  ns <- NS(id)
-  tagList(
-    h4("Square Lattice Design"),
-    sidebarLayout(
-      sidebarPanel(width = 4,
-                   radioButtons(
+  ns <- shiny::NS(id)
+  shiny::tagList(
+    shiny::h4("Square Lattice Design"),
+    shiny::sidebarLayout(
+      shiny::sidebarPanel(width = 4,
+                   shiny::radioButtons(
                      ns("owndata_square"), 
                      label = "Import entries' list?",
                      choices = c("Yes", "No"), 
@@ -23,93 +22,93 @@ mod_Square_Lattice_ui <- function(id){
                      choiceNames = NULL, 
                      choiceValues = NULL),
                    
-                   conditionalPanel("input.owndata_square != 'Yes'", ns = ns,
-                                    numericInput(ns("t.square"), label = "Input # of Treatments:",
+                   shiny::conditionalPanel("input.owndata_square != 'Yes'", ns = ns,
+                                    shiny::numericInput(ns("t.square"), label = "Input # of Treatments:",
                                                  value = 49, min = 2)
                    ),
-                   conditionalPanel("input.owndata_square == 'Yes'", ns = ns,
-                                    fluidRow(
-                                      column(8, style=list("padding-right: 28px;"),
-                                             fileInput(inputId = ns("file.square"), label = "Upload a CSV File:", multiple = FALSE)),
-                                      column(4, style=list("padding-left: 5px;"),
-                                             radioButtons(inputId = ns("sep.square"), "Separator",
+                   shiny::conditionalPanel("input.owndata_square == 'Yes'", ns = ns,
+                                    shiny::fluidRow(
+                                      shiny::column(8, style=list("padding-right: 28px;"),
+                                             shiny::fileInput(inputId = ns("file.square"), label = "Upload a CSV File:", multiple = FALSE)),
+                                      shiny::column(4, style=list("padding-left: 5px;"),
+                                             shiny::radioButtons(inputId = ns("sep.square"), "Separator",
                                                           choices = c(Comma = ",",
                                                                       Semicolon = ";",
                                                                       Tab = "\t"),
                                                           selected = ","))
                                     )        
                    ),
-                   numericInput(inputId = ns("r.square"), label = "Input # of Full Reps:", value = 3, min = 2),
-                   selectInput(inputId = ns("k.square"), label = "Input # of Plots per IBlock:", choices = ""),
-                   numericInput(inputId = ns("l.square"), label = "Input # of Locations:", value = 1, min = 1),
+                   shiny::numericInput(inputId = ns("r.square"), label = "Input # of Full Reps:", value = 3, min = 2),
+                   shiny::selectInput(inputId = ns("k.square"), label = "Input # of Plots per IBlock:", choices = ""),
+                   shiny::numericInput(inputId = ns("l.square"), label = "Input # of Locations:", value = 1, min = 1),
                    
-                   selectInput(inputId = ns("planter_mov_square"), label = "Plot Order Layout:",
+                   shiny::selectInput(inputId = ns("planter_mov_square"), label = "Plot Order Layout:",
                                choices = c("serpentine", "cartesian"), multiple = FALSE,
                                selected = "serpentine"),
                    
-                   fluidRow(
-                     column(6, style=list("padding-right: 28px;"),
-                            textInput(inputId = ns("plot_start.square"), "Starting Plot Number:", value = 101)
+                   shiny::fluidRow(
+                     shiny::column(6, style=list("padding-right: 28px;"),
+                            shiny::textInput(inputId = ns("plot_start.square"), "Starting Plot Number:", value = 101)
                      ),
-                     column(6,style=list("padding-left: 5px;"),
-                            textInput(inputId = ns("Location.square"), "Input Location:", value = "FARGO")
+                     shiny::column(6,style=list("padding-left: 5px;"),
+                            shiny::textInput(inputId = ns("Location.square"), "Input Location:", value = "FARGO")
                      )
                    ),
-                   numericInput(inputId = ns("myseed.square"), label = "Random Seed:",
+                   shiny::numericInput(inputId = ns("myseed.square"), label = "Random Seed:",
                                                        value = 5, min = 1),
                     
-                   fluidRow(
-                     column(6,# style=list("padding-right: 28px;"),
-                            actionButton(
+                   shiny::fluidRow(
+                     shiny::column(6,# style=list("padding-right: 28px;"),
+                            shiny::actionButton(
                               inputId = ns("RUN.square"), 
                               "Run!", 
-                              icon = icon("circle-nodes", verify_fa = FALSE),
+                              icon = shiny::icon("circle-nodes", verify_fa = FALSE),
                               width = '100%'),
                      ),
-                     column(6,#style=list("padding-left: 5px;"),
+                     shiny::column(6,#style=list("padding-left: 5px;"),
                             
-                            actionButton(
+                            shiny::actionButton(
                               inputId = ns("Simulate.square"), 
                               "Simulate!", 
-                              icon = icon("greater-than-equal", verify_fa = FALSE),
+                              icon = shiny::icon("greater-than-equal", verify_fa = FALSE),
                               width = '100%'),
                      )
                      
                    ), 
-                   br(),
-                   downloadButton(ns("downloadData.square"), "Save My Experiment", style = "width:100%")
+                   shiny::br(),
+                   shiny::downloadButton(ns("downloadData.square"), "Save My Experiment", style = "width:100%")
       ),
       
-      mainPanel(
+      shiny::mainPanel(
         width = 8,
-        fluidRow(
-          tabsetPanel(
-            tabPanel(
+        shiny::fluidRow(
+          shiny::tabsetPanel(
+            shiny::tabPanel(
               "Summary Design",
-              br(),
-              div(
+              shiny::br(),
+              shiny::div(
                 fieldhub_spinner(
-                  verbatimTextOutput(outputId = ns("summary_square_lattice"), 
+                  shiny::verbatimTextOutput(outputId = ns("summary_square_lattice"),
                                      placeholder = FALSE), 
                   type = 4
                 ),
                 style = "padding-right: 40px;"
               )
             ),
-            tabPanel("Field Layout",
+            shiny::tabPanel("Field Layout",
                      shinyjs::useShinyjs(),
-                     shinyjs::hidden(downloadButton(ns("downloadCsv.square"), 
+                     shinyjs::hidden(shiny::downloadButton(ns("downloadCsv.square"),
                                                     label =  "CSV",
-                                                    icon = icon("file-csv"), 
+                                                    icon = shiny::icon("file-csv"),
                                                     width = '10%',
                                                     style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
                      fieldhub_spinner(
                        plotly::plotlyOutput(ns("random_layout"), width = "97%", height = "550px"),type = 5
                      ),
-                     br(),
-                     column(12, uiOutput(ns("well_panel_layout_sq")))
+                     shiny::br(),
+                     shiny::column(12, shiny::uiOutput(ns("well_panel_layout_sq")))
             ),
-            tabPanel("Field Book", 
+            shiny::tabPanel("Field Book",
                      fieldhub_spinner(DT::DTOutput(ns("square_fieldbook")), type = 5)
             )
           )
@@ -123,15 +122,15 @@ mod_Square_Lattice_ui <- function(id){
 #'
 #' @noRd 
 mod_Square_Lattice_server <- function(id){
-  moduleServer(id, function(input, output, session){
+  shiny::moduleServer(id, function(input, output, session){
     ns <- session$ns
     
     shinyjs::useShinyjs()
     
-    init_data_square <- reactive({
+    init_data_square <- shiny::reactive({
       
       if (input$owndata_square == "Yes") {
-        req(input$file.square)
+        shiny::req(input$file.square)
         inFile <- input$file.square
         data_ingested <- load_file(name = inFile$name, 
                                    path = inFile[["datapath"]],
@@ -157,7 +156,7 @@ mod_Square_Lattice_server <- function(id){
           return(NULL)
         }
       } else {
-        req(input$t.square)
+        shiny::req(input$t.square)
         nt <- as.numeric(input$t.square)
         df <- default_entries(nt)
         data_square <- df
@@ -166,15 +165,15 @@ mod_Square_Lattice_server <- function(id){
       }     
     })
     
-    list_to_observe <- reactive({
-      req(init_data_square())
+    list_to_observe <- shiny::reactive({
+      shiny::req(init_data_square())
       list(
         entry_list = input$owndata_square,
         entries = init_data_square()$treatments
       )
     })
     
-    observeEvent(list_to_observe(), {
+    shiny::observeEvent(list_to_observe(), {
       
       options <- valid_block_sizes(
         as.numeric(init_data_square()$treatments),
@@ -182,7 +181,7 @@ mod_Square_Lattice_server <- function(id){
       )
       k <- if (length(options) == 0L) "No Options Available" else options
 
-      updateSelectInput(session = session, 
+      shiny::updateSelectInput(session = session,
                         inputId = 'k.square', 
                         label = "Input # of Plots per IBlock:",
                         choices = k,
@@ -190,7 +189,7 @@ mod_Square_Lattice_server <- function(id){
     })
     
     # getData.square
-    get_data_square <- reactive({
+    get_data_square <- shiny::reactive({
       if (is.null(init_data_square())) {
         shinyalert::shinyalert(
           "Error!!", 
@@ -199,18 +198,18 @@ mod_Square_Lattice_server <- function(id){
         return(NULL)
       } else return(init_data_square())
     }) |>
-      bindEvent(input$RUN.square)
-    
-    square_inputs <- reactive({
-      req(get_data_square())
-      req(input$k.square)
-      req(input$owndata_square)
-      req(input$myseed.square)
-      req(input$planter_mov_square)
-      req(input$plot_start.square)
-      req(input$Location.square)
-      req(input$l.square)
-      req(input$r.square)
+      shiny::bindEvent(input$RUN.square)
+
+    square_inputs <- shiny::reactive({
+      shiny::req(get_data_square())
+      shiny::req(input$k.square)
+      shiny::req(input$owndata_square)
+      shiny::req(input$myseed.square)
+      shiny::req(input$planter_mov_square)
+      shiny::req(input$plot_start.square)
+      shiny::req(input$Location.square)
+      shiny::req(input$l.square)
+      shiny::req(input$r.square)
       r.square <- as.numeric(input$r.square)
       k.square <- as.numeric(input$k.square)
       if (input$k.square == "No Options Available") {
@@ -238,41 +237,41 @@ mod_Square_Lattice_server <- function(id){
                   site_names = site_names,
                   seed = seed))
     }) |>
-      bindEvent(input$RUN.square)
+      shiny::bindEvent(input$RUN.square)
     
     
     entryListFormat_SQUARE <- data.frame(ENTRY = 1:9, 
                                          NAME = c(paste("Genotype", LETTERS[1:9], sep = "")))
     entriesInfoModal_SQUARE <- function() {
-      modalDialog(
-        title = div(tags$h3("Important message", style = "color: red;")),
-        h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
-        renderTable(entryListFormat_SQUARE,
+      shiny::modalDialog(
+        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
+        shiny::h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
+        shiny::renderTable(entryListFormat_SQUARE,
                     bordered = TRUE,
                     align = 'c',
                     striped = TRUE),
-        h4("Entry numbers can be any set of consecutive positive numbers."),
+        shiny::h4("Entry numbers can be any set of consecutive positive numbers."),
         easyClose = FALSE
       )
     }
     
-    toListen <- reactive({
+    toListen <- shiny::reactive({
       list(input$owndata_square)
     })
     
-    observeEvent(toListen(), {
+    shiny::observeEvent(toListen(), {
       if (input$owndata_square == "Yes") {
-        showModal(
+        shiny::showModal(
           entriesInfoModal_SQUARE()
         )
       }
     })
     
     
-    SQUARE_reactive <- eventReactive(input$RUN.square,{
+    SQUARE_reactive <- shiny::eventReactive(input$RUN.square,{
       
-      req(get_data_square())
-      req(square_inputs())
+      shiny::req(get_data_square())
+      shiny::req(square_inputs())
       
       shinyjs::show(id = "downloadCsv.square", anim = FALSE)
       
@@ -299,21 +298,21 @@ mod_Square_Lattice_server <- function(id){
       
     })
     
-    output$summary_square_lattice <- renderPrint({
-      req(SQUARE_reactive())
+    output$summary_square_lattice <- shiny::renderPrint({
+      shiny::req(SQUARE_reactive())
         cat("Randomization was successful!", "\n", "\n")
         print(SQUARE_reactive(), n = 6)
     })
     
-    upDateSites_SQ <- reactive({
-      req(square_inputs())
+    upDateSites_SQ <- shiny::reactive({
+      shiny::req(square_inputs())
       locs <- square_inputs()$sites
       sites <- 1:locs
       return(list(sites = sites))
     })
     
-    output$well_panel_layout_sq <- renderUI({
-      req(SQUARE_reactive()$fieldBook)
+    output$well_panel_layout_sq <- shiny::renderUI({
+      shiny::req(SQUARE_reactive()$fieldBook)
       df <- SQUARE_reactive()$fieldBook
       locs_sq <- length(levels(as.factor(df$LOCATION)))
       repsSquare <- length(levels(as.factor(df$REP)))
@@ -327,56 +326,56 @@ mod_Square_Lattice_server <- function(id){
       allBooks_sq <- plot_layout(x = obj_sq, layout = 1)$newBooks
       nBooks_sq <- length(allBooks_sq)
       layoutOptions_sq <- 1:nBooks_sq
-      wellPanel(
-        column(3,
-               radioButtons(ns("typlotSQ"), "Type of Plot:",
+      shiny::wellPanel(
+        shiny::column(3,
+               shiny::radioButtons(ns("typlotSQ"), "Type of Plot:",
                             c("Entries/Treatments" = 1,
                               "Plots" = 2,
                               "Heatmap" = 3))
         ),
-        fluidRow(
-          column(3,
-                 selectInput(inputId = ns("stacked_sq"), label = "Reps layout:", 
+        shiny::fluidRow(
+          shiny::column(3,
+                 shiny::selectInput(inputId = ns("stacked_sq"), label = "Reps layout:",
                              choices = stacked)
           ),
-          column(2, #align="center",
-                 selectInput(inputId = ns("layoutO_sq"), label = "Layout option:", choices = layoutOptions_sq, selected = 1)
+          shiny::column(2, #align="center",
+                 shiny::selectInput(inputId = ns("layoutO_sq"), label = "Layout option:", choices = layoutOptions_sq, selected = 1)
           ),
-          column(2, #align="center",
-                 selectInput(inputId = ns("locLayout_sq"), label = "Location:", choices = as.numeric(upDateSites_SQ()$sites))
+          shiny::column(2, #align="center",
+                 shiny::selectInput(inputId = ns("locLayout_sq"), label = "Location:", choices = as.numeric(upDateSites_SQ()$sites))
           )
         )
       )
     })
     
-    observeEvent(input$stacked_sq, {
-      req(input$stacked_sq)
-      req(input$l.square)
+    shiny::observeEvent(input$stacked_sq, {
+      shiny::req(input$stacked_sq)
+      shiny::req(input$l.square)
       obj_sq <- SQUARE_reactive()
       allBooks <- plot_layout(x = obj_sq, layout = 1, stacked = input$stacked_sq)$newBooks
       nBooks <- length(allBooks)
       NewlayoutOptions <- 1:nBooks
-      updateSelectInput(session = session, inputId = 'layoutO_sq',
+      shiny::updateSelectInput(session = session, inputId = 'layoutO_sq',
                         label = "Layout option:",
                         choices = NewlayoutOptions,
                         selected = 1
       )
     })
     
-    reset_selection <- reactiveValues(reset = 0)
+    reset_selection <- shiny::reactiveValues(reset = 0)
     
-    observeEvent(input$stacked_sq, {
+    shiny::observeEvent(input$stacked_sq, {
       reset_selection$reset <- 1
     })
     
-    observeEvent(input$layoutO_sq, {
+    shiny::observeEvent(input$layoutO_sq, {
       reset_selection$reset <- 0
     })
     
-    reactive_layoutSquare <- reactive({
-      req(square_inputs()$planter)
-      req(input$layoutO_sq)
-      req(SQUARE_reactive())
+    reactive_layoutSquare <- shiny::reactive({
+      shiny::req(square_inputs()$planter)
+      shiny::req(input$layoutO_sq)
+      shiny::req(SQUARE_reactive())
       obj_sq <- SQUARE_reactive()
       
       if (reset_selection$reset == 1) {
@@ -391,10 +390,10 @@ mod_Square_Lattice_server <- function(id){
                       stacked = input$stacked_sq), silent = TRUE)
     })
     
-    output$layout.output_sq <- renderPlot({
-      req(reactive_layoutSquare())
-      req(SQUARE_reactive())
-      req(input$typlotSQ)
+    output$layout.output_sq <- shiny::renderPlot({
+      shiny::req(reactive_layoutSquare())
+      shiny::req(SQUARE_reactive())
+      shiny::req(input$typlotSQ)
       if (input$typlotSQ == 1) {
         reactive_layoutSquare()$out_layout
       } else if (input$typlotSQ == 2) {
@@ -402,72 +401,72 @@ mod_Square_Lattice_server <- function(id){
       }
     })
     
-    valsSQUARE <- reactiveValues(maxV.square = NULL, minV.square = NULL, trail.square = NULL)
+    valsSQUARE <- shiny::reactiveValues(maxV.square = NULL, minV.square = NULL, trail.square = NULL)
     
     simuModal.square <- function(failed = FALSE) {
       
-      modalDialog(
-        h4("Generate a random response variable:"),
-        selectInput(inputId = ns("trailsSQUARE"), label = "Select One:", choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
-        conditionalPanel("input.trailsSQUARE == 'Other'", ns = ns,
-                         textInput(inputId = ns("OtherSQUARE"), label = "Input Trail Name:", value = NULL)
+      shiny::modalDialog(
+        shiny::h4("Generate a random response variable:"),
+        shiny::selectInput(inputId = ns("trailsSQUARE"), label = "Select One:", choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
+        shiny::conditionalPanel("input.trailsSQUARE == 'Other'", ns = ns,
+                         shiny::textInput(inputId = ns("OtherSQUARE"), label = "Input Trail Name:", value = NULL)
         ),
-        fluidRow(
-          column(6,
-                 numericInput(inputId = ns("min.square"), "Input the min value", value = NULL)
+        shiny::fluidRow(
+          shiny::column(6,
+                 shiny::numericInput(inputId = ns("min.square"), "Input the min value", value = NULL)
           ),
-          column(6,
-                 numericInput(inputId = ns("max.square"), "Input the max value", value = NULL)
+          shiny::column(6,
+                 shiny::numericInput(inputId = ns("max.square"), "Input the max value", value = NULL)
                  
           )
           
         ),
         
         if (failed)
-          div(tags$b("Invalid input of data max and min", style = "color: red;")),
+          shiny::div(shiny::tags$b("Invalid input of data max and min", style = "color: red;")),
         
-        footer = tagList(
-          modalButton("Cancel"),
-          actionButton(inputId = ns("ok.square"), "GO")
+        footer = shiny::tagList(
+          shiny::modalButton("Cancel"),
+          shiny::actionButton(inputId = ns("ok.square"), "GO")
         )
         
       )
       
     }
     
-    observeEvent(input$Simulate.square, {
-      req(input$k.square)
-      req(input$r.square)
-      req(reactive_layoutSquare()$fieldBookXY)
-      showModal(
+    shiny::observeEvent(input$Simulate.square, {
+      shiny::req(input$k.square)
+      shiny::req(input$r.square)
+      shiny::req(reactive_layoutSquare()$fieldBookXY)
+      shiny::showModal(
         simuModal.square()
       )
     })
     
-    observeEvent(input$ok.square, {
-      req(input$max.square, input$min.square)
+    shiny::observeEvent(input$ok.square, {
+      shiny::req(input$max.square, input$min.square)
       if (input$max.square > input$min.square && input$min.square != input$max.square) {
         valsSQUARE$maxV.square <- input$max.square
         valsSQUARE$minV.square <- input$min.square
         if(input$trailsSQUARE == "Other") {
-          req(input$OtherSQUARE)
+          shiny::req(input$OtherSQUARE)
           if(!is.null(input$OtherSQUARE)) {
             valsSQUARE$trail.square <- as.character(input$OtherSQUARE)
-          }else showModal(simuModal.square(failed = TRUE))
+          }else shiny::showModal(simuModal.square(failed = TRUE))
         }else {
           valsSQUARE$trail.square <- as.character(input$trailsSQUARE)
         }
-        removeModal()
+        shiny::removeModal()
       }else {
-        showModal(
+        shiny::showModal(
           simuModal.square(failed = TRUE)
         )
       }
     })
     
     
-    simuDataSQUARE <- reactive({
-      req(reactive_layoutSquare()$allSitesFieldbook)
+    simuDataSQUARE <- shiny::reactive({
+      shiny::req(reactive_layoutSquare()$allSitesFieldbook)
       if(!is.null(valsSQUARE$maxV.square) && !is.null(valsSQUARE$minV.square) && !is.null(valsSQUARE$trail.square)) {
         max <- as.numeric(valsSQUARE$maxV.square)
         min <- as.numeric(valsSQUARE$minV.square)
@@ -485,19 +484,19 @@ mod_Square_Lattice_server <- function(id){
     })
     
     heatmapInfoModal_Square <- function() {
-      modalDialog(
-        title = div(tags$h3("Important message", style = "color: red;")),
-        h4("Simulate some data to see a heatmap!"),
+      shiny::modalDialog(
+        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
+        shiny::h4("Simulate some data to see a heatmap!"),
         easyClose = TRUE
       )
     }
     
-    locNum <- reactive(
+    locNum <- shiny::reactive(
       return(as.numeric(input$locLayout_sq))
     )
     
-    heatmap_obj <- reactive({
-      req(simuDataSQUARE()$df)
+    heatmap_obj <- shiny::reactive({
+      shiny::req(simuDataSQUARE()$df)
       if (ncol(simuDataSQUARE()$df) == 11) {
         locs <- factor(simuDataSQUARE()$df$LOCATION, levels = unique(simuDataSQUARE()$df$LOCATION))
         locLevels <- levels(locs)
@@ -531,7 +530,7 @@ mod_Square_Lattice_server <- function(id){
         p2 <- plotly::ggplotly(p1, tooltip="text", height = 560)
         return(p2)
       } else {
-        showModal(
+        shiny::showModal(
           heatmapInfoModal_Square()
         )
         return(NULL)
@@ -539,21 +538,21 @@ mod_Square_Lattice_server <- function(id){
     })
     
     output$random_layout <- plotly::renderPlotly({
-      req(SQUARE_reactive())
-      req(reactive_layoutSquare())
-      req(input$typlotSQ)
+      shiny::req(SQUARE_reactive())
+      shiny::req(reactive_layoutSquare())
+      shiny::req(input$typlotSQ)
       if (input$typlotSQ == 1) {
         reactive_layoutSquare()$out_layout
       } else if (input$typlotSQ == 2) {
         reactive_layoutSquare()$out_layoutPlots
       } else {
-        req(heatmap_obj())
+        shiny::req(heatmap_obj())
         heatmap_obj()
       }
     })
     
     output$square_fieldbook <- DT::renderDataTable({
-      req(simuDataSQUARE()$df)
+      shiny::req(simuDataSQUARE()$df)
       df <- simuDataSQUARE()$df
       df$LOCATION <- as.factor(df$LOCATION)
       df$PLOT <- as.factor(df$PLOT)
@@ -574,22 +573,22 @@ mod_Square_Lattice_server <- function(id){
                       columnDefs = list(list(className = 'dt-center', targets = "_all")))))
     })
     
-    output$downloadData.square <- downloadHandler(
+    output$downloadData.square <- shiny::downloadHandler(
       filename = function() {
         loc <- paste("Square_Lattice_", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
       },
       content = function(file) {
-        req(simuDataSQUARE()$df)
+        shiny::req(simuDataSQUARE()$df)
         df <- as.data.frame(simuDataSQUARE()$df)
         write.csv(df, file, row.names = FALSE)
       }
     )
     
-    csv_data <- reactive({
-      req(simuDataSQUARE()$df)
+    csv_data <- shiny::reactive({
+      shiny::req(simuDataSQUARE()$df)
       df <- simuDataSQUARE()$df
-      req(input$typlotSQ)
+      shiny::req(input$typlotSQ)
       if (input$typlotSQ == 2) {
         export_layout(df, locNum(), TRUE)
       } else {
@@ -599,7 +598,7 @@ mod_Square_Lattice_server <- function(id){
     
     
     # Downloadable csv of selected dataset ----
-    output$downloadCsv.square <- downloadHandler(
+    output$downloadCsv.square <- shiny::downloadHandler(
       filename = function() {
         loc <- paste("Square_Lattice_Layout", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")

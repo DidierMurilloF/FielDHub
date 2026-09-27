@@ -114,6 +114,7 @@ test_that("plot() explains that a layout option is not available", {
 })
 
 test_that("the app shows FielDHub errors as validation messages", {
+  skip_if_not_installed("shiny")
   err <- tryCatch(validate_design(CRD(t = 5, reps = 3, plotNumber = 0)),
                   error = function(e) e)
   expect_s3_class(err, "shiny.silent.error")

@@ -6,26 +6,25 @@
 #'
 #' @noRd 
 #'
-#' @importFrom shiny NS tagList 
 mod_Rectangular_Lattice_ui <- function(id){
-  ns <- NS(id)
-  tagList(
-    h4("Rectangular Lattice Design"),
-    sidebarLayout(
-      sidebarPanel(width = 4,
-                   radioButtons(ns("owndata_rectangular"), label = "Import entries' list?", choices = c("Yes", "No"), selected = "No",
+  ns <- shiny::NS(id)
+  shiny::tagList(
+    shiny::h4("Rectangular Lattice Design"),
+    shiny::sidebarLayout(
+      shiny::sidebarPanel(width = 4,
+                   shiny::radioButtons(ns("owndata_rectangular"), label = "Import entries' list?", choices = c("Yes", "No"), selected = "No",
                                 inline = TRUE, width = NULL, choiceNames = NULL, choiceValues = NULL),
                    
-                   conditionalPanel("input.owndata_rectangular != 'Yes'", ns = ns,
-                                    numericInput(ns("t.rectangular"), label = "Input # of Treatments:",
+                   shiny::conditionalPanel("input.owndata_rectangular != 'Yes'", ns = ns,
+                                    shiny::numericInput(ns("t.rectangular"), label = "Input # of Treatments:",
                                                  value = 30, min = 2)
                    ),
-                   conditionalPanel("input.owndata_rectangular == 'Yes'", ns = ns,
-                                    fluidRow(
-                                      column(8, style=list("padding-right: 28px;"),
-                                             fileInput(inputId = ns("file.rectangular"), label = "Upload a CSV File:", multiple = FALSE)),
-                                      column(4, style=list("padding-left: 5px;"),
-                                             radioButtons(inputId = ns("sep.rectangular"), "Separator",
+                   shiny::conditionalPanel("input.owndata_rectangular == 'Yes'", ns = ns,
+                                    shiny::fluidRow(
+                                      shiny::column(8, style=list("padding-right: 28px;"),
+                                             shiny::fileInput(inputId = ns("file.rectangular"), label = "Upload a CSV File:", multiple = FALSE)),
+                                      shiny::column(4, style=list("padding-left: 5px;"),
+                                             shiny::radioButtons(inputId = ns("sep.rectangular"), "Separator",
                                                           choices = c(Comma = ",",
                                                                       Semicolon = ";",
                                                                       Tab = "\t"),
@@ -33,64 +32,64 @@ mod_Rectangular_Lattice_ui <- function(id){
                                     )        
                    ),
                    
-                   numericInput(inputId = ns("r.rectangular"), label = "Input # of Full Reps:", value = 3, min = 2),
-                   selectInput(inputId = ns("k.rectangular"), label = "Input # of Plots per IBlock:", choices = ""),
-                   numericInput(inputId = ns("l.rectangular"), label = "Input # of Locations:", value = 1, min = 1),
+                   shiny::numericInput(inputId = ns("r.rectangular"), label = "Input # of Full Reps:", value = 3, min = 2),
+                   shiny::selectInput(inputId = ns("k.rectangular"), label = "Input # of Plots per IBlock:", choices = ""),
+                   shiny::numericInput(inputId = ns("l.rectangular"), label = "Input # of Locations:", value = 1, min = 1),
                    
-                   selectInput(inputId = ns("planter_mov_rect"), label = "Plot Order Layout:",
+                   shiny::selectInput(inputId = ns("planter_mov_rect"), label = "Plot Order Layout:",
                                choices = c("serpentine", "cartesian"), multiple = FALSE,
                                selected = "serpentine"),
 
-                   fluidRow(
-                     column(6, style=list("padding-right: 28px;"),
-                            textInput(inputId = ns("plot_start.rectangular"), "Starting Plot Number:", value = 101)
+                   shiny::fluidRow(
+                     shiny::column(6, style=list("padding-right: 28px;"),
+                            shiny::textInput(inputId = ns("plot_start.rectangular"), "Starting Plot Number:", value = 101)
                      ),
-                     column(6,style=list("padding-left: 5px;"),
-                            textInput(inputId = ns("Location.rectangular"), "Input Location:", value = "FARGO")
+                     shiny::column(6,style=list("padding-left: 5px;"),
+                            shiny::textInput(inputId = ns("Location.rectangular"), "Input Location:", value = "FARGO")
                      )
                    ), 
-                   numericInput(inputId = ns("myseed.rectangular"), label = "Random Seed:",
+                   shiny::numericInput(inputId = ns("myseed.rectangular"), label = "Random Seed:",
                                 value = 007, min = 1),
-                   fluidRow(
-                     column(6,
-                            actionButton(
+                   shiny::fluidRow(
+                     shiny::column(6,
+                            shiny::actionButton(
                               inputId = ns("RUN.rectangular"), 
                               "Run!", 
-                              icon = icon("circle-nodes", verify_fa = FALSE),
+                              icon = shiny::icon("circle-nodes", verify_fa = FALSE),
                               width = '100%'),
                      ),
-                     column(6,
-                            actionButton(
+                     shiny::column(6,
+                            shiny::actionButton(
                               inputId = ns("Simulate.rectangular"), 
                               "Simulate!",
-                              icon = icon("greater-than-equal", verify_fa = FALSE),
+                              icon = shiny::icon("greater-than-equal", verify_fa = FALSE),
                               width = '100%'),
                      )
                      
                    ), 
-                   br(),
-                   downloadButton(ns("downloadData.rectangular"), "Save My Experiment", style = "width:100%")
+                   shiny::br(),
+                   shiny::downloadButton(ns("downloadData.rectangular"), "Save My Experiment", style = "width:100%")
       ),
       
-      mainPanel(
+      shiny::mainPanel(
         width = 8,
-        fluidRow(
-          tabsetPanel(
-            tabPanel(
+        shiny::fluidRow(
+          shiny::tabsetPanel(
+            shiny::tabPanel(
               "Summary Design",
-              br(),
+              shiny::br(),
               fieldhub_spinner(
-                verbatimTextOutput(outputId = ns("summary_rectangular_lattice"), 
+                shiny::verbatimTextOutput(outputId = ns("summary_rectangular_lattice"),
                                    placeholder = FALSE), 
                 type = 4
               ),
               style = "padding-right: 40px;"
             ),
-            tabPanel("Field Layout",
+            shiny::tabPanel("Field Layout",
                      shinyjs::useShinyjs(),
-                     shinyjs::hidden(downloadButton(ns("downloadCsv.rectangular"), 
+                     shinyjs::hidden(shiny::downloadButton(ns("downloadCsv.rectangular"),
                                                     label =  "CSV",
-                                                    icon = icon("file-csv"), 
+                                                    icon = shiny::icon("file-csv"),
                                                     width = '10%',
                                                     style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
                      fieldhub_spinner(
@@ -99,10 +98,10 @@ mod_Rectangular_Lattice_ui <- function(id){
                                             height = "550px"),
                        type = 5
                      ),
-                     br(),
-                     column(12,uiOutput(ns("well_panel_layout_rt")))
+                     shiny::br(),
+                     shiny::column(12,shiny::uiOutput(ns("well_panel_layout_rt")))
             ),
-            tabPanel("Field Book", 
+            shiny::tabPanel("Field Book",
                      fieldhub_spinner(DT::DTOutput(ns("rectangular_fieldbook")), type = 5)
             )
           )
@@ -116,15 +115,15 @@ mod_Rectangular_Lattice_ui <- function(id){
 #'
 #' @noRd 
 mod_Rectangular_Lattice_server <- function(id) {
-  moduleServer(id, function(input, output, session) {
+  shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
     shinyjs::useShinyjs()
     
-    init_data_rectangular <- reactive({
+    init_data_rectangular <- shiny::reactive({
       
       if (input$owndata_rectangular == "Yes") {
-      req(input$file.rectangular)
+      shiny::req(input$file.rectangular)
       inFile <- input$file.rectangular
       data_ingested <- load_file(name = inFile$name,
                                  path = inFile[["datapath"]],
@@ -152,7 +151,7 @@ mod_Rectangular_Lattice_server <- function(id) {
         return(NULL)
       }
     } else {
-      req(input$t.rectangular)
+      shiny::req(input$t.rectangular)
       nt <- as.numeric(input$t.rectangular)
       df <- default_entries(nt)
       data_rectangular <- df
@@ -161,23 +160,23 @@ mod_Rectangular_Lattice_server <- function(id) {
       }
     })
     
-    list_to_observe <- reactive({
-      req(init_data_rectangular())
+    list_to_observe <- shiny::reactive({
+      shiny::req(init_data_rectangular())
       list(
         entry_list = input$owndata_rectangular,
         entries = init_data_rectangular()$treatments
       )
     })
     
-    observeEvent(list_to_observe(), {
-      req(init_data_rectangular())
+    shiny::observeEvent(list_to_observe(), {
+      shiny::req(init_data_rectangular())
       options <- valid_block_sizes(
         as.numeric(init_data_rectangular()$treatments),
         "rectangular_lattice"
       )
       k <- if (length(options) == 0L) "No Options Available" else options
       
-      updateSelectInput(session = session, 
+      shiny::updateSelectInput(session = session,
                         inputId = 'k.rectangular', 
                         label = "Input # of Plots per IBlock:",
                         choices = k, 
@@ -185,7 +184,7 @@ mod_Rectangular_Lattice_server <- function(id) {
     })
     
     
-    get_data_rectangular <- reactive({
+    get_data_rectangular <- shiny::reactive({
       if (is.null(init_data_rectangular())) {
         shinyalert::shinyalert(
           "Error!!", 
@@ -194,17 +193,17 @@ mod_Rectangular_Lattice_server <- function(id) {
         return(NULL)
       } else return(init_data_rectangular())
     }) |>
-      bindEvent(input$RUN.rectangular)
-    
-    rectangular_inputs <- reactive({
-      req(init_data_rectangular())
-      req(input$k.rectangular)
-      req(input$myseed.rectangular)
-      req(input$planter_mov_rect)
-      req(input$plot_start.rectangular)
-      req(input$Location.rectangular)
-      req(input$l.rectangular)
-      req(input$r.rectangular)
+      shiny::bindEvent(input$RUN.rectangular)
+
+    rectangular_inputs <- shiny::reactive({
+      shiny::req(init_data_rectangular())
+      shiny::req(input$k.rectangular)
+      shiny::req(input$myseed.rectangular)
+      shiny::req(input$planter_mov_rect)
+      shiny::req(input$plot_start.rectangular)
+      shiny::req(input$Location.rectangular)
+      shiny::req(input$l.rectangular)
+      shiny::req(input$r.rectangular)
       if (input$k.rectangular == "No Options Available") {
         shinyalert::shinyalert(
           "Error!!",
@@ -232,41 +231,41 @@ mod_Rectangular_Lattice_server <- function(id) {
                   site_names = site_names,
                   seed = seed))
     }) |>
-      bindEvent(input$RUN.rectangular)
+      shiny::bindEvent(input$RUN.rectangular)
     
     
     entryListFormat_RECT <- data.frame(ENTRY = 1:9, 
                                        NAME = c(paste("Genotype", LETTERS[1:9], sep = "")))
     entriesInfoModal_RECT <- function() {
-      modalDialog(
-        title = div(tags$h3("Important message", style = "color: red;")),
-        h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
-        renderTable(entryListFormat_RECT,
+      shiny::modalDialog(
+        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
+        shiny::h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
+        shiny::renderTable(entryListFormat_RECT,
                     bordered = TRUE,
                     align = 'c',
                     striped = TRUE),
-        h4("Entry numbers can be any set of consecutive positive numbers."),
+        shiny::h4("Entry numbers can be any set of consecutive positive numbers."),
         easyClose = FALSE
       )
     }
     
-    toListen <- reactive({
+    toListen <- shiny::reactive({
       list(input$owndata_rectangular)
     })
     
-    observeEvent(toListen(), {
+    shiny::observeEvent(toListen(), {
       if (input$owndata_rectangular == "Yes") {
-        showModal(
+        shiny::showModal(
           entriesInfoModal_RECT()
         )
       }
     })
     
     
-    RECTANGULAR_reactive <- reactive({
+    RECTANGULAR_reactive <- shiny::reactive({
       
-      req(get_data_rectangular())
-      req(rectangular_inputs())
+      shiny::req(get_data_rectangular())
+      shiny::req(rectangular_inputs())
       
       shinyjs::show(id = "downloadCsv.rectangular", anim = FALSE)
       
@@ -291,24 +290,24 @@ mod_Rectangular_Lattice_server <- function(id) {
         data = data
       )) 
     }) |>
-      bindEvent(input$RUN.rectangular)
+      shiny::bindEvent(input$RUN.rectangular)
     
-    output$summary_rectangular_lattice <- renderPrint({
-      req(RECTANGULAR_reactive())
+    output$summary_rectangular_lattice <- shiny::renderPrint({
+      shiny::req(RECTANGULAR_reactive())
       cat("Randomization was successful!", "\n", "\n")
       print(RECTANGULAR_reactive(), n = 6)
     })
     
     
-    upDateSites_RT <- reactive({
-      req(rectangular_inputs())
+    upDateSites_RT <- shiny::reactive({
+      shiny::req(rectangular_inputs())
       locs <- rectangular_inputs()$sites
       sites <- 1:locs
       return(list(sites = sites))
     })
     
-    output$well_panel_layout_rt <- renderUI({
-      req(RECTANGULAR_reactive()$fieldBook)
+    output$well_panel_layout_rt <- shiny::renderUI({
+      shiny::req(RECTANGULAR_reactive()$fieldBook)
       df <- RECTANGULAR_reactive()$fieldBook
       locs_rt <- length(levels(as.factor(df$LOCATION)))
       repsRect <- length(levels(as.factor(df$REP)))
@@ -322,58 +321,58 @@ mod_Rectangular_Lattice_server <- function(id) {
       allBooks_rt <- plot_layout(x = obj_rt, layout = 1, stacked = "vertical")$newBooks
       nBooks_rt <- length(allBooks_rt)
       layoutOptions_rt <- 1:nBooks_rt
-      wellPanel(
-        column(3,
-               radioButtons(ns("typlotRT"), "Type of Plot:",
+      shiny::wellPanel(
+        shiny::column(3,
+               shiny::radioButtons(ns("typlotRT"), "Type of Plot:",
                             c("Entries/Treatments" = 1,
                               "Plots" = 2,
                               "Heatmap" = 3))
         ),
-        fluidRow(
-          column(3,
-                 selectInput(inputId = ns("stackedRT"), label = "Reps layout:", 
+        shiny::fluidRow(
+          shiny::column(3,
+                 shiny::selectInput(inputId = ns("stackedRT"), label = "Reps layout:",
                              choices = stacked)
           ),
-          column(2,
-                 selectInput(inputId = ns("layoutO_rt"), label = "Layout option:", choices = layoutOptions_rt, selected = 1)
+          shiny::column(2,
+                 shiny::selectInput(inputId = ns("layoutO_rt"), label = "Layout option:", choices = layoutOptions_rt, selected = 1)
           ),
-          column(2, 
-                 selectInput(inputId = ns("locLayout_rt"), label = "Location:", choices = as.numeric(upDateSites_RT()$sites))
+          shiny::column(2,
+                 shiny::selectInput(inputId = ns("locLayout_rt"), label = "Location:", choices = as.numeric(upDateSites_RT()$sites))
           )
         )
       )
     })
     
-    observeEvent(input$stackedRT, {
-      req(input$stackedRT)
-      req(input$l.rectangular)
+    shiny::observeEvent(input$stackedRT, {
+      shiny::req(input$stackedRT)
+      shiny::req(input$l.rectangular)
       obj_rt <- RECTANGULAR_reactive()
       allBooks <- plot_layout(x = obj_rt, layout = 1, stacked = input$stackedRT)$newBooks
       nBooks <- length(allBooks)
       NewlayoutOptions <- 1:nBooks
-      updateSelectInput(session = session, inputId = 'layoutO_rt',
+      shiny::updateSelectInput(session = session, inputId = 'layoutO_rt',
                         label = "Layout option:",
                         choices = NewlayoutOptions,
                         selected = 1
       )
     })
     
-    reset_selection <- reactiveValues(reset = 0)
+    reset_selection <- shiny::reactiveValues(reset = 0)
     
-    observeEvent(input$stackedRT, {
+    shiny::observeEvent(input$stackedRT, {
       reset_selection$reset <- 1
     })
     
-    observeEvent( input$layoutO_rt, {
+    shiny::observeEvent( input$layoutO_rt, {
       reset_selection$reset <- 0
     })
     
-    reactive_layoutRect <- reactive({
-      req(input$stackedRT)
-      req(input$layoutO_rt)
-      req(input$locLayout_rt)
-      req(rectangular_inputs()$planter)
-      req(RECTANGULAR_reactive())
+    reactive_layoutRect <- shiny::reactive({
+      shiny::req(input$stackedRT)
+      shiny::req(input$layoutO_rt)
+      shiny::req(input$locLayout_rt)
+      shiny::req(rectangular_inputs()$planter)
+      shiny::req(RECTANGULAR_reactive())
       obj_rt <- RECTANGULAR_reactive()
       
       if (reset_selection$reset == 1) {
@@ -389,70 +388,70 @@ mod_Rectangular_Lattice_server <- function(id) {
     })
     
     
-    valsRECT <- reactiveValues(maxV.rectangular= NULL, minV.rectangular= NULL, trail.rectangular= NULL)
+    valsRECT <- shiny::reactiveValues(maxV.rectangular= NULL, minV.rectangular= NULL, trail.rectangular= NULL)
     
     simuModal.rectangular<- function(failed = FALSE) {
-      modalDialog(
-        selectInput(inputId = ns("trailsRECT"), label = "Select One:", choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
-        conditionalPanel("input.trailsRECT == 'Other'", ns = ns,
-                         textInput(inputId = ns("OtherRECT"), label = "Input Trial Name:", value = NULL)
+      shiny::modalDialog(
+        shiny::selectInput(inputId = ns("trailsRECT"), label = "Select One:", choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
+        shiny::conditionalPanel("input.trailsRECT == 'Other'", ns = ns,
+                         shiny::textInput(inputId = ns("OtherRECT"), label = "Input Trial Name:", value = NULL)
         ),
-        fluidRow(
-          column(6,
-                 numericInput(inputId = ns("min.rectangular"), "Input the min value", value = NULL)
+        shiny::fluidRow(
+          shiny::column(6,
+                 shiny::numericInput(inputId = ns("min.rectangular"), "Input the min value", value = NULL)
           ),
-          column(6,
-                 numericInput(inputId = ns("max.rectangular"), "Input the max value", value = NULL)
+          shiny::column(6,
+                 shiny::numericInput(inputId = ns("max.rectangular"), "Input the max value", value = NULL)
                  
           )
           
         ),
         
         if (failed)
-          div(tags$b("Invalid input of data max and min", style = "color: red;")),
+          shiny::div(shiny::tags$b("Invalid input of data max and min", style = "color: red;")),
         
-        footer = tagList(
-          modalButton("Cancel"),
-          actionButton(inputId = ns("ok.rectangular"), "GO")
+        footer = shiny::tagList(
+          shiny::modalButton("Cancel"),
+          shiny::actionButton(inputId = ns("ok.rectangular"), "GO")
         )
         
       )
       
     }
     
-    observeEvent(input$Simulate.rectangular, {
-      req(input$k.rectangular)
-      req(input$r.rectangular)
-      req(reactive_layoutRect()$fieldBookXY)
-      showModal(
+    shiny::observeEvent(input$Simulate.rectangular, {
+      shiny::req(input$k.rectangular)
+      shiny::req(input$r.rectangular)
+      shiny::req(reactive_layoutRect()$fieldBookXY)
+      shiny::showModal(
         simuModal.rectangular()
       )
     })
     
-    observeEvent(input$ok.rectangular, {
-      req(input$max.rectangular, input$min.rectangular)
+    shiny::observeEvent(input$ok.rectangular, {
+      shiny::req(input$max.rectangular, input$min.rectangular)
       if (input$max.rectangular> input$min.rectangular&& input$min.rectangular!= input$max.rectangular) {
         valsRECT$maxV.rectangular<- input$max.rectangular
         valsRECT$minV.rectangular<- input$min.rectangular
         if(input$trailsRECT == "Other") {
-          req(input$OtherRECT)
+          shiny::req(input$OtherRECT)
           if(!is.null(input$OtherRECT)) {
             valsRECT$trail.rectangular <- as.character(input$OtherRECT)
-          }else showModal(simuModal.rectangular(failed = TRUE))
+          }else shiny::showModal(simuModal.rectangular(failed = TRUE))
         }else {
           valsRECT$trail.rectangular <- as.character(input$trailsRECT)
         }
-        removeModal()
+        shiny::removeModal()
       }else {
-        showModal(
+        shiny::showModal(
           simuModal.rectangular(failed = TRUE)
         )
       }
     })
     
     
-    simuDataRECT <- reactive({
-      req(reactive_layoutRect()$allSitesFieldbook)
+    simuDataRECT <- shiny::reactive({
+      shiny::req(reactive_layoutRect()$allSitesFieldbook)
       if(!is.null(valsRECT$maxV.rectangular) && !is.null(valsRECT$minV.rectangular) && !is.null(valsRECT$trail.rectangular)) {
         max <- as.numeric(valsRECT$maxV.rectangular)
         min <- as.numeric(valsRECT$minV.rectangular)
@@ -470,19 +469,19 @@ mod_Rectangular_Lattice_server <- function(id) {
     })
     
     heatmapInfoModal_Rect <- function() {
-      modalDialog(
-        title = div(tags$h3("Important message", style = "color: red;")),
-        h4("Simulate some data to see a heatmap!"),
+      shiny::modalDialog(
+        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
+        shiny::h4("Simulate some data to see a heatmap!"),
         easyClose = TRUE
       )
     }
     
-    locNum <- reactive(
+    locNum <- shiny::reactive(
       return(as.numeric(input$locLayout_rt))
     )
     
-    heatmap_obj <- reactive({
-      req(simuDataRECT()$df)
+    heatmap_obj <- shiny::reactive({
+      shiny::req(simuDataRECT()$df)
       if (ncol(simuDataRECT()$df) == 11) {
         locs <- factor(simuDataRECT()$df$LOCATION, levels = unique(simuDataRECT()$df$LOCATION))
         locLevels <- levels(locs)
@@ -516,7 +515,7 @@ mod_Rectangular_Lattice_server <- function(id) {
         p2 <- plotly::ggplotly(p1, tooltip="text", height = 560)
         return(p2)
       } else {
-        showModal(
+        shiny::showModal(
           heatmapInfoModal_Rect()
         )
         return(NULL)
@@ -524,21 +523,21 @@ mod_Rectangular_Lattice_server <- function(id) {
     })
     
     output$random_layout <- plotly::renderPlotly({
-      req(reactive_layoutRect())
-      req(RECTANGULAR_reactive())
-      req(input$typlotRT)
+      shiny::req(reactive_layoutRect())
+      shiny::req(RECTANGULAR_reactive())
+      shiny::req(input$typlotRT)
       if (input$typlotRT == 1) {
         reactive_layoutRect()$out_layout
       } else if (input$typlotRT == 2) {
         reactive_layoutRect()$out_layoutPlots
       } else {
-        req(heatmap_obj())
+        shiny::req(heatmap_obj())
         heatmap_obj()
       }
     })
     
     output$rectangular_fieldbook <- DT::renderDataTable({
-      req(simuDataRECT())
+      shiny::req(simuDataRECT())
       df <- simuDataRECT()$df
       df$LOCATION <- as.factor(df$LOCATION)
       df$PLOT <- as.factor(df$PLOT)
@@ -560,7 +559,7 @@ mod_Rectangular_Lattice_server <- function(id) {
       
     })
     
-    output$downloadData.rectangular <- downloadHandler(
+    output$downloadData.rectangular <- shiny::downloadHandler(
       filename = function() {
         loc <- paste("Rectangular_Lattice_", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
@@ -571,10 +570,10 @@ mod_Rectangular_Lattice_server <- function(id) {
       }
     )
     
-    csv_data <- reactive({
-      req(simuDataRECT()$df)
+    csv_data <- shiny::reactive({
+      shiny::req(simuDataRECT()$df)
       df <- simuDataRECT()$df
-      req(input$typlotRT)
+      shiny::req(input$typlotRT)
       if (input$typlotRT == 2) {
         export_layout(df, locNum(), TRUE)
       } else {
@@ -584,7 +583,7 @@ mod_Rectangular_Lattice_server <- function(id) {
     
     
     # Downloadable csv of selected dataset ----
-    output$downloadCsv.rectangular <- downloadHandler(
+    output$downloadCsv.rectangular <- shiny::downloadHandler(
       filename = function() {
         loc <- paste("Rectangular_Lattice_Layout", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
