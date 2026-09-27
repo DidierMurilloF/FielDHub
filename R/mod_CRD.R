@@ -4,9 +4,7 @@
 #'
 #' @param id,input,output,session Internal parameters for {shiny}.
 #'
-#' @noRd 
-#'
-#' @importFrom utils write.csv
+#' @noRd
 mod_CRD_ui <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
@@ -135,11 +133,7 @@ mod_CRD_ui <- function(id) {
 mod_CRD_server <- function(id) {
   
   shiny::moduleServer(id, function(input, output, session) {
-    
-    ns <- session$ns
-    
-    shinyjs::useShinyjs()
-    
+
     get_data_crd <- shiny::reactive({
       
       if (input$owndatacrd == "Yes") {
@@ -266,32 +260,6 @@ mod_CRD_server <- function(id) {
         shiny::req(CRD_reactive()$fieldBook)
       }
     )
-
-    output$tabsetCRD <- shiny::renderUI({
-      shiny::req(input$typlotCRD)
-      shiny::tabsetPanel(
-        if (input$typlotCRD != 3) {
-          shiny::tabPanel("Completely Randomized Field Layout",
-                   fieldhub_spinner(
-                     shiny::plotOutput(ns("layout.crd"),
-                                width = "100%",
-                                height = "650px"),
-                    type = 5))
-        } else {
-          shiny::tabPanel("Completely Randomized Field Layout",
-                   fieldhub_spinner(
-                     plotly::plotlyOutput(ns("heatmapCRD"), 
-                                          width = "100%", 
-                                          height = "650px"),
-                     type = 5))
-        },
-        shiny::tabPanel("Completely Randomized Field Book",
-                 fieldhub_spinner(
-                   DT::DTOutput(ns("CRD.output")), 
-                   type = 5))
-      )
-      
-    })
 
   })
 }

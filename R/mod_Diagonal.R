@@ -4,9 +4,7 @@
 #'
 #' @param id,input,output,session Internal parameters for {shiny}.
 #'
-#' @noRd 
-#'
-#' @importFrom utils write.csv
+#' @noRd
 mod_Diagonal_ui <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
@@ -203,8 +201,6 @@ mod_Diagonal_server <- function(id) {
       list(randomize_hit$times, user_tries$tries)
     })
 
-    shinyjs::useShinyjs()
-    
     single_inputs <- shiny::eventReactive(input$RUN.diagonal, {
       planter_mov <- input$planter_single
       Name_expt <- as.vector(unlist(strsplit(input$expt_name, ",")))

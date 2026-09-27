@@ -262,8 +262,6 @@ mod_multi_loc_preps_server <- function(id){
   shiny::moduleServer( id, function(input, output, session){
     ns <- session$ns
 
-    shinyjs::useShinyjs()
-
     shiny::observe({
         shiny::req(input$locs_prep)
         prep_locs <- as.numeric(input$locs_prep)

@@ -110,14 +110,14 @@ test_that("plots_along_grid() is planting_path() applied to a field-book-ordered
 #' side), anywhere inside expression `e` -- the odd/even test an alternate-
 #' row check is built from.
 #' @noRd
-fielddhub_contains_mod2 <- function(e) {
+fieldhub_contains_mod2 <- function(e) {
   if (!is.call(e)) return(FALSE)
   if (is.symbol(e[[1]]) && identical(as.character(e[[1]]), "%%") && length(e) == 3 &&
       is.numeric(e[[3]]) && isTRUE(as.numeric(e[[3]]) == 2)) {
     return(TRUE)
   }
   for (i in seq_len(length(e))) {
-    if (is.call(e[[i]]) && fielddhub_contains_mod2(e[[i]])) return(TRUE)
+    if (is.call(e[[i]]) && fieldhub_contains_mod2(e[[i]])) return(TRUE)
   }
   FALSE
 }
@@ -126,11 +126,11 @@ fielddhub_contains_mod2 <- function(e) {
 #' i.e. alternate-row, test) and whose consequent or alternate branch
 #' contains a call to `rev()` -- the "reverse every other row" pattern.
 #' @noRd
-fielddhub_is_alternate_row_reversal_if <- function(e) {
+fieldhub_is_alternate_row_reversal_if <- function(e) {
   if (!is.call(e) || !is.symbol(e[[1]]) || !identical(as.character(e[[1]]), "if")) {
     return(FALSE)
   }
-  has_mod2 <- fielddhub_contains_mod2(e[[2]])
+  has_mod2 <- fieldhub_contains_mod2(e[[2]])
   has_rev <- ("rev" %in% all.names(e[[3]])) ||
     (length(e) >= 4 && "rev" %in% all.names(e[[4]]))
   isTRUE(has_mod2) && isTRUE(has_rev)
@@ -139,11 +139,11 @@ fielddhub_is_alternate_row_reversal_if <- function(e) {
 #' Every `if (... %% 2 ...) ... rev(...) ...` node inside `expr`, walking the
 #' whole parse tree (branches of other `if`s, loop bodies, nested calls).
 #' @noRd
-fielddhub_alternate_row_reversal_ifs <- function(expr) {
+fieldhub_alternate_row_reversal_ifs <- function(expr) {
   hits <- list()
   walk <- function(e) {
     if (!is.call(e)) return(invisible())
-    if (fielddhub_is_alternate_row_reversal_if(e)) hits[[length(hits) + 1]] <<- e
+    if (fieldhub_is_alternate_row_reversal_if(e)) hits[[length(hits) + 1]] <<- e
     n <- length(e)
     for (i in seq_len(n)) {
       if (is.call(e[[i]])) walk(e[[i]])
@@ -200,14 +200,14 @@ test_that("the static check catches the deleted planter_transform()'s reversal",
     return(PLOTS = New_PLOTS)
   })
 
-  hits <- fielddhub_alternate_row_reversal_ifs(old_planter_transform_body)
+  hits <- fieldhub_alternate_row_reversal_ifs(old_planter_transform_body)
   expect_length(hits, 2)
 })
 
 test_that("no core function other than planting_path() reverses alternate rows", {
   functions <- core_functions()
   offenders <- names(Filter(
-    function(f) length(fielddhub_alternate_row_reversal_ifs(body(f))) > 0,
+    function(f) length(fieldhub_alternate_row_reversal_ifs(body(f))) > 0,
     functions
   ))
   expect_identical(offenders, character(0))

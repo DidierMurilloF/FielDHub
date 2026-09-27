@@ -211,8 +211,6 @@ mod_sparse_allocation_server <- function(id){
   shiny::moduleServer( id, function(input, output, session) {
     ns <- session$ns
 
-    shinyjs::useShinyjs()
-    
     # Evaluate a call to a FielDHub function, showing its errors in an alert
     # (and returning NULL) and its warnings in an alert after it finishes
     call_api <- function(expr) {

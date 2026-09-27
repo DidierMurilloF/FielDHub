@@ -204,9 +204,7 @@ mod_RCBD_augmented_ui <- function(id){
 mod_RCBD_augmented_server <- function(id) {
   shiny::moduleServer( id, function(input, output, session) {
     ns <- session$ns
-    
-    shinyjs::useShinyjs()
-    
+
     shiny::observeEvent(input$random, {
       if (input$random == FALSE) {
         shinyalert::shinyalert(
@@ -305,7 +303,6 @@ mod_RCBD_augmented_server <- function(id) {
         checks = checks_arcbd, 
         start = 3
       )
-      # print(set_blocks)
       blocks_arcbd <- set_blocks$b
       if (length(blocks_arcbd) == 0) {
         shinyalert::shinyalert(
@@ -554,7 +551,6 @@ mod_RCBD_augmented_server <- function(id) {
     output$plot_number_layout <- shiny::renderPlot({
       shiny::req(reactive_layoutARCBD())
       shiny::req(rcbd_augmented_reactive())
-      print(reactive_layoutARCBD()$out_layoutPlots)
       reactive_layoutARCBD()$out_layoutPlots
     }, height = 620, res = 100)
     

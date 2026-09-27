@@ -641,10 +641,6 @@ set_augmented_blocks <- function(lines, checks, start = 5) {
       }
     }
     
-    # # Unique options
-    # options_dims <- unique(lapply(options_dims, function(x) paste(x[1], x[2], sep = "x")))
-    # options_dims <- lapply(options_dims, function(s) as.numeric(strsplit(s, "x", fixed = TRUE)[[1]]))
-    
     options_dims <- unique(lapply(options_dims, function(x) paste(x[1], x[2], sep = "x")))
     options_dims <- lapply(options_dims, function(s) as.numeric(strsplit(s, "x", fixed = TRUE)[[1]]))
     

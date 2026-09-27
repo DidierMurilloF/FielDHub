@@ -164,7 +164,6 @@ mod_STRIPD_ui <- function(id){
 mod_STRIPD_server <- function(id) {
   shiny::moduleServer( id, function(input, output, session) {
     ns <- session$ns
-    shinyjs::useShinyjs()
 
     Hplots <- LETTERS[1:5]
     Vplots <- LETTERS[1:5]

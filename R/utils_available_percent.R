@@ -83,8 +83,7 @@ available_percent <- function(n_rows,
   
   vis <- 0
   for (m in opts) {
-    w_map <- w_map_engage[[m]] 
-    #print(c(sum(w_map == 0), dim_data_1))
+    w_map <- w_map_engage[[m]]
     if (sum(w_map == 0) < dim_data_1) next
     n_Checks <- sum(w_map != 0)
     if (kindExpt == "SUDC") {
@@ -95,12 +94,7 @@ available_percent <- function(n_rows,
         limit_out <- checks + 1
         checks_in_first_row <- sum(w_map[1, ] != "0")
         if ((Fillers + checks_in_first_row) >= n_cols) next
-        #if (diff(c(Fillers, (n_cols - 5))) <= 2) next 
         if (Fillers > 0 && Fillers < n_cols) {
-          #print(Fillers)
-          # checks_in_first_row <- sum(w_map[1, ] != "0")
-          # if ((Fillers + checks_in_first_row) >= n_cols) next
-          #if (Fillers > ceiling(n_cols/2)) next
           w_map <- top_row_fillers(w_map, Fillers, planter_mov1)
         }
         n_Checks <- sum(w_map == 1)
@@ -110,15 +104,7 @@ available_percent <- function(n_rows,
         Fillers_t <- sum(w_map == "Filler")
         f_expt_lines <- expt_lines - Fillers_t
         M[m, c(1,2,3,4,5,6)] <- c(m, per, n_Checks, Fillers_t, f_expt_lines, pots)
-      } 
-      # else {
-      #   n_Checks <- length(which(w_map == 1))
-      #   pots <- nrow(w_map) * ncol(w_map)
-      #   per <- round((n_Checks/pots)*100,1)
-      #   expt_lines <- pots - n_Checks
-      #   f_expt_lines <- expt_lines
-      #   M[m, c(1,2,3,4,5)] <- c(m, per, n_Checks, f_expt_lines, pots)
-      # }
+      }
     } else if (kindExpt == "DBUDC") {
       if(dim_data > sum(w_map == 0) || dim_data < sum(w_map[n_rows:2,] == 0)) {
         next
@@ -211,7 +197,6 @@ random_checks <- function(dt = NULL, d_checks = NULL, p = NULL, percent = NULL,
   validate_planter(planter_mov)
   my_P <- p
   if (!is.null(percent) && is.null(exptlines)) {
-    #print(subset(my_P, my_P[,1] == percent)[1,2])
     my_index <- subset(my_P, my_P[,1] == percent)[1,2]
   } else if (is.null(percent) && !is.null(exptlines)) {
     if (Option_NCD == TRUE) {

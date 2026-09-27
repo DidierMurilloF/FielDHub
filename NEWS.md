@@ -621,6 +621,17 @@
   `incomplete_blocks()`/`row_column()`'s block-size error message (now
   listing every accepted `k`) have changed.
 
+- Unused internals are removed to reduce the package's surface: the `text`
+  `globalVariables()` entry, the unused `utils::write.csv` import declared
+  by four app modules, several long-dead commented-out code blocks across
+  the classic, allocation and incomplete-block engines, the CRD module's
+  orphaned `output$tabsetCRD` render (nothing in its UI displayed it), the
+  app's no-op `shinyjs::useShinyjs()` calls inside `*_server` functions
+  (each module still calls it once from its own UI, where it is required),
+  a duplicate debug `print()` in the augmented-RCBD plot-numbers layout
+  render, and the unused `inst/golem-config.yml`. No design output, golden
+  snapshot or public API changes.
+
 ### Fix bugs:
 
 - Blank app seed boxes no longer error. Shiny sends a cleared numeric

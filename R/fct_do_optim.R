@@ -111,7 +111,6 @@ do_optim <- function(
             df_data_lines <- data_input[(checks + 1):nrow(data_input), ]
             ENTRY <- as.vector(df_data_lines$ENTRY)
             if (!is.numeric(ENTRY)) fieldhub_abort("ENTRY column should have integer numbers!")
-            # max_entry <- max(ENTRY)
             max_entry <- lines
             if (nrow(df_data_lines) != lines) {
                 fieldhub_abort("The number of treatments/lines in the data does not match the input value")
@@ -131,7 +130,6 @@ do_optim <- function(
                 df_data_lines <- data_input[(checks + 1):nrow(data_input), ]
                 ENTRY <- as.vector(df_data_lines$ENTRY)
                 if (!is.numeric(ENTRY)) fieldhub_abort("ENTRY column should have integer numbers!")
-                # max_entry <- max(ENTRY)
                 max_entry <- lines
                 if (nrow(df_data_lines) != lines) {
                   fieldhub_abort("The number of treatments/lines in the data does not match the input value")
@@ -149,7 +147,6 @@ do_optim <- function(
                 }
                 ENTRY <- as.vector(df_data_lines$ENTRY)
                 if (!is.numeric(ENTRY)) fieldhub_abort("ENTRY column should have integer numbers!")
-                #max_entry <- max(ENTRY)
                 max_entry <- lines
                 if (nrow(df_data_lines) != lines) {
                     fieldhub_abort("The number of treatments/lines in the data does not match the input value")

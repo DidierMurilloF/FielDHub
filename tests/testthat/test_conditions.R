@@ -176,3 +176,47 @@ test_that("the app shows FielDHub errors as validation messages", {
   expect_s3_class(err, "shiny.silent.error")
   expect_match(conditionMessage(err), "plotNumber must be an integer greater than 0")
 })
+
+test_that("app/module functions do not call cat() or print() outside a rendered summary", {
+  # See helper-source.R: app_functions() inspects the namespace instead of
+  # parsing R/ source files, so this also works under R CMD check, where no
+  # R/ directory exists (constraints.md ruling R2). fieldhub_calls_named()
+  # is used instead of all.names(body(f)) because the latter also matches a
+  # same-named argument read (app_table_export_buttons() has a `print`
+  # formal), not just a call.
+  functions <- app_functions()
+  direct_cat_or_print <- names(Filter(
+    function(x) fieldhub_calls_named(body(x), c("cat", "print")),
+    functions
+  ))
+  # Each of these `*_server` functions renders its design summary with
+  # `shiny::renderPrint({ cat(...); print(...) })` bound to a
+  # `shiny::verbatimTextOutput()` in the module's own UI (e.g.
+  # mod_Alpha_Lattice.R's "summary_alpha_lattice"): renderPrint() captures
+  # the cat()/print() output into that text output, it never reaches the R
+  # console, so this is the legitimate exception ruling R2 allows.
+  summary_render_servers <- c(
+    "mod_Alpha_Lattice_server",
+    "mod_IBD_server",
+    "mod_Optim_server",
+    "mod_pREPS_server",
+    "mod_RCBD_augmented_server",
+    "mod_Rectangular_Lattice_server",
+    "mod_RowCol_server",
+    "mod_Square_Lattice_server"
+  )
+  expect_setequal(direct_cat_or_print, summary_render_servers)
+})
+
+test_that("no *_server function body calls shinyjs::useShinyjs()", {
+  # useShinyjs() only registers the JavaScript shinyjs needs when it is part
+  # of a UI definition; calling it inside a server function is a no-op. Each
+  # module keeps its (one) useShinyjs() call in its `*_ui` function instead.
+  functions <- app_functions()
+  server_functions <- functions[grepl("_server$", names(functions))]
+  direct_shinyjs <- names(Filter(
+    function(x) fieldhub_calls_named(body(x), "useShinyjs"),
+    server_functions
+  ))
+  expect_setequal(direct_shinyjs, character(0))
+})

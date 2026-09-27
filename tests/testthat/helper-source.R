@@ -46,7 +46,7 @@ app_functions <- function() {
 #' Whether `e` is a bare numeric literal, or a unary-minus of one
 #'
 #' @noRd
-fielddhub_is_numeric_literal <- function(e) {
+fieldhub_is_numeric_literal <- function(e) {
   if (is.numeric(e)) return(TRUE)
   is.call(e) && is.symbol(e[[1]]) && identical(as.character(e[[1]]), "-") &&
     length(e) == 2 && is.numeric(e[[2]])
@@ -58,21 +58,21 @@ fielddhub_is_numeric_literal <- function(e) {
 #' variable holding one.
 #'
 #' @noRd
-fielddhub_is_positional_index <- function(e) {
-  if (fielddhub_is_numeric_literal(e)) return(TRUE)
+fieldhub_is_positional_index <- function(e) {
+  if (fieldhub_is_numeric_literal(e)) return(TRUE)
   if (!is.call(e) || !is.symbol(e[[1]])) return(FALSE)
   nm <- as.character(e[[1]])
   if (nm == ":" && length(e) == 3) {
-    return(fielddhub_is_numeric_literal(e[[2]]) || fielddhub_is_numeric_literal(e[[3]]))
+    return(fieldhub_is_numeric_literal(e[[2]]) || fieldhub_is_numeric_literal(e[[3]]))
   }
   if (nm == "c") {
     args <- as.list(e)[-1]
-    return(length(args) > 0 && all(vapply(args, fielddhub_is_numeric_literal, logical(1))))
+    return(length(args) > 0 && all(vapply(args, fieldhub_is_numeric_literal, logical(1))))
   }
   if (nm == "-" && length(e) == 2 && is.call(e[[2]]) &&
       is.symbol(e[[2]][[1]]) && identical(as.character(e[[2]][[1]]), "c")) {
     args <- as.list(e[[2]])[-1]
-    return(length(args) > 0 && all(vapply(args, fielddhub_is_numeric_literal, logical(1))))
+    return(length(args) > 0 && all(vapply(args, fieldhub_is_numeric_literal, logical(1))))
   }
   FALSE
 }
@@ -85,7 +85,7 @@ fielddhub_is_positional_index <- function(e) {
 #' it is evaluated, even outside a function call.
 #'
 #' @noRd
-fielddhub_first_unnamed_from <- function(e, from) {
+fieldhub_first_unnamed_from <- function(e, from) {
   if (length(e) < from) return(NA_integer_)
   nms <- names(e)
   for (i in from:length(e)) {
@@ -104,15 +104,15 @@ fielddhub_first_unnamed_from <- function(e, from) {
 #' of scope, so it doesn't explode the allow-list with unrelated hits.
 #'
 #' @noRd
-fielddhub_is_name_accessor <- function(e) {
+fieldhub_is_name_accessor <- function(e) {
   if (is.call(e) && is.symbol(e[[1]]) && length(e) == 2 &&
       as.character(e[[1]]) %in% c("names", "colnames")) {
     return(TRUE)
   }
   if (is.call(e) && is.symbol(e[[1]]) && identical(as.character(e[[1]]), "[[") &&
       length(e) >= 3) {
-    idx_pos <- fielddhub_first_unnamed_from(e, 3)
-    if (!is.na(idx_pos) && fielddhub_is_numeric_literal(e[[idx_pos]]) &&
+    idx_pos <- fieldhub_first_unnamed_from(e, 3)
+    if (!is.na(idx_pos) && fieldhub_is_numeric_literal(e[[idx_pos]]) &&
         isTRUE(as.numeric(e[[idx_pos]]) == 2)) {
       obj <- e[[2]]
       if (is.call(obj) && is.symbol(obj[[1]]) &&
@@ -135,25 +135,25 @@ fielddhub_is_name_accessor <- function(e) {
 #'
 #' @return A list of the matching call objects (not their positions).
 #' @noRd
-fielddhub_positional_index_calls <- function(expr) {
+fieldhub_positional_index_calls <- function(expr) {
   hits <- list()
   walk <- function(e) {
     if (!is.call(e)) return(invisible())
     if (is.symbol(e[[1]])) {
       head <- as.character(e[[1]])
       if (head == "[" && length(e) >= 4 && identical(e[[3]], quote(expr = ))) {
-        col_pos <- fielddhub_first_unnamed_from(e, 4)
-        if (!is.na(col_pos) && fielddhub_is_positional_index(e[[col_pos]])) {
+        col_pos <- fieldhub_first_unnamed_from(e, 4)
+        if (!is.na(col_pos) && fieldhub_is_positional_index(e[[col_pos]])) {
           hits[[length(hits) + 1]] <<- e
         }
-      } else if (head == "[" && length(e) >= 3 && fielddhub_is_name_accessor(e[[2]])) {
-        idx_pos <- fielddhub_first_unnamed_from(e, 3)
-        if (!is.na(idx_pos) && fielddhub_is_positional_index(e[[idx_pos]])) {
+      } else if (head == "[" && length(e) >= 3 && fieldhub_is_name_accessor(e[[2]])) {
+        idx_pos <- fieldhub_first_unnamed_from(e, 3)
+        if (!is.na(idx_pos) && fieldhub_is_positional_index(e[[idx_pos]])) {
           hits[[length(hits) + 1]] <<- e
         }
       } else if (head == "[[" && length(e) >= 3) {
-        idx_pos <- fielddhub_first_unnamed_from(e, 3)
-        if (!is.na(idx_pos) && fielddhub_is_numeric_literal(e[[idx_pos]])) {
+        idx_pos <- fieldhub_first_unnamed_from(e, 3)
+        if (!is.na(idx_pos) && fieldhub_is_numeric_literal(e[[idx_pos]])) {
           hits[[length(hits) + 1]] <<- e
         }
       }
@@ -165,4 +165,52 @@ fielddhub_positional_index_calls <- function(expr) {
   }
   walk(expr)
   hits
+}
+
+#' The bare function name a call head `h` (`e[[1]]` of some call `e`)
+#' refers to, or `NA_character_` if `h` is not a plain call target: a
+#' symbol (`print`), or a `pkg::fun`/`pkg:::fun` namespaced reference
+#' (`shinyjs::useShinyjs`, itself parsed as a `::` call, not a symbol).
+#'
+#' @noRd
+fieldhub_call_head_name <- function(h) {
+  if (is.symbol(h)) return(as.character(h))
+  if (is.call(h) && is.symbol(h[[1]]) && length(h) == 3 &&
+      as.character(h[[1]]) %in% c("::", ":::") && is.symbol(h[[3]])) {
+    return(as.character(h[[3]]))
+  }
+  NA_character_
+}
+
+#' Whether `expr` contains a call whose head is one of `names`, called
+#' either bare (`print(x)`) or namespaced (`shinyjs::useShinyjs()`)
+#'
+#' Unlike `all.names(expr)`, this only matches call position, not a plain
+#' symbol read of a same-named argument or local (a function with a
+#' `print = FALSE` argument does not match `"print"` just because its body
+#' reads that argument). Walks `e[[i]]` directly, as
+#' `fieldhub_positional_index_calls()` does above, instead of binding it to
+#' a bare variable first: an unsupplied-argument slot in the parse tree
+#' (the empty symbol in `x[, j]`) raises "argument is missing, with no
+#' default" the next time a *variable* holding it is evaluated.
+#'
+#' @return A single logical.
+#' @noRd
+fieldhub_calls_named <- function(expr, names) {
+  found <- FALSE
+  walk <- function(e) {
+    if (found || !is.call(e)) return(invisible())
+    head_name <- fieldhub_call_head_name(e[[1]])
+    if (!is.na(head_name) && head_name %in% names) {
+      found <<- TRUE
+      return(invisible())
+    }
+    n <- length(e)
+    for (i in seq_len(n)) {
+      if (is.call(e[[i]])) walk(e[[i]])
+      if (found) return(invisible())
+    }
+  }
+  walk(expr)
+  found
 }

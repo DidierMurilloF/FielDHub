@@ -166,8 +166,6 @@ mod_RCBD_server <- function(id) {
   shiny::moduleServer(id, function(input, output, session) {
     
     ns <- session$ns
-    
-    shinyjs::useShinyjs()
 
     get_data_rcbd <- shiny::reactive({
       if (input$owndatarcbd == "Yes") {

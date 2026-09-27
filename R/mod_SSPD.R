@@ -170,7 +170,6 @@ mod_SSPD_server <- function(id){
   shiny::moduleServer( id, function(input, output, session){
     
     ns <- session$ns
-    shinyjs::useShinyjs()
     
    wp <- paste("IRR_", c("NO", "Yes"), sep = "") 
    sp <- c("NFung", paste("Fung", 1:4, sep = "")) 

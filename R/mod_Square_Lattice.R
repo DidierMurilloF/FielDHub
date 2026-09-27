@@ -123,9 +123,7 @@ mod_Square_Lattice_ui <- function(id){
 mod_Square_Lattice_server <- function(id){
   shiny::moduleServer(id, function(input, output, session){
     ns <- session$ns
-    
-    shinyjs::useShinyjs()
-    
+
     init_data_square <- shiny::reactive({
       
       if (input$owndata_square == "Yes") {

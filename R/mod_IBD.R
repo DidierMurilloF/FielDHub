@@ -157,7 +157,6 @@ mod_IBD_server <- function(id) {
   shiny::moduleServer( id, function(input, output, session){
     
     ns <- session$ns
-    shinyjs::useShinyjs()
     treatments <- paste("TX-", 1:9, sep = "")
     entryListFormat_IBD <- data.frame(ENTRY = 1:9, 
                                       NAME = treatments)

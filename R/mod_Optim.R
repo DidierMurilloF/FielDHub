@@ -163,8 +163,6 @@ mod_Optim_server <- function(id) {
   shiny::moduleServer(id, function(input, output, session){
     ns <- session$ns
 
-    shinyjs::useShinyjs()
-
     optim_inputs <- shiny::eventReactive(input$RUN.optim, {
       planter_mov <- input$planter_mov.spatial
       expt_name <- as.character(input$expt_name.spatial)

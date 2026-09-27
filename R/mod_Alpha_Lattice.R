@@ -4,9 +4,7 @@
 #'
 #' @param id,input,output,session Internal parameters for {shiny}.
 #'
-#' @noRd 
-#'
-#' @importFrom utils write.csv
+#' @noRd
 mod_Alpha_Lattice_ui <- function(id) {
   ns <- shiny::NS(id)
   
@@ -118,10 +116,7 @@ mod_Alpha_Lattice_ui <- function(id) {
 mod_Alpha_Lattice_server <- function(id){
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    
-    # for showing .csv button on run
-    shinyjs::useShinyjs()
-    
+
     init_data_alpha <- shiny::reactive({
       if (input$owndata_alpha == "Yes") {
         shiny::req(input$file.alpha)

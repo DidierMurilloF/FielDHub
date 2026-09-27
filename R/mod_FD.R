@@ -122,9 +122,7 @@ mod_FD_server <- function(id) {
   shiny::moduleServer(id, function(input, output, session){
     
     ns <- session$ns
-    
-    shinyjs::useShinyjs()
-    
+
     FACTORS <- rep(c("A", "B", "C"), c(2,3,2))
     LEVELS <- c("a0", "a1", "b0", "b1", "b2", "c0", "c1")
     entryListFormat_FD <- data.frame(list(FACTOR = FACTORS, LEVEL = LEVELS))

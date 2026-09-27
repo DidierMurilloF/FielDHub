@@ -4,9 +4,7 @@
 #'
 #' @param id,input,output,session Internal parameters for {shiny}.
 #'
-#' @noRd 
-#'
-#' @importFrom utils write.csv
+#' @noRd
 mod_diagonal_multiple_ui <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
@@ -219,9 +217,7 @@ mod_diagonal_multiple_server <- function(id) {
         list_to_observe_multi <- shiny::reactive({
             list(randomize_hit_multi$times_multi, user_tries_multi$tries)
         })
-        
-        shinyjs::useShinyjs()
-        
+
         multiple_inputs <- shiny::eventReactive(input$RUN_multiple, {
             stacked <- input$stacked
             planter_mov <- input$planter_multiple

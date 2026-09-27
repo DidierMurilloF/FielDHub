@@ -150,7 +150,6 @@ mod_RowCol_server <- function(id){
   shiny::moduleServer( id, function(input, output, session){
     
     ns <- session$ns
-    shinyjs::useShinyjs()
     
     entryListFormat_RCD <- data.frame(ENTRY = 1:9, 
                                        NAME = c(paste("Genotype", 

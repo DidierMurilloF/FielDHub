@@ -160,22 +160,18 @@ partially_replicated <- function(
     validate_count_vector(ncols, "ncols")
     if (length(nrows) != l) {
         if (length(nrows) < l) {
-            # warning("Number of nrows values not matching number of locations", call. = FALSE)
             # Filling missing nrows values with last provided value
             nrows <- c(nrows, rep(nrows[length(nrows)], l - length(nrows)))
         } else {
-            # warning("Number of nrows values not matching number of locations", call. = FALSE)
             # Filling missing nrows values with last provided value
             nrows <- nrows[1:l]
         }
     }
     if (length(ncols) != l) {
         if (length(ncols) < l) {
-            # warning("Number of ncols values not matching number of locations", call. = FALSE)
             # Filling missing nrows values with last provided value
             ncols <- c(ncols, rep(ncols[length(ncols)], l - length(ncols)))
         } else  {
-            # warning("Number of ncols values not matching number of locations", call. = FALSE)
             # Filling missing nrows values with last provided value
             ncols <- ncols[1:l]
         }

@@ -207,8 +207,6 @@ mod_pREPS_server <- function(id){
   shiny::moduleServer( id, function(input, output, session){
     ns <- session$ns
 
-    shinyjs::useShinyjs()
-    
     prep_inputs <- shiny::eventReactive(input$RUN.prep, {
       planter_mov <- input$planter_mov.preps
       expt_name <- as.character(input$expt_name.preps)

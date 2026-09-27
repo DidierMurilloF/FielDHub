@@ -200,9 +200,7 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
       P <- matrix(data = D[r]:(D[r] + (nH*nV) - 1), nrow = nH, ncol = nV, byrow = TRUE)
       P <- along_rows(P, planter)
       PLOTS[[z]] <- P
-      # Hplots.random <- replicate(1, sample(Hplots))
-      # Vplots.random <- replicate(1, sample(Vplots))
-      
+
       # Choose horizontal strips:
       if (randomizeH) {
         Hplots.random <- replicate(1, sample(Hplots))

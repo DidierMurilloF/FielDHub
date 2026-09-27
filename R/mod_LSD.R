@@ -134,9 +134,7 @@ mod_LSD_server <- function(id){
   shiny::moduleServer( id, function(input, output, session){
     
     ns <- session$ns
-    
-    shinyjs::useShinyjs()
-    
+
     entryListFormat_LSD <- data.frame(
       list(ROW = paste("Period", 1:5, sep = ""),
            COLUMN = paste("Cow", 1:5, sep = ""),

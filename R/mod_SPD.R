@@ -143,9 +143,7 @@ mod_SPD_server <- function(id){
   shiny::moduleServer( id, function(input, output, session){
     
     ns <- session$ns
-    
-    shinyjs::useShinyjs()
-    
+
     wp <- c("NFung", paste("Fung", 1:4, sep = "")) 
     sp <- paste("Beans", 1:10, sep = "")            
     entryListFormat_SPD <- data.frame(list(WHOLEPLOT = c(wp, rep("", 5)), 

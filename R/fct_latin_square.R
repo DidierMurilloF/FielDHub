@@ -146,11 +146,8 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
     D <- plot.numbs[[l]]
     P <- matrix(data = D[j]:(D[j] + (ls.len*ls.len) - 1), nrow = ls.len, ncol = ls.len,
                 byrow = TRUE)
-    # plot_matrix <- apply(P, 2, rev)
     plot_matrix <- P
     plot_matrix <- along_rows(plot_matrix, planter)
-    # print(plot_matrix)
-    # print(as.vector(t(plot_matrix)))
     plotSquares[[j]] <- plot_matrix
     ls.random <- lsq(len = ls.len, reps = 1, first_square = j)
     #get random rows order
@@ -174,8 +171,6 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
       w <- w + 1
     }
     new_expt.ls <- order_ls(S = expt.ls, data = data)
-    # print(new_expt.ls)
-    # print(as.vector(t(new_expt.ls)))
     lsd.reps[[j]] <- new_expt.ls
     step.random[[j]] <- list(ls.random, ls.random.r, ls.random.c)
     Row <- rep(rownames(lsd.reps[[j]]), each = ls.len)
@@ -193,7 +188,6 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
   lsd.reps <- setNames(lsd.reps, paste0("rep", seq(1:reps))) # set names
   ls.output$ROW <- factor(ls.output$ROW, levels = Name.Rows)
   ls.output$COLUMN <- factor(ls.output$COLUMN, levels = Name.Columns)
-  #ls.output.order <- ls.output[order(ls.output$PLOT, ls.output$SQUARE, ls.output$ROW), ]
   ls.output.order <- ls.output[order(ls.output$SQUARE, ls.output$ROW), ]
   if (!is.null(locationNames) & length(locationNames) == l) {
     ls.output.order$LOCATION <- rep(locationNames, each = (ls.len * ls.len) * reps)

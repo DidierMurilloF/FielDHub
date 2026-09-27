@@ -81,7 +81,7 @@ test_that("core code selects field-book columns by name, not position", {
   # function that legitimately indexes a helper matrix by position
   # elsewhere must still fail this test if a *different* expression in it
   # selects or reorders field-book columns positionally -- including a
-  # reverted fix. fielddhub_positional_index_calls() (helper-source.R)
+  # reverted fix. fieldhub_positional_index_calls() (helper-source.R)
   # walks the parsed call tree directly, so it also catches an expression
   # wrapped across lines, unlike matching on deparse(body(f)) text.
   pos <- function(fn, expr, reason) list(fn = fn, expr = expr, reason = reason)
@@ -247,7 +247,7 @@ test_that("core code selects field-book columns by name, not position", {
 
   functions <- core_functions()
   observed <- unlist(lapply(names(functions), function(fn) {
-    calls <- fielddhub_positional_index_calls(body(functions[[fn]]))
+    calls <- fieldhub_positional_index_calls(body(functions[[fn]]))
     if (length(calls) == 0L) return(character(0))
     exprs <- unique(vapply(calls, deparse1, character(1)))
     key(fn, exprs)

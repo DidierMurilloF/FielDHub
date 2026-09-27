@@ -116,9 +116,7 @@ mod_Rectangular_Lattice_ui <- function(id){
 mod_Rectangular_Lattice_server <- function(id) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    
-    shinyjs::useShinyjs()
-    
+
     init_data_rectangular <- shiny::reactive({
       
       if (input$owndata_rectangular == "Yes") {
