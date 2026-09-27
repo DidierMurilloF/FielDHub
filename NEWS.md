@@ -190,6 +190,13 @@
 
 ### Fix bugs:
 
+- Multiple diagonal arrangements split by column now skip check patterns
+  whose fillers cannot fit in the last column. Those patterns previously
+  ran past the field boundary and raised an unclassed "subscript out of
+  bounds" error, including for 3,959 entries in a 50-by-100 field. If no
+  pattern fits, the API reports its normal dimension condition and the
+  preview returns no choices. Existing feasible layouts are unchanged.
+
 - `plot()` now draws a `CRD()` with unequal replication, which failed with
   "`ROW` must be size 10 or 1, not 12"; its plots fill every grid that holds
   them exactly.

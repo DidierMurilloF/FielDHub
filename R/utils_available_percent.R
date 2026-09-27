@@ -154,14 +154,11 @@ available_percent <- function(n_rows,
           limit_out <- checks + 1
           if (diff(c(Fillers, (n_rows - 5))) <= 2) next
           if (Fillers > 0) {
-            # next
-            i <- 0
-            repeat {
-              w_map[1 + i, n_cols] <- ifelse(w_map[1 + i, n_cols] == 0, "Filler", "-9")
-              if (sum(w_map[, n_cols] == "Filler") == Fillers) break
-              i <- i + 1
-            }
-            w_map[w_map == "-9"] <- "Filler"
+            empty_rows <- which(w_map[, n_cols] == 0)
+            if (Fillers > length(empty_rows)) next
+            # Preserve the existing top-down placement, including checks
+            # passed on the way to the last required empty cell.
+            w_map[seq_len(empty_rows[Fillers]), n_cols] <- "Filler"
           }
           if (Fillers < 0 || Fillers > n_rows){
             Fillers <- 0
