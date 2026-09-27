@@ -39,8 +39,12 @@ resolve_seed <- function(seed, default = function() stats::runif(1, min = -50000
     }
     return(default())
   }
-  if (!is.numeric(seed) || length(seed) != 1 || !is.finite(seed)) {
+  if (!is.numeric(seed) || is.complex(seed) || length(seed) != 1 || !is.finite(seed)) {
     fieldhub_abort("'seed' must be a single number.", call = sys.call(-1))
+  }
+  if (abs(trunc(seed)) > .Machine$integer.max) {
+    fieldhub_abort("'seed' must fit R's integer seed range after truncation.",
+                   call = sys.call(-1))
   }
   seed
 }

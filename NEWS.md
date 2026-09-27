@@ -201,6 +201,11 @@
 
 ### Fix bugs:
 
+- Unsupported seed values now give a classed input error before reaching
+  `set.seed()`. Out-of-range and complex seeds no longer leak coercion
+  warnings or unclassed errors. Accepted real-valued seeds retain R's
+  existing truncation behavior and are still recorded as supplied.
+
 - All 18 public engines with an `l` argument now validate the location
   count through one shared rule before allocating fields. Missing,
   non-finite, fractional, nonnumeric and multi-value counts give a named
