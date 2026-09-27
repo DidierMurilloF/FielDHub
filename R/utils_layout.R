@@ -130,8 +130,8 @@ layout_columns <- function(book) {
 #' Field books of each location, in the order of the field book
 #' @noRd
 location_books <- function(x) {
-  locations <- factor(x$fieldBook$LOCATION, levels = unique(x$fieldBook$LOCATION))
-  lapply(levels(locations), function(loc) {
+  locations <- field_book_locations(x$fieldBook)
+  lapply(locations, function(loc) {
     as.data.frame(dplyr::filter(x$fieldBook, LOCATION == loc))
   })
 }

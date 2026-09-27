@@ -1,7 +1,8 @@
 #' Function to export a formatted .csv table from data in the Fieldbook
 #'
 #' @param Fieldbook A list from a FielDHub design.
-#' @param selected A number, to select which location to view.
+#' @param selected Location number, in field-book appearance order, matching
+#'   the layout plot and heatmap.
 #' @param type_pref (optional) Column name to prefer as the exported cell
 #'   value, when present in \code{Fieldbook} (e.g. \code{"TREATMENT"}). By
 #'   default \code{NULL}, which preserves the original ENTRY-first behaviour.
@@ -18,7 +19,7 @@ export_layout <- function(Fieldbook, selected, plotOn = FALSE, type_pref = NULL)
       anyNA(dataIn$LOCATION)) {
     fieldhub_abort("The layout field book must contain nonmissing LOCATION identifiers.")
   }
-  locs <- levels(factor(dataIn$LOCATION))
+  locs <- field_book_locations(dataIn)
   if (!is.numeric(selected) || is.complex(selected) || length(selected) != 1L ||
       !is.finite(selected) || !selected %in% seq_along(locs)) {
     fieldhub_abort("Select one available location for the layout export.")

@@ -34,7 +34,7 @@ field_book_heatmap_data <- function(field_book, response_name, selected = 1L,
     fieldhub_abort("The heatmap response must be numeric, with finite or missing values.")
   }
   locations <- as.character(field_book$LOCATION)
-  available <- unique(locations)
+  available <- field_book_locations(field_book)
   if (!is.numeric(selected) || is.complex(selected) || length(selected) != 1L ||
       !is.finite(selected) || !selected %in% seq_along(available)) {
     fieldhub_abort("Select one available location for the heatmap.")

@@ -55,6 +55,12 @@
 
 ### New features:
 
+- Layout CSV downloads now select locations in field-book appearance order,
+  matching plots and heatmaps. Character names or differently ordered factor
+  levels previously could select another location. The multiple-diagonal
+  experiment map also uses named coordinates instead of positional row slices.
+  Design generation and each location's layout values are unchanged.
+
 - Layout and allocation table Copy, Excel, and Print exports now include the
   complete design metadata and selected view. Excel stores the full record in a
   separate, chunked metadata worksheet; table values and existing export types

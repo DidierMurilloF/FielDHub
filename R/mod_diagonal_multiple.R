@@ -805,19 +805,9 @@ mod_diagonal_multiple_server <- function(id) {
         # layoutRandom (the first matrix row is the last field row)
         expt_layout_sites <- shiny::reactive({
             shiny::req(diagonal_design())
-            fieldBook <- diagonal_design()$fieldBook
-            n_rows <- diagonal_design()$infoDesign$rows
-            n_cols <- diagonal_design()$infoDesign$columns
-            n_plots <- n_rows * n_cols
-            locs <- diagonal_design()$infoDesign$locations
-            expt_layouts <- vector(mode = "list", length = locs)
-            for (sites in 1:locs) {
-                fieldBook_site <- fieldBook[((sites - 1) * n_plots + 1):(sites * n_plots), ]
-                my_names <- matrix(data = NA, nrow = n_rows, ncol = n_cols)
-                my_names[cbind(n_rows - fieldBook_site$ROW + 1, fieldBook_site$COLUMN)] <- fieldBook_site$EXPT
-                expt_layouts[[sites]] <- my_names
-            }
-            return(expt_layouts)
+            validate_design(field_book_location_grids(
+                diagonal_design()$fieldBook, "EXPT", reverse_rows = TRUE
+            ))
         })
         
         output$name_layout <- DT::renderDT({
