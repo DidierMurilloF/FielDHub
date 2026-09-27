@@ -68,7 +68,7 @@ mod_Rectangular_Lattice_ui <- function(id){
                      
                    ), 
                    shiny::br(),
-                   shiny::downloadButton(ns("downloadData.rectangular"), "Save My Experiment", style = "width:100%")
+                   shiny::downloadButton(ns("downloadData.rectangular"), "Save experiment (ZIP)", style = "width:100%")
       ),
       
       shiny::mainPanel(
@@ -88,9 +88,9 @@ mod_Rectangular_Lattice_ui <- function(id){
             shiny::tabPanel("Field Layout",
                      shinyjs::useShinyjs(),
                      shinyjs::hidden(shiny::downloadButton(ns("downloadCsv.rectangular"),
-                                                    label =  "CSV",
-                                                    icon = shiny::icon("file-csv"),
-                                                    width = '10%',
+                                                    label = "CSV + metadata (ZIP)",
+                                                    icon = shiny::icon("download"),
+                                                    width = 'auto',
                                                     style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
                      fieldhub_spinner(
                        plotly::plotlyOutput(ns("random_layout"), 
@@ -536,15 +536,17 @@ mod_Rectangular_Lattice_server <- function(id) {
       
     })
     
-    output$downloadData.rectangular <- shiny::downloadHandler(
+    output$downloadData.rectangular <- app_csv_archive(
       filename = function() {
         loc <- paste("Rectangular_Lattice_", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
       },
-      content = function(file) {
-        df <- as.data.frame(simuDataRECT()$df)
-        write.csv(df, file, row.names = FALSE)
-      }
+      data = function() as.data.frame(simuDataRECT()$df),
+      design = RECTANGULAR_reactive,
+      field_book = function() simuDataRECT()$df,
+      simulation = function() simuDataRECT()$simulation,
+      layout = function() reactive_layoutRect()$layout_metadata,
+      kind = "field_book"
     )
     
     csv_data <- shiny::reactive({
@@ -560,15 +562,17 @@ mod_Rectangular_Lattice_server <- function(id) {
     
     
     # Downloadable csv of selected dataset ----
-    output$downloadCsv.rectangular <- shiny::downloadHandler(
+    output$downloadCsv.rectangular <- app_csv_archive(
       filename = function() {
         loc <- paste("Rectangular_Lattice_Layout", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
       },
-      content = function(file) {
-        df <- as.data.frame(csv_data()$file)
-        write.csv(df, file, row.names = FALSE)
-      }
+      data = function() as.data.frame(csv_data()$file),
+      design = RECTANGULAR_reactive,
+      field_book = function() simuDataRECT()$df,
+      simulation = function() simuDataRECT()$simulation,
+      layout = function() reactive_layoutRect()$layout_metadata,
+      kind = "layout"
     )
     
     app_reproduction_outputs(output, RECTANGULAR_reactive)

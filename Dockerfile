@@ -45,6 +45,7 @@ RUN R -q -e "install.packages('viridisLite')"
 RUN R -q -e "install.packages('shinyalert')"
 RUN R -q -e "install.packages('desplot')"
 RUN R -q -e "install.packages('shinyjs')"
+RUN R -q -e "install.packages('zip')"
 
 RUN mkdir /build_zone
 ADD . /build_zone

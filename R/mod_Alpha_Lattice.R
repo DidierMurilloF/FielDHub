@@ -70,7 +70,7 @@ mod_Alpha_Lattice_ui <- function(id) {
                      
                    ), 
                    shiny::br(),
-                   shiny::downloadButton(ns("downloadData.alpha"), "Save My Experiment", style = "width:100%")
+                   shiny::downloadButton(ns("downloadData.alpha"), "Save experiment (ZIP)", style = "width:100%")
       ),
       
       shiny::mainPanel(
@@ -92,9 +92,9 @@ mod_Alpha_Lattice_ui <- function(id) {
                      # hidden .csv download button
                      shinyjs::useShinyjs(),
                      shinyjs::hidden(shiny::downloadButton(ns("downloadCsv.alpha"),
-                                    label =  "CSV",
-                                    icon = shiny::icon("file-csv"),
-                                    width = '10%',
+                                    label = "CSV + metadata (ZIP)",
+                                    icon = shiny::icon("download"),
+                                    width = 'auto',
                                     style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
                      
                      fieldhub_spinner(
@@ -537,15 +537,17 @@ mod_Alpha_Lattice_server <- function(id){
     })
     
     # Downloadable csv of selected dataset ----
-    output$downloadData.alpha <- shiny::downloadHandler(
+    output$downloadData.alpha <- app_csv_archive(
       filename = function() {
         loc <- paste("Alpha_Lattice_", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
       },
-      content = function(file) {
-        df <- as.data.frame(simuDataALPHA()$df)
-        write.csv(df, file, row.names = FALSE)
-      }
+      data = function() as.data.frame(simuDataALPHA()$df),
+      design = ALPHA_reactive,
+      field_book = function() simuDataALPHA()$df,
+      simulation = function() simuDataALPHA()$simulation,
+      layout = function() reactive_layoutAlpha()$layout_metadata,
+      kind = "field_book"
     )
     
     csv_data <- shiny::reactive({
@@ -560,15 +562,17 @@ mod_Alpha_Lattice_server <- function(id){
     })
     
     # Downloadable csv of selected dataset ----
-    output$downloadCsv.alpha <- shiny::downloadHandler(
+    output$downloadCsv.alpha <- app_csv_archive(
       filename = function() {
         loc <- paste("Alpha_Lattice_Layout", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
       },
-      content = function(file) {
-        df <- as.data.frame(csv_data()$file)
-        write.csv(df, file, row.names = FALSE)
-      }
+      data = function() as.data.frame(csv_data()$file),
+      design = ALPHA_reactive,
+      field_book = function() simuDataALPHA()$df,
+      simulation = function() simuDataALPHA()$simulation,
+      layout = function() reactive_layoutAlpha()$layout_metadata,
+      kind = "layout"
     )
     
     

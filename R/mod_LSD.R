@@ -94,7 +94,7 @@ mod_LSD_ui <- function(id){
         ), 
         shiny::br(),
         shiny::downloadButton(ns("downloadData.lsd"),
-                       "Save Experiment!", 
+                       "Save experiment (ZIP)",
                        style = "width:100%")
                    
       ),
@@ -106,9 +106,9 @@ mod_LSD_ui <- function(id){
                        shinyjs::hidden(
                          shiny::downloadButton(
                            ns("downloadCsv.lsd"), 
-                           label =  "CSV",
-                           icon = shiny::icon("file-csv"),
-                           width = '10%',
+                           label = "CSV + metadata (ZIP)",
+                           icon = shiny::icon("download"),
+                           width = 'auto',
                            style="color: #337ab7; background-color: #fff; border-color: #2e6da4")
                         ),
                        plotly::plotlyOutput(ns("layout_lsd"),
@@ -502,15 +502,17 @@ mod_LSD_server <- function(id){
       
     })
     
-    output$downloadData.lsd <- shiny::downloadHandler(
+    output$downloadData.lsd <- app_csv_archive(
       filename = function() {
         loc <- paste("Latin_Square_", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
       },
-      content = function(file) {
-        df <- as.data.frame(simuDataLSD()$df)
-        write.csv(df, file, row.names = FALSE)
-      }
+      data = function() as.data.frame(simuDataLSD()$df),
+      design = latinsquare_reactive,
+      field_book = function() simuDataLSD()$df,
+      simulation = function() simuDataLSD()$simulation,
+      layout = function() reactive_layoutLSD()$layout_metadata,
+      kind = "field_book"
     )
     
     csv_data <- shiny::reactive({
@@ -526,15 +528,17 @@ mod_LSD_server <- function(id){
     
     
     # Downloadable csv of selected dataset ----
-    output$downloadCsv.lsd <- shiny::downloadHandler(
+    output$downloadCsv.lsd <- app_csv_archive(
       filename = function() {
         loc <- paste("Latin_Square_Layout", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
       },
-      content = function(file) {
-        df <- as.data.frame(csv_data()$file)
-        write.csv(df, file, row.names = FALSE)
-      }
+      data = function() as.data.frame(csv_data()$file),
+      design = latinsquare_reactive,
+      field_book = function() simuDataLSD()$df,
+      simulation = function() simuDataLSD()$simulation,
+      layout = function() reactive_layoutLSD()$layout_metadata,
+      kind = "layout"
     )
     
     app_reproduction_outputs(output, latinsquare_reactive)

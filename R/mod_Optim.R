@@ -340,7 +340,7 @@ mod_Optim_server <- function(id) {
       output$download_expt_optim <- shiny::renderUI({
         if (randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0) {
           shiny::downloadButton(ns("downloadData.spatial"),
-                          "Save Experiment",
+                          "Save experiment (ZIP)",
                           style = "width:100%")
         }
       })
@@ -704,16 +704,18 @@ mod_Optim_server <- function(id) {
       heatmap_obj()
     })
     
-    output$downloadData.spatial <- shiny::downloadHandler(
+    output$downloadData.spatial <- app_csv_archive(
       filename = function() {
         shiny::req(input$Location.spatial)
         loc <- input$Location.spatial
         loc <- paste(loc, "_", "Optim_", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
       },
-      content = function(file) {
-        write.csv(simuDataOPTIM()$df, file, row.names = FALSE)
-      }
+      data = function() as.data.frame(simuDataOPTIM()$df),
+      design = optimized_arrang,
+      field_book = function() simuDataOPTIM()$df,
+      simulation = function() simuDataOPTIM()$simulation,
+      kind = "field_book"
     )
     
     app_reproduction_outputs(output, optimized_arrang)

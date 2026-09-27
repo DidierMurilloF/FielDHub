@@ -7,8 +7,9 @@ app_reproduction_ui <- function(ns) {
     shiny::helpText(
       "After generating a design, download its complete RDS result, including",
       "the seed, parameters, random-number settings, and FielDHub version.",
-      "The R code below reconstructs the core design. App layout selections and",
-      "simulated responses are not included; keep the CSV download for those outputs.",
+      "The R code below reconstructs the core design. Use Save experiment (ZIP)",
+      "to keep the CSV, displayed field book, simulation record, layout settings,",
+      "software versions, and reconstruction code together.",
       "Keep the original RDS to preserve the exact result across software upgrades."
     ),
     shiny::downloadButton(ns("design_rds"), "Save design (RDS)"),

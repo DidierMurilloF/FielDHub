@@ -76,7 +76,7 @@ mod_Square_Lattice_ui <- function(id){
                      
                    ), 
                    shiny::br(),
-                   shiny::downloadButton(ns("downloadData.square"), "Save My Experiment", style = "width:100%")
+                   shiny::downloadButton(ns("downloadData.square"), "Save experiment (ZIP)", style = "width:100%")
       ),
       
       shiny::mainPanel(
@@ -98,9 +98,9 @@ mod_Square_Lattice_ui <- function(id){
             shiny::tabPanel("Field Layout",
                      shinyjs::useShinyjs(),
                      shinyjs::hidden(shiny::downloadButton(ns("downloadCsv.square"),
-                                                    label =  "CSV",
-                                                    icon = shiny::icon("file-csv"),
-                                                    width = '10%',
+                                                    label = "CSV + metadata (ZIP)",
+                                                    icon = shiny::icon("download"),
+                                                    width = 'auto',
                                                     style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
                      fieldhub_spinner(
                        plotly::plotlyOutput(ns("random_layout"), width = "97%", height = "550px"),type = 5
@@ -550,16 +550,17 @@ mod_Square_Lattice_server <- function(id){
                       columnDefs = list(list(className = 'dt-center', targets = "_all")))))
     })
     
-    output$downloadData.square <- shiny::downloadHandler(
+    output$downloadData.square <- app_csv_archive(
       filename = function() {
         loc <- paste("Square_Lattice_", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
       },
-      content = function(file) {
-        shiny::req(simuDataSQUARE()$df)
-        df <- as.data.frame(simuDataSQUARE()$df)
-        write.csv(df, file, row.names = FALSE)
-      }
+      data = function() as.data.frame(simuDataSQUARE()$df),
+      design = SQUARE_reactive,
+      field_book = function() simuDataSQUARE()$df,
+      simulation = function() simuDataSQUARE()$simulation,
+      layout = function() reactive_layoutSquare()$layout_metadata,
+      kind = "field_book"
     )
     
     csv_data <- shiny::reactive({
@@ -575,15 +576,17 @@ mod_Square_Lattice_server <- function(id){
     
     
     # Downloadable csv of selected dataset ----
-    output$downloadCsv.square <- shiny::downloadHandler(
+    output$downloadCsv.square <- app_csv_archive(
       filename = function() {
         loc <- paste("Square_Lattice_Layout", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
       },
-      content = function(file) {
-        df <- as.data.frame(csv_data()$file)
-        write.csv(df, file, row.names = FALSE)
-      }
+      data = function() as.data.frame(csv_data()$file),
+      design = SQUARE_reactive,
+      field_book = function() simuDataSQUARE()$df,
+      simulation = function() simuDataSQUARE()$simulation,
+      layout = function() reactive_layoutSquare()$layout_metadata,
+      kind = "layout"
     )
     
     app_reproduction_outputs(output, SQUARE_reactive)

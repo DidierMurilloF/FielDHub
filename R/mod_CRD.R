@@ -94,7 +94,7 @@ mod_CRD_ui <- function(id) {
                    ), 
                    shiny::br(),
                    shiny::downloadButton(ns("downloadData.crd"),
-                                  "Save My Experiment",
+                                  "Save experiment (ZIP)",
                                   style = "width:100%")
       ),
       shiny::mainPanel(
@@ -106,9 +106,9 @@ mod_CRD_ui <- function(id) {
                      shinyjs::hidden(
                        shiny::downloadButton(
                          ns("downloadCsv.crd"), 
-                         label =  "CSV",
-                         icon = shiny::icon("file-csv"),
-                         width = '10%',
+                         label = "CSV + metadata (ZIP)",
+                         icon = shiny::icon("download"),
+                         width = 'auto',
                          style="color: #337ab7; background-color: #fff; border-color: #2e6da4")
                       ),
                       fieldhub_spinner(
@@ -448,15 +448,17 @@ mod_CRD_server <- function(id) {
                       columnDefs = list(list(className = 'dt-center', targets = "_all")))))
     })
     
-    output$downloadData.crd <- shiny::downloadHandler(
+    output$downloadData.crd <- app_csv_archive(
       filename = function() {
         loc <- paste("CRD_", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
       },
-      content = function(file) {
-        df <- as.data.frame(simuDataCRD()$df)
-        write.csv(df, file, row.names = FALSE)
-      }
+      data = function() as.data.frame(simuDataCRD()$df),
+      design = CRD_reactive,
+      field_book = function() simuDataCRD()$df,
+      simulation = function() simuDataCRD()$simulation,
+      layout = function() reactive_layoutCRD()$layout_metadata,
+      kind = "field_book"
     )
     
     csv_data <- shiny::reactive({
@@ -472,15 +474,17 @@ mod_CRD_server <- function(id) {
     
     
     # Downloadable csv of selected dataset ----
-    output$downloadCsv.crd <- shiny::downloadHandler(
+    output$downloadCsv.crd <- app_csv_archive(
       filename = function() {
         loc <- paste("Completely_Randomized_Layout", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
       },
-      content = function(file) {
-        df <- as.data.frame(csv_data()$file)
-        write.csv(df, file, row.names = FALSE)
-      }
+      data = function() as.data.frame(csv_data()$file),
+      design = CRD_reactive,
+      field_book = function() simuDataCRD()$df,
+      simulation = function() simuDataCRD()$simulation,
+      layout = function() reactive_layoutCRD()$layout_metadata,
+      kind = "layout"
     )
     
     app_reproduction_outputs(output, CRD_reactive)

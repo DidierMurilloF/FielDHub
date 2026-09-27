@@ -85,7 +85,7 @@ mod_FD_ui <- function(id){
                      
                    ), 
                    shiny::br(),
-                   shiny::downloadButton(ns("downloadData.fd"), "Save Experiment!",
+                   shiny::downloadButton(ns("downloadData.fd"), "Save experiment (ZIP)",
                                   style = "width:100%")
       ),
       
@@ -96,9 +96,9 @@ mod_FD_ui <- function(id){
             shiny::tabPanel("Field Layout",
                      shinyjs::useShinyjs(),
                      shinyjs::hidden(shiny::downloadButton(ns("downloadCsv.fd"),
-                                                    label =  "CSV",
-                                                    icon = shiny::icon("file-csv"),
-                                                    width = '10%',
+                                                    label = "CSV + metadata (ZIP)",
+                                                    icon = shiny::icon("download"),
+                                                    width = 'auto',
                                                     style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
                      fieldhub_spinner(
                        plotly::plotlyOutput(ns("layouts"), width = "97%", 
@@ -516,15 +516,17 @@ mod_FD_server <- function(id) {
       
     })
     
-    output$downloadData.fd <- shiny::downloadHandler(
+    output$downloadData.fd <- app_csv_archive(
       filename = function() {
         loc <- paste("Full_Factorial_", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
       },
-      content = function(file) {
-        df <- as.data.frame(simuData_fd()$df)
-        write.csv(df, file, row.names = FALSE)
-      }
+      data = function() as.data.frame(simuData_fd()$df),
+      design = fd_reactive,
+      field_book = function() simuData_fd()$df,
+      simulation = function() simuData_fd()$simulation,
+      layout = function() reactive_layoutFD()$layout_metadata,
+      kind = "field_book"
     )
     
     csv_data <- shiny::reactive({
@@ -540,15 +542,17 @@ mod_FD_server <- function(id) {
     
     
     # Downloadable csv of selected dataset ----
-    output$downloadCsv.fd <- shiny::downloadHandler(
+    output$downloadCsv.fd <- app_csv_archive(
       filename = function() {
         loc <- paste("Factorial_Layout", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
       },
-      content = function(file) {
-        df <- as.data.frame(csv_data()$file)
-        write.csv(df, file, row.names = FALSE)
-      }
+      data = function() as.data.frame(csv_data()$file),
+      design = fd_reactive,
+      field_book = function() simuData_fd()$df,
+      simulation = function() simuData_fd()$simulation,
+      layout = function() reactive_layoutFD()$layout_metadata,
+      kind = "layout"
     )
     
     app_reproduction_outputs(output, fd_reactive)

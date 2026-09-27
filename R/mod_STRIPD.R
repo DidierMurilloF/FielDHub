@@ -122,7 +122,7 @@ mod_STRIPD_ui <- function(id){
         ), 
         shiny::br(),
         shiny::downloadButton(ns("downloadData.strip"),
-                       "Save Experiment!", 
+                       "Save experiment (ZIP)",
                        style = "width:100%")
       ),
       
@@ -133,9 +133,9 @@ mod_STRIPD_ui <- function(id){
             shiny::tabPanel(title = "Field Layout",
                      shinyjs::useShinyjs(),
                      shinyjs::hidden(shiny::downloadButton(ns("downloadCsv.strip"),
-                                                    label =  "CSV",
-                                                    icon = shiny::icon("file-csv"),
-                                                    width = '10%',
+                                                    label = "CSV + metadata (ZIP)",
+                                                    icon = shiny::icon("download"),
+                                                    width = 'auto',
                                                     style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
                      fieldhub_spinner(
                        plotly::plotlyOutput(ns("layout.strip"), 
@@ -556,15 +556,17 @@ mod_STRIPD_server <- function(id) {
       
     })
     
-    output$downloadData.strip <- shiny::downloadHandler(
+    output$downloadData.strip <- app_csv_archive(
       filename = function() {
         loc <- paste("Strip-Plot_", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
       },
-      content = function(file) {
-        df <- as.data.frame(simuData_strip()$df)
-        write.csv(df, file, row.names = FALSE)
-      }
+      data = function() as.data.frame(simuData_strip()$df),
+      design = strip_reactive,
+      field_book = function() simuData_strip()$df,
+      simulation = function() simuData_strip()$simulation,
+      layout = function() reactive_layoutSTRIP()$layout_metadata,
+      kind = "field_book"
     )
     csv_data <- shiny::reactive({
       shiny::req(simuData_strip()$df)
@@ -579,15 +581,17 @@ mod_STRIPD_server <- function(id) {
     
     
     # Downloadable csv of selected dataset ----
-    output$downloadCsv.strip <- shiny::downloadHandler(
+    output$downloadCsv.strip <- app_csv_archive(
       filename = function() {
         loc <- paste("Strip_Plot_Layout", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
       },
-      content = function(file) {
-        df <- as.data.frame(csv_data()$file)
-        write.csv(df, file, row.names = FALSE)
-      }
+      data = function() as.data.frame(csv_data()$file),
+      design = strip_reactive,
+      field_book = function() simuData_strip()$df,
+      simulation = function() simuData_strip()$simulation,
+      layout = function() reactive_layoutSTRIP()$layout_metadata,
+      kind = "layout"
     )
     
     app_reproduction_outputs(output, strip_reactive)

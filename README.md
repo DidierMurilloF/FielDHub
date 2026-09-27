@@ -57,7 +57,7 @@ its additional packages once:
 
 ``` r
 install.packages(c("golem", "shiny", "htmltools", "DT", "bslib",
-                   "shinycssloaders", "plotly", "shinyalert", "shinyjs"))
+                   "shinycssloaders", "plotly", "shinyalert", "shinyjs", "zip"))
 ```
 
 If anything is missing, `run_app()` reports the packages to install.

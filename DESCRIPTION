@@ -65,6 +65,7 @@ Suggests:
     plotly,
     shinyalert,
     shinyjs,
+    zip (>= 2.3.0),
     codetools,
     testthat (>= 3.0.0),
     spelling,

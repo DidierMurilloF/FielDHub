@@ -100,7 +100,7 @@ mod_SPD_ui <- function(id) {
           
         ), 
         shiny::br(),
-        shiny::downloadButton(ns("downloadData.spd"), "Save Experiment!",
+        shiny::downloadButton(ns("downloadData.spd"), "Save experiment (ZIP)",
                       style = "width:100%")
       ),
       
@@ -111,9 +111,9 @@ mod_SPD_ui <- function(id) {
             shiny::tabPanel("Field Layout",
                      shinyjs::useShinyjs(),
                      shinyjs::hidden(shiny::downloadButton(ns("downloadCsv.spd"),
-                                                    label =  "CSV",
-                                                    icon = shiny::icon("file-csv"),
-                                                    width = '10%',
+                                                    label = "CSV + metadata (ZIP)",
+                                                    icon = shiny::icon("download"),
+                                                    width = 'auto',
                                                     style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
                      fieldhub_spinner(
                        plotly::plotlyOutput(ns("layouts"), 
@@ -510,15 +510,17 @@ mod_SPD_server <- function(id){
       
     })
     
-    output$downloadData.spd <- shiny::downloadHandler(
+    output$downloadData.spd <- app_csv_archive(
       filename = function() {
         loc <- paste("Split-Plot_", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
       },
-      content = function(file) {
-        df <- as.data.frame(simuData_spd()$df)
-        write.csv(df, file, row.names = FALSE)
-      }
+      data = function() as.data.frame(simuData_spd()$df),
+      design = spd_reactive,
+      field_book = function() simuData_spd()$df,
+      simulation = function() simuData_spd()$simulation,
+      layout = function() reactive_layoutSPD()$layout_metadata,
+      kind = "field_book"
     )
     csv_data <- shiny::reactive({
       shiny::req(simuData_spd()$df)
@@ -533,15 +535,17 @@ mod_SPD_server <- function(id){
     
     
     # Downloadable csv of selected dataset ----
-    output$downloadCsv.spd <- shiny::downloadHandler(
+    output$downloadCsv.spd <- app_csv_archive(
       filename = function() {
         loc <- paste("Split_Plot_Layout", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
       },
-      content = function(file) {
-        df <- as.data.frame(csv_data()$file)
-        write.csv(df, file, row.names = FALSE)
-      }
+      data = function() as.data.frame(csv_data()$file),
+      design = spd_reactive,
+      field_book = function() simuData_spd()$df,
+      simulation = function() simuData_spd()$simulation,
+      layout = function() reactive_layoutSPD()$layout_metadata,
+      kind = "layout"
     )
     app_reproduction_outputs(output, spd_reactive)
   })

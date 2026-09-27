@@ -413,7 +413,7 @@ mod_RCBD_augmented_server <- function(id) {
       output$download_arcbd <- shiny::renderUI({
         if (test_arcbd()) {
           shiny::downloadButton(ns("downloadData_a_rcbd"),
-                         "Save Experiment",
+                         "Save experiment (ZIP)",
                          style = "width:100%")
         }
       })
@@ -796,17 +796,18 @@ mod_RCBD_augmented_server <- function(id) {
       heatmap_obj()
     })
     
-    output$downloadData_a_rcbd <- shiny::downloadHandler(
+    output$downloadData_a_rcbd <- app_csv_archive(
       filename = function() {
         shiny::req(input$Location_a_rcbd)
         loc <- input$Location_a_rcbd
         loc <- paste(loc, "_", "ARCBD_", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
       },
-      content = function(file) {
-        df <- as.data.frame(simuDataARCBD()$df)
-        write.csv(df, file, row.names = FALSE)
-      }
+      data = function() as.data.frame(simuDataARCBD()$df),
+      design = rcbd_augmented_reactive,
+      field_book = function() simuDataARCBD()$df,
+      simulation = function() simuDataARCBD()$simulation,
+      kind = "field_book"
     )
     
     app_reproduction_outputs(output, rcbd_augmented_reactive)

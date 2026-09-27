@@ -61,7 +61,7 @@ The development version keeps the app dependencies optional. R scripts can use t
 
 ``` r
 install.packages(c("golem", "shiny", "htmltools", "DT", "bslib",
-                   "shinycssloaders", "plotly", "shinyalert", "shinyjs"))
+                   "shinycssloaders", "plotly", "shinyalert", "shinyjs", "zip"))
 ```
 
 If anything is missing, `run_app()` reports the packages to install.
@@ -178,4 +178,3 @@ To see more examples, please go to <https://didiermurillof.github.io/FielDHub/ar
 
 <br>
 <br>
-

@@ -734,7 +734,7 @@ mod_multi_loc_preps_server <- function(id){
         if (randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0) {
           shiny::downloadButton(
             ns("downloadData.preps"),
-            "Save Experiment",
+            "Save experiment (ZIP)",
             style = "width:100%")
         }
       })
@@ -1104,16 +1104,18 @@ mod_multi_loc_preps_server <- function(id){
       )
     })
     
-    output$downloadData.preps <- shiny::downloadHandler(
+    output$downloadData.preps <- app_csv_archive(
       filename = function() {
         shiny::req(input$loc_name_preps)
         loc <- input$loc_name_preps
         loc <- paste(loc, "_", "pREP_", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
       },
-      content = function(file) {
-        write.csv(simuDataPREP()$df, file, row.names = FALSE)
-      }
+      data = function() as.data.frame(simuDataPREP()$df),
+      design = pREPS_reactive,
+      field_book = function() simuDataPREP()$df,
+      simulation = function() simuDataPREP()$simulation,
+      kind = "field_book"
     )
  
     app_reproduction_outputs(output, pREPS_reactive)

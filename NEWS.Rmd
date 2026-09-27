@@ -34,6 +34,12 @@ knitr::opts_chunk$set(
 
 ### New features:
 
+- App data downloads now use ZIP archives containing the unchanged CSV table,
+  the complete design and simulation records, displayed field book, layout
+  settings, software versions, and reconstruction code. Buttons explicitly
+  identify the ZIP format. The separate core-design RDS download remains
+  available. Archives require the optional `zip` package.
+
 - `swap_pairs()` now reports its stop reason, attempted thresholds, completed
   swap sweeps, and per-threshold budget. Invalid or infinite limits, invalid
   distance choices, and non-integer or out-of-range entry labels receive classed

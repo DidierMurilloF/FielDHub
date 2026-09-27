@@ -126,7 +126,7 @@ mod_SSPD_ui <- function(id){
         shiny::br(),
         shiny::downloadButton(
           ns("downloadData.sspd"), 
-          "Save Experiment!", 
+          "Save experiment (ZIP)",
           style = "width:100%")
       ),
       
@@ -139,9 +139,9 @@ mod_SSPD_ui <- function(id){
                      shinyjs::hidden(
                        shiny::downloadButton(
                          ns("downloadCsv.sspd"), 
-                         label =  "CSV",
-                         icon = shiny::icon("file-csv"),
-                         width = '10%',
+                         label = "CSV + metadata (ZIP)",
+                         icon = shiny::icon("download"),
+                         width = 'auto',
                          style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
                      fieldhub_spinner(
                        plotly::plotlyOutput(ns("layouts"), 
@@ -542,15 +542,17 @@ mod_SSPD_server <- function(id){
       
     })
     
-    output$downloadData.sspd <- shiny::downloadHandler(
+    output$downloadData.sspd <- app_csv_archive(
       filename = function() {
         loc <- paste("Split-Split-Plot_", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
       },
-      content = function(file) {
-        df <- as.data.frame(simuData_sspd()$df)
-        write.csv(df, file, row.names = FALSE)
-      }
+      data = function() as.data.frame(simuData_sspd()$df),
+      design = sspd_reactive,
+      field_book = function() simuData_sspd()$df,
+      simulation = function() simuData_sspd()$simulation,
+      layout = function() reactive_layoutSSPD()$layout_metadata,
+      kind = "field_book"
     )
     csv_data <- shiny::reactive({
       shiny::req(simuData_sspd()$df)
@@ -565,15 +567,17 @@ mod_SSPD_server <- function(id){
     
     
     # Downloadable csv of selected dataset ----
-    output$downloadCsv.sspd <- shiny::downloadHandler(
+    output$downloadCsv.sspd <- app_csv_archive(
       filename = function() {
         loc <- paste("Split_Split_Plot_Layout", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
       },
-      content = function(file) {
-        df <- as.data.frame(csv_data()$file)
-        write.csv(df, file, row.names = FALSE)
-      }
+      data = function() as.data.frame(csv_data()$file),
+      design = sspd_reactive,
+      field_book = function() simuData_sspd()$df,
+      simulation = function() simuData_sspd()$simulation,
+      layout = function() reactive_layoutSSPD()$layout_metadata,
+      kind = "layout"
     )
     app_reproduction_outputs(output, sspd_reactive)
   })

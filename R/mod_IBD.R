@@ -100,7 +100,7 @@ mod_IBD_ui <- function(id) {
         ), 
         shiny::br(),
         shiny::downloadButton(ns("downloadData.ibd"),
-                       "Save Experiment!", 
+                       "Save experiment (ZIP)",
                        style = "width:100%")
       ),
       
@@ -123,9 +123,9 @@ mod_IBD_ui <- function(id) {
                      shinyjs::hidden(
                        shiny::downloadButton(
                          ns("downloadCsv.ibd"), 
-                         label =  "CSV",
-                         icon = shiny::icon("file-csv"),
-                         width = '10%',
+                         label = "CSV + metadata (ZIP)",
+                         icon = shiny::icon("download"),
+                         width = 'auto',
                          style="color: #337ab7; background-color: #fff; border-color: #2e6da4")
                       ),
                      fieldhub_spinner(
@@ -584,15 +584,17 @@ mod_IBD_server <- function(id) {
     })
     
     
-    output$downloadData.ibd <- shiny::downloadHandler(
+    output$downloadData.ibd <- app_csv_archive(
       filename = function() {
         loc <- paste("IBD_", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
       },
-      content = function(file) {
-        df <- as.data.frame(simuDataIBD()$df)
-        write.csv(df, file, row.names = FALSE)
-      }
+      data = function() as.data.frame(simuDataIBD()$df),
+      design = IBD_reactive,
+      field_book = function() simuDataIBD()$df,
+      simulation = function() simuDataIBD()$simulation,
+      layout = function() reactive_layoutIBD()$layout_metadata,
+      kind = "field_book"
     )
     csv_data <- shiny::reactive({
       shiny::req(simuDataIBD()$df)
@@ -607,15 +609,17 @@ mod_IBD_server <- function(id) {
     
     
     # Downloadable csv of selected dataset ----
-    output$downloadCsv.ibd <- shiny::downloadHandler(
+    output$downloadCsv.ibd <- app_csv_archive(
       filename = function() {
         loc <- paste("Incomplete_Block_Layout", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
       },
-      content = function(file) {
-        df <- as.data.frame(csv_data()$file)
-        write.csv(df, file, row.names = FALSE)
-      }
+      data = function() as.data.frame(csv_data()$file),
+      design = IBD_reactive,
+      field_book = function() simuDataIBD()$df,
+      simulation = function() simuDataIBD()$simulation,
+      layout = function() reactive_layoutIBD()$layout_metadata,
+      kind = "layout"
     )
     app_reproduction_outputs(output, IBD_reactive)
   })

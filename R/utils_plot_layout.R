@@ -21,7 +21,8 @@
 #'   map of plot numbers \code{out_layoutPlots} (NULL for some designs), the
 #'   drawn field book of the location \code{fieldBookXY}, the layout options
 #'   of the location \code{newBooks}, and the field book with coordinates of
-#'   every location \code{allSitesFieldbook}. When the location, stacking or
+#'   every location \code{allSitesFieldbook}, and the selected layout settings
+#'   \code{layout_metadata}. When the location, stacking or
 #'   layout option is not available, a warning and NULL.
 #'
 #' @references
@@ -63,5 +64,7 @@ plot_layout <- function(
          out_layoutPlots = drawn$p2,
          fieldBookXY = drawn$data,
          newBooks = site_options,
-         allSitesFieldbook = all_locations_layout(x, options, layout))
+         allSitesFieldbook = all_locations_layout(x, options, layout),
+         layout_metadata = list(parameters = list(layout = layout, planter = planter, stacked = stacked),
+                                selected = l))
 }

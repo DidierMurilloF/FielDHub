@@ -102,7 +102,7 @@ mod_RowCol_ui <- function(id){
                    ), 
                    shiny::br(),
                    shiny::downloadButton(ns("downloadData.rowcolD"),
-                                  "Save Experiment!",
+                                  "Save experiment (ZIP)",
                                   style = "width:100%")
       ),
       shiny::mainPanel(
@@ -122,9 +122,9 @@ mod_RowCol_ui <- function(id){
             shiny::tabPanel("Field Layout",
                      shinyjs::useShinyjs(),
                      shinyjs::hidden(shiny::downloadButton(ns("downloadCsv.rcd"),
-                                                    label =  "CSV",
-                                                    icon = shiny::icon("file-csv"),
-                                                    width = '10%',
+                                                    label = "CSV + metadata (ZIP)",
+                                                    icon = shiny::icon("download"),
+                                                    width = 'auto',
                                                     style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
                      fieldhub_spinner(
                        plotly::plotlyOutput(ns("layouts"), 
@@ -575,15 +575,17 @@ mod_RowCol_server <- function(id){
       
     })
 
-    output$downloadData.rowcolD <- shiny::downloadHandler(
+    output$downloadData.rowcolD <- app_csv_archive(
       filename = function() {
         loc <- paste("Row-Column_", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
       },
-      content = function(file) {
-        df <- as.data.frame(simuData_RowCol()$df)
-        write.csv(df, file, row.names = FALSE)
-      }
+      data = function() as.data.frame(simuData_RowCol()$df),
+      design = RowCol_reactive,
+      field_book = function() simuData_RowCol()$df,
+      simulation = function() simuData_RowCol()$simulation,
+      layout = function() reactive_layoutROWCOL()$layout_metadata,
+      kind = "field_book"
     )
     
     csv_data <- shiny::reactive({
@@ -599,15 +601,17 @@ mod_RowCol_server <- function(id){
     
     
     # Downloadable csv of selected dataset ----
-    output$downloadCsv.rcd <- shiny::downloadHandler(
+    output$downloadCsv.rcd <- app_csv_archive(
       filename = function() {
         loc <- paste("Resolvable_Row-Column_Layout", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
       },
-      content = function(file) {
-        df <- as.data.frame(csv_data()$file)
-        write.csv(df, file, row.names = FALSE)
-      }
+      data = function() as.data.frame(csv_data()$file),
+      design = RowCol_reactive,
+      field_book = function() simuData_RowCol()$df,
+      simulation = function() simuData_RowCol()$simulation,
+      layout = function() reactive_layoutROWCOL()$layout_metadata,
+      kind = "layout"
     )
     app_reproduction_outputs(output, RowCol_reactive)
   })

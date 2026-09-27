@@ -738,7 +738,7 @@ mod_sparse_allocation_server <- function(id){
       output$sparse_download <- shiny::renderUI({
         if (randomize_hit$times > 0 & user_tries$tries > 0) {
           shiny::downloadButton(ns("downloadData_Diagonal"),
-                          "Save Experiment",
+                          "Save experiment (ZIP)",
                           style = "width:100%")
         }
       })
@@ -1033,16 +1033,18 @@ mod_sparse_allocation_server <- function(id){
       heatmap_obj_D()
     })
     
-    output$downloadData_Diagonal <- shiny::downloadHandler(
+    output$downloadData_Diagonal <- app_csv_archive(
       filename = function() {
         shiny::req(input$sparse_loc_names)
         loc <- input$sparse_loc_names
         loc <- paste(loc, "_", "Diagonal_", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
       },
-      content = function(file) {
-        write.csv(simudata_DIAG()$df, file, row.names = FALSE)
-      }
+      data = function() as.data.frame(simudata_DIAG()$df),
+      design = sparse_design,
+      field_book = function() simudata_DIAG()$df,
+      simulation = function() simudata_DIAG()$simulation,
+      kind = "field_book"
     )
     
     app_reproduction_outputs(output, sparse_design)

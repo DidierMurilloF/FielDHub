@@ -620,7 +620,7 @@ mod_diagonal_multiple_server <- function(id) {
             output$download_multi <- shiny::renderUI({
                 if (randomize_hit_multi$times_multi > 0 & user_tries_multi$tries > 0) {
                 shiny::downloadButton(ns("download_fieldbook_multiple"),
-                                "Save Experiment",
+                                "Save experiment (ZIP)",
                                 style = "width:100%")
                 }
             })
@@ -1032,16 +1032,18 @@ mod_diagonal_multiple_server <- function(id) {
             heatmap_obj_D()
         })
         
-        output$download_fieldbook_multiple <- shiny::downloadHandler(
+        output$download_fieldbook_multiple <- app_csv_archive(
             filename = function() {
                 shiny::req(multiple_inputs()$location_names)
                 loc <- multiple_inputs()$location_names
                 loc <- paste(loc, "_", "Diagonal_Multi", sep = "")
                 paste(loc, Sys.Date(), ".csv", sep = "")
             },
-            content = function(file) {
-                write.csv(simudata_DIAG()$df, file, row.names = FALSE)
-            }
+          data = function() as.data.frame(simudata_DIAG()$df),
+          design = diagonal_design,
+          field_book = function() simudata_DIAG()$df,
+          simulation = function() simudata_DIAG()$simulation,
+          kind = "field_book"
         )
         app_reproduction_outputs(output, diagonal_design)
     })

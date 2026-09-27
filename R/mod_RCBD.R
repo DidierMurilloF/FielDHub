@@ -121,7 +121,7 @@ mod_RCBD_ui <- function(id) {
         ), 
         shiny::br(),
         shiny::downloadButton(ns("downloadData.rcbd"),
-                       "Save Experiment!", 
+                       "Save experiment (ZIP)",
                        style = "width:100%")
                    
       ),
@@ -135,9 +135,9 @@ mod_RCBD_ui <- function(id) {
                      shinyjs::hidden(
                        shiny::downloadButton(
                          ns("downloadCsv.rcbd"), 
-                         label =  "CSV",
-                         icon = shiny::icon("file-csv"),
-                         width = '10%',
+                         label = "CSV + metadata (ZIP)",
+                         icon = shiny::icon("download"),
+                         width = 'auto',
                          style="color: #337ab7; background-color: #fff; border-color: #2e6da4")
                       ),
                      fieldhub_spinner(
@@ -609,15 +609,17 @@ mod_RCBD_server <- function(id) {
       
     })
 
-    output$downloadData.rcbd <- shiny::downloadHandler(
+    output$downloadData.rcbd <- app_csv_archive(
       filename = function() {
         loc <- paste("RCBD_", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
       },
-      content = function(file) {
-        df <- as.data.frame(simuDataRCBD()$df)
-        write.csv(df, file, row.names = FALSE)
-      }
+      data = function() as.data.frame(simuDataRCBD()$df),
+      design = RCBD_reactive,
+      field_book = function() simuDataRCBD()$df,
+      simulation = function() simuDataRCBD()$simulation,
+      layout = function() reactive_layoutRCBD()$layout_metadata,
+      kind = "field_book"
     )
     csv_data <- shiny::reactive({
       shiny::req(simuDataRCBD()$df)
@@ -636,15 +638,17 @@ mod_RCBD_server <- function(id) {
     
     
     # Downloadable csv of selected dataset ----
-    output$downloadCsv.rcbd <- shiny::downloadHandler(
+    output$downloadCsv.rcbd <- app_csv_archive(
       filename = function() {
         loc <- paste("Randomized_Complete_Block_Layout", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
       },
-      content = function(file) {
-        df <- as.data.frame(csv_data()$file)
-        write.csv(df, file, row.names = FALSE)
-      }
+      data = function() as.data.frame(csv_data()$file),
+      design = RCBD_reactive,
+      field_book = function() simuDataRCBD()$df,
+      simulation = function() simuDataRCBD()$simulation,
+      layout = function() reactive_layoutRCBD()$layout_metadata,
+      kind = "layout"
     )
  
     app_reproduction_outputs(output, RCBD_reactive)
