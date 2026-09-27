@@ -2,6 +2,12 @@
 #'
 #' @description It randomly generates a completely randomized design.
 #'
+#' @details The result records effective inputs and the resolved seed
+#'   in \code{metadata$parameters}. Under the same package versions and RNG
+#'   settings, rebuild a result \code{x} with
+#'   \code{do.call(CRD, x$metadata$parameters)}. Data inputs are recorded after
+#'   the existing column selection and normalization.
+#'
 #' @param t An integer number with total number of treatments or a vector of dimension t with labels.
 #' @param reps Number of replicates of each treatment.
 #' @param plotNumber Starting plot number. By default \code{plotNumber = 101}.
@@ -22,8 +28,10 @@
 #'
 #' @importFrom stats runif na.omit
 #'
-#' @return A list with two elements.
+#' @return A list with three elements.
 #' \itemize{
+#'   \item \code{metadata} records the design, schema/package versions, seed,
+#'     random-number settings and effective input parameters.
 #'   \item \code{infoDesign} is a list with information on the design parameters.
 #'   \item \code{fieldBook} is a data frame with the CRD field book.
 #' }
@@ -148,6 +156,9 @@ CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL,
     seed = seed, id_design = 1
   )
   output <- list(infoDesign = parameters, fieldBook = design)
-  output <- new_fieldhub_design(output, "crd")
+  reproduction_parameters <- record_design_parameters(
+    environment(), overrides = list(locationNames = locationName), exclude = "locationName"
+  )
+  output <- new_fieldhub_design(output, "crd", parameters = reproduction_parameters)
   return(invisible(output))
 }

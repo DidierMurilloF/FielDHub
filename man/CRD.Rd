@@ -32,14 +32,23 @@ positional calls remain supported, with a deprecation warning.}
 of \code{locationNames} and \code{locationName}.}
 }
 \value{
-A list with two elements.
+A list with three elements.
 \itemize{
+  \item \code{metadata} records the design, schema/package versions, seed,
+    random-number settings and effective input parameters.
   \item \code{infoDesign} is a list with information on the design parameters.
   \item \code{fieldBook} is a data frame with the CRD field book.
 }
 }
 \description{
 It randomly generates a completely randomized design.
+}
+\details{
+The result records effective inputs and the resolved seed
+  in \code{metadata$parameters}. Under the same package versions and RNG
+  settings, rebuild a result \code{x} with
+  \code{do.call(CRD, x$metadata$parameters)}. Data inputs are recorded after
+  the existing column selection and normalization.
 }
 \examples{
 # Example 1: Generates a CRD design with 10 treatments and 5 reps each.

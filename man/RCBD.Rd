@@ -60,6 +60,8 @@ whole block is randomized without restriction.}
 \value{
 A list with five elements.
 \itemize{
+  \item \code{metadata} records the design, schema/package versions, seed,
+    random-number settings and effective input parameters.
   \item \code{infoDesign} is a list with information on the design parameters.
   \item \code{layoutRandom} is the RCBD layout randomization for each location.
   \item \code{plotNumber} is the plot number layout for each location.
@@ -74,6 +76,11 @@ A list with five elements.
 It randomly generates a randomized complete block design (RCBD) across locations.
 }
 \details{
+The result records effective inputs, the resolved seed and the
+starting plot numbers in \code{metadata$parameters}. Under the same package
+versions and RNG settings, rebuild a result \code{x} with
+\code{do.call(RCBD, x$metadata$parameters)}.
+
 When \code{checks} is supplied, one or more checks are repeated multiple times within
 every block, while every test entry still appears exactly once. In a classical RCBD,
 the residual is the treatment-by-block interaction; repeating checks inside a block

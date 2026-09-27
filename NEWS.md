@@ -104,6 +104,14 @@
 
 ### Enhancements:
 
+- `CRD()` and `RCBD()` now record effective inputs, defaults and the resolved
+  seed in `metadata$parameters`, enabling reconstruction with `do.call()`
+  under the same software and RNG settings. RCBD saves starting plot numbers
+  before expanding them by block, and CRD records the canonical location
+  argument. Recording occurs after design generation,
+  preserving the existing scientific calculation and seeded outputs; older
+  metadata without parameter lists remains supported.
+
 - `do_optim()` now returns allocation plans through a validated constructor
   and records the seed, RNG settings, package/schema versions and evaluated
   input arguments in `metadata`. Rebuild a plan with

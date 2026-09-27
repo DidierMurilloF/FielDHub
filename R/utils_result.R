@@ -28,17 +28,19 @@ fieldhub_metadata <- function(design, seed) {
 #' @param x List with the elements of the result, including
 #'   \code{infoDesign}.
 #' @param design Name of the design, such as \code{"rcbd"}.
+#' @param parameters Optional named list of effective inputs for reconstruction.
 #'
 #' @return The result, with the element \code{metadata}: a list with
 #'   \code{design}, \code{schema_version}, \code{seed}, \code{rng_kind} (the
 #'   \code{RNGkind()} used) and \code{package_version}.
 #' @noRd
-new_fieldhub_design <- function(x, design) {
+new_fieldhub_design <- function(x, design, parameters = NULL) {
   if (!is.list(x) || !is.list(x$infoDesign)) {
     fieldhub_abort("Internal error: the design result must be a list with infoDesign.",
                    class = "fieldhub_internal_error", call. = FALSE)
   }
   x$metadata <- fieldhub_metadata(design, x$infoDesign$seed)
+  if (!is.null(parameters)) x$metadata$parameters <- parameters
   class(x) <- c(paste0("fieldhub_", design), "FielDHub")
   validate_fieldhub_design(x)
 }
@@ -102,6 +104,7 @@ validate_fieldhub_design <- function(x) {
     if (!identical(meta$schema_version, fieldhub_schema_version)) {
       problems <- c(problems, "has an unknown schema version")
     }
+    problems <- c(problems, recorded_parameter_problems(meta))
     if (meta$design != "split_families") {
       problems <- c(problems, field_book_problems(x$fieldBook))
     }

@@ -32,7 +32,7 @@ test_that("every design result records how it was built", {
     if (!fun %in% names(result_designs)) next
     design <- catalogue_design(name)
     expect_identical(
-      design$metadata,
+      design$metadata[c("design", "schema_version", "seed", "rng_kind", "package_version")],
       list(design = result_designs[[fun]], schema_version = 1L,
            seed = design$infoDesign$seed, rng_kind = RNGkind(),
            package_version = version),

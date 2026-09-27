@@ -4,6 +4,11 @@
 #' @description It randomly generates a randomized complete block design (RCBD) across locations.
 #'
 #' @details
+#' The result records effective inputs, the resolved seed and the
+#' starting plot numbers in \code{metadata$parameters}. Under the same package
+#' versions and RNG settings, rebuild a result \code{x} with
+#' \code{do.call(RCBD, x$metadata$parameters)}.
+#'
 #' When \code{checks} is supplied, one or more checks are repeated multiple times within
 #' every block, while every test entry still appears exactly once. In a classical RCBD,
 #' the residual is the treatment-by-block interaction; repeating checks inside a block
@@ -71,6 +76,8 @@
 #' 
 #' @return A list with five elements.
 #' \itemize{
+#'   \item \code{metadata} records the design, schema/package versions, seed,
+#'     random-number settings and effective input parameters.
 #'   \item \code{infoDesign} is a list with information on the design parameters.
 #'   \item \code{layoutRandom} is the RCBD layout randomization for each location.
 #'   \item \code{plotNumber} is the plot number layout for each location.
@@ -217,10 +224,12 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
     mytreatments <- data$Treatment
   }
   if (!has_checks) n_units <- nt
+  recorded_locations <- locationNames
   if (length(locationNames) != l) {
     default_names <- paste("loc", 1:l, sep = "")
     if (!is.null(locationNames)) warn_default_location_names(locationNames, l, default_names)
     locationNames <- default_names
+    recorded_locations <- NULL
   }
   RCBD <- matrix(data = NA, nrow = b * l, ncol = n_units, byrow = TRUE)
   RCBD.layout <- matrix(data = NA, nrow = b, ncol = 2, byrow = TRUE)
@@ -245,6 +254,7 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
     }
     RCBD.layout.loc[[i]] <- RCBD.layout
   }
+  starting_plots <- plotNumber
   plotNumber <- seriePlot.numbers(plot.number = plotNumber,
                                   reps = b,
                                   l = l,
@@ -317,6 +327,9 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
                  layoutRandom = RCBD.layout.loc,
                  plotNumber = p.number.loc,
                  fieldBook = RCBD_output)
-  output <- new_fieldhub_design(output, "rcbd")
+  reproduction_parameters <- record_design_parameters(
+    environment(), overrides = list(plotNumber = starting_plots, locationNames = recorded_locations)
+  )
+  output <- new_fieldhub_design(output, "rcbd", parameters = reproduction_parameters)
   return(invisible(output))
 }
