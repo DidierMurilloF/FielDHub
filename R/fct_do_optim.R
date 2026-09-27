@@ -145,6 +145,7 @@ do_optim <- function(
         }
     }
     # Generate the optim IBs
+    local_optimizer_options()
     optim_blocks <- blocksdesign::blocks(
         treatments = lines,
         replicates = copies_per_entry,

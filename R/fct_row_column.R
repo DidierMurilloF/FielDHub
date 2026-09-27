@@ -288,6 +288,7 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
   N <- nt * r
   out_row_col_loc <- vector(mode = "list", length = l)
   blocks_model <- list()
+  local_optimizer_options()
   for (i in 1:l) {
     reps <- r
     ncols <- nt / nunits

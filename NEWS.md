@@ -538,6 +538,11 @@
 
 ### Fix bugs:
 
+- Optimizer-backed designs restore the caller's `warn` and `contrasts`
+  options on success and error, including multi-location allocation wrappers.
+  The optimizer's settings remain in effect during design construction, so
+  fixed-seed results are unchanged. Unrelated process options are not reset.
+
 - Simulation settings are accepted atomically across all nineteen design
   modules. Invalid bounds, duplicate or blank trait names, and malformed
   spatial correlations leave the last accepted simulation settings untouched.

@@ -130,6 +130,7 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
   if (sqrt(nt) == round(sqrt(nt))) square <- TRUE
   outIBD_loc <- vector(mode = "list", length = l)
   blocks_model <- list()
+  local_optimizer_options()
   for (i in 1:l) {
     mydes <- blocksdesign::blocks(treatments = nt, replicates = r, blocks = list(r, b), seed = NULL)
     mydes <- rerandomize_ibd(ibd_design = mydes)
