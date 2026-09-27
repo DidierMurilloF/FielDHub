@@ -108,6 +108,14 @@
   unaffected: the caller's random-number state is left completely
   untouched.
 
+- The app's CRD and RCBD modules now generate their app-built entry lists
+  by calling `CRD(t = )` and `RCBD(t = , checks = )` with bare counts
+  instead of pre-building `T-`/`G-`/`CH` label data frames, so generated
+  field books use the R API's own labels: CRD entries are `T1`, `T2`, ...
+  and RCBD's generated checks are `CH1`, `CH2`, ... ahead of `T1`, `T2`, ...
+  test entries, matching a direct `RCBD(checks = N)` call. Uploaded entry
+  lists, and every other design, are unaffected.
+
 - The Shiny application stack is now optional. Installing FielDHub for R
   scripts requires only the design and plotting dependencies; the nine
   app-only packages have moved from Imports to Suggests. `run_app()` checks
