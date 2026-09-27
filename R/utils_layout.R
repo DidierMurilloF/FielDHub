@@ -119,6 +119,38 @@ along_rows <- function(M, planter = "serpentine") {
   M
 }
 
+#' Plot numbers of a grid in planting order
+#'
+#' Fills an \code{nrows x ncols} grid with \code{plots}, row by row, then
+#' reads the grid back along the planting path: unchanged for a cartesian
+#' planter, with every second row reversed for a serpentine one.
+#'
+#' @param plots Plot numbers, row 1 of the grid first.
+#' @param ncols Number of columns of the grid.
+#' @param planter \code{"serpentine"} or \code{"cartesian"}.
+#' @noRd
+plots_along_grid <- function(plots, ncols, planter = "serpentine") {
+  M <- matrix(plots, ncol = ncols, byrow = TRUE)
+  as.vector(t(along_rows(M, planter)))
+}
+
+#' Plot numbers of a grid in planting order, one rep at a time
+#'
+#' Some layouts lay each rep's plots out in its own grid of \code{grid_cols}
+#' columns; the planter starts each rep's grid afresh, so the serpentine
+#' direction restarts at row 1 of every rep instead of continuing across
+#' reps. \code{plots} holds every rep's plots back to back.
+#'
+#' @param plots Plot numbers of every rep, rep by rep.
+#' @param grid_cols Columns of each rep's grid.
+#' @param reps Number of reps.
+#' @param planter \code{"serpentine"} or \code{"cartesian"}.
+#' @noRd
+plots_along_grid_by_rep <- function(plots, grid_cols, reps, planter = "serpentine") {
+  chunks <- split_vectors(x = plots, len_cuts = rep(length(plots) / reps, reps))
+  unlist(lapply(chunks, plots_along_grid, ncols = grid_cols, planter = planter))
+}
+
 #' Columns of a field book with coordinates: the identifiers, the
 #' coordinates, then the other columns in their order
 #' @noRd
@@ -407,13 +439,7 @@ generate_vertical_layout <- function(NewBook, plots, n_units, n_Reps, planter) {
         )
       nCols <- max(df$COLUMN)
 
-      df$PLOT <- planter_transform(
-        plots   = plots,
-        planter = planter,
-        reps    = n_Reps,
-        cols    = nCols,
-        units   = NULL
-      )
+      df$PLOT <- plots_along_grid(plots, ncols = nCols, planter = planter)
       layouts[[paste0("vertical_ext_", i)]] <- df
     }
   }
@@ -476,14 +502,8 @@ generate_horizontal_layout <- function(NewBook, plots, n_units, n_Reps, planter)
         )
       nCols <- max(df$COLUMN)
 
-      df$PLOT <- planter_transform(
-        plots   = plots,
-        planter = planter,
-        reps    = n_Reps,
-        cols    = nCols,
-        mode    = "Horizontal",
-        units   = NULL
-      )
+      df$PLOT <- plots_along_grid_by_rep(plots, grid_cols = nCols / n_Reps,
+                                         reps = n_Reps, planter = planter)
       layouts[[paste0("horizontal_ext_", i)]] <- df
     }
   }
@@ -625,13 +645,16 @@ iblock_layouts <- function(x, planter = "serpentine", stacked = "vertical") {
   iBlocks <- n_TrtGen / sizeIblocks
   lapply(location_books(x), function(NewBook) {
     plots <- NewBook$PLOT
-    with_rows <- function(coordinates, order_by = "ROW", mode = NULL, units = NULL) {
+    with_rows <- function(coordinates, order_by = "ROW", per_rep = FALSE, grid_cols = NULL) {
       df <- NewBook |>
         dplyr::mutate(ROW = coordinates$ROW, COLUMN = coordinates$COLUMN)
       if (identical(order_by, "ROW")) df <- df[order(df$ROW, decreasing = FALSE), ]
       if (identical(order_by, "REP")) df <- df[order(df$REP, df$UNIT), ]
-      df$PLOT <- planter_transform(plots = plots, planter = planter, reps = n_Reps,
-                                   cols = max(df$COLUMN), mode = mode, units = units)
+      df$PLOT <- if (per_rep) {
+        plots_along_grid_by_rep(plots, grid_cols = grid_cols, reps = n_Reps, planter = planter)
+      } else {
+        plots_along_grid(plots, ncols = max(df$COLUMN), planter = planter)
+      }
       df
     }
     z <- block_panel_rows(sizeIblocks, n_Reps, iBlocks)
@@ -653,7 +676,10 @@ iblock_layouts <- function(x, planter = "serpentine", stacked = "vertical") {
         if (sizeIblocks %% 2 == 0) list(with_rows(blocks_in_rows))
       )
     } else if (stacked == "horizontal") {
-      horizontal <- function(coordinates) with_rows(coordinates, order_by = NULL, mode = "Horizontal")
+      horizontal <- function(coordinates) {
+        with_rows(coordinates, order_by = NULL, per_rep = TRUE,
+                  grid_cols = max(coordinates$COLUMN) / n_Reps)
+      }
       books <- list(horizontal(data.frame(ROW = rep(rep(1:iBlocks, each = sizeIblocks), n_Reps), COLUMN = z)))
       if (sizeIblocks %% 2 == 0 || sqrt(sizeIblocks) %% 1 == 0) {
         Y <- as.data.frame(factor_subsets(sizeIblocks, all_factors = TRUE)$comb_factors)
@@ -684,7 +710,7 @@ iblock_layouts <- function(x, planter = "serpentine", stacked = "vertical") {
     } else if (stacked == "grid_panel") {
       number_units <- length(levels(as.factor(NewBook$IBLOCK)))
       books <- lapply(panel_grid_coordinates(sizeIblocks, n_Reps, iBlocks), with_rows,
-                      order_by = "REP", mode = "Grid", units = number_units)
+                      order_by = "REP", per_rep = TRUE, grid_cols = number_units)
     }
     lapply(unique(books), layout_columns)
   })
@@ -757,8 +783,7 @@ square_layouts <- function(x, rsRep, csRep, n_Reps, planter, stacked, from_book)
         dplyr::mutate(NewROW = NewROWS1, NewCOLUMNS = NewCOLUMNS1)
       df1 <- df1[order(df1$NewROW, decreasing = FALSE), ]
       nCols <- max(df1$NewCOLUMNS)
-      df1$PLOT <- planter_transform(plots = plots, planter = planter, reps = n_Reps,
-                                    cols = nCols, units = csRep)
+      df1$PLOT <- plots_along_grid(plots, ncols = nCols, planter = planter)
       return(list(df1))
     }
     if (stacked == "horizontal") {
@@ -772,8 +797,8 @@ square_layouts <- function(x, rsRep, csRep, n_Reps, planter, stacked, from_book)
       df2 <- NewBook |>
         dplyr::mutate(NewROW = NewROWS2, NewCOLUMNS = unlist(z))
       nCols <- max(df2$NewCOLUMNS)
-      df2$PLOT <- planter_transform(plots = plots, planter = planter, reps = n_Reps,
-                                    cols = nCols, units = NULL, mode = "horizontal")
+      df2$PLOT <- plots_along_grid_by_rep(plots, grid_cols = nCols / n_Reps,
+                                          reps = n_Reps, planter = planter)
       return(list(df2))
     }
     list()

@@ -181,7 +181,6 @@ test_that("core code selects field-book columns by name, not position", {
     pos("partially_replicated", "reps_data[, 3]",
         "internal REPS-ordered entry-list column, not a field book"),
     pos("paste_by_row", "files_list[[1]]", "list-element access, not a data-frame column"),
-    pos("planter_transform", "rep_breaks[[1]]", "list-element access, not a data-frame column"),
     pos("pREP", "data_rep_treatments[, 1]",
         "internal REPS-ordered entry-list column, not a field book"),
     pos("pREP", "data_rep_treatments[, 3]",
