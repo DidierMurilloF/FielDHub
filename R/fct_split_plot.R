@@ -69,6 +69,12 @@
 #' head(SPDExample2$fieldBook,12)
 #'              
 #'                   
+#' @section Reproducibility:
+#' The result records effective inputs and the resolved seed in
+#' \code{metadata$parameters}. Under the same package versions and RNG
+#' settings, rebuild a result \code{x} with
+#' \code{do.call(split_plot, x$metadata$parameters)}.
+#'
 #' @export
 split_plot <- function(wp = NULL, sp = NULL, reps = NULL, type = 2, l = 1, plotNumber = 101, 
                        seed = NULL, locationNames = NULL, factorLabels = TRUE, 
@@ -227,6 +233,9 @@ split_plot <- function(wp = NULL, sp = NULL, reps = NULL, type = 2, l = 1, plotN
                      id_design = 5)
   output <- list(infoDesign = info.design, layoutlocations = loc.spd.layout, 
               fieldBook = spd_output)
-  output <- new_fieldhub_design(output, "split_plot")
+  reproduction_parameters <- record_design_parameters(
+    environment(), overrides = list(wp = args1[[1]], sp = args1[[2]], type = if (crd) 1 else 2)
+  )
+  output <- new_fieldhub_design(output, "split_plot", parameters = reproduction_parameters)
   return(invisible(output))
 }

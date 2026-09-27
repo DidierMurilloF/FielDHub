@@ -119,6 +119,12 @@
 #' head(prep_deseign2$fieldBook, 10)
 #' }
 #' 
+#' @section Reproducibility:
+#' The result records effective inputs and the resolved seed in
+#' \code{metadata$parameters}. Under the same package versions and RNG
+#' settings, rebuild a result \code{x} with
+#' \code{do.call(partially_replicated, x$metadata$parameters)}.
+#'
 #' @export
 partially_replicated <- function(
     nrows = NULL, 
@@ -175,7 +181,8 @@ partially_replicated <- function(
         }
     }
     
-    if (is.null(data)) {
+    generated_data <- is.null(data)
+    if (generated_data) {
         if (is.null(repGens) || is.null(repUnits)) {
             fieldhub_abort("Input repGens and repUnits are missing.")
         } 
@@ -481,6 +488,9 @@ partially_replicated <- function(
         treatments_with_no_reps = treatments_with_no_reps,
         fieldBook = field_book_with_rep
     )
-    output <- new_fieldhub_design(output, "partially_replicated")
+    reproduction_parameters <- record_design_parameters(
+        environment(), overrides = list(data = if (generated_data) NULL else data)
+    )
+    output <- new_fieldhub_design(output, "partially_replicated", parameters = reproduction_parameters)
     return(invisible(output))
 }

@@ -75,6 +75,14 @@ A list with eight elements.
 \description{
 Unreplicated designs using the sparse allocation approach
 }
+\section{Reproducibility}{
+
+The result records effective inputs and the resolved seed in
+\code{metadata$parameters}. Under the same package versions and RNG
+settings, rebuild a result \code{x} with
+\code{do.call(sparse_allocation, x$metadata$parameters)}.
+}
+
 \examples{
 sparse <- sparse_allocation(
   lines = 120,

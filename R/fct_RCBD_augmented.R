@@ -97,6 +97,12 @@ stack_reps <- function(x_list, repsStack = c("vertical", "horizontal")) {
 #' ARCBD2$plotNumber
 #' head(ARCBD2$fieldBook, 12)
 #'                                        
+#' @section Reproducibility:
+#' The result records effective inputs and the resolved seed in
+#' \code{metadata$parameters}. Under the same package versions and RNG
+#' settings, rebuild a result \code{x} with
+#' \code{do.call(RCBD_augmented, x$metadata$parameters)}.
+#'
 #' @export
 RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1, 
                            planter = "serpentine", plotNumber = 101, 
@@ -171,9 +177,11 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
   excedent <- plots_per_block * b
   Fillers <- excedent - all_genotypes
   
+  recorded_locations <- NULL
   if (!is.null(locationNames)) {
     if (length(locationNames) == l) {
       locationNames <- toupper(locationNames)
+      recorded_locations <- locationNames
     } else {
       warn_default_location_names(locationNames, l, 1:l)
       locationNames <- 1:l
@@ -195,7 +203,8 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
   # -----------------------------
   # NEW: infer within-block dims + block grid (vertical or side-by-side)
   # -----------------------------
-  if (is.null(nrows) || is.null(ncols)) {
+  automatic_dimensions <- is.null(nrows) || is.null(ncols)
+  if (automatic_dimensions) {
     nrows_within_block <- 1
     ncols_within_block <- plots_per_block
     blocks_per_col <- b
@@ -566,7 +575,11 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
     fieldBook = fieldbook
   )
   
-  output <- new_fieldhub_design(output, "rcbd_augmented")
+  reproduction_parameters <- record_design_parameters(
+    environment(), overrides = list(ncols = if (automatic_dimensions) NULL else field_cols,
+                                    locationNames = recorded_locations)
+  )
+  output <- new_fieldhub_design(output, "rcbd_augmented", parameters = reproduction_parameters)
   return(invisible(output))
 }
 

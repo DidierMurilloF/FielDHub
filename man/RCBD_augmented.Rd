@@ -71,6 +71,14 @@ A list with five elements.
 \description{
 It randomly generates an augmented randomized complete block design across locations (ARCBD).
 }
+\section{Reproducibility}{
+
+The result records effective inputs and the resolved seed in
+\code{metadata$parameters}. Under the same package versions and RNG
+settings, rebuild a result \code{x} with
+\code{do.call(RCBD_augmented, x$metadata$parameters)}.
+}
+
 \examples{
 # Example 1: Generates an ARCBD with 6 blocks, 3 checks for each, and 50 treatments 
 # in two locations.

@@ -50,6 +50,12 @@
 #'   locationNames = c("LOC1", "LOC2", "LOC3", "LOC4"),
 #'   seed = 1234
 #' )
+#' @section Reproducibility:
+#' The result records effective inputs and the resolved seed in
+#' \code{metadata$parameters}. Under the same package versions and RNG
+#' settings, rebuild a result \code{x} with
+#' \code{do.call(sparse_allocation, x$metadata$parameters)}.
+#'
 #' @export
 sparse_allocation <- function(
     lines,
@@ -179,6 +185,7 @@ sparse_allocation <- function(
         allocation = unrep$allocation,
         size_locations = unrep$size_locations
     )
-    output <- new_fieldhub_design(output, "sparse_allocation")
+    reproduction_parameters <- record_design_parameters(environment())
+    output <- new_fieldhub_design(output, "sparse_allocation", parameters = reproduction_parameters)
     return(invisible(output))
 }

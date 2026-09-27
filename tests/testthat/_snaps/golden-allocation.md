@@ -477,7 +477,7 @@
                 "names": {
                   "type": "character",
                   "attributes": {},
-                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                  "value": ["design", "schema_version", "seed", "rng_kind", "parameters"]
                 }
               },
               "value": [
@@ -500,6 +500,99 @@
                   "type": "character",
                   "attributes": {},
                   "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                },
+                {
+                  "type": "list",
+                  "attributes": {
+                    "names": {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["nrows", "ncols", "repGens", "repUnits", "planter", "l", "plotNumber", "spread_reps", "seed", "exptName", "locationNames", "multiLocationData", "dist_method", "border_penalization", "data", "allow_fillers", "year"]
+                    }
+                  },
+                  "value": [
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [8]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [8]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [50, 7]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [1, 2]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["cartesian"]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [1]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [101]
+                    },
+                    {
+                      "type": "logical",
+                      "attributes": {},
+                      "value": [true]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [32]
+                    },
+                    {
+                      "type": "NULL"
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["LOC1"]
+                    },
+                    {
+                      "type": "logical",
+                      "attributes": {},
+                      "value": [false]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["euclidean"]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [0.5]
+                    },
+                    {
+                      "type": "NULL"
+                    },
+                    {
+                      "type": "logical",
+                      "attributes": {},
+                      "value": [false]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["2026"]
+                    }
+                  ]
                 }
               ]
             }
@@ -987,7 +1080,7 @@
                 "names": {
                   "type": "character",
                   "attributes": {},
-                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                  "value": ["design", "schema_version", "seed", "rng_kind", "parameters"]
                 }
               },
               "value": [
@@ -1010,6 +1103,99 @@
                   "type": "character",
                   "attributes": {},
                   "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                },
+                {
+                  "type": "list",
+                  "attributes": {
+                    "names": {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["nrows", "ncols", "repGens", "repUnits", "planter", "l", "plotNumber", "spread_reps", "seed", "exptName", "locationNames", "multiLocationData", "dist_method", "border_penalization", "data", "allow_fillers", "year"]
+                    }
+                  },
+                  "value": [
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [9]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [8]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [50, 7]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [1, 2]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["serpentine"]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [1]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [101]
+                    },
+                    {
+                      "type": "logical",
+                      "attributes": {},
+                      "value": [true]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [33]
+                    },
+                    {
+                      "type": "NULL"
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["LOC1"]
+                    },
+                    {
+                      "type": "logical",
+                      "attributes": {},
+                      "value": [false]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["euclidean"]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [0.5]
+                    },
+                    {
+                      "type": "NULL"
+                    },
+                    {
+                      "type": "logical",
+                      "attributes": {},
+                      "value": [true]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["2026"]
+                    }
+                  ]
                 }
               ]
             }
@@ -2160,7 +2346,7 @@
                 "names": {
                   "type": "character",
                   "attributes": {},
-                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                  "value": ["design", "schema_version", "seed", "rng_kind", "parameters"]
                 }
               },
               "value": [
@@ -2183,6 +2369,99 @@
                   "type": "character",
                   "attributes": {},
                   "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                },
+                {
+                  "type": "list",
+                  "attributes": {
+                    "names": {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["lines", "nrows", "ncols", "l", "planter", "plotNumber", "copies_per_entry", "checks", "rep_checks", "exptName", "locationNames", "seed", "spread_reps", "data", "allow_fillers", "max_fillers", "year"]
+                    }
+                  },
+                  "value": [
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [80]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [9, 9, 9, 9]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [12, 12, 12, 12]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [4]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["serpentine"]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [1, 1001, 2001, 3001]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [5]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [2]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [4, 4]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["PrepExpt"]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["LOC1", "LOC2", "LOC3", "LOC4"]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [34]
+                    },
+                    {
+                      "type": "logical",
+                      "attributes": {},
+                      "value": [true]
+                    },
+                    {
+                      "type": "NULL"
+                    },
+                    {
+                      "type": "logical",
+                      "attributes": {},
+                      "value": [true]
+                    },
+                    {
+                      "type": "NULL"
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["2026"]
+                    }
+                  ]
                 }
               ]
             }
@@ -2965,7 +3244,7 @@
                 "names": {
                   "type": "character",
                   "attributes": {},
-                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                  "value": ["design", "schema_version", "seed", "rng_kind", "parameters"]
                 }
               },
               "value": [
@@ -2988,6 +3267,84 @@
                   "type": "character",
                   "attributes": {},
                   "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                },
+                {
+                  "type": "list",
+                  "attributes": {
+                    "names": {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["lines", "nrows", "ncols", "l", "planter", "plotNumber", "copies_per_entry", "checks", "exptName", "locationNames", "seed", "data", "year", "checksPercent"]
+                    }
+                  },
+                  "value": [
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [120]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [10]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [10]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [4]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["serpentine"]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [1, 1001, 2001, 3001]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [3]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [4]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["SparseExpt"]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["LOC1", "LOC2", "LOC3", "LOC4"]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [35]
+                    },
+                    {
+                      "type": "NULL"
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["2026"]
+                    },
+                    {
+                      "type": "NULL"
+                    }
+                  ]
                 }
               ]
             }
@@ -3856,7 +4213,7 @@
                 "names": {
                   "type": "character",
                   "attributes": {},
-                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                  "value": ["design", "schema_version", "seed", "rng_kind", "parameters"]
                 }
               },
               "value": [
@@ -3879,6 +4236,65 @@
                   "type": "character",
                   "attributes": {},
                   "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                },
+                {
+                  "type": "list",
+                  "attributes": {
+                    "names": {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["l", "data", "seed"]
+                    }
+                  },
+                  "value": [
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [3]
+                    },
+                    {
+                      "type": "list",
+                      "attributes": {
+                        "names": {
+                          "type": "character",
+                          "attributes": {},
+                          "value": ["ENTRY", "NAME", "FAMILY"]
+                        },
+                        "class": {
+                          "type": "character",
+                          "attributes": {},
+                          "value": ["data.frame"]
+                        },
+                        "row.names": {
+                          "type": "integer",
+                          "attributes": {},
+                          "value": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60]
+                        }
+                      },
+                      "value": [
+                        {
+                          "type": "integer",
+                          "attributes": {},
+                          "value": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60]
+                        },
+                        {
+                          "type": "character",
+                          "attributes": {},
+                          "value": ["SB-1", "SB-2", "SB-3", "SB-4", "SB-5", "SB-6", "SB-7", "SB-8", "SB-9", "SB-10", "SB-11", "SB-12", "SB-13", "SB-14", "SB-15", "SB-16", "SB-17", "SB-18", "SB-19", "SB-20", "SB-21", "SB-22", "SB-23", "SB-24", "SB-25", "SB-26", "SB-27", "SB-28", "SB-29", "SB-30", "SB-31", "SB-32", "SB-33", "SB-34", "SB-35", "SB-36", "SB-37", "SB-38", "SB-39", "SB-40", "SB-41", "SB-42", "SB-43", "SB-44", "SB-45", "SB-46", "SB-47", "SB-48", "SB-49", "SB-50", "SB-51", "SB-52", "SB-53", "SB-54", "SB-55", "SB-56", "SB-57", "SB-58", "SB-59", "SB-60"]
+                        },
+                        {
+                          "type": "integer",
+                          "attributes": {},
+                          "value": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [38]
+                    }
+                  ]
                 }
               ]
             }

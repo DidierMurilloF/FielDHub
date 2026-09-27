@@ -51,6 +51,12 @@
 #' summary(split_population)
 #' head(split_population$data_locations,12)
 #'
+#' @section Reproducibility:
+#' The result records effective inputs and the resolved seed in
+#' \code{metadata$parameters}. Under the same package versions and RNG
+#' settings, rebuild a result \code{x} with
+#' \code{do.call(split_families, x$metadata$parameters)}.
+#'
 #' @export
 split_families <- function(l = NULL, data = NULL, seed = NULL) {
   validate_locations(l)
@@ -127,6 +133,7 @@ split_families <- function(l = NULL, data = NULL, seed = NULL) {
   data_locations$LOCATION <- rep(paste("Location", 1:l), rowseach)
   output <- list(rowsEachlist = rowsEachlist, data_locations = data_locations,
                  infoDesign = list(id_design = 17, seed = seed))
-  output <- new_fieldhub_design(output, "split_families")
+  reproduction_parameters <- record_design_parameters(environment())
+  output <- new_fieldhub_design(output, "split_families", parameters = reproduction_parameters)
   return(invisible(output))
 }

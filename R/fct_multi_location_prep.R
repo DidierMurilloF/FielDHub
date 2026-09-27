@@ -84,6 +84,12 @@
 #' field_book <- optim_multi_prep$fieldBook
 #' head(subset(field_book, LOCATION == "LOC1"), 10)
 #' }
+#' @section Reproducibility:
+#' The result records effective inputs and the resolved seed in
+#' \code{metadata$parameters}. Under the same package versions and RNG
+#' settings, rebuild a result \code{x} with
+#' \code{do.call(multi_location_prep, x$metadata$parameters)}.
+#'
 #' @export
 multi_location_prep <- function(
     lines,
@@ -239,6 +245,7 @@ multi_location_prep <- function(
         allocation = preps$allocation,
         size_locations = preps$size_locations
     )
-    output <- new_fieldhub_design(output, "multi_location_prep")
+    reproduction_parameters <- record_design_parameters(environment())
+    output <- new_fieldhub_design(output, "multi_location_prep", parameters = reproduction_parameters)
     return(invisible(output))
 }

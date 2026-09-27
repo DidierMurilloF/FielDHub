@@ -68,6 +68,14 @@ Randomly generates a spatial un-replicated optimized arrangement design, where t
 between checks is maximized in such a way that each row and column have control plots.
 Note that design generation needs the dimension of the field (number of rows and columns).
 }
+\section{Reproducibility}{
+
+The result records effective inputs and the resolved seed in
+\code{metadata$parameters}. Under the same package versions and RNG
+settings, rebuild a result \code{x} with
+\code{do.call(optimized_arrangement, x$metadata$parameters)}.
+}
+
 \examples{
 # Example 1: Generates a spatial unreplicated optimized arrangement design in one location
 # with 120 genotypes + 20 check plots (4 checks) for a field with dimension 14 rows x 10 cols.

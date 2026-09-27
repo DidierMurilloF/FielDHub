@@ -50,6 +50,14 @@ a \code{fieldhub_search_error} with the square number and iteration limit.
 No incomplete design is returned; try a different seed. Designs completed
 within the limit retain their existing seeded output.
 }
+\section{Reproducibility}{
+
+The result records effective inputs and the resolved seed in
+\code{metadata$parameters}. Under the same package versions and RNG
+settings, rebuild a result \code{x} with
+\code{do.call(latin_square, x$metadata$parameters)}.
+}
+
 \examples{
 # Example 1: Generates a latin square design with 4 treatments and 2 reps.
 latinSq1 <- latin_square(t = 4,

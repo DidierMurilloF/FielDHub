@@ -71,6 +71,12 @@
 #' fullFact2$infoDesign
 #' head(fullFact2$fieldBook,10)
 #'
+#' @section Reproducibility:
+#' The result records effective inputs and the resolved seed in
+#' \code{metadata$parameters}. Under the same package versions and RNG
+#' settings, rebuild a result \code{x} with
+#' \code{do.call(full_factorial, x$metadata$parameters)}.
+#'
 #' @export
 full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
                            type = 2, plotNumber = 101, continuous = FALSE,
@@ -94,7 +100,8 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
     warn_default_plot_numbers(plotNumber, l, default_plots)
     plotNumber <- default_plots
   }
-  if (is.null(data)) {
+  generated_data <- is.null(data)
+  if (generated_data) {
     if(!is.null(setfactors)) {
       if(is.numeric(setfactors)) {
         if (length(setfactors) < 2) fieldhub_abort("More than one factor needs to be specified.")
@@ -212,6 +219,9 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
     seed = seed,
     id_design = 4)
   output <- list(infoDesign = fullfactorial, fieldBook = design_output)
-  output <- new_fieldhub_design(output, "full_factorial")
+  reproduction_parameters <- record_design_parameters(
+    environment(), overrides = list(data = if (generated_data) NULL else data)
+  )
+  output <- new_fieldhub_design(output, "full_factorial", parameters = reproduction_parameters)
   return(invisible(output))
 }

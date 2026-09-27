@@ -94,6 +94,12 @@
 #' head(optim_unrep2$fieldBook,12)
 #' }
 #'                   
+#' @section Reproducibility:
+#' The result records effective inputs and the resolved seed in
+#' \code{metadata$parameters}. Under the same package versions and RNG
+#' settings, rebuild a result \code{x} with
+#' \code{do.call(optimized_arrangement, x$metadata$parameters)}.
+#'
 #' @export
 optimized_arrangement <- function(
     nrows = NULL, 
@@ -146,7 +152,9 @@ optimized_arrangement <- function(
         }
     } 
     
+    recorded_checks <- NULL
     if(is.null(data)) {
+        recorded_checks <- checks
         if (length(checks) == 1 && checks > 1) {
             checksEntries <- 1:checks
             checks <- checks
@@ -372,6 +380,9 @@ optimized_arrangement <- function(
         genEntries = genEntries,
         fieldBook = field_book
     )
-    output <- new_fieldhub_design(output, "optimized_arrangement")
+    reproduction_parameters <- record_design_parameters(
+        environment(), overrides = list(checks = recorded_checks)
+    )
+    output <- new_fieldhub_design(output, "optimized_arrangement", parameters = reproduction_parameters)
     return(invisible(output))
 }

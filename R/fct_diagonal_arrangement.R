@@ -123,6 +123,12 @@
 #' spatAB$plotsNumber
 #' head(spatAB$fieldBook,12)
 #' 
+#' @section Reproducibility:
+#' The result records effective inputs and the resolved seed in
+#' \code{metadata$parameters}. Under the same package versions and RNG
+#' settings, rebuild a result \code{x} with
+#' \code{do.call(diagonal_arrangement, x$metadata$parameters)}.
+#'
 #' @export
 diagonal_arrangement <- function(
     nrows = NULL, 
@@ -188,6 +194,7 @@ diagonal_arrangement <- function(
         }
     }
     
+    starting_plots <- plotNumber
     if (kindExpt == "SUDC") {
         if (!is.null(l)) {
         if (is.null(plotNumber) || length(plotNumber) != l) {
@@ -272,6 +279,7 @@ diagonal_arrangement <- function(
     percentChecks_vector <- vector(mode = "numeric", length = l)
     seed <- resolve_seed(seed, default = function() sample.int(100000, 1))
     local_design_seed(seed)
+    uses_default_percent <- TRUE
     for (sites in 1:l) {
         checks_percentages <- available_percent(
             n_rows = nrows, 
@@ -378,6 +386,8 @@ diagonal_arrangement <- function(
             }
             selected_percent <- options_percent[match_percent[1]]
         }
+        uses_default_percent <- uses_default_percent &&
+            identical(selected_percent, as.numeric(percent_col[len]))
         rand_checks <- random_checks(
             dt = checks_percentages$dt, 
             d_checks = checks_percentages$d_checks, 
@@ -649,7 +659,11 @@ diagonal_arrangement <- function(
         fieldBook = field_book
     )
     
-    output <- new_fieldhub_design(output, "diagonal_arrangement")
+    reproduction_parameters <- record_design_parameters(
+        environment(), overrides = list(plotNumber = starting_plots,
+                                         checksPercent = if (uses_default_percent) NULL else checksPercent)
+    )
+    output <- new_fieldhub_design(output, "diagonal_arrangement", parameters = reproduction_parameters)
     return(invisible(output))
 }
 

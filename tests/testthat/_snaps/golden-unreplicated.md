@@ -291,7 +291,7 @@
                 "names": {
                   "type": "character",
                   "attributes": {},
-                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                  "value": ["design", "schema_version", "seed", "rng_kind", "parameters"]
                 }
               },
               "value": [
@@ -314,6 +314,100 @@
                   "type": "character",
                   "attributes": {},
                   "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                },
+                {
+                  "type": "list",
+                  "attributes": {
+                    "names": {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["nrows", "ncols", "lines", "checks", "planter", "l", "plotNumber", "kindExpt", "splitBy", "seed", "blocks", "exptName", "locationNames", "multiLocationData", "data", "year", "checksPercent", "sameEntries"]
+                    }
+                  },
+                  "value": [
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [15]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [20]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [270]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [4]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["serpentine"]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [1]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [101]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["SUDC"]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["row"]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [24]
+                    },
+                    {
+                      "type": "NULL"
+                    },
+                    {
+                      "type": "NULL"
+                    },
+                    {
+                      "type": "integer",
+                      "attributes": {},
+                      "value": [1]
+                    },
+                    {
+                      "type": "logical",
+                      "attributes": {},
+                      "value": [false]
+                    },
+                    {
+                      "type": "NULL"
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["2026"]
+                    },
+                    {
+                      "type": "NULL"
+                    },
+                    {
+                      "type": "logical",
+                      "attributes": {},
+                      "value": [false]
+                    }
+                  ]
                 }
               ]
             }
@@ -615,7 +709,7 @@
                 "names": {
                   "type": "character",
                   "attributes": {},
-                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                  "value": ["design", "schema_version", "seed", "rng_kind", "parameters"]
                 }
               },
               "value": [
@@ -638,6 +732,100 @@
                   "type": "character",
                   "attributes": {},
                   "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                },
+                {
+                  "type": "list",
+                  "attributes": {
+                    "names": {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["nrows", "ncols", "lines", "checks", "planter", "l", "plotNumber", "kindExpt", "splitBy", "seed", "blocks", "exptName", "locationNames", "multiLocationData", "data", "year", "checksPercent", "sameEntries"]
+                    }
+                  },
+                  "value": [
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [10]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [32]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [287]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [4]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["cartesian"]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [1]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [101]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["SUDC"]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["row"]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [25]
+                    },
+                    {
+                      "type": "NULL"
+                    },
+                    {
+                      "type": "NULL"
+                    },
+                    {
+                      "type": "integer",
+                      "attributes": {},
+                      "value": [1]
+                    },
+                    {
+                      "type": "logical",
+                      "attributes": {},
+                      "value": [false]
+                    },
+                    {
+                      "type": "NULL"
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["2026"]
+                    },
+                    {
+                      "type": "NULL"
+                    },
+                    {
+                      "type": "logical",
+                      "attributes": {},
+                      "value": [false]
+                    }
+                  ]
                 }
               ]
             }
@@ -944,7 +1132,7 @@
                 "names": {
                   "type": "character",
                   "attributes": {},
-                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                  "value": ["design", "schema_version", "seed", "rng_kind", "parameters"]
                 }
               },
               "value": [
@@ -967,6 +1155,102 @@
                   "type": "character",
                   "attributes": {},
                   "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                },
+                {
+                  "type": "list",
+                  "attributes": {
+                    "names": {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["nrows", "ncols", "lines", "checks", "planter", "l", "plotNumber", "kindExpt", "splitBy", "seed", "blocks", "exptName", "locationNames", "multiLocationData", "data", "year", "checksPercent", "sameEntries"]
+                    }
+                  },
+                  "value": [
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [30]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [26]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [720]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [5]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["serpentine"]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [1]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [1]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["DBUDC"]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["row"]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [26]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [150, 155, 95, 200, 120]
+                    },
+                    {
+                      "type": "NULL"
+                    },
+                    {
+                      "type": "integer",
+                      "attributes": {},
+                      "value": [1]
+                    },
+                    {
+                      "type": "logical",
+                      "attributes": {},
+                      "value": [false]
+                    },
+                    {
+                      "type": "NULL"
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["2026"]
+                    },
+                    {
+                      "type": "NULL"
+                    },
+                    {
+                      "type": "logical",
+                      "attributes": {},
+                      "value": [false]
+                    }
+                  ]
                 }
               ]
             }
@@ -1273,7 +1557,7 @@
                 "names": {
                   "type": "character",
                   "attributes": {},
-                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                  "value": ["design", "schema_version", "seed", "rng_kind", "parameters"]
                 }
               },
               "value": [
@@ -1296,6 +1580,102 @@
                   "type": "character",
                   "attributes": {},
                   "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                },
+                {
+                  "type": "list",
+                  "attributes": {
+                    "names": {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["nrows", "ncols", "lines", "checks", "planter", "l", "plotNumber", "kindExpt", "splitBy", "seed", "blocks", "exptName", "locationNames", "multiLocationData", "data", "year", "checksPercent", "sameEntries"]
+                    }
+                  },
+                  "value": [
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [20]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [25]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [400]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [4]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["serpentine"]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [1]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [1]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["DBUDC"]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["column"]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [27]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [40, 40, 40, 40, 40, 40, 40, 40, 40, 40]
+                    },
+                    {
+                      "type": "NULL"
+                    },
+                    {
+                      "type": "integer",
+                      "attributes": {},
+                      "value": [1]
+                    },
+                    {
+                      "type": "logical",
+                      "attributes": {},
+                      "value": [false]
+                    },
+                    {
+                      "type": "NULL"
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["2026"]
+                    },
+                    {
+                      "type": "NULL"
+                    },
+                    {
+                      "type": "logical",
+                      "attributes": {},
+                      "value": [true]
+                    }
+                  ]
                 }
               ]
             }
@@ -1602,7 +1982,7 @@
                 "names": {
                   "type": "character",
                   "attributes": {},
-                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                  "value": ["design", "schema_version", "seed", "rng_kind", "parameters"]
                 }
               },
               "value": [
@@ -1625,6 +2005,84 @@
                   "type": "character",
                   "attributes": {},
                   "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                },
+                {
+                  "type": "list",
+                  "attributes": {
+                    "names": {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["nrows", "ncols", "lines", "amountChecks", "checks", "planter", "l", "plotNumber", "seed", "exptName", "locationNames", "spread_reps", "data", "year"]
+                    }
+                  },
+                  "value": [
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [12]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [10]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [100]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [20]
+                    },
+                    {
+                      "type": "integer",
+                      "attributes": {},
+                      "value": [1, 2, 3, 4, 5]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["serpentine"]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [1]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [101]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [28]
+                    },
+                    {
+                      "type": "NULL"
+                    },
+                    {
+                      "type": "integer",
+                      "attributes": {},
+                      "value": [1]
+                    },
+                    {
+                      "type": "logical",
+                      "attributes": {},
+                      "value": [true]
+                    },
+                    {
+                      "type": "NULL"
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["2026"]
+                    }
+                  ]
                 }
               ]
             }
@@ -2194,7 +2652,7 @@
                 "names": {
                   "type": "character",
                   "attributes": {},
-                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                  "value": ["design", "schema_version", "seed", "rng_kind", "parameters"]
                 }
               },
               "value": [
@@ -2217,6 +2675,119 @@
                   "type": "character",
                   "attributes": {},
                   "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                },
+                {
+                  "type": "list",
+                  "attributes": {
+                    "names": {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["lines", "checks", "b", "l", "planter", "plotNumber", "repsStack", "exptName", "seed", "locationNames", "repsExpt", "random", "data", "nrows", "ncols", "year"]
+                    }
+                  },
+                  "value": [
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [50]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [3]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [5]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [1]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["serpentine"]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [101]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["vertical"]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["Expt1"]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [29]
+                    },
+                    {
+                      "type": "NULL"
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [1]
+                    },
+                    {
+                      "type": "logical",
+                      "attributes": {},
+                      "value": [true]
+                    },
+                    {
+                      "type": "list",
+                      "attributes": {
+                        "names": {
+                          "type": "character",
+                          "attributes": {},
+                          "value": ["ENTRY", "NAME"]
+                        },
+                        "class": {
+                          "type": "character",
+                          "attributes": {},
+                          "value": ["data.frame"]
+                        },
+                        "row.names": {
+                          "type": "integer",
+                          "attributes": {},
+                          "value": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53]
+                        }
+                      },
+                      "value": [
+                        {
+                          "type": "integer",
+                          "attributes": {},
+                          "value": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53]
+                        },
+                        {
+                          "type": "character",
+                          "attributes": {},
+                          "value": ["CH1", "CH2", "CH3", "G4", "G5", "G6", "G7", "G8", "G9", "G10", "G11", "G12", "G13", "G14", "G15", "G16", "G17", "G18", "G19", "G20", "G21", "G22", "G23", "G24", "G25", "G26", "G27", "G28", "G29", "G30", "G31", "G32", "G33", "G34", "G35", "G36", "G37", "G38", "G39", "G40", "G41", "G42", "G43", "G44", "G45", "G46", "G47", "G48", "G49", "G50", "G51", "G52", "G53"]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "NULL"
+                    },
+                    {
+                      "type": "NULL"
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["2026"]
+                    }
+                  ]
                 }
               ]
             }
@@ -3026,7 +3597,7 @@
                 "names": {
                   "type": "character",
                   "attributes": {},
-                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                  "value": ["design", "schema_version", "seed", "rng_kind", "parameters"]
                 }
               },
               "value": [
@@ -3049,6 +3620,123 @@
                   "type": "character",
                   "attributes": {},
                   "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                },
+                {
+                  "type": "list",
+                  "attributes": {
+                    "names": {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["lines", "checks", "b", "l", "planter", "plotNumber", "repsStack", "exptName", "seed", "locationNames", "repsExpt", "random", "data", "nrows", "ncols", "year"]
+                    }
+                  },
+                  "value": [
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [122]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [4]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [5]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [1]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["serpentine"]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [101]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["vertical"]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["Expt1"]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [30]
+                    },
+                    {
+                      "type": "NULL"
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [1]
+                    },
+                    {
+                      "type": "logical",
+                      "attributes": {},
+                      "value": [false]
+                    },
+                    {
+                      "type": "list",
+                      "attributes": {
+                        "names": {
+                          "type": "character",
+                          "attributes": {},
+                          "value": ["ENTRY", "NAME"]
+                        },
+                        "class": {
+                          "type": "character",
+                          "attributes": {},
+                          "value": ["data.frame"]
+                        },
+                        "row.names": {
+                          "type": "integer",
+                          "attributes": {},
+                          "value": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126]
+                        }
+                      },
+                      "value": [
+                        {
+                          "type": "integer",
+                          "attributes": {},
+                          "value": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126]
+                        },
+                        {
+                          "type": "character",
+                          "attributes": {},
+                          "value": ["CH1", "CH2", "CH3", "CH4", "G5", "G6", "G7", "G8", "G9", "G10", "G11", "G12", "G13", "G14", "G15", "G16", "G17", "G18", "G19", "G20", "G21", "G22", "G23", "G24", "G25", "G26", "G27", "G28", "G29", "G30", "G31", "G32", "G33", "G34", "G35", "G36", "G37", "G38", "G39", "G40", "G41", "G42", "G43", "G44", "G45", "G46", "G47", "G48", "G49", "G50", "G51", "G52", "G53", "G54", "G55", "G56", "G57", "G58", "G59", "G60", "G61", "G62", "G63", "G64", "G65", "G66", "G67", "G68", "G69", "G70", "G71", "G72", "G73", "G74", "G75", "G76", "G77", "G78", "G79", "G80", "G81", "G82", "G83", "G84", "G85", "G86", "G87", "G88", "G89", "G90", "G91", "G92", "G93", "G94", "G95", "G96", "G97", "G98", "G99", "G100", "G101", "G102", "G103", "G104", "G105", "G106", "G107", "G108", "G109", "G110", "G111", "G112", "G113", "G114", "G115", "G116", "G117", "G118", "G119", "G120", "G121", "G122", "G123", "G124", "G125", "G126"]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [5]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [29]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["2026"]
+                    }
+                  ]
                 }
               ]
             }
@@ -3817,7 +4505,7 @@
                 "names": {
                   "type": "character",
                   "attributes": {},
-                  "value": ["design", "schema_version", "seed", "rng_kind"]
+                  "value": ["design", "schema_version", "seed", "rng_kind", "parameters"]
                 }
               },
               "value": [
@@ -3840,6 +4528,121 @@
                   "type": "character",
                   "attributes": {},
                   "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                },
+                {
+                  "type": "list",
+                  "attributes": {
+                    "names": {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["lines", "checks", "b", "l", "planter", "plotNumber", "repsStack", "exptName", "seed", "locationNames", "repsExpt", "random", "data", "nrows", "ncols", "year"]
+                    }
+                  },
+                  "value": [
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [40]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [4]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [4]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [2]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["serpentine"]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [1, 101]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["vertical"]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["Expt1"]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [31]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["A", "B"]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [1]
+                    },
+                    {
+                      "type": "logical",
+                      "attributes": {},
+                      "value": [true]
+                    },
+                    {
+                      "type": "list",
+                      "attributes": {
+                        "names": {
+                          "type": "character",
+                          "attributes": {},
+                          "value": ["ENTRY", "NAME"]
+                        },
+                        "class": {
+                          "type": "character",
+                          "attributes": {},
+                          "value": ["data.frame"]
+                        },
+                        "row.names": {
+                          "type": "integer",
+                          "attributes": {},
+                          "value": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44]
+                        }
+                      },
+                      "value": [
+                        {
+                          "type": "integer",
+                          "attributes": {},
+                          "value": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44]
+                        },
+                        {
+                          "type": "character",
+                          "attributes": {},
+                          "value": ["CH1", "CH2", "CH3", "CH4", "G5", "G6", "G7", "G8", "G9", "G10", "G11", "G12", "G13", "G14", "G15", "G16", "G17", "G18", "G19", "G20", "G21", "G22", "G23", "G24", "G25", "G26", "G27", "G28", "G29", "G30", "G31", "G32", "G33", "G34", "G35", "G36", "G37", "G38", "G39", "G40", "G41", "G42", "G43", "G44"]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "NULL"
+                    },
+                    {
+                      "type": "NULL"
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["2026"]
+                    }
+                  ]
                 }
               ]
             }

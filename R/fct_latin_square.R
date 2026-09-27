@@ -69,6 +69,12 @@
 #' latinSq2$plotSquares
 #' head(latinSq2$fieldBook)
 #'
+#' @section Reproducibility:
+#' The result records effective inputs and the resolved seed in
+#' \code{metadata$parameters}. Under the same package versions and RNG
+#' settings, rebuild a result \code{x} with
+#' \code{do.call(latin_square, x$metadata$parameters)}.
+#'
 #' @export
 latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpentine",
                          seed = NULL, locationNames = NULL, data = NULL) {
@@ -198,7 +204,8 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
   )
   output <- list(infoDesign =  parameters, squares = lsd.reps,
                  plotSquares = plotSquares, fieldBook = latin_design)
-  output <- new_fieldhub_design(output, "latin_square")
+  reproduction_parameters <- record_design_parameters(environment())
+  output <- new_fieldhub_design(output, "latin_square", parameters = reproduction_parameters)
   return(invisible(output))
 }
 

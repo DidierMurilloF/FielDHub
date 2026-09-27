@@ -84,6 +84,12 @@
 #' strip2$plotLayouts
 #' head(strip2$fieldBook, 12)
 #'
+#' @section Reproducibility:
+#' The result records effective inputs and the resolved seed in
+#' \code{metadata$parameters}. Under the same package versions and RNG
+#' settings, rebuild a result \code{x} with
+#' \code{do.call(strip_plot, x$metadata$parameters)}.
+#'
 #' @export
 strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = NULL,
                        planter = "serpentine", locationNames = NULL, seed = NULL,
@@ -252,6 +258,9 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
                      nameLocations = locationNames, seed = seed, id_design = 7)
   output <- list(infoDesign = infoDesign, stripsBlockLoc = strips.b.loc,
                  plotLayouts = NEW_PLOTS, fieldBook = stripDesig_output)
-  output <- new_fieldhub_design(output, "strip_plot")
+  reproduction_parameters <- record_design_parameters(
+    environment(), overrides = list(reps = b), exclude = "b"
+  )
+  output <- new_fieldhub_design(output, "strip_plot", parameters = reproduction_parameters)
   return(invisible(output))
 }

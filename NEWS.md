@@ -104,6 +104,13 @@
 
 ### Enhancements:
 
+- All field-design and family-allocation engines now record their replay
+  inputs in `metadata$parameters`, completing this support beyond CRD,
+  RCBD and incomplete-block designs. Recording preserves split-plot labels,
+  generated versus supplied factorial data, original diagonal plot starts,
+  augmented field dimensions, custom check entry numbers and the resolved
+  year. Existing seeded scientific results are unchanged.
+
 - Incomplete-block, alpha, square and rectangular lattice, and row-column
   results now include effective inputs in `metadata$parameters`. Replay
   uses the canonical `reps` argument without deprecation warnings and

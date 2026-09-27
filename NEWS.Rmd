@@ -61,6 +61,8 @@ knitr::opts_chunk$set(
 
 ### Enhancements:
 
+* All field-design and family-allocation engines now record their replay inputs in `metadata$parameters`, completing this support beyond CRD, RCBD and incomplete-block designs. Recording preserves split-plot labels, generated versus supplied factorial data, original diagonal plot starts, augmented field dimensions, custom check entry numbers and the resolved year. Existing seeded scientific results are unchanged.
+
 - Incomplete-block, alpha, square and rectangular lattice, and row-column results now include effective inputs in `metadata$parameters`. Replay uses the canonical `reps` argument without deprecation warnings and preserves the existing treatment labels and default location types.
 
 * `CRD()` and `RCBD()` now record effective inputs, defaults and the resolved seed in `metadata$parameters`, enabling reconstruction with `do.call()` under the same software and RNG settings. RCBD saves starting plot numbers before expanding them by block, and CRD records the canonical location argument. Recording occurs after design generation, preserving the existing scientific calculation and seeded outputs; older metadata without parameter lists remains supported.

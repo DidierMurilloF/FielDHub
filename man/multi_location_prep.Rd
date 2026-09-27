@@ -100,6 +100,14 @@ A list of class \code{FielDHub} with several elements.
 \description{
 Optimized multi-location partially replicated design
 }
+\section{Reproducibility}{
+
+The result records effective inputs and the resolved seed in
+\code{metadata$parameters}. Under the same package versions and RNG
+settings, rebuild a result \code{x} with
+\code{do.call(multi_location_prep, x$metadata$parameters)}.
+}
+
 \examples{
 # Example 1: Generates a spatially optimized multi-location p-rep design with 142
 # genotypes. The number of copies per plant available for this experiment is 9.

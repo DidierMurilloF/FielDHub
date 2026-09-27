@@ -35,6 +35,14 @@ To reproduce an allocation previously made with
 \code{split_families(l, data, seed = s)}. Omitting \code{seed} now selects
 and records an automatic seed instead of consuming the caller's stream.
 }
+\section{Reproducibility}{
+
+The result records effective inputs and the resolved seed in
+\code{metadata$parameters}. Under the same package versions and RNG
+settings, rebuild a result \code{x} with
+\code{do.call(split_families, x$metadata$parameters)}.
+}
+
 \examples{
 # Example 1: Split a population of 3000 and 200 families into 8 locations. 
 # Original dataset is been simulated.
