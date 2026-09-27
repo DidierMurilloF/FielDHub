@@ -417,9 +417,10 @@ mod_IBD_server <- function(id) {
     })
     
     
-    valsIBD <- shiny::reactiveValues(maxV.ibd = NULL,
-                              minV.ibd = NULL, 
-                              trail.ibd = NULL)
+    simulation_settings <- app_simulation_controls(input, session,
+      ids = c(trait = "trailsIBD", other = "OtherIBD", minimum = "min.ibd", maximum = "max.ibd", submit = "ok.ibd"),
+      field_book = function() reactive_layoutIBD()$allSitesFieldbook
+    )
     
     simuModal.ibd <- function(failed = FALSE) {
       app_simulation_modal(ns,
@@ -434,38 +435,17 @@ mod_IBD_server <- function(id) {
       )
     })
     
-    shiny::observeEvent(input$ok.ibd, {
-      shiny::req(input$max.ibd, input$min.ibd)
-      if (input$max.ibd > input$min.ibd && input$min.ibd != input$max.ibd) {
-        valsIBD$maxV.ibd <- input$max.ibd
-        valsIBD$minV.ibd <- input$min.ibd
-        if(input$trailsIBD == "Other") {
-          shiny::req(input$OtherIBD)
-          if(!is.null(input$OtherIBD)) {
-            valsIBD$trail.ibd <- as.character(input$OtherIBD)
-          }else shiny::showModal(simuModal.ibd(failed = TRUE))
-        }else {
-          valsIBD$trail.ibd <- as.character(input$trailsIBD)
-        }
-        shiny::removeModal()
-      }else {
-        shiny::showModal(
-          simuModal.ibd(failed = TRUE)
-        )
-      }
-    })
     
     
     simuDataIBD <- shiny::reactive({
       shiny::req(IBD_reactive()$fieldBook)
-      if(!is.null(valsIBD$maxV.ibd) && !is.null(valsIBD$minV.ibd) && 
-         !is.null(valsIBD$trail.ibd)) {
-        max <- as.numeric(valsIBD$maxV.ibd)
-        min <- as.numeric(valsIBD$minV.ibd)
+      if (!is.null(simulation_settings())) {
+        max <- as.numeric(simulation_settings()$max_value)
+        min <- as.numeric(simulation_settings()$min_value)
         df.ibd <- reactive_layoutIBD()$allSitesFieldbook
         simulation <- validate_design(simulate_classic_field_book(
           field_book = df.ibd, min_value = min, max_value = max,
-          response_name = valsIBD$trail.ibd, seed = ibd_inputs()$seed,
+          response_name = simulation_settings()$response_name, seed = ibd_inputs()$seed,
           order_by_id = FALSE
         ))
         df.ibd <- simulation$field_book
@@ -493,7 +473,7 @@ mod_IBD_server <- function(id) {
     heatmap_obj <- shiny::reactive({
       shiny::req(simuDataIBD()$df)
       book <- simuDataIBD()$df
-      response <- as.character(valsIBD$trail.ibd)
+      response <- as.character(simulation_settings()$response_name)
       if (length(response) == 1L && response %in% names(book)) {
         validate_design(app_field_heatmap(
           book, response_name = response, selected = locNum(),

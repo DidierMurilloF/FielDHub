@@ -383,7 +383,10 @@ mod_SSPD_server <- function(id){
     })
     
     
-    valsspd <- shiny::reactiveValues(maxV.sspd = NULL, minV.sspd = NULL, Trial.sspd = NULL)
+    simulation_settings <- app_simulation_controls(input, session,
+      ids = c(trait = "TrialsRowCol", other = "Otherspd", minimum = "min.sspd", maximum = "max.sspd", submit = "ok.sspd"),
+      field_book = function() reactive_layoutSSPD()$allSitesFieldbook
+    )
     
     simuModal.sspd <- function(failed = FALSE) {
       app_simulation_modal(ns,
@@ -398,38 +401,17 @@ mod_SSPD_server <- function(id){
       )
     })
     
-    shiny::observeEvent(input$ok.sspd, {
-      shiny::req(input$max.sspd, input$min.sspd)
-      if (input$max.sspd > input$min.sspd && input$min.sspd != input$max.sspd) {
-        valsspd$maxV.sspd <- input$max.sspd
-        valsspd$minV.sspd <- input$min.sspd
-        if(input$TrialsRowCol == "Other") {
-          shiny::req(input$Otherspd)
-          if(!is.null(input$Otherspd)) {
-            valsspd$Trial.sspd <- input$Otherspd
-          }else shiny::showModal(simuModal.sspd(failed = TRUE))
-        }else {
-          valsspd$Trial.sspd <- as.character(input$TrialsRowCol)
-        }
-        shiny::removeModal()
-      }else {
-        shiny::showModal(
-          simuModal.sspd(failed = TRUE)
-        )
-      }
-    })
     
     simuData_sspd <- shiny::reactive({
       shiny::req(sspd_reactive()$fieldBook)
       
-      if(!is.null(valsspd$maxV.sspd) && !is.null(valsspd$minV.sspd) && 
-         !is.null(valsspd$Trial.sspd)) {
-        max <- as.numeric(valsspd$maxV.sspd)
-        min <- as.numeric(valsspd$minV.sspd)
+      if (!is.null(simulation_settings())) {
+        max <- as.numeric(simulation_settings()$max_value)
+        min <- as.numeric(simulation_settings()$min_value)
         df.sspd <- reactive_layoutSSPD()$allSitesFieldbook
         simulation <- validate_design(simulate_classic_field_book(
           field_book = df.sspd, min_value = min, max_value = max,
-          response_name = valsspd$Trial.sspd, seed = sspd_inputs()$seed,
+          response_name = simulation_settings()$response_name, seed = sspd_inputs()$seed,
           order_by_id = TRUE
         ))
         df.sspd <- simulation$field_book
@@ -456,7 +438,7 @@ mod_SSPD_server <- function(id){
     heatmap_obj <- shiny::reactive({
       shiny::req(simuData_sspd()$df)
       book <- simuData_sspd()$df
-      response <- as.character(valsspd$Trial.sspd)
+      response <- as.character(simulation_settings()$response_name)
       if (length(response) == 1L && response %in% names(book)) {
         validate_design(app_field_heatmap(
           book, response_name = response, selected = locNum(),

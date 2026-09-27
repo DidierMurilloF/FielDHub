@@ -604,8 +604,11 @@ mod_pREPS_server <- function(id){
                     )
     })
 
-    valsPREP <- shiny::reactiveValues(ROX = NULL, ROY = NULL, trail.prep = NULL, minValue = NULL,
-                                maxValue = NULL)
+    simulation_settings <- app_simulation_controls(input, session,
+      ids = c(trait = "trailsPREP", other = "OtherPREP", minimum = "min.prep", maximum = "max.prep", submit = "ok.prep"),
+      field_book = function() pREPS_reactive()$fieldBook,
+      correlation_ids = c(x = "ROX.PREP", y = "ROY.PREP")
+    )
     
     simuModal.PREP <- function(failed = FALSE) {
       shiny::modalDialog(
@@ -651,45 +654,22 @@ mod_pREPS_server <- function(id){
       }
     })
     
-    shiny::observeEvent(input$ok.prep, {
-      shiny::req(input$min.prep, input$max.prep)
-      if (input$max.prep > input$min.prep & input$min.prep != input$max.prep) {
-        valsPREP$maxValue <- input$max.prep
-        valsPREP$minValue  <- input$min.prep
-        valsPREP$ROX <- as.numeric(input$ROX.PREP)
-        valsPREP$ROY <- as.numeric(input$ROY.PREP)
-        if(input$trailsPREP == "Other") {
-          shiny::req(input$OtherPREP)
-          if(!is.null(input$OtherPREP)) {
-            valsPREP$trail.prep <- as.character(input$OtherPREP)
-          }else shiny::showModal(simuModal.PREP(failed = TRUE))
-        }else {
-          valsPREP$trail.prep <- as.character(input$trailsPREP)
-        }
-        shiny::removeModal()
-      }else {
-        shiny::showModal(
-          simuModal.PREP(failed = TRUE)
-        )
-      }
-    })
     
     simuDataPREP <- shiny::reactive({
       shiny::req(pREPS_reactive()$fieldBook)
       shiny::req(prep_inputs())
       field_book <- pREPS_reactive()$fieldBook
-      if (is.null(valsPREP$maxValue) || is.null(valsPREP$minValue) ||
-          is.null(valsPREP$trail.prep)) {
+      if (is.null(simulation_settings())) {
         return(list(df = field_book, simulation = NULL))
       }
       simulation <- validate_design(simulate_spatial_field_book(
         field_book = as.data.frame(field_book),
         nrows = field_dimensions_prep()$d_row, ncols = field_dimensions_prep()$d_col,
-        correlation_x = as.numeric(valsPREP$ROX),
-        correlation_y = as.numeric(valsPREP$ROY),
-        min_value = as.numeric(valsPREP$minValue),
-        max_value = as.numeric(valsPREP$maxValue),
-        response_name = as.character(valsPREP$trail.prep),
+        correlation_x = as.numeric(simulation_settings()$correlation_x),
+        correlation_y = as.numeric(simulation_settings()$correlation_y),
+        min_value = as.numeric(simulation_settings()$min_value),
+        max_value = as.numeric(simulation_settings()$max_value),
+        response_name = as.character(simulation_settings()$response_name),
         seed = as.numeric(prep_inputs()$seed_number)
       ))
       list(df = simulation$field_book, dfSimulationList = simulation$simulations,
@@ -698,11 +678,8 @@ mod_pREPS_server <- function(id){
 
     heat_map_prep <- shiny::reactiveValues(heat_map_option = FALSE)
     
-    shiny::observeEvent(input$ok.prep, {
-      shiny::req(input$min.prep, input$max.prep)
-      if (input$max.prep > input$min.prep & input$min.prep != input$max.prep) {
-        heat_map_prep$heat_map_option <- TRUE
-      }
+    shiny::observeEvent(simulation_settings(), {
+      heat_map_prep$heat_map_option <- TRUE
     })
     
     shiny::observeEvent(heat_map_prep$heat_map_option, {
@@ -718,7 +695,7 @@ mod_pREPS_server <- function(id){
       shiny::req(input$heatmap_PREP)
       validate_design(app_spatial_heatmap(
         simuDataPREP()$dfSimulationList,
-        response_name = as.character(valsPREP$trail.prep),
+        response_name = as.character(simulation_settings()$response_name),
         selected = user_site_selection(), height = 700
       ))
     })

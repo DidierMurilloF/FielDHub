@@ -361,7 +361,10 @@ mod_FD_server <- function(id) {
     })
     
     
-    valsfd <- shiny::reactiveValues(maxV.fd = NULL, minV.fd = NULL, trail.fd = NULL)
+    simulation_settings <- app_simulation_controls(input, session,
+      ids = c(trait = "trailsfd", other = "Otherfd", minimum = "min.fd", maximum = "max.fd", submit = "ok.fd"),
+      field_book = function() reactive_layoutFD()$allSitesFieldbook
+    )
     
     simuModal.fd <- function(failed = FALSE) {
       app_simulation_modal(ns,
@@ -376,37 +379,17 @@ mod_FD_server <- function(id) {
       )
     })
     
-    shiny::observeEvent(input$ok.fd, {
-      shiny::req(input$max.fd, input$min.fd)
-      if (input$max.fd > input$min.fd && input$min.fd != input$max.fd) {
-        valsfd$maxV.fd <- input$max.fd
-        valsfd$minV.fd <- input$min.fd
-        if(input$trailsfd == "Other") {
-          shiny::req(input$Otherfd)
-          if(!is.null(input$Otherfd)) {
-            valsfd$trail.fd <- input$Otherfd
-          }else shiny::showModal(simuModal.fd(failed = TRUE))
-        }else {
-          valsfd$trail.fd <- as.character(input$trailsfd)
-        }
-        shiny::removeModal()
-      }else {
-        shiny::showModal(
-          simuModal.fd(failed = TRUE)
-        )
-      }
-    })
     
     simuData_fd <- shiny::reactive({
       shiny::req(fd_inputs()$seed)
       shiny::req(fd_reactive()$fieldBook)
-      if(!is.null(valsfd$maxV.fd) && !is.null(valsfd$minV.fd) && !is.null(valsfd$trail.fd)) {
-        max <- as.numeric(valsfd$maxV.fd)
-        min <- as.numeric(valsfd$minV.fd)
+      if (!is.null(simulation_settings())) {
+        max <- as.numeric(simulation_settings()$max_value)
+        min <- as.numeric(simulation_settings()$min_value)
         df.fd <- reactive_layoutFD()$allSitesFieldbook
         simulation <- validate_design(simulate_classic_field_book(
           field_book = df.fd, min_value = min, max_value = max,
-          response_name = valsfd$trail.fd, seed = fd_inputs()$seed,
+          response_name = simulation_settings()$response_name, seed = fd_inputs()$seed,
           order_by_id = FALSE
         ))
         df.fd <- simulation$field_book
@@ -434,7 +417,7 @@ mod_FD_server <- function(id) {
     heatmap_obj <- shiny::reactive({
       shiny::req(simuData_fd()$df)
       book <- simuData_fd()$df
-      response <- as.character(valsfd$trail.fd)
+      response <- as.character(simulation_settings()$response_name)
       if (length(response) == 1L && response %in% names(book)) {
         validate_design(app_field_heatmap(
           book, response_name = response, selected = locNum(),

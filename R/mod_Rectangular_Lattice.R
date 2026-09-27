@@ -384,7 +384,10 @@ mod_Rectangular_Lattice_server <- function(id) {
     })
     
     
-    valsRECT <- shiny::reactiveValues(maxV.rectangular= NULL, minV.rectangular= NULL, trail.rectangular= NULL)
+    simulation_settings <- app_simulation_controls(input, session,
+      ids = c(trait = "trailsRECT", other = "OtherRECT", minimum = "min.rectangular", maximum = "max.rectangular", submit = "ok.rectangular"),
+      field_book = function() reactive_layoutRect()$allSitesFieldbook
+    )
     
     simuModal.rectangular <- function(failed = FALSE) {
       app_simulation_modal(ns,
@@ -401,37 +404,17 @@ mod_Rectangular_Lattice_server <- function(id) {
       )
     })
     
-    shiny::observeEvent(input$ok.rectangular, {
-      shiny::req(input$max.rectangular, input$min.rectangular)
-      if (input$max.rectangular> input$min.rectangular&& input$min.rectangular!= input$max.rectangular) {
-        valsRECT$maxV.rectangular<- input$max.rectangular
-        valsRECT$minV.rectangular<- input$min.rectangular
-        if(input$trailsRECT == "Other") {
-          shiny::req(input$OtherRECT)
-          if(!is.null(input$OtherRECT)) {
-            valsRECT$trail.rectangular <- as.character(input$OtherRECT)
-          }else shiny::showModal(simuModal.rectangular(failed = TRUE))
-        }else {
-          valsRECT$trail.rectangular <- as.character(input$trailsRECT)
-        }
-        shiny::removeModal()
-      }else {
-        shiny::showModal(
-          simuModal.rectangular(failed = TRUE)
-        )
-      }
-    })
     
     
     simuDataRECT <- shiny::reactive({
       shiny::req(reactive_layoutRect()$allSitesFieldbook)
-      if(!is.null(valsRECT$maxV.rectangular) && !is.null(valsRECT$minV.rectangular) && !is.null(valsRECT$trail.rectangular)) {
-        max <- as.numeric(valsRECT$maxV.rectangular)
-        min <- as.numeric(valsRECT$minV.rectangular)
+      if (!is.null(simulation_settings())) {
+        max <- as.numeric(simulation_settings()$max_value)
+        min <- as.numeric(simulation_settings()$min_value)
         df.rectangular <- reactive_layoutRect()$allSitesFieldbook
         simulation <- validate_design(simulate_classic_field_book(
           field_book = df.rectangular, min_value = min, max_value = max,
-          response_name = valsRECT$trail.rectangular, seed = rectangular_inputs()$seed,
+          response_name = simulation_settings()$response_name, seed = rectangular_inputs()$seed,
           order_by_id = FALSE
         ))
         df.rectangular <- simulation$field_book
@@ -459,7 +442,7 @@ mod_Rectangular_Lattice_server <- function(id) {
     heatmap_obj <- shiny::reactive({
       shiny::req(simuDataRECT()$df)
       book <- simuDataRECT()$df
-      response <- as.character(valsRECT$trail.rectangular)
+      response <- as.character(simulation_settings()$response_name)
       if (length(response) == 1L && response %in% names(book)) {
         validate_design(app_field_heatmap(
           book, response_name = response, selected = locNum(),

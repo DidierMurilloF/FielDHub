@@ -444,9 +444,10 @@ mod_RCBD_server <- function(id) {
     })
 
     
-    valsRCBD <- shiny::reactiveValues(maxV.rcbd = NULL,
-                               minV.rcbd = NULL, 
-                               trail.rcbd = NULL)
+    simulation_settings <- app_simulation_controls(input, session,
+      ids = c(trait = "trailsRCBD", other = "OtherRCBD", minimum = "min.rcbd", maximum = "max.rcbd", submit = "ok.rcbd"),
+      field_book = function() reactive_layoutRCBD()$allSitesFieldbook
+    )
     
     simuModal.rcbd <- function(failed = FALSE) {
       app_simulation_modal(ns,
@@ -461,38 +462,17 @@ mod_RCBD_server <- function(id) {
       )
     })
     
-    shiny::observeEvent(input$ok.rcbd, {
-      shiny::req(input$max.rcbd, input$min.rcbd)
-      if (input$max.rcbd > input$min.rcbd && input$min.rcbd != input$max.rcbd) {
-        valsRCBD$maxV.rcbd <- input$max.rcbd
-        valsRCBD$minV.rcbd <- input$min.rcbd
-        if(input$trailsRCBD == "Other") {
-          shiny::req(input$OtherRCBD)
-          if(!is.null(input$OtherRCBD)) {
-            valsRCBD$trail.rcbd <- as.character(input$OtherRCBD)
-          }else shiny::showModal(simuModal.rcbd(failed = TRUE))
-        }else {
-          valsRCBD$trail.rcbd <- as.character(input$trailsRCBD)
-        }
-        shiny::removeModal()
-      }else {
-        shiny::showModal(
-          simuModal.rcbd(failed = TRUE)
-        )
-      }
-    })
     
     
     simuDataRCBD <- shiny::reactive({
       shiny::req(RCBD_reactive()$fieldBook)
-      if(!is.null(valsRCBD$maxV.rcbd) && !is.null(valsRCBD$minV.rcbd) && 
-         !is.null(valsRCBD$trail.rcbd)) {
-        max <- as.numeric(valsRCBD$maxV.rcbd)
-        min <- as.numeric(valsRCBD$minV.rcbd)
+      if (!is.null(simulation_settings())) {
+        max <- as.numeric(simulation_settings()$max_value)
+        min <- as.numeric(simulation_settings()$min_value)
         df.rcbd <- reactive_layoutRCBD()$allSitesFieldbook
         simulation <- validate_design(simulate_classic_field_book(
           field_book = df.rcbd, min_value = min, max_value = max,
-          response_name = valsRCBD$trail.rcbd, seed = rcbd_inputs()$seed,
+          response_name = simulation_settings()$response_name, seed = rcbd_inputs()$seed,
           order_by_id = TRUE
         ))
         df.rcbd <- simulation$field_book
@@ -518,7 +498,7 @@ mod_RCBD_server <- function(id) {
     heatmap_obj <- shiny::reactive({
       shiny::req(simuDataRCBD()$df)
       book <- simuDataRCBD()$df
-      response <- as.character(valsRCBD$trail.rcbd)
+      response <- as.character(simulation_settings()$response_name)
       if (length(response) == 1L && response %in% names(book)) {
         validate_design(app_field_heatmap(
           book, response_name = response, selected = locNum(),

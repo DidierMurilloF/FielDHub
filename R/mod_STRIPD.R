@@ -387,9 +387,10 @@ mod_STRIPD_server <- function(id) {
                       l = locSelected), silent = TRUE)
     })
     
-    valsStrip <- shiny::reactiveValues(maxV.strip = NULL,
-                                minV.strip = NULL, 
-                                trail.strip = NULL)
+    simulation_settings <- app_simulation_controls(input, session,
+      ids = c(trait = "trailsStrip", other = "OtherStrip", minimum = "min.strip", maximum = "max.strip", submit = "ok.strip"),
+      field_book = function() reactive_layoutSTRIP()$allSitesFieldbook
+    )
     
     simuModal.strip <- function(failed = FALSE) {
       app_simulation_modal(ns,
@@ -404,39 +405,17 @@ mod_STRIPD_server <- function(id) {
       )
     })
     
-    shiny::observeEvent(input$ok.strip, {
-      shiny::req(input$max.strip, input$min.strip)
-      if (input$max.strip > input$min.strip && input$min.strip != input$max.strip) {
-        valsStrip$maxV.strip <- input$max.strip
-        valsStrip$minV.strip <- input$min.strip
-        if(input$trailsStrip == "Other") {
-          shiny::req(input$OtherStrip)
-          if(!is.null(input$OtherStrip)) {
-            valsStrip$trail.strip <- input$OtherStrip
-          }else shiny::showModal(simuModal.strip(failed = TRUE))
-        }else {
-          valsStrip$trail.strip <- as.character(input$trailsStrip)
-        }
-        shiny::removeModal()
-      }else {
-        shiny::showModal(
-          simuModal.strip(failed = TRUE)
-        )
-      }
-    })
     
     
     simuData_strip <- shiny::reactive({
       shiny::req(strip_reactive()$fieldBook)
-      if(!is.null(valsStrip$maxV.strip) && 
-         !is.null(valsStrip$minV.strip) && 
-         !is.null(valsStrip$trail.strip)) {
-        max <- as.numeric(valsStrip$maxV.strip)
-        min <- as.numeric(valsStrip$minV.strip)
+      if (!is.null(simulation_settings())) {
+        max <- as.numeric(simulation_settings()$max_value)
+        min <- as.numeric(simulation_settings()$min_value)
         df.strip <- reactive_layoutSTRIP()$allSitesFieldbook
         simulation <- validate_design(simulate_classic_field_book(
           field_book = df.strip, min_value = min, max_value = max,
-          response_name = valsStrip$trail.strip, seed = strip_inputs()$seed,
+          response_name = simulation_settings()$response_name, seed = strip_inputs()$seed,
           order_by_id = FALSE
         ))
         df.strip <- simulation$field_book
@@ -464,7 +443,7 @@ mod_STRIPD_server <- function(id) {
     heatmap_obj <- shiny::reactive({
       shiny::req(simuData_strip()$df)
       book <- simuData_strip()$df
-      response <- as.character(valsStrip$trail.strip)
+      response <- as.character(simulation_settings()$response_name)
       if (length(response) == 1L && response %in% names(book)) {
         validate_design(app_field_heatmap(
           book, response_name = response, selected = locNum(),

@@ -344,9 +344,10 @@ mod_LSD_server <- function(id){
           silent = TRUE)
     })
     
-    valsLSD <- shiny::reactiveValues(maxV.lsd = NULL,
-                              minV.lsd = NULL, 
-                              trail.lsd = NULL)
+    simulation_settings <- app_simulation_controls(input, session,
+      ids = c(trait = "trailsLSD", other = "OtherLSD", minimum = "min.lsd", maximum = "max.lsd", submit = "ok.lsd"),
+      field_book = function() reactive_layoutLSD()$allSitesFieldbook
+    )
     
     simuModal.lsd <- function(failed = FALSE) {
       app_simulation_modal(ns,
@@ -360,38 +361,17 @@ mod_LSD_server <- function(id){
       )
     })
     
-    shiny::observeEvent(input$ok.lsd, {
-      shiny::req(input$max.lsd, input$min.lsd)
-      if (input$max.lsd > input$min.lsd && input$min.lsd != input$max.lsd) {
-        valsLSD$maxV.lsd <- input$max.lsd
-        valsLSD$minV.lsd <- input$min.lsd
-        if(input$trailsLSD == "Other") {
-          shiny::req(input$OtherLSD)
-          if(!is.null(input$OtherLSD)) {
-            valsLSD$trail.lsd <- input$OtherLSD
-          }else shiny::showModal(simuModal.lsd(failed = TRUE))
-        }else {
-          valsLSD$trail.lsd <- as.character(input$trailsLSD)
-        }
-        shiny::removeModal()
-      }else {
-        shiny::showModal(
-          simuModal.lsd(failed = TRUE)
-        )
-      }
-    })
     
     
     simuDataLSD <- shiny::reactive({
       shiny::req(latinsquare_reactive()$fieldBook)
-      if(!is.null(valsLSD$maxV.lsd) && !is.null(valsLSD$minV.lsd) && 
-         !is.null(valsLSD$trail.lsd)) {
-        max <- as.numeric(valsLSD$maxV.lsd)
-        min <- as.numeric(valsLSD$minV.lsd)
+      if (!is.null(simulation_settings())) {
+        max <- as.numeric(simulation_settings()$max_value)
+        min <- as.numeric(simulation_settings()$min_value)
         df.lsd <- reactive_layoutLSD()$allSitesFieldbook
         simulation <- validate_design(simulate_classic_field_book(
           field_book = df.lsd, min_value = min, max_value = max,
-          response_name = valsLSD$trail.lsd, seed = lsd_inputs()$seed,
+          response_name = simulation_settings()$response_name, seed = lsd_inputs()$seed,
           order_by_id = TRUE
         ))
         df.lsd <- simulation$field_book
@@ -414,7 +394,7 @@ mod_LSD_server <- function(id){
     heatmap_obj <- shiny::reactive({
       shiny::req(simuDataLSD()$df)
       book <- simuDataLSD()$df
-      response <- as.character(valsLSD$trail.lsd)
+      response <- as.character(simulation_settings()$response_name)
       if (length(response) == 1L && response %in% names(book)) {
         validate_design(app_field_heatmap(
           book, response_name = response, selected = 1L,

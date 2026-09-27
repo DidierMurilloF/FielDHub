@@ -383,7 +383,10 @@ mod_Alpha_Lattice_server <- function(id){
     })
     
     
-    valsALPHA <- shiny::reactiveValues(maxV.alpha = NULL, minV.alpha = NULL, trail.alpha = NULL)
+    simulation_settings <- app_simulation_controls(input, session,
+      ids = c(trait = "trailsALPHA", other = "OtherALPHA", minimum = "min.alpha", maximum = "max.alpha", submit = "ok.alpha"),
+      field_book = function() reactive_layoutAlpha()$allSitesFieldbook
+    )
     
     simuModal.alpha <- function(failed = FALSE) {
       app_simulation_modal(ns,
@@ -400,36 +403,16 @@ mod_Alpha_Lattice_server <- function(id){
       )
     })
     
-    shiny::observeEvent(input$ok.alpha, {
-      shiny::req(input$max.alpha, input$min.alpha)
-      if (input$max.alpha > input$min.alpha && input$min.alpha != input$max.alpha) {
-        valsALPHA$maxV.alpha <- input$max.alpha
-        valsALPHA$minV.alpha <- input$min.alpha
-        if(input$trailsALPHA == "Other") {
-          shiny::req(input$OtherALPHA)
-          if(!is.null(input$OtherALPHA)) {
-            valsALPHA$trail.alpha <- as.character(input$OtherALPHA)
-          }else shiny::showModal(simuModal.alpha(failed = TRUE))
-        }else {
-          valsALPHA$trail.alpha <- as.character(input$trailsALPHA)
-        }
-        shiny::removeModal()
-      }else {
-        shiny::showModal(
-          simuModal.alpha(failed = TRUE)
-        )
-      }
-    })
     
     simuDataALPHA <- shiny::reactive({
       shiny::req(reactive_layoutAlpha())
-      if(!is.null(valsALPHA$maxV.alpha) && !is.null(valsALPHA$minV.alpha) && !is.null(valsALPHA$trail.alpha)) {
-        max <- as.numeric(valsALPHA$maxV.alpha)
-        min <- as.numeric(valsALPHA$minV.alpha)
+      if (!is.null(simulation_settings())) {
+        max <- as.numeric(simulation_settings()$max_value)
+        min <- as.numeric(simulation_settings()$min_value)
         df.alpha <- reactive_layoutAlpha()$allSitesFieldbook
         simulation <- validate_design(simulate_classic_field_book(
           field_book = df.alpha, min_value = min, max_value = max,
-          response_name = valsALPHA$trail.alpha, seed = alpha_inputs()$seed,
+          response_name = simulation_settings()$response_name, seed = alpha_inputs()$seed,
           order_by_id = FALSE
         ))
         df.alpha <- simulation$field_book
@@ -457,7 +440,7 @@ mod_Alpha_Lattice_server <- function(id){
     heatmap_obj <- shiny::reactive({
       shiny::req(simuDataALPHA()$df)
       book <- simuDataALPHA()$df
-      response <- as.character(valsALPHA$trail.alpha)
+      response <- as.character(simulation_settings()$response_name)
       if (length(response) == 1L && response %in% names(book)) {
         validate_design(app_field_heatmap(
           book, response_name = response, selected = locNum(),

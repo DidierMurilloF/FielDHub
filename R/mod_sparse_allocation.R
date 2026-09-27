@@ -894,8 +894,11 @@ mod_sparse_allocation_server <- function(id){
       )
     })
 
-    valsDIAG <- shiny::reactiveValues(ROX = NULL, ROY = NULL, trail = NULL, minValue = NULL,
-                               maxValue = NULL)
+    simulation_settings <- app_simulation_controls(input, session,
+      ids = c(trait = "trailsDIAG", other = "OtherDIAG", minimum = "min.diag", maximum = "max.diag", submit = "ok_simu_single"),
+      field_book = function() sparse_design()$fieldBook,
+      correlation_ids = c(x = "ROX.DIAG", y = "ROY.DIAG")
+    )
     
     simuModal_DIAG <- function(failed = FALSE) {
       shiny::modalDialog(
@@ -933,44 +936,21 @@ mod_sparse_allocation_server <- function(id){
       )
     })
     
-    shiny::observeEvent(input$ok_simu_single, {
-      shiny::req(input$min.diag, input$max.diag)
-      if (input$max.diag > input$min.diag && input$min.diag != input$max.diag) {
-        valsDIAG$maxValue <- input$max.diag
-        valsDIAG$minValue  <- input$min.diag
-        valsDIAG$ROX <- as.numeric(input$ROX.DIAG)
-        valsDIAG$ROY <- as.numeric(input$ROY.DIAG)
-        if(input$trailsDIAG == "Other") {
-          shiny::req(input$OtherDIAG)
-          if(!is.null(input$OtherDIAG)) {
-            valsDIAG$trail <- as.character(input$OtherDIAG)
-          }else shiny::showModal(simuModal_DIAG(failed = TRUE))
-        }else {
-          valsDIAG$trail <- as.character(input$trailsDIAG)
-        }
-        shiny::removeModal()
-      }else {
-        shiny::showModal(
-          simuModal_DIAG(failed = TRUE)
-        )
-      }
-    })
     
     simudata_DIAG <- shiny::reactive({
       shiny::req(sparse_design()$fieldBook)
       field_book <- sparse_design()$fieldBook
-      if (is.null(valsDIAG$maxValue) || is.null(valsDIAG$minValue) ||
-          is.null(valsDIAG$trail)) {
+      if (is.null(simulation_settings())) {
         return(list(df = field_book, simulation = NULL))
       }
       simulation <- validate_design(simulate_spatial_field_book(
         field_book = field_book,
         nrows = sparse_design()$infoDesign$rows, ncols = sparse_design()$infoDesign$columns,
-        correlation_x = as.numeric(valsDIAG$ROX),
-        correlation_y = as.numeric(valsDIAG$ROY),
-        min_value = as.numeric(valsDIAG$minValue),
-        max_value = as.numeric(valsDIAG$maxValue),
-        response_name = as.character(valsDIAG$trail),
+        correlation_x = as.numeric(simulation_settings()$correlation_x),
+        correlation_y = as.numeric(simulation_settings()$correlation_y),
+        min_value = as.numeric(simulation_settings()$min_value),
+        max_value = as.numeric(simulation_settings()$max_value),
+        response_name = as.character(simulation_settings()$response_name),
         seed = as.numeric(single_inputs()$seed_number)
       ))
       list(df = simulation$field_book, dfSimulationList = simulation$simulations,
@@ -979,11 +959,8 @@ mod_sparse_allocation_server <- function(id){
 
     heat_map <- shiny::reactiveValues(heat_map_option = FALSE)
     
-    shiny::observeEvent(input$ok_simu_single, {
-      shiny::req(input$min.diag, input$max.diag)
-      if (input$max.diag > input$min.diag && input$min.diag != input$max.diag) {
-        heat_map$heat_map_option <- TRUE
-      }
+    shiny::observeEvent(simulation_settings(), {
+      heat_map$heat_map_option <- TRUE
     })
 
     shiny::observeEvent(heat_map$heat_map_option, {
@@ -1010,7 +987,7 @@ mod_sparse_allocation_server <- function(id){
       shiny::req(simudata_DIAG()$dfSimulationList)
       validate_design(app_spatial_heatmap(
         simudata_DIAG()$dfSimulationList,
-        response_name = as.character(valsDIAG$trail),
+        response_name = as.character(simulation_settings()$response_name),
         selected = as.numeric(input$sparse_loc_view), height = 720
       ))
     })

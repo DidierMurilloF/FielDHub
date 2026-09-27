@@ -285,7 +285,10 @@ mod_CRD_server <- function(id) {
       }
     })
     
-    vals <- shiny::reactiveValues(maxV.CRD = NULL, minV.CRD = NULL, trail.CRD = NULL)
+    simulation_settings <- app_simulation_controls(input, session,
+      ids = c(trait = "trailsCRD", other = "OtherCRD", minimum = "min.crd", maximum = "max.crd", submit = "ok.crd"),
+      field_book = function() reactive_layoutCRD()$fieldBookXY
+    )
     
     simuModal.crd <- function(failed = FALSE) {
       app_simulation_modal(ns,
@@ -301,37 +304,16 @@ mod_CRD_server <- function(id) {
       )
     })
     
-    # When OK button is pressed, attempt to load the data set. If successful,
-    # remove the modal. If not show another modal, but this time with a failure
-    # message.
-    shiny::observeEvent(input$ok.crd, {
-      shiny::req(input$max.crd, input$min.crd)
-      if (input$max.crd > input$min.crd && input$min.crd != input$max.crd) {
-        vals$maxV.CRD <- input$max.crd
-        vals$minV.CRD <- input$min.crd
-        if(input$trailsCRD == "Other") {
-          shiny::req(input$OtherCRD)
-          vals$trail.CRD <- as.character(input$OtherCRD)
-        }else {
-          vals$trail.CRD <- as.character(input$trailsCRD)
-        }
-        shiny::removeModal()
-      }else {
-        shiny::showModal(
-          simuModal.crd(failed = TRUE)
-        )
-      }
-    })
     
     simuDataCRD <- shiny::reactive({
       shiny::req(CRD_reactive()$fieldBook)
-      if(!is.null(vals$maxV.CRD) && !is.null(vals$minV.CRD) && !is.null(vals$trail.CRD)) {
-        max <- as.numeric(vals$maxV.CRD)
-        min <- as.numeric(vals$minV.CRD)
+      if (!is.null(simulation_settings())) {
+        max <- as.numeric(simulation_settings()$max_value)
+        min <- as.numeric(simulation_settings()$min_value)
         df.crd <- reactive_layoutCRD()$fieldBookXY
         simulation <- validate_design(simulate_classic_field_book(
           field_book = df.crd, min_value = min, max_value = max,
-          response_name = vals$trail.CRD, seed = crd_inputs()$seed,
+          response_name = simulation_settings()$response_name, seed = crd_inputs()$seed,
           order_by_id = TRUE
         ))
         df.crd <- simulation$field_book
@@ -379,7 +361,7 @@ mod_CRD_server <- function(id) {
     heatmap_obj <- shiny::reactive({
       shiny::req(simuDataCRD()$df)
       book <- simuDataCRD()$df
-      response <- as.character(vals$trail.CRD)
+      response <- as.character(simulation_settings()$response_name)
       if (length(response) == 1L && response %in% names(book)) {
         validate_design(app_field_heatmap(
           book, response_name = response, selected = 1L,

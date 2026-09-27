@@ -554,8 +554,11 @@ mod_Optim_server <- function(id) {
                     )
     })
     
-    valsOPTIM <- shiny::reactiveValues(ROX = NULL, ROY = NULL, trail.optim = NULL, minValue = NULL,
-                                maxValue = NULL)
+    simulation_settings <- app_simulation_controls(input, session,
+      ids = c(trait = "trailsOPTIM", other = "OtherOPTIM", minimum = "min.optim", maximum = "max.optim", submit = "ok.optim"),
+      field_book = function() optimized_arrang()$fieldBook,
+      correlation_ids = c(x = "ROX.O", y = "ROY.O")
+    )
     
     simuModal.OPTIM <- function(failed = FALSE) {
       shiny::modalDialog(
@@ -601,44 +604,21 @@ mod_Optim_server <- function(id) {
       }
     })
     
-    shiny::observeEvent(input$ok.optim, {
-      shiny::req(input$min.optim, input$max.optim)
-      if (input$max.optim > input$min.optim & input$min.optim != input$max.optim) {
-        valsOPTIM$maxValue <- input$max.optim
-        valsOPTIM$minValue  <- input$min.optim
-        valsOPTIM$ROX <- as.numeric(input$ROX.O)
-        valsOPTIM$ROY <- as.numeric(input$ROY.O)
-        if(input$trailsOPTIM == "Other") {
-          shiny::req(input$OtherOPTIM)
-          if(!is.null(input$OtherOPTIM)) {
-            valsOPTIM$trail.optim <- as.character(input$OtherOPTIM)
-          }else shiny::showModal(simuModal.OPTIM(failed = TRUE))
-        }else {
-          valsOPTIM$trail.optim <- as.character(input$trailsOPTIM)
-        }
-        shiny::removeModal()
-      }else {
-        shiny::showModal(
-          simuModal.OPTIM(failed = TRUE)
-        )
-      }
-    })
     
     simuDataOPTIM <- shiny::reactive({
       shiny::req(optimized_arrang()$fieldBook)
       field_book <- optimized_arrang()$fieldBook
-      if (is.null(valsOPTIM$maxValue) || is.null(valsOPTIM$minValue) ||
-          is.null(valsOPTIM$trail.optim)) {
+      if (is.null(simulation_settings())) {
         return(list(df = field_book, simulation = NULL))
       }
       simulation <- validate_design(simulate_spatial_field_book(
         field_book = field_book,
         nrows = max(field_book$ROW), ncols = max(field_book$COLUMN),
-        correlation_x = as.numeric(valsOPTIM$ROX),
-        correlation_y = as.numeric(valsOPTIM$ROY),
-        min_value = as.numeric(valsOPTIM$minValue),
-        max_value = as.numeric(valsOPTIM$maxValue),
-        response_name = as.character(valsOPTIM$trail.optim),
+        correlation_x = as.numeric(simulation_settings()$correlation_x),
+        correlation_y = as.numeric(simulation_settings()$correlation_y),
+        min_value = as.numeric(simulation_settings()$min_value),
+        max_value = as.numeric(simulation_settings()$max_value),
+        response_name = as.character(simulation_settings()$response_name),
         seed = as.numeric(input$seed.spatial)
       ))
       list(df = simulation$field_book, dfSimulation = simulation$simulations,
@@ -647,11 +627,8 @@ mod_Optim_server <- function(id) {
 
     heat_map_optim <- shiny::reactiveValues(heat_map_option = FALSE)
     
-    shiny::observeEvent(input$ok.optim, {
-      shiny::req(input$min.optim, input$max.optim)
-      if (input$max.optim > input$min.optim & input$min.optim != input$max.optim) {
-        heat_map_optim$heat_map_option <- TRUE
-      }
+    shiny::observeEvent(simulation_settings(), {
+      heat_map_optim$heat_map_option <- TRUE
     })
     
     shiny::observeEvent(heat_map_optim$heat_map_option, {
@@ -680,7 +657,7 @@ mod_Optim_server <- function(id) {
       shiny::req(input$heatmap_s)
       validate_design(app_spatial_heatmap(
         simuDataOPTIM()$dfSimulation,
-        response_name = as.character(valsOPTIM$trail.optim),
+        response_name = as.character(simulation_settings()$response_name),
         selected = user_site_selection(), height = 740, show_title = TRUE
       ))
     })

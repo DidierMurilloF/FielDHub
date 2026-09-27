@@ -462,6 +462,13 @@
 
 ### Fix bugs:
 
+- Simulation settings are accepted atomically across all nineteen design
+  modules. Invalid bounds, duplicate or blank trait names, and malformed
+  spatial correlations leave the last accepted simulation settings untouched.
+  The dialog stays open with a specific validation message, and heatmap tabs
+  become available only after a complete, valid submission. Valid simulations
+  retain their existing responses, row order, seeds, and metadata.
+
 - Factorial uploads and `full_factorial()` now share a factor-level
   uniqueness rule. The same label (such as "Low") may belong to different
   factors, which the app previously rejected. Duplicate levels within one

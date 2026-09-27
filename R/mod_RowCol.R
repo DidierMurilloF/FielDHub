@@ -416,9 +416,10 @@ mod_RowCol_server <- function(id){
           silent = TRUE)
     }) 
     
-    valsRowColD <- shiny::reactiveValues(maxV.RowCol = NULL,
-                                  minV.RowCol = NULL, 
-                                  trail.RowCol = NULL)
+    simulation_settings <- app_simulation_controls(input, session,
+      ids = c(trait = "trailsRowCol", other = "OtherRowCol", minimum = "min.RowCol", maximum = "max.RowCol", submit = "ok.RowCol"),
+      field_book = function() reactive_layoutROWCOL()$allSitesFieldbook
+    )
     
     simuModal.RowCol <- function(failed = FALSE) {
       app_simulation_modal(ns,
@@ -433,39 +434,16 @@ mod_RowCol_server <- function(id){
       )
     })
     
-    shiny::observeEvent(input$ok.RowCol, {
-      shiny::req(input$max.RowCol, input$min.RowCol)
-      if (input$max.RowCol > input$min.RowCol && 
-          input$min.RowCol != input$max.RowCol) {
-        valsRowColD$maxV.RowCol <- input$max.RowCol
-        valsRowColD$minV.RowCol <- input$min.RowCol
-        if(input$trailsRowCol == "Other") {
-          shiny::req(input$OtherRowCol)
-          if(!is.null(input$OtherRowCol)) {
-            valsRowColD$trail.RowCol <- input$OtherRowCol
-          }else shiny::showModal(simuModal.RowCol(failed = TRUE))
-        }else {
-          valsRowColD$trail.RowCol <- as.character(input$trailsRowCol)
-        }
-        shiny::removeModal()
-      }else {
-        shiny::showModal(
-          simuModal.RowCol(failed = TRUE)
-        )
-      }
-    })
     
     simuData_RowCol <- shiny::reactive({
       shiny::req(RowCol_reactive()$fieldBook)
-      if(!is.null(valsRowColD$maxV.RowCol) && 
-         !is.null(valsRowColD$minV.RowCol) && 
-         !is.null(valsRowColD$trail.RowCol)) {
-        max <- as.numeric(valsRowColD$maxV.RowCol)
-        min <- as.numeric(valsRowColD$minV.RowCol)
+      if (!is.null(simulation_settings())) {
+        max <- as.numeric(simulation_settings()$max_value)
+        min <- as.numeric(simulation_settings()$min_value)
         df.RowCol <- reactive_layoutROWCOL()$allSitesFieldbook
         simulation <- validate_design(simulate_classic_field_book(
           field_book = df.RowCol, min_value = min, max_value = max,
-          response_name = valsRowColD$trail.RowCol, seed = rcd_inputs()$seed,
+          response_name = simulation_settings()$response_name, seed = rcd_inputs()$seed,
           order_by_id = FALSE
         ))
         df.RowCol <- simulation$field_book
@@ -493,7 +471,7 @@ mod_RowCol_server <- function(id){
     heatmap_obj <- shiny::reactive({
       shiny::req(simuData_RowCol()$df)
       book <- simuData_RowCol()$df
-      response <- as.character(valsRowColD$trail.RowCol)
+      response <- as.character(simulation_settings()$response_name)
       if (length(response) == 1L && response %in% names(book)) {
         validate_design(app_field_heatmap(
           book, response_name = response, selected = locNum(),

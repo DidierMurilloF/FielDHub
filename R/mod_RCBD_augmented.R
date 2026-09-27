@@ -651,8 +651,11 @@ mod_RCBD_augmented_server <- function(id) {
                         backgroundColor = DT::styleEqual(Name_expt, colores_back[1:repsExpt]))
     })
     
-    valsARCBD <- shiny::reactiveValues(ROX = NULL, ROY = NULL, trail.arcbd = NULL, minValue = NULL,
-                                maxValue = NULL)
+    simulation_settings <- app_simulation_controls(input, session,
+      ids = c(trait = "trailsARCBD", other = "OtherARCBD", minimum = "min.arcbd", maximum = "max.arcbd", submit = "ok.arcbd"),
+      field_book = function() rcbd_augmented_reactive()$fieldBook,
+      correlation_ids = c(x = "ROX.O", y = "ROY.O")
+    )
     
     simuModal.ARCBD <- function(failed = FALSE) {
       shiny::modalDialog(
@@ -695,44 +698,21 @@ mod_RCBD_augmented_server <- function(id) {
       )}
     })
     
-    shiny::observeEvent(input$ok.arcbd, {
-      shiny::req(input$min.arcbd, input$max.arcbd)
-      if (input$max.arcbd > input$min.arcbd && input$min.arcbd != input$max.arcbd) {
-        valsARCBD$maxValue <- input$max.arcbd
-        valsARCBD$minValue  <- input$min.arcbd
-        valsARCBD$ROX <- as.numeric(input$ROX.O)
-        valsARCBD$ROY <- as.numeric(input$ROY.O)
-        if(input$trailsARCBD == "Other") {
-          shiny::req(input$OtherARCBD)
-          if(!is.null(input$OtherARCBD)) {
-            valsARCBD$trail.arcbd <- as.character(input$OtherARCBD)
-          }else shiny::showModal(simuModal.ARCBD(failed = TRUE))
-        }else {
-          valsARCBD$trail.arcbd <- as.character(input$trailsARCBD)
-        }
-        shiny::removeModal()
-      }else {
-        shiny::showModal(
-          simuModal.ARCBD(failed = TRUE)
-        )
-      }
-    })
     
     simuDataARCBD <- shiny::reactive({
       shiny::req(rcbd_augmented_reactive()$fieldBook)
       field_book <- rcbd_augmented_reactive()$fieldBook
-      if (is.null(valsARCBD$maxValue) || is.null(valsARCBD$minValue) ||
-          is.null(valsARCBD$trail.arcbd)) {
+      if (is.null(simulation_settings())) {
         return(list(df = field_book, simulation = NULL))
       }
       simulation <- validate_design(simulate_spatial_field_book(
         field_book = field_book,
         nrows = length(unique(field_book$ROW)), ncols = length(unique(field_book$COLUMN)),
-        correlation_x = as.numeric(valsARCBD$ROX),
-        correlation_y = as.numeric(valsARCBD$ROY),
-        min_value = as.numeric(valsARCBD$minValue),
-        max_value = as.numeric(valsARCBD$maxValue),
-        response_name = as.character(valsARCBD$trail.arcbd),
+        correlation_x = as.numeric(simulation_settings()$correlation_x),
+        correlation_y = as.numeric(simulation_settings()$correlation_y),
+        min_value = as.numeric(simulation_settings()$min_value),
+        max_value = as.numeric(simulation_settings()$max_value),
+        response_name = as.character(simulation_settings()$response_name),
         seed = as.numeric(input$myseed_a_rcbd)
       ))
       list(df = simulation$field_book, dfSimulation = simulation$simulations,
@@ -741,11 +721,8 @@ mod_RCBD_augmented_server <- function(id) {
 
     heat_map_arcbd <- shiny::reactiveValues(heat_map_option = FALSE)
     
-    shiny::observeEvent(input$ok.arcbd, {
-      shiny::req(input$min.arcbd, input$max.arcbd)
-      if (input$max.arcbd > input$min.arcbd && input$min.arcbd != input$max.arcbd) {
-        heat_map_arcbd$heat_map_option <- TRUE
-      }
+    shiny::observeEvent(simulation_settings(), {
+      heat_map_arcbd$heat_map_option <- TRUE
     })
     
     shiny::observeEvent(heat_map_arcbd$heat_map_option, {
@@ -771,7 +748,7 @@ mod_RCBD_augmented_server <- function(id) {
       shiny::req(input$heatmap_s)
       validate_design(app_spatial_heatmap(
         simuDataARCBD()$dfSimulation,
-        response_name = as.character(valsARCBD$trail.arcbd),
+        response_name = as.character(simulation_settings()$response_name),
         selected = locNum(), height = 740
       ))
     })

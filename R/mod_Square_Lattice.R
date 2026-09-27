@@ -397,7 +397,10 @@ mod_Square_Lattice_server <- function(id){
       }
     })
     
-    valsSQUARE <- shiny::reactiveValues(maxV.square = NULL, minV.square = NULL, trail.square = NULL)
+    simulation_settings <- app_simulation_controls(input, session,
+      ids = c(trait = "trailsSQUARE", other = "OtherSQUARE", minimum = "min.square", maximum = "max.square", submit = "ok.square"),
+      field_book = function() reactive_layoutSquare()$allSitesFieldbook
+    )
     
     simuModal.square <- function(failed = FALSE) {
       app_simulation_modal(ns,
@@ -414,37 +417,17 @@ mod_Square_Lattice_server <- function(id){
       )
     })
     
-    shiny::observeEvent(input$ok.square, {
-      shiny::req(input$max.square, input$min.square)
-      if (input$max.square > input$min.square && input$min.square != input$max.square) {
-        valsSQUARE$maxV.square <- input$max.square
-        valsSQUARE$minV.square <- input$min.square
-        if(input$trailsSQUARE == "Other") {
-          shiny::req(input$OtherSQUARE)
-          if(!is.null(input$OtherSQUARE)) {
-            valsSQUARE$trail.square <- as.character(input$OtherSQUARE)
-          }else shiny::showModal(simuModal.square(failed = TRUE))
-        }else {
-          valsSQUARE$trail.square <- as.character(input$trailsSQUARE)
-        }
-        shiny::removeModal()
-      }else {
-        shiny::showModal(
-          simuModal.square(failed = TRUE)
-        )
-      }
-    })
     
     
     simuDataSQUARE <- shiny::reactive({
       shiny::req(reactive_layoutSquare()$allSitesFieldbook)
-      if(!is.null(valsSQUARE$maxV.square) && !is.null(valsSQUARE$minV.square) && !is.null(valsSQUARE$trail.square)) {
-        max <- as.numeric(valsSQUARE$maxV.square)
-        min <- as.numeric(valsSQUARE$minV.square)
+      if (!is.null(simulation_settings())) {
+        max <- as.numeric(simulation_settings()$max_value)
+        min <- as.numeric(simulation_settings()$min_value)
         df.square <- reactive_layoutSquare()$allSitesFieldbook
         simulation <- validate_design(simulate_classic_field_book(
           field_book = df.square, min_value = min, max_value = max,
-          response_name = valsSQUARE$trail.square, seed = square_inputs()$seed,
+          response_name = simulation_settings()$response_name, seed = square_inputs()$seed,
           order_by_id = FALSE
         ))
         df.square <- simulation$field_book
@@ -472,7 +455,7 @@ mod_Square_Lattice_server <- function(id){
     heatmap_obj <- shiny::reactive({
       shiny::req(simuDataSQUARE()$df)
       book <- simuDataSQUARE()$df
-      response <- as.character(valsSQUARE$trail.square)
+      response <- as.character(simulation_settings()$response_name)
       if (length(response) == 1L && response %in% names(book)) {
         validate_design(app_field_heatmap(
           book, response_name = response, selected = locNum(),
