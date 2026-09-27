@@ -492,28 +492,10 @@ mod_FD_server <- function(id) {
     
     output$FD.Output <- DT::renderDataTable({
       df <- simuData_fd()$df
-
-      df$LOCATION <- as.factor(df$LOCATION)
-      df$PLOT <- as.factor(df$PLOT)
-      df$ROW <- as.factor(df$ROW)
-      df$COLUMN <- as.factor(df$COLUMN)
-      df$REP <- as.factor(df$REP)
-      colnames_set <- colnames(df)
-      
-      len_colnames_set <- length(colnames_set)
-      if (colnames_set[len_colnames_set] == "TRT_COMB") {
-        df[, 7:len_colnames_set] <- lapply(df[, 7:len_colnames_set], as.factor)
-      } else {
-        df[, 7:(len_colnames_set - 1)] <- lapply(df[, 7:(len_colnames_set - 1)], as.factor)
-      }
-      
-      a <- as.numeric(simuData_fd()$a)
-      table_options <- list(pageLength = nrow(df), autoWidth = FALSE,
-                                scrollX = TRUE, scrollY = "500px")
-      
-      DT::datatable(df, filter = 'top', rownames = FALSE, options = utils::modifyList(table_options, list(
-        columnDefs = list(list(className = 'dt-center', targets = "_all")))))
-      
+      validate_design(app_field_book_table(
+        df, factor_columns = c("LOCATION", "PLOT", "ROW", "COLUMN", field_book_extension_columns(fd_reactive())),
+        height = 500
+      ))
     })
     
     output$downloadData.fd <- app_csv_archive(

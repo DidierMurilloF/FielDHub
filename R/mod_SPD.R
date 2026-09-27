@@ -491,23 +491,10 @@ mod_SPD_server <- function(id){
     output$SPD.output <- DT::renderDataTable({
       
       df <- simuData_spd()$df
-      df$LOCATION <- as.factor(df$LOCATION)
-      df$PLOT <- as.factor(df$PLOT)
-      df$ROW <- as.factor(df$ROW)
-      df$COLUMN <- as.factor(df$COLUMN)
-      df$REP <- as.factor(df$REP)
-      df$WHOLE_PLOT <- as.factor(df$WHOLE_PLOT)
-      df$SUB_PLOT <- as.factor(df$SUB_PLOT)
-      df$TRT_COMB <- as.factor(df$TRT_COMB)
-      table_options <- list(pageLength = nrow(df), autoWidth = FALSE,
-                                scrollX = TRUE, scrollY = "500px")
-      
-      DT::datatable(df, 
-                    filter = 'top', 
-                    rownames = FALSE, 
-                    options = utils::modifyList(table_options, list(
-        columnDefs = list(list(className = 'dt-center', targets = "_all")))))
-      
+      validate_design(app_field_book_table(
+        df, factor_columns = c("LOCATION", "PLOT", "ROW", "COLUMN", "REP", "WHOLE_PLOT", "SUB_PLOT", "TRT_COMB"),
+        height = 500
+      ))
     })
     
     output$downloadData.spd <- app_csv_archive(

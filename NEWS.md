@@ -55,6 +55,11 @@
 
 ### New features:
 
+- All nineteen field-book views now use a shared table component, preserving
+  their factor filters, column order, scrolling settings, and displayed values.
+  The factorial view selects factor columns by their recorded names, so
+  reordered columns or additional response fields are not coerced by position.
+
 - Row-column designs now support seeds at the top of R's accepted range.
   Location-specific seed offsets wrap only when they would otherwise overflow;
   these calls previously failed or reported a misleading optimization warning.

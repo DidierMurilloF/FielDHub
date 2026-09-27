@@ -483,23 +483,10 @@ mod_LSD_server <- function(id){
     output$LSD_fieldbook <- DT::renderDataTable({
       
       df <- simuDataLSD()$df
-      # "ID LOCATION PLOT ROW COLUMN SQUARE ROW_SQ COLUMN_SQ TREATMENT"
-      df$LOCATION <- as.factor(df$LOCATION)
-      df$PLOT <- as.factor(df$PLOT)
-      df$ROW <- as.factor(df$ROW)
-      df$COLUMN <- as.factor(df$COLUMN)
-      df$SQUARE <- as.factor(df$SQUARE)
-      df$TREATMENT <- as.factor(df$TREATMENT)
-      
-      table_options <- list(pageLength = nrow(df), autoWidth = FALSE,
-                                scrollX = TRUE, scrollY = "500px")
-      
-      DT::datatable(df, 
-                    filter = "top",
-                    rownames = FALSE, 
-                    options = utils::modifyList(table_options, list(
-        columnDefs = list(list(className = 'dt-center', targets = "_all")))))
-      
+      validate_design(app_field_book_table(
+        df, factor_columns = c("LOCATION", "PLOT", "ROW", "COLUMN", "SQUARE", "TREATMENT"),
+        height = 500
+      ))
     })
     
     output$downloadData.lsd <- app_csv_archive(

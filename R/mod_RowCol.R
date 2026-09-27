@@ -558,21 +558,10 @@ mod_RowCol_server <- function(id){
     
     output$rowcolD <- DT::renderDataTable({
       df <- simuData_RowCol()$df
-      df$LOCATION <- as.factor(df$LOCATION)
-      df$PLOT <- as.factor(df$PLOT)
-      df$ROW <- as.factor(df$ROW)
-      df$COLUMN <- as.factor(df$COLUMN)
-      df$REP <- as.factor(df$REP)
-      df$ENTRY <- as.factor(df$ENTRY)
-      a <- as.numeric(simuData_RowCol()$a)
-      table_options <- list(pageLength = nrow(df), autoWidth = FALSE,
-                                scrollX = TRUE, scrollY = "490px")
-      DT::datatable(df, 
-                    filter = 'top', 
-                    rownames = FALSE, 
-                    options = utils::modifyList(table_options, list(
-        columnDefs = list(list(className = 'dt-center', targets = "_all")))))
-      
+      validate_design(app_field_book_table(
+        df, factor_columns = c("LOCATION", "PLOT", "ROW", "COLUMN", "REP", "ENTRY"),
+        height = 490
+      ))
     })
 
     output$downloadData.rowcolD <- app_csv_archive(

@@ -534,26 +534,10 @@ mod_STRIPD_server <- function(id) {
     output$STRIP.output <- DT::renderDataTable({
       
       df <- simuData_strip()$df
-      
-      df$LOCATION <- as.factor(df$LOCATION)
-      df$PLOT <- as.factor(df$PLOT)
-      df$ROW <- as.factor(df$ROW)
-      df$COLUMN <- as.factor(df$COLUMN)
-      df$REP <- as.factor(df$REP)
-      df$HSTRIP <- as.factor(df$HSTRIP)
-      df$VSTRIP <- as.factor(df$VSTRIP)
-      df$TRT_COMB <- as.factor(df$TRT_COMB)
-      
-      table_options <- list(pageLength = nrow(df), autoWidth = FALSE,
-                                scrollX = TRUE, scrollY = "500px")
-      
-      DT::datatable(df, 
-                    filter = "top",
-                    rownames = FALSE, 
-                    options = utils::modifyList(table_options, list(
-                      columnDefs = list(
-                        list(className = 'dt-center', targets = "_all")))))
-      
+      validate_design(app_field_book_table(
+        df, factor_columns = c("LOCATION", "PLOT", "ROW", "COLUMN", "REP", "HSTRIP", "VSTRIP", "TRT_COMB"),
+        height = 500
+      ))
     })
     
     output$downloadData.strip <- app_csv_archive(

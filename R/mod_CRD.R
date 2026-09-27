@@ -432,20 +432,10 @@ mod_CRD_server <- function(id) {
     
     output$CRD_fieldbook <- DT::renderDT({
       df <- simuDataCRD()$df
-      df$LOCATION <- as.factor(df$LOCATION)
-      df$PLOT <- as.factor(df$PLOT)
-      df$ROW <- as.factor(df$ROW)
-      df$COLUMN <- as.factor(df$COLUMN)
-      df$REP <- as.factor(df$REP)
-      df$TREATMENT <- as.factor(df$TREATMENT)
-      table_options <- list(pageLength = nrow(df), autoWidth = FALSE,
-                                scrollX = TRUE, scrollY = "500px")
-      
-      DT::datatable(df,
-                    filter = 'top',
-                    rownames = FALSE, 
-                    options = utils::modifyList(table_options, list(
-                      columnDefs = list(list(className = 'dt-center', targets = "_all")))))
+      validate_design(app_field_book_table(
+        df, factor_columns = c("LOCATION", "PLOT", "ROW", "COLUMN", "REP", "TREATMENT"),
+        height = 500
+      ))
     })
     
     output$downloadData.crd <- app_csv_archive(

@@ -1086,22 +1086,10 @@ mod_multi_loc_preps_server <- function(id){
       test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
       if (!test) return(NULL)
       df <- simuDataPREP()$df
-      df$EXPT <- as.factor(df$EXPT)
-      df$LOCATION <- as.factor(df$LOCATION)
-      df$PLOT <- as.factor(df$PLOT)
-      df$ROW <- as.factor(df$ROW)
-      df$COLUMN <- as.factor(df$COLUMN)
-      df$CHECKS <- as.factor(df$CHECKS)
-      df$ENTRY <- as.factor(df$ENTRY)
-      df$TREATMENT <- as.factor(df$TREATMENT)
-      table_options <- list(pageLength = nrow(df), autoWidth = FALSE,
-                                scrollX = TRUE, scrollY = "500px")
-      DT::datatable(df, 
-                    filter = "top",
-                    rownames = FALSE, 
-                    options = utils::modifyList(table_options, list(
-                      columnDefs = list(list(className = 'dt-center', targets = "_all"))))
-      )
+      validate_design(app_field_book_table(
+        df, factor_columns = c("EXPT", "LOCATION", "PLOT", "ROW", "COLUMN", "CHECKS", "ENTRY", "TREATMENT"),
+        height = 500
+      ))
     })
     
     output$downloadData.preps <- app_csv_archive(

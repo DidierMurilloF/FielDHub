@@ -835,21 +835,10 @@ mod_Diagonal_server <- function(id) {
       if (!test) return(NULL)
       shiny::req(simudata_DIAG()$df)
       df <- simudata_DIAG()$df
-      df$EXPT <- as.factor(df$EXPT)
-      df$LOCATION <- as.factor(df$LOCATION)
-      df$PLOT <- as.factor(df$PLOT)
-      df$ROW <- as.factor(df$ROW)
-      df$COLUMN <- as.factor(df$COLUMN)
-      df$CHECKS <- as.factor(df$CHECKS)
-      df$ENTRY <- as.factor(df$ENTRY)
-      df$TREATMENT <- as.factor(df$TREATMENT)
-      table_options <- list(pageLength = nrow(df), autoWidth = FALSE,
-                                scrollX = TRUE, scrollY = "600px")
-      DT::datatable(df,
-                    filter = "top",
-                    rownames = FALSE, 
-                    options = utils::modifyList(table_options, list(
-                      columnDefs = list(list(className = 'dt-center', targets = "_all")))))
+      validate_design(app_field_book_table(
+        df, factor_columns = c("EXPT", "LOCATION", "PLOT", "ROW", "COLUMN", "CHECKS", "ENTRY", "TREATMENT"),
+        height = 600
+      ))
     })
     
     
