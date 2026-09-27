@@ -183,7 +183,7 @@ mod_SPD_server <- function(id){
         req(input$file.SPD)
         inFile <- input$file.SPD
         data_ingested <- load_file(name = inFile$name, 
-                                   path = inFile$datapat, 
+                                   path = inFile[["datapath"]],
                                    sep = input$sep.spd, 
                                    check = TRUE, 
                                    design = "spd")

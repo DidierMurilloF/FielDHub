@@ -209,7 +209,7 @@ mod_Optim_server <- function(id) {
         req(input$file3)
         inFile <- input$file3
         data_ingested <- load_file(name = inFile$name, 
-                                   path = inFile$datapat, 
+                                   path = inFile[["datapath"]],
                                    sep = input$sep.OPTIM,
                                    check = TRUE, 
                                    design = "optim")

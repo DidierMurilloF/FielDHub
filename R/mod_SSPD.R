@@ -212,7 +212,7 @@ mod_SSPD_server <- function(id){
         req(input$file.SSPD)
         inFile <- input$file.SSPD
         data_ingested <- load_file(name = inFile$name, 
-                                   path = inFile$datapat, 
+                                   path = inFile[["datapath"]],
                                    sep = input$sep.sspd, 
                                    check = TRUE, 
                                    design = "sspd")

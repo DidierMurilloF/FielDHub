@@ -228,6 +228,12 @@
 
 ### Fix bugs:
 
+- App uploads now read Shiny's `datapath` field with exact matching.
+  Eighteen modules previously relied on the abbreviated `$datapat`,
+  producing warnings under strict host settings; a similarly named field
+  could also be selected when `datapath` was missing. All 19 modules now
+  use the exact field without changing valid upload paths.
+
 - Printed design parameters now exclude `id_design` by name instead of
   dropping the final element. Extra or reordered parameters are no longer
   hidden, and identifier-only parameter lists print safely. Existing

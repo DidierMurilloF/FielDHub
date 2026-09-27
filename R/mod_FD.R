@@ -163,7 +163,7 @@ mod_FD_server <- function(id) {
         inFile <- input$file.FD
         
         data_ingested <- load_file(name = inFile$name,
-          path = inFile$datapat,
+          path = inFile[["datapath"]],
           sep = input$sep.fd,
           check = TRUE, 
           design = "factorial")

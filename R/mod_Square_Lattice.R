@@ -134,7 +134,7 @@ mod_Square_Lattice_server <- function(id){
         req(input$file.square)
         inFile <- input$file.square
         data_ingested <- load_file(name = inFile$name, 
-                                   path = inFile$datapat, 
+                                   path = inFile[["datapath"]],
                                    sep = input$sep.square, check = TRUE, design = "square")
         
         if (names(data_ingested) == "dataUp") {

@@ -178,7 +178,7 @@ mod_RCBD_server <- function(id) {
         req(input$file.RCBD)
         inFile <- input$file.RCBD
         data_ingested <- load_file(name = inFile$name, 
-                                   path = inFile$datapat, 
+                                   path = inFile[["datapath"]],
                                    sep = input$sep.rcbd, 
                                    check = TRUE, 
                                    design = "rcbd")

@@ -205,7 +205,7 @@ mod_STRIPD_server <- function(id) {
         req(input$file.STRIP)
         inFile <- input$file.STRIP
         data_ingested <- load_file(name = inFile$name, 
-                                   path = inFile$datapat, 
+                                   path = inFile[["datapath"]],
                                    sep = input$sep.strip, 
                                    check = TRUE,
                                    design = "strip")

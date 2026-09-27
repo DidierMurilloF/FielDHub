@@ -311,7 +311,7 @@ mod_diagonal_multiple_server <- function(id) {
                 inFile <- input$file_multiple
                 data_ingested <- load_file(
                     name = inFile$name, 
-                    path = inFile$datapat, 
+                    path = inFile[["datapath"]],
                     sep = input$sep.DIAGONALS, 
                     check = checking_entry_list, 
                     design = "mdiag"

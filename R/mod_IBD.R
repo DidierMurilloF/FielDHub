@@ -195,7 +195,7 @@ mod_IBD_server <- function(id) {
         req(input$file.IBD)
         inFile <- input$file.IBD
         data_ingested <- load_file(name = inFile$name, 
-                                   path = inFile$datapat, 
+                                   path = inFile[["datapath"]],
                                    sep = input$sep.ibd, 
                                    check = TRUE, 
                                    design = "ibd")

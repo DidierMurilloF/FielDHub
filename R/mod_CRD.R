@@ -151,7 +151,7 @@ mod_CRD_server <- function(id) {
         req(input$sep.crd)
         inFile <- input$file.CRD
         data_ingested <- load_file(name = inFile$name,
-                                   path = inFile$datapat,
+                                   path = inFile[["datapath"]],
                                    sep = input$sep.crd,
                                    check = TRUE, 
                                    design = "crd")

@@ -407,7 +407,7 @@ mod_sparse_allocation_server <- function(id){
             inFile <- input$sparse_file
             data_ingested <- load_file(
                 name = inFile$name, 
-                path = inFile$datapath, 
+                path = inFile[["datapath"]],
                 sep = input$sparse_file_sep, 
                 check = TRUE, 
                 design = "sdiag"

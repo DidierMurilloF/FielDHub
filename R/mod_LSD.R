@@ -178,7 +178,7 @@ mod_LSD_server <- function(id){
         req(input$sep.lsd)
         inFile <- input$file.LSD
         data_ingested <- load_file(name = inFile$name, 
-                                path = inFile$datapat, 
+                                path = inFile[["datapath"]],
                                 sep = input$sep.lsd,
                                 check = TRUE, 
                                 design = "lsd")

@@ -363,7 +363,7 @@ mod_multi_loc_preps_server <- function(id){
             inFile <- input$file_multi_prep
             data_ingested <- load_file(
                 name = inFile$name,
-                path = inFile$datapat,
+                path = inFile[["datapath"]],
                 sep = input$sep_multi_prep, 
                 check = TRUE, 
                 design = "sdiag"

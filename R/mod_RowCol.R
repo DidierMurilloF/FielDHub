@@ -190,7 +190,7 @@ mod_RowCol_server <- function(id){
         req(input$file.RCD)
         inFile <- input$file.RCD
         data_ingested <- load_file(name = inFile$name, 
-                                   path = inFile$datapat, 
+                                   path = inFile[["datapath"]],
                                    sep = input$sep.rcd, 
                                    check = TRUE, 
                                    design = "rcd")

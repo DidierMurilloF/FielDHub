@@ -254,7 +254,7 @@ mod_pREPS_server <- function(id){
         inFile <- input$file.preps
         data_ingested <- load_file(
            name = inFile$name,
-           path = inFile$datapat,
+           path = inFile[["datapath"]],
            sep = input$sep.preps, 
            check = TRUE, 
            design = "prep"

@@ -127,7 +127,7 @@ mod_Rectangular_Lattice_server <- function(id) {
       req(input$file.rectangular)
       inFile <- input$file.rectangular
       data_ingested <- load_file(name = inFile$name,
-                                 path = inFile$datapat,
+                                 path = inFile[["datapath"]],
                                  sep = input$sep.rectangular,
                                  check = TRUE, 
                                  design = "rect")

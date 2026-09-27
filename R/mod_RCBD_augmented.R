@@ -235,7 +235,7 @@ mod_RCBD_augmented_server <- function(id) {
         req(input$file1_a_rcbd)
         inFile <- input$file1_a_rcbd
         data_ingested <- load_file(name = inFile$name, 
-                                   path = inFile$datapat, 
+                                   path = inFile[["datapath"]],
                                    sep = input$sep.a_rcbd, check = TRUE, design = "arcbd")
         
         if (names(data_ingested) == "dataUp") {

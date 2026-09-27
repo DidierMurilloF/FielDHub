@@ -284,7 +284,7 @@ mod_Diagonal_server <- function(id) {
             inFile <- input$file1
             data_ingested <- load_file(
                 name = inFile$name, 
-                path = inFile$datapat, 
+                path = inFile[["datapath"]],
                 sep = input$sep.DIAGONALS, 
                 check = TRUE, 
                 design = "sdiag"

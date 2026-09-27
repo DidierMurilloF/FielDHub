@@ -129,7 +129,7 @@ mod_Alpha_Lattice_server <- function(id){
         req(input$file.alpha)
         inFile <- input$file.alpha
         data_ingested <- load_file(name = inFile$name,
-                                   path = inFile$datapat,
+                                   path = inFile[["datapath"]],
                                    sep = input$sep.alpha,
                                    check = TRUE, design = "alpha")
         
