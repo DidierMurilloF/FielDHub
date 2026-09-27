@@ -17,3 +17,10 @@ A shiny app object
 \description{
 Run the Shiny Application
 }
+\details{
+Constructing the app does not change R options. On startup,
+uploads are limited to 100 MiB (100 * 1024^2 bytes); when the app stops,
+the previous upload-limit option is restored, including an unset option.
+Shiny uses a process-wide upload limit, shared by the app's sessions while
+it is running. Closing one session does not restore the limit for others.
+}

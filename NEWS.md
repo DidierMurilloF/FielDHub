@@ -222,6 +222,13 @@
 
 ### Fix bugs:
 
+- `run_app()` no longer changes the host's upload limit when merely
+  constructing an app. The existing 100 MiB limit is applied on application
+  startup and the previous option is restored on shutdown, including after
+  startup failure. Restoration is registered for the whole app, not for
+  individual sessions. Shiny still uses this process-wide option while the
+  app is running.
+
 - The Latin-square search now stops with a `fieldhub_search_error` after
   100,000 placement iterations per square instead of restarting indefinitely.
   The condition identifies the square and budget, no partial design is
