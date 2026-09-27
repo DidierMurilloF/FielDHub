@@ -182,7 +182,7 @@ mod_pREPS_ui <- function(id){
 					br(),
 					br(),
 					div(
-					  shinycssloaders::withSpinner(
+					  fieldhub_spinner(
 					    verbatimTextOutput(
 					      outputId = ns("summary_prep"), 
 					      placeholder = FALSE
@@ -194,7 +194,7 @@ mod_pREPS_ui <- function(id){
 				),
 				tabPanel("Data Input", DT::DTOutput(ns("dataup.preps"))),
 				tabPanel("Randomized Field",
-						shinycssloaders::withSpinner(
+						fieldhub_spinner(
 							DT::DTOutput(ns("dtpREPS")), 
 							type = 4)
 						),

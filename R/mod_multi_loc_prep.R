@@ -242,14 +242,14 @@ mod_multi_loc_preps_ui <- function(id){
                     )
                   )
                 ),
-                shinycssloaders::withSpinner(
+                fieldhub_spinner(
                     DT::DTOutput(ns("prep_allocation")),
                     type = 4
                 )
             ),
             tabPanel("Data Input", DT::DTOutput(ns("multi_prep_data_input"))),
             tabPanel("Randomized Field",
-                    shinycssloaders::withSpinner(
+                    fieldhub_spinner(
                         DT::DTOutput(ns("avg_field_preps")), 
                         type = 4)
                     ),

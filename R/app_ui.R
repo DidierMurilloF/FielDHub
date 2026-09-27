@@ -18,7 +18,6 @@ fieldhub_theme <- function() {
 
 #' @noRd
 app_ui <- function(request) {
-  options(spinner.color="#2c7da3", spinner.color.background="#ffffff", spinner.size = 2)
   tagList(
     golem_add_external_resources(),
     fluidPage(theme = fieldhub_theme(),

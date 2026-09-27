@@ -112,7 +112,7 @@ mod_CRD_ui <- function(id) {
                          width = '10%',
                          style="color: #337ab7; background-color: #fff; border-color: #2e6da4")
                       ),
-                      shinycssloaders::withSpinner(
+                      fieldhub_spinner(
                        plotly::plotlyOutput(ns("layout_random"), 
                                             width = "97%", 
                                             height = "560px"),
@@ -122,7 +122,7 @@ mod_CRD_ui <- function(id) {
                      column(12,uiOutput(ns("well_panel_layout_CRD")))
             ),
             tabPanel("Field Book", 
-                     shinycssloaders::withSpinner(
+                     fieldhub_spinner(
                        DT::DTOutput(ns("CRD_fieldbook")), 
                        type = 5
                     )
@@ -396,21 +396,21 @@ mod_CRD_server <- function(id) {
       tabsetPanel(
         if (input$typlotCRD != 3) {
           tabPanel("Completely Randomized Field Layout", 
-                   shinycssloaders::withSpinner(
+                   fieldhub_spinner(
                      plotOutput(ns("layout.crd"), 
                                 width = "100%",
                                 height = "650px"),
                     type = 5))
         } else {
           tabPanel("Completely Randomized Field Layout", 
-                   shinycssloaders::withSpinner(
+                   fieldhub_spinner(
                      plotly::plotlyOutput(ns("heatmapCRD"), 
                                           width = "100%", 
                                           height = "650px"),
                      type = 5))
         },
         tabPanel("Completely Randomized Field Book", 
-                 shinycssloaders::withSpinner(
+                 fieldhub_spinner(
                    DT::DTOutput(ns("CRD.output")), 
                    type = 5))
       )

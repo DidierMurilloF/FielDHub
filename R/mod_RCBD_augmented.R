@@ -178,7 +178,7 @@ mod_RCBD_augmented_ui <- function(id){
                              br(),
                              br(),
                              div(
-                               shinycssloaders::withSpinner(
+                               fieldhub_spinner(
                                  verbatimTextOutput(outputId = ns("summary_augmented"), 
                                                     placeholder = FALSE),
                                  type = 4

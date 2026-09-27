@@ -140,7 +140,7 @@ mod_Optim_ui <- function(id) {
           ),
           br(),
           br(),
-          shinycssloaders::withSpinner(
+          fieldhub_spinner(
             verbatimTextOutput(outputId = ns("summary_optim"), 
                                placeholder = FALSE), 
               type = 4

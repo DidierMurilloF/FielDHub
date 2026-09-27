@@ -141,7 +141,7 @@ mod_RCBD_ui <- function(id) {
                          width = '10%',
                          style="color: #337ab7; background-color: #fff; border-color: #2e6da4")
                       ),
-                     shinycssloaders::withSpinner(
+                     fieldhub_spinner(
                        plotly::plotlyOutput(
                          ns("layouts"), 
                          width = "97%", 
@@ -152,7 +152,7 @@ mod_RCBD_ui <- function(id) {
                      column(12,uiOutput(ns("well_panel_layout_RCBD")))
             ),
             tabPanel("Field Book", 
-                     shinycssloaders::withSpinner(
+                     fieldhub_spinner(
                        DT::DTOutput(ns("RCBD_fieldbook")), 
                        type = 5)
             )

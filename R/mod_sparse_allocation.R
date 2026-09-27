@@ -181,7 +181,7 @@ mod_sparse_allocation_ui <- function(id) {
                 ),
                 tags$br(),
                 tags$br(),
-                shinycssloaders::withSpinner(
+                fieldhub_spinner(
                     DT::DTOutput(ns("sparse_allocation")),
                     type = 4
                 )
@@ -200,7 +200,7 @@ mod_sparse_allocation_ui <- function(id) {
                         DT::DTOutput(ns("plot_number_layout"))),
             tabPanel("Field Book", 
                         DT::DTOutput(ns("fieldBook_diagonal"))),
-            tabPanel("Heatmap", shinycssloaders::withSpinner(
+            tabPanel("Heatmap", fieldhub_spinner(
                 plotly::plotlyOutput(ns("heatmap_diag"),  width = "97%"), 
                 type = 5)
             )

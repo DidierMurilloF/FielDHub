@@ -88,7 +88,7 @@ mod_Square_Lattice_ui <- function(id){
               "Summary Design",
               br(),
               div(
-                shinycssloaders::withSpinner(
+                fieldhub_spinner(
                   verbatimTextOutput(outputId = ns("summary_square_lattice"), 
                                      placeholder = FALSE), 
                   type = 4
@@ -103,14 +103,14 @@ mod_Square_Lattice_ui <- function(id){
                                                     icon = icon("file-csv"), 
                                                     width = '10%',
                                                     style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
-                     shinycssloaders::withSpinner(
+                     fieldhub_spinner(
                        plotly::plotlyOutput(ns("random_layout"), width = "97%", height = "550px"),type = 5
                      ),
                      br(),
                      column(12, uiOutput(ns("well_panel_layout_sq")))
             ),
             tabPanel("Field Book", 
-                     shinycssloaders::withSpinner(DT::DTOutput(ns("square_fieldbook")), type = 5)
+                     fieldhub_spinner(DT::DTOutput(ns("square_fieldbook")), type = 5)
             )
           )
         )

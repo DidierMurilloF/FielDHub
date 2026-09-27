@@ -81,7 +81,7 @@ mod_Alpha_Lattice_ui <- function(id) {
             tabPanel(
               "Summary Design",
               br(),
-              shinycssloaders::withSpinner(
+              fieldhub_spinner(
                 verbatimTextOutput(outputId = ns("summary_alpha_lattice"), 
                                    placeholder = FALSE), 
                 type = 4
@@ -98,14 +98,14 @@ mod_Alpha_Lattice_ui <- function(id) {
                                     width = '10%',
                                     style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
                      
-                     shinycssloaders::withSpinner(
+                     fieldhub_spinner(
                        plotly::plotlyOutput(ns("random_layout"), width = "97%", height = "550px"),type = 5
                      ),
                      br(),
                      column(12, uiOutput(ns("well_panel_layout")))
             ),
             tabPanel("Field Book", 
-                     shinycssloaders::withSpinner(DT::DTOutput(ns("ALPHA_fieldbook")), type = 5)
+                     fieldhub_spinner(DT::DTOutput(ns("ALPHA_fieldbook")), type = 5)
             )
           )
         )

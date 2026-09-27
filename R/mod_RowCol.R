@@ -113,7 +113,7 @@ mod_RowCol_ui <- function(id){
             tabPanel(
               "Summary Design",
               br(),
-              shinycssloaders::withSpinner(
+              fieldhub_spinner(
                 verbatimTextOutput(outputId = ns("summary_row_column"), 
                                    placeholder = FALSE), 
                 type = 4
@@ -127,7 +127,7 @@ mod_RowCol_ui <- function(id){
                                                     icon = icon("file-csv"), 
                                                     width = '10%',
                                                     style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
-                     shinycssloaders::withSpinner(
+                     fieldhub_spinner(
                        plotly::plotlyOutput(ns("layouts"), 
                                             width = "97%", 
                                             height = "550px"),
@@ -136,7 +136,7 @@ mod_RowCol_ui <- function(id){
                      column(12,uiOutput(ns("well_panel_layout_ROWCOL")))
             ),
             tabPanel("Field Book", 
-                     shinycssloaders::withSpinner(DT::DTOutput(ns("rowcolD")), 
+                     fieldhub_spinner(DT::DTOutput(ns("rowcolD")),
                                                   type = 5)
             )
           )

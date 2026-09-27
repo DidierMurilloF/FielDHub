@@ -175,7 +175,7 @@ mod_diagonal_multiple_ui <- function(id) {
                     tabPanel("Plot Number Field", DT::DTOutput(ns("plot_number_layout"))),
                     tabPanel("Field Book", DT::DTOutput(ns("fieldBook_diagonal"))),
                     tabPanel("Heatmap", 
-                             shinycssloaders::withSpinner(
+                             fieldhub_spinner(
                                plotly::plotlyOutput(
                                  ns("heatmap_diag"),
                                  width = "97%"

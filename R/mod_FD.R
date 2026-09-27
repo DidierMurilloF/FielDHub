@@ -101,7 +101,7 @@ mod_FD_ui <- function(id){
                                                     icon = icon("file-csv"), 
                                                     width = '10%',
                                                     style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
-                     shinycssloaders::withSpinner(
+                     fieldhub_spinner(
                        plotly::plotlyOutput(ns("layouts"), width = "97%", 
                                             height = "550px"), type = 5
                      ),
@@ -109,7 +109,7 @@ mod_FD_ui <- function(id){
                      column(12, uiOutput(ns("well_panel_layout_FD")))
             ),
             tabPanel("Field Book", 
-                     shinycssloaders::withSpinner(DT::DTOutput(ns("FD.Output")), type = 5)
+                     fieldhub_spinner(DT::DTOutput(ns("FD.Output")), type = 5)
             )
           )
         )

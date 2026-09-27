@@ -112,7 +112,7 @@ mod_IBD_ui <- function(id) {
             tabPanel(
               "Summary Design",
               br(),
-              shinycssloaders::withSpinner(
+              fieldhub_spinner(
                 verbatimTextOutput(outputId = ns("summary_ibd"), 
                                    placeholder = FALSE), 
                 type = 4
@@ -129,7 +129,7 @@ mod_IBD_ui <- function(id) {
                          width = '10%',
                          style="color: #337ab7; background-color: #fff; border-color: #2e6da4")
                       ),
-                     shinycssloaders::withSpinner(
+                     fieldhub_spinner(
                        plotly::plotlyOutput(ns("layouts"), 
                                             width = "97%", 
                                             height = "550px"),
@@ -141,7 +141,7 @@ mod_IBD_ui <- function(id) {
                             )
             ),
             tabPanel("Field Book", 
-                     shinycssloaders::withSpinner(
+                     fieldhub_spinner(
                        DT::DTOutput(ns("IBD.output")), 
                        type = 5
                        )

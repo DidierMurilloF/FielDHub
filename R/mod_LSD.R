@@ -119,7 +119,7 @@ mod_LSD_ui <- function(id){
                        column(12, uiOutput(ns("well_panel_layout_LSD")))
               ),
               tabPanel("Field Book", 
-                       shinycssloaders::withSpinner(
+                       fieldhub_spinner(
                          DT::DTOutput(ns("LSD_fieldbook")), 
                          type = 5
                       )

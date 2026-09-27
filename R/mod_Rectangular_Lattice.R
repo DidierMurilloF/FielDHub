@@ -79,7 +79,7 @@ mod_Rectangular_Lattice_ui <- function(id){
             tabPanel(
               "Summary Design",
               br(),
-              shinycssloaders::withSpinner(
+              fieldhub_spinner(
                 verbatimTextOutput(outputId = ns("summary_rectangular_lattice"), 
                                    placeholder = FALSE), 
                 type = 4
@@ -93,7 +93,7 @@ mod_Rectangular_Lattice_ui <- function(id){
                                                     icon = icon("file-csv"), 
                                                     width = '10%',
                                                     style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
-                     shinycssloaders::withSpinner(
+                     fieldhub_spinner(
                        plotly::plotlyOutput(ns("random_layout"), 
                                             width = "97%", 
                                             height = "550px"),
@@ -103,7 +103,7 @@ mod_Rectangular_Lattice_ui <- function(id){
                      column(12,uiOutput(ns("well_panel_layout_rt")))
             ),
             tabPanel("Field Book", 
-                     shinycssloaders::withSpinner(DT::DTOutput(ns("rectangular_fieldbook")), type = 5)
+                     fieldhub_spinner(DT::DTOutput(ns("rectangular_fieldbook")), type = 5)
             )
           )
         )

@@ -138,7 +138,7 @@ mod_STRIPD_ui <- function(id){
                                                     icon = icon("file-csv"), 
                                                     width = '10%',
                                                     style="color: #337ab7; background-color: #fff; border-color: #2e6da4")),
-                     shinycssloaders::withSpinner(
+                     fieldhub_spinner(
                        plotly::plotlyOutput(ns("layout.strip"), 
                                             width = "97%", 
                                             height = "560px"),
@@ -150,7 +150,7 @@ mod_STRIPD_ui <- function(id){
                             )
             ),
             tabPanel(title = "Field Book", 
-                     shinycssloaders::withSpinner(
+                     fieldhub_spinner(
                        DT::DTOutput(ns("STRIP.output")), 
                        type = 5
                        )
