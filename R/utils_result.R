@@ -65,10 +65,17 @@ new_fieldhub_design <- function(x, design, parameters = NULL) {
     fieldhub_abort("Internal error: the design result must be a list with infoDesign.",
                    class = "fieldhub_internal_error", call. = FALSE)
   }
-  x$metadata <- fieldhub_metadata(design, x$infoDesign$seed)
+  new_fieldhub_result(x, design, x$infoDesign$seed, parameters,
+                     c(paste0("fieldhub_", design), "FielDHub"), validate_fieldhub_design)
+}
+
+#' Shared construction boundary for field, family and allocation results
+#' @noRd
+new_fieldhub_result <- function(x, design, seed, parameters, classes, validate) {
+  x$metadata <- fieldhub_metadata(design, seed)
   if (!is.null(parameters)) x$metadata$parameters <- parameters
-  class(x) <- c(paste0("fieldhub_", design), "FielDHub")
-  validate_fieldhub_design(x)
+  class(x) <- classes
+  validate(x)
 }
 
 #' Designs of the id_design values of results saved by FielDHub 1.5 or
@@ -132,7 +139,9 @@ validate_fieldhub_design <- function(x) {
       problems <- c(problems, "has a recorded seed that disagrees with infoDesign")
     }
     if (meta$design != "split_families") {
-      problems <- c(problems, field_book_problems(x$fieldBook))
+      problems <- c(problems, field_book_problems(x$fieldBook), field_book_extension_problems(x))
+    } else {
+      problems <- c(problems, family_split_problems(x))
     }
   }
   if (length(problems) > 0) {

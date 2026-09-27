@@ -117,6 +117,13 @@
 
 ### Enhancements:
 
+- Field designs, family splits and allocation plans now share one result
+  construction boundary. Schema validation checks design-specific field-book
+  columns and family-split location totals in addition to common keys and
+  metadata. Existing storage types, filler markers, empty family locations
+  and extra user columns are preserved. See `help("design_results")` for the
+  schema and reproducibility contract.
+
 - Spatial simulation now applies the separable AR1-by-AR1 covariance through
   two linear recurrences, avoiding the dense plot-by-plot covariance matrix
   and Cholesky factorization. Random draws, coordinate order, standardization

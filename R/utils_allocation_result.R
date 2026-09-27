@@ -12,10 +12,9 @@ new_fieldhub_allocation <- function(x, parameters) {
                    class = "fieldhub_internal_error", call. = FALSE)
   }
   design <- unname(as.character(parameters$design))
-  x$metadata <- fieldhub_metadata(paste0("allocation_", design), parameters$seed)
-  x$metadata$parameters <- parameters
-  class(x) <- if (identical(design, "prep")) "MultiPrep" else "Sparse"
-  validate_fieldhub_allocation(x)
+  new_fieldhub_result(x, paste0("allocation_", design), parameters$seed, parameters,
+                     if (identical(design, "prep")) "MultiPrep" else "Sparse",
+                     validate_fieldhub_allocation)
 }
 
 #' Validate the allocation-specific result schema
