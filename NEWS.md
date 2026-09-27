@@ -55,6 +55,12 @@
 
 ### New features:
 
+- All twelve classic design pages now share a heatmap data builder and renderer.
+  Locations, coordinates, treatment labels, and responses are selected by name,
+  so extra or reordered columns cannot silently change a heatmap. Existing
+  datasets, tooltips, colors, and plot sizes are unchanged; invalid selections
+  receive the shared input-error presentation.
+
 - All twelve classic app workflows now use one response-simulation service.
   It validates response names, preserves their existing field-book ordering,
   and retains the input field book, effective seed, parameters, RNG settings,

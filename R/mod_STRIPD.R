@@ -504,37 +504,17 @@ mod_STRIPD_server <- function(id) {
     
     heatmap_obj <- shiny::reactive({
       shiny::req(simuData_strip()$df)
-      if (ncol(simuData_strip()$df) == 10) {
-        locs <- factor(simuData_strip()$df$LOCATION, levels = unique(simuData_strip()$df$LOCATION))
-        locLevels <- levels(locs)
-        df = subset(simuData_strip()$df, LOCATION == locLevels[locNum()])
-        loc <- levels(factor(df$LOCATION))
-        trail <- as.character(valsStrip$trail.strip)
-        label_trail <- paste(trail, ": ")
-        heatmapTitle <- paste("Heatmap for ", trail)
-        new_df <- df |>
-          dplyr::mutate(text = paste0("Site: ", loc, "\n", "Row: ", df$ROW, "\n", "Col: ", df$COLUMN, "\n", "Treatment: ", 
-                                      df$TRT_COMB, "\n", label_trail, round(df[,10],2)))
-        w <- as.character(valsStrip$trail.strip)
-        new_df$ROW <- as.factor(new_df$ROW) # Set up ROWS as factors
-        new_df$COLUMN <- as.factor(new_df$COLUMN) # Set up COLUMNS as factors
-        p1 <- ggplot2::ggplot(new_df, ggplot2::aes(x = new_df[,5], y = new_df[,4], fill = new_df[,10], text = text)) +
-          ggplot2::geom_tile() +
-          ggplot2::xlab("COLUMN") +
-          ggplot2::ylab("ROW") +
-          ggplot2::labs(fill = w) +
-          fieldhub_viridis_scale() +
-          ggplot2::ggtitle(heatmapTitle) +
-          ggplot2::theme_minimal() + # I added this option 
-          ggplot2::theme(plot.title = ggplot2::element_text(family="Calibri", face="bold", size=13, hjust=0.5))
-        
-        p2 <- plotly::ggplotly(p1, tooltip="text", height = 560)
-        return(p2)
+      book <- simuData_strip()$df
+      response <- as.character(valsStrip$trail.strip)
+      if (length(response) == 1L && response %in% names(book)) {
+        validate_design(app_field_heatmap(
+          book, response_name = response, selected = locNum(),
+          label_column = "TRT_COMB", label_title = "Treatment",
+          include_site = TRUE, include_checks = FALSE
+        ))
       } else {
-        shiny::showModal(
-          heatmapInfoModal_STRIP()
-        )
-        return(NULL)
+        shiny::showModal(heatmapInfoModal_STRIP())
+        NULL
       }
     })
     

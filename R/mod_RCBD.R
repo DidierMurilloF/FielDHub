@@ -560,59 +560,17 @@ mod_RCBD_server <- function(id) {
     
     heatmap_obj <- shiny::reactive({
       shiny::req(simuDataRCBD()$df)
-      trait <- as.character(valsRCBD$trail.rcbd)
-      # Was `ncol(df) == 8`, which silently failed once the field book widened
-      # for repeated checks. What it always meant was "has simulated data".
-      if (length(trait) == 1 && trait %in% colnames(simuDataRCBD()$df)) {
-        locs <- factor(simuDataRCBD()$df$LOCATION, 
-                       levels = unique(simuDataRCBD()$df$LOCATION))
-        locLevels <- levels(locs)
-        df = subset(simuDataRCBD()$df, LOCATION == locLevels[locNum()])
-        loc <- levels(factor(df$LOCATION))
-        label_trail <- paste(trait, ": ")
-        heatmapTitle <- paste("Heatmap for ", trait)
-        check_txt <- if ("CHECKS" %in% names(df)) {
-          paste0("Check: ", ifelse(df$CHECKS != 0, "yes", "no"), "\n")
-        } else {
-          ""
-        }
-        new_df <- df |>
-          dplyr::mutate(text = paste0("Site: ", loc, "\n",
-                                      "Row: ", df$ROW, "\n",
-                                      "Col: ", df$COLUMN, "\n",
-                                      "Treatment: ", df$TREATMENT, "\n",
-                                      check_txt,
-                                      label_trail, round(df[[trait]], 2)))
-        w <- trait
-        new_df$ROW <- as.factor(new_df$ROW)
-        new_df$COLUMN <- as.factor(new_df$COLUMN)
-        p1 <- ggplot2::ggplot(
-          new_df, ggplot2::aes(
-            x = new_df$COLUMN,
-            y = new_df$ROW,
-            fill = new_df[[trait]],
-            text = text)) +
-          ggplot2::geom_tile() +
-          ggplot2::xlab("COLUMN") +
-          ggplot2::ylab("ROW") +
-          ggplot2::labs(fill = w) +
-          fieldhub_viridis_scale() +
-          ggplot2::ggtitle(heatmapTitle) +
-          ggplot2::theme_minimal() + # I added this option 
-          ggplot2::theme(plot.title = ggplot2::element_text(
-            family="Calibri", 
-            face="bold", 
-            size=13, 
-            hjust=0.5))
-        p2 <- plotly::ggplotly(p1, 
-                               tooltip="text", 
-                               height = 560)
-        return(p2)
+      book <- simuDataRCBD()$df
+      response <- as.character(valsRCBD$trail.rcbd)
+      if (length(response) == 1L && response %in% names(book)) {
+        validate_design(app_field_heatmap(
+          book, response_name = response, selected = locNum(),
+          label_column = "TREATMENT", label_title = "Treatment",
+          include_site = TRUE, include_checks = TRUE
+        ))
       } else {
-        shiny::showModal(
-          heatmapInfoModal_RCBD()
-        )
-        return(NULL)
+        shiny::showModal(heatmapInfoModal_RCBD())
+        NULL
       }
     })
 

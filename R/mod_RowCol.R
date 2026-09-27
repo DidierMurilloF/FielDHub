@@ -529,46 +529,17 @@ mod_RowCol_server <- function(id){
     
     heatmap_obj <- shiny::reactive({
       shiny::req(simuData_RowCol()$df)
-      if (ncol(simuData_RowCol()$df) == 9) {
-        locs <- factor(simuData_RowCol()$df$LOCATION, 
-                       levels = unique(simuData_RowCol()$df$LOCATION))
-        locLevels <- levels(locs)
-        df = subset(simuData_RowCol()$df, LOCATION == locLevels[locNum()])
-        loc <- levels(factor(df$LOCATION))
-        trail <- as.character(valsRowColD$trail.RowCol)
-        label_trail <- paste(trail, ": ")
-        heatmapTitle <- paste("Heatmap for ", trail)
-        new_df <- df |>
-          dplyr::mutate(text = paste0("Site: ", loc, "\n", 
-                                      "Row: ", df$ROW, "\n", 
-                                      "Col: ", df$COLUMN, "\n", 
-                                      "Entry: ", df$ENTRY, "\n", 
-                                      label_trail, round(df[,9],2)))
-        w <- as.character(valsRowColD$trail.RowCol)
-        new_df$ROW <- as.factor(new_df$ROW) # Set up ROWS as factors
-        new_df$COLUMN <- as.factor(new_df$COLUMN) # Set up COLUMNS as factors
-        p1 <- ggplot2::ggplot(new_df, ggplot2::aes(x = new_df[,5], 
-                                                   y = new_df[,4], 
-                                                   fill = new_df[,9], 
-                                                   text = text)) +
-          ggplot2::geom_tile() +
-          ggplot2::xlab("COLUMN") +
-          ggplot2::ylab("ROW") +
-          ggplot2::labs(fill = w) +
-          fieldhub_viridis_scale() +
-          ggplot2::ggtitle(heatmapTitle) +
-          ggplot2::theme_minimal() + # I added this option 
-          ggplot2::theme(plot.title = ggplot2::element_text(
-            family="Calibri", face="bold", size=13, hjust=0.5)
-            )
-        
-        p2 <- plotly::ggplotly(p1, tooltip="text", height = 560)
-        return(p2)
+      book <- simuData_RowCol()$df
+      response <- as.character(valsRowColD$trail.RowCol)
+      if (length(response) == 1L && response %in% names(book)) {
+        validate_design(app_field_heatmap(
+          book, response_name = response, selected = locNum(),
+          label_column = "ENTRY", label_title = "Entry",
+          include_site = TRUE, include_checks = FALSE
+        ))
       } else {
-        shiny::showModal(
-          heatmapInfoModal_RCD()
-        )
-        return(NULL)
+        shiny::showModal(heatmapInfoModal_RCD())
+        NULL
       }
     })
     

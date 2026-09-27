@@ -403,33 +403,17 @@ mod_CRD_server <- function(id) {
     
     heatmap_obj <- shiny::reactive({
       shiny::req(simuDataCRD()$df)
-      if (ncol(simuDataCRD()$df) == 8) {
-        trail <- as.character(vals$trail.CRD)
-        label_trail <- paste(trail, ": ")
-        heatmapTitle <- paste("Heatmap for ", trail)
-        df <- simuDataCRD()$df
-        new_df <- df |>
-          dplyr::mutate(text = paste0("Row: ", df$ROW, "\n", "Col: ", df$COLUMN, "\n", "Entry: ", 
-                                      df$TREATMENT, "\n", label_trail, round(df[,8],2)))
-        w <- as.character(vals$trail.CRD)
-        new_df$ROW <- as.factor(new_df$ROW) # Set up ROWS as factors
-        new_df$COLUMN <- as.factor(new_df$COLUMN) # Set up COLUMNS as factors
-        p1 <- ggplot2::ggplot(new_df, ggplot2::aes(x = new_df[,5], y = new_df[,4], fill = new_df[,8], text = text)) +
-          ggplot2::geom_tile() +
-          ggplot2::xlab("COLUMN") +
-          ggplot2::ylab("ROW") +
-          ggplot2::labs(fill = w) +
-          fieldhub_viridis_scale() +
-          ggplot2::ggtitle(heatmapTitle) +
-          ggplot2::theme_minimal() + # I added this option 
-          ggplot2::theme(plot.title = ggplot2::element_text(family="Calibri", face="bold", size=13, hjust=0.5))
-        p2 <- plotly::ggplotly(p1, tooltip="text", height = 560)
-        return(p2)
+      book <- simuDataCRD()$df
+      response <- as.character(vals$trail.CRD)
+      if (length(response) == 1L && response %in% names(book)) {
+        validate_design(app_field_heatmap(
+          book, response_name = response, selected = 1L,
+          label_column = "TREATMENT", label_title = "Entry",
+          include_site = FALSE, include_checks = FALSE
+        ))
       } else {
-        shiny::showModal(
-          heatmapInfoModal_CRD()
-        )
-        return(NULL)
+        shiny::showModal(heatmapInfoModal_CRD())
+        NULL
       }
     })
 

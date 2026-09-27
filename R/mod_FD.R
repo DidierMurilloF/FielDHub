@@ -456,62 +456,23 @@ mod_FD_server <- function(id) {
       )
     }
     
-    kindNum <- shiny::reactive({
-      shiny::req(input$setfactors)
-      setfactors.fd <- fd_reactive()$infoDesign$levels_each_factor
-      lengthfactors <- length(setfactors.fd)
-      end_columns <- lengthfactors + 7
-      return(end_columns)
-    }
-    )
-    
     locNum <- shiny::reactive(
       return(as.numeric(input$locLayout_fd))
     )
     
     heatmap_obj <- shiny::reactive({
       shiny::req(simuData_fd()$df)
-      if (ncol(simuData_fd()$df) == (kindNum() + 1)) {
-        locs <- factor(simuData_fd()$df$LOCATION, levels = unique(simuData_fd()$df$LOCATION))
-        locLevels <- levels(locs)
-        df = subset(simuData_fd()$df, LOCATION == locLevels[locNum()])
-        loc <- levels(factor(df$LOCATION))
-        trail <- as.character(valsfd$trail.fd)
-        label_trail <- paste(trail, ": ")
-        heatmapTitle <- paste("Heatmap for ", trail)
-        new_df <- df |>
-          dplyr::mutate(text = paste0("Site: ", loc, "\n", 
-                                      "Row: ", df$ROW, "\n", 
-                                      "Col: ", df$COLUMN, "\n", 
-                                      "Treatment: ", df$TRT_COMB, "\n", 
-                                      label_trail, round(df[,(kindNum() + 1)],2)))
-        w <- as.character(valsfd$trail.fd)
-        new_df$ROW <- as.factor(new_df$ROW) # Set up ROWS as factors
-        new_df$COLUMN <- as.factor(new_df$COLUMN) # Set up COLUMNS as factors
-        p1 <- ggplot2::ggplot(new_df, 
-                              ggplot2::aes(
-                                x = new_df[,5], 
-                                y = new_df[,4], 
-                                fill = new_df[,(kindNum() + 1)], 
-                                text = text)) +
-          ggplot2::geom_tile() +
-          ggplot2::xlab("COLUMN") +
-          ggplot2::ylab("ROW") +
-          ggplot2::labs(fill = w) +
-          fieldhub_viridis_scale() +
-          ggplot2::ggtitle(heatmapTitle) +
-          ggplot2::theme_minimal() + # I added this option 
-          ggplot2::theme(plot.title = ggplot2::element_text(
-            family="Calibri", face="bold", size=13, hjust=0.5)
-            )
-        
-        p2 <- plotly::ggplotly(p1, tooltip="text", height = 560)
-        return(p2)
+      book <- simuData_fd()$df
+      response <- as.character(valsfd$trail.fd)
+      if (length(response) == 1L && response %in% names(book)) {
+        validate_design(app_field_heatmap(
+          book, response_name = response, selected = locNum(),
+          label_column = "TRT_COMB", label_title = "Treatment",
+          include_site = TRUE, include_checks = FALSE
+        ))
       } else {
-        shiny::showModal(
-          heatmapInfoModal_fd()
-        )
-        return(NULL)
+        shiny::showModal(heatmapInfoModal_fd())
+        NULL
       }
     })
     

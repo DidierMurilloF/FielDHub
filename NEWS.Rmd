@@ -34,6 +34,12 @@ knitr::opts_chunk$set(
 
 ### New features:
 
+- All twelve classic design pages now share a heatmap data builder and renderer.
+  Locations, coordinates, treatment labels, and responses are selected by name,
+  so extra or reordered columns cannot silently change a heatmap. Existing
+  datasets, tooltips, colors, and plot sizes are unchanged; invalid selections
+  receive the shared input-error presentation.
+
 * All twelve classic app workflows now use one response-simulation service. It validates response names, preserves their existing field-book ordering, and retains the input field book, effective seed, parameters, RNG settings, and package version for later reproducible exports. An omitted simulation seed is now resolved and recorded without advancing the caller's stream. Explicitly seeded field books and existing CSV contents are unchanged.
 
 * Classic simulated responses now use the named TREATMENT or TRT_COMB column, so reordered columns or appended user metadata cannot change the treatment distributions. Valid seeded responses are unchanged. The simulator rejects malformed bounds, missing identifiers, ambiguous treatment columns, an existing RESP column, or fewer than two treatments before drawing values.

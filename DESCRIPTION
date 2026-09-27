@@ -45,6 +45,7 @@ Imports:
     dplyr,
     blocksdesign,
     ggplot2,
+    rlang,
     viridisLite,
     desplot (>= 1.11)
 Encoding: UTF-8
@@ -67,7 +68,6 @@ Suggests:
     codetools,
     testthat (>= 3.0.0),
     spelling,
-    rlang,
     glue,
     knitr,
     kableExtra,
