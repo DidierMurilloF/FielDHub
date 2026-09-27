@@ -101,7 +101,8 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
     lookup <- TRUE
     dataLookUp <- data.frame(list(ENTRY = 1:nt, LABEL_TREATMENT = TRT))
   }
-  if(any(plotNumber %% 1 != 0) || any(plotNumber < 1) || any(diff(plotNumber) < 0)) {
+  if (!is.null(plotNumber)) validate_plot_starts(plotNumber)
+  if(any(plotNumber < 1) || any(diff(plotNumber) < 0)) {
     fieldhub_abort("'incomplete_blocks()' requires plotNumber to be possitive integers and sorted.")
   }
   if (is.null(plotNumber) || length(plotNumber) != l) {

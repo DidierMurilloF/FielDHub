@@ -93,8 +93,8 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
   local_design_seed(seed)
   if(l < 1 || is.null(l)) fieldhub_abort("Please, check the value for the number of locations.")
   if (!is.null(plotNumber) && length(plotNumber) == l) {
-    if (any(!is.numeric(plotNumber)) || any(plotNumber < 1) || any(plotNumber %% 1 != 0) ||
-        any(diff(plotNumber) < 0)) {
+    validate_plot_starts(plotNumber)
+    if (any(plotNumber < 1) || any(diff(plotNumber) < 0)) {
       fieldhub_abort("The input plotNumber must be an integer greater than 0 and sorted.")
     }
   }else {

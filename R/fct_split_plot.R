@@ -144,8 +144,8 @@ split_plot <- function(wp = NULL, sp = NULL, reps = NULL, type = 2, l = 1, plotN
   }
   b <- reps
   if (!is.null(plotNumber)) {
-    if (any(!is.numeric(plotNumber)) || any(plotNumber < 1) || any(plotNumber %% 1 != 0) ||
-        any(diff(plotNumber) < 0)) {
+    validate_plot_starts(plotNumber)
+    if (any(plotNumber < 1) || any(diff(plotNumber) < 0)) {
       fieldhub_abort("Input plotNumber must be an integer greater than 0 and sorted.")
     } 
   }else {

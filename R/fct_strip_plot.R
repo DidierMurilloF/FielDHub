@@ -154,8 +154,8 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
     }
   }else fieldhub_abort("\n'strip_plot()' requires number of locations to be an integer.")
   if (!is.null(plotNumber) && length(plotNumber) == l) {
-    if (any(!is.numeric(plotNumber)) || any(plotNumber < 1) || any(plotNumber %% 1 != 0) ||
-        any(diff(plotNumber) < 0)) {
+    validate_plot_starts(plotNumber)
+    if (any(plotNumber < 1) || any(diff(plotNumber) < 0)) {
       fieldhub_abort("Input plotNumber must be an integer greater than 0, and sorted.")
     } 
   }else {

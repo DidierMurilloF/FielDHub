@@ -180,17 +180,14 @@ diagonal_arrangement <- function(
     }
     
     if (!inherits(plotNumber,"list")) { 
+        validate_plot_starts(plotNumber)
         if (!is.null(plotNumber) && is.numeric(plotNumber)) {
           if(any(plotNumber < 1) || any(diff(plotNumber) < 0)) {
               fieldhub_abort('diagonal_arrangement() requires plotNumber to be positive and sorted integers.')
           }
         }
-        if(!is.numeric(plotNumber) && !is.integer(plotNumber)) {
-            fieldhub_abort("plotNumber should be an integer or a numeric vector.")
-        }
-        if (any(plotNumber %% 1 != 0)) {
-            fieldhub_abort("plotNumber should be integers.")
-        }
+    } else {
+        for (starts in plotNumber) validate_plot_starts(starts)
     }
     
     starting_plots <- plotNumber

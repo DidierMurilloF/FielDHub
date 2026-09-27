@@ -180,8 +180,8 @@ split_split_plot <- function(wp = NULL, sp = NULL, ssp = NULL, reps = NULL, type
     }
   }
   if (!is.null(plotNumber)) {
-    if (any(!is.numeric(plotNumber)) || any(plotNumber < 1) || any(plotNumber %% 1 != 0) ||
-        any(diff(plotNumber) < 0)) {
+    validate_plot_starts(plotNumber)
+    if (any(plotNumber < 1) || any(diff(plotNumber) < 0)) {
       fieldhub_abort("Input plotNumber must be an integer greater than 0 and sorted.")
     } 
   }else {

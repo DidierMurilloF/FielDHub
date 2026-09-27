@@ -119,12 +119,7 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
   }
   seed <- resolve_seed(seed)
   local_design_seed(seed)
-  if (!is.numeric(plotNumber) && !is.integer(plotNumber)) {
-    fieldhub_abort("plotNumber should be an integer or a numeric vector.")
-  }
-  if (any(plotNumber %% 1 != 0)) {
-    fieldhub_abort("plotNumber should be integers.")
-  }
+  validate_plot_starts(plotNumber)
   
   if (!is.null(l)) {
     if (is.null(plotNumber) || !(length(plotNumber) %in% c(l, repsExpt, l * repsExpt))) {

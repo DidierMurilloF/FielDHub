@@ -20,6 +20,12 @@ knitr::opts_chunk$set(
 
 ### Breaking changes:
 
+- Starting plot numbers now reject missing, non-finite, nonnumeric, fractional,
+  and matrix values with structured input errors before numbering arithmetic.
+  This also validates per-experiment vectors in diagonal-design lists instead
+  of silently coercing them. Use numeric vectors for plot starts. Valid seeded
+  results and each engine's existing length-based defaults are unchanged.
+
 - Incomplete-block and lattice engines now validate block sizes, replication,
   and treatment counts before randomization, including when entry tables are
   supplied. Counts must be finite scalar whole numbers, block sizes must be at
