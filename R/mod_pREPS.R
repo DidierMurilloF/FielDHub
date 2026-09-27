@@ -275,23 +275,9 @@ mod_pREPS_server <- function(id){
           if(!is.numeric(data_preps$REPS) || !is.integer(data_preps$REPS) ||
              is.factor(data_preps$REPS)) validate("'REPS' must be numeric.")
           total_plots <- sum(data_preps$REPS)
-        } else if (names(data_ingested) == "bad_format") {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Invalid file; Please upload a .csv file.", 
-            type = "error")
-          return(NULL)
-        } else if (names(data_ingested) == "duplicated_vals") {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Check input file for duplicate values.", 
-            type = "error")
-          return(NULL)
-        } else if (names(data_ingested) == "missing_cols") {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Data input needs at least three columns with: ENTRY, NAME and REPS.",
-            type = "error")
+        } else {
+          app_upload_error(data_ingested,
+                           missing_columns = "Data input needs at least three columns with: ENTRY, NAME and REPS.")
           return(NULL)
         }
       } else {

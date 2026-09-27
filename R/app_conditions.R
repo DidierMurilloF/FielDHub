@@ -13,3 +13,11 @@ validate_design <- function(expr) {
     fieldhub_error = function(e) shiny::validate(conditionMessage(e))
   )
 }
+
+#' Show a shared upload error while preserving each design's column guidance
+#' @noRd
+app_upload_error <- function(result, missing_columns, notify = shinyalert::shinyalert) {
+  message <- upload_error_message(result, missing_columns)
+  if (!is.null(message)) notify("Error!!", message, type = "error")
+  invisible(NULL)
+}

@@ -218,23 +218,9 @@ mod_STRIPD_server <- function(id) {
           Vstrip <- length(as.vector(na.omit(data_strip[,2])))
           treatments <- c(Hstrip, Vstrip)
           return(list(data_strip = data_strip, treatments = treatments))
-        } else if (names(data_ingested) == "bad_format") {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Invalid file; Please upload a .csv file.", 
-            type = "error")
-          return(NULL)
-        } else if (names(data_ingested) == "duplicated_vals") {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Check input file for duplicate values.", 
-            type = "error")
-          return(NULL)
-        } else if (names(data_ingested) == "missing_cols") {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Data input needs at least two column: Hplot and Vplot", 
-            type = "error")
+        } else {
+          app_upload_error(data_ingested,
+                           missing_columns = "Data input needs at least two column: Hplot and Vplot")
           return(NULL)
         }
       } else {

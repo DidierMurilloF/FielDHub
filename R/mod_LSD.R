@@ -189,23 +189,9 @@ mod_LSD_server <- function(id){
           data_lsd <- na.omit(data_up)
           colnames(data_lsd) <- c("ROW", "COLUMN", "TREATMENT")
           return(list(data_lsd = data_lsd))
-        } else if (names(data_ingested) == "bad_format") {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Invalid file; Please upload a .csv file.", 
-            type = "error")
-          return(NULL)
-        } else if (names(data_ingested) == "duplicated_vals") {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Check input file for duplicate values.", 
-            type = "error")
-          return(NULL)
-        } else if (names(data_ingested) == "missing_cols") {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Data input needs at least one column: ROW, COLUMN, and  TREATMENT", 
-            type = "error")
+        } else {
+          app_upload_error(data_ingested,
+                           missing_columns = "Data input needs at least one column: ROW, COLUMN, and  TREATMENT")
           return(NULL)
         }
       }

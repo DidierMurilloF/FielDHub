@@ -401,25 +401,11 @@ mod_diagonal_multiple_server <- function(id) {
                                 data_api = data_entry_UP[, c("ENTRY", "NAME")],
                                 lines = NULL,
                                 same_entries = input$sameEntries))
-                } else if (names(data_ingested) == "bad_format") {
-                    shinyalert::shinyalert(
-                        "Error!!", 
-                        "Invalid file; Please upload a .csv file.", 
-                        type = "error")
-                    return(NULL)
-                    } else if (names(data_ingested) == "duplicated_vals") {
-                    shinyalert::shinyalert(
-                        "Error!!", 
-                        "Check input file for duplicate values.", 
-                        type = "error")
-                    return(NULL)
-                    } else if (names(data_ingested) == "missing_cols") {
-                    shinyalert::shinyalert(
-                        "Error!!", 
-                        "Data input needs at least two columns: ENTRY and NAME",
-                        type = "error")
-                    return(NULL)
-                    }
+                } else {
+                  app_upload_error(data_ingested,
+                                   missing_columns = "Data input needs at least two columns: ENTRY and NAME")
+                  return(NULL)
+                }
             } else {
                 req(input$checks.db)
                 req(input$blocks.db)

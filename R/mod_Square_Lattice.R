@@ -151,23 +151,9 @@ mod_Square_Lattice_server <- function(id){
           colnames(data_square) <- c("ENTRY", "NAME")
           treatments = nrow(data_square)
           return(list(data_square = data_square, treatments = treatments))
-        } else if (names(data_ingested) == "bad_format") {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Invalid file; Please upload a .csv file.", 
-            type = "error")
-          return(NULL)
-        } else if (names(data_ingested) == "duplicated_vals") {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Check input file for duplicate values.", 
-            type = "error")
-          return(NULL)
-        } else if (names(data_ingested) == "missing_cols") {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Data input needs at least two columns: ENTRY and NAME",
-            type = "error")
+        } else {
+          app_upload_error(data_ingested,
+                           missing_columns = "Data input needs at least two columns: ENTRY and NAME")
           return(NULL)
         }
       } else {

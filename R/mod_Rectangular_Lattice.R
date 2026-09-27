@@ -146,25 +146,11 @@ mod_Rectangular_Lattice_server <- function(id) {
         colnames(data_rectangular) <- c("ENTRY", "NAME")
         treatments = nrow(data_rectangular)
         return(list(data_rectangular = data_rectangular, treatments = treatments))
-      } else if (names(data_ingested) == "bad_format") {
-        shinyalert::shinyalert(
-          "Error!!", 
-          "Invalid file; Please upload a .csv file.", 
-          type = "error")
+      } else {
+        app_upload_error(data_ingested,
+                         missing_columns = "Data input needs at least two columns: ENTRY and NAME")
         return(NULL)
-      } else if (names(data_ingested) == "duplicated_vals") {
-        shinyalert::shinyalert(
-          "Error!!", 
-          "Check input file for duplicate values.", 
-          type = "error")
-        return(NULL)
-      } else if (names(data_ingested) == "missing_cols") {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Data input needs at least two columns: ENTRY and NAME",
-            type = "error")
-          return(NULL)
-        }
+      }
     } else {
       req(input$t.rectangular)
       nt <- as.numeric(input$t.rectangular)

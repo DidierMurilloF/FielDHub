@@ -226,23 +226,9 @@ mod_SSPD_server <- function(id){
           ssp <- as.vector(na.omit(data_sspd[,3]))
           treatments <- c(wp, sp, ssp)
           return(list(data_sspd = data_sspd, treatments = treatments))
-        } else if (names(data_ingested) == "bad_format") {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Invalid file; Please upload a .csv file.", 
-            type = "error")
-          return(NULL)
-        } else if (names(data_ingested) == "duplicated_vals") {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Check input file for duplicate values.", 
-            type = "error")
-          return(NULL)
-        } else if (names(data_ingested) == "missing_cols") {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Data input needs at least two column: WHOLEPLOT, SUBPLOT, and SUB_SUBPLOT", 
-            type = "error")
+        } else {
+          app_upload_error(data_ingested,
+                           missing_columns = "Data input needs at least two column: WHOLEPLOT, SUBPLOT, and SUB_SUBPLOT")
           return(NULL)
         }
       } else {

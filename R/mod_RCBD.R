@@ -190,23 +190,9 @@ mod_RCBD_server <- function(id) {
           colnames(data_rcbd) <- "TREATMENT"
           nt <- nrow(data_rcbd)
           return(list(data_rcbd = data_rcbd, treatments = nt))
-        } else if (names(data_ingested) == "bad_format") {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Invalid file; Please upload a .csv file.", 
-            type = "error")
-          return(NULL)
-        } else if (names(data_ingested) == "duplicated_vals") {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Check input file for duplicate values.", 
-            type = "error")
-          return(NULL)
-        } else if (names(data_ingested) == "missing_cols") {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Data input needs at least one column: TREATMENT", 
-            type = "error")
+        } else {
+          app_upload_error(data_ingested,
+                           missing_columns = "Data input needs at least one column: TREATMENT")
           return(NULL)
         }
       } else {

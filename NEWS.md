@@ -104,6 +104,12 @@
 
 ### Enhancements:
 
+- All 19 app modules now share upload-error message mapping and one alert
+  adapter instead of copying the same format, duplicate-value and
+  missing-column branches. Existing alert wording, design-specific column
+  guidance and successful-upload logic are preserved; the shared behavior
+  is tested without Shiny sessions.
+
 - Result validation now enforces the common field-book keys: finite
   numeric `ID` and `PLOT` columns, nonmissing atomic `LOCATION` identifiers,
   and unique column names. Existing integer/double storage and additional

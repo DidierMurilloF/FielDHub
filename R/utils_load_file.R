@@ -32,3 +32,15 @@ load_file <- function(name, path, sep, check = FALSE, design = NULL) {
     } else return(list(dataUp = dataUp))
   }
 }
+
+#' Translate the existing upload-result flags into a shared error message
+#' @noRd
+upload_error_message <- function(result, missing_columns) {
+  kind <- names(result)
+  if (length(kind) != 1L) return(NULL)
+  switch(kind,
+         bad_format = "Invalid file; Please upload a .csv file.",
+         duplicated_vals = "Check input file for duplicate values.",
+         missing_cols = missing_columns,
+         NULL)
+}

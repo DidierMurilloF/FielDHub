@@ -262,25 +262,9 @@ mod_RCBD_augmented_server <- function(id) {
           return(list(error = FALSE, 
                       dataUp_a_rcbd = data_up,
                       entries = lines))
-        } else if (names(data_ingested) == "bad_format") {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Invalid file; Please upload a .csv file.", 
-            type = "error")
-          error_message <- "Invalid file; Please upload a .csv file."
-          return(NULL)
-        } else if (names(data_ingested) == "duplicated_vals") {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Check input file for duplicate values.", 
-            type = "error")
-          error_message <- "Check input file for duplicate values."
-          return(NULL)
-        } else if (names(data_ingested) == "missing_cols") {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Data input needs at least three columns with: ENTRY and NAME.",
-            type = "error")
+        } else {
+          app_upload_error(data_ingested,
+                           missing_columns = "Data input needs at least three columns with: ENTRY and NAME.")
           return(NULL)
         }
       } else {

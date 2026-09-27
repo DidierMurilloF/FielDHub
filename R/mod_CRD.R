@@ -164,23 +164,9 @@ mod_CRD_server <- function(id) {
           colnames(data_crd) <- c("TREATMENT", "REP")
           treatments = nrow(data_crd)
           return(list(data_crd = data_crd, treatments = treatments))
-        } else if (names(data_ingested) == "bad_format") {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Invalid file; Please upload a .csv file.", 
-            type = "error")
-          return(NULL)
-        } else if (names(data_ingested) == "duplicated_vals") {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Check input file for duplicate values.", 
-            type = "error")
-          return(NULL)
-        } else if (names(data_ingested) == "missing_cols") {
-          shinyalert::shinyalert(
-            "Error!!", 
-            "Data input needs at least two columns: TREATMENT and REP.", 
-            type = "error")
+        } else {
+          app_upload_error(data_ingested,
+                           missing_columns = "Data input needs at least two columns: TREATMENT and REP.")
           return(NULL)
         }
       } else {
