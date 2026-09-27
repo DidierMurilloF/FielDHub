@@ -594,7 +594,7 @@ mod_diagonal_multiple_server <- function(id) {
             planter_multiple <- multiple_inputs()$planter_mov
             n_rows <- field_dimensions_diagonal()$d_row
             n_cols <- field_dimensions_diagonal()$d_col
-            available_percent(
+            diagonal_check_options(
                 n_rows = n_rows, 
                 n_cols = n_cols, 
                 checks = checksEntries, 

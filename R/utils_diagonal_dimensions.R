@@ -18,6 +18,16 @@ field_dimensions <- function(lines_within_loc, minimum_extra = 0.10) {
     return(choices_list)
 }
 
+#' Query diagonal check options without advancing the random-number stream
+#'
+#' @param ... Arguments passed to the legacy check-placement helper.
+#' @return The option tables and check maps from `available_percent()`.
+#' @noRd
+diagonal_check_options <- function(...) {
+    local_rng_state()
+    available_percent(...)
+}
+
 #' Feasible dimensions for single, multiple and sparse diagonal arrangements
 #'
 #' @param lines Number of experimental plots in this location, excluding checks.
@@ -77,13 +87,10 @@ diagonal_dimension_choices <- function(lines, checks, kindExpt = "SUDC",
 
     candidates <- unlist(field_dimensions(lines, minimum_extra), use.names = FALSE)
     if (length(candidates) == 0L) return(character())
-    # available_percent() samples identical check placeholders internally.
-    # Feasibility is deterministic and must not advance the caller's stream.
-    local_rng_state()
     dims <- do.call(rbind, strsplit(candidates, " x ", fixed = TRUE))
     storage.mode(dims) <- "integer"
     feasible <- vapply(seq_along(candidates), function(i) {
-        options <- available_percent(
+        options <- diagonal_check_options(
             n_rows = dims[i, 1], n_cols = dims[i, 2], checks = checks,
             Option_NCD = TRUE, kindExpt = kindExpt, stacked = stacked,
             planter_mov1 = planter, data = data,

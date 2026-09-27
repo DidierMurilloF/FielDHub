@@ -167,6 +167,9 @@
   columns cannot be overwritten. Explicit simulation seeds are scoped to their
   calls, and the modules no longer call `set.seed()` themselves. Reserved
   simulation-column names now give a clear error.
+- Diagonal and sparse check-percentage previews now use an RNG-isolated query
+  helper. Preview tables and maps are unchanged, while browsing the available
+  percentages no longer advances the session's random-number stream.
 - The shared `desplot` renderer and layout theme now live in a dedicated
   rendering file, and the augmented-RCBD source filename now correctly spells
   `RCBD`.

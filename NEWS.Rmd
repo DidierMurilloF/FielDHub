@@ -89,6 +89,8 @@ knitr::opts_chunk$set(
 
 * Spatial simulations in seven app modules now use one tested core workflow, preserving seeded responses, location order and per-location dimensions. Responses are appended by name and aligned by plot ID, so additional metadata columns cannot be overwritten. Explicit simulation seeds are scoped to their calls, and the modules no longer call `set.seed()` themselves. Reserved simulation-column names now give a clear error.
 
+* Diagonal and sparse check-percentage previews now use an RNG-isolated query helper. Preview tables and maps are unchanged, while browsing the available percentages no longer advances the session's random-number stream.
+
 * The shared `desplot` renderer and layout theme now live in a dedicated rendering file, and the augmented-RCBD source filename now correctly spells `RCBD`.
 
 * The generated namespace no longer imports the unused `dplyr::glimpse()`, `golem::activate_js()` and `stats::dist()` symbols.
