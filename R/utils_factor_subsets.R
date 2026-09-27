@@ -1,121 +1,88 @@
-#' factor_subsets 
+#' Rectangular factor pairs in the established dimension-option order
 #'
-#' @description A utils function
-#' 
+#' @description Find feasible rectangles without enumerating every subset of
+#' repeated prime factors. Filter precedence and prime-number behavior are
+#' retained for compatibility with existing layout choices.
+#'
 #' @author Matthew Seelfedt [aut]
-#'
-#' @return The return value, if any, from executing the utility.
-#'
+#' @return A list of named row/column pairs, labels and an optional matrix,
+#' or NULL when the requested filters admit no rectangle.
 #' @noRd
-factor_subsets <- function(
-    n, 
-    diagonal = FALSE, 
-    augmented = FALSE, 
-    all_factors = FALSE) {
-    
+factor_subsets <- function(n, diagonal = FALSE, augmented = FALSE, all_factors = FALSE) {
     factors <- prime_factors(n)
-    left <- 1
-    right <- 1
-    combos <- list()
-    labels <- list()
-    both <- list()
-    if(length(sq(length(factors))) == 2) {
+    if (length(factors) == 1L) {
         if (all_factors == TRUE) {
-        comb_factors <- matrix(data = c(1,factors, factors, 1), 
-                                nrow = 2, 
-                                ncol = 2, 
-                                byrow = TRUE)
-        return(list(comb_factors = comb_factors))
-        } else return(NULL)
-    } else {
-        list <- sq(length(factors))[-1,][-(nrow(sq(length(factors)))-1),]
-    }
-    for (i in 1:nrow(list)) {
-        for (n in 1:length(factors)) {
-        if (list[i,][n]==1) {
-            left <- left*factors[n]
-        } else {
-            right <- right*factors[n]
+            return(list(comb_factors = matrix(c(1, factors, factors, 1),
+                                               nrow = 2, ncol = 2, byrow = TRUE)))
         }
-        }
-        cols <- 3
-        rows <- 3
-        if (diagonal) {
-        cols <- 9
-        rows <- 4
-        } else if (augmented) {
-        cols <- 3
-        rows <- 0
-        } else if (all_factors) {
-        cols <- 1
-        rows <- 1
-        }
-        if(left > rows & right > cols) {
-        combos[[i]] <- c(row = left, col = right)
-        labels[[i]] <- paste(left,"x",right,sep = " ")
-        }
-        left <- 1
-        right <- 1
-    }
-    combos <- unique(combos[!sapply(combos,is.null)])
-    labels <- unique(labels[!sapply(labels,is.null)])
-    
-    if (all_factors) {
-        c_factors <- labels
-        n_labels <- length(labels)
-        comb_factors <- matrix(data = NA, nrow = n_labels, ncol = 2)
-        for (i in 1:n_labels) {
-        comb_factors[i,] <- as.numeric(unlist(strsplit(c_factors[[i]],  " x ")))
-        }
-    } else comb_factors <- NULL
-    
-    if (length(combos) == 0) {
         return(NULL)
-    } else return(list(combos = combos, 
-                        labels = labels, 
-                        comb_factors = comb_factors))
+    }
+    pairs <- ordered_factor_pairs(n)
+    rows <- 3
+    cols <- 3
+    if (diagonal) {
+        rows <- 4
+        cols <- 9
+    } else if (augmented) {
+        rows <- 0
+        cols <- 3
+    } else if (all_factors) {
+        rows <- 1
+        cols <- 1
+    }
+    pairs <- pairs[pairs[, "row"] > rows & pairs[, "col"] > cols, , drop = FALSE]
+    if (nrow(pairs) == 0L) return(NULL)
+    combos <- lapply(seq_len(nrow(pairs)), function(i) {
+        if (is.null(names(factors))) return(pairs[i, ])
+        # Named scalar inputs historically propagate prime-factor names to
+        # individual pair elements. Retain those attributes as well as values.
+        remaining <- pairs[i, "row"]
+        selected <- logical(length(factors))
+        for (j in rev(seq_along(factors))) {
+            if (remaining %% factors[j] == 0) {
+                selected[j] <- TRUE
+                remaining <- remaining / factors[j]
+            }
+        }
+        left <- right <- 1
+        for (j in seq_along(factors)) {
+            if (selected[j]) left <- left * factors[j] else right <- right * factors[j]
+        }
+        c(row = left, col = right)
+    })
+    labels <- lapply(seq_len(nrow(pairs)), function(i) paste(pairs[i, 1], "x", pairs[i, 2]))
+    list(combos = combos, labels = labels,
+         comb_factors = if (all_factors) unname(pairs) else NULL)
 }
 
-#' sq
+#' Proper divisor pairs in legacy binary-subset first-appearance order
 #'
-#' @description A utils function
+#' A divisor determines how many copies of each prime go on the left. Its
+#' first appearance in binary-subset enumeration selects the rightmost copies
+#' of each repeated prime. The corresponding mask orders the distinct pairs
+#' without constructing any of the 2^length(factors) subsets.
 #'
-#' @return The return value, if any, from executing the utility.
-#'
+#' Work is bounded by the square-root divisor search and at most 30 prime
+#' factors per divisor in the supported signed-integer range.
 #' @noRd
-sq <- function (J, s = NULL) 
-{
-  M = NULL
-  if (J > 0) {
-    if (!is.null(s)) {
-      if (s == J) 
-        M = matrix(1, 1, J)
-      if (s > 1 & s < J) 
-        for (i in 1:(J - s + 1)) {
-          S = sq(J - i, s - 1)
-          if (is.null(S)) 
-            r = 0
-          else r = dim(S)[1]
-          M1 = cbind(matrix(0, r, i - 1), matrix(1, r, 
-                                                 1), S)
-          M = rbind(M1, M)
+ordered_factor_pairs <- function(n) {
+    factors <- prime_factors(n)
+    size <- as.double(n)
+    left <- as.double(integer_divisors(size))
+    left <- left[left > 1 & left < size]
+    groups <- rle(unname(factors))
+    shifts <- length(factors) - cumsum(groups$lengths)
+    remaining <- left
+    masks <- numeric(length(left))
+    for (i in seq_along(groups$values)) {
+        exponents <- integer(length(left))
+        for (power in seq_len(groups$lengths[i])) {
+            divisible <- remaining %% groups$values[i] == 0
+            exponents[divisible] <- exponents[divisible] + 1L
+            remaining[divisible] <- remaining[divisible] / groups$values[i]
         }
-      if (s == 1) {
-        M = matrix(0, J, J)
-        for (j in 1:J) M[j, J - j + 1] = 1
-      }
-      if (s == 0) 
-        M = matrix(0, 1, J)
+        masks <- masks + (2^exponents - 1) * 2^shifts[i]
     }
-    else {
-      if (J == 1) {
-        M = matrix(c(0, 1), 2, 1)
-      }
-      else {
-        M1 = sq(J - 1)
-        M = rbind(cbind(0, M1), cbind(1, M1))
-      }
-    }
-  }
-  return(M)
+    left <- left[order(masks)]
+    cbind(row = left, col = size / left)
 }

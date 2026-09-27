@@ -124,6 +124,13 @@
 
 ### Enhancements:
 
+- Field-dimension searches now enumerate distinct divisor pairs instead of
+  every subset of repeated prime factors. The established option order,
+  filters, numeric values and named-input attributes are retained, while
+  work stays bounded for counts such as `2^30`. Empty mixed-filter searches
+  now return no choices instead of a subscript error. A repeatable dimension
+  benchmark accompanies the change.
+
 - Field designs, family splits and allocation plans now share one result
   construction boundary. Schema validation checks design-specific field-book
   columns and family-split location totals in addition to common keys and
