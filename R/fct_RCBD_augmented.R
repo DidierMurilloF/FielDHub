@@ -110,13 +110,12 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
                            exptName = NULL, seed = NULL, locationNames = NULL, 
                            repsExpt = 1, random = TRUE, data = NULL, 
                            nrows = NULL, ncols = NULL, year = NULL) {
+  plotNumber_supplied <- !missing(plotNumber)
   validate_locations(l)
   validate_flag(random, "random")
   year <- resolve_year(year)
   repsStack <- match_design_choice(repsStack, c("vertical", "horizontal"), "repsStack")
-  if (all(c("serpentine", "cartesian") != planter)) {
-    fieldhub_abort("Input planter choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
-  }
+  validate_planter(planter)
   seed <- resolve_seed(seed)
   local_design_seed(seed)
   validate_plot_starts(plotNumber)
@@ -125,15 +124,11 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
   if (!is.null(plotNumber) && !is.null(repsExpt)) {
     validate_iteration_budget(repsExpt, "repsExpt")
   }
-  
+
   if (!is.null(l)) {
     if (is.null(plotNumber) || !(length(plotNumber) %in% c(l, repsExpt, l * repsExpt))) {
-      if (l > 1) {
-        default_plots <- seq(1001, 1000 * (l + 1), 1000)
-      } else {
-        default_plots <- 1001
-      }
-      warn_default_plot_numbers(plotNumber, l, default_plots)
+      default_plots <- default_plot_starts(l, 1001)
+      warn_default_plot_numbers(plotNumber, l, default_plots, caller_supplied = plotNumber_supplied)
       plotNumber <- default_plots
     }
   } else {
@@ -194,7 +189,7 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
   
   if (l < 1 || is.null(l)) fieldhub_abort("Check the input for the number of locations.")
   if (is.null(plotNumber) || !(length(plotNumber) %in% c(l, repsExpt, l * repsExpt))) {
-    plotNumber <- seq(1001, 1000 * (l + 1), 1000)
+    plotNumber <- default_plot_starts(l, 1001)
   }
   
   outputDesign_loc <- vector(mode = "list", length = l)
@@ -228,8 +223,10 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
     )
     
     if (is.null(inferred)) {
-      # Feedback (now includes side-by-side options)
-      set_blocks <- set_augmented_blocks(lines = lines, checks = checks)
+      # Feedback (now includes side-by-side options). Use the same starting
+      # block count (start = 3) as the "too small" check below, so the two
+      # error paths list exactly the same accepted block counts.
+      set_blocks <- set_augmented_blocks(lines = lines, checks = checks, start = 3)
       blocks_dims <- set_blocks$blocks_dims
       colnames(blocks_dims) <- c("BLOCKS", "DIMENSIONS")
       feedback <- as.data.frame(blocks_dims)

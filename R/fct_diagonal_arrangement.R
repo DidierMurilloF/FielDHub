@@ -169,10 +169,8 @@ diagonal_arrangement <- function(
             fieldhub_abort("With 'sameEntries', all blocks must have the same size.")
         }
     }
-  
-    if (all(c("serpentine", "cartesian") != planter)) {
-        fieldhub_abort('Input for planter is unknown. Please, choose one: "serpentine" or "cartesian"')
-    }
+
+    validate_planter(planter)
     if (all(c("SUDC", "DBUDC") != kindExpt)) {
         fieldhub_abort('Input for kindExpt is unknown. Please, choose one: "SUDC" or "DBUDC"')
     }
@@ -196,7 +194,7 @@ diagonal_arrangement <- function(
         if (!is.null(l)) {
         if (is.null(plotNumber) || length(plotNumber) != l) {
             if (l > 1){
-            plotNumber <- as.list(seq(1001, 1000*(l+1), 1000))
+            plotNumber <- as.list(default_plot_starts(l, 1001))
             } else plotNumber <- list(1001)
         }
         } else fieldhub_abort("Number of locations/sites is missing")
@@ -210,7 +208,7 @@ diagonal_arrangement <- function(
             if (all(lengths(plotNumber) == num_expts) &
                 length(plotNumber) == l) {
                 plotNumber <- plotNumber
-            } else plotNumber <- as.list(seq(1001, 1000*(l+1), 1000))
+            } else plotNumber <- as.list(default_plot_starts(l, 1001))
             } else {
             if (l == 1) {
                 if (length(plotNumber) == num_expts) {
@@ -221,7 +219,7 @@ diagonal_arrangement <- function(
             } else {
                 if (length(plotNumber) == l) {
                 plotNumber <- as.list(plotNumber)
-                } else plotNumber <- as.list(seq(1001, 1000*(l+1), 1000))
+                } else plotNumber <- as.list(default_plot_starts(l, 1001))
             }
             } 
         }

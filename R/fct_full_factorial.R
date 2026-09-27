@@ -83,12 +83,11 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
                            planter = "serpentine", seed = NULL,
                            locationNames = NULL, factorLabels = TRUE,
                            data = NULL) {
+  plotNumber_supplied <- !missing(plotNumber)
   validate_locations(l)
   validate_flag(continuous, "continuous")
   validate_flag(factorLabels, "factorLabels")
-  if (all(c("serpentine", "cartesian") != planter)) {
-    fieldhub_abort("Input for planter choice is unknown. Please, choose one: serpentine or cartesian.")
-  }
+  validate_planter(planter)
   seed <- resolve_seed(seed)
   local_design_seed(seed)
   if(l < 1 || is.null(l)) fieldhub_abort("Please, check the value for the number of locations.")
@@ -98,8 +97,8 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
       fieldhub_abort("The input plotNumber must be an integer greater than 0 and sorted.")
     }
   }else {
-    default_plots <- seq(1001, 1000*(l+1), 1000)
-    warn_default_plot_numbers(plotNumber, l, default_plots)
+    default_plots <- default_plot_starts(l, 1001)
+    warn_default_plot_numbers(plotNumber, l, default_plots, caller_supplied = plotNumber_supplied)
     plotNumber <- default_plots
   }
   generated_data <- is.null(data)

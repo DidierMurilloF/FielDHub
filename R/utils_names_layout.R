@@ -137,7 +137,8 @@ paste_by_row <- function(files_list){
 #' @noRd
 #'
 #'
-plot_number_splits <- function(plot.number = NULL, reps = NULL, l = NULL, t = NULL, crd = FALSE) {
+plot_number_splits <- function(plot.number = NULL, reps = NULL, l = NULL, t = NULL, crd = FALSE,
+                               supplied = TRUE) {
   b <- reps
   wp <- t
   if (!is.null(plot.number)) {
@@ -166,8 +167,8 @@ plot_number_splits <- function(plot.number = NULL, reps = NULL, l = NULL, t = NU
         }
       }
     }else if (length(plot.number) < l) {
-      default_plots <- seq(1001, 1000*(l+1), 1000)
-      warn_default_plot_numbers(plot.number, l, default_plots)
+      default_plots <- default_plot_starts(l, 1001)
+      warn_default_plot_numbers(plot.number, l, default_plots, caller_supplied = supplied)
       plot.number <- default_plots
       plot.number_serie <- seriePlot.numbers(plot.number = plot.number, reps = b, l = l, t = wp)
       plot.random <- matrix(data = NA, nrow = wp * b, ncol = l)
@@ -192,7 +193,7 @@ plot_number_splits <- function(plot.number = NULL, reps = NULL, l = NULL, t = NU
       }
     }else if (length(plot.number) > l) {
       default_plots <- plot.number[1:l]
-      warn_default_plot_numbers(plot.number, l, default_plots)
+      warn_default_plot_numbers(plot.number, l, default_plots, caller_supplied = supplied)
       plot.number <- default_plots
       plot.number_serie <- seriePlot.numbers(plot.number = plot.number, reps = b, l = l, t = wp)
       plot.random <- matrix(data = NA, nrow = wp * b, ncol = l)
@@ -217,8 +218,8 @@ plot_number_splits <- function(plot.number = NULL, reps = NULL, l = NULL, t = NU
       }
     }
   }else {
-    default_plots <- seq(1001, 1000*(l+1), 1000)
-    warn_default_plot_numbers(plot.number, l, default_plots)
+    default_plots <- default_plot_starts(l, 1001)
+    warn_default_plot_numbers(plot.number, l, default_plots, caller_supplied = supplied)
     plot.number <- default_plots
     plot.number_serie <- seriePlot.numbers(plot.number = plot.number, reps = b, l = l, t = wp)
     plot.random <- matrix(data = NA, nrow = wp * b, ncol = l)
@@ -238,7 +239,8 @@ plot_number_splits <- function(plot.number = NULL, reps = NULL, l = NULL, t = NU
 #' @noRd 
 #' 
 #' 
-seriePlot.numbers <- function(plot.number = NULL, reps = NULL, l = NULL, t = NULL) {
+seriePlot.numbers <- function(plot.number = NULL, reps = NULL, l = NULL, t = NULL,
+                              supplied = TRUE) {
   overlap <- FALSE
   if (t >= 100) overlap <- TRUE
   if (!is.null(plot.number)) {
@@ -252,8 +254,8 @@ seriePlot.numbers <- function(plot.number = NULL, reps = NULL, l = NULL, t = NUL
       plot.number <- plot.number[1:l]
     }
   }else {
-    default_plots <- seq(1001, 1000*(l+1), 1000)
-    warn_default_plot_numbers(plot.number, l, default_plots)
+    default_plots <- default_plot_starts(l, 1001)
+    warn_default_plot_numbers(plot.number, l, default_plots, caller_supplied = supplied)
     plot.number <- default_plots
   }
   plot.numbs <- list()

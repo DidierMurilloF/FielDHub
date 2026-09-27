@@ -129,7 +129,7 @@ multi_location_prep <- function(
     }
     validate_location_labels(locationNames, l)
     if (missing(plotNumber) || length(plotNumber) != l) {
-        default_plots <- seq(1, 1000 * l, by = 1000)[1:l]
+        default_plots <- default_plot_starts(l, 1)
         if (!missing(plotNumber)) {
             warn_default_plot_numbers(plotNumber, l, default_plots)
         }
@@ -137,9 +137,7 @@ multi_location_prep <- function(
     }
     if (missing(exptName)) exptName <- "PrepExpt"
     if (missing(planter) || is.null(planter)) planter <- "serpentine"
-    if (all(c("serpentine", "cartesian") != planter)) {
-        fieldhub_abort("Input planter choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
-    }
+    validate_planter(planter)
     if (missing(copies_per_entry) && missing(desired_avg)) {
         fieldhub_abort("multi_location_prep() requires either the argument copies_per_entry or desired_avg.")
     }

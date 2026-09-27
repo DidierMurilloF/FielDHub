@@ -17,3 +17,48 @@ test_that("every planter check shares one classed error", {
     expect_identical(e$options, c("serpentine", "cartesian"))
   }
 })
+
+test_that("every exported planter check shares the same classed error", {
+  calls <- list(
+    function() RCBD(t = 4, reps = 2, planter = "zigzag", seed = 1),
+    function() full_factorial(setfactors = c(2, 2), planter = "zigzag", seed = 1),
+    function() partially_replicated(nrows = 8, ncols = 5, repGens = c(10, 20), repUnits = c(2, 1),
+                                    planter = "zigzag", seed = 1),
+    function() diagonal_arrangement(nrows = 15, ncols = 20, lines = 270, checks = 4,
+                                    planter = "zigzag", seed = 1),
+    function() latin_square(t = 4, planter = "zigzag", seed = 1),
+    function() RCBD_augmented(lines = 50, checks = 3, b = 6, planter = "zigzag", seed = 1)
+  )
+  for (f in calls) {
+    e <- expect_error(f(), class = "fieldhub_input_error")
+    expect_identical(e$options, c("serpentine", "cartesian"))
+  }
+})
+
+test_that("default_plot_starts() reproduces the two inline formulas it replaces", {
+  expect_identical(FielDHub:::default_plot_starts(1, 1001), 1001)
+  expect_identical(FielDHub:::default_plot_starts(3, 1001), c(1001, 2001, 3001))
+  expect_identical(FielDHub:::default_plot_starts(1, 1), 1)
+  expect_identical(FielDHub:::default_plot_starts(3, 1), c(1, 1001, 2001))
+})
+
+test_that("(R5) a design called with its own default plotNumber builds defaults silently", {
+  expect_no_warning(RCBD(t = 4, reps = 2, l = 2, seed = 1))
+  expect_no_warning(split_plot(wp = 3, sp = 2, reps = 2, l = 2, seed = 1))
+  expect_no_warning(strip_plot(Hplots = 3, Vplots = 2, reps = 2, l = 2, seed = 1))
+})
+
+test_that("(R5) a caller-supplied wrong-length plotNumber still warns", {
+  w <- expect_warning(RCBD(t = 4, reps = 2, l = 2, plotNumber = 101, seed = 1),
+                      class = "fieldhub_default_warning")
+  expect_identical(w$argument, "plotNumber")
+})
+
+test_that("augmented RCBD lists exactly the block counts it accepts", {
+  # This is a fieldhub_dimension_error (block counts are field-size feasibility,
+  # not an argument-shape problem), a more specific fieldhub_error than the
+  # brief's fieldhub_input_error placeholder class.
+  e <- expect_error(RCBD_augmented(lines = 20, checks = 4, b = 2, seed = 1), class = "fieldhub_error")
+  accepted <- Filter(function(b) !inherits(try(RCBD_augmented(lines = 20, checks = 4, b = b, seed = 1), silent = TRUE), "try-error"), 1:10)
+  for (b in accepted) expect_true(grepl(paste0("\\b", b, "\\b"), conditionMessage(e)))
+})

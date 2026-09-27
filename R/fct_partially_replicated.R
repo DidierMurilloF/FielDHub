@@ -144,15 +144,14 @@ partially_replicated <- function(
     data = NULL,
     allow_fillers = FALSE,
     year = NULL) {
+    plotNumber_supplied <- !missing(plotNumber)
     validate_locations(l)
     validate_flag(spread_reps, "spread_reps")
     validate_flag(multiLocationData, "multiLocationData")
     validate_flag(allow_fillers, "allow_fillers")
     year <- resolve_year(year)
-    
-    if (all(c("serpentine", "cartesian") != planter)) {
-        fieldhub_abort('Input "planter" is unknown. Please, choose one: "serpentine" or "cartesian"')
-    }
+
+    validate_planter(planter)
 
     if (is.null(nrows) || is.null(ncols) || !is.numeric(nrows) || !is.numeric(ncols)) {
         fieldhub_abort('Basic design parameters missing (nrows, ncols) or is not numeric.')
@@ -197,12 +196,8 @@ partially_replicated <- function(
     
     if (!is.null(l)) {
         if (is.null(plotNumber) || length(plotNumber) != l) {
-            if (l > 1) {
-                default_plots <- seq(1001, 1000*(l+1), 1000)
-            } else {
-                default_plots <- 1001
-            }
-            warn_default_plot_numbers(plotNumber, l, default_plots)
+            default_plots <- default_plot_starts(l, 1001)
+            warn_default_plot_numbers(plotNumber, l, default_plots, caller_supplied = plotNumber_supplied)
             plotNumber <- default_plots
         }
     } else fieldhub_abort("Number of locations/sites is missing")

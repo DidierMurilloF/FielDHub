@@ -144,14 +144,13 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
                  continuous = FALSE, planter = "serpentine",
                  seed = NULL, locationNames = NULL, data = NULL,
                  checks = NULL, rep_checks = NULL, spread_checks = TRUE) {
+  plotNumber_supplied <- !missing(plotNumber)
   validate_locations(l)
   validate_flag(continuous, "continuous")
   validate_flag(spread_checks, "spread_checks")
   has_checks <- !is.null(checks)
   b <- reps
-  if (all(c("serpentine", "cartesian") != planter)) {
-    fieldhub_abort("Input planter choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
-  }
+  validate_planter(planter)
   seed <- resolve_seed(seed)
   local_design_seed(seed)
   if (is.null(l) || !is.numeric(l) || l %% 1 != 0) {
@@ -164,8 +163,8 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
       fieldhub_abort("Input plotNumber must be an integer greater than 0 and sorted.")
     } 
   }else {
-    default_plots <- seq(1001, 1000*(l+1), 1000)
-    warn_default_plot_numbers(plotNumber, l, default_plots)
+    default_plots <- default_plot_starts(l, 1001)
+    warn_default_plot_numbers(plotNumber, l, default_plots, caller_supplied = plotNumber_supplied)
     plotNumber <- default_plots
   }
   validate_location_labels(locationNames, l)

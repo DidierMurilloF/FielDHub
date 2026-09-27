@@ -81,9 +81,7 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
 
   seed <- resolve_seed(seed)
   local_design_seed(seed)
-  if (all(c("serpentine", "cartesian") != planter)) {
-    fieldhub_abort('Input planter is unknown. Please, choose one: "serpentine" or "cartesian"')
-  }
+  validate_planter(planter)
   n <- t
   l <- 1
   force(data)
@@ -130,7 +128,7 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
     }else if (l > 1 && !is.null(locationNames)) {
       if (length(locationNames) < l) locationNames <- 1:l
     }
-    if (length(plotNumber) < l || is.null(plotNumber)) plotNumber <- seq(1001, 1000*(l+1), 1000)
+    if (length(plotNumber) < l || is.null(plotNumber)) plotNumber <- default_plot_starts(l, 1001)
   }else fieldhub_abort("\n'latinsquare()' requires a integer for number of locations!")
   plot.numbs <- seriePlot.numbers(plot.number = plotNumber, reps = reps, l = l, t = ls.len*ls.len)
   validate_location_labels(locationNames, l)

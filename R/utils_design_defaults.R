@@ -28,12 +28,22 @@ warn_default_values <- function(argument, supplied, used, reason) {
 
 #' Warn that default starting plots replace the ones supplied
 #'
+#' @description (Ruling R5) A design built with its own default `plotNumber`
+#' (the caller never supplied one) falls back to the per-location defaults
+#' silently, even when that default does not have one value per location;
+#' only a caller-supplied value of the wrong length raises
+#' `fieldhub_default_warning`.
+#'
 #' @param plotNumber Starting plot numbers supplied by the user, or NULL.
 #' @param l Number of locations.
 #' @param default Starting plot numbers used instead.
+#' @param caller_supplied Whether the caller actually supplied `plotNumber`
+#'   (typically `!missing(plotNumber)` in the public function), as opposed to
+#'   the fallback being reached through the argument's own default value.
 #'
 #' @noRd
-warn_default_plot_numbers <- function(plotNumber, l, default) {
+warn_default_plot_numbers <- function(plotNumber, l, default, caller_supplied = TRUE) {
+  if (!caller_supplied) return(invisible(NULL))
   if (is.null(plotNumber)) {
     reason <- "'plotNumber' was not supplied"
   } else {
@@ -48,12 +58,31 @@ warn_default_plot_numbers <- function(plotNumber, l, default) {
 #' @param locationNames Location names supplied by the user.
 #' @param l Number of locations.
 #' @param default Location names used instead.
+#' @param caller_supplied Whether the caller actually supplied
+#'   `locationNames`; see `warn_default_plot_numbers()` (Ruling R5).
 #'
 #' @noRd
-warn_default_location_names <- function(locationNames, l, default) {
+warn_default_location_names <- function(locationNames, l, default, caller_supplied = TRUE) {
+  if (!caller_supplied) return(invisible(NULL))
   reason <- paste0("'locationNames' has ", length(locationNames), " value(s) for ",
                    l, " location(s)")
   warn_default_values("locationNames", locationNames, default, reason)
+}
+
+#' Default per-location starting plot numbers
+#'
+#' @description Shared formula behind the two starting-plot-number bases used
+#' across engines: `default_plot_starts(l, 1001)` for engines whose first
+#' location starts at 1001, and `default_plot_starts(l, 1)` for engines whose
+#' first location starts at 1. Output is unchanged from the inline
+#' `seq()` calls it replaces.
+#'
+#' @param l Number of locations.
+#' @param base Starting plot number for the first location.
+#' @return An integer-like numeric vector of length `l`.
+#' @noRd
+default_plot_starts <- function(l, base) {
+  seq(base, base + 1000 * (l - 1), by = 1000)
 }
 
 #' Year recorded in the YEAR column of a field book
