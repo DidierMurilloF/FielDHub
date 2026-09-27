@@ -81,9 +81,7 @@ mod_RowCol_ui <- function(id){
                                       value = "FARGO")
                      )
                    ),
-                   shiny::numericInput(ns("seed.rcd"),
-                                label = "Random Seed:", 
-                                value = 2437),
+                   app_seed_input(ns("seed.rcd"), value = 2437),
                    shiny::fluidRow(
                      shiny::column(6,
                             shiny::actionButton(
@@ -261,7 +259,6 @@ mod_RowCol_server <- function(id){
       shiny::req(input$r.rcd)
       shiny::req(input$plot_start.rcd)
       shiny::req(input$Location.rcd)
-      shiny::req(input$seed.rcd)
       shiny::req(input$l.rcd)
       if (input$k.rcd == "No Options Available") {
         shinyalert::shinyalert(
@@ -279,7 +276,7 @@ mod_RowCol_server <- function(id){
         input$plot_start.rcd, "Starting Plot Number"
       ))
       site_names <-  as.vector(unlist(strsplit(input$Location.rcd, ",")))
-      seed <- as.numeric(input$seed.rcd)
+      seed <- validate_design(resolve_seed(read_app_seed(input$seed.rcd)))
       return(list(r = r.rcd, 
                   k = k.rcd, 
                   t = treatments, 

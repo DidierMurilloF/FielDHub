@@ -70,10 +70,7 @@ mod_LSD_ui <- function(id){
                            value = "FARGO")
           )
         ),
-        shiny::numericInput(ns("seed.lsd"),
-                     label = "Random Seed:", 
-                     value = 123, 
-                     min = 1),
+        app_seed_input(ns("seed.lsd"), value = 123),
         
         shiny::fluidRow(
           shiny::column(6,
@@ -200,7 +197,6 @@ mod_LSD_server <- function(id){
       shiny::req(input$plot_start.lsd)
       shiny::req(input$Location.lsd)
       shiny::req(input$reps.lsd)
-      shiny::req(input$seed.lsd)
       
       if (input$owndataLSD == "Yes") {
         shiny::req(get_data_lsd())
@@ -235,7 +231,7 @@ mod_LSD_server <- function(id){
         input$plot_start.lsd, "Starting Plot Number"
       ))
       loc.lsd <-  as.vector(unlist(strsplit(input$Location.lsd, ",")))
-      seed.number.lsd <- as.numeric(input$seed.lsd)
+      seed.number.lsd <- validate_design(resolve_seed(read_app_seed(input$seed.lsd)))
       planting_lsd <- input$planter.lsd
 
       return(

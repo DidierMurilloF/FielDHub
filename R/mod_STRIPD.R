@@ -96,10 +96,7 @@ mod_STRIPD_ui <- function(id){
         ),
         # -----------------------------------------------
         
-        shiny::numericInput(inputId = ns("myseed.strip"),
-                     label = "Random Seed:", 
-                     value = 123, 
-                     min = 1),
+        app_seed_input(ns("myseed.strip"), value = 123),
         
         shiny::fluidRow(
           shiny::column(6,
@@ -245,13 +242,12 @@ mod_STRIPD_server <- function(id) {
       
       shiny::req(input$plot_start.strip)
       shiny::req(input$Location.strip)
-      shiny::req(input$myseed.strip)
       shiny::req(input$l.strip)
       shiny::req(input$blocks.strip)
       shiny::req(input$planter.strip)
       
       l.strip <- as.numeric(input$l.strip)
-      seed.strip <- as.numeric(input$myseed.strip)
+      seed.strip <- validate_design(resolve_seed(read_app_seed(input$myseed.strip)))
       plot_start.strip <- validate_design(read_whole_numbers(
         input$plot_start.strip, "Starting Plot Number"
       ))

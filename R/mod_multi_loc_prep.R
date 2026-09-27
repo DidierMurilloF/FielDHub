@@ -157,12 +157,7 @@ mod_multi_loc_preps_ui <- function(id){
             shiny::fluidRow(
                 shiny::column(
                     width = 6,
-                    shiny::numericInput(
-                        ns("seed_preps"), 
-                        label = "Random Seed:", 
-                        value = 1, 
-                        min = 1
-                    ) 
+                    app_seed_input(ns("seed_preps"), value = 1)
                 ),
                 shiny::column(
                     width = 6, 
@@ -303,7 +298,7 @@ mod_multi_loc_preps_server <- function(id){
           input$plot_start_preps, "Starting Plot Number"
         ))
         site_names <- as.character(as.vector(unlist(strsplit(input$loc_name_preps, ","))))
-        seed_number <- as.numeric(input$seed_preps)
+        seed_number <- validate_design(resolve_seed(read_app_seed(input$seed_preps)))
         sites = as.numeric(input$locs_prep)
         if (length(site_names) == 0 || length(site_names) != sites) {
             site_names <- paste0("LOC", 1:sites)
@@ -952,7 +947,7 @@ mod_multi_loc_preps_server <- function(id){
 
     app_spatial_workflow(input, output, session,
       design = function() pREPS_reactive(),
-      seed = function() as.numeric(prep_inputs()$seed_number),
+      seed = function() validate_design(read_app_seed(prep_inputs()$seed_number)),
       dimensions = function(field_book) list(nrows = field_dimensions_prep()$d_row, ncols = field_dimensions_prep()$d_col),
       selected = function() user_site_selection(),
       filename = function() {

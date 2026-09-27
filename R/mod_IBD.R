@@ -78,9 +78,7 @@ mod_IBD_ui <- function(id) {
                            value = "FARGO")
           )
         ), 
-        shiny::numericInput(inputId = ns("seed.ibd"),
-                     label = "Random Seed:",
-                     value = 4),
+        app_seed_input(ns("seed.ibd"), value = 4),
         shiny::fluidRow(
           shiny::column(6,
                  shiny::actionButton(
@@ -265,7 +263,6 @@ mod_IBD_server <- function(id) {
       
       shiny::req(input$r.ibd)
       shiny::req(input$k.ibd)
-      shiny::req(input$seed.ibd)
       shiny::req(input$plot_start.ibd)
       shiny::req(input$Location.ibd)
       shiny::req(input$l.ibd)
@@ -279,7 +276,7 @@ mod_IBD_server <- function(id) {
         input$plot_start.ibd, "Starting Plot Number"
       ))
       site_names <-  as.vector(unlist(strsplit(input$Location.ibd, ",")))
-      seed <- as.numeric(input$seed.ibd)
+      seed <- validate_design(resolve_seed(read_app_seed(input$seed.ibd)))
       sites <- as.numeric(input$l.ibd)
       if (input$k.ibd == "No Options Available") {
         shinyalert::shinyalert(

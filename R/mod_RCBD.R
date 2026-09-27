@@ -97,10 +97,7 @@ mod_RCBD_ui <- function(id) {
                   "Input Location:",
                   value = "FARGO"),
         
-        shiny::numericInput(inputId = ns("seed.rcbd"),
-                     label = "Random Seed:",
-                     value = 123, 
-                     min = 1),
+        app_seed_input(ns("seed.rcbd"), value = 123),
         
         shiny::fluidRow(
           shiny::column(6,
@@ -221,7 +218,6 @@ mod_RCBD_server <- function(id) {
       shiny::req(get_data_rcbd())
       
       shiny::req(input$b)
-      shiny::req(input$seed.rcbd)
       shiny::req(input$plot_start.rcbd)
       shiny::req(input$Location.rcbd)
       shiny::req(input$l.rcbd)
@@ -234,7 +230,7 @@ mod_RCBD_server <- function(id) {
         input$plot_start.rcbd, "Starting Plot Number"
       ))
       site_names <-  as.vector(unlist(strsplit(input$Location.rcbd, ",")))
-      seed <- as.numeric(input$seed.rcbd)
+      seed <- validate_design(resolve_seed(read_app_seed(input$seed.rcbd)))
       sites <- as.numeric(input$l.rcbd)
       continuous <- input$continuous.plot
 

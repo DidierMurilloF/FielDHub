@@ -101,10 +101,7 @@ mod_SSPD_ui <- function(id){
           )
         ),
         
-        shiny::numericInput(inputId = ns("seed.sspd"),
-                     label = "Random Seed:", 
-                     value = 123, 
-                     min = 1),
+        app_seed_input(ns("seed.sspd"), value = 123),
         
         shiny::fluidRow(
           shiny::column(6,
@@ -248,12 +245,11 @@ mod_SSPD_server <- function(id){
       
       shiny::req(input$plot_start.sspd)
       shiny::req(input$Location.sspd)
-      shiny::req(input$seed.sspd)
       shiny::req(input$l.sspd)
       shiny::req(input$reps.sspd)
       
       sites <- as.numeric(input$l.sspd)
-      seed <- as.numeric(input$seed.sspd)
+      seed <- validate_design(resolve_seed(read_app_seed(input$seed.sspd)))
       plot_start <- validate_design(read_whole_numbers(
         input$plot_start.sspd, "Starting Plot Number"
       ))

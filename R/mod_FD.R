@@ -67,8 +67,7 @@ mod_FD_ui <- function(id){
                                choices = c("serpentine", "cartesian"), multiple = FALSE,
                                selected = "serpentine"),
                    
-                   shiny::numericInput(inputId = ns("seed.fd"), label = "Random Seed:",
-                                value = 123, min = 1),
+                   app_seed_input(ns("seed.fd"), value = 123),
                    shiny::fluidRow(
                      shiny::column(6,
                             shiny::actionButton(
@@ -224,7 +223,6 @@ mod_FD_server <- function(id) {
       shiny::req(input$plot_start.fd)
       shiny::req(input$Location.fd)
       shiny::req(input$l.fd)
-      shiny::req(input$seed.fd)
       shiny::req(input$kindFD)
       shiny::req(input$planter_mov_fd)
       
@@ -234,7 +232,7 @@ mod_FD_server <- function(id) {
       ))
       planter <- input$planter_mov_fd
       site_names <-  as.vector(unlist(strsplit(input$Location.fd, ",")))
-      seed <- as.numeric(input$seed.fd)
+      seed <- validate_design(resolve_seed(read_app_seed(input$seed.fd)))
       reps <- as.numeric(input$reps.fd)
       sites <- as.numeric(input$l.fd)
       type_design <- input$kindFD

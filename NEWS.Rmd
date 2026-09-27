@@ -261,6 +261,12 @@ knitr::opts_chunk$set(
 
 ### Enhancements:
 
+- All 19 app modules share optional seed controls with the R API's signed
+  seed bounds. Existing displayed defaults are retained. Clearing a seed
+  chooses and records an automatic value once in the run's input snapshot,
+  shared by allocation and field generation. Simulations with a blank seed
+  reuse the accepted design's recorded seed. Fixed-seed workflows are unchanged.
+
 - The seven spatial design modules now share their result workflow and
   simulation dialogs. Existing correlation controls, location selection,
   display numbering, tables, heatmaps, and reproducible archives are retained.

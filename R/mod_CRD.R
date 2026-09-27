@@ -70,10 +70,7 @@ mod_CRD_ui <- function(id) {
                      )
                    ),
                    
-                   shiny::numericInput(inputId = ns("seed.crd"),
-                                label = "Random Seed:",
-                                value = 123,
-                                min = 1),
+                   app_seed_input(ns("seed.crd"), value = 123),
                    
                    shiny::fluidRow(
                      shiny::column(6,
@@ -190,7 +187,6 @@ mod_CRD_server <- function(id) {
       shiny::req(input$reps.crd)
       shiny::req(input$plot_start.crd)
       shiny::req(input$Location.crd)
-      shiny::req(input$seed.crd)
       
       treatments <- as.numeric(get_data_crd()$treatments)
       reps <- as.numeric(input$reps.crd)
@@ -199,7 +195,7 @@ mod_CRD_server <- function(id) {
         input$plot_start.crd, "Starting Plot Number"
       ))[1]
       site_names <-  as.vector(unlist(strsplit(input$Location.crd, ",")))
-      seed <- as.numeric(input$seed.crd)
+      seed <- validate_design(resolve_seed(read_app_seed(input$seed.crd)))
       return(list(t = treatments, 
         r = reps, 
         planter = planter,

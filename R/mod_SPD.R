@@ -79,8 +79,7 @@ mod_SPD_ui <- function(id) {
                            value = "FARGO")
           )
         ),
-        shiny::numericInput(inputId = ns("seed.spd"), label = "Random Seed:",
-                     value = 118, min = 1),
+        app_seed_input(ns("seed.spd"), value = 118),
         
         shiny::fluidRow(
           shiny::column(6,
@@ -217,12 +216,11 @@ mod_SPD_server <- function(id){
       
       shiny::req(input$plot_start.spd)
       shiny::req(input$Location.spd)
-      shiny::req(input$seed.spd)
       shiny::req(input$l.spd)
       shiny::req(input$reps.spd)
       
       sites <- as.numeric(input$l.spd)
-      seed <- as.numeric(input$seed.spd)
+      seed <- validate_design(resolve_seed(read_app_seed(input$seed.spd)))
       plot_start <- validate_design(read_whole_numbers(
         input$plot_start.spd, "Starting Plot Number"
       ))

@@ -124,12 +124,7 @@ mod_pREPS_ui <- function(id){
 			shiny::fluidRow(
 				shiny::column(
 					width = 6,
-          shiny::numericInput(
-						ns("seed.preps"), 
-						label = "Random Seed:", 
-						value = 4095, 
-						min = 1
-          )
+          app_seed_input(ns("seed.preps"), value = 4095)
 				),
 				shiny::column(
 					width = 6,
@@ -221,7 +216,7 @@ mod_pREPS_server <- function(id){
         input$plot_start.preps, "Starting Plot Number"
       ))
       site_names <- as.character(as.vector(unlist(strsplit(input$Location.preps, ","))))
-      seed_number <- as.numeric(input$seed.preps)
+      seed_number <- validate_design(resolve_seed(read_app_seed(input$seed.preps)))
       sites = as.numeric(input$l.preps)
       return(list(sites = sites, 
                   location_names = site_names, 
@@ -604,7 +599,7 @@ mod_pREPS_server <- function(id){
 
     app_spatial_workflow(input, output, session,
       design = function() pREPS_reactive(),
-      seed = function() as.numeric(prep_inputs()$seed_number),
+      seed = function() validate_design(read_app_seed(prep_inputs()$seed_number)),
       dimensions = function(field_book) list(nrows = field_dimensions_prep()$d_row, ncols = field_dimensions_prep()$d_col),
       selected = function() user_site_selection(),
       filename = function() {

@@ -91,11 +91,7 @@ mod_Diagonal_ui <- function(id) {
         shiny::fluidRow(
             shiny::column(6,
                     style=list("padding-right: 28px;"),
-                    shiny::numericInput(
-                        inputId = ns("seed_single"), 
-                        label = "Random Seed:", 
-                        value = 17, 
-                        min = 1)
+                    app_seed_input(ns("seed_single"), value = 17)
             ),
             shiny::column(6,
                     style=list("padding-left: 5px;"),
@@ -221,7 +217,7 @@ mod_Diagonal_server <- function(id) {
       plotNumber <- validate_design(read_whole_numbers(
         input$plot_start, "Starting Plot Number"
       ))
-      seed_number <- as.numeric(input$seed_single)
+      seed_number <- validate_design(resolve_seed(read_app_seed(input$seed_single)))
       location_names <- as.vector(unlist(strsplit(input$Location, ",")))
       sites = as.numeric(input$l.diagonal)
       return(list(sites = sites, 
@@ -518,7 +514,6 @@ mod_Diagonal_server <- function(id) {
     diagonal_inputs <- shiny::eventReactive(input$get_random, {
       shiny::req(getData())
       shiny::req(field_dimensions_diagonal())
-      shiny::req(single_inputs()$seed_number)
       sites <- single_inputs()$sites
       plot_starts <- single_inputs()$plotNumber
       if (any(is.na(plot_starts))) {
@@ -546,7 +541,7 @@ mod_Diagonal_server <- function(id) {
         l = sites,
         plotNumber = plot_starts,
         kindExpt = kindExpt_single,
-        seed = as.numeric(single_inputs()$seed_number),
+        seed = validate_design(read_app_seed(single_inputs()$seed_number)),
         exptName = single_inputs()$expt_name,
         locationNames = location_names
       )

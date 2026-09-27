@@ -48,8 +48,7 @@ mod_Rectangular_Lattice_ui <- function(id){
                             shiny::textInput(inputId = ns("Location.rectangular"), "Input Location:", value = "FARGO")
                      )
                    ), 
-                   shiny::numericInput(inputId = ns("myseed.rectangular"), label = "Random Seed:",
-                                value = 007, min = 1),
+                   app_seed_input(ns("myseed.rectangular"), value = 007),
                    shiny::fluidRow(
                      shiny::column(6,
                             shiny::actionButton(
@@ -197,7 +196,6 @@ mod_Rectangular_Lattice_server <- function(id) {
     rectangular_inputs <- shiny::reactive({
       shiny::req(init_data_rectangular())
       shiny::req(input$k.rectangular)
-      shiny::req(input$myseed.rectangular)
       shiny::req(input$planter_mov_rect)
       shiny::req(input$plot_start.rectangular)
       shiny::req(input$Location.rectangular)
@@ -219,7 +217,7 @@ mod_Rectangular_Lattice_server <- function(id) {
         input$plot_start.rectangular, "Starting Plot Number"
       ))
       site_names <- as.vector(unlist(strsplit(input$Location.rectangular, ",")))
-      seed <- as.numeric(input$myseed.rectangular)
+      seed <- validate_design(resolve_seed(read_app_seed(input$myseed.rectangular)))
       sites <- as.numeric(input$l.rectangular)
       return(list(r = r.rectangular,
                   k = k.rectangular,

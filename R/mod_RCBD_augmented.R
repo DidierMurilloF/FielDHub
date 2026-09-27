@@ -128,10 +128,7 @@ mod_RCBD_augmented_ui <- function(id){
         shiny::fluidRow(
           shiny::column(6,
                  style=list("padding-right: 28px;"),
-                 shiny::numericInput(inputId = ns("myseed_a_rcbd"),
-                              label = "Random Seed:",
-                              value = 1, 
-                              min = 1)
+                 app_seed_input(ns("myseed_a_rcbd"), value = 1)
           ),
           shiny::column(6,style=list("padding-left: 5px;"),
                  shiny::textInput(ns("Location_a_rcbd"),
@@ -486,7 +483,6 @@ mod_RCBD_augmented_server <- function(id) {
       shiny::req(input$blocks_a_rcbd)
       shiny::req(input$planter_mov1_a_rcbd)
       shiny::req(input$plot_start_a_rcbd)
-      shiny::req(input$myseed_a_rcbd)
       shiny::req(input$Location_a_rcbd)
       loc <- as.numeric(input$l.arcbd)
       checks <- as.numeric(input$checks_a_rcbd)
@@ -498,7 +494,7 @@ mod_RCBD_augmented_server <- function(id) {
         gen.list <- getDataup_a_rcbd()$dataUp_a_rcbd
       }
       b <- as.numeric(input$blocks_a_rcbd)
-      seed.number <- as.numeric(input$myseed_a_rcbd)
+      seed.number <- validate_design(resolve_seed(read_app_seed(input$myseed_a_rcbd)))
       planter <- input$planter_mov1_a_rcbd
       l.arcbd <- as.numeric(input$l.arcbd)
       if (length(loc) > l.arcbd) {
@@ -648,7 +644,7 @@ mod_RCBD_augmented_server <- function(id) {
     
     app_spatial_workflow(input, output, session,
       design = function() rcbd_augmented_reactive(),
-      seed = function() as.numeric(input$myseed_a_rcbd),
+      seed = function() validate_design(read_app_seed(input$myseed_a_rcbd)),
       dimensions = function(field_book) list(nrows = length(unique(field_book$ROW)), ncols = length(unique(field_book$COLUMN))),
       selected = function() locNum(),
       filename = function() {

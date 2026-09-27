@@ -20,7 +20,8 @@ app_classic_workflow <- function(input, output, session, design, layout, seed,
   })
   book <- shiny::reactive({
     shiny::req(field_book())
-    validate_design(classic_workflow_book(field_book(), settings(), seed(), spec$order_by_id))
+    validate_design(classic_workflow_book(field_book(), settings(),
+      workflow_seed(seed(), design()), spec$order_by_id))
   })
   heatmap <- shiny::reactive({
     data <- book()$df

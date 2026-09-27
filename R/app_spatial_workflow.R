@@ -19,7 +19,7 @@ app_spatial_workflow <- function(input, output, session, design, seed, dimension
     field_book <- design()$fieldBook
     shape <- if (!is.null(settings())) dimensions(field_book)
     validate_design(spatial_workflow_book(field_book, settings(), shape$nrows, shape$ncols,
-      seed(), renumber_display = spec$renumber_display, coerce_book = spec$coerce_book))
+      workflow_seed(seed(), design()), renumber_display = spec$renumber_display, coerce_book = spec$coerce_book))
   })
   heatmap_state <- shiny::reactiveValues(visible = FALSE)
   shiny::observeEvent(settings(), {

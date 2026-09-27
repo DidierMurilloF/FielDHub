@@ -54,8 +54,7 @@ mod_Square_Lattice_ui <- function(id){
                             shiny::textInput(inputId = ns("Location.square"), "Input Location:", value = "FARGO")
                      )
                    ),
-                   shiny::numericInput(inputId = ns("myseed.square"), label = "Random Seed:",
-                                                       value = 5, min = 1),
+                   app_seed_input(ns("myseed.square"), value = 5),
                     
                    shiny::fluidRow(
                      shiny::column(6,# style=list("padding-right: 28px;"),
@@ -204,7 +203,6 @@ mod_Square_Lattice_server <- function(id){
       shiny::req(get_data_square())
       shiny::req(input$k.square)
       shiny::req(input$owndata_square)
-      shiny::req(input$myseed.square)
       shiny::req(input$planter_mov_square)
       shiny::req(input$plot_start.square)
       shiny::req(input$Location.square)
@@ -224,7 +222,7 @@ mod_Square_Lattice_server <- function(id){
       ))
       planter <- input$planter_mov_square
       site_names <- as.vector(unlist(strsplit(input$Location.square, ",")))
-      seed <- as.numeric(input$myseed.square)
+      seed <- validate_design(resolve_seed(read_app_seed(input$myseed.square)))
       sites <- as.numeric(input$l.square)
       treatments <- get_data_square()$treatments
       

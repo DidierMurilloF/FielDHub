@@ -50,8 +50,7 @@ mod_Alpha_Lattice_ui <- function(id) {
                             shiny::textInput(inputId = ns("Location.alpha"), "Input Location:", value = "FARGO")
                      )
                    ),  
-                   shiny::numericInput(inputId = ns("myseed.alpha"), label = "Random Seed:",
-                                value = 16, min = 1),
+                   app_seed_input(ns("myseed.alpha"), value = 16),
                    shiny::fluidRow(
                      shiny::column(6,
                             shiny::actionButton(
@@ -197,7 +196,6 @@ mod_Alpha_Lattice_server <- function(id){
       shiny::req(input$r.alpha)
       shiny::req(input$plot_start.alpha)
       shiny::req(input$Location.alpha)
-      shiny::req(input$myseed.alpha)
       shiny::req(input$l.alpha)
       if (input$k.alpha == "No Options Available") {
         shinyalert::shinyalert(
@@ -215,7 +213,7 @@ mod_Alpha_Lattice_server <- function(id){
         input$plot_start.alpha, "Starting Plot Number"
       ))
       site_names <-  as.vector(unlist(strsplit(input$Location.alpha, ",")))
-      seed <- as.numeric(input$myseed.alpha)
+      seed <- validate_design(resolve_seed(read_app_seed(input$myseed.alpha)))
       return(list(r = r.alpha, 
                   k = k.alpha, 
                   t = treatments, 

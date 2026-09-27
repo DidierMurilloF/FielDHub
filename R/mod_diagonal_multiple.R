@@ -106,10 +106,7 @@ mod_diagonal_multiple_ui <- function(id) {
         shiny::fluidRow(
           shiny::column(6,
                  style=list("padding-right: 28px;"),
-                  shiny::numericInput(inputId = ns("seed_multiple"),
-                              label = "Random Seed:", 
-                              value = 17, 
-                              min = 1)
+                  app_seed_input(ns("seed_multiple"), value = 17)
           ),
           shiny::column(6,
                  style=list("padding-left: 5px;"),
@@ -240,7 +237,7 @@ mod_diagonal_multiple_server <- function(id) {
             plotNumber <- validate_design(read_whole_numbers(
               input$plot_start_multiple, "Starting Plot Number"
             ))
-            seed_number <- as.numeric(input$seed_multiple)
+            seed_number <- validate_design(resolve_seed(read_app_seed(input$seed_multiple)))
             location_names <- trimws(as.vector(unlist(strsplit(input$location_multiple, ","))))
             sites = as.numeric(input$locs_db)
             return(list(sites = sites, 
@@ -632,7 +629,6 @@ mod_diagonal_multiple_server <- function(id) {
             shiny::req(get_data_multiple())
             shiny::req(field_dimensions_diagonal())
             shiny::req(available_percent_multi()$dt)
-            shiny::req(multiple_inputs()$seed_number)
             # The selector keeps its previous value until the options of the
             # current field reach the browser; wait for one of them.
             percent <- as.numeric(input$percent_checks_multi)
@@ -675,7 +671,7 @@ mod_diagonal_multiple_server <- function(id) {
                         plotNumber = plot_starts,
                         kindExpt = kindExpt,
                         splitBy = split_by,
-                        seed = as.numeric(multiple_inputs()$seed_number),
+                        seed = validate_design(read_app_seed(multiple_inputs()$seed_number)),
                         blocks = blocks,
                         exptName = multiple_inputs()$expt_name,
                         locationNames = location_names,
@@ -879,7 +875,7 @@ mod_diagonal_multiple_server <- function(id) {
         
     app_spatial_workflow(input, output, session,
       design = function() diagonal_design(),
-      seed = function() as.numeric(multiple_inputs()$seed_number),
+      seed = function() validate_design(read_app_seed(multiple_inputs()$seed_number)),
       dimensions = function(field_book) list(nrows = diagonal_design()$infoDesign$rows, ncols = diagonal_design()$infoDesign$columns),
       selected = function() user_location()$user_site,
       filename = function() {

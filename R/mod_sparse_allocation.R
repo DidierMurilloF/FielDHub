@@ -120,12 +120,7 @@ mod_sparse_allocation_ui <- function(id) {
             shiny::column(
                 width = 6,
                 style=list("padding-right: 28px;"),
-                shiny::numericInput(
-                    inputId = ns("seed_single"), 
-                    label = "Random Seed:", 
-                    value = 17, 
-                    min = 1
-                )
+                app_seed_input(ns("seed_single"), value = 17)
             ),
             shiny::column(
                 width = 6,
@@ -302,7 +297,7 @@ mod_sparse_allocation_server <- function(id){
         plotNumber <- validate_design(read_whole_numbers(
           input$sparse_plot_start, "Starting Plot Number"
         ))
-        seed_number <- as.numeric(input$seed_single)
+        seed_number <- validate_design(resolve_seed(read_app_seed(input$seed_single)))
         location_names <- as.vector(unlist(strsplit(input$sparse_loc_names, ",")))
         sites = as.numeric(input$sparse_locations)
         if (length(location_names) == 0 || length(location_names) != sites) {
@@ -779,7 +774,6 @@ mod_sparse_allocation_server <- function(id){
       shiny::req(get_sparse_data())
       shiny::req(field_dimensions_diagonal())
       shiny::req(available_percent_table()$dt)
-      shiny::req(single_inputs()$seed_number)
       # Wait until the percentage selector holds one of the options of the
       # current field (it is updated after the options table)
       percent <- suppressWarnings(as.numeric(input$percent_checks))
@@ -804,7 +798,7 @@ mod_sparse_allocation_server <- function(id){
           exptName = single_inputs()$expt_name[1],
           locationNames = single_inputs()$location_names,
           sparse_list = sparse_list,
-          seed = as.numeric(single_inputs()$seed_number),
+          seed = validate_design(read_app_seed(single_inputs()$seed_number)),
           data = sparse_data_input,
           checksPercent = percent
         )
@@ -894,7 +888,7 @@ mod_sparse_allocation_server <- function(id){
 
     app_spatial_workflow(input, output, session,
       design = function() sparse_design(),
-      seed = function() as.numeric(single_inputs()$seed_number),
+      seed = function() validate_design(read_app_seed(single_inputs()$seed_number)),
       dimensions = function(field_book) list(nrows = sparse_design()$infoDesign$rows, ncols = sparse_design()$infoDesign$columns),
       selected = function() as.numeric(input$sparse_loc_view),
       filename = function() {

@@ -91,12 +91,7 @@ mod_Optim_ui <- function(id) {
          shiny::column(
             width = 6,
             style=list("padding-right: 28px;"),
-            shiny::numericInput(
-                ns("seed.spatial"), 
-                label = "Random Seed:", 
-                value = 5,
-                min = 1
-            )
+            app_seed_input(ns("seed.spatial"), value = 5)
          ),
          shiny::column(6,style=list("padding-left: 5px;"),
                 shiny::textInput(ns("Location.spatial"),
@@ -177,7 +172,7 @@ mod_Optim_server <- function(id) {
         input$plot_start.spatial, "Starting Plot Number"
       ))
       site_names <- as.character(as.vector(unlist(strsplit(input$Location.spatial, ","))))
-      seed_number <- as.numeric(input$seed.spatial)
+      seed_number <- validate_design(resolve_seed(read_app_seed(input$seed.spatial)))
       sites = as.numeric(input$l.optim)
       return(list(sites = sites, 
                   location_names = site_names, 
@@ -556,7 +551,7 @@ mod_Optim_server <- function(id) {
     
     app_spatial_workflow(input, output, session,
       design = function() optimized_arrang(),
-      seed = function() as.numeric(input$seed.spatial),
+      seed = function() validate_design(read_app_seed(input$seed.spatial)),
       dimensions = function(field_book) list(nrows = max(field_book$ROW), ncols = max(field_book$COLUMN)),
       selected = function() user_site_selection(),
       filename = function() {
