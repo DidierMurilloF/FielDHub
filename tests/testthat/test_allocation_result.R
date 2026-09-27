@@ -21,12 +21,15 @@ test_that("allocation results record a reproducible input contract", {
   }
 })
 
-test_that("automatic allocation seeds are recorded without consuming caller RNG", {
+test_that("automatic allocation seeds consume exactly one draw from the caller's stream", {
   set.seed(91)
-  before <- .Random.seed
+  expected <- sample.int(.Machine$integer.max, 1L)
+  after_one_draw <- .Random.seed
+  set.seed(91)
   out <- allocation_example(seed = NULL)
-  expect_identical(.Random.seed, before)
+  expect_identical(.Random.seed, after_one_draw)
   expect_type(out$metadata$seed, "integer")
+  expect_identical(out$metadata$seed, expected)
   expect_identical(do.call(do_optim, out$metadata$parameters), out)
 })
 

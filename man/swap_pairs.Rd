@@ -33,8 +33,9 @@ scoring, stopping, and reported distances: "euclidean" (default) or "manhattan".
 \item{candidate_sample_size}{Maximum candidates evaluated per swap, as a
 positive whole number within R's integer range. Default is 4.}
 
-\item{seed}{Optional randomization seed. When omitted, an automatic integer
-seed is recorded. The caller's random-number state is restored on exit.}
+\item{seed}{Optional randomization seed. When omitted, one integer is
+drawn from the current random-number stream and recorded; the swap's own
+randomization does not change the caller's stream.}
 }
 \value{
 A list containing:

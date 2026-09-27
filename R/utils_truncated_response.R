@@ -56,8 +56,9 @@ truncated_response_spec <- function(a, b, data) {
 norm_trunc <- function(a = NULL, b = NULL, data = NULL, seed = NULL) {
   model <- truncated_response_spec(a, b, data)
   if (!is.null(seed)) {
+    seed <- resolve_seed(seed)
     local_rng_state()
-    set.seed(resolve_seed(seed))
+    set.seed(seed)
   }
   trt.sample <- sample(levels(model$treatments))
   counts <- model$counts[match(trt.sample, levels(model$treatments))]

@@ -24,7 +24,9 @@ Each function's help page defines its supported inputs and constraints.
     \code{CRD()} takes one location name.}
   \item{\code{plotNumber}}{Starting plot number, or one start per location.}
   \item{\code{seed}}{Seed recorded in the result to reproduce randomization.
-    Design generation restores the caller's random-number state.}
+    When \code{seed} is \code{NULL}, one integer is drawn from the current
+    random-number stream and recorded; the design's own randomization does
+    not change the caller's stream.}
   \item{\code{k}}{Number of plots per incomplete block.}
 }
 }

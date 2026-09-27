@@ -27,14 +27,18 @@ local_rng_state <- function(frame = parent.frame()) {
 #' @param default Function drawing the seed when \code{seed} is NULL.
 #'
 #' @return The seed. When \code{seed} is NULL, the outermost design call draws
-#'   an integer from the whole range of seeds, and a nested call keeps the
-#'   draw of \code{default}, so that designs built by other design functions
-#'   do not change.
+#'   exactly one integer from the caller's random-number stream, without
+#'   restoring it: the draw is consumed. A nested call keeps the draw of
+#'   \code{default}, so that designs built by other design functions do not
+#'   change. Callers that set the design's own random-number state, such as
+#'   \code{local_design_seed()}, still restore it to its state right after
+#'   this draw, so the design's internal randomization never reaches the
+#'   caller's stream. Explicit seeds are only validated: they neither draw
+#'   nor advance the caller's stream.
 #' @noRd
 resolve_seed <- function(seed, default = function() stats::runif(1, min = -50000, max = 50000)) {
   if (is.null(seed)) {
     if (rng_calls$depth == 0) {
-      local_rng_state()
       return(sample.int(.Machine$integer.max, 1))
     }
     return(default())
@@ -65,10 +69,13 @@ offset_design_seed <- function(seed, offset) {
 #' Set the seed of a design function and restore the caller's stream on exit
 #'
 #' @description Calls \code{set.seed(seed)}. In the outermost design call, it
-#' also saves the caller's random-number state and restores it when the
-#' calling function exits, so that creating a design does not change the
-#' random numbers the user draws next. Nested design calls leave the stream as
-#' they always did.
+#' also saves the caller's random-number state as it stands when called
+#' (right after \code{resolve_seed()} drew a seed, when the call had none) and
+#' restores it to that state when the calling function exits, so that the
+#' design's own internal randomization does not change the random numbers the
+#' user draws next: only the one draw of its own seed, when there was one,
+#' reaches the caller's stream. Nested design calls leave the stream as they
+#' always did.
 #'
 #' @param seed The seed.
 #' @param frame The frame of the design function.

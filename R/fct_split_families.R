@@ -8,14 +8,13 @@
 #' @param data Data frame with the entry (ENTRY) and the labels of each treatment (NAME)
 #' and number of individuals per family group (FAMILY).
 #' @param seed (optional) A single real number specifying the random seed.
-#' When omitted, an integer seed is selected automatically and recorded in
-#' \code{infoDesign$seed} and \code{metadata$seed}. The caller's random-number
-#' state is restored after the call.
+#' When omitted, one integer is drawn from the current random-number stream
+#' and recorded in \code{infoDesign$seed} and \code{metadata$seed}; the
+#' allocation's own randomization does not change the caller's stream.
 #'
 #' @details To reproduce an allocation previously made with
 #' \code{set.seed(s); split_families(l, data)}, use
-#' \code{split_families(l, data, seed = s)}. Omitting \code{seed} now selects
-#' and records an automatic seed instead of consuming the caller's stream.
+#' \code{split_families(l, data, seed = s)}.
 #' 
 #' @author Didier Murillo [aut],
 #'         Salvador Gezan [aut],

@@ -24,8 +24,8 @@ simulate_classic_field_book <- function(field_book, min_value, max_value,
       fieldhub_abort("ID ordering requires a finite numeric ID column.")
     }
   }
-  local_rng_state()
   seed <- as.integer(resolve_seed(seed))
+  local_rng_state()
   result <- norm_trunc(min_value, max_value, field_book, seed = seed)
   names(result)[names(result) == "RESP"] <- response_name
   if (order_by_id) result <- result[order(result$ID), ]

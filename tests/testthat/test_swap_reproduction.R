@@ -1,15 +1,18 @@
-test_that("standalone pair swaps record a seed without changing the caller stream", {
+test_that("a seedless standalone pair swap consumes exactly one draw from the caller's stream", {
   x <- matrix(c(rep(1:3, 2), 4:13), 4)
   set.seed(99)
-  before <- .Random.seed
+  expected <- sample.int(.Machine$integer.max, 1L)
+  after_one_draw <- .Random.seed
+  set.seed(99)
   out <- swap_pairs(x, starting_dist = 2, stop_iter = 3, candidate_sample_size = 1)
-  expect_true(identical(.Random.seed, before))
+  expect_true(identical(.Random.seed, after_one_draw))
   expect_s3_class(out, "fieldhub_optimization")
   expect_identical(out$metadata$design, "pair_swap")
   expect_true(is.integer(out$metadata$seed))
+  expect_identical(out$metadata$seed, expected)
   expect_identical(out$metadata$parameters$X, x)
   expect_identical(reproduce_design(out), out)
-  expect_true(identical(.Random.seed, before))
+  expect_true(identical(.Random.seed, after_one_draw))
 })
 
 test_that("explicit pair-swap seeds reproduce independently of caller state", {

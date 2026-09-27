@@ -47,14 +47,21 @@ test_that("spatial simulations select columns by name and align rows by ID", {
                "already has", class = "fieldhub_input_error")
 })
 
-test_that("spatial simulations preserve the caller's RNG state", {
+test_that("spatial simulations preserve the caller's RNG state for explicit seeds", {
   set.seed(123)
   before <- .Random.seed
   simulate_spatial_test(seed = 27)
   expect_identical(.Random.seed, before)
-  simulate_spatial_test()
-  expect_identical(.Random.seed, before)
+})
+
+test_that("a seedless spatial simulation consumes exactly one draw from the caller's stream", {
+  set.seed(123)
+  expected <- sample.int(.Machine$integer.max, 1L)
+  after_one_draw <- .Random.seed
+  set.seed(123)
   out <- simulate_spatial_test()
+  expect_identical(.Random.seed, after_one_draw)
+  expect_identical(out$seed, expected)
   expect_identical(simulate_spatial_test(seed = out$seed), out)
 })
 

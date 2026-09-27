@@ -4,8 +4,9 @@ AR1xAR1_simulation <- function(nrows = NULL, ncols = NULL, ROX = NULL,
                                maxValue = NULL, fieldbook = NULL, 
                                trail = NULL, seed = NULL) {
   if (!is.null(seed)) {
+    seed <- resolve_seed(seed)
     local_rng_state()
-    set.seed(resolve_seed(seed))
+    set.seed(seed)
   }
   rag <- diff(c(minValue, maxValue))
   sigma <- rag*0.15

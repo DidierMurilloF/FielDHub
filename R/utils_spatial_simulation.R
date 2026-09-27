@@ -5,8 +5,9 @@
 #' @param correlation_x,correlation_y Correlations along columns and rows.
 #' @param min_value,max_value Response range used by the spatial simulator.
 #' @param response_name Name of the new simulated-response column.
-#' @param seed Simulation seed. When omitted, an integer seed is drawn and
-#'   returned. The caller's random-number state is always restored.
+#' @param seed Simulation seed. When omitted, one integer is drawn from the
+#'   current random-number stream and returned; the simulation's own
+#'   randomization does not change the caller's stream.
 #' @return A list containing the augmented field_book, per-location simulations,
 #'   the seed, exact input field book, and reconstruction metadata. Locations
 #'   retain their first-appearance order.
@@ -73,10 +74,11 @@ simulate_spatial_field_book <- function(field_book, nrows, ncols,
         fieldhub_abort("The response name '", response_name, "' is reserved by the spatial simulator.")
     }
 
-    # Resolve the seed inside the preserved scope, including the random draw
-    # used when no seed was supplied.
-    local_rng_state()
+    # Resolve the seed before scoping the stream, so a seedless call's one
+    # draw reaches the caller and only the simulation's own randomization
+    # (below) is undone on exit.
     seed <- resolve_seed(seed)
+    local_rng_state()
     if (seed > .Machine$integer.max || seed < -.Machine$integer.max) {
         fieldhub_abort("'seed' must fit in an R integer.")
     }

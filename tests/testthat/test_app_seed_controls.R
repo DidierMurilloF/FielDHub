@@ -31,8 +31,12 @@ test_that("automatic simulation seeds come from the accepted design", {
 
 test_that("a run resolves an automatic seed once for allocation and field construction", {
   set.seed(419)
-  before <- .Random.seed
+  expected <- sample.int(.Machine$integer.max, 1L)
+  after_one_draw <- .Random.seed
+  set.seed(419)
   seed <- resolve_seed(read_app_seed(NULL))
+  expect_identical(seed, expected)
+  expect_identical(.Random.seed, after_one_draw)
   allocation <- do_optim(design = "sparse", lines = 120, l = 4,
     copies_per_entry = 3, add_checks = TRUE, checks = 4, seed = seed)
   design <- sparse_allocation(lines = 120, l = 4, copies_per_entry = 3,
@@ -40,7 +44,7 @@ test_that("a run resolves an automatic seed once for allocation and field constr
   expect_identical(allocation$metadata$seed, seed)
   expect_identical(design$metadata$seed, seed)
   expect_identical(reproduce_design(design), design)
-  expect_identical(.Random.seed, before)
+  expect_identical(.Random.seed, after_one_draw)
 })
 
 test_that("one seed widget shares labels and API bounds while retaining supplied defaults", {

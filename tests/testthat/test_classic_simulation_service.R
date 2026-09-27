@@ -3,10 +3,10 @@ classic_simulation_book <- function() {
              PLOT = c(2L, 1L, 2L, 1L), TREATMENT = c("x", "y", "x", "y"))
 }
 
-test_that("classic simulation records replayable inputs and preserves the caller's RNG", {
+test_that("classic simulation records replayable inputs and preserves the caller's RNG for explicit seeds", {
   set.seed(52)
   before <- .Random.seed
-  for (seed in list(NULL, 19, 19.75, -8)) {
+  for (seed in list(19, 19.75, -8)) {
     result <- simulate_classic_field_book(classic_simulation_book(), 0, 100, "YIELD", seed)
     expect_identical(.Random.seed, before)
     expect_identical(result$input_field_book, classic_simulation_book())
@@ -19,6 +19,24 @@ test_that("classic simulation records replayable inputs and preserves the caller
     expect_identical(replay, result)
     expect_identical(.Random.seed, before)
   }
+})
+
+test_that("a seedless classic simulation consumes exactly one draw from the caller's stream", {
+  set.seed(52)
+  expected <- sample.int(.Machine$integer.max, 1L)
+  after_one_draw <- .Random.seed
+  set.seed(52)
+  result <- simulate_classic_field_book(classic_simulation_book(), 0, 100, "YIELD", NULL)
+  expect_identical(.Random.seed, after_one_draw)
+  expect_identical(result$input_field_book, classic_simulation_book())
+  expect_identical(result$metadata$model, "truncated_normal")
+  expect_identical(result$metadata$seed, expected)
+  expect_identical(result$metadata$rng_kind, RNGkind())
+  expect_identical(result$metadata$package_version, as.character(utils::packageVersion("FielDHub")))
+  replay <- do.call(simulate_classic_field_book,
+                    c(list(field_book = result$input_field_book), result$metadata$parameters))
+  expect_identical(replay, result)
+  expect_identical(.Random.seed, after_one_draw)
 })
 
 test_that("classic simulation validates response names and optional ID sorting", {
