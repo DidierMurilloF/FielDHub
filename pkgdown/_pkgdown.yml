@@ -13,6 +13,8 @@ navbar:
     articles:
      text: Articles
      menu:
+     - text: "Scientific Validation and Computational Limits"
+       href: articles/scientific_validation.html
      - text: "Sparse Allocation/Testing"
        href: articles/sparse_allocation.html
      - text: "Unreplicated Diagonal Arrangement Design"

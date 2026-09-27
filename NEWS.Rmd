@@ -48,6 +48,12 @@ knitr::opts_chunk$set(
 
 ### New features:
 
+- Independent scientific checks now cover every design family in the fixed-seed
+  catalogue: replication, block completeness, physical coordinates, checks,
+  fillers, allocation budgets, and pair distances. Incomplete-block and lattice
+  efficiencies are checked using separate incidence-matrix algebra. A new
+  scientific-validation vignette explains the evidence and search limits.
+
 - Classic layout selectors now use a shared core helper without building
   plots. Available choices and field books are unchanged; unavailable stacking
   produces no choices instead of the invalid sequence `1, 0`. Invalid requests

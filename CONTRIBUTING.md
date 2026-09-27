@@ -101,6 +101,13 @@ and platform matrix, reconstruction checks, deployment validation, and reviewed
 performance benchmarks. Use a minor release for deliberate API or behavior
 changes; keep migration guidance alongside the change.
 
+Scientific changes also need independent count, geometry, or numerical checks.
+Use the plain helpers in `tests/testthat/helper-invariants.R`, specify expected
+levels from the inputs (including missing groups), and include corrupted
+fixtures to prove the checks detect failures. See the
+[scientific validation guide](vignettes/scientific_validation.Rmd) for the
+family-by-family checks, reference calculations, and computational limits.
+
 ## Attribution
 
 This Contributing is adapted from [CONTRIBUTING](https://gist.github.com/peterdesmet/e90a1b0dc17af6c12daf6e8b2f044e7c).
