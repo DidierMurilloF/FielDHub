@@ -33,7 +33,10 @@ local_rng_state <- function(frame = parent.frame()) {
 #' @noRd
 resolve_seed <- function(seed, default = function() stats::runif(1, min = -50000, max = 50000)) {
   if (is.null(seed)) {
-    if (rng_calls$depth == 0) return(sample.int(.Machine$integer.max, 1))
+    if (rng_calls$depth == 0) {
+      local_rng_state()
+      return(sample.int(.Machine$integer.max, 1))
+    }
     return(default())
   }
   if (!is.numeric(seed) || length(seed) != 1 || !is.finite(seed)) {
