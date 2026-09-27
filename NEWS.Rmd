@@ -71,6 +71,8 @@ knitr::opts_chunk$set(
 
 * Field-book export now extracts each map along the planting path with vectorized indexing instead of a cell-by-cell R loop. Row order, numeric storage, character labels and filler handling are preserved.
 
+* Spatial field-book export now constructs its columns by name instead of filling a temporary matrix by position. Established column order, location abbreviations, block columns and entry-label joins are preserved.
+
 * The multi-location p-rep app now builds its final design through `multi_location_prep()`, the same public function used by R scripts, instead of recreating the workflow from internal helpers. Simulated responses are appended by column name so result metadata cannot be overwritten when the field-book schema grows.
 
 * Pull requests now report core (`fct_*`, `utils_*` and `render_*`) test coverage against their base commit and fail if it decreases. Dedicated renderers remain covered when code moves out of the layout helpers. A separate gate applies the correctness-oriented `lintr` checks only to changed R lines, so legacy style findings do not block unrelated work.

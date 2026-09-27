@@ -131,6 +131,10 @@
   vectorized indexing instead of a cell-by-cell R loop. Row order, numeric
   storage, character labels and filler handling are preserved.
 
+- Spatial field-book export now constructs its columns by name instead of
+  filling a temporary matrix by position. Established column order,
+  location abbreviations, block columns and entry-label joins are preserved.
+
 - The multi-location p-rep app now builds its final design through
   `multi_location_prep()`, the same public function used by R scripts, instead
   of recreating the workflow from internal helpers. Simulated responses are

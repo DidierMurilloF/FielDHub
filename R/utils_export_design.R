@@ -1,80 +1,40 @@
+#' Build the spatial field book from its maps, preserving the legacy schema
+#' @noRd
 export_design <- function(G, movement_planter = NULL, location = NULL, Year = NULL,
-                          data_file = NULL, reps = FALSE){
-  
+                          data_file = NULL, reps = FALSE) {
   if (all(c("serpentine", "cartesian") != movement_planter)) {
     fieldhub_abort("Input movement_planter is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
   }
   if (is.null(Year)) Year <- format(Sys.Date(), "%Y")
-  H <- G[[3]]
-  # The field book lists the plots in planting order, starting at the bottom
-  # row of the maps
-  planting <- planting_path(nrow(H), ncol(H), movement_planter)
-  path <- field_path(nrow(H), ncol(H), movement_planter)
-  asExport_cordenates <- function(){
-    
-    if (reps == FALSE){ 
-      
-      my_output_cord <- matrix(data = NA, nrow = dim(H)[1]*dim(H)[2], ncol = 9)
-      names_exp <- c("ROW", "COLUMN", "ENTRY", "PLOT", "CHECKS", 
-                     "EXPT", "LOCATION", "LOC", "YEAR")
-      colnames(my_output_cord) <- names_exp
-      
-    } else{
-      
-      my_output_cord <- matrix(data = NA, nrow = dim(H)[1]*dim(H)[2], ncol = 10)
-      names_exp <- c("ROW", "COLUMN", "ENTRY", "PLOT", "CHECKS", 
-                     "EXPT", "LOCATION", "LOC", "YEAR", "REP")
-      colnames(my_output_cord) <- names_exp
-      
-    }
-    
-    my_output_cord <- as.data.frame(my_output_cord)
-    
-    DATA_LOCATIONS <- list(Locations = c("PROSPER","BERTHOLD","CARRINGTON",
-                                         "CASSELTON","LANGDON","OSNABROCK",
-                                         "HETTINGER","MINOT","POLK CO","WILLISTON",
-                                         "WOLVERTON","MANDAN","HEBRON","FARGO"),
-                           LOC = c("PRO","BER","CAR","CAS","LAN","HOS","HET","MNT",
-                                   "POL","WIL","WOL","MAN", "HEB","FAR")
-    )
-    
-    LOCATIONS <- data.frame(DATA_LOCATIONS)
-    
-    location <- toupper(location)
-    
-    my_output_cord[,1] <- planting[, "ROW"]
-    my_output_cord[,7] <- rep(location, dim(H)[1]*dim(H)[2])
-    
-    
-    if (location %in% LOCATIONS$Locations){
-      
-      my_output_cord[,8] <- subset(LOCATIONS, LOCATIONS[,1] == location)[,2]
-      
-    }else my_output_cord[,8] <- rep(substr(location, start = 1, stop = 3), dim(H)[1]*dim(H)[2])
-    
-    
-    my_output_cord[,9] <- rep(Year, dim(H)[1]*dim(H)[2])
-    
-    my_output_cord[,2] <- planting[, "COLUMN"]
-    return(my_output_cord)
+  rows <- nrow(G[[3]])
+  cols <- ncol(G[[3]])
+  size <- rows * cols
+  planting <- planting_path(rows, cols, movement_planter)
+  path <- field_path(rows, cols, movement_planter)
+  location <- toupper(location)
+  location_codes <- c(
+    PROSPER = "PRO", BERTHOLD = "BER", CARRINGTON = "CAR", CASSELTON = "CAS",
+    LANGDON = "LAN", OSNABROCK = "HOS", HETTINGER = "HET", MINOT = "MNT",
+    "POLK CO" = "POL", WILLISTON = "WIL", WOLVERTON = "WOL", MANDAN = "MAN",
+    HEBRON = "HEB", FARGO = "FAR"
+  )
+  code <- if (location %in% names(location_codes)) {
+    unname(location_codes[location])
+  } else {
+    substr(location, start = 1, stop = 3)
   }
-  
-  my_final_export <- asExport_cordenates()
-  for (m in 1:4){
-    my_final_export[, m + 2] <- values_along_path(G[[m]], path)
-  }
-  
-  if(reps == TRUE) {
-    my_final_export[, 10] <- values_along_path(G[[5]], path)
-    colnames(my_final_export)[10] <- "BLOCK"
-  }
-  
-  datos_names <- data_file
-  datos_names_merge <- datos_names |> dplyr::distinct(ENTRY, .keep_all = TRUE)
-  export_full <- merge(my_final_export, datos_names_merge,
-                       by.x = 3, by.y = 1, sort = F)
-  my_final_export_full <-  export_full[order(export_full$ROW, export_full$PLOT),]
-  
-  return(my_final_export_full)
-  
+  book <- data.frame(
+    ROW = planting[, "ROW"], COLUMN = planting[, "COLUMN"],
+    ENTRY = values_along_path(G[[1]], path),
+    PLOT = values_along_path(G[[2]], path),
+    CHECKS = values_along_path(G[[3]], path),
+    EXPT = values_along_path(G[[4]], path),
+    LOCATION = rep(location, size), LOC = rep(code, size), YEAR = rep(Year, size),
+    row.names = NULL, stringsAsFactors = FALSE
+  )
+  if (reps) book$BLOCK <- values_along_path(G[[5]], path)
+  entry_names <- dplyr::distinct(data_file, ENTRY, .keep_all = TRUE)
+  # Entry labels occupy the first column of the established input format.
+  book <- merge(book, entry_names, by.x = "ENTRY", by.y = names(entry_names)[1], sort = FALSE)
+  book[order(book$ROW, book$PLOT), ]
 }
