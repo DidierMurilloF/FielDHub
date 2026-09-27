@@ -699,56 +699,22 @@ mod_pREPS_server <- function(id){
     simuDataPREP <- reactive({
       req(pREPS_reactive()$fieldBook)
       req(prep_inputs())
-      if(!is.null(valsPREP$maxValue) & !is.null(valsPREP$minValue) & !is.null(valsPREP$trail.prep)) {
-        maxVal <- as.numeric(valsPREP$maxValue)
-        minVal <- as.numeric(valsPREP$minValue)
-        ROX_PREP <- as.numeric(valsPREP$ROX)
-        ROY_PREP <- as.numeric(valsPREP$ROY)
-        df.prep <- pREPS_reactive()$fieldBook
-        loc_levels_factors <- levels(factor(df.prep$LOCATION, unique(df.prep$LOCATION)))
-        locs <- prep_inputs()$sites
-        nrows_prep <- field_dimensions_prep()$d_row
-        ncols_prep <- field_dimensions_prep()$d_col
-        seed_prep <- prep_inputs()$seed_number
-        df.prep_list <- vector(mode = "list", length = locs)
-        dfSimulationList <- vector(mode = "list", length = locs)
-        w <- 1
-        set.seed(seed_prep)
-        for (sites in 1:locs) {
-            df_loc <- subset(df.prep, LOCATION == loc_levels_factors[w])
-            # fieldBook <- df_loc[, c(1,6,7,9)]
-            fieldBook <- df_loc |> dplyr::select(ID, ROW, COLUMN, ENTRY)
-            dfSimulation <- AR1xAR1_simulation(
-                nrows = nrows_prep, 
-                ncols = ncols_prep, 
-                ROX = ROX_PREP, 
-                ROY = ROY_PREP, 
-                minValue = minVal, 
-                maxValue = maxVal, 
-                fieldbook = fieldBook, 
-                trail = valsPREP$trail.prep, 
-                seed = NULL
-            )
-          
-          dfSimulation <- dfSimulation$outOrder
-          dfSimulationList[[sites]] <- dfSimulation
-          dataPrep <- df_loc
-          df_prep <- cbind(dataPrep, round(dfSimulation[,7],2))
-          colnames(df_prep)[12] <- as.character(valsPREP$trail.prep)
-          df.prep_list[[sites]] <- df_prep
-          w <- w + 1
-        }
-        df.prep_locs <- dplyr::bind_rows(df.prep_list)
-        v <- 1
-      }else {
-        dataPrep <- pREPS_reactive()$fieldBook
-        v <- 2
+      field_book <- pREPS_reactive()$fieldBook
+      if (is.null(valsPREP$maxValue) || is.null(valsPREP$minValue) ||
+          is.null(valsPREP$trail.prep)) {
+        return(list(df = field_book))
       }
-      if (v == 1) {
-        return(list(df = df.prep_locs, dfSimulationList = dfSimulationList))
-      }else if (v == 2) {
-        return(list(df = dataPrep))
-      }
+      simulation <- validate_design(simulate_spatial_field_book(
+        field_book = as.data.frame(field_book),
+        nrows = field_dimensions_prep()$d_row, ncols = field_dimensions_prep()$d_col,
+        correlation_x = as.numeric(valsPREP$ROX),
+        correlation_y = as.numeric(valsPREP$ROY),
+        min_value = as.numeric(valsPREP$minValue),
+        max_value = as.numeric(valsPREP$maxValue),
+        response_name = as.character(valsPREP$trail.prep),
+        seed = as.numeric(prep_inputs()$seed_number)
+      ))
+      list(df = simulation$field_book, dfSimulationList = simulation$simulations)
     })
 
     heat_map_prep <- reactiveValues(heat_map_option = FALSE)

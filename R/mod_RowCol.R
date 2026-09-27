@@ -507,7 +507,6 @@ mod_RowCol_server <- function(id){
     })
     
     simuData_RowCol <- reactive({
-      set.seed(input$seed.rcd)
       req(RowCol_reactive()$fieldBook)
       if(!is.null(valsRowColD$maxV.RowCol) && 
          !is.null(valsRowColD$minV.RowCol) && 

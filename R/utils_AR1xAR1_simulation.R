@@ -3,7 +3,10 @@ AR1xAR1_simulation <- function(nrows = NULL, ncols = NULL, ROX = NULL,
                                ROY = NULL, minValue = NULL, 
                                maxValue = NULL, fieldbook = NULL, 
                                trail = NULL, seed = NULL) {
-  if (!is.null(seed)) set.seed(seed)
+  if (!is.null(seed)) {
+    local_rng_state()
+    set.seed(resolve_seed(seed))
+  }
   rag <- diff(c(minValue, maxValue))
   sigma <- rag*0.15
   Beta <- sum(minValue, maxValue)/2
@@ -125,7 +128,10 @@ ZST <- function(n,m,RHOX,RHOY,s20) {
 
 #' @importFrom stats pnorm qnorm
 norm_trunc <- function(a = NULL, b = NULL, data = NULL, seed = NULL) {
-  if (!is.null(seed)) set.seed(seed)
+  if (!is.null(seed)) {
+    local_rng_state()
+    set.seed(resolve_seed(seed))
+  }
   if (a == b) fieldhub_abort('The range of simulated values (a, b) is empty.')
   min <- a;max <- b
   Nc <- ncol(data)

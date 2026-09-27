@@ -648,51 +648,22 @@ mod_Optim_server <- function(id) {
     
     simuDataOPTIM <- reactive({
       req(optimized_arrang()$fieldBook)
-      if(!is.null(valsOPTIM$maxValue) & !is.null(valsOPTIM$minValue) & !is.null(valsOPTIM$trail.optim)) {
-        maxVal <- as.numeric(valsOPTIM$maxValue)
-        minVal <- as.numeric(valsOPTIM$minValue)
-        ROX_O <- as.numeric(valsOPTIM$ROX)
-        ROY_O <- as.numeric(valsOPTIM$ROY)
-        df_optim <- optimized_arrang()$fieldBook
-        locs <- length(levels(factor(df_optim$LOCATION)))
-        nrows.s <- max(as.numeric(df_optim$ROW))
-        ncols.s <- max(as.numeric(df_optim$COLUMN))
-        loc_levels_factors <- levels(factor(df_optim$LOCATION, unique(df_optim$LOCATION)))
-        
-        seed.s <- as.numeric(input$seed.spatial)
-        
-        df_optim_list <- vector(mode = "list", length = locs)
-        dfSimulationList <- vector(mode = "list", length = locs)
-        do_sites <- 1:locs
-        z <- 1
-        set.seed(seed.s)
-        for (sites in do_sites) {
-          df_loc <- subset(df_optim, LOCATION == loc_levels_factors[z])
-          fieldBook <- df_loc[, c(1,6,7,9)]
-          dfSimulation <- AR1xAR1_simulation(nrows = nrows.s, ncols = ncols.s, 
-                                             ROX = ROX_O, ROY = ROY_O, minValue = minVal, 
-                                             maxValue = maxVal, fieldbook = fieldBook, 
-                                             trail = valsOPTIM$trail.optim, 
-                                             seed = NULL)
-          dfSimulation <- dfSimulation$outOrder
-          dfSimulationList[[sites]] <- dfSimulation
-          dataOptim_loc <- df_loc
-          df_optim_simu <- cbind(dataOptim_loc, round(dfSimulation[,7],2))
-          colnames(df_optim_simu)[11] <- as.character(valsOPTIM$trail.optim)
-          df_optim_list[[sites]] <- df_optim_simu 
-          z <- z + 1
-        }
-        df_optim_locs <- dplyr::bind_rows(df_optim_list)
-        v <- 1
-      }else {
-        dataOptim <- optimized_arrang()$fieldBook
-        v <- 2
+      field_book <- optimized_arrang()$fieldBook
+      if (is.null(valsOPTIM$maxValue) || is.null(valsOPTIM$minValue) ||
+          is.null(valsOPTIM$trail.optim)) {
+        return(list(df = field_book))
       }
-      if (v == 1) {
-        return(list(df = df_optim_locs, dfSimulation = dfSimulationList))
-      }else if (v == 2) {
-        return(list(df = dataOptim))
-      }
+      simulation <- validate_design(simulate_spatial_field_book(
+        field_book = field_book,
+        nrows = max(field_book$ROW), ncols = max(field_book$COLUMN),
+        correlation_x = as.numeric(valsOPTIM$ROX),
+        correlation_y = as.numeric(valsOPTIM$ROY),
+        min_value = as.numeric(valsOPTIM$minValue),
+        max_value = as.numeric(valsOPTIM$maxValue),
+        response_name = as.character(valsOPTIM$trail.optim),
+        seed = as.numeric(input$seed.spatial)
+      ))
+      list(df = simulation$field_book, dfSimulation = simulation$simulations)
     })
 
     heat_map_optim <- reactiveValues(heat_map_option = FALSE)

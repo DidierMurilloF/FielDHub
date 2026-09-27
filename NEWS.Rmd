@@ -87,6 +87,8 @@ knitr::opts_chunk$set(
 
 * Field-dimension searches for the single diagonal, multiple diagonal, sparse allocation and optimized arrangement modules now live in tested core helpers. Existing choices and their ordering are preserved, searches no longer consume the caller's random numbers, and an empty search clears the choices and shows an explanation instead of failing inside a loop.
 
+* Spatial simulations in seven app modules now use one tested core workflow, preserving seeded responses, location order and per-location dimensions. Responses are appended by name and aligned by plot ID, so additional metadata columns cannot be overwritten. Explicit simulation seeds are scoped to their calls, and the modules no longer call `set.seed()` themselves. Reserved simulation-column names now give a clear error.
+
 * The shared `desplot` renderer and layout theme now live in a dedicated rendering file, and the augmented-RCBD source filename now correctly spells `RCBD`.
 
 * The generated namespace no longer imports the unused `dplyr::glimpse()`, `golem::activate_js()` and `stats::dist()` symbols.

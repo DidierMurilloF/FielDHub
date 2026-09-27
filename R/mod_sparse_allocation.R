@@ -982,51 +982,24 @@ mod_sparse_allocation_server <- function(id){
     
     simudata_DIAG <- reactive({
       req(sparse_design()$fieldBook)
-      if(!is.null(valsDIAG$maxValue) && !is.null(valsDIAG$minValue) && !is.null(valsDIAG$trail)) {
-        maxVal <- as.numeric(valsDIAG$maxValue)
-        minVal <- as.numeric(valsDIAG$minValue)
-        ROX_DIAG <- as.numeric(valsDIAG$ROX)
-        ROY_DIAG <- as.numeric(valsDIAG$ROY)
-        df_diag <- sparse_design()$fieldBook
-        loc_levels_factors <- levels(factor(df_diag$LOCATION, unique(df_diag$LOCATION)))
-        nrows_diag <- sparse_design()$infoDesign$rows
-        ncols_diag <- sparse_design()$infoDesign$columns
-        seed_diag <- as.numeric(single_inputs()$seed_number)
-        locs_diag <- length(loc_levels_factors)
-        df_diag_list <- vector(mode = "list", length = locs_diag)
-        df_simulation_list <- vector(mode = "list", length = locs_diag)
-        w <- 1
-        set.seed(seed_diag)
-        for (sites in 1:locs_diag) {
-          df_loc <- subset(df_diag, LOCATION == loc_levels_factors[w])
-          fieldBook <- df_loc[, c(1,6,7,9)]
-          dfSimulation <- AR1xAR1_simulation(nrows = nrows_diag, ncols = ncols_diag,
-                                             ROX = ROX_DIAG, ROY = ROY_DIAG,
-                                             minValue = minVal, maxValue = maxVal,
-                                             fieldbook = fieldBook,
-                                             trail = valsDIAG$trail,
-                                             seed = NULL)
-          dfSimulation <- dfSimulation$outOrder
-          df_simulation_list[[sites]] <- dfSimulation
-          dataPrep <- df_loc
-          df_DIAG <- cbind(dataPrep, round(dfSimulation[,7],2))
-          colnames(df_DIAG)[11] <- as.character(valsDIAG$trail)
-          df_diag_list[[sites]] <- df_DIAG
-          w <- w + 1
-        }
-        df_diag_locs <- dplyr::bind_rows(df_diag_list)
-        v <- 1
-      }else {
-        df_DIAG <- sparse_design()$fieldBook
-        v <- 2
+      field_book <- sparse_design()$fieldBook
+      if (is.null(valsDIAG$maxValue) || is.null(valsDIAG$minValue) ||
+          is.null(valsDIAG$trail)) {
+        return(list(df = field_book))
       }
-      if (v == 1) {
-        return(list(df = df_diag_locs, dfSimulationList = df_simulation_list))
-      } else if (v == 2) {
-        return(list(df = df_DIAG))
-      }
+      simulation <- validate_design(simulate_spatial_field_book(
+        field_book = field_book,
+        nrows = sparse_design()$infoDesign$rows, ncols = sparse_design()$infoDesign$columns,
+        correlation_x = as.numeric(valsDIAG$ROX),
+        correlation_y = as.numeric(valsDIAG$ROY),
+        min_value = as.numeric(valsDIAG$minValue),
+        max_value = as.numeric(valsDIAG$maxValue),
+        response_name = as.character(valsDIAG$trail),
+        seed = as.numeric(single_inputs()$seed_number)
+      ))
+      list(df = simulation$field_book, dfSimulationList = simulation$simulations)
     })
-    
+
     heat_map <- reactiveValues(heat_map_option = FALSE)
     
     observeEvent(input$ok_simu_single, {

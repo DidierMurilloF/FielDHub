@@ -762,52 +762,24 @@ mod_RCBD_augmented_server <- function(id) {
     
     simuDataARCBD <- reactive({
       req(rcbd_augmented_reactive()$fieldBook)
-      if(!is.null(valsARCBD$maxValue) && !is.null(valsARCBD$minValue) && !is.null(valsARCBD$trail.arcbd)) {
-        maxVal <- as.numeric(valsARCBD$maxValue)
-        minVal <- as.numeric(valsARCBD$minValue)
-        ROX_O <- as.numeric(valsARCBD$ROX)
-        ROY_O <- as.numeric(valsARCBD$ROY)
-        df_arcbd <- rcbd_augmented_reactive()$fieldBook
-        nrows.s <- length(levels(as.factor(df_arcbd$ROW)))
-        ncols.s <- length(levels(as.factor(df_arcbd$COLUMN)))
-        loc_levels_factors <- levels(factor(df_arcbd$LOCATION, unique(df_arcbd$LOCATION)))
-        seed.s <- as.numeric(input$myseed_a_rcbd)
-        locs <- length(loc_levels_factors)
-        df_arcbd_list <- vector(mode = "list", length = locs)
-        dfSimulationList <- vector(mode = "list", length = locs)
-        do_sites <- 1:(length(loc_levels_factors))
-        z <- 1
-        set.seed(seed.s)
-        for (sites in do_sites) {
-          df_loc <- subset(df_arcbd, LOCATION == loc_levels_factors[z])
-          fieldBook <- df_loc[, c(1,6,7,10)]
-          dfSimulation <- AR1xAR1_simulation(nrows = nrows.s, ncols = ncols.s,
-                                             ROX = ROX_O, ROY = ROY_O, minValue = minVal,
-                                             maxValue = maxVal, fieldbook = fieldBook,
-                                             trail = valsARCBD$trail.arcbd,
-                                             seed = NULL)
-          dfSimulation <- dfSimulation$outOrder
-          dfSimulationList[[sites]] <- dfSimulation
-          dataArcbd_loc <- df_loc
-          df_arcbd_simu <- cbind(dataArcbd_loc, round(dfSimulation[,7],2))
-          colnames(df_arcbd_simu)[12] <- as.character(valsARCBD$trail.arcbd)
-          df_arcbd_list[[sites]] <- df_arcbd_simu
-          z <- z + 1
-        }
-        df_arcbd_locs <- dplyr::bind_rows(df_arcbd_list)
-        v <- 1
-      }else {
-        dataArcbd <- rcbd_augmented_reactive()$fieldBook
-        v <- 2
+      field_book <- rcbd_augmented_reactive()$fieldBook
+      if (is.null(valsARCBD$maxValue) || is.null(valsARCBD$minValue) ||
+          is.null(valsARCBD$trail.arcbd)) {
+        return(list(df = field_book))
       }
-      if (v == 1) {
-        return(list(df = df_arcbd_locs, dfSimulation = dfSimulationList))
-      }else if (v == 2) {
-        return(list(df = dataArcbd))
-      }
-      
+      simulation <- validate_design(simulate_spatial_field_book(
+        field_book = field_book,
+        nrows = length(unique(field_book$ROW)), ncols = length(unique(field_book$COLUMN)),
+        correlation_x = as.numeric(valsARCBD$ROX),
+        correlation_y = as.numeric(valsARCBD$ROY),
+        min_value = as.numeric(valsARCBD$minValue),
+        max_value = as.numeric(valsARCBD$maxValue),
+        response_name = as.character(valsARCBD$trail.arcbd),
+        seed = as.numeric(input$myseed_a_rcbd)
+      ))
+      list(df = simulation$field_book, dfSimulation = simulation$simulations)
     })
-    
+
     heat_map_arcbd <- reactiveValues(heat_map_option = FALSE)
     
     observeEvent(input$ok.arcbd, {
