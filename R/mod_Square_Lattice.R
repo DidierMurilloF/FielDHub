@@ -400,34 +400,9 @@ mod_Square_Lattice_server <- function(id){
     valsSQUARE <- shiny::reactiveValues(maxV.square = NULL, minV.square = NULL, trail.square = NULL)
     
     simuModal.square <- function(failed = FALSE) {
-      
-      shiny::modalDialog(
-        shiny::h4("Generate a random response variable:"),
-        shiny::selectInput(inputId = ns("trailsSQUARE"), label = "Select One:", choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
-        shiny::conditionalPanel("input.trailsSQUARE == 'Other'", ns = ns,
-                         shiny::textInput(inputId = ns("OtherSQUARE"), label = "Input Trail Name:", value = NULL)
-        ),
-        shiny::fluidRow(
-          shiny::column(6,
-                 shiny::numericInput(inputId = ns("min.square"), "Input the min value", value = NULL)
-          ),
-          shiny::column(6,
-                 shiny::numericInput(inputId = ns("max.square"), "Input the max value", value = NULL)
-                 
-          )
-          
-        ),
-        
-        if (failed)
-          shiny::div(shiny::tags$b("Invalid input of data max and min", style = "color: red;")),
-        
-        footer = shiny::tagList(
-          shiny::modalButton("Cancel"),
-          shiny::actionButton(inputId = ns("ok.square"), "GO")
-        )
-        
-      )
-      
+      app_simulation_modal(ns,
+        ids = c(trait = "trailsSQUARE", other = "OtherSQUARE", minimum = "min.square", maximum = "max.square", submit = "ok.square"),
+        failed = failed, introduction = "Generate a random response variable:")
     }
     
     shiny::observeEvent(input$Simulate.square, {

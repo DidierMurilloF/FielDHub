@@ -386,33 +386,10 @@ mod_Rectangular_Lattice_server <- function(id) {
     
     valsRECT <- shiny::reactiveValues(maxV.rectangular= NULL, minV.rectangular= NULL, trail.rectangular= NULL)
     
-    simuModal.rectangular<- function(failed = FALSE) {
-      shiny::modalDialog(
-        shiny::selectInput(inputId = ns("trailsRECT"), label = "Select One:", choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
-        shiny::conditionalPanel("input.trailsRECT == 'Other'", ns = ns,
-                         shiny::textInput(inputId = ns("OtherRECT"), label = "Input Trial Name:", value = NULL)
-        ),
-        shiny::fluidRow(
-          shiny::column(6,
-                 shiny::numericInput(inputId = ns("min.rectangular"), "Input the min value", value = NULL)
-          ),
-          shiny::column(6,
-                 shiny::numericInput(inputId = ns("max.rectangular"), "Input the max value", value = NULL)
-                 
-          )
-          
-        ),
-        
-        if (failed)
-          shiny::div(shiny::tags$b("Invalid input of data max and min", style = "color: red;")),
-        
-        footer = shiny::tagList(
-          shiny::modalButton("Cancel"),
-          shiny::actionButton(inputId = ns("ok.rectangular"), "GO")
-        )
-        
-      )
-      
+    simuModal.rectangular <- function(failed = FALSE) {
+      app_simulation_modal(ns,
+        ids = c(trait = "trailsRECT", other = "OtherRECT", minimum = "min.rectangular", maximum = "max.rectangular", submit = "ok.rectangular"),
+        failed = failed)
     }
     
     shiny::observeEvent(input$Simulate.rectangular, {

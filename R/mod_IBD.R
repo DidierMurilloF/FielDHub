@@ -422,43 +422,9 @@ mod_IBD_server <- function(id) {
                               trail.ibd = NULL)
     
     simuModal.ibd <- function(failed = FALSE) {
-      shiny::modalDialog(
-        shiny::selectInput(inputId = ns("trailsIBD"),
-                    label = "Select One:", 
-                    choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
-        shiny::conditionalPanel(
-          condition = "input.trailsIBD == 'Other'", 
-          ns = ns,
-          shiny::textInput(inputId = ns("OtherIBD"),
-                    label = "Input Trial Name:", 
-                    value = NULL)
-        ),
-        shiny::fluidRow(
-          shiny::column(6,
-                 shiny::numericInput(inputId = ns("min.ibd"),
-                              "Input the min value", 
-                              value = NULL)
-          ),
-          shiny::column(6,
-                 shiny::numericInput(inputId = ns("max.ibd"),
-                              "Input the max value", 
-                              value = NULL)
-                 
-          )
-          
-        ),
-        
-        if (failed)
-          shiny::div(shiny::tags$b("Invalid input of data max and min",
-                     style = "color: red;")),
-        
-        footer = shiny::tagList(
-          shiny::modalButton("Cancel"),
-          shiny::actionButton(inputId = ns("ok.ibd"), "GO")
-        )
-        
-      )
-      
+      app_simulation_modal(ns,
+        ids = c(trait = "trailsIBD", other = "OtherIBD", minimum = "min.ibd", maximum = "max.ibd", submit = "ok.ibd"),
+        failed = failed)
     }
     
     shiny::observeEvent(input$Simulate.ibd, {

@@ -386,37 +386,9 @@ mod_SSPD_server <- function(id){
     valsspd <- shiny::reactiveValues(maxV.sspd = NULL, minV.sspd = NULL, Trial.sspd = NULL)
     
     simuModal.sspd <- function(failed = FALSE) {
-      shiny::modalDialog(
-        shiny::selectInput(inputId = ns("TrialsRowCol"),
-                    label = "Select One:", 
-                    choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
-        shiny::conditionalPanel("input.TrialsRowCol == 'Other'",
-                         ns = ns,
-                         shiny::textInput(inputId = ns("Otherspd"),
-                                   label = "Input Trial Name:",
-                                   value = NULL)
-        ),
-        shiny::fluidRow(
-          shiny::column(6,
-                 shiny::numericInput(ns("min.sspd"), "Input the min value", value = NULL)
-          ),
-          shiny::column(6,
-                 shiny::numericInput(ns("max.sspd"), "Input the max value", value = NULL)
-                 
-          )
-          
-        ),
-        
-        if (failed)
-          shiny::div(shiny::tags$b("Invalid input of data max and min", style = "color: red;")),
-        
-        footer = shiny::tagList(
-          shiny::modalButton("Cancel"),
-          shiny::actionButton(ns("ok.sspd"), "GO")
-        )
-        
-      )
-      
+      app_simulation_modal(ns,
+        ids = c(trait = "TrialsRowCol", other = "Otherspd", minimum = "min.sspd", maximum = "max.sspd", submit = "ok.sspd"),
+        failed = failed)
     }
     
     shiny::observeEvent(input$Simulate.sspd, {

@@ -288,30 +288,9 @@ mod_CRD_server <- function(id) {
     vals <- shiny::reactiveValues(maxV.CRD = NULL, minV.CRD = NULL, trail.CRD = NULL)
     
     simuModal.crd <- function(failed = FALSE) {
-      shiny::modalDialog(
-        shiny::selectInput(inputId = ns("trailsCRD"), label = "Select One:", choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
-        shiny::conditionalPanel("input.trailsCRD == 'Other'", ns = ns,
-                         shiny::textInput(inputId = ns("OtherCRD"), label = "Input Trial Name:", value = NULL)
-        ),
-        shiny::fluidRow(
-          shiny::column(6,
-                 shiny::numericInput(ns("min.crd"), "Input the min value", value = NULL)
-          ),
-          shiny::column(6,
-                 shiny::numericInput(ns("max.crd"), "Input the max value", value = NULL)
-                 
-          )
-        ),
-        
-        if (failed)
-          shiny::div(shiny::tags$b("Invalid input of data max and min", style = "color: red;")),
-        
-        footer = shiny::tagList(
-          shiny::modalButton("Cancel"),
-          shiny::actionButton(ns("ok.crd"), "GO")
-        )
-        
-      )
+      app_simulation_modal(ns,
+        ids = c(trait = "trailsCRD", other = "OtherCRD", minimum = "min.crd", maximum = "max.crd", submit = "ok.crd"),
+        failed = failed)
     }
     
     # Show modal when button is clicked.

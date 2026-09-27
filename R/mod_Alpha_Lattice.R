@@ -386,32 +386,9 @@ mod_Alpha_Lattice_server <- function(id){
     valsALPHA <- shiny::reactiveValues(maxV.alpha = NULL, minV.alpha = NULL, trail.alpha = NULL)
     
     simuModal.alpha <- function(failed = FALSE) {
-      shiny::modalDialog(
-        shiny::selectInput(inputId = ns("trailsALPHA"), label = "Select One:", choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
-        shiny::conditionalPanel("input.trailsALPHA == 'Other'", ns = ns,
-                         shiny::textInput(inputId = ns("OtherALPHA"), label = "Input the Trial Name:", value = NULL)
-        ),
-        shiny::fluidRow(
-          shiny::column(6,
-                 shiny::numericInput(inputId = ns("min.alpha"), "Input the min value", value = NULL)
-          ),
-          shiny::column(6,
-                 shiny::numericInput(inputId = ns("max.alpha"), "Input the max value", value = NULL)
-                 
-          )
-          
-        ),
-        
-        if (failed)
-          shiny::div(shiny::tags$b("Invalid input of data max and min", style = "color: red;")),
-        
-        footer = shiny::tagList(
-          shiny::modalButton("Cancel"),
-          shiny::actionButton(inputId = ns("ok.alpha"), "GO")
-        )
-        
-      )
-      
+      app_simulation_modal(ns,
+        ids = c(trait = "trailsALPHA", other = "OtherALPHA", minimum = "min.alpha", maximum = "max.alpha", submit = "ok.alpha"),
+        failed = failed)
     }
     
     shiny::observeEvent(input$Simulate.alpha, {

@@ -364,32 +364,9 @@ mod_FD_server <- function(id) {
     valsfd <- shiny::reactiveValues(maxV.fd = NULL, minV.fd = NULL, trail.fd = NULL)
     
     simuModal.fd <- function(failed = FALSE) {
-      shiny::modalDialog(
-        shiny::selectInput(inputId = ns("trailsfd"), label = "Select One:", choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
-        shiny::conditionalPanel("input.trailsfd == 'Other'", ns = ns,
-                         shiny::textInput(inputId = ns("Otherfd"), label = "Input Trail Name:", value = NULL)
-        ),
-        shiny::fluidRow(
-          shiny::column(6,
-                 shiny::numericInput(inputId = ns("min.fd"), "Input the min value", value = NULL)
-          ),
-          shiny::column(6,
-                 shiny::numericInput(inputId = ns("max.fd"), "Input the max value", value = NULL)
-                 
-          )
-          
-        ),
-        
-        if (failed)
-          shiny::div(shiny::tags$b("Invalid input of data max and min", style = "color: red;")),
-        
-        footer = shiny::tagList(
-          shiny::modalButton("Cancel"),
-          shiny::actionButton(ns("ok.fd"), "GO")
-        )
-        
-      )
-      
+      app_simulation_modal(ns,
+        ids = c(trait = "trailsfd", other = "Otherfd", minimum = "min.fd", maximum = "max.fd", submit = "ok.fd"),
+        failed = failed)
     }
     
     shiny::observeEvent(input$Simulate.fd, {

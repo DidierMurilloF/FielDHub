@@ -48,6 +48,9 @@ knitr::opts_chunk$set(
 
 ### New features:
 
+- The twelve classic-design simulation dialogs now share one component,
+  preserving existing controls and correcting the response label to "Trait name".
+
 - Independent scientific checks now cover every design family in the fixed-seed
   catalogue: replication, block completeness, physical coordinates, checks,
   fillers, allocation budgets, and pair distances. Incomplete-block and lattice

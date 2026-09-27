@@ -392,41 +392,9 @@ mod_STRIPD_server <- function(id) {
                                 trail.strip = NULL)
     
     simuModal.strip <- function(failed = FALSE) {
-      shiny::modalDialog(
-        shiny::selectInput(inputId = ns("trailsStrip"),
-                    label = "Select One:", 
-                    choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
-        shiny::conditionalPanel(
-          condition = "input.trailsStrip == 'Other'", 
-          ns = ns,
-          shiny::textInput(inputId = ns("OtherStrip"),
-                    label = "Input Trial Name:", 
-                    value = NULL)
-        ),
-        shiny::fluidRow(
-          shiny::column(6,
-                 shiny::numericInput(ns("min.strip"),
-                              "Input the min value", 
-                              value = NULL)
-          ),
-          shiny::column(6,
-                 shiny::numericInput(ns("max.strip"),
-                              "Input the max value", 
-                              value = NULL)  
-          )
-        ),
-        
-        if (failed)
-          shiny::div(shiny::tags$b("Invalid input of data max and min",
-                     style = "color: red;")),
-        
-        footer = shiny::tagList(
-          shiny::modalButton("Cancel"),
-          shiny::actionButton(ns("ok.strip"), "GO")
-        )
-        
-      )
-      
+      app_simulation_modal(ns,
+        ids = c(trait = "trailsStrip", other = "OtherStrip", minimum = "min.strip", maximum = "max.strip", submit = "ok.strip"),
+        failed = failed)
     }
     
     shiny::observeEvent(input$Simulate.strip, {

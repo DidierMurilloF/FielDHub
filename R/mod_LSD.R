@@ -349,38 +349,9 @@ mod_LSD_server <- function(id){
                               trail.lsd = NULL)
     
     simuModal.lsd <- function(failed = FALSE) {
-      shiny::modalDialog(
-        shiny::selectInput(inputId = ns("trailsLSD"),
-                    label = "Select One:", 
-                    choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
-        shiny::conditionalPanel(
-          condition = "input.trailsLSD == 'Other'", ns = ns,
-          shiny::textInput(inputId = ns("OtherLSD"),
-                    label = "Input Trial Name:", 
-                    value = NULL)
-        ),
-        shiny::fluidRow(
-          shiny::column(6,
-                 shiny::numericInput(ns("min.lsd"),
-                              "Input the min value", 
-                              value = NULL)
-          ),
-          shiny::column(6,
-                 shiny::numericInput(ns("max.lsd"),
-                              "Input the max value", 
-                              value = NULL)
-          )
-        ),
-        
-        if (failed)
-          shiny::div(shiny::tags$b("Invalid input of data max and min",
-                     style = "color: red;")),
-        
-        footer = shiny::tagList(
-          shiny::modalButton("Cancel"),
-          shiny::actionButton(ns("ok.lsd"), "GO")
-        )
-      )
+      app_simulation_modal(ns,
+        ids = c(trait = "trailsLSD", other = "OtherLSD", minimum = "min.lsd", maximum = "max.lsd", submit = "ok.lsd"),
+        failed = failed)
     }
     shiny::observeEvent(input$Simulate.lsd, {
       shiny::req(latinsquare_reactive()$fieldBook)

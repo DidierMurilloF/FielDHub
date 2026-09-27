@@ -361,32 +361,9 @@ mod_SPD_server <- function(id){
     valspd <- shiny::reactiveValues(maxV.spd = NULL, minV.spd = NULL, trail.spd = NULL)
     
     simuModal.spd <- function(failed = FALSE) {
-      shiny::modalDialog(
-        shiny::selectInput(inputId = ns("trailsspd"), label = "Select One:", choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
-        shiny::conditionalPanel("input.trailsspd == 'Other'", ns = ns,
-                         shiny::textInput(inputId = ns("Otherspd"), label = "Input Trial Name:", value = NULL)
-        ),
-        shiny::fluidRow(
-          shiny::column(6,
-                 shiny::numericInput(ns("min.spd"), "Input the min value", value = NULL)
-          ),
-          shiny::column(6,
-                 shiny::numericInput(ns("max.spd"), "Input the max value", value = NULL)
-                 
-          )
-          
-        ),
-        
-        if (failed)
-          shiny::div(shiny::tags$b("Invalid input of data max and min", style = "color: red;")),
-        
-        footer = shiny::tagList(
-          shiny::modalButton("Cancel"),
-          shiny::actionButton(ns("ok.spd"), "GO")
-        )
-        
-      )
-      
+      app_simulation_modal(ns,
+        ids = c(trait = "trailsspd", other = "Otherspd", minimum = "min.spd", maximum = "max.spd", submit = "ok.spd"),
+        failed = failed)
     }
     
     shiny::observeEvent(input$Simulate.spd, {

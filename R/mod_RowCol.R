@@ -421,41 +421,9 @@ mod_RowCol_server <- function(id){
                                   trail.RowCol = NULL)
     
     simuModal.RowCol <- function(failed = FALSE) {
-      shiny::modalDialog(
-        shiny::selectInput(inputId = ns("trailsRowCol"),
-                    label = "Select One:", 
-                    choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
-        shiny::conditionalPanel(
-          condition = "input.trailsRowCol == 'Other'", ns = ns,
-          shiny::textInput(inputId = ns("OtherRowCol"),
-                    label = "Input Trial Name:", 
-                    value = NULL)
-        ),
-        shiny::fluidRow(
-          shiny::column(6,
-                 shiny::numericInput(ns("min.RowCol"),
-                              "Input the min value", 
-                              value = NULL)
-          ),
-          shiny::column(6,
-                 shiny::numericInput(ns("max.RowCol"),
-                              "Input the max value",
-                              value = NULL)
-          )
-          
-        ),
-        
-        if (failed)
-          shiny::div(shiny::tags$b("Invalid input of data max and min",
-                     style = "color: red;")),
-        
-        footer = shiny::tagList(
-          shiny::modalButton("Cancel"),
-          shiny::actionButton(ns("ok.RowCol"), "GO")
-        )
-        
-      )
-      
+      app_simulation_modal(ns,
+        ids = c(trait = "trailsRowCol", other = "OtherRowCol", minimum = "min.RowCol", maximum = "max.RowCol", submit = "ok.RowCol"),
+        failed = failed)
     }
     
     shiny::observeEvent(input$Simulate.RowCol, {

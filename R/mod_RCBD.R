@@ -449,43 +449,9 @@ mod_RCBD_server <- function(id) {
                                trail.rcbd = NULL)
     
     simuModal.rcbd <- function(failed = FALSE) {
-      shiny::modalDialog(
-        shiny::selectInput(inputId = ns("trailsRCBD"),
-                    label = "Select One:", 
-                    choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
-        shiny::conditionalPanel(
-          condition = "input.trailsRCBD == 'Other'", 
-          ns = ns,
-          shiny::textInput(inputId = ns("OtherRCBD"),
-                    label = "Input Trial Name:", 
-                    value = NULL)
-        ),
-        shiny::fluidRow(
-          shiny::column(6,
-                 shiny::numericInput(inputId = ns("min.rcbd"),
-                              "Input the min value", 
-                              value = NULL)
-          ),
-          shiny::column(6,
-                 shiny::numericInput(inputId = ns("max.rcbd"),
-                              "Input the max value", 
-                              value = NULL)
-                 
-          )
-          
-        ),
-        
-        if (failed)
-          shiny::div(shiny::tags$b("Invalid input of data max and min",
-                     style = "color: red;")),
-        
-        footer = shiny::tagList(
-          shiny::modalButton("Cancel"),
-          shiny::actionButton(inputId = ns("ok.rcbd"), "GO")
-        )
-        
-      )
-      
+      app_simulation_modal(ns,
+        ids = c(trait = "trailsRCBD", other = "OtherRCBD", minimum = "min.rcbd", maximum = "max.rcbd", submit = "ok.rcbd"),
+        failed = failed)
     }
     
     shiny::observeEvent(input$Simulate.rcbd, {
