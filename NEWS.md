@@ -104,6 +104,14 @@
 
 ### Enhancements:
 
+- `do_optim()` now returns allocation plans through a validated constructor
+  and records the seed, RNG settings, package/schema versions and evaluated
+  input arguments in `metadata`. Rebuild a plan with
+  `do.call(do_optim, x$metadata$parameters)` under the same software and RNG
+  settings. Existing `Sparse`/`MultiPrep` classes and all four allocation
+  data elements are preserved. Allocation plans have their own schema
+  because they do not yet contain field-book coordinates.
+
 - Upload column requirements and missing-value rules now share one internal
   definition across all design families. Each file is validated once instead
   of twice; supported input formats and validation outcomes are preserved.

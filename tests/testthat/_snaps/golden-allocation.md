@@ -3014,7 +3014,7 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["multi_location_data", "list_locs", "allocation", "size_locations"]
+              "value": ["multi_location_data", "list_locs", "allocation", "size_locations", "metadata"]
             },
             "class": {
               "type": "character",
@@ -3252,6 +3252,96 @@
                 }
               },
               "value": [90, 90, 90, 90]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["design", "schema_version", "seed", "rng_kind", "parameters"]
+                }
+              },
+              "value": [
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["allocation_sparse"]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [36]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                },
+                {
+                  "type": "list",
+                  "attributes": {
+                    "names": {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["design", "lines", "l", "copies_per_entry", "add_checks", "checks", "rep_checks", "force_balance", "seed", "data"]
+                    }
+                  },
+                  "value": [
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["sparse"]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [120]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [4]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [3]
+                    },
+                    {
+                      "type": "logical",
+                      "attributes": {},
+                      "value": [true]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [4]
+                    },
+                    {
+                      "type": "NULL"
+                    },
+                    {
+                      "type": "logical",
+                      "attributes": {},
+                      "value": [true]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [36]
+                    },
+                    {
+                      "type": "NULL"
+                    }
+                  ]
+                }
+              ]
             }
           ]
         }
@@ -3276,7 +3366,7 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["multi_location_data", "list_locs", "allocation", "size_locations"]
+              "value": ["multi_location_data", "list_locs", "allocation", "size_locations", "metadata"]
             },
             "class": {
               "type": "character",
@@ -3539,6 +3629,98 @@
                 }
               },
               "value": [100, 100, 100, 100]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["design", "schema_version", "seed", "rng_kind", "parameters"]
+                }
+              },
+              "value": [
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["allocation_prep"]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [37]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                },
+                {
+                  "type": "list",
+                  "attributes": {
+                    "names": {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["design", "lines", "l", "copies_per_entry", "add_checks", "checks", "rep_checks", "force_balance", "seed", "data"]
+                    }
+                  },
+                  "value": [
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["prep"]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [80]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [4]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [5]
+                    },
+                    {
+                      "type": "logical",
+                      "attributes": {},
+                      "value": [true]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [2]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [4, 4]
+                    },
+                    {
+                      "type": "logical",
+                      "attributes": {},
+                      "value": [true]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [37]
+                    },
+                    {
+                      "type": "NULL"
+                    }
+                  ]
+                }
+              ]
             }
           ]
         }

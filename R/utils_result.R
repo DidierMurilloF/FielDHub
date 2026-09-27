@@ -5,10 +5,23 @@
 #' @noRd
 fieldhub_schema_version <- 1L
 
+#' Reproducibility metadata shared by field designs and allocation plans
+#' @noRd
+fieldhub_metadata <- function(design, seed) {
+  list(
+    design = design,
+    schema_version = fieldhub_schema_version,
+    seed = seed,
+    rng_kind = RNGkind(),
+    package_version = as.character(utils::packageVersion("FielDHub"))
+  )
+}
+
 #' Build the result of a design function
 #'
-#' @description Every design function returns its result through this
-#' constructor. It adds a \code{metadata} element and gives the result the
+#' @description Field designs and family splits return their result through
+#' this constructor; allocation plans use \code{new_fieldhub_allocation()}.
+#' It adds a \code{metadata} element and gives the result the
 #' class \code{c("fieldhub_<design>", "FielDHub")}, so that \code{print()},
 #' \code{summary()} and \code{plot()} dispatch on the design.
 #'
@@ -25,13 +38,7 @@ new_fieldhub_design <- function(x, design) {
     fieldhub_abort("Internal error: the design result must be a list with infoDesign.",
                    class = "fieldhub_internal_error", call. = FALSE)
   }
-  x$metadata <- list(
-    design = design,
-    schema_version = fieldhub_schema_version,
-    seed = x$infoDesign$seed,
-    rng_kind = RNGkind(),
-    package_version = as.character(utils::packageVersion("FielDHub"))
-  )
+  x$metadata <- fieldhub_metadata(design, x$infoDesign$seed)
   class(x) <- c(paste0("fieldhub_", design), "FielDHub")
   validate_fieldhub_design(x)
 }

@@ -15,13 +15,21 @@
 #'         Salvador Gezan [aut],
 #'         Ana Heilman [ctb]
 #'
-#' @return A list with four elements.
+#' @return A list with five elements, retaining class \code{Sparse} or
+#'   \code{MultiPrep} for compatibility.
 #' \itemize{
 #'   \item \code{multi_location_data} is a data frame with the entries of every
-#'  location: \code{LOCATION | ENTRY | NAME}.
+#'     location: \code{LOCATION | ENTRY | NAME}, with a \code{REPS} column
+#'     for p-rep allocations.
 #'   \item \code{list_locs} is a list with each location list of entries.
-#'   \item \code{allocation} is a matrix with the allocation of treatments.
-#'   \item \code{size_locations} is a named vector with the size of each location.
+#'   \item \code{allocation} is a data frame of test-entry copy counts, with
+#'     one column per location.
+#'   \item \code{size_locations} is a named vector of test-entry copies per
+#'     location, excluding checks.
+#'   \item \code{metadata} records the allocation type, schema version, seed,
+#'     random-number settings, package version and evaluated input parameters.
+#'     With the same package versions and RNG settings, rebuild the allocation
+#'     with \code{do.call(do_optim, x$metadata$parameters)}.
 #' }
 #'
 #' @references
@@ -240,10 +248,10 @@ do_optim <- function(
         allocation = allocation_df,
         size_locations = col_sum
     )
-    # Create the class "MultiPrep" for the object out
-    design_class <- "MultiPrep"
-    if (design != "prep") design_class <- "Sparse"
-    class(out) <- design_class
-    #return the object out
+    out <- new_fieldhub_allocation(out, parameters = list(
+        design = design, lines = lines, l = l, copies_per_entry = copies_per_entry,
+        add_checks = add_checks, checks = checks, rep_checks = rep_checks,
+        force_balance = force_balance, seed = seed, data = data
+    ))
     return(out)
 }
