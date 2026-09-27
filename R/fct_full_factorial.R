@@ -19,7 +19,9 @@
 #' @param factorLabels (optional) If \code{TRUE} retain the levels
 #'   labels from the original data set otherwise, numeric labels will be
 #'   assigned. Default is \code{factorLabels =TRUE}.
-#' @param data (optional) Data frame with the labels of factors.
+#' @param data (optional) Data frame whose first two columns contain factor
+#'   names and level labels. Levels must be unique within each factor, but a
+#'   label may occur in different factors. Incomplete rows are omitted.
 #' 
 #' @author Didier Murillo [aut],
 #'         Salvador Gezan [aut],
@@ -110,7 +112,16 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
     }
   } else {
     if(!is.data.frame(data)) fieldhub_abort("Data must be a data frame.")
+    if (ncol(data) < 2L) {
+      fieldhub_abort("full_factorial() requires at least two columns: FACTOR and LEVEL.")
+    }
     data <- as.data.frame(na.omit(data[,1:2]))
+    if (nrow(data) == 0L) {
+      fieldhub_abort("full_factorial() requires at least one complete factor-level row.")
+    }
+    if (!factorial_levels_unique(data)) {
+      fieldhub_abort("full_factorial() requires levels to be unique within each factor.")
+    }
     colnames(data) <- c("factors", "levels")
     data$factors <- factor(data$factors, as.character(unique(data$factors)))
     l.factors <- levels(data$factors)

@@ -61,7 +61,7 @@ check_input <- function(design, dataIn) {
     } else return(NULL)
   } else if (design == "factorial") {
     if (ncol(dataIn) >= 2) {
-      return(isTRUE(all.equal(dataIn[,2],unique(dataIn[,2]))))
+      return(factorial_levels_unique(dataIn))
     } else return(NULL)
   } else if (design == "rcbd") {
     if (ncol(dataIn) >= 1) {

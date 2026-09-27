@@ -117,6 +117,8 @@ knitr::opts_chunk$set(
 
 ### Fix bugs:
 
+* Factorial uploads and `full_factorial()` now share a factor-level uniqueness rule. The same label (such as "Low") may belong to different factors, which the app previously rejected. Duplicate levels within one factor now raise a classed input error in the R API instead of silently producing repeated combinations. Incomplete rows are still omitted, and malformed or empty input tables give targeted errors. Valid seeded designs are unchanged.
+
 * CSV uploads now require a header and equally sized data records. An extra field could previously be interpreted as a row name, silently shifting entry identifiers and treatment labels; short rows were silently padded. These malformed files now show the existing format error. Quoted separators, multiline labels and explicitly empty cells remain supported.
 
 * App uploads now read Shiny's `datapath` field with exact matching. Eighteen modules previously relied on the abbreviated `$datapat`, producing warnings under strict host settings; a similarly named field could also be selected when `datapath` was missing. All 19 modules now use the exact field without changing valid upload paths.

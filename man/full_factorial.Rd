@@ -46,7 +46,9 @@ to obtain reproducible designs.}
 labels from the original data set otherwise, numeric labels will be
 assigned. Default is \code{factorLabels =TRUE}.}
 
-\item{data}{(optional) Data frame with the labels of factors.}
+\item{data}{(optional) Data frame whose first two columns contain factor
+names and level labels. Levels must be unique within each factor, but a
+label may occur in different factors. Incomplete rows are omitted.}
 }
 \value{
 A list with two elements.
