@@ -226,8 +226,11 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
   # search cannot latinize across replicates); for method = "twostage" it is
   # ignored, with a warning if it was explicitly set to TRUE.
   if (latinize && method == "twostage") {
-    warning('latinize is only available with method = "onestage"; ',
-            'it is ignored for method = "twostage".', call. = FALSE)
+    fieldhub_warn(
+      'latinize is only available with method = "onestage"; ',
+      'it is ignored for method = "twostage".',
+      class = "fieldhub_design_warning", call = NULL
+    )
     latinize <- FALSE
   }
   seed <- resolve_seed(seed)
@@ -277,10 +280,13 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
   if (latinize) {
     ncols_full <- nt / nunits
     if (r > nrows || r > ncols_full) {
-      warning('With latinize = TRUE, full latinization requires r <= nrows and ',
-              'r <= ncols (here r = ', r, ', nrows = ', nrows, ', ncols = ',
-              ncols_full, '), so some treatments will still repeat a row or a ',
-              'column across replicates.', call. = FALSE)
+      fieldhub_warn(
+        'With latinize = TRUE, full latinization requires r <= nrows and ',
+        'r <= ncols (here r = ', r, ', nrows = ', nrows, ', ncols = ',
+        ncols_full, '), so some treatments will still repeat a row or a ',
+        'column across replicates.',
+        class = "fieldhub_design_warning", call = NULL
+      )
     }
   }
 
@@ -308,12 +314,15 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
         onestage_infeasible = function(cnd) cnd
       )
       if (inherits(onestage_fit, "onestage_infeasible")) {
-        warning('method = "onestage" is not feasible for these dimensions ',
-                '(t = ', nt, ', nrows = ', nrows, ', r = ', r, '): the joint ',
-                'one-stage row-and-column model is over-parameterized, so ',
-                'row_column() falls back to method = "twostage". ',
-                'blocksdesign::design() reported: ',
-                conditionMessage(onestage_fit), call. = FALSE)
+        fieldhub_warn(
+          'method = "onestage" is not feasible for these dimensions ',
+          '(t = ', nt, ', nrows = ', nrows, ', r = ', r, '): the joint ',
+          'one-stage row-and-column model is over-parameterized, so ',
+          'row_column() falls back to method = "twostage". ',
+          'blocksdesign::design() reported: ',
+          conditionMessage(onestage_fit),
+          class = "fieldhub_design_warning", call = NULL
+        )
         method <- "twostage"
       } else {
         field_book_best_design <- onestage_fit

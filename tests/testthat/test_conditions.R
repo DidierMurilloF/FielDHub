@@ -13,19 +13,68 @@ test_that("fieldhub_abort builds one classed condition from message parts", {
 })
 
 test_that("package functions signal errors through fieldhub_abort", {
-  namespace <- asNamespace("FielDHub")
-  objects <- mget(ls(namespace, all.names = TRUE), namespace, inherits = FALSE)
-  functions <- Filter(
-    function(x) is.function(x) && identical(environment(x), namespace),
-    objects
-  )
-  functions <- functions[!grepl("^(app_|golem_|mod_)|^run_app$", names(functions))]
+  functions <- core_functions()
   direct_stop <- names(Filter(
     function(x) "stop" %in% all.names(body(x), functions = TRUE),
     functions
   ))
 
   expect_setequal(direct_stop, "fieldhub_abort")
+})
+
+test_that("core code signals warnings only through fieldhub_warn()", {
+  # See helper-source.R: core_functions() inspects the namespace instead of
+  # parsing R/ source files, so this also works under R CMD check, where no
+  # R/ directory exists (constraints.md ruling R2).
+  functions <- core_functions()
+  direct_warning <- names(Filter(
+    function(x) "warning" %in% all.names(body(x), functions = TRUE),
+    functions
+  ))
+
+  expect_setequal(direct_warning, "fieldhub_warn")
+})
+
+test_that("wrong-length plot numbers and location names warn with the values used", {
+  w <- expect_warning(RCBD(t = 4, reps = 2, l = 2, plotNumber = 101, seed = 1),
+                      class = "fieldhub_default_warning")
+  expect_identical(w$argument, "plotNumber")
+  expect_identical(w$supplied, 101)
+  expect_length(w$used, 2L)
+  # plotNumber must have one value per location here, otherwise RCBD()'s own
+  # default plotNumber = 101 (length 1) also mismatches l = 2 and warns first,
+  # leaking a second, unmatched warning (RCBD's plotNumber check runs before
+  # its locationNames check; test_default_arguments.R avoids this the same
+  # way).
+  w <- expect_warning(RCBD(t = 4, reps = 2, l = 2, plotNumber = c(1, 101),
+                           locationNames = "A", seed = 1),
+                      class = "fieldhub_default_warning")
+  expect_identical(w$argument, "locationNames")
+})
+
+test_that("split_plot() and split_split_plot() warn with a classed default when plotNumber is NULL", {
+  w <- expect_warning(
+    split_plot(wp = 3, sp = 2, reps = 2, plotNumber = NULL, seed = 1),
+    class = "fieldhub_default_warning"
+  )
+  expect_identical(w$argument, "plotNumber")
+  expect_null(w$supplied)
+
+  w <- expect_warning(
+    split_split_plot(wp = 2, sp = 2, ssp = 2, reps = 2, plotNumber = NULL, seed = 1),
+    class = "fieldhub_default_warning"
+  )
+  expect_identical(w$argument, "plotNumber")
+  expect_null(w$supplied)
+})
+
+test_that("row_column() warns with a classed default for a wrong-length IBD plotNumber", {
+  w <- expect_warning(
+    row_column(t = 12, nrows = 3, reps = 2, l = 2, plotNumber = 101, seed = 1,
+               method = "twostage", iterations = 50),
+    class = "fieldhub_default_warning"
+  )
+  expect_identical(w$argument, "plotNumber")
 })
 
 test_that("invalid arguments raise a fieldhub_input_error", {
@@ -109,7 +158,8 @@ test_that("plot() explains that a layout option is not available", {
   rcbd <- RCBD(t = 6, reps = 3, seed = 1)
   expect_warning(
     expect_error(plot(rcbd, layout = 99), class = "fieldhub_error"),
-    "Layout option 99 is not available"
+    "Layout option 99 is not available",
+    class = "fieldhub_layout_warning"
   )
 })
 

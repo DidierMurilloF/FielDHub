@@ -148,17 +148,23 @@ rcbd_resolve_entries <- function(t = NULL,
 
   if (sum(rep_checks) > n_units / 2) {
     if (spread_checks) {
-      warning("Checks occupy more than half of each block (",
-              sum(rep_checks), " of ", n_units, " plots). At this density the stratified ",
-              "placement becomes tightly constrained and the position of a repeated check ",
-              "may be nearly or fully determined rather than random.")
+      fieldhub_warn(
+        "Checks occupy more than half of each block (",
+        sum(rep_checks), " of ", n_units, " plots). At this density the stratified ",
+        "placement becomes tightly constrained and the position of a repeated check ",
+        "may be nearly or fully determined rather than random.",
+        class = "fieldhub_design_warning"
+      )
     } else {
       # spread_checks = FALSE never stratifies, so the constraint described
       # above does not apply here; only the density itself is worth flagging.
-      warning("Checks occupy more than half of each block (",
-              sum(rep_checks), " of ", n_units, " plots). Placement is unrestricted ",
-              "('spread_checks = FALSE'), so no per-check position guarantee applies, ",
-              "but more than half of every block will be checks rather than test entries.")
+      fieldhub_warn(
+        "Checks occupy more than half of each block (",
+        sum(rep_checks), " of ", n_units, " plots). Placement is unrestricted ",
+        "('spread_checks = FALSE'), so no per-check position guarantee applies, ",
+        "but more than half of every block will be checks rather than test entries.",
+        class = "fieldhub_design_warning"
+      )
     }
   }
   entries
@@ -238,9 +244,12 @@ rcbd_randomize_block <- function(entries, spread_checks = TRUE, max_tries = 100)
     }
   }
 
-  warning("Could not place the repeated checks into distinct strata after ",
-          max_tries, " attempts; falling back to unrestricted randomization ",
-          "for this block.")
+  fieldhub_warn(
+    "Could not place the repeated checks into distinct strata after ",
+    max_tries, " attempts; falling back to unrestricted randomization ",
+    "for this block.",
+    class = "fieldhub_design_warning"
+  )
   shuffle_all()
 }
 

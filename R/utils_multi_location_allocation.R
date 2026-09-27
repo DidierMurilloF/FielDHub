@@ -130,8 +130,11 @@ balance_allocation <- function(allocation, key_value, add_value) {
         k <- k - 1
     }
     if (init <= max_swaps) {
-        warning("The locations could not be balanced: no entry could be added to ",
-                length(unbalanced_locs), " of them.", call. = FALSE)
+        fieldhub_warn(
+            "The locations could not be balanced: no entry could be added to ",
+            length(unbalanced_locs), " of them.",
+            class = "fieldhub_design_warning", call = NULL
+        )
     }
     allocation
 }

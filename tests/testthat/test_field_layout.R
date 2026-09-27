@@ -166,11 +166,13 @@ test_that("plot() explains that a stacking is not available", {
   alpha <- alpha_lattice(t = 12, k = 4, reps = 2, seed = 1)
   expect_warning(
     expect_error(plot(alpha, stacked = "grid_panel"), class = "fieldhub_error"),
-    "Stacking \"grid_panel\" is not available"
+    "Stacking \"grid_panel\" is not available",
+    class = "fieldhub_layout_warning"
   )
   expect_warning(
     expect_error(plot(RCBD(t = 6, reps = 3, seed = 1), stacked = "grid_panel"),
                  class = "fieldhub_error"),
-    "not available"
+    "not available",
+    class = "fieldhub_layout_warning"
   )
 })

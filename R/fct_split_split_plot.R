@@ -134,8 +134,9 @@ split_split_plot <- function(wp = NULL, sp = NULL, ssp = NULL, reps = NULL, type
       fieldhub_abort("Input plotNumber must be an integer greater than 0 and sorted.")
     } 
   }else {
-    plotNumber <- seq(1001, 1000*(l+1), 1000)
-    warning("Since plotNumber was NULL, it was set up to its default value for each location.")
+    default_plots <- seq(1001, 1000*(l+1), 1000)
+    warn_default_plot_numbers(plotNumber, l, default_plots)
+    plotNumber <- default_plots
   }
   plot.number <- plotNumber
   if (type == 1) crd <- TRUE else crd <- FALSE

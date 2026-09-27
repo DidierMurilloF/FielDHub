@@ -94,7 +94,8 @@ split_families <- function(l = NULL, data = NULL, seed = NULL) {
         Glist_locations[[w]] <- rbind(Glist_locations[[w]], population[k,])
         k <- k + 1
       }
-      warning(paste("Family", fmly, "is not in all locations."))
+      fieldhub_warn("Family ", fmly, " is not in all locations.",
+                    class = "fieldhub_design_warning")
       a[sp] <- 1
     }else if (sj %% l == 0) {
       lOptions <- 1:l

@@ -121,7 +121,8 @@ test_that("latinize = TRUE is ignored with a warning for method = 'twostage'", {
   expect_warning(
     des <- row_column(t = 24, nrows = 6, reps = 2, seed = 21, iterations = 100,
                       method = "twostage", latinize = TRUE),
-    'onestage'
+    'onestage',
+    class = "fieldhub_design_warning"
   )
   # The design is still produced; latinize simply has no effect for twostage.
   expect_valid_row_column(des, t = 24, nrows = 6, r = 2)
@@ -133,7 +134,8 @@ test_that("latinize = TRUE warns when full latinization is infeasible (r > ncols
   expect_warning(
     des <- row_column(t = 12, nrows = 4, reps = 4, seed = 7, iterations = 20,
                       method = "onestage", latinize = TRUE),
-    "full latinization"
+    "full latinization",
+    class = "fieldhub_design_warning"
   )
   expect_valid_row_column(des, t = 12, nrows = 4, r = 4)
 })
@@ -229,7 +231,8 @@ test_that("the default (onestage) falls back for a small app-style design", {
   skip_on_cran()
   expect_warning(
     des <- row_column(t = 8, nrows = 2, reps = 2, seed = 21),
-    'twostage'
+    'twostage',
+    class = "fieldhub_design_warning"
   )
   expect_valid_row_column(des, t = 8, nrows = 2, r = 2)
   expect_equal(des$infoDesign$optimization, "twostage")

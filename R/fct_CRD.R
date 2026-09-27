@@ -97,8 +97,8 @@ CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL,
       fieldhub_abort("plotNumber must be an integer greater than 0.")
     }
   } else {
+    warn_default_plot_numbers(plotNumber, 1, 101)
     plotNumber <- 101
-    warning("Since plotNumber was NULL, default 'plotNumber = 101' is considered.")
   }
   if (is.null(locationName)) locationName <- 1
   validate_crd_location(locationName)

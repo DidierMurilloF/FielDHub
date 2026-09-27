@@ -1,7 +1,8 @@
 test_that("family splits retain empty locations without losing entries", {
   data <- data.frame(ENTRY = 1:3, NAME = paste0("G", 1:3), FAMILY = "A")
   expect_warning(design <- split_families(5, data, seed = 38),
-                 "Family A is not in all locations", fixed = TRUE)
+                 "Family A is not in all locations", fixed = TRUE,
+                 class = "fieldhub_design_warning")
   expect_identical(design$rowsEachlist$Location, paste("Location", 1:5))
   expect_identical(sort(design$rowsEachlist$n), c(0, 0, 1, 1, 1))
   expect_identical(sort(design$data_locations$ENTRY), 1:3)

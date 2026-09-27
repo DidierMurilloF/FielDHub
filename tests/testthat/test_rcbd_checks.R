@@ -99,14 +99,16 @@ test_that("duplicate labels in the entry pool are rejected", {
 test_that("a check-heavy block warns", {
   expect_warning(
     rcbd_resolve_entries(t = 2, checks = "CK1", rep_checks = 4),
-    "more than half"
+    "more than half",
+    class = "fieldhub_design_warning"
   )
 })
 
 test_that("the high-density warning mentions the randomization consequence", {
   expect_warning(
     rcbd_resolve_entries(t = 2, checks = "CK1", rep_checks = 4),
-    "nearly or fully determined"
+    "nearly or fully determined",
+    class = "fieldhub_design_warning"
   )
 })
 
@@ -117,7 +119,8 @@ test_that("the high-density warning does not mention stratification when spread_
   # must not claim a constraint that is not in effect.
   expect_warning(
     rcbd_resolve_entries(t = 2, checks = "CK1", rep_checks = 4, spread_checks = FALSE),
-    "more than half"
+    "more than half",
+    class = "fieldhub_design_warning"
   )
   w <- tryCatch({
     rcbd_resolve_entries(t = 2, checks = "CK1", rep_checks = 4, spread_checks = FALSE)
@@ -247,7 +250,8 @@ test_that("exhausting the retries falls back with a warning", {
   set.seed(3)
   expect_warning(
     blk <- rcbd_randomize_block(e, spread_checks = TRUE, max_tries = 0),
-    "falling back"
+    "falling back",
+    class = "fieldhub_design_warning"
   )
   expect_length(blk, 9)
   expect_equal(sum(blk == 1L), 6)

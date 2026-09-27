@@ -45,18 +45,27 @@ plot_layout <- function(
     options <- layout_options(x, planter = planter, stacked = stacked)
     locs_available <- length(options)
     if (l > locs_available) {
-        warning("Location ", l, " is not available: the design has ", locs_available, " ",
-                if (locs_available > 1) "locations!" else "location!", call. = FALSE)
+        fieldhub_warn(
+            "Location ", l, " is not available: the design has ", locs_available, " ",
+            if (locs_available > 1) "locations!" else "location!",
+            class = "fieldhub_layout_warning", call = NULL
+        )
         return(NULL)
     }
     site_options <- options[[l]]
     if (length(site_options) == 0) {
-        warning("Stacking \"", stacked, "\" is not available for this design.", call. = FALSE)
+        fieldhub_warn(
+            "Stacking \"", stacked, "\" is not available for this design.",
+            class = "fieldhub_layout_warning", call = NULL
+        )
         return(NULL)
     }
     if (length(layout) != 1 || !layout %in% seq_along(site_options)) {
-        warning("Layout option ", layout, " is not available for this design. Options: ",
-                paste(seq_along(site_options), collapse = ", "), ".", call. = FALSE)
+        fieldhub_warn(
+            "Layout option ", layout, " is not available for this design. Options: ",
+            paste(seq_along(site_options), collapse = ", "), ".",
+            class = "fieldhub_layout_warning", call = NULL
+        )
         return(NULL)
     }
     render_layout_view(x, options, layout, planter, l, stacked, ...)

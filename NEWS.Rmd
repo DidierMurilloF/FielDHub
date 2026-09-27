@@ -342,6 +342,8 @@ knitr::opts_chunk$set(
 
 * Public design functions and core helpers now signal failures through the shared `fieldhub_error` condition hierarchy instead of unclassed base errors. The notice that `rep_checks` defaulted to one is now a classed `fieldhub_default_warning` rather than an unstructured message.
 
+* All 24 core `warning()` calls are now classed. A wrong-length or missing `plotNumber`/`locationNames` still falls back to its existing default (1.5.x scripts keep working) but now signals a `fieldhub_default_warning` carrying `argument`, `supplied` and `used` fields, unifying what used to be several different wordings into one message per fallback; catch it with `withCallingHandlers(expr, fieldhub_default_warning = handler)`. Design-quality notices (row-column latinization/one-stage fallback, RCBD checks occupying more than half a block or failing to stratify, a family not present in every location, locations that could not be balanced) now signal `fieldhub_design_warning`, and the internal field-layout adapter's "location/stacking/layout option not available" notices signal `fieldhub_layout_warning`. Only the warning class and wording changed; seeded results are unchanged.
+
 * The incomplete-block, row-column and lattice app modules now obtain feasible block sizes from one tested core validator instead of duplicating the rules in each server.
 
 * Generated app entry lists now come from one tested core builder, giving the classic, diagonal, p-rep and optimized modules the same identifier and label construction rules.

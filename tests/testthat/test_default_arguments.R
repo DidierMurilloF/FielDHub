@@ -32,6 +32,7 @@ test_that("design functions warn when plotNumber has the wrong length", {
     expect_warning(
       utils::capture.output(calls[[fn]]()),
       "'plotNumber' has [0-9]+ value\\(s\\) for [0-9]+ location\\(s\\)",
+      class = "fieldhub_default_warning",
       info = fn
     )
   }
@@ -83,6 +84,7 @@ test_that("design functions warn when locationNames has the wrong length", {
     expect_warning(
       utils::capture.output(calls[[fn]]()),
       "'locationNames' has [0-9]+ value\\(s\\) for [0-9]+ location\\(s\\)",
+      class = "fieldhub_default_warning",
       info = fn
     )
   }

@@ -17,7 +17,8 @@ test_that("balance_allocation() stops when no entry can be added", {
   allocation <- cbind(LOC1 = c(2, 1, 1), LOC2 = c(1, 1, 1))
   expect_warning(
     balanced <- balance_allocation(allocation, key_value = 0, add_value = 1),
-    "could not be balanced"
+    "could not be balanced",
+    class = "fieldhub_design_warning"
   )
   expect_identical(balanced, allocation)
 })
