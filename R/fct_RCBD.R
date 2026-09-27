@@ -175,10 +175,7 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
   # path) rcbd_resolve_entries()'s block math alike, so it is validated once,
   # here, ahead of every path rather than only inside the numeric-t branch
   # below. For valid input (a whole number >= 2) this changes nothing.
-  if (is.null(reps) || !is.numeric(reps) || length(reps) != 1 || is.na(reps) ||
-      reps %% 1 != 0 || reps < 2) {
-    fieldhub_abort("RCBD() requires 'reps' to be a single whole number of 2 or more.")
-  }
+  validate_iteration_budget(reps, "reps", minimum = 2)
   entries <- NULL
   if (has_checks) {
     entries <- rcbd_resolve_entries(t = t, checks = checks, rep_checks = rep_checks,

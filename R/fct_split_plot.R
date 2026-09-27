@@ -84,11 +84,10 @@ split_plot <- function(wp = NULL, sp = NULL, reps = NULL, type = 2, l = 1, plotN
   
   seed <- resolve_seed(seed)
   local_design_seed(seed)
-  if (all(c(1,2) != type)) {
-    fieldhub_abort("Input type is unknown. Please, choose one: 1 or 2, for CRD or RCBD, respectively.")
-  }
+  validate_factorial_type(type)
   args0 <- c(wp, sp, reps, l)
   args1 <- list(wp, sp, reps, l)
+  validate_iteration_budget(reps, "reps")
   if (is.null(data)) {
     if(all(!is.null(args0))) {
       if(all(is.numeric(args0)) && all(lengths(args1) == 1)) {

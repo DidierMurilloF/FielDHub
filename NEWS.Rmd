@@ -20,6 +20,14 @@ knitr::opts_chunk$set(
 
 ### Breaking changes:
 
+- Classic and row-column designs now require finite scalar whole-number
+  replication counts on both generated and supplied-entry paths. Row-column
+  treatment/row counts and entry tables use the same early checks as the block
+  engines. Factorial and split-plot `type` must be numeric `1` (CRD) or `2`
+  (RCBD); other values no longer silently select RCBD or fail in a raw R
+  conditional. Use numeric scalars instead of character/logical values or
+  one-cell matrices. Valid seeded results are unchanged.
+
 - Starting plot numbers now reject missing, non-finite, nonnumeric, fractional,
   and matrix values with structured input errors before numbering arithmetic.
   This also validates per-experiment vectors in diagonal-design lists instead

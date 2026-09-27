@@ -4,14 +4,15 @@
 #' Numeric vectors retain their established generated-label behavior; the
 #' supplied-data path requires a scalar count matching the processed table.
 #' @noRd
-validate_block_design_inputs <- function(t, k, reps, l, data) {
+validate_block_design_inputs <- function(t, k, reps, l, data,
+                                         block_minimum = 2, block_name = "k") {
   # Keep valid lazy argument expressions in their historical RNG scope and
   # evaluation order: supplied data, treatments, then block size. Replication
   # and location have already been resolved by the calling engine.
   force(data)
   force(t)
   force(k)
-  validate_iteration_budget(k, "k", minimum = 2)
+  validate_iteration_budget(k, block_name, minimum = block_minimum)
   validate_iteration_budget(reps, "reps")
   if (!is.null(data)) {
     validate_iteration_budget(t, "t", minimum = 2)

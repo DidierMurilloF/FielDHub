@@ -108,6 +108,7 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
       if(is.numeric(setfactors)) {
         if (length(setfactors) < 2) fieldhub_abort("More than one factor needs to be specified.")
         nt <- length(setfactors)
+        validate_iteration_budget(reps, "reps")
         TRT <- rep(LETTERS[1:nt], each = reps)
         newlevels <- get.levels(k = setfactors)
         allcomb <- expand.grid(newlevels, KEEP.OUT.ATTRS = FALSE,
@@ -172,6 +173,7 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
   # label; keep the labels unique so each one maps back to its row of allcomb
   trt <- make.unique(trt)
   design.loc <- list()
+  validate_factorial_type(type)
   for (locs in 1:l) {
     if (type == 1) {
       m1 <- CRD(t = trt, reps = reps, plotNumber = plotNumber[locs], # seed = seed,

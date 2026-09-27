@@ -85,14 +85,11 @@ split_split_plot <- function(wp = NULL, sp = NULL, ssp = NULL, reps = NULL, type
 
   seed <- resolve_seed(seed)
   local_design_seed(seed)
-  if (all(c(1,2) != type)) {
-    fieldhub_abort("Input type is unknown. Please, choose one: 1 or 2, for CRD or RCBD, respectively.")
-  }
+  validate_factorial_type(type)
   b <- reps
+  validate_iteration_budget(reps, "reps")
   args0 <- c(wp, sp, ssp, reps, l)
   args1 <- list(wp, sp, ssp)
-  if (any(lengths(list(reps,l)) >  1))  fieldhub_abort("Number of blocks and locations need to be integers.")
-  if (any(c(reps, l) %% 1 != 0)) fieldhub_abort("Number of blocks and locations need to be integers.")
   if (is.null(data)) {
     if(all(!is.null(args0))) {
       if(all(is.numeric(args0)) && all(lengths(args1) == 1)) {

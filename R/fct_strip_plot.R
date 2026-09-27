@@ -103,6 +103,7 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
     reps, b, new = "reps", old = "b",
     new_supplied = !missing(reps), old_supplied = !missing(b)
   )
+  validate_iteration_budget(b, "reps")
   seed <- resolve_seed(seed)
   local_design_seed(seed)
   arg0 <- c(Hplots, Vplots)

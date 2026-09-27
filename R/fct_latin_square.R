@@ -86,6 +86,8 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
   }
   n <- t
   l <- 1
+  force(data)
+  validate_iteration_budget(reps, "reps")
   if (is.null(data)) {
     if (all(!is.null(c(n, reps))) && all(base::lengths(list(n, reps)) == 1)) {
       if (all(is.numeric(c(n, reps))) && all(c(n, reps) %% 1 == 0) & all(c(n, reps) > 0)) {
