@@ -99,6 +99,15 @@
   its previous optimization. Internal pair swaps keep the surrounding design's
   original draw sequence; seeded field designs are unchanged.
 
+- A design function called without an explicit seed (`seed = NULL`) now
+  draws exactly one integer from the caller's random-number stream and
+  leaves the stream advanced by that one draw, instead of fully restoring
+  it: two seedless calls starting from the same RNG state no longer return
+  the same seed and design. Calling `set.seed(k)` before a seedless call
+  reproduces it, as for any other R random function. Explicit seeds are
+  unaffected: the caller's random-number state is left completely
+  untouched.
+
 - The Shiny application stack is now optional. Installing FielDHub for R
   scripts requires only the design and plotting dependencies; the nine
   app-only packages have moved from Imports to Suggests. `run_app()` checks
@@ -642,17 +651,6 @@
   and missing or empty design names as `fieldhub_internal_error` conditions
   instead of leaking base-R field-access or missing-logical errors. Valid
   result objects are unchanged.
-
-- A design function called without an explicit seed (`seed = NULL`) now
-  draws exactly one integer from the caller's random-number stream and
-  records it as the seed, leaving the stream advanced by that one draw; the
-  design's own internal randomization is still fully undone on exit.
-  Previously the draw itself was undone too, so repeated seedless calls
-  returned an identical seed and design. Seedless calls now differ from each
-  other, and `set.seed(k)` before one reproduces it, as for any other R
-  random function. Explicit seeds are unaffected: the caller's random-number
-  state is left completely untouched. Starting from a session with no
-  `.Random.seed` behaves the same way: the draw creates it.
 
 - The RCBD block-size preview now uses the same 10,000-plot limit as design
   generation, with its counting and validation in a plain core helper.

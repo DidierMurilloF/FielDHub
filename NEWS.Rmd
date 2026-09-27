@@ -112,6 +112,15 @@ knitr::opts_chunk$set(
   its previous optimization. Internal pair swaps keep the surrounding design's
   original draw sequence; seeded field designs are unchanged.
 
+- A design function called without an explicit seed (`seed = NULL`) now
+  draws exactly one integer from the caller's random-number stream and
+  leaves the stream advanced by that one draw, instead of fully restoring
+  it: two seedless calls starting from the same RNG state no longer return
+  the same seed and design. Calling `set.seed(k)` before a seedless call
+  reproduces it, as for any other R random function. Explicit seeds are
+  unaffected: the caller's random-number state is left completely
+  untouched.
+
 * The Shiny application stack is now optional. Installing FielDHub for R scripts requires only the design and plotting dependencies; the nine app-only packages have moved from Imports to Suggests. `run_app()` checks for them and reports an installation command when any are missing. No packages are installed automatically, and existing app installations keep the same interface and design behavior.
 
 * `split_families()` now accepts `seed`, records it in `infoDesign` and `metadata`, and restores the caller's random-number state. When omitted, it selects an automatic integer seed using the shared design contract; default allocations therefore change. To reproduce a previous `set.seed(s); split_families(l, data)` allocation, pass `seed = s` explicitly. Existing positional `l` and `data` arguments remain supported.
@@ -399,8 +408,6 @@ knitr::opts_chunk$set(
 * All 18 public engines with an `l` argument now validate the location count through one shared rule before allocating fields. Missing, non-finite, fractional, nonnumeric and multi-value counts give a named `fieldhub_input_error`; valid counts and seeded designs are unchanged.
 
 * Result construction and validation now report malformed object shapes and missing or empty design names as `fieldhub_internal_error` conditions instead of leaking base-R field-access or missing-logical errors. Valid result objects are unchanged.
-
-* A design function called without an explicit seed (`seed = NULL`) now draws exactly one integer from the caller's random-number stream and records it as the seed, leaving the stream advanced by that one draw; the design's own internal randomization is still fully undone on exit. Previously the draw itself was undone too, so repeated seedless calls returned an identical seed and design. Seedless calls now differ from each other, and `set.seed(k)` before one reproduces it, as for any other R random function. Explicit seeds are unaffected: the caller's random-number state is left completely untouched. Starting from a session with no `.Random.seed` behaves the same way: the draw creates it.
 
 * The RCBD block-size preview now uses the same 10,000-plot limit as design generation, with its counting and validation in a plain core helper. Oversized check replications give an explanation instead of failing during integer formatting; valid size descriptions and generated designs are unchanged.
 
