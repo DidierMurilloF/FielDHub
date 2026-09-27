@@ -24,7 +24,7 @@ do_optim(
 
 \item{l}{Number of locations or sites. By default  \code{l = 1}.}
 
-\item{copies_per_entry}{Number of copies per plant. 
+\item{copies_per_entry}{Number of copies per plant.
 When design is \code{sparse} then \code{copies_per_entry} should be less than \code{l}}
 
 \item{add_checks}{Option to add checks. Optional if \code{design = "prep"}}
@@ -55,16 +55,16 @@ Generate the sparse or p-rep allocation to multiple locations.
 \examples{
 sparse_example <- do_optim(
    design = "sparse",
-   lines = 120, 
-   l = 4, 
-   copies_per_entry = 3, 
-   add_checks = TRUE, 
+   lines = 120,
+   l = 4,
+   copies_per_entry = 3,
+   add_checks = TRUE,
    checks = 4,
    seed = 15
 )
 }
 \references{
-Edmondson, R.N. Multi-level Block Designs for Comparative Experiments. JABES 25, 
+Edmondson, R.N. Multi-level Block Designs for Comparative Experiments. JABES 25,
 500–522 (2020). https://doi.org/10.1007/s13253-020-00416-0
 }
 \author{

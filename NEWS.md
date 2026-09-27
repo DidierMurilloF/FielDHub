@@ -191,6 +191,11 @@
   rendering file, and the augmented-RCBD source filename now correctly spells
   `RCBD`.
 
+- Sparse allocation and multi-location p-rep now have their own engine
+  source files. Their shared allocation-merging and balancing helpers are
+  grouped separately; public function names and seeded results are
+  unchanged.
+
 - The generated namespace no longer imports the unused `dplyr::glimpse()`,
   `golem::activate_js()` and `stats::dist()` symbols.
 
