@@ -277,8 +277,7 @@ mod_RCBD_server <- function(id) {
         )
     }) |>
       shiny::bindEvent(input$RUN.rcbd)
-    
-    
+
     entryListFormat_RCBD <- data.frame(
       TREATMENT = c(paste("TRT_", LETTERS[1:9], sep = ""))
       )
@@ -307,7 +306,6 @@ mod_RCBD_server <- function(id) {
       }
     })
 
-        
     RCBD_reactive <- shiny::reactive({
       
       shiny::req(get_data_rcbd())
@@ -405,139 +403,17 @@ mod_RCBD_server <- function(id) {
       ids = c(layout = "layoutO_rcbd", stacked = "stackedRCBD", location = "locLayout_rcbd")
     )
 
-    
-    simulation_settings <- app_simulation_controls(input, session,
-      ids = c(trait = "trailsRCBD", other = "OtherRCBD", minimum = "min.rcbd", maximum = "max.rcbd", submit = "ok.rcbd"),
-      field_book = function() reactive_layoutRCBD()$allSitesFieldbook
-    )
-    
-    simuModal.rcbd <- function(failed = FALSE) {
-      app_simulation_modal(ns,
-        ids = c(trait = "trailsRCBD", other = "OtherRCBD", minimum = "min.rcbd", maximum = "max.rcbd", submit = "ok.rcbd"),
-        failed = failed)
-    }
-    
-    shiny::observeEvent(input$Simulate.rcbd, {
-      shiny::req(RCBD_reactive()$fieldBook)
-      shiny::showModal(
-        simuModal.rcbd()
-      )
-    })
-    
-    
-    
-    simuDataRCBD <- shiny::reactive({
-      shiny::req(RCBD_reactive()$fieldBook)
-      if (!is.null(simulation_settings())) {
-        max <- as.numeric(simulation_settings()$max_value)
-        min <- as.numeric(simulation_settings()$min_value)
-        df.rcbd <- reactive_layoutRCBD()$allSitesFieldbook
-        simulation <- validate_design(simulate_classic_field_book(
-          field_book = df.rcbd, min_value = min, max_value = max,
-          response_name = simulation_settings()$response_name, seed = rcbd_inputs()$seed,
-          order_by_id = TRUE
-        ))
-        df.rcbd <- simulation$field_book
-      }else {
-        simulation <- NULL
-        df.rcbd <- reactive_layoutRCBD()$allSitesFieldbook
+    app_classic_workflow(input, output, session,
+      design = function() RCBD_reactive(),
+      layout = function() reactive_layoutRCBD(),
+      seed = function() rcbd_inputs()$seed,
+      selected = function() return(as.numeric(input$locLayout_rcbd)),
+      spec = classic_workflow_spec("RCBD"),
+      simulation_ready = function() {
+        shiny::req(RCBD_reactive()$fieldBook)
       }
-      return(list(df = df.rcbd, simulation = simulation))
-    })
-    
-    heatmapInfoModal_RCBD <- function() {
-      shiny::modalDialog(
-        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
-        shiny::h4("Simulate some data to see a heatmap!"),
-        easyClose = TRUE
-      )
-    }
-    
-    locNum <- shiny::reactive(
-      return(as.numeric(input$locLayout_rcbd))
     )
-    
-    heatmap_obj <- shiny::reactive({
-      shiny::req(simuDataRCBD()$df)
-      book <- simuDataRCBD()$df
-      response <- as.character(simulation_settings()$response_name)
-      if (length(response) == 1L && response %in% names(book)) {
-        validate_design(app_field_heatmap(
-          book, response_name = response, selected = locNum(),
-          label_column = "TREATMENT", label_title = "Treatment",
-          include_site = TRUE, include_checks = TRUE
-        ))
-      } else {
-        shiny::showModal(heatmapInfoModal_RCBD())
-        NULL
-      }
-    })
 
-    output$layouts <- plotly::renderPlotly({
-      shiny::req(reactive_layoutRCBD())
-      shiny::req(RCBD_reactive())
-      shiny::req(input$typlotRCBD)
-      if (input$typlotRCBD == 1) {
-        reactive_layoutRCBD()$out_layout
-      } else if (input$typlotRCBD == 2) {
-        reactive_layoutRCBD()$out_layoutPlots
-      } else {
-        shiny::req(heatmap_obj())
-        heatmap_obj()
-      }
-    })
-    
-    output$RCBD_fieldbook <- DT::renderDataTable({
-      df <- simuDataRCBD()$df
-      validate_design(app_field_book_table(
-        df, factor_columns = c("LOCATION", "PLOT", "ROW", "COLUMN", "REP", "TREATMENT"),
-        height = 500
-      ))
-    })
-
-    output$downloadData.rcbd <- app_csv_archive(
-      filename = function() {
-        loc <- paste("RCBD_", sep = "")
-        paste(loc, Sys.Date(), ".csv", sep = "")
-      },
-      data = function() as.data.frame(simuDataRCBD()$df),
-      design = RCBD_reactive,
-      field_book = function() simuDataRCBD()$df,
-      simulation = function() simuDataRCBD()$simulation,
-      layout = function() reactive_layoutRCBD()$layout_metadata,
-      kind = "field_book"
-    )
-    csv_data <- shiny::reactive({
-      shiny::req(simuDataRCBD()$df)
-      df <- simuDataRCBD()$df
-      shiny::req(input$typlotRCBD)
-      if (input$typlotRCBD == 2) {
-        export_layout(df, locNum(), TRUE)
-      } else {
-        # The on-screen map (plot_RCBD(), utils_plot_RCBD.R) labels plots with
-        # TREATMENT, checks included, so the exported CSV must match it
-        # instead of falling back to ENTRY when a checks design adds that
-        # column.
-        export_layout(df, locNum(), type_pref = "TREATMENT")
-      }
-    })
-    
-    
-    # Downloadable csv of selected dataset ----
-    output$downloadCsv.rcbd <- app_csv_archive(
-      filename = function() {
-        loc <- paste("Randomized_Complete_Block_Layout", sep = "")
-        paste(loc, Sys.Date(), ".csv", sep = "")
-      },
-      data = function() as.data.frame(csv_data()$file),
-      design = RCBD_reactive,
-      field_book = function() simuDataRCBD()$df,
-      simulation = function() simuDataRCBD()$simulation,
-      layout = function() reactive_layoutRCBD()$layout_metadata,
-      kind = "layout"
-    )
- 
-    app_reproduction_outputs(output, RCBD_reactive)
   })
 }
     

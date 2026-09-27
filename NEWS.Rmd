@@ -213,6 +213,13 @@ knitr::opts_chunk$set(
 
 ### Enhancements:
 
+- The twelve classic design modules now share one registry-driven result
+  workflow for simulation dialogs, accepted settings, heatmaps, field-book
+  tables, CSV archives, and reproduction code. Existing controls, labels,
+  layout choices, and complete seeded outputs are preserved; design-specific
+  presentation settings live in one internal registry instead of copied
+  server code.
+
 - The twelve classic design modules share layout-selection and stacking-reset
   behavior. Unavailable selections and drawing failures now show validation
   messages instead of silently leaving a blank layout panel. Existing input

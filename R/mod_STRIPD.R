@@ -169,7 +169,6 @@ mod_STRIPD_server <- function(id) {
     ns <- session$ns
     shinyjs::useShinyjs()
 
-    
     Hplots <- LETTERS[1:5]
     Vplots <- LETTERS[1:5]
     entryListFormat_STRIP <- data.frame(
@@ -232,8 +231,7 @@ mod_STRIPD_server <- function(id) {
       }
     }) |> 
       shiny::bindEvent(input$RUN.strip)
-    
-    
+
     strip_inputs <- shiny::reactive({
       shiny::req(input$blocks.strip)
       if (input$blocks.strip < 2) {
@@ -299,8 +297,7 @@ mod_STRIPD_server <- function(id) {
       
     }) |> 
       shiny::bindEvent(input$RUN.strip)
-    
-    
+
     upDateSites <- shiny::reactive({
       shiny::req(input$l.strip)
       locs <- as.numeric(input$l.strip)
@@ -349,136 +346,17 @@ mod_STRIPD_server <- function(id) {
       ids = c(layout = "layoutO_strip", stacked = "stackedSTRIP", location = "locLayout_strip")
     )
     
-    simulation_settings <- app_simulation_controls(input, session,
-      ids = c(trait = "trailsStrip", other = "OtherStrip", minimum = "min.strip", maximum = "max.strip", submit = "ok.strip"),
-      field_book = function() reactive_layoutSTRIP()$allSitesFieldbook
-    )
-    
-    simuModal.strip <- function(failed = FALSE) {
-      app_simulation_modal(ns,
-        ids = c(trait = "trailsStrip", other = "OtherStrip", minimum = "min.strip", maximum = "max.strip", submit = "ok.strip"),
-        failed = failed)
-    }
-    
-    shiny::observeEvent(input$Simulate.strip, {
-      shiny::req(strip_reactive()$fieldBook)
-      shiny::showModal(
-        simuModal.strip()
-      )
-    })
-    
-    
-    
-    simuData_strip <- shiny::reactive({
-      shiny::req(strip_reactive()$fieldBook)
-      if (!is.null(simulation_settings())) {
-        max <- as.numeric(simulation_settings()$max_value)
-        min <- as.numeric(simulation_settings()$min_value)
-        df.strip <- reactive_layoutSTRIP()$allSitesFieldbook
-        simulation <- validate_design(simulate_classic_field_book(
-          field_book = df.strip, min_value = min, max_value = max,
-          response_name = simulation_settings()$response_name, seed = strip_inputs()$seed,
-          order_by_id = FALSE
-        ))
-        df.strip <- simulation$field_book
-        a <- ncol(df.strip)
-      }else {
-        simulation <- NULL
-        df.strip <- reactive_layoutSTRIP()$allSitesFieldbook
-        a <- ncol(df.strip)
+    app_classic_workflow(input, output, session,
+      design = function() strip_reactive(),
+      layout = function() reactive_layoutSTRIP(),
+      seed = function() strip_inputs()$seed,
+      selected = function() return(as.numeric(input$locLayout_strip)),
+      spec = classic_workflow_spec("STRIPD"),
+      simulation_ready = function() {
+        shiny::req(strip_reactive()$fieldBook)
       }
-      return(list(df = df.strip, a = a, simulation = simulation))
-    })
-    
-    heatmapInfoModal_STRIP <- function() {
-      shiny::modalDialog(
-        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
-        shiny::h4("Simulate some data to see a heatmap!"),
-        easyClose = TRUE
-      )
-    }
-    
-    locNum <- shiny::reactive(
-      return(as.numeric(input$locLayout_strip))
     )
-    
-    heatmap_obj <- shiny::reactive({
-      shiny::req(simuData_strip()$df)
-      book <- simuData_strip()$df
-      response <- as.character(simulation_settings()$response_name)
-      if (length(response) == 1L && response %in% names(book)) {
-        validate_design(app_field_heatmap(
-          book, response_name = response, selected = locNum(),
-          label_column = "TRT_COMB", label_title = "Treatment",
-          include_site = TRUE, include_checks = FALSE
-        ))
-      } else {
-        shiny::showModal(heatmapInfoModal_STRIP())
-        NULL
-      }
-    })
-    
-    output$layout.strip <- plotly::renderPlotly({
-      shiny::req(strip_reactive())
-      shiny::req(input$typlotstrip)
-      if (input$typlotstrip == 1) {
-        reactive_layoutSTRIP()$out_layout
-      } else if (input$typlotstrip == 2) {
-        reactive_layoutSTRIP()$out_layoutPlots
-      } else {
-        shiny::req(heatmap_obj())
-        heatmap_obj()
-      }
-    })
-    
-    output$STRIP.output <- DT::renderDataTable({
-      
-      df <- simuData_strip()$df
-      validate_design(app_field_book_table(
-        df, factor_columns = c("LOCATION", "PLOT", "ROW", "COLUMN", "REP", "HSTRIP", "VSTRIP", "TRT_COMB"),
-        height = 500
-      ))
-    })
-    
-    output$downloadData.strip <- app_csv_archive(
-      filename = function() {
-        loc <- paste("Strip-Plot_", sep = "")
-        paste(loc, Sys.Date(), ".csv", sep = "")
-      },
-      data = function() as.data.frame(simuData_strip()$df),
-      design = strip_reactive,
-      field_book = function() simuData_strip()$df,
-      simulation = function() simuData_strip()$simulation,
-      layout = function() reactive_layoutSTRIP()$layout_metadata,
-      kind = "field_book"
-    )
-    csv_data <- shiny::reactive({
-      shiny::req(simuData_strip()$df)
-      df <- simuData_strip()$df
-      shiny::req(input$typlotstrip)
-      if (input$typlotstrip == 2) {
-        export_layout(df, locNum(), TRUE)
-      } else {
-        export_layout(df, locNum())
-      }
-    })
-    
-    
-    # Downloadable csv of selected dataset ----
-    output$downloadCsv.strip <- app_csv_archive(
-      filename = function() {
-        loc <- paste("Strip_Plot_Layout", sep = "")
-        paste(loc, Sys.Date(), ".csv", sep = "")
-      },
-      data = function() as.data.frame(csv_data()$file),
-      design = strip_reactive,
-      field_book = function() simuData_strip()$df,
-      simulation = function() simuData_strip()$simulation,
-      layout = function() reactive_layoutSTRIP()$layout_metadata,
-      kind = "layout"
-    )
-    
-    app_reproduction_outputs(output, strip_reactive)
+
   })
 }
     

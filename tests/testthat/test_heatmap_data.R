@@ -51,6 +51,7 @@ test_that("all classic modules use the shared heatmap builder", {
                 "Alpha_Lattice", "Square_Lattice", "Rectangular_Lattice")
   for (module in modules) {
     code <- body(get(paste0("mod_", module, "_server"), asNamespace("FielDHub")))
-    expect_identical(sum(all.names(code) == "app_field_heatmap"), 1L)
+    expect_identical(sum(all.names(code) == "app_classic_workflow"), 1L)
   }
+  expect_identical(sum(all.names(body(app_classic_workflow)) == "app_field_heatmap"), 1L)
 })

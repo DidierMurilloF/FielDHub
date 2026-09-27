@@ -283,8 +283,7 @@ mod_SSPD_server <- function(id){
       )
     }) |>
       shiny::bindEvent(input$RUN.sspd)
-    
-    
+
     sspd_reactive <- shiny::reactive({
       
       shiny::req(sspd_inputs())
@@ -347,137 +346,17 @@ mod_SSPD_server <- function(id){
       planter = function() sspd_inputs()$planter,
       ids = c(layout = "layoutO_sspd", stacked = "stackedSSPD", location = "locLayout_sspd")
     )
-    
-    
-    simulation_settings <- app_simulation_controls(input, session,
-      ids = c(trait = "TrialsRowCol", other = "Otherspd", minimum = "min.sspd", maximum = "max.sspd", submit = "ok.sspd"),
-      field_book = function() reactive_layoutSSPD()$allSitesFieldbook
-    )
-    
-    simuModal.sspd <- function(failed = FALSE) {
-      app_simulation_modal(ns,
-        ids = c(trait = "TrialsRowCol", other = "Otherspd", minimum = "min.sspd", maximum = "max.sspd", submit = "ok.sspd"),
-        failed = failed)
-    }
-    
-    shiny::observeEvent(input$Simulate.sspd, {
-      shiny::req(sspd_reactive()$fieldBook)
-      shiny::showModal(
-        simuModal.sspd()
-      )
-    })
-    
-    
-    simuData_sspd <- shiny::reactive({
-      shiny::req(sspd_reactive()$fieldBook)
-      
-      if (!is.null(simulation_settings())) {
-        max <- as.numeric(simulation_settings()$max_value)
-        min <- as.numeric(simulation_settings()$min_value)
-        df.sspd <- reactive_layoutSSPD()$allSitesFieldbook
-        simulation <- validate_design(simulate_classic_field_book(
-          field_book = df.sspd, min_value = min, max_value = max,
-          response_name = simulation_settings()$response_name, seed = sspd_inputs()$seed,
-          order_by_id = TRUE
-        ))
-        df.sspd <- simulation$field_book
-      }else {
-        simulation <- NULL
-        df.sspd <- reactive_layoutSSPD()$allSitesFieldbook
+
+    app_classic_workflow(input, output, session,
+      design = function() sspd_reactive(),
+      layout = function() reactive_layoutSSPD(),
+      seed = function() sspd_inputs()$seed,
+      selected = function() return(as.numeric(input$locLayout_sspd)),
+      spec = classic_workflow_spec("SSPD"),
+      simulation_ready = function() {
+        shiny::req(sspd_reactive()$fieldBook)
       }
-      return(list(df = df.sspd, simulation = simulation))
-    })
-    
-    
-    heatmapInfoModal_SSPD <- function() {
-      shiny::modalDialog(
-        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
-        shiny::h4("Simulate some data to see a heatmap!"),
-        easyClose = TRUE
-      )
-    }
-    
-    locNum <- shiny::reactive(
-      return(as.numeric(input$locLayout_sspd))
     )
-    
-    heatmap_obj <- shiny::reactive({
-      shiny::req(simuData_sspd()$df)
-      book <- simuData_sspd()$df
-      response <- as.character(simulation_settings()$response_name)
-      if (length(response) == 1L && response %in% names(book)) {
-        validate_design(app_field_heatmap(
-          book, response_name = response, selected = locNum(),
-          label_column = "TRT_COMB", label_title = "TRT_COMB",
-          include_site = TRUE, include_checks = FALSE,
-          height = 580
-        ))
-      } else {
-        shiny::showModal(heatmapInfoModal_SSPD())
-        NULL
-      }
-    })
-    
-    output$layouts <- plotly::renderPlotly({
-      shiny::req(reactive_layoutSSPD())
-      shiny::req(sspd_reactive())
-      shiny::req(input$typlotsspd)
-      if (input$typlotsspd == 1) {
-        reactive_layoutSSPD()$out_layout
-      } else if (input$typlotsspd == 2) {
-        reactive_layoutSSPD()$out_layoutPlots
-      } else {
-        shiny::req(heatmap_obj())
-        heatmap_obj()
-      }
-    })
-    
-    output$SSPD.output  <- DT::renderDataTable({
-      
-      df <- simuData_sspd()$df
-      validate_design(app_field_book_table(
-        df, factor_columns = c("LOCATION", "PLOT", "ROW", "COLUMN", "REP", "WHOLE_PLOT", "SUB_PLOT", "SUB_SUB_PLOT", "TRT_COMB" ),
-        height = 500
-      ))
-    })
-    
-    output$downloadData.sspd <- app_csv_archive(
-      filename = function() {
-        loc <- paste("Split-Split-Plot_", sep = "")
-        paste(loc, Sys.Date(), ".csv", sep = "")
-      },
-      data = function() as.data.frame(simuData_sspd()$df),
-      design = sspd_reactive,
-      field_book = function() simuData_sspd()$df,
-      simulation = function() simuData_sspd()$simulation,
-      layout = function() reactive_layoutSSPD()$layout_metadata,
-      kind = "field_book"
-    )
-    csv_data <- shiny::reactive({
-      shiny::req(simuData_sspd()$df)
-      df <- simuData_sspd()$df
-      shiny::req(input$typlotsspd)
-      if (input$typlotsspd == 2) {
-        export_layout(df, locNum(), TRUE)
-      } else {
-        export_layout(df, locNum())
-      }
-    })
-    
-    
-    # Downloadable csv of selected dataset ----
-    output$downloadCsv.sspd <- app_csv_archive(
-      filename = function() {
-        loc <- paste("Split_Split_Plot_Layout", sep = "")
-        paste(loc, Sys.Date(), ".csv", sep = "")
-      },
-      data = function() as.data.frame(csv_data()$file),
-      design = sspd_reactive,
-      field_book = function() simuData_sspd()$df,
-      simulation = function() simuData_sspd()$simulation,
-      layout = function() reactive_layoutSSPD()$layout_metadata,
-      kind = "layout"
-    )
-    app_reproduction_outputs(output, sspd_reactive)
+
   })
 }

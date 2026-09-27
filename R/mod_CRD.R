@@ -208,8 +208,7 @@ mod_CRD_server <- function(id) {
         seed = seed))
     }) |>
       shiny::bindEvent(input$RUN.crd)
-    
-    
+
     CRD_reactive <- shiny::reactive({
       
       shiny::req(get_data_crd())
@@ -282,53 +281,17 @@ mod_CRD_server <- function(id) {
       }
     })
     
-    simulation_settings <- app_simulation_controls(input, session,
-      ids = c(trait = "trailsCRD", other = "OtherCRD", minimum = "min.crd", maximum = "max.crd", submit = "ok.crd"),
-      field_book = function() reactive_layoutCRD()$fieldBookXY
-    )
-    
-    simuModal.crd <- function(failed = FALSE) {
-      app_simulation_modal(ns,
-        ids = c(trait = "trailsCRD", other = "OtherCRD", minimum = "min.crd", maximum = "max.crd", submit = "ok.crd"),
-        failed = failed)
-    }
-    
-    # Show modal when button is clicked.
-    shiny::observeEvent(input$Simulate.crd, {
-      shiny::req(CRD_reactive()$fieldBook)
-      shiny::showModal(
-        simuModal.crd()
-      )
-    })
-    
-    
-    simuDataCRD <- shiny::reactive({
-      shiny::req(CRD_reactive()$fieldBook)
-      if (!is.null(simulation_settings())) {
-        max <- as.numeric(simulation_settings()$max_value)
-        min <- as.numeric(simulation_settings()$min_value)
-        df.crd <- reactive_layoutCRD()$fieldBookXY
-        simulation <- validate_design(simulate_classic_field_book(
-          field_book = df.crd, min_value = min, max_value = max,
-          response_name = simulation_settings()$response_name, seed = crd_inputs()$seed,
-          order_by_id = TRUE
-        ))
-        df.crd <- simulation$field_book
-      }else {
-        simulation <- NULL
-        df.crd <- reactive_layoutCRD()$fieldBookXY
+    app_classic_workflow(input, output, session,
+      design = function() CRD_reactive(),
+      layout = function() reactive_layoutCRD(),
+      seed = function() crd_inputs()$seed,
+      selected = function() 1L,
+      spec = classic_workflow_spec("CRD"),
+      simulation_ready = function() {
+        shiny::req(CRD_reactive()$fieldBook)
       }
-      return(list(df = df.crd, simulation = simulation))
-    })
-    
-    heatmapInfoModal_CRD <- function() {
-      shiny::modalDialog(
-        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
-        shiny::h4("Simulate some data to see a heatmap!"),
-        easyClose = TRUE
-      )
-    }
-    
+    )
+
     output$tabsetCRD <- shiny::renderUI({
       shiny::req(input$typlotCRD)
       shiny::tabsetPanel(
@@ -354,83 +317,6 @@ mod_CRD_server <- function(id) {
       )
       
     })
-    
-    heatmap_obj <- shiny::reactive({
-      shiny::req(simuDataCRD()$df)
-      book <- simuDataCRD()$df
-      response <- as.character(simulation_settings()$response_name)
-      if (length(response) == 1L && response %in% names(book)) {
-        validate_design(app_field_heatmap(
-          book, response_name = response, selected = 1L,
-          label_column = "TREATMENT", label_title = "Entry",
-          include_site = FALSE, include_checks = FALSE
-        ))
-      } else {
-        shiny::showModal(heatmapInfoModal_CRD())
-        NULL
-      }
-    })
 
-    output$layout_random <- plotly::renderPlotly({
-      shiny::req(CRD_reactive())
-      shiny::req(input$typlotCRD)
-      if (input$typlotCRD == 1) {
-        reactive_layoutCRD()$out_layout
-      } else if (input$typlotCRD == 2) {
-        reactive_layoutCRD()$out_layoutPlots
-      } else {
-        shiny::req(heatmap_obj())
-        heatmap_obj()
-      }
-    })
-    
-    output$CRD_fieldbook <- DT::renderDT({
-      df <- simuDataCRD()$df
-      validate_design(app_field_book_table(
-        df, factor_columns = c("LOCATION", "PLOT", "ROW", "COLUMN", "REP", "TREATMENT"),
-        height = 500
-      ))
-    })
-    
-    output$downloadData.crd <- app_csv_archive(
-      filename = function() {
-        loc <- paste("CRD_", sep = "")
-        paste(loc, Sys.Date(), ".csv", sep = "")
-      },
-      data = function() as.data.frame(simuDataCRD()$df),
-      design = CRD_reactive,
-      field_book = function() simuDataCRD()$df,
-      simulation = function() simuDataCRD()$simulation,
-      layout = function() reactive_layoutCRD()$layout_metadata,
-      kind = "field_book"
-    )
-    
-    csv_data <- shiny::reactive({
-      shiny::req(simuDataCRD()$df)
-      df <- simuDataCRD()$df
-      shiny::req(input$typlotCRD)
-      if (input$typlotCRD == 2) {
-        export_layout(df, 1, TRUE)
-      } else {
-        export_layout(df, 1)
-      }
-    })
-    
-    
-    # Downloadable csv of selected dataset ----
-    output$downloadCsv.crd <- app_csv_archive(
-      filename = function() {
-        loc <- paste("Completely_Randomized_Layout", sep = "")
-        paste(loc, Sys.Date(), ".csv", sep = "")
-      },
-      data = function() as.data.frame(csv_data()$file),
-      design = CRD_reactive,
-      field_book = function() simuDataCRD()$df,
-      simulation = function() simuDataCRD()$simulation,
-      layout = function() reactive_layoutCRD()$layout_metadata,
-      kind = "layout"
-    )
-    
-    app_reproduction_outputs(output, CRD_reactive)
   })
 }

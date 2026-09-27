@@ -5,13 +5,15 @@
 #' This registry is internal, not a public extension interface.
 #' @noRd
 fieldhub_app_registry <- function() {
+  classic <- names(fieldhub_classic_workflows())
   groups <- c("Unreplicated Designs", "Partially Replicated Designs",
               "Lattice Designs", "Other Designs")
   entry <- function(label, module, engine, group, server_order) {
     list(label = label, id = paste0(module, "_ui_1"),
          ui = paste0("mod_", module, "_ui"),
          server = paste0("mod_", module, "_server"), engine = engine,
-         group = groups[[group]], server_order = as.integer(server_order))
+         group = groups[[group]], server_order = as.integer(server_order),
+         workflow = if (module %in% classic) module else NULL)
   }
   list(
     entry("Single Diagonal Arrangement", "Diagonal", "diagonal_arrangement", 1, 1),

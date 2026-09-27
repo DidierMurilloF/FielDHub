@@ -43,7 +43,9 @@ test_that("every classic module delegates response generation to the shared serv
   for (module in modules) {
     code <- body(get(paste0("mod_", module, "_server"), asNamespace("FielDHub")))
     symbols <- all.names(code)
-    expect_identical(sum(symbols == "simulate_classic_field_book"), 1L)
+    expect_identical(sum(symbols == "app_classic_workflow"), 1L)
     expect_false("norm_trunc" %in% symbols)
   }
+  expect_identical(sum(all.names(body(app_classic_workflow)) == "classic_workflow_book"), 1L)
+  expect_identical(sum(all.names(body(classic_workflow_book)) == "simulate_classic_field_book"), 1L)
 })

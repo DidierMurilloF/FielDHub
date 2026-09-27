@@ -14,7 +14,8 @@ test_that("every module connects its design to the shared reproduction component
   )
   calls <- function(code) {
     if (missing(code) || (!is.call(code) && !is.pairlist(code))) return(list())
-    if (is.call(code) && identical(code[[1]], as.name("app_reproduction_outputs"))) {
+    if (is.call(code) && any(vapply(c("app_reproduction_outputs", "app_classic_workflow"),
+                                    function(name) identical(code[[1]], as.name(name)), logical(1)))) {
       return(list(code))
     }
     unlist(lapply(as.list(code), calls), recursive = FALSE)
@@ -25,10 +26,16 @@ test_that("every module connects its design to the shared reproduction component
     bindings <- calls(body(get(entry$server, asNamespace("FielDHub"))))
     expect_length(bindings, 1L)
     if (length(bindings) == 1L) {
-      expect_identical(bindings[[1]][[2]], as.name("output"), info = entry$server)
-      expect_identical(bindings[[1]][[3]], as.name(sources[[entry$server]]), info = entry$server)
+      if (!is.null(entry$workflow)) {
+        expect_identical(bindings[[1]][[3]], as.name("output"), info = entry$server)
+        expect_identical(bindings[[1]][["design"]][[3]], call(sources[[entry$server]]), info = entry$server)
+      } else {
+        expect_identical(bindings[[1]][[2]], as.name("output"), info = entry$server)
+        expect_identical(bindings[[1]][[3]], as.name(sources[[entry$server]]), info = entry$server)
+      }
     }
   }
+  expect_identical(sum(all.names(body(app_classic_workflow)) == "app_reproduction_outputs"), 1L)
   expect_true("app_reproduction_ui" %in% all.names(body(fieldhub_design_menus)))
 })
 

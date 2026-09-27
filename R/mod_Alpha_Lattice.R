@@ -153,8 +153,7 @@ mod_Alpha_Lattice_server <- function(id){
         return(list(data_alpha = data_alpha, treatments = treatments))
       }
     })
-    
-    
+
     list_to_observe <- shiny::reactive({
       shiny::req(init_data_alpha())
       list(
@@ -228,7 +227,6 @@ mod_Alpha_Lattice_server <- function(id){
     }) |>
       shiny::bindEvent(input$RUN.alpha)
 
-
     entryListFormatreatments <- data.frame(ENTRY = 1:9, 
                                         NAME = c(paste("Genotype", LETTERS[1:9], sep = "")))
     entriesInfoModal_ALPHA <- function() {
@@ -255,7 +253,6 @@ mod_Alpha_Lattice_server <- function(id){
         )
       }
     })
-    
 
     ALPHA_reactive <- shiny::eventReactive(input$RUN.alpha, {
       shiny::req(get_data_alpha())
@@ -298,8 +295,7 @@ mod_Alpha_Lattice_server <- function(id){
       sites <- 1:locs
       return(list(sites = sites))
     })
-    
-    
+
     output$well_panel_layout <- shiny::renderUI({
       shiny::req(ALPHA_reactive()$fieldBook)
       df <- ALPHA_reactive()$fieldBook
@@ -346,141 +342,19 @@ mod_Alpha_Lattice_server <- function(id){
       planter = function() alpha_inputs()$planter,
       ids = c(layout = "layoutO", stacked = "stackedAlpha", location = "locLayout")
     )
-    
-    
-    simulation_settings <- app_simulation_controls(input, session,
-      ids = c(trait = "trailsALPHA", other = "OtherALPHA", minimum = "min.alpha", maximum = "max.alpha", submit = "ok.alpha"),
-      field_book = function() reactive_layoutAlpha()$allSitesFieldbook
-    )
-    
-    simuModal.alpha <- function(failed = FALSE) {
-      app_simulation_modal(ns,
-        ids = c(trait = "trailsALPHA", other = "OtherALPHA", minimum = "min.alpha", maximum = "max.alpha", submit = "ok.alpha"),
-        failed = failed)
-    }
-    
-    shiny::observeEvent(input$Simulate.alpha, {
-      shiny::req(input$k.alpha)
-      shiny::req(input$r.alpha)
-      shiny::req(reactive_layoutAlpha()$fieldBookXY)
-      shiny::showModal(
-        simuModal.alpha()
-      )
-    })
-    
-    
-    simuDataALPHA <- shiny::reactive({
-      shiny::req(reactive_layoutAlpha())
-      if (!is.null(simulation_settings())) {
-        max <- as.numeric(simulation_settings()$max_value)
-        min <- as.numeric(simulation_settings()$min_value)
-        df.alpha <- reactive_layoutAlpha()$allSitesFieldbook
-        simulation <- validate_design(simulate_classic_field_book(
-          field_book = df.alpha, min_value = min, max_value = max,
-          response_name = simulation_settings()$response_name, seed = alpha_inputs()$seed,
-          order_by_id = FALSE
-        ))
-        df.alpha <- simulation$field_book
-        a <- ncol(df.alpha)
-      }else {
-        simulation <- NULL
-        df.alpha <- reactive_layoutAlpha()$allSitesFieldbook
-        a <- ncol(df.alpha)
+
+    app_classic_workflow(input, output, session,
+      design = function() ALPHA_reactive(),
+      layout = function() reactive_layoutAlpha(),
+      seed = function() alpha_inputs()$seed,
+      selected = function() return(as.numeric(input$locLayout)),
+      spec = classic_workflow_spec("Alpha_Lattice"),
+      simulation_ready = function() {
+        shiny::req(input$k.alpha)
+        shiny::req(input$r.alpha)
+        shiny::req(reactive_layoutAlpha()$fieldBookXY)
       }
-      return(list(df = df.alpha, a = a, simulation = simulation))
-    })
-    
-    heatmapInfoModal_ALPHA <- function() {
-      shiny::modalDialog(
-        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
-        shiny::h4("Simulate some data to see a heatmap!"),
-        easyClose = TRUE
-      )
-    }
-    
-    locNum <- shiny::reactive(
-      return(as.numeric(input$locLayout))
     )
-    
-    heatmap_obj <- shiny::reactive({
-      shiny::req(simuDataALPHA()$df)
-      book <- simuDataALPHA()$df
-      response <- as.character(simulation_settings()$response_name)
-      if (length(response) == 1L && response %in% names(book)) {
-        validate_design(app_field_heatmap(
-          book, response_name = response, selected = locNum(),
-          label_column = "ENTRY", label_title = "Entry",
-          include_site = TRUE, include_checks = FALSE
-        ))
-      } else {
-        shiny::showModal(heatmapInfoModal_ALPHA())
-        NULL
-      }
-    })
-    
-    output$random_layout <- plotly::renderPlotly({
-      shiny::req(reactive_layoutAlpha())
-      shiny::req(ALPHA_reactive())
-      shiny::req(input$typlotALPHA)
-      if (input$typlotALPHA == 1) {
-        reactive_layoutAlpha()$out_layout
-      } else if (input$typlotALPHA == 2) {
-        reactive_layoutAlpha()$out_layoutPlots
-      } else {
-        shiny::req(heatmap_obj())
-        heatmap_obj()
-      }
-    })
-    
-    output$ALPHA_fieldbook <- DT::renderDataTable({
-      shiny::req(simuDataALPHA()$df)
-      df <- simuDataALPHA()$df
-      validate_design(app_field_book_table(
-        df, factor_columns = c("LOCATION", "PLOT", "ROW", "COLUMN", "REP", "IBLOCK", "UNIT", "ENTRY"),
-        height = 500
-      ))
-    })
-    
-    # Downloadable csv of selected dataset ----
-    output$downloadData.alpha <- app_csv_archive(
-      filename = function() {
-        loc <- paste("Alpha_Lattice_", sep = "")
-        paste(loc, Sys.Date(), ".csv", sep = "")
-      },
-      data = function() as.data.frame(simuDataALPHA()$df),
-      design = ALPHA_reactive,
-      field_book = function() simuDataALPHA()$df,
-      simulation = function() simuDataALPHA()$simulation,
-      layout = function() reactive_layoutAlpha()$layout_metadata,
-      kind = "field_book"
-    )
-    
-    csv_data <- shiny::reactive({
-      shiny::req(simuDataALPHA()$df)
-      df <- simuDataALPHA()$df
-      shiny::req(input$typlotALPHA)
-      if (input$typlotALPHA == 2) {
-        export_layout(df, locNum(), TRUE)
-      } else {
-        export_layout(df, locNum())
-      }
-    })
-    
-    # Downloadable csv of selected dataset ----
-    output$downloadCsv.alpha <- app_csv_archive(
-      filename = function() {
-        loc <- paste("Alpha_Lattice_Layout", sep = "")
-        paste(loc, Sys.Date(), ".csv", sep = "")
-      },
-      data = function() as.data.frame(csv_data()$file),
-      design = ALPHA_reactive,
-      field_book = function() simuDataALPHA()$df,
-      simulation = function() simuDataALPHA()$simulation,
-      layout = function() reactive_layoutAlpha()$layout_metadata,
-      kind = "layout"
-    )
-    
-    
-    app_reproduction_outputs(output, ALPHA_reactive)
+
   })
 }

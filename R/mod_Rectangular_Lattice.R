@@ -182,8 +182,7 @@ mod_Rectangular_Lattice_server <- function(id) {
                         choices = k, 
                         selected = k[1])
     })
-    
-    
+
     get_data_rectangular <- shiny::reactive({
       if (is.null(init_data_rectangular())) {
         shinyalert::shinyalert(
@@ -232,8 +231,7 @@ mod_Rectangular_Lattice_server <- function(id) {
                   seed = seed))
     }) |>
       shiny::bindEvent(input$RUN.rectangular)
-    
-    
+
     entryListFormat_RECT <- data.frame(ENTRY = 1:9, 
                                        NAME = c(paste("Genotype", LETTERS[1:9], sep = "")))
     entriesInfoModal_RECT <- function() {
@@ -260,8 +258,7 @@ mod_Rectangular_Lattice_server <- function(id) {
         )
       }
     })
-    
-    
+
     RECTANGULAR_reactive <- shiny::reactive({
       
       shiny::req(get_data_rectangular())
@@ -297,8 +294,7 @@ mod_Rectangular_Lattice_server <- function(id) {
       cat("Randomization was successful!", "\n", "\n")
       print(RECTANGULAR_reactive(), n = 6)
     })
-    
-    
+
     upDateSites_RT <- shiny::reactive({
       shiny::req(rectangular_inputs())
       locs <- rectangular_inputs()$sites
@@ -346,141 +342,19 @@ mod_Rectangular_Lattice_server <- function(id) {
       planter = function() rectangular_inputs()$planter,
       ids = c(layout = "layoutO_rt", stacked = "stackedRT", location = "locLayout_rt")
     )
-    
-    
-    simulation_settings <- app_simulation_controls(input, session,
-      ids = c(trait = "trailsRECT", other = "OtherRECT", minimum = "min.rectangular", maximum = "max.rectangular", submit = "ok.rectangular"),
-      field_book = function() reactive_layoutRect()$allSitesFieldbook
-    )
-    
-    simuModal.rectangular <- function(failed = FALSE) {
-      app_simulation_modal(ns,
-        ids = c(trait = "trailsRECT", other = "OtherRECT", minimum = "min.rectangular", maximum = "max.rectangular", submit = "ok.rectangular"),
-        failed = failed)
-    }
-    
-    shiny::observeEvent(input$Simulate.rectangular, {
-      shiny::req(input$k.rectangular)
-      shiny::req(input$r.rectangular)
-      shiny::req(reactive_layoutRect()$fieldBookXY)
-      shiny::showModal(
-        simuModal.rectangular()
-      )
-    })
-    
-    
-    
-    simuDataRECT <- shiny::reactive({
-      shiny::req(reactive_layoutRect()$allSitesFieldbook)
-      if (!is.null(simulation_settings())) {
-        max <- as.numeric(simulation_settings()$max_value)
-        min <- as.numeric(simulation_settings()$min_value)
-        df.rectangular <- reactive_layoutRect()$allSitesFieldbook
-        simulation <- validate_design(simulate_classic_field_book(
-          field_book = df.rectangular, min_value = min, max_value = max,
-          response_name = simulation_settings()$response_name, seed = rectangular_inputs()$seed,
-          order_by_id = FALSE
-        ))
-        df.rectangular <- simulation$field_book
-        a <- ncol(df.rectangular)
-      }else {
-        simulation <- NULL
-        df.rectangular <- reactive_layoutRect()$allSitesFieldbook
-        a <- ncol(df.rectangular)
+
+    app_classic_workflow(input, output, session,
+      design = function() RECTANGULAR_reactive(),
+      layout = function() reactive_layoutRect(),
+      seed = function() rectangular_inputs()$seed,
+      selected = function() return(as.numeric(input$locLayout_rt)),
+      spec = classic_workflow_spec("Rectangular_Lattice"),
+      simulation_ready = function() {
+        shiny::req(input$k.rectangular)
+        shiny::req(input$r.rectangular)
+        shiny::req(reactive_layoutRect()$fieldBookXY)
       }
-      return(list(df = df.rectangular, a = a, simulation = simulation))
-    })
-    
-    heatmapInfoModal_Rect <- function() {
-      shiny::modalDialog(
-        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
-        shiny::h4("Simulate some data to see a heatmap!"),
-        easyClose = TRUE
-      )
-    }
-    
-    locNum <- shiny::reactive(
-      return(as.numeric(input$locLayout_rt))
     )
-    
-    heatmap_obj <- shiny::reactive({
-      shiny::req(simuDataRECT()$df)
-      book <- simuDataRECT()$df
-      response <- as.character(simulation_settings()$response_name)
-      if (length(response) == 1L && response %in% names(book)) {
-        validate_design(app_field_heatmap(
-          book, response_name = response, selected = locNum(),
-          label_column = "ENTRY", label_title = "Entry",
-          include_site = TRUE, include_checks = FALSE
-        ))
-      } else {
-        shiny::showModal(heatmapInfoModal_Rect())
-        NULL
-      }
-    })
-    
-    output$random_layout <- plotly::renderPlotly({
-      shiny::req(reactive_layoutRect())
-      shiny::req(RECTANGULAR_reactive())
-      shiny::req(input$typlotRT)
-      if (input$typlotRT == 1) {
-        reactive_layoutRect()$out_layout
-      } else if (input$typlotRT == 2) {
-        reactive_layoutRect()$out_layoutPlots
-      } else {
-        shiny::req(heatmap_obj())
-        heatmap_obj()
-      }
-    })
-    
-    output$rectangular_fieldbook <- DT::renderDataTable({
-      shiny::req(simuDataRECT())
-      df <- simuDataRECT()$df
-      validate_design(app_field_book_table(
-        df, factor_columns = c("LOCATION", "PLOT", "ROW", "COLUMN", "REP", "IBLOCK", "UNIT", "ENTRY"),
-        height = 500
-      ))
-    })
-    
-    output$downloadData.rectangular <- app_csv_archive(
-      filename = function() {
-        loc <- paste("Rectangular_Lattice_", sep = "")
-        paste(loc, Sys.Date(), ".csv", sep = "")
-      },
-      data = function() as.data.frame(simuDataRECT()$df),
-      design = RECTANGULAR_reactive,
-      field_book = function() simuDataRECT()$df,
-      simulation = function() simuDataRECT()$simulation,
-      layout = function() reactive_layoutRect()$layout_metadata,
-      kind = "field_book"
-    )
-    
-    csv_data <- shiny::reactive({
-      shiny::req(simuDataRECT()$df)
-      df <- simuDataRECT()$df
-      shiny::req(input$typlotRT)
-      if (input$typlotRT == 2) {
-        export_layout(df, locNum(), TRUE)
-      } else {
-        export_layout(df, locNum())
-      }
-    })
-    
-    
-    # Downloadable csv of selected dataset ----
-    output$downloadCsv.rectangular <- app_csv_archive(
-      filename = function() {
-        loc <- paste("Rectangular_Lattice_Layout", sep = "")
-        paste(loc, Sys.Date(), ".csv", sep = "")
-      },
-      data = function() as.data.frame(csv_data()$file),
-      design = RECTANGULAR_reactive,
-      field_book = function() simuDataRECT()$df,
-      simulation = function() simuDataRECT()$simulation,
-      layout = function() reactive_layoutRect()$layout_metadata,
-      kind = "layout"
-    )
-    
-    app_reproduction_outputs(output, RECTANGULAR_reactive)
+
   })
 }

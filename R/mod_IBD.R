@@ -381,139 +381,17 @@ mod_IBD_server <- function(id) {
       planter = function() ibd_inputs()$planter,
       ids = c(layout = "layoutO_ibd", stacked = "stackedibd", location = "locLayout_ibd")
     )
-    
-    
-    simulation_settings <- app_simulation_controls(input, session,
-      ids = c(trait = "trailsIBD", other = "OtherIBD", minimum = "min.ibd", maximum = "max.ibd", submit = "ok.ibd"),
-      field_book = function() reactive_layoutIBD()$allSitesFieldbook
-    )
-    
-    simuModal.ibd <- function(failed = FALSE) {
-      app_simulation_modal(ns,
-        ids = c(trait = "trailsIBD", other = "OtherIBD", minimum = "min.ibd", maximum = "max.ibd", submit = "ok.ibd"),
-        failed = failed)
-    }
-    
-    shiny::observeEvent(input$Simulate.ibd, {
-      shiny::req(IBD_reactive()$fieldBook)
-      shiny::showModal(
-        simuModal.ibd()
-      )
-    })
-    
-    
-    
-    simuDataIBD <- shiny::reactive({
-      shiny::req(IBD_reactive()$fieldBook)
-      if (!is.null(simulation_settings())) {
-        max <- as.numeric(simulation_settings()$max_value)
-        min <- as.numeric(simulation_settings()$min_value)
-        df.ibd <- reactive_layoutIBD()$allSitesFieldbook
-        simulation <- validate_design(simulate_classic_field_book(
-          field_book = df.ibd, min_value = min, max_value = max,
-          response_name = simulation_settings()$response_name, seed = ibd_inputs()$seed,
-          order_by_id = FALSE
-        ))
-        df.ibd <- simulation$field_book
-        a <- ncol(df.ibd)
-      }else {
-        simulation <- NULL
-        df.ibd <- reactive_layoutIBD()$allSitesFieldbook
-        a <- ncol(df.ibd)
+
+    app_classic_workflow(input, output, session,
+      design = function() IBD_reactive(),
+      layout = function() reactive_layoutIBD(),
+      seed = function() ibd_inputs()$seed,
+      selected = function() return(as.numeric(input$locLayout_ibd)),
+      spec = classic_workflow_spec("IBD"),
+      simulation_ready = function() {
+        shiny::req(IBD_reactive()$fieldBook)
       }
-      return(list(df = df.ibd, a = a, simulation = simulation))
-    })
-    
-    heatmapInfoModal_IBD <- function() {
-      shiny::modalDialog(
-        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
-        shiny::h4("Simulate some data to see a heatmap!"),
-        easyClose = TRUE
-      )
-    }
-    
-    locNum <- shiny::reactive(
-      return(as.numeric(input$locLayout_ibd))
     )
-    
-    heatmap_obj <- shiny::reactive({
-      shiny::req(simuDataIBD()$df)
-      book <- simuDataIBD()$df
-      response <- as.character(simulation_settings()$response_name)
-      if (length(response) == 1L && response %in% names(book)) {
-        validate_design(app_field_heatmap(
-          book, response_name = response, selected = locNum(),
-          label_column = "ENTRY", label_title = "Entry",
-          include_site = TRUE, include_checks = FALSE
-        ))
-      } else {
-        shiny::showModal(heatmapInfoModal_IBD())
-        NULL
-      }
-    })
-    
-    output$layouts <- plotly::renderPlotly({
-      shiny::req(reactive_layoutIBD())
-      shiny::req(IBD_reactive())
-      shiny::req(input$typlotibd)
-      if (input$typlotibd == 1) {
-        reactive_layoutIBD()$out_layout
-      } else if (input$typlotibd == 2) {
-        reactive_layoutIBD()$out_layoutPlots
-      } else {
-        shiny::req(heatmap_obj())
-        heatmap_obj()
-      }
-    })
-    
-    output$IBD.output <- DT::renderDataTable({
-      
-      shiny::req(simuDataIBD()$df)
-      df <- simuDataIBD()$df
-      validate_design(app_field_book_table(
-        df, factor_columns = c("LOCATION", "PLOT", "ROW", "COLUMN", "REP", "IBLOCK", "UNIT", "ENTRY", "TREATMENT"),
-        height = 500
-      ))
-    })
-    
-    
-    output$downloadData.ibd <- app_csv_archive(
-      filename = function() {
-        loc <- paste("IBD_", sep = "")
-        paste(loc, Sys.Date(), ".csv", sep = "")
-      },
-      data = function() as.data.frame(simuDataIBD()$df),
-      design = IBD_reactive,
-      field_book = function() simuDataIBD()$df,
-      simulation = function() simuDataIBD()$simulation,
-      layout = function() reactive_layoutIBD()$layout_metadata,
-      kind = "field_book"
-    )
-    csv_data <- shiny::reactive({
-      shiny::req(simuDataIBD()$df)
-      df <- simuDataIBD()$df
-      shiny::req(input$typlotibd)
-      if (input$typlotibd == 2) {
-        export_layout(df, locNum(), TRUE)
-      } else {
-        export_layout(df, locNum())
-      }
-    })
-    
-    
-    # Downloadable csv of selected dataset ----
-    output$downloadCsv.ibd <- app_csv_archive(
-      filename = function() {
-        loc <- paste("Incomplete_Block_Layout", sep = "")
-        paste(loc, Sys.Date(), ".csv", sep = "")
-      },
-      data = function() as.data.frame(csv_data()$file),
-      design = IBD_reactive,
-      field_book = function() simuDataIBD()$df,
-      simulation = function() simuDataIBD()$simulation,
-      layout = function() reactive_layoutIBD()$layout_metadata,
-      kind = "layout"
-    )
-    app_reproduction_outputs(output, IBD_reactive)
+
   })
 }

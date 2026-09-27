@@ -251,8 +251,7 @@ mod_FD_server <- function(id) {
         seed = seed))
     }) |>
       shiny::bindEvent(input$RUN.fd)
-    
-    
+
     fd_reactive <- shiny::reactive({
       
       shiny::req(get_data_factorial())
@@ -277,8 +276,7 @@ mod_FD_server <- function(id) {
       
     }) |> 
       shiny::bindEvent(input$RUN.fd)
-    
-    
+
     upDateSites <- shiny::reactive({
       shiny::req(input$l.fd)
       locs <- as.numeric(input$l.fd)
@@ -326,138 +324,17 @@ mod_FD_server <- function(id) {
       planter = function() fd_inputs()$planter,
       ids = c(layout = "layoutO_fd", stacked = "stackedFD", location = "locLayout_fd")
     )
-    
-    
-    simulation_settings <- app_simulation_controls(input, session,
-      ids = c(trait = "trailsfd", other = "Otherfd", minimum = "min.fd", maximum = "max.fd", submit = "ok.fd"),
-      field_book = function() reactive_layoutFD()$allSitesFieldbook
-    )
-    
-    simuModal.fd <- function(failed = FALSE) {
-      app_simulation_modal(ns,
-        ids = c(trait = "trailsfd", other = "Otherfd", minimum = "min.fd", maximum = "max.fd", submit = "ok.fd"),
-        failed = failed)
-    }
-    
-    shiny::observeEvent(input$Simulate.fd, {
-      shiny::req(fd_reactive()$fieldBook)
-      shiny::showModal(
-        simuModal.fd()
-      )
-    })
-    
-    
-    simuData_fd <- shiny::reactive({
-      shiny::req(fd_inputs()$seed)
-      shiny::req(fd_reactive()$fieldBook)
-      if (!is.null(simulation_settings())) {
-        max <- as.numeric(simulation_settings()$max_value)
-        min <- as.numeric(simulation_settings()$min_value)
-        df.fd <- reactive_layoutFD()$allSitesFieldbook
-        simulation <- validate_design(simulate_classic_field_book(
-          field_book = df.fd, min_value = min, max_value = max,
-          response_name = simulation_settings()$response_name, seed = fd_inputs()$seed,
-          order_by_id = FALSE
-        ))
-        df.fd <- simulation$field_book
-        a <- ncol(df.fd)
-      } else {
-        simulation <- NULL
-        df.fd <- reactive_layoutFD()$allSitesFieldbook
-        a <- ncol(df.fd)
+
+    app_classic_workflow(input, output, session,
+      design = function() fd_reactive(),
+      layout = function() reactive_layoutFD(),
+      seed = function() fd_inputs()$seed,
+      selected = function() return(as.numeric(input$locLayout_fd)),
+      spec = classic_workflow_spec("FD"),
+      simulation_ready = function() {
+        shiny::req(fd_reactive()$fieldBook)
       }
-      return(list(df = df.fd, a = a, simulation = simulation))
-    })
-    
-    heatmapInfoModal_fd <- function() {
-      shiny::modalDialog(
-        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
-        shiny::h4("Simulate some data to see a heatmap!"),
-        easyClose = TRUE
-      )
-    }
-    
-    locNum <- shiny::reactive(
-      return(as.numeric(input$locLayout_fd))
     )
-    
-    heatmap_obj <- shiny::reactive({
-      shiny::req(simuData_fd()$df)
-      book <- simuData_fd()$df
-      response <- as.character(simulation_settings()$response_name)
-      if (length(response) == 1L && response %in% names(book)) {
-        validate_design(app_field_heatmap(
-          book, response_name = response, selected = locNum(),
-          label_column = "TRT_COMB", label_title = "Treatment",
-          include_site = TRUE, include_checks = FALSE
-        ))
-      } else {
-        shiny::showModal(heatmapInfoModal_fd())
-        NULL
-      }
-    })
-    
-    output$layouts <- plotly::renderPlotly({
-      shiny::req(reactive_layoutFD())
-      shiny::req(fd_reactive())
-      shiny::req(input$typlotfd)
-      if (input$typlotfd == 1) {
-        reactive_layoutFD()$out_layout
-      } else if (input$typlotfd == 2) {
-        reactive_layoutFD()$out_layoutPlots
-      } else {
-        shiny::req(heatmap_obj())
-        heatmap_obj()
-      }
-    })
-    
-    output$FD.Output <- DT::renderDataTable({
-      df <- simuData_fd()$df
-      validate_design(app_field_book_table(
-        df, factor_columns = c("LOCATION", "PLOT", "ROW", "COLUMN", field_book_extension_columns(fd_reactive())),
-        height = 500
-      ))
-    })
-    
-    output$downloadData.fd <- app_csv_archive(
-      filename = function() {
-        loc <- paste("Full_Factorial_", sep = "")
-        paste(loc, Sys.Date(), ".csv", sep = "")
-      },
-      data = function() as.data.frame(simuData_fd()$df),
-      design = fd_reactive,
-      field_book = function() simuData_fd()$df,
-      simulation = function() simuData_fd()$simulation,
-      layout = function() reactive_layoutFD()$layout_metadata,
-      kind = "field_book"
-    )
-    
-    csv_data <- shiny::reactive({
-      shiny::req(simuData_fd()$df)
-      df <- simuData_fd()$df
-      shiny::req(input$typlotfd)
-      if (input$typlotfd == 2) {
-        export_layout(df, locNum(), TRUE)
-      } else {
-        export_layout(df, locNum())
-      }
-    })
-    
-    
-    # Downloadable csv of selected dataset ----
-    output$downloadCsv.fd <- app_csv_archive(
-      filename = function() {
-        loc <- paste("Factorial_Layout", sep = "")
-        paste(loc, Sys.Date(), ".csv", sep = "")
-      },
-      data = function() as.data.frame(csv_data()$file),
-      design = fd_reactive,
-      field_book = function() simuData_fd()$df,
-      simulation = function() simuData_fd()$simulation,
-      layout = function() reactive_layoutFD()$layout_metadata,
-      kind = "layout"
-    )
-    
-    app_reproduction_outputs(output, fd_reactive)
+
   })
 }

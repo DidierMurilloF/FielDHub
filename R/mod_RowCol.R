@@ -243,8 +243,7 @@ mod_RowCol_server <- function(id){
                         selected = selected)
       
     })
-    
-    
+
     get_data_rcd <- shiny::reactive({
       if (is.null(init_data_rcd())) {
         shinyalert::shinyalert(
@@ -255,8 +254,7 @@ mod_RowCol_server <- function(id){
       } else return(init_data_rcd())
     }) |>
       shiny::bindEvent(input$RUN.rcd)
-    
-    
+
     rcd_inputs <- shiny::reactive({
       shiny::req(get_data_rcd())
       shiny::req(input$k.rcd)
@@ -378,133 +376,16 @@ mod_RowCol_server <- function(id){
       ids = c(layout = "layoutO_rcd", stacked = "stackedRowCol", location = "locLayout_rcd")
     )
     
-    simulation_settings <- app_simulation_controls(input, session,
-      ids = c(trait = "trailsRowCol", other = "OtherRowCol", minimum = "min.RowCol", maximum = "max.RowCol", submit = "ok.RowCol"),
-      field_book = function() reactive_layoutROWCOL()$allSitesFieldbook
+    app_classic_workflow(input, output, session,
+      design = function() RowCol_reactive(),
+      layout = function() reactive_layoutROWCOL(),
+      seed = function() rcd_inputs()$seed,
+      selected = function() return(as.numeric(input$locLayout_rcd)),
+      spec = classic_workflow_spec("RowCol"),
+      simulation_ready = function() {
+        shiny::req(RowCol_reactive()$fieldBook)
+      }
     )
-    
-    simuModal.RowCol <- function(failed = FALSE) {
-      app_simulation_modal(ns,
-        ids = c(trait = "trailsRowCol", other = "OtherRowCol", minimum = "min.RowCol", maximum = "max.RowCol", submit = "ok.RowCol"),
-        failed = failed)
-    }
-    
-    shiny::observeEvent(input$Simulate.RowCol, {
-      shiny::req(RowCol_reactive()$fieldBook)
-      shiny::showModal(
-        simuModal.RowCol()
-      )
-    })
-    
-    
-    simuData_RowCol <- shiny::reactive({
-      shiny::req(RowCol_reactive()$fieldBook)
-      if (!is.null(simulation_settings())) {
-        max <- as.numeric(simulation_settings()$max_value)
-        min <- as.numeric(simulation_settings()$min_value)
-        df.RowCol <- reactive_layoutROWCOL()$allSitesFieldbook
-        simulation <- validate_design(simulate_classic_field_book(
-          field_book = df.RowCol, min_value = min, max_value = max,
-          response_name = simulation_settings()$response_name, seed = rcd_inputs()$seed,
-          order_by_id = FALSE
-        ))
-        df.RowCol <- simulation$field_book
-        a <- ncol(df.RowCol)
-      }else {
-        simulation <- NULL
-        df.RowCol <- reactive_layoutROWCOL()$allSitesFieldbook
-        a <- ncol(df.RowCol)
-      }
-      return(list(df = df.RowCol, a = a, simulation = simulation))
-    })
-    
-    heatmapInfoModal_RCD <- function() {
-      shiny::modalDialog(
-        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
-        shiny::h4("Simulate some data to see a heatmap!"),
-        easyClose = TRUE
-      )
-    }
-    
-    locNum <- shiny::reactive(
-      return(as.numeric(input$locLayout_rcd))
-    )
-    
-    heatmap_obj <- shiny::reactive({
-      shiny::req(simuData_RowCol()$df)
-      book <- simuData_RowCol()$df
-      response <- as.character(simulation_settings()$response_name)
-      if (length(response) == 1L && response %in% names(book)) {
-        validate_design(app_field_heatmap(
-          book, response_name = response, selected = locNum(),
-          label_column = "ENTRY", label_title = "Entry",
-          include_site = TRUE, include_checks = FALSE
-        ))
-      } else {
-        shiny::showModal(heatmapInfoModal_RCD())
-        NULL
-      }
-    })
-    
-    output$layouts <- plotly::renderPlotly({
-      shiny::req(RowCol_reactive())
-      shiny::req(input$typlotrcd)
-      if (input$typlotrcd == 1) {
-        reactive_layoutROWCOL()$out_layout
-      } else if (input$typlotrcd == 2) {
-        reactive_layoutROWCOL()$out_layoutPlots
-      } else {
-        shiny::req(heatmap_obj())
-        heatmap_obj()
-      }
-    })
-    
-    output$rowcolD <- DT::renderDataTable({
-      df <- simuData_RowCol()$df
-      validate_design(app_field_book_table(
-        df, factor_columns = c("LOCATION", "PLOT", "ROW", "COLUMN", "REP", "ENTRY"),
-        height = 490
-      ))
-    })
 
-    output$downloadData.rowcolD <- app_csv_archive(
-      filename = function() {
-        loc <- paste("Row-Column_", sep = "")
-        paste(loc, Sys.Date(), ".csv", sep = "")
-      },
-      data = function() as.data.frame(simuData_RowCol()$df),
-      design = RowCol_reactive,
-      field_book = function() simuData_RowCol()$df,
-      simulation = function() simuData_RowCol()$simulation,
-      layout = function() reactive_layoutROWCOL()$layout_metadata,
-      kind = "field_book"
-    )
-    
-    csv_data <- shiny::reactive({
-      shiny::req(simuData_RowCol()$df)
-      df <- simuData_RowCol()$df
-      shiny::req(input$typlotrcd)
-      if (input$typlotrcd == 2) {
-        export_layout(df, locNum(), TRUE)
-      } else {
-        export_layout(df, locNum())
-      }
-    })
-    
-    
-    # Downloadable csv of selected dataset ----
-    output$downloadCsv.rcd <- app_csv_archive(
-      filename = function() {
-        loc <- paste("Resolvable_Row-Column_Layout", sep = "")
-        paste(loc, Sys.Date(), ".csv", sep = "")
-      },
-      data = function() as.data.frame(csv_data()$file),
-      design = RowCol_reactive,
-      field_book = function() simuData_RowCol()$df,
-      simulation = function() simuData_RowCol()$simulation,
-      layout = function() reactive_layoutROWCOL()$layout_metadata,
-      kind = "layout"
-    )
-    app_reproduction_outputs(output, RowCol_reactive)
   })
 }

@@ -238,8 +238,7 @@ mod_Square_Lattice_server <- function(id){
                   seed = seed))
     }) |>
       shiny::bindEvent(input$RUN.square)
-    
-    
+
     entryListFormat_SQUARE <- data.frame(ENTRY = 1:9, 
                                          NAME = c(paste("Genotype", LETTERS[1:9], sep = "")))
     entriesInfoModal_SQUARE <- function() {
@@ -266,8 +265,7 @@ mod_Square_Lattice_server <- function(id){
         )
       }
     })
-    
-    
+
     SQUARE_reactive <- shiny::eventReactive(input$RUN.square,{
       
       shiny::req(get_data_square())
@@ -363,139 +361,18 @@ mod_Square_Lattice_server <- function(id){
       }
     })
     
-    simulation_settings <- app_simulation_controls(input, session,
-      ids = c(trait = "trailsSQUARE", other = "OtherSQUARE", minimum = "min.square", maximum = "max.square", submit = "ok.square"),
-      field_book = function() reactive_layoutSquare()$allSitesFieldbook
-    )
-    
-    simuModal.square <- function(failed = FALSE) {
-      app_simulation_modal(ns,
-        ids = c(trait = "trailsSQUARE", other = "OtherSQUARE", minimum = "min.square", maximum = "max.square", submit = "ok.square"),
-        failed = failed, introduction = "Generate a random response variable:")
-    }
-    
-    shiny::observeEvent(input$Simulate.square, {
-      shiny::req(input$k.square)
-      shiny::req(input$r.square)
-      shiny::req(reactive_layoutSquare()$fieldBookXY)
-      shiny::showModal(
-        simuModal.square()
-      )
-    })
-    
-    
-    
-    simuDataSQUARE <- shiny::reactive({
-      shiny::req(reactive_layoutSquare()$allSitesFieldbook)
-      if (!is.null(simulation_settings())) {
-        max <- as.numeric(simulation_settings()$max_value)
-        min <- as.numeric(simulation_settings()$min_value)
-        df.square <- reactive_layoutSquare()$allSitesFieldbook
-        simulation <- validate_design(simulate_classic_field_book(
-          field_book = df.square, min_value = min, max_value = max,
-          response_name = simulation_settings()$response_name, seed = square_inputs()$seed,
-          order_by_id = FALSE
-        ))
-        df.square <- simulation$field_book
-        a <- ncol(df.square)
-      }else {
-        simulation <- NULL
-        df.square <- reactive_layoutSquare()$allSitesFieldbook
-        a <- ncol(df.square)
+    app_classic_workflow(input, output, session,
+      design = function() SQUARE_reactive(),
+      layout = function() reactive_layoutSquare(),
+      seed = function() square_inputs()$seed,
+      selected = function() return(as.numeric(input$locLayout_sq)),
+      spec = classic_workflow_spec("Square_Lattice"),
+      simulation_ready = function() {
+        shiny::req(input$k.square)
+        shiny::req(input$r.square)
+        shiny::req(reactive_layoutSquare()$fieldBookXY)
       }
-      return(list(df = df.square, a = a, simulation = simulation))
-    })
-    
-    heatmapInfoModal_Square <- function() {
-      shiny::modalDialog(
-        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
-        shiny::h4("Simulate some data to see a heatmap!"),
-        easyClose = TRUE
-      )
-    }
-    
-    locNum <- shiny::reactive(
-      return(as.numeric(input$locLayout_sq))
     )
-    
-    heatmap_obj <- shiny::reactive({
-      shiny::req(simuDataSQUARE()$df)
-      book <- simuDataSQUARE()$df
-      response <- as.character(simulation_settings()$response_name)
-      if (length(response) == 1L && response %in% names(book)) {
-        validate_design(app_field_heatmap(
-          book, response_name = response, selected = locNum(),
-          label_column = "ENTRY", label_title = "Entry",
-          include_site = TRUE, include_checks = FALSE
-        ))
-      } else {
-        shiny::showModal(heatmapInfoModal_Square())
-        NULL
-      }
-    })
-    
-    output$random_layout <- plotly::renderPlotly({
-      shiny::req(SQUARE_reactive())
-      shiny::req(reactive_layoutSquare())
-      shiny::req(input$typlotSQ)
-      if (input$typlotSQ == 1) {
-        reactive_layoutSquare()$out_layout
-      } else if (input$typlotSQ == 2) {
-        reactive_layoutSquare()$out_layoutPlots
-      } else {
-        shiny::req(heatmap_obj())
-        heatmap_obj()
-      }
-    })
-    
-    output$square_fieldbook <- DT::renderDataTable({
-      shiny::req(simuDataSQUARE()$df)
-      df <- simuDataSQUARE()$df
-      validate_design(app_field_book_table(
-        df, factor_columns = c("LOCATION", "PLOT", "ROW", "COLUMN", "REP", "IBLOCK", "UNIT", "ENTRY", "TREATMENT"),
-        height = 500
-      ))
-    })
-    
-    output$downloadData.square <- app_csv_archive(
-      filename = function() {
-        loc <- paste("Square_Lattice_", sep = "")
-        paste(loc, Sys.Date(), ".csv", sep = "")
-      },
-      data = function() as.data.frame(simuDataSQUARE()$df),
-      design = SQUARE_reactive,
-      field_book = function() simuDataSQUARE()$df,
-      simulation = function() simuDataSQUARE()$simulation,
-      layout = function() reactive_layoutSquare()$layout_metadata,
-      kind = "field_book"
-    )
-    
-    csv_data <- shiny::reactive({
-      shiny::req(simuDataSQUARE()$df)
-      df <- simuDataSQUARE()$df
-      shiny::req(input$typlotSQ)
-      if (input$typlotSQ == 2) {
-        export_layout(df, locNum(), TRUE)
-      } else {
-        export_layout(df, locNum())
-      }
-    })
-    
-    
-    # Downloadable csv of selected dataset ----
-    output$downloadCsv.square <- app_csv_archive(
-      filename = function() {
-        loc <- paste("Square_Lattice_Layout", sep = "")
-        paste(loc, Sys.Date(), ".csv", sep = "")
-      },
-      data = function() as.data.frame(csv_data()$file),
-      design = SQUARE_reactive,
-      field_book = function() simuDataSQUARE()$df,
-      simulation = function() simuDataSQUARE()$simulation,
-      layout = function() reactive_layoutSquare()$layout_metadata,
-      kind = "layout"
-    )
-    
-    app_reproduction_outputs(output, SQUARE_reactive)
+
   })
 }

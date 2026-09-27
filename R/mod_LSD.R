@@ -169,8 +169,7 @@ mod_LSD_server <- function(id){
         )
       }
     })
-    
-    
+
     get_data_lsd <- shiny::reactive({
       if (input$owndataLSD == "Yes") {
         shiny::req(input$file.LSD)
@@ -195,8 +194,7 @@ mod_LSD_server <- function(id){
         }
       }
     })
-    
-    
+
     lsd_inputs <- shiny::reactive({
       
       shiny::req(input$plot_start.lsd)
@@ -271,8 +269,7 @@ mod_LSD_server <- function(id){
       
     }) |> 
       shiny::bindEvent(input$RUN.lsd)
-    
-    
+
     output$well_panel_layout_LSD <- shiny::renderUI({
       shiny::req(latinsquare_reactive()$fieldBook)
       shiny::req(latinsquare_reactive())
@@ -309,132 +306,17 @@ mod_LSD_server <- function(id){
       ids = c(layout = "layoutO_lsd", stacked = "stackedLSD")
     )
     
-    simulation_settings <- app_simulation_controls(input, session,
-      ids = c(trait = "trailsLSD", other = "OtherLSD", minimum = "min.lsd", maximum = "max.lsd", submit = "ok.lsd"),
-      field_book = function() reactive_layoutLSD()$allSitesFieldbook
+    app_classic_workflow(input, output, session,
+      design = function() latinsquare_reactive(),
+      layout = function() reactive_layoutLSD(),
+      seed = function() lsd_inputs()$seed,
+      selected = function() 1L,
+      spec = classic_workflow_spec("LSD"),
+      simulation_ready = function() {
+        shiny::req(latinsquare_reactive()$fieldBook)
+      }
     )
-    
-    simuModal.lsd <- function(failed = FALSE) {
-      app_simulation_modal(ns,
-        ids = c(trait = "trailsLSD", other = "OtherLSD", minimum = "min.lsd", maximum = "max.lsd", submit = "ok.lsd"),
-        failed = failed)
-    }
-    shiny::observeEvent(input$Simulate.lsd, {
-      shiny::req(latinsquare_reactive()$fieldBook)
-      shiny::showModal(
-        simuModal.lsd()
-      )
-    })
-    
-    
-    
-    simuDataLSD <- shiny::reactive({
-      shiny::req(latinsquare_reactive()$fieldBook)
-      if (!is.null(simulation_settings())) {
-        max <- as.numeric(simulation_settings()$max_value)
-        min <- as.numeric(simulation_settings()$min_value)
-        df.lsd <- reactive_layoutLSD()$allSitesFieldbook
-        simulation <- validate_design(simulate_classic_field_book(
-          field_book = df.lsd, min_value = min, max_value = max,
-          response_name = simulation_settings()$response_name, seed = lsd_inputs()$seed,
-          order_by_id = TRUE
-        ))
-        df.lsd <- simulation$field_book
-      }else {
-        simulation <- NULL
-        df.lsd <- reactive_layoutLSD()$allSitesFieldbook
-      }
-      return(list(df = df.lsd, simulation = simulation))
-    })
-    
-    heatmapInfoModal_LSD <- function() {
-      shiny::modalDialog(
-        title = shiny::div(shiny::tags$h3("Important message",
-                            style = "color: red;")),
-        shiny::h4("Simulate some data to see a heatmap!"),
-        easyClose = TRUE
-      )
-    }
-    
-    heatmap_obj <- shiny::reactive({
-      shiny::req(simuDataLSD()$df)
-      book <- simuDataLSD()$df
-      response <- as.character(simulation_settings()$response_name)
-      if (length(response) == 1L && response %in% names(book)) {
-        validate_design(app_field_heatmap(
-          book, response_name = response, selected = 1L,
-          label_column = "TREATMENT", label_title = "Treatment",
-          include_site = TRUE, include_checks = FALSE
-        ))
-      } else {
-        shiny::showModal(heatmapInfoModal_LSD())
-        NULL
-      }
-    })
-    
-    output$layout_lsd <- plotly::renderPlotly({
-      shiny::req(reactive_layoutLSD())
-      shiny::req(latinsquare_reactive())
-      shiny::req(input$typlotLSD)
-      if (input$typlotLSD == 1) {
-        reactive_layoutLSD()$out_layout
-      } else if (input$typlotLSD == 2) {
-        reactive_layoutLSD()$out_layoutPlots
-      } else {
-        shiny::req(heatmap_obj())
-        heatmap_obj()
-      }
-    })
-    
-    output$LSD_fieldbook <- DT::renderDataTable({
-      
-      df <- simuDataLSD()$df
-      validate_design(app_field_book_table(
-        df, factor_columns = c("LOCATION", "PLOT", "ROW", "COLUMN", "SQUARE", "TREATMENT"),
-        height = 500
-      ))
-    })
-    
-    output$downloadData.lsd <- app_csv_archive(
-      filename = function() {
-        loc <- paste("Latin_Square_", sep = "")
-        paste(loc, Sys.Date(), ".csv", sep = "")
-      },
-      data = function() as.data.frame(simuDataLSD()$df),
-      design = latinsquare_reactive,
-      field_book = function() simuDataLSD()$df,
-      simulation = function() simuDataLSD()$simulation,
-      layout = function() reactive_layoutLSD()$layout_metadata,
-      kind = "field_book"
-    )
-    
-    csv_data <- shiny::reactive({
-      shiny::req(simuDataLSD()$df)
-      df <- simuDataLSD()$df
-      shiny::req(input$typlotLSD)
-      if (input$typlotLSD == 2) {
-        export_layout(df, 1, TRUE)
-      } else {
-        export_layout(df, 1)
-      }
-    })
-    
-    
-    # Downloadable csv of selected dataset ----
-    output$downloadCsv.lsd <- app_csv_archive(
-      filename = function() {
-        loc <- paste("Latin_Square_Layout", sep = "")
-        paste(loc, Sys.Date(), ".csv", sep = "")
-      },
-      data = function() as.data.frame(csv_data()$file),
-      design = latinsquare_reactive,
-      field_book = function() simuDataLSD()$df,
-      simulation = function() simuDataLSD()$simulation,
-      layout = function() reactive_layoutLSD()$layout_metadata,
-      kind = "layout"
-    )
-    
-    app_reproduction_outputs(output, latinsquare_reactive)
+
   })
 }
 
