@@ -2,7 +2,9 @@ test_that("every field design has distinct final physical coordinates", {
   entries <- names(catalogue)[vapply(names(catalogue), function(name) {
     !is.null(catalogue_design(name)$fieldBook)
   }, logical(1))]
-  expect_length(entries, 36L)
+  # Task 8 added RCBD_check_count to the catalogue (RCBD() generating its own
+  # check labels from a bare check count).
+  expect_length(entries, 37L)
   for (name in entries) {
     book <- field_layout(catalogue_design(name))
     expect_true(has_unique_units(book, c("LOCATION", "ROW", "COLUMN")), info = name)

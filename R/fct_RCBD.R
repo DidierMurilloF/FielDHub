@@ -14,13 +14,15 @@
 #' the residual is the treatment-by-block interaction; repeating checks inside a block
 #' instead supplies a within-block estimate of error and a form of local control.
 #'
-#' \code{checks} accepts either a single positive integer \code{N} (the first \code{N}
-#' entries of \code{data}, or of a character vector \code{t}, are the checks) or a
-#' character vector of check labels. When a pool of entries is supplied through \code{data}
-#' or a character \code{t}, every label named in \code{checks} must already exist in that
-#' pool; an unmatched label is an error that also names the closest case-insensitive match,
-#' if any. When \code{t} is a bare count (no pool supplied), the check labels are new and
-#' are appended to the auto-generated test entries.
+#' \code{checks} accepts either a single positive integer \code{N} or a character vector
+#' of check labels. When a pool of entries is supplied through \code{data} or a character
+#' \code{t}, an integer \code{N} takes the first \code{N} entries of that pool as the
+#' checks, and a character vector of labels must already exist in that pool; an unmatched
+#' label is an error that also names the closest case-insensitive match, if any. When no
+#' pool is supplied (\code{t} is a bare count), the labels are generated instead: a
+#' character \code{checks} is appended to the auto-generated test entries, while an
+#' integer \code{N} generates its own check labels \code{"CH1".."CHN"} ahead of the
+#' auto-generated test entries \code{"T1".."Tt"}.
 #'
 #' \code{rep_checks} sets how many times each check repeats within a block: a single value
 #' is recycled across all checks, or one value can be supplied per check.
@@ -47,13 +49,15 @@
 #' @param locationNames (optional) Names for each location.
 #' @param data (optional) Data frame with the labels of treatments.
 #' @param checks (optional) Checks to repeat within every block. Either a positive
-#'   integer \code{N}, meaning the first \code{N} entries of \code{data} (or of a
-#'   character vector \code{t}) are the checks, or a character vector of check
-#'   labels. \code{checks} sits after \code{data} in the argument list (rather than
-#'   next to \code{t}, where it might otherwise go) precisely so that \code{data}
-#'   keeps its original positional slot and existing positional calls to
-#'   \code{RCBD()} keep working unchanged. By default \code{checks = NULL}, which
-#'   produces an ordinary RCBD.
+#'   integer \code{N} or a character vector of check labels. When \code{data} or a
+#'   character vector \code{t} supplies a pool of entries, \code{N} takes that pool's
+#'   first \code{N} entries as the checks; when no pool is supplied (\code{t} is a
+#'   bare count), \code{N} instead generates its own check labels \code{"CH1".."CHN"}
+#'   ahead of the auto-generated test entries \code{"T1".."Tt"}. \code{checks} sits
+#'   after \code{data} in the argument list (rather than next to \code{t}, where it
+#'   might otherwise go) precisely so that \code{data} keeps its original positional
+#'   slot and existing positional calls to \code{RCBD()} keep working unchanged. By
+#'   default \code{checks = NULL}, which produces an ordinary RCBD.
 #' @param rep_checks (optional) Number of times each check is repeated within
 #'   every block. A single value is recycled across all checks, or supply one
 #'   value per check. By default \code{rep_checks = NULL}, which is treated as 1

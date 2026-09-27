@@ -1450,6 +1450,360 @@
       ## cartesian, grid_panel
       Error: Stacking 'grid_panel' is not available for this design. 
 
+# the field layouts of RCBD_check_count are unchanged
+
+    Code
+      print_layouts(catalogue_design(entry))
+    Output
+      ## serpentine, vertical
+      ### Layout 1: Randomized Complete Block Design 3X10
+      Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
+      Location loc1, ID:
+       1  2  3  4  5  6  7  8  9 10
+      11 12 13 14 15 16 17 18 19 20
+      21 22 23 24 25 26 27 28 29 30
+      PLOT:
+      101 102 103 104 105 106 107 108 109 110
+      201 202 203 204 205 206 207 208 209 210
+      301 302 303 304 305 306 307 308 309 310
+      ### Layout 2: Randomized Complete Block Design 15X2
+      Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
+      Location loc1, ID:
+       1  2
+       3  4
+       5  6
+       7  8
+       9 10
+      11 12
+      13 14
+      15 16
+      17 18
+      19 20
+      21 22
+      23 24
+      25 26
+      27 28
+      29 30
+      PLOT:
+      101 102
+      104 103
+      105 106
+      108 107
+      109 110
+      202 201
+      203 204
+      206 205
+      207 208
+      210 209
+      301 302
+      304 303
+      305 306
+      308 307
+      309 310
+      ### Layout 3: Randomized Complete Block Design 6X5
+      Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
+      Location loc1, ID:
+       1  2  3  4  5
+       6  7  8  9 10
+      11 12 13 14 15
+      16 17 18 19 20
+      21 22 23 24 25
+      26 27 28 29 30
+      PLOT:
+      101 102 103 104 105
+      110 109 108 107 106
+      201 202 203 204 205
+      210 209 208 207 206
+      301 302 303 304 305
+      310 309 308 307 306
+      ### Layout 4: Randomized Complete Block Design 30X1
+      Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
+      Location loc1, ID:
+       1
+       2
+       3
+       4
+       5
+       6
+       7
+       8
+       9
+      10
+      11
+      12
+      13
+      14
+      15
+      16
+      17
+      18
+      19
+      20
+      21
+      22
+      23
+      24
+      25
+      26
+      27
+      28
+      29
+      30
+      PLOT:
+      101
+      102
+      103
+      104
+      105
+      106
+      107
+      108
+      109
+      110
+      201
+      202
+      203
+      204
+      205
+      206
+      207
+      208
+      209
+      210
+      301
+      302
+      303
+      304
+      305
+      306
+      307
+      308
+      309
+      310
+      ## cartesian, vertical
+      ### Layout 1: Randomized Complete Block Design 3X10
+      Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
+      Location loc1, ID:
+       1  2  3  4  5  6  7  8  9 10
+      11 12 13 14 15 16 17 18 19 20
+      21 22 23 24 25 26 27 28 29 30
+      PLOT:
+      101 102 103 104 105 106 107 108 109 110
+      201 202 203 204 205 206 207 208 209 210
+      301 302 303 304 305 306 307 308 309 310
+      ### Layout 2: Randomized Complete Block Design 15X2
+      Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
+      Location loc1, ID:
+       1  2
+       3  4
+       5  6
+       7  8
+       9 10
+      11 12
+      13 14
+      15 16
+      17 18
+      19 20
+      21 22
+      23 24
+      25 26
+      27 28
+      29 30
+      PLOT:
+      101 102
+      103 104
+      105 106
+      107 108
+      109 110
+      201 202
+      203 204
+      205 206
+      207 208
+      209 210
+      301 302
+      303 304
+      305 306
+      307 308
+      309 310
+      ### Layout 3: Randomized Complete Block Design 6X5
+      Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
+      Location loc1, ID:
+       1  2  3  4  5
+       6  7  8  9 10
+      11 12 13 14 15
+      16 17 18 19 20
+      21 22 23 24 25
+      26 27 28 29 30
+      PLOT:
+      101 102 103 104 105
+      106 107 108 109 110
+      201 202 203 204 205
+      206 207 208 209 210
+      301 302 303 304 305
+      306 307 308 309 310
+      ### Layout 4: Randomized Complete Block Design 30X1
+      Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
+      Location loc1, ID:
+       1
+       2
+       3
+       4
+       5
+       6
+       7
+       8
+       9
+      10
+      11
+      12
+      13
+      14
+      15
+      16
+      17
+      18
+      19
+      20
+      21
+      22
+      23
+      24
+      25
+      26
+      27
+      28
+      29
+      30
+      PLOT:
+      101
+      102
+      103
+      104
+      105
+      106
+      107
+      108
+      109
+      110
+      201
+      202
+      203
+      204
+      205
+      206
+      207
+      208
+      209
+      210
+      301
+      302
+      303
+      304
+      305
+      306
+      307
+      308
+      309
+      310
+      ## serpentine, horizontal
+      ### Layout 1: Randomized Complete Block Design 10X3
+      Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
+      Location loc1, ID:
+       1 11 21
+       2 12 22
+       3 13 23
+       4 14 24
+       5 15 25
+       6 16 26
+       7 17 27
+       8 18 28
+       9 19 29
+      10 20 30
+      PLOT:
+      101 201 301
+      102 202 302
+      103 203 303
+      104 204 304
+      105 205 305
+      106 206 306
+      107 207 307
+      108 208 308
+      109 209 309
+      110 210 310
+      ### Layout 2: Randomized Complete Block Design 2X15
+      Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
+      Location loc1, ID:
+       1  2  3  4  5 11 12 13 14 15 21 22 23 24 25
+       6  7  8  9 10 16 17 18 19 20 26 27 28 29 30
+      PLOT:
+      101 102 103 104 105 201 202 203 204 205 301 302 303 304 305
+      110 109 108 107 106 210 209 208 207 206 310 309 308 307 306
+      ### Layout 3: Randomized Complete Block Design 5X6
+      Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
+      Location loc1, ID:
+       1  2 11 12 21 22
+       3  4 13 14 23 24
+       5  6 15 16 25 26
+       7  8 17 18 27 28
+       9 10 19 20 29 30
+      PLOT:
+      101 102 201 202 301 302
+      104 103 204 203 304 303
+      105 106 205 206 305 306
+      108 107 208 207 308 307
+      109 110 209 210 309 310
+      ## cartesian, horizontal
+      ### Layout 1: Randomized Complete Block Design 10X3
+      Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
+      Location loc1, ID:
+       1 11 21
+       2 12 22
+       3 13 23
+       4 14 24
+       5 15 25
+       6 16 26
+       7 17 27
+       8 18 28
+       9 19 29
+      10 20 30
+      PLOT:
+      101 201 301
+      102 202 302
+      103 203 303
+      104 204 304
+      105 205 305
+      106 206 306
+      107 207 307
+      108 208 308
+      109 209 309
+      110 210 310
+      ### Layout 2: Randomized Complete Block Design 2X15
+      Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
+      Location loc1, ID:
+       1  2  3  4  5 11 12 13 14 15 21 22 23 24 25
+       6  7  8  9 10 16 17 18 19 20 26 27 28 29 30
+      PLOT:
+      101 102 103 104 105 201 202 203 204 205 301 302 303 304 305
+      106 107 108 109 110 206 207 208 209 210 306 307 308 309 310
+      ### Layout 3: Randomized Complete Block Design 5X6
+      Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
+      Location loc1, ID:
+       1  2 11 12 21 22
+       3  4 13 14 23 24
+       5  6 15 16 25 26
+       7  8 17 18 27 28
+       9 10 19 20 29 30
+      PLOT:
+      101 102 201 202 301 302
+      103 104 203 204 303 304
+      105 106 205 206 305 306
+      107 108 207 208 307 308
+      109 110 209 210 309 310
+      ## serpentine, grid_panel
+      Error: Stacking 'grid_panel' is not available for this design. 
+      ## cartesian, grid_panel
+      Error: Stacking 'grid_panel' is not available for this design. 
+
 # the field layouts of RCBD_cartesian are unchanged
 
     Code

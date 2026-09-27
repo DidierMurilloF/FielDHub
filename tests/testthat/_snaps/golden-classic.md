@@ -1660,6 +1660,421 @@
       ]
     }
 
+# RCBD_check_count keeps its output
+
+    {
+      "type": "list",
+      "attributes": {
+        "names": {
+          "type": "character",
+          "attributes": {},
+          "value": ["design", "layout"]
+        }
+      },
+      "value": [
+        {
+          "type": "list",
+          "attributes": {
+            "names": {
+              "type": "character",
+              "attributes": {},
+              "value": ["infoDesign", "layoutRandom", "plotNumber", "fieldBook", "metadata"]
+            },
+            "class": {
+              "type": "character",
+              "attributes": {},
+              "value": ["fieldhub_rcbd", "FielDHub"]
+            }
+          },
+          "value": [
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["blocks", "number.of.treatments", "treatments", "checks", "check_names", "rep_checks", "plots_per_block", "spread_checks", "locations", "plotNumber", "locationNames", "seed", "id_design"]
+                }
+              },
+              "value": [
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [3]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [6]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["T1", "T2", "T3", "T4", "T5", "T6"]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [2]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["CH1", "CH2"]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [2, 2]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [10]
+                },
+                {
+                  "type": "logical",
+                  "attributes": {},
+                  "value": [true]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [1]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [101, 201, 301]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["loc1"]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [40]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [2]
+                }
+              ]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["Loc_loc1"]
+                }
+              },
+              "value": [
+                {
+                  "type": "character",
+                  "attributes": {
+                    "dim": {
+                      "type": "integer",
+                      "attributes": {},
+                      "value": [3, 2]
+                    },
+                    "dimnames": {
+                      "type": "list",
+                      "attributes": {},
+                      "value": [
+                        {
+                          "type": "NULL"
+                        },
+                        {
+                          "type": "character",
+                          "attributes": {},
+                          "value": ["Block", "--Treatments--"]
+                        }
+                      ]
+                    }
+                  },
+                  "value": ["1", "2", "3", "T2 CH2 T5 CH1 T6 T1 T3 CH2 T4 CH1", "CH2 T2 T5 CH1 T3 T4 T1 T6 CH2 CH1", "CH2 T5 T1 CH1 T2 T6 CH1 T3 CH2 T4"]
+                }
+              ]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["Loc_loc1"]
+                }
+              },
+              "value": [
+                {
+                  "type": "integer",
+                  "attributes": {
+                    "dim": {
+                      "type": "integer",
+                      "attributes": {},
+                      "value": [3, 10]
+                    }
+                  },
+                  "value": [101, 210, 301, 102, 209, 302, 103, 208, 303, 104, 207, 304, 105, 206, 305, 106, 205, 306, 107, 204, 307, 108, 203, 308, 109, 202, 309, 110, 201, 310]
+                }
+              ]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["ID", "LOCATION", "PLOT", "REP", "ENTRY", "CHECKS", "TREATMENT"]
+                },
+                "class": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["data.frame"]
+                },
+                "row.names": {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
+                }
+              },
+              "value": [
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {
+                    "levels": {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["loc1"]
+                    },
+                    "class": {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["factor"]
+                    }
+                  },
+                  "value": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [4, 2, 7, 1, 8, 3, 5, 2, 6, 1, 1, 2, 8, 3, 6, 5, 1, 7, 4, 2, 2, 7, 3, 1, 4, 8, 1, 5, 2, 6]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [0, 2, 0, 1, 0, 0, 0, 2, 0, 1, 1, 2, 0, 0, 0, 0, 1, 0, 0, 2, 2, 0, 0, 1, 0, 0, 1, 0, 2, 0]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["T2", "CH2", "T5", "CH1", "T6", "T1", "T3", "CH2", "T4", "CH1", "CH1", "CH2", "T6", "T1", "T4", "T3", "CH1", "T5", "T2", "CH2", "CH2", "T5", "T1", "CH1", "T2", "T6", "CH1", "T3", "CH2", "T4"]
+                }
+              ]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["design", "schema_version", "seed", "rng_kind", "parameters"]
+                }
+              },
+              "value": [
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["rcbd"]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [40]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                },
+                {
+                  "type": "list",
+                  "attributes": {
+                    "names": {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["t", "reps", "l", "plotNumber", "continuous", "planter", "seed", "locationNames", "data", "checks", "rep_checks", "spread_checks"]
+                    }
+                  },
+                  "value": [
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [6]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [3]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [1]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [101]
+                    },
+                    {
+                      "type": "logical",
+                      "attributes": {},
+                      "value": [false]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["serpentine"]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [40]
+                    },
+                    {
+                      "type": "NULL"
+                    },
+                    {
+                      "type": "NULL"
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [2]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [2, 2]
+                    },
+                    {
+                      "type": "logical",
+                      "attributes": {},
+                      "value": [true]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "attributes": {
+            "row.names": {
+              "type": "integer",
+              "attributes": {},
+              "value": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
+            },
+            "names": {
+              "type": "character",
+              "attributes": {},
+              "value": ["ID", "LOCATION", "PLOT", "ROW", "COLUMN", "REP", "ENTRY", "CHECKS", "TREATMENT"]
+            },
+            "class": {
+              "type": "character",
+              "attributes": {},
+              "value": ["data.frame"]
+            }
+          },
+          "value": [
+            {
+              "type": "integer",
+              "attributes": {},
+              "value": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
+            },
+            {
+              "type": "integer",
+              "attributes": {
+                "levels": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["loc1"]
+                },
+                "class": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["factor"]
+                }
+              },
+              "value": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+            },
+            {
+              "type": "integer",
+              "attributes": {},
+              "value": [101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310]
+            },
+            {
+              "type": "integer",
+              "attributes": {},
+              "value": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+            },
+            {
+              "type": "integer",
+              "attributes": {},
+              "value": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+            },
+            {
+              "type": "integer",
+              "attributes": {},
+              "value": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+            },
+            {
+              "type": "integer",
+              "attributes": {},
+              "value": [4, 2, 7, 1, 8, 3, 5, 2, 6, 1, 1, 2, 8, 3, 6, 5, 1, 7, 4, 2, 2, 7, 3, 1, 4, 8, 1, 5, 2, 6]
+            },
+            {
+              "type": "integer",
+              "attributes": {},
+              "value": [0, 2, 0, 1, 0, 0, 0, 2, 0, 1, 1, 2, 0, 0, 0, 0, 1, 0, 0, 2, 2, 0, 0, 1, 0, 0, 1, 0, 2, 0]
+            },
+            {
+              "type": "character",
+              "attributes": {},
+              "value": ["T2", "CH2", "T5", "CH1", "T6", "T1", "T3", "CH2", "T4", "CH1", "CH1", "CH2", "T6", "T1", "T4", "T3", "CH1", "T5", "T2", "CH2", "CH2", "T5", "T1", "CH1", "T2", "T6", "CH1", "T3", "CH2", "T4"]
+            }
+          ]
+        }
+      ]
+    }
+
 # RCBD_cartesian keeps its output
 
     {

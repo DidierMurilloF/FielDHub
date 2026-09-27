@@ -137,6 +137,8 @@ knitr::opts_chunk$set(
 
 ### New features:
 
+* `RCBD()` now generates its own check labels when `checks` is a bare positive integer and no entry pool is supplied (`t` is itself a bare count): the check labels become `"CH1".."CHN"`, followed by the auto-generated test entries `"T1".."Tt"`, instead of requiring `data` or a character vector `t`. Existing calls that supply a pool (`data`, or a character `t`) or character check labels are unchanged, and so are their seeded results.
+
 - The twelve classic-design simulation dialogs now share one component,
   preserving existing controls and correcting the response label to "Trait name".
 

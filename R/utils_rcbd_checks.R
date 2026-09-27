@@ -41,13 +41,23 @@ rcbd_resolve_entries <- function(t = NULL,
   if (is.numeric(checks) && length(checks) == 1) {
     validate_iteration_budget(checks, "checks")
     if (is.null(pool)) {
-      fieldhub_abort("RCBD() requires 'data' (or a character vector 't') when 'checks' is given as a count.")
+      # No pool to slice checks from. When `t` is itself a bare count, the
+      # check and test labels are both generated: "CH1..CHk" for the checks,
+      # followed by "T1..Tn" for the test entries (the same T-prefix RCBD()
+      # already uses to auto-generate treatment labels).
+      if (is.null(t) || !is.numeric(t) || length(t) != 1) {
+        fieldhub_abort("RCBD() requires 'data' (or a character vector 't') when 'checks' is given as a count.")
+      }
+      validate_iteration_budget(t, "t")
+      check_names <- paste0("CH", seq_len(checks))
+      test_names  <- paste0("T", seq_len(t))
+    } else {
+      if (checks >= length(pool)) {
+        fieldhub_abort("RCBD() requires at least one test entry: 'checks' must be fewer than the entries supplied.")
+      }
+      check_names <- pool[seq_len(checks)]
+      test_names  <- pool[-seq_len(checks)]
     }
-    if (checks >= length(pool)) {
-      fieldhub_abort("RCBD() requires at least one test entry: 'checks' must be fewer than the entries supplied.")
-    }
-    check_names <- pool[seq_len(checks)]
-    test_names  <- pool[-seq_len(checks)]
   } else if (is.character(checks) && length(checks) >= 1) {
     validate_entry_labels(checks, "checks")
     if (anyDuplicated(checks) > 0) {

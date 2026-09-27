@@ -25,6 +25,12 @@ catalogue <- list(
     RCBD(t = 8, reps = 3, checks = c("CK1", "CK2"), rep_checks = c(2, 2),
          plotNumber = 101, seed = 5)
   }),
+  RCBD_check_count = list(fun = "RCBD", family = "classic", build = function() {
+    # Task 8: `checks` as a bare count with no pool supplied (`t` is itself a
+    # count) generates its own labels: "CH1".."CHk" checks, "T1".."Tt" tests.
+    RCBD(t = 6, reps = 3, checks = 2, rep_checks = c(2, 2),
+         plotNumber = 101, seed = 40)
+  }),
   RCBD_cartesian = list(fun = "RCBD", family = "classic", build = function() {
     RCBD(t = 5, reps = 3, planter = "cartesian", continuous = TRUE, seed = 6)
   }),
