@@ -176,6 +176,11 @@
 - Loading indicators now receive their shared colors and size explicitly.
   Building the app UI no longer changes the caller's `spinner.*` options,
   while preserving the existing styling.
+- The app's design menus and server registration now share one internal
+  catalogue of the 19 existing modules. Labels, module IDs and registration
+  order are preserved, and the displayed app version now comes from package
+  metadata instead of a hard-coded release number.
+
 - The shared `desplot` renderer and layout theme now live in a dedicated
   rendering file, and the augmented-RCBD source filename now correctly spells
   `RCBD`.
