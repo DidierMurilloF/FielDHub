@@ -115,6 +115,8 @@ knitr::opts_chunk$set(
 
 ### Fix bugs:
 
+* Printed design parameters now exclude `id_design` by name instead of dropping the final element. Extra or reordered parameters are no longer hidden, and identifier-only parameter lists print safely. Existing catalogue print and summary output is unchanged.
+
 * `split_families()` now handles locations that receive no entries, retaining zero counts in the location summary instead of failing while combining the allocations. Inputs with no complete entries now give a classed input error. Existing successful seeded allocations and family-coverage warnings are unchanged.
 
 * `run_app()` no longer changes the host's upload limit when merely constructing an app. The existing 100 MiB limit is applied on application startup and the previous option is restored on shutdown, including after startup failure. Restoration is registered for the whole app, not for individual sessions. Shiny still uses this process-wide option while the app is running.

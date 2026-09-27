@@ -4,10 +4,9 @@
 # c("summary.fieldhub_<design>", "summary.FielDHub").
 #-----------------------------------------------------------------------
 
-# The design parameters, without id_design, which is always last
+# The design parameters, without the internal design identifier
 str_parameters <- function(x) {
-  len <- length(x$infoDesign)
-  str(x$infoDesign[1:(len-1)])
+  str(x$infoDesign[names(x$infoDesign) != "id_design"])
 }
 
 # The first n rows of a data frame, under a line that names it

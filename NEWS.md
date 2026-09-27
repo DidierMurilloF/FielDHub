@@ -222,6 +222,11 @@
 
 ### Fix bugs:
 
+- Printed design parameters now exclude `id_design` by name instead of
+  dropping the final element. Extra or reordered parameters are no longer
+  hidden, and identifier-only parameter lists print safely. Existing
+  catalogue print and summary output is unchanged.
+
 - `split_families()` now handles locations that receive no entries,
   retaining zero counts in the location summary instead of failing while
   combining the allocations. Inputs with no complete entries now give a
