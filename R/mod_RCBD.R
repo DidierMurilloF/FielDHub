@@ -366,11 +366,7 @@ mod_RCBD_server <- function(id) {
     output$well_panel_layout_RCBD <- shiny::renderUI({
       shiny::req(RCBD_reactive()$fieldBook)
       obj_rcbd <- RCBD_reactive()
-      allBooks_rcbd <- plot_layout(x = obj_rcbd, 
-                                   layout = 1, 
-                                   stacked = "vertical")$newBooks
-      nBooks_rcbd <- length(allBooks_rcbd)
-      layoutOptions_rcbd <- 1:nBooks_rcbd
+      layoutOptions_rcbd <- validate_design(layout_choices(x = obj_rcbd, stacked = "vertical"))
       df <- RCBD_reactive()$fieldBook
       stacked_rcbd <- c("Vertical Stack Panel" = "vertical", 
                           "Horizontal Stack Panel" = "horizontal")
@@ -407,12 +403,7 @@ mod_RCBD_server <- function(id) {
       shiny::req(input$stackedRCBD)
       shiny::req(input$l.rcbd)
       obj_rcbd <- RCBD_reactive()
-      allBooks <- try(plot_layout(x = obj_rcbd, 
-                                  layout = 1, 
-                                  stacked = input$stackedRCBD)$newBooks, 
-                      silent = TRUE)
-      nBooks <- length(allBooks)
-      NewlayoutOptions <- 1:nBooks
+      NewlayoutOptions <- validate_design(layout_choices(x = obj_rcbd, stacked = input$stackedRCBD))
       shiny::updateSelectInput(session = session, inputId = 'layoutO_rcbd',
                         label = "Layout option:",
                         choices = NewlayoutOptions,

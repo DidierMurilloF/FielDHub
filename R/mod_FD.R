@@ -290,10 +290,7 @@ mod_FD_server <- function(id) {
     output$well_panel_layout_FD <- shiny::renderUI({
       shiny::req(fd_reactive()$fieldBook)
       obj_fd <- fd_reactive()
-      allBooks_fd <- plot_layout(x = obj_fd, layout = 1, 
-                                 stacked = "vertical")$newBooks
-      nBooks_fd <- length(allBooks_fd)
-      layoutOptions_fd <- 1:nBooks_fd
+      layoutOptions_fd <- validate_design(layout_choices(x = obj_fd, stacked = "vertical"))
       stacked_fd <- c("Vertical Stack Panel" = "vertical", 
                         "Horizontal Stack Panel" = "horizontal")
       sites <- as.numeric(input$l.fd)
@@ -328,10 +325,7 @@ mod_FD_server <- function(id) {
       shiny::req(input$stackedFD)
       shiny::req(input$l.fd)
       obj_fd <- fd_reactive()
-      allBooks <- plot_layout(x = obj_fd, layout = 1, 
-                              stacked = input$stackedFD)$newBooks
-      nBooks <- length(allBooks)
-      NewlayoutOptions <- 1:nBooks
+      NewlayoutOptions <- validate_design(layout_choices(x = obj_fd, stacked = input$stackedFD))
       shiny::updateSelectInput(session = session, inputId = 'layoutO_fd',
                         label = "Layout option:",
                         choices = NewlayoutOptions,

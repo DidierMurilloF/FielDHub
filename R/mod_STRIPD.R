@@ -312,11 +312,7 @@ mod_STRIPD_server <- function(id) {
     output$well_panel_layout_STRIP <- shiny::renderUI({
       shiny::req(strip_reactive()$fieldBook)
       obj_strip <- strip_reactive()
-      allBooks_strip<- plot_layout(x = obj_strip, 
-                                   layout = 1, 
-                                   stacked = "vertical")$newBooks
-      nBooks_strip <- length(allBooks_strip)
-      layoutOptions_strip <- 1:nBooks_strip
+      layoutOptions_strip <- validate_design(layout_choices(x = obj_strip, stacked = "vertical"))
       stacked_strips <- c("Vertical Stack Panel" = "vertical", 
                             "Horizontal Stack Panel" = "horizontal")
       sites <- as.numeric(input$l.strip)
@@ -352,13 +348,8 @@ mod_STRIPD_server <- function(id) {
       shiny::req(input$stackedSTRIP)
       shiny::req(input$l.strip)
       obj_strips <- strip_reactive()
-      allBooks <- try(plot_layout(x = obj_strips, 
-                                  layout = 1,
-                                  planter = strip_inputs()$planter,
-                                  stacked = input$stackedSTRIP)$newBooks, 
-                      silent = TRUE)
-      nBooks <- length(allBooks)
-      NewlayoutOptions <- 1:nBooks
+      NewlayoutOptions <- validate_design(layout_choices(
+        x = obj_strips, planter = strip_inputs()$planter, stacked = input$stackedSTRIP))
       shiny::updateSelectInput(session = session,
                         inputId = 'layoutO_strip',
                         label = "Layout option:",

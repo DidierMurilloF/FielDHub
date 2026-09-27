@@ -318,9 +318,7 @@ mod_Rectangular_Lattice_server <- function(id) {
         stacked <- c("Vertical Stack Panel" = "vertical", "Horizontal Stack Panel" = "horizontal")
       }
       obj_rt <- RECTANGULAR_reactive()
-      allBooks_rt <- plot_layout(x = obj_rt, layout = 1, stacked = "vertical")$newBooks
-      nBooks_rt <- length(allBooks_rt)
-      layoutOptions_rt <- 1:nBooks_rt
+      layoutOptions_rt <- validate_design(layout_choices(x = obj_rt, stacked = "vertical"))
       shiny::wellPanel(
         shiny::column(3,
                shiny::radioButtons(ns("typlotRT"), "Type of Plot:",
@@ -347,9 +345,7 @@ mod_Rectangular_Lattice_server <- function(id) {
       shiny::req(input$stackedRT)
       shiny::req(input$l.rectangular)
       obj_rt <- RECTANGULAR_reactive()
-      allBooks <- plot_layout(x = obj_rt, layout = 1, stacked = input$stackedRT)$newBooks
-      nBooks <- length(allBooks)
-      NewlayoutOptions <- 1:nBooks
+      NewlayoutOptions <- validate_design(layout_choices(x = obj_rt, stacked = input$stackedRT))
       shiny::updateSelectInput(session = session, inputId = 'layoutO_rt',
                         label = "Layout option:",
                         choices = NewlayoutOptions,

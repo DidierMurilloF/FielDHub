@@ -323,9 +323,7 @@ mod_Square_Lattice_server <- function(id){
         stacked <- c("Vertical Stack Panel" = "vertical", "Horizontal Stack Panel" = "horizontal")
       }
       obj_sq <- SQUARE_reactive()
-      allBooks_sq <- plot_layout(x = obj_sq, layout = 1)$newBooks
-      nBooks_sq <- length(allBooks_sq)
-      layoutOptions_sq <- 1:nBooks_sq
+      layoutOptions_sq <- validate_design(layout_choices(x = obj_sq))
       shiny::wellPanel(
         shiny::column(3,
                shiny::radioButtons(ns("typlotSQ"), "Type of Plot:",
@@ -352,9 +350,7 @@ mod_Square_Lattice_server <- function(id){
       shiny::req(input$stacked_sq)
       shiny::req(input$l.square)
       obj_sq <- SQUARE_reactive()
-      allBooks <- plot_layout(x = obj_sq, layout = 1, stacked = input$stacked_sq)$newBooks
-      nBooks <- length(allBooks)
-      NewlayoutOptions <- 1:nBooks
+      NewlayoutOptions <- validate_design(layout_choices(x = obj_sq, stacked = input$stacked_sq))
       shiny::updateSelectInput(session = session, inputId = 'layoutO_sq',
                         label = "Layout option:",
                         choices = NewlayoutOptions,

@@ -346,9 +346,7 @@ mod_IBD_server <- function(id) {
     output$well_panel_layout_IBD <- shiny::renderUI({
       shiny::req(IBD_reactive()$fieldBook)
       obj_ibd <- IBD_reactive()
-      allBooks_ibd<- plot_layout(x = obj_ibd, layout = 1)$newBooks
-      nBooks_ibd <- length(allBooks_ibd)
-      layoutOptions_ibd <- 1:nBooks_ibd
+      layoutOptions_ibd <- validate_design(layout_choices(x = obj_ibd))
       stacked <- c("Vertical Stack Panel" = "vertical", 
                      "Horizontal Stack Panel" = "horizontal")
       shiny::wellPanel(
@@ -381,11 +379,7 @@ mod_IBD_server <- function(id) {
     shiny::observeEvent(input$stackedibd, {
       shiny::req(input$stackedibd)
       obj <- IBD_reactive()
-      allBooks <- plot_layout(x = obj, 
-                              layout = 1, 
-                              stacked = input$stackedibd)$newBooks
-      nBooks <- length(allBooks)
-      NewlayoutOptions <- 1:nBooks
+      NewlayoutOptions <- validate_design(layout_choices(x = obj, stacked = input$stackedibd))
       shiny::updateSelectInput(session = session, inputId = 'layoutO_ibd',
                         label = "Layout option:",
                         choices = NewlayoutOptions,

@@ -285,11 +285,7 @@ mod_SPD_server <- function(id){
     output$well_panel_layout_SPD <- shiny::renderUI({
       shiny::req(spd_reactive()$fieldBook)
       obj_spd <- spd_reactive()
-      allBooks_spd<- plot_layout(x = obj_spd, 
-                                 layout = 1, 
-                                 stacked = "vertical")$newBooks
-      nBooks_spd <- length(allBooks_spd)
-      layoutOptions_spd <- 1:nBooks_spd
+      layoutOptions_spd <- validate_design(layout_choices(x = obj_spd, stacked = "vertical"))
       sites <- as.numeric(input$l.spd)
       stacked_spd <- c("Vertical Stack Panel" = "vertical", 
                          "Horizontal Stack Panel" = "horizontal")
@@ -323,11 +319,7 @@ mod_SPD_server <- function(id){
       shiny::req(input$stackedSPD)
       shiny::req(input$l.spd)
       obj_spd <- spd_reactive()
-      allBooks <- plot_layout(x = obj_spd, 
-                              layout = 1, 
-                              stacked = input$stackedSPD)$newBooks
-      nBooks <- length(allBooks)
-      NewlayoutOptions <- 1:nBooks
+      NewlayoutOptions <- validate_design(layout_choices(x = obj_spd, stacked = input$stackedSPD))
       shiny::updateSelectInput(session = session, inputId = 'layoutO_spd',
                         label = "Layout option:",
                         choices = NewlayoutOptions,

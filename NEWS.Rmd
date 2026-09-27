@@ -42,6 +42,11 @@ knitr::opts_chunk$set(
 
 ### New features:
 
+- Classic layout selectors now use a shared core helper without building
+  plots. Available choices and field books are unchanged; unavailable stacking
+  produces no choices instead of the invalid sequence `1, 0`. Invalid requests
+  use the app's shared validation messages.
+
 - Layout CSV downloads now select locations in field-book appearance order,
   matching plots and heatmaps. Character names or differently ordered factor
   levels previously could select another location. The multiple-diagonal

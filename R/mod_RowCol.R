@@ -341,9 +341,7 @@ mod_RowCol_server <- function(id){
     output$well_panel_layout_ROWCOL <- shiny::renderUI({
       shiny::req(RowCol_reactive()$fieldBook)
       obj_rcd <- RowCol_reactive()
-      allBooks_rcd<- plot_layout(x = obj_rcd, layout = 1)$newBooks
-      nBooks_rcd <- length(allBooks_rcd)
-      layoutOptions_rcd <- 1:nBooks_rcd
+      layoutOptions_rcd <- validate_design(layout_choices(x = obj_rcd))
       stacked <- c("Vertical Stack Panel" = "vertical", 
                      "Horizontal Stack Panel" = "horizontal")
       shiny::wellPanel(
@@ -379,10 +377,7 @@ mod_RowCol_server <- function(id){
       shiny::req(input$stackedRowCol)
       shiny::req(input$l.rcd)
       obj <- RowCol_reactive()
-      allBooks <- plot_layout(x = obj, layout = 1, 
-                              stacked = input$stackedRowCol)$newBooks
-      nBooks <- length(allBooks)
-      NewlayoutOptions <- 1:nBooks
+      NewlayoutOptions <- validate_design(layout_choices(x = obj, stacked = input$stackedRowCol))
       shiny::updateSelectInput(session = session, inputId = 'layoutO_rcd',
                         label = "Layout option:",
                         choices = NewlayoutOptions,

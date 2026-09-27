@@ -277,15 +277,10 @@ mod_LSD_server <- function(id){
       shiny::req(latinsquare_reactive()$fieldBook)
       shiny::req(latinsquare_reactive())
       obj_lsd <- latinsquare_reactive()
-      allBooks_lsd <- plot_layout(x = obj_lsd, 
-                                 layout = 1,
-                                 stacked = "vertical")$newBooks
-      nBooks_lsd <- length(allBooks_lsd)
-      layoutOptions_lsd <- 1:nBooks_lsd
+      layoutOptions_lsd <- validate_design(layout_choices(x = obj_lsd, stacked = "vertical"))
       df <- latinsquare_reactive()$fieldBook
       stacked_lsd <- c("Vertical Stack Panel" = "vertical", 
                           "Horizontal Stack Panel" = "horizontal")
-      nBooks_lsd <- length(allBooks_lsd)
       shiny::wellPanel(
         shiny::column(3,
                shiny::radioButtons(ns("typlotLSD"), "Type of Plot:",
@@ -312,13 +307,8 @@ mod_LSD_server <- function(id){
       shiny::req(input$stackedLSD)
       shiny::req(lsd_inputs())
       obj_lsd <- latinsquare_reactive()
-      allBooks <- try(plot_layout(x = obj_lsd, 
-                                  layout = 1, 
-                                  planter = lsd_inputs()$planter,
-                                  stacked = input$stackedLSD)$newBooks, 
-                      silent = TRUE)
-      nBooks <- length(allBooks)
-      NewlayoutOptions <- 1:nBooks
+      NewlayoutOptions <- validate_design(layout_choices(
+        x = obj_lsd, planter = lsd_inputs()$planter, stacked = input$stackedLSD))
       shiny::updateSelectInput(session = session, inputId = 'layoutO_lsd',
                         label = "Layout option:",
                         choices = NewlayoutOptions,

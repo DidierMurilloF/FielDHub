@@ -232,11 +232,7 @@ mod_CRD_server <- function(id) {
       shiny::req(CRD_reactive())
       obj_crd <- CRD_reactive()
       planting_crd <- crd_inputs()$planter
-      allBooks_crd <- plot_layout(x = obj_crd, 
-                                  layout = 1, 
-                                  planter = planting_crd)$newBooks
-      nBooks_crd <- length(allBooks_crd)
-      layoutOptions_crd <- 1:nBooks_crd
+      layoutOptions_crd <- validate_design(layout_choices(x = obj_crd, planter = planting_crd))
       shiny::wellPanel(
         shiny::fluidRow(
           shiny::column(3,

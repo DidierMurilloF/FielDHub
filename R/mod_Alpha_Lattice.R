@@ -312,9 +312,7 @@ mod_Alpha_Lattice_server <- function(id){
         stacked <- c("Vertical Stack Panel" = "vertical", "Horizontal Stack Panel" = "horizontal")
       }
       obj <- ALPHA_reactive()
-      allBooks <- plot_layout(x = obj, layout = 1, stacked = "vertical")$newBooks
-      nBooks <- length(allBooks)
-      layoutOptions <- 1:nBooks
+      layoutOptions <- validate_design(layout_choices(x = obj, stacked = "vertical"))
       shiny::wellPanel(
         shiny::fluidPage(
           shiny::column(3,
@@ -346,11 +344,7 @@ mod_Alpha_Lattice_server <- function(id){
     shiny::observeEvent(input$stackedAlpha, {
       shiny::req(input$stackedAlpha)
       obj <- ALPHA_reactive()
-      allBooks <- plot_layout(x = obj, 
-                              layout = 1, 
-                              stacked = input$stackedAlpha)$newBooks
-      nBooks <- length(allBooks)
-      NewlayoutOptions <- 1:nBooks
+      NewlayoutOptions <- validate_design(layout_choices(x = obj, stacked = input$stackedAlpha))
       shiny::updateSelectInput(session = session, inputId = 'layoutO',
                         label = "Layout option:",
                         choices = NewlayoutOptions,
