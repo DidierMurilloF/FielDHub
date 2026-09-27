@@ -215,6 +215,11 @@
 
 ### Fix bugs:
 
+- The spatial export helper now joins entry-label tables on `ENTRY` by
+  name. A table with another column before `ENTRY` previously used that
+  unrelated column as the join key and could silently lose rows. Existing
+  entry-first tables produce unchanged exports.
+
 - Unsupported seed values now give a classed input error before reaching
   `set.seed()`. Out-of-range and complex seeds no longer leak coercion
   warnings or unclassed errors. Accepted real-valued seeds retain R's

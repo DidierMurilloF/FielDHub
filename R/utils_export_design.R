@@ -34,7 +34,6 @@ export_design <- function(G, movement_planter = NULL, location = NULL, Year = NU
   )
   if (reps) book$BLOCK <- values_along_path(G[[5]], path)
   entry_names <- dplyr::distinct(data_file, ENTRY, .keep_all = TRUE)
-  # Entry labels occupy the first column of the established input format.
-  book <- merge(book, entry_names, by.x = "ENTRY", by.y = names(entry_names)[1], sort = FALSE)
+  book <- merge(book, entry_names, by = "ENTRY", sort = FALSE)
   book[order(book$ROW, book$PLOT), ]
 }
