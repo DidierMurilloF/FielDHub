@@ -13,10 +13,17 @@
 export_layout <- function(Fieldbook, selected, plotOn = FALSE, type_pref = NULL) {
 
   dataIn <- Fieldbook
-
+  if (!is.data.frame(dataIn) || !"LOCATION" %in% names(dataIn) ||
+      !is.atomic(dataIn$LOCATION) || !is.null(dim(dataIn$LOCATION)) ||
+      anyNA(dataIn$LOCATION)) {
+    fieldhub_abort("The layout field book must contain nonmissing LOCATION identifiers.")
+  }
   locs <- levels(factor(dataIn$LOCATION))
-
-  df_site_one <- subset(dataIn, dataIn$LOCATION == locs[selected])
+  if (!is.numeric(selected) || is.complex(selected) || length(selected) != 1L ||
+      !is.finite(selected) || !selected %in% seq_along(locs)) {
+    fieldhub_abort("Select one available location for the layout export.")
+  }
+  df_site_one <- dataIn[dataIn$LOCATION == locs[selected], , drop = FALSE]
 
   if (!plotOn) {if (!is.null(type_pref) && type_pref %in% colnames(dataIn)) {
     type <- type_pref
@@ -33,17 +40,7 @@ export_layout <- function(Fieldbook, selected, plotOn = FALSE, type_pref = NULL)
     type = "PLOT"
   }
   
-  cols <- length(levels(factor(df_site_one$COLUMN)))
-  rows <- length(levels(factor(df_site_one$ROW)))
-  mtx <- matrix(nrow = rows, ncol = cols)
-  # k <- rows
-  
-  for (i in 1:rows) {
-    for (j in 1:cols) {
-      mtx[i,j] <- subset(df_site_one, ROW == i & COLUMN == j)[[type]]
-    }
-    # k <- k - 1
-  } 
+  mtx <- field_book_export_grid(df_site_one, type)
   df <- as.data.frame(mtx)
   
   leftHead <- c("Location",locs[selected],1:(nrow(mtx)))

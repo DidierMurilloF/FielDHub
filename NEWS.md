@@ -55,6 +55,12 @@
 
 ### New features:
 
+- Layout CSV assembly now indexes plots directly by row and column instead
+  of repeatedly scanning the field book for every cell. Existing valid
+  exports retain their values, headers, and orientation. Invalid locations,
+  missing cells, and duplicate coordinates receive classed input errors.
+  A release benchmark measures layout assembly and CSV writing together.
+
 - Repeated diagonal field-dimension candidate queries use a bounded
   least-recently-used cache: at most 64 queries and 4 MiB of retained keys and
   results. Failed, warning-producing, or oversized results are not cached.
