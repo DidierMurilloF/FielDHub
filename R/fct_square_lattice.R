@@ -66,6 +66,7 @@
 #' @export
 square_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101, locationNames = NULL,
                            seed = NULL, data = NULL, reps = NULL) {
+  plotNumber_supplied <- !missing(plotNumber)
   validate_locations(l)
   r <- resolve_argument_alias(
     reps, r, new = "reps", old = "r",
@@ -108,9 +109,10 @@ square_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101
   }
   s <- k
   nunits <- k
-  matdf <- incomplete_blocks(t = nt, k = nunits, reps = r, l = l, plotNumber = plotNumber,
-                             seed = seed, locationNames = locationNames,
-                             data = data_square, caller = "square_lattice")
+  matdf <- build_incomplete_blocks(t = nt, k = nunits, reps = r, l = l, plotNumber = plotNumber,
+                                   seed = seed, locationNames = locationNames,
+                                   data = data_square, caller = "square_lattice",
+                                   plotNumber_supplied = plotNumber_supplied)
   blocksModel <- matdf$blocksModel
   matdf <- matdf$fieldBook
   OutSquare_Lattice <- as.data.frame(matdf)

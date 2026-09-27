@@ -203,6 +203,7 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
                        locationNames = NULL, seed = NULL, iterations = NULL,
                        data = NULL, method = c("onestage", "twostage"),
                        latinize = FALSE, reps = NULL) {
+  plotNumber_supplied <- !missing(plotNumber)
   validate_locations(l)
   validate_flag(latinize, "latinize")
   r <- resolve_argument_alias(
@@ -263,9 +264,11 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
     lookup <- TRUE
     dataLookUp <- data.frame(list(ENTRY = 1:nt, LABEL_TREATMENT = TRT))
   }
-  if (k >= nt) fieldhub_abort('incomplete_blocks() requires k < t.')
-  if (nt %% k != 0) {
-    fieldhub_abort('Number of treatments can not be fully distributed over the specified incomplete block specification.')
+  if (!(k %in% valid_block_sizes(nt, "row_column"))) {
+    fieldhub_abort(
+      "row_column() requires nrows to divide t evenly, with nrows < t. Valid nrows for t = ",
+      nt, ": ", paste(valid_block_sizes(nt, "row_column"), collapse = ", "), "."
+    )
   }
   validate_location_labels(locationNames, l)
   if(is.null(locationNames) || length(locationNames) != l) {
@@ -398,7 +401,8 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
   out_row_col_id <- out_row_col
   
   out_row_col_id <- out_row_col_id[order(out_row_col_id$LOCATION, out_row_col_id$REP, out_row_col_id$ROW),]
-  row_col_plots <- ibd_plot_numbers(nt = nt, plot.number = plotNumber, r = r, l = l)
+  row_col_plots <- ibd_plot_numbers(nt = nt, plot.number = plotNumber, r = r, l = l,
+                                    supplied = plotNumber_supplied)
   out_row_col_id$PLOT <- as.vector(unlist(row_col_plots))
   
   ID <- 1:nrow(out_row_col_id)

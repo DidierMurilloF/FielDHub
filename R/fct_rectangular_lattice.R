@@ -68,6 +68,7 @@
 #' @export
 rectangular_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101, locationNames = NULL,
                                 seed = NULL, data = NULL, reps = NULL) {
+  plotNumber_supplied <- !missing(plotNumber)
   validate_locations(l)
   r <- resolve_argument_alias(
     reps, r, new = "reps", old = "r",
@@ -111,9 +112,10 @@ rectangular_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber 
     recorded_locations <- NULL
   }
   nunits <- k
-  matdf <- incomplete_blocks(t = nt, k = nunits, reps = r, l = l, plotNumber = plotNumber,
-                             seed = seed, locationNames = locationNames,
-                             data = data_alpha, caller = "rectangular_lattice")
+  matdf <- build_incomplete_blocks(t = nt, k = nunits, reps = r, l = l, plotNumber = plotNumber,
+                                   seed = seed, locationNames = locationNames,
+                                   data = data_alpha, caller = "rectangular_lattice",
+                                   plotNumber_supplied = plotNumber_supplied)
   blocksModel <- matdf$blocksModel
   lambda <- r*(k - 1)/(nt - 1)
   matdf <- matdf$fieldBook

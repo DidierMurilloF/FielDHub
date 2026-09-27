@@ -83,6 +83,7 @@ alpha_lattice <- function(t = NULL,
                           locationNames = NULL,
                           seed = NULL, 
                           data = NULL, reps = NULL) {
+  plotNumber_supplied <- !missing(plotNumber)
   validate_locations(l)
   r <- resolve_argument_alias(
     reps, r, new = "reps", old = "r",
@@ -129,9 +130,10 @@ alpha_lattice <- function(t = NULL,
   if (s %% 1 != 0) fieldhub_abort('Combinations for this amount of treatments do not exist.')
   
   nunits <- k
-  matdf <- incomplete_blocks(t = nt, k = nunits, reps = r, l = l, plotNumber = plotNumber,
-                             seed = seed, locationNames = locationNames,
-                             data = data_alpha, caller = "alpha_lattice")
+  matdf <- build_incomplete_blocks(t = nt, k = nunits, reps = r, l = l, plotNumber = plotNumber,
+                                   seed = seed, locationNames = locationNames,
+                                   data = data_alpha, caller = "alpha_lattice",
+                                   plotNumber_supplied = plotNumber_supplied)
   blocksModel <- matdf$blocksModel
   lambda <- r*(k - 1)/(nt - 1)
   matdf <- matdf$fieldBook

@@ -12,11 +12,6 @@
 #' @param seed (optional) Real number that specifies the starting seed to obtain reproducible designs.
 #' @param locationNames (optional) Names for each location.
 #' @param data (optional) Data frame with label list of treatments.
-#' @param caller Internal. Name of the function to name in error messages,
-#'   used so that \code{alpha_lattice()}, \code{square_lattice()} and
-#'   \code{rectangular_lattice()} (which build their design through
-#'   \code{incomplete_blocks()}) can report failures under their own name
-#'   instead of \code{incomplete_blocks()}. Not intended for direct use.
 #'
 #' @author Didier Murillo [aut],
 #'         Salvador Gezan [aut],
@@ -71,12 +66,43 @@
 #' @export
 incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101,
                               locationNames = NULL, seed = NULL, data = NULL,
-                              reps = NULL, caller = "incomplete_blocks") {
-  validate_locations(l)
-  r <- resolve_argument_alias(
+                              reps = NULL) {
+  reps <- resolve_argument_alias(
     reps, r, new = "reps", old = "r",
     new_supplied = !missing(reps), old_supplied = !missing(r)
   )
+  build_incomplete_blocks(
+    t = t, k = k, l = l, plotNumber = plotNumber, locationNames = locationNames,
+    seed = seed, data = data, reps = reps, caller = "incomplete_blocks",
+    plotNumber_supplied = !missing(plotNumber)
+  )
+}
+
+#' Build an incomplete-block design, naming the calling function in messages
+#'
+#' @description Internal engine shared by \code{incomplete_blocks()},
+#' \code{alpha_lattice()}, \code{square_lattice()} and
+#' \code{rectangular_lattice()} (which build their design through it).
+#' \code{reps} must already be the resolved \code{r}/\code{reps} value: each
+#' public wrapper resolves that alias itself, since that is where
+#' \code{missing()} reflects what its own caller actually supplied.
+#'
+#' @inheritParams incomplete_blocks
+#' @param reps Number of full resolvable replicates per location (already
+#'   resolved from any legacy \code{r} alias by the caller).
+#' @param caller Name of the function to name in error messages, so a design
+#'   built through \code{incomplete_blocks()} reports failures under its own
+#'   name instead of \code{incomplete_blocks()}.
+#' @param plotNumber_supplied Whether the caller's own caller actually
+#'   supplied \code{plotNumber} (Ruling R5); see
+#'   \code{warn_default_plot_numbers()}.
+#' @noRd
+build_incomplete_blocks <- function(t = NULL, k = NULL, l = 1, plotNumber = 101,
+                                    locationNames = NULL, seed = NULL, data = NULL,
+                                    reps = NULL, caller = "incomplete_blocks",
+                                    plotNumber_supplied = TRUE) {
+  validate_locations(l)
+  r <- reps
   seed <- resolve_seed(seed)
   local_design_seed(seed)
   treatment_count <- validate_block_design_inputs(t, k, r, l, data)
@@ -111,11 +137,16 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
     fieldhub_abort("'", caller, "()' requires plotNumber to be possitive integers and sorted.")
   }
   if (is.null(plotNumber) || length(plotNumber) != l) {
-    default_plots <- seq(1001, 1000*(l+1), 1000)
-    warn_default_plot_numbers(plotNumber, l, default_plots)
+    default_plots <- default_plot_starts(l, 1001)
+    warn_default_plot_numbers(plotNumber, l, default_plots, caller_supplied = plotNumber_supplied)
     plotNumber <- default_plots
   }
-  if (k >= nt) fieldhub_abort(caller, "() requires that k < t.")
+  if (!(k %in% valid_block_sizes(nt, "incomplete_blocks"))) {
+    fieldhub_abort(
+      caller, "() requires k to divide t evenly, with k < t. Valid k for t = ",
+      nt, ": ", paste(valid_block_sizes(nt, "incomplete_blocks"), collapse = ", "), "."
+    )
+  }
   validate_location_labels(locationNames, l)
   if(is.null(locationNames) || length(locationNames) != l) {
     if (!is.null(locationNames)) warn_default_location_names(locationNames, l, 1:l)
@@ -125,9 +156,6 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
   N <- nt * r
   if (k * nincblock != N) {
     fieldhub_abort('Size of experiment defined by number of units per incomplete block (nunits) is inconsistent. Check input parameters.')
-  }
-  if (nt %% k != 0) {
-    fieldhub_abort('Number of treatments can not be fully distributed over the specified incomplete block specification.')
   }
 
   ibd_plots <- ibd_plot_numbers(nt = nt, plot.number = plotNumber, r = r, l = l)
@@ -184,7 +212,7 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
                      id_design = 8)
   output <- list(infoDesign = infoDesign, fieldBook = OutIBD_new, blocksModel = blocks_model[[1]])
   reproduction_parameters <- record_design_parameters(
-    environment(), overrides = list(reps = r), exclude = c("r", "caller")
+    environment(), exclude = c("caller", "plotNumber_supplied")
   )
   output <- new_fieldhub_design(output, "incomplete_blocks", parameters = reproduction_parameters)
   return(invisible(output))

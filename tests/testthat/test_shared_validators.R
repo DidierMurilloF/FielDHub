@@ -46,10 +46,17 @@ test_that("(R5) a design called with its own default plotNumber builds defaults 
   expect_no_warning(RCBD(t = 4, reps = 2, l = 2, seed = 1))
   expect_no_warning(split_plot(wp = 3, sp = 2, reps = 2, l = 2, seed = 1))
   expect_no_warning(strip_plot(Hplots = 3, Vplots = 2, reps = 2, l = 2, seed = 1))
+  expect_no_warning(incomplete_blocks(t = 12, k = 4, reps = 2, l = 2, seed = 1))
+  expect_no_warning(row_column(t = 12, nrows = 3, reps = 2, l = 2, seed = 1, iterations = 20))
+  expect_no_warning(alpha_lattice(t = 12, k = 4, reps = 2, l = 2, seed = 1))
 })
 
 test_that("(R5) a caller-supplied wrong-length plotNumber still warns", {
   w <- expect_warning(RCBD(t = 4, reps = 2, l = 2, plotNumber = 101, seed = 1),
+                      class = "fieldhub_default_warning")
+  expect_identical(w$argument, "plotNumber")
+  w <- expect_warning(row_column(t = 12, nrows = 3, reps = 2, l = 2, plotNumber = 101, seed = 1,
+                                 iterations = 20),
                       class = "fieldhub_default_warning")
   expect_identical(w$argument, "plotNumber")
 })
@@ -61,4 +68,25 @@ test_that("augmented RCBD lists exactly the block counts it accepts", {
   e <- expect_error(RCBD_augmented(lines = 20, checks = 4, b = 2, seed = 1), class = "fieldhub_error")
   accepted <- Filter(function(b) !inherits(try(RCBD_augmented(lines = 20, checks = 4, b = b, seed = 1), silent = TRUE), "try-error"), 1:10)
   for (b in accepted) expect_true(grepl(paste0("\\b", b, "\\b"), conditionMessage(e)))
+})
+
+test_that("valid_block_sizes() backs the block-size checks in incomplete_blocks() and row_column()", {
+  e1 <- expect_error(incomplete_blocks(t = 12, k = 5, reps = 2, seed = 1), class = "fieldhub_input_error")
+  expect_match(conditionMessage(e1), "incomplete_blocks", fixed = TRUE)
+  e2 <- expect_error(row_column(t = 12, nrows = 5, reps = 2, seed = 1), class = "fieldhub_input_error")
+  expect_match(conditionMessage(e2), "row_column", fixed = TRUE)
+  expect_false(grepl("incomplete_blocks", conditionMessage(e2), fixed = TRUE))
+})
+
+test_that("(R6) incomplete_blocks() keeps its 1.5 signature without an internal caller argument", {
+  expect_false("caller" %in% names(formals(incomplete_blocks)))
+  expect_identical(
+    names(formals(incomplete_blocks)),
+    c("t", "k", "r", "l", "plotNumber", "locationNames", "seed", "data", "reps")
+  )
+})
+
+test_that("(R6) row_column() names itself, not incomplete_blocks(), in its block-size error", {
+  e <- expect_error(row_column(t = 12, nrows = 5, reps = 2, seed = 1), class = "fieldhub_input_error")
+  expect_match(conditionMessage(e), "row_column", fixed = TRUE)
 })
