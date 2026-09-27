@@ -55,6 +55,12 @@
 
 ### New features:
 
+- `CRD()` now rejects fractional or nonpositive replication, malformed scalar
+  controls, duplicate supplied treatments, and blank labels or locations before
+  allocating a field book. Valid designs retain their exact outputs. Invalid
+  row-column method and augmented-block stacking choices now carry structured
+  input conditions, while accepted defaults and abbreviations are unchanged.
+
 - All nineteen field-book views now use a shared table component, preserving
   their factor filters, column order, scrolling settings, and displayed values.
   The factorial view selects factor columns by their recorded names, so

@@ -17,7 +17,7 @@ CRD(
 \arguments{
 \item{t}{An integer number with total number of treatments or a vector of dimension t with labels.}
 
-\item{reps}{Number of replicates of each treatment.}
+\item{reps}{One positive whole-number count of replicates per treatment.}
 
 \item{plotNumber}{Starting plot number. By default \code{plotNumber = 101}.}
 
@@ -26,7 +26,9 @@ positional calls remain supported, with a deprecation warning.}
 
 \item{seed}{(optional) Real number that specifies the starting seed to obtain reproducible designs.}
 
-\item{data}{(optional) Data frame with the 2 columns with labels of each treatments and its number of replicates.}
+\item{data}{(optional) Data frame whose first two columns contain unique
+treatment labels and positive whole-number replication counts. Extra columns
+are ignored; rows missing either selected value are omitted.}
 
 \item{locationNames}{(optional) Name of the single location. Supply only one
 of \code{locationNames} and \code{locationName}.}

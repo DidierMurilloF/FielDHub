@@ -208,7 +208,7 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
     reps, r, new = "reps", old = "r",
     new_supplied = !missing(reps), old_supplied = !missing(r)
   )
-  method <- match.arg(method)
+  method <- match_design_choice(method, c("onestage", "twostage"), "method")
   # iterations has a method-specific meaning and default: for "onestage" it is
   # the number of blocksdesign::design() searches (a few hundred already
   # captures the gain), for "twostage" the number of greedy row-swap iterations.

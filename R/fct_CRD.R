@@ -9,14 +9,16 @@
 #'   the existing column selection and normalization.
 #'
 #' @param t An integer number with total number of treatments or a vector of dimension t with labels.
-#' @param reps Number of replicates of each treatment.
+#' @param reps One positive whole-number count of replicates per treatment.
 #' @param plotNumber Starting plot number. By default \code{plotNumber = 101}.
 #' @param locationName Deprecated spelling of \code{locationNames}. Existing
 #'   positional calls remain supported, with a deprecation warning.
 #' @param locationNames (optional) Name of the single location. Supply only one
 #'   of \code{locationNames} and \code{locationName}.
 #' @param seed (optional) Real number that specifies the starting seed to obtain reproducible designs.
-#' @param data (optional) Data frame with the 2 columns with labels of each treatments and its number of replicates.
+#' @param data (optional) Data frame whose first two columns contain unique
+#' treatment labels and positive whole-number replication counts. Extra columns
+#' are ignored; rows missing either selected value are omitted.
 #'
 #'
 #' @author Didier Murillo [aut],
@@ -90,29 +92,34 @@ CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL,
   seed <- resolve_seed(seed)
   local_design_seed(seed)
   if (!is.null(plotNumber)) {
-    if (plotNumber < 1 || plotNumber %% 1 != 0) fieldhub_abort("plotNumber must be an integer greater than 0.")
+    if (!is.numeric(plotNumber) || !is.null(dim(plotNumber)) || length(plotNumber) != 1L ||
+        !is.finite(plotNumber) || plotNumber < 1 || plotNumber %% 1 != 0) {
+      fieldhub_abort("plotNumber must be an integer greater than 0.")
+    }
   } else {
     plotNumber <- 101
     warning("Since plotNumber was NULL, default 'plotNumber = 101' is considered.")
   }
   if (is.null(locationName)) locationName <- 1
+  validate_crd_location(locationName)
   if (is.null(data)) {
-    if (!is.null(t) & !is.null(reps)) {
-      if (length(t) == 1 & is.numeric(t)) {
-        arg2 <- c(t, reps)
-        if (base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
-          fieldhub_abort("CRD() requires that t and reps are integers greater than 0.")
-        }
+    if (!is.null(t) && !is.null(reps)) {
+      validate_iteration_budget(reps, "reps")
+      if (length(t) == 1 && is.numeric(t)) {
+        validate_crd_size(t, reps)
         nt <- t
         trts <- paste(rep("T", nt), 1:nt, sep = "")
         TRT <- rep(trts, each = reps)
       } else if ((is.character(t) || is.factor(t)) && length(t) > 1) {
         t <- as.character(t)
-        check_unique_labels(t, "CRD")
+        validate_crd_labels(t)
         nt <- length(t)
+        validate_crd_size(nt, reps)
         TRT <- rep(t, each = reps)
       } else if ((is.character(t) || is.factor(t)) && length(t) == 1) {
         fieldhub_abort('"CRD()" requires more than one treatment.')
+      } else {
+        fieldhub_abort("CRD() requires a positive treatment count or a vector of treatment labels.")
       }
     } else {
       fieldhub_abort("Inputs t and reps are missing.")
@@ -125,7 +132,8 @@ CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL,
     data <- as.data.frame(data[, 1:2])
     data <- na.omit(data)
     colnames(data) <- c("Treatment", "Reps")
-    if (is.character(data[, 2]) || is.factor(data[, 2])) fieldhub_abort("Reps must be numeric.")
+    validate_crd_labels(data$Treatment)
+    validate_crd_size(1, data$Reps)
     data$Reps <- as.numeric(data$Reps)
     TRT <- rep(data$Treatment, times = data$Reps)
     N <- sum(data$Reps)

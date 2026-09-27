@@ -1,6 +1,6 @@
 #' @noRd
 stack_reps <- function(x_list, repsStack = c("vertical", "horizontal")) {
-  repsStack <- match.arg(repsStack)
+  repsStack <- match_design_choice(repsStack, c("vertical", "horizontal"), "repsStack")
   
   # x_list is a list of data.frames (same dims)
   if (length(x_list) == 1) return(x_list[[1]])
@@ -112,7 +112,7 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
                            nrows = NULL, ncols = NULL, year = NULL) {
   validate_locations(l)
   year <- resolve_year(year)
-  repsStack <- match.arg(repsStack)
+  repsStack <- match_design_choice(repsStack, c("vertical", "horizontal"), "repsStack")
   if (all(c("serpentine", "cartesian") != planter)) {
     fieldhub_abort("Input planter choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
   }
