@@ -8,15 +8,7 @@ load_file <- function(name, path, sep, check = FALSE, design = NULL) {
     bad_format = TRUE
     return(list(bad_format = bad_format))
   } else {
-    # A file read.csv() cannot parse (ragged rows, empty file) is reported
-    # like a wrong format instead of stopping the app session
-    dataUp <- tryCatch(
-      read.csv(path,
-               header = TRUE,
-               sep = sep,
-               na.strings = c("", " ","NA")),
-      error = function(e) NULL
-    )
+    dataUp <- read_upload_csv(path, sep)
     if (is.null(dataUp)) {
       bad_format = TRUE
       return(list(bad_format = bad_format))
@@ -31,6 +23,22 @@ load_file <- function(name, path, sep, check = FALSE, design = NULL) {
       } else return(list(missing_cols = TRUE))
     } else return(list(dataUp = dataUp))
   }
+}
+
+#' Read an upload without repairing ragged records or inferring row names
+#' @noRd
+read_upload_csv <- function(path, sep) {
+  tryCatch({
+    fields <- utils::count.fields(path, sep = sep, quote = "\"",
+                                  comment.char = "", blank.lines.skip = TRUE)
+    # Continued quoted records have NA counts on their unfinished lines.
+    fields <- fields[!is.na(fields)]
+    if (length(fields) < 2L || any(fields != fields[1L])) return(NULL)
+    data <- read.csv(path, header = TRUE, sep = sep, fill = FALSE,
+                     na.strings = c("", " ", "NA"))
+    if (nrow(data) != length(fields) - 1L) return(NULL)
+    data
+  }, error = function(e) NULL)
 }
 
 #' Translate the existing upload-result flags into a shared error message

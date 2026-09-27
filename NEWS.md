@@ -228,6 +228,12 @@
 
 ### Fix bugs:
 
+- CSV uploads now require a header and equally sized data records. An extra
+  field could previously be interpreted as a row name, silently shifting
+  entry identifiers and treatment labels; short rows were silently padded.
+  These malformed files now show the existing format error. Quoted
+  separators, multiline labels and explicitly empty cells remain supported.
+
 - App uploads now read Shiny's `datapath` field with exact matching.
   Eighteen modules previously relied on the abbreviated `$datapat`,
   producing warnings under strict host settings; a similarly named field
