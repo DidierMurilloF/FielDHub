@@ -12,7 +12,12 @@
 #' @param seed (optional) Real number that specifies the starting seed to obtain reproducible designs.
 #' @param locationNames (optional) Names for each location.
 #' @param data (optional) Data frame with label list of treatments.
-#' 
+#' @param caller Internal. Name of the function to name in error messages,
+#'   used so that \code{alpha_lattice()}, \code{square_lattice()} and
+#'   \code{rectangular_lattice()} (which build their design through
+#'   \code{incomplete_blocks()}) can report failures under their own name
+#'   instead of \code{incomplete_blocks()}. Not intended for direct use.
+#'
 #' @author Didier Murillo [aut],
 #'         Salvador Gezan [aut],
 #'         Ana Heilman [ctb],
@@ -64,9 +69,9 @@
 #' \code{do.call(incomplete_blocks, x$metadata$parameters)}.
 #'
 #' @export
-incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101, 
+incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101,
                               locationNames = NULL, seed = NULL, data = NULL,
-                              reps = NULL) {
+                              reps = NULL, caller = "incomplete_blocks") {
   validate_locations(l)
   r <- resolve_argument_alias(
     reps, r, new = "reps", old = "r",
@@ -78,7 +83,7 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
   lookup <- FALSE
   if(is.null(data)) {
     nt <- treatment_count
-    trt_labels <- treatment_labels(t, nt, "incomplete_blocks")
+    trt_labels <- treatment_labels(t, nt, caller)
     data_up <- data.frame(list(ENTRY = 1:nt, TREATMENT = trt_labels))
     colnames(data_up) <- c("ENTRY", "TREATMENT")
     lookup <- TRUE
@@ -103,14 +108,14 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
   }
   if (!is.null(plotNumber)) validate_plot_starts(plotNumber)
   if(any(plotNumber < 1) || any(diff(plotNumber) < 0)) {
-    fieldhub_abort("'incomplete_blocks()' requires plotNumber to be possitive integers and sorted.")
+    fieldhub_abort("'", caller, "()' requires plotNumber to be possitive integers and sorted.")
   }
   if (is.null(plotNumber) || length(plotNumber) != l) {
     default_plots <- seq(1001, 1000*(l+1), 1000)
     warn_default_plot_numbers(plotNumber, l, default_plots)
     plotNumber <- default_plots
   }
-  if (k >= nt) fieldhub_abort('incomplete_blocks() requires that k < t.')
+  if (k >= nt) fieldhub_abort(caller, "() requires that k < t.")
   validate_location_labels(locationNames, l)
   if(is.null(locationNames) || length(locationNames) != l) {
     if (!is.null(locationNames)) warn_default_location_names(locationNames, l, 1:l)
@@ -137,7 +142,7 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
       blocksdesign::blocks(treatments = nt, replicates = r, blocks = list(r, b), seed = NULL),
       error = function(e) {
         fieldhub_abort(
-          "incomplete_blocks() cannot build a resolvable design for t = ", nt,
+          caller, "() cannot build a resolvable design for t = ", nt,
           " treatments, k = ", k, ", and reps = ", r, ": not enough replication ",
           "for this block size. Increase reps or use a different block size.",
           call = NULL
@@ -177,7 +182,7 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
                      id_design = 8)
   output <- list(infoDesign = infoDesign, fieldBook = OutIBD_new, blocksModel = blocks_model[[1]])
   reproduction_parameters <- record_design_parameters(
-    environment(), overrides = list(reps = r), exclude = "r"
+    environment(), overrides = list(reps = r), exclude = c("r", "caller")
   )
   output <- new_fieldhub_design(output, "incomplete_blocks", parameters = reproduction_parameters)
   return(invisible(output))

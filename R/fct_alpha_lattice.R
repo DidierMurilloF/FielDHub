@@ -114,7 +114,7 @@ alpha_lattice <- function(t = NULL,
     if (nt != t) fieldhub_abort('Number of treatment do not match with data input')
     data_alpha <- data_up
   }
-  if (k >= nt) fieldhub_abort('incomplete_blocks() requires that k < t.')
+  if (k >= nt) fieldhub_abort('alpha_lattice() requires that k < t.')
   validate_location_labels(locationNames, l)
   if (!is.null(locationNames)) locationNames <- toupper(locationNames)
   validate_location_labels(locationNames, l)
@@ -131,7 +131,7 @@ alpha_lattice <- function(t = NULL,
   nunits <- k
   matdf <- incomplete_blocks(t = nt, k = nunits, reps = r, l = l, plotNumber = plotNumber,
                              seed = seed, locationNames = locationNames,
-                             data = data_alpha)
+                             data = data_alpha, caller = "alpha_lattice")
   blocksModel <- matdf$blocksModel
   lambda <- r*(k - 1)/(nt - 1)
   matdf <- matdf$fieldBook

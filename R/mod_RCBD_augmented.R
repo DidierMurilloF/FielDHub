@@ -541,7 +541,7 @@ mod_RCBD_augmented_server <- function(id) {
     reactive_layoutARCBD <- shiny::reactive({
       shiny::req(rcbd_augmented_reactive())
       obj_arcbd <- rcbd_augmented_reactive()
-      loc_to_view <- as.numeric(input$locView.arcbd)
+      loc_to_view <- suppressWarnings(as.numeric(input$locView.arcbd))
       validate_design(checked_layout_view(obj_arcbd, location = loc_to_view))
     })
     

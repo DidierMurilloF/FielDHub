@@ -13,7 +13,8 @@ incomplete_blocks(
   locationNames = NULL,
   seed = NULL,
   data = NULL,
-  reps = NULL
+  reps = NULL,
+  caller = "incomplete_blocks"
 )
 }
 \arguments{
@@ -34,6 +35,12 @@ incomplete_blocks(
 \item{data}{(optional) Data frame with label list of treatments.}
 
 \item{reps}{Number of full resolvable replicates per location.}
+
+\item{caller}{Internal. Name of the function to name in error messages,
+used so that \code{alpha_lattice()}, \code{square_lattice()} and
+\code{rectangular_lattice()} (which build their design through
+\code{incomplete_blocks()}) can report failures under their own name
+instead of \code{incomplete_blocks()}. Not intended for direct use.}
 }
 \value{
 A list with two elements.

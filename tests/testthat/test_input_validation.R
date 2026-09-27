@@ -63,6 +63,43 @@ test_that("degenerate factors and replication give classed input errors", {
   expect_false(grepl("RCBD", conditionMessage(e)))
 })
 
+test_that("alpha_lattice(), square_lattice() and rectangular_lattice() name themselves, not incomplete_blocks()", {
+  # Regression test: these engines build their design through
+  # incomplete_blocks() and used to let its condition propagate unchanged, so
+  # an under-replicated design, or k >= t, raised an error that said
+  # "incomplete_blocks() ..." even when the user called, say, alpha_lattice().
+  under_replicated <- list(
+    alpha_lattice = quote(alpha_lattice(t = 16, k = 4, reps = 1, seed = 1)),
+    square_lattice = quote(square_lattice(t = 16, k = 4, reps = 1, seed = 1)),
+    rectangular_lattice = quote(rectangular_lattice(t = 12, k = 3, reps = 1, seed = 1))
+  )
+  for (fn in names(under_replicated)) {
+    e <- expect_error(eval(under_replicated[[fn]]), class = "fieldhub_input_error", info = fn)
+    expect_match(conditionMessage(e), paste0("^", fn, "\\("), info = fn)
+    expect_false(grepl("incomplete_blocks", conditionMessage(e), fixed = TRUE), info = fn)
+  }
+
+  # The pre-existing k >= t check in alpha_lattice() had the same defect.
+  e <- expect_error(alpha_lattice(t = 16, k = 20, reps = 2, seed = 1),
+                    class = "fieldhub_input_error")
+  expect_match(conditionMessage(e), "^alpha_lattice\\(")
+  expect_false(grepl("incomplete_blocks", conditionMessage(e), fixed = TRUE))
+
+  # incomplete_blocks() itself still names incomplete_blocks() for both checks.
+  e <- expect_error(incomplete_blocks(t = 4, k = 2, reps = 1, seed = 1),
+                    class = "fieldhub_input_error")
+  expect_match(conditionMessage(e), "^incomplete_blocks\\(")
+  e <- expect_error(incomplete_blocks(t = 4, k = 20, reps = 2, seed = 1),
+                    class = "fieldhub_input_error")
+  expect_match(conditionMessage(e), "^incomplete_blocks\\(")
+
+  # The internal `caller` argument is not part of the recorded reproduction
+  # parameters, so do.call(incomplete_blocks, x$metadata$parameters) is
+  # unaffected.
+  ibd <- incomplete_blocks(t = 12, k = 4, reps = 2, seed = 1)
+  expect_false("caller" %in% names(ibd$metadata$parameters))
+})
+
 test_that("designs stay valid with a single whole plot or a single replicate", {
   # split_plot()/split_split_plot() only crash when the *sub*- or sub-sub-
   # plot factor collapses to one level; a single whole plot, and a single

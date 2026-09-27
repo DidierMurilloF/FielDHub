@@ -113,7 +113,7 @@ rectangular_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber 
   nunits <- k
   matdf <- incomplete_blocks(t = nt, k = nunits, reps = r, l = l, plotNumber = plotNumber,
                              seed = seed, locationNames = locationNames,
-                             data = data_alpha)
+                             data = data_alpha, caller = "rectangular_lattice")
   blocksModel <- matdf$blocksModel
   lambda <- r*(k - 1)/(nt - 1)
   matdf <- matdf$fieldBook

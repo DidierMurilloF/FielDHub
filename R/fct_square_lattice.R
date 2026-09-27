@@ -110,7 +110,7 @@ square_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101
   nunits <- k
   matdf <- incomplete_blocks(t = nt, k = nunits, reps = r, l = l, plotNumber = plotNumber,
                              seed = seed, locationNames = locationNames,
-                             data = data_square)
+                             data = data_square, caller = "square_lattice")
   blocksModel <- matdf$blocksModel
   matdf <- matdf$fieldBook
   OutSquare_Lattice <- as.data.frame(matdf)
