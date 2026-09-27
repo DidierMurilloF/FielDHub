@@ -19,35 +19,28 @@ fieldhub_theme <- function() {
 app_ui <- function(request) {
   shiny::tagList(
     golem_add_external_resources(),
-    shiny::fluidPage(
-      theme = fieldhub_theme(),
-      do.call(shiny::navbarPage, c(
-        list(
-          title = fieldhub_app_title(),
-          shiny::tabPanel(
-            " Welcome!", icon = shiny::icon("home", lib = "glyphicon"),
-            suppressWarnings(htmltools::includeHTML(
-              system.file("app/www/home.html", package = "FielDHub")
-            ))
-          )
-        ),
-        fieldhub_design_menus(),
-        list(shiny::navbarMenu(
-          "More",
-          shiny::tabPanel(
-            "Help",
-            suppressWarnings(htmltools::includeHTML(
-              system.file("app/www/Help.html", package = "FielDHub")
-            ))
+    shiny::tags$div(
+      id = "fieldhub-app",
+      shiny::fluidPage(
+        theme = fieldhub_theme(),
+        do.call(shiny::navbarPage, c(
+          list(
+            title = fieldhub_app_title(),
+            shiny::tabPanel(
+              " Welcome!", icon = shiny::icon("home", lib = "glyphicon"),
+              htmltools::includeHTML(
+                system.file("app/www/home.html", package = "FielDHub")
+              )
+            )
           ),
-          shiny::tabPanel(
-            "About Us",
-            suppressWarnings(htmltools::includeHTML(
-              system.file("app/www/aboutUs.html", package = "FielDHub")
-            ))
-          )
+          fieldhub_design_menus(),
+          list(shiny::navbarMenu(
+            "More",
+            shiny::tabPanel("Help", app_help_ui()),
+            shiny::tabPanel("About Us", app_about_ui())
+          ))
         ))
-      ))
+      )
     )
   )
 }
@@ -66,9 +59,15 @@ golem_add_external_resources <- function(){
  
   shiny::tags$head(
     golem::favicon(),
-    golem::bundle_resources(
-      path = app_sys('app/www'),
-      app_title = 'FielDHub'
-    )
+    golem::activate_js(),
+    htmltools::htmlDependency(
+      name = "fieldhub-resources",
+      version = as.character(utils::packageVersion("FielDHub")),
+      src = app_sys("app/www"),
+      script = c("corner.js", "shinybusy.js"),
+      stylesheet = c("style.css", "mobile.css"),
+      all_files = TRUE
+    ),
+    shiny::tags$title("FielDHub")
   )
 }

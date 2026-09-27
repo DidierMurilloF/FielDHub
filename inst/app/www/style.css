@@ -1,14 +1,14 @@
-* {
+#fieldhub-app * {
   margin:0;
   padding:0;
   box-sizing: border-box;
 }
 
-.navbar>.container .navbar-brand, .navbar>.container-fluid .navbar-brand {
+#fieldhub-app .navbar>.container .navbar-brand, #fieldhub-app .navbar>.container-fluid .navbar-brand {
   margin-left: auto;
 }
 
-html,body {
+#fieldhub-app {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   line-height: 1.2em;
   font-size: 14px;
@@ -17,84 +17,84 @@ html,body {
   background-color: #ffffff;
 }
 
-body::-webkit-scrollbar {
+#fieldhub-app::-webkit-scrollbar {
   display: none;
 }
 
-.nav a {
+#fieldhub-app .nav a {
     font-size: 1.0em !important;
 }
 
-.navbar {
+#fieldhub-app .navbar {
   margin-bottom: 0;
   padding: 0;
 }
 
-li a {
+#fieldhub-app li a {
   font-size: 20px;
 }
 
-.container {
+#fieldhub-app .container {
   margin: auto;
   max-width: 1200px;
   padding: 0 20px;
 }
 
-h1, h2, h3 {
+#fieldhub-app h1, #fieldhub-app h2, #fieldhub-app h3 {
   padding-bottom: 10px;
 }
 
-p {
+#fieldhub-app p {
   margin: 10px 0;
 }
 
-.p-box {
+#fieldhub-app .p-box {
   font-size: 16px;
 }
 
-.text-primary1 {
+#fieldhub-app .text-primary1 {
   color: #ffc72a;
   background: rgba(156, 137, 132, 0.55);
   font-size: 88px;
   font-weight: bold;
 }
 
-.text-primary2 {
+#fieldhub-app .text-primary2 {
   color: #0a5640;
   background: rgba(156, 137, 132, 0.55);
   font-size: 88px;
   font-weight: bold;
 }
 
-.welcome-primary {
+#fieldhub-app .welcome-primary {
   font-size: 28px;
   font-weight: bold;
 }
 
-#text-primary {
+#fieldhub-app #text-primary {
   color:#ffc72a;
   font-weight: bold;
 }
 
-#text-primary1 {
+#fieldhub-app .footer-label {
   color:#ffc72a;
 }
 
-#text-primary2 {
+#fieldhub-app #text-primary2 {
   color:#0a5640;
 }
 
-.tittle-FielDHub {
+#fieldhub-app .tittle-FielDHub {
   color:#ffc72a;
   font-weight: bold;
 }
 
-.lead {
+#fieldhub-app .lead {
   font-size: 20px;
   font-weight: bold;
 }
 
-.btn {
+#fieldhub-app .btn {
   display: inline-block;
   height: 36px;
   font-size: 14px;
@@ -107,71 +107,71 @@ p {
   cursor: pointer;
 }
 
-.btn:hover {
+#fieldhub-app .btn:hover {
   background: #18bc9c;
   color: #343a40;
 }
 
-.btn-light {
+#fieldhub-app .btn-light {
   background: #f4f4f4;
   color: #333;
 }
 
-.bg-dark {
+#fieldhub-app .bg-dark {
   background: #444;
   color: #fff;
 }
 
-.bg-light {
+#fieldhub-app .bg-light {
   background: #f4f4f4;
   color: #333;
 }
 
-.bg-primary {
+#fieldhub-app .bg-primary {
   background: #f7c08a;
   color: #333;
 }
 
-.clr {
+#fieldhub-app .clr {
   clear: both;
 }
 
 /* Showcase */
-#showcase {
+#fieldhub-app #showcase {
   background: url('baner46.jpg') no-repeat center center/cover;
   /*background: url('golden.jpg') no-repeat center center/cover;*/
   height: 550px;
 }
 
-#showcase .showcase-content {
+#fieldhub-app #showcase .showcase-content {
   color: #fff;
   text-align: center;
   padding-top: 210px;
 }
 
-#showcase .showcase-content p {
+#fieldhub-app #showcase .showcase-content p {
   padding-bottom: 20px;
   line-height: 1.7em;
 }
 
 /* Features */
-.box {
+#fieldhub-app .box {
   float: left;
   width: 33.3%;
   padding: 50px;
   text-align:center;
 }
 
-.box i {
+#fieldhub-app .box i {
   margin-bottom: 10px;
 }
 
 /* Home Info */
-#home-info {
+#fieldhub-app #home-info {
   height: 450px;
 }
 
-#home-info .info-img {
+#fieldhub-app #home-info .info-img {
   float: left;
   width: 50%;
   background: url('drone1.jpg') no-repeat;
@@ -180,7 +180,7 @@ p {
   min-height: 100%;
 }
 
-#home-info .info-content {
+#fieldhub-app #home-info .info-content {
   float: right;
   width: 50%;
   height: 100%;
@@ -189,29 +189,29 @@ p {
   overflow: hidden;
 }
 
-#home-info .info-content p {
+#fieldhub-app #home-info .info-content p {
   padding-bottom: 30px;
   padding-top: 10px;
 }
 
 /* About Us*/
 
-.ABC {
+#fieldhub-app .ABC {
   background-color: #edebeb;
 }    
 
-.section-tittle {
+#fieldhub-app .section-tittle {
   margin-left: 150px;
   margin-right: 100px;
 }
 
-.aboutUs-p {
+#fieldhub-app .aboutUs-p {
   font-family: Arial, Helvetica, sans-serif;
   font-size: 18px;
   line-height: 1.6em;
 }
 
-.profile-p {
+#fieldhub-app .profile-p {
   font-family: Arial, Helvetica, sans-serif;
   font-size: 14px;
   line-height: 1.5em;
@@ -221,7 +221,7 @@ p {
   padding-right: 0;
 }
 
-.grid-container {
+#fieldhub-app .grid-container {
   display: grid;
   justify-content: center;
   grid-row-gap: 5px;
@@ -232,7 +232,7 @@ p {
   padding-bottom: 50px;
 }
 
-.grid-container1 {
+#fieldhub-app .grid-container1 {
   display: grid;
   justify-content: center;
   grid-row-gap: 5px;
@@ -243,14 +243,14 @@ p {
   padding-bottom: 50px;
 }
 
-.grid-item {
+#fieldhub-app .grid-item {
   padding: 20px;
   font-size: 16px;
   text-align:left;
   padding-bottom: 5px;
 }
 
-.circular--portrait {
+#fieldhub-app .circular--portrait {
   position: relative;
   width: 150px;
   height: 150px;
@@ -258,30 +258,30 @@ p {
   border-radius: 50%;
 }
                               
-.circular--portrait img {
+#fieldhub-app .circular--portrait img {
   width: 100%;
   height: auto;
 }
 
 /* footer */
-.container-fluid {
+#fieldhub-app .container-fluid {
   width: 100%;
   margin: 0;
   padding: 0;
 }
 
-a {
+#fieldhub-app a {
   font-size: 16px;
 }
   
-#main-footer {
+#fieldhub-app .fieldhub-footer {
   text-align: center;
   background: #444;
   color: #fff;
   padding: 20px;
 }
 
-.selectize-input {
+#fieldhub-app .selectize-input {
   height: 36px;
   font-size: 13px;
   display: flex;
@@ -289,7 +289,7 @@ a {
   border: 1px solid rgb(226, 224, 224);
 }
 
-input[type=text], input[type=number] {
+#fieldhub-app input[type=text], #fieldhub-app input[type=number] {
   width: 100%;
   height: 36px;
   font-size: 13px;
@@ -298,7 +298,7 @@ input[type=text], input[type=number] {
   border: 1px solid rgb(226, 224, 224);
 }
 
-.well {
+#fieldhub-app .well {
   min-height: 20px;
   padding: 19px;
   margin-bottom: 40px;
@@ -310,7 +310,7 @@ input[type=text], input[type=number] {
   box-shadow: inset 0 1px 1px rgba(0,0,0,0.05);
 }
 
-h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+#fieldhub-app h1, #fieldhub-app h2, #fieldhub-app h3, #fieldhub-app h4, #fieldhub-app h5, #fieldhub-app h6, #fieldhub-app .h1, #fieldhub-app .h2, #fieldhub-app .h3, #fieldhub-app .h4, #fieldhub-app .h5, #fieldhub-app .h6 {
   font-family: "Lato","Helvetica Neue",Helvetica,Arial,sans-serif;
   font-weight: 400;
   line-height: 1.1;
@@ -321,7 +321,7 @@ h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
 /* * {
     box-sizing: border-box;
 } */
-.content-help {
+#fieldhub-app .content-help {
   /* float: left;
   max-width: 75%;
   margin: auto;
@@ -335,13 +335,37 @@ h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
   padding: 1px;
   padding-bottom: 50px;
 }
-.column1 {
+#fieldhub-app .column1 {
   float: left;
   width: 60%;
   padding: 10px;
 }
-.column2 {
+#fieldhub-app .column2 {
   float: right;
   width: 40%;
   padding: 15px;
+}
+
+#fieldhub-app .fieldhub-feature-icon {
+  font-size: 3em;
+}
+
+#fieldhub-app .fieldhub-help, #fieldhub-app .fieldhub-package-info {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+#fieldhub-app .fieldhub-help-topics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+#fieldhub-app .fieldhub-help li {
+  margin: 12px 0 12px 24px;
+}
+
+#fieldhub-app .fieldhub-help li a {
+  font-size: 16px;
 }

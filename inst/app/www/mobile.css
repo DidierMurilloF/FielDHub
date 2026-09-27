@@ -1,9 +1,10 @@
+@media screen and (max-width: 768px) {
 /* Showcase */
-#showcase {
+#fieldhub-app #showcase {
   height: 100%;
 }
 
-#showcase .showcase-content {
+#fieldhub-app #showcase .showcase-content {
   padding-top: 70px;
   padding-bottom: 30px;
 }
@@ -24,7 +25,8 @@
 }
 */
 /* Boxes */
-.box {
+#fieldhub-app .box {
   float: none;
   width: 100%;
+}
 }

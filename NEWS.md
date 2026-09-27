@@ -55,6 +55,12 @@
 
 ### New features:
 
+- The app's Help topics now follow its design registry and include offline
+  R help commands. About displays the package version, credits, and license
+  from DESCRIPTION while retaining the team profiles. Welcome icons use
+  bundled Bootstrap assets instead of a CDN; custom styles are scoped to the
+  app root, and mobile rules are applied only on narrow screens.
+
 - Layout CSV assembly now indexes plots directly by row and column instead
   of repeatedly scanning the field book for every cell. Existing valid
   exports retain their values, headers, and orientation. Invalid locations,
