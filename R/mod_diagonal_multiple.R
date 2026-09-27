@@ -296,8 +296,7 @@ mod_diagonal_multiple_server <- function(id) {
                     handlerExpr = shiny::updateTabsetPanel(session,
                                                     "tabset_multi",
                                                     selected = "tabPanel1"))
-        
-        
+
         get_data_multiple <- shiny::eventReactive(input$RUN_multiple, {
             Option_NCD <- TRUE
             if (input$list_entries_multiple == "Yes") {
@@ -729,8 +728,7 @@ mod_diagonal_multiple_server <- function(id) {
                 options = utils::modifyList(table_options, list(
                 columnDefs = list(list(className = 'dt-center', targets = "_all")))))
         })
-        
-        
+
         output$data_input <- DT::renderDT({
             test <- randomize_hit_multi$times_multi > 0 & user_tries_multi$tries > 0
             if (!test) return(NULL)
@@ -879,126 +877,27 @@ mod_diagonal_multiple_server <- function(id) {
             )
         })
         
-        simulation_settings <- app_simulation_controls(input, session,
-          ids = c(trait = "trailsDIAG", other = "OtherDIAG", minimum = "min.diag", maximum = "max.diag", submit = "ok_simu_multi"),
-          field_book = function() diagonal_design()$fieldBook,
-          correlation_ids = c(x = "ROX.DIAG", y = "ROY.DIAG")
-        )
-        
-        simuModal_DIAG <- function(failed = FALSE) {
-            shiny::modalDialog(
-                shiny::fluidRow(
-                shiny::column(6,
-                        shiny::selectInput(inputId = ns("trailsDIAG"), label = "Select One:",
-                                    choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
-                )
-                ),
-                shiny::conditionalPanel("input.trailsDIAG == 'Other'", ns = ns,
-                                shiny::textInput(inputId = ns("OtherDIAG"), label = "Input Trial Name:", value = NULL)
-                ),
-                app_spatial_correlations(ns, ".DIAG"),
-                shiny::fluidRow(
-                shiny::column(6,
-                        shiny::numericInput(inputId = ns("min.diag"), "Input the min value:", value = NULL)
-                ),
-                shiny::column(6,
-                        shiny::numericInput(inputId = ns("max.diag"), "Input the max value:", value = NULL)
-                        
-                )
-                ),
-                if (failed)
-                shiny::div(shiny::tags$b("Invalid input of data max and min", style = "color: red;")),
-                
-                footer = shiny::tagList(
-                    shiny::modalButton("Cancel"),
-                    shiny::actionButton(inputId = ns("ok_simu_multi"), "GO")
-                )
-            )
-        }
-        
-        shiny::observeEvent(input$simulate_multiple, {
-            shiny::req(diagonal_design()$fieldBook)
-            shiny::showModal(
-              simuModal_DIAG()
-            )
-        })
-        
-        
-        simudata_DIAG <- shiny::reactive({
-            shiny::req(diagonal_design()$fieldBook)
-            field_book <- diagonal_design()$fieldBook
-            if (is.null(simulation_settings())) {
-              return(list(df = field_book, simulation = NULL))
-            }
-            simulation <- validate_design(simulate_spatial_field_book(
-                field_book = field_book,
-                nrows = diagonal_design()$infoDesign$rows,
-                ncols = diagonal_design()$infoDesign$columns,
-                correlation_x = as.numeric(simulation_settings()$correlation_x),
-                correlation_y = as.numeric(simulation_settings()$correlation_y),
-                min_value = as.numeric(simulation_settings()$min_value),
-                max_value = as.numeric(simulation_settings()$max_value),
-                response_name = as.character(simulation_settings()$response_name),
-                seed = as.numeric(multiple_inputs()$seed_number)
-            ))
-            list(df = simulation$field_book, dfSimulationList = simulation$simulations,
-                 simulation = simulation)
-        })
+    app_spatial_workflow(input, output, session,
+      design = function() diagonal_design(),
+      seed = function() as.numeric(multiple_inputs()$seed_number),
+      dimensions = function(field_book) list(nrows = diagonal_design()$infoDesign$rows, ncols = diagonal_design()$infoDesign$columns),
+      selected = function() user_location()$user_site,
+      filename = function() {
+        shiny::req(multiple_inputs()$location_names)
+        loc <- multiple_inputs()$location_names
+        loc <- paste(loc, "_", "Diagonal_Multi", sep = "")
+        paste(loc, Sys.Date(), ".csv", sep = "")
+      },
+      visible = function() randomize_hit_multi$times_multi > 0 & user_tries_multi$tries > 0,
+      simulation_ready = function() {
+        shiny::req(diagonal_design()$fieldBook)
+        TRUE
+      },
+      book_ready = function() {
+        shiny::req(diagonal_design()$fieldBook)
+      },
+      spec = spatial_workflow_spec("diagonal_multiple")
+    )
 
-        heat_map <- shiny::reactiveValues(heat_map_option = FALSE)
-        
-        shiny::observeEvent(simulation_settings(), {
-          heat_map$heat_map_option <- TRUE
-        })
-        
-        shiny::observeEvent(heat_map$heat_map_option, {
-        if (heat_map$heat_map_option == FALSE) {
-            shiny::hideTab(inputId = "tabset_multi", target = "Heatmap")
-        } else {
-            shiny::showTab(inputId = "tabset_multi", target = "Heatmap")
-        }
-        })
-        
-        output$fieldBook_diagonal <- DT::renderDT({
-            test <- randomize_hit_multi$times_multi > 0 & user_tries_multi$tries > 0
-            if (!test) return(NULL)
-            shiny::req(simudata_DIAG()$df)
-            df <- simudata_DIAG()$df
-            validate_design(app_field_book_table(
-              df, factor_columns = c("EXPT", "LOCATION", "PLOT", "ROW", "COLUMN", "CHECKS", "ENTRY", "TREATMENT"),
-              height = 600
-            ))
-        })
-        
-        heatmap_obj_D <- shiny::reactive({
-          shiny::req(simudata_DIAG()$dfSimulationList)
-          validate_design(app_spatial_heatmap(
-            simudata_DIAG()$dfSimulationList,
-            response_name = as.character(simulation_settings()$response_name),
-            selected = user_location()$user_site, height = 700
-          ))
-        })
-        
-        output$heatmap_diag <- plotly::renderPlotly({
-            test <- randomize_hit_multi$times_multi > 0 & user_tries_multi$tries > 0
-            if (!test) return(NULL)
-            shiny::req(heatmap_obj_D())
-            heatmap_obj_D()
-        })
-        
-        output$download_fieldbook_multiple <- app_csv_archive(
-            filename = function() {
-                shiny::req(multiple_inputs()$location_names)
-                loc <- multiple_inputs()$location_names
-                loc <- paste(loc, "_", "Diagonal_Multi", sep = "")
-                paste(loc, Sys.Date(), ".csv", sep = "")
-            },
-          data = function() as.data.frame(simudata_DIAG()$df),
-          design = diagonal_design,
-          field_book = function() simudata_DIAG()$df,
-          simulation = function() simudata_DIAG()$simulation,
-          kind = "field_book"
-        )
-        app_reproduction_outputs(output, diagonal_design)
     })
 }

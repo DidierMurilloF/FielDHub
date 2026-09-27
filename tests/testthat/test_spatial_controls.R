@@ -23,7 +23,7 @@ test_that("all spatial workflows share the correlation controls with their exist
                mod_multi_loc_preps_server = ".PREP")
   calls <- function(code) {
     if (missing(code) || (!is.call(code) && !is.pairlist(code))) return(list())
-    if (is.call(code) && identical(code[[1]], as.name("app_spatial_correlations"))) {
+    if (is.call(code) && identical(code[[1]], as.name("spatial_workflow_spec"))) {
       return(list(code))
     }
     unlist(lapply(as.list(code), calls), recursive = FALSE)
@@ -32,8 +32,11 @@ test_that("all spatial workflows share the correlation controls with their exist
     controls <- calls(body(get(name, asNamespace("FielDHub"))))
     expect_length(controls, 1L)
     if (length(controls) == 1L) {
-      expect_identical(controls[[1]][[2]], as.name("ns"))
-      expect_identical(controls[[1]][[3]], sources[[name]])
+      spec <- spatial_workflow_spec(controls[[1]][[2]])
+      expect_identical(spec$correlation_suffix, sources[[name]])
+      expect_identical(spec$correlation_ids, c(x = paste0("ROX", sources[[name]]),
+                                               y = paste0("ROY", sources[[name]])))
     }
   }
+  expect_identical(sum(all.names(body(app_spatial_simulation_modal)) == "app_spatial_correlations"), 1L)
 })

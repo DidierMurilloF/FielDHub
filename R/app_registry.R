@@ -13,7 +13,8 @@ fieldhub_app_registry <- function() {
          ui = paste0("mod_", module, "_ui"),
          server = paste0("mod_", module, "_server"), engine = engine,
          group = groups[[group]], server_order = as.integer(server_order),
-         workflow = if (module %in% classic) module else NULL)
+         workflow = module,
+         workflow_family = if (module %in% classic) "classic" else "spatial")
   }
   list(
     entry("Single Diagonal Arrangement", "Diagonal", "diagonal_arrangement", 1, 1),

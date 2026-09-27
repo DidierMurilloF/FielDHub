@@ -261,7 +261,6 @@ mod_sparse_allocation_server <- function(id){
             selected = plant_reps[length(plant_reps)]
         )
     })
-    
 
     counts <- shiny::reactiveValues(trigger = 0)
     
@@ -647,7 +646,6 @@ mod_sparse_allocation_server <- function(id){
           columnDefs = list(list(className = 'dt-center', targets = "_all")))))
     })
 
-    
     field_dimensions_diagonal <- shiny::eventReactive(input$sparse_get_random, {
       shiny::req(sparse_setup())
       shiny::req(input$sparse_dims)
@@ -894,126 +892,28 @@ mod_sparse_allocation_server <- function(id){
       )
     })
 
-    simulation_settings <- app_simulation_controls(input, session,
-      ids = c(trait = "trailsDIAG", other = "OtherDIAG", minimum = "min.diag", maximum = "max.diag", submit = "ok_simu_single"),
-      field_book = function() sparse_design()$fieldBook,
-      correlation_ids = c(x = "ROX.DIAG", y = "ROY.DIAG")
-    )
-    
-    simuModal_DIAG <- function(failed = FALSE) {
-      shiny::modalDialog(
-        shiny::fluidRow(
-          shiny::column(6,
-                 shiny::selectInput(inputId = ns("trailsDIAG"), label = "Select One:",
-                             choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
-          )
-        ),
-        shiny::conditionalPanel("input.trailsDIAG == 'Other'", ns = ns,
-                         shiny::textInput(inputId = ns("OtherDIAG"), label = "Input Trial Name:", value = NULL)
-        ),
-        app_spatial_correlations(ns, ".DIAG"),
-        shiny::fluidRow(
-          shiny::column(6,
-                 shiny::numericInput(inputId = ns("min.diag"), "Input the min value:", value = NULL)
-          ),
-          shiny::column(6,
-                 shiny::numericInput(inputId = ns("max.diag"), "Input the max value:", value = NULL)
-          )
-        ),
-        if (failed)
-          shiny::div(shiny::tags$b("Invalid input of data max and min", style = "color: red;")),
-        footer = shiny::tagList(
-          shiny::modalButton("Cancel"),
-          shiny::actionButton(inputId = ns("ok_simu_single"), "GO")
-        )
-      )
-    }
-    
-    shiny::observeEvent(input$sparse_simulate, {
-      shiny::req(sparse_design()$fieldBook)
-      shiny::showModal(
-        simuModal_DIAG()
-      )
-    })
-    
-    
-    simudata_DIAG <- shiny::reactive({
-      shiny::req(sparse_design()$fieldBook)
-      field_book <- sparse_design()$fieldBook
-      if (is.null(simulation_settings())) {
-        return(list(df = field_book, simulation = NULL))
-      }
-      simulation <- validate_design(simulate_spatial_field_book(
-        field_book = field_book,
-        nrows = sparse_design()$infoDesign$rows, ncols = sparse_design()$infoDesign$columns,
-        correlation_x = as.numeric(simulation_settings()$correlation_x),
-        correlation_y = as.numeric(simulation_settings()$correlation_y),
-        min_value = as.numeric(simulation_settings()$min_value),
-        max_value = as.numeric(simulation_settings()$max_value),
-        response_name = as.character(simulation_settings()$response_name),
-        seed = as.numeric(single_inputs()$seed_number)
-      ))
-      list(df = simulation$field_book, dfSimulationList = simulation$simulations,
-           simulation = simulation)
-    })
-
-    heat_map <- shiny::reactiveValues(heat_map_option = FALSE)
-    
-    shiny::observeEvent(simulation_settings(), {
-      heat_map$heat_map_option <- TRUE
-    })
-
-    shiny::observeEvent(heat_map$heat_map_option, {
-      if (heat_map$heat_map_option == FALSE) {
-        shiny::hideTab(inputId = "sparse_tabset_single", target = "Heatmap")
-      } else {
-        shiny::showTab(inputId = "sparse_tabset_single", target = "Heatmap")
-      }
-    })
-
-    output$fieldBook_diagonal <- DT::renderDT({
-      test <- randomize_hit$times > 0 & user_tries$tries > 0
-      if (!test) return(NULL)
-      shiny::req(simudata_DIAG()$df)
-      df <- simudata_DIAG()$df
-      validate_design(app_field_book_table(
-        df, factor_columns = c("EXPT", "LOCATION", "PLOT", "ROW", "COLUMN", "CHECKS", "ENTRY", "TREATMENT"),
-        height = 600
-      ))
-    })
-    
-    
-    heatmap_obj_D <- shiny::reactive({
-      shiny::req(simudata_DIAG()$dfSimulationList)
-      validate_design(app_spatial_heatmap(
-        simudata_DIAG()$dfSimulationList,
-        response_name = as.character(simulation_settings()$response_name),
-        selected = as.numeric(input$sparse_loc_view), height = 720
-      ))
-    })
-    
-    output$heatmap_diag <- plotly::renderPlotly({
-      test <- randomize_hit$times > 0 & user_tries$tries > 0
-      if (!test) return(NULL)
-      shiny::req(heatmap_obj_D())
-      heatmap_obj_D()
-    })
-    
-    output$downloadData_Diagonal <- app_csv_archive(
+    app_spatial_workflow(input, output, session,
+      design = function() sparse_design(),
+      seed = function() as.numeric(single_inputs()$seed_number),
+      dimensions = function(field_book) list(nrows = sparse_design()$infoDesign$rows, ncols = sparse_design()$infoDesign$columns),
+      selected = function() as.numeric(input$sparse_loc_view),
       filename = function() {
         shiny::req(input$sparse_loc_names)
         loc <- input$sparse_loc_names
         loc <- paste(loc, "_", "Diagonal_", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
       },
-      data = function() as.data.frame(simudata_DIAG()$df),
-      design = sparse_design,
-      field_book = function() simudata_DIAG()$df,
-      simulation = function() simudata_DIAG()$simulation,
-      kind = "field_book"
+      visible = function() randomize_hit$times > 0 & user_tries$tries > 0,
+      simulation_ready = function() {
+        shiny::req(sparse_design()$fieldBook)
+        TRUE
+      },
+      book_ready = function() {
+        shiny::req(sparse_design()$fieldBook)
+      },
+      spec = spatial_workflow_spec("sparse_allocation")
     )
-    
-    app_reproduction_outputs(output, sparse_design)
+
   })
 }
     

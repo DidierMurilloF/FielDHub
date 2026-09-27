@@ -554,135 +554,30 @@ mod_Optim_server <- function(id) {
                     )
     })
     
-    simulation_settings <- app_simulation_controls(input, session,
-      ids = c(trait = "trailsOPTIM", other = "OtherOPTIM", minimum = "min.optim", maximum = "max.optim", submit = "ok.optim"),
-      field_book = function() optimized_arrang()$fieldBook,
-      correlation_ids = c(x = "ROX.O", y = "ROY.O")
-    )
-    
-    simuModal.OPTIM <- function(failed = FALSE) {
-      shiny::modalDialog(
-        shiny::fluidRow(
-          shiny::column(6,
-                 shiny::selectInput(inputId = ns("trailsOPTIM"), label = "Select One:",
-                             choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
-          ),
-          shiny::column(6,
-                 shiny::checkboxInput(inputId = ns("heatmap_s"), label = "Include a Heatmap", value = TRUE),
-          )
-        ),
-        shiny::conditionalPanel("input.trailsOPTIM == 'Other'", ns = ns,
-                         shiny::textInput(inputId = ns("OtherOPTIM"), label = "Input Trial Name:", value = NULL)
-        ),
-        app_spatial_correlations(ns, ".O"),
-        shiny::fluidRow(
-          shiny::column(6,
-                 shiny::numericInput(inputId = ns("min.optim"), "Input the min value:", value = NULL)
-          ),
-          shiny::column(6,
-                 shiny::numericInput(inputId = ns("max.optim"), "Input the max value:", value = NULL)
-                 
-          )
-        ),
-        if (failed)
-          shiny::div(shiny::tags$b("Invalid input of data max and min", style = "color: red;")),
-        
-        footer = shiny::tagList(
-          shiny::modalButton("Cancel"),
-          shiny::actionButton(inputId = ns("ok.optim"), "GO")
-        )
-      )
-    }
-    
-    shiny::observeEvent(input$Simulate.optim, {
-      shiny::req(optimized_arrang()$fieldBook)
-      test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0
-      if (test) {
-        shiny::showModal(
-          simuModal.OPTIM()
-        )
-      }
-    })
-    
-    
-    simuDataOPTIM <- shiny::reactive({
-      shiny::req(optimized_arrang()$fieldBook)
-      field_book <- optimized_arrang()$fieldBook
-      if (is.null(simulation_settings())) {
-        return(list(df = field_book, simulation = NULL))
-      }
-      simulation <- validate_design(simulate_spatial_field_book(
-        field_book = field_book,
-        nrows = max(field_book$ROW), ncols = max(field_book$COLUMN),
-        correlation_x = as.numeric(simulation_settings()$correlation_x),
-        correlation_y = as.numeric(simulation_settings()$correlation_y),
-        min_value = as.numeric(simulation_settings()$min_value),
-        max_value = as.numeric(simulation_settings()$max_value),
-        response_name = as.character(simulation_settings()$response_name),
-        seed = as.numeric(input$seed.spatial)
-      ))
-      list(df = simulation$field_book, dfSimulation = simulation$simulations,
-           simulation = simulation)
-    })
-
-    heat_map_optim <- shiny::reactiveValues(heat_map_option = FALSE)
-    
-    shiny::observeEvent(simulation_settings(), {
-      heat_map_optim$heat_map_option <- TRUE
-    })
-    
-    shiny::observeEvent(heat_map_optim$heat_map_option, {
-      if (heat_map_optim$heat_map_option == FALSE) {
-        shiny::hideTab(inputId = "tabset_optim", target = "Heatmap")
-      } else {
-        shiny::showTab(inputId = "tabset_optim", target = "Heatmap")
-      }
-    })
-    
-    output$OPTIMOUTPUT <- DT::renderDT({
-      test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0
-      if (!test) return(NULL)
-      # if (user_tries_optim$tries_optim < 1) return(NULL)
-      shiny::req(simuDataOPTIM()$df)
-      df <- simuDataOPTIM()$df
-      validate_design(app_field_book_table(
-        df, factor_columns = c("EXPT", "LOCATION", "PLOT", "ROW", "COLUMN", "CHECKS", "ENTRY", "TREATMENT"),
-        height = 600
-      ))
-    })
-    
-    
-    heatmap_obj <- shiny::reactive({
-      shiny::req(simuDataOPTIM()$dfSimulation)
-      shiny::req(input$heatmap_s)
-      validate_design(app_spatial_heatmap(
-        simuDataOPTIM()$dfSimulation,
-        response_name = as.character(simulation_settings()$response_name),
-        selected = user_site_selection(), height = 740, show_title = TRUE
-      ))
-    })
-    
-    output$heatmap <- plotly::renderPlotly({
-      test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0
-      if (!test) return(NULL)
-      shiny::req(heatmap_obj())
-      heatmap_obj()
-    })
-    
-    output$downloadData.spatial <- app_csv_archive(
+    app_spatial_workflow(input, output, session,
+      design = function() optimized_arrang(),
+      seed = function() as.numeric(input$seed.spatial),
+      dimensions = function(field_book) list(nrows = max(field_book$ROW), ncols = max(field_book$COLUMN)),
+      selected = function() user_site_selection(),
       filename = function() {
         shiny::req(input$Location.spatial)
         loc <- input$Location.spatial
         loc <- paste(loc, "_", "Optim_", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
       },
-      data = function() as.data.frame(simuDataOPTIM()$df),
-      design = optimized_arrang,
-      field_book = function() simuDataOPTIM()$df,
-      simulation = function() simuDataOPTIM()$simulation,
-      kind = "field_book"
+      visible = function() randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0,
+      simulation_ready = function() {
+        shiny::req(optimized_arrang()$fieldBook)
+        test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0
+        if (test) {
+            TRUE
+        }
+      },
+      book_ready = function() {
+        shiny::req(optimized_arrang()$fieldBook)
+      },
+      spec = spatial_workflow_spec("Optim")
     )
-    
-    app_reproduction_outputs(output, optimized_arrang)
+
   })
 }

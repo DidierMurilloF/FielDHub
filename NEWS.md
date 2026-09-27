@@ -293,6 +293,12 @@
 
 ### Enhancements:
 
+- The seven spatial design modules now share their result workflow and
+  simulation dialogs. Existing correlation controls, location selection,
+  display numbering, tables, heatmaps, and reproducible archives are retained.
+  Custom response names are labeled "Trait name" consistently with classic
+  designs; simulation records keep their original source identifiers.
+
 - The twelve classic design modules now share one registry-driven result
   workflow for simulation dialogs, accepted settings, heatmaps, field-book
   tables, CSV archives, and reproduction code. Existing controls, labels,

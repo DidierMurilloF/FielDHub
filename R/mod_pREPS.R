@@ -516,7 +516,6 @@ mod_pREPS_server <- function(id){
        return(as.numeric(input$locView.preps))
      })
 
-    
     output$BINARYpREPS <- DT::renderDT({
       if (user_tries_prep$tries_prep < 1) return(NULL)
       shiny::req(pREPS_reactive())
@@ -535,8 +534,7 @@ mod_pREPS_server <- function(id){
         DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
                         backgroundColor = DT::styleEqual(1, "gray"))
     })
-    
-    
+
     output$dtpREPS <- DT::renderDataTable({
       test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
       if (!test) return(NULL)
@@ -604,134 +602,31 @@ mod_pREPS_server <- function(id){
                     )
     })
 
-    simulation_settings <- app_simulation_controls(input, session,
-      ids = c(trait = "trailsPREP", other = "OtherPREP", minimum = "min.prep", maximum = "max.prep", submit = "ok.prep"),
-      field_book = function() pREPS_reactive()$fieldBook,
-      correlation_ids = c(x = "ROX.PREP", y = "ROY.PREP")
-    )
-    
-    simuModal.PREP <- function(failed = FALSE) {
-      shiny::modalDialog(
-        shiny::fluidRow(
-          shiny::column(6,
-                 shiny::selectInput(inputId = ns("trailsPREP"), label = "Select One:",
-                             choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
-          ),
-          shiny::column(6,
-                 shiny::checkboxInput(inputId = ns("heatmap_PREP"), label = "Include a Heatmap", value = TRUE),
-          )
-        ),
-        shiny::conditionalPanel("input.trailsPREP == 'Other'", ns = ns,
-                         shiny::textInput(inputId = ns("OtherPREP"), label = "Input Trial Name:", value = NULL)
-        ),
-        app_spatial_correlations(ns, ".PREP"),
-        shiny::fluidRow(
-          shiny::column(6,
-                 shiny::numericInput(inputId = ns("min.prep"), "Input the min value", value = NULL)
-          ),
-          shiny::column(6,
-                 shiny::numericInput(inputId = ns("max.prep"), "Input the max value", value = NULL)
-                 
-          )
-        ),
-        if (failed)
-          shiny::div(shiny::tags$b("Invalid input of data max and min", style = "color: red;")),
-        
-        footer = shiny::tagList(
-          shiny::modalButton("Cancel"),
-          shiny::actionButton(inputId = ns("ok.prep"), "GO")
-        )
-      )
-    }
-    
-    shiny::observeEvent(input$Simulate.prep, {
-      shiny::req(pREPS_reactive()$fieldBook)
-      test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
-      if (test) {
-        shiny::showModal(
-          simuModal.PREP()
-        )
-      }
-    })
-    
-    
-    simuDataPREP <- shiny::reactive({
-      shiny::req(pREPS_reactive()$fieldBook)
-      shiny::req(prep_inputs())
-      field_book <- pREPS_reactive()$fieldBook
-      if (is.null(simulation_settings())) {
-        return(list(df = field_book, simulation = NULL))
-      }
-      simulation <- validate_design(simulate_spatial_field_book(
-        field_book = as.data.frame(field_book),
-        nrows = field_dimensions_prep()$d_row, ncols = field_dimensions_prep()$d_col,
-        correlation_x = as.numeric(simulation_settings()$correlation_x),
-        correlation_y = as.numeric(simulation_settings()$correlation_y),
-        min_value = as.numeric(simulation_settings()$min_value),
-        max_value = as.numeric(simulation_settings()$max_value),
-        response_name = as.character(simulation_settings()$response_name),
-        seed = as.numeric(prep_inputs()$seed_number)
-      ))
-      list(df = simulation$field_book, dfSimulationList = simulation$simulations,
-           simulation = simulation)
-    })
-
-    heat_map_prep <- shiny::reactiveValues(heat_map_option = FALSE)
-    
-    shiny::observeEvent(simulation_settings(), {
-      heat_map_prep$heat_map_option <- TRUE
-    })
-    
-    shiny::observeEvent(heat_map_prep$heat_map_option, {
-      if (heat_map_prep$heat_map_option == FALSE) {
-        shiny::hideTab(inputId = "tabset_prep", target = "Heatmap")
-      } else {
-        shiny::showTab(inputId = "tabset_prep", target = "Heatmap")
-      }
-    })
-    
-    heatmap_obj <- shiny::reactive({
-      shiny::req(simuDataPREP()$dfSimulationList)
-      shiny::req(input$heatmap_PREP)
-      validate_design(app_spatial_heatmap(
-        simuDataPREP()$dfSimulationList,
-        response_name = as.character(simulation_settings()$response_name),
-        selected = user_site_selection(), height = 700
-      ))
-    })
-    
-    output$heatmap_prep <- plotly::renderPlotly({
-      test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
-      if (!test) return(NULL)
-      shiny::req(heatmap_obj())
-      heatmap_obj()
-    }) 
-    
-    
-    output$pREPSOUTPUT <- DT::renderDT({
-      test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
-      if (!test) return(NULL)
-      df <- simuDataPREP()$df
-      validate_design(app_field_book_table(
-        df, factor_columns = c("EXPT", "LOCATION", "PLOT", "ROW", "COLUMN", "CHECKS", "ENTRY", "TREATMENT"),
-        height = 500
-      ))
-    })
-    
-    output$downloadData.preps <- app_csv_archive(
+    app_spatial_workflow(input, output, session,
+      design = function() pREPS_reactive(),
+      seed = function() as.numeric(prep_inputs()$seed_number),
+      dimensions = function(field_book) list(nrows = field_dimensions_prep()$d_row, ncols = field_dimensions_prep()$d_col),
+      selected = function() user_site_selection(),
       filename = function() {
         shiny::req(input$Location.preps)
         loc <- input$Location.preps
         loc <- paste(loc, "_", "pREP_", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
       },
-      data = function() as.data.frame(simuDataPREP()$df),
-      design = pREPS_reactive,
-      field_book = function() simuDataPREP()$df,
-      simulation = function() simuDataPREP()$simulation,
-      kind = "field_book"
+      visible = function() randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0,
+      simulation_ready = function() {
+        shiny::req(pREPS_reactive()$fieldBook)
+        test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
+        if (test) {
+            TRUE
+        }
+      },
+      book_ready = function() {
+        shiny::req(pREPS_reactive()$fieldBook)
+        shiny::req(prep_inputs())
+      },
+      spec = spatial_workflow_spec("pREPS")
     )
- 
-    app_reproduction_outputs(output, pREPS_reactive)
+
   })
 }

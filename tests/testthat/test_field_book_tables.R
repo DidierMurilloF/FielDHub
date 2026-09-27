@@ -40,10 +40,9 @@ test_that("each app field-book view delegates to the shared table component", {
   registry <- fieldhub_app_registry()
   for (entry in registry) {
     code <- body(get(entry$server, asNamespace("FielDHub")))
-    if (!is.null(entry$workflow)) {
-      expect_identical(sum(all.names(code) == "app_classic_workflow"), 1L)
-      code <- body(app_classic_workflow)
-    }
+    workflow <- paste0("app_", entry$workflow_family, "_workflow")
+    expect_identical(sum(all.names(code) == workflow), 1L)
+    code <- body(get(workflow, asNamespace("FielDHub")))
     expect_identical(sum(all.names(code) == "app_field_book_table"), 1L)
   }
 })

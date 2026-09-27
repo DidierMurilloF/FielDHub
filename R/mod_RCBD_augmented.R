@@ -227,8 +227,7 @@ mod_RCBD_augmented_server <- function(id) {
                  handlerExpr = shiny::updateTabsetPanel(session,
                                                  "tabset_arcbd",
                                                  selected = "tabPanel_augmented"))
-    
-    
+
     init_data <- shiny::reactive({
       if (input$owndata_a_rcbd == "Yes") {
         shiny::req(input$file1_a_rcbd)
@@ -290,8 +289,7 @@ mod_RCBD_augmented_server <- function(id) {
     }) 
     # |> 
     #   bindEvent(input$RUN.arcbd)
-    
-    
+
     list_to_observe <- shiny::reactive({
       shiny::req(init_data())
       list(
@@ -355,8 +353,7 @@ mod_RCBD_augmented_server <- function(id) {
                         choices = choices,
                         selected = choices[1])
     })
-    
-    
+
     getDataup_a_rcbd <- shiny::eventReactive(input$RUN.arcbd, {
       shiny::req(init_data())
       if (is.null(init_data())) {
@@ -367,8 +364,7 @@ mod_RCBD_augmented_server <- function(id) {
         return(NULL)
       } else return(init_data())
     })
-    
-    
+
     some_inputs <- shiny::eventReactive(input$RUN.arcbd, {
       return(list(blocks = input$blocks_a_rcbd, 
                   entries = input$lines_a_rcbd, 
@@ -377,8 +373,7 @@ mod_RCBD_augmented_server <- function(id) {
                   expts_a_rcbd = input$nExpt_a_rcbd)
       )
     })
-    
-    
+
     field_dims_augmented <- shiny::eventReactive(input$get_random_augmented, {
       dims <- unlist(strsplit(input$field_dims, " x "))
       d_row <- as.numeric(dims[1])
@@ -651,128 +646,29 @@ mod_RCBD_augmented_server <- function(id) {
                         backgroundColor = DT::styleEqual(Name_expt, colores_back[1:repsExpt]))
     })
     
-    simulation_settings <- app_simulation_controls(input, session,
-      ids = c(trait = "trailsARCBD", other = "OtherARCBD", minimum = "min.arcbd", maximum = "max.arcbd", submit = "ok.arcbd"),
-      field_book = function() rcbd_augmented_reactive()$fieldBook,
-      correlation_ids = c(x = "ROX.O", y = "ROY.O")
-    )
-    
-    simuModal.ARCBD <- function(failed = FALSE) {
-      shiny::modalDialog(
-        shiny::fluidRow(
-          shiny::column(6,
-                 shiny::selectInput(inputId = ns("trailsARCBD"), label = "Select One:",
-                             choices = c("YIELD", "MOISTURE", "HEIGHT", "Other")),
-          ),
-          shiny::column(6,
-                 shiny::checkboxInput(inputId = ns("heatmap_s"), label = "Include a Heatmap", value = TRUE),
-          )
-        ),
-        shiny::conditionalPanel("input.trailsARCBD == 'Other'", ns = ns,
-                         shiny::textInput(inputId = ns("OtherARCBD"), label = "Input Trial Name:", value = NULL)
-        ),
-        app_spatial_correlations(ns, ".O"),
-        shiny::fluidRow(
-          shiny::column(6,
-                 shiny::numericInput(inputId = ns("min.arcbd"), "Input the min value:", value = NULL)
-          ),
-          shiny::column(6,
-                 shiny::numericInput(inputId = ns("max.arcbd"), "Input the max value:", value = NULL)
-                 
-          )
-        ),
-        if (failed)
-          shiny::div(shiny::tags$b("Invalid input of data max and min", style = "color: red;")),
-        
-        footer = shiny::tagList(
-          shiny::modalButton("Cancel"),
-          shiny::actionButton(inputId = ns("ok.arcbd"), "GO")
-        )
-      )
-    }
-    
-    shiny::observeEvent(input$Simulate.arcbd, {
-      shiny::req(rcbd_augmented_reactive()$fieldBook)
-      if(test_arcbd()) {shiny::showModal(
-        simuModal.ARCBD()
-      )}
-    })
-    
-    
-    simuDataARCBD <- shiny::reactive({
-      shiny::req(rcbd_augmented_reactive()$fieldBook)
-      field_book <- rcbd_augmented_reactive()$fieldBook
-      if (is.null(simulation_settings())) {
-        return(list(df = field_book, simulation = NULL))
-      }
-      simulation <- validate_design(simulate_spatial_field_book(
-        field_book = field_book,
-        nrows = length(unique(field_book$ROW)), ncols = length(unique(field_book$COLUMN)),
-        correlation_x = as.numeric(simulation_settings()$correlation_x),
-        correlation_y = as.numeric(simulation_settings()$correlation_y),
-        min_value = as.numeric(simulation_settings()$min_value),
-        max_value = as.numeric(simulation_settings()$max_value),
-        response_name = as.character(simulation_settings()$response_name),
-        seed = as.numeric(input$myseed_a_rcbd)
-      ))
-      list(df = simulation$field_book, dfSimulation = simulation$simulations,
-           simulation = simulation)
-    })
-
-    heat_map_arcbd <- shiny::reactiveValues(heat_map_option = FALSE)
-    
-    shiny::observeEvent(simulation_settings(), {
-      heat_map_arcbd$heat_map_option <- TRUE
-    })
-    
-    shiny::observeEvent(heat_map_arcbd$heat_map_option, {
-      if (heat_map_arcbd$heat_map_option == FALSE) {
-        shiny::hideTab(inputId = "tabset_arcbd", target = "Heatmap")
-      } else {
-        shiny::showTab(inputId = "tabset_arcbd", target = "Heatmap")
-      }
-    })
-    
-    
-    output$fieldBook_ARCBD <- DT::renderDT({
-      if(!test_arcbd()) return(NULL)
-      df <- simuDataARCBD()$df
-      validate_design(app_field_book_table(
-        df, factor_columns = c("EXPT", "LOCATION", "PLOT", "ROW", "COLUMN", "CHECKS", "BLOCK", "ENTRY", "TREATMENT"),
-        height = 600, collapse = TRUE
-      ))
-    })
-    
-    heatmap_obj <- shiny::reactive({
-      shiny::req(simuDataARCBD()$dfSimulation)
-      shiny::req(input$heatmap_s)
-      validate_design(app_spatial_heatmap(
-        simuDataARCBD()$dfSimulation,
-        response_name = as.character(simulation_settings()$response_name),
-        selected = locNum(), height = 740
-      ))
-    })
-    
-    output$heatmap <- plotly::renderPlotly({
-      shiny::req(heatmap_obj())
-      if(!test_arcbd()) return(NULL)
-      heatmap_obj()
-    })
-    
-    output$downloadData_a_rcbd <- app_csv_archive(
+    app_spatial_workflow(input, output, session,
+      design = function() rcbd_augmented_reactive(),
+      seed = function() as.numeric(input$myseed_a_rcbd),
+      dimensions = function(field_book) list(nrows = length(unique(field_book$ROW)), ncols = length(unique(field_book$COLUMN))),
+      selected = function() locNum(),
       filename = function() {
         shiny::req(input$Location_a_rcbd)
         loc <- input$Location_a_rcbd
         loc <- paste(loc, "_", "ARCBD_", sep = "")
         paste(loc, Sys.Date(), ".csv", sep = "")
       },
-      data = function() as.data.frame(simuDataARCBD()$df),
-      design = rcbd_augmented_reactive,
-      field_book = function() simuDataARCBD()$df,
-      simulation = function() simuDataARCBD()$simulation,
-      kind = "field_book"
+      visible = function() test_arcbd(),
+      simulation_ready = function() {
+        shiny::req(rcbd_augmented_reactive()$fieldBook)
+        if (test_arcbd()) {
+            TRUE
+        }
+      },
+      book_ready = function() {
+        shiny::req(rcbd_augmented_reactive()$fieldBook)
+      },
+      spec = spatial_workflow_spec("RCBD_augmented")
     )
-    
-    app_reproduction_outputs(output, rcbd_augmented_reactive)
+
   })
 }

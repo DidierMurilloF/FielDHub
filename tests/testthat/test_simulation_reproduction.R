@@ -86,7 +86,11 @@ test_that("spatial modules retain the simulation record without rewriting its ou
   }
   for (module in modules) {
     code <- body(get(paste0("mod_", module, "_server"), asNamespace("FielDHub")))
-    expect_length(records(code), 1L)
+    expect_identical(sum(all.names(code) == "app_spatial_workflow"), 1L)
+  }
+  expect_identical(sum(all.names(body(app_spatial_workflow)) == "spatial_workflow_book"), 1L)
+  expect_length(records(body(spatial_workflow_book)), 1L)
+  for (code in list(body(app_spatial_workflow), body(spatial_workflow_book))) {
     expect_false(grepl("simulation$field_book$ID <-", paste(deparse(code), collapse = " "),
                        fixed = TRUE))
   }

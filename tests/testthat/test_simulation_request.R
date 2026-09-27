@@ -59,10 +59,9 @@ test_that("spatial requests parse select values and reject invalid correlations"
 test_that("every design module shares atomic simulation settings", {
   for (entry in fieldhub_app_registry()) {
     code <- body(get(entry$server, asNamespace("FielDHub")))
-    if (!is.null(entry$workflow)) {
-      expect_identical(sum(all.names(code) == "app_classic_workflow"), 1L)
-      code <- body(app_classic_workflow)
-    }
+    workflow <- paste0("app_", entry$workflow_family, "_workflow")
+    expect_identical(sum(all.names(code) == workflow), 1L)
+    code <- body(get(workflow, asNamespace("FielDHub")))
     expect_identical(sum(all.names(code) == "app_simulation_controls"), 1L)
   }
 })

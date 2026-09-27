@@ -14,7 +14,7 @@ test_that("every module connects its design to the shared reproduction component
   )
   calls <- function(code) {
     if (missing(code) || (!is.call(code) && !is.pairlist(code))) return(list())
-    if (is.call(code) && any(vapply(c("app_reproduction_outputs", "app_classic_workflow"),
+    if (is.call(code) && any(vapply(c("app_reproduction_outputs", "app_classic_workflow", "app_spatial_workflow"),
                                     function(name) identical(code[[1]], as.name(name)), logical(1)))) {
       return(list(code))
     }
@@ -36,6 +36,7 @@ test_that("every module connects its design to the shared reproduction component
     }
   }
   expect_identical(sum(all.names(body(app_classic_workflow)) == "app_reproduction_outputs"), 1L)
+  expect_identical(sum(all.names(body(app_spatial_workflow)) == "app_reproduction_outputs"), 1L)
   expect_true("app_reproduction_ui" %in% all.names(body(fieldhub_design_menus)))
 })
 
