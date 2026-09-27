@@ -164,6 +164,7 @@ diagonal_arrangement <- function(
         if (multiLocationData) {
             fieldhub_abort("'sameEntries' cannot be used with multiLocationData = TRUE.")
         }
+        validate_count_vector(blocks, "blocks")
         if (is.null(blocks) || any(blocks != blocks[1])) {
             fieldhub_abort("With 'sameEntries', all blocks must have the same size.")
         }
@@ -773,6 +774,7 @@ unrep_data_parameters <- function(
             }
             ##############################################################################################
             # Check if the data entry is a data frame
+            validate_spatial_checks(checks, nrows * ncols)
             if (!is.null(checks) && is.numeric(checks) && all(checks %% 1 == 0)) {
                 if (!is.null(data_entry)) {
                     if (length(checks) == 1 && checks >= 1) {
@@ -789,6 +791,11 @@ unrep_data_parameters <- function(
             }
             ###############################################################################################
             if (kindExpt == "DBUDC") {
+                validate_count_vector(blocks, "blocks")
+                if (sum(as.double(blocks)) != nrow(data_entry_UP) - checks) {
+                    fieldhub_abort("The block sizes must match the number of non-check entries in data.",
+                                   data = list(argument = "blocks"))
+                }
                 data_entry_UP <- na.omit(data_entry[,1:2]) 
                 data_entry_UP$BLOCK <- c(rep("ALL", checks), rep(1:length(blocks), times = blocks))
                 colnames(data_entry_UP) <- c("ENTRY", "NAME", "BLOCK")
@@ -819,6 +826,7 @@ unrep_data_parameters <- function(
             }
         } else {
             # Check if the data entry is a data frame
+            validate_spatial_checks(checks, nrows * ncols)
             if (!is.null(checks) && is.numeric(checks) && all(checks %% 1 == 0)) {
                 if (length(checks) == 1 && checks >= 1) {
                   checksEntries <- 1:checks
@@ -831,6 +839,7 @@ unrep_data_parameters <- function(
             if (any(diff(checksEntries) > 1) || any(diff(checksEntries) < 0)) {
               fieldhub_abort(paste("'diagonal_arrangement()' requires input checks to be a continuous range."))
             }
+            validate_design_size(max(as.double(checksEntries)) + as.double(lines))
             if (kindExpt != "DBUDC") {
                 NAME <- c(paste0(rep("Check-", checks), 1:checks),
                         paste0(rep("Gen-", lines), (checksEntries[checks] + 1):(checksEntries[1] + lines + checks - 1)))
@@ -847,6 +856,7 @@ unrep_data_parameters <- function(
                 }
                 if (nrow(data_entry_UP) != (lines + checks)) fieldhub_abort("nrows data != of lines + checks")
             } else if (kindExpt == "DBUDC") {
+                validate_count_vector(blocks, "blocks")
                 if (is.null(blocks)) {
                     fieldhub_abort("'diagonal_arrangement()' requires blocks when kindExpt = 'DBUDC' and data is null.")
                 } 

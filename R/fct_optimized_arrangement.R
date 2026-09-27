@@ -147,6 +147,7 @@ optimized_arrangement <- function(
     recorded_checks <- NULL
     if(is.null(data)) {
         recorded_checks <- checks
+        validate_spatial_checks(checks, nrows * ncols, sort_entries = TRUE)
         if (length(checks) == 1 && checks > 1) {
             checksEntries <- 1:checks
             checks <- checks
@@ -159,43 +160,27 @@ optimized_arrangement <- function(
         }
     }
     if (is.null(data)) {
-        if (!is.null(checks) && is.numeric(checks) && all(checks %% 1 == 0) && 
-            !is.null(amountChecks) && is.numeric(amountChecks) && all(amountChecks %% 1 == 0) &&
-            all(amountChecks > 0) && all(checks > 0)) {
-            if (length(checks) == 1) {
-                if (length(amountChecks) == checks) {
-                    RepChecks <- amountChecks
-                } else if (length(amountChecks) == 1 && amountChecks > checks) {
-                    res <- amountChecks %% checks
-                    divs <- (amountChecks - res) / checks
-                    if (res == 0) {
-                        u <- amountChecks / checks
-                        RepChecks <- rep(u, checks)
-                    } else {
-                        RepChecks <- rep(divs, checks - 1)
-                        RepChecks <- sample(c(RepChecks, amountChecks - sum(RepChecks)))
-                    }
-                }
-            } else if (length(checks) > 1) {
-                if (any(any(checks != sort(checks)) || any(diff(checks) > 1))) {
-                    fieldhub_abort("Input checks must be in consecutive numbers and sorted.")
-                } 
-                if(length(unique(checks)) != length(checks)) fieldhub_abort("Input checks must be different from each other.")
-                if (length(amountChecks) == length(checks)) {
-                    RepChecks <- amountChecks
-                } else if (length(amountChecks) == 1 && amountChecks > length(checks)) {
-                    res <- amountChecks %% length(checks)
-                    divs <- (amountChecks - res) / length(checks)
-                    if (res == 0) {
-                        u <- amountChecks / length(checks)
-                        RepChecks <- rep(u, length(checks))
-                    } else {
-                        RepChecks <- rep(divs, length(checks) - 1)
-                        RepChecks <- sample(c(RepChecks, amountChecks - sum(RepChecks)))
-                    }
-                }
+        validate_count_vector(amountChecks, "amountChecks")
+        if (length(amountChecks) != checks &&
+            !(length(amountChecks) == 1L && amountChecks > checks)) {
+            fieldhub_abort("Supply one replication count per check, or a total greater than the number of checks.",
+                           data = list(argument = "amountChecks", checks = checks))
+        }
+        validate_design_size(sum(as.double(amountChecks)) + as.double(lines))
+        validate_design_size(max(as.double(checksEntries)) + as.double(lines))
+        if (length(amountChecks) == checks) {
+            RepChecks <- amountChecks
+        } else {
+            res <- amountChecks %% checks
+            divs <- (amountChecks - res) / checks
+            if (res == 0) {
+                u <- amountChecks / checks
+                RepChecks <- rep(u, checks)
+            } else {
+                RepChecks <- rep(divs, checks - 1)
+                RepChecks <- sample(c(RepChecks, amountChecks - sum(RepChecks)))
             }
-        } else fieldhub_abort('"optimized_arrangement()" requires inputs checks and amountChecks to be possitive integers and distinct of NULL.')
+        }
         
         t_plots <- as.numeric(sum(RepChecks) + lines)
         if (is_prime(t_plots) || t_plots != (nrows * ncols)) {

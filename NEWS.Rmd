@@ -20,6 +20,12 @@ knitr::opts_chunk$set(
 
 ### Breaking changes:
 
+- Diagonal and optimized designs now reject malformed check counts/ranges
+  and incomplete check replication before allocation. Check entry vectors
+  must be consecutive and distinct; optimized designs still sort them.
+  Diagonal block sizes must be complete positive whole numbers and match
+  the entry count. Valid seeded results and replication draws are unchanged.
+
 - Spatial row and column counts now reject missing, non-finite, fractional,
   and matrix inputs before field construction. Diagonal and optimized entry
   counts, plus augmented-RCBD entry, check, block, and experiment-replication
