@@ -67,13 +67,15 @@ split_families <- function(l = NULL, data = NULL, seed = NULL) {
   }
   gen.list <- na.omit(data[,1:3])
   colnames(gen.list) <- c("ENTRY", "NAME", "FAMILY")
+  if (nrow(gen.list) == 0L) {
+    fieldhub_abort("split_families() requires at least one complete entry.")
+  }
   fmlys <- factor(gen.list$FAMILY)
   familyLevels <- levels(fmlys)
   LF <- length(familyLevels)
   locations <- 1:l
   Glist_locations <- vector(mode = "list", length = l)
-  v <- matrix(nrow = 0, ncol = 3)
-  colnames(v) <- c("ENTRY",  "NAME", "FAMILY")
+  v <- gen.list[0, , drop = FALSE]
   for (n in 1:l) {Glist_locations[[n]] <- v}
   a <- vector(mode = "numeric", length = LF)
   sp <- 1

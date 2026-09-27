@@ -222,6 +222,12 @@
 
 ### Fix bugs:
 
+- `split_families()` now handles locations that receive no entries,
+  retaining zero counts in the location summary instead of failing while
+  combining the allocations. Inputs with no complete entries now give a
+  classed input error. Existing successful seeded allocations and
+  family-coverage warnings are unchanged.
+
 - `run_app()` no longer changes the host's upload limit when merely
   constructing an app. The existing 100 MiB limit is applied on application
   startup and the previous option is restored on shutdown, including after
