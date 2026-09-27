@@ -3,7 +3,8 @@
 #' @description Calls the design engine using the input parameters and
 #' random-number settings recorded in a result's metadata.
 #'
-#' @param x A FielDHub design or allocation plan with recorded parameters.
+#' @param x A FielDHub design, allocation plan, or pair-swap optimization result
+#' with recorded parameters.
 #'
 #' @details The caller's RNG settings and \code{.Random.seed} are restored
 #' on exit, including when reconstruction fails. Arguments are passed as
@@ -48,7 +49,7 @@ reproduce_design <- function(x) {
 #' Resolve a recorded engine without evaluating arbitrary function names
 #' @noRd
 reproduction_engine <- function(x) {
-  if (!is.list(x)) fieldhub_abort("'x' must be a FielDHub design or allocation plan.")
+  if (!is.list(x)) fieldhub_abort("'x' must be a FielDHub design, allocation plan, or optimization result.")
   if (!is.list(x$metadata) || is.null(x$metadata$parameters)) {
     fieldhub_abort("This result has no recorded parameters; reconstruct it from its original inputs.")
   }
@@ -56,8 +57,10 @@ reproduction_engine <- function(x) {
     validate_fieldhub_design(x)
   } else if (inherits(x, "Sparse") || inherits(x, "MultiPrep")) {
     validate_fieldhub_allocation(x)
+  } else if (inherits(x, "fieldhub_optimization")) {
+    validate_fieldhub_optimization(x)
   } else {
-    fieldhub_abort("'x' must be a FielDHub design or allocation plan.")
+    fieldhub_abort("'x' must be a FielDHub design, allocation plan, or optimization result.")
   }
   engines <- fieldhub_engine_registry()
   name <- unname(engines[x$metadata$design])
@@ -79,5 +82,5 @@ fieldhub_engine_registry <- function() {
     rcbd_augmented = "RCBD_augmented", diagonal_arrangement = "diagonal_arrangement",
     optimized_arrangement = "optimized_arrangement", split_families = "split_families",
     sparse_allocation = "sparse_allocation", multi_location_prep = "multi_location_prep",
-    allocation_sparse = "do_optim", allocation_prep = "do_optim")
+    allocation_sparse = "do_optim", allocation_prep = "do_optim", pair_swap = "swap_pairs")
 }

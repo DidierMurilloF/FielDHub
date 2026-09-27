@@ -7,6 +7,14 @@
 
 ### Breaking changes:
 
+- `swap_pairs()` now accepts and records a seed, restores the caller's RNG
+  state, and returns a validated `fieldhub_optimization` result with complete
+  replay metadata. Direct calls without a seed now choose an automatic integer
+  seed, so their layouts can change. With the input matrix already built,
+  replace `set.seed(s); swap_pairs(X)` with `swap_pairs(X, seed = s)` to retain
+  its previous optimization. Internal pair swaps keep the surrounding design's
+  original draw sequence; seeded field designs are unchanged.
+
 - The Shiny application stack is now optional. Installing FielDHub for R
   scripts requires only the design and plotting dependencies; the nine
   app-only packages have moved from Imports to Suggests. `run_app()` checks

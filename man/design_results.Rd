@@ -7,7 +7,7 @@
 FielDHub uses a versioned result contract. Schema 1 retains
 the established elements and storage types of each design family; validation
 checks those elements without coercing valid field books or removing user
-columns. Field, family and allocation results share the same construction
+columns. Field, family, allocation and optimization results share the same construction
 boundary, with validation appropriate to each result type.
 }
 \section{Field designs}{
@@ -59,6 +59,15 @@ locations with zero entries.
 \code{do_optim()} retains the \code{Sparse} or \code{MultiPrep} class.
 Its allocation counts, location sizes and entry lists are validated; these
 plans are not field books and do not yet specify plot coordinates.
+}
+
+\section{Standalone optimization}{
+
+\code{swap_pairs()} retains its matrices, distances and stopping diagnostics,
+with the classes \code{fieldhub_pair_swap} and \code{fieldhub_optimization}.
+Its shared metadata includes the input matrix and every optimization control.
+The validator checks field geometry, entry counts and retained search steps.
+These results can be saved and replayed with \code{reproduce_design()}.
 }
 
 \section{Reproducibility}{

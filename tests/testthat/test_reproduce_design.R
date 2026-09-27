@@ -1,5 +1,5 @@
 test_that("reproduce_design rebuilds every recorded catalogue result", {
-  for (name in setdiff(names(catalogue), "swap_pairs")) {
+  for (name in names(catalogue)) {
     x <- catalogue_design(name)
     replay <- suppressWarnings(reproduce_design(x))
     expect_identical(replay, x, info = name)

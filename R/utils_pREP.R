@@ -190,9 +190,9 @@ pREP <- function(
 
     ################### Spread Reps Optimization ###############################
     if (spread_reps) {
-      # Perform an optimization by using the function swap_pairs()
+      # Keep optimization in this design's seeded draw sequence.
       if (max(table(field_layout)) == 2) {
-        swap <- swap_pairs(
+        swap <- swap_pairs_core(
           X = field_layout, 
           starting_dist = 3, 
           stop_iter = 10, 
@@ -200,7 +200,7 @@ pREP <- function(
           lambda = border_penalization
         )
       } else {
-        swap <- swap_pairs(
+        swap <- swap_pairs_core(
           X = field_layout, 
           starting_dist = 2, 
           stop_iter = 10, 

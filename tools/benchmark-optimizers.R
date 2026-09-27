@@ -17,9 +17,8 @@ measure <- function(size, method) {
   set.seed(57)
   input <- matrix(sample(entries), nrow = size)
   run <- function() {
-    set.seed(27)
     swap_pairs(input, starting_dist = 3, stop_iter = 3,
-               dist_method = method, candidate_sample_size = 4)
+               dist_method = method, candidate_sample_size = 4, seed = 27)
   }
   result <- run()
   if (is.null(result$diagnostics)) stop("This benchmark requires optimizer diagnostics.")

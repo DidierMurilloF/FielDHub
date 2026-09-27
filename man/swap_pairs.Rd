@@ -10,7 +10,8 @@ swap_pairs(
   stop_iter = 10,
   lambda = 0.5,
   dist_method = "euclidean",
-  candidate_sample_size = 4
+  candidate_sample_size = 4,
+  seed = NULL
 )
 }
 \arguments{
@@ -31,6 +32,9 @@ scoring, stopping, and reported distances: "euclidean" (default) or "manhattan".
 
 \item{candidate_sample_size}{Maximum candidates evaluated per swap, as a
 positive whole number within R's integer range. Default is 4.}
+
+\item{seed}{Optional randomization seed. When omitted, an automatic integer
+seed is recorded. The caller's random-number state is restored on exit.}
 }
 \value{
 A list containing:
@@ -47,6 +51,9 @@ last threshold, last attempted minimum distance, and retained minimum distance.
 Stop reasons are \code{iteration_limit}, \code{distance_range_complete},
 and \code{no_distance_thresholds}. A failed attempt is not retained in
 \code{optim_design}.}
+\item{metadata}{The design identifier, schema and package versions, RNG
+settings, resolved seed and complete input parameters, including \code{X}.
+The result inherits from \code{fieldhub_optimization}.}
 }
 \description{
 Attempts to separate repeated entries by swapping cells of
@@ -66,6 +73,13 @@ Manhattan distance between active positions. There are at most
 \code{starting_dist}, and none otherwise. Each threshold permits at most
 \code{stop_iter} complete sweeps. Diagnostics distinguish an exhausted
 threshold budget from completing or skipping the distance range.
+
+Standalone calls use the shared seed contract. To reproduce a previous
+\code{set.seed(s); swap_pairs(X)} call, with \code{X} already constructed,
+pass \code{seed = s}. Calls without a seed now select an automatic seed,
+so their layouts can differ from previous versions. Optimization performed
+inside field-design engines retains its existing draw sequence.
+Use \code{reproduce_design()} to replay a recorded optimization result.
 }
 \examples{
 set.seed(123)
@@ -76,7 +90,8 @@ B <- swap_pairs(
   stop_iter = 50,
   lambda = 0.5,
   dist_method = "euclidean",
-  candidate_sample_size = 3
+  candidate_sample_size = 3,
+  seed = 123
 )
 B$optim_design
 

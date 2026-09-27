@@ -164,6 +164,8 @@ pairs_distance <- function(X, dist_method = "euclidean") {
 #' scoring, stopping, and reported distances: "euclidean" (default) or "manhattan".
 #' @param candidate_sample_size Maximum candidates evaluated per swap, as a
 #' positive whole number within R's integer range. Default is 4.
+#' @param seed Optional randomization seed. When omitted, an automatic integer
+#' seed is recorded. The caller's random-number state is restored on exit.
 #'
 #' @details The finite threshold range is bounded by the field geometry. For
 #' Euclidean distance without missing cells, the historical bound is
@@ -174,6 +176,13 @@ pairs_distance <- function(X, dist_method = "euclidean") {
 #' \code{starting_dist}, and none otherwise. Each threshold permits at most
 #' \code{stop_iter} complete sweeps. Diagnostics distinguish an exhausted
 #' threshold budget from completing or skipping the distance range.
+#'
+#' Standalone calls use the shared seed contract. To reproduce a previous
+#' \code{set.seed(s); swap_pairs(X)} call, with \code{X} already constructed,
+#' pass \code{seed = s}. Calls without a seed now select an automatic seed,
+#' so their layouts can differ from previous versions. Optimization performed
+#' inside field-design engines retains its existing draw sequence.
+#' Use \code{reproduce_design()} to replay a recorded optimization result.
 #'
 #' @return A list containing:
 #' \item{optim_design}{The modified matrix.}
@@ -189,6 +198,9 @@ pairs_distance <- function(X, dist_method = "euclidean") {
 #' Stop reasons are \code{iteration_limit}, \code{distance_range_complete},
 #' and \code{no_distance_thresholds}. A failed attempt is not retained in
 #' \code{optim_design}.}
+#' \item{metadata}{The design identifier, schema and package versions, RNG
+#' settings, resolved seed and complete input parameters, including \code{X}.
+#' The result inherits from \code{fieldhub_optimization}.}
 #'
 #' @examples
 #' set.seed(123)
@@ -199,7 +211,8 @@ pairs_distance <- function(X, dist_method = "euclidean") {
 #'   stop_iter = 50,
 #'   lambda = 0.5,
 #'   dist_method = "euclidean",
-#'   candidate_sample_size = 3
+#'   candidate_sample_size = 3,
+#'   seed = 123
 #' )
 #' B$optim_design
 #'
@@ -209,7 +222,21 @@ swap_pairs <- function(X,
                        stop_iter = 10,
                        lambda = 0.5,
                        dist_method = "euclidean",
-                       candidate_sample_size = 4) {
+                       candidate_sample_size = 4,
+                       seed = NULL) {
+  seed <- resolve_seed(seed)
+  local_design_seed(seed)
+  parameters <- list(X = X, starting_dist = starting_dist, stop_iter = stop_iter,
+                      lambda = lambda, dist_method = dist_method,
+                      candidate_sample_size = candidate_sample_size, seed = seed)
+  result <- swap_pairs_core(X, starting_dist, stop_iter, lambda, dist_method, candidate_sample_size)
+  new_fieldhub_optimization(result, parameters)
+}
+
+#' Pair-swap worker consuming the surrounding design's established RNG stream
+#' @noRd
+swap_pairs_core <- function(X, starting_dist = 3, stop_iter = 10, lambda = 0.5,
+                             dist_method = "euclidean", candidate_sample_size = 4) {
   validate_swap_matrix(X)
   validate_swap_controls(starting_dist, stop_iter, lambda, dist_method, candidate_sample_size)
 

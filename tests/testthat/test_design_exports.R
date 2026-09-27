@@ -2,7 +2,7 @@ test_that("design downloads preserve complete results and reproducibility metada
   directory <- tempfile("fieldhub-design-export-")
   dir.create(directory)
   on.exit(unlink(directory, recursive = TRUE), add = TRUE)
-  for (name in setdiff(names(catalogue), "swap_pairs")) {
+  for (name in names(catalogue)) {
     x <- catalogue_design(name)
     handlers <- design_export_handlers(function() x)
     expect_match(handlers$filename(), "^FielDHub_[a-z_]+_seed_-?[0-9.]+[.]rds$", info = name)

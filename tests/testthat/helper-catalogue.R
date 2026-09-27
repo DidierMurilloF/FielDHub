@@ -159,9 +159,10 @@ catalogue <- list(
     split_families(l = 3, data = gen_list, seed = 38)
   }),
   swap_pairs = list(fun = "swap_pairs", family = "allocation", build = function() {
+    FielDHub:::local_rng_state()
     set.seed(39)
     X <- matrix(sample(c(rep(1:10, 2), 11:50)), ncol = 10)
-    swap_pairs(X, starting_dist = 3, stop_iter = 10)
+    swap_pairs(X, starting_dist = 3, stop_iter = 10, seed = 39)
   })
 )
 

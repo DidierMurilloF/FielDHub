@@ -27,7 +27,7 @@ test_that("metadata chunks retain every character without reaching Excel's cell 
 })
 
 test_that("all recorded design and allocation families round-trip table metadata", {
-  for (name in setdiff(names(catalogue), "swap_pairs")) {
+  for (name in names(catalogue)) {
     design <- catalogue_design(name)
     record <- table_export_record(design, "Recorded design")
     rebuilt <- new.env(parent = baseenv())

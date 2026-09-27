@@ -7,7 +7,8 @@
 reproduce_design(x)
 }
 \arguments{
-\item{x}{A FielDHub design or allocation plan with recorded parameters.}
+\item{x}{A FielDHub design, allocation plan, or pair-swap optimization result
+with recorded parameters.}
 }
 \value{
 A newly generated design or allocation plan, invisibly.
