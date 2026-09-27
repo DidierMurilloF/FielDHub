@@ -138,11 +138,15 @@
 - `optimized_arrangement()` now accepts `rep_checks` for check replication,
   matching the vocabulary used by `RCBD()`, `multi_location_prep()` and
   `do_optim()`. The former `amountChecks` argument still works but signals a
-  `fieldhub_deprecated_warning`; supplying both names is an error. Recorded
-  reproduction parameters now use `rep_checks`; `reproduce_design()` still
-  replays older results recorded with `amountChecks`. Seeded results are
-  unchanged. See `help("design_arguments")` for the shared vocabulary and
-  migration guidance.
+  `fieldhub_deprecated_warning`; supplying both names is an error. An
+  invalid value is now reported under `rep_checks`, the canonical name,
+  whichever spelling the call used. Recorded reproduction parameters now
+  use `rep_checks`; `reproduce_design()` still replays older results
+  recorded with `amountChecks`, translating the legacy name first so
+  replay does not raise a `fieldhub_deprecated_warning` about an argument
+  the replaying caller never typed. Seeded results are unchanged. See
+  `help("design_arguments")` for the shared vocabulary and migration
+  guidance.
 
 - The design functions now signal their errors as R conditions of class
   `fieldhub_error`, with the more specific class `fieldhub_input_error` for
@@ -588,12 +592,26 @@
   supply one) now builds the per-location starting plots silently, even when
   that default does not have one value per location, such as
   `RCBD(t = 4, reps = 2, l = 2)`. `fieldhub_default_warning` now fires only
-  when the caller supplies a `plotNumber` of the wrong length; `locationNames`
-  already worked this way. Every planter check across the design and
-  allocation functions, and the default-plot-start and incomplete-block-size
-  checks, now share one validator each (`validate_planter()`,
-  `default_plot_starts()`, `valid_block_sizes()`); error classes, messages
-  and seeded results are unchanged.
+  when the caller supplies a `plotNumber` of the wrong length;
+  `locationNames` already worked this way, and `diagonal_arrangement()`
+  (which previously never warned about `plotNumber` at all) now warns for a
+  caller-supplied wrong-length value the same as the others. `split_plot()`,
+  `split_split_plot()`, `row_column()`, `alpha_lattice()`, `square_lattice()`
+  and `rectangular_lattice()` now record the effective per-location starts
+  they actually used, not the raw argument, so `reproduce_design()` of a
+  design built at `l > 1` with a mismatched default `plotNumber` replays
+  silently and identically instead of warning on replay for a value the
+  original build never warned about. `strip_plot()`'s own default
+  `plotNumber = NULL` is treated the same whether omitted or passed
+  explicitly. Every planter check across the design and allocation
+  functions, including `strip_plot()`'s (previously unchecked - any value,
+  valid or not, was accepted and recorded), and the default-plot-start and
+  incomplete-block-size checks, now share one validator each
+  (`validate_planter()`, `default_plot_starts()`, `valid_block_sizes()`);
+  error classes and seeded results are unchanged, but the planter error's
+  wording (now the same for every function) and
+  `incomplete_blocks()`/`row_column()`'s block-size error message (now
+  listing every accepted `k`) have changed.
 
 ### Fix bugs:
 
@@ -911,9 +929,10 @@
 - `RCBD_augmented()`'s "the field dimensions do not fit" error, raised when
   explicit `nrows`/`ncols` do not fit the requested blocks, now lists the
   same accepted block counts as its "the number of blocks is too small"
-  error; it previously listed a different, wider range that included block
-  counts the design does not actually accept. `row_column()`'s error for an
-  infeasible `nrows` no longer names `incomplete_blocks()`; both it and
+  error; it previously searched from 5 blocks instead of 3, so its list
+  silently left out the smaller, still-accepted block counts of 3 and 4.
+  `row_column()`'s error for an infeasible `nrows` no longer names
+  `incomplete_blocks()`; both it and
   `incomplete_blocks()` now validate their block size the same way and list
   every accepted size.
 

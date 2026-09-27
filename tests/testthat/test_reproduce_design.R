@@ -69,14 +69,16 @@ test_that("reproduce_design replays an old result recorded with amountChecks", {
   # an older FielDHub version still has metadata$parameters$amountChecks (no
   # rep_checks key at all); reproduce_design() must still rebuild it, because
   # amountChecks remains a working, deprecated argument of
-  # optimized_arrangement() itself.
+  # optimized_arrangement() itself. reproduce_design() translates the legacy
+  # key to rep_checks before replay, so it does not raise a
+  # fieldhub_deprecated_warning about an argument the caller never typed.
   x <- optimized_arrangement(nrows = 10, ncols = 20, lines = 160, checks = 1:4,
                              rep_checks = c(10, 10, 10, 10), seed = 40, year = 2026)
   old_shape <- x
   old_shape$metadata$parameters$amountChecks <- old_shape$metadata$parameters$rep_checks
   old_shape$metadata$parameters$rep_checks <- NULL
 
-  expect_warning(replay <- reproduce_design(old_shape), class = "fieldhub_deprecated_warning")
+  replay <- expect_no_warning(reproduce_design(old_shape))
   expect_identical(replay$fieldBook, x$fieldBook)
   expect_identical(replay$infoDesign, x$infoDesign)
 })
