@@ -237,7 +237,7 @@ mod_diagonal_multiple_server <- function(id) {
             plotNumber <- validate_design(read_whole_numbers(
               input$plot_start_multiple, "Starting Plot Number"
             ))
-            seed_number <- validate_design(resolve_seed(read_app_seed(input$seed_multiple)))
+            seed_number <- validate_design(app_design_seed(input$seed_multiple))
             location_names <- trimws(as.vector(unlist(strsplit(input$location_multiple, ","))))
             sites = as.numeric(input$locs_db)
             return(list(sites = sites, 

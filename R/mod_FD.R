@@ -232,7 +232,7 @@ mod_FD_server <- function(id) {
       ))
       planter <- input$planter_mov_fd
       site_names <-  as.vector(unlist(strsplit(input$Location.fd, ",")))
-      seed <- validate_design(resolve_seed(read_app_seed(input$seed.fd)))
+      seed <- validate_design(app_design_seed(input$seed.fd))
       reps <- as.numeric(input$reps.fd)
       sites <- as.numeric(input$l.fd)
       type_design <- input$kindFD

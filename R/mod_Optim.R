@@ -172,7 +172,7 @@ mod_Optim_server <- function(id) {
         input$plot_start.spatial, "Starting Plot Number"
       ))
       site_names <- as.character(as.vector(unlist(strsplit(input$Location.spatial, ","))))
-      seed_number <- validate_design(resolve_seed(read_app_seed(input$seed.spatial)))
+      seed_number <- validate_design(app_design_seed(input$seed.spatial))
       sites = as.numeric(input$l.optim)
       return(list(sites = sites, 
                   location_names = site_names, 

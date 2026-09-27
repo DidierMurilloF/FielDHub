@@ -220,7 +220,7 @@ mod_SPD_server <- function(id){
       shiny::req(input$reps.spd)
       
       sites <- as.numeric(input$l.spd)
-      seed <- validate_design(resolve_seed(read_app_seed(input$seed.spd)))
+      seed <- validate_design(app_design_seed(input$seed.spd))
       plot_start <- validate_design(read_whole_numbers(
         input$plot_start.spd, "Starting Plot Number"
       ))

@@ -213,7 +213,7 @@ mod_Alpha_Lattice_server <- function(id){
         input$plot_start.alpha, "Starting Plot Number"
       ))
       site_names <-  as.vector(unlist(strsplit(input$Location.alpha, ",")))
-      seed <- validate_design(resolve_seed(read_app_seed(input$myseed.alpha)))
+      seed <- validate_design(app_design_seed(input$myseed.alpha))
       return(list(r = r.alpha, 
                   k = k.alpha, 
                   t = treatments, 

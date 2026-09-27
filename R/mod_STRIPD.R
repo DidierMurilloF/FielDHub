@@ -247,7 +247,7 @@ mod_STRIPD_server <- function(id) {
       shiny::req(input$planter.strip)
       
       l.strip <- as.numeric(input$l.strip)
-      seed.strip <- validate_design(resolve_seed(read_app_seed(input$myseed.strip)))
+      seed.strip <- validate_design(app_design_seed(input$myseed.strip))
       plot_start.strip <- validate_design(read_whole_numbers(
         input$plot_start.strip, "Starting Plot Number"
       ))

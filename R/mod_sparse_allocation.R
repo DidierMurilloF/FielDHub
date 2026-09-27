@@ -297,7 +297,7 @@ mod_sparse_allocation_server <- function(id){
         plotNumber <- validate_design(read_whole_numbers(
           input$sparse_plot_start, "Starting Plot Number"
         ))
-        seed_number <- validate_design(resolve_seed(read_app_seed(input$seed_single)))
+        seed_number <- validate_design(app_design_seed(input$seed_single))
         location_names <- as.vector(unlist(strsplit(input$sparse_loc_names, ",")))
         sites = as.numeric(input$sparse_locations)
         if (length(location_names) == 0 || length(location_names) != sites) {

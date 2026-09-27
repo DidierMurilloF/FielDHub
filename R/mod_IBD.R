@@ -276,7 +276,7 @@ mod_IBD_server <- function(id) {
         input$plot_start.ibd, "Starting Plot Number"
       ))
       site_names <-  as.vector(unlist(strsplit(input$Location.ibd, ",")))
-      seed <- validate_design(resolve_seed(read_app_seed(input$seed.ibd)))
+      seed <- validate_design(app_design_seed(input$seed.ibd))
       sites <- as.numeric(input$l.ibd)
       if (input$k.ibd == "No Options Available") {
         shinyalert::shinyalert(

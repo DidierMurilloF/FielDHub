@@ -566,6 +566,14 @@
 
 ### Fix bugs:
 
+- Blank app seed boxes no longer error. Shiny sends a cleared numeric
+  input as a logical `NA`, which all 19 design modules now accept as an
+  automatic seed, the same as `NULL` or an empty string. Automatic app
+  seeds are now drawn from a package-private random-number stream instead
+  of the shared global stream, so one Shiny session's blank seed box no
+  longer changes another session's random numbers. Explicit seeds are
+  unaffected.
+
 - `plot()` no longer prints ggplot2 messages or warnings. Augmented RCBD
   maps passed their block colours as a second fill scale ("Scale for fill
   is already present"), and outlines drawn without an explicit width

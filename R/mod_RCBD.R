@@ -230,7 +230,7 @@ mod_RCBD_server <- function(id) {
         input$plot_start.rcbd, "Starting Plot Number"
       ))
       site_names <-  as.vector(unlist(strsplit(input$Location.rcbd, ",")))
-      seed <- validate_design(resolve_seed(read_app_seed(input$seed.rcbd)))
+      seed <- validate_design(app_design_seed(input$seed.rcbd))
       sites <- as.numeric(input$l.rcbd)
       continuous <- input$continuous.plot
 

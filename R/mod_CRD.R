@@ -195,7 +195,7 @@ mod_CRD_server <- function(id) {
         input$plot_start.crd, "Starting Plot Number"
       ))[1]
       site_names <-  as.vector(unlist(strsplit(input$Location.crd, ",")))
-      seed <- validate_design(resolve_seed(read_app_seed(input$seed.crd)))
+      seed <- validate_design(app_design_seed(input$seed.crd))
       return(list(t = treatments, 
         r = reps, 
         planter = planter,

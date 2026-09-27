@@ -494,7 +494,7 @@ mod_RCBD_augmented_server <- function(id) {
         gen.list <- getDataup_a_rcbd()$dataUp_a_rcbd
       }
       b <- as.numeric(input$blocks_a_rcbd)
-      seed.number <- validate_design(resolve_seed(read_app_seed(input$myseed_a_rcbd)))
+      seed.number <- validate_design(app_design_seed(input$myseed_a_rcbd))
       planter <- input$planter_mov1_a_rcbd
       l.arcbd <- as.numeric(input$l.arcbd)
       if (length(loc) > l.arcbd) {

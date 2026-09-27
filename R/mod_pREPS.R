@@ -216,7 +216,7 @@ mod_pREPS_server <- function(id){
         input$plot_start.preps, "Starting Plot Number"
       ))
       site_names <- as.character(as.vector(unlist(strsplit(input$Location.preps, ","))))
-      seed_number <- validate_design(resolve_seed(read_app_seed(input$seed.preps)))
+      seed_number <- validate_design(app_design_seed(input$seed.preps))
       sites = as.numeric(input$l.preps)
       return(list(sites = sites, 
                   location_names = site_names, 

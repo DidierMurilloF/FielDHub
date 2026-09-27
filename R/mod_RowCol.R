@@ -276,7 +276,7 @@ mod_RowCol_server <- function(id){
         input$plot_start.rcd, "Starting Plot Number"
       ))
       site_names <-  as.vector(unlist(strsplit(input$Location.rcd, ",")))
-      seed <- validate_design(resolve_seed(read_app_seed(input$seed.rcd)))
+      seed <- validate_design(app_design_seed(input$seed.rcd))
       return(list(r = r.rcd, 
                   k = k.rcd, 
                   t = treatments, 

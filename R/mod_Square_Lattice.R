@@ -222,7 +222,7 @@ mod_Square_Lattice_server <- function(id){
       ))
       planter <- input$planter_mov_square
       site_names <- as.vector(unlist(strsplit(input$Location.square, ",")))
-      seed <- validate_design(resolve_seed(read_app_seed(input$myseed.square)))
+      seed <- validate_design(app_design_seed(input$myseed.square))
       sites <- as.numeric(input$l.square)
       treatments <- get_data_square()$treatments
       

@@ -231,7 +231,7 @@ mod_LSD_server <- function(id){
         input$plot_start.lsd, "Starting Plot Number"
       ))
       loc.lsd <-  as.vector(unlist(strsplit(input$Location.lsd, ",")))
-      seed.number.lsd <- validate_design(resolve_seed(read_app_seed(input$seed.lsd)))
+      seed.number.lsd <- validate_design(app_design_seed(input$seed.lsd))
       planting_lsd <- input$planter.lsd
 
       return(

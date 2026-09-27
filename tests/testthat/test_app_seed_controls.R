@@ -7,6 +7,43 @@ test_that("blank app seeds select the recorded automatic-seed path", {
   expect_identical(.Random.seed, before)
 })
 
+test_that("a cleared Shiny number input means an automatic seed", {
+  blank <- shiny:::inputHandlers$get("shiny.number")(NULL)
+  expect_null(read_app_seed(blank))
+  expect_null(read_app_seed(NA))
+  expect_null(read_app_seed(""))
+  expect_error(read_app_seed("abc"), class = "fieldhub_input_error")
+})
+
+test_that("automatic app seeds vary and never touch the global stream", {
+  set.seed(3)
+  before <- .Random.seed
+  seeds <- replicate(5, app_design_seed(NA))
+  expect_identical(.Random.seed, before)
+  expect_true(length(unique(seeds)) > 1L)
+  expect_true(all(seeds >= 1 & seeds <= .Machine$integer.max & seeds %% 1 == 0))
+  expect_identical(app_design_seed(17), 17)
+})
+
+test_that("automatic app seeds leave an unseeded process unseeded", {
+  withr_rm <- function() if (exists(".Random.seed", globalenv())) rm(".Random.seed", envir = globalenv())
+  saved <- if (exists(".Random.seed", globalenv())) get(".Random.seed", globalenv())
+  on.exit(if (!is.null(saved)) assign(".Random.seed", saved, globalenv()) else withr_rm())
+  withr_rm()
+  app_design_seed(NA)
+  expect_false(exists(".Random.seed", globalenv()))
+})
+
+test_that("every module resolves design seeds through app_design_seed()", {
+  namespace <- asNamespace("FielDHub")
+  servers <- ls(namespace, pattern = "^mod_.*_server$")
+  expect_length(servers, 19L)
+  for (name in servers) {
+    text <- paste(deparse(body(get(name, namespace))), collapse = "\n")
+    expect_false(grepl("resolve_seed(read_app_seed(", text, fixed = TRUE), info = name)
+  }
+})
+
 test_that("app seed parsing preserves valid numeric conversion", {
   for (value in list(0, 0L, -17, 123L, 7.9, "123", " -17 ", "1e3", c(seed = 42))) {
     expect_identical(read_app_seed(value), as.numeric(value))
@@ -61,8 +98,7 @@ test_that("every design module uses shared seed controls without requiring a val
   namespace <- asNamespace("FielDHub")
   seed_resolvers <- function(expr) {
     if (missing(expr) || (!is.call(expr) && !is.pairlist(expr))) return(0L)
-    resolves_input <- is.call(expr) && identical(expr[[1]], as.name("resolve_seed")) &&
-      length(expr) == 2L && is.call(expr[[2]]) && identical(expr[[2]][[1]], as.name("read_app_seed"))
+    resolves_input <- is.call(expr) && identical(expr[[1]], as.name("app_design_seed"))
     as.integer(resolves_input) + sum(vapply(as.list(expr), seed_resolvers, integer(1)))
   }
   seed_requirements <- function(expr) {
@@ -75,7 +111,7 @@ test_that("every design module uses shared seed controls without requiring a val
   for (entry in fieldhub_app_registry()) {
     server <- body(get(entry$server, namespace))
     ui <- body(get(entry$ui, namespace))
-    expect_true("read_app_seed" %in% all.names(server), info = entry$id)
+    expect_true("app_design_seed" %in% all.names(server), info = entry$id)
     expect_true("app_seed_input" %in% all.names(ui), info = entry$id)
     expect_false(seed_requirements(server), info = entry$id)
     expect_identical(seed_resolvers(server), 1L, info = entry$id)

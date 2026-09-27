@@ -298,7 +298,7 @@ mod_multi_loc_preps_server <- function(id){
           input$plot_start_preps, "Starting Plot Number"
         ))
         site_names <- as.character(as.vector(unlist(strsplit(input$loc_name_preps, ","))))
-        seed_number <- validate_design(resolve_seed(read_app_seed(input$seed_preps)))
+        seed_number <- validate_design(app_design_seed(input$seed_preps))
         sites = as.numeric(input$locs_prep)
         if (length(site_names) == 0 || length(site_names) != sites) {
             site_names <- paste0("LOC", 1:sites)
