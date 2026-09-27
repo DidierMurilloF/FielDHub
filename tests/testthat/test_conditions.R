@@ -139,7 +139,7 @@ test_that("field dimensions that do not fit raise an error with the valid option
   calls <- list(
     diagonal_arrangement = quote(diagonal_arrangement(nrows = 7, ncols = 7, lines = 100, checks = 4)),
     optimized_arrangement = quote(optimized_arrangement(nrows = 7, ncols = 7, lines = 100,
-                                                        amountChecks = 20, checks = 1:5)),
+                                                        rep_checks = 20, checks = 1:5)),
     partially_replicated = quote(partially_replicated(nrows = 7, ncols = 7, repGens = c(50, 7),
                                                       repUnits = c(1, 2))),
     RCBD_augmented = quote(RCBD_augmented(lines = 20, checks = 3, b = 4, nrows = 7, ncols = 7))

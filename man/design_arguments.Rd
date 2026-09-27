@@ -28,6 +28,18 @@ Each function's help page defines its supported inputs and constraints.
     random-number stream and recorded; the design's own randomization does
     not change the caller's stream.}
   \item{\code{k}}{Number of plots per incomplete block.}
+  \item{\code{checks}}{A check count, entry identifiers, or labels; see
+    "Dimensions, factors and checks" below.}
+  \item{\code{rep_checks}}{Check replication: how many times each check is
+    repeated. \code{RCBD()} takes one count per check label supplied in
+    \code{checks} (recycled from a scalar). \code{optimized_arrangement()}
+    takes either a total check count or one count per check label (this is
+    \code{amountChecks} in 1.5.x scripts; see "Migrating existing scripts").
+    Multi-location allocations (\code{multi_location_prep()},
+    \code{do_optim(design = "prep")}) take the same one-count-per-check
+    form. \code{sparse_allocation()} and \code{do_optim(design = "sparse")}
+    have no \code{rep_checks}: every check is replicated once per location
+    by construction.}
 }
 }
 
@@ -41,6 +53,15 @@ arguments so whole plots, subplots and crossed strips remain distinct.
 The meaning of \code{checks} is design-specific: a count, entry identifiers,
 or labels. Consult the function's help before transferring a check vector
 between design families.
+
+Partial and multi-location replication does not share one argument name
+across families; each keeps the allocation arguments that describe its own
+replication scheme: \code{partially_replicated()}'s \code{repGens} (how
+many entries get each replication level) and \code{repUnits} (those
+replication levels), and \code{RCBD_augmented()}'s \code{b} (number of
+augmented blocks) and \code{repsExpt} (replicates of the whole experiment).
+These are design-specific allocation arguments, not aliases of
+\code{reps} or \code{rep_checks}.
 }
 
 \section{Boolean controls}{
@@ -60,6 +81,8 @@ strings, vectors, and arrays are not supported. Invalid switches signal a
 \code{alpha_lattice()}, \code{square_lattice()}, \code{rectangular_lattice()}
 and \code{row_column()}, replace the argument name \code{r} with \code{reps}.
 In \code{strip_plot()}, replace \code{b} with \code{reps}.
+In \code{optimized_arrangement()}, replace \code{amountChecks} with
+\code{rep_checks}.
 \code{RCBD_augmented(b = ...)} still denotes blocks and is unchanged.
 
 Old names and positional calls retain their meaning and signal a warning

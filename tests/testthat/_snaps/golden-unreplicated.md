@@ -2012,7 +2012,7 @@
                     "names": {
                       "type": "character",
                       "attributes": {},
-                      "value": ["nrows", "ncols", "lines", "amountChecks", "checks", "planter", "l", "plotNumber", "seed", "exptName", "locationNames", "spread_reps", "data", "year"]
+                      "value": ["nrows", "ncols", "lines", "checks", "planter", "l", "plotNumber", "seed", "exptName", "locationNames", "spread_reps", "data", "year", "rep_checks"]
                     }
                   },
                   "value": [
@@ -2030,11 +2030,6 @@
                       "type": "double",
                       "attributes": {},
                       "value": [100]
-                    },
-                    {
-                      "type": "double",
-                      "attributes": {},
-                      "value": [20]
                     },
                     {
                       "type": "integer",
@@ -2081,6 +2076,11 @@
                       "type": "character",
                       "attributes": {},
                       "value": ["2026"]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [20]
                     }
                   ]
                 }

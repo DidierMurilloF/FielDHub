@@ -27,12 +27,37 @@ test_that("every exported planter check shares the same classed error", {
     function() diagonal_arrangement(nrows = 15, ncols = 20, lines = 270, checks = 4,
                                     planter = "zigzag", seed = 1),
     function() latin_square(t = 4, planter = "zigzag", seed = 1),
-    function() RCBD_augmented(lines = 50, checks = 3, b = 6, planter = "zigzag", seed = 1)
+    function() RCBD_augmented(lines = 50, checks = 3, b = 6, planter = "zigzag", seed = 1),
+    function() optimized_arrangement(nrows = 10, ncols = 20, lines = 160, checks = 1:4,
+                                     rep_checks = c(10, 10, 10, 10), planter = "zigzag", seed = 1)
   )
   for (f in calls) {
     e <- expect_error(f(), class = "fieldhub_input_error")
     expect_identical(e$options, c("serpentine", "cartesian"))
   }
+})
+
+test_that("optimized_arrangement accepts rep_checks and deprecates amountChecks", {
+  a <- optimized_arrangement(nrows = 10, ncols = 20, lines = 160, checks = 1:4,
+                             rep_checks = c(10, 10, 10, 10), seed = 1)
+  expect_warning(
+    b <- optimized_arrangement(nrows = 10, ncols = 20, lines = 160, checks = 1:4,
+                               amountChecks = c(10, 10, 10, 10), seed = 1),
+    class = "fieldhub_deprecated_warning"
+  )
+  expect_identical(a$fieldBook, b$fieldBook)
+  expect_error(
+    optimized_arrangement(nrows = 10, ncols = 20, lines = 160, checks = 1:4,
+                          rep_checks = c(10, 10, 10, 10), amountChecks = c(10, 10, 10, 10), seed = 1),
+    class = "fieldhub_input_error"
+  )
+})
+
+test_that("optimized_arrangement records rep_checks, not amountChecks", {
+  a <- optimized_arrangement(nrows = 10, ncols = 20, lines = 160, checks = 1:4,
+                             rep_checks = c(10, 10, 10, 10), seed = 1)
+  expect_identical(a$metadata$parameters$rep_checks, c(10, 10, 10, 10))
+  expect_null(a$metadata$parameters$amountChecks)
 })
 
 test_that("default_plot_starts() reproduces the two inline formulas it replaces", {

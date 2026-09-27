@@ -17,7 +17,7 @@ test_that("design functions warn when plotNumber has the wrong length", {
     RCBD_augmented = function() RCBD_augmented(lines = 40, checks = 4, b = 4, l = 2,
                                                plotNumber = c(1, 2, 3), seed = 1),
     optimized_arrangement = function() optimized_arrangement(
-      nrows = 12, ncols = 10, lines = 100, amountChecks = 20, checks = 1:5,
+      nrows = 12, ncols = 10, lines = 100, rep_checks = 20, checks = 1:5,
       l = 2, plotNumber = 101, seed = 1
     ),
     partially_replicated = function() partially_replicated(

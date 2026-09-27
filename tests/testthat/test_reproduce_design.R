@@ -62,3 +62,21 @@ test_that("recorded argument expressions are values, not executable code", {
   x$metadata$parameters$data <- quote(stop("must not execute"))
   expect_error(reproduce_design(x), "Data must be a data frame", class = "fieldhub_input_error")
 })
+
+test_that("reproduce_design replays an old result recorded with amountChecks", {
+  # AD-08: optimized_arrangement() now records the vocabulary name rep_checks
+  # instead of amountChecks (see test_shared_validators.R). A result saved by
+  # an older FielDHub version still has metadata$parameters$amountChecks (no
+  # rep_checks key at all); reproduce_design() must still rebuild it, because
+  # amountChecks remains a working, deprecated argument of
+  # optimized_arrangement() itself.
+  x <- optimized_arrangement(nrows = 10, ncols = 20, lines = 160, checks = 1:4,
+                             rep_checks = c(10, 10, 10, 10), seed = 40, year = 2026)
+  old_shape <- x
+  old_shape$metadata$parameters$amountChecks <- old_shape$metadata$parameters$rep_checks
+  old_shape$metadata$parameters$rep_checks <- NULL
+
+  expect_warning(replay <- reproduce_design(old_shape), class = "fieldhub_deprecated_warning")
+  expect_identical(replay$fieldBook, x$fieldBook)
+  expect_identical(replay$infoDesign, x$infoDesign)
+})

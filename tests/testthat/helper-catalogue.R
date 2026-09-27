@@ -113,7 +113,7 @@ catalogue <- list(
                          sameEntries = TRUE, plotNumber = 1, seed = 27, year = 2026)
   }),
   optimized_arrangement = list(fun = "optimized_arrangement", family = "unreplicated", build = function() {
-    optimized_arrangement(nrows = 12, ncols = 10, lines = 100, amountChecks = 20,
+    optimized_arrangement(nrows = 12, ncols = 10, lines = 100, rep_checks = 20,
                           checks = 1:5, plotNumber = 101, seed = 28, year = 2026)
   }),
   RCBD_augmented = list(fun = "RCBD_augmented", family = "unreplicated", build = function() {

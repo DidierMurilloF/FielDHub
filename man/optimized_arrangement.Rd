@@ -18,7 +18,8 @@ optimized_arrangement(
   locationNames = NULL,
   spread_reps = TRUE,
   data = NULL,
-  year = NULL
+  year = NULL,
+  rep_checks = NULL
 )
 }
 \arguments{
@@ -28,7 +29,7 @@ optimized_arrangement(
 
 \item{lines}{Number of genotypes, experimental lines or treatments.}
 
-\item{amountChecks}{Integer with the amount total of checks or a numeric vector with the replicates of each check label.}
+\item{amountChecks}{Deprecated alias for \code{rep_checks}.}
 
 \item{checks}{Number of genotypes as checks.}
 
@@ -44,13 +45,16 @@ optimized_arrangement(
 
 \item{locationNames}{(optional) Name for each location.}
 
-\item{spread_reps}{A logical value indicating whether to maximize the spatial 
+\item{spread_reps}{A logical value indicating whether to maximize the spatial
 distance between replicated treatments in the field. Default is \code{TRUE}.}
 
 \item{data}{(optional) Data frame with 3 columns: \code{ENTRY | NAME | REPS}.}
 
 \item{year}{(optional) Year recorded in the \code{YEAR} column of the field book.
 By default the current year.}
+
+\item{rep_checks}{Integer with the total amount of checks, or a numeric
+vector with the replicates of each check label.}
 }
 \value{
 A list with five elements.

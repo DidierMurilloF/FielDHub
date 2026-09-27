@@ -1,7 +1,7 @@
 test_that("spatial check counts and entry ranges reject malformed values", {
   specs <- list(
     diagonal_arrangement = list(nrows = 15, ncols = 20, lines = 270, checks = 4),
-    optimized_arrangement = list(nrows = 12, ncols = 10, lines = 100, amountChecks = 20, checks = 1:5))
+    optimized_arrangement = list(nrows = 12, ncols = 10, lines = 100, rep_checks = 20, checks = 1:5))
   for (engine in names(specs)) {
     for (bad in list(NULL, numeric(), NA_real_, NaN, Inf, 0, -1, 2.5, "2", TRUE,
                      list(2), matrix(2), c(1, NA), c(1, 1), c(1, 3))) {
@@ -20,7 +20,7 @@ test_that("optimized check replication is complete and matches the check count",
   for (bad in list(NULL, numeric(), NA_real_, NaN, Inf, 0, -1, 2.5, "20", TRUE,
                    list(20), matrix(20), c(4, NA, 4, 4, 4), c(10, 10), 4, 5)) {
     expect_error(optimized_arrangement(nrows = 12, ncols = 10, lines = 100,
-      checks = 1:5, amountChecks = bad, seed = 19), class = "fieldhub_input_error")
+      checks = 1:5, rep_checks = bad, seed = 19), class = "fieldhub_input_error")
   }
 })
 

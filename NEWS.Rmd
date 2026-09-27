@@ -129,6 +129,8 @@ knitr::opts_chunk$set(
 
 * `CRD()` now accepts `locationNames`, matching the other design functions. The old `locationName` argument still works, including positional calls, but signals a `fieldhub_deprecated_warning`. Supplying both spellings is an error. Design output and the saved `infoDesign$locationName` field are unchanged.
 
+* `optimized_arrangement()` now accepts `rep_checks` for check replication, matching the vocabulary used by `RCBD()`, `multi_location_prep()` and `do_optim()`. The former `amountChecks` argument still works but signals a `fieldhub_deprecated_warning`; supplying both names is an error. Recorded reproduction parameters now use `rep_checks`; `reproduce_design()` still replays older results recorded with `amountChecks`. Seeded results are unchanged. See `help("design_arguments")` for the shared vocabulary and migration guidance.
+
 * The design functions now signal their errors as R conditions of class `fieldhub_error`, with the more specific class `fieldhub_input_error` for invalid arguments or `fieldhub_dimension_error` for field dimensions that do not fit the entries, so scripts can catch them with `tryCatch()`. They no longer raise Shiny validation errors or print to the console. When the field dimensions do not fit, `diagonal_arrangement()`, `optimized_arrangement()`, `partially_replicated()`, `multi_location_prep()` and `RCBD_augmented()` used to print a message and return `NULL` (or, for `RCBD_augmented()`, a data frame of options); they now raise a `fieldhub_dimension_error` whose `options` field holds the valid dimensions. `plot()` raises an error, instead of drawing an empty plot, when the layout or location requested is not available. The Shiny app shows these errors as before.
 * A `seed` that is not a single number is now an error. `CRD()`, `full_factorial()`, `split_plot()` and `strip_plot()` used to ignore a character seed, such as `"123"`, and pick a random one.
 * The results of the design functions have the class `c("fieldhub_<design>", "FielDHub")` instead of `"FielDHub"`, and a new element, `metadata`. Code that compares `class(x) == "FielDHub"` should use `inherits(x, "FielDHub")`.
@@ -370,6 +372,8 @@ knitr::opts_chunk$set(
 
 * The generated namespace no longer imports the unused `dplyr::glimpse()`, `golem::activate_js()` and `stats::dist()` symbols.
 
+* A design called with its own default `plotNumber` (the caller did not supply one) now builds the per-location starting plots silently, even when that default does not have one value per location, such as `RCBD(t = 4, reps = 2, l = 2)`. `fieldhub_default_warning` now fires only when the caller supplies a `plotNumber` of the wrong length; `locationNames` already worked this way. Every planter check across the design and allocation functions, and the default-plot-start and incomplete-block-size checks, now share one validator each (`validate_planter()`, `default_plot_starts()`, `valid_block_sizes()`); error classes, messages and seeded results are unchanged.
+
 ### Fix bugs:
 
 * Blank app seed boxes no longer error. Shiny sends a cleared numeric input as a logical `NA`, which all 19 design modules now accept as an automatic seed, the same as `NULL` or an empty string. Automatic app seeds are now drawn from a package-private random-number stream instead of the shared global stream, so one Shiny session's blank seed box no longer changes another session's random numbers. Explicit seeds are unaffected.
@@ -461,6 +465,8 @@ knitr::opts_chunk$set(
 * The documentation of `swap_pairs()`, `do_optim()`, `sparse_allocation()` and `multi_location_prep()` now matches their defaults and the elements they return.
 * `split_plot()`, `split_split_plot()` and `strip_plot()` now raise a classed input error for a sub-plot, sub-sub-plot or strip factor with only one level, which used to crash with base R's "incorrect number of dimensions"; a single whole plot and a single replicate are still valid designs. `incomplete_blocks()` and `row_column()` (and, through them, `alpha_lattice()`, `square_lattice()` and `rectangular_lattice()`) now explain that there is not enough replication for the block size instead of leaking blocksdesign's "Too many parameters for the available plots". `full_factorial()` no longer names `RCBD()` in the error it raises for a single-run design (every factor at one level). `plot()` of an unavailable location, stacking or layout option now raises a classed `fieldhub_input_error` that lists the valid options, replacing the internal field-layout adapter's warn-and-return-`NULL` path (and its short-lived `fieldhub_layout_warning` class); the augmented RCBD app module routes the same error through the app's validation messages instead of silently swallowing it.
 
+* `RCBD_augmented()`'s "the field dimensions do not fit" error, raised when explicit `nrows`/`ncols` do not fit the requested blocks, now lists the same accepted block counts as its "the number of blocks is too small" error; it previously listed a different, wider range that included block counts the design does not actually accept. `row_column()`'s error for an infeasible `nrows` no longer names `incomplete_blocks()`; both it and `incomplete_blocks()` now validate their block size the same way and list every accepted size.
+
 ### Changes to results for a given seed:
 
 Some of the fixes above change the design produced for a given seed. Field books generated with FielDHub 1.5.0 or earlier should be checked if they came from:
@@ -477,6 +483,7 @@ Some of the fixes above change the design produced for a given seed. Field books
 * The Split-Split Plot module of the Shiny app with the horizontal reps layout (the exported field book had the vertical layout).
 * Not a design change: the golden layout-preview snapshot for `stacked = "grid_panel"` on a design that does not support it now shows the classed `fieldhub_input_error` message instead of the placeholder "No layout", because `plot()`/`plot_layout()` now raise that error instead of returning `NULL` (see Fix bugs). No generated field book is affected.
 * Not a design change: `do_optim()` results now carry an additional `fieldhub_sparse_optimization` or `fieldhub_multi_prep_optimization` class next to the legacy `Sparse`/`MultiPrep` one, so callers can recognize a FielDHub allocation plan without matching on the legacy name. The legacy classes, `print()`/`summary()` behavior and generated allocations are unchanged.
+* Not a design change: `optimized_arrangement()` results now record their check replication as `rep_checks` in `metadata$parameters` instead of `amountChecks`, whichever argument name the call used. `reproduce_design()` still replays older results recorded with `amountChecks`. The field book, `infoDesign` and every other output are unchanged.
 
 # FielDHub 1.3.1
 

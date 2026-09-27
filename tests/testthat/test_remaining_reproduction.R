@@ -41,7 +41,7 @@ test_that("augmented replay records full field dimensions and custom check entri
                       seed = 38, year = 2026)
   expect_identical(x$metadata$parameters$ncols, 32)
   expect_identical(do.call(RCBD_augmented, x$metadata$parameters), x)
-  x <- optimized_arrangement(nrows = 12, ncols = 10, lines = 100, amountChecks = 20,
+  x <- optimized_arrangement(nrows = 12, ncols = 10, lines = 100, rep_checks = 20,
                              checks = c(101, 102, 103, 104), seed = 38, year = 2026)
   expect_identical(x$metadata$parameters$checks, c(101, 102, 103, 104))
   expect_identical(do.call(optimized_arrangement, x$metadata$parameters), x)

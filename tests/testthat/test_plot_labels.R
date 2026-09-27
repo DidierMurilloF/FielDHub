@@ -82,7 +82,7 @@ test_that("partially replicated design labels filler plots", {
 
 test_that("optimized arrangement draws entry numbers unabbreviated", {
   o <- optimized_arrangement(
-    nrows = 12, ncols = 10, lines = 110, amountChecks = 10, checks = 1,
+    nrows = 12, ncols = 10, lines = 110, rep_checks = 10, checks = 1,
     plotNumber = 101, seed = 1
   )
   p <- plot_layout(o, l = 1)

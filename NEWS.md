@@ -135,6 +135,15 @@
   an error. Design output and the saved `infoDesign$locationName` field are
   unchanged.
 
+- `optimized_arrangement()` now accepts `rep_checks` for check replication,
+  matching the vocabulary used by `RCBD()`, `multi_location_prep()` and
+  `do_optim()`. The former `amountChecks` argument still works but signals a
+  `fieldhub_deprecated_warning`; supplying both names is an error. Recorded
+  reproduction parameters now use `rep_checks`; `reproduce_design()` still
+  replays older results recorded with `amountChecks`. Seeded results are
+  unchanged. See `help("design_arguments")` for the shared vocabulary and
+  migration guidance.
+
 - The design functions now signal their errors as R conditions of class
   `fieldhub_error`, with the more specific class `fieldhub_input_error` for
   invalid arguments or `fieldhub_dimension_error` for field dimensions that do
@@ -575,6 +584,17 @@
 - The generated namespace no longer imports the unused `dplyr::glimpse()`,
   `golem::activate_js()` and `stats::dist()` symbols.
 
+- A design called with its own default `plotNumber` (the caller did not
+  supply one) now builds the per-location starting plots silently, even when
+  that default does not have one value per location, such as
+  `RCBD(t = 4, reps = 2, l = 2)`. `fieldhub_default_warning` now fires only
+  when the caller supplies a `plotNumber` of the wrong length; `locationNames`
+  already worked this way. Every planter check across the design and
+  allocation functions, and the default-plot-start and incomplete-block-size
+  checks, now share one validator each (`validate_planter()`,
+  `default_plot_starts()`, `valid_block_sizes()`); error classes, messages
+  and seeded results are unchanged.
+
 ### Fix bugs:
 
 - Blank app seed boxes no longer error. Shiny sends a cleared numeric
@@ -888,6 +908,15 @@
   module routes the same error through the app's validation messages
   instead of silently swallowing it.
 
+- `RCBD_augmented()`'s "the field dimensions do not fit" error, raised when
+  explicit `nrows`/`ncols` do not fit the requested blocks, now lists the
+  same accepted block counts as its "the number of blocks is too small"
+  error; it previously listed a different, wider range that included block
+  counts the design does not actually accept. `row_column()`'s error for an
+  infeasible `nrows` no longer names `incomplete_blocks()`; both it and
+  `incomplete_blocks()` now validate their block size the same way and list
+  every accepted size.
+
 ### Changes to results for a given seed:
 
 Some of the fixes above change the design produced for a given seed. Field
@@ -925,6 +954,12 @@ from:
   next to the legacy `Sparse`/`MultiPrep` one, so callers can recognize a
   FielDHub allocation plan without matching on the legacy name. The legacy
   classes, `print()`/`summary()` behavior and generated allocations are
+  unchanged.
+- Not a design change: `optimized_arrangement()` results now record their
+  check replication as `rep_checks` in `metadata$parameters` instead of
+  `amountChecks`, whichever argument name the call used.
+  `reproduce_design()` still replays older results recorded with
+  `amountChecks`. The field book, `infoDesign` and every other output are
   unchanged.
 
 # FielDHub 1.3.1

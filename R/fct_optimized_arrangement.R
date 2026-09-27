@@ -9,7 +9,7 @@
 #' @param ncols Number of columns in the field.
 #' @param lines Number of genotypes, experimental lines or treatments.
 #' @param checks Number of genotypes as checks.
-#' @param amountChecks Integer with the amount total of checks or a numeric vector with the replicates of each check label.
+#' @param amountChecks Deprecated alias for \code{rep_checks}.
 #' @param planter Option for \code{serpentine} or \code{cartesian} arrangement. By default  \code{planter = 'serpentine'}.
 #' @param l Number of locations. By default \code{l = 1}.
 #' @param plotNumber Numeric vector with the starting plot number for each location. By default \code{plotNumber = 101}.
@@ -17,9 +17,11 @@
 #' @param exptName (optional) Name of the experiment.
 #' @param locationNames (optional) Name for each location.
 #' @param data (optional) Data frame with 3 columns: \code{ENTRY | NAME | REPS}.
-#' @param spread_reps A logical value indicating whether to maximize the spatial 
+#' @param spread_reps A logical value indicating whether to maximize the spatial
 #'   distance between replicated treatments in the field. Default is \code{TRUE}.
-#' 
+#' @param rep_checks Integer with the total amount of checks, or a numeric
+#'   vector with the replicates of each check label.
+#'
 #' @author Didier Murillo [aut],
 #'         Salvador Gezan [aut],
 #'         Ana Heilman [ctb],
@@ -102,36 +104,38 @@
 #'
 #' @export
 optimized_arrangement <- function(
-    nrows = NULL, 
-    ncols = NULL, 
-    lines = NULL,  
-    amountChecks = NULL, 
+    nrows = NULL,
+    ncols = NULL,
+    lines = NULL,
+    amountChecks = NULL,
     checks = NULL,
-    planter = "serpentine", 
-    l = 1, 
-    plotNumber = 101, 
-    seed = NULL, 
+    planter = "serpentine",
+    l = 1,
+    plotNumber = 101,
+    seed = NULL,
     exptName = NULL,
-    locationNames = NULL, 
-    spread_reps = TRUE, 
+    locationNames = NULL,
+    spread_reps = TRUE,
     data = NULL,
-    year = NULL) {
+    year = NULL,
+    rep_checks = NULL) {
+    plotNumber_supplied <- !missing(plotNumber)
+    amountChecks <- resolve_argument_alias(
+        rep_checks, amountChecks, new = "rep_checks", old = "amountChecks",
+        new_supplied = !missing(rep_checks), old_supplied = !missing(amountChecks)
+    )
     validate_locations(l)
     validate_flag(spread_reps, "spread_reps")
     year <- resolve_year(year)
-    
+
     seed <- resolve_seed(seed)
     local_design_seed(seed)
-    if (all(c("serpentine", "cartesian") != planter)) {
-        fieldhub_abort('Input planter is unknown. Please, choose one: "serpentine" or "cartesian"')
-    }
+    validate_planter(planter)
     validate_plot_starts(plotNumber)
     if (!is.null(l)) {
         if (is.null(plotNumber) || length(plotNumber) != l) {
-            if (l > 1){
-                default_plots <- seq(1001, 1000*(l+1), 1000)
-            } else default_plots <- 1001
-            warn_default_plot_numbers(plotNumber, l, default_plots)
+            default_plots <- default_plot_starts(l, 1001)
+            warn_default_plot_numbers(plotNumber, l, default_plots, caller_supplied = plotNumber_supplied)
             plotNumber <- default_plots
         }
     } else fieldhub_abort("Number of locations/sites is missing")
@@ -363,7 +367,8 @@ optimized_arrangement <- function(
         fieldBook = field_book
     )
     reproduction_parameters <- record_design_parameters(
-        environment(), overrides = list(checks = recorded_checks)
+        environment(), overrides = list(checks = recorded_checks, rep_checks = amountChecks),
+        exclude = "amountChecks"
     )
     output <- new_fieldhub_design(output, "optimized_arrangement", parameters = reproduction_parameters)
     return(invisible(output))

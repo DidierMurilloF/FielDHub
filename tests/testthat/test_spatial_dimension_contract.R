@@ -1,7 +1,7 @@
 test_that("spatial engines validate row and column counts before field construction", {
   specifications <- list(
     diagonal_arrangement = list(nrows = 15, ncols = 20, lines = 270, checks = 4),
-    optimized_arrangement = list(nrows = 12, ncols = 10, lines = 100, amountChecks = 20, checks = 1:5),
+    optimized_arrangement = list(nrows = 12, ncols = 10, lines = 100, rep_checks = 20, checks = 1:5),
     RCBD_augmented = list(lines = 122, checks = 4, b = 5, nrows = 5, ncols = 29, random = FALSE),
     partially_replicated = list(nrows = 8, ncols = 8, repGens = c(50, 7), repUnits = c(1, 2), spread_reps = FALSE))
   for (engine in names(specifications)) for (parameter in c("nrows", "ncols")) {
@@ -37,7 +37,7 @@ test_that("dimension vectors retain their storage while rejecting invalid values
 test_that("unreplicated entry and block counts reject malformed scalar values", {
   specifications <- list(
     diagonal_arrangement = list(nrows = 15, ncols = 20, lines = 270, checks = 4),
-    optimized_arrangement = list(nrows = 12, ncols = 10, lines = 100, amountChecks = 20, checks = 1:5),
+    optimized_arrangement = list(nrows = 12, ncols = 10, lines = 100, rep_checks = 20, checks = 1:5),
     RCBD_augmented = list(lines = 50, checks = 3, b = 5, repsExpt = 1))
   for (engine in names(specifications)) {
     parameters <- if (engine == "RCBD_augmented") c("lines", "checks", "b", "repsExpt") else "lines"

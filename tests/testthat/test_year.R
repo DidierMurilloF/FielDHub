@@ -12,7 +12,7 @@ year_designs <- function(year) {
     ),
     RCBD_augmented = RCBD_augmented(lines = 50, checks = 3, b = 5, seed = 1, year = year),
     optimized_arrangement = optimized_arrangement(
-      nrows = 12, ncols = 10, lines = 100, amountChecks = 20, checks = 1:5,
+      nrows = 12, ncols = 10, lines = 100, rep_checks = 20, checks = 1:5,
       seed = 1, year = year
     ),
     partially_replicated = partially_replicated(

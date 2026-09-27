@@ -38,7 +38,7 @@ test_that("print(summary()) shows the data input of p-rep and optimized designs"
   expect_match(summary_section(prep, "4. Structure", "5. Structure"),
                "data.frame", all = FALSE)
   optim <- optimized_arrangement(nrows = 12, ncols = 10, lines = 100,
-                                 amountChecks = 20, checks = 1:5, seed = 1)
+                                 rep_checks = 20, checks = 1:5, seed = 1)
   expect_match(summary_section(optim, "4. Structure", "5. Structure"),
                "data.frame", all = FALSE)
 })

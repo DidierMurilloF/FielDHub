@@ -47,7 +47,7 @@ test_that("optimized_arrangement() is reproducible when checks do not divide eve
   # Regression test: the replication of the checks was sampled before the
   # seed was set, from the caller's random-number stream
   build <- function() {
-    optimized_arrangement(nrows = 12, ncols = 10, lines = 99, amountChecks = 21,
+    optimized_arrangement(nrows = 12, ncols = 10, lines = 99, rep_checks = 21,
                           checks = 1:5, seed = 7, year = 2026)
   }
   set.seed(1)
