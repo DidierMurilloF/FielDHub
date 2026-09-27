@@ -588,12 +588,15 @@ diagonal_arrangement <- function(
         if (dim(fieldBook)[1]*dim(fieldBook)[2] == 0) {
             fieldhub_abort("fieldBook is NULL or != data frame or length 0.")
         }
-        fieldBook <- fieldBook[,-11]
-        
+        # BLOCK is only present for DBUDC entry lists (see colnames(data_entry_UP)
+        # <- c("ENTRY", "NAME", "BLOCK") above); dropping it by name is a no-op
+        # when it is absent, reproducing the previous fieldBook[, -11].
+        fieldBook$BLOCK <- NULL
         ID <- 1:nrow(fieldBook)
-        fieldBook <- fieldBook[, c(6,7,9,4,2,3,5,1,10)]
+        fieldBook <- fieldBook[, c("EXPT", "LOCATION", "YEAR", "PLOT", "ROW",
+                                   "COLUMN", "CHECKS", "ENTRY", "NAME")]
         fieldBook <- cbind(ID, fieldBook)
-        colnames(fieldBook)[10] <- "TREATMENT"
+        names(fieldBook)[names(fieldBook) == "NAME"] <- "TREATMENT"
         rownames(fieldBook) <- 1:nrow(fieldBook)
         
         linesexpt <- data_random$Lines

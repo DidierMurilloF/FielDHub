@@ -476,6 +476,7 @@ Some of the fixes above change the design produced for a given seed. Field books
 * `optimized_arrangement()` when `amountChecks` is not a multiple of the number of checks (the design was not reproducible).
 * The Split-Split Plot module of the Shiny app with the horizontal reps layout (the exported field book had the vertical layout).
 * Not a design change: the golden layout-preview snapshot for `stacked = "grid_panel"` on a design that does not support it now shows the classed `fieldhub_input_error` message instead of the placeholder "No layout", because `plot()`/`plot_layout()` now raise that error instead of returning `NULL` (see Fix bugs). No generated field book is affected.
+* Not a design change: `do_optim()` results now carry an additional `fieldhub_sparse_optimization` or `fieldhub_multi_prep_optimization` class next to the legacy `Sparse`/`MultiPrep` one, so callers can recognize a FielDHub allocation plan without matching on the legacy name. The legacy classes, `print()`/`summary()` behavior and generated allocations are unchanged.
 
 # FielDHub 1.3.1
 

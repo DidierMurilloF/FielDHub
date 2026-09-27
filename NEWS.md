@@ -920,6 +920,12 @@ from:
   `fieldhub_input_error` message instead of the placeholder "No layout",
   because `plot()`/`plot_layout()` now raise that error instead of
   returning `NULL` (see Fix bugs). No generated field book is affected.
+- Not a design change: `do_optim()` results now carry an additional
+  `fieldhub_sparse_optimization` or `fieldhub_multi_prep_optimization` class
+  next to the legacy `Sparse`/`MultiPrep` one, so callers can recognize a
+  FielDHub allocation plan without matching on the legacy name. The legacy
+  classes, `print()`/`summary()` behavior and generated allocations are
+  unchanged.
 
 # FielDHub 1.3.1
 

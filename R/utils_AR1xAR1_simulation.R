@@ -30,7 +30,7 @@ AR1xAR1_simulation <- function(nrows = NULL, ncols = NULL, ROX = NULL,
               s20 = ar1$s20)
   newPlan <- merge(matdf, plan, by = c("ROW","COLUMN"))
   newPlan <- newPlan[order(newPlan$ID),]
-  newPlan <- newPlan[, c(3,1,2,4,5)]
+  newPlan <- newPlan[, c("ID", "ROW", "COLUMN", "ENTRY", "ZST")]
   gen <- cbind(genet[,1], genet[,2])
   colnames(gen) <- c("ENTRY","genot")
   if (0 %in% newPlan$ENTRY) {
@@ -40,7 +40,7 @@ AR1xAR1_simulation <- function(nrows = NULL, ncols = NULL, ROX = NULL,
   merged <- merge(newPlan, gen, by = "ENTRY")
   merged$genot <- sqrt(H2) * merged$genot
   merged$resp <- Beta + merged$genot + sqrt(1 - H2) * merged$ZST
-  merged <- merged[, c(2,1,3:7)]
+  merged <- merged[, c("ID", "ENTRY", "ROW", "COLUMN", "ZST", "genot", "resp")]
   outOrder <- merged[order(merged$ID),]
   colnames(outOrder)[7] <- trail
   outOrder$ROW <- as.factor(outOrder$ROW)

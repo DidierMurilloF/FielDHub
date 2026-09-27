@@ -176,25 +176,32 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
   design.loc <- list()
   validate_factorial_type(type)
   for (locs in 1:l) {
+    # CRD()/RCBD() are always called here without `checks`, so their
+    # fieldBook is always exactly ID, LOCATION, PLOT, REP, TREATMENT
+    # (rcbd_fieldbook_cols(has_checks = FALSE) in utils_rcbd_checks.R).
     if (type == 1) {
       m1 <- CRD(t = trt, reps = reps, plotNumber = plotNumber[locs], # seed = seed,
                 data = NULL, locationNames = locationNames[1])$fieldBook
-      m1 <- m1[,-c(1,2)]
+      m1 <- m1[, c("PLOT", "REP", "TREATMENT")]
       kind <- "CRD"
     }else {
       m1 <- RCBD(t = trt, reps = reps, l = 1, plotNumber = plotNumber[locs], continuous = continuous,
                  planter = planter, locationNames = locationNames[locs])$fieldBook # seed = seed,
-      m1 <- m1[,-c(1,2)]
+      m1 <- m1[, c("PLOT", "REP", "TREATMENT")]
       kind <- "RCBD"
     }
     m1 <- cbind(m1, matrix(data = 0, nrow = nruns, ncol = nt + 1, byrow = TRUE))
     # Take the factor levels from allcomb instead of splitting the treatment
     # label on spaces, which broke levels such as "Low N"
-    comb_rows <- allcomb[match(as.character(m1[, 3]), trt), , drop = FALSE]
+    comb_rows <- allcomb[match(as.character(m1[, "TREATMENT"]), trt), , drop = FALSE]
+    # The nt + 1 placeholder columns just bound by cbind() have no names yet
+    # (ColFactors/TRT_COMB are assigned after the loop, once TRT's levels are
+    # final); filling them by position is genuine matrix-style construction,
+    # not a reorder of existing field-book columns.
     m1[, 4:(4 + nt - 1)] <- lapply(comb_rows, as.character)
     m1[, ncol(m1)] <- do.call(paste, c(unname(m1[, 4:(4 + nt - 1), drop = FALSE]), sep = "*"))
     design <- m1
-    design <- design[,-3]
+    design$TREATMENT <- NULL
     if (kind == "RCBD") {
       # Sort within the location, so LOCATION can be assigned by position
       # even when locations share plot numbers

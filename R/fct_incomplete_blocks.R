@@ -167,10 +167,12 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
   OutIBD_test$ID <- 1:nrow(OutIBD_test)
   if(lookup) {
     OutIBD <- dplyr::inner_join(OutIBD, dataLookUp, by = "ENTRY")
-    OutIBD <- OutIBD[,-6]
+    # ENTRY was only needed to look up LABEL_TREATMENT; drop it by name.
+    OutIBD$ENTRY <- NULL
     colnames(OutIBD) <- c("LOCATION","PLOT", "REP", "IBLOCK", "UNIT", "TREATMENT")
     OutIBD <- dplyr::inner_join(OutIBD, data_up, by = "TREATMENT")
-    OutIBD <- OutIBD[, c(1:5,7,6)]
+    OutIBD <- OutIBD[, c("LOCATION", "PLOT", "REP", "IBLOCK", "UNIT", "ENTRY",
+                         "TREATMENT")]
     colnames(OutIBD) <- c("LOCATION","PLOT", "REP", "IBLOCK", "UNIT", "ENTRY", "TREATMENT")
   }
   ID <- 1:nrow(OutIBD)

@@ -7,7 +7,17 @@ allocation_example <- function(design = "sparse", seed = 38) {
 test_that("allocation results record a reproducible input contract", {
   for (design in c("sparse", "prep")) {
     out <- allocation_example(design)
-    expect_identical(class(out), if (design == "sparse") "Sparse" else "MultiPrep")
+    # do_optim() results carry a fieldhub_* class next to the legacy
+    # Sparse/MultiPrep one (constraints.md Task 5), distinct from
+    # "fieldhub_sparse_allocation"/"fieldhub_multi_location_prep": those
+    # belong to the fuller, field-book-shaped objects sparse_allocation()
+    # and multi_location_prep() build around do_optim(), which this bare
+    # allocation plan is not.
+    expect_identical(class(out), if (design == "sparse") {
+      c("fieldhub_sparse_optimization", "Sparse")
+    } else {
+      c("fieldhub_multi_prep_optimization", "MultiPrep")
+    })
     expect_identical(out$metadata$design, paste0("allocation_", design))
     expect_identical(out$metadata$schema_version, fieldhub_schema_version)
     expect_identical(out$metadata$seed, 38)

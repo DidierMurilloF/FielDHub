@@ -3376,7 +3376,7 @@
             "class": {
               "type": "character",
               "attributes": {},
-              "value": ["Sparse"]
+              "value": ["fieldhub_sparse_optimization", "Sparse"]
             }
           },
           "value": [
@@ -3728,7 +3728,7 @@
             "class": {
               "type": "character",
               "attributes": {},
-              "value": ["MultiPrep"]
+              "value": ["fieldhub_multi_prep_optimization", "MultiPrep"]
             }
           },
           "value": [

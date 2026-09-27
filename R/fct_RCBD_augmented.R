@@ -529,15 +529,16 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
   
   fieldbook <- dplyr::bind_rows(outputDesign_loc)
   ID <- 1:nrow(fieldbook)
-  fieldbook <- fieldbook[, c(6:9, 4, 2, 3, 5, 10, 1, 11)]
+  fieldbook <- fieldbook[, c("EXPT", "LOCATION", "LOC", "YEAR", "PLOT", "ROW",
+                             "COLUMN", "CHECKS", "BLOCK", "ENTRY", "NAME")]
   fieldbook <- cbind(ID, fieldbook)
-  colnames(fieldbook)[12] <- "TREATMENT"
+  names(fieldbook)[names(fieldbook) == "NAME"] <- "TREATMENT"
   rownames(fieldbook) <- 1:nrow(fieldbook)
-  
+
   fieldbook$EXPT <- factor(fieldbook$EXPT, levels = as.character(exptName))
   fieldbook$LOCATION <- factor(fieldbook$LOCATION, levels = as.character(locationNames))
   fieldbook <- fieldbook[order(fieldbook$LOCATION, fieldbook$EXPT), ]
-  fieldbook <- fieldbook[, -4]
+  fieldbook$LOC <- NULL
   # The layouts are character matrices when the entries are randomized, so
   # keep ENTRY and CHECKS numeric whatever path built them
   fieldbook$ENTRY <- as.numeric(fieldbook$ENTRY)

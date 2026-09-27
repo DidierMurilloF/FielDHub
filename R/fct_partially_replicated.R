@@ -426,11 +426,15 @@ partially_replicated <- function(
         }
         
         fieldBook <- as.data.frame(export_spat()$final_expt)
-        fieldBook <- fieldBook[,-11]
+        # REPS (see colnames(gen_list) <- c("ENTRY", "NAME", "REPS") above) is
+        # only needed to build the allocation; dropping it by name reproduces
+        # the previous fieldBook[, -11].
+        fieldBook$REPS <- NULL
         ID <- 1:nrow(fieldBook)
-        fieldBook <- fieldBook[, c(6,7,9,4,2,3,5,1,10)]
+        fieldBook <- fieldBook[, c("EXPT", "LOCATION", "YEAR", "PLOT", "ROW",
+                                   "COLUMN", "CHECKS", "ENTRY", "NAME")]
         fieldBook <- cbind(ID, fieldBook)
-        colnames(fieldBook)[10] <- "TREATMENT"
+        names(fieldBook)[names(fieldBook) == "NAME"] <- "TREATMENT"
         layoutR = prep$field.map
         rownames(layoutR) <- paste("Row", nrow(layoutR):1, sep = "")
         colnames(layoutR) <- paste("Col", 1:ncol(layoutR), sep = "")

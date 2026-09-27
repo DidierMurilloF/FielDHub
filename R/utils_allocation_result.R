@@ -12,9 +12,23 @@ new_fieldhub_allocation <- function(x, parameters) {
                    class = "fieldhub_internal_error", call. = FALSE)
   }
   design <- unname(as.character(parameters$design))
+  prep <- identical(design, "prep")
+  # A fieldhub_* class marks this as a FielDHub result you can recognize
+  # without matching on the legacy Sparse/MultiPrep name (see
+  # doc_result_contract.R). It is not "fieldhub_sparse_allocation" /
+  # "fieldhub_multi_location_prep": those names are reserved for the fuller,
+  # field-book-shaped objects sparse_allocation()/multi_location_prep() build
+  # around do_optim() (classed via new_fieldhub_design()), and for FielDHub
+  # 1.5.0 objects upgraded by with_design_class() -- both have a $fieldBook
+  # their print/summary methods read, which this bare allocation plan (just
+  # $allocation, $list_locs, $size_locations, $multi_location_data) does not.
+  classes <- if (prep) {
+    c("fieldhub_multi_prep_optimization", "MultiPrep")
+  } else {
+    c("fieldhub_sparse_optimization", "Sparse")
+  }
   new_fieldhub_result(x, paste0("allocation_", design), parameters$seed, parameters,
-                     if (identical(design, "prep")) "MultiPrep" else "Sparse",
-                     validate_fieldhub_allocation)
+                     classes, validate_fieldhub_allocation)
 }
 
 #' Validate the allocation-specific result schema
