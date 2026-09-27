@@ -106,44 +106,39 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
   validate_iteration_budget(b, "reps")
   seed <- resolve_seed(seed)
   local_design_seed(seed)
-  arg0 <- c(Hplots, Vplots)
   arg1 <- list(Hplots, Vplots)
   if (is.null(data)) {
-    if(all(!is.null(c(Hplots, Vplots, b, l)))) {
-      if (all(base::lengths(arg1) > 1)) {
-        if (all(is.character(arg0)) || all(is.numeric(arg0))) {
-          nH <- length(Hplots)
-          nV <- length(Vplots)
-        }
-      }else if (all(base::lengths(arg1) == 1)) {
-        if (all(is.numeric(arg0))) {
-          Hplots <- paste(rep("b", Hplots), 0:(Hplots-1), sep = "")
-          Vplots <- paste(rep("a", Vplots), 0:(Vplots-1), sep = "")
-          nH <- length(Hplots)
-          nV <- length(Vplots)
-        }
-      }else {
-        fieldhub_abort("\n 'strip_plot()' requires an 1-dimensional array for input Hplots and Vplots.")
-      }
-    }else fieldhub_abort("\n 'strip_plot()' requires arguments to be differents than NULL")
+    resolved <- resolve_design_factors(stats::setNames(arg1, c("Hplots", "Vplots")), b, l,
+                                       prefixes = c(Hplots = "b", Vplots = "a"))
+    Hplots <- resolved$Hplots$levels
+    Vplots <- resolved$Vplots$levels
+    nH <- length(Hplots)
+    nV <- length(Vplots)
   } else {
-    if(!is.data.frame(data)) fieldhub_abort("Data must be a data frame.")
-    if (ncol(data) < 2) fieldhub_abort("Data input needs at least two columns.")
-    data <- as.data.frame(data[,1:2])
+    if (!is.data.frame(data))
+      fieldhub_abort("Data must be a data frame.")
+    if (ncol(data) < 2)
+      fieldhub_abort("Data input needs at least two columns.")
+    data <- as.data.frame(data[, 1:2])
     colnames(data) <- c("Hplot", "Vplot")
     Hplots <- as.vector(na.omit(data$Hplot))
     Vplots <- as.vector(na.omit(data$Vplot))
+    validate_entry_labels(Hplots, "Hplot")
+    validate_entry_labels(Vplots, "Vplot")
+    check_unique_labels(Hplots, "Hplot")
+    check_unique_labels(Vplots, "Vplot")
     Hplots.f <- factor(Hplots, as.character(unique(Hplots)))
     Vplots.f <- factor(Vplots, as.character(unique(Vplots)))
     nH <- length(levels(Hplots.f))
     nV <- length(levels(Vplots.f))
     Hplots <- as.character(Hplots.f)
     Vplots <- as.character(Vplots.f)
-    if(!factorLabels) {
+    if (!factorLabels) {
       Hplots <- as.character(1:nH)
       Vplots <- as.character((nH + 1):(nH + nV))
     }
   }
+  validate_design_size(c(nH, nV, b, l))
   if(!is.null(l) && is.numeric(l) && length(l) == 1) {
     if (l >= 1 && is.null(locationNames)) {
       locationNames <- 1:l

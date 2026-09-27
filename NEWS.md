@@ -7,6 +7,17 @@
 
 ### Breaking changes:
 
+- Factorial, split-plot, split-split-plot, and strip-plot designs now check
+  factor counts and level labels before expansion. Counts must be finite,
+  positive whole numbers; level labels must be complete, nonblank, and unique
+  within each factor. Full factorials still allow the same level names in
+  different factors. Incomplete rows/column padding are omitted as before.
+  Generated full factorials accept 2 to 26 factor counts,
+  matching their established A-to-Z factor names. Invalid or oversized inputs
+  now raise structured input errors. Split and strip designs share one factor
+  parser and accept mixed count/label inputs consistently; valid existing
+  seeded results are unchanged.
+
 - RCBD and Latin-square treatment counts now reject missing, non-finite,
   fractional, and nonscalar values before allocation. Entry tables must have
   the required columns and usable, nonblank labels; Latin squares need at

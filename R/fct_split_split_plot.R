@@ -88,79 +88,30 @@ split_split_plot <- function(wp = NULL, sp = NULL, ssp = NULL, reps = NULL, type
   validate_factorial_type(type)
   b <- reps
   validate_iteration_budget(reps, "reps")
-  args0 <- c(wp, sp, ssp, reps, l)
   args1 <- list(wp, sp, ssp)
   if (is.null(data)) {
-    if(all(!is.null(args0))) {
-      if(all(is.numeric(args0)) && all(lengths(args1) == 1)) {
-        WholePlots <- 1:wp
-        SubPlots <- 1:sp
-        SubSubPlots <- 1:ssp
-      }else if(is.numeric(wp) && length(wp) == 1) {
-        WholePlots <- 1:wp
-        if (length(sp) > 1) {
-          SubPlots <- sp
-          sp <- length(SubPlots)
-        } else if (is.numeric(sp)) {
-          SubPlots <- 1:sp
-        } else fieldhub_abort("The sub plots should be more than one.")
-        if (length(ssp) > 1) {
-          SubSubPlots <- ssp
-          ssp <- length(SubSubPlots)
-        } else if (is.numeric(ssp)) {
-          SubSubPlots <- 1:ssp
-        } else fieldhub_abort("The sub sub plots should be more than one.")
-      }else if(all(lengths(list(wp, sp, ssp)) > 1)){
-        WholePlots <- wp
-        wp <- length(WholePlots)
-        SubPlots <- sp
-        sp <- length(SubPlots)
-        SubSubPlots <- ssp
-        ssp <- length(SubSubPlots)
-      }else if(is.character(wp) || is.numeric(wp)) {
-        if (length(wp) > 1) {
-          if (is.numeric(sp) && is.numeric(ssp)) {
-            if (all(lengths(list(sp, ssp)) == 1)) {
-              WholePlots <- wp
-              wp <- length(WholePlots)
-              SubPlots <- 1:sp
-              SubSubPlots <- 1:ssp
-            }else if (all(lengths(list(sp, ssp)) > 1)) {
-              WholePlots <- wp
-              wp <- length(WholePlots)
-              SubPlots <- sp
-              sp <- length(SubPlots)
-              SubSubPlots <- ssp
-              ssp <- length(SubSubPlots)
-            }
-          } else if (is.character(sp) && is.character(ssp)) {
-            if (all(lengths(list(sp, ssp)) > 1)) {
-              WholePlots <- wp
-              wp <- length(WholePlots)
-              SubPlots <- sp
-              sp <- length(SubPlots)
-              SubSubPlots <- ssp
-              ssp <- length(SubSubPlots)
-            }else {
-              fieldhub_abort("The sub plots and sub sub plots should be more than one.")
-            }
-          }
-        }else {
-          fieldhub_abort("The whole plots should be more than one.")
-        }
-      }else {
-        fieldhub_abort("Please, check your input variables.")
-      }
-    }else {
-      fieldhub_abort("Input wp, sp, reps and l must be differents of NULL.")
-    }
-  }else {
-    if(!is.data.frame(data)) fieldhub_abort("Data must be a data frame.")
-    data <- as.data.frame(data[,1:3])
+    resolved <- resolve_design_factors(list(wp = wp, sp = sp, ssp = ssp), reps, l)
+    WholePlots <- resolved$wp$levels
+    SubPlots <- resolved$sp$levels
+    SubSubPlots <- resolved$ssp$levels
+    wp <- resolved$wp$count
+    sp <- resolved$sp$count
+    ssp <- resolved$ssp$count
+  } else {
+    if (!is.data.frame(data))
+      fieldhub_abort("Data must be a data frame.")
+    if (ncol(data) < 3L) fieldhub_abort("split_split_plot() requires whole-, sub-, and sub-sub-plot columns in data.")
+    data <- as.data.frame(data[, 1:3])
     colnames(data) <- c("WholePlot", "SubPlot", "SubSubPlot")
     WholePlots <- as.vector(na.omit(data$WholePlot))
     SubPlots <- as.vector(na.omit(data$SubPlot))
     SubSubPlots <- as.vector(na.omit(data$SubSubPlot))
+    validate_entry_labels(WholePlots, "WholePlot")
+    validate_entry_labels(SubPlots, "SubPlot")
+    validate_entry_labels(SubSubPlots, "SubSubPlot")
+    check_unique_labels(WholePlots, "WholePlot")
+    check_unique_labels(SubPlots, "SubPlot")
+    check_unique_labels(SubSubPlots, "SubSubPlot")
     WholePlots.f <- factor(WholePlots, as.character(unique(WholePlots)))
     SubPlots.f <- factor(SubPlots, as.character(unique(SubPlots)))
     SubSubPlot.f <- factor(SubSubPlots, as.character(unique(SubSubPlots)))
@@ -170,12 +121,13 @@ split_split_plot <- function(wp = NULL, sp = NULL, ssp = NULL, reps = NULL, type
     WholePlots <- as.character(WholePlots.f)
     SubPlots <- as.character(SubPlots.f)
     SubSubPlots <- as.character(SubSubPlot.f)
-    if(!factorLabels) {
+    if (!factorLabels) {
       WholePlots <- as.character(1:wp)
       SubPlots <- as.character((wp + 1):(wp + sp))
       SubSubPlots <- as.character((wp + sp + 1):(wp + sp + ssp))
     }
   }
+  validate_design_size(c(wp, sp, ssp, reps, l))
   if (!is.null(plotNumber)) {
     validate_plot_starts(plotNumber)
     if (any(plotNumber < 1) || any(diff(plotNumber) < 0)) {

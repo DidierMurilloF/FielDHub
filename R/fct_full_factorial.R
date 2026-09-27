@@ -104,31 +104,26 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
   }
   generated_data <- is.null(data)
   if (generated_data) {
-    if(!is.null(setfactors)) {
-      if(is.numeric(setfactors)) {
-        if (length(setfactors) < 2) fieldhub_abort("More than one factor needs to be specified.")
-        nt <- length(setfactors)
-        validate_iteration_budget(reps, "reps")
-        TRT <- rep(LETTERS[1:nt], each = reps)
-        newlevels <- get.levels(k = setfactors)
-        allcomb <- expand.grid(newlevels, KEEP.OUT.ATTRS = FALSE,
-                               stringsAsFactors = FALSE)
-        colnames(allcomb) <- levels(as.factor(TRT))
-        data <- data.frame(list(factors = rep(levels(as.factor(TRT)), times = setfactors),
-                                levels = unlist(newlevels)))
-        levels.by.factor <- as.vector(unlist(newlevels))
-        entries_each_factor <- setfactors
-      }else fieldhub_abort("In 'full_factorial()' the input setfactors must be a numeric vector.")
-    }
+    validate_factor_counts(setfactors, reps, l)
+    nt <- length(setfactors)
+    TRT <- rep(LETTERS[1:nt], each = reps)
+    newlevels <- get.levels(k = setfactors)
+    allcomb <- expand.grid(newlevels, KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE)
+    colnames(allcomb) <- levels(as.factor(TRT))
+    data <- data.frame(list(factors = rep(levels(as.factor(TRT)), times = setfactors), levels = unlist(newlevels)))
+    levels.by.factor <- as.vector(unlist(newlevels))
+    entries_each_factor <- setfactors
   } else {
-    if(!is.data.frame(data)) fieldhub_abort("Data must be a data frame.")
+    if (!is.data.frame(data))
+      fieldhub_abort("Data must be a data frame.")
     if (ncol(data) < 2L) {
       fieldhub_abort("full_factorial() requires at least two columns: FACTOR and LEVEL.")
     }
-    data <- as.data.frame(na.omit(data[,1:2]))
+    data <- as.data.frame(na.omit(data[, 1:2]))
     if (nrow(data) == 0L) {
       fieldhub_abort("full_factorial() requires at least one complete factor-level row.")
     }
+    for (column in names(data)) validate_entry_labels(data[[column]], column)
     if (!factorial_levels_unique(data)) {
       fieldhub_abort("full_factorial() requires levels to be unique within each factor.")
     }
@@ -139,18 +134,17 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
     data.by.factor <- list()
     entries_each_factor <- numeric()
     v <- 1
-    for(i in l.factors) {
+    for (i in l.factors) {
       data.by.factor[[v]] <- subset(data, data$factors == i)
       entries_each_factor[v] <- nrow(subset(data, data$factors == i))
-      levels.by.factor[[v]] <- data.by.factor[[v]][,2]
+      levels.by.factor[[v]] <- data.by.factor[[v]][, 2]
       v <- v + 1
     }
     if (!factorLabels) {
       levels.by.factor <- split_vectors(x = 1:nrow(data), len_cuts = base::lengths(levels.by.factor))
     }
     nt <- length(l.factors)
-    allcomb <- base::expand.grid(levels.by.factor, KEEP.OUT.ATTRS = FALSE,
-                                 stringsAsFactors = FALSE)
+    allcomb <- base::expand.grid(levels.by.factor, KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE)
     colnames(allcomb) <- l.factors
     newlevels <- data.by.factor
     TRT <- l.factors
