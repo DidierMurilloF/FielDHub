@@ -97,6 +97,12 @@
 
 ### Enhancements:
 
+- Result validation now enforces the common field-book keys: finite
+  numeric `ID` and `PLOT` columns, nonmissing atomic `LOCATION` identifiers,
+  and unique column names. Existing integer/double storage and additional
+  user columns are preserved; this validates the minimum schema without
+  rewriting valid field books.
+
 - Creating a design no longer changes the caller's random numbers: the design
   functions set their seed and restore the random-number state when they
   finish. Without a seed, they draw an integer seed from the whole range of

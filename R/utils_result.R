@@ -66,6 +66,11 @@ with_design_class <- function(x) {
 
 #' Check the structure of a design result
 #'
+#' Field books require ID and PLOT as finite numeric vectors and LOCATION
+#' as a nonmissing atomic vector. Integer and double storage are both kept,
+#' preserving the established types of each design family. Extra columns
+#' remain permitted.
+#'
 #' @param x A design result.
 #' @return \code{x}, invisibly, or an error when its structure is not valid.
 #' @noRd
@@ -90,9 +95,8 @@ validate_fieldhub_design <- function(x) {
     if (!identical(meta$schema_version, fieldhub_schema_version)) {
       problems <- c(problems, "has an unknown schema version")
     }
-    if (meta$design != "split_families" &&
-        (!is.data.frame(x$fieldBook) || nrow(x$fieldBook) == 0)) {
-      problems <- c(problems, "has no field book")
+    if (meta$design != "split_families") {
+      problems <- c(problems, field_book_problems(x$fieldBook))
     }
   }
   if (length(problems) > 0) {
@@ -100,4 +104,34 @@ validate_fieldhub_design <- function(x) {
                    class = "fieldhub_internal_error", call. = FALSE)
   }
   invisible(x)
+}
+
+#' Check the common field-book keys without coercing or dropping columns
+#' @noRd
+field_book_problems <- function(book) {
+  if (!is.data.frame(book) || nrow(book) == 0L) return("has no field book")
+  problems <- character()
+  if (anyDuplicated(names(book)) > 0L) {
+    problems <- c(problems, "has duplicate column names in its field book")
+  }
+  missing <- setdiff(c("ID", "LOCATION", "PLOT"), names(book))
+  if (length(missing) > 0L) {
+    problems <- c(problems, paste0("has no field-book columns: ", paste(missing, collapse = ", ")))
+  }
+  for (name in intersect(c("ID", "PLOT"), names(book))) {
+    values <- book[[name]]
+    if (!is.numeric(values) || is.complex(values) || !is.null(dim(values)) ||
+        length(values) != nrow(book) || any(!is.finite(values))) {
+      problems <- c(problems, paste0("has a field-book ", name,
+                                    " column that is not a finite numeric vector"))
+    }
+  }
+  if ("LOCATION" %in% names(book)) {
+    locations <- book[["LOCATION"]]
+    if (!is.atomic(locations) || !is.null(dim(locations)) ||
+        length(locations) != nrow(book) || anyNA(locations)) {
+      problems <- c(problems, "has a field-book LOCATION column that is not a nonmissing atomic vector")
+    }
+  }
+  problems
 }
