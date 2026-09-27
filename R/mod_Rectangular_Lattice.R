@@ -150,10 +150,10 @@ mod_Rectangular_Lattice_server <- function(id) {
     } else {
       shiny::req(input$t.rectangular)
       nt <- as.numeric(input$t.rectangular)
-      df <- default_entries(nt)
-      data_rectangular <- df
-      treatments = nrow(data_rectangular)
-      return(list(data_rectangular = data_rectangular, treatments = treatments))
+      # No entry list is built here: rectangular_lattice() generates its own
+      # "G-1".."G-n" labels from a bare treatment count
+      # (design_args_Rectangular_Lattice()/rectangular_lattice(t = )).
+      return(list(data_rectangular = NULL, treatments = nt))
       }
     })
     

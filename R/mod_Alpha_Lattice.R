@@ -141,10 +141,10 @@ mod_Alpha_Lattice_server <- function(id){
       } else {
         shiny::req(input$t.alpha)
         nt <- as.numeric(input$t.alpha)
-        df <- default_entries(nt)
-        data_alpha <- df
-        treatments = nrow(data_alpha)
-        return(list(data_alpha = data_alpha, treatments = treatments))
+        # No entry list is built here: alpha_lattice() generates its own
+        # "G-1".."G-n" labels from a bare treatment count
+        # (design_args_Alpha_Lattice()/alpha_lattice(t = )).
+        return(list(data_alpha = NULL, treatments = nt))
       }
     })
 

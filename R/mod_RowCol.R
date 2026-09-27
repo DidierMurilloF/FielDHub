@@ -206,10 +206,10 @@ mod_RowCol_server <- function(id){
       } else {
         shiny::req(input$t.rcd)
         nt <- as.numeric(input$t.rcd)
-        df <- default_entries(nt)
-        data_rcd <- df
-        treatments = nrow(data_rcd)
-        return(list(data_rcd = data_rcd, treatments = treatments))
+        # No entry list is built here: row_column() generates its own
+        # "G-1".."G-n" labels from a bare treatment count
+        # (design_args_RowCol()/row_column(t = )).
+        return(list(data_rcd = NULL, treatments = nt))
       }
     })
     

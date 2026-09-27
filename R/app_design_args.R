@@ -42,6 +42,28 @@ NULL
 #' @noRd
 `%||%` <- function(x, default) if (is.null(x)) default else x
 
+#' Assemble the `values` crd_inputs() sends design_args_CRD(), from already-
+#' parsed scalars. Shared by the module and its tests so both build `values`
+#' the same way.
+#'
+#' `data`: the parsed upload data frame, or `NULL` on the generated path.
+#' @noRd
+design_values_CRD <- function(treatment_count, reps, planter, plot_start,
+                              location_names, seed, data) {
+  list(
+    # CRD() derives everything from `data` when it is supplied and ignores
+    # `t`; only send a bare treatment count on the generated path, so a
+    # recorded metadata$parameters$t matches a direct CRD(data = ...) call
+    # (which never supplies t) instead of recording an unused count.
+    t = if (is.null(data)) treatment_count else NULL,
+    reps = reps,
+    planter = planter,
+    plot_start = plot_start,
+    location_names = location_names,
+    seed = seed
+  )
+}
+
 #' Build CRD() arguments
 #'
 #' `values`: `t` (treatment count; `NULL` when `data` supplies the entries),
@@ -116,6 +138,31 @@ design_args_FD <- function(values, data = NULL) {
   )
 }
 
+#' Assemble the `values` spd_inputs() sends design_args_SPD(), from already-
+#' parsed scalars. Shared by the module and its tests so both build `values`
+#' the same way.
+#'
+#' `data`: the parsed upload data frame, or `NULL` on the generated path.
+#' @noRd
+design_values_SPD <- function(wp_count, sp_count, reps, l, seed, planter,
+                              plot_start, location_names, type, data) {
+  list(
+    # split_plot() ignores wp/sp when data is supplied (it recomputes both
+    # from the data instead), so only send the generated-path counts; on the
+    # upload path wp_count/sp_count are label strings pulled from the
+    # uploaded entries, not a wp/sp count, and must not be recorded as one.
+    wp = if (is.null(data)) wp_count else NULL,
+    sp = if (is.null(data)) sp_count else NULL,
+    reps = reps,
+    l = l,
+    seed = seed,
+    planter = planter,
+    plot_start = plot_start,
+    location_names = location_names,
+    type = type
+  )
+}
+
 #' Build split_plot() arguments
 #'
 #' `values`: `wp`, `sp`, `reps`, `l`, `type` (`1` = CRD, `2` = RCBD),
@@ -132,6 +179,33 @@ design_args_SPD <- function(values, data = NULL) {
     seed = values[["seed"]],
     locationNames = values[["location_names"]],
     data = data
+  )
+}
+
+#' Assemble the `values` sspd_inputs() sends design_args_SSPD(), from
+#' already-parsed scalars. Shared by the module and its tests so both build
+#' `values` the same way.
+#'
+#' `data`: the parsed upload data frame, or `NULL` on the generated path.
+#' @noRd
+design_values_SSPD <- function(wp_count, sp_count, ssp_count, reps, l, seed,
+                               planter, plot_start, location_names, type, data) {
+  list(
+    # split_split_plot() ignores wp/sp/ssp when data is supplied (it
+    # recomputes all three from the data instead), so only send the
+    # generated-path counts; on the upload path wp_count/sp_count/ssp_count
+    # are label strings pulled from the uploaded entries, not counts, and
+    # must not be recorded as one.
+    wp = if (is.null(data)) wp_count else NULL,
+    sp = if (is.null(data)) sp_count else NULL,
+    ssp = if (is.null(data)) ssp_count else NULL,
+    reps = reps,
+    l = l,
+    seed = seed,
+    planter = planter,
+    plot_start = plot_start,
+    location_names = location_names,
+    type = type
   )
 }
 
@@ -176,22 +250,48 @@ design_args_STRIPD <- function(values, data = NULL) {
   )
 }
 
-#' Build incomplete_blocks() arguments
+#' Shared shape behind incomplete_blocks()/alpha_lattice()/square_lattice()/
+#' rectangular_lattice(): all four take the same (t, k, reps, l, plotNumber,
+#' locationNames, seed, data) arguments.
 #'
 #' `values`: `t`, `k`, `reps`, `l`, `plot_start`, `location_names`, `seed`.
 #' @noRd
-design_args_IBD <- function(values, data = NULL) {
+design_args_incomplete_block_family <- function(values, data = NULL) {
   list(
     t = values[["t"]],
     k = values[["k"]],
     reps = values[["reps"]],
     l = values[["l"]] %||% 1,
     plotNumber = values[["plot_start"]],
-    seed = values[["seed"]],
     locationNames = values[["location_names"]],
+    seed = values[["seed"]],
     data = data
   )
 }
+
+#' Build incomplete_blocks() arguments
+#'
+#' `values`: `t`, `k`, `reps`, `l`, `plot_start`, `location_names`, `seed`.
+#' @noRd
+design_args_IBD <- design_args_incomplete_block_family
+
+#' Build alpha_lattice() arguments
+#'
+#' `values`: `t`, `k`, `reps`, `l`, `plot_start`, `location_names`, `seed`.
+#' @noRd
+design_args_Alpha_Lattice <- design_args_incomplete_block_family
+
+#' Build square_lattice() arguments
+#'
+#' `values`: `t`, `k`, `reps`, `l`, `plot_start`, `location_names`, `seed`.
+#' @noRd
+design_args_Square_Lattice <- design_args_incomplete_block_family
+
+#' Build rectangular_lattice() arguments
+#'
+#' `values`: `t`, `k`, `reps`, `l`, `plot_start`, `location_names`, `seed`.
+#' @noRd
+design_args_Rectangular_Lattice <- design_args_incomplete_block_family
 
 #' Build row_column() arguments
 #'
@@ -207,57 +307,6 @@ design_args_RowCol <- function(values, data = NULL) {
     plotNumber = values[["plot_start"]],
     seed = values[["seed"]],
     locationNames = values[["location_names"]],
-    data = data
-  )
-}
-
-#' Build alpha_lattice() arguments
-#'
-#' `values`: `t`, `k`, `reps`, `l`, `plot_start`, `location_names`, `seed`.
-#' @noRd
-design_args_Alpha_Lattice <- function(values, data = NULL) {
-  list(
-    t = values[["t"]],
-    k = values[["k"]],
-    reps = values[["reps"]],
-    l = values[["l"]] %||% 1,
-    plotNumber = values[["plot_start"]],
-    locationNames = values[["location_names"]],
-    seed = values[["seed"]],
-    data = data
-  )
-}
-
-#' Build square_lattice() arguments
-#'
-#' `values`: `t`, `k`, `reps`, `l`, `plot_start`, `location_names`, `seed`.
-#' @noRd
-design_args_Square_Lattice <- function(values, data = NULL) {
-  list(
-    t = values[["t"]],
-    k = values[["k"]],
-    reps = values[["reps"]],
-    l = values[["l"]] %||% 1,
-    plotNumber = values[["plot_start"]],
-    locationNames = values[["location_names"]],
-    seed = values[["seed"]],
-    data = data
-  )
-}
-
-#' Build rectangular_lattice() arguments
-#'
-#' `values`: `t`, `k`, `reps`, `l`, `plot_start`, `location_names`, `seed`.
-#' @noRd
-design_args_Rectangular_Lattice <- function(values, data = NULL) {
-  list(
-    t = values[["t"]],
-    k = values[["k"]],
-    reps = values[["reps"]],
-    l = values[["l"]] %||% 1,
-    plotNumber = values[["plot_start"]],
-    locationNames = values[["location_names"]],
-    seed = values[["seed"]],
     data = data
   )
 }

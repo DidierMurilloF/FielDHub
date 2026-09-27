@@ -53,7 +53,7 @@ mod_SPD_ui <- function(id) {
         shiny::fluidRow(
           shiny::column(6, style=list("padding-right: 28px;"),
                  shiny::numericInput(ns("reps.spd"), label = "Input # of Full Reps:",
-                              value = 3, min = 2), 
+                              value = 3, min = 1),
           ),
           shiny::column(6,style=list("padding-left: 5px;"),
                  shiny::numericInput(ns("l.spd"), label = "Input # of Locations:",
@@ -227,18 +227,17 @@ mod_SPD_server <- function(id){
       planter <- input$planter_mov_spd
       type <- if (input$kindSPD == "SPD_RCBD") 2 else 1
 
-      return(
-        list(
-          wp = get_data_spd()$treatments[1],
-          sp = get_data_spd()$treatments[2],
-          reps = reps,
-          l = l,
-          seed = seed,
-          planter = planter,
-          plot_start = plot_start,
-          location_names = location_names,
-          type = type
-        )
+      design_values_SPD(
+        wp_count = get_data_spd()$treatments[1],
+        sp_count = get_data_spd()$treatments[2],
+        reps = reps,
+        l = l,
+        seed = seed,
+        planter = planter,
+        plot_start = plot_start,
+        location_names = location_names,
+        type = type,
+        data = get_data_spd()$data_spd
       )
     }) |>
       shiny::bindEvent(input$RUN.spd)

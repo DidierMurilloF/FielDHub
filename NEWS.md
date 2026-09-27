@@ -116,6 +116,15 @@
   test entries, matching a direct `RCBD(checks = N)` call. Uploaded entry
   lists, and every other design, are unaffected.
 
+- The app's STRIPD, SPD and SSPD modules now accept a single replicate
+  (their "Input # of Full Reps" minimums dropped from 2 to 1), matching
+  `strip_plot()`/`split_plot()`/`split_split_plot()`, which already accepted
+  `reps = 1`.
+
+- The app's RCBD module now shows an `RCBD()` failure the same way every
+  other classic design does: as an inline validation message where the
+  layout or field book would appear, instead of a separate alert dialog.
+
 - The Shiny application stack is now optional. Installing FielDHub for R
   scripts requires only the design and plotting dependencies; the nine
   app-only packages have moved from Imports to Suggests. `run_app()` checks

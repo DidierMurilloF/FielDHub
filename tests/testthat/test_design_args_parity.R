@@ -14,22 +14,47 @@ parity <- function(builder, engine, values, data = NULL, direct) {
   expect_identical(via_app$metadata$parameters, direct$metadata$parameters)
 }
 
+#' Muffle only the onestage->twostage fallback warning row_column() raises
+#' for some (t, nrows) combinations, so an unrelated warning still surfaces.
+#' @noRd
+suppress_design_warning <- function(expr) {
+  withCallingHandlers(expr, fieldhub_design_warning = function(w) invokeRestart("muffleWarning"))
+}
+
 # --- Step 1: one primary parity test per design (l = 2 wherever the engine
 # supports locations), plus an uploaded-data parity test for every design
 # (all twelve classic engines accept `data`). ---
 
 test_that("CRD app arguments reproduce the API design", {
-  values <- list(t = 5, reps = 3, planter = "serpentine", plot_start = 101,
-                 location_names = "FARGO", seed = 11)
+  values <- design_values_CRD(treatment_count = 5, reps = 3, planter = "serpentine",
+                              plot_start = 101, location_names = "FARGO", seed = 11, data = NULL)
   parity(design_args_CRD, CRD, values,
          direct = CRD(t = 5, reps = 3, plotNumber = 101, locationNames = "FARGO", seed = 11))
 })
 
 test_that("CRD app arguments reproduce an uploaded-data design", {
+  # crd_inputs() always computes a bare treatment count from get_data_crd()
+  # (nrow(data) on this path) and hands it to design_values_CRD() alongside
+  # `data`; model that exactly, instead of a `values` that conveniently omits
+  # `t`, so this test would have caught the regression where the module sent
+  # `t = 4` through to metadata$parameters even though CRD(data = ...) never
+  # records a `t`.
   data <- data.frame(TREATMENT = paste0("ND-", 1:4), REP = 4)
-  values <- list(plot_start = 2001, location_names = "Cali", seed = 21)
+  values <- design_values_CRD(treatment_count = nrow(data), reps = NULL, planter = "serpentine",
+                              plot_start = 2001, location_names = "Cali", seed = 21, data = data)
+  expect_null(values$t)
   parity(design_args_CRD, CRD, values, data,
          direct = CRD(plotNumber = 2001, locationNames = "Cali", seed = 21, data = data))
+})
+
+test_that("design_values_CRD() nulls the treatment count whenever data is supplied", {
+  with_data <- design_values_CRD(treatment_count = 4, reps = 2, planter = "serpentine",
+                                 plot_start = 101, location_names = "A", seed = 1,
+                                 data = data.frame(TREATMENT = "A", REP = 1))
+  expect_null(with_data$t)
+  without_data <- design_values_CRD(treatment_count = 4, reps = 2, planter = "serpentine",
+                                    plot_start = 101, location_names = "A", seed = 1, data = NULL)
+  expect_identical(without_data$t, 4)
 })
 
 test_that("RCBD app arguments reproduce the API design with checks and two locations", {
@@ -89,37 +114,91 @@ test_that("FD app arguments reproduce an uploaded-data design", {
 })
 
 test_that("SPD app arguments reproduce the API design across two locations", {
-  values <- list(wp = 4, sp = 2, reps = 3, l = 2, type = 2, plot_start = c(101, 1001),
-                 location_names = c("A", "B"), seed = 8)
+  values <- design_values_SPD(wp_count = 4, sp_count = 2, reps = 3, l = 2, seed = 8,
+                              planter = NULL, plot_start = c(101, 1001),
+                              location_names = c("A", "B"), type = 2, data = NULL)
   parity(design_args_SPD, split_plot, values,
          direct = split_plot(wp = 4, sp = 2, reps = 3, l = 2, type = 2,
                              plotNumber = c(101, 1001), locationNames = c("A", "B"), seed = 8))
 })
 
 test_that("SPD app arguments reproduce an uploaded-data design", {
+  # spd_inputs() always reads get_data_spd()$treatments[1]/[2] as wp_count/
+  # sp_count; on the upload path that vector is the uploaded WHOLEPLOT/SUBPLOT
+  # labels concatenated, so treatments[1] is a WP label and treatments[2] is
+  # a SECOND WP label, not a SP label. Model that exactly (garbage in) and
+  # confirm design_values_SPD() still nulls both out because `data` is
+  # supplied, instead of a `values` that conveniently passes real counts.
   wp <- c("A", "B"); sp <- c("s1", "s2", "s3")
   data <- data.frame(WHOLEPLOT = c(wp, NA), SUBPLOT = sp)
-  values <- list(reps = 2, l = 1, type = 2, plot_start = 101, location_names = "Loc1", seed = 4)
+  treatments <- c(wp, sp)
+  values <- design_values_SPD(wp_count = treatments[1], sp_count = treatments[2], reps = 2,
+                              l = 1, seed = 4, planter = NULL, plot_start = 101,
+                              location_names = "Loc1", type = 2, data = data)
+  expect_null(values$wp)
+  expect_null(values$sp)
   parity(design_args_SPD, split_plot, values, data,
          direct = split_plot(reps = 2, l = 1, type = 2, plotNumber = 101,
                              locationNames = "Loc1", seed = 4, data = data))
 })
 
+test_that("design_values_SPD() nulls wp/sp whenever data is supplied", {
+  with_data <- design_values_SPD(wp_count = "A", sp_count = "B", reps = 2, l = 1, seed = 1,
+                                 planter = NULL, plot_start = 101, location_names = "Loc",
+                                 type = 2, data = data.frame(WHOLEPLOT = "A", SUBPLOT = "B"))
+  expect_null(with_data$wp)
+  expect_null(with_data$sp)
+  without_data <- design_values_SPD(wp_count = 3, sp_count = 2, reps = 2, l = 1, seed = 1,
+                                    planter = NULL, plot_start = 101, location_names = "Loc",
+                                    type = 2, data = NULL)
+  expect_identical(without_data$wp, 3)
+  expect_identical(without_data$sp, 2)
+})
+
 test_that("SSPD app arguments reproduce the API design across two locations", {
-  values <- list(wp = 2, sp = 2, ssp = 3, reps = 2, l = 2, type = 2, plot_start = c(101, 1001),
-                 location_names = c("A", "B"), seed = 6)
+  values <- design_values_SSPD(wp_count = 2, sp_count = 2, ssp_count = 3, reps = 2, l = 2,
+                               seed = 6, planter = NULL, plot_start = c(101, 1001),
+                               location_names = c("A", "B"), type = 2, data = NULL)
   parity(design_args_SSPD, split_split_plot, values,
          direct = split_split_plot(wp = 2, sp = 2, ssp = 3, reps = 2, l = 2, type = 2,
                                    plotNumber = c(101, 1001), locationNames = c("A", "B"), seed = 6))
 })
 
 test_that("SSPD app arguments reproduce an uploaded-data design", {
+  # sspd_inputs() always reads get_data_sspd()$treatments[1:3] as wp_count/
+  # sp_count/ssp_count; on the upload path that vector is the uploaded
+  # WHOLEPLOT/SUBPLOT/SUB_SUBPLOT labels concatenated, so these are WP labels,
+  # not a wp/sp/ssp count. Model that exactly (garbage in) and confirm
+  # design_values_SSPD() still nulls all three out because `data` is supplied.
   wp <- c("A", "B"); sp <- c("s1", "s2"); ssp <- c("x1", "x2", "x3")
   data <- data.frame(WHOLEPLOT = c(wp, NA), SUBPLOT = c(sp, NA), SUB_SUBPLOT = ssp)
-  values <- list(reps = 1, l = 1, type = 1, plot_start = 101, location_names = "Loc", seed = 2)
+  treatments <- c(wp, sp, ssp)
+  values <- design_values_SSPD(wp_count = treatments[1], sp_count = treatments[2],
+                               ssp_count = treatments[3], reps = 1, l = 1, seed = 2,
+                               planter = NULL, plot_start = 101, location_names = "Loc",
+                               type = 1, data = data)
+  expect_null(values$wp)
+  expect_null(values$sp)
+  expect_null(values$ssp)
   parity(design_args_SSPD, split_split_plot, values, data,
          direct = split_split_plot(reps = 1, l = 1, type = 1, plotNumber = 101,
                                    locationNames = "Loc", seed = 2, data = data))
+})
+
+test_that("design_values_SSPD() nulls wp/sp/ssp whenever data is supplied", {
+  with_data <- design_values_SSPD(wp_count = "A", sp_count = "B", ssp_count = "C", reps = 1,
+                                  l = 1, seed = 1, planter = NULL, plot_start = 101,
+                                  location_names = "Loc", type = 1,
+                                  data = data.frame(WHOLEPLOT = "A", SUBPLOT = "B", SUB_SUBPLOT = "C"))
+  expect_null(with_data$wp)
+  expect_null(with_data$sp)
+  expect_null(with_data$ssp)
+  without_data <- design_values_SSPD(wp_count = 2, sp_count = 2, ssp_count = 2, reps = 1, l = 1,
+                                     seed = 1, planter = NULL, plot_start = 101,
+                                     location_names = "Loc", type = 1, data = NULL)
+  expect_identical(without_data$wp, 2)
+  expect_identical(without_data$sp, 2)
+  expect_identical(without_data$ssp, 2)
 })
 
 test_that("STRIPD app arguments reproduce the API design across two locations", {
@@ -164,10 +243,10 @@ test_that("IBD app arguments reproduce an uploaded-data design", {
 test_that("RowCol app arguments reproduce the API design across two locations", {
   values <- list(t = 9, nrows = 3, reps = 2, l = 2, plot_start = c(101, 1001),
                  location_names = c("A", "B"), seed = 14)
-  via_app <- suppressWarnings(do.call(row_column, design_args_RowCol(values)))
-  direct <- suppressWarnings(row_column(t = 9, nrows = 3, reps = 2, l = 2,
-                                        plotNumber = c(101, 1001), locationNames = c("A", "B"),
-                                        seed = 14))
+  via_app <- suppress_design_warning(do.call(row_column, design_args_RowCol(values)))
+  direct <- suppress_design_warning(row_column(t = 9, nrows = 3, reps = 2, l = 2,
+                                               plotNumber = c(101, 1001), locationNames = c("A", "B"),
+                                               seed = 14))
   expect_identical(via_app$fieldBook, direct$fieldBook)
   expect_identical(via_app$metadata$parameters, direct$metadata$parameters)
 })
@@ -175,9 +254,9 @@ test_that("RowCol app arguments reproduce the API design across two locations", 
 test_that("RowCol app arguments reproduce an uploaded-data design", {
   data <- data.frame(ENTRY = 1:9, TREATMENT = paste0("ND-", 1:9))
   values <- list(t = 9, nrows = 3, reps = 2, l = 1, plot_start = 101, location_names = "A", seed = 5)
-  via_app <- suppressWarnings(do.call(row_column, design_args_RowCol(values, data)))
-  direct <- suppressWarnings(row_column(t = 9, nrows = 3, reps = 2, l = 1, plotNumber = 101,
-                                        locationNames = "A", seed = 5, data = data))
+  via_app <- suppress_design_warning(do.call(row_column, design_args_RowCol(values, data)))
+  direct <- suppress_design_warning(row_column(t = 9, nrows = 3, reps = 2, l = 1, plotNumber = 101,
+                                               locationNames = "A", seed = 5, data = data))
   expect_identical(via_app$fieldBook, direct$fieldBook)
   expect_identical(via_app$metadata$parameters, direct$metadata$parameters)
 })
@@ -364,13 +443,23 @@ test_that("classic modules build their design only through design_args_<Module>(
     "classic_workflow_spec", # registry of per-design IDs/labels the shared workflow helpers use
     "load_file",           # parses an uploaded CSV into a data frame
     "read_whole_numbers",  # parses a comma-separated starting-plot-number input
-    "default_entries",     # builds a default ENTRY/NAME table from a treatment count
     "valid_block_sizes",   # lists the valid incomplete-block sizes for a treatment count
     "parse_n_checks",      # parses the RCBD "# of checks" input
     "parse_rep_checks",    # parses the RCBD "reps per check" input
     "rcbd_size_preview",   # previews the RCBD block size before Run is clicked
-    "parse_whole_numbers"  # parses the FD "entries per factor" input
+    "parse_whole_numbers", # parses the FD "entries per factor" input
+    "design_values_CRD",   # assembles CRD's values from parsed inputs (nulls t when data is given)
+    "design_values_SPD",   # assembles SPD's values from parsed inputs (nulls wp/sp when data is given)
+    "design_values_SSPD"   # assembles SSPD's values from parsed inputs (nulls wp/sp/ssp when data is given)
   )
+  # `default_entries` is deliberately absent from allowed_helpers: no classic
+  # module still needs it to build a generated-path entry table (that would
+  # defeat decision 2 -- pass bare counts and let the engine generate the
+  # same "G-" labels itself). Its absence is a regression guard, enforced by
+  # the setdiff() check below: if a module's generated path called
+  # default_entries(nt) again (as mod_IBD.R/mod_RowCol.R/etc. used to), that
+  # symbol would show up in `called` but not in `allowed`, and the test would
+  # fail -- the same way it would for any other un-allow-listed helper.
   forbidden <- c("sample", "set.seed", "runif", "get.levels", "blocksdesign")
 
   namespace <- asNamespace("FielDHub")
@@ -415,41 +504,23 @@ test_that("rcbd_fieldbook_cols() orders the field book with and without checks",
                    c("ID", "LOCATION", "PLOT", "REP", "ENTRY", "CHECKS", "TREATMENT"))
 })
 
-test_that("app_csv_archive() writes a downloadable archive with the expected files and metadata", {
-  skip_if_not_installed("zip")
-  design <- RCBD(t = 4, reps = 2, seed = 17)
-  book <- field_layout(design)
-  handler <- app_csv_archive(
-    filename = function() "trial.csv",
-    data = function() book,
-    design = function() design,
-    field_book = function() book
-  )
-  # app_csv_archive() is a thin shiny::downloadHandler() wrapper around the
-  # already directly-tested csv_archive_handlers() (test_workflow_archives.R);
-  # shiny::downloadHandler() closes the filename/content callbacks it was
-  # given over its own internal renderFunc, so they can be called directly
-  # here -- exercising the exact callbacks the app registers -- without a
-  # Shiny reactive/test-server context (no testServer/shinytest2, per the
-  # "No Shiny tests" rule).
-  expect_s3_class(handler, "shiny.render.function")
-  inner <- environment(environment(handler)$renderFunc)
-  expect_identical(inner$contentType, "application/zip")
-  expect_identical(inner$filename(), "trial.zip")
-
-  directory <- tempfile("fieldhub-app-csv-archive-")
-  dir.create(directory)
-  on.exit(unlink(directory, recursive = TRUE), add = TRUE)
-  file <- file.path(directory, inner$filename())
-  inner$content(file)
-  expect_true(file.exists(file))
-
-  extracted <- file.path(directory, "contents")
-  utils::unzip(file, exdir = extracted)
-  expect_setequal(list.files(extracted), c("data.csv", "workflow.rds", "reproduce.R", "README.txt"))
-  saved <- readRDS(file.path(extracted, "workflow.rds"))
-  expect_identical(saved$design, design)
-  expect_identical(saved$field_book, book)
-  expect_identical(saved$export$data, book)
-  expect_identical(saved$export$kind, "field_book")
+test_that("app_csv_archive() wraps the already-tested archive writer in a zip download handler", {
+  # app_csv_archive() (R/app_export.R) is a thin shiny::downloadHandler()
+  # wrapper: handlers <- csv_archive_handlers(...); shiny::downloadHandler(
+  # filename = handlers$filename, content = handlers$content, contentType =
+  # "application/zip"). The actual archive-writing logic -- write a CSV plus
+  # workflow.rds/reproduce.R/README.txt, zip them, and read them back -- is
+  # csv_archive_handlers()/write_workflow_archive(), a plain function with
+  # its own full tempfile-write/unzip/metadata-check coverage in
+  # test_workflow_archives.R ("archive callbacks preserve CSV bytes..."), so
+  # it is not repeated here. This test only confirms app_csv_archive() wires
+  # that plain function up correctly, checked structurally (no Shiny
+  # reactive/test-server context, and no reaching into
+  # shiny::downloadHandler()'s private closure layout to call its callbacks,
+  # per the "No Shiny tests" rule).
+  skip_if_not_installed("shiny")
+  code <- body(app_csv_archive)
+  expect_identical(sum(all.names(code) == "csv_archive_handlers"), 1L)
+  expect_identical(sum(all.names(code) == "downloadHandler"), 1L)
+  expect_true(grepl('"application/zip"', paste(deparse(code), collapse = " "), fixed = TRUE))
 })

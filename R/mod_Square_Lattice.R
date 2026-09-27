@@ -155,11 +155,11 @@ mod_Square_Lattice_server <- function(id){
       } else {
         shiny::req(input$t.square)
         nt <- as.numeric(input$t.square)
-        df <- default_entries(nt)
-        data_square <- df
-        treatments = nrow(data_square)
-        return(list(data_square = data_square, treatments = treatments))
-      }     
+        # No entry list is built here: square_lattice() generates its own
+        # "G-1".."G-n" labels from a bare treatment count
+        # (design_args_Square_Lattice()/square_lattice(t = )).
+        return(list(data_square = NULL, treatments = nt))
+      }
     })
     
     list_to_observe <- shiny::reactive({
@@ -268,22 +268,10 @@ mod_Square_Lattice_server <- function(id){
       shiny::req(square_inputs())
       
       shinyjs::show(id = "downloadCsv.square", anim = FALSE)
-      
-      # Task 11a scope note: IBD/RowCol/Alpha_Lattice/Rectangular_Lattice/
-      # STRIPD dropped this app-level reps < 2 check because their engines
-      # already reject an under-replicated design with a classed
-      # fieldhub_input_error. square_lattice() behaves the same way (it also
-      # only requires reps >= 1 up front and then fails downstream for an
-      # infeasible design), but removing the app-level check here was left
-      # out of that task's module list, so it is intentionally kept as-is.
-      if (square_inputs()$reps < 2) {
-        shinyalert::shinyalert(
-          "Error!!",
-          "Square Lattice Design needs at least 2 replicates.",
-          type = "error")
-        return(NULL)
-      }
 
+      # square_lattice() itself rejects an under-replicated design (a classed
+      # fieldhub_input_error surfaced below through validate_design()); no
+      # duplicate reps < 2 check is needed here.
       validate_design(do.call(
         square_lattice, design_args_Square_Lattice(square_inputs(), get_data_square()$data_square)
       ))

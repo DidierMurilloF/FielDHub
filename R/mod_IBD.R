@@ -211,10 +211,10 @@ mod_IBD_server <- function(id) {
       } else {
         shiny::req(input$t.ibd)
         nt <- as.numeric(input$t.ibd)
-        df <- default_entries(nt)
-        data_ibd <- df
-        treatments = nrow(data_ibd)
-        return(list(data_ibd = data_ibd, treatments = treatments))
+        # No entry list is built here: incomplete_blocks() generates its own
+        # "G-1".."G-n" labels from a bare treatment count
+        # (design_args_IBD()/incomplete_blocks(t = )).
+        return(list(data_ibd = NULL, treatments = nt))
       }
     })
     

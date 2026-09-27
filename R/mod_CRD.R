@@ -176,20 +176,20 @@ mod_CRD_server <- function(id) {
       shiny::req(input$plot_start.crd)
       shiny::req(input$Location.crd)
       
-      treatments <- as.numeric(get_data_crd()$treatments)
-      reps <- as.numeric(input$reps.crd)
-      planter <- input$planter_mov_crd
       plot_start <- validate_design(read_whole_numbers(
         input$plot_start.crd, "Starting Plot Number"
       ))[1]
       location_names <-  as.vector(unlist(strsplit(input$Location.crd, ",")))
       seed <- validate_design(app_design_seed(input$seed.crd))
-      return(list(t = treatments,
-        reps = reps,
-        planter = planter,
+      design_values_CRD(
+        treatment_count = as.numeric(get_data_crd()$treatments),
+        reps = as.numeric(input$reps.crd),
+        planter = input$planter_mov_crd,
         plot_start = plot_start,
         location_names = location_names,
-        seed = seed))
+        seed = seed,
+        data = get_data_crd()$data_crd
+      )
     }) |>
       shiny::bindEvent(input$RUN.crd)
 
