@@ -32,6 +32,8 @@ knitr::opts_chunk$set(
 
 ### New features:
 
+* `reproduce_design()` rebuilds field designs and allocation plans from their recorded parameters and RNG settings. It restores the caller's RNG settings and seed state on exit, explains missing legacy parameters, and warns when the recorded FielDHub version differs. Reproduction across different dependency versions or platforms is not guaranteed.
+
 * Every design result records how it was built in a new `metadata` element: the design, the version of the structure of the result (`schema_version`), the seed, the random-number generator (`RNGkind()`) and the version of FielDHub. Its class names the design, such as `c("fieldhub_rcbd", "FielDHub")`, so scripts can tell designs apart with `inherits()`. The other elements are unchanged, and results saved by earlier versions still print, summarise and plot as before. `print()` on a result of a design it does not know now shows its elements instead of nothing.
 
 * `field_layout()` returns the field book of a design with the `ROW` and `COLUMN` of every plot, for the layout, planter and stacking chosen: the field book that `plot()` draws and that the Shiny app exports. The coordinates of CRD, RCBD, latin square, factorial, split-plot, strip-plot, incomplete-block, lattice and row-column designs could only be obtained by drawing them.

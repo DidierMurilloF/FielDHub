@@ -48,6 +48,12 @@
 
 ### New features:
 
+- `reproduce_design()` rebuilds field designs and allocation plans from their
+  recorded parameters and RNG settings. It restores the caller's RNG settings
+  and seed state on exit, explains missing legacy parameters, and warns when
+  the recorded FielDHub version differs. Reproduction across different
+  dependency versions or platforms is not guaranteed.
+
 - Every design result records how it was built in a new `metadata` element:
   the design, the version of the structure of the result (`schema_version`),
   the seed, the random-number generator (`RNGkind()`) and the version of

@@ -1,6 +1,6 @@
 # Exported functions that take a design instead of building one; the layout
-# goldens cover field_layout()
-design_tools <- c("run_app", "field_layout")
+# goldens cover field_layout(); test_reproduce_design.R replays the catalogue.
+design_tools <- c("run_app", "field_layout", "reproduce_design")
 
 test_that("the catalogue covers every exported function", {
   namespace <- readLines(system.file("NAMESPACE", package = "FielDHub"))
