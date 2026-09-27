@@ -127,6 +127,14 @@ split_split_plot <- function(wp = NULL, sp = NULL, ssp = NULL, reps = NULL, type
       SubSubPlots <- as.character((wp + sp + 1):(wp + sp + ssp))
     }
   }
+  if (sp < 2L) {
+    fieldhub_abort("split_split_plot() requires at least two sub-plot levels: sp = ", sp,
+                   " leaves nothing to split within each whole plot.")
+  }
+  if (ssp < 2L) {
+    fieldhub_abort("split_split_plot() requires at least two sub-sub-plot levels: ssp = ", ssp,
+                   " leaves nothing to split within each sub-plot.")
+  }
   validate_design_size(c(wp, sp, ssp, reps, l))
   if (!is.null(plotNumber)) {
     validate_plot_starts(plotNumber)

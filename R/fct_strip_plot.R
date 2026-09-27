@@ -138,6 +138,14 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
       Vplots <- as.character((nH + 1):(nH + nV))
     }
   }
+  if (nH < 2L) {
+    fieldhub_abort("strip_plot() requires at least two horizontal-strip levels: Hplots = ", nH,
+                   " leaves nothing to strip.")
+  }
+  if (nV < 2L) {
+    fieldhub_abort("strip_plot() requires at least two vertical-strip levels: Vplots = ", nV,
+                   " leaves nothing to strip.")
+  }
   validate_design_size(c(nH, nV, b, l))
   if(!is.null(l) && is.numeric(l) && length(l) == 1) {
     validate_location_labels(locationNames, l)

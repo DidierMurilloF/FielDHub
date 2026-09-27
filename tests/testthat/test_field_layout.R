@@ -163,16 +163,17 @@ test_that("split-split plots in complete blocks follow the stacking", {
 test_that("plot() explains that a stacking is not available", {
   # Regression test: grid_panel failed with "undefined columns selected" for
   # designs with two reps, and RCBD() designs rejected it with a plain error.
+  # plot_layout() used to warn (fieldhub_layout_warning) and return NULL
+  # instead of raising the classed error directly.
   alpha <- alpha_lattice(t = 12, k = 4, reps = 2, seed = 1)
   expect_warning(
-    expect_error(plot(alpha, stacked = "grid_panel"), class = "fieldhub_error"),
-    "Stacking \"grid_panel\" is not available",
-    class = "fieldhub_layout_warning"
+    expect_error(plot(alpha, stacked = "grid_panel"), "Stacking 'grid_panel' is not available",
+                 class = "fieldhub_input_error"),
+    NA
   )
   expect_warning(
     expect_error(plot(RCBD(t = 6, reps = 3, seed = 1), stacked = "grid_panel"),
-                 class = "fieldhub_error"),
-    "not available",
-    class = "fieldhub_layout_warning"
+                 "not available", class = "fieldhub_input_error"),
+    NA
   )
 })

@@ -133,7 +133,17 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
   blocks_model <- list()
   local_optimizer_options()
   for (i in 1:l) {
-    mydes <- blocksdesign::blocks(treatments = nt, replicates = r, blocks = list(r, b), seed = NULL)
+    mydes <- tryCatch(
+      blocksdesign::blocks(treatments = nt, replicates = r, blocks = list(r, b), seed = NULL),
+      error = function(e) {
+        fieldhub_abort(
+          "incomplete_blocks() cannot build a resolvable design for t = ", nt,
+          " treatments, k = ", k, ", and reps = ", r, ": not enough replication ",
+          "for this block size. Increase reps or use a different block size.",
+          call = NULL
+        )
+      }
+    )
     mydes <- rerandomize_ibd(ibd_design = mydes)
     matdf <- base::data.frame(list(LOCATION = rep(locationNames[i], each = N)))
     matdf$PLOT <- as.numeric(unlist(ibd_plots[[i]]))

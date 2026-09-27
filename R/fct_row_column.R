@@ -330,11 +330,21 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
     }
     if (method == "twostage") {
       # Two-stage: build columns with blocks(), then greedily optimize rows.
-      mydes <- blocksdesign::blocks(
-        treatments = nt,
-        replicates = reps,
-        blocks = list(reps, ncols),
-        seed = offset_design_seed(seed, i)
+      mydes <- tryCatch(
+        blocksdesign::blocks(
+          treatments = nt,
+          replicates = reps,
+          blocks = list(reps, ncols),
+          seed = offset_design_seed(seed, i)
+        ),
+        error = function(e) {
+          fieldhub_abort(
+            "row_column() cannot build a resolvable design for t = ", nt,
+            ", nrows = ", nrows, ", and reps = ", reps, ": not enough replication ",
+            "for this block size. Increase reps or use a different number of rows.",
+            call = NULL
+          )
+        }
       )
       mydes <- rerandomize_ibd(ibd_design = mydes)
       # Create row and column design

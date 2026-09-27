@@ -159,6 +159,12 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
     }
   }
   nruns <- nrow(allcomb)
+  if (nruns < 2L) {
+    fieldhub_abort(
+      "full_factorial() requires the factors to produce at least two treatment ",
+      "combinations; the factors and levels supplied produce ", nruns, "."
+    )
+  }
   trt <- vector(mode = "character", length = nruns)
   H <- 1:nrow(allcomb)
   for (i in H) {

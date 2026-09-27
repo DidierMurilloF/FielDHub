@@ -154,12 +154,18 @@ test_that("field dimensions that do not fit raise an error with the valid option
   }
 })
 
-test_that("plot() explains that a layout option is not available", {
+test_that("plot() of an unavailable view is a classed error with the options", {
+  # Regression test: plot_layout() used to warn (fieldhub_layout_warning) and
+  # return NULL, which plot.FielDHub() then turned into a generic error that
+  # did not carry the valid options. Now the location/layout/stacking check
+  # itself raises the classed error, with no warning along the way.
   rcbd <- RCBD(t = 6, reps = 3, seed = 1)
+  e <- expect_error(plot(rcbd, l = 3), class = "fieldhub_input_error")
+  expect_true(length(e$options) >= 1L)
   expect_warning(
-    expect_error(plot(rcbd, layout = 99), class = "fieldhub_error"),
-    "Layout option 99 is not available",
-    class = "fieldhub_layout_warning"
+    expect_error(plot(rcbd, layout = 99), "available layout option",
+                 class = "fieldhub_input_error"),
+    NA
   )
 })
 

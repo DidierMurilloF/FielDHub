@@ -159,18 +159,15 @@ plot.FielDHub <- function(x, ...) {
     if (!inherits(x,"FielDHub")) {
       fieldhub_abort("x is not a FielDHub class")
     }
+    # plot_layout() raises a classed fieldhub_input_error, listing the valid
+    # options, when the requested layout, location or stacking is unavailable.
     p <- plot_layout(x = x, ...)
-    if (is.null(p)) {
-      # plot_layout() warns which layouts or locations are available
-      fieldhub_abort("The layout or location requested is not available for this design.")
-    } else {
-      out <- list(
-        field_book = p$allSitesFieldbook,
-        layout = p$out_layout
-      )
-      class(out) <- "fieldLayout"
-      print(x = out)
-      return(invisible(list(p = out$layout, field_book = out$field_book)))
-    }
+    out <- list(
+      field_book = p$allSitesFieldbook,
+      layout = p$out_layout
+    )
+    class(out) <- "fieldLayout"
+    print(x = out)
+    return(invisible(list(p = out$layout, field_book = out$field_book)))
   } else fieldhub_abort("x is missing!")
 }

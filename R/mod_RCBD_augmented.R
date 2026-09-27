@@ -542,10 +542,7 @@ mod_RCBD_augmented_server <- function(id) {
       shiny::req(rcbd_augmented_reactive())
       obj_arcbd <- rcbd_augmented_reactive()
       loc_to_view <- as.numeric(input$locView.arcbd)
-      try(
-        plot_layout(x = obj_arcbd, l = loc_to_view),
-        silent = TRUE
-      )
+      validate_design(checked_layout_view(obj_arcbd, location = loc_to_view))
     })
     
     output$field_layout <- shiny::renderPlot({

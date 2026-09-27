@@ -22,8 +22,9 @@
 #'   drawn field book of the location \code{fieldBookXY}, the layout options
 #'   of the location \code{newBooks}, and the field book with coordinates of
 #'   every location \code{allSitesFieldbook}, and the selected layout settings
-#'   \code{layout_metadata}. When the location, stacking or
-#'   layout option is not available, a warning and NULL.
+#'   \code{layout_metadata}. An unavailable location, stacking or layout
+#'   option raises a classed \code{fieldhub_input_error} that lists the valid
+#'   options, instead of warning and returning NULL.
 #'
 #' @references
 #' Kevin Wright (2020). desplot: Plotting Field Plans for Agricultural Experiments. R package version 1.8.
@@ -32,41 +33,12 @@
 #'
 #' @noRd
 plot_layout <- function(
-    x = NULL, 
+    x = NULL,
     layout = 1,
-    planter = "serpentine", 
-    l = 1, 
+    planter = "serpentine",
+    l = 1,
     stacked = "vertical",
     ...) {
-    if (!inherits(x,"FielDHub")) fieldhub_abort("x is not a FielDHub class object")
-    if (length(l) != 1 || l < 1 || l %% 1 != 0) fieldhub_abort("l must be a positive integer!")
-    x <- with_design_class(x)
-    check_layout_arguments(planter, stacked)
-    options <- layout_options(x, planter = planter, stacked = stacked)
-    locs_available <- length(options)
-    if (l > locs_available) {
-        fieldhub_warn(
-            "Location ", l, " is not available: the design has ", locs_available, " ",
-            if (locs_available > 1) "locations!" else "location!",
-            class = "fieldhub_layout_warning", call = NULL
-        )
-        return(NULL)
-    }
-    site_options <- options[[l]]
-    if (length(site_options) == 0) {
-        fieldhub_warn(
-            "Stacking \"", stacked, "\" is not available for this design.",
-            class = "fieldhub_layout_warning", call = NULL
-        )
-        return(NULL)
-    }
-    if (length(layout) != 1 || !layout %in% seq_along(site_options)) {
-        fieldhub_warn(
-            "Layout option ", layout, " is not available for this design. Options: ",
-            paste(seq_along(site_options), collapse = ", "), ".",
-            class = "fieldhub_layout_warning", call = NULL
-        )
-        return(NULL)
-    }
-    render_layout_view(x, options, layout, planter, l, stacked, ...)
+    checked_layout_view(x, layout = layout, planter = planter, location = l,
+                        stacked = stacked, ...)
 }

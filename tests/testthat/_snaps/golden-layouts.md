@@ -900,9 +900,9 @@
       1003 1004 1103 1104 1203 1204
       1005 1006 1105 1106 1205 1206
       ## serpentine, grid_panel
-      No layout
+      Error: Stacking 'grid_panel' is not available for this design. 
       ## cartesian, grid_panel
-      No layout
+      Error: Stacking 'grid_panel' is not available for this design. 
 
 # the field layouts of RCBD_checks are unchanged
 
@@ -1446,9 +1446,9 @@
       105 106 107 108 205 206 207 208 305 306 307 308
       109 110 111 112 209 210 211 212 309 310 311 312
       ## serpentine, grid_panel
-      No layout
+      Error: Stacking 'grid_panel' is not available for this design. 
       ## cartesian, grid_panel
-      No layout
+      Error: Stacking 'grid_panel' is not available for this design. 
 
 # the field layouts of RCBD_cartesian are unchanged
 
@@ -1616,9 +1616,9 @@
       PLOT:
       101 102 103 104 105 106 107 108 109 110 111 112 113 114 115
       ## serpentine, grid_panel
-      No layout
+      Error: Stacking 'grid_panel' is not available for this design. 
       ## cartesian, grid_panel
-      No layout
+      Error: Stacking 'grid_panel' is not available for this design. 
 
 # the field layouts of latin_square are unchanged
 
@@ -1694,9 +1694,9 @@
       109 110 111 112 209 210 211 212
       113 114 115 116 213 214 215 216
       ## serpentine, grid_panel
-      No layout
+      Error: Stacking 'grid_panel' is not available for this design. 
       ## cartesian, grid_panel
-      No layout
+      Error: Stacking 'grid_panel' is not available for this design. 
 
 # the field layouts of latin_square_cartesian are unchanged
 
@@ -1764,9 +1764,9 @@
       16 17 18 19 20
       21 22 23 24 25
       ## serpentine, grid_panel
-      No layout
+      Error: Stacking 'grid_panel' is not available for this design. 
       ## cartesian, grid_panel
-      No layout
+      Error: Stacking 'grid_panel' is not available for this design. 
 
 # the field layouts of full_factorial_rcbd are unchanged
 
@@ -2142,9 +2142,9 @@
       1003 1004 1103 1104
       1005 1006 1105 1106
       ## serpentine, grid_panel
-      No layout
+      Error: Stacking 'grid_panel' is not available for this design. 
       ## cartesian, grid_panel
-      No layout
+      Error: Stacking 'grid_panel' is not available for this design. 
 
 # the field layouts of full_factorial_crd_data are unchanged
 
@@ -2464,9 +2464,9 @@
       1002 1002 1102 1102
       1003 1003 1103 1103
       ## serpentine, grid_panel
-      No layout
+      Error: Stacking 'grid_panel' is not available for this design. 
       ## cartesian, grid_panel
-      No layout
+      Error: Stacking 'grid_panel' is not available for this design. 
 
 # the field layouts of split_plot_crd are unchanged
 
@@ -2770,9 +2770,9 @@
       102 102 202 202
       102 102 202 202
       ## serpentine, grid_panel
-      No layout
+      Error: Stacking 'grid_panel' is not available for this design. 
       ## cartesian, grid_panel
-      No layout
+      Error: Stacking 'grid_panel' is not available for this design. 
 
 # the field layouts of split_split_plot_crd are unchanged
 
@@ -3108,9 +3108,9 @@
       1003 1004 1103 1104
       1005 1006 1105 1106
       ## serpentine, grid_panel
-      No layout
+      Error: Stacking 'grid_panel' is not available for this design. 
       ## cartesian, grid_panel
-      No layout
+      Error: Stacking 'grid_panel' is not available for this design. 
 
 # the field layouts of strip_plot_labels are unchanged
 
@@ -3170,9 +3170,9 @@
       101 102 103 201 202 203 301 302 303
       104 105 106 204 205 206 304 305 306
       ## serpentine, grid_panel
-      No layout
+      Error: Stacking 'grid_panel' is not available for this design. 
       ## cartesian, grid_panel
-      No layout
+      Error: Stacking 'grid_panel' is not available for this design. 
 
 # the field layouts of incomplete_blocks are unchanged
 
@@ -3356,9 +3356,9 @@
       103 107 111 203 207 211
       104 108 112 204 208 212
       ## serpentine, grid_panel
-      No layout
+      Error: Stacking 'grid_panel' is not available for this design. 
       ## cartesian, grid_panel
-      No layout
+      Error: Stacking 'grid_panel' is not available for this design. 
 
 # the field layouts of incomplete_blocks_labels are unchanged
 
@@ -3614,9 +3614,9 @@
       104 109 204 209
       105 110 205 210
       ## serpentine, grid_panel
-      No layout
+      Error: Stacking 'grid_panel' is not available for this design. 
       ## cartesian, grid_panel
-      No layout
+      Error: Stacking 'grid_panel' is not available for this design. 
 
 # the field layouts of alpha_lattice are unchanged
 
@@ -3800,9 +3800,9 @@
       103 107 111 203 207 211
       104 108 112 204 208 212
       ## serpentine, grid_panel
-      No layout
+      Error: Stacking 'grid_panel' is not available for this design. 
       ## cartesian, grid_panel
-      No layout
+      Error: Stacking 'grid_panel' is not available for this design. 
 
 # the field layouts of alpha_lattice_six_reps are unchanged
 
@@ -4418,9 +4418,9 @@
       103 107 111 115 203 207 211 215
       104 108 112 116 204 208 212 216
       ## serpentine, grid_panel
-      No layout
+      Error: Stacking 'grid_panel' is not available for this design. 
       ## cartesian, grid_panel
-      No layout
+      Error: Stacking 'grid_panel' is not available for this design. 
 
 # the field layouts of rectangular_lattice are unchanged
 
@@ -4572,9 +4572,9 @@
       102 105 108 111 202 205 208 211
       103 106 109 112 203 206 209 212
       ## serpentine, grid_panel
-      No layout
+      Error: Stacking 'grid_panel' is not available for this design. 
       ## cartesian, grid_panel
-      No layout
+      Error: Stacking 'grid_panel' is not available for this design. 
 
 # the field layouts of row_column are unchanged
 
@@ -4638,9 +4638,9 @@
       105 106 107 108 205 206 207 208
       109 110 111 112 209 210 211 212
       ## serpentine, grid_panel
-      No layout
+      Error: Stacking 'grid_panel' is not available for this design. 
       ## cartesian, grid_panel
-      No layout
+      Error: Stacking 'grid_panel' is not available for this design. 
 
 # the field layouts of row_column_twostage are unchanged
 
@@ -4748,7 +4748,7 @@
       1005 1006 1007 1008 1105 1106 1107 1108
       1009 1010 1011 1012 1109 1110 1111 1112
       ## serpentine, grid_panel
-      No layout
+      Error: Stacking 'grid_panel' is not available for this design. 
       ## cartesian, grid_panel
-      No layout
+      Error: Stacking 'grid_panel' is not available for this design. 
 

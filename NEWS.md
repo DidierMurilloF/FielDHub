@@ -517,10 +517,8 @@
   Design-quality notices (row-column latinization/one-stage fallback, RCBD
   checks occupying more than half a block or failing to stratify, a family
   not present in every location, locations that could not be balanced) now
-  signal `fieldhub_design_warning`, and the internal field-layout adapter's
-  "location/stacking/layout option not available" notices signal
-  `fieldhub_layout_warning`. Only the warning class and wording changed;
-  seeded results are unchanged.
+  signal `fieldhub_design_warning`. Only the warning class and wording
+  changed; seeded results are unchanged.
 
 - The incomplete-block, row-column and lattice app modules now obtain feasible
   block sizes from one tested core validator instead of duplicating the rules
@@ -873,6 +871,22 @@
 - The documentation of `swap_pairs()`, `do_optim()`, `sparse_allocation()` and
   `multi_location_prep()` now matches their defaults and the elements they
   return.
+- `split_plot()`, `split_split_plot()` and `strip_plot()` now raise a
+  classed input error for a sub-plot, sub-sub-plot or strip factor with
+  only one level, which used to crash with base R's "incorrect number of
+  dimensions"; a single whole plot and a single replicate are still valid
+  designs. `incomplete_blocks()` and `row_column()` (and, through them,
+  `alpha_lattice()`, `square_lattice()` and `rectangular_lattice()`) now
+  explain that there is not enough replication for the block size instead
+  of leaking blocksdesign's "Too many parameters for the available plots".
+  `full_factorial()` no longer names `RCBD()` in the error it raises for a
+  single-run design (every factor at one level). `plot()` of an
+  unavailable location, stacking or layout option now raises a classed
+  `fieldhub_input_error` that lists the valid options, replacing the
+  internal field-layout adapter's warn-and-return-`NULL` path (and its
+  short-lived `fieldhub_layout_warning` class); the augmented RCBD app
+  module routes the same error through the app's validation messages
+  instead of silently swallowing it.
 
 ### Changes to results for a given seed:
 
@@ -901,6 +915,11 @@ from:
   number of checks (the design was not reproducible).
 - The Split-Split Plot module of the Shiny app with the horizontal reps layout
   (the exported field book had the vertical layout).
+- Not a design change: the golden layout-preview snapshot for `stacked =
+  "grid_panel"` on a design that does not support it now shows the classed
+  `fieldhub_input_error` message instead of the placeholder "No layout",
+  because `plot()`/`plot_layout()` now raise that error instead of
+  returning `NULL` (see Fix bugs). No generated field book is affected.
 
 # FielDHub 1.3.1
 

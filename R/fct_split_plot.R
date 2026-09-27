@@ -116,6 +116,10 @@ split_plot <- function(wp = NULL, sp = NULL, reps = NULL, type = 2, l = 1, plotN
       SubPlots <- as.character((wp + 1):(wp + sp))
     }
   }
+  if (sp < 2L) {
+    fieldhub_abort("split_plot() requires at least two sub-plot levels: sp = ", sp,
+                   " leaves nothing to split within each whole plot.")
+  }
   b <- reps
   validate_design_size(c(wp, sp, reps, l))
   if (!is.null(plotNumber)) {

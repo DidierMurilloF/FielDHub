@@ -37,3 +37,37 @@ test_that("sparse_allocation() explains when no field dimensions fit", {
     "no field dimension options"
   )
 })
+
+test_that("degenerate factors and replication give classed input errors", {
+  # Regression test: these used to crash with leaked, unclassed errors: base
+  # R's "incorrect number of dimensions" for a one-level sub-/strip-plot
+  # factor, and blocksdesign's "Too many parameters for the available plots"
+  # for under-replicated block designs.
+  expect_error(split_plot(wp = 2, sp = 1, reps = 2, seed = 1), class = "fieldhub_input_error")
+  expect_error(split_split_plot(wp = 2, sp = 2, ssp = 1, reps = 2, seed = 1),
+               class = "fieldhub_input_error")
+  expect_error(strip_plot(Hplots = 2, Vplots = 1, reps = 2, seed = 1), class = "fieldhub_input_error")
+  expect_error(incomplete_blocks(t = 4, k = 2, reps = 1, seed = 1), class = "fieldhub_input_error")
+  # row_column() first warns (fieldhub_design_warning) that the default
+  # method = "onestage" is infeasible and falls back to "twostage", which
+  # then also fails for this under-replicated design.
+  expect_error(suppressWarnings(row_column(t = 4, nrows = 2, reps = 1, seed = 1)),
+               class = "fieldhub_input_error")
+  for (f in list(alpha_lattice, square_lattice, rectangular_lattice)) {
+    expect_error(f(t = 16, k = 4, reps = 1, seed = 1), class = "fieldhub_input_error")
+  }
+  # Regression test: full_factorial() delegated a single-run design to RCBD(),
+  # which raised a "RCBD() requires..." error that named the wrong function.
+  e <- expect_error(full_factorial(setfactors = c(1, 1), reps = 2, seed = 1),
+                    class = "fieldhub_input_error")
+  expect_false(grepl("RCBD", conditionMessage(e)))
+})
+
+test_that("designs stay valid with a single whole plot or a single replicate", {
+  # split_plot()/split_split_plot() only crash when the *sub*- or sub-sub-
+  # plot factor collapses to one level; a single whole plot, and a single
+  # replicate, are both still meaningful designs and must keep working.
+  expect_s3_class(split_plot(wp = 1, sp = 2, reps = 2, seed = 1), "FielDHub")
+  expect_s3_class(split_split_plot(wp = 1, sp = 2, ssp = 2, reps = 2, seed = 1), "FielDHub")
+  expect_s3_class(split_plot(wp = 2, sp = 2, reps = 1, seed = 1), "FielDHub")
+})
