@@ -39,6 +39,11 @@ plot_desplot <- function(form, data, ..., extra_args = list()) {
     args <- utils::modifyList(utils::modifyList(defaults, list(...)), extra_args)
     args$form <- form
     args$data <- data
+    # desplot passes a missing outline width to ggplot2 as an empty linewidth,
+    # which warns on every draw; ggplot2 would draw it at 0.5 anyway.
+    for (gpar in c("out1.gpar", "out2.gpar")) {
+        if (is.list(args[[gpar]]) && is.null(args[[gpar]]$lwd)) args[[gpar]]$lwd <- 0.5
+    }
     do.call(desplot::desplot, args) + fieldhub_layout_theme()
 }
 

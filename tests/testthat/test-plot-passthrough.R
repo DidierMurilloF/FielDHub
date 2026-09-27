@@ -31,3 +31,15 @@ test_that("plot() forwards extra arguments on the do.call() path (prep)", {
   expect_s3_class(pl$p, "ggplot")
   expect_identical(pl$p$labels$x, "CUSTOM_X")
 })
+
+test_that("drawing every catalogue design is silent", {
+  skip_if_layout_refactor_unavailable()
+  for (name in setdiff(names(catalogue), "split_families")) {
+    design <- catalogue_design(name)
+    if (!inherits(design, "FielDHub")) next
+    layout <- plot_layout(design)
+    for (p in Filter(function(z) inherits(z, "ggplot"), layout)) {
+      expect_silent(ggplot2::ggplot_build(p))
+    }
+  }
+})

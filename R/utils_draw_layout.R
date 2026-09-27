@@ -467,9 +467,9 @@ draw_layout.fieldhub_rcbd_augmented <- function(x, df, ...) {
       ticks = "all",
       panel.border = FALSE,
       out2.gpar = list(col = "gray50", lwd = 1, lty = 1),
+      col.regions = fill_vals,
       ...
     ), dots)) +
-      ggplot2::scale_fill_manual(values = fill_vals, guide = "none") +
       fieldhub_layout_theme()
   }
   # p1: entries, with the checks highlighted; p2: plot numbers

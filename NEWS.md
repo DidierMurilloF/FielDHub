@@ -557,6 +557,12 @@
 
 ### Fix bugs:
 
+- `plot()` no longer prints ggplot2 messages or warnings. Augmented RCBD
+  maps passed their block colours as a second fill scale ("Scale for fill
+  is already present"), and outlines drawn without an explicit width
+  warned "Ignoring empty aesthetic: `linewidth`" in split-plot,
+  incomplete-block, lattice and other maps. The drawn maps are unchanged.
+
 - `do_optim()` now honors its declared `design = "sparse"` default when the
   argument is omitted; previously it incorrectly reported a missing design.
 
