@@ -137,16 +137,12 @@ optimized_arrangement <- function(
     } else fieldhub_abort("Number of locations/sites is missing")
     
     if (!is.null(data)) {
-        arg1 <- list(nrows, ncols, l);arg2 <- c(nrows, ncols, l)
-        if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
-            fieldhub_abort('"optimized_arrangement()" requires arguments nrows, ncols, and l to be numeric and distint of NULL')
-        }
+        counts <- list(nrows = nrows, ncols = ncols, l = l)
     } else {
-        arg1 <- list(nrows, ncols, lines, l);arg2 <- c(nrows, ncols, lines, l)
-        if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
-            fieldhub_abort('"optimized_arrangement()" requires arguments nrows, ncols, and l to be numeric and distint of NULL')
-        }
-    } 
+        counts <- list(nrows = nrows, ncols = ncols, lines = lines, l = l)
+    }
+    for (argument in names(counts)) validate_iteration_budget(counts[[argument]], argument)
+    validate_design_size(c(nrows, ncols, l))
     
     recorded_checks <- NULL
     if(is.null(data)) {

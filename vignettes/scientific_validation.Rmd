@@ -112,6 +112,7 @@ biological experiment.
 |---|---|
 | RCBD, Latin-square, incomplete-block, lattice, and row-column construction | Validates counts before allocation and rejects a projected total exceeding R's integer-index bound; available memory can impose a lower practical limit |
 | Generated factorial, split-plot, split-split-plot, and strip-plot expansion | Checks the product of factor counts, replications, and locations against R's integer-index bound before expanding levels or allocating the field book |
+| Spatial field construction | Validates scalar or per-location dimensions and rejects projected diagonal, optimized, augmented-RCBD, and p-rep field sizes beyond R's integer-index bound |
 | Block-model connectivity | At most one graph expansion per treatment; stops when all treatments are reached or no new treatment is reachable |
 | Latin-square placement | At most 100,000 placement iterations per square; a `fieldhub_search_error` records the square and budget on exhaustion |
 | Repeated-check placement in RCBD | At most 100 attempts per block; warns and falls back to unrestricted placement if stratification cannot be completed |

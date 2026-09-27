@@ -120,6 +120,11 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
   seed <- resolve_seed(seed)
   local_design_seed(seed)
   validate_plot_starts(plotNumber)
+  # With explicit plot starts, repsExpt is used in arithmetic before the other
+  # counts. Keep NULL-plot defaults in their existing promise-evaluation order.
+  if (!is.null(plotNumber) && !is.null(repsExpt)) {
+    validate_iteration_budget(repsExpt, "repsExpt")
+  }
   
   if (!is.null(l)) {
     if (is.null(plotNumber) || !(length(plotNumber) %in% c(l, repsExpt, l * repsExpt))) {
@@ -140,11 +145,10 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
   }
   if (is.null(repsExpt)) repsExpt <- 1
   
-  arg1 <- list(lines, b, l, repsExpt)
-  arg2 <- c(lines, b, l, repsExpt)
-  if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
-    fieldhub_abort("RCBD_augmented() requires input lines, b and l to be possitive integers.")
-  }
+  counts <- list(lines = lines, b = b, l = l, repsExpt = repsExpt, checks = checks)
+  for (argument in names(counts)) validate_iteration_budget(counts[[argument]], argument)
+  requested_plots <- as.double(lines) + as.double(checks) * as.double(b)
+  validate_design_size(c(ceiling(requested_plots / b) * b, l, repsExpt))
   if (!is.null(plotNumber) && is.numeric(plotNumber)) {
     if (any(plotNumber < 1) || any(diff(plotNumber) < 0)) {
       fieldhub_abort("RCBD_augmented() requires input plotNumber to be possitive integers and sorted.")
@@ -208,9 +212,9 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
     field_rows <- nrows_within_block * blocks_per_col
     field_cols <- ncols_within_block * blocks_per_row
   } else {
-    if (nrows %% 1 != 0 || ncols %% 1 != 0 || nrows < 1 || ncols < 1) {
-      fieldhub_abort("nrows and ncols must be positive integers.")
-    }
+    validate_iteration_budget(nrows, "nrows")
+    validate_iteration_budget(ncols, "ncols")
+    validate_design_size(c(nrows, ncols, l, repsExpt))
     # We no longer require nrows %% b == 0 because blocks can be side-by-side.
     # We infer a grid (blocks_per_col x blocks_per_row) where blocks_per_col * blocks_per_row = b.
     

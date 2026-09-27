@@ -7,6 +7,15 @@
 
 ### Breaking changes:
 
+- Spatial row and column counts now reject missing, non-finite, fractional,
+  and matrix inputs before field construction. Diagonal and optimized entry
+  counts, plus augmented-RCBD entry, check, block, and experiment-replication
+  counts, use the same finite scalar checks. P-rep dimension vectors must be
+  complete positive counts; existing padding/truncation and augmented-RCBD
+  automatic-dimension defaults are retained. Projected field sizes beyond
+  R's integer-index range raise structured errors. Valid seeded results are
+  unchanged.
+
 - Factorial, split-plot, split-split-plot, and strip-plot designs now check
   factor counts and level labels before expansion. Counts must be finite,
   positive whole numbers; level labels must be complete, nonblank, and unique

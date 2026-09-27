@@ -157,6 +157,8 @@ partially_replicated <- function(
     if (is.null(nrows) || is.null(ncols) || !is.numeric(nrows) || !is.numeric(ncols)) {
         fieldhub_abort('Basic design parameters missing (nrows, ncols) or is not numeric.')
     }
+    validate_count_vector(nrows, "nrows")
+    validate_count_vector(ncols, "ncols")
     if (length(nrows) != l) {
         if (length(nrows) < l) {
             # warning("Number of nrows values not matching number of locations", call. = FALSE)
@@ -180,6 +182,7 @@ partially_replicated <- function(
         }
     }
     
+    validate_design_size(sum(as.double(nrows) * as.double(ncols)))
     generated_data <- is.null(data)
     if (generated_data) {
         if (is.null(repGens) || is.null(repUnits)) {
