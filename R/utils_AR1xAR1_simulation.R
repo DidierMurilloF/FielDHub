@@ -89,34 +89,17 @@ append_simulated_response <- function(field_book, simulation, response_name,
 
 #' @importFrom stats rnorm sd
 ZST <- function(n,m,RHOX,RHOY,s20) {
-  
-  s2 <- 1
-  N <- n*m
-  V <- diag(N)
-  
+  N <- check_spatial_grid(n, m, RHOX, RHOY)
+  if (N < 2L) fieldhub_abort("Spatial standardization needs at least two plots.")
+  if (!is.numeric(s20) || is.complex(s20) || length(s20) != 1L ||
+      !is.finite(s20) || s20 < 0 || s20 > 1) {
+    fieldhub_abort("The spatial nugget fraction must be a finite number between zero and one.")
+  }
   e1 <- rnorm(N)
   e2 <- rnorm(N)
-  
-  Y <- matrix(0,N,1)
-  X <- matrix(0,N,1)
-  for (K in 1:(N)) {
-    
-    Y1 <- floor((K-1)/m)+1     
-    X1 <- K-(Y1-1)*m         
-    Y[K,1] <- Y1                
-    X[K,1] <- X1
-    
-    if (K!=N) {
-      for (L in (K+1):N) {
-        Y2 <- floor((L-1)/m)+1         
-        X2 <- L-(Y2-1)*m              
-        V[K,L] <- s2*(RHOX^abs(X2-X1))*(RHOY^abs(Y2-Y1))
-        V[L,K] <- V[K,L]              
-      }
-    }
-  }
-  L <- chol(V)
-  PAT <- t(L)%*%e1
+  Y <- rep(as.numeric(seq_len(n)), each = m)
+  X <- rep(as.numeric(seq_len(m)), times = n)
+  PAT <- separable_ar1_patch(e1, n, m, RHOX, RHOY)
   PAT <- (PAT-mean(PAT))/sd(PAT); #Standarization of Patchess
   
   Z <- PAT

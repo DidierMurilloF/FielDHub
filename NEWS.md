@@ -117,6 +117,14 @@
 
 ### Enhancements:
 
+- Spatial simulation now applies the separable AR1-by-AR1 covariance through
+  two linear recurrences, avoiding the dense plot-by-plot covariance matrix
+  and Cholesky factorization. Random draws, coordinate order, standardization
+  and the nugget model are preserved. Raw simulated values can differ by
+  floating-point rounding for the same seed; design randomization is
+  unchanged. Independent covariance tests and a repeatable spatial benchmark
+  accompany the implementation.
+
 - Field designs and allocation plans now share validation of their schema,
   seed range, RNG settings, package version and recorded parameters.
   Duplicate metadata fields and conflicting design seeds are rejected with
