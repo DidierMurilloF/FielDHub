@@ -96,11 +96,42 @@ fielddhub_first_unnamed_from <- function(e, from) {
   NA_integer_
 }
 
+#' Whether `e` is `names(x)`, `colnames(x)` or `dimnames(x)[[2]]`: an
+#' accessor whose result is a character vector of *column names*, as
+#' opposed to some other vector a plain `x[3]` might index into. Restricting
+#' the single-index `[` check (below) to these keeps genuinely positional
+#' vector indexing on non-name vectors (`x[3]`, `plotNumber[locs]`, ...) out
+#' of scope, so it doesn't explode the allow-list with unrelated hits.
+#'
+#' @noRd
+fielddhub_is_name_accessor <- function(e) {
+  if (is.call(e) && is.symbol(e[[1]]) && length(e) == 2 &&
+      as.character(e[[1]]) %in% c("names", "colnames")) {
+    return(TRUE)
+  }
+  if (is.call(e) && is.symbol(e[[1]]) && identical(as.character(e[[1]]), "[[") &&
+      length(e) >= 3) {
+    idx_pos <- fielddhub_first_unnamed_from(e, 3)
+    if (!is.na(idx_pos) && fielddhub_is_numeric_literal(e[[idx_pos]]) &&
+        isTRUE(as.numeric(e[[idx_pos]]) == 2)) {
+      obj <- e[[2]]
+      if (is.call(obj) && is.symbol(obj[[1]]) &&
+          identical(as.character(obj[[1]]), "dimnames") && length(obj) == 2) {
+        return(TRUE)
+      }
+    }
+  }
+  FALSE
+}
+
 #' Every `[`/`[[` call in `expr` that selects a column by hard-coded
 #' position: `x[, 3]`, `x[, 1:3]`, `x[, c(6, 7, 9)]`, `x[, -1]`,
-#' `x[, -c(1, 2)]`, `x[[3]]`. Matches an assignment target the same as a
-#' read (`x[, 1] <- v` is, in the unevaluated parse tree, a `[` call inside
-#' a `<-` call; R only rewrites it to `` `[<-` `` at evaluation time).
+#' `x[, -c(1, 2)]`, `x[[3]]`, plus a single-index positional read or rename
+#' of column *names* themselves: `names(x)[3]`, `colnames(x)[c(1, 2)]`,
+#' `colnames(x)[3] <- v`, `dimnames(x)[[2]][3]`. Matches an assignment
+#' target the same as a read (`x[, 1] <- v` / `colnames(x)[1] <- v` is, in
+#' the unevaluated parse tree, a `[` call inside a `<-` call; R only
+#' rewrites it to `` `[<-` `` / `` `names<-` `` at evaluation time).
 #'
 #' @return A list of the matching call objects (not their positions).
 #' @noRd
@@ -113,6 +144,11 @@ fielddhub_positional_index_calls <- function(expr) {
       if (head == "[" && length(e) >= 4 && identical(e[[3]], quote(expr = ))) {
         col_pos <- fielddhub_first_unnamed_from(e, 4)
         if (!is.na(col_pos) && fielddhub_is_positional_index(e[[col_pos]])) {
+          hits[[length(hits) + 1]] <<- e
+        }
+      } else if (head == "[" && length(e) >= 3 && fielddhub_is_name_accessor(e[[2]])) {
+        idx_pos <- fielddhub_first_unnamed_from(e, 3)
+        if (!is.na(idx_pos) && fielddhub_is_positional_index(e[[idx_pos]])) {
           hits[[length(hits) + 1]] <<- e
         }
       } else if (head == "[[" && length(e) >= 3) {

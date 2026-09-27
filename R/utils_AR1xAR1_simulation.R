@@ -42,7 +42,9 @@ AR1xAR1_simulation <- function(nrows = NULL, ncols = NULL, ROX = NULL,
   merged$resp <- Beta + merged$genot + sqrt(1 - H2) * merged$ZST
   merged <- merged[, c("ID", "ENTRY", "ROW", "COLUMN", "ZST", "genot", "resp")]
   outOrder <- merged[order(merged$ID),]
-  colnames(outOrder)[7] <- trail
+  # "resp" is the simulated response column merged[, ...] built above; rename
+  # it by that name rather than by its (currently 7th) position.
+  names(outOrder)[names(outOrder) == "resp"] <- trail
   outOrder$ROW <- as.factor(outOrder$ROW)
   outOrder$COLUMN <- as.factor(outOrder$COLUMN)
   label_trail <- paste(trail, ": ")

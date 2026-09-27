@@ -155,7 +155,10 @@ CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL,
   design <- design[order(design$PLOT), ]
   id <- 1:nrow(design)
   design <- cbind(id, design)
-  colnames(design)[1] <- "ID"
+  # cbind() of a bare `id` argument names the new column "id" (deparse.level
+  # = 1); rename it by that name rather than by its (currently first)
+  # position.
+  names(design)[names(design) == "id"] <- "ID"
   design <- as.data.frame(design)
   rownames(design) <- 1:N
   TRT <- levels(factor(TRT, as.character(unique(TRT))))

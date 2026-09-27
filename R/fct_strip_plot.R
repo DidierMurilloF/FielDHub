@@ -259,7 +259,10 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
   
   id <- 1:nrow(stripDesig_output)
   stripDesig_output <- cbind(id, stripDesig_output)
-  colnames(stripDesig_output)[1] <- "ID"
+  # cbind() of a bare `id` argument names the new column "id" (deparse.level
+  # = 1); rename it by that name rather than by its (currently first)
+  # position.
+  names(stripDesig_output)[names(stripDesig_output) == "id"] <- "ID"
   stripDesig_output <- as.data.frame(stripDesig_output)
   
   infoDesign <- list(Hplots = nH, Vplots = nV, blocks = b, numberLocations = l,
