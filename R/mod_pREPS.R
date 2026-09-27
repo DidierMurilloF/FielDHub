@@ -680,7 +680,7 @@ mod_pREPS_server <- function(id){
       field_book <- pREPS_reactive()$fieldBook
       if (is.null(valsPREP$maxValue) || is.null(valsPREP$minValue) ||
           is.null(valsPREP$trail.prep)) {
-        return(list(df = field_book))
+        return(list(df = field_book, simulation = NULL))
       }
       simulation <- validate_design(simulate_spatial_field_book(
         field_book = as.data.frame(field_book),
@@ -692,7 +692,8 @@ mod_pREPS_server <- function(id){
         response_name = as.character(valsPREP$trail.prep),
         seed = as.numeric(prep_inputs()$seed_number)
       ))
-      list(df = simulation$field_book, dfSimulationList = simulation$simulations)
+      list(df = simulation$field_book, dfSimulationList = simulation$simulations,
+           simulation = simulation)
     })
 
     heat_map_prep <- shiny::reactiveValues(heat_map_option = FALSE)

@@ -961,7 +961,7 @@ mod_sparse_allocation_server <- function(id){
       field_book <- sparse_design()$fieldBook
       if (is.null(valsDIAG$maxValue) || is.null(valsDIAG$minValue) ||
           is.null(valsDIAG$trail)) {
-        return(list(df = field_book))
+        return(list(df = field_book, simulation = NULL))
       }
       simulation <- validate_design(simulate_spatial_field_book(
         field_book = field_book,
@@ -973,7 +973,8 @@ mod_sparse_allocation_server <- function(id){
         response_name = as.character(valsDIAG$trail),
         seed = as.numeric(single_inputs()$seed_number)
       ))
-      list(df = simulation$field_book, dfSimulationList = simulation$simulations)
+      list(df = simulation$field_book, dfSimulationList = simulation$simulations,
+           simulation = simulation)
     })
 
     heat_map <- shiny::reactiveValues(heat_map_option = FALSE)

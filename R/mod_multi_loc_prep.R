@@ -1029,7 +1029,7 @@ mod_multi_loc_preps_server <- function(id){
       if (is.null(valsPREP$maxValue) || is.null(valsPREP$minValue) ||
           is.null(valsPREP$trail.prep)) {
         field_book$ID <- seq_len(nrow(field_book))
-        return(list(df = field_book))
+        return(list(df = field_book, simulation = NULL))
       }
       simulation <- validate_design(simulate_spatial_field_book(
         field_book = field_book,
@@ -1041,8 +1041,10 @@ mod_multi_loc_preps_server <- function(id){
         response_name = as.character(valsPREP$trail.prep),
         seed = as.numeric(prep_inputs()$seed_number)
       ))
-      simulation$field_book$ID <- seq_len(nrow(simulation$field_book))
-      list(df = simulation$field_book, dfSimulationList = simulation$simulations)
+      display_book <- simulation$field_book
+      display_book$ID <- seq_len(nrow(display_book))
+      list(df = display_book, dfSimulationList = simulation$simulations,
+           simulation = simulation)
     })
 
     heat_map_prep <- shiny::reactiveValues(heat_map_option = FALSE)

@@ -723,7 +723,7 @@ mod_RCBD_augmented_server <- function(id) {
       field_book <- rcbd_augmented_reactive()$fieldBook
       if (is.null(valsARCBD$maxValue) || is.null(valsARCBD$minValue) ||
           is.null(valsARCBD$trail.arcbd)) {
-        return(list(df = field_book))
+        return(list(df = field_book, simulation = NULL))
       }
       simulation <- validate_design(simulate_spatial_field_book(
         field_book = field_book,
@@ -735,7 +735,8 @@ mod_RCBD_augmented_server <- function(id) {
         response_name = as.character(valsARCBD$trail.arcbd),
         seed = as.numeric(input$myseed_a_rcbd)
       ))
-      list(df = simulation$field_book, dfSimulation = simulation$simulations)
+      list(df = simulation$field_book, dfSimulation = simulation$simulations,
+           simulation = simulation)
     })
 
     heat_map_arcbd <- shiny::reactiveValues(heat_map_option = FALSE)

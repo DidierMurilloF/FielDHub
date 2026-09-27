@@ -23,7 +23,7 @@ simulate_spatial_test <- function(book = spatial_test_book(), ...) {
 
 test_that("spatial simulations preserve metadata and location order", {
   out <- simulate_spatial_test(seed = 27)
-  expect_named(out, c("field_book", "simulations", "seed"))
+  expect_named(out, c("field_book", "simulations", "seed", "input_field_book", "metadata"))
   expect_identical(out$field_book[names(spatial_test_book())], spatial_test_book())
   expect_identical(unique(out$field_book$LOCATION), c("Z", "A"))
   expect_length(out$simulations, 2)

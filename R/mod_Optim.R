@@ -629,7 +629,7 @@ mod_Optim_server <- function(id) {
       field_book <- optimized_arrang()$fieldBook
       if (is.null(valsOPTIM$maxValue) || is.null(valsOPTIM$minValue) ||
           is.null(valsOPTIM$trail.optim)) {
-        return(list(df = field_book))
+        return(list(df = field_book, simulation = NULL))
       }
       simulation <- validate_design(simulate_spatial_field_book(
         field_book = field_book,
@@ -641,7 +641,8 @@ mod_Optim_server <- function(id) {
         response_name = as.character(valsOPTIM$trail.optim),
         seed = as.numeric(input$seed.spatial)
       ))
-      list(df = simulation$field_book, dfSimulation = simulation$simulations)
+      list(df = simulation$field_book, dfSimulation = simulation$simulations,
+           simulation = simulation)
     })
 
     heat_map_optim <- shiny::reactiveValues(heat_map_option = FALSE)

@@ -8,7 +8,8 @@
 #' @param seed Simulation seed. When omitted, an integer seed is drawn and
 #'   returned. The caller's random-number state is always restored.
 #' @return A list containing the augmented field_book, per-location simulations,
-#'   and the seed. Locations retain their first-appearance order.
+#'   the seed, exact input field book, and reconstruction metadata. Locations
+#'   retain their first-appearance order.
 #' @noRd
 simulate_spatial_field_book <- function(field_book, nrows, ncols,
                                         correlation_x, correlation_y,
@@ -103,5 +104,16 @@ simulate_spatial_field_book <- function(field_book, nrows, ncols,
         aligned <- simulation[match(book$ID, simulation$ID), , drop = FALSE]
         books[[i]] <- append_simulated_response(book, aligned, response_name)
     }
-    list(field_book = dplyr::bind_rows(books), simulations = simulations, seed = seed)
+    list(
+        field_book = dplyr::bind_rows(books), simulations = simulations, seed = seed,
+        input_field_book = field_book,
+        metadata = list(
+            model = "ar1xar1", schema_version = 1L, seed = seed,
+            rng_kind = RNGkind(), package_version = as.character(utils::packageVersion("FielDHub")),
+            parameters = list(nrows = nrows, ncols = ncols,
+                              correlation_x = correlation_x, correlation_y = correlation_y,
+                              min_value = min_value, max_value = max_value,
+                              response_name = response_name, seed = seed)
+        )
+    )
 }

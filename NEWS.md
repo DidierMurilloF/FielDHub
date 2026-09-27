@@ -55,6 +55,13 @@
 
 ### New features:
 
+- Spatial simulation records now retain the original input field book and all
+  effective model parameters, seed, RNG settings, and package version.
+  `reproduce_simulation()` replays both spatial and classic simulation records
+  without evaluating recorded arguments as code. The seven spatial app pages
+  retain those records separately from display-only changes to plot IDs.
+  Existing seeded field books and unrounded simulation values are unchanged.
+
 - The seven spatial design pages now share the same named-column tile renderer
   as the classic pages, with their existing colors, sizes, and unrounded
   simulation values preserved. Invalid simulation locations receive classed
