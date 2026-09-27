@@ -87,6 +87,7 @@ sparse_allocation <- function(
         }
         locationNames <- default_names
     }
+    validate_location_labels(locationNames, l)
     if (missing(plotNumber) || length(plotNumber) != l) {
         default_plots <- seq(1, 1000 * l, by = 1000)[1:l]
         if (!missing(plotNumber)) {

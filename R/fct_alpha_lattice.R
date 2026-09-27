@@ -115,7 +115,9 @@ alpha_lattice <- function(t = NULL,
     data_alpha <- data_up
   }
   if (k >= nt) fieldhub_abort('incomplete_blocks() requires that k < t.')
+  validate_location_labels(locationNames, l)
   if (!is.null(locationNames)) locationNames <- toupper(locationNames)
+  validate_location_labels(locationNames, l)
   recorded_locations <- locationNames
   if(is.null(locationNames) || length(locationNames) != l) {
     if (!is.null(locationNames)) warn_default_location_names(locationNames, l, 1:l)

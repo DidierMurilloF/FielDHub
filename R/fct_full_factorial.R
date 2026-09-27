@@ -149,6 +149,7 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
     newlevels <- data.by.factor
     TRT <- l.factors
   }
+  validate_location_labels(locationNames, l)
   if (is.null(locationNames)) {
     locationNames <- 1:l
   }else if (!is.null(locationNames)) {

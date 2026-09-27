@@ -20,6 +20,13 @@ knitr::opts_chunk$set(
 
 ### Breaking changes:
 
+- Effective location names must be complete, nonblank atomic vectors with
+  one distinct name per location. Names that become duplicates after an
+  engine's existing uppercase conversion are also rejected. This prevents
+  silently combined fields and late internal errors. Existing wrong-length
+  fallbacks, valid label types, ordering, and seeded results are preserved.
+  Location counts no longer accept one-cell matrices.
+
 - Allocation engines reject malformed line counts, copies per entry, and
   active check counts/replications before calling the optimizer. Desired
   averages must be finite positive scalars. Infeasible location-block models

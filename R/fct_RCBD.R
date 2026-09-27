@@ -168,8 +168,10 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
     warn_default_plot_numbers(plotNumber, l, default_plots)
     plotNumber <- default_plots
   }
+  validate_location_labels(locationNames, l)
   if (!is.null(locationNames)) {
     locationNames <- toupper(locationNames)
+    validate_location_labels(locationNames, l)
   } else locationName <- 1:l
   # 'reps' feeds a matrix nrow(), a plot-number sequence, and (on the checks
   # path) rcbd_resolve_entries()'s block math alike, so it is validated once,

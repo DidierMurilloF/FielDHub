@@ -196,6 +196,7 @@ split_split_plot <- function(wp = NULL, sp = NULL, ssp = NULL, reps = NULL, type
   wp.d <- rep(as.vector(wp.random), each = sp*ssp)
   sp.d <- rep(as.vector(sp.random), each = ssp)
   ssp.d <- as.vector(ssp.random)
+  validate_location_labels(locationNames, l)
   if (!is.null(locationNames) && length(locationNames) == l) {
     LOCATION <- rep(locationNames, each = (sp * wp * ssp) * b)
   }else if (is.null(locationNames) || length(locationNames) != l) {

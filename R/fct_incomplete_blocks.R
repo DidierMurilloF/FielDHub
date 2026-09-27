@@ -111,6 +111,7 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
     plotNumber <- default_plots
   }
   if (k >= nt) fieldhub_abort('incomplete_blocks() requires that k < t.')
+  validate_location_labels(locationNames, l)
   if(is.null(locationNames) || length(locationNames) != l) {
     if (!is.null(locationNames)) warn_default_location_names(locationNames, l, 1:l)
     locationNames <- 1:l

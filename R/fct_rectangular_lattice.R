@@ -97,7 +97,9 @@ rectangular_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber 
     nt <- length(TRT)
     data_alpha <- data_up
   }
+  validate_location_labels(locationNames, l)
   if (!is.null(locationNames)) locationNames <- toupper(locationNames)
+  validate_location_labels(locationNames, l)
   s <- nt / k
   if (s %% 1 != 0 || k != (s - 1) || nt != s*(s - 1)) {
     fieldhub_abort('rectangular_lattice() requires t = s*(s-1), where s is the iBlock numbers per replicate.')

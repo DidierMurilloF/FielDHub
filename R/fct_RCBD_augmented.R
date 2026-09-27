@@ -178,9 +178,11 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
   Fillers <- excedent - all_genotypes
   
   recorded_locations <- NULL
+  validate_location_labels(locationNames, l)
   if (!is.null(locationNames)) {
     if (length(locationNames) == l) {
       locationNames <- toupper(locationNames)
+      validate_location_labels(locationNames, l)
       recorded_locations <- locationNames
     } else {
       warn_default_location_names(locationNames, l, 1:l)

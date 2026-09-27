@@ -133,6 +133,7 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
     if (length(plotNumber) < l || is.null(plotNumber)) plotNumber <- seq(1001, 1000*(l+1), 1000)
   }else fieldhub_abort("\n'latinsquare()' requires a integer for number of locations!")
   plot.numbs <- seriePlot.numbers(plot.number = plotNumber, reps = reps, l = l, t = ls.len*ls.len)
+  validate_location_labels(locationNames, l)
   if (!is.null(locationNames) && length(locationNames) == l) {
     locs <- locationNames
   }else locs <- 1:l

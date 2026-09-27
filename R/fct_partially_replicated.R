@@ -380,6 +380,7 @@ partially_replicated <- function(
             )
         }
         
+        validate_location_labels(locationNames, l)
         if (is.null(locationNames) || length(locationNames) != l) {
             default_names <- paste0("LOC", 1:l)
             if (!is.null(locationNames)) {

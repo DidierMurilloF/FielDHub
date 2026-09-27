@@ -140,6 +140,7 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
   }
   validate_design_size(c(nH, nV, b, l))
   if(!is.null(l) && is.numeric(l) && length(l) == 1) {
+    validate_location_labels(locationNames, l)
     if (l >= 1 && is.null(locationNames)) {
       locationNames <- 1:l
     }else if (l > 1 && !is.null(locationNames)) {

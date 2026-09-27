@@ -264,6 +264,7 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
   if (nt %% k != 0) {
     fieldhub_abort('Number of treatments can not be fully distributed over the specified incomplete block specification.')
   }
+  validate_location_labels(locationNames, l)
   if(is.null(locationNames) || length(locationNames) != l) {
     if (!is.null(locationNames)) warn_default_location_names(locationNames, l, 1:l)
     locationNames <- 1:l

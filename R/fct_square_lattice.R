@@ -97,7 +97,9 @@ square_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101
   }
   if (sqrt(nt) %% 1 != 0) fieldhub_abort('square_lattice() requires t to be a square number.')
   if (k != sqrt(nt)) fieldhub_abort('square_lattice() requires k to equal sqrt(t). Use rectangular_lattice() or alpha_lattice() otherwise.')
+  validate_location_labels(locationNames, l)
   if (!is.null(locationNames)) locationNames <- toupper(locationNames)
+  validate_location_labels(locationNames, l)
   recorded_locations <- locationNames
   if(is.null(locationNames) || length(locationNames) != l) {
     if (!is.null(locationNames)) warn_default_location_names(locationNames, l, 1:l)

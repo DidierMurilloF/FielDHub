@@ -178,6 +178,7 @@ split_plot <- function(wp = NULL, sp = NULL, reps = NULL, type = 2, l = 1, plotN
   rownames(spd.layout) <- 1:nrow(spd.layout)
   wp.d <- rep(as.vector(wp.random), each = sp)
   sp.d <- as.vector(sp.random)
+  validate_location_labels(locationNames, l)
   if (!is.null(locationNames) && length(locationNames) == l) {
     LOCATION <- rep(locationNames, each = (sp * wp) * b)
   }else if (is.null(locationNames) || length(locationNames) != l) {

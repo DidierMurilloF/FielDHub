@@ -259,6 +259,7 @@ diagonal_arrangement <- function(
         sameEntries = sameEntries
     )
     
+    validate_location_labels(locationNames, l)
     if (is.null(locationNames) || length(locationNames) != l) {
         if (!is.null(locationNames)) warn_default_location_names(locationNames, l, 1:l)
         locationNames <- 1:l
