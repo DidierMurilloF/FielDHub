@@ -57,6 +57,12 @@
 #' ibd2$infoDesign
 #' head(ibd2$fieldBook)
 #'
+#' @section Reproducibility:
+#' The result records effective inputs and the resolved seed in
+#' \code{metadata$parameters}, using \code{reps} for replication. Under the
+#' same package versions and RNG settings, rebuild a result \code{x} with
+#' \code{do.call(incomplete_blocks, x$metadata$parameters)}.
+#'
 #' @export
 incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101, 
                               locationNames = NULL, seed = NULL, data = NULL,
@@ -180,7 +186,10 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
                      Locations = locationNames, seed = seed, lambda = lambda, 
                      id_design = 8)
   output <- list(infoDesign = infoDesign, fieldBook = OutIBD_new, blocksModel = blocks_model[[1]])
-  output <- new_fieldhub_design(output, "incomplete_blocks")
+  reproduction_parameters <- record_design_parameters(
+    environment(), overrides = list(reps = r), exclude = "r"
+  )
+  output <- new_fieldhub_design(output, "incomplete_blocks", parameters = reproduction_parameters)
   return(invisible(output))
 }
 

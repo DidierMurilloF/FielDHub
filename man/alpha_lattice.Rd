@@ -45,6 +45,14 @@ A list with two elements.
 \description{
 Randomly generates an alpha design like \code{alpha(0,1)} across multiple locations.
 }
+\section{Reproducibility}{
+
+The result records effective inputs and the resolved seed in
+\code{metadata$parameters}, using \code{reps} for replication. Under the
+same package versions and RNG settings, rebuild a result \code{x} with
+\code{do.call(alpha_lattice, x$metadata$parameters)}.
+}
+
 \examples{
 # Example 1: Generates an alpha design with 4 full blocks and 15 treatments.
 # Size of IBlocks k = 3.

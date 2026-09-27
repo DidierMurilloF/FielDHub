@@ -46,6 +46,14 @@ A list with two elements.
 Randomly generates a resolvable incomplete block design (IBD) of characteristics (t, k, r).
 The randomization can be done across locations.
 }
+\section{Reproducibility}{
+
+The result records effective inputs and the resolved seed in
+\code{metadata$parameters}, using \code{reps} for replication. Under the
+same package versions and RNG settings, rebuild a result \code{x} with
+\code{do.call(incomplete_blocks, x$metadata$parameters)}.
+}
+
 \examples{
 # Example 1: Generates a resolvable IBD of characteristics (t,k,r) = (12,4,2).
 # 1-resolvable IBDs

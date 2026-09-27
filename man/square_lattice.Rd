@@ -45,6 +45,14 @@ A list with two elements.
 \description{
 It randomly generates a square lattice design across locations.
 }
+\section{Reproducibility}{
+
+The result records effective inputs and the resolved seed in
+\code{metadata$parameters}, using \code{reps} for replication. Under the
+same package versions and RNG settings, rebuild a result \code{x} with
+\code{do.call(square_lattice, x$metadata$parameters)}.
+}
+
 \examples{
 # Example 1: Generates a square lattice design with 5 full blocks, 8 units per IBlock,
 # 8 IBlocks for a square number of treatmens of 64 in two locations.

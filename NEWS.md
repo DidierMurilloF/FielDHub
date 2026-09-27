@@ -104,6 +104,11 @@
 
 ### Enhancements:
 
+- Incomplete-block, alpha, square and rectangular lattice, and row-column
+  results now include effective inputs in `metadata$parameters`. Replay
+  uses the canonical `reps` argument without deprecation warnings and
+  preserves the existing treatment labels and default location types.
+
 - `CRD()` and `RCBD()` now record effective inputs, defaults and the resolved
   seed in `metadata$parameters`, enabling reconstruction with `do.call()`
   under the same software and RNG settings. RCBD saves starting plot numbers

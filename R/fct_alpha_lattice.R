@@ -68,6 +68,12 @@
 #' alphalattice2$infoDesign
 #' head(alphalattice2$fieldBook, 10)
 #' 
+#' @section Reproducibility:
+#' The result records effective inputs and the resolved seed in
+#' \code{metadata$parameters}, using \code{reps} for replication. Under the
+#' same package versions and RNG settings, rebuild a result \code{x} with
+#' \code{do.call(alpha_lattice, x$metadata$parameters)}.
+#'
 #' @export
 alpha_lattice <- function(t = NULL, 
                           k = NULL, 
@@ -133,9 +139,11 @@ alpha_lattice <- function(t = NULL,
   }
   if (k >= nt) fieldhub_abort('incomplete_blocks() requires that k < t.')
   if (!is.null(locationNames)) locationNames <- toupper(locationNames)
+  recorded_locations <- locationNames
   if(is.null(locationNames) || length(locationNames) != l) {
     if (!is.null(locationNames)) warn_default_location_names(locationNames, l, 1:l)
     locationNames <- 1:l
+    recorded_locations <- NULL
   }
   if (is_prime(nt)) fieldhub_abort('Combinations for this amount of treatments do not exist.')
   s <- nt / k
@@ -155,6 +163,9 @@ alpha_lattice <- function(t = NULL,
                      Locations = locationNames, seed = seed, lambda = lambda,
                      id_design = 12)
   output <- list(infoDesign = infoDesign, fieldBook = OutAlpha, blocksModel = blocksModel)
-  output <- new_fieldhub_design(output, "alpha_lattice")
+  reproduction_parameters <- record_design_parameters(
+    environment(), overrides = list(reps = r, locationNames = recorded_locations), exclude = "r"
+  )
+  output <- new_fieldhub_design(output, "alpha_lattice", parameters = reproduction_parameters)
   return(invisible(output))
 }

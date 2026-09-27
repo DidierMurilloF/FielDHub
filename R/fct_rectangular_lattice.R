@@ -59,6 +59,12 @@
 #' rectangularLattice2$infoDesign
 #' head(rectangularLattice2$fieldBook,12)
 #' 
+#' @section Reproducibility:
+#' The result records effective inputs and the resolved seed in
+#' \code{metadata$parameters}, using \code{reps} for replication. Under the
+#' same package versions and RNG settings, rebuild a result \code{x} with
+#' \code{do.call(rectangular_lattice, x$metadata$parameters)}.
+#'
 #' @export
 rectangular_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101, locationNames = NULL,
                                 seed = NULL, data = NULL, reps = NULL) {
@@ -119,9 +125,11 @@ rectangular_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber 
   if (s %% 1 != 0 || k != (s - 1) || nt != s*(s - 1)) {
     fieldhub_abort('rectangular_lattice() requires t = s*(s-1), where s is the iBlock numbers per replicate.')
   } 
+  recorded_locations <- locationNames
   if(is.null(locationNames) || length(locationNames) != l) {
     if (!is.null(locationNames)) warn_default_location_names(locationNames, l, 1:l)
     locationNames <- 1:l
+    recorded_locations <- NULL
   }
   nunits <- k
   matdf <- incomplete_blocks(t = nt, k = nunits, reps = r, l = l, plotNumber = plotNumber,
@@ -138,6 +146,9 @@ rectangular_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber 
                      Locations = locationNames, seed = seed, lambda = lambda,
                      id_design = 11)
   output <- list(infoDesign = infoDesign, fieldBook = OutRectagular_Lattice, blocksModel = blocksModel)
-  output <- new_fieldhub_design(output, "rectangular_lattice")
+  reproduction_parameters <- record_design_parameters(
+    environment(), overrides = list(reps = r, locationNames = recorded_locations), exclude = "r"
+  )
+  output <- new_fieldhub_design(output, "rectangular_lattice", parameters = reproduction_parameters)
   return(invisible(output))
 }

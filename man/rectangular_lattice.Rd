@@ -45,6 +45,14 @@ A list with two elements.
 \description{
 It randomly generates a rectangular lattice design across locations.
 }
+\section{Reproducibility}{
+
+The result records effective inputs and the resolved seed in
+\code{metadata$parameters}, using \code{reps} for replication. Under the
+same package versions and RNG settings, rebuild a result \code{x} with
+\code{do.call(rectangular_lattice, x$metadata$parameters)}.
+}
+
 \examples{
 # Example 1: Generates a rectangular lattice design with 6 full blocks, 4 units per IBlock (k)
 # and 20 treatments in one location.

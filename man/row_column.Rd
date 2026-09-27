@@ -144,6 +144,14 @@ as replicates. By default (\code{latinize = FALSE}) the rows and columns stay
 nested within each replicate. \code{latinize} has no effect for
 \code{method = "twostage"}, which cannot latinize across replicates.
 }
+\section{Reproducibility}{
+
+The result records effective inputs and the resolved seed in
+\code{metadata$parameters}, using \code{reps} for replication. Under the
+same package versions and RNG settings, rebuild a result \code{x} with
+\code{do.call(row_column, x$metadata$parameters)}.
+}
+
 \examples{
 
 # Example 1: Generates a row-column design with 2 full blocks and 24 treatments

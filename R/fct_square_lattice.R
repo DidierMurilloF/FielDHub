@@ -57,6 +57,12 @@
 #' squareLattice2$infoDesign
 #' head(squareLattice2$fieldBook,12)
 #' 
+#' @section Reproducibility:
+#' The result records effective inputs and the resolved seed in
+#' \code{metadata$parameters}, using \code{reps} for replication. Under the
+#' same package versions and RNG settings, rebuild a result \code{x} with
+#' \code{do.call(square_lattice, x$metadata$parameters)}.
+#'
 #' @export
 square_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101, locationNames = NULL,
                            seed = NULL, data = NULL, reps = NULL) {
@@ -115,9 +121,11 @@ square_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101
   if (sqrt(nt) %% 1 != 0) fieldhub_abort('square_lattice() requires t to be a square number.')
   if (k != sqrt(nt)) fieldhub_abort('square_lattice() requires k to equal sqrt(t). Use rectangular_lattice() or alpha_lattice() otherwise.')
   if (!is.null(locationNames)) locationNames <- toupper(locationNames)
+  recorded_locations <- locationNames
   if(is.null(locationNames) || length(locationNames) != l) {
     if (!is.null(locationNames)) warn_default_location_names(locationNames, l, 1:l)
     locationNames <- 1:l
+    recorded_locations <- NULL
   }
   s <- k
   nunits <- k
@@ -139,6 +147,9 @@ square_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101
     fieldBook = OutSquare_Lattice, 
     blocksModel = blocksModel
   )
-  output <- new_fieldhub_design(output, "square_lattice")
+  reproduction_parameters <- record_design_parameters(
+    environment(), overrides = list(reps = r, locationNames = recorded_locations), exclude = "r"
+  )
+  output <- new_fieldhub_design(output, "square_lattice", parameters = reproduction_parameters)
   return(invisible(output))
 }

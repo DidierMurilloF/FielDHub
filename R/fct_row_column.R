@@ -191,6 +191,12 @@
 #' head(rowcold3$fieldBook, 12)
 #'
 #'
+#' @section Reproducibility:
+#' The result records effective inputs and the resolved seed in
+#' \code{metadata$parameters}, using \code{reps} for replication. Under the
+#' same package versions and RNG settings, rebuild a result \code{x} with
+#' \code{do.call(row_column, x$metadata$parameters)}.
+#'
 #' @export
 row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
                        locationNames = NULL, seed = NULL, iterations = NULL,
@@ -456,6 +462,9 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
     concurrence = new_summ,
     fieldBook = out_row_col_fieldbook
   )
-  output <- new_fieldhub_design(output, "row_column")
+  reproduction_parameters <- record_design_parameters(
+    environment(), overrides = list(reps = r), exclude = "r"
+  )
+  output <- new_fieldhub_design(output, "row_column", parameters = reproduction_parameters)
   return(invisible(output))
 }
