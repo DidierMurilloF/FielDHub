@@ -617,7 +617,7 @@ mod_RCBD_augmented_server <- function(id) {
                                    class = 'compact cell-border stripe',  rownames = FALSE,
                                    server = FALSE,
                                    filter = list( position = 'top', clear = FALSE, plain =TRUE ),
-                                   buttons = c('copy', 'excel'),
+                                   buttons = app_table_export_buttons(rcbd_augmented_reactive(), "Entry layout", locNum()),
                                    lengthMenu = list(c(10,25,50,-1),
                                                      c(10,25,50,"All"))))
       ) |>

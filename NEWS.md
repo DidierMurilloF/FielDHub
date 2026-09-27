@@ -55,6 +55,11 @@
 
 ### New features:
 
+- Layout and allocation table Copy, Excel, and Print exports now include the
+  complete design metadata and selected view. Excel stores the full record in a
+  separate, chunked metadata worksheet; table values and existing export types
+  are preserved. Labels in printed metadata are escaped as text.
+
 - `CRD()` now rejects fractional or nonpositive replication, malformed scalar
   controls, duplicate supplied treatments, and blank labels or locations before
   allocating a field book. Valid designs retain their exact outputs. Invalid

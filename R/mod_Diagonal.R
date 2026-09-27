@@ -692,7 +692,7 @@ mod_Diagonal_server <- function(id) {
                         filter = list( position = 'top',
                                       clear = FALSE,
                                       plain =TRUE ),
-                        buttons = c('copy', 'excel'),
+                        buttons = app_table_export_buttons(diagonal_design(), "Entry layout", user_location()),
                         lengthMenu = list(c(10,25,50,-1),
                                           c(10,25,50,"All")))
       ) |> 
@@ -722,7 +722,7 @@ mod_Diagonal_server <- function(id) {
                        class = 'compact cell-border stripe',  rownames = FALSE,
                        server = FALSE,
                        filter = list( position = 'top', clear = FALSE, plain =TRUE ),
-                       buttons = c('copy', 'excel'),
+                       buttons = app_table_export_buttons(diagonal_design(), "Plot numbers", user_location()),
                        lengthMenu = list(c(10,25,50,-1),
                                          c(10,25,50,"All")))
       )

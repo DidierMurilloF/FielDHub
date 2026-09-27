@@ -802,7 +802,7 @@ mod_multi_loc_preps_server <- function(id){
                 scrollY = "350px",
                 lengthMenu = list(c(5, 15, -1), c('5', '15', 'All')),
                 pageLength = nrow(df),
-                buttons = c('copy', 'excel', 'print')
+                buttons = app_table_export_buttons(setup_optim_prep(), "Allocation", print = TRUE)
             )
         )
     })
@@ -913,7 +913,7 @@ mod_multi_loc_preps_server <- function(id){
             class = 'compact cell-border stripe',  rownames = FALSE,
             server = FALSE,
             filter = list( position = 'top', clear = FALSE, plain =TRUE ),
-            buttons = c('copy', 'excel'),
+            buttons = app_table_export_buttons(pREPS_reactive(), "Entry layout", user_site_selection()),
             lengthMenu = list(c(10,25,50,-1),
                             c(10,25,50,"All"))))) |>
         DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
@@ -945,7 +945,7 @@ mod_multi_loc_preps_server <- function(id){
             class = 'compact cell-border stripe', rownames = FALSE,
             server = FALSE,
             filter = list( position = 'top', clear = FALSE, plain = TRUE ),
-            buttons = c('copy', 'excel'),
+            buttons = app_table_export_buttons(pREPS_reactive(), "Plot numbers", user_site_selection()),
             lengthMenu = list(c(10,25,50,-1),
                                 c(10,25,50,"All"))))
         

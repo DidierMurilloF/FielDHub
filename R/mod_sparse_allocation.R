@@ -613,7 +613,7 @@ mod_sparse_allocation_server <- function(id){
             scrollY = "400px",
             lengthMenu = list(c(5, 15, -1), c('5', '15', 'All')),
             pageLength = nrow(df),
-            buttons = c('copy', 'excel', 'print')
+            buttons = app_table_export_buttons(sparse_setup(), "Allocation", print = TRUE)
           )
         )
     })
@@ -855,7 +855,7 @@ mod_sparse_allocation_server <- function(id){
                         filter = list( position = 'top',
                                         clear = FALSE,
                                         plain =TRUE ),
-                        buttons = c('copy', 'excel'),
+                        buttons = app_table_export_buttons(sparse_design(), "Entry layout", user_site),
                         lengthMenu = list(c(10,25,50,-1),
                                             c(10,25,50,"All")))
       ) |>
@@ -888,7 +888,7 @@ mod_sparse_allocation_server <- function(id){
                                    class = 'compact cell-border stripe',  rownames = FALSE,
                                    server = FALSE,
                                    filter = list( position = 'top', clear = FALSE, plain =TRUE ),
-                                   buttons = c('copy', 'excel'),
+                                   buttons = app_table_export_buttons(sparse_design(), "Plot numbers", user_site),
                                    lengthMenu = list(c(10,25,50,-1),
                                                      c(10,25,50,"All")))
       )

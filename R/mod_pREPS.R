@@ -567,7 +567,7 @@ mod_pREPS_server <- function(id){
                      class = 'compact cell-border stripe',  rownames = FALSE,
                      server = FALSE,
                      filter = list( position = 'top', clear = FALSE, plain =TRUE ),
-                     buttons = c('copy', 'excel'),
+                     buttons = app_table_export_buttons(pREPS_reactive(), "Entry layout", user_site_selection()),
                      lengthMenu = list(c(10,25,50,-1),
                                        c(10,25,50,"All"))))) |>
         DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
@@ -597,7 +597,7 @@ mod_pREPS_server <- function(id){
                                    class = 'compact cell-border stripe',  rownames = FALSE,
                                    server = FALSE,
                                    filter = list( position = 'top', clear = FALSE, plain =TRUE ),
-                                   buttons = c('copy', 'excel'),
+                                   buttons = app_table_export_buttons(pREPS_reactive(), "Plot numbers", user_site_selection()),
                                    lengthMenu = list(c(10,25,50,-1),
                                                      c(10,25,50,"All"))))
                     
