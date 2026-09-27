@@ -95,11 +95,14 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
                        planter = "serpentine", locationNames = NULL, seed = NULL,
                        factorLabels = TRUE, randomizeH = TRUE, randomizeV = FALSE,
                        data = NULL, reps = 1) {
-  plotNumber_supplied <- !missing(plotNumber)
+  # plotNumber's own default is NULL, so an explicit plotNumber = NULL is
+  # indistinguishable from (and must warn the same as) not supplying it.
+  plotNumber_supplied <- !missing(plotNumber) && !is.null(plotNumber)
   validate_locations(l)
   validate_flag(factorLabels, "factorLabels")
   validate_flag(randomizeH, "randomizeH")
   validate_flag(randomizeV, "randomizeV")
+  validate_planter(planter)
   b <- resolve_argument_alias(
     reps, b, new = "reps", old = "b",
     new_supplied = !missing(reps), old_supplied = !missing(b)
