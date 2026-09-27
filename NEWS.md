@@ -55,6 +55,11 @@
 
 ### New features:
 
+- Repeated diagonal field-dimension candidate queries use a bounded
+  least-recently-used cache: at most 64 queries and 4 MiB of retained keys and
+  results. Failed, warning-producing, or oversized results are not cached.
+  Candidate values and ordering are unchanged.
+
 - The seven spatial-simulation workflows now share their correlation controls.
   Labels distinguish adjacent columns within a row from adjacent rows within
   a column. Input identifiers, choices, defaults, and simulation calculations

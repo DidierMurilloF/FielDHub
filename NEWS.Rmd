@@ -34,6 +34,8 @@ knitr::opts_chunk$set(
 
 ### New features:
 
+* Repeated diagonal field-dimension candidate queries use a bounded least-recently-used cache: at most 64 queries and 4 MiB of retained keys and results. Failed, warning-producing, or oversized results are not cached. Candidate values and ordering are unchanged.
+
 * The seven spatial-simulation workflows now share their correlation controls. Labels distinguish adjacent columns within a row from adjacent rows within a column. Input identifiers, choices, defaults, and simulation calculations are unchanged.
 
 * Every design page in the app now offers a shared reproducibility panel with a complete RDS design download and R code to reconstruct it. The archive preserves the original result, seed, parameters, RNG settings, and package version. It covers the core design, not later app layout selections or simulated responses; existing CSV downloads are unchanged. Layout download buttons now say CSV instead of Excel, matching their file format.

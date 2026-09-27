@@ -5,6 +5,12 @@
 #' @return Lists of rectangular dimension labels, in candidate-size order.
 #' @noRd
 field_dimensions <- function(lines_within_loc, minimum_extra = 0.10) {
+    cached_field_dimensions(lines_within_loc, minimum_extra)
+}
+
+#' Compute uncached candidates in their established order
+#' @noRd
+find_field_dimensions <- function(lines_within_loc, minimum_extra) {
     t1 <- floor(lines_within_loc + lines_within_loc * minimum_extra)
     t2 <- ceiling(lines_within_loc + lines_within_loc * 0.20)
     t <- t1:t2
