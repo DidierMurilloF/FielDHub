@@ -20,6 +20,15 @@ knitr::opts_chunk$set(
 
 ### Breaking changes:
 
+- Incomplete-block and lattice engines now validate block sizes, replication,
+  and treatment counts before randomization, including when entry tables are
+  supplied. Counts must be finite scalar whole numbers, block sizes must be at
+  least two, and generated treatment labels cannot be missing or blank.
+  Replace character/logical counts or one-cell matrices with numeric scalars.
+  Malformed controls and underspecified entry tables raise structured input
+  errors instead of raw R or optimizer errors. Valid input representations and
+  seeded results are unchanged.
+
 - Disconnected block models now report zero A- and D-efficiency instead of
   `NaN` or a spuriously positive A-efficiency. FielDHub computes these metrics
   from normalized incidence counts with an explicit connectivity check.

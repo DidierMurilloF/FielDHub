@@ -90,33 +90,10 @@ alpha_lattice <- function(t = NULL,
   )
   seed <- resolve_seed(seed, default = function() runif(1, min = 0, max = 10000))
   local_design_seed(seed)
+  treatment_count <- validate_block_design_inputs(t, k, r, l, data)
   lookup <- FALSE
   if(is.null(data)) {
-    if (is.null(t) || is.null(k) || is.null(r) || is.null(l)) {
-      fieldhub_abort('Basic design parameters missing (t, k, r or l).')
-    }
-    arg1 <- list(k, r, l);arg2 <- c(k, r, l)
-    if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
-      fieldhub_abort('incomplete_blocks() requires k, r and l to be possitive integers.')
-    }
-    if (is.numeric(t)) {
-      if (length(t) == 1) {
-        if (t == 1 || t < 1) {
-          fieldhub_abort('incomplete_blocks() requires more than one treatment.')
-        } 
-        nt <- t
-      }else if ((length(t) > 1)) {
-        nt <- length(t)
-        TRT <- t
-      }
-    }else if (is.character(t) || is.factor(t)) {
-      if (length(t) == 1) {
-        fieldhub_abort('incomplete_blocks() requires more than one treatment.')
-      } 
-      nt <- length(t)
-    }else if ((length(t) > 1)) {
-      nt <- length(t)
-    }
+    nt <- treatment_count
     df <- data.frame(list(ENTRY = 1:nt,
                           TREATMENT = treatment_labels(t, nt, "alpha_lattice")))
     data_alpha <- df

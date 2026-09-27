@@ -74,33 +74,10 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
   )
   seed <- resolve_seed(seed)
   local_design_seed(seed)
+  treatment_count <- validate_block_design_inputs(t, k, r, l, data)
   lookup <- FALSE
   if(is.null(data)) {
-    if (is.null(t) || is.null(k) || is.null(r) || is.null(l)) {
-      fieldhub_abort('Basic design parameters missing (t, k, r or l).')
-    }
-    arg1 <- list(k, r, l);arg2 <- c(k, r, l)
-    if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
-      fieldhub_abort('incomplete_blocks() requires k, r and l to be possitive integers.')
-    }
-    if (is.numeric(t)) {
-      if (length(t) == 1) {
-        if (t == 1 || t < 1) {
-          fieldhub_abort('incomplete_blocks() requires more than one treatment.')
-        } 
-        nt <- t
-      }else if ((length(t) > 1)) {
-        nt <- length(t)
-        TRT <- t
-      }
-    } else if (is.character(t) || is.factor(t)) {
-      if (length(t) == 1) {
-        fieldhub_abort('incomplete_blocks() requires more than one treatment.')
-      } 
-      nt <- length(t)
-    } else if ((length(t) > 1)) {
-      nt <- length(t)
-    }
+    nt <- treatment_count
     trt_labels <- treatment_labels(t, nt, "incomplete_blocks")
     data_up <- data.frame(list(ENTRY = 1:nt, TREATMENT = trt_labels))
     colnames(data_up) <- c("ENTRY", "TREATMENT")
