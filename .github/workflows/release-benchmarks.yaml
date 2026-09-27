@@ -1,0 +1,60 @@
+name: release-benchmarks
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main, master]
+    paths:
+      - "R/**"
+      - "DESCRIPTION"
+      - "tools/benchmark-*.R"
+      - "tools/check-release-tools.R"
+      - ".github/workflows/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  benchmarks:
+    runs-on: macos-latest
+    timeout-minutes: 30
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: release
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: |
+            local::.
+            any::yaml
+          needs: check
+      - name: Check release tooling
+        run: Rscript tools/check-release-tools.R .
+      - name: Benchmark the installed candidate
+        shell: Rscript {0}
+        run: |
+          output <- file.path(Sys.getenv("RUNNER_TEMP"), "fieldhub-benchmarks")
+          stopifnot(dir.create(output))
+          for (name in c("dimensions", "spatial", "exports", "optimizers")) {
+            script <- file.path("tools", paste0("benchmark-", name, ".R"))
+            result <- file.path(output, paste0(name, ".csv"))
+            status <- system2(file.path(R.home("bin"), "Rscript"),
+                              c(shQuote(script), shQuote(result)))
+            if (status != 0L) stop("Benchmark failed: ", name)
+          }
+          writeLines(capture.output(sessionInfo()), file.path(output, "session-info.txt"))
+      - uses: actions/upload-artifact@v7
+        with:
+          name: benchmarks-${{ github.sha }}
+          path: ${{ runner.temp }}/fieldhub-benchmarks
+          if-no-files-found: error
+          retention-days: 90

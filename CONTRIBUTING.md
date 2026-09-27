@@ -11,7 +11,7 @@ FielDHub is an open-source project, maintained by people who care.
 [new_issue]: https://github.com/DidierMurilloF/FielDHub/issues/new
 [website]: https://DidierMurilloF.github.io/FielDHub
 [citation]: https://DidierMurilloF.github.io/FielDHub/authors.html
-[email]: didier.murilloflorez@ndsu.edu
+[email]: mailto:didier.murilloflorez@ndsu.edu
 
 ## Code of conduct
 
@@ -31,7 +31,7 @@ Using FielDHub for a paper you are writing? Consider [citing it][citation].
 
 Using FielDHub and got stuck? Browse the [documentation][website] to see if you can find a solution. Still stuck? Post your question as an [issue on GitHub][new_issue]. While we cannot offer user support, we'll try to do our best to address it, as questions often lead to better documentation or the discovery of bugs.
 
-Want to ask a question in private? Contact the package maintainer by [email][didier.murilloflorez@ndsu.edu].
+Want to ask a question in private? Contact the package maintainer by [email][email].
 
 ### Propose an idea 💡
 
@@ -78,12 +78,28 @@ We try to follow the [GitHub flow](https://guides.github.com/introduction/flow/)
 2. If you have forked and cloned the project before and it has been a while since you worked on it, [pull changes from the original repo](https://help.github.com/articles/merging-an-upstream-repository-into-your-fork/) to your clone by using `git pull upstream master`.
 3. Open the RStudio project file (`.Rproj`).
 4. Make your changes:
-    * Write your code.
-    * Test your code (bonus points for adding unit tests).
+    * Add a plain-R regression test that fails before fixing a defect, then
+      implement the fix. Keep scientific logic out of Shiny modules; do not add
+      Shiny server or browser tests.
+    * Run the full tests with `NOT_CRAN=true FIELDHUB_GOLDEN=true`. Golden
+      snapshots are recorded on macOS. Review deliberate scientific output
+      changes and announce affected inputs in NEWS; never accept snapshots
+      blindly.
+    * For output-preserving refactors, compare complete fixed-seed results with
+      the previous implementation using `identical()`. Preserve supplied labels,
+      field-book column types, RNG state, and process options.
     * Document your code (see function documentation above).
-    * Check your code with `devtools::check()` and aim for 0 errors, warnings and notes.
+    * Run `R CMD check --as-cran`, build the UI without starting a session, and
+      inspect the completed check log. A development-version NOTE is expected;
+      other findings require investigation. Correctness lint and core coverage
+      are also checked in CI.
 5. Commit and push your changes.
 6. Submit a [pull request](https://guides.github.com/activities/forking/#making-a-pull-request).
+
+Maintainers follow the [release checklist](RELEASING.md), including the full R
+and platform matrix, reconstruction checks, deployment validation, and reviewed
+performance benchmarks. Use a minor release for deliberate API or behavior
+changes; keep migration guidance alongside the change.
 
 ## Attribution
 

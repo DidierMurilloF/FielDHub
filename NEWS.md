@@ -55,6 +55,11 @@
 
 ### New features:
 
+- Release tooling now includes Windows, R-devel, oldrel, and exact minimum-R
+  CI jobs, plus a repeatable benchmark workflow and maintainer checklist.
+  Required macOS and Linux release-job names are unchanged. Export benchmarks
+  also work when R memory profiling is unavailable.
+
 - Row-column, Latin-square, and pair-swap searches share finite whole-number
   budget validation. Fractional or infinite row-column budgets now fail with
   classed input errors before randomization. Pair-swap scoring no longer

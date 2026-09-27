@@ -21,6 +21,7 @@ $run_dev.*
 ^pREPExample\.PNG$
 ^DExample.PNG$
 ^CONTRIBUTING\.md$
+^RELEASING\.md$
 ^rsconnect$
 ^Dockerfile$
 ^\.dockerignore$

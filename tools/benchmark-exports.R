@@ -20,7 +20,11 @@ measure <- function(size) {
   book$ENTRY <- seq_len(nrow(book))
   file <- tempfile("fieldhub-export-", fileext = ".csv")
   profile <- tempfile("fieldhub-export-profile-")
-  on.exit({Rprofmem(NULL); unlink(c(file, profile))}, add = TRUE)
+  profiling <- FALSE
+  on.exit({
+    if (profiling) Rprofmem(NULL)
+    unlink(c(file, profile))
+  }, add = TRUE)
   write_export <- function() utils::write.csv(export(book, 1)$file, file, row.names = FALSE)
   seconds <- replicate(5L, {
     gc()
@@ -29,8 +33,10 @@ measure <- function(size) {
   largest <- NA_real_
   if (isTRUE(capabilities("profmem"))) {
     Rprofmem(profile)
+    profiling <- TRUE
     write_export()
     Rprofmem(NULL)
+    profiling <- FALSE
     bytes <- suppressWarnings(as.numeric(sub(" .*", "", readLines(profile))))
     if (!all(is.na(bytes))) largest <- max(bytes, na.rm = TRUE)
   }
