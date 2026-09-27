@@ -628,14 +628,14 @@ mod_Diagonal_server <- function(id) {
         }
         my_out <- available_percent_table()$dt
         df <- as.data.frame(my_out)
-        options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                  scrollX = TRUE, scrollY = "460px"))
+        table_options <- list(pageLength = nrow(df), autoWidth = FALSE,
+                                  scrollX = TRUE, scrollY = "460px")
         DT::datatable(
           df, rownames = FALSE, 
           caption = 'Reference guide to design your experiment. Choose the percentage (%)
         of checks based on the total number of plots you want to have in the final layout.', 
-          options = list(
-            columnDefs = list(list(className = 'dt-center', targets = "_all"))))
+          options = utils::modifyList(table_options, list(
+            columnDefs = list(list(className = 'dt-center', targets = "_all")))))
     })
     
     output$data_input <- DT::renderDT({
@@ -645,16 +645,16 @@ mod_Diagonal_server <- function(id) {
         df <- diagonal_design()$data_entry[[user_location()]]
         df$ENTRY <- as.factor(df$ENTRY)
         df$NAME <- as.factor(df$NAME)
-        options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                  scrollX = TRUE, scrollY = "600px"))
+        table_options <- list(pageLength = nrow(df), autoWidth = FALSE,
+                                  scrollX = TRUE, scrollY = "600px")
 
         DT::datatable(df,
                       filter = "top",
                       rownames = FALSE, 
                       caption = 'List of Entries.', 
-                      options = list(
+                      options = utils::modifyList(table_options, list(
                         columnDefs = list(
-                          list(className = 'dt-center', targets = "_all")))
+                          list(className = 'dt-center', targets = "_all"))))
         )
     })
     
@@ -671,11 +671,11 @@ mod_Diagonal_server <- function(id) {
           NAME = data_entry$NAME[match(entry_checks, data_entry$ENTRY)],
           TIMES = info_design$rep_checks[[user_site]]
         )
-        options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                  scrollX = TRUE, scrollY = "350px"))
+        table_options <- list(pageLength = nrow(df), autoWidth = FALSE,
+                                  scrollX = TRUE, scrollY = "350px")
         DT::datatable(df, rownames = FALSE, caption = 'Table of Checks.', 
-                      options = list(
-                        columnDefs = list(list(className = 'dt-center', targets = "_all"))))
+                      options = utils::modifyList(table_options, list(
+                        columnDefs = list(list(className = 'dt-center', targets = "_all")))))
     })
     
     output$randomized_layout <- DT::renderDT({
@@ -866,13 +866,13 @@ mod_Diagonal_server <- function(id) {
       df$CHECKS <- as.factor(df$CHECKS)
       df$ENTRY <- as.factor(df$ENTRY)
       df$TREATMENT <- as.factor(df$TREATMENT)
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                scrollX = TRUE, scrollY = "600px"))
+      table_options <- list(pageLength = nrow(df), autoWidth = FALSE,
+                                scrollX = TRUE, scrollY = "600px")
       DT::datatable(df,
                     filter = "top",
                     rownames = FALSE, 
-                    options = list(
-                      columnDefs = list(list(className = 'dt-center', targets = "_all"))))
+                    options = utils::modifyList(table_options, list(
+                      columnDefs = list(list(className = 'dt-center', targets = "_all")))))
     })
     
     

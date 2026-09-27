@@ -170,6 +170,9 @@
 - Diagonal and sparse check-percentage previews now use an RNG-isolated query
   helper. Preview tables and maps are unchanged, while browsing the available
   percentages no longer advances the session's random-number stream.
+- All 19 app modules now pass table settings directly to each `DT::datatable()`
+  instead of changing process-wide `DT.options`. The existing pagination,
+  scrolling and column settings are preserved without leaking into other sessions.
 - The shared `desplot` renderer and layout theme now live in a dedicated
   rendering file, and the augmented-RCBD source filename now correctly spells
   `RCBD`.

@@ -460,15 +460,15 @@ mod_RCBD_augmented_server <- function(id) {
       df <- getDataup_a_rcbd()$dataUp_a_rcbd
       df$ENTRY <- as.factor(df$ENTRY)
       df$NAME <- as.factor(df$NAME)
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                scrollX = TRUE, scrollY = "600px"))
+      table_options <- list(pageLength = nrow(df), autoWidth = FALSE,
+                                scrollX = TRUE, scrollY = "600px")
       DT::datatable(df,
                     filter = "top",
                     rownames = FALSE, 
                     caption = 'List of Entries.', 
-                    options = list(
+                    options = utils::modifyList(table_options, list(
                       columnDefs = list(list(className = 'dt-center', 
-                                             targets = "_all"))))
+                                             targets = "_all")))))
     })
     
     entryListFormat_ARCBD <- data.frame(ENTRY = 1:9, 
@@ -512,11 +512,11 @@ mod_RCBD_augmented_server <- function(id) {
       req(getDataup_a_rcbd()$dataUp_a_rcbd)
       data_entry <- getDataup_a_rcbd()$dataUp_a_rcbd
       df <- data_entry[1:(as.numeric(input$checks_a_rcbd)),]
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                scrollX = TRUE, scrollY = "350px"))
+      table_options <- list(pageLength = nrow(df), autoWidth = FALSE,
+                                scrollX = TRUE, scrollY = "350px")
       a <- ncol(df) - 1
-      DT::datatable(df, rownames = FALSE, caption = 'Table of checks.', options = list(
-        columnDefs = list(list(className = 'dt-left', targets = 0:a))))
+      DT::datatable(df, rownames = FALSE, caption = 'Table of checks.', options = utils::modifyList(table_options, list(
+        columnDefs = list(list(className = 'dt-left', targets = 0:a)))))
     })
     
     rcbd_augmented_reactive <- reactive({
@@ -636,12 +636,12 @@ mod_RCBD_augmented_server <- function(id) {
       colores <- c('royalblue','salmon', 'green', 'orange','orchid', 'slategrey',
                    'greenyellow', 'blueviolet','deepskyblue','gold','blue', 'red')
       colnames(df) <- paste("V", 1:ncol(df), sep = "")
-      options(DT.options = list(pageLength = nrow(df), 
+      table_options <- list(pageLength = nrow(df),
                                 autoWidth = FALSE, 
-                                scrollY = "700px"))
+                                scrollY = "700px")
       DT::datatable(df,
                     extensions = 'Buttons',
-                    options = list(dom = 'Blfrtip',
+                    options = utils::modifyList(table_options, list(dom = 'Blfrtip',
                                    autoWidth = FALSE,
                                    scrollX = TRUE,
                                    fixedColumns = TRUE,
@@ -652,7 +652,7 @@ mod_RCBD_augmented_server <- function(id) {
                                    filter = list( position = 'top', clear = FALSE, plain =TRUE ),
                                    buttons = c('copy', 'excel'),
                                    lengthMenu = list(c(10,25,50,-1),
-                                                     c(10,25,50,"All")))
+                                                     c(10,25,50,"All"))))
       ) |>
         DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
                         backgroundColor = DT::styleEqual(c(checks),
@@ -672,14 +672,14 @@ mod_RCBD_augmented_server <- function(id) {
       colnames(df) <- paste("V", 1:ncol(df), sep = "")
       colores_back <- c('yellow', 'cadetblue', 'lightgreen', 'grey', 'tan', 'lightcyan',
                         'violet', 'thistle') 
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
+      table_options <- list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px")
       DT::datatable(df,
                     extensions = 'FixedColumns',
-                    options = list(
+                    options = utils::modifyList(table_options, list(
                       dom = 't',
                       scrollX = TRUE,
                       fixedColumns = TRUE
-                    )) |>
+                    ))) |>
         DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
                         backgroundColor = DT::styleEqual(Name_expt, colores_back[1:repsExpt]))
     })
@@ -811,13 +811,13 @@ mod_RCBD_augmented_server <- function(id) {
       df$ENTRY <- as.factor(df$ENTRY)
       df$TREATMENT <- as.factor(df$TREATMENT)
       
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                scrollX = TRUE, scrollCollapse=TRUE, scrollY = "600px"))
+      table_options <- list(pageLength = nrow(df), autoWidth = FALSE,
+                                scrollX = TRUE, scrollCollapse=TRUE, scrollY = "600px")
       DT::datatable(df, 
                     filter = "top",
                     rownames = FALSE, 
-                    options = list(
-                      columnDefs = list(list(className = 'dt-center', targets = "_all")))
+                    options = utils::modifyList(table_options, list(
+                      columnDefs = list(list(className = 'dt-center', targets = "_all"))))
       )
     })
     

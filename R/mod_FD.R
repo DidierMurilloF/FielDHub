@@ -566,11 +566,11 @@ mod_FD_server <- function(id) {
       }
       
       a <- as.numeric(simuData_fd()$a)
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                scrollX = TRUE, scrollY = "500px"))
+      table_options <- list(pageLength = nrow(df), autoWidth = FALSE,
+                                scrollX = TRUE, scrollY = "500px")
       
-      DT::datatable(df, filter = 'top', rownames = FALSE, options = list(
-        columnDefs = list(list(className = 'dt-center', targets = "_all"))))
+      DT::datatable(df, filter = 'top', rownames = FALSE, options = utils::modifyList(table_options, list(
+        columnDefs = list(list(className = 'dt-center', targets = "_all")))))
       
     })
     

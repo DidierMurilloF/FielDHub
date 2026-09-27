@@ -610,13 +610,13 @@ mod_RowCol_server <- function(id){
       df$REP <- as.factor(df$REP)
       df$ENTRY <- as.factor(df$ENTRY)
       a <- as.numeric(simuData_RowCol()$a)
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                scrollX = TRUE, scrollY = "490px"))
+      table_options <- list(pageLength = nrow(df), autoWidth = FALSE,
+                                scrollX = TRUE, scrollY = "490px")
       DT::datatable(df, 
                     filter = 'top', 
                     rownames = FALSE, 
-                    options = list(
-        columnDefs = list(list(className = 'dt-center', targets = "_all"))))
+                    options = utils::modifyList(table_options, list(
+        columnDefs = list(list(className = 'dt-center', targets = "_all")))))
       
     })
 

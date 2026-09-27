@@ -661,15 +661,15 @@ mod_RCBD_server <- function(id) {
       df$COLUMN <- as.factor(df$COLUMN)
       df$REP <- as.factor(df$REP)
       df$TREATMENT <- as.factor(df$TREATMENT)
-      options(DT.options = list(pageLength = nrow(df), 
+      table_options <- list(pageLength = nrow(df),
                                 autoWidth = FALSE,
                                 scrollX = TRUE, 
-                                scrollY = "500px"))
+                                scrollY = "500px")
       
       DT::datatable(df,
                     filter = 'top',
-                    rownames = FALSE, options = list(
-        columnDefs = list(list(className = 'dt-center', targets = "_all")))
+                    rownames = FALSE, options = utils::modifyList(table_options, list(
+        columnDefs = list(list(className = 'dt-center', targets = "_all"))))
         )
       
     })

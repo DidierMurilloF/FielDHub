@@ -733,14 +733,14 @@ mod_diagonal_multiple_server <- function(id) {
             }
             my_out <- available_percent_multi()$dt
             df <- as.data.frame(my_out)
-            options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                        scrollX = TRUE, scrollY = "460px"))
+            table_options <- list(pageLength = nrow(df), autoWidth = FALSE,
+                                        scrollX = TRUE, scrollY = "460px")
             DT::datatable(
                 df, rownames = FALSE, 
                 caption = 'Reference guide to design your experiment. Choose the percentage (%)
             of checks based on the total number of plots you want to have in the final layout.', 
-                options = list(
-                columnDefs = list(list(className = 'dt-center', targets = "_all"))))
+                options = utils::modifyList(table_options, list(
+                columnDefs = list(list(className = 'dt-center', targets = "_all")))))
         })
         
         
@@ -753,16 +753,16 @@ mod_diagonal_multiple_server <- function(id) {
             df$NAME <- as.factor(df$NAME)
             df$BLOCK <- as.factor(df$BLOCK)
             a <- ncol(df) - 1
-            options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                        scrollX = TRUE, scrollY = "600px"))
+            table_options <- list(pageLength = nrow(df), autoWidth = FALSE,
+                                        scrollX = TRUE, scrollY = "600px")
             DT::datatable(
                 df,
                 filter = "top",
                 rownames = FALSE, 
                 caption = 'List of Entries.', 
-                options = list(
+                options = utils::modifyList(table_options, list(
                 columnDefs = list(
-                    list(className = 'dt-center', targets = "_all")))
+                    list(className = 'dt-center', targets = "_all"))))
             )
         })
         
@@ -774,9 +774,9 @@ mod_diagonal_multiple_server <- function(id) {
             table_type <- as.data.frame(table(data_entry$BLOCK))
             colnames(table_type) <- c("SUB-BLOCKS", "FREQUENCY")
             df <- table_type
-            options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                        scrollX = TRUE, scrollY = "350px"))
-            DT::datatable(df, rownames = FALSE)
+            table_options <- list(pageLength = nrow(df), autoWidth = FALSE,
+                                        scrollX = TRUE, scrollY = "350px")
+            DT::datatable(df, rownames = FALSE, options = table_options)
         })
         
         output$randomized_layout <- DT::renderDT({
@@ -1026,14 +1026,14 @@ mod_diagonal_multiple_server <- function(id) {
             df$CHECKS <- as.factor(df$CHECKS)
             df$ENTRY <- as.factor(df$ENTRY)
             df$TREATMENT <- as.factor(df$TREATMENT)
-            options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                        scrollX = TRUE, scrollY = "600px"))
+            table_options <- list(pageLength = nrow(df), autoWidth = FALSE,
+                                        scrollX = TRUE, scrollY = "600px")
             DT::datatable(
                 df,
                 filter = "top",
                 rownames = FALSE, 
-                options = list(
-                columnDefs = list(list(className = 'dt-center', targets = "_all")))
+                options = utils::modifyList(table_options, list(
+                columnDefs = list(list(className = 'dt-center', targets = "_all"))))
             )
         })
         

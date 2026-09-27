@@ -547,14 +547,14 @@ mod_LSD_server <- function(id){
       df$SQUARE <- as.factor(df$SQUARE)
       df$TREATMENT <- as.factor(df$TREATMENT)
       
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                scrollX = TRUE, scrollY = "500px"))
+      table_options <- list(pageLength = nrow(df), autoWidth = FALSE,
+                                scrollX = TRUE, scrollY = "500px")
       
       DT::datatable(df, 
                     filter = "top",
                     rownames = FALSE, 
-                    options = list(
-        columnDefs = list(list(className = 'dt-center', targets = "_all"))))
+                    options = utils::modifyList(table_options, list(
+        columnDefs = list(list(className = 'dt-center', targets = "_all")))))
       
     })
     

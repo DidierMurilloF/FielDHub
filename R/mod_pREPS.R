@@ -473,13 +473,13 @@ mod_pREPS_server <- function(id){
       df$ENTRY <- as.factor(df$ENTRY)
       df$NAME <- as.factor(df$NAME)
       df$REPS <- as.factor(df$REPS)
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                scrollX = TRUE, scrollY = "500px"))
+      table_options <- list(pageLength = nrow(df), autoWidth = FALSE,
+                                scrollX = TRUE, scrollY = "500px")
       DT::datatable(df,
                     rownames = FALSE, 
                     filter = 'top',
-                    options = list(
-        columnDefs = list(list(className = 'dt-center', targets = "_all"))))
+                    options = utils::modifyList(table_options, list(
+        columnDefs = list(list(className = 'dt-center', targets = "_all")))))
     })
     
     pREPS_reactive <- reactive({
@@ -537,14 +537,14 @@ mod_pREPS_server <- function(id){
       B <- pREPS_reactive()$binaryField[[selection]]
       df <- as.data.frame(B)
       rownames(df) <- nrow(df):1
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
+      table_options <- list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px")
       DT::datatable(df,
                     extensions = 'FixedColumns',
-                    options = list(
+                    options = utils::modifyList(table_options, list(
                       dom = 't',
                       scrollX = TRUE,
                       fixedColumns = TRUE
-                    )) |>
+                    ))) |>
         DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
                         backgroundColor = DT::styleEqual(1, "gray"))
     })
@@ -568,11 +568,11 @@ mod_pREPS_server <- function(id){
       
       rownames(df) <- nrow(df):1
       colnames(df) <- paste0('V', 1:ncol(df))
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, 
-                                scrollY = "700px"))
+      table_options <- list(pageLength = nrow(df), autoWidth = FALSE,
+                                scrollY = "700px")
       DT::datatable(df,
                     extensions = 'Buttons', 
-                     options = list(dom = 'Blfrtip',
+                     options = utils::modifyList(table_options, list(dom = 'Blfrtip',
                      scrollX = TRUE,
                      fixedColumns = TRUE,
                      pageLength = nrow(df),
@@ -582,7 +582,7 @@ mod_pREPS_server <- function(id){
                      filter = list( position = 'top', clear = FALSE, plain =TRUE ),
                      buttons = c('copy', 'excel'),
                      lengthMenu = list(c(10,25,50,-1),
-                                       c(10,25,50,"All")))) |>
+                                       c(10,25,50,"All"))))) |>
         DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
                     backgroundColor = DT::styleEqual(c(checks), # c(checks,gens)
                                                  c(rep(colores[3], len_checks)) # , rep('yellow', length(gens))
@@ -599,10 +599,10 @@ mod_pREPS_server <- function(id){
       len_a <- length(a)
       df <- as.data.frame(plot_num)
       rownames(df) <- nrow(df):1
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
+      table_options <- list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px")
       DT::datatable(df,
                     extensions = 'Buttons', 
-                    options = list(dom = 'Blfrtip',
+                    options = utils::modifyList(table_options, list(dom = 'Blfrtip',
                                    scrollX = TRUE,
                                    fixedColumns = TRUE,
                                    pageLength = nrow(df),
@@ -612,7 +612,7 @@ mod_pREPS_server <- function(id){
                                    filter = list( position = 'top', clear = FALSE, plain =TRUE ),
                                    buttons = c('copy', 'excel'),
                                    lengthMenu = list(c(10,25,50,-1),
-                                                     c(10,25,50,"All")))
+                                                     c(10,25,50,"All"))))
                     
                     )
     })
@@ -773,13 +773,13 @@ mod_pREPS_server <- function(id){
       df$CHECKS <- as.factor(df$CHECKS)
       df$ENTRY <- as.factor(df$ENTRY)
       df$TREATMENT <- as.factor(df$TREATMENT)
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                scrollX = TRUE, scrollY = "500px"))
+      table_options <- list(pageLength = nrow(df), autoWidth = FALSE,
+                                scrollX = TRUE, scrollY = "500px")
       DT::datatable(df, 
                     filter = "top",
                     rownames = FALSE, 
-                    options = list(
-                      columnDefs = list(list(className = 'dt-center', targets = "_all")))
+                    options = utils::modifyList(table_options, list(
+                      columnDefs = list(list(className = 'dt-center', targets = "_all"))))
       )
     })
     

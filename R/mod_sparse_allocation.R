@@ -650,16 +650,16 @@ mod_sparse_allocation_server <- function(id){
       df$LOCATION <- as.factor(df$LOCATION)
       df$ENTRY <- as.factor(df$ENTRY)
       df$NAME <- as.factor(df$NAME)
-      options(DT.options = list(
+      table_options <- list(
         pageLength = nrow(df), 
         autoWidth = FALSE,
-        scrollX = TRUE, scrollY = "500px"))
+        scrollX = TRUE, scrollY = "500px")
       DT::datatable(
         df,
         rownames = FALSE, 
         filter = 'top',
-        options = list(
-          columnDefs = list(list(className = 'dt-center', targets = "_all"))))
+        options = utils::modifyList(table_options, list(
+          columnDefs = list(list(className = 'dt-center', targets = "_all")))))
     })
 
     
@@ -1030,13 +1030,13 @@ mod_sparse_allocation_server <- function(id){
       df$CHECKS <- as.factor(df$CHECKS)
       df$ENTRY <- as.factor(df$ENTRY)
       df$TREATMENT <- as.factor(df$TREATMENT)
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                scrollX = TRUE, scrollY = "600px"))
+      table_options <- list(pageLength = nrow(df), autoWidth = FALSE,
+                                scrollX = TRUE, scrollY = "600px")
       DT::datatable(df,
                     filter = "top",
                     rownames = FALSE,
-                    options = list(
-                      columnDefs = list(list(className = 'dt-center', targets = "_all"))))
+                    options = utils::modifyList(table_options, list(
+                      columnDefs = list(list(className = 'dt-center', targets = "_all")))))
     })
     
     

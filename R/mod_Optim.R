@@ -409,13 +409,13 @@ mod_Optim_server <- function(id) {
       df$ENTRY <- as.factor(df$ENTRY)
       df$NAME <- as.factor(df$NAME)
       df$REPS <- as.factor(df$REPS)
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                scrollX = TRUE, scrollY = "600px"))
+      table_options <- list(pageLength = nrow(df), autoWidth = FALSE,
+                                scrollX = TRUE, scrollY = "600px")
       DT::datatable(df,
                     filter = "top",
                     rownames = FALSE, 
                     caption = 'List of Entries.', 
-                    options = list(columnDefs = list(list(className = 'dt-center', targets = "_all")))
+                    options = utils::modifyList(table_options, list(columnDefs = list(list(className = 'dt-center', targets = "_all"))))
       )
     })
     
@@ -430,11 +430,11 @@ mod_Optim_server <- function(id) {
         data_entry <- get_data_optim()$data_up.spatial
         checks_input <- data_entry[data_entry$REPS > 1, ]
         df <- as.data.frame(checks_input)
-        options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                  scrollX = TRUE, scrollY = "350px"))
+        table_options <- list(pageLength = nrow(df), autoWidth = FALSE,
+                                  scrollX = TRUE, scrollY = "350px")
         a <- ncol(df) - 1
-        DT::datatable(df, rownames = FALSE, caption = 'Table of checks.', options = list(
-          columnDefs = list(list(className = 'dt-left', targets = 0:a))))
+        DT::datatable(df, rownames = FALSE, caption = 'Table of checks.', options = utils::modifyList(table_options, list(
+          columnDefs = list(list(className = 'dt-left', targets = 0:a)))))
     })
     
     optimized_arrang <- eventReactive(input$get_random_optim, { 
@@ -494,14 +494,14 @@ mod_Optim_server <- function(id) {
       B <- optimized_arrang()$binaryField[[user_site_selection()]]
       df <- as.data.frame(B)
       rownames(df) <- nrow(df):1
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px"))
+      table_options <- list(pageLength = nrow(df), autoWidth = FALSE, scrollY = "700px")
       DT::datatable(df,
                     extensions = 'FixedColumns',
-                    options = list(
+                    options = utils::modifyList(table_options, list(
                       dom = 't',
                       scrollX = TRUE,
                       fixedColumns = TRUE
-                    )) |> 
+                    ))) |>
         DT::formatStyle(paste0(rep('V', ncol(df)), 1:ncol(df)),
                         backgroundColor = DT::styleEqual(1, 
                                                          c("gray")))
@@ -697,12 +697,13 @@ mod_Optim_server <- function(id) {
       df$CHECKS <- as.factor(df$CHECKS)
       df$ENTRY <- as.factor(df$ENTRY)
       df$TREATMENT <- as.factor(df$TREATMENT)
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
+      table_options <- list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "600px",
-              columnDefs = list(list(className = 'dt-center', targets = "_all"))))
+              columnDefs = list(list(className = 'dt-center', targets = "_all")))
       DT::datatable(df,
         filter = "top",
-        rownames = FALSE
+        rownames = FALSE,
+        options = table_options
       )
     })
     

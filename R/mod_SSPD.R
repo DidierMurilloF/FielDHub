@@ -578,14 +578,14 @@ mod_SSPD_server <- function(id){
       df$SUB_PLOT <- as.factor(df$SUB_PLOT)
       df$SUB_SUB_PLOT <- as.factor(df$SUB_SUB_PLOT)
       df$TRT_COMB <- as.factor(df$TRT_COMB)
-      options(DT.options = list(pageLength = nrow(df), autoWidth = FALSE,
-                                scrollX = TRUE, scrollY = "500px"))
+      table_options <- list(pageLength = nrow(df), autoWidth = FALSE,
+                                scrollX = TRUE, scrollY = "500px")
       
       DT::datatable(df, 
                     filter = 'top',
                     rownames = FALSE, 
-                    options = list(
-        columnDefs = list(list(className = 'dt-center', targets = "_all"))))
+                    options = utils::modifyList(table_options, list(
+        columnDefs = list(list(className = 'dt-center', targets = "_all")))))
       
     })
     
