@@ -432,19 +432,17 @@ mod_SPD_server <- function(id){
         max <- as.numeric(valspd$maxV.spd)
         min <- as.numeric(valspd$minV.spd)
         df.spd <- reactive_layoutSPD()$allSitesFieldbook
-        cnamesdf.spd <- colnames(df.spd)
-        df.spd <- validate_design(norm_trunc(
-          a = min, 
-          b = max, 
-          data = df.spd, 
-          seed = spd_inputs()$seed
+        simulation <- validate_design(simulate_classic_field_book(
+          field_book = df.spd, min_value = min, max_value = max,
+          response_name = valspd$trail.spd, seed = spd_inputs()$seed,
+          order_by_id = TRUE
         ))
-        colnames(df.spd) <- c(cnamesdf.spd[1:(ncol(df.spd) - 1)], valspd$trail.spd)
-        df.spd <- df.spd[order(df.spd$ID),]
+        df.spd <- simulation$field_book
       }else {
+        simulation <- NULL
         df.spd <- reactive_layoutSPD()$allSitesFieldbook
       }
-      return(list(df = df.spd))
+      return(list(df = df.spd, simulation = simulation))
     })
     
     heatmapInfoModal_SPD <- function() {

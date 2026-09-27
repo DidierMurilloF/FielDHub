@@ -471,16 +471,19 @@ mod_Square_Lattice_server <- function(id){
         max <- as.numeric(valsSQUARE$maxV.square)
         min <- as.numeric(valsSQUARE$minV.square)
         df.square <- reactive_layoutSquare()$allSitesFieldbook
-        cnamesdf.square <- colnames(df.square)
-        df.square <- validate_design(norm_trunc(a = min, b = max, data = df.square,
-                                seed = square_inputs()$seed))
-        colnames(df.square) <- c(cnamesdf.square[1:(ncol(df.square) - 1)], valsSQUARE$trail.square)
+        simulation <- validate_design(simulate_classic_field_book(
+          field_book = df.square, min_value = min, max_value = max,
+          response_name = valsSQUARE$trail.square, seed = square_inputs()$seed,
+          order_by_id = FALSE
+        ))
+        df.square <- simulation$field_book
         a <- ncol(df.square)
       }else {
+        simulation <- NULL
         df.square <- reactive_layoutSquare()$allSitesFieldbook
         a <- ncol(df.square)
       }
-      return(list(df = df.square, a = a))
+      return(list(df = df.square, a = a, simulation = simulation))
     })
     
     heatmapInfoModal_Square <- function() {

@@ -433,20 +433,19 @@ mod_FD_server <- function(id) {
         max <- as.numeric(valsfd$maxV.fd)
         min <- as.numeric(valsfd$minV.fd)
         df.fd <- reactive_layoutFD()$allSitesFieldbook
-        cnamesdf.fd <- colnames(df.fd)
-        df.fd <- validate_design(norm_trunc(
-          a = min, 
-          b = max, 
-          data = df.fd, 
-          seed = fd_inputs()$seed
+        simulation <- validate_design(simulate_classic_field_book(
+          field_book = df.fd, min_value = min, max_value = max,
+          response_name = valsfd$trail.fd, seed = fd_inputs()$seed,
+          order_by_id = FALSE
         ))
-        colnames(df.fd) <- c(cnamesdf.fd[1:(ncol(df.fd) - 1)], valsfd$trail.fd)
+        df.fd <- simulation$field_book
         a <- ncol(df.fd)
       } else {
+        simulation <- NULL
         df.fd <- reactive_layoutFD()$allSitesFieldbook
         a <- ncol(df.fd)
       }
-      return(list(df = df.fd, a = a))
+      return(list(df = df.fd, a = a, simulation = simulation))
     })
     
     heatmapInfoModal_fd <- function() {

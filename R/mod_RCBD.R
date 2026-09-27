@@ -533,20 +533,17 @@ mod_RCBD_server <- function(id) {
         max <- as.numeric(valsRCBD$maxV.rcbd)
         min <- as.numeric(valsRCBD$minV.rcbd)
         df.rcbd <- reactive_layoutRCBD()$allSitesFieldbook
-        cnamesdf.rcbd <- colnames(df.rcbd)
-        df.rcbd <- validate_design(norm_trunc(
-          a = min, 
-          b = max, 
-          data = df.rcbd, 
-          seed = rcbd_inputs()$seed
+        simulation <- validate_design(simulate_classic_field_book(
+          field_book = df.rcbd, min_value = min, max_value = max,
+          response_name = valsRCBD$trail.rcbd, seed = rcbd_inputs()$seed,
+          order_by_id = TRUE
         ))
-        colnames(df.rcbd) <- c(cnamesdf.rcbd[1:(ncol(df.rcbd) - 1)], 
-                               valsRCBD$trail.rcbd)
-        df.rcbd <- df.rcbd[order(df.rcbd$ID),]
+        df.rcbd <- simulation$field_book
       }else {
+        simulation <- NULL
         df.rcbd <- reactive_layoutRCBD()$allSitesFieldbook
       }
-      return(list(df = df.rcbd))
+      return(list(df = df.rcbd, simulation = simulation))
     })
     
     heatmapInfoModal_RCBD <- function() {

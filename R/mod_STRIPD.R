@@ -475,20 +475,19 @@ mod_STRIPD_server <- function(id) {
         max <- as.numeric(valsStrip$maxV.strip)
         min <- as.numeric(valsStrip$minV.strip)
         df.strip <- reactive_layoutSTRIP()$allSitesFieldbook
-        cnamesdf.strip <- colnames(df.strip)
-        df.strip <- validate_design(norm_trunc(
-          a = min, 
-          b = max, 
-          data = df.strip, 
-          seed = strip_inputs()$seed
-         ))
-        colnames(df.strip) <- c(cnamesdf.strip[1:(ncol(df.strip) - 1)], valsStrip$trail.strip)
+        simulation <- validate_design(simulate_classic_field_book(
+          field_book = df.strip, min_value = min, max_value = max,
+          response_name = valsStrip$trail.strip, seed = strip_inputs()$seed,
+          order_by_id = FALSE
+        ))
+        df.strip <- simulation$field_book
         a <- ncol(df.strip)
       }else {
+        simulation <- NULL
         df.strip <- reactive_layoutSTRIP()$allSitesFieldbook
         a <- ncol(df.strip)
       }
-      return(list(df = df.strip, a = a))
+      return(list(df = df.strip, a = a, simulation = simulation))
     })
     
     heatmapInfoModal_STRIP <- function() {

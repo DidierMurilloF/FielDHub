@@ -428,20 +428,17 @@ mod_LSD_server <- function(id){
         max <- as.numeric(valsLSD$maxV.lsd)
         min <- as.numeric(valsLSD$minV.lsd)
         df.lsd <- reactive_layoutLSD()$allSitesFieldbook
-        cnamesdf.lsd <- colnames(df.lsd)
-        df.lsd <- validate_design(norm_trunc(
-          a = min, 
-          b = max, 
-          data = df.lsd, 
-          seed = lsd_inputs()$seed
+        simulation <- validate_design(simulate_classic_field_book(
+          field_book = df.lsd, min_value = min, max_value = max,
+          response_name = valsLSD$trail.lsd, seed = lsd_inputs()$seed,
+          order_by_id = TRUE
         ))
-        colnames(df.lsd) <- c(cnamesdf.lsd[1:(ncol(df.lsd) - 1)], 
-                              valsLSD$trail.lsd)
-        df.lsd <- df.lsd[order(df.lsd$ID),]
+        df.lsd <- simulation$field_book
       }else {
+        simulation <- NULL
         df.lsd <- reactive_layoutLSD()$allSitesFieldbook
       }
-      return(list(df = df.lsd))
+      return(list(df = df.lsd, simulation = simulation))
     })
     
     heatmapInfoModal_LSD <- function() {

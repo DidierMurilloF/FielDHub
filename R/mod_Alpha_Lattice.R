@@ -456,16 +456,19 @@ mod_Alpha_Lattice_server <- function(id){
         max <- as.numeric(valsALPHA$maxV.alpha)
         min <- as.numeric(valsALPHA$minV.alpha)
         df.alpha <- reactive_layoutAlpha()$allSitesFieldbook
-        cnamesdf.alpha <- colnames(df.alpha)
-        df.alpha <- validate_design(norm_trunc(a = min, b = max, data = df.alpha,
-                               seed = alpha_inputs()$seed))
-        colnames(df.alpha) <- c(cnamesdf.alpha[1:(ncol(df.alpha) - 1)], valsALPHA$trail.alpha)
+        simulation <- validate_design(simulate_classic_field_book(
+          field_book = df.alpha, min_value = min, max_value = max,
+          response_name = valsALPHA$trail.alpha, seed = alpha_inputs()$seed,
+          order_by_id = FALSE
+        ))
+        df.alpha <- simulation$field_book
         a <- ncol(df.alpha)
       }else {
+        simulation <- NULL
         df.alpha <- reactive_layoutAlpha()$allSitesFieldbook
         a <- ncol(df.alpha)
       }
-      return(list(df = df.alpha, a = a))
+      return(list(df = df.alpha, a = a, simulation = simulation))
     })
     
     heatmapInfoModal_ALPHA <- function() {

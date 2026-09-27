@@ -1,0 +1,49 @@
+classic_simulation_book <- function() {
+  data.frame(ID = c(4L, 2L, 3L, 1L), LOCATION = c("B", "B", "A", "A"),
+             PLOT = c(2L, 1L, 2L, 1L), TREATMENT = c("x", "y", "x", "y"))
+}
+
+test_that("classic simulation records replayable inputs and preserves the caller's RNG", {
+  set.seed(52)
+  before <- .Random.seed
+  for (seed in list(NULL, 19, 19.75, -8)) {
+    result <- simulate_classic_field_book(classic_simulation_book(), 0, 100, "YIELD", seed)
+    expect_identical(.Random.seed, before)
+    expect_identical(result$input_field_book, classic_simulation_book())
+    expect_identical(result$metadata$model, "truncated_normal")
+    expect_type(result$metadata$seed, "integer")
+    expect_identical(result$metadata$rng_kind, RNGkind())
+    expect_identical(result$metadata$package_version, as.character(utils::packageVersion("FielDHub")))
+    replay <- do.call(simulate_classic_field_book,
+                      c(list(field_book = result$input_field_book), result$metadata$parameters))
+    expect_identical(replay, result)
+    expect_identical(.Random.seed, before)
+  }
+})
+
+test_that("classic simulation validates response names and optional ID sorting", {
+  book <- classic_simulation_book()
+  ordered <- simulate_classic_field_book(book, 0, 100, "Dry yield (kg)", 7, order_by_id = TRUE)
+  expect_identical(ordered$field_book$ID, 1:4)
+  expect_true("Dry yield (kg)" %in% names(ordered$field_book))
+  expect_false("RESP" %in% names(ordered$field_book))
+  for (name in list(NULL, "", "  ", NA_character_, c("a", "b"), "PLOT", "text")) {
+    expect_error(simulate_classic_field_book(book, 0, 100, name, 7), class = "fieldhub_input_error")
+  }
+  for (value in list(NULL, 1, NA, c(TRUE, FALSE))) {
+    expect_error(simulate_classic_field_book(book, 0, 100, "YIELD", 7, value), class = "fieldhub_input_error")
+  }
+  expect_error(simulate_classic_field_book(book[names(book) != "ID"], 0, 100, "YIELD", 7, TRUE),
+               class = "fieldhub_input_error")
+})
+
+test_that("every classic module delegates response generation to the shared service", {
+  modules <- c("CRD", "RCBD", "LSD", "FD", "SPD", "SSPD", "STRIPD", "IBD", "RowCol",
+                "Alpha_Lattice", "Square_Lattice", "Rectangular_Lattice")
+  for (module in modules) {
+    code <- body(get(paste0("mod_", module, "_server"), asNamespace("FielDHub")))
+    symbols <- all.names(code)
+    expect_identical(sum(symbols == "simulate_classic_field_book"), 1L)
+    expect_false("norm_trunc" %in% symbols)
+  }
+})

@@ -503,17 +503,19 @@ mod_IBD_server <- function(id) {
         max <- as.numeric(valsIBD$maxV.ibd)
         min <- as.numeric(valsIBD$minV.ibd)
         df.ibd <- reactive_layoutIBD()$allSitesFieldbook
-        cnamesdf.ibd <- colnames(df.ibd)
-        df.ibd <- validate_design(norm_trunc(a = min, b = max, data = df.ibd,
-                             seed = ibd_inputs()$seed))
-        colnames(df.ibd) <- c(cnamesdf.ibd[1:(ncol(df.ibd) - 1)], 
-                              valsIBD$trail.ibd)
+        simulation <- validate_design(simulate_classic_field_book(
+          field_book = df.ibd, min_value = min, max_value = max,
+          response_name = valsIBD$trail.ibd, seed = ibd_inputs()$seed,
+          order_by_id = FALSE
+        ))
+        df.ibd <- simulation$field_book
         a <- ncol(df.ibd)
       }else {
+        simulation <- NULL
         df.ibd <- reactive_layoutIBD()$allSitesFieldbook
         a <- ncol(df.ibd)
       }
-      return(list(df = df.ibd, a = a))
+      return(list(df = df.ibd, a = a, simulation = simulation))
     })
     
     heatmapInfoModal_IBD <- function() {

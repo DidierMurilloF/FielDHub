@@ -500,21 +500,19 @@ mod_RowCol_server <- function(id){
         max <- as.numeric(valsRowColD$maxV.RowCol)
         min <- as.numeric(valsRowColD$minV.RowCol)
         df.RowCol <- reactive_layoutROWCOL()$allSitesFieldbook
-        cnamesdf.RowCol <- colnames(df.RowCol)
-        df.RowCol <- validate_design(norm_trunc(
-          a = min, 
-          b = max, 
-          data = df.RowCol, 
-          seed = rcd_inputs()$seed
+        simulation <- validate_design(simulate_classic_field_book(
+          field_book = df.RowCol, min_value = min, max_value = max,
+          response_name = valsRowColD$trail.RowCol, seed = rcd_inputs()$seed,
+          order_by_id = FALSE
         ))
-        colnames(df.RowCol) <- c(cnamesdf.RowCol[1:(ncol(df.RowCol) - 1)], 
-                                 valsRowColD$trail.RowCol)
+        df.RowCol <- simulation$field_book
         a <- ncol(df.RowCol)
       }else {
+        simulation <- NULL
         df.RowCol <- reactive_layoutROWCOL()$allSitesFieldbook
         a <- ncol(df.RowCol)
       }
-      return(list(df = df.RowCol, a = a))
+      return(list(df = df.RowCol, a = a, simulation = simulation))
     })
     
     heatmapInfoModal_RCD <- function() {

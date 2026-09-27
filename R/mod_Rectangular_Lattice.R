@@ -456,16 +456,19 @@ mod_Rectangular_Lattice_server <- function(id) {
         max <- as.numeric(valsRECT$maxV.rectangular)
         min <- as.numeric(valsRECT$minV.rectangular)
         df.rectangular <- reactive_layoutRect()$allSitesFieldbook
-        cnamesdf.rectangular<- colnames(df.rectangular)
-        df.rectangular<- validate_design(norm_trunc(a = min, b = max, data = df.rectangular,
-                                    seed = rectangular_inputs()$seed))
-        colnames(df.rectangular) <- c(cnamesdf.rectangular[1:(ncol(df.rectangular) - 1)], valsRECT$trail.rectangular)
+        simulation <- validate_design(simulate_classic_field_book(
+          field_book = df.rectangular, min_value = min, max_value = max,
+          response_name = valsRECT$trail.rectangular, seed = rectangular_inputs()$seed,
+          order_by_id = FALSE
+        ))
+        df.rectangular <- simulation$field_book
         a <- ncol(df.rectangular)
       }else {
+        simulation <- NULL
         df.rectangular <- reactive_layoutRect()$allSitesFieldbook
         a <- ncol(df.rectangular)
       }
-      return(list(df = df.rectangular, a = a))
+      return(list(df = df.rectangular, a = a, simulation = simulation))
     })
     
     heatmapInfoModal_Rect <- function() {

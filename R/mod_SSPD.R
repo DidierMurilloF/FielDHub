@@ -462,19 +462,17 @@ mod_SSPD_server <- function(id){
         max <- as.numeric(valsspd$maxV.sspd)
         min <- as.numeric(valsspd$minV.sspd)
         df.sspd <- reactive_layoutSSPD()$allSitesFieldbook
-        cnamesdf.sspd <- colnames(df.sspd)
-        df.sspd <- validate_design(norm_trunc(
-          a = min, 
-          b = max, 
-          data = df.sspd, 
-          seed = sspd_inputs()$seed
+        simulation <- validate_design(simulate_classic_field_book(
+          field_book = df.sspd, min_value = min, max_value = max,
+          response_name = valsspd$Trial.sspd, seed = sspd_inputs()$seed,
+          order_by_id = TRUE
         ))
-        colnames(df.sspd) <- c(cnamesdf.sspd[1:(ncol(df.sspd) - 1)], valsspd$Trial.sspd)
-        df.sspd <- df.sspd[order(df.sspd$ID),]
+        df.sspd <- simulation$field_book
       }else {
+        simulation <- NULL
         df.sspd <- reactive_layoutSSPD()$allSitesFieldbook
       }
-      return(list(df = df.sspd))
+      return(list(df = df.sspd, simulation = simulation))
     })
     
     

@@ -354,19 +354,17 @@ mod_CRD_server <- function(id) {
         max <- as.numeric(vals$maxV.CRD)
         min <- as.numeric(vals$minV.CRD)
         df.crd <- reactive_layoutCRD()$fieldBookXY
-        cnamesdf.crd <- colnames(df.crd)
-        df.crd <- validate_design(norm_trunc(
-          a = min, 
-          b = max, 
-          data = df.crd, 
-          seed = crd_inputs()$seed
+        simulation <- validate_design(simulate_classic_field_book(
+          field_book = df.crd, min_value = min, max_value = max,
+          response_name = vals$trail.CRD, seed = crd_inputs()$seed,
+          order_by_id = TRUE
         ))
-        colnames(df.crd) <- c(cnamesdf.crd[1:(ncol(df.crd) - 1)], vals$trail.CRD)
-        df.crd <- df.crd[order(df.crd$ID),]
+        df.crd <- simulation$field_book
       }else {
+        simulation <- NULL
         df.crd <- reactive_layoutCRD()$fieldBookXY
       }
-      return(list(df = df.crd))
+      return(list(df = df.crd, simulation = simulation))
     })
     
     heatmapInfoModal_CRD <- function() {
