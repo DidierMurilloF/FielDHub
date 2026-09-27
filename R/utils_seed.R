@@ -49,6 +49,19 @@ resolve_seed <- function(seed, default = function() stats::runif(1, min = -50000
   seed
 }
 
+#' Derive a location seed without overflowing R's supported seed interval
+#'
+#' Keep the original addition, including its type and names, whenever R can
+#' seed from it. Only out-of-range sums wrap around the signed integer interval.
+#' @noRd
+offset_design_seed <- function(seed, offset) {
+  limit <- .Machine$integer.max
+  combined <- as.double(seed) + as.double(offset)
+  if (abs(trunc(combined)) <= limit) return(seed + offset)
+  wrapped <- (trunc(combined) + limit) %% (2 * limit + 1) - limit
+  if (is.integer(seed) && is.integer(offset)) as.integer(wrapped) else wrapped
+}
+
 #' Set the seed of a design function and restore the caller's stream on exit
 #'
 #' @description Calls \code{set.seed(seed)}. In the outermost design call, it

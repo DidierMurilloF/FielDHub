@@ -325,7 +325,7 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
       onestage_fit <- tryCatch(
         build_row_column_onestage(
           nt = nt, nrows = nrows, ncols = ncols, reps = reps,
-          latinize = latinize, searches = searches_onestage, seed = seed + i
+          latinize = latinize, searches = searches_onestage, seed = offset_design_seed(seed, i)
         ),
         onestage_infeasible = function(cnd) cnd
       )
@@ -347,7 +347,7 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
         treatments = nt,
         replicates = reps,
         blocks = list(reps, ncols),
-        seed = seed + i
+        seed = offset_design_seed(seed, i)
       )
       mydes <- rerandomize_ibd(ibd_design = mydes)
       # Create row and column design
@@ -357,7 +357,8 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
         dplyr::mutate(Level_3 = factor(Level_3, levels = unique(Level_3))) |>
         dplyr::select(Level_1, Level_2, Level_3, plots, treatments)
 
-      improved_design <- improve_efficiency(row_col_design, iterations_twostage, seed = seed + i)
+      improved_design <- improve_efficiency(row_col_design, iterations_twostage,
+                                             seed = offset_design_seed(seed, i))
       field_book_best_design <- improved_design$best_design
     }
     row_column_efficiency <- report_efficiency(field_book_best_design)

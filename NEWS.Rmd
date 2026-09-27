@@ -34,6 +34,11 @@ knitr::opts_chunk$set(
 
 ### New features:
 
+- Row-column designs now support seeds at the top of R's accepted range.
+  Location-specific seed offsets wrap only when they would otherwise overflow;
+  these calls previously failed or reported a misleading optimization warning.
+  Ordinary seeded results and caller RNG states are unchanged.
+
 - Release tooling now includes Windows, R-devel, oldrel, and exact minimum-R
   CI jobs, plus a repeatable benchmark workflow and maintainer checklist.
   Required macOS and Linux release-job names are unchanged. Export benchmarks
