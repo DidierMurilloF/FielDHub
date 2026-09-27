@@ -1,71 +1,30 @@
+#' Column and missing-value rules for the app's legacy upload formats
+#' @noRd
+upload_validation_rule <- function(design) {
+  if (is.factor(design)) design <- as.character(design)
+  if (!is.character(design) || length(design) != 1L || is.na(design)) return(NULL)
+  columns <- switch(design,
+    crd = , rcbd = 1L,
+    lsd = , sspd = 1:3,
+    sdiag = , mdiag = , optim = , arcbd = , prep = , square = , rect = ,
+    alpha = , ibd = , rcd = , factorial = , spd = , strip = 1:2,
+    NULL
+  )
+  if (is.null(columns)) return(NULL)
+  list(columns = columns, omit_na = design %in% c("spd", "sspd", "strip"),
+        paired = design == "factorial")
+}
+
+#' Check upload uniqueness, returning NULL for missing columns or rules
+#' @noRd
 check_input <- function(design, dataIn) {
-  if (design == "sdiag" || design == "mdiag" || design == "optim" || design == "arcbd"
-      || design == "prep"|| design == "square" || design == "rect" || design == "alpha"
-      || design == "ibd" || design == "rcd") {
-    if (ncol(dataIn) >= 2) {
-      return(
-        all(
-          isTRUE(all.equal(dataIn[,1], unique(dataIn[,1]))),
-          isTRUE(all.equal(dataIn[,2], unique(dataIn[,2])))
-        )
-      )
-    } else return(NULL)
-  } else if (design == "lsd") {
-    if (ncol(dataIn) >= 3) { 
-      return(
-        all(
-          isTRUE(all.equal(dataIn[,1],unique(dataIn[,1]))),
-          isTRUE(all.equal(dataIn[,2],unique(dataIn[,2]))),
-          isTRUE(all.equal(dataIn[,3],unique(dataIn[,3])))
-        )
-      )
-    } else return(NULL)
-  } else if (design == "spd") {
-    if (ncol(dataIn) >= 2) {
-      wp <- as.vector(na.omit(dataIn[,1]))
-      sp <- as.vector(na.omit(dataIn[,2]))
-      return(
-        all(
-          isTRUE(all.equal(wp,unique(wp))),
-          isTRUE(all.equal(sp,unique(sp)))
-        )
-      )
-    } else return(NULL)
-  } else if (design == "sspd") {
-    if (ncol(dataIn) >= 3) { 
-      wp <- as.vector(na.omit(dataIn[,1]))
-      sp <- as.vector(na.omit(dataIn[,2]))
-      ssp <- as.vector(na.omit(dataIn[,3]))
-      return(
-        all(
-          isTRUE(all.equal(wp,unique(wp))),
-          isTRUE(all.equal(sp,unique(sp))),
-          isTRUE(all.equal(ssp,unique(ssp)))
-        )
-      )
-    } else return(NULL)
-  } else if (design == "strip") {
-    if (ncol(dataIn) >= 2) {
-      h <- as.vector(na.omit(dataIn[,1]))
-      v <- as.vector(na.omit(dataIn[,2]))
-      return(
-        all(
-          isTRUE(all.equal(h,unique(h))),
-          isTRUE(all.equal(v,unique(v)))
-        )
-      )
-    } else return(NULL)
-  } else if (design == "crd") {
-    if (ncol(dataIn) >= 1) {
-      return(isTRUE(all.equal(dataIn[,1],unique(dataIn[,1]))))
-    } else return(NULL)
-  } else if (design == "factorial") {
-    if (ncol(dataIn) >= 2) {
-      return(factorial_levels_unique(dataIn))
-    } else return(NULL)
-  } else if (design == "rcbd") {
-    if (ncol(dataIn) >= 1) {
-      return(isTRUE(all.equal(dataIn[,1],unique(dataIn[,1]))))
-    } else return(NULL)
-  }
+  rule <- upload_validation_rule(design)
+  if (is.null(rule) || length(dim(dataIn)) != 2L ||
+      ncol(dataIn) < max(rule$columns)) return(NULL)
+  if (rule$paired) return(factorial_levels_unique(dataIn))
+  all(vapply(rule$columns, function(column) {
+    values <- dataIn[, column]
+    if (rule$omit_na) values <- as.vector(na.omit(values))
+    isTRUE(all.equal(values, unique(values)))
+  }, logical(1)))
 }

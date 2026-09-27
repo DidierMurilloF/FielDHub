@@ -104,6 +104,12 @@
 
 ### Enhancements:
 
+- Upload column requirements and missing-value rules now share one internal
+  definition across all design families. Each file is validated once instead
+  of twice; supported input formats and validation outcomes are preserved.
+  Incomplete validation requests now return the existing missing-columns
+  status instead of a raw R error.
+
 - All 19 app modules now share upload-error message mapping and one alert
   adapter instead of copying the same format, duplicate-value and
   missing-column branches. Existing alert wording, design-specific column

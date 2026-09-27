@@ -61,6 +61,8 @@ knitr::opts_chunk$set(
 
 ### Enhancements:
 
+* Upload column requirements and missing-value rules now share one internal definition across all design families. Each file is validated once instead of twice; supported input formats and validation outcomes are preserved. Incomplete validation requests now return the existing missing-columns status instead of a raw R error.
+
 * All 19 app modules now share upload-error message mapping and one alert adapter instead of copying the same format, duplicate-value and missing-column branches. Existing alert wording, design-specific column guidance and successful-upload logic are preserved; the shared behavior is tested without Shiny sessions.
 
 * Result validation now enforces the common field-book keys: finite numeric `ID` and `PLOT` columns, nonmissing atomic `LOCATION` identifiers, and unique column names. Existing integer/double storage and additional user columns are preserved; this validates the minimum schema without rewriting valid field books.
