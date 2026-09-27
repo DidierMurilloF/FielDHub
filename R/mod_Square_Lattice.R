@@ -307,45 +307,12 @@ mod_Square_Lattice_server <- function(id){
       return(list(sites = sites))
     })
     
-    output$well_panel_layout_sq <- shiny::renderUI({
-      shiny::req(SQUARE_reactive()$fieldBook)
-      df <- SQUARE_reactive()$fieldBook
-      locs_sq <- length(levels(as.factor(df$LOCATION)))
-      repsSquare <- length(levels(as.factor(df$REP)))
-      if ((repsSquare >= 4 & repsSquare %% 2 == 0) | (repsSquare >= 4 & sqrt(repsSquare) %% 1 == 0)) {
-        stacked <- c("Vertical Stack Panel" = "vertical", "Horizontal Stack Panel" = "horizontal",  
-                       "Grid Panel" = "grid_panel")
-      } else {
-        stacked <- c("Vertical Stack Panel" = "vertical", "Horizontal Stack Panel" = "horizontal")
-      }
-      obj_sq <- SQUARE_reactive()
-      layoutOptions_sq <- validate_design(layout_choices(x = obj_sq))
-      shiny::wellPanel(
-        shiny::column(3,
-               shiny::radioButtons(ns("typlotSQ"), "Type of Plot:",
-                            c("Entries/Treatments" = 1,
-                              "Plots" = 2,
-                              "Heatmap" = 3))
-        ),
-        shiny::fluidRow(
-          shiny::column(3,
-                 shiny::selectInput(inputId = ns("stacked_sq"), label = "Reps layout:",
-                             choices = stacked)
-          ),
-          shiny::column(2, #align="center",
-                 shiny::selectInput(inputId = ns("layoutO_sq"), label = "Layout option:", choices = layoutOptions_sq, selected = 1)
-          ),
-          shiny::column(2, #align="center",
-                 shiny::selectInput(inputId = ns("locLayout_sq"), label = "Location:", choices = as.numeric(upDateSites_SQ()$sites))
-          )
-        )
-      )
-    })
     
-    reactive_layoutSquare <- app_layout_selection(input, session,
+    reactive_layoutSquare <- app_classic_layout(input, output, session,
       design = function() SQUARE_reactive(),
       planter = function() square_inputs()$planter,
-      ids = c(layout = "layoutO_sq", stacked = "stacked_sq", location = "locLayout_sq")
+      spec = classic_workflow_spec("Square_Lattice"),
+      locations = function() as.numeric(upDateSites_SQ()$sites)
     )
     
     output$layout.output_sq <- shiny::renderPlot({

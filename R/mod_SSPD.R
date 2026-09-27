@@ -302,45 +302,11 @@ mod_SSPD_server <- function(id){
     }) |> 
       shiny::bindEvent(input$RUN.sspd)
   
-    output$well_panel_layout_SSPD <- shiny::renderUI({
-      shiny::req(sspd_reactive()$fieldBook)
-      obj_sspd <- sspd_reactive()
-      layoutOptions_sspd <- validate_design(layout_choices(x = obj_sspd))
-      df <- sspd_reactive()$fieldBook
-      stacked_sspd <- c("Vertical Stack Panel" = "vertical", 
-                          "Horizontal Stack Panel" = "horizontal")
-      sites <- 1:length(levels(as.factor(df$LOCATION)))
-      shiny::wellPanel(
-        shiny::column(2,
-               shiny::radioButtons(ns("typlotsspd"), "Type of Plot:",
-                            c("Entries/Treatments" = 1,
-                              "Plots" = 2,
-                              "Heatmap" = 3), selected = 1)
-        ),
-        shiny::fluidRow(
-          shiny::column(3,
-                 shiny::selectInput(inputId = ns("stackedSSPD"),
-                             label = "Reps layout:", 
-                             choices = stacked_sspd),
-          ),
-          shiny::column(3,
-                 shiny::selectInput(inputId = ns("layoutO_sspd"),
-                             label = "Layout option:", 
-                             choices = layoutOptions_sspd)
-          ),
-          shiny::column(3,
-                 shiny::selectInput(inputId = ns("locLayout_sspd"),
-                             label = "Location:", 
-                             choices = sites) 
-          )
-        )
-      )
-    })
     
-    reactive_layoutSSPD <- app_layout_selection(input, session,
+    reactive_layoutSSPD <- app_classic_layout(input, output, session,
       design = function() sspd_reactive(),
       planter = function() sspd_inputs()$planter,
-      ids = c(layout = "layoutO_sspd", stacked = "stackedSSPD", location = "locLayout_sspd")
+      spec = classic_workflow_spec("SSPD")
     )
 
     app_classic_workflow(input, output, session,

@@ -340,43 +340,12 @@ mod_IBD_server <- function(id) {
       return(list(sites = sites))
     })
     
-    output$well_panel_layout_IBD <- shiny::renderUI({
-      shiny::req(IBD_reactive()$fieldBook)
-      obj_ibd <- IBD_reactive()
-      layoutOptions_ibd <- validate_design(layout_choices(x = obj_ibd))
-      stacked <- c("Vertical Stack Panel" = "vertical", 
-                     "Horizontal Stack Panel" = "horizontal")
-      shiny::wellPanel(
-        shiny::column(2,
-               shiny::radioButtons(ns("typlotibd"), "Type of Plot:",
-                            c("Entries/Treatments" = 1,
-                              "Plots" = 2,
-                              "Heatmap" = 3), selected = 1)
-        ),
-        shiny::fluidRow(
-          shiny::column(3,
-                 shiny::selectInput(inputId = ns("stackedibd"),
-                             label = "Reps layout:", 
-                             choices = stacked)
-          ),
-          shiny::column(3, #align="center",
-                 shiny::selectInput(inputId = ns("layoutO_ibd"),
-                             label = "Layout option:", 
-                             choices = layoutOptions_ibd)
-          ),
-          shiny::column(3, #align="center",
-                 shiny::selectInput(inputId = ns("locLayout_ibd"),
-                             label = "Location:", 
-                             choices = as.numeric(upDateSites()$sites))
-          )
-        )
-      )
-    })
     
-    reactive_layoutIBD <- app_layout_selection(input, session,
+    reactive_layoutIBD <- app_classic_layout(input, output, session,
       design = function() IBD_reactive(),
       planter = function() ibd_inputs()$planter,
-      ids = c(layout = "layoutO_ibd", stacked = "stackedibd", location = "locLayout_ibd")
+      spec = classic_workflow_spec("IBD"),
+      locations = function() as.numeric(upDateSites()$sites)
     )
 
     app_classic_workflow(input, output, session,

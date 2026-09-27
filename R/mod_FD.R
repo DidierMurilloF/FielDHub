@@ -283,44 +283,12 @@ mod_FD_server <- function(id) {
     })  |> 
       shiny::bindEvent(input$RUN.fd)
     
-    output$well_panel_layout_FD <- shiny::renderUI({
-      shiny::req(fd_reactive()$fieldBook)
-      obj_fd <- fd_reactive()
-      layoutOptions_fd <- validate_design(layout_choices(x = obj_fd, stacked = "vertical"))
-      stacked_fd <- c("Vertical Stack Panel" = "vertical", 
-                        "Horizontal Stack Panel" = "horizontal")
-      sites <- as.numeric(input$l.fd)
-      shiny::wellPanel(
-        shiny::column(2,
-               shiny::radioButtons(ns("typlotfd"), "Type of Plot:",
-                            c("Entries/Treatments" = 1,
-                              "Plots" = 2,
-                              "Heatmap" = 3), selected = 1)
-        ),
-        shiny::fluidRow(
-          shiny::column(3,
-                 shiny::selectInput(inputId = ns("stackedFD"),
-                             label = "Reps layout:", 
-                             choices = stacked_fd),
-          ),
-          shiny::column(3, #align="center",
-                 shiny::selectInput(inputId = ns("layoutO_fd"),
-                             label = "Layout option:", 
-                             choices = layoutOptions_fd)
-          ),
-          shiny::column(3, #align="center",
-                 shiny::selectInput(inputId = ns("locLayout_fd"), label = "Location:",
-                             choices = as.numeric(upDateSites()$sites), 
-                             selected = 1)
-          )
-        )
-      )
-    })
     
-    reactive_layoutFD <- app_layout_selection(input, session,
+    reactive_layoutFD <- app_classic_layout(input, output, session,
       design = function() fd_reactive(),
       planter = function() fd_inputs()$planter,
-      ids = c(layout = "layoutO_fd", stacked = "stackedFD", location = "locLayout_fd")
+      spec = classic_workflow_spec("FD"),
+      locations = function() as.numeric(upDateSites()$sites)
     )
 
     app_classic_workflow(input, output, session,

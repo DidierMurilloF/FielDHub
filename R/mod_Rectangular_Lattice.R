@@ -300,45 +300,12 @@ mod_Rectangular_Lattice_server <- function(id) {
       return(list(sites = sites))
     })
     
-    output$well_panel_layout_rt <- shiny::renderUI({
-      shiny::req(RECTANGULAR_reactive()$fieldBook)
-      df <- RECTANGULAR_reactive()$fieldBook
-      locs_rt <- length(levels(as.factor(df$LOCATION)))
-      repsRect <- length(levels(as.factor(df$REP)))
-      if ((repsRect >= 4 & repsRect %% 2 == 0) | (repsRect >= 4 & sqrt(repsRect) %% 1 == 0)) {
-        stacked <- c("Vertical Stack Panel" = "vertical", "Horizontal Stack Panel" = "horizontal",  
-                       "Grid Panel" = "grid_panel")
-      } else {
-        stacked <- c("Vertical Stack Panel" = "vertical", "Horizontal Stack Panel" = "horizontal")
-      }
-      obj_rt <- RECTANGULAR_reactive()
-      layoutOptions_rt <- validate_design(layout_choices(x = obj_rt, stacked = "vertical"))
-      shiny::wellPanel(
-        shiny::column(3,
-               shiny::radioButtons(ns("typlotRT"), "Type of Plot:",
-                            c("Entries/Treatments" = 1,
-                              "Plots" = 2,
-                              "Heatmap" = 3))
-        ),
-        shiny::fluidRow(
-          shiny::column(3,
-                 shiny::selectInput(inputId = ns("stackedRT"), label = "Reps layout:",
-                             choices = stacked)
-          ),
-          shiny::column(2,
-                 shiny::selectInput(inputId = ns("layoutO_rt"), label = "Layout option:", choices = layoutOptions_rt, selected = 1)
-          ),
-          shiny::column(2,
-                 shiny::selectInput(inputId = ns("locLayout_rt"), label = "Location:", choices = as.numeric(upDateSites_RT()$sites))
-          )
-        )
-      )
-    })
     
-    reactive_layoutRect <- app_layout_selection(input, session,
+    reactive_layoutRect <- app_classic_layout(input, output, session,
       design = function() RECTANGULAR_reactive(),
       planter = function() rectangular_inputs()$planter,
-      ids = c(layout = "layoutO_rt", stacked = "stackedRT", location = "locLayout_rt")
+      spec = classic_workflow_spec("Rectangular_Lattice"),
+      locations = function() as.numeric(upDateSites_RT()$sites)
     )
 
     app_classic_workflow(input, output, session,

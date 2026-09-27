@@ -294,51 +294,12 @@ mod_Alpha_Lattice_server <- function(id){
       return(list(sites = sites))
     })
 
-    output$well_panel_layout <- shiny::renderUI({
-      shiny::req(ALPHA_reactive()$fieldBook)
-      df <- ALPHA_reactive()$fieldBook
-      locs <- length(levels(as.factor(df$LOCATION)))
-      repsAlpha <- length(levels(as.factor(df$REP)))
-      if ((repsAlpha >= 4 & repsAlpha %% 2 == 0) | (repsAlpha >= 4 & sqrt(repsAlpha) %% 1 == 0)) {
-        stacked <- c("Vertical Stack Panel" = "vertical", "Horizontal Stack Panel" = "horizontal",  
-                       "Grid Panel" = "grid_panel")
-      } else {
-        stacked <- c("Vertical Stack Panel" = "vertical", "Horizontal Stack Panel" = "horizontal")
-      }
-      obj <- ALPHA_reactive()
-      layoutOptions <- validate_design(layout_choices(x = obj, stacked = "vertical"))
-      shiny::wellPanel(
-        shiny::fluidPage(
-          shiny::column(3,
-                 shiny::radioButtons(ns("typlotALPHA"), "Type of Plot:",
-                              c("Entries/Treatments" = 1,
-                                "Plots" = 2,
-                                "Heatmap" = 3), selected = 1)
-          ),
-          shiny::column(3,
-                 shiny::selectInput(inputId = ns("stackedAlpha"),
-                             label = "Reps layout:", 
-                             choices = stacked)
-          ),
-          shiny::column(2,
-                 shiny::selectInput(inputId = ns("layoutO"),
-                             label = "Layout option:",
-                             choices = layoutOptions, 
-                             selected = 1)
-          ),
-          shiny::column(2,
-                 shiny::selectInput(inputId = ns("locLayout"),
-                             label = 'Location:', 
-                             choices = as.numeric(upDateSites()$sites))
-          )
-        )
-      )
-    })
     
-    reactive_layoutAlpha <- app_layout_selection(input, session,
+    reactive_layoutAlpha <- app_classic_layout(input, output, session,
       design = function() ALPHA_reactive(),
       planter = function() alpha_inputs()$planter,
-      ids = c(layout = "layoutO", stacked = "stackedAlpha", location = "locLayout")
+      spec = classic_workflow_spec("Alpha_Lattice"),
+      locations = function() as.numeric(upDateSites()$sites)
     )
 
     app_classic_workflow(input, output, session,

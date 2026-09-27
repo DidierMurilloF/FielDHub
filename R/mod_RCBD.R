@@ -357,46 +357,11 @@ mod_RCBD_server <- function(id) {
       shiny::helpText(description)
     })
 
-    output$well_panel_layout_RCBD <- shiny::renderUI({
-      shiny::req(RCBD_reactive()$fieldBook)
-      obj_rcbd <- RCBD_reactive()
-      layoutOptions_rcbd <- validate_design(layout_choices(x = obj_rcbd, stacked = "vertical"))
-      df <- RCBD_reactive()$fieldBook
-      stacked_rcbd <- c("Vertical Stack Panel" = "vertical", 
-                          "Horizontal Stack Panel" = "horizontal")
-      sites <- length(levels(as.factor(df$LOCATION)))
-      shiny::wellPanel(
-        shiny::column(3,
-               shiny::radioButtons(ns("typlotRCBD"), "Type of Plot:",
-                            c("Entries/Treatments" = 1,
-                              "Plots" = 2,
-                              "Heatmap" = 3))
-        ),
-        shiny::fluidRow(
-          shiny::column(3,
-                 shiny::selectInput(inputId = ns("stackedRCBD"),
-                             label = "Reps layout:", 
-                             choices = stacked_rcbd),
-          ),
-          shiny::column(2,
-                 shiny::selectInput(inputId = ns("layoutO_rcbd"),
-                             label = "Layout option:", 
-                             choices = layoutOptions_rcbd, 
-                             selected = 1)
-          ),
-          shiny::column(2,
-                 shiny::selectInput(inputId = ns("locLayout_rcbd"),
-                             label = "Location:", 
-                             choices = 1:sites)
-          )
-        )
-      )
-    })
     
-    reactive_layoutRCBD <- app_layout_selection(input, session,
+    reactive_layoutRCBD <- app_classic_layout(input, output, session,
       design = function() RCBD_reactive(),
       planter = function() rcbd_inputs()$planter,
-      ids = c(layout = "layoutO_rcbd", stacked = "stackedRCBD", location = "locLayout_rcbd")
+      spec = classic_workflow_spec("RCBD")
     )
 
     app_classic_workflow(input, output, session,

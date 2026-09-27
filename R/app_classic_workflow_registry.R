@@ -4,13 +4,20 @@
 #' This is an internal application registry, not a public extension interface.
 #' @noRd
 fieldhub_classic_workflows <- function() {
-  entry <- function(ids, simulation_ids, export_prefixes, table_columns,
+  layout_entry <- function(output, ids, widths = c(2, 3, 3, 3), container = "split",
+                            grid = FALSE, select_layout = FALSE, select_location = FALSE,
+                            current_planter = FALSE) {
+    list(output = output, ids = ids, widths = widths, container = container,
+         grid = grid, select_layout = select_layout, select_location = select_location,
+         current_planter = current_planter)
+  }
+  entry <- function(ids, simulation_ids, export_prefixes, table_columns, layout,
                      label_column, label_title = "Treatment", order_by_id = FALSE,
                      include_site = TRUE, include_checks = FALSE,
                      book_component = "allSitesFieldbook", table_extensions = FALSE,
                      table_height = 500, table_renderer = "renderDataTable",
                      export_label = NULL) {
-    list(ids = ids, simulation_ids = simulation_ids, book_component = book_component,
+    list(ids = ids, simulation_ids = simulation_ids, layout = layout, book_component = book_component,
          order_by_id = order_by_id,
          heatmap = list(label_column = label_column, label_title = label_title,
                         include_site = include_site, include_checks = include_checks),
@@ -20,6 +27,8 @@ fieldhub_classic_workflows <- function() {
   }
   list(
     CRD = entry(
+      layout = layout_entry("well_panel_layout_CRD", c(layout = "layoutO_crd"),
+        widths = c(3, 3), container = "row", current_planter = TRUE),
       ids = c(plot_type = "typlotCRD", simulate = "Simulate.crd", plot = "layout_random", table = "CRD_fieldbook",
         field_book_download = "downloadData.crd", layout_download = "downloadCsv.crd"),
       simulation_ids = c(trait = "trailsCRD", other = "OtherCRD", minimum = "min.crd", maximum = "max.crd",
@@ -34,6 +43,9 @@ fieldhub_classic_workflows <- function() {
       include_site = FALSE
     ),
     RCBD = entry(
+      layout = layout_entry("well_panel_layout_RCBD",
+        c(layout = "layoutO_rcbd", stacked = "stackedRCBD", location = "locLayout_rcbd"),
+        widths = c(3, 3, 2, 2), select_layout = TRUE),
       ids = c(plot_type = "typlotRCBD", simulate = "Simulate.rcbd", plot = "layouts", table = "RCBD_fieldbook",
         field_book_download = "downloadData.rcbd", layout_download = "downloadCsv.rcbd"),
       simulation_ids = c(trait = "trailsRCBD", other = "OtherRCBD", minimum = "min.rcbd", maximum = "max.rcbd",
@@ -46,6 +58,8 @@ fieldhub_classic_workflows <- function() {
       include_checks = TRUE
     ),
     LSD = entry(
+      layout = layout_entry("well_panel_layout_LSD", c(layout = "layoutO_lsd", stacked = "stackedLSD"),
+        widths = c(3, 3, 3)),
       ids = c(plot_type = "typlotLSD", simulate = "Simulate.lsd", plot = "layout_lsd", table = "LSD_fieldbook",
         field_book_download = "downloadData.lsd", layout_download = "downloadCsv.lsd"),
       simulation_ids = c(trait = "trailsLSD", other = "OtherLSD", minimum = "min.lsd", maximum = "max.lsd",
@@ -56,6 +70,8 @@ fieldhub_classic_workflows <- function() {
       label_column = "TREATMENT"
     ),
     FD = entry(
+      layout = layout_entry("well_panel_layout_FD",
+        c(layout = "layoutO_fd", stacked = "stackedFD", location = "locLayout_fd"), select_location = TRUE),
       ids = c(plot_type = "typlotfd", simulate = "Simulate.fd", plot = "layouts", table = "FD.Output",
         field_book_download = "downloadData.fd", layout_download = "downloadCsv.fd"),
       simulation_ids = c(trait = "trailsfd", other = "Otherfd", minimum = "min.fd", maximum = "max.fd",
@@ -66,6 +82,8 @@ fieldhub_classic_workflows <- function() {
       label_column = "TRT_COMB"
     ),
     SPD = entry(
+      layout = layout_entry("well_panel_layout_SPD",
+        c(layout = "layoutO_spd", stacked = "stackedSPD", location = "locLayout_spd"), widths = c(2, 3, 2, 2)),
       ids = c(plot_type = "typlotspd", simulate = "Simulate.spd", plot = "layouts", table = "SPD.output",
         field_book_download = "downloadData.spd", layout_download = "downloadCsv.spd"),
       simulation_ids = c(trait = "trailsspd", other = "Otherspd", minimum = "min.spd", maximum = "max.spd",
@@ -77,6 +95,8 @@ fieldhub_classic_workflows <- function() {
       label_column = "TRT_COMB"
     ),
     SSPD = entry(
+      layout = layout_entry("well_panel_layout_SSPD",
+        c(layout = "layoutO_sspd", stacked = "stackedSSPD", location = "locLayout_sspd")),
       ids = c(plot_type = "typlotsspd", simulate = "Simulate.sspd", plot = "layouts", table = "SSPD.output",
         field_book_download = "downloadData.sspd", layout_download = "downloadCsv.sspd"),
       simulation_ids = c(trait = "TrialsRowCol", other = "Otherspd", minimum = "min.sspd", maximum = "max.sspd",
@@ -89,6 +109,8 @@ fieldhub_classic_workflows <- function() {
       label_title = "TRT_COMB"
     ),
     STRIPD = entry(
+      layout = layout_entry("well_panel_layout_STRIP",
+        c(layout = "layoutO_strip", stacked = "stackedSTRIP", location = "locLayout_strip"), container = "row"),
       ids = c(plot_type = "typlotstrip", simulate = "Simulate.strip", plot = "layout.strip",
         table = "STRIP.output", field_book_download = "downloadData.strip", layout_download = "downloadCsv.strip"
         ),
@@ -99,6 +121,8 @@ fieldhub_classic_workflows <- function() {
       label_column = "TRT_COMB"
     ),
     IBD = entry(
+      layout = layout_entry("well_panel_layout_IBD",
+        c(layout = "layoutO_ibd", stacked = "stackedibd", location = "locLayout_ibd")),
       ids = c(plot_type = "typlotibd", simulate = "Simulate.ibd", plot = "layouts", table = "IBD.output",
         field_book_download = "downloadData.ibd", layout_download = "downloadCsv.ibd"),
       simulation_ids = c(trait = "trailsIBD", other = "OtherIBD", minimum = "min.ibd", maximum = "max.ibd",
@@ -110,6 +134,8 @@ fieldhub_classic_workflows <- function() {
       label_title = "Entry"
     ),
     RowCol = entry(
+      layout = layout_entry("well_panel_layout_ROWCOL",
+        c(layout = "layoutO_rcd", stacked = "stackedRowCol", location = "locLayout_rcd")),
       ids = c(plot_type = "typlotrcd", simulate = "Simulate.RowCol", plot = "layouts", table = "rowcolD",
         field_book_download = "downloadData.rowcolD", layout_download = "downloadCsv.rcd"
         ),
@@ -122,6 +148,9 @@ fieldhub_classic_workflows <- function() {
       label_title = "Entry"
     ),
     Alpha_Lattice = entry(
+      layout = layout_entry("well_panel_layout",
+        c(layout = "layoutO", stacked = "stackedAlpha", location = "locLayout"), widths = c(3, 3, 2, 2),
+        container = "page", grid = TRUE, select_layout = TRUE),
       ids = c(plot_type = "typlotALPHA", simulate = "Simulate.alpha", plot = "random_layout",
         table = "ALPHA_fieldbook", field_book_download = "downloadData.alpha", layout_download = "downloadCsv.alpha"
         ),
@@ -133,6 +162,9 @@ fieldhub_classic_workflows <- function() {
       label_title = "Entry"
     ),
     Square_Lattice = entry(
+      layout = layout_entry("well_panel_layout_sq",
+        c(layout = "layoutO_sq", stacked = "stacked_sq", location = "locLayout_sq"),
+        widths = c(3, 3, 2, 2), grid = TRUE, select_layout = TRUE),
       ids = c(plot_type = "typlotSQ", simulate = "Simulate.square", plot = "random_layout", table = "square_fieldbook",
         field_book_download = "downloadData.square", layout_download = "downloadCsv.square"
         ),
@@ -145,6 +177,9 @@ fieldhub_classic_workflows <- function() {
       label_title = "Entry"
     ),
     Rectangular_Lattice = entry(
+      layout = layout_entry("well_panel_layout_rt",
+        c(layout = "layoutO_rt", stacked = "stackedRT", location = "locLayout_rt"),
+        widths = c(3, 3, 2, 2), grid = TRUE, select_layout = TRUE),
       ids = c(plot_type = "typlotRT", simulate = "Simulate.rectangular", plot = "random_layout",
         table = "rectangular_fieldbook", field_book_download = "downloadData.rectangular",
         layout_download = "downloadCsv.rectangular"),

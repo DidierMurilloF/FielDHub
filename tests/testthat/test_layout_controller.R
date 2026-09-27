@@ -30,19 +30,19 @@ test_that("checked views retain complete layout field books and reconstruction s
 test_that("classic modules delegate layout selection and stop swallowing plot errors", {
   find_binding <- function(code) {
     if (missing(code) || (!is.call(code) && !is.pairlist(code))) return(list())
-    if (is.call(code) && identical(code[[1]], as.name("app_layout_selection"))) return(list(code))
+    if (is.call(code) && identical(code[[1]], as.name("app_classic_layout"))) return(list(code))
     unlist(lapply(as.list(code), find_binding), recursive = FALSE)
   }
   modules <- c("CRD", "RCBD", "LSD", "FD", "SPD", "SSPD", "STRIPD", "IBD",
                "RowCol", "Alpha_Lattice", "Square_Lattice", "Rectangular_Lattice")
   for (module in modules) {
     code <- body(get(paste0("mod_", module, "_server"), asNamespace("FielDHub")))
-    expect_identical(sum(all.names(code) == "app_layout_selection"), 1L)
+    expect_identical(sum(all.names(code) == "app_classic_layout"), 1L)
     expect_false("plot_layout" %in% all.names(code))
     expect_false("reset_selection" %in% all.names(code))
     binding <- find_binding(code)
     expect_length(binding, 1L)
-    ids <- eval(binding[[1L]][["ids"]])
+    ids <- eval(binding[[1L]][["spec"]])$layout$ids
     expect_identical(anyDuplicated(ids), 0L)
     expected <- c("layout", if (module != "CRD") "stacked",
                   if (!module %in% c("CRD", "LSD")) "location")

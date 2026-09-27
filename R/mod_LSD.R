@@ -266,40 +266,11 @@ mod_LSD_server <- function(id){
     }) |> 
       shiny::bindEvent(input$RUN.lsd)
 
-    output$well_panel_layout_LSD <- shiny::renderUI({
-      shiny::req(latinsquare_reactive()$fieldBook)
-      shiny::req(latinsquare_reactive())
-      obj_lsd <- latinsquare_reactive()
-      layoutOptions_lsd <- validate_design(layout_choices(x = obj_lsd, stacked = "vertical"))
-      df <- latinsquare_reactive()$fieldBook
-      stacked_lsd <- c("Vertical Stack Panel" = "vertical", 
-                          "Horizontal Stack Panel" = "horizontal")
-      shiny::wellPanel(
-        shiny::column(3,
-               shiny::radioButtons(ns("typlotLSD"), "Type of Plot:",
-                            c("Entries/Treatments" = 1,
-                              "Plots" = 2,
-                              "Heatmap" = 3))
-        ),
-        shiny::fluidRow(
-          shiny::column(3,
-                 shiny::selectInput(inputId = ns("stackedLSD"),
-                             label = "Reps layout:",
-                             choices = stacked_lsd),
-          ),
-          shiny::column(3,
-                 shiny::selectInput(inputId = ns("layoutO_lsd"),
-                             label = "Layout option:", 
-                             choices = layoutOptions_lsd)
-          )
-        )
-      )
-    })
     
-    reactive_layoutLSD <- app_layout_selection(input, session,
+    reactive_layoutLSD <- app_classic_layout(input, output, session,
       design = function() latinsquare_reactive(),
       planter = function() lsd_inputs()$planter,
-      ids = c(layout = "layoutO_lsd", stacked = "stackedLSD")
+      spec = classic_workflow_spec("LSD")
     )
     
     app_classic_workflow(input, output, session,

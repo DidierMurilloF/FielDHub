@@ -302,44 +302,12 @@ mod_STRIPD_server <- function(id) {
     }) |> 
       shiny::bindEvent(input$RUN.strip)
     
-    output$well_panel_layout_STRIP <- shiny::renderUI({
-      shiny::req(strip_reactive()$fieldBook)
-      obj_strip <- strip_reactive()
-      layoutOptions_strip <- validate_design(layout_choices(x = obj_strip, stacked = "vertical"))
-      stacked_strips <- c("Vertical Stack Panel" = "vertical", 
-                            "Horizontal Stack Panel" = "horizontal")
-      sites <- as.numeric(input$l.strip)
-      shiny::wellPanel(
-        shiny::fluidRow(
-          shiny::column(2,
-                 shiny::radioButtons(ns("typlotstrip"), "Type of Plot:",
-                              c("Entries/Treatments" = 1,
-                                "Plots" = 2,
-                                "Heatmap" = 3))
-          ),
-          shiny::column(3,
-                 shiny::selectInput(inputId = ns("stackedSTRIP"),
-                             label = "Reps layout:", 
-                             choices = stacked_strips),
-          ),
-          shiny::column(3,
-                 shiny::selectInput(inputId = ns("layoutO_strip"),
-                             label = "Layout option:", 
-                             choices = layoutOptions_strip)
-          ),
-          shiny::column(3,
-                 shiny::selectInput(inputId = ns("locLayout_strip"),
-                             label = "Location:", 
-                             choices = as.numeric(upDateSites()$sites))
-          )
-        )
-      )
-    })
     
-    reactive_layoutSTRIP <- app_layout_selection(input, session,
+    reactive_layoutSTRIP <- app_classic_layout(input, output, session,
       design = function() strip_reactive(),
       planter = function() strip_inputs()$planter,
-      ids = c(layout = "layoutO_strip", stacked = "stackedSTRIP", location = "locLayout_strip")
+      spec = classic_workflow_spec("STRIPD"),
+      locations = function() as.numeric(upDateSites()$sites)
     )
     
     app_classic_workflow(input, output, session,

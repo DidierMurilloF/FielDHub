@@ -333,44 +333,12 @@ mod_RowCol_server <- function(id){
     }) |>
       shiny::bindEvent(input$RUN.rcd)
     
-    output$well_panel_layout_ROWCOL <- shiny::renderUI({
-      shiny::req(RowCol_reactive()$fieldBook)
-      obj_rcd <- RowCol_reactive()
-      layoutOptions_rcd <- validate_design(layout_choices(x = obj_rcd))
-      stacked <- c("Vertical Stack Panel" = "vertical", 
-                     "Horizontal Stack Panel" = "horizontal")
-      shiny::wellPanel(
-        shiny::column(2,
-               shiny::radioButtons(ns("typlotrcd"), "Type of Plot:",
-                            c("Entries/Treatments" = 1,
-                              "Plots" = 2,
-                              "Heatmap" = 3))
-        ),
-        shiny::fluidRow(
- 
-          shiny::column(3,
-                 shiny::selectInput(inputId = ns("stackedRowCol"),
-                             label = "Reps layout:", 
-                             choices = stacked)
-          ),
-          shiny::column(3, #align="center",
-                 shiny::selectInput(inputId = ns("layoutO_rcd"),
-                             label = "Layout option:", 
-                             choices = layoutOptions_rcd)
-          ),
-          shiny::column(3, #align="center",
-                 shiny::selectInput(inputId = ns("locLayout_rcd"),
-                             label = "Location:", 
-                             choices = as.numeric(upDateSites()$sites))
-          )
-        )
-      )
-    })
     
-    reactive_layoutROWCOL <- app_layout_selection(input, session,
+    reactive_layoutROWCOL <- app_classic_layout(input, output, session,
       design = function() RowCol_reactive(),
       planter = function() rcd_inputs()$planter,
-      ids = c(layout = "layoutO_rcd", stacked = "stackedRowCol", location = "locLayout_rcd")
+      spec = classic_workflow_spec("RowCol"),
+      locations = function() as.numeric(upDateSites()$sites)
     )
     
     app_classic_workflow(input, output, session,

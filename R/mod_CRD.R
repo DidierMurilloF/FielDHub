@@ -223,32 +223,11 @@ mod_CRD_server <- function(id) {
     }) |> 
       shiny::bindEvent(input$RUN.crd)
     
-    output$well_panel_layout_CRD <- shiny::renderUI({
-      shiny::req(CRD_reactive())
-      obj_crd <- CRD_reactive()
-      planting_crd <- crd_inputs()$planter
-      layoutOptions_crd <- validate_design(layout_choices(x = obj_crd, planter = planting_crd))
-      shiny::wellPanel(
-        shiny::fluidRow(
-          shiny::column(3,
-                 shiny::radioButtons(ns("typlotCRD"), "Type of Plot:",
-                              c("Entries/Treatments" = 1,
-                                "Plots" = 2,
-                                "Heatmap" = 3))
-          ),
-          shiny::column(3,
-                 shiny::selectInput(inputId = ns("layoutO_crd"),
-                             label = "Layout option:", 
-                             choices = layoutOptions_crd)
-          )
-        )
-      )
-    })
     
-    reactive_layoutCRD <- app_layout_selection(input, session,
+    reactive_layoutCRD <- app_classic_layout(input, output, session,
       design = function() CRD_reactive(),
       planter = function() crd_inputs()$planter,
-      ids = c(layout = "layoutO_crd")
+      spec = classic_workflow_spec("CRD")
     )
     
     entryListFormat_CRD <- data.frame(TREATMENT = c(paste("TRT_", LETTERS[1:9], sep = "")))
