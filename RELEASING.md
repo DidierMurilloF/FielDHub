@@ -13,6 +13,12 @@ maintainers. A clean local check is not evidence that remote CI has passed.
 3. Give a second reviewer the scientific changes, old/new comparisons,
    deliberate snapshot changes, and any remaining limitations. Agree on a
    release owner and a backup reviewer; do not infer approval from green CI.
+4. Complete a licensing review with the appropriate copyright holders. Earlier
+   releases contained efficiency helpers marked as sourced from the GPL-licensed
+   `blocksdesign` package while FielDHub declared MIT. Replacing those helpers
+   does not itself resolve obligations for historical distributions. Record the
+   maintainer's resolution before publishing; do not infer that an unchanged
+   package license is sufficient.
 
 ## Required evidence
 

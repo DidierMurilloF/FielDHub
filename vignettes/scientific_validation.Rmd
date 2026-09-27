@@ -85,6 +85,14 @@ these functions describes the first location. The independent row-column
 oracle instead uses an SVD projection to handle rank-deficient and crossed
 row/column effects; see `test_row_column.R`.
 
+The production block-efficiency calculation uses the singular values of
+normalized, mean-centered treatment/block incidence, distinct from the oracle's
+information-matrix eigendecomposition. Connectivity is checked directly in the
+incidence graph. A disconnected comparison has zero overall efficiency, even
+if comparisons within one connected component are estimable. A connected model
+whose numerical information cannot be resolved raises a structured numerical
+error instead of reporting a misleading positive efficiency.
+
 The underlying optimization package documents its
 [block models and efficiency reports](https://search.r-project.org/CRAN/refmans/blocksdesign/html/blocks.html).
 These checks validate achieved designs, not a claim of global optimality or
@@ -102,6 +110,7 @@ biological experiment.
 
 | Operation | Bound and behavior at the limit |
 |---|---|
+| Block-model connectivity | At most one graph expansion per treatment; stops when all treatments are reached or no new treatment is reachable |
 | Latin-square placement | At most 100,000 placement iterations per square; a `fieldhub_search_error` records the square and budget on exhaustion |
 | Repeated-check placement in RCBD | At most 100 attempts per block; warns and falls back to unrestricted placement if stratification cannot be completed |
 | Pair-swap optimization | A finite geometry-dependent threshold range, at most `stop_iter` sweeps per threshold, and bounded sampled candidates per swap; diagnostics distinguish exhaustion, completion, and an empty range |

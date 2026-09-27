@@ -7,6 +7,13 @@
 
 ### Breaking changes:
 
+- Disconnected block models now report zero A- and D-efficiency instead of
+  `NaN` or a spuriously positive A-efficiency. FielDHub computes these metrics
+  from normalized incidence counts with an explicit connectivity check.
+  Diagnostics and optimizer decisions can change for designs that encounter
+  disconnected comparison models; connected-model comparisons retain the
+  established seven-digit report precision.
+
 - Boolean design controls now consistently require one nonmissing `TRUE` or
   `FALSE`. Replace numeric (`0`/`1`) or character switches with logical values.
   Invalid controls are rejected before randomization with a structured
