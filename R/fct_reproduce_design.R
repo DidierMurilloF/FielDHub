@@ -43,7 +43,36 @@ reproduce_design <- function(x) {
       data = list(parent = e)
     )
   )
-  invisible(do.call(engine, meta$parameters, quote = TRUE))
+  parameters <- translate_legacy_parameters(x$metadata$design, meta$parameters)
+  invisible(do.call(engine, parameters, quote = TRUE))
+}
+
+#' Rename a recorded result's legacy parameter names to their current ones
+#'
+#' @description A result saved by an older FielDHub version can have its
+#' parameters recorded under an argument name that has since gained a
+#' vocabulary alias (AD-08), such as `optimized_arrangement()`'s former
+#' `amountChecks` (now `rep_checks`). Replaying it by calling the current
+#' engine with that legacy name would still work (the alias itself still
+#' accepts it), but would raise a `fieldhub_deprecated_warning` about an
+#' argument the replaying caller never typed. Rename it before replay so
+#' reproduce_design() is silent for both old- and new-shape recordings.
+#'
+#' @param design Recorded `metadata$design` identifier.
+#' @param parameters Recorded `metadata$parameters` list.
+#' @return `parameters`, with any known legacy names renamed to current ones.
+#' @noRd
+translate_legacy_parameters <- function(design, parameters) {
+  legacy_names <- list(optimized_arrangement = c(amountChecks = "rep_checks"))
+  renames <- legacy_names[[design]]
+  if (is.null(renames)) return(parameters)
+  for (old in names(renames)) {
+    new <- renames[[old]]
+    if (old %in% names(parameters) && !(new %in% names(parameters))) {
+      names(parameters)[names(parameters) == old] <- new
+    }
+  }
+  parameters
 }
 
 #' Resolve a recorded engine without evaluating arbitrary function names

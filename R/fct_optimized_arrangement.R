@@ -54,8 +54,8 @@
 #' optim_unrep1 <- optimized_arrangement(
 #'   nrows = 14, 
 #'   ncols = 10, 
-#'   lines = 120, 
-#'   amountChecks = 20, 
+#'   lines = 120,
+#'   rep_checks = 20,
 #'   checks = 1:4,
 #'   planter = "cartesian", 
 #'   plotNumber = 101,
@@ -164,11 +164,11 @@ optimized_arrangement <- function(
         }
     }
     if (is.null(data)) {
-        validate_count_vector(amountChecks, "amountChecks")
+        validate_count_vector(amountChecks, "rep_checks")
         if (length(amountChecks) != checks &&
             !(length(amountChecks) == 1L && amountChecks > checks)) {
             fieldhub_abort("Supply one replication count per check, or a total greater than the number of checks.",
-                           data = list(argument = "amountChecks", checks = checks))
+                           data = list(argument = "rep_checks", checks = checks))
         }
         validate_design_size(sum(as.double(amountChecks)) + as.double(lines))
         validate_design_size(max(as.double(checksEntries)) + as.double(lines))

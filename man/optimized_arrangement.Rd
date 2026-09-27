@@ -87,8 +87,8 @@ settings, rebuild a result \code{x} with
 optim_unrep1 <- optimized_arrangement(
   nrows = 14, 
   ncols = 10, 
-  lines = 120, 
-  amountChecks = 20, 
+  lines = 120,
+  rep_checks = 20,
   checks = 1:4,
   planter = "cartesian", 
   plotNumber = 101,
