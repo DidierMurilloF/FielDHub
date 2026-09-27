@@ -7,6 +7,13 @@
 
 ### Breaking changes:
 
+- `split_families()` now accepts `seed`, records it in `infoDesign` and
+  `metadata`, and restores the caller's random-number state. When omitted,
+  it selects an automatic integer seed using the shared design contract;
+  default allocations therefore change. To reproduce a previous
+  `set.seed(s); split_families(l, data)` allocation, pass `seed = s`
+  explicitly. Existing positional `l` and `data` arguments remain supported.
+
 - `incomplete_blocks()`, the three lattice functions, `row_column()` and
   `strip_plot()` now accept `reps` for full replication. The former `r`
   argument (or `b` in `strip_plot()`) still works with a

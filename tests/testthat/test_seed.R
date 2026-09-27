@@ -5,7 +5,7 @@ test_that("creating a design leaves the caller's random numbers unchanged", {
   # restored the random-number stream, so the numbers drawn after creating a
   # design depended only on its seed (a loop calling RCBD(seed = 1) and then
   # rnorm() got the same draws on every iteration).
-  seeded <- setdiff(names(catalogue), c("split_families", "swap_pairs"))
+  seeded <- setdiff(names(catalogue), "swap_pairs")
   for (name in seeded) {
     set.seed(42)
     suppressWarnings(suppressMessages(utils::capture.output(catalogue[[name]]$build())))

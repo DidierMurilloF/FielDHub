@@ -7,6 +7,15 @@
 #' @param l Number of locations.
 #' @param data Data frame with the entry (ENTRY) and the labels of each treatment (NAME)
 #' and number of individuals per family group (FAMILY).
+#' @param seed (optional) A single real number specifying the random seed.
+#' When omitted, an integer seed is selected automatically and recorded in
+#' \code{infoDesign$seed} and \code{metadata$seed}. The caller's random-number
+#' state is restored after the call.
+#'
+#' @details To reproduce an allocation previously made with
+#' \code{set.seed(s); split_families(l, data)}, use
+#' \code{split_families(l, data, seed = s)}. Omitting \code{seed} now selects
+#' and records an automatic seed instead of consuming the caller's stream.
 #' 
 #' @author Didier Murillo [aut],
 #'         Salvador Gezan [aut],
@@ -37,14 +46,16 @@
 #' gen.list <- data.frame(list(ENTRY = ENTRY, NAME = NAME, FAMILY = FAMILY))
 #' head(gen.list)
 #' # Now we are going to use the split_families() function.
-#' split_population <- split_families(l = 8, data = gen.list)
+#' split_population <- split_families(l = 8, data = gen.list, seed = 77)
 #' print(split_population)
 #' summary(split_population)
 #' head(split_population$data_locations,12)
 #'
 #' @export
-split_families <- function(l = NULL, data = NULL) {
+split_families <- function(l = NULL, data = NULL, seed = NULL) {
   validate_locations(l)
+  seed <- resolve_seed(seed)
+  local_design_seed(seed)
   if (is.null(l) || !is.numeric(l) || length(l) != 1 || l < 1 || l %% 1 != 0) {
     fieldhub_abort("\n 'split_families()' requires the number of locations 'l' as a whole number of 1 or more.")
   }
@@ -113,7 +124,7 @@ split_families <- function(l = NULL, data = NULL) {
   data_locations <- dplyr::bind_rows(Glist_locations)
   data_locations$LOCATION <- rep(paste("Location", 1:l), rowseach)
   output <- list(rowsEachlist = rowsEachlist, data_locations = data_locations,
-                 infoDesign = list(id_design = 17))
+                 infoDesign = list(id_design = 17, seed = seed))
   output <- new_fieldhub_design(output, "split_families")
   return(invisible(output))
 }

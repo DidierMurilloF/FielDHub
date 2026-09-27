@@ -4,13 +4,18 @@
 \alias{split_families}
 \title{Split a population of genotypes randomly into several locations.}
 \usage{
-split_families(l = NULL, data = NULL)
+split_families(l = NULL, data = NULL, seed = NULL)
 }
 \arguments{
 \item{l}{Number of locations.}
 
 \item{data}{Data frame with the entry (ENTRY) and the labels of each treatment (NAME)
 and number of individuals per family group (FAMILY).}
+
+\item{seed}{(optional) A single real number specifying the random seed.
+When omitted, an integer seed is selected automatically and recorded in
+\code{infoDesign$seed} and \code{metadata$seed}. The caller's random-number
+state is restored after the call.}
 }
 \value{
 A list with two elements.
@@ -23,6 +28,12 @@ A list with two elements.
 Split a population of genotypes randomly into several locations, with the
 aim of having approximatelly the same number of replicates of each genotype, line or
 treatment per location.
+}
+\details{
+To reproduce an allocation previously made with
+\code{set.seed(s); split_families(l, data)}, use
+\code{split_families(l, data, seed = s)}. Omitting \code{seed} now selects
+and records an automatic seed instead of consuming the caller's stream.
 }
 \examples{
 # Example 1: Split a population of 3000 and 200 families into 8 locations. 
@@ -37,7 +48,7 @@ for (i in x) { FAMILY[i] <- sample(1:families, size = 1, replace = TRUE) }
 gen.list <- data.frame(list(ENTRY = ENTRY, NAME = NAME, FAMILY = FAMILY))
 head(gen.list)
 # Now we are going to use the split_families() function.
-split_population <- split_families(l = 8, data = gen.list)
+split_population <- split_families(l = 8, data = gen.list, seed = 77)
 print(split_population)
 summary(split_population)
 head(split_population$data_locations,12)

@@ -156,8 +156,7 @@ catalogue <- list(
   split_families = list(fun = "split_families", family = "allocation", build = function() {
     gen_list <- data.frame(ENTRY = 1:60, NAME = paste0("SB-", 1:60),
                            FAMILY = rep(1:6, times = c(14, 12, 10, 10, 8, 6)))
-    set.seed(38)
-    split_families(l = 3, data = gen_list)
+    split_families(l = 3, data = gen_list, seed = 38)
   }),
   swap_pairs = list(fun = "swap_pairs", family = "allocation", build = function() {
     set.seed(39)
