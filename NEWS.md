@@ -127,6 +127,10 @@
 - Field layouts, plot numbering and filler placement now share one tested
   planting-path implementation internally. This refactor preserves the
   existing design output.
+- Field-book export now extracts each map along the planting path with
+  vectorized indexing instead of a cell-by-cell R loop. Row order, numeric
+  storage, character labels and filler handling are preserved.
+
 - The multi-location p-rep app now builds its final design through
   `multi_location_prep()`, the same public function used by R scripts, instead
   of recreating the workflow from internal helpers. Simulated responses are

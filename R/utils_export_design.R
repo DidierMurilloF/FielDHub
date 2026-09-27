@@ -58,22 +58,14 @@ export_design <- function(G, movement_planter = NULL, location = NULL, Year = NU
     my_output_cord[,2] <- planting[, "COLUMN"]
     return(my_output_cord)
   }
-  asExport <- function(H) {
-    # The cells of the map in planting order
-    cells <- numeric()
-    for (k in seq_len(nrow(path))) {
-      cells[k] <- H[path[k, "row"], path[k, "col"]]
-    }
-    return(cells)
-  }
   
   my_final_export <- asExport_cordenates()
   for (m in 1:4){
-    my_final_export[, m + 2] <- asExport(G[[m]])
+    my_final_export[, m + 2] <- values_along_path(G[[m]], path)
   }
   
   if(reps == TRUE) {
-    my_final_export[, 10] <- asExport(G[[5]])
+    my_final_export[, 10] <- values_along_path(G[[5]], path)
     colnames(my_final_export)[10] <- "BLOCK"
   }
   

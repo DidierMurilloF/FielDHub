@@ -69,6 +69,8 @@ knitr::opts_chunk$set(
 
 * Field layouts, plot numbering and filler placement now share one tested planting-path implementation internally. This refactor preserves the existing design output.
 
+* Field-book export now extracts each map along the planting path with vectorized indexing instead of a cell-by-cell R loop. Row order, numeric storage, character labels and filler handling are preserved.
+
 * The multi-location p-rep app now builds its final design through `multi_location_prep()`, the same public function used by R scripts, instead of recreating the workflow from internal helpers. Simulated responses are appended by column name so result metadata cannot be overwritten when the field-book schema grows.
 
 * Pull requests now report core (`fct_*`, `utils_*` and `render_*`) test coverage against their base commit and fail if it decreases. Dedicated renderers remain covered when code moves out of the layout helpers. A separate gate applies the correctness-oriented `lintr` checks only to changed R lines, so legacy style findings do not block unrelated work.

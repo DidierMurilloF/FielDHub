@@ -60,6 +60,20 @@ field_path <- function(nrows, ncols, planter = "serpentine") {
   cbind(row = as.integer(nrows) + 1L - path[, "ROW"], col = path[, "COLUMN"])
 }
 
+#' Extract map values in an existing planting path's order
+#'
+#' Keep the export convention of double storage for numeric/logical maps,
+#' character storage for labels, and no names on the returned vector.
+#' @param map A field-map matrix.
+#' @param path A two-column matrix of row and column indices.
+#' @noRd
+values_along_path <- function(map, path) {
+  if (nrow(path) == 0L) return(numeric())
+  values <- numeric(nrow(path))
+  values[] <- map[path]
+  values
+}
+
 #' Fill the empty cells of a field map in planting order
 #'
 #' @param map A matrix.
