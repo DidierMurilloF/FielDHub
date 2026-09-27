@@ -85,6 +85,8 @@ knitr::opts_chunk$set(
 
 * RCBD check-count and replication parsing now lives in the tested core input-parsing layer rather than in the Shiny module.
 
+* Field-dimension searches for the single diagonal, multiple diagonal, sparse allocation and optimized arrangement modules now live in tested core helpers. Existing choices and their ordering are preserved, searches no longer consume the caller's random numbers, and an empty search clears the choices and shows an explanation instead of failing inside a loop.
+
 * The shared `desplot` renderer and layout theme now live in a dedicated rendering file, and the augmented-RCBD source filename now correctly spells `RCBD`.
 
 * The generated namespace no longer imports the unused `dplyr::glimpse()`, `golem::activate_js()` and `stats::dist()` symbols.

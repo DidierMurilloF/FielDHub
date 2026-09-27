@@ -3,6 +3,24 @@
 rng_calls <- new.env(parent = emptyenv())
 rng_calls$depth <- 0
 
+#' Restore the caller's random-number state on exit
+#'
+#' @param frame The frame whose exit restores the state.
+#' @noRd
+local_rng_state <- function(frame = parent.frame()) {
+  global <- globalenv()
+  had_seed <- exists(".Random.seed", envir = global, inherits = FALSE)
+  old_seed <- if (had_seed) base::get(".Random.seed", envir = global, inherits = FALSE)
+  restore <- function() {
+    if (had_seed) {
+      assign(".Random.seed", old_seed, envir = global)
+    } else if (exists(".Random.seed", envir = global, inherits = FALSE)) {
+      rm(".Random.seed", envir = global)
+    }
+  }
+  do.call(base::on.exit, list(as.call(list(restore)), add = TRUE), envir = frame)
+}
+
 #' Seed used by a design function
 #'
 #' @param seed The seed given by the user: NULL or a single number.
@@ -37,21 +55,9 @@ resolve_seed <- function(seed, default = function() stats::runif(1, min = -50000
 #'
 #' @noRd
 local_design_seed <- function(seed, frame = parent.frame()) {
-  global <- globalenv()
-  outermost <- rng_calls$depth == 0
-  if (outermost) {
-    had_seed <- exists(".Random.seed", envir = global, inherits = FALSE)
-    old_seed <- if (had_seed) base::get(".Random.seed", envir = global, inherits = FALSE)
-  }
+  if (rng_calls$depth == 0) local_rng_state(frame)
   restore <- function() {
     rng_calls$depth <- rng_calls$depth - 1
-    if (outermost) {
-      if (had_seed) {
-        assign(".Random.seed", old_seed, envir = global)
-      } else if (exists(".Random.seed", envir = global, inherits = FALSE)) {
-        rm(".Random.seed", envir = global)
-      }
-    }
   }
   do.call(base::on.exit, list(as.call(list(restore)), add = TRUE), envir = frame)
   rng_calls$depth <- rng_calls$depth + 1

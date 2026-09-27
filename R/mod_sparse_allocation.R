@@ -574,58 +574,20 @@ mod_sparse_allocation_server <- function(id){
         req(sparse_setup())
         req(get_sparse_data())
         req(sparse_setup()$size_locations)
-        sparse_checks <- as.numeric(getChecks()$sparse_checks)
         lines_within_loc <- as.numeric(sparse_setup()$size_locations[1])
-        choices_list <- field_dimensions(lines_within_loc = lines_within_loc)
-        if (length(choices_list) == 0) {
-          shinyalert::shinyalert(
-            "Error!!",
-            "Number of entries is too small!",
-            type = "error"
-          )
-          return(NULL)
-        }
-        choices <- unlist(choices_list[!sapply(choices_list, is.null)])
-        Option_NCD <- TRUE
-        checksEntries <- as.vector(getChecks()$checksEntries)
-        new_choices <- list()
-        v <- 1
-        by_choices <- 1:length(choices)
-        for (dim_options in by_choices) {
-            planter_mov <- single_inputs()$planter_mov
-            dims <- unlist(strsplit(choices[[dim_options]], " x "))
-            n_rows <- as.numeric(dims[1])
-            n_cols  <- as.numeric(dims[2])
-            
-            dt_options <- available_percent(
-                n_rows = n_rows,
-                n_cols = n_cols,
-                checks = checksEntries,
-                Option_NCD = Option_NCD,
-                kindExpt = kindExpt_single,
-                planter_mov1 = planter_mov,
-                data = NULL,
-                dim_data = lines_within_loc + sparse_checks,
-                dim_data_1 = lines_within_loc,
-                Block_Fillers = NULL
-            )
-            if (!is.null(dt_options$dt)) {
-              new_choices[[v]] <- choices[[dim_options]]
-              v <- v + 1
-            }
-        }
-        dif <- vector(mode = "numeric", length = length(new_choices))
-        for (option in 1:length(new_choices)) {
-            dims <- unlist(strsplit(new_choices[[option]], " x "))
-            dif[option] <- abs(as.numeric(dims[1]) - as.numeric(dims[2]))
-        }
-        df_choices <- data.frame(choices = unlist(new_choices), diff_dim = dif)
-        df_choices <- df_choices[order(df_choices$diff_dim, decreasing = FALSE), ]
-        sort_choices <- as.vector(df_choices$choices)
+        sort_choices <- validate_design(diagonal_dimension_choices(
+            lines = lines_within_loc, checks = as.vector(getChecks()$checksEntries),
+            kindExpt = kindExpt_single, planter = single_inputs()$planter_mov
+        ))
 
         updateSelectInput(inputId = "sparse_dims",
                           choices = sort_choices,
-                          selected = sort_choices[1])
+                          selected = head(sort_choices, 1))
+        if (length(sort_choices) == 0L) {
+            shinyalert::shinyalert("No field dimensions available",
+                                  "No feasible field was found for these entries and checks.",
+                                  type = "error")
+        }
     })
     
     observeEvent(input$sparse_run, {

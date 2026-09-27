@@ -523,61 +523,23 @@ mod_diagonal_multiple_server <- function(id) {
             checks <- as.numeric(getChecks()$checks)
             total_entries <- as.numeric(get_data_multiple()$dim_data_entry)
             lines <- total_entries - checks
-            t1 <- floor(lines + lines * 0.10)
-            t2 <- ceiling(lines + lines * 0.20)
-            t <- t1:t2
             withProgress(message = 'Getting field dimensions ...', {
-                choices_list <- list()
-                i <- 1
-                for (n in t) {
-                    choices_list[[i]] <- factor_subsets(n, diagonal = TRUE)$labels
-                    i <- i + 1
-                }
-                choices <- unlist(choices_list[!sapply(choices_list, is.null)])
-                if (is.null(choices)) {
-                    choices <- "No options available"
-                } 
-                Option_NCD <- TRUE
-                checksEntries <- as.vector(getChecks()$checksEntries)
-                new_choices <- list()
-                v <- 1
-                by_choices <- 1:length(choices)
-                for (dim_options in by_choices) {
-                    planter_multiple <- multiple_inputs()$planter_mov
-                    dims <- unlist(strsplit(choices[[dim_options]], " x "))
-                    n_rows <- as.numeric(dims[1])
-                    n_cols  <- as.numeric(dims[2])
-                    dt_options <- available_percent(
-                        n_rows = n_rows,
-                        n_cols = n_cols,
-                        checks = checksEntries,
-                        Option_NCD = Option_NCD,
-                        kindExpt = kindExpt,
-                        stacked = multiple_inputs()$stacked,
-                        planter_mov1 = planter_multiple,
-                        data = get_data_multiple()$data_entry,
-                        dim_data = get_data_multiple()$dim_data_entry,
-                        dim_data_1 = get_data_multiple()$dim_data_1,
-                        Block_Fillers = blocks_length()
-                    )
-                    if (!is.null(dt_options$dt)) {
-                        new_choices[[v]] <- choices[[dim_options]]
-                        v <- v + 1
-                    }
-                }
-                dif <- vector(mode = "numeric", length = length(new_choices))
-                for (option in 1:length(new_choices)) {
-                    dims <- unlist(strsplit(new_choices[[option]], " x "))
-                    dif[option] <- abs(as.numeric(dims[1]) - as.numeric(dims[2]))
-                }
-                df_choices <- data.frame(choices = unlist(new_choices), diff_dim = dif)
-                df_choices <- df_choices[order(df_choices$diff_dim, decreasing = FALSE), ]
-                sort_choices <- as.vector(df_choices$choices)
+                sort_choices <- validate_design(diagonal_dimension_choices(
+                    lines = lines, checks = as.vector(getChecks()$checksEntries),
+                    kindExpt = kindExpt, stacked = multiple_inputs()$stacked,
+                    planter = multiple_inputs()$planter_mov,
+                    data = get_data_multiple()$data_entry
+                ))
             })
             
             updateSelectInput(inputId = "dimensions_multiple",
                                 choices = sort_choices,
-                                selected = sort_choices[1])
+                                selected = head(sort_choices, 1))
+            if (length(sort_choices) == 0L) {
+                shinyalert::shinyalert("No field dimensions available",
+                                      "No feasible field was found for these entries and checks.",
+                                      type = "error")
+            }
         })
         
         observeEvent(input$RUN_multiple, {

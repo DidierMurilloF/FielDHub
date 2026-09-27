@@ -283,26 +283,19 @@ mod_Optim_server <- function(id) {
         data_up <- gen.list
         total_plots <- sum(data_up$REPS)
       }
-      plot_factors <- prime_factors(total_plots)
-      if (length(plot_factors) == 2) {
-        if (plot_factors[1] < 4 & is_prime(plot_factors[2])) {
-          shinyalert::shinyalert(
-            "Error!!",
-            "There are no options available for field dimensions. Please try a different number of treatments or checks.",
-            type = "error"
-          )
-          return(NULL)
-        }
-      }
-      if (is_prime(total_plots)) {
+      dimension_choices <- validate_design(optimized_dimension_choices(total_plots))
+      if (length(dimension_choices) == 0L) {
+        updateSelectInput(inputId = "dimensions.s", choices = character(),
+                          selected = character())
         shinyalert::shinyalert(
-          "Error!!",
-          "The number of field plots results in a prime number. Please try a different number of treatments.",
+          "No field dimensions available",
+          "Please try a different number of treatments or checks.",
           type = "error"
         )
         return(NULL)
       }
-      return(list(data_up.spatial = data_up, total_plots = total_plots))
+      return(list(data_up.spatial = data_up, total_plots = total_plots,
+                  dimension_choices = dimension_choices))
     })
     
     list_inputs <- eventReactive(input$RUN.optim, {
@@ -321,35 +314,10 @@ mod_Optim_server <- function(id) {
     
     observeEvent(list_inputs(), {
       req(get_data_optim())
-      req(input$owndataOPTIM)
-      if (input$owndataOPTIM != 'Yes') {
-        req(input$amount.checks)
-        req(input$lines.s)
-        r.checks <- as.numeric(unlist(strsplit(input$amount.checks, ",")))
-        lines <- as.numeric(input$lines.s)
-        n <- sum(r.checks,lines)
-        choices <- factor_subsets(n)$labels
-      } else {
-        req(get_data_optim()$total_plots)
-        n <- get_data_optim()$total_plots
-        choices <- factor_subsets(n)$labels
-      }
-      if(is.null(choices)){
-        choices <- "No options available"
-      }
-      if (!is.null(choices)) {
-        dif <- vector(mode = "numeric", length = length(choices))
-        for (option in 1:length(choices)) {
-          dims <- unlist(strsplit(choices[[option]], " x "))
-          dif[option] <- abs(as.numeric(dims[1]) - as.numeric(dims[2]))
-        }
-        df_choices <- data.frame(choices = unlist(choices), diff_dim = dif)
-        df_choices <- df_choices[order(df_choices$diff_dim, decreasing = FALSE), ]
-        choices <- as.vector(df_choices$choices)
-      }
+      choices <- get_data_optim()$dimension_choices
       updateSelectInput(inputId = "dimensions.s", 
                         choices = choices, 
-                        selected = choices[1])
+                        selected = head(choices, 1))
     })
     
     field_dimensions_optim <- eventReactive(input$get_random_optim, {
