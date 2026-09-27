@@ -107,6 +107,8 @@ knitr::opts_chunk$set(
 
 ### Fix bugs:
 
+* Result construction and validation now report malformed object shapes and missing or empty design names as `fieldhub_internal_error` conditions instead of leaking base-R field-access or missing-logical errors. Valid result objects are unchanged.
+
 * Automatic seed selection now restores the caller's random-number state too. Previously, calls without an explicit seed consumed a draw before the design-level restoration began. For a given starting RNG state, the selected seed and design are unchanged; subsequent caller draws no longer depend on creating the design. Calls starting without `.Random.seed` leave it absent.
 
 * The RCBD block-size preview now uses the same 10,000-plot limit as design generation, with its counting and validation in a plain core helper. Oversized check replications give an explanation instead of failing during integer formatting; valid size descriptions and generated designs are unchanged.

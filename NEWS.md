@@ -201,6 +201,11 @@
 
 ### Fix bugs:
 
+- Result construction and validation now report malformed object shapes
+  and missing or empty design names as `fieldhub_internal_error` conditions
+  instead of leaking base-R field-access or missing-logical errors. Valid
+  result objects are unchanged.
+
 - Automatic seed selection now restores the caller's random-number state
   too. Previously, calls without an explicit seed consumed a draw before
   the design-level restoration began. For a given starting RNG state, the

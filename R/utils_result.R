@@ -21,6 +21,10 @@ fieldhub_schema_version <- 1L
 #'   \code{RNGkind()} used) and \code{package_version}.
 #' @noRd
 new_fieldhub_design <- function(x, design) {
+  if (!is.list(x) || !is.list(x$infoDesign)) {
+    fieldhub_abort("Internal error: the design result must be a list with infoDesign.",
+                   class = "fieldhub_internal_error", call. = FALSE)
+  }
   x$metadata <- list(
     design = design,
     schema_version = fieldhub_schema_version,
@@ -66,13 +70,18 @@ with_design_class <- function(x) {
 #' @return \code{x}, invisibly, or an error when its structure is not valid.
 #' @noRd
 validate_fieldhub_design <- function(x) {
+  if (!is.list(x)) {
+    fieldhub_abort("Internal error: the design result is not a FielDHub list.",
+                   class = "fieldhub_internal_error", call. = FALSE)
+  }
   problems <- character(0)
-  if (!is.list(x) || !inherits(x, "FielDHub")) problems <- c(problems, "is not a FielDHub list")
+  if (!inherits(x, "FielDHub")) problems <- c(problems, "is not a FielDHub list")
   if (!is.list(x$infoDesign) || is.null(x$infoDesign$id_design)) {
     problems <- c(problems, "has no infoDesign with id_design")
   }
   meta <- x$metadata
-  if (!is.list(meta) || !is.character(meta$design) || length(meta$design) != 1) {
+  if (!is.list(meta) || !is.character(meta$design) || length(meta$design) != 1L ||
+      is.na(meta$design) || !nzchar(trimws(meta$design))) {
     problems <- c(problems, "has no metadata naming the design")
   } else {
     if (!identical(class(x)[1], paste0("fieldhub_", meta$design))) {
