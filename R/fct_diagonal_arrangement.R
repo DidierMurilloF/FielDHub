@@ -150,13 +150,12 @@ diagonal_arrangement <- function(
     checksPercent = NULL,
     sameEntries = FALSE) {
     validate_locations(l)
+    validate_flag(multiLocationData, "multiLocationData")
+    validate_flag(sameEntries, "sameEntries")
     year <- resolve_year(year)
     if (!is.null(checksPercent) &&
         (!is.numeric(checksPercent) || length(checksPercent) != 1 || is.na(checksPercent))) {
         fieldhub_abort("'checksPercent' must be a single number.")
-    }
-    if (!is.logical(sameEntries) || length(sameEntries) != 1 || is.na(sameEntries)) {
-        fieldhub_abort("'sameEntries' must be TRUE or FALSE.")
     }
     if (sameEntries) {
         if (kindExpt != "DBUDC") {

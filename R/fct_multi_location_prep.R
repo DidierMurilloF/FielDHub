@@ -112,6 +112,8 @@ multi_location_prep <- function(
     max_fillers = NULL,
     year = NULL) {
     validate_locations(l)
+    validate_flag(spread_reps, "spread_reps")
+    validate_flag(allow_fillers, "allow_fillers")
     year <- resolve_year(year)
     # set a random seed if it is missing
     if (missing(seed)) seed <- NULL
@@ -136,10 +138,6 @@ multi_location_prep <- function(
     if (missing(planter) || is.null(planter)) planter <- "serpentine"
     if (all(c("serpentine", "cartesian") != planter)) {
         fieldhub_abort("Input planter choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
-    }
-    if (length(allow_fillers) != 1 || is.na(allow_fillers) ||
-        !is.logical(allow_fillers)) {
-        fieldhub_abort("allow_fillers must be TRUE or FALSE.")
     }
     if (missing(copies_per_entry) && missing(desired_avg)) {
         fieldhub_abort("multi_location_prep() requires either the argument copies_per_entry or desired_avg.")

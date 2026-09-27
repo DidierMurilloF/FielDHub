@@ -34,6 +34,14 @@
 #' or labels. Consult the function's help before transferring a check vector
 #' between design families.
 #'
+#' @section Boolean controls:
+#' Logical switches such as \code{continuous}, \code{factorLabels},
+#' \code{spread_reps}, \code{allow_fillers}, and \code{randomizeH} require one
+#' nonmissing \code{TRUE} or \code{FALSE}. Numeric switches (\code{0}/\code{1}),
+#' strings, vectors, and arrays are not supported. Invalid switches signal a
+#' \code{fieldhub_input_error} before randomization, with \code{argument},
+#' \code{value}, and \code{options} fields identifying the correction.
+#'
 #' @section Migrating existing scripts:
 #' \code{CRD(locationName = ...)} remains supported; use
 #' \code{CRD(locationNames = ...)} in new code. In \code{incomplete_blocks()},

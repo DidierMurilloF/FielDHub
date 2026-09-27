@@ -7,6 +7,12 @@
 
 ### Breaking changes:
 
+- Boolean design controls now consistently require one nonmissing `TRUE` or
+  `FALSE`. Replace numeric (`0`/`1`) or character switches with logical values.
+  Invalid controls are rejected before randomization with a structured
+  `fieldhub_input_error` naming the argument, supplied value, and valid options.
+  Valid logical inputs retain their exact designs and RNG behavior.
+
 - `swap_pairs()` now accepts and records a seed, restores the caller's RNG
   state, and returns a validated `fieldhub_optimization` result with complete
   replay metadata. Direct calls without a seed now choose an automatic integer

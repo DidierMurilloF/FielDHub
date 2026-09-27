@@ -145,14 +145,13 @@ partially_replicated <- function(
     allow_fillers = FALSE,
     year = NULL) {
     validate_locations(l)
+    validate_flag(spread_reps, "spread_reps")
+    validate_flag(multiLocationData, "multiLocationData")
+    validate_flag(allow_fillers, "allow_fillers")
     year <- resolve_year(year)
     
     if (all(c("serpentine", "cartesian") != planter)) {
         fieldhub_abort('Input "planter" is unknown. Please, choose one: "serpentine" or "cartesian"')
-    }
-    if (length(allow_fillers) != 1 || is.na(allow_fillers) ||
-        !is.logical(allow_fillers)) {
-        fieldhub_abort("allow_fillers must be TRUE or FALSE.")
     }
 
     if (is.null(nrows) || is.null(ncols) || !is.numeric(nrows) || !is.numeric(ncols)) {

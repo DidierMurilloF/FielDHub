@@ -204,6 +204,7 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
                        data = NULL, method = c("onestage", "twostage"),
                        latinize = FALSE, reps = NULL) {
   validate_locations(l)
+  validate_flag(latinize, "latinize")
   r <- resolve_argument_alias(
     reps, r, new = "reps", old = "r",
     new_supplied = !missing(reps), old_supplied = !missing(r)
@@ -224,9 +225,6 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
   # latinize is only meaningful for method = "onestage" (the two-stage greedy
   # search cannot latinize across replicates); for method = "twostage" it is
   # ignored, with a warning if it was explicitly set to TRUE.
-  if (!is.logical(latinize) || length(latinize) != 1 || is.na(latinize)) {
-    fieldhub_abort('row_column() requires latinize to be TRUE or FALSE.')
-  }
   if (latinize && method == "twostage") {
     warning('latinize is only available with method = "onestage"; ',
             'it is ignored for method = "twostage".', call. = FALSE)

@@ -145,10 +145,9 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
                  seed = NULL, locationNames = NULL, data = NULL,
                  checks = NULL, rep_checks = NULL, spread_checks = TRUE) {
   validate_locations(l)
+  validate_flag(continuous, "continuous")
+  validate_flag(spread_checks, "spread_checks")
   has_checks <- !is.null(checks)
-  if (!is.logical(spread_checks) || length(spread_checks) != 1 || is.na(spread_checks)) {
-    fieldhub_abort("RCBD() requires 'spread_checks' to be a single TRUE or FALSE.")
-  }
   b <- reps
   if (all(c("serpentine", "cartesian") != planter)) {
     fieldhub_abort("Input planter choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")

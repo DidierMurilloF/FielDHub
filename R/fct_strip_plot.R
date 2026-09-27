@@ -96,6 +96,9 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
                        factorLabels = TRUE, randomizeH = TRUE, randomizeV = FALSE,
                        data = NULL, reps = 1) {
   validate_locations(l)
+  validate_flag(factorLabels, "factorLabels")
+  validate_flag(randomizeH, "randomizeH")
+  validate_flag(randomizeV, "randomizeV")
   b <- resolve_argument_alias(
     reps, b, new = "reps", old = "b",
     new_supplied = !missing(reps), old_supplied = !missing(b)

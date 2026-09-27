@@ -80,6 +80,7 @@ split_plot <- function(wp = NULL, sp = NULL, reps = NULL, type = 2, l = 1, plotN
                        seed = NULL, locationNames = NULL, factorLabels = TRUE, 
                        data = NULL) {
   validate_locations(l)
+  validate_flag(factorLabels, "factorLabels")
   
   seed <- resolve_seed(seed)
   local_design_seed(seed)
