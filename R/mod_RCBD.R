@@ -371,17 +371,11 @@ mod_RCBD_server <- function(id) {
       if (is.null(input$n_checks_rcbd) || is.null(input$rep_checks_rcbd)) {
         return(NULL)  # UI not rendered yet
       }
-      n_ck_parsed <- parse_n_checks(input$n_checks_rcbd)
-      if (!n_ck_parsed$ok) {
-        return(helpText(n_ck_parsed$message))
-      }
-      rep_parsed <- parse_rep_checks(input$rep_checks_rcbd, n_ck_parsed$value)
-      if (!rep_parsed$ok) {
-        return(helpText(rep_parsed$message))
-      }
-      n_units <- as.numeric(input$t) + sum(rep_parsed$value)
-      helpText(sprintf("Block size: %d plots. Total: %d plots.",
-                       n_units, n_units * as.numeric(input$b)))
+      description <- tryCatch(
+        rcbd_size_preview(input$t, input$b, input$n_checks_rcbd, input$rep_checks_rcbd),
+        fieldhub_error = conditionMessage
+      )
+      helpText(description)
     })
 
     output$well_panel_layout_RCBD <- renderUI({

@@ -128,6 +128,7 @@ rcbd_resolve_entries <- function(t = NULL,
   }
 
   n_test <- length(test_names)
+  n_units <- rcbd_block_size(n_test, rep_checks)
   entries <- data.frame(
     ENTRY          = seq_len(n_checks + n_test),
     TREATMENT      = c(check_names, test_names),
@@ -146,13 +147,6 @@ rcbd_resolve_entries <- function(t = NULL,
                collapse = ", "))
   }
 
-  n_units <- sum(entries$reps_per_block)
-  if (n_units > 10000) {
-    fieldhub_abort("RCBD() would build a block of ",
-         format(n_units, big.mark = ",", scientific = FALSE),
-         " plots, which is not a plausible field block. Reduce 'rep_checks' or ",
-         "the number of entries (the limit is 10,000 plots per block).")
-  }
   if (sum(rep_checks) > n_units / 2) {
     if (spread_checks) {
       warning("Checks occupy more than half of each block (",

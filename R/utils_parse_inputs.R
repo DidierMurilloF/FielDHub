@@ -33,7 +33,7 @@ parse_whole_numbers <- function(text, label) {
                 message = paste0(label, " has an empty value in \"", text, "\".")))
   }
   vals <- suppressWarnings(as.numeric(tokens))
-  bad <- tokens[!is.finite(vals) | vals %% 1 != 0 | vals < 1]
+  bad <- tokens[!is.finite(vals) | vals != trunc(vals) | vals < 1]
   if (length(bad) > 0) {
     return(list(ok = FALSE, value = NULL,
                 message = paste0(label, " could not read \"",
@@ -72,7 +72,7 @@ parse_n_checks <- function(x) {
                 message = "Input # of Checks cannot be blank."))
   }
   if (!is.numeric(x) || length(x) != 1L || !is.finite(x) ||
-      x %% 1 != 0 || x < 1 || x > .Machine$integer.max) {
+      x < 1 || x > .Machine$integer.max || x != trunc(x)) {
     return(list(ok = FALSE, value = NULL,
                 message = paste0("Input # of Checks must be a whole number from 1 to ",
                                  .Machine$integer.max, ".")))

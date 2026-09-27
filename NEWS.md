@@ -196,6 +196,12 @@
 
 ### Fix bugs:
 
+- The RCBD block-size preview now uses the same 10,000-plot limit as design
+  generation, with its counting and validation in a plain core helper.
+  Oversized check replications give an explanation instead of failing
+  during integer formatting; valid size descriptions and generated
+  designs are unchanged.
+
 - Shared numeric-input parsers now reject trailing commas, malformed scalar
   inputs and non-finite values without leaking base-R errors. RCBD
   replication previews require positive whole numbers, and check counts
