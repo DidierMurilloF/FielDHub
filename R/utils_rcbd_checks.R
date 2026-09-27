@@ -27,19 +27,19 @@ rcbd_resolve_entries <- function(t = NULL,
   pool <- NULL
   if (!is.null(data)) {
     if (!is.data.frame(data)) fieldhub_abort("Data must be a data frame.")
+    if (ncol(data) < 1L) fieldhub_abort("RCBD() requires a treatment column in data.")
     pool <- as.character(stats::na.omit(data[[1]]))
   } else if (is.character(t) && length(t) > 1) {
     pool <- as.character(t)
   }
+  if (!is.null(pool)) validate_entry_labels(pool, "entries")
   if (!is.null(pool) && anyDuplicated(pool) > 0) {
     fieldhub_abort("RCBD() requires unique entry labels; duplicated: ",
          paste(unique(pool[duplicated(pool)]), collapse = ", "))
   }
 
   if (is.numeric(checks) && length(checks) == 1) {
-    if (!is.finite(checks) || checks %% 1 != 0 || checks < 1) {
-      fieldhub_abort("RCBD() requires 'checks' to be a positive integer when given as a count.")
-    }
+    validate_iteration_budget(checks, "checks")
     if (is.null(pool)) {
       fieldhub_abort("RCBD() requires 'data' (or a character vector 't') when 'checks' is given as a count.")
     }
@@ -49,6 +49,7 @@ rcbd_resolve_entries <- function(t = NULL,
     check_names <- pool[seq_len(checks)]
     test_names  <- pool[-seq_len(checks)]
   } else if (is.character(checks) && length(checks) >= 1) {
+    validate_entry_labels(checks, "checks")
     if (anyDuplicated(checks) > 0) {
       fieldhub_abort("RCBD() requires 'checks' labels to be unique.")
     }
@@ -57,9 +58,7 @@ rcbd_resolve_entries <- function(t = NULL,
       if (is.null(t) || !is.numeric(t) || length(t) != 1) {
         fieldhub_abort("RCBD() requires a numeric 't', 'data', or a character vector 't' alongside character 'checks'.")
       }
-      if (t < 0 || t != as.integer(t)) {
-        fieldhub_abort("RCBD() requires 't' to be a single non-negative integer.")
-      }
+      validate_iteration_budget(t, "t")
       test_names <- paste0("T", seq_len(t))
       clash <- intersect(check_names, test_names)
       if (length(clash) > 0) {

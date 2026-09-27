@@ -186,6 +186,7 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
     rep_checks    <- entries$reps_per_block[entries$CHECKS != 0]
     mytreatments  <- entries$TREATMENT[entries$CHECKS == 0]
   } else if (is.null(data)) {
+    validate_rcbd_treatments(t, reps, l)
     if (!is.null(t) & !is.null(b)) {
       if(length(t) == 1 & is.numeric(t)) {
         arg2 <- c(t, b)
@@ -211,15 +212,19 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
     }
   }else if (!is.null(b) && !is.null(data)) {
     if(!is.data.frame(data)) fieldhub_abort("Data must be a data frame.")
+    if (ncol(data) < 1L) fieldhub_abort("RCBD() requires a treatment column in data.")
     data <- as.data.frame(na.omit(data[,1]))
     colnames(data) <- "Treatment"
     data$Treatment <- as.character(data$Treatment)
+    validate_entry_labels(data$Treatment, "data")
+    check_unique_labels(data$Treatment, "RCBD")
     t <- data$Treatment
     nt <- length(t)
     s <- t
     mytreatments <- data$Treatment
   }
   if (!has_checks) n_units <- nt
+  validate_design_size(c(n_units, b, l))
   recorded_locations <- locationNames
   if (length(locationNames) != l) {
     default_names <- paste("loc", 1:l, sep = "")

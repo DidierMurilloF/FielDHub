@@ -20,6 +20,15 @@ knitr::opts_chunk$set(
 
 ### Breaking changes:
 
+- RCBD and Latin-square treatment counts now reject missing, non-finite,
+  fractional, and nonscalar values before allocation. Entry tables must have
+  the required columns and usable, nonblank labels; Latin squares need at
+  least two treatments. RCBD also rejects duplicate supplied treatments and
+  zero test entries with checks (which previously generated a spurious `T`
+  entry). Projected field books exceeding R's integer-index range are rejected
+  before allocation. Valid seeded results and omitted incomplete table rows
+  are unchanged.
+
 - Classic and row-column designs now require finite scalar whole-number
   replication counts on both generated and supplied-entry paths. Row-column
   treatment/row counts and entry tables use the same early checks as the block

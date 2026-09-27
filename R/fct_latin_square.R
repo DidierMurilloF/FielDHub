@@ -89,6 +89,7 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
   force(data)
   validate_iteration_budget(reps, "reps")
   if (is.null(data)) {
+    validate_iteration_budget(n, "t")
     if (all(!is.null(c(n, reps))) && all(base::lengths(list(n, reps)) == 1)) {
       if (all(is.numeric(c(n, reps))) && all(c(n, reps) %% 1 == 0) & all(c(n, reps) > 0)) {
         if (n > 10) fieldhub_abort("\n'latinsquare()' allows only up to 10 treatments.")
@@ -101,8 +102,10 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
     }else fieldhub_abort("\n'latinsquare()' requires an possitive integer number for input t")
   }else if (!is.null(reps) && !is.null(data)) {
     if(!is.data.frame(data)) fieldhub_abort("Data must be a data frame.")
+    if (ncol(data) < 3L) fieldhub_abort("latin_square() requires row, column, and treatment columns in data.")
     data <- as.data.frame(na.omit(data[,1:3]))
     colnames(data) <- c("Row", "Column", "Treatment")
+    for (column in names(data)) validate_entry_labels(data[[column]], column)
     Row <- as.vector(na.omit(data$Row))
     Column <- as.vector(na.omit(data$Column))
     Treatment <- as.vector(na.omit(data$Treatment))
@@ -117,8 +120,10 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
     Name.Columns <- as.character(Column.f)
     Name.Treatments <- as.character(Treatment.f)
     ls.len <- n.treatments
+    if (ls.len < 2L) fieldhub_abort("latin_square() requires more than one treatment.")
     if (ls.len > 10) fieldhub_abort("\n'latinsquare()' allows only up to 10 treatments.")
   }
+  validate_design_size(c(ls.len, ls.len, reps))
   if(!is.null(l) && is.numeric(l) && length(l) == 1) {
     if (l > 1 && is.null(locationNames)) {
       locationNames <- 1:l

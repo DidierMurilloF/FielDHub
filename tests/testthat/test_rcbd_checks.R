@@ -167,7 +167,7 @@ test_that("rep_checks = NA is rejected", {
 test_that("negative t is rejected", {
   expect_error(
     rcbd_resolve_entries(t = -3, checks = "CK1", rep_checks = 2),
-    "non-negative"
+    "finite whole number", class = "fieldhub_input_error"
   )
 })
 
