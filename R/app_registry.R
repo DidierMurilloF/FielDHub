@@ -2,26 +2,22 @@
 #'
 #' UI order follows the entries below. Server order is explicit because the
 #' existing Strip-Plot server is registered after the IBD and Row-Column servers.
-#' Designs with a page spec (\code{design_app_spec()}) are pages of the one
-#' generic design module (\code{mod_design_ui()}/\code{mod_design_server()});
-#' a design without one keeps a module of its own. This registry is
-#' internal, not a public extension interface.
+#' Every design has a page spec (\code{design_app_spec()}) for the one
+#' generic design module (\code{mod_design_ui()}/\code{mod_design_server()}).
+#' This registry is internal, not a public extension interface.
 #' @noRd
 fieldhub_app_registry <- function() {
   classic <- names(fieldhub_classic_workflows())
-  generic_pages <- names(fieldhub_design_specs())
   groups <- c("Unreplicated Designs", "Partially Replicated Designs",
               "Lattice Designs", "Other Designs")
   entry <- function(label, module, engine, group, server_order) {
-    generic <- module %in% generic_pages
     list(label = label, id = paste0(module, "_ui_1"),
-         ui = if (generic) "mod_design_ui" else paste0("mod_", module, "_ui"),
-         server = if (generic) "mod_design_server" else paste0("mod_", module, "_server"),
+         ui = "mod_design_ui", server = "mod_design_server",
          engine = engine,
          group = groups[[group]], server_order = as.integer(server_order),
          workflow = module,
          workflow_family = if (module %in% classic) "classic" else "spatial",
-         spec = if (generic) module)
+         spec = module)
   }
   list(
     entry("Single Diagonal Arrangement", "Diagonal", "diagonal_arrangement", 1, 1),
@@ -55,16 +51,15 @@ fieldhub_app_title <- function() {
 
 #' Arguments a registry entry's UI and server functions are called with
 #'
-#' @description The module id, and for a page of the generic design module
-#' its spec.
+#' @description The module id and its required page spec.
 #' @noRd
 app_module_args <- function(entry) {
-  c(list(entry$id), if (!is.null(entry$spec)) list(design_app_spec(entry$spec)))
+  list(entry$id, design_app_spec(entry$spec))
 }
 
 #' Build the existing navigation from the shared module catalogue
 #' @noRd
-fieldhub_design_menus <- function(registry = fieldhub_app_registry()) {
+app_design_menus <- function(registry = fieldhub_app_registry()) {
   groups <- vapply(registry, `[[`, character(1), "group")
   lapply(unique(groups), function(group) {
     tabs <- lapply(registry[groups == group], function(entry) {

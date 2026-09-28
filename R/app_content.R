@@ -72,6 +72,14 @@ app_about_ui <- function() {
       shiny::tags$p(shiny::tags$strong("Package authors and contributors: "), info$authors),
       shiny::tags$p(shiny::tags$strong("License: "), info$license)
     ),
-    htmltools::includeHTML(system.file("app/www/aboutUs.html", package = "FielDHub"))
+    htmltools::htmlTemplate(system.file("app/www/aboutUs.html", package = "FielDHub"),
+                            team = app_team_ui(), footer = htmltools::HTML(fieldhub_footer()))
   )
+}
+
+#' Welcome content with the current footer
+#' @noRd
+app_home_ui <- function() {
+  htmltools::htmlTemplate(system.file("app/www/home.html", package = "FielDHub"),
+                          footer = htmltools::HTML(fieldhub_footer()))
 }

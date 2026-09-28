@@ -29,7 +29,7 @@ run_app <- function(
   launch.browser = TRUE,
   workers = 0L
 ) {
-  check_app_dependencies()
+  app_check_dependencies()
   runtime <- app_worker_lifecycle(workers)
   golem::with_golem_options(
     app = shiny::shinyApp(

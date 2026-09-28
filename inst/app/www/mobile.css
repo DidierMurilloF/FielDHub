@@ -1,4 +1,12 @@
 @media screen and (max-width: 768px) {
+#fieldhub-app .grid-container {
+  grid-template-columns: 1fr;
+}
+
+#fieldhub-app .section-tittle {
+  margin: 0 20px;
+}
+
 /* Showcase */
 #fieldhub-app #showcase {
   height: 100%;

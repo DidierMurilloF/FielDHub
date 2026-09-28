@@ -16,7 +16,7 @@ app_table_export_buttons <- function(design, table, location = NULL, print = FAL
   if (isTRUE(print)) {
     buttons[[length(buttons) + 1L]] <- list(
       extend = "print", text = "Print + metadata", messageBottom = NULL,
-      messageTop = paste0('<pre style="white-space:pre-wrap;overflow-wrap:anywhere">',
+      messageTop = paste0('<pre class="fieldhub-export-metadata">',
                           htmltools::htmlEscape(text), "</pre>")
     )
   }

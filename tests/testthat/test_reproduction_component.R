@@ -35,7 +35,7 @@ test_that("every module connects its design to the shared reproduction component
   }
   expect_identical(sum(all.names(body(app_classic_workflow)) == "app_reproduction_outputs"), 1L)
   expect_identical(sum(all.names(body(app_spatial_workflow)) == "app_reproduction_outputs"), 1L)
-  expect_true("app_reproduction_ui" %in% all.names(body(fieldhub_design_menus)))
+  expect_true("app_reproduction_ui" %in% all.names(body(app_design_menus)))
 })
 
 test_that("CSV layout downloads are labeled as CSV", {

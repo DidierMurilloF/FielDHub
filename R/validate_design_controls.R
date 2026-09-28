@@ -324,7 +324,9 @@ read_design_steps <- function(steps, raw, values, choices = list()) {
   for (step in steps) {
     if (!is.null(step$enabled_by) && !isTRUE(values[[step$enabled_by]])) next
     value <- raw[[step$id]]
-    if (!is.null(step$options)) check_step_choices(step, choices[[step$id]]$choices)
+    if (!is.null(step$options)) {
+      check_step_choices(step, choices[[step$id]]$choices, allow_fillers = values$allow_fillers)
+    }
     if (!is.null(step$options) && !step_choice_ready(value, choices[[step$id]]$choices)) return(NULL)
     parsed <- step$parse(value, values)
     if (is.list(parsed)) values[names(parsed)] <- parsed else values[step$id] <- list(parsed)
@@ -340,16 +342,19 @@ read_design_steps <- function(steps, raw, values, choices = list()) {
 #' @param step The step control.
 #' @param choices Its current choices (a list, one per location, for a
 #'   per-location select).
+#' @param allow_fillers Whether filler plots are already enabled.
 #' @return \code{NULL}, or a classed input error naming the step (and the
 #'   location).
 #' @noRd
-check_step_choices <- function(step, choices) {
+check_step_choices <- function(step, choices, allow_fillers = FALSE) {
   label <- step$label
   if (is.list(choices)) {
     empty <- which(lengths(choices) == 0L)
     if (length(empty) > 0L) {
-      control_abort(paste(label, min(empty)), ": no field size fits this location. ",
-                    "Allow filler plots or change the entries or checks.")
+      hint <- if (isTRUE(allow_fillers)) "Change the entries or checks." else {
+        "Allow filler plots or change the entries or checks."
+      }
+      control_abort(paste(label, min(empty)), ": no field size fits this location. ", hint)
     }
   } else if (length(choices) == 0L) {
     control_abort(label, " has no option that fits.")

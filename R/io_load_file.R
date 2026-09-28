@@ -21,8 +21,13 @@ read_upload_csv <- function(path, sep) {
     # Continued quoted records have NA counts on their unfinished lines.
     fields <- fields[!is.na(fields)]
     if (length(fields) < 2L || any(fields != fields[1L])) return(NULL)
-    data <- read.csv(path, header = TRUE, sep = sep, fill = FALSE,
+    data <- read.csv(path, header = TRUE, sep = sep, fill = FALSE, check.names = FALSE,
                      na.strings = c("", " ", "NA"))
+    # Strip the byte-order mark before locale-dependent name repair. Otherwise
+    # the C locale repairs it to X... and loses the original header.
+    column_names <- names(data)
+    column_names[1L] <- sub("^\\xef\\xbb\\xbf", "", column_names[1L], useBytes = TRUE)
+    names(data) <- make.names(column_names, unique = TRUE)
     if (nrow(data) != length(fields) - 1L) return(NULL)
     data
   }, error = function(e) NULL)
@@ -58,8 +63,8 @@ upload_error_message <- function(result, missing_columns) {
 #'   understands (e.g. \code{"crd"}, \code{"sdiag"}, \code{"sspd"}, ...).
 #' @param missing_columns The message shown when the file parses but is
 #'   missing, or duplicates, the columns \code{design} requires; each design
-#'   writes its own (e.g. "Data input needs at least two columns: ENTRY and
-#'   NAME").
+#'   may override it. By default the shared upload rule supplies the message
+#'   (e.g. "Data input needs at least two columns: ENTRY and NAME").
 #' @param name The uploaded file's own name, used only to check its
 #'   extension; defaults to \code{basename(path)} for callers (tests) that
 #'   have no separate name, such as a temp file uploaded as itself.
@@ -74,6 +79,10 @@ read_design_upload <- function(path, sep, design, missing_columns = NULL,
                              check = check, design = design)
   if (identical(names(data_ingested), "dataUp")) {
     return(list(data = data_ingested$dataUp))
+  }
+  if (is.null(missing_columns)) {
+    rule <- upload_rule(design)
+    missing_columns <- if (is.null(rule)) "Choose a supported upload design." else rule$missing_columns
   }
   fieldhub_abort(upload_error_message(data_ingested, missing_columns))
 }

@@ -39,7 +39,7 @@ app_tile_heatmap <- function(data, response_name, height, title = NULL,
   if (classic) {
     plot <- plot + ggplot2::theme_minimal() +
       ggplot2::theme(plot.title = ggplot2::element_text(
-        family = "Calibri", face = "bold", size = 13, hjust = 0.5
+        face = "bold", size = 13, hjust = 0.5
       ))
   }
   plotly::ggplotly(plot, tooltip = "text", height = height)

@@ -291,16 +291,17 @@ app_spatial_page <- function(input, output, session, spec, run, raw_controls) {
   if (identical(spec$setup$type, "summary")) {
     output$setup <- shiny::renderPrint({
       if (!randomized()) return(invisible(NULL))
-      shiny::req(design())
+      current <- settled(design)
       cat("Randomization was successful!", "\n", "\n")
-      print(design(), n = 6)
+      print(current, n = 6)
     })
   } else {
     output$setup <- DT::renderDT({
       if (identical(spec$setup$stage, "randomize")) {
         if (!randomized()) return(NULL)
-        inputs <- randomized_inputs()
-        choices <- design_choices()
+        if (!is.null(result()$problem)) return(NULL)
+        inputs <- settled(randomized_inputs)
+        choices <- settled(design_choices)
       } else {
         inputs <- settled(prepared)
         choices <- settled(run_choices)

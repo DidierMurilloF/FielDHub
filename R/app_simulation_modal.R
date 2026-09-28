@@ -13,7 +13,7 @@ app_simulation_modal <- function(ns, ids, failed = FALSE, introduction = NULL) {
       shiny::column(6, shiny::numericInput(ns(ids[["minimum"]]), "Input the min value", value = NULL)),
       shiny::column(6, shiny::numericInput(ns(ids[["maximum"]]), "Input the max value", value = NULL))
     ),
-    if (failed) shiny::div(shiny::tags$b("Invalid input of data max and min", style = "color: red;")),
+    if (failed) shiny::div(shiny::tags$b("Invalid input of data max and min", class = "fieldhub-input-error")),
     footer = shiny::tagList(shiny::modalButton("Cancel"), shiny::actionButton(ns(ids[["submit"]]), "GO"))
   )
 }
@@ -37,7 +37,7 @@ app_spatial_simulation_modal <- function(ns, spec, failed = FALSE) {
       shiny::column(6, shiny::numericInput(ns(ids[["minimum"]]), spec$numeric_labels[[1L]], value = NULL)),
       shiny::column(6, shiny::numericInput(ns(ids[["maximum"]]), spec$numeric_labels[[2L]], value = NULL))
     ),
-    if (failed) shiny::div(shiny::tags$b("Invalid input of data max and min", style = "color: red;")),
+    if (failed) shiny::div(shiny::tags$b("Invalid input of data max and min", class = "fieldhub-input-error")),
     footer = shiny::tagList(shiny::modalButton("Cancel"), shiny::actionButton(ns(ids[["submit"]]), "GO"))
   )
 }

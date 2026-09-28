@@ -33,7 +33,7 @@ test_that("application styles are scoped to the FielDHub root", {
     selectors <- regmatches(css, gregexpr("[^{}]+(?=\\{)", css, perl = TRUE))[[1]]
     selectors <- trimws(unlist(strsplit(selectors, ",", fixed = TRUE)))
     selectors <- selectors[!startsWith(selectors, "@media")]
-    expect_true(all(startsWith(selectors, "#fieldhub-app")), info = name)
+    expect_true(all(startsWith(selectors, "#fieldhub-app") | startsWith(selectors, ".fieldhub-")), info = name)
   }
 })
 
@@ -42,4 +42,9 @@ test_that("the app builds Help and About from shared content functions", {
   expect_match(code, "app_help_ui", fixed = TRUE)
   expect_match(code, "app_about_ui", fixed = TRUE)
   expect_match(code, 'id = "fieldhub-app"', fixed = TRUE)
+})
+
+test_that("design-page rows stay within the edge-to-edge app container", {
+  css <- paste(readLines(system.file("app/www/style.css", package = "FielDHub")), collapse = "\n")
+  expect_match(css, "#fieldhub-app .tab-pane > .row {\n  margin-left: 0;\n  margin-right: 0;\n}", fixed = TRUE)
 })

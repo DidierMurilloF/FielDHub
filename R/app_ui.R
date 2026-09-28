@@ -29,12 +29,10 @@ app_ui <- function(request) {
             title = fieldhub_app_title(),
             shiny::tabPanel(
               " Welcome!", icon = shiny::icon("home", lib = "glyphicon"),
-              htmltools::includeHTML(
-                system.file("app/www/home.html", package = "FielDHub")
-              )
+              app_home_ui()
             )
           ),
-          fieldhub_design_menus(),
+          app_design_menus(),
           list(shiny::navbarMenu(
             "More",
             shiny::tabPanel("Help", app_help_ui()),

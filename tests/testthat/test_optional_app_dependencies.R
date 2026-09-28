@@ -13,9 +13,9 @@ test_that("app dependencies are optional and not imported at namespace load", {
 test_that("the app dependency guard reports only unavailable packages", {
   checked <- character()
   available <- function(package) {checked <<- c(checked, package); TRUE}
-  expect_null(check_app_dependencies(available))
+  expect_null(app_check_dependencies(available))
   expect_identical(checked, app_dependencies())
-  error <- tryCatch(check_app_dependencies(function(package) !package %in% c("DT", "shiny")),
+  error <- tryCatch(app_check_dependencies(function(package) !package %in% c("DT", "shiny")),
                     fieldhub_dependency_error = identity)
   expect_s3_class(error, "fieldhub_dependency_error")
   expect_identical(error$packages, c("shiny", "DT"))
@@ -24,7 +24,7 @@ test_that("the app dependency guard reports only unavailable packages", {
 
 test_that("app startup checks dependencies before constructing the application", {
   calls <- as.list(body(run_app))[-1L]
-  expect_identical(calls[[1L]], quote(check_app_dependencies()))
+  expect_identical(calls[[1L]], quote(app_check_dependencies()))
 })
 
 test_that("app functions do not rely on a whole Shiny namespace import", {

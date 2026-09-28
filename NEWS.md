@@ -444,6 +444,18 @@
 
 ### Enhancements:
 
+- The Welcome and About pages use the current year and DESCRIPTION's
+  contributor names and roles. Existing local portraits and profiles remain;
+  contributor cards also accommodate narrow screens. App styles no longer
+  reset every element's spacing or hard-code the heatmap font.
+
+- Upload examples, column guidance and uniqueness rules share one maintained
+  table. Missing-column errors now explain the required columns even outside
+  the app, and UTF-8 BOM headers work in the C locale. The shared upload row
+  gives seven columns to the file chooser and five to separator controls.
+  Spatial setup panels no longer repeat randomization errors, and field-size
+  guidance no longer suggests enabling fillers when they are already enabled.
+
 - All 19 app modules share optional seed controls with the R API's signed
   seed bounds. Existing displayed defaults are retained. Clearing a seed
   chooses and records an automatic value once in the run's input snapshot,

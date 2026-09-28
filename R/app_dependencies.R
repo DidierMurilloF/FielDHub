@@ -7,7 +7,7 @@ app_dependencies <- function() {
 
 #' Explain missing app packages without installing or loading the application
 #' @noRd
-check_app_dependencies <- function(available = function(package) {
+app_check_dependencies <- function(available = function(package) {
   minimum <- c(shiny = "1.8.1")
   requireNamespace(package, quietly = TRUE) &&
     (!package %in% names(minimum) || utils::packageVersion(package) >= minimum[[package]])
