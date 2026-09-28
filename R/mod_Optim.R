@@ -223,6 +223,7 @@ mod_Optim_server <- function(id) {
           if(!is.numeric(data_up$REPS) || !is.integer(data_up$REPS) ||
              is.factor(data_up$REPS)) shiny::validate("'REPS' must be numeric.")
           total_plots <- sum(data_up$REPS)
+          counts <- NULL
         } else {
           app_upload_error(data_ingested,
                            missing_columns = "Data input needs at least three columns with: ENTRY, NAME and REPS.")
@@ -253,15 +254,10 @@ mod_Optim_server <- function(id) {
           )
           return(NULL)
         }
-        entries <- dplyr::bind_rows(
-          default_entries(n.checks, prefix = "CH"),
-          default_entries(lines, prefix = "G", start = n.checks + 1)
-        )
-        reps.checks <- r.checks
-        REPS <- c(reps.checks, rep(1, lines))
-        gen.list <- data.frame(entries, REPS = REPS)
-        data_up <- gen.list
-        total_plots <- sum(data_up$REPS)
+        # optimized_arrangement() builds the CH/G entry list from the counts
+        data_up <- NULL
+        counts <- list(lines = lines, checks = n.checks, rep_checks = r.checks)
+        total_plots <- sum(r.checks) + lines
       }
       dimension_choices <- validate_design(optimized_dimension_choices(total_plots))
       if (length(dimension_choices) == 0L) {
@@ -274,7 +270,7 @@ mod_Optim_server <- function(id) {
         )
         return(NULL)
       }
-      return(list(data_up.spatial = data_up, total_plots = total_plots,
+      return(list(data_up.spatial = data_up, counts = counts, total_plots = total_plots,
                   dimension_choices = dimension_choices))
     })
     
@@ -383,8 +379,9 @@ mod_Optim_server <- function(id) {
       }
       test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0
       if (!test) return(NULL)
-      shiny::req(get_data_optim()$data_up.spatial)
-      data_entry <- get_data_optim()$data_up.spatial
+      # The entry list of the design, generated or uploaded
+      shiny::req(optimized_arrang())
+      data_entry <- optimized_arrang()$dataEntry
       df <- as.data.frame(data_entry)
       df$ENTRY <- as.factor(df$ENTRY)
       df$NAME <- as.factor(df$NAME)
@@ -406,8 +403,8 @@ mod_Optim_server <- function(id) {
       }
       test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0
       if (!test) return(NULL)
-      shiny::req(get_data_optim()$data_up.spatial)
-        data_entry <- get_data_optim()$data_up.spatial
+      shiny::req(optimized_arrang())
+        data_entry <- optimized_arrang()$dataEntry
         checks_input <- data_entry[data_entry$REPS > 1, ]
         df <- as.data.frame(checks_input)
         table_options <- list(pageLength = nrow(df), autoWidth = FALSE,
@@ -422,31 +419,18 @@ mod_Optim_server <- function(id) {
       if (input$dimensions.s == "No options available") {
         shiny::validate("No options available for this number of treatments")
       }
-      shiny::req(get_data_optim()$data_up.spatial)
-      nrows <- field_dimensions_optim()$d_row
-      ncols <- field_dimensions_optim()$d_col
-      niter <- 1000
-      
-      data.spatial <- get_data_optim()$data_up.spatial
-      sites <- optim_inputs()$sites
-      site_names <- optim_inputs()$location_names
-      seed.spatial <- optim_inputs()$seed_number
-      plotNumber <- optim_inputs()$plotNumber
-      movement_planter <- optim_inputs()$planter_mov
-      expt_name <- optim_inputs()$expt_name
-
-      optimized <- validate_design(optimized_arrangement(
-        nrows = nrows,
-        ncols = ncols, 
-        locationNames = site_names,
-        planter = movement_planter,
-        plotNumber = plotNumber,
-        l = sites, 
-        exptName = expt_name,
-        spread_reps = TRUE,
-        seed = seed.spatial, 
-        data = data.spatial
+      values <- c(get_data_optim()$counts, list(
+        nrows = field_dimensions_optim()$d_row,
+        ncols = field_dimensions_optim()$d_col,
+        planter = optim_inputs()$planter_mov,
+        l = optim_inputs()$sites,
+        plot_start = optim_inputs()$plotNumber,
+        seed = optim_inputs()$seed_number,
+        expt_name = optim_inputs()$expt_name,
+        location_names = optim_inputs()$location_names
       ))
+      data <- get_data_optim()$data_up.spatial
+      validate_design(do.call(optimized_arrangement, design_args_Optim(values, data)))
     })
 
     output$summary_optim <- shiny::renderPrint({

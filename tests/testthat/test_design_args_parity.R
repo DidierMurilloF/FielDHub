@@ -802,6 +802,52 @@ test_that("diagonal_dimension_choices(first = TRUE) is the first choice, found w
                class = "fieldhub_input_error")
 })
 
+test_that("Optim app arguments reproduce the API design from counts across two locations", {
+  values <- list(nrows = 12, ncols = 10, lines = 100, checks = 4, rep_checks = c(5, 5, 5, 5),
+                 planter = "serpentine", l = 2, plot_start = c(1, 1001), seed = 5,
+                 expt_name = "Expt1", location_names = c("A", "B"))
+  via_app <- do.call(optimized_arrangement, design_args_Optim(values))
+  direct <- optimized_arrangement(nrows = 12, ncols = 10, lines = 100, checks = 4,
+                                  rep_checks = c(5, 5, 5, 5), l = 2, plotNumber = c(1, 1001),
+                                  seed = 5, exptName = "Expt1", locationNames = c("A", "B"))
+  expect_identical(via_app$fieldBook, direct$fieldBook)
+  expect_identical(via_app$metadata$parameters, direct$metadata$parameters)
+  # Passing counts instead of the module's former CH/G entry table changes
+  # the recorded inputs, not the field book: the engine generates the same
+  # CH1..CH4, G5..G104 list
+  former <- data.frame(ENTRY = 1:104, NAME = c(paste0("CH", 1:4), paste0("G", 5:104)),
+                       REPS = c(5, 5, 5, 5, rep(1, 100)))
+  former_design <- optimized_arrangement(nrows = 12, ncols = 10, l = 2, plotNumber = c(1, 1001),
+                                         seed = 5, exptName = "Expt1",
+                                         locationNames = c("A", "B"), data = former)
+  expect_identical(via_app$fieldBook, former_design$fieldBook)
+  expect_null(via_app$metadata$parameters$data)
+})
+
+test_that("Optim app arguments reproduce an uploaded-data design", {
+  data <- data.frame(ENTRY = 1:104, NAME = c(paste0("CHECK", 1:4), paste0("SB-", 5:104)),
+                     REPS = c(4, 4, 6, 6, rep(1, 100)))
+  values <- list(nrows = 12, ncols = 10, planter = "cartesian", l = 1, plot_start = 101,
+                 seed = 17, expt_name = "Trial", location_names = "FARGO")
+  parity(design_args_Optim, optimized_arrangement, values, data,
+         direct = optimized_arrangement(nrows = 12, ncols = 10, planter = "cartesian",
+                                        plotNumber = 101, seed = 17, exptName = "Trial",
+                                        locationNames = "FARGO", data = data))
+  # Generated-path counts left over in `values` never reach the engine
+  built <- design_args_Optim(c(values, list(lines = 100, checks = 4, rep_checks = 1:4)), data)
+  expect_null(built$lines)
+  expect_null(built$checks)
+  expect_null(built$rep_checks)
+})
+
+test_that("design_args_Optim() falls back to the l/planter/plot-start defaults", {
+  values <- list(nrows = 12, ncols = 10, lines = 100, checks = 4, rep_checks = c(5, 5, 5, 5),
+                 seed = 6)
+  parity(design_args_Optim, optimized_arrangement, values,
+         direct = optimized_arrangement(nrows = 12, ncols = 10, lines = 100, checks = 4,
+                                        rep_checks = c(5, 5, 5, 5), seed = 6))
+})
+
 # --- Spatial structural check (ruling R2): namespace bodies, call heads ---
 
 test_that("spatial modules build their designs only through design_args_<Module>() and do.call()", {
@@ -811,7 +857,8 @@ test_that("spatial modules build their designs only through design_args_<Module>
     Diagonal = c(design_args_Diagonal = "diagonal_arrangement"),
     diagonal_multiple = c(design_args_diagonal_multiple = "diagonal_arrangement"),
     sparse_allocation = c(design_args_sparse_allocation_optim = "do_optim",
-                          design_args_sparse_allocation = "sparse_allocation")
+                          design_args_sparse_allocation = "sparse_allocation"),
+    Optim = c(design_args_Optim = "optimized_arrangement")
   )
   # Unexported helpers a spatial module server may call, and why. Anything
   # else it calls must be one of its engines/builders, or a base/shiny/DT/
@@ -829,6 +876,7 @@ test_that("spatial modules build their designs only through design_args_<Module>
     "field_dimensions",           # candidate field sizes: rejects too few entries before any randomization
     "diagonal_dimension_choices", # feasible diagonal field dimensions offered before randomizing (seed-isolated)
     "diagonal_check_options",     # percentages of checks offered for a field before randomizing (seed-isolated)
+    "optimized_dimension_choices",# field dimensions offered for an optimized arrangement (no RNG)
     "field_book_location_grids",  # splits a field book into per-location EXPT grids for display
     "allocation_entry_names"      # reads the entry names of a do_optim() allocation for its table
   )

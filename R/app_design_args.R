@@ -505,3 +505,29 @@ allocation_entry_names <- function(allocation, lines) {
   entries <- allocation$multi_location_data
   as.character(entries$NAME[match(seq_len(lines), entries$ENTRY)])
 }
+
+#' Build optimized_arrangement() arguments for the Optim module
+#'
+#' `values`: `nrows`, `ncols`, `lines`, `checks` and `rep_checks` (the
+#' generated path: optimized_arrangement() builds the CH1.., G.. entry list
+#' from these counts; ignored when `data` supplies the ENTRY/NAME/REPS
+#' list), `planter`, `l`, `plot_start`, `seed`, `expt_name`,
+#' `location_names`.
+#' @noRd
+design_args_Optim <- function(values, data = NULL) {
+  generated <- is.null(data)
+  list(
+    nrows = values[["nrows"]],
+    ncols = values[["ncols"]],
+    lines = if (generated) values[["lines"]],
+    checks = if (generated) values[["checks"]],
+    planter = values[["planter"]] %||% "serpentine",
+    l = values[["l"]] %||% 1,
+    plotNumber = values[["plot_start"]] %||% 101,
+    seed = values[["seed"]],
+    exptName = values[["expt_name"]],
+    locationNames = values[["location_names"]],
+    data = data,
+    rep_checks = if (generated) values[["rep_checks"]]
+  )
+}
