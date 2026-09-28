@@ -537,7 +537,6 @@ Some of the fixes above change the design produced for a given seed. Field books
 * Not a design change: the golden layout-preview snapshot for `stacked = "grid_panel"` on a design that does not support it now shows the classed `fieldhub_input_error` message instead of the placeholder "No layout", because `plot()`/`plot_layout()` now raise that error instead of returning `NULL` (see Fix bugs). No generated field book is affected.
 * Not a design change: `do_optim()` results now carry an additional `fieldhub_sparse_optimization` or `fieldhub_multi_prep_optimization` class next to the legacy `Sparse`/`MultiPrep` one, so callers can recognize a FielDHub allocation plan without matching on the legacy name. The legacy classes, `print()`/`summary()` behavior and generated allocations are unchanged.
 * Not a design change: `optimized_arrangement()` results now record their check replication as `rep_checks` in `metadata$parameters` instead of `amountChecks`, whichever argument name the call used. `reproduce_design()` still replays older results recorded with `amountChecks`. The field book, `infoDesign` and every other output are unchanged.
-* `sparse_allocation()` without `nrows` and `ncols`, for some location sizes: it now builds the field the app preselects, the squarest size 10% to 20% larger than a location's entries that the checks fit (it took the squarest size 11% to 20% larger without checking the fit), for example 10 x 11 instead of 10 x 12 for 100 entries per location. Pass `nrows` and `ncols` to rebuild an earlier design.
 
 # FielDHub 1.3.1
 

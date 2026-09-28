@@ -773,33 +773,42 @@ test_that("design_args_sparse_allocation() without an allocation or dimensions l
                                     copies_per_entry = 2, checks = 4, seed = 5))
 })
 
-test_that("sparse_allocation() without dimensions builds the field the app preselects", {
-  # The app offers diagonal_dimension_choices() (field_dimensions()
-  # candidates the checks fit, squarest first) and preselects the first;
-  # sparse_allocation() now defaults to that same field. With 100 entries
-  # per location it used to take 10 x 12 from a narrower candidate range.
+test_that("sparse_allocation() keeps its automatic field size, now read from field_dimensions()", {
+  # The automatic choice (no nrows/ncols) is unchanged: the squarest size
+  # 11% to 20% larger than a location. Its candidates now come from
+  # field_dimensions(n, minimum_extra = 0.11), identical to the former
+  # inline search for every size.
+  former_candidates <- function(n) {
+    t <- floor(n + n * 0.11):ceiling(n + n * 0.20)
+    unlist(lapply(t[!is_prime(t)], function(size) factor_subsets(size, diagonal = TRUE)$labels))
+  }
+  for (n in c(40, 46, 90, 100, 110, 287, 1000)) {
+    expect_identical(unlist(field_dimensions(n, minimum_extra = 0.11)), former_candidates(n),
+                     info = n)
+  }
+  # 100 entries per location: still 10 x 12 (the catalogue's 90 gives 10 x 10)
   design <- sparse_allocation(lines = 150, l = 3, copies_per_entry = 2, checks = 4, seed = 2)
-  lines_within_loc <- as.numeric(design$size_locations[1])
-  expect_identical(lines_within_loc, 100)
-  preselected <- diagonal_dimension_choices(lines_within_loc, checks = 151:154)[1]
-  expect_identical(preselected, "10 x 11")
-  expect_identical(paste(design$infoDesign$rows, "x", design$infoDesign$columns), preselected)
+  expect_identical(as.numeric(design$size_locations[1]), 100)
+  expect_identical(c(design$infoDesign$rows, design$infoDesign$columns), c(10, 12))
 })
 
-test_that("diagonal_dimension_choices(first = TRUE) is the first choice, found without testing the rest", {
-  for (lines in c(46, 90, 100)) {
-    expect_identical(diagonal_dimension_choices(lines, checks = 1:4, first = TRUE),
-                     diagonal_dimension_choices(lines, checks = 1:4)[1], info = lines)
-  }
-  layout <- data.frame(ENTRY = 1:304, BLOCK = c(rep("ALL", 4), rep(1:3, times = c(100, 120, 80))))
-  expect_identical(
-    diagonal_dimension_choices(300, 1:4, kindExpt = "DBUDC", stacked = "By Column",
-                               data = layout, first = TRUE),
-    diagonal_dimension_choices(300, 1:4, kindExpt = "DBUDC", stacked = "By Column",
-                               data = layout)[1])
-  expect_identical(diagonal_dimension_choices(40, checks = 1:4, first = TRUE), character())
-  expect_error(diagonal_dimension_choices(90, checks = 1:4, first = NA),
-               class = "fieldhub_input_error")
+test_that("the sparse module's explicit dimensions reproduce the API design", {
+  # The module offers diagonal_dimension_choices() (field_dimensions()
+  # sizes the checks fit, squarest first) and preselects the first; it
+  # always passes the chosen nrows/ncols, so the app's design is the API
+  # design with those dimensions, whatever sparse_allocation() would
+  # choose on its own (10 x 12 here).
+  optim_values <- list(lines = 150, l = 3, copies_per_entry = 2, checks = 4, seed = 2)
+  allocation <- do.call(do_optim, design_args_sparse_allocation_optim(optim_values))
+  preselected <- diagonal_dimension_choices(as.numeric(allocation$size_locations[1]),
+                                            checks = 151:154)[1]
+  expect_identical(preselected, "10 x 11")
+  values <- c(optim_values, list(nrows = 10, ncols = 11, plot_start = c(1, 1001, 2001),
+                                 sparse_list = allocation))
+  parity(design_args_sparse_allocation, sparse_allocation, values,
+         direct = sparse_allocation(lines = 150, nrows = 10, ncols = 11, l = 3,
+                                    plotNumber = c(1, 1001, 2001), copies_per_entry = 2,
+                                    checks = 4, sparse_list = allocation, seed = 2))
 })
 
 test_that("Optim app arguments reproduce the API design from counts across two locations", {

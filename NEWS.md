@@ -1053,12 +1053,6 @@ from:
   `reproduce_design()` still replays older results recorded with
   `amountChecks`. The field book, `infoDesign` and every other output are
   unchanged.
-- `sparse_allocation()` without `nrows` and `ncols`, for some location
-  sizes: it now builds the field the app preselects, the squarest size 10%
-  to 20% larger than a location's entries that the checks fit (it took the
-  squarest size 11% to 20% larger without checking the fit), for example
-  10 x 11 instead of 10 x 12 for 100 entries per location. Pass `nrows` and
-  `ncols` to rebuild an earlier design.
 
 # FielDHub 1.3.1
 
