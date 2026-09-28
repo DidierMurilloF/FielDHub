@@ -61,7 +61,7 @@ The development version keeps the app dependencies optional. R scripts can use t
 
 ``` r
 install.packages(c("golem", "shiny", "htmltools", "DT", "bslib",
-                   "shinycssloaders", "plotly", "shinyalert", "shinyjs", "zip"))
+                   "shinycssloaders", "plotly", "shinyalert", "shinyjs", "zip", "promises"))
 ```
 
 If anything is missing, `run_app()` reports the packages to install.
@@ -72,6 +72,13 @@ This is a basic example which shows you how to launch the app:
 library(FielDHub)
 run_app()
 ```
+
+The app requires Shiny 1.8.1 or newer. To keep
+other sessions responsive during long designs, optionally install `mirai`
+and use `run_app(workers = 2L)`. Workers require an installed FielDHub
+package; development source and installations without mirai use synchronous
+execution. The default `workers = 0L` starts no workers. Each app owns its
+worker pool and closes it when the app stops.
 ### Diagonal Arrangement Example
 
 A project needs to test 280 genotypes in a field containing 16 rows and 20 columns of plots. In this example, these 280 genotypes are divided among three different experiments. In addition, four checks are included in a systematic diagonal arrangement across experiments to fill 40 plots representing 12.5% of the total number of experimental plots. An option to include filler plots is also available for fields where the number of experimental plots does not equal the number of available field plots.

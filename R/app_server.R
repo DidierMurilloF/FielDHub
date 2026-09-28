@@ -11,7 +11,8 @@
 #'         Richard Horsley [ctb]
 #'              
 #' @noRd
-app_server <- function( input, output, session ) {
+app_server <- function(input, output, session, task_runtime = NULL) {
+  session$userData$fieldhub_task_runtime <- task_runtime
   registry <- fieldhub_app_registry()
   registration_order <- order(vapply(registry, `[[`, integer(1), "server_order"))
   for (entry in registry[registration_order]) {

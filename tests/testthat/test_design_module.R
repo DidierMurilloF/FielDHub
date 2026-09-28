@@ -110,10 +110,8 @@ page_defaults <- function(module, seed = 7) {
   raw
 }
 
-# Spatial pages whose runs take long: the diagonal searches, the
-# allocations and the p-rep optimizations. optimized_arrangement() and
-# RCBD_augmented() run in well under a second.
-long_running <- c(Optim = FALSE, pREPS = TRUE, RCBD_augmented = FALSE, Diagonal = TRUE,
+# Every spatial page uses the same task lifecycle, including small runs.
+long_running <- c(Optim = TRUE, pREPS = TRUE, RCBD_augmented = TRUE, Diagonal = TRUE,
                   diagonal_multiple = TRUE, sparse_allocation = TRUE,
                   multi_loc_preps = TRUE)
 
@@ -136,7 +134,8 @@ test_that("there is one page spec per design, in the registry's workflow order",
     if (identical(spec$kind, "classic")) {
       expect_identical(spec$workflow, classic_workflow_spec(spec$module))
       expect_identical(spec$layout, spec$workflow$layout)
-      expect_false(spec$long_running)
+      expect_identical(spec$long_running, spec$module %in%
+                         c("IBD", "RowCol", "Alpha_Lattice", "Square_Lattice", "Rectangular_Lattice"))
     } else {
       expect_identical(spec$workflow, spatial_workflow_spec(spec$module))
       expect_null(spec$layout)

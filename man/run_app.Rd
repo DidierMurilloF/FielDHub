@@ -4,12 +4,15 @@
 \alias{run_app}
 \title{Run the Shiny Application}
 \usage{
-run_app(..., launch.browser = TRUE)
+run_app(..., launch.browser = TRUE, workers = 0L)
 }
 \arguments{
 \item{...}{Unused, for extensibility}
 
 \item{launch.browser}{Logical. If `TRUE`, the application is launched in the system's default web browser.}
+
+\item{workers}{Non-negative integer. Background workers; the default \code{0L}
+keeps synchronous execution and does not start any worker processes.}
 }
 \value{
 A shiny app object
@@ -28,4 +31,9 @@ The app packages are optional for R-script users. If any are unavailable,
 this function signals a \code{fieldhub_dependency_error} with an installation
 command and the missing package names in its \code{packages} field. It never
 installs packages automatically. See the README for the full app package list.
+
+With \code{workers > 0}, an installed package and the optional \pkg{mirai}
+package run design jobs in a private background pool. Other sessions remain
+responsive while a design runs. The pool closes when the app stops. Without
+mirai, or with development source, execution stays synchronous with a message.
 }

@@ -241,20 +241,22 @@ test_that("only the one presentation helper refers to shinyalert", {
 test_that("no app function writes a literal shiny::validate() message", {
   # Messages the app shows are written as FielDHub conditions and reach the
   # user through validate_design()/app_report_problem(); only
-  # validate_design(), app_attempt(fail = "validate") and app_plot_state()
+  # validate_design(), app_attempt(fail = "validate"), app_plot_state() and
+  # the shared task boundary (which already reported the condition once)
   # call shiny::validate() itself.
   calls_validate <- function(f) {
     grepl("shiny::validate(", paste(deparse(body(f)), collapse = "\n"), fixed = TRUE)
   }
   expect_setequal(names(Filter(calls_validate, c(core_functions(), app_functions()))),
-                  c("validate_design", "app_plot_state", "app_attempt"))
+                  c("validate_design", "app_plot_state", "app_attempt", "app_design_task"))
 })
 
 test_that("no module catches conditions itself", {
   # Catch-all tryCatch(error = <alert>) blocks and ad-hoc warning collectors
   # used to word the same condition differently in each module. Modules now
   # use validate_design(), app_attempt() or app_report_problem() instead;
-  # the only handlers left are those helpers in R/app_conditions.R.
+  # The shared task adapter also captures deferred results; the worker-pool
+  # lifecycle handles startup/shutdown failures without touching a session.
   catches <- function(f) {
     fieldhub_calls_named(body(f), c("tryCatch", "withCallingHandlers", "try",
                                     "showNotification", "conditionMessage"))
@@ -262,7 +264,7 @@ test_that("no module catches conditions itself", {
   functions <- app_functions()
   expect_setequal(names(Filter(catches, functions)),
                   c("app_attempt", "app_present_problem", "app_design_state",
-                    "app_log_problem"))
+                    "app_log_problem", "app_design_task", "app_worker_lifecycle"))
 })
 
 test_that("the p-rep modules share the no-dimensions explanation", {

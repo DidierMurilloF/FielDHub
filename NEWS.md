@@ -227,6 +227,13 @@
 
 ### New features:
 
+- `run_app(workers = 2L)` optionally runs designs in a private background
+  worker pool so other app sessions remain responsive. Long runs show a busy
+  control and progress message. Workers require an installed FielDHub package
+  and the optional mirai package; the default `workers = 0L` stays synchronous.
+  Pools close with the app, and recorded seeds and RNG settings are preserved.
+  The optional app now requires Shiny 1.8.1 or newer and promises.
+
 - The app's reproduction panel and ZIP exports now include a self-contained
   R call built from the recorded design arguments. Calls retain the seed,
   year and RNG settings, quote uploaded labels as data, and reconstruct

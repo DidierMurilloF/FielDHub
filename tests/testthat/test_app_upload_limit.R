@@ -50,6 +50,8 @@ test_that("each app restart captures the current host upload limit", {
 test_that("run_app defers the upload limit to the application startup hook", {
   # Inspect wiring only; do not create a Shiny session or run a server.
   code <- paste(deparse(body(run_app)), collapse = "\n")
-  expect_match(code, "onStart = app_upload_limit", fixed = TRUE)
+  expect_match(code, "onStart = function()", fixed = TRUE)
+  expect_match(code, "app_upload_limit()", fixed = TRUE)
+  expect_match(code, "runtime$start()", fixed = TRUE)
   expect_false("options" %in% all.names(body(run_app), functions = TRUE))
 })

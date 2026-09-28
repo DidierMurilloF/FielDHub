@@ -57,10 +57,12 @@ Author: Didier Murillo [cre, aut], Salvador Gezan [aut], Ana Heilman [ctb],
 Maintainer: Didier Murillo <didier.murilloflorez@ndsu.edu>
 Suggests: 
     golem,
-    shiny (>= 1.7.0),
+    shiny (>= 1.8.1),
     htmltools,
     DT,
     bslib,
+    promises,
+    mirai,
     shinycssloaders,
     plotly,
     shinyalert,

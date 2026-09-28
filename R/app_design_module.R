@@ -57,8 +57,8 @@ mod_design_ui <- function(id, spec) {
         if (!is.null(spec$upload)) app_upload_ui(ns, spec$upload),
         lapply(spec$controls, app_control_ui, ns = ns, toggle = toggle),
         shiny::fluidRow(
-          shiny::column(6, shiny::actionButton(
-            ns("run"), "Run!", icon = shiny::icon("circle-nodes", verify_fa = FALSE),
+          shiny::column(6, app_task_button(
+            ns("run"), "Run!", spec$long_running, icon = shiny::icon("circle-nodes", verify_fa = FALSE),
             class = "btn-block"
           )),
           shiny::column(6, shiny::actionButton(
@@ -66,6 +66,7 @@ mod_design_ui <- function(id, spec) {
             icon = shiny::icon("greater-than-equal", verify_fa = FALSE), class = "btn-block"
           ))
         ),
+        shiny::textOutput(ns("run_status"), container = function(...) shiny::div(role = "status", ...)),
         shiny::br(),
         save
       ),
@@ -154,12 +155,13 @@ mod_design_server <- function(id, spec) {
       return(app_spatial_page(input, output, session, spec, run = run, raw_controls = raw_controls))
     }
 
-    design <- shiny::reactive({
+    arguments <- shiny::reactive({
       inputs <- run()
-      shinyjs::show(id = workflow$ids[["layout_download"]])
-      validate_design(do.call(spec$engine, spec$args(inputs$values, inputs$data)))
-    }) |>
-      shiny::bindEvent(input$run)
+      validate_design(spec$args(inputs$values, inputs$data))
+    })
+    design <- app_design_task("run", spec$engine, arguments,
+      long_running = spec$long_running, busy_message = spec$busy_message)
+    shiny::observeEvent(design(), shinyjs::show(id = workflow$ids[["layout_download"]]))
 
     if (isTRUE(spec$summary)) {
       output$summary <- shiny::renderPrint({

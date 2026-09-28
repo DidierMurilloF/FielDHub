@@ -45,7 +45,8 @@ app_spatial_tabs <- function(ns, spec) {
         shinyjs::useShinyjs(),
         shiny::br(),
         steps("run"),
-        shinyjs::hidden(shiny::actionButton(ns("randomize"), "Randomize!")),
+        shinyjs::hidden(app_task_button(ns("randomize"), "Randomize!", spec$long_running)),
+        shiny::textOutput(ns("randomize_status"), container = function(...) shiny::div(role = "status", ...)),
         shiny::br(), shiny::br(),
         shiny::uiOutput(ns("status")),
         setup),
@@ -107,16 +108,21 @@ app_spatial_page <- function(input, output, session, spec, run, raw_controls) {
   }
 
   # Run!: the inputs of the run, with the design's allocation where it has one
+  allocation <- if (!is.null(spec$optim)) {
+    arguments <- shiny::reactive({
+      inputs <- run()
+      validate_design(spec$optim$args(inputs$values, inputs$data))
+    })
+    app_design_task("run", spec$optim$engine, arguments,
+      long_running = spec$long_running, busy_message = "Optimizing allocation...")
+  }
   prepared <- shiny::reactive({
     inputs <- run()
     if (!is.null(spec$optim)) {
-      inputs$values[[spec$optim$into]] <- in_progress("Optimization in progress ...", validate_design(
-        do.call(spec$optim$engine, spec$optim$args(inputs$values, inputs$data))
-      ))
+      inputs$values[[spec$optim$into]] <- allocation()
     }
     inputs
-  }) |>
-    shiny::bindEvent(input$run)
+  })
   # The run's values, with the controls the steps follow read as they change
   staged <- shiny::reactive({
     inputs <- prepared()
@@ -252,12 +258,13 @@ app_spatial_page <- function(input, output, session, spec, run, raw_controls) {
   })
   # The design comes from the engine through the spec's argument builder,
   # as a direct API call with the same values builds it
-  design <- shiny::reactive({
+  arguments <- shiny::reactive({
+    shiny::req(randomized())
     inputs <- design_inputs()
-    in_progress(spec$randomizing, validate_design(
-      spec$accept(do.call(spec$engine, spec$args(inputs$values, inputs$data)))
-    ))
+    validate_design(spec$args(inputs$values, inputs$data))
   })
+  design <- app_design_task("randomize", spec$engine, arguments, on_done = spec$accept,
+    long_running = spec$long_running, busy_message = spec$busy_message)
   # The state of the last Randomize!: ready, still waiting, or its problem
   result <- shiny::reactive({
     spatial_randomize_state(randomized(), if (isTRUE(randomized())) app_design_state(design))

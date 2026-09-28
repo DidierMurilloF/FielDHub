@@ -11,23 +11,35 @@
 #' command and the missing package names in its \code{packages} field. It never
 #' installs packages automatically. See the README for the full app package list.
 #'
+#' With \code{workers > 0}, an installed package and the optional \pkg{mirai}
+#' package run design jobs in a private background pool. Other sessions remain
+#' responsive while a design runs. The pool closes when the app stops. Without
+#' mirai, or with development source, execution stays synchronous with a message.
+#'
 #' @return A shiny app object
 #' @param ... Unused, for extensibility
 #' @param launch.browser Logical. If `TRUE`, the application is launched in the system's default web browser.
+#' @param workers Non-negative integer. Background workers; the default \code{0L}
+#'   keeps synchronous execution and does not start any worker processes.
 #'
 #' @export
 
 run_app <- function(
   ...,
-  launch.browser = TRUE
+  launch.browser = TRUE,
+  workers = 0L
 ) {
   check_app_dependencies()
+  runtime <- app_worker_lifecycle(workers)
   golem::with_golem_options(
     app = shiny::shinyApp(
       options = list(launch.browser = launch.browser),
-      onStart = app_upload_limit,
+      onStart = function() {
+        app_upload_limit()
+        runtime$start()
+      },
       ui = app_ui,
-      server = app_server
+      server = function(input, output, session) app_server(input, output, session, runtime)
     ),
     golem_opts = list()
   )

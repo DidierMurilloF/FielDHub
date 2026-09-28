@@ -71,7 +71,8 @@ design_spec_cache <- new.env(parent = emptyenv())
 build_design_specs <- function() {
   classic <- function(module, title, engine, controls, upload, upload_columns,
                       values, omit_na = TRUE, upload_check = identity,
-                      data = function(upload, controls) upload, summary = FALSE) {
+                      data = function(upload, controls) upload, summary = FALSE,
+                      long_running = FALSE, busy_message = "Randomizing design...") {
     workflow <- classic_workflow_spec(module)
     list(
       module = module, title = title, engine = engine, controls = controls,
@@ -80,7 +81,7 @@ build_design_specs <- function() {
       data = data, values = values,
       args = get(paste0("design_args_", module), mode = "function"),
       kind = "classic", workflow = workflow, layout = workflow$layout, summary = summary,
-      long_running = FALSE
+      long_running = long_running, busy_message = busy_message
     )
   }
   spatial <- function(module, title, engine, controls, upload, upload_columns, values, steps,
@@ -97,7 +98,7 @@ build_design_specs <- function() {
       kind = "spatial", optim = optim, steps = steps, setup = setup, entries = entries,
       panels = panels, workflow = spatial_workflow_spec(module), layout = NULL, summary = FALSE,
       field_size = field_size, accept = accept, upload_repeats = upload_repeats,
-      long_running = long_running, randomizing = randomizing, file_tag = file_tag
+      long_running = long_running, randomizing = randomizing, busy_message = randomizing, file_tag = file_tag
     )
   }
   # Result tabs of the spatial pages
@@ -184,7 +185,8 @@ build_design_specs <- function() {
   }
   lattice <- function(module, title, engine, design, upload, treatments) {
     classic(module, title, engine, upload = upload, upload_columns = c("ENTRY", "NAME"),
-      summary = TRUE, values = incomplete_block_values,
+      summary = TRUE, values = incomplete_block_values, long_running = TRUE,
+      busy_message = "Optimizing layout...",
       controls = list(
         ctl_count("t", treatments, generated_only = TRUE), ctl_reps(3), block_sizes(design),
         ctl_locations(), ctl_planter(), ctl_plot_start(), ctl_location_names(), ctl_seed()
@@ -310,12 +312,14 @@ build_design_specs <- function() {
              randomizeH = controls$randomizeH, randomizeV = controls$randomizeV)
       }),
     IBD = classic("IBD", "Incomplete Blocks Design", incomplete_blocks, upload = "ibd",
+      long_running = TRUE, busy_message = "Optimizing layout...",
       upload_columns = c("ENTRY", "NAME"), summary = TRUE, values = incomplete_block_values,
       controls = list(
         ctl_count("t", 15, generated_only = TRUE), ctl_reps(4), block_sizes("incomplete_blocks"),
         ctl_locations(), ctl_planter(), ctl_plot_start(), ctl_location_names(), ctl_seed()
       )),
     RowCol = classic("RowCol", "Row-Column Design", row_column, upload = "rcd",
+      long_running = TRUE, busy_message = "Optimizing layout...",
       upload_columns = c("ENTRY", "NAME"), summary = TRUE,
       controls = list(
         ctl_count("t", 42, generated_only = TRUE),
@@ -339,7 +343,7 @@ build_design_specs <- function() {
     # optimized_arrangement() runs in well under a second
     Optim = spatial("Optim", "Unreplicated Optimized Arrangement", optimized_arrangement,
       upload = "optim", upload_columns = c("ENTRY", "NAME", "REPS"),
-      upload_check = check_reps_upload, long_running = FALSE, file_tag = "Optim_",
+      upload_check = check_reps_upload, file_tag = "Optim_",
       controls = c(
         list(ctl_checks(4, generated_only = TRUE), ctl_rep_checks("8,8,8,8", generated_only = TRUE),
              ctl_count("lines", 280, min = 5, generated_only = TRUE), ctl_locations()),
@@ -413,7 +417,7 @@ build_design_specs <- function() {
       )),
     # RCBD_augmented() runs in well under a second; its layouts are plots
     RCBD_augmented = spatial("RCBD_augmented", "Augmented RCBD", RCBD_augmented,
-      upload = "arcbd", upload_columns = c("ENTRY", "NAME"), long_running = FALSE,
+      upload = "arcbd", upload_columns = c("ENTRY", "NAME"),
       file_tag = "ARCBD_",
       controls = c(
         list(

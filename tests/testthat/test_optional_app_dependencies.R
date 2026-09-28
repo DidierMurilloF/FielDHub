@@ -1,6 +1,6 @@
 test_that("app dependencies are optional and not imported at namespace load", {
   app <- c("golem", "shiny", "htmltools", "DT", "bslib", "shinycssloaders",
-           "plotly", "shinyalert", "shinyjs")
+           "plotly", "shinyalert", "shinyjs", "promises", "mirai")
   packages <- function(field) {
     text <- utils::packageDescription("FielDHub", fields = field)
     trimws(sub("\\s*\\(.*$", "", strsplit(text, ",")[[1L]]))

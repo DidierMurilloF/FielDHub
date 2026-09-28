@@ -2,20 +2,22 @@
 #' @noRd
 app_dependencies <- function() {
   c("golem", "shiny", "htmltools", "DT", "bslib", "shinycssloaders",
-    "plotly", "shinyalert", "shinyjs", "zip")
+    "plotly", "shinyalert", "shinyjs", "zip", "promises")
 }
 
 #' Explain missing app packages without installing or loading the application
 #' @noRd
 check_app_dependencies <- function(available = function(package) {
-  requireNamespace(package, quietly = TRUE)
+  minimum <- c(shiny = "1.8.1")
+  requireNamespace(package, quietly = TRUE) &&
+    (!package %in% names(minimum) || utils::packageVersion(package) >= minimum[[package]])
 }) {
   packages <- app_dependencies()
   missing <- packages[!vapply(packages, available, logical(1))]
   if (length(missing)) {
     quoted <- paste(encodeString(missing, quote = '"'), collapse = ", ")
     fieldhub_abort(
-      "The FielDHub app needs additional packages. Install them with ",
+      "The FielDHub app needs additional or updated packages. Install them with ",
       "install.packages(c(", quoted, ")). The R design functions remain available.",
       class = "fieldhub_dependency_error", data = list(packages = missing)
     )

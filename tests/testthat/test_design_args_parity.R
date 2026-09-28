@@ -420,7 +420,7 @@ test_that("design_args_RowCol() falls back to the l default", {
 # --- Step 2 (ruling R2): structural checks on the classic module bodies,
 # via the namespace so they also work under R CMD check (no R/ directory). ---
 
-test_that("classic pages build their design only through design_args_<Module>() and do.call()", {
+test_that("classic pages submit only argument-builder snapshots to the shared design task", {
   classic_engines <- list(
     CRD = "CRD", RCBD = "RCBD", LSD = "latin_square", FD = "full_factorial",
     SPD = "split_plot", SSPD = "split_split_plot", STRIPD = "strip_plot",
@@ -439,6 +439,7 @@ test_that("classic pages build their design only through design_args_<Module>() 
     "app_upload_dialog_observer", # opens the shared entries-format dialog when the upload toggle switches to "Yes"
     "app_classic_layout",  # shared layout-panel lifecycle for classic design pages
     "app_classic_workflow",# shared results/simulation/export lifecycle for classic design pages
+    "app_design_task",     # submits immutable engine arguments to the shared job runner
     "read_design_controls",   # parses the page's controls (R/validate_design_controls.R)
     "design_control_choices", # choices of a select computed from other controls or the upload
     "design_upload_data",  # says why a run with a failed upload does nothing
@@ -464,8 +465,10 @@ test_that("classic pages build their design only through design_args_<Module>() 
 
   code <- body(mod_design_server)
   nm <- all.names(code)
-  expect_identical(sum(nm == "do.call"), 1L)
-  expect_true(grepl("do.call(spec$engine, spec$args(", paste(deparse(code), collapse = " "), fixed = TRUE))
+  expect_identical(sum(nm == "do.call"), 0L)
+  text <- gsub("[[:space:]]+", "", paste(deparse(code), collapse = ""))
+  expect_true(grepl('app_design_task("run",spec$engine,arguments,', text, fixed = TRUE))
+  expect_true(grepl("spec$args(inputs$values,inputs$data)", text, fixed = TRUE))
   expect_identical(intersect(nm, forbidden), character(0))
   expect_identical(intersect(nm, c(unlist(classic_engines), paste0("design_args_", names(classic_engines)))),
                    character(0))
@@ -1135,7 +1138,7 @@ test_that("spatial builders leave a missing or invalid l to the engine's classed
 
 # --- Spatial structural check (ruling R2): namespace bodies, call heads ---
 
-test_that("spatial modules build their designs only through design_args_<Module>() and do.call()", {
+test_that("spatial pages submit builder snapshots for allocation and final design tasks", {
   # Every engine call each spatial module makes, keyed by the builder that
   # must supply its arguments.
   spatial_engines <- list(
@@ -1196,18 +1199,20 @@ test_that("spatial modules build their designs only through design_args_<Module>
   generic <- vapply(registry, function(entry) !is.null(entry$spec), logical(1))
   generic <- vapply(registry[generic], `[[`, character(1), "workflow")
 
-  # The generic spatial page reaches each engine only through its spec:
-  # do.call(spec$engine, spec$args(...)), and do.call(spec$optim$engine,
-  # spec$optim$args(...)) for the allocation of Run!
+  # Both stages use the shared task, with arguments built only by the spec.
   code <- body(app_spatial_page)
   text <- gsub("[[:space:]]+", "", paste(deparse(code), collapse = ""))
-  expect_identical(sum(all.names(code) == "do.call"), 2L)
-  expect_true(grepl("do.call(spec$engine,spec$args(", text, fixed = TRUE))
-  expect_true(grepl("do.call(spec$optim$engine,spec$optim$args(", text, fixed = TRUE))
+  expect_identical(sum(all.names(code) == "do.call"), 0L)
+  expect_identical(sum(all.names(code) == "app_design_task"), 2L)
+  expect_true(grepl('app_design_task("randomize",spec$engine,arguments,', text, fixed = TRUE))
+  expect_true(grepl('app_design_task("run",spec$optim$engine,arguments,', text, fixed = TRUE))
+  expect_true(grepl("spec$args(inputs$values,inputs$data)", text, fixed = TRUE))
+  expect_true(grepl("spec$optim$args(inputs$values,inputs$data)", text, fixed = TRUE))
   heads <- fieldhub_call_heads(code)
   expect_identical(intersect(heads, c(forbidden, unlist(spatial_engines),
                                       unlist(lapply(spatial_engines, names)))), character(0))
   page_helpers <- c(
+    "app_design_task",            # worker/sync lifecycle shared by both engine steps
     "validate_design", "app_design_state", "app_plot_state", "app_upload_spec",
     "read_design_controls",       # reads again the controls the steps follow (filler plots)
     "design_step_choices",        # choices of a step, from the values of the run

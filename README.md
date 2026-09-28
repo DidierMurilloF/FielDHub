@@ -57,7 +57,7 @@ its additional packages once:
 
 ``` r
 install.packages(c("golem", "shiny", "htmltools", "DT", "bslib",
-                   "shinycssloaders", "plotly", "shinyalert", "shinyjs", "zip"))
+                   "shinycssloaders", "plotly", "shinyalert", "shinyjs", "zip", "promises"))
 ```
 
 If anything is missing, `run_app()` reports the packages to install.
@@ -68,6 +68,13 @@ This is a basic example which shows you how to launch the app:
 library(FielDHub)
 run_app()
 ```
+
+The app requires Shiny 1.8.1 or newer. To keep
+other sessions responsive during long designs, optionally install `mirai`
+and use `run_app(workers = 2L)`. Workers require an installed FielDHub
+package; development source and installations without mirai use synchronous
+execution. The default `workers = 0L` starts no workers. Each app owns its
+worker pool and closes it when the app stops.
 
 ### Diagonal Arrangement Example
 
