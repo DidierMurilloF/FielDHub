@@ -742,6 +742,36 @@
   per-design upload rules, error wording and format-example content are
   preserved.
 
+- The 12 classic design pages (CRD, RCBD, Latin square, factorial,
+  split-plot, split-split-plot, strip-plot, incomplete blocks, row-column
+  and the three lattices) are now built by one generic page from a
+  per-design spec, with shared sidebar controls whose label, default and
+  minimum are held once per concept. Menus, tab ids, result and export
+  ids, uploads, results and archives are unchanged, and every page still
+  calls its engine through the same argument builder, so the app and the R
+  API build identical designs. Deliberate consistency changes: the seed
+  box is blank by default on every classic page (labelled "Random Seed
+  (blank = automatic):" on every page; an automatic seed is recorded in
+  the result and its exports) instead of starting at 123, 118, 4, 2437,
+  16, 5 or 7; "Starting Plot Number(s):" and "Location Name(s):" replace
+  "Starting Plot Number:", "Input Location:" and "Input the Location:";
+  the Latin square reads "Input # of Full Reps:" (was "... (Squares):");
+  the factorial, split-plot and split-split-plot type reads "Select Design
+  Type:"; the split-plot counts read "Input # of Whole Plots:", "Input #
+  of Sub-plots Within Whole Plots:" and "Input # of Sub-sub-plots Within
+  Sub-plots:"; the factor levels read "Input # of Entries for Each Factor
+  (comma separated):". Minimums now match what the engines accept: the CRD
+  page takes a single treatment and the split-plot and split-split-plot
+  pages a single whole plot, and the Latin square page offers at most 10
+  treatments. Every page reads its controls with one plain reader,
+  `read_design_controls()`: a blank or invalid control is explained by its
+  label where the result would be (most blank inputs used to do nothing),
+  and "No options for this combination of treatments!", invalid RCBD check
+  inputs, too few factorial factors and a Run! after a rejected upload
+  ("Check the input file and try again.") are shown there instead of in a
+  dialog. Controls appear in the same order on every page, and the field
+  plot has the same height on every page.
+
 ### Fix bugs:
 
 - Blank app seed boxes no longer error. Shiny sends a cleared numeric

@@ -2,10 +2,7 @@ test_that("every module connects its design to the shared reproduction component
   # The classic designs share the generic page server (mod_design_server()),
   # whose design reactive is `design`.
   sources <- c(
-    mod_design_server = "design", mod_IBD_server = "IBD_reactive",
-    mod_RowCol_server = "RowCol_reactive", mod_Alpha_Lattice_server = "ALPHA_reactive",
-    mod_Rectangular_Lattice_server = "RECTANGULAR_reactive",
-    mod_Square_Lattice_server = "SQUARE_reactive", mod_Diagonal_server = "diagonal_design",
+    mod_design_server = "design", mod_Diagonal_server = "diagonal_design",
     mod_diagonal_multiple_server = "diagonal_design", mod_Optim_server = "optimized_arrang",
     mod_RCBD_augmented_server = "rcbd_augmented_reactive",
     mod_sparse_allocation_server = "sparse_design", mod_pREPS_server = "pREPS_reactive",

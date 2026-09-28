@@ -196,15 +196,10 @@ test_that("app/module functions do not call cat() or print() outside a rendered 
   # the cat()/print() output into that text output, it never reaches the R
   # console, so this is the legitimate exception ruling R2 allows.
   summary_render_servers <- c(
-    "mod_Alpha_Lattice_server",
     "mod_design_server",
-    "mod_IBD_server",
     "mod_Optim_server",
     "mod_pREPS_server",
-    "mod_RCBD_augmented_server",
-    "mod_Rectangular_Lattice_server",
-    "mod_RowCol_server",
-    "mod_Square_Lattice_server"
+    "mod_RCBD_augmented_server"
   )
   expect_setequal(direct_cat_or_print, summary_render_servers)
 })

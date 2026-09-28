@@ -481,25 +481,6 @@ test_that("classic pages build their design only through design_args_<Module>() 
                        info = paste(module, field))
     }
   }
-
-  # Designs not yet rendered by the generic page keep their own module
-  module_helpers <- c("validate_design", "app_report_problem", "app_attempt", "app_design_seed",
-                      "app_read_upload", "app_upload_dialog_observer", "app_classic_layout",
-                      "app_classic_workflow", "classic_workflow_spec", "parse_whole_numbers",
-                      "valid_block_sizes")
-  for (entry in fieldhub_app_registry()) {
-    if (!identical(entry$workflow_family, "classic") || !is.null(entry$spec)) next
-    module <- entry$workflow
-    nm <- all.names(body(get(entry$server, namespace)))
-    engine <- classic_engines[[module]]
-    builder <- paste0("design_args_", module)
-    expect_identical(sum(nm == "do.call"), 1L, info = module)
-    expect_identical(sum(nm == engine), 1L, info = module)
-    expect_identical(sum(nm == builder), 1L, info = module)
-    expect_identical(intersect(nm, forbidden), character(0), info = module)
-    expect_identical(setdiff(intersect(nm, package_functions), c(module_helpers, engine, builder)),
-                     character(0), info = module)
-  }
 })
 
 # --- Step 7: direct unit tests for helpers classic modules use that had

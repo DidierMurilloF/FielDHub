@@ -12,16 +12,14 @@ fieldhub_app_registry <- function() {
   groups <- c("Unreplicated Designs", "Partially Replicated Designs",
               "Lattice Designs", "Other Designs")
   entry <- function(label, module, engine, group, server_order) {
-    # Designs already rendered by the generic page; the others keep their
-    # own module until they are migrated
-    generic <- module %in% c("CRD", "RCBD", "LSD", "FD", "SPD", "SSPD", "STRIPD")
+    generic <- module %in% classic
     list(label = label, id = paste0(module, "_ui_1"),
          ui = if (generic) "mod_design_ui" else paste0("mod_", module, "_ui"),
          server = if (generic) "mod_design_server" else paste0("mod_", module, "_server"),
          engine = engine,
          group = groups[[group]], server_order = as.integer(server_order),
          workflow = module,
-         workflow_family = if (module %in% classic) "classic" else "spatial",
+         workflow_family = if (generic) "classic" else "spatial",
          spec = if (generic) module)
   }
   list(

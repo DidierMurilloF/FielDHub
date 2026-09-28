@@ -42,9 +42,9 @@ test_that("classic modules delegate layout selection and stop swallowing plot er
     expect_false("reset_selection" %in% all.names(code))
     binding <- find_binding(code)
     expect_length(binding, 1L)
-    spec <- binding[[1L]][["spec"]]
     # the generic page hands its own workflow spec to the layout lifecycle
-    ids <- if (is.name(spec)) design_app_spec(module)$workflow$layout$ids else eval(spec)$layout$ids
+    expect_identical(binding[[1L]][["spec"]], as.name("workflow"))
+    ids <- design_app_spec(module)$workflow$layout$ids
     expect_identical(anyDuplicated(ids), 0L)
     expected <- c("layout", if (module != "CRD") "stacked",
                   if (!module %in% c("CRD", "LSD")) "location")
