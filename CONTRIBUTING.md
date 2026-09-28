@@ -73,6 +73,17 @@ Care to fix bugs or implement new functionality for FielDHub? Awesome! 👏 Have
 
 ## Development guidelines
 
+From the repository root, run `source("dev/run_dev.R")` to load the source
+package and start the app. This path does not need `golem-config.yml`, detach
+packages, clear your workspace, or regenerate documentation. Stop the app
+normally before reloading changed source. Installed-package users run
+`FielDHub::run_app()` after installing the optional app dependencies in README.
+The root `app.R` returns the app object for source-based Shiny deployment.
+
+Regenerate documentation separately with `devtools::document()` when changing
+roxygen comments. `Rscript --vanilla tools/check-launchers.R .` checks both
+entry-script contracts without starting a server or changing the R session.
+
 We try to follow the [GitHub flow](https://guides.github.com/introduction/flow/) for development.
 
 1. Fork [this repo][repo] and clone it to your computer. To learn more about this process, see [this guide](https://guides.github.com/activities/forking/).

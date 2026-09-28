@@ -9,6 +9,9 @@ on:
       - "DESCRIPTION"
       - "tools/benchmark-*.R"
       - "tools/check-release-tools.R"
+      - "tools/check-launchers.R"
+      - "dev/run_dev.R"
+      - "app.R"
       - ".github/workflows/**"
 
 permissions:

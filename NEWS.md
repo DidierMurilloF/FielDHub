@@ -867,6 +867,12 @@
 
 ### Fix bugs:
 
+- The development launcher no longer calls a golem helper requiring the
+  removed configuration file. Sourcing `dev/run_dev.R` now loads the source
+  and starts the app explicitly, without detaching packages, changing
+  production options or regenerating documentation. The source-deployment
+  entry point also leaves production options alone.
+
 - Blank app seed boxes no longer error. Shiny sends a cleared numeric
   input as a logical `NA`, which all 19 design modules now accept as an
   automatic seed, the same as `NULL` or an empty string. Automatic app
