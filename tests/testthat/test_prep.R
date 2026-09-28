@@ -1,5 +1,4 @@
 library(testthat)
-library(dplyr)
 library(FielDHub)
 
 
@@ -164,7 +163,7 @@ test_that("For groups with ENTRY numeric value between 31 and 33, REP is always 
   groups <- df_new |>
     dplyr::group_by(LOCATION, ENTRY, entry_num) |>
     dplyr::summarise(
-      group_size = n(),
+      group_size = dplyr::n(),
       max_rep = max(REP),
       .groups = "drop"
     )

@@ -1,6 +1,5 @@
 library(testthat)
 library(FielDHub)
-library(dplyr)
 
 # Create an example RCBD design with 4 treatments and 3 replicates.
 example_design <- RCBD(t = 4, reps = 3, seed = 89076)
