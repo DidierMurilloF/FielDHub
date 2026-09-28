@@ -444,6 +444,10 @@
 
 ### Enhancements:
 
+- Repeated identical unexpected errors no longer queue duplicate dialogs in
+  one app session. Each occurrence is still logged; normal input errors and
+  warnings keep their existing presentation.
+
 - The Welcome and About pages use the current year and DESCRIPTION's
   contributor names and roles. Existing local portraits and profiles remain;
   contributor cards also accommodate narrow screens. App styles no longer

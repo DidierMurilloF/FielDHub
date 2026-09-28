@@ -158,6 +158,12 @@ app_present_problem <- function(message, severity = c("error", "warning", "info"
     if (identical(severity, "warning")) warning(text, call. = FALSE) else message(text)
     return(invisible(NULL))
   }
+  if (identical(severity, "error") && startsWith(message, "Unexpected problem: ")) {
+    if (is.null(session$userData$fieldhub_problem_notice_gate)) {
+      session$userData$fieldhub_problem_notice_gate <- problem_notice_gate()
+    }
+    if (!session$userData$fieldhub_problem_notice_gate(message)) return(invisible(NULL))
+  }
   if (identical(severity, "warning")) {
     shiny::showNotification(
       shiny::tagList(shiny::strong(label), shiny::br(), message),

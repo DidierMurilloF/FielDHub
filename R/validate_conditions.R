@@ -97,6 +97,21 @@ problem_severity <- function(problem) {
   if (inherits(problem, "warning")) "warning" else "error"
 }
 
+#' Suppress consecutive identical unexpected dialogs within one session
+#'
+#' The app owns a separate gate per session. Errors are still logged at their
+#' source; only repeated dialog presentation is suppressed. A different bug
+#' is always shown. Expected input errors and warnings bypass this gate.
+#' @noRd
+problem_notice_gate <- function() {
+  previous <- NULL
+  function(message) {
+    if (identical(previous, message)) return(FALSE)
+    previous <<- message
+    TRUE
+  }
+}
+
 #' Evaluate work, collecting the FielDHub warnings it signals
 #'
 #' @description FielDHub warnings are muffled and collected; any other
