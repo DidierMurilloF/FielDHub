@@ -698,6 +698,110 @@ test_that("design_args_diagonal_multiple() repeats entries across experiments on
                                        blocks = blocks, sameEntries = TRUE))
 })
 
+test_that("sparse_allocation app arguments reproduce the API allocation and design across three locations", {
+  # Run!: the allocation, through its own builder
+  optim_values <- list(lines = 135, l = 3, copies_per_entry = 2, checks = 4, seed = 5)
+  via_app_allocation <- do.call(do_optim, design_args_sparse_allocation_optim(optim_values))
+  direct_allocation <- do_optim(design = "sparse", lines = 135, l = 3, copies_per_entry = 2,
+                                add_checks = TRUE, checks = 4, seed = 5)
+  expect_identical(via_app_allocation, direct_allocation)
+  # Randomize!: the design of every location from that allocation
+  lines_within_loc <- as.numeric(via_app_allocation$size_locations[1])
+  dims <- as.numeric(strsplit(diagonal_dimension_choices(lines_within_loc, checks = 136:139)[1],
+                              " x ")[[1]])
+  percents <- offered_check_percents(dims[1], dims[2], checks = 136:139, lines = lines_within_loc)
+  values <- c(optim_values, list(nrows = dims[1], ncols = dims[2], planter = "cartesian",
+                                 plot_start = c(1, 1001, 2001), expt_name = "Sparse1",
+                                 location_names = c("A", "B", "C"),
+                                 sparse_list = via_app_allocation, checksPercent = percents[1]))
+  parity(design_args_sparse_allocation, sparse_allocation, values,
+         direct = sparse_allocation(lines = 135, nrows = dims[1], ncols = dims[2], l = 3,
+                                    planter = "cartesian", plotNumber = c(1, 1001, 2001),
+                                    copies_per_entry = 2, checks = 4, exptName = "Sparse1",
+                                    locationNames = c("A", "B", "C"),
+                                    sparse_list = direct_allocation, seed = 5,
+                                    checksPercent = percents[1]))
+})
+
+test_that("sparse_allocation app arguments reproduce an uploaded-data allocation and design", {
+  data <- data.frame(ENTRY = 1:139, NAME = c(paste0("CHECK", 1:4), paste0("SB-", 5:139)))
+  optim_values <- list(lines = 135, l = 3, copies_per_entry = 2, checks = 4, seed = 8)
+  via_app_allocation <- do.call(do_optim, design_args_sparse_allocation_optim(optim_values, data))
+  direct_allocation <- do_optim(design = "sparse", lines = 135, l = 3, copies_per_entry = 2,
+                                add_checks = TRUE, checks = 4, seed = 8, data = data)
+  expect_identical(via_app_allocation, direct_allocation)
+  values <- c(optim_values, list(nrows = 10, ncols = 10, planter = "serpentine",
+                                 plot_start = c(101, 201, 301), expt_name = "E",
+                                 location_names = c("X", "Y", "Z"),
+                                 sparse_list = via_app_allocation, checksPercent = NULL))
+  parity(design_args_sparse_allocation, sparse_allocation, values, data,
+         direct = sparse_allocation(lines = 135, nrows = 10, ncols = 10, l = 3,
+                                    plotNumber = c(101, 201, 301), copies_per_entry = 2,
+                                    checks = 4, exptName = "E", locationNames = c("X", "Y", "Z"),
+                                    sparse_list = direct_allocation, seed = 8, data = data))
+})
+
+test_that("design_args_sparse_allocation() leaves misfit plot starts, names and experiment names to the engine (R9)", {
+  allocation <- do_optim(design = "sparse", lines = 135, l = 3, copies_per_entry = 2,
+                         add_checks = TRUE, checks = 4, seed = 5)
+  values <- list(lines = 135, l = 3, copies_per_entry = 2, checks = 4, seed = 5,
+                 nrows = 10, ncols = 10, planter = "serpentine", plot_start = 1001,
+                 expt_name = character(), location_names = "ONLY", sparse_list = allocation)
+  built <- design_args_sparse_allocation(values)
+  # The engine's own base: sparse_allocation() starts the default at 1, the
+  # app's inline formula used to start it at 1001
+  expect_identical(built$plotNumber, default_plot_starts(3, 1))
+  expect_false(any(c("locationNames", "exptName") %in% names(built)))
+  found <- warnings_of_class(via_app <- do.call(sparse_allocation, built),
+                             "fieldhub_default_warning")
+  expect_length(found, 0L)
+  direct <- sparse_allocation(lines = 135, nrows = 10, ncols = 10, l = 3, plotNumber = c(1, 1001, 2001),
+                              copies_per_entry = 2, checks = 4, sparse_list = allocation, seed = 5)
+  expect_identical(via_app$fieldBook, direct$fieldBook)
+  expect_identical(via_app$metadata$parameters, direct$metadata$parameters)
+  expect_identical(unique(via_app$fieldBook$LOCATION), paste0("LOC", 1:3))
+  expect_true(all(via_app$fieldBook$EXPT %in% c("SparseExpt", "Filler")))
+})
+
+test_that("design_args_sparse_allocation() without an allocation or dimensions lets sparse_allocation() compute them", {
+  values <- list(lines = 135, l = 3, copies_per_entry = 2, checks = 4, seed = 5,
+                 plot_start = c(1, 1001, 2001))
+  built <- design_args_sparse_allocation(values)
+  expect_false(any(c("sparse_list", "nrows", "ncols") %in% names(built)))
+  parity(design_args_sparse_allocation, sparse_allocation, values,
+         direct = sparse_allocation(lines = 135, l = 3, plotNumber = c(1, 1001, 2001),
+                                    copies_per_entry = 2, checks = 4, seed = 5))
+})
+
+test_that("sparse_allocation() without dimensions builds the field the app preselects", {
+  # The app offers diagonal_dimension_choices() (field_dimensions()
+  # candidates the checks fit, squarest first) and preselects the first;
+  # sparse_allocation() now defaults to that same field. With 100 entries
+  # per location it used to take 10 x 12 from a narrower candidate range.
+  design <- sparse_allocation(lines = 150, l = 3, copies_per_entry = 2, checks = 4, seed = 2)
+  lines_within_loc <- as.numeric(design$size_locations[1])
+  expect_identical(lines_within_loc, 100)
+  preselected <- diagonal_dimension_choices(lines_within_loc, checks = 151:154)[1]
+  expect_identical(preselected, "10 x 11")
+  expect_identical(paste(design$infoDesign$rows, "x", design$infoDesign$columns), preselected)
+})
+
+test_that("diagonal_dimension_choices(first = TRUE) is the first choice, found without testing the rest", {
+  for (lines in c(46, 90, 100, 287)) {
+    expect_identical(diagonal_dimension_choices(lines, checks = 1:4, first = TRUE),
+                     diagonal_dimension_choices(lines, checks = 1:4)[1], info = lines)
+  }
+  layout <- data.frame(ENTRY = 1:304, BLOCK = c(rep("ALL", 4), rep(1:3, times = c(100, 120, 80))))
+  expect_identical(
+    diagonal_dimension_choices(300, 1:4, kindExpt = "DBUDC", stacked = "By Column",
+                               data = layout, first = TRUE),
+    diagonal_dimension_choices(300, 1:4, kindExpt = "DBUDC", stacked = "By Column",
+                               data = layout)[1])
+  expect_identical(diagonal_dimension_choices(40, checks = 1:4, first = TRUE), character())
+  expect_error(diagonal_dimension_choices(90, checks = 1:4, first = NA),
+               class = "fieldhub_input_error")
+})
+
 # --- Spatial structural check (ruling R2): namespace bodies, call heads ---
 
 test_that("spatial modules build their designs only through design_args_<Module>() and do.call()", {
@@ -705,7 +809,9 @@ test_that("spatial modules build their designs only through design_args_<Module>
   # must supply its arguments.
   spatial_engines <- list(
     Diagonal = c(design_args_Diagonal = "diagonal_arrangement"),
-    diagonal_multiple = c(design_args_diagonal_multiple = "diagonal_arrangement")
+    diagonal_multiple = c(design_args_diagonal_multiple = "diagonal_arrangement"),
+    sparse_allocation = c(design_args_sparse_allocation_optim = "do_optim",
+                          design_args_sparse_allocation = "sparse_allocation")
   )
   # Unexported helpers a spatial module server may call, and why. Anything
   # else it calls must be one of its engines/builders, or a base/shiny/DT/
@@ -723,7 +829,8 @@ test_that("spatial modules build their designs only through design_args_<Module>
     "field_dimensions",           # candidate field sizes: rejects too few entries before any randomization
     "diagonal_dimension_choices", # feasible diagonal field dimensions offered before randomizing (seed-isolated)
     "diagonal_check_options",     # percentages of checks offered for a field before randomizing (seed-isolated)
-    "field_book_location_grids"   # splits a field book into per-location EXPT grids for display
+    "field_book_location_grids",  # splits a field book into per-location EXPT grids for display
+    "allocation_entry_names"      # reads the entry names of a do_optim() allocation for its table
   )
   forbidden <- c("sample", "sample.int", "set.seed", "runif", "available_percent",
                  "random_checks", "merge_user_data", "pREP", "get_random",
@@ -753,7 +860,7 @@ test_that("spatial modules build their designs only through design_args_<Module>
     # ... and never called directly, nor referred to anywhere else
     for (engine in unique(engines)) {
       expect_false(engine %in% heads, info = paste(module, engine))
-      expect_identical(sum(all.names(code) == engine), sum(engines == engine),
+      expect_identical(sum(fieldhub_symbol_refs(code) == engine), sum(engines == engine),
                        info = paste(module, engine))
     }
     for (builder in names(engines)) {

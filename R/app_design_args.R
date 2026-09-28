@@ -431,3 +431,77 @@ design_args_diagonal_multiple <- function(values, data = NULL) {
     sameEntries = values[["sameEntries"]] %||% FALSE
   )
 }
+
+#' Build do_optim() arguments for the sparse allocation module's Run! step
+#'
+#' `values`: `lines`, `l`, `copies_per_entry`, `checks`, `seed`. `data`
+#' (the uploaded entry list, checks first) is only validated here; the
+#' allocation itself depends on the counts, and `sparse_allocation()`
+#' merges the list into the locations.
+#' @noRd
+design_args_sparse_allocation_optim <- function(values, data = NULL) {
+  list(
+    design = "sparse",
+    lines = values[["lines"]],
+    l = values[["l"]],
+    copies_per_entry = values[["copies_per_entry"]],
+    add_checks = TRUE,
+    checks = values[["checks"]],
+    seed = values[["seed"]],
+    data = data
+  )
+}
+
+#' Build sparse_allocation() arguments for the sparse allocation module
+#'
+#' `values`: the `design_args_sparse_allocation_optim()` values plus
+#' `nrows`, `ncols`, `planter`, `plot_start`, `expt_name`,
+#' `location_names`, `sparse_list` (the allocation computed at Run!) and
+#' `checksPercent`.
+#'
+#' `sparse_allocation()` tests `missing()` for several arguments, so the
+#' ones the app cannot fill are left out instead of sent as NULL: misfit
+#' location names and a blank experiment name get the engine's own
+#' defaults (`LOC1`, ... and `"SparseExpt"`), and without `sparse_list` or
+#' field dimensions the engine computes them itself. Misfit starting plots
+#' become the engine's own default, `default_plot_starts(l, 1)` (ruling R9;
+#' the module used to start its default at 1001).
+#' @noRd
+design_args_sparse_allocation <- function(values, data = NULL) {
+  l <- values[["l"]]
+  expt_name <- values[["expt_name"]]
+  args <- list(
+    lines = values[["lines"]],
+    nrows = values[["nrows"]],
+    ncols = values[["ncols"]],
+    l = l,
+    planter = values[["planter"]] %||% "serpentine",
+    plotNumber = location_plot_starts(values[["plot_start"]], l, base = 1),
+    copies_per_entry = values[["copies_per_entry"]],
+    checks = values[["checks"]],
+    exptName = if (length(expt_name) > 0L) expt_name[1],
+    locationNames = location_names_or_null(values[["location_names"]], l),
+    sparse_list = values[["sparse_list"]],
+    seed = values[["seed"]],
+    data = data,
+    checksPercent = values[["checksPercent"]]
+  )
+  drop_null_args(args, c("nrows", "ncols", "exptName", "locationNames", "sparse_list"))
+}
+
+#' Names of the entries of an allocation table, in allocation-row order
+#'
+#' @description The allocation table of the sparse and multi-location p-rep
+#' modules has one row per entry `1..lines`. Its names are those
+#' `do_optim()` gave the entries (`G-1`, ... for a generated list), read
+#' back from the allocation instead of rebuilt by the module, so the table
+#' always shows the labels of the field book.
+#'
+#' @param allocation A `do_optim()` result.
+#' @param lines Number of entries, excluding checks.
+#' @return A character vector of length `lines`.
+#' @noRd
+allocation_entry_names <- function(allocation, lines) {
+  entries <- allocation$multi_location_data
+  as.character(entries$NAME[match(seq_len(lines), entries$ENTRY)])
+}

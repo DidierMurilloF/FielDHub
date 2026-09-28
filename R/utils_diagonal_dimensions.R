@@ -43,12 +43,16 @@ diagonal_check_options <- function(...) {
 #' @param planter Either `serpentine` or `cartesian`.
 #' @param data Entry list with checks first and a `BLOCK` column for `DBUDC`.
 #' @param minimum_extra Lower search margin; the upper margin is 20 percent.
+#' @param first When `TRUE`, return only the first feasible option (the
+#'   squarest one, the app's preselected dimension), testing the candidates
+#'   in that order and stopping at the first that fits.
 #' @return Character dimension labels, ordered by increasing difference between
 #'   rows and columns. An empty vector means no feasible option was found.
 #' @noRd
 diagonal_dimension_choices <- function(lines, checks, kindExpt = "SUDC",
                                        stacked = "By Row", planter = "serpentine",
-                                       data = NULL, minimum_extra = 0.10) {
+                                       data = NULL, minimum_extra = 0.10,
+                                       first = FALSE) {
     invalid_lines <- !is.numeric(lines) || length(lines) != 1L ||
         is.na(lines) || !is.finite(lines) || lines < 1 || lines %% 1 != 0 ||
         lines > floor(.Machine$integer.max / 1.20)
@@ -78,6 +82,7 @@ diagonal_dimension_choices <- function(lines, checks, kindExpt = "SUDC",
         minimum_extra < 0 || minimum_extra > 0.20) {
         fieldhub_abort("`minimum_extra` must be one number between 0 and 0.20.")
     }
+    validate_flag(first, "first")
     if (kindExpt == "DBUDC") {
         if (!is.data.frame(data) || !all(c("ENTRY", "BLOCK") %in% names(data)) ||
             nrow(data) != lines + length(checks)) {
@@ -95,7 +100,7 @@ diagonal_dimension_choices <- function(lines, checks, kindExpt = "SUDC",
     if (length(candidates) == 0L) return(character())
     dims <- do.call(rbind, strsplit(candidates, " x ", fixed = TRUE))
     storage.mode(dims) <- "integer"
-    feasible <- vapply(seq_along(candidates), function(i) {
+    fits <- function(i) {
         options <- diagonal_check_options(
             n_rows = dims[i, 1], n_cols = dims[i, 2], checks = checks,
             Option_NCD = TRUE, kindExpt = kindExpt, stacked = stacked,
@@ -103,7 +108,15 @@ diagonal_dimension_choices <- function(lines, checks, kindExpt = "SUDC",
             dim_data = lines + length(checks), dim_data_1 = lines
         )
         !is.null(options$dt)
-    }, logical(1))
+    }
+    if (first) {
+        # order() is stable, so this is the first element of the full list
+        for (i in order(abs(dims[, 1] - dims[, 2]))) {
+            if (fits(i)) return(candidates[i])
+        }
+        return(character())
+    }
+    feasible <- vapply(seq_along(candidates), fits, logical(1))
     candidates <- candidates[feasible]
     dims <- dims[feasible, , drop = FALSE]
     candidates[order(abs(dims[, 1] - dims[, 2]))]

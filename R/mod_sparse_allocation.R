@@ -284,6 +284,9 @@ mod_sparse_allocation_server <- function(id){
       list(randomize_hit$times, user_tries$tries)
     })
     
+    # Inputs parsed at Run!; sparse_allocation() applies its own defaults to
+    # starting plots, location names or a blank experiment name that do not
+    # fit (see design_args_sparse_allocation())
     single_inputs <- shiny::eventReactive(input$sparse_run, {
         shiny::req(input$sparse_lines)
         shiny::req(input$sparse_plot_start)
@@ -298,16 +301,7 @@ mod_sparse_allocation_server <- function(id){
         seed_number <- validate_design(app_design_seed(input$seed_single))
         location_names <- as.vector(unlist(strsplit(input$sparse_loc_names, ",")))
         sites = as.numeric(input$sparse_locations)
-        if (length(location_names) == 0 || length(location_names) != sites) {
-            location_names <- paste0("LOC", 1:sites)
-        }
-        if (length(plotNumber) == 0 || length(plotNumber) != sites) {
-            plotNumber <- seq(1, 1000 * sites, by = 1000)[1:sites]
-        }
         name_expt <- Name_expt
-        if (length(Name_expt) == 0) {
-            name_expt <- "expt_sparse"
-        }
         return(
             list(
                 sparse_lines = input_sparse_lines,
@@ -424,8 +418,6 @@ mod_sparse_allocation_server <- function(id){
                     )
                     return(NULL)
                 }
-                input_entries_column <- data_entry_UP[(sparse_checks + 1):nrow(data_entry_UP),1]
-                input_entries <- as.numeric(input_entries_column)
                 dim_data_entry <- nrow(data_entry_UP)
                 entries_in_file <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
                 input_lines <- as.numeric(input$sparse_lines)
@@ -442,7 +434,7 @@ mod_sparse_allocation_server <- function(id){
                     list(
                         data_entry = data_entry_UP,
                         data_without_checks = data_without_checks,
-                        input_entries = input_entries,
+                        checks_entries = sort(checksEntries),
                         dim_data_entry = dim_data_entry, 
                         dim_without_checks = entries_in_file,
                         upload = TRUE))
@@ -455,28 +447,16 @@ mod_sparse_allocation_server <- function(id){
             shiny::req(input$sparse_lines)
             shiny::req(input$sparse_checks)
             sparse_checks <- as.numeric(input$sparse_checks)
-            checksEntries <- 1:sparse_checks
-            lines <- input$sparse_lines
-            max_entry <- lines
-            df_checks <- default_entries(
-                sparse_checks,
-                prefix = "CH-",
-                start = max_entry + 1
-            )
-            # Same names that do_optim() gives the entries
-            gen.list <- default_entries(lines)
-            input_entries <- as.numeric(gen.list$ENTRY)
-            data_entry_UP <- dplyr::bind_rows(df_checks, gen.list)
-            dim_data_entry <- nrow(data_entry_UP)
-            entries_in_file <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
-            data_without_checks <- gen.list
+            lines <- as.numeric(input$sparse_lines)
+            # do_optim() generates the entries and names them; its checks
+            # are the entries that follow the lines
             return(
                 list(
-                    data_entry = data_entry_UP,
-                    data_without_checks = data_without_checks, 
-                    input_entries = input_entries,
-                    dim_data_entry = dim_data_entry, 
-                    dim_without_checks = entries_in_file,
+                    data_entry = NULL,
+                    data_without_checks = NULL,
+                    checks_entries = lines + seq_len(sparse_checks),
+                    dim_data_entry = lines + sparse_checks, 
+                    dim_without_checks = lines,
                     upload = FALSE
                 )
             )
@@ -484,6 +464,18 @@ mod_sparse_allocation_server <- function(id){
     }) |>
         shiny::bindEvent(input$sparse_run)
     
+    # Values of design_args_sparse_allocation_optim(), parsed at Run!
+    sparse_optim_values <- shiny::reactive({
+        list(
+            lines = get_sparse_data()$dim_without_checks,
+            l = single_inputs()$sites,
+            copies_per_entry = single_inputs()$plant_reps,
+            checks = as.numeric(input$sparse_checks),
+            seed = single_inputs()$seed_number
+        )
+    }) |>
+        shiny::bindEvent(input$sparse_run)
+
     # Allocation of the entries to the locations, computed as
     # sparse_allocation() computes it. The design is built later from this
     # object (its sparse_list argument), so the allocation can be shown and
@@ -493,25 +485,11 @@ mod_sparse_allocation_server <- function(id){
     sparse_setup <- shiny::reactive({
         shiny::req(input$input_sparse_data)
         shiny::req(get_sparse_data())
-        sparse_data_input <- NULL
-        if (get_sparse_data()$upload) {
-            sparse_data_input <- get_sparse_data()$data_entry
-        }
-        input_lines <- get_sparse_data()$dim_without_checks
-        checks <- as.numeric(input$sparse_checks)
-        locs <- single_inputs()$sites
+        values <- sparse_optim_values()
+        data <- if (get_sparse_data()$upload) get_sparse_data()$data_entry
         shiny::withProgress(message = 'Optimization in progress ...', {
           optim_out <- call_api(
-            do_optim(
-              design = "sparse",
-              lines = input_lines,
-              l = locs,
-              copies_per_entry = single_inputs()$plant_reps,
-              add_checks = TRUE,
-              checks = checks,
-              seed = single_inputs()$seed_number,
-              data = sparse_data_input
-            )
+            do.call(do_optim, design_args_sparse_allocation_optim(values, data))
           )
         })
         if (is.null(optim_out)) return(NULL)
@@ -531,10 +509,8 @@ mod_sparse_allocation_server <- function(id){
     getChecks <- shiny::eventReactive(input$sparse_run, {
         shiny::req(sparse_setup())
         sparse_checks <- as.numeric(input$sparse_checks)
-        data <- get_sparse_data()$data_entry
         # The design sorts the check entries, as sparse_allocation() does
-        checksEntries <- sort(as.numeric(data[1:sparse_checks,1]))
-        list(checksEntries = checksEntries, sparse_checks = sparse_checks)
+        list(checksEntries = get_sparse_data()$checks_entries, sparse_checks = sparse_checks)
     })
     
     list_inputs_diagonal <- shiny::eventReactive(input$sparse_run, {
@@ -577,14 +553,12 @@ mod_sparse_allocation_server <- function(id){
     output$sparse_allocation <- DT::renderDT({
         shiny::req(get_sparse_data())
         shiny::req(sparse_setup())
-        data_without_checks <- get_sparse_data()$data_without_checks
-        sparse_lines <- single_inputs()$sparse_lines
-
-        gen_names <- data_without_checks |>
-            dplyr::mutate(sparse_entry = 1:sparse_lines) |>
-            dplyr::arrange(sparse_entry) |>
-            dplyr::select(NAME) |>
-            dplyr::pull()
+        # Uploaded names, or the names do_optim() gave the generated entries
+        if (get_sparse_data()$upload) {
+            gen_names <- get_sparse_data()$data_without_checks$NAME
+        } else {
+            gen_names <- allocation_entry_names(sparse_setup(), single_inputs()$sparse_lines)
+        }
 
         locs <- single_inputs()$sites
         df <- as.data.frame(sparse_setup()$allocation)
@@ -735,31 +709,6 @@ mod_sparse_allocation_server <- function(id){
       })
     })
 
-    plot_number_sites <- shiny::reactive({
-      shiny::req(single_inputs())
-      if (is.null(single_inputs()$plotNumber)) {
-        shiny::validate("Plot starting number is missing.")
-      }
-      l <- single_inputs()$sites
-      plotNumber <- single_inputs()$plotNumber
-      if(!is.numeric(plotNumber) && !is.integer(plotNumber)) {
-        shiny::validate("plotNumber should be an integer or a numeric vector.")
-      }
-
-      if (anyNA(plotNumber) || any(plotNumber %% 1 != 0)) {
-        shiny::validate("plotNumber should be integers.")
-      }
-      if (!is.null(l)) {
-        if (is.null(plotNumber) || length(plotNumber) != l) {
-          if (l > 1){
-            plotNumber <- seq(1001, 1000*(l+1), 1000)
-          } else plotNumber <- 1001
-        }
-      }else shiny::validate("Number of locations/sites is missing")
-
-      return(plotNumber)
-    })
-
     # The design of every location, built by sparse_allocation() from the
     # allocation computed at Run! and the dimensions and percentage of
     # checks chosen by the user. Every output is taken from this object.
@@ -777,29 +726,19 @@ mod_sparse_allocation_server <- function(id){
       percent <- suppressWarnings(as.numeric(input$percent_checks))
       options_percent <- as.numeric(available_percent_table()$dt[,2])
       shiny::req(shiny::isTruthy(percent), any(abs(options_percent - percent) < 1e-6))
-      sparse_data_input <- NULL
-      if (get_sparse_data()$upload) {
-        sparse_data_input <- get_sparse_data()$data_entry
-      }
-      plotNumber <- plot_number_sites()
-      sparse_list <- sparse_setup()
+      values <- c(sparse_optim_values(), list(
+        nrows = field_dimensions_diagonal()$d_row,
+        ncols = field_dimensions_diagonal()$d_col,
+        planter = single_inputs()$planter_mov,
+        plot_start = single_inputs()$plotNumber,
+        expt_name = single_inputs()$expt_name,
+        location_names = single_inputs()$location_names,
+        sparse_list = sparse_setup(),
+        checksPercent = percent
+      ))
+      data <- if (get_sparse_data()$upload) get_sparse_data()$data_entry
       design <- call_api(
-        sparse_allocation(
-          lines = get_sparse_data()$dim_without_checks,
-          nrows = field_dimensions_diagonal()$d_row,
-          ncols = field_dimensions_diagonal()$d_col,
-          l = single_inputs()$sites,
-          planter = single_inputs()$planter_mov,
-          plotNumber = plotNumber,
-          copies_per_entry = single_inputs()$plant_reps,
-          checks = getChecks()$sparse_checks,
-          exptName = single_inputs()$expt_name[1],
-          locationNames = single_inputs()$location_names,
-          sparse_list = sparse_list,
-          seed = validate_design(read_app_seed(single_inputs()$seed_number)),
-          data = sparse_data_input,
-          checksPercent = percent
-        )
+        do.call(sparse_allocation, design_args_sparse_allocation(values, data))
       )
       if (is.null(design)) return(NULL)
       if (is.null(design$fieldBook)) {

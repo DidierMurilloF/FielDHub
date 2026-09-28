@@ -131,31 +131,19 @@ sparse_allocation <- function(
             checks = checks
         )
     }
-    # Define field dimensions (rows and columns)
+    # Define field dimensions (rows and columns): the squarest field the
+    # checks fit, among the sizes field_dimensions() gives. It is the
+    # dimension the app preselects (diagonal_dimension_choices()).
     if (missing(nrows) || missing(ncols)) {
         lines_within_loc <- as.numeric(unrep$size_locations[1])
-        t1 <- floor(lines_within_loc + lines_within_loc * 0.11)
-        t2 <- ceiling(lines_within_loc + lines_within_loc * 0.20)
-        t <- t1:t2
-        non_primes <- t[!is_prime(t)]
-        choices_list <- list()
-        i <- 1
-        for (n in non_primes) {
-            choices_list[[i]] <- factor_subsets(n, diagonal = TRUE)$labels
-            i <- i + 1
-        }
-        choices <- unlist(choices_list[!sapply(choices_list, is.null)])
-        if (length(choices) == 0) {
+        choice <- diagonal_dimension_choices(
+            lines = lines_within_loc, checks = seq_len(checks),
+            planter = planter, first = TRUE
+        )
+        if (length(choice) == 0) {
             fieldhub_abort("There are no field dimension options available. Please specify nrows and ncols.")
         }
-        dif <- vector(mode = "numeric", length = length(choices))
-        for (option in seq_along(choices)) {
-            dims <- unlist(strsplit(choices[[option]], " x "))
-            dif[option] <- abs(as.numeric(dims[1]) - as.numeric(dims[2]))
-        }
-        df_choices <- data.frame(choices = choices, diff_dim = dif)
-        df_choices <- df_choices[order(df_choices$diff_dim, decreasing = FALSE), ]
-        dimensions <- unlist(strsplit(df_choices[1,1], " x "))
+        dimensions <- unlist(strsplit(choice, " x "))
         nrows <- as.numeric(dimensions[1])
         ncols <- as.numeric(dimensions[2])
     }
