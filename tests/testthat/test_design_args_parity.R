@@ -1222,7 +1222,8 @@ test_that("spatial modules build their designs only through design_args_<Module>
     "field_grid_view", "spatial_highlight_colours", "entry_list_view", "location_view_choices",
     "parse_control_number", "parse_control_whole_numbers", "parse_control_names",
     "parse_control_choice", "parse_control_option", "parse_control_flag", "parse_control_seed",
-    "parse_control_rep_checks", "parse_control_checks", "parse_control_dimensions"
+    "parse_control_rep_checks", "parse_control_checks", "parse_control_dimensions",
+    "parse_control_rep_units", "prep_field_choices"
   )
 
   for (module in names(spatial_engines)) {

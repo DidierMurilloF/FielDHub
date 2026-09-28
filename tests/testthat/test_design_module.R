@@ -8,7 +8,7 @@ library(FielDHub)
 
 classic_modules <- c("CRD", "RCBD", "LSD", "FD", "SPD", "SSPD", "STRIPD", "IBD", "RowCol",
                      "Alpha_Lattice", "Square_Lattice", "Rectangular_Lattice")
-spatial_modules <- c("Optim")
+spatial_modules <- c("Optim", "pREPS")
 all_modules <- c(classic_modules, spatial_modules)
 
 # The one label of each concept, written out here so a label changed in
@@ -112,7 +112,7 @@ page_defaults <- function(module, seed = 7) {
 # Spatial pages whose runs take long: the diagonal searches, the
 # allocations and the p-rep optimizations. optimized_arrangement() and
 # RCBD_augmented() run in well under a second.
-long_running <- c(Optim = FALSE)
+long_running <- c(Optim = FALSE, pREPS = TRUE)
 
 test_that("there is one page spec per design, in the registry's workflow order", {
   specs <- fieldhub_design_specs()
@@ -248,7 +248,10 @@ spatial_defaults <- function(module) {
   switch(module,
     Optim = optimized_arrangement(nrows = 13, ncols = 24, lines = 280, checks = 4,
                                   rep_checks = c(8, 8, 8, 8), l = 1, plotNumber = 1, seed = 7,
-                                  exptName = "Expt1", locationNames = "FARGO")
+                                  exptName = "Expt1", locationNames = "FARGO"),
+    pREPS = partially_replicated(nrows = 15, ncols = 20, repGens = c(75, 150), repUnits = c(2, 1),
+                                 l = 1, plotNumber = 1, seed = 7, exptName = "Expt1",
+                                 locationNames = "FARGO")
   )
 }
 
@@ -280,6 +283,27 @@ test_that("spatial pages with changed controls, steps or an uploaded file build 
                "Reps per Check must have 1 value or 4 values", class = "fieldhub_input_error")
   expect_error(page_design(spec, utils::modifyList(raw, list(checks = 4, rep_checks = "80", lines = 280))),
                "Number of lines should be greater", class = "fieldhub_input_error")
+})
+
+test_that("the p-rep page offers filler plots and builds the API's design", {
+  spec <- design_app_spec("pREPS")
+  # 301 plots only fit a 7 x 43 field; filler plots offer squarer ones
+  raw <- utils::modifyList(page_defaults("pREPS", seed = 11), list(
+    repGens = "75,151", repUnits = "2,1", allow_fillers = TRUE, l = 2, planter = "cartesian",
+    plot_start = "1,501", location_names = "A,B", expt_name = "P1"))
+  expect_same_design(page_design(spec, raw, steps = list(dimensions = "16 x 19")),
+    partially_replicated(nrows = 16, ncols = 19, repGens = c(75, 151), repUnits = c(2, 1), l = 2,
+                         planter = "cartesian", plotNumber = c(1, 501), seed = 11, exptName = "P1",
+                         locationNames = c("A", "B"), allow_fillers = TRUE))
+  entries <- data.frame(ENTRY = 1:120, NAME = paste0("E", 1:120), REPS = rep(c(2L, 1L), c(40, 80)))
+  raw <- utils::modifyList(page_defaults("pREPS"), list(repGens = "", repUnits = NA))
+  expect_same_design(page_design(spec, raw, entries, steps = list(dimensions = "16 x 10")),
+    partially_replicated(nrows = 16, ncols = 10, plotNumber = 1, seed = 7, exptName = "Expt1",
+                         locationNames = "FARGO", data = entries))
+  expect_error(page_design(spec, utils::modifyList(page_defaults("pREPS"), list(repUnits = "2"))),
+               "# of Rep Per Group must have one value per group of entries", class = "fieldhub_input_error")
+  expect_error(page_design(spec, utils::modifyList(page_defaults("pREPS"), list(repGens = "75,157"))),
+               "Select 'Allow filler plots'", class = "fieldhub_input_error")
 })
 
 test_that("choices of computed selects follow the entries, typed or uploaded", {
@@ -357,7 +381,8 @@ test_that("the same concept has the same label, default and minimum on every pag
   # The spatial pages keep the smallest counts they have always offered,
   # and the defaults of their own
   page_minimums <- c(Optim.lines = 5)
-  page_values <- c(Optim.plot_start = "1", Optim.rep_checks = "8,8,8,8")
+  page_values <- c(Optim.plot_start = "1", Optim.rep_checks = "8,8,8,8", pREPS.plot_start = "1",
+                   pREPS.repGens = "75,150", pREPS.repUnits = "2,1")
   seen <- character()
   for (module in all_modules) {
     spec <- design_app_spec(module)

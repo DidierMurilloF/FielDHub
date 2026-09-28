@@ -775,21 +775,25 @@
   a single replicate, which its CRD type accepts; with the RCBD type the
   page explains that two are needed.
 
-- The spatial design pages are moving to the same generic page (Optimized
-  Arrangement so far). The page reads its sidebar with
-  `read_design_controls()`, offers its field sizes after Run! from the same
-  plain functions the R functions use, and builds its design through the
-  same argument builder, so the page and a direct `optimized_arrangement()`
-  call build identical designs. Menus, result, simulation and export ids,
-  uploads and archives are unchanged. Deliberate consistency changes: the
-  seed box is blank by default (it started at 5) and uses the shared
-  labels ("Reps per Check:", "Experiment Name(s):", "Starting Plot
-  Number(s):", "Location Name(s):", "Choose Location to View:"); controls
-  are stacked one per row; "Reps per Check:" accepts one value for every
-  check, as on the RCBD page; and a blank or invalid control, too many
-  check plots for the entries, an uploaded `REPS` column that is not whole
-  numbers, or a number of plots with no field size is explained in the
-  "Get Random" tab instead of a dialog.
+- The spatial design pages are moving to the same generic page (so far:
+  the optimized arrangement and p-rep pages). The page reads its sidebar
+  with `read_design_controls()`, offers its field sizes after Run! from
+  the same plain functions the R functions use, and builds its design
+  through the same argument builder, so the page and a direct
+  `optimized_arrangement()` or `partially_replicated()` call build
+  identical designs. Menus, result, simulation and export ids, uploads and
+  archives are unchanged. Deliberate consistency changes: the seed box is
+  blank by default (it started at 5 on the optimized arrangement page and
+  4095 on the p-rep page) and uses the shared labels ("Reps per Check:",
+  "Experiment Name(s):", "Starting Plot Number(s):", "Location Name(s):",
+  "Choose Location to View:"); controls are stacked one per row; "Reps per
+  Check:" accepts one value for every check, as on the RCBD page; and a
+  blank or invalid control, too many check plots for the entries, an
+  uploaded `REPS` column that is not whole numbers, a number of plots with
+  no field size (on the p-rep page, the advice to allow filler plots) or
+  "# of Rep Per Group:" with a different number of values than "# of
+  Entries Per Rep Group:" is explained in the "Get Random" tab instead of
+  a dialog.
 
 ### Fix bugs:
 

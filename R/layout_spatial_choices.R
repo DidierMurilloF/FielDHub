@@ -27,3 +27,22 @@ optim_field_choices <- function(plots) {
   field_size_choices(optimized_dimension_choices(plots),
                      "Please try a different number of treatments or checks.")
 }
+
+#' Field sizes of a p-rep design, with filler plots where allowed
+#'
+#' @param plots Number of plots.
+#' @param allow_fillers Whether filler plots may complete the field.
+#' @return \code{list(choices = , selected = )}; each choice is labelled
+#'   with its filler plots.
+#' @noRd
+prep_field_choices <- function(plots, allow_fillers) {
+  if (!is.numeric(plots) || length(plots) != 1L || !is.finite(plots) || plots < 1 ||
+      plots != trunc(plots)) {
+    fieldhub_abort("The number of plots must be one positive whole number.")
+  }
+  options <- prep_dimension_options(total_plots = plots, allow_fillers = isTRUE(allow_fillers),
+                                    max_fillers = .prep_max_fillers)
+  if (is.null(options)) fieldhub_abort(prep_no_dimensions_problem(allow_fillers)$message)
+  list(choices = stats::setNames(options$value, options$label),
+       selected = utils::head(options$value, 1L))
+}

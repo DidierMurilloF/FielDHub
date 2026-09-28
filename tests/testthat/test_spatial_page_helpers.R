@@ -71,3 +71,17 @@ test_that("entry lists show their names and entries as filterable factors", {
   expect_true(all(vapply(entries, is.factor, logical(1))))
   expect_identical(levels(entry_list_view(list(ENTRY = 2:1, NAME = c("b", "a")))$NAME), c("a", "b"))
 })
+
+test_that("p-rep pages offer field sizes, labelled with their filler plots where allowed", {
+  offered <- prep_field_choices(300, FALSE)
+  expect_identical(offered$selected, "15 x 20")
+  expect_identical(unname(offered$choices), prep_dimension_options(300)$value)
+  # 301 plots: 7 x 43 without fillers, squarer fields with them
+  expect_identical(unname(prep_field_choices(301, FALSE)$choices), c("43 x 7", "7 x 43"))
+  with_fillers <- prep_field_choices(301, TRUE)
+  expect_true("16 x 19 (+3 fillers)" %in% names(with_fillers$choices))
+  expect_identical(with_fillers$selected, "43 x 7")
+  expect_error(prep_field_choices(307, FALSE), "Select 'Allow filler plots'", class = "fieldhub_input_error")
+  expect_error(prep_field_choices(307, NA), "Select 'Allow filler plots'", class = "fieldhub_input_error")
+  for (value in blank_inputs) expect_classed(prep_field_choices(value, TRUE), info = deparse(value))
+})

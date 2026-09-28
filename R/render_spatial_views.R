@@ -48,7 +48,7 @@ field_grid_view <- function(grid, fillers = NULL, highlight = NULL, colours = NU
   if (!is.null(fillers)) grid[fillers] <- "Filler"
   data <- as.data.frame(unname(grid), stringsAsFactors = FALSE)
   colnames(data) <- paste0("V", seq_len(ncol(data)))
-  rownames(data) <- nrow(data):1
+  rownames(data) <- rev(seq_len(nrow(data)))
   list(data = data, highlight = highlight, colours = colours)
 }
 

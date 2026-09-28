@@ -329,7 +329,44 @@ build_design_specs <- function() {
       ),
       field_size = function(design, values) {
         list(nrows = max(design$fieldBook$ROW), ncols = max(design$fieldBook$COLUMN))
-      })
+      }),
+    # A new choice of filler plots offers other field sizes without a new Run!
+    pREPS = spatial("pREPS", "Single and Multi-Location P-rep Design", partially_replicated,
+      upload = "prep", upload_columns = c("ENTRY", "NAME", "REPS"),
+      upload_check = check_reps_upload, file_tag = "pREP_",
+      randomizing = "Running p-rep optimization ...",
+      controls = c(
+        list(ctl_text_list("repGens", "75,150", generated_only = TRUE),
+             ctl_text_list("repUnits", "2,1", generated_only = TRUE,
+                           parse = function(value, label, values) {
+                             parse_control_rep_units(value, label, values$repGens)
+                           }),
+             ctl_flag("allow_fillers"), ctl_locations()),
+        spatial_shared(expt_name = ctl_expt_name(split = FALSE)), list(ctl_seed())
+      ),
+      values = function(controls, data) {
+        list(repGens = controls$repGens, repUnits = controls$repUnits,
+             allow_fillers = controls$allow_fillers, planter = controls$planter, l = controls$l,
+             plot_start = controls$plot_start, seed = controls$seed,
+             expt_name = controls$expt_name, location_names = controls$location_names,
+             plots = if (is.null(data)) sum(controls$repGens * controls$repUnits) else sum(data$REPS))
+      },
+      steps = list(ctl_dimensions(function(values, data) {
+        prep_field_choices(values$plots, values$allow_fillers)
+      }, depends_on = "allow_fillers")),
+      setup = summary_setup,
+      entries = list(function(design, location, values) {
+        entry_table(entry_list_view(design$dataEntry, c("ENTRY", "NAME", "REPS")), height = "500px")
+      }),
+      panels = list(
+        field_panel(function(design, location, values) {
+          replicated <- as.vector(design$genEntries$entry_checks)
+          field_grid_view(design$layoutRandom[[location]], fillers = design$fillerField[[location]],
+                          highlight = replicated,
+                          colours = spatial_highlight_colours("replicated", length(replicated)))
+        }),
+        numbers_panel("plotNumber")
+      ))
   )
 }
 
