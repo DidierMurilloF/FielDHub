@@ -45,3 +45,27 @@ valid_block_sizes <- function(treatments, design) {
   block_size <- as.integer(floor((sqrt(1 + 4 * treatments) - 1) / 2))
   if (block_size * (block_size + 1) == treatments) block_size else integer()
 }
+
+#' The option a block-size select offers when no size fits the entries
+#' @noRd
+no_block_size_option <- function() "No Options Available"
+
+#' Block-size (or row-count) choices offered for a number of entries
+#'
+#' @description The choices of the "# of Plots per IBlock" and "# of Rows"
+#' selects: every feasible size (\code{valid_block_sizes()}), or
+#' "No Options Available" when none fits. The middle size is selected when
+#' there are more than two, the first otherwise.
+#'
+#' @param treatments Number of entries.
+#' @param design Design family, as for \code{valid_block_sizes()}.
+#' @return \code{list(choices = , selected = )}.
+#' @noRd
+block_size_choices <- function(treatments, design) {
+  options <- valid_block_sizes(treatments, design)
+  if (length(options) == 0L) {
+    return(list(choices = no_block_size_option(), selected = no_block_size_option()))
+  }
+  selected <- if (length(options) > 2L) options[ceiling(length(options) / 2)] else options[1L]
+  list(choices = options, selected = selected)
+}

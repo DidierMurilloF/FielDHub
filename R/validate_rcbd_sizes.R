@@ -48,3 +48,24 @@ rcbd_size_preview <- function(t, reps, n_checks, rep_checks) {
   if (!is.finite(total)) fieldhub_abort("The total number of plots is too large.")
   sprintf("Block size: %.0f plots. Total: %.0f plots.", n_units, total)
 }
+
+#' The block-size note shown under the RCBD repeated-checks controls
+#'
+#' @description Nothing until repeated checks are enabled and the counts it
+#' needs have been typed; on the upload path the block size depends on the
+#' file, so a note says so instead of predicting it.
+#'
+#' @param values Named list of raw control values: \code{use_checks},
+#'   \code{t}, \code{reps}, \code{checks}, \code{rep_checks}.
+#' @param uploaded Whether the entries come from an uploaded file.
+#' @return A description, \code{NULL}, or a classed input condition.
+#' @noRd
+rcbd_checks_note <- function(values, uploaded) {
+  if (!isTRUE(values[["use_checks"]])) return(NULL)
+  if (isTRUE(uploaded)) {
+    return("Block size depends on the uploaded list: its first rows are taken as the checks.")
+  }
+  needed <- values[c("t", "reps", "checks", "rep_checks")]
+  if (any(vapply(needed, is_blank_control_value, logical(1)))) return(NULL)
+  rcbd_size_preview(values[["t"]], values[["reps"]], values[["checks"]], values[["rep_checks"]])
+}
