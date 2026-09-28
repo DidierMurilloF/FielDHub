@@ -215,7 +215,7 @@ mod_Square_Lattice_server <- function(id){
           type = "error")
         return(NULL)
       }
-      plot_start <- validate_design(read_whole_numbers(
+      plot_start <- validate_design(parse_whole_numbers(
         input$plot_start.square, "Starting Plot Number"
       ))
       planter <- input$planter_mov_square

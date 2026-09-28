@@ -296,7 +296,7 @@ mod_sparse_allocation_server <- function(id){
         input_sparse_lines <- as.numeric(input$sparse_lines)
         planter_mov <- input$sparse_planter
         Name_expt <- as.vector(unlist(strsplit(input$sparse_expt_name, ",")))
-        plotNumber <- validate_design(read_whole_numbers(
+        plotNumber <- validate_design(parse_whole_numbers(
           input$sparse_plot_start, "Starting Plot Number"
         ))
         seed_number <- validate_design(app_design_seed(input$seed_single))

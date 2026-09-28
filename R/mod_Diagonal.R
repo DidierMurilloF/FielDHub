@@ -207,7 +207,7 @@ mod_Diagonal_server <- function(id) {
     single_inputs <- shiny::eventReactive(input$RUN.diagonal, {
       planter_mov <- input$planter_single
       name_expt <- as.vector(unlist(strsplit(input$expt_name, ",")))
-      plotNumber <- validate_design(read_whole_numbers(
+      plotNumber <- validate_design(parse_whole_numbers(
         input$plot_start, "Starting Plot Number"
       ))
       seed_number <- validate_design(app_design_seed(input$seed_single))
@@ -285,7 +285,7 @@ mod_Diagonal_server <- function(id) {
                 } 
                 data_entry_UP <- na.omit(data_up[,1:2])
                 colnames(data_entry_UP) <- c("ENTRY", "NAME")
-                checks <- validate_design(read_n_checks(input$checks))
+                checks <- validate_design(parse_n_checks(input$checks))
                 checksEntries <- suppressWarnings(
                     sort(as.numeric(data_entry_UP[1:checks,1]), na.last = TRUE)
                 )
@@ -324,7 +324,7 @@ mod_Diagonal_server <- function(id) {
             }
         } else {
             shiny::req(input$lines.d)
-            checks <- validate_design(read_n_checks(input$checks))
+            checks <- validate_design(parse_n_checks(input$checks))
             lines <- input$lines.d
             choices_list <- validate_design(field_dimensions(lines_within_loc = lines))
             if (length(choices_list) == 0) {

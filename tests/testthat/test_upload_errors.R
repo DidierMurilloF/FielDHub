@@ -15,7 +15,7 @@ test_that("the upload alert adapter reports a single error and returns NULL", {
   notify <- function(...) alerts[[length(alerts) + 1L]] <<- list(...)
   result <- app_upload_error(list(missing_cols = TRUE), "Use ENTRY and NAME", notify)
   expect_null(result)
-  expect_identical(alerts, list(list("Error!!", "Use ENTRY and NAME", type = "error")))
+  expect_identical(alerts, list(list("Use ENTRY and NAME")))
   app_upload_error(list(dataUp = data.frame()), "columns", notify)
   expect_length(alerts, 1L)
 })

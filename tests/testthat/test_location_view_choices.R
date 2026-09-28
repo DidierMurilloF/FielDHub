@@ -30,7 +30,7 @@ test_that("validate_locations_input() coerces numeric-looking text before valida
   }
 })
 
-test_that("read_n_checks() rejects a cleared or blank checks-count input with a classed error", {
+test_that("parse_n_checks() rejects a cleared or blank checks-count input with a classed error", {
   # Regression test for the RCBD_augmented upload path: init_data()'s
   # owndata_a_rcbd == "Yes" branch (R/mod_RCBD_augmented.R) used to read
   # `checks <- as.numeric(input$checks_a_rcbd)` with no req() guard, unlike
@@ -38,12 +38,12 @@ test_that("read_n_checks() rejects a cleared or blank checks-count input with a 
   # logical NA, so `lines <- nrow(data_up) - checks` became NA and
   # `if (lines < 8)` threw "missing value where TRUE/FALSE needed" -- inside
   # an observer's eventExpr (list_to_observe() -> observeEvent()), which
-  # ends the Shiny session. read_n_checks() (R/validate_input_parsers.R) now
+  # ends the Shiny session. parse_n_checks() (R/validate_input_parsers.R) now
   # validates the raw input first, with a classed fieldhub_input_error a
   # caller can show through validate_design() instead of crashing.
-  expect_identical(FielDHub:::read_n_checks(4), 4L)
+  expect_identical(FielDHub:::parse_n_checks(4), 4L)
   for (value in list(NA, NA_real_, "", NULL, 0, -1, 1.5)) {
-    err <- tryCatch(FielDHub:::read_n_checks(value), error = function(e) e)
+    err <- tryCatch(FielDHub:::parse_n_checks(value), error = function(e) e)
     expect_s3_class(err, "fieldhub_input_error")
   }
 })

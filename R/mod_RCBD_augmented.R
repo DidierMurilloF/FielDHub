@@ -240,7 +240,7 @@ mod_RCBD_augmented_server <- function(id) {
               type = "error")
             return(NULL)
           } 
-          checks <- validate_design(read_n_checks(input$checks_a_rcbd))
+          checks <- validate_design(parse_n_checks(input$checks_a_rcbd))
           data_up <- as.data.frame(data_up[,1:2])
           data_up <- na.omit(data_up)
           colnames(data_up) <- c("ENTRY", "NAME")
@@ -328,7 +328,7 @@ mod_RCBD_augmented_server <- function(id) {
         set_choices_dims <- as.vector(subset(blocks_dims, blocks_dims[,1] == b)[,2])
         choices <- set_choices_dims
       } else {
-        checks <- validate_design(read_n_checks(input$checks_a_rcbd))
+        checks <- validate_design(parse_n_checks(input$checks_a_rcbd))
         lines <- as.numeric(init_data()$entries)
         b <- as.numeric(input$blocks_a_rcbd)
         set_dims <- validate_design(set_augmented_blocks(lines = lines, checks = checks, start = 3))
@@ -463,8 +463,8 @@ mod_RCBD_augmented_server <- function(id) {
       if(!test_arcbd()) return(NULL)
       shiny::req(rcbd_augmented_reactive())
       data_entry <- rcbd_augmented_reactive()$data_entry
-      # read_n_checks() validates the count before indexing.
-      df <- data_entry[seq_len(validate_design(read_n_checks(input$checks_a_rcbd))),]
+      # parse_n_checks() validates the count before indexing.
+      df <- data_entry[seq_len(validate_design(parse_n_checks(input$checks_a_rcbd))),]
       table_options <- list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "350px")
       a <- ncol(df) - 1
@@ -496,7 +496,7 @@ mod_RCBD_augmented_server <- function(id) {
         b = as.numeric(input$blocks_a_rcbd),
         l = l.arcbd,
         planter = input$planter_mov1_a_rcbd,
-        plot_start = validate_design(read_whole_numbers(
+        plot_start = validate_design(parse_whole_numbers(
           input$plot_start_a_rcbd, "Starting Plot Number"
         )),
         expt_name = as.vector(unlist(strsplit(input$expt_name_a_rcbd, ","))),
@@ -556,8 +556,8 @@ mod_RCBD_augmented_server <- function(id) {
     output$randomized_layout <- DT::renderDT({
       if(!test_arcbd()) return(NULL)
       r_map <- rcbd_augmented_reactive()$layout_random_sites[[locNum()]]
-      # read_n_checks() validates the count before building the range.
-      checks <- seq_len(validate_design(read_n_checks(some_inputs()$checks)))
+      # parse_n_checks() validates the count before building the range.
+      checks <- seq_len(validate_design(parse_n_checks(some_inputs()$checks)))
       b <- as.numeric(some_inputs()$blocks)
       len_checks <- length(checks)
       df <- as.data.frame(r_map)

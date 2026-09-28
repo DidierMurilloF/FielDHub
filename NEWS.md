@@ -1030,6 +1030,16 @@
   own table or field book still shows the usual validation message once it
   is built from invalid input.
 
+- Text in the p-rep "# of Entries Per Rep Group" or "# of Rep Per Group"
+  inputs, such as "75,abc", is now explained by name instead of failing
+  with a raw R error from `1:sum(NA)`, and `partially_replicated()` itself
+  now rejects a missing or fractional `repGens`/`repUnits` value with a
+  classed input error. Any error the app does not expect (one that is not
+  a FielDHub condition) is now shown as "Unexpected problem: <message>"
+  where the output would be, and no longer ends the Shiny session when it
+  happens inside an observer, for example a missing value reaching the
+  diagonal check-percentage or augmented-RCBD block choices.
+
 ### Changes to results for a given seed:
 
 Some of the fixes above change the design produced for a given seed. Field

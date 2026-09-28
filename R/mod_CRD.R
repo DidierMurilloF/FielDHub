@@ -176,7 +176,7 @@ mod_CRD_server <- function(id) {
       shiny::req(input$plot_start.crd)
       shiny::req(input$Location.crd)
       
-      plot_start <- validate_design(read_whole_numbers(
+      plot_start <- validate_design(parse_whole_numbers(
         input$plot_start.crd, "Starting Plot Number"
       ))[1]
       location_names <-  as.vector(unlist(strsplit(input$Location.crd, ",")))

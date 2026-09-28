@@ -62,3 +62,35 @@ stop_dimensions <- function(message, options = NULL, labels = NULL, no_options =
   fieldhub_abort(message, class = "fieldhub_dimension_error",
                  data = list(options = options), call = call)
 }
+
+#' The message the app shows a user for a problem
+#'
+#' @description FielDHub conditions (\code{fieldhub_error},
+#' \code{fieldhub_warning}) are written for the user, so they are shown
+#' verbatim. Any other error or warning comes from R or a dependency: it is
+#' shown after "Unexpected problem: " (or "Unexpected warning: ") so the user
+#' can tell it apart from a problem with their input. A character value is a
+#' message already written for the user.
+#'
+#' @param problem A condition, or a character message.
+#' @return A single string.
+#' @noRd
+problem_message <- function(problem) {
+  if (is.character(problem)) return(paste(problem, collapse = "\n"))
+  if (!inherits(problem, "condition")) {
+    fieldhub_abort("A problem must be a condition or a character message.")
+  }
+  message <- conditionMessage(problem)
+  if (inherits(problem, c("fieldhub_error", "fieldhub_warning"))) return(message)
+  prefix <- if (inherits(problem, "warning")) "Unexpected warning: " else "Unexpected problem: "
+  paste0(prefix, message)
+}
+
+#' Whether a problem stops the work (error) or only informs (warning)
+#'
+#' @param problem A condition, or a character message (an error).
+#' @return \code{"warning"} for a warning condition, \code{"error"} otherwise.
+#' @noRd
+problem_severity <- function(problem) {
+  if (inherits(problem, "warning")) "warning" else "error"
+}

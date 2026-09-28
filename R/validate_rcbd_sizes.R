@@ -34,19 +34,16 @@ rcbd_block_size <- function(n_test, rep_checks) {
 #' @return A description, or a classed input condition.
 #' @noRd
 rcbd_size_preview <- function(t, reps, n_checks, rep_checks) {
-  n_test <- read_whole_numbers(t, "Number of test entries")
-  blocks <- read_whole_numbers(reps, "Replicates")
+  n_test <- parse_whole_numbers(t, "Number of test entries")
+  blocks <- parse_whole_numbers(reps, "Replicates")
   if (length(n_test) != 1L || length(blocks) != 1L) {
     fieldhub_abort("Number of test entries and replicates must each be one whole number.")
   }
   count <- parse_n_checks(n_checks)
-  if (!count$ok) fieldhub_abort(count$message)
   # Every check needs at least one plot. Apply the cap before recycling a
   # scalar replication count, even when the requested check count is huge.
-  rcbd_block_size(n_test, count$value)
-  parsed <- parse_rep_checks(rep_checks, count$value)
-  if (!parsed$ok) fieldhub_abort(parsed$message)
-  n_units <- rcbd_block_size(n_test, parsed$value)
+  rcbd_block_size(n_test, count)
+  n_units <- rcbd_block_size(n_test, parse_rep_checks(rep_checks, count))
   total <- n_units * blocks
   if (!is.finite(total)) fieldhub_abort("The total number of plots is too large.")
   sprintf("Block size: %.0f plots. Total: %.0f plots.", n_units, total)

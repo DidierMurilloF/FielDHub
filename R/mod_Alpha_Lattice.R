@@ -204,7 +204,7 @@ mod_Alpha_Lattice_server <- function(id){
       k <- as.numeric(input$k.alpha)
       treatments <- as.numeric(get_data_alpha()$treatments)
       planter <- input$planter_mov_alpha
-      plot_start <- validate_design(read_whole_numbers(
+      plot_start <- validate_design(parse_whole_numbers(
         input$plot_start.alpha, "Starting Plot Number"
       ))
       location_names <-  as.vector(unlist(strsplit(input$Location.alpha, ",")))

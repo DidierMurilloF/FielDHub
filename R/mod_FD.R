@@ -171,10 +171,7 @@ mod_FD_server <- function(id) {
           colnames(data_factorial) <- c("FACTOR", "LEVEL")
           nt <- length(unique(data_factorial$FACTOR))
           if (nt < 2) {
-            shinyalert::shinyalert(
-              "Error!!",
-              "More than one factor needs to be specified.",
-              type = "error")
+            app_report_problem("More than one factor needs to be specified.")
             return(NULL)
           }
           return(list(data_fd = data_factorial, setfactors = NULL))
@@ -185,17 +182,12 @@ mod_FD_server <- function(id) {
         }
       } else {
         shiny::req(input$setfactors)
-        setfactors.fd <- parse_whole_numbers(input$setfactors, "# of Entries for Each Factor")
-        if (!setfactors.fd$ok) {
-          shinyalert::shinyalert("Error!!", setfactors.fd$message, type = "error")
-          return(NULL)
-        }
-        setfactors.fd <- setfactors.fd$value
+        setfactors.fd <- app_attempt(
+          parse_whole_numbers(input$setfactors, "# of Entries for Each Factor")
+        )
+        if (is.null(setfactors.fd)) return(NULL)
         if (length(setfactors.fd) < 2) {
-          shinyalert::shinyalert(
-            "Error!!",
-            "More than one factor needs to be specified.",
-            type = "error")
+          app_report_problem("More than one factor needs to be specified.")
           return(NULL)
         }
         # No entry list is built here: full_factorial() expands its own
@@ -214,7 +206,7 @@ mod_FD_server <- function(id) {
       shiny::req(input$kindFD)
       shiny::req(input$planter_mov_fd)
 
-      plot_start <- validate_design(read_whole_numbers(
+      plot_start <- validate_design(parse_whole_numbers(
         input$plot_start.fd, "Starting Plot Number"
       ))
       planter <- input$planter_mov_fd

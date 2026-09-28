@@ -210,7 +210,7 @@ mod_pREPS_server <- function(id){
     prep_inputs <- shiny::eventReactive(input$RUN.prep, {
       planter_mov <- input$planter_mov.preps
       expt_name <- as.character(input$expt_name.preps)
-      plotNumber <- validate_design(read_whole_numbers(
+      plotNumber <- validate_design(parse_whole_numbers(
         input$plot_start.preps, "Starting Plot Number"
       ))
       site_names <- as.character(as.vector(unlist(strsplit(input$Location.preps, ","))))
@@ -257,16 +257,16 @@ mod_pREPS_server <- function(id){
           data_up <- na.omit(data_up)
           data_preps <- as.data.frame(data_up)
           if (ncol(data_preps) < 3) {
-            shinyalert::shinyalert(
-              "Error!!", 
-              "Data input needs at least three columns with: ENTRY, NAME and REPS.", 
-              type = "error")
+            app_report_problem("Data input needs at least three columns with: ENTRY, NAME and REPS.")
             return(NULL)
-          } 
+          }
           data_preps <- as.data.frame(data_preps[,1:3])
           colnames(data_preps) <- c("ENTRY", "NAME", "REPS")
-          if(!is.numeric(data_preps$REPS) || !is.integer(data_preps$REPS) ||
-             is.factor(data_preps$REPS)) shiny::validate("'REPS' must be numeric.")
+          if (!is.numeric(data_preps$REPS) || !is.integer(data_preps$REPS) ||
+              is.factor(data_preps$REPS)) {
+            app_report_problem("'REPS' must be numeric.")
+            return(NULL)
+          }
           total_plots <- sum(data_preps$REPS)
         } else {
           app_upload_error(data_ingested,
@@ -274,54 +274,33 @@ mod_pREPS_server <- function(id){
           return(NULL)
         }
       } else {
-        shiny::req(input$repGens.preps)
-        shiny::req(input$repUnits.preps)
-        repGens <- as.numeric(as.vector(unlist(strsplit(input$repGens.preps, ","))))
-        repUnits <- as.numeric(as.vector(unlist(strsplit(input$repUnits.preps, ","))))
-        if (length(repGens) != length(repUnits)) shiny::validate("Input repGens and repUnits must be of the same length.")
+        # parse_rep_groups() reads both inputs as whole numbers of the same
+        # length, so text such as "75,abc" is explained instead of reaching
+        # partially_replicated() as an NA.
+        groups <- app_attempt(parse_rep_groups(input$repGens.preps, input$repUnits.preps))
+        if (is.null(groups)) return(NULL)
         # partially_replicated() builds the G1.. entry list from the counts
-        return(list(data_up.preps = NULL, repGens = repGens, repUnits = repUnits,
-                    total_plots = sum(repGens * repUnits)))
+        return(list(data_up.preps = NULL, repGens = groups$repGens,
+                    repUnits = groups$repUnits, total_plots = groups$total_plots))
       }
       return(list(data_up.preps = data_preps, total_plots = total_plots))
     })
     
     list_input_plots <- shiny::eventReactive(input$RUN.prep, {
       shiny::req(get_data_prep())
-      if (input$owndataPREPS != 'Yes') {
-        shiny::req(input$repGens.preps)
-        shiny::req(input$repUnits.preps)
-        repGens <- as.numeric(as.vector(unlist(strsplit(input$repGens.preps, ","))))
-        repUnits <- as.numeric(as.vector(unlist(strsplit(input$repUnits.preps, ","))))
-        n_plots <- sum(repGens * repUnits)
-        return(list(n_plots = n_plots, input$owndataPREPS))
-      } else {
-        n_plots <- get_data_prep()$total_plots
-        return(list(n_plots = n_plots, input$owndataPREPS))
-      }
+      # get_data_prep() has already parsed the group inputs (or the file)
+      list(n_plots = get_data_prep()$total_plots, input$owndataPREPS)
     })
     
     shiny::observeEvent(list(list_input_plots(), input$allow_fillers.preps), {
       shiny::req(get_data_prep())
       shiny::req(input$owndataPREPS)
-      if (input$owndataPREPS != 'Yes') {
-        repGens <- as.numeric(as.vector(unlist(strsplit(input$repGens.preps, ","))))
-        repUnits <- as.numeric(as.vector(unlist(strsplit(input$repUnits.preps, ","))))
-        n <- sum(repGens * repUnits)
-        options <- validate_design(prep_dimension_options(
-          total_plots = n,
-          allow_fillers = isTRUE(input$allow_fillers.preps),
-          max_fillers = .prep_max_fillers
-        ))
-      } else {
-        shiny::req(get_data_prep()$total_plots)
-        n <- get_data_prep()$total_plots
-        options <- validate_design(prep_dimension_options(
-          total_plots = n,
-          allow_fillers = isTRUE(input$allow_fillers.preps),
-          max_fillers = .prep_max_fillers
-        ))
-      }
+      shiny::req(get_data_prep()$total_plots)
+      options <- validate_design(prep_dimension_options(
+        total_plots = get_data_prep()$total_plots,
+        allow_fillers = isTRUE(input$allow_fillers.preps),
+        max_fillers = .prep_max_fillers
+      ))
       if (is.null(options)) {
         choices <- "No options available"
       } else {
@@ -333,8 +312,7 @@ mod_pREPS_server <- function(id){
       if (is.null(options)) {
         shinyjs::hide(id = "get_random_prep")
         if (!isTRUE(input$allow_fillers.preps)) {
-          shinyalert::shinyalert(
-            "Filler plots required",
+          app_report_problem(
             sprintf(paste(
               "The current design does not fit any supported rectangular",
               "field dimensions without unused cells. Select 'Allow filler",
@@ -342,17 +320,16 @@ mod_pREPS_server <- function(id){
               "dimensions requiring no more than %d filler plots and place",
               "the fillers at the end of the selected planter path."
             ), .prep_max_fillers),
-            type = "info"
+            severity = "info", title = "Filler plots required"
           )
         } else {
-          shinyalert::shinyalert(
-            "No dimensions within the filler limit",
+          app_report_problem(
             sprintf(paste(
               "FielDHub could not find supported rectangular field dimensions",
               "requiring %d or fewer filler plots. Adjust the number of entries",
               "or replication settings and try again."
             ), .prep_max_fillers),
-            type = "warning"
+            title = "No dimensions within the filler limit"
           )
         }
       } else {

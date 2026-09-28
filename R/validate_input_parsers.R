@@ -8,87 +8,52 @@
 #'
 #' @param text The raw text input value.
 #' @param label Name of the input, used in the message.
-#' @return A list with \code{ok} (logical), \code{value} (a numeric vector
-#'   when \code{ok}), and \code{message} (a user-facing string when
-#'   \code{!ok}).
+#' @return A numeric vector, or a \code{fieldhub_input_error} for invalid
+#'   input.
 #' @noRd
 parse_whole_numbers <- function(text, label) {
-  if (length(text) == 0L) {
-    return(list(ok = FALSE, value = NULL,
-                message = paste0(label, " cannot be blank.")))
-  }
+  if (length(text) == 0L) fieldhub_abort(label, " cannot be blank.")
   if (!(is.character(text) || is.numeric(text)) || length(text) != 1L) {
-    return(list(ok = FALSE, value = NULL,
-                message = paste0(label, " must be one comma-separated text value.")))
+    fieldhub_abort(label, " must be one comma-separated text value.")
   }
   if (is.na(text) || !nzchar(trimws(as.character(text)))) {
-    return(list(ok = FALSE, value = NULL,
-                message = paste0(label, " cannot be blank.")))
+    fieldhub_abort(label, " cannot be blank.")
   }
   text <- as.character(text)
   tokens <- trimws(strsplit(text, ",", fixed = TRUE)[[1]])
   # strsplit() drops a trailing empty token; do not silently accept it.
   if (length(tokens) == 0L || any(!nzchar(tokens)) || grepl(",[[:space:]]*$", text)) {
-    return(list(ok = FALSE, value = NULL,
-                message = paste0(label, " has an empty value in \"", text, "\".")))
+    fieldhub_abort(label, " has an empty value in \"", text, "\".")
   }
   vals <- suppressWarnings(as.numeric(tokens))
   bad <- tokens[!is.finite(vals) | vals != trunc(vals) | vals < 1]
   if (length(bad) > 0) {
-    return(list(ok = FALSE, value = NULL,
-                message = paste0(label, " could not read \"",
-                                 paste(bad, collapse = "\", \""),
-                                 "\" as a whole number of 1 or more.")))
+    fieldhub_abort(label, " could not read \"", paste(bad, collapse = "\", \""),
+                   "\" as a whole number of 1 or more.")
   }
-  list(ok = TRUE, value = vals, message = NULL)
-}
-
-#' Read whole-number inputs using the shared classed error contract
-#'
-#' @param text The raw comma-separated input.
-#' @param label Input name to include in a validation message.
-#' @return A numeric vector, or a `fieldhub_input_error` for invalid input.
-#' @noRd
-read_whole_numbers <- function(text, label) {
-  parsed <- parse_whole_numbers(text, label)
-  if (!parsed$ok) fieldhub_abort(parsed$message)
-  parsed$value
+  vals
 }
 
 #' Parse the "Input # of Checks" numeric input
 #'
 #' @description
-#' A single, shared validator for `n_checks_rcbd` so the app never hands a
-#' negative or fractional count to `seq_len()`, `rep()`, or
-#' `rcbd_resolve_entries()`.
+#' A single, shared validator for the checks-count inputs so the app never
+#' hands a blank, negative or fractional count to \code{seq_len()},
+#' \code{rep()}, or \code{rcbd_resolve_entries()}.
 #'
-#' @param x The raw `n_checks_rcbd` input value.
-#' @return A list with `ok` (logical), `value` (an integer when `ok`), and
-#'   `message` (a user-facing string when `!ok`).
+#' @param x The raw checks-count input value.
+#' @return An integer, or a \code{fieldhub_input_error} for invalid input.
 #' @noRd
 parse_n_checks <- function(x) {
   if (length(x) == 0L || (is.atomic(x) && length(x) == 1L && anyNA(x))) {
-    return(list(ok = FALSE, value = NULL,
-                message = "Input # of Checks cannot be blank."))
+    fieldhub_abort("Input # of Checks cannot be blank.")
   }
   if (!is.numeric(x) || length(x) != 1L || !is.finite(x) ||
       x < 1 || x > .Machine$integer.max || x != trunc(x)) {
-    return(list(ok = FALSE, value = NULL,
-                message = paste0("Input # of Checks must be a whole number from 1 to ",
-                                 .Machine$integer.max, ".")))
+    fieldhub_abort("Input # of Checks must be a whole number from 1 to ",
+                   .Machine$integer.max, ".")
   }
-  list(ok = TRUE, value = as.integer(x), message = NULL)
-}
-
-#' Read the "Input # of Checks" input using the shared classed error contract
-#'
-#' @inheritParams parse_n_checks
-#' @return An integer, or a `fieldhub_input_error` for invalid input.
-#' @noRd
-read_n_checks <- function(x) {
-  parsed <- parse_n_checks(x)
-  if (!parsed$ok) fieldhub_abort(parsed$message)
-  parsed$value
+  as.integer(x)
 }
 
 #' Parse the "Reps per Check" text input
@@ -102,26 +67,42 @@ read_n_checks <- function(x) {
 #'
 #' @param text The raw `rep_checks_rcbd` input value.
 #' @param n_checks Number of checks the value must ultimately cover.
-#' @return A list with `ok` (logical), `value` (a numeric vector of length
-#'   `n_checks` when `ok`), and `message` (a user-facing string when `!ok`).
+#' @return A numeric vector of length `n_checks`, or a
+#'   \code{fieldhub_input_error} for invalid input.
 #' @noRd
 parse_rep_checks <- function(text, n_checks) {
-  count <- parse_n_checks(n_checks)
-  if (!count$ok) return(count)
-  n_checks <- count$value
-  parsed <- parse_whole_numbers(text, "Reps per Check")
-  if (!parsed$ok) return(parsed)
-  vals <- parsed$value
-  if (length(vals) == 1) {
-    return(list(ok = TRUE, value = rep(vals, n_checks), message = NULL))
-  }
+  n_checks <- parse_n_checks(n_checks)
+  vals <- parse_whole_numbers(text, "Reps per Check")
+  if (length(vals) == 1) return(rep(vals, n_checks))
   if (length(vals) != n_checks) {
-    return(list(ok = FALSE, value = NULL,
-                message = sprintf(
-                  "Reps per Check must have 1 value or %d values (one per check); got %d.",
-                  n_checks, length(vals))))
+    fieldhub_abort(sprintf(
+      "Reps per Check must have 1 value or %d values (one per check); got %d.",
+      n_checks, length(vals)))
   }
-  list(ok = TRUE, value = vals, message = NULL)
+  vals
+}
+
+#' Parse the p-rep "entries per rep group" and "reps per group" inputs
+#'
+#' @description
+#' Both inputs are comma-separated whole numbers of 1 or more, one value per
+#' replication group, so they must have the same length. Text such as
+#' "75,abc" is reported by name instead of reaching the design as an NA.
+#'
+#' @param entries The raw "# of Entries Per Rep Group" input.
+#' @param reps The raw "# of Rep Per Group" input.
+#' @return A list with \code{repGens}, \code{repUnits} and
+#'   \code{total_plots}, or a \code{fieldhub_input_error}.
+#' @noRd
+parse_rep_groups <- function(entries, reps) {
+  rep_gens <- parse_whole_numbers(entries, "# of Entries Per Rep Group")
+  rep_units <- parse_whole_numbers(reps, "# of Rep Per Group")
+  if (length(rep_gens) != length(rep_units)) {
+    fieldhub_abort("# of Entries Per Rep Group and # of Rep Per Group must have the same ",
+                   "number of values (one per group); got ", length(rep_gens), " and ",
+                   length(rep_units), ".")
+  }
+  list(repGens = rep_gens, repUnits = rep_units, total_plots = sum(rep_gens * rep_units))
 }
 
 #' Read an optional app seed without drawing from the caller's RNG stream

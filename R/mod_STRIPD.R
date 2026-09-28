@@ -239,7 +239,7 @@ mod_STRIPD_server <- function(id) {
 
       l.strip <- as.numeric(input$l.strip)
       seed.strip <- validate_design(app_design_seed(input$myseed.strip))
-      plot_start.strip <- validate_design(read_whole_numbers(
+      plot_start.strip <- validate_design(parse_whole_numbers(
         input$plot_start.strip, "Starting Plot Number"
       ))
       loc.strip <-  as.vector(unlist(strsplit(input$Location.strip, ",")))

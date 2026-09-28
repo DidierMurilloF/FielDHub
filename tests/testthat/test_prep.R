@@ -267,3 +267,18 @@ test_that("fillers follow planter direction and row parity", {
 
 
 
+
+test_that("partially_replicated() rejects missing or fractional group counts by name", {
+  # Regression test: repGens = c(75, NA) (text typed in the app's group
+  # input) failed with a raw R error from 1:sum(NA).
+  expect_error(
+    partially_replicated(nrows = 10, ncols = 10, repGens = c(75, NA), repUnits = c(2, 1),
+                         seed = 1),
+    "repGens", class = "fieldhub_input_error"
+  )
+  expect_error(
+    partially_replicated(nrows = 10, ncols = 10, repGens = c(20, 30), repUnits = c(2, 1.5),
+                         seed = 1),
+    "repUnits", class = "fieldhub_input_error"
+  )
+})

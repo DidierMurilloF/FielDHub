@@ -166,7 +166,7 @@ mod_Optim_server <- function(id) {
     optim_inputs <- shiny::eventReactive(input$RUN.optim, {
       planter_mov <- input$planter_mov.spatial
       expt_name <- as.character(input$expt_name.spatial)
-      plotNumber <- validate_design(read_whole_numbers(
+      plotNumber <- validate_design(parse_whole_numbers(
         input$plot_start.spatial, "Starting Plot Number"
       ))
       site_names <- as.character(as.vector(unlist(strsplit(input$Location.spatial, ","))))

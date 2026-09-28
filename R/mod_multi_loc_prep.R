@@ -277,7 +277,7 @@ mod_multi_loc_preps_server <- function(id){
         shiny::req(input$gens_prep)
         if (input$include_checks == "Yes"){
             prep_checks <- as.numeric(as.vector(unlist(strsplit(input$prep_checks, ","))))
-            checks <- validate_design(read_n_checks(input$prep_checks_met))
+            checks <- validate_design(parse_n_checks(input$prep_checks_met))
             if (length(prep_checks) != checks) {
                 shinyalert::shinyalert(
                     "Error!!",
@@ -293,7 +293,7 @@ mod_multi_loc_preps_server <- function(id){
         input_lines <- as.numeric(input$gens_prep)
         planter_mov <- input$planter_preps
         expt_name <- as.vector(unlist(strsplit(input$expt_name_preps, ",")))
-        plotNumber <- validate_design(read_whole_numbers(
+        plotNumber <- validate_design(parse_whole_numbers(
           input$plot_start_preps, "Starting Plot Number"
         ))
         site_names <- as.character(as.vector(unlist(strsplit(input$loc_name_preps, ","))))
@@ -381,7 +381,7 @@ mod_multi_loc_preps_server <- function(id){
                 }
                 if (input$include_checks == "Yes") {
                     prep_checks <- as.numeric(as.vector(unlist(strsplit(input$prep_checks, ","))))
-                    checks <- validate_design(read_n_checks(input$prep_checks_met))
+                    checks <- validate_design(parse_n_checks(input$prep_checks_met))
                     if (length(prep_checks) != checks) {
                         shinyalert::shinyalert(
                             "Error!!", 

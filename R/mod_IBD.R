@@ -271,7 +271,7 @@ mod_IBD_server <- function(id) {
       k <- as.numeric(input$k.ibd)
       treatments <- as.numeric(get_data_ibd()$treatments)
       planter <- input$planter_mov_ibd
-      plot_start <- validate_design(read_whole_numbers(
+      plot_start <- validate_design(parse_whole_numbers(
         input$plot_start.ibd, "Starting Plot Number"
       ))
       location_names <-  as.vector(unlist(strsplit(input$Location.ibd, ",")))

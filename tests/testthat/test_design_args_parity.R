@@ -458,19 +458,20 @@ test_that("classic modules build their design only through design_args_<Module>(
   # else found in a module body must be the module's own engine/builder, a
   # base/shiny/DT/plotly/shinyjs/shinyalert call, or is a bug.
   allowed_helpers <- c(
-    "validate_design",     # shows a fieldhub_error as a Shiny validation message
+    "validate_design",     # shows any error where the output would be (R/app_conditions.R)
+    "app_report_problem",  # reports a problem of an event with no output slot (dialog or notice)
+    "app_attempt",         # evaluates event work, reporting its errors/warnings via app_report_problem()
     "app_design_seed",     # resolves the optional app seed without touching the shared RNG stream
     "app_upload_error",    # shows the shared upload-error alert for a failed file parse
     "app_classic_layout",  # shared layout-panel lifecycle for classic design modules
     "app_classic_workflow",# shared results/simulation/export lifecycle for classic design modules
     "classic_workflow_spec", # registry of per-design IDs/labels the shared workflow helpers use
     "load_file",           # parses an uploaded CSV into a data frame
-    "read_whole_numbers",  # parses a comma-separated starting-plot-number input
+    "parse_whole_numbers", # parses comma-separated whole numbers (plot starts, FD "entries per factor")
     "valid_block_sizes",   # lists the valid incomplete-block sizes for a treatment count
     "parse_n_checks",      # parses the RCBD "# of checks" input
     "parse_rep_checks",    # parses the RCBD "reps per check" input
     "rcbd_size_preview",   # previews the RCBD block size before Run is clicked
-    "parse_whole_numbers", # parses the FD "entries per factor" input
     "design_values_CRD",   # assembles CRD's values from parsed inputs (nulls t when data is given)
     "design_values_SPD",   # assembles SPD's values from parsed inputs (nulls wp/sp when data is given)
     "design_values_SSPD"   # assembles SSPD's values from parsed inputs (nulls wp/sp/ssp when data is given)
@@ -1160,12 +1161,15 @@ test_that("spatial modules build their designs only through design_args_<Module>
   # else it calls must be one of its engines/builders, or a base/shiny/DT/
   # plotly/shinyjs/shinyalert function.
   allowed_helpers <- c(
-    "validate_design",            # shows a fieldhub_error as a Shiny validation message
+    "validate_design",            # shows any error where the output would be (R/app_conditions.R)
+    "app_report_problem",         # reports a problem of an event with no output slot (dialog or notice)
+    "app_attempt",                # evaluates event work, reporting its errors/warnings via app_report_problem()
+    "parse_rep_groups",           # parses the p-rep "entries per group"/"reps per group" inputs
     "app_design_seed",            # resolves the optional app seed without touching the shared RNG stream
     "read_app_seed",              # re-reads the resolved design seed for the simulation workflow; never draws
     "app_upload_error",           # shows the shared upload-error alert for a failed file parse
     "load_file",                  # parses an uploaded CSV into a data frame
-    "read_whole_numbers",         # parses the comma-separated starting-plot-number input
+    "parse_whole_numbers",        # parses the comma-separated starting-plot-number input
     "app_spatial_workflow",       # shared results/simulation/export lifecycle for spatial modules
     "spatial_workflow_spec",      # registry of per-design IDs/labels the shared workflow uses
     "app_table_export_buttons",   # DT export buttons carrying the design's metadata
@@ -1181,7 +1185,7 @@ test_that("spatial modules build their designs only through design_args_<Module>
     "validate_locations_input",   # validates a raw "# of Locations" input before using the count
     "location_view_choices",      # choices for a "view location" select input (Task 13)
     "plant_rep_choices",          # choices for the sparse allocation "plant reps" select input (Task 13)
-    "read_n_checks"               # validates a raw "# of Checks" input before using the count (Task 13)
+    "parse_n_checks"              # validates a raw "# of Checks" input before using the count (Task 13)
   )
   forbidden <- c("sample", "sample.int", "set.seed", "runif", "available_percent",
                  "random_checks", "merge_user_data", "pREP", "get_random",

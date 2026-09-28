@@ -14,8 +14,10 @@ source_layout_exceptions <- c("globals.R", "run_app.R")
 
 # Shiny-layer functions whose names predate the app_ prefix. They live in
 # app_ files (checked below when the sources are available), so they may call
-# app_ functions.
-unprefixed_app_functions <- c("check_app_dependencies", "fieldhub_design_menus")
+# app_ functions. validate_design() (R/app_conditions.R) shows problems as
+# Shiny validation messages.
+unprefixed_app_functions <- c("check_app_dependencies", "fieldhub_design_menus",
+                              "validate_design")
 
 source_layout_dir <- function() {
   dir <- testthat::test_path("..", "..", "R")

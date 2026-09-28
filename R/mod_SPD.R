@@ -219,7 +219,7 @@ mod_SPD_server <- function(id){
       
       l <- as.numeric(input$l.spd)
       seed <- validate_design(app_design_seed(input$seed.spd))
-      plot_start <- validate_design(read_whole_numbers(
+      plot_start <- validate_design(parse_whole_numbers(
         input$plot_start.spd, "Starting Plot Number"
       ))
       location_names <-  as.vector(unlist(strsplit(input$Location.spd, ",")))

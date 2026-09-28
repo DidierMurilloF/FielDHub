@@ -227,7 +227,7 @@ mod_diagonal_multiple_server <- function(id) {
             blocks <- as.numeric(as.vector(unlist(strsplit(input$blocks.db, ","))))
             expe_names <- as.vector(unlist(strsplit(input$expt_name_multiple, ",")))
             expe_names <- gsub(" ", "", expe_names)
-            plotNumber <- validate_design(read_whole_numbers(
+            plotNumber <- validate_design(parse_whole_numbers(
               input$plot_start_multiple, "Starting Plot Number"
             ))
             seed_number <- validate_design(app_design_seed(input$seed_multiple))

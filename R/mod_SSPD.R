@@ -248,7 +248,7 @@ mod_SSPD_server <- function(id){
       
       l <- as.numeric(input$l.sspd)
       seed <- validate_design(app_design_seed(input$seed.sspd))
-      plot_start <- validate_design(read_whole_numbers(
+      plot_start <- validate_design(parse_whole_numbers(
         input$plot_start.sspd, "Starting Plot Number"
       ))
       location_names <-  as.vector(unlist(strsplit(input$Location.sspd, ",")))

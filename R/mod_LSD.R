@@ -211,7 +211,7 @@ mod_LSD_server <- function(id){
         data.lsd <- NULL
       }
 
-      plot_start <- validate_design(read_whole_numbers(
+      plot_start <- validate_design(parse_whole_numbers(
         input$plot_start.lsd, "Starting Plot Number"
       ))
       loc.lsd <-  as.vector(unlist(strsplit(input$Location.lsd, ",")))

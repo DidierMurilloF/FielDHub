@@ -213,7 +213,7 @@ mod_RCBD_server <- function(id) {
       reps <- as.numeric(input$b)
       treatments <- as.numeric(get_data_rcbd()$treatments)
       planter <- input$planter_mov_rcbd
-      plot_start <- validate_design(read_whole_numbers(
+      plot_start <- validate_design(parse_whole_numbers(
         input$plot_start.rcbd, "Starting Plot Number"
       ))
       location_names <-  as.vector(unlist(strsplit(input$Location.rcbd, ",")))
@@ -229,18 +229,10 @@ mod_RCBD_server <- function(id) {
         if (is.null(input$n_checks_rcbd) || is.null(input$rep_checks_rcbd)) {
           shiny::req(FALSE)  # UI not rendered yet; nothing to validate
         }
-        n_ck_parsed <- parse_n_checks(input$n_checks_rcbd)
-        if (!n_ck_parsed$ok) {
-          shinyalert::shinyalert("Error!!", n_ck_parsed$message, type = "error")
-          shiny::req(FALSE)
-        }
-        checks <- n_ck_parsed$value
-        rep_parsed <- parse_rep_checks(input$rep_checks_rcbd, checks)
-        if (!rep_parsed$ok) {
-          shinyalert::shinyalert("Error!!", rep_parsed$message, type = "error")
-          shiny::req(FALSE)
-        }
-        rep_checks <- rep_parsed$value
+        checks <- app_attempt(parse_n_checks(input$n_checks_rcbd))
+        shiny::req(checks)
+        rep_checks <- app_attempt(parse_rep_checks(input$rep_checks_rcbd, checks))
+        shiny::req(rep_checks)
         spread_checks <- isTRUE(input$spread_checks_rcbd)
       }
 
@@ -316,11 +308,9 @@ mod_RCBD_server <- function(id) {
       if (is.null(input$n_checks_rcbd) || is.null(input$rep_checks_rcbd)) {
         return(NULL)  # UI not rendered yet
       }
-      description <- tryCatch(
-        rcbd_size_preview(input$t, input$b, input$n_checks_rcbd, input$rep_checks_rcbd),
-        fieldhub_error = conditionMessage
-      )
-      shiny::helpText(description)
+      shiny::helpText(validate_design(
+        rcbd_size_preview(input$t, input$b, input$n_checks_rcbd, input$rep_checks_rcbd)
+      ))
     })
 
     

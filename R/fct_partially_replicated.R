@@ -186,6 +186,9 @@ partially_replicated <- function(
         if (length(repGens) != length(repUnits)) {
             fieldhub_abort("Input repGens and repUnits should have the same length.")
         }
+        # An NA or a non-whole count used to fail later as 1:sum(NA)
+        validate_count_vector(repGens, "repGens")
+        validate_count_vector(repUnits, "repUnits")
     }
     
     validate_plot_starts(plotNumber)
