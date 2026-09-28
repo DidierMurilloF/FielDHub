@@ -12,33 +12,10 @@ mod_diagonal_multiple_ui <- function(id) {
     shiny::sidebarLayout(
       shiny::sidebarPanel(
         width = 4,
-        shiny::radioButtons(inputId = ns("list_entries_multiple"),
-                     label = "Import entries' list?", 
-                     choices = c("Yes", "No"), 
-                     selected = "No",
-                     inline = TRUE, 
-                     width = NULL, 
-                     choiceNames = NULL, 
-                     choiceValues = NULL),
+        app_upload_ui(ns, "mdiag"),
         shiny::checkboxInput(inputId = ns("sameEntries"),
-                      label = "Repeat entries across experiments", 
+                      label = "Repeat entries across experiments",
                       value = FALSE),
-        shiny::conditionalPanel(
-          condition = "input.list_entries_multiple == 'Yes'", 
-          ns = ns,
-          shiny::fluidRow(
-            shiny::column(7, style=list("padding-right: 28px;"),
-                   shiny::fileInput(ns("file_multiple"),
-                             label = "Upload a CSV File:", 
-                             multiple = FALSE)),
-            shiny::column(5,style=list("padding-left: 5px;"),
-                   shiny::radioButtons(ns("sep.DIAGONALS"), "Separator",
-                                choices = c(Comma = ",",
-                                            Semicolon = ";",
-                                            Tab = "\t"),
-                                selected = ","))
-          )              
-        ),
         shiny::conditionalPanel(
           condition = "input.list_entries_multiple == 'No'", 
           ns = ns,
@@ -296,17 +273,9 @@ mod_diagonal_multiple_server <- function(id) {
                     checking_entry_list = FALSE
                 }
                 shiny::req(input$checks.db)
-                shiny::req(input$file_multiple)
-                inFile <- input$file_multiple
-                data_ingested <- load_file(
-                    name = inFile$name, 
-                    path = inFile[["datapath"]],
-                    sep = input$sep.DIAGONALS, 
-                    check = checking_entry_list, 
-                    design = "mdiag"
-                )
-                if (names(data_ingested) == "dataUp") {
-                    data_up <- data_ingested$dataUp
+                data_ingested <- app_read_upload(input, "mdiag", check = checking_entry_list)
+                if (!is.null(data_ingested)) {
+                    data_up <- data_ingested$data
                     data_entry <- na.omit(data_up)
                     if (ncol(data_entry) < 2) {
                         app_report_problem("Data input needs at least two columns: ENTRY and NAME.")
@@ -369,8 +338,6 @@ mod_diagonal_multiple_server <- function(id) {
                                 lines = NULL,
                                 same_entries = input$sameEntries))
                 } else {
-                  app_upload_error(data_ingested,
-                                   missing_columns = "Data input needs at least two columns: ENTRY and NAME")
                   return(NULL)
                 }
             } else {
@@ -490,36 +457,8 @@ mod_diagonal_multiple_server <- function(id) {
             return(list(d_row = d_row, d_col = d_col))
         })
         
-        entryListFormat_DBUDC <- data.frame(
-            ENTRY = 1:9, 
-            NAME = c(c("CHECK1", "CHECK2","CHECK3"), paste("Genotype", LETTERS[1:6], sep = ""))
-        )
-        
-        toListen <- shiny::reactive({
-            list(input$list_entries_multiple)
-        })
-        
-        entriesInfoModal_DBUDC <- function() {
-        shiny::modalDialog(
-            title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
-            shiny::h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
-            shiny::renderTable(entryListFormat_DBUDC,
-                        bordered = TRUE,
-                        align = 'c',
-                        striped = TRUE),
-            shiny::h4("Note that the controls must be in the first rows of the CSV file."),
-            easyClose = FALSE
-        )
-        }
-        
-        shiny::observeEvent(toListen(), {
-        if (input$list_entries_multiple == "Yes") {
-            shiny::showModal(
-              entriesInfoModal_DBUDC()
-            )
-        }
-        })
-        
+        app_upload_dialog_observer(input, "mdiag")
+
         available_percent_multi <- shiny::eventReactive(input$get_random_multi, {
             shiny::req(input$dimensions_multiple)
             shiny::req(get_data_multiple())

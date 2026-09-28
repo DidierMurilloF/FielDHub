@@ -14,37 +14,19 @@ mod_FD_ui <- function(id){
     shiny::h4("Full Factorial Designs"),
     shiny::sidebarLayout(
       shiny::sidebarPanel(width = 4,
-                   shiny::radioButtons(inputId = ns("owndata"),
-                                label = "Import entries' list?", 
-                                choices = c("Yes", "No"), selected = "No",
-                                inline = TRUE, width = NULL, 
-                                choiceNames = NULL, choiceValues = NULL),
+                   app_upload_ui(ns, "factorial"),
                    shiny::selectInput(inputId = ns("kindFD"),
                                label = "Select a Factorial Design Type:",
-                               choices = c("Factorial in a RCBD" = "FD_RCBD", 
+                               choices = c("Factorial in a RCBD" = "FD_RCBD",
                                            "Factorial in a CRD" = "FD_CRD"),
                                multiple = FALSE),
-                   
+
                    shiny::conditionalPanel("input.owndata != 'Yes'", ns = ns,
                                     shiny::textInput(inputId = ns("setfactors"),
                                               label = "Input # of Entries for Each Factor: (Separated by Comma)",
-                                              value = "2,2,3")     
+                                              value = "2,2,3")
                    ),
-                   shiny::conditionalPanel("input.owndata == 'Yes'", ns = ns,
-                                    shiny::fluidRow(
-                                      shiny::column(8, style=list("padding-right: 28px;"),
-                                             shiny::fileInput(ns("file.FD"),
-                                                       label = "Upload a CSV File:", 
-                                                       multiple = FALSE)),
-                                      shiny::column(4,style=list("padding-left: 5px;"),
-                                             shiny::radioButtons(ns("sep.fd"), "Separator",
-                                                          choices = c(Comma = ",",
-                                                                      Semicolon = ";",
-                                                                      Tab = "\t"),
-                                                          selected = ","))
-                                    )
-                   ),
-                   
+
                    shiny::fluidRow(
                      shiny::column(6, style=list("padding-right: 28px;"),
                             shiny::numericInput(inputId = ns("reps.fd"), label = "Input # of Full Reps:",
@@ -123,63 +105,23 @@ mod_FD_server <- function(id) {
     
     ns <- session$ns
 
-    FACTORS <- rep(c("A", "B", "C"), c(2,3,2))
-    LEVELS <- c("a0", "a1", "b0", "b1", "b2", "c0", "c1")
-    entryListFormat_FD <- data.frame(list(FACTOR = FACTORS, LEVEL = LEVELS))
-    
-    entriesInfoModal_FD <- function() {
-      shiny::modalDialog(
-        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
-        shiny::h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
-        shiny::renderTable(entryListFormat_FD,
-                    bordered = TRUE,
-                    align = 'c',
-                    striped = TRUE),
-        easyClose = FALSE
-      )
-    }
-    
-    toListen <- shiny::reactive({
-      list(input$owndata)
-    })
-    
-    shiny::observeEvent(toListen(), {
-      if (input$owndata == "Yes") {
-        shiny::showModal(
-          entriesInfoModal_FD()
-        )
-      }
-    })
-    
+    app_upload_dialog_observer(input, "factorial")
+
     get_data_factorial <- shiny::reactive({
-      
+
       if (input$owndata == "Yes") {
-        shiny::req(input$file.FD)
-        shiny::req(input$sep.fd)
-        inFile <- input$file.FD
-        
-        data_ingested <- load_file(name = inFile$name,
-          path = inFile[["datapath"]],
-          sep = input$sep.fd,
-          check = TRUE, 
-          design = "factorial")
-        
-        if (names(data_ingested) == "dataUp") {
-          data_up <- data_ingested$dataUp
-          data_up <- as.data.frame(data_up[,1:2])
-          data_factorial <- na.omit(data_up)
-          colnames(data_factorial) <- c("FACTOR", "LEVEL")
-          nt <- length(unique(data_factorial$FACTOR))
-          if (nt < 2) {
-            app_report_problem("More than one factor needs to be specified.")
-            return(NULL)
-          }
-          return(list(data_fd = data_factorial, setfactors = NULL))
-        } else {
-          app_upload_error(data_ingested,
-                           missing_columns = "Data input needs at least two column: FACTOR and LEVEL")
+        data_ingested <- app_read_upload(input, "factorial")
+        if (is.null(data_ingested)) return(NULL)
+        data_up <- data_ingested$data
+        data_up <- as.data.frame(data_up[,1:2])
+        data_factorial <- na.omit(data_up)
+        colnames(data_factorial) <- c("FACTOR", "LEVEL")
+        nt <- length(unique(data_factorial$FACTOR))
+        if (nt < 2) {
+          app_report_problem("More than one factor needs to be specified.")
           return(NULL)
         }
+        return(list(data_fd = data_factorial, setfactors = NULL))
       } else {
         shiny::req(input$setfactors)
         setfactors.fd <- app_attempt(

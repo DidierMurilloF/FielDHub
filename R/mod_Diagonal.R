@@ -12,32 +12,9 @@ mod_Diagonal_ui <- function(id) {
     shiny::sidebarLayout(
       shiny::sidebarPanel(
         width = 4,
-        shiny::radioButtons(inputId = ns("owndataDIAGONALS"),
-                     label = "Import entries' list?",
-                     choices = c("Yes", "No"), 
-                     selected = "No",
-                     inline = TRUE,
-                     width = NULL,
-                     choiceNames = NULL,
-                     choiceValues = NULL),
+        app_upload_ui(ns, "sdiag"),
         shiny::conditionalPanel(
-          condition = "input.owndataDIAGONALS == 'Yes'", 
-          ns = ns,
-          shiny::fluidRow(
-            shiny::column(7, style=list("padding-right: 28px;"),
-                   shiny::fileInput(ns("file1"),
-                             label = "Upload a CSV File:", 
-                             multiple = FALSE)),
-            shiny::column(5,style=list("padding-left: 5px;"),
-                   shiny::radioButtons(ns("sep.DIAGONALS"), "Separator",
-                                choices = c(Comma = ",",
-                                            Semicolon = ";",
-                                            Tab = "\t"),
-                                selected = ","))
-          )              
-        ),
-        shiny::conditionalPanel(
-          condition = "input.owndataDIAGONALS == 'No'", 
+          condition = "input.owndataDIAGONALS == 'No'",
           ns = ns,
           shiny::numericInput(inputId = ns("lines.d"),
                        label = "Input # of Entries:",
@@ -269,17 +246,9 @@ mod_Diagonal_server <- function(id) {
     getData <- shiny::eventReactive(input$RUN.diagonal, {
         Option_NCD <- TRUE
         if (input$owndataDIAGONALS == "Yes") {
-            shiny::req(input$file1)
-            inFile <- input$file1
-            data_ingested <- load_file(
-                name = inFile$name, 
-                path = inFile[["datapath"]],
-                sep = input$sep.DIAGONALS, 
-                check = TRUE, 
-                design = "sdiag"
-            )
-            if (names(data_ingested) == "dataUp") {
-                data_up <- data_ingested$dataUp
+            data_ingested <- app_read_upload(input, "sdiag")
+            if (!is.null(data_ingested)) {
+                data_up <- data_ingested$data
                 if (ncol(data_up) < 2) {
                     app_report_problem("Data input needs at least two columns: ENTRY and NAME.")
                     return(NULL)
@@ -311,8 +280,6 @@ mod_Diagonal_server <- function(id) {
                             dim_without_checks = dim_data_1,
                             uploaded = TRUE))
             } else {
-              app_upload_error(data_ingested,
-                               missing_columns = "Data input needs at least two columns: ENTRY and NAME")
               return(NULL)
             }
         } else {
@@ -383,36 +350,9 @@ mod_Diagonal_server <- function(id) {
       return(list(d_row = d_row, d_col = d_col))
     })
 
-    entryListFormat_SUDC <- data.frame(
-      ENTRY = 1:9, 
-      NAME = c(c("CHECK1", "CHECK2","CHECK3"), paste("Genotype", LETTERS[1:6], 
-                                                     sep = ""))
-    )
-    
-    toListen <- shiny::reactive({
-      list(input$owndataDIAGONALS,kindExpt_single)
-    })
-    
-    entriesInfoModal_SUDC <- function() {
-      shiny::modalDialog(
-        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
-        shiny::h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
-        shiny::renderTable(entryListFormat_SUDC,
-                    bordered = TRUE,
-                    align  = 'c',
-                    striped = TRUE),
-        shiny::h4("Note that the controls must be in the first rows of the CSV file."),
-        easyClose = FALSE
-      )
-    }
-
-    shiny::observeEvent(toListen(), {
-      if (input$owndataDIAGONALS == "Yes" && kindExpt_single == "SUDC") {
-        shiny::showModal(
-          entriesInfoModal_SUDC()
-        )
-      }
-    })
+    # kindExpt_single is always "SUDC" here (set above), so the dialog only
+    # ever depended on the toggle in practice.
+    app_upload_dialog_observer(input, "sdiag")
 
     available_percent_table <- shiny::eventReactive(input$get_random, {
       shiny::req(input$dimensions.d)

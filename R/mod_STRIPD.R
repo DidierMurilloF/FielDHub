@@ -13,34 +13,10 @@ mod_STRIPD_ui <- function(id){
     shiny::sidebarLayout(
       shiny::sidebarPanel(
         width = 4,
-        shiny::radioButtons(inputId = ns("owndataSTRIP"),
-                     label = "Import entries' list?", 
-                     choices = c("Yes", "No"), 
-                     selected = "No",
-                     inline = TRUE, 
-                     width = NULL, 
-                     choiceNames = NULL, 
-                     choiceValues = NULL),
+        app_upload_ui(ns, "strip"),
+
         shiny::conditionalPanel(
-          condition = "input.owndataSTRIP == 'Yes'", 
-          ns = ns,
-          shiny::fluidRow(
-            shiny::column(8, style=list("padding-right: 28px;"),
-                   shiny::fileInput(ns("file.STRIP"),
-                             label = "Upload a csv File:",
-                             multiple = FALSE)),
-            
-            shiny::column(4,style=list("padding-left: 5px;"),
-                   shiny::radioButtons(ns("sep.strip"), "Separator",
-                                choices = c(Comma = ",",
-                                            Semicolon = ";",
-                                            Tab = "\t"),
-                                selected = ","))
-          )
-        ),
-        
-        shiny::conditionalPanel(
-          condition = "input.owndataSTRIP != 'Yes'", 
+          condition = "input.owndataSTRIP != 'Yes'",
           ns = ns,
           shiny::fluidRow(
             shiny::column(6, style=list("padding-right: 28px;"),
@@ -165,58 +141,19 @@ mod_STRIPD_server <- function(id) {
   shiny::moduleServer( id, function(input, output, session) {
     ns <- session$ns
 
-    Hplots <- LETTERS[1:5]
-    Vplots <- LETTERS[1:5]
-    entryListFormat_STRIP <- data.frame(
-      list(HPLOTS = Hplots, VPLOTS = Vplots)
-      )           
-    entriesInfoModal_STRIP <- function() {
-      shiny::modalDialog(
-        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
-        shiny::h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
-        shiny::renderTable(entryListFormat_STRIP,
-                    bordered = TRUE,
-                    align = 'c',
-                    striped = TRUE),
-        easyClose = FALSE
-      )
-    }
-    
-    toListen <- shiny::reactive({
-      list(input$owndataSTRIP)
-    })
-    
-    shiny::observeEvent(toListen(), {
-      if (input$owndataSTRIP == "Yes") {
-        shiny::showModal(
-          entriesInfoModal_STRIP()
-        )
-      }
-    })
-    
+    app_upload_dialog_observer(input, "strip")
+
     get_data_strip <- shiny::reactive({
       if (input$owndataSTRIP == "Yes") {
-        shiny::req(input$file.STRIP)
-        inFile <- input$file.STRIP
-        data_ingested <- load_file(name = inFile$name, 
-                                   path = inFile[["datapath"]],
-                                   sep = input$sep.strip, 
-                                   check = TRUE,
-                                   design = "strip")
-        
-        if (names(data_ingested) == "dataUp") {
-          data_up <- data_ingested$dataUp
-          data_strip <- as.data.frame(data_up[,1:2])
-          colnames(data_strip) <- c("Hplot", "Vplot")
-          Hstrip <- length(as.vector(na.omit(data_strip[,1])))
-          Vstrip <- length(as.vector(na.omit(data_strip[,2])))
-          treatments <- c(Hstrip, Vstrip)
-          return(list(data_strip = data_strip, treatments = treatments))
-        } else {
-          app_upload_error(data_ingested,
-                           missing_columns = "Data input needs at least two column: Hplot and Vplot")
-          return(NULL)
-        }
+        data_ingested <- app_read_upload(input, "strip")
+        if (is.null(data_ingested)) return(NULL)
+        data_up <- data_ingested$data
+        data_strip <- as.data.frame(data_up[,1:2])
+        colnames(data_strip) <- c("Hplot", "Vplot")
+        Hstrip <- length(as.vector(na.omit(data_strip[,1])))
+        Vstrip <- length(as.vector(na.omit(data_strip[,2])))
+        treatments <- c(Hstrip, Vstrip)
+        return(list(data_strip = data_strip, treatments = treatments))
       } else {
         shiny::req(input$HStrip.strip, input$VStrip.strip)
         shiny::req(input$blocks.strip)

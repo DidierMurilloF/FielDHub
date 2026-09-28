@@ -727,6 +727,21 @@
   Diagonal, Sparse Allocation, Optimized Arrangement, p-rep,
   Multi-location p-rep and Augmented RCBD modules.
 
+- All 19 app modules now share one upload component instead of their own
+  copy of the "Import entries' list?" toggle, file input, separator
+  control and entries-format dialog: a plain `read_design_upload()`
+  parses and validates the file (reusing each design's existing column
+  rule and error wording, and now classed as a `fieldhub_input_error`
+  reported through the app's one problem path instead of a bespoke
+  adapter), and `app_upload_ui()`/`app_upload_dialog()` build the shared
+  controls and dialog. Labels are unified: the toggle always reads
+  "Import entries' list?" (a few modules said "Import Entries' List?" or
+  "Do you have your own data?"), and the file input always reads "Upload
+  a CSV File:" (the Row-Column, Split-Plot, Split-Split-Plot and
+  Strip-Plot modules said "Upload a csv File:"). Existing input ids,
+  per-design upload rules, error wording and format-example content are
+  preserved.
+
 ### Fix bugs:
 
 - Blank app seed boxes no longer error. Shiny sends a cleared numeric

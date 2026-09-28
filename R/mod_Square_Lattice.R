@@ -12,31 +12,11 @@ mod_Square_Lattice_ui <- function(id){
     shiny::h4("Square Lattice Design"),
     shiny::sidebarLayout(
       shiny::sidebarPanel(width = 4,
-                   shiny::radioButtons(
-                     ns("owndata_square"), 
-                     label = "Import entries' list?",
-                     choices = c("Yes", "No"), 
-                     selected = "No",
-                     inline = TRUE,
-                     width = NULL, 
-                     choiceNames = NULL, 
-                     choiceValues = NULL),
-                   
+                   app_upload_ui(ns, "square"),
+
                    shiny::conditionalPanel("input.owndata_square != 'Yes'", ns = ns,
                                     shiny::numericInput(ns("t.square"), label = "Input # of Treatments:",
                                                  value = 49, min = 2)
-                   ),
-                   shiny::conditionalPanel("input.owndata_square == 'Yes'", ns = ns,
-                                    shiny::fluidRow(
-                                      shiny::column(8, style=list("padding-right: 28px;"),
-                                             shiny::fileInput(inputId = ns("file.square"), label = "Upload a CSV File:", multiple = FALSE)),
-                                      shiny::column(4, style=list("padding-left: 5px;"),
-                                             shiny::radioButtons(inputId = ns("sep.square"), "Separator",
-                                                          choices = c(Comma = ",",
-                                                                      Semicolon = ";",
-                                                                      Tab = "\t"),
-                                                          selected = ","))
-                                    )        
                    ),
                    shiny::numericInput(inputId = ns("r.square"), label = "Input # of Full Reps:", value = 3, min = 2),
                    shiny::selectInput(inputId = ns("k.square"), label = "Input # of Plots per IBlock:", choices = ""),
@@ -127,28 +107,18 @@ mod_Square_Lattice_server <- function(id){
     init_data_square <- shiny::reactive({
       
       if (input$owndata_square == "Yes") {
-        shiny::req(input$file.square)
-        inFile <- input$file.square
-        data_ingested <- load_file(name = inFile$name, 
-                                   path = inFile[["datapath"]],
-                                   sep = input$sep.square, check = TRUE, design = "square")
-        
-        if (names(data_ingested) == "dataUp") {
-          data_up <- data_ingested$dataUp
-          if (ncol(data_up) < 2) {
-            app_report_problem("Data input needs at least two columns: ENTRY and NAME.")
-            return(NULL)
-          } 
-          data_up <- as.data.frame(data_up[,1:2])
-          data_square <- na.omit(data_up)
-          colnames(data_square) <- c("ENTRY", "NAME")
-          treatments = nrow(data_square)
-          return(list(data_square = data_square, treatments = treatments))
-        } else {
-          app_upload_error(data_ingested,
-                           missing_columns = "Data input needs at least two columns: ENTRY and NAME")
+        data_ingested <- app_read_upload(input, "square")
+        if (is.null(data_ingested)) return(NULL)
+        data_up <- data_ingested$data
+        if (ncol(data_up) < 2) {
+          app_report_problem("Data input needs at least two columns: ENTRY and NAME.")
           return(NULL)
         }
+        data_up <- as.data.frame(data_up[,1:2])
+        data_square <- na.omit(data_up)
+        colnames(data_square) <- c("ENTRY", "NAME")
+        treatments = nrow(data_square)
+        return(list(data_square = data_square, treatments = treatments))
       } else {
         shiny::req(input$t.square)
         nt <- as.numeric(input$t.square)
@@ -226,32 +196,7 @@ mod_Square_Lattice_server <- function(id){
     }) |>
       shiny::bindEvent(input$RUN.square)
 
-    entryListFormat_SQUARE <- data.frame(ENTRY = 1:9, 
-                                         NAME = c(paste("Genotype", LETTERS[1:9], sep = "")))
-    entriesInfoModal_SQUARE <- function() {
-      shiny::modalDialog(
-        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
-        shiny::h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
-        shiny::renderTable(entryListFormat_SQUARE,
-                    bordered = TRUE,
-                    align = 'c',
-                    striped = TRUE),
-        shiny::h4("Entry numbers can be any set of consecutive positive numbers."),
-        easyClose = FALSE
-      )
-    }
-    
-    toListen <- shiny::reactive({
-      list(input$owndata_square)
-    })
-    
-    shiny::observeEvent(toListen(), {
-      if (input$owndata_square == "Yes") {
-        shiny::showModal(
-          entriesInfoModal_SQUARE()
-        )
-      }
-    })
+    app_upload_dialog_observer(input, "square")
 
     SQUARE_reactive <- shiny::eventReactive(input$RUN.square,{
       

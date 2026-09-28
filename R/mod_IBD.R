@@ -14,40 +14,16 @@ mod_IBD_ui <- function(id) {
     shiny::sidebarLayout(
       shiny::sidebarPanel(
         width = 4,
-        shiny::radioButtons(ns("owndataibd"),
-                     label = "Import entries' list?", 
-                     choices = c("Yes", "No"), 
-                     selected = "No",
-                     inline = TRUE, 
-                     width = NULL, 
-                     choiceNames = NULL, 
-                     choiceValues = NULL),
-        
+        app_upload_ui(ns, "ibd"),
         shiny::conditionalPanel(
-          condition = "input.owndataibd != 'Yes'", 
+          condition = "input.owndataibd != 'Yes'",
           ns = ns,
           shiny::numericInput(ns("t.ibd"),
                        label = "Input # of Treatments:",
-                       value = 15, 
+                       value = 15,
                        min = 2)
         ),
-        shiny::conditionalPanel(
-          condition = "input.owndataibd == 'Yes'", 
-          ns = ns,
-          shiny::fluidRow(
-            shiny::column(8, style=list("padding-right: 28px;"),
-                   shiny::fileInput(inputId = ns("file.IBD"),
-                             label = "Upload a CSV File:", 
-                             multiple = FALSE)),
-            shiny::column(4, style=list("padding-left: 5px;"),
-                   shiny::radioButtons(inputId = ns("sep.ibd"), "Separator",
-                                choices = c(Comma = ",",
-                                            Semicolon = ";",
-                                            Tab = "\t"),
-                                selected = ","))
-          )        
-        ),
-        
+
         shiny::numericInput(inputId = ns("r.ibd"),
                      label = "Input # of Full Reps:", 
                      value = 4, 
@@ -157,57 +133,20 @@ mod_IBD_server <- function(id) {
   shiny::moduleServer( id, function(input, output, session){
     
     ns <- session$ns
-    treatments <- paste("TX-", 1:9, sep = "")
-    entryListFormat_IBD <- data.frame(ENTRY = 1:9, 
-                                      NAME = treatments)
-    entriesInfoModal_IBD <- function() {
-      shiny::modalDialog(
-        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
-        shiny::h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
-        shiny::renderTable(entryListFormat_IBD,
-                    bordered = TRUE,
-                    align = 'c',
-                    striped = TRUE),
-        shiny::h4("Entry numbers can be any set of consecutive positive numbers."),
-        easyClose = FALSE
-      )
-    }
-    
-    toListen <- shiny::reactive({
-      list(input$owndataibd)
-    })
-    
-    shiny::observeEvent(toListen(), {
-      if (input$owndataibd == "Yes") {
-        shiny::showModal(
-          entriesInfoModal_IBD()
-        )
-      }
-    })
-    
+
+    app_upload_dialog_observer(input, "ibd")
+
     init_data_ibd <- shiny::reactive({
-      
+
       if(input$owndataibd == "Yes") {
-        shiny::req(input$file.IBD)
-        inFile <- input$file.IBD
-        data_ingested <- load_file(name = inFile$name, 
-                                   path = inFile[["datapath"]],
-                                   sep = input$sep.ibd, 
-                                   check = TRUE, 
-                                   design = "ibd")
-        
-        if (names(data_ingested) == "dataUp") {
-          data_up <- data_ingested$dataUp
-          data_up <- as.data.frame(data_up[,1:2])
-          data_ibd <- na.omit(data_up)
-          colnames(data_ibd) <- c("ENTRY", "NAME")
-          treatments = nrow(data_ibd)
-          return(list(data_ibd = data_ibd, treatments = treatments))
-        } else {
-          app_upload_error(data_ingested,
-                           missing_columns = "Data input needs at least two columns: ENTRY and NAME")
-          return(NULL)
-        }
+        data_ingested <- app_read_upload(input, "ibd")
+        if (is.null(data_ingested)) return(NULL)
+        data_up <- data_ingested$data
+        data_up <- as.data.frame(data_up[,1:2])
+        data_ibd <- na.omit(data_up)
+        colnames(data_ibd) <- c("ENTRY", "NAME")
+        treatments = nrow(data_ibd)
+        return(list(data_ibd = data_ibd, treatments = treatments))
       } else {
         shiny::req(input$t.ibd)
         nt <- as.numeric(input$t.ibd)

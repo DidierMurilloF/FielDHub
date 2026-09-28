@@ -13,33 +13,8 @@ mod_LSD_ui <- function(id){
     shiny::sidebarLayout(
       shiny::sidebarPanel(
         width = 4,
-        shiny::radioButtons(inputId = ns("owndataLSD"),
-                     label = "Import entries' list?", 
-                     choices = c("Yes", "No"), 
-                     selected = "No",
-                     inline = TRUE, 
-                     width = NULL, 
-                     choiceNames = NULL, 
-                     choiceValues = NULL), 
-        
-        shiny::conditionalPanel(
-          condition = "input.owndataLSD == 'Yes'", 
-          ns = ns,
-          shiny::fluidRow(
-            shiny::column(8, style=list("padding-right: 28px;"),
-                   shiny::fileInput(ns("file.LSD"),
-                             label = "Upload a CSV File:", 
-                             multiple = FALSE)),
-            
-            shiny::column(4,style=list("padding-left: 5px;"),
-                   shiny::radioButtons(ns("sep.lsd"), "Separator",
-                                choices = c(Comma = ",",
-                                            Semicolon = ";",
-                                            Tab = "\t"),
-                                selected = ","))
-          )             
-        ),
-        
+        app_upload_ui(ns, "lsd"),
+
         shiny::conditionalPanel(
           condition = "input.owndataLSD != 'Yes'", ns = ns,
                          
@@ -135,58 +110,17 @@ mod_LSD_server <- function(id){
     
     ns <- session$ns
 
-    entryListFormat_LSD <- data.frame(
-      list(ROW = paste("Period", 1:5, sep = ""),
-           COLUMN = paste("Cow", 1:5, sep = ""),
-           TREATMENT = paste("Diet", 1:5, sep = ""))
-    )
-    entriesInfoModal_LSD <- function() {
-      shiny::modalDialog(
-        title = shiny::div(shiny::tags$h3("Important message",
-                            style = "color: red;")),
-        shiny::h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
-        shiny::renderTable(entryListFormat_LSD,
-                    bordered = TRUE,
-                    align = 'c',
-                    striped = TRUE),
-        easyClose = FALSE
-      )
-    }
-    
-    toListen <- shiny::reactive({
-      list(input$owndataLSD)
-    })
-    
-    shiny::observeEvent(toListen(), {
-      if (input$owndataLSD == "Yes") {
-        shiny::showModal(
-          entriesInfoModal_LSD()
-        )
-      }
-    })
+    app_upload_dialog_observer(input, "lsd")
 
     get_data_lsd <- shiny::reactive({
       if (input$owndataLSD == "Yes") {
-        shiny::req(input$file.LSD)
-        shiny::req(input$sep.lsd)
-        inFile <- input$file.LSD
-        data_ingested <- load_file(name = inFile$name, 
-                                path = inFile[["datapath"]],
-                                sep = input$sep.lsd,
-                                check = TRUE, 
-                                design = "lsd")
-        
-        if (names(data_ingested) == "dataUp") {
-          data_up <- data_ingested$dataUp
-          data_up <- as.data.frame(data_up[,1:3])
-          data_lsd <- na.omit(data_up)
-          colnames(data_lsd) <- c("ROW", "COLUMN", "TREATMENT")
-          return(list(data_lsd = data_lsd))
-        } else {
-          app_upload_error(data_ingested,
-                           missing_columns = "Data input needs at least one column: ROW, COLUMN, and  TREATMENT")
-          return(NULL)
-        }
+        data_ingested <- app_read_upload(input, "lsd")
+        if (is.null(data_ingested)) return(NULL)
+        data_up <- data_ingested$data
+        data_up <- as.data.frame(data_up[,1:3])
+        data_lsd <- na.omit(data_up)
+        colnames(data_lsd) <- c("ROW", "COLUMN", "TREATMENT")
+        return(list(data_lsd = data_lsd))
       }
     })
 

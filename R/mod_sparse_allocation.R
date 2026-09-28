@@ -13,41 +13,7 @@ mod_sparse_allocation_ui <- function(id) {
     shiny::sidebarLayout(
       shiny::sidebarPanel(
         width = 4,
-        shiny::radioButtons(
-            inputId = ns("input_sparse_data"),
-            label = "Import entries' list?",
-            choices = c("Yes", "No"), 
-            selected = "No",
-            inline = TRUE,
-            width = NULL,
-            choiceNames = NULL,
-            choiceValues = NULL
-        ),
-        shiny::conditionalPanel(
-            condition = "input.input_sparse_data == 'Yes'", 
-            ns = ns,
-            shiny::fluidRow(
-                shiny::column(
-                    width = 7, 
-                    style=list("padding-right: 28px;"),
-                    shiny::fileInput(
-                        ns("sparse_file"), 
-                        label = "Upload a CSV File:", 
-                        multiple = FALSE
-                    )
-                ),
-                shiny::column(
-                    width = 5,
-                    tyle=list("padding-left: 5px;"),
-                    shiny::radioButtons(
-                        ns("sparse_file_sep"), "Separator",
-                        choices = c(Comma = ",",
-                                    Semicolon = ";",
-                                    Tab = "\t"),
-                        selected = ",")
-                )
-            )              
-        ),
+        app_upload_ui(ns, "sparse_allocation"),
         shiny::numericInput(
             inputId = ns("sparse_lines"), 
             label = "Input # of Entries:",
@@ -349,18 +315,10 @@ mod_sparse_allocation_server <- function(id){
         if (input$input_sparse_data == "Yes") {
             shiny::req(input$sparse_lines)
             shiny::req(input$sparse_checks)
-            shiny::req(input$sparse_file)
             sparse_checks <- as.numeric(input$sparse_checks)
-            inFile <- input$sparse_file
-            data_ingested <- load_file(
-                name = inFile$name, 
-                path = inFile[["datapath"]],
-                sep = input$sparse_file_sep, 
-                check = TRUE, 
-                design = "sdiag"
-            )
-            if (names(data_ingested) == "dataUp") {
-                data_up <- data_ingested$dataUp
+            data_ingested <- app_read_upload(input, "sparse_allocation")
+            if (!is.null(data_ingested)) {
+                data_up <- data_ingested$data
                 if (ncol(data_up) < 2) {
                     app_report_problem("Data input needs at least two columns: ENTRY and NAME.")
                     return(NULL)
@@ -394,8 +352,6 @@ mod_sparse_allocation_server <- function(id){
                         dim_without_checks = entries_in_file,
                         upload = TRUE))
             } else {
-              app_upload_error(data_ingested,
-                               missing_columns = "Data input needs at least two columns: ENTRY and NAME")
               return(NULL)
             }
         } else {
@@ -572,36 +528,9 @@ mod_sparse_allocation_server <- function(id){
       return(list(d_row = d_row, d_col = d_col))
     })
 
-    entryListFormat_SUDC <- data.frame(
-      ENTRY = 1:9, 
-      NAME = c(c("CHECK1", "CHECK2","CHECK3"), paste("Genotype", LETTERS[1:6], 
-                                                     sep = ""))
-    )
-    
-    toListen <- shiny::reactive({
-      list(input$input_sparse_data, kindExpt_single)
-    })
-    
-    entriesInfoModal_SUDC <- function() {
-      shiny::modalDialog(
-        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
-        shiny::h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
-        shiny::renderTable(entryListFormat_SUDC,
-                    bordered = TRUE,
-                    align  = 'c',
-                    striped = TRUE),
-        shiny::h4("Note that the controls must be in the first rows of the CSV file."),
-        easyClose = FALSE
-      )
-    }
-
-    shiny::observeEvent(toListen(), {
-      if (input$input_sparse_data == "Yes" && kindExpt_single == "SUDC") {
-        shiny::showModal(
-          entriesInfoModal_SUDC()
-        )
-      }
-    })
+    # kindExpt_single is always "SUDC" here (set above), so the dialog only
+    # ever depended on the toggle in practice.
+    app_upload_dialog_observer(input, "sparse_allocation")
 
     available_percent_table <- shiny::eventReactive(input$sparse_get_random, {
       shiny::req(input$sparse_dims)

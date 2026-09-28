@@ -39,3 +39,41 @@ upload_error_message <- function(result, missing_columns) {
          missing_cols = missing_columns,
          NULL)
 }
+
+#' Read and validate an uploaded design entries file
+#'
+#' @description The shared entry point every module's upload boils down to:
+#' parses \code{path} as a CSV (\code{load_file()}/\code{read_upload_csv()}),
+#' checks it against \code{design}'s column rule
+#' (\code{upload_validation_rule()}/\code{check_input()}), and raises a
+#' classed \code{fieldhub_input_error} with the same wording modules have
+#' always shown (\code{upload_error_message()}) for anything that fails: an
+#' unreadable/non-CSV file, ragged rows, or duplicate values in the columns
+#' \code{design} requires to be unique. A malformed upload never raises an
+#' uncaught error; it always reports this one condition.
+#'
+#' @param path Path to the uploaded file (e.g. \code{input$file$datapath}).
+#' @param sep Field separator (\code{","}, \code{";"} or \code{"\t"}).
+#' @param design One of the design keys \code{upload_validation_rule()}
+#'   understands (e.g. \code{"crd"}, \code{"sdiag"}, \code{"sspd"}, ...).
+#' @param missing_columns The message shown when the file parses but is
+#'   missing, or duplicates, the columns \code{design} requires; each design
+#'   writes its own (e.g. "Data input needs at least two columns: ENTRY and
+#'   NAME").
+#' @param name The uploaded file's own name, used only to check its
+#'   extension; defaults to \code{basename(path)} for callers (tests) that
+#'   have no separate name, such as a temp file uploaded as itself.
+#' @param check Whether to apply \code{design}'s column/uniqueness rule at
+#'   all; \code{FALSE} skips it (a module lets the same entries repeat
+#'   across experiments, so duplicate values are expected).
+#' @return \code{list(data = <data.frame>)}.
+#' @noRd
+read_design_upload <- function(path, sep, design, missing_columns = NULL,
+                               name = basename(path), check = TRUE) {
+  data_ingested <- load_file(name = name, path = path, sep = sep,
+                             check = check, design = design)
+  if (identical(names(data_ingested), "dataUp")) {
+    return(list(data = data_ingested$dataUp))
+  }
+  fieldhub_abort(upload_error_message(data_ingested, missing_columns))
+}

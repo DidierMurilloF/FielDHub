@@ -13,30 +13,7 @@ mod_Optim_ui <- function(id) {
     shiny::sidebarLayout(
       shiny::sidebarPanel(
         width = 4,
-        shiny::radioButtons(inputId = ns("owndataOPTIM"),
-                    label = "Import Entries' List?", 
-                    choices = c("Yes", "No"), 
-                    selected = "No",
-                    inline = TRUE, 
-                    width = NULL, 
-                    choiceNames = NULL, 
-                    choiceValues = NULL),
-       shiny::conditionalPanel(
-         condition = "input.owndataOPTIM == 'Yes'", 
-         ns = ns,
-         shiny::fluidRow(
-          shiny::column(7, style=list("padding-right: 28px;"),
-                  shiny::fileInput(ns("file3"),
-                            label = "Upload a CSV File:", 
-                            multiple = FALSE)),
-          shiny::column(5,style=list("padding-left: 5px;"),
-                  shiny::radioButtons(ns("sep.OPTIM"), "Separator",
-                              choices = c(Comma = ",",
-                                          Semicolon = ";",
-                                          Tab = "\t"),
-                              selected = ","))
-         )
-       ),
+        app_upload_ui(ns, "optim"),
        shiny::conditionalPanel(
          "input.owndataOPTIM != 'Yes'", 
           ns = ns,
@@ -199,16 +176,9 @@ mod_Optim_server <- function(id) {
 
     get_data_optim <- shiny::eventReactive(input$RUN.optim, {
       if (input$owndataOPTIM == "Yes") {
-        shiny::req(input$file3)
-        inFile <- input$file3
-        data_ingested <- load_file(name = inFile$name, 
-                                   path = inFile[["datapath"]],
-                                   sep = input$sep.OPTIM,
-                                   check = TRUE, 
-                                   design = "optim")
-        
-        if (names(data_ingested) == "dataUp") {
-          data_up <- data_ingested$dataUp
+        data_ingested <- app_read_upload(input, "optim")
+        if (!is.null(data_ingested)) {
+          data_up <- data_ingested$data
           data_up <- na.omit(data_up)
           data_up <- as.data.frame(data_up)
           if (ncol(data_up) < 3) {
@@ -226,8 +196,6 @@ mod_Optim_server <- function(id) {
           total_plots <- sum(data_up$REPS)
           counts <- NULL
         } else {
-          app_upload_error(data_ingested,
-                           missing_columns = "Data input needs at least three columns with: ENTRY, NAME and REPS.")
           return(NULL)
         }
       } else {
@@ -327,35 +295,7 @@ mod_Optim_server <- function(id) {
       })
     })
 
-    entryListFormat_OPTIM <- data.frame(ENTRY = 1:9, 
-                                        NAME = c(c("CHECK1", "CHECK2","CHECK3"), 
-                                                 paste("Genotype", LETTERS[1:6], sep = "")),
-                                        REPS = as.factor(c(rep(10, times = 3), rep(1,6))))
-    
-    entriesInfoModal_OPTIM <- function() {
-      shiny::modalDialog(
-        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
-        shiny::h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
-        shiny::renderTable(entryListFormat_OPTIM,
-                    bordered = TRUE,
-                    align = 'c',
-                    striped = TRUE),
-        shiny::h4("Note that the controls must be in the first rows of the CSV file."),
-        easyClose = FALSE
-      )
-    }
-    
-    toListen <- shiny::reactive({
-      list(input$owndataOPTIM)
-    })
-    
-    shiny::observeEvent(toListen(), {
-      if (input$owndataOPTIM == "Yes") {
-        shiny::showModal(
-          entriesInfoModal_OPTIM()
-        )
-      }
-    })
+    app_upload_dialog_observer(input, "optim")
 
     shiny::observeEvent(input$RUN.optim, {
       shiny::req(get_data_optim())

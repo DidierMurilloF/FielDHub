@@ -13,39 +13,7 @@ mod_multi_loc_preps_ui <- function(id){
     shiny::sidebarLayout(
         shiny::sidebarPanel(
             width = 4,
-            shiny::radioButtons(
-                inputId = ns("multi_prep_data"), 
-                label = "Import entries' list?", 
-                choices = c("Yes", "No"), 
-                selected = "No",
-                inline = TRUE, 
-                width = NULL, 
-                choiceNames = NULL, 
-                choiceValues = NULL
-            ),
-            shiny::conditionalPanel(
-                condition = "input.multi_prep_data == 'Yes'", 
-                ns = ns,
-                shiny::fluidRow(
-                shiny::column(
-                    width = 7, # style=list("padding-right: 28px;"),
-                    shiny::fileInput(
-                        ns("file_multi_prep"), 
-                        label = "Upload a CSV File:", 
-                        multiple = FALSE
-                    )
-                ),
-                shiny::column(
-                    width = 5, #style=list("padding-left: 5px;"),
-                    shiny::radioButtons(
-                        ns("sep_multi_prep"), "Separator",
-                        choices = c(Comma = ",",
-                                    Semicolon = ";",
-                                    Tab = "\t"),
-                        selected = ",")
-                    )
-                )             
-            ),
+            app_upload_ui(ns, "multi_loc_prep"),
             shiny::numericInput(
                 inputId = ns("gens_prep"), 
                 label = "Input # of Entries:",
@@ -341,18 +309,10 @@ mod_multi_loc_preps_server <- function(id){
             return(NULL)
         }
         if (input$multi_prep_data == 'Yes') {
-            shiny::req(input$file_multi_prep)
             shiny::req(input$gens_prep)
-            inFile <- input$file_multi_prep
-            data_ingested <- load_file(
-                name = inFile$name,
-                path = inFile[["datapath"]],
-                sep = input$sep_multi_prep, 
-                check = TRUE, 
-                design = "sdiag"
-            )
-            if (names(data_ingested) == "dataUp") {
-                data_up <- data_ingested$dataUp
+            data_ingested <- app_read_upload(input, "multi_loc_prep")
+            if (!is.null(data_ingested)) {
+                data_up <- data_ingested$data
                 data_preps <- as.data.frame(data_up)
                 if (ncol(data_preps) < 2) {
                     app_report_problem("Data input needs at least two columns: ENTRY and NAME.")
@@ -388,8 +348,6 @@ mod_multi_loc_preps_server <- function(id){
                     }
                 }
             } else {
-              app_upload_error(data_ingested,
-                               missing_columns = "Data input needs at least three columns with: ENTRY, NAME and REPS.")
               return(NULL)
             }
         } else {
@@ -516,37 +474,7 @@ mod_multi_loc_preps_server <- function(id){
       return(list(d_row = d_row, d_col = d_col))
     })
 
-    format_list_no_checks <- data.frame(
-      ENTRY = 1:10, 
-      NAME = c(paste0("Genotype-", LETTERS[1:10]))
-    )
-
-    info_modal_multi_prep <- function() {
-      shiny::modalDialog(
-        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
-        shiny::h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
-        shiny::renderTable(
-			format_list_no_checks,
-			bordered = TRUE,
-			align = 'c',
-			striped = TRUE
-			),
-		shiny::h5("Remark: If you want to include checks, please add them in the first rows of the file."),
-        easyClose = FALSE
-      )
-    }
-    
-    toListen <- shiny::reactive({
-      list(input$multi_prep_data)
-    })
-    
-    shiny::observeEvent(toListen(), {
-      if (input$multi_prep_data == 'Yes'){
-        shiny::showModal(
-          info_modal_multi_prep()
-        )
-      }
-    })
+    app_upload_dialog_observer(input, "multi_loc_prep")
 
     dimension_choices <- function(site = 1) {
       shiny::req(setup_optim_prep())

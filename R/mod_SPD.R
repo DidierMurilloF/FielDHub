@@ -13,34 +13,13 @@ mod_SPD_ui <- function(id) {
     shiny::sidebarLayout(
       shiny::sidebarPanel(
         width = 4,
-        shiny::radioButtons(inputId = ns("owndataSPD"),
-                     label = "Import entries' list?", 
-                     choices = c("Yes", "No"), 
-                     selected = "No",
-                     inline = TRUE, 
-                     width = NULL, 
-                     choiceNames = NULL, 
-                     choiceValues = NULL),
+        app_upload_ui(ns, "spd"),
         shiny::selectInput(inputId = ns("kindSPD"),
                     label = "Select SPD Type:",
-                    choices = c("Split-Plot in a RCBD" = "SPD_RCBD", 
+                    choices = c("Split-Plot in a RCBD" = "SPD_RCBD",
                                 "Split-Plot in a CRD" = "SPD_CRD"),
                     multiple = FALSE),
-        
-        shiny::conditionalPanel("input.owndataSPD == 'Yes'", ns = ns,
-                         shiny::fluidRow(
-                           shiny::column(8, style=list("padding-right: 28px;"),
-                                  shiny::fileInput(ns("file.SPD"),
-                                            label = "Upload a csv File:", 
-                                            multiple = FALSE)),
-                           shiny::column(4,style=list("padding-left: 5px;"),
-                                  shiny::radioButtons(ns("sep.spd"), "Separator",
-                                               choices = c(Comma = ",",
-                                                           Semicolon = ";",
-                                                           Tab = "\t"),
-                                               selected = ","))
-                         )
-        ),
+
         shiny::conditionalPanel("input.owndataSPD != 'Yes'", ns = ns,
                           shiny::numericInput(ns("mp.spd"),
                                        label = "Whole-plots:",
@@ -144,59 +123,19 @@ mod_SPD_server <- function(id){
     
     ns <- session$ns
 
-    wp <- c("NFung", paste("Fung", 1:4, sep = "")) 
-    sp <- paste("Beans", 1:10, sep = "")            
-    entryListFormat_SPD <- data.frame(list(WHOLEPLOT = c(wp, rep("", 5)), 
-                                           SUBPLOT = sp))
-    
-    entriesInfoModal_SPD<- function() {
-      shiny::modalDialog(
-        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
-        shiny::h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
-        shiny::renderTable(entryListFormat_SPD,
-                    bordered = TRUE,
-                    align = 'c',
-                    striped = TRUE),
-        #h4("Note that reps might be unbalanced."),
-        easyClose = FALSE
-      )
-    }
-    
-    toListen <- shiny::reactive({
-      list(input$owndataSPD)
-    })
-    
-    shiny::observeEvent(toListen(), {
-      if (input$owndataSPD == "Yes") {
-        shiny::showModal(
-          entriesInfoModal_SPD()
-        )
-      }
-    })
-    
+    app_upload_dialog_observer(input, "spd")
+
     get_data_spd <- shiny::reactive({
       if (input$owndataSPD == "Yes") {
-        shiny::req(input$file.SPD)
-        inFile <- input$file.SPD
-        data_ingested <- load_file(name = inFile$name, 
-                                   path = inFile[["datapath"]],
-                                   sep = input$sep.spd, 
-                                   check = TRUE, 
-                                   design = "spd")
-        
-        if (names(data_ingested) == "dataUp") {
-          data_up <- data_ingested$dataUp
-          data_spd <- as.data.frame(data_up[,1:2])
-          colnames(data_spd) <- c("WHOLEPLOT", "SUBPLOT")
-          wp <- as.vector(na.omit(data_spd[,1]))
-          sp <- as.vector(na.omit(data_spd[,2]))
-          treatments <- c(wp, sp)
-          return(list(data_spd = data_spd, treatments = treatments))
-        } else {
-          app_upload_error(data_ingested,
-                           missing_columns = "Data input needs at least two column: WHOLEPLOT and SUBPLOT")
-          return(NULL)
-        }
+        data_ingested <- app_read_upload(input, "spd")
+        if (is.null(data_ingested)) return(NULL)
+        data_up <- data_ingested$data
+        data_spd <- as.data.frame(data_up[,1:2])
+        colnames(data_spd) <- c("WHOLEPLOT", "SUBPLOT")
+        wp <- as.vector(na.omit(data_spd[,1]))
+        sp <- as.vector(na.omit(data_spd[,2]))
+        treatments <- c(wp, sp)
+        return(list(data_spd = data_spd, treatments = treatments))
       } else {
         shiny::req(input$mp.spd, input$sp.spd)
         wp <- as.numeric(input$mp.spd)

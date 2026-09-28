@@ -13,33 +13,8 @@ mod_RowCol_ui <- function(id){
     shiny::sidebarLayout(
       shiny::sidebarPanel(width = 4,
 
-                   shiny::radioButtons(inputId = ns("owndataRCD"),
-                                label = "Import entries' list?",
-                                choices = c("Yes", "No"), 
-                                selected = "No",
-                                inline = TRUE, 
-                                width = NULL, 
-                                choiceNames = NULL, 
-                                choiceValues = NULL),
-                   
-                   shiny::conditionalPanel(
-                     condition = "input.owndataRCD == 'Yes'", 
-                     ns = ns,
-                     shiny::fluidRow(
-                       shiny::column(8, style=list("padding-right: 28px;"),
-                              shiny::fileInput(ns("file.RCD"),
-                                        label = "Upload a csv File:", 
-                                        multiple = FALSE)),
-                       shiny::column(4,style=list("padding-left: 5px;"),
-                              shiny::radioButtons(ns("sep.rcd"), "Separator",
-                                           choices = c(Comma = ",",
-                                                       Semicolon = ";",
-                                                       Tab = "\t"),
-                                           selected = ","
-                              )
-                       )
-                    )
-                   ),
+                   app_upload_ui(ns, "rcd"),
+
                    shiny::conditionalPanel(
                      condition = "input.owndataRCD != 'Yes'",
                      ns = ns,
@@ -151,58 +126,19 @@ mod_RowCol_server <- function(id){
     
     ns <- session$ns
     
-    entryListFormat_RCD <- data.frame(ENTRY = 1:9, 
-                                       NAME = c(paste("Genotype", 
-                                                      LETTERS[1:9], 
-                                                      sep = "")))
-    entriesInfoModal_RCD <- function() {
-      shiny::modalDialog(
-        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
-        shiny::h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
-        shiny::renderTable(entryListFormat_RCD,
-                    bordered = TRUE,
-                    align = 'c',
-                    striped = TRUE),
-        shiny::h4("Entry numbers can be any set of consecutive positive numbers."),
-        easyClose = FALSE
-      )
-    }
-    
-    toListen <- shiny::reactive({
-      list(input$owndataRCD)
-    })
-    
-    shiny::observeEvent(toListen(), {
-      if (input$owndataRCD == "Yes") {
-        shiny::showModal(
-          entriesInfoModal_RCD()
-        )
-      }
-    })
-    
+    app_upload_dialog_observer(input, "rcd")
+
     init_data_rcd <- shiny::reactive({
-      
+
       if (input$owndataRCD == "Yes") {
-        shiny::req(input$file.RCD)
-        inFile <- input$file.RCD
-        data_ingested <- load_file(name = inFile$name, 
-                                   path = inFile[["datapath"]],
-                                   sep = input$sep.rcd, 
-                                   check = TRUE, 
-                                   design = "rcd")
-        
-        if (names(data_ingested) == "dataUp") {
-          data_up <- data_ingested$dataUp
-          data_up <- as.data.frame(data_up[,1:2])
-          data_rcd <- na.omit(data_up)
-          colnames(data_rcd) <- c("ENTRY", "NAME")
-          treatments = nrow(data_rcd)
-          return(list(data_rcd = data_rcd, treatments = treatments))
-        } else {
-          app_upload_error(data_ingested,
-                           missing_columns = "Data input needs at least two columns: ENTRY and NAME")
-          return(NULL)
-        }
+        data_ingested <- app_read_upload(input, "rcd")
+        if (is.null(data_ingested)) return(NULL)
+        data_up <- data_ingested$data
+        data_up <- as.data.frame(data_up[,1:2])
+        data_rcd <- na.omit(data_up)
+        colnames(data_rcd) <- c("ENTRY", "NAME")
+        treatments = nrow(data_rcd)
+        return(list(data_rcd = data_rcd, treatments = treatments))
       } else {
         shiny::req(input$t.rcd)
         nt <- as.numeric(input$t.rcd)

@@ -13,39 +13,16 @@ mod_RCBD_ui <- function(id) {
     shiny::sidebarLayout(
       shiny::sidebarPanel(
         width = 4,
-        shiny::radioButtons(ns("owndatarcbd"),
-                     label = "Import entries' list?", 
-                     choices = c("Yes", "No"), 
-                     selected = "No",
-                     inline = TRUE, 
-                     width = NULL, 
-                     choiceNames = NULL, 
-                     choiceValues = NULL),
+        app_upload_ui(ns, "rcbd"),
         shiny::conditionalPanel(
-          condition = "input.owndatarcbd != 'Yes'", 
+          condition = "input.owndatarcbd != 'Yes'",
           ns = ns,
           shiny::numericInput(ns("t"),
                        label = "Input # of Treatments:",
-                       value = 18, 
+                       value = 18,
                        min = 2)
         ),
-        shiny::conditionalPanel(
-          condition = "input.owndatarcbd == 'Yes'", 
-          ns = ns,
-          shiny::fluidRow(
-            shiny::column(8, style=list("padding-right: 28px;"),
-                   shiny::fileInput(inputId = ns("file.RCBD"),
-                             label = "Upload a CSV File:", 
-                             multiple = FALSE)),
-            shiny::column(4, style=list("padding-left: 5px;"),
-                   shiny::radioButtons(inputId = ns("sep.rcbd"), "Separator",
-                                choices = c(Comma = ",",
-                                            Semicolon = ";",
-                                            Tab = "\t"),
-                                selected = ","))
-          )        
-        ),
-        
+
         shiny::numericInput(inputId = ns("b"),
                      label = "Input # of Full Reps:", 
                      value = 3, min = 2),
@@ -169,26 +146,14 @@ mod_RCBD_server <- function(id) {
 
     get_data_rcbd <- shiny::reactive({
       if (input$owndatarcbd == "Yes") {
-        shiny::req(input$file.RCBD)
-        inFile <- input$file.RCBD
-        data_ingested <- load_file(name = inFile$name, 
-                                   path = inFile[["datapath"]],
-                                   sep = input$sep.rcbd, 
-                                   check = TRUE, 
-                                   design = "rcbd")
-        
-        if (names(data_ingested) == "dataUp") {
-          data_up <- data_ingested$dataUp
-          data_up <- as.data.frame(data_up[,1])
-          data_rcbd <- na.omit(data_up)
-          colnames(data_rcbd) <- "TREATMENT"
-          nt <- nrow(data_rcbd)
-          return(list(data_rcbd = data_rcbd, treatments = nt))
-        } else {
-          app_upload_error(data_ingested,
-                           missing_columns = "Data input needs at least one column: TREATMENT")
-          return(NULL)
-        }
+        data_ingested <- app_read_upload(input, "rcbd")
+        if (is.null(data_ingested)) return(NULL)
+        data_up <- data_ingested$data
+        data_up <- as.data.frame(data_up[,1])
+        data_rcbd <- na.omit(data_up)
+        colnames(data_rcbd) <- "TREATMENT"
+        nt <- nrow(data_rcbd)
+        return(list(data_rcbd = data_rcbd, treatments = nt))
       } else {
         shiny::req(input$t)
         nt <- as.numeric(input$t)
@@ -252,33 +217,7 @@ mod_RCBD_server <- function(id) {
     }) |>
       shiny::bindEvent(input$RUN.rcbd)
 
-    entryListFormat_RCBD <- data.frame(
-      TREATMENT = c(paste("TRT_", LETTERS[1:9], sep = ""))
-      )
-    entriesInfoModal_RCBD <- function() {
-      shiny::modalDialog(
-        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
-        shiny::h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
-        shiny::renderTable(entryListFormat_RCBD,
-                    bordered = TRUE,
-                    align = 'c',
-                    striped = TRUE),
-        shiny::h4("Note that only the TREATMENT column is required. When repeated checks are enabled, the first rows of the file are taken as the checks."),
-        easyClose = FALSE
-      )
-    }
-    
-    toListen <- shiny::reactive({
-      list(input$owndatarcbd)
-    })
-    
-    shiny::observeEvent(toListen(), {
-      if (input$owndatarcbd == "Yes") {
-        shiny::showModal(
-          entriesInfoModal_RCBD()
-        )
-      }
-    })
+    app_upload_dialog_observer(input, "rcbd")
 
     RCBD_reactive <- shiny::reactive({
       

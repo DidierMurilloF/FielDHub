@@ -462,11 +462,11 @@ test_that("classic modules build their design only through design_args_<Module>(
     "app_report_problem",  # reports a problem of an event with no output slot (dialog or notice)
     "app_attempt",         # evaluates event work, reporting its errors/warnings via app_report_problem()
     "app_design_seed",     # resolves the optional app seed without touching the shared RNG stream
-    "app_upload_error",    # shows the shared upload-error alert for a failed file parse
+    "app_read_upload",     # reads/validates the module's upload, reporting a failure itself (R/app_upload.R)
+    "app_upload_dialog_observer", # opens the shared entries-format dialog when the upload toggle switches to "Yes"
     "app_classic_layout",  # shared layout-panel lifecycle for classic design modules
     "app_classic_workflow",# shared results/simulation/export lifecycle for classic design modules
     "classic_workflow_spec", # registry of per-design IDs/labels the shared workflow helpers use
-    "load_file",           # parses an uploaded CSV into a data frame
     "parse_whole_numbers", # parses comma-separated whole numbers (plot starts, FD "entries per factor")
     "valid_block_sizes",   # lists the valid incomplete-block sizes for a treatment count
     "parse_n_checks",      # parses the RCBD "# of checks" input
@@ -1171,8 +1171,8 @@ test_that("spatial modules build their designs only through design_args_<Module>
     "app_design_state",           # reads a design that has not run as NULL for app_plot_state()
     "app_design_seed",            # resolves the optional app seed without touching the shared RNG stream
     "read_app_seed",              # re-reads the resolved design seed for the simulation workflow; never draws
-    "app_upload_error",           # shows the shared upload-error alert for a failed file parse
-    "load_file",                  # parses an uploaded CSV into a data frame
+    "app_read_upload",            # reads/validates the module's upload, reporting a failure itself (R/app_upload.R)
+    "app_upload_dialog_observer", # opens the shared entries-format dialog when the upload toggle switches to "Yes"
     "parse_whole_numbers",        # parses the comma-separated starting-plot-number input
     "app_spatial_workflow",       # shared results/simulation/export lifecycle for spatial modules
     "spatial_workflow_spec",      # registry of per-design IDs/labels the shared workflow uses

@@ -169,14 +169,6 @@ app_present_problem <- function(message, severity = c("error", "warning", "info"
   invisible(NULL)
 }
 
-#' Show a shared upload error while preserving each design's column guidance
-#' @noRd
-app_upload_error <- function(result, missing_columns, notify = app_report_problem) {
-  message <- upload_error_message(result, missing_columns)
-  if (!is.null(message)) notify(message)
-  invisible(NULL)
-}
-
 #' Explain an empty plot panel where the plot would be
 #'
 #' @inheritParams plot_state_message

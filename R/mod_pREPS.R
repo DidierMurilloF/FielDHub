@@ -13,40 +13,7 @@ mod_pREPS_ui <- function(id){
     shiny::sidebarLayout(
       shiny::sidebarPanel(
         width = 4,
-        shiny::radioButtons(
-			inputId = ns("owndataPREPS"), 
-			label = "Import entries' list?", 
-			choices = c("Yes", "No"), 
-			selected = "No",
-			inline = TRUE, 
-			width = NULL, 
-			choiceNames = NULL, 
-			choiceValues = NULL
-		),
-    shiny::conditionalPanel(
-			condition = "input.owndataPREPS == 'Yes'", 
-			ns = ns,
-			shiny::fluidRow(
-			shiny::column(
-				width = 7,
-				shiny::fileInput(
-					ns("file.preps"), 
-					label = "Upload a CSV File:", 
-					multiple = FALSE
-				)
-			),
-			shiny::column(
-				width = 5,
-				shiny::radioButtons(
-					ns("sep.preps"), 
-					"Separator",
-					choices = c(Comma = ",",
-								Semicolon = ";",
-								Tab = "\t"),
-					selected = ",")
-				)
-			),             
-        ),
+        app_upload_ui(ns, "prep"),
         shiny::conditionalPanel(
 			condition = "input.owndataPREPS == 'No'", 
 			ns = ns,
@@ -243,17 +210,9 @@ mod_pREPS_server <- function(id){
     
     get_data_prep <- shiny::eventReactive(input$RUN.prep, {
       if (input$owndataPREPS == 'Yes') {
-        shiny::req(input$file.preps)
-        inFile <- input$file.preps
-        data_ingested <- load_file(
-           name = inFile$name,
-           path = inFile[["datapath"]],
-           sep = input$sep.preps, 
-           check = TRUE, 
-           design = "prep"
-        )
-        if (names(data_ingested) == "dataUp") {
-          data_up <- data_ingested$dataUp
+        data_ingested <- app_read_upload(input, "prep")
+        if (!is.null(data_ingested)) {
+          data_up <- data_ingested$data
           data_up <- na.omit(data_up)
           data_preps <- as.data.frame(data_up)
           if (ncol(data_preps) < 3) {
@@ -269,8 +228,6 @@ mod_pREPS_server <- function(id){
           }
           total_plots <- sum(data_preps$REPS)
         } else {
-          app_upload_error(data_ingested,
-                           missing_columns = "Data input needs at least three columns with: ENTRY, NAME and REPS.")
           return(NULL)
         }
       } else {
@@ -359,35 +316,7 @@ mod_pREPS_server <- function(id){
       })
     })
 
-    entryListFormat_pREP <- data.frame(
-		ENTRY = 1:9, 
-		NAME = c(paste("Genotype", LETTERS[1:9], sep = "")),
-		REPS = as.factor(c(rep(2, times = 3), rep(1,6)))
-	)
-
-    entriesInfoModal_pREP <- function() {
-      shiny::modalDialog(
-        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
-        shiny::h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
-        shiny::renderTable(entryListFormat_pREP,
-                    bordered = TRUE,
-                    align = 'c',
-                    striped = TRUE),
-        easyClose = FALSE
-      )
-    }
-    
-    toListen <- shiny::reactive({
-      list(input$owndataPREPS)
-    })
-    
-    shiny::observeEvent(toListen(), {
-      if (input$owndataPREPS == 'Yes'){
-        shiny::showModal(
-          entriesInfoModal_pREP()
-        )
-      }
-    })
+    app_upload_dialog_observer(input, "prep")
 
     shiny::observeEvent(input$RUN.prep, {
       shiny::req(get_data_prep())

@@ -13,29 +13,7 @@ mod_RCBD_augmented_ui <- function(id){
     shiny::sidebarLayout(
       shiny::sidebarPanel(
         width = 4,
-        shiny::radioButtons(inputId = ns("owndata_a_rcbd"),
-                     label = "Import entries' list?", 
-                     choices = c("Yes", "No"), 
-                     selected = "No",
-                     inline = TRUE, 
-                     width = NULL, 
-                     choiceNames = NULL, 
-                     choiceValues = NULL),
-        shiny::conditionalPanel(
-          condition = "input.owndata_a_rcbd == 'Yes'", ns = ns,
-          shiny::fluidRow(
-            shiny::column(7, style=list("padding-right: 28px;"),
-                   shiny::fileInput(ns("file1_a_rcbd"),
-                             label = "Upload a CSV File:", 
-                             multiple = FALSE)),
-            shiny::column(5,style=list("padding-left: 5px;"),
-                   shiny::radioButtons(ns("sep.a_rcbd"), "Separator",
-                                choices = c(Comma = ",",
-                                            Semicolon = ";",
-                                            Tab = "\t"),
-                                selected = ","))
-          )              
-        ),
+        app_upload_ui(ns, "arcbd"),
         shiny::fluidRow(
           shiny::column(6,
                  style=list("padding-right: 28px;"),
@@ -223,14 +201,9 @@ mod_RCBD_augmented_server <- function(id) {
 
     init_data <- shiny::reactive({
       if (input$owndata_a_rcbd == "Yes") {
-        shiny::req(input$file1_a_rcbd)
-        inFile <- input$file1_a_rcbd
-        data_ingested <- load_file(name = inFile$name, 
-                                   path = inFile[["datapath"]],
-                                   sep = input$sep.a_rcbd, check = TRUE, design = "arcbd")
-        
-        if (names(data_ingested) == "dataUp") {
-          data_up <- data_ingested$dataUp
+        data_ingested <- app_read_upload(input, "arcbd")
+        if (!is.null(data_ingested)) {
+          data_up <- data_ingested$data
           if (ncol(data_up) < 2) {
             app_report_problem("Data input needs at least two columns: ENTRY and NAME.")
             return(NULL)
@@ -244,12 +217,10 @@ mod_RCBD_augmented_server <- function(id) {
             app_report_problem("At least ten treatments are required!!")
             return(NULL)
           }
-          return(list(error = FALSE, 
+          return(list(error = FALSE,
                       dataUp_a_rcbd = data_up,
                       entries = lines))
         } else {
-          app_upload_error(data_ingested,
-                           missing_columns = "Data input needs at least three columns with: ENTRY and NAME.")
           return(NULL)
         }
       } else {
@@ -408,35 +379,7 @@ mod_RCBD_augmented_server <- function(id) {
                                              targets = "_all")))))
     })
     
-    entryListFormat_ARCBD <- data.frame(ENTRY = 1:9, 
-                                        NAME = c(c("CHECK1", "CHECK2","CHECK3"), 
-                                                 paste("Genotype", 
-                                                       LETTERS[1:6], 
-                                                       sep = "")))
-    entriesInfoModal_ARCBD <- function() {
-      shiny::modalDialog(
-        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
-        shiny::h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
-        shiny::renderTable(entryListFormat_ARCBD,
-                    bordered = TRUE,
-                    align = 'c',
-                    striped = TRUE),
-        shiny::h4("Note that the controls must be in the first rows of the CSV file."),
-        easyClose = FALSE
-      )
-    }
-    
-    toListen <- shiny::reactive({
-      list(input$owndata_a_rcbd)
-    })
-    
-    shiny::observeEvent(toListen(), {
-      if (input$owndata_a_rcbd == "Yes") {
-        shiny::showModal(
-          entriesInfoModal_ARCBD()
-        )
-      }
-    })
+    app_upload_dialog_observer(input, "arcbd")
     
     shiny::observeEvent(input$RUN.arcbd, {
       shiny::req(getDataup_a_rcbd())

@@ -11,41 +11,15 @@ mod_CRD_ui <- function(id) {
     shiny::h4("Completely Randomized Design"),
     shiny::sidebarLayout(
       shiny::sidebarPanel(width = 4,
-                   shiny::radioButtons(
-                        inputId = ns("owndatacrd"), 
-                        label = "Import entries' list?",
-                        choices = c("Yes", "No"), 
-                        selected = "No",
-                        inline = TRUE, 
-                        width = NULL,
-                        choiceNames = NULL, 
-                        choiceValues = NULL
-                    ),
+                   app_upload_ui(ns, "crd"),
                    shiny::conditionalPanel(
                      "input.owndatacrd != 'Yes'",
                      ns = ns,
                      shiny::numericInput(ns("t.crd"),
                        label = "Input # of Treatments:",
-                       value = 15, 
+                       value = 15,
                        min = 2),
                     ),
-                   shiny::conditionalPanel(
-                     "input.owndatacrd == 'Yes'", 
-                     ns = ns,
-                     shiny::fluidRow(
-                      shiny::column(7, style=list("padding-right: 28px;"),
-                             shiny::fileInput(ns("file.CRD"),
-                                       label = "Upload a CSV File:",
-                                       multiple = FALSE)),
-                      shiny::column(5,style=list("padding-left: 5px;"),
-                             shiny::radioButtons(ns("sep.crd"),
-                                          "Separator",
-                                          choices = c(Comma = ",",
-                                                      Semicolon = ";",
-                                                      Tab = "\t"),
-                                          selected = ","))
-                    )
-                   ),
                     shiny::numericInput(ns("reps.crd"),
                       label = "Input # of Full Reps:",
                       value = 4, 
@@ -137,28 +111,15 @@ mod_CRD_server <- function(id) {
     get_data_crd <- shiny::reactive({
       
       if (input$owndatacrd == "Yes") {
-        shiny::req(input$file.CRD)
-        shiny::req(input$sep.crd)
-        inFile <- input$file.CRD
-        data_ingested <- load_file(name = inFile$name,
-                                   path = inFile[["datapath"]],
-                                   sep = input$sep.crd,
-                                   check = TRUE, 
-                                   design = "crd")
-        
-        if (names(data_ingested) == "dataUp") {
-          data_up <- data_ingested$dataUp
-          data_up <- as.data.frame(data_up[,1])
-          data_crd <- na.omit(data_up)
-          data_crd$REP <- rep(input$reps.crd, times = nrow(data_crd))
-          colnames(data_crd) <- c("TREATMENT", "REP")
-          treatments = nrow(data_crd)
-          return(list(data_crd = data_crd, treatments = treatments))
-        } else {
-          app_upload_error(data_ingested,
-                           missing_columns = "Data input needs at least two columns: TREATMENT and REP.")
-          return(NULL)
-        }
+        data_ingested <- app_read_upload(input, "crd")
+        if (is.null(data_ingested)) return(NULL)
+        data_up <- data_ingested$data
+        data_up <- as.data.frame(data_up[,1])
+        data_crd <- na.omit(data_up)
+        data_crd$REP <- rep(input$reps.crd, times = nrow(data_crd))
+        colnames(data_crd) <- c("TREATMENT", "REP")
+        treatments = nrow(data_crd)
+        return(list(data_crd = data_crd, treatments = treatments))
       } else {
         shiny::req(input$t.crd)
         nt <- as.numeric(input$t.crd)
@@ -214,32 +175,8 @@ mod_CRD_server <- function(id) {
       spec = classic_workflow_spec("CRD")
     )
     
-    entryListFormat_CRD <- data.frame(TREATMENT = c(paste("TRT_", LETTERS[1:9], sep = "")))
-    entriesInfoModal_CRD <- function() {
-      shiny::modalDialog(
-        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
-        shiny::h4("Please, follow the format shown in the following example. Make sure to upload a CSV file!"),
-        shiny::renderTable(entryListFormat_CRD,
-                    bordered = TRUE,
-                    align = 'c',
-                    striped = TRUE),
-        shiny::h4("Note that only the TREATMENT column is required."),
-        easyClose = FALSE
-      )
-    }
-    
-    toListen <- shiny::reactive({
-      list(input$owndatacrd)
-    })
-    
-    shiny::observeEvent(toListen(), {
-      if (input$owndatacrd == "Yes") {
-        shiny::showModal(
-          entriesInfoModal_CRD()
-        )
-      }
-    })
-    
+    app_upload_dialog_observer(input, "crd")
+
     app_classic_workflow(input, output, session,
       design = function() CRD_reactive(),
       layout = function() reactive_layoutCRD(),
