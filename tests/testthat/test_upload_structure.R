@@ -37,3 +37,23 @@ test_that("structural checks preserve quoted records and explicit empty cells", 
   expect_named(load_file("entries.csv", padded, ",", check = TRUE, design = "spd"),
                "dataUp")
 })
+
+test_that("unterminated quoted uploads report one format error without parser warnings", {
+  for (lines in list(c("ENTRY,NAME", '1,"unterminated'),
+                     c("ENTRY,NAME", "1,G1", '2,"unterminated', "next line"))) {
+    path <- write_structural_upload(lines)
+    expect_warning(error <- tryCatch(read_design_upload(path, ",", "alpha"),
+                                     error = identity), NA)
+    expect_s3_class(error, "fieldhub_input_error")
+    expect_identical(conditionMessage(error), "Invalid file; Please upload a .csv file.")
+  }
+})
+
+test_that("complete CSV records do not require a final newline", {
+  for (ending in c("", "\n", "\r\n")) {
+    path <- tempfile(fileext = ".csv")
+    writeBin(charToRaw(paste0('ENTRY,NAME\n1,"G,1"\n2,"G\ntwo"', ending)), path)
+    expect_warning(out <- read_design_upload(path, ",", "alpha"), NA)
+    expect_identical(out$data, data.frame(ENTRY = 1:2, NAME = c("G,1", "G\ntwo")))
+  }
+})

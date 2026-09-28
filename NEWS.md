@@ -909,6 +909,8 @@
   entry identifiers and treatment labels; short rows were silently padded.
   These malformed files now show the existing format error. Quoted
   separators, multiline labels and explicitly empty cells remain supported.
+  Unterminated quoted fields show the same classed format error without
+  leaking parser warnings; complete records do not require a final newline.
 
 - App uploads now read Shiny's `datapath` field with exact matching.
   Eighteen modules previously relied on the abbreviated `$datapat`,

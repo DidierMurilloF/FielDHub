@@ -21,7 +21,11 @@ read_upload_csv <- function(path, sep) {
     # Continued quoted records have NA counts on their unfinished lines.
     fields <- fields[!is.na(fields)]
     if (length(fields) < 2L || any(fields != fields[1L])) return(NULL)
-    data <- read.csv(path, header = TRUE, sep = sep, fill = FALSE, check.names = FALSE,
+    # Normalize record endings, including a valid final record without a newline.
+    # A parser warning after that means the file is malformed, not usable data.
+    input <- textConnection(readLines(path, warn = FALSE), encoding = "bytes")
+    on.exit(close(input), add = TRUE)
+    data <- read.csv(input, header = TRUE, sep = sep, fill = FALSE, check.names = FALSE,
                      na.strings = c("", " ", "NA"))
     # Strip the byte-order mark before locale-dependent name repair. Otherwise
     # the C locale repairs it to X... and loses the original header.
@@ -30,7 +34,7 @@ read_upload_csv <- function(path, sep) {
     names(data) <- make.names(column_names, unique = TRUE)
     if (nrow(data) != length(fields) - 1L) return(NULL)
     data
-  }, error = function(e) NULL)
+  }, warning = function(w) NULL, error = function(e) NULL)
 }
 
 #' Translate the existing upload-result flags into a shared error message
