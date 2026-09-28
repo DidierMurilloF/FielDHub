@@ -290,7 +290,7 @@ mod_RCBD_augmented_server <- function(id) {
         lines = lines_arcbd,
         checks = checks_arcbd,
         start = 3
-      ))
+      ), report = TRUE)
       blocks_arcbd <- set_blocks$b
       if (length(blocks_arcbd) == 0) {
         app_report_problem("No options available for that amount of treatments!!.")
@@ -311,16 +311,16 @@ mod_RCBD_augmented_server <- function(id) {
         checks <- as.numeric(input$checks_a_rcbd)
         lines <- as.numeric(input$lines_a_rcbd)
         b <- as.numeric(input$blocks_a_rcbd)
-        set_dims <- validate_design(set_augmented_blocks(lines = lines, checks = checks, start = 3))
+        set_dims <- validate_design(set_augmented_blocks(lines = lines, checks = checks, start = 3), report = TRUE)
         dim_options <- set_dims$blocks_dims
         blocks_dims <- as.data.frame(dim_options)
         set_choices_dims <- as.vector(subset(blocks_dims, blocks_dims[,1] == b)[,2])
         choices <- set_choices_dims
       } else {
-        checks <- validate_design(parse_n_checks(input$checks_a_rcbd))
+        checks <- validate_design(parse_n_checks(input$checks_a_rcbd), report = TRUE)
         lines <- as.numeric(init_data()$entries)
         b <- as.numeric(input$blocks_a_rcbd)
-        set_dims <- validate_design(set_augmented_blocks(lines = lines, checks = checks, start = 3))
+        set_dims <- validate_design(set_augmented_blocks(lines = lines, checks = checks, start = 3), report = TRUE)
         blocks_dims <- as.data.frame(set_dims$blocks_dims)
         set_choices_dims <- as.vector(subset(blocks_dims, blocks_dims[,1] == b)[,2])
         choices <- set_choices_dims
@@ -526,7 +526,7 @@ mod_RCBD_augmented_server <- function(id) {
     
     shiny::observeEvent(some_inputs()$sites, {
       # location_view_choices() validates the count before building the range.
-      sites_to_view <- validate_design(location_view_choices(some_inputs()$sites))
+      sites_to_view <- validate_design(location_view_choices(some_inputs()$sites), report = TRUE)
       shiny::updateSelectInput(session = session,
                         inputId = "locView.arcbd",
                         choices = sites_to_view,

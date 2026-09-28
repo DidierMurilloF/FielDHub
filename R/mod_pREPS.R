@@ -226,7 +226,7 @@ mod_pREPS_server <- function(id){
 
     shiny::observeEvent(prep_inputs()$sites, {
       # location_view_choices() validates the count before building the range.
-      loc_user_view <- validate_design(location_view_choices(prep_inputs()$sites))
+      loc_user_view <- validate_design(location_view_choices(prep_inputs()$sites), report = TRUE)
       shiny::updateSelectInput(inputId = "locView.preps",
                         choices = loc_user_view,
                         selected = loc_user_view[1])
@@ -300,7 +300,7 @@ mod_pREPS_server <- function(id){
         total_plots = get_data_prep()$total_plots,
         allow_fillers = isTRUE(input$allow_fillers.preps),
         max_fillers = .prep_max_fillers
-      ))
+      ), report = TRUE)
       if (is.null(options)) {
         choices <- "No options available"
       } else {

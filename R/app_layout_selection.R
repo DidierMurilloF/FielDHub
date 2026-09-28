@@ -15,7 +15,7 @@ app_layout_selection <- function(input, session, design, planter, ids) {
     shiny::observeEvent(input[[ids[["stacked"]]]], {
       stacking <- input[[ids[["stacked"]]]]
       shiny::req(stacking, design(), planter())
-      choices <- validate_design(layout_choices(design(), planter = planter(), stacked = stacking))
+      choices <- validate_design(layout_choices(design(), planter = planter(), stacked = stacking), report = TRUE)
       reset(TRUE)
       shiny::updateSelectInput(session, inputId = ids[["layout"]], label = "Layout option:",
                                choices = choices, selected = 1)

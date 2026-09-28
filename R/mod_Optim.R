@@ -182,7 +182,7 @@ mod_Optim_server <- function(id) {
 
     shiny::observeEvent(optim_inputs()$sites, {
       # location_view_choices() validates the count before building the range.
-      loc_user_view <- validate_design(location_view_choices(optim_inputs()$sites))
+      loc_user_view <- validate_design(location_view_choices(optim_inputs()$sites), report = TRUE)
       shiny::updateSelectInput(inputId = "locView.optim",
                         choices = loc_user_view,
                         selected = loc_user_view[1])

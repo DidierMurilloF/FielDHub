@@ -69,8 +69,8 @@ stop_dimensions <- function(message, options = NULL, labels = NULL, no_options =
 #' \code{fieldhub_warning}) are written for the user, so they are shown
 #' verbatim. Any other error or warning comes from R or a dependency: it is
 #' shown after "Unexpected problem: " (or "Unexpected warning: ") so the user
-#' can tell it apart from a problem with their input. A character value is a
-#' message already written for the user.
+#' can tell it apart from a problem with their input. A character value, or
+#' a Shiny validation condition, is a message already written for the user.
 #'
 #' @param problem A condition, or a character message.
 #' @return A single string.
@@ -81,7 +81,9 @@ problem_message <- function(problem) {
     fieldhub_abort("A problem must be a condition or a character message.")
   }
   message <- conditionMessage(problem)
-  if (inherits(problem, c("fieldhub_error", "fieldhub_warning"))) return(message)
+  # A Shiny validation condition ("validation") already carries a message
+  # written for the user, typically by validate_design().
+  if (inherits(problem, c("fieldhub_error", "fieldhub_warning", "validation"))) return(message)
   prefix <- if (inherits(problem, "warning")) "Unexpected warning: " else "Unexpected problem: "
   paste0(prefix, message)
 }
@@ -93,4 +95,33 @@ problem_message <- function(problem) {
 #' @noRd
 problem_severity <- function(problem) {
   if (inherits(problem, "warning")) "warning" else "error"
+}
+
+#' Evaluate work, collecting the FielDHub warnings it signals
+#'
+#' @description FielDHub warnings are muffled and collected; any other
+#' warning keeps R's own handling. When the work fails, \code{on_error} is
+#' called with the error and the warnings collected so far, before the
+#' error unwinds (a calling handler): it may signal another condition in its
+#' place, or return to let the error continue.
+#'
+#' @param expr The work to evaluate.
+#' @param on_error \code{NULL}, or a function of the error and the list of
+#'   warnings collected before it.
+#' @return A list with the \code{value} of \code{expr} and its
+#'   \code{warnings} (a list of \code{fieldhub_warning} conditions).
+#' @noRd
+capture_fieldhub_warnings <- function(expr, on_error = NULL) {
+  warnings <- list()
+  value <- withCallingHandlers(
+    expr,
+    fieldhub_warning = function(w) {
+      warnings[[length(warnings) + 1L]] <<- w
+      invokeRestart("muffleWarning")
+    },
+    error = function(e) {
+      if (!is.null(on_error)) on_error(e, warnings)
+    }
+  )
+  list(value = value, warnings = warnings)
 }

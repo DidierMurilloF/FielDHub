@@ -692,36 +692,40 @@
 
 - The Shiny app now reports every problem through one path, so the same
   condition reads the same everywhere. Problems of an output (a design,
-  table or plot that cannot be built) are shown where the output would
-  be; problems of an event with no output (a rejected upload, a Run! whose
-  inputs do not fit, invalid simulation settings) open one dialog, titled
-  "Error" instead of "Error!!". FielDHub warnings raised while the app
-  builds a design, such as `fieldhub_default_warning` for starting plot
-  numbers or location names that do not have one value per location, are
-  now shown as non-blocking notices instead of being hidden (Diagonal,
-  Multi-location Diagonal) or only logged to the R console (Optimized
-  Arrangement, p-rep, Augmented RCBD, the classic designs); other R
-  warnings are still logged to the console. Sparse Allocation no longer
-  shows R's non-FielDHub warnings in a dialog, and the "only the checks
-  are randomized" reminder of Augmented RCBD is now a notice. A few
-  messages were corrected: the Multi-location Diagonal and Multi-location
-  p-rep uploads ask for the two columns ENTRY and NAME they need (not
-  three), and a block total that does not match the file now says "does
-  not match". The p-rep "no field dimensions" explanations are shared by
-  both p-rep modules, and text in the Optimized Arrangement "# Check's
-  Reps" input is explained by name.
+  table or plot that cannot be built) are shown where the output would be;
+  problems of an event with no output (a rejected upload, a Run! whose
+  inputs do not fit) open one dialog, titled "Error" instead of "Error!!";
+  invalid simulation settings are still a non-blocking notice, so they do
+  not cover the open simulation dialog. When a design fails after FielDHub
+  warnings, the warnings are shown along with the error. FielDHub warnings
+  raised while the app builds a design, such as `fieldhub_default_warning`
+  for starting plot numbers or location names that do not have one value
+  per location, are now shown as non-blocking notices instead of being
+  hidden (Diagonal, Multi-location Diagonal) or only logged to the R
+  console (Optimized Arrangement, p-rep, Augmented RCBD, the classic
+  designs); other R warnings are still logged to the console. Sparse
+  Allocation no longer shows R's non-FielDHub warnings in a dialog, and
+  the "only the checks are randomized" reminder of Augmented RCBD is now a
+  notice. A few messages were corrected: the Multi-location Diagonal and
+  Multi-location p-rep uploads ask for the two columns ENTRY and NAME they
+  need (not three), a block total that does not match the file now says
+  "does not match", and, when no file is uploaded, the Multi-location
+  Diagonal block check no longer mentions a data input file. The p-rep "no
+  field dimensions" explanations are shared by both p-rep modules, and
+  text in the Optimized Arrangement "# Check's Reps" input is explained by
+  name.
 
 - Layout and heatmap panels in the Shiny app now explain why they are
   empty instead of staying blank: "Run the design to see the field
-  layout." before a design is run or randomized, the reason when it
-  failed, and "Simulate data to see the heatmap." before data is
-  simulated. The classic designs' heatmap no longer opens an "Important
-  message" dialog from inside the plot when no data has been simulated;
-  the explanation is shown in the plot area. This applies to the classic
-  designs' shared field plot and heatmap, the spatial designs' heatmap,
-  and the main field layout of the Diagonal, Multi-location Diagonal,
-  Sparse Allocation, Optimized Arrangement, p-rep, Multi-location p-rep
-  and Augmented RCBD modules.
+  layout." (or "... the heatmap.") before a design is run or randomized,
+  the reason when it failed, and "Simulate data to see the heatmap."
+  before data is simulated. The classic designs' heatmap no longer opens
+  an "Important message" dialog from inside the plot when no data has been
+  simulated; the explanation is shown in the plot area. This applies to
+  the classic designs' shared field plot and heatmap, the spatial designs'
+  heatmap, and the main field layout of the Diagonal, Multi-location
+  Diagonal, Sparse Allocation, Optimized Arrangement, p-rep,
+  Multi-location p-rep and Augmented RCBD modules.
 
 ### Fix bugs:
 
@@ -1068,10 +1072,14 @@
   with a raw R error from `1:sum(NA)`, and `partially_replicated()` itself
   now rejects a missing or fractional `repGens`/`repUnits` value with a
   classed input error. Any error the app does not expect (one that is not
-  a FielDHub condition) is now shown as "Unexpected problem: <message>"
-  where the output would be, and no longer ends the Shiny session when it
-  happens inside an observer, for example a missing value reaching the
-  diagonal check-percentage or augmented-RCBD block choices.
+  a FielDHub condition, so a bug rather than a problem with the input) no
+  longer ends the Shiny session when it happens inside an observer, for
+  example a missing value reaching the diagonal check-percentage or
+  augmented-RCBD block choices. It is always logged to the R console as
+  "FielDHub: unexpected problem ...", and shown to the user as "Unexpected
+  problem: <message>": where the output would be for an output, and in a
+  dialog for an observer that updates a selector (which has no output to
+  show it in).
 
 ### Changes to results for a given seed:
 

@@ -223,7 +223,7 @@ mod_Diagonal_server <- function(id) {
     
     shiny::observeEvent(single_inputs()$sites, {
       # location_view_choices() validates the count before building the range.
-      loc_user_view <- validate_design(location_view_choices(input$l.diagonal))
+      loc_user_view <- validate_design(location_view_choices(input$l.diagonal), report = TRUE)
       shiny::updateSelectInput(inputId = "locView.diagonal",
                         choices = loc_user_view,
                         selected = loc_user_view[1])
@@ -358,7 +358,7 @@ mod_Diagonal_server <- function(id) {
           lines = lines, checks = as.vector(getChecks()$checksEntries),
           kindExpt = kindExpt_single, planter = single_inputs()$planter_mov,
           data = getData()$data_entry
-        ))
+        ), report = TRUE)
       })
       shiny::updateSelectInput(inputId = "dimensions.d",
                         choices = sort_choices,
@@ -516,8 +516,10 @@ mod_Diagonal_server <- function(id) {
       data <- if (isTRUE(getData()$uploaded)) getData()$data_entry
       # Errors are reported in a dialog; FielDHub warnings (such as a
       # starting plot number that does not have one value per location) as
-      # notices.
-      app_attempt(do.call(diagonal_arrangement, design_args_Diagonal(values, data)))
+      # notices. A failure stays the design's state, so the layout and
+      # heatmap panels explain it.
+      app_attempt(do.call(diagonal_arrangement, design_args_Diagonal(values, data)),
+                  fail = "validate")
     })
     
     user_location <- shiny::reactive({

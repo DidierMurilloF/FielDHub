@@ -245,7 +245,7 @@ mod_diagonal_multiple_server <- function(id) {
         
         shiny::observeEvent(multiple_inputs()$sites, {
             # location_view_choices() validates the count before building the range.
-            loc_user_view <- validate_design(location_view_choices(input$locs_db))
+            loc_user_view <- validate_design(location_view_choices(input$locs_db), report = TRUE)
             shiny::updateSelectInput(inputId = "locView_diagonal_db",
                                 choices = loc_user_view,
                                 selected = loc_user_view[1])
@@ -387,7 +387,7 @@ mod_diagonal_multiple_server <- function(id) {
                 checksEntries <- 1:checks
                 blocks <- as.numeric(as.vector(unlist(strsplit(input$blocks.db, ","))))
                 if (lines.db != sum(blocks)) {
-                    app_report_problem("Number of treatments in blocks does not match with the data input file.")
+                    app_report_problem("The entries in the blocks must add up to the number of entries.")
                     return(NULL)
                 }
                 if (as.numeric(input$lines.db) < 50) {
@@ -464,7 +464,7 @@ mod_diagonal_multiple_server <- function(id) {
                     kindExpt = kindExpt, stacked = multiple_inputs()$stacked,
                     planter = multiple_inputs()$planter_mov,
                     data = get_data_multiple()$data_entry
-                ))
+                ), report = TRUE)
             })
             
             shiny::updateSelectInput(inputId = "dimensions_multiple",
@@ -605,8 +605,10 @@ mod_diagonal_multiple_server <- function(id) {
             data <- get_data_multiple()$data_api
             # Errors are reported in a dialog; FielDHub warnings (such as a
             # starting plot number that does not have one value per location)
-            # as notices.
-            app_attempt(do.call(diagonal_arrangement, design_args_diagonal_multiple(values, data)))
+            # as notices. A failure stays the design's state, so the layout
+            # and heatmap panels explain it.
+            app_attempt(do.call(diagonal_arrangement, design_args_diagonal_multiple(values, data)),
+                        fail = "validate")
         }) 
         
         user_location <- shiny::reactive({

@@ -265,7 +265,7 @@ mod_multi_loc_preps_server <- function(id){
     shiny::observe({
         # validate_locations_input() validates the count before the existing
         # choices formula runs.
-        prep_locs <- validate_design(validate_locations_input(input$locs_prep))
+        prep_locs <- validate_design(validate_locations_input(input$locs_prep), report = TRUE)
         start <- prep_locs + 1
         plant_reps <- start:(prep_locs * 2 - 1)
         shiny::updateSelectInput(inputId = "plant_copies_preps",
@@ -317,7 +317,7 @@ mod_multi_loc_preps_server <- function(id){
 
     shiny::observeEvent(prep_inputs()$l, {
         # location_view_choices() validates the count before building the range.
-        loc_user_view <- validate_design(location_view_choices(prep_inputs()$l))
+        loc_user_view <- validate_design(location_view_choices(prep_inputs()$l), report = TRUE)
         shiny::updateSelectInput(
             inputId = "loc_to_view_preps",
             choices = loc_user_view,
@@ -461,7 +461,7 @@ mod_multi_loc_preps_server <- function(id){
             total_plots = total_plots[1],
             allow_fillers = isTRUE(input$allow_fillers_prep),
             max_fillers = .prep_max_fillers
-        ))
+        ), report = TRUE)
         if (is.null(options)) {
             sort_choices <- "No options available"
         } else {
@@ -484,7 +484,7 @@ mod_multi_loc_preps_server <- function(id){
     dimensions <-  shiny::reactiveValues()
 
     shiny::observeEvent(input$prep_randomize_multi_loc, {
-      prep_number_of_locs <- validate_design(validate_locations_input(input$locs_prep))
+      prep_number_of_locs <- validate_design(validate_locations_input(input$locs_prep), report = TRUE)
 
       for (i in seq_len(prep_number_of_locs)) {
         shiny::req(input[[paste0("dimensions_loc_", i)]])

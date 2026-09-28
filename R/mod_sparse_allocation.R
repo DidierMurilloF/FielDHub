@@ -214,7 +214,7 @@ mod_sparse_allocation_server <- function(id){
     shiny::observe({
         # validate_locations_input() validates the count before the existing
         # choices formula runs.
-        sparse_locs <- validate_design(validate_locations_input(input$sparse_locations))
+        sparse_locs <- validate_design(validate_locations_input(input$sparse_locations), report = TRUE)
         start <- ceiling(sparse_locs / 2)
         plant_reps <- start:(sparse_locs - 1)
         shiny::updateSelectInput(
@@ -287,11 +287,11 @@ mod_sparse_allocation_server <- function(id){
     
     shiny::observeEvent(single_inputs()$sites, {
       # location_view_choices()/plant_rep_choices() validate the count first.
-      loc_user_view <- validate_design(location_view_choices(input$sparse_locations))
+      loc_user_view <- validate_design(location_view_choices(input$sparse_locations), report = TRUE)
       shiny::updateSelectInput(inputId = "sparse_loc_view",
                         choices = loc_user_view,
                         selected = loc_user_view[1])
-      plant_reps <- validate_design(plant_rep_choices(input$sparse_locations))
+      plant_reps <- validate_design(plant_rep_choices(input$sparse_locations), report = TRUE)
       shiny::updateSelectInput(inputId = "plant_reps",
                         choices = plant_reps,
                         selected = plant_reps[length(plant_reps)])
@@ -482,7 +482,7 @@ mod_sparse_allocation_server <- function(id){
         sort_choices <- validate_design(diagonal_dimension_choices(
             lines = lines_within_loc, checks = as.vector(getChecks()$checksEntries),
             kindExpt = kindExpt_single, planter = single_inputs()$planter_mov
-        ))
+        ), report = TRUE)
 
         shiny::updateSelectInput(inputId = "sparse_dims",
                           choices = sort_choices,
@@ -687,15 +687,15 @@ mod_sparse_allocation_server <- function(id){
         checksPercent = percent
       ))
       data <- if (get_sparse_data()$upload) get_sparse_data()$data_entry
-      design <- app_attempt(
-        do.call(sparse_allocation, design_args_sparse_allocation(values, data))
-      )
-      if (is.null(design)) return(NULL)
-      if (is.null(design$fieldBook)) {
-        app_report_problem("The field dimensions do not fit the entries. Please, choose other dimensions.")
-        return(NULL)
-      }
-      return(design)
+      # A failure stays the design's state, so the layout and heatmap panels
+      # explain it.
+      app_attempt({
+        design <- do.call(sparse_allocation, design_args_sparse_allocation(values, data))
+        if (is.null(design$fieldBook)) {
+          fieldhub_abort("The field dimensions do not fit the entries. Please, choose other dimensions.")
+        }
+        design
+      }, fail = "validate")
     })
 
     output$randomized_layout <- DT::renderDT({
