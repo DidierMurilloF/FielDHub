@@ -336,3 +336,58 @@ design_server_body <- function(module) {
   stopifnot(length(entries) == 1L)
   body(get(entries[[1L]]$server, asNamespace("FielDHub")))
 }
+
+#' Body of the code that runs the steps and results of a spatial design
+#'
+#' A spatial design with a page spec runs through the generic server
+#' (`mod_design_server()`), which hands its steps and results to the
+#' generic spatial page (`app_spatial_page()`); a spatial design without one
+#' has a server of its own. Structural tests that used to inspect
+#' `mod_<Module>_server()` ask for the code that runs `module` instead.
+#'
+#' @param module Registry workflow name (`"Diagonal"`, `"Optim"`, ...).
+spatial_server_body <- function(module) {
+  entries <- Filter(function(entry) identical(entry$workflow, module), fieldhub_app_registry())
+  stopifnot(length(entries) == 1L)
+  name <- if (is.null(entries[[1L]]$spec)) entries[[1L]]$server else "app_spatial_page"
+  body(get(name, asNamespace("FielDHub")))
+}
+
+#' Every function a page spec runs while the page is used
+#'
+#' The spec's `values`, `data` and `upload_shape`, the parsers, choices and
+#' previews of its controls and steps, and its result views (`entries`,
+#' `panels`, `setup`, `field_size`, `accept`), with the local helpers these
+#' call (a parser a constructor wraps, `entry_count()`, ...). FielDHub
+#' functions they reach through a variable (an `upload_check` such as
+#' `check_reps_upload()`) are returned by name.
+#'
+#' @return `list(closures = <list of functions>, named = <character>)`.
+spec_runtime_functions <- function(spec) {
+  namespace <- asNamespace("FielDHub")
+  package <- Filter(function(f) is.function(f) && identical(environment(f), namespace),
+                    mget(ls(namespace, all.names = TRUE), namespace, inherits = FALSE))
+  found <- list()
+  named <- character()
+  add <- function(f) {
+    if (!is.function(f) || is.primitive(f)) return(invisible())
+    if (isNamespace(environment(f))) {
+      hit <- names(Filter(function(g) identical(g, f), package))
+      named <<- unique(c(named, hit))
+      return(invisible())
+    }
+    if (any(vapply(found, identical, logical(1), f))) return(invisible())
+    found[[length(found) + 1L]] <<- f
+    env <- environment(f)
+    for (name in intersect(unique(all.names(body(f))), ls(env, all.names = TRUE))) {
+      add(get(name, envir = env))
+    }
+  }
+  controls <- c(spec$controls, spec$steps)
+  roots <- c(list(spec$values, spec$data, spec$upload_shape, spec$field_size, spec$accept,
+                  spec$setup$view),
+             lapply(controls, `[[`, "parse"), lapply(controls, `[[`, "options"),
+             lapply(controls, `[[`, "preview"), spec$entries, lapply(spec$panels, `[[`, "view"))
+  for (f in roots) add(f)
+  list(closures = found, named = named)
+}

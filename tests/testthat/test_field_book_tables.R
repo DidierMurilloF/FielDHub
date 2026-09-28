@@ -39,7 +39,13 @@ test_that("invalid field-book tables and display controls have classed errors", 
 test_that("each app field-book view delegates to the shared table component", {
   registry <- fieldhub_app_registry()
   for (entry in registry) {
-    code <- body(get(entry$server, asNamespace("FielDHub")))
+    # a spatial page of the generic module runs its workflow in
+    # app_spatial_page() (spatial_server_body())
+    code <- if (identical(entry$workflow_family, "spatial")) {
+      spatial_server_body(entry$workflow)
+    } else {
+      body(get(entry$server, asNamespace("FielDHub")))
+    }
     workflow <- paste0("app_", entry$workflow_family, "_workflow")
     expect_identical(sum(all.names(code) == workflow), 1L)
     code <- body(get(workflow, asNamespace("FielDHub")))

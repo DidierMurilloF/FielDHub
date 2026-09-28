@@ -2,24 +2,25 @@
 #'
 #' UI order follows the entries below. Server order is explicit because the
 #' existing Strip-Plot server is registered after the IBD and Row-Column servers.
-#' The classic designs are pages of the one generic design module
-#' (\code{mod_design_ui()}/\code{mod_design_server()}), built from their
-#' \code{spec} (\code{design_app_spec()}); the spatial designs keep a module
-#' of their own. This registry is internal, not a public extension interface.
+#' Designs with a page spec (\code{design_app_spec()}) are pages of the one
+#' generic design module (\code{mod_design_ui()}/\code{mod_design_server()});
+#' a design without one keeps a module of its own. This registry is
+#' internal, not a public extension interface.
 #' @noRd
 fieldhub_app_registry <- function() {
   classic <- names(fieldhub_classic_workflows())
+  generic_pages <- names(fieldhub_design_specs())
   groups <- c("Unreplicated Designs", "Partially Replicated Designs",
               "Lattice Designs", "Other Designs")
   entry <- function(label, module, engine, group, server_order) {
-    generic <- module %in% classic
+    generic <- module %in% generic_pages
     list(label = label, id = paste0(module, "_ui_1"),
          ui = if (generic) "mod_design_ui" else paste0("mod_", module, "_ui"),
          server = if (generic) "mod_design_server" else paste0("mod_", module, "_server"),
          engine = engine,
          group = groups[[group]], server_order = as.integer(server_order),
          workflow = module,
-         workflow_family = if (generic) "classic" else "spatial",
+         workflow_family = if (module %in% classic) "classic" else "spatial",
          spec = if (generic) module)
   }
   list(

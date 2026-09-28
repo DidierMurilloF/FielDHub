@@ -56,8 +56,21 @@ test_that("every client-side table export uses the shared metadata configuration
   expected <- c(Diagonal = 2L, diagonal_multiple = 3L, Optim = 2L,
                  RCBD_augmented = 1L, pREPS = 2L, multi_loc_preps = 3L,
                  sparse_allocation = 3L)
+  specs <- names(fieldhub_design_specs())
   for (module in names(expected)) {
+    if (module %in% specs) {
+      # A page of the generic module exports its field grids and its
+      # allocation table through app_spatial_grid()/app_spatial_table()
+      spec <- design_app_spec(module)
+      grids <- Filter(function(panel) identical(panel$type, "grid"), spec$panels)
+      exports <- c(vapply(grids, `[[`, character(1), "export"), spec$setup$export)
+      expect_length(exports, expected[[module]])
+      next
+    }
     code <- body(get(paste0("mod_", module, "_server"), asNamespace("FielDHub")))
     expect_identical(sum(all.names(code) == "app_table_export_buttons"), unname(expected[[module]]))
+  }
+  for (name in c("app_spatial_grid", "app_spatial_table")) {
+    expect_identical(sum(all.names(body(get(name, asNamespace("FielDHub")))) == "app_table_export_buttons"), 1L)
   }
 })

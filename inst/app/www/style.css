@@ -403,3 +403,9 @@
 #fieldhub-app .fieldhub-design-summary {
   padding-right: 40px;
 }
+
+/* Spatial design pages (app_spatial_tabs()); the heatmap draws at its own height */
+#fieldhub-app .fieldhub-spatial-heatmap .plotly.html-widget {
+  width: 97%;
+  height: 400px;
+}

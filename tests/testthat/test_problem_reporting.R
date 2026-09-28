@@ -314,11 +314,12 @@ test_that("app_design_state() reads a design that has not run as NULL, a failed 
 test_that("layout and heatmap outputs explain their empty states", {
   # Shared workflows and each spatial module's main layout output
   functions <- app_functions()
-  for (name in c("app_classic_workflow", "app_spatial_workflow", "mod_Diagonal_server",
-                 "mod_diagonal_multiple_server", "mod_sparse_allocation_server",
-                 "mod_Optim_server", "mod_pREPS_server", "mod_multi_loc_preps_server",
-                 "mod_RCBD_augmented_server")) {
+  for (name in c("app_classic_workflow", "app_spatial_workflow")) {
     expect_true(fieldhub_calls_named(body(functions[[name]]), "app_plot_state"), info = name)
+  }
+  for (module in c("Diagonal", "diagonal_multiple", "sparse_allocation", "Optim", "pREPS",
+                   "multi_loc_preps", "RCBD_augmented")) {
+    expect_true(fieldhub_calls_named(spatial_server_body(module), "app_plot_state"), info = module)
   }
   # The classic heatmap no longer opens a dialog from inside a reactive
   expect_false(fieldhub_calls_named(body(functions$app_classic_workflow), "modalDialog"))

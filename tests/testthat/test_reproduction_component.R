@@ -1,9 +1,12 @@
 test_that("every module connects its design to the shared reproduction component", {
   # The classic designs share the generic page server (mod_design_server()),
   # whose design reactive is `design`.
+  # A spatial page of the generic module runs its results in
+  # app_spatial_page(), whose design reactive is `design` too.
   sources <- c(
-    mod_design_server = "design", mod_Diagonal_server = "diagonal_design",
-    mod_diagonal_multiple_server = "diagonal_design", mod_Optim_server = "optimized_arrang",
+    mod_design_server = "design", app_spatial_page = "design",
+    mod_Diagonal_server = "diagonal_design",
+    mod_diagonal_multiple_server = "diagonal_design",
     mod_RCBD_augmented_server = "rcbd_augmented_reactive",
     mod_sparse_allocation_server = "sparse_design", mod_pREPS_server = "pREPS_reactive",
     mod_multi_loc_preps_server = "pREPS_reactive"
@@ -17,8 +20,12 @@ test_that("every module connects its design to the shared reproduction component
     unlist(lapply(as.list(code), calls), recursive = FALSE)
   }
   registry <- fieldhub_app_registry()
-  expect_setequal(names(sources), unique(vapply(registry, `[[`, character(1), "server")))
+  runs <- function(entry) {
+    if (!is.null(entry$spec) && identical(entry$workflow_family, "spatial")) "app_spatial_page" else entry$server
+  }
+  expect_setequal(names(sources), unique(vapply(registry, runs, character(1))))
   for (entry in registry) {
+    entry$server <- runs(entry)
     bindings <- calls(body(get(entry$server, asNamespace("FielDHub"))))
     expect_length(bindings, 1L)
     if (length(bindings) == 1L) {

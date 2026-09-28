@@ -8,6 +8,57 @@ library(FielDHub)
 
 classic_modules <- c("CRD", "RCBD", "LSD", "FD", "SPD", "SSPD", "STRIPD", "IBD", "RowCol",
                      "Alpha_Lattice", "Square_Lattice", "Rectangular_Lattice")
+spatial_modules <- c("Optim")
+all_modules <- c(classic_modules, spatial_modules)
+
+# The one label of each concept, written out here so a label changed in
+# fieldhub_control_concepts() fails this test instead of passing by
+# construction
+canonical_labels <- c(
+  type = "Select Design Type:",
+  t = "Input # of Treatments:",
+  setfactors = "Input # of Entries for Each Factor (comma separated):",
+  wp = "Input # of Whole Plots:",
+  sp = "Input # of Sub-plots Within Whole Plots:",
+  ssp = "Input # of Sub-sub-plots Within Sub-plots:",
+  Hplots = "Input # of Horizontal Strips:",
+  Vplots = "Input # of Vertical Strips:",
+  reps = "Input # of Full Reps:",
+  k = "Input # of Plots per IBlock:",
+  nrows = "Input # of Rows:",
+  use_checks = "Add repeated checks?",
+  checks = "Input # of Checks:",
+  rep_checks = "Reps per Check:",
+  spread_checks = "Spread checks within each block",
+  checks_note = NA,
+  l = "Input # of Locations:",
+  planter = "Plot Order Layout:",
+  plot_start = "Starting Plot Number(s):",
+  continuous = "Continuous Plot",
+  location_names = "Location Name(s):",
+  randomizeH = "Randomize Horizontal Strips (Across reps)",
+  randomizeV = "Randomize Vertical Strips (Across reps)",
+  seed = "Random Seed (blank = automatic):",
+  lines = "Input # of Entries:",
+  repGens = "# of Entries Per Rep Group:",
+  repUnits = "# of Rep Per Group:",
+  blocks = "Input # Entries per Expt:",
+  b = "Input # of Blocks:",
+  repsExpt = "Input # of Stacked Expts:",
+  repsStack = "Stack experiments:",
+  stacked = "Blocks Layout:",
+  copies_per_entry = "# of Copies Per Entry:",
+  location_view = "Choose Location to View:",
+  expt_name = "Experiment Name(s):",
+  random = "Randomize Entries?",
+  random_note = NA,
+  sameEntries = "Repeat entries across experiments",
+  allow_fillers = "Allow filler plots",
+  dimensions = "Select dimensions of field:",
+  multi_dimension = "Set different dimensions across locations",
+  location_dimensions = "Select dimension for location",
+  checks_percent = "Choose % of Checks:"
+)
 
 #' Muffle only the onestage->twostage fallback row_column() may report
 quiet_design <- function(expr) {
@@ -15,12 +66,36 @@ quiet_design <- function(expr) {
 }
 
 #' The design a page builds from raw control values (and an uploaded file),
-#' as mod_design_server() does on Run!
-page_design <- function(spec, raw, file = NULL) {
+#' as mod_design_server() does on Run! (and, on a spatial page,
+#' app_spatial_page() on Randomize!). `steps` gives raw step values; a step
+#' left out takes the choice the page selects.
+page_design <- function(spec, raw, file = NULL, steps = list()) {
   shaped <- if (!is.null(file)) spec$upload_shape(file)
   controls <- read_design_controls(spec, shiny_shaped(raw), uploaded = !is.null(shaped))
   data <- spec$data(shaped, controls)
-  quiet_design(do.call(spec$engine, spec$args(spec$values(controls, data), data)))
+  values <- spec$values(controls, data)
+  if (identical(spec$kind, "spatial")) values <- page_step_values(spec, values, data, steps)
+  quiet_design(do.call(spec$engine, spec$args(values, data)))
+}
+
+#' The values a spatial page sends its engine after its steps
+page_step_values <- function(spec, values, data, steps = list()) {
+  if (!is.null(spec$optim)) {
+    values[[spec$optim$into]] <- do.call(spec$optim$engine, spec$optim$args(values, data))
+  }
+  for (stage in c("run", "randomize")) {
+    stage_steps <- Filter(function(step) identical(step$stage, stage), spec$steps)
+    offered <- Filter(function(step) !is.null(step$options), stage_steps)
+    choices <- stats::setNames(lapply(offered, design_step_choices, values = values, data = data),
+                               vapply(offered, `[[`, character(1), "id"))
+    raw <- lapply(stage_steps, function(step) {
+      if (step$id %in% names(steps)) steps[[step$id]] else choices[[step$id]]$selected
+    })
+    names(raw) <- vapply(stage_steps, `[[`, character(1), "id")
+    values <- read_design_steps(stage_steps, raw, values, choices)
+    stopifnot(!is.null(values))
+  }
+  values
 }
 
 expect_same_design <- function(via_page, direct, info = NULL) {
@@ -34,27 +109,55 @@ page_defaults <- function(module, seed = 7) {
   raw
 }
 
-test_that("there is one page spec per classic design, in the registry's workflow order", {
+# Spatial pages whose runs take long: the diagonal searches, the
+# allocations and the p-rep optimizations. optimized_arrangement() and
+# RCBD_augmented() run in well under a second.
+long_running <- c(Optim = FALSE)
+
+test_that("there is one page spec per design, in the registry's workflow order", {
   specs <- fieldhub_design_specs()
-  expect_identical(names(specs), classic_modules)
-  expect_identical(names(specs), names(fieldhub_classic_workflows()))
+  expect_identical(names(specs), all_modules)
+  expect_identical(names(specs)[seq_along(classic_modules)], names(fieldhub_classic_workflows()))
   registry <- fieldhub_app_registry()
   for (entry in registry) {
-    if (!identical(entry$workflow_family, "classic")) next
+    if (is.null(entry$spec)) next
     spec <- design_app_spec(entry$workflow)
+    expect_identical(entry$ui, "mod_design_ui")
+    expect_identical(entry$server, "mod_design_server")
     expect_identical(spec$module, entry$workflow)
     expect_identical(spec$engine, getExportedValue("FielDHub", entry$engine), info = entry$id)
     expect_identical(spec$args, get(paste0("design_args_", spec$module), asNamespace("FielDHub")),
                      info = entry$id)
-    expect_identical(spec$workflow, classic_workflow_spec(spec$module))
-    expect_identical(spec$layout, spec$workflow$layout)
-    expect_false(spec$long_running)
+    expect_identical(spec$kind, entry$workflow_family, info = entry$id)
+    if (identical(spec$kind, "classic")) {
+      expect_identical(spec$workflow, classic_workflow_spec(spec$module))
+      expect_identical(spec$layout, spec$workflow$layout)
+      expect_false(spec$long_running)
+    } else {
+      expect_identical(spec$workflow, spatial_workflow_spec(spec$module))
+      expect_null(spec$layout)
+      expect_identical(spec$long_running, long_running[[spec$module]], info = entry$id)
+      expect_true(all(vapply(spec$steps, function(step) step$stage %in% c("run", "randomize"), TRUE)))
+      expect_true(spec$setup$type %in% c("summary", "table"), info = entry$id)
+      expect_true(length(spec$entries) %in% 1:2, info = entry$id)
+      expect_true(all(c("field_layout", "plot_numbers") %in% vapply(spec$panels, `[[`, "", "id")))
+      if (!is.null(spec$optim)) {
+        expect_identical(spec$optim$engine, do_optim)
+        expect_identical(spec$optim$args, get(paste0("design_args_", spec$module, "_optim"),
+                                              asNamespace("FielDHub")))
+      }
+    }
     expect_true(is.function(spec$values) && is.function(spec$data) && is.function(spec$upload_shape))
     expect_no_error(app_upload_spec(spec$upload))
   }
-  for (bad in list(NULL, NA_character_, "Diagonal", 1, c("CRD", "RCBD"))) {
+  # every design with a spec is a page of the generic module
+  expect_setequal(names(specs), unlist(lapply(registry, `[[`, "spec")))
+  for (bad in list(NULL, NA_character_, "unknown", 1, c("CRD", "RCBD"))) {
     expect_error(design_app_spec(bad), class = "fieldhub_input_error")
   }
+  # built once per session
+  expect_identical(fieldhub_design_specs(), specs)
+  expect_true(identical(design_app_spec("CRD")$values, design_app_spec("CRD")$values))
 })
 
 test_that("each page's defaults build the design a direct API call with the documented defaults builds", {
@@ -137,6 +240,48 @@ test_that("pages with an uploaded file build the design the module always sent",
                "More than one factor", class = "fieldhub_input_error")
 })
 
+# --- Spatial pages: controls -> values -> (allocation) -> steps -> engine ---
+
+# What each spatial page builds from its defaults (seed 7), as a direct call
+# with the field size (and percentage of checks) the page selects first
+spatial_defaults <- function(module) {
+  switch(module,
+    Optim = optimized_arrangement(nrows = 13, ncols = 24, lines = 280, checks = 4,
+                                  rep_checks = c(8, 8, 8, 8), l = 1, plotNumber = 1, seed = 7,
+                                  exptName = "Expt1", locationNames = "FARGO")
+  )
+}
+
+test_that("each spatial page's defaults build the design of a direct API call", {
+  for (module in spatial_modules) {
+    expect_same_design(page_design(design_app_spec(module), page_defaults(module)),
+                       spatial_defaults(module), info = module)
+  }
+})
+
+test_that("spatial pages with changed controls, steps or an uploaded file build the API's design", {
+  spec <- design_app_spec("Optim")
+  raw <- utils::modifyList(page_defaults("Optim", seed = 5), list(
+    lines = 100, rep_checks = "5", l = 2, planter = "cartesian", plot_start = "1,1001",
+    location_names = "A,B", expt_name = "Trial 1"))
+  expect_same_design(page_design(spec, raw, steps = list(dimensions = "12 x 10")),
+    optimized_arrangement(nrows = 12, ncols = 10, lines = 100, checks = 4, rep_checks = c(5, 5, 5, 5),
+                          l = 2, planter = "cartesian", plotNumber = c(1, 1001), seed = 5,
+                          exptName = "Trial 1", locationNames = c("A", "B")))
+  entries <- data.frame(ENTRY = 1:104, NAME = c(paste0("CHECK", 1:4), paste0("SB-", 5:104)),
+                        REPS = c(4L, 4L, 6L, 6L, rep(1L, 100)))
+  raw <- utils::modifyList(page_defaults("Optim"), list(checks = NA, rep_checks = "", lines = NA))
+  expect_same_design(page_design(spec, raw, entries, steps = list(dimensions = "12 x 10")),
+    optimized_arrangement(nrows = 12, ncols = 10, plotNumber = 1, seed = 7, exptName = "Expt1",
+                          locationNames = "FARGO", data = entries))
+  expect_error(page_design(spec, raw, transform(entries, REPS = as.numeric(REPS))), "'REPS' must be numeric",
+               class = "fieldhub_input_error")
+  expect_error(page_design(spec, utils::modifyList(raw, list(checks = 4, rep_checks = "1,2", lines = 280))),
+               "Reps per Check must have 1 value or 4 values", class = "fieldhub_input_error")
+  expect_error(page_design(spec, utils::modifyList(raw, list(checks = 4, rep_checks = "80", lines = 280))),
+               "Number of lines should be greater", class = "fieldhub_input_error")
+})
+
 test_that("choices of computed selects follow the entries, typed or uploaded", {
   spec <- design_app_spec("RowCol")
   nrows <- Filter(function(control) identical(control$id, "nrows"), spec$controls)[[1]]
@@ -154,28 +299,41 @@ test_that("the page HTML has every control, the shared buttons and no inline sty
   # Styles the libraries write themselves: shiny's hidden file input and the
   # spinner's placeholder
   library_styles <- c('<input[^>]*class="shiny-input-file"[^>]*>', '<div style="height:400px" class="shiny-spinner-placeholder">')
-  for (module in classic_modules) {
+  for (module in all_modules) {
     spec <- design_app_spec(module)
     html <- as.character(mod_design_ui("x", spec))
-    for (control in spec$controls) {
-      expect_true(grepl(paste0('id="x-', control$id, '"'), html, fixed = TRUE), info = paste(module, control$id))
+    has_id <- function(id) grepl(paste0('id="x-', id, '"'), html, fixed = TRUE)
+    for (control in c(spec$controls, spec$steps)) {
+      expect_true(has_id(control$id), info = paste(module, control$id))
       if (!is.null(control$label)) {
         expect_true(grepl(htmltools::htmlEscape(control$label), html, fixed = TRUE),
                     info = paste(module, control$id))
       }
     }
     upload <- app_upload_spec(spec$upload)
-    for (id in c("run", spec$workflow$ids[c("simulate", "field_book_download", "layout_download",
-                                            "plot", "table")], spec$layout$output,
-                 upload$toggle, upload$file, upload$sep)) {
-      expect_true(grepl(paste0('id="x-', id, '"'), html, fixed = TRUE), info = paste(module, id))
+    ids <- if (identical(spec$kind, "classic")) {
+      c(spec$workflow$ids[c("simulate", "field_book_download", "layout_download", "plot", "table")],
+        spec$layout$output)
+    } else {
+      c(spec$workflow$ids[c("simulate", "download", "table", "heatmap", "tabset")], "randomize",
+        "status", "setup", paste0("entries_", seq_along(spec$entries)),
+        vapply(spec$panels, `[[`, "", "id"), paste0(vapply(spec$steps, `[[`, "", "id"), "_step"))
     }
-    for (text in c(spec$title, "Run!", "Simulate!", "Save experiment (ZIP)", "CSV + metadata (ZIP)",
-                   "Import entries' list?", "Upload a CSV File:", "Field Layout", "Field Book")) {
+    for (id in c("run", ids, upload$toggle, upload$file, upload$sep)) {
+      expect_true(has_id(id), info = paste(module, id))
+    }
+    texts <- if (identical(spec$kind, "classic")) {
+      c("CSV + metadata (ZIP)", "Field Layout", "Field Book")
+    } else {
+      c("Get Random", "Randomize!", "Data Input", vapply(spec$panels, `[[`, "", "title"), "Field Book",
+        "Heatmap")
+    }
+    for (text in c(spec$title, "Run!", "Simulate!", "Save experiment (ZIP)", "Import entries' list?",
+                   "Upload a CSV File:", texts)) {
       expect_true(grepl(text, html, fixed = TRUE), info = paste(module, text))
     }
     expect_identical(grepl("Summary Design", html, fixed = TRUE), spec$summary, info = module)
-    expect_identical(grepl('id="x-summary"', html, fixed = TRUE), spec$summary, info = module)
+    expect_identical(has_id("summary"), spec$summary, info = module)
     stripped <- html
     for (pattern in library_styles) stripped <- gsub(pattern, "", stripped, perl = TRUE)
     expect_false(grepl("style=", stripped, fixed = TRUE), info = module)
@@ -188,46 +346,64 @@ test_that("the page HTML has every control, the shared buttons and no inline sty
 
 test_that("the same concept has the same label, default and minimum on every page", {
   concepts <- fieldhub_control_concepts()
+  expect_identical(vapply(concepts, function(concept) {
+    if (is.null(concept$label)) NA_character_ else concept$label
+  }, character(1)), canonical_labels)
   # Where an engine accepts less than the concept's minimum, the page offers
-  # the engine's minimum (checked against the engines below).
+  # the engine's minimum (checked against the engines below). FD offers the
+  # minimum of its CRD type (see design_app_spec()).
   engine_minimums <- c(CRD.t = 1, CRD.reps = 1, LSD.reps = 1, SPD.reps = 1, SSPD.reps = 1,
-                       STRIPD.reps = 1, SPD.wp = 1, SSPD.wp = 1)
+                       STRIPD.reps = 1, SPD.wp = 1, SSPD.wp = 1, FD.reps = 1)
+  # The spatial pages keep the smallest counts they have always offered,
+  # and the defaults of their own
+  page_minimums <- c(Optim.lines = 5)
+  page_values <- c(Optim.plot_start = "1", Optim.rep_checks = "8,8,8,8")
   seen <- character()
-  for (module in classic_modules) {
+  for (module in all_modules) {
     spec <- design_app_spec(module)
     ids <- vapply(spec$controls, `[[`, character(1), "id")
-    expect_identical(anyDuplicated(ids), 0L, info = module)
+    expect_identical(anyDuplicated(c(ids, vapply(spec$steps, `[[`, "", "id"))), 0L, info = module)
     # every page has the shared controls, the seed last
     expect_true(all(c("planter", "plot_start", "location_names", "seed") %in% ids), info = module)
     expect_identical(ids[[length(ids)]], "seed", info = module)
     expect_identical("l" %in% ids, "l" %in% names(formals(spec$engine)), info = module)
-    for (control in spec$controls) {
+    expect_identical("location_view" %in% ids, identical(spec$kind, "spatial"), info = module)
+    for (control in c(spec$controls, spec$steps)) {
       concept <- concepts[[control$id]]
       info <- paste(module, control$id)
-      expect_false(is.null(concept), info = info)
-      expect_identical(control$label, concept$label, info = info)
-      if ("value" %in% names(concept)) expect_identical(control$value, concept$value, info = info)
-      if (!is.null(concept$choices)) expect_identical(unname(control$choices), concept$choices, info = info)
       key <- paste(module, control$id, sep = ".")
-      if (key %in% names(engine_minimums)) {
-        expect_identical(control$min, engine_minimums[[key]], info = info)
+      expect_false(is.null(concept), info = info)
+      expect_identical(control$label, if (is.na(canonical_labels[[control$id]])) NULL else canonical_labels[[control$id]],
+                       info = info)
+      if (key %in% names(page_values)) {
+        expect_identical(control$value, page_values[[key]], info = info)
+        seen <- c(seen, key)
+      } else if ("value" %in% names(concept)) {
+        expect_identical(control$value, concept$value, info = info)
+      }
+      if (!is.null(concept$choices)) expect_identical(unname(control$choices), concept$choices, info = info)
+      minimums <- c(engine_minimums, page_minimums)
+      if (key %in% names(minimums)) {
+        expect_identical(control$min, minimums[[key]], info = info)
         seen <- c(seen, key)
       } else {
         expect_identical(control$min, concept$min, info = info)
       }
     }
   }
-  expect_setequal(seen, names(engine_minimums))
+  expect_setequal(seen, c(names(engine_minimums), names(page_minimums), names(page_values)))
 })
 
 test_that("every minimum a page offers is the smallest value its engine accepts", {
+  # FD's single replicate is for its CRD type
+  at_minimum <- list(FD.reps = list(type = "1"))
   for (module in classic_modules) {
     spec <- design_app_spec(module)
     computed <- any(vapply(spec$controls, function(control) !is.null(control$options), logical(1)))
     for (control in spec$controls) {
       if (!identical(control$type, "number") || is.null(control$min)) next
       info <- paste(module, control$id)
-      raw <- page_defaults(module)
+      raw <- utils::modifyList(page_defaults(module), c(list(), at_minimum[[paste(module, control$id, sep = ".")]]))
       if (!is.null(control$enabled_by)) raw[[control$enabled_by]] <- TRUE
       below <- replace(raw, control$id, list(control$min - 1))
       expect_error(page_design(spec, below), class = "fieldhub_input_error", info = info)
@@ -246,7 +422,7 @@ test_that("every minimum a page offers is the smallest value its engine accepts"
 })
 
 test_that("only a numeric locations control and whole-number defaults are offered", {
-  for (module in classic_modules) {
+  for (module in all_modules) {
     for (control in design_app_spec(module)$controls) {
       if (identical(control$type, "number")) {
         expect_true(is.numeric(control$value) && control$value >= control$min, info = paste(module, control$id))

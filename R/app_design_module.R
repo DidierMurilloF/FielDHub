@@ -2,9 +2,11 @@
 #'
 #' @description The sidebar is the page's upload controls
 #' (\code{app_upload_ui()}), its controls (\code{app_control_ui()}) and the
-#' Run!/Simulate!/Save buttons; the main panel shows the field layout and
-#' field book (and a design summary where the spec asks for one), with the
-#' output ids of the page's workflow (\code{classic_workflow_spec()}).
+#' Run!/Simulate!/Save buttons. The main panel of a classic page shows the
+#' field layout and field book (and a design summary where the spec asks
+#' for one), with the output ids of the page's workflow
+#' (\code{classic_workflow_spec()}); a spatial page shows its steps and
+#' result tabs (\code{app_spatial_tabs()}).
 #'
 #' @param id The page's module id.
 #' @param spec The page spec (\code{design_app_spec()}).
@@ -13,7 +15,16 @@ mod_design_ui <- function(id, spec) {
   ns <- shiny::NS(id)
   ids <- spec$workflow$ids
   toggle <- if (!is.null(spec$upload)) app_upload_spec(spec$upload)$toggle
-  tabs <- list(
+  spatial <- identical(spec$kind, "spatial")
+  # A spatial page offers its experiment once it is randomized
+  save <- if (spatial) {
+    shinyjs::hidden(shiny::downloadButton(ns(ids[["download"]]), "Save experiment (ZIP)",
+                                          class = "btn-block"))
+  } else {
+    shiny::downloadButton(ns(ids[["field_book_download"]]), "Save experiment (ZIP)",
+                          class = "btn-block")
+  }
+  tabs <- if (!spatial) list(
     if (isTRUE(spec$summary)) shiny::tabPanel(
       "Summary Design",
       shiny::br(),
@@ -56,12 +67,15 @@ mod_design_ui <- function(id, spec) {
           ))
         ),
         shiny::br(),
-        shiny::downloadButton(ns(ids[["field_book_download"]]), "Save experiment (ZIP)",
-                              class = "btn-block")
+        save
       ),
       shiny::mainPanel(
         width = 8,
-        shiny::fluidRow(do.call(shiny::tabsetPanel, Filter(Negate(is.null), tabs)))
+        shiny::fluidRow(if (spatial) {
+          app_spatial_tabs(ns, spec)
+        } else {
+          do.call(shiny::tabsetPanel, Filter(Negate(is.null), tabs))
+        })
       )
     )
   )
@@ -71,11 +85,12 @@ mod_design_ui <- function(id, spec) {
 #'
 #' @description Run! reads the controls (\code{read_design_controls()}) and
 #' the upload (\code{app_read_upload()}), builds the builder's \code{values}
-#' with the spec, resolves the seed (\code{app_design_seed()}) and calls the
-#' engine only through the spec's argument builder, so the page and a direct
-#' API call build the same design. Results, simulation, exports and
-#' reproduction come from the shared workflow
-#' (\code{app_classic_layout()}, \code{app_classic_workflow()}).
+#' with the spec and resolves the seed (\code{app_design_seed()}). A classic
+#' page then calls the engine only through the spec's argument builder, so
+#' the page and a direct API call build the same design, and its results,
+#' simulation, exports and reproduction come from the shared workflow
+#' (\code{app_classic_layout()}, \code{app_classic_workflow()}). A spatial
+#' page goes on to its steps (\code{app_spatial_page()}).
 #'
 #' @inheritParams mod_design_ui
 #' @noRd
@@ -91,14 +106,18 @@ mod_design_server <- function(id, spec) {
     }
     # The shaped upload, or NULL when reading it failed (already reported)
     upload <- shiny::reactive({
-      file <- app_read_upload(input, spec$upload)
+      # A page may let the entries of an upload repeat (a flag control)
+      repeats <- !is.null(spec$upload_repeats) && isTRUE(input[[spec$upload_repeats]])
+      file <- app_read_upload(input, spec$upload, check = !repeats)
       if (is.null(file)) return(NULL)
       validate_design(spec$upload_shape(file$data))
     })
     if (!is.null(spec$upload)) app_upload_dialog_observer(input, spec$upload)
 
     # Selects whose choices follow other controls or the uploaded entries
-    for (control in Filter(function(control) !is.null(control$options), controls)) local({
+    live <- Filter(function(control) !is.null(control$options) && identical(control$stage, "live"),
+                   controls)
+    for (control in live) local({
       control <- control
       dependency <- shiny::reactive({
         list(raw = raw_controls(control$depends_on),
@@ -125,11 +144,15 @@ mod_design_server <- function(id, spec) {
       data <- if (uploaded()) validate_design(design_upload_data(upload()))
       parsed <- validate_design(read_design_controls(spec, raw_controls(), uploaded = !is.null(data)))
       data <- spec$data(data, parsed)
-      values <- spec$values(parsed, data)
+      values <- validate_design(spec$values(parsed, data))
       values$seed <- validate_design(app_design_seed(values$seed))
       list(values = values, data = data)
     }) |>
       shiny::bindEvent(input$run)
+
+    if (identical(spec$kind, "spatial")) {
+      return(app_spatial_page(input, output, session, spec, run = run, raw_controls = raw_controls))
+    }
 
     design <- shiny::reactive({
       inputs <- run()

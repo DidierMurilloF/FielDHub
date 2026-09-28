@@ -1,7 +1,7 @@
-#' How each classic design page is built
+#' How each design page is built
 #'
-#' @description One entry per classic design, rendered and run by
-#' \code{mod_design_ui()}/\code{mod_design_server()}:
+#' @description One entry per design, rendered and run by
+#' \code{mod_design_ui()}/\code{mod_design_server()}. Every page has:
 #' \itemize{
 #'   \item \code{title}: heading of the page.
 #'   \item \code{engine}: the public design function.
@@ -17,23 +17,58 @@
 #'     (\code{read_design_controls()}) and \code{data}.
 #'   \item \code{args}: the argument builder \code{design_args_<Module>()},
 #'     so the page and a direct API call build the same design.
+#'   \item \code{kind}: \code{"classic"} or \code{"spatial"}.
 #'   \item \code{workflow}, \code{layout}: the result panels
-#'     (\code{classic_workflow_spec()}).
+#'     (\code{classic_workflow_spec()}, or \code{spatial_workflow_spec()}
+#'     with no \code{layout}).
 #'   \item \code{summary}: whether the page shows a "Summary Design" tab.
 #'   \item \code{long_running}: whether a run may take long (used to run it
 #'     without blocking other sessions).
 #' }
 #'
+#' A spatial page (\code{kind = "spatial"}) builds its design in steps
+#' (\code{app_spatial_page()}): Run! reads the controls, and where the
+#' design needs one computes the allocation (\code{optim}: the engine and
+#' argument builder of the \code{do_optim()} step, and the \code{values}
+#' field its result goes to). It then offers its \code{steps} with
+#' \code{stage = "run"} (the field size, from plain choice functions); each
+#' Randomize! reads them, offers the \code{"randomize"} steps (the
+#' percentage of checks) and builds the design. Its other fields describe
+#' the result tabs: \code{setup} (what the first tab shows), \code{entries}
+#' (the entry tables), \code{panels} (the field grids or plots),
+#' \code{field_size} (the field the simulation fills), \code{accept} (a
+#' last check of the design), \code{upload_repeats} (a flag that lets an
+#' upload repeat entries), \code{randomizing} (the progress message) and
+#' \code{file_tag} (the export file name).
+#'
 #' Every page has the same shared controls (locations where its engine
 #' takes them, plot order, starting plots, location names, seed); counts
-#' that describe the design keep the page's own defaults. A minimum differs
-#' from the concept's only where the engine accepts a smaller value:
+#' that describe the design keep the page's own defaults, and so do the
+#' spatial pages' starting plot (1) and locations. A minimum differs from
+#' the concept's only where the engine accepts a smaller value:
 #' \code{CRD()} takes a single treatment, and \code{CRD()},
 #' \code{latin_square()}, \code{split_plot()}, \code{split_split_plot()} and
 #' \code{strip_plot()} a single replicate; the split-plot engines take a
-#' single whole plot.
+#' single whole plot. \code{full_factorial()} takes a single replicate for
+#' its CRD type only; a minimum cannot follow the design type the page
+#' selects (it is a hint written into the page), so the page offers 1 and
+#' the engine explains that the RCBD type needs 2. The spatial pages keep
+#' the smallest number of entries and locations they have always offered.
+#'
+#' The specs are built once per R session (\code{design_app_spec()}).
 #' @noRd
 fieldhub_design_specs <- function() {
+  if (is.null(design_spec_cache$specs)) design_spec_cache$specs <- build_design_specs()
+  design_spec_cache$specs
+}
+
+#' Specs built by the first fieldhub_design_specs() call of the session
+#' @noRd
+design_spec_cache <- new.env(parent = emptyenv())
+
+#' Build every design page spec (see fieldhub_design_specs())
+#' @noRd
+build_design_specs <- function() {
   classic <- function(module, title, engine, controls, upload, upload_columns,
                       values, omit_na = TRUE, upload_check = identity,
                       data = function(upload, controls) upload, summary = FALSE) {
@@ -44,9 +79,52 @@ fieldhub_design_specs <- function() {
       upload_shape = function(data) upload_check(shape_design_upload(data, upload_columns, omit_na)),
       data = data, values = values,
       args = get(paste0("design_args_", module), mode = "function"),
-      workflow = workflow, layout = workflow$layout, summary = summary,
+      kind = "classic", workflow = workflow, layout = workflow$layout, summary = summary,
       long_running = FALSE
     )
+  }
+  spatial <- function(module, title, engine, controls, upload, upload_columns, values, steps,
+                      setup, entries, panels, file_tag, upload_check = identity,
+                      data = function(upload, controls) upload, optim = NULL,
+                      field_size = function(design, values) list(nrows = values$nrows, ncols = values$ncols),
+                      accept = identity, upload_repeats = NULL, long_running = TRUE,
+                      randomizing = "Randomizing ...") {
+    list(
+      module = module, title = title, engine = engine, controls = controls, upload = upload,
+      upload_shape = function(data) upload_check(shape_design_upload(data, upload_columns)),
+      data = data, values = values,
+      args = get(paste0("design_args_", module), mode = "function"),
+      kind = "spatial", optim = optim, steps = steps, setup = setup, entries = entries,
+      panels = panels, workflow = spatial_workflow_spec(module), layout = NULL, summary = FALSE,
+      field_size = field_size, accept = accept, upload_repeats = upload_repeats,
+      long_running = long_running, randomizing = randomizing, file_tag = file_tag
+    )
+  }
+  # Result tabs of the spatial pages
+  entry_table <- function(data, caption = NULL, height = "600px", filter = "top") {
+    list(data = data, caption = caption, height = height, filter = filter)
+  }
+  grid_panel <- function(title, id, export, view) {
+    list(type = "grid", title = title, id = id, export = export, view = view)
+  }
+  plot_panel <- function(title, id, view) list(type = "plot", title = title, id = id, view = view)
+  field_panel <- function(view) grid_panel("Randomized Field", "field_layout", "Entry layout", view)
+  numbers_panel <- function(component) {
+    grid_panel("Plot Number Field", "plot_numbers", "Plot numbers", function(design, location, values) {
+      field_grid_view(design[[component]][[location]])
+    })
+  }
+  checks_view <- function(design, location, values) {
+    checks <- design$infoDesign$entry_checks[[location]]
+    field_grid_view(design$layoutRandom[[location]], highlight = checks,
+                    colours = spatial_highlight_colours("checks", length(checks)))
+  }
+  summary_setup <- list(type = "summary")
+  # Location views, plot order, plot starts, experiment and location names
+  # of a spatial page
+  spatial_shared <- function(expt_name = ctl_expt_name(), trim_locations = FALSE) {
+    list(ctl_location_view(), ctl_planter(), ctl_plot_start("1"), expt_name,
+         ctl_location_names(trim = trim_locations))
   }
   # Entries come from the file on the upload path, from `t` otherwise
   entry_count <- function(controls, data) if (is.null(data)) controls$t else nrow(data)
@@ -97,12 +175,8 @@ fieldhub_design_specs <- function() {
       controls = list(
         ctl_count("t", 18, generated_only = TRUE), ctl_reps(3),
         ctl_flag("use_checks"),
-        ctl_count("checks", 2, show_if = "input.use_checks == true", enabled_by = "use_checks",
-                  parse = function(value, label) parse_n_checks(value)),
-        ctl_text_list("rep_checks", show_if = "input.use_checks == true", enabled_by = "use_checks",
-                      parse = function(value, label, values) {
-                        parse_control_rep_checks(value, label, values$checks)
-                      }),
+        ctl_checks(2, show_if = "input.use_checks == true", enabled_by = "use_checks"),
+        ctl_rep_checks(show_if = "input.use_checks == true", enabled_by = "use_checks"),
         ctl_flag("spread_checks", show_if = "input.use_checks == true", enabled_by = "use_checks",
                  disabled_value = TRUE),
         ctl_preview("checks_note", show_if = "input.use_checks == true",
@@ -134,7 +208,7 @@ fieldhub_design_specs <- function() {
         ctl_select("type", split_types("Factorial"), convert = as.numeric),
         ctl_text_list("setfactors", "2,2,3", generated_only = TRUE,
                       parse = function(value, label, values) parse_control_factor_counts(value, label)),
-        ctl_reps(3), ctl_locations(), ctl_planter(), ctl_plot_start(), ctl_location_names(),
+        ctl_reps(3, min = 1), ctl_locations(), ctl_planter(), ctl_plot_start(), ctl_location_names(),
         ctl_seed()
       ),
       values = function(controls, data) {
@@ -217,11 +291,49 @@ fieldhub_design_specs <- function() {
     Square_Lattice = lattice("Square_Lattice", "Square Lattice Design", square_lattice,
                              "square_lattice", "square", 49),
     Rectangular_Lattice = lattice("Rectangular_Lattice", "Rectangular Lattice Design",
-                                  rectangular_lattice, "rectangular_lattice", "rect", 30)
+                                  rectangular_lattice, "rectangular_lattice", "rect", 30),
+    # optimized_arrangement() runs in well under a second
+    Optim = spatial("Optim", "Unreplicated Optimized Arrangement", optimized_arrangement,
+      upload = "optim", upload_columns = c("ENTRY", "NAME", "REPS"),
+      upload_check = check_reps_upload, long_running = FALSE, file_tag = "Optim_",
+      controls = c(
+        list(ctl_checks(4, generated_only = TRUE), ctl_rep_checks("8,8,8,8", generated_only = TRUE),
+             ctl_count("lines", 280, min = 5, generated_only = TRUE), ctl_locations()),
+        spatial_shared(expt_name = ctl_expt_name(split = FALSE)), list(ctl_seed())
+      ),
+      values = function(controls, data) {
+        list(lines = controls$lines, checks = controls$checks, rep_checks = controls$rep_checks,
+             planter = controls$planter, l = controls$l, plot_start = controls$plot_start,
+             seed = controls$seed, expt_name = controls$expt_name,
+             location_names = controls$location_names,
+             plots = if (is.null(data)) optim_total_plots(controls$lines, controls$rep_checks) else sum(data$REPS))
+      },
+      steps = list(ctl_dimensions(function(values, data) optim_field_choices(values$plots))),
+      setup = summary_setup,
+      entries = list(
+        function(design, location, values) {
+          entry_table(entry_list_view(design$dataEntry, c("ENTRY", "NAME", "REPS")), "List of Entries.")
+        },
+        function(design, location, values) {
+          entries <- design$dataEntry
+          entry_table(entries[entries$REPS > 1, ], "Table of checks.", height = "350px", filter = "none")
+        }
+      ),
+      panels = list(
+        field_panel(function(design, location, values) {
+          checks <- as.vector(design$genEntries$entry_checks)
+          field_grid_view(design$layoutRandom[[location]], highlight = checks,
+                          colours = spatial_highlight_colours("checks", length(checks)))
+        }),
+        numbers_panel("plotNumber")
+      ),
+      field_size = function(design, values) {
+        list(nrows = max(design$fieldBook$ROW), ncols = max(design$fieldBook$COLUMN))
+      })
   )
 }
 
-#' The page spec of one classic design
+#' The page spec of one design
 #'
 #' @param module Registry name of the design (\code{"CRD"}, \code{"RCBD"},
 #'   ...).

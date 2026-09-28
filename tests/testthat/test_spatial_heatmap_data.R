@@ -36,8 +36,7 @@ test_that("all spatial modules use the shared heatmap builder", {
   modules <- c("Diagonal", "diagonal_multiple", "sparse_allocation", "Optim",
                 "RCBD_augmented", "pREPS", "multi_loc_preps")
   for (module in modules) {
-    code <- body(get(paste0("mod_", module, "_server"), asNamespace("FielDHub")))
-    expect_identical(sum(all.names(code) == "app_spatial_workflow"), 1L)
+    expect_identical(sum(all.names(spatial_server_body(module)) == "app_spatial_workflow"), 1L)
   }
   expect_identical(sum(all.names(body(app_spatial_workflow)) == "app_spatial_heatmap"), 1L)
 })

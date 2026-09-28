@@ -17,10 +17,8 @@ test_that("spatial controls describe the coordinate axis and retain existing def
 })
 
 test_that("all spatial workflows share the correlation controls with their existing IDs", {
-  sources <- c(mod_Diagonal_server = ".DIAG", mod_diagonal_multiple_server = ".DIAG",
-               mod_sparse_allocation_server = ".DIAG", mod_Optim_server = ".O",
-               mod_RCBD_augmented_server = ".O", mod_pREPS_server = ".PREP",
-               mod_multi_loc_preps_server = ".PREP")
+  sources <- c(Diagonal = ".DIAG", diagonal_multiple = ".DIAG", sparse_allocation = ".DIAG",
+               Optim = ".O", RCBD_augmented = ".O", pREPS = ".PREP", multi_loc_preps = ".PREP")
   calls <- function(code) {
     if (missing(code) || (!is.call(code) && !is.pairlist(code))) return(list())
     if (is.call(code) && identical(code[[1]], as.name("spatial_workflow_spec"))) {
@@ -28,15 +26,21 @@ test_that("all spatial workflows share the correlation controls with their exist
     }
     unlist(lapply(as.list(code), calls), recursive = FALSE)
   }
+  specs <- names(fieldhub_design_specs())
   for (name in names(sources)) {
-    controls <- calls(body(get(name, asNamespace("FielDHub"))))
-    expect_length(controls, 1L)
-    if (length(controls) == 1L) {
+    if (name %in% specs) {
+      # A page of the generic module takes its workflow from its spec
+      spec <- design_app_spec(name)$workflow
+      expect_identical(spec, spatial_workflow_spec(name))
+    } else {
+      controls <- calls(body(get(paste0("mod_", name, "_server"), asNamespace("FielDHub"))))
+      expect_length(controls, 1L)
       spec <- spatial_workflow_spec(controls[[1]][[2]])
-      expect_identical(spec$correlation_suffix, sources[[name]])
-      expect_identical(spec$correlation_ids, c(x = paste0("ROX", sources[[name]]),
-                                               y = paste0("ROY", sources[[name]])))
     }
+    expect_identical(spec$correlation_suffix, sources[[name]])
+    expect_identical(spec$correlation_ids, c(x = paste0("ROX", sources[[name]]),
+                                             y = paste0("ROY", sources[[name]])))
   }
+  expect_identical(sum(all.names(body(app_spatial_page)) == "app_spatial_workflow"), 1L)
   expect_identical(sum(all.names(body(app_spatial_simulation_modal)) == "app_spatial_correlations"), 1L)
 })

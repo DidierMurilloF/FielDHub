@@ -164,10 +164,8 @@ test_that("controls for generated entries are not read when entries are uploaded
 test_that("controls enabled by a flag take their off value while it is off", {
   spec <- page(
     ctl_flag("use_checks"),
-    ctl_count("checks", 2, enabled_by = "use_checks", parse = function(value, label) parse_n_checks(value)),
-    ctl_text_list("rep_checks", enabled_by = "use_checks", parse = function(value, label, values) {
-      parse_control_rep_checks(value, label, values$checks)
-    }),
+    ctl_checks(2, enabled_by = "use_checks"),
+    ctl_rep_checks(enabled_by = "use_checks"),
     ctl_flag("spread_checks", enabled_by = "use_checks", disabled_value = TRUE)
   )
   off <- read_design_controls(spec, list(use_checks = FALSE, checks = NA, rep_checks = "", spread_checks = FALSE))
@@ -176,14 +174,112 @@ test_that("controls enabled by a flag take their off value while it is off", {
   expect_identical(on, list(use_checks = TRUE, checks = 2L, rep_checks = c(2, 3), spread_checks = FALSE))
   expect_identical(read_design_controls(spec, list(use_checks = TRUE, checks = 3L, rep_checks = "2"))$rep_checks,
                    c(2, 2, 2))
-  expect_control_error(read_design_controls(spec, list(use_checks = TRUE, checks = NA, rep_checks = "2")),
-                       "Input # of Checks cannot be blank.")
+  err <- expect_control_error(read_design_controls(spec, list(use_checks = TRUE, checks = NA, rep_checks = "2")),
+                              "Input # of Checks cannot be blank.")
+  expect_identical(err$control, "Input # of Checks:")
+  err <- expect_control_error(read_design_controls(spec, list(use_checks = TRUE, checks = 0L, rep_checks = "2")),
+                              "Input # of Checks must be a whole number from 1 to")
+  expect_identical(err$control, "Input # of Checks:")
   for (value in blanks) {
     expect_control_error(read_design_controls(spec, list(use_checks = TRUE, checks = 2L, rep_checks = value)),
                          "Reps per Check cannot be blank.")
   }
-  expect_control_error(read_design_controls(spec, list(use_checks = TRUE, checks = 2L, rep_checks = "1,2,3")),
-                       "Reps per Check must have 1 value or 2 values")
+  err <- expect_control_error(read_design_controls(spec, list(use_checks = TRUE, checks = 2L, rep_checks = "1,2,3")),
+                              "Reps per Check must have 1 value or 2 values")
+  expect_identical(err$control, "Reps per Check:")
+})
+
+test_that("every parser takes (value, label, values) and names its control in errors", {
+  # A parser reads the values read before it, and every error it raises
+  # carries the label of its control
+  spec <- page(ctl_text_list("repGens", "75,150"),
+               ctl_text_list("repUnits", "2,1", parse = function(value, label, values) {
+                 parse_control_rep_units(value, label, values$repGens)
+               }),
+               ctl_plot_start())
+  expect_identical(read_design_controls(spec, list(repGens = "75,150", repUnits = "2,1", plot_start = "1")),
+                   list(repGens = c(75, 150), repUnits = c(2, 1), plot_start = 1))
+  cases <- list(
+    list(raw = list(repGens = "75,x", repUnits = "2,1", plot_start = "1"), control = "# of Entries Per Rep Group:",
+         message = "# of Entries Per Rep Group could not read"),
+    list(raw = list(repGens = "75,150", repUnits = "2", plot_start = "1"), control = "# of Rep Per Group:",
+         message = "# of Rep Per Group must have one value per group of entries (2); got 1."),
+    list(raw = list(repGens = "75", repUnits = "2", plot_start = "0"), control = "Starting Plot Number(s):",
+         message = "Starting Plot Number(s) could not read")
+  )
+  for (case in cases) {
+    err <- expect_control_error(read_design_controls(spec, case$raw), case$message)
+    expect_identical(err$control, case$control)
+  }
+  # the parser a constructor is given receives the label and earlier values
+  seen <- NULL
+  spec <- page(ctl_reps(3), ctl_count("t", 4, parse = function(value, label, values) {
+    seen <<- list(label = label, values = values)
+    value
+  }))
+  read_design_controls(spec, list(reps = 3L, t = 4L))
+  expect_identical(seen, list(label = "Input # of Treatments:", values = list(reps = 3L)))
+})
+
+test_that("names split on commas, and may be read whole or trimmed", {
+  expect_identical(read_design_controls(page(ctl_expt_name()), list(expt_name = "A, B"))$expt_name,
+                   c("A", " B"))
+  expect_identical(read_design_controls(page(ctl_expt_name(trim = TRUE)), list(expt_name = "A, B"))$expt_name,
+                   c("A", "B"))
+  expect_identical(read_design_controls(page(ctl_expt_name(split = FALSE)), list(expt_name = "A,B"))$expt_name,
+                   "A,B")
+  expect_identical(read_design_controls(page(ctl_location_names(trim = TRUE)),
+                                        list(location_names = " X ,Y"))$location_names, c("X", "Y"))
+  for (value in blanks) {
+    expect_control_error(read_design_controls(page(ctl_expt_name()), list(expt_name = value)),
+                         "Experiment Name(s) cannot be blank.")
+  }
+})
+
+test_that("field sizes read as rows and columns", {
+  expect_identical(parse_control_dimensions("15 x 20", "Size:"), c(15, 20))
+  for (value in c(blanks, list("15x20", "15 x", "a x b", "0 x 3", "2.5 x 3", 15, "No Options Available"))) {
+    expect_error(parse_control_dimensions(value, "Size:"), class = "fieldhub_input_error")
+  }
+  dims <- ctl_dimensions(function(values, data) NULL)
+  expect_identical(dims$parse("15 x 20", list(l = 3)), list(nrows = 15, ncols = 20))
+  dims <- ctl_dimensions(function(values, data) NULL, per_location = TRUE)
+  expect_identical(dims$parse("15 x 20", list(l = 3)), list(nrows = c(15, 15, 15), ncols = c(20, 20, 20)))
+  sizes <- ctl_location_dimensions(function(values, data) NULL, enabled_by = "multi_dimension")
+  expect_identical(sizes$parse(list("8 x 8", "9 x 7"), list(l = 2)), list(nrows = c(8, 9), ncols = c(8, 7)))
+  expect_identical(ctl_checks_percent(function(values, data) NULL)$parse("9.6", list()),
+                   list(checksPercent = 9.6))
+})
+
+test_that("a step is read once it holds one of its current choices", {
+  expect_true(step_choice_ready("15 x 20", c("15 x 20", "20 x 15")))
+  expect_true(step_choice_ready("15 x 20", c(`15 x 20 (+1 filler)` = "15 x 20")))
+  expect_false(step_choice_ready("1 x 300", c("15 x 20", "20 x 15")))
+  expect_true(step_choice_ready("9.6", c(4.5, 9.6)))
+  expect_true(step_choice_ready(9.6, c(4.5, 9.6)))
+  expect_false(step_choice_ready("9.7", c(4.5, 9.6)))
+  expect_true(step_choice_ready(list("8 x 8", "9 x 7"), list(c("8 x 8"), c("9 x 7", "7 x 9"))))
+  expect_false(step_choice_ready(list("8 x 8", NULL), list(c("8 x 8"), c("9 x 7"))))
+  expect_false(step_choice_ready(list("8 x 8"), list(c("8 x 8"), c("9 x 7"))))
+  for (value in c(blanks, list(c("a", "b"), list("x")))) expect_false(step_choice_ready(value, c("a", "b")))
+
+  steps <- list(
+    ctl_dimensions(function(values, data) list(choices = c("2 x 3", "3 x 2"), selected = "2 x 3"),
+                   per_location = TRUE),
+    ctl_flag("multi_dimension", stage = "run"),
+    ctl_location_dimensions(function(values, data) NULL, enabled_by = "multi_dimension")
+  )
+  choices <- list(dimensions = design_step_choices(steps[[1]], list(l = 2)),
+                  location_dimensions = list(choices = list("2 x 3", c("1 x 6", "2 x 3"))))
+  values <- read_design_steps(steps, list(dimensions = "3 x 2", multi_dimension = FALSE), list(l = 2), choices)
+  expect_identical(values, list(l = 2, nrows = c(3, 3), ncols = c(2, 2), multi_dimension = FALSE))
+  values <- read_design_steps(steps, list(dimensions = "3 x 2", multi_dimension = TRUE,
+                                          location_dimensions = list("2 x 3", "1 x 6")), list(l = 2), choices)
+  expect_identical(values[c("nrows", "ncols")], list(nrows = c(2, 1), ncols = c(3, 6)))
+  # waits while a select holds a value of earlier choices
+  expect_null(read_design_steps(steps, list(dimensions = "6 x 1"), list(l = 2), choices))
+  expect_null(read_design_steps(steps, list(dimensions = "3 x 2", multi_dimension = TRUE,
+                                            location_dimensions = list("2 x 3", "9 x 9")), list(l = 2), choices))
 })
 
 test_that("read_design_controls() reads only the controls asked for, and needs a named list", {
@@ -226,6 +322,24 @@ test_that("control constructors take labels, defaults and minimums from the conc
                                                       !grepl(":", concepts[[id]]$label), info = id)
   }
   expect_error(ctl_count("unknown", 1), class = "fieldhub_internal_error")
+  expect_identical(ctl_select("stacked", selected = "By Row")$choices, c("By Column", "By Row"))
+  expect_identical(ctl_plot_start("1")$value, "1")
+  expect_identical(ctl_expt_name()$value, "Expt1")
+  expect_identical(ctl_location_view()$stage, "run")
+  expect_null(ctl_location_view()$parse)
+  expect_identical(ctl_checks_percent(function(values, data) NULL)$stage, "randomize")
+})
+
+test_that("computed selects of the sidebar can depend on controls read with an upload", {
+  # checks are read on the upload path too; entries typed only on the other
+  control <- ctl_dependent_select("b", depends_on = c("lines", "checks"), options = function(values, data) {
+    list(choices = values, selected = if (is.null(data)) "typed" else nrow(data))
+  })
+  spec <- page(ctl_count("lines", 50, generated_only = TRUE), ctl_checks(4), control)
+  expect_identical(design_control_choices(spec, control, list(lines = 50L, checks = 3L))$choices,
+                   list(lines = 50L, checks = 3L))
+  offered <- design_control_choices(spec, control, list(lines = NA, checks = 3L), data.frame(ENTRY = 1:9))
+  expect_identical(offered, list(choices = list(checks = 3L), selected = 9L))
 })
 
 test_that("app_control_ui() renders each control type with its namespaced id", {
@@ -242,6 +356,9 @@ test_that("app_control_ui() renders each control type with its namespaced id", {
   expect_match(html(ctl_seed()), 'id="page-seed"', fixed = TRUE)
   expect_false(grepl("value=", html(ctl_seed()), fixed = TRUE))
   expect_match(html(ctl_dependent_select("k", "t", function(values, data) NULL)), 'id="page-k"', fixed = TRUE)
+  expect_match(html(ctl_location_view()), 'id="page-location_view"', fixed = TRUE)
+  expect_match(html(ctl_location_dimensions(function(values, data) NULL, "multi_dimension")),
+               'id="page-location_dimensions" class="shiny-html-output"', fixed = TRUE)
   expect_match(html(ctl_preview("checks_note", function(raw, uploaded) NULL)),
                'id="page-checks_note" class="shiny-html-output"', fixed = TRUE)
   hidden <- html(ctl_count("t", 15, generated_only = TRUE), toggle = "owndata")

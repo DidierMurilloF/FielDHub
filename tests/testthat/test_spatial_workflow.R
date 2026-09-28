@@ -39,7 +39,7 @@ test_that("spatial workflows keep per-module view and correlation identifiers", 
     spec <- spatial_workflow_spec(module)
     expect_identical(anyDuplicated(c(spec$ids, spec$simulation_ids, spec$correlation_ids,
                                       spec$heatmap_checkbox)), 0L)
-    code <- body(get(paste0("mod_", module, "_server"), asNamespace("FielDHub")))
+    code <- spatial_server_body(module)
     expect_identical(sum(all.names(code) == "app_spatial_workflow"), 1L)
     expect_false(any(c("app_csv_archive", "simulate_spatial_field_book", "app_spatial_heatmap") %in% all.names(code)))
   }

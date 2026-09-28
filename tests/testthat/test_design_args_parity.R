@@ -446,7 +446,8 @@ test_that("classic pages build their design only through design_args_<Module>() 
     "design_values_SPD",   # assembles SPD's values from parsed inputs (nulls wp/sp when data is given)
     "design_values_SSPD",  # assembles SSPD's values from parsed inputs (nulls wp/sp/ssp when data is given)
     "upload_level_counts", # counts the strips of an uploaded strip-plot file
-    "classic_workflow_spec" # registry of per-design IDs/labels the shared workflow helpers use
+    "classic_workflow_spec", # registry of per-design IDs/labels the shared workflow helpers use
+    "app_spatial_page"     # the steps and results of a spatial page (checked below)
   )
   # `default_entries` is deliberately absent from allowed_helpers: no classic
   # page still needs it to build a generated-path entry table (that would
@@ -470,16 +471,33 @@ test_that("classic pages build their design only through design_args_<Module>() 
                    character(0))
   expect_identical(setdiff(intersect(nm, package_functions), allowed_helpers), character(0))
 
+  # Everything a spec runs while its page is used (values, data, the upload
+  # shape and check, parsers, computed choices and previews): plain parsers
+  # and choice helpers only
+  spec_helpers <- c(
+    "shape_design_upload",        # names and completes the uploaded columns
+    "check_factorial_upload",     # an uploaded factorial list needs two factors
+    "block_size_choices",         # block sizes offered for a number of entries
+    "rcbd_checks_note",           # RCBD block-size preview
+    "parse_control_number", "parse_control_whole_numbers", "parse_control_factor_counts",
+    "parse_control_names", "parse_control_choice", "parse_control_option", "parse_control_flag",
+    "parse_control_seed", "parse_control_rep_checks", "parse_control_checks"
+  )
   for (module in names(classic_engines)) {
     spec <- design_app_spec(module)
     expect_identical(spec$engine, get(classic_engines[[module]], namespace), info = module)
     expect_identical(spec$args, get(paste0("design_args_", module), namespace), info = module)
-    for (field in c("values", "data")) {
-      nm <- all.names(body(spec[[field]]))
+    runtime <- spec_runtime_functions(spec)
+    called <- runtime$named
+    for (f in runtime$closures) {
+      nm <- fieldhub_call_heads(body(f))
       expect_identical(intersect(nm, forbidden), character(0), info = module)
-      expect_identical(setdiff(intersect(nm, package_functions), allowed_helpers), character(0),
-                       info = paste(module, field))
+      called <- c(called, intersect(nm, package_functions))
     }
+    expect_true(length(runtime$closures) > length(spec$controls), info = module)
+    expect_identical(setdiff(called, c(allowed_helpers, spec_helpers)), character(0), info = module)
+    expect_identical(intersect(called, c(unlist(classic_engines), paste0("design_args_", names(classic_engines)))),
+                     character(0), info = module)
   }
 })
 
@@ -1174,7 +1192,61 @@ test_that("spatial modules build their designs only through design_args_<Module>
   all_objects <- mget(ls(namespace, all.names = TRUE), namespace, inherits = FALSE)
   package_functions <- names(Filter(is.function, all_objects))
   modules <- app_functions()
+  registry <- fieldhub_app_registry()
+  generic <- vapply(registry, function(entry) !is.null(entry$spec), logical(1))
+  generic <- vapply(registry[generic], `[[`, character(1), "workflow")
+
+  # The generic spatial page reaches each engine only through its spec:
+  # do.call(spec$engine, spec$args(...)), and do.call(spec$optim$engine,
+  # spec$optim$args(...)) for the allocation of Run!
+  code <- body(app_spatial_page)
+  text <- gsub("[[:space:]]+", "", paste(deparse(code), collapse = ""))
+  expect_identical(sum(all.names(code) == "do.call"), 2L)
+  expect_true(grepl("do.call(spec$engine,spec$args(", text, fixed = TRUE))
+  expect_true(grepl("do.call(spec$optim$engine,spec$optim$args(", text, fixed = TRUE))
+  heads <- fieldhub_call_heads(code)
+  expect_identical(intersect(heads, c(forbidden, unlist(spatial_engines),
+                                      unlist(lapply(spatial_engines, names)))), character(0))
+  page_helpers <- c(
+    "validate_design", "app_design_state", "app_plot_state", "app_upload_spec",
+    "read_design_controls",       # reads again the controls the steps follow (filler plots)
+    "design_step_choices",        # choices of a step, from the values of the run
+    "read_design_steps",          # reads the steps into the values of the builder
+    "location_view_choices",      # the locations of the run
+    "app_spatial_workflow", "app_spatial_table", "app_spatial_grid"
+  )
+  expect_identical(setdiff(intersect(heads, package_functions), page_helpers), character(0))
+  # What the specs run: plain parsers, checks, choice helpers and views
+  spec_helpers <- c(
+    "shape_design_upload", "check_reps_upload", "optim_total_plots", "optim_field_choices",
+    "field_grid_view", "spatial_highlight_colours", "entry_list_view", "location_view_choices",
+    "parse_control_number", "parse_control_whole_numbers", "parse_control_names",
+    "parse_control_choice", "parse_control_option", "parse_control_flag", "parse_control_seed",
+    "parse_control_rep_checks", "parse_control_checks", "parse_control_dimensions"
+  )
+
   for (module in names(spatial_engines)) {
+    engines <- spatial_engines[[module]]
+    if (module %in% generic) {
+      spec <- design_app_spec(module)
+      builder <- paste0("design_args_", module)
+      expect_identical(spec$engine, get(engines[[builder]], namespace), info = module)
+      expect_identical(spec$args, get(builder, namespace), info = module)
+      optim <- setdiff(names(engines), builder)
+      if (length(optim) == 1L) {
+        expect_identical(spec$optim$engine, get(engines[[optim]], namespace), info = module)
+        expect_identical(spec$optim$args, get(optim, namespace), info = module)
+      } else {
+        expect_null(spec$optim, info = module)
+      }
+      runtime <- spec_runtime_functions(spec)
+      called <- runtime$named
+      for (f in runtime$closures) called <- c(called, intersect(fieldhub_call_heads(body(f)), package_functions))
+      expect_identical(intersect(called, c(forbidden, unname(engines), names(engines))), character(0),
+                       info = module)
+      expect_identical(setdiff(called, spec_helpers), character(0), info = module)
+      next
+    }
     server_name <- paste0("mod_", module, "_server")
     f <- modules[[server_name]]
     expect_false(is.null(f), info = server_name)
