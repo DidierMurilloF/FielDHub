@@ -227,6 +227,14 @@
 
 ### New features:
 
+- The app's reproduction panel and ZIP exports now include a self-contained
+  R call built from the recorded design arguments. Calls retain the seed,
+  year and RNG settings, quote uploaded labels as data, and reconstruct
+  supplied allocation plans before generating their fields. Tables with
+  more than 200 rows and records without portable inputs explain why the
+  saved RDS is needed. The existing RDS and full-workflow instructions
+  remain available; no design results change.
+
 - `RCBD()` now generates its own check labels when `checks` is a bare
   positive integer and no entry pool is supplied (`t` is itself a bare
   count): the check labels become `"CH1".."CHN"`, followed by the

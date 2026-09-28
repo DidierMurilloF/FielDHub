@@ -95,6 +95,12 @@ test_that("core code selects field-book columns by name, not position", {
   # field book), a third-party package's own output matrix, or `[[n]]`
   # list-element access.
   allowed <- list(
+    pos("call_constant_default", "value[[1L]]",
+        "call-head inspection of an engine formal, not a field-book column"),
+    pos("call_presence_arguments", "parts[[1L]]",
+        "call-head inspection of engine source, not a field-book column"),
+    pos("call_presence_arguments", "parts[[2L]]",
+        "argument inspection of a missing() call, not a field-book column"),
     pos("alpha_lattice", "data[, c(1, 2)]",
         "upload contract: ENTRY/NAME are columns 1-2 regardless of header text"),
     pos("AR1xAR1_simulation", "g.random[, 1]",

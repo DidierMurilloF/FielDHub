@@ -65,10 +65,11 @@ csv_archive_filename <- function(filename) {
   sub("[.]csv$", ".zip", filename, ignore.case = TRUE)
 }
 
-#' Executable reconstruction code with no user data interpolated into source
+#' Standalone design call followed by the complete saved-workflow reconstruction
 #' @noRd
-workflow_reproduction_code <- function() {
+workflow_reproduction_code <- function(design = NULL) {
   c(
+    if (!is.null(design)) design_call_section(design),
     "# Run from the directory containing workflow.rds, after extracting the ZIP.",
     "saved <- readRDS(\"workflow.rds\")",
     "design <- FielDHub::reproduce_design(saved$design)",
@@ -106,7 +107,7 @@ write_workflow_archive <- function(archive, file) {
     files <- file.path(directory, c("data.csv", "workflow.rds", "reproduce.R", "README.txt"))
     utils::write.csv(as.data.frame(archive$export$data), files[1L], row.names = FALSE)
     saveRDS(archive, files[2L], version = 2)
-    writeLines(workflow_reproduction_code(), files[3L], useBytes = TRUE)
+    writeLines(workflow_reproduction_code(archive$design), files[3L], useBytes = TRUE)
     writeLines(c(
       "FielDHub reproducible export (archive schema 1)",
       paste("Design:", archive$design$metadata$design),

@@ -32,6 +32,7 @@ design_export_handlers <- function(design) {
       paste(c(
         paste0("# FielDHub version: ", encodeString(x$metadata$package_version)),
         paste0("# Design: ", x$metadata$design, "; seed: ", x$metadata$seed),
+        design_call_section(x),
         "# Save the RDS download in your R working directory, then run:",
         paste0("saved_design <- readRDS(", encodeString(filename(x), quote = '"'), ")"),
         "design <- FielDHub::reproduce_design(saved_design)",
