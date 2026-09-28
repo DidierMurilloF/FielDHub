@@ -128,6 +128,28 @@ build_design_specs <- function() {
                     "of checks based on the total number of plots you want to have in the final layout."),
     view = function(values, choices) choices$checks_percent$table
   )
+  # The allocation pages (sparse, multi-location p-rep): the allocation of
+  # Run!, the copies per entry the locations allow, and each location's
+  # entries
+  allocation_setup <- function(caption, into, average = FALSE) {
+    list(type = "table", stage = "run", caption = caption, export = "Allocation",
+         view = function(values, choices) {
+           allocation <- values[[into]]
+           names <- values$entries$names %||% allocation_entry_names(allocation, values$lines)
+           allocation_view(allocation, names, average = average)
+         })
+  }
+  ctl_locations_from <- function(value, min) ctl_count("l", value, min = min)
+  ctl_copies_per_entry <- function() {
+    ctl_dependent_select("copies_per_entry", depends_on = "l", options = function(values, data) {
+      choices <- plant_rep_choices(values$l)
+      list(choices = choices, selected = utils::tail(choices, 1L))
+    })
+  }
+  location_plots <- function(allocation) as.numeric(utils::head(allocation$size_locations, 1L))
+  location_entries_table <- function(design, location, values) {
+    entry_table(location_entries_view(design$list_locs), height = "500px")
+  }
   diagonal_entry_tables <- list(
     function(design, location, values) {
       entry_table(entry_list_view(design$data_entry[[location]]), "List of Entries.")
@@ -524,6 +546,47 @@ build_design_specs <- function() {
       ),
       field_size = function(design, values) {
         list(nrows = design$infoDesign$rows, ncols = design$infoDesign$columns)
+      }),
+    # Run! allocates the entries to the locations (do_optim()); the field
+    # of one location holds its share of the entries and the checks
+    sparse_allocation = spatial("sparse_allocation", "Unreplicated Designs: Sparse Allocation",
+      sparse_allocation, upload = "sparse_allocation", upload_columns = c("ENTRY", "NAME"),
+      file_tag = "Diagonal_",
+      optim = list(engine = do_optim, args = design_args_sparse_allocation_optim, into = "sparse_list"),
+      controls = c(
+        list(ctl_count("lines", 380, min = 50), ctl_checks(4, max = 10), ctl_locations_from(5, 3),
+             ctl_copies_per_entry()),
+        spatial_shared(), list(ctl_seed())
+      ),
+      values = function(controls, data) {
+        list(lines = controls$lines, checks = controls$checks, l = controls$l,
+             copies_per_entry = controls$copies_per_entry, planter = controls$planter,
+             plot_start = controls$plot_start, seed = controls$seed, expt_name = controls$expt_name,
+             location_names = controls$location_names,
+             entries = sparse_entries(controls$lines, controls$checks, controls$l, data))
+      },
+      steps = list(
+        ctl_dimensions(function(values, data) {
+          plots <- location_plots(values$sparse_list)
+          diagonal_field_choices(plots, plots, values$entries$checks_entries, planter = values$planter)
+        }),
+        ctl_checks_percent(function(values, data) {
+          plots <- location_plots(values$sparse_list)
+          diagonal_percent_choices(values$nrows, values$ncols, values$entries$checks_entries,
+                                   plots + values$checks, planter = values$planter)
+        })
+      ),
+      setup = allocation_setup("Table 1: Genotype Allocation Across Environments.", "sparse_list"),
+      entries = list(location_entries_table),
+      panels = list(field_panel(checks_view), numbers_panel("plotsNumber")),
+      field_size = function(design, values) {
+        list(nrows = design$infoDesign$rows, ncols = design$infoDesign$columns)
+      },
+      accept = function(design) {
+        if (is.null(design$fieldBook)) {
+          fieldhub_abort("The field dimensions do not fit the entries. Please, choose other dimensions.")
+        }
+        design
       })
   )
 }

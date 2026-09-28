@@ -8,7 +8,8 @@ library(FielDHub)
 
 classic_modules <- c("CRD", "RCBD", "LSD", "FD", "SPD", "SSPD", "STRIPD", "IBD", "RowCol",
                      "Alpha_Lattice", "Square_Lattice", "Rectangular_Lattice")
-spatial_modules <- c("Optim", "pREPS", "RCBD_augmented", "Diagonal", "diagonal_multiple")
+spatial_modules <- c("Optim", "pREPS", "RCBD_augmented", "Diagonal", "diagonal_multiple",
+                     "sparse_allocation")
 all_modules <- c(classic_modules, spatial_modules)
 
 # The one label of each concept, written out here so a label changed in
@@ -113,7 +114,7 @@ page_defaults <- function(module, seed = 7) {
 # allocations and the p-rep optimizations. optimized_arrangement() and
 # RCBD_augmented() run in well under a second.
 long_running <- c(Optim = FALSE, pREPS = TRUE, RCBD_augmented = FALSE, Diagonal = TRUE,
-                  diagonal_multiple = TRUE)
+                  diagonal_multiple = TRUE, sparse_allocation = TRUE)
 
 test_that("there is one page spec per design, in the registry's workflow order", {
   specs <- fieldhub_design_specs()
@@ -263,7 +264,15 @@ spatial_defaults <- function(module) {
                                              plotNumber = 1, kindExpt = "DBUDC", splitBy = "row",
                                              seed = 7, blocks = c(100, 120, 80),
                                              exptName = c("Expt1", "Expt2", "Expt3"),
-                                             locationNames = "FARGO", checksPercent = 12.3)
+                                             locationNames = "FARGO", checksPercent = 12.3),
+    # "FARGO" names one of five locations: the engine's LOC1, ... are used
+    sparse_allocation = sparse_allocation(lines = 380, nrows = 19, ncols = 19, l = 5,
+                                          plotNumber = c(1, 1001, 2001, 3001, 4001),
+                                          copies_per_entry = 4, checks = 4, exptName = "Expt1",
+                                          sparse_list = do_optim(design = "sparse", lines = 380, l = 5,
+                                                                 copies_per_entry = 4, add_checks = TRUE,
+                                                                 checks = 4, seed = 7),
+                                          seed = 7, checksPercent = 14.13)
   )
 }
 
@@ -420,6 +429,49 @@ test_that("the multiple diagonal page lays out its experiments and builds the AP
                class = "fieldhub_input_error")
 })
 
+test_that("the sparse allocation page allocates at Run! and builds the API's design", {
+  spec <- design_app_spec("sparse_allocation")
+  copies <- Filter(function(control) identical(control$id, "copies_per_entry"), spec$controls)[[1]]
+  expect_identical(design_control_choices(spec, copies, shiny_shaped(list(l = 4))),
+                   list(choices = 1:3, selected = 3L))
+  raw <- utils::modifyList(page_defaults("sparse_allocation", seed = 9), list(
+    lines = 120, checks = 2, l = 3, copies_per_entry = "2", planter = "cartesian",
+    plot_start = "1,501,1001", location_names = "A,B,C", expt_name = "S1"))
+  values <- spec$values(read_design_controls(spec, shiny_shaped(raw)), NULL)
+  allocation <- do.call(do_optim, design_args_sparse_allocation_optim(values))
+  expect_identical(allocation, do_optim(design = "sparse", lines = 120, l = 3, copies_per_entry = 2,
+                                        add_checks = TRUE, checks = 2, seed = 9))
+  plots <- as.numeric(allocation$size_locations[["LOC1"]])
+  fields <- diagonal_field_choices(plots, plots, 121:122, planter = "cartesian")$choices
+  size <- as.numeric(strsplit(fields[[2]], " x ")[[1]])
+  percent <- diagonal_percent_choices(size[1], size[2], 121:122, plots + 2, planter = "cartesian")$choices[[1]]
+  expect_same_design(page_design(spec, raw, steps = list(dimensions = fields[[2]],
+                                                         checks_percent = as.character(percent))),
+    sparse_allocation(lines = 120, nrows = size[1], ncols = size[2], l = 3, planter = "cartesian",
+                      plotNumber = c(1, 501, 1001), copies_per_entry = 2, checks = 2, exptName = "S1",
+                      locationNames = c("A", "B", "C"), sparse_list = allocation, seed = 9,
+                      checksPercent = percent))
+  # the allocation table: one row per entry, the copies and totals
+  view <- spec$setup$view(c(values, list(sparse_list = allocation)), list())
+  expect_identical(dim(view), c(121L, 4L))
+  expect_identical(rownames(view)[c(1, 121)], c(allocation_entry_names(allocation, 120)[1], "Total"))
+  # an uploaded list names the entries of the table
+  upload <- data.frame(ENTRY = 1:122, NAME = c("CH1", "CH2", paste0("Line", 3:122)))
+  raw <- utils::modifyList(raw, list(copies_per_entry = "2"))
+  shaped <- spec$upload_shape(upload)
+  values <- spec$values(read_design_controls(spec, shiny_shaped(raw), uploaded = TRUE), shaped)
+  expect_identical(values$entries$names, paste0("Line", 3:122))
+  expect_identical(rownames(spec$setup$view(c(values, list(sparse_list = allocation)), list()))[1], "Line3")
+  problems <- list(list(list(l = 2), "at least 3 locations"), list(list(lines = 59), "at least 60 entries"))
+  for (problem in problems) {
+    expect_error(page_design(spec, utils::modifyList(page_defaults("sparse_allocation"), problem[[1]])),
+                 problem[[2]], class = "fieldhub_input_error")
+  }
+  expect_error(page_design(spec, utils::modifyList(raw, list(lines = 100)), upload),
+               "does not match with the input value", class = "fieldhub_input_error")
+  expect_error(spec$accept(list(fieldBook = NULL)), "do not fit the entries", class = "fieldhub_input_error")
+})
+
 test_that("choices of computed selects follow the entries, typed or uploaded", {
   spec <- design_app_spec("RowCol")
   nrows <- Filter(function(control) identical(control$id, "nrows"), spec$controls)[[1]]
@@ -494,11 +546,13 @@ test_that("the same concept has the same label, default and minimum on every pag
                        STRIPD.reps = 1, SPD.wp = 1, SSPD.wp = 1, FD.reps = 1)
   # The spatial pages keep the smallest counts they have always offered,
   # and the defaults of their own
-  page_minimums <- c(Optim.lines = 5, Diagonal.lines = 50, diagonal_multiple.lines = 50)
-  page_values <- c(Optim.plot_start = "1", Optim.rep_checks = "8,8,8,8", pREPS.plot_start = "1",
+  page_minimums <- c(Optim.lines = 5, Diagonal.lines = 50, diagonal_multiple.lines = 50,
+                     sparse_allocation.lines = 50, sparse_allocation.l = 3)
+  page_values <- list(Optim.plot_start = "1", Optim.rep_checks = "8,8,8,8", pREPS.plot_start = "1",
                    pREPS.repGens = "75,150", pREPS.repUnits = "2,1",
                    RCBD_augmented.plot_start = "1", Diagonal.plot_start = "1",
-                   diagonal_multiple.plot_start = "1", diagonal_multiple.expt_name = "Expt1, Expt2, Expt3")
+                   diagonal_multiple.plot_start = "1", diagonal_multiple.expt_name = "Expt1, Expt2, Expt3",
+                   sparse_allocation.plot_start = "1", sparse_allocation.l = 5)
   seen <- character()
   for (module in all_modules) {
     spec <- design_app_spec(module)

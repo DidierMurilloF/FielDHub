@@ -124,3 +124,24 @@ multiple_diagonal_entries <- function(lines, blocks, checks, same_entries, data 
   list(checks_entries = checks_entries, entries = lines + checks,
        field_entries = if (is.null(data)) lines else nrow(data), layout = layout)
 }
+
+#' Entries of a sparse allocation
+#'
+#' @param lines Number of entries (the uploaded list must have as many
+#'   after its checks).
+#' @param checks Number of checks.
+#' @param l Number of locations.
+#' @param data The uploaded ENTRY/NAME list (checks first), or \code{NULL}.
+#' @return A list with \code{checks_entries} and \code{names} (the uploaded
+#'   names of the entries, or \code{NULL}).
+#' @noRd
+sparse_entries <- function(lines, checks, l, data = NULL) {
+  if (l < 3) fieldhub_abort("The system requires at least 3 locations to proceed.")
+  if (lines < 60) fieldhub_abort("The system requires at least 60 entries/lines to proceed!")
+  if (is.null(data)) return(list(checks_entries = lines + seq_len(checks), names = NULL))
+  checks_entries <- upload_check_entries(data, checks)
+  if (nrow(data) - checks != lines) {
+    fieldhub_abort("Number of entries in file does not match with the input value.")
+  }
+  list(checks_entries = checks_entries, names = data$NAME[-seq_len(checks)])
+}

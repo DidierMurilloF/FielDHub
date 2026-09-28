@@ -1227,7 +1227,9 @@ test_that("spatial modules build their designs only through design_args_<Module>
     "augmented_lines", "augmented_block_choices", "augmented_field_choices", "augmented_random_note",
     "checked_layout_view",
     "diagonal_entries", "diagonal_field_choices", "diagonal_percent_choices", "diagonal_checks_view",
-    "multiple_diagonal_entries", "block_frequency_view", "experiment_grid_view"
+    "multiple_diagonal_entries", "block_frequency_view", "experiment_grid_view",
+    "sparse_entries", "allocation_view", "allocation_entry_names", "location_entries_view",
+    "plant_rep_choices", "fieldhub_abort", "%||%"
   )
 
   for (module in names(spatial_engines)) {

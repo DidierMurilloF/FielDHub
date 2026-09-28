@@ -106,3 +106,37 @@ experiment_grid_view <- function(design, location) {
   field_grid_view(grids[[location]], highlight = names,
                   colours = spatial_highlight_colours("experiments", length(names)))
 }
+
+#' Entries of every location, one list
+#' @param locations Named list of ENTRY/NAME(/REPS) data frames, one per
+#'   location.
+#' @param columns The columns shown after LOCATION.
+#' @return A data frame with a LOCATION column first.
+#' @noRd
+location_entries_view <- function(locations, columns = c("ENTRY", "NAME")) {
+  rows <- lapply(names(locations), function(name) {
+    cbind(LOCATION = name, as.data.frame(locations[[name]])[, columns, drop = FALSE])
+  })
+  entry_list_view(do.call(rbind, rows), c("LOCATION", columns))
+}
+
+#' Allocation of the entries to the locations, with totals
+#'
+#' @param allocation A \code{do_optim()} result.
+#' @param names Names of the entries, in allocation-row order.
+#' @param average Whether to add the average copies per location
+#'   (multi-location p-rep).
+#' @return A data frame: one row per entry and a "Total" row; a "Copies"
+#'   column (and "Avg").
+#' @noRd
+allocation_view <- function(allocation, names, average = FALSE) {
+  table <- as.data.frame(allocation$allocation)
+  locations <- ncol(table)
+  table$Copies <- rowSums(table)
+  if (average) table$Avg <- round(table$Copies / locations, 1)
+  total <- as.data.frame(t(colSums(table)))
+  if (average) total$Avg <- NA
+  table <- rbind(table, total)
+  rownames(table) <- c(names, "Total")
+  table
+}

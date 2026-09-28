@@ -182,3 +182,31 @@ test_that("multiple diagonal pages show the entries per experiment and each expe
   expect_identical(dim(view$data), c(19L, 18L))
   expect_error(experiment_grid_view(design, 3), "no field layout", class = "fieldhub_input_error")
 })
+
+test_that("sparse allocation pages check their locations, entries and uploaded list", {
+  expect_identical(sparse_entries(100, 3, 4), list(checks_entries = c(101, 102, 103), names = NULL))
+  upload <- data.frame(ENTRY = 1:63, NAME = c("C1", "C2", "C3", paste0("L", 4:63)))
+  expect_identical(sparse_entries(60, 3, 3, upload),
+                   list(checks_entries = c(1, 2, 3), names = paste0("L", 4:63)))
+  expect_error(sparse_entries(100, 3, 2), "at least 3 locations", class = "fieldhub_input_error")
+  expect_error(sparse_entries(59, 3, 3), "at least 60 entries", class = "fieldhub_input_error")
+  expect_error(sparse_entries(61, 3, 3, upload), "does not match", class = "fieldhub_input_error")
+})
+
+test_that("allocation tables add the copies of each entry and the totals", {
+  allocation <- list(allocation = data.frame(LOC1 = c(1, 0, 1), LOC2 = c(1, 1, 0)))
+  view <- allocation_view(allocation, c("a", "b", "c"))
+  expect_identical(rownames(view), c("a", "b", "c", "Total"))
+  expect_identical(view$Copies, c(2, 1, 1, 4))
+  expect_identical(view$LOC1, c(1, 0, 1, 2))
+  averaged <- allocation_view(allocation, c("a", "b", "c"), average = TRUE)
+  expect_identical(averaged$Avg, c(1, 0.5, 0.5, NA))
+})
+
+test_that("location entry lists show each location's entries, LOCATION first", {
+  view <- location_entries_view(list(LOC1 = data.frame(ENTRY = 1:2, NAME = c("a", "b"), X = 0),
+                                     LOC2 = data.frame(ENTRY = 3L, NAME = "c", X = 0)))
+  expect_identical(names(view), c("LOCATION", "ENTRY", "NAME"))
+  expect_identical(as.character(view$LOCATION), c("LOC1", "LOC1", "LOC2"))
+  expect_true(all(vapply(view, is.factor, logical(1))))
+})
