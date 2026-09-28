@@ -27,6 +27,12 @@ field_size_range <- function(lines_within_loc,
 #' @noRd
 field_dimensions <- function(lines_within_loc,
                              minimum_extra = .diagonal_size_margins[["minimum"]]) {
+    if (!is.numeric(lines_within_loc) || length(lines_within_loc) != 1L ||
+        is.na(lines_within_loc) || !is.finite(lines_within_loc) ||
+        lines_within_loc < 1 || lines_within_loc %% 1 != 0 ||
+        lines_within_loc > floor(.Machine$integer.max / 1.20)) {
+        fieldhub_abort("`lines_within_loc` must be one positive whole number in the supported range.")
+    }
     cached_field_dimensions(lines_within_loc, minimum_extra)
 }
 

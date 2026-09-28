@@ -496,7 +496,7 @@ mod_sparse_allocation_server <- function(id){
         })
         if (is.null(optim_out)) return(NULL)
         lines_within_loc <- as.numeric(optim_out$size_locations[1])
-        choices_list <- field_dimensions(lines_within_loc = lines_within_loc)
+        choices_list <- validate_design(field_dimensions(lines_within_loc = lines_within_loc))
         if (length(choices_list) == 0) {
           shinyalert::shinyalert(
             "Error!!",
@@ -666,18 +666,18 @@ mod_sparse_allocation_server <- function(id){
       planter_mov <- single_inputs()$planter_mov
       n_rows <- field_dimensions_diagonal()$d_row
       n_cols <- field_dimensions_diagonal()$d_col
-      diagonal_check_options(
+      validate_design(diagonal_check_options(
           n_rows = n_rows,
           n_cols = n_cols,
           checks = checksEntries,
           Option_NCD = Option_NCD,
           kindExpt = kindExpt_single,
           planter_mov1 = planter_mov,
-          data = NULL, 
+          data = NULL,
           dim_data = lines_within_loc + sparse_checks,
           dim_data_1 = lines_within_loc,
           Block_Fillers = NULL
-      )
+      ))
     })
 
     shiny::observeEvent(available_percent_table()$dt, {

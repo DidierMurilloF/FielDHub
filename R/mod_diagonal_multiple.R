@@ -374,7 +374,7 @@ mod_diagonal_multiple_server <- function(id) {
                         selected <- length(Block_levels)
                     }
                     dim_data_entry <- nrow(data_entry_UP)
-                    choices_list <- field_dimensions(lines_within_loc = dim_data_entry)
+                    choices_list <- validate_design(field_dimensions(lines_within_loc = dim_data_entry))
                         if (length(choices_list) == 0) {
                             shinyalert::shinyalert(
                                 "Error!!", 
@@ -400,7 +400,7 @@ mod_diagonal_multiple_server <- function(id) {
                 shiny::req(input$blocks.db)
                 shiny::req(input$lines.db)
                 lines.db <- as.numeric(input$lines.db)
-                choices_list <- field_dimensions(lines_within_loc = lines.db)
+                choices_list <- validate_design(field_dimensions(lines_within_loc = lines.db))
                 if (length(choices_list) == 0) {
                     shinyalert::shinyalert(
                         "Error!!", 
@@ -564,20 +564,20 @@ mod_diagonal_multiple_server <- function(id) {
             planter_multiple <- multiple_inputs()$planter_mov
             n_rows <- field_dimensions_diagonal()$d_row
             n_cols <- field_dimensions_diagonal()$d_col
-            diagonal_check_options(
-                n_rows = n_rows, 
-                n_cols = n_cols, 
-                checks = checksEntries, 
-                Option_NCD = Option_NCD, 
-                kindExpt = kindExpt, 
-                stacked = multiple_inputs()$stacked, 
-                planter_mov1 = planter_multiple, 
-                data = get_data_multiple()$data_entry, 
+            validate_design(diagonal_check_options(
+                n_rows = n_rows,
+                n_cols = n_cols,
+                checks = checksEntries,
+                Option_NCD = Option_NCD,
+                kindExpt = kindExpt,
+                stacked = multiple_inputs()$stacked,
+                planter_mov1 = planter_multiple,
+                data = get_data_multiple()$data_entry,
                 dim_data = get_data_multiple()$dim_data_entry,
-                dim_data_1 = get_data_multiple()$dim_data_1, 
+                dim_data_1 = get_data_multiple()$dim_data_1,
                 Block_Fillers = blocks_length()
-            )
-        }) 
+            ))
+        })
         
         shiny::observeEvent(available_percent_multi()$dt, {
             my_out <- available_percent_multi()$dt

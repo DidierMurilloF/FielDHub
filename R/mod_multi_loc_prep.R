@@ -609,11 +609,11 @@ mod_multi_loc_preps_server <- function(id){
       }
       plots_for_treatments <- as.numeric(setup_optim_prep()$size_locations[site])
       total_plots <- plots_for_treatments + sum(prep_checks)
-      options <- prep_dimension_options(
+      options <- validate_design(prep_dimension_options(
         total_plots = total_plots,
         allow_fillers = isTRUE(input$allow_fillers_prep),
         max_fillers = .prep_max_fillers
-      )
+      ))
       if (is.null(options)) {
           sort_choices <- "No options available"
       } else {

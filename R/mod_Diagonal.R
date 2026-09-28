@@ -302,7 +302,7 @@ mod_Diagonal_server <- function(id) {
                     return(NULL)
                 }
                 dim_data_entry <- nrow(data_entry_UP)
-                choices_list <- field_dimensions(lines_within_loc = dim_data_entry)
+                choices_list <- validate_design(field_dimensions(lines_within_loc = dim_data_entry))
                 if (length(choices_list) == 0) {
                     shinyalert::shinyalert(
                         "Error!!", 
@@ -326,7 +326,7 @@ mod_Diagonal_server <- function(id) {
             shiny::req(input$lines.d)
             checks <- validate_design(read_n_checks(input$checks))
             lines <- input$lines.d
-            choices_list <- field_dimensions(lines_within_loc = lines)
+            choices_list <- validate_design(field_dimensions(lines_within_loc = lines))
             if (length(choices_list) == 0) {
                 shinyalert::shinyalert(
                     "Error!!", 
@@ -435,20 +435,20 @@ mod_Diagonal_server <- function(id) {
       planter_mov <- single_inputs()$planter_mov
       n_rows <- field_dimensions_diagonal()$d_row
       n_cols <- field_dimensions_diagonal()$d_col
-      diagonal_check_options(
-          n_rows = n_rows, 
-          n_cols = n_cols, 
-          checks = checksEntries, 
-          Option_NCD = Option_NCD, 
-          kindExpt = kindExpt_single, 
-          stacked = input$stacked, 
+      validate_design(diagonal_check_options(
+          n_rows = n_rows,
+          n_cols = n_cols,
+          checks = checksEntries,
+          Option_NCD = Option_NCD,
+          kindExpt = kindExpt_single,
+          stacked = input$stacked,
           planter_mov1 = planter_mov,
-          data = getData()$data_entry, 
+          data = getData()$data_entry,
           dim_data = getData()$dim_data_entry,
-          dim_data_1 = getData()$dim_without_checks, 
+          dim_data_1 = getData()$dim_without_checks,
           Block_Fillers = NULL
-      )
-    }) 
+      ))
+    })
 
     # Percentage of checks passed to diagonal_arrangement(). Each Randomize
     # starts from the last option, the API default
