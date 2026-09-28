@@ -8,7 +8,7 @@ library(FielDHub)
 
 classic_modules <- c("CRD", "RCBD", "LSD", "FD", "SPD", "SSPD", "STRIPD", "IBD", "RowCol",
                      "Alpha_Lattice", "Square_Lattice", "Rectangular_Lattice")
-spatial_modules <- c("Optim", "pREPS")
+spatial_modules <- c("Optim", "pREPS", "RCBD_augmented")
 all_modules <- c(classic_modules, spatial_modules)
 
 # The one label of each concept, written out here so a label changed in
@@ -112,7 +112,7 @@ page_defaults <- function(module, seed = 7) {
 # Spatial pages whose runs take long: the diagonal searches, the
 # allocations and the p-rep optimizations. optimized_arrangement() and
 # RCBD_augmented() run in well under a second.
-long_running <- c(Optim = FALSE, pREPS = TRUE)
+long_running <- c(Optim = FALSE, pREPS = TRUE, RCBD_augmented = FALSE)
 
 test_that("there is one page spec per design, in the registry's workflow order", {
   specs <- fieldhub_design_specs()
@@ -251,7 +251,10 @@ spatial_defaults <- function(module) {
                                   exptName = "Expt1", locationNames = "FARGO"),
     pREPS = partially_replicated(nrows = 15, ncols = 20, repGens = c(75, 150), repUnits = c(2, 1),
                                  l = 1, plotNumber = 1, seed = 7, exptName = "Expt1",
-                                 locationNames = "FARGO")
+                                 locationNames = "FARGO"),
+    RCBD_augmented = RCBD_augmented(lines = 180, checks = 4, b = 3, nrows = 3, ncols = 64, l = 1,
+                                    plotNumber = 1, seed = 7, exptName = "Expt1",
+                                    locationNames = "FARGO")
   )
 }
 
@@ -304,6 +307,41 @@ test_that("the p-rep page offers filler plots and builds the API's design", {
                "# of Rep Per Group must have one value per group of entries", class = "fieldhub_input_error")
   expect_error(page_design(spec, utils::modifyList(page_defaults("pREPS"), list(repGens = "75,157"))),
                "Select 'Allow filler plots'", class = "fieldhub_input_error")
+})
+
+test_that("the augmented RCBD page offers the blocks and fields of its entries", {
+  spec <- design_app_spec("RCBD_augmented")
+  blocks <- Filter(function(control) identical(control$id, "b"), spec$controls)[[1]]
+  typed <- design_control_choices(spec, blocks, shiny_shaped(list(lines = 180, checks = 4)))
+  expect_identical(typed, augmented_block_choices(180, 4))
+  entries <- data.frame(ENTRY = 1:64, NAME = c(paste0("CH", 1:4), paste0("G", 5:64)))
+  uploaded <- design_control_choices(spec, blocks, shiny_shaped(list(lines = NA, checks = 4)), entries)
+  expect_identical(uploaded, augmented_block_choices(60, 4))
+  # changed controls, stacked experiments and a second location
+  raw <- utils::modifyList(page_defaults("RCBD_augmented", seed = 3), list(
+    lines = 60, checks = 3, b = "5", repsExpt = 2, repsStack = "horizontal", random = FALSE, l = 2,
+    planter = "cartesian", plot_start = "1,1001", expt_name = "E1,E2", location_names = "A,B"))
+  fields <- augmented_field_choices(60, 3, 5)$choices
+  expect_same_design(page_design(spec, raw, steps = list(dimensions = fields[[2]])),
+    RCBD_augmented(lines = 60, checks = 3, b = 5, repsExpt = 2, repsStack = "horizontal",
+                   random = FALSE, l = 2, planter = "cartesian", plotNumber = c(1, 1001),
+                   exptName = c("E1", "E2"), locationNames = c("A", "B"), seed = 3,
+                   nrows = as.numeric(strsplit(fields[[2]], " x ")[[1]][1]),
+                   ncols = as.numeric(strsplit(fields[[2]], " x ")[[1]][2])))
+  # the stacking is only read for stacked experiments
+  one <- utils::modifyList(page_defaults("RCBD_augmented"), list(repsStack = "horizontal"))
+  expect_null(spec$values(read_design_controls(spec, shiny_shaped(one)), NULL)$repsStack)
+  # an uploaded list: its rows after the checks are the entries
+  raw <- utils::modifyList(page_defaults("RCBD_augmented"), list(lines = NA, b = "4"))
+  expect_same_design(page_design(spec, raw, entries, steps = list(dimensions = "4 x 19")),
+    RCBD_augmented(lines = 60, checks = 4, b = 4, nrows = 4, ncols = 19, l = 1, plotNumber = 1,
+                   seed = 7, exptName = "Expt1", locationNames = "FARGO", data = entries))
+  expect_error(page_design(spec, utils::modifyList(page_defaults("RCBD_augmented"), list(lines = 7))),
+               "At least ten treatments", class = "fieldhub_input_error")
+  expect_error(page_design(spec, utils::modifyList(page_defaults("RCBD_augmented"), list(b = "No Options Available"))),
+               "No options for this combination", class = "fieldhub_input_error")
+  expect_identical(augmented_random_note(FALSE), "By unchecking this option only the check plots are randomized.")
+  expect_null(augmented_random_note(TRUE))
 })
 
 test_that("choices of computed selects follow the entries, typed or uploaded", {
@@ -382,7 +420,8 @@ test_that("the same concept has the same label, default and minimum on every pag
   # and the defaults of their own
   page_minimums <- c(Optim.lines = 5)
   page_values <- c(Optim.plot_start = "1", Optim.rep_checks = "8,8,8,8", pREPS.plot_start = "1",
-                   pREPS.repGens = "75,150", pREPS.repUnits = "2,1")
+                   pREPS.repGens = "75,150", pREPS.repUnits = "2,1",
+                   RCBD_augmented.plot_start = "1")
   seen <- character()
   for (module in all_modules) {
     spec <- design_app_spec(module)

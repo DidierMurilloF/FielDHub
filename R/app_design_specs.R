@@ -366,7 +366,60 @@ build_design_specs <- function() {
                           colours = spatial_highlight_colours("replicated", length(replicated)))
         }),
         numbers_panel("plotNumber")
-      ))
+      )),
+    # RCBD_augmented() runs in well under a second; its layouts are plots
+    RCBD_augmented = spatial("RCBD_augmented", "Augmented RCBD", RCBD_augmented,
+      upload = "arcbd", upload_columns = c("ENTRY", "NAME"), long_running = FALSE,
+      file_tag = "ARCBD_",
+      controls = c(
+        list(
+          ctl_count("lines", 180, generated_only = TRUE), ctl_checks(4, max = 10),
+          # The blocks that fit the entries: the typed count, or the rows of
+          # the file after its checks
+          ctl_dependent_select("b", depends_on = c("lines", "checks"), options = function(values, data) {
+            augmented_block_choices(augmented_lines(values$lines, values$checks, data), values$checks)
+          }),
+          ctl_count("repsExpt", 1, max = 100), ctl_select("repsStack", show_if = "input.repsExpt > 1"),
+          ctl_flag("random"),
+          ctl_preview("random_note", show_if = "input.random == false",
+                      text = function(raw, uploaded) augmented_random_note(raw$random)),
+          ctl_locations()
+        ),
+        spatial_shared(), list(ctl_seed())
+      ),
+      values = function(controls, data) {
+        list(lines = augmented_lines(controls$lines, controls$checks, data), checks = controls$checks,
+             b = controls$b, repsExpt = controls$repsExpt,
+             repsStack = if (controls$repsExpt > 1) controls$repsStack, random = controls$random,
+             l = controls$l, planter = controls$planter, plot_start = controls$plot_start,
+             seed = controls$seed, expt_name = controls$expt_name,
+             location_names = controls$location_names)
+      },
+      steps = list(ctl_dimensions(function(values, data) {
+        augmented_field_choices(values$lines, values$checks, values$b)
+      })),
+      setup = summary_setup,
+      entries = list(
+        function(design, location, values) {
+          entry_table(entry_list_view(design$data_entry), "List of Entries.")
+        },
+        function(design, location, values) {
+          entry_table(design$data_entry[seq_len(values$checks), ], "Table of checks.",
+                      height = "350px", filter = "none")
+        }
+      ),
+      panels = list(
+        plot_panel("Field Layout", "field_layout", function(design, location, values) {
+          checked_layout_view(design, location = location)$out_layout
+        }),
+        plot_panel("Plot Number Field", "plot_numbers", function(design, location, values) {
+          checked_layout_view(design, location = location)$out_layoutPlots
+        })
+      ),
+      field_size = function(design, values) {
+        list(nrows = length(unique(design$fieldBook$ROW)),
+             ncols = length(unique(design$fieldBook$COLUMN)))
+      })
   )
 }
 

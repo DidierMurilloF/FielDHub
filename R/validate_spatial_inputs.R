@@ -31,3 +31,26 @@ optim_total_plots <- function(lines, rep_checks) {
   }
   sum(rep_checks) + lines
 }
+
+#' Entries of an augmented RCBD
+#' @param lines Number of entries typed (generated path).
+#' @param checks Number of checks.
+#' @param data The uploaded ENTRY/NAME list (checks first), or \code{NULL}.
+#' @return The number of entries, checks excluded.
+#' @noRd
+augmented_lines <- function(lines, checks, data = NULL) {
+  if (!is.null(data)) lines <- nrow(data) - checks
+  if (!is.numeric(lines) || length(lines) != 1L || !is.finite(lines) || lines != trunc(lines)) {
+    fieldhub_abort("The number of entries must be one whole number.")
+  }
+  if (lines < 8) fieldhub_abort("At least ten treatments are required!!")
+  lines
+}
+
+#' What an augmented RCBD with entries left in place does
+#' @param random The "Randomize Entries?" checkbox.
+#' @return The note shown while it is off, or \code{NULL}.
+#' @noRd
+augmented_random_note <- function(random) {
+  if (isFALSE(random)) "By unchecking this option only the check plots are randomized."
+}

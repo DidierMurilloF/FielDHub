@@ -53,8 +53,10 @@ test_that("all client export buttons include metadata without evaluating supplie
 })
 
 test_that("every client-side table export uses the shared metadata configuration", {
+  # The augmented RCBD page draws its layouts as plots: its one table
+  # export belonged to a grid output its page never showed
   expected <- c(Diagonal = 2L, diagonal_multiple = 3L, Optim = 2L,
-                 RCBD_augmented = 1L, pREPS = 2L, multi_loc_preps = 3L,
+                 RCBD_augmented = 0L, pREPS = 2L, multi_loc_preps = 3L,
                  sparse_allocation = 3L)
   specs <- names(fieldhub_design_specs())
   for (module in names(expected)) {
@@ -63,7 +65,7 @@ test_that("every client-side table export uses the shared metadata configuration
       # allocation table through app_spatial_grid()/app_spatial_table()
       spec <- design_app_spec(module)
       grids <- Filter(function(panel) identical(panel$type, "grid"), spec$panels)
-      exports <- c(vapply(grids, `[[`, character(1), "export"), spec$setup$export)
+      exports <- c(vapply(grids, `[[`, character(1), "export", USE.NAMES = FALSE), spec$setup$export)
       expect_length(exports, expected[[module]])
       next
     }

@@ -46,3 +46,50 @@ prep_field_choices <- function(plots, allow_fillers) {
   list(choices = stats::setNames(options$value, options$label),
        selected = utils::head(options$value, 1L))
 }
+
+#' Numbers of blocks of an augmented RCBD
+#'
+#' @param lines Number of entries, checks excluded.
+#' @param checks Number of checks.
+#' @return \code{list(choices = , selected = )}; "No Options Available"
+#'   (\code{no_block_size_option()}) when no block count fits, which Run!
+#'   then reports.
+#' @noRd
+augmented_block_choices <- function(lines, checks) {
+  check_augmented_counts(lines, checks)
+  blocks <- unique(set_augmented_blocks(lines = lines, checks = checks, start = 3)$b)
+  if (length(blocks) == 0L) {
+    return(list(choices = no_block_size_option(), selected = no_block_size_option()))
+  }
+  list(choices = blocks, selected = utils::head(blocks, 1L))
+}
+
+#' Field sizes of an augmented RCBD with a number of blocks
+#' @inheritParams augmented_block_choices
+#' @param b Number of blocks.
+#' @return \code{list(choices = , selected = )}.
+#' @noRd
+augmented_field_choices <- function(lines, checks, b) {
+  check_augmented_counts(lines, checks)
+  if (!is.numeric(b) || length(b) != 1L || !is.finite(b) || b < 1) {
+    fieldhub_abort("The number of blocks must be one positive whole number.")
+  }
+  options <- set_augmented_blocks(lines = lines, checks = checks, start = 3)$blocks_dims
+  sizes <- if (!is.null(options)) {
+    colnames(options) <- c("blocks", "size")
+    as.vector(options[options[, "blocks"] == b, "size"])
+  }
+  field_size_choices(sizes, paste0("No field size holds ", b, " blocks of these entries."))
+}
+
+#' Check the counts an augmented RCBD's choices are computed from
+#' @inheritParams augmented_block_choices
+#' @return \code{NULL}, or a classed input error.
+#' @noRd
+check_augmented_counts <- function(lines, checks) {
+  whole <- function(x) is.numeric(x) && length(x) == 1L && is.finite(x) && x >= 1 && x == trunc(x)
+  if (!whole(lines) || !whole(checks)) {
+    fieldhub_abort("The numbers of entries and checks must be positive whole numbers.")
+  }
+  invisible(NULL)
+}

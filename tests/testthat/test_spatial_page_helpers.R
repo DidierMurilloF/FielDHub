@@ -85,3 +85,24 @@ test_that("p-rep pages offer field sizes, labelled with their filler plots where
   expect_error(prep_field_choices(307, NA), "Select 'Allow filler plots'", class = "fieldhub_input_error")
   for (value in blank_inputs) expect_classed(prep_field_choices(value, TRUE), info = deparse(value))
 })
+
+test_that("augmented RCBD pages offer the blocks and fields their entries fit", {
+  offered <- augmented_block_choices(180, 4)
+  expect_identical(offered$choices, unique(set_augmented_blocks(180, 4, start = 3)$b))
+  expect_identical(offered$selected, 3)
+  fields <- augmented_field_choices(180, 4, 3)
+  expect_identical(fields$selected, "3 x 64")
+  expect_error(augmented_field_choices(180, 4, 999), "No field size holds 999 blocks",
+               class = "fieldhub_input_error")
+  for (value in blank_inputs) {
+    expect_classed(augmented_block_choices(value, 4), info = deparse(value))
+    expect_classed(augmented_block_choices(180, value), info = deparse(value))
+    expect_classed(augmented_field_choices(value, 4, 3), info = deparse(value))
+    expect_classed(augmented_field_choices(180, 4, value), info = deparse(value))
+    expect_classed(augmented_lines(value, 4), info = deparse(value))
+  }
+  expect_identical(augmented_lines(180, 4), 180)
+  expect_identical(augmented_lines(NULL, 4, data.frame(ENTRY = 1:20)), 16)
+  expect_error(augmented_lines(NULL, 4, data.frame(ENTRY = 1:11)), "At least ten treatments",
+               class = "fieldhub_input_error")
+})

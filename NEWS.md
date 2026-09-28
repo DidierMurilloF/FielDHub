@@ -776,24 +776,29 @@
   page explains that two are needed.
 
 - The spatial design pages are moving to the same generic page (so far:
-  the optimized arrangement and p-rep pages). The page reads its sidebar
-  with `read_design_controls()`, offers its field sizes after Run! from
-  the same plain functions the R functions use, and builds its design
-  through the same argument builder, so the page and a direct
-  `optimized_arrangement()` or `partially_replicated()` call build
-  identical designs. Menus, result, simulation and export ids, uploads and
-  archives are unchanged. Deliberate consistency changes: the seed box is
-  blank by default (it started at 5 on the optimized arrangement page and
-  4095 on the p-rep page) and uses the shared labels ("Reps per Check:",
-  "Experiment Name(s):", "Starting Plot Number(s):", "Location Name(s):",
-  "Choose Location to View:"); controls are stacked one per row; "Reps per
-  Check:" accepts one value for every check, as on the RCBD page; and a
-  blank or invalid control, too many check plots for the entries, an
-  uploaded `REPS` column that is not whole numbers, a number of plots with
-  no field size (on the p-rep page, the advice to allow filler plots) or
-  "# of Rep Per Group:" with a different number of values than "# of
-  Entries Per Rep Group:" is explained in the "Get Random" tab instead of
-  a dialog.
+  the optimized arrangement, p-rep and augmented RCBD pages). The page
+  reads its sidebar with `read_design_controls()`, offers its field sizes
+  after Run! from the same plain functions the R functions use, and builds
+  its design through the same argument builder, so the page and a direct
+  `optimized_arrangement()`, `partially_replicated()` or
+  `RCBD_augmented()` call build identical designs. Menus, result,
+  simulation and export ids, uploads and archives are unchanged.
+  Deliberate consistency changes: the seed box is blank by default (it
+  started at 5 on the optimized arrangement page, 4095 on the p-rep page
+  and 1 on the augmented RCBD page) and uses the shared labels ("Reps per
+  Check:", "Experiment Name(s):", "Starting Plot Number(s):", "Location
+  Name(s):", "Choose Location to View:", and "Input # of Checks:" for the
+  augmented RCBD's "Checks per Block:"); controls are stacked one per row;
+  the augmented RCBD's "Input Data" tab is "Data Input" as on the other
+  pages, and unchecking "Randomize Entries?" shows its note under the
+  checkbox instead of a notice; "Reps per Check:" accepts one value for
+  every check, as on the RCBD page; and a blank or invalid control, too
+  many check plots for the entries, an uploaded `REPS` column that is not
+  whole numbers, a number of plots with no field size (on the p-rep page,
+  the advice to allow filler plots), fewer than eight augmented RCBD
+  entries, no block count for them or "# of Rep Per Group:" with a
+  different number of values than "# of Entries Per Rep Group:" is
+  explained in the "Get Random" tab instead of a dialog.
 
 ### Fix bugs:
 
