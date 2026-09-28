@@ -90,6 +90,17 @@ design_values_CRD <- function(treatment_count, reps, planter, plot_start,
   )
 }
 
+#' Build latin_rectangle() arguments without changing uploaded labels
+#' @noRd
+design_args_Latin_Rectangle <- function(values, data = NULL) {
+  list(t = if (is.null(data)) as_design_number(values[["t"]]) else as.character(data$TREATMENT),
+    rows = as_design_number(values[["nrows"]] %||% 3),
+    l = as_design_number(values[["l"]] %||% 1),
+    plotNumber = as_design_number(values[["plot_start"]] %||% 101),
+    planter = values[["planter"]] %||% "serpentine",
+    seed = as_design_number(values[["seed"]]), locationNames = values[["location_names"]])
+}
+
 #' Build CRD() arguments
 #'
 #' `values`: `t` (treatment count; `NULL` when `data` supplies the entries),

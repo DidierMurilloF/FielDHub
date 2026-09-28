@@ -9,8 +9,7 @@ test_that("simulation control identifiers are validated before building a dialog
 
 test_that("classic simulation dialogs share a component with namespaced controls", {
   skip_if_not_installed("shiny")
-  modules <- c("CRD", "RCBD", "LSD", "FD", "SPD", "SSPD", "STRIPD", "IBD",
-               "RowCol", "Alpha_Lattice", "Square_Lattice", "Rectangular_Lattice")
+  modules <- names(fieldhub_classic_workflows())
   for (module in modules) {
     code <- design_server_body(module)
     expect_identical(sum(all.names(code) == "app_classic_workflow"), 1L)

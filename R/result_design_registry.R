@@ -19,6 +19,8 @@ fieldhub_design_registry <- function() {
       c(classic, if (is.list(x$infoDesign) && !is.null(x$infoDesign$checks)) c("ENTRY", "CHECKS"))
     }),
     latin_square = entry("latin_square", c("SQUARE", "ROW", "COLUMN", "TREATMENT")),
+    latin_rectangle = entry("latin_rectangle", c("ROW", "COLUMN", "REP", "TREATMENT"),
+      title = "Latin Rectangle Design", layout = "field_book_layouts", render = "draw_registered_layout"),
     full_factorial = entry("full_factorial", function(x) {
       info <- if (is.list(x$infoDesign)) x$infoDesign else list()
       c("REP", "TRT_COMB", paste0("FACTOR_", info$factors))

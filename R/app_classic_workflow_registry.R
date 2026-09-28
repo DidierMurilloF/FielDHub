@@ -69,6 +69,17 @@ fieldhub_classic_workflows <- function() {
       export_prefixes = c(field_book = "Latin_Square_", layout = "Latin_Square_Layout"),
       label_column = "TREATMENT"
     ),
+    Latin_Rectangle = entry(
+      layout = layout_entry("layout_controls", c(layout = "layout", location = "location"),
+        widths = c(4, 4, 4), container = "row", select_layout = TRUE, select_location = TRUE),
+      ids = c(plot_type = "plot_type", simulate = "simulate", plot = "layout_plot", table = "field_book",
+        field_book_download = "download_book", layout_download = "download_layout"),
+      simulation_ids = c(trait = "trait", other = "other_trait", minimum = "minimum", maximum = "maximum",
+        submit = "simulate_submit"),
+      table_columns = c("LOCATION", "PLOT", "ROW", "COLUMN", "REP", "TREATMENT"),
+      export_prefixes = c(field_book = "Latin_Rectangle_", layout = "Latin_Rectangle_Layout"),
+      export_label = "TREATMENT", label_column = "TREATMENT"
+    ),
     FD = entry(
       layout = layout_entry("well_panel_layout_FD",
         c(layout = "layoutO_fd", stacked = "stackedFD", location = "locLayout_fd"), select_location = TRUE),

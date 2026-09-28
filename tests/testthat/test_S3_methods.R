@@ -78,7 +78,7 @@ test_that("results saved by FielDHub 1.5 print and summarise as their design", {
   # no metadata; print() and summary() find their design from id_design.
   for (name in names(catalogue)) {
     design <- catalogue_design(name)
-    if (!inherits(design, "FielDHub")) next
+    if (!inherits(design, "FielDHub") || !as.character(design$infoDesign$id_design) %in% names(legacy_designs)) next
     saved <- legacy_roundtrip(design)
     expect_identical(utils::capture.output(print(saved)),
                      utils::capture.output(print(design)), info = name)
@@ -93,7 +93,8 @@ test_that("results serialized in the FielDHub 1.5 format still plot", {
 
   for (name in names(catalogue)) {
     design <- catalogue_design(name)
-    if (!inherits(design, "FielDHub") || inherits(design, "fieldhub_split_families")) next
+    if (!inherits(design, "FielDHub") || inherits(design, "fieldhub_split_families") ||
+        !as.character(design$infoDesign$id_design) %in% names(legacy_designs)) next
 
     saved <- legacy_roundtrip(design)
     plotted <- suppressWarnings(suppressMessages(plot(saved)))

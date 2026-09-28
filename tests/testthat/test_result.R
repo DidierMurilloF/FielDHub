@@ -2,7 +2,7 @@ library(FielDHub)
 
 # Design name of the results of each design function
 result_designs <- c(
-  CRD = "crd", RCBD = "rcbd", latin_square = "latin_square",
+  CRD = "crd", RCBD = "rcbd", latin_square = "latin_square", latin_rectangle = "latin_rectangle",
   full_factorial = "full_factorial", split_plot = "split_plot",
   split_split_plot = "split_split_plot", strip_plot = "strip_plot",
   incomplete_blocks = "incomplete_blocks", row_column = "row_column",

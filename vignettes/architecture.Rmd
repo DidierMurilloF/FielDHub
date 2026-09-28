@@ -1,0 +1,127 @@
+---
+title: "Architecture and compatibility contracts"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Architecture and compatibility contracts}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(FielDHub)
+```
+
+## Layers and direction of dependencies
+
+| Layer | Responsibilities | Must not do |
+|---|---|---|
+| Public engines (`fct_`, `engine_`, `validate_`) | Validate inputs, randomize, optimize, construct results | Depend on Shiny, display dialogs, install packages, change caller options |
+| Results (`result_`) | Schema, declarative engine registry, replay, S3 presentation | Evaluate function names or handlers supplied by saved metadata |
+| Layout/render/simulation (`layout_`, `render_`, `sim_`) | Coordinates, drawing, numerical simulation | Re-randomize a saved design merely to display it |
+| I/O (`io_`) | Parse uploads, validated format dispatch, workflow archives | Treat a CSV field book as a complete replay record |
+| App (`app_`) | Declarative page controls, argument builders, one generic module | Duplicate engine logic or mutate the accepted result when controls change |
+
+Script users need only Imports. `run_app()` checks its optional packages and
+reports an installation command if needed; it does not install anything.
+`source("dev/run_dev.R")` is the source-development launcher, while deployed
+images start the installed package. Neither requires a golem config file.
+
+Every app request is converted to a plain named argument list and sent to a
+whitelisted public engine. A completed design is an immutable snapshot for
+layout, simulation and downloads. With opt-in `workers > 0`, installed-package
+jobs use a private mirai pool; source development remains synchronous. Workers
+close when the app stops. The 100 MiB process-wide Shiny upload setting is scoped
+to the app lifetime and restored afterward, not on each session disconnect.
+
+## Results and randomness
+
+A design has class `c("fieldhub_<key>", "FielDHub")`, `infoDesign`, `fieldBook`
+and schema-1 metadata. The common book keys are `ID`, `LOCATION`, and `PLOT`;
+the registry declares additional columns for each design. Extra columns are
+allowed. Field coordinates belong to the layout contract; some engines record
+them at construction, while others offer multiple layouts. `PLOT` alone is not
+a universal unique key for split units, fillers or multiple locations.
+
+Metadata records the design key, schema version, effective seed, RNG kinds,
+package version and effective parameters. An explicit seed restores the caller
+stream; an omitted seed consumes exactly one automatically selected seed, then
+isolates all internal randomization. Failed input validation should occur before
+that draw. Numerical optimizers can also depend on R, dependencies and platform;
+metadata is not a guarantee of cross-version bit-identical reconstruction.
+
+```{r recorded-result}
+x <- latin_rectangle(5, rows = 3, seed = 27)
+x$metadata[c("design", "schema_version", "seed", "package_version")]
+stopifnot(identical(reproduce_design(x), x))
+```
+
+Allocation plans and pair-swap results have separate validated classes but use
+the same metadata/replay boundary. Legacy 1.5.x results still have their
+documented printing and plotting path. Missing historical parameters cannot be
+recovered automatically and must not be invented.
+
+## Extension boundaries
+
+The reviewed `fieldhub_design_registry()` is the single declaration of engine
+names and field-book extensions. New fixed-coordinate designs can declare
+generic layout/render handlers and a title, avoiding new dispatcher branches.
+Existing specialized S3 methods preserve established layouts and output.
+Optimization strategies live in plain engine helpers and record their choices
+as data; visualizations use the layout/render S3 boundary. Neither should leak
+UI concerns into scientific computation.
+
+These are contributor interfaces for package code, not a mutable global plugin
+registry. External packages should use the documented public engines,
+`field_layout()`, replay and I/O APIs rather than depend on internal function
+names. Adding runtime third-party handlers would need a separate compatibility
+and security proposal. See the *Adding designs and formats* vignette for the
+concrete extension procedure and the Latin rectangle example.
+
+## Versioned interchange
+
+```{r formats}
+design_formats()
+file <- tempfile(fileext = ".rds")
+write_design(x, file)
+stopifnot(identical(read_design(file), x))
+unlink(file)
+```
+
+Format version 1 and result schema version 1 are independent contracts. RDS uses
+R serialization version 2 and preserves the exact result. The validated reader
+rejects unknown result schemas and engines and does not replay or execute code.
+Only deserialize files from trusted sources. An R script is a write-only replay
+artifact, never an importer; inspect it before explicitly sourcing it.
+Script export declines oversized uploads/nonportable parameters rather than
+emitting a misleading incomplete program. App workflow ZIPs separately carry
+layout selections, simulated values, CSV data and metadata.
+
+No existing file is overwritten by `write_design()` unless `overwrite = TRUE`.
+Serialization happens first in a temporary file; the final copy is not an
+atomic filesystem transaction. Preserve backups of important outputs.
+
+## Compatibility and release ownership
+
+Scientific outputs for a fixed seed are part of the compatibility contract.
+Correctness fixes may change them, but require a regression, an independent
+scientific check, an explained snapshot diff and a NEWS entry naming affected
+inputs. Do not silently update snapshots to make a refactor pass. New public
+options retain old defaults unless a deliberate change is documented.
+
+Deprecated public arguments retain an alias and a classed warning through at
+least one published minor release before removal is proposed. A schema change
+requires a version increment and an explicit migration/rejection policy.
+Internal extension changes must update the contributor guide and contract tests
+in the same change; they are not an undocumented third-party API promise.
+
+Maintainers choose a release owner and an independent backup/reviewer for each
+release. Green checks do not confer scientific or publication approval. The
+repository's `RELEASING.md` requires reviewed benchmarks, a platform/R matrix,
+deployment evidence, licensing resolution, NEWS and an exact release tag.
+Local verification does not establish remote CI or CRAN acceptance.
+
+Feedback is opt-in through issues or the published maintainer contact. Request
+minimal synthetic reproductions; do not collect private field books or add
+telemetry. Review/release roles and contributor identities require agreement,
+not inference from activity counts or email similarity.

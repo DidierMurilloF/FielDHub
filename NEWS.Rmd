@@ -195,6 +195,19 @@ knitr::opts_chunk$set(
 
 ### New features:
 
+- `design_formats()`, `read_design()` and `write_design()` expose versioned
+  format registries for validated RDS records and write-only replay scripts.
+  Imports do not execute scripts or re-randomize designs; overwriting existing
+  files requires explicit permission. Contributor vignettes document design
+  registration, app adapters, interchange and compatibility contracts.
+
+- `latin_rectangle()` adds randomized cyclic Latin rectangles, including
+  multi-location layouts, preserved treatment labels, recorded seeds and replay.
+  The app uses the same engine through its shared design module. Rows are
+  complete replicates; columns need not form balanced incomplete blocks.
+  Two-row rectangles have no residual degrees of freedom in the additive
+  row/column/treatment model; these limits are documented in the function help.
+
 - Release benchmarks now record exact revisions and environments and compare
   workloads, runtime, allocations, optimizer quality and stop diagnostics.
   Regressions require measurement-specific review explanations.

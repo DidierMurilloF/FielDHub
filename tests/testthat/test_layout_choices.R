@@ -43,8 +43,7 @@ test_that("layout choices support legacy design classes without changing global 
 })
 
 test_that("classic layout selectors use shared core choices without rendering", {
-  modules <- c("CRD", "RCBD", "LSD", "FD", "SPD", "SSPD", "STRIPD", "IBD",
-               "RowCol", "Alpha_Lattice", "Square_Lattice", "Rectangular_Lattice")
+  modules <- names(fieldhub_classic_workflows())
   for (module in modules) {
     code <- design_server_body(module)
     expect_false("newBooks" %in% all.names(code), info = module)

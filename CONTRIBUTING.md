@@ -124,6 +124,16 @@ family-by-family checks, reference calculations, and computational limits.
 
 ## Source layout
 
+Read the [architecture and compatibility guide](vignettes/architecture.Rmd)
+and the [step-by-step design/format extension guide](vignettes/extending_fieldhub.Rmd)
+before adding a new engine or format. The Latin rectangle is a complete
+registry-driven example, including the shared app page and independent tests.
+
+The `.mailmap` normalizes display-name aliases using an already shared email
+address. Propose other identity mappings with the contributor's confirmation;
+do not guess from similar names or rewrite historical commits. The release
+owner and independent reviewer are agreed by maintainers for each release.
+
 Each file in `R/` is named `<prefix>_<topic>.R`. The prefix says what the
 file is responsible for; the topic says what it holds (for example
 `engine_diagonal_checks.R`, `layout_planting_path.R`, `result_methods.R`).

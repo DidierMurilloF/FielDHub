@@ -35,6 +35,7 @@ fieldhub_app_registry <- function() {
     entry("Completely Randomized Design (CRD)", "CRD", "CRD", 4, 11),
     entry("Randomized Complete Block Designs (RCBD)", "RCBD", "RCBD", 4, 12),
     entry("Latin Square Design (LSD)", "LSD", "latin_square", 4, 13),
+    entry("Latin Rectangle Design", "Latin_Rectangle", "latin_rectangle", 4, 20),
     entry("Factorial Designs", "FD", "full_factorial", 4, 14),
     entry("Split-Plot Design", "SPD", "split_plot", 4, 15),
     entry("Split-Split-Plot Design", "SSPD", "split_split_plot", 4, 16),

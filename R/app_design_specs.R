@@ -248,6 +248,17 @@ build_design_specs <- function() {
              plot_start = controls$plot_start[1], planter = controls$planter,
              location_names = controls$location_names[1], seed = controls$seed)
       }),
+    Latin_Rectangle = classic("Latin_Rectangle", "Latin Rectangle Design", latin_rectangle,
+      upload = "rcbd", upload_columns = "TREATMENT", omit_na = FALSE, summary = TRUE,
+      controls = list(
+        ctl_count("t", 5, generated_only = TRUE), ctl_count("nrows", 3, min = 2),
+        ctl_locations(), ctl_planter(), ctl_plot_start(), ctl_location_names(), ctl_seed()
+      ),
+      values = function(controls, data) {
+        list(t = controls$t, nrows = controls$nrows, l = controls$l,
+          plot_start = controls$plot_start, planter = controls$planter,
+          location_names = controls$location_names, seed = controls$seed)
+      }),
     FD = classic("FD", "Full Factorial Designs", full_factorial, upload = "factorial",
       upload_columns = c("FACTOR", "LEVEL"), upload_check = check_factorial_upload,
       controls = list(

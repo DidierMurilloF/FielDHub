@@ -48,3 +48,4 @@ $run_dev.*
 ^ROADMAP\.md$
 ^\.superpowers$
 ^deployment$
+^\.mailmap$

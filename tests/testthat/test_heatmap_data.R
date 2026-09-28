@@ -47,8 +47,7 @@ test_that("invalid heatmap selections and schemas give classed errors", {
 })
 
 test_that("all classic modules use the shared heatmap builder", {
-  modules <- c("CRD", "RCBD", "LSD", "FD", "SPD", "SSPD", "STRIPD", "IBD", "RowCol",
-                "Alpha_Lattice", "Square_Lattice", "Rectangular_Lattice")
+  modules <- names(fieldhub_classic_workflows())
   for (module in modules) {
     code <- design_server_body(module)
     expect_identical(sum(all.names(code) == "app_classic_workflow"), 1L)

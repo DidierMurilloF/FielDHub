@@ -19,7 +19,7 @@ design_export_handlers <- function(design) {
     content = function(file) {
       x <- result()
       tryCatch(
-        saveRDS(x, file = file, version = 2),
+        write_design(x, file = file, overwrite = TRUE),
         error = function(e) fieldhub_abort(
           "Could not save the design: ", conditionMessage(e),
           class = "fieldhub_export_error", data = list(parent = e)

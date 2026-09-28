@@ -33,8 +33,7 @@ test_that("classic modules delegate layout selection and stop swallowing plot er
     if (is.call(code) && identical(code[[1]], as.name("app_classic_layout"))) return(list(code))
     unlist(lapply(as.list(code), find_binding), recursive = FALSE)
   }
-  modules <- c("CRD", "RCBD", "LSD", "FD", "SPD", "SSPD", "STRIPD", "IBD",
-               "RowCol", "Alpha_Lattice", "Square_Lattice", "Rectangular_Lattice")
+  modules <- names(fieldhub_classic_workflows())
   for (module in modules) {
     code <- design_server_body(module)
     expect_identical(sum(all.names(code) == "app_classic_layout"), 1L)
@@ -46,7 +45,7 @@ test_that("classic modules delegate layout selection and stop swallowing plot er
     expect_identical(binding[[1L]][["spec"]], as.name("workflow"))
     ids <- design_app_spec(module)$workflow$layout$ids
     expect_identical(anyDuplicated(ids), 0L)
-    expected <- c("layout", if (module != "CRD") "stacked",
+    expected <- c("layout", if (!module %in% c("CRD", "Latin_Rectangle")) "stacked",
                   if (!module %in% c("CRD", "LSD")) "location")
     expect_identical(names(ids), expected)
   }

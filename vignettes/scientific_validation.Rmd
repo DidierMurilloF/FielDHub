@@ -21,7 +21,7 @@ The invariant tests use explicit expected counts from the input fixtures, not
 counts inferred from the generated design's summaries. Mutation tests check
 that the independent helpers reject missing, repeated, or relabeled units.
 
-The 40-case catalogue covers every design engine, including generated and
+The fixed-seed catalogue covers every design engine, including generated and
 supplied labels, multiple locations, unequal replication, checks, and fillers.
 `tests/testthat/test_scientific_invariants.R` checks the following properties on
 every test platform; it is not restricted to the snapshot reference platform.
@@ -31,6 +31,7 @@ every test platform; it is not restricted to the snapshot reference platform.
 | Completely randomized | Requested treatment multiplicities, including unequal replication |
 | Complete blocks | Every test entry once per replicate and location; requested extra copies of checks |
 | Latin squares | Every treatment once in each row and column of every square |
+| Cyclic Latin rectangles | Every treatment once per row, no within-column repeats, equal replication and full additive row/column/treatment model rank |
 | Full factorial | Every requested factor combination in every replicate and location |
 | Split and split-split plots | Complete factor combinations and a single whole-plot treatment within each physical whole plot |
 | Strip plots | Complete horizontal-by-vertical combinations per replicate and location |
@@ -43,7 +44,7 @@ every test platform; it is not restricted to the snapshot reference platform.
 | Family splitting | Every original entry retained; family counts across locations differ by at most one |
 | Pair swapping | Entry frequencies and geometry retained; reported distances agree with `stats::dist()` |
 
-All 36 field-design catalogue cases also have distinct final
+All field-design catalogue cases also have distinct final
 `LOCATION`/`ROW`/`COLUMN` coordinates. `PLOT` is not a universal unique key:
 split-unit designs can share a whole-plot number, fillers can have `PLOT = 0`,
 and identifiers can restart at each location. Use the experimental hierarchy
@@ -66,6 +67,15 @@ definitions in the NIST/SEMATECH handbook:
 [randomized blocks](https://www.itl.nist.gov/div898/handbook/pri/section3/pri332.htm),
 [Latin squares](https://www.itl.nist.gov/div898/handbook/pri/section3/pri3321.htm), and
 [full factorials](https://www.itl.nist.gov/div898/handbook/pri/section3/pri333.htm).
+
+The Latin rectangle definition follows
+[Doyle's treatment](https://math.dartmouth.edu/~doyle/docs/latin/latin.pdf).
+`test_latin_rectangle.R` checks consecutive cyclic shifts with independent
+row/column/symbol permutations for treatment counts 3 through 8, every supported
+row count and several seeds. A separate model-matrix rank calculation verifies
+connectivity and `(rows - 2) * (t - 1)` residual degrees of freedom. Two-row
+rectangles are saturated. Columns need not be balanced incomplete blocks, and
+the generator does not sample uniformly over all Latin rectangles.
 
 ## Numerical reference checks
 
@@ -115,6 +125,7 @@ biological experiment.
 | Spatial field construction | Validates scalar or per-location dimensions and rejects projected diagonal, optimized, augmented-RCBD, and p-rep field sizes beyond R's integer-index bound |
 | Block-model connectivity | At most one graph expansion per treatment; stops when all treatments are reached or no new treatment is reachable |
 | Latin-square placement | At most 100,000 placement iterations per square; a `fieldhub_search_error` records the square and budget on exhaustion |
+| Cyclic Latin rectangles | Direct construction with work proportional to locations × rows × treatments; no iterative search, and projected field size checked before allocation |
 | Repeated-check placement in RCBD | At most 100 attempts per block; warns and falls back to unrestricted placement if stratification cannot be completed |
 | Pair-swap optimization | A finite geometry-dependent threshold range, at most `stop_iter` sweeps per threshold, and bounded sampled candidates per swap; diagnostics distinguish exhaustion, completion, and an empty range |
 | Row-column search | Positive finite whole-number `iterations`; defaults are 200 external onestage searches or 1,000 twostage row-swap iterations |

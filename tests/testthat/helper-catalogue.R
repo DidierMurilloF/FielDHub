@@ -40,6 +40,10 @@ catalogue <- list(
   latin_square_cartesian = list(fun = "latin_square", family = "classic", build = function() {
     latin_square(t = 5, reps = 1, plotNumber = 1, planter = "cartesian", seed = 8)
   }),
+  latin_rectangle = list(fun = "latin_rectangle", family = "classic", build = function() {
+    latin_rectangle(t = c("No nitrogen", "A*B", "C", "D", "E"), rows = 3,
+      l = 2, plotNumber = c(101, 201), locationNames = c("A", "B"), seed = 27)
+  }),
   full_factorial_rcbd = list(fun = "full_factorial", family = "classic", build = function() {
     full_factorial(setfactors = c(2, 3), reps = 2, l = 2, type = 2,
                    plotNumber = c(101, 1001), seed = 9)

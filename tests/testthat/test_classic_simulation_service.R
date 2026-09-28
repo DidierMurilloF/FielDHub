@@ -56,8 +56,7 @@ test_that("classic simulation validates response names and optional ID sorting",
 })
 
 test_that("every classic module delegates response generation to the shared service", {
-  modules <- c("CRD", "RCBD", "LSD", "FD", "SPD", "SSPD", "STRIPD", "IBD", "RowCol",
-                "Alpha_Lattice", "Square_Lattice", "Rectangular_Lattice")
+  modules <- names(fieldhub_classic_workflows())
   for (module in modules) {
     code <- design_server_body(module)
     symbols <- all.names(code)

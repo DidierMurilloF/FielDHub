@@ -3223,6 +3223,216 @@
       ]
     }
 
+# latin_rectangle keeps its output
+
+    {
+      "type": "list",
+      "attributes": {
+        "names": {
+          "type": "character",
+          "attributes": {},
+          "value": ["design"]
+        }
+      },
+      "value": [
+        {
+          "type": "list",
+          "attributes": {
+            "names": {
+              "type": "character",
+              "attributes": {},
+              "value": ["infoDesign", "fieldBook", "metadata"]
+            },
+            "class": {
+              "type": "character",
+              "attributes": {},
+              "value": ["fieldhub_latin_rectangle", "FielDHub"]
+            }
+          },
+          "value": [
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["nTrt", "nRows", "l", "planter", "seed", "id_design"]
+                }
+              },
+              "value": [
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [5]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [3]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [2]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["serpentine"]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [27]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["latin_rectangle"]
+                }
+              ]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["ID", "LOCATION", "PLOT", "ROW", "COLUMN", "REP", "TREATMENT"]
+                },
+                "row.names": {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
+                },
+                "class": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["data.frame"]
+                }
+              },
+              "value": [
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B"]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1, 2, 3, 4, 5, 5, 4, 3, 2, 1, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 5, 4, 3, 2, 1, 1, 2, 3, 4, 5]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["No nitrogen", "C", "D", "E", "A*B", "No nitrogen", "D", "C", "A*B", "E", "D", "No nitrogen", "A*B", "C", "E", "E", "D", "C", "No nitrogen", "A*B", "E", "C", "A*B", "No nitrogen", "D", "C", "A*B", "D", "E", "No nitrogen"]
+                }
+              ]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["design", "schema_version", "seed", "rng_kind", "parameters"]
+                }
+              },
+              "value": [
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["latin_rectangle"]
+                },
+                {
+                  "type": "integer",
+                  "attributes": {},
+                  "value": [1]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [27]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["Mersenne-Twister", "Inversion", "Rejection"]
+                },
+                {
+                  "type": "list",
+                  "attributes": {
+                    "names": {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["t", "rows", "l", "plotNumber", "planter", "seed", "locationNames"]
+                    }
+                  },
+                  "value": [
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["No nitrogen", "A*B", "C", "D", "E"]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [3]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [2]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [101, 201]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["serpentine"]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [27]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["A", "B"]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+
 # full_factorial_rcbd keeps its output
 
     {

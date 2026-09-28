@@ -6,7 +6,7 @@ library(FielDHub)
 # the HTML it builds, and the consistency of its controls. No Shiny server
 # is started.
 
-classic_modules <- c("CRD", "RCBD", "LSD", "FD", "SPD", "SSPD", "STRIPD", "IBD", "RowCol",
+classic_modules <- c("CRD", "RCBD", "LSD", "Latin_Rectangle", "FD", "SPD", "SSPD", "STRIPD", "IBD", "RowCol",
                      "Alpha_Lattice", "Square_Lattice", "Rectangular_Lattice")
 spatial_modules <- c("Optim", "pREPS", "RCBD_augmented", "Diagonal", "diagonal_multiple",
                      "sparse_allocation", "multi_loc_preps")
@@ -170,6 +170,8 @@ test_that("each page's defaults build the design a direct API call with the docu
                 planter = "serpentine", locationNames = "FARGO", seed = 7),
     LSD = latin_square(t = 5, reps = 1, plotNumber = 101, planter = "serpentine",
                        locationNames = "FARGO", seed = 7),
+    Latin_Rectangle = latin_rectangle(t = 5, rows = 3, l = 1, plotNumber = 101,
+      planter = "serpentine", locationNames = "FARGO", seed = 7),
     FD = full_factorial(setfactors = c(2, 2, 3), reps = 3, l = 1, type = 2, plotNumber = 101,
                         planter = "serpentine", locationNames = "FARGO", seed = 7),
     SPD = split_plot(wp = 4, sp = 3, reps = 3, l = 1, type = 2, plotNumber = 101,
@@ -198,6 +200,11 @@ test_that("each page's defaults build the design a direct API call with the docu
 })
 
 test_that("pages with changed controls still build the API's design", {
+  raw <- utils::modifyList(page_defaults("Latin_Rectangle"), list(nrows = 4, l = 2,
+    plot_start = "1,101", location_names = "Fargo, CASSELTON", planter = "cartesian"))
+  expect_same_design(page_design(design_app_spec("Latin_Rectangle"), raw),
+    latin_rectangle(5, rows = 4, l = 2, plotNumber = c(1, 101),
+      locationNames = c("Fargo", " CASSELTON"), planter = "cartesian", seed = 7))
   raw <- utils::modifyList(page_defaults("RCBD", seed = 4), list(
     t = 6, l = 2, planter = "cartesian", plot_start = "101,1001", location_names = "A,B",
     continuous = FALSE, use_checks = TRUE, checks = 2, rep_checks = "2", spread_checks = TRUE))
@@ -218,6 +225,11 @@ test_that("pages with changed controls still build the API's design", {
 })
 
 test_that("pages with an uploaded file build the design the module always sent", {
+  labels <- c("No nitrogen", "A*B", "C", "D", "E")
+  raw <- utils::modifyList(page_defaults("Latin_Rectangle"), list(t = NA))
+  expect_same_design(page_design(design_app_spec("Latin_Rectangle"), raw,
+    data.frame(TREATMENT = labels)), latin_rectangle(labels, rows = 3,
+      locationNames = "FARGO", seed = 7))
   entries <- data.frame(ENTRY = 1:12, NAME = paste0("G", 1:12), NOTE = "x")
   raw <- utils::modifyList(page_defaults("IBD"), list(t = NA, k = "3"))
   expect_same_design(page_design(design_app_spec("IBD"), raw, entries),
@@ -593,7 +605,7 @@ test_that("the same concept has the same label, default and minimum on every pag
   # the engine's minimum (checked against the engines below). FD offers the
   # minimum of its CRD type (see design_app_spec()).
   engine_minimums <- c(CRD.t = 1, CRD.reps = 1, LSD.reps = 1, SPD.reps = 1, SSPD.reps = 1,
-                       STRIPD.reps = 1, SPD.wp = 1, SSPD.wp = 1, FD.reps = 1)
+                       STRIPD.reps = 1, SPD.wp = 1, SSPD.wp = 1, FD.reps = 1, Latin_Rectangle.nrows = 2)
   # The spatial pages keep the smallest counts they have always offered,
   # and the defaults of their own
   page_minimums <- c(Optim.lines = 5, Diagonal.lines = 50, diagonal_multiple.lines = 50,
@@ -644,7 +656,7 @@ test_that("the same concept has the same label, default and minimum on every pag
 
 test_that("every minimum a page offers is the smallest value its engine accepts", {
   # FD's single replicate is for its CRD type
-  at_minimum <- list(FD.reps = list(type = "1"))
+  at_minimum <- list(FD.reps = list(type = "1"), Latin_Rectangle.t = list(nrows = 2))
   for (module in classic_modules) {
     spec <- design_app_spec(module)
     computed <- any(vapply(spec$controls, function(control) !is.null(control$options), logical(1)))

@@ -15,6 +15,10 @@ navbar:
      menu:
      - text: "Scientific Validation and Computational Limits"
        href: articles/scientific_validation.html
+     - text: "Architecture and Compatibility Contracts"
+       href: articles/architecture.html
+     - text: "Adding Designs and Formats"
+       href: articles/extending_fieldhub.html
      - text: "Sparse Allocation/Testing"
        href: articles/sparse_allocation.html
      - text: "Unreplicated Diagonal Arrangement Design"
