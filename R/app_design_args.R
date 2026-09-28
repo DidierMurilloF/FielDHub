@@ -558,3 +558,66 @@ design_args_pREPS <- function(values, data = NULL) {
     allow_fillers = values[["allow_fillers"]] %||% FALSE
   )
 }
+
+#' Build do_optim() arguments for the multi-location p-rep module's Run!
+#' step
+#'
+#' `values`: `lines`, `l`, `copies_per_entry`, `checks` and `rep_checks`
+#' (both NULL without checks), `seed`. `data` (the uploaded ENTRY/NAME list,
+#' checks first) is only validated here; `multi_location_prep()` merges it
+#' into the locations.
+#' @noRd
+design_args_multi_loc_preps_optim <- function(values, data = NULL) {
+  checks <- values[["checks"]]
+  rep_checks <- values[["rep_checks"]]
+  list(
+    design = "prep",
+    lines = values[["lines"]],
+    l = values[["l"]],
+    copies_per_entry = values[["copies_per_entry"]],
+    add_checks = !is.null(checks) && !is.null(rep_checks),
+    checks = checks,
+    rep_checks = rep_checks,
+    seed = values[["seed"]],
+    data = data
+  )
+}
+
+#' Build multi_location_prep() arguments for the multi-location p-rep
+#' module
+#'
+#' `values`: the `design_args_multi_loc_preps_optim()` values plus `nrows`
+#' and `ncols` (one per location), `planter`, `plot_start`, `expt_name`,
+#' `location_names`, `optim_list` (the allocation computed at Run!) and
+#' `allow_fillers`.
+#'
+#' The uploaded `data` goes with `optim_list`, so `multi_location_prep()`
+#' merges it into the locations (the module used to call
+#' `merge_user_data()` itself). As for `design_args_sparse_allocation()`,
+#' arguments the engine tests with `missing()` are left out when the app
+#' cannot fill them, and misfit starting plots become the engine's own
+#' default, `default_plot_starts(l, 1)` (ruling R9). The optimizer settings
+#' stay the engine's fixed ones: the module has no control for them.
+#' @noRd
+design_args_multi_loc_preps <- function(values, data = NULL) {
+  l <- values[["l"]]
+  expt_name <- values[["expt_name"]]
+  args <- list(
+    lines = values[["lines"]],
+    nrows = values[["nrows"]],
+    ncols = values[["ncols"]],
+    l = l,
+    planter = values[["planter"]] %||% "serpentine",
+    plotNumber = location_plot_starts(values[["plot_start"]], l, base = 1),
+    copies_per_entry = values[["copies_per_entry"]],
+    checks = values[["checks"]],
+    rep_checks = values[["rep_checks"]],
+    exptName = if (length(expt_name) > 0L) expt_name,
+    locationNames = location_names_or_null(values[["location_names"]], l),
+    optim_list = values[["optim_list"]],
+    seed = values[["seed"]],
+    data = data,
+    allow_fillers = values[["allow_fillers"]] %||% FALSE
+  )
+  drop_null_args(args, c("nrows", "ncols", "exptName", "locationNames", "optim_list"))
+}

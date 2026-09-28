@@ -298,32 +298,28 @@ mod_multi_loc_preps_server <- function(id){
         site_names <- as.character(as.vector(unlist(strsplit(input$loc_name_preps, ","))))
         seed_number <- validate_design(app_design_seed(input$seed_preps))
         sites = as.numeric(input$locs_prep)
-        if (length(site_names) == 0 || length(site_names) != sites) {
-            site_names <- paste0("LOC", 1:sites)
-        }
-        if (length(plotNumber) == 0 || length(plotNumber) != sites) {
-            plotNumber <- seq(1, 1000 * sites, by = 1000)[1:sites]
-        }
-        if (length(expt_name) == 0) {
-            expt_name <- "expt_prep"
-        }
+        # The values of design_args_multi_loc_preps_optim() and
+        # design_args_multi_loc_preps(); multi_location_prep() applies its
+        # own defaults to starting plots, location names or a blank
+        # experiment name that do not fit
         return(
             list(
-                prep_lines = input_lines,
-                sites = sites, 
-                location_names = site_names, 
-                seed_number = seed_number, 
-                plotNumber = plotNumber,
-                planter_mov = planter_mov,
-                expt_name = expt_name,
+                lines = input_lines,
+                l = sites, 
+                copies_per_entry = as.numeric(input$plant_copies_preps),
                 checks = checks,
-                prep_checks = prep_checks
+                rep_checks = prep_checks,
+                seed = seed_number, 
+                planter = planter_mov,
+                plot_start = plotNumber,
+                expt_name = expt_name,
+                location_names = site_names
             )
         ) 
     })
 
-    shiny::observeEvent(prep_inputs()$sites, {
-        loc_user_view <- 1:prep_inputs()$sites
+    shiny::observeEvent(prep_inputs()$l, {
+        loc_user_view <- 1:prep_inputs()$l
         shiny::updateSelectInput(
             inputId = "loc_to_view_preps", 
             choices = loc_user_view, 
@@ -434,22 +430,10 @@ mod_multi_loc_preps_server <- function(id){
                     )
                     return(NULL)
                 }
-                input_lines <- as.numeric(input$gens_prep)
-                max_entry <- input_lines
-                df_checks <- default_entries(
-                    checks,
-                    prefix = "CH-",
-                    start = max_entry + 1
-                )
-                data_without_checks <- default_entries(input_lines, prefix = "Gen-")
-                input_entries <- as.numeric(data_without_checks$ENTRY)
-                data_preps <- dplyr::bind_rows(df_checks, data_without_checks)
-            } else {
-                input_lines <- as.numeric(input$gens_prep)
-                data_preps <- default_entries(input_lines, prefix = "Gen-")
-                input_entries <- as.numeric(data_preps$ENTRY)
-                data_without_checks <- data_preps
             }
+            # do_optim() generates and names the entries (G-1, ...) and checks
+            data_preps <- NULL
+            data_without_checks <- NULL
         }
         return(
             list(
@@ -462,40 +446,15 @@ mod_multi_loc_preps_server <- function(id){
 
     setup_optim_prep <- shiny::reactive({
         shiny::req(get_multi_loc_prep())
-        if (is.null(get_multi_loc_prep())) return(NULL)
         shiny::req(prep_inputs())
-        input_lines <- as.numeric(input$gens_prep)
-        locs <- as.numeric(input$locs_prep)
-        checks <- as.numeric(prep_inputs()$checks)
-        prep_checks <- prep_inputs()$prep_checks
-        prep_data_input <- get_multi_loc_prep()$multi_loc_preps_data
-        add_checks <- FALSE
-        if (input$include_checks == "Yes") add_checks <- TRUE
+        # An uploaded list is only validated here: multi_location_prep()
+        # merges it into the locations at Randomize!
+        data <- get_multi_loc_prep()$multi_loc_preps_data
         shiny::withProgress(message = 'Optimization in progress ...', {
-            optim_out <- validate_design(do_optim(
-                design = "prep",
-                lines = input$gens_prep, 
-                l = locs, 
-                copies_per_entry = as.numeric(input$plant_copies_preps), 
-                add_checks = add_checks,
-                checks = checks, 
-                rep_checks = prep_inputs()$prep_checks,
-                seed = prep_inputs()$seed_number,
-                data = prep_data_input
-            ))
-        })
-        ### Do the merge with the user data ###
-        if (input$multi_prep_data == "Yes") {
-            data_prep_no_checks <- get_multi_loc_prep()$data_without_checks
-            optim_out <- merge_user_data(
-                optim_out = optim_out, 
-                data = prep_data_input, 
-                lines = input_lines, 
-                add_checks = add_checks, 
-                checks = checks, 
-                rep_checks = prep_inputs()$prep_checks
+            optim_out <- validate_design(
+                do.call(do_optim, design_args_multi_loc_preps_optim(prep_inputs(), data))
             )
-        }
+        })
         return(optim_out)
     }) |>
         shiny::bindEvent(input$run_prep)
@@ -504,8 +463,8 @@ mod_multi_loc_preps_server <- function(id){
         shiny::req(setup_optim_prep())
         shiny::req(get_multi_loc_prep())
         shiny::req(prep_inputs())
-        if (!is.null(prep_inputs()$prep_checks)) {
-            prep_checks <- as.numeric(prep_inputs()$prep_checks)
+        if (!is.null(prep_inputs()$rep_checks)) {
+            prep_checks <- as.numeric(prep_inputs()$rep_checks)
         } else {
             prep_checks <- 0
         }
@@ -519,8 +478,8 @@ mod_multi_loc_preps_server <- function(id){
     shiny::observeEvent(list(list_input_plots(), input$allow_fillers_prep), {
         shiny::req(setup_optim_prep())
         shiny::req(prep_inputs())
-        if (!is.null(prep_inputs()$prep_checks)) {
-            prep_checks <- as.numeric(prep_inputs()$prep_checks)
+        if (!is.null(prep_inputs()$rep_checks)) {
+            prep_checks <- as.numeric(prep_inputs()$rep_checks)
         } else {
             prep_checks <- 0
         }
@@ -640,8 +599,8 @@ mod_multi_loc_preps_server <- function(id){
     dimension_choices <- function(site = 1) {
       shiny::req(setup_optim_prep())
       shiny::req(prep_inputs())
-      if (!is.null(prep_inputs()$prep_checks)) {
-          prep_checks <- as.numeric(prep_inputs()$prep_checks)
+      if (!is.null(prep_inputs()$rep_checks)) {
+          prep_checks <- as.numeric(prep_inputs()$rep_checks)
       } else {
           prep_checks <- 0
       }
@@ -763,16 +722,14 @@ mod_multi_loc_preps_server <- function(id){
     output$prep_allocation <- DT::renderDT({
         shiny::req(setup_optim_prep())
         shiny::req(get_multi_loc_prep())
-        data_without_checks <- get_multi_loc_prep()$data_without_checks
-        prep_lines <- prep_inputs()$prep_lines
+        # Uploaded names, or the names do_optim() gave the generated entries
+        if (input$multi_prep_data == 'Yes') {
+            gen_names <- get_multi_loc_prep()$data_without_checks$NAME
+        } else {
+            gen_names <- allocation_entry_names(setup_optim_prep(), prep_inputs()$lines)
+        }
 
-        gen_names <- data_without_checks |>
-            dplyr::mutate(sparse_entry = 1:prep_lines) |>
-            dplyr::arrange(sparse_entry) |>
-            dplyr::select(NAME) |>
-            dplyr::pull()
-
-        locs <- prep_inputs()$sites
+        locs <- prep_inputs()$l
         df <- as.data.frame(setup_optim_prep()$allocation)
         df <- df |> 
             dplyr::mutate(
@@ -799,17 +756,16 @@ mod_multi_loc_preps_server <- function(id){
     })
     ###### Plotting the data ##############
     output$multi_prep_data_input <- DT::renderDT({
-        shiny::req(setup_optim_prep())
         test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
         if (!test) return(NULL)
-        shiny::req(setup_optim_prep())
-        multi_loc_data <- setup_optim_prep()$multi_location_data
+        shiny::req(pREPS_reactive())
+        multi_loc_data <- pREPS_reactive()$multi_location_data
         df <- as.data.frame(multi_loc_data)
-        # Combine the data frames into a single data frame with 
-        # a new column for the list element name
+        # The uploaded names, as multi_location_prep() merged them into
+        # each location: combine the data frames into a single data frame
+        # with a new column for the list element name
         if (input$multi_prep_data == 'Yes') {
-            shiny::req(setup_optim_prep())
-            list_locs <- setup_optim_prep()$list_locs
+            list_locs <- pREPS_reactive()$list_locs
             df <- dplyr::bind_rows(
                 lapply(names(list_locs), function(name) {
                     dplyr::mutate(list_locs[[name]], LOCATION = name)
@@ -835,37 +791,17 @@ mod_multi_loc_preps_server <- function(id){
     pREPS_reactive <- shiny::reactive({
         shiny::req(setup_optim_prep())
         shiny::req(field_dimensions_prep())
-        nrows <- field_dimensions_prep()$d_row
-        ncols <- field_dimensions_prep()$d_col
-        locs_preps <- prep_inputs()$sites
-        site_names <- prep_inputs()$location_names
-        preps_seed <- prep_inputs()$seed_number
-        plotNumber <- prep_inputs()$plotNumber
-        if (length(site_names) != locs_preps) {
-            site_names <- paste0("LOC", 1:locs_preps)
-        }
-        if (length(plotNumber) != locs_preps) {
-            plotNumber <- seq(1, 1000 * locs_preps, by = 1000)
-        }
-        movement_planter <- prep_inputs()$planter_mov
-        expt_name <- prep_inputs()$expt_name
+        values <- c(prep_inputs(), list(
+            nrows = field_dimensions_prep()$d_row,
+            ncols = field_dimensions_prep()$d_col,
+            optim_list = setup_optim_prep(),
+            allow_fillers = isTRUE(input$allow_fillers_prep)
+        ))
+        data <- get_multi_loc_prep()$multi_loc_preps_data
         shiny::withProgress(message = 'Running p-rep optimization ...', {
-            locations_preps <- validate_design(multi_location_prep(
-                lines = prep_inputs()$prep_lines,
-                nrows = nrows, 
-                ncols = ncols, 
-                l = locs_preps, 
-                plotNumber = plotNumber, 
-                exptName =  expt_name,
-                locationNames = site_names, 
-                planter = movement_planter,
-                seed = preps_seed, 
-                copies_per_entry = as.numeric(input$plant_copies_preps),
-                checks = prep_inputs()$checks,
-                rep_checks = prep_inputs()$prep_checks,
-                optim_list = setup_optim_prep(),
-                allow_fillers = isTRUE(input$allow_fillers_prep)
-            ))
+            locations_preps <- validate_design(
+                do.call(multi_location_prep, design_args_multi_loc_preps(values, data))
+            )
         })
         return(locations_preps)
     }) |> 
@@ -945,7 +881,7 @@ mod_multi_loc_preps_server <- function(id){
 
     app_spatial_workflow(input, output, session,
       design = function() pREPS_reactive(),
-      seed = function() validate_design(read_app_seed(prep_inputs()$seed_number)),
+      seed = function() validate_design(read_app_seed(prep_inputs()$seed)),
       dimensions = function(field_book) list(nrows = field_dimensions_prep()$d_row, ncols = field_dimensions_prep()$d_col),
       selected = function() user_site_selection(),
       filename = function() {

@@ -894,6 +894,88 @@ test_that("design_args_pREPS() falls back to the l/planter/plot-start/allow_fill
                                        repUnits = c(1, 2), seed = 32))
 })
 
+test_that("multi_loc_preps app arguments reproduce the API allocation and design with checks", {
+  optim_values <- list(lines = 40, l = 2, copies_per_entry = 3, checks = 2,
+                       rep_checks = c(2, 2), seed = 7)
+  via_app_allocation <- do.call(do_optim, design_args_multi_loc_preps_optim(optim_values))
+  direct_allocation <- do_optim(design = "prep", lines = 40, l = 2, copies_per_entry = 3,
+                                add_checks = TRUE, checks = 2, rep_checks = c(2, 2), seed = 7)
+  expect_identical(via_app_allocation, direct_allocation)
+  # The module sends one field size per location
+  values <- c(optim_values, list(nrows = c(8, 8), ncols = c(8, 8), planter = "cartesian",
+                                 plot_start = c(1, 1001), expt_name = "MET",
+                                 location_names = c("FARGO", "MINOT"),
+                                 optim_list = via_app_allocation, allow_fillers = FALSE))
+  parity(design_args_multi_loc_preps, multi_location_prep, values,
+         direct = multi_location_prep(lines = 40, nrows = c(8, 8), ncols = c(8, 8), l = 2,
+                                      planter = "cartesian", plotNumber = c(1, 1001),
+                                      copies_per_entry = 3, checks = 2, rep_checks = c(2, 2),
+                                      exptName = "MET", locationNames = c("FARGO", "MINOT"),
+                                      optim_list = direct_allocation, seed = 7))
+})
+
+test_that("multi_loc_preps app arguments let multi_location_prep() merge an uploaded list", {
+  data <- data.frame(ENTRY = 101:140, NAME = paste0("SB-", 101:140))
+  optim_values <- list(lines = 40, l = 2, copies_per_entry = 3, seed = 12)
+  via_app_allocation <- do.call(do_optim, design_args_multi_loc_preps_optim(optim_values, data))
+  direct_allocation <- do_optim(design = "prep", lines = 40, l = 2, copies_per_entry = 3,
+                                add_checks = FALSE, seed = 12, data = data)
+  expect_identical(via_app_allocation, direct_allocation)
+  # Without checks the 60 plots of each location need filler plots
+  values <- c(optim_values, list(nrows = c(8, 8), ncols = c(8, 8), plot_start = c(1, 1001),
+                                 expt_name = "MET", location_names = c("A", "B"),
+                                 optim_list = via_app_allocation, allow_fillers = TRUE))
+  via_app <- do.call(multi_location_prep, design_args_multi_loc_preps(values, data))
+  direct <- multi_location_prep(lines = 40, nrows = c(8, 8), ncols = c(8, 8), l = 2,
+                                plotNumber = c(1, 1001), copies_per_entry = 3, exptName = "MET",
+                                locationNames = c("A", "B"), optim_list = direct_allocation,
+                                seed = 12, data = data, allow_fillers = TRUE)
+  expect_identical(via_app$fieldBook, direct$fieldBook)
+  expect_identical(via_app$metadata$parameters, direct$metadata$parameters)
+  # The engine merges the uploaded names, as the module's own
+  # merge_user_data() call used to do before handing it the merged list
+  expect_true(all(via_app$fieldBook$TREATMENT[via_app$fieldBook$ENTRY > 0] %in% data$NAME))
+  merged <- merge_user_data(direct_allocation, data = data, lines = 40)
+  former <- multi_location_prep(lines = 40, nrows = c(8, 8), ncols = c(8, 8), l = 2,
+                                plotNumber = c(1, 1001), copies_per_entry = 3, exptName = "MET",
+                                locationNames = c("A", "B"), optim_list = merged, seed = 12,
+                                allow_fillers = TRUE)
+  expect_identical(via_app$fieldBook, former$fieldBook)
+})
+
+test_that("design_args_multi_loc_preps() leaves misfit plot starts, names and experiment names to the engine (R9)", {
+  allocation <- do_optim(design = "prep", lines = 40, l = 2, copies_per_entry = 3,
+                         add_checks = TRUE, checks = 2, rep_checks = c(2, 2), seed = 7)
+  values <- list(lines = 40, l = 2, copies_per_entry = 3, checks = 2, rep_checks = c(2, 2),
+                 seed = 7, nrows = c(8, 8), ncols = c(8, 8), plot_start = 1001,
+                 expt_name = character(), location_names = "ONLY", optim_list = allocation)
+  built <- design_args_multi_loc_preps(values)
+  # The engine's own base, where the module's inline formulas used 1
+  # in one place and 1, 1001, ... in another
+  expect_identical(built$plotNumber, default_plot_starts(2, 1))
+  expect_false(any(c("locationNames", "exptName") %in% names(built)))
+  found <- warnings_of_class(via_app <- do.call(multi_location_prep, built),
+                             "fieldhub_default_warning")
+  expect_length(found, 0L)
+  direct <- multi_location_prep(lines = 40, nrows = c(8, 8), ncols = c(8, 8), l = 2,
+                                plotNumber = c(1, 1001), copies_per_entry = 3, checks = 2,
+                                rep_checks = c(2, 2), optim_list = allocation, seed = 7)
+  expect_identical(via_app$fieldBook, direct$fieldBook)
+  expect_identical(via_app$metadata$parameters, direct$metadata$parameters)
+  expect_identical(unique(via_app$fieldBook$EXPT), "PrepExpt")
+})
+
+test_that("allocation_entry_names() reads the names do_optim() gave the entries, in entry order", {
+  allocation <- do_optim(design = "prep", lines = 40, l = 2, copies_per_entry = 3,
+                         add_checks = TRUE, checks = 2, rep_checks = c(2, 2), seed = 7)
+  expect_identical(allocation_entry_names(allocation, 40), paste0("G-", 1:40))
+  sparse <- do_optim(design = "sparse", lines = 135, l = 3, copies_per_entry = 2,
+                     add_checks = TRUE, checks = 4, seed = 5)
+  expect_identical(allocation_entry_names(sparse, 135), paste0("G-", 1:135))
+  # The allocation table has one row per entry, in the same order
+  expect_identical(rownames(sparse$allocation), as.character(1:135))
+})
+
 # --- Spatial structural check (ruling R2): namespace bodies, call heads ---
 
 test_that("spatial modules build their designs only through design_args_<Module>() and do.call()", {
@@ -905,7 +987,9 @@ test_that("spatial modules build their designs only through design_args_<Module>
     sparse_allocation = c(design_args_sparse_allocation_optim = "do_optim",
                           design_args_sparse_allocation = "sparse_allocation"),
     Optim = c(design_args_Optim = "optimized_arrangement"),
-    pREPS = c(design_args_pREPS = "partially_replicated")
+    pREPS = c(design_args_pREPS = "partially_replicated"),
+    multi_loc_preps = c(design_args_multi_loc_preps_optim = "do_optim",
+                        design_args_multi_loc_preps = "multi_location_prep")
   )
   # Unexported helpers a spatial module server may call, and why. Anything
   # else it calls must be one of its engines/builders, or a base/shiny/DT/
