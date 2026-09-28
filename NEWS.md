@@ -135,8 +135,11 @@
   builds its design through an argument builder tested against the R
   function. The multi-location p-rep module's allocation table names
   generated entries `G-1`, `G-2`, ..., as in its field book (it showed
-  `Gen-1`, ...), and `multi_location_prep()` itself now merges an uploaded
-  entry list into the locations.
+  `Gen-1`, ...), and the module now delegates merging an uploaded entry list
+  into the locations to `multi_location_prep()` instead of merging it
+  itself. All nineteen app modules now record whole numbers entered in the
+  app as an R user types them (`270`, where Shiny delivers `270L`), so their
+  `metadata$parameters` match a direct call.
 
 - App defaults for inputs that do not fit now follow the R functions: a
   blank experiment name gives `SparseExpt` in the sparse allocation module
@@ -154,6 +157,14 @@
   `diagonal_arrangement()`'s suggestions (which now come from the same
   candidate list), instead of a module-only 11%, so some smaller fields are
   now offered.
+
+- Two spatial app screens changed: the augmented RCBD module's table of
+  checks now appears with the list of entries after Randomize! (it used to
+  appear as soon as Run! was clicked), and the multi-location p-rep module
+  reads the number of copies per entry once, at Run!, for both the
+  allocation and the design, so changing it takes effect at the next Run!
+  (the design used to record the value shown at Randomize!, while the
+  allocation kept the one of Run!).
 
 - The Shiny application stack is now optional. Installing FielDHub for R
   scripts requires only the design and plotting dependencies; the nine

@@ -121,7 +121,7 @@ knitr::opts_chunk$set(
   unaffected: the caller's random-number state is left completely
   untouched.
 
-- The app's CRD and RCBD modules now generate their app-built entry lists
+* The app's CRD and RCBD modules now generate their app-built entry lists
   by calling `CRD(t = )` and `RCBD(t = , checks = )` with bare counts
   instead of pre-building `T-`/`G-`/`CH` label data frames, so generated
   field books use the R API's own labels: CRD entries are `T1`, `T2`, ...
@@ -129,16 +129,16 @@ knitr::opts_chunk$set(
   test entries, matching a direct `RCBD(checks = N)` call. Uploaded entry
   lists, and every other design, are unaffected.
 
-- The app's STRIPD, SPD and SSPD modules now accept a single replicate
+* The app's STRIPD, SPD and SSPD modules now accept a single replicate
   (their "Input # of Full Reps" minimums dropped from 2 to 1), matching
   `strip_plot()`/`split_plot()`/`split_split_plot()`, which already accepted
   `reps = 1`.
 
-- The app's RCBD module now shows an `RCBD()` failure the same way every
+* The app's RCBD module now shows an `RCBD()` failure the same way every
   other classic design does: as an inline validation message where the
   layout or field book would appear, instead of a separate alert dialog.
 
-- The app's optimized arrangement, p-rep and augmented RCBD modules now pass
+* The app's optimized arrangement, p-rep and augmented RCBD modules now pass
   counts instead of app-built entry tables: `lines`/`checks`/`rep_checks` to
   `optimized_arrangement()`, `repGens`/`repUnits` to
   `partially_replicated()` and `lines`/`checks` to `RCBD_augmented()`. Their
@@ -148,10 +148,13 @@ knitr::opts_chunk$set(
   builds its design through an argument builder tested against the R
   function. The multi-location p-rep module's allocation table names
   generated entries `G-1`, `G-2`, ..., as in its field book (it showed
-  `Gen-1`, ...), and `multi_location_prep()` itself now merges an uploaded
-  entry list into the locations.
+  `Gen-1`, ...), and the module now delegates merging an uploaded entry list
+  into the locations to `multi_location_prep()` instead of merging it
+  itself. All nineteen app modules now record whole numbers entered in the
+  app as an R user types them (`270`, where Shiny delivers `270L`), so their
+  `metadata$parameters` match a direct call.
 
-- App defaults for inputs that do not fit now follow the R functions: a
+* App defaults for inputs that do not fit now follow the R functions: a
   blank experiment name gives `SparseExpt` in the sparse allocation module
   and `PrepExpt` in the multi-location p-rep module (it was
   `expt_sparse`/`expt_prep`), and in the multiple diagonal module a number
@@ -162,11 +165,19 @@ knitr::opts_chunk$set(
   their default 1, 1001, ..., now taken from
   `sparse_allocation()`/`multi_location_prep()` themselves.
 
-- The single diagonal module now offers the same field dimensions as the R
+* The single diagonal module now offers the same field dimensions as the R
   functions: its list starts at 10% more plots than entries, like
   `diagonal_arrangement()`'s suggestions (which now come from the same
   candidate list), instead of a module-only 11%, so some smaller fields are
   now offered.
+
+* Two spatial app screens changed: the augmented RCBD module's table of
+  checks now appears with the list of entries after Randomize! (it used to
+  appear as soon as Run! was clicked), and the multi-location p-rep module
+  reads the number of copies per entry once, at Run!, for both the
+  allocation and the design, so changing it takes effect at the next Run!
+  (the design used to record the value shown at Randomize!, while the
+  allocation kept the one of Run!).
 
 * The Shiny application stack is now optional. Installing FielDHub for R scripts requires only the design and plotting dependencies; the nine app-only packages have moved from Imports to Suggests. `run_app()` checks for them and reports an installation command when any are missing. No packages are installed automatically, and existing app installations keep the same interface and design behavior.
 
