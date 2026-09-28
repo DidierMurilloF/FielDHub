@@ -123,7 +123,8 @@ test_that("there is one page spec per design, in the registry's workflow order",
   expect_identical(names(specs)[seq_along(classic_modules)], names(fieldhub_classic_workflows()))
   registry <- fieldhub_app_registry()
   for (entry in registry) {
-    if (is.null(entry$spec)) next
+    # every design is a page of the generic module
+    expect_false(is.null(entry$spec), info = entry$id)
     spec <- design_app_spec(entry$workflow)
     expect_identical(entry$ui, "mod_design_ui")
     expect_identical(entry$server, "mod_design_server")

@@ -175,10 +175,19 @@ app_spatial_page <- function(input, output, session, spec, run, raw_controls) {
       }))
     })
   })
-  # A new field size hides the results of the last one
+  # A new field size hides the results of the last one (one select per
+  # location is one input per location)
   for (step in run_steps) local({
-    id <- step$id
-    shiny::observeEvent(input[[id]], randomized(FALSE), ignoreInit = TRUE)
+    step <- step
+    watched <- shiny::reactive({
+      if (identical(step$type, "location_selects")) {
+        lapply(seq_along(run_choices()[[step$id]]$choices),
+               function(i) input[[paste0(step$id, "_", i)]])
+      } else {
+        input[[step$id]]
+      }
+    })
+    shiny::observeEvent(watched(), randomized(FALSE), ignoreInit = TRUE)
   })
   step_values <- function(steps, choices) {
     raw <- list()
@@ -210,20 +219,33 @@ app_spatial_page <- function(input, output, session, spec, run, raw_controls) {
       validate_design(design_step_choices(step, inputs$values, inputs$data))
     })
   })
+  # Each Randomize! starts its steps from the choice they select (the API
+  # default); a value left in a select from the last field is not read, so
+  # the design is built once. A choice the user makes later replaces it.
+  design_raw <- shiny::reactiveVal(list())
   shiny::observeEvent(design_choices(), {
     choices <- design_choices()
     for (step in offered(design_steps)) {
       shiny::updateSelectInput(session, step$id, choices = choices[[step$id]]$choices,
                                selected = choices[[step$id]]$selected)
     }
+    design_raw(selected_step_values(offered(design_steps), choices))
     for (step in design_steps) shinyjs::show(paste0(step$id, "_step"))
+  }, priority = 10)
+  for (step in design_steps) local({
+    id <- step$id
+    shiny::observeEvent(input[[id]], {
+      raw <- design_raw()
+      raw[id] <- list(input[[id]])
+      design_raw(raw)
+    }, ignoreInit = TRUE)
   })
   design_inputs <- shiny::reactive({
     inputs <- randomized_inputs()
     if (length(design_steps) > 0L) {
       choices <- design_choices()
       inputs$values <- shiny::req(validate_design(
-        read_design_steps(design_steps, step_values(design_steps, choices), inputs$values, choices)
+        read_design_steps(design_steps, design_raw(), inputs$values, choices)
       ))
     }
     inputs
@@ -236,8 +258,12 @@ app_spatial_page <- function(input, output, session, spec, run, raw_controls) {
       spec$accept(do.call(spec$engine, spec$args(inputs$values, inputs$data)))
     ))
   })
-  shiny::observeEvent(randomized(), {
-    if (randomized()) shinyjs::show(ids[["download"]]) else shinyjs::hide(ids[["download"]])
+  # The state of the last Randomize!: ready, still waiting, or its problem
+  result <- shiny::reactive({
+    spatial_randomize_state(randomized(), if (isTRUE(randomized())) app_design_state(design))
+  })
+  shiny::observeEvent(result()$ready, {
+    if (result()$ready) shinyjs::show(ids[["download"]]) else shinyjs::hide(ids[["download"]])
   })
   location <- shiny::reactive({
     selected <- suppressWarnings(as.numeric(input$location_view))
@@ -246,10 +272,13 @@ app_spatial_page <- function(input, output, session, spec, run, raw_controls) {
     selected
   })
 
-  # What the run found: its problems, and the page's setup view
+  # What the run and the last Randomize! found: their problems, and the
+  # page's setup view
   output$status <- shiny::renderUI({
     prepared()
     run_choices()
+    problem <- result()$problem
+    if (!is.null(problem)) validate_design(fieldhub_abort(problem))
     NULL
   })
   if (identical(spec$setup$type, "summary")) {

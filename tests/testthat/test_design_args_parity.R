@@ -1212,6 +1212,9 @@ test_that("spatial modules build their designs only through design_args_<Module>
     "read_design_controls",       # reads again the controls the steps follow (filler plots)
     "design_step_choices",        # choices of a step, from the values of the run
     "read_design_steps",          # reads the steps into the values of the builder
+    "selected_step_values",       # each Randomize! starts from the choices it selects
+    "spatial_randomize_state",    # ready / waiting / the problem of the last Randomize!
+    "fieldhub_abort",             # shows that problem through validate_design()
     "location_view_choices",      # the locations of the run
     "app_spatial_workflow", "app_spatial_table", "app_spatial_grid"
   )
@@ -1231,7 +1234,7 @@ test_that("spatial modules build their designs only through design_args_<Module>
     "sparse_entries", "allocation_view", "allocation_entry_names", "location_entries_view",
     "plant_rep_choices", "fieldhub_abort", "%||%",
     "check_numeric_entries_upload", "multi_prep_entries", "prep_copies_choices",
-    "prep_location_field_choices", "parse_control_flag"
+    "prep_location_field_choices"
   )
 
   for (module in names(spatial_engines)) {

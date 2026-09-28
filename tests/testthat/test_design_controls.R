@@ -282,6 +282,31 @@ test_that("a step is read once it holds one of its current choices", {
                                             location_dimensions = list("2 x 3", "9 x 9")), list(l = 2), choices))
 })
 
+test_that("a step with nothing to choose from is explained instead of waited for", {
+  sizes <- ctl_location_dimensions(function(values, data) NULL, enabled_by = "multi_dimension")
+  steps <- list(ctl_flag("multi_dimension", stage = "run"), sizes)
+  choices <- list(location_dimensions = list(choices = list("8 x 8", character(), character())))
+  raw <- list(multi_dimension = TRUE, location_dimensions = list("8 x 8", NULL, NULL))
+  err <- expect_error(read_design_steps(steps, raw, list(l = 3), choices), class = "fieldhub_input_error")
+  expect_match(conditionMessage(err), "^Select dimension for location 2: no field size fits this location")
+  expect_identical(err$control, "Select dimension for location 2")
+  # the per-location sizes are not read while their flag is off
+  expect_identical(read_design_steps(steps, list(multi_dimension = FALSE), list(l = 3), choices),
+                   list(l = 3, multi_dimension = FALSE))
+  empty <- ctl_dimensions(function(values, data) NULL)
+  expect_error(read_design_steps(list(empty), list(dimensions = ""), list(),
+                                 list(dimensions = list(choices = character()))),
+               "Select dimensions of field has no option that fits.", class = "fieldhub_input_error")
+})
+
+test_that("each Randomize! starts its steps from the choices it selects, as the selects send them", {
+  steps <- list(ctl_checks_percent(function(values, data) NULL))
+  choices <- list(checks_percent = list(choices = c(6.98, 9.6, 11.11), selected = 11.11))
+  raw <- selected_step_values(steps, choices)
+  expect_identical(raw, list(checks_percent = "11.11"))
+  expect_identical(read_design_steps(steps, raw, list(), choices), list(checksPercent = 11.11))
+})
+
 test_that("read_design_controls() reads only the controls asked for, and needs a named list", {
   spec <- page(ctl_count("t", 15), ctl_reps(3))
   expect_identical(read_design_controls(spec, list(t = 9L, reps = NA), only = "t"), list(t = 9L))

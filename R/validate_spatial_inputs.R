@@ -173,3 +173,22 @@ multi_prep_entries <- function(lines, checks, l, data = NULL) {
   }
   list(names = data$NAME[setdiff(seq_len(nrow(data)), seq_len(checks))])
 }
+
+#' The state of the last Randomize! of a spatial page
+#'
+#' @description The page shows its results and offers to save the
+#' experiment once the design is built; when building it failed, the
+#' "Get Random" tab explains why.
+#' @param randomized Whether Randomize! was clicked since the last Run! or
+#'   field change.
+#' @param state The design's state (\code{app_design_state()}): the design,
+#'   \code{NULL} while it waits for its inputs, or the condition it failed
+#'   with.
+#' @return \code{list(ready = , problem = )}: whether the design is built,
+#'   and the message of its failure (or \code{NULL}).
+#' @noRd
+spatial_randomize_state <- function(randomized, state) {
+  if (!isTRUE(randomized) || is.null(state)) return(list(ready = FALSE, problem = NULL))
+  if (inherits(state, "condition")) return(list(ready = FALSE, problem = problem_message(state)))
+  list(ready = TRUE, problem = NULL)
+}

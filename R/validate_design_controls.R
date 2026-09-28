@@ -324,11 +324,51 @@ read_design_steps <- function(steps, raw, values, choices = list()) {
   for (step in steps) {
     if (!is.null(step$enabled_by) && !isTRUE(values[[step$enabled_by]])) next
     value <- raw[[step$id]]
+    if (!is.null(step$options)) check_step_choices(step, choices[[step$id]]$choices)
     if (!is.null(step$options) && !step_choice_ready(value, choices[[step$id]]$choices)) return(NULL)
     parsed <- step$parse(value, values)
     if (is.list(parsed)) values[names(parsed)] <- parsed else values[step$id] <- list(parsed)
   }
   values
+}
+
+#' Check that a step has something to choose from
+#'
+#' @description A select with no choices (a location no field size fits)
+#' can never hold one, so reading it would wait for ever; this explains it
+#' instead.
+#' @param step The step control.
+#' @param choices Its current choices (a list, one per location, for a
+#'   per-location select).
+#' @return \code{NULL}, or a classed input error naming the step (and the
+#'   location).
+#' @noRd
+check_step_choices <- function(step, choices) {
+  label <- step$label
+  if (is.list(choices)) {
+    empty <- which(lengths(choices) == 0L)
+    if (length(empty) > 0L) {
+      control_abort(paste(label, min(empty)), ": no field size fits this location. ",
+                    "Allow filler plots or change the entries or checks.")
+    }
+  } else if (length(choices) == 0L) {
+    control_abort(label, " has no option that fits.")
+  }
+  invisible(NULL)
+}
+
+#' The raw values of steps that start from their selected choice
+#'
+#' @description Each Randomize! starts its steps from the choice the page
+#' selects, written as the select sends it back (text).
+#' @param steps The step controls with options.
+#' @param choices Named list of each step's \code{list(choices = , selected
+#'   = )}.
+#' @return Named list of raw values, by step id.
+#' @noRd
+selected_step_values <- function(steps, choices) {
+  ids <- vapply(steps, `[[`, character(1), "id")
+  stats::setNames(lapply(ids, function(id) as.character(choices[[id]]$selected)), ids)
 }
 
 #' Parse a field size offered as "rows x columns"

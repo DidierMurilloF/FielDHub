@@ -229,3 +229,22 @@ test_that("multi-location p-rep pages offer copies per entry and a field size pe
   expect_error(check_numeric_entries_upload(transform(upload, ENTRY = as.character(ENTRY))),
                "should be numeric", class = "fieldhub_input_error")
 })
+
+test_that("a Randomize! is ready once its design is built, and explains a failure", {
+  waiting <- list(ready = FALSE, problem = NULL)
+  expect_identical(spatial_randomize_state(FALSE, NULL), waiting)
+  expect_identical(spatial_randomize_state(TRUE, NULL), waiting)
+  design <- diagonal_arrangement(nrows = 18, ncols = 18, lines = 287, checks = 4, seed = 1)
+  expect_identical(spatial_randomize_state(TRUE, design), list(ready = TRUE, problem = NULL))
+  expect_identical(spatial_randomize_state(FALSE, design), waiting)
+  failed <- tryCatch(fieldhub_abort("The field dimensions do not fit the entries."), error = function(e) e)
+  expect_identical(spatial_randomize_state(TRUE, failed),
+                   list(ready = FALSE, problem = "The field dimensions do not fit the entries."))
+  # the sparse page's last check of a design turns a missing field book into that problem
+  spec <- design_app_spec("sparse_allocation")
+  rejected <- tryCatch(spec$accept(list(fieldBook = NULL)), error = function(e) e)
+  expect_match(spatial_randomize_state(TRUE, rejected)$problem, "do not fit the entries")
+  unexpected <- simpleError("subscript out of bounds")
+  expect_identical(spatial_randomize_state(TRUE, unexpected)$problem,
+                   "Unexpected problem: subscript out of bounds")
+})
