@@ -21,7 +21,7 @@ test_that("classic layout presentation is described by the workflow registry", {
     spec <- classic_workflow_spec(module)
     expect_true(is.list(spec$layout), info = module)
     ids <- spec$layout$ids
-    expected <- c("layout", if (module != "CRD") "stacked",
+    expected <- c("layout", if (!module %in% c("CRD", "Latin_Rectangle")) "stacked",
                   if (!module %in% c("CRD", "LSD")) "location")
     expect_identical(names(ids), expected, info = module)
     expect_identical(anyDuplicated(c(spec$ids, spec$simulation_ids, ids, spec$layout$output)), 0L)

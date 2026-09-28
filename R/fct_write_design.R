@@ -37,7 +37,9 @@ write_design <- function(x, file, format = "rds", overwrite = FALSE) {
     class = "fieldhub_export_error", data = list(parent = e))
   tryCatch({
     handler$write(x, temporary)
-    if (!file.copy(temporary, file, overwrite = overwrite)) stop("Could not copy the serialized output to its destination.")
+    if (!file.copy(temporary, file, overwrite = overwrite)) {
+      fieldhub_abort("Could not copy the serialized output to its destination.", class = "fieldhub_export_error")
+    }
   }, error = problem, warning = problem)
   invisible(file)
 }

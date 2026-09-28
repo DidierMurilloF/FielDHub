@@ -57,6 +57,16 @@ test_that("imports reject malformed and unknown-schema files with one classed co
   expect_error(read_design(c(file, file)), class = "fieldhub_input_error")
 })
 
+test_that("copy failures use the common error contract and clean temporary output", {
+  directory <- tempfile("fieldhub-copy-failure-")
+  dir.create(directory)
+  on.exit(unlink(directory, recursive = TRUE), add = TRUE)
+  local_mocked_bindings(file.copy = function(...) FALSE, .package = "base")
+  expect_error(write_design(latin_rectangle(5, 3, seed = 1), file.path(directory, "result.rds")),
+    "Could not copy", class = "fieldhub_export_error")
+  expect_length(list.files(directory, all.files = TRUE, no.. = TRUE), 0L)
+})
+
 test_that("standalone script exports replay exactly but are never imported as code", {
   file <- tempfile(fileext = ".R")
   on.exit(unlink(file), add = TRUE)

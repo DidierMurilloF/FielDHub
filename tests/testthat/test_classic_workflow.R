@@ -23,6 +23,7 @@ test_that("classic workflow books preserve the unsimulated view and replay simul
 
 test_that("the classic workflow registry preserves module-specific view contracts", {
   expected <- c(CRD = "CRD_fieldbook", RCBD = "RCBD_fieldbook", LSD = "LSD_fieldbook",
+                 Latin_Rectangle = "field_book",
                  FD = "FD.Output", SPD = "SPD.output", SSPD = "SSPD.output",
                  STRIPD = "STRIP.output", IBD = "IBD.output", RowCol = "rowcolD",
                  Alpha_Lattice = "ALPHA_fieldbook", Square_Lattice = "square_fieldbook",
