@@ -69,7 +69,7 @@ Rscript tools/run-benchmarks.R candidate-results /path/to/candidate-library FULL
 Rscript tools/compare-benchmarks.R baseline-results candidate-results comparison.csv
 ```
 
-The comparison rejects mismatched environments, workloads, missing cases and
+The comparison rejects mismatched environments, measurement-script hashes, workloads, missing cases and
 duplicate cases. Runtime increases over both 25% and 10 ms, allocation increases
 over 25%, unavailable allocation profiling, reduced optimizer minimum distance,
 and changed stop diagnostics require review. These are review thresholds, not

@@ -50,7 +50,7 @@ dir.create(scratch)
 directories <- file.path(scratch, c("baseline", "candidate"))
 for (directory in directories) dir.create(directory)
 manifest <- data.frame(Revision = strrep("a", 40L), PackageVersion = "1", RVersion = "4.5.3",
-  RBuild = "fixture", Platform = "fixture", Host = "fixture", BLAS = "fixture", Dependencies = "fixture")
+  RBuild = "fixture", Platform = "fixture", Host = "fixture", BLAS = "fixture", Dependencies = "fixture", BenchmarkCode = "fixture")
 for (directory in directories) {
   write.dcf(manifest, file.path(directory, "manifest.dcf"))
   for (family in names(benchmark_contracts())) {
@@ -66,6 +66,10 @@ manifest$Host <- "different"
 write.dcf(manifest, file.path(directories[2L], "manifest.dcf"))
 fails(compare_benchmark_directories(directories[1L], directories[2L]))
 manifest$Host <- "fixture"
+manifest$BenchmarkCode <- "different"
+write.dcf(manifest, file.path(directories[2L], "manifest.dcf"))
+fails(compare_benchmark_directories(directories[1L], directories[2L]))
+manifest$BenchmarkCode <- "fixture"
 manifest$PackageVersion <- "different"
 write.dcf(manifest, file.path(directories[2L], "manifest.dcf"))
 fails(compare_benchmark_directories(directories[1L], directories[2L]))

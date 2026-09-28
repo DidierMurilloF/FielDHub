@@ -10,6 +10,8 @@ if (file.exists(output) || !dir.create(output, recursive = TRUE)) stop("Choose a
 library(FielDHub, lib.loc = library_path)
 script <- sub("^--file=", "", grep("^--file=", commandArgs(), value = TRUE)[1L])
 source(file.path(dirname(script), "benchmark-compare.R"))
+benchmark_scripts <- file.path(dirname(script), paste0("benchmark-", names(benchmark_contracts()), ".R"))
+benchmark_hashes <- tools::md5sum(benchmark_scripts)
 installed <- installed.packages()
 dependencies <- tools::package_dependencies("FielDHub", installed, recursive = TRUE)[[1L]]
 dependencies <- sort(unique(dependencies))
@@ -18,6 +20,7 @@ manifest <- c(Revision = arguments[3L], PackageVersion = as.character(utils::pac
   RVersion = as.character(getRversion()), RBuild = R.version.string, Platform = R.version$platform,
   Host = paste(Sys.info()[c("sysname", "release", "nodename", "machine")], collapse = "; "),
   BLAS = unname(extSoftVersion()["BLAS"]),
+  BenchmarkCode = paste(paste(basename(benchmark_scripts), unname(benchmark_hashes), sep = "="), collapse = "; "),
   Dependencies = paste(paste(dependencies, versions, sep = "="), collapse = "; "),
   StartedUTC = format(Sys.time(), tz = "UTC", usetz = TRUE))
 write.dcf(as.data.frame(as.list(manifest)), file.path(output, "manifest.dcf"))

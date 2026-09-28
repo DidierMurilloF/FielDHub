@@ -100,13 +100,13 @@ compare_benchmark_tables <- function(baseline, candidate, family) {
 compare_benchmark_directories <- function(baseline, candidate) {
   manifests <- lapply(c(baseline, candidate), function(path) {
     x <- read.dcf(file.path(path, "manifest.dcf"))
-    required <- c("Revision", "PackageVersion", "RVersion", "RBuild", "Platform", "Host", "BLAS", "Dependencies")
+    required <- c("Revision", "PackageVersion", "RVersion", "RBuild", "Platform", "Host", "BLAS", "Dependencies", "BenchmarkCode")
     if (nrow(x) != 1L || !all(required %in% colnames(x)) || anyNA(x[, required]) ||
         any(!nzchar(x[, required])) ||
         !grepl("^[0-9a-f]{40}$", x[1L, "Revision"])) stop("Incomplete benchmark manifest.")
     x
   })
-  for (column in c("RVersion", "RBuild", "Platform", "Host", "BLAS", "Dependencies")) {
+  for (column in c("RVersion", "RBuild", "Platform", "Host", "BLAS", "Dependencies", "BenchmarkCode")) {
     if (!identical(manifests[[1L]][1L, column], manifests[[2L]][1L, column])) {
       stop("Benchmark manifests differ: ", column)
     }
