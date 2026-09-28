@@ -6,7 +6,8 @@ if (length(arguments) < 1L || length(arguments) > 2L) {
   stop("Usage: Rscript tools/benchmark-spatial.R results.csv [package-library]")
 }
 if (file.exists(arguments[1])) stop("The output file already exists; choose a new path.")
-library(FielDHub, lib.loc = if (length(arguments) == 2L) arguments[2] else NULL)
+if (length(arguments) == 2L) .libPaths(c(normalizePath(arguments[2], mustWork = TRUE), .libPaths()))
+library(FielDHub)
 namespace <- asNamespace("FielDHub")
 if (!exists("separable_ar1_patch", namespace, inherits = FALSE)) {
   stop("This benchmark requires the separable spatial simulator.")
@@ -22,7 +23,7 @@ largest_allocation <- function(size) {
   invisible(spatial(size, size, 0.4, 0.5, 0.1))
   Rprofmem(NULL)
   bytes <- suppressWarnings(as.numeric(sub(" .*", "", readLines(profile))))
-  if (all(is.na(bytes))) NA_real_ else max(bytes, na.rm = TRUE)
+  if (all(is.na(bytes))) 0 else max(bytes, na.rm = TRUE)
 }
 
 measure <- function(size) {

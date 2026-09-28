@@ -3,6 +3,9 @@ if (is.na(root) || !dir.exists(root)) stop("Pass the repository path.")
 launcher_status <- system2(file.path(R.home("bin"), "Rscript"),
   c("--vanilla", shQuote(file.path(root, "tools", "check-launchers.R")), shQuote(root)))
 stopifnot(launcher_status == 0L)
+comparison_status <- system2(file.path(R.home("bin"), "Rscript"),
+  c("--vanilla", shQuote(file.path(root, "tools", "check-benchmark-comparison.R")), shQuote(root)))
+stopifnot(comparison_status == 0L)
 description <- read.dcf(file.path(root, "DESCRIPTION"))
 stopifnot(grepl("testthat (>= 3.2.0)", description[1L, "Suggests"], fixed = TRUE))
 workflow <- yaml::read_yaml(file.path(root, ".github/workflows/R-CMD-check.yaml"))

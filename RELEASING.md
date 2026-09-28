@@ -58,9 +58,42 @@ Rscript tools/benchmark-exports.R exports.csv /path/to/candidate-library
 Rscript tools/benchmark-optimizers.R optimizers.csv /path/to/candidate-library
 ```
 
+For a complete, comparable record use `tools/run-benchmarks.R` instead. Install
+each exact revision into a separate library first; the revision argument labels
+that installation, it does not fetch or install code. Run both sequentially on
+the same idle host with identical dependency versions:
+
+```sh
+Rscript tools/run-benchmarks.R baseline-results /path/to/baseline-library FULL_BASELINE_SHA
+Rscript tools/run-benchmarks.R candidate-results /path/to/candidate-library FULL_CANDIDATE_SHA
+Rscript tools/compare-benchmarks.R baseline-results candidate-results comparison.csv
+```
+
+The comparison rejects mismatched environments, workloads, missing cases and
+duplicate cases. Runtime increases over both 25% and 10 ms, allocation increases
+over 25%, unavailable allocation profiling, reduced optimizer minimum distance,
+and changed stop diagnostics require review. These are review thresholds, not
+scientific tolerances or promises about performance. Re-run noisy measurements.
+An optional fourth argument supplies a CSV of reviewed exceptions containing
+`case`, `metric`, `baseline`, `candidate`, `baseline_revision`,
+`candidate_revision`, and a substantive `reason`. Copy the exact values from
+the report; stale, duplicate or unnecessary exceptions fail. Keep the original
+report, new report, and explanations with the release evidence.
+
+The full suite requires the bounded factor search, separable simulator, indexed
+exporter and optimizer diagnostics. `f06aaf01626bf390f985861c62c386656604b4d3` is
+the first frozen modernization baseline for this protocol, **not a released
+version**. The old 1.5.0 implementation cannot safely run the large cases (its
+factor subsets are exponential and spatial covariance is dense). Do not label
+an unsupported old-release comparison as passing or run it at those sizes.
+Use an independently bounded common-workload study for historical comparisons.
+
 The manually dispatchable `release-benchmarks` workflow runs the same four
 benchmarks and retains CSV files and session information for 90 days. Copy the
 reviewed results into the permanent release assets before they expire.
+It accepts an optional full baseline SHA to run and compare on the same runner;
+without one, it collects candidate evidence but does not claim a regression gate
+passed. Remote workflow execution still requires a pushed branch.
 
 Compare with the previous release on the same hardware, R version, and package
 versions, with no competing workloads. Record and explain regressions before
@@ -68,6 +101,8 @@ publishing; repeat noisy measurements. Do not treat shared-runner timings as
 precise cross-release comparisons. Review optimizer quality and stop reasons,
 not just speed. `largest_R_allocation_bytes` measures the largest R allocation,
 not peak memory, and is `NA` when profiling is unavailable.
+Zero means profiling ran but recorded no numeric allocation event (small
+allocations can use R's existing allocation pools); it does not mean zero RAM.
 
 ## Publish and follow up
 

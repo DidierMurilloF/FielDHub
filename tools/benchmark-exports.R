@@ -7,7 +7,8 @@ if (length(arguments) < 1L || length(arguments) > 2L) {
   stop("Usage: Rscript tools/benchmark-exports.R results.csv [package-library]")
 }
 if (file.exists(arguments[1])) stop("The output file already exists; choose a new path.")
-library(FielDHub, lib.loc = if (length(arguments) == 2L) arguments[2] else NULL)
+if (length(arguments) == 2L) .libPaths(c(normalizePath(arguments[2], mustWork = TRUE), .libPaths()))
+library(FielDHub)
 namespace <- asNamespace("FielDHub")
 if (!exists("field_book_export_grid", namespace, inherits = FALSE)) {
   stop("This benchmark requires the indexed layout exporter.")
@@ -38,7 +39,7 @@ measure <- function(size) {
     Rprofmem(NULL)
     profiling <- FALSE
     bytes <- suppressWarnings(as.numeric(sub(" .*", "", readLines(profile))))
-    if (!all(is.na(bytes))) largest <- max(bytes, na.rm = TRUE)
+    largest <- if (all(is.na(bytes))) 0 else max(bytes, na.rm = TRUE)
   }
   data.frame(package_version = as.character(utils::packageVersion("FielDHub")),
              r_version = as.character(getRversion()), platform = R.version$platform,
