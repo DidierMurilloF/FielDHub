@@ -1,31 +1,9 @@
 #' Schema-1 field-book extensions, preserving established storage types
 #' @noRd
 field_book_extension_columns <- function(x) {
-  info <- if (is.list(x$infoDesign)) x$infoDesign else list()
-  classic <- c("REP", "TREATMENT")
-  incomplete <- c("REP", "IBLOCK", "UNIT", "ENTRY", "TREATMENT")
-  spatial <- c("EXPT", "YEAR", "ROW", "COLUMN", "CHECKS", "ENTRY", "TREATMENT")
-  columns <- switch(x$metadata$design,
-    crd = classic,
-    rcbd = c(classic, if (!is.null(info$checks)) c("ENTRY", "CHECKS")),
-    latin_square = c("SQUARE", "ROW", "COLUMN", "TREATMENT"),
-    full_factorial = c("REP", "TRT_COMB", paste0("FACTOR_", info$factors)),
-    split_plot = c("REP", "WHOLE_PLOT", "SUB_PLOT", "TRT_COMB"),
-    split_split_plot = c("REP", "WHOLE_PLOT", "SUB_PLOT", "SUB_SUB_PLOT", "TRT_COMB"),
-    strip_plot = c("REP", "HSTRIP", "VSTRIP", "TRT_COMB"),
-    incomplete_blocks = incomplete,
-    alpha_lattice = incomplete,
-    square_lattice = incomplete,
-    rectangular_lattice = incomplete,
-    row_column = c("REP", "ROW", "COLUMN", "ENTRY", "TREATMENT"),
-    diagonal_arrangement = spatial,
-    optimized_arrangement = spatial,
-    sparse_allocation = spatial,
-    rcbd_augmented = c(spatial, "BLOCK"),
-    partially_replicated = c(spatial, "REP"),
-    multi_location_prep = c(spatial, "REP"),
-    character()
-  )
+  columns <- registered_design_entry(x)$columns
+  if (is.null(columns)) return(character())
+  if (is.function(columns)) columns <- columns(x)
   unique(columns)
 }
 

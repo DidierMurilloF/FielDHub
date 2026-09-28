@@ -33,7 +33,11 @@ print.FielDHub <- function(x, n=10, ...){
   # Each design has its own method. Results saved by FielDHub 1.5 or earlier
   # have the class "FielDHub" only, so they get the class of their design.
   design <- with_design_class(x)
-  if (identical(class(design), class(x))) return(NextMethod())
+  if (identical(class(design), class(x))) {
+    entry <- registered_design_entry(x)
+    if (is.null(entry$title)) return(NextMethod())
+    return(print_design(x, entry$title, x$metadata$design, n, ...))
+  }
   print(design, n = n, ...)
   invisible(x)
 }
@@ -89,8 +93,14 @@ summary.FielDHub <- function(object, ...) {
 #' @importFrom utils str
 #' @export
 print.summary.FielDHub <- function(x, ...) {
-  # Each design has its own method; this one shows results of other designs
-  NextMethod()
+  entry <- registered_design_entry(x)
+  if (is.null(entry$title)) {
+    NextMethod()
+  } else {
+    cat(entry$title, "\n\n")
+    summary_list("1. Information on the design parameters:", x$infoDesign)
+    summary_str("2. Structure of the field book:", x$fieldBook)
+  }
   invisible(x)
 }
 #-----------------------------------------------------------------------

@@ -102,14 +102,5 @@ reproduction_engine <- function(x) {
 #' Core design identifiers and their public engine names
 #' @noRd
 fieldhub_engine_registry <- function() {
-  c(crd = "CRD", rcbd = "RCBD", latin_square = "latin_square",
-    full_factorial = "full_factorial", split_plot = "split_plot",
-    split_split_plot = "split_split_plot", strip_plot = "strip_plot",
-    incomplete_blocks = "incomplete_blocks", row_column = "row_column",
-    square_lattice = "square_lattice", rectangular_lattice = "rectangular_lattice",
-    alpha_lattice = "alpha_lattice", partially_replicated = "partially_replicated",
-    rcbd_augmented = "RCBD_augmented", diagonal_arrangement = "diagonal_arrangement",
-    optimized_arrangement = "optimized_arrangement", split_families = "split_families",
-    sparse_allocation = "sparse_allocation", multi_location_prep = "multi_location_prep",
-    allocation_sparse = "do_optim", allocation_prep = "do_optim", pair_swap = "swap_pairs")
+  vapply(fieldhub_design_registry(), `[[`, character(1), "engine")
 }

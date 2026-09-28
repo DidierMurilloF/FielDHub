@@ -14,6 +14,28 @@
 #' @noRd
 draw_layout <- function(x, df, ...) UseMethod("draw_layout")
 
+#' @method draw_layout FielDHub
+#' @export
+#' @noRd
+draw_layout.FielDHub <- function(x, df, ...) {
+  handler <- registered_design_entry(x)$render
+  if (is.null(handler)) fieldhub_abort("This result has no registered layout renderer.")
+  get(handler, envir = asNamespace("FielDHub"), inherits = FALSE)(x, df, ...)
+}
+
+#' Treatment and plot maps for registered fixed-coordinate designs
+#' @noRd
+draw_registered_layout <- function(x, df, ...) {
+  main <- layout_title(paste0(registered_design_entry(x)$title, " "), df)
+  p1 <- plot_desplot(TREATMENT ~ COLUMN + ROW, data = df, text.string = "TREATMENT",
+                    main = main, extra_args = list(...))
+  numbers <- df
+  numbers$PLOT <- as.character(numbers$PLOT)
+  p2 <- plot_desplot(PLOT ~ COLUMN + ROW, data = numbers, text.string = "PLOT",
+                    main = main, extra_args = list(...))
+  list(p1 = p1, p2 = p2, data = df)
+}
+
 # Title of a layout map, with its dimensions
 layout_title <- function(title, df) {
   paste0(title, max(as.numeric(df$ROW)), "X", max(as.numeric(df$COLUMN)))

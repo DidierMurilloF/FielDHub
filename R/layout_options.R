@@ -48,6 +48,15 @@ layout_options.default <- function(x, planter = "serpentine", stacked = "vertica
   fieldhub_abort("This result has no field layout.")
 }
 
+#' @method layout_options FielDHub
+#' @export
+#' @noRd
+layout_options.FielDHub <- function(x, planter = "serpentine", stacked = "vertical") {
+  handler <- registered_design_entry(x)$layout
+  if (is.null(handler)) fieldhub_abort("This result has no field layout.")
+  get(handler, envir = asNamespace("FielDHub"), inherits = FALSE)(x, planter, stacked)
+}
+
 #' @method layout_options fieldhub_split_families
 #' @export
 #' @noRd
