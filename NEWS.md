@@ -775,19 +775,21 @@
   a single replicate, which its CRD type accepts; with the RCBD type the
   page explains that two are needed.
 
-- The spatial design pages are moving to the same generic page (so far:
-  the optimized arrangement, p-rep, augmented RCBD, single diagonal,
-  multiple diagonal and sparse allocation pages). The page reads its
-  sidebar with `read_design_controls()`, offers its field sizes after Run!
-  from the same plain functions the R functions use, and builds its design
-  through the same argument builder, so the page and a direct
+- The seven spatial design pages (optimized arrangement, p-rep, augmented
+  RCBD, single and multiple diagonal, sparse allocation and multi-location
+  p-rep) are now built by the same generic page as the classic designs,
+  from a per-design spec; no design keeps a module of its own. The page
+  reads its sidebar with `read_design_controls()`, offers its field sizes
+  after Run! from the same plain functions the R functions use, and builds
+  its design through the same argument builder, so the page and a direct
   `optimized_arrangement()`, `partially_replicated()`, `RCBD_augmented()`,
-  `diagonal_arrangement()` or `sparse_allocation()` call (the allocation
-  of Run! through `do_optim()`) build identical designs. Menus, result,
-  simulation and export ids, uploads and archives are unchanged.
-  Deliberate consistency changes: the seed box is blank by default (it
-  started at 5 on the optimized arrangement page, 4095 on the p-rep page,
-  1 on the augmented RCBD page and 17 on the diagonal and sparse
+  `diagonal_arrangement()`, `sparse_allocation()` or
+  `multi_location_prep()` call (the allocation of Run! through
+  `do_optim()`) build identical designs. Menus, result, simulation and
+  export ids, uploads and archives are unchanged. Deliberate consistency
+  changes: the seed box is blank by default (it started at 5 on the
+  optimized arrangement page, 4095 on the p-rep page, 1 on the augmented
+  RCBD and multi-location p-rep pages and 17 on the diagonal and sparse
   allocation pages) and uses the shared labels ("Reps per Check:",
   "Experiment Name(s):", "Starting Plot Number(s):", "Location Name(s):",
   "Choose Location to View:", and "Input # of Checks:" for the augmented
@@ -801,22 +803,29 @@
   sparse allocation pages also did so when most sidebar controls changed);
   the sparse allocation page's "# of Copies Per Entry:" offers 1 up to one
   less than the locations from the start (it first offered only the upper
-  half until Run!); the multiple diagonal page trims the spaces around
-  each experiment name instead of removing every space, and colours its
-  experiment layout by the experiments of the field book; and unchecking
-  "Randomize Entries?" shows its note under the checkbox instead of a
-  notice; "Reps per Check:" accepts one value for every check, as on the
-  RCBD page; and a blank or invalid control, too many check plots for the
-  entries, an uploaded `REPS` column that is not whole numbers, a number
-  of plots with no field size (on the p-rep page, the advice to allow
-  filler plots), fewer than eight augmented RCBD entries, no block count
-  for them, uploaded diagonal checks without consecutive ENTRY numbers,
-  too few diagonal entries for any field, experiment sizes that do not add
-  up to the entries or differ while entries repeat across experiments,
-  fewer than 3 sparse locations or 60 sparse entries, an uploaded sparse
-  list whose entries do not match "Input # of Entries:" or "# of Rep Per
-  Group:" with a different number of values than "# of Entries Per Rep
-  Group:" is explained in the "Get Random" tab instead of a dialog.
+  half until Run!); the multi-location p-rep page's "Include checks?"
+  Yes/No buttons are the shared "Add repeated checks?" checkbox, and its
+  different field size per location is chosen in one select per location
+  under "Set different dimensions across locations" instead of a "Select
+  multiple dimensions" dialog; the multiple diagonal page trims the spaces
+  around each experiment name instead of removing every space, and colours
+  its experiment layout by the experiments of the field book; unchecking
+  the augmented RCBD's "Randomize Entries?" shows its note under the
+  checkbox instead of a notice; "Reps per Check:" accepts one value for
+  every check, as on the RCBD page (optimized arrangement and
+  multi-location p-rep pages); and a blank or invalid control, too many
+  check plots for the entries, an uploaded `REPS` column that is not whole
+  numbers, a number of plots with no field size (on the p-rep page, the
+  advice to allow filler plots), fewer than eight augmented RCBD entries,
+  no block count for them, uploaded diagonal checks without consecutive
+  ENTRY numbers, too few diagonal entries for any field, experiment sizes
+  that do not add up to the entries or differ while entries repeat across
+  experiments, fewer than 3 sparse locations or 60 sparse entries, an
+  uploaded sparse or multi-location p-rep list whose entries do not match
+  "Input # of Entries:", fewer than 2 multi-location p-rep locations or "#
+  of Rep Per Group:" with a different number of values than "# of Entries
+  Per Rep Group:" is explained in the "Get Random" tab instead of a
+  dialog.
 
 ### Fix bugs:
 

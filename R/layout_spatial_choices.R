@@ -146,3 +146,34 @@ diagonal_percent_choices <- function(nrows, ncols, checks, entries, kindExpt = "
   percents <- as.numeric(options$dt[["Percentage of Checks"]])
   list(choices = percents, selected = utils::tail(percents, 1L), table = options$dt)
 }
+
+#' Field sizes of each location of a multi-location p-rep design
+#'
+#' @param plots Number of plots of each location.
+#' @inheritParams prep_field_choices
+#' @return \code{list(choices = , selected = )}, each a list with one entry
+#'   per location (no choices where no size fits).
+#' @noRd
+prep_location_field_choices <- function(plots, allow_fillers) {
+  offered <- lapply(plots, function(n) {
+    tryCatch(prep_field_choices(n, allow_fillers), fieldhub_input_error = function(e) {
+      list(choices = character(), selected = character())
+    })
+  })
+  list(choices = lapply(offered, `[[`, "choices"), selected = lapply(offered, `[[`, "selected"))
+}
+
+#' Copies per entry a multi-location p-rep design offers
+#'
+#' @description From one more than the locations to one less than twice
+#' the locations (some entries are replicated in some locations); the
+#' second is selected where there is one.
+#' @param l Number of locations.
+#' @return \code{list(choices = , selected = )}.
+#' @noRd
+prep_copies_choices <- function(l) {
+  l <- validate_locations_input(l)
+  if (l < 2) fieldhub_abort("The system requires at least 2 locations to proceed.")
+  choices <- seq(l + 1, 2 * l - 1)
+  list(choices = choices, selected = min(l + 2, 2 * l - 1))
+}

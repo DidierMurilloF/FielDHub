@@ -9,7 +9,7 @@ library(FielDHub)
 classic_modules <- c("CRD", "RCBD", "LSD", "FD", "SPD", "SSPD", "STRIPD", "IBD", "RowCol",
                      "Alpha_Lattice", "Square_Lattice", "Rectangular_Lattice")
 spatial_modules <- c("Optim", "pREPS", "RCBD_augmented", "Diagonal", "diagonal_multiple",
-                     "sparse_allocation")
+                     "sparse_allocation", "multi_loc_preps")
 all_modules <- c(classic_modules, spatial_modules)
 
 # The one label of each concept, written out here so a label changed in
@@ -114,7 +114,8 @@ page_defaults <- function(module, seed = 7) {
 # allocations and the p-rep optimizations. optimized_arrangement() and
 # RCBD_augmented() run in well under a second.
 long_running <- c(Optim = FALSE, pREPS = TRUE, RCBD_augmented = FALSE, Diagonal = TRUE,
-                  diagonal_multiple = TRUE, sparse_allocation = TRUE)
+                  diagonal_multiple = TRUE, sparse_allocation = TRUE,
+                  multi_loc_preps = TRUE)
 
 test_that("there is one page spec per design, in the registry's workflow order", {
   specs <- fieldhub_design_specs()
@@ -272,7 +273,15 @@ spatial_defaults <- function(module) {
                                           sparse_list = do_optim(design = "sparse", lines = 380, l = 5,
                                                                  copies_per_entry = 4, add_checks = TRUE,
                                                                  checks = 4, seed = 7),
-                                          seed = 7, checksPercent = 14.13)
+                                          seed = 7, checksPercent = 14.13),
+    multi_loc_preps = multi_location_prep(lines = 312, nrows = rep(26, 6), ncols = rep(16, 6), l = 6,
+                                          plotNumber = c(1, 1001, 2001, 3001, 4001, 5001),
+                                          copies_per_entry = 8, checks = NULL, rep_checks = NULL,
+                                          exptName = "Expt1",
+                                          optim_list = do_optim(design = "prep", lines = 312, l = 6,
+                                                                copies_per_entry = 8, add_checks = FALSE,
+                                                                seed = 7),
+                                          seed = 7, allow_fillers = FALSE)
   )
 }
 
@@ -472,6 +481,45 @@ test_that("the sparse allocation page allocates at Run! and builds the API's des
   expect_error(spec$accept(list(fieldBook = NULL)), "do not fit the entries", class = "fieldhub_input_error")
 })
 
+test_that("the multi-location p-rep page allocates at Run! and builds the API's design", {
+  spec <- design_app_spec("multi_loc_preps")
+  copies <- Filter(function(control) identical(control$id, "copies_per_entry"), spec$controls)[[1]]
+  expect_identical(design_control_choices(spec, copies, shiny_shaped(list(l = 4))), prep_copies_choices(4))
+  # checks, a different field size per location, filler plots
+  raw <- utils::modifyList(page_defaults("multi_loc_preps", seed = 13), list(
+    lines = 150, use_checks = TRUE, checks = 2, rep_checks = "6", l = 3, copies_per_entry = "4",
+    allow_fillers = TRUE, planter = "cartesian", plot_start = "1,501,1001",
+    location_names = "A,B,C", expt_name = "M1"))
+  values <- spec$values(read_design_controls(spec, shiny_shaped(raw)), NULL)
+  allocation <- do_optim(design = "prep", lines = 150, l = 3, copies_per_entry = 4, add_checks = TRUE,
+                         checks = 2, rep_checks = c(6, 6), seed = 13)
+  expect_identical(do.call(do_optim, design_args_multi_loc_preps_optim(values)), allocation)
+  plots <- as.numeric(allocation$size_locations) + 12
+  sizes <- prep_location_field_choices(plots, TRUE)
+  chosen <- vapply(sizes$choices, function(choices) utils::tail(unname(choices), 1L), "")
+  parts <- lapply(strsplit(chosen, " x "), as.numeric)
+  expect_same_design(
+    page_design(spec, raw, steps = list(multi_dimension = TRUE, location_dimensions = as.list(chosen))),
+    multi_location_prep(lines = 150, nrows = vapply(parts, `[[`, 1, 1), ncols = vapply(parts, `[[`, 1, 2),
+                        l = 3, planter = "cartesian", plotNumber = c(1, 501, 1001), copies_per_entry = 4,
+                        checks = 2, rep_checks = c(6, 6), exptName = "M1", locationNames = c("A", "B", "C"),
+                        optim_list = allocation, seed = 13, allow_fillers = TRUE))
+  # the allocation table averages the copies over the locations
+  view <- spec$setup$view(c(values, list(optim_list = allocation)), list())
+  expect_identical(names(view), c("LOC1", "LOC2", "LOC3", "Copies", "Avg"))
+  expect_true(is.na(view["Total", "Avg"]))
+  # an uploaded list, its checks first
+  upload <- data.frame(ENTRY = 1:152, NAME = c("C1", "C2", paste0("L", 3:152)))
+  values <- spec$values(read_design_controls(spec, shiny_shaped(raw), uploaded = TRUE), spec$upload_shape(upload))
+  expect_identical(values$entries$names, paste0("L", 3:152))
+  expect_error(spec$upload_shape(transform(upload, ENTRY = paste0("E", ENTRY))), "ENTRY should be numeric",
+               class = "fieldhub_input_error")
+  expect_error(page_design(spec, utils::modifyList(raw, list(lines = 149)), upload),
+               "does not match with the input value", class = "fieldhub_input_error")
+  expect_error(page_design(spec, utils::modifyList(page_defaults("multi_loc_preps"), list(l = 1))),
+               "at least 2 locations", class = "fieldhub_input_error")
+})
+
 test_that("choices of computed selects follow the entries, typed or uploaded", {
   spec <- design_app_spec("RowCol")
   nrows <- Filter(function(control) identical(control$id, "nrows"), spec$controls)[[1]]
@@ -495,7 +543,8 @@ test_that("the page HTML has every control, the shared buttons and no inline sty
     has_id <- function(id) grepl(paste0('id="x-', id, '"'), html, fixed = TRUE)
     for (control in c(spec$controls, spec$steps)) {
       expect_true(has_id(control$id), info = paste(module, control$id))
-      if (!is.null(control$label)) {
+      # one select per location is drawn by the server, labelled "<label> <i>"
+      if (!is.null(control$label) && !identical(control$type, "location_selects")) {
         expect_true(grepl(htmltools::htmlEscape(control$label), html, fixed = TRUE),
                     info = paste(module, control$id))
       }
@@ -547,12 +596,15 @@ test_that("the same concept has the same label, default and minimum on every pag
   # The spatial pages keep the smallest counts they have always offered,
   # and the defaults of their own
   page_minimums <- c(Optim.lines = 5, Diagonal.lines = 50, diagonal_multiple.lines = 50,
-                     sparse_allocation.lines = 50, sparse_allocation.l = 3)
+                     sparse_allocation.lines = 50, sparse_allocation.l = 3,
+                     multi_loc_preps.l = 2)
   page_values <- list(Optim.plot_start = "1", Optim.rep_checks = "8,8,8,8", pREPS.plot_start = "1",
                    pREPS.repGens = "75,150", pREPS.repUnits = "2,1",
                    RCBD_augmented.plot_start = "1", Diagonal.plot_start = "1",
                    diagonal_multiple.plot_start = "1", diagonal_multiple.expt_name = "Expt1, Expt2, Expt3",
-                   sparse_allocation.plot_start = "1", sparse_allocation.l = 5)
+                   sparse_allocation.plot_start = "1", sparse_allocation.l = 5,
+                   multi_loc_preps.plot_start = "1", multi_loc_preps.l = 6, multi_loc_preps.lines = 312,
+                   multi_loc_preps.checks = 3, multi_loc_preps.rep_checks = "8,8,8")
   seen <- character()
   for (module in all_modules) {
     spec <- design_app_spec(module)

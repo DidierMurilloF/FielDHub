@@ -210,3 +210,22 @@ test_that("location entry lists show each location's entries, LOCATION first", {
   expect_identical(as.character(view$LOCATION), c("LOC1", "LOC1", "LOC2"))
   expect_true(all(vapply(view, is.factor, logical(1))))
 })
+
+test_that("multi-location p-rep pages offer copies per entry and a field size per location", {
+  expect_identical(prep_copies_choices(6), list(choices = 7:11, selected = 8))
+  expect_identical(prep_copies_choices(2), list(choices = 3L, selected = 3))
+  expect_error(prep_copies_choices(1), "at least 2 locations", class = "fieldhub_input_error")
+  for (value in blank_inputs) expect_classed(prep_copies_choices(value), info = deparse(value))
+  sizes <- prep_location_field_choices(c(300, 307), FALSE)
+  expect_identical(sizes$selected, list("15 x 20", character()))
+  expect_length(sizes$choices[[2]], 0L)
+  expect_identical(multi_prep_entries(100, NULL, 3), list(names = NULL))
+  upload <- data.frame(ENTRY = 1:12, NAME = paste0("N", 1:12))
+  expect_identical(multi_prep_entries(10, 2, 3, upload)$names, paste0("N", 3:12))
+  expect_identical(multi_prep_entries(12, NULL, 3, upload)$names, paste0("N", 1:12))
+  expect_error(multi_prep_entries(11, 2, 3, upload), "does not match", class = "fieldhub_input_error")
+  expect_error(multi_prep_entries(10, 2, 1), "at least 2 locations", class = "fieldhub_input_error")
+  expect_identical(check_numeric_entries_upload(upload), upload)
+  expect_error(check_numeric_entries_upload(transform(upload, ENTRY = as.character(ENTRY))),
+               "should be numeric", class = "fieldhub_input_error")
+})

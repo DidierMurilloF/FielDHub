@@ -4,8 +4,7 @@ test_that("every module connects its design to the shared reproduction component
   # A spatial page of the generic module runs its results in
   # app_spatial_page(), whose design reactive is `design` too.
   sources <- c(
-    mod_design_server = "design", app_spatial_page = "design",
-    mod_multi_loc_preps_server = "pREPS_reactive"
+    mod_design_server = "design", app_spatial_page = "design"
   )
   calls <- function(code) {
     if (missing(code) || (!is.call(code) && !is.pairlist(code))) return(list())

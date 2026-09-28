@@ -145,3 +145,31 @@ sparse_entries <- function(lines, checks, l, data = NULL) {
   }
   list(checks_entries = checks_entries, names = data$NAME[-seq_len(checks)])
 }
+
+#' Check the ENTRY column of an uploaded entry list is numeric
+#' @param data A shaped ENTRY/NAME data frame.
+#' @return \code{data}, or a classed input error.
+#' @noRd
+check_numeric_entries_upload <- function(data) {
+  if (!is.numeric(data$ENTRY)) fieldhub_abort("Column ENTRY should be numeric (integer numbers).")
+  data
+}
+
+#' Entries of a multi-location p-rep design
+#'
+#' @param lines Number of entries.
+#' @param checks Number of checks, or \code{NULL} without checks.
+#' @param l Number of locations.
+#' @param data The uploaded ENTRY/NAME list (checks first), or \code{NULL}.
+#' @return A list with \code{names} (the uploaded names of the entries, or
+#'   \code{NULL}).
+#' @noRd
+multi_prep_entries <- function(lines, checks, l, data = NULL) {
+  if (l < 2) fieldhub_abort("The system requires at least 2 locations to proceed.")
+  if (is.null(data)) return(list(names = NULL))
+  checks <- if (is.null(checks)) 0L else checks
+  if (nrow(data) - checks != lines) {
+    fieldhub_abort("Number of entries in file does not match with the input value.")
+  }
+  list(names = data$NAME[setdiff(seq_len(nrow(data)), seq_len(checks))])
+}

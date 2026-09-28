@@ -150,6 +150,11 @@ build_design_specs <- function() {
   location_entries_table <- function(design, location, values) {
     entry_table(location_entries_view(design$list_locs), height = "500px")
   }
+  # Plots of each location of a multi-location p-rep design: its entries
+  # and its checks
+  prep_location_plots <- function(values) {
+    as.numeric(values$optim_list$size_locations) + sum(values$rep_checks)
+  }
   diagonal_entry_tables <- list(
     function(design, location, values) {
       entry_table(entry_list_view(design$data_entry[[location]]), "List of Entries.")
@@ -587,7 +592,58 @@ build_design_specs <- function() {
           fieldhub_abort("The field dimensions do not fit the entries. Please, choose other dimensions.")
         }
         design
-      })
+      }),
+    # Run! allocates the entries to the locations (do_optim()); each
+    # location may get a field size of its own
+    multi_loc_preps = spatial("multi_loc_preps", "Optimized Multi-Location P-rep Design",
+      multi_location_prep, upload = "multi_loc_prep", upload_columns = c("ENTRY", "NAME"),
+      upload_check = check_numeric_entries_upload, file_tag = "pREP_",
+      randomizing = "Running p-rep optimization ...",
+      optim = list(engine = do_optim, args = design_args_multi_loc_preps_optim, into = "optim_list"),
+      controls = c(
+        list(ctl_count("lines", 312),
+             ctl_flag("use_checks", FALSE),
+             ctl_checks(3, max = 10, show_if = "input.use_checks == true", enabled_by = "use_checks"),
+             ctl_rep_checks("8,8,8", show_if = "input.use_checks == true", enabled_by = "use_checks"),
+             ctl_locations_from(6, 2),
+             ctl_dependent_select("copies_per_entry", depends_on = "l", options = function(values, data) {
+               prep_copies_choices(values$l)
+             }),
+             ctl_flag("allow_fillers")),
+        spatial_shared(), list(ctl_seed())
+      ),
+      values = function(controls, data) {
+        list(lines = controls$lines, checks = controls$checks, rep_checks = controls$rep_checks,
+             l = controls$l, copies_per_entry = controls$copies_per_entry,
+             allow_fillers = controls$allow_fillers, planter = controls$planter,
+             plot_start = controls$plot_start, seed = controls$seed, expt_name = controls$expt_name,
+             location_names = controls$location_names,
+             entries = multi_prep_entries(controls$lines, controls$checks, controls$l, data))
+      },
+      steps = list(
+        ctl_dimensions(function(values, data) {
+          prep_field_choices(utils::head(prep_location_plots(values), 1L), values$allow_fillers)
+        }, depends_on = "allow_fillers", per_location = TRUE,
+        show_if = "input.multi_dimension != true"),
+        ctl_flag("multi_dimension", stage = "run"),
+        ctl_location_dimensions(function(values, data) {
+          prep_location_field_choices(prep_location_plots(values), values$allow_fillers)
+        }, enabled_by = "multi_dimension", show_if = "input.multi_dimension == true")
+      ),
+      setup = allocation_setup("Table 1: Genotype Allocation Across Environments.", "optim_list",
+                               average = TRUE),
+      entries = list(function(design, location, values) {
+        entry_table(location_entries_view(design$list_locs, c("ENTRY", "NAME", "REPS")), height = "500px")
+      }),
+      panels = list(
+        field_panel(function(design, location, values) {
+          replicated <- as.vector(design$treatments_with_reps[[location]])
+          field_grid_view(design$layoutRandom[[location]], fillers = design$fillerField[[location]],
+                          highlight = replicated,
+                          colours = spatial_highlight_colours("replicated", length(replicated)))
+        }),
+        numbers_panel("plotNumber")
+      ))
   )
 }
 
