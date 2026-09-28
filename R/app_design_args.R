@@ -47,6 +47,27 @@ NULL
 #' @noRd
 `%||%` <- function(x, default) if (is.null(x)) default else x
 
+#' Send a parsed number to the API as R code typing it would
+#'
+#' @description Shiny delivers a whole-number `numericInput` value as an
+#' integer (`shiny:::decodeMessage()` parses the message with
+#' `simplifyVector = FALSE`, so `270` arrives as `270L`), and so do `nrow()`
+#' counts and automatic app seeds (`sample.int()`). The engines accept both,
+#' and build the same field book, but record the argument as given: a design
+#' built from `lines = 270L` has different `metadata$parameters` than one
+#' built from `lines = 270`. Every builder passes its numeric values through
+#' here, so the app records exactly what an R user typing numbers records.
+#'
+#' @param x A parsed value, or NULL.
+#' @return `x` with integer storage turned into double (names and
+#'   dimensions kept); NULL, doubles, characters, logicals, factors, lists
+#'   and data frames unchanged.
+#' @noRd
+as_design_number <- function(x) {
+  if (is.integer(x)) storage.mode(x) <- "double"
+  x
+}
+
 #' Assemble the `values` crd_inputs() sends design_args_CRD(), from already-
 #' parsed scalars. Shared by the module and its tests so both build `values`
 #' the same way.
@@ -76,11 +97,11 @@ design_values_CRD <- function(treatment_count, reps, planter, plot_start,
 #' @noRd
 design_args_CRD <- function(values, data = NULL) {
   list(
-    t = values[["t"]],
-    reps = values[["reps"]],
-    plotNumber = values[["plot_start"]],
+    t = as_design_number(values[["t"]]),
+    reps = as_design_number(values[["reps"]]),
+    plotNumber = as_design_number(values[["plot_start"]]),
     locationNames = values[["location_names"]],
-    seed = values[["seed"]],
+    seed = as_design_number(values[["seed"]]),
     data = data
   )
 }
@@ -92,17 +113,17 @@ design_args_CRD <- function(values, data = NULL) {
 #' @noRd
 design_args_RCBD <- function(values, data = NULL) {
   list(
-    t = values[["t"]],
-    reps = values[["reps"]],
-    l = values[["l"]] %||% 1,
-    plotNumber = values[["plot_start"]],
+    t = as_design_number(values[["t"]]),
+    reps = as_design_number(values[["reps"]]),
+    l = as_design_number(values[["l"]]) %||% 1,
+    plotNumber = as_design_number(values[["plot_start"]]),
     continuous = values[["continuous"]] %||% FALSE,
     planter = values[["planter"]] %||% "serpentine",
-    seed = values[["seed"]],
+    seed = as_design_number(values[["seed"]]),
     locationNames = values[["location_names"]],
     data = data,
-    checks = values[["checks"]],
-    rep_checks = values[["rep_checks"]],
+    checks = as_design_number(values[["checks"]]),
+    rep_checks = as_design_number(values[["rep_checks"]]),
     spread_checks = values[["spread_checks"]] %||% TRUE
   )
 }
@@ -113,11 +134,11 @@ design_args_RCBD <- function(values, data = NULL) {
 #' @noRd
 design_args_LSD <- function(values, data = NULL) {
   list(
-    t = values[["t"]],
-    reps = values[["reps"]],
-    plotNumber = values[["plot_start"]],
+    t = as_design_number(values[["t"]]),
+    reps = as_design_number(values[["reps"]]),
+    plotNumber = as_design_number(values[["plot_start"]]),
     planter = values[["planter"]] %||% "serpentine",
-    seed = values[["seed"]],
+    seed = as_design_number(values[["seed"]]),
     locationNames = values[["location_names"]],
     data = data
   )
@@ -131,13 +152,13 @@ design_args_LSD <- function(values, data = NULL) {
 #' @noRd
 design_args_FD <- function(values, data = NULL) {
   list(
-    setfactors = values[["setfactors"]],
-    reps = values[["reps"]],
-    l = values[["l"]] %||% 1,
-    type = values[["type"]] %||% 2,
-    plotNumber = values[["plot_start"]],
+    setfactors = as_design_number(values[["setfactors"]]),
+    reps = as_design_number(values[["reps"]]),
+    l = as_design_number(values[["l"]]) %||% 1,
+    type = as_design_number(values[["type"]]) %||% 2,
+    plotNumber = as_design_number(values[["plot_start"]]),
     planter = values[["planter"]] %||% "serpentine",
-    seed = values[["seed"]],
+    seed = as_design_number(values[["seed"]]),
     locationNames = values[["location_names"]],
     data = data
   )
@@ -175,13 +196,13 @@ design_values_SPD <- function(wp_count, sp_count, reps, l, seed, planter,
 #' @noRd
 design_args_SPD <- function(values, data = NULL) {
   list(
-    wp = values[["wp"]],
-    sp = values[["sp"]],
-    reps = values[["reps"]],
-    l = values[["l"]] %||% 1,
-    type = values[["type"]] %||% 2,
-    plotNumber = values[["plot_start"]],
-    seed = values[["seed"]],
+    wp = as_design_number(values[["wp"]]),
+    sp = as_design_number(values[["sp"]]),
+    reps = as_design_number(values[["reps"]]),
+    l = as_design_number(values[["l"]]) %||% 1,
+    type = as_design_number(values[["type"]]) %||% 2,
+    plotNumber = as_design_number(values[["plot_start"]]),
+    seed = as_design_number(values[["seed"]]),
     locationNames = values[["location_names"]],
     data = data
   )
@@ -221,14 +242,14 @@ design_values_SSPD <- function(wp_count, sp_count, ssp_count, reps, l, seed,
 #' @noRd
 design_args_SSPD <- function(values, data = NULL) {
   list(
-    wp = values[["wp"]],
-    sp = values[["sp"]],
-    ssp = values[["ssp"]],
-    reps = values[["reps"]],
-    l = values[["l"]] %||% 1,
-    type = values[["type"]] %||% 2,
-    plotNumber = values[["plot_start"]],
-    seed = values[["seed"]],
+    wp = as_design_number(values[["wp"]]),
+    sp = as_design_number(values[["sp"]]),
+    ssp = as_design_number(values[["ssp"]]),
+    reps = as_design_number(values[["reps"]]),
+    l = as_design_number(values[["l"]]) %||% 1,
+    type = as_design_number(values[["type"]]) %||% 2,
+    plotNumber = as_design_number(values[["plot_start"]]),
+    seed = as_design_number(values[["seed"]]),
     locationNames = values[["location_names"]],
     data = data
   )
@@ -241,14 +262,14 @@ design_args_SSPD <- function(values, data = NULL) {
 #' @noRd
 design_args_STRIPD <- function(values, data = NULL) {
   list(
-    Hplots = values[["Hplots"]],
-    Vplots = values[["Vplots"]],
-    reps = values[["reps"]],
-    l = values[["l"]] %||% 1,
+    Hplots = as_design_number(values[["Hplots"]]),
+    Vplots = as_design_number(values[["Vplots"]]),
+    reps = as_design_number(values[["reps"]]),
+    l = as_design_number(values[["l"]]) %||% 1,
     planter = values[["planter"]] %||% "serpentine",
-    plotNumber = values[["plot_start"]],
+    plotNumber = as_design_number(values[["plot_start"]]),
     locationNames = values[["location_names"]],
-    seed = values[["seed"]],
+    seed = as_design_number(values[["seed"]]),
     randomizeH = values[["randomizeH"]] %||% TRUE,
     randomizeV = values[["randomizeV"]] %||% FALSE,
     data = data
@@ -263,13 +284,13 @@ design_args_STRIPD <- function(values, data = NULL) {
 #' @noRd
 design_args_incomplete_block_family <- function(values, data = NULL) {
   list(
-    t = values[["t"]],
-    k = values[["k"]],
-    reps = values[["reps"]],
-    l = values[["l"]] %||% 1,
-    plotNumber = values[["plot_start"]],
+    t = as_design_number(values[["t"]]),
+    k = as_design_number(values[["k"]]),
+    reps = as_design_number(values[["reps"]]),
+    l = as_design_number(values[["l"]]) %||% 1,
+    plotNumber = as_design_number(values[["plot_start"]]),
     locationNames = values[["location_names"]],
-    seed = values[["seed"]],
+    seed = as_design_number(values[["seed"]]),
     data = data
   )
 }
@@ -305,12 +326,12 @@ design_args_Rectangular_Lattice <- design_args_incomplete_block_family
 #' @noRd
 design_args_RowCol <- function(values, data = NULL) {
   list(
-    t = values[["t"]],
-    nrows = values[["nrows"]],
-    reps = values[["reps"]],
-    l = values[["l"]] %||% 1,
-    plotNumber = values[["plot_start"]],
-    seed = values[["seed"]],
+    t = as_design_number(values[["t"]]),
+    nrows = as_design_number(values[["nrows"]]),
+    reps = as_design_number(values[["reps"]]),
+    l = as_design_number(values[["l"]]) %||% 1,
+    plotNumber = as_design_number(values[["plot_start"]]),
+    seed = as_design_number(values[["seed"]]),
     locationNames = values[["location_names"]],
     data = data
   )
@@ -338,18 +359,33 @@ design_args_RowCol <- function(values, data = NULL) {
 #' pass the engine's own base, so the app and R agree.
 #'
 #' @param plot_start Parsed starting plot numbers, or NULL.
-#' @param l Number of locations.
+#' @param l Number of locations (left for the engine to reject when it is
+#'   not a usable count; see `is_location_count()`).
 #' @param base First starting plot of the engine's default.
 #' @noRd
 location_plot_starts <- function(plot_start, l, base) {
-  if (length(plot_start) == l) plot_start else default_plot_starts(l, base)
+  if (!is_location_count(l) || length(plot_start) == l) return(plot_start)
+  default_plot_starts(l, base)
 }
 
 #' Location names a spatial builder sends: the user's when there is one per
 #' location, otherwise NULL so the engine uses its own default names.
 #' @noRd
 location_names_or_null <- function(location_names, l) {
-  if (length(location_names) == l) location_names
+  if (!is_location_count(l) || length(location_names) == l) location_names
+}
+
+#' Whether `l` is a number of locations the location helpers can use
+#'
+#' @description A missing or invalid `l` (NULL, a string, zero, a
+#' fraction, ...) leaves the starting plots and names as given: the engine
+#' then rejects `l` itself with its classed `fieldhub_input_error`
+#' (`validate_locations()`), instead of a raw R error from building a
+#' default for it here.
+#' @noRd
+is_location_count <- function(l) {
+  is.numeric(l) && length(l) == 1L && is.null(dim(l)) && is.finite(l) &&
+    l >= 1 && l == trunc(l)
 }
 
 #' Drop builder arguments whose value is NULL
@@ -375,21 +411,21 @@ drop_null_args <- function(args, optional) {
 #' `plot_start`/`location_names` fall back to the engine's own defaults.
 #' @noRd
 design_args_Diagonal <- function(values, data = NULL) {
-  l <- values[["l"]] %||% 1
+  l <- as_design_number(values[["l"]]) %||% 1
   list(
-    nrows = values[["nrows"]],
-    ncols = values[["ncols"]],
-    lines = if (is.null(data)) values[["lines"]],
-    checks = values[["checks"]],
+    nrows = as_design_number(values[["nrows"]]),
+    ncols = as_design_number(values[["ncols"]]),
+    lines = if (is.null(data)) as_design_number(values[["lines"]]),
+    checks = as_design_number(values[["checks"]]),
     planter = values[["planter"]] %||% "serpentine",
     l = l,
-    plotNumber = location_plot_starts(values[["plot_start"]] %||% 101, l, base = 1001),
+    plotNumber = location_plot_starts(as_design_number(values[["plot_start"]]) %||% 101, l, base = 1001),
     kindExpt = "SUDC",
-    seed = values[["seed"]],
+    seed = as_design_number(values[["seed"]]),
     exptName = values[["expt_name"]],
     locationNames = location_names_or_null(values[["location_names"]], l),
     data = data,
-    checksPercent = values[["checksPercent"]]
+    checksPercent = as_design_number(values[["checksPercent"]])
   )
 }
 
@@ -407,9 +443,11 @@ design_args_Diagonal <- function(values, data = NULL) {
 #' (ruling R9).
 #' @noRd
 design_args_diagonal_multiple <- function(values, data = NULL) {
-  l <- values[["l"]] %||% 1
-  plot_start <- values[["plot_start"]] %||% 101
-  plot_starts <- if (length(plot_start) == length(values[["blocks"]])) {
+  l <- as_design_number(values[["l"]]) %||% 1
+  plot_start <- as_design_number(values[["plot_start"]]) %||% 101
+  plot_starts <- if (!is_location_count(l)) {
+    plot_start
+  } else if (length(plot_start) == length(values[["blocks"]])) {
     rep(list(plot_start), l)
   } else if (length(plot_start) == 1L) {
     rep(plot_start, l)
@@ -417,21 +455,21 @@ design_args_diagonal_multiple <- function(values, data = NULL) {
     default_plot_starts(l, 1001)
   }
   list(
-    nrows = values[["nrows"]],
-    ncols = values[["ncols"]],
-    lines = if (is.null(data)) values[["lines"]],
-    checks = values[["checks"]],
+    nrows = as_design_number(values[["nrows"]]),
+    ncols = as_design_number(values[["ncols"]]),
+    lines = if (is.null(data)) as_design_number(values[["lines"]]),
+    checks = as_design_number(values[["checks"]]),
     planter = values[["planter"]] %||% "serpentine",
     l = l,
     plotNumber = plot_starts,
     kindExpt = "DBUDC",
     splitBy = if (identical(values[["stacked"]], "By Column")) "column" else "row",
-    seed = values[["seed"]],
-    blocks = values[["blocks"]],
+    seed = as_design_number(values[["seed"]]),
+    blocks = as_design_number(values[["blocks"]]),
     exptName = values[["expt_name"]],
     locationNames = location_names_or_null(values[["location_names"]], l),
     data = data,
-    checksPercent = values[["checksPercent"]],
+    checksPercent = as_design_number(values[["checksPercent"]]),
     sameEntries = values[["sameEntries"]] %||% FALSE
   )
 }
@@ -446,12 +484,12 @@ design_args_diagonal_multiple <- function(values, data = NULL) {
 design_args_sparse_allocation_optim <- function(values, data = NULL) {
   list(
     design = "sparse",
-    lines = values[["lines"]],
-    l = values[["l"]],
-    copies_per_entry = values[["copies_per_entry"]],
+    lines = as_design_number(values[["lines"]]),
+    l = as_design_number(values[["l"]]),
+    copies_per_entry = as_design_number(values[["copies_per_entry"]]),
     add_checks = TRUE,
-    checks = values[["checks"]],
-    seed = values[["seed"]],
+    checks = as_design_number(values[["checks"]]),
+    seed = as_design_number(values[["seed"]]),
     data = data
   )
 }
@@ -472,23 +510,23 @@ design_args_sparse_allocation_optim <- function(values, data = NULL) {
 #' the module used to start its default at 1001).
 #' @noRd
 design_args_sparse_allocation <- function(values, data = NULL) {
-  l <- values[["l"]]
+  l <- as_design_number(values[["l"]])
   expt_name <- values[["expt_name"]]
   args <- list(
-    lines = values[["lines"]],
-    nrows = values[["nrows"]],
-    ncols = values[["ncols"]],
+    lines = as_design_number(values[["lines"]]),
+    nrows = as_design_number(values[["nrows"]]),
+    ncols = as_design_number(values[["ncols"]]),
     l = l,
     planter = values[["planter"]] %||% "serpentine",
-    plotNumber = location_plot_starts(values[["plot_start"]], l, base = 1),
-    copies_per_entry = values[["copies_per_entry"]],
-    checks = values[["checks"]],
+    plotNumber = location_plot_starts(as_design_number(values[["plot_start"]]), l, base = 1),
+    copies_per_entry = as_design_number(values[["copies_per_entry"]]),
+    checks = as_design_number(values[["checks"]]),
     exptName = if (length(expt_name) > 0L) expt_name[1],
     locationNames = location_names_or_null(values[["location_names"]], l),
     sparse_list = values[["sparse_list"]],
-    seed = values[["seed"]],
+    seed = as_design_number(values[["seed"]]),
     data = data,
-    checksPercent = values[["checksPercent"]]
+    checksPercent = as_design_number(values[["checksPercent"]])
   )
   drop_null_args(args, c("nrows", "ncols", "exptName", "locationNames", "sparse_list"))
 }
@@ -521,18 +559,18 @@ allocation_entry_names <- function(allocation, lines) {
 design_args_Optim <- function(values, data = NULL) {
   generated <- is.null(data)
   list(
-    nrows = values[["nrows"]],
-    ncols = values[["ncols"]],
-    lines = if (generated) values[["lines"]],
-    checks = if (generated) values[["checks"]],
+    nrows = as_design_number(values[["nrows"]]),
+    ncols = as_design_number(values[["ncols"]]),
+    lines = if (generated) as_design_number(values[["lines"]]),
+    checks = if (generated) as_design_number(values[["checks"]]),
     planter = values[["planter"]] %||% "serpentine",
-    l = values[["l"]] %||% 1,
-    plotNumber = values[["plot_start"]] %||% 101,
-    seed = values[["seed"]],
+    l = as_design_number(values[["l"]]) %||% 1,
+    plotNumber = as_design_number(values[["plot_start"]]) %||% 101,
+    seed = as_design_number(values[["seed"]]),
     exptName = values[["expt_name"]],
     locationNames = values[["location_names"]],
     data = data,
-    rep_checks = if (generated) values[["rep_checks"]]
+    rep_checks = if (generated) as_design_number(values[["rep_checks"]])
   )
 }
 
@@ -548,14 +586,14 @@ design_args_Optim <- function(values, data = NULL) {
 design_args_pREPS <- function(values, data = NULL) {
   generated <- is.null(data)
   list(
-    nrows = values[["nrows"]],
-    ncols = values[["ncols"]],
-    repGens = if (generated) values[["repGens"]],
-    repUnits = if (generated) values[["repUnits"]],
+    nrows = as_design_number(values[["nrows"]]),
+    ncols = as_design_number(values[["ncols"]]),
+    repGens = if (generated) as_design_number(values[["repGens"]]),
+    repUnits = if (generated) as_design_number(values[["repUnits"]]),
     planter = values[["planter"]] %||% "serpentine",
-    l = values[["l"]] %||% 1,
-    plotNumber = values[["plot_start"]] %||% 101,
-    seed = values[["seed"]],
+    l = as_design_number(values[["l"]]) %||% 1,
+    plotNumber = as_design_number(values[["plot_start"]]) %||% 101,
+    seed = as_design_number(values[["seed"]]),
     exptName = values[["expt_name"]],
     locationNames = values[["location_names"]],
     data = data,
@@ -572,17 +610,17 @@ design_args_pREPS <- function(values, data = NULL) {
 #' into the locations.
 #' @noRd
 design_args_multi_loc_preps_optim <- function(values, data = NULL) {
-  checks <- values[["checks"]]
-  rep_checks <- values[["rep_checks"]]
+  checks <- as_design_number(values[["checks"]])
+  rep_checks <- as_design_number(values[["rep_checks"]])
   list(
     design = "prep",
-    lines = values[["lines"]],
-    l = values[["l"]],
-    copies_per_entry = values[["copies_per_entry"]],
+    lines = as_design_number(values[["lines"]]),
+    l = as_design_number(values[["l"]]),
+    copies_per_entry = as_design_number(values[["copies_per_entry"]]),
     add_checks = !is.null(checks) && !is.null(rep_checks),
     checks = checks,
     rep_checks = rep_checks,
-    seed = values[["seed"]],
+    seed = as_design_number(values[["seed"]]),
     data = data
   )
 }
@@ -604,22 +642,22 @@ design_args_multi_loc_preps_optim <- function(values, data = NULL) {
 #' stay the engine's fixed ones: the module has no control for them.
 #' @noRd
 design_args_multi_loc_preps <- function(values, data = NULL) {
-  l <- values[["l"]]
+  l <- as_design_number(values[["l"]])
   expt_name <- values[["expt_name"]]
   args <- list(
-    lines = values[["lines"]],
-    nrows = values[["nrows"]],
-    ncols = values[["ncols"]],
+    lines = as_design_number(values[["lines"]]),
+    nrows = as_design_number(values[["nrows"]]),
+    ncols = as_design_number(values[["ncols"]]),
     l = l,
     planter = values[["planter"]] %||% "serpentine",
-    plotNumber = location_plot_starts(values[["plot_start"]], l, base = 1),
-    copies_per_entry = values[["copies_per_entry"]],
-    checks = values[["checks"]],
-    rep_checks = values[["rep_checks"]],
+    plotNumber = location_plot_starts(as_design_number(values[["plot_start"]]), l, base = 1),
+    copies_per_entry = as_design_number(values[["copies_per_entry"]]),
+    checks = as_design_number(values[["checks"]]),
+    rep_checks = as_design_number(values[["rep_checks"]]),
     exptName = if (length(expt_name) > 0L) expt_name,
     locationNames = location_names_or_null(values[["location_names"]], l),
     optim_list = values[["optim_list"]],
-    seed = values[["seed"]],
+    seed = as_design_number(values[["seed"]]),
     data = data,
     allow_fillers = values[["allow_fillers"]] %||% FALSE
   )
@@ -637,20 +675,20 @@ design_args_multi_loc_preps <- function(values, data = NULL) {
 #' @noRd
 design_args_RCBD_augmented <- function(values, data = NULL) {
   list(
-    lines = values[["lines"]],
-    checks = values[["checks"]],
-    b = values[["b"]],
-    l = values[["l"]] %||% 1,
+    lines = as_design_number(values[["lines"]]),
+    checks = as_design_number(values[["checks"]]),
+    b = as_design_number(values[["b"]]),
+    l = as_design_number(values[["l"]]) %||% 1,
     planter = values[["planter"]] %||% "serpentine",
-    plotNumber = values[["plot_start"]] %||% 101,
+    plotNumber = as_design_number(values[["plot_start"]]) %||% 101,
     repsStack = values[["repsStack"]],
     exptName = values[["expt_name"]],
-    seed = values[["seed"]],
+    seed = as_design_number(values[["seed"]]),
     locationNames = values[["location_names"]],
-    repsExpt = values[["repsExpt"]] %||% 1,
+    repsExpt = as_design_number(values[["repsExpt"]]) %||% 1,
     random = values[["random"]] %||% TRUE,
     data = data,
-    nrows = values[["nrows"]],
-    ncols = values[["ncols"]]
+    nrows = as_design_number(values[["nrows"]]),
+    ncols = as_design_number(values[["ncols"]])
   )
 }

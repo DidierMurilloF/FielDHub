@@ -8,8 +8,31 @@ library(FielDHub)
 # exact fieldBook and metadata$parameters of an equivalent direct API call,
 # for the same inputs and seed.
 
+#' `values` as Shiny can deliver them: every whole number as an integer
+#'
+#' Shiny decodes a whole-number numericInput value as an integer
+#' (shiny:::decodeMessage() parses with simplifyVector = FALSE, so 270
+#' arrives as 270L), and nrow() counts and automatic app seeds
+#' (sample.int()) are integers too. Which fields take one of those paths
+#' differs by module (the single diagonal module's raw `input$lines.d`, the
+#' sparse module's nrow() count of an upload, the augmented RCBD module's
+#' number of experiments, ...), so the tests send every whole number as an
+#' integer -- the superset of what any module sends -- while the direct
+#' API calls they compare with are written with doubles, as an R user
+#' types them. Non-whole doubles (a percentage of checks such as 9.6),
+#' characters, logicals and lists (a do_optim() allocation) are unchanged.
+#' @noRd
+shiny_shaped <- function(values) {
+  lapply(values, function(v) {
+    whole <- is.double(v) && is.null(dim(v)) && length(v) > 0L && all(is.finite(v)) &&
+      all(v == trunc(v)) && all(abs(v) <= .Machine$integer.max)
+    if (whole) storage.mode(v) <- "integer"
+    v
+  })
+}
+
 parity <- function(builder, engine, values, data = NULL, direct) {
-  via_app <- do.call(engine, builder(values, data))
+  via_app <- do.call(engine, builder(shiny_shaped(values), data))
   expect_identical(via_app$fieldBook, direct$fieldBook)
   expect_identical(via_app$metadata$parameters, direct$metadata$parameters)
 }
@@ -243,7 +266,7 @@ test_that("IBD app arguments reproduce an uploaded-data design", {
 test_that("RowCol app arguments reproduce the API design across two locations", {
   values <- list(t = 9, nrows = 3, reps = 2, l = 2, plot_start = c(101, 1001),
                  location_names = c("A", "B"), seed = 14)
-  via_app <- suppress_design_warning(do.call(row_column, design_args_RowCol(values)))
+  via_app <- suppress_design_warning(do.call(row_column, design_args_RowCol(shiny_shaped(values))))
   direct <- suppress_design_warning(row_column(t = 9, nrows = 3, reps = 2, l = 2,
                                                plotNumber = c(101, 1001), locationNames = c("A", "B"),
                                                seed = 14))
@@ -254,7 +277,7 @@ test_that("RowCol app arguments reproduce the API design across two locations", 
 test_that("RowCol app arguments reproduce an uploaded-data design", {
   data <- data.frame(ENTRY = 1:9, TREATMENT = paste0("ND-", 1:9))
   values <- list(t = 9, nrows = 3, reps = 2, l = 1, plot_start = 101, location_names = "A", seed = 5)
-  via_app <- suppress_design_warning(do.call(row_column, design_args_RowCol(values, data)))
+  via_app <- suppress_design_warning(do.call(row_column, design_args_RowCol(shiny_shaped(values), data)))
   direct <- suppress_design_warning(row_column(t = 9, nrows = 3, reps = 2, l = 1, plotNumber = 101,
                                                locationNames = "A", seed = 5, data = data))
   expect_identical(via_app$fieldBook, direct$fieldBook)
@@ -323,7 +346,7 @@ test_that("design_args_RCBD() falls back to l/planter/continuous/spread_checks d
   values <- list(t = 6, reps = 3, plot_start = 101, location_names = "FARGO", seed = 4)
   parity(design_args_RCBD, RCBD, values,
          direct = RCBD(t = 6, reps = 3, plotNumber = 101, locationNames = "FARGO", seed = 4))
-  built <- design_args_RCBD(values)
+  built <- design_args_RCBD(shiny_shaped(values))
   expect_identical(built$l, 1)
   expect_identical(built$planter, "serpentine")
   expect_false(built$continuous)
@@ -336,7 +359,7 @@ test_that("design_args_LSD() falls back to the planter default", {
   values <- list(t = 4, reps = 1, plot_start = 101, location_names = "Loc", seed = 1)
   parity(design_args_LSD, latin_square, values,
          direct = latin_square(t = 4, reps = 1, plotNumber = 101, locationNames = "Loc", seed = 1))
-  expect_identical(design_args_LSD(values)$planter, "serpentine")
+  expect_identical(design_args_LSD(shiny_shaped(values))$planter, "serpentine")
 })
 
 test_that("design_args_FD() falls back to l/type/planter defaults", {
@@ -344,7 +367,7 @@ test_that("design_args_FD() falls back to l/type/planter defaults", {
   parity(design_args_FD, full_factorial, values,
          direct = full_factorial(setfactors = c(2, 2), reps = 2, plotNumber = 101,
                                  locationNames = "Loc", seed = 1))
-  built <- design_args_FD(values)
+  built <- design_args_FD(shiny_shaped(values))
   expect_identical(built$l, 1)
   expect_identical(built$type, 2)
   expect_identical(built$planter, "serpentine")
@@ -355,7 +378,7 @@ test_that("design_args_SPD() and design_args_SSPD() fall back to l/type defaults
   parity(design_args_SPD, split_plot, values,
          direct = split_plot(wp = 3, sp = 2, reps = 2, plotNumber = 101,
                              locationNames = "Loc", seed = 1))
-  built <- design_args_SPD(values)
+  built <- design_args_SPD(shiny_shaped(values))
   expect_identical(built$l, 1)
   expect_identical(built$type, 2)
 
@@ -363,7 +386,7 @@ test_that("design_args_SPD() and design_args_SSPD() fall back to l/type defaults
   parity(design_args_SSPD, split_split_plot, values2,
          direct = split_split_plot(wp = 2, sp = 2, ssp = 2, reps = 1, plotNumber = 101,
                                    locationNames = "Loc", seed = 1))
-  built2 <- design_args_SSPD(values2)
+  built2 <- design_args_SSPD(shiny_shaped(values2))
   expect_identical(built2$l, 1)
   expect_identical(built2$type, 2)
 })
@@ -373,7 +396,7 @@ test_that("design_args_STRIPD() falls back to l/planter/randomizeH/randomizeV de
   parity(design_args_STRIPD, strip_plot, values,
          direct = strip_plot(Hplots = 3, Vplots = 3, reps = 1, plotNumber = 101,
                              locationNames = "Loc", seed = 1))
-  built <- design_args_STRIPD(values)
+  built <- design_args_STRIPD(shiny_shaped(values))
   expect_identical(built$l, 1)
   expect_identical(built$planter, "serpentine")
   expect_true(built$randomizeH)
@@ -385,23 +408,23 @@ test_that("design_args_IBD()/design_args_Alpha_Lattice()/design_args_Square_Latt
   parity(design_args_IBD, incomplete_blocks, values,
          direct = incomplete_blocks(t = 12, k = 4, reps = 2, plotNumber = 101,
                                     locationNames = "Loc", seed = 1))
-  expect_identical(design_args_IBD(values)$l, 1)
+  expect_identical(design_args_IBD(shiny_shaped(values))$l, 1)
 
   values2 <- list(t = 9, k = 3, reps = 2, plot_start = 101, location_names = "Loc", seed = 1)
   parity(design_args_Alpha_Lattice, alpha_lattice, values2,
          direct = alpha_lattice(t = 9, k = 3, reps = 2, plotNumber = 101,
                                 locationNames = "Loc", seed = 1))
-  expect_identical(design_args_Alpha_Lattice(values2)$l, 1)
+  expect_identical(design_args_Alpha_Lattice(shiny_shaped(values2))$l, 1)
   parity(design_args_Square_Lattice, square_lattice, values2,
          direct = square_lattice(t = 9, k = 3, reps = 2, plotNumber = 101,
                                  locationNames = "Loc", seed = 1))
-  expect_identical(design_args_Square_Lattice(values2)$l, 1)
+  expect_identical(design_args_Square_Lattice(shiny_shaped(values2))$l, 1)
 
   values3 <- list(t = 6, k = 2, reps = 2, plot_start = 101, location_names = "Loc", seed = 1)
   parity(design_args_Rectangular_Lattice, rectangular_lattice, values3,
          direct = rectangular_lattice(t = 6, k = 2, reps = 2, plotNumber = 101,
                                       locationNames = "Loc", seed = 1))
-  expect_identical(design_args_Rectangular_Lattice(values3)$l, 1)
+  expect_identical(design_args_Rectangular_Lattice(shiny_shaped(values3))$l, 1)
 })
 
 test_that("design_args_RowCol() falls back to the l default", {
@@ -414,7 +437,7 @@ test_that("design_args_RowCol() falls back to the l default", {
   # would silently read `location_names`; the builder uses `values[["l"]]`
   # precisely to avoid that).
   values <- list(t = 8, nrows = 2, reps = 2, plot_start = 101, location_names = "A", seed = 1)
-  built <- design_args_RowCol(values)
+  built <- design_args_RowCol(shiny_shaped(values))
   expect_identical(built$l, 1)
   expect_identical(names(built), c("t", "nrows", "reps", "l", "plotNumber", "seed",
                                    "locationNames", "data"))
@@ -593,7 +616,7 @@ test_that("Diagonal app arguments reproduce an uploaded-data design with a chose
 test_that("design_args_Diagonal() gives misfit plot starts and names the engine's own defaults (R9)", {
   values <- list(nrows = 15, ncols = 20, lines = 270, checks = 4, planter = "serpentine",
                  l = 2, plot_start = 5, seed = 3, expt_name = "E", location_names = "ONLY")
-  built <- design_args_Diagonal(values)
+  built <- design_args_Diagonal(shiny_shaped(values))
   expect_identical(built$plotNumber, default_plot_starts(2, 1001))
   expect_null(built$locationNames)
   # ... silently, where passing the misfit values straight through would
@@ -669,11 +692,11 @@ test_that("design_args_diagonal_multiple() shares one start across locations, or
   values <- list(nrows = 19, ncols = 18, lines = 300, checks = 4, l = 2, plot_start = 5,
                  stacked = "By Row", seed = 3, blocks = blocks, sameEntries = FALSE)
   # One start: every location starts there
-  expect_identical(design_args_diagonal_multiple(values)$plotNumber, c(5, 5))
+  expect_identical(design_args_diagonal_multiple(shiny_shaped(values))$plotNumber, c(5, 5))
   # A start count that is neither one nor one per experiment: the engine's
   # own per-location default, default_plot_starts(l, 1001), silently
   misfit <- utils::modifyList(values, list(plot_start = c(1, 2), location_names = "ONLY"))
-  built <- design_args_diagonal_multiple(misfit)
+  built <- design_args_diagonal_multiple(shiny_shaped(misfit))
   expect_identical(built$plotNumber, default_plot_starts(2, 1001))
   expect_null(built$locationNames)
   found <- warnings_of_class(via_app <- do.call(diagonal_arrangement, built),
@@ -691,7 +714,7 @@ test_that("design_args_diagonal_multiple() repeats entries across experiments on
   values <- list(nrows = 12, ncols = 18, lines = 200, checks = 4, planter = "serpentine",
                  l = 1, plot_start = 1, stacked = "By Row", seed = 21, blocks = blocks,
                  sameEntries = TRUE)
-  expect_identical(design_args_diagonal_multiple(values)$splitBy, "row")
+  expect_identical(design_args_diagonal_multiple(shiny_shaped(values))$splitBy, "row")
   parity(design_args_diagonal_multiple, diagonal_arrangement, values,
          direct = diagonal_arrangement(nrows = 12, ncols = 18, lines = 200, checks = 4,
                                        plotNumber = 1, kindExpt = "DBUDC", seed = 21,
@@ -701,7 +724,7 @@ test_that("design_args_diagonal_multiple() repeats entries across experiments on
 test_that("sparse_allocation app arguments reproduce the API allocation and design across three locations", {
   # Run!: the allocation, through its own builder
   optim_values <- list(lines = 135, l = 3, copies_per_entry = 2, checks = 4, seed = 5)
-  via_app_allocation <- do.call(do_optim, design_args_sparse_allocation_optim(optim_values))
+  via_app_allocation <- do.call(do_optim, design_args_sparse_allocation_optim(shiny_shaped(optim_values)))
   direct_allocation <- do_optim(design = "sparse", lines = 135, l = 3, copies_per_entry = 2,
                                 add_checks = TRUE, checks = 4, seed = 5)
   expect_identical(via_app_allocation, direct_allocation)
@@ -726,7 +749,7 @@ test_that("sparse_allocation app arguments reproduce the API allocation and desi
 test_that("sparse_allocation app arguments reproduce an uploaded-data allocation and design", {
   data <- data.frame(ENTRY = 1:139, NAME = c(paste0("CHECK", 1:4), paste0("SB-", 5:139)))
   optim_values <- list(lines = 135, l = 3, copies_per_entry = 2, checks = 4, seed = 8)
-  via_app_allocation <- do.call(do_optim, design_args_sparse_allocation_optim(optim_values, data))
+  via_app_allocation <- do.call(do_optim, design_args_sparse_allocation_optim(shiny_shaped(optim_values), data))
   direct_allocation <- do_optim(design = "sparse", lines = 135, l = 3, copies_per_entry = 2,
                                 add_checks = TRUE, checks = 4, seed = 8, data = data)
   expect_identical(via_app_allocation, direct_allocation)
@@ -747,7 +770,7 @@ test_that("design_args_sparse_allocation() leaves misfit plot starts, names and 
   values <- list(lines = 135, l = 3, copies_per_entry = 2, checks = 4, seed = 5,
                  nrows = 10, ncols = 10, planter = "serpentine", plot_start = 1001,
                  expt_name = character(), location_names = "ONLY", sparse_list = allocation)
-  built <- design_args_sparse_allocation(values)
+  built <- design_args_sparse_allocation(shiny_shaped(values))
   # The engine's own base: sparse_allocation() starts the default at 1, the
   # app's inline formula used to start it at 1001
   expect_identical(built$plotNumber, default_plot_starts(3, 1))
@@ -766,7 +789,7 @@ test_that("design_args_sparse_allocation() leaves misfit plot starts, names and 
 test_that("design_args_sparse_allocation() without an allocation or dimensions lets sparse_allocation() compute them", {
   values <- list(lines = 135, l = 3, copies_per_entry = 2, checks = 4, seed = 5,
                  plot_start = c(1, 1001, 2001))
-  built <- design_args_sparse_allocation(values)
+  built <- design_args_sparse_allocation(shiny_shaped(values))
   expect_false(any(c("sparse_list", "nrows", "ncols") %in% names(built)))
   parity(design_args_sparse_allocation, sparse_allocation, values,
          direct = sparse_allocation(lines = 135, l = 3, plotNumber = c(1, 1001, 2001),
@@ -799,7 +822,7 @@ test_that("the sparse module's explicit dimensions reproduce the API design", {
   # design with those dimensions, whatever sparse_allocation() would
   # choose on its own (10 x 12 here).
   optim_values <- list(lines = 150, l = 3, copies_per_entry = 2, checks = 4, seed = 2)
-  allocation <- do.call(do_optim, design_args_sparse_allocation_optim(optim_values))
+  allocation <- do.call(do_optim, design_args_sparse_allocation_optim(shiny_shaped(optim_values)))
   preselected <- diagonal_dimension_choices(as.numeric(allocation$size_locations[1]),
                                             checks = 151:154)[1]
   expect_identical(preselected, "10 x 11")
@@ -815,7 +838,7 @@ test_that("Optim app arguments reproduce the API design from counts across two l
   values <- list(nrows = 12, ncols = 10, lines = 100, checks = 4, rep_checks = c(5, 5, 5, 5),
                  planter = "serpentine", l = 2, plot_start = c(1, 1001), seed = 5,
                  expt_name = "Expt1", location_names = c("A", "B"))
-  via_app <- do.call(optimized_arrangement, design_args_Optim(values))
+  via_app <- do.call(optimized_arrangement, design_args_Optim(shiny_shaped(values)))
   direct <- optimized_arrangement(nrows = 12, ncols = 10, lines = 100, checks = 4,
                                   rep_checks = c(5, 5, 5, 5), l = 2, plotNumber = c(1, 1001),
                                   seed = 5, exptName = "Expt1", locationNames = c("A", "B"))
@@ -861,7 +884,7 @@ test_that("pREPS app arguments reproduce the API design from repGens/repUnits ac
   values <- list(nrows = 7, ncols = 15, repGens = c(75, 15), repUnits = c(1, 2),
                  planter = "serpentine", l = 2, plot_start = c(1, 1001), seed = 4095,
                  expt_name = "Expt1", location_names = c("A", "B"), allow_fillers = FALSE)
-  via_app <- do.call(partially_replicated, design_args_pREPS(values))
+  via_app <- do.call(partially_replicated, design_args_pREPS(shiny_shaped(values)))
   direct <- partially_replicated(nrows = 7, ncols = 15, repGens = c(75, 15), repUnits = c(1, 2),
                                  l = 2, plotNumber = c(1, 1001), seed = 4095, exptName = "Expt1",
                                  locationNames = c("A", "B"))
@@ -906,7 +929,7 @@ test_that("design_args_pREPS() falls back to the l/planter/plot-start/allow_fill
 test_that("multi_loc_preps app arguments reproduce the API allocation and design with checks", {
   optim_values <- list(lines = 40, l = 2, copies_per_entry = 3, checks = 2,
                        rep_checks = c(2, 2), seed = 7)
-  via_app_allocation <- do.call(do_optim, design_args_multi_loc_preps_optim(optim_values))
+  via_app_allocation <- do.call(do_optim, design_args_multi_loc_preps_optim(shiny_shaped(optim_values)))
   direct_allocation <- do_optim(design = "prep", lines = 40, l = 2, copies_per_entry = 3,
                                 add_checks = TRUE, checks = 2, rep_checks = c(2, 2), seed = 7)
   expect_identical(via_app_allocation, direct_allocation)
@@ -926,7 +949,7 @@ test_that("multi_loc_preps app arguments reproduce the API allocation and design
 test_that("multi_loc_preps app arguments let multi_location_prep() merge an uploaded list", {
   data <- data.frame(ENTRY = 101:140, NAME = paste0("SB-", 101:140))
   optim_values <- list(lines = 40, l = 2, copies_per_entry = 3, seed = 12)
-  via_app_allocation <- do.call(do_optim, design_args_multi_loc_preps_optim(optim_values, data))
+  via_app_allocation <- do.call(do_optim, design_args_multi_loc_preps_optim(shiny_shaped(optim_values), data))
   direct_allocation <- do_optim(design = "prep", lines = 40, l = 2, copies_per_entry = 3,
                                 add_checks = FALSE, seed = 12, data = data)
   expect_identical(via_app_allocation, direct_allocation)
@@ -934,7 +957,7 @@ test_that("multi_loc_preps app arguments let multi_location_prep() merge an uplo
   values <- c(optim_values, list(nrows = c(8, 8), ncols = c(8, 8), plot_start = c(1, 1001),
                                  expt_name = "MET", location_names = c("A", "B"),
                                  optim_list = via_app_allocation, allow_fillers = TRUE))
-  via_app <- do.call(multi_location_prep, design_args_multi_loc_preps(values, data))
+  via_app <- do.call(multi_location_prep, design_args_multi_loc_preps(shiny_shaped(values), data))
   direct <- multi_location_prep(lines = 40, nrows = c(8, 8), ncols = c(8, 8), l = 2,
                                 plotNumber = c(1, 1001), copies_per_entry = 3, exptName = "MET",
                                 locationNames = c("A", "B"), optim_list = direct_allocation,
@@ -958,7 +981,7 @@ test_that("design_args_multi_loc_preps() leaves misfit plot starts, names and ex
   values <- list(lines = 40, l = 2, copies_per_entry = 3, checks = 2, rep_checks = c(2, 2),
                  seed = 7, nrows = c(8, 8), ncols = c(8, 8), plot_start = 1001,
                  expt_name = character(), location_names = "ONLY", optim_list = allocation)
-  built <- design_args_multi_loc_preps(values)
+  built <- design_args_multi_loc_preps(shiny_shaped(values))
   # The engine's own base, where the module's inline formulas used 1
   # in one place and 1, 1001, ... in another
   expect_identical(built$plotNumber, default_plot_starts(2, 1))
@@ -999,7 +1022,7 @@ test_that("RCBD_augmented app arguments reproduce the API design from counts acr
                  plot_start = c(1, 1001), expt_name = "Expt1", seed = 3,
                  location_names = c("fargo", "minot"), repsExpt = 1, random = TRUE,
                  repsStack = NULL, nrows = dims[1], ncols = dims[2])
-  via_app <- do.call(RCBD_augmented, design_args_RCBD_augmented(values))
+  via_app <- do.call(RCBD_augmented, design_args_RCBD_augmented(shiny_shaped(values)))
   direct <- RCBD_augmented(lines = 60, checks = 4, b = 5, l = 2, plotNumber = c(1, 1001),
                            exptName = "Expt1", seed = 3, locationNames = c("fargo", "minot"),
                            nrows = dims[1], ncols = dims[2])
@@ -1036,6 +1059,78 @@ test_that("design_args_RCBD_augmented() falls back to the l/planter/plot-start/r
   values <- list(lines = 50, checks = 3, b = 5, seed = 29)
   parity(design_args_RCBD_augmented, RCBD_augmented, values,
          direct = RCBD_augmented(lines = 50, checks = 3, b = 5, seed = 29))
+})
+
+test_that("an integer from Shiny and a typed double record the same design through a builder", {
+  # The engines record an argument as given: 270L and 270 build the same
+  # field book but different metadata$parameters...
+  typed <- diagonal_arrangement(nrows = 15, ncols = 20, lines = 270, checks = 4,
+                                plotNumber = 101, seed = 24)
+  from_integer <- diagonal_arrangement(nrows = 15, ncols = 20, lines = 270L, checks = 4,
+                                       plotNumber = 101, seed = 24)
+  expect_identical(from_integer$fieldBook, typed$fieldBook)
+  expect_false(identical(from_integer$metadata$parameters, typed$metadata$parameters))
+  # ... so the builders send doubles, whichever Shiny delivered
+  values <- list(nrows = 15, ncols = 20, lines = 270, checks = 4, plot_start = 101, seed = 24)
+  from_shiny <- shiny_shaped(values)
+  expect_type(from_shiny$lines, "integer")
+  via_integer <- do.call(diagonal_arrangement, design_args_Diagonal(from_shiny))
+  via_double <- do.call(diagonal_arrangement, design_args_Diagonal(values))
+  expect_identical(via_integer$metadata$parameters, via_double$metadata$parameters)
+  expect_identical(via_integer$metadata$parameters, typed$metadata$parameters)
+  # The other two reported paths: the augmented RCBD number of experiments
+  # (numericInput, default 1L) and do_optim()'s lines (an nrow() count)
+  arcbd <- list(lines = 40L, checks = 3L, b = 4L, repsExpt = 2L, repsStack = "vertical", seed = 5L)
+  expect_identical(
+    do.call(RCBD_augmented, design_args_RCBD_augmented(arcbd))$metadata$parameters,
+    RCBD_augmented(lines = 40, checks = 3, b = 4, repsExpt = 2, repsStack = "vertical",
+                   seed = 5)$metadata$parameters)
+  sparse <- list(lines = 135L, l = 3L, copies_per_entry = 2L, checks = 4L, seed = 5L)
+  expect_identical(
+    do.call(do_optim, design_args_sparse_allocation_optim(sparse))$metadata$parameters,
+    do_optim(design = "sparse", lines = 135, l = 3, copies_per_entry = 2, add_checks = TRUE,
+             checks = 4, seed = 5)$metadata$parameters)
+})
+
+test_that("as_design_number() turns integer storage into double and leaves everything else", {
+  expect_null(as_design_number(NULL))
+  expect_identical(as_design_number(270L), 270)
+  expect_identical(as_design_number(c(a = 1L, b = 2L)), c(a = 1, b = 2))
+  expect_identical(as_design_number(matrix(1:4, 2)), matrix(c(1, 2, 3, 4), 2))
+  for (unchanged in list(9.6, c(101, 1001), "4", c("A", "B"), TRUE, NA,
+                         factor(c("x", "y")), list(1L), data.frame(ENTRY = 1:2))) {
+    expect_identical(as_design_number(unchanged), unchanged)
+  }
+})
+
+test_that("spatial builders leave a missing or invalid l to the engine's classed error", {
+  allocation <- do_optim(design = "sparse", lines = 135, l = 3, copies_per_entry = 2,
+                         add_checks = TRUE, checks = 4, seed = 5)
+  base <- list(lines = 135, copies_per_entry = 2, checks = 4, seed = 5, nrows = 10, ncols = 10,
+               plot_start = c(1, 1001, 2001), location_names = c("A", "B", "C"),
+               sparse_list = allocation)
+  prep <- list(lines = 40, copies_per_entry = 3, seed = 7, nrows = 8, ncols = 8,
+               plot_start = c(1, 1001), location_names = c("A", "B"), allow_fillers = TRUE)
+  for (l in list(NULL, "3", 0, 2.5, c(2, 3))) {
+    with_l <- function(values) if (is.null(l)) values else c(values, list(l = l))
+    expect_error(do.call(sparse_allocation, design_args_sparse_allocation(with_l(base))),
+                 class = "fieldhub_input_error")
+    expect_error(do.call(do_optim, design_args_sparse_allocation_optim(with_l(base))),
+                 class = "fieldhub_input_error")
+    expect_error(do.call(multi_location_prep, design_args_multi_loc_preps(with_l(prep))),
+                 class = "fieldhub_input_error")
+    expect_error(do.call(do_optim, design_args_multi_loc_preps_optim(with_l(prep))),
+                 class = "fieldhub_input_error")
+    if (!is.null(l)) {
+      diagonal <- list(nrows = 15, ncols = 20, lines = 270, checks = 4, seed = 1, l = l,
+                       plot_start = c(1, 1001), location_names = c("A", "B"),
+                       blocks = c(100, 170))
+      expect_error(do.call(diagonal_arrangement, design_args_Diagonal(diagonal)),
+                   class = "fieldhub_input_error")
+      expect_error(do.call(diagonal_arrangement, design_args_diagonal_multiple(diagonal)),
+                   class = "fieldhub_input_error")
+    }
+  }
 })
 
 # --- Spatial structural check (ruling R2): namespace bodies, call heads ---
