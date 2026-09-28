@@ -273,12 +273,8 @@ mod_RCBD_augmented_server <- function(id) {
         lines <- as.numeric(input$lines_a_rcbd)
         checks <- as.numeric(input$checks_a_rcbd)
         if(lines < 1 || checks <= 0) shiny::validate("Number of lines and checks should be greater than 1.")
-        gen.list <- dplyr::bind_rows(
-          default_entries(checks, prefix = "CH"),
-          default_entries(lines, prefix = "G", start = checks + 1)
-        )
-        data_up <- gen.list
-        return(list(dataUp_a_rcbd = data_up, 
+        # RCBD_augmented() generates the CH/G entry list from the counts
+        return(list(dataUp_a_rcbd = NULL, 
                     entries = lines))
       }
     }) 
@@ -408,10 +404,11 @@ mod_RCBD_augmented_server <- function(id) {
       })
     })
     
+    # The entry list of the design, generated or uploaded
     output$data_input <- DT::renderDT({
       if(!test_arcbd()) return(NULL)
-      shiny::req(getDataup_a_rcbd()$dataUp_a_rcbd)
-      df <- getDataup_a_rcbd()$dataUp_a_rcbd
+      shiny::req(rcbd_augmented_reactive())
+      df <- rcbd_augmented_reactive()$data_entry
       df$ENTRY <- as.factor(df$ENTRY)
       df$NAME <- as.factor(df$NAME)
       table_options <- list(pageLength = nrow(df), autoWidth = FALSE,
@@ -463,8 +460,9 @@ mod_RCBD_augmented_server <- function(id) {
     })
     
     output$checks_table <- DT::renderDT({
-      shiny::req(getDataup_a_rcbd()$dataUp_a_rcbd)
-      data_entry <- getDataup_a_rcbd()$dataUp_a_rcbd
+      if(!test_arcbd()) return(NULL)
+      shiny::req(rcbd_augmented_reactive())
+      data_entry <- rcbd_augmented_reactive()$data_entry
       df <- data_entry[1:(as.numeric(input$checks_a_rcbd)),]
       table_options <- list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "350px")
@@ -474,7 +472,7 @@ mod_RCBD_augmented_server <- function(id) {
     })
     
     rcbd_augmented_reactive <- shiny::reactive({
-      shiny::req(getDataup_a_rcbd()$dataUp_a_rcbd)
+      shiny::req(getDataup_a_rcbd())
       shiny::req(input$checks_a_rcbd)
       shiny::req(input$lines_a_rcbd)
       shiny::req(input$blocks_a_rcbd)
@@ -482,56 +480,35 @@ mod_RCBD_augmented_server <- function(id) {
       shiny::req(input$plot_start_a_rcbd)
       shiny::req(input$Location_a_rcbd)
       loc <- as.numeric(input$l.arcbd)
-      checks <- as.numeric(input$checks_a_rcbd)
-      if (input$owndata_a_rcbd == "Yes") {
-        gen.list <- getDataup_a_rcbd()$dataUp_a_rcbd
-        lines <- as.numeric(nrow(gen.list) - checks)
-      } else {
-        lines <- as.numeric(input$lines_a_rcbd)
-        gen.list <- getDataup_a_rcbd()$dataUp_a_rcbd
-      }
-      b <- as.numeric(input$blocks_a_rcbd)
-      seed.number <- validate_design(app_design_seed(input$myseed_a_rcbd))
-      planter <- input$planter_mov1_a_rcbd
       l.arcbd <- as.numeric(input$l.arcbd)
       if (length(loc) > l.arcbd) {
         shiny::validate("Length of vector with name of locations is greater than the number of locations.")
       } 
-      
       repsExpt <- some_inputs()$expts_a_rcbd
-      repsStack <- NULL
-      if (repsExpt > 1) {
-        repsStack <- input$repsStack_a_rcbd
-      }
-      nameexpt <- as.vector(unlist(strsplit(input$expt_name_a_rcbd, ",")))
-      if (length(nameexpt) != 0) {
-        Name_expt <- nameexpt
-      }else Name_expt <- paste(rep('Expt', repsExpt), 1:repsExpt, sep = "")
-      plotNumber <- validate_design(read_whole_numbers(
-        input$plot_start_a_rcbd, "Starting Plot Number"
-      ))
-      site_names <- as.character(as.vector(unlist(strsplit(input$Location_a_rcbd, ","))))
-      random <- input$random
-      nrows <- field_dims_augmented()$d_row
-      ncols <- field_dims_augmented()$d_col
-      ARCBD <- validate_design(RCBD_augmented(
-        lines = lines,
-        checks = checks,
-        b = b,
+      # RCBD_augmented() names the experiments Expt1, ... when the names
+      # typed do not fit
+      # The lines and checks of Run! (on the upload path, the lines are the
+      # rows of the file after the checks)
+      values <- list(
+        lines = as.numeric(getDataup_a_rcbd()$entries),
+        checks = some_inputs()$checks,
+        b = as.numeric(input$blocks_a_rcbd),
         l = l.arcbd,
-        planter = planter,
-        plotNumber = plotNumber,
-        exptName = Name_expt,
-        seed = seed.number,
-        locationNames = site_names,
+        planter = input$planter_mov1_a_rcbd,
+        plot_start = validate_design(read_whole_numbers(
+          input$plot_start_a_rcbd, "Starting Plot Number"
+        )),
+        expt_name = as.vector(unlist(strsplit(input$expt_name_a_rcbd, ","))),
+        seed = validate_design(app_design_seed(input$myseed_a_rcbd)),
+        location_names = as.character(as.vector(unlist(strsplit(input$Location_a_rcbd, ",")))),
         repsExpt = repsExpt,
-        random = random, 
-        repsStack = repsStack,
-        data = gen.list,
-        nrows = nrows,
-        ncols = ncols
-      ))
-      return(ARCBD)
+        random = input$random,
+        repsStack = if (repsExpt > 1) input$repsStack_a_rcbd,
+        nrows = field_dims_augmented()$d_row,
+        ncols = field_dims_augmented()$d_col
+      )
+      data <- getDataup_a_rcbd()$dataUp_a_rcbd
+      validate_design(do.call(RCBD_augmented, design_args_RCBD_augmented(values, data)))
     }) |> 
       shiny::bindEvent(input$get_random_augmented)
     

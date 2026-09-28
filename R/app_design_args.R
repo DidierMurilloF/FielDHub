@@ -621,3 +621,32 @@ design_args_multi_loc_preps <- function(values, data = NULL) {
   )
   drop_null_args(args, c("nrows", "ncols", "exptName", "locationNames", "optim_list"))
 }
+
+#' Build RCBD_augmented() arguments for the augmented RCBD module
+#'
+#' `values`: `lines` (on the upload path, the lines of the file), `checks`,
+#' `b`, `l`, `planter`, `plot_start`, `expt_name`, `seed`,
+#' `location_names`, `repsExpt`, `random`, `repsStack` (NULL for one
+#' experiment: the engine's default layout), `nrows`, `ncols`. Without
+#' `data`, RCBD_augmented() generates the CH1.., G.. entry list from
+#' `lines` and `checks`.
+#' @noRd
+design_args_RCBD_augmented <- function(values, data = NULL) {
+  list(
+    lines = values[["lines"]],
+    checks = values[["checks"]],
+    b = values[["b"]],
+    l = values[["l"]] %||% 1,
+    planter = values[["planter"]] %||% "serpentine",
+    plotNumber = values[["plot_start"]] %||% 101,
+    repsStack = values[["repsStack"]],
+    exptName = values[["expt_name"]],
+    seed = values[["seed"]],
+    locationNames = values[["location_names"]],
+    repsExpt = values[["repsExpt"]] %||% 1,
+    random = values[["random"]] %||% TRUE,
+    data = data,
+    nrows = values[["nrows"]],
+    ncols = values[["ncols"]]
+  )
+}

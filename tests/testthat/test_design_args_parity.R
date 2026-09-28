@@ -976,6 +976,59 @@ test_that("allocation_entry_names() reads the names do_optim() gave the entries,
   expect_identical(rownames(sparse$allocation), as.character(1:135))
 })
 
+#' The first field size the RCBD_augmented module offers for `b` blocks,
+#' as the module reads it from set_augmented_blocks()
+#' @noRd
+offered_augmented_dims <- function(lines, checks, b) {
+  options <- set_augmented_blocks(lines = lines, checks = checks, start = 3)$blocks_dims
+  as.numeric(strsplit(options[options[, 1] == b, 2][1], " x ")[[1]])
+}
+
+test_that("RCBD_augmented app arguments reproduce the API design from counts across two locations", {
+  dims <- offered_augmented_dims(60, 4, b = 5)
+  values <- list(lines = 60, checks = 4, b = 5, l = 2, planter = "serpentine",
+                 plot_start = c(1, 1001), expt_name = "Expt1", seed = 3,
+                 location_names = c("fargo", "minot"), repsExpt = 1, random = TRUE,
+                 repsStack = NULL, nrows = dims[1], ncols = dims[2])
+  via_app <- do.call(RCBD_augmented, design_args_RCBD_augmented(values))
+  direct <- RCBD_augmented(lines = 60, checks = 4, b = 5, l = 2, plotNumber = c(1, 1001),
+                           exptName = "Expt1", seed = 3, locationNames = c("fargo", "minot"),
+                           nrows = dims[1], ncols = dims[2])
+  expect_identical(via_app$fieldBook, direct$fieldBook)
+  expect_identical(via_app$metadata$parameters, direct$metadata$parameters)
+  # Passing counts instead of the module's former CH/G entry table leaves
+  # the field book unchanged: the engine generates the same list (and, on
+  # this path, records that generated list itself, as a direct call does)
+  former <- data.frame(ENTRY = 1:64, NAME = c(paste0("CH", 1:4), paste0("G", 5:64)))
+  former_design <- RCBD_augmented(lines = 60, checks = 4, b = 5, l = 2, plotNumber = c(1, 1001),
+                                  exptName = "Expt1", seed = 3,
+                                  locationNames = c("fargo", "minot"), repsStack = NULL,
+                                  data = former, nrows = dims[1], ncols = dims[2])
+  expect_identical(via_app$fieldBook, former_design$fieldBook)
+})
+
+test_that("RCBD_augmented app arguments reproduce an uploaded-data design with two stacked experiments", {
+  data <- data.frame(ENTRY = 1:43, NAME = c(paste0("CHECK", 1:3), paste0("SB-", 4:43)))
+  dims <- offered_augmented_dims(40, 3, b = 4)
+  # On the upload path the module counts the lines of the file
+  values <- list(lines = nrow(data) - 3, checks = 3, b = 4, l = 1, planter = "cartesian",
+                 plot_start = c(101, 201), expt_name = c("E1", "E2"), seed = 29,
+                 location_names = "CASSELTON", repsExpt = 2, random = FALSE,
+                 repsStack = "horizontal", nrows = dims[1], ncols = dims[2])
+  parity(design_args_RCBD_augmented, RCBD_augmented, values, data,
+         direct = RCBD_augmented(lines = 40, checks = 3, b = 4, planter = "cartesian",
+                                 plotNumber = c(101, 201), repsStack = "horizontal",
+                                 exptName = c("E1", "E2"), seed = 29,
+                                 locationNames = "CASSELTON", repsExpt = 2, random = FALSE,
+                                 data = data, nrows = dims[1], ncols = dims[2]))
+})
+
+test_that("design_args_RCBD_augmented() falls back to the l/planter/plot-start/repsExpt/random defaults", {
+  values <- list(lines = 50, checks = 3, b = 5, seed = 29)
+  parity(design_args_RCBD_augmented, RCBD_augmented, values,
+         direct = RCBD_augmented(lines = 50, checks = 3, b = 5, seed = 29))
+})
+
 # --- Spatial structural check (ruling R2): namespace bodies, call heads ---
 
 test_that("spatial modules build their designs only through design_args_<Module>() and do.call()", {
@@ -989,7 +1042,8 @@ test_that("spatial modules build their designs only through design_args_<Module>
     Optim = c(design_args_Optim = "optimized_arrangement"),
     pREPS = c(design_args_pREPS = "partially_replicated"),
     multi_loc_preps = c(design_args_multi_loc_preps_optim = "do_optim",
-                        design_args_multi_loc_preps = "multi_location_prep")
+                        design_args_multi_loc_preps = "multi_location_prep"),
+    RCBD_augmented = c(design_args_RCBD_augmented = "RCBD_augmented")
   )
   # Unexported helpers a spatial module server may call, and why. Anything
   # else it calls must be one of its engines/builders, or a base/shiny/DT/
@@ -1009,6 +1063,8 @@ test_that("spatial modules build their designs only through design_args_<Module>
     "diagonal_check_options",     # percentages of checks offered for a field before randomizing (seed-isolated)
     "optimized_dimension_choices",# field dimensions offered for an optimized arrangement (no RNG)
     "prep_dimension_options",     # field dimensions (and filler counts) offered for a p-rep design (no RNG)
+    "set_augmented_blocks",       # block counts and field dimensions offered for an augmented RCBD (no RNG)
+    "checked_layout_view",        # draws the augmented RCBD field layout of one location
     "field_book_location_grids",  # splits a field book into per-location EXPT grids for display
     "allocation_entry_names"      # reads the entry names of a do_optim() allocation for its table
   )
