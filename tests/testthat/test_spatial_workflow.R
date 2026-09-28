@@ -52,6 +52,7 @@ test_that("spatial workflows keep per-module view and correlation identifiers", 
 })
 
 test_that("shared spatial dialogs preserve controls and use trait terminology", {
+  skip_if_not_installed("shiny")
   for (module in names(fieldhub_spatial_workflows())) {
     spec <- spatial_workflow_spec(module)
     for (failed in c(FALSE, TRUE)) {

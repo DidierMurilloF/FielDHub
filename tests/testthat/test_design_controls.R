@@ -368,6 +368,7 @@ test_that("computed selects of the sidebar can depend on controls read with an u
 })
 
 test_that("app_control_ui() renders each control type with its namespaced id", {
+  skip_if_not_installed("shiny")
   ns <- shiny::NS("page")
   html <- function(control, toggle = NULL) as.character(app_control_ui(control, ns, toggle))
   expect_match(html(ctl_count("t", 15)), 'id="page-t" type="number"', fixed = TRUE)
@@ -395,6 +396,7 @@ test_that("app_control_ui() renders each control type with its namespaced id", {
 })
 
 test_that("the seed widget shows the concept's label", {
+  skip_if_not_installed("shiny")
   html <- as.character(app_seed_input("s"))
   expect_match(html, "Random Seed (blank = automatic):", fixed = TRUE)
   expect_false(grepl("value=", html, fixed = TRUE))

@@ -534,6 +534,7 @@ test_that("choices of computed selects follow the entries, typed or uploaded", {
 })
 
 test_that("the page HTML has every control, the shared buttons and no inline style", {
+  for (package in app_dependencies()) skip_if_not_installed(package)
   # Styles the libraries write themselves: shiny's hidden file input and the
   # spinner's placeholder
   library_styles <- c('<input[^>]*class="shiny-input-file"[^>]*>', '<div style="height:400px" class="shiny-spinner-placeholder">')

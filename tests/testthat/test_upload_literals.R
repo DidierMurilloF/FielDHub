@@ -16,6 +16,7 @@ test_that("upload examples retain their literal published contents", {
 })
 
 test_that("upload HTML keeps each literal module identifier", {
+  skip_if_not_installed("shiny")
   ids <- list(
     alpha = c("owndata_alpha", "file.alpha", "sep.alpha"),
     crd = c("owndatacrd", "file.CRD", "sep.crd"),

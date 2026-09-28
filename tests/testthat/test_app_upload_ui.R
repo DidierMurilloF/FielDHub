@@ -6,6 +6,7 @@ all_upload_keys <- c("crd", "rcbd", "alpha", "rect", "rcd", "square", "mdiag",
                      "strip")
 
 test_that("app_upload_ui() namespaces each module's own input ids", {
+  skip_if_not_installed("shiny")
   for (design in all_upload_keys) {
     ns <- shiny::NS("mod")
     spec <- FielDHub:::app_upload_spec(design)
@@ -17,6 +18,7 @@ test_that("app_upload_ui() namespaces each module's own input ids", {
 })
 
 test_that("app_upload_ui() uses the canonical labels for every module", {
+  skip_if_not_installed("shiny")
   for (design in all_upload_keys) {
     html <- as.character(app_upload_ui(shiny::NS("mod"), design))
     expect_match(html, "Import entries' list?", fixed = TRUE, info = design)
@@ -31,6 +33,7 @@ test_that("app_upload_ui() uses the canonical labels for every module", {
 })
 
 test_that("app_upload_ui() drops the inline column spacing styles modules had", {
+  skip_if_not_installed("shiny")
   for (design in all_upload_keys) {
     html <- as.character(app_upload_ui(shiny::NS("mod"), design))
     expect_no_match(html, "padding-right", fixed = TRUE, info = design)
@@ -39,6 +42,7 @@ test_that("app_upload_ui() drops the inline column spacing styles modules had", 
 })
 
 test_that("app_upload_dialog() shows the design's own example table and note", {
+  skip_if_not_installed("shiny")
   html <- as.character(app_upload_dialog("crd"))
   expect_match(html, "Important message", fixed = TRUE)
   expect_match(html,
@@ -51,6 +55,7 @@ test_that("app_upload_dialog() shows the design's own example table and note", {
 })
 
 test_that("app_upload_dialog() renders for every module upload key", {
+  skip_if_not_installed("shiny")
   for (design in all_upload_keys) {
     expect_no_error(as.character(app_upload_dialog(design)))
   }

@@ -8,6 +8,7 @@ test_that("blank app seeds select the recorded automatic-seed path", {
 })
 
 test_that("a cleared Shiny number input means an automatic seed", {
+  skip_if_not_installed("shiny")
   blank <- shiny:::inputHandlers$get("shiny.number")(NULL)
   expect_null(read_app_seed(blank))
   expect_null(read_app_seed(NA))

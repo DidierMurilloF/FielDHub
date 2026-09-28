@@ -80,7 +80,7 @@ test_that("long-running specs share a task lifecycle and a progress message", {
   expect_false(design_app_spec("CRD")$long_running)
   expect_true("app_design_task" %in% all.names(body(mod_design_server)))
   expect_true("app_design_task" %in% all.names(body(app_spatial_page)))
-  expect_identical(as.list(body(app_design_task))[[2L]], quote(force(args_reactive)))
+  expect_identical(fieldhub_uninstrument(as.list(body(app_design_task))[[2L]]), quote(force(args_reactive)))
   expect_false(any(c("shiny", "bslib", "promises", "mirai") %in% all.names(body(run_design_job))))
 })
 
@@ -110,6 +110,7 @@ test_that("worker pools belong to the app and close once", {
 })
 
 test_that("task controls keep the existing theme and announce progress", {
+  skip_if_not_installed("shiny")
   previous <- options(sass.cache = FALSE)
   on.exit(options(previous), add = TRUE)
   button <- as.character(app_task_button("x-run", "Run!", TRUE))

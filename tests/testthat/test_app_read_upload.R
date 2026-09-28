@@ -15,6 +15,7 @@ fake_input <- function(design, path, sep = ",", name = "entries.csv") {
 }
 
 test_that("app_read_upload() returns list(data =) for a well-formed file", {
+  skip_if_not_installed("shiny")
   path <- write_upload(c("ENTRY,NAME", "1,G1", "2,G2"))
   out <- app_read_upload(fake_input("alpha", path), "alpha")
   expect_named(out, "data")
@@ -22,6 +23,7 @@ test_that("app_read_upload() returns list(data =) for a well-formed file", {
 })
 
 test_that("app_read_upload() reports a bad upload and returns NULL, never an error", {
+  skip_if_not_installed("shiny")
   path <- write_upload(c("TREATMENT", "T1", "T1", "T2"))
   reported <- character()
   withCallingHandlers(
@@ -36,6 +38,7 @@ test_that("app_read_upload() reports a bad upload and returns NULL, never an err
 })
 
 test_that("app_read_upload() returns NULL when no file has been chosen yet", {
+  skip_if_not_installed("shiny")
   input <- list()
   spec <- FielDHub:::app_upload_spec("crd")
   input[[spec$sep]] <- ","
@@ -44,6 +47,7 @@ test_that("app_read_upload() returns NULL when no file has been chosen yet", {
 })
 
 test_that("app_read_upload() passes check = FALSE through to skip the uniqueness rule", {
+  skip_if_not_installed("shiny")
   path <- write_upload(c("ENTRY,NAME", "1,G1", "1,G1"))
   out <- app_read_upload(fake_input("mdiag", path), "mdiag", check = FALSE)
   expect_named(out, "data")

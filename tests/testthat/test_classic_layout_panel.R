@@ -38,6 +38,7 @@ test_that("classic layout presentation is described by the workflow registry", {
 })
 
 test_that("shared layout panels retain control labels, namespacing, and options", {
+  skip_if_not_installed("shiny")
   set.seed(18)
   before <- .Random.seed
   x <- RCBD(t = 6, reps = 4, l = 2, plotNumber = c(101, 1001), seed = 7)

@@ -1,4 +1,5 @@
 test_that("served fragments get their year and team only at render time", {
+  skip_if_not_installed("shiny")
   for (name in c("home.html", "aboutUs.html")) {
     html <- paste(readLines(system.file("app/www", name, package = "FielDHub")), collapse = "\n")
     expect_false(grepl("&copy; [0-9]{4}|Didier Murillo|Salvador Gezan", html))

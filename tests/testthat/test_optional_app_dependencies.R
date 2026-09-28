@@ -24,7 +24,7 @@ test_that("the app dependency guard reports only unavailable packages", {
 
 test_that("app startup checks dependencies before constructing the application", {
   calls <- as.list(body(run_app))[-1L]
-  expect_identical(calls[[1L]], quote(app_check_dependencies()))
+  expect_identical(fieldhub_uninstrument(calls[[1L]]), quote(app_check_dependencies()))
 })
 
 test_that("app functions do not rely on a whole Shiny namespace import", {

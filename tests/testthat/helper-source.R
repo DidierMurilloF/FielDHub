@@ -4,6 +4,18 @@
 # there too. See .superpowers/sdd/2026-09-27-m1-m3-completion/constraints.md
 # ruling R2.
 
+# Unwrap only covr's exact counter wrapper when checking the first expression.
+# Real branches and other calls must remain visible to structural assertions.
+fieldhub_uninstrument <- function(expr) {
+  if (is.call(expr) && length(expr) == 3L && identical(expr[[1L]], as.name("if")) &&
+      identical(expr[[2L]], TRUE) && is.call(expr[[3L]]) && length(expr[[3L]]) == 3L &&
+      identical(expr[[3L]][[1L]], as.name("{")) && is.call(expr[[3L]][[2L]]) &&
+      identical(expr[[3L]][[2L]][[1L]], quote(covr:::count))) {
+    return(fieldhub_uninstrument(expr[[3L]][[3L]]))
+  }
+  expr
+}
+
 #' Functions defined in the FielDHub namespace, restricted to core code
 #'
 #' @return A named list of functions whose environment is the FielDHub
