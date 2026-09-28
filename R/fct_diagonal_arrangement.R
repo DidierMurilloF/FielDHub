@@ -299,17 +299,10 @@ diagonal_arrangement <- function(
             checks <- as.numeric(checks)
             total_entries <- as.numeric(getData$dim_data_entry[[sites]])
             lines <- total_entries - checks
+            # The same candidate sizes the app offers (field_dimensions())
             t1 <- floor(lines + lines * 0.10)
             t2 <- ceiling(lines + lines * 0.20)
-            t <- t1:t2
-            choices_list <- list()
-            i <- 1
-            for (n in t) {
-                choices_list[[i]] <- factor_subsets(n, diagonal = TRUE)$labels
-                i <- i + 1
-            }
-            
-            choices <- unlist(choices_list[!sapply(choices_list, is.null)])
+            choices <- unlist(field_dimensions(lines))
             dims <- dimension_options(choices)
             stop_dimensions(
                 paste0("diagonal_arrangement(): the field dimensions do not match the entries. ",

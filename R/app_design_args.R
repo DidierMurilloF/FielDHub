@@ -1,15 +1,16 @@
 #' Plain argument builders bridging app inputs to the public design API
 #'
 #' @description
-#' One function per classic design module, each translating a named list of
+#' One function per design module, each translating a named list of
 #' already-parsed Shiny control values (`values`) and an optional parsed
 #' upload (`data`) into the exact named argument list its public API function
-#' expects. Every classic module server calls its engine only through
-#' `do.call(<engine>, design_args_<Module>(values, data))`, so the app and a
-#' direct API call with the same inputs and seed produce identical results
-#' (M2 exit criterion). These builders are plain R: no Shiny, no
-#' randomization, no validation beyond what `do.call()` itself triggers
-#' inside the engine.
+#' expects. Every module server calls its engine only through
+#' `do.call(<engine>, design_args_<Module>(values, data))` (the sparse and
+#' multi-location p-rep modules also build their `do_optim()` allocation
+#' through `design_args_<Module>_optim()`), so the app and a direct API call
+#' with the same inputs and seed produce identical results (M2 exit
+#' criterion). These builders are plain R: no Shiny, no randomization, no
+#' validation beyond what `do.call()` itself triggers inside the engine.
 #'
 #' `values` is a named list of parsed control values (numbers, character
 #' vectors, logicals); an entry the module never fills in is simply absent
@@ -308,5 +309,82 @@ design_args_RowCol <- function(values, data = NULL) {
     seed = values[["seed"]],
     locationNames = values[["location_names"]],
     data = data
+  )
+}
+
+# --- Spatial designs -------------------------------------------------------
+#
+# The spatial modules build their design at "Randomize!" time from the
+# values parsed at "Run!" plus the field dimensions (and, for the diagonal
+# designs, the percentage of checks) chosen afterwards. `values` then also
+# carries `nrows`/`ncols` and those later choices. Design-specific entries
+# use the API argument name (`lines`, `checks`, `blocks`, `checksPercent`,
+# `copies_per_entry`, ...); the shared ones keep the classic names (`l`,
+# `planter`, `plot_start`, `location_names`, `seed`), plus `expt_name` for
+# the experiment name(s) every spatial engine takes as `exptName`.
+
+#' Starting plots a spatial builder sends for `l` locations (ruling R9)
+#'
+#' @description The user's starting plots when there is one per location;
+#' otherwise the per-location default the engine itself falls back to,
+#' `default_plot_starts(l, base)`. The modules used to rebuild this default
+#' with their own inline `seq()` formulas, and the sparse and multi-location
+#' p-rep modules disagreed with their engines about the base (1001 in the
+#' app, 1 in `sparse_allocation()`/`multi_location_prep()`); the builders now
+#' pass the engine's own base, so the app and R agree.
+#'
+#' @param plot_start Parsed starting plot numbers, or NULL.
+#' @param l Number of locations.
+#' @param base First starting plot of the engine's default.
+#' @noRd
+location_plot_starts <- function(plot_start, l, base) {
+  if (length(plot_start) == l) plot_start else default_plot_starts(l, base)
+}
+
+#' Location names a spatial builder sends: the user's when there is one per
+#' location, otherwise NULL so the engine uses its own default names.
+#' @noRd
+location_names_or_null <- function(location_names, l) {
+  if (length(location_names) == l) location_names
+}
+
+#' Drop builder arguments whose value is NULL
+#'
+#' @description `do.call()` then leaves them missing, so the engine applies
+#' its own default. Needed for arguments that `sparse_allocation()` and
+#' `multi_location_prep()` test with `missing()`: for those, an explicit
+#' NULL is not the same as leaving the argument out.
+#'
+#' @param args Named argument list.
+#' @param optional Names in `args` to drop when their value is NULL.
+#' @noRd
+drop_null_args <- function(args, optional) {
+  drop <- optional[vapply(args[optional], is.null, logical(1))]
+  args[setdiff(names(args), drop)]
+}
+
+#' Build diagonal_arrangement() arguments for the single diagonal module
+#'
+#' `values`: `nrows`, `ncols`, `lines` (generated entries; ignored when
+#' `data` supplies the entry list), `checks`, `planter`, `l`, `plot_start`,
+#' `seed`, `expt_name`, `location_names`, `checksPercent`. Wrong-length
+#' `plot_start`/`location_names` fall back to the engine's own defaults.
+#' @noRd
+design_args_Diagonal <- function(values, data = NULL) {
+  l <- values[["l"]] %||% 1
+  list(
+    nrows = values[["nrows"]],
+    ncols = values[["ncols"]],
+    lines = if (is.null(data)) values[["lines"]],
+    checks = values[["checks"]],
+    planter = values[["planter"]] %||% "serpentine",
+    l = l,
+    plotNumber = location_plot_starts(values[["plot_start"]] %||% 101, l, base = 1001),
+    kindExpt = "SUDC",
+    seed = values[["seed"]],
+    exptName = values[["expt_name"]],
+    locationNames = location_names_or_null(values[["location_names"]], l),
+    data = data,
+    checksPercent = values[["checksPercent"]]
   )
 }

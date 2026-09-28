@@ -214,3 +214,52 @@ fieldhub_calls_named <- function(expr, names) {
   walk(expr)
   found
 }
+
+#' Every function name `expr` calls, bare (`f(x)`) or namespaced
+#' (`pkg::f(x)`)
+#'
+#' Unlike `all.names(expr)`, a plain symbol read -- an input ID such as
+#' `input$get_random` or an output such as `output$field_layout` -- is not
+#' mistaken for a call to a same-named package function. Walks `e[[i]]`
+#' directly for the same reason `fieldhub_calls_named()` does.
+#'
+#' @return A character vector (with repeats, in walk order).
+#' @noRd
+fieldhub_call_heads <- function(expr) {
+  heads <- character()
+  walk <- function(e) {
+    if (!is.call(e)) return(invisible())
+    head_name <- fieldhub_call_head_name(e[[1]])
+    if (!is.na(head_name)) heads <<- c(heads, head_name)
+    n <- length(e)
+    for (i in seq_len(n)) {
+      if (is.call(e[[i]])) walk(e[[i]])
+    }
+  }
+  walk(expr)
+  heads
+}
+
+#' The `do.call(<fun>, <builder>(...))` calls in `expr`
+#'
+#' @return A list with one `c(fun = , builder = )` character pair per
+#'   `do.call()` whose first argument is a symbol; `builder` is the head of
+#'   the second argument when it is a call, `NA` otherwise.
+#' @noRd
+fieldhub_do_call_pairs <- function(expr) {
+  pairs <- list()
+  walk <- function(e) {
+    if (!is.call(e)) return(invisible())
+    if (identical(fieldhub_call_head_name(e[[1]]), "do.call") && length(e) >= 3 &&
+        is.symbol(e[[2]])) {
+      builder <- if (is.call(e[[3]])) fieldhub_call_head_name(e[[3]][[1]]) else NA_character_
+      pairs[[length(pairs) + 1L]] <<- c(fun = as.character(e[[2]]), builder = builder)
+    }
+    n <- length(e)
+    for (i in seq_len(n)) {
+      if (is.call(e[[i]])) walk(e[[i]])
+    }
+  }
+  walk(expr)
+  pairs
+}

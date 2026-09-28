@@ -201,15 +201,12 @@ mod_Diagonal_server <- function(id) {
       list(randomize_hit$times, user_tries$tries)
     })
 
+    # Inputs parsed at Run!; diagonal_arrangement() applies its own defaults
+    # to an experiment name, starting plots or location names that do not
+    # fit (see design_args_Diagonal())
     single_inputs <- shiny::eventReactive(input$RUN.diagonal, {
       planter_mov <- input$planter_single
-      Name_expt <- as.vector(unlist(strsplit(input$expt_name, ",")))
-      blocks <- 1
-      if (length(Name_expt) == blocks & !missing(Name_expt)) {
-        name_expt <- Name_expt
-      }else{
-        name_expt = paste0(rep("Block", times = blocks), 1:blocks)
-      }
+      name_expt <- as.vector(unlist(strsplit(input$expt_name, ",")))
       plotNumber <- validate_design(read_whole_numbers(
         input$plot_start, "Starting Plot Number"
       ))
@@ -315,6 +312,7 @@ mod_Diagonal_server <- function(id) {
                 }
                 dim_data_1 <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
                 return(list(data_entry = data_entry_UP, 
+                            checks_entries = checksEntries,
                             dim_data_entry = dim_data_entry, 
                             dim_without_checks = dim_data_1,
                             uploaded = TRUE))
@@ -327,7 +325,6 @@ mod_Diagonal_server <- function(id) {
             shiny::req(input$lines.d)
             shiny::req(input$checks)
             checks <- as.numeric(input$checks)
-            checksEntries <- 1:checks
             lines <- input$lines.d
             choices_list <- field_dimensions(lines_within_loc = lines)
             if (length(choices_list) == 0) {
@@ -338,27 +335,20 @@ mod_Diagonal_server <- function(id) {
                 )
                 return(NULL)
             }
-            # Same entry list as diagonal_arrangement() generates from lines
-            data_entry_UP <- dplyr::bind_rows(
-                default_entries(checks, prefix = "Check-"),
-                default_entries(lines, prefix = "Gen-", start = checks + 1)
-            )
-            dim_data_entry <- nrow(data_entry_UP)
-            dim_data_1 <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
-            return(list(data_entry = data_entry_UP, 
-                    dim_data_entry = dim_data_entry, 
-                    dim_without_checks = dim_data_1,
+            # diagonal_arrangement() generates the entry list from the
+            # counts; the dimension and check options only need the counts
+            return(list(data_entry = NULL, 
+                    checks_entries = seq_len(checks),
+                    dim_data_entry = lines + checks, 
+                    dim_without_checks = lines,
                     lines = lines,
                     uploaded = FALSE))
         }
     })
     
     getChecks <- shiny::eventReactive(input$RUN.diagonal, {
-      shiny::req(getData()$data_entry)
-      data <- as.data.frame(getData()$data_entry)
-      checksEntries <- sort(as.numeric(data[1:input$checks,1]))
-      checks <- as.numeric(input$checks)
-      list(checksEntries = checksEntries, checks = checks)
+      shiny::req(getData())
+      list(checksEntries = getData()$checks_entries, checks = as.numeric(input$checks))
     })
     
     list_inputs_diagonal <- shiny::eventReactive(input$RUN.diagonal, {
@@ -378,7 +368,7 @@ mod_Diagonal_server <- function(id) {
         sort_choices <- validate_design(diagonal_dimension_choices(
           lines = lines, checks = as.vector(getChecks()$checksEntries),
           kindExpt = kindExpt_single, planter = single_inputs()$planter_mov,
-          data = getData()$data_entry, minimum_extra = 0.11
+          data = getData()$data_entry
         ))
       })
       shiny::updateSelectInput(inputId = "dimensions.d",
@@ -506,67 +496,39 @@ mod_Diagonal_server <- function(id) {
       })
     })
 
-    # Arguments of diagonal_arrangement(), taken when Randomize is clicked
-    diagonal_inputs <- shiny::eventReactive(input$get_random, {
+    # Values for design_args_Diagonal(), taken when Randomize is clicked
+    diagonal_values <- shiny::eventReactive(input$get_random, {
       shiny::req(getData())
       shiny::req(field_dimensions_diagonal())
-      sites <- single_inputs()$sites
-      plot_starts <- single_inputs()$plotNumber
-      if (any(is.na(plot_starts))) {
-        shinyalert::shinyalert(
-          "Error!!",
-          "The starting plot numbers must be integers separated by commas.",
-          type = "error"
-        )
-        return(NULL)
-      }
-      # One starting plot per location, otherwise 1001, 2001, ...
-      if (length(plot_starts) != sites) {
-        if (sites > 1) {
-          plot_starts <- seq(1001, 1000*(sites+1), 1000)
-        } else plot_starts <- 1001
-      }
-      # One name per location, otherwise the locations are numbered
-      location_names <- single_inputs()$location_names
-      if (length(location_names) != sites) location_names <- NULL
-      args <- list(
+      list(
         nrows = field_dimensions_diagonal()$d_row,
         ncols = field_dimensions_diagonal()$d_col,
+        lines = getData()$lines,
         checks = as.numeric(getChecks()$checks),
         planter = single_inputs()$planter_mov,
-        l = sites,
-        plotNumber = plot_starts,
-        kindExpt = kindExpt_single,
-        seed = validate_design(read_app_seed(single_inputs()$seed_number)),
-        exptName = single_inputs()$expt_name,
-        locationNames = location_names
+        l = single_inputs()$sites,
+        plot_start = single_inputs()$plotNumber,
+        seed = single_inputs()$seed_number,
+        expt_name = single_inputs()$expt_name,
+        location_names = single_inputs()$location_names
       )
-      if (isTRUE(getData()$uploaded)) {
-        args$data <- getData()$data_entry
-      } else {
-        args$lines <- as.numeric(getData()$lines)
-      }
-      return(args)
     })
 
-    # The design comes from diagonal_arrangement(), so the app and the R
-    # function give the same design for the same inputs and seed
+    # The design comes from diagonal_arrangement(), through the same
+    # argument builder the tests compare with a direct call, so the app and
+    # the R function give the same design for the same inputs and seed
     diagonal_design <- shiny::reactive({
-      shiny::req(diagonal_inputs())
+      shiny::req(diagonal_values())
       shiny::req(available_percent_table()$dt)
       percent <- checks_percent()
       shiny::req(percent)
       options_percent <- as.numeric(available_percent_table()$dt[,2])
       shiny::req(any(abs(options_percent - percent) < 1e-6))
-      args <- c(diagonal_inputs(), list(checksPercent = percent))
-      design <- NULL
-      # diagonal_arrangement() prints a message and returns NULL when the
-      # field dimensions do not fit the entries
-      console_out <- utils::capture.output(
-        design <- tryCatch(
-          suppressWarnings(do.call(diagonal_arrangement, args)),
-          error = function(e) e
-        )
+      values <- c(diagonal_values(), list(checksPercent = percent))
+      data <- if (isTRUE(getData()$uploaded)) getData()$data_entry
+      design <- tryCatch(
+        suppressWarnings(do.call(diagonal_arrangement, design_args_Diagonal(values, data))),
+        error = function(e) e
       )
       if (inherits(design, "error")) {
         shinyalert::shinyalert(

@@ -524,3 +524,174 @@ test_that("app_csv_archive() wraps the already-tested archive writer in a zip do
   expect_identical(sum(all.names(code) == "downloadHandler"), 1L)
   expect_true(grepl('"application/zip"', paste(deparse(code), collapse = " "), fixed = TRUE))
 })
+
+# === Task 11b: the seven spatial modules =====================================
+#
+# The spatial modules build their design at "Randomize!" time, through the
+# same design_args_<Module>(values, data) pattern (plus a
+# design_args_<Module>_optim() builder for the do_optim() allocation the
+# sparse and multi-location p-rep modules compute at "Run!"). Each `values`
+# below is what the module sends: the parsed inputs of Run!, plus the field
+# dimensions (and percentage of checks) chosen afterwards.
+
+#' Collect the warnings of one class an expression signals, muffling them
+#' @noRd
+warnings_of_class <- function(expr, class) {
+  found <- list()
+  withCallingHandlers(expr, warning = function(w) {
+    if (inherits(w, class)) {
+      found[[length(found) + 1L]] <<- w
+      invokeRestart("muffleWarning")
+    }
+  })
+  found
+}
+
+#' The percentages of checks the diagonal modules offer for a field, as the
+#' module reads them from diagonal_check_options() before randomizing
+#' @noRd
+offered_check_percents <- function(nrows, ncols, checks, lines, kindExpt = "SUDC",
+                                   planter = "serpentine", data = NULL,
+                                   stacked = "By Row", blocks = NULL) {
+  options <- diagonal_check_options(
+    n_rows = nrows, n_cols = ncols, checks = checks, Option_NCD = TRUE,
+    kindExpt = kindExpt, stacked = stacked, planter_mov1 = planter, data = data,
+    dim_data = lines + length(checks), dim_data_1 = lines, Block_Fillers = blocks
+  )
+  as.numeric(options$dt[, 2])
+}
+
+test_that("Diagonal app arguments reproduce the API design across two locations", {
+  percents <- offered_check_percents(15, 20, checks = 1:4, lines = 270)
+  # The module preselects the last option (the API default)
+  values <- list(nrows = 15, ncols = 20, lines = 270, checks = 4, planter = "serpentine",
+                 l = 2, plot_start = c(101, 2001), seed = 24, expt_name = "20WRY1",
+                 location_names = c("MINOT", "FARGO"), checksPercent = percents[length(percents)])
+  parity(design_args_Diagonal, diagonal_arrangement, values,
+         direct = diagonal_arrangement(nrows = 15, ncols = 20, lines = 270, checks = 4,
+                                       l = 2, plotNumber = c(101, 2001), seed = 24,
+                                       exptName = "20WRY1", locationNames = c("MINOT", "FARGO")))
+})
+
+test_that("Diagonal app arguments reproduce an uploaded-data design with a chosen percentage of checks", {
+  data <- data.frame(ENTRY = 1:274, NAME = c(paste0("CHECK", 1:4), paste0("LINE", 5:274)))
+  percents <- offered_check_percents(15, 20, checks = 1:4, lines = 270, planter = "cartesian")
+  # On the upload path the module has no `lines` count: the entries are the file
+  values <- list(nrows = 15, ncols = 20, lines = NULL, checks = 4, planter = "cartesian",
+                 l = 1, plot_start = 1, seed = 7, expt_name = "Expt1",
+                 location_names = "CASSELTON", checksPercent = percents[1])
+  parity(design_args_Diagonal, diagonal_arrangement, values, data,
+         direct = diagonal_arrangement(nrows = 15, ncols = 20, checks = 4, planter = "cartesian",
+                                       plotNumber = 1, seed = 7, exptName = "Expt1",
+                                       locationNames = "CASSELTON", data = data,
+                                       checksPercent = percents[1]))
+  # A generated-path count left over in `values` never reaches the engine
+  built <- design_args_Diagonal(utils::modifyList(values, list(lines = 999)), data)
+  expect_null(built$lines)
+})
+
+test_that("design_args_Diagonal() gives misfit plot starts and names the engine's own defaults (R9)", {
+  values <- list(nrows = 15, ncols = 20, lines = 270, checks = 4, planter = "serpentine",
+                 l = 2, plot_start = 5, seed = 3, expt_name = "E", location_names = "ONLY")
+  built <- design_args_Diagonal(values)
+  expect_identical(built$plotNumber, default_plot_starts(2, 1001))
+  expect_null(built$locationNames)
+  # ... silently, where passing the misfit values straight through would
+  # raise the DEF-12 fieldhub_default_warning
+  found <- warnings_of_class(via_app <- do.call(diagonal_arrangement, built),
+                             "fieldhub_default_warning")
+  expect_length(found, 0L)
+  direct <- diagonal_arrangement(nrows = 15, ncols = 20, lines = 270, checks = 4, l = 2,
+                                 plotNumber = c(1001, 2001), seed = 3, exptName = "E")
+  expect_identical(via_app$fieldBook, direct$fieldBook)
+  expect_identical(via_app$metadata$parameters, direct$metadata$parameters)
+})
+
+test_that("design_args_Diagonal() falls back to the l/planter/plot-start defaults", {
+  values <- list(nrows = 15, ncols = 20, lines = 270, checks = 4, seed = 9)
+  parity(design_args_Diagonal, diagonal_arrangement, values,
+         direct = diagonal_arrangement(nrows = 15, ncols = 20, lines = 270, checks = 4, seed = 9))
+})
+
+test_that("diagonal_arrangement() suggests the field sizes the app offers", {
+  # With an unusable field, diagonal_arrangement() lists the rectangular
+  # sizes field_dimensions() gives for the lines, the same candidates
+  # diagonal_dimension_choices() (the module's dimension list) starts from.
+  err <- tryCatch(diagonal_arrangement(nrows = 4, ncols = 70, lines = 270, checks = 4, seed = 1),
+                  fieldhub_dimension_error = function(e) e)
+  expect_s3_class(err, "fieldhub_dimension_error")
+  expect_identical(err$options, dimension_options(unlist(field_dimensions(270))))
+  offered <- diagonal_dimension_choices(lines = 270, checks = 1:4)
+  expect_true(all(offered %in% unlist(field_dimensions(270))))
+  # The module no longer narrows the candidates with its own minimum_extra
+  expect_identical(formals(diagonal_dimension_choices)$minimum_extra,
+                   formals(field_dimensions)$minimum_extra)
+})
+
+# --- Spatial structural check (ruling R2): namespace bodies, call heads ---
+
+test_that("spatial modules build their designs only through design_args_<Module>() and do.call()", {
+  # Every engine call each spatial module makes, keyed by the builder that
+  # must supply its arguments.
+  spatial_engines <- list(
+    Diagonal = c(design_args_Diagonal = "diagonal_arrangement")
+  )
+  # Unexported helpers a spatial module server may call, and why. Anything
+  # else it calls must be one of its engines/builders, or a base/shiny/DT/
+  # plotly/shinyjs/shinyalert function.
+  allowed_helpers <- c(
+    "validate_design",            # shows a fieldhub_error as a Shiny validation message
+    "app_design_seed",            # resolves the optional app seed without touching the shared RNG stream
+    "read_app_seed",              # re-reads the resolved design seed for the simulation workflow; never draws
+    "app_upload_error",           # shows the shared upload-error alert for a failed file parse
+    "load_file",                  # parses an uploaded CSV into a data frame
+    "read_whole_numbers",         # parses the comma-separated starting-plot-number input
+    "app_spatial_workflow",       # shared results/simulation/export lifecycle for spatial modules
+    "spatial_workflow_spec",      # registry of per-design IDs/labels the shared workflow uses
+    "app_table_export_buttons",   # DT export buttons carrying the design's metadata
+    "field_dimensions",           # candidate field sizes: rejects too few entries before any randomization
+    "diagonal_dimension_choices", # feasible diagonal field dimensions offered before randomizing (seed-isolated)
+    "diagonal_check_options"      # percentages of checks offered for a field before randomizing (seed-isolated)
+  )
+  forbidden <- c("sample", "sample.int", "set.seed", "runif", "available_percent",
+                 "random_checks", "merge_user_data", "pREP", "get_random",
+                 "get_random_stacked", "get_single_random", "swap_pairs",
+                 "default_entries")
+
+  namespace <- asNamespace("FielDHub")
+  all_objects <- mget(ls(namespace, all.names = TRUE), namespace, inherits = FALSE)
+  package_functions <- names(Filter(is.function, all_objects))
+  modules <- app_functions()
+  for (module in names(spatial_engines)) {
+    server_name <- paste0("mod_", module, "_server")
+    f <- modules[[server_name]]
+    expect_false(is.null(f), info = server_name)
+    code <- body(f)
+    engines <- spatial_engines[[module]]
+    heads <- fieldhub_call_heads(code)
+
+    # Each engine is reached exactly once, as do.call(<engine>, <its builder>(...))
+    pairs <- fieldhub_do_call_pairs(code)
+    engine_pairs <- Filter(function(p) p[["fun"]] %in% package_functions, pairs)
+    expect_setequal(vapply(engine_pairs, `[[`, character(1), "builder"), names(engines))
+    expect_identical(length(engine_pairs), length(engines), info = module)
+    for (p in engine_pairs) {
+      expect_identical(unname(engines[p[["builder"]]]), p[["fun"]], info = module)
+    }
+    # ... and never called directly, nor referred to anywhere else
+    for (engine in unique(engines)) {
+      expect_false(engine %in% heads, info = paste(module, engine))
+      expect_identical(sum(all.names(code) == engine), sum(engines == engine),
+                       info = paste(module, engine))
+    }
+    for (builder in names(engines)) {
+      expect_identical(sum(heads == builder), 1L, info = paste(module, builder))
+    }
+    expect_identical(intersect(heads, forbidden), character(0), info = module)
+    expect_false("blocksdesign" %in% all.names(code), info = module)
+
+    called <- intersect(c(heads, vapply(pairs, `[[`, character(1), "fun")), package_functions)
+    allowed <- c(allowed_helpers, unname(engines), names(engines))
+    expect_identical(setdiff(called, allowed), character(0), info = module)
+  }
+})
