@@ -10,7 +10,7 @@ fieldhub_uninstrument <- function(expr) {
   if (is.call(expr) && length(expr) == 3L && identical(expr[[1L]], as.name("if")) &&
       identical(expr[[2L]], TRUE) && is.call(expr[[3L]]) && length(expr[[3L]]) == 3L &&
       identical(expr[[3L]][[1L]], as.name("{")) && is.call(expr[[3L]][[2L]]) &&
-      identical(expr[[3L]][[2L]][[1L]], quote(covr:::count))) {
+      identical(expr[[3L]][[2L]][[1L]], call(":::", as.name("covr"), as.name("count")))) {
     return(fieldhub_uninstrument(expr[[3L]][[3L]]))
   }
   expr
