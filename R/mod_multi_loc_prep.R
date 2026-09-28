@@ -762,10 +762,11 @@ mod_multi_loc_preps_server <- function(id){
         shiny::req(pREPS_reactive())
         multi_loc_data <- pREPS_reactive()$multi_location_data
         df <- as.data.frame(multi_loc_data)
-        # The uploaded names, as multi_location_prep() merged them into
-        # each location: combine the data frames into a single data frame
-        # with a new column for the list element name
-        if (input$multi_prep_data == 'Yes') {
+        # With a list uploaded at Run! (the same snapshot as the allocation
+        # table), the uploaded names as multi_location_prep() merged them
+        # into each location: combine the data frames into a single data
+        # frame with a new column for the list element name
+        if (!is.null(get_multi_loc_prep()$data_without_checks)) {
             list_locs <- pREPS_reactive()$list_locs
             df <- dplyr::bind_rows(
                 lapply(names(list_locs), function(name) {

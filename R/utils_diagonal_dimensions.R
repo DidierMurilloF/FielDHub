@@ -1,19 +1,40 @@
+#' Search margins of the diagonal field-size candidates
+#'
+#' @description Candidate fields have `minimum` to `maximum` more plots
+#' than the entries they hold (10% to 20% by default). The one source for
+#' `field_dimensions()`, `diagonal_dimension_choices()` and the sizes
+#' `diagonal_arrangement()` names in its "dimensions do not match" error.
+#' @noRd
+.diagonal_size_margins <- c(minimum = 0.10, maximum = 0.20)
+
+#' Smallest and largest candidate field size for a number of entries
+#'
+#' @param lines_within_loc Number of experimental entries, excluding checks.
+#' @param minimum_extra Lower search margin relative to the number of entries.
+#' @return `c(smallest, largest)`, whole numbers of plots.
+#' @noRd
+field_size_range <- function(lines_within_loc,
+                             minimum_extra = .diagonal_size_margins[["minimum"]]) {
+    c(floor(lines_within_loc + lines_within_loc * minimum_extra),
+      ceiling(lines_within_loc + lines_within_loc * .diagonal_size_margins[["maximum"]]))
+}
+
 #' Candidate field dimensions for diagonal checks
 #'
 #' @param lines_within_loc Number of experimental entries, excluding checks.
 #' @param minimum_extra Lower search margin relative to the number of entries.
 #' @return Lists of rectangular dimension labels, in candidate-size order.
 #' @noRd
-field_dimensions <- function(lines_within_loc, minimum_extra = 0.10) {
+field_dimensions <- function(lines_within_loc,
+                             minimum_extra = .diagonal_size_margins[["minimum"]]) {
     cached_field_dimensions(lines_within_loc, minimum_extra)
 }
 
 #' Compute uncached candidates in their established order
 #' @noRd
 find_field_dimensions <- function(lines_within_loc, minimum_extra) {
-    t1 <- floor(lines_within_loc + lines_within_loc * minimum_extra)
-    t2 <- ceiling(lines_within_loc + lines_within_loc * 0.20)
-    t <- t1:t2
+    range <- field_size_range(lines_within_loc, minimum_extra)
+    t <- range[1]:range[2]
     non_primes <- t[!is_prime(t)]
     choices_list <- list()
     i <- 1
@@ -48,7 +69,8 @@ diagonal_check_options <- function(...) {
 #' @noRd
 diagonal_dimension_choices <- function(lines, checks, kindExpt = "SUDC",
                                        stacked = "By Row", planter = "serpentine",
-                                       data = NULL, minimum_extra = 0.10) {
+                                       data = NULL,
+                                       minimum_extra = .diagonal_size_margins[["minimum"]]) {
     invalid_lines <- !is.numeric(lines) || length(lines) != 1L ||
         is.na(lines) || !is.finite(lines) || lines < 1 || lines %% 1 != 0 ||
         lines > floor(.Machine$integer.max / 1.20)
@@ -75,8 +97,9 @@ diagonal_dimension_choices <- function(lines, checks, kindExpt = "SUDC",
     }
     if (!is.numeric(minimum_extra) || length(minimum_extra) != 1L ||
         is.na(minimum_extra) || !is.finite(minimum_extra) ||
-        minimum_extra < 0 || minimum_extra > 0.20) {
-        fieldhub_abort("`minimum_extra` must be one number between 0 and 0.20.")
+        minimum_extra < 0 || minimum_extra > .diagonal_size_margins[["maximum"]]) {
+        fieldhub_abort("`minimum_extra` must be one number between 0 and ",
+                       sprintf("%.2f", .diagonal_size_margins[["maximum"]]), ".")
     }
     if (kindExpt == "DBUDC") {
         if (!is.data.frame(data) || !all(c("ENTRY", "BLOCK") %in% names(data)) ||

@@ -646,9 +646,16 @@ test_that("diagonal_arrangement() suggests the field sizes the app offers", {
   expect_identical(err$options, dimension_options(unlist(field_dimensions(270))))
   offered <- diagonal_dimension_choices(lines = 270, checks = 1:4)
   expect_true(all(offered %in% unlist(field_dimensions(270))))
-  # The module no longer narrows the candidates with its own minimum_extra
-  expect_identical(formals(diagonal_dimension_choices)$minimum_extra,
-                   formals(field_dimensions)$minimum_extra)
+  # The module no longer narrows the candidates with its own minimum_extra:
+  # both functions, and the error's size range, read the same margins
+  namespace <- asNamespace("FielDHub")
+  expect_identical(eval(formals(diagonal_dimension_choices)$minimum_extra, namespace),
+                   eval(formals(field_dimensions)$minimum_extra, namespace))
+  expect_identical(.diagonal_size_margins, c(minimum = 0.10, maximum = 0.20))
+  expect_identical(field_size_range(270), c(floor(270 * 1.10), ceiling(270 * 1.20)))
+  sizes <- vapply(strsplit(unlist(field_dimensions(270)), " x "),
+                  function(d) prod(as.numeric(d)), numeric(1))
+  expect_true(all(sizes >= field_size_range(270)[1] & sizes <= field_size_range(270)[2]))
 })
 
 test_that("diagonal_multiple app arguments reproduce the API design with per-experiment plot starts in two locations", {
@@ -1332,8 +1339,34 @@ test_that("the choice helpers spatial modules call before randomizing are Shiny-
     checked_layout_view = function() checked_layout_view(design, location = 1)
   )
   ui_packages <- c("shiny", "DT", "shinyjs", "shinyalert", "bslib", "plotly")
+  # Every FielDHub function a helper can reach, not only its own body:
+  # follow each package-function symbol the body refers to (called, or
+  # passed on as in lapply(x, f)), transitively.
+  namespace <- asNamespace("FielDHub")
+  package_functions <- names(Filter(is.function,
+                                    mget(ls(namespace, all.names = TRUE), namespace)))
+  reachable <- function(name) {
+    seen <- character()
+    queue <- name
+    while (length(queue) > 0L) {
+      current <- queue[1]
+      queue <- queue[-1]
+      if (current %in% seen) next
+      seen <- c(seen, current)
+      f <- get(current, envir = namespace)
+      if (!is.function(f) || is.primitive(f)) next
+      queue <- c(queue, setdiff(intersect(fieldhub_symbol_refs(body(f)), package_functions), seen))
+    }
+    seen
+  }
   for (name in names(calls)) {
-    expect_identical(intersect(all.names(body(get(name))), ui_packages), character(0), info = name)
+    for (callee in reachable(name)) {
+      f <- get(callee, envir = namespace)
+      if (is.primitive(f)) next
+      expect_identical(intersect(all.names(body(f)), ui_packages), character(0),
+                       info = paste(name, "->", callee))
+      expect_false(grepl("^(app_|mod_)", callee), info = paste(name, "->", callee))
+    }
     set.seed(2026)
     before <- .Random.seed
     result <- calls[[name]]()
