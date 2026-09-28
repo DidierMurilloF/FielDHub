@@ -47,3 +47,4 @@ $run_dev.*
 ^ARCHITECTURE_AUDIT\.md$
 ^ROADMAP\.md$
 ^\.superpowers$
+^deployment$

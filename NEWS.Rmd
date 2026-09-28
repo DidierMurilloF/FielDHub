@@ -195,6 +195,13 @@ knitr::opts_chunk$set(
 
 ### New features:
 
+- Release benchmarks now record exact revisions and environments and compare
+  workloads, runtime, allocations, optimizer quality and stop diagnostics.
+  Regressions require measurement-specific review explanations.
+- The deployment image now uses a digest-pinned R base, a complete R dependency
+  lock, a checksum-verified bootstrap and a non-root user. A build-only CI job
+  checks the installed runtime without publishing the image.
+
 - `run_app(workers = 2L)` optionally runs designs in a private background
   worker pool so other app sessions remain responsive. Long runs show a busy
   control and progress message. Workers require an installed FielDHub package

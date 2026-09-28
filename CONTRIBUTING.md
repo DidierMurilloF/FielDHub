@@ -112,6 +112,8 @@ Maintainers follow the [release checklist](RELEASING.md), including the full R
 and platform matrix, reconstruction checks, deployment validation, and reviewed
 performance benchmarks. Use a minor release for deliberate API or behavior
 changes; keep migration guidance alongside the change.
+The [deployment guide](deployment/README.md) documents the locked Docker build
+and distinguishes source checks from verified image execution.
 
 Scientific changes also need independent count, geometry, or numerical checks.
 Use the plain helpers in `tests/testthat/helper-invariants.R`, specify expected
