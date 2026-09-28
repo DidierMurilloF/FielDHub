@@ -18,11 +18,26 @@ source_layout_exceptions <- c("globals.R", "run_app.R")
 # Shiny validation messages.
 unprefixed_app_functions <- "validate_design"
 
+has_layout_sources <- function(dir) {
+  file.exists(file.path(dir, "fct_CRD.R")) && file.exists(file.path(dir, "app_conditions.R"))
+}
+
 source_layout_dir <- function() {
   dir <- testthat::test_path("..", "..", "R")
-  skip_if_not(dir.exists(dir), "The R/ sources are not available.")
+  skip_if_not(has_layout_sources(dir), "The R/ sources are not available.")
   dir
 }
+
+test_that("installed package loader directories are not treated as source files", {
+  path <- tempfile()
+  dir.create(path)
+  on.exit(unlink(path, recursive = TRUE), add = TRUE)
+  writeLines("# Lazy-load database loader", file.path(path, "FielDHub.R"))
+  expect_false(has_layout_sources(path))
+  writeLines("CRD <- function() NULL", file.path(path, "fct_CRD.R"))
+  writeLines("validate_design <- function() NULL", file.path(path, "app_conditions.R"))
+  expect_true(has_layout_sources(path))
+})
 
 is_app_file <- function(file) grepl("^(app|mod)_", file)
 
