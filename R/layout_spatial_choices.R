@@ -93,3 +93,56 @@ check_augmented_counts <- function(lines, checks) {
   }
   invisible(NULL)
 }
+
+#' Field sizes of a diagonal arrangement
+#'
+#' @param field_entries The count candidate fields are searched for.
+#' @param lines Entries of one location, checks excluded.
+#' @param checks ENTRY numbers of the checks.
+#' @param kindExpt \code{"SUDC"} or \code{"DBUDC"}.
+#' @param stacked Blocks layout of a multiple arrangement.
+#' @param planter Plot order.
+#' @param data Entry list with checks first (a BLOCK column for
+#'   \code{"DBUDC"}), or \code{NULL}.
+#' @return \code{list(choices = , selected = )}.
+#' @noRd
+diagonal_field_choices <- function(field_entries, lines, checks, kindExpt = "SUDC",
+                                   stacked = "By Row", planter = "serpentine", data = NULL) {
+  if (length(field_dimensions(lines_within_loc = field_entries)) == 0L) {
+    fieldhub_abort("Insufficient number of entries provided!")
+  }
+  field_size_choices(
+    diagonal_dimension_choices(lines = lines, checks = checks, kindExpt = kindExpt,
+                               stacked = stacked, planter = planter, data = data),
+    "No feasible field was found for these entries and checks."
+  )
+}
+
+#' Percentages of checks a diagonal field offers
+#'
+#' @param nrows,ncols The field size.
+#' @param checks ENTRY numbers of the checks.
+#' @param entries All entries, checks included.
+#' @param kindExpt,stacked,planter,data As for \code{diagonal_field_choices()}.
+#' @param blocks Number of experiments of a multiple arrangement, or
+#'   \code{NULL}.
+#' @return \code{list(choices = , selected = , table = )}: the percentages,
+#'   the last selected (the API default), and the reference table the page
+#'   shows.
+#' @noRd
+diagonal_percent_choices <- function(nrows, ncols, checks, entries, kindExpt = "SUDC",
+                                     stacked = "By Row", planter = "serpentine", data = NULL,
+                                     blocks = NULL) {
+  whole <- function(x) is.numeric(x) && length(x) == 1L && is.finite(x) && x >= 1 && x == trunc(x)
+  if (!whole(nrows) || !whole(ncols) || !whole(entries)) {
+    fieldhub_abort("The field size and the number of entries must be positive whole numbers.")
+  }
+  options <- diagonal_check_options(
+    n_rows = nrows, n_cols = ncols, checks = checks, Option_NCD = TRUE, kindExpt = kindExpt,
+    stacked = stacked, planter_mov1 = planter, data = data, dim_data = entries,
+    dim_data_1 = entries - length(checks), Block_Fillers = blocks
+  )
+  if (is.null(options$dt)) fieldhub_abort("Data input does not fit to field dimensions.")
+  percents <- as.numeric(options$dt[["Percentage of Checks"]])
+  list(choices = percents, selected = utils::tail(percents, 1L), table = options$dt)
+}

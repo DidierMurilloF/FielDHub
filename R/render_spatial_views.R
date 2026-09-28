@@ -62,3 +62,17 @@ entry_list_view <- function(data, factors = c("ENTRY", "NAME")) {
   for (column in intersect(factors, names(data))) data[[column]] <- as.factor(data[[column]])
   data
 }
+
+#' The checks of one location of a diagonal arrangement and their plots
+#' @param design A \code{diagonal_arrangement()} or
+#'   \code{sparse_allocation()} result.
+#' @param location The location.
+#' @return A data frame with ENTRY, NAME and TIMES.
+#' @noRd
+diagonal_checks_view <- function(design, location) {
+  info <- design$infoDesign
+  entries <- design$data_entry[[location]]
+  checks <- info$entry_checks[[location]]
+  data.frame(ENTRY = checks, NAME = entries$NAME[match(checks, entries$ENTRY)],
+             TIMES = info$rep_checks[[location]])
+}

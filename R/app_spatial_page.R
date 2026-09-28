@@ -270,7 +270,8 @@ app_spatial_page <- function(input, output, session, spec, run, raw_controls) {
         choices <- settled(run_choices)
       }
       app_spatial_table(validate_design(spec$setup$view(inputs$values, choices)),
-                        caption = spec$setup$caption, design = inputs$values[[spec$optim$into]],
+                        caption = spec$setup$caption,
+                        design = if (!is.null(spec$optim)) inputs$values[[spec$optim$into]],
                         export = spec$setup$export)
     })
   }

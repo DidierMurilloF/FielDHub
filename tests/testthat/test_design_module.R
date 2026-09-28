@@ -8,7 +8,7 @@ library(FielDHub)
 
 classic_modules <- c("CRD", "RCBD", "LSD", "FD", "SPD", "SSPD", "STRIPD", "IBD", "RowCol",
                      "Alpha_Lattice", "Square_Lattice", "Rectangular_Lattice")
-spatial_modules <- c("Optim", "pREPS", "RCBD_augmented")
+spatial_modules <- c("Optim", "pREPS", "RCBD_augmented", "Diagonal")
 all_modules <- c(classic_modules, spatial_modules)
 
 # The one label of each concept, written out here so a label changed in
@@ -112,7 +112,7 @@ page_defaults <- function(module, seed = 7) {
 # Spatial pages whose runs take long: the diagonal searches, the
 # allocations and the p-rep optimizations. optimized_arrangement() and
 # RCBD_augmented() run in well under a second.
-long_running <- c(Optim = FALSE, pREPS = TRUE, RCBD_augmented = FALSE)
+long_running <- c(Optim = FALSE, pREPS = TRUE, RCBD_augmented = FALSE, Diagonal = TRUE)
 
 test_that("there is one page spec per design, in the registry's workflow order", {
   specs <- fieldhub_design_specs()
@@ -254,7 +254,10 @@ spatial_defaults <- function(module) {
                                  locationNames = "FARGO"),
     RCBD_augmented = RCBD_augmented(lines = 180, checks = 4, b = 3, nrows = 3, ncols = 64, l = 1,
                                     plotNumber = 1, seed = 7, exptName = "Expt1",
-                                    locationNames = "FARGO")
+                                    locationNames = "FARGO"),
+    Diagonal = diagonal_arrangement(nrows = 18, ncols = 18, lines = 287, checks = 4, l = 1,
+                                    plotNumber = 1, kindExpt = "SUDC", seed = 7, exptName = "Expt1",
+                                    locationNames = "FARGO", checksPercent = 11.11)
   )
 }
 
@@ -344,6 +347,34 @@ test_that("the augmented RCBD page offers the blocks and fields of its entries",
   expect_null(augmented_random_note(TRUE))
 })
 
+test_that("the diagonal page offers fields and percentages of checks and builds the API's design", {
+  spec <- design_app_spec("Diagonal")
+  raw <- utils::modifyList(page_defaults("Diagonal", seed = 21), list(
+    lines = 150, checks = 3, l = 2, planter = "cartesian", plot_start = "1,1001",
+    location_names = "A,B", expt_name = "D1"))
+  fields <- diagonal_field_choices(150, 150, 1:3, planter = "cartesian")$choices
+  size <- as.numeric(strsplit(fields[[2]], " x ")[[1]])
+  percents <- diagonal_percent_choices(size[1], size[2], 1:3, 153, planter = "cartesian")$choices
+  expect_same_design(page_design(spec, raw, steps = list(dimensions = fields[[2]],
+                                                         checks_percent = as.character(percents[[1]]))),
+    diagonal_arrangement(nrows = size[1], ncols = size[2], lines = 150, checks = 3, l = 2,
+                         planter = "cartesian", plotNumber = c(1, 1001), kindExpt = "SUDC", seed = 21,
+                         exptName = "D1", locationNames = c("A", "B"), checksPercent = percents[[1]]))
+  # an uploaded list, its checks first
+  entries <- data.frame(ENTRY = 1:154, NAME = c(paste0("CH", 1:4), paste0("G", 5:154)))
+  raw <- utils::modifyList(page_defaults("Diagonal"), list(lines = NA))
+  percents <- diagonal_percent_choices(13, 13, 1:4, 154, data = entries)$choices
+  expect_same_design(page_design(spec, raw, entries, steps = list(dimensions = "13 x 13")),
+    diagonal_arrangement(nrows = 13, ncols = 13, checks = 4, l = 1, plotNumber = 1, kindExpt = "SUDC",
+                         seed = 7, exptName = "Expt1", locationNames = "FARGO", data = entries,
+                         checksPercent = utils::tail(percents, 1L)))
+  shuffled <- entries[c(2, 1, 5, 3, 4, 6:154), ]
+  expect_error(page_design(spec, raw, shuffled), "must have consecutive ENTRY numbers",
+               class = "fieldhub_input_error")
+  expect_error(page_design(spec, utils::modifyList(raw, list(lines = 2))),
+               "Insufficient number of entries", class = "fieldhub_input_error")
+})
+
 test_that("choices of computed selects follow the entries, typed or uploaded", {
   spec <- design_app_spec("RowCol")
   nrows <- Filter(function(control) identical(control$id, "nrows"), spec$controls)[[1]]
@@ -418,10 +449,10 @@ test_that("the same concept has the same label, default and minimum on every pag
                        STRIPD.reps = 1, SPD.wp = 1, SSPD.wp = 1, FD.reps = 1)
   # The spatial pages keep the smallest counts they have always offered,
   # and the defaults of their own
-  page_minimums <- c(Optim.lines = 5)
+  page_minimums <- c(Optim.lines = 5, Diagonal.lines = 50)
   page_values <- c(Optim.plot_start = "1", Optim.rep_checks = "8,8,8,8", pREPS.plot_start = "1",
                    pREPS.repGens = "75,150", pREPS.repUnits = "2,1",
-                   RCBD_augmented.plot_start = "1")
+                   RCBD_augmented.plot_start = "1", Diagonal.plot_start = "1")
   seen <- character()
   for (module in all_modules) {
     spec <- design_app_spec(module)

@@ -120,6 +120,23 @@ build_design_specs <- function() {
                     colours = spatial_highlight_colours("checks", length(checks)))
   }
   summary_setup <- list(type = "summary")
+  # The diagonal pages: the percentages of checks of the field, and each
+  # location's entries and checks
+  percent_setup <- list(
+    type = "table", stage = "randomize",
+    caption = paste("Reference guide to design your experiment. Choose the percentage (%)",
+                    "of checks based on the total number of plots you want to have in the final layout."),
+    view = function(values, choices) choices$checks_percent$table
+  )
+  diagonal_entry_tables <- list(
+    function(design, location, values) {
+      entry_table(entry_list_view(design$data_entry[[location]]), "List of Entries.")
+    },
+    function(design, location, values) {
+      entry_table(diagonal_checks_view(design, location), "Table of Checks.", height = "350px",
+                  filter = "none")
+    }
+  )
   # Location views, plot order, plot starts, experiment and location names
   # of a spatial page
   spatial_shared <- function(expt_name = ctl_expt_name(), trim_locations = FALSE) {
@@ -419,6 +436,38 @@ build_design_specs <- function() {
       field_size = function(design, values) {
         list(nrows = length(unique(design$fieldBook$ROW)),
              ncols = length(unique(design$fieldBook$COLUMN)))
+      }),
+    # The field sizes are searched after Run!, the percentages of checks
+    # after Randomize!
+    Diagonal = spatial("Diagonal", "Unreplicated Single Diagonal Arrangement", diagonal_arrangement,
+      upload = "sdiag", upload_columns = c("ENTRY", "NAME"), file_tag = "Diagonal_",
+      controls = c(
+        list(ctl_count("lines", 287, min = 50, generated_only = TRUE), ctl_checks(4, max = 10),
+             ctl_locations()),
+        spatial_shared(), list(ctl_seed())
+      ),
+      values = function(controls, data) {
+        list(lines = controls$lines, checks = controls$checks, l = controls$l,
+             planter = controls$planter, plot_start = controls$plot_start, seed = controls$seed,
+             expt_name = controls$expt_name, location_names = controls$location_names,
+             entries = diagonal_entries(controls$lines, controls$checks, data))
+      },
+      steps = list(
+        ctl_dimensions(function(values, data) {
+          entries <- values$entries
+          diagonal_field_choices(entries$field_entries, entries$entries - values$checks,
+                                 entries$checks_entries, planter = values$planter, data = data)
+        }),
+        ctl_checks_percent(function(values, data) {
+          diagonal_percent_choices(values$nrows, values$ncols, values$entries$checks_entries,
+                                   values$entries$entries, planter = values$planter, data = data)
+        })
+      ),
+      setup = percent_setup,
+      entries = diagonal_entry_tables,
+      panels = list(field_panel(checks_view), numbers_panel("plotsNumber")),
+      field_size = function(design, values) {
+        list(nrows = design$infoDesign$rows, ncols = design$infoDesign$columns)
       })
   )
 }

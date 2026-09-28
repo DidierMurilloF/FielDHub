@@ -16,8 +16,8 @@ test_that("field_dimensions() proposes non-prime field sizes for a prime-free ra
 test_that("field_dimensions() rejects a malformed entry count with a classed error", {
   # Regression test: typing 0 or a negative "Input # of Entries" and
   # clicking Run reached field_dimensions(lines_within_loc = 0) directly
-  # inside an observer-read eventReactive (getData() in R/mod_Diagonal.R and
-  # R/mod_diagonal_multiple.R, sparse_setup() in R/mod_sparse_allocation.R).
+  # inside an observer-read eventReactive of the diagonal and sparse pages
+  # (now diagonal_field_choices(), run by the generic spatial page).
   # field_dimensions(0)/(-1) already raised a classed fieldhub_input_error
   # (via is_prime()'s validator), but field_dimensions(NA) raised an
   # unclassed "NA/NaN argument" from `range[1]:range[2]` before ever
@@ -31,8 +31,8 @@ test_that("field_dimensions() rejects a malformed entry count with a classed err
 
 test_that("validate_design(field_dimensions(0)) is safe inside an observer", {
   skip_if_not_installed("shiny")
-  # Proves the wrap used at every observer-read call site (R/mod_Diagonal.R,
-  # R/mod_diagonal_multiple.R, R/mod_sparse_allocation.R) turns the classed
+  # Proves the wrap used at every observer-read call site (the spatial
+  # pages' choice functions run inside validate_design()) turns the classed
   # error into the same silent, session-safe condition req() raises.
   err <- tryCatch(validate_design(FielDHub:::field_dimensions(0)), error = function(e) e)
   expect_s3_class(err, "shiny.silent.error")

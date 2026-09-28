@@ -106,3 +106,44 @@ test_that("augmented RCBD pages offer the blocks and fields their entries fit", 
   expect_error(augmented_lines(NULL, 4, data.frame(ENTRY = 1:11)), "At least ten treatments",
                class = "fieldhub_input_error")
 })
+
+test_that("diagonal pages read their entries and checks, typed or uploaded", {
+  expect_identical(diagonal_entries(287, 4),
+                   list(checks_entries = 1:4, entries = 291, field_entries = 287, layout = NULL))
+  entries <- data.frame(ENTRY = 11:30, NAME = paste0("E", 1:20))
+  read <- diagonal_entries(NULL, 3, entries)
+  expect_identical(read$checks_entries, c(11, 12, 13))
+  expect_identical(read$entries, 20L)
+  expect_identical(read$field_entries, 20L)
+  expect_identical(upload_check_entries(entries[c(3, 1, 2, 4:20), ], 3), c(11, 12, 13))
+  for (bad in list(entries[c(1, 5, 2:4, 6:20), ], transform(entries, ENTRY = c("a", ENTRY[-1])),
+                   entries[1:3, ])) {
+    expect_error(upload_check_entries(bad, 3), "consecutive ENTRY numbers", class = "fieldhub_input_error")
+  }
+})
+
+test_that("diagonal pages offer fields, then percentages of checks with the API default selected", {
+  fields <- diagonal_field_choices(287, 287, 1:4)
+  expect_identical(fields$choices, diagonal_dimension_choices(287, 1:4))
+  expect_identical(fields$selected, "18 x 18")
+  expect_error(diagonal_field_choices(2, 2, 1:4), "Insufficient number of entries provided!",
+               class = "fieldhub_input_error")
+  percents <- diagonal_percent_choices(18, 18, 1:4, 291)
+  expect_identical(percents$selected, utils::tail(percents$choices, 1L))
+  expect_identical(percents$choices, as.numeric(percents$table[["Percentage of Checks"]]))
+  expect_error(diagonal_percent_choices(5, 5, 1:4, 291), "does not fit", class = "fieldhub_input_error")
+  for (value in blank_inputs) {
+    expect_classed(diagonal_field_choices(value, 287, 1:4), info = deparse(value))
+    expect_classed(diagonal_field_choices(287, value, 1:4), info = deparse(value))
+    expect_classed(diagonal_percent_choices(value, 18, 1:4, 291), info = deparse(value))
+    expect_classed(diagonal_percent_choices(18, 18, 1:4, value), info = deparse(value))
+  }
+})
+
+test_that("the checks table of a diagonal location lists each check and its plots", {
+  design <- diagonal_arrangement(nrows = 18, ncols = 18, lines = 287, checks = 4, seed = 1)
+  view <- diagonal_checks_view(design, 1)
+  expect_identical(names(view), c("ENTRY", "NAME", "TIMES"))
+  expect_identical(view$ENTRY, design$infoDesign$entry_checks[[1]])
+  expect_equal(sum(view$TIMES), sum(design$fieldBook$CHECKS != 0))
+})

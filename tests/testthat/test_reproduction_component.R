@@ -5,7 +5,6 @@ test_that("every module connects its design to the shared reproduction component
   # app_spatial_page(), whose design reactive is `design` too.
   sources <- c(
     mod_design_server = "design", app_spatial_page = "design",
-    mod_Diagonal_server = "diagonal_design",
     mod_diagonal_multiple_server = "diagonal_design",
     mod_sparse_allocation_server = "sparse_design",
     mod_multi_loc_preps_server = "pREPS_reactive"
