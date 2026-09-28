@@ -130,13 +130,21 @@ file is responsible for; the topic says what it holds (for example
 
 - A `fct_` file is named after its exported function (`fct_RCBD.R` holds
   `RCBD()`). Helpers used only by that function may sit beside it.
+- Exception: the allocation and pair-swap result builders
+  (`new_fieldhub_allocation()`, `validate_fieldhub_allocation()`,
+  `new_fieldhub_optimization()`, `validate_fieldhub_optimization()`) live in
+  `fct_do_optim.R` and `fct_swap_pairs.R`, not in `result_` files. Each
+  validator reads the arguments of its engine (`formals(do_optim)`,
+  `formals(swap_pairs)`), so a `result_` file would depend on the `fct_` file
+  that depends on it. `fct_reproduce_design.R` calls both validators.
 - `api_` files hold roxygen documentation only: `api_vocabulary.R` (argument
   names) and `api_result_contract.R` (the structure of every result, shared
   by all designs, so it is `api_` rather than `result_`).
-- Plain functions that exist only to serve the app (reading Shiny inputs,
-  workflow steps, table options) go in `app_` files even when they make no
-  Shiny calls. Core files (every other prefix) never refer to `app_`/`mod_`
-  code and make no `shiny`, `DT`, `bslib`, `shinyjs` or `shinyalert` calls.
+- `app_`/`mod_` files hold the Shiny wiring. Plain helpers the app uses
+  (reading an input, preparing a simulation or an export) live in core
+  prefixes, where they are unit-tested and count toward core coverage. Core
+  files (every other prefix) never refer to `app_`/`mod_` code and make no
+  `shiny`, `DT`, `bslib`, `shinyjs` or `shinyalert` calls.
 - Dependencies between files go one way: no file may depend, directly or
   through other files, on a file that depends on it. When two files call
   each other, move the mutually dependent functions into one file, or into a

@@ -186,3 +186,191 @@ pairs_distance <- function(X, dist_method = "euclidean") {
     delta = delta
   )
 }
+
+#' Pair-swap worker consuming the surrounding design's established RNG stream
+#' @noRd
+swap_pairs_core <- function(X, starting_dist = 3, stop_iter = 10, lambda = 0.5,
+                             dist_method = "euclidean", candidate_sample_size = 4) {
+  validate_swap_matrix(X)
+  validate_swap_controls(starting_dist, stop_iter, lambda, dist_method, candidate_sample_size)
+
+  input_X <- X
+  input_freq <- table(input_X)
+  nr <- nrow(X)
+  nc <- ncol(X)
+  active_pos <- which(!is.na(X), arr.ind = TRUE)
+  if (nrow(active_pos) == 0L) fieldhub_abort("X must contain at least one active cell")
+
+  if (anyNA(X)) {
+    center <- colMeans(active_pos)
+  } else {
+    center <- c(nr / 2, nc / 2)
+  }
+  if (dist_method == "manhattan") {
+    # The maximum L1 distance is a range of row + column or row - column.
+    minDist <- max(diff(range(active_pos[, 1L] + active_pos[, 2L])),
+                   diff(range(active_pos[, 1L] - active_pos[, 2L])))
+  } else if (anyNA(X)) {
+    minDist <- if (nrow(active_pos) > 1L) max(stats::dist(active_pos)) else 0
+  } else {
+    # Preserve the historical Euclidean no-filler calculation exactly.
+    minDist <- sqrt(nr^2 + nc^2)
+  }
+  dist_fn <- swap_distance_function(dist_method)
+
+  swap_succeed <- FALSE
+  designs <- list(X)
+  init_pd <- pairs_distance(X, dist_method)
+  distances <- list(init_pd)
+  rows_incidence <- numeric()
+  genos <- unique(init_pd$geno)
+  w <- 2L
+
+  # Guard against a reversed/empty threshold range: on very small fields the
+  # field diagonal (minDist) can be shorter than starting_dist, which would make
+  # seq(starting_dist, minDist, 1) error with "wrong sign in 'by' argument".
+  dist_seq <- if (minDist >= starting_dist) seq(starting_dist, minDist, 1) else numeric(0)
+  iterations <- 0
+  thresholds_attempted <- 0L
+  last_threshold <- NA_real_
+  last_attempt_min <- min(init_pd$DIST)
+  stop_reason <- if (length(dist_seq)) "distance_range_complete" else "no_distance_thresholds"
+
+  # ------------------------------------------------------------------ #
+  #  Main loop over increasing minimum-distance thresholds              #
+  # ------------------------------------------------------------------ #
+  for (min_dist in dist_seq) {
+    # A double counter avoids integer overflow at the largest accepted limit.
+    n_iter <- 1
+    thresholds_attempted <- thresholds_attempted + 1L
+    last_threshold <- min_dist
+
+    while (n_iter <= stop_iter) {
+      # ---- (A) pairs_distance() called ONCE per while-iteration ---------
+      plotDist <- pairs_distance(X, dist_method)
+      LowID <- which(plotDist$DIST < min_dist)
+      if (length(LowID) == 0L) {
+        break
+      }
+
+      low_dist_gens <- unique(plotDist$geno[LowID])
+
+      # Global sum and pair-count for incremental scoring.
+      # n_pairs stays constant throughout — swapping never adds/removes pairs.
+      base_sum <- sum(plotDist$DIST)
+      n_pairs <- nrow(plotDist)
+
+      # ---- (B) Resolve each violating genotype --------------------------
+      for (genotype in low_dist_gens) {
+        geno_rc <- which(X == genotype, arr.ind = TRUE)
+
+        # Inactive cells are fixed geometry, not swap candidates.
+        other_mask <- !is.na(X) & X != genotype
+        other_r <- row(X)[other_mask]
+        other_c <- col(X)[other_mask]
+
+        for (i in seq_len(nrow(geno_rc))) {
+          r0 <- geno_rc[i, 1L]
+          c0 <- geno_rc[i, 2L]
+
+          # ---- (C) Vectorised distance to every other cell --------------
+          d <- dist_fn(r0, c0, other_r, other_c)
+          valid <- d >= min_dist
+          if (!any(valid)) next
+
+          v_r <- other_r[valid]
+          v_c <- other_c[valid]
+          nv <- length(v_r)
+
+          # ---- (D) Sample candidates ------------------------------------
+          if (nv > candidate_sample_size) {
+            idx <- sample.int(nv, candidate_sample_size)
+            v_r <- v_r[idx]
+            v_c <- v_c[idx]
+            nv <- candidate_sample_size
+          }
+
+          # ---- (E) Score candidates — no pairs_distance() call ----------
+          scores <- numeric(nv)
+          deltas <- numeric(nv)
+          for (j in seq_len(nv)) {
+            res <- .score_swap(
+              X, r0, c0, v_r[j], v_c[j],
+              lambda, center, base_sum, n_pairs, dist_method
+            )
+            scores[j] <- res$score
+            deltas[j] <- res$delta
+          }
+
+          # ---- (F) Apply best swap --------------------------------------
+          best <- which.max(scores)
+          rb <- v_r[best]
+          cb <- v_c[best]
+          tmp <- X[rb, cb]
+          X[rb, cb] <- X[r0, c0]
+          X[r0, c0] <- tmp
+
+          # ---- (G) Update base_sum — pure arithmetic, zero allocations --
+          base_sum <- base_sum + deltas[best]
+          # n_pairs is unchanged; no call needed
+        }
+      }
+
+      n_iter <- n_iter + 1L
+      iterations <- iterations + 1
+    }
+
+    # ---- Did we satisfy the current min_dist threshold? -----------------
+    current_min <- min(pairs_distance(X, dist_method)$DIST)
+    last_attempt_min <- current_min
+    if (current_min < min_dist) {
+      stop_reason <- "iteration_limit"
+      break
+    } else {
+      swap_succeed <- TRUE
+
+      output_freq <- table(X)
+      if (!all(input_freq == output_freq)) {
+        fieldhub_abort("swap_pairs() changed the frequency of some integers.")
+      }
+
+      rows_incidence[w - 1L] <- sum(apply(X, 1L, function(row) {
+        any(tabulate(match(row, genos)) >= 2L)
+      }))
+
+      designs[[w]] <- X
+      distances[[w]] <- pairs_distance(X, dist_method)
+      w <- w + 1L
+    }
+  }
+
+  # ---- Retain the established result fields and append diagnostics ----
+  optim_design <- designs[[length(designs)]]
+  pairwise_distance <- pairs_distance(optim_design, dist_method)
+  min_distance <- min(pairwise_distance$DIST)
+
+  if (!swap_succeed) {
+    optim_design <- designs[[1L]]
+    pairwise_distance <- pairs_distance(optim_design, dist_method)
+    min_distance <- min(pairwise_distance$DIST)
+    rows_incidence[1L] <- sum(apply(optim_design, 1L, function(row) {
+      any(tabulate(match(row, genos)) >= 2L)
+    }))
+    distances[[1L]] <- pairwise_distance
+  }
+
+  list(
+    rows_incidence    = rows_incidence,
+    optim_design      = optim_design,
+    designs           = designs,
+    distances         = distances,
+    min_distance      = min_distance,
+    pairwise_distance = pairwise_distance,
+    diagnostics = list(
+      distance_method = dist_method, stop_reason = stop_reason,
+      iterations = iterations, max_iterations_per_threshold = stop_iter,
+      thresholds_attempted = thresholds_attempted, last_threshold = last_threshold,
+      last_attempt_min_distance = last_attempt_min, retained_min_distance = min_distance
+    )
+  )
+}

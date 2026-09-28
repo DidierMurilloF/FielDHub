@@ -90,3 +90,16 @@ local_design_seed <- function(seed, frame = parent.frame()) {
   rng_calls$depth <- rng_calls$depth + 1
   set.seed(seed)
 }
+
+#' Reuse the accepted design seed when an app simulation has no explicit seed
+#' @noRd
+workflow_seed <- function(seed, design) {
+  if (!is.null(seed) && length(seed) > 0L) return(seed)
+  recorded <- design$metadata$seed
+  if (!is.numeric(recorded) || length(recorded) != 1L || !is.finite(recorded) ||
+      abs(trunc(recorded)) > .Machine$integer.max) {
+    fieldhub_abort("The accepted design has no recorded seed for simulation.",
+                   class = "fieldhub_internal_error")
+  }
+  recorded
+}

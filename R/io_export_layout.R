@@ -62,3 +62,15 @@ export_layout <- function(Fieldbook, selected, plotOn = FALSE, type_pref = NULL)
   
   return(list(file = layout_entries2))
 }
+
+#' Export the selected classic layout using the same labels as its map
+#' @noRd
+classic_workflow_layout <- function(field_book, selected, plot_type, spec) {
+  if ((!is.character(plot_type) && !is.numeric(plot_type)) ||
+      !is.null(dim(plot_type)) || length(plot_type) != 1L || is.na(plot_type) ||
+      !as.character(plot_type) %in% c("1", "2", "3")) {
+    fieldhub_abort("Select entries, plot numbers, or a heatmap before exporting the layout.")
+  }
+  export_layout(field_book, selected, plotOn = as.character(plot_type) == "2",
+                 type_pref = spec$export_label)
+}

@@ -62,20 +62,3 @@ stop_dimensions <- function(message, options = NULL, labels = NULL, no_options =
   fieldhub_abort(message, class = "fieldhub_dimension_error",
                  data = list(options = options), call = call)
 }
-
-#' Valid field dimensions as a data frame
-#'
-#' @param choices Character vector of dimensions such as "10 x 20".
-#' @return A data frame with the columns rows and cols, sorted by rows, or NULL
-#'   when there is no choice.
-#' @noRd
-dimension_options <- function(choices) {
-  if (is.null(choices) || length(choices) == 0) return(NULL)
-  dims <- do.call(rbind, lapply(choices, function(x) {
-    parts <- as.integer(trimws(strsplit(x, "x")[[1]]))
-    data.frame(rows = parts[1], cols = parts[2])
-  }))
-  dims <- unique(dims[order(dims$rows), ])
-  rownames(dims) <- NULL
-  dims
-}
