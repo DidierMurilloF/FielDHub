@@ -1013,6 +1013,18 @@
   `incomplete_blocks()` now validate their block size the same way and list
   every accepted size.
 
+- Clearing (or otherwise invalidating) the "# of Locations" input no longer
+  ends the Shiny session in the Diagonal, Multi-location Diagonal,
+  Optimized Arrangement, p-rep, Multi-location p-rep, Sparse Allocation and
+  Augmented RCBD modules, and clearing the Multi-location p-rep "plant
+  copies" or Sparse Allocation "plant reps" locations input no longer does
+  either. These observers built their location-view/replicate choices as
+  `1:as.numeric(input$...)`, which throws "NA/NaN argument" on Shiny's `NA`
+  for a blank input; an uncaught error inside an observer ends the session.
+  They now validate the count with a plain helper and show the app's usual
+  validation message instead. The Augmented RCBD "# of Checks" input is
+  guarded the same way.
+
 ### Changes to results for a given seed:
 
 Some of the fixes above change the design produced for a given seed. Field

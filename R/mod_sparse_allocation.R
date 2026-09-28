@@ -244,13 +244,15 @@ mod_sparse_allocation_server <- function(id){
     }
 
     shiny::observe({
-        shiny::req(input$sparse_locations)
-        sparse_locs <- as.numeric(input$sparse_locations)
+        # validate_locations_input() rejects NULL/NA/""/"abc"/0/negative/
+        # fractional/multi-value counts before the existing choices formula
+        # runs unchanged (Task 13).
+        sparse_locs <- validate_design(validate_locations_input(input$sparse_locations))
         start <- ceiling(sparse_locs / 2)
         plant_reps <- start:(sparse_locs - 1)
         shiny::updateSelectInput(
-            inputId = "plant_reps", 
-            choices = plant_reps, 
+            inputId = "plant_reps",
+            choices = plant_reps,
             selected = plant_reps[length(plant_reps)]
         )
     })
@@ -317,13 +319,15 @@ mod_sparse_allocation_server <- function(id){
     })
     
     shiny::observeEvent(single_inputs()$sites, {
-      loc_user_view <- 1:as.numeric(input$sparse_locations)
+      # See R/mod_Diagonal.R's equivalent observer (Task 13): a cleared
+      # "# of Locations" input must not end the session.
+      loc_user_view <- validate_design(location_view_choices(input$sparse_locations))
       shiny::updateSelectInput(inputId = "sparse_loc_view",
-                        choices = loc_user_view, 
+                        choices = loc_user_view,
                         selected = loc_user_view[1])
-      plant_reps <- 1:(as.numeric(input$sparse_locations) - 1)
+      plant_reps <- validate_design(plant_rep_choices(input$sparse_locations))
       shiny::updateSelectInput(inputId = "plant_reps",
-                        choices = plant_reps, 
+                        choices = plant_reps,
                         selected = plant_reps[length(plant_reps)])
     })
     

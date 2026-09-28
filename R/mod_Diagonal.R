@@ -222,9 +222,13 @@ mod_Diagonal_server <- function(id) {
     })
     
     shiny::observeEvent(single_inputs()$sites, {
-      loc_user_view <- 1:as.numeric(input$l.diagonal)
+      # A cleared "# of Locations" input sends NA; 1:as.numeric(NA) throws
+      # "NA/NaN argument" and, inside an observer, ends the session.
+      # location_view_choices() validates first, so this shows the app's
+      # usual validation message instead (Task 13).
+      loc_user_view <- validate_design(location_view_choices(input$l.diagonal))
       shiny::updateSelectInput(inputId = "locView.diagonal",
-                        choices = loc_user_view, 
+                        choices = loc_user_view,
                         selected = loc_user_view[1])
     })
     

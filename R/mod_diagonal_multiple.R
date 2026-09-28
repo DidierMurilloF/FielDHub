@@ -244,9 +244,11 @@ mod_diagonal_multiple_server <- function(id) {
         })
         
         shiny::observeEvent(multiple_inputs()$sites, {
-            loc_user_view <- 1:as.numeric(input$locs_db)
+            # See R/mod_Diagonal.R's equivalent observer (Task 13): a
+            # cleared "# of Locations" input must not end the session.
+            loc_user_view <- validate_design(location_view_choices(input$locs_db))
             shiny::updateSelectInput(inputId = "locView_diagonal_db",
-                                choices = loc_user_view, 
+                                choices = loc_user_view,
                                 selected = loc_user_view[1])
         })
         

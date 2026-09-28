@@ -292,3 +292,33 @@ fieldhub_symbol_refs <- function(expr) {
   walk(expr)
   refs
 }
+
+#' Every `:` (range) call in `expr` with an `as.numeric()` or `sum()` call on
+#' either side, such as `1:as.numeric(input$l.diagonal)` or `1:sum(repGens)`
+#'
+#' `as.numeric(<Shiny input>)` is `NA` for a cleared numeric input, and
+#' `1:NA` raises "NA/NaN argument"; inside an observer (as opposed to a
+#' `reactive()`/`render*()`), that ends the Shiny session (Task 13). Used by
+#' `test_location_view_choices.R` to keep this pattern out of every
+#' `mod_*_server()`/`app_*` function body, in place of the validated plain
+#' helpers in R/validate_locations.R.
+#'
+#' @return A list of the matching call objects.
+#' @noRd
+fieldhub_colon_as_numeric_calls <- function(expr) {
+  hits <- list()
+  operand_is_risky <- function(e) fieldhub_calls_named(e, c("as.numeric", "sum"))
+  walk <- function(e) {
+    if (!is.call(e)) return(invisible())
+    if (is.symbol(e[[1]]) && identical(as.character(e[[1]]), ":") && length(e) == 3 &&
+        (operand_is_risky(e[[2]]) || operand_is_risky(e[[3]]))) {
+      hits[[length(hits) + 1]] <<- e
+    }
+    n <- length(e)
+    for (i in seq_len(n)) {
+      if (is.call(e[[i]])) walk(e[[i]])
+    }
+  }
+  walk(expr)
+  hits
+}

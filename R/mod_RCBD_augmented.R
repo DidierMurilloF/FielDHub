@@ -463,7 +463,10 @@ mod_RCBD_augmented_server <- function(id) {
       if(!test_arcbd()) return(NULL)
       shiny::req(rcbd_augmented_reactive())
       data_entry <- rcbd_augmented_reactive()$data_entry
-      df <- data_entry[1:(as.numeric(input$checks_a_rcbd)),]
+      # Guard the checks count the same way as the location-view observers
+      # (Task 13): a malformed `checks_a_rcbd` must show a validation
+      # message, not an unclassed "NA/NaN argument"/indexing error.
+      df <- data_entry[seq_len(validate_design(read_n_checks(input$checks_a_rcbd))),]
       table_options <- list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "350px")
       a <- ncol(df) - 1
@@ -539,13 +542,14 @@ mod_RCBD_augmented_server <- function(id) {
     })
     
     shiny::observeEvent(some_inputs()$sites, {
-      sites <- as.numeric(some_inputs()$sites)
-      sites_to_view <- 1:sites 
+      # See R/mod_Diagonal.R's equivalent observer (Task 13): a cleared
+      # "# of Locations" input must not end the session.
+      sites_to_view <- validate_design(location_view_choices(some_inputs()$sites))
       shiny::updateSelectInput(session = session,
-                        inputId = "locView.arcbd", 
-                        choices = sites_to_view, 
+                        inputId = "locView.arcbd",
+                        choices = sites_to_view,
                         selected = sites_to_view[1])
-      
+
     })
     
     locNum <- shiny::reactive(
@@ -555,7 +559,8 @@ mod_RCBD_augmented_server <- function(id) {
     output$randomized_layout <- DT::renderDT({
       if(!test_arcbd()) return(NULL)
       r_map <- rcbd_augmented_reactive()$layout_random_sites[[locNum()]]
-      checks <- 1:(as.numeric(some_inputs()$checks))
+      # See the equivalent guard on input$checks_a_rcbd above (Task 13).
+      checks <- seq_len(validate_design(read_n_checks(some_inputs()$checks)))
       b <- as.numeric(some_inputs()$blocks)
       len_checks <- length(checks)
       df <- as.data.frame(r_map)

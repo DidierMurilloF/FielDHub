@@ -181,9 +181,11 @@ mod_Optim_server <- function(id) {
     })
 
     shiny::observeEvent(optim_inputs()$sites, {
-      loc_user_view <- 1:as.numeric(optim_inputs()$sites)
+      # See R/mod_Diagonal.R's equivalent observer (Task 13): a cleared
+      # "# of Locations" input must not end the session.
+      loc_user_view <- validate_design(location_view_choices(optim_inputs()$sites))
       shiny::updateSelectInput(inputId = "locView.optim",
-                        choices = loc_user_view, 
+                        choices = loc_user_view,
                         selected = loc_user_view[1])
     })
 

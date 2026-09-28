@@ -1177,7 +1177,11 @@ test_that("spatial modules build their designs only through design_args_<Module>
     "set_augmented_blocks",       # block counts and field dimensions offered for an augmented RCBD (no RNG)
     "checked_layout_view",        # draws the augmented RCBD field layout of one location
     "field_book_location_grids",  # splits a field book into per-location EXPT grids for display
-    "allocation_entry_names"      # reads the entry names of a do_optim() allocation for its table
+    "allocation_entry_names",     # reads the entry names of a do_optim() allocation for its table
+    "validate_locations_input",   # validates a raw "# of Locations" input before using the count
+    "location_view_choices",      # choices for a "view location" select input (Task 13)
+    "plant_rep_choices",          # choices for the sparse allocation "plant reps" select input (Task 13)
+    "read_n_checks"               # validates a raw "# of Checks" input before using the count (Task 13)
   )
   forbidden <- c("sample", "sample.int", "set.seed", "runif", "available_percent",
                  "random_checks", "merge_user_data", "pREP", "get_random",

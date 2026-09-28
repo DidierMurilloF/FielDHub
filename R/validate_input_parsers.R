@@ -80,6 +80,17 @@ parse_n_checks <- function(x) {
   list(ok = TRUE, value = as.integer(x), message = NULL)
 }
 
+#' Read the "Input # of Checks" input using the shared classed error contract
+#'
+#' @inheritParams parse_n_checks
+#' @return An integer, or a `fieldhub_input_error` for invalid input.
+#' @noRd
+read_n_checks <- function(x) {
+  parsed <- parse_n_checks(x)
+  if (!parsed$ok) fieldhub_abort(parsed$message)
+  parsed$value
+}
+
 #' Parse the "Reps per Check" text input
 #'
 #' @description

@@ -263,12 +263,16 @@ mod_multi_loc_preps_server <- function(id){
     ns <- session$ns
 
     shiny::observe({
-        shiny::req(input$locs_prep)
-        prep_locs <- as.numeric(input$locs_prep)
+        # req() alone only screens out NULL/NA/"" (Task 13); a numeric-
+        # looking-but-invalid `locs_prep` (0, negative, fractional, "abc")
+        # still reached `start:(prep_locs * 2 - 1)` below and could throw.
+        # validate_locations_input() rejects those too, before the existing
+        # choices formula runs unchanged.
+        prep_locs <- validate_design(validate_locations_input(input$locs_prep))
         start <- prep_locs + 1
         plant_reps <- start:(prep_locs * 2 - 1)
         shiny::updateSelectInput(inputId = "plant_copies_preps",
-                            choices = plant_reps, 
+                            choices = plant_reps,
                             selected = plant_reps[2])
     })
 
@@ -319,10 +323,12 @@ mod_multi_loc_preps_server <- function(id){
     })
 
     shiny::observeEvent(prep_inputs()$l, {
-        loc_user_view <- 1:prep_inputs()$l
+        # See R/mod_Diagonal.R's equivalent observer (Task 13): a cleared
+        # "# of Locations" input must not end the session.
+        loc_user_view <- validate_design(location_view_choices(prep_inputs()$l))
         shiny::updateSelectInput(
-            inputId = "loc_to_view_preps", 
-            choices = loc_user_view, 
+            inputId = "loc_to_view_preps",
+            choices = loc_user_view,
             selected = loc_user_view[1])
     })
 
