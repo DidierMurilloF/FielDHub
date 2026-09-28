@@ -139,3 +139,28 @@ app_upload_error <- function(result, missing_columns, notify = app_report_proble
   if (!is.null(message)) notify(message)
   invisible(NULL)
 }
+#' Explain an empty plot panel where the plot would be
+#'
+#' @inheritParams plot_state_message
+#' @return \code{NULL} invisibly when the plot can be drawn; otherwise a
+#'   Shiny validation message with the explanation.
+#' @noRd
+app_plot_state <- function(design, settings, view) {
+  message <- plot_state_message(design, settings, view)
+  shiny::validate(shiny::need(is.null(message), message))
+  invisible(NULL)
+}
+
+#' The current value of a design reactive, or NULL when it has not run
+#'
+#' @description A design that has not been run yet stops with an empty
+#' \code{shiny::req()}; that becomes \code{NULL}, for
+#' \code{plot_state_message()}. A design that failed keeps its message.
+#' @param design A function (reactive) returning the design.
+#' @noRd
+app_design_state <- function(design) {
+  tryCatch(design(), shiny.silent.error = function(e) {
+    if (nzchar(conditionMessage(e))) stop(e)
+    NULL
+  })
+}

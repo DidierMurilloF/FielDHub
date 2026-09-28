@@ -1167,6 +1167,8 @@ test_that("spatial modules build their designs only through design_args_<Module>
     "parse_rep_groups",           # parses the p-rep "entries per group"/"reps per group" inputs
     "prep_no_dimensions_problem", # explains why a p-rep design has no field dimensions to offer
     "fieldhub_abort",             # writes a problem an output shows through validate_design()
+    "app_plot_state",             # explains an empty layout panel (not randomized yet, or failed)
+    "app_design_state",           # reads a design that has not run as NULL for app_plot_state()
     "app_design_seed",            # resolves the optional app seed without touching the shared RNG stream
     "read_app_seed",              # re-reads the resolved design seed for the simulation workflow; never draws
     "app_upload_error",           # shows the shared upload-error alert for a failed file parse

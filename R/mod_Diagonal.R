@@ -588,7 +588,8 @@ mod_Diagonal_server <- function(id) {
     
     output$randomized_layout <- DT::renderDT({
       test <- randomize_hit$times > 0 & user_tries$tries > 0
-      if (!test) return(NULL)
+      # Explain a design that has not been randomized (or failed)
+      app_plot_state(if (test) app_design_state(diagonal_design), NULL, "layout")
       shiny::req(diagonal_design())
       user_site <- user_location()
       r_map <- diagonal_design()$layoutRandom[[user_site]]

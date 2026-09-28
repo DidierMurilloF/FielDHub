@@ -27,26 +27,23 @@ app_classic_workflow <- function(input, output, session, design, layout, seed,
     data <- book()$df
     shiny::req(data)
     response <- as.character(settings()$response_name)
-    if (length(response) == 1L && response %in% names(data)) {
-      validate_design(do.call(app_field_heatmap,
-        c(list(field_book = data, response_name = response, selected = selected()), spec$heatmap)))
-    } else {
-      shiny::showModal(shiny::modalDialog(
-        title = shiny::div(shiny::tags$h3("Important message", style = "color: red;")),
-        shiny::h4("Simulate some data to see a heatmap!"), easyClose = TRUE
-      ), session = session)
-      NULL
-    }
+    simulated <- length(response) == 1L && response %in% names(data)
+    # "Simulate data to see the heatmap." where the heatmap would be
+    app_plot_state(design(), if (simulated) settings(), "heatmap")
+    validate_design(do.call(app_field_heatmap,
+      c(list(field_book = data, response_name = response, selected = selected()), spec$heatmap)))
   })
   output[[spec$ids[["plot"]]]] <- plotly::renderPlotly({
-    shiny::req(design(), input[[spec$ids[["plot_type"]]]])
+    # "Run the design to see the field layout." (or why it failed) instead
+    # of a blank panel
+    app_plot_state(app_design_state(design), NULL, "layout")
+    shiny::req(input[[spec$ids[["plot_type"]]]])
     type <- input[[spec$ids[["plot_type"]]]]
     if (type == 1) {
       layout()$out_layout
     } else if (type == 2) {
       layout()$out_layoutPlots
     } else {
-      shiny::req(heatmap())
       heatmap()
     }
   })

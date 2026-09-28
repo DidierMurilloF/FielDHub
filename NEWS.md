@@ -711,6 +711,18 @@
   both p-rep modules, and text in the Optimized Arrangement "# Check's
   Reps" input is explained by name.
 
+- Layout and heatmap panels in the Shiny app now explain why they are
+  empty instead of staying blank: "Run the design to see the field
+  layout." before a design is run or randomized, the reason when it
+  failed, and "Simulate data to see the heatmap." before data is
+  simulated. The classic designs' heatmap no longer opens an "Important
+  message" dialog from inside the plot when no data has been simulated;
+  the explanation is shown in the plot area. This applies to the classic
+  designs' shared field plot and heatmap, the spatial designs' heatmap,
+  and the main field layout of the Diagonal, Multi-location Diagonal,
+  Sparse Allocation, Optimized Arrangement, p-rep, Multi-location p-rep
+  and Augmented RCBD modules.
+
 ### Fix bugs:
 
 - Blank app seed boxes no longer error. Shiny sends a cleared numeric

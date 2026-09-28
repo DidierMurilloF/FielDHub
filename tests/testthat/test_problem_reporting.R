@@ -151,25 +151,27 @@ test_that("only the one presentation helper refers to shinyalert", {
 test_that("no app function writes a literal shiny::validate() message", {
   # Messages the app shows are written as FielDHub conditions and reach the
   # user through validate_design()/app_report_problem(); only
-  # validate_design() calls shiny::validate() itself.
+  # validate_design() and app_plot_state() call shiny::validate() itself.
   calls_validate <- function(f) {
     grepl("shiny::validate(", paste(deparse(body(f)), collapse = "\n"), fixed = TRUE)
   }
   expect_setequal(names(Filter(calls_validate, c(core_functions(), app_functions()))),
-                  "validate_design")
+                  c("validate_design", "app_plot_state"))
 })
 
 test_that("no module catches conditions itself", {
   # Catch-all tryCatch(error = <alert>) blocks and ad-hoc warning collectors
   # used to word the same condition differently in each module. Modules now
-  # use validate_design(), app_attempt() or app_report_problem() instead.
+  # use validate_design(), app_attempt() or app_report_problem() instead;
+  # the only handlers left are those helpers in R/app_conditions.R.
   catches <- function(f) {
     fieldhub_calls_named(body(f), c("tryCatch", "withCallingHandlers", "try",
                                     "showNotification", "conditionMessage"))
   }
   functions <- app_functions()
   expect_setequal(names(Filter(catches, functions)),
-                  c("app_capture_conditions", "app_attempt", "app_present_problem"))
+                  c("app_capture_conditions", "app_attempt", "app_present_problem",
+                    "app_design_state"))
 })
 
 test_that("the p-rep modules share the no-dimensions explanation", {
@@ -180,4 +182,52 @@ test_that("the p-rep modules share the no-dimensions explanation", {
   expect_identical(prep_no_dimensions_problem(TRUE)$severity, "error")
   expect_match(prep_no_dimensions_problem(TRUE, 7)$message, "7 or fewer filler plots",
                fixed = TRUE)
+})
+
+test_that("plot_state_message() explains each empty plot state", {
+  design <- structure(list(fieldBook = data.frame(PLOT = 1)), class = "FielDHub")
+  expect_identical(plot_state_message(NULL, NULL, "layout"),
+                   "Run the design to see the field layout.")
+  expect_identical(plot_state_message(NULL, NULL, "heatmap"),
+                   "Run the design to see the field layout.")
+  expect_null(plot_state_message(design, NULL, "layout"))
+  expect_identical(plot_state_message(design, NULL, "heatmap"),
+                   "Simulate data to see the heatmap.")
+  expect_null(plot_state_message(design, list(response_name = "YIELD"), "heatmap"))
+  expect_identical(plot_state_message(input_error("Too few entries."), NULL, "layout"),
+                   "Too few entries.")
+  expect_identical(plot_state_message(simpleError("boom"), NULL, "heatmap"),
+                   "Unexpected problem: boom")
+  expect_error(plot_state_message(design, NULL, "table"), class = "fieldhub_input_error")
+})
+
+test_that("app_plot_state() shows the explanation as a validation message", {
+  skip_if_not_installed("shiny")
+  err <- tryCatch(app_plot_state(NULL, NULL, "layout"), error = function(e) e)
+  expect_s3_class(err, "shiny.silent.error")
+  expect_identical(conditionMessage(err), "Run the design to see the field layout.")
+  design <- structure(list(fieldBook = data.frame(PLOT = 1)), class = "FielDHub")
+  expect_null(app_plot_state(design, NULL, "layout"))
+})
+
+test_that("app_design_state() reads a design that has not run as NULL", {
+  skip_if_not_installed("shiny")
+  expect_null(app_design_state(function() shiny::req(FALSE)))
+  expect_identical(app_design_state(function() "design"), "design")
+  failed <- tryCatch(app_design_state(function() shiny::validate("Too few entries.")),
+                     error = function(e) e)
+  expect_identical(conditionMessage(failed), "Too few entries.")
+})
+
+test_that("layout and heatmap outputs explain their empty states", {
+  # Shared workflows and each spatial module's main layout output
+  functions <- app_functions()
+  for (name in c("app_classic_workflow", "app_spatial_workflow", "mod_Diagonal_server",
+                 "mod_diagonal_multiple_server", "mod_sparse_allocation_server",
+                 "mod_Optim_server", "mod_pREPS_server", "mod_multi_loc_preps_server",
+                 "mod_RCBD_augmented_server")) {
+    expect_true(fieldhub_calls_named(body(functions[[name]]), "app_plot_state"), info = name)
+  }
+  # The classic heatmap no longer opens a dialog from inside a reactive
+  expect_false(fieldhub_calls_named(body(functions$app_classic_workflow), "modalDialog"))
 })

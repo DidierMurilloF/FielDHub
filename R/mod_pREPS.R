@@ -471,7 +471,8 @@ mod_pREPS_server <- function(id){
 
     output$dtpREPS <- DT::renderDataTable({
       test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
-      if (!test) return(NULL)
+      # Explain a design that has not been randomized (or failed)
+      app_plot_state(if (test) app_design_state(pREPS_reactive), NULL, "layout")
       shiny::req(pREPS_reactive())
       selection <- as.numeric(user_site_selection())
       w_map <- pREPS_reactive()$layoutRandom[[selection]]

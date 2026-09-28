@@ -46,7 +46,9 @@ app_spatial_workflow <- function(input, output, session, design, seed, dimension
       height = spec$heatmap_height, show_title = spec$heatmap_title))
   })
   output[[spec$ids[["heatmap"]]]] <- plotly::renderPlotly({
-    if (!visible()) return(NULL)
+    # Explain a design that has not been randomized (or failed) and a
+    # heatmap with no simulated data instead of a blank panel
+    app_plot_state(if (visible()) app_design_state(design), settings(), "heatmap")
     shiny::req(heatmap())
     heatmap()
   })

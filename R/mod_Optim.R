@@ -465,8 +465,8 @@ mod_Optim_server <- function(id) {
     
     output$RFIELD <- DT::renderDT({
       test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0
-      if (!test) return(NULL)
-      # if (user_tries_optim$tries_optim < 1) return(NULL)
+      # Explain a design that has not been randomized (or failed)
+      app_plot_state(if (test) app_design_state(optimized_arrang), NULL, "layout")
       shiny::req(optimized_arrang())
       w_map <- optimized_arrang()$layoutRandom[[user_site_selection()]]
       checks = as.vector(optimized_arrang()$genEntries[[1]])

@@ -504,6 +504,8 @@ mod_RCBD_augmented_server <- function(id) {
     })
     
     output$field_layout <- shiny::renderPlot({
+      # Explain a design that has not been randomized (or failed)
+      app_plot_state(app_design_state(rcbd_augmented_reactive), NULL, "layout")
       shiny::req(reactive_layoutARCBD())
       shiny::req(rcbd_augmented_reactive())
       reactive_layoutARCBD()$out_layout
