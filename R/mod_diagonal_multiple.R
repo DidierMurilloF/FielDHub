@@ -218,18 +218,15 @@ mod_diagonal_multiple_server <- function(id) {
             list(randomize_hit_multi$times_multi, user_tries_multi$tries)
         })
 
+        # Inputs parsed at Run!; diagonal_arrangement() applies its own
+        # defaults to experiment names, starting plots or location names that
+        # do not fit (see design_args_diagonal_multiple())
         multiple_inputs <- shiny::eventReactive(input$RUN_multiple, {
             stacked <- input$stacked
             planter_mov <- input$planter_multiple
-            blocks <- as.vector(unlist(strsplit(input$blocks.db, ",")))
-            n_blocks <- length(blocks)
-            Name_expt <- as.vector(unlist(strsplit(input$expt_name_multiple, ",")))
-            Name_expt <- gsub(" ", "", Name_expt)
-            if (length(Name_expt) == n_blocks) {
-                expe_names <- Name_expt
-            }else {
-                expe_names = paste0(rep("Block", times = n_blocks), 1:n_blocks)
-            }
+            blocks <- as.numeric(as.vector(unlist(strsplit(input$blocks.db, ","))))
+            expe_names <- as.vector(unlist(strsplit(input$expt_name_multiple, ",")))
+            expe_names <- gsub(" ", "", expe_names)
             plotNumber <- validate_design(read_whole_numbers(
               input$plot_start_multiple, "Starting Plot Number"
             ))
@@ -435,20 +432,13 @@ mod_diagonal_multiple_server <- function(id) {
                         type = "error")
                     return(NULL)
                 }
-                # The entries and names diagonal_arrangement() generates when
-                # no data is given; with sameEntries every block holds the
-                # entries numbered after the checks
-                if (input$sameEntries) {
-                    ENTRY <- c(checksEntries,
-                               rep((checks + 1):(checks + blocks[1]), times = length(blocks)))
-                } else {
-                    ENTRY <- 1:(lines.db + checks)
-                }
-                NAME <- c(paste0(rep("Check-", checks), 1:checks),
-                          paste0(rep("Gen-", lines.db), ENTRY[-(1:checks)]))
-                data_entry_UP <- data.frame(ENTRY = ENTRY, NAME = NAME)
-                data_entry_UP$BLOCK <- c(rep("ALL", checks), rep(1:length(blocks), times = blocks))
-                colnames(data_entry_UP) <- c("ENTRY", "NAME", "BLOCK")
+                # diagonal_arrangement() generates the entries and their names
+                # from the counts. The dimension and check options only need
+                # the experiment (BLOCK) of each entry, checks first
+                data_entry_UP <- data.frame(
+                    ENTRY = seq_len(lines.db + checks),
+                    BLOCK = c(rep("ALL", checks), rep(seq_along(blocks), times = blocks))
+                )
                 if (Option_NCD == TRUE) {
                     data_entry1 <- data_entry_UP[(checks + 1):nrow(data_entry_UP), ]
                     Block_levels <- suppressWarnings(as.numeric(levels(as.factor(data_entry1$BLOCK))))
@@ -618,9 +608,10 @@ mod_diagonal_multiple_server <- function(id) {
             })
         })
         
-        # The design comes from diagonal_arrangement(), so the app and the
-        # R function give the same design for the same inputs and seed. Every
-        # output below is derived from its result.
+        # The design comes from diagonal_arrangement(), through the same
+        # argument builder the tests compare with a direct call, so the app
+        # and the R function give the same design for the same inputs and
+        # seed. Every output below is derived from its result.
         diagonal_design <- shiny::reactive({
             shiny::req(get_data_multiple())
             shiny::req(field_dimensions_diagonal())
@@ -630,51 +621,26 @@ mod_diagonal_multiple_server <- function(id) {
             percent <- as.numeric(input$percent_checks_multi)
             options_percent <- as.numeric(available_percent_multi()$dt[,2])
             shiny::req(shiny::isTruthy(percent), any(abs(options_percent - percent) < 1e-6))
-            locs <- as.numeric(multiple_inputs()$sites)
-            blocks <- as.numeric(multiple_inputs()$blocks)
-            plotNumber <- multiple_inputs()$plotNumber
-            if (length(plotNumber) == 0 || anyNA(plotNumber)) {
-                shiny::validate("Plot starting number is missing.")
-            }
-            if (any(plotNumber %% 1 != 0)) {
-                shiny::validate("plotNumber should be integers.")
-            }
-            # Same starting plots in every location: one start for all the
-            # experiments or one per experiment. Any other number of starts
-            # keeps the previous default of 1001.
-            if (length(plotNumber) > 1 && length(plotNumber) != length(blocks)) {
-                plotNumber <- seq(1001, 1000 * (locs + 1), 1000)
-            }
-            if (length(plotNumber) == length(blocks)) {
-                plot_starts <- rep(list(plotNumber), locs)
-            } else {
-                plot_starts <- rep(plotNumber[1], locs)
-            }
-            location_names <- multiple_inputs()$location_names
-            if (length(location_names) != locs) location_names <- NULL
-            if (multiple_inputs()$stacked == "By Row") {
-                split_by <- "row"
-            } else split_by <- "column"
+            values <- list(
+                nrows = field_dimensions_diagonal()$d_row,
+                ncols = field_dimensions_diagonal()$d_col,
+                lines = get_data_multiple()$lines,
+                checks = as.numeric(getChecks()$checks),
+                planter = multiple_inputs()$planter_mov,
+                l = as.numeric(multiple_inputs()$sites),
+                plot_start = multiple_inputs()$plotNumber,
+                stacked = multiple_inputs()$stacked,
+                seed = multiple_inputs()$seed_number,
+                blocks = multiple_inputs()$blocks,
+                expt_name = multiple_inputs()$expt_name,
+                location_names = multiple_inputs()$location_names,
+                checksPercent = percent,
+                sameEntries = get_data_multiple()$same_entries
+            )
+            data <- get_data_multiple()$data_api
             design <- tryCatch(
                 suppressWarnings(
-                    diagonal_arrangement(
-                        nrows = field_dimensions_diagonal()$d_row,
-                        ncols = field_dimensions_diagonal()$d_col,
-                        lines = get_data_multiple()$lines,
-                        checks = as.numeric(getChecks()$checks),
-                        planter = multiple_inputs()$planter_mov,
-                        l = locs,
-                        plotNumber = plot_starts,
-                        kindExpt = kindExpt,
-                        splitBy = split_by,
-                        seed = validate_design(read_app_seed(multiple_inputs()$seed_number)),
-                        blocks = blocks,
-                        exptName = multiple_inputs()$expt_name,
-                        locationNames = location_names,
-                        data = get_data_multiple()$data_api,
-                        checksPercent = percent,
-                        sameEntries = get_data_multiple()$same_entries
-                    )
+                    do.call(diagonal_arrangement, design_args_diagonal_multiple(values, data))
                 ),
                 error = function(e) e
             )

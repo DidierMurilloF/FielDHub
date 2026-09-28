@@ -628,13 +628,84 @@ test_that("diagonal_arrangement() suggests the field sizes the app offers", {
                    formals(field_dimensions)$minimum_extra)
 })
 
+test_that("diagonal_multiple app arguments reproduce the API design with per-experiment plot starts in two locations", {
+  blocks <- c(100, 120, 80)
+  # The module's block layout (checks first, then one BLOCK per experiment),
+  # which only feeds the percentage-of-checks options
+  layout <- data.frame(ENTRY = 1:304, BLOCK = c(rep("ALL", 4), rep(1:3, times = blocks)))
+  percents <- offered_check_percents(19, 18, checks = 1:4, lines = 300, kindExpt = "DBUDC",
+                                     data = layout, blocks = 3)
+  values <- list(nrows = 19, ncols = 18, lines = 300, checks = 4, planter = "serpentine",
+                 l = 2, plot_start = c(1, 1001, 2001), stacked = "By Row", seed = 3,
+                 blocks = blocks, expt_name = c("A", "B", "C"),
+                 location_names = c("FARGO", "MINOT"), checksPercent = percents[1],
+                 sameEntries = FALSE)
+  # One start per experiment: the same starts in every location
+  parity(design_args_diagonal_multiple, diagonal_arrangement, values,
+         direct = diagonal_arrangement(nrows = 19, ncols = 18, lines = 300, checks = 4, l = 2,
+                                       plotNumber = list(c(1, 1001, 2001), c(1, 1001, 2001)),
+                                       kindExpt = "DBUDC", splitBy = "row", seed = 3,
+                                       blocks = blocks, exptName = c("A", "B", "C"),
+                                       locationNames = c("FARGO", "MINOT"),
+                                       checksPercent = percents[1]))
+})
+
+test_that("diagonal_multiple app arguments reproduce an uploaded-data design split by column", {
+  blocks <- c(100, 120, 80)
+  data <- data.frame(ENTRY = 1:304, NAME = c(paste0("CH", 1:4), paste0("SB-", 5:304)))
+  values <- list(nrows = 19, ncols = 18, lines = NULL, checks = 4, planter = "cartesian",
+                 l = 1, plot_start = 101, stacked = "By Column", seed = 11,
+                 blocks = blocks, expt_name = "ONE", location_names = "CASSELTON",
+                 checksPercent = NULL, sameEntries = FALSE)
+  parity(design_args_diagonal_multiple, diagonal_arrangement, values, data,
+         direct = diagonal_arrangement(nrows = 19, ncols = 18, checks = 4, planter = "cartesian",
+                                       plotNumber = 101, kindExpt = "DBUDC", splitBy = "column",
+                                       seed = 11, blocks = blocks, exptName = "ONE",
+                                       locationNames = "CASSELTON", data = data))
+})
+
+test_that("design_args_diagonal_multiple() shares one start across locations, or falls back to the engine default (R9)", {
+  blocks <- c(100, 120, 80)
+  values <- list(nrows = 19, ncols = 18, lines = 300, checks = 4, l = 2, plot_start = 5,
+                 stacked = "By Row", seed = 3, blocks = blocks, sameEntries = FALSE)
+  # One start: every location starts there
+  expect_identical(design_args_diagonal_multiple(values)$plotNumber, c(5, 5))
+  # A start count that is neither one nor one per experiment: the engine's
+  # own per-location default, default_plot_starts(l, 1001), silently
+  misfit <- utils::modifyList(values, list(plot_start = c(1, 2), location_names = "ONLY"))
+  built <- design_args_diagonal_multiple(misfit)
+  expect_identical(built$plotNumber, default_plot_starts(2, 1001))
+  expect_null(built$locationNames)
+  found <- warnings_of_class(via_app <- do.call(diagonal_arrangement, built),
+                             "fieldhub_default_warning")
+  expect_length(found, 0L)
+  direct <- diagonal_arrangement(nrows = 19, ncols = 18, lines = 300, checks = 4, l = 2,
+                                 plotNumber = c(1001, 2001), kindExpt = "DBUDC", seed = 3,
+                                 blocks = blocks)
+  expect_identical(via_app$fieldBook, direct$fieldBook)
+  expect_identical(via_app$metadata$parameters, direct$metadata$parameters)
+})
+
+test_that("design_args_diagonal_multiple() repeats entries across experiments on request", {
+  blocks <- rep(40, 5)
+  values <- list(nrows = 12, ncols = 18, lines = 200, checks = 4, planter = "serpentine",
+                 l = 1, plot_start = 1, stacked = "By Row", seed = 21, blocks = blocks,
+                 sameEntries = TRUE)
+  expect_identical(design_args_diagonal_multiple(values)$splitBy, "row")
+  parity(design_args_diagonal_multiple, diagonal_arrangement, values,
+         direct = diagonal_arrangement(nrows = 12, ncols = 18, lines = 200, checks = 4,
+                                       plotNumber = 1, kindExpt = "DBUDC", seed = 21,
+                                       blocks = blocks, sameEntries = TRUE))
+})
+
 # --- Spatial structural check (ruling R2): namespace bodies, call heads ---
 
 test_that("spatial modules build their designs only through design_args_<Module>() and do.call()", {
   # Every engine call each spatial module makes, keyed by the builder that
   # must supply its arguments.
   spatial_engines <- list(
-    Diagonal = c(design_args_Diagonal = "diagonal_arrangement")
+    Diagonal = c(design_args_Diagonal = "diagonal_arrangement"),
+    diagonal_multiple = c(design_args_diagonal_multiple = "diagonal_arrangement")
   )
   # Unexported helpers a spatial module server may call, and why. Anything
   # else it calls must be one of its engines/builders, or a base/shiny/DT/
@@ -651,7 +722,8 @@ test_that("spatial modules build their designs only through design_args_<Module>
     "app_table_export_buttons",   # DT export buttons carrying the design's metadata
     "field_dimensions",           # candidate field sizes: rejects too few entries before any randomization
     "diagonal_dimension_choices", # feasible diagonal field dimensions offered before randomizing (seed-isolated)
-    "diagonal_check_options"      # percentages of checks offered for a field before randomizing (seed-isolated)
+    "diagonal_check_options",     # percentages of checks offered for a field before randomizing (seed-isolated)
+    "field_book_location_grids"   # splits a field book into per-location EXPT grids for display
   )
   forbidden <- c("sample", "sample.int", "set.seed", "runif", "available_percent",
                  "random_checks", "merge_user_data", "pREP", "get_random",

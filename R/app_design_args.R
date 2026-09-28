@@ -388,3 +388,46 @@ design_args_Diagonal <- function(values, data = NULL) {
     checksPercent = values[["checksPercent"]]
   )
 }
+
+#' Build diagonal_arrangement() arguments for the multiple diagonal module
+#'
+#' `values`: `nrows`, `ncols`, `lines` (generated entries; ignored when
+#' `data` supplies the entry list), `checks`, `planter`, `l`, `plot_start`,
+#' `stacked` (`"By Row"`/`"By Column"`, sent as `splitBy`), `seed`,
+#' `blocks` (entries per experiment), `expt_name`, `location_names`,
+#' `checksPercent`, `sameEntries`.
+#'
+#' Every location gets the same starting plots: one start per experiment,
+#' or one start for all of them. Any other number of starts falls back to
+#' the engine's own per-location default, `default_plot_starts(l, 1001)`
+#' (ruling R9).
+#' @noRd
+design_args_diagonal_multiple <- function(values, data = NULL) {
+  l <- values[["l"]] %||% 1
+  plot_start <- values[["plot_start"]] %||% 101
+  plot_starts <- if (length(plot_start) == length(values[["blocks"]])) {
+    rep(list(plot_start), l)
+  } else if (length(plot_start) == 1L) {
+    rep(plot_start, l)
+  } else {
+    default_plot_starts(l, 1001)
+  }
+  list(
+    nrows = values[["nrows"]],
+    ncols = values[["ncols"]],
+    lines = if (is.null(data)) values[["lines"]],
+    checks = values[["checks"]],
+    planter = values[["planter"]] %||% "serpentine",
+    l = l,
+    plotNumber = plot_starts,
+    kindExpt = "DBUDC",
+    splitBy = if (identical(values[["stacked"]], "By Column")) "column" else "row",
+    seed = values[["seed"]],
+    blocks = values[["blocks"]],
+    exptName = values[["expt_name"]],
+    locationNames = location_names_or_null(values[["location_names"]], l),
+    data = data,
+    checksPercent = values[["checksPercent"]],
+    sameEntries = values[["sameEntries"]] %||% FALSE
+  )
+}
