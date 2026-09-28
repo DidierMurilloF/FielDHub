@@ -28,7 +28,7 @@ test_that("classic layout presentation is described by the workflow registry", {
     expect_true(all(spec$layout$widths %in% 1:12))
     expect_identical(spec$layout$grid,
                      module %in% c("Alpha_Lattice", "Square_Lattice", "Rectangular_Lattice"))
-    code <- body(get(paste0("mod_", module, "_server"), asNamespace("FielDHub")))
+    code <- design_server_body(module)
     expect_identical(sum(all.names(code) == "app_classic_layout"), 1L, info = module)
     expect_false(any(c("app_layout_selection", "layout_choices", "sqrt") %in% all.names(code)), info = module)
   }

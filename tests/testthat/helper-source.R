@@ -322,3 +322,17 @@ fieldhub_colon_as_numeric_calls <- function(expr) {
   walk(expr)
   hits
 }
+
+#' Body of the server function that runs a design of the app registry
+#'
+#' The classic designs share one generic server (`mod_design_server()`,
+#' driven by `design_app_spec(module)`); the spatial designs have their
+#' own. Structural tests that used to inspect `mod_<Module>_server()` ask
+#' for the server that runs `module` instead.
+#'
+#' @param module Registry workflow name (`"CRD"`, `"Diagonal"`, ...).
+design_server_body <- function(module) {
+  entries <- Filter(function(entry) identical(entry$workflow, module), fieldhub_app_registry())
+  stopifnot(length(entries) == 1L)
+  body(get(entries[[1L]]$server, asNamespace("FielDHub")))
+}

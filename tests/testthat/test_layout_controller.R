@@ -36,13 +36,15 @@ test_that("classic modules delegate layout selection and stop swallowing plot er
   modules <- c("CRD", "RCBD", "LSD", "FD", "SPD", "SSPD", "STRIPD", "IBD",
                "RowCol", "Alpha_Lattice", "Square_Lattice", "Rectangular_Lattice")
   for (module in modules) {
-    code <- body(get(paste0("mod_", module, "_server"), asNamespace("FielDHub")))
+    code <- design_server_body(module)
     expect_identical(sum(all.names(code) == "app_classic_layout"), 1L)
     expect_false("plot_layout" %in% all.names(code))
     expect_false("reset_selection" %in% all.names(code))
     binding <- find_binding(code)
     expect_length(binding, 1L)
-    ids <- eval(binding[[1L]][["spec"]])$layout$ids
+    spec <- binding[[1L]][["spec"]]
+    # the generic page hands its own workflow spec to the layout lifecycle
+    ids <- if (is.name(spec)) design_app_spec(module)$workflow$layout$ids else eval(spec)$layout$ids
     expect_identical(anyDuplicated(ids), 0L)
     expected <- c("layout", if (module != "CRD") "stacked",
                   if (!module %in% c("CRD", "LSD")) "location")

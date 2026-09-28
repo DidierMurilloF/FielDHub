@@ -33,7 +33,7 @@ test_that("the classic workflow registry preserves module-specific view contract
     spec <- classic_workflow_spec(module)
     expect_identical(spec$ids[["table"]], expected[[module]])
     expect_identical(anyDuplicated(c(spec$ids, spec$simulation_ids)), 0L)
-    code <- body(get(paste0("mod_", module, "_server"), asNamespace("FielDHub")))
+    code <- design_server_body(module)
     expect_identical(sum(all.names(code) == "app_classic_workflow"), 1L)
     expect_false(any(c("app_csv_archive", "app_field_heatmap", "simulate_classic_field_book") %in% all.names(code)))
   }

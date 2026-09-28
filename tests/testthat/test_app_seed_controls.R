@@ -37,7 +37,8 @@ test_that("automatic app seeds leave an unseeded process unseeded", {
 test_that("every module resolves design seeds through app_design_seed()", {
   namespace <- asNamespace("FielDHub")
   servers <- ls(namespace, pattern = "^mod_.*_server$")
-  expect_length(servers, 19L)
+  # the spatial modules and the generic page server of the classic designs
+  expect_setequal(servers, vapply(fieldhub_app_registry(), `[[`, character(1), "server"))
   for (name in servers) {
     text <- paste(deparse(body(get(name, namespace))), collapse = "\n")
     expect_false(grepl("resolve_seed(read_app_seed(", text, fixed = TRUE), info = name)
@@ -112,10 +113,21 @@ test_that("every design module uses shared seed controls without requiring a val
     server <- body(get(entry$server, namespace))
     ui <- body(get(entry$ui, namespace))
     expect_true("app_design_seed" %in% all.names(server), info = entry$id)
-    expect_true("app_seed_input" %in% all.names(ui), info = entry$id)
+    if (is.null(entry$spec)) {
+      expect_true("app_seed_input" %in% all.names(ui), info = entry$id)
+    } else {
+      # a generic page renders its controls with app_control_ui(); every
+      # page has the shared seed control, blank by default
+      expect_true("app_control_ui" %in% all.names(ui), info = entry$id)
+      seeds <- Filter(function(control) identical(control$type, "seed"),
+                      design_app_spec(entry$spec)$controls)
+      expect_length(seeds, 1L)
+      expect_null(seeds[[1L]]$value)
+    }
     expect_false(seed_requirements(server), info = entry$id)
     expect_identical(seed_resolvers(server), 1L, info = entry$id)
   }
+  expect_true("app_seed_input" %in% all.names(body(app_control_ui)))
   for (workflow in c("app_classic_workflow", "app_spatial_workflow")) {
     expect_true("workflow_seed" %in% all.names(body(get(workflow, namespace))), info = workflow)
   }

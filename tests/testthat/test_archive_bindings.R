@@ -4,7 +4,7 @@ test_that("all app CSV downloads share the workflow archive writer", {
   spatial <- c("Diagonal", "diagonal_multiple", "sparse_allocation", "Optim",
                 "RCBD_augmented", "pREPS", "multi_loc_preps")
   for (module in c(classic, spatial)) {
-    code <- body(get(paste0("mod_", module, "_server"), asNamespace("FielDHub")))
+    code <- design_server_body(module)
     if (module %in% classic) {
       expect_identical(sum(all.names(code) == "app_classic_workflow"), 1L)
       code <- body(app_classic_workflow)

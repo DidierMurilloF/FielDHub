@@ -8,34 +8,8 @@ library(FielDHub)
 # exact fieldBook and metadata$parameters of an equivalent direct API call,
 # for the same inputs and seed.
 
-#' `values` as Shiny can deliver them: every whole number as an integer
-#'
-#' Shiny decodes a whole-number numericInput value as an integer
-#' (shiny:::decodeMessage() parses with simplifyVector = FALSE, so 270
-#' arrives as 270L), and nrow() counts and automatic app seeds
-#' (sample.int()) are integers too. Which fields take one of those paths
-#' differs by module (the single diagonal module's raw `input$lines.d`, the
-#' sparse module's nrow() count of an upload, the augmented RCBD module's
-#' number of experiments, ...), so the tests send every whole number as an
-#' integer -- the superset of what any module sends -- while the direct
-#' API calls they compare with are written with doubles, as an R user
-#' types them. Non-whole doubles (a percentage of checks such as 9.6),
-#' characters, logicals and lists (a do_optim() allocation) are unchanged.
-#' @noRd
-shiny_shaped <- function(values) {
-  lapply(values, function(v) {
-    whole <- is.double(v) && is.null(dim(v)) && length(v) > 0L && all(is.finite(v)) &&
-      all(v == trunc(v)) && all(abs(v) <= .Machine$integer.max)
-    if (whole) storage.mode(v) <- "integer"
-    v
-  })
-}
-
-parity <- function(builder, engine, values, data = NULL, direct) {
-  via_app <- do.call(engine, builder(shiny_shaped(values), data))
-  expect_identical(via_app$fieldBook, direct$fieldBook)
-  expect_identical(via_app$metadata$parameters, direct$metadata$parameters)
-}
+# shiny_shaped() and parity() live in helper-parity.R (shared with
+# test_design_module.R).
 
 #' Muffle only the onestage->twostage fallback warning row_column() raises
 #' for some (t, nrows) combinations, so an unrelated warning still surfaces.
@@ -446,7 +420,7 @@ test_that("design_args_RowCol() falls back to the l default", {
 # --- Step 2 (ruling R2): structural checks on the classic module bodies,
 # via the namespace so they also work under R CMD check (no R/ directory). ---
 
-test_that("classic modules build their design only through design_args_<Module>() and do.call()", {
+test_that("classic pages build their design only through design_args_<Module>() and do.call()", {
   classic_engines <- list(
     CRD = "CRD", RCBD = "RCBD", LSD = "latin_square", FD = "full_factorial",
     SPD = "split_plot", SSPD = "split_split_plot", STRIPD = "strip_plot",
@@ -454,58 +428,77 @@ test_that("classic modules build their design only through design_args_<Module>(
     Alpha_Lattice = "alpha_lattice", Square_Lattice = "square_lattice",
     Rectangular_Lattice = "rectangular_lattice"
   )
-  # Unexported helpers a classic module server may call, and why. Anything
-  # else found in a module body must be the module's own engine/builder, a
-  # base/shiny/DT/plotly/shinyjs call, or is a bug.
+  # Unexported helpers the generic page server (mod_design_server()) and the
+  # page specs (design_app_spec()) may call, and why. Anything else found in
+  # them must be a base/shiny/DT/plotly/shinyjs call, or is a bug.
   allowed_helpers <- c(
     "validate_design",     # shows any error where the output would be (R/app_conditions.R)
-    "app_report_problem",  # reports a problem of an event with no output slot (dialog or notice)
-    "app_attempt",         # evaluates event work, reporting its errors/warnings via app_report_problem()
     "app_design_seed",     # resolves the optional app seed without touching the shared RNG stream
-    "app_read_upload",     # reads/validates the module's upload, reporting a failure itself (R/app_upload.R)
+    "app_read_upload",     # reads/validates the page's upload, reporting a failure itself (R/app_upload.R)
+    "app_upload_spec",     # the page's upload ids (the toggle it reads)
     "app_upload_dialog_observer", # opens the shared entries-format dialog when the upload toggle switches to "Yes"
-    "app_classic_layout",  # shared layout-panel lifecycle for classic design modules
-    "app_classic_workflow",# shared results/simulation/export lifecycle for classic design modules
-    "classic_workflow_spec", # registry of per-design IDs/labels the shared workflow helpers use
-    "parse_whole_numbers", # parses comma-separated whole numbers (plot starts, FD "entries per factor")
-    "valid_block_sizes",   # lists the valid incomplete-block sizes for a treatment count
-    "parse_n_checks",      # parses the RCBD "# of checks" input
-    "parse_rep_checks",    # parses the RCBD "reps per check" input
-    "rcbd_size_preview",   # previews the RCBD block size before Run is clicked
+    "app_classic_layout",  # shared layout-panel lifecycle for classic design pages
+    "app_classic_workflow",# shared results/simulation/export lifecycle for classic design pages
+    "read_design_controls",   # parses the page's controls (R/validate_design_controls.R)
+    "design_control_choices", # choices of a select computed from other controls or the upload
+    "design_upload_data",  # says why a run with a failed upload does nothing
     "design_values_CRD",   # assembles CRD's values from parsed inputs (nulls t when data is given)
     "design_values_SPD",   # assembles SPD's values from parsed inputs (nulls wp/sp when data is given)
-    "design_values_SSPD"   # assembles SSPD's values from parsed inputs (nulls wp/sp/ssp when data is given)
+    "design_values_SSPD",  # assembles SSPD's values from parsed inputs (nulls wp/sp/ssp when data is given)
+    "upload_level_counts", # counts the strips of an uploaded strip-plot file
+    "classic_workflow_spec" # registry of per-design IDs/labels the shared workflow helpers use
   )
   # `default_entries` is deliberately absent from allowed_helpers: no classic
-  # module still needs it to build a generated-path entry table (that would
+  # page still needs it to build a generated-path entry table (that would
   # defeat decision 2 -- pass bare counts and let the engine generate the
   # same "G-" labels itself). Its absence is a regression guard, enforced by
-  # the setdiff() check below: if a module's generated path called
-  # default_entries(nt) again (as mod_IBD.R/mod_RowCol.R/etc. used to), that
-  # symbol would show up in `called` but not in `allowed`, and the test would
-  # fail -- the same way it would for any other un-allow-listed helper.
+  # the setdiff() checks below: if a page's values called default_entries(nt)
+  # again (as mod_IBD.R/mod_RowCol.R/etc. used to), that symbol would show up
+  # in `called` but not in `allowed`, and the test would fail.
   forbidden <- c("sample", "set.seed", "runif", "get.levels", "blocksdesign")
 
   namespace <- asNamespace("FielDHub")
   all_objects <- mget(ls(namespace, all.names = TRUE), namespace, inherits = FALSE)
   package_functions <- names(Filter(is.function, all_objects))
 
-  modules <- app_functions()
+  code <- body(mod_design_server)
+  nm <- all.names(code)
+  expect_identical(sum(nm == "do.call"), 1L)
+  expect_true(grepl("do.call(spec$engine, spec$args(", paste(deparse(code), collapse = " "), fixed = TRUE))
+  expect_identical(intersect(nm, forbidden), character(0))
+  expect_identical(intersect(nm, c(unlist(classic_engines), paste0("design_args_", names(classic_engines)))),
+                   character(0))
+  expect_identical(setdiff(intersect(nm, package_functions), allowed_helpers), character(0))
+
   for (module in names(classic_engines)) {
-    server_name <- paste0("mod_", module, "_server")
-    f <- modules[[server_name]]
-    expect_false(is.null(f), info = server_name)
-    code <- body(f)
-    nm <- all.names(code)
+    spec <- design_app_spec(module)
+    expect_identical(spec$engine, get(classic_engines[[module]], namespace), info = module)
+    expect_identical(spec$args, get(paste0("design_args_", module), namespace), info = module)
+    for (field in c("values", "data")) {
+      nm <- all.names(body(spec[[field]]))
+      expect_identical(intersect(nm, forbidden), character(0), info = module)
+      expect_identical(setdiff(intersect(nm, package_functions), allowed_helpers), character(0),
+                       info = paste(module, field))
+    }
+  }
 
+  # Designs not yet rendered by the generic page keep their own module
+  module_helpers <- c("validate_design", "app_report_problem", "app_attempt", "app_design_seed",
+                      "app_read_upload", "app_upload_dialog_observer", "app_classic_layout",
+                      "app_classic_workflow", "classic_workflow_spec", "parse_whole_numbers",
+                      "valid_block_sizes")
+  for (entry in fieldhub_app_registry()) {
+    if (!identical(entry$workflow_family, "classic") || !is.null(entry$spec)) next
+    module <- entry$workflow
+    nm <- all.names(body(get(entry$server, namespace)))
+    engine <- classic_engines[[module]]
+    builder <- paste0("design_args_", module)
     expect_identical(sum(nm == "do.call"), 1L, info = module)
-    expect_identical(sum(nm == classic_engines[[module]]), 1L, info = module)
-    expect_identical(sum(nm == paste0("design_args_", module)), 1L, info = module)
+    expect_identical(sum(nm == engine), 1L, info = module)
+    expect_identical(sum(nm == builder), 1L, info = module)
     expect_identical(intersect(nm, forbidden), character(0), info = module)
-
-    called <- intersect(nm, package_functions)
-    allowed <- c(allowed_helpers, classic_engines[[module]], paste0("design_args_", module))
-    expect_identical(setdiff(called, allowed), character(0), info = module)
+    expect_identical(setdiff(intersect(nm, package_functions), c(module_helpers, engine, builder)),
+                     character(0), info = module)
   }
 })
 

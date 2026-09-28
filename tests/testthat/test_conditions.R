@@ -192,11 +192,12 @@ test_that("app/module functions do not call cat() or print() outside a rendered 
   # Each of these `*_server` functions renders its design summary with
   # `shiny::renderPrint({ cat(...); print(...) })` bound to a
   # `shiny::verbatimTextOutput()` in the module's own UI (e.g.
-  # mod_Alpha_Lattice.R's "summary_alpha_lattice"): renderPrint() captures
+  # the generic design page's "summary"): renderPrint() captures
   # the cat()/print() output into that text output, it never reaches the R
   # console, so this is the legitimate exception ruling R2 allows.
   summary_render_servers <- c(
     "mod_Alpha_Lattice_server",
+    "mod_design_server",
     "mod_IBD_server",
     "mod_Optim_server",
     "mod_pREPS_server",

@@ -2,19 +2,27 @@
 #'
 #' UI order follows the entries below. Server order is explicit because the
 #' existing Strip-Plot server is registered after the IBD and Row-Column servers.
-#' This registry is internal, not a public extension interface.
+#' The classic designs are pages of the one generic design module
+#' (\code{mod_design_ui()}/\code{mod_design_server()}), built from their
+#' \code{spec} (\code{design_app_spec()}); the spatial designs keep a module
+#' of their own. This registry is internal, not a public extension interface.
 #' @noRd
 fieldhub_app_registry <- function() {
   classic <- names(fieldhub_classic_workflows())
   groups <- c("Unreplicated Designs", "Partially Replicated Designs",
               "Lattice Designs", "Other Designs")
   entry <- function(label, module, engine, group, server_order) {
+    # Designs already rendered by the generic page; the others keep their
+    # own module until they are migrated
+    generic <- module %in% c("CRD", "RCBD", "LSD", "FD", "SPD", "SSPD", "STRIPD")
     list(label = label, id = paste0(module, "_ui_1"),
-         ui = paste0("mod_", module, "_ui"),
-         server = paste0("mod_", module, "_server"), engine = engine,
+         ui = if (generic) "mod_design_ui" else paste0("mod_", module, "_ui"),
+         server = if (generic) "mod_design_server" else paste0("mod_", module, "_server"),
+         engine = engine,
          group = groups[[group]], server_order = as.integer(server_order),
          workflow = module,
-         workflow_family = if (module %in% classic) "classic" else "spatial")
+         workflow_family = if (module %in% classic) "classic" else "spatial",
+         spec = if (generic) module)
   }
   list(
     entry("Single Diagonal Arrangement", "Diagonal", "diagonal_arrangement", 1, 1),
@@ -46,6 +54,15 @@ fieldhub_app_title <- function() {
   paste0("FielDHub v", utils::packageVersion("FielDHub"))
 }
 
+#' Arguments a registry entry's UI and server functions are called with
+#'
+#' @description The module id, and for a page of the generic design module
+#' its spec.
+#' @noRd
+app_module_args <- function(entry) {
+  c(list(entry$id), if (!is.null(entry$spec)) list(design_app_spec(entry$spec)))
+}
+
 #' Build the existing navigation from the shared module catalogue
 #' @noRd
 fieldhub_design_menus <- function(registry = fieldhub_app_registry()) {
@@ -53,7 +70,8 @@ fieldhub_design_menus <- function(registry = fieldhub_app_registry()) {
   lapply(unique(groups), function(group) {
     tabs <- lapply(registry[groups == group], function(entry) {
       ui <- get(entry$ui, mode = "function")
-      shiny::tabPanel(entry$label, ui(entry$id), app_reproduction_ui(shiny::NS(entry$id)))
+      shiny::tabPanel(entry$label, do.call(ui, app_module_args(entry)),
+                      app_reproduction_ui(shiny::NS(entry$id)))
     })
     do.call(shiny::navbarMenu, c(list(title = group), tabs))
   })

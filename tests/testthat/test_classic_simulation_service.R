@@ -59,7 +59,7 @@ test_that("every classic module delegates response generation to the shared serv
   modules <- c("CRD", "RCBD", "LSD", "FD", "SPD", "SSPD", "STRIPD", "IBD", "RowCol",
                 "Alpha_Lattice", "Square_Lattice", "Rectangular_Lattice")
   for (module in modules) {
-    code <- body(get(paste0("mod_", module, "_server"), asNamespace("FielDHub")))
+    code <- design_server_body(module)
     symbols <- all.names(code)
     expect_identical(sum(symbols == "app_classic_workflow"), 1L)
     expect_false("norm_trunc" %in% symbols)

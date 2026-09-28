@@ -11,7 +11,7 @@ test_that("classic simulation dialogs share a component with namespaced controls
   modules <- c("CRD", "RCBD", "LSD", "FD", "SPD", "SSPD", "STRIPD", "IBD",
                "RowCol", "Alpha_Lattice", "Square_Lattice", "Rectangular_Lattice")
   for (module in modules) {
-    code <- body(get(paste0("mod_", module, "_server"), asNamespace("FielDHub")))
+    code <- design_server_body(module)
     expect_identical(sum(all.names(code) == "app_classic_workflow"), 1L)
   }
   expect_identical(sum(all.names(body(app_classic_workflow)) == "app_simulation_modal"), 1L)

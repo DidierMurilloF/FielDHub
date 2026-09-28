@@ -16,6 +16,6 @@ app_server <- function( input, output, session ) {
   registration_order <- order(vapply(registry, `[[`, integer(1), "server_order"))
   for (entry in registry[registration_order]) {
     server <- get(entry$server, mode = "function")
-    server(entry$id)
+    do.call(server, app_module_args(entry))
   }
 }
