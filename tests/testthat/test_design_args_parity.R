@@ -848,6 +848,52 @@ test_that("design_args_Optim() falls back to the l/planter/plot-start defaults",
                                         rep_checks = c(5, 5, 5, 5), seed = 6))
 })
 
+test_that("pREPS app arguments reproduce the API design from repGens/repUnits across two locations", {
+  values <- list(nrows = 7, ncols = 15, repGens = c(75, 15), repUnits = c(1, 2),
+                 planter = "serpentine", l = 2, plot_start = c(1, 1001), seed = 4095,
+                 expt_name = "Expt1", location_names = c("A", "B"), allow_fillers = FALSE)
+  via_app <- do.call(partially_replicated, design_args_pREPS(values))
+  direct <- partially_replicated(nrows = 7, ncols = 15, repGens = c(75, 15), repUnits = c(1, 2),
+                                 l = 2, plotNumber = c(1, 1001), seed = 4095, exptName = "Expt1",
+                                 locationNames = c("A", "B"))
+  expect_identical(via_app$fieldBook, direct$fieldBook)
+  expect_identical(via_app$metadata$parameters, direct$metadata$parameters)
+  # The module used to build its own G1..G105 table and hard-code the
+  # optimizer settings; both equal what the engine does by default, so the
+  # field book is unchanged and only the recorded inputs differ
+  expect_identical(formals(partially_replicated)$border_penalization, 0.5)
+  expect_identical(formals(partially_replicated)$dist_method, "euclidean")
+  former <- data.frame(ENTRY = 1:90, NAME = paste0("G", 1:90), REPS = rep(c(1, 2), times = c(75, 15)))
+  former_design <- partially_replicated(nrows = rep(7, 2), ncols = rep(15, 2), l = 2, seed = 4095,
+                                        plotNumber = c(1, 1001), exptName = "Expt1",
+                                        locationNames = c("A", "B"), border_penalization = 0.5,
+                                        dist_method = "euclidean", data = former)
+  expect_identical(via_app$fieldBook, former_design$fieldBook)
+  expect_null(via_app$metadata$parameters$data)
+})
+
+test_that("pREPS app arguments reproduce an uploaded-data design with filler plots", {
+  data <- data.frame(ENTRY = 1:57, NAME = paste0("SB-", 1:57), REPS = rep(c(1, 2), times = c(50, 7)))
+  values <- list(nrows = 9, ncols = 8, planter = "cartesian", l = 1, plot_start = 101,
+                 seed = 33, expt_name = "PREP", location_names = "CASSELTON",
+                 allow_fillers = TRUE)
+  parity(design_args_pREPS, partially_replicated, values, data,
+         direct = partially_replicated(nrows = 9, ncols = 8, planter = "cartesian",
+                                       plotNumber = 101, seed = 33, exptName = "PREP",
+                                       locationNames = "CASSELTON", data = data,
+                                       allow_fillers = TRUE))
+  built <- design_args_pREPS(c(values, list(repGens = 50, repUnits = 1)), data)
+  expect_null(built$repGens)
+  expect_null(built$repUnits)
+})
+
+test_that("design_args_pREPS() falls back to the l/planter/plot-start/allow_fillers defaults", {
+  values <- list(nrows = 8, ncols = 8, repGens = c(50, 7), repUnits = c(1, 2), seed = 32)
+  parity(design_args_pREPS, partially_replicated, values,
+         direct = partially_replicated(nrows = 8, ncols = 8, repGens = c(50, 7),
+                                       repUnits = c(1, 2), seed = 32))
+})
+
 # --- Spatial structural check (ruling R2): namespace bodies, call heads ---
 
 test_that("spatial modules build their designs only through design_args_<Module>() and do.call()", {
@@ -858,7 +904,8 @@ test_that("spatial modules build their designs only through design_args_<Module>
     diagonal_multiple = c(design_args_diagonal_multiple = "diagonal_arrangement"),
     sparse_allocation = c(design_args_sparse_allocation_optim = "do_optim",
                           design_args_sparse_allocation = "sparse_allocation"),
-    Optim = c(design_args_Optim = "optimized_arrangement")
+    Optim = c(design_args_Optim = "optimized_arrangement"),
+    pREPS = c(design_args_pREPS = "partially_replicated")
   )
   # Unexported helpers a spatial module server may call, and why. Anything
   # else it calls must be one of its engines/builders, or a base/shiny/DT/
@@ -877,6 +924,7 @@ test_that("spatial modules build their designs only through design_args_<Module>
     "diagonal_dimension_choices", # feasible diagonal field dimensions offered before randomizing (seed-isolated)
     "diagonal_check_options",     # percentages of checks offered for a field before randomizing (seed-isolated)
     "optimized_dimension_choices",# field dimensions offered for an optimized arrangement (no RNG)
+    "prep_dimension_options",     # field dimensions (and filler counts) offered for a p-rep design (no RNG)
     "field_book_location_grids",  # splits a field book into per-location EXPT grids for display
     "allocation_entry_names"      # reads the entry names of a do_optim() allocation for its table
   )

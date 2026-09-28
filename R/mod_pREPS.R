@@ -278,17 +278,9 @@ mod_pREPS_server <- function(id){
         repGens <- as.numeric(as.vector(unlist(strsplit(input$repGens.preps, ","))))
         repUnits <- as.numeric(as.vector(unlist(strsplit(input$repUnits.preps, ","))))
         if (length(repGens) != length(repUnits)) shiny::validate("Input repGens and repUnits must be of the same length.")
-        ENTRY <- 1:sum(repGens)
-        NAME <- paste(rep("G", sum(repGens)), 1:sum(repGens), sep = "")
-        # REPS <- sort(rep(repUnits, times = repGens), decreasing = TRUE)
-        REPS <- rep(repUnits, times = repGens)
-        data_preps <- data.frame(
-            ENTRY = ENTRY, 
-            NAME = NAME, 
-            REPS = REPS
-        )
-        colnames(data_preps) <- c("ENTRY", "NAME", "REPS")
-        total_plots <- sum(data_preps$REPS)
+        # partially_replicated() builds the G1.. entry list from the counts
+        return(list(data_up.preps = NULL, repGens = repGens, repUnits = repUnits,
+                    total_plots = sum(repGens * repUnits)))
       }
       return(list(data_up.preps = data_preps, total_plots = total_plots))
     })
@@ -447,8 +439,9 @@ mod_pREPS_server <- function(id){
       shiny::req(get_data_prep())
       test <- randomize_hit_prep$times > 0 & user_tries_prep$tries_prep > 0
       if (!test) return(NULL)
-      shiny::req(get_data_prep()$data_up.preps)
-      data_entry.preps <- get_data_prep()$data_up.preps
+      # The entry list of the design, generated or uploaded
+      shiny::req(pREPS_reactive())
+      data_entry.preps <- pREPS_reactive()$dataEntry
       df <- as.data.frame(data_entry.preps)
       df$ENTRY <- as.factor(df$ENTRY)
       df$NAME <- as.factor(df$NAME)
@@ -464,34 +457,22 @@ mod_pREPS_server <- function(id){
     
     pREPS_reactive <- shiny::reactive({
       shiny::req(get_data_prep())
-      shiny::req(get_data_prep()$data_up.preps)
-      gen.list <- get_data_prep()$data_up.preps
-      nrows <- field_dimensions_prep()$d_row
-      ncols <- field_dimensions_prep()$d_col
-      niter <- 10000
-      prep <- TRUE
-  
-      locs_preps <- prep_inputs()$sites
-      site_names <- prep_inputs()$location_names
-      preps.seed <- prep_inputs()$seed_number
-      plotNumber <- prep_inputs()$plotNumber
-      movement_planter <- prep_inputs()$planter_mov
-      expt_name <- prep_inputs()$expt_name
+      values <- list(
+        nrows = field_dimensions_prep()$d_row,
+        ncols = field_dimensions_prep()$d_col,
+        repGens = get_data_prep()$repGens,
+        repUnits = get_data_prep()$repUnits,
+        planter = prep_inputs()$planter_mov,
+        l = prep_inputs()$sites,
+        plot_start = prep_inputs()$plotNumber,
+        seed = prep_inputs()$seed_number,
+        expt_name = prep_inputs()$expt_name,
+        location_names = prep_inputs()$location_names,
+        allow_fillers = isTRUE(input$allow_fillers.preps)
+      )
+      data <- get_data_prep()$data_up.preps
       shiny::withProgress(message = 'Running p-rep optimization ...', {
-          pREPS <- validate_design(partially_replicated(
-            nrows = rep(nrows, locs_preps), 
-            ncols = rep(ncols, locs_preps), 
-            l = locs_preps, 
-            seed = preps.seed, 
-            plotNumber = plotNumber, 
-            exptName =  expt_name,
-            locationNames = site_names, 
-            planter = movement_planter,
-            border_penalization = 0.5, #input$border_penalization,
-            dist_method = "euclidean", # input$optimization_distance_method,
-            data = gen.list,
-            allow_fillers = isTRUE(input$allow_fillers.preps)
-          ))
+          validate_design(do.call(partially_replicated, design_args_pREPS(values, data)))
       })
     }) |> 
       shiny::bindEvent(input$get_random_prep)

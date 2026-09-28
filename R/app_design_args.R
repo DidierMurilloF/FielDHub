@@ -531,3 +531,30 @@ design_args_Optim <- function(values, data = NULL) {
     rep_checks = if (generated) values[["rep_checks"]]
   )
 }
+
+#' Build partially_replicated() arguments for the pREPS module
+#'
+#' `values`: `nrows`, `ncols`, `repGens` and `repUnits` (the generated
+#' path: partially_replicated() builds the G1.. entry list from them;
+#' ignored when `data` supplies the ENTRY/NAME/REPS list), `planter`, `l`,
+#' `plot_start`, `seed`, `expt_name`, `location_names`, `allow_fillers`.
+#' The optimizer's `border_penalization`/`dist_method` keep their API
+#' defaults, as the module has no control for them.
+#' @noRd
+design_args_pREPS <- function(values, data = NULL) {
+  generated <- is.null(data)
+  list(
+    nrows = values[["nrows"]],
+    ncols = values[["ncols"]],
+    repGens = if (generated) values[["repGens"]],
+    repUnits = if (generated) values[["repUnits"]],
+    planter = values[["planter"]] %||% "serpentine",
+    l = values[["l"]] %||% 1,
+    plotNumber = values[["plot_start"]] %||% 101,
+    seed = values[["seed"]],
+    exptName = values[["expt_name"]],
+    locationNames = values[["location_names"]],
+    data = data,
+    allow_fillers = values[["allow_fillers"]] %||% FALSE
+  )
+}
