@@ -3,7 +3,10 @@ core_coverage_summary <- function(lines) {
     stop("Coverage records must contain filename and value columns.", call. = FALSE)
   }
   filenames <- gsub("\\\\", "/", lines$filename)
-  is_core <- grepl("(^|/)R/(fct_|utils_|render_).*[.]R$", filenames)
+  # Core is every package source file except the Shiny layer (app_*, mod_*)
+  # and the app launcher (run_app.R); see "Source layout" in CONTRIBUTING.md.
+  is_core <- grepl("(^|/)R/[^/]+[.]R$", filenames) &
+    !grepl("(^|/)R/(app_[^/]*|mod_[^/]*|run_app)[.]R$", filenames)
   values <- lines$value[is_core]
   if (length(values) == 0L) {
     stop("No core coverage records were produced.", call. = FALSE)

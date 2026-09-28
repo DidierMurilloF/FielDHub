@@ -177,7 +177,7 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
   for (locs in 1:l) {
     # CRD()/RCBD() are always called here without `checks`, so their
     # fieldBook is always exactly ID, LOCATION, PLOT, REP, TREATMENT
-    # (rcbd_fieldbook_cols(has_checks = FALSE) in utils_rcbd_checks.R).
+    # (rcbd_fieldbook_cols(has_checks = FALSE) in engine_rcbd_checks.R).
     if (type == 1) {
       m1 <- CRD(t = trt, reps = reps, plotNumber = plotNumber[locs], # seed = seed,
                 data = NULL, locationNames = locationNames[1])$fieldBook

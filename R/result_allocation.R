@@ -15,7 +15,7 @@ new_fieldhub_allocation <- function(x, parameters) {
   prep <- identical(design, "prep")
   # A fieldhub_* class marks this as a FielDHub result you can recognize
   # without matching on the legacy Sparse/MultiPrep name (see
-  # doc_result_contract.R). It is not "fieldhub_sparse_allocation" /
+  # api_result_contract.R). It is not "fieldhub_sparse_allocation" /
   # "fieldhub_multi_location_prep": those names are reserved for the fuller,
   # field-book-shaped objects sparse_allocation()/multi_location_prep() build
   # around do_optim() (classed via new_fieldhub_design()), and for FielDHub

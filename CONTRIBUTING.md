@@ -63,7 +63,8 @@ Noticed a typo on the website? Think a function could use a better example? Good
 Functions are described as comments near their code and translated to documentation using [`roxygen2`](https://klutometis.github.io/roxygen/). If you want to improve a function description:
 
 1. Go to `R/` directory in the [code repository][repo].
-2. Look for the file with the name of the function.
+2. Look for the file that holds the function: an exported function `f()` is
+   in `R/fct_f.R` (see [Source layout](#source-layout) for the other files).
 3. [Propose a file change](https://help.github.com/articles/editing-files-in-another-user-s-repository/) to update the function documentation in the roxygen comments (starting with `#'`).
 
 ### Contribute code 📝
@@ -107,6 +108,51 @@ levels from the inputs (including missing groups), and include corrupted
 fixtures to prove the checks detect failures. See the
 [scientific validation guide](vignettes/scientific_validation.Rmd) for the
 family-by-family checks, reference calculations, and computational limits.
+
+## Source layout
+
+Each file in `R/` is named `<prefix>_<topic>.R`. The prefix says what the
+file is responsible for; the topic says what it holds (for example
+`engine_diagonal_checks.R`, `layout_options.R`, `result_methods.R`).
+
+| Prefix | Responsibility |
+|---|---|
+| `fct_` | exported design engines (one per exported function) |
+| `engine_` | internal randomization/allocation/optimization helpers |
+| `layout_` | field coordinates, planting paths, layout options |
+| `render_` | drawing only (desplot/ggplot/heatmap data) |
+| `io_` | uploads, exports, archives |
+| `validate_` | input validators and parsers |
+| `result_` | result constructor, schema, S3 methods, reproduction |
+| `sim_` | response simulation |
+| `api_` | cross-cutting public documentation |
+| `app_`, `mod_` | Shiny layer only |
+
+- A `fct_` file is named after its exported function (`fct_RCBD.R` holds
+  `RCBD()`). Helpers used only by that function may sit beside it.
+- `api_` files hold roxygen documentation only: `api_vocabulary.R` (argument
+  names) and `api_result_contract.R` (the structure of every result, shared
+  by all designs, so it is `api_` rather than `result_`).
+- Plain functions that exist only to serve the app (reading Shiny inputs,
+  workflow steps, table options) go in `app_` files even when they make no
+  Shiny calls. Core files (every other prefix) never refer to `app_`/`mod_`
+  code and make no `shiny`, `DT`, `bslib`, `shinyjs` or `shinyalert` calls.
+- R loads these files in alphabetical order, so top-level code (such as
+  `x <- f()`) may only use objects defined above it in the same file.
+
+Two files are exceptions:
+
+- `globals.R` declares the column names used in non-standard evaluation.
+- `run_app.R` holds `run_app()`, the exported launcher of the Shiny app.
+
+Tests live in `tests/testthat/test_<topic>.R` and are plain R: never Shiny
+server or browser tests. `test_source_layout.R` checks this layout (prefixes,
+one `fct_` file per exported function, no core reference to the Shiny
+layer). Structural checks that must also run under `R CMD check`, where `R/`
+is not installed, inspect the namespace with `core_functions()` and
+`app_functions()` from `helper-source.R`. The core
+coverage gate in CI (`inst/ci/compare-core-coverage.R`) measures every `R/`
+file except `app_*`, `mod_*` and `run_app.R`.
 
 ## Attribution
 

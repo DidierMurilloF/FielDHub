@@ -141,9 +141,10 @@ test_that("the field map builds without a ggplot2 warning for both schemas", {
 })
 
 test_that("export_layout() TREATMENT preference matches the rendered checks map", {
-  # plot_RCBD() (utils_plot_RCBD.R) always uses text.string = "TREATMENT" on
-  # the rendered map, checks included, so the exported CSV must show the same
-  # labels rather than falling back to ENTRY just because that column exists.
+  # draw_layout.fieldhub_rcbd() (R/render_draw_layout.R) always uses
+  # text.string = "TREATMENT" on the rendered map, checks included, so the
+  # exported CSV must show the same labels rather than falling back to ENTRY
+  # just because that column exists.
   d_chk <- RCBD(t = 6, reps = 3, checks = c("CK1", "CK2"),
                 rep_checks = c(2, 2), seed = 993)
   fb <- plot_layout(x = d_chk, layout = 1, stacked = "vertical")$fieldBookXY
