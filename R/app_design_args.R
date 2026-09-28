@@ -20,10 +20,14 @@
 #' `locationNames`, `seed`, `data`), passing that `NULL` through reproduces
 #' the default exactly. The few arguments whose API default is not `NULL`
 #' (`l`, `planter`, `type`, `continuous`, `spread_checks`, `randomizeH`,
-#' `randomizeV`) get an explicit fallback to that same default via `%||%`
-#' below, so an incomplete `values` list still reproduces a direct call that
-#' omits the argument. `data` is the parsed upload data frame, or `NULL`
-#' when the design's entries are generated from counts.
+#' `randomizeV`, and for the spatial engines `plotNumber`, `repsExpt`,
+#' `random`, `allow_fillers`, `sameEntries`) get an explicit fallback to
+#' that same default via `%||%` below, so an incomplete `values` list still
+#' reproduces a direct call that omits the argument. Arguments that
+#' `sparse_allocation()`/`multi_location_prep()` test with `missing()` are
+#' left out instead (see `drop_null_args()`). `data` is the parsed upload
+#' data frame, or `NULL` when the design's entries are generated from
+#' counts.
 #'
 #' @name design_args
 #' @noRd

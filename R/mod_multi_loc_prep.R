@@ -722,8 +722,9 @@ mod_multi_loc_preps_server <- function(id){
     output$prep_allocation <- DT::renderDT({
         shiny::req(setup_optim_prep())
         shiny::req(get_multi_loc_prep())
-        # Uploaded names, or the names do_optim() gave the generated entries
-        if (input$multi_prep_data == 'Yes') {
+        # Uploaded names (as parsed at Run!), or the names do_optim() gave
+        # the generated entries
+        if (!is.null(get_multi_loc_prep()$data_without_checks)) {
             gen_names <- get_multi_loc_prep()$data_without_checks$NAME
         } else {
             gen_names <- allocation_entry_names(setup_optim_prep(), prep_inputs()$lines)
