@@ -138,6 +138,36 @@ knitr::opts_chunk$set(
   other classic design does: as an inline validation message where the
   layout or field book would appear, instead of a separate alert dialog.
 
+- The app's optimized arrangement, p-rep and augmented RCBD modules now pass
+  counts instead of app-built entry tables: `lines`/`checks`/`rep_checks` to
+  `optimized_arrangement()`, `repGens`/`repUnits` to
+  `partially_replicated()` and `lines`/`checks` to `RCBD_augmented()`. Their
+  field books are unchanged (the functions build the same `CH1`, ..., `G5`,
+  ... lists); `metadata$parameters` now records the counts, exactly as a
+  direct call with the same inputs and seed does. Every spatial module now
+  builds its design through an argument builder tested against the R
+  function. The multi-location p-rep module's allocation table names
+  generated entries `G-1`, `G-2`, ..., as in its field book (it showed
+  `Gen-1`, ...), and `multi_location_prep()` itself now merges an uploaded
+  entry list into the locations.
+
+- App defaults for inputs that do not fit now follow the R functions: a
+  blank experiment name gives `SparseExpt` in the sparse allocation module
+  and `PrepExpt` in the multi-location p-rep module (it was
+  `expt_sparse`/`expt_prep`), and in the multiple diagonal module a number
+  of starting plots that is neither one nor one per experiment gives the
+  locations `diagonal_arrangement()`'s default starts 1001, 2001, ... (every
+  location used to start at 1001). Starting plots that do not fit the
+  locations of the sparse allocation and multi-location p-rep modules keep
+  their default 1, 1001, ..., now taken from
+  `sparse_allocation()`/`multi_location_prep()` themselves.
+
+- The single diagonal module now offers the same field dimensions as the R
+  functions: its list starts at 10% more plots than entries, like
+  `diagonal_arrangement()`'s suggestions (which now come from the same
+  candidate list), instead of a module-only 11%, so some smaller fields are
+  now offered.
+
 * The Shiny application stack is now optional. Installing FielDHub for R scripts requires only the design and plotting dependencies; the nine app-only packages have moved from Imports to Suggests. `run_app()` checks for them and reports an installation command when any are missing. No packages are installed automatically, and existing app installations keep the same interface and design behavior.
 
 * `split_families()` now accepts `seed`, records it in `infoDesign` and `metadata`, and restores the caller's random-number state. When omitted, it selects an automatic integer seed using the shared design contract; default allocations therefore change. To reproduce a previous `set.seed(s); split_families(l, data)` allocation, pass `seed = s` explicitly. Existing positional `l` and `data` arguments remain supported.
@@ -507,6 +537,7 @@ Some of the fixes above change the design produced for a given seed. Field books
 * Not a design change: the golden layout-preview snapshot for `stacked = "grid_panel"` on a design that does not support it now shows the classed `fieldhub_input_error` message instead of the placeholder "No layout", because `plot()`/`plot_layout()` now raise that error instead of returning `NULL` (see Fix bugs). No generated field book is affected.
 * Not a design change: `do_optim()` results now carry an additional `fieldhub_sparse_optimization` or `fieldhub_multi_prep_optimization` class next to the legacy `Sparse`/`MultiPrep` one, so callers can recognize a FielDHub allocation plan without matching on the legacy name. The legacy classes, `print()`/`summary()` behavior and generated allocations are unchanged.
 * Not a design change: `optimized_arrangement()` results now record their check replication as `rep_checks` in `metadata$parameters` instead of `amountChecks`, whichever argument name the call used. `reproduce_design()` still replays older results recorded with `amountChecks`. The field book, `infoDesign` and every other output are unchanged.
+* `sparse_allocation()` without `nrows` and `ncols`, for some location sizes: it now builds the field the app preselects, the squarest size 10% to 20% larger than a location's entries that the checks fit (it took the squarest size 11% to 20% larger without checking the fit), for example 10 x 11 instead of 10 x 12 for 100 entries per location. Pass `nrows` and `ncols` to rebuild an earlier design.
 
 # FielDHub 1.3.1
 

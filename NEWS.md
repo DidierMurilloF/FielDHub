@@ -125,6 +125,36 @@
   other classic design does: as an inline validation message where the
   layout or field book would appear, instead of a separate alert dialog.
 
+- The app's optimized arrangement, p-rep and augmented RCBD modules now pass
+  counts instead of app-built entry tables: `lines`/`checks`/`rep_checks` to
+  `optimized_arrangement()`, `repGens`/`repUnits` to
+  `partially_replicated()` and `lines`/`checks` to `RCBD_augmented()`. Their
+  field books are unchanged (the functions build the same `CH1`, ..., `G5`,
+  ... lists); `metadata$parameters` now records the counts, exactly as a
+  direct call with the same inputs and seed does. Every spatial module now
+  builds its design through an argument builder tested against the R
+  function. The multi-location p-rep module's allocation table names
+  generated entries `G-1`, `G-2`, ..., as in its field book (it showed
+  `Gen-1`, ...), and `multi_location_prep()` itself now merges an uploaded
+  entry list into the locations.
+
+- App defaults for inputs that do not fit now follow the R functions: a
+  blank experiment name gives `SparseExpt` in the sparse allocation module
+  and `PrepExpt` in the multi-location p-rep module (it was
+  `expt_sparse`/`expt_prep`), and in the multiple diagonal module a number
+  of starting plots that is neither one nor one per experiment gives the
+  locations `diagonal_arrangement()`'s default starts 1001, 2001, ... (every
+  location used to start at 1001). Starting plots that do not fit the
+  locations of the sparse allocation and multi-location p-rep modules keep
+  their default 1, 1001, ..., now taken from
+  `sparse_allocation()`/`multi_location_prep()` themselves.
+
+- The single diagonal module now offers the same field dimensions as the R
+  functions: its list starts at 10% more plots than entries, like
+  `diagonal_arrangement()`'s suggestions (which now come from the same
+  candidate list), instead of a module-only 11%, so some smaller fields are
+  now offered.
+
 - The Shiny application stack is now optional. Installing FielDHub for R
   scripts requires only the design and plotting dependencies; the nine
   app-only packages have moved from Imports to Suggests. `run_app()` checks
@@ -1023,6 +1053,12 @@ from:
   `reproduce_design()` still replays older results recorded with
   `amountChecks`. The field book, `infoDesign` and every other output are
   unchanged.
+- `sparse_allocation()` without `nrows` and `ncols`, for some location
+  sizes: it now builds the field the app preselects, the squarest size 10%
+  to 20% larger than a location's entries that the checks fit (it took the
+  squarest size 11% to 20% larger without checking the fit), for example
+  10 x 11 instead of 10 x 12 for 100 entries per location. Pass `nrows` and
+  `ncols` to rebuild an earlier design.
 
 # FielDHub 1.3.1
 
