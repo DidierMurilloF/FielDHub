@@ -8,7 +8,7 @@ library(FielDHub)
 
 classic_modules <- c("CRD", "RCBD", "LSD", "FD", "SPD", "SSPD", "STRIPD", "IBD", "RowCol",
                      "Alpha_Lattice", "Square_Lattice", "Rectangular_Lattice")
-spatial_modules <- c("Optim", "pREPS", "RCBD_augmented", "Diagonal")
+spatial_modules <- c("Optim", "pREPS", "RCBD_augmented", "Diagonal", "diagonal_multiple")
 all_modules <- c(classic_modules, spatial_modules)
 
 # The one label of each concept, written out here so a label changed in
@@ -112,7 +112,8 @@ page_defaults <- function(module, seed = 7) {
 # Spatial pages whose runs take long: the diagonal searches, the
 # allocations and the p-rep optimizations. optimized_arrangement() and
 # RCBD_augmented() run in well under a second.
-long_running <- c(Optim = FALSE, pREPS = TRUE, RCBD_augmented = FALSE, Diagonal = TRUE)
+long_running <- c(Optim = FALSE, pREPS = TRUE, RCBD_augmented = FALSE, Diagonal = TRUE,
+                  diagonal_multiple = TRUE)
 
 test_that("there is one page spec per design, in the registry's workflow order", {
   specs <- fieldhub_design_specs()
@@ -257,7 +258,12 @@ spatial_defaults <- function(module) {
                                     locationNames = "FARGO"),
     Diagonal = diagonal_arrangement(nrows = 18, ncols = 18, lines = 287, checks = 4, l = 1,
                                     plotNumber = 1, kindExpt = "SUDC", seed = 7, exptName = "Expt1",
-                                    locationNames = "FARGO", checksPercent = 11.11)
+                                    locationNames = "FARGO", checksPercent = 11.11),
+    diagonal_multiple = diagonal_arrangement(nrows = 19, ncols = 18, lines = 300, checks = 4, l = 1,
+                                             plotNumber = 1, kindExpt = "DBUDC", splitBy = "row",
+                                             seed = 7, blocks = c(100, 120, 80),
+                                             exptName = c("Expt1", "Expt2", "Expt3"),
+                                             locationNames = "FARGO", checksPercent = 12.3)
   )
 }
 
@@ -375,6 +381,45 @@ test_that("the diagonal page offers fields and percentages of checks and builds 
                "Insufficient number of entries", class = "fieldhub_input_error")
 })
 
+test_that("the multiple diagonal page lays out its experiments and builds the API's design", {
+  spec <- design_app_spec("diagonal_multiple")
+  expect_identical(spec$upload_repeats, "sameEntries")
+  raw <- utils::modifyList(page_defaults("diagonal_multiple", seed = 5), list(
+    lines = 240, blocks = "80,80,80", sameEntries = TRUE, checks = 3, stacked = "By Column", l = 2,
+    planter = "cartesian", plot_start = "1,101,201", expt_name = "A, B ,C", location_names = "X, Y"))
+  entries <- multiple_diagonal_entries(240, c(80, 80, 80), 3, TRUE)
+  fields <- diagonal_field_choices(entries$field_entries, 240, 1:3, kindExpt = "DBUDC",
+                                   stacked = "By Column", planter = "cartesian", data = entries$layout)
+  size <- as.numeric(strsplit(fields$selected, " x ")[[1]])
+  percents <- diagonal_percent_choices(size[1], size[2], 1:3, 243, kindExpt = "DBUDC", stacked = "By Column",
+                                       planter = "cartesian", data = entries$layout, blocks = 3)
+  expect_same_design(page_design(spec, raw),
+    diagonal_arrangement(nrows = size[1], ncols = size[2], lines = 240, checks = 3, l = 2,
+                         planter = "cartesian", plotNumber = list(c(1, 101, 201), c(1, 101, 201)),
+                         kindExpt = "DBUDC", splitBy = "column", seed = 5, blocks = c(80, 80, 80),
+                         exptName = c("A", "B", "C"), locationNames = c("X", "Y"),
+                         checksPercent = utils::tail(percents$choices, 1L), sameEntries = TRUE))
+  # an uploaded list, its checks first
+  upload <- data.frame(ENTRY = 1:304, NAME = c(paste0("CH", 1:4), paste0("G", 5:304)))
+  raw <- utils::modifyList(page_defaults("diagonal_multiple"), list(lines = NA))
+  expect_same_design(page_design(spec, raw, upload, steps = list(dimensions = "19 x 18")),
+    diagonal_arrangement(nrows = 19, ncols = 18, checks = 4, l = 1, plotNumber = 1, kindExpt = "DBUDC",
+                         splitBy = "row", seed = 7, blocks = c(100, 120, 80),
+                         exptName = c("Expt1", "Expt2", "Expt3"), locationNames = "FARGO",
+                         data = upload, checksPercent = 12.3))
+  problems <- list(
+    list(list(blocks = "100,120"), "must add up to the number of entries"),
+    list(list(lines = 40, blocks = "20,20"), "Larger field size is recommended"),
+    list(list(sameEntries = TRUE), "Blocks should have the same size")
+  )
+  for (problem in problems) {
+    expect_error(page_design(spec, utils::modifyList(page_defaults("diagonal_multiple"), problem[[1]])),
+                 problem[[2]], class = "fieldhub_input_error")
+  }
+  expect_error(page_design(spec, raw, upload[-5, ]), "does not match with the data input file",
+               class = "fieldhub_input_error")
+})
+
 test_that("choices of computed selects follow the entries, typed or uploaded", {
   spec <- design_app_spec("RowCol")
   nrows <- Filter(function(control) identical(control$id, "nrows"), spec$controls)[[1]]
@@ -449,10 +494,11 @@ test_that("the same concept has the same label, default and minimum on every pag
                        STRIPD.reps = 1, SPD.wp = 1, SSPD.wp = 1, FD.reps = 1)
   # The spatial pages keep the smallest counts they have always offered,
   # and the defaults of their own
-  page_minimums <- c(Optim.lines = 5, Diagonal.lines = 50)
+  page_minimums <- c(Optim.lines = 5, Diagonal.lines = 50, diagonal_multiple.lines = 50)
   page_values <- c(Optim.plot_start = "1", Optim.rep_checks = "8,8,8,8", pREPS.plot_start = "1",
                    pREPS.repGens = "75,150", pREPS.repUnits = "2,1",
-                   RCBD_augmented.plot_start = "1", Diagonal.plot_start = "1")
+                   RCBD_augmented.plot_start = "1", Diagonal.plot_start = "1",
+                   diagonal_multiple.plot_start = "1", diagonal_multiple.expt_name = "Expt1, Expt2, Expt3")
   seen <- character()
   for (module in all_modules) {
     spec <- design_app_spec(module)

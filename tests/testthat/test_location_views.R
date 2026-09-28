@@ -39,6 +39,12 @@ test_that("shared location order follows appearance and rejects malformed identi
                     data.frame(LOCATION = NA_character_))) {
     expect_error(field_book_locations(book), class = "fieldhub_input_error")
   }
-  code <- body(get("mod_diagonal_multiple_server", asNamespace("FielDHub")))
+  # The multiple diagonal page's experiment grid reads the field book's
+  # locations by name, through experiment_grid_view()
+  code <- body(experiment_grid_view)
   expect_identical(sum(all.names(code) == "field_book_location_grids"), 1L)
+  expect_identical(sum(all.names(code) == "field_book_locations"), 1L)
+  panels <- design_app_spec("diagonal_multiple")$panels
+  experiment <- Filter(function(panel) identical(panel$id, "expt_layout"), panels)[[1]]
+  expect_true("experiment_grid_view" %in% all.names(body(experiment$view)))
 })

@@ -468,6 +468,62 @@ build_design_specs <- function() {
       panels = list(field_panel(checks_view), numbers_panel("plotsNumber")),
       field_size = function(design, values) {
         list(nrows = design$infoDesign$rows, ncols = design$infoDesign$columns)
+      }),
+    # Experiments (blocks) of entries, laid out by row or column; an
+    # uploaded list may repeat its entries across experiments
+    diagonal_multiple = spatial("diagonal_multiple", "Unreplicated Multiple Diagonal Arrangement",
+      diagonal_arrangement, upload = "mdiag", upload_columns = c("ENTRY", "NAME"),
+      upload_repeats = "sameEntries", file_tag = "Diagonal_Multi",
+      controls = c(
+        list(ctl_flag("sameEntries"), ctl_count("lines", 300, min = 50, generated_only = TRUE),
+             ctl_text_list("blocks", "100,120,80"), ctl_checks(4, max = 20), ctl_locations(),
+             ctl_select("stacked", selected = "By Row")),
+        spatial_shared(expt_name = ctl_expt_name("Expt1, Expt2, Expt3", trim = TRUE),
+                       trim_locations = TRUE),
+        list(ctl_seed())
+      ),
+      values = function(controls, data) {
+        list(lines = controls$lines, blocks = controls$blocks, checks = controls$checks,
+             sameEntries = controls$sameEntries, stacked = controls$stacked, l = controls$l,
+             planter = controls$planter, plot_start = controls$plot_start, seed = controls$seed,
+             expt_name = controls$expt_name, location_names = controls$location_names,
+             entries = multiple_diagonal_entries(controls$lines, controls$blocks, controls$checks,
+                                                 controls$sameEntries, data))
+      },
+      steps = list(
+        ctl_dimensions(function(values, data) {
+          entries <- values$entries
+          diagonal_field_choices(entries$field_entries, entries$entries - values$checks,
+                                 entries$checks_entries, kindExpt = "DBUDC", stacked = values$stacked,
+                                 planter = values$planter, data = entries$layout)
+        }),
+        ctl_checks_percent(function(values, data) {
+          entries <- values$entries
+          diagonal_percent_choices(values$nrows, values$ncols, entries$checks_entries, entries$entries,
+                                   kindExpt = "DBUDC", stacked = values$stacked,
+                                   planter = values$planter, data = entries$layout,
+                                   blocks = length(values$blocks))
+        })
+      ),
+      setup = percent_setup,
+      entries = list(
+        function(design, location, values) {
+          entry_table(entry_list_view(design$data_entry[[location]], c("ENTRY", "NAME", "BLOCK")),
+                      "List of Entries.")
+        },
+        function(design, location, values) {
+          entry_table(block_frequency_view(design$data_entry[[location]]), height = "350px", filter = "none")
+        }
+      ),
+      panels = list(
+        field_panel(checks_view),
+        grid_panel("Expt Layout", "expt_layout", "Experiment layout", function(design, location, values) {
+          experiment_grid_view(design, location)
+        }),
+        numbers_panel("plotsNumber")
+      ),
+      field_size = function(design, values) {
+        list(nrows = design$infoDesign$rows, ncols = design$infoDesign$columns)
       })
   )
 }

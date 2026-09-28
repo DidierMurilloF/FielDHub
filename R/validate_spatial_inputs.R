@@ -89,3 +89,38 @@ diagonal_entries <- function(lines, checks, data = NULL) {
   list(checks_entries = upload_check_entries(data, checks), entries = nrow(data),
        field_entries = nrow(data), layout = data)
 }
+
+#' Entries of a multiple diagonal arrangement
+#'
+#' @description Checks that the entries per experiment add up to the
+#' entries, and lays the entries out with the experiment (BLOCK) of each,
+#' checks first, which the field-size and check options read.
+#' @inheritParams diagonal_entries
+#' @param blocks Entries of each experiment.
+#' @param same_entries Whether the experiments repeat the same entries.
+#' @return As \code{diagonal_entries()}, with \code{layout} the
+#'   ENTRY(/NAME)/BLOCK table.
+#' @noRd
+multiple_diagonal_entries <- function(lines, blocks, checks, same_entries, data = NULL) {
+  if (is.null(data)) {
+    if (lines != sum(blocks)) {
+      fieldhub_abort("The entries in the blocks must add up to the number of entries.")
+    }
+    checks_entries <- seq_len(checks)
+    layout <- data.frame(ENTRY = seq_len(lines + checks))
+  } else {
+    checks_entries <- upload_check_entries(data, checks)
+    lines <- nrow(data) - checks
+    if (sum(blocks) != lines) {
+      fieldhub_abort("Number of treatments in blocks does not match with the data input file.")
+    }
+    layout <- data
+  }
+  if (lines < 50) fieldhub_abort("Larger field size is recommended for this experiment type")
+  if (isTRUE(same_entries) && length(unique(blocks)) > 1L) {
+    fieldhub_abort("Blocks should have the same size")
+  }
+  layout$BLOCK <- c(rep("ALL", checks), rep(seq_along(blocks), times = blocks))
+  list(checks_entries = checks_entries, entries = lines + checks,
+       field_entries = if (is.null(data)) lines else nrow(data), layout = layout)
+}

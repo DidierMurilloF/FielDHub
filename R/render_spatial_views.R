@@ -76,3 +76,33 @@ diagonal_checks_view <- function(design, location) {
   data.frame(ENTRY = checks, NAME = entries$NAME[match(checks, entries$ENTRY)],
              TIMES = info$rep_checks[[location]])
 }
+
+#' Entries of each experiment of a multiple diagonal arrangement
+#' @param entries The entry list, with its BLOCK column.
+#' @return A data frame with SUB-BLOCKS and FREQUENCY.
+#' @noRd
+block_frequency_view <- function(entries) {
+  counts <- as.data.frame(table(entries$BLOCK))
+  colnames(counts) <- c("SUB-BLOCKS", "FREQUENCY")
+  counts
+}
+
+#' The experiment of each plot of one location, each experiment coloured
+#'
+#' @description Read from the field book (EXPT by ROW and COLUMN), oriented
+#' as the other grids.
+#' @param design A multiple \code{diagonal_arrangement()} result.
+#' @param location The location.
+#' @return A \code{field_grid_view()}.
+#' @noRd
+experiment_grid_view <- function(design, location) {
+  grids <- field_book_location_grids(design$fieldBook, "EXPT", reverse_rows = TRUE)
+  if (!is.numeric(location) || length(location) != 1L || !location %in% seq_along(grids)) {
+    fieldhub_abort("This location has no field layout.")
+  }
+  books <- design$fieldBook
+  at <- as.character(books$LOCATION) == field_book_locations(books)[location]
+  names <- setdiff(unique(as.character(books$EXPT[at])), "Filler")
+  field_grid_view(grids[[location]], highlight = names,
+                  colours = spatial_highlight_colours("experiments", length(names)))
+}

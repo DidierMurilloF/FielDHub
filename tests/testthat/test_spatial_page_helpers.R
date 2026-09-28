@@ -147,3 +147,38 @@ test_that("the checks table of a diagonal location lists each check and its plot
   expect_identical(view$ENTRY, design$infoDesign$entry_checks[[1]])
   expect_equal(sum(view$TIMES), sum(design$fieldBook$CHECKS != 0))
 })
+
+test_that("multiple diagonal pages lay out their entries by experiment, checks first", {
+  read <- multiple_diagonal_entries(60, c(30, 30), 2, FALSE)
+  expect_identical(read$checks_entries, 1:2)
+  expect_identical(read$entries, 62)
+  expect_identical(read$field_entries, 60)
+  expect_identical(read$layout$BLOCK, c("ALL", "ALL", rep(c("1", "2"), each = 30)))
+  upload <- data.frame(ENTRY = 1:62, NAME = paste0("E", 1:62))
+  read <- multiple_diagonal_entries(NULL, c(30, 30), 2, TRUE, upload)
+  expect_identical(read$field_entries, 62L)
+  expect_identical(names(read$layout), c("ENTRY", "NAME", "BLOCK"))
+  expect_error(multiple_diagonal_entries(61, c(30, 30), 2, FALSE), "must add up",
+               class = "fieldhub_input_error")
+  expect_error(multiple_diagonal_entries(NULL, c(30, 31), 2, FALSE, upload), "does not match",
+               class = "fieldhub_input_error")
+  expect_error(multiple_diagonal_entries(40, c(20, 20), 2, FALSE), "Larger field size",
+               class = "fieldhub_input_error")
+  expect_error(multiple_diagonal_entries(60, c(20, 40), 2, TRUE), "same size",
+               class = "fieldhub_input_error")
+})
+
+test_that("multiple diagonal pages show the entries per experiment and each experiment's plots", {
+  entries <- data.frame(ENTRY = 1:7, BLOCK = c("ALL", "1", "1", "2", "2", "2", "2"))
+  expect_identical(block_frequency_view(entries),
+                   data.frame(`SUB-BLOCKS` = factor(c("1", "2", "ALL")), FREQUENCY = c(2L, 4L, 1L),
+                              check.names = FALSE))
+  design <- diagonal_arrangement(nrows = 19, ncols = 18, lines = 300, checks = 4, kindExpt = "DBUDC",
+                                 blocks = c(100, 120, 80), exptName = c("E1", "E2", "E3"), l = 2,
+                                 seed = 3)
+  view <- experiment_grid_view(design, 2)
+  expect_identical(view$highlight, c("E1", "E2", "E3"))
+  expect_identical(view$colours, c("snow", "cadetblue", "lightgreen"))
+  expect_identical(dim(view$data), c(19L, 18L))
+  expect_error(experiment_grid_view(design, 3), "no field layout", class = "fieldhub_input_error")
+})
