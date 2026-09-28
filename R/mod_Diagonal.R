@@ -281,8 +281,9 @@ mod_Diagonal_server <- function(id) {
             if (names(data_ingested) == "dataUp") {
                 data_up <- data_ingested$dataUp
                 if (ncol(data_up) < 2) {
-                    shiny::validate("Data input needs at least two Columns with the ENTRY and NAME.")
-                } 
+                    app_report_problem("Data input needs at least two columns: ENTRY and NAME.")
+                    return(NULL)
+                }
                 data_entry_UP <- na.omit(data_up[,1:2])
                 colnames(data_entry_UP) <- c("ENTRY", "NAME")
                 checks <- validate_design(parse_n_checks(input$checks))
@@ -292,23 +293,15 @@ mod_Diagonal_server <- function(id) {
                 # diagonal_arrangement() takes the checks from the first rows
                 # of the list and requires them to be consecutive numbers
                 if (any(is.na(checksEntries)) || any(diff(checksEntries) != 1)) {
-                    shinyalert::shinyalert(
-                        "Error!!",
-                        paste0("The check entries (the ENTRY of the first ", checks,
-                               " rows of the file) must be consecutive numbers, ",
-                               "such as 1, 2, 3, 4."),
-                        type = "error"
-                    )
+                    app_report_problem(paste0("The check entries (the ENTRY of the first ", checks,
+                      " rows of the file) must be consecutive numbers, ",
+                      "such as 1, 2, 3, 4."))
                     return(NULL)
                 }
                 dim_data_entry <- nrow(data_entry_UP)
                 choices_list <- validate_design(field_dimensions(lines_within_loc = dim_data_entry))
                 if (length(choices_list) == 0) {
-                    shinyalert::shinyalert(
-                        "Error!!", 
-                        "Insufficient number of entries provided!",
-                        type = "error"
-                    )
+                    app_report_problem("Insufficient number of entries provided!")
                     return(NULL)
                 }
                 dim_data_1 <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
@@ -328,11 +321,7 @@ mod_Diagonal_server <- function(id) {
             lines <- input$lines.d
             choices_list <- validate_design(field_dimensions(lines_within_loc = lines))
             if (length(choices_list) == 0) {
-                shinyalert::shinyalert(
-                    "Error!!", 
-                    "Insufficient number of entries provided!",
-                    type = "error"
-                )
+                app_report_problem("Insufficient number of entries provided!")
                 return(NULL)
             }
             # diagonal_arrangement() generates the entry list from the
@@ -375,9 +364,8 @@ mod_Diagonal_server <- function(id) {
                         choices = sort_choices,
                         selected = head(sort_choices, 1))
       if (length(sort_choices) == 0L) {
-        shinyalert::shinyalert("No field dimensions available",
-                              "No feasible field was found for these entries and checks.",
-                              type = "error")
+        app_report_problem("No feasible field was found for these entries and checks.",
+                           title = "No field dimensions available")
       }
     })
     
@@ -526,27 +514,10 @@ mod_Diagonal_server <- function(id) {
       shiny::req(any(abs(options_percent - percent) < 1e-6))
       values <- c(diagonal_values(), list(checksPercent = percent))
       data <- if (isTRUE(getData()$uploaded)) getData()$data_entry
-      design <- tryCatch(
-        suppressWarnings(do.call(diagonal_arrangement, design_args_Diagonal(values, data))),
-        error = function(e) e
-      )
-      if (inherits(design, "error")) {
-        shinyalert::shinyalert(
-          "Error!!",
-          conditionMessage(design),
-          type = "error"
-        )
-        return(NULL)
-      }
-      if (is.null(design)) {
-        shinyalert::shinyalert(
-          "Error!!",
-          "The field dimensions do not fit the entries. Please, choose other dimensions.",
-          type = "error"
-        )
-        return(NULL)
-      }
-      return(design)
+      # Errors are reported in a dialog; FielDHub warnings (such as a
+      # starting plot number that does not have one value per location) as
+      # notices.
+      app_attempt(do.call(diagonal_arrangement, design_args_Diagonal(values, data)))
     })
     
     user_location <- shiny::reactive({
@@ -561,8 +532,7 @@ mod_Diagonal_server <- function(id) {
       if (!test) return(NULL)
         Option_NCD <- TRUE
         if (is.null(available_percent_table()$dt)) {
-          shiny::validate("Data input does not fit to field dimensions")
-          return(NULL)
+          validate_design(fieldhub_abort("Data input does not fit to field dimensions."))
         }
         my_out <- available_percent_table()$dt
         df <- as.data.frame(my_out)

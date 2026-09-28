@@ -311,27 +311,9 @@ mod_pREPS_server <- function(id){
                         selected = choices[1])
       if (is.null(options)) {
         shinyjs::hide(id = "get_random_prep")
-        if (!isTRUE(input$allow_fillers.preps)) {
-          app_report_problem(
-            sprintf(paste(
-              "The current design does not fit any supported rectangular",
-              "field dimensions without unused cells. Select 'Allow filler",
-              "plots' to continue. FielDHub will then offer nearby valid",
-              "dimensions requiring no more than %d filler plots and place",
-              "the fillers at the end of the selected planter path."
-            ), .prep_max_fillers),
-            severity = "info", title = "Filler plots required"
-          )
-        } else {
-          app_report_problem(
-            sprintf(paste(
-              "FielDHub could not find supported rectangular field dimensions",
-              "requiring %d or fewer filler plots. Adjust the number of entries",
-              "or replication settings and try again."
-            ), .prep_max_fillers),
-            title = "No dimensions within the filler limit"
-          )
-        }
+        problem <- prep_no_dimensions_problem(input$allow_fillers.preps)
+        app_report_problem(problem$message, severity = problem$severity,
+                           title = problem$title)
       } else {
         shinyjs::show(id = "get_random_prep")
       }

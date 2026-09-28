@@ -243,10 +243,7 @@ mod_RowCol_server <- function(id){
 
     get_data_rcd <- shiny::reactive({
       if (is.null(init_data_rcd())) {
-        shinyalert::shinyalert(
-          "Error!!", 
-          "Check input file and try again!", 
-          type = "error")
+        app_report_problem("Check input file and try again!")
         return(NULL)
       } else return(init_data_rcd())
     }) |>
@@ -260,10 +257,7 @@ mod_RowCol_server <- function(id){
       shiny::req(input$Location.rcd)
       shiny::req(input$l.rcd)
       if (input$k.rcd == "No Options Available") {
-        shinyalert::shinyalert(
-          "Error!!", 
-          "No options for this combination of treatments!", 
-          type = "error")
+        app_report_problem("No options for this combination of treatments!")
         return(NULL)
       } 
       l <- as.numeric(input$l.rcd)

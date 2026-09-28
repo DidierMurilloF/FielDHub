@@ -690,6 +690,27 @@
   render, and the unused `inst/golem-config.yml`. No design output, golden
   snapshot or public API changes.
 
+- The Shiny app now reports every problem through one path, so the same
+  condition reads the same everywhere. Problems of an output (a design,
+  table or plot that cannot be built) are shown where the output would
+  be; problems of an event with no output (a rejected upload, a Run! whose
+  inputs do not fit, invalid simulation settings) open one dialog, titled
+  "Error" instead of "Error!!". FielDHub warnings raised while the app
+  builds a design, such as `fieldhub_default_warning` for starting plot
+  numbers or location names that do not have one value per location, are
+  now shown as non-blocking notices instead of being hidden (Diagonal,
+  Multi-location Diagonal) or only logged to the R console (Optimized
+  Arrangement, p-rep, Augmented RCBD, the classic designs); other R
+  warnings are still logged to the console. Sparse Allocation no longer
+  shows R's non-FielDHub warnings in a dialog, and the "only the checks
+  are randomized" reminder of Augmented RCBD is now a notice. A few
+  messages were corrected: the Multi-location Diagonal and Multi-location
+  p-rep uploads ask for the two columns ENTRY and NAME they need (not
+  three), and a block total that does not match the file now says "does
+  not match". The p-rep "no field dimensions" explanations are shared by
+  both p-rep modules, and text in the Optimized Arrangement "# Check's
+  Reps" input is explained by name.
+
 ### Fix bugs:
 
 - Blank app seed boxes no longer error. Shiny sends a cleared numeric

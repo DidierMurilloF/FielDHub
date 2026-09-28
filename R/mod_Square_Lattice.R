@@ -136,10 +136,7 @@ mod_Square_Lattice_server <- function(id){
         if (names(data_ingested) == "dataUp") {
           data_up <- data_ingested$dataUp
           if (ncol(data_up) < 2) {
-            shinyalert::shinyalert(
-              "Error!!", 
-              "Data input needs at least two columns: ENTRY and NAME.", 
-              type = "error")
+            app_report_problem("Data input needs at least two columns: ENTRY and NAME.")
             return(NULL)
           } 
           data_up <- as.data.frame(data_up[,1:2])
@@ -188,10 +185,7 @@ mod_Square_Lattice_server <- function(id){
     # getData.square
     get_data_square <- shiny::reactive({
       if (is.null(init_data_square())) {
-        shinyalert::shinyalert(
-          "Error!!", 
-          "Check input file and try again!", 
-          type = "error")
+        app_report_problem("Check input file and try again!")
         return(NULL)
       } else return(init_data_square())
     }) |>
@@ -209,10 +203,7 @@ mod_Square_Lattice_server <- function(id){
       reps <- as.numeric(input$r.square)
       k <- as.numeric(input$k.square)
       if (input$k.square == "No Options Available") {
-        shinyalert::shinyalert(
-          "Error!!",
-          "No options for this combination of treatments!",
-          type = "error")
+        app_report_problem("No options for this combination of treatments!")
         return(NULL)
       }
       plot_start <- validate_design(parse_whole_numbers(

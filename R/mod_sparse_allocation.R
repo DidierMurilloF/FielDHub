@@ -211,38 +211,6 @@ mod_sparse_allocation_server <- function(id){
   shiny::moduleServer( id, function(input, output, session) {
     ns <- session$ns
 
-    # Evaluate a call to a FielDHub function, showing its errors in an alert
-    # (and returning NULL) and its warnings in an alert after it finishes
-    call_api <- function(expr) {
-      warnings_found <- character(0)
-      out <- tryCatch(
-        withCallingHandlers(
-          expr,
-          warning = function(w) {
-            warnings_found <<- c(warnings_found, conditionMessage(w))
-            invokeRestart("muffleWarning")
-          }
-        ),
-        error = function(e) {
-          if (inherits(e, "shiny.silent.error")) stop(e)
-          shinyalert::shinyalert(
-            "Error!!",
-            conditionMessage(e),
-            type = "error"
-          )
-          NULL
-        }
-      )
-      if (!is.null(out) && length(warnings_found) > 0) {
-        shinyalert::shinyalert(
-          "Warning!",
-          paste(unique(warnings_found), collapse = "\n"),
-          type = "warning"
-        )
-      }
-      out
-    }
-
     shiny::observe({
         # validate_locations_input() validates the count before the existing
         # choices formula runs.
@@ -370,19 +338,11 @@ mod_sparse_allocation_server <- function(id){
         shiny::req(input$sparse_locations)
         sparse_lines <- as.numeric(input$sparse_lines)
         if (input$sparse_locations < 3) {
-            shinyalert::shinyalert(
-                "Error!!", 
-                "The system requires at least 3 locations to proceed.",
-                type = "error"
-            )
+            app_report_problem("The system requires at least 3 locations to proceed.")
             return(NULL)
         }
         if (input$sparse_lines < 60) {
-            shinyalert::shinyalert(
-                "Error!!", 
-                "The system requires at least 60 entries/lines to proceed!",
-                type = "error"
-            )
+            app_report_problem("The system requires at least 60 entries/lines to proceed!")
             return(NULL)
         }
         Option_NCD <- TRUE
@@ -402,22 +362,19 @@ mod_sparse_allocation_server <- function(id){
             if (names(data_ingested) == "dataUp") {
                 data_up <- data_ingested$dataUp
                 if (ncol(data_up) < 2) {
-                    shiny::validate("Data input needs at least two Columns with the ENTRY and NAME.")
-                } 
+                    app_report_problem("Data input needs at least two columns: ENTRY and NAME.")
+                    return(NULL)
+                }
                 data_entry_UP <- na.omit(data_up[, 1:2])
                 colnames(data_entry_UP) <- c("ENTRY", "NAME")
                 checksEntries <- suppressWarnings(as.numeric(data_entry_UP[1:sparse_checks,1]))
                 # sparse_allocation() needs the checks to be a range of
                 # consecutive entries, in any order
                 if (anyNA(checksEntries) || any(diff(sort(checksEntries)) != 1)) {
-                    shinyalert::shinyalert(
-                        "Error!!", 
-                        paste(
-                            "The checks (the first", sparse_checks, "rows of the file)",
-                            "must have consecutive ENTRY numbers, for example 1, 2, 3, 4."
-                        ),
-                        type = "error"
-                    )
+                    app_report_problem(paste(
+                        "The checks (the first", sparse_checks, "rows of the file)",
+                        "must have consecutive ENTRY numbers, for example 1, 2, 3, 4."
+                    ))
                     return(NULL)
                 }
                 dim_data_entry <- nrow(data_entry_UP)
@@ -425,11 +382,7 @@ mod_sparse_allocation_server <- function(id){
                 input_lines <- as.numeric(input$sparse_lines)
                 data_without_checks <- data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ]
                 if (entries_in_file != input_lines) {
-                    shinyalert::shinyalert(
-                        "Error!!", 
-                        "Number of entries in file does not match with the input value.", 
-                        type = "error"
-                    )
+                    app_report_problem("Number of entries in file does not match with the input value.")
                     return(NULL)
                 }
                 return(
@@ -490,7 +443,7 @@ mod_sparse_allocation_server <- function(id){
         values <- sparse_optim_values()
         data <- if (get_sparse_data()$upload) get_sparse_data()$data_entry
         shiny::withProgress(message = 'Optimization in progress ...', {
-          optim_out <- call_api(
+          optim_out <- app_attempt(
             do.call(do_optim, design_args_sparse_allocation_optim(values, data))
           )
         })
@@ -498,11 +451,7 @@ mod_sparse_allocation_server <- function(id){
         lines_within_loc <- as.numeric(optim_out$size_locations[1])
         choices_list <- validate_design(field_dimensions(lines_within_loc = lines_within_loc))
         if (length(choices_list) == 0) {
-          shinyalert::shinyalert(
-            "Error!!",
-            "Number of entries is too small!",
-            type = "error"
-          )
+          app_report_problem("Number of entries is too small!")
           return(NULL)
         } else return(optim_out)
     }) |>
@@ -539,9 +488,8 @@ mod_sparse_allocation_server <- function(id){
                           choices = sort_choices,
                           selected = head(sort_choices, 1))
         if (length(sort_choices) == 0L) {
-            shinyalert::shinyalert("No field dimensions available",
-                                  "No feasible field was found for these entries and checks.",
-                                  type = "error")
+            app_report_problem("No feasible field was found for these entries and checks.",
+                               title = "No field dimensions available")
         }
     })
     
@@ -739,16 +687,12 @@ mod_sparse_allocation_server <- function(id){
         checksPercent = percent
       ))
       data <- if (get_sparse_data()$upload) get_sparse_data()$data_entry
-      design <- call_api(
+      design <- app_attempt(
         do.call(sparse_allocation, design_args_sparse_allocation(values, data))
       )
       if (is.null(design)) return(NULL)
       if (is.null(design$fieldBook)) {
-        shinyalert::shinyalert(
-          "Error!!",
-          "The field dimensions do not fit the entries. Please, choose other dimensions.",
-          type = "error"
-        )
+        app_report_problem("The field dimensions do not fit the entries. Please, choose other dimensions.")
         return(NULL)
       }
       return(design)

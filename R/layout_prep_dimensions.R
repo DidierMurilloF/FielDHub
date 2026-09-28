@@ -68,3 +68,39 @@ prep_dimension_options <- function(
     rownames(options) <- NULL
     options
 }
+
+#' Explain why a p-rep design has no field dimensions to offer
+#'
+#' @description Shared by the p-rep and multi-location p-rep modules when
+#' \code{prep_dimension_options()} returns \code{NULL}.
+#'
+#' @param allow_fillers Whether filler plots were allowed.
+#' @param max_fillers The most filler plots a field may have.
+#' @return A list with the dialog \code{title}, the \code{message} and its
+#'   \code{severity} (\code{"info"} when allowing fillers would help,
+#'   \code{"error"} otherwise).
+#' @noRd
+prep_no_dimensions_problem <- function(allow_fillers, max_fillers = .prep_max_fillers) {
+  if (!isTRUE(allow_fillers)) {
+    return(list(
+      title = "Filler plots required",
+      message = sprintf(paste(
+        "The current design does not fit any supported rectangular",
+        "field dimensions without unused cells. Select 'Allow filler",
+        "plots' to continue. FielDHub will then offer nearby valid",
+        "dimensions requiring no more than %d filler plots and place",
+        "the fillers at the end of the selected planter path."
+      ), max_fillers),
+      severity = "info"
+    ))
+  }
+  list(
+    title = "No dimensions within the filler limit",
+    message = sprintf(paste(
+      "FielDHub could not find supported rectangular field dimensions",
+      "requiring %d or fewer filler plots. Adjust the number of entries",
+      "or replication settings and try again."
+    ), max_fillers),
+    severity = "error"
+  )
+}

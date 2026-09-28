@@ -456,7 +456,7 @@ test_that("classic modules build their design only through design_args_<Module>(
   )
   # Unexported helpers a classic module server may call, and why. Anything
   # else found in a module body must be the module's own engine/builder, a
-  # base/shiny/DT/plotly/shinyjs/shinyalert call, or is a bug.
+  # base/shiny/DT/plotly/shinyjs call, or is a bug.
   allowed_helpers <- c(
     "validate_design",     # shows any error where the output would be (R/app_conditions.R)
     "app_report_problem",  # reports a problem of an event with no output slot (dialog or notice)
@@ -1159,12 +1159,14 @@ test_that("spatial modules build their designs only through design_args_<Module>
   )
   # Unexported helpers a spatial module server may call, and why. Anything
   # else it calls must be one of its engines/builders, or a base/shiny/DT/
-  # plotly/shinyjs/shinyalert function.
+  # plotly/shinyjs function.
   allowed_helpers <- c(
     "validate_design",            # shows any error where the output would be (R/app_conditions.R)
     "app_report_problem",         # reports a problem of an event with no output slot (dialog or notice)
     "app_attempt",                # evaluates event work, reporting its errors/warnings via app_report_problem()
     "parse_rep_groups",           # parses the p-rep "entries per group"/"reps per group" inputs
+    "prep_no_dimensions_problem", # explains why a p-rep design has no field dimensions to offer
+    "fieldhub_abort",             # writes a problem an output shows through validate_design()
     "app_design_seed",            # resolves the optional app seed without touching the shared RNG stream
     "read_app_seed",              # re-reads the resolved design seed for the simulation workflow; never draws
     "app_upload_error",           # shows the shared upload-error alert for a failed file parse

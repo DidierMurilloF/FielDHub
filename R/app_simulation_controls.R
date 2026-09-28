@@ -14,7 +14,6 @@ app_simulation_controls <- function(input, session, ids, field_book,
     fieldhub_abort("Spatial simulation controls need distinct x and y input identifiers.")
   }
   settings <- shiny::reactiveVal(NULL)
-  notification_id <- session$ns("simulation-settings-error")
   read_correlation <- function(id) {
     value <- input[[id]]
     if (is.null(value)) NA_real_ else value
@@ -22,7 +21,9 @@ app_simulation_controls <- function(input, session, ids, field_book,
   shiny::observeEvent(input[[ids[["submit"]]]], {
     book <- field_book()
     shiny::req(book)
-    candidate <- tryCatch(
+    # An invalid submission is reported in a dialog above the open
+    # simulation dialog, which stays open with the previous settings.
+    candidate <- app_attempt(
       simulation_request(
         min_value = input[[ids[["minimum"]]]], max_value = input[[ids[["maximum"]]]],
         trait = input[[ids[["trait"]]]], other = input[[ids[["other"]]]],
@@ -31,16 +32,10 @@ app_simulation_controls <- function(input, session, ids, field_book,
           c(x = read_correlation(correlation_ids[["x"]]),
             y = read_correlation(correlation_ids[["y"]]))
         }
-      ),
-      fieldhub_error = function(e) {
-        shiny::showNotification(conditionMessage(e), type = "error", duration = 8,
-                                 id = notification_id, session = session)
-        NULL
-      }
+      )
     )
     if (!is.null(candidate)) {
       settings(candidate)
-      shiny::removeNotification(notification_id, session = session)
       shiny::removeModal(session = session)
     }
   }, ignoreInit = TRUE)

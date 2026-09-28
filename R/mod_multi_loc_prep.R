@@ -279,11 +279,7 @@ mod_multi_loc_preps_server <- function(id){
             prep_checks <- as.numeric(as.vector(unlist(strsplit(input$prep_checks, ","))))
             checks <- validate_design(parse_n_checks(input$prep_checks_met))
             if (length(prep_checks) != checks) {
-                shinyalert::shinyalert(
-                    "Error!!",
-                    "Length does not match with the input for number of checks!",
-                    type = "error"
-                )
+                app_report_problem("Length does not match with the input for number of checks!")
                 return(NULL)
             }
         } else {
@@ -341,11 +337,7 @@ mod_multi_loc_preps_server <- function(id){
     get_multi_loc_prep <- shiny::reactive({
         shiny::req(input$locs_prep)
         if (input$locs_prep < 2) {
-            shinyalert::shinyalert(
-                "Error!!", 
-                "The system requires at least 2 locations to proceed.",
-                type = "error"
-            )
+            app_report_problem("The system requires at least 2 locations to proceed.")
             return(NULL)
         }
         if (input$multi_prep_data == 'Yes') {
@@ -363,42 +355,27 @@ mod_multi_loc_preps_server <- function(id){
                 data_up <- data_ingested$dataUp
                 data_preps <- as.data.frame(data_up)
                 if (ncol(data_preps) < 2) {
-                    shinyalert::shinyalert(
-                    "Error!!", 
-                    "Data input needs at least three columns with: ENTRY, NAME and REPS.", 
-                    type = "error")
+                    app_report_problem("Data input needs at least two columns: ENTRY and NAME.")
                     return(NULL)
                 } 
                 data_preps <- na.omit(data_preps[,1:2])
                 colnames(data_preps) <- c("ENTRY", "NAME")
                 if (!is.numeric(data_preps$ENTRY)) {
-                    shinyalert::shinyalert(
-                        "Error!!", 
-                        "Column ENTRY should be numeric (integer numbers).", 
-                        type = "error"
-                    )
+                    app_report_problem("Column ENTRY should be numeric (integer numbers).")
                     return(NULL)
                 }
                 if (input$include_checks == "Yes") {
                     prep_checks <- as.numeric(as.vector(unlist(strsplit(input$prep_checks, ","))))
                     checks <- validate_design(parse_n_checks(input$prep_checks_met))
                     if (length(prep_checks) != checks) {
-                        shinyalert::shinyalert(
-                            "Error!!", 
-                            "Length of check's reps does not match with the input for number of checks!", 
-                            type = "error"
-                        )
+                        app_report_problem("Length of check's reps does not match with the input for number of checks!")
                         return(NULL)
                     }
                     entries_in_file <- nrow(data_preps[(length(prep_checks) + 1):nrow(data_preps), ])
                     input_lines <- as.numeric(input$gens_prep)
                     data_without_checks <- data_preps[(length(prep_checks) + 1):nrow(data_preps), ]
                     if (entries_in_file != input_lines) {
-                        shinyalert::shinyalert(
-                            "Error!!", 
-                            "Number of entries in file does not match with the input value.", 
-                            type = "error"
-                        )
+                        app_report_problem("Number of entries in file does not match with the input value.")
                         return(NULL)
                     }
                 } else {
@@ -406,11 +383,7 @@ mod_multi_loc_preps_server <- function(id){
                     input_lines <- as.numeric(input$gens_prep)
                     data_without_checks <- data_preps
                     if (entries_in_file != input_lines) {
-                        shinyalert::shinyalert(
-                            "Error!!", 
-                            "Number of entries in file does not match with the input value.", 
-                            type = "error"
-                        )
+                        app_report_problem("Number of entries in file does not match with the input value.")
                         return(NULL)
                     }
                 }
@@ -426,11 +399,7 @@ mod_multi_loc_preps_server <- function(id){
                 prep_checks <- as.numeric(as.vector(unlist(strsplit(input$prep_checks, ","))))
                 checks <- as.numeric(input$prep_checks_met)
                 if (length(prep_checks) != checks) {
-                    shinyalert::shinyalert(
-                        "Error!!", 
-                        "Length of check's reps does not match with the input for number of checks!", 
-                        type = "error"
-                    )
+                    app_report_problem("Length of check's reps does not match with the input for number of checks!")
                     return(NULL)
                 }
             }
@@ -504,29 +473,9 @@ mod_multi_loc_preps_server <- function(id){
             selected = sort_choices[1])
         if (is.null(options)) {
             shinyjs::hide(id = "get_random_prep")
-            if (!isTRUE(input$allow_fillers_prep)) {
-                shinyalert::shinyalert(
-                    "Filler plots required",
-                    sprintf(paste(
-                        "The current design does not fit any supported rectangular",
-                        "field dimensions without unused cells. Select 'Allow filler",
-                        "plots' to continue. FielDHub will then offer nearby valid",
-                        "dimensions requiring no more than %d filler plots and place",
-                        "the fillers at the end of the selected planter path."
-                    ), .prep_max_fillers),
-                    type = "info"
-                )
-            } else {
-                shinyalert::shinyalert(
-                    "No dimensions within the filler limit",
-                    sprintf(paste(
-                        "FielDHub could not find supported rectangular field dimensions",
-                        "requiring %d or fewer filler plots. Adjust the number of entries",
-                        "or replication settings and try again."
-                    ), .prep_max_fillers),
-                    type = "warning"
-                )
-            }
+            problem <- prep_no_dimensions_problem(input$allow_fillers_prep)
+            app_report_problem(problem$message, severity = problem$severity,
+                               title = problem$title)
         } else {
             shinyjs::show(id = "get_random_prep")
         }

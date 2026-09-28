@@ -309,10 +309,7 @@ mod_diagonal_multiple_server <- function(id) {
                     data_up <- data_ingested$dataUp
                     data_entry <- na.omit(data_up)
                     if (ncol(data_entry) < 2) {
-                        shinyalert::shinyalert(
-                        "Error!!", 
-                        "Data input needs at least three Columns with the ENTRY and NAME.", 
-                        type = "error")
+                        app_report_problem("Data input needs at least two columns: ENTRY and NAME.")
                         return(NULL)
                     } 
                     data_entry_UP <- data_entry[,1:2] 
@@ -321,34 +318,22 @@ mod_diagonal_multiple_server <- function(id) {
                     # diagonal_arrangement() takes the checks from the first rows
                     # and needs their ENTRY numbers to be consecutive
                     if (anyNA(checksEntries) || any(diff(checksEntries) != 1)) {
-                        shinyalert::shinyalert(
-                        "Error!!",
-                        paste0("The checks, the first ", checks, " rows of the file, ",
-                               "must have consecutive ENTRY numbers, for example 1, 2, 3, 4."),
-                        type = "error")
+                        app_report_problem(paste0("The checks, the first ", checks, " rows of the file, ",
+                          "must have consecutive ENTRY numbers, for example 1, 2, 3, 4."))
                         return(NULL)
                     }
                     lines.db <- nrow(data_entry_UP) - length(checksEntries)
                     blocks <- as.numeric(as.vector(unlist(strsplit(input$blocks.db, ","))))
                     if(sum(blocks) != lines.db) {
-                        shinyalert::shinyalert(
-                        "Error!!", 
-                        "Number of treatments in blocks does not match with the data input file.", 
-                        type = "error")
+                        app_report_problem("Number of treatments in blocks does not match with the data input file.")
                         return(NULL)
                     }
                     if (as.numeric(lines.db) < 50) {
-                        shinyalert::shinyalert(
-                        "Error!!", 
-                        "Larger field size is recommended for this experiment type", 
-                        type = "error")
+                        app_report_problem("Larger field size is recommended for this experiment type")
                         return(NULL)
                     }
                     if (input$sameEntries && any(blocks != blocks[1])) {
-                        shinyalert::shinyalert(
-                        "Error!!",
-                        "Blocks should have the same size",
-                        type = "error")
+                        app_report_problem("Blocks should have the same size")
                         return(NULL)
                     }
                     data_entry_UP$BLOCK <- c(rep("ALL", checks), rep(1:length(blocks), times = blocks))
@@ -365,10 +350,7 @@ mod_diagonal_multiple_server <- function(id) {
                         dim_data <- sum(data_dim_each_block)
                         input_blocks <- as.numeric(sort(Block_levels))
                         if (any(input_blocks < 1) || any(diff(input_blocks) != 1)) {
-                        shinyalert::shinyalert(
-                            "Error!!", 
-                            "Data input does not fit the requirements!", 
-                            type = "error")
+                        app_report_problem("Data input does not fit the requirements!")
                         return(NULL)
                         }
                         selected <- length(Block_levels)
@@ -376,11 +358,7 @@ mod_diagonal_multiple_server <- function(id) {
                     dim_data_entry <- nrow(data_entry_UP)
                     choices_list <- validate_design(field_dimensions(lines_within_loc = dim_data_entry))
                         if (length(choices_list) == 0) {
-                            shinyalert::shinyalert(
-                                "Error!!", 
-                                "Insufficient number of entries provided!",
-                                type = "error"
-                            )
+                            app_report_problem("Insufficient number of entries provided!")
                             return(NULL)
                         }
                     dim_data_1 <- nrow(data_entry_UP[(length(checksEntries) + 1):nrow(data_entry_UP), ])
@@ -402,35 +380,22 @@ mod_diagonal_multiple_server <- function(id) {
                 lines.db <- as.numeric(input$lines.db)
                 choices_list <- validate_design(field_dimensions(lines_within_loc = lines.db))
                 if (length(choices_list) == 0) {
-                    shinyalert::shinyalert(
-                        "Error!!", 
-                        "Insufficient number of entries provided!",
-                        type = "error"
-                    )
+                    app_report_problem("Insufficient number of entries provided!")
                     return(NULL)
                 }
                 checks <- as.numeric(input$checks.db)
                 checksEntries <- 1:checks
                 blocks <- as.numeric(as.vector(unlist(strsplit(input$blocks.db, ","))))
                 if (lines.db != sum(blocks)) {
-                    shinyalert::shinyalert(
-                        "Error!!", 
-                        "Number of treatments in blocks does match with the data input file.", 
-                        type = "error")
+                    app_report_problem("Number of treatments in blocks does not match with the data input file.")
                     return(NULL)
                 }
                 if (as.numeric(input$lines.db) < 50) {
-                    shinyalert::shinyalert(
-                        "Error!!", 
-                        "Larger field size is recommended for this experiment type", 
-                        type = "error")
+                    app_report_problem("Larger field size is recommended for this experiment type")
                     return(NULL)
                 }
                 if (input$sameEntries && any(blocks != blocks[1])) {
-                    shinyalert::shinyalert(
-                        "Error!!", 
-                        "Blocks should have the same size", 
-                        type = "error")
+                    app_report_problem("Blocks should have the same size")
                     return(NULL)
                 }
                 # diagonal_arrangement() generates the entries and their names
@@ -506,9 +471,8 @@ mod_diagonal_multiple_server <- function(id) {
                                 choices = sort_choices,
                                 selected = head(sort_choices, 1))
             if (length(sort_choices) == 0L) {
-                shinyalert::shinyalert("No field dimensions available",
-                                      "No feasible field was found for these entries and checks.",
-                                      type = "error")
+                app_report_problem("No feasible field was found for these entries and checks.",
+                                   title = "No field dimensions available")
             }
         })
         
@@ -639,27 +603,10 @@ mod_diagonal_multiple_server <- function(id) {
                 sameEntries = get_data_multiple()$same_entries
             )
             data <- get_data_multiple()$data_api
-            design <- tryCatch(
-                suppressWarnings(
-                    do.call(diagonal_arrangement, design_args_diagonal_multiple(values, data))
-                ),
-                error = function(e) e
-            )
-            if (inherits(design, "error")) {
-                shinyalert::shinyalert(
-                    "Error!!",
-                    conditionMessage(design),
-                    type = "error")
-                return(NULL)
-            }
-            if (is.null(design)) {
-                shinyalert::shinyalert(
-                    "Error!!",
-                    "Data input does not fit to field dimensions",
-                    type = "error")
-                return(NULL)
-            }
-            return(design)
+            # Errors are reported in a dialog; FielDHub warnings (such as a
+            # starting plot number that does not have one value per location)
+            # as notices.
+            app_attempt(do.call(diagonal_arrangement, design_args_diagonal_multiple(values, data)))
         }) 
         
         user_location <- shiny::reactive({
@@ -673,8 +620,7 @@ mod_diagonal_multiple_server <- function(id) {
             if (!test) return(NULL)
             Option_NCD <- TRUE
             if (is.null(available_percent_multi()$dt)) {
-                shiny::validate("Data input does not fit to field dimensions")
-                return(NULL)
+                validate_design(fieldhub_abort("Data input does not fit to field dimensions."))
             }
             my_out <- available_percent_multi()$dt
             df <- as.data.frame(my_out)

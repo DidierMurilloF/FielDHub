@@ -207,10 +207,8 @@ mod_RCBD_augmented_server <- function(id) {
 
     shiny::observeEvent(input$random, {
       if (input$random == FALSE) {
-        shinyalert::shinyalert(
-          "Warning!!", 
-          "By unchecking this option you will only randomized the check plots.", 
-          type = "warning")
+        app_report_problem("By unchecking this option only the check plots are randomized.",
+                           severity = "warning")
       }
     })
     
@@ -234,10 +232,7 @@ mod_RCBD_augmented_server <- function(id) {
         if (names(data_ingested) == "dataUp") {
           data_up <- data_ingested$dataUp
           if (ncol(data_up) < 2) {
-            shinyalert::shinyalert(
-              "Error!!", 
-              "Data input needs at least two columns: ENTRY and NAME.", 
-              type = "error")
+            app_report_problem("Data input needs at least two columns: ENTRY and NAME.")
             return(NULL)
           } 
           checks <- validate_design(parse_n_checks(input$checks_a_rcbd))
@@ -246,10 +241,7 @@ mod_RCBD_augmented_server <- function(id) {
           colnames(data_up) <- c("ENTRY", "NAME")
           lines <- nrow(data_up) - checks
           if (lines < 8) {
-            shinyalert::shinyalert(
-              "Error!!",
-              "At least ten treatments are required!!",
-              type = "error")
+            app_report_problem("At least ten treatments are required!!")
             return(NULL)
           }
           return(list(error = FALSE, 
@@ -264,15 +256,15 @@ mod_RCBD_augmented_server <- function(id) {
         shiny::req(input$checks_a_rcbd)
         shiny::req(input$lines_a_rcbd)
         if (input$lines_a_rcbd < 8) {
-          shinyalert::shinyalert(
-            "Error!!",
-            "At least ten treatments are required!!",
-            type = "error")
+          app_report_problem("At least ten treatments are required!!")
           return(NULL)
         }
         lines <- as.numeric(input$lines_a_rcbd)
         checks <- as.numeric(input$checks_a_rcbd)
-        if(lines < 1 || checks <= 0) shiny::validate("Number of lines and checks should be greater than 1.")
+        if (lines < 1 || checks <= 0) {
+          app_report_problem("Number of lines and checks should be greater than 1.")
+          return(NULL)
+        }
         # RCBD_augmented() generates the CH/G entry list from the counts
         return(list(dataUp_a_rcbd = NULL, 
                     entries = lines))
@@ -301,10 +293,7 @@ mod_RCBD_augmented_server <- function(id) {
       ))
       blocks_arcbd <- set_blocks$b
       if (length(blocks_arcbd) == 0) {
-        shinyalert::shinyalert(
-          "Error!!", 
-          "No options available for that amount of treatments!!.", 
-          type = "error")
+        app_report_problem("No options available for that amount of treatments!!.")
       }
       shiny::updateSelectInput(session = session,
                         inputId = "blocks_a_rcbd",
@@ -347,10 +336,7 @@ mod_RCBD_augmented_server <- function(id) {
     getDataup_a_rcbd <- shiny::eventReactive(input$RUN.arcbd, {
       shiny::req(init_data())
       if (is.null(init_data())) {
-        shinyalert::shinyalert(
-          "Error!!", 
-          "Check input file and try again!", 
-          type = "error")
+        app_report_problem("Check input file and try again!")
         return(NULL)
       } else return(init_data())
     })
@@ -480,11 +466,8 @@ mod_RCBD_augmented_server <- function(id) {
       shiny::req(input$planter_mov1_a_rcbd)
       shiny::req(input$plot_start_a_rcbd)
       shiny::req(input$Location_a_rcbd)
-      loc <- as.numeric(input$l.arcbd)
-      l.arcbd <- as.numeric(input$l.arcbd)
-      if (length(loc) > l.arcbd) {
-        shiny::validate("Length of vector with name of locations is greater than the number of locations.")
-      } 
+      # RCBD_augmented() checks the location names against this count
+      l.arcbd <- validate_design(validate_locations_input(input$l.arcbd))
       repsExpt <- some_inputs()$expts_a_rcbd
       # RCBD_augmented() names the experiments Expt1, ... when the names
       # typed do not fit

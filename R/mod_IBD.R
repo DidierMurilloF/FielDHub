@@ -247,10 +247,7 @@ mod_IBD_server <- function(id) {
     
     get_data_ibd <- shiny::reactive({
       if (is.null(init_data_ibd())) {
-        shinyalert::shinyalert(
-          "Error!!", 
-          "Check input file and try again!", 
-          type = "error")
+        app_report_problem("Check input file and try again!")
         return(NULL)
       } else return(init_data_ibd())
     }) |>
@@ -278,10 +275,7 @@ mod_IBD_server <- function(id) {
       seed <- validate_design(app_design_seed(input$seed.ibd))
       l <- as.numeric(input$l.ibd)
       if (input$k.ibd == "No Options Available") {
-        shinyalert::shinyalert(
-          "Error!!",
-          "No options for this combination of treatments!",
-          type = "error")
+        app_report_problem("No options for this combination of treatments!")
         return(NULL)
       }
       return(list(

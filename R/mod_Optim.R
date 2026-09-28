@@ -212,17 +212,17 @@ mod_Optim_server <- function(id) {
           data_up <- na.omit(data_up)
           data_up <- as.data.frame(data_up)
           if (ncol(data_up) < 3) {
-            shinyalert::shinyalert(
-              "Error!!", 
-              "Data input needs at least three columns with: ENTRY, NAME and REPS.", 
-              type = "error")
+            app_report_problem("Data input needs at least three columns with: ENTRY, NAME and REPS.")
             return(NULL)
           } 
           data_up <- as.data.frame(data_up[,1:3])
           data_up <- na.omit(data_up)
           colnames(data_up) <- c("ENTRY", "NAME", "REPS")
-          if(!is.numeric(data_up$REPS) || !is.integer(data_up$REPS) ||
-             is.factor(data_up$REPS)) shiny::validate("'REPS' must be numeric.")
+          if (!is.numeric(data_up$REPS) || !is.integer(data_up$REPS) ||
+              is.factor(data_up$REPS)) {
+            app_report_problem("'REPS' must be numeric.")
+            return(NULL)
+          }
           total_plots <- sum(data_up$REPS)
           counts <- NULL
         } else {
@@ -234,25 +234,20 @@ mod_Optim_server <- function(id) {
         shiny::req(input$amount.checks)
         shiny::req(input$lines.s)
         shiny::req(input$checks.s)
-        r.checks <- as.numeric(unlist(strsplit(input$amount.checks, ",")))
+        # Text such as "8,x" is explained instead of becoming an NA that
+        # fails the comparisons below
+        r.checks <- app_attempt(parse_whole_numbers(input$amount.checks, "Input # Check's Reps"))
+        if (is.null(r.checks)) return(NULL)
         checks.s <- as.numeric(input$checks.s)
-        if(checks.s != length(r.checks)) {
-          shinyalert::shinyalert(
-            "Error!!",
-            "The number of checks and the length of the reps vector must be equal.",
-            type = "error"
-          )
+        if (checks.s != length(r.checks)) {
+          app_report_problem("The number of checks and the length of the reps vector must be equal.")
           return(NULL)
         } 
         total.checks <- sum(r.checks)
         n.checks <- as.numeric(input$checks.s)
         lines <- as.numeric(input$lines.s)
         if (lines <= sum(total.checks)) {
-          shinyalert::shinyalert(
-            "Error!!",
-            "Number of lines should be greater then the number of checks.",
-            type = "error"
-          )
+          app_report_problem("Number of lines should be greater then the number of checks.")
           return(NULL)
         }
         # optimized_arrangement() builds the CH/G entry list from the counts
@@ -264,11 +259,8 @@ mod_Optim_server <- function(id) {
       if (length(dimension_choices) == 0L) {
         shiny::updateSelectInput(inputId = "dimensions.s", choices = character(),
                           selected = character())
-        shinyalert::shinyalert(
-          "No field dimensions available",
-          "Please try a different number of treatments or checks.",
-          type = "error"
-        )
+        app_report_problem("Please try a different number of treatments or checks.",
+                           title = "No field dimensions available")
         return(NULL)
       }
       return(list(data_up.spatial = data_up, counts = counts, total_plots = total_plots,
@@ -278,10 +270,9 @@ mod_Optim_server <- function(id) {
     list_inputs <- shiny::eventReactive(input$RUN.optim, {
       shiny::req(get_data_optim())
       if (input$owndataOPTIM != 'Yes') {
-        shiny::req(input$amount.checks)
-        shiny::req(input$lines.s)
-        r.checks <- as.numeric(unlist(strsplit(input$amount.checks, ",")))
-        lines <- as.numeric(input$lines.s)
+        # get_data_optim() has already parsed the counts
+        r.checks <- get_data_optim()$counts$rep_checks
+        lines <- get_data_optim()$counts$lines
         return(list(r.checks=r.checks, lines = lines, input$owndataOPTIM))
       } else {
         n_plots <- get_data_optim()$total_plots
@@ -376,7 +367,7 @@ mod_Optim_server <- function(id) {
     output$data_input <- DT::renderDT({
       shiny::req(get_data_optim())
       if (input$dimensions.s == "No options available"){
-        shiny::validate("No options available for this number of treatments")
+        validate_design(fieldhub_abort("No options available for this number of treatments."))
       }
       test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0
       if (!test) return(NULL)
@@ -400,7 +391,7 @@ mod_Optim_server <- function(id) {
     output$table_checks <- DT::renderDT({
       shiny::req(get_data_optim())
       if (input$dimensions.s == "No options available") {
-        shiny::validate("No options available for this number of treatments")
+        validate_design(fieldhub_abort("No options available for this number of treatments."))
       }
       test <- randomize_hit_optim$times > 0 & user_tries_optim$tries_optim > 0
       if (!test) return(NULL)
@@ -418,7 +409,7 @@ mod_Optim_server <- function(id) {
     optimized_arrang <- shiny::eventReactive(input$get_random_optim, {
       shiny::req(get_data_optim())
       if (input$dimensions.s == "No options available") {
-        shiny::validate("No options available for this number of treatments")
+        validate_design(fieldhub_abort("No options available for this number of treatments."))
       }
       values <- c(get_data_optim()$counts, list(
         nrows = field_dimensions_optim()$d_row,

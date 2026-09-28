@@ -175,10 +175,7 @@ mod_Alpha_Lattice_server <- function(id){
     
     get_data_alpha <- shiny::reactive({
       if (is.null(init_data_alpha())) {
-        shinyalert::shinyalert(
-          "Error!!", 
-          "Check input file and try again!", 
-          type = "error")
+        app_report_problem("Check input file and try again!")
         return(NULL)
       } else return(init_data_alpha())
     }) |>
@@ -193,10 +190,7 @@ mod_Alpha_Lattice_server <- function(id){
       shiny::req(input$Location.alpha)
       shiny::req(input$l.alpha)
       if (input$k.alpha == "No Options Available") {
-        shinyalert::shinyalert(
-          "Error!!", 
-          "No options for this combination of treatments!", 
-          type = "error")
+        app_report_problem("No options for this combination of treatments!")
         return(NULL)
       } 
       l <- as.numeric(input$l.alpha)

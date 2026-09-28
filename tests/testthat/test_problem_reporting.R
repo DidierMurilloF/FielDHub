@@ -137,3 +137,47 @@ test_that("app_attempt() reports errors and warnings of work with no output", {
   expect_s3_class(silent, "shiny.silent.error")
   expect_length(reported, 2L)
 })
+
+test_that("only the one presentation helper refers to shinyalert", {
+  # Ruling R2: inspect the namespace, not R/ sources. Formals count too, so a
+  # default argument such as `notify = shinyalert::shinyalert` is caught.
+  refers_to_shinyalert <- function(f) {
+    "shinyalert" %in% c(all.names(body(f)), unlist(lapply(formals(f), all.names)))
+  }
+  functions <- c(core_functions(), app_functions())
+  expect_setequal(names(Filter(refers_to_shinyalert, functions)), "app_present_problem")
+})
+
+test_that("no app function writes a literal shiny::validate() message", {
+  # Messages the app shows are written as FielDHub conditions and reach the
+  # user through validate_design()/app_report_problem(); only
+  # validate_design() calls shiny::validate() itself.
+  calls_validate <- function(f) {
+    grepl("shiny::validate(", paste(deparse(body(f)), collapse = "\n"), fixed = TRUE)
+  }
+  expect_setequal(names(Filter(calls_validate, c(core_functions(), app_functions()))),
+                  "validate_design")
+})
+
+test_that("no module catches conditions itself", {
+  # Catch-all tryCatch(error = <alert>) blocks and ad-hoc warning collectors
+  # used to word the same condition differently in each module. Modules now
+  # use validate_design(), app_attempt() or app_report_problem() instead.
+  catches <- function(f) {
+    fieldhub_calls_named(body(f), c("tryCatch", "withCallingHandlers", "try",
+                                    "showNotification", "conditionMessage"))
+  }
+  functions <- app_functions()
+  expect_setequal(names(Filter(catches, functions)),
+                  c("app_capture_conditions", "app_attempt", "app_present_problem"))
+})
+
+test_that("the p-rep modules share the no-dimensions explanation", {
+  expect_identical(prep_no_dimensions_problem(FALSE)$severity, "info")
+  expect_identical(prep_no_dimensions_problem(FALSE)$title, "Filler plots required")
+  expect_match(prep_no_dimensions_problem(FALSE, 10)$message, "no more than 10 filler plots",
+               fixed = TRUE)
+  expect_identical(prep_no_dimensions_problem(TRUE)$severity, "error")
+  expect_match(prep_no_dimensions_problem(TRUE, 7)$message, "7 or fewer filler plots",
+               fixed = TRUE)
+})
