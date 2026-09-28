@@ -1,148 +1,3 @@
-#' @title Calculate pairwise distances between all elements in a matrix that appears twice or more.
-#'
-#' @description Given a matrix of integers, this function calculates pairwise
-#' distance between all possible pairs of elements in the matrix that appear two or more times.
-#' If no element appears two or more times, the function will return an error message.
-#'
-#'
-#' @param X a matrix of integers
-#' @param dist_method Coordinate distance: "euclidean" or "manhattan".
-#'
-#' @return A data frame with the following columns:
-#' \itemize{
-#'   \item \code{geno}: the integer value for which the pairwise distances are calculated
-#'   \item \code{Pos1}: the row index of the first element in the pair
-#'   \item \code{Pos2}: the row index of the second element in the pair
-#'   \item \code{DIST}: the Euclidean distance between the two elements in the pair
-#'   \item \code{rA}: the row index of the first element in the pair
-#'   \item \code{cA}: the column index of the first element in the pair
-#'   \item \code{rB}: the row index of the second element in the pair
-#'   \item \code{cB}: the column index of the second element in the pair
-#' }
-#'
-#' @author Jean-Marc Montpetit [aut]
-#'
-#' @noRd
-pairs_distance <- function(X, dist_method = "euclidean") {
-  validate_swap_matrix(X)
-  dist_fn <- swap_distance_function(dist_method)
-
-  nr <- nrow(X)
-  # NA cells are inactive field positions and must not enter the distance
-  # calculations as an artificial replicated treatment.
-  tab <- table(as.vector(X))
-  dupsI <- as.integer(names(tab)[tab > 1L])
-  if (length(dupsI) == 0L) fieldhub_abort("All elements in X appear only once")
-
-  out_list <- vector("list", length(dupsI))
-  for (i in seq_along(dupsI)) {
-    g <- dupsI[i]
-    id <- which(X == g)
-    pairs <- utils::combn(id, 2)
-    p1 <- pairs[1L, ]
-    p2 <- pairs[2L, ]
-    rA <- ((p1 - 1L) %% nr) + 1L
-    cA <- ((p1 - 1L) %/% nr) + 1L
-    rB <- ((p2 - 1L) %% nr) + 1L
-    cB <- ((p2 - 1L) %/% nr) + 1L
-    distances <- as.numeric(dist_fn(rA, cA, rB, cB))
-    out_list[[i]] <- data.frame(
-      geno = rep.int(g, length(distances)),
-      Pos1 = p1, Pos2 = p2, DIST = distances,
-      rA = rA, cA = cA, rB = rB, cB = cB
-    )
-  }
-  plotDist <- do.call(rbind, out_list)
-  plotDist <- plotDist[order(plotDist$DIST), ]
-  rownames(plotDist) <- NULL
-  plotDist
-}
-
-# ============================================================
-#  Internal helpers
-# ============================================================
-#' @noRd
-.vec_dist_euclidean <- function(r0, c0, rmat, cmat) {
-  sqrt((rmat - r0)^2 + (cmat - c0)^2)
-}
-
-#' @noRd
-.vec_dist_manhattan <- function(r0, c0, rmat, cmat) {
-  abs(rmat - r0) + abs(cmat - c0)
-}
-
-#' @noRd
-# All pairwise distances for ONE genotype in matrix mat
-.pair_dists_for_geno <- function(mat, g, dist_method = "euclidean") {
-  pos <- which(mat == g, arr.ind = TRUE)
-  if (nrow(pos) < 2L) {
-    return(numeric(0))
-  }
-  pairs <- utils::combn(seq_len(nrow(pos)), 2L)
-  dr <- pos[pairs[1L, ], 1L] - pos[pairs[2L, ], 1L]
-  dc <- pos[pairs[1L, ], 2L] - pos[pairs[2L, ], 2L]
-  # Exponentiation promotes integer coordinates before squaring, avoiding
-  # overflow for distant plots while preserving ordinary-field distances.
-  if (dist_method == "manhattan") abs(dr) + abs(dc) else sqrt(dr^2 + dc^2)
-}
-
-# ---- Score a candidate swap ----------------------------------------------------
-#
-# Returns a list(score, delta):
-#
-#   score : adjusted_global_mean - lambda * candidate_center_dist  (maximise)
-#   delta : new_contrib - old_contrib
-#
-# The DELTA is the key optimisation here. After the best swap is applied the
-# caller updates base_sum as:
-#
-#     base_sum <- base_sum + delta
-#
-# This is pure arithmetic — no pairs_distance() call, no allocations.
-# n_pairs never changes (swapping cells doesn't add/remove pairs).
-#
-# Border penalisation is identical to the previous version:
-#   large candidate_center_dist  =>  candidate near border  =>  lower score
-#
-#' @noRd
-.score_swap <- function(X, ri, ci, rj, cj,
-                        lambda, center, base_sum, n_pairs,
-                        dist_method = "euclidean") {
-  g_i <- X[ri, ci]
-  g_j <- X[rj, cj]
-
-  # old pairwise-distance sums for the two affected genotypes
-  old_i <- .pair_dists_for_geno(X, g_i, dist_method)
-  old_j <- if (g_j != g_i) .pair_dists_for_geno(X, g_j, dist_method) else numeric(0)
-  old_contrib <- sum(old_i) + sum(old_j)
-
-  # apply swap on a temp copy
-  X_tmp <- X
-  X_tmp[ri, ci] <- g_j
-  X_tmp[rj, cj] <- g_i
-
-  # new pairwise-distance sums for the same genotypes
-  new_i <- .pair_dists_for_geno(X_tmp, g_i, dist_method)
-  new_j <- if (g_j != g_i) .pair_dists_for_geno(X_tmp, g_j, dist_method) else numeric(0)
-  new_contrib <- sum(new_i) + sum(new_j)
-
-  delta <- new_contrib - old_contrib
-
-  # incrementally updated global mean
-  adjusted_mean <- (base_sum + delta) / max(n_pairs, 1L)
-
-  # Use the selected metric for the centrality penalty as well.
-  candidate_center_dist <- if (dist_method == "manhattan") {
-    abs(rj - center[1L]) + abs(cj - center[2L])
-  } else sqrt((rj - center[1L])^2 + (cj - center[2L])^2)
-
-  list(
-    score = adjusted_mean - lambda * candidate_center_dist,
-    delta = delta
-  )
-}
-
-
 #' @title Swap pairs in a matrix of integers
 #'
 #' @description Attempts to separate repeated entries by swapping cells of
@@ -420,4 +275,63 @@ swap_pairs_core <- function(X, starting_dist = 3, stop_iter = 10, lambda = 0.5,
       last_attempt_min_distance = last_attempt_min, retained_min_distance = min_distance
     )
   )
+}
+
+#' Construct a reproducible standalone pair-swap result
+#' @noRd
+new_fieldhub_optimization <- function(x, parameters) {
+  new_fieldhub_result(x, "pair_swap", parameters$seed, parameters,
+                     c("fieldhub_pair_swap", "fieldhub_optimization"), validate_fieldhub_optimization)
+}
+
+#' Validate a pair-swap result without running its optimizer again
+#' @noRd
+validate_fieldhub_optimization <- function(x) {
+  fail <- function(message) {
+    fieldhub_abort("Internal error: the optimization result ", message, ".",
+                   class = "fieldhub_internal_error", call. = FALSE)
+  }
+  if (!is.list(x) || !identical(class(x), c("fieldhub_pair_swap", "fieldhub_optimization"))) {
+    fail("has an inconsistent class")
+  }
+  meta <- x$metadata
+  problems <- fieldhub_metadata_problems(meta)
+  if (length(problems)) fail(paste(problems, collapse = ", "))
+  if (!identical(meta$design, "pair_swap")) fail("does not name the pair-swap engine")
+  parameters <- meta$parameters
+  if (!is.list(parameters) || !identical(names(parameters), names(formals(swap_pairs)))) {
+    fail("has incomplete input parameters")
+  }
+  input <- parameters$X
+  output <- x$optim_design
+  tryCatch({
+    validate_swap_matrix(input)
+    validate_swap_matrix(output)
+    validate_swap_controls(parameters$starting_dist, parameters$stop_iter, parameters$lambda,
+                            parameters$dist_method, parameters$candidate_sample_size)
+  }, fieldhub_error = function(e) fail(conditionMessage(e)))
+  if (!identical(dim(input), dim(output)) || !identical(is.na(input), is.na(output)) ||
+      !identical(table(input, dnn = NULL), table(output, dnn = NULL))) {
+    fail("does not preserve field geometry and entry counts")
+  }
+  if (!is.list(x$designs) || !is.list(x$distances) || length(x$designs) == 0L ||
+      length(x$designs) != length(x$distances) || !identical(x$designs[[1L]], input) ||
+      !identical(x$designs[[length(x$designs)]], output) ||
+      !identical(x$distances[[length(x$distances)]], x$pairwise_distance)) {
+    fail("has inconsistent retained search steps")
+  }
+  distances <- x$pairwise_distance
+  if (!is.data.frame(distances) || !is.numeric(distances$DIST) || nrow(distances) == 0L ||
+      any(!is.finite(distances$DIST)) || any(distances$DIST < 0) ||
+      !identical(x$min_distance, min(distances$DIST))) {
+    fail("has invalid retained distances")
+  }
+  diagnostics <- x$diagnostics
+  if (!is.list(diagnostics) ||
+      !identical(diagnostics$distance_method, parameters$dist_method) ||
+      !identical(diagnostics$max_iterations_per_threshold, parameters$stop_iter) ||
+      !identical(diagnostics$retained_min_distance, x$min_distance)) {
+    fail("has inconsistent optimization diagnostics")
+  }
+  invisible(x)
 }

@@ -113,7 +113,7 @@ family-by-family checks, reference calculations, and computational limits.
 
 Each file in `R/` is named `<prefix>_<topic>.R`. The prefix says what the
 file is responsible for; the topic says what it holds (for example
-`engine_diagonal_checks.R`, `layout_options.R`, `result_methods.R`).
+`engine_diagonal_checks.R`, `layout_planting_path.R`, `result_methods.R`).
 
 | Prefix | Responsibility |
 |---|---|
@@ -137,6 +137,10 @@ file is responsible for; the topic says what it holds (for example
   workflow steps, table options) go in `app_` files even when they make no
   Shiny calls. Core files (every other prefix) never refer to `app_`/`mod_`
   code and make no `shiny`, `DT`, `bslib`, `shinyjs` or `shinyalert` calls.
+- Dependencies between files go one way: no file may depend, directly or
+  through other files, on a file that depends on it. When two files call
+  each other, move the mutually dependent functions into one file, or into a
+  lower layer that both use.
 - R loads these files in alphabetical order, so top-level code (such as
   `x <- f()`) may only use objects defined above it in the same file.
 
@@ -148,11 +152,12 @@ Two files are exceptions:
 Tests live in `tests/testthat/test_<topic>.R` and are plain R: never Shiny
 server or browser tests. `test_source_layout.R` checks this layout (prefixes,
 one `fct_` file per exported function, no core reference to the Shiny
-layer). Structural checks that must also run under `R CMD check`, where `R/`
-is not installed, inspect the namespace with `core_functions()` and
-`app_functions()` from `helper-source.R`. The core
-coverage gate in CI (`inst/ci/compare-core-coverage.R`) measures every `R/`
-file except `app_*`, `mod_*` and `run_app.R`.
+layer, no dependency cycle between core files). Structural checks that must
+also run under `R CMD check`, where `R/` is not installed, inspect the
+namespace with `core_functions()` and `app_functions()` from
+`helper-source.R`. The core coverage gate in CI
+(`inst/ci/compare-core-coverage.R`) measures every `R/` file except `app_*`,
+`mod_*` and `run_app.R`.
 
 ## Attribution
 

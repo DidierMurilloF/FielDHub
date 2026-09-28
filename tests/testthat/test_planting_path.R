@@ -15,8 +15,8 @@ library(FielDHub)
 #      square_layouts() horizontal, iblock_layouts()'s horizontal branch)
 #   C: mode = "Grid"        (iblock_layouts()'s grid_panel branch)
 #
-# `plots_along_grid()`/`plots_along_grid_by_rep()` (R/utils_layout.R), both
-# built on `planting_path()`, now replace it. This test proves they reproduce
+# `plots_along_grid()`/`plots_along_grid_by_rep()` (R/layout_planting_path.R),
+# both built on `planting_path()`, now replace it. This test proves they reproduce
 # every shape exactly, odd and even row counts, single and multiple reps,
 # serpentine and cartesian.
 

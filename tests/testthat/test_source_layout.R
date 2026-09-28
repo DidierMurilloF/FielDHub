@@ -1,6 +1,7 @@
 # Source layout (CONTRIBUTING.md, "Source layout"): every file in R/ names
 # its responsibility with a prefix, one fct_ file holds each exported design
-# function, and core code never reaches into the Shiny layer (app_*, mod_*).
+# function, core code never reaches into the Shiny layer (app_*, mod_*), and
+# no two core files depend on each other.
 #
 # File-name checks need the R/ sources, which R CMD check does not install,
 # so they skip there (ruling R2). The Shiny-layer check also runs on the
@@ -121,6 +122,39 @@ test_that("the Shiny layer is referenced only from app_ and mod_ files", {
     }
   }
   expect_identical(offenders, character())
+})
+
+test_that("no two R/ files outside the Shiny layer depend on each other", {
+  dir <- source_layout_dir()
+  defs <- source_definitions(dir)
+  core <- defs[!is_app_file(defs$file) & !defs$file %in% source_layout_exceptions, ]
+  named <- core[!is.na(core$name), ]
+  home <- stats::setNames(named$file, named$name)
+  adjacency <- list()
+  for (i in seq_len(nrow(core))) {
+    to <- setdiff(unique(unname(home[intersect(core$refs[[i]], names(home))])), core$file[i])
+    adjacency[[core$file[i]]] <- unique(c(adjacency[[core$file[i]]], to))
+  }
+  files <- unique(core$file)
+  state <- stats::setNames(integer(length(files)), files)  # 0 new, 1 open, 2 done
+  path <- character()
+  cycle <- character()
+  visit <- function(file) {
+    state[[file]] <<- 1L
+    path <<- c(path, file)
+    for (next_file in adjacency[[file]]) {
+      if (length(cycle)) return(invisible())
+      if (state[[next_file]] == 1L) {
+        cycle <<- c(path[match(next_file, path):length(path)], next_file)
+        return(invisible())
+      }
+      if (state[[next_file]] == 0L) visit(next_file)
+    }
+    path <<- head(path, -1L)
+    state[[file]] <<- 2L
+  }
+  for (file in files) if (!length(cycle) && state[[file]] == 0L) visit(file)
+  expect_identical(paste(cycle, collapse = " -> "), "")
 })
 
 test_that("core functions never refer to app_ or mod_ functions", {

@@ -755,3 +755,15 @@ assemble_arcbd_blocks <- function(block_list, blocks_per_col, blocks_per_row) {
   
   do.call(rbind, rows_out)
 }
+
+#' @noRd 
+no_random_arcbd <- function(checksMap = NULL, 
+                            data_Entry = NULL, 
+                            planter = "serpentine") {
+  w_map <- fill_along_path(checksMap, as.vector(data_Entry), planter)
+  w_map_letters <- w_map
+  dim_each_block <- rep(ncol(w_map), nrow(w_map))
+  return(list(rand = w_map, 
+              len_cut = dim_each_block, 
+              w_map_letters = w_map_letters))
+}

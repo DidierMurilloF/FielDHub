@@ -236,3 +236,13 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
   output <- new_fieldhub_design(output, "full_factorial", parameters = reproduction_parameters)
   return(invisible(output))
 }
+
+#' @noRd
+get.levels <- function(k = NULL) {
+  newlevels <- list();s <- 1
+  for (i in k) {
+    newlevels[[s]] <- rep(0:(i-1), 1)
+    s <- s + 1
+  }
+  return(newlevels)
+}

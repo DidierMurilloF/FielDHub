@@ -79,3 +79,19 @@ family_split_problems <- function(x) {
   }
   character()
 }
+
+#' Whether an allocation column contains finite nonnegative whole counts
+#' @noRd
+allocation_counts_valid <- function(x) {
+  is.numeric(x) && !is.complex(x) && is.null(dim(x)) &&
+    all(is.finite(x)) && all(x >= 0 & x %% 1 == 0)
+}
+
+#' Minimum entry-table structure shared by allocation locations
+#' @noRd
+allocation_table_valid <- function(x, columns) {
+  is.data.frame(x) && nrow(x) > 0L && anyDuplicated(names(x)) == 0L &&
+    all(columns %in% names(x)) && all(vapply(x[columns], function(column) {
+      is.atomic(column) && is.null(dim(column)) && !anyNA(column)
+    }, logical(1)))
+}
