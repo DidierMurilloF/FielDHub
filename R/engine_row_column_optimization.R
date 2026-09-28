@@ -21,7 +21,7 @@ swap_treatments <- function(df) {
     
     if (nrow(df_level2) >= 2) {
       # Randomly select two different rows to swap treatments
-      rows_to_swap <- sample(1:nrow(df_level2), 2)
+      rows_to_swap <- sample(seq_len(nrow(df_level2)), 2)
       temp <- df_level2$treatments[rows_to_swap[1]]
       df_level2$treatments[rows_to_swap[1]] <- df_level2$treatments[rows_to_swap[2]]
       df_level2$treatments[rows_to_swap[2]] <- temp
@@ -157,13 +157,12 @@ build_row_column_onestage <- function(nt, nrows, ncols, reps, latinize, searches
 # have residual degrees of freedom for every treatment contrast).
 #' @noRd
 row_column_joint_efficiency <- function(design) {
-  Rows <- factor(design$Level_3)                    # actual row block factor
-  Cols <- factor(design$Level_2)                    # actual column block factor
+  blocks <- data.frame(Rows = factor(design$Level_3), Cols = factor(design$Level_2))
   TF <- factor(design$treatments)
   v <- nlevels(TF)
   r <- mean(table(TF))
   Tind <- stats::model.matrix(~ TF - 1)             # full treatment indicators
-  Bind <- stats::model.matrix(~ Rows + Cols)        # row + column block model
+  Bind <- stats::model.matrix(~ Rows + Cols, data = blocks) # row + column block model
   resid <- qr.resid(qr(Bind), Tind)                 # (I - P_B) T, rank-aware
   C <- crossprod(resid)                             # treatment info eliminating blocks
   ev <- sort(eigen(C, symmetric = TRUE, only.values = TRUE)$values,

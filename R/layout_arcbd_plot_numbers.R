@@ -9,7 +9,6 @@ ARCBD_plot_number <- function(plot.number = NULL,
   nrows <- b
   ncols <- ncol(datos_name)
   datos_name = as.matrix(datos_name) 
-  movement_planter <- planter
   plot_n_start <- plot.number
   if (!is.null(name.expt)) { 
     Name_expt <- name.expt  
@@ -30,6 +29,5 @@ ARCBD_plot_number <- function(plot.number = NULL,
   }
   return(list(plot_num = plot_num1))
 }
-
 
 

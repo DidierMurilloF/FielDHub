@@ -15,8 +15,8 @@ get_random_stacked <- function(stacked = "By Column",
   }
   target <- rep(paste0("B", 1:b), times = data_dim_each_block)
   v <- 1
-  for(j in 1:ncol(matrix_checks)) {
-    for (i in nrow(matrix_checks):1) {
+  for(j in seq_len(ncol(matrix_checks))) {
+    for (i in rev(seq_len(nrow(matrix_checks)))) {
       if (matrix_checks[i,j] == 0){
         matrix_checks[i,j] <- target[v]
         v <- v + 1
@@ -47,7 +47,6 @@ get_random_stacked <- function(stacked = "By Column",
               Lines = data_dim_each_block, 
               w_map_letters = w_map_letters))
 }
-
 
 
 

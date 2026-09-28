@@ -25,12 +25,12 @@ automatically_cuts <- function(
             }
         }
         
-        x <- nrow(w_map):1
+        x <- rev(seq_len(nrow(w_map)))
         y <- auto_cuts_by_r
         cuts <- x[y]
         bks  <- list()
         s <- 1
-        for (h in 1:length(cuts)){
+        for (h in seq_along(cuts)){
         bks[[h]] <- s:(cuts[h])
         s <- (cuts[h] + 1)
         }
@@ -42,8 +42,8 @@ automatically_cuts <- function(
     }else {
         auto_cuts_by_c <- numeric()
         v <- 1;k <- 0 
-        for (j in 1:ncol(w_map)) {
-        for (i in 1:nrow(w_map)) {
+        for (j in seq_len(ncol(w_map))) {
+        for (i in seq_len(nrow(w_map))) {
             if (w_map[i,j] == 0) k <- k + 1
             if (data_dim_each_block[v] == k) {
             auto_cuts_by_c[v] <- j;k <- 0

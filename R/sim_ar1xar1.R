@@ -12,7 +12,6 @@ AR1xAR1_simulation <- function(nrows = NULL, ncols = NULL, ROX = NULL,
   sigma <- rag*0.15
   Beta <- sum(minValue, maxValue)/2
   s20 <- 0.1;H2 <- 0.5
-  iter <- 20
   info <- as.data.frame(cbind(ROX, ROY, s20))
   info <- info[abs(info$ROY-info$ROX) < 0.85, ]
   ar1 <- info[1,]

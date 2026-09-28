@@ -473,8 +473,8 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
       plot_number <- apply(plotEXPT$plot_num, 2, as.numeric)
       Col_checks <- col_checks
       
-      rownames(layout1) <- paste("Row", nrow(layout1):1, sep = "")
-      colnames(layout1) <- paste("Col", 1:ncol(layout1), sep = "")
+      rownames(layout1) <- paste("Row", rev(seq_len(nrow(layout1))), sep = "")
+      colnames(layout1) <- paste("Col", seq_len(ncol(layout1)), sep = "")
       
       layout1_expt[[sky]] <- as.data.frame(layout1)
       Blocks_info_expt[[sky]] <- as.data.frame(Blocks_info)
@@ -525,12 +525,12 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
   }
   
   fieldbook <- dplyr::bind_rows(outputDesign_loc)
-  ID <- 1:nrow(fieldbook)
+  ID <- seq_len(nrow(fieldbook))
   fieldbook <- fieldbook[, c("EXPT", "LOCATION", "LOC", "YEAR", "PLOT", "ROW",
                              "COLUMN", "CHECKS", "BLOCK", "ENTRY", "NAME")]
   fieldbook <- cbind(ID, fieldbook)
   names(fieldbook)[names(fieldbook) == "NAME"] <- "TREATMENT"
-  rownames(fieldbook) <- 1:nrow(fieldbook)
+  rownames(fieldbook) <- seq_len(nrow(fieldbook))
 
   fieldbook$EXPT <- factor(fieldbook$EXPT, levels = as.character(exptName))
   fieldbook$LOCATION <- factor(fieldbook$LOCATION, levels = as.character(locationNames))

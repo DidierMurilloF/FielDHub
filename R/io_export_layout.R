@@ -44,9 +44,9 @@ export_layout <- function(Fieldbook, selected, plotOn = FALSE, type_pref = NULL)
   mtx <- field_book_export_grid(df_site_one, type)
   df <- as.data.frame(mtx)
   
-  leftHead <- c("Location",locs[selected],1:(nrow(mtx)))
+  leftHead <- c("Location",locs[selected],seq_len(nrow(mtx)))
   blanks <- as.data.frame(matrix("", ncol = ncol(mtx)), nrow = 2)
-  col_labels <- as.data.frame(matrix(c(1:ncol(mtx)), 
+  col_labels <- as.data.frame(matrix(c(seq_len(ncol(mtx))),
                                      ncol = ncol(mtx)), nrow = 1)
   
   names(blanks) <- names(df)
@@ -56,7 +56,7 @@ export_layout <- function(Fieldbook, selected, plotOn = FALSE, type_pref = NULL)
   layout_entries3 <- rbind(blanks2, df)
   
   layout_entries2 <- cbind(leftHead, as.data.frame(layout_entries3))
-  layout_entries2 <- layout_entries2[order(nrow(layout_entries2):1),]
+  layout_entries2 <- layout_entries2[order(rev(seq_len(nrow(layout_entries2)))),]
   layout_entries2 <- rbind(tail(layout_entries2, 2)[2:1, ], head(layout_entries2, -2))
   rownames(layout_entries2) <- 1:(nrow(mtx) + 2)
   

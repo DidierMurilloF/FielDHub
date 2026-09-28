@@ -84,7 +84,6 @@ pREP <- function(
         reps_one_time <- subset(gen_list, REPS == 1)
         if (nrow(reps_one_time) == 0) {
             prep <- FALSE
-            optim <- FALSE
             gen_list_order <- gen_list[order(gen_list$REPS, decreasing = TRUE), ]
             reps_treatments <- as.vector(gen_list_order[,3])
             entry_treatments <- as.vector(gen_list_order[,1])

@@ -42,9 +42,9 @@ names_layout <- function(w_map = NULL,
         z <- z + 1 
       } 
       checks_ch <- as.character(checks) 
-      for(i in nrow(w_map_letters1):1) { 
-        for(j in 1:ncol(w_map_letters1)) { 
-          if (any(checks_ch %in% w_map_letters1[i, j]) & w_map_letters1[i,j] != "Filler") {
+      for(i in rev(seq_len(nrow(w_map_letters1)))) {
+        for(j in seq_len(ncol(w_map_letters1))) {
+          if (any(checks_ch %in% w_map_letters1[i, j]) && w_map_letters1[i,j] != "Filler") {
             if (j != ncol(w_map_letters1)){
               if (w_map_letters1[i, j + 1] == "Filler") {
                 w_map_letters1[i, j] <- w_map_letters1[i, j - 1]
@@ -78,9 +78,9 @@ names_layout <- function(w_map = NULL,
         z <- z + 1 
       } 
       checks_ch <- as.character(checks) 
-      for(j in 1:ncol(w_map_letters1)) {
-        for(i in nrow(w_map_letters1):1) { 
-          if (any(checks_ch %in% w_map_letters1[i, j]) & w_map_letters1[i,j] != "Filler") {
+      for(j in seq_len(ncol(w_map_letters1))) {
+        for(i in rev(seq_len(nrow(w_map_letters1)))) {
+          if (any(checks_ch %in% w_map_letters1[i, j]) && w_map_letters1[i,j] != "Filler") {
             if (i != 1) {
               if (w_map_letters1[i - 1, j] == "Filler") {
                 w_map_letters1[i, j] <- w_map_letters1[i + 1, j]

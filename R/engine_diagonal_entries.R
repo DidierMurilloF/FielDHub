@@ -22,18 +22,18 @@ get_random <- function(n_rows = NULL,
                                                   byrow = TRUE)
         li_my_split_r <- rev(li_my_split_r)
         any_check <- numeric()
-        for (z in 1:length(li_my_split_r)){
+        for (z in seq_along(li_my_split_r)){
           any_check[z] <- length(table(as.vector(li_my_split_r[[z]]))) - 2
         }
         lines <- numeric()                                                              
-        for (n in 1:length(li_my_split_r)){
+        for (n in seq_along(li_my_split_r)){
           lines[n] <- sum(li_my_split_r[[n]] == 0)
         }
         test_equ <- logical()
-        for (v in 1:length(lines)){
+        for (v in seq_along(lines)){
           test_equ[v] <- (lines[v] != data_dim_each_block[v])
         }
-        Blocks <- 1:length(lines)
+        Blocks <- seq_along(lines)
         val <- data.frame(Blocks, lines, data_dim_each_block)
         colnames(val) <- c("Block", "Available Plots", "Your Entries")
         if (any(test_equ == TRUE)) return(NULL)
@@ -46,12 +46,12 @@ get_random <- function(n_rows = NULL,
           data_dim_each_block[i] <- nrow(subset(data_entry, 
                                                 data_entry$BLOCK == i))
         }
-        target <- rep(LETTERS[1:length(data_dim_each_block)], data_dim_each_block)
+        target <- rep(LETTERS[seq_along(data_dim_each_block)], data_dim_each_block)
         W_SPLIT <- split_matrix_into_blocks(my_split_r, 
                                             blocks = rev(row_sets), 
                                             byrow = TRUE)
         W_SPLIT <- rev(W_SPLIT)
-        z <- 1:length(W_SPLIT)
+        z <- seq_along(W_SPLIT)
         dim_each_block_without_Fillers_and_checks <- numeric()
         for (i in z){
           dim_each_block_without_Fillers_and_checks[i] <- nrow(W_SPLIT[[i]]) * 
@@ -60,8 +60,8 @@ get_random <- function(n_rows = NULL,
         split_target <- split_vectors(target, dim_each_block_without_Fillers_and_checks)
         v <- 1
         for (s in z){
-          for(i in 1:nrow(W_SPLIT[[s]])){
-            for(j in 1:ncol(W_SPLIT[[s]])){
+          for(i in seq_len(nrow(W_SPLIT[[s]]))){
+            for(j in seq_len(ncol(W_SPLIT[[s]]))){
               if (W_SPLIT[[s]][i,j] == 0){
                 W_SPLIT[[s]][i,j] <- split_target[[s]][v]
                 v <- v + 1
@@ -89,7 +89,7 @@ get_random <- function(n_rows = NULL,
         data_entries <- as.vector(data_entry1$ENTRY)
         entries <- split_vectors(data_entries, data_dim_each_block)
         z <- 1
-        for(k in 1:length(entries)){
+        for(k in seq_along(entries)){
           w_map[w_map == levels_target[z]] <- entries[[k]][sample.int(length(entries[[k]]))]
           z <- z + 1
         }
@@ -104,7 +104,7 @@ get_random <- function(n_rows = NULL,
           data_dim_each_block[i] <- nrow(subset(data_entry, 
                                                 data_entry$BLOCK == i))
         }
-        target <- rep(LETTERS[1:length(data_dim_each_block)], 
+        target <- rep(LETTERS[seq_along(data_dim_each_block)],
                       data_dim_each_block)
         if(length(which.blocks) == 1 && 
            which.blocks == length(data_dim_each_block)) {
@@ -118,7 +118,7 @@ get_random <- function(n_rows = NULL,
             which_b <- c(which_b, length(r_sets))
           }
           cuts_max <- numeric()
-          for (i in 1:length(r_sets)) {
+          for (i in seq_along(r_sets)) {
             cuts_max[i] <- max(r_sets[[i]])
           }
           new_r_sets <- list()
@@ -135,7 +135,7 @@ get_random <- function(n_rows = NULL,
                                               byrow = TRUE)
           W_SPLIT <- rev(W_SPLIT)
           dim_each_block_without_Fillers_and_checks <- numeric()
-          for (i in 1:length(W_SPLIT)){
+          for (i in seq_along(W_SPLIT)){
            dim_each_block_without_Fillers_and_checks[i] <- nrow(W_SPLIT[[i]]) * 
              ncol(W_SPLIT[[i]]) - sum(W_SPLIT[[i]] != 0)
           }
@@ -162,7 +162,7 @@ get_random <- function(n_rows = NULL,
         data_entries <- as.vector(data_entry1$ENTRY)
         entries <- split_vectors(data_entries, data_dim_each_block)
         z <- 1
-        for(k in 1:length(entries)){
+        for(k in seq_along(entries)){
           w_map[w_map == levels_target[z]] <- entries[[k]][sample.int(length(entries[[k]]))]
           z <- z + 1
         }

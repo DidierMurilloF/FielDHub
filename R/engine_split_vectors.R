@@ -10,7 +10,7 @@ split_vectors <- function(x, len_cuts){
   entris <- list()
   v = 1; s = 1
   h <- dim_each_split[v]
-  for (j in 1:length(dim_each_split)) {
+  for (j in seq_along(dim_each_split)) {
     entris[[v]] <- cut_test[s:h]
     s = s + dim_each_split[v]
     v = v + 1

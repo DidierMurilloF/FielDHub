@@ -385,7 +385,7 @@ factor_splits <- function(f) {
     return(unique(data.frame(rbind(f, rev(f)))))
   }
   f1 <- c(f[1], prod(f[2:length(f)]))
-  f2 <- c(prod(f[1:length(f) - 1]), f[length(f)])
+  f2 <- c(prod(f[seq_along(f) - 1]), f[length(f)])
   unique(data.frame(rbind(f1, rev(f1), f2, rev(f2))))
 }
 
@@ -413,7 +413,7 @@ block_grid_coordinates <- function(sizeIblocks, n_Reps, iBlocks) {
     if (iBlocks %% 2 != 0) {
       r <- c(r[1], prod(r[2:length(r)]))
     } else {
-      r <- c(prod(r[1:length(r) - 1]), r[length(r)])
+      r <- c(prod(r[seq_along(r) - 1]), r[length(r)])
     }
   }
   if (length(r) == 1) r <- c(1, r)

@@ -144,9 +144,6 @@ seriePlot.numbers <- function(plot.number = NULL, reps = NULL, l = NULL, t = NUL
       if (plot.number[k] == 1) {
         plot.numbs[[k]] <- seq(1, t*reps, t)
       }else if (plot.number[k] > 1 && plot.number[k] < 1000) {
-        if (reps == 1) B <- 1 else B <- 0
-        if (t == 100) R <- 1 else R <- 0
-        #plot.numbs[[k]] <- seq(plot.number[k], (t+R)*reps + B, t)
         plot.numbs[[k]] <- seq(plot.number[k], plot.number[k]+(t*(reps-1)), t)[1:reps]
       }else if (plot.number[k] >= 1000 && plot.number[k] < 10000) {
         plot.numbs[[k]] <- seq(plot.number[k], plot.number[k]+(t*(reps-1)), t)[1:reps]

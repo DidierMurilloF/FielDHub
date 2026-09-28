@@ -16,16 +16,14 @@ available_percent <- function(n_rows,
   n_rows <- n_rows; n_cols = n_cols
   checks <- checks
   dim_expt <- n_rows * n_cols
-  P <- matrix(c(rep(NA,10),c(1:10), rep(c(14:8,7,6,5),1),
-                c(3,3,7,7,3,2,5,2,7,2)), ncol = 4, byrow = F)
   W <- matrix(c(rep(0,50),c(1:50), 
                 rep(c(14:8,7,6,5),5),
                 rep(c(3,3,7,7,3,2,5,2,7,2),5), 
                 rep(c(0,1,2,3,4), each = 10), 
                 rep(NA,50)),
-              ncol = 6, byrow = F)
+              ncol = 6, byrow = FALSE)
   w_map_list <- list()
-  range_in_W <- 1:nrow(W)
+  range_in_W <- seq_len(nrow(W))
   for (l in range_in_W) {
     if (n_cols < W[l,3]) next
     p_start <-  W[l,5]
@@ -61,7 +59,7 @@ available_percent <- function(n_rows,
   }
   if (multi == FALSE) {
     if (Option_NCD == TRUE) {
-      M <- matrix(data = NA, ncol = 6, nrow = ncols_W, byrow = T)
+      M <- matrix(data = NA, ncol = 6, nrow = ncols_W, byrow = TRUE)
       colnames(M) <- c("Options", "Percentage of Checks", 
                        "Total # of Check Plots",
                        "Total # of Fillers",
@@ -70,7 +68,7 @@ available_percent <- function(n_rows,
     }
   } else if (multi == TRUE) {
     if (Option_NCD == TRUE) {
-      M <- matrix(data = NA, ncol = 6, nrow = ncols_W, byrow = T)
+      M <- matrix(data = NA, ncol = 6, nrow = ncols_W, byrow = TRUE)
       colnames(M) <- c("Options", "Percentage of Checks", 
                        "Total # of Check Plots", 
                        "Total # of Fillers",
@@ -78,20 +76,17 @@ available_percent <- function(n_rows,
                        "Total #r of Plots")
     }
   } 
-  opts <- 1:length(w_map_engage)
+  opts <- seq_along(w_map_engage)
   d_checks <- list()
   
-  vis <- 0
   for (m in opts) {
     w_map <- w_map_engage[[m]]
     if (sum(w_map == 0) < dim_data_1) next
     n_Checks <- sum(w_map != 0)
     if (kindExpt == "SUDC") {
       if (Option_NCD == TRUE) {
-        dim_data_entry <- dim_data
         real_dim_data_entry <- dim_data_1
         Fillers <- dim_expt - real_dim_data_entry - n_Checks
-        limit_out <- checks + 1
         checks_in_first_row <- sum(w_map[1, ] != "0")
         if ((Fillers + checks_in_first_row) >= n_cols) next
         if (Fillers > 0 && Fillers < n_cols) {
@@ -111,7 +106,6 @@ available_percent <- function(n_rows,
       }
       if (stacked == "By Row") {
         if (Option_NCD == TRUE) {
-          dim_data_entry <- dim_data
           real_dim_data_entry <- dim_data_1
           Fillers <- dim_expt - real_dim_data_entry - n_Checks
           if (diff(c(Fillers, (n_cols - 5))) <= 2) next 
@@ -134,10 +128,8 @@ available_percent <- function(n_rows,
         }
       } else if (stacked == "By Column") {
         if (Option_NCD == TRUE) {
-          dim_data_entry <- dim_data
           real_dim_data_entry <- dim_data_1 
           Fillers <- dim_expt - real_dim_data_entry - n_Checks
-          limit_out <- checks + 1
           if (diff(c(Fillers, (n_rows - 5))) <= 2) next
           if (Fillers > 0) {
             empty_rows <- which(w_map[, n_cols] == 0)
@@ -166,12 +158,12 @@ available_percent <- function(n_rows,
   if (Option_NCD == TRUE) {
     M <- subset(M, M[,4] >= 0 & M[,5] >= realData)
   }
-  W[,2] <- 1:nrow(W)
+  W[,2] <- seq_len(nrow(W))
   M <- na.omit(M)
   if (length(M) == 0) return(NULL)
   dt <- as.data.frame(M)
   dt <- dt[!duplicated(dt[,3]),]
-  dt[,1] <- 1:nrow(dt)
+  dt[,1] <- seq_len(nrow(dt))
   if (multi && Option_NCD == TRUE) {
     list(dt = dt, P = W, d_checks = d_checks, 
          data_dim_each_block = data_dim_each_block)
@@ -193,7 +185,7 @@ diagonals_checks <- function(n_rows = NULL, n_cols = NULL, jump_by_cols = 5, jum
     n_rows <- n_rows + di
     
   }
-  w_map <- matrix(data = 0, ncol = n_cols, nrow = n_rows, byrow = F)
+  w_map <- matrix(data = 0, ncol = n_cols, nrow = n_rows, byrow = FALSE)
   
   breaks_points <- seq(1, (jump_by_cols + p_start)*jump_by_rows, jump_by_rows)
   breaks_points <- rev(breaks_points)
@@ -204,7 +196,7 @@ diagonals_checks <- function(n_rows = NULL, n_cols = NULL, jump_by_cols = 5, jum
   }
   
   star_break_points <- list()
-  for (l in 1:length(min_breaks_points)) {
+  for (l in seq_along(min_breaks_points)) {
     star_break_points[[l]] <- seq(min_breaks_points[l], n_rows, by = jump_by_cols)
   }
   
@@ -213,7 +205,7 @@ diagonals_checks <- function(n_rows = NULL, n_cols = NULL, jump_by_cols = 5, jum
   divs <- (n_cols - rem) / jump_by_cols
   ###############################################
   
-  for(i in 1:length(star_break_points)) {
+  for(i in seq_along(star_break_points)) {
     w_map[star_break_points[[i]], i] <- 1
   }
   
@@ -282,8 +274,6 @@ random_checks <- function(dt = NULL, d_checks = NULL, p = NULL, percent = NULL,
   my_index <- as.numeric(my_index)
   w_map <- d_checks[[my_index]]
   if(is.null(w_map)) fieldhub_abort("Input w_map is NULL.")
-  n_cols <- ncol(w_map)
-  n_rows <- nrow(w_map)
   if (is.null(w_map)) {
     fieldhub_abort("Internal error: the checks map is missing.",
                    class = "fieldhub_internal_error")
@@ -299,7 +289,6 @@ random_checks <- function(dt = NULL, d_checks = NULL, p = NULL, percent = NULL,
         stacked = "By Row",
         dim_data = data_dim_each_block)[[1]]
       if(is.null(my_row_sets)) return(NULL)
-      blocks <- length(my_row_sets)
     }else {
       data_dim_each_block <- data_dim_each_block
       cuts_by_c <- automatically_cuts(
@@ -308,7 +297,6 @@ random_checks <- function(dt = NULL, d_checks = NULL, p = NULL, percent = NULL,
         stacked = "By Column",
         dim_data = data_dim_each_block)
       if(is.null(cuts_by_c)) return(NULL)
-      blocks <- length(cuts_by_c)
       m = diff(cuts_by_c)
       my_col_sets = c(cuts_by_c[1], m)
     }
@@ -318,12 +306,12 @@ random_checks <- function(dt = NULL, d_checks = NULL, p = NULL, percent = NULL,
                                               blocks = my_col_sets,
                                               byrow = FALSE)
       Total_checks <- numeric()                                                              
-      for (n in 1:length(w_map_split)) {
+      for (n in seq_along(w_map_split)) {
         Total_checks[n] <- sum(w_map_split[[n]] == 1)
       }
       checks <- Checks
       rand_checks <- list()
-      for (j in 1:length(w_map_split)) {
+      for (j in seq_along(w_map_split)) {
         res <- Total_checks[j] %% length(checks)
         if (res == 0) {
           s <- rep(checks, Total_checks[j]/length(checks))
@@ -331,10 +319,10 @@ random_checks <- function(dt = NULL, d_checks = NULL, p = NULL, percent = NULL,
         } else {
           if (res > 1) {
             v <- c(rep(checks,(Total_checks[j]-res)/length(checks)), 
-                   checks[sample(1:length(checks), size = res)])
+                   checks[sample(seq_along(checks), size = res)])
           } else {
             v <- c(rep(checks,(Total_checks[j]-res)/length(checks)), 
-                   checks[sample(1:length(checks), size = 1)])
+                   checks[sample(seq_along(checks), size = 1)])
           }
           rand_checks[[j]] <- sample(v)
         }
@@ -347,13 +335,13 @@ random_checks <- function(dt = NULL, d_checks = NULL, p = NULL, percent = NULL,
                                               blocks = my_row_sets, 
                                               byrow = TRUE)
       Total_checks <- numeric()                                                              
-      for (n in 1:length(w_map_split)) {
+      for (n in seq_along(w_map_split)) {
         Total_checks[n] <- sum(w_map_split[[n]] == 1)
       }
       
       checks <- Checks
       rand_checks <- list()
-      for (j in 1:length(w_map_split)) {
+      for (j in seq_along(w_map_split)) {
         if (Total_checks[j] >= length(checks)) {
           res <- Total_checks[j] %% length(checks)
           if (res == 0) {
@@ -386,12 +374,12 @@ random_checks <- function(dt = NULL, d_checks = NULL, p = NULL, percent = NULL,
   } else if (multi == FALSE) {
     w_map_split <- list(w_map)
     Total_checks <- numeric()                                                              
-    for (n in 1:length(w_map_split)){
+    for (n in seq_along(w_map_split)){
       Total_checks[n] <- sum(w_map_split[[n]] == 1)
     }
     checks = Checks
     rand_checks <- list()
-    for (j in 1:length(w_map_split)){
+    for (j in seq_along(w_map_split)){
       res <- Total_checks[j] %% length(checks)
       if (res == 0){
         s <- rep(checks, Total_checks[j]/length(checks))

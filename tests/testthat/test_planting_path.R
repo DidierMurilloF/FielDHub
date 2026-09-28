@@ -170,8 +170,8 @@ test_that("the static check catches the deleted planter_transform()'s reversal",
         nCuts <- length(RPLOTS[[nreps]]) / repCols
         rep_breaks[[nreps]] <- split_vectors(x = RPLOTS[[nreps]], len_cuts = rep(repCols, each = nCuts))
       }
-      lngt1 <- 1:length(rep_breaks)
-      lngt2 <- 1:length(rep_breaks[[1]])
+      lngt1 <- seq_along(rep_breaks)
+      lngt2 <- seq_along(rep_breaks[[1]])
       new_breaks <- list()
       k <- 1
       for (n in lngt1) {
@@ -185,7 +185,7 @@ test_that("the static check catches the deleted planter_transform()'s reversal",
     } else {
       nCuts <- length(PLOTS) / cols
       breaks <- split_vectors(x = PLOTS, len_cuts = rep(cols, each = nCuts))
-      lngt <- 1:length(breaks)
+      lngt <- seq_along(breaks)
       new_breaks <- vector(mode = "list", length = nCuts)
       for (n in lngt) {
         if (n %% 2 == 0) {
