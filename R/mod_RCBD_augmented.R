@@ -240,7 +240,7 @@ mod_RCBD_augmented_server <- function(id) {
               type = "error")
             return(NULL)
           } 
-          checks <- as.numeric(input$checks_a_rcbd)
+          checks <- validate_design(read_n_checks(input$checks_a_rcbd))
           data_up <- as.data.frame(data_up[,1:2])
           data_up <- na.omit(data_up)
           colnames(data_up) <- c("ENTRY", "NAME")
@@ -328,7 +328,7 @@ mod_RCBD_augmented_server <- function(id) {
         set_choices_dims <- as.vector(subset(blocks_dims, blocks_dims[,1] == b)[,2])
         choices <- set_choices_dims
       } else {
-        checks <- as.numeric(input$checks_a_rcbd)
+        checks <- validate_design(read_n_checks(input$checks_a_rcbd))
         lines <- as.numeric(init_data()$entries)
         b <- as.numeric(input$blocks_a_rcbd)
         set_dims <- set_augmented_blocks(lines = lines, checks = checks, start = 3)
@@ -463,9 +463,7 @@ mod_RCBD_augmented_server <- function(id) {
       if(!test_arcbd()) return(NULL)
       shiny::req(rcbd_augmented_reactive())
       data_entry <- rcbd_augmented_reactive()$data_entry
-      # Guard the checks count the same way as the location-view observers
-      # (Task 13): a malformed `checks_a_rcbd` must show a validation
-      # message, not an unclassed "NA/NaN argument"/indexing error.
+      # read_n_checks() validates the count before indexing.
       df <- data_entry[seq_len(validate_design(read_n_checks(input$checks_a_rcbd))),]
       table_options <- list(pageLength = nrow(df), autoWidth = FALSE,
                                 scrollX = TRUE, scrollY = "350px")
@@ -542,8 +540,7 @@ mod_RCBD_augmented_server <- function(id) {
     })
     
     shiny::observeEvent(some_inputs()$sites, {
-      # See R/mod_Diagonal.R's equivalent observer (Task 13): a cleared
-      # "# of Locations" input must not end the session.
+      # location_view_choices() validates the count before building the range.
       sites_to_view <- validate_design(location_view_choices(some_inputs()$sites))
       shiny::updateSelectInput(session = session,
                         inputId = "locView.arcbd",
@@ -559,7 +556,7 @@ mod_RCBD_augmented_server <- function(id) {
     output$randomized_layout <- DT::renderDT({
       if(!test_arcbd()) return(NULL)
       r_map <- rcbd_augmented_reactive()$layout_random_sites[[locNum()]]
-      # See the equivalent guard on input$checks_a_rcbd above (Task 13).
+      # read_n_checks() validates the count before building the range.
       checks <- seq_len(validate_design(read_n_checks(some_inputs()$checks)))
       b <- as.numeric(some_inputs()$blocks)
       len_checks <- length(checks)

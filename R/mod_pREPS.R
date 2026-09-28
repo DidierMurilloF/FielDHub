@@ -225,8 +225,7 @@ mod_pREPS_server <- function(id){
     })
 
     shiny::observeEvent(prep_inputs()$sites, {
-      # See R/mod_Diagonal.R's equivalent observer (Task 13): a cleared
-      # "# of Locations" input must not end the session.
+      # location_view_choices() validates the count before building the range.
       loc_user_view <- validate_design(location_view_choices(prep_inputs()$sites))
       shiny::updateSelectInput(inputId = "locView.preps",
                         choices = loc_user_view,
@@ -309,19 +308,19 @@ mod_pREPS_server <- function(id){
         repGens <- as.numeric(as.vector(unlist(strsplit(input$repGens.preps, ","))))
         repUnits <- as.numeric(as.vector(unlist(strsplit(input$repUnits.preps, ","))))
         n <- sum(repGens * repUnits)
-        options <- prep_dimension_options(
+        options <- validate_design(prep_dimension_options(
           total_plots = n,
           allow_fillers = isTRUE(input$allow_fillers.preps),
           max_fillers = .prep_max_fillers
-        )
+        ))
       } else {
         shiny::req(get_data_prep()$total_plots)
         n <- get_data_prep()$total_plots
-        options <- prep_dimension_options(
+        options <- validate_design(prep_dimension_options(
           total_plots = n,
           allow_fillers = isTRUE(input$allow_fillers.preps),
           max_fillers = .prep_max_fillers
-        )
+        ))
       }
       if (is.null(options)) {
         choices <- "No options available"

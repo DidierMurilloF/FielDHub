@@ -222,10 +222,7 @@ mod_Diagonal_server <- function(id) {
     })
     
     shiny::observeEvent(single_inputs()$sites, {
-      # A cleared "# of Locations" input sends NA; 1:as.numeric(NA) throws
-      # "NA/NaN argument" and, inside an observer, ends the session.
-      # location_view_choices() validates first, so this shows the app's
-      # usual validation message instead (Task 13).
+      # location_view_choices() validates the count before building the range.
       loc_user_view <- validate_design(location_view_choices(input$l.diagonal))
       shiny::updateSelectInput(inputId = "locView.diagonal",
                         choices = loc_user_view,
@@ -288,7 +285,7 @@ mod_Diagonal_server <- function(id) {
                 } 
                 data_entry_UP <- na.omit(data_up[,1:2])
                 colnames(data_entry_UP) <- c("ENTRY", "NAME")
-                checks <- as.numeric(input$checks)
+                checks <- validate_design(read_n_checks(input$checks))
                 checksEntries <- suppressWarnings(
                     sort(as.numeric(data_entry_UP[1:checks,1]), na.last = TRUE)
                 )
@@ -327,8 +324,7 @@ mod_Diagonal_server <- function(id) {
             }
         } else {
             shiny::req(input$lines.d)
-            shiny::req(input$checks)
-            checks <- as.numeric(input$checks)
+            checks <- validate_design(read_n_checks(input$checks))
             lines <- input$lines.d
             choices_list <- field_dimensions(lines_within_loc = lines)
             if (length(choices_list) == 0) {

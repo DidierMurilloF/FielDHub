@@ -263,11 +263,8 @@ mod_multi_loc_preps_server <- function(id){
     ns <- session$ns
 
     shiny::observe({
-        # req() alone only screens out NULL/NA/"" (Task 13); a numeric-
-        # looking-but-invalid `locs_prep` (0, negative, fractional, "abc")
-        # still reached `start:(prep_locs * 2 - 1)` below and could throw.
-        # validate_locations_input() rejects those too, before the existing
-        # choices formula runs unchanged.
+        # validate_locations_input() validates the count before the existing
+        # choices formula runs.
         prep_locs <- validate_design(validate_locations_input(input$locs_prep))
         start <- prep_locs + 1
         plant_reps <- start:(prep_locs * 2 - 1)
@@ -280,11 +277,11 @@ mod_multi_loc_preps_server <- function(id){
         shiny::req(input$gens_prep)
         if (input$include_checks == "Yes"){
             prep_checks <- as.numeric(as.vector(unlist(strsplit(input$prep_checks, ","))))
-            checks <- as.numeric(input$prep_checks_met)
+            checks <- validate_design(read_n_checks(input$prep_checks_met))
             if (length(prep_checks) != checks) {
                 shinyalert::shinyalert(
-                    "Error!!", 
-                    "Length does not match with the input for number of checks!", 
+                    "Error!!",
+                    "Length does not match with the input for number of checks!",
                     type = "error"
                 )
                 return(NULL)
@@ -323,8 +320,7 @@ mod_multi_loc_preps_server <- function(id){
     })
 
     shiny::observeEvent(prep_inputs()$l, {
-        # See R/mod_Diagonal.R's equivalent observer (Task 13): a cleared
-        # "# of Locations" input must not end the session.
+        # location_view_choices() validates the count before building the range.
         loc_user_view <- validate_design(location_view_choices(prep_inputs()$l))
         shiny::updateSelectInput(
             inputId = "loc_to_view_preps",
@@ -354,6 +350,7 @@ mod_multi_loc_preps_server <- function(id){
         }
         if (input$multi_prep_data == 'Yes') {
             shiny::req(input$file_multi_prep)
+            shiny::req(input$gens_prep)
             inFile <- input$file_multi_prep
             data_ingested <- load_file(
                 name = inFile$name,
@@ -384,7 +381,7 @@ mod_multi_loc_preps_server <- function(id){
                 }
                 if (input$include_checks == "Yes") {
                     prep_checks <- as.numeric(as.vector(unlist(strsplit(input$prep_checks, ","))))
-                    checks <- as.numeric(input$prep_checks_met)
+                    checks <- validate_design(read_n_checks(input$prep_checks_met))
                     if (length(prep_checks) != checks) {
                         shinyalert::shinyalert(
                             "Error!!", 
@@ -491,11 +488,11 @@ mod_multi_loc_preps_server <- function(id){
         }
         plots_for_treatments <- as.numeric(setup_optim_prep()$size_locations)
         total_plots <- plots_for_treatments + sum(prep_checks)
-        options <- prep_dimension_options(
+        options <- validate_design(prep_dimension_options(
             total_plots = total_plots[1],
             allow_fillers = isTRUE(input$allow_fillers_prep),
             max_fillers = .prep_max_fillers
-        )
+        ))
         if (is.null(options)) {
             sort_choices <- "No options available"
         } else {
@@ -538,9 +535,9 @@ mod_multi_loc_preps_server <- function(id){
     dimensions <-  shiny::reactiveValues()
 
     shiny::observeEvent(input$prep_randomize_multi_loc, {
-      prep_number_of_locs <- input$locs_prep
-      
-      for (i in 1:prep_number_of_locs) {
+      prep_number_of_locs <- validate_design(validate_locations_input(input$locs_prep))
+
+      for (i in seq_len(prep_number_of_locs)) {
         shiny::req(input[[paste0("dimensions_loc_", i)]])
         loc_field_dimension <- input[[paste0("dimensions_loc_", i)]]
         dimensions$i <- loc_field_dimension
@@ -552,11 +549,11 @@ mod_multi_loc_preps_server <- function(id){
     field_dimensions_prep <- shiny::eventReactive(input$get_random_prep, {
       shiny::req(setup_optim_prep())
       if (input$dimensions_preps == "No options available") return(NULL)
-      prep_number_of_locs <- input$locs_prep
+      prep_number_of_locs <- validate_design(validate_locations_input(input$locs_prep))
       if (input$multi_dimension_toggle) {
         d_row <- vector(mode = "numeric", length = prep_number_of_locs)
         d_col <- vector(mode = "numeric", length = prep_number_of_locs)
-        for (i in 1:prep_number_of_locs) {
+        for (i in seq_len(prep_number_of_locs)) {
           shiny::req(input[[paste0("dimensions_loc_", i)]])
           dims <- unlist(strsplit(input[[paste0("dimensions_loc_", i)]]," x "))
           d_row[i] <- as.numeric(dims[1])
@@ -638,10 +635,10 @@ mod_multi_loc_preps_server <- function(id){
     }
   
     output$additional_inputs <- shiny::renderUI({
-      prep_number_of_locs <- input$locs_prep
       shiny::req(input$run_prep)
+      prep_number_of_locs <- validate_design(validate_locations_input(input$locs_prep))
       # Create a list to store the UI elements
-      ui_list <- lapply(1:prep_number_of_locs, function(i) {
+      ui_list <- lapply(seq_len(prep_number_of_locs), function(i) {
         shiny::div(
           class = "multi-dimension-container",
           style = "display: flex; justify-content: left; align-items: left;",
