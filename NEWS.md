@@ -1039,7 +1039,8 @@
 - Fixed two bugs in `full_factorial()`: with the RCBD type, locations sharing
   plot numbers (e.g. `plotNumber = c(101, 101)`) produced duplicated
   `LOCATION`/`PLOT` pairs, and level labels containing spaces (e.g. "Low N")
-  were split into two values.
+  were split into two values. This also fixes the factorial page of the app
+  for uploaded factor and level names with spaces (#43).
 - Fixed a bug in `row_column()` where every matrix in `resolvableBlocks` was
   filled with `NA`.
 - `incomplete_blocks()`, `alpha_lattice()`, `square_lattice()`,
