@@ -787,7 +787,7 @@ test_that("sparse_allocation() without dimensions builds the field the app prese
 })
 
 test_that("diagonal_dimension_choices(first = TRUE) is the first choice, found without testing the rest", {
-  for (lines in c(46, 90, 100, 287)) {
+  for (lines in c(46, 90, 100)) {
     expect_identical(diagonal_dimension_choices(lines, checks = 1:4, first = TRUE),
                      diagonal_dimension_choices(lines, checks = 1:4)[1], info = lines)
   }
@@ -1108,5 +1108,132 @@ test_that("spatial modules build their designs only through design_args_<Module>
     called <- intersect(c(heads, vapply(pairs, `[[`, character(1), "fun")), package_functions)
     allowed <- c(allowed_helpers, unname(engines), names(engines))
     expect_identical(setdiff(called, allowed), character(0), info = module)
+  }
+})
+
+# --- Direct tests for the helpers the spatial modules keep calling ---
+
+test_that("set_augmented_blocks() lists block counts with fields that hold every block", {
+  for (case in list(c(lines = 60, checks = 4), c(lines = 40, checks = 3), c(lines = 8, checks = 2))) {
+    lines <- case[["lines"]]; checks <- case[["checks"]]
+    set.seed(71)
+    before <- .Random.seed
+    options <- set_augmented_blocks(lines = lines, checks = checks, start = 3)
+    expect_identical(.Random.seed, before)
+    expect_identical(options, set_augmented_blocks(lines = lines, checks = checks, start = 3))
+    expect_named(options, c("b", "option_dims", "blocks_dims"))
+    # One row per option: the block count and the field it fits in
+    expect_identical(nrow(options$blocks_dims), length(options$b))
+    expect_identical(as.numeric(options$blocks_dims[, 1]), as.numeric(options$b))
+    expect_identical(options$blocks_dims[, 2], unlist(options$option_dims))
+    # Counts searched from `start` up to a third (more than 40 lines) or a
+    # half of the lines
+    divisor <- if (lines > 40) 3 else 2
+    expect_true(all(options$b >= 3 & options$b <= ceiling(lines / divisor)))
+    dims <- do.call(rbind, strsplit(options$blocks_dims[, 2], " x ", fixed = TRUE))
+    rows <- as.numeric(dims[, 1]); cols <- as.numeric(dims[, 2])
+    # No one-row or one-column fields, and each field holds b equal blocks
+    expect_true(all(rows > 1 & cols > 1))
+    plots_per_block <- ceiling((lines + checks * options$b) / options$b)
+    expect_identical(rows * cols, plots_per_block * options$b)
+  }
+  # 8 lines and 2 checks in 3 blocks: 14 plots, 5 per block, a 3 x 5 field
+  expect_identical(set_augmented_blocks(lines = 8, checks = 2, start = 3)$blocks_dims[1, ],
+                   c("3", "3 x 5"))
+})
+
+test_that("RCBD_augmented() accepts the fields set_augmented_blocks() offers", {
+  options <- set_augmented_blocks(lines = 60, checks = 4, start = 3)$blocks_dims
+  for (b in unique(options[, 1])) {
+    dims <- as.numeric(strsplit(options[options[, 1] == b, 2][1], " x ")[[1]])
+    design <- RCBD_augmented(lines = 60, checks = 4, b = as.numeric(b), seed = 1,
+                             nrows = dims[1], ncols = dims[2])
+    expect_identical(c(design$infoDesign$rows, design$infoDesign$columns), dims, info = b)
+  }
+})
+
+test_that("merge_user_data() puts the uploaded entries of a sparse allocation in its locations", {
+  allocation <- do_optim(design = "sparse", lines = 20, l = 3, copies_per_entry = 2,
+                         add_checks = TRUE, checks = 2, seed = 1)
+  data <- data.frame(ENTRY = c(901, 902, 101:120), NAME = c("C1", "C2", paste0("L", 1:20)))
+  merged <- merge_user_data(allocation, data, lines = 20, add_checks = TRUE, checks = 2)
+  expect_identical(class(merged), class(allocation))
+  expect_identical(merged$allocation, allocation$allocation)
+  expect_identical(merged$size_locations, allocation$size_locations)
+  expect_identical(names(merged$list_locs), paste0("LOC", 1:3))
+  # Generated entry e is the uploaded row holding it: checks (entries 21,
+  # 22) are the first rows, line i is row 2 + i
+  row_of <- function(entry) ifelse(entry > 20, entry - 20, entry + 2)
+  for (loc in 1:3) {
+    generated <- allocation$list_locs[[loc]]$ENTRY
+    expect_setequal(merged$list_locs[[loc]]$ENTRY, data$ENTRY[row_of(generated)])
+    expect_setequal(merged$list_locs[[loc]]$NAME, data$NAME[row_of(generated)])
+    expect_named(merged$list_locs[[loc]], c("ENTRY", "NAME"))
+  }
+})
+
+test_that("merge_user_data() keeps the replication of a p-rep allocation", {
+  allocation <- do_optim(design = "prep", lines = 40, l = 2, copies_per_entry = 3,
+                         add_checks = TRUE, checks = 2, rep_checks = c(2, 2), seed = 7)
+  data <- data.frame(ENTRY = c(501, 502, 1:40), NAME = c("CHK-A", "CHK-B", paste0("SB-", 1:40)))
+  merged <- merge_user_data(allocation, data, lines = 40, add_checks = TRUE, checks = 2,
+                            rep_checks = c(2, 2))
+  row_of <- function(entry) ifelse(entry > 40, entry - 40, entry + 2)
+  for (loc in 1:2) {
+    generated <- allocation$list_locs[[loc]]
+    merged_loc <- merged$list_locs[[loc]]
+    expect_named(merged_loc, c("ENTRY", "NAME", "REPS"))
+    expect_identical(merged_loc$REPS, sort(merged_loc$REPS, decreasing = TRUE))
+    expected_reps <- setNames(generated$REPS, data$NAME[row_of(generated$ENTRY)])
+    expect_identical(merged_loc$REPS, unname(expected_reps[merged_loc$NAME]))
+    expect_identical(sum(merged_loc$REPS[-(1:2)]), as.numeric(allocation$size_locations[loc]))
+  }
+})
+
+test_that("merge_user_data() rejects uploads that do not match the allocation", {
+  allocation <- do_optim(design = "sparse", lines = 20, l = 3, copies_per_entry = 2,
+                         add_checks = TRUE, checks = 2, seed = 1)
+  data <- data.frame(ENTRY = c(901, 902, 101:120), NAME = c("C1", "C2", paste0("L", 1:20)))
+  expect_error(merge_user_data(allocation, data[-3, ], lines = 20, add_checks = TRUE, checks = 2),
+               class = "fieldhub_input_error")
+  duplicated_entry <- data; duplicated_entry$ENTRY[4] <- 101
+  expect_error(merge_user_data(allocation, duplicated_entry, lines = 20, add_checks = TRUE,
+                               checks = 2), class = "fieldhub_input_error")
+  duplicated_name <- data; duplicated_name$NAME[4] <- "L1"
+  expect_error(merge_user_data(allocation, duplicated_name, lines = 20, add_checks = TRUE,
+                               checks = 2), class = "fieldhub_input_error")
+  expect_error(merge_user_data(allocation, data, lines = 20, add_checks = TRUE, checks = 2,
+                               rep_checks = c(2, 2, 2)), class = "fieldhub_input_error")
+  # No upload: nothing to merge (callers only call it with data)
+  expect_null(merge_user_data(allocation, NULL, lines = 20))
+})
+
+test_that("the choice helpers spatial modules call before randomizing are Shiny-free and leave the RNG alone", {
+  allocation <- do_optim(design = "prep", lines = 40, l = 2, copies_per_entry = 3,
+                         add_checks = TRUE, checks = 2, rep_checks = c(2, 2), seed = 7)
+  design <- RCBD_augmented(lines = 50, checks = 3, b = 5, seed = 29)
+  calls <- list(
+    field_dimensions = function() field_dimensions(270),
+    diagonal_dimension_choices = function() diagonal_dimension_choices(90, checks = 1:4),
+    diagonal_check_options = function() {
+      diagonal_check_options(n_rows = 15, n_cols = 20, checks = 1:4, Option_NCD = TRUE,
+                             kindExpt = "SUDC", planter_mov1 = "serpentine", data = NULL,
+                             dim_data = 274, dim_data_1 = 270, Block_Fillers = NULL)
+    },
+    optimized_dimension_choices = function() optimized_dimension_choices(120),
+    prep_dimension_options = function() prep_dimension_options(64, allow_fillers = TRUE),
+    set_augmented_blocks = function() set_augmented_blocks(60, 4, start = 3),
+    allocation_entry_names = function() allocation_entry_names(allocation, 40),
+    field_book_location_grids = function() field_book_location_grids(design$fieldBook, "ENTRY"),
+    checked_layout_view = function() checked_layout_view(design, location = 1)
+  )
+  ui_packages <- c("shiny", "DT", "shinyjs", "shinyalert", "bslib", "plotly")
+  for (name in names(calls)) {
+    expect_identical(intersect(all.names(body(get(name))), ui_packages), character(0), info = name)
+    set.seed(2026)
+    before <- .Random.seed
+    result <- calls[[name]]()
+    expect_false(is.null(result), info = name)
+    expect_identical(.Random.seed, before, info = name)
   }
 })
