@@ -1,23 +1,36 @@
 (function() {
   "use strict";
 
+  var tasks = Object.create(null);
+
+  function updateRegion(region) {
+    var active = region.getAttribute("data-fieldhub-tasks").split(" ").find(function(id) {
+      return Object.prototype.hasOwnProperty.call(tasks, id);
+    });
+    var busy = Boolean(active);
+    var content = region.querySelector(".fieldhub-task-content");
+    var feedback = region.querySelector(".fieldhub-task-feedback");
+    region.classList.toggle("is-busy", busy);
+    content.inert = busy;
+    content.setAttribute("aria-busy", String(busy));
+    if (busy) content.setAttribute("aria-hidden", "true");
+    else content.removeAttribute("aria-hidden");
+    feedback.querySelector(".fieldhub-task-message").textContent = busy ? tasks[active] : "";
+    feedback.hidden = !busy;
+  }
+
   function showFeedback(id, busy, message) {
-    var panel = document.getElementById(id + "_feedback");
-    var label = document.getElementById(id + "_status");
-    if (!panel || !label) return;
-    label.textContent = busy ? message : "";
-    panel.hidden = !busy;
-    return panel;
+    if (busy) tasks[id] = message || "Preparing your results...";
+    else delete tasks[id];
+    document.querySelectorAll(".fieldhub-task-region").forEach(updateRegion);
   }
 
   // Paint before even synchronous R work starts. Output-recalculation events
   // alone cannot describe an asynchronous job waiting for a result or worker.
   $(document).on("click", "[data-fieldhub-task]", function() {
     if (this.disabled || this.classList.contains("disabled")) return;
-    var panel = showFeedback(this.getAttribute("data-fieldhub-task"), true,
+    showFeedback(this.getAttribute("data-fieldhub-task"), true,
       this.getAttribute("data-fieldhub-message") || "Preparing your results...");
-    // Run can be below the fold, especially when the sidebar stacks on mobile.
-    if (panel) panel.scrollIntoView({block: "nearest"});
   });
 
   $(function() {
@@ -27,9 +40,8 @@
   });
 
   $(document).on("shiny:disconnected", function() {
-    document.querySelectorAll(".fieldhub-task-feedback").forEach(function(panel) {
-      panel.hidden = true;
-    });
+    tasks = Object.create(null);
+    document.querySelectorAll(".fieldhub-task-region").forEach(updateRegion);
     // The app-wide connection notice explains why work is no longer proceeding.
   });
 }());

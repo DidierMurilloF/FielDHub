@@ -55,23 +55,21 @@ app_worker_lifecycle <- function(workers, available = function() requireNamespac
 
 #' A Run or Randomize button with immediate feedback, even for small designs
 #' @noRd
-app_task_button <- function(id, label, ..., busy_message = "Preparing your results...") {
+app_task_button <- function(id, label, ..., busy_message = "Preparing your results...", results_id = NULL) {
   shiny::actionButton(id, label,
-    `aria-describedby` = paste0(id, "_status"),
-    `aria-controls` = paste0(id, "_feedback"),
+    `aria-controls` = results_id,
     `data-fieldhub-task` = id, `data-fieldhub-message` = busy_message, ...)
 }
 
-#' Visible task feedback, outside the result tabs so switching tabs cannot hide it
+#' Replace one tab's content with a centered loading state while its tasks run
 #' @noRd
-app_task_feedback <- function(id) {
-  shiny::div(id = paste0(id, "_feedback"), class = "fieldhub-task-feedback", hidden = "hidden",
-    role = "status", `aria-live` = "polite", `aria-atomic` = "true",
-    shiny::icon("spinner", class = "fa-spin fieldhub-task-spinner"),
-    shiny::div(
-      shiny::div(id = paste0(id, "_status"), class = "fieldhub-task-message"),
-      shiny::p("Please wait. Results will appear here when this step finishes.")
-    ))
+app_task_feedback <- function(tasks, ...) {
+  shiny::div(class = "fieldhub-task-region", `data-fieldhub-tasks` = paste(tasks, collapse = " "),
+    shiny::div(class = "fieldhub-task-content", ...),
+    shiny::div(class = "fieldhub-task-feedback", hidden = "hidden",
+      role = "status", `aria-live` = "polite", `aria-atomic` = "true",
+      shiny::icon("spinner", class = "fa-spin fieldhub-task-spinner"),
+      shiny::div(class = "fieldhub-task-message")))
 }
 
 #' Send every terminal state, even when consecutive requests have the same status

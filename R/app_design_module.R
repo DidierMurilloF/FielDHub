@@ -16,6 +16,7 @@ mod_design_ui <- function(id, spec) {
   ids <- spec$workflow$ids
   toggle <- if (!is.null(spec$upload)) app_upload_spec(spec$upload)$toggle
   spatial <- identical(spec$kind, "spatial")
+  feedback <- function(...) app_task_feedback(ns("run"), ...)
   # A spatial page offers its experiment once it is randomized
   save <- if (spatial) {
     shinyjs::hidden(shiny::downloadButton(ns(ids[["download"]]), "Save experiment (ZIP)",
@@ -27,26 +28,28 @@ mod_design_ui <- function(id, spec) {
   tabs <- if (!spatial) list(
     if (isTRUE(spec$summary)) shiny::tabPanel(
       "Summary Design",
-      shiny::br(),
-      shiny::div(class = "fieldhub-design-summary",
-        fieldhub_spinner(shiny::verbatimTextOutput(ns("summary"), placeholder = FALSE), type = 4))
+      feedback(
+        shiny::br(),
+        shiny::div(class = "fieldhub-design-summary",
+          fieldhub_spinner(shiny::verbatimTextOutput(ns("summary"), placeholder = FALSE), type = 4)))
     ),
     shiny::tabPanel(
       "Field Layout",
-      shinyjs::useShinyjs(),
-      shinyjs::hidden(shiny::downloadButton(
-        ns(ids[["layout_download"]]), label = "CSV + metadata (ZIP)",
-        icon = shiny::icon("download"), class = "fieldhub-csv-download"
-      )),
-      shiny::div(class = "fieldhub-design-plot",
-        fieldhub_spinner(plotly::plotlyOutput(ns(ids[["plot"]]), width = NULL, height = NULL),
-                         type = 5)),
-      shiny::br(),
-      shiny::column(12, shiny::uiOutput(ns(spec$layout$output)))
+      feedback(
+        shinyjs::useShinyjs(),
+        shinyjs::hidden(shiny::downloadButton(
+          ns(ids[["layout_download"]]), label = "CSV + metadata (ZIP)",
+          icon = shiny::icon("download"), class = "fieldhub-csv-download"
+        )),
+        shiny::div(class = "fieldhub-design-plot",
+          fieldhub_spinner(plotly::plotlyOutput(ns(ids[["plot"]]), width = NULL, height = NULL),
+                           type = 5)),
+        shiny::br(),
+        shiny::column(12, shiny::uiOutput(ns(spec$layout$output))))
     ),
     shiny::tabPanel(
       "Field Book",
-      fieldhub_spinner(DT::DTOutput(ns(ids[["table"]]), width = NULL, height = NULL), type = 5)
+      feedback(fieldhub_spinner(DT::DTOutput(ns(ids[["table"]]), width = NULL, height = NULL), type = 5))
     )
   )
   shiny::tagList(
@@ -59,7 +62,8 @@ mod_design_ui <- function(id, spec) {
         shiny::fluidRow(
           shiny::column(6, app_task_button(
             ns("run"), "Run!", icon = shiny::icon("circle-nodes", verify_fa = FALSE),
-            class = "btn-block", busy_message = if (!is.null(spec$optim)) "Optimizing allocation..." else
+            class = "btn-block", results_id = ns("results"),
+            busy_message = if (!is.null(spec$optim)) "Optimizing allocation..." else
               if (spatial) "Preparing field dimensions..." else spec$busy_message
           )),
           shiny::column(6, shiny::actionButton(
@@ -72,13 +76,11 @@ mod_design_ui <- function(id, spec) {
       ),
       shiny::mainPanel(
         width = 8,
-        app_task_feedback(ns("run")),
-        if (spatial) app_task_feedback(ns("randomize")),
-        shiny::fluidRow(if (spatial) {
+        shiny::div(id = ns("results"), shiny::fluidRow(if (spatial) {
           app_spatial_tabs(ns, spec)
         } else {
           do.call(shiny::tabsetPanel, Filter(Negate(is.null), tabs))
-        })
+        }))
       )
     )
   )

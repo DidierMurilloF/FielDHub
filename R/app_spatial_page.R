@@ -13,6 +13,7 @@
 #' @noRd
 app_spatial_tabs <- function(ns, spec) {
   ids <- spec$workflow$ids
+  feedback <- function(...) app_task_feedback(c(ns("run"), ns("randomize")), ...)
   step_ui <- function(step) {
     shinyjs::hidden(shiny::div(id = ns(paste0(step$id, "_step")), app_control_ui(step, ns)))
   }
@@ -36,30 +37,31 @@ app_spatial_tabs <- function(ns, spec) {
     } else {
       DT::DTOutput(ns(panel$id), width = NULL, height = NULL)
     }
-    shiny::tabPanel(panel$title, shiny::br(), if (i == 1L) steps("randomize"),
-                    fieldhub_spinner(view, type = 5))
+    shiny::tabPanel(panel$title, feedback(shiny::br(), if (i == 1L) steps("randomize"),
+                    fieldhub_spinner(view, type = 5)))
   })
   tabs <- c(
     list(
       id = ns(ids[["tabset"]]),
       shiny::tabPanel("Get Random", value = "setup",
-        shinyjs::useShinyjs(),
-        shiny::br(),
-        steps("run"),
-        shinyjs::hidden(app_task_button(ns("randomize"), "Randomize!",
-                                        busy_message = spec$busy_message)),
-        shiny::br(), shiny::br(),
-        shiny::uiOutput(ns("status")),
-        setup),
-      shiny::tabPanel("Data Input", entries)
+        feedback(
+          shinyjs::useShinyjs(),
+          shiny::br(),
+          steps("run"),
+          shinyjs::hidden(app_task_button(ns("randomize"), "Randomize!",
+                                          busy_message = spec$busy_message, results_id = ns("results"))),
+          shiny::br(), shiny::br(),
+          shiny::uiOutput(ns("status")),
+          setup)),
+      shiny::tabPanel("Data Input", feedback(entries))
     ),
     panels,
     list(
       shiny::tabPanel("Field Book",
-        fieldhub_spinner(DT::DTOutput(ns(ids[["table"]]), width = NULL, height = NULL), type = 5)),
-      shiny::tabPanel("Heatmap", shiny::div(class = "fieldhub-spatial-heatmap",
+        feedback(fieldhub_spinner(DT::DTOutput(ns(ids[["table"]]), width = NULL, height = NULL), type = 5))),
+      shiny::tabPanel("Heatmap", feedback(shiny::div(class = "fieldhub-spatial-heatmap",
         fieldhub_spinner(plotly::plotlyOutput(ns(ids[["heatmap"]]), width = NULL, height = NULL),
-                         type = 5)))
+                         type = 5))))
     )
   )
   do.call(shiny::tabsetPanel, tabs)
@@ -295,6 +297,8 @@ app_spatial_page <- function(input, output, session, spec, run, raw_controls) {
     if (!is.null(problem)) validate_design(fieldhub_abort(problem))
     NULL
   })
+  # Validation must be ready when Run returns from another result tab.
+  shiny::outputOptions(output, "status", suspendWhenHidden = FALSE)
   if (identical(spec$setup$type, "summary")) {
     output$setup <- shiny::renderPrint({
       if (!randomized()) return(invisible(NULL))

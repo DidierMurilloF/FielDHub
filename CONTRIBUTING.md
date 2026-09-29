@@ -109,8 +109,11 @@ We try to follow the [GitHub flow](https://guides.github.com/introduction/flow/)
 6. Submit a [pull request](https://guides.github.com/activities/forking/#making-a-pull-request).
 
 Design pages must never be blank while a requested operation is running.
-Run and Randomize need explicit task-lifecycle feedback visible from every
-result tab, including queued background jobs. Plots and tables also need
+Run and Randomize need a centered spinner and short status inside each result
+tab's content area, including queued background jobs. The loading state replaces
+that tab's content until it is ready; do not add a banner above or outside the
+tabs. Tab switching must keep the feedback visible in the selected tab without
+forced scrolling. Plots and tables also need
 output-loading indicators. Clear task feedback on success, validation failure,
 worker failure and disconnection; show an explanation for errors. Do not rely
 only on output-recalculation spinners for asynchronous work, or display a

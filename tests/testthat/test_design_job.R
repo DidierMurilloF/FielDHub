@@ -113,9 +113,9 @@ test_that("task controls keep the existing theme and announce progress", {
   skip_if_not_installed("shiny")
   previous <- options(sass.cache = FALSE)
   on.exit(options(previous), add = TRUE)
-  button <- as.character(app_task_button("x-run", "Run!"))
+  button <- as.character(app_task_button("x-run", "Run!", results_id = "x-results"))
   expect_match(button, 'class="btn btn-default action-button"', fixed = TRUE)
-  expect_match(button, 'aria-describedby="x-run_status"', fixed = TRUE)
+  expect_match(button, 'aria-controls="x-results"', fixed = TRUE)
   expect_false(grepl("bslib-task-button", button, fixed = TRUE))
   expect_match(button, 'data-fieldhub-task="x-run"', fixed = TRUE)
   # Render dependencies too: deferred bslib dependencies can reject the theme

@@ -493,8 +493,9 @@ knitr::opts_chunk$set(
 
 ### Fix bugs:
 
-- Design pages now show a prominent loading panel during allocation and
-  randomization, visible across all result tabs. This includes multi-location
+- Design pages now show a centered spinner and short status inside the active
+  result tab during allocation and randomization, replacing its content until
+  ready without adding a banner above the tabs. This includes multi-location
   p-rep and its Randomized Field tab. Feedback starts on the button click and
   clears on completion or failure; spatial plot and table outputs also have
   loading spinners. Scientific calculations and seeded results are unchanged.

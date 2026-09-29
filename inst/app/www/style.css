@@ -398,18 +398,34 @@
 }
 
 /* Design pages (mod_design_ui()) */
+#fieldhub-app .fieldhub-task-region {
+  position: relative;
+}
+
+#fieldhub-app .fieldhub-task-region.is-busy {
+  min-height: 400px;
+}
+
+#fieldhub-app .fieldhub-task-content {
+  display: flow-root;
+}
+
+#fieldhub-app .fieldhub-task-region.is-busy > .fieldhub-task-content {
+  opacity: 0;
+  pointer-events: none;
+}
+
 #fieldhub-app .fieldhub-task-feedback {
+  position: absolute;
+  inset: 0;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 24px;
-  min-height: 170px;
-  margin: 0 0 20px;
+  gap: 14px;
   padding: 24px;
-  border: 1px solid #c4dce6;
-  border-radius: 6px;
-  background: #f2f8fb;
-  color: #214b60;
+  color: #5f6b73;
+  text-align: center;
 }
 
 #fieldhub-app .fieldhub-task-feedback[hidden] {
@@ -417,18 +433,14 @@
 }
 
 #fieldhub-app .fieldhub-task-spinner {
-  font-size: 36px;
+  font-size: 32px;
+  color: #2c7da3;
   flex-shrink: 0;
 }
 
 #fieldhub-app .fieldhub-task-message {
-  font-size: 20px;
-  font-weight: 600;
-  line-height: 1.4;
-}
-
-#fieldhub-app .fieldhub-task-feedback p {
-  margin: 8px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 @media (prefers-reduced-motion: reduce) {
