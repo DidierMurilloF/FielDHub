@@ -108,6 +108,15 @@ We try to follow the [GitHub flow](https://guides.github.com/introduction/flow/)
 5. Commit and push your changes.
 6. Submit a [pull request](https://guides.github.com/activities/forking/#making-a-pull-request).
 
+Design pages must never be blank while a requested operation is running.
+Run and Randomize need explicit task-lifecycle feedback visible from every
+result tab, including queued background jobs. Plots and tables also need
+output-loading indicators. Clear task feedback on success, validation failure,
+worker failure and disconnection; show an explanation for errors. Do not rely
+only on output-recalculation spinners for asynchronous work, or display a
+percentage unless the operation reports real progress. Verify these states in
+a real browser; keep automated tests at the plain-helper and UI-contract level.
+
 Maintainers follow the [release checklist](RELEASING.md), including the full R
 and platform matrix, reconstruction checks, deployment validation, and reviewed
 performance benchmarks. Use a minor release for deliberate API or behavior

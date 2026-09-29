@@ -493,6 +493,12 @@ knitr::opts_chunk$set(
 
 ### Fix bugs:
 
+- Design pages now show a prominent loading panel during allocation and
+  randomization, visible across all result tabs. This includes multi-location
+  p-rep and its Randomized Field tab. Feedback starts on the button click and
+  clears on completion or failure; spatial plot and table outputs also have
+  loading spinners. Scientific calculations and seeded results are unchanged.
+
 * The development launcher no longer calls a golem helper requiring the removed configuration file. Sourcing `dev/run_dev.R` now loads the source and starts the app explicitly, without detaching packages, changing production options or regenerating documentation. The source-deployment entry point also leaves production options alone.
 
 * Blank app seed boxes no longer error. Shiny sends a cleared numeric input as a logical `NA`, which all 19 design modules now accept as an automatic seed, the same as `NULL` or an empty string. Automatic app seeds are now drawn from a package-private random-number stream instead of the shared global stream, so one Shiny session's blank seed box no longer changes another session's random numbers. Explicit seeds are unaffected.

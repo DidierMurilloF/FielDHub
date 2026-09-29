@@ -66,7 +66,7 @@ golem_add_external_resources <- function(){
       name = "fieldhub-resources",
       version = as.character(utils::packageVersion("FielDHub")),
       src = app_sys("app/www"),
-      script = c("corner.js", "shinybusy.js"),
+      script = c("corner.js", "shinybusy.js", "task-feedback.js"),
       stylesheet = c("style.css", "mobile.css"),
       all_files = TRUE
     ),

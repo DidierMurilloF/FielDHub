@@ -887,6 +887,12 @@
 
 ### Fix bugs:
 
+- Design pages now show a prominent loading panel during allocation and
+  randomization, visible across all result tabs. This includes multi-location
+  p-rep and its Randomized Field tab. Feedback starts on the button click and
+  clears on completion or failure; spatial plot and table outputs also have
+  loading spinners. Scientific calculations and seeded results are unchanged.
+
 - The development launcher no longer calls a golem helper requiring the
   removed configuration file. Sourcing `dev/run_dev.R` now loads the source
   and starts the app explicitly, without detaching packages, changing

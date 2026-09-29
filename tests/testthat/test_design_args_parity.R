@@ -1213,6 +1213,7 @@ test_that("spatial pages submit builder snapshots for allocation and final desig
                                       unlist(lapply(spatial_engines, names)))), character(0))
   page_helpers <- c(
     "app_design_task",            # worker/sync lifecycle shared by both engine steps
+    "app_report_task_feedback",   # loading feedback while Run prepares field dimensions
     "validate_design", "app_design_state", "app_plot_state", "app_upload_spec",
     "read_design_controls",       # reads again the controls the steps follow (filler plots)
     "design_step_choices",        # choices of a step, from the values of the run

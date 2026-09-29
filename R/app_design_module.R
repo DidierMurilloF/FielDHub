@@ -58,20 +58,22 @@ mod_design_ui <- function(id, spec) {
         lapply(spec$controls, app_control_ui, ns = ns, toggle = toggle),
         shiny::fluidRow(
           shiny::column(6, app_task_button(
-            ns("run"), "Run!", spec$long_running, icon = shiny::icon("circle-nodes", verify_fa = FALSE),
-            class = "btn-block"
+            ns("run"), "Run!", icon = shiny::icon("circle-nodes", verify_fa = FALSE),
+            class = "btn-block", busy_message = if (!is.null(spec$optim)) "Optimizing allocation..." else
+              if (spatial) "Preparing field dimensions..." else spec$busy_message
           )),
           shiny::column(6, shiny::actionButton(
             ns(ids[["simulate"]]), "Simulate!",
             icon = shiny::icon("greater-than-equal", verify_fa = FALSE), class = "btn-block"
           ))
         ),
-        shiny::textOutput(ns("run_status"), container = function(...) shiny::div(role = "status", ...)),
         shiny::br(),
         save
       ),
       shiny::mainPanel(
         width = 8,
+        app_task_feedback(ns("run")),
+        if (spatial) app_task_feedback(ns("randomize")),
         shiny::fluidRow(if (spatial) {
           app_spatial_tabs(ns, spec)
         } else {

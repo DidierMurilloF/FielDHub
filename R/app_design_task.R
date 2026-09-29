@@ -53,10 +53,32 @@ app_worker_lifecycle <- function(workers, available = function() requireNamespac
   runtime
 }
 
-#' A Run button whose busy state follows a long-running task
+#' A Run or Randomize button with immediate feedback, even for small designs
 #' @noRd
-app_task_button <- function(id, label, long_running, ...) {
-  shiny::actionButton(id, label, `aria-describedby` = if (isTRUE(long_running)) paste0(id, "_status"), ...)
+app_task_button <- function(id, label, ..., busy_message = "Preparing your results...") {
+  shiny::actionButton(id, label,
+    `aria-describedby` = paste0(id, "_status"),
+    `aria-controls` = paste0(id, "_feedback"),
+    `data-fieldhub-task` = id, `data-fieldhub-message` = busy_message, ...)
+}
+
+#' Visible task feedback, outside the result tabs so switching tabs cannot hide it
+#' @noRd
+app_task_feedback <- function(id) {
+  shiny::div(id = paste0(id, "_feedback"), class = "fieldhub-task-feedback", hidden = "hidden",
+    role = "status", `aria-live` = "polite", `aria-atomic` = "true",
+    shiny::icon("spinner", class = "fa-spin fieldhub-task-spinner"),
+    shiny::div(
+      shiny::div(id = paste0(id, "_status"), class = "fieldhub-task-message"),
+      shiny::p("Please wait. Results will appear here when this step finishes.")
+    ))
+}
+
+#' Send every terminal state, even when consecutive requests have the same status
+#' @noRd
+app_report_task_feedback <- function(session, id, busy, message = "") {
+  session$sendCustomMessage("fieldhub-task-feedback", list(
+    id = session$ns(id), busy = isTRUE(busy), message = if (isTRUE(busy)) message else ""))
 }
 
 #' Run immutable argument snapshots outside the reactive graph
@@ -113,7 +135,9 @@ app_design_task <- function(id_prefix, engine, args_reactive, on_done = identity
     completed(NULL)
     if (!current$ok) {
       completed(current)
+      app_report_task_feedback(session, id_prefix, FALSE)
     } else {
+      app_report_task_feedback(session, id_prefix, TRUE, busy_message)
       task$invoke(current$args, sequence, RNGkind())
     }
   }, priority = 20)
@@ -137,10 +161,7 @@ app_design_task <- function(id_prefix, engine, args_reactive, on_done = identity
       app_report_problem(job$condition)
     }
     completed(job)
-  })
-  session$output[[paste0(id_prefix, "_status")]] <- shiny::renderText({
-    current <- request()
-    if (current$ok && (is.null(completed()) || !identical(current, submitted()))) busy_message else ""
+    app_report_task_feedback(session, id_prefix, FALSE)
   })
   shiny::reactive({
     current <- request()

@@ -24,7 +24,7 @@ app_spatial_tabs <- function(ns, spec) {
     fieldhub_spinner(DT::DTOutput(ns("setup"), width = NULL, height = NULL), type = 4)
   }
   entries <- lapply(seq_along(spec$entries), function(i) {
-    DT::DTOutput(ns(paste0("entries_", i)), width = NULL, height = NULL)
+    fieldhub_spinner(DT::DTOutput(ns(paste0("entries_", i)), width = NULL, height = NULL), type = 5)
   })
   if (length(entries) == 2L) {
     entries <- shiny::fluidRow(shiny::column(6, entries[[1L]]), shiny::column(6, entries[[2L]]))
@@ -36,7 +36,8 @@ app_spatial_tabs <- function(ns, spec) {
     } else {
       DT::DTOutput(ns(panel$id), width = NULL, height = NULL)
     }
-    shiny::tabPanel(panel$title, shiny::br(), if (i == 1L) steps("randomize"), view)
+    shiny::tabPanel(panel$title, shiny::br(), if (i == 1L) steps("randomize"),
+                    fieldhub_spinner(view, type = 5))
   })
   tabs <- c(
     list(
@@ -45,8 +46,8 @@ app_spatial_tabs <- function(ns, spec) {
         shinyjs::useShinyjs(),
         shiny::br(),
         steps("run"),
-        shinyjs::hidden(app_task_button(ns("randomize"), "Randomize!", spec$long_running)),
-        shiny::textOutput(ns("randomize_status"), container = function(...) shiny::div(role = "status", ...)),
+        shinyjs::hidden(app_task_button(ns("randomize"), "Randomize!",
+                                        busy_message = spec$busy_message)),
         shiny::br(), shiny::br(),
         shiny::uiOutput(ns("status")),
         setup),
@@ -133,6 +134,12 @@ app_spatial_page <- function(input, output, session, spec, run, raw_controls) {
     inputs
   })
   run_choices <- shiny::reactive({
+    if (is.null(spec$optim)) {
+      # These Run buttons prepare dimensions directly, without a background task.
+      # Clear feedback even if validation stops this reactive before choices exist.
+      on.exit(app_report_task_feedback(session, "run", FALSE), add = TRUE)
+      app_report_task_feedback(session, "run", TRUE, "Preparing field dimensions...")
+    }
     inputs <- staged()
     in_progress("Getting field dimensions ...", lapply(offered(run_steps), function(step) {
       validate_design(design_step_choices(step, inputs$values, inputs$data))
