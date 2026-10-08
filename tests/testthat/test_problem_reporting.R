@@ -228,14 +228,30 @@ test_that("validate_design() shows the warnings raised before a failure", {
   expect_identical(noticed, list("Using 1001."))
 })
 
-test_that("only the one presentation helper refers to shinyalert", {
-  # Ruling R2: inspect the namespace, not R/ sources. Formals count too, so a
-  # default argument such as `notify = shinyalert::shinyalert` is caught.
-  refers_to_shinyalert <- function(f) {
-    "shinyalert" %in% c(all.names(body(f)), unlist(lapply(formals(f), all.names)))
-  }
-  functions <- c(core_functions(), app_functions())
-  expect_setequal(names(Filter(refers_to_shinyalert, functions)), "app_present_problem")
+test_that("problems use escaped native modals, notifications and the existing notice gate", {
+  modals <- notices <- list()
+  local_mocked_bindings(
+    showModal = function(ui, session) modals[[length(modals) + 1L]] <<- list(ui = ui, session = session),
+    showNotification = function(ui, ..., session) notices[[length(notices) + 1L]] <<- list(ui = ui, session = session),
+    .package = "shiny"
+  )
+  session <- list(userData = new.env(parent = emptyenv()))
+  app_present_problem("<script>bad()</script>", "error", session = session)
+  app_present_problem("Read the instructions.", "info", title = "Details", session = session)
+  expect_length(modals, 2L)
+  expect_identical(modals[[1L]]$session, session)
+  expect_match(as.character(modals[[1L]]$ui), "&lt;script&gt;bad()&lt;/script&gt;", fixed = TRUE)
+  expect_match(as.character(modals[[1L]]$ui), 'data-dismiss="modal"', fixed = TRUE)
+  expect_match(as.character(modals[[2L]]$ui), "Details", fixed = TRUE)
+  app_present_problem("Few plots.", "warning", session = session)
+  expect_length(notices, 1L)
+  expect_identical(notices[[1L]]$session, session)
+  expect_length(modals, 2L)
+  app_present_problem("Unexpected problem: test", session = session)
+  app_present_problem("Unexpected problem: test", session = session)
+  expect_length(modals, 3L)
+  expect_message(app_present_problem("No session.", "info", session = NULL), "Information: No session.")
+  expect_warning(app_present_problem("No session.", "warning", session = NULL), "Warning: No session.")
 })
 
 test_that("no app function writes a literal shiny::validate() message", {
@@ -257,6 +273,7 @@ test_that("no module catches conditions itself", {
   # use validate_design(), app_attempt() or app_report_problem() instead;
   # The shared task adapter also captures deferred results; the worker-pool
   # lifecycle handles startup/shutdown failures without touching a session.
+  # The image renderer removes temporary files when rendering fails.
   catches <- function(f) {
     fieldhub_calls_named(body(f), c("tryCatch", "withCallingHandlers", "try",
                                     "showNotification", "conditionMessage"))
@@ -264,7 +281,7 @@ test_that("no module catches conditions itself", {
   functions <- app_functions()
   expect_setequal(names(Filter(catches, functions)),
                   c("app_attempt", "app_present_problem", "app_design_state",
-                    "app_log_problem", "app_design_task", "app_worker_lifecycle"))
+                    "app_log_problem", "app_design_task", "app_worker_lifecycle", "app_plot_outputs"))
 })
 
 test_that("the p-rep modules share the no-dimensions explanation", {

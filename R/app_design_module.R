@@ -31,7 +31,7 @@ mod_design_ui <- function(id, spec) {
       feedback(
         shiny::br(),
         shiny::div(class = "fieldhub-design-summary",
-          fieldhub_spinner(shiny::verbatimTextOutput(ns("summary"), placeholder = FALSE), type = 4)))
+          app_output_feedback(shiny::verbatimTextOutput(ns("summary"), placeholder = FALSE))))
     ),
     shiny::tabPanel(
       "Field Layout",
@@ -44,7 +44,7 @@ mod_design_ui <- function(id, spec) {
     ),
     shiny::tabPanel(
       "Field Book",
-      feedback(fieldhub_spinner(DT::DTOutput(ns(ids[["table"]]), width = NULL, height = NULL), type = 5))
+      feedback(app_output_feedback(DT::DTOutput(ns(ids[["table"]]), width = NULL, height = NULL)))
     )
   )
   shiny::tagList(

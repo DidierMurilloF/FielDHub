@@ -7,7 +7,7 @@ LABEL org.opencontainers.image.authors="Didier Murillo <didier.murilloflorez@nds
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates curl libcurl4-openssl-dev libssl-dev libxml2-dev \
-    libicu-dev zlib1g-dev libgit2-dev pkg-config \
+    libicu-dev zlib1g-dev libuv1-dev pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
 ENV R_LIBS_USER=/opt/fieldhub/library \
@@ -16,6 +16,9 @@ ENV R_LIBS_USER=/opt/fieldhub/library \
     RENV_CONFIG_PAK_ENABLED=false
 
 FROM base AS build
+# nanonext compiles its bundled NNG/Mbed TLS sources during mirai installation.
+RUN apt-get update && apt-get install -y --no-install-recommends cmake xz-utils \
+    && rm -rf /var/lib/apt/lists/*
 WORKDIR /opt/fieldhub
 COPY deployment/renv.lock ./renv.lock
 # Bootstrap is pinned independently; restore never installs a moving latest renv.

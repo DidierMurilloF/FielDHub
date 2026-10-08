@@ -7,6 +7,58 @@ test_that("help topics follow the shared app registry and public API names", {
   expect_identical(topics$engine, engines)
   expect_identical(topics$help, paste0('help("', engines, '", package = "FielDHub")'))
   expect_identical(topics$url, paste0("https://didiermurillof.github.io/FielDHub/reference/", engines, ".html"))
+  articles <- ifelse(engines %in% c("CRD", "RCBD"), tolower(engines), engines)
+  guides <- paste0("https://didiermurillof.github.io/FielDHub/articles/", articles, ".html")
+  guides[engines == "latin_rectangle"] <- topics$url[engines == "latin_rectangle"]
+  expect_identical(topics$guide, guides)
+})
+
+test_that("Help keeps compact legacy groups and puts optional R commands behind one disclosure", {
+  ui <- app_help_ui()
+  query <- htmltools::tagQuery(ui)
+  expect_equal(query$find(".fieldhub-help-group")$length(), 4L)
+  links <- query$find(".fieldhub-help-group a")$selectedTags()
+  expect_identical(unname(vapply(links, function(link) link$attribs$href, "")), fieldhub_help_topics()$guide)
+  expect_true(all(vapply(links, function(link) identical(link$attribs$rel, "noopener noreferrer"), TRUE)))
+  expect_equal(query$find(".fieldhub-help-resources")$length(), 1L)
+  expect_equal(query$find(".fieldhub-help-group code")$length(), 0L)
+  details <- query$find("details")$selectedTags()
+  expect_length(details, 1L)
+  expect_null(details[[1L]]$attribs$open)
+  expect_equal(query$find("details code")$length(), nrow(fieldhub_help_topics()))
+  expect_match(as.character(ui), 'class="fieldhub-footer"', fixed = TRUE)
+})
+
+test_that("About retains the six legacy profiles without duplicate credits or the removed profile", {
+  ui <- app_about_ui()
+  query <- htmltools::tagQuery(ui)
+  expect_equal(query$find(".fieldhub-team-profile")$length(), 6L)
+  images <- query$find(".fieldhub-team-profile img")$selectedTags()
+  profiles <- app_team_profiles()
+  portraits <- Filter(function(profile) !is.null(profile$photo), profiles)
+  expect_identical(unname(vapply(images, function(image) image$attribs$src, "")),
+                   unname(vapply(portraits, function(profile) paste0("www/", profile$photo), "")))
+  expect_true(all(nzchar(vapply(images, function(image) image$attribs$alt, ""))))
+  html <- as.character(ui)
+  expect_match(html, "Thomas Walk", fixed = TRUE)
+  expect_false(grepl("Jean-Marc Montpetit|jeanmarc[.]montpetit@videotron[.]ca|Package authors and contributors:", html))
+  expect_match(html, 'class="fieldhub-package-info"', fixed = TRUE)
+  expect_match(html, 'class="fieldhub-footer"', fixed = TRUE)
+  expect_match(html, fieldhub_about_info()$version, fixed = TRUE)
+  expect_match(html, fieldhub_about_info()$license, fixed = TRUE)
+  expect_false(grepl("mailto:|Copyright:|jeanmarc[.]montpetit@videotron[.]ca", html))
+  expect_match(html, "https://www.linkedin.com/in/salvador-a-gezan-54768a1a/", fixed = TRUE)
+  expect_match(html, "https://www.linkedin.com/in/richard-horsley-1047301b/", fixed = TRUE)
+})
+
+test_that("additional credited people remain visible without introducing extra portrait rows", {
+  team <- fieldhub_team()
+  team <- rbind(team, data.frame(name = "Another Contributor", roles = "ctb", email = "person@example.org"))
+  ui <- app_team_ui(team)
+  query <- htmltools::tagQuery(shiny::div(ui))
+  expect_equal(query$find(".fieldhub-team-profile")$length(), 6L)
+  expect_match(as.character(query$find(".fieldhub-team-others")$selectedTags()[[1L]]),
+               "Another Contributor", fixed = TRUE)
 })
 
 test_that("the About page uses maintained package metadata", {

@@ -1,4 +1,4 @@
-#fieldhub-app + #fieldhub-status:not(:empty) {
+#fieldhub-app + #fieldhub-status:not(:empty):not(.sr-only) {
     position: fixed;
     bottom: 1rem;
     right: 1rem;
@@ -206,76 +206,6 @@
   padding-top: 10px;
 }
 
-/* About Us*/
-
-#fieldhub-app .ABC {
-  background-color: #edebeb;
-}    
-
-#fieldhub-app .section-tittle {
-  margin-left: 150px;
-  margin-right: 100px;
-}
-
-#fieldhub-app .aboutUs-p {
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 18px;
-  line-height: 1.6em;
-}
-
-#fieldhub-app .profile-p {
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 14px;
-  line-height: 1.5em;
-  padding-top: 10px;
-  padding-bottom: 0;
-  padding-left: 0;
-  padding-right: 0;
-}
-
-#fieldhub-app .grid-container {
-  display: grid;
-  justify-content: center;
-  grid-row-gap: 5px;
-  grid-template-columns: 29% 29% 29%;
-  grid-template-rows: auto auto auto;
-  background-color: #edebeb;
-  padding: 1px;
-  padding-bottom: 50px;
-}
-
-#fieldhub-app .grid-container1 {
-  display: grid;
-  justify-content: center;
-  grid-row-gap: 5px;
-  grid-template-columns: 40% 35%;
-  grid-template-rows: auto auto;
-  background-color: #edebeb;
-  padding: 1px;
-  padding-bottom: 50px;
-}
-
-#fieldhub-app .grid-item {
-  padding: 20px;
-  font-size: 16px;
-  text-align:left;
-  padding-bottom: 5px;
-  overflow-wrap: anywhere;
-}
-
-#fieldhub-app .circular--portrait {
-  position: relative;
-  width: 150px;
-  height: 150px;
-  overflow: hidden;
-  border-radius: 50%;
-}
-                              
-#fieldhub-app .circular--portrait img {
-  width: 100%;
-  height: auto;
-}
-
 /* footer */
 #fieldhub-app .container-fluid {
   width: 100%;
@@ -345,64 +275,226 @@
   margin-left: 10px;
 }
 
-/* * {
-    box-sizing: border-box;
-} */
-#fieldhub-app .content-help {
-  /* float: left;
-  max-width: 75%;
-  margin: auto;
-  padding-left: 180px; */
-  display: grid;
-  justify-content: center;
-  grid-row-gap: 5px;
-  grid-template-columns: 60% 40%;
-  grid-template-rows: auto auto;
-  background-color: #edebeb;
-  padding: 1px;
-  padding-bottom: 50px;
-}
-#fieldhub-app .column1 {
-  float: left;
-  width: 60%;
-  padding: 10px;
-}
-#fieldhub-app .column2 {
-  float: right;
-  width: 40%;
-  padding: 15px;
-}
-
 #fieldhub-app .fieldhub-feature-icon {
   font-size: 3em;
 }
 
-#fieldhub-app .fieldhub-help, #fieldhub-app .fieldhub-package-info {
-  max-width: 1200px;
+/* Help and About retain the legacy neutral background and compact columns.
+   Content flows with the page: no nested scrolling or clipped biographies. */
+#fieldhub-app .fieldhub-info-page {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - var(--fieldhub-navbar-height, 60px));
+  background: #f3f4f4;
+}
+
+#fieldhub-app .fieldhub-info-content {
+  width: 100%;
+  max-width: 1360px;
   margin: 0 auto;
-  padding: 24px;
+  padding: 20px 32px;
+  flex: 1;
+}
+
+#fieldhub-app .fieldhub-info-page h2 {
+  margin: 0 0 10px;
+  padding: 0;
+  font-size: 25px;
+  font-weight: 600;
+}
+
+#fieldhub-app .fieldhub-info-page h3 {
+  margin: 0 0 10px;
+  padding: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+#fieldhub-app .fieldhub-info-intro {
+  margin: 0 0 20px;
+  max-width: 1100px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+#fieldhub-app .fieldhub-info-page a {
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+#fieldhub-app .fieldhub-info-page a:focus-visible,
+#fieldhub-app .fieldhub-offline-help summary:focus-visible {
+  outline: 2px solid #2c7da3;
+  outline-offset: 3px;
+}
+
+#fieldhub-app .fieldhub-info-page .fieldhub-footer {
+  padding: 12px 24px;
+}
+
+#fieldhub-app .fieldhub-info-page .fieldhub-footer p {
+  margin: 0;
+}
+
+#fieldhub-app .fieldhub-help-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  gap: 40px;
 }
 
 #fieldhub-app .fieldhub-help-topics {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px 32px;
+  align-items: start;
+}
+
+#fieldhub-app .fieldhub-help ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 #fieldhub-app .fieldhub-help li {
-  margin: 12px 0 12px 24px;
+  margin: 0 0 7px;
+  line-height: 1.45;
 }
 
-#fieldhub-app .fieldhub-help li a {
-  font-size: 16px;
+#fieldhub-app .fieldhub-help-resources {
+  border-left: 1px solid #d7dede;
+  padding-left: 24px;
+}
+
+#fieldhub-app .fieldhub-help-resources h3:not(:first-child) {
+  margin-top: 24px;
+}
+
+#fieldhub-app .fieldhub-offline-help {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #d7dede;
+}
+
+#fieldhub-app .fieldhub-offline-help summary {
+  display: list-item;
+  list-style-position: inside;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+#fieldhub-app .fieldhub-offline-help dl {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px 24px;
+  margin: 16px 0 0;
+}
+
+#fieldhub-app .fieldhub-offline-help dt,
+#fieldhub-app .fieldhub-offline-help dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+#fieldhub-app .fieldhub-offline-help code {
+  white-space: normal;
+}
+
+#fieldhub-app .fieldhub-team-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px 32px;
+}
+
+#fieldhub-app .fieldhub-team-profile {
+  display: grid;
+  grid-template-columns: 80px minmax(0, 1fr);
+  column-gap: 16px;
+  align-content: start;
+  align-items: center;
+}
+
+#fieldhub-app .fieldhub-team-profile h3 {
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+
+#fieldhub-app .fieldhub-team-role {
+  margin: 0;
+  font-size: 13px;
+  color: #5f6b73;
+}
+
+#fieldhub-app .fieldhub-about .circular--portrait {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+#fieldhub-app .fieldhub-about .circular--portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+#fieldhub-app .fieldhub-about .profile-p {
+  grid-column: 1 / -1;
+  margin: 10px 0 8px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+#fieldhub-app .fieldhub-team-contact {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+#fieldhub-app .fieldhub-team-others {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px 20px;
+  margin-top: 16px;
+}
+
+#fieldhub-app .fieldhub-team-others h3 {
+  font-size: 15px;
+  margin: 0;
+}
+
+#fieldhub-app .fieldhub-team-others ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 24px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#fieldhub-app .fieldhub-team-others li {
+  display: flex;
+  gap: 16px;
+  align-items: baseline;
+}
+
+#fieldhub-app .fieldhub-package-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #d7dede;
+  font-size: 12px;
+  color: #5f6b73;
 }
 
 /* Design pages (mod_design_ui()) */
 #fieldhub-app .fieldhub-task-region {
   position: relative;
-}
-
-#fieldhub-app .fieldhub-task-region.is-busy {
+  /* A stable loading stage, independent of a table's rows or plot height. */
   min-height: 400px;
 }
 
@@ -415,25 +507,29 @@
   pointer-events: none;
 }
 
-#fieldhub-app .fieldhub-task-feedback {
+#fieldhub-app .fieldhub-task-feedback,
+#fieldhub-app .fieldhub-output-feedback {
   position: absolute;
-  inset: 0;
+  inset: 0 0 auto;
+  height: 400px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 14px;
-  padding: 24px;
+  /* Keep the spinner itself anchored even when a status message wraps. */
+  padding: 160px 24px 24px;
   color: #5f6b73;
   text-align: center;
 }
 
-#fieldhub-app .fieldhub-task-feedback[hidden] {
+#fieldhub-app .fieldhub-task-feedback[hidden],
+#fieldhub-app .fieldhub-output-feedback[hidden] {
   display: none;
 }
 
 #fieldhub-app .fieldhub-task-spinner {
-  font-size: 32px;
+  font-size: 40px;
   color: #2c7da3;
   flex-shrink: 0;
 }
@@ -441,6 +537,34 @@
 #fieldhub-app .fieldhub-task-message {
   font-size: 14px;
   line-height: 1.5;
+}
+
+/* Output recalculation retains the existing drawing area while loading. */
+#fieldhub-app .fieldhub-output-loader {
+  position: relative;
+}
+
+#fieldhub-app .fieldhub-output-loader.is-loading {
+  min-height: 100px;
+}
+
+#fieldhub-app .fieldhub-output-content {
+  display: flow-root;
+}
+
+#fieldhub-app .fieldhub-output-loader.is-loading > .fieldhub-output-content {
+  visibility: hidden;
+}
+
+/* The tab-level indicator handles these outputs, including side-by-side tables. */
+#fieldhub-app .fieldhub-task-region .fieldhub-output-loader.is-loading > .fieldhub-output-content {
+  visibility: visible;
+}
+
+/* DT's separate processing overlay is replaced by the shared indicator. */
+#fieldhub-app .fieldhub-output-loader .dataTables_processing,
+#fieldhub-app .fieldhub-output-loader .dt-processing {
+  display: none !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -478,13 +602,36 @@
   padding-right: 0 !important;
 }
 
+#fieldhub-app .fieldhub-plot-header {
+  display: flex;
+  flex-direction: row-reverse;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 12px 16px;
+  width: 98%;
+  margin: 12px auto;
+}
+
 #fieldhub-app .fieldhub-plot-toolbar {
   display: flow-root;
   visibility: hidden;
+  max-width: 100%;
+  margin-left: auto;
 }
 
-#fieldhub-app .fieldhub-plot-panel.has-plot > .fieldhub-plot-toolbar {
+#fieldhub-app .fieldhub-plot-panel.has-plot > .fieldhub-plot-header > .fieldhub-plot-toolbar {
   visibility: visible;
+}
+
+#fieldhub-app .fieldhub-plot-controls {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+#fieldhub-app .fieldhub-plot-controls .shiny-input-container {
+  width: 100%;
+  max-width: 300px;
+  margin-bottom: 0;
 }
 
 #fieldhub-app .fieldhub-layout-image {
@@ -493,7 +640,8 @@
   margin: 0 auto;
 }
 
-#fieldhub-app .fieldhub-layout-image .shiny-spinner-output-container,
+#fieldhub-app .fieldhub-layout-image .fieldhub-output-loader,
+#fieldhub-app .fieldhub-layout-image .fieldhub-output-content,
 #fieldhub-app .fieldhub-layout-image .shiny-image-output {
   width: 100%;
   height: 100%;
@@ -512,6 +660,5 @@
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 8px;
-  width: 98%;
-  margin: 0 auto 12px;
+  margin: 0;
 }

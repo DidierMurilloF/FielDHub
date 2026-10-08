@@ -20,7 +20,6 @@ knitr::opts_chunk$set(
 ```{r, echo = FALSE}
 library(FielDHub)
 library(knitr)
-library(kableExtra)
 ```
 
 
@@ -83,8 +82,7 @@ allocation <- data.frame(
 
 ```{r, echo = FALSE}
 allocation |>
-  kbl() |>
-  kable_styling()
+  knitr::kable()
 ```
 
 The table illustrates the allocation of genotypes across different environments, with genotypes listed
@@ -136,8 +134,7 @@ df <- data.frame(ENTRY,NAME)
 
 ```{r, echo = FALSE, results='asis'}
 df |>
-  kbl() |>
-  kable_styling()
+  knitr::kable()
 ```
 
 2. Enter the number of entries/treatments in the **Input # of Entries** box, which is 260 in our case.

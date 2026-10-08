@@ -35,7 +35,16 @@ test_that("every module connects its design to the shared reproduction component
   }
   expect_identical(sum(all.names(body(app_classic_workflow)) == "app_reproduction_outputs"), 1L)
   expect_identical(sum(all.names(body(app_spatial_workflow)) == "app_reproduction_outputs"), 1L)
-  expect_true("app_reproduction_ui" %in% all.names(body(app_design_menus)))
+})
+
+test_that("design menus do not append the reproduction footer", {
+  for (menu in app_design_menus()) {
+    ui <- shiny::navbarPage("Designs", menu)
+    query <- htmltools::tagQuery(ui)
+    expect_equal(query$find(".fieldhub-reproduction")$length(), 0L)
+    expect_equal(query$find("details")$length(), 0L)
+    expect_false(grepl("Save design and reproduction code", as.character(ui), fixed = TRUE))
+  }
 })
 
 test_that("CSV layout downloads are labeled as CSV", {

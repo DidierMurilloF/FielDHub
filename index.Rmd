@@ -1,5 +1,7 @@
 ---
-output: github_document
+output:
+  github_document:
+    html_preview: false
 ---
 
 
@@ -15,7 +17,7 @@ knitr::opts_chunk$set(
 <br>
 <br>
 
-<img src='man/figures/icon.gif' width = "140px" align="left"/> 
+<img src='man/figures/icon.gif' alt="FielDHub logo" width = "140px" align="left"/>
 
 <br>
 <br>
@@ -30,7 +32,16 @@ FielDHub is an R package/shiny design of experiments (DOE) app that aids in the 
 
 For more details and examples of all functions present in the FielDHub package. Please, go to <https://didiermurillof.github.io/FielDHub/reference/index.html>.
 
-<img src='man/figures/FielDHub_Infographic.jpg' align="center"/>
+## Version 1.6.0
+
+The Shiny app and R package share one release version. This release retains
+the original input panels, adds native plot previews and consistent tab-local
+loading, and simplifies downloads. Required app dependencies install with the
+package; no golem configuration is needed. See the
+[release notes](news/index.html) for migration guidance and scientific
+corrections that may affect existing scripts or seeded results.
+
+<img src='man/figures/FielDHub_Infographic.jpg' alt="FielDHub design families and workflows" align="center"/>
 
 ## Usage
 
@@ -44,11 +55,11 @@ run_app()
 
 A project needs to test 280 genotypes in a field containing 16 rows and 20 columns of plots. In this example, these 280 genotypes are divided among three different experiments. In addition, four checks are included in a systematic diagonal arrangement across experiments to fill 40 plots representing 12.5% of the total number of experimental plots. An option to include filler plots is also available for fields where the number of experimental plots does not equal the number of available field plots.
 
-<img src='man/figures/DExample.PNG' align="center"/>
+<img src='man/figures/DExample.jpg' alt="Diagonal arrangement with replicated checks" align="center"/>
 
 The figure above shows a map of an experiment randomized along with multiple experiments (three) and checks on diagonals. Distinctively colored check plots are replicated throughout the field in a systematic diagonal arrangement.
 
-<img src='man/figures/multiple_expts.png' align="center"/>
+<img src='man/figures/multiple_expts.jpg' alt="Three experiments arranged in one field" align="center"/>
 
 The figure above shows the layout for the three experiments in the field. 
 
@@ -85,7 +96,7 @@ head(diagonal$fieldBook, 12)
 
 Users can plot the layout design from `diagonal_arrangement()` using the function `plot()` as follows,
 
-```{r, fig.align='center', fig.width=6.8, fig.height=4.7}
+```{r, fig.align='center', fig.width=6.8, fig.height=4.7, fig.alt='Native plot of the diagonal arrangement with colored checks'}
 plot(diagonal)
 ```
 
@@ -100,7 +111,7 @@ To see more examples, go to <https://didiermurillof.github.io/FielDHub/articles/
 
 Partially replicated designs are commonly employed in early generation field trials. This type of design is characterized by replication of a portion of the entries, with the remaining entries only appearing once in the experiment. As an example, considered a field trial with 288 plots containing 75 entries appearing two times each, and 138 entries only appearing once. This field trials is arranged in a field of 16 rows by 18 columns.
 
-<img src='man/figures/prep_shiny.png' align="center"/>
+<img src='man/figures/prep_shiny.jpg' alt="Partially replicated field layout in the Shiny app" align="center"/>
 
 
 In the figure above, green plots contain replicated entries, and the other plots contain entries that only appear once.
@@ -138,7 +149,7 @@ head(pREP$fieldBook, 12)
 
 Users can plot the layout design from `partially_replicated()` using the function `plot()` as follows,
 
-```{r, fig.align='center', fig.width=6.8, fig.height=4.7}
+```{r, fig.align='center', fig.width=6.8, fig.height=4.7, fig.alt='Native plot showing replicated and unreplicated p-rep entries'}
 plot(pREP)
 ```
 
@@ -146,4 +157,3 @@ To see more examples, please go to <https://didiermurillof.github.io/FielDHub/ar
 
 <br>
 <br>
-

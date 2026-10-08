@@ -1,22 +1,3 @@
-#' Shared design archive and R code panel for every design page
-#' @noRd
-app_reproduction_ui <- function(ns) {
-  shiny::tags$details(
-    class = "fieldhub-reproduction",
-    shiny::tags$summary("Save design and reproduction code"),
-    shiny::helpText(
-      "After generating a design, download its complete RDS result, including",
-      "the seed, parameters, random-number settings, and FielDHub version.",
-      "The R code below rebuilds this design with FielDHub. Large uploads or",
-      "older records use the saved RDS instead. Download field book (CSV)",
-      "saves only the displayed field book, including any simulated traits.",
-      "Keep the original RDS to preserve the exact result across software upgrades."
-    ),
-    shiny::downloadButton(ns("design_rds"), "Save design (RDS)"),
-    shiny::verbatimTextOutput(ns("design_code"))
-  )
-}
-
 #' Connect the shared exports to a module's existing public-API result
 #' @noRd
 app_reproduction_outputs <- function(output, design) {

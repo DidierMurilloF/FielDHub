@@ -18,7 +18,7 @@ fieldhub_theme <- function() {
 #' @noRd
 app_ui <- function(request) {
   shiny::tagList(
-    golem_add_external_resources(),
+    app_add_external_resources(),
     shiny::tags$div(
       id = "fieldhub-app",
       `aria-busy` = "false",
@@ -53,20 +53,19 @@ app_ui <- function(request) {
 #' resources inside the Shiny application. 
 #' 
 #' @noRd
-golem_add_external_resources <- function(){
+app_add_external_resources <- function(){
   
-  golem::add_resource_path(
+  shiny::addResourcePath(
     'www', app_sys('app/www')
   )
  
   shiny::tags$head(
-    golem::favicon(),
-    golem::activate_js(),
+    shiny::tags$link(rel = "shortcut icon", href = "www/favicon.ico"),
     htmltools::htmlDependency(
       name = "fieldhub-resources",
       version = as.character(utils::packageVersion("FielDHub")),
       src = app_sys("app/www"),
-      script = c("corner.js", "shinybusy.js", "task-feedback.js", "layout-images.js"),
+      script = c("corner.js", "shinybusy.js", "task-feedback.js", "output-feedback.js", "layout-images.js"),
       stylesheet = c("style.css", "mobile.css"),
       all_files = TRUE
     ),

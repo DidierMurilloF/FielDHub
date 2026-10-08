@@ -74,10 +74,10 @@ Care to fix bugs or implement new functionality for FielDHub? Awesome! 👏 Have
 ## Development guidelines
 
 From the repository root, run `source("dev/run_dev.R")` to load the source
-package and start the app. This path does not need `golem-config.yml`, detach
+package and start the app. This path does not need a configuration file, detach
 packages, clear your workspace, or regenerate documentation. Stop the app
 normally before reloading changed source. Installed-package users run
-`FielDHub::run_app()` after installing the optional app dependencies in README.
+`FielDHub::run_app()`. The standard app dependencies are installed with the package.
 The root `app.R` returns the app object for source-based Shiny deployment.
 
 Regenerate documentation separately with `devtools::document()` when changing
@@ -179,7 +179,7 @@ file is responsible for; the topic says what it holds (for example
   (reading an input, preparing a simulation or an export) live in core
   prefixes, where they are unit-tested and count toward core coverage. Core
   files (every other prefix) never refer to `app_`/`mod_` code and make no
-  `shiny`, `DT`, `bslib`, `shinyjs` or `shinyalert` calls.
+  `shiny`, `DT`, `bslib` or `shinyjs` calls.
 - Dependencies between files go one way: no file may depend, directly or
   through other files, on a file that depends on it. When two files call
   each other, move the mutually dependent functions into one file, or into a

@@ -19,7 +19,7 @@ csv_download_handlers <- function(filename, data) {
     },
     content = function(file) {
       table <- data()
-      validate_archive_table(table)
+      validate_export_table(table)
       tryCatch(
         utils::write.csv(table, file, row.names = FALSE, fileEncoding = "UTF-8"),
         error = function(e) fieldhub_abort("Could not save the CSV: ", conditionMessage(e),

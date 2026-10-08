@@ -68,8 +68,7 @@ app_task_feedback <- function(tasks, ...) {
     shiny::div(class = "fieldhub-task-content", ...),
     shiny::div(class = "fieldhub-task-feedback", hidden = "hidden",
       role = "status", `aria-live` = "polite", `aria-atomic` = "true",
-      shiny::icon("spinner", class = "fa-spin fieldhub-task-spinner"),
-      shiny::div(class = "fieldhub-task-message")))
+      app_loading_indicator(NULL)))
 }
 
 #' Send every terminal state, even when consecutive requests have the same status
@@ -106,13 +105,14 @@ app_design_task <- function(id_prefix, engine, args_reactive, on_done = identity
       library_paths <- runtime$libraries
       mirai::mirai({
         .libPaths(library_paths)
-        FielDHub:::run_design_job(engine, args, rng_kind)
+        # The worker is a fresh process; resolve the installed internal runner.
+        job_runner <- get("run_design_job", envir = asNamespace("FielDHub"), inherits = FALSE)
+        job_runner(engine, args, rng_kind)
       }, engine = engine_name, args = args, rng_kind = rng_kind,
       library_paths = library_paths, .compute = runtime$profile)
     } else {
-      value <- if (isTRUE(long_running)) {
-        shiny::withProgress(message = busy_message, run_design_job(engine_name, args, rng_kind))
-      } else run_design_job(engine_name, args, rng_kind)
+      # Tab-local feedback covers both synchronous work and background jobs.
+      value <- run_design_job(engine_name, args, rng_kind)
       promises::promise_resolve(value)
     }, error = function(condition) promises::promise_reject(condition))
     promises::then(promise,

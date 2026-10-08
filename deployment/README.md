@@ -10,7 +10,7 @@ docker run --rm --publish 127.0.0.1:3838:3838 fieldhub-local
 
 Open `http://127.0.0.1:3838` on the host. The image starts the installed package,
 not the development launcher, and runs as UID/GID 10001. It does not need a
-golem config file, source loader, runtime package installation or writable R
+framework configuration file, source loader, runtime package installation or writable R
 library. The default is synchronous execution (`workers = 0L`); mirai is locked
 and installed for deployments that explicitly opt into workers. Put shared
 internet-facing deployments behind a maintained HTTPS/authentication proxy;

@@ -45,18 +45,6 @@
       "Source": "Repository",
       "Repository": "CRAN"
     },
-    "askpass": {
-      "Package": "askpass",
-      "Version": "1.2.1",
-      "Source": "Repository",
-      "Repository": "CRAN"
-    },
-    "attempt": {
-      "Package": "attempt",
-      "Version": "0.3.1",
-      "Source": "Repository",
-      "Repository": "CRAN"
-    },
     "base64enc": {
       "Package": "base64enc",
       "Version": "0.1-6",
@@ -87,21 +75,9 @@
       "Source": "Repository",
       "Repository": "CRAN"
     },
-    "codetools": {
-      "Package": "codetools",
-      "Version": "0.2-20",
-      "Source": "Repository",
-      "Repository": "CRAN"
-    },
     "commonmark": {
       "Package": "commonmark",
       "Version": "2.0.0",
-      "Source": "Repository",
-      "Repository": "CRAN"
-    },
-    "config": {
-      "Package": "config",
-      "Version": "0.3.2",
       "Source": "Repository",
       "Repository": "CRAN"
     },
@@ -114,18 +90,6 @@
     "crosstalk": {
       "Package": "crosstalk",
       "Version": "1.2.2",
-      "Source": "Repository",
-      "Repository": "CRAN"
-    },
-    "curl": {
-      "Package": "curl",
-      "Version": "8.0.0",
-      "Source": "Repository",
-      "Repository": "CRAN"
-    },
-    "data.table": {
-      "Package": "data.table",
-      "Version": "1.18.6.1",
       "Source": "Repository",
       "Repository": "CRAN"
     },
@@ -195,12 +159,6 @@
       "Source": "Repository",
       "Repository": "CRAN"
     },
-    "golem": {
-      "Package": "golem",
-      "Version": "1.0.1",
-      "Source": "Repository",
-      "Repository": "CRAN"
-    },
     "gtable": {
       "Package": "gtable",
       "Version": "0.3.6",
@@ -228,12 +186,6 @@
     "httpuv": {
       "Package": "httpuv",
       "Version": "1.6.17",
-      "Source": "Repository",
-      "Repository": "CRAN"
-    },
-    "httr": {
-      "Package": "httr",
-      "Version": "1.4.9",
       "Source": "Repository",
       "Repository": "CRAN"
     },
@@ -321,12 +273,6 @@
       "Source": "Repository",
       "Repository": "CRAN"
     },
-    "openssl": {
-      "Package": "openssl",
-      "Version": "2.4.2",
-      "Source": "Repository",
-      "Repository": "CRAN"
-    },
     "otel": {
       "Package": "otel",
       "Version": "0.2.0",
@@ -345,12 +291,6 @@
       "Source": "Repository",
       "Repository": "CRAN"
     },
-    "plotly": {
-      "Package": "plotly",
-      "Version": "4.12.1",
-      "Source": "Repository",
-      "Repository": "CRAN"
-    },
     "plyr": {
       "Package": "plyr",
       "Version": "1.8.9",
@@ -360,12 +300,6 @@
     "promises": {
       "Package": "promises",
       "Version": "1.5.0",
-      "Source": "Repository",
-      "Repository": "CRAN"
-    },
-    "purrr": {
-      "Package": "purrr",
-      "Version": "1.2.2",
       "Source": "Repository",
       "Repository": "CRAN"
     },
@@ -417,18 +351,6 @@
       "Source": "Repository",
       "Repository": "CRAN"
     },
-    "shinyalert": {
-      "Package": "shinyalert",
-      "Version": "3.1.0",
-      "Source": "Repository",
-      "Repository": "CRAN"
-    },
-    "shinycssloaders": {
-      "Package": "shinycssloaders",
-      "Version": "1.1.0",
-      "Source": "Repository",
-      "Repository": "CRAN"
-    },
     "shinyjs": {
       "Package": "shinyjs",
       "Version": "2.1.1",
@@ -453,21 +375,9 @@
       "Source": "Repository",
       "Repository": "CRAN"
     },
-    "sys": {
-      "Package": "sys",
-      "Version": "3.4.3",
-      "Source": "Repository",
-      "Repository": "CRAN"
-    },
     "tibble": {
       "Package": "tibble",
       "Version": "3.3.1",
-      "Source": "Repository",
-      "Repository": "CRAN"
-    },
-    "tidyr": {
-      "Package": "tidyr",
-      "Version": "1.3.2",
       "Source": "Repository",
       "Repository": "CRAN"
     },
@@ -486,12 +396,6 @@
     "utf8": {
       "Package": "utf8",
       "Version": "1.2.6",
-      "Source": "Repository",
-      "Repository": "CRAN"
-    },
-    "uuid": {
-      "Package": "uuid",
-      "Version": "1.2-2",
       "Source": "Repository",
       "Repository": "CRAN"
     },
@@ -528,12 +432,6 @@
     "yaml": {
       "Package": "yaml",
       "Version": "2.3.12",
-      "Source": "Repository",
-      "Repository": "CRAN"
-    },
-    "zip": {
-      "Package": "zip",
-      "Version": "2.3.3",
       "Source": "Repository",
       "Repository": "CRAN"
     }

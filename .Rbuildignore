@@ -10,6 +10,8 @@ dev_history.R
 $run_dev.*
 ^LICENSE\.md$
 ^README\.Rmd$
+^README\.html$
+^NEWS\.html$
 ^CODE_OF_CONDUCT\.md$
 ^app\.R$
 ^rsconnect$

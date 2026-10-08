@@ -1,14 +1,17 @@
 #' Responsive image panel shared by every app plot
 #' @noRd
-app_plot_ui <- function(ns, panel, csv_id = paste0(panel$id, "_csv")) {
+app_plot_ui <- function(ns, panel, csv_id = paste0(panel$id, "_csv"), controls = NULL) {
   shiny::div(class = "fieldhub-plot-panel",
-    # Keep the toolbar's real (including wrapped) height while a plot is loading.
-    shiny::div(id = ns(paste0(panel$id, "_tools")), class = "fieldhub-plot-toolbar",
-      `aria-hidden` = "true", inert = NA,
-      app_plot_tools(ns, panel$id, csv_id)),
+    shiny::div(class = "fieldhub-plot-header",
+      # Downloads come first so they stay at the top right when controls wrap.
+      # Keep their real height while loading, without hiding the live controls.
+      shiny::div(id = ns(paste0(panel$id, "_tools")), class = "fieldhub-plot-toolbar",
+        `aria-hidden` = "true", inert = NA,
+        app_plot_tools(ns, panel$id, csv_id)),
+      if (length(controls)) shiny::div(class = "fieldhub-plot-controls", controls)),
     shiny::div(class = "fieldhub-layout-image",
       role = "region", `aria-label` = paste(panel$title, "image"),
-      fieldhub_spinner(shiny::imageOutput(ns(panel$id), width = NULL, height = NULL), type = 5))
+      app_output_feedback(shiny::imageOutput(ns(panel$id), width = NULL, height = NULL)))
   )
 }
 

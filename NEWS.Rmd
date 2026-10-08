@@ -1,5 +1,7 @@
 ---
-output: github_document
+output:
+  github_document:
+    html_preview: false
 ---
 
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
@@ -16,7 +18,56 @@ knitr::opts_chunk$set(
 
 # Changelog
 
-# FielDHub (development version)
+# FielDHub 1.6.0
+
+## Release highlights
+
+This release modernizes the Shiny app and the R package while retaining the
+original design input panels. The app version, package version and exported
+result metadata all come from `DESCRIPTION`.
+
+- Every design uses native, high-resolution plot previews with consistent
+  PNG, vector PDF and plain layout CSV downloads above the image.
+- Loading feedback stays inside the affected results tab, at a consistent
+  position, without task-to-output flicker or unnecessary re-renders.
+- The app runs directly on Shiny, without golem configuration. Required app
+  dependencies are Imports; background workers remain opt-in through `mirai`.
+  Obsolete popup, loader, interactive-plot and ZIP dependencies are removed.
+- Public design results have shared layout, validation, seed-recording and
+  reproduction contracts. Existing valid seeded results are preserved except
+  for the corrections explicitly documented below.
+- Help and About Us retain compact legacy-style layouts. About Us has no email
+  buttons or separate copyright label; Salvador Gezan's LinkedIn link is
+  updated and Richard Horsley's LinkedIn link is added. Package authorship,
+  maintainer contact details and legal notices are unchanged.
+
+Review the breaking changes and seeded-result corrections below before
+upgrading existing scripts. Migration guidance is available in
+`help("design_arguments", package = "FielDHub")` and the architecture vignette.
+
+### App usability:
+
+- Help and About Us return to compact legacy-style layouts: grouped design
+  guides beside project links, six portrait profiles, and a small contributors
+  section. Optional offline R help is collapsed by default, duplicate credits
+  are removed, and pages use natural responsive flow without nested scrolling.
+  Jean-Marc Montpetit's profile is removed from About Us; historical package
+  attribution is unchanged.
+
+- All design tabs use one shared loading appearance for Run/Randomize tasks and
+  individual outputs, implemented with native Shiny events and bundled CSS/JS.
+  Loading stays local to affected tabs, preserves plot dimensions, and clears on
+  results, errors or disconnection; shinycssloaders is no longer required.
+
+- Result tabs now keep a single, slightly larger loading indicator at the same
+  position across tables and plots. Task completion and output painting share
+  its lifecycle, and brief output updates do not flash an extra spinner.
+  The bottom "Save design and reproduction code" panel is removed; field-book
+  and plot downloads, and the public R reproduction functions, are unchanged.
+
+- The pinned Docker image includes the system libuv headers needed for its
+  locked `fs` dependency and build-stage-only CMake/XZ tools for the bundled
+  worker transport libraries. Deployment checks guard these prerequisites.
 
 ### Breaking changes:
 
@@ -179,7 +230,7 @@ knitr::opts_chunk$set(
   (the design used to record the value shown at Randomize!, while the
   allocation kept the one of Run!).
 
-* The Shiny application stack is now optional. Installing FielDHub for R scripts requires only the design and plotting dependencies; the nine app-only packages have moved from Imports to Suggests. `run_app()` checks for them and reports an installation command when any are missing. No packages are installed automatically, and existing app installations keep the same interface and design behavior.
+* The standard Shiny app dependencies are now installed with FielDHub. Native Shiny handles startup, resources and problem dialogs; golem and shinyalert are no longer required. Shinyjs is retained, and mirai remains optional for background workers. Unused plotly/glue declarations and cosmetic kableExtra vignette styling are removed; knitr and rmarkdown remain documentation dependencies.
 
 * `split_families()` now accepts `seed`, records it in `infoDesign` and `metadata`, and restores the caller's random-number state. When omitted, it selects an automatic integer seed using the shared design contract; default allocations therefore change. To reproduce a previous `set.seed(s); split_families(l, data)` allocation, pass `seed = s` explicitly. Existing positional `l` and `data` arguments remain supported.
 
@@ -220,9 +271,9 @@ knitr::opts_chunk$set(
   control and progress message. Workers require an installed FielDHub package
   and the optional mirai package; the default `workers = 0L` stays synchronous.
   Pools close with the app, and recorded seeds and RNG settings are preserved.
-  The optional app now requires Shiny 1.8.1 or newer and promises.
+  The app requires Shiny 1.8.1 or newer and promises.
 
-* The app's reproduction panel and ZIP exports now include a self-contained R call built from the recorded design arguments. Calls retain the seed, year and RNG settings, quote uploaded labels as data, and reconstruct supplied allocation plans before generating their fields. Tables with more than 200 rows and records without portable inputs explain why the saved RDS is needed. The existing RDS and full-workflow instructions remain available; no design results change.
+* `write_design(x, file, format = "r")` writes a self-contained R call from the recorded design arguments. Calls retain the seed, year and RNG settings, quote uploaded labels as data, and reconstruct supplied allocation plans before generating their fields. Tables with more than 200 rows and records without portable inputs require the RDS format instead. These reproduction tools remain available through the R API; the app's bottom reproduction panel has been removed to keep its pages simple.
 
 * `RCBD()` now generates its own check labels when `checks` is a bare positive integer and no entry pool is supplied (`t` is itself a bare count): the check labels become `"CH1".."CHN"`, followed by the auto-generated test entries `"T1".."Tt"`, instead of requiring `data` or a character vector `t`. Existing calls that supply a pool (`data`, or a character `t`) or character check labels are unchanged, and so are their seeded results.
 
@@ -282,11 +333,7 @@ knitr::opts_chunk$set(
   or re-enabling controls across the document. The navbar logo is scoped to
   FielDHub, inserted only once, and includes alternative text.
 
-- App data downloads now use ZIP archives containing the unchanged CSV table,
-  the complete design and simulation records, displayed field book, layout
-  settings, software versions, and reconstruction code. Buttons explicitly
-  identify the ZIP format. The separate core-design RDS download remains
-  available. Archives require the optional `zip` package.
+- Obsolete private ZIP-export helpers and their zip dependency are removed. Plain CSV field-book and layout downloads retain their table validation and filenames; core design reproduction remains available separately.
 
 - `swap_pairs()` now reports its stop reason, attempted thresholds, completed
   swap sweeps, and per-threshold budget. Invalid or infinite limits, invalid
@@ -328,7 +375,7 @@ knitr::opts_chunk$set(
 
 * The seven spatial-simulation workflows now share their correlation controls. Labels distinguish adjacent columns within a row from adjacent rows within a column. Input identifiers, choices, defaults, and simulation calculations are unchanged.
 
-* Every design page in the app now offers a shared reproducibility panel with a complete RDS design download and R code to reconstruct it. The archive preserves the original result, seed, parameters, RNG settings, and package version. It covers the core design, not later app layout selections or simulated responses; existing CSV downloads are unchanged. Layout download buttons now say CSV instead of Excel, matching their file format.
+* The R reproduction API preserves the original result, seed, parameters, RNG settings, and package version. It covers the core design, not later app layout selections or simulated responses. App downloads save plain CSV field books or the selected plot's PNG, PDF or layout CSV; layout buttons say CSV instead of Excel, matching their file format.
 
 * `reproduce_design()` rebuilds field designs and allocation plans from their recorded parameters and RNG settings. It restores the caller's RNG settings and seed state on exit, explains missing legacy parameters, and warns when the recorded FielDHub version differs. Reproduction across different dependency versions or platforms is not guaranteed.
 
@@ -492,6 +539,15 @@ knitr::opts_chunk$set(
 * The seven spatial design pages (optimized arrangement, p-rep, augmented RCBD, single and multiple diagonal, sparse allocation and multi-location p-rep) are now built by the same generic page as the classic designs, from a per-design spec; no design keeps a module of its own. The page reads its sidebar with `read_design_controls()`, offers its field sizes after Run! from the same plain functions the R functions use, and builds its design through the same argument builder, so the page and a direct `optimized_arrangement()`, `partially_replicated()`, `RCBD_augmented()`, `diagonal_arrangement()`, `sparse_allocation()` or `multi_location_prep()` call (the allocation of Run! through `do_optim()`) build identical designs. Menus, uploads, archives and the ids the shared spatial workflow keeps (simulation, field book, heatmap, save and tab set) are unchanged; the other result ids of these pages changed (for example the optimized arrangement's `RFIELD`, `PLOTFIELD`, `summary_optim` and `data_input` are now `field_layout`, `plot_numbers`, `setup` and `entries_1`). Deliberate consistency changes: the seed box is blank by default (it started at 5 on the optimized arrangement page, 4095 on the p-rep page, 1 on the augmented RCBD and multi-location p-rep pages and 17 on the diagonal and sparse allocation pages) and uses the shared labels ("Reps per Check:", "Experiment Name(s):", "Starting Plot Number(s):", "Location Name(s):", "Choose Location to View:", and "Input # of Checks:" for the augmented RCBD's "Checks per Block:"); controls are stacked one per row; the number of checks of the diagonal and sparse allocation pages is a number box (1 to 10, or 20 for multiple diagonals) as on the other pages instead of a list; the diagonal and sparse allocation pages' "Expt Design Info" tab is "Get Random" and the augmented RCBD and diagonal pages' "Input Data" tab is "Data Input", as on the other pages; only Run! and the upload toggle bring back the first tab (the diagonal and sparse allocation pages also did so when most sidebar controls changed); the sparse allocation page's "# of Copies Per Entry:" offers 1 up to one less than the locations from the start (it first offered only the upper half until Run!); the multi-location p-rep page's "Include checks?" Yes/No buttons are the shared "Add repeated checks?" checkbox, and its different field size per location is chosen in one select per location under "Set different dimensions across locations" instead of a "Select multiple dimensions" dialog; the multiple diagonal page trims the spaces around each experiment name instead of removing every space, and colours its experiment layout by the experiments of the field book; unchecking the augmented RCBD's "Randomize Entries?" shows its note under the checkbox instead of a notice; "Reps per Check:" accepts one value for every check, as on the RCBD page (optimized arrangement and multi-location p-rep pages); and a blank or invalid control, too many check plots for the entries, an uploaded `REPS` column that is not whole numbers, a number of plots with no field size (on the p-rep page, the advice to allow filler plots), fewer than eight augmented RCBD entries, no block count for them, uploaded diagonal checks without consecutive ENTRY numbers, too few diagonal entries for any field, experiment sizes that do not add up to the entries or differ while entries repeat across experiments, fewer than 3 sparse locations or 60 sparse entries, an uploaded sparse or multi-location p-rep list whose entries do not match "Input # of Entries:", fewer than 2 multi-location p-rep locations or "# of Rep Per Group:" with a different number of values than "# of Entries Per Rep Group:" is explained in the "Get Random" tab instead of a dialog. A Randomize! that fails (for example a sparse field whose dimensions do not fit the entries, or a location no field size fits) is explained there too, and "Save experiment (ZIP)" appears only once a design is built (it used to appear on Randomize! even when the design failed).
 
 ### Fix bugs:
+
+- Plot controls and downloads now share a header: selectors stay on the left
+  and the three download buttons stay at the top right above the image.
+  Narrow panels place selectors below the buttons without overlapping the plot.
+  Unreplicated diagonal and sparse entry maps fill check cells like optimized
+  arrangements. Optimized entry maps also outline checks, without adding borders
+  to plot-number maps. Augmented RCBD adds filled, bordered check cells without changing
+  its block backgrounds. Native layouts share a lighter neutral gray; plot-number
+  and experiment maps retain their neutral or block coloring.
 
 - Layouts and heatmaps share a stable download toolbar and wait for browser
   dimensions to settle before resizing the preview. Output updates no longer
@@ -801,4 +857,4 @@ See [plot()](https://didiermurillof.github.io/FielDHub/reference/plot.FielDHub.h
 
 # FielDHub 0.1.0
 
-CRAN release. 
+CRAN release.

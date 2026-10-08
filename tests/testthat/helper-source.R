@@ -19,8 +19,8 @@ fieldhub_uninstrument <- function(expr) {
 #' Functions defined in the FielDHub namespace, restricted to core code
 #'
 #' @return A named list of functions whose environment is the FielDHub
-#'   namespace, excluding Shiny app/module/golem entry points
-#'   (`app_*`, `golem_*`, `mod_*`, `run_app`).
+#'   namespace, excluding Shiny app/module entry points
+#'   (`app_*`, `mod_*`, `run_app`).
 core_functions <- function() {
   namespace <- asNamespace("FielDHub")
   objects <- mget(ls(namespace, all.names = TRUE), namespace, inherits = FALSE)
@@ -28,7 +28,7 @@ core_functions <- function() {
     function(x) is.function(x) && identical(environment(x), namespace),
     objects
   )
-  functions[!grepl("^(app_|golem_|mod_)|^run_app$", names(functions))]
+  functions[!grepl("^(app_|mod_)|^run_app$", names(functions))]
 }
 
 #' Shiny app/module functions defined in the FielDHub namespace

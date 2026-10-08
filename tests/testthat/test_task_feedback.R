@@ -51,7 +51,7 @@ test_that("every result tab contains its own loading state instead of an externa
       expect_match(as.character(ui), 'data-fieldhub-task="page-randomize"', fixed = TRUE)
       for (panel in spec$panels) {
         output <- htmltools::tagQuery(ui)$find(paste0("#page-", panel$id))
-        expect_equal(output$parents(".shiny-spinner-output-container")$length(), 1L)
+        expect_equal(output$parents(".fieldhub-output-loader")$length(), 1L)
       }
     }
   }

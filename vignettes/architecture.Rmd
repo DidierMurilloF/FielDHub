@@ -19,13 +19,13 @@ library(FielDHub)
 | Public engines (`fct_`, `engine_`, `validate_`) | Validate inputs, randomize, optimize, construct results | Depend on Shiny, display dialogs, install packages, change caller options |
 | Results (`result_`) | Schema, declarative engine registry, replay, S3 presentation | Evaluate function names or handlers supplied by saved metadata |
 | Layout/render/simulation (`layout_`, `render_`, `sim_`) | Coordinates, drawing, numerical simulation | Re-randomize a saved design merely to display it |
-| I/O (`io_`) | Parse uploads, validated format dispatch, workflow archives | Treat a CSV field book as a complete replay record |
+| I/O (`io_`) | Parse uploads, validated format dispatch, plain CSV exports | Treat a CSV field book as a complete replay record |
 | App (`app_`) | Declarative page controls, argument builders, one generic module | Duplicate engine logic or mutate the accepted result when controls change |
 
-Script users need only Imports. `run_app()` checks its optional packages and
+The standard app dependencies are in Imports. `run_app()` checks its runtime packages and
 reports an installation command if needed; it does not install anything.
 `source("dev/run_dev.R")` is the source-development launcher, while deployed
-images start the installed package. Neither requires a golem config file.
+images start the installed package. Both use native Shiny without a framework configuration file.
 
 Every app request is converted to a plain named argument list and sent to a
 whitelisted public engine. A completed design is an immutable snapshot for

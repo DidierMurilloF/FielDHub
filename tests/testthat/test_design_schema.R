@@ -164,8 +164,6 @@ test_that("core code selects field-book columns by name, not position", {
         "list-element access, not a data-frame column"),
     pos("latin_square", "data[, 1:3]", "upload contract: data[, 1:3]"),
     pos("merge_user_data", "data[, 1:2]", "upload contract: data[, 1:2]"),
-    pos("new_workflow_archive", "strsplit(imports, \",\")[[1L]]",
-        "list-element access, not a data-frame column"),
     pos("optimized_arrangement", "gen_list[, 1:3]", "upload contract: gen_list[, 1:3]"),
     pos("optimized_arrangement", "my_REPS[, 1]",
         "internal REPS-ordered entry-list column, not a field book"),

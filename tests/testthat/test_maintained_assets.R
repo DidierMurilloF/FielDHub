@@ -7,7 +7,10 @@ test_that("served fragments get their year and team only at render time", {
     expect_match(html, "{{ footer }}", fixed = TRUE)
   }
   about <- as.character(app_about_ui())
-  for (name in fieldhub_team()$name) expect_match(about, name, fixed = TRUE)
+  team <- fieldhub_team()
+  visible <- team$name[team$name != "Jean-Marc Montpetit" & !grepl("(^|, )cph($|, )", team$roles)]
+  for (name in visible) expect_match(about, name, fixed = TRUE)
+  expect_false(grepl("Jean-Marc Montpetit|jeanmarc[.]montpetit@videotron[.]ca", about))
   expect_match(about, format(Sys.Date(), "%Y"), fixed = TRUE)
 })
 

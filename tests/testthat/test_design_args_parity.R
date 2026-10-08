@@ -430,7 +430,7 @@ test_that("classic pages submit only argument-builder snapshots to the shared de
   )
   # Unexported helpers the generic page server (mod_design_server()) and the
   # page specs (design_app_spec()) may call, and why. Anything else found in
-  # them must be a base/shiny/DT/plotly/shinyjs call, or is a bug.
+  # them must be a base/shiny/DT/shinyjs call, or is a bug.
   allowed_helpers <- c(
     "validate_design",     # shows any error where the output would be (R/app_conditions.R)
     "app_design_seed",     # resolves the optional app seed without touching the shared RNG stream
@@ -1142,7 +1142,7 @@ test_that("spatial pages submit builder snapshots for allocation and final desig
   )
   # Unexported helpers a spatial module server may call, and why. Anything
   # else it calls must be one of its engines/builders, or a base/shiny/DT/
-  # plotly/shinyjs function.
+  # Shiny/shinyjs function.
   allowed_helpers <- c(
     "validate_design",            # shows any error where the output would be (R/app_conditions.R)
     "app_report_problem",         # reports a problem of an event with no output slot (dialog or notice)
@@ -1402,7 +1402,7 @@ test_that("the choice helpers spatial modules call before randomizing are Shiny-
     field_book_location_grids = function() field_book_location_grids(design$fieldBook, "ENTRY"),
     checked_layout_view = function() checked_layout_view(design, location = 1)
   )
-  ui_packages <- c("shiny", "DT", "shinyjs", "shinyalert", "bslib", "plotly")
+  ui_packages <- c("shiny", "DT", "shinyjs", "bslib", "htmltools", "promises")
   # Every FielDHub function a helper can reach, not only its own body:
   # follow each package-function symbol the body refers to (called, or
   # passed on as in lapply(x, f)), transitively.

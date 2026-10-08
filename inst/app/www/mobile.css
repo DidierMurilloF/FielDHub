@@ -1,10 +1,23 @@
-@media screen and (max-width: 768px) {
-#fieldhub-app .grid-container {
-  grid-template-columns: 1fr;
+@media screen and (max-width: 1100px) {
+#fieldhub-app .fieldhub-team-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
 }
 
-#fieldhub-app .section-tittle {
-  margin: 0 20px;
+@media screen and (max-width: 768px) {
+#fieldhub-app .fieldhub-info-content {
+  padding: 20px;
+}
+
+#fieldhub-app .fieldhub-help-layout {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+}
+
+#fieldhub-app .fieldhub-help-resources {
+  border-left: 0;
+  border-top: 1px solid #d7dede;
+  padding: 20px 0 0;
 }
 
 /* Showcase */
@@ -36,5 +49,17 @@
 #fieldhub-app .box {
   float: none;
   width: 100%;
+}
+}
+
+@media screen and (max-width: 600px) {
+#fieldhub-app .fieldhub-team-grid,
+#fieldhub-app .fieldhub-help-topics,
+#fieldhub-app .fieldhub-offline-help dl {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+#fieldhub-app .fieldhub-offline-help dd {
+  margin-bottom: 8px;
 }
 }

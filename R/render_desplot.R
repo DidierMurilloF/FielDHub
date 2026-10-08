@@ -36,6 +36,8 @@ plot_desplot <- function(form, data, ..., extra_args = list()) {
         ticks = "all",
         panel.border = FALSE
     )
+    fill <- data[[all.vars(form)[1L]]]
+    if (is.character(fill) || is.factor(fill)) defaults$col.regions <- fieldhub_layout_palette()
     args <- utils::modifyList(utils::modifyList(defaults, list(...)), extra_args)
     args$form <- form
     args$data <- data
@@ -45,6 +47,19 @@ plot_desplot <- function(form, data, ..., extra_args = list()) {
         if (is.list(args[[gpar]]) && is.null(args[[gpar]]$lwd)) args[[gpar]]$lwd <- 0.5
     }
     do.call(desplot::desplot, args) + fieldhub_layout_theme()
+}
+
+#' Neutral cell fill shared by native layouts
+#' @noRd
+fieldhub_layout_neutral <- function() "#F2F2F2"
+
+#' Established categorical layout colours, with a lighter neutral background
+#' @noRd
+fieldhub_layout_palette <- function() {
+    c(fieldhub_layout_neutral(), "#FFD9D9", "#FFB2B2", "#FFD7B2", "#FDFFB2", "#D9FFB2",
+      "#B2D6FF", "#C2B2FF", "#F0B2FF", "#A6FFC9", "#FF8C8C", "#B2B2B2", "#FFBD80",
+      "#BFFF80", "#80BAFF", "#9980FF", "#E680FF", "#D0D192", "#59FF9C", "#FFA24D",
+      "#FBFF4D", "#4D9FFF", "#704DFF", "#DB4DFF", "#808080", "#9FFF40", "#C9CC3D")
 }
 
 #' Title and axis text sizes shared by all FielDHub layout plots

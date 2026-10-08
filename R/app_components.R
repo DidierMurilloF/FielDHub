@@ -1,20 +1,20 @@
-#' Explicit styling shared by app spinners
-#'
-#' @param ... Per-spinner overrides.
+#' One loading appearance for tasks and individual outputs
+#' @param message Description of the work in progress.
 #' @noRd
-fieldhub_spinner_options <- function(...) {
-  utils::modifyList(
-    list(color = "#2c7da3", color.background = "#ffffff", size = 2),
-    list(...)
-  )
+app_loading_indicator <- function(message) {
+  shiny::tagList(
+    shiny::icon("spinner", class = "fa-spin fieldhub-task-spinner"),
+    shiny::div(class = "fieldhub-task-message", message))
 }
 
-#' Wrap an output in a spinner without changing process-wide options
+#' Tab-local output feedback driven by Shiny's browser events
 #'
-#' @param ui_element The output to wrap.
-#' @param ... Arguments passed to `shinycssloaders::withSpinner()`.
+#' @param ui_element The output to wrap, retaining its dimensions while busy.
 #' @noRd
-fieldhub_spinner <- function(ui_element, ...) {
-  do.call(shinycssloaders::withSpinner,
-          c(list(ui_element = ui_element), fieldhub_spinner_options(...)))
+app_output_feedback <- function(ui_element) {
+  shiny::div(class = "fieldhub-output-loader", `aria-busy` = "false",
+    shiny::div(class = "fieldhub-output-content", ui_element),
+    shiny::div(class = "fieldhub-output-feedback", hidden = "hidden",
+      role = "status", `aria-live` = "polite", `aria-atomic` = "true",
+      app_loading_indicator("Loading results...")))
 }

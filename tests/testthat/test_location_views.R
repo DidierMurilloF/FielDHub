@@ -46,5 +46,6 @@ test_that("shared location order follows appearance and rejects malformed identi
   expect_identical(sum(all.names(code) == "field_book_locations"), 1L)
   panels <- design_app_spec("diagonal_multiple")$panels
   experiment <- Filter(function(panel) identical(panel$id, "expt_layout"), panels)[[1]]
-  expect_true("experiment_grid_view" %in% all.names(body(experiment$view)))
+  expect_identical(experiment$type, "image")
+  expect_true("experiment_grid_view" %in% all.names(body(experiment$grid)))
 })

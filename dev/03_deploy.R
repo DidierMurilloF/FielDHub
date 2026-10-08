@@ -1,38 +1,12 @@
-# Building a Prod-Ready, Robust Shiny Application.
-# 
-# README: each step of the dev files is optional, and you don't have to 
-# fill every dev scripts before getting started. 
-# 01_start.R should be filled at start. 
-# 02_dev.R should be used to keep track of your development during the project.
-# 03_deploy.R should be used once you need to deploy your app.
-# 
-# 
-######################################
-#### CURRENT FILE: DEPLOY SCRIPT #####
-######################################
-
-# Test your app
-
-## Run checks ----
-## Check the package before sending to prod
+# Validate the package before deployment. Run from the repository root.
 devtools::check()
-rhub::check_for_cran()
 
-# Deploy
+# The existing Dockerfile starts the installed package using native Shiny.
+# See deployment/README.md for the pinned build and runtime checks.
+# Refresh deployment/renv.lock only from deliberately prepared, tested versions:
+# Rscript tools/lock-deployment.R .
+# Rscript tools/check-deployment.R .
+# docker build --tag fieldhub-local .
 
-## RStudio ----
-## If you want to deploy on RStudio related platforms
-golem::add_rstudioconnect_file()
-golem::add_shinyappsio_file()
-golem::add_shinyserver_file()
-
-## Docker ----
-## If you want to deploy via a generic Dockerfile
-# golem::add_dockerfile()
-golem::add_dockerfile_with_renv()
-
-## If you want to deploy to ShinyProxy
-golem::add_dockerfile_shinyproxy()
-
-## If you want to deploy to Heroku
-golem::add_dockerfile_heroku()
+# For an installed package outside Docker:
+# shiny::runApp(FielDHub::run_app(launch.browser = FALSE), host = "127.0.0.1", port = 3838)

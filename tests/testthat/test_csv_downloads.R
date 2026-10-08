@@ -75,5 +75,4 @@ test_that("unavailable or malformed CSV data fails without writing files", {
     expect_false(file.exists(file))
   }
   expect_false("zip" %in% app_dependencies())
-  expect_false(grepl("ZIP", as.character(app_reproduction_ui(shiny::NS("page"))), fixed = TRUE))
 })

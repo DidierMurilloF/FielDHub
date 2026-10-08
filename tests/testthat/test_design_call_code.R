@@ -119,15 +119,11 @@ test_that("legacy recordings emit canonical argument names", {
   }
 })
 
-test_that("both reproduction downloads show the standalone call before the RDS path", {
+test_that("reproduction code shows the standalone call before the RDS path", {
   x <- RCBD(t = 5, reps = 3, seed = 11)
   code <- design_export_handlers(function() x)$code()
   expect_match(code, "FielDHub::RCBD(", fixed = TRUE)
   expect_lt(regexpr("FielDHub::RCBD(", code, fixed = TRUE)[[1]], regexpr("readRDS(", code, fixed = TRUE)[[1]])
-  archive <- paste(workflow_reproduction_code(x), collapse = "\n")
-  expect_match(archive, "FielDHub::RCBD(", fixed = TRUE)
-  expect_match(archive, 'readRDS("workflow.rds")', fixed = TRUE)
   x <- CRD(data = data.frame(TREATMENT = paste0("T", seq_len(201)), REPS = 2), seed = 12)
   expect_match(design_export_handlers(function() x)$code(), "200")
-  expect_match(paste(workflow_reproduction_code(x), collapse = "\n"), "200")
 })

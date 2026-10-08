@@ -6,7 +6,7 @@ for (record in lock$Packages) {
   installed <- utils::packageDescription(record$Package, fields = "Version")
   if (!identical(installed, record$Version)) stop("Dependency drift: ", record$Package)
 }
-# Load optional namespaces before measuring app-construction side effects.
+# Load app namespaces before measuring app-construction side effects.
 FielDHub:::app_check_dependencies()
 options_before <- options()
 app <- FielDHub::run_app(launch.browser = FALSE)

@@ -170,7 +170,12 @@ app_present_problem <- function(message, severity = c("error", "warning", "info"
       type = "warning", duration = 10, session = session
     )
   } else {
-    shinyalert::shinyalert(label, message, type = severity, session = session)
+    shiny::showModal(shiny::modalDialog(
+      title = label,
+      shiny::p(message),
+      footer = shiny::modalButton("OK"),
+      easyClose = TRUE
+    ), session = session)
   }
   invisible(NULL)
 }

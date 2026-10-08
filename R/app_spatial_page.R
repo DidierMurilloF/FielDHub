@@ -21,20 +21,20 @@ app_spatial_tabs <- function(ns, spec) {
   steps <- function(stage) lapply(Filter(function(step) identical(step$stage, stage), spec$steps), step_ui)
   setup <- if (identical(spec$setup$type, "summary")) {
     shiny::div(class = "fieldhub-design-summary",
-      fieldhub_spinner(shiny::verbatimTextOutput(ns("setup"), placeholder = FALSE), type = 4))
+      app_output_feedback(shiny::verbatimTextOutput(ns("setup"), placeholder = FALSE)))
   } else {
-    fieldhub_spinner(DT::DTOutput(ns("setup"), width = NULL, height = NULL), type = 4)
+    app_output_feedback(DT::DTOutput(ns("setup"), width = NULL, height = NULL))
   }
   entries <- lapply(seq_along(spec$entries), function(i) {
-    fieldhub_spinner(DT::DTOutput(ns(paste0("entries_", i)), width = NULL, height = NULL), type = 5)
+    app_output_feedback(DT::DTOutput(ns(paste0("entries_", i)), width = NULL, height = NULL))
   })
   if (length(entries) == 2L) {
     entries <- shiny::fluidRow(shiny::column(6, entries[[1L]]), shiny::column(6, entries[[2L]]))
   }
   panels <- lapply(seq_along(spec$panels), function(i) {
     panel <- spec$panels[[i]]
-    shiny::tabPanel(panel$title, feedback(shiny::br(), if (i == 1L) steps("randomize"),
-                    app_plot_ui(ns, panel)))
+    shiny::tabPanel(panel$title, feedback(
+      app_plot_ui(ns, panel, controls = if (i == 1L) steps("randomize"))))
   })
   tabs <- c(
     list(
@@ -54,7 +54,7 @@ app_spatial_tabs <- function(ns, spec) {
     panels,
     list(
       shiny::tabPanel("Field Book",
-        feedback(fieldhub_spinner(DT::DTOutput(ns(ids[["table"]]), width = NULL, height = NULL), type = 5))),
+        feedback(app_output_feedback(DT::DTOutput(ns(ids[["table"]]), width = NULL, height = NULL)))),
       shiny::tabPanel("Heatmap", feedback(
         app_plot_ui(ns, list(id = ids[["heatmap"]], title = "Heatmap"))))
     )
@@ -94,9 +94,6 @@ app_spatial_page <- function(input, output, session, spec, run, raw_controls) {
   design_steps <- stage(spec$steps, "randomize")
   views <- stage(spec$controls, "run")
   live_ids <- unique(unlist(lapply(run_steps, `[[`, "depends_on")))
-  in_progress <- function(message, expr) {
-    if (isTRUE(spec$long_running)) shiny::withProgress(message = message, expr) else expr
-  }
   # A reactive's value, or a silent stop while it has not run or failed
   # (the status panel explains a failure)
   settled <- function(reactive) {
@@ -138,9 +135,9 @@ app_spatial_page <- function(input, output, session, spec, run, raw_controls) {
       app_report_task_feedback(session, "run", TRUE, "Preparing field dimensions...")
     }
     inputs <- staged()
-    in_progress("Getting field dimensions ...", lapply(offered(run_steps), function(step) {
+    lapply(offered(run_steps), function(step) {
       validate_design(design_step_choices(step, inputs$values, inputs$data))
-    }))
+    })
   })
 
   randomized <- shiny::reactiveVal(FALSE)

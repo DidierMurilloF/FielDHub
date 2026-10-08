@@ -12,6 +12,7 @@ test_that("every design layout and heatmap uses the shared image panel", {
     expect_equal(images$parents(".fieldhub-task-region")$length(), length(ids))
     expect_equal(ui$find(".fieldhub-layout-image")$length(), length(ids))
     expect_equal(ui$find(".fieldhub-plot-panel")$length(), length(ids))
+    expect_equal(ui$find(".fieldhub-plot-header")$length(), length(ids))
     expect_equal(ui$find(".fieldhub-plot-toolbar")$length(), length(ids))
     for (id in ids) {
       toolbars <- ui$find(".fieldhub-plot-toolbar")$selectedTags()
@@ -26,11 +27,38 @@ test_that("every design layout and heatmap uses the shared image panel", {
       expect_identical(unname(vapply(buttons, function(button) button$attribs$id, "")),
         paste0("page-", c(paste0(id, "_png"), paste0(id, "_pdf"), csv_id)))
     }
+    for (panel in ui$find(".fieldhub-plot-panel")$selectedTags()) {
+      expect_identical(panel$children[[1L]]$attribs$class, "fieldhub-plot-header")
+      expect_identical(panel$children[[2L]]$attribs$class, "fieldhub-layout-image")
+      header <- htmltools::tagQuery(panel$children[[1L]])
+      expect_equal(header$find(".fieldhub-plot-toolbar")$length(), 1L)
+      expect_identical(panel$children[[1L]]$children[[1L]]$attribs$class, "fieldhub-plot-toolbar")
+    }
     expect_equal(ui$find(".plotly")$length(), 0L)
     expect_false(grepl("scroll to inspect", as.character(mod_design_ui("page", spec)), fixed = TRUE))
     if (spec$kind == "spatial") expect_equal(ui$find("#page-entries_1.datatables")$length(), 1L)
   }
   expect_false("plotly" %in% app_dependencies())
+})
+
+test_that("randomized plot controls share the header without hiding with downloads", {
+  for (package in app_dependencies()) skip_if_not_installed(package)
+  for (spec in fieldhub_design_specs()) {
+    ui <- htmltools::tagQuery(mod_design_ui("page", spec))
+    steps <- Filter(function(step) identical(step$stage, "randomize"), spec$steps)
+    controls <- ui$find(".fieldhub-plot-controls")
+    expect_equal(controls$length(), as.integer(length(steps) > 0L))
+    if (!length(steps)) next
+    expect_equal(controls$parents(".fieldhub-plot-header")$length(), 1L)
+    expect_equal(controls$parents(".fieldhub-plot-toolbar")$length(), 0L)
+    expect_null(controls$selectedTags()[[1L]]$attribs[["aria-hidden"]])
+    expect_null(controls$selectedTags()[[1L]]$attribs$inert)
+    for (step in steps) {
+      expect_equal(controls$find(paste0("#page-", step$id, "_step"))$length(), 1L)
+    }
+    header <- controls$parents(".fieldhub-plot-header")
+    expect_equal(header$find(".shiny-download-link")$length(), 3L)
+  }
 })
 
 test_that("plot loading does not rebuild or collapse the download toolbar", {
@@ -39,7 +67,7 @@ test_that("plot loading does not rebuild or collapse the download toolbar", {
   expect_match(css, "[.]fieldhub-layout-page\\s*\\{\\s*scrollbar-gutter: stable;")
   expect_match(css, "[.]fieldhub-layout-page > body\\s*\\{\\s*padding-right: 0 !important;")
   expect_match(css, "[.]fieldhub-plot-toolbar\\s*\\{\\s*display: flow-root;\\s*visibility: hidden;")
-  expect_match(css, "[.]has-plot > [.]fieldhub-plot-toolbar\\s*\\{\\s*visibility: visible;")
+  expect_match(css, "[.]has-plot > [.]fieldhub-plot-header > [.]fieldhub-plot-toolbar\\s*\\{\\s*visibility: visible;")
   js <- paste(readLines(system.file("app/www/layout-images.js", package = "FielDHub")), collapse = "\n")
   expect_match(js, 'pending[image.id] !== key', fixed = TRUE)
   expect_match(js, '"shiny:value shiny:error shiny:recalculating", plotState', fixed = TRUE)
@@ -58,14 +86,19 @@ test_that("layout previews fill a wide, bounded drawing area without internal sc
   expect_match(container, "height: var(--fieldhub-preview-height, 520px);", fixed = TRUE)
   expect_match(container, "margin: 0 auto;", fixed = TRUE)
   expect_false(grepl("overflow:|min-height:", container))
+  header <- rules("[.]fieldhub-plot-header")
+  for (declaration in c("display: flex;", "flex-direction: row-reverse;", "flex-wrap: wrap;",
+                        "align-items: flex-start;", "width: 98%;")) {
+    expect_match(header, declaration, fixed = TRUE)
+  }
   toolbar <- rules("[.]fieldhub-layout-downloads")
-  for (declaration in c("justify-content: flex-end;", "width: 98%;", "flex-wrap: wrap;")) {
+  for (declaration in c("justify-content: flex-end;", "flex-wrap: wrap;")) {
     expect_match(toolbar, declaration, fixed = TRUE)
   }
   for (declaration in c("width: 100%;", "height: 100%;", "object-fit: contain;", "margin: 0 auto;")) {
     expect_match(image, declaration, fixed = TRUE)
   }
-  expect_match(paste(deparse(body(golem_add_external_resources)), collapse = " "),
+  expect_match(paste(deparse(body(app_add_external_resources)), collapse = " "),
     "layout-images.js", fixed = TRUE)
 })
 

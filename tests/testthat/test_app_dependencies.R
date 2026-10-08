@@ -1,12 +1,15 @@
-test_that("app dependencies are optional and not imported at namespace load", {
-  app <- c("golem", "shiny", "htmltools", "DT", "bslib", "shinycssloaders",
-           "plotly", "shinyalert", "shinyjs", "promises", "mirai")
+test_that("the standard app installs with FielDHub while workers and tooling are optional", {
+  app <- c("shiny", "htmltools", "DT", "bslib", "promises", "shinyjs")
   packages <- function(field) {
     text <- utils::packageDescription("FielDHub", fields = field)
     trimws(sub("\\s*\\(.*$", "", strsplit(text, ",")[[1L]]))
   }
-  expect_length(intersect(packages("Imports"), app), 0L)
-  expect_true(all(app %in% packages("Suggests")))
+  expect_identical(app_dependencies(), app)
+  expect_setequal(packages("Imports"),
+    c("dplyr", "blocksdesign", "ggplot2", "rlang", "viridisLite", "desplot", app))
+  expect_setequal(packages("Suggests"),
+    c("mirai", "codetools", "testthat", "spelling", "knitr", "rmarkdown"))
+  # Imports installs packages; qualified calls do not need whole-namespace imports.
   expect_length(intersect(names(getNamespaceImports("FielDHub")), app), 0L)
 })
 
@@ -32,7 +35,7 @@ test_that("app functions do not rely on a whole Shiny namespace import", {
   skip_if_not_installed("codetools")
   namespace <- asNamespace("FielDHub")
   exports <- getNamespaceExports("shiny")
-  for (name in c("app_ui", "golem_add_external_resources", "run_app",
+  for (name in c("app_ui", "app_add_external_resources", "run_app",
                   ls(namespace, pattern = "^mod_.*_(ui|server)$"))) {
     globals <- codetools::findGlobals(get(name, namespace), merge = FALSE)
     expect_length(intersect(c(globals$functions, globals$variables), exports), 0L)

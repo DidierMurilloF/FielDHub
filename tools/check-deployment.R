@@ -6,11 +6,16 @@ lock <- jsonlite::read_json(file.path(root, "deployment", "renv.lock"))
 docker <- readLines(file.path(root, "Dockerfile"))
 stopifnot(any(grepl("^ARG BASE_IMAGE=rocker/r-ver:4\\.5\\.3@sha256:[a-f0-9]{64}$", docker)))
 stopifnot(identical(lock$R$Version, "4.5.3"), identical(lock$Packages$renv$Version, "1.1.4"))
+# fs 2.1.0 in the locked dependency set requires system libuv headers.
+stopifnot(any(grepl("libuv1-dev", docker, fixed = TRUE)))
+stopifnot(any(grepl("cmake xz-utils", docker, fixed = TRUE)))
 environment <- new.env(parent = baseenv())
 sys.source(file.path(root, "R/app_dependencies.R"), envir = environment)
 description <- read.dcf(file.path(root, "DESCRIPTION"))
 imports <- trimws(sub(" *\\(.*", "", strsplit(description[1L, "Imports"], ",")[[1L]]))
 stopifnot(all(c(imports, environment$app_dependencies(), "mirai", "renv") %in% names(lock$Packages)))
+stopifnot(!any(c("golem", "shinyalert", "shinycssloaders", "plotly", "kableExtra", "zip") %in%
+                names(lock$Packages)))
 for (name in names(lock$Packages)) {
   package <- lock$Packages[[name]]
   stopifnot(identical(package$Package, name), nzchar(package$Version),

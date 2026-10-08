@@ -366,8 +366,8 @@ field_title <- function(title, df) {
   paste0(title, max(as.numeric(df$ROW)), " x ", max(as.numeric(df$COLUMN)))
 }
 
-# Unreplicated designs in diagonal arrangements: the experiments, with the
-# checks outlined and coloured
+# Unreplicated entry maps fill the checks, while experiment and plot-number
+# maps keep experiment colours without highlighting checks.
 draw_diagonal_layout <- function(x, df, ...) {
   dots <- list(...)
   labels <- if (is.null(dots$text.string)) "ENTRY" else dots$text.string
@@ -375,15 +375,30 @@ draw_diagonal_layout <- function(x, df, ...) {
   experiments <- unique(as.character(df$EXPT))
   has_blocks <- length(setdiff(experiments, "Filler")) > 1L
   if (!entry_view && !has_blocks) {
-    dots <- utils::modifyList(list(col.regions = rep("gray", length(experiments))), dots)
+    dots <- utils::modifyList(list(col.regions = rep(fieldhub_layout_neutral(), length(experiments))), dots)
   }
   df$ENTRY <- as.character(df$ENTRY)
   df$ENTRY[df$TREATMENT == "Filler"] <- "Filler"
+  drawn <- df
+  drawn$CHECKS <- as.character(drawn$CHECKS)
+  form <- if (entry_view) CHECKS ~ COLUMN + ROW else EXPT ~ COLUMN + ROW
+  colours <- fieldhub_layout_palette()
+  if (entry_view && has_blocks) {
+    # Keep experiment backgrounds and boundaries; only check cells get new fills.
+    expts <- sort(unique(as.character(drawn$EXPT)))
+    check <- !is.na(drawn$CHECKS) & drawn$CHECKS != "0"
+    checks <- sort(unique(drawn$CHECKS[check]))
+    drawn$LAYOUT_FILL <- ifelse(check, paste0("check:", drawn$CHECKS), paste0("experiment:", drawn$EXPT))
+    groups <- c(paste0("experiment:", expts), paste0("check:", checks))
+    colours <- stats::setNames(rep(colours, length.out = length(groups)), groups)
+    if ("Filler" %in% expts) colours[["experiment:Filler"]] <- fieldhub_layout_neutral()
+    form <- LAYOUT_FILL ~ COLUMN + ROW
+  }
   p1 <- do.call(desplot::ggdesplot, utils::modifyList(list(
-    data = df,
-    form = EXPT ~ COLUMN + ROW,
+    data = drawn,
+    form = form,
     text.string = "ENTRY",
-    col.string = if (entry_view) "CHECKS" else NULL,
+    col.regions = colours,
     cex = 1,
     shorten = "no",
     out1.string = if (entry_view || has_blocks) "EXPT" else NULL,
@@ -425,7 +440,7 @@ draw_prep_layout <- function(x, df, ...) {
     shorten = "no",
     show.key = FALSE,
     gg = TRUE,
-    col.regions = if (plot_numbers) c("gray", "gray") else c("gray", "seagreen")
+    col.regions = c(fieldhub_layout_neutral(), if (plot_numbers) fieldhub_layout_neutral() else "seagreen")
   ), dots))
   list(p1 = p1, p2 = NULL, data = df)
 }
@@ -444,15 +459,24 @@ draw_layout.fieldhub_multi_location_prep <- draw_prep_layout
 #' @noRd
 draw_layout.fieldhub_optimized_arrangement <- function(x, df, ...) {
   dots <- list(...)
-  if (identical(dots$text.string, "PLOT")) {
-    dots <- utils::modifyList(list(col.regions = rep("gray", length(unique(df$CHECKS)))), dots)
+  plot_numbers <- identical(dots$text.string, "PLOT")
+  if (plot_numbers) {
+    dots <- utils::modifyList(list(col.regions = rep(fieldhub_layout_neutral(), length(unique(df$CHECKS)))), dots)
   }
   df$ENTRY <- as.character(df$ENTRY)
   df$CHECKS <- as.character(df$CHECKS)
+  drawn <- df
+  if (!plot_numbers) {
+    # Give adjacent copies of a check separate cell borders, not a merged outline.
+    drawn$CHECK_OUTLINE <- ifelse(!is.na(df$CHECKS) & df$CHECKS != "0", seq_len(nrow(df)), 0L)
+  }
   p1 <- do.call(desplot::ggdesplot, utils::modifyList(list(
-    data = df,
+    data = drawn,
     form = CHECKS ~ COLUMN + ROW,
+    col.regions = fieldhub_layout_palette(),
     text.string = "ENTRY",
+    out2.string = if (!plot_numbers) "CHECK_OUTLINE" else NULL,
+    out2.gpar = list(col = "gray50", lwd = 1, lty = 1),
     cex = 1,
     shorten = "no",
     main = field_title("Un-replicated Optimized Arrangement ", df),
@@ -480,7 +504,7 @@ draw_layout.fieldhub_rcbd_augmented <- function(x, df, ...) {
   check_text_cols <- c(check = "red3", test = "gray10")
   # Muted palette for the block background
   block_levels <- sort(unique(df$BLOCK))
-  muted6 <- c("#F2F2F2", "#E6EEF5", "#E9F2EC", "#F3EEE6", "#EDE7F2", "#F1E9E9")
+  muted6 <- c(fieldhub_layout_neutral(), "#E6EEF5", "#E9F2EC", "#F3EEE6", "#EDE7F2", "#F1E9E9")
   if (length(block_levels) > length(muted6)) {
     muted6 <- grDevices::colorRampPalette(muted6)(length(block_levels))
   } else {
@@ -512,6 +536,17 @@ draw_layout.fieldhub_rcbd_augmented <- function(x, df, ...) {
   # p1: entries, with the checks highlighted; p2: plot numbers
   p1 <- augmented_map("ENTRY", field_title("Augmented RCBD Layout ", df),
                       col.string = "CHECK_TEXT", col.text = check_text_cols)
+  # Fill and outline only check cells, beneath the existing block outlines and
+  # labels. Using the drawn data also respects desplot's coordinate transforms.
+  cells <- p1$data[p1$data$CHECK_TEXT == "check", , drop = FALSE]
+  if (nrow(cells)) {
+    checks <- factor(cells$ENTRY)
+    colours <- rep(fieldhub_layout_palette()[-1L], length.out = nlevels(checks))
+    check_tiles <- ggplot2::geom_tile(data = cells, ggplot2::aes(x = COLUMN, y = ROW),
+      inherit.aes = FALSE, fill = colours[as.integer(checks)], colour = "gray50", linewidth = 1)
+    background <- which(vapply(p1$layers, function(layer) inherits(layer$geom, "GeomTile"), TRUE))[1L]
+    p1$layers <- append(p1$layers, list(check_tiles), after = background)
+  }
   p2 <- augmented_map("PLOT_TXT", field_title("Augmented RCBD Plot Number Layout ", df),
                       col.text = "gray10")
   list(p1 = p1, p2 = p2, data = df)

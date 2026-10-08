@@ -1,8 +1,7 @@
-#' Optional packages needed to run the application
+#' Runtime packages installed with the application
 #' @noRd
 app_dependencies <- function() {
-  c("golem", "shiny", "htmltools", "DT", "bslib", "shinycssloaders",
-    "shinyalert", "shinyjs", "promises")
+  c("shiny", "htmltools", "DT", "bslib", "promises", "shinyjs")
 }
 
 #' Explain missing app packages without installing or loading the application
@@ -17,8 +16,8 @@ app_check_dependencies <- function(available = function(package) {
   if (length(missing)) {
     quoted <- paste(encodeString(missing, quote = '"'), collapse = ", ")
     fieldhub_abort(
-      "The FielDHub app needs additional or updated packages. Install them with ",
-      "install.packages(c(", quoted, ")). The R design functions remain available.",
+      "The FielDHub app needs missing or updated runtime packages. Install them with ",
+      "install.packages(c(", quoted, ")). These packages are normally installed with FielDHub.",
       class = "fieldhub_dependency_error", data = list(packages = missing)
     )
   }
