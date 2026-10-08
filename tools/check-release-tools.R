@@ -11,11 +11,18 @@ stopifnot(grepl("testthat (>= 3.2.0)", description[1L, "Suggests"], fixed = TRUE
 workflow <- yaml::read_yaml(file.path(root, ".github/workflows/R-CMD-check.yaml"))
 matrix <- workflow$jobs[["R-CMD-check"]]$strategy$matrix$config
 keys <- vapply(matrix, function(x) paste(x$os, x$r), character(1))
-required <- c("macos-latest release", "ubuntu-latest release", "windows-latest release",
-              "ubuntu-latest devel", "ubuntu-latest oldrel-1", "ubuntu-latest 4.1.0")
-stopifnot(all(required %in% keys))
+required <- c("macos-latest release", "ubuntu-latest release", "windows-latest release")
+stopifnot(setequal(required, keys), length(keys) == 3L)
 stopifnot(identical(workflow$jobs[["R-CMD-check"]]$name,
                     "${{ matrix.config.os }} (${{ matrix.config.r }})"))
+extended <- yaml::read_yaml(file.path(root, ".github/workflows/R-CMD-check-extended.yaml"))
+extended_job <- extended$jobs[["R-CMD-check"]]
+versions <- vapply(extended_job$strategy$matrix$config, function(x) x$r, character(1))
+stopifnot(identical(extended_job[["runs-on"]], "ubuntu-latest"),
+          setequal(versions, c("devel", "oldrel-1", "4.1.0")), length(versions) == 3L,
+          !is.null(extended$on$schedule), "workflow_dispatch" %in% names(extended$on),
+          identical(extended$on$push$tags, "v*"),
+          identical(extended_job$strategy[["fail-fast"]], FALSE))
 for (file in list.files(file.path(root, ".github/workflows"), full.names = TRUE)) {
   content <- readLines(file)
   if (any(grepl("actions/checkout@", content, fixed = TRUE))) {

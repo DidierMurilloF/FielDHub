@@ -7,6 +7,18 @@
 
 ## Release highlights
 
+- R-devel’s additional binomial RNG setting is recorded and restored
+  without rejecting valid results. Older three-setting records retain
+  the historical binomial algorithm when replayed on newer R; newer
+  four-setting records report a clear error on R versions that cannot
+  restore them.
+- Current-R checks run on macOS, Linux and Windows for every PR and
+  push. Extended Linux checks (R-devel, oldrel and R 4.1.0) run weekly,
+  on release tags, and manually before publication. Historical
+  optimized-layout fixtures use their macOS reference for exact
+  comparisons; all platforms still check treatment counts, location
+  sizes and exact local seeded replay.
+
 This release modernizes the Shiny app and the R package while retaining
 the original design input panels. The app version, package version and
 exported result metadata all come from `DESCRIPTION`.

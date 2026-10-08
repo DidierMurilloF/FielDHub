@@ -1,62 +1,52 @@
-# Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
-# Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
+# Run manually against the candidate before publishing a release.
 'on':
-  push:
-    branches: [main, master]
-  pull_request:
-    branches: [main, master]
+  schedule:
+    - cron: '17 7 * * 1'
   workflow_dispatch:
+  push:
+    tags: ['v*']
 
-name: R-CMD-check
+name: R-CMD-check-extended
 
 permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   R-CMD-check:
-    runs-on: ${{ matrix.config.os }}
+    runs-on: ubuntu-latest
     timeout-minutes: 60
-
-    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
-
+    name: ubuntu-latest (${{ matrix.config.r }})
     strategy:
       fail-fast: false
       matrix:
         config:
-          # The golden snapshots (tests/testthat/_snaps) are recorded on macOS
-          - {os: macos-latest, r: 'release', golden: 'true'}
-          - {os: ubuntu-latest, r: 'release', golden: 'false'}
-          - {os: windows-latest, r: 'release', golden: 'false'}
-
+          - {r: 'devel', http-user-agent: 'release'}
+          - {r: 'oldrel-1'}
+          # Test the exact minimum declared in DESCRIPTION, not just its last patch.
+          - {r: '4.1.0'}
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
-      # Run the tests skipped on CRAN, too
       NOT_CRAN: true
-      FIELDHUB_GOLDEN: ${{ matrix.config.golden }}
-
+      FIELDHUB_GOLDEN: 'false'
     steps:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
-
       - uses: r-lib/actions/setup-pandoc@v2
-
       - uses: r-lib/actions/setup-r@v2
         with:
           r-version: ${{ matrix.config.r }}
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
-
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck
           needs: check
-
       - uses: r-lib/actions/check-r-package@v2
         with:
           args: 'c("--no-manual", "--as-cran")'

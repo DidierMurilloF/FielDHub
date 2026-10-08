@@ -36,7 +36,11 @@ maintainers. A clean local check is not evidence that remote CI has passed.
   Investigate every other NOTE, warning, or error. Network-unavailable checks
   must be rerun with network access before submission.
 - Confirm the remote check matrix passes on macOS, Linux, Windows, R-devel,
-  oldrel, and the declared minimum R version. Keep the required check names
+  oldrel, and the declared minimum R version. The three current-R platforms
+  run on every PR and push. Manually dispatch `R-CMD-check-extended` against
+  the exact candidate revision before publishing; its Linux R-devel, oldrel
+  and minimum-R checks also run weekly and on `v*` tags. Keep the required
+  check names
   `macos-latest (release)` and `ubuntu-latest (release)` stable.
 - Confirm pkgdown, changed-line correctness lint, and the core coverage gate
   pass. Review legacy-object compatibility and design/simulation reconstruction

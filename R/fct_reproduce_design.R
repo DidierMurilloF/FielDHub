@@ -37,7 +37,7 @@ reproduce_design <- function(x) {
   previous_kind <- RNGkind()
   on.exit(do.call(RNGkind, as.list(previous_kind)), add = TRUE, after = FALSE)
   tryCatch(
-    do.call(RNGkind, as.list(meta$rng_kind)),
+    restore_recorded_rng(meta$rng_kind),
     error = function(e) fieldhub_abort(
       "Cannot restore the recorded RNG settings: ", conditionMessage(e),
       data = list(parent = e)

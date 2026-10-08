@@ -32,7 +32,8 @@ fieldhub_metadata_problems <- function(meta) {
       !is.finite(meta$seed) || abs(trunc(meta$seed)) > .Machine$integer.max) {
     problems <- c(problems, "has no valid recorded seed")
   }
-  if (!is.character(meta$rng_kind) || length(meta$rng_kind) != 3L ||
+  if (!is.character(meta$rng_kind) || !length(meta$rng_kind) %in% c(3L, 4L) ||
+      !is.null(dim(meta$rng_kind)) ||
       anyNA(meta$rng_kind) || any(!nzchar(trimws(meta$rng_kind)))) {
     problems <- c(problems, "has incomplete random-number settings")
   }

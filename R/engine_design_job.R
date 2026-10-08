@@ -16,7 +16,7 @@ run_design_job <- function(engine, args, rng_kind = RNGkind()) {
           any(!nzchar(names(args))) || anyDuplicated(names(args)) > 0L))) {
       fieldhub_abort("Design job arguments must be a list with distinct names.")
     }
-    if (!identical(rng_kind, previous_kind)) do.call(RNGkind, as.list(rng_kind))
+    if (!identical(rng_kind, previous_kind)) restore_recorded_rng(rng_kind)
     captured <- capture_fieldhub_warnings(
       do.call(getExportedValue("FielDHub", engine), args, quote = TRUE),
       on_error = function(condition, recorded) warnings <<- recorded

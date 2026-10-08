@@ -37,6 +37,7 @@ test_that("jobs use the submitted RNG kind and restore process state", {
   previous <- RNGkind()
   on.exit(do.call(RNGkind, as.list(previous)), add = TRUE, after = FALSE)
   RNGkind("Mersenne-Twister", "Inversion", "Rejection")
+  submitted_kind <- RNGkind()
   args <- list(t = 12, nrows = 3, reps = 2, method = "twostage", seed = 4)
   expected <- do.call(row_column, args)
   RNGkind("L'Ecuyer-CMRG", "Inversion", "Rejection")
@@ -44,7 +45,7 @@ test_that("jobs use the submitted RNG kind and restore process state", {
   seed <- .Random.seed
   kind <- RNGkind()
   opts <- options()
-  job <- run_design_job("row_column", args, rng_kind = c("Mersenne-Twister", "Inversion", "Rejection"))
+  job <- run_design_job("row_column", args, rng_kind = submitted_kind)
   expect_true(job$ok)
   expect_identical(job$value, expected)
   expect_identical(.Random.seed, seed)
