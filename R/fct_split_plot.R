@@ -69,86 +69,80 @@
 #' head(SPDExample2$fieldBook,12)
 #'              
 #'                   
+#' @section Reproducibility:
+#' The result records effective inputs and the resolved seed in
+#' \code{metadata$parameters}. Under the same package versions and RNG
+#' settings, rebuild a result \code{x} with
+#' \code{do.call(split_plot, x$metadata$parameters)}.
+#'
 #' @export
 split_plot <- function(wp = NULL, sp = NULL, reps = NULL, type = 2, l = 1, plotNumber = 101, 
                        seed = NULL, locationNames = NULL, factorLabels = TRUE, 
                        data = NULL) {
+  plotNumber_supplied <- !missing(plotNumber)
+  validate_locations(l)
+  validate_flag(factorLabels, "factorLabels")
   
-  if (is.null(seed) || is.character(seed) || is.factor(seed)) seed <- runif(1, min = -50000, max = 50000)
-  set.seed(seed)
-  if (all(c(1,2) != type)) {
-    stop("Input type is unknown. Please, choose one: 1 or 2, for CRD or RCBD, respectively.")
-  }
-  args0 <- c(wp, sp, reps, l)
+  seed <- resolve_seed(seed)
+  local_design_seed(seed)
+  validate_factorial_type(type)
   args1 <- list(wp, sp, reps, l)
+  validate_iteration_budget(reps, "reps")
   if (is.null(data)) {
-    if(all(!is.null(args0))) {
-      if(all(is.numeric(args0)) && all(lengths(args1) == 1)) {
-        WholePlots <- 1:wp
-        SubPlots <- 1:sp
-      }else if(is.numeric(wp) && length(wp) == 1 && length(sp) > 1) {
-        WholePlots <- 1:wp
-        SubPlots <- sp
-        sp <- length(SubPlots)
-      }else if(is.character(wp)) {
-        if (length(wp) > 1) {
-          if (is.numeric(sp)) {
-            if (length(sp) == 1) {
-              WholePlots <- wp
-              wp <- length(WholePlots)
-              SubPlots <- 1:sp
-            }else {
-              stop("Input sp should be a integer number.")
-            }
-          }else if (is.character(sp) || is.numeric(sp)) {
-            if (length(sp) > 1) {
-              WholePlots <- wp
-              wp <- length(WholePlots)
-              SubPlots <- sp
-              sp <- length(SubPlots)
-            }else {
-              stop("The number of sub plots should be more than one.")
-            }
-          }
-        }else {
-          stop("The numerb of whole plots should be more than one.")
-        }
-      }
-    }else {
-      stop("Input wp, sp, reps and l must be differents of NULL.")
-    }
-  }else {
-    if(!is.data.frame(data)) stop("Data must be a data frame.")
-    data <- as.data.frame(data[,1:2])
+    resolved <- resolve_design_factors(list(wp = wp, sp = sp), reps, l)
+    WholePlots <- resolved$wp$levels
+    SubPlots <- resolved$sp$levels
+    wp <- resolved$wp$count
+    sp <- resolved$sp$count
+  } else {
+    if (!is.data.frame(data))
+      fieldhub_abort("Data must be a data frame.")
+    if (ncol(data) < 2L) fieldhub_abort("split_plot() requires whole-plot and sub-plot columns in data.")
+    data <- as.data.frame(data[, 1:2])
     colnames(data) <- c("WholePlot", "SubPlot")
     WholePlots <- as.vector(na.omit(data$WholePlot))
     SubPlots <- as.vector(na.omit(data$SubPlot))
+    validate_entry_labels(WholePlots, "WholePlot")
+    validate_entry_labels(SubPlots, "SubPlot")
+    check_unique_labels(WholePlots, "WholePlot")
+    check_unique_labels(SubPlots, "SubPlot")
     WholePlots.f <- factor(WholePlots, as.character(unique(WholePlots)))
     SubPlots.f <- factor(SubPlots, as.character(unique(SubPlots)))
     wp <- length(levels(WholePlots.f))
     sp <- length(levels(SubPlots.f))
     WholePlots <- as.character(WholePlots.f)
     SubPlots <- as.character(SubPlots.f)
-    if(!factorLabels) {
+    if (!factorLabels) {
       WholePlots <- as.character(1:wp)
       SubPlots <- as.character((wp + 1):(wp + sp))
     }
   }
+  if (sp < 2L) {
+    fieldhub_abort("split_plot() requires at least two sub-plot levels: sp = ", sp,
+                   " leaves nothing to split within each whole plot.")
+  }
   b <- reps
+  validate_design_size(c(wp, sp, reps, l))
   if (!is.null(plotNumber)) {
-    if (any(!is.numeric(plotNumber)) || any(plotNumber < 1) || any(plotNumber %% 1 != 0) ||
-        any(diff(plotNumber) < 0)) {
-      shiny::validate("Input plotNumber must be an integer greater than 0 and sorted.")
+    validate_plot_starts(plotNumber)
+    if (any(plotNumber < 1) || any(diff(plotNumber) < 0)) {
+      fieldhub_abort("Input plotNumber must be an integer greater than 0 and sorted.")
     } 
   }else {
-    plotNumber <- seq(1001, 1000*(l+1), 1000)
-    warning("Since plotNumber was NULL, it was set up to its default value for each location.")
+    default_plots <- default_plot_starts(l, 1001)
+    warn_default_plot_numbers(plotNumber, l, default_plots, caller_supplied = plotNumber_supplied)
+    plotNumber <- default_plots
   }
   plot.number <- plotNumber
   if (type == 1) crd <- TRUE else crd <- FALSE
-  pred_plots <- plot_number_splits(plot.number = plot.number, reps = b, l = l, t = wp, crd = crd)
+  pred_plots <- plot_number_splits(plot.number = plot.number, reps = b, l = l, t = wp, crd = crd,
+                                   supplied = plotNumber_supplied)
   plot.random <- pred_plots$plots
   p.number.loc <- pred_plots$plots_loc
+  # Record the effective per-location starts plot_number_splits() actually
+  # used, not the raw (possibly length-mismatched or absent) plotNumber
+  # argument, so reproduce_design() replays silently and identically.
+  plotNumber <- pred_plots$plot_number
   if (crd) {
     loc.list <- vector(mode = "list", length = l)
     for (v in 1:l) {
@@ -195,6 +189,7 @@ split_plot <- function(wp = NULL, sp = NULL, reps = NULL, type = 2, l = 1, plotN
   rownames(spd.layout) <- 1:nrow(spd.layout)
   wp.d <- rep(as.vector(wp.random), each = sp)
   sp.d <- as.vector(sp.random)
+  validate_location_labels(locationNames, l)
   if (!is.null(locationNames) && length(locationNames) == l) {
     LOCATION <- rep(locationNames, each = (sp * wp) * b)
   }else if (is.null(locationNames) || length(locationNames) != l) {
@@ -226,6 +221,9 @@ split_plot <- function(wp = NULL, sp = NULL, reps = NULL, type = 2, l = 1, plotN
                      id_design = 5)
   output <- list(infoDesign = info.design, layoutlocations = loc.spd.layout, 
               fieldBook = spd_output)
-  class(output) <- "FielDHub"
+  reproduction_parameters <- record_design_parameters(
+    environment(), overrides = list(wp = args1[[1]], sp = args1[[2]], type = if (crd) 1 else 2)
+  )
+  output <- new_fieldhub_design(output, "split_plot", parameters = reproduction_parameters)
   return(invisible(output))
 }

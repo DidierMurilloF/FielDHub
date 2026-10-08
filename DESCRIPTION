@@ -1,6 +1,6 @@
 Package: FielDHub
 Title: A Shiny App for Design of Experiments in Life Sciences
-Version: 1.5.0.9000
+Version: 1.6.0
 Authors@R: 
        c(person(given = "Didier",
               family = "Murillo",
@@ -42,21 +42,17 @@ Description: A shiny design of experiments (DOE) app that aids in the creation o
 Depends: R (>= 4.1.0)
 License: MIT + file LICENSE
 Imports: 
-    config,
-    golem,
-    shiny (>= 1.7.0),
+    dplyr (>= 1.0.0),
+    blocksdesign,
+    ggplot2 (>= 3.4.0),
+    rlang,
+    viridisLite,
+    desplot (>= 1.11),
+    shiny (>= 1.8.1),
     htmltools,
     DT,
-    shinythemes,
-    dplyr,
-    numbers,
-    blocksdesign,
-    shinycssloaders,
-    ggplot2,
-    plotly,
-    viridis,
-    shinyalert,
-    desplot (>= 1.11),
+    bslib,
+    promises,
     shinyjs
 Encoding: UTF-8
 RoxygenNote: 7.3.2
@@ -66,12 +62,11 @@ Author: Didier Murillo [cre, aut], Salvador Gezan [aut], Ana Heilman [ctb],
  North Dakota State University [cph]
 Maintainer: Didier Murillo <didier.murilloflorez@ndsu.edu>
 Suggests: 
-    testthat (>= 3.0.0),
+    mirai,
+    codetools,
+    testthat (>= 3.2.0),
     spelling,
-    rlang,
-    glue,
     knitr,
-    kableExtra,
     rmarkdown
 Config/testthat/edition: 3
 URL: https://github.com/DidierMurilloF/FielDHub,

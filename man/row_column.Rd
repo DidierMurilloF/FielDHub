@@ -15,7 +15,8 @@ row_column(
   iterations = NULL,
   data = NULL,
   method = c("onestage", "twostage"),
-  latinize = FALSE
+  latinize = FALSE,
+  reps = NULL
 )
 }
 \arguments{
@@ -23,7 +24,7 @@ row_column(
 
 \item{nrows}{Number of rows of a full resolvable replicate.}
 
-\item{r}{Number of blocks (full resolvable replicates).}
+\item{r}{Deprecated alias for \code{reps}; positional calls remain supported.}
 
 \item{l}{Number of locations. By default \code{l = 1}.}
 
@@ -35,7 +36,8 @@ location. By default \code{plotNumber = 101}.}
 \item{seed}{(optional) Real number that specifies the starting seed to obtain 
 reproducible designs.}
 
-\item{iterations}{Number of optimization iterations. Its meaning and default
+\item{iterations}{Finite positive whole-number optimization budget, at most
+\code{.Machine$integer.max}. Its meaning and default
 depend on \code{method}. For \code{method = "onestage"} it is passed to
 \code{blocksdesign::design()} as its number of \code{searches} (default 200;
 values beyond a few hundred rarely improve the design). For
@@ -67,6 +69,8 @@ treatment tends to appear in different rows and columns across the replicates.
 By default \code{FALSE}. Only meaningful with \code{method = "onestage"}; it
 is ignored for \code{method = "twostage"} (which cannot latinize across
 replicates), where passing \code{latinize = TRUE} is ignored with a warning.}
+
+\item{reps}{Number of full resolvable replicates per location.}
 }
 \value{
 A list with five elements.
@@ -141,6 +145,14 @@ as replicates. By default (\code{latinize = FALSE}) the rows and columns stay
 nested within each replicate. \code{latinize} has no effect for
 \code{method = "twostage"}, which cannot latinize across replicates.
 }
+\section{Reproducibility}{
+
+The result records effective inputs and the resolved seed in
+\code{metadata$parameters}, using \code{reps} for replication. Under the
+same package versions and RNG settings, rebuild a result \code{x} with
+\code{do.call(row_column, x$metadata$parameters)}.
+}
+
 \examples{
 
 # Example 1: Generates a row-column design with 2 full blocks and 24 treatments
@@ -150,7 +162,7 @@ nested within each replicate. \code{latinize} has no effect for
 rowcold1 <- row_column(
   t = 24, 
   nrows = 6, 
-  r = 2, 
+  reps = 2,
   l = 1, 
   plotNumber= 101, 
   locationNames = "Loc1",
@@ -171,7 +183,7 @@ head(treatment_list)
 rowcold2 <- row_column(
   t = 30, 
   nrows = 5, 
-  r = 2, 
+  reps = 2,
   l = 1, 
   plotNumber= 1001, 
   locationNames = "A",
@@ -191,7 +203,7 @@ head(rowcold2$fieldBook,12)
 rowcold3 <- row_column(
   t = 24,
   nrows = 6,
-  r = 2,
+  reps = 2,
   l = 1,
   plotNumber = 101,
   locationNames = "Loc1",

@@ -50,10 +50,10 @@ test_that("rep_checks recycles from a scalar", {
   expect_equal(e$reps_per_block[1:3], c(2, 2, 2))
 })
 
-test_that("rep_checks defaults to 1 with a message", {
-  expect_message(
+test_that("rep_checks defaults to 1 with a classed warning", {
+  expect_warning(
     e <- rcbd_resolve_entries(t = 5, checks = "CK1"),
-    "ordinary RCBD"
+    "ordinary RCBD", class = "fieldhub_default_warning"
   )
   expect_equal(e$reps_per_block[1], 1)
 })
@@ -61,7 +61,10 @@ test_that("rep_checks defaults to 1 with a message", {
 test_that("entry resolution rejects bad input", {
   pool <- data.frame(TREATMENT = c("CK1", "CK2", "G-1"))
 
-  expect_error(rcbd_resolve_entries(t = 5, checks = 2), "requires 'data'")
+  # Task 8: a bare check count now generates CH/T labels when `t` is a
+  # numeric count (see below); "requires 'data'" now only fires when neither
+  # `t` nor `data` supplies a pool for the count to draw from.
+  expect_error(rcbd_resolve_entries(checks = 2), "requires 'data'")
   expect_error(rcbd_resolve_entries(checks = 3, rep_checks = 2, data = pool),
                "at least one test entry")
   expect_error(rcbd_resolve_entries(t = 5, checks = c("CK1", "CK1"), rep_checks = 2),
@@ -99,14 +102,16 @@ test_that("duplicate labels in the entry pool are rejected", {
 test_that("a check-heavy block warns", {
   expect_warning(
     rcbd_resolve_entries(t = 2, checks = "CK1", rep_checks = 4),
-    "more than half"
+    "more than half",
+    class = "fieldhub_design_warning"
   )
 })
 
 test_that("the high-density warning mentions the randomization consequence", {
   expect_warning(
     rcbd_resolve_entries(t = 2, checks = "CK1", rep_checks = 4),
-    "nearly or fully determined"
+    "nearly or fully determined",
+    class = "fieldhub_design_warning"
   )
 })
 
@@ -117,7 +122,8 @@ test_that("the high-density warning does not mention stratification when spread_
   # must not claim a constraint that is not in effect.
   expect_warning(
     rcbd_resolve_entries(t = 2, checks = "CK1", rep_checks = 4, spread_checks = FALSE),
-    "more than half"
+    "more than half",
+    class = "fieldhub_design_warning"
   )
   w <- tryCatch({
     rcbd_resolve_entries(t = 2, checks = "CK1", rep_checks = 4, spread_checks = FALSE)
@@ -167,7 +173,7 @@ test_that("rep_checks = NA is rejected", {
 test_that("negative t is rejected", {
   expect_error(
     rcbd_resolve_entries(t = -3, checks = "CK1", rep_checks = 2),
-    "non-negative"
+    "finite whole number", class = "fieldhub_input_error"
   )
 })
 
@@ -247,7 +253,8 @@ test_that("exhausting the retries falls back with a warning", {
   set.seed(3)
   expect_warning(
     blk <- rcbd_randomize_block(e, spread_checks = TRUE, max_tries = 0),
-    "falling back"
+    "falling back",
+    class = "fieldhub_design_warning"
   )
   expect_length(blk, 9)
   expect_equal(sum(blk == 1L), 6)
@@ -315,6 +322,43 @@ test_that("RCBD() accepts checks as a count over uploaded data", {
   expect_equal(d$infoDesign$plots_per_block, 12)
   expect_equal(d$infoDesign$check_names, c("CK1", "CK2"))
   expect_equal(d$infoDesign$number.of.treatments, 8)
+})
+
+test_that("RCBD generates check labels for a check count", {
+  x <- RCBD(t = 6, reps = 3, checks = 2, rep_checks = c(2, 2), seed = 5)
+  labels <- unique(x$fieldBook$TREATMENT)
+  expect_setequal(labels, c(paste0("CH", 1:2), paste0("T", 1:6)))
+  # rep_checks counts repeats *within a block*; each of the 3 reps is one
+  # complete block, so CH1 (rep_checks[1] = 2) appears 2 * 3 = 6 times total.
+  expect_identical(sum(x$fieldBook$TREATMENT == "CH1"), 2L * 3L)
+})
+
+test_that("rcbd_resolve_entries() generates CH/T labels for a bare check count", {
+  e <- rcbd_resolve_entries(t = 6, checks = 2, rep_checks = c(2, 2))
+  expect_equal(e$TREATMENT, c("CH1", "CH2", paste0("T", 1:6)))
+  expect_equal(e$CHECKS, c(1L, 2L, 0L, 0L, 0L, 0L, 0L, 0L))
+  expect_equal(e$reps_per_block, c(2, 2, 1, 1, 1, 1, 1, 1))
+})
+
+test_that("checks as a count over a character t vector still slices the pool (unchanged)", {
+  pool <- c("CK1", "CK2", paste0("G", 1:6))
+  e <- rcbd_resolve_entries(t = pool, checks = 2, rep_checks = 2)
+  expect_equal(e$TREATMENT, pool)
+  expect_equal(e$CHECKS, c(1L, 2L, 0L, 0L, 0L, 0L, 0L, 0L))
+})
+
+test_that("RCBD() generates check labels for a check count across locations", {
+  d <- RCBD(t = 6, reps = 2, l = 2, checks = 2, rep_checks = 2,
+            plotNumber = c(101, 1001), locationNames = c("A", "B"), seed = 82)
+  labels <- unique(d$fieldBook$TREATMENT)
+  expect_setequal(labels, c("CH1", "CH2", paste0("T", 1:6)))
+  expect_equal(nrow(d$fieldBook), (6 + 2 * 2) * 2 * 2)  # n_units * reps * l
+})
+
+test_that("a non-positive or fractional check count is rejected even without a pool", {
+  expect_error(rcbd_resolve_entries(t = 5, checks = 0), class = "fieldhub_input_error")
+  expect_error(rcbd_resolve_entries(t = 5, checks = -2), class = "fieldhub_input_error")
+  expect_error(rcbd_resolve_entries(t = 5, checks = 2.5), class = "fieldhub_input_error")
 })
 
 test_that("plot numbers step by block size when checks are present", {

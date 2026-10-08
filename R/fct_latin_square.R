@@ -2,6 +2,12 @@
 #'
 #' Randomly generates a latin square design of up 10 treatments.
 #'
+#' @details The randomized search is limited to 100,000 placement iterations
+#' per square. If it cannot complete a square within that budget, it raises
+#' a \code{fieldhub_search_error} with the square number and iteration limit.
+#' No incomplete design is returned; try a different seed. Designs completed
+#' within the limit retain their existing seeded output.
+#'
 #' @param t Number of treatments.
 #' @param reps Number of full resolvable squares. By default \code{reps = 1}.
 #' @param plotNumber Starting plot number. By default \code{plotNumber = 101}.
@@ -63,32 +69,41 @@
 #' latinSq2$plotSquares
 #' head(latinSq2$fieldBook)
 #'
+#' @section Reproducibility:
+#' The result records effective inputs and the resolved seed in
+#' \code{metadata$parameters}. Under the same package versions and RNG
+#' settings, rebuild a result \code{x} with
+#' \code{do.call(latin_square, x$metadata$parameters)}.
+#'
 #' @export
 latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpentine",
                          seed = NULL, locationNames = NULL, data = NULL) {
 
-  if (is.null(seed) || !is.numeric(seed)) seed <- runif(1, min = -50000, max = 50000)
-  set.seed(seed)
-  if (all(c("serpentine", "cartesian") != planter)) {
-    base::stop('Input planter is unknown. Please, choose one: "serpentine" or "cartesian"')
-  }
+  seed <- resolve_seed(seed)
+  local_design_seed(seed)
+  validate_planter(planter)
   n <- t
   l <- 1
+  force(data)
+  validate_iteration_budget(reps, "reps")
   if (is.null(data)) {
+    validate_iteration_budget(n, "t")
     if (all(!is.null(c(n, reps))) && all(base::lengths(list(n, reps)) == 1)) {
       if (all(is.numeric(c(n, reps))) && all(c(n, reps) %% 1 == 0) & all(c(n, reps) > 0)) {
-        if (n > 10) stop("\n'latinsquare()' allows only up to 10 treatments.")
-        if (n < 2) stop("latin_square() requires more than one treatment.")
+        if (n > 10) fieldhub_abort("\n'latinsquare()' allows only up to 10 treatments.")
+        if (n < 2) fieldhub_abort("latin_square() requires more than one treatment.")
         ls.len <- n
         Name.Rows <- paste(rep("Row", ls.len), 1:ls.len)
         Name.Columns <- paste(rep("Column", ls.len), 1:ls.len)
         Name.Treatments <- paste(rep("T", ls.len), 1:ls.len,  sep = "")
-      }else stop("\n'latinsquare()' requires a possitive integer number for input t")
-    }else stop("\n'latinsquare()' requires an possitive integer number for input t")
+      }else fieldhub_abort("\n'latinsquare()' requires a possitive integer number for input t")
+    }else fieldhub_abort("\n'latinsquare()' requires an possitive integer number for input t")
   }else if (!is.null(reps) && !is.null(data)) {
-    if(!is.data.frame(data)) stop("Data must be a data frame.")
+    if(!is.data.frame(data)) fieldhub_abort("Data must be a data frame.")
+    if (ncol(data) < 3L) fieldhub_abort("latin_square() requires row, column, and treatment columns in data.")
     data <- as.data.frame(na.omit(data[,1:3]))
     colnames(data) <- c("Row", "Column", "Treatment")
+    for (column in names(data)) validate_entry_labels(data[[column]], column)
     Row <- as.vector(na.omit(data$Row))
     Column <- as.vector(na.omit(data$Column))
     Treatment <- as.vector(na.omit(data$Treatment))
@@ -98,22 +113,25 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
     n.rows <- length(levels(Row.f))
     n.cols <- length(levels(Column.f))
     n.treatments <- length(levels(Treatment.f))
-    if (any(c(n.rows, n.cols, n.treatments) != n.rows)) stop("\n'latinsquare()' requires a balanced data as input!")
+    if (any(c(n.rows, n.cols, n.treatments) != n.rows)) fieldhub_abort("\n'latinsquare()' requires a balanced data as input!")
     Name.Rows <- as.character(Row.f)
     Name.Columns <- as.character(Column.f)
     Name.Treatments <- as.character(Treatment.f)
     ls.len <- n.treatments
-    if (ls.len > 10) stop("\n'latinsquare()' allows only up to 10 treatments.")
+    if (ls.len < 2L) fieldhub_abort("latin_square() requires more than one treatment.")
+    if (ls.len > 10) fieldhub_abort("\n'latinsquare()' allows only up to 10 treatments.")
   }
+  validate_design_size(c(ls.len, ls.len, reps))
   if(!is.null(l) && is.numeric(l) && length(l) == 1) {
     if (l > 1 && is.null(locationNames)) {
       locationNames <- 1:l
     }else if (l > 1 && !is.null(locationNames)) {
       if (length(locationNames) < l) locationNames <- 1:l
     }
-    if (length(plotNumber) < l || is.null(plotNumber)) plotNumber <- seq(1001, 1000*(l+1), 1000)
-  }else stop("\n'latinsquare()' requires a integer for number of locations!")
+    if (length(plotNumber) < l || is.null(plotNumber)) plotNumber <- default_plot_starts(l, 1001)
+  }else fieldhub_abort("\n'latinsquare()' requires a integer for number of locations!")
   plot.numbs <- seriePlot.numbers(plot.number = plotNumber, reps = reps, l = l, t = ls.len*ls.len)
+  validate_location_labels(locationNames, l)
   if (!is.null(locationNames) && length(locationNames) == l) {
     locs <- locationNames
   }else locs <- 1:l
@@ -128,13 +146,10 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
     D <- plot.numbs[[l]]
     P <- matrix(data = D[j]:(D[j] + (ls.len*ls.len) - 1), nrow = ls.len, ncol = ls.len,
                 byrow = TRUE)
-    # plot_matrix <- apply(P, 2, rev)
     plot_matrix <- P
-    if(planter == "serpentine") plot_matrix <- serpentinelayout(plot_matrix, opt = 2)
-    # print(plot_matrix)
-    # print(as.vector(t(plot_matrix)))
+    plot_matrix <- along_rows(plot_matrix, planter)
     plotSquares[[j]] <- plot_matrix
-    ls.random <- lsq(len = ls.len, reps = 1)
+    ls.random <- lsq(len = ls.len, reps = 1, first_square = j)
     #get random rows order
     ls.random.r <- ls.random
     row.random <- sample(1:ls.len)
@@ -156,8 +171,6 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
       w <- w + 1
     }
     new_expt.ls <- order_ls(S = expt.ls, data = data)
-    # print(new_expt.ls)
-    # print(as.vector(t(new_expt.ls)))
     lsd.reps[[j]] <- new_expt.ls
     step.random[[j]] <- list(ls.random, ls.random.r, ls.random.c)
     Row <- rep(rownames(lsd.reps[[j]]), each = ls.len)
@@ -175,7 +188,6 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
   lsd.reps <- setNames(lsd.reps, paste0("rep", seq(1:reps))) # set names
   ls.output$ROW <- factor(ls.output$ROW, levels = Name.Rows)
   ls.output$COLUMN <- factor(ls.output$COLUMN, levels = Name.Columns)
-  #ls.output.order <- ls.output[order(ls.output$PLOT, ls.output$SQUARE, ls.output$ROW), ]
   ls.output.order <- ls.output[order(ls.output$SQUARE, ls.output$ROW), ]
   if (!is.null(locationNames) & length(locationNames) == l) {
     ls.output.order$LOCATION <- rep(locationNames, each = (ls.len * ls.len) * reps)
@@ -192,12 +204,14 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
   )
   output <- list(infoDesign =  parameters, squares = lsd.reps,
                  plotSquares = plotSquares, fieldBook = latin_design)
-  class(output) <- "FielDHub"
+  reproduction_parameters <- record_design_parameters(environment())
+  output <- new_fieldhub_design(output, "latin_square", parameters = reproduction_parameters)
   return(invisible(output))
 }
 
 #' @noRd 
-lsq <- function(len, reps = 1) {
+lsq <- function(len, reps = 1, max_iterations = 100000L, first_square = 1L) {
+  validate_iteration_budget(max_iterations, "Latin-square search limit")
   allsq <- matrix(nrow = reps*len, ncol = len)
   #if (returnstrings) { squareid <- vector(mode = "character", length = reps) }
   sample1 <- function(x) {
@@ -206,7 +220,19 @@ lsq <- function(len, reps = 1) {
   }
   for (n in 1:reps) {
     sq <- matrix(nrow=len, ncol=len) 
+    iterations <- 0L
     while (any(is.na(sq))) {
+      if (iterations >= max_iterations) {
+        square <- first_square + n - 1L
+        fieldhub_abort(
+          "latin_square() reached its placement-iteration limit of ",
+          max_iterations, " for square ", square, ". Try a different seed.",
+          class = "fieldhub_search_error",
+          data = list(design = "latin_square", square = square,
+                      iterations = iterations, max_iterations = max_iterations)
+        )
+      }
+      iterations <- iterations + 1L
       k <- sample1(which(is.na(sq)))
       i <- (k-1) %% len + 1       
       j <- floor((k-1) / len) + 1 
@@ -239,7 +265,31 @@ lsq <- function(len, reps = 1) {
     z <- z + 1
   }
   colnames(ls4.random) <- paste(rep("Column", len), 1:len)
-  rownames(ls4.random) <- paste(rep("Row", len), 1:len)
+  rownames(ls4.random) <- paste("Row", rep(seq_len(len), times = reps))
   
   return(ls4.random)
+}
+
+#' @noRd 
+order_ls <- function(S = NULL, data = NULL) {
+  cindex <- ncol(S)
+  rindex <- nrow(S)
+  if (is.null(data)) {
+    r <- paste("Row", 1:rindex, sep = " ")
+    c <- paste("Column", 1:cindex, sep = " ")
+  }else {
+    r <- factor(data[,1], levels = as.character(unique(data[,1])))
+    c <- factor(data[,2], levels = as.character(unique(data[,2])))
+  }
+  rnames <- rownames(S)
+  cnames <- colnames(S)
+  rOrder <- vector(mode = "numeric")
+  cOrder <- vector(mode = "numeric")
+  for (i in r) {rOrder[i] <- which(rnames == i)}
+  for (j in c) {cOrder[j] <- which(cnames == j)}
+  rOrder <- as.numeric(rOrder)
+  cOrder <- as.numeric(cOrder)
+  new_s <- S[,cOrder]
+  new_s <- new_s[rOrder,]
+  return(new_s)
 }

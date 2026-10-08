@@ -97,6 +97,14 @@ using a pairwise distance metric. The function outputs various information about
 including the field layout, replicated and unreplicated treatments, and pairwise distances between 
 treatments. Note that the design generation needs the dimension of the field (number of rows and columns).
 }
+\section{Reproducibility}{
+
+The result records effective inputs and the resolved seed in
+\code{metadata$parameters}. Under the same package versions and RNG
+settings, rebuild a result \code{x} with
+\code{do.call(partially_replicated, x$metadata$parameters)}.
+}
+
 \examples{
 # Example 1: Generates a spatial optimized partially replicated arrangement design in one 
 # location with 335 genotypes for a field with dimensions 15 rows x 28 cols. 

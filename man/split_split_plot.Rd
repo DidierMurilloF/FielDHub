@@ -53,6 +53,14 @@ A list with two elements.
 \description{
 It randomly generates a split split plot design (SSPD) across locations.
 }
+\section{Reproducibility}{
+
+The result records effective inputs and the resolved seed in
+\code{metadata$parameters}. Under the same package versions and RNG
+settings, rebuild a result \code{x} with
+\code{do.call(split_split_plot, x$metadata$parameters)}.
+}
+
 \examples{
 # Example 1: Generates a split split plot design SSPD with 5 whole plots, 2 sub-plots,
 # 3 sub-sub plots, and 3 reps in an RCBD arrangement. This is for one location.

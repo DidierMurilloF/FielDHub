@@ -1,0 +1,63 @@
+get_random_stacked <- function(stacked = "By Column",
+                               n_rows, 
+                               n_cols, 
+                               matrix_checks = NULL,
+                               Fillers = FALSE, 
+                               checks = NULL, 
+                               data = NULL, 
+                               data_dim_each_block = NULL) {
+  data_entries <- as.vector(data[,1])
+  data_entries_no_checks <- data_entries[!(data_entries %in% checks)]
+  b <- length(data_dim_each_block)
+  target <- rep(paste0("B", 1:b), times = data_dim_each_block)
+  if (sum(matrix_checks == 0) != sum(data_dim_each_block)) {
+    fieldhub_abort("Block dimensions do not fit to the matrix")
+  }
+  target <- rep(paste0("B", 1:b), times = data_dim_each_block)
+  v <- 1
+  for(j in seq_len(ncol(matrix_checks))) {
+    for (i in rev(seq_len(nrow(matrix_checks)))) {
+      if (matrix_checks[i,j] == 0){
+        matrix_checks[i,j] <- target[v]
+        v <- v + 1
+      }else{
+        matrix_checks[i,j] <- matrix_checks[i,j]
+        v <- v
+      }
+    }
+  }
+  w_map_letters <- matrix_checks
+  # Block labels in block order; sorting them (B1, B10, B2, ...) would pair
+  # the entries of one block with the region of another once b >= 10.
+  levels_target <- paste0("B", 1:b)
+  split_entries <- split_vectors(data_entries_no_checks, data_dim_each_block)
+  z <- 1
+  for(k in 1:b){
+    matrix_checks[matrix_checks == levels_target[z]] <- split_entries[[k]][sample.int(length(split_entries[[k]]))]
+    z <- z + 1
+  }
+  
+  treatments_random <- sum(data_entries_no_checks %in% matrix_checks)
+  len_entries_to_random <- length(data_entries_no_checks)
+  if (treatments_random == len_entries_to_random) {
+    matrix_checks_random_entries <- matrix_checks
+  } else fieldhub_abort("Some entries are missing in the randomization!!")
+  return(list(rand = matrix_checks_random_entries, 
+              Entries = split_entries, 
+              Lines = data_dim_each_block, 
+              w_map_letters = w_map_letters))
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

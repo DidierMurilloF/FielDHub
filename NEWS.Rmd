@@ -1,5 +1,7 @@
 ---
-output: github_document
+output:
+  github_document:
+    html_preview: false
 ---
 
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
@@ -16,9 +18,370 @@ knitr::opts_chunk$set(
 
 # Changelog
 
-# FielDHub (development version)
+# FielDHub 1.6.0
+
+## Release highlights
+
+This release modernizes the Shiny app and the R package while retaining the
+original design input panels. The app version, package version and exported
+result metadata all come from `DESCRIPTION`.
+
+- Every design uses native, high-resolution plot previews with consistent
+  PNG, vector PDF and plain layout CSV downloads above the image.
+- Loading feedback stays inside the affected results tab, at a consistent
+  position, without task-to-output flicker or unnecessary re-renders.
+- The app runs directly on Shiny, without golem configuration. Required app
+  dependencies are Imports; background workers remain opt-in through `mirai`.
+  Obsolete popup, loader, interactive-plot and ZIP dependencies are removed.
+- Public design results have shared layout, validation, seed-recording and
+  reproduction contracts. Existing valid seeded results are preserved except
+  for the corrections explicitly documented below.
+- Help and About Us retain compact legacy-style layouts. About Us has no email
+  buttons or separate copyright label; Salvador Gezan's LinkedIn link is
+  updated and Richard Horsley's LinkedIn link is added. Package authorship,
+  maintainer contact details and legal notices are unchanged.
+
+Review the breaking changes and seeded-result corrections below before
+upgrading existing scripts. Migration guidance is available in
+`help("design_arguments", package = "FielDHub")` and the architecture vignette.
+
+### App usability:
+
+- Help and About Us return to compact legacy-style layouts: grouped design
+  guides beside project links, six portrait profiles, and a small contributors
+  section. Optional offline R help is collapsed by default, duplicate credits
+  are removed, and pages use natural responsive flow without nested scrolling.
+  Jean-Marc Montpetit's profile is removed from About Us; historical package
+  attribution is unchanged.
+
+- All design tabs use one shared loading appearance for Run/Randomize tasks and
+  individual outputs, implemented with native Shiny events and bundled CSS/JS.
+  Loading stays local to affected tabs, preserves plot dimensions, and clears on
+  results, errors or disconnection; shinycssloaders is no longer required.
+
+- Result tabs now keep a single, slightly larger loading indicator at the same
+  position across tables and plots. Task completion and output painting share
+  its lifecycle, and brief output updates do not flash an extra spinner.
+  The bottom "Save design and reproduction code" panel is removed; field-book
+  and plot downloads, and the public R reproduction functions, are unchanged.
+
+- The pinned Docker image includes the system libuv headers needed for its
+  locked `fs` dependency and build-stage-only CMake/XZ tools for the bundled
+  worker transport libraries. Deployment checks guard these prerequisites.
+
+### Breaking changes:
+
+- Effective location names must be complete, nonblank atomic vectors with
+  one distinct name per location. Names that become duplicates after an
+  engine's existing uppercase conversion are also rejected. This prevents
+  silently combined fields and late internal errors. Existing wrong-length
+  fallbacks, valid label types, ordering, and seeded results are preserved.
+  Location counts no longer accept one-cell matrices.
+
+- Allocation engines reject malformed line counts, copies per entry, and
+  active check counts/replications before calling the optimizer. Desired
+  averages must be finite positive scalars. Infeasible location-block models
+  and sizes beyond R's integer-index range raise structured input errors.
+  Valid seeded allocations are unchanged.
+
+- Diagonal and optimized designs now reject malformed check counts/ranges
+  and incomplete check replication before allocation. Check entry vectors
+  must be consecutive and distinct; optimized designs still sort them.
+  Diagonal block sizes must be complete positive whole numbers and match
+  the entry count. Valid seeded results and replication draws are unchanged.
+
+- Spatial row and column counts now reject missing, non-finite, fractional,
+  and matrix inputs before field construction. Diagonal and optimized entry
+  counts, plus augmented-RCBD entry, check, block, and experiment-replication
+  counts, use the same finite scalar checks. P-rep dimension vectors must be
+  complete positive counts; existing padding/truncation and augmented-RCBD
+  automatic-dimension defaults are retained. Projected field sizes beyond
+  R's integer-index range raise structured errors. Valid seeded results are
+  unchanged.
+
+- Factorial, split-plot, split-split-plot, and strip-plot designs now check
+  factor counts and level labels before expansion. Counts must be finite,
+  positive whole numbers; level labels must be complete, nonblank, and unique
+  within each factor. Full factorials still allow the same level names in
+  different factors. Incomplete rows/column padding are omitted as before.
+  Generated full factorials accept 2 to 26 factor counts,
+  matching their established A-to-Z factor names. Invalid or oversized inputs
+  now raise structured input errors. Split and strip designs share one factor
+  parser and accept mixed count/label inputs consistently; valid existing
+  seeded results are unchanged.
+
+- RCBD and Latin-square treatment counts now reject missing, non-finite,
+  fractional, and nonscalar values before allocation. Entry tables must have
+  the required columns and usable, nonblank labels; Latin squares need at
+  least two treatments. RCBD also rejects duplicate supplied treatments and
+  zero test entries with checks (which previously generated a spurious `T`
+  entry). Projected field books exceeding R's integer-index range are rejected
+  before allocation. Valid seeded results and omitted incomplete table rows
+  are unchanged.
+
+- Classic and row-column designs now require finite scalar whole-number
+  replication counts on both generated and supplied-entry paths. Row-column
+  treatment/row counts and entry tables use the same early checks as the block
+  engines. Factorial and split-plot `type` must be numeric `1` (CRD) or `2`
+  (RCBD); other values no longer silently select RCBD or fail in a raw R
+  conditional. Use numeric scalars instead of character/logical values or
+  one-cell matrices. Valid seeded results are unchanged.
+
+- Starting plot numbers now reject missing, non-finite, nonnumeric, fractional,
+  and matrix values with structured input errors before numbering arithmetic.
+  This also validates per-experiment vectors in diagonal-design lists instead
+  of silently coercing them. Use numeric vectors for plot starts. Valid seeded
+  results and each engine's existing length-based defaults are unchanged.
+
+- Incomplete-block and lattice engines now validate block sizes, replication,
+  and treatment counts before randomization, including when entry tables are
+  supplied. Counts must be finite scalar whole numbers, block sizes must be at
+  least two, and generated treatment labels cannot be missing or blank.
+  Replace character/logical counts or one-cell matrices with numeric scalars.
+  Malformed controls and underspecified entry tables raise structured input
+  errors instead of raw R or optimizer errors. Valid input representations and
+  seeded results are unchanged.
+
+- Disconnected block models now report zero A- and D-efficiency instead of
+  `NaN` or a spuriously positive A-efficiency. FielDHub computes these metrics
+  from normalized incidence counts with an explicit connectivity check.
+  Diagnostics and optimizer decisions can change for designs that encounter
+  disconnected comparison models; connected-model comparisons retain the
+  established seven-digit report precision.
+
+- Boolean design controls now consistently require one nonmissing `TRUE` or
+  `FALSE`. Replace numeric (`0`/`1`) or character switches with logical values.
+  Invalid controls are rejected before randomization with a structured
+  `fieldhub_input_error` naming the argument, supplied value, and valid options.
+  Valid logical inputs retain their exact designs and RNG behavior.
+
+- `swap_pairs()` now accepts and records a seed, restores the caller's RNG
+  state, and returns a validated `fieldhub_optimization` result with complete
+  replay metadata. Direct calls without a seed now choose an automatic integer
+  seed, so their layouts can change. With the input matrix already built,
+  replace `set.seed(s); swap_pairs(X)` with `swap_pairs(X, seed = s)` to retain
+  its previous optimization. Internal pair swaps keep the surrounding design's
+  original draw sequence; seeded field designs are unchanged.
+
+- A design function called without an explicit seed (`seed = NULL`) now
+  draws exactly one integer from the caller's random-number stream and
+  leaves the stream advanced by that one draw, instead of fully restoring
+  it: two seedless calls starting from the same RNG state no longer return
+  the same seed and design. Calling `set.seed(k)` before a seedless call
+  reproduces it, as for any other R random function. Explicit seeds are
+  unaffected: the caller's random-number state is left completely
+  untouched.
+
+* The app's CRD and RCBD modules now generate their app-built entry lists
+  by calling `CRD(t = )` and `RCBD(t = , checks = )` with bare counts
+  instead of pre-building `T-`/`G-`/`CH` label data frames, so generated
+  field books use the R API's own labels: CRD entries are `T1`, `T2`, ...
+  and RCBD's generated checks are `CH1`, `CH2`, ... ahead of `T1`, `T2`, ...
+  test entries, matching a direct `RCBD(checks = N)` call. Uploaded entry
+  lists, and every other design, are unaffected.
+
+* The app's STRIPD, SPD and SSPD modules now accept a single replicate
+  (their "Input # of Full Reps" minimums dropped from 2 to 1), matching
+  `strip_plot()`/`split_plot()`/`split_split_plot()`, which already accepted
+  `reps = 1`.
+
+* The app's RCBD module now shows an `RCBD()` failure the same way every
+  other classic design does: as an inline validation message where the
+  layout or field book would appear, instead of a separate alert dialog.
+
+* The app's optimized arrangement, p-rep and augmented RCBD modules now pass
+  counts instead of app-built entry tables: `lines`/`checks`/`rep_checks` to
+  `optimized_arrangement()`, `repGens`/`repUnits` to
+  `partially_replicated()` and `lines`/`checks` to `RCBD_augmented()`. Their
+  field books are unchanged (the functions build the same `CH1`, ..., `G5`,
+  ... lists); `metadata$parameters` now records the counts, exactly as a
+  direct call with the same inputs and seed does. Every spatial module now
+  builds its design through an argument builder tested against the R
+  function. The multi-location p-rep module's allocation table names
+  generated entries `G-1`, `G-2`, ..., as in its field book (it showed
+  `Gen-1`, ...), and the module now delegates merging an uploaded entry list
+  into the locations to `multi_location_prep()` instead of merging it
+  itself. All nineteen app modules now record whole numbers entered in the
+  app as an R user types them (`270`, where Shiny delivers `270L`), so their
+  `metadata$parameters` match a direct call.
+
+* App defaults for inputs that do not fit now follow the R functions: a
+  blank experiment name gives `SparseExpt` in the sparse allocation module
+  and `PrepExpt` in the multi-location p-rep module (it was
+  `expt_sparse`/`expt_prep`), and in the multiple diagonal module a number
+  of starting plots that is neither one nor one per experiment gives the
+  locations `diagonal_arrangement()`'s default starts 1001, 2001, ... (every
+  location used to start at 1001). Starting plots that do not fit the
+  locations of the sparse allocation and multi-location p-rep modules keep
+  their default 1, 1001, ..., now taken from
+  `sparse_allocation()`/`multi_location_prep()` themselves.
+
+* The single diagonal module now offers the same field dimensions as the R
+  functions: its list starts at 10% more plots than entries, like
+  `diagonal_arrangement()`'s suggestions (which now come from the same
+  candidate list), instead of a module-only 11%, so some smaller fields are
+  now offered.
+
+* Two spatial app screens changed: the augmented RCBD module's table of
+  checks now appears with the list of entries after Randomize! (it used to
+  appear as soon as Run! was clicked), and the multi-location p-rep module
+  reads the number of copies per entry once, at Run!, for both the
+  allocation and the design, so changing it takes effect at the next Run!
+  (the design used to record the value shown at Randomize!, while the
+  allocation kept the one of Run!).
+
+* The standard Shiny app dependencies are now installed with FielDHub. Native Shiny handles startup, resources and problem dialogs; golem and shinyalert are no longer required. Shinyjs is retained, and mirai remains optional for background workers. Unused plotly/glue declarations and cosmetic kableExtra vignette styling are removed; knitr and rmarkdown remain documentation dependencies.
+
+* `split_families()` now accepts `seed`, records it in `infoDesign` and `metadata`, and restores the caller's random-number state. When omitted, it selects an automatic integer seed using the shared design contract; default allocations therefore change. To reproduce a previous `set.seed(s); split_families(l, data)` allocation, pass `seed = s` explicitly. Existing positional `l` and `data` arguments remain supported.
+
+* `incomplete_blocks()`, the three lattice functions, `row_column()` and `strip_plot()` now accept `reps` for full replication. The former `r` argument (or `b` in `strip_plot()`) still works with a `fieldhub_deprecated_warning`, including positional calls. Supplying both names is an error. Seeded results are unchanged. See `help("design_arguments")` for the shared vocabulary and migration guidance.
+
+* `CRD()` now accepts `locationNames`, matching the other design functions. The old `locationName` argument still works, including positional calls, but signals a `fieldhub_deprecated_warning`. Supplying both spellings is an error. Design output and the saved `infoDesign$locationName` field are unchanged.
+
+* `optimized_arrangement()` now accepts `rep_checks` for check replication, matching the vocabulary used by `RCBD()`, `multi_location_prep()` and `do_optim()`. The former `amountChecks` argument still works but signals a `fieldhub_deprecated_warning`; supplying both names is an error. An invalid value is now reported under `rep_checks`, the canonical name, whichever spelling the call used. Recorded reproduction parameters now use `rep_checks`; `reproduce_design()` still replays older results recorded with `amountChecks`, translating the legacy name first so replay does not raise a `fieldhub_deprecated_warning` about an argument the replaying caller never typed. Seeded results are unchanged. See `help("design_arguments")` for the shared vocabulary and migration guidance.
+
+* The design functions now signal their errors as R conditions of class `fieldhub_error`, with the more specific class `fieldhub_input_error` for invalid arguments or `fieldhub_dimension_error` for field dimensions that do not fit the entries, so scripts can catch them with `tryCatch()`. They no longer raise Shiny validation errors or print to the console. When the field dimensions do not fit, `diagonal_arrangement()`, `optimized_arrangement()`, `partially_replicated()`, `multi_location_prep()` and `RCBD_augmented()` used to print a message and return `NULL` (or, for `RCBD_augmented()`, a data frame of options); they now raise a `fieldhub_dimension_error` whose `options` field holds the valid dimensions. `plot()` raises an error, instead of drawing an empty plot, when the layout or location requested is not available. The Shiny app shows these errors as before.
+* A `seed` that is not a single number is now an error. `CRD()`, `full_factorial()`, `split_plot()` and `strip_plot()` used to ignore a character seed, such as `"123"`, and pick a random one.
+* The results of the design functions have the class `c("fieldhub_<design>", "FielDHub")` instead of `"FielDHub"`, and a new element, `metadata`. Code that compares `class(x) == "FielDHub"` should use `inherits(x, "FielDHub")`.
 
 ### New features:
+
+- `design_formats()`, `read_design()` and `write_design()` expose versioned
+  format registries for validated RDS records and write-only replay scripts.
+  Imports do not execute scripts or re-randomize designs; overwriting existing
+  files requires explicit permission. Contributor vignettes document design
+  registration, app adapters, interchange and compatibility contracts.
+
+- `latin_rectangle()` adds randomized cyclic Latin rectangles, including
+  multi-location layouts, preserved treatment labels, recorded seeds and replay.
+  The app uses the same engine through its shared design module. Rows are
+  complete replicates; columns need not form balanced incomplete blocks.
+  Two-row rectangles have no residual degrees of freedom in the additive
+  row/column/treatment model; these limits are documented in the function help.
+
+- Release benchmarks now record exact revisions and environments and compare
+  workloads, runtime, allocations, optimizer quality and stop diagnostics.
+  Regressions require measurement-specific review explanations.
+- The deployment image now uses a digest-pinned R base, a complete R dependency
+  lock, a checksum-verified bootstrap and a non-root user. A build-only CI job
+  checks the installed runtime without publishing the image.
+
+- `run_app(workers = 2L)` optionally runs designs in a private background
+  worker pool so other app sessions remain responsive. Long runs show a busy
+  control and progress message. Workers require an installed FielDHub package
+  and the optional mirai package; the default `workers = 0L` stays synchronous.
+  Pools close with the app, and recorded seeds and RNG settings are preserved.
+  The app requires Shiny 1.8.1 or newer and promises.
+
+* `write_design(x, file, format = "r")` writes a self-contained R call from the recorded design arguments. Calls retain the seed, year and RNG settings, quote uploaded labels as data, and reconstruct supplied allocation plans before generating their fields. Tables with more than 200 rows and records without portable inputs require the RDS format instead. These reproduction tools remain available through the R API; the app's bottom reproduction panel has been removed to keep its pages simple.
+
+* `RCBD()` now generates its own check labels when `checks` is a bare positive integer and no entry pool is supplied (`t` is itself a bare count): the check labels become `"CH1".."CHN"`, followed by the auto-generated test entries `"T1".."Tt"`, instead of requiring `data` or a character vector `t`. Existing calls that supply a pool (`data`, or a character `t`) or character check labels are unchanged, and so are their seeded results.
+
+- The twelve classic-design simulation dialogs now share one component,
+  preserving existing controls and correcting the response label to "Trait name".
+
+- Independent scientific checks now cover every design family in the fixed-seed
+  catalogue: replication, block completeness, physical coordinates, checks,
+  fillers, allocation budgets, and pair distances. Incomplete-block and lattice
+  efficiencies are checked using separate incidence-matrix algebra. A new
+  scientific-validation vignette explains the evidence and search limits.
+
+- Classic layout selectors now use a shared core helper without building
+  plots. Available choices and field books are unchanged; unavailable stacking
+  produces no choices instead of the invalid sequence `1, 0`. Invalid requests
+  use the app's shared validation messages.
+
+- Layout CSV downloads now select locations in field-book appearance order,
+  matching plots and heatmaps. Character names or differently ordered factor
+  levels previously could select another location. The multiple-diagonal
+  experiment map also uses named coordinates instead of positional row slices.
+  Design generation and each location's layout values are unchanged.
+
+- Layout and allocation table Copy, Excel, and Print exports now include the
+  complete design metadata and selected view. Excel stores the full record in a
+  separate, chunked metadata worksheet; table values and existing export types
+  are preserved. Labels in printed metadata are escaped as text.
+
+- `CRD()` now rejects fractional or nonpositive replication, malformed scalar
+  controls, duplicate supplied treatments, and blank labels or locations before
+  allocating a field book. Valid designs retain their exact outputs. Invalid
+  row-column method and augmented-block stacking choices now carry structured
+  input conditions, while accepted defaults and abbreviations are unchanged.
+
+- All nineteen field-book views now use a shared table component, preserving
+  their factor filters, column order, scrolling settings, and displayed values.
+  The factorial view selects factor columns by their recorded names, so
+  reordered columns or additional response fields are not coerced by position.
+
+- Row-column designs now support seeds at the top of R's accepted range.
+  Location-specific seed offsets wrap only when they would otherwise overflow;
+  these calls previously failed or reported a misleading optimization warning.
+  Ordinary seeded results and caller RNG states are unchanged.
+
+- Release tooling now includes Windows, R-devel, oldrel, and exact minimum-R
+  CI jobs, plus a repeatable benchmark workflow and maintainer checklist.
+  Required macOS and Linux release-job names are unchanged. Export benchmarks
+  also work when R memory profiling is unavailable.
+
+- Row-column, Latin-square, and pair-swap searches share finite whole-number
+  budget validation. Fractional or infinite row-column budgets now fail with
+  classed input errors before randomization. Pair-swap scoring no longer
+  overflows when squaring distant integer plot coordinates; ordinary-field
+  results are unchanged.
+
+- App busy feedback now reports activity and lost connections without disabling
+  or re-enabling controls across the document. The navbar logo is scoped to
+  FielDHub, inserted only once, and includes alternative text.
+
+- Obsolete private ZIP-export helpers and their zip dependency are removed. Plain CSV field-book and layout downloads retain their table validation and filenames; core design reproduction remains available separately.
+
+- `swap_pairs()` now reports its stop reason, attempted thresholds, completed
+  swap sweeps, and per-threshold budget. Invalid or infinite limits, invalid
+  distance choices, and non-integer or out-of-range entry labels receive classed
+  errors before searching. Successful default Euclidean layouts and RNG draw
+  order are unchanged. The Manhattan option now consistently uses Manhattan
+  distance for filtering, scoring, stopping, and reported distances; its seeded
+  layouts can therefore change. Previously it mixed Manhattan candidate filters
+  with Euclidean scores and distance reports.
+
+- Spatial simulation records now retain the original input field book and all
+  effective model parameters, seed, RNG settings, and package version.
+  `reproduce_simulation()` replays both spatial and classic simulation records
+  without evaluating recorded arguments as code. The seven spatial app pages
+  retain those records separately from display-only changes to plot IDs.
+  Existing seeded field books and unrounded simulation values are unchanged.
+
+- The seven spatial design pages now share the same named-column tile renderer
+  as the classic pages, with their existing colors, sizes, and unrounded
+  simulation values preserved. Invalid simulation locations receive classed
+  input errors. The optimized-design heatmap title now names the selected
+  response instead of always saying yield.
+
+- All twelve classic design pages now share a heatmap data builder and renderer.
+  Locations, coordinates, treatment labels, and responses are selected by name,
+  so extra or reordered columns cannot silently change a heatmap. Existing
+  datasets, tooltips, colors, and plot sizes are unchanged; invalid selections
+  receive the shared input-error presentation.
+
+* All twelve classic app workflows now use one response-simulation service. It validates response names, preserves their existing field-book ordering, and retains the input field book, effective seed, parameters, RNG settings, and package version for later reproducible exports. An omitted simulation seed is now resolved and recorded without advancing the caller's stream. Explicitly seeded field books and existing CSV contents are unchanged.
+
+* Classic simulated responses now use the named TREATMENT or TRT_COMB column, so reordered columns or appended user metadata cannot change the treatment distributions. Valid seeded responses are unchanged. The simulator rejects malformed bounds, missing identifiers, ambiguous treatment columns, an existing RESP column, or fewer than two treatments before drawing values.
+
+* The app's Help topics now follow its design registry and include offline R help commands. About displays the package version, credits, and license from DESCRIPTION while retaining the team profiles. Welcome icons use bundled Bootstrap assets instead of a CDN; custom styles are scoped to the app root, and mobile rules are applied only on narrow screens.
+
+* Layout CSV assembly now indexes plots directly by row and column instead of repeatedly scanning the field book for every cell. Existing valid exports retain their values, headers, and orientation. Invalid locations, missing cells, and duplicate coordinates receive classed input errors. A release benchmark measures layout assembly and CSV writing together.
+
+* Repeated diagonal field-dimension candidate queries use a bounded least-recently-used cache: at most 64 queries and 4 MiB of retained keys and results. Failed, warning-producing, or oversized results are not cached. Candidate values and ordering are unchanged.
+
+* The seven spatial-simulation workflows now share their correlation controls. Labels distinguish adjacent columns within a row from adjacent rows within a column. Input identifiers, choices, defaults, and simulation calculations are unchanged.
+
+* The R reproduction API preserves the original result, seed, parameters, RNG settings, and package version. It covers the core design, not later app layout selections or simulated responses. App downloads save plain CSV field books or the selected plot's PNG, PDF or layout CSV; layout buttons say CSV instead of Excel, matching their file format.
+
+* `reproduce_design()` rebuilds field designs and allocation plans from their recorded parameters and RNG settings. It restores the caller's RNG settings and seed state on exit, explains missing legacy parameters, and warns when the recorded FielDHub version differs. Reproduction across different dependency versions or platforms is not guaranteed.
+
+* Every design result records how it was built in a new `metadata` element: the design, the version of the structure of the result (`schema_version`), the seed, the random-number generator (`RNGkind()`) and the version of FielDHub. Its class names the design, such as `c("fieldhub_rcbd", "FielDHub")`, so scripts can tell designs apart with `inherits()`. The other elements are unchanged, and results saved by earlier versions still print, summarise and plot as before. `print()` on a result of a design it does not know now shows its elements instead of nothing.
+
+* `field_layout()` returns the field book of a design with the `ROW` and `COLUMN` of every plot, for the layout, planter and stacking chosen: the field book that `plot()` draws and that the Shiny app exports. The coordinates of CRD, RCBD, latin square, factorial, split-plot, strip-plot, incomplete-block, lattice and row-column designs could only be obtained by drawing them.
 
 * `diagonal_arrangement()` gains `checksPercent`, to choose the percentage of checks among the options available for the field (by default the last one, as before), and `sameEntries`, for `"DBUDC"` designs whose blocks all hold the same entries. `sparse_allocation()` gains `checksPercent` too. These are the choices the Shiny app offers.
 
@@ -45,12 +408,259 @@ knitr::opts_chunk$set(
 
 ### Enhancements:
 
+* Repeated identical unexpected errors no longer queue duplicate dialogs in
+  one app session. Each occurrence is still logged; normal input errors and
+  warnings keep their existing presentation.
+
+- The Welcome and About pages use the current year and DESCRIPTION's
+  contributor names and roles. Existing local portraits and profiles remain;
+  contributor cards also accommodate narrow screens. App styles no longer
+  reset every element's spacing or hard-code the heatmap font.
+
+- Upload examples, column guidance and uniqueness rules share one maintained
+  table. Missing-column errors now explain the required columns even outside
+  the app, and UTF-8 BOM headers work in the C locale. The shared upload row
+  gives seven columns to the file chooser and five to separator controls.
+  Spatial setup panels no longer repeat randomization errors, and field-size
+  guidance no longer suggests enabling fillers when they are already enabled.
+
+- All 19 app modules share optional seed controls with the R API's signed
+  seed bounds. Existing displayed defaults are retained. Clearing a seed
+  chooses and records an automatic value once in the run's input snapshot,
+  shared by allocation and field generation. Simulations with a blank seed
+  reuse the accepted design's recorded seed. Fixed-seed workflows are unchanged.
+
+- The seven spatial design modules now share their result workflow and
+  simulation dialogs. Existing correlation controls, location selection,
+  display numbering, tables, heatmaps, and reproducible archives are retained.
+  Custom response names are labeled "Trait name" consistently with classic
+  designs; simulation records keep their original source identifiers.
+
+- The twelve classic design modules now share one registry-driven result
+  workflow for simulation dialogs, accepted settings, heatmaps, field-book
+  tables, CSV archives, and reproduction code. Existing controls, labels,
+  layout choices, and complete seeded outputs are preserved; design-specific
+  presentation settings live in one internal registry instead of copied
+  server code.
+
+- The twelve classic design modules share layout-selection and stacking-reset
+  behavior. Unavailable selections and drawing failures now show validation
+  messages instead of silently leaving a blank layout panel. Existing input
+  identifiers, valid field books, map labels, and layout metadata are retained.
+
+* Field-dimension searches now enumerate distinct divisor pairs instead of every subset of repeated prime factors. The established option order, filters, numeric values and named-input attributes are retained, while work stays bounded for counts such as `2^30`. Empty mixed-filter searches now return no choices instead of a subscript error. A repeatable dimension benchmark accompanies the change.
+
+* Field designs, family splits and allocation plans now share one result construction boundary. Schema validation checks design-specific field-book columns and family-split location totals in addition to common keys and metadata. Existing storage types, filler markers, empty family locations and extra user columns are preserved. See `help("design_results")` for the schema and reproducibility contract.
+
+* Spatial simulation now applies the separable AR1-by-AR1 covariance through two linear recurrences, avoiding the dense plot-by-plot covariance matrix and Cholesky factorization. Random draws, coordinate order, standardization and the nugget model are preserved. Raw simulated values can differ by floating-point rounding for the same seed; design randomization is unchanged. Independent covariance tests and a repeatable spatial benchmark accompany the implementation.
+
+* Field designs and allocation plans now share validation of their schema, seed range, RNG settings, package version and recorded parameters. Duplicate metadata fields and conflicting design seeds are rejected with classed internal errors; valid results and older schema-1 metadata without parameter lists remain supported.
+
+* Compatibility tests now load genuine objects generated by the unmodified FielDHub 1.5.0 release source for all 19 design families. The saved fixtures include their source revision, generation inputs and dependency versions; tests exercise printing, summaries and field plots without changing the stored designs.
+
+* All field-design and family-allocation engines now record their replay inputs in `metadata$parameters`, completing this support beyond CRD, RCBD and incomplete-block designs. Recording preserves split-plot labels, generated versus supplied factorial data, original diagonal plot starts, augmented field dimensions, custom check entry numbers and the resolved year. Existing seeded scientific results are unchanged.
+
+- Incomplete-block, alpha, square and rectangular lattice, and row-column results now include effective inputs in `metadata$parameters`. Replay uses the canonical `reps` argument without deprecation warnings and preserves the existing treatment labels and default location types.
+
+* `CRD()` and `RCBD()` now record effective inputs, defaults and the resolved seed in `metadata$parameters`, enabling reconstruction with `do.call()` under the same software and RNG settings. RCBD saves starting plot numbers before expanding them by block, and CRD records the canonical location argument. Recording occurs after design generation, preserving the existing scientific calculation and seeded outputs; older metadata without parameter lists remains supported.
+
+* `do_optim()` now returns allocation plans through a validated constructor and records the seed, RNG settings, package/schema versions and evaluated input arguments in `metadata`. Rebuild a plan with `do.call(do_optim, x$metadata$parameters)` under the same software and RNG settings. Existing `Sparse`/`MultiPrep` classes and all four allocation data elements are preserved. Allocation plans have their own schema because they do not yet contain field-book coordinates.
+
+* Upload column requirements and missing-value rules now share one internal definition across all design families. Each file is validated once instead of twice; supported input formats and validation outcomes are preserved. Incomplete validation requests now return the existing missing-columns status instead of a raw R error.
+
+* All 19 app modules now share upload-error message mapping and one alert adapter instead of copying the same format, duplicate-value and missing-column branches. Existing alert wording, design-specific column guidance and successful-upload logic are preserved; the shared behavior is tested without Shiny sessions.
+
+* Result validation now enforces the common field-book keys: finite numeric `ID` and `PLOT` columns, nonmissing atomic `LOCATION` identifiers, and unique column names. Existing integer/double storage and additional user columns are preserved; this validates the minimum schema without rewriting valid field books.
+
+* Creating a design no longer changes the caller's random numbers: the design functions set their seed and restore the random-number state when they finish. Without a seed, they draw an integer seed from the whole range of seeds and record it, so any design can be reproduced from `infoDesign$seed`; `full_factorial()` now records its seed too.
+
 * `diagonal_arrangement()`, `optimized_arrangement()`, `partially_replicated()`, `RCBD_augmented()`, `sparse_allocation()` and `multi_location_prep()` gain a `year` argument that sets the `YEAR` column of the field book. It defaults to the current year, as before; setting it makes the field book independent of the date the design is generated, which the internal field-book builder previously ignored.
 
 * `plot()` on a design object now passes additional arguments through to `desplot::desplot()`, so the field map can be customized in place - for example `plot(design, col.regions = ...)` to change the fill colors or `plot(design, cex = 1.4)` to resize the plot labels. Previously such arguments were silently ignored. Internally the shared plot styling is now produced by a single `desplot()` call (using the native `ticks` and `panel.border` arguments, hence `desplot (>= 1.11)`) instead of being patched onto the finished plot, which also makes title and axis styling consistent across all design types.
 
+* Field layouts, plot numbering and filler placement now share one tested planting-path implementation internally. This refactor preserves the existing design output.
+
+* Field-book export now extracts each map along the planting path with vectorized indexing instead of a cell-by-cell R loop. Row order, numeric storage, character labels and filler handling are preserved.
+
+* Spatial field-book export now constructs its columns by name instead of filling a temporary matrix by position. Established column order, location abbreviations, block columns and entry-label joins are preserved.
+
+* The multi-location p-rep app now builds its final design through `multi_location_prep()`, the same public function used by R scripts, instead of recreating the workflow from internal helpers. Simulated responses are appended by column name so result metadata cannot be overwritten when the field-book schema grows.
+
+* Pull requests now report core (`fct_*`, `utils_*` and `render_*`) test coverage against their base commit and fail if it decreases. Dedicated renderers remain covered when code moves out of the layout helpers. A separate gate applies the correctness-oriented `lintr` checks only to changed R lines, so legacy style findings do not block unrelated work.
+
+* The app's heatmaps now share one scale helper and use the lightweight `viridisLite` package instead of `viridis`, while preserving the existing 256-colour palette.
+
+* Prime-factor, divisor, and primality calculations now use small internal helpers instead of the `numbers` package.
+
+* The app now supplies its Flatly Bootstrap 3 theme through `bslib`, which is already part of Shiny's dependency stack, instead of the additional `shinythemes` package.
+
+* Public design functions and core helpers now signal failures through the shared `fieldhub_error` condition hierarchy instead of unclassed base errors. The notice that `rep_checks` defaulted to one is now a classed `fieldhub_default_warning` rather than an unstructured message.
+
+* All 24 core `warning()` calls are now classed. A wrong-length or missing `plotNumber`/`locationNames` still falls back to its existing default (1.5.x scripts keep working) but now signals a `fieldhub_default_warning` carrying `argument`, `supplied` and `used` fields, unifying what used to be several different wordings into one message per fallback; catch it with `withCallingHandlers(expr, fieldhub_default_warning = handler)`. Design-quality notices (row-column latinization/one-stage fallback, RCBD checks occupying more than half a block or failing to stratify, a family not present in every location, locations that could not be balanced) now signal `fieldhub_design_warning`. Only the warning class and wording changed; seeded results are unchanged.
+
+* The incomplete-block, row-column and lattice app modules now obtain feasible block sizes from one tested core validator instead of duplicating the rules in each server.
+
+* Generated app entry lists now come from one tested core builder, giving the classic, diagonal, p-rep and optimized modules the same identifier and label construction rules.
+
+* RCBD check-count and replication parsing now lives in the tested core input-parsing layer rather than in the Shiny module.
+
+* Field-dimension searches for the single diagonal, multiple diagonal, sparse allocation and optimized arrangement modules now live in tested core helpers. Existing choices and their ordering are preserved, searches no longer consume the caller's random numbers, and an empty search clears the choices and shows an explanation instead of failing inside a loop.
+
+* Spatial simulations in seven app modules now use one tested core workflow, preserving seeded responses, location order and per-location dimensions. Responses are appended by name and aligned by plot ID, so additional metadata columns cannot be overwritten. Explicit simulation seeds are scoped to their calls, and the modules no longer call `set.seed()` themselves. Reserved simulation-column names now give a clear error.
+
+* Diagonal and sparse check-percentage previews now use an RNG-isolated query helper. Preview tables and maps are unchanged, while browsing the available percentages no longer advances the session's random-number stream.
+
+* All 19 app modules now pass table settings directly to each `DT::datatable()` instead of changing process-wide `DT.options`. The existing pagination, scrolling and column settings are preserved without leaking into other sessions.
+
+* Loading indicators now receive their shared colors and size explicitly. Building the app UI no longer changes the caller's `spinner.*` options, while preserving the existing styling.
+
+* The app's design menus and server registration now share one internal catalogue of the 19 existing modules. Labels, module IDs and registration order are preserved, and the displayed app version now comes from package metadata instead of a hard-coded release number.
+
+* Starting plot numbers in all 19 modules now use one strict core reader and the shared validation-message path. Malformed numbers and trailing commas produce a named explanation instead of silently losing values or reaching design generation as missing numbers. Valid starting numbers are unchanged.
+
+* The shared `desplot` renderer and layout theme now live in a dedicated rendering file, and the augmented-RCBD source filename now correctly spells `RCBD`.
+
+* Sparse allocation and multi-location p-rep now have their own engine source files. Their shared allocation-merging and balancing helpers are grouped separately; public function names and seeded results are unchanged.
+
+* The generated namespace no longer imports the unused `dplyr::glimpse()`, `golem::activate_js()` and `stats::dist()` symbols.
+
+* A design called with its own default `plotNumber` (the caller did not supply one) now builds the per-location starting plots silently, even when that default does not have one value per location, such as `RCBD(t = 4, reps = 2, l = 2)`. `fieldhub_default_warning` now fires only when the caller supplies a `plotNumber` of the wrong length; `locationNames` already worked this way, and `diagonal_arrangement()` (which previously never warned about `plotNumber` at all) now warns for a caller-supplied wrong-length value the same as the others. `split_plot()`, `split_split_plot()`, `row_column()`, `alpha_lattice()`, `square_lattice()` and `rectangular_lattice()` now record the effective per-location starts they actually used, not the raw argument, so `reproduce_design()` of a design built at `l > 1` with a mismatched default `plotNumber` replays silently and identically instead of warning on replay for a value the original build never warned about. `strip_plot()`'s own default `plotNumber = NULL` is treated the same whether omitted or passed explicitly. Every planter check across the design and allocation functions, including `strip_plot()`'s (previously unchecked - any value, valid or not, was accepted and recorded), and the default-plot-start and incomplete-block-size checks, now share one validator each (`validate_planter()`, `default_plot_starts()`, `valid_block_sizes()`); error classes and seeded results are unchanged, but the planter error's wording (now the same for every function) and `incomplete_blocks()`/`row_column()`'s block-size error message (now listing every accepted `k`) have changed.
+
+* Unused internals are removed to reduce the package's surface: the `text` `globalVariables()` entry, the unused `utils::write.csv` import declared by four app modules, several long-dead commented-out code blocks across the classic, allocation and incomplete-block engines, the CRD module's orphaned `output$tabsetCRD` render (nothing in its UI displayed it), the app's no-op `shinyjs::useShinyjs()` calls inside `*_server` functions (each module still calls it once from its own UI, where it is required), a duplicate debug `print()` in the augmented-RCBD plot-numbers layout render, and the unused `inst/golem-config.yml`. No design output, golden snapshot or public API changes.
+
+* The Shiny app now reports every problem through one path, so the same condition reads the same everywhere. Problems of an output (a design, table or plot that cannot be built) are shown where the output would be; problems of an event with no output (a rejected upload, a Run! whose inputs do not fit) open one dialog, titled "Error" instead of "Error!!"; invalid simulation settings are still a non-blocking notice, so they do not cover the open simulation dialog. When a design fails after FielDHub warnings, the warnings are shown along with the error. FielDHub warnings raised while the app builds a design, such as `fieldhub_default_warning` for starting plot numbers or location names that do not have one value per location, are now shown as non-blocking notices instead of being hidden (Diagonal, Multi-location Diagonal) or only logged to the R console (Optimized Arrangement, p-rep, Augmented RCBD, the classic designs); other R warnings are still logged to the console. Sparse Allocation no longer shows R's non-FielDHub warnings in a dialog, and the "only the checks are randomized" reminder of Augmented RCBD is now a notice. A few messages were corrected: the Multi-location Diagonal and Multi-location p-rep uploads ask for the two columns ENTRY and NAME they need (not three), a block total that does not match the file now says "does not match", and, when no file is uploaded, the Multi-location Diagonal block check no longer mentions a data input file. The p-rep "no field dimensions" explanations are shared by both p-rep modules, and text in the Optimized Arrangement "# Check's Reps" input is explained by name.
+
+* Layout and heatmap panels in the Shiny app now explain why they are empty instead of staying blank: "Run the design to see the field layout." (or "... the heatmap.") before a design is run or randomized, the reason when it failed, and "Simulate data to see the heatmap." before data is simulated. The classic designs' heatmap no longer opens an "Important message" dialog from inside the plot when no data has been simulated; the explanation is shown in the plot area. This applies to the classic designs' shared field plot and heatmap, the spatial designs' heatmap, and the main field layout of the Diagonal, Multi-location Diagonal, Sparse Allocation, Optimized Arrangement, p-rep, Multi-location p-rep and Augmented RCBD modules.
+
+* All 19 app modules now share one upload component instead of their own copy of the "Import entries' list?" toggle, file input, separator control and entries-format dialog: a plain `read_design_upload()` parses and validates the file (reusing each design's existing column rule and error wording, and now classed as a `fieldhub_input_error` reported through the app's one problem path instead of a bespoke adapter), and `app_upload_ui()`/`app_upload_dialog()` build the shared controls and dialog. Labels are unified: the toggle always reads "Import entries' list?" (a few modules said "Import Entries' List?" or "Do you have your own data?"), and the file input always reads "Upload a CSV File:" (the Row-Column, Split-Plot, Split-Split-Plot and Strip-Plot modules said "Upload a csv File:"). Existing input ids, per-design upload rules, error wording and format-example content are preserved.
+
+* The 12 classic design pages (CRD, RCBD, Latin square, factorial, split-plot, split-split-plot, strip-plot, incomplete blocks, row-column and the three lattices) are now built by one generic page from a per-design spec, with shared sidebar controls whose label, default and minimum are held once per concept. Menus, tab ids, result and export ids, uploads, results and archives are unchanged, and every page still calls its engine through the same argument builder, so the app and the R API build identical designs. Deliberate consistency changes: the seed box is blank by default on every classic page (labelled "Random Seed (blank = automatic):" on every page; an automatic seed is recorded in the result and its exports) instead of starting at 123, 118, 4, 2437, 16, 5 or 7; "Starting Plot Number(s):" and "Location Name(s):" replace "Starting Plot Number:", "Input Location:" and "Input the Location:"; the Latin square reads "Input # of Full Reps:" (was "... (Squares):"); the factorial, split-plot and split-split-plot type reads "Select Design Type:"; the split-plot counts read "Input # of Whole Plots:", "Input # of Sub-plots Within Whole Plots:" and "Input # of Sub-sub-plots Within Sub-plots:"; the factor levels read "Input # of Entries for Each Factor (comma separated):". Minimums now match what the engines accept: the CRD page takes a single treatment and the split-plot and split-split-plot pages a single whole plot, and the Latin square page offers at most 10 treatments. Every page reads its controls with one plain reader, `read_design_controls()`: a blank or invalid control is explained by its label where the result would be (most blank inputs used to do nothing), and "No options for this combination of treatments!", invalid RCBD check inputs, too few factorial factors and a Run! after a rejected upload ("Check the input file and try again.") are shown there instead of in a dialog. Controls appear in the same order on every page, one per row (controls the old pages paired side by side are now stacked), and the field plot has the same height on every page. The factorial page offers a single replicate, which its CRD type accepts; with the RCBD type the page explains that two are needed.
+
+* The seven spatial design pages (optimized arrangement, p-rep, augmented RCBD, single and multiple diagonal, sparse allocation and multi-location p-rep) are now built by the same generic page as the classic designs, from a per-design spec; no design keeps a module of its own. The page reads its sidebar with `read_design_controls()`, offers its field sizes after Run! from the same plain functions the R functions use, and builds its design through the same argument builder, so the page and a direct `optimized_arrangement()`, `partially_replicated()`, `RCBD_augmented()`, `diagonal_arrangement()`, `sparse_allocation()` or `multi_location_prep()` call (the allocation of Run! through `do_optim()`) build identical designs. Menus, uploads, archives and the ids the shared spatial workflow keeps (simulation, field book, heatmap, save and tab set) are unchanged; the other result ids of these pages changed (for example the optimized arrangement's `RFIELD`, `PLOTFIELD`, `summary_optim` and `data_input` are now `field_layout`, `plot_numbers`, `setup` and `entries_1`). Deliberate consistency changes: the seed box is blank by default (it started at 5 on the optimized arrangement page, 4095 on the p-rep page, 1 on the augmented RCBD and multi-location p-rep pages and 17 on the diagonal and sparse allocation pages) and uses the shared labels ("Reps per Check:", "Experiment Name(s):", "Starting Plot Number(s):", "Location Name(s):", "Choose Location to View:", and "Input # of Checks:" for the augmented RCBD's "Checks per Block:"); controls are stacked one per row; the number of checks of the diagonal and sparse allocation pages is a number box (1 to 10, or 20 for multiple diagonals) as on the other pages instead of a list; the diagonal and sparse allocation pages' "Expt Design Info" tab is "Get Random" and the augmented RCBD and diagonal pages' "Input Data" tab is "Data Input", as on the other pages; only Run! and the upload toggle bring back the first tab (the diagonal and sparse allocation pages also did so when most sidebar controls changed); the sparse allocation page's "# of Copies Per Entry:" offers 1 up to one less than the locations from the start (it first offered only the upper half until Run!); the multi-location p-rep page's "Include checks?" Yes/No buttons are the shared "Add repeated checks?" checkbox, and its different field size per location is chosen in one select per location under "Set different dimensions across locations" instead of a "Select multiple dimensions" dialog; the multiple diagonal page trims the spaces around each experiment name instead of removing every space, and colours its experiment layout by the experiments of the field book; unchecking the augmented RCBD's "Randomize Entries?" shows its note under the checkbox instead of a notice; "Reps per Check:" accepts one value for every check, as on the RCBD page (optimized arrangement and multi-location p-rep pages); and a blank or invalid control, too many check plots for the entries, an uploaded `REPS` column that is not whole numbers, a number of plots with no field size (on the p-rep page, the advice to allow filler plots), fewer than eight augmented RCBD entries, no block count for them, uploaded diagonal checks without consecutive ENTRY numbers, too few diagonal entries for any field, experiment sizes that do not add up to the entries or differ while entries repeat across experiments, fewer than 3 sparse locations or 60 sparse entries, an uploaded sparse or multi-location p-rep list whose entries do not match "Input # of Entries:", fewer than 2 multi-location p-rep locations or "# of Rep Per Group:" with a different number of values than "# of Entries Per Rep Group:" is explained in the "Get Random" tab instead of a dialog. A Randomize! that fails (for example a sparse field whose dimensions do not fit the entries, or a location no field size fits) is explained there too, and "Save experiment (ZIP)" appears only once a design is built (it used to appear on Randomize! even when the design failed).
+
 ### Fix bugs:
 
+- Plot controls and downloads now share a header: selectors stay on the left
+  and the three download buttons stay at the top right above the image.
+  Narrow panels place selectors below the buttons without overlapping the plot.
+  Unreplicated diagonal and sparse entry maps fill check cells like optimized
+  arrangements. Optimized entry maps also outline checks, without adding borders
+  to plot-number maps. Augmented RCBD adds filled, bordered check cells without changing
+  its block backgrounds. Native layouts share a lighter neutral gray; plot-number
+  and experiment maps retain their neutral or block coloring.
+
+- Layouts and heatmaps share a stable download toolbar and wait for browser
+  dimensions to settle before resizing the preview. Output updates no longer
+  trigger their own size checks, preventing repeated image redraws and flicker
+  across design pages. Native plots, preview sizing and downloads are unchanged.
+
+- Restored the original design-specific input panels: control order, labels,
+  full-width inputs, paired rows, upload widths and gutters. This supersedes
+  the stacked/compact-row presentation described above. Diagonal and sparse
+  check selectors and multi-location p-rep's Yes/No checks choice are restored.
+  Automatic recorded seeds, validation, native plots and the three right-aligned
+  plot downloads are retained.
+
+- Every app layout and heatmap now uses the same native high-resolution image
+  panel, including classic designs and augmented RCBD. PNG (300 dpi), PDF
+  (vector), and Layout CSV buttons are consistently aligned to the right.
+  Previews retain 98% width, a 700 px height cap, and no internal scrollbars.
+  Dense preview labels scale to fit without abbreviating or changing download text.
+  Downloads follow the selected view and location; heatmap CSVs contain the
+  simulated response at its field coordinates. Plotly interaction is replaced
+  by the shared image display; the app no longer requires Plotly at runtime.
+
+- Plot-number maps for p-rep, optimized, single-diagonal and sparse designs use
+  neutral gray instead of entry/check highlighting. Multiple-diagonal plot
+  numbers and experiment maps distinguish experiments, with uniform text and
+  no check highlighting. This applies to the app and `plot(text.string = "PLOT")`.
+- The remaining nine DT field-map tabs (optimized, single and multiple diagonal,
+  and sparse allocation) now use the same high-resolution `plot()` renderer
+  and responsive image panel as p-rep, including the experiment-layout tab.
+  All 13 migrated maps retain 98% width, a 700 px height cap bounded by the
+  sidebar and viewport, no internal scrollbars, and PNG, PDF and plain CSV
+  downloads. Allocation tables, entry lists and field books remain tables.
+  Diagonal entry maps preserve the grid's explicit "Filler" labels instead of
+  drawing filler cells as entry zero.
+
+- Both p-rep pages now draw the Randomized Field and Plot Number Field as
+  high-resolution images through the same renderer as `plot()`, instead of DT
+  grids. Previews are re-rendered at 98% of the panel width in a landscape canvas,
+  with height capped at 700 px and bounded by the sidebar and viewport,
+  without stretching or internal scrolling.
+  They preserve full labels, fillers, and replicated-entry
+  highlighting, with 300-dpi PNG, vector PDF and plain layout CSV downloads.
+  Allocation tables, entry lists and field books remain tables.
+
+- Layout downloads and the sidebar's "Download field book (CSV)" now save one
+  plain CSV, not a ZIP with companion files. Filenames identify the design,
+  content, date and, for layouts, location. Field books retain all locations
+  and any simulated traits. The app no longer requires the zip package.
+
+- Multi-location p-rep and sparse allocation keep the completed allocation in
+  Get Random visible during Randomize!; only dependent result tabs show that
+  loading state. Allocation tables now default to six rows per page, with
+  pagination and a page-size selector. Exports still include all rows.
+
+- Design pages now show a centered spinner and short status inside the active
+  result tab during allocation and randomization, replacing its content until
+  ready without adding a banner above the tabs. This includes multi-location
+  p-rep and its Randomized Field tab. Feedback starts on the button click and
+  clears on completion or failure; spatial plot and table outputs also have
+  loading spinners. Scientific calculations and seeded results are unchanged.
+
+* The development launcher no longer calls a golem helper requiring the removed configuration file. Sourcing `dev/run_dev.R` now loads the source and starts the app explicitly, without detaching packages, changing production options or regenerating documentation. The source-deployment entry point also leaves production options alone.
+
+* Blank app seed boxes no longer error. Shiny sends a cleared numeric input as a logical `NA`, which all 19 design modules now accept as an automatic seed, the same as `NULL` or an empty string. Automatic app seeds are now drawn from a package-private random-number stream instead of the shared global stream, so one Shiny session's blank seed box no longer changes another session's random numbers. Explicit seeds are unaffected.
+
+* `plot()` no longer prints ggplot2 messages or warnings. Augmented RCBD maps passed their block colours as a second fill scale ("Scale for fill is already present"), and outlines drawn without an explicit width warned "Ignoring empty aesthetic: `linewidth`" in split-plot, incomplete-block, lattice and other maps. The drawn maps are unchanged.
+
+- `do_optim()` now honors its declared `design = "sparse"` default when the
+  argument is omitted; previously it incorrectly reported a missing design.
+
+- Optimizer-backed designs restore the caller's `warn` and `contrasts`
+  options on success and error, including multi-location allocation wrappers.
+  The optimizer's settings remain in effect during design construction, so
+  fixed-seed results are unchanged. Unrelated process options are not reset.
+
+- Simulation settings are accepted atomically across all nineteen design
+  modules. Invalid bounds, duplicate or blank trait names, and malformed
+  spatial correlations leave the last accepted simulation settings untouched.
+  The dialog stays open with a specific validation message, and heatmap tabs
+  become available only after a complete, valid submission. Valid simulations
+  retain their existing responses, row order, seeds, and metadata.
+
+* Factorial uploads and `full_factorial()` now share a factor-level uniqueness rule. The same label (such as "Low") may belong to different factors, which the app previously rejected. Duplicate levels within one factor now raise a classed input error in the R API instead of silently producing repeated combinations. Incomplete rows are still omitted, and malformed or empty input tables give targeted errors. Valid seeded designs are unchanged.
+
+* CSV uploads now require a header and equally sized data records. An extra field could previously be interpreted as a row name, silently shifting entry identifiers and treatment labels; short rows were silently padded. These malformed files now show the existing format error. Quoted separators, multiline labels and explicitly empty cells remain supported. Unterminated quoted fields show the same classed format error without leaking parser warnings; complete records do not require a final newline.
+
+* App uploads now read Shiny's `datapath` field with exact matching. Eighteen modules previously relied on the abbreviated `$datapat`, producing warnings under strict host settings; a similarly named field could also be selected when `datapath` was missing. All 19 modules now use the exact field without changing valid upload paths.
+
+* Printed design parameters now exclude `id_design` by name instead of dropping the final element. Extra or reordered parameters are no longer hidden, and identifier-only parameter lists print safely. Existing catalogue print and summary output is unchanged.
+
+* `split_families()` now handles locations that receive no entries, retaining zero counts in the location summary instead of failing while combining the allocations. Inputs with no complete entries now give a classed input error. Existing successful seeded allocations and family-coverage warnings are unchanged.
+
+* `run_app()` no longer changes the host's upload limit when merely constructing an app. The existing 100 MiB limit is applied on application startup and the previous option is restored on shutdown, including after startup failure. Restoration is registered for the whole app, not for individual sessions. Shiny still uses this process-wide option while the app is running.
+
+* The Latin-square search now stops with a `fieldhub_search_error` after 100,000 placement iterations per square instead of restarting indefinitely. The condition identifies the square and budget, no partial design is returned, and the caller's RNG state is restored. The internal helper also assigns correctly sized row names when building multiple squares. Public designs completed within the limit keep their existing seeded output.
+
+* The spatial export helper now joins entry-label tables on `ENTRY` by name. A table with another column before `ENTRY` previously used that unrelated column as the join key and could silently lose rows. Existing entry-first tables produce unchanged exports.
+
+* Unsupported seed values now give a classed input error before reaching `set.seed()`. Out-of-range and complex seeds no longer leak coercion warnings or unclassed errors. Accepted real-valued seeds retain R's existing truncation behavior and are still recorded as supplied.
+
+* All 18 public engines with an `l` argument now validate the location count through one shared rule before allocating fields. Missing, non-finite, fractional, nonnumeric and multi-value counts give a named `fieldhub_input_error`; valid counts and seeded designs are unchanged.
+
+* Result construction and validation now report malformed object shapes and missing or empty design names as `fieldhub_internal_error` conditions instead of leaking base-R field-access or missing-logical errors. Valid result objects are unchanged.
+
+* The RCBD block-size preview now uses the same 10,000-plot limit as design generation, with its counting and validation in a plain core helper. Oversized check replications give an explanation instead of failing during integer formatting; valid size descriptions and generated designs are unchanged.
+
+* Shared numeric-input parsers now reject trailing commas, malformed scalar inputs and non-finite values without leaking base-R errors. RCBD replication previews require positive whole numbers, and check counts must fit in R's integer range. Valid numeric inputs retain their existing interpretation.
+
+* Multiple diagonal arrangements split by column now skip check patterns whose fillers cannot fit in the last column. Those patterns previously ran past the field boundary and raised an unclassed "subscript out of bounds" error, including for 3,959 entries in a 50-by-100 field. If no pattern fits, the API reports its normal dimension condition and the preview returns no choices. Existing feasible layouts are unchanged.
+
+* `plot()` now draws a `CRD()` with unequal replication, which failed with "`ROW` must be size 10 or 1, not 12"; its plots fill every grid that holds them exactly.
+* In `plot()` and the Split-Split Plot module of the Shiny app, split-split plots in complete blocks now follow `stacked`; every stacking gave the vertical layouts.
+* `plot()` now warns that a stacking is not available for a design, such as `stacked = "grid_panel"` with two reps, instead of failing with "undefined columns selected" or "Invalid stacking option provided." An unknown `planter` or `stacked` is now an error instead of being taken as `"cartesian"`, and a `layout` other than 1 is an error for the designs placed when they are built (partially replicated, augmented RCBD, diagonal, sparse and optimized arrangements), which ignored it.
 * Fixed a bug in `split_split_plot()` where, for the CRD type (`type = 1`), the whole-plot column was built with `rep(WholePlots, each = reps)` instead of `times = reps`, so whole-plots were mis-assigned across replicates; each replicate now contains every whole-plot.
 * Fixed a bug in `split_families()` where the `gen.list` assignment sat after `stop()` inside the column-count check, so valid three-column input never created `gen.list` and the function errored with "object 'gen.list' not found"; the assignment now runs after the guard.
 * Fixed a bug in `diagonal_arrangement()` and `sparse_allocation()` where the internal non-prime field-size filter `t[-numbers::isPrime(t)]` used a logical vector as a negative index and returned wrong or no field dimensions; it now uses `t[!numbers::isPrime(t)]`.
@@ -66,7 +676,7 @@ knitr::opts_chunk$set(
 * Fixed a bug in `diagonal_arrangement()` (`kindExpt = "DBUDC"`, `splitBy = "column"`) where, with ten or more blocks, the block labels were matched in alphabetical order (B1, B10, B2, ...), so the entries of one block were placed in the region and under the name of another; with unequal block sizes the call failed with "Some entries are missing in the randomization!!".
 * Fixed a bug in `diagonal_arrangement()` (`kindExpt = "DBUDC"`) where, with unequal block sizes and experiment names not in alphabetical order (including the default `Block1`, ..., `Block10`), the plot numbering paired sizes and names wrongly and failed with "missing value where TRUE/FALSE needed".
 * Fixed a bug in `diagonal_arrangement()` (`kindExpt = "DBUDC"`) where a block holding a single entry was filled with `sample(entry)`, a permutation of `1:entry`, giving the block the wrong entry.
-* Fixed two bugs in `full_factorial()`: with the RCBD type, locations sharing plot numbers (e.g. `plotNumber = c(101, 101)`) produced duplicated `LOCATION`/`PLOT` pairs, and level labels containing spaces (e.g. "Low N") were split into two values.
+* Fixed two bugs in `full_factorial()`: with the RCBD type, locations sharing plot numbers (e.g. `plotNumber = c(101, 101)`) produced duplicated `LOCATION`/`PLOT` pairs, and level labels containing spaces (e.g. "Low N") were split into two values. This also fixes the factorial page of the app for uploaded factor and level names with spaces (#43).
 * Fixed a bug in `row_column()` where every matrix in `resolvableBlocks` was filled with `NA`.
 * `incomplete_blocks()`, `alpha_lattice()`, `square_lattice()`, `rectangular_lattice()` and `row_column()` now keep the labels of a character `t` instead of replacing them with `G-1`, ..., `G-n`, and `CRD()`, `RCBD()` and these functions reject duplicated treatment labels.
 * Fixed `print()`, `summary()` and `plot()` for several designs: `print()` returns the design invisibly, `summary()` shows the data input of `partially_replicated()` and `optimized_arrangement()` designs and now describes `sparse_allocation()` and `multi_location_prep()` designs, and `plot()` explains that `split_families()` results have no field layout.
@@ -86,7 +696,15 @@ knitr::opts_chunk$set(
 * `RCBD_augmented()` now returns numeric `ENTRY` and `CHECKS` columns in every case. `ENTRY` was character for randomized designs without fillers, and `CHECKS` was character, with the string `"NA"` for filler plots, whenever the field had fillers; filler plots now have `CHECKS = NA`.
 * Fixed a bug in `diagonal_arrangement()` and `sparse_allocation()` where, with a cartesian planter, an even number of rows and filler plots, the experiment names placed the fillers at the wrong end of the first row: one check and one entry in each location got `EXPT = "Filler"` and `PLOT = 0`, while the real filler plots got plot numbers. The randomization itself is unchanged.
 * The single diagonal, multiple diagonal and sparse allocation modules of the Shiny app now build their designs with `diagonal_arrangement()` and `sparse_allocation()`, so the app and R give the same design for the same inputs and seed. The modules used to re-implement the randomization and drew the random numbers in a different order, so the same seed gave a different design in the app. As a result, designs made in the app with a given seed differ from earlier versions, generated entries are named as in R, field-book IDs restart at 1 in each location, filler plots of sparse allocations have `EXPT = "Filler"`, and uploaded check entries must be consecutive numbers.
+* Fixed `optimized_arrangement()` drawing the replication of the checks before setting the seed when `amountChecks` is not a multiple of the number of checks, so the same seed could give different designs.
 * The documentation of `swap_pairs()`, `do_optim()`, `sparse_allocation()` and `multi_location_prep()` now matches their defaults and the elements they return.
+* `split_plot()`, `split_split_plot()` and `strip_plot()` now raise a classed input error for a sub-plot, sub-sub-plot or strip factor with only one level, which used to crash with base R's "incorrect number of dimensions"; a single whole plot and a single replicate are still valid designs. `incomplete_blocks()` and `row_column()` (and, through them, `alpha_lattice()`, `square_lattice()` and `rectangular_lattice()`) now explain that there is not enough replication for the block size instead of leaking blocksdesign's "Too many parameters for the available plots". `full_factorial()` no longer names `RCBD()` in the error it raises for a single-run design (every factor at one level). `plot()` of an unavailable location, stacking or layout option now raises a classed `fieldhub_input_error` that lists the valid options, replacing the internal field-layout adapter's warn-and-return-`NULL` path (and its short-lived `fieldhub_layout_warning` class); the augmented RCBD app module routes the same error through the app's validation messages instead of silently swallowing it.
+
+* `RCBD_augmented()`'s "the field dimensions do not fit" error, raised when explicit `nrows`/`ncols` do not fit the requested blocks, now lists the same accepted block counts as its "the number of blocks is too small" error; it previously searched from 5 blocks instead of 3, so its list silently left out the smaller, still-accepted block counts of 3 and 4. `row_column()`'s error for an infeasible `nrows` no longer names `incomplete_blocks()`; both it and `incomplete_blocks()` now validate their block size the same way and list every accepted size.
+
+* Clearing or otherwise invalidating a "# of Locations", "# of Checks" or "Checks per Block" input no longer ends the Shiny session in the Diagonal, Multi-location Diagonal, Optimized Arrangement, p-rep, Multi-location p-rep, Sparse Allocation and Augmented RCBD modules, including on the Augmented RCBD upload path and after uploading data in Diagonal and Multi-location p-rep. These observers, and the reactives they read (a malformed upload among them), built their location-view/replicate/dimension choices straight from the raw input or an unguarded comparison, any of which can throw on Shiny's `NA` for a blank input; an uncaught error inside an observer ends the whole session. They now validate the count with a plain helper first and route a failure through the app's existing validation-message mechanism. A selector fed an invalid count (such as "view location" or "# of Checks") keeps showing its last valid choices, with no inline message of its own; the design's own table or field book still shows the usual validation message once it is built from invalid input.
+
+* Text in the p-rep "# of Entries Per Rep Group" or "# of Rep Per Group" inputs, such as "75,abc", is now explained by name instead of failing with a raw R error from `1:sum(NA)`, and `partially_replicated()` itself now rejects a missing or fractional `repGens`/`repUnits` value with a classed input error. Any error the app does not expect (one that is not a FielDHub condition, so a bug rather than a problem with the input) no longer ends the Shiny session when it happens inside an observer, for example a missing value reaching the diagonal check-percentage or augmented-RCBD block choices. It is always logged to the R console as "FielDHub: unexpected problem ...", and shown to the user as "Unexpected problem: <message>": where the output would be for an output, and in a dialog for an observer that updates a selector (which has no output to show it in).
 
 ### Changes to results for a given seed:
 
@@ -96,10 +714,17 @@ Some of the fixes above change the design produced for a given seed. Field books
 * `diagonal_arrangement()` with `kindExpt = "DBUDC"` and `splitBy = "column"` with ten or more blocks (entries under the wrong experiment).
 * `full_factorial()` of the RCBD type with plot numbers shared or overlapping across locations, or with level labels containing spaces.
 * `incomplete_blocks()`, `alpha_lattice()`, `square_lattice()`, `rectangular_lattice()` or `row_column()` with a character `t` (the labels were replaced by `G-1`, ..., `G-n`; the randomization itself is unchanged).
+* `row_column()` without an explicit `method` (its new default, `method = "onestage"`, jointly optimizes rows and columns; see New features). Pass `method = "twostage"` to reproduce field books generated by 1.5.x and earlier, which always used the two-step optimization.
 * The Square Lattice and Optimized Arrangement modules of the Shiny app with more than one location (the location names were ignored).
 * The single diagonal or sparse allocation modules of the Shiny app when the number of checks was changed after randomizing.
 * `diagonal_arrangement()` or `sparse_allocation()` with `planter = "cartesian"`, an even number of rows and filler plots (one check and one entry per location labeled as fillers).
 * `RCBD_augmented()` with `random = FALSE` when the field has filler plots (blocks with too many or too few checks, and possibly missing lines).
+* Not a design change: `RCBD_augmented()`'s `ENTRY` and `CHECKS` columns are now numeric in every case instead of character (see Fix bugs); values are unchanged and match `as.numeric()` of the 1.5.0 columns.
+* `optimized_arrangement()` when `amountChecks` is not a multiple of the number of checks (the design was not reproducible).
+* The Split-Split Plot module of the Shiny app with the horizontal reps layout (the exported field book had the vertical layout).
+* Not a design change: the golden layout-preview snapshot for `stacked = "grid_panel"` on a design that does not support it now shows the classed `fieldhub_input_error` message instead of the placeholder "No layout", because `plot()`/`plot_layout()` now raise that error instead of returning `NULL` (see Fix bugs). No generated field book is affected.
+* Not a design change: `do_optim()` results now carry an additional `fieldhub_sparse_optimization` or `fieldhub_multi_prep_optimization` class next to the legacy `Sparse`/`MultiPrep` one, so callers can recognize a FielDHub allocation plan without matching on the legacy name. The legacy classes, `print()`/`summary()` behavior and generated allocations are unchanged.
+* Not a design change: `optimized_arrangement()` results now record their check replication as `rep_checks` in `metadata$parameters` instead of `amountChecks`, whichever argument name the call used. `reproduce_design()` still replays older results recorded with `amountChecks`. The field book, `infoDesign` and every other output are unchanged.
 
 # FielDHub 1.3.1
 
@@ -232,5 +857,4 @@ See [plot()](https://didiermurillof.github.io/FielDHub/reference/plot.FielDHub.h
 
 # FielDHub 0.1.0
 
-CRAN release. 
-
+CRAN release.

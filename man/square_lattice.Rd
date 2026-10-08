@@ -12,7 +12,8 @@ square_lattice(
   plotNumber = 101,
   locationNames = NULL,
   seed = NULL,
-  data = NULL
+  data = NULL,
+  reps = NULL
 )
 }
 \arguments{
@@ -20,7 +21,7 @@ square_lattice(
 
 \item{k}{Size of incomplete blocks (number of units per incomplete block).}
 
-\item{r}{Number of blocks (full resolvable replicates).}
+\item{r}{Deprecated alias for \code{reps}; positional calls remain supported.}
 
 \item{l}{Number of locations. By default \code{l = 1}.}
 
@@ -31,6 +32,8 @@ square_lattice(
 \item{seed}{(optional) Real number that specifies the starting seed to obtain reproducible designs.}
 
 \item{data}{(optional) Data frame with label list of treatments.}
+
+\item{reps}{Number of full resolvable replicates per location.}
 }
 \value{
 A list with two elements.
@@ -42,10 +45,18 @@ A list with two elements.
 \description{
 It randomly generates a square lattice design across locations.
 }
+\section{Reproducibility}{
+
+The result records effective inputs and the resolved seed in
+\code{metadata$parameters}, using \code{reps} for replication. Under the
+same package versions and RNG settings, rebuild a result \code{x} with
+\code{do.call(square_lattice, x$metadata$parameters)}.
+}
+
 \examples{
 # Example 1: Generates a square lattice design with 5 full blocks, 8 units per IBlock,
 # 8 IBlocks for a square number of treatmens of 64 in two locations.
-squareLattice1 <- square_lattice(t = 64, k = 8, r = 5, l = 2, 
+squareLattice1 <- square_lattice(t = 64, k = 8, reps = 5, l = 2,
                                  plotNumber = c(1001, 2001),
                                  locationNames = c("FARGO", "MINOT"), 
                                  seed = 1986)
@@ -59,7 +70,7 @@ treatments <- paste("G", 1:49, sep = "")
 ENTRY <- 1:49
 treatment_list <- data.frame(list(ENTRY = ENTRY, TREATMENT = treatments))
 head(treatment_list) 
-squareLattice2 <- square_lattice(t = 49, k = 7, r = 3, l = 1, 
+squareLattice2 <- square_lattice(t = 49, k = 7, reps = 3, l = 1,
                                  plotNumber = 1001,
                                  locationNames = "CASSELTON", 
                                  seed = 1986,

@@ -2,12 +2,23 @@
 #'
 #' @description It randomly generates a completely randomized design.
 #'
+#' @details The result records effective inputs and the resolved seed
+#'   in \code{metadata$parameters}. Under the same package versions and RNG
+#'   settings, rebuild a result \code{x} with
+#'   \code{do.call(CRD, x$metadata$parameters)}. Data inputs are recorded after
+#'   the existing column selection and normalization.
+#'
 #' @param t An integer number with total number of treatments or a vector of dimension t with labels.
-#' @param reps Number of replicates of each treatment.
+#' @param reps One positive whole-number count of replicates per treatment.
 #' @param plotNumber Starting plot number. By default \code{plotNumber = 101}.
-#' @param locationName (optional) Name of the location.
+#' @param locationName Deprecated spelling of \code{locationNames}. Existing
+#'   positional calls remain supported, with a deprecation warning.
+#' @param locationNames (optional) Name of the single location. Supply only one
+#'   of \code{locationNames} and \code{locationName}.
 #' @param seed (optional) Real number that specifies the starting seed to obtain reproducible designs.
-#' @param data (optional) Data frame with the 2 columns with labels of each treatments and its number of replicates.
+#' @param data (optional) Data frame whose first two columns contain unique
+#' treatment labels and positive whole-number replication counts. Extra columns
+#' are ignored; rows missing either selected value are omitted.
 #'
 #'
 #' @author Didier Murillo [aut],
@@ -19,8 +30,10 @@
 #'
 #' @importFrom stats runif na.omit
 #'
-#' @return A list with two elements.
+#' @return A list with three elements.
 #' \itemize{
+#'   \item \code{metadata} records the design, schema/package versions, seed,
+#'     random-number settings and effective input parameters.
 #'   \item \code{infoDesign} is a list with information on the design parameters.
 #'   \item \code{fieldBook} is a data frame with the CRD field book.
 #' }
@@ -36,7 +49,7 @@
 #'   reps = 5,
 #'   plotNumber = 101,
 #'   seed = 1987,
-#'   locationName = "Fargo"
+#'   locationNames = "Fargo"
 #' )
 #' crd1$infoDesign
 #' head(crd1$fieldBook, 10)
@@ -48,7 +61,7 @@
 #'   reps = 6,
 #'   plotNumber = 1001,
 #'   seed = 1654,
-#'   locationName = "Fargo"
+#'   locationNames = "Fargo"
 #' )
 #' crd2$infoDesign
 #' head(crd2$fieldBook, 10)
@@ -63,7 +76,7 @@
 #'   reps = NULL,
 #'   plotNumber = 2001,
 #'   seed = 1655,
-#'   locationName = "Cali",
+#'   locationNames = "Cali",
 #'   data = treatment_list
 #' )
 #' crd3$infoDesign
@@ -71,46 +84,56 @@
 #'
 #' @export
 CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL,
-                seed = NULL, data = NULL) {
-  if (is.null(seed) || is.character(seed) || is.factor(seed)) seed <- runif(1, min = -50000, max = 50000)
-  set.seed(seed)
+                seed = NULL, data = NULL, locationNames = NULL) {
+  locationName <- resolve_argument_alias(
+    locationNames, locationName, new = "locationNames", old = "locationName",
+    new_supplied = !missing(locationNames), old_supplied = !missing(locationName)
+  )
+  seed <- resolve_seed(seed)
+  local_design_seed(seed)
   if (!is.null(plotNumber)) {
-    if (plotNumber < 1 || plotNumber %% 1 != 0) shiny::validate("plotNumber must be an integer greater than 0.")
+    if (!is.numeric(plotNumber) || !is.null(dim(plotNumber)) || length(plotNumber) != 1L ||
+        !is.finite(plotNumber) || plotNumber < 1 || plotNumber %% 1 != 0) {
+      fieldhub_abort("plotNumber must be an integer greater than 0.")
+    }
   } else {
+    warn_default_plot_numbers(plotNumber, 1, 101)
     plotNumber <- 101
-    warning("Since plotNumber was NULL, default 'plotNumber = 101' is considered.")
   }
   if (is.null(locationName)) locationName <- 1
+  validate_crd_location(locationName)
   if (is.null(data)) {
-    if (!is.null(t) & !is.null(reps)) {
-      if (length(t) == 1 & is.numeric(t)) {
-        arg2 <- c(t, reps)
-        if (base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
-          shiny::validate("CRD() requires that t and reps are integers greater than 0.")
-        }
+    if (!is.null(t) && !is.null(reps)) {
+      validate_iteration_budget(reps, "reps")
+      if (length(t) == 1 && is.numeric(t)) {
+        validate_crd_size(t, reps)
         nt <- t
         trts <- paste(rep("T", nt), 1:nt, sep = "")
         TRT <- rep(trts, each = reps)
       } else if ((is.character(t) || is.factor(t)) && length(t) > 1) {
         t <- as.character(t)
-        check_unique_labels(t, "CRD")
+        validate_crd_labels(t)
         nt <- length(t)
+        validate_crd_size(nt, reps)
         TRT <- rep(t, each = reps)
       } else if ((is.character(t) || is.factor(t)) && length(t) == 1) {
-        shiny::validate('"CRD()" requires more than one treatment.')
+        fieldhub_abort('"CRD()" requires more than one treatment.')
+      } else {
+        fieldhub_abort("CRD() requires a positive treatment count or a vector of treatment labels.")
       }
     } else {
-      stop("Inputs t and reps are missing.")
+      fieldhub_abort("Inputs t and reps are missing.")
     }
     N <- nt * reps
     REP <- rep(1:reps, times = nt)
   } else {
-    if (!is.data.frame(data)) stop("Data must be a data frame.")
-    if (ncol(data) < 2) validate("Data input needs at least two columns with the names: Treatment and Reps.")
+    if (!is.data.frame(data)) fieldhub_abort("Data must be a data frame.")
+    if (ncol(data) < 2) fieldhub_abort("Data input needs at least two columns with the names: Treatment and Reps.")
     data <- as.data.frame(data[, 1:2])
     data <- na.omit(data)
     colnames(data) <- c("Treatment", "Reps")
-    if (is.character(data[, 2]) || is.factor(data[, 2])) validate("Reps must be numeric.")
+    validate_crd_labels(data$Treatment)
+    validate_crd_size(1, data$Reps)
     data$Reps <- as.numeric(data$Reps)
     TRT <- rep(data$Treatment, times = data$Reps)
     N <- sum(data$Reps)
@@ -132,7 +155,10 @@ CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL,
   design <- design[order(design$PLOT), ]
   id <- 1:nrow(design)
   design <- cbind(id, design)
-  colnames(design)[1] <- "ID"
+  # cbind() of a bare `id` argument names the new column "id" (deparse.level
+  # = 1); rename it by that name rather than by its (currently first)
+  # position.
+  names(design)[names(design) == "id"] <- "ID"
   design <- as.data.frame(design)
   rownames(design) <- 1:N
   TRT <- levels(factor(TRT, as.character(unique(TRT))))
@@ -141,6 +167,9 @@ CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL,
     seed = seed, id_design = 1
   )
   output <- list(infoDesign = parameters, fieldBook = design)
-  class(output) <- "FielDHub"
+  reproduction_parameters <- record_design_parameters(
+    environment(), overrides = list(locationNames = locationName), exclude = "locationName"
+  )
+  output <- new_fieldhub_design(output, "crd", parameters = reproduction_parameters)
   return(invisible(output))
 }

@@ -1,0 +1,98 @@
+name: release-benchmarks
+
+on:
+  workflow_dispatch:
+    inputs:
+      baseline_ref:
+        description: "Optional compatible benchmark baseline: full commit SHA (f06aaf0 or later)"
+        required: false
+        type: string
+  pull_request:
+    branches: [main, master]
+    paths:
+      - "R/**"
+      - "DESCRIPTION"
+      - "tools/benchmark-*.R"
+      - "tools/run-benchmarks.R"
+      - "tools/compare-benchmarks.R"
+      - "tools/check-benchmark-comparison.R"
+      - "tools/check-release-tools.R"
+      - "tools/check-launchers.R"
+      - "dev/run_dev.R"
+      - "app.R"
+      - ".github/workflows/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  benchmarks:
+    runs-on: macos-latest
+    timeout-minutes: 30
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: release
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: |
+            local::.
+            any::yaml
+          needs: check
+      - name: Check release tooling
+        run: Rscript tools/check-release-tools.R .
+      - name: Benchmark the installed candidate
+        shell: Rscript {0}
+        run: |
+          output <- file.path(Sys.getenv("RUNNER_TEMP"), "fieldhub-benchmarks")
+          library <- dirname(find.package("FielDHub"))
+          status <- system2(file.path(R.home("bin"), "Rscript"),
+            c("--vanilla", "tools/run-benchmarks.R", shQuote(file.path(output, "candidate")),
+              shQuote(library), shQuote(Sys.getenv("GITHUB_SHA"))))
+          stopifnot(status == 0L)
+      - uses: actions/checkout@v7
+        if: ${{ inputs.baseline_ref != '' }}
+        with:
+          ref: ${{ inputs.baseline_ref }}
+          path: benchmark-baseline
+          persist-credentials: false
+      - name: Install and compare the requested baseline
+        if: ${{ inputs.baseline_ref != '' }}
+        shell: Rscript {0}
+        env:
+          BASELINE_REF: ${{ inputs.baseline_ref }}
+        run: |
+          revision <- Sys.getenv("BASELINE_REF")
+          stopifnot(grepl("^[0-9a-f]{40}$", revision))
+          actual <- system2("git", c("-C", "benchmark-baseline", "rev-parse", "HEAD"), stdout = TRUE)
+          stopifnot(identical(actual, revision))
+          output <- file.path(Sys.getenv("RUNNER_TEMP"), "fieldhub-benchmarks")
+          library <- file.path(Sys.getenv("RUNNER_TEMP"), "baseline-library")
+          stopifnot(dir.create(library))
+          status <- system2(file.path(R.home("bin"), "R"),
+            c("CMD", "INSTALL", "--no-multiarch", paste0("--library=", shQuote(library)), "benchmark-baseline"))
+          stopifnot(status == 0L)
+          status <- system2(file.path(R.home("bin"), "Rscript"),
+            c("--vanilla", "tools/run-benchmarks.R", shQuote(file.path(output, "baseline")),
+              shQuote(library), revision))
+          stopifnot(status == 0L)
+          status <- system2(file.path(R.home("bin"), "Rscript"),
+            c("--vanilla", "tools/compare-benchmarks.R", shQuote(file.path(output, "baseline")),
+              shQuote(file.path(output, "candidate")), shQuote(file.path(output, "comparison.csv"))))
+          stopifnot(status == 0L)
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: benchmarks-${{ github.sha }}
+          path: ${{ runner.temp }}/fieldhub-benchmarks
+          if-no-files-found: error
+          retention-days: 90

@@ -10,14 +10,14 @@ test_that("design functions warn when plotNumber has the wrong length", {
     RCBD = function() RCBD(t = 4, reps = 2, l = 2, plotNumber = 101, seed = 1),
     full_factorial = function() full_factorial(setfactors = c(2, 2), reps = 2, l = 2,
                                                plotNumber = 101, seed = 1),
-    incomplete_blocks = function() incomplete_blocks(t = 12, k = 4, r = 2, l = 2,
+    incomplete_blocks = function() incomplete_blocks(t = 12, k = 4, reps = 2, l = 2,
                                                      plotNumber = 101, seed = 1),
-    strip_plot = function() strip_plot(Hplots = 3, Vplots = 2, b = 2, l = 2,
+    strip_plot = function() strip_plot(Hplots = 3, Vplots = 2, reps = 2, l = 2,
                                        plotNumber = 101, seed = 1),
     RCBD_augmented = function() RCBD_augmented(lines = 40, checks = 4, b = 4, l = 2,
                                                plotNumber = c(1, 2, 3), seed = 1),
     optimized_arrangement = function() optimized_arrangement(
-      nrows = 12, ncols = 10, lines = 100, amountChecks = 20, checks = 1:5,
+      nrows = 12, ncols = 10, lines = 100, rep_checks = 20, checks = 1:5,
       l = 2, plotNumber = 101, seed = 1
     ),
     partially_replicated = function() partially_replicated(
@@ -32,6 +32,7 @@ test_that("design functions warn when plotNumber has the wrong length", {
     expect_warning(
       utils::capture.output(calls[[fn]]()),
       "'plotNumber' has [0-9]+ value\\(s\\) for [0-9]+ location\\(s\\)",
+      class = "fieldhub_default_warning",
       info = fn
     )
   }
@@ -49,22 +50,22 @@ test_that("design functions warn when locationNames has the wrong length", {
     full_factorial = function() full_factorial(setfactors = c(2, 2), reps = 2, l = 2,
                                                plotNumber = c(1, 101),
                                                locationNames = names3, seed = 1),
-    incomplete_blocks = function() incomplete_blocks(t = 12, k = 4, r = 2, l = 2,
+    incomplete_blocks = function() incomplete_blocks(t = 12, k = 4, reps = 2, l = 2,
                                                      plotNumber = c(1, 101),
                                                      locationNames = names3, seed = 1),
-    alpha_lattice = function() alpha_lattice(t = 12, k = 4, r = 2, l = 2,
+    alpha_lattice = function() alpha_lattice(t = 12, k = 4, reps = 2, l = 2,
                                              plotNumber = c(1, 101),
                                              locationNames = names3, seed = 1),
-    square_lattice = function() square_lattice(t = 16, k = 4, r = 2, l = 2,
+    square_lattice = function() square_lattice(t = 16, k = 4, reps = 2, l = 2,
                                                plotNumber = c(1, 101),
                                                locationNames = names3, seed = 1),
-    rectangular_lattice = function() rectangular_lattice(t = 12, k = 3, r = 2, l = 2,
+    rectangular_lattice = function() rectangular_lattice(t = 12, k = 3, reps = 2, l = 2,
                                                          plotNumber = c(1, 101),
                                                          locationNames = names3, seed = 1),
-    row_column = function() row_column(t = 12, nrows = 3, r = 2, l = 2,
+    row_column = function() row_column(t = 12, nrows = 3, reps = 2, l = 2,
                                        plotNumber = c(1, 101),
                                        locationNames = names3, seed = 1),
-    strip_plot = function() strip_plot(Hplots = 3, Vplots = 2, b = 2, l = 2,
+    strip_plot = function() strip_plot(Hplots = 3, Vplots = 2, reps = 2, l = 2,
                                        plotNumber = c(1, 101),
                                        locationNames = "A", seed = 1),
     diagonal_arrangement = function() diagonal_arrangement(
@@ -83,6 +84,7 @@ test_that("design functions warn when locationNames has the wrong length", {
     expect_warning(
       utils::capture.output(calls[[fn]]()),
       "'locationNames' has [0-9]+ value\\(s\\) for [0-9]+ location\\(s\\)",
+      class = "fieldhub_default_warning",
       info = fn
     )
   }

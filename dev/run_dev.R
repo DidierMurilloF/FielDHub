@@ -1,12 +1,3 @@
-# Set options here
-options(golem.app.prod = FALSE) # TRUE = production mode, FALSE = development mode
-
-# Detach all loaded packages and clean your environment
-golem::detach_all_attached()
-# rm(list=ls(all.names = TRUE))
-
-# Document and reload your package
-golem::document_and_reload()
-
-# Run the application
-run_app()
+# Run from the repository root. Documentation is a separate development task.
+pkgload::load_all(".", export_all = FALSE, helpers = FALSE, attach_testthat = FALSE)
+shiny::runApp(FielDHub::run_app())

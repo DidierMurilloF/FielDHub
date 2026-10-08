@@ -61,14 +61,16 @@
 #'
 #' @param t Number of treatments, or a character vector with the treatment labels.
 #' @param nrows Number of rows of a full resolvable replicate. 
-#' @param r Number of blocks (full resolvable replicates).
+#' @param r Deprecated alias for \code{reps}; positional calls remain supported.
+#' @param reps Number of full resolvable replicates per location.
 #' @param l Number of locations. By default \code{l = 1}.
 #' @param plotNumber Numeric vector with the starting plot number for each 
 #' location. By default \code{plotNumber = 101}.
 #' @param seed (optional) Real number that specifies the starting seed to obtain 
 #' reproducible designs.
 #' @param locationNames (optional) Names for each location.
-#' @param iterations Number of optimization iterations. Its meaning and default
+#' @param iterations Finite positive whole-number optimization budget, at most
+#' \code{.Machine$integer.max}. Its meaning and default
 #' depend on \code{method}. For \code{method = "onestage"} it is passed to
 #' \code{blocksdesign::design()} as its number of \code{searches} (default 200;
 #' values beyond a few hundred rarely improve the design). For
@@ -135,7 +137,7 @@
 #' rowcold1 <- row_column(
 #'   t = 24, 
 #'   nrows = 6, 
-#'   r = 2, 
+#'   reps = 2,
 #'   l = 1, 
 #'   plotNumber= 101, 
 #'   locationNames = "Loc1",
@@ -156,7 +158,7 @@
 #' rowcold2 <- row_column(
 #'   t = 30, 
 #'   nrows = 5, 
-#'   r = 2, 
+#'   reps = 2,
 #'   l = 1, 
 #'   plotNumber= 1001, 
 #'   locationNames = "A",
@@ -176,7 +178,7 @@
 #' rowcold3 <- row_column(
 #'   t = 24,
 #'   nrows = 6,
-#'   r = 2,
+#'   reps = 2,
 #'   l = 1,
 #'   plotNumber = 101,
 #'   locationNames = "Loc1",
@@ -190,13 +192,25 @@
 #' head(rowcold3$fieldBook, 12)
 #'
 #'
+#' @section Reproducibility:
+#' The result records effective inputs and the resolved seed in
+#' \code{metadata$parameters}, using \code{reps} for replication. Under the
+#' same package versions and RNG settings, rebuild a result \code{x} with
+#' \code{do.call(row_column, x$metadata$parameters)}.
+#'
 #' @export
 row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
                        locationNames = NULL, seed = NULL, iterations = NULL,
                        data = NULL, method = c("onestage", "twostage"),
-                       latinize = FALSE) {
-
-  method <- match.arg(method)
+                       latinize = FALSE, reps = NULL) {
+  plotNumber_supplied <- !missing(plotNumber)
+  validate_locations(l)
+  validate_flag(latinize, "latinize")
+  r <- resolve_argument_alias(
+    reps, r, new = "reps", old = "r",
+    new_supplied = !missing(reps), old_supplied = !missing(r)
+  )
+  method <- match_design_choice(method, c("onestage", "twostage"), "method")
   # iterations has a method-specific meaning and default: for "onestage" it is
   # the number of blocksdesign::design() searches (a few hundred already
   # captures the gain), for "twostage" the number of greedy row-swap iterations.
@@ -205,54 +219,29 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
     searches_onestage <- 200L
     iterations_twostage <- 1000L
   } else {
-    if (!is.numeric(iterations) || length(iterations) != 1 || is.na(iterations) ||
-        iterations < 1) {
-      shiny::validate('row_column() requires iterations to be a single positive integer.')
-    }
+    validate_iteration_budget(iterations)
     searches_onestage <- iterations
     iterations_twostage <- iterations
   }
   # latinize is only meaningful for method = "onestage" (the two-stage greedy
   # search cannot latinize across replicates); for method = "twostage" it is
   # ignored, with a warning if it was explicitly set to TRUE.
-  if (!is.logical(latinize) || length(latinize) != 1 || is.na(latinize)) {
-    shiny::validate('row_column() requires latinize to be TRUE or FALSE.')
-  }
   if (latinize && method == "twostage") {
-    warning('latinize is only available with method = "onestage"; ',
-            'it is ignored for method = "twostage".', call. = FALSE)
+    fieldhub_warn(
+      'latinize is only available with method = "onestage"; ',
+      'it is ignored for method = "twostage".',
+      class = "fieldhub_design_warning", call = NULL
+    )
     latinize <- FALSE
   }
-  if (is.null(seed) || !is.numeric(seed)) seed <- runif(1, min = -50000, max = 50000)
-  # set.seed(seed)
+  seed <- resolve_seed(seed)
+  local_design_seed(seed)
   k <- nrows
+  treatment_count <- validate_block_design_inputs(t, k, r, l, data,
+                                                  block_minimum = 1, block_name = "nrows")
   lookup <- FALSE
   if (is.null(data)) {
-    if (is.null(t) || is.null(k) || is.null(r) || is.null(l)) {
-      shiny::validate('Some of the basic design parameters are missing (t, k, r or l).')
-    }
-    arg1 <- list(k, r, l);arg2 <- c(k, r, l)
-    if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
-      shiny::validate('row_column() requires k, r and l to be possitive integers.')
-    }
-    if (is.numeric(t)) {
-      if (length(t) == 1) {
-        if (t == 1 || t < 1) {
-          shiny::validate('row_column() requires more than one treatment.')
-        } 
-        nt <- t
-      }else if ((length(t) > 1)) {
-        nt <- length(t)
-        TRT <- t
-      }
-    } else if (is.character(t) || is.factor(t)) {
-      if (length(t) == 1) {
-        shiny::validate('incomplete_blocks() requires more than one treatment.')
-      } 
-      nt <- length(t)
-    } else if ((length(t) > 1)) {
-      nt <- length(t)
-    }
+    nt <- treatment_count
     trt_labels <- treatment_labels(t, nt, "row_column")
     data_up <- data.frame(list(ENTRY = 1:nt, TREATMENT = trt_labels))
     colnames(data_up) <- c("ENTRY", "TREATMENT")
@@ -261,24 +250,27 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
     dataLookUp <- df
   } else if (!is.null(data)) {
     if (is.null(t) || is.null(r) || is.null(k) || is.null(l)) {
-      shiny::validate('Some of the basic design parameters are missing (t, r, k or l).')
+      fieldhub_abort('Some of the basic design parameters are missing (t, r, k or l).')
     }
-    if(!is.data.frame(data)) shiny::validate("Data must be a data frame.")
+    if(!is.data.frame(data)) fieldhub_abort("Data must be a data frame.")
     data_up <- as.data.frame(data[,c(1,2)])
     data_up <- na.omit(data_up)
     colnames(data_up) <- c("ENTRY", "TREATMENT")
     data_up$TREATMENT <- as.character(data_up$TREATMENT)
     new_t <- length(data_up$TREATMENT)
-    if (t != new_t) base::stop("Number of treatments do not match with data input.")
+    if (t != new_t) fieldhub_abort("Number of treatments do not match with data input.")
     TRT <- data_up$TREATMENT
     nt <- length(TRT)
     lookup <- TRUE
     dataLookUp <- data.frame(list(ENTRY = 1:nt, LABEL_TREATMENT = TRT))
   }
-  if (k >= nt) shiny::validate('incomplete_blocks() requires k < t.')
-  if (nt %% k != 0) {
-    shiny::validate('Number of treatments can not be fully distributed over the specified incomplete block specification.')
+  if (!(k %in% valid_block_sizes(nt, "row_column"))) {
+    fieldhub_abort(
+      "row_column() requires nrows to divide t evenly, with nrows < t. Valid nrows for t = ",
+      nt, ": ", paste(valid_block_sizes(nt, "row_column"), collapse = ", "), "."
+    )
   }
+  validate_location_labels(locationNames, l)
   if(is.null(locationNames) || length(locationNames) != l) {
     if (!is.null(locationNames)) warn_default_location_names(locationNames, l, 1:l)
     locationNames <- 1:l
@@ -291,10 +283,13 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
   if (latinize) {
     ncols_full <- nt / nunits
     if (r > nrows || r > ncols_full) {
-      warning('With latinize = TRUE, full latinization requires r <= nrows and ',
-              'r <= ncols (here r = ', r, ', nrows = ', nrows, ', ncols = ',
-              ncols_full, '), so some treatments will still repeat a row or a ',
-              'column across replicates.', call. = FALSE)
+      fieldhub_warn(
+        'With latinize = TRUE, full latinization requires r <= nrows and ',
+        'r <= ncols (here r = ', r, ', nrows = ', nrows, ', ncols = ',
+        ncols_full, '), so some treatments will still repeat a row or a ',
+        'column across replicates.',
+        class = "fieldhub_design_warning", call = NULL
+      )
     }
   }
 
@@ -303,6 +298,7 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
   N <- nt * r
   out_row_col_loc <- vector(mode = "list", length = l)
   blocks_model <- list()
+  local_optimizer_options()
   for (i in 1:l) {
     reps <- r
     ncols <- nt / nunits
@@ -316,17 +312,20 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
       onestage_fit <- tryCatch(
         build_row_column_onestage(
           nt = nt, nrows = nrows, ncols = ncols, reps = reps,
-          latinize = latinize, searches = searches_onestage, seed = seed + i
+          latinize = latinize, searches = searches_onestage, seed = offset_design_seed(seed, i)
         ),
         onestage_infeasible = function(cnd) cnd
       )
       if (inherits(onestage_fit, "onestage_infeasible")) {
-        warning('method = "onestage" is not feasible for these dimensions ',
-                '(t = ', nt, ', nrows = ', nrows, ', r = ', r, '): the joint ',
-                'one-stage row-and-column model is over-parameterized, so ',
-                'row_column() falls back to method = "twostage". ',
-                'blocksdesign::design() reported: ',
-                conditionMessage(onestage_fit), call. = FALSE)
+        fieldhub_warn(
+          'method = "onestage" is not feasible for these dimensions ',
+          '(t = ', nt, ', nrows = ', nrows, ', r = ', r, '): the joint ',
+          'one-stage row-and-column model is over-parameterized, so ',
+          'row_column() falls back to method = "twostage". ',
+          'blocksdesign::design() reported: ',
+          conditionMessage(onestage_fit),
+          class = "fieldhub_design_warning", call = NULL
+        )
         method <- "twostage"
       } else {
         field_book_best_design <- onestage_fit
@@ -334,11 +333,21 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
     }
     if (method == "twostage") {
       # Two-stage: build columns with blocks(), then greedily optimize rows.
-      mydes <- blocksdesign::blocks(
-        treatments = nt,
-        replicates = reps,
-        blocks = list(reps, ncols),
-        seed = seed + i
+      mydes <- tryCatch(
+        blocksdesign::blocks(
+          treatments = nt,
+          replicates = reps,
+          blocks = list(reps, ncols),
+          seed = offset_design_seed(seed, i)
+        ),
+        error = function(e) {
+          fieldhub_abort(
+            "row_column() cannot build a resolvable design for t = ", nt,
+            ", nrows = ", nrows, ", and reps = ", reps, ": not enough replication ",
+            "for this block size. Increase reps or use a different number of rows.",
+            call = NULL
+          )
+        }
       )
       mydes <- rerandomize_ibd(ibd_design = mydes)
       # Create row and column design
@@ -348,7 +357,8 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
         dplyr::mutate(Level_3 = factor(Level_3, levels = unique(Level_3))) |>
         dplyr::select(Level_1, Level_2, Level_3, plots, treatments)
 
-      improved_design <- improve_efficiency(row_col_design, iterations_twostage, seed = seed + i)
+      improved_design <- improve_efficiency(row_col_design, iterations_twostage,
+                                             seed = offset_design_seed(seed, i))
       field_book_best_design <- improved_design$best_design
     }
     row_column_efficiency <- report_efficiency(field_book_best_design)
@@ -391,8 +401,13 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
   out_row_col_id <- out_row_col
   
   out_row_col_id <- out_row_col_id[order(out_row_col_id$LOCATION, out_row_col_id$REP, out_row_col_id$ROW),]
-  row_col_plots <- ibd_plot_numbers(nt = nt, plot.number = plotNumber, r = r, l = l)
-  out_row_col_id$PLOT <- as.vector(unlist(row_col_plots))
+  ibd_result <- ibd_plot_numbers(nt = nt, plot.number = plotNumber, r = r, l = l,
+                                 supplied = plotNumber_supplied)
+  out_row_col_id$PLOT <- as.vector(unlist(ibd_result$plot.number))
+  # Record the effective per-location starts actually used, not the raw
+  # (possibly length-mismatched or absent) plotNumber argument, so
+  # reproduce_design() replays silently and identically.
+  plotNumber <- ibd_result$starts
   
   ID <- 1:nrow(out_row_col_id)
   out_row_col_fieldbook <- cbind(ID, out_row_col_id)
@@ -451,6 +466,9 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
     concurrence = new_summ,
     fieldBook = out_row_col_fieldbook
   )
-  class(output) <- "FielDHub"
+  reproduction_parameters <- record_design_parameters(
+    environment(), overrides = list(reps = r), exclude = "r"
+  )
+  output <- new_fieldhub_design(output, "row_column", parameters = reproduction_parameters)
   return(invisible(output))
 }

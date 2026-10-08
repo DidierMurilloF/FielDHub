@@ -7,6 +7,14 @@
 #' @param l Number of locations.
 #' @param data Data frame with the entry (ENTRY) and the labels of each treatment (NAME)
 #' and number of individuals per family group (FAMILY).
+#' @param seed (optional) A single real number specifying the random seed.
+#' When omitted, one integer is drawn from the current random-number stream
+#' and recorded in \code{infoDesign$seed} and \code{metadata$seed}; the
+#' allocation's own randomization does not change the caller's stream.
+#'
+#' @details To reproduce an allocation previously made with
+#' \code{set.seed(s); split_families(l, data)}, use
+#' \code{split_families(l, data, seed = s)}.
 #' 
 #' @author Didier Murillo [aut],
 #'         Salvador Gezan [aut],
@@ -37,31 +45,42 @@
 #' gen.list <- data.frame(list(ENTRY = ENTRY, NAME = NAME, FAMILY = FAMILY))
 #' head(gen.list)
 #' # Now we are going to use the split_families() function.
-#' split_population <- split_families(l = 8, data = gen.list)
+#' split_population <- split_families(l = 8, data = gen.list, seed = 77)
 #' print(split_population)
 #' summary(split_population)
 #' head(split_population$data_locations,12)
 #'
+#' @section Reproducibility:
+#' The result records effective inputs and the resolved seed in
+#' \code{metadata$parameters}. Under the same package versions and RNG
+#' settings, rebuild a result \code{x} with
+#' \code{do.call(split_families, x$metadata$parameters)}.
+#'
 #' @export
-split_families <- function(l = NULL, data = NULL) {
+split_families <- function(l = NULL, data = NULL, seed = NULL) {
+  validate_locations(l)
+  seed <- resolve_seed(seed)
+  local_design_seed(seed)
   if (is.null(l) || !is.numeric(l) || length(l) != 1 || l < 1 || l %% 1 != 0) {
-    stop("\n 'split_families()' requires the number of locations 'l' as a whole number of 1 or more.")
+    fieldhub_abort("\n 'split_families()' requires the number of locations 'l' as a whole number of 1 or more.")
   }
   if(!is.data.frame(data)) {
-    stop("\n 'split_families()' requires input data to be a data frame.")
+    fieldhub_abort("\n 'split_families()' requires input data to be a data frame.")
   } 
   if (ncol(data) < 3) {
-    stop("\n 'split_families()' requires that data have three columns: ENTRY | NAME | FAMILY.")
+    fieldhub_abort("\n 'split_families()' requires that data have three columns: ENTRY | NAME | FAMILY.")
   }
   gen.list <- na.omit(data[,1:3])
   colnames(gen.list) <- c("ENTRY", "NAME", "FAMILY")
+  if (nrow(gen.list) == 0L) {
+    fieldhub_abort("split_families() requires at least one complete entry.")
+  }
   fmlys <- factor(gen.list$FAMILY)
   familyLevels <- levels(fmlys)
   LF <- length(familyLevels)
   locations <- 1:l
   Glist_locations <- vector(mode = "list", length = l)
-  v <- matrix(nrow = 0, ncol = 3)
-  colnames(v) <- c("ENTRY",  "NAME", "FAMILY")
+  v <- gen.list[0, , drop = FALSE]
   for (n in 1:l) {Glist_locations[[n]] <- v}
   a <- vector(mode = "numeric", length = LF)
   sp <- 1
@@ -75,7 +94,8 @@ split_families <- function(l = NULL, data = NULL) {
         Glist_locations[[w]] <- rbind(Glist_locations[[w]], population[k,])
         k <- k + 1
       }
-      warning(paste("Family", fmly, "is not in all locations."))
+      fieldhub_warn("Family ", fmly, " is not in all locations.",
+                    class = "fieldhub_design_warning")
       a[sp] <- 1
     }else if (sj %% l == 0) {
       lOptions <- 1:l
@@ -112,7 +132,8 @@ split_families <- function(l = NULL, data = NULL) {
   data_locations <- dplyr::bind_rows(Glist_locations)
   data_locations$LOCATION <- rep(paste("Location", 1:l), rowseach)
   output <- list(rowsEachlist = rowsEachlist, data_locations = data_locations,
-                 infoDesign = list(id_design = 17))
-  class(output) <- "FielDHub"
+                 infoDesign = list(id_design = 17, seed = seed))
+  reproduction_parameters <- record_design_parameters(environment())
+  output <- new_fieldhub_design(output, "split_families", parameters = reproduction_parameters)
   return(invisible(output))
 }

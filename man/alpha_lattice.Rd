@@ -12,7 +12,8 @@ alpha_lattice(
   plotNumber = 101,
   locationNames = NULL,
   seed = NULL,
-  data = NULL
+  data = NULL,
+  reps = NULL
 )
 }
 \arguments{
@@ -20,7 +21,7 @@ alpha_lattice(
 
 \item{k}{Size of incomplete blocks (number of units per incomplete block).}
 
-\item{r}{Number of full blocks (or resolvable replicates) (also number of replicates per treatment).}
+\item{r}{Deprecated alias for \code{reps}; positional calls remain supported.}
 
 \item{l}{Number of locations. By default \code{l = 1}.}
 
@@ -31,6 +32,8 @@ alpha_lattice(
 \item{seed}{(optional) Real number that specifies the starting seed to obtain reproducible designs.}
 
 \item{data}{(optional) Data frame with label list of treatments.}
+
+\item{reps}{Number of full resolvable replicates per location.}
 }
 \value{
 A list with two elements.
@@ -42,12 +45,20 @@ A list with two elements.
 \description{
 Randomly generates an alpha design like \code{alpha(0,1)} across multiple locations.
 }
+\section{Reproducibility}{
+
+The result records effective inputs and the resolved seed in
+\code{metadata$parameters}, using \code{reps} for replication. Under the
+same package versions and RNG settings, rebuild a result \code{x} with
+\code{do.call(alpha_lattice, x$metadata$parameters)}.
+}
+
 \examples{
 # Example 1: Generates an alpha design with 4 full blocks and 15 treatments.
 # Size of IBlocks k = 3.
 alphalattice1 <- alpha_lattice(t = 15, 
                                k = 3, 
-                               r = 4, 
+                               reps = 4,
                                l = 1, 
                                plotNumber = 101, 
                                locationNames = "GreenHouse", 
@@ -64,7 +75,7 @@ treatment_list <- data.frame(list(ENTRY = ENTRY, TREATMENT = treatments))
 head(treatment_list) 
 alphalattice2 <- alpha_lattice(t = 25,
                                k = 5,
-                               r = 3, 
+                               reps = 3,
                                l = 1, 
                                plotNumber = 1001, 
                                locationNames = "A", 

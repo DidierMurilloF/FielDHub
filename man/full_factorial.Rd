@@ -46,7 +46,9 @@ to obtain reproducible designs.}
 labels from the original data set otherwise, numeric labels will be
 assigned. Default is \code{factorLabels =TRUE}.}
 
-\item{data}{(optional) Data frame with the labels of factors.}
+\item{data}{(optional) Data frame whose first two columns contain factor
+names and level labels. Levels must be unique within each factor, but a
+label may occur in different factors. Incomplete rows are omitted.}
 }
 \value{
 A list with two elements.
@@ -58,6 +60,14 @@ A list with two elements.
 \description{
 It randomly generates a full factorial design across locations.
 }
+\section{Reproducibility}{
+
+The result records effective inputs and the resolved seed in
+\code{metadata$parameters}. Under the same package versions and RNG
+settings, rebuild a result \code{x} with
+\code{do.call(full_factorial, x$metadata$parameters)}.
+}
+
 \examples{
 # Example 1: Generates a full factorial with 3 factors each with 2 levels.
 # This in an RCBD arrangement with 3 reps.

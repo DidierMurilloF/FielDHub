@@ -1,0 +1,156 @@
+---
+title: "Scientific validation and computational limits"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Scientific validation and computational limits}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(FielDHub)
+```
+
+## What the checks establish
+
+FielDHub uses three complementary checks: complete fixed-seed snapshots,
+independent structural invariants, and independently calculated numerical
+references. Snapshots detect changes; they do not establish scientific validity.
+The invariant tests use explicit expected counts from the input fixtures, not
+counts inferred from the generated design's summaries. Mutation tests check
+that the independent helpers reject missing, repeated, or relabeled units.
+
+The fixed-seed catalogue covers every design engine, including generated and
+supplied labels, multiple locations, unequal replication, checks, and fillers.
+`tests/testthat/test_scientific_invariants.R` checks the following properties on
+every test platform; it is not restricted to the snapshot reference platform.
+
+| Design family | Independently checked property |
+|---|---|
+| Completely randomized | Requested treatment multiplicities, including unequal replication |
+| Complete blocks | Every test entry once per replicate and location; requested extra copies of checks |
+| Latin squares | Every treatment once in each row and column of every square |
+| Cyclic Latin rectangles | Every treatment once per row, no within-column repeats, equal replication and full additive row/column/treatment model rank |
+| Full factorial | Every requested factor combination in every replicate and location |
+| Split and split-split plots | Complete factor combinations and a single whole-plot treatment within each physical whole plot |
+| Strip plots | Complete horizontal-by-vertical combinations per replicate and location |
+| Incomplete blocks and lattices | Complete treatment replicates, fixed block sizes, distinct nested units, and block efficiency |
+| Row-column | Complete treatment replicates and complete replicate grids; separate SVD-based joint-efficiency tests |
+| Diagonal and optimized arrangements | Experimental-entry multiplicities, total check allocation, and filler counts |
+| Augmented complete blocks | Unreplicated test entries and every check in every block |
+| Partially replicated | Requested one- and two-copy entry groups, excluding fillers |
+| Sparse and multi-location allocations | Across-location copy budgets in balanced fixtures, site-level restrictions, and agreement between count matrices and entry lists |
+| Family splitting | Every original entry retained; family counts across locations differ by at most one |
+| Pair swapping | Entry frequencies and geometry retained; reported distances agree with `stats::dist()` |
+
+All field-design catalogue cases also have distinct final
+`LOCATION`/`ROW`/`COLUMN` coordinates. `PLOT` is not a universal unique key:
+split-unit designs can share a whole-plot number, fillers can have `PLOT = 0`,
+and identifiers can restart at each location. Use the experimental hierarchy
+and final physical coordinates appropriate to the design.
+
+For example, a complete-block and physical-coordinate check can be written
+without calling a package validator:
+
+```{r complete-block-check}
+design <- RCBD(t = 6, reps = 3, seed = 42)
+book <- design$fieldBook
+stopifnot(all(table(book$TREATMENT, book$REP) == 1L))
+layout <- field_layout(design)
+stopifnot(!anyDuplicated(layout[c("LOCATION", "ROW", "COLUMN")]))
+stopifnot(identical(reproduce_design(design), design))
+```
+
+The complete-block, Latin-square, and full-factorial properties follow the
+definitions in the NIST/SEMATECH handbook:
+[randomized blocks](https://www.itl.nist.gov/div898/handbook/pri/section3/pri332.htm),
+[Latin squares](https://www.itl.nist.gov/div898/handbook/pri/section3/pri3321.htm), and
+[full factorials](https://www.itl.nist.gov/div898/handbook/pri/section3/pri333.htm).
+
+The Latin rectangle definition follows
+[Doyle's treatment](https://math.dartmouth.edu/~doyle/docs/latin/latin.pdf).
+`test_latin_rectangle.R` checks consecutive cyclic shifts with independent
+row/column/symbol permutations for treatment counts 3 through 8, every supported
+row count and several seeds. A separate model-matrix rank calculation verifies
+connectivity and `(rows - 2) * (t - 1)` residual degrees of freedom. Two-row
+rectangles are saturated. Columns need not be balanced incomplete blocks, and
+the generator does not sample uniformly over all Latin rectangles.
+
+## Numerical reference checks
+
+For equally replicated incomplete-block designs, the independent test oracle
+forms the treatment-by-block incidence matrix $N$ and computes
+
+$$C = \operatorname{diag}(r) - N\operatorname{diag}(1/k)N^\mathsf{T}.$$
+
+Here $r$ contains treatment replications and $k$ contains block sizes. If the
+design is connected, the harmonic mean of its nonzero information eigenvalues,
+divided by the common replication, gives the relative A-efficiency. The oracle
+is checked against complete blocks (efficiency 1), the six pairs of four
+treatments (efficiency 2/3), and a disconnected design (efficiency 0).
+It then checks the reported efficiencies of incomplete-block, alpha, square,
+and rectangular lattice catalogue cases. The legacy `blocksModel` table for
+these functions describes the first location. The independent row-column
+oracle instead uses an SVD projection to handle rank-deficient and crossed
+row/column effects; see `test_row_column.R`.
+
+The production block-efficiency calculation uses the singular values of
+normalized, mean-centered treatment/block incidence, distinct from the oracle's
+information-matrix eigendecomposition. Connectivity is checked directly in the
+incidence graph. A disconnected comparison has zero overall efficiency, even
+if comparisons within one connected component are estimable. A connected model
+whose numerical information cannot be resolved raises a structured numerical
+error instead of reporting a misleading positive efficiency.
+
+The underlying optimization package documents its
+[block models and efficiency reports](https://search.r-project.org/CRAN/refmans/blocksdesign/html/blocks.html).
+These checks validate achieved designs, not a claim of global optimality or
+uniform sampling over all possible randomizations.
+
+Spatial simulation tests compare the separable AR1 construction against an
+independent dense covariance/Cholesky calculation, including negative
+correlations and nonsquare fields (`test_separable_spatial.R`). Response tests
+check the stated treatment-specific model and unequal replication
+(`test_truncated_response_contract.R` and `test_simulation.R`). These are
+computational checks, not evidence that simulated responses fit a particular
+biological experiment.
+
+## Search bounds and diagnostics
+
+| Operation | Bound and behavior at the limit |
+|---|---|
+| RCBD, Latin-square, incomplete-block, lattice, and row-column construction | Validates counts before allocation and rejects a projected total exceeding R's integer-index bound; available memory can impose a lower practical limit |
+| Generated factorial, split-plot, split-split-plot, and strip-plot expansion | Checks the product of factor counts, replications, and locations against R's integer-index bound before expanding levels or allocating the field book |
+| Spatial field construction | Validates scalar or per-location dimensions and rejects projected diagonal, optimized, augmented-RCBD, and p-rep field sizes beyond R's integer-index bound |
+| Block-model connectivity | At most one graph expansion per treatment; stops when all treatments are reached or no new treatment is reachable |
+| Latin-square placement | At most 100,000 placement iterations per square; a `fieldhub_search_error` records the square and budget on exhaustion |
+| Cyclic Latin rectangles | Direct construction with work proportional to locations × rows × treatments; no iterative search, and projected field size checked before allocation |
+| Repeated-check placement in RCBD | At most 100 attempts per block; warns and falls back to unrestricted placement if stratification cannot be completed |
+| Pair-swap optimization | A finite geometry-dependent threshold range, at most `stop_iter` sweeps per threshold, and bounded sampled candidates per swap; diagnostics distinguish exhaustion, completion, and an empty range |
+| Row-column search | Positive finite whole-number `iterations`; defaults are 200 external onestage searches or 1,000 twostage row-swap iterations |
+| Allocation balancing | At most one upward pass through the allocation rows; warns if no eligible entry can complete the balancing |
+| Dimension cache | At most 64 retained queries and 4 MiB of retained keys and results; temporary search memory is outside this bound |
+
+Finite iteration counts are not wall-clock or memory guarantees. Work still
+grows with field size, and external optimizer search internals are controlled
+by `blocksdesign`. Forced allocation balancing can add entry copies to fill
+smaller locations; inspect the returned allocation rather than assuming every
+input copy budget is unchanged under that option. Pair-swap diagnostics
+describe the retained result separately from an unsuccessful final attempt.
+
+## Reproducibility and release evidence
+
+Golden outputs are recorded on macOS. Structural and numerical tests run on
+all supported test platforms, since optimizer choices can depend on R and
+dependency versions and floating-point behavior. Replay comparisons use the
+same package versions and recorded RNG settings. Review and explain any
+deliberate fixed-seed change before accepting updated snapshots.
+
+The release benchmark scripts under `tools/` measure optimizers, spatial
+simulation, dimension searches, and layout exports. They record package/R
+versions, platform, fixed inputs, elapsed time, and available allocation
+measurements. Largest observed R allocation is not peak resident memory.
+Compare results on the same host with comparable load, investigate changes,
+and follow `RELEASING.md`; a successful local check does not establish that the
+remote CI matrix or a deployment has passed.

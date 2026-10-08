@@ -4,14 +4,15 @@
 #' The randomization can be done across locations.
 #'
 #' @param t Number of treatments, or a character vector with the treatment labels.
-#' @param r Number of full blocks (or resolvable replicates) (also number of replicates per treatment).
+#' @param r Deprecated alias for \code{reps}; positional calls remain supported.
+#' @param reps Number of full resolvable replicates per location.
 #' @param k Size of incomplete blocks (number of units per incomplete block).
 #' @param l Number of locations. By default \code{l = 1}.
 #' @param plotNumber Numeric vector with the starting plot number for each location. By default \code{plotNumber = 101}.
 #' @param seed (optional) Real number that specifies the starting seed to obtain reproducible designs.
 #' @param locationNames (optional) Names for each location.
 #' @param data (optional) Data frame with label list of treatments.
-#' 
+#'
 #' @author Didier Murillo [aut],
 #'         Salvador Gezan [aut],
 #'         Ana Heilman [ctb],
@@ -37,7 +38,7 @@
 #' # 1-resolvable IBDs
 #' ibd1 <- incomplete_blocks(t = 12,
 #'                           k = 4,
-#'                           r = 2,
+#'                           reps = 2,
 #'                           seed = 1984)
 #' ibd1$infoDesign
 #' head(ibd1$fieldBook)
@@ -50,46 +51,65 @@
 #' head(treatment_list)
 #' ibd2 <- incomplete_blocks(t = 15,
 #'                           k = 3,
-#'                           r = 7,
+#'                           reps = 7,
 #'                           seed = 1985,
 #'                           data = treatment_list)
 #' ibd2$infoDesign
 #' head(ibd2$fieldBook)
 #'
+#' @section Reproducibility:
+#' The result records effective inputs and the resolved seed in
+#' \code{metadata$parameters}, using \code{reps} for replication. Under the
+#' same package versions and RNG settings, rebuild a result \code{x} with
+#' \code{do.call(incomplete_blocks, x$metadata$parameters)}.
+#'
 #' @export
-incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101, 
-                              locationNames = NULL, seed = NULL, data = NULL) {
+incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101,
+                              locationNames = NULL, seed = NULL, data = NULL,
+                              reps = NULL) {
+  reps <- resolve_argument_alias(
+    reps, r, new = "reps", old = "r",
+    new_supplied = !missing(reps), old_supplied = !missing(r)
+  )
+  build_incomplete_blocks(
+    t = t, k = k, l = l, plotNumber = plotNumber, locationNames = locationNames,
+    seed = seed, data = data, reps = reps, caller = "incomplete_blocks",
+    plotNumber_supplied = !missing(plotNumber)
+  )
+}
 
-  if (is.null(seed) || !is.numeric(seed)) seed <- runif(1, min = -50000, max = 50000)
-  set.seed(seed)
+#' Build an incomplete-block design, naming the calling function in messages
+#'
+#' @description Internal engine shared by \code{incomplete_blocks()},
+#' \code{alpha_lattice()}, \code{square_lattice()} and
+#' \code{rectangular_lattice()} (which build their design through it).
+#' \code{reps} must already be the resolved \code{r}/\code{reps} value: each
+#' public wrapper resolves that alias itself, since that is where
+#' \code{missing()} reflects what its own caller actually supplied.
+#'
+#' @inheritParams incomplete_blocks
+#' @param reps Number of full resolvable replicates per location (already
+#'   resolved from any legacy \code{r} alias by the caller).
+#' @param caller Name of the function to name in error messages, so a design
+#'   built through \code{incomplete_blocks()} reports failures under its own
+#'   name instead of \code{incomplete_blocks()}.
+#' @param plotNumber_supplied Whether the caller's own caller actually
+#'   supplied \code{plotNumber} (Ruling R5); see
+#'   \code{warn_default_plot_numbers()}.
+#' @noRd
+build_incomplete_blocks <- function(t = NULL, k = NULL, l = 1, plotNumber = 101,
+                                    locationNames = NULL, seed = NULL, data = NULL,
+                                    reps = NULL, caller = "incomplete_blocks",
+                                    plotNumber_supplied = TRUE) {
+  validate_locations(l)
+  r <- reps
+  seed <- resolve_seed(seed)
+  local_design_seed(seed)
+  treatment_count <- validate_block_design_inputs(t, k, r, l, data)
   lookup <- FALSE
   if(is.null(data)) {
-    if (is.null(t) || is.null(k) || is.null(r) || is.null(l)) {
-      shiny::validate('Basic design parameters missing (t, k, r or l).')
-    }
-    arg1 <- list(k, r, l);arg2 <- c(k, r, l)
-    if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
-      shiny::validate('incomplete_blocks() requires k, r and l to be possitive integers.')
-    }
-    if (is.numeric(t)) {
-      if (length(t) == 1) {
-        if (t == 1 || t < 1) {
-          shiny::validate('incomplete_blocks() requires more than one treatment.')
-        } 
-        nt <- t
-      }else if ((length(t) > 1)) {
-        nt <- length(t)
-        TRT <- t
-      }
-    } else if (is.character(t) || is.factor(t)) {
-      if (length(t) == 1) {
-        shiny::validate('incomplete_blocks() requires more than one treatment.')
-      } 
-      nt <- length(t)
-    } else if ((length(t) > 1)) {
-      nt <- length(t)
-    }
-    trt_labels <- treatment_labels(t, nt, "incomplete_blocks")
+    nt <- treatment_count
+    trt_labels <- treatment_labels(t, nt, caller)
     data_up <- data.frame(list(ENTRY = 1:nt, TREATMENT = trt_labels))
     colnames(data_up) <- c("ENTRY", "TREATMENT")
     lookup <- TRUE
@@ -97,30 +117,37 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
     dataLookUp <- df
   } else if (!is.null(data)) {
     if (is.null(t) || is.null(r) || is.null(k) || is.null(l)) {
-      shiny::validate('Some of the basic design parameters are missing (t, k, r or l)')
+      fieldhub_abort('Some of the basic design parameters are missing (t, k, r or l)')
     }
-    if(!is.data.frame(data)) shiny::validate("Data must be a data frame.")
-    if (ncol(data) < 2) base::stop("Data input needs at least two columns with: ENTRY and NAME.")
+    if(!is.data.frame(data)) fieldhub_abort("Data must be a data frame.")
+    if (ncol(data) < 2) fieldhub_abort("Data input needs at least two columns with: ENTRY and NAME.")
     data_up <- as.data.frame(data[,c(1,2)])
     data_up <- na.omit(data_up)
     colnames(data_up) <- c("ENTRY", "TREATMENT")
     data_up$TREATMENT <- as.character(data_up$TREATMENT)
     new_t <- length(data_up$TREATMENT)
-    if (t != new_t) base::stop("Number of treatments do not match with the data input.")
+    if (t != new_t) fieldhub_abort("Number of treatments do not match with the data input.")
     TRT <- data_up$TREATMENT
     nt <- length(TRT)
     lookup <- TRUE
     dataLookUp <- data.frame(list(ENTRY = 1:nt, LABEL_TREATMENT = TRT))
   }
-  if(any(plotNumber %% 1 != 0) || any(plotNumber < 1) || any(diff(plotNumber) < 0)) {
-    shiny::validate("'incomplete_blocks()' requires plotNumber to be possitive integers and sorted.")
+  if (!is.null(plotNumber)) validate_plot_starts(plotNumber)
+  if(any(plotNumber < 1) || any(diff(plotNumber) < 0)) {
+    fieldhub_abort("'", caller, "()' requires plotNumber to be possitive integers and sorted.")
   }
   if (is.null(plotNumber) || length(plotNumber) != l) {
-    default_plots <- seq(1001, 1000*(l+1), 1000)
-    warn_default_plot_numbers(plotNumber, l, default_plots)
+    default_plots <- default_plot_starts(l, 1001)
+    warn_default_plot_numbers(plotNumber, l, default_plots, caller_supplied = plotNumber_supplied)
     plotNumber <- default_plots
   }
-  if (k >= nt) shiny::validate('incomplete_blocks() requires that k < t.')
+  if (!(k %in% valid_block_sizes(nt, "incomplete_blocks"))) {
+    fieldhub_abort(
+      caller, "() requires k to divide t evenly, with k < t. Valid k for t = ",
+      nt, ": ", paste(valid_block_sizes(nt, "incomplete_blocks"), collapse = ", "), "."
+    )
+  }
+  validate_location_labels(locationNames, l)
   if(is.null(locationNames) || length(locationNames) != l) {
     if (!is.null(locationNames)) warn_default_location_names(locationNames, l, 1:l)
     locationNames <- 1:l
@@ -128,20 +155,28 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
   nincblock <- nt*r/k
   N <- nt * r
   if (k * nincblock != N) {
-    shiny::validate('Size of experiment defined by number of units per incomplete block (nunits) is inconsistent. Check input parameters.')
-  }
-  if (nt %% k != 0) {
-    shiny::validate('Number of treatments can not be fully distributed over the specified incomplete block specification.')
+    fieldhub_abort('Size of experiment defined by number of units per incomplete block (nunits) is inconsistent. Check input parameters.')
   }
 
-  ibd_plots <- ibd_plot_numbers(nt = nt, plot.number = plotNumber, r = r, l = l)
+  ibd_plots <- ibd_plot_numbers(nt = nt, plot.number = plotNumber, r = r, l = l)$plot.number
   b <- nt/k
   square <- FALSE
   if (sqrt(nt) == round(sqrt(nt))) square <- TRUE
   outIBD_loc <- vector(mode = "list", length = l)
   blocks_model <- list()
+  local_optimizer_options()
   for (i in 1:l) {
-    mydes <- blocksdesign::blocks(treatments = nt, replicates = r, blocks = list(r, b), seed = NULL)
+    mydes <- tryCatch(
+      blocksdesign::blocks(treatments = nt, replicates = r, blocks = list(r, b), seed = NULL),
+      error = function(e) {
+        fieldhub_abort(
+          caller, "() cannot build a resolvable design for t = ", nt,
+          " treatments, k = ", k, ", and reps = ", r, ": not enough replication ",
+          "for this block size. Increase reps or use a different block size.",
+          call = NULL
+        )
+      }
+    )
     mydes <- rerandomize_ibd(ibd_design = mydes)
     matdf <- base::data.frame(list(LOCATION = rep(locationNames[i], each = N)))
     matdf$PLOT <- as.numeric(unlist(ibd_plots[[i]]))
@@ -160,10 +195,12 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
   OutIBD_test$ID <- 1:nrow(OutIBD_test)
   if(lookup) {
     OutIBD <- dplyr::inner_join(OutIBD, dataLookUp, by = "ENTRY")
-    OutIBD <- OutIBD[,-6]
+    # ENTRY was only needed to look up LABEL_TREATMENT; drop it by name.
+    OutIBD$ENTRY <- NULL
     colnames(OutIBD) <- c("LOCATION","PLOT", "REP", "IBLOCK", "UNIT", "TREATMENT")
     OutIBD <- dplyr::inner_join(OutIBD, data_up, by = "TREATMENT")
-    OutIBD <- OutIBD[, c(1:5,7,6)]
+    OutIBD <- OutIBD[, c("LOCATION", "PLOT", "REP", "IBLOCK", "UNIT", "ENTRY",
+                         "TREATMENT")]
     colnames(OutIBD) <- c("LOCATION","PLOT", "REP", "IBLOCK", "UNIT", "ENTRY", "TREATMENT")
   }
   ID <- 1:nrow(OutIBD)
@@ -174,7 +211,10 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
                      Locations = locationNames, seed = seed, lambda = lambda, 
                      id_design = 8)
   output <- list(infoDesign = infoDesign, fieldBook = OutIBD_new, blocksModel = blocks_model[[1]])
-  class(output) <- "FielDHub"
+  reproduction_parameters <- record_design_parameters(
+    environment(), exclude = c("caller", "plotNumber_supplied")
+  )
+  output <- new_fieldhub_design(output, "incomplete_blocks", parameters = reproduction_parameters)
   return(invisible(output))
 }
 
@@ -183,18 +223,18 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
 #' 
 concurrence_matrix <- function(df=NULL, trt=NULL, target=NULL) {
   if (is.null(df)) {
-    stop('No input dataset provided.')
+    fieldhub_abort('No input dataset provided.')
   }
   if (is.null(trt)) {
-    stop('No input treatment factor provided.')
+    fieldhub_abort('No input treatment factor provided.')
   }
   if (is.null(target)) {
-    stop('No input target design factor provided.')
+    fieldhub_abort('No input target design factor provided.')
   }
   df[,target]<-as.factor(df[,target])
   df[,trt]<-as.factor(df[,trt])
   s <- length(levels(df[,target]))
-  if (s==0) { stop('No levels found for design factor provided.') }
+  if (s==0) { fieldhub_abort('No levels found for design factor provided.') }
   inc <- as.matrix(table(df[,target],df[,trt]))
   for (i in 1:s) {
     inc[inc[,i]>0,i] <- 1

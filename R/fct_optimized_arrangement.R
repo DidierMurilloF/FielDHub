@@ -9,7 +9,7 @@
 #' @param ncols Number of columns in the field.
 #' @param lines Number of genotypes, experimental lines or treatments.
 #' @param checks Number of genotypes as checks.
-#' @param amountChecks Integer with the amount total of checks or a numeric vector with the replicates of each check label.
+#' @param amountChecks Deprecated alias for \code{rep_checks}.
 #' @param planter Option for \code{serpentine} or \code{cartesian} arrangement. By default  \code{planter = 'serpentine'}.
 #' @param l Number of locations. By default \code{l = 1}.
 #' @param plotNumber Numeric vector with the starting plot number for each location. By default \code{plotNumber = 101}.
@@ -17,9 +17,11 @@
 #' @param exptName (optional) Name of the experiment.
 #' @param locationNames (optional) Name for each location.
 #' @param data (optional) Data frame with 3 columns: \code{ENTRY | NAME | REPS}.
-#' @param spread_reps A logical value indicating whether to maximize the spatial 
+#' @param spread_reps A logical value indicating whether to maximize the spatial
 #'   distance between replicated treatments in the field. Default is \code{TRUE}.
-#' 
+#' @param rep_checks Integer with the total amount of checks, or a numeric
+#'   vector with the replicates of each check label.
+#'
 #' @author Didier Murillo [aut],
 #'         Salvador Gezan [aut],
 #'         Ana Heilman [ctb],
@@ -52,8 +54,8 @@
 #' optim_unrep1 <- optimized_arrangement(
 #'   nrows = 14, 
 #'   ncols = 10, 
-#'   lines = 120, 
-#'   amountChecks = 20, 
+#'   lines = 120,
+#'   rep_checks = 20,
 #'   checks = 1:4,
 #'   planter = "cartesian", 
 #'   plotNumber = 101,
@@ -94,57 +96,62 @@
 #' head(optim_unrep2$fieldBook,12)
 #' }
 #'                   
+#' @section Reproducibility:
+#' The result records effective inputs and the resolved seed in
+#' \code{metadata$parameters}. Under the same package versions and RNG
+#' settings, rebuild a result \code{x} with
+#' \code{do.call(optimized_arrangement, x$metadata$parameters)}.
+#'
 #' @export
 optimized_arrangement <- function(
-    nrows = NULL, 
-    ncols = NULL, 
-    lines = NULL,  
-    amountChecks = NULL, 
+    nrows = NULL,
+    ncols = NULL,
+    lines = NULL,
+    amountChecks = NULL,
     checks = NULL,
-    planter = "serpentine", 
-    l = 1, 
-    plotNumber = 101, 
-    seed = NULL, 
+    planter = "serpentine",
+    l = 1,
+    plotNumber = 101,
+    seed = NULL,
     exptName = NULL,
-    locationNames = NULL, 
-    spread_reps = TRUE, 
+    locationNames = NULL,
+    spread_reps = TRUE,
     data = NULL,
-    year = NULL) {
+    year = NULL,
+    rep_checks = NULL) {
+    plotNumber_supplied <- !missing(plotNumber)
+    amountChecks <- resolve_argument_alias(
+        rep_checks, amountChecks, new = "rep_checks", old = "amountChecks",
+        new_supplied = !missing(rep_checks), old_supplied = !missing(amountChecks)
+    )
+    validate_locations(l)
+    validate_flag(spread_reps, "spread_reps")
     year <- resolve_year(year)
-    
-    if (is.null(seed) || !is.numeric(seed)) seed <- runif(1, min = -50000, max = 50000)
-    if (all(c("serpentine", "cartesian") != planter)) {
-        base::stop('Input planter is unknown. Please, choose one: "serpentine" or "cartesian"')
-    }
-    if (!is.numeric(plotNumber) && !is.integer(plotNumber)) {
-        stop("plotNumber should be an integer or a numeric vector.")
-    }
-    if (any(plotNumber %% 1 != 0)) {
-        stop("plotNumber should be integers.")
-    }
+
+    seed <- resolve_seed(seed)
+    local_design_seed(seed)
+    validate_planter(planter)
+    validate_plot_starts(plotNumber)
     if (!is.null(l)) {
         if (is.null(plotNumber) || length(plotNumber) != l) {
-            if (l > 1){
-                default_plots <- seq(1001, 1000*(l+1), 1000)
-            } else default_plots <- 1001
-            warn_default_plot_numbers(plotNumber, l, default_plots)
+            default_plots <- default_plot_starts(l, 1001)
+            warn_default_plot_numbers(plotNumber, l, default_plots, caller_supplied = plotNumber_supplied)
             plotNumber <- default_plots
         }
-    } else stop("Number of locations/sites is missing")
+    } else fieldhub_abort("Number of locations/sites is missing")
     
     if (!is.null(data)) {
-        arg1 <- list(nrows, ncols, l);arg2 <- c(nrows, ncols, l)
-        if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
-            base::stop('"optimized_arrangement()" requires arguments nrows, ncols, and l to be numeric and distint of NULL')
-        }
+        counts <- list(nrows = nrows, ncols = ncols, l = l)
     } else {
-        arg1 <- list(nrows, ncols, lines, l);arg2 <- c(nrows, ncols, lines, l)
-        if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
-            base::stop('"optimized_arrangement()" requires arguments nrows, ncols, and l to be numeric and distint of NULL')
-        }
-    } 
+        counts <- list(nrows = nrows, ncols = ncols, lines = lines, l = l)
+    }
+    for (argument in names(counts)) validate_iteration_budget(counts[[argument]], argument)
+    validate_design_size(c(nrows, ncols, l))
     
+    recorded_checks <- NULL
     if(is.null(data)) {
+        recorded_checks <- checks
+        validate_spatial_checks(checks, nrows * ncols, sort_entries = TRUE)
         if (length(checks) == 1 && checks > 1) {
             checksEntries <- 1:checks
             checks <- checks
@@ -157,81 +164,41 @@ optimized_arrangement <- function(
         }
     }
     if (is.null(data)) {
-        if (!is.null(checks) && is.numeric(checks) && all(checks %% 1 == 0) && 
-            !is.null(amountChecks) && is.numeric(amountChecks) && all(amountChecks %% 1 == 0) &&
-            all(amountChecks > 0) && all(checks > 0)) {
-            if (length(checks) == 1) {
-                if (length(amountChecks) == checks) {
-                    RepChecks <- amountChecks
-                } else if (length(amountChecks) == 1 && amountChecks > checks) {
-                    res <- amountChecks %% checks
-                    divs <- (amountChecks - res) / checks
-                    if (res == 0) {
-                        u <- amountChecks / checks
-                        RepChecks <- rep(u, checks)
-                    } else {
-                        RepChecks <- rep(divs, checks - 1)
-                        RepChecks <- sample(c(RepChecks, amountChecks - sum(RepChecks)))
-                    }
-                }
-            } else if (length(checks) > 1) {
-                if (any(any(checks != sort(checks)) || any(diff(checks) > 1))) {
-                    base::stop("Input checks must be in consecutive numbers and sorted.")
-                } 
-                if(length(unique(checks)) != length(checks)) base::stop("Input checks must be different from each other.")
-                if (length(amountChecks) == length(checks)) {
-                    RepChecks <- amountChecks
-                } else if (length(amountChecks) == 1 && amountChecks > length(checks)) {
-                    res <- amountChecks %% length(checks)
-                    divs <- (amountChecks - res) / length(checks)
-                    if (res == 0) {
-                        u <- amountChecks / length(checks)
-                        RepChecks <- rep(u, length(checks))
-                    } else {
-                        RepChecks <- rep(divs, length(checks) - 1)
-                        RepChecks <- sample(c(RepChecks, amountChecks - sum(RepChecks)))
-                    }
-                }
+        validate_count_vector(amountChecks, "rep_checks")
+        if (length(amountChecks) != checks &&
+            !(length(amountChecks) == 1L && amountChecks > checks)) {
+            fieldhub_abort("Supply one replication count per check, or a total greater than the number of checks.",
+                           data = list(argument = "rep_checks", checks = checks))
+        }
+        validate_design_size(sum(as.double(amountChecks)) + as.double(lines))
+        validate_design_size(max(as.double(checksEntries)) + as.double(lines))
+        if (length(amountChecks) == checks) {
+            RepChecks <- amountChecks
+        } else {
+            res <- amountChecks %% checks
+            divs <- (amountChecks - res) / checks
+            if (res == 0) {
+                u <- amountChecks / checks
+                RepChecks <- rep(u, checks)
+            } else {
+                RepChecks <- rep(divs, checks - 1)
+                RepChecks <- sample(c(RepChecks, amountChecks - sum(RepChecks)))
             }
-        } else base::stop('"optimized_arrangement()" requires inputs checks and amountChecks to be possitive integers and distinct of NULL.')
+        }
         
         t_plots <- as.numeric(sum(RepChecks) + lines)
-        width  <- 55
-        border <- paste(rep("=", width), collapse = "")
-        thin   <- paste(rep("-", width), collapse = "")
-        
-        if (numbers::isPrime(t_plots) || t_plots != (nrows * ncols)) {
-            choices <- if (!numbers::isPrime(t_plots)) factor_subsets(t_plots)$labels else NULL
-            
-            cat("\n")
-            cat(border, "\n")
-            cat("  ERROR: optimized_arrangement()\n")
-            cat(thin, "\n")
-            cat("  Field dimensions do not match the data entered.\n")
-            cat("  Total plots in data:", t_plots, "\n")
-            cat("  Field size provided:", nrows, "x", ncols, "=", nrows * ncols, "plots\n")
-            cat(thin, "\n")
-            
-            if (!is.null(choices) && length(choices) > 0) {
-                dims <- do.call(rbind, lapply(choices, function(x) {
-                    parts <- as.integer(trimws(strsplit(x, "x")[[1]]))
-                    data.frame(rows = parts[1], cols = parts[2])
-                }))
-                dims <- dims[order(dims$rows), ]
-                dims <- unique(dims)
-                cat("  Valid dimension options (sorted by rows):\n\n")
-                for (i in seq_len(nrow(dims))) {
-                    cat(sprintf("   [%2d ]  %4d rows  x  %4d cols\n", i, dims$rows[i], dims$cols[i]))
-                }
-            } else {
-                cat("  No valid rectangular dimensions exist for", t_plots, "plots.\n")
-                cat("  Reason: total plots is a prime number.\n")
-                cat("  Suggestion: adjust treatments or replication levels\n")
-                cat("  so that total plots has more than 2 factors.\n")
-            }
-            
-            cat(border, "\n\n")
-            return(invisible(NULL))
+        if (is_prime(t_plots) || t_plots != (nrows * ncols)) {
+            choices <- if (!is_prime(t_plots)) factor_subsets(t_plots)$labels else NULL
+            dims <- dimension_options(choices)
+            stop_dimensions(
+                paste0("optimized_arrangement(): the field dimensions do not match the entries. ",
+                       "Total plots in the data: ", t_plots, "; field size given: ",
+                       nrows, " x ", ncols, " = ", nrows * ncols, " plots."),
+                options = dims,
+                labels = if (!is.null(dims)) paste(dims$rows, "x", dims$cols),
+                no_options = paste0("No rectangular field has ", t_plots,
+                                    " plots: it is a prime number.")
+            )
         }
         
         NAME <- c(paste(rep("CH", checks), 1:checks, sep = ""),
@@ -248,19 +215,19 @@ optimized_arrangement <- function(
         )
         colnames(gen_list) <- c("ENTRY", "NAME", "REPS")
     } else {
-        if (!is.data.frame(data)) base::stop("Data must be a data frame.")
+        if (!is.data.frame(data)) fieldhub_abort("Data must be a data frame.")
         gen_list <- data
         gen_list <- gen_list[, 1:3]
         gen_list <- na.omit(gen_list)
         colnames(gen_list) <- c("ENTRY", "NAME", "REPS")
         if (length(gen_list$ENTRY) != length(unique(gen_list$ENTRY))) {
-            stop("Please ensure all ENTRIES in data are distinct.")
+            fieldhub_abort("Please ensure all ENTRIES in data are distinct.")
         }
         if (length(gen_list$NAME) != length(unique(gen_list$NAME))) {
-            stop("Please ensure all NAMES in data are distinct.")
+            fieldhub_abort("Please ensure all NAMES in data are distinct.")
         }
         if (any(gen_list$ENTRY < 1) || any(gen_list$REPS < 1)) {
-            base::stop("Negatives number are not allowed in the data.")
+            fieldhub_abort("Negatives number are not allowed in the data.")
         } 
         gen_list_ordered <- gen_list[order(gen_list$REPS, decreasing = TRUE), ]
         my_GENS <- subset(gen_list_ordered, gen_list_ordered$REPS == 1)
@@ -271,18 +238,22 @@ optimized_arrangement <- function(
         checks <- length(checksEntries)
         lines <- sum(my_GENS$REPS)
         t_plots <- sum(as.numeric(gen_list$REPS))
-        if (numbers::isPrime(t_plots)) {
-            stop("No options when the total number of plots is a prime number.", call. = FALSE)
+        if (is_prime(t_plots)) {
+            fieldhub_abort("No options when the total number of plots is a prime number.", call. = FALSE)
         }
         if (t_plots != (nrows * ncols)) {
             choices <- factor_subsets(t_plots)$labels
             if (!is.null(choices)) {
-                message(cat("\n", "Error in optimized_arrangement(): ", "\n", "\n",
-                "Field dimensions do not fit with the data entered!", "\n",
-                "Try one of the following options: ", "\n"))
-                return(for (i in 1:length(choices)) {print(choices[[i]])})
+                dims <- dimension_options(choices)
+                stop_dimensions(
+                    paste0("optimized_arrangement(): the field dimensions do not match the entries. ",
+                           "Total plots in the data: ", t_plots, "; field size given: ",
+                           nrows, " x ", ncols, " = ", nrows * ncols, " plots."),
+                    options = dims,
+                    labels = paste(dims$rows, "x", dims$cols)
+                )
             } else {
-                stop("Field dimensions do not fit with the data entered. Try another amount of treatments!", call. = FALSE)
+                fieldhub_abort("Field dimensions do not fit with the data entered. Try another amount of treatments!", call. = FALSE)
             }
         }
     }
@@ -295,7 +266,6 @@ optimized_arrangement <- function(
     plot_numbers_sites <- vector(mode = "list", length = l)
     col_checks_sites <- vector(mode = "list", length = l)
     min_distance_sites <- vector(mode = "numeric", length = l)
-    set.seed(seed)
     for (sites in 1:l) {
         prep <- pREP(
             nrows = nrows, 
@@ -329,6 +299,7 @@ optimized_arrangement <- function(
                 fillers = 0
             )
         }
+        validate_location_labels(locationNames, l)
         if (is.null(locationNames) || length(locationNames) != l) {
             if (!is.null(locationNames)) warn_default_location_names(locationNames, l, 1:l)
             locationNames <- 1:l
@@ -354,11 +325,15 @@ optimized_arrangement <- function(
             return(list(final_expt = final_expt_export))
         }
         fieldBook <- as.data.frame(export_spat()$final_expt)
-        fieldBook <- fieldBook[,-11]
+        # REPS (see colnames(gen_list) <- c("ENTRY", "NAME", "REPS") above) is
+        # only needed to build the allocation; dropping it by name reproduces
+        # the previous fieldBook[, -11].
+        fieldBook$REPS <- NULL
         ID <- 1:nrow(fieldBook)
-        fieldBook <- fieldBook[, c(6,7,9,4,2,3,5,1,10)]
+        fieldBook <- fieldBook[, c("EXPT", "LOCATION", "YEAR", "PLOT", "ROW",
+                                   "COLUMN", "CHECKS", "ENTRY", "NAME")]
         fieldBook <- cbind(ID, fieldBook)
-        colnames(fieldBook)[10] <- "TREATMENT"
+        names(fieldBook)[names(fieldBook) == "NAME"] <- "TREATMENT"
         layoutR = prep$field.map
         rownames(layoutR) <- paste("Row", nrow(layoutR):1, sep = "")
         colnames(layoutR) <- paste("Col", 1:ncol(layoutR), sep = "")
@@ -391,6 +366,10 @@ optimized_arrangement <- function(
         genEntries = genEntries,
         fieldBook = field_book
     )
-    class(output) <- "FielDHub"
+    reproduction_parameters <- record_design_parameters(
+        environment(), overrides = list(checks = recorded_checks, rep_checks = amountChecks),
+        exclude = "amountChecks"
+    )
+    output <- new_fieldhub_design(output, "optimized_arrangement", parameters = reproduction_parameters)
     return(invisible(output))
 }

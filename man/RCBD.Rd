@@ -39,13 +39,15 @@ RCBD(
 \item{data}{(optional) Data frame with the labels of treatments.}
 
 \item{checks}{(optional) Checks to repeat within every block. Either a positive
-integer \code{N}, meaning the first \code{N} entries of \code{data} (or of a
-character vector \code{t}) are the checks, or a character vector of check
-labels. \code{checks} sits after \code{data} in the argument list (rather than
-next to \code{t}, where it might otherwise go) precisely so that \code{data}
-keeps its original positional slot and existing positional calls to
-\code{RCBD()} keep working unchanged. By default \code{checks = NULL}, which
-produces an ordinary RCBD.}
+integer \code{N} or a character vector of check labels. When \code{data} or a
+character vector \code{t} supplies a pool of entries, \code{N} takes that pool's
+first \code{N} entries as the checks; when no pool is supplied (\code{t} is a
+bare count), \code{N} instead generates its own check labels \code{"CH1".."CHN"}
+ahead of the auto-generated test entries \code{"T1".."Tt"}. \code{checks} sits
+after \code{data} in the argument list (rather than next to \code{t}, where it
+might otherwise go) precisely so that \code{data} keeps its original positional
+slot and existing positional calls to \code{RCBD()} keep working unchanged. By
+default \code{checks = NULL}, which produces an ordinary RCBD.}
 
 \item{rep_checks}{(optional) Number of times each check is repeated within
 every block. A single value is recycled across all checks, or supply one
@@ -60,6 +62,8 @@ whole block is randomized without restriction.}
 \value{
 A list with five elements.
 \itemize{
+  \item \code{metadata} records the design, schema/package versions, seed,
+    random-number settings and effective input parameters.
   \item \code{infoDesign} is a list with information on the design parameters.
   \item \code{layoutRandom} is the RCBD layout randomization for each location.
   \item \code{plotNumber} is the plot number layout for each location.
@@ -74,18 +78,25 @@ A list with five elements.
 It randomly generates a randomized complete block design (RCBD) across locations.
 }
 \details{
+The result records effective inputs, the resolved seed and the
+starting plot numbers in \code{metadata$parameters}. Under the same package
+versions and RNG settings, rebuild a result \code{x} with
+\code{do.call(RCBD, x$metadata$parameters)}.
+
 When \code{checks} is supplied, one or more checks are repeated multiple times within
 every block, while every test entry still appears exactly once. In a classical RCBD,
 the residual is the treatment-by-block interaction; repeating checks inside a block
 instead supplies a within-block estimate of error and a form of local control.
 
-\code{checks} accepts either a single positive integer \code{N} (the first \code{N}
-entries of \code{data}, or of a character vector \code{t}, are the checks) or a
-character vector of check labels. When a pool of entries is supplied through \code{data}
-or a character \code{t}, every label named in \code{checks} must already exist in that
-pool; an unmatched label is an error that also names the closest case-insensitive match,
-if any. When \code{t} is a bare count (no pool supplied), the check labels are new and
-are appended to the auto-generated test entries.
+\code{checks} accepts either a single positive integer \code{N} or a character vector
+of check labels. When a pool of entries is supplied through \code{data} or a character
+\code{t}, an integer \code{N} takes the first \code{N} entries of that pool as the
+checks, and a character vector of labels must already exist in that pool; an unmatched
+label is an error that also names the closest case-insensitive match, if any. When no
+pool is supplied (\code{t} is a bare count), the labels are generated instead: a
+character \code{checks} is appended to the auto-generated test entries, while an
+integer \code{N} generates its own check labels \code{"CH1".."CHN"} ahead of the
+auto-generated test entries \code{"T1".."Tt"}.
 
 \code{rep_checks} sets how many times each check repeats within a block: a single value
 is recycled across all checks, or one value can be supplied per check.

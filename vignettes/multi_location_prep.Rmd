@@ -22,7 +22,6 @@ knitr::opts_chunk$set(
 library(FielDHub)
 library(dplyr)
 library(knitr)
-library(kableExtra)
 ```
 
 This vignette shows how to generate an **optimized multi-location partially replicated (p-rep) design** 
@@ -188,8 +187,7 @@ df <- data.frame(ENTRY,NAME)
 
 ```{r, echo = FALSE, results='asis'}
 df |>
-  kbl() |>
-  kable_styling()
+  knitr::kable()
 ```
 
 2. Enter the number of entries in the **Input # of Entries** box as a comma separated list. 
@@ -338,8 +336,7 @@ optim_multi_prep$allocation |>
   ) |>
     head(10) |>
     `rownames<-`(paste0("Gen-", 1:10)) |>
-    kbl() |>
-    kable_styling()
+    knitr::kable()
 ```
 
 We can manipulate the `optim_multi_prep` object as any other list in R. We can first display the design parameters 
@@ -401,4 +398,3 @@ plot(optim_multi_prep, l = 5)
 ```
 
 # References
-

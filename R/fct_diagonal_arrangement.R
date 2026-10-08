@@ -123,6 +123,12 @@
 #' spatAB$plotsNumber
 #' head(spatAB$fieldBook,12)
 #' 
+#' @section Reproducibility:
+#' The result records effective inputs and the resolved seed in
+#' \code{metadata$parameters}. Under the same package versions and RNG
+#' settings, rebuild a result \code{x} with
+#' \code{do.call(diagonal_arrangement, x$metadata$parameters)}.
+#'
 #' @export
 diagonal_arrangement <- function(
     nrows = NULL, 
@@ -143,60 +149,58 @@ diagonal_arrangement <- function(
     year = NULL,
     checksPercent = NULL,
     sameEntries = FALSE) {
+    plotNumber_supplied <- !missing(plotNumber)
+    validate_locations(l)
+    validate_flag(multiLocationData, "multiLocationData")
+    validate_flag(sameEntries, "sameEntries")
     year <- resolve_year(year)
     if (!is.null(checksPercent) &&
         (!is.numeric(checksPercent) || length(checksPercent) != 1 || is.na(checksPercent))) {
-        base::stop("'checksPercent' must be a single number.")
-    }
-    if (!is.logical(sameEntries) || length(sameEntries) != 1 || is.na(sameEntries)) {
-        base::stop("'sameEntries' must be TRUE or FALSE.")
+        fieldhub_abort("'checksPercent' must be a single number.")
     }
     if (sameEntries) {
         if (kindExpt != "DBUDC") {
-            base::stop("'sameEntries' is only available when kindExpt = 'DBUDC'.")
+            fieldhub_abort("'sameEntries' is only available when kindExpt = 'DBUDC'.")
         }
         if (multiLocationData) {
-            base::stop("'sameEntries' cannot be used with multiLocationData = TRUE.")
+            fieldhub_abort("'sameEntries' cannot be used with multiLocationData = TRUE.")
         }
+        validate_count_vector(blocks, "blocks")
         if (is.null(blocks) || any(blocks != blocks[1])) {
-            base::stop("With 'sameEntries', all blocks must have the same size.")
+            fieldhub_abort("With 'sameEntries', all blocks must have the same size.")
         }
     }
-  
-    if (all(c("serpentine", "cartesian") != planter)) {
-        base::stop('Input for planter is unknown. Please, choose one: "serpentine" or "cartesian"')
-    }
+
+    validate_planter(planter)
     if (all(c("SUDC", "DBUDC") != kindExpt)) {
-        base::stop('Input for kindExpt is unknown. Please, choose one: "SUDC" or "DBUDC"')
+        fieldhub_abort('Input for kindExpt is unknown. Please, choose one: "SUDC" or "DBUDC"')
     }
     if (all(c("column", "row") != splitBy)) {
-        base::stop('Input for splitBy is unknown. Please, choose one: "column" or "row"')
+        fieldhub_abort('Input for splitBy is unknown. Please, choose one: "column" or "row"')
     }
     
     if (!inherits(plotNumber,"list")) { 
+        validate_plot_starts(plotNumber)
         if (!is.null(plotNumber) && is.numeric(plotNumber)) {
           if(any(plotNumber < 1) || any(diff(plotNumber) < 0)) {
-              base::stop('diagonal_arrangement() requires plotNumber to be positive and sorted integers.')
+              fieldhub_abort('diagonal_arrangement() requires plotNumber to be positive and sorted integers.')
           }
         }
-        if(!is.numeric(plotNumber) && !is.integer(plotNumber)) {
-            base::stop("plotNumber should be an integer or a numeric vector.")
-        }
-        if (any(plotNumber %% 1 != 0)) {
-            base::stop("plotNumber should be integers.")
-        }
+    } else {
+        for (starts in plotNumber) validate_plot_starts(starts)
     }
     
+    starting_plots <- plotNumber
     if (kindExpt == "SUDC") {
         if (!is.null(l)) {
         if (is.null(plotNumber) || length(plotNumber) != l) {
-            if (l > 1){
-            plotNumber <- as.list(seq(1001, 1000*(l+1), 1000))
-            } else plotNumber <- list(1001)
+            default_plots <- default_plot_starts(l, 1001)
+            warn_default_plot_numbers(plotNumber, l, default_plots, caller_supplied = plotNumber_supplied)
+            plotNumber <- as.list(default_plots)
         }
-        } else stop("Number of locations/sites is missing")
+        } else fieldhub_abort("Number of locations/sites is missing")
     }
-    
+
     if (kindExpt != "SUDC") {
         num_expts <- length(blocks)
         if (!is.null(l)) {
@@ -205,7 +209,11 @@ diagonal_arrangement <- function(
             if (all(lengths(plotNumber) == num_expts) &
                 length(plotNumber) == l) {
                 plotNumber <- plotNumber
-            } else plotNumber <- as.list(seq(1001, 1000*(l+1), 1000))
+            } else {
+                default_plots <- default_plot_starts(l, 1001)
+                warn_default_plot_numbers(plotNumber, l, default_plots, caller_supplied = plotNumber_supplied)
+                plotNumber <- as.list(default_plots)
+            }
             } else {
             if (l == 1) {
                 if (length(plotNumber) == num_expts) {
@@ -216,24 +224,24 @@ diagonal_arrangement <- function(
             } else {
                 if (length(plotNumber) == l) {
                 plotNumber <- as.list(plotNumber)
-                } else plotNumber <- as.list(seq(1001, 1000*(l+1), 1000))
+                } else {
+                default_plots <- default_plot_starts(l, 1001)
+                warn_default_plot_numbers(plotNumber, l, default_plots, caller_supplied = plotNumber_supplied)
+                plotNumber <- as.list(default_plots)
+                }
             }
-            } 
+            }
         }
         }
     }
     # 
     if (!is.null(data)) {
-        arg1 <- list(nrows, ncols, l);arg2 <- c(nrows, ncols, l)
-        if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
-            base::stop("'diagonal_arrangement()' requires input nrows, ncols, and l to be numeric and distint of NULL")
-        }
+        counts <- list(nrows = nrows, ncols = ncols, l = l)
     } else {
-        arg1 <- list(nrows, ncols, lines, l);arg2 <- c(nrows, ncols, lines, l)
-        if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
-            base::stop("'diagonal_arrangement()' requires input nrows, ncols, and l to be numeric and distint of NULL")
-        }
-    } 
+        counts <- list(nrows = nrows, ncols = ncols, lines = lines, l = l)
+    }
+    for (argument in names(counts)) validate_iteration_budget(counts[[argument]], argument)
+    validate_design_size(c(nrows, ncols, l))
     # Set Option_NCD to TRUE
     Option_NCD <- TRUE
     if (splitBy == "column") {
@@ -258,6 +266,7 @@ diagonal_arrangement <- function(
         sameEntries = sameEntries
     )
     
+    validate_location_labels(locationNames, l)
     if (is.null(locationNames) || length(locationNames) != l) {
         if (!is.null(locationNames)) warn_default_location_names(locationNames, l, 1:l)
         locationNames <- 1:l
@@ -269,8 +278,9 @@ diagonal_arrangement <- function(
     col_checks_sites <- vector(mode = "list", length = l)
     RepChecks_list <- vector(mode = "list", length = l)
     percentChecks_vector <- vector(mode = "numeric", length = l)
-    if (is.null(seed)) seed = sample.int(100000, 1)
-    set.seed(seed)
+    seed <- resolve_seed(seed, default = function() sample.int(100000, 1))
+    local_design_seed(seed)
+    uses_default_percent <- TRUE
     for (sites in 1:l) {
         checks_percentages <- available_percent(
             n_rows = nrows, 
@@ -289,52 +299,21 @@ diagonal_arrangement <- function(
             checks <- as.numeric(checks)
             total_entries <- as.numeric(getData$dim_data_entry[[sites]])
             lines <- total_entries - checks
-            t1 <- floor(lines + lines * 0.10)
-            t2 <- ceiling(lines + lines * 0.20)
-            t <- t1:t2
-            choices_list <- list()
-            i <- 1
-            for (n in t) {
-                choices_list[[i]] <- factor_subsets(n, diagonal = TRUE)$labels
-                i <- i + 1
-            }
-            
-            choices <- unlist(choices_list[!sapply(choices_list, is.null)])
-            
-            width  <- 55
-            border <- paste(rep("=", width), collapse = "")
-            thin   <- paste(rep("-", width), collapse = "")
-            
-            cat("\n")
-            cat(border, "\n")
-            cat("  ERROR: diagonal_arrangement()\n")
-            cat(thin, "\n")
-            cat("  Field dimensions do not match the data entered.\n")
-            cat("  Total entries (lines + checks):", total_entries, "\n")
-            cat("  Field size provided:", nrows, "x", ncols, "=", nrows * ncols, "plots\n")
-            cat("  Searched plot range:", t1, "to", t2, "\n")
-            cat(thin, "\n")
-            
-            if (!is.null(choices) && length(choices) > 0) {
-              dims <- do.call(rbind, lapply(choices, function(x) {
-                parts <- as.integer(trimws(strsplit(x, "x")[[1]]))
-                data.frame(rows = parts[1], cols = parts[2])
-              }))
-              dims <- dims[order(dims$rows), ]
-              dims <- unique(dims)
-              cat("  Valid dimension options (sorted by rows):\n\n")
-              for (i in seq_len(nrow(dims))) {
-                cat(sprintf("   [%2d ]  %4d rows  x  %4d cols\n", i, dims$rows[i], dims$cols[i]))
-              }
-            } else {
-              cat("  No valid rectangular dimensions exist in range", t1, "to", t2, "\n")
-              cat("  Reason: all values in range are prime numbers.\n")
-              cat("  Suggestion: adjust lines or checks so total plots\n")
-              cat("  has more than 2 factors.\n")
-            }
-            
-            cat(border, "\n\n")
-            return(invisible(NULL))
+            # The same candidate sizes the app offers (field_dimensions())
+            size_range <- field_size_range(lines)
+            t1 <- size_range[1]
+            t2 <- size_range[2]
+            choices <- unlist(field_dimensions(lines))
+            dims <- dimension_options(choices)
+            stop_dimensions(
+                paste0("diagonal_arrangement(): the field dimensions do not match the entries. ",
+                       "Total entries (lines + checks): ", total_entries, "; field size given: ",
+                       nrows, " x ", ncols, " = ", nrows * ncols, " plots."),
+                options = dims,
+                labels = if (!is.null(dims)) paste(dims$rows, "x", dims$cols),
+                no_options = paste0("No rectangular field exists between ", t1, " and ", t2,
+                                    " plots: all those numbers are prime.")
+            )
         }
         new_lines <- nrow(getData$data_entry[[sites]]) - checks
         infoP <- as.data.frame(checks_percentages$P)
@@ -387,7 +366,7 @@ diagonal_arrangement <- function(
                     infoP$V7 <- Exptlines
                 }  
             }
-        } else stop("Field dimensions do not fit with the data entered!")
+        } else fieldhub_abort("Field dimensions do not fit with the data entered!")
         percent_table <- checks_percentages$dt
         percent_col <- percent_table[,2]
         len <- length(percent_col)
@@ -397,11 +376,13 @@ diagonal_arrangement <- function(
             options_percent <- as.numeric(percent_col)
             match_percent <- which(abs(options_percent - checksPercent) < 1e-6)
             if (length(match_percent) == 0) {
-                base::stop("'checksPercent' must be one of the percentages available for this field: ",
+                fieldhub_abort("'checksPercent' must be one of the percentages available for this field: ",
                            paste(options_percent, collapse = ", "), ".")
             }
             selected_percent <- options_percent[match_percent[1]]
         }
+        uses_default_percent <- uses_default_percent &&
+            identical(selected_percent, as.numeric(percent_col[len]))
         rand_checks <- random_checks(
             dt = checks_percentages$dt, 
             d_checks = checks_percentages$d_checks, 
@@ -422,7 +403,7 @@ diagonal_arrangement <- function(
         w_map <- rand_checks$map_checks
         n_rows = nrows; n_cols = ncols
         my_split_r <- rand_checks$map_checks
-        multi <- kindExpt == "RDC" || kindExpt == "DBUDC"
+        multi <- kindExpt == "DBUDC"
         if (multi == TRUE) {
             map_checks <- rand_checks$map_checks
             data_entry <- getData$data_entry[[sites]]
@@ -433,13 +414,17 @@ diagonal_arrangement <- function(
                     stacked = "By Row", 
                     dim_data = data_dim_each_block
                 )[[1]]
-                if (is.null(my_row_sets)) return(NULL)
+                if (is.null(my_row_sets)) {
+                    stop_dimensions("diagonal_arrangement(): the blocks do not fit the rows of the field.")
+                }
                 n_blocks <- length(my_row_sets)
             } else if (kindExpt == "DBUDC" && stacked == "By Column") {
                 data_dim_each_block <- checks_percentages$data_dim_each_block
                 cuts_by_c <- automatically_cuts(data = map_checks, planter_mov = planter, stacked = "By Column",
                                                 dim_data = data_dim_each_block)
-                if (is.null(cuts_by_c)) return(NULL)
+                if (is.null(cuts_by_c)) {
+                    stop_dimensions("diagonal_arrangement(): the blocks do not fit the columns of the field.")
+                }
                 n_blocks <- length(cuts_by_c)
                 m = diff(cuts_by_c)
                 my_col_sets = c(cuts_by_c[1], m)
@@ -456,29 +441,19 @@ diagonal_arrangement <- function(
                     data_dim_each_block = data_dim_each_block
                 )
             } else {
-                if (Option_NCD == FALSE) {
-                    data_entry1 <- data_entry[(checks + 1):nrow(data_entry), ]
-                    data_random <- get_DBrandom(
-                        binaryMap = w_map, 
-                        data_dim_each_block = data_dim_each_block, 
-                        data_entries = data_entry1,
-                        planter = planter
-                    )
-                } else {
-                    Block_Fillers <- as.numeric(getData$Blocks[[sites]])
-                    data_random <- get_random(
-                        n_rows = nrows, 
-                        n_cols = ncols, 
-                        d_checks = my_split_r,
-                        Fillers = FALSE, 
-                        row_sets = my_row_sets,
-                        checks = getData$checksEntries[[sites]], 
-                        data = data_entry, 
-                        planter_mov  = planter,
-                        Multi.Fillers = TRUE, 
-                        which.blocks = Block_Fillers
-                    )
-                }
+                Block_Fillers <- as.numeric(getData$Blocks[[sites]])
+                data_random <- get_random(
+                    n_rows = nrows, 
+                    n_cols = ncols, 
+                    d_checks = my_split_r,
+                    Fillers = FALSE, 
+                    row_sets = my_row_sets,
+                    checks = getData$checksEntries[[sites]], 
+                    data = data_entry, 
+                    planter_mov  = planter,
+                    Multi.Fillers = TRUE, 
+                    which.blocks = Block_Fillers
+                )
             }
         } else {
             n_blocks <- 1
@@ -561,10 +536,10 @@ diagonal_arrangement <- function(
         my_export_design <- function(){
 
             
-            if (is.null(data_random$rand)) base::stop("Random matrix is missing.")
-            if (is.null(rand_checks$col_checks)) base::stop("checks matrix is missing.")
-            if (is.null(plot_nuber_layout$w_map_letters1)) base::stop("Plot numbers matrix is missing.")
-            if (is.null(split_name_diagonal1$my_names)) base::stop("Names matrix is missing.")
+            if (is.null(data_random$rand)) fieldhub_abort("Random matrix is missing.")
+            if (is.null(rand_checks$col_checks)) fieldhub_abort("checks matrix is missing.")
+            if (is.null(plot_nuber_layout$w_map_letters1)) fieldhub_abort("Plot numbers matrix is missing.")
+            if (is.null(split_name_diagonal1$my_names)) fieldhub_abort("Names matrix is missing.")
             
             movement_planter <- planter
             random_entries_map <- data_random$rand
@@ -609,17 +584,20 @@ diagonal_arrangement <- function(
         
         fieldBook <- as.data.frame(my_export_design()$final_expt)
         if (is.null(fieldBook) || !is.data.frame(fieldBook)) {
-            base::stop("fieldBook is NULL or != data frame.")
+            fieldhub_abort("fieldBook is NULL or != data frame.")
         }
         if (dim(fieldBook)[1]*dim(fieldBook)[2] == 0) {
-            base::stop("fieldBook is NULL or != data frame or length 0.")
+            fieldhub_abort("fieldBook is NULL or != data frame or length 0.")
         }
-        fieldBook <- fieldBook[,-11]
-        
+        # BLOCK is only present for DBUDC entry lists (see colnames(data_entry_UP)
+        # <- c("ENTRY", "NAME", "BLOCK") above); dropping it by name is a no-op
+        # when it is absent, reproducing the previous fieldBook[, -11].
+        fieldBook$BLOCK <- NULL
         ID <- 1:nrow(fieldBook)
-        fieldBook <- fieldBook[, c(6,7,9,4,2,3,5,1,10)]
+        fieldBook <- fieldBook[, c("EXPT", "LOCATION", "YEAR", "PLOT", "ROW",
+                                   "COLUMN", "CHECKS", "ENTRY", "NAME")]
         fieldBook <- cbind(ID, fieldBook)
-        colnames(fieldBook)[10] <- "TREATMENT"
+        names(fieldBook)[names(fieldBook) == "NAME"] <- "TREATMENT"
         rownames(fieldBook) <- 1:nrow(fieldBook)
         
         linesexpt <- data_random$Lines
@@ -679,7 +657,11 @@ diagonal_arrangement <- function(
         fieldBook = field_book
     )
     
-    class(output) <- "FielDHub"
+    reproduction_parameters <- record_design_parameters(
+        environment(), overrides = list(plotNumber = starting_plots,
+                                         checksPercent = if (uses_default_percent) NULL else checksPercent)
+    )
+    output <- new_fieldhub_design(output, "diagonal_arrangement", parameters = reproduction_parameters)
     return(invisible(output))
 }
 
@@ -740,14 +722,14 @@ unrep_data_parameters <- function(
                     gen_list <- as.data.frame(gen_list)
                     gen_list <- na.omit(gen_list[, 1:3])
                     if (ncol(gen_list) < 3) {
-                        base::stop("Input data should have 4 columns: LOCATION, ENTRY, NAME")
+                        fieldhub_abort("Input data should have 4 columns: LOCATION, ENTRY, NAME")
                     }
                     colnames(gen_list) <- c("LOCATION", "ENTRY", "NAME")
                     if (length(gen_list$ENTRY) != length(unique(gen_list$ENTRY))) {
-                      stop("Please ensure all ENTRIES in data are distinct.")
+                      fieldhub_abort("Please ensure all ENTRIES in data are distinct.")
                     }
                     if (length(gen_list$NAME) != length(unique(gen_list$NAME))) {
-                      stop("Please ensure all NAMES in data are distinct.")
+                      fieldhub_abort("Please ensure all NAMES in data are distinct.")
                     }
                     # Create a space in memory for the locations data entry list
                     list_locs <- setNames(
@@ -767,10 +749,10 @@ unrep_data_parameters <- function(
                     data_entry_UP <- na.omit(data_entry[,1:2]) 
                     colnames(data_entry_UP) <- c("ENTRY", "NAME")
                     if (length(data_entry_UP$ENTRY) != length(unique(data_entry_UP$ENTRY))) {
-                      stop("Please ensure all ENTRIES in data are distinct.")
+                      fieldhub_abort("Please ensure all ENTRIES in data are distinct.")
                     }
                     if (length(data_entry_UP$NAME) != length(unique(data_entry_UP$NAME))) {
-                      stop("Please ensure all NAMES in data are distinct.")
+                      fieldhub_abort("Please ensure all NAMES in data are distinct.")
                     }
                 } else if (is.list(data)) {
                     list_locs <- data
@@ -778,10 +760,10 @@ unrep_data_parameters <- function(
                     data_entry_UP <- na.omit(data_entry[ ,1:2]) 
                     colnames(data_entry_UP) <- c("ENTRY", "NAME")
                     if (length(data_entry_UP$ENTRY) != length(unique(data_entry_UP$ENTRY))) {
-                      stop("Please ensure all ENTRIES in data are distinct.")
+                      fieldhub_abort("Please ensure all ENTRIES in data are distinct.")
                     }
                     if (length(data_entry_UP$NAME) != length(unique(data_entry_UP$NAME))) {
-                      stop("Please ensure all NAMES in data are distinct.")
+                      fieldhub_abort("Please ensure all NAMES in data are distinct.")
                     }
                 }
             } else {
@@ -789,14 +771,15 @@ unrep_data_parameters <- function(
                 data_entry_UP <- na.omit(data_entry[,1:2]) 
                 colnames(data_entry_UP) <- c("ENTRY", "NAME")
                 if (!sameEntries && length(data_entry_UP$ENTRY) != length(unique(data_entry_UP$ENTRY))) {
-                  stop("Please ensure all ENTRIES in data are distinct.")
+                  fieldhub_abort("Please ensure all ENTRIES in data are distinct.")
                 }
                 if (!sameEntries && length(data_entry_UP$NAME) != length(unique(data_entry_UP$NAME))) {
-                  stop("Please ensure all NAMES in data are distinct.")
+                  fieldhub_abort("Please ensure all NAMES in data are distinct.")
                 }
             }
             ##############################################################################################
             # Check if the data entry is a data frame
+            validate_spatial_checks(checks, nrows * ncols)
             if (!is.null(checks) && is.numeric(checks) && all(checks %% 1 == 0)) {
                 if (!is.null(data_entry)) {
                     if (length(checks) == 1 && checks >= 1) {
@@ -807,12 +790,17 @@ unrep_data_parameters <- function(
                         checks <- length(checks)
                     } 
                 } 
-            } else base::stop("'diagonal_arrangement()' requires input checks to be an integer greater than 0.")
+            } else fieldhub_abort("'diagonal_arrangement()' requires input checks to be an integer greater than 0.")
             if (any(diff(checksEntries) > 1) || any(diff(checksEntries) < 0)) {
-                base::stop(paste("'diagonal_arrangement()' requires input checks to be a continuous range."))
+                fieldhub_abort(paste("'diagonal_arrangement()' requires input checks to be a continuous range."))
             }
             ###############################################################################################
             if (kindExpt == "DBUDC") {
+                validate_count_vector(blocks, "blocks")
+                if (sum(as.double(blocks)) != nrow(data_entry_UP) - checks) {
+                    fieldhub_abort("The block sizes must match the number of non-check entries in data.",
+                                   data = list(argument = "blocks"))
+                }
                 data_entry_UP <- na.omit(data_entry[,1:2]) 
                 data_entry_UP$BLOCK <- c(rep("ALL", checks), rep(1:length(blocks), times = blocks))
                 colnames(data_entry_UP) <- c("ENTRY", "NAME", "BLOCK")
@@ -820,10 +808,10 @@ unrep_data_parameters <- function(
                     check_same_entries(data_entry_UP, checks)
                 } else {
                     if (length(data_entry_UP$ENTRY) != length(unique(data_entry_UP$ENTRY))) {
-                      stop("Please ensure all ENTRIES in data are distinct.")
+                      fieldhub_abort("Please ensure all ENTRIES in data are distinct.")
                     }
                     if (length(data_entry_UP$NAME) != length(unique(data_entry_UP$NAME))) {
-                      stop("Please ensure all NAMES in data are distinct.")
+                      fieldhub_abort("Please ensure all NAMES in data are distinct.")
                     }
                 }
                 B <- data_entry_UP[(checks + 1):nrow(data_entry_UP),]
@@ -843,6 +831,7 @@ unrep_data_parameters <- function(
             }
         } else {
             # Check if the data entry is a data frame
+            validate_spatial_checks(checks, nrows * ncols)
             if (!is.null(checks) && is.numeric(checks) && all(checks %% 1 == 0)) {
                 if (length(checks) == 1 && checks >= 1) {
                   checksEntries <- 1:checks
@@ -851,10 +840,11 @@ unrep_data_parameters <- function(
                   checksEntries <- checks
                   checks <- length(checks)
                 }
-            } else base::stop("'diagonal_arrangement()' requires input checks to be an integer greater than 0.")
+            } else fieldhub_abort("'diagonal_arrangement()' requires input checks to be an integer greater than 0.")
             if (any(diff(checksEntries) > 1) || any(diff(checksEntries) < 0)) {
-              base::stop(paste("'diagonal_arrangement()' requires input checks to be a continuous range."))
+              fieldhub_abort(paste("'diagonal_arrangement()' requires input checks to be a continuous range."))
             }
+            validate_design_size(max(as.double(checksEntries)) + as.double(lines))
             if (kindExpt != "DBUDC") {
                 NAME <- c(paste0(rep("Check-", checks), 1:checks),
                         paste0(rep("Gen-", lines), (checksEntries[checks] + 1):(checksEntries[1] + lines + checks - 1)))
@@ -864,18 +854,19 @@ unrep_data_parameters <- function(
                 )
                 colnames(data_entry_UP) <- c("ENTRY", "NAME")
                 if (length(data_entry_UP$ENTRY) != length(unique(data_entry_UP$ENTRY))) {
-                  stop("Please ensure all ENTRIES in data are distinct.")
+                  fieldhub_abort("Please ensure all ENTRIES in data are distinct.")
                 }
                 if (length(data_entry_UP$NAME) != length(unique(data_entry_UP$NAME))) {
-                  stop("Please ensure all NAMES in data are distinct.")
+                  fieldhub_abort("Please ensure all NAMES in data are distinct.")
                 }
-                if (nrow(data_entry_UP) != (lines + checks)) base::stop("nrows data != of lines + checks")
+                if (nrow(data_entry_UP) != (lines + checks)) fieldhub_abort("nrows data != of lines + checks")
             } else if (kindExpt == "DBUDC") {
+                validate_count_vector(blocks, "blocks")
                 if (is.null(blocks)) {
-                    stop("'diagonal_arrangement()' requires blocks when kindExpt = 'DBUDC' and data is null.")
+                    fieldhub_abort("'diagonal_arrangement()' requires blocks when kindExpt = 'DBUDC' and data is null.")
                 } 
                 if (sum(blocks) != lines) {
-                    stop("In 'diagonal_arrangement()' number of lines and total lines in 'blocks' do not match.")
+                    fieldhub_abort("In 'diagonal_arrangement()' number of lines and total lines in 'blocks' do not match.")
                 }
                 if (sameEntries) {
                     # Every block holds the same entries, numbered after the checks
@@ -893,10 +884,10 @@ unrep_data_parameters <- function(
                 data_entry_UP$BLOCK <- c(rep("ALL", checks), rep(1:length(blocks), times = blocks))
                 colnames(data_entry_UP) <- c("ENTRY", "NAME", "BLOCK")
                 if (!sameEntries && length(data_entry_UP$ENTRY) != length(unique(data_entry_UP$ENTRY))) {
-                  stop("Please ensure all ENTRIES in data are distinct.")
+                  fieldhub_abort("Please ensure all ENTRIES in data are distinct.")
                 }
                 if (!sameEntries && length(data_entry_UP$NAME) != length(unique(data_entry_UP$NAME))) {
-                  stop("Please ensure all NAMES in data are distinct.")
+                  fieldhub_abort("Please ensure all NAMES in data are distinct.")
                 }
                 Blocks <- length(blocks)
                 if (Option_NCD == TRUE) {
@@ -930,23 +921,6 @@ unrep_data_parameters <- function(
     )
 }
 
-#' @noRd 
-#' 
-#' 
-field_dimensions <- function(lines_within_loc) {
-    t1 <- floor(lines_within_loc + lines_within_loc * 0.10)
-    t2 <- ceiling(lines_within_loc + lines_within_loc * 0.20)
-    t <- t1:t2
-    non_primes <- t[!numbers::isPrime(t)]
-    choices_list <- list()
-    i <- 1
-    for (n in non_primes) {
-        choices_list[[i]] <- factor_subsets(n, diagonal = TRUE)$labels
-        i <- i + 1
-    }
-    return(choices_list)
-}
-
 #' Check the entries of a DBUDC design whose blocks repeat the same entries
 #'
 #' @param data_entry Data frame with the columns ENTRY, NAME and BLOCK, the
@@ -959,14 +933,14 @@ check_same_entries <- function(data_entry, checks) {
     same_set <- vapply(block_entries, function(e) setequal(e, block_entries[[1]]), logical(1))
     repeated <- vapply(block_entries, anyDuplicated, numeric(1)) > 0
     if (!all(same_set) || any(repeated)) {
-        stop("With 'sameEntries', every block must hold the same entries, each once.")
+        fieldhub_abort("With 'sameEntries', every block must hold the same entries, each once.")
     }
     names_per_entry <- tapply(lines$NAME, lines$ENTRY, function(n) length(unique(n)))
     if (any(names_per_entry > 1)) {
-        stop("With 'sameEntries', each ENTRY must have the same NAME in every block.")
+        fieldhub_abort("With 'sameEntries', each ENTRY must have the same NAME in every block.")
     }
     if (any(data_entry$ENTRY[1:checks] %in% lines$ENTRY)) {
-        stop("With 'sameEntries', checks cannot also be entries of the blocks.")
+        fieldhub_abort("With 'sameEntries', checks cannot also be entries of the blocks.")
     }
     invisible(data_entry)
 }

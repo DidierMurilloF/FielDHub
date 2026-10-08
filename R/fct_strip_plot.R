@@ -4,7 +4,8 @@
 #'
 #' @param Hplots Number of horizontal factors, as an integer or a vector.
 #' @param Vplots Number of vertical factors, as an integer or a vector.
-#' @param b Number of blocks (full replicates).
+#' @param b Deprecated alias for \code{reps}; positional calls remain supported.
+#' @param reps Number of blocks (full replicates) per location. Default is one.
 #' @param l Number of locations. By default \code{l = 1}.
 #' @param plotNumber Numeric vector with the starting plot number for each location. By default \code{plotNumber = 101}.
 #' @param planter Option for \code{serpentine} or \code{cartesian} arrangement. By default \code{planter = 'serpentine'}.
@@ -49,7 +50,7 @@
 #' strip1 <- strip_plot(
 #'   Hplots = H,
 #'   Vplots = V,
-#'   b = 3,
+#'   reps = 3,
 #'   l = 1,
 #'   plotNumber = 101,
 #'   planter = "serpentine",
@@ -70,7 +71,7 @@
 #' strip2 <- strip_plot(
 #'   Hplots = 5,
 #'   Vplots = 5,
-#'   b = 6,
+#'   reps = 6,
 #'   l = 3,
 #'   plotNumber = c(101, 1001, 2001),
 #'   planter = "cartesian",
@@ -83,52 +84,75 @@
 #' strip2$plotLayouts
 #' head(strip2$fieldBook, 12)
 #'
+#' @section Reproducibility:
+#' The result records effective inputs and the resolved seed in
+#' \code{metadata$parameters}. Under the same package versions and RNG
+#' settings, rebuild a result \code{x} with
+#' \code{do.call(strip_plot, x$metadata$parameters)}.
+#'
 #' @export
 strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = NULL,
                        planter = "serpentine", locationNames = NULL, seed = NULL,
                        factorLabels = TRUE, randomizeH = TRUE, randomizeV = FALSE,
-                       data = NULL) {
-  if (is.null(seed) || is.character(seed) || is.factor(seed)) seed <- runif(1, min = -50000, max = 50000)
-  set.seed(seed)
-  arg0 <- c(Hplots, Vplots)
+                       data = NULL, reps = 1) {
+  # plotNumber's own default is NULL, so an explicit plotNumber = NULL is
+  # indistinguishable from (and must warn the same as) not supplying it.
+  plotNumber_supplied <- !missing(plotNumber) && !is.null(plotNumber)
+  validate_locations(l)
+  validate_flag(factorLabels, "factorLabels")
+  validate_flag(randomizeH, "randomizeH")
+  validate_flag(randomizeV, "randomizeV")
+  validate_planter(planter)
+  b <- resolve_argument_alias(
+    reps, b, new = "reps", old = "b",
+    new_supplied = !missing(reps), old_supplied = !missing(b)
+  )
+  validate_iteration_budget(b, "reps")
+  seed <- resolve_seed(seed)
+  local_design_seed(seed)
   arg1 <- list(Hplots, Vplots)
   if (is.null(data)) {
-    if(all(!is.null(c(Hplots, Vplots, b, l)))) {
-      if (all(base::lengths(arg1) > 1)) {
-        if (all(is.character(arg0)) || all(is.numeric(arg0))) {
-          nH <- length(Hplots)
-          nV <- length(Vplots)
-        }
-      }else if (all(base::lengths(arg1) == 1)) {
-        if (all(is.numeric(arg0))) {
-          Hplots <- paste(rep("b", Hplots), 0:(Hplots-1), sep = "")
-          Vplots <- paste(rep("a", Vplots), 0:(Vplots-1), sep = "")
-          nH <- length(Hplots)
-          nV <- length(Vplots)
-        }
-      }else {
-        stop("\n 'strip_plot()' requires an 1-dimensional array for input Hplots and Vplots.")
-      }
-    }else stop("\n 'strip_plot()' requires arguments to be differents than NULL")
+    resolved <- resolve_design_factors(stats::setNames(arg1, c("Hplots", "Vplots")), b, l,
+                                       prefixes = c(Hplots = "b", Vplots = "a"))
+    Hplots <- resolved$Hplots$levels
+    Vplots <- resolved$Vplots$levels
+    nH <- length(Hplots)
+    nV <- length(Vplots)
   } else {
-    if(!is.data.frame(data)) stop("Data must be a data frame.")
-    if (ncol(data) < 2) base::stop("Data input needs at least two columns.")
-    data <- as.data.frame(data[,1:2])
+    if (!is.data.frame(data))
+      fieldhub_abort("Data must be a data frame.")
+    if (ncol(data) < 2)
+      fieldhub_abort("Data input needs at least two columns.")
+    data <- as.data.frame(data[, 1:2])
     colnames(data) <- c("Hplot", "Vplot")
     Hplots <- as.vector(na.omit(data$Hplot))
     Vplots <- as.vector(na.omit(data$Vplot))
+    validate_entry_labels(Hplots, "Hplot")
+    validate_entry_labels(Vplots, "Vplot")
+    check_unique_labels(Hplots, "Hplot")
+    check_unique_labels(Vplots, "Vplot")
     Hplots.f <- factor(Hplots, as.character(unique(Hplots)))
     Vplots.f <- factor(Vplots, as.character(unique(Vplots)))
     nH <- length(levels(Hplots.f))
     nV <- length(levels(Vplots.f))
     Hplots <- as.character(Hplots.f)
     Vplots <- as.character(Vplots.f)
-    if(!factorLabels) {
+    if (!factorLabels) {
       Hplots <- as.character(1:nH)
       Vplots <- as.character((nH + 1):(nH + nV))
     }
   }
+  if (nH < 2L) {
+    fieldhub_abort("strip_plot() requires at least two horizontal-strip levels: Hplots = ", nH,
+                   " leaves nothing to strip.")
+  }
+  if (nV < 2L) {
+    fieldhub_abort("strip_plot() requires at least two vertical-strip levels: Vplots = ", nV,
+                   " leaves nothing to strip.")
+  }
+  validate_design_size(c(nH, nV, b, l))
   if(!is.null(l) && is.numeric(l) && length(l) == 1) {
+    validate_location_labels(locationNames, l)
     if (l >= 1 && is.null(locationNames)) {
       locationNames <- 1:l
     }else if (l > 1 && !is.null(locationNames)) {
@@ -137,15 +161,15 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
         locationNames <- 1:l
       }
     }
-  }else stop("\n'strip_plot()' requires number of locations to be an integer.")
+  }else fieldhub_abort("\n'strip_plot()' requires number of locations to be an integer.")
   if (!is.null(plotNumber) && length(plotNumber) == l) {
-    if (any(!is.numeric(plotNumber)) || any(plotNumber < 1) || any(plotNumber %% 1 != 0) ||
-        any(diff(plotNumber) < 0)) {
-      shiny::validate("Input plotNumber must be an integer greater than 0, and sorted.")
+    validate_plot_starts(plotNumber)
+    if (any(plotNumber < 1) || any(diff(plotNumber) < 0)) {
+      fieldhub_abort("Input plotNumber must be an integer greater than 0, and sorted.")
     } 
   }else {
-    default_plots <- seq(1001, 1000*(l+1), 1000)
-    warn_default_plot_numbers(plotNumber, l, default_plots)
+    default_plots <- default_plot_starts(l, 1001)
+    warn_default_plot_numbers(plotNumber, l, default_plots, caller_supplied = plotNumber_supplied)
     plotNumber <- default_plots
   }
   plot.numbs <- seriePlot.numbers(plot.number = plotNumber, reps = b, l = l, t = nH*nV)
@@ -174,11 +198,9 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
     for (r in 1:b) {
       D <- plot.numbs[[sites]]
       P <- matrix(data = D[r]:(D[r] + (nH*nV) - 1), nrow = nH, ncol = nV, byrow = TRUE)
-      if (planter == "serpentine") P <- serpentinelayout(P, opt = 2)
+      P <- along_rows(P, planter)
       PLOTS[[z]] <- P
-      # Hplots.random <- replicate(1, sample(Hplots))
-      # Vplots.random <- replicate(1, sample(Vplots))
-      
+
       # Choose horizontal strips:
       if (randomizeH) {
         Hplots.random <- replicate(1, sample(Hplots))
@@ -239,13 +261,19 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
   
   id <- 1:nrow(stripDesig_output)
   stripDesig_output <- cbind(id, stripDesig_output)
-  colnames(stripDesig_output)[1] <- "ID"
+  # cbind() of a bare `id` argument names the new column "id" (deparse.level
+  # = 1); rename it by that name rather than by its (currently first)
+  # position.
+  names(stripDesig_output)[names(stripDesig_output) == "id"] <- "ID"
   stripDesig_output <- as.data.frame(stripDesig_output)
   
   infoDesign <- list(Hplots = nH, Vplots = nV, blocks = b, numberLocations = l,
                      nameLocations = locationNames, seed = seed, id_design = 7)
   output <- list(infoDesign = infoDesign, stripsBlockLoc = strips.b.loc,
                  plotLayouts = NEW_PLOTS, fieldBook = stripDesig_output)
-  class(output) <- "FielDHub"
+  reproduction_parameters <- record_design_parameters(
+    environment(), overrides = list(reps = b), exclude = "b"
+  )
+  output <- new_fieldhub_design(output, "strip_plot", parameters = reproduction_parameters)
   return(invisible(output))
 }

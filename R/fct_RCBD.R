@@ -4,18 +4,25 @@
 #' @description It randomly generates a randomized complete block design (RCBD) across locations.
 #'
 #' @details
+#' The result records effective inputs, the resolved seed and the
+#' starting plot numbers in \code{metadata$parameters}. Under the same package
+#' versions and RNG settings, rebuild a result \code{x} with
+#' \code{do.call(RCBD, x$metadata$parameters)}.
+#'
 #' When \code{checks} is supplied, one or more checks are repeated multiple times within
 #' every block, while every test entry still appears exactly once. In a classical RCBD,
 #' the residual is the treatment-by-block interaction; repeating checks inside a block
 #' instead supplies a within-block estimate of error and a form of local control.
 #'
-#' \code{checks} accepts either a single positive integer \code{N} (the first \code{N}
-#' entries of \code{data}, or of a character vector \code{t}, are the checks) or a
-#' character vector of check labels. When a pool of entries is supplied through \code{data}
-#' or a character \code{t}, every label named in \code{checks} must already exist in that
-#' pool; an unmatched label is an error that also names the closest case-insensitive match,
-#' if any. When \code{t} is a bare count (no pool supplied), the check labels are new and
-#' are appended to the auto-generated test entries.
+#' \code{checks} accepts either a single positive integer \code{N} or a character vector
+#' of check labels. When a pool of entries is supplied through \code{data} or a character
+#' \code{t}, an integer \code{N} takes the first \code{N} entries of that pool as the
+#' checks, and a character vector of labels must already exist in that pool; an unmatched
+#' label is an error that also names the closest case-insensitive match, if any. When no
+#' pool is supplied (\code{t} is a bare count), the labels are generated instead: a
+#' character \code{checks} is appended to the auto-generated test entries, while an
+#' integer \code{N} generates its own check labels \code{"CH1".."CHN"} ahead of the
+#' auto-generated test entries \code{"T1".."Tt"}.
 #'
 #' \code{rep_checks} sets how many times each check repeats within a block: a single value
 #' is recycled across all checks, or one value can be supplied per check.
@@ -42,13 +49,15 @@
 #' @param locationNames (optional) Names for each location.
 #' @param data (optional) Data frame with the labels of treatments.
 #' @param checks (optional) Checks to repeat within every block. Either a positive
-#'   integer \code{N}, meaning the first \code{N} entries of \code{data} (or of a
-#'   character vector \code{t}) are the checks, or a character vector of check
-#'   labels. \code{checks} sits after \code{data} in the argument list (rather than
-#'   next to \code{t}, where it might otherwise go) precisely so that \code{data}
-#'   keeps its original positional slot and existing positional calls to
-#'   \code{RCBD()} keep working unchanged. By default \code{checks = NULL}, which
-#'   produces an ordinary RCBD.
+#'   integer \code{N} or a character vector of check labels. When \code{data} or a
+#'   character vector \code{t} supplies a pool of entries, \code{N} takes that pool's
+#'   first \code{N} entries as the checks; when no pool is supplied (\code{t} is a
+#'   bare count), \code{N} instead generates its own check labels \code{"CH1".."CHN"}
+#'   ahead of the auto-generated test entries \code{"T1".."Tt"}. \code{checks} sits
+#'   after \code{data} in the argument list (rather than next to \code{t}, where it
+#'   might otherwise go) precisely so that \code{data} keeps its original positional
+#'   slot and existing positional calls to \code{RCBD()} keep working unchanged. By
+#'   default \code{checks = NULL}, which produces an ordinary RCBD.
 #' @param rep_checks (optional) Number of times each check is repeated within
 #'   every block. A single value is recycled across all checks, or supply one
 #'   value per check. By default \code{rep_checks = NULL}, which is treated as 1
@@ -71,6 +80,8 @@
 #' 
 #' @return A list with five elements.
 #' \itemize{
+#'   \item \code{metadata} records the design, schema/package versions, seed,
+#'     random-number settings and effective input parameters.
 #'   \item \code{infoDesign} is a list with information on the design parameters.
 #'   \item \code{layoutRandom} is the RCBD layout randomization for each location.
 #'   \item \code{plotNumber} is the plot number layout for each location.
@@ -137,41 +148,39 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
                  continuous = FALSE, planter = "serpentine",
                  seed = NULL, locationNames = NULL, data = NULL,
                  checks = NULL, rep_checks = NULL, spread_checks = TRUE) {
+  plotNumber_supplied <- !missing(plotNumber)
+  validate_locations(l)
+  validate_flag(continuous, "continuous")
+  validate_flag(spread_checks, "spread_checks")
   has_checks <- !is.null(checks)
-  if (!is.logical(spread_checks) || length(spread_checks) != 1 || is.na(spread_checks)) {
-    stop("RCBD() requires 'spread_checks' to be a single TRUE or FALSE.")
-  }
   b <- reps
-  if (all(c("serpentine", "cartesian") != planter)) {
-    stop("Input planter choice is unknown. Please, choose one: 'serpentine' or 'cartesian'.")
-  }
-  if (is.null(seed) || !is.numeric(seed)) seed <- runif(1, min = -50000, max = 50000)
-  set.seed(seed)
+  validate_planter(planter)
+  seed <- resolve_seed(seed)
+  local_design_seed(seed)
   if (is.null(l) || !is.numeric(l) || l %% 1 != 0) {
-    shiny::validate("'RCBD()' requires that locations number to be an integer greater than 0.")
+    fieldhub_abort("'RCBD()' requires that locations number to be an integer greater than 0.")
   }
   b <- reps
   if (!is.null(plotNumber) && length(plotNumber) == l) {
-    if (any(!is.numeric(plotNumber)) || any(plotNumber < 1) || any(plotNumber %% 1 != 0) ||
-        any(diff(plotNumber) < 0)) {
-      shiny::validate("Input plotNumber must be an integer greater than 0 and sorted.")
+    validate_plot_starts(plotNumber)
+    if (any(plotNumber < 1) || any(diff(plotNumber) < 0)) {
+      fieldhub_abort("Input plotNumber must be an integer greater than 0 and sorted.")
     } 
   }else {
-    default_plots <- seq(1001, 1000*(l+1), 1000)
-    warn_default_plot_numbers(plotNumber, l, default_plots)
+    default_plots <- default_plot_starts(l, 1001)
+    warn_default_plot_numbers(plotNumber, l, default_plots, caller_supplied = plotNumber_supplied)
     plotNumber <- default_plots
   }
+  validate_location_labels(locationNames, l)
   if (!is.null(locationNames)) {
     locationNames <- toupper(locationNames)
+    validate_location_labels(locationNames, l)
   } else locationName <- 1:l
   # 'reps' feeds a matrix nrow(), a plot-number sequence, and (on the checks
   # path) rcbd_resolve_entries()'s block math alike, so it is validated once,
   # here, ahead of every path rather than only inside the numeric-t branch
   # below. For valid input (a whole number >= 2) this changes nothing.
-  if (is.null(reps) || !is.numeric(reps) || length(reps) != 1 || is.na(reps) ||
-      reps %% 1 != 0 || reps < 2) {
-    shiny::validate("RCBD() requires 'reps' to be a single whole number of 2 or more.")
-  }
+  validate_iteration_budget(reps, "reps", minimum = 2)
   entries <- NULL
   if (has_checks) {
     entries <- rcbd_resolve_entries(t = t, checks = checks, rep_checks = rep_checks,
@@ -182,44 +191,51 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
     rep_checks    <- entries$reps_per_block[entries$CHECKS != 0]
     mytreatments  <- entries$TREATMENT[entries$CHECKS == 0]
   } else if (is.null(data)) {
+    validate_rcbd_treatments(t, reps, l)
     if (!is.null(t) & !is.null(b)) {
       if(length(t) == 1 & is.numeric(t)) {
         arg2 <- c(t, b)
         if (base::any(arg2 %% 1 != 0) || base::any(arg2 < 2)) {
-          shiny::validate("RCBD() requires input t and b to be integer > 1.")
+          fieldhub_abort("RCBD() requires input t and b to be integer > 1.")
         }
         nt <- t
         mytreatments <- paste(rep("T", each = nt), 1:nt, sep = "")
         s <- paste(rep("T", each = nt), 1:nt, sep = "")
       }else if(is.character(t) & length(t) > 1) {
         if (anyDuplicated(t) > 0) {
-          stop("RCBD() requires unique entry labels; duplicated: ",
+          fieldhub_abort("RCBD() requires unique entry labels; duplicated: ",
                paste(unique(t[duplicated(t)]), collapse = ", "))
         }
         nt <- length(t)
         s <- t
         mytreatments <- t
       }else if(is.character(t) & length(t) == 1) {
-        shiny::validate("'RCBD()' requires more than one treatment.")
+        fieldhub_abort("'RCBD()' requires more than one treatment.")
       }
     }else {
-      stop("Input t and b are missing.")
+      fieldhub_abort("Input t and b are missing.")
     }
   }else if (!is.null(b) && !is.null(data)) {
-    if(!is.data.frame(data)) stop("Data must be a data frame.")
+    if(!is.data.frame(data)) fieldhub_abort("Data must be a data frame.")
+    if (ncol(data) < 1L) fieldhub_abort("RCBD() requires a treatment column in data.")
     data <- as.data.frame(na.omit(data[,1]))
     colnames(data) <- "Treatment"
     data$Treatment <- as.character(data$Treatment)
+    validate_entry_labels(data$Treatment, "data")
+    check_unique_labels(data$Treatment, "RCBD")
     t <- data$Treatment
     nt <- length(t)
     s <- t
     mytreatments <- data$Treatment
   }
   if (!has_checks) n_units <- nt
+  validate_design_size(c(n_units, b, l))
+  recorded_locations <- locationNames
   if (length(locationNames) != l) {
     default_names <- paste("loc", 1:l, sep = "")
     if (!is.null(locationNames)) warn_default_location_names(locationNames, l, default_names)
     locationNames <- default_names
+    recorded_locations <- NULL
   }
   RCBD <- matrix(data = NA, nrow = b * l, ncol = n_units, byrow = TRUE)
   RCBD.layout <- matrix(data = NA, nrow = b, ncol = 2, byrow = TRUE)
@@ -244,49 +260,25 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
     }
     RCBD.layout.loc[[i]] <- RCBD.layout
   }
+  starting_plots <- plotNumber
   plotNumber <- seriePlot.numbers(plot.number = plotNumber,
                                   reps = b,
                                   l = l,
                                   t = n_units)
   p.number.loc <- setNames(vector(mode = "list", length = l),
                            paste0("Loc_", locationNames))
-  if (!continuous) {
-    if (planter == "serpentine") {
-      for (i in 1:l) {
-        M <- matrix(data = NA, ncol = n_units, nrow = b, byrow = TRUE)
-        for (k in 1:b) {
-          D <- plotNumber[[i]]
-          M[k,] <- D[k]:(D[k] + (n_units - 1))
-        }
-        p.number.loc[[i]] <- serpentinelayout(M, opt = 2)
+  for (i in 1:l) {
+    D <- plotNumber[[i]]
+    if (!continuous) {
+      M <- matrix(data = NA, ncol = n_units, nrow = b, byrow = TRUE)
+      for (k in 1:b) {
+        M[k,] <- D[k]:(D[k] + (n_units - 1))
       }
-    }else {
-      for (i in 1:l) {
-        M <- matrix(data = NA, ncol = n_units, nrow = b, byrow = TRUE)
-        for (k in 1:b) {
-          D <- plotNumber[[i]]
-          M[k,] <- D[k]:(D[k] + (n_units - 1))
-        }
-        p.number.loc[[i]] <- M
-      }
+    } else {
+      M <- matrix(data = D[1]:(D[1] + (n_units * b - 1)), ncol = n_units,
+                  nrow = b, byrow = TRUE)
     }
-  }else {
-    if (planter == "serpentine") {
-      for (i in 1:l) {
-        D <- plotNumber[[i]]
-        M <- matrix(data = D[1]:(D[1] + (n_units * b - 1)), ncol = n_units,
-                                    nrow = b, byrow = TRUE)
-        p.number.loc[[i]] <- serpentinelayout(M, opt = 2)
-      }
-    }else {
-      for (i in 1:l) {
-        D <- plotNumber[[i]]
-        p.number.loc[[i]] <- matrix(data = D[1]:(D[1] + (n_units * b - 1)), 
-                                    ncol = n_units,
-                                    nrow = b, 
-                                    byrow = TRUE)
-      }
-    }
+    p.number.loc[[i]] <- along_rows(M, planter)
   }
   if (l > 1) {
     p.number.loc1 <- paste_by_row(p.number.loc)
@@ -341,6 +333,9 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
                  layoutRandom = RCBD.layout.loc,
                  plotNumber = p.number.loc,
                  fieldBook = RCBD_output)
-  class(output) <- "FielDHub"
+  reproduction_parameters <- record_design_parameters(
+    environment(), overrides = list(plotNumber = starting_plots, locationNames = recorded_locations)
+  )
+  output <- new_fieldhub_design(output, "rcbd", parameters = reproduction_parameters)
   return(invisible(output))
 }

@@ -86,6 +86,14 @@ A list with five elements.
 \description{
 Randomly generates an spatial un-replicated diagonal arrangement design.
 }
+\section{Reproducibility}{
+
+The result records effective inputs and the resolved seed in
+\code{metadata$parameters}. Under the same package versions and RNG
+settings, rebuild a result \code{x} with
+\code{do.call(diagonal_arrangement, x$metadata$parameters)}.
+}
+
 \examples{
 
 # Example 1: Generates a spatial single diagonal arrangement design in one location

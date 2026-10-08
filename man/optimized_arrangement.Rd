@@ -18,7 +18,8 @@ optimized_arrangement(
   locationNames = NULL,
   spread_reps = TRUE,
   data = NULL,
-  year = NULL
+  year = NULL,
+  rep_checks = NULL
 )
 }
 \arguments{
@@ -28,7 +29,7 @@ optimized_arrangement(
 
 \item{lines}{Number of genotypes, experimental lines or treatments.}
 
-\item{amountChecks}{Integer with the amount total of checks or a numeric vector with the replicates of each check label.}
+\item{amountChecks}{Deprecated alias for \code{rep_checks}.}
 
 \item{checks}{Number of genotypes as checks.}
 
@@ -44,13 +45,16 @@ optimized_arrangement(
 
 \item{locationNames}{(optional) Name for each location.}
 
-\item{spread_reps}{A logical value indicating whether to maximize the spatial 
+\item{spread_reps}{A logical value indicating whether to maximize the spatial
 distance between replicated treatments in the field. Default is \code{TRUE}.}
 
 \item{data}{(optional) Data frame with 3 columns: \code{ENTRY | NAME | REPS}.}
 
 \item{year}{(optional) Year recorded in the \code{YEAR} column of the field book.
 By default the current year.}
+
+\item{rep_checks}{Integer with the total amount of checks, or a numeric
+vector with the replicates of each check label.}
 }
 \value{
 A list with five elements.
@@ -68,6 +72,14 @@ Randomly generates a spatial un-replicated optimized arrangement design, where t
 between checks is maximized in such a way that each row and column have control plots.
 Note that design generation needs the dimension of the field (number of rows and columns).
 }
+\section{Reproducibility}{
+
+The result records effective inputs and the resolved seed in
+\code{metadata$parameters}. Under the same package versions and RNG
+settings, rebuild a result \code{x} with
+\code{do.call(optimized_arrangement, x$metadata$parameters)}.
+}
+
 \examples{
 # Example 1: Generates a spatial unreplicated optimized arrangement design in one location
 # with 120 genotypes + 20 check plots (4 checks) for a field with dimension 14 rows x 10 cols.
@@ -75,8 +87,8 @@ Note that design generation needs the dimension of the field (number of rows and
 optim_unrep1 <- optimized_arrangement(
   nrows = 14, 
   ncols = 10, 
-  lines = 120, 
-  amountChecks = 20, 
+  lines = 120,
+  rep_checks = 20,
   checks = 1:4,
   planter = "cartesian", 
   plotNumber = 101,

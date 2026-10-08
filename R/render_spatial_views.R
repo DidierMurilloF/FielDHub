@@ -1,0 +1,142 @@
+#' Tables the spatial design pages show
+#'
+#' @description Plain functions that shape a spatial design (or its
+#' allocation) into the data frames the result tabs of its page show: the
+#' field grids, the entry lists and the allocation table. They only read
+#' the result.
+#' @name spatial_views
+#' @noRd
+NULL
+
+#' Colours of highlighted values in a field grid
+#'
+#' @param kind \code{"checks"} (a colour per check), \code{"replicated"}
+#'   (one colour for every replicated entry) or \code{"experiments"} (a
+#'   colour per experiment).
+#' @param n Number of values.
+#' @return A character vector of \code{n} colours (\code{NA} past the
+#'   palette).
+#' @noRd
+spatial_highlight_colours <- function(kind, n) {
+  palette <- switch(kind,
+    checks = c("royalblue", "salmon", "green", "orange", "orchid", "slategrey",
+               "greenyellow", "blueviolet", "deepskyblue", "gold", "blue", "red"),
+    replicated = rep("green", n),
+    experiments = c("snow", "cadetblue", "lightgreen", "grey", "tan", "lightcyan",
+                    "violet", "thistle"),
+    fieldhub_abort("Unknown highlight: ", kind, class = "fieldhub_internal_error")
+  )
+  palette[seq_len(n)]
+}
+
+#' A field grid as the page shows it
+#'
+#' @description Columns \code{V1..Vn}, and rows numbered from the bottom of
+#' the field, as the grids are stored (the first matrix row is the last
+#' field row).
+#' @param grid A matrix or data frame of one location.
+#' @param fillers Optional logical matrix of the filler plots, shown as
+#'   "Filler".
+#' @param highlight Values to colour (checks, replicated entries or
+#'   experiments).
+#' @param colours Their colours (\code{spatial_highlight_colours()}).
+#' @return A list with \code{data}, \code{highlight} and \code{colours}.
+#' @noRd
+field_grid_view <- function(grid, fillers = NULL, highlight = NULL, colours = NULL) {
+  if (is.null(grid) || length(dim(grid)) != 2L) fieldhub_abort("This location has no field layout.")
+  grid <- as.matrix(grid)
+  if (!is.null(fillers)) grid[fillers] <- "Filler"
+  data <- as.data.frame(unname(grid), stringsAsFactors = FALSE)
+  colnames(data) <- paste0("V", seq_len(ncol(data)))
+  rownames(data) <- rev(seq_len(nrow(data)))
+  list(data = data, highlight = highlight, colours = colours)
+}
+
+#' An entry list as the page shows it
+#' @param data A data frame.
+#' @param factors Columns shown as factors (filterable by level).
+#' @return \code{data} with those columns as factors.
+#' @noRd
+entry_list_view <- function(data, factors = c("ENTRY", "NAME")) {
+  data <- as.data.frame(data)
+  for (column in intersect(factors, names(data))) data[[column]] <- as.factor(data[[column]])
+  data
+}
+
+#' The checks of one location of a diagonal arrangement and their plots
+#' @param design A \code{diagonal_arrangement()} or
+#'   \code{sparse_allocation()} result.
+#' @param location The location.
+#' @return A data frame with ENTRY, NAME and TIMES.
+#' @noRd
+diagonal_checks_view <- function(design, location) {
+  info <- design$infoDesign
+  entries <- design$data_entry[[location]]
+  checks <- info$entry_checks[[location]]
+  data.frame(ENTRY = checks, NAME = entries$NAME[match(checks, entries$ENTRY)],
+             TIMES = info$rep_checks[[location]])
+}
+
+#' Entries of each experiment of a multiple diagonal arrangement
+#' @param entries The entry list, with its BLOCK column.
+#' @return A data frame with SUB-BLOCKS and FREQUENCY.
+#' @noRd
+block_frequency_view <- function(entries) {
+  counts <- as.data.frame(table(entries$BLOCK))
+  colnames(counts) <- c("SUB-BLOCKS", "FREQUENCY")
+  counts
+}
+
+#' The experiment of each plot of one location, each experiment coloured
+#'
+#' @description Read from the field book (EXPT by ROW and COLUMN), oriented
+#' as the other grids.
+#' @param design A multiple \code{diagonal_arrangement()} result.
+#' @param location The location.
+#' @return A \code{field_grid_view()}.
+#' @noRd
+experiment_grid_view <- function(design, location) {
+  grids <- field_book_location_grids(design$fieldBook, "EXPT", reverse_rows = TRUE)
+  if (!is.numeric(location) || length(location) != 1L || !location %in% seq_along(grids)) {
+    fieldhub_abort("This location has no field layout.")
+  }
+  books <- design$fieldBook
+  at <- as.character(books$LOCATION) == field_book_locations(books)[location]
+  names <- setdiff(unique(as.character(books$EXPT[at])), "Filler")
+  field_grid_view(grids[[location]], highlight = names,
+                  colours = spatial_highlight_colours("experiments", length(names)))
+}
+
+#' Entries of every location, one list
+#' @param locations Named list of ENTRY/NAME(/REPS) data frames, one per
+#'   location.
+#' @param columns The columns shown after LOCATION.
+#' @return A data frame with a LOCATION column first.
+#' @noRd
+location_entries_view <- function(locations, columns = c("ENTRY", "NAME")) {
+  rows <- lapply(names(locations), function(name) {
+    cbind(LOCATION = name, as.data.frame(locations[[name]])[, columns, drop = FALSE])
+  })
+  entry_list_view(do.call(rbind, rows), c("LOCATION", columns))
+}
+
+#' Allocation of the entries to the locations, with totals
+#'
+#' @param allocation A \code{do_optim()} result.
+#' @param names Names of the entries, in allocation-row order.
+#' @param average Whether to add the average copies per location
+#'   (multi-location p-rep).
+#' @return A data frame: one row per entry and a "Total" row; a "Copies"
+#'   column (and "Avg").
+#' @noRd
+allocation_view <- function(allocation, names, average = FALSE) {
+  table <- as.data.frame(allocation$allocation)
+  locations <- ncol(table)
+  table$Copies <- rowSums(table)
+  if (average) table$Avg <- round(table$Copies / locations, 1)
+  total <- as.data.frame(t(colSums(table)))
+  if (average) total$Avg <- NA
+  table <- rbind(table, total)
+  rownames(table) <- c(names, "Total")
+  table
+}

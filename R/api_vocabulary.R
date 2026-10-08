@@ -1,0 +1,86 @@
+#' Shared design arguments and compatibility
+#'
+#' @description
+#' Use named arguments when writing FielDHub scripts. The common names below
+#' describe the same concepts across the design families that support them.
+#' Each function's help page defines its supported inputs and constraints.
+#'
+#' @section Common arguments:
+#' \describe{
+#'   \item{\code{t}}{Treatments in classical designs: a count or, where supported,
+#'     a vector of labels. Check-based designs use \code{lines} for the number
+#'     of experimental entries excluding checks.}
+#'   \item{\code{reps}}{Full replicates per location in classical, incomplete-block,
+#'     lattice, row-column and strip-plot designs. In \code{latin_square()},
+#'     this is the number of independent squares. Partial and multi-location
+#'     replication uses the design-specific allocation arguments instead.}
+#'   \item{\code{l}}{Number of locations. \code{CRD()} and \code{latin_square()}
+#'     generate one location and have no \code{l} argument.}
+#'   \item{\code{locationNames}}{Location labels, in location order.
+#'     \code{CRD()} takes one location name.}
+#'   \item{\code{plotNumber}}{Starting plot number, or one start per location.}
+#'   \item{\code{seed}}{Seed recorded in the result to reproduce randomization.
+#'     When \code{seed} is \code{NULL}, one integer is drawn from the current
+#'     random-number stream and recorded; the design's own randomization does
+#'     not change the caller's stream.}
+#'   \item{\code{k}}{Number of plots per incomplete block.}
+#'   \item{\code{checks}}{A check count, entry identifiers, or labels; see
+#'     "Dimensions, factors and checks" below.}
+#'   \item{\code{rep_checks}}{Check replication: how many times each check is
+#'     repeated. \code{RCBD()} takes one count per check label supplied in
+#'     \code{checks} (recycled from a scalar). \code{optimized_arrangement()}
+#'     takes either a total check count or one count per check label (this is
+#'     \code{amountChecks} in 1.5.x scripts; see "Migrating existing scripts").
+#'     Multi-location allocations (\code{multi_location_prep()},
+#'     \code{do_optim(design = "prep")}) take the same one-count-per-check
+#'     form. \code{sparse_allocation()} and \code{do_optim(design = "sparse")}
+#'     have no \code{rep_checks}: every check is replicated once per location
+#'     by construction.}
+#' }
+#'
+#' @section Dimensions, factors and checks:
+#' \code{nrows} and \code{ncols} describe field dimensions in spatial designs.
+#' In \code{row_column()}, \code{nrows} is the number of rows per replicate;
+#' \code{field_layout()} controls how replicates are placed in the field.
+#' Factorial, split-plot and strip-plot designs keep their factor-specific
+#' arguments so whole plots, subplots and crossed strips remain distinct.
+#' The meaning of \code{checks} is design-specific: a count, entry identifiers,
+#' or labels. Consult the function's help before transferring a check vector
+#' between design families.
+#'
+#' Partial and multi-location replication does not share one argument name
+#' across families; each keeps the allocation arguments that describe its own
+#' replication scheme: \code{partially_replicated()}'s \code{repGens} (how
+#' many entries get each replication level) and \code{repUnits} (those
+#' replication levels), and \code{RCBD_augmented()}'s \code{b} (number of
+#' augmented blocks) and \code{repsExpt} (replicates of the whole experiment).
+#' These are design-specific allocation arguments, not aliases of
+#' \code{reps} or \code{rep_checks}.
+#'
+#' @section Boolean controls:
+#' Logical switches such as \code{continuous}, \code{factorLabels},
+#' \code{spread_reps}, \code{allow_fillers}, and \code{randomizeH} require one
+#' nonmissing \code{TRUE} or \code{FALSE}. Numeric switches (\code{0}/\code{1}),
+#' strings, vectors, and arrays are not supported. Invalid switches signal a
+#' \code{fieldhub_input_error} before randomization, with \code{argument},
+#' \code{value}, and \code{options} fields identifying the correction.
+#'
+#' @section Migrating existing scripts:
+#' \code{CRD(locationName = ...)} remains supported; use
+#' \code{CRD(locationNames = ...)} in new code. In \code{incomplete_blocks()},
+#' \code{alpha_lattice()}, \code{square_lattice()}, \code{rectangular_lattice()}
+#' and \code{row_column()}, replace the argument name \code{r} with \code{reps}.
+#' In \code{strip_plot()}, replace \code{b} with \code{reps}.
+#' In \code{optimized_arrangement()}, replace \code{amountChecks} with
+#' \code{rep_checks}.
+#' \code{RCBD_augmented(b = ...)} still denotes blocks and is unchanged.
+#'
+#' Old names and positional calls retain their meaning and signal a warning
+#' of class \code{fieldhub_deprecated_warning}. Supplying both names for one
+#' argument is an error, even if their values agree. These aliases do not change
+#' seeded designs or the field names of saved results.
+#'
+#' @name design_arguments
+#' @seealso \code{\link{CRD}}, \code{\link{incomplete_blocks}},
+#'   \code{\link{row_column}}, \code{\link{strip_plot}}, \code{\link{field_layout}}
+NULL

@@ -1,6 +1,5 @@
 library(testthat)
 library(FielDHub)
-library(dplyr)
 
 # Create an example RCBD design with 4 treatments and 3 replicates.
 example_design <- RCBD(t = 4, reps = 3, seed = 89076)
@@ -40,9 +39,9 @@ test_that("generate_vertical_layout produces a single-column layout", {
 test_that("generate_vertical_layout produces extended layouts when prime factors exist", {
   layouts <- generate_vertical_layout(NewBook, plots, n_TrtGen, n_Reps, planter)
 
-  # For n_TrtGen = 4, numbers::primeFactors(4) may return c(2,2) (or similar),
+  # For n_TrtGen = 4, prime_factors(4) returns c(2, 2),
   # so we expect at least one extended vertical layout.
-  if (length(numbers::primeFactors(n_TrtGen)) >= 2) {
+  if (length(prime_factors(n_TrtGen)) >= 2) {
     expect_true(any(grepl("vertical_ext", names(layouts))))
     # Check that the extended layout has a PLOT column computed.
     ext_name <- grep("vertical_ext", names(layouts), value = TRUE)[1]
@@ -142,9 +141,10 @@ test_that("the field map builds without a ggplot2 warning for both schemas", {
 })
 
 test_that("export_layout() TREATMENT preference matches the rendered checks map", {
-  # plot_RCBD() (utils_plot_RCBD.R) always uses text.string = "TREATMENT" on
-  # the rendered map, checks included, so the exported CSV must show the same
-  # labels rather than falling back to ENTRY just because that column exists.
+  # draw_layout.fieldhub_rcbd() (R/render_draw_layout.R) always uses
+  # text.string = "TREATMENT" on the rendered map, checks included, so the
+  # exported CSV must show the same labels rather than falling back to ENTRY
+  # just because that column exists.
   d_chk <- RCBD(t = 6, reps = 3, checks = c("CK1", "CK2"),
                 rep_checks = c(2, 2), seed = 993)
   fb <- plot_layout(x = d_chk, layout = 1, stacked = "vertical")$fieldBookXY
@@ -178,8 +178,8 @@ test_that("TREATMENT is the last column of the layout for both schemas", {
 test_that("simulated data works on a checks design", {
   d <- RCBD(t = 6, reps = 3, checks = c("CK1", "CK2"), rep_checks = c(2, 2), seed = 96)
   lay <- plot_layout(x = d, layout = 1, stacked = "vertical")$allSitesFieldbook
-  # norm_trunc() takes the LAST column as the treatment factor, so TREATMENT
-  # must be last or the Simulate! button errors for every checks design.
+  # Keep the established field-book order, although norm_trunc() now resolves
+  # the treatment column by name and does not depend on its position.
   expect_identical(names(lay)[ncol(lay)], "TREATMENT")
   sim <- norm_trunc(a = 1, b = 10, data = lay, seed = 1)
   expect_s3_class(sim, "data.frame")

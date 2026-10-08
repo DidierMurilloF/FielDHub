@@ -116,7 +116,7 @@ Then, you can enter the information describing the above design like this:
 rcd <- row_column(
   t = 45,
   nrows = 5,
-  r = 3,
+  reps = 3,
   l = 1, 
   plotNumber = 101, 
   locationNames = "FARGO",
@@ -131,7 +131,7 @@ The description for the inputs that we used to generate the design,
 
 *   `t = 45` is the number of treatments.
 *   `nrows = 5` is the number of rows.
-*   `r=3` is the number of reps
+*   `reps =3` is the number of reps
 *   `l = 1` is the number of locations.
 *   `plotNumber = 101` is the starting plot number.
 *   `locationNames = "FARGO"` is an optional name for each location.
@@ -191,7 +191,7 @@ while the historical two-stage method typically reports a lower joint `Row-by-Co
 rcd_twostage <- row_column(
   t = 45,
   nrows = 5,
-  r = 3,
+  reps = 3,
   l = 1,
   plotNumber = 101,
   locationNames = "FARGO",
@@ -208,7 +208,7 @@ Setting `latinize = TRUE` (only available with `method = "onestage"`) optimizes 
 rcd_latinized <- row_column(
   t = 45,
   nrows = 5,
-  r = 3,
+  reps = 3,
   l = 1,
   plotNumber = 101,
   locationNames = "FARGO",

@@ -5,7 +5,8 @@
 #' 
 #'
 #' @param t Number of treatments, or a character vector with the treatment labels.
-#' @param r Number of full blocks (or resolvable replicates) (also number of replicates per treatment).
+#' @param r Deprecated alias for \code{reps}; positional calls remain supported.
+#' @param reps Number of full resolvable replicates per location.
 #' @param k Size of incomplete blocks (number of units per incomplete block). 
 #' @param l Number of locations. By default \code{l = 1}.
 #' @param plotNumber Numeric vector with the starting plot number for each location. By default \code{plotNumber = 101}.
@@ -41,7 +42,7 @@
 #' # Size of IBlocks k = 3.
 #' alphalattice1 <- alpha_lattice(t = 15, 
 #'                                k = 3, 
-#'                                r = 4, 
+#'                                reps = 4,
 #'                                l = 1, 
 #'                                plotNumber = 101, 
 #'                                locationNames = "GreenHouse", 
@@ -58,7 +59,7 @@
 #' head(treatment_list) 
 #' alphalattice2 <- alpha_lattice(t = 25,
 #'                                k = 5,
-#'                                r = 3, 
+#'                                reps = 3,
 #'                                l = 1, 
 #'                                plotNumber = 1001, 
 #'                                locationNames = "A", 
@@ -67,6 +68,12 @@
 #' alphalattice2$infoDesign
 #' head(alphalattice2$fieldBook, 10)
 #' 
+#' @section Reproducibility:
+#' The result records effective inputs and the resolved seed in
+#' \code{metadata$parameters}, using \code{reps} for replication. Under the
+#' same package versions and RNG settings, rebuild a result \code{x} with
+#' \code{do.call(alpha_lattice, x$metadata$parameters)}.
+#'
 #' @export
 alpha_lattice <- function(t = NULL, 
                           k = NULL, 
@@ -75,72 +82,63 @@ alpha_lattice <- function(t = NULL,
                           plotNumber = 101, 
                           locationNames = NULL,
                           seed = NULL, 
-                          data = NULL) {
-  
-  if (is.null(seed)) {seed <- runif(1, min=0, max=10000)}
-  set.seed(seed)
+                          data = NULL, reps = NULL) {
+  plotNumber_supplied <- !missing(plotNumber)
+  validate_locations(l)
+  r <- resolve_argument_alias(
+    reps, r, new = "reps", old = "r",
+    new_supplied = !missing(reps), old_supplied = !missing(r)
+  )
+  seed <- resolve_seed(seed, default = function() runif(1, min = 0, max = 10000))
+  local_design_seed(seed)
+  treatment_count <- validate_block_design_inputs(t, k, r, l, data)
   lookup <- FALSE
   if(is.null(data)) {
-    if (is.null(t) || is.null(k) || is.null(r) || is.null(l)) {
-      shiny::validate('Basic design parameters missing (t, k, r or l).')
-    }
-    arg1 <- list(k, r, l);arg2 <- c(k, r, l)
-    if (base::any(lengths(arg1) != 1) || base::any(arg2 %% 1 != 0) || base::any(arg2 < 1)) {
-      shiny::validate('incomplete_blocks() requires k, r and l to be possitive integers.')
-    }
-    if (is.numeric(t)) {
-      if (length(t) == 1) {
-        if (t == 1 || t < 1) {
-          shiny::validate('incomplete_blocks() requires more than one treatment.')
-        } 
-        nt <- t
-      }else if ((length(t) > 1)) {
-        nt <- length(t)
-        TRT <- t
-      }
-    }else if (is.character(t) || is.factor(t)) {
-      if (length(t) == 1) {
-        shiny::validate('incomplete_blocks() requires more than one treatment.')
-      } 
-      nt <- length(t)
-    }else if ((length(t) > 1)) {
-      nt <- length(t)
-    }
+    nt <- treatment_count
     df <- data.frame(list(ENTRY = 1:nt,
                           TREATMENT = treatment_labels(t, nt, "alpha_lattice")))
     data_alpha <- df
   } else if (!is.null(data)) {
     if (is.null(t) || is.null(r) || is.null(k) || is.null(l)) {
-      shiny::validate('Basic design parameters missing (t, k, r or l).')
+      fieldhub_abort('Basic design parameters missing (t, k, r or l).')
     }
-    if(!is.data.frame(data)) shiny::validate("Data must be a data frame.")
-    if (ncol(data) < 2) base::stop("Data input needs at least two columns with: ENTRY and NAME.")
+    if(!is.data.frame(data)) fieldhub_abort("Data must be a data frame.")
+    if (ncol(data) < 2) fieldhub_abort("Data input needs at least two columns with: ENTRY and NAME.")
     data_up <- as.data.frame(data[,c(1,2)])
     data_up <- na.omit(data_up)
     colnames(data_up) <- c("ENTRY", "TREATMENT")
     data_up$TREATMENT <- as.character(data_up$TREATMENT)
     new_t <- length(data_up$TREATMENT)
-    if (t != new_t) base::stop("Number of treatments do not match with data input.")
+    if (t != new_t) fieldhub_abort("Number of treatments do not match with data input.")
     TRT <- data_up$TREATMENT
     nt <- length(TRT)
-    if (nt != t) shiny::validate('Number of treatment do not match with data input')
+    if (nt != t) fieldhub_abort('Number of treatment do not match with data input')
     data_alpha <- data_up
   }
-  if (k >= nt) shiny::validate('incomplete_blocks() requires that k < t.')
+  if (k >= nt) fieldhub_abort('alpha_lattice() requires that k < t.')
+  validate_location_labels(locationNames, l)
   if (!is.null(locationNames)) locationNames <- toupper(locationNames)
+  validate_location_labels(locationNames, l)
+  recorded_locations <- locationNames
   if(is.null(locationNames) || length(locationNames) != l) {
     if (!is.null(locationNames)) warn_default_location_names(locationNames, l, 1:l)
     locationNames <- 1:l
+    recorded_locations <- NULL
   }
-  if (numbers::isPrime(nt)) shiny::validate('Combinations for this amount of treatments do not exist.')
+  if (is_prime(nt)) fieldhub_abort('Combinations for this amount of treatments do not exist.')
   s <- nt / k
-  if (s %% 1 != 0) shiny::validate('Combinations for this amount of treatments do not exist.')
+  if (s %% 1 != 0) fieldhub_abort('Combinations for this amount of treatments do not exist.')
   
   nunits <- k
-  matdf <- incomplete_blocks(t = nt, k = nunits, r = r, l = l, plotNumber = plotNumber,
-                             seed = seed, locationNames = locationNames,
-                             data = data_alpha)
+  matdf <- build_incomplete_blocks(t = nt, k = nunits, reps = r, l = l, plotNumber = plotNumber,
+                                   seed = seed, locationNames = locationNames,
+                                   data = data_alpha, caller = "alpha_lattice",
+                                   plotNumber_supplied = plotNumber_supplied)
   blocksModel <- matdf$blocksModel
+  # build_incomplete_blocks() already recorded the effective per-location
+  # starts it used (raw plotNumber pre-normalized); record the same value
+  # here so reproduce_design() replays silently and identically.
+  plotNumber <- matdf$metadata$parameters$plotNumber
   lambda <- r*(k - 1)/(nt - 1)
   matdf <- matdf$fieldBook
   OutAlpha <- as.data.frame(matdf)
@@ -150,6 +148,9 @@ alpha_lattice <- function(t = NULL,
                      Locations = locationNames, seed = seed, lambda = lambda,
                      id_design = 12)
   output <- list(infoDesign = infoDesign, fieldBook = OutAlpha, blocksModel = blocksModel)
-  class(output) <- "FielDHub"
+  reproduction_parameters <- record_design_parameters(
+    environment(), overrides = list(reps = r, locationNames = recorded_locations), exclude = "r"
+  )
+  output <- new_fieldhub_design(output, "alpha_lattice", parameters = reproduction_parameters)
   return(invisible(output))
 }

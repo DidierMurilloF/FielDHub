@@ -10,10 +10,11 @@ dev_history.R
 $run_dev.*
 ^LICENSE\.md$
 ^README\.Rmd$
+^README\.html$
+^NEWS\.html$
 ^CODE_OF_CONDUCT\.md$
 ^app\.R$
 ^rsconnect$
-^\.travis\.yml$
 ^\.github$
 ^docs$
 ^joss$
@@ -22,6 +23,7 @@ $run_dev.*
 ^pREPExample\.PNG$
 ^DExample.PNG$
 ^CONTRIBUTING\.md$
+^RELEASING\.md$
 ^rsconnect$
 ^Dockerfile$
 ^\.dockerignore$
@@ -44,4 +46,8 @@ $run_dev.*
 ^vignettes/square_lattice\.Rmd$
 ^vignettes/sparse_allocation\.Rmd$
 ^vignettes/optimized_arrangement\.Rmd$
-
+^ARCHITECTURE_AUDIT\.md$
+^ROADMAP\.md$
+^\.superpowers$
+^deployment$
+^\.mailmap$

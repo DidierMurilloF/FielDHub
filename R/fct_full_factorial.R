@@ -19,7 +19,9 @@
 #' @param factorLabels (optional) If \code{TRUE} retain the levels
 #'   labels from the original data set otherwise, numeric labels will be
 #'   assigned. Default is \code{factorLabels =TRUE}.
-#' @param data (optional) Data frame with the labels of factors.
+#' @param data (optional) Data frame whose first two columns contain factor
+#'   names and level labels. Levels must be unique within each factor, but a
+#'   label may occur in different factors. Incomplete rows are omitted.
 #' 
 #' @author Didier Murillo [aut],
 #'         Salvador Gezan [aut],
@@ -69,47 +71,61 @@
 #' fullFact2$infoDesign
 #' head(fullFact2$fieldBook,10)
 #'
+#' @section Reproducibility:
+#' The result records effective inputs and the resolved seed in
+#' \code{metadata$parameters}. Under the same package versions and RNG
+#' settings, rebuild a result \code{x} with
+#' \code{do.call(full_factorial, x$metadata$parameters)}.
+#'
 #' @export
 full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
                            type = 2, plotNumber = 101, continuous = FALSE,
                            planter = "serpentine", seed = NULL,
                            locationNames = NULL, factorLabels = TRUE,
                            data = NULL) {
-  if (all(c("serpentine", "cartesian") != planter)) {
-    stop("Input for planter choice is unknown. Please, choose one: serpentine or cartesian.")
-  }
-  if (is.null(seed) || is.character(seed) || is.factor(seed)) seed <- runif(1, min = -50000, max = 50000)
-  set.seed(seed)
-  if(l < 1 || is.null(l)) stop("Please, check the value for the number of locations.")
+  plotNumber_supplied <- !missing(plotNumber)
+  validate_locations(l)
+  validate_flag(continuous, "continuous")
+  validate_flag(factorLabels, "factorLabels")
+  validate_planter(planter)
+  seed <- resolve_seed(seed)
+  local_design_seed(seed)
+  if(l < 1 || is.null(l)) fieldhub_abort("Please, check the value for the number of locations.")
   if (!is.null(plotNumber) && length(plotNumber) == l) {
-    if (any(!is.numeric(plotNumber)) || any(plotNumber < 1) || any(plotNumber %% 1 != 0) ||
-        any(diff(plotNumber) < 0)) {
-      shiny::validate("The input plotNumber must be an integer greater than 0 and sorted.")
+    validate_plot_starts(plotNumber)
+    if (any(plotNumber < 1) || any(diff(plotNumber) < 0)) {
+      fieldhub_abort("The input plotNumber must be an integer greater than 0 and sorted.")
     }
   }else {
-    default_plots <- seq(1001, 1000*(l+1), 1000)
-    warn_default_plot_numbers(plotNumber, l, default_plots)
+    default_plots <- default_plot_starts(l, 1001)
+    warn_default_plot_numbers(plotNumber, l, default_plots, caller_supplied = plotNumber_supplied)
     plotNumber <- default_plots
   }
-  if (is.null(data)) {
-    if(!is.null(setfactors)) {
-      if(is.numeric(setfactors)) {
-        if (length(setfactors) < 2) stop("More than one factor needs to be specified.")
-        nt <- length(setfactors)
-        TRT <- rep(LETTERS[1:nt], each = reps)
-        newlevels <- get.levels(k = setfactors)
-        allcomb <- expand.grid(newlevels, KEEP.OUT.ATTRS = FALSE,
-                               stringsAsFactors = FALSE)
-        colnames(allcomb) <- levels(as.factor(TRT))
-        data <- data.frame(list(factors = rep(levels(as.factor(TRT)), times = setfactors),
-                                levels = unlist(newlevels)))
-        levels.by.factor <- as.vector(unlist(newlevels))
-        entries_each_factor <- setfactors
-      }else stop("In 'full_factorial()' the input setfactors must be a numeric vector.")
-    }
+  generated_data <- is.null(data)
+  if (generated_data) {
+    validate_factor_counts(setfactors, reps, l)
+    nt <- length(setfactors)
+    TRT <- rep(LETTERS[1:nt], each = reps)
+    newlevels <- get.levels(k = setfactors)
+    allcomb <- expand.grid(newlevels, KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE)
+    colnames(allcomb) <- levels(as.factor(TRT))
+    data <- data.frame(list(factors = rep(levels(as.factor(TRT)), times = setfactors), levels = unlist(newlevels)))
+    levels.by.factor <- as.vector(unlist(newlevels))
+    entries_each_factor <- setfactors
   } else {
-    if(!is.data.frame(data)) stop("Data must be a data frame.")
-    data <- as.data.frame(na.omit(data[,1:2]))
+    if (!is.data.frame(data))
+      fieldhub_abort("Data must be a data frame.")
+    if (ncol(data) < 2L) {
+      fieldhub_abort("full_factorial() requires at least two columns: FACTOR and LEVEL.")
+    }
+    data <- as.data.frame(na.omit(data[, 1:2]))
+    if (nrow(data) == 0L) {
+      fieldhub_abort("full_factorial() requires at least one complete factor-level row.")
+    }
+    for (column in names(data)) validate_entry_labels(data[[column]], column)
+    if (!factorial_levels_unique(data)) {
+      fieldhub_abort("full_factorial() requires levels to be unique within each factor.")
+    }
     colnames(data) <- c("factors", "levels")
     data$factors <- factor(data$factors, as.character(unique(data$factors)))
     l.factors <- levels(data$factors)
@@ -117,22 +133,22 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
     data.by.factor <- list()
     entries_each_factor <- numeric()
     v <- 1
-    for(i in l.factors) {
+    for (i in l.factors) {
       data.by.factor[[v]] <- subset(data, data$factors == i)
       entries_each_factor[v] <- nrow(subset(data, data$factors == i))
-      levels.by.factor[[v]] <- data.by.factor[[v]][,2]
+      levels.by.factor[[v]] <- data.by.factor[[v]][, 2]
       v <- v + 1
     }
     if (!factorLabels) {
       levels.by.factor <- split_vectors(x = 1:nrow(data), len_cuts = base::lengths(levels.by.factor))
     }
     nt <- length(l.factors)
-    allcomb <- base::expand.grid(levels.by.factor, KEEP.OUT.ATTRS = FALSE,
-                                 stringsAsFactors = FALSE)
+    allcomb <- base::expand.grid(levels.by.factor, KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE)
     colnames(allcomb) <- l.factors
     newlevels <- data.by.factor
     TRT <- l.factors
   }
+  validate_location_labels(locationNames, l)
   if (is.null(locationNames)) {
     locationNames <- 1:l
   }else if (!is.null(locationNames)) {
@@ -142,6 +158,12 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
     }
   }
   nruns <- nrow(allcomb)
+  if (nruns < 2L) {
+    fieldhub_abort(
+      "full_factorial() requires the factors to produce at least two treatment ",
+      "combinations; the factors and levels supplied produce ", nruns, "."
+    )
+  }
   trt <- vector(mode = "character", length = nruns)
   H <- 1:nrow(allcomb)
   for (i in H) {
@@ -151,26 +173,34 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
   # label; keep the labels unique so each one maps back to its row of allcomb
   trt <- make.unique(trt)
   design.loc <- list()
+  validate_factorial_type(type)
   for (locs in 1:l) {
+    # CRD()/RCBD() are always called here without `checks`, so their
+    # fieldBook is always exactly ID, LOCATION, PLOT, REP, TREATMENT
+    # (rcbd_fieldbook_cols(has_checks = FALSE) in engine_rcbd_checks.R).
     if (type == 1) {
       m1 <- CRD(t = trt, reps = reps, plotNumber = plotNumber[locs], # seed = seed,
-                data = NULL, locationName = locationNames[1])$fieldBook
-      m1 <- m1[,-c(1,2)]
+                data = NULL, locationNames = locationNames[1])$fieldBook
+      m1 <- m1[, c("PLOT", "REP", "TREATMENT")]
       kind <- "CRD"
     }else {
       m1 <- RCBD(t = trt, reps = reps, l = 1, plotNumber = plotNumber[locs], continuous = continuous,
                  planter = planter, locationNames = locationNames[locs])$fieldBook # seed = seed,
-      m1 <- m1[,-c(1,2)]
+      m1 <- m1[, c("PLOT", "REP", "TREATMENT")]
       kind <- "RCBD"
     }
     m1 <- cbind(m1, matrix(data = 0, nrow = nruns, ncol = nt + 1, byrow = TRUE))
     # Take the factor levels from allcomb instead of splitting the treatment
     # label on spaces, which broke levels such as "Low N"
-    comb_rows <- allcomb[match(as.character(m1[, 3]), trt), , drop = FALSE]
+    comb_rows <- allcomb[match(as.character(m1[, "TREATMENT"]), trt), , drop = FALSE]
+    # The nt + 1 placeholder columns just bound by cbind() have no names yet
+    # (ColFactors/TRT_COMB are assigned after the loop, once TRT's levels are
+    # final); filling them by position is genuine matrix-style construction,
+    # not a reorder of existing field-book columns.
     m1[, 4:(4 + nt - 1)] <- lapply(comb_rows, as.character)
     m1[, ncol(m1)] <- do.call(paste, c(unname(m1[, 4:(4 + nt - 1), drop = FALSE]), sep = "*"))
     design <- m1
-    design <- design[,-3]
+    design$TREATMENT <- NULL
     if (kind == "RCBD") {
       # Sort within the location, so LOCATION can be assigned by position
       # even when locations share plot numbers
@@ -197,8 +227,22 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
     location_names = locationNames, 
     kind = kind, 
     levels_each_factor = entries_each_factor,
+    seed = seed,
     id_design = 4)
   output <- list(infoDesign = fullfactorial, fieldBook = design_output)
-  class(output) <- "FielDHub"
+  reproduction_parameters <- record_design_parameters(
+    environment(), overrides = list(data = if (generated_data) NULL else data)
+  )
+  output <- new_fieldhub_design(output, "full_factorial", parameters = reproduction_parameters)
   return(invisible(output))
+}
+
+#' @noRd
+get.levels <- function(k = NULL) {
+  newlevels <- list();s <- 1
+  for (i in k) {
+    newlevels[[s]] <- rep(0:(i-1), 1)
+    s <- s + 1
+  }
+  return(newlevels)
 }

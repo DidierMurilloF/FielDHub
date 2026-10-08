@@ -10,31 +10,47 @@ CRD(
   plotNumber = 101,
   locationName = NULL,
   seed = NULL,
-  data = NULL
+  data = NULL,
+  locationNames = NULL
 )
 }
 \arguments{
 \item{t}{An integer number with total number of treatments or a vector of dimension t with labels.}
 
-\item{reps}{Number of replicates of each treatment.}
+\item{reps}{One positive whole-number count of replicates per treatment.}
 
 \item{plotNumber}{Starting plot number. By default \code{plotNumber = 101}.}
 
-\item{locationName}{(optional) Name of the location.}
+\item{locationName}{Deprecated spelling of \code{locationNames}. Existing
+positional calls remain supported, with a deprecation warning.}
 
 \item{seed}{(optional) Real number that specifies the starting seed to obtain reproducible designs.}
 
-\item{data}{(optional) Data frame with the 2 columns with labels of each treatments and its number of replicates.}
+\item{data}{(optional) Data frame whose first two columns contain unique
+treatment labels and positive whole-number replication counts. Extra columns
+are ignored; rows missing either selected value are omitted.}
+
+\item{locationNames}{(optional) Name of the single location. Supply only one
+of \code{locationNames} and \code{locationName}.}
 }
 \value{
-A list with two elements.
+A list with three elements.
 \itemize{
+  \item \code{metadata} records the design, schema/package versions, seed,
+    random-number settings and effective input parameters.
   \item \code{infoDesign} is a list with information on the design parameters.
   \item \code{fieldBook} is a data frame with the CRD field book.
 }
 }
 \description{
 It randomly generates a completely randomized design.
+}
+\details{
+The result records effective inputs and the resolved seed
+  in \code{metadata$parameters}. Under the same package versions and RNG
+  settings, rebuild a result \code{x} with
+  \code{do.call(CRD, x$metadata$parameters)}. Data inputs are recorded after
+  the existing column selection and normalization.
 }
 \examples{
 # Example 1: Generates a CRD design with 10 treatments and 5 reps each.
@@ -43,7 +59,7 @@ crd1 <- CRD(
   reps = 5,
   plotNumber = 101,
   seed = 1987,
-  locationName = "Fargo"
+  locationNames = "Fargo"
 )
 crd1$infoDesign
 head(crd1$fieldBook, 10)
@@ -55,7 +71,7 @@ crd2 <- CRD(
   reps = 6,
   plotNumber = 1001,
   seed = 1654,
-  locationName = "Fargo"
+  locationNames = "Fargo"
 )
 crd2$infoDesign
 head(crd2$fieldBook, 10)
@@ -70,7 +86,7 @@ crd3 <- CRD(
   reps = NULL,
   plotNumber = 2001,
   seed = 1655,
-  locationName = "Cali",
+  locationNames = "Cali",
   data = treatment_list
 )
 crd3$infoDesign

@@ -1,0 +1,405 @@
+#' Result tabs of a spatial design page
+#'
+#' @description The main panel of a spatial page
+#' (\code{mod_design_ui()} with a \code{kind = "spatial"} spec): "Get
+#' Random" (the steps offered after Run!, Randomize!, what the run found and
+#' the page's \code{setup} view), "Data Input" (the entry tables), the
+#' spec's \code{panels} (the randomize steps above the first), "Field Book"
+#' and "Heatmap", with the ids of the page's spatial workflow
+#' (\code{spatial_workflow_spec()}).
+#'
+#' @param ns The page's namespace function.
+#' @param spec The page spec (\code{design_app_spec()}).
+#' @noRd
+app_spatial_tabs <- function(ns, spec) {
+  ids <- spec$workflow$ids
+  feedback <- function(..., tasks = c("run", "randomize")) app_task_feedback(ns(tasks), ...)
+  setup_tasks <- if (identical(spec$setup$stage, "run")) "run" else c("run", "randomize")
+  step_ui <- function(step) {
+    shinyjs::hidden(shiny::div(id = ns(paste0(step$id, "_step")), app_control_ui(step, ns)))
+  }
+  steps <- function(stage) lapply(Filter(function(step) identical(step$stage, stage), spec$steps), step_ui)
+  setup <- if (identical(spec$setup$type, "summary")) {
+    shiny::div(class = "fieldhub-design-summary",
+      app_output_feedback(shiny::verbatimTextOutput(ns("setup"), placeholder = FALSE)))
+  } else {
+    app_output_feedback(DT::DTOutput(ns("setup"), width = NULL, height = NULL))
+  }
+  entries <- lapply(seq_along(spec$entries), function(i) {
+    app_output_feedback(DT::DTOutput(ns(paste0("entries_", i)), width = NULL, height = NULL))
+  })
+  if (length(entries) == 2L) {
+    entries <- shiny::fluidRow(shiny::column(6, entries[[1L]]), shiny::column(6, entries[[2L]]))
+  }
+  panels <- lapply(seq_along(spec$panels), function(i) {
+    panel <- spec$panels[[i]]
+    shiny::tabPanel(panel$title, feedback(
+      app_plot_ui(ns, panel, controls = if (i == 1L) steps("randomize"))))
+  })
+  tabs <- c(
+    list(
+      id = ns(ids[["tabset"]]),
+      shiny::tabPanel("Get Random", value = "setup",
+        feedback(
+          shinyjs::useShinyjs(),
+          shiny::br(),
+          steps("run"),
+          shinyjs::hidden(app_task_button(ns("randomize"), "Randomize!",
+                                          busy_message = spec$busy_message, results_id = ns("results"))),
+          shiny::br(), shiny::br(),
+          shiny::uiOutput(ns("status")),
+          setup, tasks = setup_tasks)),
+      shiny::tabPanel("Data Input", feedback(entries))
+    ),
+    panels,
+    list(
+      shiny::tabPanel("Field Book",
+        feedback(app_output_feedback(DT::DTOutput(ns(ids[["table"]]), width = NULL, height = NULL)))),
+      shiny::tabPanel("Heatmap", feedback(
+        app_plot_ui(ns, list(id = ids[["heatmap"]], title = "Heatmap"))))
+    )
+  )
+  do.call(shiny::tabsetPanel, tabs)
+}
+
+#' Run the steps and results of a spatial design page
+#'
+#' @description Called by \code{mod_design_server()} for a
+#' \code{kind = "spatial"} spec, with the page's Run! (the parsed controls,
+#' the upload and the seed). Where the spec has an \code{optim} step, Run!
+#' also computes the allocation through its argument builder. The run's
+#' \code{"run"} steps (field sizes, from plain choice functions) are offered
+#' next; each Randomize! reads them, offers the \code{"randomize"} steps (the
+#' percentage of checks) and builds the design through the spec's argument
+#' builder. Results, simulation, exports and reproduction come from the
+#' shared spatial workflow (\code{app_spatial_workflow()}).
+#'
+#' @param input,output,session The page's module arguments.
+#' @param spec The page spec.
+#' @param run The page's Run! reactive: \code{list(values = , data = )}.
+#' @param raw_controls Function returning the raw values of the given
+#'   control ids.
+#' @return The page's design, run choices and randomize choices
+#'   (reactives), invisibly.
+#' @noRd
+app_spatial_page <- function(input, output, session, spec, run, raw_controls) {
+  ids <- spec$workflow$ids
+  ns <- session$ns
+  stage <- function(controls, name) Filter(function(control) identical(control$stage, name), controls)
+  offered <- function(steps) {
+    steps <- Filter(function(step) !is.null(step$options), steps)
+    stats::setNames(steps, vapply(steps, `[[`, character(1), "id"))
+  }
+  run_steps <- stage(spec$steps, "run")
+  design_steps <- stage(spec$steps, "randomize")
+  views <- stage(spec$controls, "run")
+  live_ids <- unique(unlist(lapply(run_steps, `[[`, "depends_on")))
+  # A reactive's value, or a silent stop while it has not run or failed
+  # (the status panel explains a failure)
+  settled <- function(reactive) {
+    state <- app_design_state(reactive)
+    shiny::req(!is.null(state), !inherits(state, "condition"))
+    state
+  }
+
+  # Run!: the inputs of the run, with the design's allocation where it has one
+  allocation <- if (!is.null(spec$optim)) {
+    arguments <- shiny::reactive({
+      inputs <- run()
+      validate_design(spec$optim$args(inputs$values, inputs$data))
+    })
+    app_design_task("run", spec$optim$engine, arguments,
+      long_running = spec$long_running, busy_message = "Optimizing allocation...")
+  }
+  prepared <- shiny::reactive({
+    inputs <- run()
+    if (!is.null(spec$optim)) {
+      inputs$values[[spec$optim$into]] <- allocation()
+    }
+    inputs
+  })
+  # The run's values, with the controls the steps follow read as they change
+  staged <- shiny::reactive({
+    inputs <- prepared()
+    if (length(live_ids) > 0L) {
+      live <- validate_design(read_design_controls(spec, raw_controls(live_ids), only = live_ids))
+      inputs$values[names(live)] <- live
+    }
+    inputs
+  })
+  run_choices <- shiny::reactive({
+    if (is.null(spec$optim)) {
+      # These Run buttons prepare dimensions directly, without a background task.
+      # Clear feedback even if validation stops this reactive before choices exist.
+      on.exit(app_report_task_feedback(session, "run", FALSE), add = TRUE)
+      app_report_task_feedback(session, "run", TRUE, "Preparing field dimensions...")
+    }
+    inputs <- staged()
+    lapply(offered(run_steps), function(step) {
+      validate_design(design_step_choices(step, inputs$values, inputs$data))
+    })
+  })
+
+  randomized <- shiny::reactiveVal(FALSE)
+  shiny::observeEvent(input$run, {
+    randomized(FALSE)
+    for (step in spec$steps) shinyjs::hide(paste0(step$id, "_step"))
+    shinyjs::hide("randomize")
+    shiny::updateTabsetPanel(session, ids[["tabset"]], selected = "setup")
+  })
+  if (!is.null(spec$upload)) {
+    toggle <- app_upload_spec(spec$upload)$toggle
+    shiny::observeEvent(input[[toggle]], {
+      shiny::updateTabsetPanel(session, ids[["tabset"]], selected = "setup")
+    })
+  }
+  shiny::observeEvent(prepared(), {
+    for (control in views) {
+      options <- validate_design(design_step_choices(control, prepared()$values, prepared()$data),
+                                 report = TRUE)
+      shiny::updateSelectInput(session, control$id, choices = options$choices,
+                               selected = options$selected)
+    }
+  })
+  shiny::observeEvent(run_choices(), {
+    choices <- run_choices()
+    for (step in offered(run_steps)) {
+      if (identical(step$type, "dependent_select")) {
+        shiny::updateSelectInput(session, step$id, choices = choices[[step$id]]$choices,
+                                 selected = choices[[step$id]]$selected)
+      }
+    }
+    for (step in run_steps) shinyjs::show(paste0(step$id, "_step"))
+    shinyjs::show("randomize")
+  })
+  for (step in Filter(function(step) identical(step$type, "location_selects"), run_steps)) local({
+    step <- step
+    output[[step$id]] <- shiny::renderUI({
+      options <- run_choices()[[step$id]]
+      shiny::tagList(lapply(seq_along(options$choices), function(i) {
+        shiny::selectInput(ns(paste0(step$id, "_", i)), paste(step$label, i),
+                           choices = options$choices[[i]], selected = options$selected[[i]])
+      }))
+    })
+  })
+  # A new field size hides the results of the last one (one select per
+  # location is one input per location)
+  for (step in run_steps) local({
+    step <- step
+    watched <- shiny::reactive({
+      if (identical(step$type, "location_selects")) {
+        lapply(seq_along(run_choices()[[step$id]]$choices),
+               function(i) input[[paste0(step$id, "_", i)]])
+      } else {
+        input[[step$id]]
+      }
+    })
+    shiny::observeEvent(watched(), randomized(FALSE), ignoreInit = TRUE)
+  })
+  step_values <- function(steps, choices) {
+    raw <- list()
+    for (step in steps) {
+      raw[step$id] <- list(if (identical(step$type, "location_selects")) {
+        lapply(seq_along(choices[[step$id]]$choices), function(i) input[[paste0(step$id, "_", i)]])
+      } else {
+        input[[step$id]]
+      })
+    }
+    raw
+  }
+
+  # Randomize!: the steps of the run, then those of the field
+  shiny::observeEvent(input$randomize, randomized(TRUE))
+  randomized_inputs <- shiny::reactive({
+    inputs <- staged()
+    choices <- run_choices()
+    # A select that does not hold one of its new choices yet is waited for
+    inputs$values <- shiny::req(validate_design(
+      read_design_steps(run_steps, step_values(run_steps, choices), inputs$values, choices)
+    ))
+    inputs
+  }) |>
+    shiny::bindEvent(input$randomize)
+  design_choices <- shiny::reactive({
+    inputs <- randomized_inputs()
+    lapply(offered(design_steps), function(step) {
+      validate_design(design_step_choices(step, inputs$values, inputs$data))
+    })
+  })
+  # Each Randomize! starts its steps from the choice they select (the API
+  # default); a value left in a select from the last field is not read, so
+  # the design is built once. A choice the user makes later replaces it.
+  design_raw <- shiny::reactiveVal(list())
+  shiny::observeEvent(design_choices(), {
+    choices <- design_choices()
+    for (step in offered(design_steps)) {
+      shiny::updateSelectInput(session, step$id, choices = choices[[step$id]]$choices,
+                               selected = choices[[step$id]]$selected)
+    }
+    design_raw(selected_step_values(offered(design_steps), choices))
+    for (step in design_steps) shinyjs::show(paste0(step$id, "_step"))
+  }, priority = 10)
+  for (step in design_steps) local({
+    id <- step$id
+    shiny::observeEvent(input[[id]], {
+      raw <- design_raw()
+      raw[id] <- list(input[[id]])
+      design_raw(raw)
+    }, ignoreInit = TRUE)
+  })
+  design_inputs <- shiny::reactive({
+    inputs <- randomized_inputs()
+    if (length(design_steps) > 0L) {
+      choices <- design_choices()
+      inputs$values <- shiny::req(validate_design(
+        read_design_steps(design_steps, design_raw(), inputs$values, choices)
+      ))
+    }
+    inputs
+  })
+  # The design comes from the engine through the spec's argument builder,
+  # as a direct API call with the same values builds it
+  arguments <- shiny::reactive({
+    shiny::req(randomized())
+    inputs <- design_inputs()
+    validate_design(spec$args(inputs$values, inputs$data))
+  })
+  design <- app_design_task("randomize", spec$engine, arguments, on_done = spec$accept,
+    long_running = spec$long_running, busy_message = spec$busy_message)
+  # The state of the last Randomize!: ready, still waiting, or its problem
+  result <- shiny::reactive({
+    spatial_randomize_state(randomized(), if (isTRUE(randomized())) app_design_state(design))
+  })
+  shiny::observeEvent(result()$ready, {
+    if (result()$ready) shinyjs::show(ids[["download"]]) else shinyjs::hide(ids[["download"]])
+  })
+  location <- shiny::reactive({
+    selected <- suppressWarnings(as.numeric(input$location_view))
+    shiny::req(length(selected) == 1L, is.finite(selected), selected >= 1,
+               selected <= length(location_view_choices(design_inputs()$values$l)))
+    selected
+  })
+
+  # What the run and the last Randomize! found: their problems, and the
+  # page's setup view
+  output$status <- shiny::renderUI({
+    prepared()
+    run_choices()
+    problem <- result()$problem
+    if (!is.null(problem)) validate_design(fieldhub_abort(problem))
+    NULL
+  })
+  # Validation must be ready when Run returns from another result tab.
+  shiny::outputOptions(output, "status", suspendWhenHidden = FALSE)
+  if (identical(spec$setup$type, "summary")) {
+    output$setup <- shiny::renderPrint({
+      if (!randomized()) return(invisible(NULL))
+      current <- settled(design)
+      cat("Randomization was successful!", "\n", "\n")
+      print(current, n = 6)
+    })
+  } else {
+    # Paged allocations stay client-side so copy, Excel and print include every row.
+    output$setup <- DT::renderDT({
+      if (identical(spec$setup$stage, "randomize")) {
+        if (!randomized()) return(NULL)
+        if (!is.null(result()$problem)) return(NULL)
+        inputs <- settled(randomized_inputs)
+        choices <- settled(design_choices)
+      } else {
+        inputs <- settled(prepared)
+        choices <- settled(run_choices)
+      }
+      app_spatial_table(validate_design(spec$setup$view(inputs$values, choices)),
+                        caption = spec$setup$caption,
+                        design = if (!is.null(spec$optim)) inputs$values[[spec$optim$into]],
+                        export = spec$setup$export, rows = spec$setup$rows)
+    }, server = is.null(spec$setup$rows))
+  }
+  for (i in seq_along(spec$entries)) local({
+    entries <- spec$entries[[i]]
+    output[[paste0("entries_", i)]] <- DT::renderDT({
+      if (!randomized()) return(NULL)
+      table <- validate_design(entries(design(), location(), design_inputs()$values))
+      app_spatial_table(table$data, caption = table$caption, height = table$height,
+                        filter = table$filter)
+    })
+  })
+  for (i in seq_along(spec$panels)) local({
+    panel <- spec$panels[[i]]
+    first <- i == 1L
+    draw <- function() {
+      # Explain a design that has not been randomized (or failed)
+      if (first) app_plot_state(if (randomized()) app_design_state(design), NULL, "layout")
+      if (!randomized()) return(NULL)
+      validate_design(panel$view(design(), location(), design_inputs()$values))
+    }
+    app_spatial_plot_outputs(input, output, session, panel, plot = shiny::reactive(draw()),
+      design = design, location = location, values = function() design_inputs()$values,
+      ready = function() isTRUE(randomized()) && isTRUE(result()$ready))
+  })
+
+  app_spatial_workflow(input, output, session,
+    design = function() design(),
+    seed = function() run()$values$seed,
+    dimensions = function(field_book) spec$field_size(design(), design_inputs()$values),
+    selected = function() location(),
+    visible = function() randomized(),
+    simulation_ready = function() {
+      shiny::req(design()$fieldBook)
+      isTRUE(randomized())
+    },
+    book_ready = function() shiny::req(design()$fieldBook),
+    spec = spec$workflow
+  )
+  invisible(list(design = design, run_choices = run_choices, design_choices = design_choices))
+}
+
+#' A table of a spatial page (entry list, allocation, check options)
+#'
+#' @param data The data frame.
+#' @param caption Optional caption.
+#' @param height Scroll height.
+#' @param filter \code{"top"} to filter by column, \code{"none"}.
+#' @param design Optional result whose metadata the export buttons carry.
+#' @param export Optional name of the exported table (adds export buttons).
+#' @param rows Optional number of rows per page; otherwise shows all rows.
+#' @noRd
+app_spatial_table <- function(data, caption = NULL, height = "600px", filter = "none",
+                              design = NULL, export = NULL, rows = NULL) {
+  options <- list(pageLength = rows %||% nrow(data), autoWidth = FALSE, scrollX = TRUE, scrollY = height,
+                  columnDefs = list(list(className = "dt-center", targets = "_all")))
+  if (!is.null(rows)) {
+    options$paging <- TRUE
+    options$scrollCollapse <- TRUE
+    options$lengthMenu <- unique(c(rows, 10L, 25L, 50L, 100L))
+  }
+  if (!is.null(export)) {
+    options$dom <- if (is.null(rows)) "Bfrtip" else "Blfrtip"
+    options$buttons <- app_table_export_buttons(design, export, print = TRUE)
+  }
+  DT::datatable(data, caption = caption, filter = filter, rownames = !is.null(export),
+                extensions = if (!is.null(export)) "Buttons" else list(), options = options)
+}
+
+#' A field grid of a spatial page, its highlighted values coloured
+#'
+#' @param view A \code{field_grid_view()}.
+#' @param design The design (its metadata goes with the exports).
+#' @param export Name of the exported table.
+#' @param location The location shown.
+#' @noRd
+app_spatial_grid <- function(view, design, export, location) {
+  data <- view$data
+  table <- DT::datatable(data, extensions = "Buttons", options = list(
+    dom = "Blfrtip", autoWidth = FALSE, scrollX = TRUE, fixedColumns = TRUE,
+    pageLength = nrow(data), scrollY = "600px", class = "compact cell-border stripe",
+    rownames = FALSE, server = FALSE,
+    filter = list(position = "top", clear = FALSE, plain = TRUE),
+    buttons = app_table_export_buttons(design, export, location),
+    lengthMenu = list(c(10, 25, 50, -1), c(10, 25, 50, "All"))
+  ))
+  if (length(view$highlight) == 0L) return(table)
+  DT::formatStyle(table, colnames(data),
+                  backgroundColor = DT::styleEqual(view$highlight, view$colours))
+}
