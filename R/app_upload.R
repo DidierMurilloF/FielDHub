@@ -31,36 +31,43 @@ app_upload_spec <- function(design) {
 
 #' The shared "Import entries' list?" toggle, file input and separator
 #'
-#' @description Every module's own copy of this control, unified behind
-#' canonical labels ("Import entries' list?", "Upload a CSV File:",
-#' "Separator") and moved out of each module. Ids come from
+#' @description Shared upload bindings with presentation arguments for each
+#' original input panel. Ids come from
 #' \code{app_upload_spec()}, so each module keeps the input ids it has
 #' always had.
 #'
 #' @param ns The module's namespace function.
 #' @param design One of the module upload keys (see \code{app_upload_spec()}).
+#' @param part Render both parts, just the toggle, or just the file row.
+#' @param file_width Bootstrap columns for the file input (out of twelve).
+#' @param gutters Use the original wider left-column gutter.
+#' @param separator_gutter Use the original narrow right-column gutter.
+#' @param toggle_label,file_label Original visible labels.
 #' @return A \code{shiny::tagList()}.
 #' @noRd
-app_upload_ui <- function(ns, design) {
+app_upload_ui <- function(ns, design, part = c("all", "toggle", "file"),
+                          file_width = 7, gutters = FALSE, separator_gutter = TRUE,
+                          toggle_label = "Import entries' list?", file_label = "Upload a CSV File:") {
   spec <- app_upload_spec(design)
+  part <- match.arg(part)
   shiny::tagList(
-    shiny::radioButtons(
+    if (part != "file") shiny::radioButtons(
       inputId = ns(spec$toggle),
-      label = "Import entries' list?",
+      label = toggle_label,
       choices = c("Yes", "No"),
       selected = "No",
       inline = TRUE
     ),
-    shiny::conditionalPanel(
+    if (part != "toggle") shiny::conditionalPanel(
       condition = paste0("input.", spec$toggle, " == 'Yes'"),
       ns = ns,
       shiny::fluidRow(
         shiny::column(
-          7,
-          shiny::fileInput(ns(spec$file), label = "Upload a CSV File:", multiple = FALSE)
+          file_width, class = if (gutters) "fieldhub-input-left",
+          shiny::fileInput(ns(spec$file), label = file_label, multiple = FALSE)
         ),
         shiny::column(
-          5,
+          12 - file_width, class = if (gutters && separator_gutter) "fieldhub-input-right",
           shiny::radioButtons(
             ns(spec$sep), "Separator",
             choices = c(Comma = ",", Semicolon = ";", Tab = "\t"),

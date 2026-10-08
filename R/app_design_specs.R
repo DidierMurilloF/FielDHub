@@ -6,7 +6,8 @@
 #'   \item \code{title}: heading of the page.
 #'   \item \code{engine}: the public design function.
 #'   \item \code{controls}: the sidebar, built from the shared \code{ctl_*()}
-#'     constructors (R/app_controls.R), in display order.
+#'     constructors (R/app_controls.R), in parser dependency order. Original
+#'     display order and row groupings are held in app_sidebar_layout().
 #'   \item \code{upload}: key of the page's upload controls
 #'     (\code{app_upload_spec()}), or \code{NULL}; \code{upload_shape} turns
 #'     the file into the entries the engine reads.
@@ -105,15 +106,24 @@ build_design_specs <- function() {
   entry_table <- function(data, caption = NULL, height = "600px", filter = "top") {
     list(data = data, caption = caption, height = height, filter = filter)
   }
-  grid_panel <- function(title, id, export, view) {
-    list(type = "grid", title = title, id = id, export = export, view = view)
+  # Field maps use the same renderer as plot(); matrices remain only for CSV.
+  image_panel <- function(title, id, grid, label = "ENTRY") {
+    list(type = "image", title = title, id = id, grid = grid,
+      view = function(design, location, values) {
+        checked_layout_view(design, location = location, text.string = label)$out_layout
+      })
   }
-  plot_panel <- function(title, id, view) list(type = "plot", title = title, id = id, view = view)
-  field_panel <- function(view) grid_panel("Randomized Field", "field_layout", "Entry layout", view)
+  plot_panel <- function(title, id, label, view) {
+    list(type = "image", title = title, id = id, label = label, view = view)
+  }
+  field_panel <- function(view) image_panel("Randomized Field", "field_layout", view)
   numbers_panel <- function(component) {
-    grid_panel("Plot Number Field", "plot_numbers", "Plot numbers", function(design, location, values) {
+    image_panel("Plot Number Field", "plot_numbers", function(design, location, values) {
       field_grid_view(design[[component]][[location]])
-    })
+    }, label = "PLOT")
+  }
+  prep_panels <- function(entries) {
+    list(field_panel(entries), numbers_panel("plotNumber"))
   }
   checks_view <- function(design, location, values) {
     checks <- design$infoDesign$entry_checks[[location]]
@@ -133,7 +143,7 @@ build_design_specs <- function() {
   # Run!, the copies per entry the locations allow, and each location's
   # entries
   allocation_setup <- function(caption, into, average = FALSE) {
-    list(type = "table", stage = "run", caption = caption, export = "Allocation",
+    list(type = "table", stage = "run", caption = caption, export = "Allocation", rows = 6L,
          view = function(values, choices) {
            allocation <- values[[into]]
            names <- values$entries$names %||% allocation_entry_names(allocation, values$lines)
@@ -417,15 +427,12 @@ build_design_specs <- function() {
       entries = list(function(design, location, values) {
         entry_table(entry_list_view(design$dataEntry, c("ENTRY", "NAME", "REPS")), height = "500px")
       }),
-      panels = list(
-        field_panel(function(design, location, values) {
-          replicated <- as.vector(design$genEntries$entry_checks)
-          field_grid_view(design$layoutRandom[[location]], fillers = design$fillerField[[location]],
-                          highlight = replicated,
-                          colours = spatial_highlight_colours("replicated", length(replicated)))
-        }),
-        numbers_panel("plotNumber")
-      )),
+      panels = prep_panels(function(design, location, values) {
+        replicated <- as.vector(design$genEntries$entry_checks)
+        field_grid_view(design$layoutRandom[[location]], fillers = design$fillerField[[location]],
+                        highlight = replicated,
+                        colours = spatial_highlight_colours("replicated", length(replicated)))
+      })),
     # RCBD_augmented() runs in well under a second; its layouts are plots
     RCBD_augmented = spatial("RCBD_augmented", "Augmented RCBD", RCBD_augmented,
       upload = "arcbd", upload_columns = c("ENTRY", "NAME"),
@@ -468,10 +475,10 @@ build_design_specs <- function() {
         }
       ),
       panels = list(
-        plot_panel("Field Layout", "field_layout", function(design, location, values) {
+        plot_panel("Field Layout", "field_layout", "ENTRY", function(design, location, values) {
           checked_layout_view(design, location = location)$out_layout
         }),
-        plot_panel("Plot Number Field", "plot_numbers", function(design, location, values) {
+        plot_panel("Plot Number Field", "plot_numbers", "PLOT", function(design, location, values) {
           checked_layout_view(design, location = location)$out_layoutPlots
         })
       ),
@@ -484,7 +491,7 @@ build_design_specs <- function() {
     Diagonal = spatial("Diagonal", "Unreplicated Single Diagonal Arrangement", diagonal_arrangement,
       upload = "sdiag", upload_columns = c("ENTRY", "NAME"), file_tag = "Diagonal_",
       controls = c(
-        list(ctl_count("lines", 287, min = 50, generated_only = TRUE), ctl_checks(4, max = 10),
+        list(ctl_count("lines", 287, min = 50, generated_only = TRUE), ctl_checks(4, max = 10, choices = 1:10),
              ctl_locations()),
         spatial_shared(), list(ctl_seed())
       ),
@@ -518,7 +525,7 @@ build_design_specs <- function() {
       upload_repeats = "sameEntries", file_tag = "Diagonal_Multi",
       controls = c(
         list(ctl_flag("sameEntries"), ctl_count("lines", 300, min = 50, generated_only = TRUE),
-             ctl_text_list("blocks", "100,120,80"), ctl_checks(4, max = 20), ctl_locations(),
+             ctl_text_list("blocks", "100,120,80"), ctl_checks(4, max = 20, choices = 1:20), ctl_locations(),
              ctl_select("stacked", selected = "By Row")),
         spatial_shared(expt_name = ctl_expt_name("Expt1, Expt2, Expt3", trim = TRUE),
                        trim_locations = TRUE),
@@ -559,9 +566,9 @@ build_design_specs <- function() {
       ),
       panels = list(
         field_panel(checks_view),
-        grid_panel("Expt Layout", "expt_layout", "Experiment layout", function(design, location, values) {
+        image_panel("Expt Layout", "expt_layout", function(design, location, values) {
           experiment_grid_view(design, location)
-        }),
+        }, label = "EXPT"),
         numbers_panel("plotsNumber")
       ),
       field_size = function(design, values) {
@@ -574,7 +581,7 @@ build_design_specs <- function() {
       file_tag = "Diagonal_",
       optim = list(engine = do_optim, args = design_args_sparse_allocation_optim, into = "sparse_list"),
       controls = c(
-        list(ctl_count("lines", 380, min = 50), ctl_checks(4, max = 10), ctl_locations_from(5, 3),
+        list(ctl_count("lines", 380, min = 50), ctl_checks(4, max = 10, choices = 1:10), ctl_locations_from(5, 3),
              ctl_copies_per_entry()),
         spatial_shared(), list(ctl_seed())
       ),
@@ -617,9 +624,9 @@ build_design_specs <- function() {
       optim = list(engine = do_optim, args = design_args_multi_loc_preps_optim, into = "optim_list"),
       controls = c(
         list(ctl_count("lines", 312),
-             ctl_flag("use_checks", FALSE),
-             ctl_checks(3, max = 10, show_if = "input.use_checks == true", enabled_by = "use_checks"),
-             ctl_rep_checks("8,8,8", show_if = "input.use_checks == true", enabled_by = "use_checks"),
+             ctl_flag("use_checks", FALSE, choices = c(Yes = TRUE, No = FALSE)),
+             ctl_checks(3, max = 10, show_if = "input.use_checks == 'TRUE'", enabled_by = "use_checks"),
+             ctl_rep_checks("8,8,8", show_if = "input.use_checks == 'TRUE'", enabled_by = "use_checks"),
              ctl_locations_from(6, 2),
              ctl_dependent_select("copies_per_entry", depends_on = "l", options = function(values, data) {
                prep_copies_choices(values$l)
@@ -650,15 +657,12 @@ build_design_specs <- function() {
       entries = list(function(design, location, values) {
         entry_table(location_entries_view(design$list_locs, c("ENTRY", "NAME", "REPS")), height = "500px")
       }),
-      panels = list(
-        field_panel(function(design, location, values) {
-          replicated <- as.vector(design$treatments_with_reps[[location]])
-          field_grid_view(design$layoutRandom[[location]], fillers = design$fillerField[[location]],
-                          highlight = replicated,
-                          colours = spatial_highlight_colours("replicated", length(replicated)))
-        }),
-        numbers_panel("plotNumber")
-      ))
+      panels = prep_panels(function(design, location, values) {
+        replicated <- as.vector(design$treatments_with_reps[[location]])
+        field_grid_view(design$layoutRandom[[location]], fillers = design$fillerField[[location]],
+                        highlight = replicated,
+                        colours = spatial_highlight_colours("replicated", length(replicated)))
+      }))
   )
 }
 

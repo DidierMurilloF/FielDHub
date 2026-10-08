@@ -42,5 +42,5 @@ app_tile_heatmap <- function(data, response_name, height, title = NULL,
         face = "bold", size = 13, hjust = 0.5
       ))
   }
-  plotly::ggplotly(plot, tooltip = "text", height = height)
+  plot
 }

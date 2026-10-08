@@ -80,6 +80,51 @@ test_that("partially replicated design labels filler plots", {
   expect_false("0" %in% labels)
 })
 
+test_that("plot-number maps do not inherit replication or check colours", {
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  for (name in c("partially_replicated_fillers", "multi_location_prep", "optimized_arrangement",
+                 "diagonal_single", "diagonal_fillers", "sparse_allocation")) {
+    design <- if (name == "diagonal_fillers") {
+      diagonal_arrangement(nrows = 18, ncols = 18, lines = 287, checks = 4, seed = 27)
+    } else catalogue_design(name)
+    if (name == "diagonal_fillers") {
+      entries <- checked_layout_view(design)$out_layout
+      expect_true("Filler" %in% drawn_text(entries)[[1L]]$label)
+      expect_false("0" %in% drawn_text(entries)[[1L]]$label)
+    }
+    for (location in seq_along(location_books(design))) {
+      book <- location_books(design)[[location]]
+      numbers <- plot(design, l = location, text.string = "PLOT")$p
+      expect_equal(as.character(drawn_text(numbers)[[1L]]$label), as.character(book$PLOT), info = name)
+      expect_length(tile_fills(numbers), 1L)
+      expect_equal(unname(grDevices::col2rgb(tile_fills(numbers))), unname(grDevices::col2rgb("gray")),
+                    info = name)
+      expect_length(unique(drawn_text(numbers)[[1L]]$colour), 1L)
+      if (name %in% c("partially_replicated_fillers", "multi_location_prep")) {
+        entries <- plot(design, l = location)$p
+        colours <- apply(grDevices::col2rgb(tile_fills(entries)), 2L, paste, collapse = ",")
+        expect_true("46,139,87" %in% colours, info = name) # seagreen
+      }
+    }
+  }
+})
+
+test_that("multiple-diagonal plot numbers and experiment maps colour only experiments", {
+  design <- catalogue_design("diagonal_blocks_row")
+  book <- design$fieldBook
+  for (label in c("PLOT", "EXPT")) {
+    map <- checked_layout_view(design, text.string = label)$out_layout
+    text <- drawn_text(map)[[1L]]
+    expect_equal(as.character(text$label), as.character(book[[label]]))
+    expect_length(unique(text$colour), 1L)
+    tile <- ggplot2::layer_data(map, which(vapply(map$layers, function(layer) inherits(layer$geom, "GeomTile"), TRUE))[1])
+    experiment <- book$EXPT[match(paste(tile$x, tile$y), paste(book$COLUMN, book$ROW))]
+    expect_true(all(vapply(split(tile$fill, experiment), function(fill) length(unique(fill)) == 1L, TRUE)))
+    expect_length(unique(tile$fill), length(unique(book$EXPT)))
+  }
+})
+
 test_that("optimized arrangement draws entry numbers unabbreviated", {
   o <- optimized_arrangement(
     nrows = 12, ncols = 10, lines = 110, rep_checks = 10, checks = 1,

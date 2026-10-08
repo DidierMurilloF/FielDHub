@@ -8,9 +8,8 @@ app_reproduction_ui <- function(ns) {
       "After generating a design, download its complete RDS result, including",
       "the seed, parameters, random-number settings, and FielDHub version.",
       "The R code below rebuilds this design with FielDHub. Large uploads or",
-      "older records use the saved RDS instead. Use Save experiment (ZIP)",
-      "to keep the CSV, displayed field book, simulation record, layout settings,",
-      "software versions, and reconstruction code together.",
+      "older records use the saved RDS instead. Download field book (CSV)",
+      "saves only the displayed field book, including any simulated traits.",
       "Keep the original RDS to preserve the exact result across software upgrades."
     ),
     shiny::downloadButton(ns("design_rds"), "Save design (RDS)"),

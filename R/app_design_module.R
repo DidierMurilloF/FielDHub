@@ -19,10 +19,10 @@ mod_design_ui <- function(id, spec) {
   feedback <- function(...) app_task_feedback(ns("run"), ...)
   # A spatial page offers its experiment once it is randomized
   save <- if (spatial) {
-    shinyjs::hidden(shiny::downloadButton(ns(ids[["download"]]), "Save experiment (ZIP)",
+    shinyjs::hidden(shiny::downloadButton(ns(ids[["download"]]), "Download field book (CSV)",
                                           class = "btn-block"))
   } else {
-    shiny::downloadButton(ns(ids[["field_book_download"]]), "Save experiment (ZIP)",
+    shiny::downloadButton(ns(ids[["field_book_download"]]), "Download field book (CSV)",
                           class = "btn-block")
   }
   tabs <- if (!spatial) list(
@@ -37,13 +37,8 @@ mod_design_ui <- function(id, spec) {
       "Field Layout",
       feedback(
         shinyjs::useShinyjs(),
-        shinyjs::hidden(shiny::downloadButton(
-          ns(ids[["layout_download"]]), label = "CSV + metadata (ZIP)",
-          icon = shiny::icon("download"), class = "fieldhub-csv-download"
-        )),
-        shiny::div(class = "fieldhub-design-plot",
-          fieldhub_spinner(plotly::plotlyOutput(ns(ids[["plot"]]), width = NULL, height = NULL),
-                           type = 5)),
+        app_plot_ui(ns, list(id = ids[["plot"]], title = "Field layout or heatmap"),
+                    csv_id = ids[["layout_download"]]),
         shiny::br(),
         shiny::column(12, shiny::uiOutput(ns(spec$layout$output))))
     ),
@@ -57,8 +52,7 @@ mod_design_ui <- function(id, spec) {
     shiny::sidebarLayout(
       shiny::sidebarPanel(
         width = 4,
-        if (!is.null(spec$upload)) app_upload_ui(ns, spec$upload),
-        lapply(spec$controls, app_control_ui, ns = ns, toggle = toggle),
+        app_sidebar_ui(spec, ns = ns, toggle = toggle),
         shiny::fluidRow(
           shiny::column(6, app_task_button(
             ns("run"), "Run!", icon = shiny::icon("circle-nodes", verify_fa = FALSE),
@@ -132,7 +126,7 @@ mod_design_server <- function(id, spec) {
         options <- validate_design(
           design_control_choices(spec, control, dependency()$raw, dependency()$data), report = TRUE
         )
-        shiny::updateSelectInput(session, control$id, label = control$label,
+        shiny::updateSelectInput(session, control$id,
                                  choices = options$choices, selected = options$selected)
       })
     })
@@ -165,7 +159,6 @@ mod_design_server <- function(id, spec) {
     })
     design <- app_design_task("run", spec$engine, arguments,
       long_running = spec$long_running, busy_message = spec$busy_message)
-    shiny::observeEvent(design(), shinyjs::show(id = workflow$ids[["layout_download"]]))
 
     if (isTRUE(spec$summary)) {
       output$summary <- shiny::renderPrint({

@@ -369,23 +369,32 @@ field_title <- function(title, df) {
 # Unreplicated designs in diagonal arrangements: the experiments, with the
 # checks outlined and coloured
 draw_diagonal_layout <- function(x, df, ...) {
-  df$ENTRY <- as.numeric(df$ENTRY)
+  dots <- list(...)
+  labels <- if (is.null(dots$text.string)) "ENTRY" else dots$text.string
+  entry_view <- !labels %in% c("PLOT", "EXPT")
+  experiments <- unique(as.character(df$EXPT))
+  has_blocks <- length(setdiff(experiments, "Filler")) > 1L
+  if (!entry_view && !has_blocks) {
+    dots <- utils::modifyList(list(col.regions = rep("gray", length(experiments))), dots)
+  }
+  df$ENTRY <- as.character(df$ENTRY)
+  df$ENTRY[df$TREATMENT == "Filler"] <- "Filler"
   p1 <- do.call(desplot::ggdesplot, utils::modifyList(list(
     data = df,
     form = EXPT ~ COLUMN + ROW,
     text.string = "ENTRY",
-    col.string = "CHECKS",
+    col.string = if (entry_view) "CHECKS" else NULL,
     cex = 1,
     shorten = "no",
-    out1.string = "EXPT",
-    out2.string = "CHECKS",
+    out1.string = if (entry_view || has_blocks) "EXPT" else NULL,
+    out2.string = if (entry_view) "CHECKS" else NULL,
     xlab = "COLUMNS",
     ylab = "ROWS",
     main = field_title("Un-replicated Diagonal Arrangement ", df),
     show.key = FALSE,
     gg = TRUE,
     out2.gpar = list(col = "gray50", lwd = 1, lty = 1)
-  ), list(...)))
+  ), dots))
   list(p1 = p1, p2 = NULL, data = df)
 }
 
@@ -400,6 +409,8 @@ draw_layout.fieldhub_sparse_allocation <- draw_diagonal_layout
 
 # Partially replicated designs: the replicated entries in green
 draw_prep_layout <- function(x, df, ...) {
+  dots <- list(...)
+  plot_numbers <- identical(dots$text.string, "PLOT")
   df$ENTRY <- as.character(df$ENTRY)
   df$ENTRY[df$TREATMENT == "Filler"] <- "Filler"
   df$binay_checks <- ifelse(df$CHECKS != 0, 1, 0)
@@ -414,8 +425,8 @@ draw_prep_layout <- function(x, df, ...) {
     shorten = "no",
     show.key = FALSE,
     gg = TRUE,
-    col.regions = c("gray", "seagreen")
-  ), list(...)))
+    col.regions = if (plot_numbers) c("gray", "gray") else c("gray", "seagreen")
+  ), dots))
   list(p1 = p1, p2 = NULL, data = df)
 }
 
@@ -432,6 +443,10 @@ draw_layout.fieldhub_multi_location_prep <- draw_prep_layout
 #' @export
 #' @noRd
 draw_layout.fieldhub_optimized_arrangement <- function(x, df, ...) {
+  dots <- list(...)
+  if (identical(dots$text.string, "PLOT")) {
+    dots <- utils::modifyList(list(col.regions = rep("gray", length(unique(df$CHECKS)))), dots)
+  }
   df$ENTRY <- as.character(df$ENTRY)
   df$CHECKS <- as.character(df$CHECKS)
   p1 <- do.call(desplot::ggdesplot, utils::modifyList(list(
@@ -445,7 +460,7 @@ draw_layout.fieldhub_optimized_arrangement <- function(x, df, ...) {
     xlab = "COLUMNS",
     ylab = "ROWS",
     gg = TRUE
-  ), list(...)))
+  ), dots))
   list(p1 = p1, p2 = NULL, data = df)
 }
 

@@ -505,7 +505,7 @@ test_that("classic pages submit only argument-builder snapshots to the shared de
 })
 
 # --- Step 7: direct unit tests for helpers classic modules use that had
-# none: validate_plot_starts(), app_csv_archive(), rcbd_fieldbook_cols(). ---
+# none: validate_plot_starts(), app_csv_download(), rcbd_fieldbook_cols(). ---
 
 test_that("validate_plot_starts() accepts finite whole-number vectors and rejects everything else", {
   expect_identical(validate_plot_starts(c(101, 1001)), c(101, 1001))
@@ -523,25 +523,13 @@ test_that("rcbd_fieldbook_cols() orders the field book with and without checks",
                    c("ID", "LOCATION", "PLOT", "REP", "ENTRY", "CHECKS", "TREATMENT"))
 })
 
-test_that("app_csv_archive() wraps the already-tested archive writer in a zip download handler", {
-  # app_csv_archive() (R/app_export.R) is a thin shiny::downloadHandler()
-  # wrapper: handlers <- csv_archive_handlers(...); shiny::downloadHandler(
-  # filename = handlers$filename, content = handlers$content, contentType =
-  # "application/zip"). The actual archive-writing logic -- write a CSV plus
-  # workflow.rds/reproduce.R/README.txt, zip them, and read them back -- is
-  # csv_archive_handlers()/write_workflow_archive(), a plain function with
-  # its own full tempfile-write/unzip/metadata-check coverage in
-  # test_workflow_archives.R ("archive callbacks preserve CSV bytes..."), so
-  # it is not repeated here. This test only confirms app_csv_archive() wires
-  # that plain function up correctly, checked structurally (no Shiny
-  # reactive/test-server context, and no reaching into
-  # shiny::downloadHandler()'s private closure layout to call its callbacks,
-  # per the "No Shiny tests" rule).
+test_that("app_csv_download() connects the plain writer with a CSV content type", {
+  # Callback contents are exercised directly in test_csv_downloads.R.
   skip_if_not_installed("shiny")
-  code <- body(app_csv_archive)
-  expect_identical(sum(all.names(code) == "csv_archive_handlers"), 1L)
+  code <- body(app_csv_download)
+  expect_identical(sum(all.names(code) == "csv_download_handlers"), 1L)
   expect_identical(sum(all.names(code) == "downloadHandler"), 1L)
-  expect_true(grepl('"application/zip"', paste(deparse(code), collapse = " "), fixed = TRUE))
+  expect_true(grepl('"text/csv; charset=utf-8"', paste(deparse(code), collapse = " "), fixed = TRUE))
 })
 
 # === Task 11b: the seven spatial modules =====================================
@@ -1222,7 +1210,7 @@ test_that("spatial pages submit builder snapshots for allocation and final desig
     "spatial_randomize_state",    # ready / waiting / the problem of the last Randomize!
     "fieldhub_abort",             # shows that problem through validate_design()
     "location_view_choices",      # the locations of the run
-    "app_spatial_workflow", "app_spatial_table", "app_spatial_grid"
+    "app_spatial_workflow", "app_spatial_table", "app_spatial_grid", "app_spatial_plot_outputs"
   )
   expect_identical(setdiff(intersect(heads, package_functions), page_helpers), character(0))
   # What the specs run: plain parsers, checks, choice helpers and views

@@ -1,7 +1,7 @@
 #' Shared lifecycle for classic-design results
 #'
 #' One registry-driven workflow owns accepted simulation settings, rendering,
-#' tables, metadata-bearing downloads, and reproduction. Design generation and
+#' tables, CSV downloads, and reproduction. Design generation and
 #' layout selection are injected services; scientific work stays in plain R.
 #' @noRd
 app_classic_workflow <- function(input, output, session, design, layout, seed,
@@ -33,7 +33,7 @@ app_classic_workflow <- function(input, output, session, design, layout, seed,
     validate_design(do.call(app_field_heatmap,
       c(list(field_book = data, response_name = response, selected = selected()), spec$heatmap)))
   })
-  output[[spec$ids[["plot"]]]] <- plotly::renderPlotly({
+  current_plot <- shiny::reactive({
     # "Run the design to see the field layout." (or why it failed) instead
     # of a blank panel
     app_plot_state(app_design_state(design), NULL, "layout")
@@ -56,21 +56,24 @@ app_classic_workflow <- function(input, output, session, design, layout, seed,
   })
   layout_data <- shiny::reactive({
     shiny::req(book()$df, input[[spec$ids[["plot_type"]]]])
+    if (input[[spec$ids[["plot_type"]]]] == 3) {
+      return(list(file = app_plot_grid_data(heatmap(), as.character(settings()$response_name))))
+    }
     validate_design(classic_workflow_layout(book()$df, selected(),
                                             input[[spec$ids[["plot_type"]]]], spec))
   })
-  output[[spec$ids[["field_book_download"]]]] <- app_csv_archive(
-    filename = function() paste0(spec$export_prefixes[["field_book"]], Sys.Date(), ".csv"),
-    data = function() as.data.frame(book()$df), design = design,
-    field_book = function() book()$df, simulation = function() book()$simulation,
-    layout = function() layout()$layout_metadata, kind = "field_book"
+  output[[spec$ids[["field_book_download"]]]] <- app_csv_download(
+    filename = function() csv_export_filename(design()),
+    data = function() as.data.frame(book()$df)
   )
-  output[[spec$ids[["layout_download"]]]] <- app_csv_archive(
-    filename = function() paste0(spec$export_prefixes[["layout"]], Sys.Date(), ".csv"),
-    data = function() as.data.frame(layout_data()$file), design = design,
-    field_book = function() book()$df, simulation = function() book()$simulation,
-    layout = function() layout()$layout_metadata, kind = "layout"
-  )
+  app_plot_outputs(input, output, session,
+    panel = list(id = spec$ids[["plot"]], title = "Field layout or heatmap"),
+    plot = current_plot, design = design, location = selected,
+    ready = function() inherits(app_design_state(current_plot), "ggplot"),
+    csv_data = function() as.data.frame(layout_data()$file),
+    kind = function() switch(as.character(input[[spec$ids[["plot_type"]]]]),
+      "1" = "field_layout", "2" = "plot_numbers", "3" = "heatmap"),
+    csv_id = spec$ids[["layout_download"]])
   app_reproduction_outputs(output, design)
   invisible(list(book = book, settings = settings, layout_data = layout_data))
 }

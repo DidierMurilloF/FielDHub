@@ -36,7 +36,7 @@ test_that("the classic workflow registry preserves module-specific view contract
     expect_identical(anyDuplicated(c(spec$ids, spec$simulation_ids)), 0L)
     code <- design_server_body(module)
     expect_identical(sum(all.names(code) == "app_classic_workflow"), 1L)
-    expect_false(any(c("app_csv_archive", "app_field_heatmap", "simulate_classic_field_book") %in% all.names(code)))
+    expect_false(any(c("app_csv_download", "app_field_heatmap", "simulate_classic_field_book") %in% all.names(code)))
   }
   expect_identical(classic_workflow_spec("RowCol")$table_height, 490)
   expect_true(classic_workflow_spec("FD")$table_extensions)

@@ -454,23 +454,64 @@
   margin-right: 0;
 }
 
-#fieldhub-app .fieldhub-design-plot .plotly.html-widget {
-  width: 97%;
-  height: 560px;
-}
-
-#fieldhub-app .btn.fieldhub-csv-download {
-  color: #337ab7;
-  background-color: #fff;
-  border-color: #2e6da4;
-}
-
 #fieldhub-app .fieldhub-design-summary {
   padding-right: 40px;
 }
 
-/* Spatial design pages (app_spatial_tabs()); the heatmap draws at its own height */
-#fieldhub-app .fieldhub-spatial-heatmap .plotly.html-widget {
-  width: 97%;
-  height: 400px;
+/* Original module gutters; Bootstrap retains the original responsive columns. */
+#fieldhub-app .fieldhub-sidebar-controls .fieldhub-input-left {
+  padding-right: 28px;
+}
+
+#fieldhub-app .fieldhub-sidebar-controls .fieldhub-input-right {
+  padding-left: 5px;
+}
+
+/* Every layout and heatmap uses the same responsive image and download toolbar. */
+.fieldhub-layout-page {
+  scrollbar-gutter: stable;
+}
+
+/* The root gutter already reserves this space; Bootstrap 3 modal padding
+   would otherwise narrow the app again until the closing animation ends. */
+.fieldhub-layout-page > body {
+  padding-right: 0 !important;
+}
+
+#fieldhub-app .fieldhub-plot-toolbar {
+  display: flow-root;
+  visibility: hidden;
+}
+
+#fieldhub-app .fieldhub-plot-panel.has-plot > .fieldhub-plot-toolbar {
+  visibility: visible;
+}
+
+#fieldhub-app .fieldhub-layout-image {
+  width: 98%;
+  height: var(--fieldhub-preview-height, 520px);
+  margin: 0 auto;
+}
+
+#fieldhub-app .fieldhub-layout-image .shiny-spinner-output-container,
+#fieldhub-app .fieldhub-layout-image .shiny-image-output {
+  width: 100%;
+  height: 100%;
+}
+
+#fieldhub-app .fieldhub-layout-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  margin: 0 auto;
+}
+
+#fieldhub-app .fieldhub-layout-downloads {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  width: 98%;
+  margin: 0 auto 12px;
 }

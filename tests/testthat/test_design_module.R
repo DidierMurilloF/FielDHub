@@ -554,7 +554,8 @@ test_that("the page HTML has every control, the shared buttons and no inline sty
     spec <- design_app_spec(module)
     html <- as.character(mod_design_ui("x", spec))
     has_id <- function(id) grepl(paste0('id="x-', id, '"'), html, fixed = TRUE)
-    for (control in c(spec$controls, spec$steps)) {
+    display_controls <- lapply(spec$controls, app_sidebar_control, module = module)
+    for (control in c(display_controls, spec$steps)) {
       expect_true(has_id(control$id), info = paste(module, control$id))
       # one select per location is drawn by the server, labelled "<label> <i>"
       if (!is.null(control$label) && !identical(control$type, "location_selects")) {
@@ -564,7 +565,8 @@ test_that("the page HTML has every control, the shared buttons and no inline sty
     }
     upload <- app_upload_spec(spec$upload)
     ids <- if (identical(spec$kind, "classic")) {
-      c(spec$workflow$ids[c("simulate", "field_book_download", "layout_download", "plot", "table")],
+      c(spec$workflow$ids[c("simulate", "field_book_download", "plot", "table")],
+        paste0(spec$workflow$ids[["plot"]], "_tools"),
         spec$layout$output)
     } else {
       c(spec$workflow$ids[c("simulate", "download", "table", "heatmap", "tabset")], "randomize",
@@ -575,15 +577,17 @@ test_that("the page HTML has every control, the shared buttons and no inline sty
       expect_true(has_id(id), info = paste(module, id))
     }
     texts <- if (identical(spec$kind, "classic")) {
-      c("CSV + metadata (ZIP)", "Field Layout", "Field Book")
+      c("Field Layout", "Field Book")
     } else {
       c("Get Random", "Randomize!", "Data Input", vapply(spec$panels, `[[`, "", "title"), "Field Book",
         "Heatmap")
     }
-    for (text in c(spec$title, "Run!", "Simulate!", "Save experiment (ZIP)", "Import entries' list?",
-                   "Upload a CSV File:", texts)) {
+    presentation <- app_sidebar_layout(spec)
+    for (text in c(spec$title, "Run!", "Simulate!", "Download field book (CSV)", presentation$upload_label,
+                   presentation$file_label, texts)) {
       expect_true(grepl(text, html, fixed = TRUE), info = paste(module, text))
     }
+    expect_false(grepl("ZIP|Save experiment", html), info = module)
     expect_identical(grepl("Summary Design", html, fixed = TRUE), spec$summary, info = module)
     expect_identical(has_id("summary"), spec$summary, info = module)
     stripped <- html

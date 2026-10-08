@@ -3,7 +3,9 @@
 #' @description Every design page builds its sidebar from the constructors
 #' below, and every constructor takes its label (and, where the concept has
 #' one, its default and minimum) from this table, so the same concept reads
-#' the same on every page. The input id of a control is its concept, which
+#' the same in validation on every page. Original visible labels and row
+#' layouts are applied separately by \code{app_sidebar_ui()}.
+#' The input id of a control is its concept, which
 #' is also the name its value has in the \code{values} the argument
 #' builders read (\code{design_args_<Module>()}).
 #'
@@ -125,10 +127,21 @@ ctl_count <- function(id, value, min = NULL, max = NULL, generated_only = FALSE,
 
 #' Number of checks
 #' @param max Only where the page offers no more.
+#' @param choices Allowed counts for an original dropdown; NULL for a number box.
 #' @noRd
-ctl_checks <- function(value, max = NULL, generated_only = FALSE, ...) {
-  ctl_count("checks", value, max = max, generated_only = generated_only, ...,
-            parse = function(value, label, values) parse_control_checks(value, label))
+ctl_checks <- function(value, max = NULL, generated_only = FALSE, choices = NULL, ...) {
+  control <- ctl_count("checks", value, max = max, generated_only = generated_only, ...,
+    parse = function(value, label, values) {
+      if (!is.null(choices) && is.character(value)) {
+        value <- as.numeric(parse_control_choice(value, label, choices))
+      }
+      parse_control_checks(value, label)
+    })
+  if (!is.null(choices)) {
+    control$type <- "select"
+    control$choices <- choices
+  }
+  control
 }
 
 #' Replicates of each check (one value is used for every check)
@@ -289,18 +302,23 @@ ctl_checks_percent <- function(options) {
                        })
 }
 
-#' A checkbox
+#' A boolean control, optionally shown as inline Yes/No choices
+#' @param choices Named logical choices, or NULL for a checkbox.
 #' @param enabled_by Id of a flag that must be on for this control to be
 #'   read; while it is off the control reads as \code{disabled_value}.
 #' @param stage \code{"run"} for a flag offered with the steps of a spatial
 #'   page.
 #' @noRd
 ctl_flag <- function(id, value = NULL, show_if = NULL, enabled_by = NULL, disabled_value = NULL,
-                     stage = "live") {
+                     stage = "live", choices = NULL) {
   default <- concept_value(id, value)
   design_control(id, "flag", value = default, show_if = show_if, enabled_by = enabled_by,
-                 disabled_value = disabled_value, stage = stage,
-                 parse = function(value, label, values) parse_control_flag(value, label, default))
+                 disabled_value = disabled_value, stage = stage, choices = choices,
+                 parse = function(value, label, values) {
+                   if (!is.null(choices) && is.character(value) && length(value) == 1L &&
+                       !is.na(value) && value %in% as.character(choices)) value <- as.logical(value)
+                   parse_control_flag(value, label, default)
+                 })
 }
 
 #' A note computed from the other controls (no value of its own)
@@ -330,8 +348,10 @@ app_control_ui <- function(control, ns, toggle = NULL) {
                                 selected = control$value, multiple = FALSE),
     dependent_select = shiny::selectInput(id, control$label, choices = ""),
     location_selects = shiny::uiOutput(id),
-    flag = shiny::checkboxInput(id, control$label, value = control$value),
-    seed = app_seed_input(id, value = control$value),
+    flag = if (is.null(control$choices)) shiny::checkboxInput(id, control$label, value = control$value)
+      else shiny::radioButtons(id, control$label, choices = control$choices,
+                               selected = as.character(control$value), inline = TRUE),
+    seed = app_seed_input(id, value = control$value, label = control$label),
     preview = shiny::uiOutput(id),
     fieldhub_abort("Unknown control type: ", control$type, class = "fieldhub_internal_error")
   )

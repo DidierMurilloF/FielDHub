@@ -41,7 +41,7 @@ test_that("spatial workflows keep per-module view and correlation identifiers", 
                                       spec$heatmap_checkbox)), 0L)
     code <- spatial_server_body(module)
     expect_identical(sum(all.names(code) == "app_spatial_workflow"), 1L)
-    expect_false(any(c("app_csv_archive", "simulate_spatial_field_book", "app_spatial_heatmap") %in% all.names(code)))
+    expect_false(any(c("app_csv_download", "simulate_spatial_field_book", "app_spatial_heatmap") %in% all.names(code)))
   }
   expect_true(spatial_workflow_spec("multi_loc_preps")$renumber_display)
   expect_true(spatial_workflow_spec("RCBD_augmented")$table_collapse)

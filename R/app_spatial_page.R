@@ -13,7 +13,8 @@
 #' @noRd
 app_spatial_tabs <- function(ns, spec) {
   ids <- spec$workflow$ids
-  feedback <- function(...) app_task_feedback(c(ns("run"), ns("randomize")), ...)
+  feedback <- function(..., tasks = c("run", "randomize")) app_task_feedback(ns(tasks), ...)
+  setup_tasks <- if (identical(spec$setup$stage, "run")) "run" else c("run", "randomize")
   step_ui <- function(step) {
     shinyjs::hidden(shiny::div(id = ns(paste0(step$id, "_step")), app_control_ui(step, ns)))
   }
@@ -32,13 +33,8 @@ app_spatial_tabs <- function(ns, spec) {
   }
   panels <- lapply(seq_along(spec$panels), function(i) {
     panel <- spec$panels[[i]]
-    view <- if (identical(panel$type, "plot")) {
-      shiny::plotOutput(ns(panel$id), width = NULL, height = NULL)
-    } else {
-      DT::DTOutput(ns(panel$id), width = NULL, height = NULL)
-    }
     shiny::tabPanel(panel$title, feedback(shiny::br(), if (i == 1L) steps("randomize"),
-                    fieldhub_spinner(view, type = 5)))
+                    app_plot_ui(ns, panel)))
   })
   tabs <- c(
     list(
@@ -52,16 +48,15 @@ app_spatial_tabs <- function(ns, spec) {
                                           busy_message = spec$busy_message, results_id = ns("results"))),
           shiny::br(), shiny::br(),
           shiny::uiOutput(ns("status")),
-          setup)),
+          setup, tasks = setup_tasks)),
       shiny::tabPanel("Data Input", feedback(entries))
     ),
     panels,
     list(
       shiny::tabPanel("Field Book",
         feedback(fieldhub_spinner(DT::DTOutput(ns(ids[["table"]]), width = NULL, height = NULL), type = 5))),
-      shiny::tabPanel("Heatmap", feedback(shiny::div(class = "fieldhub-spatial-heatmap",
-        fieldhub_spinner(plotly::plotlyOutput(ns(ids[["heatmap"]]), width = NULL, height = NULL),
-                         type = 5))))
+      shiny::tabPanel("Heatmap", feedback(
+        app_plot_ui(ns, list(id = ids[["heatmap"]], title = "Heatmap"))))
     )
   )
   do.call(shiny::tabsetPanel, tabs)
@@ -307,6 +302,7 @@ app_spatial_page <- function(input, output, session, spec, run, raw_controls) {
       print(current, n = 6)
     })
   } else {
+    # Paged allocations stay client-side so copy, Excel and print include every row.
     output$setup <- DT::renderDT({
       if (identical(spec$setup$stage, "randomize")) {
         if (!randomized()) return(NULL)
@@ -320,8 +316,8 @@ app_spatial_page <- function(input, output, session, spec, run, raw_controls) {
       app_spatial_table(validate_design(spec$setup$view(inputs$values, choices)),
                         caption = spec$setup$caption,
                         design = if (!is.null(spec$optim)) inputs$values[[spec$optim$into]],
-                        export = spec$setup$export)
-    })
+                        export = spec$setup$export, rows = spec$setup$rows)
+    }, server = is.null(spec$setup$rows))
   }
   for (i in seq_along(spec$entries)) local({
     entries <- spec$entries[[i]]
@@ -341,15 +337,9 @@ app_spatial_page <- function(input, output, session, spec, run, raw_controls) {
       if (!randomized()) return(NULL)
       validate_design(panel$view(design(), location(), design_inputs()$values))
     }
-    output[[panel$id]] <- if (identical(panel$type, "plot")) {
-      shiny::renderPlot(draw(), height = 620, res = 100)
-    } else {
-      DT::renderDT({
-        view <- draw()
-        if (is.null(view)) return(NULL)
-        app_spatial_grid(view, design(), panel$export, location())
-      })
-    }
+    app_spatial_plot_outputs(input, output, session, panel, plot = shiny::reactive(draw()),
+      design = design, location = location, values = function() design_inputs()$values,
+      ready = function() isTRUE(randomized()) && isTRUE(result()$ready))
   })
 
   app_spatial_workflow(input, output, session,
@@ -357,10 +347,6 @@ app_spatial_page <- function(input, output, session, spec, run, raw_controls) {
     seed = function() run()$values$seed,
     dimensions = function(field_book) spec$field_size(design(), design_inputs()$values),
     selected = function() location(),
-    filename = function() {
-      names <- paste(run()$values$location_names, collapse = ",")
-      paste0(names, "_", spec$file_tag, Sys.Date(), ".csv")
-    },
     visible = function() randomized(),
     simulation_ready = function() {
       shiny::req(design()$fieldBook)
@@ -380,13 +366,19 @@ app_spatial_page <- function(input, output, session, spec, run, raw_controls) {
 #' @param filter \code{"top"} to filter by column, \code{"none"}.
 #' @param design Optional result whose metadata the export buttons carry.
 #' @param export Optional name of the exported table (adds export buttons).
+#' @param rows Optional number of rows per page; otherwise shows all rows.
 #' @noRd
 app_spatial_table <- function(data, caption = NULL, height = "600px", filter = "none",
-                              design = NULL, export = NULL) {
-  options <- list(pageLength = nrow(data), autoWidth = FALSE, scrollX = TRUE, scrollY = height,
+                              design = NULL, export = NULL, rows = NULL) {
+  options <- list(pageLength = rows %||% nrow(data), autoWidth = FALSE, scrollX = TRUE, scrollY = height,
                   columnDefs = list(list(className = "dt-center", targets = "_all")))
+  if (!is.null(rows)) {
+    options$paging <- TRUE
+    options$scrollCollapse <- TRUE
+    options$lengthMenu <- unique(c(rows, 10L, 25L, 50L, 100L))
+  }
   if (!is.null(export)) {
-    options$dom <- "Bfrtip"
+    options$dom <- if (is.null(rows)) "Bfrtip" else "Blfrtip"
     options$buttons <- app_table_export_buttons(design, export, print = TRUE)
   }
   DT::datatable(data, caption = caption, filter = filter, rownames = !is.null(export),

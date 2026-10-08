@@ -887,6 +887,59 @@
 
 ### Fix bugs:
 
+- Layouts and heatmaps share a stable download toolbar and wait for browser
+  dimensions to settle before resizing the preview. Output updates no longer
+  trigger their own size checks, preventing repeated image redraws and flicker
+  across design pages. Native plots, preview sizing and downloads are unchanged.
+
+- Restored the original design-specific input panels: control order, labels,
+  full-width inputs, paired rows, upload widths and gutters. This supersedes
+  the stacked/compact-row presentation described above. Diagonal and sparse
+  check selectors and multi-location p-rep's Yes/No checks choice are restored.
+  Automatic recorded seeds, validation, native plots and the three right-aligned
+  plot downloads are retained.
+
+- Every app layout and heatmap now uses the same native high-resolution image
+  panel, including classic designs and augmented RCBD. PNG (300 dpi), PDF
+  (vector), and Layout CSV buttons are consistently aligned to the right.
+  Previews retain 98% width, a 700 px height cap, and no internal scrollbars.
+  Dense preview labels scale to fit without abbreviating or changing download text.
+  Downloads follow the selected view and location; heatmap CSVs contain the
+  simulated response at its field coordinates. Plotly interaction is replaced
+  by the shared image display; the app no longer requires Plotly at runtime.
+
+- Plot-number maps for p-rep, optimized, single-diagonal and sparse designs use
+  neutral gray instead of entry/check highlighting. Multiple-diagonal plot
+  numbers and experiment maps distinguish experiments, with uniform text and
+  no check highlighting. This applies to the app and `plot(text.string = "PLOT")`.
+- The remaining nine DT field-map tabs (optimized, single and multiple diagonal,
+  and sparse allocation) now use the same high-resolution `plot()` renderer
+  and responsive image panel as p-rep, including the experiment-layout tab.
+  All 13 migrated maps retain 98% width, a 700 px height cap bounded by the
+  sidebar and viewport, no internal scrollbars, and PNG, PDF and plain CSV
+  downloads. Allocation tables, entry lists and field books remain tables.
+  Diagonal entry maps preserve the grid's explicit "Filler" labels instead of
+  drawing filler cells as entry zero.
+
+- Both p-rep pages now draw the Randomized Field and Plot Number Field as
+  high-resolution images through the same renderer as `plot()`, instead of DT
+  grids. Previews are re-rendered at 98% of the panel width in a landscape canvas,
+  with height capped at 700 px and bounded by the sidebar and viewport,
+  without stretching or internal scrolling.
+  They preserve full labels, fillers, and replicated-entry
+  highlighting, with 300-dpi PNG, vector PDF and plain layout CSV downloads.
+  Allocation tables, entry lists and field books remain tables.
+
+- Layout downloads and the sidebar's "Download field book (CSV)" now save one
+  plain CSV, not a ZIP with companion files. Filenames identify the design,
+  content, date and, for layouts, location. Field books retain all locations
+  and any simulated traits. The app no longer requires the zip package.
+
+- Multi-location p-rep and sparse allocation keep the completed allocation in
+  Get Random visible during Randomize!; only dependent result tabs show that
+  loading state. Allocation tables now default to six rows per page, with
+  pagination and a page-size selector. Exports still include all rows.
+
 - Design pages now show a centered spinner and short status inside the active
   result tab during allocation and randomization, replacing its content until
   ready without adding a banner above the tabs. This includes multi-location

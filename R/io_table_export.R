@@ -17,7 +17,7 @@ table_export_text <- function(record) {
   dump <- utils::capture.output(dput(record, control = c("keepNA", "keepInteger", "showAttributes", "hexNumeric")))
   paste(c("# FielDHub table export: complete reproducibility record",
           "# Table filtering or sorting does not change the recorded core design.",
-          "# Keep the design RDS or experiment ZIP to preserve exact results.",
+          "# Keep the design RDS to preserve the exact design result.",
           "# Software or platform changes can alter reconstructed results.",
           "# Do not evaluate records received from untrusted sources.",
           paste0("record <- ", dump[1L]), dump[-1L]), collapse = "\n")

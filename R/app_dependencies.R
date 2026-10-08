@@ -2,7 +2,7 @@
 #' @noRd
 app_dependencies <- function() {
   c("golem", "shiny", "htmltools", "DT", "bslib", "shinycssloaders",
-    "plotly", "shinyalert", "shinyjs", "zip", "promises")
+    "shinyalert", "shinyjs", "promises")
 }
 
 #' Explain missing app packages without installing or loading the application

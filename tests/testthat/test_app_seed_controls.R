@@ -117,9 +117,9 @@ test_that("every design module uses shared seed controls without requiring a val
     if (is.null(entry$spec)) {
       expect_true("app_seed_input" %in% all.names(ui), info = entry$id)
     } else {
-      # a generic page renders its controls with app_control_ui(); every
-      # page has the shared seed control, blank by default
-      expect_true("app_control_ui" %in% all.names(ui), info = entry$id)
+      # Original input panels still render shared controls; every page has one
+      # seed control, blank by default.
+      expect_true("app_sidebar_ui" %in% all.names(ui), info = entry$id)
       seeds <- Filter(function(control) identical(control$type, "seed"),
                       design_app_spec(entry$spec)$controls)
       expect_length(seeds, 1L)
@@ -128,6 +128,7 @@ test_that("every design module uses shared seed controls without requiring a val
     expect_false(seed_requirements(server), info = entry$id)
     expect_identical(seed_resolvers(server), 1L, info = entry$id)
   }
+  expect_true("app_control_ui" %in% all.names(body(app_sidebar_ui)))
   expect_true("app_seed_input" %in% all.names(body(app_control_ui)))
   for (workflow in c("app_classic_workflow", "app_spatial_workflow")) {
     expect_true("workflow_seed" %in% all.names(body(get(workflow, namespace))), info = workflow)
