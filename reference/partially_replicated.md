@@ -22,7 +22,8 @@ partially_replicated(
   dist_method = "euclidean",
   border_penalization = 0.5,
   data = NULL,
-  allow_fillers = FALSE
+  allow_fillers = FALSE,
+  year = NULL
 )
 ```
 
@@ -63,12 +64,6 @@ partially_replicated(
   A logical value indicating whether to maximize the spatial distance
   between replicated treatments in the field. Default is `TRUE`.
 
-- allow_fillers:
-
-  A logical value indicating whether field dimensions may exceed the
-  number of experimental plots. Fillers occupy the terminal cells of the
-  selected planter path. Default is `FALSE`.
-
 - seed:
 
   (optional) Real number that specifies the starting seed to obtain
@@ -100,6 +95,17 @@ partially_replicated(
   (optional) Data frame with 3 columns: `ENTRY | NAME | REPS`. If
   `multiLocationData = TRUE` then the `data` must have 4 columns:
   `LOCATION | ENTRY | NAME | REPS`
+
+- allow_fillers:
+
+  A logical value indicating whether field dimensions may exceed the
+  number of experimental plots. Fillers occupy the terminal cells of the
+  selected planter path. Default is `FALSE`.
+
+- year:
+
+  (optional) Year recorded in the `YEAR` column of the field book. By
+  default the current year.
 
 ## Value
 
@@ -148,6 +154,13 @@ the optimized design including the field layout, replicated and
 unreplicated treatments, and pairwise distances between treatments. Note
 that the design generation needs the dimension of the field (number of
 rows and columns).
+
+## Reproducibility
+
+The result records effective inputs and the resolved seed in
+`metadata$parameters`. Under the same package versions and RNG settings,
+rebuild a result `x` with
+`do.call(partially_replicated, x$metadata$parameters)`.
 
 ## References
 

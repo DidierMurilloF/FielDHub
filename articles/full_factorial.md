@@ -167,7 +167,7 @@ print(factorial)
     Full Factorial Design 
 
     Information on the design parameters: 
-    List of 9
+    List of 10
      $ factors           : chr [1:3] "A" "B" "C"
      $ levels            : int [1:8] 0 1 2 0 1 2 0 1
      $ runs              : int 18
@@ -180,6 +180,7 @@ print(factorial)
      $ location_names    : chr "FARGO"
      $ kind              : chr "RCBD"
      $ levels_each_factor: num [1:3] 3 3 2
+     $ seed              : num 1239
 
      10 First observations of the data frame with the full_factorial field book: 
        ID LOCATION PLOT REP FACTOR_A FACTOR_B FACTOR_C TRT_COMB

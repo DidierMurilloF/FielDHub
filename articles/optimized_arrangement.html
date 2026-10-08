@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">FielDHub</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,7 +33,10 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/sparse_allocation.html">Sparse Allocation/Testing</a></li>
+<li><a class="dropdown-item" href="../articles/scientific_validation.html">Scientific Validation and Computational Limits</a></li>
+    <li><a class="dropdown-item" href="../articles/architecture.html">Architecture and Compatibility Contracts</a></li>
+    <li><a class="dropdown-item" href="../articles/extending_fieldhub.html">Adding Designs and Formats</a></li>
+    <li><a class="dropdown-item" href="../articles/sparse_allocation.html">Sparse Allocation/Testing</a></li>
     <li><a class="dropdown-item" href="../articles/diagonal_arrangement.html">Unreplicated Diagonal Arrangement Design</a></li>
     <li><a class="dropdown-item" href="../articles/optimized_arrangement.html">Unreplicated Optimized Arrangement Design</a></li>
     <li><a class="dropdown-item" href="../articles/RCBD_augmented.html">Augmented Randomized Complete Block Design</a></li>
@@ -345,8 +348,8 @@ this:</p>
 <code class="sourceCode R"><span><span class="va">optim_expt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/optimized_arrangement.html">optimized_arrangement</a></span><span class="op">(</span></span>
 <span>  nrows <span class="op">=</span> <span class="fl">29</span>,</span>
 <span>  ncols <span class="op">=</span> <span class="fl">15</span>,</span>
-<span>  lines <span class="op">=</span> <span class="fl">401</span>, </span>
-<span>  amountChecks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">12</span>,<span class="fl">11</span>,<span class="fl">11</span><span class="op">)</span>,</span>
+<span>  lines <span class="op">=</span> <span class="fl">401</span>,</span>
+<span>  rep_checks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">12</span>,<span class="fl">11</span>,<span class="fl">11</span><span class="op">)</span>,</span>
 <span>  checks <span class="op">=</span> <span class="fl">3</span>, </span>
 <span>  l <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  plotNumber <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1001</span>,<span class="fl">2001</span>,<span class="fl">3001</span><span class="op">)</span>,</span>
@@ -368,7 +371,7 @@ design,</p>
 <li>
 <code>lines = 401</code> is the number of entries</li>
 <li>
-<code>amountChecks = c(12,11,11)</code> are the values for
+<code>rep_checks = c(12,11,11)</code> are the values for
 representing respective replicates of each check, or an integer total
 number of checks.</li>
 <li>

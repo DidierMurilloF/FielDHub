@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">FielDHub</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -18,7 +18,10 @@
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/sparse_allocation.html">Sparse Allocation/Testing</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/scientific_validation.html">Scientific Validation and Computational Limits</a></li>
+    <li><a class="dropdown-item" href="../articles/architecture.html">Architecture and Compatibility Contracts</a></li>
+    <li><a class="dropdown-item" href="../articles/extending_fieldhub.html">Adding Designs and Formats</a></li>
+    <li><a class="dropdown-item" href="../articles/sparse_allocation.html">Sparse Allocation/Testing</a></li>
     <li><a class="dropdown-item" href="../articles/diagonal_arrangement.html">Unreplicated Diagonal Arrangement Design</a></li>
     <li><a class="dropdown-item" href="../articles/optimized_arrangement.html">Unreplicated Optimized Arrangement Design</a></li>
     <li><a class="dropdown-item" href="../articles/RCBD_augmented.html">Augmented Randomized Complete Block Design</a></li>
@@ -127,13 +130,15 @@
 
 <dt id="arg-checks">checks<a class="anchor" aria-label="anchor" href="#arg-checks"></a></dt>
 <dd><p>(optional) Checks to repeat within every block. Either a positive
-integer <code>N</code>, meaning the first <code>N</code> entries of <code>data</code> (or of a
-character vector <code>t</code>) are the checks, or a character vector of check
-labels. <code>checks</code> sits after <code>data</code> in the argument list (rather than
-next to <code>t</code>, where it might otherwise go) precisely so that <code>data</code>
-keeps its original positional slot and existing positional calls to
-<code>RCBD()</code> keep working unchanged. By default <code>checks = NULL</code>, which
-produces an ordinary RCBD.</p></dd>
+integer <code>N</code> or a character vector of check labels. When <code>data</code> or a
+character vector <code>t</code> supplies a pool of entries, <code>N</code> takes that pool's
+first <code>N</code> entries as the checks; when no pool is supplied (<code>t</code> is a
+bare count), <code>N</code> instead generates its own check labels <code>"CH1".."CHN"</code>
+ahead of the auto-generated test entries <code>"T1".."Tt"</code>. <code>checks</code> sits
+after <code>data</code> in the argument list (rather than next to <code>t</code>, where it
+might otherwise go) precisely so that <code>data</code> keeps its original positional
+slot and existing positional calls to <code>RCBD()</code> keep working unchanged. By
+default <code>checks = NULL</code>, which produces an ordinary RCBD.</p></dd>
 
 
 <dt id="arg-rep-checks">rep_checks<a class="anchor" aria-label="anchor" href="#arg-rep-checks"></a></dt>
@@ -152,7 +157,9 @@ whole block is randomized without restriction.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list with five elements.</p><ul><li><p><code>infoDesign</code> is a list with information on the design parameters.</p></li>
+    <p>A list with five elements.</p><ul><li><p><code>metadata</code> records the design, schema/package versions, seed,
+    random-number settings and effective input parameters.</p></li>
+<li><p><code>infoDesign</code> is a list with information on the design parameters.</p></li>
 <li><p><code>layoutRandom</code> is the RCBD layout randomization for each location.</p></li>
 <li><p><code>plotNumber</code> is the plot number layout for each location.</p></li>
 <li><p><code>fieldBook</code> is a data frame with the RCBD field book design. Without
@@ -163,17 +170,23 @@ whole block is randomized without restriction.</p></dd>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>When <code>checks</code> is supplied, one or more checks are repeated multiple times within
+    <p>The result records effective inputs, the resolved seed and the
+starting plot numbers in <code>metadata$parameters</code>. Under the same package
+versions and RNG settings, rebuild a result <code>x</code> with
+<code>do.call(RCBD, x$metadata$parameters)</code>.</p>
+<p>When <code>checks</code> is supplied, one or more checks are repeated multiple times within
 every block, while every test entry still appears exactly once. In a classical RCBD,
 the residual is the treatment-by-block interaction; repeating checks inside a block
 instead supplies a within-block estimate of error and a form of local control.</p>
-<p><code>checks</code> accepts either a single positive integer <code>N</code> (the first <code>N</code>
-entries of <code>data</code>, or of a character vector <code>t</code>, are the checks) or a
-character vector of check labels. When a pool of entries is supplied through <code>data</code>
-or a character <code>t</code>, every label named in <code>checks</code> must already exist in that
-pool; an unmatched label is an error that also names the closest case-insensitive match,
-if any. When <code>t</code> is a bare count (no pool supplied), the check labels are new and
-are appended to the auto-generated test entries.</p>
+<p><code>checks</code> accepts either a single positive integer <code>N</code> or a character vector
+of check labels. When a pool of entries is supplied through <code>data</code> or a character
+<code>t</code>, an integer <code>N</code> takes the first <code>N</code> entries of that pool as the
+checks, and a character vector of labels must already exist in that pool; an unmatched
+label is an error that also names the closest case-insensitive match, if any. When no
+pool is supplied (<code>t</code> is a bare count), the labels are generated instead: a
+character <code>checks</code> is appended to the auto-generated test entries, while an
+integer <code>N</code> generates its own check labels <code>"CH1".."CHN"</code> ahead of the
+auto-generated test entries <code>"T1".."Tt"</code>.</p>
 <p><code>rep_checks</code> sets how many times each check repeats within a block: a single value
 is recycled across all checks, or one value can be supplied per check.</p>
 <p>A block (test entries plus repeated checks) larger than 10,000 plots is rejected.</p>

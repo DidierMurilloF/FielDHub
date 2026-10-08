@@ -9,7 +9,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">FielDHub</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -20,7 +20,10 @@
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/sparse_allocation.html">Sparse Allocation/Testing</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/scientific_validation.html">Scientific Validation and Computational Limits</a></li>
+    <li><a class="dropdown-item" href="../articles/architecture.html">Architecture and Compatibility Contracts</a></li>
+    <li><a class="dropdown-item" href="../articles/extending_fieldhub.html">Adding Designs and Formats</a></li>
+    <li><a class="dropdown-item" href="../articles/sparse_allocation.html">Sparse Allocation/Testing</a></li>
     <li><a class="dropdown-item" href="../articles/diagonal_arrangement.html">Unreplicated Diagonal Arrangement Design</a></li>
     <li><a class="dropdown-item" href="../articles/optimized_arrangement.html">Unreplicated Optimized Arrangement Design</a></li>
     <li><a class="dropdown-item" href="../articles/RCBD_augmented.html">Augmented Randomized Complete Block Design</a></li>
@@ -61,7 +64,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Summary a <code>FielDHub</code> object</h1>
-      <small class="dont-index">Source: <a href="https://github.com/DidierMurilloF/FielDHub/blob/master/R/utils_S3_methods.R" class="external-link"><code>R/utils_S3_methods.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/DidierMurilloF/FielDHub/blob/master/R/result_methods.R" class="external-link"><code>R/result_methods.R</code></a></small>
       <div class="d-none name"><code>summary.FielDHub.Rd</code></div>
     </div>
 
@@ -103,7 +106,7 @@
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Example 1: Generates a CRD design with 5 treatments and 5 reps each.</span></span></span>
 <span class="r-in"><span><span class="va">crd1</span> <span class="op">&lt;-</span> <span class="fu"><a href="CRD.html">CRD</a></span><span class="op">(</span>t <span class="op">=</span> <span class="fl">5</span>, reps <span class="op">=</span> <span class="fl">5</span>, plotNumber <span class="op">=</span> <span class="fl">101</span>,</span></span>
-<span class="r-in"><span>seed <span class="op">=</span> <span class="fl">1985</span>, locationName <span class="op">=</span> <span class="st">"Fargo"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>seed <span class="op">=</span> <span class="fl">1985</span>, locationNames <span class="op">=</span> <span class="st">"Fargo"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">crd1</span><span class="op">$</span><span class="va">infoDesign</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $numberofTreatments</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 5</span>

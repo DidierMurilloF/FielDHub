@@ -118,7 +118,7 @@ crd <- CRD(
   t = 15,
   reps = 6,
   plotNumber = 101, 
-  locationName = "FARGO",
+  locationNames = "FARGO",
   seed = 1236
 )
 ```

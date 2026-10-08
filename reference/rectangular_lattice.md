@@ -13,7 +13,8 @@ rectangular_lattice(
   plotNumber = 101,
   locationNames = NULL,
   seed = NULL,
-  data = NULL
+  data = NULL,
+  reps = NULL
 )
 ```
 
@@ -21,7 +22,7 @@ rectangular_lattice(
 
 - t:
 
-  Number of treatments.
+  Number of treatments, or a character vector with the treatment labels.
 
 - k:
 
@@ -29,7 +30,7 @@ rectangular_lattice(
 
 - r:
 
-  Number of blocks (full resolvable replicates).
+  Deprecated alias for `reps`; positional calls remain supported.
 
 - l:
 
@@ -53,6 +54,10 @@ rectangular_lattice(
 
   (optional) Data frame with label list of treatments.
 
+- reps:
+
+  Number of full resolvable replicates per location.
+
 ## Value
 
 A list with two elements.
@@ -61,6 +66,13 @@ A list with two elements.
 
 - `fieldBook` is a data frame with the rectangular lattice design field
   book.
+
+## Reproducibility
+
+The result records effective inputs and the resolved seed in
+`metadata$parameters`, using `reps` for replication. Under the same
+package versions and RNG settings, rebuild a result `x` with
+`do.call(rectangular_lattice, x$metadata$parameters)`.
 
 ## References
 
@@ -78,7 +90,7 @@ Thomas Walk \[ctb\], Johan Aparicio \[ctb\], Richard Horsley \[ctb\]
 ``` r
 # Example 1: Generates a rectangular lattice design with 6 full blocks, 4 units per IBlock (k)
 # and 20 treatments in one location.
-rectangularLattice1 <- rectangular_lattice(t = 20, k = 4, r = 6, l = 1, 
+rectangularLattice1 <- rectangular_lattice(t = 20, k = 4, reps = 6, l = 1,
                                            plotNumber = 101,
                                            locationNames = "FARGO", 
                                            seed = 126)
@@ -136,7 +148,7 @@ head(treatment_list)
 #> 4     4      ND-4
 #> 5     5      ND-5
 #> 6     6      ND-6
-rectangularLattice2 <- rectangular_lattice(t = 56, k = 7, r = 5, l = 2, 
+rectangularLattice2 <- rectangular_lattice(t = 56, k = 7, reps = 5, l = 2,
                                            plotNumber = c(1001,2001),
                                            locationNames = c("Loc1", "Loc2"), 
                                            seed = 127,

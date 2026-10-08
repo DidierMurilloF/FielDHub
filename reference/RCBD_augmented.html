@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">FielDHub</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -18,7 +18,10 @@
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/sparse_allocation.html">Sparse Allocation/Testing</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/scientific_validation.html">Scientific Validation and Computational Limits</a></li>
+    <li><a class="dropdown-item" href="../articles/architecture.html">Architecture and Compatibility Contracts</a></li>
+    <li><a class="dropdown-item" href="../articles/extending_fieldhub.html">Adding Designs and Formats</a></li>
+    <li><a class="dropdown-item" href="../articles/sparse_allocation.html">Sparse Allocation/Testing</a></li>
     <li><a class="dropdown-item" href="../articles/diagonal_arrangement.html">Unreplicated Diagonal Arrangement Design</a></li>
     <li><a class="dropdown-item" href="../articles/optimized_arrangement.html">Unreplicated Optimized Arrangement Design</a></li>
     <li><a class="dropdown-item" href="../articles/RCBD_augmented.html">Augmented Randomized Complete Block Design</a></li>
@@ -59,7 +62,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Generates an Augmented Randomized Complete Block Design (ARCBD)</h1>
-      <small class="dont-index">Source: <a href="https://github.com/DidierMurilloF/FielDHub/blob/master/R/fct_RCDB_augmented.R" class="external-link"><code>R/fct_RCDB_augmented.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/DidierMurilloF/FielDHub/blob/master/R/fct_RCBD_augmented.R" class="external-link"><code>R/fct_RCBD_augmented.R</code></a></small>
       <div class="d-none name"><code>RCBD_augmented.Rd</code></div>
     </div>
 
@@ -84,7 +87,8 @@
 <span>  random <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  data <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  nrows <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  ncols <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  ncols <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  year <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -151,6 +155,11 @@
 <dt id="arg-ncols">ncols<a class="anchor" aria-label="anchor" href="#arg-ncols"></a></dt>
 <dd><p>(optional) Number of columns in the field.</p></dd>
 
+
+<dt id="arg-year">year<a class="anchor" aria-label="anchor" href="#arg-year"></a></dt>
+<dd><p>(optional) Year recorded in the <code>YEAR</code> column of the field book.
+By default the current year.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -161,6 +170,15 @@
 <li><p><code>data_entry</code> is a data frame with the data input.</p></li>
 <li><p><code>fieldBook</code> is a data frame with the ARCBD field book.</p></li>
 </ul></div>
+    <div class="section level2">
+    <h2 id="reproducibility">Reproducibility<a class="anchor" aria-label="anchor" href="#reproducibility"></a></h2>
+
+
+<p>The result records effective inputs and the resolved seed in
+<code>metadata$parameters</code>. Under the same package versions and RNG
+settings, rebuild a result <code>x</code> with
+<code>do.call(RCBD_augmented, x$metadata$parameters)</code>.</p>
+    </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Federer, W. T. (1955). Experimental Design. Theory and Application. New York, USA. The

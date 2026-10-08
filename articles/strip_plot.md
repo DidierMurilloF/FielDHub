@@ -134,7 +134,7 @@ this:
 strip <- strip_plot(
   Hplots = 6,
   Vplots = 4, 
-  b = 3,
+  reps = 3,
   l = 1,  
   plotNumber = 101, 
   planter = "serpentine",
@@ -149,7 +149,7 @@ The description for the inputs that we used to generate the design,
 
 - `Hplots = 6` is the number of horizontal strips
 - `Vplots = 4` is the number of vertical strips
-- `b = 3` is the number of reps
+- `reps = 3` is the number of reps
 - `l = 1` is the number of locations.
 - `plotNumber = 101` is the starting plot number.
 - `planter = "cartesian"` is the order layout.

@@ -11,7 +11,8 @@ CRD(
   plotNumber = 101,
   locationName = NULL,
   seed = NULL,
-  data = NULL
+  data = NULL,
+  locationNames = NULL
 )
 ```
 
@@ -24,7 +25,7 @@ CRD(
 
 - reps:
 
-  Number of replicates of each treatment.
+  One positive whole-number count of replicates per treatment.
 
 - plotNumber:
 
@@ -32,7 +33,8 @@ CRD(
 
 - locationName:
 
-  (optional) Name of the location.
+  Deprecated spelling of `locationNames`. Existing positional calls
+  remain supported, with a deprecation warning.
 
 - seed:
 
@@ -41,16 +43,33 @@ CRD(
 
 - data:
 
-  (optional) Data frame with the 2 columns with labels of each
-  treatments and its number of replicates.
+  (optional) Data frame whose first two columns contain unique treatment
+  labels and positive whole-number replication counts. Extra columns are
+  ignored; rows missing either selected value are omitted.
+
+- locationNames:
+
+  (optional) Name of the single location. Supply only one of
+  `locationNames` and `locationName`.
 
 ## Value
 
-A list with two elements.
+A list with three elements.
+
+- `metadata` records the design, schema/package versions, seed,
+  random-number settings and effective input parameters.
 
 - `infoDesign` is a list with information on the design parameters.
 
 - `fieldBook` is a data frame with the CRD field book.
+
+## Details
+
+The result records effective inputs and the resolved seed in
+`metadata$parameters`. Under the same package versions and RNG settings,
+rebuild a result `x` with `do.call(CRD, x$metadata$parameters)`. Data
+inputs are recorded after the existing column selection and
+normalization.
 
 ## References
 
@@ -71,7 +90,7 @@ crd1 <- CRD(
   reps = 5,
   plotNumber = 101,
   seed = 1987,
-  locationName = "Fargo"
+  locationNames = "Fargo"
 )
 crd1$infoDesign
 #> $numberofTreatments
@@ -112,7 +131,7 @@ crd2 <- CRD(
   reps = 6,
   plotNumber = 1001,
   seed = 1654,
-  locationName = "Fargo"
+  locationNames = "Fargo"
 )
 crd2$infoDesign
 #> $numberofTreatments
@@ -137,16 +156,16 @@ crd2$infoDesign
 #> 
 head(crd2$fieldBook, 10)
 #>    ID LOCATION PLOT REP TREATMENT
-#> 1   1    Fargo 1001   6    Wheat3
-#> 2   2    Fargo 1002   2    Wheat8
-#> 3   3    Fargo 1003   2    Wheat2
-#> 4   4    Fargo 1004   4    Wheat4
-#> 5   5    Fargo 1005   1    Wheat1
+#> 1   1    Fargo 1001   6    Wheat8
+#> 2   2    Fargo 1002   2    Wheat2
+#> 3   3    Fargo 1003   2    Wheat6
+#> 4   4    Fargo 1004   4   Wheat11
+#> 5   5    Fargo 1005   1   Wheat11
 #> 6   6    Fargo 1006   1    Wheat4
 #> 7   7    Fargo 1007   1   Wheat13
 #> 8   8    Fargo 1008   1    Wheat1
-#> 9   9    Fargo 1009   6   Wheat15
-#> 10 10    Fargo 1010   4    Wheat7
+#> 9   9    Fargo 1009   6    Wheat5
+#> 10 10    Fargo 1010   4    Wheat9
 
 # Example 3: Generates a CRD design with 12 treatments and 4 reps each.
 # In this case, we show how to use the option data.
@@ -165,7 +184,7 @@ crd3 <- CRD(
   reps = NULL,
   plotNumber = 2001,
   seed = 1655,
-  locationName = "Cali",
+  locationNames = "Cali",
   data = treatment_list
 )
 crd3$infoDesign

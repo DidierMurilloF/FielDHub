@@ -1,7 +1,7 @@
   
   
 
-![](reference/figures/icon.gif)
+![FielDHub logo](reference/figures/icon.gif)
 
   
   
@@ -22,7 +22,19 @@ For more details and examples of all functions present in the FielDHub
 package. Please, go to
 <https://didiermurillof.github.io/FielDHub/reference/index.html>.
 
-![](reference/figures/FielDHub_Infographic.jpg)
+## Version 1.6.0
+
+The Shiny app and R package share one release version. This release
+retains the original input panels, adds native plot previews and
+consistent tab-local loading, and simplifies downloads. Required app
+dependencies install with the package; no golem configuration is needed.
+See the [release
+notes](https://didiermurillof.github.io/FielDHub/news/index.md) for
+migration guidance and scientific corrections that may affect existing
+scripts or seeded results.
+
+![FielDHub design families and
+workflows](reference/figures/FielDHub_Infographic.jpg)
 
 ## Usage
 
@@ -44,14 +56,16 @@ representing 12.5% of the total number of experimental plots. An option
 to include filler plots is also available for fields where the number of
 experimental plots does not equal the number of available field plots.
 
-![](reference/figures/DExample.PNG)
+![Diagonal arrangement with replicated
+checks](reference/figures/DExample.jpg)
 
 The figure above shows a map of an experiment randomized along with
 multiple experiments (three) and checks on diagonals. Distinctively
 colored check plots are replicated throughout the field in a systematic
 diagonal arrangement.
 
-![](reference/figures/multiple_expts.png)
+![Three experiments arranged in one
+field](reference/figures/multiple_expts.jpg)
 
 The figure above shows the layout for the three experiments in the
 field.
@@ -69,15 +83,15 @@ app. In this case, the random seed is 1249.
 ``` r
 
 diagonal <- diagonal_arrangement(
-  nrows = 16, 
-  ncols = 20, 
-  lines = 280, 
-  checks = 4, 
-  plotNumber = 101, 
-  splitBy = "row", 
-  seed = 1249, 
-  kindExpt = "DBUDC", 
-  blocks = c(100, 100, 80), 
+  nrows = 16,
+  ncols = 20,
+  lines = 280,
+  checks = 4,
+  plotNumber = 101,
+  splitBy = "row",
+  seed = 1249,
+  kindExpt = "DBUDC",
+  blocks = c(100, 100, 80),
   exptName = c("Expt1", "Expt2", "Expt3")
 )
 ```
@@ -88,9 +102,9 @@ as follow,
 
 ``` r
 print(diagonal)
-Un-replicated Diagonal Arrangement Design 
+Un-replicated Diagonal Arrangement Design
 
-Information on the design parameters: 
+Information on the design parameters:
 List of 11
  $ rows          : num 16
  $ columns       : num 20
@@ -106,18 +120,18 @@ List of 11
  $ fillers       : num 0
  $ seed          : num 1249
 
- 10 First observations of the data frame with the diagonal_arrangement field book: 
+ 10 First observations of the data frame with the diagonal_arrangement field book:
    ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 Expt1        1 2023  101   1      1      0    42    Gen-42
-2   2 Expt1        1 2023  102   1      2      0    23    Gen-23
-3   3 Expt1        1 2023  103   1      3      0    10    Gen-10
-4   4 Expt1        1 2023  104   1      4      0    45    Gen-45
-5   5 Expt1        1 2023  105   1      5      0    51    Gen-51
-6   6 Expt1        1 2023  106   1      6      0    13    Gen-13
-7   7 Expt1        1 2023  107   1      7      3     3   Check-3
-8   8 Expt1        1 2023  108   1      8      0    43    Gen-43
-9   9 Expt1        1 2023  109   1      9      0    84    Gen-84
-10 10 Expt1        1 2023  110   1     10      0   102   Gen-102
+1   1 Expt1        1 2026  101   1      1      0    42    Gen-42
+2   2 Expt1        1 2026  102   1      2      0    23    Gen-23
+3   3 Expt1        1 2026  103   1      3      0    10    Gen-10
+4   4 Expt1        1 2026  104   1      4      0    45    Gen-45
+5   5 Expt1        1 2026  105   1      5      0    51    Gen-51
+6   6 Expt1        1 2026  106   1      6      0    13    Gen-13
+7   7 Expt1        1 2026  107   1      7      3     3   Check-3
+8   8 Expt1        1 2026  108   1      8      0    43    Gen-43
+9   9 Expt1        1 2026  109   1      9      0    84    Gen-84
+10 10 Expt1        1 2026  110   1     10      0   102   Gen-102
 ```
 
 First 12 rows of the fieldbook,
@@ -125,18 +139,18 @@ First 12 rows of the fieldbook,
 ``` r
 head(diagonal$fieldBook, 12)
    ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 Expt1        1 2023  101   1      1      0    42    Gen-42
-2   2 Expt1        1 2023  102   1      2      0    23    Gen-23
-3   3 Expt1        1 2023  103   1      3      0    10    Gen-10
-4   4 Expt1        1 2023  104   1      4      0    45    Gen-45
-5   5 Expt1        1 2023  105   1      5      0    51    Gen-51
-6   6 Expt1        1 2023  106   1      6      0    13    Gen-13
-7   7 Expt1        1 2023  107   1      7      3     3   Check-3
-8   8 Expt1        1 2023  108   1      8      0    43    Gen-43
-9   9 Expt1        1 2023  109   1      9      0    84    Gen-84
-10 10 Expt1        1 2023  110   1     10      0   102   Gen-102
-11 11 Expt1        1 2023  111   1     11      0    89    Gen-89
-12 12 Expt1        1 2023  112   1     12      0    75    Gen-75
+1   1 Expt1        1 2026  101   1      1      0    42    Gen-42
+2   2 Expt1        1 2026  102   1      2      0    23    Gen-23
+3   3 Expt1        1 2026  103   1      3      0    10    Gen-10
+4   4 Expt1        1 2026  104   1      4      0    45    Gen-45
+5   5 Expt1        1 2026  105   1      5      0    51    Gen-51
+6   6 Expt1        1 2026  106   1      6      0    13    Gen-13
+7   7 Expt1        1 2026  107   1      7      3     3   Check-3
+8   8 Expt1        1 2026  108   1      8      0    43    Gen-43
+9   9 Expt1        1 2026  109   1      9      0    84    Gen-84
+10 10 Expt1        1 2026  110   1     10      0   102   Gen-102
+11 11 Expt1        1 2026  111   1     11      0    89    Gen-89
+12 12 Expt1        1 2026  112   1     12      0    75    Gen-75
 ```
 
 Users can plot the layout design from
@@ -149,7 +163,8 @@ using the function
 plot(diagonal)
 ```
 
-![](reference/figures/README-unnamed-chunk-5-1.png)
+![Native plot of the diagonal arrangement with colored
+checks](reference/figures/README-unnamed-chunk-5-1.png)
 
 In the figure, salmon, green, and blue shade the blocks of unreplicated
 experiments, while distinctively colored check plots are replicated
@@ -177,7 +192,8 @@ plots containing 75 entries appearing two times each, and 138 entries
 only appearing once. This field trials is arranged in a field of 16 rows
 by 18 columns.
 
-![](reference/figures/prep_shiny.png)
+![Partially replicated field layout in the Shiny
+app](reference/figures/prep_shiny.jpg)
 
 In the figure above, green plots contain replicated entries, and the
 other plots contain entries that only appear once.
@@ -195,11 +211,11 @@ use the same random seed, which, in this case, is 77.
 ``` r
 
 pREP <- partially_replicated(
-  nrows = 16, 
-  ncols = 18,  
+  nrows = 16,
+  ncols = 18,
   repGens = c(138,75),
   repUnits = c(1,2),
-  planter = "serpentine", 
+  planter = "serpentine",
   plotNumber = 1,
   exptName = "ExptA",
   locationNames = "FARGO",
@@ -213,54 +229,60 @@ as follows,
 
 ``` r
 print(pREP)
-Partially Replicated Design 
+Partially Replicated Design
 
-
- Replications within location: 
+Replications within location:
   LOCATION Replicated Unreplicated
 1    FARGO         75          138
 
- Information on the design parameters: 
-List of 7
- $ rows             : num 16
- $ columns          : num 18
- $ min_distance     : num 8
- $ incidence_in_rows: num 3
- $ locations        : num 1
- $ planter          : chr "serpentine"
- $ seed             : num 77
+ Information on the design parameters:
+List of 10
+ $ rows              : num 16
+ $ columns           : num 18
+ $ min_distance      : num 5
+ $ incidence_in_rows : num 1
+ $ locations         : num 1
+ $ planter           : chr "serpentine"
+ $ experimental_plots: num 288
+ $ field_capacity    : num 288
+ $ fillers           : num 0
+ $ seed              : num 77
 
- 10 First observations of the data frame with the partially_replicated field book: 
-   ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 ExptA    FARGO 2023    1   1      1     30    30       G30
-2   2 ExptA    FARGO 2023    2   1      2      0   192      G192
-3   3 ExptA    FARGO 2023    3   1      3     44    44       G44
-4   4 ExptA    FARGO 2023    4   1      4     66    66       G66
-5   5 ExptA    FARGO 2023    5   1      5      0    78       G78
-6   6 ExptA    FARGO 2023    6   1      6      0   186      G186
-7   7 ExptA    FARGO 2023    7   1      7     34    34       G34
-8   8 ExptA    FARGO 2023    8   1      8      0    86       G86
-9   9 ExptA    FARGO 2023    9   1      9     37    37       G37
-10 10 ExptA    FARGO 2023   10   1     10     55    55       G55
+ 10 First observations of the data frame with the partially_replicated field book:
+# A tibble: 10 × 11
+      ID EXPT  LOCATION YEAR   PLOT   ROW COLUMN   REP CHECKS ENTRY TREATMENT
+   <int> <chr> <chr>    <chr> <dbl> <int>  <int> <int>  <dbl> <dbl> <chr>
+ 1     1 ExptA FARGO    2026      1     1      1     1      0    69 G69
+ 2     2 ExptA FARGO    2026      2     1      2     1    158   158 G158
+ 3     3 ExptA FARGO    2026      3     1      3     1    157   157 G157
+ 4     4 ExptA FARGO    2026      4     1      4     1    201   201 G201
+ 5     5 ExptA FARGO    2026      5     1      5     1      0    79 G79
+ 6     6 ExptA FARGO    2026      6     1      6     1    213   213 G213
+ 7     7 ExptA FARGO    2026      7     1      7     1      0     1 G1
+ 8     8 ExptA FARGO    2026      8     1      8     1      0   103 G103
+ 9     9 ExptA FARGO    2026      9     1      9     1      0    37 G37
+10    10 ExptA FARGO    2026     10     1     10     1      0    12 G12
 ```
 
 First 12 rows of the fieldbook,
 
 ``` r
 head(pREP$fieldBook, 12)
-   ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 ExptA    FARGO 2023    1   1      1     30    30       G30
-2   2 ExptA    FARGO 2023    2   1      2      0   192      G192
-3   3 ExptA    FARGO 2023    3   1      3     44    44       G44
-4   4 ExptA    FARGO 2023    4   1      4     66    66       G66
-5   5 ExptA    FARGO 2023    5   1      5      0    78       G78
-6   6 ExptA    FARGO 2023    6   1      6      0   186      G186
-7   7 ExptA    FARGO 2023    7   1      7     34    34       G34
-8   8 ExptA    FARGO 2023    8   1      8      0    86       G86
-9   9 ExptA    FARGO 2023    9   1      9     37    37       G37
-10 10 ExptA    FARGO 2023   10   1     10     55    55       G55
-11 11 ExptA    FARGO 2023   11   1     11      0   125      G125
-12 12 ExptA    FARGO 2023   12   1     12      0   159      G159
+# A tibble: 12 × 11
+      ID EXPT  LOCATION YEAR   PLOT   ROW COLUMN   REP CHECKS ENTRY TREATMENT
+   <int> <chr> <chr>    <chr> <dbl> <int>  <int> <int>  <dbl> <dbl> <chr>
+ 1     1 ExptA FARGO    2026      1     1      1     1      0    69 G69
+ 2     2 ExptA FARGO    2026      2     1      2     1    158   158 G158
+ 3     3 ExptA FARGO    2026      3     1      3     1    157   157 G157
+ 4     4 ExptA FARGO    2026      4     1      4     1    201   201 G201
+ 5     5 ExptA FARGO    2026      5     1      5     1      0    79 G79
+ 6     6 ExptA FARGO    2026      6     1      6     1    213   213 G213
+ 7     7 ExptA FARGO    2026      7     1      7     1      0     1 G1
+ 8     8 ExptA FARGO    2026      8     1      8     1      0   103 G103
+ 9     9 ExptA FARGO    2026      9     1      9     1      0    37 G37
+10    10 ExptA FARGO    2026     10     1     10     1      0    12 G12
+11    11 ExptA FARGO    2026     11     1     11     1      0    99 G99
+12    12 ExptA FARGO    2026     12     1     12     1      0    50 G50
 ```
 
 Users can plot the layout design from
@@ -273,7 +295,8 @@ using the function
 plot(pREP)
 ```
 
-![](reference/figures/README-unnamed-chunk-9-1.png)
+![Native plot showing replicated and unreplicated p-rep
+entries](reference/figures/README-unnamed-chunk-9-1.png)
 
 To see more examples, please go to
 <https://didiermurillof.github.io/FielDHub/articles/partially_replicated.html>

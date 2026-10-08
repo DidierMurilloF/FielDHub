@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">FielDHub</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,7 +33,10 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/sparse_allocation.html">Sparse Allocation/Testing</a></li>
+<li><a class="dropdown-item" href="../articles/scientific_validation.html">Scientific Validation and Computational Limits</a></li>
+    <li><a class="dropdown-item" href="../articles/architecture.html">Architecture and Compatibility Contracts</a></li>
+    <li><a class="dropdown-item" href="../articles/extending_fieldhub.html">Adding Designs and Formats</a></li>
+    <li><a class="dropdown-item" href="../articles/sparse_allocation.html">Sparse Allocation/Testing</a></li>
     <li><a class="dropdown-item" href="../articles/diagonal_arrangement.html">Unreplicated Diagonal Arrangement Design</a></li>
     <li><a class="dropdown-item" href="../articles/optimized_arrangement.html">Unreplicated Optimized Arrangement Design</a></li>
     <li><a class="dropdown-item" href="../articles/RCBD_augmented.html">Augmented Randomized Complete Block Design</a></li>
@@ -295,7 +298,7 @@ this:</p>
 <code class="sourceCode R"><span><span class="va">rcd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/row_column.html">row_column</a></span><span class="op">(</span></span>
 <span>  t <span class="op">=</span> <span class="fl">45</span>,</span>
 <span>  nrows <span class="op">=</span> <span class="fl">5</span>,</span>
-<span>  r <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  reps <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  l <span class="op">=</span> <span class="fl">1</span>, </span>
 <span>  plotNumber <span class="op">=</span> <span class="fl">101</span>, </span>
 <span>  locationNames <span class="op">=</span> <span class="st">"FARGO"</span>,</span>
@@ -314,7 +317,7 @@ design,</p>
 <li>
 <code>nrows = 5</code> is the number of rows.</li>
 <li>
-<code>r=3</code> is the number of reps</li>
+<code>reps =3</code> is the number of reps</li>
 <li>
 <code>l = 1</code> is the number of locations.</li>
 <li>
@@ -341,8 +344,8 @@ Efficiency of design:
           Level Blocks D-Efficiency A-Efficiency   A-Bound
 1           Rep      3    1.0000000    1.0000000 1.0000000
 2           Row     15    0.8945848    0.8781404 0.8842892
-3        Column     27    0.7903339    0.7593720 0.7674419
-4 Row-by-Column     NA    0.6987567    0.6695097        NA
+3        Column     27    0.7905927    0.7602577 0.7674419
+4 Row-by-Column     NA    0.6985580    0.6690700        NA
 
 Information on the design parameters: 
 List of 8
@@ -357,16 +360,16 @@ List of 8
 
  10 First observations of the data frame with the row_column field book: 
    ID LOCATION PLOT REP ROW COLUMN ENTRY TREATMENT
-1   1    FARGO  101   1   1      1    30      G-30
-2   2    FARGO  102   1   1      2    27      G-27
-3   3    FARGO  103   1   1      3     9       G-9
-4   4    FARGO  104   1   1      4    15      G-15
-5   5    FARGO  105   1   1      5    21      G-21
-6   6    FARGO  106   1   1      6    31      G-31
-7   7    FARGO  107   1   1      7    25      G-25
+1   1    FARGO  101   1   1      1    15      G-15
+2   2    FARGO  102   1   1      2    18      G-18
+3   3    FARGO  103   1   1      3    37      G-37
+4   4    FARGO  104   1   1      4    25      G-25
+5   5    FARGO  105   1   1      5    43      G-43
+6   6    FARGO  106   1   1      6    34      G-34
+7   7    FARGO  107   1   1      7    42      G-42
 8   8    FARGO  108   1   1      8    16      G-16
 9   9    FARGO  109   1   1      9    22      G-22
-10 10    FARGO  110   1   2      1    40      G-40</code></pre>
+10 10    FARGO  110   1   2      1    30      G-30</code></pre>
 </div>
 <div class="section level3">
 <h3 id="access-to-rcd-object">Access to <code>rcd</code> object<a class="anchor" aria-label="anchor" href="#access-to-rcd-object"></a>
@@ -386,16 +389,16 @@ book has columns for <code>ID</code>, <code>LOCATION</code>,
 <code class="sourceCode R"><span><span class="va">field_book</span> <span class="op">&lt;-</span> <span class="va">rcd</span><span class="op">$</span><span class="va">fieldBook</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">rcd</span><span class="op">$</span><span class="va">fieldBook</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
 <pre><code>   ID LOCATION PLOT REP ROW COLUMN ENTRY TREATMENT
-1   1    FARGO  101   1   1      1    30      G-30
-2   2    FARGO  102   1   1      2    27      G-27
-3   3    FARGO  103   1   1      3     9       G-9
-4   4    FARGO  104   1   1      4    15      G-15
-5   5    FARGO  105   1   1      5    21      G-21
-6   6    FARGO  106   1   1      6    31      G-31
-7   7    FARGO  107   1   1      7    25      G-25
+1   1    FARGO  101   1   1      1    15      G-15
+2   2    FARGO  102   1   1      2    18      G-18
+3   3    FARGO  103   1   1      3    37      G-37
+4   4    FARGO  104   1   1      4    25      G-25
+5   5    FARGO  105   1   1      5    43      G-43
+6   6    FARGO  106   1   1      6    34      G-34
+7   7    FARGO  107   1   1      7    42      G-42
 8   8    FARGO  108   1   1      8    16      G-16
 9   9    FARGO  109   1   1      9    22      G-22
-10 10    FARGO  110   1   2      1    40      G-40</code></pre>
+10 10    FARGO  110   1   2      1    30      G-30</code></pre>
 </div>
 <div class="section level3">
 <h3 id="plot-the-field-layout">Plot the field layout<a class="anchor" aria-label="anchor" href="#plot-the-field-layout"></a>
@@ -433,14 +436,14 @@ one-stage design above reports:</p>
 <span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>          Level Blocks D<span class="sc">-</span>Efficiency A<span class="sc">-</span>Efficiency   A<span class="sc">-</span>Bound</span>
 <span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="dv">1</span>           Rep      <span class="dv">3</span>    <span class="fl">1.0000000</span>    <span class="fl">1.0000000</span> <span class="fl">1.0000000</span></span>
 <span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="dv">2</span>           Row     <span class="dv">15</span>    <span class="fl">0.8945848</span>    <span class="fl">0.8781404</span> <span class="fl">0.8842892</span></span>
-<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="dv">3</span>        Column     <span class="dv">27</span>    <span class="fl">0.7903339</span>    <span class="fl">0.7593720</span> <span class="fl">0.7674419</span></span>
-<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="dv">4</span> Row<span class="sc">-</span>by<span class="sc">-</span>Column     <span class="cn">NA</span>    <span class="fl">0.6987567</span>    <span class="fl">0.6695097</span>        <span class="cn">NA</span></span></code></pre></div>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="dv">3</span>        Column     <span class="dv">27</span>    <span class="fl">0.7905927</span>    <span class="fl">0.7602577</span> <span class="fl">0.7674419</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="dv">4</span> Row<span class="sc">-</span>by<span class="sc">-</span>Column     <span class="cn">NA</span>    <span class="fl">0.6985580</span>    <span class="fl">0.6690700</span>        <span class="cn">NA</span></span></code></pre></div>
 <p>while the historical two-stage method typically reports a lower joint
 <code>Row-by-Column</code> A-Efficiency:</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>rcd_twostage <span class="ot">&lt;-</span> <span class="fu">row_column</span>(</span>
 <span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>  <span class="at">t =</span> <span class="dv">45</span>,</span>
 <span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>  <span class="at">nrows =</span> <span class="dv">5</span>,</span>
-<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>  <span class="at">r =</span> <span class="dv">3</span>,</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>  <span class="at">reps =</span> <span class="dv">3</span>,</span>
 <span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>  <span class="at">l =</span> <span class="dv">1</span>,</span>
 <span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>  <span class="at">plotNumber =</span> <span class="dv">101</span>,</span>
 <span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>  <span class="at">locationNames =</span> <span class="st">"FARGO"</span>,</span>
@@ -451,9 +454,9 @@ one-stage design above reports:</p>
 <span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a>rcd_twostage<span class="sc">$</span>blocksModel[[<span class="dv">1</span>]]</span>
 <span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a>          Level Blocks D<span class="sc">-</span>Efficiency A<span class="sc">-</span>Efficiency   A<span class="sc">-</span>Bound</span>
 <span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a><span class="dv">1</span>           Rep      <span class="dv">3</span>    <span class="fl">1.0000000</span>    <span class="fl">1.0000000</span> <span class="fl">1.0000000</span></span>
-<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a><span class="dv">2</span>           Row     <span class="dv">15</span>    <span class="fl">0.8933189</span>    <span class="fl">0.8748190</span> <span class="fl">0.8842892</span></span>
-<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a><span class="dv">3</span>        Column     <span class="dv">27</span>    <span class="fl">0.7912269</span>    <span class="fl">0.7624155</span> <span class="fl">0.7674419</span></span>
-<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a><span class="dv">4</span> Row<span class="sc">-</span>by<span class="sc">-</span>Column     <span class="cn">NA</span>    <span class="fl">0.6836307</span>    <span class="fl">0.6347911</span>        <span class="cn">NA</span></span></code></pre></div>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a><span class="dv">2</span>           Row     <span class="dv">15</span>    <span class="fl">0.8933026</span>    <span class="fl">0.8747622</span> <span class="fl">0.8842892</span></span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a><span class="dv">3</span>        Column     <span class="dv">27</span>    <span class="fl">0.7912410</span>    <span class="fl">0.7624412</span> <span class="fl">0.7674419</span></span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a><span class="dv">4</span> Row<span class="sc">-</span>by<span class="sc">-</span>Column     <span class="cn">NA</span>    <span class="fl">0.6834216</span>    <span class="fl">0.6344528</span>        <span class="cn">NA</span></span></code></pre></div>
 <p>Setting <code>latinize = TRUE</code> (only available with
 <code>method = "onestage"</code>) optimizes the rows and columns as
 crossed factors that are shared across the replicates, so that a
@@ -464,7 +467,7 @@ replicates.</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>rcd_latinized <span class="ot">&lt;-</span> <span class="fu">row_column</span>(</span>
 <span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>  <span class="at">t =</span> <span class="dv">45</span>,</span>
 <span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>  <span class="at">nrows =</span> <span class="dv">5</span>,</span>
-<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>  <span class="at">r =</span> <span class="dv">3</span>,</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>  <span class="at">reps =</span> <span class="dv">3</span>,</span>
 <span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>  <span class="at">l =</span> <span class="dv">1</span>,</span>
 <span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>  <span class="at">plotNumber =</span> <span class="dv">101</span>,</span>
 <span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>  <span class="at">locationNames =</span> <span class="st">"FARGO"</span>,</span>
@@ -477,8 +480,8 @@ replicates.</p>
 <span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a>          Level Blocks D<span class="sc">-</span>Efficiency A<span class="sc">-</span>Efficiency   A<span class="sc">-</span>Bound</span>
 <span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a><span class="dv">1</span>           Rep      <span class="dv">3</span>    <span class="fl">1.0000000</span>    <span class="fl">1.0000000</span> <span class="fl">1.0000000</span></span>
 <span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a><span class="dv">2</span>           Row      <span class="dv">5</span>    <span class="fl">0.9835497</span>    <span class="fl">0.9821140</span> <span class="fl">0.9821140</span></span>
-<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a><span class="dv">3</span>        Column      <span class="dv">9</span>    <span class="fl">0.9488372</span>    <span class="fl">0.9423564</span> <span class="fl">0.9425511</span></span>
-<span id="cb10-18"><a href="#cb10-18" tabindex="-1"></a><span class="dv">4</span> Row<span class="sc">-</span>by<span class="sc">-</span>Column     <span class="cn">NA</span>    <span class="fl">0.9330012</span>    <span class="fl">0.9259216</span>        <span class="cn">NA</span></span></code></pre></div>
+<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a><span class="dv">3</span>        Column      <span class="dv">9</span>    <span class="fl">0.9487597</span>    <span class="fl">0.9421601</span> <span class="fl">0.9425511</span></span>
+<span id="cb10-18"><a href="#cb10-18" tabindex="-1"></a><span class="dv">4</span> Row<span class="sc">-</span>by<span class="sc">-</span>Column     <span class="cn">NA</span>    <span class="fl">0.9328015</span>    <span class="fl">0.9254515</span>        <span class="cn">NA</span></span></code></pre></div>
 <p>Because a latinized design optimizes the rows and columns as crossed
 factors shared across the replicates, its <code>Row-by-Column</code>
 efficiency is computed on that crossed model and is therefore not

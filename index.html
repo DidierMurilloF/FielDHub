@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">FielDHub</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,7 +35,10 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="articles/sparse_allocation.html">Sparse Allocation/Testing</a></li>
+<li><a class="dropdown-item" href="articles/scientific_validation.html">Scientific Validation and Computational Limits</a></li>
+    <li><a class="dropdown-item" href="articles/architecture.html">Architecture and Compatibility Contracts</a></li>
+    <li><a class="dropdown-item" href="articles/extending_fieldhub.html">Adding Designs and Formats</a></li>
+    <li><a class="dropdown-item" href="articles/sparse_allocation.html">Sparse Allocation/Testing</a></li>
     <li><a class="dropdown-item" href="articles/diagonal_arrangement.html">Unreplicated Diagonal Arrangement Design</a></li>
     <li><a class="dropdown-item" href="articles/optimized_arrangement.html">Unreplicated Optimized Arrangement Design</a></li>
     <li><a class="dropdown-item" href="articles/RCBD_augmented.html">Augmented Randomized Complete Block Design</a></li>
@@ -81,7 +84,7 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><p><br><br></p>
-<p><img src="reference/figures/icon.gif" width="140px" align="left"></p>
+<p><img src="reference/figures/icon.gif" alt="FielDHub logo" width="140px" align="left"></p>
 <p><br><br></p>
 <div class="section level3">
 <h3 id="id_--fieldhub">  FielDHub<a class="anchor" aria-label="anchor" href="#id_--fieldhub"></a>
@@ -93,7 +96,12 @@
 </h3>
 <p>FielDHub is an R package/shiny design of experiments (DOE) app that aids in the creation of traditional, un-replicated, augmented and partially-replicated designs applied to agriculture, plant breeding, forestry, animal and biological sciences.</p>
 <p>For more details and examples of all functions present in the FielDHub package. Please, go to <a href="https://didiermurillof.github.io/FielDHub/reference/index.html" class="uri">https://didiermurillof.github.io/FielDHub/reference/index.html</a>.</p>
-<p><img src="reference/figures/FielDHub_Infographic.jpg" align="center"></p>
+</div>
+<div class="section level2">
+<h2 id="version-160">Version 1.6.0<a class="anchor" aria-label="anchor" href="#version-160"></a>
+</h2>
+<p>The Shiny app and R package share one release version. This release retains the original input panels, adds native plot previews and consistent tab-local loading, and simplifies downloads. Required app dependencies install with the package; no golem configuration is needed. See the <a href="news/index.html">release notes</a> for migration guidance and scientific corrections that may affect existing scripts or seeded results.</p>
+<p><img src="reference/figures/FielDHub_Infographic.jpg" alt="FielDHub design families and workflows" align="center"></p>
 </div>
 <div class="section level2">
 <h2 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
@@ -106,9 +114,9 @@
 <h3 id="diagonal-arrangement-example">Diagonal Arrangement Example<a class="anchor" aria-label="anchor" href="#diagonal-arrangement-example"></a>
 </h3>
 <p>A project needs to test 280 genotypes in a field containing 16 rows and 20 columns of plots. In this example, these 280 genotypes are divided among three different experiments. In addition, four checks are included in a systematic diagonal arrangement across experiments to fill 40 plots representing 12.5% of the total number of experimental plots. An option to include filler plots is also available for fields where the number of experimental plots does not equal the number of available field plots.</p>
-<p><img src="reference/figures/DExample.PNG" align="center"></p>
+<p><img src="reference/figures/DExample.jpg" alt="Diagonal arrangement with replicated checks" align="center"></p>
 <p>The figure above shows a map of an experiment randomized along with multiple experiments (three) and checks on diagonals. Distinctively colored check plots are replicated throughout the field in a systematic diagonal arrangement.</p>
-<p><img src="reference/figures/multiple_expts.png" align="center"></p>
+<p><img src="reference/figures/multiple_expts.jpg" alt="Three experiments arranged in one field" align="center"></p>
 <p>The figure above shows the layout for the three experiments in the field.</p>
 </div>
 <div class="section level3">
@@ -118,22 +126,22 @@
 <p>To illustrate using FielDHub to build experimental designs through R code, the design produced in the R Shiny interface described above can also be created using the function <code><a href="reference/diagonal_arrangement.html">diagonal_arrangement()</a></code> in the R script below. Note, that to obtain identical results, users must include the same random seed in the script as was used in the Shiny app. In this case, the random seed is 1249.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">diagonal</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/diagonal_arrangement.html">diagonal_arrangement</a></span><span class="op">(</span></span>
-<span>  nrows <span class="op">=</span> <span class="fl">16</span>, </span>
-<span>  ncols <span class="op">=</span> <span class="fl">20</span>, </span>
-<span>  lines <span class="op">=</span> <span class="fl">280</span>, </span>
-<span>  checks <span class="op">=</span> <span class="fl">4</span>, </span>
-<span>  plotNumber <span class="op">=</span> <span class="fl">101</span>, </span>
-<span>  splitBy <span class="op">=</span> <span class="st">"row"</span>, </span>
-<span>  seed <span class="op">=</span> <span class="fl">1249</span>, </span>
-<span>  kindExpt <span class="op">=</span> <span class="st">"DBUDC"</span>, </span>
-<span>  blocks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">100</span>, <span class="fl">80</span><span class="op">)</span>, </span>
+<span>  nrows <span class="op">=</span> <span class="fl">16</span>,</span>
+<span>  ncols <span class="op">=</span> <span class="fl">20</span>,</span>
+<span>  lines <span class="op">=</span> <span class="fl">280</span>,</span>
+<span>  checks <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>  plotNumber <span class="op">=</span> <span class="fl">101</span>,</span>
+<span>  splitBy <span class="op">=</span> <span class="st">"row"</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">1249</span>,</span>
+<span>  kindExpt <span class="op">=</span> <span class="st">"DBUDC"</span>,</span>
+<span>  blocks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">100</span>, <span class="fl">80</span><span class="op">)</span>,</span>
 <span>  exptName <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Expt1"</span>, <span class="st">"Expt2"</span>, <span class="st">"Expt3"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Users can print the returned values from <code><a href="reference/diagonal_arrangement.html">diagonal_arrangement()</a></code> as follow,</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">print</span>(diagonal)</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>Un<span class="sc">-</span>replicated Diagonal Arrangement Design </span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>Un<span class="sc">-</span>replicated Diagonal Arrangement Design</span>
 <span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a></span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>Information on the design parameters<span class="sc">:</span> </span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>Information on the design parameters<span class="sc">:</span></span>
 <span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>List of <span class="dv">11</span></span>
 <span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a> <span class="sc">$</span> rows          <span class="sc">:</span> num <span class="dv">16</span></span>
 <span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a> <span class="sc">$</span> columns       <span class="sc">:</span> num <span class="dv">20</span></span>
@@ -149,37 +157,37 @@
 <span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a> <span class="sc">$</span> fillers       <span class="sc">:</span> num <span class="dv">0</span></span>
 <span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a> <span class="sc">$</span> seed          <span class="sc">:</span> num <span class="dv">1249</span></span>
 <span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a></span>
-<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a> <span class="dv">10</span> First observations of the data frame with the diagonal_arrangement field book<span class="sc">:</span> </span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a> <span class="dv">10</span> First observations of the data frame with the diagonal_arrangement field book<span class="sc">:</span></span>
 <span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a>   ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT</span>
-<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="dv">1</span>   <span class="dv">1</span> Expt1        <span class="dv">1</span> <span class="dv">2023</span>  <span class="dv">101</span>   <span class="dv">1</span>      <span class="dv">1</span>      <span class="dv">0</span>    <span class="dv">42</span>    Gen<span class="dv">-42</span></span>
-<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="dv">2</span>   <span class="dv">2</span> Expt1        <span class="dv">1</span> <span class="dv">2023</span>  <span class="dv">102</span>   <span class="dv">1</span>      <span class="dv">2</span>      <span class="dv">0</span>    <span class="dv">23</span>    Gen<span class="dv">-23</span></span>
-<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="dv">3</span>   <span class="dv">3</span> Expt1        <span class="dv">1</span> <span class="dv">2023</span>  <span class="dv">103</span>   <span class="dv">1</span>      <span class="dv">3</span>      <span class="dv">0</span>    <span class="dv">10</span>    Gen<span class="dv">-10</span></span>
-<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="dv">4</span>   <span class="dv">4</span> Expt1        <span class="dv">1</span> <span class="dv">2023</span>  <span class="dv">104</span>   <span class="dv">1</span>      <span class="dv">4</span>      <span class="dv">0</span>    <span class="dv">45</span>    Gen<span class="dv">-45</span></span>
-<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a><span class="dv">5</span>   <span class="dv">5</span> Expt1        <span class="dv">1</span> <span class="dv">2023</span>  <span class="dv">105</span>   <span class="dv">1</span>      <span class="dv">5</span>      <span class="dv">0</span>    <span class="dv">51</span>    Gen<span class="dv">-51</span></span>
-<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a><span class="dv">6</span>   <span class="dv">6</span> Expt1        <span class="dv">1</span> <span class="dv">2023</span>  <span class="dv">106</span>   <span class="dv">1</span>      <span class="dv">6</span>      <span class="dv">0</span>    <span class="dv">13</span>    Gen<span class="dv">-13</span></span>
-<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a><span class="dv">7</span>   <span class="dv">7</span> Expt1        <span class="dv">1</span> <span class="dv">2023</span>  <span class="dv">107</span>   <span class="dv">1</span>      <span class="dv">7</span>      <span class="dv">3</span>     <span class="dv">3</span>   Check<span class="dv">-3</span></span>
-<span id="cb3-29"><a href="#cb3-29" tabindex="-1"></a><span class="dv">8</span>   <span class="dv">8</span> Expt1        <span class="dv">1</span> <span class="dv">2023</span>  <span class="dv">108</span>   <span class="dv">1</span>      <span class="dv">8</span>      <span class="dv">0</span>    <span class="dv">43</span>    Gen<span class="dv">-43</span></span>
-<span id="cb3-30"><a href="#cb3-30" tabindex="-1"></a><span class="dv">9</span>   <span class="dv">9</span> Expt1        <span class="dv">1</span> <span class="dv">2023</span>  <span class="dv">109</span>   <span class="dv">1</span>      <span class="dv">9</span>      <span class="dv">0</span>    <span class="dv">84</span>    Gen<span class="dv">-84</span></span>
-<span id="cb3-31"><a href="#cb3-31" tabindex="-1"></a><span class="dv">10</span> <span class="dv">10</span> Expt1        <span class="dv">1</span> <span class="dv">2023</span>  <span class="dv">110</span>   <span class="dv">1</span>     <span class="dv">10</span>      <span class="dv">0</span>   <span class="dv">102</span>   Gen<span class="dv">-102</span></span></code></pre></div>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="dv">1</span>   <span class="dv">1</span> Expt1        <span class="dv">1</span> <span class="dv">2026</span>  <span class="dv">101</span>   <span class="dv">1</span>      <span class="dv">1</span>      <span class="dv">0</span>    <span class="dv">42</span>    Gen<span class="dv">-42</span></span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="dv">2</span>   <span class="dv">2</span> Expt1        <span class="dv">1</span> <span class="dv">2026</span>  <span class="dv">102</span>   <span class="dv">1</span>      <span class="dv">2</span>      <span class="dv">0</span>    <span class="dv">23</span>    Gen<span class="dv">-23</span></span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="dv">3</span>   <span class="dv">3</span> Expt1        <span class="dv">1</span> <span class="dv">2026</span>  <span class="dv">103</span>   <span class="dv">1</span>      <span class="dv">3</span>      <span class="dv">0</span>    <span class="dv">10</span>    Gen<span class="dv">-10</span></span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="dv">4</span>   <span class="dv">4</span> Expt1        <span class="dv">1</span> <span class="dv">2026</span>  <span class="dv">104</span>   <span class="dv">1</span>      <span class="dv">4</span>      <span class="dv">0</span>    <span class="dv">45</span>    Gen<span class="dv">-45</span></span>
+<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a><span class="dv">5</span>   <span class="dv">5</span> Expt1        <span class="dv">1</span> <span class="dv">2026</span>  <span class="dv">105</span>   <span class="dv">1</span>      <span class="dv">5</span>      <span class="dv">0</span>    <span class="dv">51</span>    Gen<span class="dv">-51</span></span>
+<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a><span class="dv">6</span>   <span class="dv">6</span> Expt1        <span class="dv">1</span> <span class="dv">2026</span>  <span class="dv">106</span>   <span class="dv">1</span>      <span class="dv">6</span>      <span class="dv">0</span>    <span class="dv">13</span>    Gen<span class="dv">-13</span></span>
+<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a><span class="dv">7</span>   <span class="dv">7</span> Expt1        <span class="dv">1</span> <span class="dv">2026</span>  <span class="dv">107</span>   <span class="dv">1</span>      <span class="dv">7</span>      <span class="dv">3</span>     <span class="dv">3</span>   Check<span class="dv">-3</span></span>
+<span id="cb3-29"><a href="#cb3-29" tabindex="-1"></a><span class="dv">8</span>   <span class="dv">8</span> Expt1        <span class="dv">1</span> <span class="dv">2026</span>  <span class="dv">108</span>   <span class="dv">1</span>      <span class="dv">8</span>      <span class="dv">0</span>    <span class="dv">43</span>    Gen<span class="dv">-43</span></span>
+<span id="cb3-30"><a href="#cb3-30" tabindex="-1"></a><span class="dv">9</span>   <span class="dv">9</span> Expt1        <span class="dv">1</span> <span class="dv">2026</span>  <span class="dv">109</span>   <span class="dv">1</span>      <span class="dv">9</span>      <span class="dv">0</span>    <span class="dv">84</span>    Gen<span class="dv">-84</span></span>
+<span id="cb3-31"><a href="#cb3-31" tabindex="-1"></a><span class="dv">10</span> <span class="dv">10</span> Expt1        <span class="dv">1</span> <span class="dv">2026</span>  <span class="dv">110</span>   <span class="dv">1</span>     <span class="dv">10</span>      <span class="dv">0</span>   <span class="dv">102</span>   Gen<span class="dv">-102</span></span></code></pre></div>
 <p>First 12 rows of the fieldbook,</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">head</span>(diagonal<span class="sc">$</span>fieldBook, <span class="dv">12</span>)</span>
 <span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>   ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="dv">1</span>   <span class="dv">1</span> Expt1        <span class="dv">1</span> <span class="dv">2023</span>  <span class="dv">101</span>   <span class="dv">1</span>      <span class="dv">1</span>      <span class="dv">0</span>    <span class="dv">42</span>    Gen<span class="dv">-42</span></span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="dv">2</span>   <span class="dv">2</span> Expt1        <span class="dv">1</span> <span class="dv">2023</span>  <span class="dv">102</span>   <span class="dv">1</span>      <span class="dv">2</span>      <span class="dv">0</span>    <span class="dv">23</span>    Gen<span class="dv">-23</span></span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="dv">3</span>   <span class="dv">3</span> Expt1        <span class="dv">1</span> <span class="dv">2023</span>  <span class="dv">103</span>   <span class="dv">1</span>      <span class="dv">3</span>      <span class="dv">0</span>    <span class="dv">10</span>    Gen<span class="dv">-10</span></span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="dv">4</span>   <span class="dv">4</span> Expt1        <span class="dv">1</span> <span class="dv">2023</span>  <span class="dv">104</span>   <span class="dv">1</span>      <span class="dv">4</span>      <span class="dv">0</span>    <span class="dv">45</span>    Gen<span class="dv">-45</span></span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="dv">5</span>   <span class="dv">5</span> Expt1        <span class="dv">1</span> <span class="dv">2023</span>  <span class="dv">105</span>   <span class="dv">1</span>      <span class="dv">5</span>      <span class="dv">0</span>    <span class="dv">51</span>    Gen<span class="dv">-51</span></span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="dv">6</span>   <span class="dv">6</span> Expt1        <span class="dv">1</span> <span class="dv">2023</span>  <span class="dv">106</span>   <span class="dv">1</span>      <span class="dv">6</span>      <span class="dv">0</span>    <span class="dv">13</span>    Gen<span class="dv">-13</span></span>
-<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="dv">7</span>   <span class="dv">7</span> Expt1        <span class="dv">1</span> <span class="dv">2023</span>  <span class="dv">107</span>   <span class="dv">1</span>      <span class="dv">7</span>      <span class="dv">3</span>     <span class="dv">3</span>   Check<span class="dv">-3</span></span>
-<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="dv">8</span>   <span class="dv">8</span> Expt1        <span class="dv">1</span> <span class="dv">2023</span>  <span class="dv">108</span>   <span class="dv">1</span>      <span class="dv">8</span>      <span class="dv">0</span>    <span class="dv">43</span>    Gen<span class="dv">-43</span></span>
-<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="dv">9</span>   <span class="dv">9</span> Expt1        <span class="dv">1</span> <span class="dv">2023</span>  <span class="dv">109</span>   <span class="dv">1</span>      <span class="dv">9</span>      <span class="dv">0</span>    <span class="dv">84</span>    Gen<span class="dv">-84</span></span>
-<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="dv">10</span> <span class="dv">10</span> Expt1        <span class="dv">1</span> <span class="dv">2023</span>  <span class="dv">110</span>   <span class="dv">1</span>     <span class="dv">10</span>      <span class="dv">0</span>   <span class="dv">102</span>   Gen<span class="dv">-102</span></span>
-<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="dv">11</span> <span class="dv">11</span> Expt1        <span class="dv">1</span> <span class="dv">2023</span>  <span class="dv">111</span>   <span class="dv">1</span>     <span class="dv">11</span>      <span class="dv">0</span>    <span class="dv">89</span>    Gen<span class="dv">-89</span></span>
-<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="dv">12</span> <span class="dv">12</span> Expt1        <span class="dv">1</span> <span class="dv">2023</span>  <span class="dv">112</span>   <span class="dv">1</span>     <span class="dv">12</span>      <span class="dv">0</span>    <span class="dv">75</span>    Gen<span class="dv">-75</span></span></code></pre></div>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="dv">1</span>   <span class="dv">1</span> Expt1        <span class="dv">1</span> <span class="dv">2026</span>  <span class="dv">101</span>   <span class="dv">1</span>      <span class="dv">1</span>      <span class="dv">0</span>    <span class="dv">42</span>    Gen<span class="dv">-42</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="dv">2</span>   <span class="dv">2</span> Expt1        <span class="dv">1</span> <span class="dv">2026</span>  <span class="dv">102</span>   <span class="dv">1</span>      <span class="dv">2</span>      <span class="dv">0</span>    <span class="dv">23</span>    Gen<span class="dv">-23</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="dv">3</span>   <span class="dv">3</span> Expt1        <span class="dv">1</span> <span class="dv">2026</span>  <span class="dv">103</span>   <span class="dv">1</span>      <span class="dv">3</span>      <span class="dv">0</span>    <span class="dv">10</span>    Gen<span class="dv">-10</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="dv">4</span>   <span class="dv">4</span> Expt1        <span class="dv">1</span> <span class="dv">2026</span>  <span class="dv">104</span>   <span class="dv">1</span>      <span class="dv">4</span>      <span class="dv">0</span>    <span class="dv">45</span>    Gen<span class="dv">-45</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="dv">5</span>   <span class="dv">5</span> Expt1        <span class="dv">1</span> <span class="dv">2026</span>  <span class="dv">105</span>   <span class="dv">1</span>      <span class="dv">5</span>      <span class="dv">0</span>    <span class="dv">51</span>    Gen<span class="dv">-51</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="dv">6</span>   <span class="dv">6</span> Expt1        <span class="dv">1</span> <span class="dv">2026</span>  <span class="dv">106</span>   <span class="dv">1</span>      <span class="dv">6</span>      <span class="dv">0</span>    <span class="dv">13</span>    Gen<span class="dv">-13</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="dv">7</span>   <span class="dv">7</span> Expt1        <span class="dv">1</span> <span class="dv">2026</span>  <span class="dv">107</span>   <span class="dv">1</span>      <span class="dv">7</span>      <span class="dv">3</span>     <span class="dv">3</span>   Check<span class="dv">-3</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="dv">8</span>   <span class="dv">8</span> Expt1        <span class="dv">1</span> <span class="dv">2026</span>  <span class="dv">108</span>   <span class="dv">1</span>      <span class="dv">8</span>      <span class="dv">0</span>    <span class="dv">43</span>    Gen<span class="dv">-43</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="dv">9</span>   <span class="dv">9</span> Expt1        <span class="dv">1</span> <span class="dv">2026</span>  <span class="dv">109</span>   <span class="dv">1</span>      <span class="dv">9</span>      <span class="dv">0</span>    <span class="dv">84</span>    Gen<span class="dv">-84</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="dv">10</span> <span class="dv">10</span> Expt1        <span class="dv">1</span> <span class="dv">2026</span>  <span class="dv">110</span>   <span class="dv">1</span>     <span class="dv">10</span>      <span class="dv">0</span>   <span class="dv">102</span>   Gen<span class="dv">-102</span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="dv">11</span> <span class="dv">11</span> Expt1        <span class="dv">1</span> <span class="dv">2026</span>  <span class="dv">111</span>   <span class="dv">1</span>     <span class="dv">11</span>      <span class="dv">0</span>    <span class="dv">89</span>    Gen<span class="dv">-89</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="dv">12</span> <span class="dv">12</span> Expt1        <span class="dv">1</span> <span class="dv">2026</span>  <span class="dv">112</span>   <span class="dv">1</span>     <span class="dv">12</span>      <span class="dv">0</span>    <span class="dv">75</span>    Gen<span class="dv">-75</span></span></code></pre></div>
 <p>Users can plot the layout design from <code><a href="reference/diagonal_arrangement.html">diagonal_arrangement()</a></code> using the function <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> as follows,</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">diagonal</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-5-1.png" width="100%" style="display: block; margin: auto;"></p>
+<p><img src="reference/figures/README-unnamed-chunk-5-1.png" alt="Native plot of the diagonal arrangement with colored checks" width="100%" style="display: block; margin: auto;"></p>
 <p>In the figure, salmon, green, and blue shade the blocks of unreplicated experiments, while distinctively colored check plots are replicated throughout the field in a systematic diagonal arrangement.</p>
 <p>The main difference between using the <code>FielDHub</code> Shiny app and using the standalone function <code><a href="reference/diagonal_arrangement.html">diagonal_arrangement()</a></code> is that the standalone function will allocate filler only if it is necessary, while in Shiny App, users can customize the number of fillers if it is needed. In cases where users include fillers, either between or after experiments, the Shiny app is preferable for filling and visualizing all field plots.</p>
 <p>To see more examples, go to <a href="https://didiermurillof.github.io/FielDHub/articles/diagonal_arrangement.html" class="uri">https://didiermurillof.github.io/FielDHub/articles/diagonal_arrangement.html</a></p>
@@ -188,7 +196,7 @@
 <h3 id="partially-replicated-design-example">Partially Replicated Design Example<a class="anchor" aria-label="anchor" href="#partially-replicated-design-example"></a>
 </h3>
 <p>Partially replicated designs are commonly employed in early generation field trials. This type of design is characterized by replication of a portion of the entries, with the remaining entries only appearing once in the experiment. As an example, considered a field trial with 288 plots containing 75 entries appearing two times each, and 138 entries only appearing once. This field trials is arranged in a field of 16 rows by 18 columns.</p>
-<p><img src="reference/figures/prep_shiny.png" align="center"></p>
+<p><img src="reference/figures/prep_shiny.jpg" alt="Partially replicated field layout in the Shiny app" align="center"></p>
 <p>In the figure above, green plots contain replicated entries, and the other plots contain entries that only appear once.</p>
 </div>
 <div class="section level3">
@@ -198,11 +206,11 @@
 <p>Instead of using the Shiny FielDHub app, users can use the standalone FielDHub function <code><a href="reference/partially_replicated.html">partially_replicated()</a></code>. The partially replicated layout described above can be produced through scripting as follows. As noted in the previous example, to obtain identical results between the script and the Shiny app, users need to use the same random seed, which, in this case, is 77.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pREP</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/partially_replicated.html">partially_replicated</a></span><span class="op">(</span></span>
-<span>  nrows <span class="op">=</span> <span class="fl">16</span>, </span>
-<span>  ncols <span class="op">=</span> <span class="fl">18</span>,  </span>
+<span>  nrows <span class="op">=</span> <span class="fl">16</span>,</span>
+<span>  ncols <span class="op">=</span> <span class="fl">18</span>,</span>
 <span>  repGens <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">138</span>,<span class="fl">75</span><span class="op">)</span>,</span>
 <span>  repUnits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span>,</span>
-<span>  planter <span class="op">=</span> <span class="st">"serpentine"</span>, </span>
+<span>  planter <span class="op">=</span> <span class="st">"serpentine"</span>,</span>
 <span>  plotNumber <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  exptName <span class="op">=</span> <span class="st">"ExptA"</span>,</span>
 <span>  locationNames <span class="op">=</span> <span class="st">"FARGO"</span>,</span>
@@ -210,54 +218,60 @@
 <span><span class="op">)</span></span></code></pre></div>
 <p>Users can print returned values from <code><a href="reference/partially_replicated.html">partially_replicated()</a></code> as follows,</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">print</span>(pREP)</span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>Partially Replicated Design </span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>Partially Replicated Design</span>
 <span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a></span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a></span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a> Replications within location<span class="sc">:</span> </span>
-<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>  LOCATION Replicated Unreplicated</span>
-<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="dv">1</span>    FARGO         <span class="dv">75</span>          <span class="dv">138</span></span>
-<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a></span>
-<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a> Information on the design parameters<span class="sc">:</span> </span>
-<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>List of <span class="dv">7</span></span>
-<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a> <span class="sc">$</span> rows             <span class="sc">:</span> num <span class="dv">16</span></span>
-<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a> <span class="sc">$</span> columns          <span class="sc">:</span> num <span class="dv">18</span></span>
-<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a> <span class="sc">$</span> min_distance     <span class="sc">:</span> num <span class="dv">8</span></span>
-<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a> <span class="sc">$</span> incidence_in_rows<span class="sc">:</span> num <span class="dv">3</span></span>
-<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a> <span class="sc">$</span> locations        <span class="sc">:</span> num <span class="dv">1</span></span>
-<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a> <span class="sc">$</span> planter          <span class="sc">:</span> chr <span class="st">"serpentine"</span></span>
-<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a> <span class="sc">$</span> seed             <span class="sc">:</span> num <span class="dv">77</span></span>
-<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a></span>
-<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a> <span class="dv">10</span> First observations of the data frame with the partially_replicated field book<span class="sc">:</span> </span>
-<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a>   ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT</span>
-<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a><span class="dv">1</span>   <span class="dv">1</span> ExptA    FARGO <span class="dv">2023</span>    <span class="dv">1</span>   <span class="dv">1</span>      <span class="dv">1</span>     <span class="dv">30</span>    <span class="dv">30</span>       G30</span>
-<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a><span class="dv">2</span>   <span class="dv">2</span> ExptA    FARGO <span class="dv">2023</span>    <span class="dv">2</span>   <span class="dv">1</span>      <span class="dv">2</span>      <span class="dv">0</span>   <span class="dv">192</span>      G192</span>
-<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a><span class="dv">3</span>   <span class="dv">3</span> ExptA    FARGO <span class="dv">2023</span>    <span class="dv">3</span>   <span class="dv">1</span>      <span class="dv">3</span>     <span class="dv">44</span>    <span class="dv">44</span>       G44</span>
-<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a><span class="dv">4</span>   <span class="dv">4</span> ExptA    FARGO <span class="dv">2023</span>    <span class="dv">4</span>   <span class="dv">1</span>      <span class="dv">4</span>     <span class="dv">66</span>    <span class="dv">66</span>       G66</span>
-<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a><span class="dv">5</span>   <span class="dv">5</span> ExptA    FARGO <span class="dv">2023</span>    <span class="dv">5</span>   <span class="dv">1</span>      <span class="dv">5</span>      <span class="dv">0</span>    <span class="dv">78</span>       G78</span>
-<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a><span class="dv">6</span>   <span class="dv">6</span> ExptA    FARGO <span class="dv">2023</span>    <span class="dv">6</span>   <span class="dv">1</span>      <span class="dv">6</span>      <span class="dv">0</span>   <span class="dv">186</span>      G186</span>
-<span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a><span class="dv">7</span>   <span class="dv">7</span> ExptA    FARGO <span class="dv">2023</span>    <span class="dv">7</span>   <span class="dv">1</span>      <span class="dv">7</span>     <span class="dv">34</span>    <span class="dv">34</span>       G34</span>
-<span id="cb7-28"><a href="#cb7-28" tabindex="-1"></a><span class="dv">8</span>   <span class="dv">8</span> ExptA    FARGO <span class="dv">2023</span>    <span class="dv">8</span>   <span class="dv">1</span>      <span class="dv">8</span>      <span class="dv">0</span>    <span class="dv">86</span>       G86</span>
-<span id="cb7-29"><a href="#cb7-29" tabindex="-1"></a><span class="dv">9</span>   <span class="dv">9</span> ExptA    FARGO <span class="dv">2023</span>    <span class="dv">9</span>   <span class="dv">1</span>      <span class="dv">9</span>     <span class="dv">37</span>    <span class="dv">37</span>       G37</span>
-<span id="cb7-30"><a href="#cb7-30" tabindex="-1"></a><span class="dv">10</span> <span class="dv">10</span> ExptA    FARGO <span class="dv">2023</span>   <span class="dv">10</span>   <span class="dv">1</span>     <span class="dv">10</span>     <span class="dv">55</span>    <span class="dv">55</span>       G55</span></code></pre></div>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>Replications within location<span class="sc">:</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>  LOCATION Replicated Unreplicated</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="dv">1</span>    FARGO         <span class="dv">75</span>          <span class="dv">138</span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a> Information on the design parameters<span class="sc">:</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>List of <span class="dv">10</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a> <span class="sc">$</span> rows              <span class="sc">:</span> num <span class="dv">16</span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a> <span class="sc">$</span> columns           <span class="sc">:</span> num <span class="dv">18</span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a> <span class="sc">$</span> min_distance      <span class="sc">:</span> num <span class="dv">5</span></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a> <span class="sc">$</span> incidence_in_rows <span class="sc">:</span> num <span class="dv">1</span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a> <span class="sc">$</span> locations         <span class="sc">:</span> num <span class="dv">1</span></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a> <span class="sc">$</span> planter           <span class="sc">:</span> chr <span class="st">"serpentine"</span></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a> <span class="sc">$</span> experimental_plots<span class="sc">:</span> num <span class="dv">288</span></span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a> <span class="sc">$</span> field_capacity    <span class="sc">:</span> num <span class="dv">288</span></span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a> <span class="sc">$</span> fillers           <span class="sc">:</span> num <span class="dv">0</span></span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a> <span class="sc">$</span> seed              <span class="sc">:</span> num <span class="dv">77</span></span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a></span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a> <span class="dv">10</span> First observations of the data frame with the partially_replicated field book<span class="sc">:</span></span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a><span class="co"># A tibble: 10 × 11</span></span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a>      ID EXPT  LOCATION YEAR   PLOT   ROW COLUMN   REP CHECKS ENTRY TREATMENT</span>
+<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a>   <span class="sc">&lt;</span>int<span class="sc">&gt;</span> <span class="er">&lt;</span>chr<span class="sc">&gt;</span> <span class="er">&lt;</span>chr<span class="sc">&gt;</span>    <span class="er">&lt;</span>chr<span class="sc">&gt;</span> <span class="er">&lt;</span>dbl<span class="sc">&gt;</span> <span class="er">&lt;</span>int<span class="sc">&gt;</span>  <span class="er">&lt;</span>int<span class="sc">&gt;</span> <span class="er">&lt;</span>int<span class="sc">&gt;</span>  <span class="er">&lt;</span>dbl<span class="sc">&gt;</span> <span class="er">&lt;</span>dbl<span class="sc">&gt;</span> <span class="er">&lt;</span>chr<span class="sc">&gt;</span></span>
+<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a> <span class="dv">1</span>     <span class="dv">1</span> ExptA FARGO    <span class="dv">2026</span>      <span class="dv">1</span>     <span class="dv">1</span>      <span class="dv">1</span>     <span class="dv">1</span>      <span class="dv">0</span>    <span class="dv">69</span> G69</span>
+<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a> <span class="dv">2</span>     <span class="dv">2</span> ExptA FARGO    <span class="dv">2026</span>      <span class="dv">2</span>     <span class="dv">1</span>      <span class="dv">2</span>     <span class="dv">1</span>    <span class="dv">158</span>   <span class="dv">158</span> G158</span>
+<span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a> <span class="dv">3</span>     <span class="dv">3</span> ExptA FARGO    <span class="dv">2026</span>      <span class="dv">3</span>     <span class="dv">1</span>      <span class="dv">3</span>     <span class="dv">1</span>    <span class="dv">157</span>   <span class="dv">157</span> G157</span>
+<span id="cb7-28"><a href="#cb7-28" tabindex="-1"></a> <span class="dv">4</span>     <span class="dv">4</span> ExptA FARGO    <span class="dv">2026</span>      <span class="dv">4</span>     <span class="dv">1</span>      <span class="dv">4</span>     <span class="dv">1</span>    <span class="dv">201</span>   <span class="dv">201</span> G201</span>
+<span id="cb7-29"><a href="#cb7-29" tabindex="-1"></a> <span class="dv">5</span>     <span class="dv">5</span> ExptA FARGO    <span class="dv">2026</span>      <span class="dv">5</span>     <span class="dv">1</span>      <span class="dv">5</span>     <span class="dv">1</span>      <span class="dv">0</span>    <span class="dv">79</span> G79</span>
+<span id="cb7-30"><a href="#cb7-30" tabindex="-1"></a> <span class="dv">6</span>     <span class="dv">6</span> ExptA FARGO    <span class="dv">2026</span>      <span class="dv">6</span>     <span class="dv">1</span>      <span class="dv">6</span>     <span class="dv">1</span>    <span class="dv">213</span>   <span class="dv">213</span> G213</span>
+<span id="cb7-31"><a href="#cb7-31" tabindex="-1"></a> <span class="dv">7</span>     <span class="dv">7</span> ExptA FARGO    <span class="dv">2026</span>      <span class="dv">7</span>     <span class="dv">1</span>      <span class="dv">7</span>     <span class="dv">1</span>      <span class="dv">0</span>     <span class="dv">1</span> G1</span>
+<span id="cb7-32"><a href="#cb7-32" tabindex="-1"></a> <span class="dv">8</span>     <span class="dv">8</span> ExptA FARGO    <span class="dv">2026</span>      <span class="dv">8</span>     <span class="dv">1</span>      <span class="dv">8</span>     <span class="dv">1</span>      <span class="dv">0</span>   <span class="dv">103</span> G103</span>
+<span id="cb7-33"><a href="#cb7-33" tabindex="-1"></a> <span class="dv">9</span>     <span class="dv">9</span> ExptA FARGO    <span class="dv">2026</span>      <span class="dv">9</span>     <span class="dv">1</span>      <span class="dv">9</span>     <span class="dv">1</span>      <span class="dv">0</span>    <span class="dv">37</span> G37</span>
+<span id="cb7-34"><a href="#cb7-34" tabindex="-1"></a><span class="dv">10</span>    <span class="dv">10</span> ExptA FARGO    <span class="dv">2026</span>     <span class="dv">10</span>     <span class="dv">1</span>     <span class="dv">10</span>     <span class="dv">1</span>      <span class="dv">0</span>    <span class="dv">12</span> G12</span></code></pre></div>
 <p>First 12 rows of the fieldbook,</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">head</span>(pREP<span class="sc">$</span>fieldBook, <span class="dv">12</span>)</span>
-<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>   ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT</span>
-<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="dv">1</span>   <span class="dv">1</span> ExptA    FARGO <span class="dv">2023</span>    <span class="dv">1</span>   <span class="dv">1</span>      <span class="dv">1</span>     <span class="dv">30</span>    <span class="dv">30</span>       G30</span>
-<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="dv">2</span>   <span class="dv">2</span> ExptA    FARGO <span class="dv">2023</span>    <span class="dv">2</span>   <span class="dv">1</span>      <span class="dv">2</span>      <span class="dv">0</span>   <span class="dv">192</span>      G192</span>
-<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="dv">3</span>   <span class="dv">3</span> ExptA    FARGO <span class="dv">2023</span>    <span class="dv">3</span>   <span class="dv">1</span>      <span class="dv">3</span>     <span class="dv">44</span>    <span class="dv">44</span>       G44</span>
-<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="dv">4</span>   <span class="dv">4</span> ExptA    FARGO <span class="dv">2023</span>    <span class="dv">4</span>   <span class="dv">1</span>      <span class="dv">4</span>     <span class="dv">66</span>    <span class="dv">66</span>       G66</span>
-<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="dv">5</span>   <span class="dv">5</span> ExptA    FARGO <span class="dv">2023</span>    <span class="dv">5</span>   <span class="dv">1</span>      <span class="dv">5</span>      <span class="dv">0</span>    <span class="dv">78</span>       G78</span>
-<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="dv">6</span>   <span class="dv">6</span> ExptA    FARGO <span class="dv">2023</span>    <span class="dv">6</span>   <span class="dv">1</span>      <span class="dv">6</span>      <span class="dv">0</span>   <span class="dv">186</span>      G186</span>
-<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="dv">7</span>   <span class="dv">7</span> ExptA    FARGO <span class="dv">2023</span>    <span class="dv">7</span>   <span class="dv">1</span>      <span class="dv">7</span>     <span class="dv">34</span>    <span class="dv">34</span>       G34</span>
-<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="dv">8</span>   <span class="dv">8</span> ExptA    FARGO <span class="dv">2023</span>    <span class="dv">8</span>   <span class="dv">1</span>      <span class="dv">8</span>      <span class="dv">0</span>    <span class="dv">86</span>       G86</span>
-<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="dv">9</span>   <span class="dv">9</span> ExptA    FARGO <span class="dv">2023</span>    <span class="dv">9</span>   <span class="dv">1</span>      <span class="dv">9</span>     <span class="dv">37</span>    <span class="dv">37</span>       G37</span>
-<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a><span class="dv">10</span> <span class="dv">10</span> ExptA    FARGO <span class="dv">2023</span>   <span class="dv">10</span>   <span class="dv">1</span>     <span class="dv">10</span>     <span class="dv">55</span>    <span class="dv">55</span>       G55</span>
-<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a><span class="dv">11</span> <span class="dv">11</span> ExptA    FARGO <span class="dv">2023</span>   <span class="dv">11</span>   <span class="dv">1</span>     <span class="dv">11</span>      <span class="dv">0</span>   <span class="dv">125</span>      G125</span>
-<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a><span class="dv">12</span> <span class="dv">12</span> ExptA    FARGO <span class="dv">2023</span>   <span class="dv">12</span>   <span class="dv">1</span>     <span class="dv">12</span>      <span class="dv">0</span>   <span class="dv">159</span>      G159</span></code></pre></div>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="co"># A tibble: 12 × 11</span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>      ID EXPT  LOCATION YEAR   PLOT   ROW COLUMN   REP CHECKS ENTRY TREATMENT</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>   <span class="sc">&lt;</span>int<span class="sc">&gt;</span> <span class="er">&lt;</span>chr<span class="sc">&gt;</span> <span class="er">&lt;</span>chr<span class="sc">&gt;</span>    <span class="er">&lt;</span>chr<span class="sc">&gt;</span> <span class="er">&lt;</span>dbl<span class="sc">&gt;</span> <span class="er">&lt;</span>int<span class="sc">&gt;</span>  <span class="er">&lt;</span>int<span class="sc">&gt;</span> <span class="er">&lt;</span>int<span class="sc">&gt;</span>  <span class="er">&lt;</span>dbl<span class="sc">&gt;</span> <span class="er">&lt;</span>dbl<span class="sc">&gt;</span> <span class="er">&lt;</span>chr<span class="sc">&gt;</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a> <span class="dv">1</span>     <span class="dv">1</span> ExptA FARGO    <span class="dv">2026</span>      <span class="dv">1</span>     <span class="dv">1</span>      <span class="dv">1</span>     <span class="dv">1</span>      <span class="dv">0</span>    <span class="dv">69</span> G69</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a> <span class="dv">2</span>     <span class="dv">2</span> ExptA FARGO    <span class="dv">2026</span>      <span class="dv">2</span>     <span class="dv">1</span>      <span class="dv">2</span>     <span class="dv">1</span>    <span class="dv">158</span>   <span class="dv">158</span> G158</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a> <span class="dv">3</span>     <span class="dv">3</span> ExptA FARGO    <span class="dv">2026</span>      <span class="dv">3</span>     <span class="dv">1</span>      <span class="dv">3</span>     <span class="dv">1</span>    <span class="dv">157</span>   <span class="dv">157</span> G157</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a> <span class="dv">4</span>     <span class="dv">4</span> ExptA FARGO    <span class="dv">2026</span>      <span class="dv">4</span>     <span class="dv">1</span>      <span class="dv">4</span>     <span class="dv">1</span>    <span class="dv">201</span>   <span class="dv">201</span> G201</span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a> <span class="dv">5</span>     <span class="dv">5</span> ExptA FARGO    <span class="dv">2026</span>      <span class="dv">5</span>     <span class="dv">1</span>      <span class="dv">5</span>     <span class="dv">1</span>      <span class="dv">0</span>    <span class="dv">79</span> G79</span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a> <span class="dv">6</span>     <span class="dv">6</span> ExptA FARGO    <span class="dv">2026</span>      <span class="dv">6</span>     <span class="dv">1</span>      <span class="dv">6</span>     <span class="dv">1</span>    <span class="dv">213</span>   <span class="dv">213</span> G213</span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a> <span class="dv">7</span>     <span class="dv">7</span> ExptA FARGO    <span class="dv">2026</span>      <span class="dv">7</span>     <span class="dv">1</span>      <span class="dv">7</span>     <span class="dv">1</span>      <span class="dv">0</span>     <span class="dv">1</span> G1</span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a> <span class="dv">8</span>     <span class="dv">8</span> ExptA FARGO    <span class="dv">2026</span>      <span class="dv">8</span>     <span class="dv">1</span>      <span class="dv">8</span>     <span class="dv">1</span>      <span class="dv">0</span>   <span class="dv">103</span> G103</span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a> <span class="dv">9</span>     <span class="dv">9</span> ExptA FARGO    <span class="dv">2026</span>      <span class="dv">9</span>     <span class="dv">1</span>      <span class="dv">9</span>     <span class="dv">1</span>      <span class="dv">0</span>    <span class="dv">37</span> G37</span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a><span class="dv">10</span>    <span class="dv">10</span> ExptA FARGO    <span class="dv">2026</span>     <span class="dv">10</span>     <span class="dv">1</span>     <span class="dv">10</span>     <span class="dv">1</span>      <span class="dv">0</span>    <span class="dv">12</span> G12</span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a><span class="dv">11</span>    <span class="dv">11</span> ExptA FARGO    <span class="dv">2026</span>     <span class="dv">11</span>     <span class="dv">1</span>     <span class="dv">11</span>     <span class="dv">1</span>      <span class="dv">0</span>    <span class="dv">99</span> G99</span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a><span class="dv">12</span>    <span class="dv">12</span> ExptA FARGO    <span class="dv">2026</span>     <span class="dv">12</span>     <span class="dv">1</span>     <span class="dv">12</span>     <span class="dv">1</span>      <span class="dv">0</span>    <span class="dv">50</span> G50</span></code></pre></div>
 <p>Users can plot the layout design from <code><a href="reference/partially_replicated.html">partially_replicated()</a></code> using the function <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> as follows,</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pREP</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-9-1.png" width="100%" style="display: block; margin: auto;"></p>
+<p><img src="reference/figures/README-unnamed-chunk-9-1.png" alt="Native plot showing replicated and unreplicated p-rep entries" width="100%" style="display: block; margin: auto;"></p>
 <p>To see more examples, please go to <a href="https://didiermurillof.github.io/FielDHub/articles/partially_replicated.html" class="uri">https://didiermurillof.github.io/FielDHub/articles/partially_replicated.html</a></p>
 <p><br><br></p>
 </div>

@@ -139,7 +139,7 @@ this:
 
 ibd <- incomplete_blocks(
   t = 28,
-  r = 4,
+  reps = 4,
   k = 4, 
   l = 1,
   seed = 1243
@@ -151,7 +151,7 @@ ibd <- incomplete_blocks(
 The description for the inputs that we used to generate the design,
 
 - `t = 28` is the number of treatments.
-- `r=4` is the number of replicates.
+- `reps =4` is the number of replicates.
 - `k = 4` is the number of plots per incomplete block.
 - `l = 1` is the number of locations
 - `plotNumber = 101` is the starting plot number.
@@ -185,16 +185,16 @@ print(ibd)
 
      10 First observations of the data frame with the incomplete_blocks field book: 
        ID LOCATION PLOT REP IBLOCK UNIT ENTRY TREATMENT
-    1   1        1  101   1      1    1     6       G-6
-    2   2        1  102   1      1    2    11      G-11
-    3   3        1  103   1      1    3    15      G-15
-    4   4        1  104   1      1    4    23      G-23
-    5   5        1  105   1      2    1    17      G-17
-    6   6        1  106   1      2    2     7       G-7
-    7   7        1  107   1      2    3    28      G-28
-    8   8        1  108   1      2    4    13      G-13
-    9   9        1  109   1      3    1    12      G-12
-    10 10        1  110   1      3    2    20      G-20
+    1   1        1  101   1      1    1    25      G-25
+    2   2        1  102   1      1    2     4       G-4
+    3   3        1  103   1      1    3    20      G-20
+    4   4        1  104   1      1    4     1       G-1
+    5   5        1  105   1      2    1    19      G-19
+    6   6        1  106   1      2    2    22      G-22
+    7   7        1  107   1      2    3    10      G-10
+    8   8        1  108   1      2    4    28      G-28
+    9   9        1  109   1      3    1     2       G-2
+    10 10        1  110   1      3    2     9       G-9
 
 ### Access to `ibd` object
 
@@ -218,16 +218,16 @@ head(ibd$fieldBook, 10)
 ```
 
        ID LOCATION PLOT REP IBLOCK UNIT ENTRY TREATMENT
-    1   1        1  101   1      1    1     6       G-6
-    2   2        1  102   1      1    2    11      G-11
-    3   3        1  103   1      1    3    15      G-15
-    4   4        1  104   1      1    4    23      G-23
-    5   5        1  105   1      2    1    17      G-17
-    6   6        1  106   1      2    2     7       G-7
-    7   7        1  107   1      2    3    28      G-28
-    8   8        1  108   1      2    4    13      G-13
-    9   9        1  109   1      3    1    12      G-12
-    10 10        1  110   1      3    2    20      G-20
+    1   1        1  101   1      1    1    25      G-25
+    2   2        1  102   1      1    2     4       G-4
+    3   3        1  103   1      1    3    20      G-20
+    4   4        1  104   1      1    4     1       G-1
+    5   5        1  105   1      2    1    19      G-19
+    6   6        1  106   1      2    2    22      G-22
+    7   7        1  107   1      2    3    10      G-10
+    8   8        1  108   1      2    4    28      G-28
+    9   9        1  109   1      3    1     2       G-2
+    10 10        1  110   1      3    2     9       G-9
 
 ### Plot the field layout
 

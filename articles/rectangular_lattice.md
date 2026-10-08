@@ -125,7 +125,7 @@ this:
 
 rect <- rectangular_lattice(
   t = 56,
-  r = 3, 
+  reps = 3,
   k = 7, 
   l = 1, 
   plotNumber = 101,
@@ -137,7 +137,7 @@ rect <- rectangular_lattice(
 #### Details on the inputs entered in `rectangular_lattice()` above
 
 - `t = 56` is the number of treatments.
-- `r=3` is the number of replicates.
+- `reps =3` is the number of replicates.
 - `k = 7` is the number of plots per incomplete block.
 - `l = 1` is the number of locations.
 - `plotNumber = 101` is the starting plot number.

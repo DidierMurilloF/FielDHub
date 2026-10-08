@@ -21,7 +21,8 @@ RCBD_augmented(
   random = TRUE,
   data = NULL,
   nrows = NULL,
-  ncols = NULL
+  ncols = NULL,
+  year = NULL
 )
 ```
 
@@ -92,6 +93,11 @@ RCBD_augmented(
 
   (optional) Number of columns in the field.
 
+- year:
+
+  (optional) Year recorded in the `YEAR` column of the field book. By
+  default the current year.
+
 ## Value
 
 A list with five elements.
@@ -108,6 +114,13 @@ A list with five elements.
 - `data_entry` is a data frame with the data input.
 
 - `fieldBook` is a data frame with the ARCBD field book.
+
+## Reproducibility
+
+The result records effective inputs and the resolved seed in
+`metadata$parameters`. Under the same package versions and RNG settings,
+rebuild a result `x` with
+`do.call(RCBD_augmented, x$metadata$parameters)`.
 
 ## References
 

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">FielDHub</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -18,7 +18,10 @@
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/sparse_allocation.html">Sparse Allocation/Testing</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/scientific_validation.html">Scientific Validation and Computational Limits</a></li>
+    <li><a class="dropdown-item" href="../articles/architecture.html">Architecture and Compatibility Contracts</a></li>
+    <li><a class="dropdown-item" href="../articles/extending_fieldhub.html">Adding Designs and Formats</a></li>
+    <li><a class="dropdown-item" href="../articles/sparse_allocation.html">Sparse Allocation/Testing</a></li>
     <li><a class="dropdown-item" href="../articles/diagonal_arrangement.html">Unreplicated Diagonal Arrangement Design</a></li>
     <li><a class="dropdown-item" href="../articles/optimized_arrangement.html">Unreplicated Optimized Arrangement Design</a></li>
     <li><a class="dropdown-item" href="../articles/RCBD_augmented.html">Augmented Randomized Complete Block Design</a></li>
@@ -69,7 +72,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">run_app</span><span class="op">(</span><span class="va">...</span>, launch.browser <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">run_app</span><span class="op">(</span><span class="va">...</span>, launch.browser <span class="op">=</span> <span class="cn">TRUE</span>, workers <span class="op">=</span> <span class="fl">0L</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -83,10 +86,31 @@
 <dt id="arg-launch-browser">launch.browser<a class="anchor" aria-label="anchor" href="#arg-launch-browser"></a></dt>
 <dd><p>Logical. If `TRUE`, the application is launched in the system's default web browser.</p></dd>
 
+
+<dt id="arg-workers">workers<a class="anchor" aria-label="anchor" href="#arg-workers"></a></dt>
+<dd><p>Non-negative integer. Background workers; the default <code>0L</code>
+keeps synchronous execution and does not start any worker processes.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A shiny app object</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>Constructing the app does not change R options. On startup,
+uploads are limited to 100 MiB (100 * 1024^2 bytes); when the app stops,
+the previous upload-limit option is restored, including an unset option.
+Shiny uses a process-wide upload limit, shared by the app's sessions while
+it is running. Closing one session does not restore the limit for others.</p>
+<p>The standard app packages are installed with FielDHub. If any are unavailable,
+this function signals a <code>fieldhub_dependency_error</code> with an installation
+command and the missing package names in its <code>packages</code> field. It never
+installs packages automatically. Only the background-worker backend is optional.</p>
+<p>With <code>workers &gt; 0</code>, an installed package and the optional <span class="pkg">mirai</span>
+package run design jobs in a private background pool. Other sessions remain
+responsive while a design runs. The pool closes when the app stops. Without
+mirai, or with development source, execution stays synchronous with a message.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

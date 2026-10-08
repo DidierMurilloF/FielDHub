@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">FielDHub</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,7 +33,10 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/sparse_allocation.html">Sparse Allocation/Testing</a></li>
+<li><a class="dropdown-item" href="../articles/scientific_validation.html">Scientific Validation and Computational Limits</a></li>
+    <li><a class="dropdown-item" href="../articles/architecture.html">Architecture and Compatibility Contracts</a></li>
+    <li><a class="dropdown-item" href="../articles/extending_fieldhub.html">Adding Designs and Formats</a></li>
+    <li><a class="dropdown-item" href="../articles/sparse_allocation.html">Sparse Allocation/Testing</a></li>
     <li><a class="dropdown-item" href="../articles/diagonal_arrangement.html">Unreplicated Diagonal Arrangement Design</a></li>
     <li><a class="dropdown-item" href="../articles/optimized_arrangement.html">Unreplicated Optimized Arrangement Design</a></li>
     <li><a class="dropdown-item" href="../articles/RCBD_augmented.html">Augmented Randomized Complete Block Design</a></li>
@@ -80,7 +83,7 @@
 
 
 
-<script src="sparse_allocation_files/kePrint-0.0.1/kePrint.js"></script><link href="sparse_allocation_files/lightable-0.0.1/lightable.css" rel="stylesheet">
+
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
@@ -148,226 +151,95 @@ in all environments. To address the seed shortage, the sparse allocation
 strategy will be used.</p>
 <p>The table below illustrates the allocation of the first ten genotypes
 across the five environments.</p>
-<table class="table table" style="margin-left: auto; margin-right: auto;">
-<thead><tr>
-<th style="text-align:left;">
-</th>
-<th style="text-align:right;">
-ENV1
-</th>
-<th style="text-align:right;">
-ENV2
-</th>
-<th style="text-align:right;">
-ENV3
-</th>
-<th style="text-align:right;">
-ENV4
-</th>
-<th style="text-align:right;">
-ENV5
-</th>
+<table class="table">
+<thead><tr class="header">
+<th align="left"></th>
+<th align="right">ENV1</th>
+<th align="right">ENV2</th>
+<th align="right">ENV3</th>
+<th align="right">ENV4</th>
+<th align="right">ENV5</th>
 </tr></thead>
 <tbody>
-<tr>
-<td style="text-align:left;">
-Gen-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
+<tr class="odd">
+<td align="left">Gen-1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
 </tr>
-<tr>
-<td style="text-align:left;">
-Gen-2
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
+<tr class="even">
+<td align="left">Gen-2</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
 </tr>
-<tr>
-<td style="text-align:left;">
-Gen-3
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
+<tr class="odd">
+<td align="left">Gen-3</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
 </tr>
-<tr>
-<td style="text-align:left;">
-Gen-4
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
+<tr class="even">
+<td align="left">Gen-4</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
 </tr>
-<tr>
-<td style="text-align:left;">
-Gen-5
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
+<tr class="odd">
+<td align="left">Gen-5</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
 </tr>
-<tr>
-<td style="text-align:left;">
-Gen-6
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
+<tr class="even">
+<td align="left">Gen-6</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
 </tr>
-<tr>
-<td style="text-align:left;">
-Gen-7
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
+<tr class="odd">
+<td align="left">Gen-7</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
 </tr>
-<tr>
-<td style="text-align:left;">
-Gen-8
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
+<tr class="even">
+<td align="left">Gen-8</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
 </tr>
-<tr>
-<td style="text-align:left;">
-Gen-9
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
+<tr class="odd">
+<td align="left">Gen-9</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">1</td>
 </tr>
-<tr>
-<td style="text-align:left;">
-Gen-10
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
+<tr class="even">
+<td align="left">Gen-10</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">1</td>
 </tr>
 </tbody>
 </table>
@@ -421,87 +293,47 @@ must appear in the first rows of the <code>.csv</code> file.</p></li>
 </ul>
 </li>
 </ol>
-<table class="table table" style="margin-left: auto; margin-right: auto;">
-<thead><tr>
-<th style="text-align:right;">
-ENTRY
-</th>
-<th style="text-align:left;">
-NAME
-</th>
+<table class="table">
+<thead><tr class="header">
+<th align="right">ENTRY</th>
+<th align="left">NAME</th>
 </tr></thead>
 <tbody>
-<tr>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:left;">
-CHECK1
-</td>
+<tr class="odd">
+<td align="right">1</td>
+<td align="left">CHECK1</td>
 </tr>
-<tr>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:left;">
-CHECK2
-</td>
+<tr class="even">
+<td align="right">2</td>
+<td align="left">CHECK2</td>
 </tr>
-<tr>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:left;">
-CHECK3
-</td>
+<tr class="odd">
+<td align="right">3</td>
+<td align="left">CHECK3</td>
 </tr>
-<tr>
-<td style="text-align:right;">
-4
-</td>
-<td style="text-align:left;">
-GenotypeA
-</td>
+<tr class="even">
+<td align="right">4</td>
+<td align="left">GenotypeA</td>
 </tr>
-<tr>
-<td style="text-align:right;">
-5
-</td>
-<td style="text-align:left;">
-GenotypeB
-</td>
+<tr class="odd">
+<td align="right">5</td>
+<td align="left">GenotypeB</td>
 </tr>
-<tr>
-<td style="text-align:right;">
-6
-</td>
-<td style="text-align:left;">
-GenotypeC
-</td>
+<tr class="even">
+<td align="right">6</td>
+<td align="left">GenotypeC</td>
 </tr>
-<tr>
-<td style="text-align:right;">
-7
-</td>
-<td style="text-align:left;">
-GenotypeD
-</td>
+<tr class="odd">
+<td align="right">7</td>
+<td align="left">GenotypeD</td>
 </tr>
-<tr>
-<td style="text-align:right;">
-8
-</td>
-<td style="text-align:left;">
-GenotypeE
-</td>
+<tr class="even">
+<td align="right">8</td>
+<td align="left">GenotypeE</td>
 </tr>
-<tr>
-<td style="text-align:right;">
-9
-</td>
-<td style="text-align:left;">
-GenotypeF
-</td>
+<tr class="odd">
+<td align="right">9</td>
+<td align="left">GenotypeF</td>
 </tr>
 </tbody>
 </table>
@@ -668,15 +500,15 @@ us print the first ten genotypes allocation.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">sparse_example</span><span class="op">$</span><span class="va">allocation</span>, <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code>   LOC1 LOC2 LOC3 LOC4 LOC5
-1     1    1    0    1    1
-2     1    1    1    0    1
-3     1    1    0    1    1
+1     1    0    1    1    1
+2     0    1    1    1    1
+3     0    1    1    1    1
 4     1    1    1    1    0
-5     1    1    1    0    1
+5     1    1    1    1    0
 6     1    1    0    1    1
 7     1    0    1    1    1
 8     0    1    1    1    1
-9     1    1    1    1    0
+9     1    1    1    0    1
 10    1    1    1    0    1</code></pre>
 <p>We can manipulate the sparse_allocation object as any other list in
 R. For example, we can print the design information as following:</p>
@@ -711,16 +543,16 @@ List of 11
 
  10 First observations of the data frame with the diagonal_arrangement field book: 
    ID           EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 SparseTest2023    FARGO 2026    1   1      1      0    34      G-34
-2   2 SparseTest2023    FARGO 2026    2   1      2      0    83      G-83
-3   3 SparseTest2023    FARGO 2026    3   1      3      0    59      G-59
+1   1 SparseTest2023    FARGO 2026    1   1      1      0    35      G-35
+2   2 SparseTest2023    FARGO 2026    2   1      2      0    76      G-76
+3   3 SparseTest2023    FARGO 2026    3   1      3      0    54      G-54
 4   4 SparseTest2023    FARGO 2026    4   1      4    261   261    CH-261
-5   5 SparseTest2023    FARGO 2026    5   1      5      0   220     G-220
-6   6 SparseTest2023    FARGO 2026    6   1      6      0    65      G-65
-7   7 SparseTest2023    FARGO 2026    7   1      7      0   188     G-188
-8   8 SparseTest2023    FARGO 2026    8   1      8      0    22      G-22
-9   9 SparseTest2023    FARGO 2026    9   1      9      0   235     G-235
-10 10 SparseTest2023    FARGO 2026   10   1     10      0   238     G-238</code></pre>
+5   5 SparseTest2023    FARGO 2026    5   1      5      0   215     G-215
+6   6 SparseTest2023    FARGO 2026    6   1      6      0    58      G-58
+7   7 SparseTest2023    FARGO 2026    7   1      7      0   181     G-181
+8   8 SparseTest2023    FARGO 2026    8   1      8      0    24      G-24
+9   9 SparseTest2023    FARGO 2026    9   1      9      0   232     G-232
+10 10 SparseTest2023    FARGO 2026   10   1     10      0   235     G-235</code></pre>
 </div>
 <div class="section level4">
 <h4 id="access-to-sparse_example-object">Access to <code>sparse_example</code> object<a class="anchor" aria-label="anchor" href="#access-to-sparse_example-object"></a>
@@ -745,16 +577,16 @@ in this experiment.</p>
 <code class="sourceCode R"><span><span class="va">field_book</span> <span class="op">&lt;-</span> <span class="va">sparse_example</span><span class="op">$</span><span class="va">fieldBook</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">field_book</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
 <pre><code>   ID           EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
-1   1 SparseTest2023    FARGO 2026    1   1      1      0    34      G-34
-2   2 SparseTest2023    FARGO 2026    2   1      2      0    83      G-83
-3   3 SparseTest2023    FARGO 2026    3   1      3      0    59      G-59
+1   1 SparseTest2023    FARGO 2026    1   1      1      0    35      G-35
+2   2 SparseTest2023    FARGO 2026    2   1      2      0    76      G-76
+3   3 SparseTest2023    FARGO 2026    3   1      3      0    54      G-54
 4   4 SparseTest2023    FARGO 2026    4   1      4    261   261    CH-261
-5   5 SparseTest2023    FARGO 2026    5   1      5      0   220     G-220
-6   6 SparseTest2023    FARGO 2026    6   1      6      0    65      G-65
-7   7 SparseTest2023    FARGO 2026    7   1      7      0   188     G-188
-8   8 SparseTest2023    FARGO 2026    8   1      8      0    22      G-22
-9   9 SparseTest2023    FARGO 2026    9   1      9      0   235     G-235
-10 10 SparseTest2023    FARGO 2026   10   1     10      0   238     G-238</code></pre>
+5   5 SparseTest2023    FARGO 2026    5   1      5      0   215     G-215
+6   6 SparseTest2023    FARGO 2026    6   1      6      0    58      G-58
+7   7 SparseTest2023    FARGO 2026    7   1      7      0   181     G-181
+8   8 SparseTest2023    FARGO 2026    8   1      8      0    24      G-24
+9   9 SparseTest2023    FARGO 2026    9   1      9      0   232     G-232
+10 10 SparseTest2023    FARGO 2026   10   1     10      0   235     G-235</code></pre>
 </div>
 <div class="section level4">
 <h4 id="plot-field-layout">Plot field layout<a class="anchor" aria-label="anchor" href="#plot-field-layout"></a>

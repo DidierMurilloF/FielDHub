@@ -71,7 +71,9 @@ full_factorial(
 
 - data:
 
-  (optional) Data frame with the labels of factors.
+  (optional) Data frame whose first two columns contain factor names and
+  level labels. Levels must be unique within each factor, but a label
+  may occur in different factors. Incomplete rows are omitted.
 
 ## Value
 
@@ -80,6 +82,13 @@ A list with two elements.
 - `infoDesign` is a list with information on the design parameters.
 
 - `fieldBook` is a data frame with the full factorial field book.
+
+## Reproducibility
+
+The result records effective inputs and the resolved seed in
+`metadata$parameters`. Under the same package versions and RNG settings,
+rebuild a result `x` with
+`do.call(full_factorial, x$metadata$parameters)`.
 
 ## References
 
@@ -137,6 +146,9 @@ fullFact1$infoDesign
 #> 
 #> $levels_each_factor
 #> [1] 2 2 2
+#> 
+#> $seed
+#> [1] 325
 #> 
 #> $id_design
 #> [1] 4
@@ -223,6 +235,9 @@ fullFact2$infoDesign
 #> 
 #> $levels_each_factor
 #> [1] 2 3 2
+#> 
+#> $seed
+#> [1] 326
 #> 
 #> $id_design
 #> [1] 4

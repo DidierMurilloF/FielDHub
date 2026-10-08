@@ -60,6 +60,21 @@ A list with two elements.
 
 - `fieldBook` is a data frame with the latin square field book.
 
+## Details
+
+The randomized search is limited to 100,000 placement iterations per
+square. If it cannot complete a square within that budget, it raises a
+`fieldhub_search_error` with the square number and iteration limit. No
+incomplete design is returned; try a different seed. Designs completed
+within the limit retain their existing seeded output.
+
+## Reproducibility
+
+The result records effective inputs and the resolved seed in
+`metadata$parameters`. Under the same package versions and RNG settings,
+rebuild a result `x` with
+`do.call(latin_square, x$metadata$parameters)`.
+
 ## References
 
 Federer, W. T. (1955). Experimental Design. Theory and Application. New

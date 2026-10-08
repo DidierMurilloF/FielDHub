@@ -17,7 +17,8 @@ strip_plot(
   factorLabels = TRUE,
   randomizeH = TRUE,
   randomizeV = FALSE,
-  data = NULL
+  data = NULL,
+  reps = 1
 )
 ```
 
@@ -33,7 +34,7 @@ strip_plot(
 
 - b:
 
-  Number of blocks (full replicates).
+  Deprecated alias for `reps`; positional calls remain supported.
 
 - l:
 
@@ -79,6 +80,10 @@ strip_plot(
   (optional) data frame with the labels of vertical and horizontal
   plots.
 
+- reps:
+
+  Number of blocks (full replicates) per location. Default is one.
+
 ## Value
 
 A list with four elements.
@@ -91,6 +96,12 @@ A list with four elements.
   location.
 
 - `fieldBook` is a data frame with the strip plot field book.
+
+## Reproducibility
+
+The result records effective inputs and the resolved seed in
+`metadata$parameters`. Under the same package versions and RNG settings,
+rebuild a result `x` with `do.call(strip_plot, x$metadata$parameters)`.
 
 ## References
 
@@ -112,7 +123,7 @@ V <- paste("V", 1:5, sep = "")
 strip1 <- strip_plot(
   Hplots = H,
   Vplots = V,
-  b = 3,
+  reps = 3,
   l = 1,
   plotNumber = 101,
   planter = "serpentine",
@@ -219,7 +230,7 @@ head(strip_data)
 strip2 <- strip_plot(
   Hplots = 5,
   Vplots = 5,
-  b = 6,
+  reps = 6,
   l = 3,
   plotNumber = c(101, 1001, 2001),
   planter = "cartesian",

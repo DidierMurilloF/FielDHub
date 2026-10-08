@@ -66,14 +66,28 @@ do_optim(
 
 ## Value
 
-A list with three elements.
+A list with five elements, classed
+`c("fieldhub_sparse_optimization", "Sparse")` or
+`c("fieldhub_multi_prep_optimization", "MultiPrep")`: the legacy
+`Sparse`/`MultiPrep` class is retained for compatibility, with an
+additional `fieldhub_*` class alongside it.
+
+- `multi_location_data` is a data frame with the entries of every
+  location: `LOCATION | ENTRY | NAME`, with a `REPS` column for p-rep
+  allocations.
 
 - `list_locs` is a list with each location list of entries.
 
-- `allocation` is a matrix with the allocation of treatments.
+- `allocation` is a data frame of test-entry copy counts, with one
+  column per location.
 
-- `size_locations` is a data frame with one column for each location and
-  one row with the size of the location.
+- `size_locations` is a named vector of test-entry copies per location,
+  excluding checks.
+
+- `metadata` records the allocation type, schema version, seed,
+  random-number settings, package version and evaluated input
+  parameters. With the same package versions and RNG settings, rebuild
+  the allocation with `do.call(do_optim, x$metadata$parameters)`.
 
 ## References
 
@@ -89,10 +103,10 @@ Didier Murillo \[aut\], Salvador Gezan \[aut\], Ana Heilman \[ctb\]
 ``` r
 sparse_example <- do_optim(
    design = "sparse",
-   lines = 120, 
-   l = 4, 
-   copies_per_entry = 3, 
-   add_checks = TRUE, 
+   lines = 120,
+   l = 4,
+   copies_per_entry = 3,
+   add_checks = TRUE,
    checks = 4,
    seed = 15
 )

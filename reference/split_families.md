@@ -7,7 +7,7 @@ genotype, line or treatment per location.
 ## Usage
 
 ``` r
-split_families(l = NULL, data = NULL)
+split_families(l = NULL, data = NULL, seed = NULL)
 ```
 
 ## Arguments
@@ -21,6 +21,13 @@ split_families(l = NULL, data = NULL)
   Data frame with the entry (ENTRY) and the labels of each treatment
   (NAME) and number of individuals per family group (FAMILY).
 
+- seed:
+
+  (optional) A single real number specifying the random seed. When
+  omitted, one integer is drawn from the current random-number stream
+  and recorded in `infoDesign$seed` and `metadata$seed`; the
+  allocation's own randomization does not change the caller's stream.
+
 ## Value
 
 A list with two elements.
@@ -28,6 +35,19 @@ A list with two elements.
 - `rowsEachlist` is a table with a summary of cases.
 
 - `data_locations` is a data frame with the entries for each location
+
+## Details
+
+To reproduce an allocation previously made with
+`set.seed(s); split_families(l, data)`, use
+`split_families(l, data, seed = s)`.
+
+## Reproducibility
+
+The result records effective inputs and the resolved seed in
+`metadata$parameters`. Under the same package versions and RNG settings,
+rebuild a result `x` with
+`do.call(split_families, x$metadata$parameters)`.
 
 ## Author
 
@@ -56,33 +76,33 @@ head(gen.list)
 #> 5     5 SB-5     37
 #> 6     6 SB-6     29
 # Now we are going to use the split_families() function.
-split_population <- split_families(l = 8, data = gen.list)
+split_population <- split_families(l = 8, data = gen.list, seed = 77)
 print(split_population)
 #> Split families: 
 #> 
 #> 
 #>  Data frame with the summary of cases by location: 
 #>     Location   n
-#> 1 Location 1 244
-#> 2 Location 2 256
-#> 3 Location 3 250
-#> 4 Location 4 245
-#> 5 Location 5 258
-#> 6 Location 6 245
-#> 7 Location 7 246
-#> 8 Location 8 256
+#> 1 Location 1 247
+#> 2 Location 2 247
+#> 3 Location 3 262
+#> 4 Location 4 249
+#> 5 Location 5 251
+#> 6 Location 6 243
+#> 7 Location 7 249
+#> 8 Location 8 252
 #> 
 #>  10 First observations of the data frame with the entries for each location: 
 #>    ENTRY    NAME FAMILY   LOCATION
-#> 1    967  SB-967      1 Location 1
-#> 2   1565 SB-1565      2 Location 1
-#> 3   1030 SB-1030      2 Location 1
-#> 4   1276 SB-1276      2 Location 1
-#> 5   1953 SB-1953      3 Location 1
+#> 1    168  SB-168      1 Location 1
+#> 2    337  SB-337      1 Location 1
+#> 3   1529 SB-1529      2 Location 1
+#> 4    171  SB-171      2 Location 1
+#> 5   1317 SB-1317      2 Location 1
 #> 6    673  SB-673      3 Location 1
-#> 7    423  SB-423      4 Location 1
-#> 8   1977 SB-1977      4 Location 1
-#> 9    882  SB-882      5 Location 1
+#> 7   1647 SB-1647      3 Location 1
+#> 8    196  SB-196      4 Location 1
+#> 9    829  SB-829      4 Location 1
 #> 10  1379 SB-1379      5 Location 1
 summary(split_population)
 #> Split families: 
@@ -91,26 +111,26 @@ summary(split_population)
 #> 
 #> 'data.frame':    8 obs. of  2 variables:
 #>  $ Location: chr  "Location 1" "Location 2" "Location 3" "Location 4" ...
-#>  $ n       : num  244 256 250 245 258 245 246 256
+#>  $ n       : num  247 247 262 249 251 243 249 252
 #> 2. Structure of the data frame with the entries for each location: 
 #> 
 #> 'data.frame':    2000 obs. of  4 variables:
-#>  $ ENTRY   : int  967 1565 1030 1276 1953 673 423 1977 882 1379 ...
-#>  $ NAME    : chr  "SB-967" "SB-1565" "SB-1030" "SB-1276" ...
-#>  $ FAMILY  : num  1 2 2 2 3 3 4 4 5 5 ...
+#>  $ ENTRY   : int  168 337 1529 171 1317 673 1647 196 829 1379 ...
+#>  $ NAME    : chr  "SB-168" "SB-337" "SB-1529" "SB-171" ...
+#>  $ FAMILY  : num  1 1 2 2 2 3 3 4 4 5 ...
 #>  $ LOCATION: chr  "Location 1" "Location 1" "Location 1" "Location 1" ...
 head(split_population$data_locations,12)
 #>    ENTRY    NAME FAMILY   LOCATION
-#> 1    967  SB-967      1 Location 1
-#> 2   1565 SB-1565      2 Location 1
-#> 3   1030 SB-1030      2 Location 1
-#> 4   1276 SB-1276      2 Location 1
-#> 5   1953 SB-1953      3 Location 1
+#> 1    168  SB-168      1 Location 1
+#> 2    337  SB-337      1 Location 1
+#> 3   1529 SB-1529      2 Location 1
+#> 4    171  SB-171      2 Location 1
+#> 5   1317 SB-1317      2 Location 1
 #> 6    673  SB-673      3 Location 1
-#> 7    423  SB-423      4 Location 1
-#> 8   1977 SB-1977      4 Location 1
-#> 9    882  SB-882      5 Location 1
+#> 7   1647 SB-1647      3 Location 1
+#> 8    196  SB-196      4 Location 1
+#> 9    829  SB-829      4 Location 1
 #> 10  1379 SB-1379      5 Location 1
-#> 11   740  SB-740      6 Location 1
-#> 12   910  SB-910      6 Location 1
+#> 11  1384 SB-1384      5 Location 1
+#> 12  1631 SB-1631      6 Location 1
 ```

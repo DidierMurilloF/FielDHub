@@ -68,13 +68,16 @@ RCBD(
 - checks:
 
   (optional) Checks to repeat within every block. Either a positive
-  integer `N`, meaning the first `N` entries of `data` (or of a
-  character vector `t`) are the checks, or a character vector of check
-  labels. `checks` sits after `data` in the argument list (rather than
-  next to `t`, where it might otherwise go) precisely so that `data`
-  keeps its original positional slot and existing positional calls to
-  `RCBD()` keep working unchanged. By default `checks = NULL`, which
-  produces an ordinary RCBD.
+  integer `N` or a character vector of check labels. When `data` or a
+  character vector `t` supplies a pool of entries, `N` takes that pool's
+  first `N` entries as the checks; when no pool is supplied (`t` is a
+  bare count), `N` instead generates its own check labels `"CH1".."CHN"`
+  ahead of the auto-generated test entries `"T1".."Tt"`. `checks` sits
+  after `data` in the argument list (rather than next to `t`, where it
+  might otherwise go) precisely so that `data` keeps its original
+  positional slot and existing positional calls to `RCBD()` keep working
+  unchanged. By default `checks = NULL`, which produces an ordinary
+  RCBD.
 
 - rep_checks:
 
@@ -94,6 +97,9 @@ RCBD(
 
 A list with five elements.
 
+- `metadata` records the design, schema/package versions, seed,
+  random-number settings and effective input parameters.
+
 - `infoDesign` is a list with information on the design parameters.
 
 - `layoutRandom` is the RCBD layout randomization for each location.
@@ -108,20 +114,27 @@ A list with five elements.
 
 ## Details
 
+The result records effective inputs, the resolved seed and the starting
+plot numbers in `metadata$parameters`. Under the same package versions
+and RNG settings, rebuild a result `x` with
+`do.call(RCBD, x$metadata$parameters)`.
+
 When `checks` is supplied, one or more checks are repeated multiple
 times within every block, while every test entry still appears exactly
 once. In a classical RCBD, the residual is the treatment-by-block
 interaction; repeating checks inside a block instead supplies a
 within-block estimate of error and a form of local control.
 
-`checks` accepts either a single positive integer `N` (the first `N`
-entries of `data`, or of a character vector `t`, are the checks) or a
-character vector of check labels. When a pool of entries is supplied
-through `data` or a character `t`, every label named in `checks` must
-already exist in that pool; an unmatched label is an error that also
-names the closest case-insensitive match, if any. When `t` is a bare
-count (no pool supplied), the check labels are new and are appended to
-the auto-generated test entries.
+`checks` accepts either a single positive integer `N` or a character
+vector of check labels. When a pool of entries is supplied through
+`data` or a character `t`, an integer `N` takes the first `N` entries of
+that pool as the checks, and a character vector of labels must already
+exist in that pool; an unmatched label is an error that also names the
+closest case-insensitive match, if any. When no pool is supplied (`t` is
+a bare count), the labels are generated instead: a character `checks` is
+appended to the auto-generated test entries, while an integer `N`
+generates its own check labels `"CH1".."CHN"` ahead of the
+auto-generated test entries `"T1".."Tt"`.
 
 `rep_checks` sets how many times each check repeats within a block: a
 single value is recycled across all checks, or one value can be supplied

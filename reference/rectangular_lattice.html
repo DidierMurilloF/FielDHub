@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">FielDHub</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -18,7 +18,10 @@
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/sparse_allocation.html">Sparse Allocation/Testing</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/scientific_validation.html">Scientific Validation and Computational Limits</a></li>
+    <li><a class="dropdown-item" href="../articles/architecture.html">Architecture and Compatibility Contracts</a></li>
+    <li><a class="dropdown-item" href="../articles/extending_fieldhub.html">Adding Designs and Formats</a></li>
+    <li><a class="dropdown-item" href="../articles/sparse_allocation.html">Sparse Allocation/Testing</a></li>
     <li><a class="dropdown-item" href="../articles/diagonal_arrangement.html">Unreplicated Diagonal Arrangement Design</a></li>
     <li><a class="dropdown-item" href="../articles/optimized_arrangement.html">Unreplicated Optimized Arrangement Design</a></li>
     <li><a class="dropdown-item" href="../articles/RCBD_augmented.html">Augmented Randomized Complete Block Design</a></li>
@@ -77,7 +80,8 @@
 <span>  plotNumber <span class="op">=</span> <span class="fl">101</span>,</span>
 <span>  locationNames <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  data <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  data <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  reps <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -86,7 +90,7 @@
 
 
 <dl><dt id="arg-t">t<a class="anchor" aria-label="anchor" href="#arg-t"></a></dt>
-<dd><p>Number of  treatments.</p></dd>
+<dd><p>Number of treatments, or a character vector with the treatment labels.</p></dd>
 
 
 <dt id="arg-k">k<a class="anchor" aria-label="anchor" href="#arg-k"></a></dt>
@@ -94,7 +98,7 @@
 
 
 <dt id="arg-r">r<a class="anchor" aria-label="anchor" href="#arg-r"></a></dt>
-<dd><p>Number of blocks (full resolvable replicates).</p></dd>
+<dd><p>Deprecated alias for <code>reps</code>; positional calls remain supported.</p></dd>
 
 
 <dt id="arg-l">l<a class="anchor" aria-label="anchor" href="#arg-l"></a></dt>
@@ -116,12 +120,25 @@
 <dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
 <dd><p>(optional) Data frame with label list of treatments.</p></dd>
 
+
+<dt id="arg-reps">reps<a class="anchor" aria-label="anchor" href="#arg-reps"></a></dt>
+<dd><p>Number of full resolvable replicates per location.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A list with two elements.</p><ul><li><p><code>infoDesign</code> is a list with information on the design parameters.</p></li>
 <li><p><code>fieldBook</code> is a data frame with the rectangular lattice design field book.</p></li>
 </ul></div>
+    <div class="section level2">
+    <h2 id="reproducibility">Reproducibility<a class="anchor" aria-label="anchor" href="#reproducibility"></a></h2>
+
+
+<p>The result records effective inputs and the resolved seed in
+<code>metadata$parameters</code>, using <code>reps</code> for replication. Under the
+same package versions and RNG settings, rebuild a result <code>x</code> with
+<code>do.call(rectangular_lattice, x$metadata$parameters)</code>.</p>
+    </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Edmondson., R. N. (2021). blocksdesign: Nested and crossed block designs for factorial and
@@ -141,7 +158,7 @@ unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Example 1: Generates a rectangular lattice design with 6 full blocks, 4 units per IBlock (k)</span></span></span>
 <span class="r-in"><span><span class="co"># and 20 treatments in one location.</span></span></span>
-<span class="r-in"><span><span class="va">rectangularLattice1</span> <span class="op">&lt;-</span> <span class="fu">rectangular_lattice</span><span class="op">(</span>t <span class="op">=</span> <span class="fl">20</span>, k <span class="op">=</span> <span class="fl">4</span>, r <span class="op">=</span> <span class="fl">6</span>, l <span class="op">=</span> <span class="fl">1</span>, </span></span>
+<span class="r-in"><span><span class="va">rectangularLattice1</span> <span class="op">&lt;-</span> <span class="fu">rectangular_lattice</span><span class="op">(</span>t <span class="op">=</span> <span class="fl">20</span>, k <span class="op">=</span> <span class="fl">4</span>, reps <span class="op">=</span> <span class="fl">6</span>, l <span class="op">=</span> <span class="fl">1</span>,</span></span>
 <span class="r-in"><span>                                           plotNumber <span class="op">=</span> <span class="fl">101</span>,</span></span>
 <span class="r-in"><span>                                           locationNames <span class="op">=</span> <span class="st">"FARGO"</span>, </span></span>
 <span class="r-in"><span>                                           seed <span class="op">=</span> <span class="fl">126</span><span class="op">)</span></span></span>
@@ -199,7 +216,7 @@ unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4     4      ND-4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5     5      ND-5</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6     6      ND-6</span>
-<span class="r-in"><span><span class="va">rectangularLattice2</span> <span class="op">&lt;-</span> <span class="fu">rectangular_lattice</span><span class="op">(</span>t <span class="op">=</span> <span class="fl">56</span>, k <span class="op">=</span> <span class="fl">7</span>, r <span class="op">=</span> <span class="fl">5</span>, l <span class="op">=</span> <span class="fl">2</span>, </span></span>
+<span class="r-in"><span><span class="va">rectangularLattice2</span> <span class="op">&lt;-</span> <span class="fu">rectangular_lattice</span><span class="op">(</span>t <span class="op">=</span> <span class="fl">56</span>, k <span class="op">=</span> <span class="fl">7</span>, reps <span class="op">=</span> <span class="fl">5</span>, l <span class="op">=</span> <span class="fl">2</span>,</span></span>
 <span class="r-in"><span>                                           plotNumber <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1001</span>,<span class="fl">2001</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                                           locationNames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Loc1"</span>, <span class="st">"Loc2"</span><span class="op">)</span>, </span></span>
 <span class="r-in"><span>                                           seed <span class="op">=</span> <span class="fl">127</span>,</span></span>

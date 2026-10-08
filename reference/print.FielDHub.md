@@ -1,6 +1,8 @@
 # Print a `FielDHub` object
 
-Prints information about any `FielDHub` function.
+Prints the design parameters and the first rows of the field book of any
+`FielDHub` design, including results saved by earlier versions of
+FielDHub.
 
 ## Usage
 
@@ -41,7 +43,7 @@ Didier Murillo \[aut\]
 ``` r
 # Example 1: Generates a CRD design with 5 treatments and 5 reps each.
 crd1 <- CRD(t = 5, reps = 5, plotNumber = 101,
-seed = 1985, locationName = "Fargo")
+seed = 1985, locationNames = "Fargo")
 crd1$infoDesign
 #> $numberofTreatments
 #> [1] 5

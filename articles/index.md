@@ -4,10 +4,14 @@
 
 - [Alpha Lattice
   Design](https://didiermurillof.github.io/FielDHub/articles/alpha_lattice.md):
+- [Architecture and compatibility
+  contracts](https://didiermurillof.github.io/FielDHub/articles/architecture.md):
 - [Completely Randomized
   Design](https://didiermurillof.github.io/FielDHub/articles/crd.md):
 - [Unreplicated Diagonal Arrangement
   Design](https://didiermurillof.github.io/FielDHub/articles/diagonal_arrangement.md):
+- [Adding designs and
+  formats](https://didiermurillof.github.io/FielDHub/articles/extending_fieldhub.md):
 - [UNKNOWN
   TITLE](https://didiermurillof.github.io/FielDHub/articles/news/fieldhub-0-1-0.md):
 - [UNKNOWN
@@ -36,6 +40,8 @@
   Design](https://didiermurillof.github.io/FielDHub/articles/rectangular_lattice.md):
 - [Row-Column
   Design](https://didiermurillof.github.io/FielDHub/articles/row_column.md):
+- [Scientific validation and computational
+  limits](https://didiermurillof.github.io/FielDHub/articles/scientific_validation.md):
 - [Sparse
   Allocation](https://didiermurillof.github.io/FielDHub/articles/sparse_allocation.md):
 - [Split-Plot

@@ -4,10 +4,13 @@
 <url><loc>https://didiermurillof.github.io/FielDHub/CONTRIBUTING.html</loc></url>
 <url><loc>https://didiermurillof.github.io/FielDHub/LICENSE-text.html</loc></url>
 <url><loc>https://didiermurillof.github.io/FielDHub/LICENSE.html</loc></url>
+<url><loc>https://didiermurillof.github.io/FielDHub/RELEASING.html</loc></url>
 <url><loc>https://didiermurillof.github.io/FielDHub/articles/RCBD_augmented.html</loc></url>
 <url><loc>https://didiermurillof.github.io/FielDHub/articles/alpha_lattice.html</loc></url>
+<url><loc>https://didiermurillof.github.io/FielDHub/articles/architecture.html</loc></url>
 <url><loc>https://didiermurillof.github.io/FielDHub/articles/crd.html</loc></url>
 <url><loc>https://didiermurillof.github.io/FielDHub/articles/diagonal_arrangement.html</loc></url>
+<url><loc>https://didiermurillof.github.io/FielDHub/articles/extending_fieldhub.html</loc></url>
 <url><loc>https://didiermurillof.github.io/FielDHub/articles/full_factorial.html</loc></url>
 <url><loc>https://didiermurillof.github.io/FielDHub/articles/incomplete_blocks.html</loc></url>
 <url><loc>https://didiermurillof.github.io/FielDHub/articles/index.html</loc></url>
@@ -22,6 +25,7 @@
 <url><loc>https://didiermurillof.github.io/FielDHub/articles/rcbd.html</loc></url>
 <url><loc>https://didiermurillof.github.io/FielDHub/articles/rectangular_lattice.html</loc></url>
 <url><loc>https://didiermurillof.github.io/FielDHub/articles/row_column.html</loc></url>
+<url><loc>https://didiermurillof.github.io/FielDHub/articles/scientific_validation.html</loc></url>
 <url><loc>https://didiermurillof.github.io/FielDHub/articles/sparse_allocation.html</loc></url>
 <url><loc>https://didiermurillof.github.io/FielDHub/articles/split_plot.html</loc></url>
 <url><loc>https://didiermurillof.github.io/FielDHub/articles/split_split_plot.html</loc></url>
@@ -34,11 +38,16 @@
 <url><loc>https://didiermurillof.github.io/FielDHub/reference/RCBD.html</loc></url>
 <url><loc>https://didiermurillof.github.io/FielDHub/reference/RCBD_augmented.html</loc></url>
 <url><loc>https://didiermurillof.github.io/FielDHub/reference/alpha_lattice.html</loc></url>
+<url><loc>https://didiermurillof.github.io/FielDHub/reference/design_arguments.html</loc></url>
+<url><loc>https://didiermurillof.github.io/FielDHub/reference/design_formats.html</loc></url>
+<url><loc>https://didiermurillof.github.io/FielDHub/reference/design_results.html</loc></url>
 <url><loc>https://didiermurillof.github.io/FielDHub/reference/diagonal_arrangement.html</loc></url>
 <url><loc>https://didiermurillof.github.io/FielDHub/reference/do_optim.html</loc></url>
+<url><loc>https://didiermurillof.github.io/FielDHub/reference/field_layout.html</loc></url>
 <url><loc>https://didiermurillof.github.io/FielDHub/reference/full_factorial.html</loc></url>
 <url><loc>https://didiermurillof.github.io/FielDHub/reference/incomplete_blocks.html</loc></url>
 <url><loc>https://didiermurillof.github.io/FielDHub/reference/index.html</loc></url>
+<url><loc>https://didiermurillof.github.io/FielDHub/reference/latin_rectangle.html</loc></url>
 <url><loc>https://didiermurillof.github.io/FielDHub/reference/latin_square.html</loc></url>
 <url><loc>https://didiermurillof.github.io/FielDHub/reference/multi_location_prep.html</loc></url>
 <url><loc>https://didiermurillof.github.io/FielDHub/reference/optimized_arrangement.html</loc></url>
@@ -47,7 +56,10 @@
 <url><loc>https://didiermurillof.github.io/FielDHub/reference/print.FielDHub.html</loc></url>
 <url><loc>https://didiermurillof.github.io/FielDHub/reference/print.fieldLayout.html</loc></url>
 <url><loc>https://didiermurillof.github.io/FielDHub/reference/print.summary.FielDHub.html</loc></url>
+<url><loc>https://didiermurillof.github.io/FielDHub/reference/read_design.html</loc></url>
 <url><loc>https://didiermurillof.github.io/FielDHub/reference/rectangular_lattice.html</loc></url>
+<url><loc>https://didiermurillof.github.io/FielDHub/reference/reproduce_design.html</loc></url>
+<url><loc>https://didiermurillof.github.io/FielDHub/reference/reproduce_simulation.html</loc></url>
 <url><loc>https://didiermurillof.github.io/FielDHub/reference/row_column.html</loc></url>
 <url><loc>https://didiermurillof.github.io/FielDHub/reference/run_app.html</loc></url>
 <url><loc>https://didiermurillof.github.io/FielDHub/reference/sparse_allocation.html</loc></url>
@@ -58,5 +70,6 @@
 <url><loc>https://didiermurillof.github.io/FielDHub/reference/strip_plot.html</loc></url>
 <url><loc>https://didiermurillof.github.io/FielDHub/reference/summary.FielDHub.html</loc></url>
 <url><loc>https://didiermurillof.github.io/FielDHub/reference/swap_pairs.html</loc></url>
+<url><loc>https://didiermurillof.github.io/FielDHub/reference/write_design.html</loc></url>
 </urlset>
 

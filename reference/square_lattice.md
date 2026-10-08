@@ -13,7 +13,8 @@ square_lattice(
   plotNumber = 101,
   locationNames = NULL,
   seed = NULL,
-  data = NULL
+  data = NULL,
+  reps = NULL
 )
 ```
 
@@ -21,7 +22,7 @@ square_lattice(
 
 - t:
 
-  Number of treatments.
+  Number of treatments, or a character vector with the treatment labels.
 
 - k:
 
@@ -29,7 +30,7 @@ square_lattice(
 
 - r:
 
-  Number of blocks (full resolvable replicates).
+  Deprecated alias for `reps`; positional calls remain supported.
 
 - l:
 
@@ -53,6 +54,10 @@ square_lattice(
 
   (optional) Data frame with label list of treatments.
 
+- reps:
+
+  Number of full resolvable replicates per location.
+
 ## Value
 
 A list with two elements.
@@ -60,6 +65,13 @@ A list with two elements.
 - `infoDesign` is a list with information on the design parameters.
 
 - `fieldBook` is a data frame with the square lattice design field book.
+
+## Reproducibility
+
+The result records effective inputs and the resolved seed in
+`metadata$parameters`, using `reps` for replication. Under the same
+package versions and RNG settings, rebuild a result `x` with
+`do.call(square_lattice, x$metadata$parameters)`.
 
 ## References
 
@@ -77,7 +89,7 @@ Thomas Walk \[ctb\], Johan Aparicio \[ctb\], Richard Horsley \[ctb\]
 ``` r
 # Example 1: Generates a square lattice design with 5 full blocks, 8 units per IBlock,
 # 8 IBlocks for a square number of treatmens of 64 in two locations.
-squareLattice1 <- square_lattice(t = 64, k = 8, r = 5, l = 2, 
+squareLattice1 <- square_lattice(t = 64, k = 8, reps = 5, l = 2,
                                  plotNumber = c(1001, 2001),
                                  locationNames = c("FARGO", "MINOT"), 
                                  seed = 1986)
@@ -135,7 +147,7 @@ head(treatment_list)
 #> 4     4        G4
 #> 5     5        G5
 #> 6     6        G6
-squareLattice2 <- square_lattice(t = 49, k = 7, r = 3, l = 1, 
+squareLattice2 <- square_lattice(t = 49, k = 7, reps = 3, l = 1,
                                  plotNumber = 1001,
                                  locationNames = "CASSELTON", 
                                  seed = 1986,

@@ -24,7 +24,9 @@ plot(x, ...)
 
   - `l` a integer to specify the location to plot.
 
-  - `planter` it can be `serpentine` or `cartesian`.
+  - `planter` it can be `serpentine` or `cartesian`. It has no effect on
+    split-plot and split-split-plot designs in complete blocks
+    (`type = 2`), whose whole plots are numbered in a fixed order.
 
   - `stacked` it can be `vertical` or `horizontal` stacked layout.
 

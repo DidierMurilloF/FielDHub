@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">FielDHub</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -18,7 +18,10 @@
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/sparse_allocation.html">Sparse Allocation/Testing</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/scientific_validation.html">Scientific Validation and Computational Limits</a></li>
+    <li><a class="dropdown-item" href="../articles/architecture.html">Architecture and Compatibility Contracts</a></li>
+    <li><a class="dropdown-item" href="../articles/extending_fieldhub.html">Adding Designs and Formats</a></li>
+    <li><a class="dropdown-item" href="../articles/sparse_allocation.html">Sparse Allocation/Testing</a></li>
     <li><a class="dropdown-item" href="../articles/diagonal_arrangement.html">Unreplicated Diagonal Arrangement Design</a></li>
     <li><a class="dropdown-item" href="../articles/optimized_arrangement.html">Unreplicated Optimized Arrangement Design</a></li>
     <li><a class="dropdown-item" href="../articles/RCBD_augmented.html">Augmented Randomized Complete Block Design</a></li>
@@ -84,7 +87,10 @@
 <span>  exptName <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  locationNames <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  multiLocationData <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  data <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  data <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  year <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  checksPercent <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  sameEntries <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -158,6 +164,22 @@ By default <code>multiLocationData = FALSE</code>.</p></dd>
 <dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
 <dd><p>(optional) Data frame with 2 columns: <code>ENTRY | NAME </code>.</p></dd>
 
+
+<dt id="arg-year">year<a class="anchor" aria-label="anchor" href="#arg-year"></a></dt>
+<dd><p>(optional) Year recorded in the <code>YEAR</code> column of the field book.
+By default the current year.</p></dd>
+
+
+<dt id="arg-checkspercent">checksPercent<a class="anchor" aria-label="anchor" href="#arg-checkspercent"></a></dt>
+<dd><p>(optional) Percentage of checks, one of the options available
+for the field dimensions. By default the last (largest) option.</p></dd>
+
+
+<dt id="arg-sameentries">sameEntries<a class="anchor" aria-label="anchor" href="#arg-sameentries"></a></dt>
+<dd><p>(optional) Logical. When <code>TRUE</code> and <code>kindExpt = "DBUDC"</code>,
+every block holds the same entries, and all blocks must have the same size.
+By default <code>sameEntries = FALSE</code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -167,6 +189,15 @@ By default <code>multiLocationData = FALSE</code>.</p></dd>
 <li><p><code>data_entry</code> is a data frame with the data input.</p></li>
 <li><p><code>fieldBook</code> is a data frame with field book design. This includes the index (Row, Column).</p></li>
 </ul></div>
+    <div class="section level2">
+    <h2 id="reproducibility">Reproducibility<a class="anchor" aria-label="anchor" href="#reproducibility"></a></h2>
+
+
+<p>The result records effective inputs and the resolved seed in
+<code>metadata$parameters</code>. Under the same package versions and RNG
+settings, rebuild a result <code>x</code> with
+<code>do.call(diagonal_arrangement, x$metadata$parameters)</code>.</p>
+    </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Clarke, G. P. Y., &amp; Stefanova, K. T. (2011). Optimal design for early-generation plant
@@ -394,7 +425,7 @@ Zealand Journal of Statistics, 53(4), 461–480.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $rep_checks</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $rep_checks[[1]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 10 13 13 11 13</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 10 13 11 13 13</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $locations</span>
@@ -410,7 +441,7 @@ Zealand Journal of Statistics, 53(4), 461–480.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $seed</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 24210</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 346871191</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $id_design</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 15</span>
@@ -418,98 +449,98 @@ Zealand Journal of Statistics, 53(4), 461–480.</p>
 <span class="r-in"><span><span class="va">spatDB</span><span class="op">$</span><span class="va">layoutRandom</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       Col1 Col2 Col3 Col4 Col5 Col6 Col7 Col8 Col9 Col10 Col11 Col12 Col13</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row30  702    3  686  699  642  709  701  689  664   720   696   633   708</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row29  722  649  616  627  716    4  673  639  711   641   680   688   710</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row28  698  615  631  674  672  636  626  685  608     4   651   697   650</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row27    5  679  629  677  606  621  692  662  694   725   663   669   666</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row26  661  622  610  678    3  612  687  657  713   609   675   670   704</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row25  566  576  522  514  491  575  433  598    4   432   473   567   454</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row24  529  500  488  518  580  458  526  525  419   480   548   605     5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row23  508  410  602    3  471  588  470  498  492   474   437   472   558</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row22  442  541  468  552  463  482  449    2  584   443   423   599   535</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row21  446  475  589  467  537  422  542  416  572   435   411     3   487</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row20  560  547    3  460  597  429  448  469  590   409   464   506   478</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row19  600  530  550  504  520  521    1  461  536   556   486   509   519</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row18  436  544  447  424  415  545  543  438  512   595     4   578   534</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row17  334    5  340  361  396  345  365  342  384   373   390   392   316</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row16  367  366  335  387  404    2  311  395  389   348   328   394   380</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row15  397  320  356  351  314  327  339  403  383     5   377   319   374</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row14    1  321  331  337  353  402  352  364  358   322   369   329   405</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row13  209  256  242  296    5  201  272  237  310   279   158   243   274</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row12  186  292  222  193  275  179  200  261    3   252   204   250   289</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row11  221  168  176  301  297  184  224  271  244   263   161   188     2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row10  306  206  307    2  300  298  255  278  284   295   259   173   241</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row9   302  190  251  170  187  178  293    2  157   230   260   240   159</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row8   246  181  189  277  192  232  162  228  305   167   245     5   194</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row7    58   41    1  124   57   55   11  199  171   254   291   182   304</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row6    96  133   44   81   98  139    2   66   62     7    53    70    20</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row5   140   85   65   31   39  106   73   33   76   112     4    34    54</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row4   145    3   50  128   64  137   95   42  144   120    92   118   115</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row3   107   67   61  149   80    5  101   47   27    77   151   127    74</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row2   138  116  122   88  154  117   29  110   78     4    60    83   113</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row1     2   94  102  114   26   79   91  131   25   109     8     6    49</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row30  616    2  651  672  614  619  698  668  667   673   661   617   669</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row29  607  706  658  720  645    4  717  626  722   696   638   612   681</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row28  719  646  622  697  662  693  631  629  680     4   640   688   630</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row27    1  682  663  633  708  723  623  639  624   642   704   613   636</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row26  625  606  678  628    3  644  632  709  677   683   649   711   610</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row25  424  581  476  474  493  512  595  572    2   472   487   471   590</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row24  526  525  599  570  446  421  464  585  555   428   604   538     3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row23  508  408  486    3  591  447  495  436  506   443   568   573   554</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row22  583  513  593  537  435  445  575    1  454   600   420   517   569</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row21  541  489  565  571  587  545  494  566  459   499   481     2   515</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row20  484  546    2  514  532  504  533  539  559   488   507   550   516</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row19  584  455  458  406  556  597    1  553  462   438   518   592   485</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row18  535  582  429  498  414  534  564  431  441   475     1   449   528</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row17  336    3  385  333  328  340  346  349  320   342   330   375   339</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row16  376  354  350  338  404    1  345  316  365   391   369   373   360</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row15  374  368  384  361  386  372  337  396  364     2   347   370   405</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row14    4  311  335  378  402  358  380  319  343   383   388   317   381</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row13  284  251  300  239    4  303  175  197  237   191   206   201   308</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row12  193  214  198  257  157  171  192  177    5   236   291   249   294</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row11  278  186  245  285  187  222  256  269  176   217   233   163     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row10  169  231  210    1  272  304  258  277  179   261   164   196   204</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row9   194  185  274  299  215  178  158    2  161   209   298   288   170</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row8   281  276  259  306  221  211  265  205  286   166   310     4   181</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row7   140   84    4  105   32  150   91  301  238   199   173   219   225</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row6    66   51  138   90  107   65    5   89   92   153    19    26    56</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row5   130  119  134   41   33   50  104  116   28   127     4   100    37</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row4   111    1  133  114   43   95   60   64   52   123   128   137   143</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row3    94  102   80  129  146    2  141   82  142   125   122    18    62</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row2    21  149  139  144   22  101   16   25   24     5    79    86    10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row1     3   76  103   35   27   55  151   58  152    23   112    85   135</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       Col14 Col15 Col16 Col17 Col18 Col19 Col20 Col21 Col22 Col23 Col24 Col25</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row30   723     5   655   611   667   700   619   617   721   623   624   635</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row29   658   714   706   643   684     1   647   638   648   705   625   719</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row28   681   640   652   654   630   715   646   724   637     2   620   718</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row27     1   690   607   682   668   613   659   644   628   653   693   634</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row26   671   691   614   676     2   632   717   660   665   703   707   618</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row25   462   455   408   596   406   479   451   591     3   494   503   513</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row24   583   426   453   483   561   496   456   571   430   440   570   459</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row23   527   553   466     5   418   524   445   420   450   477   563   452</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row22   431   555   585   538   413   417   577     4   485   546   489   551</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row21   516   407   594   439   523   604   414   481   532   539   510     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row20   562   586     2   581   573   515   531   425   501   444   587   421</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row19   517   499   507   465   484   495     5   528   559   434   574   579</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row18   412   603   476   490   565   511   457   540   582   593     2   568</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row17   349     3   336   368   341   569   564   557   493   428   554   502</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row16   385   355   323   378   375     4   318   381   399   333   362   401</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row15   376   354   391   398   350   338   332   346   330     2   382   313</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row14     3   370   386   315   325   371   324   372   379   326   317   312</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row13   203   247   285   281     5   215   400   347   363   393   357   388</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row12   264   191   286   174   225   269   197   238     1   202   217   164</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row11   282   268   223   235   165   180   163   231   183   308   198   299</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row10   216   273   177     4   294   156   276   207   169   160   195   229</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row9    210   196   233   267   249   227   290     4   205   266   211   258</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row8    219   208   280   175   172   309   236   234   239   283   212     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row7    270   287     5   166   185   213   218   226   220   288   248   265</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row6    105    32    84    12   103    16     4    35    19    69    71    87</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row5    153   130    30    63   152   150    46   141    68    38     3    10</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row4    155     2   125   147    56   132     9   119    59    13   146   121</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row3     45    52    21    72   129     1    14    18    43    90    36    75</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row2     86   134    24    22    15   143    93    17    97     3    99   100</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row1      5   136    37    48    40   111   135   104   123    28    82   148</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row30   657     5   676   725   724   675   684   702   618   641   615   654</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row29   671   656   716   664   701     3   721   647   691   713   687   659</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row28   650   715   634   705   635   666   611   692   660     1   718   689</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row27     5   655   710   707   621   714   653   608   690   703   699   670</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row26   665   620   694   643     2   700   609   679   712   695   627   674</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row25   560   416   467   492   501   477   588   502     3   567   478   557</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row24   470   529   530   463   543   407   509   523   521   549   548   510</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row23   480   520   437     5   425   542   589   439   433   426   603   598</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row22   453   551   418   427   519   578   432     4   457   579   596   490</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row21   417   448   574   444   503   451   411   586   544   410   469     5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row20   452   522     4   468   442   562   430   413   576   601   412   563</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row19   440   505   500   409   580   479     4   419   482   461   483   465</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row18   602   547   496   558   456   422   577   450   497   423     5   491</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row17   403     4   392   329   366   524   531   466   540   536   434   605</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row16   344   351   395   326   393     5   356   314   379   353   332   398</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row15   318   327   352   315   363   313   322   390   371     5   367   400</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row14     2   357   324   359   401   323   399   334   348   362   382   394</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row13   267   268   230   309     5   195   389   321   355   377   312   331</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row12   297   242   275   282   240   247   293   254     3   235   182   270</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row11   167   279   213   307   156   244   218   202   212   207   264   262</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row10   174   203   246     1   271   292   253   250   227   302   266   287</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row9    243   188   296   180   305   248   283     3   189   232   165   290</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row8    255   273   226   183   228   224   280   184   229   289   160     5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row7    172   220     4   159   260   208   252   190   234   200   241   216</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row6     69    54    31    87    57   126     1   117   148    71    13    74</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row5    118    81    45   154    12    83    68    53    49    46     2    11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row4     47     3    98    73    20    88    30   121   108    72   136    29</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row3     34     7   132   147    39     2   109    15     8    77   106    14</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row2     97    17    44     9    75   145   113    63   131     3   110    36</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row1      5    78    96    59    48    99    40    61    67    42   115    38</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       Col26</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row30   645</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row29   695</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row28   712</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row27   683</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row26   656</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row25   497</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row24     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row23   533</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row22   427</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row21   505</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row20   549</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row19   592</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row18   601</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row17   441</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row16   343</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row15   359</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row14   360</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row13   344</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row12   303</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row11     3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row10   214</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row9    253</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row8    257</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row7    262</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row6    108</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row5     89</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row4     51</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row3    142</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row2    126</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row1     23</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row30   685</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row29   648</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row28   652</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row27   637</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row26   686</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row25   460</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row24     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row23   561</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row22   511</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row21   415</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row20   473</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row19   594</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row18   552</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row17   527</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row16   325</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row15   341</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row14   397</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row13   387</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row12   263</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row11     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row10   162</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row9    168</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row8    223</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row7    295</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row6      6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row5    120</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row4     70</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row3     93</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row2    124</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row1    155</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="va">spatDB</span><span class="op">$</span><span class="va">plotsNumber</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]</span>
@@ -609,18 +640,18 @@ Zealand Journal of Statistics, 53(4), 461–480.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">spatDB</span><span class="op">$</span><span class="va">fieldBook</span>,<span class="fl">12</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    ID   EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1   1 Block1        1 2026    1   1      1      2     2       CH2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2   2 Block1        1 2026    2   1      2      0    94       G94</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3   3 Block1        1 2026    3   1      3      0   102      G102</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4   4 Block1        1 2026    4   1      4      0   114      G114</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5   5 Block1        1 2026    5   1      5      0    26       G26</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6   6 Block1        1 2026    6   1      6      0    79       G79</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7   7 Block1        1 2026    7   1      7      0    91       G91</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8   8 Block1        1 2026    8   1      8      0   131      G131</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9   9 Block1        1 2026    9   1      9      0    25       G25</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10 10 Block1        1 2026   10   1     10      0   109      G109</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11 11 Block1        1 2026   11   1     11      0     8        G8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12 12 Block1        1 2026   12   1     12      0     6        G6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1   1 Block1        1 2026    1   1      1      3     3       CH3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   2 Block1        1 2026    2   1      2      0    76       G76</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3   3 Block1        1 2026    3   1      3      0   103      G103</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4   4 Block1        1 2026    4   1      4      0    35       G35</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5   5 Block1        1 2026    5   1      5      0    27       G27</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6   6 Block1        1 2026    6   1      6      0    55       G55</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7   7 Block1        1 2026    7   1      7      0   151      G151</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8   8 Block1        1 2026    8   1      8      0    58       G58</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9   9 Block1        1 2026    9   1      9      0   152      G152</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10 10 Block1        1 2026   10   1     10      0    23       G23</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11 11 Block1        1 2026   11   1     11      0   112      G112</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12 12 Block1        1 2026   12   1     12      0    85       G85</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 3: Generates a spatial decision block diagonal arrangement design in one location</span></span></span>
 <span class="r-in"><span><span class="co"># with 270 treatments allocated in 3 experiments or blocks for a field with dimensions</span></span></span>
@@ -657,7 +688,7 @@ Zealand Journal of Statistics, 53(4), 461–480.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $rep_checks</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $rep_checks[[1]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 7 6 8 9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 8 7 7 8</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $locations</span>
@@ -673,7 +704,7 @@ Zealand Journal of Statistics, 53(4), 461–480.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $seed</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 72391</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 432744511</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $id_design</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 15</span>
@@ -681,47 +712,47 @@ Zealand Journal of Statistics, 53(4), 461–480.</p>
 <span class="r-in"><span><span class="va">spatAB</span><span class="op">$</span><span class="va">layoutRandom</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       Col1 Col2 Col3 Col4 Col5 Col6 Col7 Col8 Col9 Col10 Col11 Col12 Col13</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row20   82    1   56   57   70  144  172  148  146   173   219     4   229</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row19   49   42   69   21    3  103  111  151  102   157   237   249   221</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row18   44   10    9   29   12  109  177    3  106   149   262   225   226</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row17    2   43   90   16   71  162  176  136  104   138     4   191   185</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row16   75   88   36    1   30  110  133  175  180   158   193   253   186</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row15   85   45   91   19   13   97    2  171  154   105   252   204   245</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row14   86   67   14   83   93  134  161  100  140     4   211   217   251</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row13   33   92    3    6    5  116  160  101  117    98   227   263     2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row12   54   31   74   89    8    3  181  145   99   114   254   223   267</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row11   23    7   50   25   76  137  163  168    2   159   242   260   206</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row10   63    4   11   24   61  139  182  167  153   130   208     3   216</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row9    80   65   58   52    1  118  135  125  122   147   192   264   234</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row8    32   26   41   48   39  152  183    4  165    95   233   220   240</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row7     4   66   37   68   46  178  142  132   96   115     1   198   258</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row6    55   27   35    2   77  155  166  131  127   169   209   212   256</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row5    94   18   60   34   40  141    3  119  126   184   231   224   241</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row4    59   15   73   38   84  179  113  170  164     1   232   189   235</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row3    28   47    4   53   51  143  123  120  129   108   244   207     4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row2    64   20   17   72   81    4  107  150  174   156   210   230   222</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row1    79   62   78   22   87  121  124  112    1   128   228   261   213</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row20   18    1   29   75   82  159  107  117  125   112   220     4   185</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row19   70   94   30   26    1  162  144  113  105   122   230   187   257</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row18   68    5   59   79   90  153  130    1  139   135   241   231   218</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row17    3   41   76   53   13  142  179   97  121   145     4   222   201</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row16   45   31   50    3    8  161  151  111  109   155   223   215   263</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row15   80   21   83   44   48  170    2  164  183   143   217   236   268</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row14   17   51   81   38   16  158  177  150  132     3   208   232   199</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row13    9   69    4   64   23  178  148  120  106   126   243   258     3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row12    6   15   87   20   55    1  119  156  147   129   196   235   214</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row11   11   12   74   66   91  131   95  140    2   167   211   186   206</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row10   42    1   32   22   61  137  123   99  110   101   244     1   188</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row9    62   85   63   73    4  146  171  128  166    96   253   247   212</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row8    34   37   28   33   46  154  168    4  133   163   272   260   224</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row7     3   10   25   24   43  138  184  100  116   149     1   250   216</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row6    93   36   47    2   65  118  157  172  165   127   193   213   239</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row5    40   39   78   88   19  102    3  134  181   108   238   269   240</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row4    89   57   27   72   86   98  180  115  174     4   194   242   254</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row3    58   84    2   52   71  104  173  176  124   136   195   262     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row2    49   54   14   60   56    4  175  169  103   152   197   245   233</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row1     7   35   77   67   92  114  160  182    2   141   237   249   265</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       Col14 Col15</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row20   243   259</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row19   248     3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row18   246   196</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row17   269   265</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row16     2   190</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row15   214   257</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row14   188   266</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row13   272   255</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row12   201   203</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row11   202   270</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row10   205   215</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row9    268     3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row8    218   197</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row7    247   250</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row6      1   187</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row5    273   239</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row4    236   274</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row3    271   195</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row2    200   199</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row1    238   194</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row20   190   227</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row19   256     3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row18   252   259</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row17   226   203</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row16     1   255</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row15   198   273</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row14   251   205</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row13   221   266</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row12   271   207</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row11   261   225</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row10   267   204</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row9    264     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row8    274   248</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row7    200   234</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row6      2   189</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row5    229   219</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row4    270   192</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row3    202   210</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row2    246   209</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row1    228   191</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="va">spatAB</span><span class="op">$</span><span class="va">plotsNumber</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]</span>
@@ -770,18 +801,18 @@ Zealand Journal of Statistics, 53(4), 461–480.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">spatAB</span><span class="op">$</span><span class="va">fieldBook</span>,<span class="fl">12</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1   1 20WRA        1 2026    1   1      1      0    79    Gen-79</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2   2 20WRA        1 2026    2   1      2      0    62    Gen-62</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3   3 20WRA        1 2026    3   1      3      0    78    Gen-78</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4   4 20WRA        1 2026    4   1      4      0    22    Gen-22</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5   5 20WRA        1 2026    5   1      5      0    87    Gen-87</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6   6 20WRB        1 2026 1001   1      6      0   121   Gen-121</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7   7 20WRB        1 2026 1002   1      7      0   124   Gen-124</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8   8 20WRB        1 2026 1003   1      8      0   112   Gen-112</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9   9 20WRB        1 2026 1004   1      9      1     1   Check-1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10 10 20WRB        1 2026 1005   1     10      0   128   Gen-128</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11 11 20WRC        1 2026 2001   1     11      0   228   Gen-228</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12 12 20WRC        1 2026 2002   1     12      0   261   Gen-261</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1   1 20WRA        1 2026    1   1      1      0     7     Gen-7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   2 20WRA        1 2026    2   1      2      0    35    Gen-35</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3   3 20WRA        1 2026    3   1      3      0    77    Gen-77</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4   4 20WRA        1 2026    4   1      4      0    67    Gen-67</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5   5 20WRA        1 2026    5   1      5      0    92    Gen-92</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6   6 20WRB        1 2026 1001   1      6      0   114   Gen-114</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7   7 20WRB        1 2026 1002   1      7      0   160   Gen-160</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8   8 20WRB        1 2026 1003   1      8      0   182   Gen-182</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9   9 20WRB        1 2026 1004   1      9      2     2   Check-2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10 10 20WRB        1 2026 1005   1     10      0   141   Gen-141</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11 11 20WRC        1 2026 2001   1     11      0   237   Gen-237</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12 12 20WRC        1 2026 2002   1     12      0   249   Gen-249</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

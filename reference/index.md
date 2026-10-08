@@ -14,17 +14,32 @@
 - [`alpha_lattice()`](https://didiermurillof.github.io/FielDHub/reference/alpha_lattice.md)
   : Generates an Alpha Design
 
+- [`design_arguments`](https://didiermurillof.github.io/FielDHub/reference/design_arguments.md)
+  : Shared design arguments and compatibility
+
+- [`design_formats()`](https://didiermurillof.github.io/FielDHub/reference/design_formats.md)
+  : Supported recorded-design file formats
+
+- [`design_results`](https://didiermurillof.github.io/FielDHub/reference/design_results.md)
+  : Design results and reproducibility metadata
+
 - [`diagonal_arrangement()`](https://didiermurillof.github.io/FielDHub/reference/diagonal_arrangement.md)
   : Spatial Un-replicated Diagonal Arrangement Design
 
 - [`do_optim()`](https://didiermurillof.github.io/FielDHub/reference/do_optim.md)
   : Generate the sparse or p-rep allocation to multiple locations.
 
+- [`field_layout()`](https://didiermurillof.github.io/FielDHub/reference/field_layout.md)
+  : Field layout of a design
+
 - [`full_factorial()`](https://didiermurillof.github.io/FielDHub/reference/full_factorial.md)
   : Generates a Full Factorial Design
 
 - [`incomplete_blocks()`](https://didiermurillof.github.io/FielDHub/reference/incomplete_blocks.md)
   : Generates a Resolvable Incomplete Block Design
+
+- [`latin_rectangle()`](https://didiermurillof.github.io/FielDHub/reference/latin_rectangle.md)
+  : Randomized cyclic Latin rectangle
 
 - [`latin_square()`](https://didiermurillof.github.io/FielDHub/reference/latin_square.md)
   : Generates a Latin Square Design
@@ -58,8 +73,17 @@
 
   Print the summary of a `FielDHub` object
 
+- [`read_design()`](https://didiermurillof.github.io/FielDHub/reference/read_design.md)
+  : Read a validated recorded design
+
 - [`rectangular_lattice()`](https://didiermurillof.github.io/FielDHub/reference/rectangular_lattice.md)
   : Generates a Rectangular Lattice Design.
+
+- [`reproduce_design()`](https://didiermurillof.github.io/FielDHub/reference/reproduce_design.md)
+  : Reconstruct a design from its recorded inputs
+
+- [`reproduce_simulation()`](https://didiermurillof.github.io/FielDHub/reference/reproduce_simulation.md)
+  : Reconstruct recorded simulated responses
 
 - [`row_column()`](https://didiermurillof.github.io/FielDHub/reference/row_column.md)
   : Generates a Resolvable Row-Column Design (RowColD)
@@ -92,3 +116,6 @@
 
 - [`swap_pairs()`](https://didiermurillof.github.io/FielDHub/reference/swap_pairs.md)
   : Swap pairs in a matrix of integers
+
+- [`write_design()`](https://didiermurillof.github.io/FielDHub/reference/write_design.md)
+  : Write a recorded design or standalone replay script

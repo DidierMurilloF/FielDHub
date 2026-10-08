@@ -23,7 +23,8 @@ multi_location_prep(
   spread_reps = TRUE,
   data = NULL,
   allow_fillers = FALSE,
-  max_fillers = NULL
+  max_fillers = NULL,
+  year = NULL
 )
 ```
 
@@ -111,6 +112,11 @@ multi_location_prep(
   Maximum number of filler plots considered when dimensions are selected
   automatically. When `NULL`, up to 10 filler plots are considered.
 
+- year:
+
+  (optional) Year recorded in the `YEAR` column of the field book. By
+  default the current year.
+
 ## Value
 
 A list of class `FielDHub` with several elements.
@@ -150,10 +156,19 @@ A list of class `FielDHub` with several elements.
 
 - `list_locs` is a list with each location list of entries.
 
+- `multi_location_data` is a data frame with the entries of every
+  location: `LOCATION | ENTRY | NAME | REPS`.
+
 - `allocation` is a matrix with the allocation of treatments.
 
-- `size_locations` is a data frame with one column for each location and
-  one row with the size of the location.
+- `size_locations` is a named vector with the size of each location.
+
+## Reproducibility
+
+The result records effective inputs and the resolved seed in
+`metadata$parameters`. Under the same package versions and RNG settings,
+rebuild a result `x` with
+`do.call(multi_location_prep, x$metadata$parameters)`.
 
 ## References
 
@@ -168,27 +183,26 @@ Didier Murillo \[aut\], Salvador Gezan \[aut\], Jean-Marc Montpetit
 ## Examples
 
 ``` r
-# Example 1: Generates a spatially optimized multi-location p-rep design with 142 
-# genotypes. The number of copies per plant available for this experiment is 9. 
-# This experiment is carried out in 5 locations, and there are seven seeds available 
+# Example 1: Generates a spatially optimized multi-location p-rep design with 142
+# genotypes. The number of copies per plant available for this experiment is 9.
+# This experiment is carried out in 5 locations, and there are seven seeds available
 # for each plant to make replications.
 # In this case, we add three controls (checks) with six reps each.
-# With this setup, the experiment will have 142 treatments + 3 checks = 145 
-# entries and the number of plots per location after the allocation process 
-# will be 196. 
+# With this setup, the experiment will have 142 treatments + 3 checks = 145
+# entries and the number of plots per location after the allocation process
+# will be 196.
 # The average genotype allocation will be 1.5 copies per location.
 if (FALSE) { # \dontrun{
 optim_multi_prep <- multi_location_prep(
-  lines = 150,  
-  l = 5, 
-  copies_per_entry = 7, 
-  checks = 3, 
+  lines = 150,
+  l = 5,
+  copies_per_entry = 7,
+  checks = 3,
   rep_checks = c(6,6,6),
-  locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5"), 
+  locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5"),
   seed = 1234
 )
-designs <- optim_multi_prep$designs
-field_book_loc_1 <- designs$LOC1$fieldBook
-head(field_book_loc_1, 10)
+field_book <- optim_multi_prep$fieldBook
+head(subset(field_book, LOCATION == "LOC1"), 10)
 } # }
 ```

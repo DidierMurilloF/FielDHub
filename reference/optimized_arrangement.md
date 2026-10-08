@@ -21,7 +21,9 @@ optimized_arrangement(
   exptName = NULL,
   locationNames = NULL,
   spread_reps = TRUE,
-  data = NULL
+  data = NULL,
+  year = NULL,
+  rep_checks = NULL
 )
 ```
 
@@ -41,8 +43,7 @@ optimized_arrangement(
 
 - amountChecks:
 
-  Integer with the amount total of checks or a numeric vector with the
-  replicates of each check label.
+  Deprecated alias for `rep_checks`.
 
 - checks:
 
@@ -84,6 +85,16 @@ optimized_arrangement(
 
   (optional) Data frame with 3 columns: `ENTRY | NAME | REPS`.
 
+- year:
+
+  (optional) Year recorded in the `YEAR` column of the field book. By
+  default the current year.
+
+- rep_checks:
+
+  Integer with the total amount of checks, or a numeric vector with the
+  replicates of each check label.
+
 ## Value
 
 A list with five elements.
@@ -101,6 +112,13 @@ A list with five elements.
 
 - `fieldBook` is a data frame with field book design. This includes the
   index (Row, Column).
+
+## Reproducibility
+
+The result records effective inputs and the resolved seed in
+`metadata$parameters`. Under the same package versions and RNG settings,
+rebuild a result `x` with
+`do.call(optimized_arrangement, x$metadata$parameters)`.
 
 ## References
 
@@ -123,8 +141,8 @@ if (FALSE) { # \dontrun{
 optim_unrep1 <- optimized_arrangement(
   nrows = 14, 
   ncols = 10, 
-  lines = 120, 
-  amountChecks = 20, 
+  lines = 120,
+  rep_checks = 20,
   checks = 1:4,
   planter = "cartesian", 
   plotNumber = 101,

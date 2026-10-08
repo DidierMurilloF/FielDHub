@@ -74,6 +74,12 @@ A list with two elements.
 
 - `fieldBook` is a data frame with the split plot field book.
 
+## Reproducibility
+
+The result records effective inputs and the resolved seed in
+`metadata$parameters`. Under the same package versions and RNG settings,
+rebuild a result `x` with `do.call(split_plot, x$metadata$parameters)`.
+
 ## References
 
 Federer, W. T. (1955). Experimental Design. Theory and Application. New

@@ -18,7 +18,8 @@ row_column(
   iterations = NULL,
   data = NULL,
   method = c("onestage", "twostage"),
-  latinize = FALSE
+  latinize = FALSE,
+  reps = NULL
 )
 ```
 
@@ -26,7 +27,7 @@ row_column(
 
 - t:
 
-  Number of treatments.
+  Number of treatments, or a character vector with the treatment labels.
 
 - nrows:
 
@@ -34,7 +35,7 @@ row_column(
 
 - r:
 
-  Number of blocks (full resolvable replicates).
+  Deprecated alias for `reps`; positional calls remain supported.
 
 - l:
 
@@ -56,8 +57,9 @@ row_column(
 
 - iterations:
 
-  Number of optimization iterations. Its meaning and default depend on
-  `method`. For `method = "onestage"` it is passed to
+  Finite positive whole-number optimization budget, at most
+  `.Machine$integer.max`. Its meaning and default depend on `method`.
+  For `method = "onestage"` it is passed to
   [`blocksdesign::design()`](https://rdrr.io/pkg/blocksdesign/man/design.html)
   as its number of `searches` (default 200; values beyond a few hundred
   rarely improve the design). For `method = "twostage"` it is the number
@@ -97,6 +99,10 @@ row_column(
   `method = "onestage"`; it is ignored for `method = "twostage"` (which
   cannot latinize across replicates), where passing `latinize = TRUE` is
   ignored with a warning.
+
+- reps:
+
+  Number of full resolvable replicates per location.
 
 ## Value
 
@@ -174,6 +180,13 @@ there are at least as many rows and columns as replicates. By default
 replicate. `latinize` has no effect for `method = "twostage"`, which
 cannot latinize across replicates.
 
+## Reproducibility
+
+The result records effective inputs and the resolved seed in
+`metadata$parameters`, using `reps` for replication. Under the same
+package versions and RNG settings, rebuild a result `x` with
+`do.call(row_column, x$metadata$parameters)`.
+
 ## References
 
 Edmondson., R. N. (2021). blocksdesign: Nested and crossed block designs
@@ -196,7 +209,7 @@ Thomas Walk \[ctb\], Johan Aparicio \[ctb\], Richard Horsley \[ctb\]
 rowcold1 <- row_column(
   t = 24, 
   nrows = 6, 
-  r = 2, 
+  reps = 2,
   l = 1, 
   plotNumber= 101, 
   locationNames = "Loc1",
@@ -235,37 +248,37 @@ rowcold1$resolvableBlocks
 #> $Loc_Loc1
 #> $Loc_Loc1$rep1
 #>      [,1] [,2] [,3] [,4]
-#> [1,]   NA   NA   NA   NA
-#> [2,]   NA   NA   NA   NA
-#> [3,]   NA   NA   NA   NA
-#> [4,]   NA   NA   NA   NA
-#> [5,]   NA   NA   NA   NA
-#> [6,]   NA   NA   NA   NA
+#> [1,]    4   19   12   15
+#> [2,]    2   24    6   23
+#> [3,]    1    9   22   10
+#> [4,]   14   11    8   17
+#> [5,]    7    5   18   16
+#> [6,]   13    3   20   21
 #> 
 #> $Loc_Loc1$rep2
 #>      [,1] [,2] [,3] [,4]
-#> [1,]   NA   NA   NA   NA
-#> [2,]   NA   NA   NA   NA
-#> [3,]   NA   NA   NA   NA
-#> [4,]   NA   NA   NA   NA
-#> [5,]   NA   NA   NA   NA
-#> [6,]   NA   NA   NA   NA
+#> [1,]   13   12   17   24
+#> [2,]   10   20    5   14
+#> [3,]   15    2    3   18
+#> [4,]   23    8    1   19
+#> [5,]    7    9    6   21
+#> [6,]   11   16    4   22
 #> 
 #> 
 head(rowcold1$fieldBook,12)
 #>    ID LOCATION PLOT REP ROW COLUMN ENTRY TREATMENT
-#> 1   1     Loc1  101   1   1      1    21      G-21
-#> 2   2     Loc1  102   1   1      2     8       G-8
-#> 3   3     Loc1  103   1   1      3     4       G-4
-#> 4   4     Loc1  104   1   1      4     7       G-7
-#> 5   5     Loc1  105   1   2      1    12      G-12
-#> 6   6     Loc1  106   1   2      2     6       G-6
-#> 7   7     Loc1  107   1   2      3    23      G-23
-#> 8   8     Loc1  108   1   2      4    24      G-24
-#> 9   9     Loc1  109   1   3      1    22      G-22
+#> 1   1     Loc1  101   1   1      1     4       G-4
+#> 2   2     Loc1  102   1   1      2    19      G-19
+#> 3   3     Loc1  103   1   1      3    12      G-12
+#> 4   4     Loc1  104   1   1      4    15      G-15
+#> 5   5     Loc1  105   1   2      1     2       G-2
+#> 6   6     Loc1  106   1   2      2    24      G-24
+#> 7   7     Loc1  107   1   2      3     6       G-6
+#> 8   8     Loc1  108   1   2      4    23      G-23
+#> 9   9     Loc1  109   1   3      1     1       G-1
 #> 10 10     Loc1  110   1   3      2     9       G-9
-#> 11 11     Loc1  111   1   3      3     1       G-1
-#> 12 12     Loc1  112   1   3      4    17      G-17
+#> 11 11     Loc1  111   1   3      3    22      G-22
+#> 12 12     Loc1  112   1   3      4    10      G-10
 
 # Example 2: Generates a row-column design with 2 full blocks and 30 treatments
 # and 5 rows, for one location, using the default method = "onestage".
@@ -284,7 +297,7 @@ head(treatment_list)
 rowcold2 <- row_column(
   t = 30, 
   nrows = 5, 
-  r = 2, 
+  reps = 2,
   l = 1, 
   plotNumber= 1001, 
   locationNames = "A",
@@ -323,36 +336,36 @@ rowcold2$infoDesign
 rowcold2$resolvableBlocks
 #> $Loc_A
 #> $Loc_A$rep1
-#>      [,1] [,2] [,3] [,4] [,5] [,6]
-#> [1,] NA   NA   NA   NA   NA   NA  
-#> [2,] NA   NA   NA   NA   NA   NA  
-#> [3,] NA   NA   NA   NA   NA   NA  
-#> [4,] NA   NA   NA   NA   NA   NA  
-#> [5,] NA   NA   NA   NA   NA   NA  
+#>      [,1]    [,2]    [,3]    [,4]    [,5]    [,6]   
+#> [1,] "ND-2"  "ND-23" "ND-30" "ND-15" "ND-14" "ND-17"
+#> [2,] "ND-19" "ND-1"  "ND-7"  "ND-24" "ND-26" "ND-12"
+#> [3,] "ND-3"  "ND-16" "ND-25" "ND-28" "ND-20" "ND-10"
+#> [4,] "ND-8"  "ND-22" "ND-21" "ND-18" "ND-13" "ND-11"
+#> [5,] "ND-4"  "ND-9"  "ND-5"  "ND-27" "ND-29" "ND-6" 
 #> 
 #> $Loc_A$rep2
-#>      [,1] [,2] [,3] [,4] [,5] [,6]
-#> [1,] NA   NA   NA   NA   NA   NA  
-#> [2,] NA   NA   NA   NA   NA   NA  
-#> [3,] NA   NA   NA   NA   NA   NA  
-#> [4,] NA   NA   NA   NA   NA   NA  
-#> [5,] NA   NA   NA   NA   NA   NA  
+#>      [,1]    [,2]    [,3]    [,4]    [,5]    [,6]   
+#> [1,] "ND-17" "ND-7"  "ND-8"  "ND-27" "ND-9"  "ND-20"
+#> [2,] "ND-18" "ND-15" "ND-14" "ND-12" "ND-25" "ND-4" 
+#> [3,] "ND-19" "ND-16" "ND-28" "ND-30" "ND-6"  "ND-21"
+#> [4,] "ND-5"  "ND-11" "ND-1"  "ND-3"  "ND-26" "ND-23"
+#> [5,] "ND-22" "ND-29" "ND-10" "ND-13" "ND-2"  "ND-24"
 #> 
 #> 
 head(rowcold2$fieldBook,12)
 #>    ID LOCATION PLOT REP ROW COLUMN ENTRY TREATMENT
-#> 1   1        A 1001   1   1      1    21     ND-21
-#> 2   2        A 1002   1   1      2    18     ND-18
-#> 3   3        A 1003   1   1      3    23     ND-23
-#> 4   4        A 1004   1   1      4    12     ND-12
-#> 5   5        A 1005   1   1      5     1      ND-1
-#> 6   6        A 1006   1   1      6     5      ND-5
-#> 7   7        A 1007   1   2      1     2      ND-2
-#> 8   8        A 1008   1   2      2    10     ND-10
-#> 9   9        A 1009   1   2      3    29     ND-29
-#> 10 10        A 1010   1   2      4     9      ND-9
-#> 11 11        A 1011   1   2      5     7      ND-7
-#> 12 12        A 1012   1   2      6    17     ND-17
+#> 1   1        A 1001   1   1      1     2      ND-2
+#> 2   2        A 1002   1   1      2    23     ND-23
+#> 3   3        A 1003   1   1      3    30     ND-30
+#> 4   4        A 1004   1   1      4    15     ND-15
+#> 5   5        A 1005   1   1      5    14     ND-14
+#> 6   6        A 1006   1   1      6    17     ND-17
+#> 7   7        A 1007   1   2      1    19     ND-19
+#> 8   8        A 1008   1   2      2     1      ND-1
+#> 9   9        A 1009   1   2      3     7      ND-7
+#> 10 10        A 1010   1   2      4    24     ND-24
+#> 11 11        A 1011   1   2      5    26     ND-26
+#> 12 12        A 1012   1   2      6    12     ND-12
 
 # Example 3: Same design as Example 1 but using the historical two-stage
 # optimization (method = "twostage"), which reproduces the designs generated
@@ -362,7 +375,7 @@ head(rowcold2$fieldBook,12)
 rowcold3 <- row_column(
   t = 24,
   nrows = 6,
-  r = 2,
+  reps = 2,
   l = 1,
   plotNumber = 101,
   locationNames = "Loc1",
@@ -405,21 +418,21 @@ rowcold3$blocksModel
 #> 1           Rep      2    1.0000000    1.0000000 1.0000000
 #> 2           Row     12    0.7225014    0.6500942 0.6592357
 #> 3        Column      8    0.8304469    0.7804391 0.8070175
-#> 4 Row-by-Column     NA    0.5459002    0.3939678        NA
+#> 4 Row-by-Column     NA    0.5465871    0.4113822        NA
 #> 
 head(rowcold3$fieldBook, 12)
 #>    ID LOCATION PLOT REP ROW COLUMN ENTRY TREATMENT
-#> 1   1     Loc1  101   1   1      1    13      G-13
-#> 7   2     Loc1  102   1   1      2    23      G-23
-#> 13  3     Loc1  103   1   1      3    10      G-10
-#> 19  4     Loc1  104   1   1      4    12      G-12
-#> 2   5     Loc1  105   1   2      1    20      G-20
+#> 1   1     Loc1  101   1   1      1    10      G-10
+#> 7   2     Loc1  102   1   1      2    20      G-20
+#> 13  3     Loc1  103   1   1      3     3       G-3
+#> 19  4     Loc1  104   1   1      4    11      G-11
+#> 2   5     Loc1  105   1   2      1     1       G-1
 #> 8   6     Loc1  106   1   2      2     8       G-8
-#> 14  7     Loc1  107   1   2      3     6       G-6
-#> 20  8     Loc1  108   1   2      4    19      G-19
-#> 3   9     Loc1  109   1   3      1    24      G-24
-#> 9  10     Loc1  110   1   3      2    11      G-11
-#> 15 11     Loc1  111   1   3      3    21      G-21
-#> 21 12     Loc1  112   1   3      4     5       G-5
+#> 14  7     Loc1  107   1   2      3    15      G-15
+#> 20  8     Loc1  108   1   2      4     5       G-5
+#> 3   9     Loc1  109   1   3      1     7       G-7
+#> 9  10     Loc1  110   1   3      2     6       G-6
+#> 15 11     Loc1  111   1   3      3    12      G-12
+#> 21 12     Loc1  112   1   3      4     9       G-9
 
 ```

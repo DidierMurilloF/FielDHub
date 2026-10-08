@@ -123,7 +123,7 @@ this:
 
 square <- square_lattice(
   t = 64,
-  r = 3, 
+  reps = 3,
   k = 8,      
   l = 1,     
   plotNumber = 101, 
@@ -137,7 +137,7 @@ square <- square_lattice(
 The description for the inputs that we used to generate the design,
 
 - `t = 64` is the number of treatments, must be square number.
-- `r=3` is the number of replicates.
+- `reps =3` is the number of replicates.
 - `k = 8` is the number of plots per incomplete block.
 - `l = 1` is the number of locations.
 - `plotNumber = 101` is the starting plot number.

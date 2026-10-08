@@ -14,7 +14,8 @@ alpha_lattice(
   plotNumber = 101,
   locationNames = NULL,
   seed = NULL,
-  data = NULL
+  data = NULL,
+  reps = NULL
 )
 ```
 
@@ -22,7 +23,7 @@ alpha_lattice(
 
 - t:
 
-  Number of treatments.
+  Number of treatments, or a character vector with the treatment labels.
 
 - k:
 
@@ -30,8 +31,7 @@ alpha_lattice(
 
 - r:
 
-  Number of full blocks (or resolvable replicates) (also number of
-  replicates per treatment).
+  Deprecated alias for `reps`; positional calls remain supported.
 
 - l:
 
@@ -55,6 +55,10 @@ alpha_lattice(
 
   (optional) Data frame with label list of treatments.
 
+- reps:
+
+  Number of full resolvable replicates per location.
+
 ## Value
 
 A list with two elements.
@@ -62,6 +66,13 @@ A list with two elements.
 - `infoDesign` is a list with information on the design parameters.
 
 - `fieldBook` is a data frame with the alpha design field book.
+
+## Reproducibility
+
+The result records effective inputs and the resolved seed in
+`metadata$parameters`, using `reps` for replication. Under the same
+package versions and RNG settings, rebuild a result `x` with
+`do.call(alpha_lattice, x$metadata$parameters)`.
 
 ## References
 
@@ -81,7 +92,7 @@ Thomas Walk \[ctb\], Johan Aparicio \[ctb\], Richard Horsley \[ctb\]
 # Size of IBlocks k = 3.
 alphalattice1 <- alpha_lattice(t = 15, 
                                k = 3, 
-                               r = 4, 
+                               reps = 4,
                                l = 1, 
                                plotNumber = 101, 
                                locationNames = "GreenHouse", 
@@ -113,16 +124,16 @@ alphalattice1$infoDesign
 #> 
 head(alphalattice1$fieldBook, 10)
 #>    ID   LOCATION PLOT REP IBLOCK UNIT ENTRY TREATMENT
-#> 1   1 GREENHOUSE  101   1      1    1     8       G-8
-#> 2   2 GREENHOUSE  102   1      1    2     3       G-3
-#> 3   3 GREENHOUSE  103   1      1    3     2       G-2
-#> 4   4 GREENHOUSE  104   1      2    1     6       G-6
-#> 5   5 GREENHOUSE  105   1      2    2     9       G-9
-#> 6   6 GREENHOUSE  106   1      2    3    12      G-12
-#> 7   7 GREENHOUSE  107   1      3    1    14      G-14
-#> 8   8 GREENHOUSE  108   1      3    2     1       G-1
+#> 1   1 GREENHOUSE  101   1      1    1    15      G-15
+#> 2   2 GREENHOUSE  102   1      1    2     6       G-6
+#> 3   3 GREENHOUSE  103   1      1    3     8       G-8
+#> 4   4 GREENHOUSE  104   1      2    1     3       G-3
+#> 5   5 GREENHOUSE  105   1      2    2    10      G-10
+#> 6   6 GREENHOUSE  106   1      2    3    13      G-13
+#> 7   7 GREENHOUSE  107   1      3    1     4       G-4
+#> 8   8 GREENHOUSE  108   1      3    2    14      G-14
 #> 9   9 GREENHOUSE  109   1      3    3     5       G-5
-#> 10 10 GREENHOUSE  110   1      4    1    15      G-15
+#> 10 10 GREENHOUSE  110   1      4    1    12      G-12
 
 # Example 2: Generates an alpha design with 3 full blocks and 25 treatment.
 # Size of IBlocks k = 5. 
@@ -140,7 +151,7 @@ head(treatment_list)
 #> 6     6       G-6
 alphalattice2 <- alpha_lattice(t = 25,
                                k = 5,
-                               r = 3, 
+                               reps = 3,
                                l = 1, 
                                plotNumber = 1001, 
                                locationNames = "A", 

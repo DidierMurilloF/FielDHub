@@ -18,7 +18,9 @@ sparse_allocation(
   locationNames,
   sparse_list,
   seed,
-  data = NULL
+  data = NULL,
+  year = NULL,
+  checksPercent = NULL
 )
 ```
 
@@ -83,18 +85,44 @@ sparse_allocation(
   (optional) Data frame with 2 columns: `ENTRY | NAME `. ENTRY must be
   numeric.
 
+- year:
+
+  (optional) Year recorded in the `YEAR` column of the field book. By
+  default the current year.
+
+- checksPercent:
+
+  (optional) Percentage of checks in each location, one of the options
+  available for the field. By default the last (largest) option.
+
 ## Value
 
-A list with four elements.
+A list with eight elements.
 
-- `designs` is a list with each location unreplicated randomization.
+- `infoDesign` is a list with information on the design parameters.
+
+- `layoutRandom` is a list with the randomization layout of each
+  location.
+
+- `plotsNumber` is a list with the plot number layout of each location.
+
+- `data_entry` is a data frame with the data input.
+
+- `fieldBook` is a data frame with the field book of all locations.
 
 - `list_locs` is a list with each location list of entries.
 
 - `allocation` is a matrix with the allocation of treatments.
 
-- `size_locations` is a data frame with one column for each location and
-  one row with the size of the location.
+- `size_locations` is a named vector with the number of lines allocated
+  to each location.
+
+## Reproducibility
+
+The result records effective inputs and the resolved seed in
+`metadata$parameters`. Under the same package versions and RNG settings,
+rebuild a result `x` with
+`do.call(sparse_allocation, x$metadata$parameters)`.
 
 ## References
 
@@ -109,11 +137,11 @@ Didier Murillo \[aut\], Salvador Gezan \[aut\], Ana Heilman \[ctb\]
 
 ``` r
 sparse <- sparse_allocation(
-  lines = 120, 
-  l = 4, 
-  copies_per_entry = 3, 
-  checks = 4, 
-  locationNames = c("LOC1", "LOC2", "LOC3", "LOC4", "LOC5"), 
+  lines = 120,
+  l = 4,
+  copies_per_entry = 3,
+  checks = 4,
+  locationNames = c("LOC1", "LOC2", "LOC3", "LOC4"),
   seed = 1234
 )
 ```
