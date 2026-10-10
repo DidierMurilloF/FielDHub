@@ -548,10 +548,14 @@ arc_pair_summary <- function(pairwise, first, second) {
 #' X'X - (X'Z)(Z'Z)^+(Z'X) so that no n x n matrix is formed. Connectivity:
 #' exactly one eigenvalue of A* = diag(u)^(-1/2) C diag(u)^(-1/2) below
 #' tau_rank = 1e-8 times the largest; `rank_C` is the number of the others.
-#' `residual_df_rank` = n - rank([X Z]), where the rank counts singular values
-#' of [X Z] above tau_rank times the largest; they are the square roots of the
-#' eigenvalues of the cross-product, assembled from its blocks. The tolerance
-#' is applied to singular values, never to their squares (section 7.1).
+#' `residual_df_rank` = n - rank([X Z]) uses rank([X Z]) = rank(Z) + rank(C)
+#' (C is the Gram matrix of the columns of X after projecting out Z), with
+#' rank(Z) = rows + columns - 1 on a complete field grid. It therefore reuses
+#' the eigenvalues that decide connectivity, so the two never disagree.
+#' Neither cross-product eigenvalues nor their square roots are used: the
+#' first drop genuine small singular values, and the square roots lift
+#' rounding noise of the zero eigenvalues to about 1e-8 relative, so the
+#' rank decision would depend on the BLAS (section 7.1).
 #' Objectives (section 6) come from the Moore-Penrose inverse of C and are
 #' returned only for a connected layout (section 5, refusal rule).
 #'
@@ -594,12 +598,8 @@ arc_evaluate_layout <- function(codes, check_codes = NULL) {
   connected <- sum(small) == 1L
   rank_c <- sum(!small)
 
-  # Cross-product of [X Z] from its blocks; X'X = diag(u)
-  cross <- rbind(cbind(diag(u, nrow = n_treatments), xz),
-                 cbind(t(xz), zz))
-  squared <- eigen(cross, symmetric = TRUE, only.values = TRUE)$values
-  singular <- sqrt(pmax(squared, 0))
-  residual_df_rank <- n - sum(singular > tau_rank * max(singular))
+  # rank([X Z]) = rank(Z) + rank(C); rank(Z) = rows + columns - 1
+  residual_df_rank <- n - (nrow(codes) + ncol(codes) - 1L) - rank_c
 
   result <- list(connected = connected, rank_C = rank_c,
                  residual_df_rank = residual_df_rank)

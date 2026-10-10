@@ -31,11 +31,13 @@ arc_oracle_rank <- function(symmetric, tol = arc_oracle_tol) {
   sum(lambda > tol * max(lambda))
 }
 
-# Column rank of a matrix: singular values (square roots of the eigenvalues of
-# its cross-product) above `tol` times the largest one
+# Column rank of a matrix: its singular values, computed directly by svd(),
+# above `tol` times the largest one. Cross-product eigenvalues are not used:
+# a tolerance on them drops genuine small singular values, and taking their
+# square roots lifts the rounding noise of zero eigenvalues to about 1e-8
+# relative, so the decision would depend on the BLAS.
 arc_oracle_rank_columns <- function(matrix, tol = arc_oracle_tol) {
-  lambda <- eigen(crossprod(matrix), symmetric = TRUE, only.values = TRUE)$values
-  singular <- sqrt(pmax(lambda, 0))
+  singular <- svd(matrix, nu = 0L, nv = 0L)$d
   sum(singular > tol * max(singular))
 }
 
