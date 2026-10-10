@@ -679,3 +679,168 @@ test_that("validator: mode passes through to the structural checks", {
   expect_identical(result$df_formula, 5L)
   expect_identical(result$mode, "column_binary")
 })
+
+# Task 7: full-layout evaluator (spec 7.1) ------------------------------------
+
+# Every fixture of the manifest with its field layout: "layout" files are the
+# layout itself; contractions are expanded with the manifest mode.
+arc_layout_manifest <- function() {
+  utils::read.csv(
+    test_path("fixtures", "augmented-row-column", "manifest.csv"),
+    stringsAsFactors = FALSE
+  )
+}
+
+arc_manifest_codes <- function(entry) {
+  fixture <- arc_fixture(entry$file)
+  if (identical(entry$kind, "layout")) {
+    return(fixture)
+  }
+  arc_expand(fixture, entry$v, mode = entry$mode)$codes
+}
+
+arc_objective_names <- c("E_aug", "V_tt", "V_tc", "V_cc", "max_tt", "max_tc")
+
+test_that("layout evaluator reproduces every manifest reference", {
+  manifest <- arc_layout_manifest()
+  for (i in seq_len(nrow(manifest))) {
+    entry <- manifest[i, ]
+    result <- arc_evaluate_layout(arc_manifest_codes(entry))
+    label <- entry$file
+    expect_identical(result$connected, entry$ref_connected, label = label)
+    expect_equal(result$residual_df_rank, entry$ref_residual_df_rank,
+                 tolerance = 0, label = label)
+    if (entry$ref_connected) {
+      for (name in arc_objective_names) {
+        expect_lt(abs(result[[name]] - entry[[paste0("ref_", name)]]), 1e-10,
+                  label = paste(label, name))
+      }
+    } else {
+      for (name in c("cefs", arc_objective_names)) {
+        expect_null(result[[name]], label = paste(label, name))
+      }
+    }
+  }
+})
+
+test_that("layout evaluator agrees with the independent oracle", {
+  manifest <- arc_layout_manifest()
+  subset <- c("example1-layout.csv", "example1-contraction.csv",
+              "example2-layout.csv", "example2-contraction.csv",
+              "restricted-12x8-a.csv", "restricted-12x8-b.csv", "zero-df.csv",
+              "square-a.csv", "square-b.csv", "recoloring-counterexample.csv",
+              "cyclic-5x5-k4.csv", "bailey-haines-c-4-4-4.csv")
+  expect_true(all(subset %in% manifest$file))
+  for (file in subset) {
+    codes <- arc_manifest_codes(manifest[manifest$file == file, ])
+    result <- arc_evaluate_layout(codes)
+    reference <- arc_oracle(codes)
+    expect_identical(result$connected, reference$connected, label = file)
+    expect_equal(result$residual_df_rank, reference$residual_df_rank,
+                 tolerance = 0, label = file)
+    if (reference$connected) {
+      for (name in arc_objective_names) {
+        expect_lt(abs(result[[name]] - reference[[name]]), 1e-10,
+                  label = paste(file, name))
+      }
+      expect_length(result$cefs, length(unique(as.vector(codes))) - 1L)
+      expect_identical(result$rank_C, length(result$cefs))
+    }
+  }
+})
+
+test_that("Bailey-Haines C(4,4,4) is disconnected and gets no objectives", {
+  result <- arc_evaluate_layout(arc_fixture("bailey-haines-c-4-4-4.csv"))
+  expect_false(result$connected)
+  expect_equal(result$residual_df_rank, 14, tolerance = 0)
+  expect_identical(names(result),
+                   c("connected", "rank_C", "residual_df_rank"))
+  for (name in c("cefs", arc_objective_names)) {
+    expect_null(result[[name]])
+  }
+})
+
+test_that("the false-QR layout is disconnected with zero rank-based df", {
+  codes <- arc_expand(arc_fixture("false-qr.csv"), 54, "restricted")$codes
+  result <- arc_evaluate_layout(codes)
+  expect_false(result$connected)
+  expect_equal(result$residual_df_rank, 0, tolerance = 0)
+  expect_null(result$E_aug)
+})
+
+test_that("a transposed Example 1 layout gives identical objectives", {
+  codes <- arc_fixture("example1-layout.csv")
+  original <- arc_evaluate_layout(codes)
+  transposed <- arc_evaluate_layout(t(codes))
+  expect_true(transposed$connected)
+  for (name in arc_objective_names) {
+    expect_lt(abs(transposed[[name]] - original[[name]]), 1e-10, label = name)
+  }
+})
+
+test_that("integral doubles and explicit check codes are accepted", {
+  codes <- arc_fixture("example1-layout.csv")
+  as_integer <- arc_evaluate_layout(codes)
+  as_double <- arc_evaluate_layout(codes + 0, check_codes = c(73, 74, 75))
+  expect_identical(as_double$connected, TRUE)
+  for (name in arc_objective_names) {
+    expect_lt(abs(as_double[[name]] - as_integer[[name]]), 1e-12, label = name)
+  }
+})
+
+test_that("malformed layouts raise fieldhub_arc_layout_error", {
+  layout <- c("fieldhub_arc_layout_error", "fieldhub_input_error")
+  codes <- arc_fixture("example1-layout.csv")
+
+  # Test code 2 also replaces test 1 at cell (1, 1), so code 2 occurs twice.
+  duplicated <- codes
+  duplicated[1, 1] <- 2L
+  expect_arc_error(arc_evaluate_layout(duplicated, check_codes = 73:75),
+                   layout[1], layout[2])
+  # With check_codes = NULL a duplicated code is by definition a check (spec
+  # 7.1 inference rule), so the same matrix is a valid layout with four
+  # checks (2, 73, 74, 75) and 70 tests (v* = 74). It is evaluated without
+  # error and matches the oracle, which applies the same rule.
+  inferred <- arc_evaluate_layout(duplicated)
+  reference <- arc_oracle(duplicated)
+  expect_identical(inferred$connected, reference$connected)
+  expect_length(inferred$cefs, 73L)
+  for (name in arc_objective_names) {
+    expect_lt(abs(inferred[[name]] - reference[[name]]), 1e-10, label = name)
+  }
+
+  # Exactly one check: keep check 73 and turn every 74 and 75 into new tests.
+  one_check <- codes
+  others <- which(one_check %in% c(74L, 75L))
+  one_check[others] <- 100L + seq_along(others)
+  expect_arc_error(arc_evaluate_layout(one_check), layout[1], layout[2])
+  expect_arc_error(arc_evaluate_layout(one_check, check_codes = 73L),
+                   layout[1], layout[2])
+
+  with_na <- codes
+  with_na[2, 3] <- NA_integer_
+  expect_arc_error(arc_evaluate_layout(with_na), layout[1], layout[2])
+  expect_arc_error(arc_evaluate_layout(codes + 0.5), layout[1], layout[2])
+  expect_arc_error(arc_evaluate_layout(as.vector(codes)), layout[1],
+                   layout[2])
+  expect_arc_error(arc_evaluate_layout(codes, check_codes = c(73, 74, 999)),
+                   layout[1], layout[2])
+  expect_arc_error(arc_evaluate_layout(codes, check_codes = c(73, NA)),
+                   layout[1], layout[2])
+})
+
+test_that("layouts above the plot cap raise before evaluation", {
+  codes <- arc_fixture("example1-layout.csv")
+  before <- getOption("FielDHub.arc_oracle_max_plots")
+  local({
+    old <- options(FielDHub.arc_oracle_max_plots = 50)
+    on.exit(options(old), add = TRUE)
+    condition <- expect_arc_error(arc_evaluate_layout(codes),
+                                  "fieldhub_arc_size_error",
+                                  "fieldhub_dimension_error")
+    expect_identical(condition$n, 96L)
+    expect_identical(condition$cap, 50)
+  })
+  expect_identical(getOption("FielDHub.arc_oracle_max_plots"), before)
+  expect_true(arc_evaluate_layout(codes)$connected)
+})

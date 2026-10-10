@@ -433,3 +433,202 @@ arc_validate_contraction <- function(contraction, v, mode = "restricted") {
        connected = TRUE, lambda_min_rel = spectrum$lambda_min_rel,
        mode = mode)
 }
+
+#' Validate a field layout for the full-layout evaluator
+#'
+#' Specification section 7.1. `codes` is a field-rows x field-columns matrix
+#' of whole-number treatment codes with no missing values. The checks are
+#' `check_codes` when supplied, or else the codes occurring more than once:
+#' with `check_codes = NULL` a duplicated code is by definition a check, so a
+#' duplicated test code is detected only when `check_codes` is supplied.
+#' Every other code (a test) must occur exactly once, and there must be at
+#' least two checks. The size cap is applied right after the type check,
+#' before anything of the size of the layout is tabulated or allocated.
+#'
+#' @inheritParams arc_evaluate_layout
+#' @return A list with the plot codes in column-major order (`plots`), the
+#'   sorted distinct codes (`treatments`), their replications (`u`), and the
+#'   logical `is_check` over `treatments`.
+#' @noRd
+arc_check_layout <- function(codes, check_codes) {
+  layout_class <- c("fieldhub_arc_layout_error", "fieldhub_input_error")
+  if (!is.matrix(codes) || !is.numeric(codes) || length(codes) == 0L ||
+      anyNA(codes) || !all(is.finite(codes)) ||
+      any(codes != round(codes))) {
+    fieldhub_abort("The layout must be a matrix of whole-number treatment ",
+                   "codes with no missing values.", class = layout_class)
+  }
+  if (!is.null(check_codes) &&
+      (!is.numeric(check_codes) || length(check_codes) == 0L ||
+       anyNA(check_codes) || !all(is.finite(check_codes)) ||
+       any(check_codes != round(check_codes)))) {
+    fieldhub_abort("The check codes must be whole numbers with no missing ",
+                   "values.", class = layout_class)
+  }
+
+  n <- length(codes)
+  cap <- getOption("FielDHub.arc_oracle_max_plots", 2500)
+  if (n > cap) {
+    fieldhub_abort("The layout has ", n, " plots, more than the full-layout ",
+                   "evaluator's limit of ", cap, " plots.",
+                   class = c("fieldhub_arc_size_error",
+                             "fieldhub_dimension_error"),
+                   data = list(n = n, cap = cap))
+  }
+
+  plots <- as.vector(codes)
+  treatments <- sort(unique(plots))
+  u <- tabulate(match(plots, treatments), nbins = length(treatments))
+  if (is.null(check_codes)) {
+    is_check <- u > 1L
+  } else {
+    check_codes <- unique(as.vector(check_codes))
+    if (!all(check_codes %in% treatments)) {
+      fieldhub_abort("Every check code must occur in the layout.",
+                     class = layout_class)
+    }
+    is_check <- treatments %in% check_codes
+    if (any(u[!is_check] != 1L)) {
+      fieldhub_abort("Every test code must occur exactly once; code ",
+                     treatments[!is_check & u != 1L][1L], " occurs ",
+                     u[!is_check & u != 1L][1L], " times.",
+                     class = layout_class)
+    }
+  }
+  if (sum(is_check) < 2L) {
+    fieldhub_abort("The layout needs at least two checks; found ",
+                   sum(is_check), ".", class = layout_class)
+  }
+  list(plots = plots, treatments = treatments, u = u, is_check = is_check)
+}
+
+#' Moore-Penrose inverse of a symmetric positive semidefinite matrix
+#'
+#' From a symmetric eigen-decomposition: eigenvalues at or below
+#' `tol` times the largest are treated as zero, the others inverted.
+#' @noRd
+arc_pinv_symmetric <- function(symmetric, tol = 1e-8) {
+  decomposition <- eigen(symmetric, symmetric = TRUE)
+  values <- decomposition$values
+  keep <- values > tol * max(values)
+  vectors <- decomposition$vectors[, keep, drop = FALSE]
+  vectors %*% (t(vectors) / values[keep])
+}
+
+#' Mean and maximum pairwise variance over two treatment classes
+#'
+#' `pairwise` is the symmetric v* x v* matrix of Var(tau_i - tau_j), with a
+#' zero diagonal. Within one class the mean is over unordered distinct pairs,
+#' which is the block sum over the m(m - 1) ordered pairs; between classes it
+#' is over every pair. NA when the class has no pair.
+#' @noRd
+arc_pair_summary <- function(pairwise, first, second) {
+  block <- pairwise[first, second, drop = FALSE]
+  pairs <- if (identical(first, second)) {
+    length(first) * (length(first) - 1L)
+  } else {
+    length(first) * length(second)
+  }
+  if (pairs == 0L) {
+    return(c(mean = NA_real_, max = NA_real_))
+  }
+  c(mean = sum(block) / pairs, max = max(block))
+}
+
+#' Full-layout augmented row-column evaluator
+#'
+#' Specification section 7.1. Evaluates any field layout under the model
+#' with fixed treatment, row, and column effects (section 2), without
+#' requiring the contraction structure, so transposed and Bailey-Haines
+#' square layouts are valid. Variances are standardized (sigma^2 = 1).
+#'
+#' With X the n x v* plot-level treatment indicators (treatments in
+#' increasing code order) and Z = [1, Z_R, Z_C], the information matrix is
+#' C = X'(I - P_Z)X with P_Z = Z (Z'Z)^+ Z', computed as
+#' X'X - (X'Z)(Z'Z)^+(Z'X) so that no n x n matrix is formed. Connectivity:
+#' exactly one eigenvalue of A* = diag(u)^(-1/2) C diag(u)^(-1/2) below
+#' tau_rank = 1e-8 times the largest; `rank_C` is the number of the others.
+#' `residual_df_rank` = n - rank([X Z]), where the rank counts singular values
+#' of [X Z] above tau_rank times the largest; they are the square roots of the
+#' eigenvalues of the cross-product, assembled from its blocks. The tolerance
+#' is applied to singular values, never to their squares (section 7.1).
+#' Objectives (section 6) come from the Moore-Penrose inverse of C and are
+#' returned only for a connected layout (section 5, refusal rule).
+#'
+#' @param codes Matrix of whole-number treatment codes, field rows x field
+#'   columns, at most `getOption("FielDHub.arc_oracle_max_plots", 2500)`
+#'   plots.
+#' @param check_codes NULL to take the codes occurring more than once as the
+#'   checks, or the check codes, each of which must occur in `codes`.
+#' @return A list with `connected`, `rank_C`, and `residual_df_rank`; when
+#'   connected, also the v* - 1 nontrivial eigenvalues `cefs` of A*, `E_aug`,
+#'   the mean pairwise variances `V_tt`, `V_tc`, `V_cc`, and the maxima
+#'   `max_tt` and `max_tc`.
+#' @noRd
+arc_evaluate_layout <- function(codes, check_codes = NULL) {
+  tau_rank <- 1e-8
+  layout <- arc_check_layout(codes, check_codes)
+  n <- length(layout$plots)
+  n_treatments <- length(layout$treatments)
+  u <- layout$u
+
+  x <- matrix(0, nrow = n, ncol = n_treatments)
+  x[cbind(seq_len(n), match(layout$plots, layout$treatments))] <- 1
+  z_rows <- matrix(0, nrow = n, ncol = nrow(codes))
+  z_rows[cbind(seq_len(n), as.vector(row(codes)))] <- 1
+  z_cols <- matrix(0, nrow = n, ncol = ncol(codes))
+  z_cols[cbind(seq_len(n), as.vector(col(codes)))] <- 1
+  z <- cbind(1, z_rows, z_cols)
+
+  # C = X'X - (X'Z)(Z'Z)^+(Z'X), the projection form of X'(I - P_Z)X
+  xz <- crossprod(x, z)
+  zz <- crossprod(z)
+  information <- diag(u, nrow = n_treatments) -
+    xz %*% arc_pinv_symmetric(zz, tau_rank) %*% t(xz)
+  information <- (information + t(information)) / 2
+
+  scale <- 1 / sqrt(u)
+  scaled <- information * outer(scale, scale)
+  lambda <- eigen(scaled, symmetric = TRUE, only.values = TRUE)$values
+  small <- lambda < tau_rank * max(lambda)
+  connected <- sum(small) == 1L
+  rank_c <- sum(!small)
+
+  # Cross-product of [X Z] from its blocks; X'X = diag(u)
+  cross <- rbind(cbind(diag(u, nrow = n_treatments), xz),
+                 cbind(t(xz), zz))
+  squared <- eigen(cross, symmetric = TRUE, only.values = TRUE)$values
+  singular <- sqrt(pmax(squared, 0))
+  residual_df_rank <- n - sum(singular > tau_rank * max(singular))
+
+  result <- list(connected = connected, rank_C = rank_c,
+                 residual_df_rank = residual_df_rank)
+  if (!connected) {
+    return(result)
+  }
+
+  # eigen() sorts decreasingly; the trivial eigenvalue (for sqrt(u)) is last
+  cefs <- lambda[seq_len(n_treatments - 1L)]
+  e_aug <- (n_treatments - 1L) / sum(1 / cefs)
+
+  # C^+ drops the single null direction (the constant vector) of C
+  decomposition <- eigen(information, symmetric = TRUE)
+  keep <- seq_len(n_treatments - 1L)
+  vectors <- decomposition$vectors[, keep, drop = FALSE]
+  omega <- vectors %*% (t(vectors) / decomposition$values[keep])
+  omega <- (omega + t(omega)) / 2
+  variances <- diag(omega)
+  pairwise <- outer(variances, variances, `+`) - 2 * omega
+  diag(pairwise) <- 0
+
+  tests <- which(!layout$is_check)
+  checks <- which(layout$is_check)
+  tt <- arc_pair_summary(pairwise, tests, tests)
+  tc <- arc_pair_summary(pairwise, tests, checks)
+  cc <- arc_pair_summary(pairwise, checks, checks)
+
+  c(result, list(cefs = cefs, E_aug = e_aug,
+                 V_tt = unname(tt["mean"]), V_tc = unname(tc["mean"]),
+                 V_cc = unname(cc["mean"]), max_tt = unname(tt["max"]),
+                 max_tc = unname(tc["max"])))
+}
