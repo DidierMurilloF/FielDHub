@@ -78,3 +78,6 @@ inst/doc
 /doc/
 /Meta/
 docs
+
+# Local research material (papers, supplements, notes); not part of the package
+/research/
