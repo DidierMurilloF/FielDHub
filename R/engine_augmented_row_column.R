@@ -632,3 +632,94 @@ arc_evaluate_layout <- function(codes, check_codes = NULL) {
                  V_cc = unname(cc["mean"]), max_tt = unname(tt["max"]),
                  max_tc = unname(tc["max"])))
 }
+
+#' Orthonormal basis of the complement of the constant vector
+#'
+#' The normalized Helmert contrasts: an n x (n - 1) matrix U with U'U = I and
+#' U'1_n = 0. Restricting a symmetric matrix that maps 1_n to 0 to this basis
+#' removes its trivial eigenvalue by projection.
+#' @noRd
+arc_contrast_basis <- function(n) {
+  helmert <- stats::contr.helmert(n)
+  sweep(helmert, 2L, sqrt(colSums(helmert^2)), "/")
+}
+
+#' Paper-route augmented row-column evaluator
+#'
+#' Specification section 7.2 (Piepho and Williams 2026, eqs. 4 and 5, with
+#' the corrections of section 8). Supplies E_aug and its supporting
+#' quantities only; it computes no variances. The contraction is checked
+#' structurally first (raising for malformed input); a negative df_formula
+#' returns at once with `lambda_min_rel = NA` and no matrix work, and
+#' connectivity is the M-tilde spectrum decision of section 5.
+#'
+#' When connected, C_contr = diag(r) - W/s - N_C N_C'/k + r r'/(ks) maps 1_v
+#' to 0, and S = P_s [I_s - (1/k) M12' (diag(r) - W/s + J_v)^(-1) M12] P_s
+#' (corrected eq. 4, M12 = N_C - r 1_s'/s) maps 1_s to 0. Each is restricted
+#' to an orthonormal basis of the complement of the constant vector, so the
+#' trivial eigenvalue is removed by projection, never by dropping the
+#' smallest one; connectivity makes both restrictions positive definite.
+#' `Cbar_v` is the harmonic mean of the v - 1 remaining eigenvalues of
+#' C_contr divided by mean(r), and `Cbar_s` the harmonic mean of the s - 1
+#' remaining eigenvalues of S. `a` = tr C_contr^+ and `b` = tr S^+ / k.
+#'
+#' @inheritParams arc_check_contraction
+#' @return A list with `connected`, the integer `df_formula`, and
+#'   `lambda_min_rel` (NA after the negative-df return); when connected, also
+#'   `Cbar_v`, `Cbar_s`, `E_aug`, `a`, and `b`.
+#' @noRd
+arc_evaluate_contraction <- function(contraction, v, mode) {
+  checked <- arc_check_contraction(contraction, v, mode)
+  v <- checked$v
+  s <- checked$s
+  k <- checked$k
+  df_formula <- arc_df_formula(v, s, k)
+  if (df_formula < 0L) {
+    return(list(connected = FALSE, df_formula = df_formula,
+                lambda_min_rel = NA_real_))
+  }
+
+  matrices <- arc_contraction_matrices(contraction, v)
+  lambda <- eigen(matrices$M_tilde, symmetric = TRUE,
+                  only.values = TRUE)$values
+  spectrum <- arc_classify_spectrum(lambda)
+  result <- list(connected = spectrum$connected, df_formula = df_formula,
+                 lambda_min_rel = spectrum$lambda_min_rel)
+  if (!spectrum$connected) {
+    return(result)
+  }
+
+  r <- matrices$r
+  nc <- matrices$nc
+  row_block <- diag(r, nrow = v) - matrices$w / s
+
+  # Row quantity: C_contr on the complement of 1_v
+  c_contr <- row_block - tcrossprod(nc) / k + tcrossprod(r) / (k * s)
+  basis_v <- arc_contrast_basis(v)
+  reduced_v <- crossprod(basis_v, c_contr %*% basis_v)
+  values_v <- eigen((reduced_v + t(reduced_v)) / 2, symmetric = TRUE,
+                    only.values = TRUE)$values
+  a <- sum(1 / values_v)
+  cbar_v <- ((v - 1) / a) / mean(r)
+
+  # Column quantity: corrected eq. (4) on the complement of 1_s. M12 1_s = 0,
+  # so U_s' P_s = U_s' and the projection is carried by the basis.
+  m12 <- nc - outer(r, rep(1, s)) / s
+  bracket <- diag(s) -
+    crossprod(m12, solve(row_block + matrix(1, v, v), m12)) / k
+  basis_s <- arc_contrast_basis(s)
+  reduced_s <- crossprod(basis_s, bracket %*% basis_s)
+  values_s <- eigen((reduced_s + t(reduced_s)) / 2, symmetric = TRUE,
+                    only.values = TRUE)$values
+  trace_s <- sum(1 / values_s)
+  cbar_s <- (s - 1) / trace_s
+  b <- trace_s / k
+
+  # Eq. (5)
+  v_star <- (v - k) * s + k
+  e_aug <- (v_star - 1) /
+    (v_star - (v + s) + 1 + (v / k) * ((v - 1) / cbar_v + (s - 1) / cbar_s))
+
+  c(result, list(Cbar_v = cbar_v, Cbar_s = cbar_s, E_aug = e_aug, a = a,
+                 b = b))
+}

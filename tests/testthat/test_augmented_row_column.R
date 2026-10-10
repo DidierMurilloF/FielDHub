@@ -844,3 +844,149 @@ test_that("layouts above the plot cap raise before evaluation", {
   expect_identical(getOption("FielDHub.arc_oracle_max_plots"), before)
   expect_true(arc_evaluate_layout(codes)$connected)
 })
+
+# Task 8: paper-route contraction evaluator (spec 7.2) ------------------------
+
+# Contraction fixtures of the manifest that are connected (every contraction
+# fixture except the false-QR design).
+arc_connected_contractions <- function() {
+  manifest <- arc_layout_manifest()
+  manifest[manifest$kind == "contraction" & manifest$ref_connected, ]
+}
+
+arc_published_tol <- function(decimals) 0.5 * 10^(-decimals) + 1e-12
+
+arc_paper_fields <- c("Cbar_v", "Cbar_s", "E_aug", "a", "b")
+
+test_that("paper route reproduces the published Examples 1 and 2", {
+  manifest <- arc_layout_manifest()
+  for (name in c("example1-contraction.csv", "example2-contraction.csv")) {
+    entry <- manifest[manifest$file == name, ]
+    result <- arc_evaluate_contraction(arc_fixture(name), entry$v, entry$mode)
+    expect_true(result$connected, label = name)
+    expect_identical(result$df_formula, as.integer(entry$ref_df_formula),
+                     label = name)
+    expect_lt(abs(result$Cbar_v - entry$pub_Cbar_v),
+              arc_published_tol(entry$pub_Cbar_v_dec), label = name)
+    expect_lt(abs(result$Cbar_s - entry$pub_Cbar_s),
+              arc_published_tol(entry$pub_Cbar_s_dec), label = name)
+    expect_lt(abs(result$E_aug - entry$ref_E_aug), 1e-10, label = name)
+  }
+  example1 <- arc_evaluate_contraction(arc_ex1_contraction, 12, "restricted")
+  expect_lt(abs(example1$Cbar_v - 0.5739), 5e-5 + 1e-12)
+  expect_lt(abs(example1$Cbar_s - 0.4828), 5e-5 + 1e-12)
+})
+
+test_that("paper route reproduces all 21 rows of Table 1", {
+  manifest <- arc_layout_manifest()
+  table1 <- manifest[startsWith(manifest$file, "table1-"), ]
+  expect_identical(nrow(table1), 21L)
+  for (i in seq_len(nrow(table1))) {
+    entry <- table1[i, ]
+    label <- entry$file
+    result <- arc_evaluate_contraction(arc_fixture(entry$file), entry$v,
+                                       entry$mode)
+    expect_true(result$connected, label = label)
+    expect_lt(abs(result$E_aug - entry$pub_E_aug),
+              arc_published_tol(entry$pub_E_aug_dec), label = label)
+    expect_lt(abs(result$E_aug - entry$ref_E_aug), 1e-10, label = label)
+    expect_lt(abs(result$Cbar_v - entry$pub_Cbar_v),
+              arc_published_tol(entry$pub_Cbar_v_dec), label = label)
+    expect_lt(abs(result$Cbar_s - entry$pub_Cbar_s),
+              arc_published_tol(entry$pub_Cbar_s_dec), label = label)
+  }
+})
+
+test_that("the trivial eigenvalue is projected out, not dropped as smallest", {
+  contraction <- arc_ex1_contraction
+  v <- 12
+  k <- nrow(contraction)
+  s <- ncol(contraction)
+  # The corrected eq. (4) bracket, built here without the projection P_s.
+  mats <- arc_contraction_matrices(contraction, v)
+  m12 <- mats$nc - outer(mats$r, rep(1, s)) / s
+  row_block <- diag(mats$r) - mats$w / s + matrix(1, v, v)
+  bracket <- diag(s) - crossprod(m12, solve(row_block, m12)) / k
+  lambda <- eigen((bracket + t(bracket)) / 2, symmetric = TRUE,
+                  only.values = TRUE)$values
+  # Its trivial eigenvalue is 1 (eigenvector 1_s), not the smallest one.
+  expect_lt(min(abs(lambda - 1)), 1e-10)
+  naive <- (s - 1) / sum(1 / lambda[seq_len(s - 1)])
+  expect_lt(abs(naive - 0.5600), 5e-5)
+
+  result <- arc_evaluate_contraction(contraction, v, "restricted")
+  expect_gt(abs(result$Cbar_s - naive), 1e-3)
+  expect_lt(abs(result$Cbar_s - 0.4828), 5e-5 + 1e-12)
+})
+
+test_that("paper route agrees with the full-layout evaluator on E_aug", {
+  fixtures <- arc_connected_contractions()
+  expect_gt(nrow(fixtures), 25L)
+  for (i in seq_len(nrow(fixtures))) {
+    entry <- fixtures[i, ]
+    contraction <- arc_fixture(entry$file)
+    paper <- arc_evaluate_contraction(contraction, entry$v, entry$mode)
+    layout <- arc_evaluate_layout(
+      arc_expand(contraction, entry$v, mode = entry$mode)$codes
+    )
+    expect_true(paper$connected, label = entry$file)
+    expect_lt(abs(paper$E_aug - layout$E_aug), 1e-10, label = entry$file)
+    expect_lt(abs(paper$E_aug - entry$ref_E_aug), 1e-10, label = entry$file)
+  }
+})
+
+test_that("a and b satisfy the 1/E_aug identity, equal or unequal r", {
+  fixtures <- arc_connected_contractions()
+  for (i in seq_len(nrow(fixtures))) {
+    entry <- fixtures[i, ]
+    v <- entry$v
+    s <- entry$s
+    k <- entry$k
+    result <- arc_evaluate_contraction(arc_fixture(entry$file), v, entry$mode)
+    v_star <- (v - k) * s + k
+    lhs <- (v_star - 1) / result$E_aug
+    rhs <- v_star - v - s + 1 + s * result$a + v * result$b
+    expect_lt(abs(lhs - rhs), 1e-9, label = entry$file)
+    # The two halves separately: s a and v b against the eq. (5) terms.
+    expect_lt(abs(s * result$a - (v / k) * (v - 1) / result$Cbar_v), 1e-9,
+              label = entry$file)
+    expect_lt(abs(v * result$b - (v / k) * (s - 1) / result$Cbar_s), 1e-9,
+              label = entry$file)
+  }
+})
+
+test_that("paper route passes the mode through to the structural checks", {
+  square <- arc_fixture("square-a.csv")
+  expect_arc_error(arc_evaluate_contraction(square, 6, "restricted"),
+                   "fieldhub_arc_row_repeat_error", "fieldhub_input_error")
+  manifest <- arc_layout_manifest()
+  reference <- manifest$ref_E_aug[manifest$file == "square-a.csv"]
+  result <- arc_evaluate_contraction(square, 6, "column_binary")
+  expect_true(result$connected)
+  expect_lt(abs(result$E_aug - reference), 1e-10)
+})
+
+test_that("paper route returns early for a negative df", {
+  result <- arc_evaluate_contraction(arc_fixture("false-qr.csv"), 54,
+                                     "restricted")
+  expect_identical(names(result),
+                   c("connected", "df_formula", "lambda_min_rel"))
+  expect_false(result$connected)
+  expect_identical(result$df_formula, -1L)
+  expect_identical(result$lambda_min_rel, NA_real_)
+  expect_null(result$E_aug)
+})
+
+test_that("paper route gives a disconnected design diagnostics only", {
+  result <- arc_evaluate_contraction(arc_disconnected_contraction, 6,
+                                     "restricted")
+  expect_identical(names(result),
+                   c("connected", "df_formula", "lambda_min_rel"))
+  expect_false(result$connected)
+  expect_identical(result$df_formula, 1L)
+  expect_true(is.finite(result$lambda_min_rel))
+  expect_lt(result$lambda_min_rel, 1e-8)
+  for (name in arc_paper_fields) {
+    expect_null(result[[name]], label = name)
+  }
+})
