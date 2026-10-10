@@ -723,3 +723,123 @@ arc_evaluate_contraction <- function(contraction, v, mode) {
   c(result, list(Cbar_v = cbar_v, Cbar_s = cbar_s, E_aug = e_aug, a = a,
                  b = b))
 }
+
+#' Single-matrix augmented row-column evaluator (production route)
+#'
+#' Specification section 7.3. Computes every objective of section 6 from one
+#' symmetric factorization of size v + s, without forming any v* x v* matrix.
+#' The contraction is checked structurally first (raising for malformed
+#' input); a negative df_formula returns at once with `lambda_min_rel = NA`
+#' and no matrix work, and connectivity is the M-tilde spectrum decision of
+#' section 5. A design that is not connected gets diagnostics only.
+#'
+#' When connected, Omega = M^+ = M_tilde^(-1) - Q0 Q0' and
+#' E_aug = (v* - 1) / [v* - v - s + 1 + s tr Omega_RR + v tr Omega_CC].
+#' Pairwise variances are those of G = diag(1/u) + H Omega H', with
+#' H = diag(u)^(-1) X'Z: test cell (a, b) has H-row x = (e_a; e_b) and check
+#' i has H-row h_i = (N_R[, i]; 1_s)/s. G is never formed; the class means
+#' come from the aggregates tr G_TT = T + <Omega, S_T>,
+#' 1'G_TT 1 = T + h_T' Omega h_T, G_CC = I_k/s + H_C Omega H_C', and
+#' 1'G_TC 1 = h_T' Omega H_C' 1_k, with TI = J - N_C the test incidence,
+#' S_T = [[diag(TI 1), TI], [TI', diag(TI' 1)]] = sum of x x' over test
+#' cells, and h_T = (TI 1; TI' 1) = sum of x over test cells.
+#'
+#' With `worst_pair = TRUE`, the maxima over test pairs and test-check pairs
+#' come from the T x T test-cell kernel X_T Omega X_T' and the T x k cross
+#' kernel X_T Omega H_C', assembled from blocks of Omega by indexing. This is
+#' for reporting once per returned design, not for search.
+#'
+#' @inheritParams arc_check_contraction
+#' @param worst_pair If TRUE, also return `max_tt` and `max_tc`.
+#' @return A list with `connected`, the integer `df_formula`, and
+#'   `lambda_min_rel` (NA after the negative-df return); when connected, also
+#'   `E_aug`, `V_tt`, `V_tc`, `V_cc`, and, with `worst_pair = TRUE`,
+#'   `max_tt` and `max_tc`.
+#' @noRd
+arc_evaluate_objectives <- function(contraction, v, mode, worst_pair = FALSE) {
+  if (!is.logical(worst_pair) || length(worst_pair) != 1L ||
+      is.na(worst_pair)) {
+    fieldhub_abort("worst_pair must be TRUE or FALSE.",
+                   class = c("fieldhub_arc_input_error",
+                             "fieldhub_input_error"))
+  }
+  checked <- arc_check_contraction(contraction, v, mode)
+  v <- checked$v
+  s <- checked$s
+  k <- checked$k
+  df_formula <- arc_df_formula(v, s, k)
+  if (df_formula < 0L) {
+    return(list(connected = FALSE, df_formula = df_formula,
+                lambda_min_rel = NA_real_))
+  }
+
+  matrices <- arc_contraction_matrices(contraction, v)
+  lambda <- eigen(matrices$M_tilde, symmetric = TRUE,
+                  only.values = TRUE)$values
+  spectrum <- arc_classify_spectrum(lambda)
+  result <- list(connected = spectrum$connected, df_formula = df_formula,
+                 lambda_min_rel = spectrum$lambda_min_rel)
+  if (!spectrum$connected) {
+    return(result)
+  }
+
+  # Omega = M^+ from a Cholesky solve of the positive definite M_tilde
+  q0 <- matrices$Q0
+  omega <- chol2inv(chol(matrices$M_tilde)) - tcrossprod(q0)
+  omega <- (omega + t(omega)) / 2
+  rows <- seq_len(v)
+  cols <- v + seq_len(s)
+
+  n_tests <- (v - k) * s
+  v_star <- n_tests + k
+  diag_omega <- diag(omega)
+  e_aug <- (v_star - 1) /
+    (v_star - v - s + 1 + s * sum(diag_omega[rows]) +
+       v * sum(diag_omega[cols]))
+
+  # Test aggregates: sum of x x' (S_T) and of x (h_T) over test cells
+  ti <- 1 - matrices$nc
+  ti_rows <- rowSums(ti)
+  ti_cols <- colSums(ti)
+  s_t <- rbind(cbind(diag(ti_rows, nrow = v), ti),
+               cbind(t(ti), diag(ti_cols, nrow = s)))
+  h_t <- c(ti_rows, ti_cols)
+  omega_h_t <- drop(omega %*% h_t)
+  trace_tt <- n_tests + sum(omega * s_t)
+  sum_tt <- n_tests + sum(h_t * omega_h_t)
+
+  # Check aggregates: H_C is k x (v + s), row i = (N_R[, i]; 1_s)/s
+  h_c <- cbind(t(matrices$nr), matrix(1, k, s)) / s
+  omega_h_c <- omega %*% t(h_c)
+  g_cc <- diag(1 / s, nrow = k) + h_c %*% omega_h_c
+  trace_cc <- sum(diag(g_cc))
+  sum_cc <- sum(g_cc)
+  sum_tc <- sum(omega_h_t * colSums(h_c))
+
+  result <- c(result, list(
+    E_aug = e_aug,
+    V_tt = (n_tests * trace_tt - sum_tt) / choose(n_tests, 2),
+    V_tc = (k * trace_tt + n_tests * trace_cc - 2 * sum_tc) / (n_tests * k),
+    V_cc = (k * trace_cc - sum_cc) / choose(k, 2)
+  ))
+  if (!worst_pair) {
+    return(result)
+  }
+
+  # Test cell p = (a, b) has x_p = e_a + e_(v + b) on the (v + s) scale
+  cells <- which(ti == 1, arr.ind = TRUE)
+  a <- cells[, 1L]
+  b <- v + cells[, 2L]
+  omega_ab <- omega[a, b, drop = FALSE]
+  kernel_tt <- omega[a, a, drop = FALSE] + omega_ab + t(omega_ab) +
+    omega[b, b, drop = FALSE]
+  quad_t <- diag(kernel_tt)
+  pairs_tt <- 2 + outer(quad_t, quad_t, `+`) - 2 * kernel_tt
+  diag(pairs_tt) <- -Inf
+
+  kernel_tc <- omega_h_c[a, , drop = FALSE] + omega_h_c[b, , drop = FALSE]
+  quad_c <- colSums(t(h_c) * omega_h_c)
+  pairs_tc <- 1 + 1 / s + outer(quad_t, quad_c, `+`) - 2 * kernel_tc
+
+  c(result, list(max_tt = max(pairs_tt), max_tc = max(pairs_tc)))
+}

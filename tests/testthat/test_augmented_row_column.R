@@ -990,3 +990,172 @@ test_that("paper route gives a disconnected design diagnostics only", {
     expect_null(result[[name]], label = name)
   }
 })
+
+# Task 9: single-matrix evaluator (spec 6, 7.3) ------------------------------
+
+arc_mean_names <- c("E_aug", "V_tt", "V_tc", "V_cc")
+
+test_that("single-matrix route reproduces every connected contraction", {
+  fixtures <- arc_connected_contractions()
+  expect_gt(nrow(fixtures), 25L)
+  for (i in seq_len(nrow(fixtures))) {
+    entry <- fixtures[i, ]
+    label <- entry$file
+    contraction <- arc_fixture(entry$file)
+    result <- arc_evaluate_objectives(contraction, entry$v, entry$mode,
+                                      worst_pair = TRUE)
+    layout <- arc_evaluate_layout(
+      arc_expand(contraction, entry$v, mode = entry$mode)$codes
+    )
+    expect_true(result$connected, label = label)
+    expect_identical(result$df_formula, as.integer(entry$ref_df_formula),
+                     label = label)
+    expect_gte(result$lambda_min_rel, 1e-8, label = label)
+    for (name in arc_objective_names) {
+      expect_lt(abs(result[[name]] - entry[[paste0("ref_", name)]]), 1e-10,
+                label = paste(label, name, "reference"))
+      expect_lt(abs(result[[name]] - layout[[name]]), 1e-10,
+                label = paste(label, name, "layout"))
+    }
+  }
+})
+
+test_that("single-matrix route agrees with the independent oracle", {
+  manifest <- arc_layout_manifest()
+  subset <- c("example1-contraction.csv", "example2-contraction.csv",
+              "restricted-12x8-a.csv", "restricted-12x8-b.csv", "zero-df.csv",
+              "square-a.csv", "square-b.csv", "recoloring-counterexample.csv",
+              "cyclic-5x5-k4.csv")
+  expect_true(all(subset %in% manifest$file))
+  for (file in subset) {
+    entry <- manifest[manifest$file == file, ]
+    contraction <- arc_fixture(file)
+    result <- arc_evaluate_objectives(contraction, entry$v, entry$mode,
+                                      worst_pair = TRUE)
+    reference <- arc_oracle(
+      arc_expand(contraction, entry$v, mode = entry$mode)$codes
+    )
+    expect_true(reference$connected, label = file)
+    expect_identical(result$connected, reference$connected, label = file)
+    for (name in arc_objective_names) {
+      expect_lt(abs(result[[name]] - reference[[name]]), 1e-10,
+                label = paste(file, name))
+    }
+  }
+})
+
+test_that("the restricted 12 x 8 pair reverses E_aug and V_tt", {
+  manifest <- arc_layout_manifest()
+  a <- arc_evaluate_objectives(arc_fixture("restricted-12x8-a.csv"), 12,
+                               "restricted")
+  b <- arc_evaluate_objectives(arc_fixture("restricted-12x8-b.csv"), 12,
+                               "restricted")
+  expect_gt(a$E_aug, b$E_aug)
+  expect_lt(b$V_tt, a$V_tt)
+  expect_lt(abs(a$E_aug - 0.366768940288), 1e-10)
+  expect_lt(abs(a$V_tt - 5.575452716298), 1e-10)
+  expect_lt(abs(b$E_aug - 0.366429008708), 1e-10)
+  expect_lt(abs(b$V_tt - 5.566184662506), 1e-10)
+  for (pair in list(list(a, "restricted-12x8-a.csv"),
+                    list(b, "restricted-12x8-b.csv"))) {
+    entry <- manifest[manifest$file == pair[[2]], ]
+    expect_lt(abs(pair[[1]]$E_aug - entry$ref_E_aug), 1e-10)
+    expect_lt(abs(pair[[1]]$V_tt - entry$ref_V_tt), 1e-10)
+  }
+})
+
+test_that("the weighted-variance identity holds, equal or unequal r", {
+  fixtures <- arc_connected_contractions()
+  unequal <- 0L
+  for (i in seq_len(nrow(fixtures))) {
+    entry <- fixtures[i, ]
+    v <- entry$v
+    s <- entry$s
+    k <- entry$k
+    contraction <- arc_fixture(entry$file)
+    if (length(unique(tabulate(contraction, nbins = v))) > 1L) {
+      unequal <- unequal + 1L
+    }
+    result <- arc_evaluate_objectives(contraction, v, entry$mode)
+    n_tests <- (v - k) * s
+    v_star <- n_tests + k
+    # Pair weights u_i u_j: 1 (test-test), s (test-check), s^2 (check-check)
+    weighted <- choose(n_tests, 2) * result$V_tt +
+      s * n_tests * k * result$V_tc + s^2 * choose(k, 2) * result$V_cc
+    lhs <- v * s * (v_star - 1) / result$E_aug
+    expect_lt(abs(lhs - weighted) / abs(lhs), 1e-8, label = entry$file)
+  }
+  # Example 2 and the recoloring counterexample have unequal replication.
+  expect_gte(unequal, 2L)
+})
+
+test_that("V_tt has the equal-replication closed form", {
+  fixtures <- arc_connected_contractions()
+  checked <- 0L
+  for (i in seq_len(nrow(fixtures))) {
+    entry <- fixtures[i, ]
+    v <- entry$v
+    s <- entry$s
+    k <- entry$k
+    contraction <- arc_fixture(entry$file)
+    r <- tabulate(contraction, nbins = v)
+    if (length(unique(r)) > 1L) {
+      next
+    }
+    checked <- checked + 1L
+    paper <- arc_evaluate_contraction(contraction, v, entry$mode)
+    result <- arc_evaluate_objectives(contraction, v, entry$mode)
+    n_tests <- (v - k) * s
+    closed <- 2 + 2 / (n_tests - 1) *
+      ((s - mean(r)) * paper$a + (v + k) * paper$b - 2 * (s - 1))
+    expect_lt(abs(result$V_tt - closed), 1e-10, label = entry$file)
+  }
+  expect_gt(checked, 20L)
+})
+
+test_that("the recoloring counterexample has E_aug = 1/6", {
+  result <- arc_evaluate_objectives(arc_fixture("recoloring-counterexample.csv"),
+                                    6, "column_binary")
+  expect_true(result$connected)
+  expect_lt(abs(result$E_aug - 1 / 6), 1e-10)
+})
+
+test_that("single-matrix route returns early for a negative df", {
+  result <- arc_evaluate_objectives(arc_fixture("false-qr.csv"), 54,
+                                    "restricted", worst_pair = TRUE)
+  expect_identical(names(result),
+                   c("connected", "df_formula", "lambda_min_rel"))
+  expect_false(result$connected)
+  expect_identical(result$df_formula, -1L)
+  expect_identical(result$lambda_min_rel, NA_real_)
+})
+
+test_that("single-matrix route gives a disconnected design diagnostics only", {
+  result <- arc_evaluate_objectives(arc_disconnected_contraction, 6,
+                                    "restricted", worst_pair = TRUE)
+  expect_identical(names(result),
+                   c("connected", "df_formula", "lambda_min_rel"))
+  expect_false(result$connected)
+  expect_identical(result$df_formula, 1L)
+  expect_true(is.finite(result$lambda_min_rel))
+  expect_lt(result$lambda_min_rel, 1e-8)
+})
+
+test_that("worst-pair maxima are returned only on request", {
+  plain <- arc_evaluate_objectives(arc_ex2_contraction, 24, "restricted")
+  expect_identical(names(plain),
+                   c("connected", "df_formula", "lambda_min_rel",
+                     arc_mean_names))
+  full <- arc_evaluate_objectives(arc_ex2_contraction, 24, "restricted",
+                                  worst_pair = TRUE)
+  expect_identical(names(full), c(names(plain), "max_tt", "max_tc"))
+  for (name in arc_mean_names) {
+    expect_identical(full[[name]], plain[[name]], label = name)
+  }
+})
+
+test_that("single-matrix route passes the mode through", {
+  square <- arc_fixture("square-a.csv")
+  expect_arc_error(arc_evaluate_objectives(square, 6, "restricted"),
+                   "fieldhub_arc_row_repeat_error", "fieldhub_input_error")
+})
