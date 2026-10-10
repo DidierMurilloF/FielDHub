@@ -31,6 +31,14 @@ arc_oracle_rank <- function(symmetric, tol = arc_oracle_tol) {
   sum(lambda > tol * max(lambda))
 }
 
+# Column rank of a matrix: singular values (square roots of the eigenvalues of
+# its cross-product) above `tol` times the largest one
+arc_oracle_rank_columns <- function(matrix, tol = arc_oracle_tol) {
+  lambda <- eigen(crossprod(matrix), symmetric = TRUE, only.values = TRUE)$values
+  singular <- sqrt(pmax(lambda, 0))
+  sum(singular > tol * max(singular))
+}
+
 # Moore-Penrose inverse of the information matrix of a connected design. Its
 # null space is the constant vector alone, so the smallest eigenvalue is the
 # one dropped; every other eigenvalue is inverted.
@@ -98,7 +106,11 @@ arc_oracle <- function(codes, check_codes = NULL) {
   lambda <- eigen(A_star, symmetric = TRUE, only.values = TRUE)$values
   connected <- sum(lambda < arc_oracle_tol * max(lambda)) == 1
 
-  residual_df_rank <- n - arc_oracle_rank(crossprod(cbind(X, B)))
+  # Rank of [X B] from its singular values (square roots of the cross-product
+  # eigenvalues). Applying the tolerance to the squared values would drop
+  # genuine small singular values: in the false-QR fixture one is 2.3e-5 of
+  # the largest, so its square falls below 1e-8.
+  residual_df_rank <- n - arc_oracle_rank_columns(cbind(X, B))
   result <- list(connected = connected, residual_df_rank = residual_df_rank)
   if (!connected) {
     return(result)

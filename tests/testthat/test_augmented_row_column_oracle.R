@@ -122,3 +122,22 @@ test_that("transposing Example 1 leaves the objectives unchanged", {
     expect_equal(transposed[[name]], original[[name]], tolerance = 1e-10, info = name)
   }
 })
+
+test_that("residual df uses singular values, not squared ones", {
+  # False-QR design (M1 spike 2b): disconnected, connected-design df formula
+  # -1. Rank identities give rank([X Z]) = (v + s - 1) + (v* - 2) = 756 = n,
+  # so the rank-based residual df is 0. Its smallest genuine singular value
+  # is 2.3e-5 of the largest; a tolerance on squared values would drop it
+  # and report 1.
+  contraction <- arc_fixture("false-qr.csv")
+  v <- 54L
+  k <- nrow(contraction)
+  s <- ncol(contraction)
+  n_tests <- (v - k) * s
+  codes <- matrix(0L, v, s)
+  for (i in seq_len(k)) codes[cbind(contraction[i, ], seq_len(s))] <- n_tests + i
+  codes[codes == 0L] <- seq_len(n_tests)
+  result <- arc_oracle(codes)
+  expect_false(result$connected)
+  expect_identical(result$residual_df_rank, 0L)
+})
