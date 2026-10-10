@@ -843,3 +843,92 @@ arc_evaluate_objectives <- function(contraction, v, mode, worst_pair = FALSE) {
 
   c(result, list(max_tt = max(pairs_tt), max_tc = max(pairs_tc)))
 }
+
+#' Final scoring of an augmented row-column contraction
+#'
+#' Specification section 7.4, with the section 5 cross-check. With
+#' n = v s plots and the cap `getOption("FielDHub.arc_oracle_max_plots",
+#' 2500)`:
+#' - n <= cap: the full-layout evaluator on the expanded layout is the
+#'   authority, cross-checked against the single-matrix evaluator;
+#' - n > cap: the single-matrix evaluator with `worst_pair = TRUE` is the
+#'   authority, cross-checked against the paper route.
+#' The two routes must agree on connectivity and, when both are connected, on
+#' E_aug to 1e-10; otherwise `fieldhub_arc_numerical_error` is raised with
+#' both values in its data. When both are disconnected, diagnostics are
+#' returned without comparing absent E_aug values.
+#'
+#' `df_formula` and `lambda_min_rel` always come from the contraction-scale
+#' route (the full-layout evaluator does not compute them). A connected
+#' result has the same fields on both sides of the cap; route-specific
+#' extras (`cefs`, `rank_C`, `residual_df_rank`) are not included. A
+#' disconnected result carries `residual_df_rank` from the full-layout
+#' route, and NA above the cap, so its fields are also cap-independent.
+#'
+#' @inheritParams arc_check_contraction
+#' @return A list with `connected`, `authority` ("full_layout" or
+#'   "single_matrix"), `df_formula`, and `lambda_min_rel`; when connected,
+#'   also `E_aug`, `V_tt`, `V_tc`, `V_cc`, `max_tt`, and `max_tc`; when
+#'   disconnected, also `residual_df_rank`.
+#' @noRd
+arc_final_score <- function(contraction, v, mode) {
+  checked <- arc_check_contraction(contraction, v, mode)
+  n <- checked$v * checked$s
+  cap <- getOption("FielDHub.arc_oracle_max_plots", 2500)
+  if (n <= cap) {
+    authority_name <- "full_layout"
+    authority <- arc_evaluate_layout(arc_expand(contraction, v, mode)$codes)
+    cross <- arc_evaluate_objectives(contraction, v, mode, worst_pair = FALSE)
+    contraction_scale <- cross
+  } else {
+    authority_name <- "single_matrix"
+    authority <- arc_evaluate_objectives(contraction, v, mode,
+                                         worst_pair = TRUE)
+    cross <- arc_evaluate_contraction(contraction, v, mode)
+    contraction_scale <- authority
+  }
+  numerical_class <- c("fieldhub_arc_numerical_error",
+                       "fieldhub_numerical_error")
+  authority_connected <- isTRUE(authority$connected)
+  cross_connected <- isTRUE(cross$connected)
+  if (authority_connected != cross_connected) {
+    fieldhub_abort("The evaluation routes disagree on connectivity (",
+                   authority_name, " authority: ", authority_connected,
+                   ", cross-check: ", cross_connected, ").",
+                   class = numerical_class,
+                   data = list(authority = authority_name,
+                               authority_connected = authority_connected,
+                               cross_connected = cross_connected,
+                               lambda_min_rel =
+                                 contraction_scale$lambda_min_rel))
+  }
+  diagnostics <- list(connected = authority_connected,
+                      authority = authority_name,
+                      df_formula = contraction_scale$df_formula,
+                      lambda_min_rel = contraction_scale$lambda_min_rel)
+  if (!authority_connected) {
+    residual_df_rank <- if (is.null(authority$residual_df_rank)) {
+      NA_integer_
+    } else {
+      authority$residual_df_rank
+    }
+    return(c(diagnostics, list(residual_df_rank = residual_df_rank)))
+  }
+
+  difference <- abs(authority$E_aug - cross$E_aug)
+  if (!is.finite(difference) || difference > 1e-10) {
+    fieldhub_abort("The evaluation routes disagree on E_aug (",
+                   authority_name, " authority: ", format(authority$E_aug,
+                                                          digits = 15),
+                   ", cross-check: ", format(cross$E_aug, digits = 15), ").",
+                   class = numerical_class,
+                   data = list(authority = authority_name,
+                               authority_E_aug = authority$E_aug,
+                               cross_E_aug = cross$E_aug,
+                               difference = difference,
+                               lambda_min_rel =
+                                 contraction_scale$lambda_min_rel))
+  }
+  c(diagnostics, authority[c("E_aug", "V_tt", "V_tc", "V_cc", "max_tt",
+                             "max_tc")])
+}

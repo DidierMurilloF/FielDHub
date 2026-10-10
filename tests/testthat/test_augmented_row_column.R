@@ -1159,3 +1159,143 @@ test_that("single-matrix route passes the mode through", {
   expect_arc_error(arc_evaluate_objectives(square, 6, "restricted"),
                    "fieldhub_arc_row_repeat_error", "fieldhub_input_error")
 })
+
+# Task 10: final scoring (spec 7.4, section 5 cross-check) ---------------------
+
+arc_final_connected_names <- c("connected", "authority", "df_formula",
+                               "lambda_min_rel", "E_aug", "V_tt", "V_tc",
+                               "V_cc", "max_tt", "max_tc")
+arc_final_disconnected_names <- c("connected", "authority", "df_formula",
+                                  "lambda_min_rel", "residual_df_rank")
+
+# Final score with the plot cap set locally; the option is restored on exit.
+arc_final_score_capped <- function(contraction, v, mode, cap) {
+  old <- options(FielDHub.arc_oracle_max_plots = cap)
+  on.exit(options(old), add = TRUE)
+  arc_final_score(contraction, v, mode)
+}
+
+test_that("final score keeps fields and values when the authority changes", {
+  prior <- getOption("FielDHub.arc_oracle_max_plots")
+  manifest <- arc_layout_manifest()
+  entry <- manifest[manifest$file == "example2-contraction.csv", ]
+  contraction <- arc_fixture("example2-contraction.csv")
+  expect_identical(entry$v * entry$s, 384L)
+
+  below <- arc_final_score(contraction, 24, "restricted")
+  above <- arc_final_score_capped(contraction, 24, "restricted", 100)
+  expect_identical(getOption("FielDHub.arc_oracle_max_plots"), prior)
+
+  expect_identical(below$authority, "full_layout")
+  expect_identical(above$authority, "single_matrix")
+  expect_identical(names(below), arc_final_connected_names)
+  expect_identical(names(above), names(below))
+  expect_true(below$connected)
+  expect_true(above$connected)
+  expect_identical(below$df_formula, 37L)
+  expect_identical(above$df_formula, 37L)
+  expect_lt(abs(below$lambda_min_rel - above$lambda_min_rel), 1e-12)
+  for (name in arc_objective_names) {
+    expect_lt(abs(below[[name]] - above[[name]]), 1e-10, label = name)
+    reference <- entry[[paste0("ref_", name)]]
+    expect_lt(abs(below[[name]] - reference), 1e-10,
+              label = paste("below", name))
+    expect_lt(abs(above[[name]] - reference), 1e-10,
+              label = paste("above", name))
+  }
+})
+
+test_that("final score raises on an E_aug disagreement below the cap", {
+  prior <- getOption("FielDHub.arc_oracle_max_plots")
+  real <- asNamespace("FielDHub")$arc_evaluate_objectives
+  local_mocked_bindings(arc_evaluate_objectives = function(...) {
+    result <- real(...)
+    result$E_aug <- result$E_aug + 1e-6
+    result
+  })
+  condition <- expect_arc_error(
+    arc_final_score(arc_ex2_contraction, 24, "restricted"),
+    "fieldhub_arc_numerical_error", "fieldhub_numerical_error")
+  expect_identical(condition$authority, "full_layout")
+  expect_lt(abs(condition$cross_E_aug - condition$authority_E_aug - 1e-6),
+            1e-12)
+  expect_identical(getOption("FielDHub.arc_oracle_max_plots"), prior)
+})
+
+test_that("final score raises on an E_aug disagreement above the cap", {
+  prior <- getOption("FielDHub.arc_oracle_max_plots")
+  real <- asNamespace("FielDHub")$arc_evaluate_contraction
+  local_mocked_bindings(arc_evaluate_contraction = function(...) {
+    result <- real(...)
+    result$E_aug <- result$E_aug + 1e-6
+    result
+  })
+  condition <- expect_arc_error(
+    arc_final_score_capped(arc_ex2_contraction, 24, "restricted", 100),
+    "fieldhub_arc_numerical_error", "fieldhub_numerical_error")
+  expect_identical(condition$authority, "single_matrix")
+  expect_lt(abs(condition$cross_E_aug - condition$authority_E_aug - 1e-6),
+            1e-12)
+  expect_identical(getOption("FielDHub.arc_oracle_max_plots"), prior)
+})
+
+test_that("final score raises on a connectivity disagreement", {
+  prior <- getOption("FielDHub.arc_oracle_max_plots")
+  # Captured before any mock is installed.
+  real <- asNamespace("FielDHub")$arc_evaluate_objectives
+  local_mocked_bindings(
+    arc_evaluate_objectives = function(...) {
+      list(connected = FALSE, df_formula = 37L, lambda_min_rel = 1e-12)
+    },
+    arc_evaluate_contraction = function(...) {
+      list(connected = FALSE, df_formula = 37L, lambda_min_rel = 1e-12)
+    }
+  )
+  below <- expect_arc_error(
+    arc_final_score(arc_ex2_contraction, 24, "restricted"),
+    "fieldhub_arc_numerical_error", "fieldhub_numerical_error")
+  expect_true(below$authority_connected)
+  expect_false(below$cross_connected)
+  expect_identical(below$lambda_min_rel, 1e-12)
+  expect_identical(getOption("FielDHub.arc_oracle_max_plots"), prior)
+
+  # Above the cap the mocked single matrix is the authority (disconnected)
+  # and the mocked paper route agrees, so restore the real authority there.
+  local_mocked_bindings(arc_evaluate_objectives = real)
+  above <- expect_arc_error(
+    arc_final_score_capped(arc_ex2_contraction, 24, "restricted", 100),
+    "fieldhub_arc_numerical_error", "fieldhub_numerical_error")
+  expect_true(above$authority_connected)
+  expect_false(above$cross_connected)
+  expect_identical(getOption("FielDHub.arc_oracle_max_plots"), prior)
+})
+
+test_that("final score gives disconnected designs diagnostics only", {
+  prior <- getOption("FielDHub.arc_oracle_max_plots")
+  false_qr <- arc_final_score(arc_fixture("false-qr.csv"), 54, "restricted")
+  expect_identical(names(false_qr), arc_final_disconnected_names)
+  expect_false(false_qr$connected)
+  expect_identical(false_qr$authority, "full_layout")
+  expect_identical(false_qr$df_formula, -1L)
+  expect_identical(false_qr$lambda_min_rel, NA_real_)
+  expect_equal(false_qr$residual_df_rank, 0, tolerance = 0)
+  expect_null(false_qr$E_aug)
+
+  small <- arc_final_score(arc_disconnected_contraction, 6, "restricted")
+  expect_identical(names(small), arc_final_disconnected_names)
+  expect_false(small$connected)
+  expect_identical(small$authority, "full_layout")
+  expect_identical(small$df_formula, 1L)
+  expect_lt(small$lambda_min_rel, 1e-8)
+  expect_null(small$E_aug)
+
+  capped <- arc_final_score_capped(arc_disconnected_contraction, 6,
+                                   "restricted", 10)
+  expect_identical(names(capped), arc_final_disconnected_names)
+  expect_false(capped$connected)
+  expect_identical(capped$authority, "single_matrix")
+  expect_identical(capped$df_formula, 1L)
+  expect_identical(capped$residual_df_rank, NA_integer_)
+  expect_null(capped$E_aug)
+  expect_identical(getOption("FielDHub.arc_oracle_max_plots"), prior)
+})
