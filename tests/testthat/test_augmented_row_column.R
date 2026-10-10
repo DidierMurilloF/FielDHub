@@ -324,3 +324,237 @@ test_that("invalid label vectors are input errors", {
   expect_arc_error(expand_labels(c("Check A", NA), arc_small_tests),
                    input[1], input[2])
 })
+
+# Task 5: connectivity, df, and recoloring (spec 4.2, 4.3, 5) ----------------
+
+# Preserved false-QR design of spike 2b (v = 54, s = 14, k = 5): balanced
+# (r = 1 or 2) and row-binary, with df_formula = -1.
+arc_false_qr_contraction <- matrix(c(
+  37, 6, 46, 17, 49, 53, 47, 32, 8, 9, 11, 19, 45, 28,
+  48, 4, 2, 52, 18, 31, 6, 10, 54, 5, 51, 24, 7, 37,
+  26, 19, 44, 42, 30, 14, 13, 35, 27, 25, 12, 16, 33, 18,
+  3, 20, 47, 48, 29, 21, 35, 43, 45, 24, 22, 44, 38, 15,
+  36, 42, 50, 34, 53, 30, 40, 22, 39, 12, 3, 41, 1, 23
+), nrow = 5, byrow = TRUE)
+
+# Whether `recolored` is row-binary and keeps every column set of `original`
+# and the replication vector.
+arc_recoloring_ok <- function(recolored, original, v) {
+  identical(dim(recolored), dim(original)) &&
+    all(apply(recolored, 1L, anyDuplicated) == 0L) &&
+    all(vapply(seq_len(ncol(original)), function(j) {
+      setequal(recolored[, j], original[, j]) &&
+        length(recolored[, j]) == length(unique(recolored[, j]))
+    }, logical(1))) &&
+    identical(tabulate(recolored, nbins = v), tabulate(original, nbins = v))
+}
+
+test_that("the spectrum classifier applies both thresholds at the boundary", {
+  cases <- list(
+    list(x = 0, connected = FALSE, near = FALSE),
+    list(x = 0.5e-8, connected = FALSE, near = FALSE),
+    list(x = 1e-8, connected = TRUE, near = TRUE),
+    list(x = 2e-8, connected = TRUE, near = TRUE),
+    list(x = 0.5e-6, connected = TRUE, near = TRUE),
+    list(x = 1e-6, connected = TRUE, near = FALSE),
+    list(x = 2e-6, connected = TRUE, near = FALSE)
+  )
+  for (case in cases) {
+    # Any order is accepted.
+    for (lambda in list(c(case$x, 0.3, 1), c(1, case$x, 0.3))) {
+      out <- arc_classify_spectrum(lambda)
+      info <- paste("lambda_min_rel =", case$x)
+      expect_identical(names(out), c("connected", "lambda_min_rel",
+                                     "near_singular"), info = info)
+      expect_identical(out$connected, case$connected, info = info)
+      expect_identical(out$near_singular, case$near, info = info)
+      expect_identical(out$lambda_min_rel, case$x, info = info)
+    }
+  }
+  # The ratio is relative to the largest eigenvalue.
+  scaled <- arc_classify_spectrum(c(2e-8, 0.6, 2))
+  expect_equal(scaled$lambda_min_rel, 1e-8)
+  expect_true(scaled$connected)
+  expect_silent(arc_classify_spectrum(c(0, 0.3, 1)))
+  # Custom thresholds are honoured with the same boundary semantics.
+  custom <- arc_classify_spectrum(c(0.01, 0.3, 1), tau_rank = 0.01,
+                                  tau_warn = 0.1)
+  expect_true(custom$connected)
+  expect_true(custom$near_singular)
+})
+
+test_that("the df formula is integer and -1 for the false-QR design", {
+  expect_identical(arc_df_formula(54, 14, 5), -1L)
+  expect_identical(arc_df_formula(12, 8, 3), 3L)
+  expect_identical(arc_df_formula(24, 16, 5), 37L)
+})
+
+test_that("the false-QR design is disconnected by the M-tilde spectrum", {
+  # Row-binary and balanced, so restricted mode applies.
+  checked <- arc_check_contraction(arc_false_qr_contraction, 54, "restricted")
+  expect_identical(sort(unique(checked$r)), c(1L, 2L))
+  # The df check is bypassed here: the classifier alone must say no.
+  mats <- arc_contraction_matrices(arc_false_qr_contraction, 54)
+  lambda <- eigen(mats$M_tilde, symmetric = TRUE, only.values = TRUE)$values
+  verdict <- arc_classify_spectrum(lambda)
+  expect_false(verdict$connected)
+  expect_false(verdict$near_singular)
+  expect_lt(verdict$lambda_min_rel, 1e-12)
+})
+
+test_that("Example 1 is connected and well conditioned", {
+  arc_check_contraction(arc_ex1_contraction, 12, "restricted")
+  mats <- arc_contraction_matrices(arc_ex1_contraction, 12)
+  lambda <- eigen(mats$M_tilde, symmetric = TRUE, only.values = TRUE)$values
+  verdict <- arc_classify_spectrum(lambda)
+  expect_true(verdict$connected)
+  expect_false(verdict$near_singular)
+})
+
+test_that("contraction matrices have the null space spanned by Q0", {
+  v <- 12
+  s <- 8
+  k <- 3
+  mats <- arc_contraction_matrices(arc_ex1_contraction, v)
+  expect_identical(dim(mats$nc), c(12L, 8L))
+  expect_identical(dim(mats$nr), c(12L, 3L))
+  expect_true(all(mats$nc %in% c(0, 1)))
+  expect_identical(as.vector(colSums(mats$nc)), rep(k, s))
+  expect_identical(as.vector(rowSums(mats$nr)), as.numeric(mats$r))
+  expect_identical(as.integer(mats$r), rep(2L, 12))
+  expect_equal(mats$w, mats$nr %*% t(mats$nr))
+  expect_identical(dim(mats$M), c(20L, 20L))
+  expect_identical(dim(mats$Q0), c(20L, 2L))
+  expect_true(isSymmetric(mats$M))
+  expect_true(isSymmetric(mats$M_tilde))
+  expect_equal(mats$M_tilde, mats$M + mats$Q0 %*% t(mats$Q0))
+  expect_equal(crossprod(mats$Q0), diag(2))
+  ev <- eigen(mats$M, symmetric = TRUE, only.values = TRUE)$values
+  rel <- abs(ev) / max(ev)
+  expect_identical(sum(rel < 1e-12), 2L)
+  expect_gt(sort(rel)[3], 1e-8)
+  ones_rows <- c(rep(1, v), rep(0, s))
+  ones_cols <- c(rep(0, v), rep(1, s))
+  expect_lt(max(abs(mats$M %*% ones_rows)), 1e-12)
+  expect_lt(max(abs(mats$M %*% ones_cols)), 1e-12)
+  ev_tilde <- eigen(mats$M_tilde, symmetric = TRUE, only.values = TRUE)$values
+  expect_gt(min(ev_tilde), 1e-8 * max(ev_tilde))
+})
+
+test_that("all 85 fixed-replication 6 x 4 column multisets recolor", {
+  v <- 6L
+  s <- 4L
+  k <- 3L
+  subsets <- utils::combn(v, k, simplify = FALSE)
+  multisets <- list()
+  extend <- function(start, chosen, counts) {
+    if (length(chosen) == s) {
+      if (all(counts == 2L)) multisets[[length(multisets) + 1L]] <<- chosen
+      return(invisible(NULL))
+    }
+    for (i in start:length(subsets)) {
+      next_counts <- counts
+      next_counts[subsets[[i]]] <- next_counts[subsets[[i]]] + 1L
+      if (all(next_counts <= 2L)) extend(i, c(chosen, i), next_counts)
+    }
+  }
+  extend(1L, integer(0), integer(v))
+  expect_identical(length(multisets), 85L)
+  recolored_ok <- 0L
+  for (chosen in multisets) {
+    columns <- do.call(cbind, subsets[chosen])
+    recolored <- arc_recolor_rows(columns, v)
+    if (arc_recoloring_ok(recolored, columns, v)) {
+      recolored_ok <- recolored_ok + 1L
+    }
+  }
+  expect_identical(recolored_ok, 85L)
+})
+
+test_that("random column-binary designs recolor with sets and r unchanged", {
+  global <- globalenv()
+  had_seed <- exists(".Random.seed", envir = global, inherits = FALSE)
+  if (had_seed) saved <- get(".Random.seed", envir = global, inherits = FALSE)
+  on.exit({
+    if (had_seed) {
+      assign(".Random.seed", saved, envir = global)
+    } else if (exists(".Random.seed", envir = global, inherits = FALSE)) {
+      rm(".Random.seed", envir = global)
+    }
+  })
+  set.seed(20261010)
+  # Random fill, then random swaps until no column repeats a label.
+  random_column_binary <- function(k, s, r) {
+    repeat {
+      m <- matrix(sample(rep(seq_along(r), r)), k, s)
+      for (iteration in seq_len(2000L)) {
+        bad <- which(apply(m, 2L, anyDuplicated) > 0L)
+        if (length(bad) == 0L) return(m)
+        j <- bad[1L]
+        i <- anyDuplicated(m[, j])
+        i2 <- sample(k, 1L)
+        j2 <- sample(s, 1L)
+        held <- m[i, j]
+        m[i, j] <- m[i2, j2]
+        m[i2, j2] <- held
+      }
+    }
+  }
+  parameter_sets <- list(
+    list(v = 24L, s = 16L, k = 5L, r = rep(c(4L, 3L), c(8L, 16L))),
+    list(v = 7L, s = 5L, k = 3L, r = c(3L, 3L, 2L, 2L, 2L, 2L, 1L)),
+    list(v = 10L, s = 6L, k = 4L, r = c(4L, 3L, 3L, 3L, 2L, 2L, 2L, 2L, 2L,
+                                        1L)),
+    list(v = 12L, s = 12L, k = 4L, r = rep(4L, 12L)),
+    list(v = 30L, s = 24L, k = 5L, r = rep(4L, 30L))
+  )
+  per_set <- 80L
+  generated <- 0L
+  recolored_ok <- 0L
+  row_repeats_seen <- 0L
+  for (p in parameter_sets) {
+    for (draw in seq_len(per_set)) {
+      columns <- random_column_binary(p$k, p$s, p$r)
+      generated <- generated + 1L
+      if (any(apply(columns, 1L, anyDuplicated) > 0L)) {
+        row_repeats_seen <- row_repeats_seen + 1L
+      }
+      recolored <- arc_recolor_rows(columns, p$v)
+      if (arc_recoloring_ok(recolored, columns, p$v)) {
+        recolored_ok <- recolored_ok + 1L
+      }
+    }
+  }
+  expect_identical(generated, 400L)
+  expect_gte(generated, 300L)
+  expect_identical(recolored_ok, generated)
+  # The inputs genuinely needed recoloring.
+  expect_gt(row_repeats_seen, 0L)
+})
+
+test_that("recoloring is deterministic and leaves row-binary input valid", {
+  first <- arc_recolor_rows(arc_row_repeat_contraction, 6)
+  expect_identical(arc_recolor_rows(arc_row_repeat_contraction, 6), first)
+  expect_true(arc_recoloring_ok(first, arc_row_repeat_contraction, 6))
+  expect_type(first, "integer")
+  ex1 <- arc_recolor_rows(arc_ex1_contraction, 12)
+  expect_true(arc_recoloring_ok(ex1, arc_ex1_contraction, 12))
+})
+
+test_that("recoloring needs max(r) <= k and s <= v", {
+  condition <- expect_arc_error(
+    arc_recolor_rows(arc_unbalanced_contraction, 6),
+    "fieldhub_arc_recolor_error", "fieldhub_input_error")
+  expect_identical(condition$r, c(4L, 2L, 2L, 2L, 1L, 1L))
+  expect_identical(condition$k, 3L)
+  expect_error(arc_recolor_rows(arc_unbalanced_contraction, 6),
+               class = "fieldhub_arc_recolor_error")
+  wide <- matrix(c(1, 2, 2, 3, 3, 1, 1, 2), nrow = 2)
+  expect_arc_error(arc_recolor_rows(wide, 3), "fieldhub_arc_dimension_error",
+                   "fieldhub_dimension_error")
+  # Column collisions are rejected by the structural checks first.
+  collided <- arc_ex1_contraction
+  collided[2, 1] <- 7
+  expect_error(arc_recolor_rows(collided, 12),
+               class = "fieldhub_arc_collision_error")
+})
