@@ -1299,3 +1299,47 @@ test_that("final score gives disconnected designs diagnostics only", {
   expect_null(capped$E_aug)
   expect_identical(getOption("FielDHub.arc_oracle_max_plots"), prior)
 })
+
+# ---- Zero-information layouts (M1 gate review, P1) -------------------------
+# Treatments completely confounded with rows or columns give C = 0 exactly, so
+# no contrast is estimable. The rank decision must not be relative to the
+# rounding noise of an all-zero spectrum (specification section 5).
+
+expect_zero_information <- function(result, residual_df) {
+  expect_false(result$connected)
+  expect_identical(result$rank_C, 0L)
+  expect_identical(result$residual_df_rank, as.integer(residual_df))
+  for (field in c("cefs", "E_aug", "V_tt", "V_tc", "V_cc", "max_tt", "max_tc")) {
+    expect_null(result[[field]])
+  }
+}
+
+test_that("a layout confounded with rows has zero information", {
+  # 1 1 / 2 2: each treatment indicator is a row indicator. n = 4,
+  # rank(Z) = 2 + 2 - 1 = 3, rank(C) = 0, so residual df = 1.
+  codes <- matrix(c(1L, 2L, 1L, 2L), nrow = 2L)
+  expect_zero_information(arc_evaluate_layout(codes), 1L)
+  expect_zero_information(arc_evaluate_layout(codes[2:1, ]), 1L)
+  expect_zero_information(arc_evaluate_layout(codes[, 2:1]), 1L)
+  expect_zero_information(arc_evaluate_layout(t(codes)), 1L)
+})
+
+test_that("a single-column layout spanned by rows has zero information", {
+  # Six rows, one column: the row effects span all six plots, so rank(Z) = 6,
+  # rank(C) = 0, and residual df = 0 (never -1).
+  codes <- matrix(c(1L, 1L, 2L, 2L, 3L, 4L), ncol = 1L)
+  expect_zero_information(arc_evaluate_layout(codes), 0L)
+  expect_zero_information(arc_evaluate_layout(codes[c(6, 3, 1, 5, 2, 4), , drop = FALSE]), 0L)
+  expect_zero_information(arc_evaluate_layout(t(codes)), 0L)
+})
+
+test_that("dimensions beyond the integer range are classed input errors", {
+  contraction <- arc_fixture("example1-contraction.csv")
+  expect_error(arc_check_contraction(contraction, 2^31, "restricted"),
+               class = "fieldhub_arc_input_error")
+  codes <- matrix(c(1, 1, 2, 2, 2^31, 4), ncol = 2L)
+  expect_error(arc_evaluate_layout(codes), class = "fieldhub_arc_layout_error")
+  expect_error(arc_evaluate_layout(matrix(c(1L, 1L, 2L, 2L, 3L, 4L), ncol = 2L),
+                                   check_codes = c(1, 2^31)),
+               class = "fieldhub_arc_layout_error")
+})

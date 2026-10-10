@@ -2,7 +2,7 @@
 #' @noRd
 arc_is_whole_number <- function(x) {
   is.numeric(x) && length(x) == 1L && is.null(dim(x)) && is.finite(x) &&
-    x == round(x)
+    x == round(x) && abs(x) <= .Machine$integer.max
 }
 
 #' Structural checks for an augmented row-column contraction
@@ -454,14 +454,17 @@ arc_check_layout <- function(codes, check_codes) {
   layout_class <- c("fieldhub_arc_layout_error", "fieldhub_input_error")
   if (!is.matrix(codes) || !is.numeric(codes) || length(codes) == 0L ||
       anyNA(codes) || !all(is.finite(codes)) ||
-      any(codes != round(codes))) {
+      any(codes != round(codes)) ||
+      any(abs(codes) > .Machine$integer.max)) {
     fieldhub_abort("The layout must be a matrix of whole-number treatment ",
-                   "codes with no missing values.", class = layout_class)
+                   "codes within the integer range, with no missing values.",
+                   class = layout_class)
   }
   if (!is.null(check_codes) &&
       (!is.numeric(check_codes) || length(check_codes) == 0L ||
        anyNA(check_codes) || !all(is.finite(check_codes)) ||
-       any(check_codes != round(check_codes)))) {
+       any(check_codes != round(check_codes)) ||
+       any(abs(check_codes) > .Machine$integer.max))) {
     fieldhub_abort("The check codes must be whole numbers with no missing ",
                    "values.", class = layout_class)
   }
@@ -594,7 +597,12 @@ arc_evaluate_layout <- function(codes, check_codes = NULL) {
   scale <- 1 / sqrt(u)
   scaled <- information * outer(scale, scale)
   lambda <- eigen(scaled, symmetric = TRUE, only.values = TRUE)$values
-  small <- lambda < tau_rank * max(lambda)
+  # The eigenvalues of A* are canonical efficiency factors: 0 <= C <= X'X =
+  # diag(u) in the Loewner order, so they lie in [0, 1]. The tolerance is
+  # therefore absolute on that fixed scale, never relative to max(lambda): a
+  # zero information matrix has an all-noise spectrum whose maximum is itself
+  # rounding error (M1 gate review, P1).
+  small <- lambda < tau_rank
   connected <- sum(small) == 1L
   rank_c <- sum(!small)
 

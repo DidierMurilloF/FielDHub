@@ -106,7 +106,10 @@ arc_oracle <- function(codes, check_codes = NULL) {
   scale <- 1 / sqrt(u)
   A_star <- C * outer(scale, scale)
   lambda <- eigen(A_star, symmetric = TRUE, only.values = TRUE)$values
-  connected <- sum(lambda < arc_oracle_tol * max(lambda)) == 1
+  # Eigenvalues of A* lie in [0, 1] (0 <= C <= diag(u)), so the tolerance
+  # is absolute on that canonical scale; relative to max(lambda) it would
+  # rank the rounding noise of a zero information matrix (M1 gate review).
+  connected <- sum(lambda < arc_oracle_tol) == 1
 
   # Rank of [X B] from its singular values (square roots of the cross-product
   # eigenvalues). Applying the tolerance to the squared values would drop

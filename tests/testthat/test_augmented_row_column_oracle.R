@@ -141,3 +141,15 @@ test_that("residual df uses singular values, not squared ones", {
   expect_false(result$connected)
   expect_identical(result$residual_df_rank, 0L)
 })
+
+test_that("the oracle reports zero information for confounded layouts", {
+  # M1 gate review, P1: C = 0 exactly; exact answers, not agreement checks.
+  rows <- arc_oracle(matrix(c(1L, 2L, 1L, 2L), nrow = 2L))
+  expect_false(rows$connected)
+  expect_identical(rows$residual_df_rank, 1L)
+  expect_null(rows$E_aug)
+  column <- arc_oracle(matrix(c(1L, 1L, 2L, 2L, 3L, 4L), ncol = 1L))
+  expect_false(column$connected)
+  expect_identical(column$residual_df_rank, 0L)
+  expect_null(column$E_aug)
+})
