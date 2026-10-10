@@ -354,3 +354,82 @@ arc_alternating_path <- function(h, a, b, column_color, label_color) {
   }
   matrix(as.integer(unlist(edges)), ncol = 3L, byrow = TRUE)
 }
+
+#' Validate an augmented row-column contraction (public contract)
+#'
+#' Specification sections 4.1, 4.3, and 4.4, in order: the structural checks
+#' of `arc_check_contraction()`; the integer df formula, where a negative
+#' value means no connected design exists and no matrix work is done;
+#' connectivity from the spectrum of M-tilde (section 5); the public floor of
+#' one residual df; then the warnings. Every condition raised or signalled
+#' here carries `df_formula`, `lambda_min_rel` (NA when not computed), `v`,
+#' `s`, and `k` as data fields.
+#'
+#' @inheritParams arc_check_contraction
+#' @param mode "restricted" (the default) or "column_binary".
+#' @return A list with integer `v`, `s`, `k`, the replications `r`,
+#'   `df_formula`, `connected` (always TRUE), `lambda_min_rel`, and `mode`.
+#' @noRd
+arc_validate_contraction <- function(contraction, v, mode = "restricted") {
+  checked <- arc_check_contraction(contraction, v, mode)
+  v <- checked$v
+  s <- checked$s
+  k <- checked$k
+  df <- arc_df_formula(v, s, k)
+  data <- list(df_formula = df, lambda_min_rel = NA_real_, v = v, s = s,
+               k = k)
+
+  if (df < 0L) {
+    fieldhub_abort("No connected design exists for v = ", v, " rows, s = ", s,
+                   " columns, and k = ", k, " checks: a connected design ",
+                   "would have ks - k - v - s + 2 = ", df, " residual degrees ",
+                   "of freedom.",
+                   class = c("fieldhub_arc_infeasible_error",
+                             "fieldhub_dimension_error"),
+                   data = data)
+  }
+
+  matrices <- arc_contraction_matrices(contraction, v)
+  lambda <- eigen(matrices$M_tilde, symmetric = TRUE,
+                  only.values = TRUE)$values
+  spectrum <- arc_classify_spectrum(lambda)
+  data$lambda_min_rel <- spectrum$lambda_min_rel
+  if (!spectrum$connected) {
+    fieldhub_abort("The design is not connected: some treatment comparisons ",
+                   "cannot be estimated from these row and column positions ",
+                   "of the checks.",
+                   class = c("fieldhub_arc_disconnected_error",
+                             "fieldhub_input_error"),
+                   data = data)
+  }
+  if (df < 1L) {
+    fieldhub_abort("The design has ", df, " residual degrees of freedom, so ",
+                   "the residual variance cannot be estimated; at least 1 is ",
+                   "required.",
+                   class = c("fieldhub_arc_df_error",
+                             "fieldhub_dimension_error"),
+                   data = data)
+  }
+
+  if (df < 10L) {
+    relative_sd <- round(100 * sqrt(2 / df))
+    fieldhub_warn("The design has only ", df, " residual degrees of freedom. ",
+                  "Under independent normal errors, the estimate of the ",
+                  "residual variance then has a relative standard deviation ",
+                  "of about ", relative_sd, "%. Only adding a check or ",
+                  "changing the number of rows or columns raises the ",
+                  "residual degrees of freedom.",
+                  class = "fieldhub_arc_low_df_warning", data = data)
+  }
+  if (spectrum$near_singular) {
+    fieldhub_warn("The design is numerically near-singular: lambda_min_rel ",
+                  "= ", format(spectrum$lambda_min_rel, digits = 3),
+                  " is below 1e-6, so its computed variances may lose ",
+                  "accuracy. This is a numerical-conditioning warning.",
+                  class = "fieldhub_arc_near_singular_warning", data = data)
+  }
+
+  list(v = v, s = s, k = k, r = checked$r, df_formula = df,
+       connected = TRUE, lambda_min_rel = spectrum$lambda_min_rel,
+       mode = mode)
+}

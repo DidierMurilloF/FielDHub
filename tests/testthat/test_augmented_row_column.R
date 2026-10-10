@@ -558,3 +558,124 @@ test_that("recoloring needs max(r) <= k and s <= v", {
   expect_error(arc_recolor_rows(collided, 12),
                class = "fieldhub_arc_collision_error")
 })
+
+# Task 6: public validator (spec 4.1, 4.3, 4.4) -------------------------------
+
+# A restricted 6 x 4, k = 3 design with every r_h = 2 and df_formula = 1 that
+# is disconnected: columns 1-2 hold field rows 1-3 and columns 3-4 hold field
+# rows 4-6, so the row-column graph splits into two components. Found by
+# recoloring the 85 fixed-replication 6 x 4 column multisets (10 of them are
+# disconnected) and taking the first disconnected one.
+arc_disconnected_contraction <- matrix(c(
+  3, 1, 6, 4,
+  1, 2, 4, 5,
+  2, 3, 5, 6
+), nrow = 3, byrow = TRUE)
+
+test_that("validator: malformed input raises the structural condition", {
+  collided <- arc_ex1_contraction
+  collided[2, 1] <- 7
+  expect_arc_error(arc_validate_contraction(collided, 12),
+                   "fieldhub_arc_collision_error", "fieldhub_input_error")
+})
+
+test_that("validator: negative df is infeasible without matrix work", {
+  condition <- expect_arc_error(
+    arc_validate_contraction(arc_fixture("false-qr.csv"), 54),
+    "fieldhub_arc_infeasible_error", "fieldhub_dimension_error")
+  expect_identical(condition$df_formula, -1L)
+  expect_true(is.na(condition$lambda_min_rel))
+  expect_identical(c(condition$v, condition$s, condition$k), c(54L, 14L, 5L))
+  expect_match(condition$message, "connected design")
+})
+
+test_that("validator: a df-feasible disconnected design is rejected", {
+  # Independent check with the test oracle on the expanded layout.
+  codes <- arc_expand(arc_disconnected_contraction, 6,
+                      mode = "restricted")$codes
+  expect_false(arc_oracle(codes)$connected)
+  expect_identical(arc_df_formula(6, 4, 3), 1L)
+
+  condition <- expect_arc_error(
+    arc_validate_contraction(arc_disconnected_contraction, 6),
+    "fieldhub_arc_disconnected_error", "fieldhub_input_error")
+  expect_identical(condition$df_formula, 1L)
+  expect_lt(condition$lambda_min_rel, 1e-8)
+  expect_identical(c(condition$v, condition$s, condition$k), c(6L, 4L, 3L))
+})
+
+test_that("validator: a connected design with zero df is a df error", {
+  condition <- expect_arc_error(
+    arc_validate_contraction(arc_fixture("zero-df.csv"), 6),
+    "fieldhub_arc_df_error", "fieldhub_dimension_error")
+  expect_identical(condition$df_formula, 0L)
+  expect_gt(condition$lambda_min_rel, 1e-6)
+  expect_identical(c(condition$v, condition$s, condition$k), c(6L, 6L, 2L))
+})
+
+test_that("validator: low df warns with the df and how to raise it", {
+  contraction <- arc_fixture("example1-contraction.csv")
+  expect_warning(result <- arc_validate_contraction(contraction, 12),
+                 class = "fieldhub_arc_low_df_warning")
+  expect_identical(result$df_formula, 3L)
+  expect_true(result$connected)
+
+  condition <- tryCatch(arc_validate_contraction(contraction, 12),
+                        fieldhub_arc_low_df_warning = function(w) w)
+  expect_s3_class(condition, "fieldhub_warning")
+  expect_identical(condition$df_formula, 3L)
+  expect_match(condition$message, "3", fixed = TRUE)
+  expect_match(condition$message, "about 82%", fixed = TRUE)
+  expect_match(condition$message, "adding a check", fixed = TRUE)
+  expect_match(condition$message, "rows or columns", fixed = TRUE)
+  expect_no_match(condition$message, "optimi|search|longer|iteration",
+                  ignore.case = TRUE)
+})
+
+test_that("validator: a healthy design returns diagnostics without warning", {
+  expect_no_warning(
+    result <- arc_validate_contraction(arc_fixture("example2-contraction.csv"),
+                                       24)
+  )
+  expect_identical(result$df_formula, 37L)
+  expect_true(result$connected)
+  expect_gt(result$lambda_min_rel, 1e-6)
+  expect_identical(c(result$v, result$s, result$k), c(24L, 16L, 5L))
+  # ks / v = 80 / 24, so every r_h is 3 or 4 and they sum to 80.
+  expect_true(all(result$r %in% c(3L, 4L)))
+  expect_identical(sum(result$r), 80L)
+  expect_length(result$r, 24L)
+  expect_identical(result$mode, "restricted")
+})
+
+test_that("validator: near-singular spectra warn, others do not", {
+  contraction <- arc_fixture("example2-contraction.csv")
+  local({
+    local_mocked_bindings(arc_classify_spectrum = function(lambda, ...) {
+      list(connected = TRUE, lambda_min_rel = 5e-7, near_singular = TRUE)
+    })
+    expect_warning(result <- arc_validate_contraction(contraction, 24),
+                   class = "fieldhub_arc_near_singular_warning")
+    expect_identical(result$lambda_min_rel, 5e-7)
+  })
+  local({
+    local_mocked_bindings(arc_classify_spectrum = function(lambda, ...) {
+      list(connected = TRUE, lambda_min_rel = 2e-6, near_singular = FALSE)
+    })
+    expect_no_warning(arc_validate_contraction(contraction, 24),
+                      class = "fieldhub_arc_near_singular_warning")
+  })
+})
+
+test_that("validator: mode passes through to the structural checks", {
+  square <- arc_fixture("square-a.csv")
+  expect_arc_error(arc_validate_contraction(square, 6),
+                   "fieldhub_arc_row_repeat_error", "fieldhub_input_error")
+  # Column-binary mode reaches the df stage: connected with df 5 (manifest).
+  expect_warning(result <- arc_validate_contraction(square, 6,
+                                                    mode = "column_binary"),
+                 class = "fieldhub_arc_low_df_warning")
+  expect_true(result$connected)
+  expect_identical(result$df_formula, 5L)
+  expect_identical(result$mode, "column_binary")
+})
