@@ -1154,6 +1154,215 @@ test_that("worst-pair maxima are returned only on request", {
   }
 })
 
+# Task 2 (M2): blockwise worst pairs (spec 6.4) -------------------------------
+
+# Inputs of arc_worst_pair_maxima() rebuilt from the contraction matrices, and
+# a dense reference formed here from the full T x T kernel (the M1 code).
+arc_worst_pair_inputs <- function(contraction, v) {
+  matrices <- arc_contraction_matrices(contraction, v)
+  s <- ncol(contraction)
+  k <- nrow(contraction)
+  omega <- chol2inv(chol(matrices$M_tilde)) - tcrossprod(matrices$Q0)
+  omega <- (omega + t(omega)) / 2
+  h_c <- cbind(t(matrices$nr), matrix(1, k, s)) / s
+  omega_h_c <- omega %*% t(h_c)
+  cells <- which(1 - matrices$nc == 1, arr.ind = TRUE)
+  a <- unname(cells[, "row"])
+  b <- v + unname(cells[, "col"])
+  quad_c <- colSums(t(h_c) * omega_h_c)
+  kernel_tt <- omega[a, a, drop = FALSE] + omega[a, b, drop = FALSE] +
+    omega[b, a, drop = FALSE] + omega[b, b, drop = FALSE]
+  quad_t <- diag(kernel_tt)
+  pairs_tt <- 2 + outer(quad_t, quad_t, `+`) - 2 * kernel_tt
+  diag(pairs_tt) <- -Inf
+  kernel_tc <- omega_h_c[a, , drop = FALSE] + omega_h_c[b, , drop = FALSE]
+  pairs_tc <- 1 + 1 / s + outer(quad_t, quad_c, `+`) - 2 * kernel_tc
+  list(omega = omega, a = a, b = b, omega_h_c = omega_h_c, quad_c = quad_c,
+       s = s, n = length(a), dense_tt = max(pairs_tt),
+       dense_tc = max(pairs_tc))
+}
+
+arc_worst_pair_blocked <- function(inputs, block_size) {
+  arc_worst_pair_maxima(inputs$omega, inputs$a, inputs$b, inputs$omega_h_c,
+                        inputs$quad_c, inputs$s, block_size)
+}
+
+# Block sizes 1, 2, 7, T - 1, T, T + 5 and an exact divisor of T in 3..T-1
+# (the middle one, as in the spike), when T has one.
+arc_worst_pair_sizes <- function(n) {
+  divisors <- Filter(function(d) n %% d == 0L, seq.int(3L, max(3L, n - 1L)))
+  divisors <- divisors[divisors < n]
+  sizes <- c(1L, 2L, 7L, n - 1L, n, n + 5L)
+  if (length(divisors) > 0L) {
+    sizes <- c(sizes, divisors[ceiling(length(divisors) / 2)])
+  }
+  unique(sizes[sizes >= 1L])
+}
+
+test_that("blocked worst pairs equal the dense reference on every fixture", {
+  fixtures <- arc_connected_contractions()
+  expect_gt(nrow(fixtures), 25L)
+  with_divisor <- 0L
+  for (i in seq_len(nrow(fixtures))) {
+    entry <- fixtures[i, ]
+    inputs <- arc_worst_pair_inputs(arc_fixture(entry$file), entry$v)
+    sizes <- arc_worst_pair_sizes(inputs$n)
+    inner <- sizes[sizes >= 3L & sizes < inputs$n - 1L]
+    if (any(inputs$n %% inner == 0L)) {
+      with_divisor <- with_divisor + 1L
+    }
+    for (size in sizes) {
+      label <- paste(entry$file, "block", size)
+      blocked <- arc_worst_pair_blocked(inputs, size)
+      expect_lt(abs(blocked$max_tt - inputs$dense_tt) /
+                  max(1, abs(inputs$dense_tt)), 1e-12,
+                label = paste(label, "max_tt"))
+      expect_lt(abs(blocked$max_tc - inputs$dense_tc) /
+                  max(1, abs(inputs$dense_tc)), 1e-12,
+                label = paste(label, "max_tc"))
+      # The argmax is a distinct pair p < q of test cells
+      p <- blocked$argmax_tt[1L]
+      q <- blocked$argmax_tt[2L]
+      expect_true(p >= 1L && p < q && q <= inputs$n, label = label)
+    }
+  }
+  expect_gt(with_divisor, 20L)
+})
+
+test_that("the evaluator reports the blocked maxima at the option's size", {
+  entry <- arc_connected_contractions()
+  entry <- entry[entry$file == "example2-contraction.csv", ]
+  contraction <- arc_fixture(entry$file)
+  inputs <- arc_worst_pair_inputs(contraction, entry$v)
+  old <- options(FielDHub.arc_worst_pair_block_mib = NULL)
+  on.exit(options(old), add = TRUE)
+  for (mib in c(1e-9, 1e-4, 64)) {
+    options(FielDHub.arc_worst_pair_block_mib = mib)
+    result <- arc_evaluate_objectives(contraction, entry$v, entry$mode,
+                                      worst_pair = TRUE)
+    expect_lt(abs(result$max_tt - inputs$dense_tt), 1e-12, label = mib)
+    expect_lt(abs(result$max_tc - inputs$dense_tc), 1e-12, label = mib)
+  }
+})
+
+test_that("the block size follows the MiB budget", {
+  old <- options(FielDHub.arc_worst_pair_block_mib = NULL)
+  on.exit(options(old), add = TRUE)
+  expect_identical(arc_worst_pair_block_size(), 2896)
+  options(FielDHub.arc_worst_pair_block_mib = 1)
+  expect_identical(arc_worst_pair_block_size(), 362)
+  options(FielDHub.arc_worst_pair_block_mib = 1e-9)
+  expect_identical(arc_worst_pair_block_size(), 1)
+})
+
+test_that("an invalid worst-pair block budget is a classed input error", {
+  old <- options(FielDHub.arc_worst_pair_block_mib = NULL)
+  on.exit(options(old), add = TRUE)
+  for (bad in list(0, -1, NA_real_, Inf, NaN, "64", c(1, 2), TRUE,
+                   matrix(1))) {
+    options(FielDHub.arc_worst_pair_block_mib = bad)
+    expect_arc_error(arc_worst_pair_block_size(), "fieldhub_arc_input_error",
+                     "fieldhub_input_error")
+    expect_arc_error(arc_evaluate_objectives(arc_ex2_contraction, 24,
+                                             "restricted", worst_pair = TRUE),
+                     "fieldhub_arc_input_error", "fieldhub_input_error")
+  }
+  # Without worst pairs the option is not read
+  expect_true(arc_evaluate_objectives(arc_ex2_contraction, 24,
+                                      "restricted")$connected)
+})
+
+test_that("worst pairs match an explicit distinct-pair enumeration", {
+  # Every unordered distinct test pair and every test-check pair, scored
+  # from x_p = e_a + e_(v + b) and h_i one at a time. Each distinct test-test
+  # variance is 2 + h' Omega h >= 2, so the maximum is at least 2.
+  contraction <- arc_fixture("example1-contraction.csv")
+  v <- 12
+  inputs <- arc_worst_pair_inputs(contraction, v)
+  matrices <- arc_contraction_matrices(contraction, v)
+  s <- inputs$s
+  k <- nrow(contraction)
+  n <- inputs$n
+  x <- matrix(0, n, v + s)
+  x[cbind(seq_len(n), inputs$a)] <- 1
+  x[cbind(seq_len(n), inputs$b)] <- 1
+  h_c <- cbind(t(matrices$nr), matrix(1, k, s)) / s
+  variance_tt <- function(p, q) {
+    d <- x[p, ] - x[q, ]
+    2 + drop(crossprod(d, inputs$omega %*% d))
+  }
+  best_tt <- -Inf
+  for (p in seq_len(n - 1L)) {
+    for (q in (p + 1L):n) {
+      best_tt <- max(best_tt, variance_tt(p, q))
+    }
+  }
+  best_tc <- -Inf
+  for (p in seq_len(n)) {
+    for (i in seq_len(k)) {
+      d <- x[p, ] - h_c[i, ]
+      best_tc <- max(best_tc,
+                     1 + 1 / s + drop(crossprod(d, inputs$omega %*% d)))
+    }
+  }
+  expect_gte(best_tt, 2)
+  for (size in arc_worst_pair_sizes(n)) {
+    blocked <- arc_worst_pair_blocked(inputs, size)
+    expect_lt(abs(blocked$max_tt - best_tt), 1e-12, label = size)
+    expect_lt(abs(blocked$max_tc - best_tc), 1e-12, label = size)
+    p <- blocked$argmax_tt[1L]
+    q <- blocked$argmax_tt[2L]
+    expect_true(p >= 1L && p < q && q <= n, label = size)
+    expect_lt(abs(variance_tt(p, q) - best_tt), 1e-12, label = size)
+  }
+})
+
+test_that("a 96 x 96 layout gets worst pairs without a T x T allocation", {
+  arc_skip_unless_search_slow()
+  # Cyclic restricted contraction: column j holds rows j, j + 19, ..., mod 96
+  v <- 96L
+  s <- 96L
+  k <- 5L
+  contraction <- outer(19L * (seq_len(k) - 1L), seq_len(s) - 1L, `+`) %% v + 1L
+  n_tests <- (v - k) * s
+  dense_bytes <- n_tests^2 * 8
+  old <- options(FielDHub.arc_worst_pair_block_mib = NULL)
+  on.exit(options(old), add = TRUE)
+  # Every allocation of at least a quarter of a T x T double matrix is logged
+  # (the default 64 MiB sub-kernel is about 0.11 of it at T = 8,736)
+  profile <- tempfile(fileext = ".txt")
+  on.exit(unlink(profile), add = TRUE)
+  baseline <- gc(reset = TRUE)
+  profiling <- isTRUE(capabilities("profmem"))
+  if (profiling) Rprofmem(profile, threshold = dense_bytes / 4)
+  elapsed <- system.time(
+    result <- arc_evaluate_objectives(contraction, v, "restricted",
+                                      worst_pair = TRUE)
+  )[["elapsed"]]
+  if (profiling) Rprofmem(NULL)
+  memory <- gc()
+  peak_mib <- sum(memory[, ncol(memory)]) - sum(baseline[, 2L])
+  expect_true(result$connected)
+  expect_true(is.finite(result$max_tt) && result$max_tt >= 2)
+  expect_true(is.finite(result$max_tc))
+  if (profiling) {
+    logged <- readLines(profile)
+    sizes <- as.numeric(sub("^([0-9]+) :.*$", "\\1",
+                            grep("^[0-9]+ :", logged, value = TRUE)))
+    expect_identical(sizes[sizes >= dense_bytes / 4], numeric(0))
+  }
+  # Peak growth stays below the T x T matrix alone (about 582 MiB)
+  expect_lt(peak_mib, dense_bytes / 2^20)
+  # A different block size gives the same maxima
+  options(FielDHub.arc_worst_pair_block_mib = 8)
+  other <- arc_evaluate_objectives(contraction, v, "restricted",
+                                   worst_pair = TRUE)
+  expect_lt(abs(other$max_tt - result$max_tt), 1e-12)
+  expect_lt(abs(other$max_tc - result$max_tc), 1e-12)
+  message(sprintf("96 x 96 worst pairs: T = %d, %.2f s, peak %.0f MiB",
+                  n_tests, elapsed, peak_mib))
+})
+
 test_that("single-matrix route passes the mode through", {
   square <- arc_fixture("square-a.csv")
   expect_arc_error(arc_evaluate_objectives(square, 6, "restricted"),

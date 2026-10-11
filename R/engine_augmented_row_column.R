@@ -732,6 +732,95 @@ arc_evaluate_contraction <- function(contraction, v, mode) {
                  b = b))
 }
 
+#' Worst-pair block size from the memory budget option
+#'
+#' Specification section 6.4. Reads
+#' `getOption("FielDHub.arc_worst_pair_block_mib", 64)`, the budget in MiB
+#' for one double-precision sub-kernel of the worst-pair computation, and
+#' returns the largest block size b with b^2 doubles inside that budget (at
+#' least 1). Peak memory is a small multiple of the budget because of
+#' temporaries.
+#'
+#' @return A single positive whole number (double).
+#' @noRd
+arc_worst_pair_block_size <- function() {
+  mib <- getOption("FielDHub.arc_worst_pair_block_mib", 64)
+  valid <- is.numeric(mib) && length(mib) == 1L && is.null(dim(mib)) &&
+    is.finite(mib) && mib > 0
+  if (!valid) {
+    fieldhub_abort("The option FielDHub.arc_worst_pair_block_mib must be a ",
+                   "single finite positive number (MiB).",
+                   class = c("fieldhub_arc_input_error",
+                             "fieldhub_input_error"),
+                   data = list(value = mib))
+  }
+  max(1, floor(sqrt(mib * 2^20 / 8)))
+}
+
+#' Blocked worst-pair maxima over test cells
+#'
+#' Specification section 6.4. With test cells p = (a_p, b_p), x_p =
+#' e_(a_p) + e_(b_p) on the (v + s) scale and the T x T test-cell kernel
+#' K = X_T Omega X_T', a distinct test pair has variance
+#' 2 + K_pp + K_qq - 2 K_pq and a test-check pair (p, i) has variance
+#' 1 + 1/s + K_pp + h_i' Omega h_i - 2 (X_T Omega H_C')_pi. The test cells are
+#' cut into consecutive blocks of `block_size`; only the |P| x |Q| sub-kernel
+#' of each block pair P <= Q (upper triangle of blocks) is formed, and on a
+#' diagonal block only its strict upper triangle is used, so self-pairs are
+#' excluded and each unordered pair is seen once. `max_tc` is blocked over
+#' test rows. No T x T matrix is formed.
+#'
+#' @param omega The (v + s) x (v + s) symmetric matrix Omega = M^+.
+#' @param a,b Integer vectors of length T >= 2: the row index and the
+#'   (v + s)-scale column index of each test cell.
+#' @param omega_h_c The (v + s) x k matrix Omega H_C'.
+#' @param quad_c Length-k vector of h_i' Omega h_i.
+#' @param s Number of columns.
+#' @param block_size A positive whole number; values above T act as T.
+#' @return A list with `max_tt`, `max_tc`, and `argmax_tt`, the test-cell
+#'   indices p < q of a pair attaining `max_tt`.
+#' @noRd
+arc_worst_pair_maxima <- function(omega, a, b, omega_h_c, quad_c, s,
+                                  block_size) {
+  n <- length(a)
+  block_size <- min(block_size, n)
+  quad_t <- omega[cbind(a, a)] + 2 * omega[cbind(a, b)] + omega[cbind(b, b)]
+  starts <- seq.int(1L, n, by = block_size)
+  max_tt <- -Inf
+  argmax_tt <- c(NA_integer_, NA_integer_)
+  max_tc <- -Inf
+  for (i in starts) {
+    p <- seq.int(i, min(i + block_size - 1, n))
+    a_p <- a[p]
+    b_p <- b[p]
+    kernel_tc <- omega_h_c[a_p, , drop = FALSE] +
+      omega_h_c[b_p, , drop = FALSE]
+    max_tc <- max(max_tc,
+                  1 + 1 / s + outer(quad_t[p], quad_c, `+`) - 2 * kernel_tc)
+    for (j in starts[starts >= i]) {
+      q <- seq.int(j, min(j + block_size - 1, n))
+      a_q <- a[q]
+      b_q <- b[q]
+      # 2 + K_pp + K_qq - 2 K_pq, built in place to limit temporaries
+      pairs <- omega[a_p, a_q, drop = FALSE] + omega[a_p, b_q, drop = FALSE] +
+        omega[b_p, a_q, drop = FALSE] + omega[b_p, b_q, drop = FALSE]
+      pairs <- (2 + quad_t[p]) - 2 * pairs
+      pairs <- pairs + rep(quad_t[q], each = length(p))
+      if (i == j) {
+        if (length(p) < 2L) next
+        pairs[lower.tri(pairs, diag = TRUE)] <- -Inf
+      }
+      w <- which.max(pairs)
+      if (pairs[w] > max_tt) {
+        max_tt <- pairs[w]
+        index <- arrayInd(w, dim(pairs))
+        argmax_tt <- c(p[index[1L]], q[index[2L]])
+      }
+    }
+  }
+  list(max_tt = max_tt, max_tc = max_tc, argmax_tt = argmax_tt)
+}
+
 #' Single-matrix augmented row-column evaluator (production route)
 #'
 #' Specification section 7.3. Computes every objective of section 6 from one
@@ -752,10 +841,15 @@ arc_evaluate_contraction <- function(contraction, v, mode) {
 #' S_T = [[diag(TI 1), TI], [TI', diag(TI' 1)]] = sum of x x' over test
 #' cells, and h_T = (TI 1; TI' 1) = sum of x over test cells.
 #'
-#' With `worst_pair = TRUE`, the maxima over test pairs and test-check pairs
-#' come from the T x T test-cell kernel X_T Omega X_T' and the T x k cross
-#' kernel X_T Omega H_C', assembled from blocks of Omega by indexing. This is
-#' for reporting once per returned design, not for search.
+#' With `worst_pair = TRUE`, the maxima over distinct test pairs and over
+#' test-check pairs come from the test-cell kernel X_T Omega X_T' and the
+#' cross kernel X_T Omega H_C', computed exactly in blocks by
+#' `arc_worst_pair_maxima()` (section 6.4): only block-by-block sub-kernels
+#' are formed, never the T x T kernel. The block size comes from the memory
+#' budget `getOption("FielDHub.arc_worst_pair_block_mib", 64)` (MiB per
+#' sub-kernel), validated before any matrix work; an invalid value raises
+#' `fieldhub_arc_input_error`. This is for reporting once per returned
+#' design, not for search.
 #'
 #' @inheritParams arc_check_contraction
 #' @param worst_pair If TRUE, also return `max_tt` and `max_tc`.
@@ -771,6 +865,7 @@ arc_evaluate_objectives <- function(contraction, v, mode, worst_pair = FALSE) {
                    class = c("fieldhub_arc_input_error",
                              "fieldhub_input_error"))
   }
+  block_size <- if (worst_pair) arc_worst_pair_block_size()
   checked <- arc_check_contraction(contraction, v, mode)
   v <- checked$v
   s <- checked$s
@@ -836,20 +931,10 @@ arc_evaluate_objectives <- function(contraction, v, mode, worst_pair = FALSE) {
 
   # Test cell p = (a, b) has x_p = e_a + e_(v + b) on the (v + s) scale
   cells <- which(ti == 1, arr.ind = TRUE)
-  a <- cells[, 1L]
-  b <- v + cells[, 2L]
-  omega_ab <- omega[a, b, drop = FALSE]
-  kernel_tt <- omega[a, a, drop = FALSE] + omega_ab + t(omega_ab) +
-    omega[b, b, drop = FALSE]
-  quad_t <- diag(kernel_tt)
-  pairs_tt <- 2 + outer(quad_t, quad_t, `+`) - 2 * kernel_tt
-  diag(pairs_tt) <- -Inf
-
-  kernel_tc <- omega_h_c[a, , drop = FALSE] + omega_h_c[b, , drop = FALSE]
   quad_c <- colSums(t(h_c) * omega_h_c)
-  pairs_tc <- 1 + 1 / s + outer(quad_t, quad_c, `+`) - 2 * kernel_tc
-
-  c(result, list(max_tt = max(pairs_tt), max_tc = max(pairs_tc)))
+  maxima <- arc_worst_pair_maxima(omega, cells[, 1L], v + cells[, 2L],
+                                  omega_h_c, quad_c, s, block_size)
+  c(result, maxima[c("max_tt", "max_tc")])
 }
 
 #' Final scoring of an augmented row-column contraction
