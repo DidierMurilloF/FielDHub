@@ -1,5 +1,6 @@
 # Expected rows transcribed from the original module UIs, not derived from
-# app_sidebar_layout(). Each slash denotes the original 6/6 Bootstrap columns.
+# app_sidebar_layout(), with the added diagonal optimization controls. Each
+# slash denotes the original 6/6 Bootstrap columns.
 original_sidebar_rows <- list(
   CRD = c("t", "reps", "planter", "plot_start/location_names", "seed"),
   RCBD = c("t", "reps", "use_checks", "checks/rep_checks", "spread_checks", "checks_note",
@@ -22,7 +23,8 @@ original_sidebar_rows <- list(
     "plot_start/expt_name", "seed/location_names"),
   RCBD_augmented = c("repsExpt/random", "random_note", "repsStack", "lines", "checks/b",
     "l/location_view", "planter", "plot_start/expt_name", "seed/location_names"),
-  Diagonal = c("lines", "checks", "l/location_view", "planter", "plot_start/expt_name", "seed/location_names"),
+  Diagonal = c("lines", "checks", "spread_checks", "dist_method", "l/location_view",
+    "planter", "plot_start/expt_name", "seed/location_names"),
   diagonal_multiple = c("sameEntries", "lines", "blocks", "checks", "l/location_view", "stacked/planter",
     "plot_start/expt_name", "seed/location_names"),
   sparse_allocation = c("lines", "checks", "l/location_view", "copies_per_entry", "planter",

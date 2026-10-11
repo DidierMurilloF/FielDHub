@@ -6,7 +6,7 @@ boolean_controls <- list(
   row_column = "latinize",
   partially_replicated = c("spread_reps", "multiLocationData", "allow_fillers"),
   RCBD_augmented = "random",
-  diagonal_arrangement = c("multiLocationData", "sameEntries"),
+  diagonal_arrangement = c("multiLocationData", "sameEntries", "spread_checks"),
   optimized_arrangement = "spread_reps",
   multi_location_prep = c("spread_reps", "allow_fillers"),
   do_optim = c("add_checks", "force_balance")

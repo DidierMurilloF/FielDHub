@@ -436,7 +436,9 @@ design_args_Diagonal <- function(values, data = NULL) {
     exptName = values[["expt_name"]],
     locationNames = location_names_or_null(values[["location_names"]], l),
     data = data,
-    checksPercent = as_design_number(values[["checksPercent"]])
+    checksPercent = as_design_number(values[["checksPercent"]]),
+    spread_checks = values[["spread_checks"]] %||% FALSE,
+    dist_method = values[["dist_method"]] %||% "euclidean"
   )
 }
 

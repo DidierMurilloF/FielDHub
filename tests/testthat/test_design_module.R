@@ -31,6 +31,7 @@ canonical_labels <- c(
   checks = "Input # of Checks:",
   rep_checks = "Reps per Check:",
   spread_checks = "Spread checks within each block",
+  dist_method = "Check spacing distance:",
   checks_note = NA,
   l = "Input # of Locations:",
   planter = "Plot Order Layout:",
@@ -617,7 +618,7 @@ test_that("the same concept has the same label, default and minimum on every pag
                      multi_loc_preps.l = 2)
   page_values <- list(Optim.plot_start = "1", Optim.rep_checks = "8,8,8,8", pREPS.plot_start = "1",
                    pREPS.repGens = "75,150", pREPS.repUnits = "2,1",
-                   RCBD_augmented.plot_start = "1", Diagonal.plot_start = "1",
+                   RCBD_augmented.plot_start = "1", Diagonal.plot_start = "1", Diagonal.spread_checks = FALSE,
                    diagonal_multiple.plot_start = "1", diagonal_multiple.expt_name = "Expt1, Expt2, Expt3",
                    sparse_allocation.plot_start = "1", sparse_allocation.l = 5,
                    multi_loc_preps.plot_start = "1", multi_loc_preps.l = 6, multi_loc_preps.lines = 312,
@@ -645,7 +646,7 @@ test_that("the same concept has the same label, default and minimum on every pag
       } else if ("value" %in% names(concept)) {
         expect_identical(control$value, concept$value, info = info)
       }
-      if (!is.null(concept$choices)) expect_identical(unname(control$choices), concept$choices, info = info)
+      if (!is.null(concept$choices)) expect_identical(unname(control$choices), unname(concept$choices), info = info)
       minimums <- c(engine_minimums, page_minimums)
       if (key %in% names(minimums)) {
         expect_identical(control$min, minimums[[key]], info = info)

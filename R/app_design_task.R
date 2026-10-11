@@ -84,12 +84,17 @@ app_report_task_feedback <- function(session, id, busy, message = "") {
 #' the previous result too, so a slow worker cannot revive an obsolete design.
 #' @noRd
 app_design_task <- function(id_prefix, engine, args_reactive, on_done = identity,
-                             long_running = TRUE, busy_message = "Randomizing design...") {
+                             long_running = TRUE, busy_message = "Randomizing design...",
+                             prefetch_args = NULL) {
   # Resolve configuration now: callers may reuse their local reactive variable
   # for the next stage before our observers first run.
   force(args_reactive)
   force(on_done)
   force(busy_message)
+  if (!is.null(prefetch_args)) {
+    return(app_cached_design_task(id_prefix, engine, args_reactive, prefetch_args,
+                                  on_done, long_running, busy_message))
+  }
   session <- shiny::getDefaultReactiveDomain()
   runtime <- session$userData$fieldhub_task_runtime
   engine_name <- design_engine_name(engine)

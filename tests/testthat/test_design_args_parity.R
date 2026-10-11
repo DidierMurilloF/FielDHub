@@ -1206,6 +1206,7 @@ test_that("spatial pages submit builder snapshots for allocation and final desig
     "read_design_controls",       # reads again the controls the steps follow (filler plots)
     "design_step_choices",        # choices of a step, from the values of the run
     "read_design_steps",          # reads the steps into the values of the builder
+    "diagonal_option_requests",   # alternatives change only the percentage in builder arguments
     "selected_step_values",       # each Randomize! starts from the choices it selects
     "spatial_randomize_state",    # ready / waiting / the problem of the last Randomize!
     "fieldhub_abort",             # shows that problem through validate_design()

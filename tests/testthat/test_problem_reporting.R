@@ -264,7 +264,8 @@ test_that("no app function writes a literal shiny::validate() message", {
     grepl("shiny::validate(", paste(deparse(body(f)), collapse = "\n"), fixed = TRUE)
   }
   expect_setequal(names(Filter(calls_validate, c(core_functions(), app_functions()))),
-                  c("validate_design", "app_plot_state", "app_attempt", "app_design_task"))
+                  c("validate_design", "app_plot_state", "app_attempt", "app_design_task",
+                    "app_cached_design_task"))
 })
 
 test_that("no module catches conditions itself", {
@@ -273,6 +274,8 @@ test_that("no module catches conditions itself", {
   # use validate_design(), app_attempt() or app_report_problem() instead;
   # The shared task adapter also captures deferred results; the worker-pool
   # lifecycle handles startup/shutdown failures without touching a session.
+  # The cached task boundary captures worker results and applies the same
+  # acceptance and condition handling as the ordinary task boundary.
   # The image renderer removes temporary files when rendering fails.
   catches <- function(f) {
     fieldhub_calls_named(body(f), c("tryCatch", "withCallingHandlers", "try",
@@ -281,7 +284,8 @@ test_that("no module catches conditions itself", {
   functions <- app_functions()
   expect_setequal(names(Filter(catches, functions)),
                   c("app_attempt", "app_present_problem", "app_design_state",
-                    "app_log_problem", "app_design_task", "app_worker_lifecycle", "app_plot_outputs"))
+                    "app_log_problem", "app_design_task", "app_worker_lifecycle", "app_plot_outputs",
+                    "app_accept_design_job", "app_cached_design_task", "app_design_job_promise"))
 })
 
 test_that("the p-rep modules share the no-dimensions explanation", {
