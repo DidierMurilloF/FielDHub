@@ -1147,3 +1147,555 @@ arc_local_search <- function(budget, start, score_start, score_fn,
                 else "local_optimum"))
   }
 }
+
+# ---- Search algorithms (specification sections 4, 7.1, 7.4, 8.1, 8.2) ----
+
+#' Validate the arguments shared by every search algorithm
+#'
+#' Checks `max_evals`, `seconds`, `max_start_tries`, `now` and the shape of
+#' `starts` (NULL or a list). A run with neither a finite evaluation budget
+#' nor a finite deadline is refused: nothing would stop it. The contents of
+#' `starts` are checked after the entry check by `arc_search_check_starts()`.
+#'
+#' @inheritParams arc_search_multistart
+#' @noRd
+arc_search_check_common <- function(max_evals, seconds, starts,
+                                    max_start_tries, now) {
+  arc_search_check(arc_is_number(max_evals) && max_evals >= 0,
+                   "max_evals must be a single number >= 0 (Inf allowed).")
+  arc_search_check(arc_is_number(seconds),
+                   "seconds must be a single non-missing number.")
+  arc_search_check(is.finite(max_evals) || is.finite(seconds),
+                   "max_evals or seconds must be finite.")
+  arc_search_check(arc_is_whole_number(max_start_tries) &&
+                     max_start_tries >= 1,
+                   "max_start_tries must be a single whole number >= 1.")
+  arc_search_check(is.function(now), "now must be a function.")
+  arc_search_check(is.null(starts) || is.list(starts),
+                   "starts must be NULL or a list of contractions.")
+  invisible(TRUE)
+}
+
+#' Validate supplied start contractions
+#'
+#' Each element must be a k x s restricted contraction accepted by
+#' `arc_check_contraction(..., v, "restricted")`; any failure is raised as
+#' the classed search input error.
+#'
+#' @inheritParams arc_search_multistart
+#' @return The starts as integer matrices.
+#' @noRd
+arc_search_check_starts <- function(starts, v, s, k) {
+  if (is.null(starts)) {
+    return(NULL)
+  }
+  lapply(seq_along(starts), function(i) {
+    x <- starts[[i]]
+    arc_search_check(is.matrix(x) && identical(dim(x), as.integer(c(k, s))),
+                     paste0("starts[[", i, "]] must be a ", k, " x ", s,
+                            " matrix."))
+    tryCatch(arc_check_contraction(x, v, "restricted"),
+             fieldhub_error = function(e) {
+               fieldhub_abort("starts[[", i, "]] is not a valid restricted ",
+                              "contraction: ", conditionMessage(e),
+                              class = c("fieldhub_arc_input_error",
+                                        "fieldhub_input_error"),
+                              call = NULL)
+             })
+    storage.mode(x) <- "integer"
+    dimnames(x) <- NULL
+    x
+  })
+}
+
+#' Bounded start search for one restart
+#'
+#' Specification section 4: at most `max_tries` scored starts, each scored
+#' through the budget (every scored start counts). A supplied start is the
+#' first candidate; later candidates come from `arc_random_start()`, whose
+#' repair stops with the budget.
+#'
+#' @param budget Budget environment.
+#' @param v,s,k Dimensions.
+#' @param score_fn Score function (larger is better, `NA` disconnected).
+#' @param kind Call kind, "objective" or "proxy".
+#' @param max_tries Largest number of candidate starts.
+#' @param supplied A start contraction or `NULL`.
+#' @return `list(contraction, score, status)`; `contraction` is `NULL` with
+#'   status `budget`, `time_limit` or `start_search_exhausted` on failure.
+#' @noRd
+arc_search_start <- function(budget, v, s, k, score_fn, kind, max_tries,
+                             supplied = NULL) {
+  should_stop <- function() !is.na(arc_budget_out(budget))
+  fail <- function(status) list(contraction = NULL, score = NA_real_,
+                                status = status)
+  for (try in seq_len(max_tries)) {
+    out <- arc_budget_out(budget)
+    if (!is.na(out)) {
+      return(fail(out))
+    }
+    candidate <- if (try == 1L && !is.null(supplied)) {
+      supplied
+    } else {
+      arc_random_start(v, s, k, should_stop = should_stop)
+    }
+    if (is.null(candidate)) next
+    y <- arc_budget_eval(budget, score_fn, candidate, kind)
+    if (is.null(y)) {
+      return(fail(arc_budget_out(budget)))
+    }
+    if (!is.na(y)) {
+      return(list(contraction = candidate, score = y, status = "ok"))
+    }
+  }
+  fail("start_search_exhausted")
+}
+
+#' Supplied start of restart `i`, or `NULL`
+#' @param starts `NULL` or a list of contractions.
+#' @param i Restart index.
+#' @noRd
+arc_search_supplied <- function(starts, i) {
+  if (i <= length(starts)) starts[[i]] else NULL
+}
+
+#' Run code under a temporary, earlier deadline
+#'
+#' The budget deadline becomes `min(current, deadline)` while `code` runs and
+#' is restored on exit, also after an error.
+#'
+#' @param budget Budget environment.
+#' @param deadline Temporary deadline (`Inf` leaves it unchanged).
+#' @param code Code to evaluate (lazily).
+#' @noRd
+arc_search_with_deadline <- function(budget, deadline, code) {
+  saved <- budget$deadline
+  on.exit(budget$deadline <- saved, add = TRUE)
+  budget$deadline <- min(saved, deadline)
+  force(code)
+}
+
+#' Run a local search and append its trace row
+#'
+#' @inheritParams arc_local_search
+#' @param label Phase label for the trace.
+#' @noRd
+arc_search_polish <- function(budget, start, score_start, score_fn, label,
+                              max_evals = Inf) {
+  used <- arc_budget_used(budget)
+  res <- arc_local_search(budget, start, score_start, score_fn, "joint",
+                          max_evals = max_evals)
+  arc_budget_add_trace(budget, data.frame(
+    phase = label, f_start = score_start, f_best = res$score, t0 = NA_real_,
+    evals = arc_budget_used(budget) - used, accepted = NA_integer_,
+    worse_accepted = NA_integer_, status = res$status,
+    stringsAsFactors = FALSE
+  ))
+  res
+}
+
+#' Is `x` a better state than `best`? (finite score, larger wins)
+#' @param x,best Lists with `contraction` and `score` (`best` may be NULL).
+#' @noRd
+arc_search_better <- function(x, best) {
+  !is.null(x$contraction) && !is.na(x$score) && is.finite(x$score) &&
+    (is.null(best) || x$score > best$score)
+}
+
+#' Final verification and the result of a search run
+#'
+#' Specification sections 7.1 and 8.1. Outside the search budget and timed
+#' separately (with the budget clock): the best design is checked by
+#' `arc_validate_contraction(..., "restricted")` (its low-df warning is
+#' muffled, other warnings pass through) and re-scored by
+#' `arc_final_score()`. The reported score is the final authority's value of
+#' the objective in natural units (E_aug, V_tt or V_tc); the inner-loop score
+#' is kept as `search_score`. A failure is a classed internal error.
+#'
+#' @param budget Budget environment.
+#' @param best `NULL` or `list(contraction, score)`.
+#' @param v Pseudo-treatments.
+#' @param objective Objective name.
+#' @param phases Named per-phase statuses.
+#' @param seed Seed of the run.
+#' @param algorithm Algorithm name.
+#' @param fail_status Status when no design was found.
+#' @return The result of `arc_search_result()` with `objective`, `algorithm`
+#'   and `search_score` appended.
+#' @noRd
+arc_search_finish <- function(budget, best, v, objective, phases, seed,
+                              algorithm, fail_status = "no_design") {
+  search_secs <- arc_budget_elapsed(budget)
+  internal <- c("fieldhub_arc_internal_error", "fieldhub_internal_error")
+  design <- NULL
+  score <- NA_real_
+  final <- NULL
+  valid <- NA
+  verify_secs <- 0
+  if (!is.null(best)) {
+    design <- best$contraction
+    t_verify <- budget$now()
+    checked <- withCallingHandlers(
+      tryCatch(arc_validate_contraction(design, v, "restricted"),
+               fieldhub_error = function(e) {
+                 fieldhub_abort("Internal error: the search returned a ",
+                                "design that fails validation: ",
+                                conditionMessage(e), class = internal,
+                                data = list(design = design, cause = e),
+                                call = NULL)
+               }),
+      fieldhub_arc_low_df_warning = function(w) {
+        invokeRestart("muffleWarning")
+      })
+    final <- arc_final_score(design, v, "restricted")
+    if (!isTRUE(checked$connected) || !isTRUE(final$connected)) {
+      fieldhub_abort("Internal error: the search returned a disconnected ",
+                     "design.", class = internal,
+                     data = list(design = design), call = NULL)
+    }
+    score <- final[[objective]]
+    valid <- TRUE
+    verify_secs <- budget$now() - t_verify
+  }
+  result <- arc_search_result(
+    design = design, score = score,
+    status = if (is.null(design)) fail_status else "ok",
+    phases = phases, trace = arc_budget_trace(budget),
+    calls = arc_budget_calls(budget), proposals = budget$proposals,
+    failed = budget$failed, disconnected = budget$disconnected,
+    search_secs = search_secs, seed = seed, verify_secs = verify_secs,
+    total_secs = search_secs + verify_secs, final = final, valid = valid
+  )
+  c(result, list(objective = objective, algorithm = algorithm,
+                 search_score = if (is.null(best)) NA_real_ else best$score))
+}
+
+#' Status of a run that found no design
+#' @param last_start Status of the last failed start search, or NA.
+#' @noRd
+arc_search_fail_status <- function(last_start) {
+  if (identical(last_start, "start_search_exhausted")) last_start
+  else "no_design"
+}
+
+#' Multistart first-improvement local search
+#'
+#' Specification section 7.1: first-improvement local search over the full
+#' A/B/C/K neighbourhood from fresh random starts until the single global
+#' budget (evaluation cap, deadline, or both) is spent. Restart i uses
+#' `starts[[i]]` as its first candidate start when supplied. Final
+#' verification by `arc_final_score()` is outside the budget.
+#'
+#' @param v,s,k Field rows, columns and checks per column.
+#' @param objective One of `arc_search_objectives`.
+#' @param max_evals Global cap on objective plus proxy calls (`Inf` for
+#'   equal-time runs).
+#' @param seconds Seconds until the global deadline (`Inf` allowed when
+#'   `max_evals` is finite).
+#' @param seed `NULL` or a single number (FielDHub seed contract).
+#' @param starts `NULL` or a list of k x s restricted contractions for
+#'   matched-start experiments.
+#' @param max_start_tries Scored starts allowed per restart.
+#' @param now Clock function (seconds).
+#' @return A search result (`arc_search_result()` fields plus `objective`,
+#'   `algorithm` and `search_score`).
+#' @noRd
+arc_search_multistart <- function(v, s, k, objective = "E_aug",
+                                  max_evals = 60000, seconds = Inf,
+                                  seed = NULL, starts = NULL,
+                                  max_start_tries = 20L, now = arc_clock) {
+  arc_search_check_common(max_evals, seconds, starts, max_start_tries, now)
+  seed <- resolve_seed(seed)
+  local_design_seed(seed)
+  status <- arc_search_entry(v, s, k, objective)
+  if (!is.na(status)) {
+    return(c(arc_search_result(status = status, seed = seed),
+             list(objective = objective, algorithm = "multistart",
+                  search_score = NA_real_)))
+  }
+  starts <- arc_search_check_starts(starts, v, s, k)
+  budget <- arc_budget_new(max_evals, seconds, now = now)
+  prep <- arc_search_prep(v, s, k)
+  score_fn <- function(x) arc_search_score(x, prep, objective)
+  best <- NULL
+  phases <- character(0)
+  last_start <- NA_character_
+  restart <- 0L
+  while (is.na(arc_budget_out(budget))) {
+    restart <- restart + 1L
+    tag <- paste0("r", restart, ":")
+    start <- arc_search_start(budget, v, s, k, score_fn, "objective",
+                              max_start_tries,
+                              arc_search_supplied(starts, restart))
+    phases[[paste0(tag, "start")]] <- start$status
+    if (is.null(start$contraction)) {
+      last_start <- start$status
+      break
+    }
+    if (arc_search_better(start, best)) best <- start
+    res <- arc_search_polish(budget, start$contraction, start$score,
+                             score_fn, paste0(tag, "local"))
+    phases[[paste0(tag, "local")]] <- res$status
+    if (arc_search_better(res, best)) best <- res
+  }
+  arc_search_finish(budget, best, v, objective, phases, seed, "multistart",
+                    arc_search_fail_status(last_start))
+}
+
+#' Plain annealing on A/B/C/K moves, then polish
+#'
+#' Specification sections 7.1 and 7.4: one annealing run with
+#' `1 - polish_share` of the budget (Kempe share `kempe_share`, end-to-start
+#' temperature ratio `t_ratio`), then first-improvement polish with the
+#' rest. In equal-time mode (`max_evals = Inf`) the polish share of the
+#' remaining time is reserved through a temporary deadline.
+#'
+#' @inheritParams arc_search_multistart
+#' @param polish_share Share of the budget for polish, in [0, 1].
+#' @param kempe_share Kempe-move probability of the joint sampler, in [0, 1].
+#' @param t_ratio End-to-start temperature ratio, in (0, 1].
+#' @noRd
+arc_search_anneal <- function(v, s, k, objective = "E_aug",
+                              max_evals = 60000, seconds = Inf, seed = NULL,
+                              starts = NULL, max_start_tries = 20L,
+                              now = arc_clock, polish_share = 0.1,
+                              kempe_share = 0.3, t_ratio = 1e-3) {
+  arc_search_check_common(max_evals, seconds, starts, max_start_tries, now)
+  arc_search_check(arc_is_number(polish_share) && polish_share >= 0 &&
+                     polish_share <= 1,
+                   "polish_share must be a single number in [0, 1].")
+  arc_search_check(arc_is_number(kempe_share) && kempe_share >= 0 &&
+                     kempe_share <= 1,
+                   "kempe_share must be a single number in [0, 1].")
+  arc_search_check(arc_is_number(t_ratio) && t_ratio > 0 && t_ratio <= 1,
+                   "t_ratio must be a single number in (0, 1].")
+  seed <- resolve_seed(seed)
+  local_design_seed(seed)
+  status <- arc_search_entry(v, s, k, objective)
+  if (!is.na(status)) {
+    return(c(arc_search_result(status = status, seed = seed),
+             list(objective = objective, algorithm = "anneal",
+                  search_score = NA_real_)))
+  }
+  starts <- arc_search_check_starts(starts, v, s, k)
+  budget <- arc_budget_new(max_evals, seconds, now = now)
+  prep <- arc_search_prep(v, s, k)
+  score_fn <- function(x) arc_search_score(x, prep, objective)
+  phases <- character(0)
+  start <- arc_search_start(budget, v, s, k, score_fn, "objective",
+                            max_start_tries, arc_search_supplied(starts, 1L))
+  phases[["r1:start"]] <- start$status
+  if (is.null(start$contraction)) {
+    return(arc_search_finish(budget, NULL, v, objective, phases, seed,
+                             "anneal", arc_search_fail_status(start$status)))
+  }
+  left <- arc_budget_left(budget)
+  if (is.finite(left)) {
+    phase_evals <- floor((1 - polish_share) * left)
+    deadline <- Inf
+  } else {
+    phase_evals <- Inf
+    deadline <- budget$now() + (1 - polish_share) * arc_budget_secs_left(budget)
+  }
+  annealed <- arc_search_with_deadline(budget, deadline, arc_anneal_phase(
+    budget, start$contraction, start$score, score_fn,
+    function(x) arc_propose_joint(x, kempe_share = kempe_share),
+    phase_evals, "joint", t_ratio = t_ratio, label = "r1:joint"
+  ))
+  phases[["r1:joint"]] <- annealed$status
+  best <- if (arc_search_better(annealed, start)) annealed else start
+  polished <- arc_search_polish(budget, best$contraction, best$score,
+                                score_fn, "r1:polish")
+  phases[["r1:polish"]] <- polished$status
+  if (arc_search_better(polished, best)) best <- polished
+  arc_search_finish(budget, best, v, objective, phases, seed, "anneal")
+}
+
+#' Staged annealing with recolouring restarts
+#'
+#' Specification sections 7.1 and 7.4. `restarts` restarts share the single
+#' global budget; each restart's allowance (an equal split of what is left
+#' over the remaining restarts) goes by `shares` to column annealing on the
+#' column-efficiency proxy, row annealing (A/K) from `recolourings`
+#' recolourings, joint annealing (A/B/C/K, start temperature multiplied by
+#' `joint_t0_multiplier`) and first-improvement polish. In square designs
+#' (v == s) the row share goes to the column phase and the column state is
+#' recoloured once. When the column share is positive the start is scored by
+#' the proxy (a proxy call); otherwise by the objective. In equal-time mode
+#' (`max_evals = Inf`) allowances are times enforced by temporary phase
+#' deadlines and the annealing phases cool by elapsed fraction.
+#'
+#' @inheritParams arc_search_anneal
+#' @param restarts Whole number >= 1 (R).
+#' @param recolourings Whole number >= 1 (m), recolourings per restart.
+#' @param shares Named non-negative shares `column`, `row`, `joint`,
+#'   `polish` summing to 1.
+#' @param kempe_share Named Kempe probabilities `joint` and `row` in [0, 1].
+#' @param joint_t0_multiplier Finite number > 0 multiplying the joint
+#'   phase's calibrated start temperature (default 1).
+#' @noRd
+arc_search_staged <- function(v, s, k, objective = "E_aug",
+                              max_evals = 60000, seconds = Inf, seed = NULL,
+                              starts = NULL, max_start_tries = 20L,
+                              now = arc_clock, restarts = 4L,
+                              recolourings = 6L,
+                              shares = c(column = 0.4, row = 0.3,
+                                         joint = 0.2, polish = 0.1),
+                              kempe_share = c(joint = 0.3, row = 0.6),
+                              t_ratio = 1e-3, joint_t0_multiplier = 1) {
+  arc_search_check_common(max_evals, seconds, starts, max_start_tries, now)
+  arc_search_check(arc_is_whole_number(restarts) && restarts >= 1,
+                   "restarts must be a single whole number >= 1.")
+  arc_search_check(arc_is_whole_number(recolourings) && recolourings >= 1,
+                   "recolourings must be a single whole number >= 1.")
+  share_names <- c("column", "row", "joint", "polish")
+  arc_search_check(is.numeric(shares) && length(shares) == 4L &&
+                     setequal(names(shares), share_names) &&
+                     !anyNA(shares) && all(shares >= 0) &&
+                     abs(sum(shares) - 1) < 1e-9,
+                   paste("shares must be named column, row, joint, polish,",
+                         "non-negative and sum to 1."))
+  arc_search_check(is.numeric(kempe_share) && length(kempe_share) == 2L &&
+                     setequal(names(kempe_share), c("joint", "row")) &&
+                     !anyNA(kempe_share) && all(kempe_share >= 0) &&
+                     all(kempe_share <= 1),
+                   "kempe_share must be named joint, row, with values in [0, 1].")
+  arc_search_check(arc_is_number(t_ratio) && t_ratio > 0 && t_ratio <= 1,
+                   "t_ratio must be a single number in (0, 1].")
+  arc_search_check(arc_is_number(joint_t0_multiplier) &&
+                     is.finite(joint_t0_multiplier) &&
+                     joint_t0_multiplier > 0,
+                   "joint_t0_multiplier must be a single finite number > 0.")
+  seed <- resolve_seed(seed)
+  local_design_seed(seed)
+  status <- arc_search_entry(v, s, k, objective)
+  if (!is.na(status)) {
+    return(c(arc_search_result(status = status, seed = seed),
+             list(objective = objective, algorithm = "staged",
+                  search_score = NA_real_)))
+  }
+  starts <- arc_search_check_starts(starts, v, s, k)
+  budget <- arc_budget_new(max_evals, seconds, now = now)
+  prep <- arc_search_prep(v, s, k)
+  score_fn <- function(x) arc_search_score(x, prep, objective)
+  proxy_fn <- function(x) arc_column_proxy(x, v)
+  square <- v == s
+  shares <- shares[share_names]
+  if (square) {
+    shares[["column"]] <- shares[["column"]] + shares[["row"]]
+    shares[["row"]] <- 0
+  }
+  timed <- !is.finite(budget$max_evals)
+  propose_column <- function(x) arc_propose_column(x)
+  propose_row <- function(x) {
+    arc_propose_row(x, kempe_share = kempe_share[["row"]])
+  }
+  propose_joint <- function(x) {
+    arc_propose_joint(x, kempe_share = kempe_share[["joint"]])
+  }
+  best <- NULL
+  phases <- character(0)
+  last_start <- NA_character_
+
+  for (restart in seq_len(restarts)) {
+    if (!is.na(arc_budget_out(budget))) break
+    tag <- paste0("r", restart, ":")
+    remaining <- restarts - restart + 1L
+    # Allowance of one phase: calls (evaluation mode) or a deadline
+    # computed when the phase starts (equal-time mode).
+    if (timed) {
+      per <- arc_budget_secs_left(budget) / remaining
+      allowance <- function(share) {
+        list(evals = Inf, deadline = budget$now() + share * per)
+      }
+    } else {
+      per <- floor(arc_budget_left(budget) / remaining)
+      allowance <- function(share) {
+        list(evals = floor(share * per), deadline = Inf)
+      }
+    }
+    anneal <- function(start, score, fn, propose, share, exhaustion, label,
+                       kind = "objective", t0_multiplier = 1) {
+      a <- allowance(share)
+      arc_search_with_deadline(budget, a$deadline, arc_anneal_phase(
+        budget, start, score, fn, propose, a$evals, exhaustion,
+        t_ratio = t_ratio, kind = kind, label = label,
+        t0_multiplier = t0_multiplier
+      ))
+    }
+
+    use_proxy <- shares[["column"]] > 0
+    start <- arc_search_start(
+      budget, v, s, k, if (use_proxy) proxy_fn else score_fn,
+      if (use_proxy) "proxy" else "objective", max_start_tries,
+      arc_search_supplied(starts, restart)
+    )
+    phases[[paste0(tag, "start")]] <- start$status
+    if (is.null(start$contraction)) {
+      last_start <- start$status
+      if (identical(start$status, "start_search_exhausted")) next
+      break
+    }
+    if (use_proxy) {
+      column <- anneal(start$contraction, start$score, proxy_fn,
+                       propose_column, shares[["column"]], "column",
+                       paste0(tag, "column"), kind = "proxy")
+      phases[[paste0(tag, "column")]] <- column$status
+      column_state <- column$contraction
+    } else {
+      phases[[paste0(tag, "column")]] <- "skipped"
+      column_state <- start$contraction
+    }
+
+    current <- NULL
+    if (!square && shares[["row"]] > 0) {
+      for (q in seq_len(recolourings)) {
+        if (!is.na(arc_budget_out(budget))) break
+        label <- paste0(tag, "row", q)
+        x0 <- if (q == 1L) {
+          arc_recolor_rows(column_state, v)
+        } else {
+          arc_random_recolor(column_state, v)
+        }
+        y <- arc_budget_eval(budget, score_fn, x0, "objective")
+        if (is.null(y)) break
+        if (is.na(y)) {
+          phases[[label]] <- "skipped"
+          next
+        }
+        rows <- anneal(x0, y, score_fn, propose_row,
+                       shares[["row"]] / recolourings, "row", label)
+        phases[[label]] <- rows$status
+        if (arc_search_better(rows, current)) current <- rows
+      }
+    } else {
+      x0 <- arc_recolor_rows(column_state, v)
+      y <- arc_budget_eval(budget, score_fn, x0, "objective")
+      if (!is.null(y) && !is.na(y)) {
+        current <- list(contraction = x0, score = y)
+      }
+      phases[[paste0(tag, "recolour")]] <- if (is.null(y)) {
+        arc_budget_out(budget)
+      } else if (is.na(y)) "skipped" else "ok"
+    }
+    if (is.null(current)) next
+    if (arc_search_better(current, best)) best <- current
+
+    joint <- anneal(current$contraction, current$score, score_fn,
+                    propose_joint, shares[["joint"]], "joint",
+                    paste0(tag, "joint"),
+                    t0_multiplier = joint_t0_multiplier)
+    phases[[paste0(tag, "joint")]] <- joint$status
+    if (arc_search_better(joint, current)) current <- joint
+
+    a <- allowance(shares[["polish"]])
+    polished <- arc_search_with_deadline(budget, a$deadline,
+      arc_search_polish(budget, current$contraction, current$score,
+                        score_fn, paste0(tag, "polish"), max_evals = a$evals))
+    phases[[paste0(tag, "polish")]] <- polished$status
+    if (arc_search_better(polished, current)) current <- polished
+    if (arc_search_better(current, best)) best <- current
+  }
+  arc_search_finish(budget, best, v, objective, phases, seed, "staged",
+                    arc_search_fail_status(last_start))
+}

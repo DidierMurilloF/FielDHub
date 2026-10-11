@@ -1031,3 +1031,258 @@ test_that("local search on cyclic 5 x 5 reports empty_neighbourhood", {
   expect_identical(r2$status, "local_optimum")
   expect_identical(arc_budget_used(b2), 10)
 })
+
+# ---- Search algorithms (task 8; sections 7.1, 7.4, 8.1, 8.2) ----
+
+test_that("algorithm entry failures return at once with zero calls", {
+  cases <- list(list(6, 6, 2, "E_aug", "below_min_df"),
+                list(48, 16, 4, "V_tt", "infeasible_df"),
+                list(12, 8, 3, "foo", "unsupported_objective"))
+  for (alg in names(arc_search_algorithms)) {
+    for (case in cases) {
+      res <- arc_search_algorithms[[alg]](case[[1]], case[[2]], case[[3]],
+                                          objective = case[[4]],
+                                          max_evals = 100, seed = 11)
+      expect_identical(res$status, case[[5]])
+      expect_null(res$design)
+      expect_identical(res$objective_calls, 0)
+      expect_identical(res$proxy_calls, 0)
+      expect_identical(res$seed, 11)
+      expect_identical(res$algorithm, alg)
+    }
+  }
+})
+
+test_that("evaluation mode respects the cap and reports the final score", {
+  for (dims in list(c(12, 8, 3), c(16, 12, 4))) {
+    for (alg in names(arc_search_algorithms)) {
+      for (objective in arc_search_objectives) {
+        res <- arc_search_algorithms[[alg]](dims[1], dims[2], dims[3],
+                                            objective = objective,
+                                            max_evals = 300, seed = 5)
+        info <- paste(alg, objective, paste(dims, collapse = "x"))
+        expect_identical(res$status, "ok", info = info)
+        expect_lte(res$objective_calls + res$proxy_calls, 300)
+        expect_gt(res$objective_calls, 0)
+        if (alg != "staged") expect_identical(res$proxy_calls, 0)
+        expect_true(arc_design_valid(res$design, dims[1]), info = info)
+        final <- arc_final_score(res$design, dims[1], "restricted")
+        expect_identical(res$score, final[[objective]], info = info)
+        expect_identical(res$final, final)
+        expect_true(res$valid)
+        expect_identical(res$objective, objective)
+        sign <- if (objective == "E_aug") 1 else -1
+        expect_lt(abs(sign * res$search_score - res$score), 1e-8)
+        expect_true(all(is.finite(c(res$search_secs, res$verify_secs,
+                                    res$total_secs))))
+        expect_gte(res$proposals, res$failed_proposals)
+      }
+    }
+  }
+})
+
+test_that("a fixed seed and evaluation budget give identical results", {
+  for (alg in names(arc_search_algorithms)) {
+    run <- function(seed) {
+      arc_search_algorithms[[alg]](12, 8, 3, max_evals = 400, seed = seed)
+    }
+    a <- run(42)
+    b <- run(42)
+    expect_identical(a$design, b$design, info = alg)
+    expect_identical(a$objective_calls, b$objective_calls)
+    expect_identical(a$proxy_calls, b$proxy_calls)
+    expect_identical(a$score, b$score)
+    expect_identical(a$phases, b$phases)
+  }
+})
+
+test_that("the caller's RNG state is restored, or left absent", {
+  for (alg in names(arc_search_algorithms)) {
+    local({
+      arc_local_seed(2024)
+      before <- .Random.seed
+      res <- arc_search_algorithms[[alg]](12, 8, 3, max_evals = 150,
+                                          seed = 123)
+      expect_identical(.Random.seed, before, info = alg)
+      expect_identical(res$seed, 123)
+    })
+    local({
+      arc_local_seed(1)
+      rm(".Random.seed", envir = globalenv())
+      arc_search_algorithms[[alg]](12, 8, 3, max_evals = 150, seed = 123)
+      expect_false(exists(".Random.seed", envir = globalenv(),
+                          inherits = FALSE), info = alg)
+    })
+  }
+  # Without a seed one draw is consumed from the caller's stream and recorded.
+  local({
+    arc_local_seed(7)
+    res <- arc_search_multistart(12, 8, 3, max_evals = 50)
+    arc_local_seed(7)
+    expect_identical(res$seed, sample.int(.Machine$integer.max, 1))
+  })
+})
+
+test_that("time mode stops at the deadline and restores the RNG", {
+  for (alg in names(arc_search_algorithms)) {
+    local({
+      arc_local_seed(99)
+      before <- .Random.seed
+      res <- arc_search_algorithms[[alg]](12, 8, 3, max_evals = Inf,
+                                          seconds = 0.4, seed = 3)
+      expect_identical(.Random.seed, before, info = alg)
+      expect_identical(res$status, "ok", info = alg)
+      expect_gt(res$objective_calls, 0)
+      expect_true(arc_design_valid(res$design, 12))
+      expect_lt(res$search_secs, 0.4 + 0.5)
+      expect_identical(res$score, arc_final_score(res$design, 12,
+                                                  "restricted")$E_aug)
+    })
+  }
+})
+
+test_that("an injected clock drives the deadline of every algorithm", {
+  for (alg in names(arc_search_algorithms)) {
+    tick <- 0
+    clock <- function() {
+      tick <<- tick + 1e-3
+      tick
+    }
+    res <- arc_search_algorithms[[alg]](12, 8, 3, max_evals = Inf,
+                                        seconds = 1, seed = 8, now = clock)
+    expect_identical(res$status, "ok", info = alg)
+    expect_lte(res$search_secs, 1 + 0.05)
+    expect_true(arc_design_valid(res$design, 12))
+  }
+})
+
+test_that("an unbounded run is refused, and arguments are validated", {
+  for (alg in names(arc_search_algorithms)) {
+    expect_error(arc_search_algorithms[[alg]](12, 8, 3, max_evals = Inf,
+                                              seconds = Inf),
+                 class = "fieldhub_arc_input_error")
+    expect_error(arc_search_algorithms[[alg]](12, 8, 3, max_start_tries = 0),
+                 class = "fieldhub_arc_input_error")
+    expect_error(arc_search_algorithms[[alg]](12, 8, 3, starts = "x"),
+                 class = "fieldhub_arc_input_error")
+  }
+  bad <- list(
+    list(polish_share = 1.5), list(polish_share = NA_real_),
+    list(kempe_share = -0.1), list(t_ratio = 0)
+  )
+  for (args in bad) {
+    expect_error(do.call(arc_search_anneal, c(list(12, 8, 3), args)),
+                 class = "fieldhub_arc_input_error")
+  }
+  bad <- list(
+    list(restarts = 0), list(restarts = 1.5), list(recolourings = 0),
+    list(shares = c(column = 0.5, row = 0.5, joint = 0.5, polish = 0)),
+    list(shares = c(column = 1.1, row = -0.1, joint = 0, polish = 0)),
+    list(shares = c(0.4, 0.3, 0.2, 0.1)),
+    list(kempe_share = c(joint = 2, row = 0.6)), list(kempe_share = 0.3),
+    list(t_ratio = 2), list(joint_t0_multiplier = 0),
+    list(joint_t0_multiplier = Inf), list(joint_t0_multiplier = "a")
+  )
+  for (args in bad) {
+    expect_error(do.call(arc_search_staged, c(list(12, 8, 3), args)),
+                 class = "fieldhub_arc_input_error")
+  }
+})
+
+test_that("square designs give the row share to the column phase", {
+  res <- arc_search_staged(12, 12, 3, max_evals = 600, seed = 4)
+  expect_identical(res$status, "ok")
+  expect_false(any(grepl(":row", names(res$phases))))
+  expect_true(any(grepl(":column", names(res$phases))))
+  expect_true(arc_design_valid(res$design, 12))
+  expect_lte(res$objective_calls + res$proxy_calls, 600)
+  for (alg in c("multistart", "anneal")) {
+    res <- arc_search_algorithms[[alg]](12, 12, 3, max_evals = 200, seed = 4)
+    expect_identical(res$status, "ok")
+    expect_true(arc_design_valid(res$design, 12))
+  }
+})
+
+test_that("staged records its phases per restart", {
+  res <- arc_search_staged(12, 8, 3, max_evals = 800, seed = 6,
+                           restarts = 2L, recolourings = 3L)
+  expect_true(all(c("r1:start", "r1:column", "r1:row1", "r1:row3",
+                    "r1:joint", "r1:polish", "r2:polish") %in%
+                    names(res$phases)))
+  expect_true(all(res$phases %in% arc_search_statuses))
+  expect_true(is.data.frame(res$trace))
+  expect_gt(res$proxy_calls, 0)
+})
+
+test_that("supplied starts give matched runs, invalid starts are refused", {
+  starts <- local({
+    arc_local_seed(31)
+    lapply(1:4, function(i) arc_random_start(12, 8, 3))
+  })
+  for (alg in names(arc_search_algorithms)) {
+    a <- arc_search_algorithms[[alg]](12, 8, 3, max_evals = 300, seed = 9,
+                                      starts = starts)
+    b <- arc_search_algorithms[[alg]](12, 8, 3, max_evals = 300, seed = 9,
+                                      starts = starts)
+    expect_identical(a$design, b$design, info = alg)
+    expect_identical(a$status, "ok")
+    bad <- starts
+    bad[[2]] <- starts[[2]][, 1:7]
+    expect_error(arc_search_algorithms[[alg]](12, 8, 3, max_evals = 50,
+                                              starts = bad),
+                 class = "fieldhub_arc_input_error")
+    repeated <- starts
+    repeated[[1]][1, 1:2] <- c(5L, 5L)
+    expect_error(arc_search_algorithms[[alg]](12, 8, 3, max_evals = 50,
+                                              starts = repeated),
+                 class = "fieldhub_arc_input_error")
+  }
+  # A supplied start is the first scored start of its restart.
+  res <- arc_search_multistart(12, 8, 3, max_evals = 1, seed = 1,
+                               starts = starts[1])
+  expect_identical(res$design, starts[[1]])
+})
+
+test_that("the joint start-temperature multiplier defaults to 1", {
+  a <- arc_search_staged(12, 8, 3, max_evals = 400, seed = 77)
+  b <- arc_search_staged(12, 8, 3, max_evals = 400, seed = 77,
+                         joint_t0_multiplier = 1)
+  expect_identical(a$design, b$design)
+  expect_identical(a$trace, b$trace)
+  c <- arc_search_staged(12, 8, 3, max_evals = 400, seed = 77,
+                         joint_t0_multiplier = 0.1)
+  joint_a <- a$trace$t0[grepl(":joint", a$trace$phase)]
+  joint_c <- c$trace$t0[grepl(":joint", c$trace$phase)]
+  expect_equal(joint_c[1], 0.1 * joint_a[1])
+})
+
+test_that("a design failing final validation is a classed internal error", {
+  local_mocked_bindings(
+    arc_validate_contraction = function(...) {
+      fieldhub_abort("boom", class = c("fieldhub_arc_disconnected_error",
+                                       "fieldhub_input_error"))
+    }
+  )
+  expect_error(arc_search_multistart(12, 8, 3, max_evals = 30, seed = 1),
+               class = "fieldhub_arc_internal_error")
+})
+
+test_that("slow: Example 1 reaches its published E_aug", {
+  arc_skip_unless_search_slow()
+  target <- arc_final_score(arc_fixture("example1-contraction.csv"), 12,
+                            "restricted")$E_aug
+  manifest <- utils::read.csv(test_path("fixtures", "augmented-row-column",
+                                        "manifest.csv"))
+  published <- manifest$pub_E_aug[manifest$file == "example1-contraction.csv"]
+  expect_lt(abs(target - published), 5e-5)
+  for (alg in names(arc_search_algorithms)) {
+    hits <- vapply(1:5, function(seed) {
+      res <- arc_search_algorithms[[alg]](12, 8, 3, max_evals = 20000,
+                                          seed = seed)
+      abs(res$score - target) <= 1e-10
+    }, logical(1))
+    message(alg, ": ", sum(hits), "/5 seeds reach E_aug = ",
+            format(target, digits = 12))
+    expect_gte(sum(hits), 4L, label = paste(alg, "hits"))
+  }
+})

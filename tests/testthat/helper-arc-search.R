@@ -69,3 +69,19 @@ arc_recording_score <- function(f) {
     y
   }, values = function() values)
 }
+
+# Search-algorithm helpers (task 8). The three algorithms by name.
+arc_search_algorithms <- list(
+  multistart = function(...) arc_search_multistart(...),
+  anneal = function(...) arc_search_anneal(...),
+  staged = function(...) arc_search_staged(...)
+)
+# Whether a returned design passes the restricted M1 validation (connected).
+# The low-df warning is expected for small fixtures and is muffled here.
+arc_design_valid <- function(design, v) {
+  out <- withCallingHandlers(
+    arc_validate_contraction(design, v, "restricted"),
+    fieldhub_arc_low_df_warning = function(w) invokeRestart("muffleWarning")
+  )
+  isTRUE(out$connected)
+}
