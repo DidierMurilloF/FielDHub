@@ -18,3 +18,13 @@ arc_counting_objective <- function(value = 0) {
     value
   }, count = function() n)
 }
+
+# Injected clock: now() reads the time, advance(dt) moves it forward.
+arc_fake_clock <- function(start = 0) {
+  t <- start
+  list(now = function() t,
+       advance = function(dt) {
+         t <<- t + dt
+         invisible(t)
+       })
+}

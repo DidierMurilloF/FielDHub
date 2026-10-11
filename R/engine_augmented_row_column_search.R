@@ -118,3 +118,184 @@ arc_search_result <- function(design = NULL, score = NA_real_, status,
     final = final, valid = valid
   )
 }
+
+# ---- Global search budget (specification sections 5.4 and 7.1) ----
+
+#' Default internal clock
+#'
+#' @return Current time in seconds as a double.
+#' @noRd
+arc_clock <- function() as.numeric(Sys.time())
+
+#' Create a global search budget
+#'
+#' Specification sections 5.4 and 7.1. An environment shared by every phase
+#' and restart. It holds the global evaluation cap, the wall-clock deadline
+#' and all call accounting. The clock is injectable through `now` so tests
+#' can drive deadlines deterministically.
+#'
+#' @param max_evals Global cap on objective plus proxy calls (`Inf` allowed).
+#' @param seconds Seconds until the deadline (`Inf` allowed; zero or negative
+#'   means already expired).
+#' @param max_consec_fail Whole number >= 1, consecutive failed proposals
+#'   tolerated by later phases.
+#' @param proposal_factor Finite number > 0, proposal cap factor used by
+#'   later phases.
+#' @param now Function returning the current time in seconds.
+#' @return An environment with the budget fields.
+#' @noRd
+arc_budget_new <- function(max_evals = Inf, seconds = Inf,
+                           max_consec_fail = 200L, proposal_factor = 20,
+                           now = arc_clock) {
+  input_class <- c("fieldhub_arc_input_error", "fieldhub_input_error")
+  single_number <- function(x) {
+    is.numeric(x) && length(x) == 1L && !is.na(x)
+  }
+  if (!single_number(max_evals) || max_evals < 0) {
+    fieldhub_abort("max_evals must be a single number >= 0 (Inf allowed).",
+                   class = input_class)
+  }
+  if (!single_number(seconds)) {
+    fieldhub_abort("seconds must be a single non-missing number.",
+                   class = input_class)
+  }
+  if (!single_number(max_consec_fail) || !is.finite(max_consec_fail) ||
+      max_consec_fail < 1 || max_consec_fail != round(max_consec_fail)) {
+    fieldhub_abort("max_consec_fail must be a single whole number >= 1.",
+                   class = input_class)
+  }
+  if (!single_number(proposal_factor) || !is.finite(proposal_factor) ||
+      proposal_factor <= 0) {
+    fieldhub_abort("proposal_factor must be a single finite number > 0.",
+                   class = input_class)
+  }
+  if (!is.function(now)) {
+    fieldhub_abort("now must be a function.", class = input_class)
+  }
+  b <- new.env(parent = emptyenv())
+  b$max_evals <- as.double(max_evals)
+  b$now <- now
+  b$t_start <- now()
+  b$deadline <- b$t_start + as.double(seconds)
+  b$evals <- c(objective = 0, proxy = 0)
+  b$proposals <- 0
+  b$failed <- 0
+  b$disconnected <- 0
+  b$events <- character(0)
+  b$trace <- list()
+  b$max_consec_fail <- as.integer(max_consec_fail)
+  b$proposal_factor <- as.double(proposal_factor)
+  b
+}
+
+#' Total objective plus proxy calls spent
+#' @param b Budget environment.
+#' @noRd
+arc_budget_used <- function(b) sum(b$evals)
+
+#' Calls left under the global cap (`Inf` when uncapped)
+#' @param b Budget environment.
+#' @noRd
+arc_budget_left <- function(b) b$max_evals - arc_budget_used(b)
+
+#' Why the budget is exhausted
+#'
+#' @param b Budget environment.
+#' @return `NA_character_`, `"budget"` (checked first) or `"time_limit"`.
+#' @noRd
+arc_budget_out <- function(b) {
+  if (arc_budget_used(b) >= b$max_evals) {
+    return("budget")
+  }
+  if (b$now() >= b$deadline) {
+    return("time_limit")
+  }
+  NA_character_
+}
+
+#' Evaluate a function under the budget
+#'
+#' Refuses (returns `NULL`, `f` not called) once the budget or deadline is
+#' exhausted. Otherwise the call is counted BEFORE `f` runs, so an `f` that
+#' errors still counts. `NA` results are counted as disconnected.
+#'
+#' @param b Budget environment.
+#' @param f Function of one argument.
+#' @param x Argument passed to `f`.
+#' @param kind `"objective"` or `"proxy"`.
+#' @return `f(x)`, or `NULL` when refused.
+#' @noRd
+arc_budget_eval <- function(b, f, x, kind = "objective") {
+  if (!is.character(kind) || length(kind) != 1L || is.na(kind) ||
+      !kind %in% c("objective", "proxy")) {
+    fieldhub_abort("kind must be \"objective\" or \"proxy\".",
+                   class = c("fieldhub_arc_input_error",
+                             "fieldhub_input_error"))
+  }
+  if (!is.na(arc_budget_out(b))) {
+    return(NULL)
+  }
+  b$evals[[kind]] <- b$evals[[kind]] + 1
+  y <- f(x)
+  if (is.na(y)) {
+    b$disconnected <- b$disconnected + 1
+  }
+  y
+}
+
+#' Seconds until the deadline (may be negative or `Inf`)
+#' @param b Budget environment.
+#' @noRd
+arc_budget_secs_left <- function(b) b$deadline - b$now()
+
+#' Seconds since the budget was created
+#' @param b Budget environment.
+#' @noRd
+arc_budget_elapsed <- function(b) b$now() - b$t_start
+
+#' Append an event message
+#' @param b Budget environment.
+#' @param ... Pieces pasted together with `paste0()`.
+#' @noRd
+arc_budget_log <- function(b, ...) {
+  b$events <- c(b$events, paste0(...))
+  invisible(b)
+}
+
+#' Append a one-row trace data frame
+#' @param b Budget environment.
+#' @param row One-row data frame.
+#' @noRd
+arc_budget_add_trace <- function(b, row) {
+  b$trace[[length(b$trace) + 1L]] <- row
+  invisible(b)
+}
+
+#' Combined trace, or `NULL` when empty
+#' @param b Budget environment.
+#' @noRd
+arc_budget_trace <- function(b) {
+  if (length(b$trace) == 0L) {
+    return(NULL)
+  }
+  do.call(rbind, b$trace)
+}
+
+#' Record a proposal
+#' @param b Budget environment.
+#' @param failed `TRUE` when the proposal failed.
+#' @noRd
+arc_budget_note_proposal <- function(b, failed) {
+  b$proposals <- b$proposals + 1
+  if (isTRUE(failed)) {
+    b$failed <- b$failed + 1
+  }
+  invisible(b)
+}
+
+#' Named call counts for `arc_search_result(calls = )`
+#' @param b Budget environment.
+#' @noRd
+arc_budget_calls <- function(b) {
+  c(objective = b$evals[["objective"]], proxy = b$evals[["proxy"]])
+}
