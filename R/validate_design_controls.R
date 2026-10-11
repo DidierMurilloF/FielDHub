@@ -192,6 +192,25 @@ parse_control_option <- function(value, label) {
   number
 }
 
+#' Parse an optional positive number (blank is NULL)
+#' @inheritParams parse_control_number
+#' @param whole Whether the number must be whole.
+#' @return \code{NULL} or one positive number.
+#' @noRd
+parse_control_optional_number <- function(value, label, whole = TRUE) {
+  if (is_blank_control_value(value)) return(NULL)
+  number <- if (is.numeric(value) || is.character(value)) {
+    suppressWarnings(as.numeric(trimws(as.character(value))))
+  } else {
+    NA_real_
+  }
+  if (length(number) != 1L || !is.finite(number) || number <= 0 ||
+      (whole && number != trunc(number))) {
+    control_abort(label, " must be one positive ", if (whole) "whole ", "number, or blank.")
+  }
+  number
+}
+
 #' Parse a checkboxInput
 #' @inheritParams parse_control_number
 #' @param default The value of a blank (not yet rendered) checkbox.

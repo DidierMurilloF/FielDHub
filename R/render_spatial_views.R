@@ -77,6 +77,38 @@ diagonal_checks_view <- function(design, location) {
              TIMES = info$rep_checks[[location]])
 }
 
+#' The field book rows of one location of an augmented row-column design
+#' @param design An \code{augmented_row_column()} result.
+#' @param location The location index.
+#' @noRd
+arc_location_book <- function(design, location) {
+  book <- design$fieldBook
+  site <- as.character(design$infoDesign$locationNames[[location]])
+  book[as.character(book$LOCATION) == site, , drop = FALSE]
+}
+
+#' Checks and tests of one location of an augmented row-column design
+#' @return A data frame with ENTRY and NAME, checks first.
+#' @noRd
+arc_location_entries <- function(design, location) {
+  book <- arc_location_book(design, location)
+  entries <- book[!duplicated(book$ENTRY), c("ENTRY", "TREATMENT")]
+  entries <- entries[order(entries$ENTRY), ]
+  data.frame(ENTRY = entries$ENTRY, NAME = entries$TREATMENT)
+}
+
+#' The checks of one location of an augmented row-column design and their plots
+#' @return A data frame with ENTRY, NAME and TIMES.
+#' @noRd
+arc_location_checks <- function(design, location) {
+  book <- arc_location_book(design, location)
+  checks <- book[book$CHECKS > 0, ]
+  times <- table(checks$ENTRY)
+  entries <- sort(unique(checks$ENTRY))
+  data.frame(ENTRY = entries, NAME = checks$TREATMENT[match(entries, checks$ENTRY)],
+             TIMES = as.integer(times[as.character(entries)]))
+}
+
 #' Entries of each experiment of a multiple diagonal arrangement
 #' @param entries The entry list, with its BLOCK column.
 #' @return A data frame with SUB-BLOCKS and FREQUENCY.

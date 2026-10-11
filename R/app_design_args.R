@@ -703,3 +703,42 @@ design_args_RCBD_augmented <- function(values, data = NULL) {
     ncols = as_design_number(values[["ncols"]])
   )
 }
+
+#' Build augmented_row_column() arguments for the augmented row-column module
+#'
+#' `values`: `nrows`, `ncols`, `lines` (the number of test entries; ignored
+#' when `data` supplies the entry list, which gives `entries = NULL`),
+#' `checks` (a count), `check_direction` (required: `"columns"` or `"rows"`),
+#' `objective`, `budget`, `time_limit` (NULL for the engine's defaults), `l`,
+#' `planter`, `plot_start`, `expt_name`, `year`, `seed`, `location_names`.
+#' A missing check direction is reported here, before the engine runs, so a
+#' direct call of this builder gives the page's message.
+#' @noRd
+design_args_Augmented_RowCol <- function(values, data = NULL) {
+  direction <- values[["check_direction"]]
+  if (!is.character(direction) || length(direction) != 1L || is.na(direction) ||
+      !direction %in% c("columns", "rows")) {
+    fieldhub_abort("Choose the check direction: each check appears once in every column, ",
+                   "or once in every row.", data = list(control = "check_direction"), call = NULL)
+  }
+  l <- as_design_number(values[["l"]]) %||% 1
+  args <- list(
+    nrows = as_design_number(values[["nrows"]]),
+    ncols = as_design_number(values[["ncols"]]),
+    checks = as_design_number(values[["checks"]]),
+    check_direction = direction,
+    entries = if (is.null(data)) as_design_number(values[["lines"]]),
+    objective = values[["objective"]],
+    budget = as_design_number(values[["budget"]]),
+    time_limit = as_design_number(values[["time_limit"]]),
+    l = l,
+    plotNumber = as_design_number(values[["plot_start"]]) %||% 101,
+    planter = values[["planter"]] %||% "serpentine",
+    locationNames = location_names_or_null(values[["location_names"]], l),
+    exptName = values[["expt_name"]],
+    year = as_design_number(values[["year"]]),
+    seed = as_design_number(values[["seed"]]),
+    data = data
+  )
+  drop_null_args(args, c("objective", "planter"))
+}

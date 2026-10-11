@@ -8,8 +8,8 @@ library(FielDHub)
 
 classic_modules <- c("CRD", "RCBD", "LSD", "Latin_Rectangle", "FD", "SPD", "SSPD", "STRIPD", "IBD", "RowCol",
                      "Alpha_Lattice", "Square_Lattice", "Rectangular_Lattice")
-spatial_modules <- c("Optim", "pREPS", "RCBD_augmented", "Diagonal", "diagonal_multiple",
-                     "sparse_allocation", "multi_loc_preps")
+spatial_modules <- c("Optim", "pREPS", "RCBD_augmented", "Augmented_RowCol", "Diagonal",
+                     "diagonal_multiple", "sparse_allocation", "multi_loc_preps")
 all_modules <- c(classic_modules, spatial_modules)
 
 # The one label of each concept, written out here so a label changed in
@@ -27,6 +27,7 @@ canonical_labels <- c(
   reps = "Input # of Full Reps:",
   k = "Input # of Plots per IBlock:",
   nrows = "Input # of Rows:",
+  ncols = "Input # of Columns:",
   use_checks = "Add repeated checks?",
   checks = "Input # of Checks:",
   rep_checks = "Reps per Check:",
@@ -51,6 +52,12 @@ canonical_labels <- c(
   copies_per_entry = "# of Copies Per Entry:",
   location_view = "Choose Location to View:",
   expt_name = "Experiment Name(s):",
+  year = "Year (blank = current):",
+  check_direction = "Each check appears once in every:",
+  objective = "Search objective:",
+  advanced = "Show advanced search options",
+  budget = "Search budget per location (blank = default):",
+  time_limit = "Time limit per location in seconds (blank = none):",
   random = "Randomize Entries?",
   random_note = NA,
   sameEntries = "Repeat entries across experiments",
@@ -111,7 +118,7 @@ page_defaults <- function(module, seed = 7) {
 }
 
 # Every spatial page uses the same task lifecycle, including small runs.
-long_running <- c(Optim = TRUE, pREPS = TRUE, RCBD_augmented = TRUE, Diagonal = TRUE,
+long_running <- c(Optim = TRUE, pREPS = TRUE, RCBD_augmented = TRUE, Augmented_RowCol = TRUE, Diagonal = TRUE,
                   diagonal_multiple = TRUE, sparse_allocation = TRUE,
                   multi_loc_preps = TRUE)
 
@@ -270,6 +277,11 @@ spatial_defaults <- function(module) {
     RCBD_augmented = RCBD_augmented(lines = 180, checks = 4, b = 3, nrows = 3, ncols = 64, l = 1,
                                     plotNumber = 1, seed = 7, exptName = "Expt1",
                                     locationNames = "FARGO"),
+    # The check direction has no default: the test chooses it (and a small budget)
+    Augmented_RowCol = augmented_row_column(nrows = 10, ncols = 10, checks = 4, check_direction = "columns",
+                                            entries = 60, objective = "V_tt", budget = 300, l = 1,
+                                            plotNumber = 1, locationNames = "FARGO", exptName = "Expt1",
+                                            seed = 7),
     Diagonal = diagonal_arrangement(nrows = 18, ncols = 18, lines = 287, checks = 4, l = 1,
                                     plotNumber = 1, kindExpt = "SUDC", seed = 7, exptName = "Expt1",
                                     locationNames = "FARGO", checksPercent = 11.11),
@@ -299,8 +311,11 @@ spatial_defaults <- function(module) {
 
 test_that("each spatial page's defaults build the design of a direct API call", {
   for (module in spatial_modules) {
-    expect_same_design(page_design(design_app_spec(module), page_defaults(module)),
-                       spatial_defaults(module), info = module)
+    raw <- page_defaults(module)
+    if (module == "Augmented_RowCol") {
+      raw <- utils::modifyList(raw, list(check_direction = "columns", advanced = TRUE, budget = "300"))
+    }
+    expect_same_design(page_design(design_app_spec(module), raw), spatial_defaults(module), info = module)
   }
 })
 
@@ -571,7 +586,8 @@ test_that("the page HTML has every control, the shared buttons and no inline sty
     } else {
       c(spec$workflow$ids[c("simulate", "download", "table", "heatmap", "tabset")], "randomize",
         "status", "setup", paste0("entries_", seq_along(spec$entries)),
-        vapply(spec$panels, `[[`, "", "id"), paste0(vapply(spec$steps, `[[`, "", "id"), "_step"))
+        vapply(spec$panels, `[[`, "", "id"),
+        if (length(spec$steps) > 0L) paste0(vapply(spec$steps, `[[`, "", "id"), "_step"))
     }
     for (id in c("run", ids, upload$toggle, upload$file, upload$sep)) {
       expect_true(has_id(id), info = paste(module, id))
@@ -614,10 +630,12 @@ test_that("the same concept has the same label, default and minimum on every pag
   # and the defaults of their own
   page_minimums <- c(Optim.lines = 5, Diagonal.lines = 50, diagonal_multiple.lines = 50,
                      sparse_allocation.lines = 50, sparse_allocation.l = 3,
+                     Augmented_RowCol.nrows = 2, Augmented_RowCol.checks = 2,
                      multi_loc_preps.l = 2)
   page_values <- list(Optim.plot_start = "1", Optim.rep_checks = "8,8,8,8", pREPS.plot_start = "1",
                    pREPS.repGens = "75,150", pREPS.repUnits = "2,1",
-                   RCBD_augmented.plot_start = "1", Diagonal.plot_start = "1",
+                   RCBD_augmented.plot_start = "1", Augmented_RowCol.plot_start = "1",
+                   Diagonal.plot_start = "1",
                    diagonal_multiple.plot_start = "1", diagonal_multiple.expt_name = "Expt1, Expt2, Expt3",
                    sparse_allocation.plot_start = "1", sparse_allocation.l = 5,
                    multi_loc_preps.plot_start = "1", multi_loc_preps.l = 6, multi_loc_preps.lines = 312,
@@ -693,4 +711,51 @@ test_that("only a numeric locations control and whole-number defaults are offere
       }
     }
   }
+})
+
+test_that("the Augmented Row-Column page builds without a server and requires a check direction", {
+  for (package in app_dependencies()) skip_if_not_installed(package)
+  spec <- design_app_spec("Augmented_RowCol")
+  expect_identical(spec$kind, "spatial")
+  expect_identical(spec$workflow, spatial_workflow_spec("Augmented_RowCol"))
+  expect_identical(spec$engine, augmented_row_column)
+  expect_length(spec$steps, 0L)
+  ids <- vapply(spec$controls, `[[`, "", "id")
+  expect_identical(ids, c("nrows", "ncols", "lines", "checks", "check_direction", "objective", "l",
+                          "location_view", "planter", "plot_start", "expt_name", "location_names",
+                          "year", "advanced", "budget", "time_limit", "seed"))
+  html <- as.character(mod_design_ui("x", spec))
+  expect_true(grepl("Choose...", html, fixed = TRUE))
+  direction <- Filter(function(control) control$id == "check_direction", spec$controls)[[1]]
+  expect_identical(direction$value, "")
+  expect_identical(unname(direction$choices), c("", "columns", "rows"))
+  objective <- Filter(function(control) control$id == "objective", spec$controls)[[1]]
+  expect_identical(objective$value, arc_design_defaults()$objective)
+  expect_setequal(unname(objective$choices), c("E_aug", "V_tt", "V_tc"))
+  for (id in c("budget", "time_limit")) {
+    control <- Filter(function(control) control$id == id, spec$controls)[[1]]
+    expect_identical(control$show_if, "input.advanced == true")
+    expect_identical(control$enabled_by, "advanced")
+  }
+  # the registry entry is a page of the generic module
+  entry <- Filter(function(entry) entry$workflow == "Augmented_RowCol", fieldhub_app_registry())[[1]]
+  expect_identical(c(entry$ui, entry$server), c("mod_design_ui", "mod_design_server"))
+  expect_identical(entry$spec, "Augmented_RowCol")
+})
+
+test_that("the Augmented Row-Column entry tables and simulated field book come from the field book", {
+  design <- quiet_design(augmented_row_column(10, 8, 4, "columns", budget = 300, l = 2,
+                                              locationNames = c("A", "B"), seed = 4))
+  entries <- arc_location_entries(design, 2)
+  expect_identical(nrow(entries), 4L + 48L)
+  expect_identical(entries$ENTRY, 1:52)
+  expect_identical(entries$NAME[1:4], paste0("CH", 1:4))
+  checks <- arc_location_checks(design, 2)
+  expect_identical(checks$ENTRY, 1:4)
+  expect_identical(checks$TIMES, rep(8L, 4))
+  settings <- list(min_value = 1, max_value = 10, response_name = "Yield",
+                   correlation_x = 0.5, correlation_y = 0.5)
+  book <- spatial_workflow_book(design$fieldBook, settings, 10, 8, 4)
+  expect_true(all(c("CHECK_DIRECTION", "Yield") %in% names(book$df)))
+  expect_identical(nrow(book$df), nrow(design$fieldBook))
 })

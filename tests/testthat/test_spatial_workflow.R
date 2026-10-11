@@ -34,7 +34,7 @@ test_that("spatial workflow books preserve simulation records separately from di
 test_that("spatial workflows keep per-module view and correlation identifiers", {
   registry <- fieldhub_spatial_workflows()
   expect_identical(names(registry), c("Diagonal", "diagonal_multiple", "Optim", "RCBD_augmented",
-                                      "pREPS", "multi_loc_preps", "sparse_allocation"))
+                                      "Augmented_RowCol", "pREPS", "multi_loc_preps", "sparse_allocation"))
   for (module in names(registry)) {
     spec <- spatial_workflow_spec(module)
     expect_identical(anyDuplicated(c(spec$ids, spec$simulation_ids, spec$correlation_ids,
@@ -45,6 +45,9 @@ test_that("spatial workflows keep per-module view and correlation identifiers", 
   }
   expect_true(spatial_workflow_spec("multi_loc_preps")$renumber_display)
   expect_true(spatial_workflow_spec("RCBD_augmented")$table_collapse)
+  arc <- spatial_workflow_spec("Augmented_RowCol")
+  expect_identical(arc$table_columns, c(spatial_workflow_spec("Diagonal")$table_columns, "CHECK_DIRECTION"))
+  expect_identical(arc$correlation_suffix, ".ARC")
   expect_true(spatial_workflow_spec("Optim")$heatmap_title)
   for (bad in list(NULL, NA_character_, "unknown", 1, c("Diagonal", "pREPS"))) {
     expect_error(spatial_workflow_spec(bad), class = "fieldhub_input_error")

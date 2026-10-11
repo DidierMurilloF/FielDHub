@@ -25,6 +25,7 @@ fieldhub_app_registry <- function() {
           "diagonal_arrangement", 1, 2),
     entry("Optimized Arrangement", "Optim", "optimized_arrangement", 1, 3),
     entry("Augmented RCBD", "RCBD_augmented", "RCBD_augmented", 1, 4),
+    entry("Augmented Row-Column", "Augmented_RowCol", "augmented_row_column", 1, 21),
     entry("New - Sparse Allocation", "sparse_allocation", "sparse_allocation", 1, 5),
     entry("Single and Multi-Location p-rep", "pREPS", "partially_replicated", 2, 6),
     entry("New - Optimized Multi-Location p-rep", "multi_loc_preps",
