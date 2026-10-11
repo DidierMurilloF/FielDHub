@@ -10,6 +10,11 @@
 #'   \item{\code{t}}{Treatments in classical designs: a count or, where supported,
 #'     a vector of labels. Check-based designs use \code{lines} for the number
 #'     of experimental entries excluding checks.}
+#'   \item{\code{entries}}{Test entries excluding checks, as a count or as a
+#'     vector of labels, in \code{augmented_row_column()}. It describes the
+#'     same entries as \code{lines} in the other check-based designs, where
+#'     \code{lines} is a count only; \code{entries} also accepts labels
+#'     because an uploaded entry list is recorded portably as its labels.}
 #'   \item{\code{reps}}{Full replicates per location in classical, incomplete-block,
 #'     lattice, row-column and strip-plot designs. In \code{latin_square()},
 #'     this is the number of independent squares. Partial and multi-location

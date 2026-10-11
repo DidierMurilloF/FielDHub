@@ -40,6 +40,8 @@ fieldhub_design_registry <- function() {
     split_families = entry("split_families"),
     sparse_allocation = entry("sparse_allocation", spatial),
     multi_location_prep = entry("multi_location_prep", c(spatial, "REP")),
+    augmented_row_column = entry("augmented_row_column", c(spatial, "CHECK_DIRECTION"),
+      title = "Augmented Row-Column Design"),
     allocation_sparse = entry("do_optim"), allocation_prep = entry("do_optim"),
     pair_swap = entry("swap_pairs")
   )

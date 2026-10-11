@@ -355,6 +355,30 @@ arc_alternating_path <- function(h, a, b, column_color, label_color) {
   matrix(as.integer(unlist(edges)), ncol = 3L, byrow = TRUE)
 }
 
+#' Warn that a design has few residual degrees of freedom
+#'
+#' Specification section 4.4: raised for 1 <= df < 10. The only remedies
+#' named are adding a check or changing the number of rows or columns; a
+#' longer search cannot raise the df, so it is never suggested. Shared by
+#' `arc_validate_contraction()` and `augmented_row_column()`.
+#'
+#' @param df Residual df, an integer from 1 to 9.
+#' @param data Condition data fields (`df_formula`, `lambda_min_rel`, `v`,
+#'   `s`, `k`).
+#' @param call The call reported with the warning; by default the caller's.
+#' @noRd
+arc_warn_low_df <- function(df, data, call = sys.call(-1)) {
+  relative_sd <- round(100 * sqrt(2 / df))
+  fieldhub_warn("The design has only ", df, " residual degrees of freedom. ",
+                "Under independent normal errors, the estimate of the ",
+                "residual variance then has a relative standard deviation ",
+                "of about ", relative_sd, "%. Only adding a check or ",
+                "changing the number of rows or columns raises the ",
+                "residual degrees of freedom.",
+                class = "fieldhub_arc_low_df_warning", data = data,
+                call = call)
+}
+
 #' Validate an augmented row-column contraction (public contract)
 #'
 #' Specification sections 4.1, 4.3, and 4.4, in order: the structural checks
@@ -412,14 +436,7 @@ arc_validate_contraction <- function(contraction, v, mode = "restricted") {
   }
 
   if (df < 10L) {
-    relative_sd <- round(100 * sqrt(2 / df))
-    fieldhub_warn("The design has only ", df, " residual degrees of freedom. ",
-                  "Under independent normal errors, the estimate of the ",
-                  "residual variance then has a relative standard deviation ",
-                  "of about ", relative_sd, "%. Only adding a check or ",
-                  "changing the number of rows or columns raises the ",
-                  "residual degrees of freedom.",
-                  class = "fieldhub_arc_low_df_warning", data = data)
+    arc_warn_low_df(df, data)
   }
   if (spectrum$near_singular) {
     fieldhub_warn("The design is numerically near-singular: lambda_min_rel ",

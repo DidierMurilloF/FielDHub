@@ -2,12 +2,15 @@
 # goldens cover field_layout(); test_reproduce_design.R replays the catalogue.
 design_tools <- c("run_app", "field_layout", "reproduce_design", "reproduce_simulation",
                   "design_formats", "read_design", "write_design")
+# Exported designs whose catalogue entry is still pending (research M3 plan,
+# task 8 adds the entry and removes the name from here).
+pending_catalogue <- "augmented_row_column"
 
 test_that("the catalogue covers every exported function", {
   namespace <- readLines(system.file("NAMESPACE", package = "FielDHub"))
   exports <- sub("^export\\((.*)\\)$", "\\1", grep("^export\\(", namespace, value = TRUE))
   covered <- unique(vapply(catalogue, function(entry) entry$fun, character(1)))
-  expect_setequal(covered, setdiff(exports, design_tools))
+  expect_setequal(covered, setdiff(exports, c(design_tools, pending_catalogue)))
 })
 
 test_that("every catalogue entry builds a design", {
