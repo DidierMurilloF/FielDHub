@@ -54,3 +54,18 @@ arc_stop_after <- function(n) {
     calls > n
   }, calls = function() calls)
 }
+
+# Annealing and local-search helpers (task 7). A cheap deterministic score
+# of a contraction (no RNG): a weighted sum of its labels by position.
+arc_cheap_score <- function(m) {
+  sum(m * seq_along(m)) / length(m)
+}
+# Wrap a score function so every value it returns is recorded.
+arc_recording_score <- function(f) {
+  values <- numeric(0)
+  list(fn = function(x) {
+    y <- f(x)
+    values <<- c(values, y)
+    y
+  }, values = function() values)
+}

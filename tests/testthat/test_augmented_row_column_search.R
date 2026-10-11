@@ -728,3 +728,306 @@ test_that("balanced replication and random starts are bounded", {
   tiny <- arc_random_start(20, 20, 10, tries = 1L, repair = 1L)
   expect_null(tiny)
 })
+
+# ---- Annealing phase and local search (task 7; sections 5.4 and 7.4) ----
+
+test_that("anneal on cyclic 5 x 5 terminates as empty_neighbourhood", {
+  arc_local_seed(701)
+  cyclic <- arc_fixture("cyclic-5x5-k4.csv")
+  prep <- arc_search_prep(5L, 5L, 4L)
+  counter <- 0L
+  f <- function(m) {
+    counter <<- counter + 1L
+    arc_search_score(m, prep, "E_aug")
+  }
+  for (pe in c(3, 9, 30, 100)) {
+    b <- arc_budget_new()
+    r <- arc_anneal_phase(b, cyclic, f(cyclic), f, arc_propose_joint, pe,
+                          "joint", label = "cyc")
+    expect_identical(r$status, "empty_neighbourhood")
+    expect_identical(arc_budget_used(b), 0)
+    expect_lte(r$proposals, min(20 * pe, b$max_consec_fail))
+    expect_identical(r$contraction, cyclic)
+    tr <- arc_budget_trace(b)
+    expect_identical(nrow(tr), 1L)
+    expect_identical(tr$status, "empty_neighbourhood")
+    expect_identical(tr$evals, 0)
+  }
+  expect_identical(counter, 4L)
+})
+
+test_that("a constant objective gives a finite temperature", {
+  arc_local_seed(702)
+  m <- arc_fixture("example1-contraction.csv")
+  for (pe in c(1, 5, 12, 49)) {
+    b <- arc_budget_new()
+    obj <- arc_counting_objective(1)
+    r <- arc_anneal_phase(b, m, 1, obj$fn, arc_propose_joint, pe, "joint")
+    expect_true(is.finite(r$t0))
+    expect_lte(arc_budget_used(b), pe)
+    expect_identical(arc_budget_used(b), as.double(obj$count()))
+    expect_identical(r$status, "phase_budget")
+    if (pe < 10) {
+      expect_identical(r$t0, 0)
+      expect_identical(r$note, "")
+    } else {
+      expect_identical(r$note, "calibration_fallback")
+      expect_equal(r$t0, 1e-6)
+    }
+  }
+})
+
+test_that("time-bounded cooling cools to t0 * t_ratio by the deadline", {
+  arc_local_seed(703)
+  m <- arc_fixture("example1-contraction.csv")
+  clock <- arc_fake_clock()
+  b <- arc_budget_new(max_evals = Inf, seconds = 5, now = clock$now)
+  f <- function(x) {
+    clock$advance(0.01)
+    arc_cheap_score(x)
+  }
+  temps <- numeric(0)
+  times <- numeric(0)
+  r <- arc_anneal_phase(b, m, f(m), f, arc_propose_joint, Inf, "joint",
+                        on_step = function(temp, y, current) {
+                          temps <<- c(temps, temp)
+                          times <<- c(times, clock$now())
+                        })
+  expect_identical(r$status, "time_limit")
+  expect_gt(length(temps), 100L)
+  expect_true(all(diff(temps) <= 0))
+  expect_lte(temps[length(temps)], r$t0 * 1e-3 * (1 + 1e-9))
+  expect_true(all(temps[times <= 2.5] < r$t0))
+  expect_lt(max(temps[times >= 3]), r$t0 * 0.1) # span 4.5 s after calibration
+})
+
+test_that("evaluation-budgeted cooling is geometric to t0 * t_ratio", {
+  arc_local_seed(704)
+  m <- arc_fixture("example1-contraction.csv")
+  b <- arc_budget_new()
+  temps <- numeric(0)
+  r <- arc_anneal_phase(b, m, arc_cheap_score(m), arc_cheap_score,
+                        arc_propose_joint, 100, "joint", t_ratio = 1e-2,
+                        on_step = function(temp, y, current) {
+                          temps <<- c(temps, temp)
+                        })
+  expect_identical(r$status, "phase_budget")
+  expect_identical(arc_budget_used(b), 100)
+  expect_length(temps, 80L) # 20 calibration calls, then 80 cooled calls
+  ratios <- temps[-1L] / temps[-length(temps)]
+  expect_equal(ratios, rep(1e-2^(1 / 80), 79L), tolerance = 1e-12)
+  expect_equal(temps[80L], r$t0 * 1e-2, tolerance = 1e-12)
+})
+
+test_that("annealing never loses the best state", {
+  arc_local_seed(705)
+  prep <- arc_search_prep(12L, 8L, 3L)
+  start <- arc_random_start(12, 8, 3)
+  rec <- arc_recording_score(function(x) arc_search_score(x, prep, "E_aug"))
+  b <- arc_budget_new()
+  y0 <- arc_search_score(start, prep, "E_aug")
+  r <- arc_anneal_phase(b, start, y0, rec$fn, arc_propose_joint, 60,
+                        "joint", t0_multiplier = 1e3)
+  seen <- rec$values()
+  expect_length(seen, 60L)
+  expect_identical(r$score, max(c(y0, seen[is.finite(seen)])))
+  expect_identical(arc_search_score(r$contraction, prep, "E_aug"), r$score)
+  tr <- arc_budget_trace(b)
+  expect_gt(tr$worse_accepted, 0L)
+  expect_identical(tr$f_best, r$score)
+  expect_identical(tr$evals, 60)
+})
+
+test_that("an NA start score is handled and any finite score improves", {
+  arc_local_seed(706)
+  m <- arc_fixture("example1-contraction.csv")
+  b <- arc_budget_new()
+  r <- arc_anneal_phase(b, m, NA_real_, arc_cheap_score, arc_propose_joint,
+                        20, "joint")
+  expect_true(is.finite(r$score))
+  expect_true(is.finite(r$t0))
+  expect_identical(r$note, "calibration_fallback")
+  b2 <- arc_budget_new()
+  r2 <- arc_anneal_phase(b2, m, NA_real_, function(x) NA_real_,
+                         arc_propose_joint, 5, "joint")
+  expect_identical(r2$score, NA_real_)
+  expect_identical(r2$contraction, m)
+})
+
+test_that("annealing calls never exceed the phase or global allowance", {
+  arc_local_seed(707)
+  m <- arc_fixture("example1-contraction.csv")
+  b <- arc_budget_new(max_evals = 25)
+  obj <- arc_counting_objective(0)
+  f <- function(x) {
+    obj$fn()
+    arc_cheap_score(x)
+  }
+  r1 <- arc_anneal_phase(b, m, f(m), f, arc_propose_joint, 15, "joint")
+  expect_identical(r1$status, "phase_budget")
+  expect_identical(arc_budget_used(b), 15)
+  r2 <- arc_anneal_phase(b, r1$contraction, r1$score, f, arc_propose_joint,
+                         40, "joint")
+  expect_identical(r2$status, "budget")
+  expect_identical(arc_budget_used(b), 25)
+  expect_identical(obj$count(), 26L) # one uncounted call for the start
+  expect_gte(r2$score, r1$score)
+  expect_identical(b$proposals, r1$proposals + r2$proposals)
+  # an expired deadline stops before any call
+  clock <- arc_fake_clock()
+  b3 <- arc_budget_new(seconds = -1, now = clock$now)
+  r3 <- arc_anneal_phase(b3, m, 0, f, arc_propose_joint, 50, "joint")
+  expect_identical(r3$status, "time_limit")
+  expect_identical(arc_budget_used(b3), 0)
+})
+
+test_that("the proposal cap stops a phase whose proposals rarely score", {
+  arc_local_seed(708)
+  m <- arc_fixture("example1-contraction.csv")
+  b <- arc_budget_new(max_consec_fail = 1000L)
+  # fails every proposal: classified (example1 has moves)
+  r <- arc_anneal_phase(b, m, 0, arc_cheap_score, function(x) NULL, 3,
+                        "joint")
+  expect_identical(r$status, "sampling_exhausted")
+  expect_identical(r$proposals, 60)
+  # some succeed but the phase is starved: proposal_cap
+  n <- 0L
+  sometimes <- function(x) {
+    n <<- n + 1L
+    if (n == 1L) arc_propose_joint(x) else NULL
+  }
+  b2 <- arc_budget_new(max_consec_fail = 1000L)
+  r2 <- arc_anneal_phase(b2, m, 0, arc_cheap_score, sometimes, 3, "joint")
+  expect_identical(r2$status, "proposal_cap")
+  expect_identical(arc_budget_used(b2), 1)
+  # consecutive failures with a large allowance
+  b3 <- arc_budget_new(max_consec_fail = 5L)
+  r3 <- arc_anneal_phase(b3, m, 0, arc_cheap_score, function(x) NULL, 100,
+                         "joint")
+  expect_identical(r3$status, "sampling_exhausted")
+  expect_identical(r3$proposals, 5)
+})
+
+test_that("t0_multiplier scales the calibrated temperature", {
+  m <- arc_fixture("example1-contraction.csv")
+  run <- function(mult) {
+    arc_local_seed(709)
+    b <- arc_budget_new()
+    arc_anneal_phase(b, m, arc_cheap_score(m), arc_cheap_score,
+                     arc_propose_joint, 30, "joint", t0_multiplier = mult)$t0
+  }
+  t1 <- run(1)
+  expect_gt(t1, 0)
+  expect_equal(run(0.1), 0.1 * t1, tolerance = 1e-14)
+  arc_local_seed(709)
+  b <- arc_budget_new()
+  default <- arc_anneal_phase(b, m, arc_cheap_score(m), arc_cheap_score,
+                              arc_propose_joint, 30, "joint")$t0
+  expect_identical(default, t1)
+})
+
+test_that("annealing and local search validate their arguments", {
+  m <- arc_fixture("example1-contraction.csv")
+  b <- arc_budget_new()
+  go <- function(...) {
+    args <- utils::modifyList(list(budget = b, start = m, score_start = 0,
+                                   score_fn = arc_cheap_score,
+                                   propose = arc_propose_joint,
+                                   phase_evals = 10,
+                                   exhaustion_kind = "joint"), list(...))
+    do.call(arc_anneal_phase, args)
+  }
+  bad <- list(list(phase_evals = -1), list(phase_evals = NA_real_),
+              list(phase_evals = "a"), list(t_ratio = 0),
+              list(t_ratio = 1.5), list(t0_multiplier = 0),
+              list(t0_multiplier = Inf), list(kind = "foo"),
+              list(exhaustion_kind = "diag"), list(n_calibration = 0))
+  for (a in bad) {
+    expect_error(do.call(go, a), class = "fieldhub_arc_input_error")
+  }
+  expect_error(arc_local_search(b, m, 0, arc_cheap_score, kind = "diag"),
+               class = "fieldhub_arc_input_error")
+  expect_error(arc_local_search(b, m, 0, arc_cheap_score, max_evals = -1),
+               class = "fieldhub_input_error")
+  expect_identical(arc_budget_used(b), 0)
+})
+
+test_that("local search under a budget cut reports phase_budget", {
+  arc_local_seed(710)
+  prep <- arc_search_prep(12L, 8L, 3L)
+  start <- arc_random_start(12, 8, 3)
+  f <- function(x) arc_search_score(x, prep, "E_aug")
+  b <- arc_budget_new()
+  r <- arc_local_search(b, start, f(start), f, "joint", max_evals = 3)
+  expect_identical(r$status, "phase_budget")
+  expect_identical(arc_budget_used(b), 3)
+  expect_gte(r$score, f(start))
+  b2 <- arc_budget_new(max_evals = 4)
+  r2 <- arc_local_search(b2, start, f(start), f, "joint")
+  expect_identical(r2$status, "budget")
+  expect_identical(arc_budget_used(b2), 4)
+})
+
+test_that("local search with an expired deadline starts no scan", {
+  m <- arc_fixture("example1-contraction.csv")
+  clock <- arc_fake_clock()
+  b <- arc_budget_new(seconds = -1, now = clock$now)
+  obj <- arc_counting_objective(1)
+  local_mocked_bindings(arc_scan_neighbourhood = function(...) {
+    stop("no scan may start")
+  })
+  r <- arc_local_search(b, m, 0, obj$fn)
+  expect_identical(r$status, "time_limit")
+  expect_identical(obj$count(), 0L)
+  expect_identical(arc_budget_used(b), 0)
+  expect_identical(r$contraction, m)
+})
+
+test_that("a deadline during the scan stops it, never local_optimum", {
+  arc_local_seed(711)
+  m <- arc_fixture("example1-contraction.csv")
+  clock <- arc_fake_clock()
+  b <- arc_budget_new(seconds = 1, now = clock$now)
+  f <- function(x) {
+    clock$advance(0.3)
+    -1 # never improves
+  }
+  r <- arc_local_search(b, m, 0, f)
+  expect_identical(r$status, "time_limit")
+  expect_identical(arc_budget_used(b), 4)
+})
+
+test_that("local search runs to local_optimum and never loses the best", {
+  arc_local_seed(712)
+  start <- arc_random_start(12, 8, 3)
+  rec <- arc_recording_score(arc_cheap_score)
+  b <- arc_budget_new()
+  y0 <- arc_cheap_score(start)
+  r <- arc_local_search(b, start, y0, rec$fn, "joint")
+  expect_identical(r$status, "local_optimum")
+  expect_gte(r$score, y0)
+  expect_identical(arc_cheap_score(r$contraction), r$score)
+  expect_identical(r$score, max(c(y0, rec$values())))
+  expect_identical(arc_budget_used(b), as.double(length(rec$values())))
+  # a complete scan from the optimum finds no improvement
+  better <- FALSE
+  arc_scan_neighbourhood(r$contraction, "joint", function(x) {
+    better <<- better || arc_cheap_score(x) > r$score + 1e-12
+    FALSE
+  })
+  expect_false(better)
+})
+
+test_that("local search on cyclic 5 x 5 reports empty_neighbourhood", {
+  arc_local_seed(713)
+  cyclic <- arc_fixture("cyclic-5x5-k4.csv")
+  b <- arc_budget_new()
+  obj <- arc_counting_objective(1)
+  r <- arc_local_search(b, cyclic, 1, obj$fn, "joint")
+  expect_identical(r$status, "empty_neighbourhood")
+  expect_identical(obj$count(), 0L)
+  b2 <- arc_budget_new()
+  r2 <- arc_local_search(b2, cyclic, 1, obj$fn, "column")
+  expect_identical(r2$status, "local_optimum")
+  expect_identical(arc_budget_used(b2), 10)
+})

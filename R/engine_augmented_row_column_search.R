@@ -864,3 +864,286 @@ arc_classify_exhaustion <- function(contraction, kind,
     "sampling_exhausted"
   }
 }
+
+# ---- Annealing phase and local search (specification sections 5.4, 7.4) ----
+
+#' Check an argument and raise the classed search input error
+#'
+#' @param ok Single logical; the error is raised when it is not TRUE.
+#' @param message Error message.
+#' @noRd
+arc_search_check <- function(ok, message) {
+  if (!isTRUE(ok)) {
+    fieldhub_abort(message, class = c("fieldhub_arc_input_error",
+                                      "fieldhub_input_error"),
+                   call = sys.call(-1))
+  }
+  invisible(TRUE)
+}
+
+#' Is `x` a single non-missing number?
+#' @param x Any object.
+#' @noRd
+arc_is_number <- function(x) {
+  is.numeric(x) && length(x) == 1L && !is.na(x)
+}
+
+#' Is `x` one of the allowed strings?
+#' @param x Any object.
+#' @param allowed Character vector.
+#' @noRd
+arc_is_choice <- function(x, allowed) {
+  is.character(x) && length(x) == 1L && !is.na(x) && x %in% allowed
+}
+
+#' One bounded simulated-annealing phase (maximization)
+#'
+#' Specification sections 5.4 and 7.4. Spends at most `phase_evals` counted
+#' calls (and never more than the global budget). Phases with fewer than 10
+#' evaluations run greedy (accept non-worsening only, `t0 = 0`). Otherwise
+#' `min(n_calibration, max(1, floor(phase_evals / 5)))` counted calibration
+#' calls on proposals from the start give `t0`, the mean finite non-zero
+#' |delta| from `score_start` (fallback `1e-6 max(|score_start|, 1)`, note
+#' "calibration_fallback"), multiplied by `t0_multiplier`. The end
+#' temperature is `t0 t_ratio`. A finite allowance cools geometrically after
+#' every counted call; an infinite allowance with a finite deadline cools by
+#' the elapsed fraction of the time from the phase start (after calibration)
+#' to the deadline. With both infinite, a finite global cap is used as the
+#' allowance for cooling, else the temperature stays at `t0`.
+#'
+#' Stop order before every proposal: global budget or deadline (`budget`,
+#' `time_limit`), `phase_budget`, the proposal cap (`proposal_factor` times
+#' the allowance; when every proposal of the phase failed the exhaustion
+#' check decides `empty_neighbourhood` or `sampling_exhausted`, else
+#' `proposal_cap`), then `max_consec_fail` consecutive failures (exhaustion
+#' check). `NA` scores (disconnected) are never accepted but still cool.
+#' Calibration candidates that beat the best become the best. One trace row
+#' is appended on exit.
+#'
+#' @param budget Budget environment from `arc_budget_new()`.
+#' @param start Start contraction.
+#' @param score_start Score of `start` (`NA` or `-Inf` allowed: any finite
+#'   score then improves).
+#' @param score_fn Function of a contraction returning a number or `NA`.
+#' @param propose Function of a contraction returning a candidate or `NULL`.
+#' @param phase_evals Call allowance, a number >= 0 (`Inf`: time-bounded).
+#' @param exhaustion_kind Move set for the exhaustion check: "joint",
+#'   "column" or "row".
+#' @param t_ratio End-to-start temperature ratio in (0, 1].
+#' @param n_calibration Largest number of calibration calls, >= 1.
+#' @param kind Call kind for the budget: "objective" or "proxy".
+#' @param label Phase label for the trace.
+#' @param t0_multiplier Finite number > 0 multiplying the start temperature.
+#' @param on_step Internal, for tests: `NULL` or a function
+#'   `(temp, y, current)` called before every acceptance decision.
+#' @return `list(contraction, score, status, t0, note, proposals)` with the
+#'   best state seen.
+#' @noRd
+arc_anneal_phase <- function(budget, start, score_start, score_fn, propose,
+                             phase_evals, exhaustion_kind, t_ratio = 1e-3,
+                             n_calibration = 50L, kind = "objective",
+                             label = "", t0_multiplier = 1, on_step = NULL) {
+  arc_search_check(arc_is_number(phase_evals) && phase_evals >= 0,
+                   "phase_evals must be a single number >= 0 (Inf allowed).")
+  arc_search_check(arc_is_number(t_ratio) && t_ratio > 0 && t_ratio <= 1,
+                   "t_ratio must be a single number in (0, 1].")
+  arc_search_check(arc_is_number(n_calibration) && n_calibration >= 1,
+                   "n_calibration must be a single number >= 1.")
+  arc_search_check(arc_is_number(t0_multiplier) && is.finite(t0_multiplier) &&
+                     t0_multiplier > 0,
+                   "t0_multiplier must be a single finite number > 0.")
+  arc_search_check(arc_is_choice(kind, c("objective", "proxy")),
+                   "kind must be \"objective\" or \"proxy\".")
+  arc_search_check(arc_is_choice(exhaustion_kind, c("joint", "column", "row")),
+                   "exhaustion_kind must be \"joint\", \"column\" or \"row\".")
+  arc_search_check(is.function(score_fn) && is.function(propose),
+                   "score_fn and propose must be functions.")
+  arc_search_check(is.null(on_step) || is.function(on_step),
+                   "on_step must be NULL or a function.")
+
+  as_level <- function(y) if (is.na(y)) -Inf else y
+  current <- start
+  f_current <- as_level(score_start)
+  best <- start
+  f_best <- f_current
+  score_best <- score_start
+  n_accepted <- 0L
+  n_worse <- 0L
+  used_at_entry <- arc_budget_used(budget)
+  stop_at <- used_at_entry + phase_evals
+  max_proposals <- budget$proposal_factor * max(phase_evals, 1)
+  proposals <- 0
+  failed <- 0
+  consec <- 0L
+  budget_stop <- function() !is.na(arc_budget_out(budget))
+  exhausted <- function() {
+    arc_classify_exhaustion(current, exhaustion_kind, stop_fn = budget_stop)
+  }
+  local_out <- function() {
+    out <- arc_budget_out(budget)
+    if (!is.na(out)) return(out)
+    if (arc_budget_used(budget) >= stop_at) return("phase_budget")
+    if (proposals >= max_proposals) {
+      return(if (failed == proposals) exhausted() else "proposal_cap")
+    }
+    NA_character_
+  }
+  next_candidate <- function() {
+    proposals <<- proposals + 1
+    candidate <- propose(current)
+    arc_budget_note_proposal(budget, failed = is.null(candidate))
+    if (is.null(candidate)) {
+      failed <<- failed + 1
+      consec <<- consec + 1L
+    } else {
+      consec <<- 0L
+    }
+    candidate
+  }
+  keep_best <- function(candidate, y) {
+    if (!is.na(y) && y > f_best) {
+      best <<- candidate
+      f_best <<- y
+      score_best <<- y
+    }
+  }
+
+  greedy <- phase_evals < 10
+  t0 <- 0
+  note <- ""
+  status <- NA_character_
+  if (!greedy) {
+    deltas <- numeric(0)
+    n_cal <- min(n_calibration, max(1, floor(phase_evals / 5)))
+    for (q in seq_len(n_cal)) {
+      if (!is.na(local_out()) || consec >= budget$max_consec_fail) break
+      candidate <- next_candidate()
+      if (is.null(candidate)) next
+      y <- arc_budget_eval(budget, score_fn, candidate, kind)
+      if (is.null(y)) break
+      if (is.finite(y) && is.finite(f_current)) {
+        deltas <- c(deltas, abs(y - f_current))
+      }
+      keep_best(candidate, y)
+    }
+    deltas <- deltas[is.finite(deltas) & deltas > 0]
+    if (length(deltas) > 0L) {
+      t0 <- mean(deltas)
+    } else {
+      note <- "calibration_fallback"
+      t0 <- 1e-6 * max(if (is.finite(f_current)) abs(f_current) else 0, 1)
+    }
+    t0 <- t0 * t0_multiplier
+  }
+
+  timed <- !is.finite(phase_evals) && is.finite(budget$deadline)
+  t_phase <- budget$now()
+  span <- max(1e-3, budget$deadline - t_phase)
+  remaining <- min(stop_at, budget$max_evals) - arc_budget_used(budget)
+  alpha <- if (is.finite(remaining)) t_ratio^(1 / max(1, remaining)) else 1
+  temp <- t0
+  repeat {
+    status <- local_out()
+    if (!is.na(status)) break
+    if (consec >= budget$max_consec_fail) {
+      status <- exhausted()
+      break
+    }
+    candidate <- next_candidate()
+    if (is.null(candidate)) next
+    y <- arc_budget_eval(budget, score_fn, candidate, kind)
+    if (is.null(y)) {
+      status <- arc_budget_out(budget)
+      break
+    }
+    temp <- if (timed) {
+      t0 * t_ratio^min(1, max(0, budget$now() - t_phase) / span)
+    } else {
+      temp * alpha
+    }
+    if (is.na(y)) next
+    if (!is.null(on_step)) on_step(temp, y, f_current)
+    if (y >= f_current ||
+        (!greedy && stats::runif(1) < exp((y - f_current) / temp))) {
+      n_accepted <- n_accepted + 1L
+      if (y < f_current) n_worse <- n_worse + 1L
+      current <- candidate
+      f_current <- y
+      keep_best(candidate, y)
+    }
+  }
+  arc_budget_add_trace(budget, data.frame(
+    phase = label, f_start = score_start, f_best = score_best, t0 = t0,
+    evals = arc_budget_used(budget) - used_at_entry, accepted = n_accepted,
+    worse_accepted = n_worse, status = status, stringsAsFactors = FALSE
+  ))
+  list(contraction = best, score = score_best, status = status, t0 = t0,
+       note = note, proposals = proposals)
+}
+
+#' First-improvement local search over the lazy neighbourhood scan
+#'
+#' Specification sections 5.4 and 7.4. Stop conditions (global budget or
+#' deadline, then the phase allowance) are checked before every scan and,
+#' through the scan's `stop_fn`, before every move. The first candidate that
+#' improves by more than `tol` is taken and the scan restarts from it.
+#' `local_optimum` (some feasible move, none improving) and
+#' `empty_neighbourhood` (no feasible move) are reported only after a
+#' complete scan; an incomplete scan reports its stop reason (`budget`,
+#' `time_limit`, `phase_budget`) or `interrupted`.
+#'
+#' @inheritParams arc_anneal_phase
+#' @param kind Move set: "joint", "column" or "row".
+#' @param tol Improvement threshold, a number >= 0.
+#' @param max_evals Call allowance, a number >= 0 (`Inf` allowed).
+#' @return `list(contraction, score, status)`.
+#' @noRd
+arc_local_search <- function(budget, start, score_start, score_fn,
+                             kind = "joint", tol = 1e-12, max_evals = Inf) {
+  arc_search_check(arc_is_choice(kind, c("joint", "column", "row")),
+                   "kind must be \"joint\", \"column\" or \"row\".")
+  arc_search_check(arc_is_number(tol) && tol >= 0,
+                   "tol must be a single number >= 0.")
+  arc_search_check(arc_is_number(max_evals) && max_evals >= 0,
+                   "max_evals must be a single number >= 0 (Inf allowed).")
+  arc_search_check(is.function(score_fn), "score_fn must be a function.")
+  current <- start
+  score_current <- score_start
+  f_current <- if (is.na(score_start)) -Inf else score_start
+  stop_at <- arc_budget_used(budget) + max_evals
+  why <- function() {
+    out <- arc_budget_out(budget)
+    if (!is.na(out)) return(out)
+    if (arc_budget_used(budget) >= stop_at) return("phase_budget")
+    NA_character_
+  }
+  done <- function(status) {
+    list(contraction = current, score = score_current, status = status)
+  }
+  repeat {
+    reason <- why()
+    if (!is.na(reason)) return(done(reason))
+    found <- NULL
+    scan <- arc_scan_neighbourhood(current, kind, function(candidate) {
+      y <- arc_budget_eval(budget, score_fn, candidate, "objective")
+      if (is.null(y)) return(TRUE)
+      if (!is.na(y) && y > f_current + tol) {
+        found <<- list(contraction = candidate, score = y)
+        return(TRUE)
+      }
+      !is.na(why())
+    }, stop_fn = function() !is.na(why()))
+    if (!is.null(found)) {
+      current <- found$contraction
+      score_current <- found$score
+      f_current <- found$score
+      next
+    }
+    if (!identical(scan$status, "complete")) {
+      reason <- why()
+      return(done(if (is.na(reason)) "interrupted" else reason))
+    }
+    return(done(if (scan$n_feasible == 0L) "empty_neighbourhood"
+                else "local_optimum"))
+  }
+}
