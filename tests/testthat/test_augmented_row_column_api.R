@@ -1218,3 +1218,287 @@ test_that("the registry declares the replay fields of the design", {
   }
   expect_output(print(x, n = 2), "Augmented Row-Column Design", fixed = TRUE)
 })
+
+# Task 4: presentation ------------------------------------------------------
+# (section 3.8). print(), summary(), field_layout(), plot() and draw_layout()
+# reach the design only through its registry entry: the title and the layout,
+# render and details handlers. Residual df come from the inputs and the
+# printed statistics from the independent field-book oracle.
+
+# The lines of print(x, n = 6), the app's summary path (app_spatial_page.R)
+arc_api_printed <- function(x) utils::capture.output(print(x, n = 6))
+
+# The details block of one location: its heading and the indented lines
+# that follow it
+arc_api_details_block <- function(lines, site) {
+  start <- match(paste0("Location ", site, ":"), lines)
+  if (is.na(start)) return(character())
+  end <- start
+  while (end < length(lines) && startsWith(lines[end + 1L], "  ")) end <- end + 1L
+  lines[start:end]
+}
+
+# The number printed after "<name> = " on a line
+arc_api_printed_value <- function(line, name) {
+  as.numeric(sub(paste0(".*\\b", name, " = ([-+.0-9e]+).*"), "\\1", line))
+}
+
+# Unit cell edges of a map's segments, as "h x y" (horizontal, centred at
+# x) and "v x y" (vertical, centred at y)
+arc_api_segment_edges <- function(segments) {
+  edges <- character()
+  for (i in seq_len(nrow(segments))) {
+    s <- segments[i, ]
+    if (s$y == s$yend) {
+      centres <- seq(min(s$x, s$xend) + 0.5, max(s$x, s$xend) - 0.5, by = 1)
+      edges <- c(edges, paste("h", centres, s$y))
+    } else {
+      centres <- seq(min(s$y, s$yend) + 0.5, max(s$y, s$yend) - 0.5, by = 1)
+      edges <- c(edges, paste("v", s$x, centres))
+    }
+  }
+  unique(edges)
+}
+
+# Interior edges of a field book between neighbouring plots, split by
+# whether the two plots differ in CHECKS and whether both are test plots
+arc_api_book_edges <- function(fb) {
+  key <- paste(fb$COLUMN, fb$ROW)
+  checks <- stats::setNames(fb$CHECKS, key)
+  right <- paste(fb$COLUMN + 1L, fb$ROW)
+  up <- paste(fb$COLUMN, fb$ROW + 1L)
+  edges <- c(paste("v", fb$COLUMN + 0.5, fb$ROW), paste("h", fb$COLUMN, fb$ROW + 0.5))
+  here <- c(fb$CHECKS, fb$CHECKS)
+  there <- unname(checks[c(right, up)])
+  inside <- !is.na(there)
+  list(differ = edges[inside & here != there],
+       tests = edges[inside & here == 0L & there == 0L])
+}
+
+test_that("the registry declares the presentation fields of the design", {
+  registry <- fieldhub_design_registry()
+  entry <- registry$augmented_row_column
+  expect_identical(entry$layout, "field_book_layouts")
+  expect_identical(entry$render, "draw_augmented_row_column_layout")
+  expect_identical(entry$details, "arc_summary_lines")
+  for (handler in c(entry$layout, entry$render, entry$details)) {
+    expect_true(is.function(get(handler, envir = asNamespace("FielDHub"),
+                                inherits = FALSE)), label = handler)
+  }
+  # Presentation needs no design-specific S3 method
+  for (generic in c("print", "summary", "plot", "layout_options", "draw_layout")) {
+    expect_null(getS3method(generic, "fieldhub_augmented_row_column",
+                            optional = TRUE), label = generic)
+  }
+  expect_null(getS3method("print", "summary.fieldhub_augmented_row_column",
+                          optional = TRUE))
+  # No other entry declares details, so no other output changes
+  declared <- names(Filter(function(e) !is.null(e$details), registry))
+  expect_identical(declared, "augmented_row_column")
+})
+
+test_that("print() and summary() show each location's statistics, as the app does", {
+  v <- 10L
+  s <- 8L
+  k <- 4L
+  df <- k * s - k - v - s + 2L
+  sites <- c("Fargo", "Casselton")
+  for (direction in arc_api_directions) {
+    for (objective in c("V_tt", "E_aug")) {
+      x <- arc_api_oriented(direction, objective = objective, l = 2,
+                            budget = 300, locationNames = sites)
+      printed <- arc_api_printed(x)
+      summarised <- utils::capture.output(print(summary(x)))
+      # The statistics follow the title, before the design parameters
+      expect_identical(printed[1:3], c(
+        "Augmented Row-Column Design ", "",
+        "Statistics by location (variances in units of the residual variance):"
+      ))
+      expect_identical(summarised[1:3], printed[1:3])
+      expect_lt(match("Location Casselton:", printed),
+                match("Information on the design parameters: ", printed))
+      expect_lt(match("Location Casselton:", summarised),
+                match("1. Information on the design parameters: ", summarised))
+      sense <- if (objective == "E_aug") "maximized" else "minimized"
+      for (site in sites) {
+        label <- paste(direction, objective, site)
+        block <- arc_api_details_block(printed, site)
+        expect_length(block, 6L)
+        expect_identical(arc_api_details_block(summarised, site), block,
+                         label = label)
+        expect_identical(block[2], paste0("  Residual df: ", df), label = label)
+        oracle <- arc_field_book_oracle(arc_api_location_book(x, site))
+        expect_match(block[3], paste0("^  Optimized objective: ", objective,
+                                      " = [-+.0-9e]+ \\(", sense, "\\)$"),
+                     label = label)
+        expect_equal(arc_api_printed_value(block[3], objective),
+                     oracle[[objective]], tolerance = 1e-3, label = label)
+        for (metric in c("E_aug", "V_tt", "V_tc")) {
+          expect_equal(arc_api_printed_value(block[4], metric), oracle[[metric]],
+                       tolerance = 1e-3, label = paste(label, metric))
+        }
+        for (metric in c("max_tt", "max_tc")) {
+          expect_equal(arc_api_printed_value(block[5], metric), oracle[[metric]],
+                       tolerance = 1e-3, label = paste(label, metric))
+        }
+        expect_identical(block[6], "  Search status: ok", label = label)
+      }
+      # Twelve residual df: no low-df notice
+      expect_no_match(printed, "Notice", fixed = TRUE)
+      expect_no_match(summarised, "Notice", fixed = TRUE)
+    }
+  }
+})
+
+test_that("a low-df design shows the notice on every print and summary", {
+  notice <- c(
+    "  Notice: only 3 residual degrees of freedom (fewer than 10). Only adding a",
+    "  check or changing the number of rows or columns raises them."
+  )
+  for (direction in arc_api_directions) {
+    # A 12 x 8 field with 3 checks: k s - k - v - s + 2 = 3 residual df
+    dims <- arc_api_dims(12L, 8L, direction)
+    expect_warning(
+      x <- arc_api_run(nrows = dims[["nrows"]], ncols = dims[["ncols"]],
+                       checks = 3, check_direction = direction, l = 2,
+                       budget = 300),
+      class = "fieldhub_arc_low_df_warning"
+    )
+    # Persistent: shown each time, with no further warning
+    for (time in 1:2) {
+      expect_no_warning(printed <- arc_api_printed(x))
+      expect_no_warning(summarised <- utils::capture.output(print(summary(x))))
+      for (site in 1:2) {
+        label <- paste(direction, time, site)
+        block <- arc_api_details_block(printed, site)
+        expect_identical(block[2], "  Residual df: 3", label = label)
+        expect_identical(utils::tail(block, 2L), notice, label = label)
+        expect_identical(arc_api_details_block(summarised, site), block,
+                         label = label)
+      }
+    }
+  }
+})
+
+test_that("a location stopped by time_limit says so when printed", {
+  clock <- arc_fake_clock()
+  local_mocked_bindings(arc_clock = function() clock$advance(0.01))
+  full <- arc_api_run(budget = 600, seed = 3)
+  limited <- arc_api_run(budget = 600, seed = 3, time_limit = full$timing$search / 2)
+  expect_true(limited$diagnostics[[1]]$time_limit_hit)
+  expect_identical(arc_api_details_block(arc_api_printed(full), 1)[6],
+                   "  Search status: ok")
+  expect_identical(arc_api_details_block(arc_api_printed(limited), 1)[6],
+                   "  Search status: ok (time limit reached)")
+})
+
+test_that("field_layout(), plot() and draw_layout() work in both orientations", {
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  planters <- c("serpentine", "cartesian")
+  for (direction in arc_api_directions) {
+    dims <- arc_api_dims(10L, 8L, direction)
+    title <- paste0("Augmented Row-Column Design ", dims[["nrows"]], "X",
+                    dims[["ncols"]])
+    for (planter in planters) {
+      label <- paste(direction, planter)
+      x <- arc_api_oriented(direction, planter = planter, l = 2, budget = 100,
+                            locationNames = c("A", "B"))
+      # Plots are placed at construction: every planter and the only layout
+      # option return the field book as it is
+      for (asked in planters) {
+        expect_identical(field_layout(x, planter = asked), x$fieldBook,
+                         label = label)
+      }
+      expect_error(field_layout(x, layout = 2), class = "fieldhub_input_error")
+      plotted <- plot(x, l = 2)
+      expect_s3_class(plotted$p, "ggplot")
+      expect_identical(plotted$field_book, x$fieldBook, label = label)
+      book <- arc_api_location_book(x, "B")
+      rownames(book) <- NULL
+      view <- plot_layout(x, l = 2)
+      expect_identical(view$fieldBookXY, book, label = label)
+      drawn <- draw_layout(x, book)
+      expect_identical(drawn$data, book, label = label)
+      for (map in list(drawn$p1, drawn$p2, view$out_layout, view$out_layoutPlots)) {
+        expect_s3_class(map, "ggplot")
+        expect_identical(map$labels$title, title, label = label)
+        expect_silent(ggplot2::ggplot_build(map))
+      }
+      # The plot-number map labels every plot with its number on a neutral fill
+      built <- ggplot2::ggplot_build(drawn$p2)$data
+      expect_identical(nrow(built[[1]]), nrow(book))
+      expect_true(all(built[[1]]$fill == fieldhub_layout_neutral()))
+      text <- built[[length(built)]]
+      expect_identical(text$label[match(paste(book$COLUMN, book$ROW),
+                                        paste(text$x, text$y))],
+                       sprintf("%d", as.integer(book$PLOT)), label = label)
+    }
+  }
+})
+
+test_that("the treatment map fills and outlines the checks by CHECKS", {
+  checks <- c("Check A", "B", "C", "D")
+  for (direction in arc_api_directions) {
+    x <- arc_api_oriented(direction, checks = checks, budget = 100, seed = 17)
+    book <- x$fieldBook
+    p1 <- draw_layout(x, book)$p1
+    built <- ggplot2::ggplot_build(p1)$data
+    geoms <- vapply(p1$layers, function(layer) class(layer$geom)[1L], "")
+    tiles <- built[[match("GeomTile", geoms)]]
+    text <- built[[match("GeomText", geoms)]]
+    segments <- built[[match("GeomSegment", geoms)]]
+    at <- paste(book$COLUMN, book$ROW)
+    fill <- tiles$fill[match(at, paste(tiles$x, tiles$y))]
+    expect_false(anyNA(fill))
+    # Each plot shows its treatment label
+    expect_identical(text$label[match(at, paste(text$x, text$y))], book$TREATMENT)
+    # Fill groups are exactly the CHECKS groups: tests neutral, one shared
+    # palette colour per check, distinct across checks
+    test <- book$CHECKS == 0L
+    expect_true(all(fill[test] == fieldhub_layout_neutral()), label = direction)
+    expect_identical(length(unique(fill)), length(unique(book$CHECKS)))
+    expect_identical(nrow(unique(data.frame(fill, book$CHECKS))),
+                     length(unique(book$CHECKS)))
+    by_check <- vapply(split(fill[!test], book$CHECKS[!test]),
+                       function(f) paste(unique(f), collapse = " "), "")
+    expect_identical(unname(by_check), fieldhub_layout_palette()[2:5],
+                     label = direction)
+    # Check borders: every edge between plots of different CHECKS is drawn,
+    # and none between two test plots
+    expect_true(all(segments$colour == "gray50"))
+    drawn_edges <- arc_api_segment_edges(segments)
+    expected <- arc_api_book_edges(book)
+    expect_true(all(expected$differ %in% drawn_edges), label = direction)
+    expect_false(any(expected$tests %in% drawn_edges), label = direction)
+  }
+})
+
+test_that("latin_rectangle print and summary output is unchanged by details", {
+  # The output that print_design() and print.summary.FielDHub() gave before
+  # the details field, rebuilt from base functions
+  x <- latin_rectangle(c("No nitrogen", "A*B", "e 3", "4", "five"), 3, l = 2,
+                       locationNames = c("Fargo", " CASSELTON"), seed = 7)
+  expect_null(fieldhub_design_registry()$latin_rectangle$details)
+  expect_identical(registered_design_details(x), character())
+  for (n in c(10L, 6L)) {
+    expected <- utils::capture.output({
+      cat("Latin Rectangle Design", "\n\n")
+      cat("Information on the design parameters:", "\n")
+      str(x$infoDesign[names(x$infoDesign) != "id_design"])
+      cat("\n", n, "First observations of the data frame with the latin_rectangle field book:",
+          "\n")
+      print(head(x$fieldBook, n = n))
+    })
+    expect_identical(utils::capture.output(print(x, n = n)), expected)
+  }
+  expected <- utils::capture.output({
+    cat("Latin Rectangle Design", "\n\n")
+    cat("1. Information on the design parameters:", "\n")
+    str(x$infoDesign)
+    cat("\n")
+    cat("2. Structure of the field book:", "\n\n")
+    str(x$fieldBook)
+  })
+  expect_identical(utils::capture.output(print(summary(x))), expected)
+})

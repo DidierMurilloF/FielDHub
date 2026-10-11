@@ -17,9 +17,11 @@ print_head <- function(data, what, n, ...) {
 }
 
 # print() of most designs: the title, the design parameters and the first
-# rows of the field book, after the efficiency of the design if given
+# rows of the field book, after the efficiency of the design if given and
+# the summary lines that its registry entry declares, if any
 print_design <- function(x, title, book, n, ..., efficiency = NULL) {
   cat(title, "\n\n")
+  print_details(x)
   if (!is.null(efficiency)) {
     cat("Efficiency of design:", "\n")
     print(efficiency)
@@ -28,6 +30,14 @@ print_design <- function(x, title, book, n, ..., efficiency = NULL) {
   cat("Information on the design parameters:", "\n")
   str_parameters(x)
   print_head(x$fieldBook, paste("the", book, "field book:"), n, ...)
+  invisible(x)
+}
+
+# The summary lines of the registry entry's details handler and a blank line;
+# nothing when the entry declares no details
+print_details <- function(x) {
+  lines <- registered_design_details(x)
+  if (length(lines)) cat(paste0(lines, "\n"), "\n", sep = "")
   invisible(x)
 }
 
@@ -408,4 +418,43 @@ print.summary.fieldhub_split_families <- function(x, ...) {
   summary_str("1. Structure of the data frame with the summary of entries by location:", x$rowsEachlist)
   summary_str("2. Structure of the data frame with the entries for each location:", x$data_locations)
   invisible(x)
+}
+
+#-----------------------------------------------------------------------
+# Augmented row-column: printed by the generic methods, which show these
+# lines because the registry entry declares them as its details
+#-----------------------------------------------------------------------
+
+# Per location: the residual df, the optimized objective, the three objective
+# values, the largest variances and the search status. Below 10 residual df a
+# notice is shown every time, not only as the one-time construction warning.
+arc_summary_lines <- function(x) {
+  statistics <- x$statistics
+  if (!is.data.frame(statistics) || !nrow(statistics)) return(character())
+  objective <- x$infoDesign$objective
+  sense <- if (identical(objective, "E_aug")) "maximized" else "minimized"
+  number <- function(value) format(value, digits = 4)
+  locations <- lapply(seq_len(nrow(statistics)), function(i) {
+    row <- statistics[i, , drop = FALSE]
+    df <- row$residual_df
+    status <- x$diagnostics[[i]]$status
+    if (isTRUE(x$diagnostics[[i]]$time_limit_hit)) {
+      status <- paste0(status, " (time limit reached)")
+    }
+    c(paste0("Location ", row$LOCATION, ":"),
+      paste0("  Residual df: ", df),
+      paste0("  Optimized objective: ", objective, " = ", number(row[[objective]]),
+             " (", sense, ")"),
+      paste0("  E_aug = ", number(row$E_aug), ", V_tt = ", number(row$V_tt),
+             ", V_tc = ", number(row$V_tc)),
+      paste0("  max_tt = ", number(row$max_tt), ", max_tc = ", number(row$max_tc)),
+      paste0("  Search status: ", status),
+      if (df < 10) {
+        c(paste0("  Notice: only ", df, " residual ", if (df == 1) "degree" else "degrees",
+                 " of freedom (fewer than 10). Only adding a"),
+          "  check or changing the number of rows or columns raises them.")
+      })
+  })
+  c("Statistics by location (variances in units of the residual variance):",
+    unlist(locations))
 }
