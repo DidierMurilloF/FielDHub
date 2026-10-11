@@ -535,7 +535,8 @@ build_design_specs <- function() {
       ),
       field_size = function(design, values) {
         list(nrows = design$infoDesign$nrows, ncols = design$infoDesign$ncols)
-      }),
+      },
+      randomizing = "Searching for a balanced design..."),
     # The field sizes are searched after Run!, the percentages of checks
     # after Randomize!
     Diagonal = spatial("Diagonal", "Unreplicated Single Diagonal Arrangement", diagonal_arrangement,

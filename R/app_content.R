@@ -31,6 +31,19 @@ app_external_link <- function(label, url) {
   shiny::tags$a(label, href = url, target = "_blank", rel = "noopener noreferrer")
 }
 
+#' Replay notes for the designs that have them, from the design registry
+#' @noRd
+app_help_replay_notes <- function(topics = fieldhub_help_topics()) {
+  notes <- design_replay_notes()
+  shown <- topics[topics$engine %in% names(notes), , drop = FALSE]
+  if (!nrow(shown)) return(NULL)
+  shiny::tags$section(class = "fieldhub-help-notes", `aria-label` = "Reproduction notes",
+    shiny::tags$h3("Reproduction code"),
+    lapply(seq_len(nrow(shown)), function(i) shiny::tagList(
+      shiny::tags$h4(sub("^New - ", "", shown$label[i])),
+      shiny::tags$ul(lapply(notes[[shown$engine[i]]], shiny::tags$li)))))
+}
+
 #' Legacy documentation-and-links layout, with optional offline R help
 #' @noRd
 app_help_ui <- function() {
@@ -71,6 +84,7 @@ app_help_ui <- function() {
           )
         )
       ),
+      app_help_replay_notes(topics),
       shiny::tags$details(class = "fieldhub-offline-help",
         shiny::tags$summary("Using FielDHub from R (including offline help)"),
         shiny::tags$p("Online guides require an internet connection. These commands open the documentation installed with FielDHub and also work offline."),
