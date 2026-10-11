@@ -301,3 +301,240 @@ test_that("log, trace and proposal counters accumulate", {
   expect_identical(b$proposals, 3)
   expect_identical(b$failed, 2)
 })
+
+# ---- Fresh search evaluator (specification section 6.1; plan task 5) ----
+
+# Compare the search evaluator with arc_evaluate_objectives() on one
+# contraction: identical classification, objectives within 1e-12.
+arc_expect_evaluator_match <- function(contraction, v, mode, label) {
+  k <- nrow(contraction)
+  s <- ncol(contraction)
+  prep <- arc_search_prep(v, s, k)
+  got <- arc_search_evaluate(contraction, prep)
+  ref <- arc_evaluate_objectives(contraction, v, mode)
+  expect_identical(got$connected, ref$connected, label = label)
+  if (isTRUE(ref$connected)) {
+    for (o in c("E_aug", "V_tt", "V_tc", "V_cc")) {
+      expect_lte(abs(got[[o]] - ref[[o]]), 1e-12,
+                 label = paste(label, o))
+    }
+    expect_lte(abs(got$lambda_min_rel - ref$lambda_min_rel), 1e-12,
+               label = paste(label, "lambda_min_rel"))
+  }
+  invisible(got)
+}
+
+test_that("arc_search_prep holds the precomputed pieces", {
+  p <- arc_search_prep(12L, 8L, 3L)
+  expect_identical(p$n_tests, 72L)
+  expect_identical(p$v_star, 75L)
+  expect_identical(p$df, arc_df_formula(12, 8, 3))
+  expect_identical(dim(p$q0q0), c(20L, 20L))
+  expect_identical(dim(p$col_block), c(8L, 8L))
+  expect_identical(p$col_index, rep(1:8, each = 3L))
+  expect_identical(p$row_index, rep(1:3, times = 8L))
+})
+
+test_that("the search evaluator matches M1 on every restricted fixture", {
+  manifest <- utils::read.csv(
+    test_path("fixtures", "augmented-row-column", "manifest.csv"),
+    stringsAsFactors = FALSE
+  )
+  rows <- manifest[manifest$kind == "contraction" &
+                     manifest$mode == "restricted", ]
+  expect_gt(nrow(rows), 20L)
+  for (i in seq_len(nrow(rows))) {
+    contraction <- arc_fixture(rows$file[i])
+    arc_expect_evaluator_match(contraction, rows$v[i], "restricted",
+                               rows$file[i])
+  }
+})
+
+# Random column-binary k x s matrix with replication r (r <= s), filled
+# column by column: labels that must appear in every remaining column are
+# forced, the rest drawn with probability proportional to what remains.
+# Bounded restarts; NULL when none is found.
+arc_greedy_column_binary <- function(k, s, r, max_restarts = 50L) {
+  for (restart in seq_len(max_restarts)) {
+    left <- r
+    m <- matrix(0L, k, s)
+    ok <- TRUE
+    for (j in seq_len(s)) {
+      forced <- which(left == s - j + 1L)
+      pool <- setdiff(which(left > 0L), forced)
+      need <- k - length(forced)
+      if (need < 0L || need > length(pool)) {
+        ok <- FALSE
+        break
+      }
+      extra <- if (need > 0L) {
+        pool[sample.int(length(pool), need, prob = left[pool])]
+      }
+      col <- c(forced, extra)
+      m[, j] <- sample(col, k)
+      left[col] <- left[col] - 1L
+    }
+    if (ok) return(m)
+  }
+  NULL
+}
+
+test_that("a seeded sweep matches M1, including df 0, df 1, disconnected", {
+  arc_local_seed(20261010)
+  # (v, s, k) with df = (k - 1)(s - 1) - v + 1: forced df 0 and df 1 sets,
+  # then random small sets with v <= 14.
+  forced <- list(c(7, 4, 3), c(6, 6, 2), c(9, 5, 3), c(10, 4, 4),
+                 c(6, 4, 3), c(8, 5, 3), c(9, 4, 4), c(12, 5, 4))
+  random <- list()
+  while (length(random) < 16L) {
+    v <- sample(4:14, 1L)
+    k <- sample(2:(v - 1L), 1L)
+    s <- sample(2:v, 1L)
+    if (arc_df_formula(v, s, k) >= 0L && k <= s) {
+      random[[length(random) + 1L]] <- c(v, s, k)
+    }
+  }
+  counts <- c(states = 0, disconnected = 0, df0 = 0, df1 = 0)
+  for (vsk in c(forced, random)) {
+    v <- as.integer(vsk[1])
+    s <- as.integer(vsk[2])
+    k <- as.integer(vsk[3])
+    df <- arc_df_formula(v, s, k)
+    for (rep in seq_len(6L)) {
+      balanced <- rep %% 2L == 1L
+      total <- k * s
+      r <- as.integer(sample(rep(c(total %/% v, total %/% v + 1L),
+                                 c(v - total %% v, total %% v))))
+      if (!balanced) {
+        # Unbalance by random unit transfers within 1 <= r <= min(k, s).
+        for (move in seq_len(v)) {
+          from <- which(r > 1L)
+          to <- which(r < min(k, s))
+          if (length(from) == 0L || length(to) == 0L) break
+          a <- from[sample.int(length(from), 1L)]
+          b <- to[sample.int(length(to), 1L)]
+          if (a != b) {
+            r[a] <- r[a] - 1L
+            r[b] <- r[b] + 1L
+          }
+        }
+      }
+      filled <- arc_greedy_column_binary(k, s, r)
+      if (is.null(filled)) next
+      contraction <- arc_recolor_rows(filled, v)
+      mode <- if (balanced) "restricted" else "column_binary"
+      got <- arc_expect_evaluator_match(
+        contraction, v, mode, sprintf("v%d s%d k%d rep%d", v, s, k, rep))
+      counts[["states"]] <- counts[["states"]] + 1
+      counts[["disconnected"]] <- counts[["disconnected"]] + !got$connected
+      counts[["df0"]] <- counts[["df0"]] + (df == 0L)
+      counts[["df1"]] <- counts[["df1"]] + (df == 1L)
+    }
+  }
+  expect_gte(counts[["disconnected"]], 1)
+  expect_gte(counts[["df0"]], 1)
+  expect_gte(counts[["df1"]], 1)
+  expect_gte(counts[["states"]], 100)
+})
+
+# Latin square on labels x: rows x, x shifted by one, x shifted by two.
+arc_two_group_design <- function() {
+  latin <- function(x) rbind(x, x[c(2L, 3L, 1L)], x[c(3L, 1L, 2L)])
+  m <- cbind(latin(1:3), latin(4:6))
+  dimnames(m) <- NULL
+  m
+}
+
+test_that("the constructed two-group design is disconnected in both", {
+  m <- arc_two_group_design()
+  expect_identical(arc_df_formula(6, 6, 3), 5L)
+  prep <- arc_search_prep(6L, 6L, 3L)
+  got <- arc_search_evaluate(m, prep)
+  ref <- arc_evaluate_objectives(m, 6L, "restricted")
+  expect_false(got$connected)
+  expect_false(ref$connected)
+  expect_lt(got$lambda_min_rel, 1e-8)
+  expect_identical(names(got), c("connected", "lambda_min_rel"))
+  for (o in arc_search_objectives) {
+    expect_identical(arc_search_score(m, prep, o), NA_real_)
+  }
+})
+
+test_that("negative df returns disconnected without matrix work", {
+  # (48, 16, 4) has df < 0; the contraction content is irrelevant.
+  prep <- arc_search_prep(48L, 16L, 4L)
+  expect_lt(prep$df, 0L)
+  got <- arc_search_evaluate(matrix(1L, 4L, 16L), prep)
+  expect_identical(got, list(connected = FALSE, lambda_min_rel = NA_real_))
+})
+
+test_that("a row repeat raises the classed restricted-row error", {
+  m <- arc_fixture("example1-contraction.csv")
+  prep <- arc_search_prep(12L, 8L, 3L)
+  # Within column j, move label a = m[1, 1] into row 1: still column-binary,
+  # but row 1 now holds a twice.
+  a <- m[1, 1]
+  hit <- which(m == a, arr.ind = TRUE)
+  hit <- hit[hit[, 2] != 1, , drop = FALSE]
+  i <- hit[1, 1]
+  j <- hit[1, 2]
+  bad <- m
+  bad[c(1, i), j] <- m[c(i, 1), j]
+  expect_gt(anyDuplicated(bad[1, ]), 0L)
+  expect_true(all(apply(bad, 2L, anyDuplicated) == 0L))
+  cond <- tryCatch(arc_search_evaluate(bad, prep), error = function(e) e)
+  expect_s3_class(cond, "fieldhub_arc_row_repeat_error")
+  expect_s3_class(cond, "fieldhub_arc_input_error")
+  expect_s3_class(cond, "fieldhub_input_error")
+  expect_error(arc_search_score(bad, prep, "E_aug"),
+               class = "fieldhub_arc_row_repeat_error")
+})
+
+test_that("arc_search_score negates variances and rejects other objectives", {
+  m <- arc_fixture("example1-contraction.csv")
+  prep <- arc_search_prep(12L, 8L, 3L)
+  e <- arc_search_evaluate(m, prep)
+  expect_true(e$connected)
+  expect_identical(arc_search_score(m, prep, "E_aug"), e$E_aug)
+  expect_identical(arc_search_score(m, prep, "V_tt"), -e$V_tt)
+  expect_identical(arc_search_score(m, prep, "V_tc"), -e$V_tc)
+  for (o in list("V_cc", "foo", NA_character_, c("E_aug", "V_tt"), 1)) {
+    expect_error(arc_search_score(m, prep, o),
+                 class = "fieldhub_arc_input_error")
+  }
+})
+
+test_that("arc_column_proxy matches an independent A-efficiency", {
+  m <- arc_fixture("example1-contraction.csv")
+  v <- 12L
+  k <- nrow(m)
+  s <- ncol(m)
+  n <- matrix(0, v, s)
+  for (j in seq_len(s)) {
+    for (i in seq_len(k)) {
+      n[m[i, j], j] <- n[m[i, j], j] + 1
+    }
+  }
+  r <- rowSums(n)
+  info <- diag(r) - n %*% t(n) / k
+  j_v <- matrix(1 / v, v, v)
+  trace_pinv <- sum(diag(solve(info + j_v))) - 1
+  expected <- (v - 1) / (mean(r) * trace_pinv)
+  expect_lte(abs(arc_column_proxy(m, v) - expected), 1e-12)
+  # Column-binary input with repeated row labels is accepted.
+  shuffled <- apply(m, 2L, sample)
+  expect_lte(abs(arc_column_proxy(shuffled, v) - expected), 1e-12)
+  # The two-group design has a disconnected column design.
+  expect_identical(arc_column_proxy(arc_two_group_design(), 6L), NA_real_)
+})
+
+test_that("the evaluator decides connectivity by the M1 spectral predicate", {
+  src <- paste(c(deparse(arc_search_evaluate), deparse(arc_search_score)),
+               collapse = "\n")
+  expect_false(grepl("det(", src, fixed = TRUE))
+  expect_false(grepl("determinant", src, fixed = TRUE))
+  expect_false(grepl("pivot", src, fixed = TRUE))
+  expect_true(grepl("arc_classify_spectrum", src, fixed = TRUE))
+  expect_true(grepl("arc_search_evaluate", deparse1(arc_search_score),
+                    fixed = TRUE))
+})

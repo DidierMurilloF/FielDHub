@@ -299,3 +299,171 @@ arc_budget_note_proposal <- function(b, failed) {
 arc_budget_calls <- function(b) {
   c(objective = b$evals[["objective"]], proxy = b$evals[["proxy"]])
 }
+
+# ---- Fresh search evaluator (specification section 6.1) ----
+
+#' Precompute the pieces shared by every search evaluation
+#'
+#' Specification section 6.1. Built once per run for fixed (v, s, k). Assumes
+#' the dimensions passed `arc_search_entry()`; nothing is re-validated here.
+#'
+#' @param v,s,k Field rows, columns and checks per column (whole numbers).
+#' @return A list with integer `v`, `s`, `k`, `n_tests` = (v - k) s,
+#'   `v_star` = n_tests + k and `df` (from `arc_df_formula()`); `q0q0` = Q0
+#'   Q0' ((v + s) square); `col_block` = k (I_s - J_s / s); `col_index` and
+#'   `row_index`, the column and row of each entry of `as.integer()` of a
+#'   k x s contraction.
+#' @noRd
+arc_search_prep <- function(v, s, k) {
+  v <- as.integer(v)
+  s <- as.integer(s)
+  k <- as.integer(k)
+  n_tests <- (v - k) * s
+  q0 <- cbind(c(rep(1, v), rep(0, s)) / sqrt(v),
+              c(rep(0, v), rep(1, s)) / sqrt(s))
+  list(v = v, s = s, k = k, n_tests = n_tests, v_star = n_tests + k,
+       df = arc_df_formula(v, s, k), q0q0 = tcrossprod(q0),
+       col_block = k * (diag(s) - matrix(1 / s, s, s)),
+       col_index = rep(seq_len(s), each = k),
+       row_index = rep(seq_len(k), times = s))
+}
+
+#' Fresh evaluation of a restricted contraction inside the search
+#'
+#' Specification section 6.1, the lean counterpart of
+#' `arc_evaluate_objectives()` (same formulas, M1 section 7.3) without its
+#' structural checks. Steps: integer df pre-check; M_tilde = M + Q0 Q0' with
+#' N_R assembled by counting (an error unless every row is restricted);
+#' symmetric eigenvalues of M_tilde classified by `arc_classify_spectrum()`,
+#' M1's own connectivity predicate; when connected, Omega =
+#' chol2inv(chol(M_tilde)) - Q0 Q0' and the four objectives. Column labels
+#' are assumed to lie in 1..v without repeats within a column; column-only
+#' intermediate states must be recoloured or scored by `arc_column_proxy()`.
+#'
+#' @param contraction Integer k x s contraction with restricted rows.
+#' @param prep Output of `arc_search_prep()`.
+#' @return `list(connected, lambda_min_rel)` when df < 0 (`lambda_min_rel`
+#'   NA) or disconnected; otherwise `list(connected = TRUE, lambda_min_rel,
+#'   E_aug, V_tt, V_tc, V_cc)`.
+#' @noRd
+arc_search_evaluate <- function(contraction, prep) {
+  if (prep$df < 0L) {
+    return(list(connected = FALSE, lambda_min_rel = NA_real_))
+  }
+  v <- prep$v
+  s <- prep$s
+  k <- prep$k
+  labels <- as.integer(contraction)
+  nr <- tabulate(labels + v * (prep$row_index - 1L), nbins = v * k)
+  if (any(nr > 1L)) {
+    row <- (which(nr > 1L)[1L] - 1L) %/% v + 1L
+    fieldhub_abort("Contraction row ", row, " repeats a pseudo-treatment; ",
+                   "the search evaluator needs restricted rows (recolour ",
+                   "first or use the column proxy).",
+                   class = c("fieldhub_arc_row_repeat_error",
+                             "fieldhub_arc_input_error",
+                             "fieldhub_input_error"),
+                   data = list(row = row))
+  }
+  nr <- matrix(as.double(nr), nrow = v, ncol = k)
+  nc <- matrix(0, nrow = v, ncol = s)
+  nc[cbind(labels, prep$col_index)] <- 1
+  r <- rowSums(nc)
+  m12 <- nc - r / s
+  m_tilde <- rbind(cbind(diag(r, nrow = v) - tcrossprod(nr) / s, m12),
+                   cbind(t(m12), prep$col_block)) + prep$q0q0
+  lambda <- eigen(m_tilde, symmetric = TRUE, only.values = TRUE)$values
+  spectrum <- arc_classify_spectrum(lambda)
+  if (!spectrum$connected) {
+    return(list(connected = FALSE, lambda_min_rel = spectrum$lambda_min_rel))
+  }
+
+  omega <- chol2inv(chol(m_tilde)) - prep$q0q0
+  omega <- (omega + t(omega)) / 2
+  rows <- seq_len(v)
+  cols <- v + seq_len(s)
+  n_tests <- prep$n_tests
+  diag_omega <- diag(omega)
+  e_aug <- (prep$v_star - 1) /
+    (prep$v_star - v - s + 1 + s * sum(diag_omega[rows]) +
+       v * sum(diag_omega[cols]))
+
+  # Test aggregates S_T and h_T, check aggregates H_C (M1 section 7.3)
+  ti <- 1 - nc
+  ti_rows <- rowSums(ti)
+  ti_cols <- colSums(ti)
+  s_t <- rbind(cbind(diag(ti_rows, nrow = v), ti),
+               cbind(t(ti), diag(ti_cols, nrow = s)))
+  h_t <- c(ti_rows, ti_cols)
+  omega_h_t <- drop(omega %*% h_t)
+  trace_tt <- n_tests + sum(omega * s_t)
+  sum_tt <- n_tests + sum(h_t * omega_h_t)
+  h_c <- cbind(t(nr), matrix(1, k, s)) / s
+  omega_h_c <- omega %*% t(h_c)
+  g_cc <- diag(1 / s, nrow = k) + h_c %*% omega_h_c
+  trace_cc <- sum(diag(g_cc))
+  sum_cc <- sum(g_cc)
+  sum_tc <- sum(omega_h_t * colSums(h_c))
+
+  list(connected = TRUE, lambda_min_rel = spectrum$lambda_min_rel,
+       E_aug = e_aug,
+       V_tt = (n_tests * trace_tt - sum_tt) / choose(n_tests, 2),
+       V_tc = (k * trace_tt + n_tests * trace_cc - 2 * sum_tc) /
+         (n_tests * k),
+       V_cc = (k * trace_cc - sum_cc) / choose(k, 2))
+}
+
+#' Search score of a restricted contraction (larger is better)
+#'
+#' Specification section 6.1: E_aug, or minus V_tt or V_tc; `NA_real_` when
+#' the design is disconnected (or df < 0).
+#'
+#' @inheritParams arc_search_evaluate
+#' @param objective One of `arc_search_objectives`.
+#' @return A single number or `NA_real_`.
+#' @noRd
+arc_search_score <- function(contraction, prep, objective) {
+  if (!is.character(objective) || length(objective) != 1L ||
+      is.na(objective) || !objective %in% arc_search_objectives) {
+    fieldhub_abort("The search objective must be one of: ",
+                   paste(arc_search_objectives, collapse = ", "), ".",
+                   class = c("fieldhub_arc_input_error",
+                             "fieldhub_input_error"))
+  }
+  e <- arc_search_evaluate(contraction, prep)
+  if (!e$connected) {
+    return(NA_real_)
+  }
+  if (identical(objective, "E_aug")) e$E_aug else -e[[objective]]
+}
+
+#' Column-design proxy score
+#'
+#' Specification section 6.1 rules (phase 1): the A-efficiency of the column
+#' design, columns read as blocks of size k, for column-binary contractions
+#' whose rows need not be restricted. With C = diag(r) - N_C N_C' / k and
+#' lambda its v - 1 largest eigenvalues, the score is
+#' (v - 1) / sum(1 / lambda) / mean(r), and `NA_real_` when
+#' min(lambda) < 1e-8 max(lambda) (disconnected column design).
+#'
+#' @param contraction Integer k x s column-binary contraction.
+#' @param v Number of pseudo-treatments.
+#' @return A single number in (0, 1] or `NA_real_`.
+#' @noRd
+arc_column_proxy <- function(contraction, v) {
+  v <- as.integer(v)
+  k <- nrow(contraction)
+  s <- ncol(contraction)
+  labels <- as.integer(contraction)
+  nc <- matrix(as.double(tabulate(labels + v * (rep(seq_len(s), each = k) -
+                                                   1L), nbins = v * s)),
+               nrow = v, ncol = s)
+  r <- tabulate(labels, nbins = v)
+  info <- diag(as.double(r), nrow = v) - tcrossprod(nc) / k
+  lambda <- eigen(info, symmetric = TRUE, only.values = TRUE)$values
+  lambda <- lambda[seq_len(v - 1L)]
+  if (min(lambda) < 1e-8 * max(lambda)) {
+    return(NA_real_)
+  }
+  (v - 1) / sum(1 / lambda) / mean(r)
+}
