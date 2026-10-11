@@ -467,3 +467,400 @@ arc_column_proxy <- function(contraction, v) {
   }
   (v - 1) / sum(1 / lambda) / mean(r)
 }
+
+# ---- Moves, lazy scans and exhaustion (specification sections 4, 5.1, 5.4) ----
+
+#' Whether a two-cell exchange is feasible
+#'
+#' Specification section 5.1, moves A, B and C as one general check: the
+#' labels at cells (i, j) and (ii, jj) trade places. Equal labels (and the
+#' same cell) are never a move. Column binarity: when j != jj, a must not
+#' already be in column jj nor b in column j. Row binarity (restricted mode
+#' only): when i != ii, b must not be elsewhere in row i nor a elsewhere in
+#' row ii. Cost O(k + s).
+#'
+#' @param contraction Integer k x s column-binary contraction.
+#' @param i,j,ii,jj Row and column of the two cells.
+#' @param restricted Also require restricted (row-binary) rows.
+#' @return A single logical.
+#' @noRd
+arc_swap_feasible <- function(contraction, i, j, ii, jj, restricted = TRUE) {
+  a <- contraction[i, j]
+  b <- contraction[ii, jj]
+  if (a == b) {
+    return(FALSE)
+  }
+  if (j != jj && (any(contraction[, jj] == a) ||
+                  any(contraction[, j] == b))) {
+    return(FALSE)
+  }
+  if (restricted && i != ii && (any(contraction[i, -j] == b) ||
+                                any(contraction[ii, -jj] == a))) {
+    return(FALSE)
+  }
+  TRUE
+}
+
+#' Apply a two-cell exchange (no feasibility check)
+#'
+#' @inheritParams arc_swap_feasible
+#' @return The contraction with cells (i, j) and (ii, jj) exchanged.
+#' @noRd
+arc_swap_apply <- function(contraction, i, j, ii, jj) {
+  a <- contraction[i, j]
+  contraction[i, j] <- contraction[ii, jj]
+  contraction[ii, jj] <- a
+  contraction
+}
+
+#' Kempe components of a pair of contraction rows
+#'
+#' Specification section 5.1, move K. Columns c and d are linked when the
+#' label in row i of column c sits in row ii of column d. Swapping rows i and
+#' ii on all columns of one component keeps restricted rows and leaves N_C
+#' fixed; a singleton component is an A move. Assumes restricted rows.
+#'
+#' @inheritParams arc_swap_feasible
+#' @param i,ii The two contraction rows.
+#' @return A list of integer column sets partitioning `seq_len(s)`.
+#' @noRd
+arc_kempe_components <- function(contraction, i, ii) {
+  s <- ncol(contraction)
+  partner <- match(contraction[i, ], contraction[ii, ])
+  root <- seq_len(s)
+  find <- function(x) {
+    while (root[x] != x) x <- root[x]
+    x
+  }
+  for (column in which(!is.na(partner))) {
+    a <- find(column)
+    b <- find(partner[column])
+    if (a != b) root[a] <- b
+  }
+  roots <- vapply(seq_len(s), find, integer(1))
+  unname(split(seq_len(s), roots))
+}
+
+#' Swap two contraction rows on a set of columns
+#'
+#' @inheritParams arc_kempe_components
+#' @param columns Integer column set, normally one Kempe component.
+#' @return The contraction after the swap.
+#' @noRd
+arc_kempe_apply <- function(contraction, i, ii, columns) {
+  upper <- contraction[i, columns]
+  contraction[i, columns] <- contraction[ii, columns]
+  contraction[ii, columns] <- upper
+  contraction
+}
+
+#' Randomized recolouring with the same column incidence
+#'
+#' Specification sections 4 (item 3) and 5.1, move R: permute the labels
+#' within each column at random, then edge-colour the rows with
+#' `arc_recolor_rows()`. Needs max(r) <= k.
+#'
+#' @param contraction Integer k x s column-binary contraction.
+#' @param v Number of pseudo-treatments.
+#' @return An integer k x s restricted contraction with the same N_C.
+#' @noRd
+arc_random_recolor <- function(contraction, v) {
+  k <- nrow(contraction)
+  s <- ncol(contraction)
+  shuffled <- vapply(seq_len(s), function(j) {
+    as.integer(contraction[sample.int(k), j])
+  }, integer(k))
+  arc_recolor_rows(matrix(shuffled, nrow = k, ncol = s), v)
+}
+
+#' Balanced replication vector
+#'
+#' Every pseudo-treatment occurs floor(ks / v) times; the ks - v floor(ks /
+#' v) extra units go to labels drawn at random.
+#'
+#' @param v,s,k Pseudo-treatments, columns and checks per column.
+#' @return Integer vector of length v summing to ks.
+#' @noRd
+arc_balanced_replication <- function(v, s, k) {
+  v <- as.integer(v)
+  total <- as.integer(k) * as.integer(s)
+  low <- total %/% v
+  r <- rep(low, v)
+  extra <- total - low * v
+  r[sample.int(v, extra)] <- low + 1L
+  r
+}
+
+#' Random restricted start with bounded repair
+#'
+#' Specification section 4 (item 1) and 5.4. Each of at most `tries` fills
+#' places the labels at random, then runs at most `repair` random repairs of
+#' a repeated label within a column. A column-binary fill is edge-coloured
+#' by `arc_recolor_rows()`. `should_stop()` is checked before every fill and
+#' every 256 repair steps; once it returns TRUE the result is `NULL`. The
+#' connectivity check and scoring belong to the caller.
+#'
+#' @param v,s,k Pseudo-treatments, columns and checks per column.
+#' @param replication Integer vector of length v summing to ks.
+#' @param tries,repair Fill and repair-step bounds.
+#' @param should_stop Function returning TRUE to abandon the search.
+#' @return An integer k x s restricted contraction, or `NULL` when stopped,
+#'   when no fill succeeded, or when `replication` admits no restricted
+#'   contraction (length, total, or some r_h > min(k, s)).
+#' @noRd
+arc_random_start <- function(v, s, k,
+                             replication = arc_balanced_replication(v, s, k),
+                             tries = 50L, repair = 5000L,
+                             should_stop = function() FALSE) {
+  v <- as.integer(v)
+  s <- as.integer(s)
+  k <- as.integer(k)
+  replication <- as.integer(replication)
+  if (length(replication) != v || anyNA(replication) ||
+      any(replication < 0L) || sum(replication) != k * s ||
+      max(replication) > min(k, s)) {
+    return(NULL)
+  }
+  labels <- rep(seq_len(v), replication)
+  repeats <- function(m, j) anyDuplicated(m[, j]) > 0L
+  for (fill in seq_len(tries)) {
+    if (should_stop()) {
+      return(NULL)
+    }
+    m <- matrix(labels[sample.int(k * s)], nrow = k, ncol = s)
+    bad <- vapply(seq_len(s), function(j) repeats(m, j), logical(1))
+    for (step in seq_len(repair)) {
+      if (!any(bad)) break
+      if (step %% 256L == 0L && should_stop()) {
+        return(NULL)
+      }
+      candidates <- which(bad)
+      j <- candidates[sample.int(length(candidates), 1L)]
+      i <- anyDuplicated(m[, j])
+      ii <- sample.int(k, 1L)
+      jj <- sample.int(s, 1L)
+      if (!any(m[, j] == m[ii, jj]) && !any(m[-ii, jj] == m[i, j])) {
+        m <- arc_swap_apply(m, i, j, ii, jj)
+        bad[j] <- repeats(m, j)
+        bad[jj] <- repeats(m, jj)
+      }
+    }
+    if (!any(bad)) {
+      return(arc_recolor_rows(m, v))
+    }
+  }
+  NULL
+}
+
+#' One Kempe draw: a random row pair and one of its components
+#'
+#' @inheritParams arc_swap_feasible
+#' @return A contraction, or `NULL` when the row pair has one component.
+#' @noRd
+arc_propose_kempe <- function(contraction) {
+  rows <- sample.int(nrow(contraction), 2L)
+  i <- min(rows)
+  ii <- max(rows)
+  components <- arc_kempe_components(contraction, i, ii)
+  if (length(components) < 2L) {
+    return(NULL)
+  }
+  arc_kempe_apply(contraction, i, ii,
+                  components[[sample.int(length(components), 1L)]])
+}
+
+#' Joint-phase sampler: moves A/B/C and K
+#'
+#' Specification section 5.4: with probability `kempe_share` one Kempe draw
+#' (a single component means no Kempe move), then at most `tries` random
+#' two-cell draws with restricted feasibility.
+#'
+#' @inheritParams arc_swap_feasible
+#' @param kempe_share Probability of trying a Kempe move first.
+#' @param tries Bound on two-cell draws.
+#' @return A neighbouring restricted contraction, or `NULL`.
+#' @noRd
+arc_propose_joint <- function(contraction, kempe_share = 0.3, tries = 30L) {
+  k <- nrow(contraction)
+  s <- ncol(contraction)
+  if (k >= 2L && stats::runif(1L) < kempe_share) {
+    m <- arc_propose_kempe(contraction)
+    if (!is.null(m)) {
+      return(m)
+    }
+  }
+  for (draw in seq_len(tries)) {
+    i <- sample.int(k, 1L)
+    j <- sample.int(s, 1L)
+    ii <- sample.int(k, 1L)
+    jj <- sample.int(s, 1L)
+    if (arc_swap_feasible(contraction, i, j, ii, jj)) {
+      return(arc_swap_apply(contraction, i, j, ii, jj))
+    }
+  }
+  NULL
+}
+
+#' Column-phase sampler: column-incidence exchanges (move X)
+#'
+#' Two cells in different columns trade labels under column binarity only;
+#' rows may repeat labels until the caller recolours. At most `tries` draws.
+#'
+#' @inheritParams arc_propose_joint
+#' @return A column-binary contraction with two changed columns, or `NULL`.
+#' @noRd
+arc_propose_column <- function(contraction, tries = 30L) {
+  k <- nrow(contraction)
+  s <- ncol(contraction)
+  if (s < 2L) {
+    return(NULL)
+  }
+  for (draw in seq_len(tries)) {
+    i <- sample.int(k, 1L)
+    j <- sample.int(s, 1L)
+    ii <- sample.int(k, 1L)
+    jj <- sample.int(s - 1L, 1L)
+    if (jj >= j) jj <- jj + 1L
+    if (arc_swap_feasible(contraction, i, j, ii, jj, restricted = FALSE)) {
+      return(arc_swap_apply(contraction, i, j, ii, jj))
+    }
+  }
+  NULL
+}
+
+#' Row-phase sampler: moves A and K, N_C fixed
+#'
+#' @inheritParams arc_propose_joint
+#' @return A restricted contraction with the same N_C, or `NULL`.
+#' @noRd
+arc_propose_row <- function(contraction, kempe_share = 0.6, tries = 30L) {
+  k <- nrow(contraction)
+  s <- ncol(contraction)
+  if (k < 2L) {
+    return(NULL)
+  }
+  if (stats::runif(1L) < kempe_share) {
+    m <- arc_propose_kempe(contraction)
+    if (!is.null(m)) {
+      return(m)
+    }
+  }
+  for (draw in seq_len(tries)) {
+    j <- sample.int(s, 1L)
+    rows <- sample.int(k, 2L)
+    i <- min(rows)
+    ii <- max(rows)
+    if (arc_swap_feasible(contraction, i, j, ii, j)) {
+      return(arc_swap_apply(contraction, i, j, ii, j))
+    }
+  }
+  NULL
+}
+
+#' Lazy scan of a whole neighbourhood in random order
+#'
+#' Specification section 5.4. Descriptors are cheap: cell pairs (two-cell
+#' exchanges) and row pairs (Kempe components, expanded on visit); a move is
+#' built only when its descriptor is visited. Kinds: "joint", all two-cell
+#' exchanges with restricted checks plus Kempe moves; "column", exchanges
+#' between different columns under column binarity only; "row", same-column
+#' exchanges (A) plus Kempe moves. `stop_fn()` is checked before every
+#' descriptor and every Kempe component, so at most one move construction
+#' follows a deadline.
+#'
+#' @inheritParams arc_swap_feasible
+#' @param kind "joint", "column" or "row".
+#' @param visit Function of a candidate contraction; TRUE stops the scan.
+#' @param stop_fn Function returning TRUE to interrupt the scan.
+#' @return `list(status, n_feasible)`: status "complete", "stopped" (visit
+#'   asked) or "interrupted" (stop_fn), and the feasible moves visited.
+#' @noRd
+arc_scan_neighbourhood <- function(contraction, kind = c("joint", "column",
+                                                         "row"),
+                                   visit, stop_fn = function() FALSE) {
+  kind <- match.arg(kind)
+  k <- nrow(contraction)
+  s <- ncol(contraction)
+  n <- k * s
+  cell_row <- rep(seq_len(k), times = s)
+  cell_col <- rep(seq_len(s), each = k)
+  upper <- upper.tri(matrix(FALSE, n, n))
+  first <- row(upper)[upper]
+  second <- col(upper)[upper]
+  same_column <- cell_col[first] == cell_col[second]
+  keep <- switch(kind, joint = rep(TRUE, length(first)),
+                 column = !same_column, row = same_column)
+  first <- first[keep]
+  second <- second[keep]
+  restricted <- kind != "column"
+  if (kind != "column" && k >= 2L) {
+    pairs <- upper.tri(matrix(FALSE, k, k))
+    row_i <- row(pairs)[pairs]
+    row_ii <- col(pairs)[pairs]
+  } else {
+    row_i <- integer(0)
+    row_ii <- integer(0)
+  }
+  n_cells <- length(first)
+  n_feasible <- 0L
+  for (o in sample.int(n_cells + length(row_i))) {
+    if (stop_fn()) {
+      return(list(status = "interrupted", n_feasible = n_feasible))
+    }
+    if (o <= n_cells) {
+      p <- first[o]
+      q <- second[o]
+      if (!arc_swap_feasible(contraction, cell_row[p], cell_col[p],
+                             cell_row[q], cell_col[q], restricted)) {
+        next
+      }
+      n_feasible <- n_feasible + 1L
+      candidate <- arc_swap_apply(contraction, cell_row[p], cell_col[p],
+                                  cell_row[q], cell_col[q])
+      if (isTRUE(visit(candidate))) {
+        return(list(status = "stopped", n_feasible = n_feasible))
+      }
+    } else {
+      i <- row_i[o - n_cells]
+      ii <- row_ii[o - n_cells]
+      components <- arc_kempe_components(contraction, i, ii)
+      if (length(components) < 2L) next
+      for (columns in components[sample.int(length(components))]) {
+        if (stop_fn()) {
+          return(list(status = "interrupted", n_feasible = n_feasible))
+        }
+        n_feasible <- n_feasible + 1L
+        if (isTRUE(visit(arc_kempe_apply(contraction, i, ii, columns)))) {
+          return(list(status = "stopped", n_feasible = n_feasible))
+        }
+      }
+    }
+  }
+  list(status = "complete", n_feasible = n_feasible)
+}
+
+#' Classify a sampling failure
+#'
+#' Specification section 5.4. `empty_neighbourhood` is certified only by a
+#' complete scan of the phase's move set that finds no feasible move, and
+#' the scan runs only when the contraction has at most `cap_cells` cells.
+#' An interrupted scan certifies nothing.
+#'
+#' @inheritParams arc_scan_neighbourhood
+#' @param cap_cells Largest contraction (k s cells) that is scanned.
+#' @return "empty_neighbourhood" or "sampling_exhausted".
+#' @noRd
+arc_classify_exhaustion <- function(contraction, kind,
+                                    stop_fn = function() FALSE,
+                                    cap_cells = 400L) {
+  if (length(contraction) > cap_cells) {
+    return("sampling_exhausted")
+  }
+  scan <- arc_scan_neighbourhood(contraction, kind, function(x) TRUE,
+                                 stop_fn = stop_fn)
+  if (identical(scan$status, "complete") && scan$n_feasible == 0L) {
+    "empty_neighbourhood"
+  } else {
+    "sampling_exhausted"
+  }
+}

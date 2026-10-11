@@ -538,3 +538,193 @@ test_that("the evaluator decides connectivity by the M1 spectral predicate", {
   expect_true(grepl("arc_search_evaluate", deparse1(arc_search_score),
                     fixed = TRUE))
 })
+
+# ---- Moves, lazy scans and exhaustion (task 6; specification 5.1, 5.4) ----
+
+test_that("cyclic 5 x 5 has no A/B/C/K move and exactly 10 column moves", {
+  arc_local_seed(601)
+  cyclic <- arc_fixture("cyclic-5x5-k4.csv")
+  never <- function(candidate) FALSE
+  joint <- arc_scan_neighbourhood(cyclic, "joint", never)
+  expect_identical(joint, list(status = "complete", n_feasible = 0L))
+  row <- arc_scan_neighbourhood(cyclic, "row", never)
+  expect_identical(row, list(status = "complete", n_feasible = 0L))
+  column <- arc_scan_neighbourhood(cyclic, "column", never)
+  expect_identical(column, list(status = "complete", n_feasible = 10L))
+  expect_identical(arc_classify_exhaustion(cyclic, "joint"),
+                   "empty_neighbourhood")
+  expect_identical(arc_classify_exhaustion(cyclic, "row"),
+                   "empty_neighbourhood")
+  expect_identical(arc_classify_exhaustion(cyclic, "column"),
+                   "sampling_exhausted")
+  expect_null(arc_propose_joint(cyclic))
+  expect_null(arc_propose_row(cyclic))
+  expect_false(is.null(arc_propose_column(cyclic, tries = 200L)))
+})
+
+test_that("an interrupted or oversized exhaustion check certifies nothing", {
+  arc_local_seed(602)
+  cyclic <- arc_fixture("cyclic-5x5-k4.csv")
+  always <- function() TRUE
+  scan <- arc_scan_neighbourhood(cyclic, "joint", function(x) FALSE,
+                                 stop_fn = always)
+  expect_identical(scan, list(status = "interrupted", n_feasible = 0L))
+  expect_identical(arc_classify_exhaustion(cyclic, "joint", stop_fn = always),
+                   "sampling_exhausted")
+  expect_identical(arc_classify_exhaustion(cyclic, "joint", cap_cells = 19L),
+                   "sampling_exhausted")
+  expect_identical(arc_classify_exhaustion(cyclic, "joint", cap_cells = 20L),
+                   "empty_neighbourhood")
+})
+
+test_that("scan stops on visit and checks stop_fn before every move", {
+  arc_local_seed(603)
+  start <- arc_random_start(12, 8, 3)
+  hits <- 0L
+  scan <- arc_scan_neighbourhood(start, "joint", function(x) {
+    hits <<- hits + 1L
+    hits >= 3L
+  })
+  expect_identical(scan$status, "stopped")
+  expect_identical(scan$n_feasible, 3L)
+  for (kind in c("joint", "column", "row")) {
+    for (n in c(0L, 1L, 5L, 20L)) {
+      stopper <- arc_stop_after(n)
+      visits <- 0L
+      scan <- arc_scan_neighbourhood(start, kind, function(x) {
+        visits <<- visits + 1L
+        FALSE
+      }, stop_fn = stopper$fn)
+      expect_identical(scan$status, "interrupted")
+      expect_lte(visits, n)
+      expect_identical(scan$n_feasible, visits)
+      expect_identical(stopper$calls(), n + 1L)
+    }
+  }
+  expect_error(arc_scan_neighbourhood(start, "bogus", function(x) FALSE))
+})
+
+test_that("generated moves keep binarity and the right incidence", {
+  candidate_ok <- function(m, base, kind) {
+    ok <- arc_is_column_binary(m) &&
+      identical(sort(as.integer(m)), sort(as.integer(base)))
+    if (kind == "column") {
+      ok && arc_changed_columns(m, base) == 2L
+    } else if (kind == "row") {
+      ok && arc_is_row_binary(m) &&
+        identical(arc_column_sets(m), arc_column_sets(base))
+    } else {
+      ok && arc_is_row_binary(m)
+    }
+  }
+  samplers <- list(joint = arc_propose_joint, column = arc_propose_column,
+                   row = arc_propose_row)
+  cases <- list(c(12, 8, 3), c(10, 6, 4), c(9, 9, 2))
+  seen <- c(joint = 0L, column = 0L, row = 0L)
+  for (seed in 611:614) {
+    arc_local_seed(seed)
+    starts <- lapply(cases, function(d) arc_random_start(d[1L], d[2L], d[3L]))
+    starts <- c(starts, list(arc_fixture("restricted-12x8-a.csv")))
+    for (base in starts) {
+      expect_true(arc_is_row_binary(base))
+      for (kind in names(samplers)) {
+        drawn <- Filter(Negate(is.null),
+                        lapply(1:15, function(d) samplers[[kind]](base)))
+        seen[[kind]] <- seen[[kind]] + length(drawn)
+        ok <- vapply(drawn, candidate_ok, logical(1), base = base,
+                     kind = kind)
+        expect_true(all(ok), info = paste(seed, kind, "sampler"))
+        ok <- logical(0)
+        arc_scan_neighbourhood(base, kind, function(m) {
+          ok[length(ok) + 1L] <<- candidate_ok(m, base, kind)
+          length(ok) >= 25L
+        })
+        seen[[kind]] <- seen[[kind]] + length(ok)
+        expect_true(all(ok), info = paste(seed, kind, "scan"))
+      }
+    }
+  }
+  # some row neighbourhoods are empty (k = 2 with one Kempe cycle), but
+  # every kind produced candidates overall
+  expect_true(all(seen > 0L))
+})
+
+test_that("two-cell feasibility follows the binarity rules", {
+  # rows (1, 2, 5), (2, 5, 1), (3, 6, 4)
+  m <- matrix(c(1L, 2L, 3L,
+                2L, 5L, 6L,
+                5L, 1L, 4L), nrow = 3L)
+  # same cell and equal labels are never feasible
+  expect_false(arc_swap_feasible(m, 1, 1, 1, 1))
+  expect_false(arc_swap_feasible(m, 2, 1, 1, 2))
+  # same column (A): 2 would enter row 1, which already holds 2
+  expect_false(arc_swap_feasible(m, 1, 1, 2, 1))
+  expect_true(arc_swap_feasible(m, 1, 1, 2, 1, restricted = FALSE))
+  expect_true(arc_swap_feasible(m, 1, 1, 3, 1))
+  expect_true(arc_swap_feasible(m, 2, 2, 3, 2))
+  # different row and column: 1 <-> 6 keeps both binarities
+  expect_true(arc_swap_feasible(m, 1, 1, 3, 2))
+  # 1 <-> 5 is column binary but 5 is already in row 1 (column 3)
+  expect_false(arc_swap_feasible(m, 1, 1, 2, 2))
+  expect_true(arc_swap_feasible(m, 1, 1, 2, 2, restricted = FALSE))
+  # column binarity: 2 is already in column 1
+  expect_false(arc_swap_feasible(m, 3, 1, 1, 2))
+  expect_false(arc_swap_feasible(m, 3, 1, 1, 2, restricted = FALSE))
+  swapped <- arc_swap_apply(m, 1, 1, 3, 2)
+  expect_identical(swapped[1, 1], 6L)
+  expect_identical(swapped[3, 2], 1L)
+})
+
+test_that("Kempe components partition columns and swaps keep N_C", {
+  for (seed in 621:623) {
+    arc_local_seed(seed)
+    base <- arc_random_start(12, 8, 3)
+    for (i in 1:2) for (ii in (i + 1L):3) {
+      comps <- arc_kempe_components(base, i, ii)
+      expect_identical(sort(unlist(comps)), seq_len(ncol(base)))
+      for (cols in comps) {
+        m <- arc_kempe_apply(base, i, ii, cols)
+        expect_true(arc_is_row_binary(m))
+        expect_true(arc_is_column_binary(m))
+        expect_identical(arc_column_sets(m), arc_column_sets(base))
+      }
+    }
+  }
+  cyclic <- arc_fixture("cyclic-5x5-k4.csv")
+  expect_length(arc_kempe_components(cyclic, 1, 2), 1L)
+})
+
+test_that("random recolouring keeps N_C and is restricted", {
+  arc_local_seed(631)
+  base <- arc_fixture("restricted-12x8-a.csv")
+  for (rep in 1:5) {
+    m <- arc_random_recolor(base, 12)
+    expect_true(is.integer(m))
+    expect_true(arc_is_row_binary(m))
+    expect_identical(arc_column_sets(m), arc_column_sets(base))
+  }
+})
+
+test_that("balanced replication and random starts are bounded", {
+  arc_local_seed(641)
+  for (d in list(c(12, 8, 3), c(10, 6, 4), c(9, 9, 2), c(20, 15, 4))) {
+    r <- arc_balanced_replication(d[1L], d[2L], d[3L])
+    expect_true(is.integer(r))
+    expect_identical(sum(r), as.integer(d[2L] * d[3L]))
+    expect_lte(max(r) - min(r), 1L)
+    m <- arc_random_start(d[1L], d[2L], d[3L], replication = r)
+    expect_identical(dim(m), as.integer(c(d[3L], d[2L])))
+    expect_true(arc_is_row_binary(m) && arc_is_column_binary(m))
+    expect_identical(tabulate(m, nbins = d[1L]), r)
+  }
+  expect_null(arc_random_start(12, 8, 3, should_stop = function() TRUE))
+  # r_1 = 9 exceeds s = 8: no column-binary fill exists
+  impossible <- c(9L, 3L, 2L, 2L, rep(1L, 8L))
+  expect_identical(sum(impossible), 24L)
+  expect_null(arc_random_start(12, 8, 3, replication = impossible))
+  expect_null(arc_random_start(12, 8, 3, replication = 1:3))
+  # a tiny budget gives up without hanging
+  arc_local_seed(642)
+  tiny <- arc_random_start(20, 20, 10, tries = 1L, repair = 1L)
+  expect_null(tiny)
+})
