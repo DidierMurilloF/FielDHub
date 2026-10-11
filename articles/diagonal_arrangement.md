@@ -222,6 +222,56 @@ single_diag <- diagonal_arrangement(
 - `locationNames = "FARGO"` optional name for each location.
 - `seed = 16` is the random seed to replicate identical randomizations.
 
+#### Optimize the spacing of repeated checks
+
+Set `spread_checks = TRUE` for Single Diagonal Arrangement to exchange
+check identities among the existing diagonal check plots. Unreplicated
+entries, fillers and each check’s replication remain fixed. The option
+works with both planting directions and with or without fillers.
+
+``` r
+optimized_diag <- diagonal_arrangement(
+  nrows = 10, ncols = 32, lines = 287, checks = 4,
+  seed = 16, spread_checks = TRUE, dist_method = "euclidean"
+)
+optimized_diag$infoDesign$check_optimization
+[[1]]
+[[1]]$swaps
+[1] 11
+
+[[1]]$evaluations
+[1] 4608
+
+[[1]]$stop_reason
+[1] "local_optimum"
+
+[[1]]$before_min
+[1] 3.162278
+
+[[1]]$after_min
+[1] 4.472136
+
+[[1]]$dist_method
+[1] "euclidean"
+```
+
+The default is `spread_checks = FALSE`, preserving existing seeded
+layouts. Omitting `checksPercent` still chooses the valid option with
+the fewest fillers. Selecting a percentage explicitly optimizes that
+option only. The optimizer reduces the number of closest same-check
+pairs before considering larger separations. It stops at a local optimum
+or a fixed search limit; it does not claim optimal statistical
+precision. `dist_method = "manhattan"` measures separation as row steps
+plus column steps instead of straight-line distance.
+
+In the app, select **Optimize check spacing** before Run and Randomize.
+Results for previously selected percentages are cached within the
+session. With an installed package, `mirai`, and `run_app(workers = 1)`,
+the app prepares the other valid percentages in the background after the
+selected result. Without workers, it computes options on demand and
+caches them. Changing the seed, entries, field dimensions or
+optimization settings uses the corresponding new results.
+
 #### Print `single_diag` object
 
 To print a summary of the information that is in the object
@@ -310,7 +360,7 @@ For plotting the layout in function of the coordinates `ROW` and
 plot(single_diag)
 ```
 
-![](diagonal_arrangement_files/figure-html/unnamed-chunk-12-1.png)
+![](diagonal_arrangement_files/figure-html/unnamed-chunk-13-1.png)
 
 The figure above shows a map of an experiment randomized as a single
 unreplicated diagonal arrangement design. Gray plots represent the
@@ -627,7 +677,7 @@ For plotting the layout in function of the coordinates `ROW` and
 plot(multi_diag)
 ```
 
-![](diagonal_arrangement_files/figure-html/unnamed-chunk-20-1.png)
+![](diagonal_arrangement_files/figure-html/unnamed-chunk-21-1.png)
 
 The figure above shows a map of an experiment randomized as a multiple
 unreplicated diagonal arrangement design. Gray, salmon, and pink shade

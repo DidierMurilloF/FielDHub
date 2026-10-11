@@ -373,12 +373,61 @@ randomizations.</li>
 </ul>
 </div>
 <div class="section level4">
+<h4 id="optimize-the-spacing-of-repeated-checks">Optimize the spacing of repeated checks<a class="anchor" aria-label="anchor" href="#optimize-the-spacing-of-repeated-checks"></a>
+</h4>
+<p>Set <code>spread_checks = TRUE</code> for Single Diagonal Arrangement
+to exchange check identities among the existing diagonal check plots.
+Unreplicated entries, fillers and each check’s replication remain fixed.
+The option works with both planting directions and with or without
+fillers.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>optimized_diag <span class="ot">&lt;-</span> <span class="fu">diagonal_arrangement</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  <span class="at">nrows =</span> <span class="dv">10</span>, <span class="at">ncols =</span> <span class="dv">32</span>, <span class="at">lines =</span> <span class="dv">287</span>, <span class="at">checks =</span> <span class="dv">4</span>,</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">16</span>, <span class="at">spread_checks =</span> <span class="cn">TRUE</span>, <span class="at">dist_method =</span> <span class="st">"euclidean"</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>)</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>optimized_diag<span class="sc">$</span>infoDesign<span class="sc">$</span>check_optimization</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>[[<span class="dv">1</span>]]</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>[[<span class="dv">1</span>]]<span class="sc">$</span>swaps</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">11</span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>[[<span class="dv">1</span>]]<span class="sc">$</span>evaluations</span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">4608</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>[[<span class="dv">1</span>]]<span class="sc">$</span>stop_reason</span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"local_optimum"</span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>[[<span class="dv">1</span>]]<span class="sc">$</span>before_min</span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">3.162278</span></span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a></span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a>[[<span class="dv">1</span>]]<span class="sc">$</span>after_min</span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">4.472136</span></span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a></span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a>[[<span class="dv">1</span>]]<span class="sc">$</span>dist_method</span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"euclidean"</span></span></code></pre></div>
+<p>The default is <code>spread_checks = FALSE</code>, preserving
+existing seeded layouts. Omitting <code>checksPercent</code> still
+chooses the valid option with the fewest fillers. Selecting a percentage
+explicitly optimizes that option only. The optimizer reduces the number
+of closest same-check pairs before considering larger separations. It
+stops at a local optimum or a fixed search limit; it does not claim
+optimal statistical precision. <code>dist_method = "manhattan"</code>
+measures separation as row steps plus column steps instead of
+straight-line distance.</p>
+<p>In the app, select <strong>Optimize check spacing</strong> before Run
+and Randomize. Results for previously selected percentages are cached
+within the session. With an installed package, <code>mirai</code>, and
+<code>run_app(workers = 1)</code>, the app prepares the other valid
+percentages in the background after the selected result. Without
+workers, it computes options on demand and caches them. Changing the
+seed, entries, field dimensions or optimization settings uses the
+corresponding new results.</p>
+</div>
+<div class="section level4">
 <h4 id="print-single_diag-object">Print <code>single_diag</code> object<a class="anchor" aria-label="anchor" href="#print-single_diag-object"></a>
 </h4>
 <p>To print a summary of the information that is in the object
 <code>single_diag</code>, we can use the generic function
 <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">single_diag</span><span class="op">)</span></span></code></pre></div>
 <pre><code>Un-replicated Diagonal Arrangement Design 
 
@@ -429,7 +478,7 @@ output below, the field book has columns for <code>ID</code>,
 <code>CHECKS</code>, <code>ENTRY</code>, and <code>TREATMENT</code>.</p>
 <p>Let us see the first 10 rows of the field book for this
 experiment.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">field_book</span> <span class="op">&lt;-</span> <span class="va">single_diag</span><span class="op">$</span><span class="va">fieldBook</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">field_book</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
 <pre><code>   ID            EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
@@ -450,9 +499,9 @@ experiment.</p>
 <p>For plotting the layout in function of the coordinates
 <code>ROW</code> and <code>COLUMN</code> in the field book object we can
 use the generic function <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> as follow,</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">single_diag</span><span class="op">)</span></span></code></pre></div>
-<p><img src="diagonal_arrangement_files/figure-html/unnamed-chunk-12-1.png" class="r-plt" alt="" width="691.2" style="display: block; margin: auto;"></p>
+<p><img src="diagonal_arrangement_files/figure-html/unnamed-chunk-13-1.png" class="r-plt" alt="" width="691.2" style="display: block; margin: auto;"></p>
 <p>The figure above shows a map of an experiment randomized as a single
 unreplicated diagonal arrangement design. Gray plots represent the
 unreplicated treatments, while distinctively colored check plots are
@@ -691,7 +740,7 @@ can filter the data in relevant columns.</p>
 <code><a href="../reference/diagonal_arrangement.html">diagonal_arrangement()</a></code> function is the multiple diagonal
 arrangement, where the experiment is split into blocks of specified
 size.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">multi_diag</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/diagonal_arrangement.html">diagonal_arrangement</a></span><span class="op">(</span></span>
 <span>  nrows <span class="op">=</span> <span class="fl">15</span>,</span>
 <span>  ncols <span class="op">=</span> <span class="fl">22</span>,</span>
@@ -748,7 +797,7 @@ randomizations.</li>
 <p>For printing a summary of the information that is in the object
 <code>multi_diag</code> we can use the generic function
 <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code></p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">multi_diag</span><span class="op">)</span></span></code></pre></div>
 <pre><code>Un-replicated Diagonal Arrangement Design 
 
@@ -799,7 +848,7 @@ output below, the field book has columns for <code>ID</code>,
 <code>CHECKS</code>, <code>ENTRY</code>, and <code>TREATMENT</code>.</p>
 <p>Let us see the first 10 rows of the field book for this
 experiment.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">field_book</span> <span class="op">&lt;-</span> <span class="va">multi_diag</span><span class="op">$</span><span class="va">fieldBook</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">field_book</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
 <pre><code>   ID      EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
@@ -820,9 +869,9 @@ experiment.</p>
 <p>For plotting the layout in function of the coordinates
 <code>ROW</code> and <code>COLUMN</code> in the field book object we can
 use the generic function <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> as follow,</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">multi_diag</span><span class="op">)</span></span></code></pre></div>
-<p><img src="diagonal_arrangement_files/figure-html/unnamed-chunk-20-1.png" class="r-plt" alt="" width="691.2" style="display: block; margin: auto;"></p>
+<p><img src="diagonal_arrangement_files/figure-html/unnamed-chunk-21-1.png" class="r-plt" alt="" width="691.2" style="display: block; margin: auto;"></p>
 <p>The figure above shows a map of an experiment randomized as a
 multiple unreplicated diagonal arrangement design. Gray, salmon, and
 pink shade the blocks of unreplicated experiments, while distinctively

@@ -28,6 +28,7 @@ snapshot reference platform.
 | Incomplete blocks and lattices | Complete treatment replicates, fixed block sizes, distinct nested units, and block efficiency |
 | Row-column | Complete treatment replicates and complete replicate grids; separate SVD-based joint-efficiency tests |
 | Diagonal and optimized arrangements | Experimental-entry multiplicities, total check allocation, and filler counts |
+| Single diagonal check optimization | Fixed check slots, individual check replication, untouched entries and fillers, independent coordinate distances, first exchange checked against exhaustive enumeration, and seeded replay |
 | Augmented complete blocks | Unreplicated test entries and every check in every block |
 | Partially replicated | Requested one- and two-copy entry groups, excluding fillers |
 | Sparse and multi-location allocations | Across-location copy budgets in balanced fixtures, site-level restrictions, and agreement between count matrices and entry lists |
@@ -127,6 +128,7 @@ particular biological experiment.
 | Latin-square placement | At most 100,000 placement iterations per square; a `fieldhub_search_error` records the square and budget on exhaustion |
 | Cyclic Latin rectangles | Direct construction with work proportional to locations × rows × treatments; no iterative search, and projected field size checked before allocation |
 | Repeated-check placement in RCBD | At most 100 attempts per block; warns and falls back to unrestricted placement if stratification cannot be completed |
+| Single diagonal check optimization | At most 100 accepted exchanges or 100,000 candidate evaluations per location; an interrupted scan is never reported as a local optimum |
 | Pair-swap optimization | A finite geometry-dependent threshold range, at most `stop_iter` sweeps per threshold, and bounded sampled candidates per swap; diagnostics distinguish exhaustion, completion, and an empty range |
 | Row-column search | Positive finite whole-number `iterations`; defaults are 200 external onestage searches or 1,000 twostage row-swap iterations |
 | Allocation balancing | At most one upward pass through the allocation rows; warns if no eligible entry can complete the balancing |

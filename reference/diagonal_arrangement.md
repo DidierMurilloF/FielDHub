@@ -23,7 +23,9 @@ diagonal_arrangement(
   data = NULL,
   year = NULL,
   checksPercent = NULL,
-  sameEntries = FALSE
+  sameEntries = FALSE,
+  spread_checks = FALSE,
+  dist_method = "euclidean"
 )
 ```
 
@@ -114,11 +116,26 @@ diagonal_arrangement(
   holds the same entries, and all blocks must have the same size. By
   default `sameEntries = FALSE`.
 
+- spread_checks:
+
+  Logical. For `kindExpt = "SUDC"`, exchange check identities among the
+  existing check plots to increase separation of repeated checks. Test
+  entries, filler plots and each check's replication stay fixed. The
+  default `FALSE` preserves the original randomization.
+
+- dist_method:
+
+  Distance between field coordinates for check optimization:
+  `"euclidean"` (default) or `"manhattan"`. Grid steps have equal scale.
+
 ## Value
 
 A list with five elements.
 
-- `infoDesign` is a list with information on the design parameters.
+- `infoDesign` is a list with information on the design parameters. With
+  check optimization enabled, `check_optimization` records swaps,
+  candidate evaluations, stopping reason and minimum distance before and
+  after optimization for each location.
 
 - `layoutRandom` is a matrix with the randomization layout.
 
@@ -128,6 +145,19 @@ A list with five elements.
 
 - `fieldBook` is a data frame with field book design. This includes the
   index (Row, Column).
+
+## Details
+
+Check optimization compares counts of same-check pairs at ascending
+distances, reducing the count at the shortest differing distance first.
+It is a deterministic local exchange heuristic, not a
+statistical-efficiency or global-optimality guarantee. Each location
+stops after a complete scan finds no improvement, 100 accepted swaps, or
+100,000 candidate evaluations. One check identity, or checks occurring
+only once, leaves the layout unchanged. The selected check percentage
+and filler count are unchanged. With `checksPercent = NULL`, Single
+Diagonal Arrangement still selects the valid option with the most check
+plots and therefore the fewest fillers.
 
 ## Reproducibility
 
@@ -207,6 +237,30 @@ spatd$infoDesign
 #> 
 #> $id_design
 #> [1] 15
+#> 
+# Optimize check identities while keeping the diagonal check plots fixed.
+spread <- diagonal_arrangement(nrows = 15, ncols = 20, lines = 270, checks = 4,
+                               seed = 1987, spread_checks = TRUE)
+spread$infoDesign$check_optimization
+#> [[1]]
+#> [[1]]$swaps
+#> [1] 7
+#> 
+#> [[1]]$evaluations
+#> [1] 2696
+#> 
+#> [[1]]$stop_reason
+#> [1] "local_optimum"
+#> 
+#> [[1]]$before_min
+#> [1] 3.162278
+#> 
+#> [[1]]$after_min
+#> [1] 4.472136
+#> 
+#> [[1]]$dist_method
+#> [1] "euclidean"
+#> 
 #> 
 spatd$layoutRandom
 #> [[1]]

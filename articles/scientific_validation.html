@@ -172,24 +172,30 @@ SVD-based joint-efficiency tests</td>
 filler counts</td>
 </tr>
 <tr class="odd">
+<td>Single diagonal check optimization</td>
+<td>Fixed check slots, individual check replication, untouched entries
+and fillers, independent coordinate distances, first exchange checked
+against exhaustive enumeration, and seeded replay</td>
+</tr>
+<tr class="even">
 <td>Augmented complete blocks</td>
 <td>Unreplicated test entries and every check in every block</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Partially replicated</td>
 <td>Requested one- and two-copy entry groups, excluding fillers</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Sparse and multi-location allocations</td>
 <td>Across-location copy budgets in balanced fixtures, site-level
 restrictions, and agreement between count matrices and entry lists</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Family splitting</td>
 <td>Every original entry retained; family counts across locations differ
 by at most one</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Pair swapping</td>
 <td>Entry frequencies and geometry retained; reported distances agree
 with <code><a href="https://rdrr.io/r/stats/dist.html" class="external-link">stats::dist()</a></code>
@@ -328,24 +334,29 @@ allocation</td>
 placement if stratification cannot be completed</td>
 </tr>
 <tr class="even">
+<td>Single diagonal check optimization</td>
+<td>At most 100 accepted exchanges or 100,000 candidate evaluations per
+location; an interrupted scan is never reported as a local optimum</td>
+</tr>
+<tr class="odd">
 <td>Pair-swap optimization</td>
 <td>A finite geometry-dependent threshold range, at most
 <code>stop_iter</code> sweeps per threshold, and bounded sampled
 candidates per swap; diagnostics distinguish exhaustion, completion, and
 an empty range</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Row-column search</td>
 <td>Positive finite whole-number <code>iterations</code>; defaults are
 200 external onestage searches or 1,000 twostage row-swap
 iterations</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Allocation balancing</td>
 <td>At most one upward pass through the allocation rows; warns if no
 eligible entry can complete the balancing</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Dimension cache</td>
 <td>At most 64 retained queries and 4 MiB of retained keys and results;
 temporary search memory is outside this bound</td>
