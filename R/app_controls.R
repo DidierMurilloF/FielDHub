@@ -32,6 +32,8 @@ fieldhub_control_concepts <- function() {
     checks = list(label = "Input # of Checks:", min = 1),
     rep_checks = list(label = "Reps per Check:", value = "2"),
     spread_checks = list(label = "Spread checks within each block", value = TRUE),
+    dist_method = list(label = "Check spacing distance:", value = "euclidean",
+                       choices = c("Euclidean" = "euclidean", "Manhattan" = "manhattan")),
     checks_note = list(label = NULL),
     l = list(label = "Input # of Locations:", value = 1, min = 1),
     planter = list(label = "Plot Order Layout:", value = "serpentine",

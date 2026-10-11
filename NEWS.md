@@ -7,6 +7,16 @@
 
 ## Release highlights
 
+- Single Diagonal Arrangement now offers opt-in check-spacing optimization
+  through `spread_checks = TRUE`, with Euclidean or Manhattan distance. Only
+  check identities are exchanged; test entries, fillers, check positions and
+  replication remain fixed. The default layouts and least-filler option are
+  unchanged. Results record search limits and minimum check distances.
+- The Single Diagonal Arrangement page caches complete results by percentage
+  and seeded inputs within each session. Background workers prepare the other
+  valid percentages after the selected result; without workers, options are
+  computed on demand and cached. Older jobs cannot replace a newer selection.
+
 - R-devel’s additional binomial RNG setting is recorded and restored
   without rejecting valid results. Older three-setting records retain
   the historical binomial algorithm when replayed on newer R; newer

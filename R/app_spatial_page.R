@@ -264,8 +264,12 @@ app_spatial_page <- function(input, output, session, spec, run, raw_controls) {
     inputs <- design_inputs()
     validate_design(spec$args(inputs$values, inputs$data))
   })
+  alternatives <- if (identical(spec$module, "Diagonal")) shiny::reactive({
+    diagonal_option_requests(arguments(), design_choices()$checks_percent$choices)
+  }) else NULL
   design <- app_design_task("randomize", spec$engine, arguments, on_done = spec$accept,
-    long_running = spec$long_running, busy_message = spec$busy_message)
+    long_running = spec$long_running, busy_message = spec$busy_message,
+    prefetch_args = alternatives)
   # The state of the last Randomize!: ready, still waiting, or its problem
   result <- shiny::reactive({
     spatial_randomize_state(randomized(), if (isTRUE(randomized())) app_design_state(design))

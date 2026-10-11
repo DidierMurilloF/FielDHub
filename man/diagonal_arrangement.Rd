@@ -22,7 +22,9 @@ diagonal_arrangement(
   data = NULL,
   year = NULL,
   checksPercent = NULL,
-  sameEntries = FALSE
+  sameEntries = FALSE,
+  spread_checks = FALSE,
+  dist_method = "euclidean"
 )
 }
 \arguments{
@@ -72,11 +74,22 @@ for the field dimensions. By default the last (largest) option.}
 \item{sameEntries}{(optional) Logical. When \code{TRUE} and \code{kindExpt = "DBUDC"},
 every block holds the same entries, and all blocks must have the same size.
 By default \code{sameEntries = FALSE}.}
+
+\item{spread_checks}{Logical. For \code{kindExpt = "SUDC"}, exchange check
+identities among the existing check plots to increase separation of repeated
+checks. Test entries, filler plots and each check's replication stay fixed.
+The default \code{FALSE} preserves the original randomization.}
+
+\item{dist_method}{Distance between field coordinates for check optimization:
+\code{"euclidean"} (default) or \code{"manhattan"}. Grid steps have equal scale.}
 }
 \value{
 A list with five elements.
 \itemize{
   \item \code{infoDesign} is a list with information on the design parameters.
+  With check optimization enabled, \code{check_optimization} records swaps,
+  candidate evaluations, stopping reason and minimum distance before and after
+  optimization for each location.
   \item \code{layoutRandom} is a matrix with the randomization layout.
   \item \code{plotsNumber} is a matrix with the layout plot number.
   \item \code{data_entry} is a data frame with the data input.
@@ -85,6 +98,17 @@ A list with five elements.
 }
 \description{
 Randomly generates an spatial un-replicated diagonal arrangement design.
+}
+\details{
+Check optimization compares counts of same-check pairs at ascending
+distances, reducing the count at the shortest differing distance first. It is
+a deterministic local exchange heuristic, not a statistical-efficiency or
+global-optimality guarantee. Each location stops after a complete scan finds
+no improvement, 100 accepted swaps, or 100,000 candidate evaluations.
+One check identity, or checks occurring only once, leaves the layout unchanged.
+The selected check percentage and filler count are unchanged. With
+\code{checksPercent = NULL}, Single Diagonal Arrangement still selects the
+valid option with the most check plots and therefore the fewest fillers.
 }
 \section{Reproducibility}{
 
@@ -112,6 +136,10 @@ spatd <- diagonal_arrangement(
   locationNames = "MINOT"
 )
 spatd$infoDesign
+# Optimize check identities while keeping the diagonal check plots fixed.
+spread <- diagonal_arrangement(nrows = 15, ncols = 20, lines = 270, checks = 4,
+                               seed = 1987, spread_checks = TRUE)
+spread$infoDesign$check_optimization
 spatd$layoutRandom
 spatd$plotsNumber
 head(spatd$fieldBook, 12)

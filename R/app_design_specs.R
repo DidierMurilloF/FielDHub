@@ -492,14 +492,18 @@ build_design_specs <- function() {
       upload = "sdiag", upload_columns = c("ENTRY", "NAME"), file_tag = "Diagonal_",
       controls = c(
         list(ctl_count("lines", 287, min = 50, generated_only = TRUE), ctl_checks(4, max = 10, choices = 1:10),
-             ctl_locations()),
+             ctl_locations(),
+             ctl_flag("spread_checks", value = FALSE),
+             ctl_select("dist_method", show_if = "input.spread_checks == true")),
         spatial_shared(), list(ctl_seed())
       ),
       values = function(controls, data) {
         list(lines = controls$lines, checks = controls$checks, l = controls$l,
              planter = controls$planter, plot_start = controls$plot_start, seed = controls$seed,
              expt_name = controls$expt_name, location_names = controls$location_names,
-             entries = diagonal_entries(controls$lines, controls$checks, data))
+             entries = diagonal_entries(controls$lines, controls$checks, data),
+             spread_checks = controls$spread_checks,
+             dist_method = if (isTRUE(controls$spread_checks)) controls$dist_method else "euclidean")
       },
       steps = list(
         ctl_dimensions(function(values, data) {
