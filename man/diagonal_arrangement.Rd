@@ -84,12 +84,22 @@ The default \code{FALSE} preserves the original randomization.}
 \code{"euclidean"} (default) or \code{"manhattan"}. Grid steps have equal scale.}
 }
 \value{
-A list with five elements.
+A \code{FielDHub} design result with the following components.
 \itemize{
   \item \code{infoDesign} is a list with information on the design parameters.
   With check optimization enabled, \code{check_optimization} records swaps,
   candidate evaluations, stopping reason and minimum distance before and after
   optimization for each location.
+  \item \code{check_spacing} records per-check minimum, mean nearest and
+  mean pairwise distances, and same-check neighbors within 5 grid steps,
+  for Single Diagonal Arrangement. With optimization enabled, both the
+  original and final assignments are recorded. \code{print()} shows the
+  spacing overview and \code{summary()} adds per-check details without
+  rerunning the optimizer. Distances use \code{dist_method} and equally
+  scaled row/column coordinates, not physical plot dimensions. Overall
+  distances average equally across checks with repeated occurrences;
+  neighbor percentages include all check occurrences. These metrics
+  measure spacing, not statistical precision.
   \item \code{layoutRandom} is a matrix with the randomization layout.
   \item \code{plotsNumber} is a matrix with the layout plot number.
   \item \code{data_entry} is a data frame with the data input.

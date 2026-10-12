@@ -55,12 +55,22 @@
 #' The selected check percentage and filler count are unchanged. With
 #' \code{checksPercent = NULL}, Single Diagonal Arrangement still selects the
 #' valid option with the most check plots and therefore the fewest fillers.
-#' @return A list with five elements.
+#' @return A \code{FielDHub} design result with the following components.
 #' \itemize{
 #'   \item \code{infoDesign} is a list with information on the design parameters.
 #'   With check optimization enabled, \code{check_optimization} records swaps,
 #'   candidate evaluations, stopping reason and minimum distance before and after
 #'   optimization for each location.
+#'   \item \code{check_spacing} records per-check minimum, mean nearest and
+#'   mean pairwise distances, and same-check neighbors within 5 grid steps,
+#'   for Single Diagonal Arrangement. With optimization enabled, both the
+#'   original and final assignments are recorded. \code{print()} shows the
+#'   spacing overview and \code{summary()} adds per-check details without
+#'   rerunning the optimizer. Distances use \code{dist_method} and equally
+#'   scaled row/column coordinates, not physical plot dimensions. Overall
+#'   distances average equally across checks with repeated occurrences;
+#'   neighbor percentages include all check occurrences. These metrics
+#'   measure spacing, not statistical precision.
 #'   \item \code{layoutRandom} is a matrix with the randomization layout.
 #'   \item \code{plotsNumber} is a matrix with the layout plot number.
 #'   \item \code{data_entry} is a data frame with the data input.
@@ -662,6 +672,14 @@ diagonal_arrangement <- function(
         
     }
     
+    check_spacing <- if (identical(kindExpt, "SUDC")) {
+        lapply(seq_along(layout_random_sites), function(site) {
+            list(dist_method = dist_method, neighbor_radius = 5,
+                 before = diagonal_spacing_metrics(layout_random_sites[[site]],
+                     getData$checksEntries[[site]], getData$data_entry[[site]], dist_method),
+                 after = NULL)
+        })
+    } else NULL
     check_optimization <- vector("list", length(layout_random_sites))
     if (spread_checks) {
         for (site in seq_along(layout_random_sites)) {
@@ -671,6 +689,8 @@ diagonal_arrangement <- function(
             field_book_sites[[site]] <- diagonal_optimized_field_book(
                 field_book_sites[[site]], optimized$layout, getData$data_entry[[site]])
             check_optimization[[site]] <- optimized$diagnostics
+            check_spacing[[site]]$after <- diagonal_spacing_metrics(optimized$layout,
+                getData$checksEntries[[site]], getData$data_entry[[site]], dist_method)
         }
     }
     field_book <- dplyr::bind_rows(field_book_sites)
@@ -697,6 +717,7 @@ diagonal_arrangement <- function(
         data_entry = getData$data_entry, 
         fieldBook = field_book
     )
+    if (!is.null(check_spacing)) output$check_spacing <- check_spacing
     
     reproduction_parameters <- record_design_parameters(
         environment(), overrides = list(plotNumber = starting_plots,

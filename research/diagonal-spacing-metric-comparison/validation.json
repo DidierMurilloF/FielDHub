@@ -1,0 +1,36 @@
+{
+  "base_commit": "f31f31b9ffe6114348fcccd8eae2481143fe9b01",
+  "installed_package_tests": {
+    "pass": 17832,
+    "fail": 0,
+    "warn": 0,
+    "skip": 77,
+    "source": "R CMD check --as-cran installed-package test run"
+  },
+  "source_tests": {
+    "environment": {
+      "NOT_CRAN": "true",
+      "FIELDHUB_GOLDEN": "true"
+    },
+    "failures": 9,
+    "description": "Only golden allocation/incomplete snapshots fail. Their generated .new snapshot files are byte-for-byte identical to those from unmodified base commit on this Linux machine. Other source tests pass. No unrelated reference snapshots were updated."
+  },
+  "final_focused_tests": "diagonal_spacing, diagonal_optimization, golden-unreplicated: pass with FIELDHUB_GOLDEN=true after correcting the source Unicode literal to an equivalent ASCII escape.",
+  "compatibility": "Six complete fixed-seed results are identical to base after removing only the added check_spacing component, including off/on, multiple locations and both metrics.",
+  "lint": "Changed-line correctness lint passes.",
+  "browser": "Existing generic Single Diagonal page shows OFF and ON reports after Run! then Randomize!, with no displayed errors. App controls remain frozen by Run!; changing optimization requires pressing Run! again.",
+  "check_corrected_source": {
+    "args": [
+      "--as-cran",
+      "--no-tests"
+    ],
+    "environment": {
+      "OPENBLAS_NUM_THREADS": "1",
+      "R_RD4PDF": "times,hyper"
+    },
+    "errors": 0,
+    "warnings": 0,
+    "notes": 1,
+    "note": "HTML validation skipped because system HTML Tidy is unavailable. Tests were run separately above; the final check does not repeat them."
+  }
+}

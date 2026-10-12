@@ -22,6 +22,13 @@ knitr::opts_chunk$set(
 
 ## Release highlights
 
+- Single Diagonal Arrangement now records check-spacing metrics with
+  optimization off and on. `print()` adds a compact report, `summary()` adds
+  per-check details, and the app shows the selected location's report in
+  Get Random. Optimized results show the original and final assignments;
+  distances use the chosen grid metric and the neighbor radius is 5 steps.
+  Check placement and search behavior are unchanged.
+
 - Single Diagonal Arrangement now offers opt-in check-spacing optimization
   through `spread_checks = TRUE`, with Euclidean or Manhattan distance. Only
   check identities are exchanged; test entries, fillers, check positions and
