@@ -162,6 +162,22 @@ single_diag <- diagonal_arrangement(
 
 ### Optimize the spacing of repeated checks
 
+`print()` displays minimum same-check distance, mean nearest same-check
+distance, mean pairwise distance, and the percentage of occurrences with a
+same-check neighbor within 5 grid steps. These are reported with optimization
+off as well as on; enabled optimization shows before and after. `summary()`
+also gives the per-check measurements alongside the existing layout and
+field-book information. The app displays the report in **Get Random** after
+randomization, for the selected location.
+
+Distances use the selected Euclidean or Manhattan metric on equally scaled
+grid coordinates, rather than physical plot dimensions. Distance averages
+give equal weight to checks with repeated occurrences; the overall neighbor
+percentage counts all check occurrences. `NA` denotes a check without enough
+occurrences to calculate a same-check distance. The report is stored in
+`check_spacing` and printing never reruns the search. Improved spacing does
+not by itself establish improved statistical precision.
+
 Set `spread_checks = TRUE` for Single Diagonal Arrangement to exchange check
 identities among the existing diagonal check plots. Unreplicated entries,
 fillers and each check's replication remain fixed. The option works with both

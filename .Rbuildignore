@@ -48,6 +48,7 @@ $run_dev.*
 ^vignettes/optimized_arrangement\.Rmd$
 ^ARCHITECTURE_AUDIT\.md$
 ^ROADMAP\.md$
+^research$
 ^\.superpowers$
 ^deployment$
 ^\.mailmap$

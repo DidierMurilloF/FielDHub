@@ -336,7 +336,12 @@ print.summary.fieldhub_rcbd_augmented <- function(x, ...) {
 #-----------------------------------------------------------------------
 #' @export
 print.fieldhub_diagonal_arrangement <- function(x, n = 10, ...) {
-  print_design(x, "Un-replicated Diagonal Arrangement Design", "diagonal_arrangement", n, ...)
+  cat("Un-replicated Diagonal Arrangement Design\n\n")
+  cat("Information on the design parameters:\n")
+  str_parameters(x)
+  print_diagonal_spacing(x)
+  print_head(x$fieldBook, "the diagonal_arrangement field book:", n, ...)
+  invisible(x)
 }
 
 #' @export
@@ -347,6 +352,10 @@ print.summary.fieldhub_diagonal_arrangement <- function(x, ...) {
   summary_print("3. Plot number layout:", x$plotsNumber)
   summary_str("4. Structure of the data frame with the data input:", x$data_entry)
   summary_str("5. Structure of the data frame with the diagonal_arrangement field book:", x$fieldBook)
+  if (!is.null(x$check_spacing)) {
+    cat("\n\n6. Check spacing:\n")
+    print_diagonal_spacing(x, detailed = TRUE)
+  }
   invisible(x)
 }
 

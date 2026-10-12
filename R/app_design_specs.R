@@ -90,7 +90,7 @@ build_design_specs <- function() {
                       data = function(upload, controls) upload, optim = NULL,
                       field_size = function(design, values) list(nrows = values$nrows, ncols = values$ncols),
                       accept = identity, upload_repeats = NULL, long_running = TRUE,
-                      randomizing = "Randomizing ...") {
+                      randomizing = "Randomizing ...", report = NULL) {
     list(
       module = module, title = title, engine = engine, controls = controls, upload = upload,
       upload_shape = function(data) upload_check(shape_design_upload(data, upload_columns)),
@@ -99,7 +99,8 @@ build_design_specs <- function() {
       kind = "spatial", optim = optim, steps = steps, setup = setup, entries = entries,
       panels = panels, workflow = spatial_workflow_spec(module), layout = NULL, summary = FALSE,
       field_size = field_size, accept = accept, upload_repeats = upload_repeats,
-      long_running = long_running, randomizing = randomizing, busy_message = randomizing, file_tag = file_tag
+      long_running = long_running, randomizing = randomizing, busy_message = randomizing,
+      file_tag = file_tag, report = report
     )
   }
   # Result tabs of the spatial pages
@@ -489,6 +490,7 @@ build_design_specs <- function() {
     # The field sizes are searched after Run!, the percentages of checks
     # after Randomize!
     Diagonal = spatial("Diagonal", "Unreplicated Single Diagonal Arrangement", diagonal_arrangement,
+      report = function(design, location) print_diagonal_spacing(design, location = location),
       upload = "sdiag", upload_columns = c("ENTRY", "NAME"), file_tag = "Diagonal_",
       controls = c(
         list(ctl_count("lines", 287, min = 50, generated_only = TRUE), ctl_checks(4, max = 10, choices = 1:10),

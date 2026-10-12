@@ -1,0 +1,15 @@
+"measurement","metric","manhattan_wins","ties","euclidean_wins","mean_manhattan_minus_euclidean","median_manhattan_minus_euclidean"
+"euclidean","minimum",0,100,0,0,0
+"euclidean","nearest",33,18,49,-0.016917291992704,0
+"euclidean","worst_nearest",34,29,37,0.0126930308542434,0
+"euclidean","pairwise",45,18,37,0.00482137471635498,0
+"euclidean","pairs3",0,100,0,0,0
+"euclidean","pairs5",29,41,30,0.02,0
+"euclidean","clustered_percent5",33,33,34,-0.233333333333333,0
+"manhattan","minimum",0,100,0,0,0
+"manhattan","nearest",49,20,31,0.0375892857142857,0
+"manhattan","worst_nearest",36,42,22,0.0628571428571429,0
+"manhattan","pairwise",46,20,34,0.0171428571428572,0
+"manhattan","pairs3",0,100,0,0,0
+"manhattan","pairs5",0,100,0,0,0
+"manhattan","clustered_percent5",0,100,0,0,0

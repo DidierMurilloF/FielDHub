@@ -48,7 +48,10 @@ app_spatial_tabs <- function(ns, spec) {
                                           busy_message = spec$busy_message, results_id = ns("results"))),
           shiny::br(), shiny::br(),
           shiny::uiOutput(ns("status")),
-          setup, tasks = setup_tasks)),
+          setup,
+          if (!is.null(spec$report)) shiny::div(class = "fieldhub-design-summary",
+            app_output_feedback(shiny::verbatimTextOutput(ns("design_report"), placeholder = FALSE))),
+          tasks = setup_tasks)),
       shiny::tabPanel("Data Input", feedback(entries))
     ),
     panels,
@@ -319,6 +322,12 @@ app_spatial_page <- function(input, output, session, spec, run, raw_controls) {
                         design = if (!is.null(spec$optim)) inputs$values[[spec$optim$into]],
                         export = spec$setup$export, rows = spec$setup$rows)
     }, server = is.null(spec$setup$rows))
+  }
+  if (!is.null(spec$report)) {
+    output$design_report <- shiny::renderPrint({
+      if (!randomized()) return(invisible(NULL))
+      spec$report(settled(design), location())
+    })
   }
   for (i in seq_along(spec$entries)) local({
     entries <- spec$entries[[i]]
