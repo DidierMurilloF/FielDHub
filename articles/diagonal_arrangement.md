@@ -224,6 +224,25 @@ single_diag <- diagonal_arrangement(
 
 #### Optimize the spacing of repeated checks
 
+[`print()`](https://rdrr.io/r/base/print.html) displays minimum
+same-check distance, mean nearest same-check distance, mean pairwise
+distance, and the percentage of occurrences with a same-check neighbor
+within 5 grid steps. These are reported with optimization off as well as
+on; enabled optimization shows before and after.
+[`summary()`](https://rdrr.io/r/base/summary.html) also gives the
+per-check measurements alongside the existing layout and field-book
+information. The app displays the report in **Get Random** after
+randomization, for the selected location.
+
+Distances use the selected Euclidean or Manhattan metric on equally
+scaled grid coordinates, rather than physical plot dimensions. Distance
+averages give equal weight to checks with repeated occurrences; the
+overall neighbor percentage counts all check occurrences. `NA` denotes a
+check without enough occurrences to calculate a same-check distance. The
+report is stored in `check_spacing` and printing never reruns the
+search. Improved spacing does not by itself establish improved
+statistical precision.
+
 Set `spread_checks = TRUE` for Single Diagonal Arrangement to exchange
 check identities among the existing diagonal check plots. Unreplicated
 entries, fillers and each check’s replication remain fixed. The option
@@ -283,9 +302,9 @@ To print a summary of the information that is in the object
 print(single_diag)
 ```
 
-    Un-replicated Diagonal Arrangement Design 
+    Un-replicated Diagonal Arrangement Design
 
-    Information on the design parameters: 
+    Information on the design parameters:
     List of 11
      $ rows          : num 15
      $ columns       : num 22
@@ -300,6 +319,23 @@ print(single_diag)
      $ percent_checks: chr "9.1%"
      $ fillers       : num 0
      $ seed          : num 16
+
+    Check spacing — Location 1
+    Optimization: OFF 
+    Distance: Euclidean, in grid steps
+    Same-check neighbor radius: 5 grid steps
+
+                                     Metric Value
+                Minimum same-check distance 3.162
+           Mean nearest same-check distance 5.281
+          Mean pairwise same-check distance 9.237
+     Occurrences with a same-check neighbor 56.7%
+
+    Distance averages give equal weight to checks with repeated occurrences.
+    Minimum distance is the smallest across checks.
+    Neighbor percentage includes all check occurrences.
+    NA means that a same-check distance cannot be calculated.
+    Spacing metrics do not measure statistical precision.
 
      10 First observations of the data frame with the diagonal_arrangement field book: 
        ID            EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
@@ -600,9 +636,9 @@ For printing a summary of the information that is in the object
 print(multi_diag)
 ```
 
-    Un-replicated Diagonal Arrangement Design 
+    Un-replicated Diagonal Arrangement Design
 
-    Information on the design parameters: 
+    Information on the design parameters:
     List of 11
      $ rows          : num 15
      $ columns       : num 22

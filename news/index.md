@@ -4,6 +4,15 @@
 
 ### Release highlights
 
+- Single Diagonal Arrangement now records check-spacing metrics with
+  optimization off and on.
+  [`print()`](https://rdrr.io/r/base/print.html) adds a compact report,
+  [`summary()`](https://rdrr.io/r/base/summary.html) adds per-check
+  details, and the app shows the selected location’s report in Get
+  Random. Optimized results show the original and final assignments;
+  distances use the chosen grid metric and the neighbor radius is 5
+  steps. Check placement and search behavior are unchanged.
+
 - Single Diagonal Arrangement now offers opt-in check-spacing
   optimization through `spread_checks = TRUE`, with Euclidean or
   Manhattan distance. Only check identities are exchanged; test entries,
