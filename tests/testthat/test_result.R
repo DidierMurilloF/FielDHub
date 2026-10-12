@@ -10,7 +10,8 @@ result_designs <- c(
   alpha_lattice = "alpha_lattice", partially_replicated = "partially_replicated",
   multi_location_prep = "multi_location_prep", RCBD_augmented = "rcbd_augmented",
   diagonal_arrangement = "diagonal_arrangement", sparse_allocation = "sparse_allocation",
-  optimized_arrangement = "optimized_arrangement", split_families = "split_families"
+  optimized_arrangement = "optimized_arrangement", split_families = "split_families",
+  augmented_row_column = "augmented_row_column"
 )
 
 test_that("every design result has the class of its design", {

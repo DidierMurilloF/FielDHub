@@ -2,6 +2,11 @@ test_that("reproduce_design rebuilds every recorded catalogue result", {
   for (name in names(catalogue)) {
     x <- catalogue_design(name)
     replay <- suppressWarnings(reproduce_design(x))
+    # Wall-clock timings are not deterministic content (research M3 spec 3.7)
+    if (identical(catalogue[[name]]$fun, "augmented_row_column")) {
+      replay <- arc_deterministic_view(replay)
+      x <- arc_deterministic_view(x)
+    }
     expect_identical(replay, x, info = name)
   }
 })
