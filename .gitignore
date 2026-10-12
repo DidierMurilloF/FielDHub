@@ -78,3 +78,7 @@ inst/doc
 /doc/
 /Meta/
 docs
+
+# Local research data, scripts, drafts, and planning documents
+/research/
+/ROADMAP.md
