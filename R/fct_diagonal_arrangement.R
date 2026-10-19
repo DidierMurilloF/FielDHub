@@ -40,9 +40,37 @@
 #' @param sameEntries (optional) Logical. When \code{TRUE} and \code{kindExpt = "DBUDC"},
 #' every block holds the same entries, and all blocks must have the same size.
 #' By default \code{sameEntries = FALSE}.
-#' @return A list with five elements.
+#' @param spread_checks Logical. For \code{kindExpt = "SUDC"}, exchange check
+#' identities among the existing check plots to increase separation of repeated
+#' checks. Test entries, filler plots and each check's replication stay fixed.
+#' The default \code{FALSE} preserves the original randomization.
+#' @param dist_method Distance between field coordinates for check optimization:
+#' \code{"euclidean"} (default) or \code{"manhattan"}. Grid steps have equal scale.
+#' @details Check optimization compares counts of same-check pairs at ascending
+#' distances, reducing the count at the shortest differing distance first. It is
+#' a deterministic local exchange heuristic, not a statistical-efficiency or
+#' global-optimality guarantee. Each location stops after a complete scan finds
+#' no improvement, 100 accepted swaps, or 100,000 candidate evaluations.
+#' One check identity, or checks occurring only once, leaves the layout unchanged.
+#' The selected check percentage and filler count are unchanged. With
+#' \code{checksPercent = NULL}, Single Diagonal Arrangement still selects the
+#' valid option with the most check plots and therefore the fewest fillers.
+#' @return A \code{FielDHub} design result with the following components.
 #' \itemize{
 #'   \item \code{infoDesign} is a list with information on the design parameters.
+#'   With check optimization enabled, \code{check_optimization} records swaps,
+#'   candidate evaluations, stopping reason and minimum distance before and after
+#'   optimization for each location.
+#'   \item \code{check_spacing} records per-check minimum, mean nearest and
+#'   mean pairwise distances, and same-check neighbors within 5 grid steps,
+#'   for Single Diagonal Arrangement. With optimization enabled, both the
+#'   original and final assignments are recorded. \code{print()} shows the
+#'   spacing overview and \code{summary()} adds per-check details without
+#'   rerunning the optimizer. Distances use \code{dist_method} and equally
+#'   scaled row/column coordinates, not physical plot dimensions. Overall
+#'   distances average equally across checks with repeated occurrences;
+#'   neighbor percentages include all check occurrences. These metrics
+#'   measure spacing, not statistical precision.
 #'   \item \code{layoutRandom} is a matrix with the randomization layout.
 #'   \item \code{plotsNumber} is a matrix with the layout plot number.
 #'   \item \code{data_entry} is a data frame with the data input.
@@ -73,6 +101,10 @@
 #'   locationNames = "MINOT"
 #' )
 #' spatd$infoDesign
+#' # Optimize check identities while keeping the diagonal check plots fixed.
+#' spread <- diagonal_arrangement(nrows = 15, ncols = 20, lines = 270, checks = 4,
+#'                                seed = 1987, spread_checks = TRUE)
+#' spread$infoDesign$check_optimization
 #' spatd$layoutRandom
 #' spatd$plotsNumber
 #' head(spatd$fieldBook, 12)
@@ -148,11 +180,18 @@ diagonal_arrangement <- function(
     data = NULL,
     year = NULL,
     checksPercent = NULL,
-    sameEntries = FALSE) {
+    sameEntries = FALSE,
+    spread_checks = FALSE,
+    dist_method = "euclidean") {
     plotNumber_supplied <- !missing(plotNumber)
     validate_locations(l)
     validate_flag(multiLocationData, "multiLocationData")
     validate_flag(sameEntries, "sameEntries")
+    validate_flag(spread_checks, "spread_checks")
+    swap_distance_function(dist_method)
+    if (spread_checks && !identical(kindExpt, "SUDC")) {
+        fieldhub_abort("Check optimization is available only for kindExpt = \"SUDC\".")
+    }
     year <- resolve_year(year)
     if (!is.null(checksPercent) &&
         (!is.numeric(checksPercent) || length(checksPercent) != 1 || is.na(checksPercent))) {
@@ -633,6 +672,27 @@ diagonal_arrangement <- function(
         
     }
     
+    check_spacing <- if (identical(kindExpt, "SUDC")) {
+        lapply(seq_along(layout_random_sites), function(site) {
+            list(dist_method = dist_method, neighbor_radius = 5,
+                 before = diagonal_spacing_metrics(layout_random_sites[[site]],
+                     getData$checksEntries[[site]], getData$data_entry[[site]], dist_method),
+                 after = NULL)
+        })
+    } else NULL
+    check_optimization <- vector("list", length(layout_random_sites))
+    if (spread_checks) {
+        for (site in seq_along(layout_random_sites)) {
+            optimized <- optimize_diagonal_checks(layout_random_sites[[site]],
+                                                    getData$checksEntries[[site]], dist_method)
+            layout_random_sites[[site]] <- optimized$layout
+            field_book_sites[[site]] <- diagonal_optimized_field_book(
+                field_book_sites[[site]], optimized$layout, getData$data_entry[[site]])
+            check_optimization[[site]] <- optimized$diagnostics
+            check_spacing[[site]]$after <- diagonal_spacing_metrics(optimized$layout,
+                getData$checksEntries[[site]], getData$data_entry[[site]], dist_method)
+        }
+    }
     field_book <- dplyr::bind_rows(field_book_sites)
     
     infoDesign <- list(
@@ -649,6 +709,7 @@ diagonal_arrangement <- function(
         seed = seed, 
         id_design = 15
     )
+    if (spread_checks) infoDesign$check_optimization <- check_optimization
     output <- list(
         infoDesign = infoDesign, 
         layoutRandom = layout_random_sites, 
@@ -656,10 +717,14 @@ diagonal_arrangement <- function(
         data_entry = getData$data_entry, 
         fieldBook = field_book
     )
+    if (!is.null(check_spacing)) output$check_spacing <- check_spacing
     
     reproduction_parameters <- record_design_parameters(
         environment(), overrides = list(plotNumber = starting_plots,
-                                         checksPercent = if (uses_default_percent) NULL else checksPercent)
+                                         checksPercent = if (uses_default_percent) NULL else checksPercent),
+        exclude = if (!spread_checks && identical(dist_method, "euclidean")) {
+            c("spread_checks", "dist_method")
+        } else character()
     )
     output <- new_fieldhub_design(output, "diagonal_arrangement", parameters = reproduction_parameters)
     return(invisible(output))

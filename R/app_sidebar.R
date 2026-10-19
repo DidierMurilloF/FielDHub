@@ -34,7 +34,8 @@ app_sidebar_layout <- function(spec) {
     Augmented_RowCol = c(list("upload_file", c("nrows", "ncols"), "lines", "checks",
       "check_direction", "objective"), location_row, list("planter"), spatial_end,
       list("year", "advanced", "budget", "time_limit")),
-    Diagonal = c(list("upload_file", "lines", "checks"), location_row, list("planter"), spatial_end),
+    Diagonal = c(list("upload_file", "lines", "checks", "spread_checks", "dist_method"),
+      location_row, list("planter"), spatial_end),
     diagonal_multiple = c(list("sameEntries", "upload_file", "lines", "blocks", "checks"),
       location_row, list(c("stacked", "planter")), spatial_end),
     sparse_allocation = c(list("upload_file", "lines", "checks"), location_row,
@@ -57,6 +58,7 @@ app_sidebar_layout <- function(spec) {
 app_sidebar_control <- function(control, module) {
   labels <- c(seed = "Random Seed:", plot_start = "Starting Plot Number:",
     location_names = "Input Location:", expt_name = "Input Experiment Name:")
+  if (module == "Diagonal") labels["spread_checks"] <- "Optimize check spacing"
   if (module == "RCBD") labels["plot_start"] <- "Starting Plot Number(s):"
   if (module == "LSD") labels["reps"] <- "Input # of Full Reps (Squares):"
   if (module == "FD") labels <- c(labels, type = "Select a Factorial Design Type:",

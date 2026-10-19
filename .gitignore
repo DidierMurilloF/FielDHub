@@ -79,5 +79,6 @@ inst/doc
 /Meta/
 docs
 
-# Local research material (papers, supplements, notes); not part of the package
+# Local research data, scripts, drafts, and planning documents
 /research/
+/ROADMAP.md

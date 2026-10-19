@@ -48,7 +48,10 @@ app_spatial_tabs <- function(ns, spec) {
                                           busy_message = spec$busy_message, results_id = ns("results"))),
           shiny::br(), shiny::br(),
           shiny::uiOutput(ns("status")),
-          setup, tasks = setup_tasks)),
+          setup,
+          if (!is.null(spec$report)) shiny::div(class = "fieldhub-design-summary",
+            app_output_feedback(shiny::verbatimTextOutput(ns("design_report"), placeholder = FALSE))),
+          tasks = setup_tasks)),
       shiny::tabPanel("Data Input", feedback(entries))
     ),
     panels,
@@ -264,8 +267,12 @@ app_spatial_page <- function(input, output, session, spec, run, raw_controls) {
     inputs <- design_inputs()
     validate_design(spec$args(inputs$values, inputs$data))
   })
+  alternatives <- if (identical(spec$module, "Diagonal")) shiny::reactive({
+    diagonal_option_requests(arguments(), design_choices()$checks_percent$choices)
+  }) else NULL
   design <- app_design_task("randomize", spec$engine, arguments, on_done = spec$accept,
-    long_running = spec$long_running, busy_message = spec$busy_message)
+    long_running = spec$long_running, busy_message = spec$busy_message,
+    prefetch_args = alternatives)
   # The state of the last Randomize!: ready, still waiting, or its problem
   result <- shiny::reactive({
     spatial_randomize_state(randomized(), if (isTRUE(randomized())) app_design_state(design))
@@ -315,6 +322,12 @@ app_spatial_page <- function(input, output, session, spec, run, raw_controls) {
                         design = if (!is.null(spec$optim)) inputs$values[[spec$optim$into]],
                         export = spec$setup$export, rows = spec$setup$rows)
     }, server = is.null(spec$setup$rows))
+  }
+  if (!is.null(spec$report)) {
+    output$design_report <- shiny::renderPrint({
+      if (!randomized()) return(invisible(NULL))
+      spec$report(settled(design), location())
+    })
   }
   for (i in seq_along(spec$entries)) local({
     entries <- spec$entries[[i]]
