@@ -84,6 +84,10 @@ jobs:
           - { os: macos-14,       platform: "mac-arm64" }
     steps:
       - uses: actions/checkout@v4
+        with:
+          # A manual run with a tag must build that tag's source, not the
+          # default branch. Release and tag runs already point at the tag.
+          ref: ${{ inputs.tag || github.ref }}
 
       - uses: r-lib/actions/setup-r@v2
         with:
@@ -92,15 +96,35 @@ jobs:
 
       - name: Install build helpers
         shell: bash
-        run: Rscript -e 'install.packages(c("jsonlite","zip","digest","BiocManager","callr","curl"), repos="https://cloud.r-project.org")'
+        run: Rscript -e 'install.packages(c("jsonlite","zip","digest","BiocManager","callr","curl","httpuv"), repos="https://cloud.r-project.org")'
 
       - name: Resolve store version
         shell: bash
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
-          V="${{ github.event.release.tag_name }}${{ github.ref_name }}${{ inputs.tag }}"
+          # Take ONE value in priority order (manual tag input, release tag,
+          # pushed tag) instead of concatenating the event fields; a published
+          # release used to yield values such as 1.6.0v1.6.0.
+          V=""
+          if [ -n "$INPUT_TAG" ]; then
+            V="$INPUT_TAG"
+          elif [ -n "$RELEASE_TAG" ]; then
+            V="$RELEASE_TAG"
+          elif [ "${GITHUB_REF#refs/tags/}" != "$GITHUB_REF" ]; then
+            V="${GITHUB_REF#refs/tags/}"
+          fi
           V="${V#v}"
-          if [ -z "$V" ]; then V="0.1.0"; fi
+          if [ -z "$V" ]; then
+            V="$(sed -n 's/^Version:[[:space:]]*//p' DESCRIPTION | head -n 1)"
+          fi
+          if [ -z "$V" ]; then
+            echo "error: cannot determine the app version" >&2
+            exit 1
+          fi
           echo "VERSION=$V" >> "$GITHUB_ENV"
+          echo "Resolved version: $V"
 
       - name: Assemble bundle (app/ + rlib/ + manifest.json)
         shell: Rscript {0}
@@ -274,9 +298,10 @@ jobs:
         timeout-minutes: 12
         shell: Rscript {0}
         run: |
-          # Reproduce the ShinyApps shell's startup: put the bundle's rlib on .libPaths and
-          # load the app from its own directory. Runs in a child process with a hard timeout so
-          # it can never hang, and surfaces the exact R error if the app fails to start.
+          # Launch the built bundle the way the ShinyApps shell does -- rlib on
+          # .libPaths(), app.R served by shiny::runApp() -- and pass only when the
+          # running server answers GET / with an HTML page. shinyAppDir() alone
+          # builds the app object without starting the server or rendering the UI.
           app_id <- Sys.getenv("APP_ID"); ver <- Sys.getenv("VERSION"); plat <- "${{ matrix.platform }}"
           zip <- sprintf("%s-%s-%s.zip", app_id, ver, plat)
           if (!file.exists(zip)) stop("smoke: bundle not found: ", zip)
@@ -285,24 +310,38 @@ jobs:
           appdir <- file.path(tmp, "app"); lib <- file.path(tmp, "rlib")
           if (!dir.exists(appdir) || !dir.exists(lib)) stop("smoke: unexpected bundle layout")
           timeout <- suppressWarnings(as.integer(Sys.getenv("SMOKE_TIMEOUT_SEC", "300"))); if (is.na(timeout) || timeout < 30) timeout <- 300
-          cat(sprintf("smoke: loading app '%s' (rlib on .libPaths)\n", app_id))
-          load_app <- function(appdir, lib) {
+
+          serve <- function(appdir, lib, port) {
             .libPaths(c(lib, .libPaths()))
             old <- setwd(appdir); on.exit(setwd(old), add = TRUE)
-            # shinyAppDir reproduces the shell: it handles app.R and legacy
-            # ui.R+server.R (shinyUI/shinyServer) directory apps alike.
-            obj <- tryCatch(shiny::shinyAppDir("."), error = function(e) e)
-            if (inherits(obj, "error")) stop("shinyAppDir failed: ", conditionMessage(obj))
-            if (!inherits(obj, "shiny.appobj")) stop("app did not produce a shiny app object")
-            invisible(TRUE)
+            shiny::runApp(".", port = port, host = "127.0.0.1",
+                          launch.browser = FALSE, quiet = TRUE)
           }
-          res <- tryCatch(callr::r(load_app, args = list(appdir = appdir, lib = lib), timeout = timeout, show = TRUE),
-                          error = function(e) e)
-          if (inherits(res, "error")) {
-            cat("\n---- smoke error ----\n"); cat(conditionMessage(res), "\n")
-            stop("smoke test FAILED: the app did not start: ", conditionMessage(res))
+          port <- httpuv::randomPort()
+          proc <- callr::r_bg(serve, args = list(appdir = appdir, lib = lib, port = port), supervise = TRUE)
+          on.exit(try(proc$kill(), silent = TRUE), add = TRUE)
+          url <- sprintf("http://127.0.0.1:%d/", port)
+          deadline <- Sys.time() + timeout
+          out <- character()
+          repeat {
+            out <- c(out, proc$read_output_lines(), proc$read_error_lines())
+            if (!proc$is_alive()) {
+              cat(paste(out, collapse = "\n"), "\n")
+              stop("smoke test FAILED: the app exited before serving a page")
+            }
+            served <- tryCatch({
+              r <- curl::curl_fetch_memory(url)
+              r$status_code == 200L && length(r$content) > 0 &&
+                grepl("<!doctype|<html", rawToChar(r$content), ignore.case = TRUE)
+            }, error = function(e) FALSE)
+            if (isTRUE(served)) break
+            if (Sys.time() >= deadline) {
+              cat(paste(out, collapse = "\n"), "\n")
+              stop("smoke test FAILED: ", url, " did not serve a page within ", timeout, "s")
+            }
+            Sys.sleep(1)
           }
-          cat("SMOKE OK\n")
+          cat("SMOKE OK:", url, "served an HTML page\n")
 
       - uses: actions/upload-artifact@v4
         with:
