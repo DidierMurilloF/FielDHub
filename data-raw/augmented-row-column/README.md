@@ -11,6 +11,7 @@ and the package gains no dependency: readxl is used by this script only.
 | Table 1 contractions (21), Example 2 contraction | Piepho & Williams (2026), Biometrical Journal 68(5):e70182, Supporting File 3 | CC-BY |
 | Example 1 and 2 contractions and printed layouts | Same article, Section 2, Examples 1 and 2 | CC-BY |
 | Bailey-Haines cyclic squares (t = 12, k = 3) | Bailey & Haines (2025), JABES, Table 1 | CC-BY |
+| Bailey-Haines Fig. 1a (t = 12, k = 3, non-cyclic rectangular lattice; 3 x 12 contraction, transcribed by eye from the printed figure and checked against printed Table 6) | Bailey & Haines (2025), JABES, doi 10.1007/s13253-025-00699-1, Fig. 1a (p. 5) | CC BY 4.0 |
 | Restricted 12 x 8 pair, cyclic 5 x 5 (k = 4) | Independent specification review, 2026-10-10 | project-internal |
 | Column-binary square pair, zero-df design | Mathematical audit report | project-internal |
 | Recoloring counterexample | Implementation-plan audit | project-internal |

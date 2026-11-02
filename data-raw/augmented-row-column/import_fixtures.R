@@ -300,6 +300,18 @@ for (i in seq_len(nrow(blocks))) {
   }
 }
 
+# ---- Bailey and Haines (2025) Fig. 1a (non-cyclic rectangular lattice) ------
+
+# Fig. 1a (p. 5), 12 x 12, k = 3, doi 10.1007/s13253-025-00699-1, CC BY 4.0;
+# transcribed by eye, checked against printed Table 6 (Example 2): Act 2.0778,
+# Att 4.0075 (4 decimals). Stored as a 3 x 12 contraction (v = 12).
+fig1a <- read_input("bailey-haines-fig1a.csv")
+ref <- add_design("bailey-haines-fig1a.csv", fig1a, "contraction", 12L,
+                  "Bailey & Haines (2025) JABES, Fig. 1a (Table 6, Example 2)", "CC-BY",
+                  list(A_tt = c(4.0075, 4L), A_ct = c(2.0778, 4L)))
+stopifnot(ref$connected, abs(ref$V_tt - 4.0075) <= 5e-5, abs(ref$V_tc - 2.0778) <= 5e-5,
+          abs(ref$V_tt - 2144 / 535) <= 1e-9, abs(ref$V_cc - 1 / 6) <= 1e-10)
+
 # ---- manifest ----------------------------------------------------------------
 
 table <- do.call(rbind, manifest)
