@@ -1517,13 +1517,21 @@ arc_search_anneal <- function(v, s, k, objective = "E_aug",
 #' global budget; each restart's allowance (an equal split of what is left
 #' over the remaining restarts) goes by `shares` to column annealing on the
 #' column-efficiency proxy, row annealing (A/K) from `recolourings`
-#' recolourings, joint annealing (A/B/C/K, start temperature multiplied by
-#' `joint_t0_multiplier`) and first-improvement polish. In square designs
-#' (v == s) the row share goes to the column phase and the column state is
-#' recoloured once. When the column share is positive the start is scored by
-#' the proxy (a proxy call); otherwise by the objective. In equal-time mode
-#' (`max_evals = Inf`) allowances are times enforced by temporary phase
-#' deadlines and the annealing phases cool by elapsed fraction.
+#' recolourings, joint annealing (A/B/C/K) and first-improvement polish. In
+#' square designs (v == s) the row share goes to the column phase and the
+#' column state is recoloured once. When the column share is positive the
+#' start is scored by the proxy (a proxy call); otherwise by the objective.
+#' In equal-time mode (`max_evals = Inf`) allowances are times enforced by
+#' temporary phase deadlines and the annealing phases cool by elapsed
+#' fraction.
+#'
+#' Temperatures (M2 improvement attempt, revision 1): every annealing phase
+#' calibrates its start temperature as the mean |delta| of counted proposals
+#' from its start state. Two phases scale that value down because it runs
+#' hot there: the column phase, which starts from a random design (and cools
+#' further, to `column_t_ratio` instead of `t_ratio`), and the joint phase,
+#' which starts from an optimized state that the calibrated value would turn
+#' into a random walk.
 #'
 #' @inheritParams arc_search_anneal
 #' @param restarts Whole number >= 1 (R).
@@ -1531,8 +1539,14 @@ arc_search_anneal <- function(v, s, k, objective = "E_aug",
 #' @param shares Named non-negative shares `column`, `row`, `joint`,
 #'   `polish` summing to 1.
 #' @param kempe_share Named Kempe probabilities `joint` and `row` in [0, 1].
+#' @param t_ratio End-to-start temperature ratio of the row and joint
+#'   phases, in (0, 1].
 #' @param joint_t0_multiplier Finite number > 0 multiplying the joint
-#'   phase's calibrated start temperature (default 1).
+#'   phase's calibrated start temperature (default 0.1).
+#' @param column_t0_multiplier Finite number > 0 multiplying the column
+#'   phase's calibrated start temperature (default 0.3).
+#' @param column_t_ratio End-to-start temperature ratio of the column
+#'   phase, in (0, 1] (default 1e-4).
 #' @noRd
 arc_search_staged <- function(v, s, k, objective = "E_aug",
                               max_evals = 60000, seconds = Inf, seed = NULL,
@@ -1542,7 +1556,9 @@ arc_search_staged <- function(v, s, k, objective = "E_aug",
                               shares = c(column = 0.4, row = 0.3,
                                          joint = 0.2, polish = 0.1),
                               kempe_share = c(joint = 0.3, row = 0.6),
-                              t_ratio = 1e-3, joint_t0_multiplier = 1) {
+                              t_ratio = 1e-3, joint_t0_multiplier = 0.1,
+                              column_t0_multiplier = 0.3,
+                              column_t_ratio = 1e-4) {
   arc_search_check_common(max_evals, seconds, starts, max_start_tries, now)
   arc_search_check(arc_is_whole_number(restarts) && restarts >= 1,
                    "restarts must be a single whole number >= 1.")
@@ -1566,6 +1582,13 @@ arc_search_staged <- function(v, s, k, objective = "E_aug",
                      is.finite(joint_t0_multiplier) &&
                      joint_t0_multiplier > 0,
                    "joint_t0_multiplier must be a single finite number > 0.")
+  arc_search_check(arc_is_number(column_t0_multiplier) &&
+                     is.finite(column_t0_multiplier) &&
+                     column_t0_multiplier > 0,
+                   "column_t0_multiplier must be a single finite number > 0.")
+  arc_search_check(arc_is_number(column_t_ratio) && column_t_ratio > 0 &&
+                     column_t_ratio <= 1,
+                   "column_t_ratio must be a single number in (0, 1].")
   seed <- resolve_seed(seed)
   local_design_seed(seed)
   status <- arc_search_entry(v, s, k, objective)
@@ -1615,11 +1638,12 @@ arc_search_staged <- function(v, s, k, objective = "E_aug",
       }
     }
     anneal <- function(start, score, fn, propose, share, exhaustion, label,
-                       kind = "objective", t0_multiplier = 1) {
+                       kind = "objective", t0_multiplier = 1,
+                       ratio = t_ratio) {
       a <- allowance(share)
       arc_search_with_deadline(budget, a$deadline, arc_anneal_phase(
         budget, start, score, fn, propose, a$evals, exhaustion,
-        t_ratio = t_ratio, kind = kind, label = label,
+        t_ratio = ratio, kind = kind, label = label,
         t0_multiplier = t0_multiplier
       ))
     }
@@ -1639,7 +1663,9 @@ arc_search_staged <- function(v, s, k, objective = "E_aug",
     if (use_proxy) {
       column <- anneal(start$contraction, start$score, proxy_fn,
                        propose_column, shares[["column"]], "column",
-                       paste0(tag, "column"), kind = "proxy")
+                       paste0(tag, "column"), kind = "proxy",
+                       t0_multiplier = column_t0_multiplier,
+                       ratio = column_t_ratio)
       phases[[paste0(tag, "column")]] <- column$status
       column_state <- column$contraction
     } else {

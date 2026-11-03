@@ -1181,7 +1181,10 @@ test_that("an unbounded run is refused, and arguments are validated", {
     list(shares = c(0.4, 0.3, 0.2, 0.1)),
     list(kempe_share = c(joint = 2, row = 0.6)), list(kempe_share = 0.3),
     list(t_ratio = 2), list(joint_t0_multiplier = 0),
-    list(joint_t0_multiplier = Inf), list(joint_t0_multiplier = "a")
+    list(joint_t0_multiplier = Inf), list(joint_t0_multiplier = "a"),
+    list(column_t0_multiplier = 0), list(column_t0_multiplier = Inf),
+    list(column_t0_multiplier = NA_real_), list(column_t_ratio = 0),
+    list(column_t_ratio = 1.5), list(column_t_ratio = c(1e-4, 1e-3))
   )
   for (args in bad) {
     expect_error(do.call(arc_search_staged, c(list(12, 8, 3), args)),
@@ -1243,17 +1246,34 @@ test_that("supplied starts give matched runs, invalid starts are refused", {
   expect_identical(res$design, starts[[1]])
 })
 
-test_that("the joint start-temperature multiplier defaults to 1", {
+test_that("the column and joint phases start cooler than calibrated", {
+  # Revision 1 of the M2 improvement attempt: column start temperature 0.3
+  # times the calibrated value with end ratio 1e-4, joint start 0.1 times.
   a <- arc_search_staged(12, 8, 3, max_evals = 400, seed = 77)
   b <- arc_search_staged(12, 8, 3, max_evals = 400, seed = 77,
-                         joint_t0_multiplier = 1)
+                         joint_t0_multiplier = 0.1,
+                         column_t0_multiplier = 0.3, column_t_ratio = 1e-4)
   expect_identical(a$design, b$design)
   expect_identical(a$trace, b$trace)
-  c <- arc_search_staged(12, 8, 3, max_evals = 400, seed = 77,
-                         joint_t0_multiplier = 0.1)
-  joint_a <- a$trace$t0[grepl(":joint", a$trace$phase)]
-  joint_c <- c$trace$t0[grepl(":joint", c$trace$phase)]
-  expect_equal(joint_c[1], 0.1 * joint_a[1])
+  t0_of <- function(res, phase) {
+    res$trace$t0[grepl(paste0(":", phase, "$"), res$trace$phase)]
+  }
+  # Calibration precedes any use of the temperature, so the first phase of
+  # each kind calibrates identically and only the multiplier differs.
+  hot_joint <- arc_search_staged(12, 8, 3, max_evals = 400, seed = 77,
+                                 joint_t0_multiplier = 1)
+  expect_equal(t0_of(a, "joint")[1], 0.1 * t0_of(hot_joint, "joint")[1])
+  expect_identical(t0_of(a, "column"), t0_of(hot_joint, "column"))
+  hot_column <- arc_search_staged(12, 8, 3, max_evals = 400, seed = 77,
+                                  column_t0_multiplier = 1)
+  expect_equal(t0_of(a, "column")[1], 0.3 * t0_of(hot_column, "column")[1])
+  # The column end ratio leaves the calibration alone and changes the
+  # first column phase's path (visible at a larger budget).
+  cool <- arc_search_staged(12, 8, 3, max_evals = 3000, seed = 77)
+  ratio <- arc_search_staged(12, 8, 3, max_evals = 3000, seed = 77,
+                             column_t_ratio = 1e-3)
+  expect_identical(ratio$trace$t0[1], cool$trace$t0[1])
+  expect_false(identical(ratio$trace[1, ], cool$trace[1, ]))
 })
 
 test_that("a design failing final validation is a classed internal error", {
