@@ -10,16 +10,14 @@ class BlockSpace {
   // positive definite (design disconnected).
   bool refresh();
   // Determinant ratio det(Bhat') / det(Bhat) for moving one plot of treatment a
-  // from block p to block q and one plot of treatment c from q to p. If scale is
-  // given it receives max(1, (1 - beta)^2, alpha (t + gamma)), the size of the
-  // two terms whose difference is the ratio (its rounding error is relative to
-  // this scale; derivation section 8, eps_rel).
-  double delta(int a, int p, int c, int q, double* scale = nullptr) const;
+  // from block p to block q and one plot of treatment c from q to p.
+  double delta(int a, int p, int c, int q) const;
+  // max(1, |(1 - beta)^2|, |alpha (t + gamma)|) of the last delta(): the size of
+  // the two terms whose difference is the ratio, so its rounding error is
+  // relative to this scale (derivation section 8, eps_rel).
+  double last_scale() const;
   // Apply that swap, given its ratio from delta() (must be > 1e-9).
   void apply(int a, int p, int c, int q, double ratio);
-  // Move the same plots without updating Minv; the state is stale until the
-  // next successful refresh(). Used for escape jumps (checked exactly elsewhere).
-  void move(int a, int p, int c, int q);
   double log_det() const { return log_det_; }
   double d_efficiency() const;   // geometric mean of nonzero eigenvalues of C over r
   double a_efficiency() const;   // harmonic mean of nonzero eigenvalues of C over r; O(b^3)
@@ -41,6 +39,7 @@ class BlockSpace {
   std::vector<int> blocks_of_;  // v x r: the block of each plot of each treatment
   std::vector<double> minv_;  // b x b
   mutable std::vector<double> h_;  // scratch for delta(), size b
+  mutable double first_ = 0.0, second_ = 0.0;  // the two terms of the last delta()
   double log_det_;
 };
 

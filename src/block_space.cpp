@@ -81,10 +81,7 @@ void BlockSpace::update_counts(int a, int p, int c, int q) {
   for (int x = 0; x < r_; ++x) if (bc[x] == q) { bc[x] = p; break; }
 }
 
-void BlockSpace::move(int a, int p, int c, int q) {
-  update_counts(a, p, c, q);
-  log_det_ = std::numeric_limits<double>::quiet_NaN();
-}
+
 
 bool BlockSpace::refresh() {
   // Build and invert into scratch; the state changes only on success.
@@ -110,7 +107,7 @@ void BlockSpace::h_vector(int a, int c, std::vector<double>& h) const {
     h[j] = static_cast<double>(counts_[a + v_ * j] - counts_[c + v_ * j]) / r_;
 }
 
-double BlockSpace::delta(int a, int p, int c, int q, double* scale) const {
+double BlockSpace::delta(int a, int p, int c, int q) const {
   std::vector<double>& h = h_;
   for (int j = 0; j < b_; ++j)
     h[j] = static_cast<double>(counts_[a + v_ * j] - counts_[c + v_ * j]) / r_;
@@ -125,9 +122,13 @@ double BlockSpace::delta(int a, int p, int c, int q, double* scale) const {
       if (h[l] != 0.0) gamma += h[l] * minv_[l + b_ * j] * h[j];
   }
   double beta = mh_q - mh_p;
-  double first = (1.0 - beta) * (1.0 - beta), second = alpha * (t + gamma);
-  if (scale) *scale = std::max(1.0, std::max(std::fabs(first), std::fabs(second)));
-  return first - second;
+  first_ = (1.0 - beta) * (1.0 - beta);
+  second_ = alpha * (t + gamma);
+  return first_ - second_;
+}
+
+double BlockSpace::last_scale() const {
+  return std::max(1.0, std::max(std::fabs(first_), std::fabs(second_)));
 }
 
 void BlockSpace::apply(int a, int p, int c, int q, double ratio) {

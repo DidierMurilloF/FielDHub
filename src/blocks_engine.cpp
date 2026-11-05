@@ -110,6 +110,7 @@ bool apply_swap(BlockSpace& bs, const Layout& lay, std::vector<int>& treat, int 
   if (!budget.work(4.0 * lay.b * lay.b)) return false;  // the rank-2 update
   if (++accepted % interval == 0) {
     if (!budget.spend(static_cast<double>(lay.n + lay.b))) return true;
+    if (!budget.work(refresh_work(lay))) return false;  // the drift check below is O(b^3)
     // Spec section 8: a drift alarm triggers a refresh (done here at every
     // check) and halves the interval, so a poorly conditioned state is
     // refreshed more often.
@@ -124,8 +125,18 @@ bool apply_swap(BlockSpace& bs, const Layout& lay, std::vector<int>& treat, int 
 
 // Improvement test, relative to the size of the two terms whose difference is
 // the ratio (derivation section 8, eps_rel): a gain inside their rounding
-// error is not accepted.
-bool improves(double ratio, double scale) { return ratio > 1.0 + kTie * scale; }
+// error is not accepted. The scale is read only for the rare candidates that
+// pass the absolute test, so the common rejection costs nothing extra.
+bool improves(const BlockSpace& bs, double ratio) {
+  return ratio > 1.0 + kTie && ratio > 1.0 + kTie * bs.last_scale();
+}
+
+// Escape jumps (spec section 8): a ratio clearly above zero relative to its
+// scale proves the swap keeps the design connected; in the ambiguous zone the
+// connectivity is checked exactly with union-find, because a weakly connected
+// design's Minv is large and the ratio's rounding error grows with it.
+const double kJumpSafe = 1e-6;
+const double kDisconnectRel = 1e-9;
 
 // Random swaps that never increase the number of components, until the
 // design is connected. Each check is charged one evaluation, like a swap
@@ -145,23 +156,32 @@ bool repair_connectivity(const Layout& lay, std::vector<int>& treat, Budget& bud
 }
 
 // One escape: jumps_per_escape random swaps that keep the design connected,
-// checked exactly with union-find (a ratio test is unreliable for weakly
-// connected designs), applied to the counts only and followed by one refresh.
-// Each draw is charged one evaluation. Returns false if the search must end.
+// applied with the rank-2 update. Each draw is charged one evaluation. A jump
+// from the ambiguous zone is checked exactly and, when taken, is followed at
+// once by a refresh, so later ratios come from a fresh state. Returns false if
+// the search must end.
 bool escape(BlockSpace& bs, const Layout& lay, std::vector<int>& treat, int jumps_per_escape,
-            Budget& budget, Search& out) {
+            int& accepted, int& interval, Budget& budget, Search& out) {
   int x, y;
   for (int jump = 0; jump < jumps_per_escape && !budget.stopped();) {
     if (!budget.spend(1.0)) break;
     if (!draw_swap(lay, treat, x, y)) continue;
-    std::swap(treat[x], treat[y]);
-    if (!budget.work(static_cast<double>(lay.n + lay.v + lay.b))) { std::swap(treat[x], treat[y]); break; }
-    if (components(lay, treat) != 1) { std::swap(treat[x], treat[y]); continue; }
-    bs.move(treat[y], lay.block_of[x], treat[x], lay.block_of[y]);
+    double ratio = bs.delta(treat[x], lay.block_of[x], treat[y], lay.block_of[y]);
+    double scale = bs.last_scale();
+    if (ratio <= kJumpSafe * scale) {
+      if (ratio <= kDisconnectRel * scale) continue;
+      std::swap(treat[x], treat[y]);
+      bool connected = budget.work(static_cast<double>(lay.n + lay.v + lay.b)) && components(lay, treat) == 1;
+      std::swap(treat[x], treat[y]);
+      if (!connected) continue;
+      if (!apply_swap(bs, lay, treat, x, y, ratio, accepted, interval, out, budget)) return false;
+      if (!checked_refresh(bs, lay, budget, out)) return false;
+    } else if (!apply_swap(bs, lay, treat, x, y, ratio, accepted, interval, out, budget)) {
+      return false;
+    }
     ++jump;
   }
-  // The counts may have changed even if the budget stopped mid-escape.
-  return checked_refresh(bs, lay, budget, out);
+  return true;
 }
 
 void run_search(const Layout& lay, int jumps_per_escape, int max_stale_escapes,
@@ -185,7 +205,6 @@ void run_search(const Layout& lay, int jumps_per_escape, int max_stale_escapes,
   bool ok = true;  // false once a refresh fails or the time limit ends the search
   while (ok && !budget.stopped()) {
     int x, y;
-    double scale = 1.0;
     if (exhaustive) {
       // One pass over all plot pairs in random order; stop at the end of a pass
       // without improvement (a true single-swap local optimum).
@@ -197,8 +216,8 @@ void run_search(const Layout& lay, int jumps_per_escape, int max_stale_escapes,
           if (!budget.spend(1.0)) break;
           x = order[i]; y = order[j];
           if (lay.block_of[x] == lay.block_of[y] || treat[x] == treat[y]) continue;
-          double ratio = bs->delta(treat[x], lay.block_of[x], treat[y], lay.block_of[y], &scale);
-          if (improves(ratio, scale)) {
+          double ratio = bs->delta(treat[x], lay.block_of[x], treat[y], lay.block_of[y]);
+          if (improves(*bs, ratio)) {
             if (!apply_swap(*bs, lay, treat, x, y, ratio, accepted, interval, out, budget)) { ok = false; break; }
             improved = true;
           }
@@ -211,8 +230,8 @@ void run_search(const Layout& lay, int jumps_per_escape, int max_stale_escapes,
       int fails = 0;
       while (fails < lay.n && budget.spend(1.0)) {
         if (draw_swap(lay, treat, x, y)) {
-          double ratio = bs->delta(treat[x], lay.block_of[x], treat[y], lay.block_of[y], &scale);
-          if (improves(ratio, scale)) {
+          double ratio = bs->delta(treat[x], lay.block_of[x], treat[y], lay.block_of[y]);
+          if (improves(*bs, ratio)) {
             if (!apply_swap(*bs, lay, treat, x, y, ratio, accepted, interval, out, budget)) { ok = false; break; }
             fails = 0;
             continue;
@@ -232,12 +251,17 @@ void run_search(const Layout& lay, int jumps_per_escape, int max_stale_escapes,
     } else if (++stale >= max_stale_escapes) {
       break;
     }
-    if (!escape(*bs, lay, treat, jumps_per_escape, budget, out)) { ok = false; break; }
+    if (!escape(*bs, lay, treat, jumps_per_escape, accepted, interval, budget, out)) { ok = false; break; }
   }
-  // Score the final state from scratch: the budget or time limit may have
-  // stopped mid-pass, and a failed refresh leaves the running state unusable.
-  BlockSpace fin(lay.v, lay.b, lay.r, counts_of(lay, treat));
-  if (fin.refresh() && fin.log_det() > local_best) { local_best = fin.log_det(); local_treat = treat; }
+  // Score the final state from scratch: the budget may have stopped mid-pass,
+  // and a failed refresh leaves the running state unusable. After the time
+  // limit this O(b^3) step is skipped (the run is flagged as not reproducible,
+  // and every local optimum already has a fresh score), unless no state has
+  // been scored yet.
+  if (budget.stop() != STOP_TIME || local_treat.empty()) {
+    BlockSpace fin(lay.v, lay.b, lay.r, counts_of(lay, treat));
+    if (fin.refresh() && fin.log_det() > local_best) { local_best = fin.log_det(); local_treat = treat; }
+  }
   if (!local_treat.empty() && local_best > out.best_log_det) {
     out.best_log_det = local_best;
     out.best_treat = local_treat;

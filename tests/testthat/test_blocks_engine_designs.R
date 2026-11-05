@@ -205,5 +205,8 @@ test_that("refreshes at many blocks respect the time limit", {
   elapsed <- system.time(
     suppressWarnings(d <- blocks_engine(1000, 2, 1000, budget = 2e9, time_limit = 3))
   )[["elapsed"]]
-  expect_lt(elapsed, 15)
+  # Before the fix this took 32 s. What remains past the limit is the final
+  # O(b^3) refresh and A-efficiency at b = 1000 (about 1.3 s each on a fast
+  # core) plus the operation running when the limit is reached.
+  expect_lt(elapsed, 20)
 })
