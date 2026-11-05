@@ -12,7 +12,7 @@
 #'   log determinant against a fresh computation after each accepted swap).
 #' @noRd
 blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
-                          jumps_per_escape = 10L, max_stale_escapes = 10L,
+                          jumps_per_escape = 10L, max_stale_escapes = 5L,
                           budget = NULL, time_limit = 60) {
   validate_iteration_budget(treatments, "treatments", minimum = 2)
   validate_iteration_budget(replicates, "replicates", minimum = 1)
