@@ -1,41 +1,48 @@
 // Block-space information state (derivation.md sections 4-5, gate G0).
 #include "block_space.h"
+#include <algorithm>
 #include <cmath>
 #include <limits>
 
 bool spd_inverse(std::vector<double>& a, int n, double& log_det) {
+  // L is stored row-major (l[i * n + k] = L_ik) so the inner products run over
+  // contiguous memory; the arithmetic and its order are those of the textbook
+  // column-oriented Cholesky.
   std::vector<double> l(static_cast<size_t>(n) * n, 0.0);
   log_det = 0.0;
   for (int j = 0; j < n; ++j) {
-    double d = a[j + n * j];
-    for (int k = 0; k < j; ++k) d -= l[j + n * k] * l[j + n * k];
+    const double* lj = &l[static_cast<size_t>(j) * n];
+    double d = a[j + static_cast<size_t>(n) * j];
+    for (int k = 0; k < j; ++k) d -= lj[k] * lj[k];
     // Relative pivot test: a disconnected design leaves a rounding-level pivot.
-    if (!std::isfinite(d) || d <= 1e-9 * std::fabs(a[j + n * j])) return false;
+    if (!std::isfinite(d) || d <= 1e-9 * std::fabs(a[j + static_cast<size_t>(n) * j])) return false;
     double ljj = std::sqrt(d);
-    l[j + n * j] = ljj;
+    l[static_cast<size_t>(j) * n + j] = ljj;
     log_det += 2.0 * std::log(ljj);
     for (int i = j + 1; i < n; ++i) {
-      double s = a[i + n * j];
-      for (int k = 0; k < j; ++k) s -= l[i + n * k] * l[j + n * k];
-      l[i + n * j] = s / ljj;
+      const double* li_row = &l[static_cast<size_t>(i) * n];
+      double s = a[i + static_cast<size_t>(n) * j];
+      for (int k = 0; k < j; ++k) s -= li_row[k] * lj[k];
+      l[static_cast<size_t>(i) * n + j] = s / ljj;
     }
   }
-  // Invert L (lower triangular) in place into li, then A^{-1} = li' li.
+  // Invert L (lower triangular) into li (column-major), then A^{-1} = li' li.
   std::vector<double> li(static_cast<size_t>(n) * n, 0.0);
   for (int j = 0; j < n; ++j) {
-    li[j + n * j] = 1.0 / l[j + n * j];
+    li[j + static_cast<size_t>(n) * j] = 1.0 / l[static_cast<size_t>(j) * n + j];
     for (int i = j + 1; i < n; ++i) {
+      const double* l_row = &l[static_cast<size_t>(i) * n];
       double s = 0.0;
-      for (int k = j; k < i; ++k) s -= l[i + n * k] * li[k + n * j];
-      li[i + n * j] = s / l[i + n * i];
+      for (int k = j; k < i; ++k) s -= l_row[k] * li[k + static_cast<size_t>(n) * j];
+      li[i + static_cast<size_t>(n) * j] = s / l_row[i];
     }
   }
   for (int i = 0; i < n; ++i) {
     for (int j = 0; j <= i; ++j) {
       double s = 0.0;
-      for (int k = i; k < n; ++k) s += li[k + n * i] * li[k + n * j];
-      a[i + n * j] = s;
-      a[j + n * i] = s;
+      for (int k = i; k < n; ++k) s += li[k + static_cast<size_t>(n) * i] * li[k + static_cast<size_t>(n) * j];
+      a[i + static_cast<size_t>(n) * j] = s;
+      a[j + static_cast<size_t>(n) * i] = s;
     }
   }
   return true;
@@ -43,23 +50,51 @@ bool spd_inverse(std::vector<double>& a, int n, double& log_det) {
 
 BlockSpace::BlockSpace(int v, int b, int r, const std::vector<int>& counts)
     : v_(v), b_(b), r_(r), n_(static_cast<double>(v) * r), counts_(counts),
-      sizes_(b, 0), minv_(static_cast<size_t>(b) * b, 0.0), h_(b, 0.0),
+      sizes_(b, 0), blocks_of_(static_cast<size_t>(v) * r, 0),
+      minv_(static_cast<size_t>(b) * b, 0.0), h_(b, 0.0),
       log_det_(std::numeric_limits<double>::quiet_NaN()) {
-  for (int j = 0; j < b; ++j)
-    for (int i = 0; i < v; ++i) sizes_[j] += counts_[i + v * j];
+  std::vector<int> filled(v, 0);
+  for (int j = 0; j < b; ++j) {
+    for (int i = 0; i < v; ++i) {
+      int c = counts_[i + v * j];
+      sizes_[j] += c;
+      for (int x = 0; x < c && filled[i] < r; ++x) blocks_of_[static_cast<size_t>(i) * r + filled[i]++] = j;
+    }
+  }
+}
+
+void BlockSpace::cross_counts(std::vector<double>& nn) const {
+  nn.assign(static_cast<size_t>(b_) * b_, 0.0);
+  for (int i = 0; i < v_; ++i) {
+    const int* bl = &blocks_of_[static_cast<size_t>(i) * r_];
+    for (int x = 0; x < r_; ++x)
+      for (int y = 0; y < r_; ++y) nn[bl[x] + static_cast<size_t>(b_) * bl[y]] += 1.0;
+  }
+}
+
+void BlockSpace::update_counts(int a, int p, int c, int q) {
+  counts_[a + v_ * p] -= 1; counts_[a + v_ * q] += 1;
+  counts_[c + v_ * q] -= 1; counts_[c + v_ * p] += 1;
+  int* ba = &blocks_of_[static_cast<size_t>(a) * r_];
+  for (int x = 0; x < r_; ++x) if (ba[x] == p) { ba[x] = q; break; }
+  int* bc = &blocks_of_[static_cast<size_t>(c) * r_];
+  for (int x = 0; x < r_; ++x) if (bc[x] == q) { bc[x] = p; break; }
+}
+
+void BlockSpace::move(int a, int p, int c, int q) {
+  update_counts(a, p, c, q);
+  log_det_ = std::numeric_limits<double>::quiet_NaN();
 }
 
 bool BlockSpace::refresh() {
   // Build and invert into scratch; the state changes only on success.
-  std::vector<double> bh(static_cast<size_t>(b_) * b_);
+  std::vector<double> bh;
+  cross_counts(bh);
   for (int p = 0; p < b_; ++p) {
     for (int q = 0; q <= p; ++q) {
-      double s = 0.0;
-      for (int i = 0; i < v_; ++i)
-        s += static_cast<double>(counts_[i + v_ * p]) * counts_[i + v_ * q];
-      double value = (p == q ? sizes_[p] : 0.0) - s / r_ + 1.0 / b_;
-      bh[p + b_ * q] = value;
-      bh[q + b_ * p] = value;
+      double value = (p == q ? sizes_[p] : 0.0) - bh[p + static_cast<size_t>(b_) * q] / r_ + 1.0 / b_;
+      bh[p + static_cast<size_t>(b_) * q] = value;
+      bh[q + static_cast<size_t>(b_) * p] = value;
     }
   }
   double ld = 0.0;
@@ -75,7 +110,7 @@ void BlockSpace::h_vector(int a, int c, std::vector<double>& h) const {
     h[j] = static_cast<double>(counts_[a + v_ * j] - counts_[c + v_ * j]) / r_;
 }
 
-double BlockSpace::delta(int a, int p, int c, int q) const {
+double BlockSpace::delta(int a, int p, int c, int q, double* scale) const {
   std::vector<double>& h = h_;
   for (int j = 0; j < b_; ++j)
     h[j] = static_cast<double>(counts_[a + v_ * j] - counts_[c + v_ * j]) / r_;
@@ -90,7 +125,9 @@ double BlockSpace::delta(int a, int p, int c, int q) const {
       if (h[l] != 0.0) gamma += h[l] * minv_[l + b_ * j] * h[j];
   }
   double beta = mh_q - mh_p;
-  return (1.0 - beta) * (1.0 - beta) - alpha * (t + gamma);
+  double first = (1.0 - beta) * (1.0 - beta), second = alpha * (t + gamma);
+  if (scale) *scale = std::max(1.0, std::max(std::fabs(first), std::fabs(second)));
+  return first - second;
 }
 
 void BlockSpace::apply(int a, int p, int c, int q, double ratio) {
@@ -113,8 +150,7 @@ void BlockSpace::apply(int a, int p, int c, int q, double ratio) {
     for (int j = 0; j < b_; ++j)
       minv_[i + b_ * j] += w00 * mw[i] * mw[j] + w01 * (mw[i] * mh[j] + mh[i] * mw[j]) +
                            w11 * mh[i] * mh[j];
-  counts_[a + v_ * p] -= 1; counts_[a + v_ * q] += 1;
-  counts_[c + v_ * q] -= 1; counts_[c + v_ * p] += 1;
+  update_counts(a, p, c, q);
   log_det_ += std::log(ratio);
 }
 
@@ -126,12 +162,11 @@ double BlockSpace::d_efficiency() const {
 
 double BlockSpace::a_efficiency() const {
   // S + y y', S = K^{-1/2} B K^{-1/2}, y = (k / n)^{1/2}; tr(S^+) = tr((S + y y')^{-1}) - 1.
-  std::vector<double> s(static_cast<size_t>(b_) * b_);
+  std::vector<double> s;
+  cross_counts(s);
   for (int p = 0; p < b_; ++p) {
     for (int q = 0; q <= p; ++q) {
-      double nn = 0.0;
-      for (int i = 0; i < v_; ++i)
-        nn += static_cast<double>(counts_[i + v_ * p]) * counts_[i + v_ * q];
+      double nn = s[p + static_cast<size_t>(b_) * q];
       double bpq = (p == q ? sizes_[p] : 0.0) - nn / r_;
       double value = bpq / std::sqrt(static_cast<double>(sizes_[p]) * sizes_[q]) +
                      std::sqrt(sizes_[p] / n_) * std::sqrt(sizes_[q] / n_);
@@ -147,19 +182,20 @@ double BlockSpace::a_efficiency() const {
 }
 
 double BlockSpace::drift() const {
-  std::vector<double> bh(static_cast<size_t>(b_) * b_);
+  std::vector<double> bh;
+  cross_counts(bh);
   for (int p = 0; p < b_; ++p)
-    for (int q = 0; q < b_; ++q) {
-      double s = 0.0;
-      for (int i = 0; i < v_; ++i)
-        s += static_cast<double>(counts_[i + v_ * p]) * counts_[i + v_ * q];
-      bh[p + b_ * q] = (p == q ? sizes_[p] : 0.0) - s / r_ + 1.0 / b_;
-    }
+    for (int q = 0; q < b_; ++q)
+      bh[p + static_cast<size_t>(b_) * q] =
+          (p == q ? sizes_[p] : 0.0) - bh[p + static_cast<size_t>(b_) * q] / r_ + 1.0 / b_;
   double worst = 0.0;
   for (int i = 0; i < b_; ++i)
     for (int j = 0; j < b_; ++j) {
+      // Bhat is symmetric, so row i is read as column i (contiguous).
       double s = 0.0;
-      for (int l = 0; l < b_; ++l) s += bh[i + b_ * l] * minv_[l + b_ * j];
+      const double* bi = &bh[static_cast<size_t>(b_) * i];
+      const double* mj = &minv_[static_cast<size_t>(b_) * j];
+      for (int l = 0; l < b_; ++l) s += bi[l] * mj[l];
       double e = std::fabs(s - (i == j ? 1.0 : 0.0));
       if (e > worst) worst = e;
     }

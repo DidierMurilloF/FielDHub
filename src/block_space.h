@@ -10,10 +10,16 @@ class BlockSpace {
   // positive definite (design disconnected).
   bool refresh();
   // Determinant ratio det(Bhat') / det(Bhat) for moving one plot of treatment a
-  // from block p to block q and one plot of treatment c from q to p.
-  double delta(int a, int p, int c, int q) const;
+  // from block p to block q and one plot of treatment c from q to p. If scale is
+  // given it receives max(1, (1 - beta)^2, alpha (t + gamma)), the size of the
+  // two terms whose difference is the ratio (its rounding error is relative to
+  // this scale; derivation section 8, eps_rel).
+  double delta(int a, int p, int c, int q, double* scale = nullptr) const;
   // Apply that swap, given its ratio from delta() (must be > 1e-9).
   void apply(int a, int p, int c, int q, double ratio);
+  // Move the same plots without updating Minv; the state is stale until the
+  // next successful refresh(). Used for escape jumps (checked exactly elsewhere).
+  void move(int a, int p, int c, int q);
   double log_det() const { return log_det_; }
   double d_efficiency() const;   // geometric mean of nonzero eigenvalues of C over r
   double a_efficiency() const;   // harmonic mean of nonzero eigenvalues of C over r; O(b^3)
@@ -23,10 +29,16 @@ class BlockSpace {
 
  private:
   void h_vector(int a, int c, std::vector<double>& h) const;
+  void update_counts(int a, int p, int c, int q);
+  // N'N from the per-treatment block lists in O(v r^2): entry (p, q) is
+  // sum_i N_ip N_iq, an exact integer in double, so the order of summation
+  // does not matter.
+  void cross_counts(std::vector<double>& nn) const;
   int v_, b_, r_;
   double n_;
   std::vector<int> counts_;   // v x b, column-major
   std::vector<int> sizes_;    // block sizes k_j
+  std::vector<int> blocks_of_;  // v x r: the block of each plot of each treatment
   std::vector<double> minv_;  // b x b
   mutable std::vector<double> h_;  // scratch for delta(), size b
   double log_det_;

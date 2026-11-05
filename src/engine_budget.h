@@ -9,6 +9,7 @@ class Budget {
  public:
   Budget(double cap, double time_limit)
       : cap_(cap), used_(0.0), limit_(time_limit), next_check_(10000.0),
+        work_(0.0), next_work_check_(kWorkPerCheck),
         stop_(STOP_NONE), start_(std::chrono::steady_clock::now()) {}
 
   // Spend n evaluations. Returns false, and spends nothing, once the budget or
@@ -24,6 +25,21 @@ class Budget {
     }
     return true;
   }
+  // Record dense linear-algebra work (about one unit per floating-point
+  // multiply-add) that the evaluation count does not reflect, such as refreshes
+  // and Woodbury updates at many blocks. It never touches the evaluation budget,
+  // so results do not depend on it; it only keeps the interrupt and time checks
+  // frequent. Returns false once the time limit is reached.
+  bool work(double units) {
+    if (stop_ != STOP_NONE) return false;
+    work_ += units;
+    if (work_ >= next_work_check_) {
+      next_work_check_ = work_ + kWorkPerCheck;
+      cpp11::check_user_interrupt();
+      if (elapsed() > limit_) { stop_ = STOP_TIME; return false; }
+    }
+    return true;
+  }
   double elapsed() const {
     return std::chrono::duration<double>(std::chrono::steady_clock::now() - start_).count();
   }
@@ -32,7 +48,8 @@ class Budget {
   bool stopped() const { return stop_ != STOP_NONE; }
 
  private:
-  double cap_, used_, limit_, next_check_;
+  static constexpr double kWorkPerCheck = 2e7;
+  double cap_, used_, limit_, next_check_, work_, next_work_check_;
   int stop_;
   std::chrono::steady_clock::time_point start_;
 };

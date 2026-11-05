@@ -158,3 +158,52 @@ test_that("efficiency definitions agree with blocksdesign on known optima", {
     expect_identical(round(ours[["A-Efficiency"]], 7), theirs[["A-Efficiency"]])
   }
 })
+
+test_that("weakly connected designs (n = 2b) stay connected at many blocks", {
+  skip_on_cran()
+  for (case in list(c(40, 2, 40), c(100, 2, 100), c(300, 2, 300))) {
+    for (seed in 1:3) {
+      set.seed(seed)
+      d <- blocks_engine(case[1], case[2], case[3], searches = 2L)
+      N <- engine_ref_counts(d$Design)
+      expect_identical(engine_ref_efficiency(N, 2)[["rank"]], case[1] - 1)
+      expect_equal(d$Blocks_model[["D-Efficiency"]], engine_ref_efficiency(N, 2)[["D"]],
+                   tolerance = 1e-8)
+    }
+  }
+})
+
+test_that("debug mode stays accurate on weakly connected designs", {
+  skip_on_cran()
+  old <- Sys.getenv("FIELDHUB_ENGINE_DEBUG", unset = NA)
+  on.exit(if (is.na(old)) Sys.unsetenv("FIELDHUB_ENGINE_DEBUG") else
+    Sys.setenv(FIELDHUB_ENGINE_DEBUG = old), add = TRUE)
+  Sys.setenv(FIELDHUB_ENGINE_DEBUG = "1")
+  for (case in list(c(40, 2, 40), c(150, 2, 150))) {
+    set.seed(2)
+    d <- blocks_engine(case[1], case[2], case[3], searches = 1L)
+    expect_lte(d$search$debug_max_error, 1e-8)
+  }
+})
+
+test_that("starts and refreshes fit the default budget when there are many blocks", {
+  skip_on_cran()
+  for (case in list(c(200, 2, 150), c(2000, 2, 1000))) {
+    set.seed(4)
+    d <- blocks_engine(case[1], case[2], case[3], searches = 1L)
+    expect_identical(d$search$searches_done, 1L)
+    expect_gt(d$search$refreshes, 0)
+    expect_lte(d$search$evaluations, d$search$budget)
+    N <- engine_ref_counts(d$Design)
+    expect_identical(engine_ref_efficiency(N, 2)[["rank"]], case[1] - 1)
+  }
+})
+
+test_that("refreshes at many blocks respect the time limit", {
+  skip_on_cran()
+  set.seed(5)
+  elapsed <- system.time(
+    suppressWarnings(d <- blocks_engine(1000, 2, 1000, budget = 2e9, time_limit = 3))
+  )[["elapsed"]]
+  expect_lt(elapsed, 15)
+})
