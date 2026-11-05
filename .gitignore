@@ -82,3 +82,8 @@ docs
 # Local research data, scripts, drafts, and planning documents
 /research/
 /ROADMAP.md
+
+# Compiled objects
+src/*.o
+src/*.so
+src/*.dll

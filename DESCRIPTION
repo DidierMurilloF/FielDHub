@@ -54,6 +54,8 @@ Imports:
     bslib,
     promises,
     shinyjs
+LinkingTo: cpp11
+SystemRequirements: C++17
 Encoding: UTF-8
 RoxygenNote: 7.3.2
 Author: Didier Murillo [cre, aut], Salvador Gezan [aut], Ana Heilman [ctb],
