@@ -98,6 +98,7 @@ print.summary.FielDHub <- function(x, ...) {
     NextMethod()
   } else {
     cat(entry$title, "\n\n")
+    print_details(x)
     summary_list("1. Information on the design parameters:", x$infoDesign)
     summary_str("2. Structure of the field book:", x$fieldBook)
   }

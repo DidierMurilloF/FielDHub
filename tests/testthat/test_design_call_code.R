@@ -5,6 +5,11 @@ test_that("standalone calls rebuild every catalogue result", {
     expect_type(code, "character")
     expect_true(length(code) > 0L, info = name)
     rebuilt <- suppressWarnings(eval(parse(text = code), envir = new.env(parent = baseenv())))
+    # Wall-clock timings are not deterministic content (research M3 spec 3.7)
+    if (identical(catalogue[[name]]$fun, "augmented_row_column")) {
+      rebuilt <- arc_deterministic_view(rebuilt)
+      x <- arc_deterministic_view(x)
+    }
     expect_identical(rebuilt, x, info = name)
   }
 })

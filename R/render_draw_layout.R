@@ -36,6 +36,33 @@ draw_registered_layout <- function(x, df, ...) {
   list(p1 = p1, p2 = p2, data = df)
 }
 
+#' Treatment and plot maps of augmented row-column designs
+#'
+#' The treatment map fills each check by \code{CHECKS} with the shared
+#' palette, leaves the test plots neutral and outlines the check plots, as
+#' the diagonal arrangement's entry map does. The plot-number map is neutral.
+#' @noRd
+draw_augmented_row_column_layout <- function(x, df, ...) {
+  main <- layout_title(paste0(registered_design_entry(x)$title, " "), df)
+  drawn <- df
+  drawn$CHECKS <- as.character(drawn$CHECKS)
+  checks <- unique(df$CHECKS[!is.na(df$CHECKS) & df$CHECKS != 0])
+  checks <- as.character(sort(checks))
+  colours <- c(fieldhub_layout_neutral(),
+               rep(fieldhub_layout_palette()[-1L], length.out = length(checks)))
+  names(colours) <- c("0", checks)
+  p1 <- plot_desplot(CHECKS ~ COLUMN + ROW, data = drawn, text.string = "TREATMENT",
+                     col.regions = colours, out2.string = "CHECKS",
+                     out2.gpar = list(col = "gray50", lwd = 1, lty = 1),
+                     main = main, extra_args = list(...))
+  drawn$PLOT <- sprintf("%d", as.integer(drawn$PLOT))
+  drawn$EXPT <- as.character(drawn$EXPT)
+  p2 <- plot_desplot(EXPT ~ COLUMN + ROW, data = drawn, text.string = "PLOT",
+                     col.regions = rep(fieldhub_layout_neutral(), length(unique(drawn$EXPT))),
+                     main = main, extra_args = list(...))
+  list(p1 = p1, p2 = p2, data = df)
+}
+
 # Title of a layout map, with its dimensions
 layout_title <- function(title, df) {
   paste0(title, max(as.numeric(df$ROW)), "X", max(as.numeric(df$COLUMN)))

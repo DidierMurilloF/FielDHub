@@ -52,4 +52,5 @@ $run_dev.*
 ^\.superpowers$
 ^deployment$
 ^\.mailmap$
+^\.claude$
 ^\.git$

@@ -28,6 +28,7 @@ fieldhub_control_concepts <- function() {
     reps = list(label = "Input # of Full Reps:", min = 2),
     k = list(label = "Input # of Plots per IBlock:"),
     nrows = list(label = "Input # of Rows:"),
+    ncols = list(label = "Input # of Columns:", min = 2),
     use_checks = list(label = "Add repeated checks?", value = FALSE),
     checks = list(label = "Input # of Checks:", min = 1),
     rep_checks = list(label = "Reps per Check:", value = "2"),
@@ -56,6 +57,12 @@ fieldhub_control_concepts <- function() {
     copies_per_entry = list(label = "# of Copies Per Entry:"),
     location_view = list(label = "Choose Location to View:"),
     expt_name = list(label = "Experiment Name(s):", value = "Expt1"),
+    year = list(label = "Year (blank = current):"),
+    check_direction = list(label = "Each check appears once in every:"),
+    objective = list(label = "Search objective:"),
+    advanced = list(label = "Show advanced search options", value = FALSE),
+    budget = list(label = "Search budget per location (blank = default):"),
+    time_limit = list(label = "Time limit per location in seconds (blank = none):"),
     random = list(label = "Randomize Entries?", value = TRUE),
     random_note = list(label = NULL),
     sameEntries = list(label = "Repeat entries across experiments", value = FALSE),
@@ -329,6 +336,55 @@ ctl_flag <- function(id, value = NULL, show_if = NULL, enabled_by = NULL, disabl
 #' @noRd
 ctl_preview <- function(id, text, show_if = NULL) {
   design_control(id, "preview", parse = NULL, preview = text, show_if = show_if)
+}
+
+#' A required choice with no default: the select starts on "Choose..."
+#'
+#' @description The page cannot run until a real choice is made; reading the
+#' control with "Choose..." selected raises an input error that names the
+#' choices.
+#' @param id The concept.
+#' @param choices The real choices (named for display).
+#' @param message The input error raised while nothing is chosen.
+#' @noRd
+ctl_required_select <- function(id, choices, message) {
+  choices <- c("Choose..." = "", choices)
+  design_control(id, "select", value = "", choices = choices,
+                 parse = function(value, label, values) {
+                   if (!is.character(value) || length(value) != 1L || is.na(value) ||
+                       !value %in% setdiff(choices, "")) {
+                     fieldhub_abort(message, data = list(control = label), call = NULL)
+                   }
+                   value
+                 })
+}
+
+#' Each check appears once in every column, or in every row (required)
+#' @noRd
+ctl_check_direction <- function() {
+  ctl_required_select("check_direction", c(column = "columns", row = "rows"),
+    paste0("Choose the check direction: each check appears once in every column, ",
+           "or once in every row."))
+}
+
+#' The criterion of the augmented row-column search
+#' @param selected The default objective.
+#' @noRd
+ctl_objective <- function(selected) {
+  ctl_select("objective", c("V_tt: test versus test variance" = "V_tt",
+                            "V_tc: test versus check variance" = "V_tc",
+                            "E_aug: efficiency of all comparisons" = "E_aug"),
+             selected = selected)
+}
+
+#' An optional positive number typed in a text box (blank reads as NULL)
+#' @param whole Whether it must be a whole number.
+#' @param enabled_by,show_if Optional flag that turns the control on, and
+#'   the JavaScript condition showing it.
+#' @noRd
+ctl_optional_number <- function(id, whole = TRUE, enabled_by = NULL, show_if = NULL) {
+  design_control(id, "text", value = "", enabled_by = enabled_by, show_if = show_if,
+                 parse = function(value, label, values) parse_control_optional_number(value, label, whole))
 }
 
 #' Render one sidebar control

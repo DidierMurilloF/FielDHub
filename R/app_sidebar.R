@@ -31,6 +31,9 @@ app_sidebar_layout <- function(spec) {
       location_row, list("planter"), spatial_end),
     RCBD_augmented = c(list("upload_file", c("repsExpt", "random"), "random_note",
       "repsStack", "lines", c("checks", "b")), location_row, list("planter"), spatial_end),
+    Augmented_RowCol = c(list("upload_file", c("nrows", "ncols"), "lines", "checks",
+      "check_direction", "objective"), location_row, list("planter"), spatial_end,
+      list("year", "advanced", "budget", "time_limit")),
     Diagonal = c(list("upload_file", "lines", "checks", "spread_checks", "dist_method"),
       location_row, list("planter"), spatial_end),
     diagonal_multiple = c(list("sameEntries", "upload_file", "lines", "blocks", "checks"),
@@ -67,7 +70,8 @@ app_sidebar_control <- function(control, module) {
     labels["location_names"] <- "Input the Location:"
   }
   if (module %in% c("pREPS", "multi_loc_preps")) labels["location_names"] <- "Input Location Name:"
-  if (module %in% c("Optim", "RCBD_augmented", "Diagonal", "diagonal_multiple")) {
+  if (module %in% c("Optim", "RCBD_augmented", "Augmented_RowCol", "Diagonal",
+                    "diagonal_multiple")) {
     labels["location_view"] <- "Choose location to view:"
   }
   if (module %in% c("Optim", "multi_loc_preps")) labels["rep_checks"] <- "Input # Check's Reps:"

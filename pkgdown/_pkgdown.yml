@@ -27,6 +27,8 @@ navbar:
        href: articles/optimized_arrangement.html
      - text: "Augmented Randomized Complete Block Design"
        href: articles/RCBD_augmented.html
+     - text: "Augmented Row-Column Design"
+       href: articles/augmented_row_column.html
      - text: "Partially Replicated Design"
        href: articles/partially_replicated.html
      - text: "Optimized Multi-Location P-rep"

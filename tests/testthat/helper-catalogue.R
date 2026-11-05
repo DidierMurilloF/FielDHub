@@ -138,6 +138,14 @@ catalogue <- list(
                    locationNames = c("A", "B"), seed = 31, year = 2026)
   }),
 
+  # Augmented row-column designs ---------------------------------------------
+  # Objective, method and budget are explicit: the defaults may change
+  augmented_row_column = list(fun = "augmented_row_column", family = "augmented", build = function() {
+    augmented_row_column(nrows = 12, ncols = 8, checks = 4, check_direction = "columns",
+                         objective = "V_tt", method = "staged", budget = 300,
+                         plotNumber = 101, seed = 41, year = 2026)
+  }),
+
   # Partially replicated designs and allocations -----------------------------
   partially_replicated = list(fun = "partially_replicated", family = "allocation", build = function() {
     partially_replicated(nrows = 8, ncols = 8, repGens = c(50, 7), repUnits = c(1, 2),
@@ -214,8 +222,15 @@ skip_unless_golden_platform <- function() {
 # field map is built by plot_layout() (id_design 1 to 12), the field book with
 # the ROW and COLUMN coordinates that the app exports.
 golden_view <- function(design) {
-  # The package version changes with every release, not with the design
+  # The package version changes with every release, not with the design, and
+  # wall-clock timings are not deterministic content (research M3 spec 3.7)
   if (is.list(design$metadata)) design$metadata$package_version <- NULL
+  if (is.list(design)) design$timing <- NULL
+  # The search statistics are doubles that the JSON snapshot cannot round-trip
+  # at full precision; they are recorded to 6 significant digits
+  if (inherits(design, "fieldhub_augmented_row_column")) {
+    design <- rapply(design, function(v) signif(v, 6), classes = "numeric", how = "replace")
+  }
   view <- list(design = design)
   id <- if (inherits(design, "FielDHub")) design$infoDesign$id_design else NULL
   if (is.numeric(id) && id <= 12) {
