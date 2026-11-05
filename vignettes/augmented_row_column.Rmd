@@ -115,7 +115,7 @@ The available method is `method = "staged"`: staged annealing with recoloring re
 
 In square fields ($v = s$) every row arrangement gives the same objective value, so the row phase is skipped and its share goes to the column phase.
 
-**Budget.** `budget` is the number of objective-function calls allowed per location, shared by all restarts and phases; proxy calls count against it too. The search stops when the budget is spent. Final scoring of the returned design is outside the budget. The internal parameters (restarts, recolorings, phase shares, temperatures) are fixed by the package and are not user settings. When `budget` is not given, a default budget that depends on the field size is used; this default is provisional.
+**Budget.** `budget` is the number of objective-function calls allowed per location, shared by all restarts and phases; proxy calls count against it too. The search stops when the budget is spent. Final scoring of the returned design is outside the budget. The internal parameters (restarts, recolorings, phase shares, temperatures) are fixed by the package and are not user settings. When `budget` is not given, a default budget that depends on the field size is used; the rule is stated in `?augmented_row_column`.
 
 **No silent fallback.** If no connected starting design is found within a bounded number of tries, or the budget or time limit runs out before any design is produced, the function stops with a `fieldhub_arc_search_error`; it never switches to another method.
 
@@ -158,7 +158,7 @@ $$\frac{n(v^* - 1)}{E_{\mathrm{aug}}} = \sum_{i<j} u_i u_j \operatorname{Var}(\h
 
 In square row- and column-binary designs the three criteria rank designs identically [@BaileyHaines2025]. In rectangular fields they can rank two designs differently, which is why all three are reported.
 
-The default objective is currently `"V_tt"`. This default, and the default budget, are provisional and may change in a later release; pass `objective` and `budget` explicitly when a result must be reproducible across versions. Reproduction code always records both.
+The default objective is currently `"V_tt"`. Pass `objective` and `budget` explicitly when a result must be reproducible across package versions. Reproduction code always records both.
 
 ## Check direction
 
@@ -230,12 +230,12 @@ kable(df, format = "html")
 3. **Input # of Entries:** the number of test entries (shown only without an upload). It must equal the number of test plots, $T$ = rows × columns − checks × $s$ (80).
 4. **Input # of Checks:** the number of checks, at least 2 (4).
 5. **Each check appears once in every:** `column` or `row`. No default: it must be chosen (`column`).
-6. **Search objective:** `V_tt: test versus test variance`, `V_tc: test versus check variance` or `E_aug: efficiency of all comparisons`. The value selected when the page opens is the provisional default.
+6. **Search objective:** `V_tt: test versus test variance`, `V_tc: test versus check variance` or `E_aug: efficiency of all comparisons`. The value selected when the page opens is the default, `V_tt`.
 7. **Input # of Locations:** and the location names (2; `FARGO, CASSELTON`).
 8. **Plot Order Layout:** `serpentine` or `cartesian`.
 9. **Starting Plot Number:**, **Input Experiment Name:**, **Random Seed:** as in the other spatial designs (one starting plot per location, comma separated).
 10. **Year (blank = current):** the `YEAR` column; the effective year is recorded.
-11. **Show advanced search options**: reveals **Search budget per location (blank = default):** and **Time limit per location in seconds (blank = none):**. A blank budget uses the provisional size-based default, and a time limit makes replay timing-dependent (see "Reproducing a design").
+11. **Show advanced search options**: reveals **Search budget per location (blank = default):** and **Time limit per location in seconds (blank = none):**. A blank budget uses the size-based default, and a time limit makes replay timing-dependent (see "Reproducing a design").
 
 Then, click **Run!**, then **Randomize!**. While the search runs the active tab shows "Searching for a balanced design..."; a field-scale search can take tens of seconds per location.
 
@@ -269,7 +269,7 @@ library(FielDHub)
 - `ENTRY` in the field book: `1..k` for checks and `k+1..k+T` for tests without `data`; the uploaded values with `data`.
 - `exptName` defaults to `"Expt1"`, `year` to the current year, `locationNames` to `1..l`; the effective values are recorded, so a later replay reproduces them.
 
-Then, you can enter the information describing the above design like this. A small `budget` keeps this example fast; the objective and method are given explicitly because the defaults are provisional.
+Then, you can enter the information describing the above design like this. A small `budget` keeps this example fast; the objective and method are given explicitly so the example does not depend on the defaults.
 
 ```{r, echo = TRUE}
 arc <- augmented_row_column(

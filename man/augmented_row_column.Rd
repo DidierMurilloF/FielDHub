@@ -53,17 +53,18 @@ of distinct, nonmissing, nonblank labels must have that length. Must be
 (minimize the mean variance of test-versus-test comparisons),
 \code{"V_tc"} (minimize the mean variance of test-versus-check
 comparisons) or \code{"E_aug"} (maximize the harmonic-mean efficiency of
-all treatment comparisons). The default, \code{"V_tt"}, is
-\strong{provisional pending the M2 benchmark} and may change before
-release; reproduction code always states the objective explicitly.}
+all treatment comparisons). The default is \code{"V_tt"}.
+Pass \code{objective} explicitly when a result must be reproducible
+across package versions; reproduction code always states it.}
 
 \item{method}{Search method. Only \code{"staged"} (staged annealing with
 recolouring restarts) is available.}
 
 \item{budget}{Objective-function calls allowed per location, a positive
 whole number. \code{NULL} (default) uses 60,000 calls when
-\code{v * s <= 600} and 100,000 above (provisional, like the default
-objective). The recorded parameters keep the effective value.}
+\code{v * s <= 600} and 100,000 above. Pass \code{budget}
+explicitly when a result must be reproducible across package versions.
+The recorded parameters keep the effective value.}
 
 \item{time_limit}{Optional per-location search cutoff, in seconds of
 wall-clock time, or \code{NULL} (default) for none. See "Search, budget
