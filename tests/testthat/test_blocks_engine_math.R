@@ -98,3 +98,16 @@ test_that("drift stays below 1e-8 over 10,000 accepted swaps with refreshes", {
   expect_identical(rowSums(final), rep(as.double(r), v))
   expect_lte(abs(probe$d_efficiency - engine_ref_efficiency(final, r)[["D"]]), 1e-10)
 })
+
+test_that("the A-bound is valid and exact for the (7, 3, 1) BIBD", {
+  set.seed(15)
+  for (case in seq_len(200)) {
+    v <- sample(4:30, 1); b <- sample(2:12, 1); r <- sample(1:6, 1)
+    if (v * r < v + b - 1 || v * r < 2 * b) next
+    N <- engine_ref_random_counts(v, r, b)
+    ref <- engine_ref_efficiency(N, r)
+    if (ref[["rank"]] < v - 1) next
+    expect_lte(ref[["A"]], block_a_bound(v, r, colSums(N)) + 1e-10)
+  }
+  expect_equal(block_a_bound(7, 3, rep(3, 7)), 7 / 9, tolerance = 1e-12)
+})

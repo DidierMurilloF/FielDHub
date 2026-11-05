@@ -12,6 +12,13 @@ extern "C" SEXP _FielDHub_block_space_probe_cpp(SEXP counts, SEXP v, SEXP b, SEX
     return cpp11::as_sexp(block_space_probe_cpp(cpp11::as_cpp<cpp11::decay_t<cpp11::integers>>(counts), cpp11::as_cpp<cpp11::decay_t<int>>(v), cpp11::as_cpp<cpp11::decay_t<int>>(b), cpp11::as_cpp<cpp11::decay_t<int>>(r), cpp11::as_cpp<cpp11::decay_t<cpp11::integers>>(swaps), cpp11::as_cpp<cpp11::decay_t<int>>(refresh_every)));
   END_CPP11
 }
+// blocks_engine.cpp
+cpp11::list blocks_engine_cpp(int v, int r, int b, int searches, int jumps_per_escape, int max_stale_escapes, double budget, double time_limit, bool debug);
+extern "C" SEXP _FielDHub_blocks_engine_cpp(SEXP v, SEXP r, SEXP b, SEXP searches, SEXP jumps_per_escape, SEXP max_stale_escapes, SEXP budget, SEXP time_limit, SEXP debug) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(blocks_engine_cpp(cpp11::as_cpp<cpp11::decay_t<int>>(v), cpp11::as_cpp<cpp11::decay_t<int>>(r), cpp11::as_cpp<cpp11::decay_t<int>>(b), cpp11::as_cpp<cpp11::decay_t<int>>(searches), cpp11::as_cpp<cpp11::decay_t<int>>(jumps_per_escape), cpp11::as_cpp<cpp11::decay_t<int>>(max_stale_escapes), cpp11::as_cpp<cpp11::decay_t<double>>(budget), cpp11::as_cpp<cpp11::decay_t<double>>(time_limit), cpp11::as_cpp<cpp11::decay_t<bool>>(debug)));
+  END_CPP11
+}
 // engine_rng.cpp
 cpp11::integers engine_draw_indices_cpp(int n, int m);
 extern "C" SEXP _FielDHub_engine_draw_indices_cpp(SEXP n, SEXP m) {
@@ -23,6 +30,7 @@ extern "C" SEXP _FielDHub_engine_draw_indices_cpp(SEXP n, SEXP m) {
 extern "C" {
 static const R_CallMethodDef CallEntries[] = {
     {"_FielDHub_block_space_probe_cpp",   (DL_FUNC) &_FielDHub_block_space_probe_cpp,   6},
+    {"_FielDHub_blocks_engine_cpp",       (DL_FUNC) &_FielDHub_blocks_engine_cpp,       9},
     {"_FielDHub_engine_draw_indices_cpp", (DL_FUNC) &_FielDHub_engine_draw_indices_cpp, 2},
     {NULL, NULL, 0}
 };
