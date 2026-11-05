@@ -7,9 +7,15 @@
 # seeds for every case.
 # Rows are appended as they finish; rerunning with the same path resumes and
 # skips (case, seed) rows already present. A summary is written to <results>.md.
+# Optional shard=i/k runs only shard i of k: cases are spread over shards by
+# longest-processing-time on the estimated cost (v s)^2 x seeds. Run each shard
+# on its own core with its own results path, concatenate the shard CSVs into one
+# results path, then run once without shard= to write the combined summary.
 arguments <- commandArgs(trailingOnly = TRUE)
-if (length(arguments) < 2L || length(arguments) > 3L) {
-  stop("Usage: Rscript tools/benchmark-blocks-engine.R results.csv <A|smoke|seeds> [package-library]")
+shard_arg <- grep("^shard=", arguments, value = TRUE)
+arguments <- setdiff(arguments, shard_arg)
+if (length(arguments) < 2L || length(arguments) > 3L || length(shard_arg) > 1L) {
+  stop("Usage: Rscript tools/benchmark-blocks-engine.R results.csv <A|smoke|seeds> [package-library] [shard=i/k]")
 }
 path <- arguments[1]
 protocol <- arguments[2]
@@ -32,6 +38,20 @@ grid <- do.call(rbind, lapply(c(20, 50, 100, 300, 600, 1000, 2000), function(v) 
     data.frame(v = v, L = L, s = s[s >= 2])
   }))
 }))
+if (length(shard_arg) == 1L) {
+  ik <- as.integer(strsplit(sub("^shard=", "", shard_arg), "/", fixed = TRUE)[[1]])
+  if (length(ik) != 2L || anyNA(ik) || ik[2] < 1L || ik[1] < 1L || ik[1] > ik[2]) {
+    stop("shard= must be i/k with 1 <= i <= k.")
+  }
+  cost <- (grid$v * grid$s)^2 * vapply(grid$v, seeds_for, integer(1))
+  load <- numeric(ik[2])
+  owner <- integer(nrow(grid))
+  for (i in order(-cost, seq_along(cost))) {
+    owner[i] <- which.min(load)
+    load[owner[i]] <- load[owner[i]] + cost[i]
+  }
+  grid <- grid[owner == ik[1], , drop = FALSE]
+}
 done <- if (file.exists(path)) utils::read.csv(path) else NULL
 timed <- function(expr) {
   gc()
