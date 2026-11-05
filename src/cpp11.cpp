@@ -5,6 +5,13 @@
 #include "cpp11/declarations.hpp"
 #include <R_ext/Visibility.h>
 
+// block_space_probe.cpp
+cpp11::list block_space_probe_cpp(cpp11::integers counts, int v, int b, int r, cpp11::integers swaps, int refresh_every);
+extern "C" SEXP _FielDHub_block_space_probe_cpp(SEXP counts, SEXP v, SEXP b, SEXP r, SEXP swaps, SEXP refresh_every) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(block_space_probe_cpp(cpp11::as_cpp<cpp11::decay_t<cpp11::integers>>(counts), cpp11::as_cpp<cpp11::decay_t<int>>(v), cpp11::as_cpp<cpp11::decay_t<int>>(b), cpp11::as_cpp<cpp11::decay_t<int>>(r), cpp11::as_cpp<cpp11::decay_t<cpp11::integers>>(swaps), cpp11::as_cpp<cpp11::decay_t<int>>(refresh_every)));
+  END_CPP11
+}
 // engine_rng.cpp
 cpp11::integers engine_draw_indices_cpp(int n, int m);
 extern "C" SEXP _FielDHub_engine_draw_indices_cpp(SEXP n, SEXP m) {
@@ -15,6 +22,7 @@ extern "C" SEXP _FielDHub_engine_draw_indices_cpp(SEXP n, SEXP m) {
 
 extern "C" {
 static const R_CallMethodDef CallEntries[] = {
+    {"_FielDHub_block_space_probe_cpp",   (DL_FUNC) &_FielDHub_block_space_probe_cpp,   6},
     {"_FielDHub_engine_draw_indices_cpp", (DL_FUNC) &_FielDHub_engine_draw_indices_cpp, 2},
     {NULL, NULL, 0}
 };
