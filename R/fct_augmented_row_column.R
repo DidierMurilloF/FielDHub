@@ -28,15 +28,16 @@
 #'   (minimize the mean variance of test-versus-test comparisons),
 #'   \code{"V_tc"} (minimize the mean variance of test-versus-check
 #'   comparisons) or \code{"E_aug"} (maximize the harmonic-mean efficiency of
-#'   all treatment comparisons). The default, \code{"V_tt"}, is
-#'   \strong{provisional pending the M2 benchmark} and may change before
-#'   release; reproduction code always states the objective explicitly.
+#'   all treatment comparisons). The default is \code{"V_tt"}.
+#'   Pass \code{objective} explicitly when a result must be reproducible
+#'   across package versions; reproduction code always states it.
 #' @param method Search method. Only \code{"staged"} (staged annealing with
 #'   recolouring restarts) is available.
 #' @param budget Objective-function calls allowed per location, a positive
 #'   whole number. \code{NULL} (default) uses 60,000 calls when
-#'   \code{v * s <= 600} and 100,000 above (provisional, like the default
-#'   objective). The recorded parameters keep the effective value.
+#'   \code{v * s <= 600} and 100,000 above. Pass \code{budget}
+#'   explicitly when a result must be reproducible across package versions.
+#'   The recorded parameters keep the effective value.
 #' @param time_limit Optional per-location search cutoff, in seconds of
 #'   wall-clock time, or \code{NULL} (default) for none. See "Search, budget
 #'   and time limit" below.
@@ -301,9 +302,9 @@ augmented_row_column <- function(nrows, ncols, checks, check_direction,
   new_fieldhub_design(output, "augmented_row_column", parameters)
 }
 
-#' Provisional defaults of augmented_row_column()
+#' Defaults of augmented_row_column()
 #'
-#' Provisional until the M2 gate (M3 specification, [M2 gate] items): the
+#' Frozen with method freeze m2-method-r1-20261103: the
 #' default objective, the accepted search methods and the evaluation budget
 #' by field size. The code reads them only from here: the `objective`
 #' default of the signature, the `method` check and `arc_default_budget()`.
@@ -313,7 +314,7 @@ augmented_row_column <- function(nrows, ncols, checks, check_direction,
 #'   `budget_small` calls when `v * s <= budget_cells`, `budget_large` above.
 #' @noRd
 arc_design_defaults <- function() {
-  # provisional until the M2 gate (spec [M2 gate] items)
+  # frozen with m2-method-r1-20261103
   list(objective = "V_tt", methods = "staged", budget_cells = 600,
        budget_small = 60000, budget_large = 100000)
 }

@@ -18,6 +18,34 @@ knitr::opts_chunk$set(
 
 # Changelog
 
+# FielDHub 1.7.0
+
+## New design
+
+- `augmented_row_column()` generates augmented row-column designs: replicated
+  checks and unreplicated test entries in a complete rectangular field, with
+  every check appearing exactly once in every field line along a chosen
+  `check_direction` ("columns" or "rows") and every test entry appearing once.
+  The check positions are chosen by a staged annealing search under one of
+  three criteria: `V_tt` (the default; mean variance of test-versus-test
+  comparisons), `V_tc` (test-versus-check) or `E_aug` (harmonic-mean efficiency
+  of all treatment comparisons), with fixed row and column effects. The search
+  is FielDHub's own method, not part of the published construction. Several
+  locations are supported, and the field book includes a `CHECK_DIRECTION`
+  column. Fields with fewer than 10 residual degrees of freedom raise a
+  warning. Results record the seed and replay exactly with `reproduce_design()`
+  within the same environment (package and R versions, BLAS/LAPACK library
+  and thread count, and platform).
+- The app has a new page, Augmented Row-Column, under Unreplicated Designs.
+- A new vignette, "Augmented Row-Column Design", is added to the Articles
+  menu.
+- The design arguments vocabulary gains `entries`: the test entries excluding
+  checks, as a count or as a vector of labels (see
+  `help("design_arguments", package = "FielDHub")`).
+- The construction follows Piepho and Williams (2026); the square-array
+  foundation follows Bailey and Haines (2025). Existing designs are
+  unchanged.
+
 # FielDHub 1.6.0
 
 ## Release highlights
