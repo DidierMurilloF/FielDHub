@@ -4805,7 +4805,7 @@
                     "names": {
                       "type": "character",
                       "attributes": {},
-                      "value": ["X", "starting_dist", "stop_iter", "lambda", "dist_method", "candidate_sample_size", "seed"]
+                      "value": ["X", "starting_dist", "stop_iter", "lambda", "dist_method", "candidate_sample_size", "seed", "rowcol_penalty", "rowcol_scope"]
                     }
                   },
                   "value": [
@@ -4849,6 +4849,16 @@
                       "type": "double",
                       "attributes": {},
                       "value": [39]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [0]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["pairs"]
                     }
                   ]
                 }
