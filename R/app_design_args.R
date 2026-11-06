@@ -594,7 +594,8 @@ design_args_Optim <- function(values, data = NULL) {
 #' ignored when `data` supplies the ENTRY/NAME/REPS list), `planter`, `l`,
 #' `plot_start`, `seed`, `expt_name`, `location_names`, `allow_fillers`.
 #' The optimizer's `border_penalization`/`dist_method` keep their API
-#' defaults, as the module has no control for them.
+#' defaults; `rowcol_distinct` (the "Keep copies in distinct rows and
+#' columns" box) maps to `rowcol_penalty = Inf`, unchecked to 0.
 #' @noRd
 design_args_pREPS <- function(values, data = NULL) {
   generated <- is.null(data)
@@ -610,7 +611,8 @@ design_args_pREPS <- function(values, data = NULL) {
     exptName = values[["expt_name"]],
     locationNames = values[["location_names"]],
     data = data,
-    allow_fillers = values[["allow_fillers"]] %||% FALSE
+    allow_fillers = values[["allow_fillers"]] %||% FALSE,
+    rowcol_penalty = if (isTRUE(values[["rowcol_distinct"]])) Inf else 0
   )
 }
 
@@ -643,8 +645,8 @@ design_args_multi_loc_preps_optim <- function(values, data = NULL) {
 #'
 #' `values`: the `design_args_multi_loc_preps_optim()` values plus `nrows`
 #' and `ncols` (one per location), `planter`, `plot_start`, `expt_name`,
-#' `location_names`, `optim_list` (the allocation computed at Run!) and
-#' `allow_fillers`.
+#' `location_names`, `optim_list` (the allocation computed at Run!),
+#' `allow_fillers` and `rowcol_distinct`.
 #'
 #' The uploaded `data` goes with `optim_list`, so `multi_location_prep()`
 #' merges it into the locations (the module used to call
@@ -652,7 +654,9 @@ design_args_multi_loc_preps_optim <- function(values, data = NULL) {
 #' arguments the engine tests with `missing()` are left out when the app
 #' cannot fill them, and misfit starting plots become the engine's own
 #' default, `default_plot_starts(l, 1)` (ruling R9). The optimizer settings
-#' stay the engine's fixed ones: the module has no control for them.
+#' stay the engine's fixed ones, except `rowcol_distinct` (the "Keep copies
+#' in distinct rows and columns" box), which maps to `rowcol_penalty = Inf`,
+#' unchecked to 0.
 #' @noRd
 design_args_multi_loc_preps <- function(values, data = NULL) {
   l <- as_design_number(values[["l"]])
@@ -672,7 +676,8 @@ design_args_multi_loc_preps <- function(values, data = NULL) {
     optim_list = values[["optim_list"]],
     seed = as_design_number(values[["seed"]]),
     data = data,
-    allow_fillers = values[["allow_fillers"]] %||% FALSE
+    allow_fillers = values[["allow_fillers"]] %||% FALSE,
+    rowcol_penalty = if (isTRUE(values[["rowcol_distinct"]])) Inf else 0
   )
   drop_null_args(args, c("nrows", "ncols", "exptName", "locationNames", "optim_list"))
 }

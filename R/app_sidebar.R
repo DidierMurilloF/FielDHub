@@ -27,7 +27,7 @@ app_sidebar_layout <- function(spec) {
     RowCol = c(list("upload_file", "t", c("nrows", "reps"), "l"), classic_end),
     Optim = c(list("upload_file", "checks", "rep_checks", "lines", "planter"),
       location_row, spatial_end),
-    pREPS = c(list("upload_file", "repGens", "repUnits", "allow_fillers"),
+    pREPS = c(list("upload_file", "repGens", "repUnits", "allow_fillers", "rowcol_distinct"),
       location_row, list("planter"), spatial_end),
     RCBD_augmented = c(list("upload_file", c("repsExpt", "random"), "random_note",
       "repsStack", "lines", c("checks", "b")), location_row, list("planter"), spatial_end),
@@ -38,7 +38,7 @@ app_sidebar_layout <- function(spec) {
     sparse_allocation = c(list("upload_file", "lines", "checks"), location_row,
       list("copies_per_entry", "planter"), spatial_end),
     multi_loc_preps = c(list("upload_file", "lines", "use_checks", c("checks", "rep_checks")),
-      location_row, list("copies_per_entry", "planter", "allow_fillers"), spatial_end),
+      location_row, list("copies_per_entry", "planter", "allow_fillers", "rowcol_distinct"), spatial_end),
     c(list("upload_file"), as.list(vapply(spec$controls, `[[`, "", "id")))
   )
   if (is.null(spec$upload)) rows <- Filter(function(row) !identical(row, "upload_file"), rows)
