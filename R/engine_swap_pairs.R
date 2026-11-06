@@ -216,6 +216,18 @@ swap_pairs_core <- function(X, starting_dist = 3, stop_iter = 10, lambda = 0.5,
   genos <- unique(init_pd$geno)
   w <- 2L
 
+  # Cell index: entry codes per linear cell and each entry's cells in
+  # increasing linear index (the order of which()). Updated in O(k) per swap.
+  cell_values <- as.vector(X)
+  active_cells <- which(!is.na(cell_values))
+  entry_values <- sort(unique(cell_values[active_cells]))
+  cell_code <- match(cell_values, entry_values)
+  entry_cells <- split(active_cells, factor(cell_code[active_cells], levels = seq_along(entry_values)))
+  names(entry_cells) <- NULL
+  templates <- .pair_templates(max(lengths(entry_cells)))
+  cell_row <- row(X)[active_cells]
+  cell_col <- col(X)[active_cells]
+
   # Guard against a reversed/empty threshold range: on very small fields the
   # field diagonal (minDist) can be shorter than starting_dist, which would make
   # seq(starting_dist, minDist, 1) error with "wrong sign in 'by' argument".
@@ -252,16 +264,21 @@ swap_pairs_core <- function(X, starting_dist = 3, stop_iter = 10, lambda = 0.5,
 
       # ---- (B) Resolve each violating genotype --------------------------
       for (genotype in low_dist_gens) {
-        geno_rc <- which(X == genotype, arr.ind = TRUE)
+        # Snapshot of the entry's cells and of its candidate cells, taken
+        # once before any of its copies move (as the full-field version did).
+        code <- match(genotype, entry_values)
+        geno_cells <- entry_cells[[code]]
+        geno_r <- ((geno_cells - 1L) %% nr) + 1L
+        geno_c <- ((geno_cells - 1L) %/% nr) + 1L
 
         # Inactive cells are fixed geometry, not swap candidates.
-        other_mask <- !is.na(X) & X != genotype
-        other_r <- row(X)[other_mask]
-        other_c <- col(X)[other_mask]
+        other <- cell_code[active_cells] != code
+        other_r <- cell_row[other]
+        other_c <- cell_col[other]
 
-        for (i in seq_len(nrow(geno_rc))) {
-          r0 <- geno_rc[i, 1L]
-          c0 <- geno_rc[i, 2L]
+        for (i in seq_along(geno_cells)) {
+          r0 <- geno_r[i]
+          c0 <- geno_c[i]
 
           # ---- (C) Vectorised distance to every other cell --------------
           d <- dist_fn(r0, c0, other_r, other_c)
@@ -280,13 +297,18 @@ swap_pairs_core <- function(X, starting_dist = 3, stop_iter = 10, lambda = 0.5,
             nv <- candidate_sample_size
           }
 
-          # ---- (E) Score candidates — no pairs_distance() call ----------
+          # ---- (E) Score candidates from the cell index -----------------
+          a <- (c0 - 1L) * nr + r0
+          code_a <- cell_code[a]
+          cells_a <- entry_cells[[code_a]]
           scores <- numeric(nv)
           deltas <- numeric(nv)
           for (j in seq_len(nv)) {
-            res <- .score_swap(
-              X, r0, c0, v_r[j], v_c[j],
-              lambda, center, base_sum, n_pairs, dist_method
+            b <- (v_c[j] - 1L) * nr + v_r[j]
+            code_b <- cell_code[b]
+            res <- .score_swap_cells(
+              cells_a, entry_cells[[code_b]], a, b, v_r[j], v_c[j], code_b == code_a,
+              lambda, center, base_sum, n_pairs, nr, dist_method, templates
             )
             scores[j] <- res$score
             deltas[j] <- res$delta
@@ -299,6 +321,15 @@ swap_pairs_core <- function(X, starting_dist = 3, stop_iter = 10, lambda = 0.5,
           tmp <- X[rb, cb]
           X[rb, cb] <- X[r0, c0]
           X[r0, c0] <- tmp
+          b <- (cb - 1L) * nr + rb
+          code_b <- cell_code[b]
+          if (code_b != code_a) {
+            entry_cells[[code_a]] <- sort.int(c(cells_a[cells_a != a], b))
+            cells_b <- entry_cells[[code_b]]
+            entry_cells[[code_b]] <- sort.int(c(cells_b[cells_b != b], a))
+            cell_code[a] <- code_b
+            cell_code[b] <- code_a
+          }
 
           # ---- (G) Update base_sum — pure arithmetic, zero allocations --
           base_sum <- base_sum + deltas[best]
