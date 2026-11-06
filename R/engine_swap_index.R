@@ -93,3 +93,70 @@
   } else sqrt((rj - center[1L])^2 + (cj - center[2L])^2)
   list(score = adjusted_mean - lambda * candidate_center_dist, delta = delta)
 }
+
+#' Shared pairs s(g) of one entry: pairs of its cells in one row plus pairs in
+#' one column (distinct cells never share both)
+#' @noRd
+.shared_pairs <- function(cells, nr) {
+  if (length(cells) < 2L) return(0L)
+  rows <- ((cells - 1L) %% nr) + 1L
+  cols <- ((cells - 1L) %/% nr) + 1L
+  tr <- tabulate(rows)
+  tc <- tabulate(cols)
+  as.integer(sum(tr * (tr - 1L)) %/% 2L + sum(tc * (tc - 1L)) %/% 2L)
+}
+
+#' Change in S for swapping cells a and b (entries code_a at a, code_b at b)
+#'
+#' Zero when both cells hold one entry (the swap is the identity; spec 5.5 M1).
+#' Only covered entries count.
+#' @noRd
+.shared_delta <- function(cells_a, cells_b, a, b, same, covered_a, covered_b, nr) {
+  if (same) return(0L)
+  d <- 0L
+  if (covered_a) d <- d + .shared_pairs(sort.int(c(cells_a[cells_a != a], b)), nr) - .shared_pairs(cells_a, nr)
+  if (covered_b) d <- d + .shared_pairs(sort.int(c(cells_b[cells_b != b], a)), nr) - .shared_pairs(cells_b, nr)
+  d
+}
+
+#' Pick the candidate under the row/column rule (spec 5.3 item 2)
+#'
+#' Finite weight: largest score - weight * dS. Infinite weight (strict): smallest
+#' dS, then largest score. Ties go to the first candidate. When `require_gain`
+#' is TRUE only candidates with dS < 0 qualify; returns NA if none does.
+#' @noRd
+.rowcol_pick <- function(scores, dS, weight, require_gain) {
+  eligible <- if (require_gain) which(dS < 0L) else seq_along(scores)
+  if (length(eligible) == 0L) return(NA_integer_)
+  if (is.infinite(weight)) {
+    tied <- eligible[dS[eligible] == min(dS[eligible])]
+    return(tied[which.max(scores[tied])])
+  }
+  eligible[which.max(scores[eligible] - weight * dS[eligible])]
+}
+
+#' Check the row/column rule controls (spec 5.2); Inf is the strict setting
+#' @noRd
+validate_rowcol_controls <- function(rowcol_penalty, rowcol_scope) {
+  if (!is.numeric(rowcol_penalty) || is.complex(rowcol_penalty) || !is.null(dim(rowcol_penalty)) ||
+      length(rowcol_penalty) != 1L || is.na(rowcol_penalty) || rowcol_penalty < 0) {
+    fieldhub_abort("`rowcol_penalty` must be one number at least 0, or Inf.")
+  }
+  if (!is.character(rowcol_scope) || length(rowcol_scope) != 1L || is.na(rowcol_scope) ||
+      !rowcol_scope %in% c("pairs", "all")) {
+    fieldhub_abort("`rowcol_scope` must be \"pairs\" or \"all\".")
+  }
+  invisible(NULL)
+}
+
+#' Check the row/column rule controls of the p-rep designs (spec-m15 5.2):
+#' the rule needs the optimizer, so it conflicts with `spread_reps = FALSE`
+#' @noRd
+validate_prep_rowcol <- function(rowcol_penalty, rowcol_scope, spread_reps) {
+  validate_rowcol_controls(rowcol_penalty, rowcol_scope)
+  if (rowcol_penalty > 0 && !isTRUE(spread_reps)) {
+    fieldhub_abort("`rowcol_penalty` needs the spreading optimizer; set `spread_reps = TRUE` ",
+                   "or `rowcol_penalty = 0`.")
+  }
+  invisible(NULL)
+}
