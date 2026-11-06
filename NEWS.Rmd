@@ -18,6 +18,24 @@ knitr::opts_chunk$set(
 
 # Changelog
 
+# FielDHub (development version)
+
+### Enhancements:
+
+- The p-rep spreading optimizer (`swap_pairs()`, and the optimizer inside
+  `partially_replicated()`, `multi_location_prep()` and
+  `optimized_arrangement()`) is much faster, about 40 to 60 times on a
+  3,000-plot field. Its pair distances are built in one vectorized pass, and
+  candidate swaps are scored from a coordinate index. Every layout is unchanged
+  for the same seed.
+- New opt-in rule that keeps the copies of a replicated entry in distinct rows
+  and columns: `rowcol_penalty` (default 0, off) and `rowcol_scope` in
+  `swap_pairs()`, `partially_replicated()` and `multi_location_prep()`, and a
+  "Keep copies in distinct rows and columns" box in both p-rep modules of the
+  app. `rowcol_penalty = Inf` puts distinct rows and columns first, and the
+  shared pairs left are reported in `infoDesign$shared_pairs`. With the default,
+  every layout is unchanged.
+
 # FielDHub 1.6.0
 
 ## Release highlights
