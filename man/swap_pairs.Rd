@@ -62,7 +62,7 @@ A list containing:
 \item{optim_design}{The modified matrix.}
 \item{designs}{A list of the retained threshold layouts, starting from the input matrix;
 with the row/column rule on, it ends at the kept layout.}
-\item{distances}{A list of all pair distances for each intermediate design.}
+\item{distances}{A list of the pair distances of each layout in \code{designs}.}
 \item{min_distance}{The minimum distance between pairs of occurrences of the same integer in the final design.}
 \item{pairwise_distance}{A data frame with the pairwise distances for the final design.}
 \item{rows_incidence}{Row-repetition counts for retained threshold steps,

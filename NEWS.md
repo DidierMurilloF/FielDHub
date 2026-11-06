@@ -9,7 +9,7 @@
 
 - The p-rep spreading optimizer (`swap_pairs()`, and the optimizer inside
   `partially_replicated()`, `multi_location_prep()` and
-  `optimized_arrangement()`) is much faster, about 40 to 60 times on a
+  `optimized_arrangement()`) is much faster, about 50 times on a
   3,000-plot field. Its pair distances are built in one vectorized pass, and
   candidate swaps are scored from a coordinate index. Every layout is unchanged
   for the same seed.

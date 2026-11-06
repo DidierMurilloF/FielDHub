@@ -43,7 +43,7 @@ test_that(".shared_delta() equals the brute-force change in S on random swaps", 
 })
 
 test_that("shared delta is zero for same-entry swaps", {
-  # two copies in distinct rows and columns: the M1 formula would give 4
+  # two copies in distinct rows and columns: the M1 formula would give 4 (spec M1 condition)
   expect_identical(.shared_delta(c(1L, 4L), c(1L, 4L), 1L, 4L, TRUE, TRUE, TRUE, 2L), 0L)
 })
 
@@ -117,9 +117,11 @@ test_that("unfixable entries do not stall the sweeps", {
   set.seed(4)
   X <- matrix(as.numeric(sample(c(rep(1:3, each = 5L), 4:36))), 4)
   set.seed(4)
-  on <- swap_pairs_core(X, starting_dist = 1, stop_iter = 50, rowcol_penalty = Inf, rowcol_scope = "all")
-  # every threshold ends within its sweep budget even though S cannot reach 0
-  expect_lte(on$diagnostics$iterations, 50 * on$diagnostics$thresholds_attempted)
+  on <- swap_pairs_core(X, starting_dist = 1, stop_iter = 1000, rowcol_penalty = Inf, rowcol_scope = "all")
+  # The sweep-stop rule must end every successful threshold early even though
+  # S cannot reach 0: only a failing threshold may use the full sweep budget.
+  budget_used <- 1000 * (on$diagnostics$stop_reason == "iteration_limit")
+  expect_lt(on$diagnostics$iterations - budget_used, 100)
   expect_gt(on$diagnostics$shared_pairs_final, 0L)
   expect_lte(on$diagnostics$shared_pairs_final, on$diagnostics$shared_pairs_input)
 })
