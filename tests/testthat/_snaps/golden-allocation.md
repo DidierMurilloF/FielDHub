@@ -507,7 +507,7 @@
                     "names": {
                       "type": "character",
                       "attributes": {},
-                      "value": ["nrows", "ncols", "repGens", "repUnits", "planter", "l", "plotNumber", "spread_reps", "seed", "exptName", "locationNames", "multiLocationData", "dist_method", "border_penalization", "data", "allow_fillers", "year"]
+                      "value": ["nrows", "ncols", "repGens", "repUnits", "planter", "l", "plotNumber", "spread_reps", "seed", "exptName", "locationNames", "multiLocationData", "dist_method", "border_penalization", "data", "allow_fillers", "year", "rowcol_penalty", "rowcol_scope"]
                     }
                   },
                   "value": [
@@ -591,6 +591,16 @@
                       "type": "character",
                       "attributes": {},
                       "value": ["2026"]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [0]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["pairs"]
                     }
                   ]
                 }
@@ -1110,7 +1120,7 @@
                     "names": {
                       "type": "character",
                       "attributes": {},
-                      "value": ["nrows", "ncols", "repGens", "repUnits", "planter", "l", "plotNumber", "spread_reps", "seed", "exptName", "locationNames", "multiLocationData", "dist_method", "border_penalization", "data", "allow_fillers", "year"]
+                      "value": ["nrows", "ncols", "repGens", "repUnits", "planter", "l", "plotNumber", "spread_reps", "seed", "exptName", "locationNames", "multiLocationData", "dist_method", "border_penalization", "data", "allow_fillers", "year", "rowcol_penalty", "rowcol_scope"]
                     }
                   },
                   "value": [
@@ -1194,6 +1204,16 @@
                       "type": "character",
                       "attributes": {},
                       "value": ["2026"]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [0]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["pairs"]
                     }
                   ]
                 }
@@ -2376,7 +2396,7 @@
                     "names": {
                       "type": "character",
                       "attributes": {},
-                      "value": ["lines", "nrows", "ncols", "l", "planter", "plotNumber", "copies_per_entry", "checks", "rep_checks", "exptName", "locationNames", "seed", "spread_reps", "data", "allow_fillers", "max_fillers", "year"]
+                      "value": ["lines", "nrows", "ncols", "l", "planter", "plotNumber", "copies_per_entry", "checks", "rep_checks", "exptName", "locationNames", "seed", "spread_reps", "data", "allow_fillers", "max_fillers", "year", "rowcol_penalty", "rowcol_scope"]
                     }
                   },
                   "value": [
@@ -2460,6 +2480,16 @@
                       "type": "character",
                       "attributes": {},
                       "value": ["2026"]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [0]
+                    },
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["pairs"]
                     }
                   ]
                 }

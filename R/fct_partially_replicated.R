@@ -46,6 +46,16 @@
 #' 
 #' @param year (optional) Year recorded in the \code{YEAR} column of the field book.
 #' By default the current year.
+#' @param rowcol_penalty Weight of the rule that keeps the copies of a
+#' replicated entry in distinct rows and columns (Williams et al., 2011; Cullis
+#' et al., 2006); see \code{\link{swap_pairs}}. The default 0 leaves every layout
+#' unchanged; \code{Inf} puts distinct rows and columns first. With the rule on,
+#' \code{infoDesign$shared_pairs} gives the pairs of copies that still share a row
+#' or column at each location. Turning it on changes the optimizer's random
+#' draws, so with several locations the later locations' layouts change as well.
+#' It needs \code{spread_reps = TRUE}.
+#' @param rowcol_scope \code{"pairs"} (default) covers the entries with exactly
+#' two copies; \code{"all"} also covers the checks and any entry with more copies.
 #' @return A list with several elements.
 #' \itemize{
 #'   \item \code{infoDesign} is a list with information on the design parameters.
@@ -67,7 +77,10 @@
 #' }
 #'
 #' @references
-#' Cullis, S., B. R., & Coombes, N. E. (2006). On the design of early generation variety trials
+#' Williams, E., Piepho, H.-P., & Whitaker, D. (2011). Augmented p-rep designs.
+#' Biometrical Journal, 53(1), 19-27. https://doi.org/10.1002/bimj.201000102
+#'
+#' Cullis, B. R., Smith, A. B., & Coombes, N. E. (2006). On the design of early generation variety trials
 #' with correlated data. Journal of Agricultural, Biological, and Environmental Statistics, 11,
 #' 381–393. https://doi.org/10.1198/108571106X154443
 #'
@@ -143,12 +156,15 @@ partially_replicated <- function(
     border_penalization = 0.5,
     data = NULL,
     allow_fillers = FALSE,
-    year = NULL) {
+    year = NULL,
+    rowcol_penalty = 0,
+    rowcol_scope = "pairs") {
     plotNumber_supplied <- !missing(plotNumber)
     validate_locations(l)
     validate_flag(spread_reps, "spread_reps")
     validate_flag(multiLocationData, "multiLocationData")
     validate_flag(allow_fillers, "allow_fillers")
+    validate_prep_rowcol(rowcol_penalty, rowcol_scope, spread_reps)
     year <- resolve_year(year)
 
     validate_planter(planter)
@@ -321,6 +337,7 @@ partially_replicated <- function(
     treatments_with_no_reps = vector(mode = "list", length = l)
     filler_fields <- vector(mode = "list", length = l)
     rows_incidence <- vector(mode = "numeric", length = l)
+    shared_pairs_sites <- vector(mode = "integer", length = l)
     for (sites in 1:l) {
         prep <- pREP(
             nrows = nrows[sites], 
@@ -331,9 +348,12 @@ partially_replicated <- function(
             spread_reps = spread_reps,
             dist_method = dist_method,
             border_penalization = border_penalization,
-            data = list_locs[[sites]]
+            data = list_locs[[sites]],
+            rowcol_penalty = rowcol_penalty,
+            rowcol_scope = rowcol_scope
         )
         rows_incidence[sites] <- prep$rows_incidence[length(prep$rows_incidence)]
+        if (rowcol_penalty > 0) shared_pairs_sites[sites] <- prep$shared_pairs
         min_distance_sites[sites] <- prep$min_distance
         dataInput <- prep$gen.list
         BINAY_CHECKS <- prep$binary.field
@@ -468,6 +488,11 @@ partially_replicated <- function(
         fillers = fillers,
         seed = seed,
         id_design = 13)
+    if (rowcol_penalty > 0) {
+        # Spec-m15 5.3 item 7: reported only when the row/column rule is on.
+        infoDesign <- append(infoDesign, list(shared_pairs = shared_pairs_sites),
+                             after = match("min_distance", names(infoDesign)))
+    }
     output <- list(
         infoDesign = infoDesign,
         min_pairwise_distance = min_dist_df,
