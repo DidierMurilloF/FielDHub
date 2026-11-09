@@ -6,6 +6,7 @@ on:
     branches: [main, master]
     paths:
       - "R/**"
+      - "src/**"
       - "inst/**"
       - "DESCRIPTION"
       - "NAMESPACE"

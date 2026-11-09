@@ -28,6 +28,7 @@ RCBD
 RCD
 RRCD
 RowColD
+Rtools
 SPD
 SSPD
 Soneson
@@ -38,9 +39,11 @@ UI
 UX
 Un
 Unreplicated
+Xcode
 approximatelly
 blocksdesign
 connectedness
+cpp
 cranlogs
 de
 desplot
@@ -60,6 +63,7 @@ onestage
 priori
 recolorings
 suboptimal
+toolchain
 twostage
 un
 unreplicated
