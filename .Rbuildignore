@@ -54,3 +54,4 @@ $run_dev.*
 ^\.mailmap$
 ^\.claude$
 ^\.git$
+^tests/testthat/fixtures/swap-goldens\.rds$

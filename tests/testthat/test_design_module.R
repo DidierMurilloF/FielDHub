@@ -63,6 +63,7 @@ canonical_labels <- c(
   random_note = NA,
   sameEntries = "Repeat entries across experiments",
   allow_fillers = "Allow filler plots",
+  rowcol_distinct = "Keep copies in distinct rows and columns",
   dimensions = "Select dimensions of field:",
   multi_dimension = "Set different dimensions across locations",
   location_dimensions = "Select dimension for location",
