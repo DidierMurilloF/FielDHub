@@ -36,6 +36,11 @@
 
 ## Enhancements
 
+- FielDHub now contains compiled C++ code (through cpp11) for an internal
+  block design engine. No design uses it yet, so every result is unchanged.
+  Installing FielDHub from source, including the `app.R` and
+  `dev/run_dev.R` launchers, now needs a C++17 toolchain: Rtools on Windows
+  and the Xcode command line tools on macOS.
 - The p-rep spreading optimizer (`swap_pairs()`, and the optimizer inside
   `partially_replicated()`, `multi_location_prep()` and
   `optimized_arrangement()`) is much faster, about 50 times on a
@@ -642,11 +647,6 @@ vignette.
 
 ### Enhancements:
 
-- FielDHub now contains compiled C++ code (through cpp11) for an internal
-  block design engine. No design uses it yet, so every result is unchanged.
-  Installing FielDHub from source, including the `app.R` and
-  `dev/run_dev.R` launchers, now needs a C++17 toolchain: Rtools on Windows
-  and the Xcode command line tools on macOS.
 - Repeated identical unexpected errors no longer queue duplicate dialogs
   in one app session. Each occurrence is still logged; normal input
   errors and warnings keep their existing presentation.
