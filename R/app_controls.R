@@ -40,6 +40,8 @@ fieldhub_control_concepts <- function() {
     planter = list(label = "Plot Order Layout:", value = "serpentine",
                    choices = c("serpentine", "cartesian")),
     plot_start = list(label = "Starting Plot Number(s):", value = "101"),
+    plot_by_block = list(label = "Number plots by block", value = FALSE),
+    plot_increment = list(label = "Plot number increment between blocks:", min = 1),
     continuous = list(label = "Continuous Plot", value = TRUE),
     location_names = list(label = "Location Name(s):", value = "FARGO"),
     randomizeH = list(label = "Randomize Horizontal Strips (Across reps)", value = TRUE),
