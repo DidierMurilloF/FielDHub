@@ -1,0 +1,4 @@
+# source: mathematical audit (zero-df design); licence: project-internal
+column_1,column_2,column_3,column_4,column_5,column_6
+1,2,3,4,5,6
+2,3,4,5,6,1

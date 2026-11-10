@@ -411,12 +411,13 @@ build_design_specs <- function() {
                            parse = function(value, label, values) {
                              parse_control_rep_units(value, label, values$repGens)
                            }),
-             ctl_flag("allow_fillers"), ctl_locations()),
+             ctl_flag("allow_fillers"), ctl_flag("rowcol_distinct"), ctl_locations()),
         spatial_shared(expt_name = ctl_expt_name(split = FALSE)), list(ctl_seed())
       ),
       values = function(controls, data) {
         list(repGens = controls$repGens, repUnits = controls$repUnits,
-             allow_fillers = controls$allow_fillers, planter = controls$planter, l = controls$l,
+             allow_fillers = controls$allow_fillers, rowcol_distinct = controls$rowcol_distinct,
+             planter = controls$planter, l = controls$l,
              plot_start = controls$plot_start, seed = controls$seed,
              expt_name = controls$expt_name, location_names = controls$location_names,
              plots = if (is.null(data)) sum(controls$repGens * controls$repUnits) else sum(data$REPS))
@@ -487,6 +488,57 @@ build_design_specs <- function() {
         list(nrows = length(unique(design$fieldBook$ROW)),
              ncols = length(unique(design$fieldBook$COLUMN)))
       }),
+    # The field is typed (rows and columns), so the page has no steps. The
+    # check direction has no default and must be chosen; the search budget
+    # and time limit sit behind the "advanced" flag.
+    Augmented_RowCol = spatial("Augmented_RowCol", "Augmented Row-Column", augmented_row_column,
+      upload = "sdiag", upload_columns = c("ENTRY", "NAME"), file_tag = "ARC_",
+      controls = c(
+        list(
+          ctl_count("nrows", 10, min = 2), ctl_count("ncols", 10),
+          ctl_count("lines", 60, min = 1, generated_only = TRUE), ctl_checks(4, min = 2),
+          ctl_check_direction(), ctl_objective(arc_design_defaults()$objective),
+          ctl_locations()
+        ),
+        spatial_shared(expt_name = ctl_expt_name(split = FALSE)),
+        list(ctl_optional_number("year"), ctl_flag("advanced"),
+             ctl_optional_number("budget", enabled_by = "advanced", show_if = "input.advanced == true"),
+             ctl_optional_number("time_limit", whole = FALSE, enabled_by = "advanced",
+                                 show_if = "input.advanced == true"),
+             ctl_seed())
+      ),
+      values = function(controls, data) {
+        list(nrows = controls$nrows, ncols = controls$ncols,
+             lines = if (is.null(data)) controls$lines, checks = controls$checks,
+             check_direction = controls$check_direction, objective = controls$objective,
+             budget = controls$budget, time_limit = controls$time_limit, l = controls$l,
+             planter = controls$planter, plot_start = controls$plot_start,
+             expt_name = controls$expt_name, year = controls$year, seed = controls$seed,
+             location_names = controls$location_names)
+      },
+      steps = list(),
+      setup = summary_setup,
+      entries = list(
+        function(design, location, values) {
+          entry_table(entry_list_view(arc_location_entries(design, location)), "List of Entries.")
+        },
+        function(design, location, values) {
+          entry_table(arc_location_checks(design, location), "Table of checks.",
+                      height = "350px", filter = "none")
+        }
+      ),
+      panels = list(
+        plot_panel("Field Layout", "field_layout", "ENTRY", function(design, location, values) {
+          checked_layout_view(design, location = location)$out_layout
+        }),
+        plot_panel("Plot Number Field", "plot_numbers", "PLOT", function(design, location, values) {
+          checked_layout_view(design, location = location)$out_layoutPlots
+        })
+      ),
+      field_size = function(design, values) {
+        list(nrows = design$infoDesign$nrows, ncols = design$infoDesign$ncols)
+      },
+      randomizing = "Searching for a balanced design..."),
     # The field sizes are searched after Run!, the percentages of checks
     # after Randomize!
     Diagonal = spatial("Diagonal", "Unreplicated Single Diagonal Arrangement", diagonal_arrangement,
@@ -637,13 +689,14 @@ build_design_specs <- function() {
              ctl_dependent_select("copies_per_entry", depends_on = "l", options = function(values, data) {
                prep_copies_choices(values$l)
              }),
-             ctl_flag("allow_fillers")),
+             ctl_flag("allow_fillers"), ctl_flag("rowcol_distinct")),
         spatial_shared(), list(ctl_seed())
       ),
       values = function(controls, data) {
         list(lines = controls$lines, checks = controls$checks, rep_checks = controls$rep_checks,
              l = controls$l, copies_per_entry = controls$copies_per_entry,
-             allow_fillers = controls$allow_fillers, planter = controls$planter,
+             allow_fillers = controls$allow_fillers, rowcol_distinct = controls$rowcol_distinct,
+             planter = controls$planter,
              plot_start = controls$plot_start, seed = controls$seed, expt_name = controls$expt_name,
              location_names = controls$location_names,
              entries = multi_prep_entries(controls$lines, controls$checks, controls$l, data))

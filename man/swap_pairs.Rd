@@ -11,7 +11,9 @@ swap_pairs(
   lambda = 0.5,
   dist_method = "euclidean",
   candidate_sample_size = 4,
-  seed = NULL
+  seed = NULL,
+  rowcol_penalty = 0,
+  rowcol_scope = "pairs"
 )
 }
 \arguments{
@@ -36,12 +38,31 @@ positive whole number within R's integer range. Default is 4.}
 \item{seed}{Optional randomization seed. When omitted, one integer is
 drawn from the current random-number stream and recorded; the swap's own
 randomization does not change the caller's stream.}
+
+\item{rowcol_penalty}{Weight of the row/column rule: one number at least 0,
+or \code{Inf}. The default 0 turns the rule off and leaves every layout
+unchanged. When positive, the copies of a covered entry that share a row or a
+column are treated as a problem to fix even when they are far apart, and a
+candidate swap scores its distance score minus \code{rowcol_penalty} times the
+change in the number of shared pairs. \code{Inf} is strict: a swap that leaves
+fewer shared pairs always wins, and distance decides among equals (rows and
+columns first). With the rule on, the result keeps the successful threshold
+step with the fewest shared pairs (the largest threshold breaks ties), the
+search steps after it are dropped from \code{designs}, \code{distances} and
+\code{rows_incidence}, and \code{diagnostics} adds \code{rowcol_penalty},
+\code{rowcol_scope}, \code{retained_threshold}, \code{shared_pairs_input},
+\code{shared_pairs_final} and \code{entries_sharing_final}.}
+
+\item{rowcol_scope}{Entries the row/column rule covers: \code{"pairs"}
+(default), the entries with exactly two copies, or \code{"all"}, every entry
+with two or more copies, checks included.}
 }
 \value{
 A list containing:
 \item{optim_design}{The modified matrix.}
-\item{designs}{A list of all intermediate designs, starting from the input matrix.}
-\item{distances}{A list of all pair distances for each intermediate design.}
+\item{designs}{A list of the retained threshold layouts, starting from the input matrix;
+with the row/column rule on, it ends at the kept layout.}
+\item{distances}{A list of the pair distances of each layout in \code{designs}.}
 \item{min_distance}{The minimum distance between pairs of occurrences of the same integer in the final design.}
 \item{pairwise_distance}{A data frame with the pairwise distances for the final design.}
 \item{rows_incidence}{Row-repetition counts for retained threshold steps,
@@ -60,9 +81,11 @@ The result inherits from \code{fieldhub_optimization}.}
 Attempts to separate repeated entries by swapping cells of
 different entries. Distance thresholds increase from \code{starting_dist}
 in steps of one. Candidate sampling, mean pairwise distance, and a centrality
-penalty guide the search. The last successful threshold layout is returned;
-if none succeeds, the original matrix is returned. A requested minimum
-distance is not guaranteed.
+penalty guide the search. The last successful threshold layout is returned
+(with the row/column rule on, the successful layout with the fewest pairs of
+copies sharing a row or column; see \code{rowcol_penalty}); if none succeeds,
+the original matrix is returned. A requested minimum distance is not
+guaranteed.
 }
 \details{
 The finite threshold range is bounded by the field geometry. For
@@ -96,4 +119,12 @@ B <- swap_pairs(
 )
 B$optim_design
 
+}
+\references{
+Williams, E., Piepho, H.-P., & Whitaker, D. (2011). Augmented p-rep designs.
+Biometrical Journal, 53(1), 19-27. https://doi.org/10.1002/bimj.201000102
+
+Cullis, B. R., Smith, A. B., & Coombes, N. E. (2006). On the design of early generation variety trials
+with correlated data. Journal of Agricultural, Biological, and Environmental Statistics, 11,
+381-393. https://doi.org/10.1198/108571106X154443
 }

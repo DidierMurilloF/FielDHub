@@ -1,6 +1,6 @@
 Package: FielDHub
 Title: A Shiny App for Design of Experiments in Life Sciences
-Version: 1.6.0
+Version: 1.7.0
 Authors@R: 
        c(person(given = "Didier",
               family = "Murillo",
@@ -54,6 +54,8 @@ Imports:
     bslib,
     promises,
     shinyjs
+LinkingTo: cpp11
+SystemRequirements: C++17
 Encoding: UTF-8
 RoxygenNote: 7.3.2
 Author: Didier Murillo [cre, aut], Salvador Gezan [aut], Ana Heilman [ctb],

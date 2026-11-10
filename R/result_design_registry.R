@@ -4,11 +4,14 @@
 #' selects a key here; it never supplies executable handlers. Existing S3
 #' methods retain their historical layouts and presentation. New engines can
 #' declare a fixed-coordinate layout and use the generic methods instead.
+#' `details` optionally names a handler that returns design-specific summary
+#' lines, which the generic print() and print(summary()) show after the title.
 #' @noRd
 fieldhub_design_registry <- function() {
   entry <- function(engine, columns = character(), title = NULL, layout = NULL,
-                    render = NULL) {
-    list(engine = engine, columns = columns, title = title, layout = layout, render = render)
+                    render = NULL, details = NULL) {
+    list(engine = engine, columns = columns, title = title, layout = layout, render = render,
+         details = details)
   }
   classic <- c("REP", "TREATMENT")
   incomplete <- c("REP", "IBLOCK", "UNIT", "ENTRY", "TREATMENT")
@@ -40,6 +43,9 @@ fieldhub_design_registry <- function() {
     split_families = entry("split_families"),
     sparse_allocation = entry("sparse_allocation", spatial),
     multi_location_prep = entry("multi_location_prep", c(spatial, "REP")),
+    augmented_row_column = entry("augmented_row_column", c(spatial, "CHECK_DIRECTION"),
+      title = "Augmented Row-Column Design", layout = "field_book_layouts",
+      render = "draw_augmented_row_column_layout", details = "arc_summary_lines"),
     allocation_sparse = entry("do_optim"), allocation_prep = entry("do_optim"),
     pair_swap = entry("swap_pairs")
   )
@@ -52,4 +58,16 @@ registered_design_entry <- function(x) {
   design <- x$metadata$design
   if (!is.character(design) || length(design) != 1L || is.na(design)) return(NULL)
   fieldhub_design_registry()[[design]]
+}
+
+#' Summary lines of a known declaration's details handler
+#'
+#' The handler is looked up by name in the package namespace, as the layout
+#' and render handlers are.
+#' @return A character vector, empty when the declaration has no details.
+#' @noRd
+registered_design_details <- function(x) {
+  handler <- registered_design_entry(x)$details
+  if (is.null(handler)) return(character())
+  get(handler, envir = asNamespace("FielDHub"), inherits = FALSE)(x)
 }

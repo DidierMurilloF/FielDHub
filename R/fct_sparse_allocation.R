@@ -24,6 +24,9 @@
 #' By default the current year.
 #' @param checksPercent (optional) Percentage of checks in each location, one of the
 #' options available for the field. By default the last (largest) option.
+#' @details The allocation of entries to locations comes from \code{\link{do_optim}()};
+#' see its Details for the search, and for allocations that changed in FielDHub 1.7.0.
+#'
 #' @return A list with eight elements.
 #' \itemize{
 #'   \item \code{infoDesign} is a list with information on the design parameters.

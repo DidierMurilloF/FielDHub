@@ -66,7 +66,9 @@ pREP <- function(
     spread_reps = TRUE, 
     border_penalization = 0.5,
     dist_method = "euclidean",
-    data = NULL
+    data = NULL,
+    rowcol_penalty = 0,
+    rowcol_scope = "pairs"
     ) {
   
     prep <- TRUE
@@ -194,7 +196,9 @@ pREP <- function(
           starting_dist = 3, 
           stop_iter = 10, 
           dist_method = dist_method, 
-          lambda = border_penalization
+          lambda = border_penalization,
+          rowcol_penalty = rowcol_penalty,
+          rowcol_scope = rowcol_scope
         )
       } else {
         swap <- swap_pairs_core(
@@ -202,10 +206,13 @@ pREP <- function(
           starting_dist = 2, 
           stop_iter = 10, 
           dist_method = dist_method, 
-          lambda = border_penalization
+          lambda = border_penalization,
+          rowcol_penalty = rowcol_penalty,
+          rowcol_scope = rowcol_scope
         )
       }
       optim_layout <- swap$optim_design
+      shared_pairs <- swap$diagnostics$shared_pairs_final
       min_distance <- swap$min_distance
       pairwise_distance <- swap$pairwise_distance
       rows_incidence <- swap$rows_incidence
@@ -219,6 +226,7 @@ pREP <- function(
       rows_incidence[1L] <- sum(apply(optim_layout, 1L, function(row) {
         any(tabulate(match(row, genos)) >= 2L)
       }))
+      shared_pairs <- NULL
     }
     
     dups <- table(as.vector(optim_layout))
@@ -245,6 +253,7 @@ pREP <- function(
             filler.field = !active_field,
             rows_incidence = rows_incidence, 
             min_distance = min_distance,
+            shared_pairs = shared_pairs,
             pairwise_distance = pairwise_distance,
             replicated_treatments = replicated_treatments,
             unreplicated_treatments = unreplicated_treatments,

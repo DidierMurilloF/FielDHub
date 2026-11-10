@@ -23,7 +23,9 @@ multi_location_prep(
   data = NULL,
   allow_fillers = FALSE,
   max_fillers = NULL,
-  year = NULL
+  year = NULL,
+  rowcol_penalty = 0,
+  rowcol_scope = "pairs"
 )
 }
 \arguments{
@@ -70,6 +72,18 @@ considered.}
 
 \item{year}{(optional) Year recorded in the \code{YEAR} column of the field book.
 By default the current year.}
+
+\item{rowcol_penalty}{Weight of the rule that keeps the copies of a
+replicated entry in distinct rows and columns (Williams et al., 2011; Cullis
+et al., 2006); see \code{\link{swap_pairs}}. The default 0 leaves every layout
+unchanged; \code{Inf} puts distinct rows and columns first. With the rule on,
+\code{infoDesign$shared_pairs} gives the pairs of copies that still share a row
+or column at each location. Turning it on changes the optimizer's random
+draws, so with several locations the later locations' layouts change as well.
+It needs \code{spread_reps = TRUE}.}
+
+\item{rowcol_scope}{\code{"pairs"} (default) covers the entries with exactly
+two copies; \code{"all"} also covers the checks and any entry with more copies.}
 }
 \value{
 A list of class \code{FielDHub} with several elements.
@@ -99,6 +113,10 @@ A list of class \code{FielDHub} with several elements.
 }
 \description{
 Optimized multi-location partially replicated design
+}
+\details{
+The allocation of entries to locations comes from \code{\link{do_optim}()};
+see its Details for the search, and for allocations that changed in FielDHub 1.7.0.
 }
 \section{Reproducibility}{
 
@@ -133,6 +151,13 @@ head(subset(field_book, LOCATION == "LOC1"), 10)
 }
 }
 \references{
+Williams, E., Piepho, H.-P., & Whitaker, D. (2011). Augmented p-rep designs.
+Biometrical Journal, 53(1), 19-27. https://doi.org/10.1002/bimj.201000102
+
+Cullis, B. R., Smith, A. B., & Coombes, N. E. (2006). On the design of early generation variety trials
+with correlated data. Journal of Agricultural, Biological, and Environmental Statistics, 11,
+381-393. https://doi.org/10.1198/108571106X154443
+
 Edmondson, R.N. Multi-level Block Designs for Comparative Experiments. JABES 25,
 500–522 (2020). https://doi.org/10.1007/s13253-020-00416-0
 }

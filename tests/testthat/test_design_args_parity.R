@@ -1052,6 +1052,89 @@ test_that("design_args_RCBD_augmented() falls back to the l/planter/plot-start/r
          direct = RCBD_augmented(lines = 50, checks = 3, b = 5, seed = 29))
 })
 
+test_that("Augmented_RowCol app arguments reproduce the API design from raw controls across two locations", {
+  values <- list(nrows = 10, ncols = 8, lines = 48, checks = 4, check_direction = "columns",
+                 objective = "E_aug", budget = 300, time_limit = NULL, l = 2,
+                 planter = "cartesian", plot_start = c(1, 1001), expt_name = "Trial 1",
+                 year = 2030, seed = 3, location_names = c("fargo", "minot"))
+  parity(design_args_Augmented_RowCol, augmented_row_column, values,
+         direct = augmented_row_column(nrows = 10, ncols = 8, checks = 4, check_direction = "columns",
+                                       entries = 48, objective = "E_aug", budget = 300, l = 2,
+                                       plotNumber = c(1, 1001), planter = "cartesian",
+                                       locationNames = c("fargo", "minot"), exptName = "Trial 1",
+                                       year = 2030, seed = 3))
+  # the other direction, and an optional time limit
+  values <- list(nrows = 8, ncols = 10, lines = 48, checks = 4, check_direction = "rows",
+                 objective = "V_tc", budget = 300, time_limit = 600, l = 1, plot_start = 1,
+                 expt_name = "Expt1", seed = 5, location_names = "FARGO")
+  parity(design_args_Augmented_RowCol, augmented_row_column, values,
+         direct = augmented_row_column(nrows = 8, ncols = 10, checks = 4, check_direction = "rows",
+                                       entries = 48, objective = "V_tc", budget = 300, time_limit = 600,
+                                       plotNumber = 1, locationNames = "FARGO", exptName = "Expt1",
+                                       seed = 5))
+})
+
+test_that("Augmented_RowCol app arguments reproduce an uploaded-data design", {
+  data <- data.frame(ENTRY = 1:52, NAME = c(paste0("CHECK", 1:4), paste0("SB-", 5:52)))
+  # On the upload path the entries count is not read: the file gives it
+  values <- list(nrows = 10, ncols = 8, lines = NULL, checks = 4, check_direction = "columns",
+                 objective = "V_tt", budget = 300, l = 1, planter = "serpentine", plot_start = 1,
+                 expt_name = "Expt1", seed = 29, location_names = "CASSELTON")
+  args <- design_args_Augmented_RowCol(shiny_shaped(values), data)
+  expect_null(args$entries)
+  parity(design_args_Augmented_RowCol, augmented_row_column, values, data,
+         direct = augmented_row_column(nrows = 10, ncols = 8, checks = 4, check_direction = "columns",
+                                       objective = "V_tt", budget = 300, plotNumber = 1,
+                                       locationNames = "CASSELTON", exptName = "Expt1", seed = 29,
+                                       data = data))
+  # a count of entries typed beside an upload is ignored, not sent beside `data`
+  typed <- design_args_Augmented_RowCol(shiny_shaped(utils::modifyList(values, list(lines = 48))), data)
+  expect_null(typed$entries)
+})
+
+test_that("design_args_Augmented_RowCol() falls back to the engine's defaults", {
+  values <- list(nrows = 10, ncols = 8, lines = 48, checks = 4, check_direction = "columns",
+                 budget = 300, seed = 29)
+  parity(design_args_Augmented_RowCol, augmented_row_column, values,
+         direct = augmented_row_column(nrows = 10, ncols = 8, checks = 4, check_direction = "columns",
+                                       entries = 48, budget = 300, seed = 29))
+})
+
+test_that("a missing check direction is reported before the engine runs", {
+  values <- list(nrows = 10, ncols = 8, lines = 48, checks = 4, budget = 300, seed = 29)
+  for (direction in list(NULL, "", NA_character_, "diagonal", c("rows", "columns"))) {
+    values["check_direction"] <- list(direction)
+    expect_error(design_args_Augmented_RowCol(values), "Choose the check direction",
+                 class = "fieldhub_input_error")
+  }
+  spec <- design_app_spec("Augmented_RowCol")
+  raw <- design_control_defaults(spec)
+  expect_identical(raw$check_direction, "")
+  expect_error(read_design_controls(spec, raw), "Choose the check direction",
+               class = "fieldhub_input_error")
+  raw$check_direction <- "rows"
+  expect_identical(read_design_controls(spec, raw)$check_direction, "rows")
+  expect_identical(read_design_controls(spec, raw)$objective, "V_tt")
+})
+
+test_that("the advanced search controls are optional and read only when switched on", {
+  spec <- design_app_spec("Augmented_RowCol")
+  raw <- utils::modifyList(design_control_defaults(spec), list(check_direction = "columns"))
+  off <- read_design_controls(spec, utils::modifyList(raw, list(budget = "abc", time_limit = "-1")))
+  expect_null(off$budget)
+  expect_null(off$time_limit)
+  raw$advanced <- TRUE
+  blank <- read_design_controls(spec, raw)
+  expect_null(blank$budget)
+  expect_null(blank$time_limit)
+  on <- read_design_controls(spec, utils::modifyList(raw, list(budget = "500", time_limit = "2.5", year = "2031")))
+  expect_identical(c(on$budget, on$time_limit, on$year), c(500, 2.5, 2031))
+  for (bad in list(list(budget = "1.5"), list(budget = "0"), list(time_limit = "soon"),
+                   list(time_limit = "0"), list(year = "20.5"))) {
+    expect_error(read_design_controls(spec, utils::modifyList(raw, bad)), class = "fieldhub_input_error")
+  }
+})
+
 test_that("an integer from Shiny and a typed double record the same design through a builder", {
   # The engines record an argument as given: 270L and 270 build the same
   # field book but different metadata$parameters...
@@ -1138,7 +1221,8 @@ test_that("spatial pages submit builder snapshots for allocation and final desig
     pREPS = c(design_args_pREPS = "partially_replicated"),
     multi_loc_preps = c(design_args_multi_loc_preps_optim = "do_optim",
                         design_args_multi_loc_preps = "multi_location_prep"),
-    RCBD_augmented = c(design_args_RCBD_augmented = "RCBD_augmented")
+    RCBD_augmented = c(design_args_RCBD_augmented = "RCBD_augmented"),
+    Augmented_RowCol = c(design_args_Augmented_RowCol = "augmented_row_column")
   )
   # Unexported helpers a spatial module server may call, and why. Anything
   # else it calls must be one of its engines/builders, or a base/shiny/DT/
@@ -1221,7 +1305,8 @@ test_that("spatial pages submit builder snapshots for allocation and final desig
     "parse_control_number", "parse_control_whole_numbers", "parse_control_names",
     "parse_control_choice", "parse_control_option", "parse_control_flag", "parse_control_seed",
     "parse_control_rep_checks", "parse_control_checks", "parse_control_dimensions",
-    "parse_control_rep_units", "prep_field_choices",
+    "parse_control_rep_units", "prep_field_choices", "parse_control_optional_number",
+    "arc_location_entries", "arc_location_checks",
     "augmented_lines", "augmented_block_choices", "augmented_field_choices", "augmented_random_note",
     "checked_layout_view",
     "diagonal_entries", "diagonal_field_choices", "diagonal_percent_choices", "diagonal_checks_view",

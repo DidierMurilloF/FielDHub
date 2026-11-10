@@ -75,29 +75,19 @@ pairs_distance <- function(X, dist_method = "euclidean") {
   nr <- nrow(X)
   # NA cells are inactive field positions and must not enter the distance
   # calculations as an artificial replicated treatment.
-  tab <- table(as.vector(X))
-  dupsI <- as.integer(names(tab)[tab > 1L])
-  if (length(dupsI) == 0L) fieldhub_abort("All elements in X appear only once")
-
-  out_list <- vector("list", length(dupsI))
-  for (i in seq_along(dupsI)) {
-    g <- dupsI[i]
-    id <- which(X == g)
-    pairs <- utils::combn(id, 2)
-    p1 <- pairs[1L, ]
-    p2 <- pairs[2L, ]
-    rA <- ((p1 - 1L) %% nr) + 1L
-    cA <- ((p1 - 1L) %/% nr) + 1L
-    rB <- ((p2 - 1L) %% nr) + 1L
-    cB <- ((p2 - 1L) %/% nr) + 1L
-    distances <- as.numeric(dist_fn(rA, cA, rB, cB))
-    out_list[[i]] <- data.frame(
-      geno = rep.int(g, length(distances)),
-      Pos1 = p1, Pos2 = p2, DIST = distances,
-      rA = rA, cA = cA, rB = rB, cB = cB
-    )
-  }
-  plotDist <- do.call(rbind, out_list)
+  pairs <- .duplicate_pairs(X)
+  if (is.null(pairs)) fieldhub_abort("All elements in X appear only once")
+  p1 <- pairs$p1
+  p2 <- pairs$p2
+  rA <- ((p1 - 1L) %% nr) + 1L
+  cA <- ((p1 - 1L) %/% nr) + 1L
+  rB <- ((p2 - 1L) %% nr) + 1L
+  cB <- ((p2 - 1L) %/% nr) + 1L
+  plotDist <- data.frame(
+    geno = pairs$geno, Pos1 = p1, Pos2 = p2,
+    DIST = as.numeric(dist_fn(rA, cA, rB, cB)),
+    rA = rA, cA = cA, rB = rB, cB = cB
+  )
   plotDist <- plotDist[order(plotDist$DIST), ]
   rownames(plotDist) <- NULL
   plotDist
@@ -190,9 +180,12 @@ pairs_distance <- function(X, dist_method = "euclidean") {
 #' Pair-swap worker consuming the surrounding design's established RNG stream
 #' @noRd
 swap_pairs_core <- function(X, starting_dist = 3, stop_iter = 10, lambda = 0.5,
-                             dist_method = "euclidean", candidate_sample_size = 4) {
+                             dist_method = "euclidean", candidate_sample_size = 4,
+                             rowcol_penalty = 0, rowcol_scope = "pairs") {
   validate_swap_matrix(X)
   validate_swap_controls(starting_dist, stop_iter, lambda, dist_method, candidate_sample_size)
+  validate_rowcol_controls(rowcol_penalty, rowcol_scope)
+  rule_on <- rowcol_penalty > 0
 
   input_X <- X
   input_freq <- table(input_X)
@@ -226,6 +219,29 @@ swap_pairs_core <- function(X, starting_dist = 3, stop_iter = 10, lambda = 0.5,
   genos <- unique(init_pd$geno)
   w <- 2L
 
+  # Cell index: entry codes per linear cell and each entry's cells in
+  # increasing linear index (the order of which()). Updated in O(k) per swap.
+  cell_values <- as.vector(X)
+  active_cells <- which(!is.na(cell_values))
+  entry_values <- sort(unique(cell_values[active_cells]))
+  cell_code <- match(cell_values, entry_values)
+  entry_cells <- split(active_cells, factor(cell_code[active_cells], levels = seq_along(entry_values)))
+  names(entry_cells) <- NULL
+  templates <- .pair_templates(max(lengths(entry_cells)))
+  cell_row <- row(X)[active_cells]
+  cell_col <- col(X)[active_cells]
+
+  if (rule_on) {
+    copies <- lengths(entry_cells)
+    covered <- if (rowcol_scope == "all") copies >= 2L else copies == 2L
+    shared <- integer(length(entry_cells))
+    shared[covered] <- vapply(entry_cells[covered], .shared_pairs, integer(1), nr = nr)
+    shared_total <- sum(shared)
+    shared_input <- shared_total
+    step_shared <- shared_total      # S of designs[[1]], then of each retained step
+    step_threshold <- NA_real_
+  }
+
   # Guard against a reversed/empty threshold range: on very small fields the
   # field diagonal (minDist) can be shorter than starting_dist, which would make
   # seq(starting_dist, minDist, 1) error with "wrong sign in 'by' argument".
@@ -244,34 +260,57 @@ swap_pairs_core <- function(X, starting_dist = 3, stop_iter = 10, lambda = 0.5,
     n_iter <- 1
     thresholds_attempted <- thresholds_attempted + 1L
     last_threshold <- min_dist
+    reduced_last <- TRUE  # rule on: did the previous sweep lower S?
 
     while (n_iter <= stop_iter) {
       # ---- (A) pairs_distance() called ONCE per while-iteration ---------
       plotDist <- pairs_distance(X, dist_method)
       LowID <- which(plotDist$DIST < min_dist)
-      if (length(LowID) == 0L) {
+      if (!rule_on) {
+        if (length(LowID) == 0L) {
+          break
+        }
+      } else if (length(LowID) == 0L && (shared_total == 0L || !reduced_last)) {
         break
       }
 
       low_dist_gens <- unique(plotDist$geno[LowID])
+      # Spec 5.3 item 1: covered entries that share a row or column but are
+      # far enough apart, after the distance violators, in increasing label order.
+      shared_only <- if (rule_on) {
+        entry_values[setdiff(which(shared > 0L), match(low_dist_gens, entry_values))]
+      } else numeric(0)
 
       # Global sum and pair-count for incremental scoring.
       # n_pairs stays constant throughout — swapping never adds/removes pairs.
       base_sum <- sum(plotDist$DIST)
       n_pairs <- nrow(plotDist)
+      reduced_last <- FALSE
 
       # ---- (B) Resolve each violating genotype --------------------------
-      for (genotype in low_dist_gens) {
-        geno_rc <- which(X == genotype, arr.ind = TRUE)
+      for (genotype in c(low_dist_gens, shared_only)) {
+        only_shared <- rule_on && !(genotype %in% low_dist_gens)
+        # Snapshot of the entry's cells and of its candidate cells, taken
+        # once before any of its copies move (as the full-field version did).
+        code <- match(genotype, entry_values)
+        geno_cells <- entry_cells[[code]]
+        geno_r <- ((geno_cells - 1L) %% nr) + 1L
+        geno_c <- ((geno_cells - 1L) %/% nr) + 1L
+        movers <- seq_along(geno_cells)
+        if (only_shared) {
+          # Only the copies that belong to a shared pair are tried.
+          movers <- movers[duplicated(geno_r) | duplicated(geno_r, fromLast = TRUE) |
+                             duplicated(geno_c) | duplicated(geno_c, fromLast = TRUE)]
+        }
 
         # Inactive cells are fixed geometry, not swap candidates.
-        other_mask <- !is.na(X) & X != genotype
-        other_r <- row(X)[other_mask]
-        other_c <- col(X)[other_mask]
+        other <- cell_code[active_cells] != code
+        other_r <- cell_row[other]
+        other_c <- cell_col[other]
 
-        for (i in seq_len(nrow(geno_rc))) {
-          r0 <- geno_rc[i, 1L]
-          c0 <- geno_rc[i, 2L]
+        for (i in movers) {
+          r0 <- geno_r[i]
+          c0 <- geno_c[i]
 
           # ---- (C) Vectorised distance to every other cell --------------
           d <- dist_fn(r0, c0, other_r, other_c)
@@ -290,25 +329,55 @@ swap_pairs_core <- function(X, starting_dist = 3, stop_iter = 10, lambda = 0.5,
             nv <- candidate_sample_size
           }
 
-          # ---- (E) Score candidates — no pairs_distance() call ----------
+          # ---- (E) Score candidates from the cell index -----------------
+          a <- (c0 - 1L) * nr + r0
+          code_a <- cell_code[a]
+          cells_a <- entry_cells[[code_a]]
           scores <- numeric(nv)
           deltas <- numeric(nv)
+          if (rule_on) dS <- integer(nv)
           for (j in seq_len(nv)) {
-            res <- .score_swap(
-              X, r0, c0, v_r[j], v_c[j],
-              lambda, center, base_sum, n_pairs, dist_method
+            b <- (v_c[j] - 1L) * nr + v_r[j]
+            code_b <- cell_code[b]
+            res <- .score_swap_cells(
+              cells_a, entry_cells[[code_b]], a, b, v_r[j], v_c[j], code_b == code_a,
+              lambda, center, base_sum, n_pairs, nr, dist_method, templates
             )
             scores[j] <- res$score
             deltas[j] <- res$delta
+            if (rule_on) {
+              dS[j] <- .shared_delta(cells_a, entry_cells[[code_b]], a, b, code_b == code_a,
+                                     covered[code_a], covered[code_b], nr)
+            }
           }
 
           # ---- (F) Apply best swap --------------------------------------
-          best <- which.max(scores)
+          if (rule_on) {
+            best <- .rowcol_pick(scores, dS, rowcol_penalty, require_gain = only_shared)
+            if (is.na(best)) next
+          } else {
+            best <- which.max(scores)
+          }
           rb <- v_r[best]
           cb <- v_c[best]
           tmp <- X[rb, cb]
           X[rb, cb] <- X[r0, c0]
           X[r0, c0] <- tmp
+          b <- (cb - 1L) * nr + rb
+          code_b <- cell_code[b]
+          if (code_b != code_a) {
+            entry_cells[[code_a]] <- sort.int(c(cells_a[cells_a != a], b))
+            cells_b <- entry_cells[[code_b]]
+            entry_cells[[code_b]] <- sort.int(c(cells_b[cells_b != b], a))
+            cell_code[a] <- code_b
+            cell_code[b] <- code_a
+            if (rule_on) {
+              if (covered[code_a]) shared[code_a] <- .shared_pairs(entry_cells[[code_a]], nr)
+              if (covered[code_b]) shared[code_b] <- .shared_pairs(entry_cells[[code_b]], nr)
+              shared_total <- shared_total + dS[best]
+              if (dS[best] < 0L) reduced_last <- TRUE
+            }
+          }
 
           # ---- (G) Update base_sum — pure arithmetic, zero allocations --
           base_sum <- base_sum + deltas[best]
@@ -321,7 +390,8 @@ swap_pairs_core <- function(X, starting_dist = 3, stop_iter = 10, lambda = 0.5,
     }
 
     # ---- Did we satisfy the current min_dist threshold? -----------------
-    current_min <- min(pairs_distance(X, dist_method)$DIST)
+    current_pd <- pairs_distance(X, dist_method)
+    current_min <- min(current_pd$DIST)
     last_attempt_min <- current_min
     if (current_min < min_dist) {
       stop_reason <- "iteration_limit"
@@ -339,9 +409,24 @@ swap_pairs_core <- function(X, starting_dist = 3, stop_iter = 10, lambda = 0.5,
       }))
 
       designs[[w]] <- X
-      distances[[w]] <- pairs_distance(X, dist_method)
+      distances[[w]] <- current_pd
+      if (rule_on) {
+        step_shared[w] <- shared_total
+        step_threshold[w] <- min_dist
+      }
       w <- w + 1L
     }
+  }
+
+  # Spec 5.3 item 6: with the rule on, keep the successful step with the
+  # smallest S (ties: the largest threshold) and truncate the trace to it.
+  if (rule_on && swap_succeed) {
+    steps <- seq.int(2L, length(designs))
+    keep <- steps[step_shared[steps] == min(step_shared[steps])]
+    keep <- keep[length(keep)]
+    designs <- designs[seq_len(keep)]
+    distances <- distances[seq_len(keep)]
+    rows_incidence <- rows_incidence[seq_len(keep - 1L)]
   }
 
   # ---- Retain the established result fields and append diagnostics ----
@@ -359,6 +444,26 @@ swap_pairs_core <- function(X, starting_dist = 3, stop_iter = 10, lambda = 0.5,
     distances[[1L]] <- pairwise_distance
   }
 
+  diagnostics <- list(
+    distance_method = dist_method, stop_reason = stop_reason,
+    iterations = iterations, max_iterations_per_threshold = stop_iter,
+    thresholds_attempted = thresholds_attempted, last_threshold = last_threshold,
+    last_attempt_min_distance = last_attempt_min, retained_min_distance = min_distance
+  )
+  if (rule_on) {
+    kept <- length(designs)
+    final_cells <- split(which(!is.na(optim_design)),
+                         factor(match(as.vector(optim_design), entry_values)[!is.na(optim_design)],
+                                levels = seq_along(entry_values)))
+    final_shared <- vapply(final_cells[covered], .shared_pairs, integer(1), nr = nr)
+    diagnostics <- c(diagnostics, list(
+      rowcol_penalty = rowcol_penalty, rowcol_scope = rowcol_scope,
+      retained_threshold = if (swap_succeed) step_threshold[kept] else NA_real_,
+      shared_pairs_input = shared_input, shared_pairs_final = sum(final_shared),
+      entries_sharing_final = sum(final_shared > 0L)
+    ))
+  }
+
   list(
     rows_incidence    = rows_incidence,
     optim_design      = optim_design,
@@ -366,11 +471,6 @@ swap_pairs_core <- function(X, starting_dist = 3, stop_iter = 10, lambda = 0.5,
     distances         = distances,
     min_distance      = min_distance,
     pairwise_distance = pairwise_distance,
-    diagnostics = list(
-      distance_method = dist_method, stop_reason = stop_reason,
-      iterations = iterations, max_iterations_per_threshold = stop_iter,
-      thresholds_attempted = thresholds_attempted, last_threshold = last_threshold,
-      last_attempt_min_distance = last_attempt_min, retained_min_distance = min_distance
-    )
+    diagnostics = diagnostics
   )
 }

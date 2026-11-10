@@ -31,8 +31,26 @@
 #'   \item \code{metadata} records the allocation type, schema version, seed,
 #'     random-number settings, package version and evaluated input parameters.
 #'     With the same package versions and RNG settings, rebuild the allocation
-#'     with \code{do.call(do_optim, x$metadata$parameters)}.
+#'     with \code{do.call(do_optim, x$metadata$parameters)}. Its
+#'     \code{allocation_search} element records how the search ended:
+#'     \code{stop_reason}, \code{evaluations} and \code{even_repairs}.
 #' }
+#'
+#' @details
+#' The entry copies are allocated to the locations by FielDHub's own compiled
+#' block-design search: D-optimal plot swaps after Edmondson (2020), 20 searches
+#' from random starts drawn with the seed (the first starts from a square
+#' lattice when the shape is one). Every allocation is even: each entry
+#' has \code{floor(copies_per_entry / l)} or one more copies at each location (a
+#' final even-up step guarantees it), and location totals differ by at most one
+#' copy before \code{force_balance}. One location takes every copy without a
+#' search. From FielDHub 1.7.0 this search replaces \code{blocksdesign::blocks()},
+#' so allocations for a given seed differ from earlier versions.
+#'
+#' The swap search stops after at most 60 seconds; the even-up step and the
+#' final scoring run after it, outside that limit. A run stopped by the limit warns,
+#' records \code{stop_reason = "time_limit"}, and may not be reproducible from its
+#' seed, because where it stopped depends on the machine's speed.
 #'
 #' @references
 #' Edmondson, R.N. Multi-level Block Designs for Comparative Experiments. JABES 25,
@@ -96,6 +114,7 @@ do_optim <- function(
     }
     max_entry <- lines
     validate_iteration_budget(lines, "lines")
+    validate_allocation_size(lines, l)
     if (!is.null(data)) {
         if (design == "sparse") {
             data_input <- data[, 1:2]
@@ -168,15 +187,9 @@ do_optim <- function(
         validate_design_size(allocation_plots + check_plots * as.double(l))
     }
     local_optimizer_options()
-    optim_blocks <- blocksdesign::blocks(
-        treatments = lines,
-        replicates = copies_per_entry,
-        blocks = l,
-        searches = 20,
-        seed = seed
-    )
-    # Create allocation table
-    allocation <- table(optim_blocks$Design$treatments, optim_blocks$Design$Level_1)
+    # Allocate the copies to the locations (C++ block engine; a table of counts)
+    search <- allocation_blocks(lines, copies_per_entry, l)
+    allocation <- search$allocation
     key_value <- 0
     add_value <- 1
     if (design == "prep") {
@@ -273,7 +286,7 @@ do_optim <- function(
         allocation = allocation_df,
         size_locations = col_sum
     )
-    out <- new_fieldhub_allocation(out, parameters = list(
+    out <- new_fieldhub_allocation(out, search = search$record, parameters = list(
         design = design, lines = lines, l = l, copies_per_entry = copies_per_entry,
         add_checks = add_checks, checks = checks, rep_checks = rep_checks,
         force_balance = force_balance, seed = seed, data = data
@@ -283,7 +296,7 @@ do_optim <- function(
 
 #' Construct an allocation plan without changing its legacy data or class
 #' @noRd
-new_fieldhub_allocation <- function(x, parameters) {
+new_fieldhub_allocation <- function(x, parameters, search = NULL) {
   if (!is.list(x) || !is.list(parameters)) {
     fieldhub_abort("Internal error: an allocation and its parameters must be lists.",
                    class = "fieldhub_internal_error", call. = FALSE)
@@ -310,8 +323,10 @@ new_fieldhub_allocation <- function(x, parameters) {
   } else {
     c("fieldhub_sparse_optimization", "Sparse")
   }
-  new_fieldhub_result(x, paste0("allocation_", design), parameters$seed, parameters,
-                     classes, validate_fieldhub_allocation)
+  out <- new_fieldhub_result(x, paste0("allocation_", design), parameters$seed, parameters,
+                            classes, validate_fieldhub_allocation)
+  if (!is.null(search)) out$metadata$allocation_search <- search
+  out
 }
 
 #' Validate the allocation-specific result schema
@@ -365,4 +380,69 @@ validate_fieldhub_allocation <- function(x) {
     fail("has invalid multi-location entries")
   }
   invisible(x)
+}
+
+#' Allocate entry copies to locations with the block engine
+#'
+#' One location takes every copy without a search. Otherwise
+#' `blocks_engine()` places `copies` copies of each of `lines` entries into
+#' `l` locations, drawing from the random stream the caller seeded. The
+#' result is checked before it is returned: exact copies per entry, every
+#' entry-location count in {floor(copies / l), floor(copies / l) + 1}, and
+#' location totals within one copy of each other.
+#' @return A list: `allocation`, a `table` of copy counts, entries by
+#'   locations (`B1`, `B2`, ...), and `record`, the search outcome kept in the
+#'   result's `metadata$allocation_search` (`stop_reason`, `evaluations`,
+#'   `even_repairs`).
+#' @noRd
+allocation_blocks <- function(lines, copies, l) {
+  if (l == 1) {
+    treatments <- factor(rep(seq_len(lines), each = copies), levels = seq_len(lines))
+    allocation <- table(treatments, factor(rep("B1", length(treatments)), levels = "B1"),
+                        dnn = NULL)
+    record <- list(stop_reason = "one_location", evaluations = 0, even_repairs = 0L)
+    return(list(allocation = allocation, record = record))
+  }
+  engine <- blocks_engine(treatments = lines, replicates = copies, blocks = l, searches = 20L)
+  allocation <- table(engine$Design$treatments, engine$Design$Level_1)
+  allocation_check(allocation, lines, copies, l)
+  record <- list(stop_reason = engine$search$stop_reason,
+                 evaluations = engine$search$evaluations,
+                 even_repairs = as.integer(engine$search$even_repairs))
+  list(allocation = allocation, record = record)
+}
+
+#' Check the allocation size before the block search, in the user's terms
+#' @noRd
+validate_allocation_size <- function(lines, l) {
+  if (l >= 2 && lines < 2) {
+    fieldhub_abort("An allocation to two or more locations needs at least 2 lines.",
+                   data = list(argument = "lines"))
+  }
+  if (l > 1000) {
+    fieldhub_abort("An allocation supports at most 1000 locations.",
+                   data = list(argument = "l"))
+  }
+  if (as.double(lines) * l > 1e8) {
+    fieldhub_abort("An allocation supports at most 1e8 line-location pairs (lines \u00d7 l).",
+                   data = list(lines = lines, l = l))
+  }
+  invisible(NULL)
+}
+
+#' Refuse an allocation outside the even pattern a block search should give
+#' @noRd
+allocation_check <- function(allocation, lines, copies, l) {
+  low <- copies %/% l
+  totals <- colSums(allocation)
+  if (!identical(dim(allocation), c(as.integer(lines), as.integer(l))) ||
+      any(rowSums(allocation) != copies) ||
+      any(allocation < low | allocation > low + 1) ||
+      max(totals) - min(totals) > 1) {
+    fieldhub_abort("Internal error: the block search returned an uneven allocation.",
+                   class = "fieldhub_internal_error",
+                   data = list(lines = lines, copies = copies, locations = l,
+                               cell_range = range(allocation), totals = range(totals)))
+  }
+  invisible(allocation)
 }

@@ -18,7 +18,7 @@ test_that("spatial controls describe the coordinate axis and retain existing def
 
 test_that("all spatial workflows share the correlation controls with their existing IDs", {
   sources <- c(Diagonal = ".DIAG", diagonal_multiple = ".DIAG", sparse_allocation = ".DIAG",
-               Optim = ".O", RCBD_augmented = ".O", pREPS = ".PREP", multi_loc_preps = ".PREP")
+               Optim = ".O", RCBD_augmented = ".O", Augmented_RowCol = ".ARC", pREPS = ".PREP", multi_loc_preps = ".PREP")
   calls <- function(code) {
     if (missing(code) || (!is.call(code) && !is.pairlist(code))) return(list())
     if (is.call(code) && identical(code[[1]], as.name("spatial_workflow_spec"))) {

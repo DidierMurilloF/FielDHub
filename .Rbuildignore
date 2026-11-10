@@ -52,4 +52,6 @@ $run_dev.*
 ^\.superpowers$
 ^deployment$
 ^\.mailmap$
+^\.claude$
 ^\.git$
+^tests/testthat/fixtures/swap-goldens\.rds$

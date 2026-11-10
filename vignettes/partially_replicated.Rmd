@@ -315,4 +315,20 @@ plot(prep)
 
 In the figure above, green plots contain replicated entries, and gray plots contain entries that only appear once.
 
+### Keeping copies in distinct rows and columns
+
+Copies of an entry that share a row or a column also share that row's or
+column's effect, which weakens a spatial analysis [@Williams2011-prep;
+@Cullis2006-pREP]. Setting `rowcol_penalty = Inf` makes the optimizer fix those
+first and only then maximize the distance between copies. `infoDesign$shared_pairs`
+reports the pairs that still share a row or column.
+
+```{r, eval = FALSE}
+prep_rowcol <- partially_replicated(
+  nrows = 16, ncols = 25, repGens = c(80, 240), repUnits = c(2, 1),
+  seed = 77, rowcol_penalty = Inf
+)
+prep_rowcol$infoDesign$shared_pairs
+```
+
 # References

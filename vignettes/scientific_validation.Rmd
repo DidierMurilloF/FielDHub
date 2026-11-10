@@ -104,8 +104,12 @@ if comparisons within one connected component are estimable. A connected model
 whose numerical information cannot be resolved raises a structured numerical
 error instead of reporting a misleading positive efficiency.
 
-The underlying optimization package documents its
+For incomplete-block, lattice and row-column designs, the underlying optimization
+package documents its
 [block models and efficiency reports](https://search.r-project.org/CRAN/refmans/blocksdesign/html/blocks.html).
+Sparse and p-rep allocation across locations uses FielDHub's own compiled block
+search instead; its efficiencies are checked against the same eigenvalue
+definitions (`test_blocks_engine_designs.R`).
 These checks validate achieved designs, not a claim of global optimality or
 uniform sampling over all possible randomizations.
 
@@ -131,12 +135,13 @@ biological experiment.
 | Single diagonal check optimization | At most 100 accepted exchanges or 100,000 candidate evaluations per location; an interrupted scan is never reported as a local optimum |
 | Pair-swap optimization | A finite geometry-dependent threshold range, at most `stop_iter` sweeps per threshold, and bounded sampled candidates per swap; diagnostics distinguish exhaustion, completion, and an empty range |
 | Row-column search | Positive finite whole-number `iterations`; defaults are 200 external onestage searches or 1,000 twostage row-swap iterations |
+| Allocation block search | 20 searches under an evaluation budget, with full swap passes up to 632 plots and a lattice start for square-lattice shapes, with interrupts checked; a 60-second wall-clock limit warns and records the stop; a final even-up step leaves each entry with at most one copy more at any location than at another |
 | Allocation balancing | At most one upward pass through the allocation rows; warns if no eligible entry can complete the balancing |
 | Dimension cache | At most 64 retained queries and 4 MiB of retained keys and results; temporary search memory is outside this bound |
 
 Finite iteration counts are not wall-clock or memory guarantees. Work still
-grows with field size, and external optimizer search internals are controlled
-by `blocksdesign`. Forced allocation balancing can add entry copies to fill
+grows with field size, and the search internals of incomplete-block, lattice and
+row-column designs are controlled by `blocksdesign`. Forced allocation balancing can add entry copies to fill
 smaller locations; inspect the returned allocation rather than assuming every
 input copy budget is unchanged under that option. Pair-swap diagnostics
 describe the retained result separately from an unsuccessful final attempt.

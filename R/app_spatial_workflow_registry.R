@@ -60,6 +60,19 @@ fieldhub_spatial_workflows <- function() {
       table_collapse = TRUE,
       heatmap_height = 740
     ),
+    Augmented_RowCol = entry(
+      ids = c(simulate = "Simulate.arc", heatmap = "heatmap", table = "fieldBook_ARC", download = "downloadData_arc",
+        tabset = "tabset_arc"),
+      simulation_ids = c(trait = "trailsARC", other = "OtherARC", minimum = "min.arc", maximum = "max.arc",
+        submit = "ok.arc"),
+      correlation_ids = c(x = "ROX.ARC", y = "ROY.ARC"),
+      correlation_suffix = ".ARC",
+      heatmap_checkbox = "heatmap_s",
+      table_columns = c("EXPT", "LOCATION", "PLOT", "ROW", "COLUMN", "CHECKS", "ENTRY", "TREATMENT",
+        "CHECK_DIRECTION"),
+      table_collapse = TRUE,
+      heatmap_height = 740
+    ),
     pREPS = entry(
       ids = c(simulate = "Simulate.prep", heatmap = "heatmap_prep", table = "pREPSOUTPUT", download = "downloadData.preps",
         tabset = "tabset_prep"),

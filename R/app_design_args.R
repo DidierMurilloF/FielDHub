@@ -594,7 +594,8 @@ design_args_Optim <- function(values, data = NULL) {
 #' ignored when `data` supplies the ENTRY/NAME/REPS list), `planter`, `l`,
 #' `plot_start`, `seed`, `expt_name`, `location_names`, `allow_fillers`.
 #' The optimizer's `border_penalization`/`dist_method` keep their API
-#' defaults, as the module has no control for them.
+#' defaults; `rowcol_distinct` (the "Keep copies in distinct rows and
+#' columns" box) maps to `rowcol_penalty = Inf`, unchecked to 0.
 #' @noRd
 design_args_pREPS <- function(values, data = NULL) {
   generated <- is.null(data)
@@ -610,7 +611,8 @@ design_args_pREPS <- function(values, data = NULL) {
     exptName = values[["expt_name"]],
     locationNames = values[["location_names"]],
     data = data,
-    allow_fillers = values[["allow_fillers"]] %||% FALSE
+    allow_fillers = values[["allow_fillers"]] %||% FALSE,
+    rowcol_penalty = if (isTRUE(values[["rowcol_distinct"]])) Inf else 0
   )
 }
 
@@ -643,8 +645,8 @@ design_args_multi_loc_preps_optim <- function(values, data = NULL) {
 #'
 #' `values`: the `design_args_multi_loc_preps_optim()` values plus `nrows`
 #' and `ncols` (one per location), `planter`, `plot_start`, `expt_name`,
-#' `location_names`, `optim_list` (the allocation computed at Run!) and
-#' `allow_fillers`.
+#' `location_names`, `optim_list` (the allocation computed at Run!),
+#' `allow_fillers` and `rowcol_distinct`.
 #'
 #' The uploaded `data` goes with `optim_list`, so `multi_location_prep()`
 #' merges it into the locations (the module used to call
@@ -652,7 +654,9 @@ design_args_multi_loc_preps_optim <- function(values, data = NULL) {
 #' arguments the engine tests with `missing()` are left out when the app
 #' cannot fill them, and misfit starting plots become the engine's own
 #' default, `default_plot_starts(l, 1)` (ruling R9). The optimizer settings
-#' stay the engine's fixed ones: the module has no control for them.
+#' stay the engine's fixed ones, except `rowcol_distinct` (the "Keep copies
+#' in distinct rows and columns" box), which maps to `rowcol_penalty = Inf`,
+#' unchecked to 0.
 #' @noRd
 design_args_multi_loc_preps <- function(values, data = NULL) {
   l <- as_design_number(values[["l"]])
@@ -672,7 +676,8 @@ design_args_multi_loc_preps <- function(values, data = NULL) {
     optim_list = values[["optim_list"]],
     seed = as_design_number(values[["seed"]]),
     data = data,
-    allow_fillers = values[["allow_fillers"]] %||% FALSE
+    allow_fillers = values[["allow_fillers"]] %||% FALSE,
+    rowcol_penalty = if (isTRUE(values[["rowcol_distinct"]])) Inf else 0
   )
   drop_null_args(args, c("nrows", "ncols", "exptName", "locationNames", "optim_list"))
 }
@@ -704,4 +709,43 @@ design_args_RCBD_augmented <- function(values, data = NULL) {
     nrows = as_design_number(values[["nrows"]]),
     ncols = as_design_number(values[["ncols"]])
   )
+}
+
+#' Build augmented_row_column() arguments for the augmented row-column module
+#'
+#' `values`: `nrows`, `ncols`, `lines` (the number of test entries; ignored
+#' when `data` supplies the entry list, which gives `entries = NULL`),
+#' `checks` (a count), `check_direction` (required: `"columns"` or `"rows"`),
+#' `objective`, `budget`, `time_limit` (NULL for the engine's defaults), `l`,
+#' `planter`, `plot_start`, `expt_name`, `year`, `seed`, `location_names`.
+#' A missing check direction is reported here, before the engine runs, so a
+#' direct call of this builder gives the page's message.
+#' @noRd
+design_args_Augmented_RowCol <- function(values, data = NULL) {
+  direction <- values[["check_direction"]]
+  if (!is.character(direction) || length(direction) != 1L || is.na(direction) ||
+      !direction %in% c("columns", "rows")) {
+    fieldhub_abort("Choose the check direction: each check appears once in every column, ",
+                   "or once in every row.", data = list(control = "check_direction"), call = NULL)
+  }
+  l <- as_design_number(values[["l"]]) %||% 1
+  args <- list(
+    nrows = as_design_number(values[["nrows"]]),
+    ncols = as_design_number(values[["ncols"]]),
+    checks = as_design_number(values[["checks"]]),
+    check_direction = direction,
+    entries = if (is.null(data)) as_design_number(values[["lines"]]),
+    objective = values[["objective"]],
+    budget = as_design_number(values[["budget"]]),
+    time_limit = as_design_number(values[["time_limit"]]),
+    l = l,
+    plotNumber = as_design_number(values[["plot_start"]]) %||% 101,
+    planter = values[["planter"]] %||% "serpentine",
+    locationNames = location_names_or_null(values[["location_names"]], l),
+    exptName = values[["expt_name"]],
+    year = as_design_number(values[["year"]]),
+    seed = as_design_number(values[["seed"]]),
+    data = data
+  )
+  drop_null_args(args, c("objective", "planter"))
 }

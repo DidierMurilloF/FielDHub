@@ -56,11 +56,29 @@ A list with five elements, classed \code{c("fieldhub_sparse_optimization",
   \item \code{metadata} records the allocation type, schema version, seed,
     random-number settings, package version and evaluated input parameters.
     With the same package versions and RNG settings, rebuild the allocation
-    with \code{do.call(do_optim, x$metadata$parameters)}.
+    with \code{do.call(do_optim, x$metadata$parameters)}. Its
+    \code{allocation_search} element records how the search ended:
+    \code{stop_reason}, \code{evaluations} and \code{even_repairs}.
 }
 }
 \description{
 Generate the sparse or p-rep allocation to multiple locations.
+}
+\details{
+The entry copies are allocated to the locations by FielDHub's own compiled
+block-design search: D-optimal plot swaps after Edmondson (2020), 20 searches
+from random starts drawn with the seed (the first starts from a square
+lattice when the shape is one). Every allocation is even: each entry
+has \code{floor(copies_per_entry / l)} or one more copies at each location (a
+final even-up step guarantees it), and location totals differ by at most one
+copy before \code{force_balance}. One location takes every copy without a
+search. From FielDHub 1.7.0 this search replaces \code{blocksdesign::blocks()},
+so allocations for a given seed differ from earlier versions.
+
+The swap search stops after at most 60 seconds; the even-up step and the
+final scoring run after it, outside that limit. A run stopped by the limit warns,
+records \code{stop_reason = "time_limit"}, and may not be reproducible from its
+seed, because where it stopped depends on the machine's speed.
 }
 \examples{
 sparse_example <- do_optim(

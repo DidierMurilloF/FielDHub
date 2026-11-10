@@ -10,7 +10,7 @@
 
 source_layout_prefixes <- c("fct", "engine", "layout", "render", "io",
                             "validate", "result", "sim", "api", "app", "mod")
-source_layout_exceptions <- c("globals.R", "run_app.R")
+source_layout_exceptions <- c("cpp11.R", "globals.R", "run_app.R")
 
 # Shiny-layer functions whose names predate the app_ prefix. They live in
 # app_ files (checked below when the sources are available), so they may call

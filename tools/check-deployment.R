@@ -13,7 +13,9 @@ environment <- new.env(parent = baseenv())
 sys.source(file.path(root, "R/app_dependencies.R"), envir = environment)
 description <- read.dcf(file.path(root, "DESCRIPTION"))
 imports <- trimws(sub(" *\\(.*", "", strsplit(description[1L, "Imports"], ",")[[1L]]))
-stopifnot(all(c(imports, environment$app_dependencies(), "mirai", "renv") %in% names(lock$Packages)))
+linking <- trimws(sub(" *\\(.*", "", strsplit(description[1L, "LinkingTo"], ",")[[1L]]))
+stopifnot(all(c(imports, linking, environment$app_dependencies(), "mirai", "renv") %in%
+              names(lock$Packages)))
 stopifnot(!any(c("golem", "shinyalert", "shinycssloaders", "plotly", "kableExtra", "zip") %in%
                 names(lock$Packages)))
 for (name in names(lock$Packages)) {
@@ -26,7 +28,11 @@ stopifnot(any(grepl("shiny::runApp(FielDHub::run_app(launch.browser=FALSE)", doc
 stopifnot(!any(grepl("install.packages|remotes::|latest|sudo", docker) & !grepl("^#", docker)))
 ignore <- readLines(file.path(root, ".dockerignore"))
 stopifnot(all(c(".git", ".Renviron", ".Rprofile", ".superpowers", "ROADMAP.md") %in% ignore))
+# Host build products must never reach the image's R CMD INSTALL.
+stopifnot(all(c("src/*.o", "src/*.so", "src/*.dll") %in% ignore))
 workflow <- yaml::read_yaml(file.path(root, ".github/workflows/deployment.yaml"))
+# Compiled sources must trigger the image job (line check: YAML 1.1 reads `on` as TRUE).
+stopifnot(any(trimws(readLines(file.path(root, ".github/workflows/deployment.yaml"))) == '- "src/**"'))
 steps <- workflow$jobs$image$steps
 stopifnot(any(vapply(steps, function(x) !is.null(x$run) && grepl("docker build", x$run, fixed = TRUE), logical(1))))
 cat("Pinned image, dependency lock, non-root runtime and deployment CI contracts: OK\n")
