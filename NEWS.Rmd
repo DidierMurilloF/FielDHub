@@ -48,11 +48,22 @@ knitr::opts_chunk$set(
 
 ## Enhancements
 
-- FielDHub now contains compiled C++ code (through cpp11) for an internal
-  block design engine. No design uses it yet, so every result is unchanged.
-  Installing FielDHub from source, including the `app.R` and
-  `dev/run_dev.R` launchers, now needs a C++17 toolchain: Rtools on Windows
-  and the Xcode command line tools on macOS.
+- Sparse and multi-location p-rep allocations (`do_optim()`, and through it
+  `sparse_allocation()`, `multi_location_prep()` and both app pages) now use
+  FielDHub's own compiled block-design search instead of
+  `blocksdesign::blocks()`. It reaches the same design efficiency in a
+  fraction of the time: the median end-to-end run is about 24 times faster
+  at 300 entries and over 100 times faster at 600, and a 2,000-entry
+  allocation over six locations takes about one second and under 100 MB of
+  memory, where `blocksdesign` needed 15 to 30 GB. Every allocation is now
+  even: each entry has
+  `floor(copies_per_entry / l)` or one more copies at each location. Designs
+  of up to 632 plots get full swap passes, and square-lattice shapes (q^2
+  entries, q per location) start one search from the lattice. How the
+  search ended is recorded in `metadata$allocation_search`. Installing
+  FielDHub from source, including the `app.R` and `dev/run_dev.R` launchers,
+  now needs a C++17 toolchain: Rtools on Windows and the Xcode command line
+  tools on macOS.
 - The p-rep spreading optimizer (`swap_pairs()`, and the optimizer inside
   `partially_replicated()`, `multi_location_prep()` and
   `optimized_arrangement()`) is much faster, about 50 times on a
@@ -66,6 +77,21 @@ knitr::opts_chunk$set(
   app. `rowcol_penalty = Inf` puts distinct rows and columns first, and the
   shared pairs left are reported in `infoDesign$shared_pairs`. With the default,
   every layout is unchanged.
+
+## Changes to results for a given seed
+
+The new allocation search changes the allocation, and so the field book,
+produced for a given seed by:
+
+* `do_optim()` with two or more locations;
+* `sparse_allocation()` and `multi_location_prep()` when they build the
+  allocation themselves (two or more locations);
+* the Sparse Allocation and Multi-Location P-rep pages of the Shiny app.
+
+Field books built from an allocation passed in (`sparse_list`, `optim_list`),
+one-location allocations, and every other design are unchanged. A search
+stopped by its 60-second limit warns, and its result may not be reproducible
+from the seed on another machine.
 
 # FielDHub 1.6.0
 

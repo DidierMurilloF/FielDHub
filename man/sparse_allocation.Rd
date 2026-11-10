@@ -75,6 +75,10 @@ A list with eight elements.
 \description{
 Unreplicated designs using the sparse allocation approach
 }
+\details{
+The allocation of entries to locations comes from \code{\link{do_optim}()};
+see its Details for the search, and for allocations that changed in FielDHub 1.7.0.
+}
 \section{Reproducibility}{
 
 The result records effective inputs and the resolved seed in

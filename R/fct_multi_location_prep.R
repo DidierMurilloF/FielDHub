@@ -41,6 +41,9 @@
 #' It needs \code{spread_reps = TRUE}.
 #' @param rowcol_scope \code{"pairs"} (default) covers the entries with exactly
 #' two copies; \code{"all"} also covers the checks and any entry with more copies.
+#' @details The allocation of entries to locations comes from \code{\link{do_optim}()};
+#' see its Details for the search, and for allocations that changed in FielDHub 1.7.0.
+#'
 #' @return A list of class \code{FielDHub} with several elements.
 #' \itemize{
 #'   \item \code{infoDesign} is a list with information on the design parameters.

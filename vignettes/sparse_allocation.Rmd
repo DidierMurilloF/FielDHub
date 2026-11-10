@@ -35,7 +35,9 @@ Sparse allocation is a valuable strategy in plant breeding experiments, as it al
 evaluate a large number of treatments over multiple locations in a single experiment. Sparse allocation 
 can increase efficiency and reduce the number of experimental units required, making it a cost-effective 
 option. One standard method for implementing sparse allocation in plant breeding experiments is 
-incomplete block designs (IBD) [@EdmondsonIBDs]. 
+incomplete block designs (IBD) [@EdmondsonIBDs]. FielDHub allocates the entries to the
+locations with its own compiled block-design search, which keeps each entry's copies spread
+as evenly as possible over the locations (see `?do_optim`).
 
 The following key points summarize the advantages and disadvantages of sparse 
 allocation [@MontesinosLopezSparse]:

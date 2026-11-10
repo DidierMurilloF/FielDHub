@@ -50,6 +50,8 @@ across multiple locations.
 
 The function `multi_location_prep()` uses the incomplete blocks design approach [@EdmondsonIBDs] 
 to optimize the allocation of replicated and un-replicated treatments across the environments.
+The search is FielDHub's own compiled block-design search, and it keeps each entry's copies
+spread as evenly as possible over the locations (see `?do_optim`).
 
 ### Within Location
 
