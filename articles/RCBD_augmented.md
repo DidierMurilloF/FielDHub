@@ -124,6 +124,15 @@ Block**), per location.
     separated list of numbers the length of the number of locations for
     the input to be valid.
 
+To start a new plot-number range in each block, select **Number plots by
+block** and enter the **Plot number increment between blocks** (for
+example, `100`). With a starting plot of `101`, the blocks start at
+`101`, `201`, `301`, and so on. The increment must be at least the
+number of plots per block. For stacked experiments, each additional rep
+receives a separate range: with five blocks and an increment of 100, the
+second rep starts at `601`. Plot numbers do not overlap across reps
+within a location. Leave this option off for continuous numbering.
+
 10. Once we have entered the information for our experiment on the left
     side panel, click the **Run!** button to run the design.
 
@@ -344,3 +353,29 @@ plot(aug_RCBD, l = 2)
 
   
   
+
+## Plot numbering by block and rep
+
+The same option is available from R through `plotIncrement`. A start per
+location automatically reserves `b * plotIncrement` numbers per rep. To
+choose rep starts explicitly for one location, pass a vector such as
+`plotNumber = c(101, 1001)`; overlapping ranges are rejected. Filler
+plots keep number zero, and the entry randomization and field positions
+are unchanged.
+
+``` r
+numbered <- RCBD_augmented(lines = 50, checks = 3, b = 5, repsExpt = 2,
+                           plotNumber = 101, plotIncrement = 100, seed = 23)
+aggregate(PLOT ~ EXPT + BLOCK, data = numbered$fieldBook, FUN = min)
+    EXPT BLOCK PLOT
+1  Expt1     1  101
+2  Expt2     1  601
+3  Expt1     2  201
+4  Expt2     2  701
+5  Expt1     3  301
+6  Expt2     3  801
+7  Expt1     4  401
+8  Expt2     4  901
+9  Expt1     5  501
+10 Expt2     5 1001
+```

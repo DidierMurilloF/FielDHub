@@ -34,6 +34,13 @@
 
 ### Enhancements
 
+- Augmented RCBD designs support optional block-based plot numbering
+  with `plotIncrement`: for example, blocks start at 101, 201, 301 with
+  an increment of 100. Additional experiment reps receive separate
+  ranges within each location. The app exposes this through “Number
+  plots by block”. Continuous numbering remains the default
+  ([\#82](https://github.com/DidierMurilloF/FielDHub/issues/82)).
+
 - Sparse and multi-location p-rep allocations
   ([`do_optim()`](https://didiermurillof.github.io/FielDHub/reference/do_optim.md),
   and through it
@@ -55,6 +62,7 @@
   including the `app.R` and `dev/run_dev.R` launchers, now needs a C++17
   toolchain: Rtools on Windows and the Xcode command line tools on
   macOS.
+
 - The p-rep spreading optimizer
   ([`swap_pairs()`](https://didiermurillof.github.io/FielDHub/reference/swap_pairs.md),
   and the optimizer inside
@@ -66,6 +74,7 @@
   distances are built in one vectorized pass, and candidate swaps are
   scored from a coordinate index. Every layout is unchanged for the same
   seed.
+
 - New opt-in rule that keeps the copies of a replicated entry in
   distinct rows and columns: `rowcol_penalty` (default 0, off) and
   `rowcol_scope` in

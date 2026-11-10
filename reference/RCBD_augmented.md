@@ -22,7 +22,8 @@ RCBD_augmented(
   data = NULL,
   nrows = NULL,
   ncols = NULL,
-  year = NULL
+  year = NULL,
+  plotIncrement = NULL
 )
 ```
 
@@ -51,8 +52,10 @@ RCBD_augmented(
 
 - plotNumber:
 
-  Numeric vector with the starting plot number for each location. By
-  default `plotNumber = 101`.
+  Numeric vector with starting plot numbers per location, per rep, or
+  per location-rep pair (all reps of the first location first). A vector
+  of length `l` is interpreted as starts per location. By default
+  `plotNumber = 101`.
 
 - repsStack:
 
@@ -97,6 +100,18 @@ RCBD_augmented(
 
   (optional) Year recorded in the `YEAR` column of the field book. By
   default the current year.
+
+- plotIncrement:
+
+  (optional) Positive whole-number increment between block starts. For
+  example, `plotNumber = 101, plotIncrement = 100` starts blocks at 101,
+  201, 301, and so on. Must be at least the number of plots per block,
+  including filler positions. With one start per location, each
+  additional rep starts `b * plotIncrement` plot numbers after the
+  previous rep. Explicit starts per rep must reserve non-overlapping
+  experiment ranges within each location. `NULL` (the default) keeps
+  continuous numbering. Filler plots retain plot number zero; treatment
+  randomization is unchanged.
 
 ## Value
 
@@ -426,4 +441,15 @@ head(ARCBD2$fieldBook, 12)
 #> 11 11 Expt1        A 2026  111   1     11      0     1   210      G210
 #> 12 12 Expt1        A 2026  112   1     12      0     1   352      G352
                                        
+# Number blocks at 101, 201, ...; the second rep uses 601, 701, ...
+ARCBD3 <- RCBD_augmented(lines = 50, checks = 3, b = 5, repsExpt = 2,
+                         plotNumber = 101, plotIncrement = 100, seed = 23)
+head(ARCBD3$fieldBook)
+#>   ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS BLOCK ENTRY TREATMENT
+#> 1  1 Expt1        1 2026  101   1      1      0     1    51       G51
+#> 2  2 Expt1        1 2026  102   1      2      1     1     1       CH1
+#> 3  3 Expt1        1 2026  103   1      3      0     1    52       G52
+#> 4  4 Expt1        1 2026  104   1      4      1     1     2       CH2
+#> 5  5 Expt1        1 2026  105   1      5      0     1    21       G21
+#> 6  6 Expt1        1 2026  106   1      6      0     1    36       G36
 ```

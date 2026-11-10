@@ -89,7 +89,8 @@
 <span>  data <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  nrows <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  ncols <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  year <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  year <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  plotIncrement <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -118,7 +119,10 @@
 
 
 <dt id="arg-plotnumber">plotNumber<a class="anchor" aria-label="anchor" href="#arg-plotnumber"></a></dt>
-<dd><p>Numeric vector with the starting plot number for each location. By default <code>plotNumber = 101</code>.</p></dd>
+<dd><p>Numeric vector with starting plot numbers per location,
+per rep, or per location-rep pair (all reps of the first location first).
+A vector of length <code>l</code> is interpreted as starts per location.
+By default <code>plotNumber = 101</code>.</p></dd>
 
 
 <dt id="arg-repsstack">repsStack<a class="anchor" aria-label="anchor" href="#arg-repsstack"></a></dt>
@@ -160,6 +164,17 @@
 <dt id="arg-year">year<a class="anchor" aria-label="anchor" href="#arg-year"></a></dt>
 <dd><p>(optional) Year recorded in the <code>YEAR</code> column of the field book.
 By default the current year.</p></dd>
+
+
+<dt id="arg-plotincrement">plotIncrement<a class="anchor" aria-label="anchor" href="#arg-plotincrement"></a></dt>
+<dd><p>(optional) Positive whole-number increment between block
+starts. For example, <code>plotNumber = 101, plotIncrement = 100</code> starts
+blocks at 101, 201, 301, and so on. Must be at least the number of plots
+per block, including filler positions. With one start per location, each
+additional rep starts <code>b * plotIncrement</code> plot numbers after the previous rep.
+Explicit starts per rep must reserve non-overlapping experiment ranges
+within each location. <code>NULL</code> (the default) keeps continuous numbering.
+Filler plots retain plot number zero; treatment randomization is unchanged.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -488,6 +503,18 @@ Macmillan Company.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 11 11 Expt1        A 2026  111   1     11      0     1   210      G210</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 12 12 Expt1        A 2026  112   1     12      0     1   352      G352</span>
 <span class="r-in"><span>                                       </span></span>
+<span class="r-in"><span><span class="co"># Number blocks at 101, 201, ...; the second rep uses 601, 701, ...</span></span></span>
+<span class="r-in"><span><span class="va">ARCBD3</span> <span class="op">&lt;-</span> <span class="fu">RCBD_augmented</span><span class="op">(</span>lines <span class="op">=</span> <span class="fl">50</span>, checks <span class="op">=</span> <span class="fl">3</span>, b <span class="op">=</span> <span class="fl">5</span>, repsExpt <span class="op">=</span> <span class="fl">2</span>,</span></span>
+<span class="r-in"><span>                         plotNumber <span class="op">=</span> <span class="fl">101</span>, plotIncrement <span class="op">=</span> <span class="fl">100</span>, seed <span class="op">=</span> <span class="fl">23</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ARCBD3</span><span class="op">$</span><span class="va">fieldBook</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS BLOCK ENTRY TREATMENT</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1  1 Expt1        1 2026  101   1      1      0     1    51       G51</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2  2 Expt1        1 2026  102   1      2      1     1     1       CH1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3  3 Expt1        1 2026  103   1      3      0     1    52       G52</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4  4 Expt1        1 2026  104   1      4      1     1     2       CH2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5  5 Expt1        1 2026  105   1      5      0     1    21       G21</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6  6 Expt1        1 2026  106   1      6      0     1    36       G36</span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
