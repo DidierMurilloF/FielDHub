@@ -87,3 +87,8 @@ docs
 src/*.o
 src/*.so
 src/*.dll
+
+# Offline study material retained locally
+/data-raw/augmented-row-column/benchmark/
+/data-raw/augmented-row-column/case-study/
+/data-raw/augmented-row-column/communication/
