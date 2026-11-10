@@ -1,8 +1,0 @@
-# Bailey & Haines (2025) JABES, Table 1 (cyclic squares, t = 12, k = 3), initial blocks; licence: CC-BY
-# layout rule: T1 = t(t-k) = 108; control i gets code T1 + i at cell (j+1, ((block[i] + j) mod t) + 1), j = 0..t-1; remaining cells get test codes 1..T1 in column-major order
-name,t,block_1,block_2,block_3
-"C(3,4,5)",12,0,3,7
-"C(1,4,7)",12,0,1,5
-"C(1,5,6)",12,0,1,6
-"C(1,1,10)",12,0,1,2
-"C(4,4,4)",12,0,4,8
