@@ -98,7 +98,40 @@ bool BlockSpace::refresh() {
   if (!spd_inverse(bh, b_, ld)) return false;
   minv_.swap(bh);
   log_det_ = ld;
+  if (cached_) rebuild_g();
   return true;
+}
+
+void BlockSpace::enable_cache() {
+  cached_ = true;
+  g_.assign(static_cast<size_t>(b_) * v_, 0.0);
+}
+
+void BlockSpace::rebuild_g() {
+  std::fill(g_.begin(), g_.end(), 0.0);
+  for (int i = 0; i < v_; ++i) {
+    double* gi = &g_[static_cast<size_t>(b_) * i];
+    const int* bl = &blocks_of_[static_cast<size_t>(i) * r_];
+    for (int x = 0; x < r_; ++x) {
+      const double* m = &minv_[static_cast<size_t>(b_) * bl[x]];
+      for (int j = 0; j < b_; ++j) gi[j] += m[j];
+    }
+    for (int j = 0; j < b_; ++j) gi[j] /= r_;
+  }
+}
+
+double BlockSpace::delta_cached(int a, int p, int c, int q) const {
+  const double* ga = &g_[static_cast<size_t>(b_) * a];
+  const double* gc = &g_[static_cast<size_t>(b_) * c];
+  const int* ba = &blocks_of_[static_cast<size_t>(a) * r_];
+  const int* bc = &blocks_of_[static_cast<size_t>(c) * r_];
+  double alpha = minv_[q + b_ * q] + minv_[p + b_ * p] - 2.0 * minv_[p + b_ * q];
+  double beta = (ga[q] - gc[q]) - (ga[p] - gc[p]);
+  double gamma = 0.0;
+  for (int x = 0; x < r_; ++x) gamma += (ga[ba[x]] - gc[ba[x]]) - (ga[bc[x]] - gc[bc[x]]);
+  first_ = (1.0 - beta) * (1.0 - beta);
+  second_ = alpha * (2.0 + gamma) / r_;
+  return first_ - second_;
 }
 
 void BlockSpace::h_vector(int a, int c, std::vector<double>& h) const {
@@ -151,6 +184,27 @@ void BlockSpace::apply(int a, int p, int c, int q, double ratio) {
     for (int j = 0; j < b_; ++j)
       minv_[i + b_ * j] += w00 * mw[i] * mw[j] + w01 * (mw[i] * mh[j] + mh[i] * mw[j]) +
                            w11 * mh[i] * mh[j];
+  if (cached_) {
+    // G' = Minv' N' / r with N'' = N' + w u' (w = e_q - e_p, u = e_a - e_c):
+    // G' = G + [mw mh] W [w'G; h'G] + (Minv' w) u' / r.
+    const int* ba = &blocks_of_[static_cast<size_t>(a) * r_];
+    const int* bc = &blocks_of_[static_cast<size_t>(c) * r_];
+    for (int i = 0; i < v_; ++i) {
+      double* gi = &g_[static_cast<size_t>(b_) * i];
+      double e1 = gi[q] - gi[p], e2 = 0.0;
+      for (int x = 0; x < r_; ++x) e2 += gi[ba[x]] - gi[bc[x]];
+      e2 /= r_;
+      double c1 = w00 * e1 + w01 * e2, c2 = w01 * e1 + w11 * e2;
+      for (int j = 0; j < b_; ++j) gi[j] += c1 * mw[j] + c2 * mh[j];
+    }
+    double* ga = &g_[static_cast<size_t>(b_) * a];
+    double* gc = &g_[static_cast<size_t>(b_) * c];
+    for (int j = 0; j < b_; ++j) {
+      double d = (minv_[j + b_ * q] - minv_[j + b_ * p]) / r_;
+      ga[j] += d;
+      gc[j] -= d;
+    }
+  }
   update_counts(a, p, c, q);
   log_det_ += std::log(ratio);
 }

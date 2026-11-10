@@ -4,6 +4,18 @@ block_space_probe_cpp <- function(counts, v, b, r, swaps, refresh_every) {
   .Call(`_FielDHub_block_space_probe_cpp`, counts, v, b, r, swaps, refresh_every)
 }
 
+block_space_cached_probe_cpp <- function(counts, v, b, r, swaps, refresh_every) {
+  .Call(`_FielDHub_block_space_cached_probe_cpp`, counts, v, b, r, swaps, refresh_every)
+}
+
+even_repair_probe_cpp <- function(treatments, v, r, b) {
+  .Call(`_FielDHub_even_repair_probe_cpp`, treatments, v, r, b)
+}
+
+lattice_start_probe_cpp <- function(v, r, b) {
+  .Call(`_FielDHub_lattice_start_probe_cpp`, v, r, b)
+}
+
 blocks_engine_cpp <- function(v, r, b, searches, jumps_per_escape, max_stale_escapes, budget, time_limit, debug) {
   .Call(`_FielDHub_blocks_engine_cpp`, v, r, b, searches, jumps_per_escape, max_stale_escapes, budget, time_limit, debug)
 }

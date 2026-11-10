@@ -7,20 +7,22 @@
 #' integer `blocks`.
 #' @return A list with `Design` (`Level_1`, `plots`, `treatments` factors),
 #'   `Blocks_model` (one row: `Level`, `Blocks`, `D-Efficiency`, `A-Efficiency`,
-#'   `A-Bound`) and `search` (evaluations, budget, stop reason, refresh counts and,
+#'   `A-Bound`) and `search` (evaluations, budget, stop reason, refresh counts, the
+#'   number of even-up repair swaps `even_repairs` (spec-m5 section 6.1) and,
 #'   when `FIELDHUB_ENGINE_DEBUG=1`, the largest relative error of the running
 #'   log determinant against a fresh computation after each accepted swap).
 #' @noRd
 blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
-                          jumps_per_escape = 10L, max_stale_escapes = 5L,
+                          jumps_per_escape = NULL, max_stale_escapes = 5L,
                           budget = NULL, time_limit = 60) {
   validate_iteration_budget(treatments, "treatments", minimum = 2)
   validate_iteration_budget(replicates, "replicates", minimum = 1)
   validate_iteration_budget(blocks, "blocks", minimum = 2)
   validate_iteration_budget(searches, "searches", minimum = 1)
+  n <- as.double(treatments) * replicates
+  if (is.null(jumps_per_escape)) jumps_per_escape <- blocks_engine_default_jumps(n)
   validate_iteration_budget(jumps_per_escape, "jumps_per_escape", minimum = 1)
   validate_iteration_budget(max_stale_escapes, "max_stale_escapes", minimum = 1)
-  n <- as.double(treatments) * replicates
   if (n > .Machine$integer.max) {
     fieldhub_abort("The design has too many plots for the block engine.",
                    data = list(plots = n))
@@ -76,18 +78,31 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
   list(Design = design, Blocks_model = model,
        search = list(evaluations = out$evaluations, budget = budget, stop_reason = stop_reason,
                      searches_done = out$searches_done, refreshes = out$refreshes,
-                     drift_events = out$drift_events, repairs = out$repairs,
+                     drift_events = out$drift_events, repairs = out$repairs, even_repairs = out$even_repairs,
                      debug_max_error = out$debug_max_error))
 }
 
-#' Default evaluation budget per search: 25 exhaustive passes over the plot pairs
-#' when a pass has at most 2000 pairs, otherwise 50 n sampled evaluations; at
-#' least 5000 per search and at most `.Machine$integer.max` in total
+#' Default evaluation budget per search (spec-m5 6.4): 25 full passes over the
+#' plot pairs when a pass has at most 2000 pairs, max(10 passes, 50 n) up to 2e5
+#' pairs (the engine's full-pass threshold), otherwise 50 n sampled evaluations;
+#' at least 5000 per search and at most `.Machine$integer.max` in total. A
+#' descent from a random start takes about three to four passes and each failed
+#' escape about one more, so ten passes per search cover roughly one search's
+#' descent and its `max_stale_escapes` = 5 escapes. The budget is one pool for
+#' all searches, so harder shapes still stop on it.
 #' @noRd
 blocks_engine_default_budget <- function(n, searches) {
   pairs <- n * (n - 1) / 2
-  per_search <- if (pairs <= 2000) 25 * pairs else 50 * n
+  per_search <- if (pairs <= 2000) 25 * pairs else if (pairs <= 2e5) max(10 * pairs, 50 * n) else 50 * n
   min(as.double(searches) * max(per_search, 5000), .Machine$integer.max)
+}
+
+#' Default escape size: 3 random swaps in full-pass mode (at most 2e5 plot
+#' pairs), where a search stands at a proven local optimum and returns to its
+#' best one after a failed escape; 10 in sampled mode, as before.
+#' @noRd
+blocks_engine_default_jumps <- function(n) {
+  if (n * (n - 1) / 2 <= 2e5) 3L else 10L
 }
 
 #' Convexity upper bound for the A-efficiency of an equireplicate one-way design

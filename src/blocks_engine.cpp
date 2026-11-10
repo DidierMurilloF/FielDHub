@@ -6,6 +6,7 @@
 #include <cmath>
 #include <memory>
 #include <numeric>
+#include <utility>
 #include <vector>
 #include "block_space.h"
 #include "engine_budget.h"
@@ -17,7 +18,7 @@ const double kTie = 1e-10;        // spec section 8: accept if ratio > 1 + 1e-10
 const int kRefreshEvery = 256;    // spec section 8: refresh interval, halved after a drift alarm
 const int kRefreshMin = 16;       // smallest interval after repeated drift alarms
 const double kDriftAlarm = 1e-8;  // spec section 8: drift alarm threshold
-const double kExhaustivePairs = 2000;  // exhaustive passes only when n(n-1)/2 <= 2000
+const double kExhaustivePairs = 200000;  // full passes only when n(n-1)/2 <= 2e5 (spec-m5 6.4)
 
 struct Layout {
   int v, r, b, n;
@@ -66,6 +67,39 @@ int components(const Layout& lay, const std::vector<int>& treat) {
   return count;
 }
 
+bool is_prime(int q) {
+  if (q < 2) return false;
+  for (int d = 2; d * d <= q; ++d) if (q % d == 0) return false;
+  return true;
+}
+
+// Square lattice start (spec-m5 6.4; Yates 1936). When v = q^2 and the b = r q
+// blocks hold q plots each, treatment (i, j) goes to block i of replicate 0,
+// block j of replicate 1, and block (i + (m - 1) j) mod q of replicate m >= 2:
+// rows, columns and Latin squares that are mutually orthogonal for r <= 3 at
+// any q and for r <= q + 1 at prime q. Treatment and block labels are randomly
+// permuted. Returns an empty vector, with no random draws, for any other shape.
+std::vector<int> lattice_start(const Layout& lay) {
+  int q = static_cast<int>(std::lround(std::sqrt(static_cast<double>(lay.v))));
+  if (q < 2 || q * q != lay.v || lay.r < 2 || lay.b != lay.r * q) return std::vector<int>();
+  if (lay.r > 3 && !(is_prime(q) && lay.r <= q + 1)) return std::vector<int>();
+  std::vector<int> tp(lay.v), bp(lay.b), fill(lay.b, 0), treat(lay.n);
+  std::iota(tp.begin(), tp.end(), 0);
+  std::iota(bp.begin(), bp.end(), 0);
+  for (int x = lay.v - 1; x > 0; --x) std::swap(tp[x], tp[draw_index(x + 1)]);
+  for (int x = lay.b - 1; x > 0; --x) std::swap(bp[x], bp[draw_index(x + 1)]);
+  for (int i = 0; i < q; ++i) {
+    for (int j = 0; j < q; ++j) {
+      for (int m = 0; m < lay.r; ++m) {
+        int g = m == 0 ? i : (m == 1 ? j : (i + (m - 1) * j) % q);
+        int blk = bp[m * q + g];
+        treat[blk * q + fill[blk]++] = tp[q * i + j];
+      }
+    }
+  }
+  return treat;
+}
+
 // Draw one random swap; returns false if the pair is not a valid swap.
 bool draw_swap(const Layout& lay, const std::vector<int>& treat, int& x, int& y) {
   x = draw_index(lay.n);
@@ -76,7 +110,8 @@ bool draw_swap(const Layout& lay, const std::vector<int>& treat, int& x, int& y)
 // Dense work of one refresh or drift check (Cholesky, triangular inverse and
 // product, about b^3 multiply-adds) plus the sparse N'N build.
 double refresh_work(const Layout& lay) {
-  return static_cast<double>(lay.b) * lay.b * lay.b + static_cast<double>(lay.n) * lay.r;
+  return static_cast<double>(lay.b) * lay.b * lay.b + static_cast<double>(lay.n) * lay.r +
+         static_cast<double>(lay.n) * lay.b;
 }
 
 // Refresh with the time and interrupt checks the dense work needs. False if
@@ -107,7 +142,7 @@ bool apply_swap(BlockSpace& bs, const Layout& lay, std::vector<int>& treat, int 
       if (e > out.debug_max_error) out.debug_max_error = e;
     }
   }
-  if (!budget.work(4.0 * lay.b * lay.b)) return false;  // the rank-2 update
+  if (!budget.work(4.0 * lay.b * lay.b + 2.0 * lay.b * lay.v)) return false;  // the rank-2 updates
   if (++accepted % interval == 0) {
     if (!budget.spend(static_cast<double>(lay.n + lay.b))) return true;
     if (!budget.work(refresh_work(lay))) return false;  // the drift check below is O(b^3)
@@ -184,47 +219,74 @@ bool escape(BlockSpace& bs, const Layout& lay, std::vector<int>& treat, int jump
   return true;
 }
 
+// Full-pass descent to a single-swap local optimum. The plot order is shuffled
+// once; the pairs are then scanned cyclically in that order, first improvement,
+// until every pair has been scanned since the last accepted swap, which proves
+// the local optimum without a separate confirming pass. Only valid swaps
+// (different blocks, different treatments) are evaluated and charged. Returns
+// false if the search must end; `optimum` is false if the budget stopped it.
+bool descend_full(BlockSpace& bs, const Layout& lay, std::vector<int>& treat, std::vector<int>& order,
+                  int& accepted, int& interval, Search& out, Budget& budget, bool& optimum) {
+  optimum = false;
+  for (int i = 0; i < lay.n; ++i) order[i] = i;
+  for (int i = lay.n - 1; i > 0; --i) std::swap(order[i], order[draw_index(i + 1)]);
+  const double total = static_cast<double>(lay.n) * (lay.n - 1) / 2.0;
+  double since = 0.0;
+  for (;;) {
+    for (int i = 0; i < lay.n; ++i) {
+      for (int j = i + 1; j < lay.n; ++j) {
+        if (since >= total) { optimum = true; return true; }
+        since += 1.0;
+        int x = order[i], y = order[j];
+        if (lay.block_of[x] == lay.block_of[y] || treat[x] == treat[y]) continue;
+        if (!budget.spend(1.0)) return true;
+        double ratio = bs.delta_cached(treat[x], lay.block_of[x], treat[y], lay.block_of[y]);
+        if (improves(bs, ratio)) {
+          if (!apply_swap(bs, lay, treat, x, y, ratio, accepted, interval, out, budget)) return false;
+          if (budget.stopped()) return true;
+          since = 0.0;
+        }
+      }
+    }
+  }
+}
+
 void run_search(const Layout& lay, int jumps_per_escape, int max_stale_escapes,
-                Budget& budget, Search& out) {
+                Budget& budget, Search& out, const std::vector<int>* start = nullptr) {
   std::vector<int> treat(lay.n);
   for (int x = 0; x < lay.n; ++x) treat[x] = x / lay.r;  // r copies of each treatment
   std::unique_ptr<BlockSpace> bs;
+  // Full passes read swap ratios from the cache (spec-m5 6.5); it is switched on
+  // before the start's refresh, which then builds it.
+  const bool exhaustive = static_cast<double>(lay.n) * (lay.n - 1) / 2.0 <= kExhaustivePairs;
+  if (start) {  // a lattice start is connected; random starts follow if it can't be scored
+    if (!budget.spend(static_cast<double>(lay.n + lay.b))) return;
+    treat = *start;
+    bs.reset(new BlockSpace(lay.v, lay.b, lay.r, counts_of(lay, treat)));
+    if (exhaustive) bs->enable_cache();
+    if (!budget.work(refresh_work(lay)) || !bs->refresh()) bs.reset();
+  }
   for (int attempt = 0; attempt < 10 && !bs; ++attempt) {
     if (!budget.spend(static_cast<double>(lay.n + lay.b))) return;
     for (int x = lay.n - 1; x > 0; --x) std::swap(treat[x], treat[draw_index(x + 1)]);
     if (!repair_connectivity(lay, treat, budget, out)) continue;
     bs.reset(new BlockSpace(lay.v, lay.b, lay.r, counts_of(lay, treat)));
+    if (exhaustive) bs->enable_cache();
     if (!budget.work(refresh_work(lay)) || !bs->refresh()) bs.reset();
   }
   if (!bs) return;  // no connected start within 10 repaired shuffles
   int accepted = 0, stale = 0, interval = kRefreshEvery;
   double local_best = -INFINITY;
   std::vector<int> local_treat;
-  const bool exhaustive = static_cast<double>(lay.n) * (lay.n - 1) / 2.0 <= kExhaustivePairs;
+  std::unique_ptr<BlockSpace> best_state;  // full passes: the state at local_treat
   std::vector<int> order(lay.n);
   bool ok = true;  // false once a refresh fails or the time limit ends the search
   while (ok && !budget.stopped()) {
     int x, y;
     if (exhaustive) {
-      // One pass over all plot pairs in random order; stop at the end of a pass
-      // without improvement (a true single-swap local optimum).
-      for (int i = 0; i < lay.n; ++i) order[i] = i;
-      for (int i = lay.n - 1; i > 0; --i) std::swap(order[i], order[draw_index(i + 1)]);
-      bool improved = false;
-      for (int i = 0; ok && i < lay.n && !budget.stopped(); ++i) {
-        for (int j = i + 1; j < lay.n; ++j) {
-          if (!budget.spend(1.0)) break;
-          x = order[i]; y = order[j];
-          if (lay.block_of[x] == lay.block_of[y] || treat[x] == treat[y]) continue;
-          double ratio = bs->delta(treat[x], lay.block_of[x], treat[y], lay.block_of[y]);
-          if (improves(*bs, ratio)) {
-            if (!apply_swap(*bs, lay, treat, x, y, ratio, accepted, interval, out, budget)) { ok = false; break; }
-            improved = true;
-          }
-        }
-      }
-      if (!ok) break;
-      if (improved || budget.stopped()) continue;
+      bool optimum = false;
+      if (!descend_full(*bs, lay, treat, order, accepted, interval, out, budget, optimum)) { ok = false; break; }
+      if (!optimum) continue;  // the budget or the time limit stopped the descent
     } else {
       // Random sampling; n consecutive draws without improvement end a pass.
       int fails = 0;
@@ -248,8 +310,16 @@ void run_search(const Layout& lay, int jumps_per_escape, int max_stale_escapes,
       local_best = bs->log_det();
       local_treat = treat;
       stale = 0;
+      if (exhaustive) best_state.reset(new BlockSpace(*bs));
     } else if (++stale >= max_stale_escapes) {
       break;
+    } else if (exhaustive) {
+      // A full-pass search stands at a proven local optimum, so a failed
+      // escape returns to the best one (iterated local search) instead of
+      // walking on from a worse design. The state saved there was fresh.
+      treat = local_treat;
+      *bs = *best_state;
+      if (!budget.work(static_cast<double>(lay.b) * (lay.b + lay.v))) { ok = false; break; }
     }
     if (!escape(*bs, lay, treat, jumps_per_escape, accepted, interval, budget, out)) { ok = false; break; }
   }
@@ -268,7 +338,103 @@ void run_search(const Layout& lay, int jumps_per_escape, int max_stale_escapes,
   }
 }
 
+// Even-up repair (spec-m5 section 6.1). A search stopped by its budget can
+// return a design that is not a local optimum, and then some treatment may
+// occur in one block at least twice more often than in another. While that
+// happens: take the treatment and the pair of blocks with the largest
+// difference (ties: smallest treatment, then blocks), and swap one of its plots
+// in the fuller block with a plot of a partner treatment that is more frequent
+// in the emptier block. With block sizes within one of each other a partner
+// always exists, and each swap lowers the sum of squared counts by at least 2,
+// so the loop ends; its only fixed point is the even pattern. Partners whose
+// determinant ratio is at most 1e-9 of its scale would disconnect the design
+// and are skipped; the highest ratio wins, ratios within a relative 1e-10 of
+// it tie, and a tie goes to the smallest partner. The chosen swap is confirmed
+// connected with union-find. No random numbers are drawn, and an even design
+// is returned untouched. Returns the number of swaps, or -1 if no connected
+// partner exists (the caller's evenness check then fails).
+const double kRepairTie = 1e-10;
+
+int even_repair(const Layout& lay, std::vector<int>& treat) {
+  int swaps = 0;
+  for (;;) {
+    std::vector<int> c = counts_of(lay, treat);
+    int ti = -1, full = -1, empty = -1, worst = 1;
+    for (int i = 0; i < lay.v; ++i) {
+      int hi = 0, lo = 0;
+      for (int j = 1; j < lay.b; ++j) {
+        if (c[i + lay.v * j] > c[i + lay.v * hi]) hi = j;
+        if (c[i + lay.v * j] < c[i + lay.v * lo]) lo = j;
+      }
+      int d = c[i + lay.v * hi] - c[i + lay.v * lo];
+      if (d > worst) { worst = d; ti = i; full = hi; empty = lo; }
+    }
+    if (ti < 0) return swaps;
+    cpp11::check_user_interrupt();  // once per move; throws to R
+    BlockSpace bs(lay.v, lay.b, lay.r, c);
+    if (!bs.refresh()) return -1;
+    std::vector<std::pair<double, int>> partners;  // (ratio, partner)
+    for (int i = 0; i < lay.v; ++i) {
+      if (i == ti || c[i + lay.v * empty] <= c[i + lay.v * full]) continue;
+      double ratio = bs.delta(ti, full, i, empty);
+      if (ratio > kDisconnectRel * bs.last_scale()) partners.push_back({ratio, i});
+    }
+    bool done = false;
+    while (!done && !partners.empty()) {
+      double best = -INFINITY;
+      for (const auto& p : partners) best = std::max(best, p.first);
+      size_t pick = 0;
+      for (size_t k = 0; k < partners.size(); ++k) {
+        if (partners[k].first >= best - kRepairTie * std::fabs(best)) { pick = k; break; }
+      }
+      int partner = partners[pick].second;
+      partners.erase(partners.begin() + static_cast<long>(pick));
+      int x = -1, y = -1;
+      for (int k = 0; k < lay.n && (x < 0 || y < 0); ++k) {
+        if (x < 0 && lay.block_of[k] == full && treat[k] == ti) x = k;
+        if (y < 0 && lay.block_of[k] == empty && treat[k] == partner) y = k;
+      }
+      std::swap(treat[x], treat[y]);
+      if (components(lay, treat) == 1) {
+        done = true;
+      } else {
+        std::swap(treat[x], treat[y]);
+      }
+    }
+    if (!done) return -1;
+    ++swaps;
+  }
+}
+
 }  // namespace
+
+// Test hook: run the even-up repair on a design given as the treatment of each
+// plot (1-based, plots in block order as in blocks_engine()). Returns the
+// repaired treatments and the number of swaps (-1 if it could not finish).
+[[cpp11::register]]
+cpp11::list even_repair_probe_cpp(cpp11::integers treatments, int v, int r, int b) {
+  Layout lay = make_layout(v, r, b);
+  std::vector<int> treat(lay.n);
+  for (int x = 0; x < lay.n; ++x) treat[x] = treatments[x] - 1;
+  int swaps = even_repair(lay, treat);
+  cpp11::writable::integers out(lay.n);
+  for (int x = 0; x < lay.n; ++x) out[x] = treat[x] + 1;
+  using namespace cpp11::literals;
+  return cpp11::writable::list({"treatments"_nm = out, "swaps"_nm = swaps});
+}
+
+// Test hook: the lattice start for (v, r, b) as 1-based treatments by plot,
+// or an empty vector when the shape is not a square lattice.
+[[cpp11::register]]
+cpp11::integers lattice_start_probe_cpp(int v, int r, int b) {
+  Layout lay = make_layout(v, r, b);
+  GetRNGstate();
+  std::vector<int> start = lattice_start(lay);
+  PutRNGstate();
+  cpp11::writable::integers out(static_cast<R_xlen_t>(start.size()));
+  for (size_t x = 0; x < start.size(); ++x) out[x] = start[x] + 1;
+  return out;
+}
 
 [[cpp11::register]]
 cpp11::list blocks_engine_cpp(int v, int r, int b, int searches, int jumps_per_escape,
@@ -280,12 +446,15 @@ cpp11::list blocks_engine_cpp(int v, int r, int b, int searches, int jumps_per_e
   out.debug = debug;
   int done = 0;
   GetRNGstate();
+  std::vector<int> lattice = lattice_start(lay);
   for (int s = 0; s < searches && !bud.stopped(); ++s) {
-    run_search(lay, jumps_per_escape, max_stale_escapes, bud, out);
+    run_search(lay, jumps_per_escape, max_stale_escapes, bud, out,
+               s == 0 && !lattice.empty() ? &lattice : nullptr);
     ++done;
   }
   PutRNGstate();
   int stop = bud.stopped() ? bud.stop() : (out.best_treat.empty() ? STOP_NO_START : STOP_STALE);
+  int even_repairs = out.best_treat.empty() ? 0 : even_repair(lay, out.best_treat);
   cpp11::writable::integers treatments(lay.n), blocks(lay.n);
   double d_eff = NA_REAL, a_eff = NA_REAL, log_det = NA_REAL;
   if (!out.best_treat.empty()) {
@@ -301,5 +470,6 @@ cpp11::list blocks_engine_cpp(int v, int r, int b, int searches, int jumps_per_e
       "d_efficiency"_nm = d_eff, "a_efficiency"_nm = a_eff,
       "evaluations"_nm = bud.used(), "stop_reason"_nm = stop, "searches_done"_nm = done,
       "refreshes"_nm = out.refreshes, "drift_events"_nm = out.drift_events, "repairs"_nm = out.repairs,
+      "even_repairs"_nm = even_repairs,
       "debug_max_error"_nm = debug ? out.debug_max_error : NA_REAL});
 }

@@ -12,6 +12,13 @@ class BlockSpace {
   // Determinant ratio det(Bhat') / det(Bhat) for moving one plot of treatment a
   // from block p to block q and one plot of treatment c from q to p.
   double delta(int a, int p, int c, int q) const;
+  // Maintain G = Minv N' / r (b x v) from now on (rebuilt by refresh(), updated
+  // by apply()), so that delta_cached() costs O(r) instead of O(b + r^2).
+  void enable_cache();
+  // The same ratio as delta(), read from Minv and G: with h = (N_a. - N_c.) / r,
+  // Minv h = G_.a - G_.c, so beta is four entries of G and gamma is a sum over
+  // the 2 r plots of a and c. Requires enable_cache() and a successful refresh().
+  double delta_cached(int a, int p, int c, int q) const;
   // max(1, |(1 - beta)^2|, |alpha (t + gamma)|) of the last delta(): the size of
   // the two terms whose difference is the ratio, so its rounding error is
   // relative to this scale (derivation section 8, eps_rel).
@@ -38,6 +45,9 @@ class BlockSpace {
   std::vector<int> sizes_;    // block sizes k_j
   std::vector<int> blocks_of_;  // v x r: the block of each plot of each treatment
   std::vector<double> minv_;  // b x b
+  bool cached_ = false;
+  std::vector<double> g_;     // b x v, column i = Minv N_i.' / r (only if cached_)
+  void rebuild_g();
   mutable std::vector<double> h_;  // scratch for delta(), size b
   mutable double first_ = 0.0, second_ = 0.0;  // the two terms of the last delta()
   double log_det_;

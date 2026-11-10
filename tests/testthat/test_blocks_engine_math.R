@@ -111,3 +111,47 @@ test_that("the A-bound is valid and exact for the (7, 3, 1) BIBD", {
   }
   expect_equal(block_a_bound(7, 3, rep(3, 7)), 7 / 9, tolerance = 1e-12)
 })
+
+test_that("the cached ratio matches the uncached ratio and the eigenvalue reference", {
+  set.seed(21)
+  checked <- 0L
+  for (case in seq_len(200)) {
+    v <- sample(4:25, 1); b <- sample(2:12, 1); r <- sample(1:4, 1)
+    if (v * r < v + b - 1 || v * r < 2 * b) next
+    N <- engine_ref_random_counts(v, r, b)
+    if (engine_ref_efficiency(N, r)[["rank"]] < v - 1) next
+    s <- engine_ref_random_swap(N)
+    probe <- block_space_cached_probe_cpp(as.integer(N), v, b, r, as.integer(s), 0L)
+    expected <- engine_ref_ratio(N, s[1], s[2], s[3], s[4])
+    expect_lte(abs(probe$cached - expected) / max(1, expected), 1e-8)
+    expect_lte(abs(probe$cached - probe$ratios) / max(1, expected), 1e-10)
+    checked <- checked + 1L
+  }
+  expect_gte(checked, 100L)
+})
+
+test_that("the cache follows accepted swaps without a refresh", {
+  # 5000 random swap attempts (most are invalid and skipped) with no refresh: after each applied swap the cached
+  # ratio (Minv and G both updated by rank 2) must still agree with the
+  # uncached one (Minv only), and the final state with a direct recomputation.
+  set.seed(22)
+  for (shape in list(c(40L, 6L, 3L), c(30L, 20L, 2L), c(12L, 12L, 2L), c(25L, 4L, 7L))) {
+    v <- shape[1]; b <- shape[2]; r <- shape[3]
+    repeat {
+      N <- engine_ref_random_counts(v, r, b)
+      if (engine_ref_efficiency(N, r)[["rank"]] == v - 1) break
+    }
+    swaps <- unlist(lapply(seq_len(5000), function(i) {
+      trt <- sample.int(v, 2); blk <- sample.int(b, 2)
+      c(trt[1], blk[1], trt[2], blk[2])
+    }))
+    probe <- block_space_cached_probe_cpp(as.integer(N), v, b, r, as.integer(swaps), 0L)
+    ok <- !is.na(probe$cached)
+    expect_gte(probe$applied, 20L)
+    expect_lte(max(abs(probe$cached[ok] - probe$ratios[ok]) / pmax(1, abs(probe$ratios[ok]))), 1e-8)
+    final <- matrix(probe$counts, v, b)
+    expect_identical(rowSums(final), rep(as.double(r), v))
+    fresh <- block_space_probe_cpp(as.integer(final), v, b, r, integer(0), 0L)
+    expect_lte(abs(probe$log_det - fresh$log_det), 1e-8)
+  }
+})
