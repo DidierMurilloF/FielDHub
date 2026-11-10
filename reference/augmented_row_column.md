@@ -256,17 +256,17 @@ x$infoDesign$residual_df
 #> [1] 12
 x$statistics
 #>   LOCATION     E_aug     V_tt     V_tc      V_cc   max_tt   max_tc residual_df
-#> 1        1 0.5884851 3.502748 1.872188 0.2767563 4.120002 2.037172          12
+#> 1        1 0.5900639 3.492972 1.867456 0.2760943 4.077778 2.002083          12
 #>     authority lambda_min_rel
-#> 1 full_layout      0.1722068
+#> 1 full_layout      0.1635441
 head(x$fieldBook)
 #>   ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT CHECK_DIRECTION
-#> 1  1 Expt1        1 2026  101   1      1      0     7        G7         columns
-#> 2  2 Expt1        1 2026  102   1      2      3     3       CH3         columns
-#> 3  3 Expt1        1 2026  103   1      3      1     1       CH1         columns
-#> 4  4 Expt1        1 2026  104   1      4      4     4       CH4         columns
-#> 5  5 Expt1        1 2026  105   1      5      0    30       G30         columns
-#> 6  6 Expt1        1 2026  106   1      6      0     8        G8         columns
+#> 1  1 Expt1        1 2026  101   1      1      0    20       G20         columns
+#> 2  2 Expt1        1 2026  102   1      2      1     1       CH1         columns
+#> 3  3 Expt1        1 2026  103   1      3      2     2       CH2         columns
+#> 4  4 Expt1        1 2026  104   1      4      3     3       CH3         columns
+#> 5  5 Expt1        1 2026  105   1      5      0    37       G37         columns
+#> 6  6 Expt1        1 2026  106   1      6      0    15       G15         columns
 # Check plots per field column: each check once in every column
 checks <- x$fieldBook[x$fieldBook$CHECKS > 0, ]
 table(checks$TREATMENT, checks$COLUMN)
@@ -286,10 +286,10 @@ y <- augmented_row_column(nrows = 8, ncols = 10,
 y$contraction
 #> $`1`
 #>      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8]
-#> [1,]   10    7    5    9    6    1    2    8
-#> [2,]    8    3    9    6    4    2    5    7
-#> [3,]    2   10    1    7    5    8    3    4
-#> [4,]    9    1    4    3   10    6    8    2
+#> [1,]    7    5    9    6    2    8    3    4
+#> [2,]    9    1    6    7    8    2   10    5
+#> [3,]    4    7    3    2    1    5    8   10
+#> [4,]   10    3    1    8    4    9    2    6
 #> 
 
 # Replay from the recorded parameters

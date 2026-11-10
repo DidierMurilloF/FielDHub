@@ -496,9 +496,9 @@ Location FARGO:
   Search status: ok
 Location CASSELTON:
   Residual df: 16
-  Optimized objective: V_tt = 3.484 (minimized)
-  E_aug = 0.5849, V_tt = 3.484, V_tc = 1.84
-  max_tt = 4.293, max_tc = 2.004
+  Optimized objective: V_tt = 3.483 (minimized)
+  E_aug = 0.585, V_tt = 3.483, V_tc = 1.84
+  max_tt = 4.233, max_tc = 2
   Search status: ok
 
 Information on the design parameters: 
@@ -555,10 +555,10 @@ returned, randomized placement.
 arc$statistics
    LOCATION     E_aug     V_tt     V_tc      V_cc   max_tt   max_tc residual_df
 1     FARGO 0.5860973 3.476545 1.836753 0.2171206 4.250279 2.007862          16
-2 CASSELTON 0.5849034 3.484066 1.840236 0.2167487 4.293083 2.003576          16
+2 CASSELTON 0.5850251 3.483327 1.839863 0.2167277 4.233351 1.999798          16
     authority lambda_min_rel
 1 full_layout      0.1618441
-2 full_layout      0.1614049
+2 full_layout      0.1602844
 ```
 
 `arc$diagnostics` records the search for each location: the location
@@ -806,15 +806,15 @@ List of 15
  10 First observations of the data frame with the augmented_row_column field book: 
    ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
 1   1 Expt1        1 2026  101   1      1      0    30  Line 027
-2   2 Expt1        1 2026  102   1      2      0    39  Line 036
-3   3 Expt1        1 2026  103   1      3      1     1   Check-1
+2   2 Expt1        1 2026  102   1      2      3     3   Check-3
+3   3 Expt1        1 2026  103   1      3      0    43  Line 040
 4   4 Expt1        1 2026  104   1      4      0    35  Line 032
 5   5 Expt1        1 2026  105   1      5      0    34  Line 031
-6   6 Expt1        1 2026  106   1      6      2     2   Check-2
+6   6 Expt1        1 2026  106   1      6      0    27  Line 024
 7   7 Expt1        1 2026  107   1      7      0    66  Line 063
-8   8 Expt1        1 2026  108   1      8      0    45  Line 042
-9   9 Expt1        1 2026  109   2      8      0    41  Line 038
-10 10 Expt1        1 2026  110   2      7      0    40  Line 037
+8   8 Expt1        1 2026  108   1      8      2     2   Check-2
+9   9 Expt1        1 2026  109   2      8      0    45  Line 042
+10 10 Expt1        1 2026  110   2      7      3     3   Check-3
    CHECK_DIRECTION
 1          columns
 2          columns
