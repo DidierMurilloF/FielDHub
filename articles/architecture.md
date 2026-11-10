@@ -57,7 +57,7 @@ x$metadata[c("design", "schema_version", "seed", "package_version")]
 #> [1] 27
 #> 
 #> $package_version
-#> [1] "1.6.0"
+#> [1] "1.7.0"
 stopifnot(identical(reproduce_design(x), x))
 ```
 

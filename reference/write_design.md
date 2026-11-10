@@ -68,7 +68,7 @@ read_design(file)$metadata
 #> [1] "Mersenne-Twister" "Inversion"        "Rejection"       
 #> 
 #> $package_version
-#> [1] "1.6.0"
+#> [1] "1.7.0"
 #> 
 #> $parameters
 #> $parameters$t

@@ -6,6 +6,8 @@
   Design](https://didiermurillof.github.io/FielDHub/articles/alpha_lattice.md):
 - [Architecture and compatibility
   contracts](https://didiermurillof.github.io/FielDHub/articles/architecture.md):
+- [Augmented Row-Column
+  Design](https://didiermurillof.github.io/FielDHub/articles/augmented_row_column.md):
 - [Completely Randomized
   Design](https://didiermurillof.github.io/FielDHub/articles/crd.md):
 - [Unreplicated Diagonal Arrangement

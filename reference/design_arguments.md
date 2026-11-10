@@ -13,6 +13,14 @@ constraints.
   of labels. Check-based designs use `lines` for the number of
   experimental entries excluding checks.
 
+- `entries`:
+
+  Test entries excluding checks, as a count or as a vector of labels, in
+  [`augmented_row_column()`](https://didiermurillof.github.io/FielDHub/reference/augmented_row_column.md).
+  It describes the same entries as `lines` in the other check-based
+  designs, where `lines` is a count only; `entries` also accepts labels
+  because an uploaded entry list is recorded portably as its labels.
+
 - `reps`:
 
   Full replicates per location in classical, incomplete-block, lattice,

@@ -174,7 +174,7 @@ print(alpha)
     Efficiency of design: 
       Level Blocks D-Efficiency A-Efficiency   A-Bound
     1     1      3    1.0000000    1.0000000 1.0000000
-    2     2     33    0.7857536    0.7545892 0.7574115
+    2     2     33    0.7858061    0.7547563 0.7574115
 
     Information on the design parameters: 
     List of 7
@@ -188,16 +188,16 @@ print(alpha)
 
      10 First observations of the data frame with the alpha_lattice field book: 
        ID LOCATION PLOT REP IBLOCK UNIT ENTRY TREATMENT
-    1   1    FARGO  101   1      1    1    44      G-44
-    2   2    FARGO  102   1      1    2     2       G-2
-    3   3    FARGO  103   1      1    3    22      G-22
-    4   4    FARGO  104   1      1    4    39      G-39
-    5   5    FARGO  105   1      1    5    12      G-12
-    6   6    FARGO  106   1      2    1    47      G-47
-    7   7    FARGO  107   1      2    2    41      G-41
-    8   8    FARGO  108   1      2    3    31      G-31
-    9   9    FARGO  109   1      2    4    10      G-10
-    10 10    FARGO  110   1      2    5    20      G-20
+    1   1    FARGO  101   1      1    1    28      G-28
+    2   2    FARGO  102   1      1    2     8       G-8
+    3   3    FARGO  103   1      1    3    31      G-31
+    4   4    FARGO  104   1      1    4    47      G-47
+    5   5    FARGO  105   1      1    5    16      G-16
+    6   6    FARGO  106   1      2    1     9       G-9
+    7   7    FARGO  107   1      2    2    35      G-35
+    8   8    FARGO  108   1      2    3    52      G-52
+    9   9    FARGO  109   1      2    4    17      G-17
+    10 10    FARGO  110   1      2    5    23      G-23
 
 ### Access to `alpha` object
 
@@ -221,16 +221,16 @@ head(alpha$fieldBook, 10)
 ```
 
        ID LOCATION PLOT REP IBLOCK UNIT ENTRY TREATMENT
-    1   1    FARGO  101   1      1    1    44      G-44
-    2   2    FARGO  102   1      1    2     2       G-2
-    3   3    FARGO  103   1      1    3    22      G-22
-    4   4    FARGO  104   1      1    4    39      G-39
-    5   5    FARGO  105   1      1    5    12      G-12
-    6   6    FARGO  106   1      2    1    47      G-47
-    7   7    FARGO  107   1      2    2    41      G-41
-    8   8    FARGO  108   1      2    3    31      G-31
-    9   9    FARGO  109   1      2    4    10      G-10
-    10 10    FARGO  110   1      2    5    20      G-20
+    1   1    FARGO  101   1      1    1    28      G-28
+    2   2    FARGO  102   1      1    2     8       G-8
+    3   3    FARGO  103   1      1    3    31      G-31
+    4   4    FARGO  104   1      1    4    47      G-47
+    5   5    FARGO  105   1      1    5    16      G-16
+    6   6    FARGO  106   1      2    1     9       G-9
+    7   7    FARGO  107   1      2    2    35      G-35
+    8   8    FARGO  108   1      2    3    52      G-52
+    9   9    FARGO  109   1      2    4    17      G-17
+    10 10    FARGO  110   1      2    5    23      G-23
 
 ### Plot the field layout
 

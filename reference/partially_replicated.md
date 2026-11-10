@@ -23,7 +23,9 @@ partially_replicated(
   border_penalization = 0.5,
   data = NULL,
   allow_fillers = FALSE,
-  year = NULL
+  year = NULL,
+  rowcol_penalty = 0,
+  rowcol_scope = "pairs"
 )
 ```
 
@@ -107,6 +109,24 @@ partially_replicated(
   (optional) Year recorded in the `YEAR` column of the field book. By
   default the current year.
 
+- rowcol_penalty:
+
+  Weight of the rule that keeps the copies of a replicated entry in
+  distinct rows and columns (Williams et al., 2011; Cullis et al.,
+  2006); see
+  [`swap_pairs`](https://didiermurillof.github.io/FielDHub/reference/swap_pairs.md).
+  The default 0 leaves every layout unchanged; `Inf` puts distinct rows
+  and columns first. With the rule on, `infoDesign$shared_pairs` gives
+  the pairs of copies that still share a row or column at each location.
+  Turning it on changes the optimizer's random draws, so with several
+  locations the later locations' layouts change as well. It needs
+  `spread_reps = TRUE`.
+
+- rowcol_scope:
+
+  `"pairs"` (default) covers the entries with exactly two copies;
+  `"all"` also covers the checks and any entry with more copies.
+
 ## Value
 
 A list with several elements.
@@ -164,9 +184,13 @@ rebuild a result `x` with
 
 ## References
 
-Cullis, S., B. R., & Coombes, N. E. (2006). On the design of early
-generation variety trials with correlated data. Journal of Agricultural,
-Biological, and Environmental Statistics, 11, 381–393.
+Williams, E., Piepho, H.-P., & Whitaker, D. (2011). Augmented p-rep
+designs. Biometrical Journal, 53(1), 19-27.
+https://doi.org/10.1002/bimj.201000102
+
+Cullis, B. R., Smith, A. B., & Coombes, N. E. (2006). On the design of
+early generation variety trials with correlated data. Journal of
+Agricultural, Biological, and Environmental Statistics, 11, 381–393.
 https://doi.org/10.1198/108571106X154443
 
 ## Author

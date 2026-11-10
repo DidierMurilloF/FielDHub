@@ -14,6 +14,9 @@
 - [`alpha_lattice()`](https://didiermurillof.github.io/FielDHub/reference/alpha_lattice.md)
   : Generates an Alpha Design
 
+- [`augmented_row_column()`](https://didiermurillof.github.io/FielDHub/reference/augmented_row_column.md)
+  : Augmented row-column design
+
 - [`design_arguments`](https://didiermurillof.github.io/FielDHub/reference/design_arguments.md)
   : Shared design arguments and compatibility
 

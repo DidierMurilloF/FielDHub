@@ -4,8 +4,10 @@ Attempts to separate repeated entries by swapping cells of different
 entries. Distance thresholds increase from `starting_dist` in steps of
 one. Candidate sampling, mean pairwise distance, and a centrality
 penalty guide the search. The last successful threshold layout is
-returned; if none succeeds, the original matrix is returned. A requested
-minimum distance is not guaranteed.
+returned (with the row/column rule on, the successful layout with the
+fewest pairs of copies sharing a row or column; see `rowcol_penalty`);
+if none succeeds, the original matrix is returned. A requested minimum
+distance is not guaranteed.
 
 ## Usage
 
@@ -17,7 +19,9 @@ swap_pairs(
   lambda = 0.5,
   dist_method = "euclidean",
   candidate_sample_size = 4,
-  seed = NULL
+  seed = NULL,
+  rowcol_penalty = 0,
+  rowcol_scope = "pairs"
 )
 ```
 
@@ -57,6 +61,29 @@ swap_pairs(
   the current random-number stream and recorded; the swap's own
   randomization does not change the caller's stream.
 
+- rowcol_penalty:
+
+  Weight of the row/column rule: one number at least 0, or `Inf`. The
+  default 0 turns the rule off and leaves every layout unchanged. When
+  positive, the copies of a covered entry that share a row or a column
+  are treated as a problem to fix even when they are far apart, and a
+  candidate swap scores its distance score minus `rowcol_penalty` times
+  the change in the number of shared pairs. `Inf` is strict: a swap that
+  leaves fewer shared pairs always wins, and distance decides among
+  equals (rows and columns first). With the rule on, the result keeps
+  the successful threshold step with the fewest shared pairs (the
+  largest threshold breaks ties), the search steps after it are dropped
+  from `designs`, `distances` and `rows_incidence`, and `diagnostics`
+  adds `rowcol_penalty`, `rowcol_scope`, `retained_threshold`,
+  `shared_pairs_input`, `shared_pairs_final` and
+  `entries_sharing_final`.
+
+- rowcol_scope:
+
+  Entries the row/column rule covers: `"pairs"` (default), the entries
+  with exactly two copies, or `"all"`, every entry with two or more
+  copies, checks included.
+
 ## Value
 
 A list containing:
@@ -67,11 +94,12 @@ A list containing:
 
 - designs:
 
-  A list of all intermediate designs, starting from the input matrix.
+  A list of the retained threshold layouts, starting from the input
+  matrix; with the row/column rule on, it ends at the kept layout.
 
 - distances:
 
-  A list of all pair distances for each intermediate design.
+  A list of the pair distances of each layout in `designs`.
 
 - min_distance:
 
@@ -121,6 +149,17 @@ layouts can differ from previous versions. Optimization performed inside
 field-design engines retains its existing draw sequence. Use
 [`reproduce_design()`](https://didiermurillof.github.io/FielDHub/reference/reproduce_design.md)
 to replay a recorded optimization result.
+
+## References
+
+Williams, E., Piepho, H.-P., & Whitaker, D. (2011). Augmented p-rep
+designs. Biometrical Journal, 53(1), 19-27.
+https://doi.org/10.1002/bimj.201000102
+
+Cullis, B. R., Smith, A. B., & Coombes, N. E. (2006). On the design of
+early generation variety trials with correlated data. Journal of
+Agricultural, Biological, and Environmental Statistics, 11, 381-393.
+https://doi.org/10.1198/108571106X154443
 
 ## Examples
 

@@ -117,6 +117,13 @@ A list with eight elements.
 - `size_locations` is a named vector with the number of lines allocated
   to each location.
 
+## Details
+
+The allocation of entries to locations comes from
+[`do_optim()`](https://didiermurillof.github.io/FielDHub/reference/do_optim.md);
+see its Details for the search, and for allocations that changed in
+FielDHub 1.7.0.
+
 ## Reproducibility
 
 The result records effective inputs and the resolved seed in

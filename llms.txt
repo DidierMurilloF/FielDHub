@@ -320,6 +320,9 @@ To see more examples, please go to
 - [`alpha_lattice()`](https://didiermurillof.github.io/FielDHub/reference/alpha_lattice.md)
   : Generates an Alpha Design
 
+- [`augmented_row_column()`](https://didiermurillof.github.io/FielDHub/reference/augmented_row_column.md)
+  : Augmented row-column design
+
 - [`design_arguments`](https://didiermurillof.github.io/FielDHub/reference/design_arguments.md)
   : Shared design arguments and compatibility
 
@@ -434,6 +437,8 @@ To see more examples, please go to
   Design](https://didiermurillof.github.io/FielDHub/articles/alpha_lattice.md):
 - [Architecture and compatibility
   contracts](https://didiermurillof.github.io/FielDHub/articles/architecture.md):
+- [Augmented Row-Column
+  Design](https://didiermurillof.github.io/FielDHub/articles/augmented_row_column.md):
 - [Completely Randomized
   Design](https://didiermurillof.github.io/FielDHub/articles/crd.md):
 - [Unreplicated Diagonal Arrangement
