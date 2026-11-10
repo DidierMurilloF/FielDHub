@@ -25,3 +25,6 @@ ARCHITECTURE_AUDIT.md
 src/*.o
 src/*.so
 src/*.dll
+research/
+data-raw/
+.claude
