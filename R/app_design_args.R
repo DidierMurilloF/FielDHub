@@ -685,7 +685,8 @@ design_args_multi_loc_preps <- function(values, data = NULL) {
 #' Build RCBD_augmented() arguments for the augmented RCBD module
 #'
 #' `values`: `lines` (on the upload path, the lines of the file), `checks`,
-#' `b`, `l`, `planter`, `plot_start`, `expt_name`, `seed`,
+#' `b`, `l`, `planter`, `plot_start`, `plot_by_block`, `plot_increment`,
+#' `expt_name`, `seed`,
 #' `location_names`, `repsExpt`, `random`, `repsStack` (NULL for one
 #' experiment: the engine's default layout), `nrows`, `ncols`. Without
 #' `data`, RCBD_augmented() generates the CH1.., G.. entry list from
@@ -699,6 +700,7 @@ design_args_RCBD_augmented <- function(values, data = NULL) {
     l = as_design_number(values[["l"]]) %||% 1,
     planter = values[["planter"]] %||% "serpentine",
     plotNumber = as_design_number(values[["plot_start"]]) %||% 101,
+    plotIncrement = if (isTRUE(values[["plot_by_block"]])) as_design_number(values[["plot_increment"]]),
     repsStack = values[["repsStack"]],
     exptName = values[["expt_name"]],
     seed = as_design_number(values[["seed"]]),

@@ -449,6 +449,9 @@ build_design_specs <- function() {
           }),
           ctl_count("repsExpt", 1, max = 100), ctl_select("repsStack", show_if = "input.repsExpt > 1"),
           ctl_flag("random"),
+          ctl_flag("plot_by_block"),
+          ctl_count("plot_increment", 100, enabled_by = "plot_by_block",
+                    show_if = "input.plot_by_block"),
           ctl_preview("random_note", show_if = "input.random == false",
                       text = function(raw, uploaded) augmented_random_note(raw$random)),
           ctl_locations()
@@ -460,6 +463,7 @@ build_design_specs <- function() {
              b = controls$b, repsExpt = controls$repsExpt,
              repsStack = if (controls$repsExpt > 1) controls$repsStack, random = controls$random,
              l = controls$l, planter = controls$planter, plot_start = controls$plot_start,
+             plot_by_block = controls$plot_by_block, plot_increment = controls$plot_increment,
              seed = controls$seed, expt_name = controls$expt_name,
              location_names = controls$location_names)
       },

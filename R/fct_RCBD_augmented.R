@@ -26,7 +26,18 @@ stack_reps <- function(x_list, repsStack = c("vertical", "horizontal")) {
 #' @param checks Number of checks per augmented block.
 #' @param b Number of augmented blocks.
 #' @param l Number of locations. By default \code{l = 1}.
-#' @param plotNumber Numeric vector with the starting plot number for each location. By default \code{plotNumber = 101}.
+#' @param plotNumber Numeric vector with starting plot numbers per location,
+#' per rep, or per location-rep pair (all reps of the first location first).
+#' A vector of length \code{l} is interpreted as starts per location.
+#' By default \code{plotNumber = 101}.
+#' @param plotIncrement (optional) Positive whole-number increment between block
+#' starts. For example, \code{plotNumber = 101, plotIncrement = 100} starts
+#' blocks at 101, 201, 301, and so on. Must be at least the number of plots
+#' per block, including filler positions. With one start per location, each
+#' additional rep starts \code{b * plotIncrement} plot numbers after the previous rep.
+#' Explicit starts per rep must reserve non-overlapping experiment ranges
+#' within each location. \code{NULL} (the default) keeps continuous numbering.
+#' Filler plots retain plot number zero; treatment randomization is unchanged.
 #' @param repsStack Option for \code{horizontal} or \code{vertical} layout By default \code{repsStack = 'vertical'}.
 #' @param planter Option for \code{serpentine} or \code{cartesian} arrangement. By default \code{planter = 'serpentine'}.
 #' @param seed (optional) Real number that specifies the starting seed to obtain reproducible designs.
@@ -97,6 +108,11 @@ stack_reps <- function(x_list, repsStack = c("vertical", "horizontal")) {
 #' ARCBD2$plotNumber
 #' head(ARCBD2$fieldBook, 12)
 #'                                        
+#' # Number blocks at 101, 201, ...; the second rep uses 601, 701, ...
+#' ARCBD3 <- RCBD_augmented(lines = 50, checks = 3, b = 5, repsExpt = 2,
+#'                          plotNumber = 101, plotIncrement = 100, seed = 23)
+#' head(ARCBD3$fieldBook)
+#'
 #' @section Reproducibility:
 #' The result records effective inputs and the resolved seed in
 #' \code{metadata$parameters}. Under the same package versions and RNG
@@ -109,7 +125,7 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
                            repsStack = c("vertical", "horizontal"),
                            exptName = NULL, seed = NULL, locationNames = NULL, 
                            repsExpt = 1, random = TRUE, data = NULL, 
-                           nrows = NULL, ncols = NULL, year = NULL) {
+                           nrows = NULL, ncols = NULL, year = NULL, plotIncrement = NULL) {
   plotNumber_supplied <- !missing(plotNumber)
   validate_locations(l)
   validate_flag(random, "random")
@@ -119,6 +135,7 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
   seed <- resolve_seed(seed)
   local_design_seed(seed)
   validate_plot_starts(plotNumber)
+  if (!is.null(plotIncrement)) validate_iteration_budget(plotIncrement, "plotIncrement")
   # With explicit plot starts, repsExpt is used in arithmetic before the other
   # counts. Keep NULL-plot defaults in their existing promise-evaluation order.
   if (!is.null(plotNumber) && !is.null(repsExpt)) {
@@ -192,6 +209,10 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
     plotNumber <- default_plot_starts(l, 1001)
   }
   
+  block_plot_starts <- if (!is.null(plotIncrement)) {
+    arcbd_block_plot_starts(plotNumber, l, repsExpt, b, plots_per_block, plotIncrement)
+  }
+
   outputDesign_loc <- vector(mode = "list", length = l)
   if (is.null(exptName) || length(exptName) != repsExpt) {
     exptName <- paste(rep("Expt", repsExpt), 1:repsExpt, sep = "")
@@ -440,7 +461,9 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
         planter = planter
       )
       
-      plot_start <- if (length(plotNumber) == l) {
+      plot_start <- if (!is.null(block_plot_starts)) {
+        block_plot_starts[locations, expts]
+      } else if (length(plotNumber) == l) {
         plotNumber[locations]
       } else if (length(plotNumber) == repsExpt) {
         plotNumber[expts]
@@ -457,6 +480,12 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
         nameEXPT = nameEXPT$my_names
       )
       
+      if (!is.null(plotIncrement)) {
+        plotEXPT$plot_num <- arcbd_number_by_block(
+          layout, Blocks_info, plot_start, plotIncrement, planter
+        )
+      }
+
       my_data_VLOOKUP <- data
       COLNAMES_DATA <- colnames(my_data_VLOOKUP)
       layout1 <- layout
@@ -577,7 +606,8 @@ RCBD_augmented <- function(lines = NULL, checks = NULL, b = NULL, l = 1,
   
   reproduction_parameters <- record_design_parameters(
     environment(), overrides = list(ncols = if (automatic_dimensions) NULL else field_cols,
-                                    locationNames = recorded_locations)
+                                    locationNames = recorded_locations),
+    exclude = if (is.null(plotIncrement)) "plotIncrement" else character()
   )
   output <- new_fieldhub_design(output, "rcbd_augmented", parameters = reproduction_parameters)
   return(invisible(output))

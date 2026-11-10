@@ -20,7 +20,8 @@ RCBD_augmented(
   data = NULL,
   nrows = NULL,
   ncols = NULL,
-  year = NULL
+  year = NULL,
+  plotIncrement = NULL
 )
 }
 \arguments{
@@ -34,7 +35,10 @@ RCBD_augmented(
 
 \item{planter}{Option for \code{serpentine} or \code{cartesian} arrangement. By default \code{planter = 'serpentine'}.}
 
-\item{plotNumber}{Numeric vector with the starting plot number for each location. By default \code{plotNumber = 101}.}
+\item{plotNumber}{Numeric vector with starting plot numbers per location,
+per rep, or per location-rep pair (all reps of the first location first).
+A vector of length \code{l} is interpreted as starts per location.
+By default \code{plotNumber = 101}.}
 
 \item{repsStack}{Option for \code{horizontal} or \code{vertical} layout By default \code{repsStack = 'vertical'}.}
 
@@ -56,6 +60,15 @@ RCBD_augmented(
 
 \item{year}{(optional) Year recorded in the \code{YEAR} column of the field book.
 By default the current year.}
+
+\item{plotIncrement}{(optional) Positive whole-number increment between block
+starts. For example, \code{plotNumber = 101, plotIncrement = 100} starts
+blocks at 101, 201, 301, and so on. Must be at least the number of plots
+per block, including filler positions. With one start per location, each
+additional rep starts \code{b * plotIncrement} plot numbers after the previous rep.
+Explicit starts per rep must reserve non-overlapping experiment ranges
+within each location. \code{NULL} (the default) keeps continuous numbering.
+Filler plots retain plot number zero; treatment randomization is unchanged.}
 }
 \value{
 A list with five elements.
@@ -113,6 +126,11 @@ ARCBD2$exptNames
 ARCBD2$plotNumber
 head(ARCBD2$fieldBook, 12)
                                        
+# Number blocks at 101, 201, ...; the second rep uses 601, 701, ...
+ARCBD3 <- RCBD_augmented(lines = 50, checks = 3, b = 5, repsExpt = 2,
+                         plotNumber = 101, plotIncrement = 100, seed = 23)
+head(ARCBD3$fieldBook)
+
 }
 \references{
 Federer, W. T. (1955). Experimental Design. Theory and Application. New York, USA. The

@@ -36,6 +36,12 @@
 
 ## Enhancements
 
+- Augmented RCBD designs support optional block-based plot numbering with
+  `plotIncrement`: for example, blocks start at 101, 201, 301 with an increment
+  of 100. Additional experiment reps receive separate ranges within each
+  location. The app exposes this through "Number plots by block". Continuous
+  numbering remains the default (#82).
+
 - Sparse and multi-location p-rep allocations (`do_optim()`, and through it
   `sparse_allocation()`, `multi_location_prep()` and both app pages) now use
   FielDHub's own compiled block-design search instead of

@@ -37,6 +37,8 @@ canonical_labels <- c(
   l = "Input # of Locations:",
   planter = "Plot Order Layout:",
   plot_start = "Starting Plot Number(s):",
+  plot_by_block = "Number plots by block",
+  plot_increment = "Plot number increment between blocks:",
   continuous = "Continuous Plot",
   location_names = "Location Name(s):",
   randomizeH = "Randomize Horizontal Strips (Across reps)",
