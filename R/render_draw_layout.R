@@ -40,15 +40,15 @@ draw_registered_layout <- function(x, df, ...) {
 #' Entry and plot maps of augmented row-column designs
 #'
 #' The field-alleys style without alleys (the field has no blocks): every
-#' plot on the shared neutral inside a white plot grid, check plots on the
-#' check grey, labelled by entry number. The plot-number map keeps the grid
-#' and does not highlight checks.
+#' plot on the shared neutral inside a white plot grid, each check in its own
+#' muted colour (\code{fieldhub_check_palette()}), labelled by entry number.
+#' The plot-number map keeps the grid and does not highlight checks.
 #' @noRd
 draw_augmented_row_column_layout <- function(x, df, ...) {
   dots <- list(...)
   main <- layout_title(paste0(registered_design_entry(x)$title, " "), df)
-  is_check <- !is.na(df$CHECKS) & df$CHECKS != 0
-  p1 <- plot_field_alleys(df, "ENTRY", main, checks = is_check, grid = TRUE, extra_args = dots)
+  checks <- ifelse(!is.na(df$CHECKS) & df$CHECKS != 0, as.character(df$CHECKS), NA)
+  p1 <- plot_field_alleys(df, "ENTRY", main, check_groups = checks, grid = TRUE, extra_args = dots)
   numbers <- df
   numbers$PLOT <- sprintf("%d", as.integer(numbers$PLOT))
   p2 <- plot_field_alleys(numbers, "PLOT", main, grid = TRUE, extra_args = dots)
@@ -82,9 +82,11 @@ draw_layout.fieldhub_rcbd <- function(x, df, ...) {
   dots <- list(...)
   main <- layout_title("Randomized Complete Block Design ", df)
   # Field alleys: one muted background per block, white alleys, a white plot
-  # grid, and the checks (if any) on the check grey in the treatment map.
-  is_check <- if ("CHECKS" %in% names(df)) !is.na(df$CHECKS) & df$CHECKS != 0 else NULL
-  p1 <- plot_field_alleys(df, "TREATMENT", main, group = "REP", checks = is_check, grid = TRUE,
+  # grid, and each check (if any) in its own muted colour in the treatment map.
+  checks <- if ("CHECKS" %in% names(df)) {
+    ifelse(!is.na(df$CHECKS) & df$CHECKS != 0, as.character(df$CHECKS), NA)
+  }
+  p1 <- plot_field_alleys(df, "TREATMENT", main, group = "REP", check_groups = checks, grid = TRUE,
                           extra_args = dots)
   # The drawn field book is returned as before: REP as a factor.
   df$REP <- as.factor(df$REP)
@@ -257,50 +259,36 @@ field_title <- function(title, df) {
   paste0(title, max(as.numeric(df$ROW)), " x ", max(as.numeric(df$COLUMN)))
 }
 
-# Unreplicated entry maps fill the checks, while experiment and plot-number
-# maps keep experiment colours without highlighting checks.
+# Unreplicated diagonal maps (single and multiple diagonal, sparse
+# allocation): every plot on the neutral inside a white plot grid, each check
+# in its own muted colour, fillers white. Experiments of a multiple diagonal
+# are outlined in a mid-grey line so their start and end are clear; only the
+# experiment map (text.string = "EXPT") tints them. The plot-number and
+# experiment maps do not colour checks.
 draw_diagonal_layout <- function(x, df, ...) {
   dots <- list(...)
-  labels <- if (is.null(dots$text.string)) "ENTRY" else dots$text.string
-  entry_view <- !labels %in% c("PLOT", "EXPT")
-  experiments <- unique(as.character(df$EXPT))
-  has_blocks <- length(setdiff(experiments, "Filler")) > 1L
-  if (!entry_view && !has_blocks) {
-    dots <- utils::modifyList(list(col.regions = rep(fieldhub_layout_neutral(), length(experiments))), dots)
-  }
+  text <- if (is.null(dots$text.string)) "ENTRY" else dots$text.string
+  dots$text.string <- NULL
+  entry_view <- !text %in% c("PLOT", "EXPT")
+  # The drawn field book is returned as before.
   df$ENTRY <- as.character(df$ENTRY)
   df$ENTRY[df$TREATMENT == "Filler"] <- "Filler"
   drawn <- df
-  drawn$CHECKS <- as.character(drawn$CHECKS)
-  form <- if (entry_view) CHECKS ~ COLUMN + ROW else EXPT ~ COLUMN + ROW
-  colours <- fieldhub_layout_palette()
-  if (entry_view && has_blocks) {
-    # Keep experiment backgrounds and boundaries; only check cells get new fills.
-    expts <- sort(unique(as.character(drawn$EXPT)))
-    check <- !is.na(drawn$CHECKS) & drawn$CHECKS != "0"
-    checks <- sort(unique(drawn$CHECKS[check]))
-    drawn$LAYOUT_FILL <- ifelse(check, paste0("check:", drawn$CHECKS), paste0("experiment:", drawn$EXPT))
-    groups <- c(paste0("experiment:", expts), paste0("check:", checks))
-    colours <- stats::setNames(rep(colours, length.out = length(groups)), groups)
-    if ("Filler" %in% expts) colours[["experiment:Filler"]] <- fieldhub_layout_neutral()
-    form <- LAYOUT_FILL ~ COLUMN + ROW
+  filler <- df$TREATMENT == "Filler"
+  experiments <- setdiff(unique(as.character(df$EXPT)), "Filler")
+  group <- NULL
+  if (length(experiments) > 1L) {
+    drawn$FIELD_EXPT <- factor(as.character(df$EXPT), levels = c(experiments, "Filler"))
+    group <- "FIELD_EXPT"
   }
-  p1 <- do.call(desplot::ggdesplot, utils::modifyList(list(
-    data = drawn,
-    form = form,
-    text.string = "ENTRY",
-    col.regions = colours,
-    cex = 1,
-    shorten = "no",
-    out1.string = if (entry_view || has_blocks) "EXPT" else NULL,
-    out2.string = if (entry_view) "CHECKS" else NULL,
-    xlab = "COLUMNS",
-    ylab = "ROWS",
-    main = field_title("Un-replicated Diagonal Arrangement ", df),
-    show.key = FALSE,
-    gg = TRUE,
-    out2.gpar = list(col = "gray50", lwd = 1, lty = 1)
-  ), dots))
+  checks <- NULL
+  if (entry_view) {
+    is_check <- !is.na(df$CHECKS) & as.character(df$CHECKS) != "0" & !filler
+    checks <- ifelse(is_check, as.character(df$CHECKS), NA)
+  }
+  p1 <- plot_field_alleys(drawn, text, field_title("Un-replicated Diagonal Arrangement ", df),
+                          group = group, check_groups = checks, fillers = filler, grid = TRUE,
+                          tint = identical(text, "EXPT"), group_lines = TRUE, extra_args = dots)
   list(p1 = p1, p2 = NULL, data = df)
 }
 
@@ -347,32 +335,20 @@ draw_layout.fieldhub_multi_location_prep <- draw_prep_layout
 #' @noRd
 draw_layout.fieldhub_optimized_arrangement <- function(x, df, ...) {
   dots <- list(...)
-  plot_numbers <- identical(dots$text.string, "PLOT")
-  if (plot_numbers) {
-    dots <- utils::modifyList(list(col.regions = rep(fieldhub_layout_neutral(), length(unique(df$CHECKS)))), dots)
-  }
+  text <- if (is.null(dots$text.string)) "ENTRY" else dots$text.string
+  dots$text.string <- NULL
+  # The drawn field book is returned as before.
   df$ENTRY <- as.character(df$ENTRY)
   df$CHECKS <- as.character(df$CHECKS)
-  drawn <- df
-  if (!plot_numbers) {
-    # Give adjacent copies of a check separate cell borders, not a merged outline.
-    drawn$CHECK_OUTLINE <- ifelse(!is.na(df$CHECKS) & df$CHECKS != "0", seq_len(nrow(df)), 0L)
+  # Every plot on the neutral inside a white plot grid; each check in its own
+  # muted colour, except in the plot-number map.
+  filler <- if ("TREATMENT" %in% names(df)) df$TREATMENT == "Filler" else rep(FALSE, nrow(df))
+  checks <- NULL
+  if (!identical(text, "PLOT")) {
+    checks <- ifelse(!is.na(df$CHECKS) & df$CHECKS != "0" & !filler, df$CHECKS, NA)
   }
-  p1 <- do.call(desplot::ggdesplot, utils::modifyList(list(
-    data = drawn,
-    form = CHECKS ~ COLUMN + ROW,
-    col.regions = fieldhub_layout_palette(),
-    text.string = "ENTRY",
-    out2.string = if (!plot_numbers) "CHECK_OUTLINE" else NULL,
-    out2.gpar = list(col = "gray50", lwd = 1, lty = 1),
-    cex = 1,
-    shorten = "no",
-    main = field_title("Un-replicated Optimized Arrangement ", df),
-    show.key = FALSE,
-    xlab = "COLUMNS",
-    ylab = "ROWS",
-    gg = TRUE
-  ), dots))
+  p1 <- plot_field_alleys(df, text, field_title("Un-replicated Optimized Arrangement ", df),
+                          check_groups = checks, fillers = filler, grid = TRUE, extra_args = dots)
   list(p1 = p1, p2 = NULL, data = df)
 }
 
@@ -394,10 +370,11 @@ draw_layout.fieldhub_rcbd_augmented <- function(x, df, ...) {
   drawn$FIELD_BLOCK_GROUP <- factor(drawn$FIELD_BLOCK_GROUP,
     levels = unique(drawn$FIELD_BLOCK_GROUP[order(match(drawn$EXPT, unique(drawn$EXPT)),
                                                   as.integer(drawn$BLOCK))]))
-  is_check <- df$CHECK_TEXT == "check"
+  # Each check (by its entry number) in its own muted colour.
   is_filler <- is.na(df$CHECKS)
+  checks <- ifelse(df$CHECK_TEXT == "check" & !is_filler, df$ENTRY, NA)
   p1 <- plot_field_alleys(drawn, "ENTRY", field_title("Augmented RCBD Layout ", df),
-                          group = "FIELD_BLOCK_GROUP", checks = is_check, fillers = is_filler,
+                          group = "FIELD_BLOCK_GROUP", check_groups = checks, fillers = is_filler,
                           grid = TRUE, extra_args = dots)
   p2 <- plot_field_alleys(drawn, "PLOT_TXT", field_title("Augmented RCBD Plot Number Layout ", df),
                           group = "FIELD_BLOCK_GROUP", fillers = is_filler, grid = TRUE,

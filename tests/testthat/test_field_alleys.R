@@ -163,8 +163,8 @@ test_that("plot() arguments still override the incomplete-block map styling", {
   expect_identical(unique(fill_data(view$out_layout)$fill), "white")
 })
 
-# Augmented designs: the same style, with every check plot on one neutral grey
-# (fieldhub_check_fill()) and filler plots white with grey numbers.
+# Augmented designs: the same style, with each check in its own muted colour
+# (fieldhub_check_palette()) and filler plots white with grey numbers.
 
 fill_at <- function(p, book) {
   tiles <- fill_data(p)
@@ -177,7 +177,7 @@ text_at <- function(p, book) {
   list(label = as.character(d$label[key]), colour = as.character(d$colour[key]))
 }
 
-test_that("augmented RCBD maps tint blocks and show every check on one grey", {
+test_that("augmented RCBD maps tint blocks and colour each check", {
   designs <- list(
     single = RCBD_augmented(lines = 50, checks = 3, b = 6, seed = 23),
     two_experiments = RCBD_augmented(lines = 40, checks = 3, b = 3, seed = 5, repsExpt = 2)
@@ -201,9 +201,10 @@ test_that("augmented RCBD maps tint blocks and show every check on one grey", {
     }
     entries <- fill_at(view$out_layout, book)
     numbers <- fill_at(view$out_layoutPlots, book)
-    # one grey for all checks in the entry map; none in the plot-number map
-    expect_true(all(entries[is_check] == fieldhub_check_fill()), info = name)
-    expect_false(any(numbers == fieldhub_check_fill()), info = name)
+    # each check in its own colour in the entry map; none in the plot-number map
+    expect_identical(entries[is_check], expected_check_fills(book$ENTRY[is_check]), info = name)
+    expect_length(unique(entries[is_check]), 3L)
+    expect_false(any(numbers %in% fieldhub_check_palette(3)), info = name)
     # fillers are white in both maps
     expect_true(all(entries[filler] == "#FFFFFF") && all(numbers[filler] == "#FFFFFF"), info = name)
     # every other plot has its block's tint: one colour per block, a different one per block
@@ -232,7 +233,7 @@ test_that("augmented RCBD maps keep their returned field book and accept desplot
   expect_s3_class(flipped, "ggplot")
 })
 
-test_that("augmented row-column maps label entries and show every check on one grey", {
+test_that("augmented row-column maps label entries and colour each check", {
   design <- augmented_row_column(nrows = 10, ncols = 10, checks = 4, check_direction = "rows",
                                  entries = 60, seed = 3)
   view <- checked_layout_view(design)
@@ -272,7 +273,8 @@ test_that("augmented row-column maps label entries and show every check on one g
   expect_false(any(text$label %in% book$TREATMENT[book$TREATMENT != as.character(book$ENTRY)]))
   entries <- fill_at(view$out_layout, book)
   numbers <- fill_at(view$out_layoutPlots, book)
-  expect_true(all(entries[is_check] == fieldhub_check_fill()))
+  expect_identical(entries[is_check], expected_check_fills(book$CHECKS[is_check]))
+  expect_length(unique(entries[is_check]), 4L)
   expect_true(all(entries[!is_check] == fieldhub_field_tints(1)))
   expect_true(all(numbers == fieldhub_field_tints(1)))
   plots <- text_at(view$out_layoutPlots, book)
@@ -320,9 +322,9 @@ test_that("RCBD, row-column and strip-plot maps tint reps and draw a plot grid w
       expect_true(all(lengths(by_rep) == 1L), info = name)
       expect_length(unique(unlist(by_rep)), length(by_rep))
       expect_identical(numbers[!is_check], entries[!is_check], info = name)
-      # checks share the grey in the entry map only
-      expect_true(all(entries[is_check] == fieldhub_check_fill()), info = name)
-      expect_false(any(numbers == fieldhub_check_fill()), info = name)
+      # each check in its own colour, in the entry map only
+      expect_identical(entries[is_check], expected_check_fills(book$CHECKS[is_check]), info = name)
+      expect_false(any(numbers %in% fieldhub_check_palette(8)), info = name)
       # labels keep their columns
       text <- text_at(view$out_layout, book)
       expect_identical(text$label, as.character(book[[complete_designs[[name]]]]), info = name)
@@ -483,4 +485,72 @@ test_that("a short user palette is recycled over the map's fill levels", {
   map <- checked_layout_view(catalogue_design("partially_replicated_fillers"),
                              col.regions = c("white", "navy"))$out_layout
   expect_true(all(fill_data(map)$fill %in% c("white", "navy")))
+})
+
+# Unreplicated check maps (single and multiple diagonal, sparse allocation,
+# optimized arrangement): one muted colour per check on the neutral, a white
+# plot grid, fillers white; experiments of a multiple diagonal outlined in a
+# mid-grey line (and tinted only in the experiment map).
+check_designs <- c("diagonal_single", "diagonal_single_cartesian", "diagonal_blocks_row",
+                   "diagonal_blocks_column_same", "optimized_arrangement", "sparse_allocation")
+
+test_that("fieldhub_check_palette() gives muted, distinct, readable check colours", {
+  expect_identical(fieldhub_check_palette(5), c("#B9CADB", "#C6D7BF", "#E3D3B6", "#DEC4C4", "#CFC7DF"))
+  expect_length(unique(fieldhub_check_palette(12)), 12L)
+  expect_identical(fieldhub_check_palette(0), character())
+  expect_true(all(contrast_ratio("gray10", fieldhub_check_palette(12)) >= 7))
+  lab <- grDevices::convertColor(t(grDevices::col2rgb(fieldhub_check_palette(8)) / 255), from = "sRGB", to = "Lab")
+  expect_gte(min(stats::dist(lab)), 4)
+})
+
+test_that("check maps colour each check softly on a plot grid", {
+  for (name in check_designs) {
+    design <- catalogue_design(name)
+    for (location in seq_along(location_books(design))) {
+      view <- checked_layout_view(design, location = location)
+      numbers <- checked_layout_view(design, location = location, text.string = "PLOT")$out_layout
+      book <- view$fieldBookXY
+      filler <- book$TREATMENT == "Filler"
+      is_check <- !is.na(book$CHECKS) & as.character(book$CHECKS) != "0" & !filler
+      blocks <- length(setdiff(unique(as.character(book$EXPT)), "Filler")) > 1L
+      for (p in list(view$out_layout, numbers)) {
+        geoms <- layer_geoms(p)
+        expect_identical(sum(geoms == "GeomTile"), 1L, info = name)
+        expect_true(all(geoms %in% c("GeomTile", "GeomSegment", "GeomText")), info = name)
+        style <- segment_style(p)
+        expect_true(any(style$colour == "white" & style$width == if (blocks) 0.8 else 1.2), info = name)
+        # experiments outlined in a mid-grey line, never with heavy check borders
+        expect_identical(any(style$colour == "gray45" & style$width == 0.7), blocks, info = name)
+        expect_false(any(style$colour == "gray50"), info = name)
+      }
+      entries <- fill_at(view$out_layout, book)
+      ids <- unique(as.character(book$CHECKS[is_check]))
+      ids <- ids[order(suppressWarnings(as.numeric(ids)), ids)]
+      expected <- fieldhub_check_palette(length(ids))[match(as.character(book$CHECKS[is_check]), ids)]
+      expect_identical(entries[is_check], expected, info = name)
+      expect_true(all(entries[!is_check & !filler] == fieldhub_field_tints(1)), info = name)
+      expect_true(all(entries[filler] == "#FFFFFF"), info = name)
+      plain <- fill_at(numbers, book)
+      expect_true(all(plain[!filler] == fieldhub_field_tints(1)), info = name)
+      text <- text_at(view$out_layout, book)
+      expect_identical(text$label, as.character(book$ENTRY), info = name)
+      expect_true(all(text$colour[!filler] == "gray10"), info = name)
+      expect_identical(text_at(numbers, book)$label, as.character(book$PLOT), info = name)
+      expect_null(view$out_layoutPlots)
+    }
+  }
+})
+
+test_that("the multiple-diagonal experiment map tints and outlines each experiment", {
+  for (name in c("diagonal_blocks_row", "diagonal_blocks_column_same")) {
+    design <- catalogue_design(name)
+    map <- checked_layout_view(design, text.string = "EXPT")$out_layout
+    book <- checked_layout_view(design)$fieldBookXY
+    fill <- fill_at(map, book)
+    by_expt <- lapply(split(fill, book$EXPT), unique)
+    expect_true(all(lengths(by_expt) == 1L), info = name)
+    expect_length(unique(unlist(by_expt)), length(by_expt))
+    expect_true(any(segment_style(map)$colour == "gray45"), info = name)
+    expect_identical(text_at(map, book)$label, as.character(book$EXPT), info = name)
+  }
 })

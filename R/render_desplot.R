@@ -99,6 +99,22 @@ fieldhub_check_fill <- function() "#D5D9DD"
 #' @noRd
 fieldhub_replicated_fill <- function() "#CBE1EE"
 
+#' Muted colours for individual checks
+#'
+#' @description
+#' One soft colour per check (slate blue, sage, sand, dusty rose, lilac, teal,
+#' stone, grey-blue) for maps that tell checks apart, blended into more
+#' colours when a field has more than eight checks. Dark labels keep AAA
+#' contrast on every colour.
+#'
+#' @param n Number of checks.
+#' @return A character vector of \code{n} colours.
+#' @noRd
+fieldhub_check_palette <- function(n) {
+  colours <- c("#B9CADB", "#C6D7BF", "#E3D3B6", "#DEC4C4", "#CFC7DF", "#BDD9D3", "#D8D0BF", "#C9CEDA")
+  if (n > length(colours)) grDevices::colorRampPalette(colours)(n) else colours[seq_len(n)]
+}
+
 #' Draw a field map with white alleys between groups
 #'
 #' @description
@@ -107,7 +123,8 @@ fieldhub_replicated_fill <- function() "#CBE1EE"
 #' white alleys separate the groups, and grey lines outline the incomplete
 #' blocks. Blocks have no background of their own, so a colour never repeats
 #' inside a group. Check plots share one grey (\code{fieldhub_check_fill()}),
-#' filler plots are white with grey labels, and the other labels are dark.
+#' or with \code{check_groups} each check gets its own muted colour; filler
+#' plots are white with grey labels, and the other labels are dark.
 #'
 #' The map is drawn by a single \code{plot_desplot()} call (fill, \code{out1}
 #' for the blocks or the plot grid, \code{out2} for the alleys,
@@ -130,6 +147,13 @@ fieldhub_replicated_fill <- function() "#CBE1EE"
 #' @param checks Optional logical vector along \code{data}: the check plots
 #'   (or other highlighted plots, such as the replicated plots of a p-rep).
 #' @param check_fill Background of the \code{checks} plots.
+#' @param check_groups Optional vector along \code{data} naming the check of
+#'   each check plot (\code{NA} elsewhere): each check gets its own colour from
+#'   \code{fieldhub_check_palette()}, in numeric order of the names.
+#' @param tint Give each group its own background; \code{FALSE} keeps every
+#'   group on the neutral, so only the checks carry colour.
+#' @param group_lines Separate groups with a mid-grey line instead of a white
+#'   alley, where the exact start and end of each group matters.
 #' @param fillers Optional logical vector along \code{data}: the filler plots.
 #' @param grid Draw a white line around every plot. It is thinner when there
 #'   are alleys, so the alleys still read first.
@@ -140,7 +164,8 @@ fieldhub_replicated_fill <- function() "#CBE1EE"
 #' @noRd
 plot_field_alleys <- function(data, text, main, group = NULL, block = NULL, checks = NULL,
                               fillers = NULL, grid = FALSE, sub_block = NULL,
-                              check_fill = fieldhub_check_fill(), extra_args = list()) {
+                              check_fill = fieldhub_check_fill(), check_groups = NULL,
+                              tint = TRUE, group_lines = FALSE, extra_args = list()) {
   if ("field_grid" %in% names(extra_args)) {
     validate_flag(extra_args$field_grid, "field_grid")
     grid <- grid && extra_args$field_grid
@@ -157,12 +182,20 @@ plot_field_alleys <- function(data, text, main, group = NULL, block = NULL, chec
   }
   is_check <- if (is.null(checks)) rep(FALSE, nrow(drawn)) else checks %in% TRUE
   is_filler <- if (is.null(fillers)) rep(FALSE, nrow(drawn)) else fillers %in% TRUE
-  fill <- paste0("group", match(groups, group_levels))
+  fill <- if (tint) paste0("group", match(groups, group_levels)) else rep("group1", nrow(drawn))
   fill[is_check] <- "check"
+  check_colours <- character()
+  if (!is.null(check_groups)) {
+    named <- !is.na(check_groups) & !is_filler
+    ids <- unique(as.character(check_groups[named]))
+    ids <- ids[order(suppressWarnings(as.numeric(ids)), ids)]
+    fill[named] <- paste0("check:", check_groups[named])
+    check_colours <- stats::setNames(fieldhub_check_palette(length(ids)), paste0("check:", ids))
+  }
   fill[is_filler] <- "filler"
   colours <- c(stats::setNames(fieldhub_field_tints(length(group_levels)),
                                paste0("group", seq_along(group_levels))),
-               check = check_fill, filler = "#FFFFFF")
+               check = check_fill, check_colours, filler = "#FFFFFF")
   used <- names(colours)[names(colours) %in% fill]
   drawn$FIELD_FILL <- factor(fill, levels = used)
   text_colours <- c(label = "gray10", filler = "gray60")
@@ -187,7 +220,8 @@ plot_field_alleys <- function(data, text, main, group = NULL, block = NULL, chec
   if (length(group_levels) > 1L) {
     args$data$FIELD_GROUP <- factor(groups, levels = group_levels)
     args$out2.string <- "FIELD_GROUP"
-    args$out2.gpar <- list(col = "white", lwd = 2.2, lty = 1)
+    args$out2.gpar <- if (group_lines) list(col = "gray45", lwd = 0.7, lty = 1)
+                      else list(col = "white", lwd = 2.2, lty = 1)
   }
   if (length(extra_args$col.regions) > 0L && length(extra_args$col.regions) < length(used)) {
     extra_args$col.regions <- rep_len(extra_args$col.regions, length(used))

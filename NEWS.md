@@ -36,6 +36,19 @@
 
 ## Enhancements
 
+- Augmented RCBD, augmented row-column and RCBD-with-checks entry maps give
+  each check its own colour from the same muted palette as the diagonal and
+  optimized arrangements, so a check looks the same across designs. Blocks and
+  replications keep their light backgrounds and white alleys; the plot-number
+  maps do not highlight checks.
+- Single and multiple diagonal, sparse allocation and optimized
+  arrangement field maps use the same style. Each check keeps its own
+  colour, now from a muted palette, and the heavy check borders give way to
+  a white grid around every plot. In a multiple diagonal the experiments are
+  outlined in a mid-grey line so their start and end are clear; the
+  experiment map also gives each experiment a muted background. Fillers are
+  white with grey labels. Field books are unchanged.
+
 - p-rep and multi-location p-rep field maps use the same style: a white
   grid around every plot, replicated plots on a soft blue instead of the
   strong green, and filler plots white with grey labels. The plot-number map

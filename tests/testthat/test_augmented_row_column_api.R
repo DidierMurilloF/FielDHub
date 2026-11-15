@@ -1405,7 +1405,7 @@ test_that("field_layout(), plot() and draw_layout() work in both orientations", 
   }
 })
 
-test_that("the entry map labels entries and greys every check plot", {
+test_that("the entry map labels entries and colours each check", {
   checks <- c("Check A", "B", "C", "D")
   for (direction in arc_api_directions) {
     x <- arc_api_oriented(direction, checks = checks, budget = 100, seed = 17)
@@ -1420,10 +1420,11 @@ test_that("the entry map labels entries and greys every check plot", {
     expect_false(anyNA(fill))
     # Each plot shows its entry number, not its treatment name
     expect_identical(text$label[match(at, paste(text$x, text$y))], as.character(book$ENTRY))
-    # Test plots on the shared neutral; every check plot on the one check grey
+    # Test plots on the shared neutral; each check in its own muted colour
     test <- book$CHECKS == 0L
     expect_true(all(fill[test] == fieldhub_layout_neutral()), label = direction)
-    expect_true(all(fill[!test] == fieldhub_check_fill()), label = direction)
+    expect_identical(fill[!test], expected_check_fills(book$CHECKS[!test]), label = direction)
+    expect_length(unique(fill[!test]), length(checks))
     # A single desplot fill layer and one white plot grid: the field has no blocks
     expect_identical(sum(geoms == "GeomTile"), 1L)
     expect_identical(sum(geoms == "GeomSegment"), 1L)

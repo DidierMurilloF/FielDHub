@@ -58,3 +58,12 @@ print_layouts <- function(design) {
     }
   }
 }
+
+# Fill each check plot should have: its check's colour from
+# fieldhub_check_palette(), the checks taken in numeric order of their ids.
+expected_check_fills <- function(ids) {
+  ids <- as.character(ids)
+  levels <- unique(ids)
+  levels <- levels[order(suppressWarnings(as.numeric(levels)), levels)]
+  fieldhub_check_palette(length(levels))[match(ids, levels)]
+}
