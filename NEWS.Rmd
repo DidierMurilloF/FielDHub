@@ -48,6 +48,9 @@ knitr::opts_chunk$set(
 
 ## Enhancements
 
+- The app's styles and scripts are served under a version that changes with
+  their contents, so browsers load the current files after an update instead
+  of a cached copy that no longer matches the pages.
 - The About Us page leads with the maintainer's profile and a new portrait;
   the rest of the team follows in a two-column list, and the version,
   licence, source, issue tracker, how to cite FielDHub and other contributors

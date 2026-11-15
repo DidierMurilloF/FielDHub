@@ -17,6 +17,11 @@ test_that("native Shiny registers bundled resources without a framework wrapper"
   dependencies <- htmltools::findDependencies(ui)
   dependency <- Filter(function(x) identical(x$name, "fieldhub-resources"), dependencies)[[1L]]
   expect_true(all(c("output-feedback.js", "task-feedback.js", "layout-images.js") %in% dependency$script))
+  # served under a version that changes with the files, so browsers drop a stale copy
+  expect_identical(dependency$version, app_resources_version(c(dependency$script, dependency$stylesheet)))
+  expect_true(startsWith(dependency$version, paste0(utils::packageVersion("FielDHub"), ".")))
+  expect_s3_class(package_version(dependency$version), "package_version")
+  expect_false(identical(app_resources_version("style.css"), app_resources_version("mobile.css")))
   app <- run_app(launch.browser = FALSE)
   expect_s3_class(app, "shiny.appobj")
   expect_null(app$appOptions$golem_options)
