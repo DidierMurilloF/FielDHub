@@ -88,6 +88,17 @@ fieldhub_field_tints <- function(n) {
 #' @noRd
 fieldhub_check_fill <- function() "#D5D9DD"
 
+#' Soft blue background of replicated plots
+#'
+#' @description
+#' A pastel of the app's link blue (#2c7da3) for the replicated plots of
+#' p-rep maps: visible on the neutral background, readable under dark labels
+#' and distinct from the check grey.
+#'
+#' @return A single colour.
+#' @noRd
+fieldhub_replicated_fill <- function() "#CBE1EE"
+
 #' Draw a field map with white alleys between groups
 #'
 #' @description
@@ -116,16 +127,20 @@ fieldhub_check_fill <- function() "#D5D9DD"
 #'   within a group.
 #' @param sub_block Optional column of the units nested in \code{block} (the
 #'   sub-plots of a split-split-plot), drawn as lighter grey lines.
-#' @param checks Optional logical vector along \code{data}: the check plots.
+#' @param checks Optional logical vector along \code{data}: the check plots
+#'   (or other highlighted plots, such as the replicated plots of a p-rep).
+#' @param check_fill Background of the \code{checks} plots.
 #' @param fillers Optional logical vector along \code{data}: the filler plots.
 #' @param grid Draw a white line around every plot. It is thinner when there
 #'   are alleys, so the alleys still read first.
 #' @param extra_args desplot arguments forwarded from \code{plot()}, plus
-#'   \code{field_grid = FALSE} to switch the plot grid off.
+#'   \code{field_grid = FALSE} to switch the plot grid off. A
+#'   \code{col.regions} shorter than the map's fill levels is recycled.
 #' @return A ggplot object.
 #' @noRd
 plot_field_alleys <- function(data, text, main, group = NULL, block = NULL, checks = NULL,
-                              fillers = NULL, grid = FALSE, sub_block = NULL, extra_args = list()) {
+                              fillers = NULL, grid = FALSE, sub_block = NULL,
+                              check_fill = fieldhub_check_fill(), extra_args = list()) {
   if ("field_grid" %in% names(extra_args)) {
     validate_flag(extra_args$field_grid, "field_grid")
     grid <- grid && extra_args$field_grid
@@ -147,7 +162,7 @@ plot_field_alleys <- function(data, text, main, group = NULL, block = NULL, chec
   fill[is_filler] <- "filler"
   colours <- c(stats::setNames(fieldhub_field_tints(length(group_levels)),
                                paste0("group", seq_along(group_levels))),
-               check = fieldhub_check_fill(), filler = "#FFFFFF")
+               check = check_fill, filler = "#FFFFFF")
   used <- names(colours)[names(colours) %in% fill]
   drawn$FIELD_FILL <- factor(fill, levels = used)
   text_colours <- c(label = "gray10", filler = "gray60")
@@ -173,6 +188,9 @@ plot_field_alleys <- function(data, text, main, group = NULL, block = NULL, chec
     args$data$FIELD_GROUP <- factor(groups, levels = group_levels)
     args$out2.string <- "FIELD_GROUP"
     args$out2.gpar <- list(col = "white", lwd = 2.2, lty = 1)
+  }
+  if (length(extra_args$col.regions) > 0L && length(extra_args$col.regions) < length(used)) {
+    extra_args$col.regions <- rep_len(extra_args$col.regions, length(used))
   }
   p <- do.call(plot_desplot, c(args, list(extra_args = extra_args)))
   if (!is.null(sub_block)) p <- with_nested_lines(p, block, sub_block)

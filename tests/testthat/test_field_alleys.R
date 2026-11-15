@@ -435,3 +435,52 @@ test_that("split-split-plot sub-plot lines separate sub-plots inside a whole plo
   pairs <- pairs[book$PLOT[pairs$from] == book$PLOT[pairs$to] & book$SUB_PLOT[pairs$from] != book$SUB_PLOT[pairs$to], ]
   expect_identical(nrow(seg), nrow(pairs))
 })
+
+# p-rep maps (single and multi-location): one neutral background, a white plot
+# grid, replicated plots on a soft blue, fillers white with grey labels; the
+# plot-number map does not highlight replicated plots.
+prep_designs <- c("partially_replicated", "partially_replicated_fillers", "multi_location_prep")
+
+test_that("the replicated-plot fill is the app's blue, readable under dark labels", {
+  expect_identical(fieldhub_replicated_fill(), "#CBE1EE")
+  expect_gte(contrast_ratio("gray10", fieldhub_replicated_fill()), 7)
+  expect_false(fieldhub_replicated_fill() %in% c(fieldhub_check_fill(), fieldhub_field_tints(6)))
+})
+
+test_that("p-rep maps show replicated plots in blue on a plot grid", {
+  for (name in prep_designs) {
+    design <- catalogue_design(name)
+    for (location in seq_along(location_books(design))) {
+      entries_view <- checked_layout_view(design, location = location)
+      numbers_view <- checked_layout_view(design, location = location, text.string = "PLOT")
+      book <- entries_view$fieldBookXY
+      filler <- book$TREATMENT == "Filler"
+      replicated <- book$CHECKS != 0 & !filler
+      expect_true(any(replicated), info = name)
+      for (p in list(entries_view$out_layout, numbers_view$out_layout)) {
+        geoms <- layer_geoms(p)
+        expect_identical(sum(geoms == "GeomTile"), 1L, info = name)
+        expect_true(all(geoms %in% c("GeomTile", "GeomSegment", "GeomText")), info = name)
+        style <- segment_style(p)
+        expect_true(any(style$colour == "white" & style$width == 1.2), info = name)
+      }
+      entries <- fill_at(entries_view$out_layout, book)
+      numbers <- fill_at(numbers_view$out_layout, book)
+      expect_true(all(entries[replicated] == fieldhub_replicated_fill()), info = name)
+      expect_true(all(entries[!replicated & !filler] == fieldhub_field_tints(1)), info = name)
+      expect_true(all(numbers[!filler] == fieldhub_field_tints(1)), info = name)
+      expect_true(all(c(entries[filler], numbers[filler]) == "#FFFFFF"), info = name)
+      text <- text_at(entries_view$out_layout, book)
+      expect_identical(text$label, as.character(book$ENTRY), info = name)
+      expect_true(all(text$colour[!filler] == "gray10") && all(text$colour[filler] == "gray60"), info = name)
+      expect_identical(text_at(numbers_view$out_layout, book)$label, as.character(book$PLOT), info = name)
+      expect_null(entries_view$out_layoutPlots)
+    }
+  }
+})
+
+test_that("a short user palette is recycled over the map's fill levels", {
+  map <- checked_layout_view(catalogue_design("partially_replicated_fillers"),
+                             col.regions = c("white", "navy"))$out_layout
+  expect_true(all(fill_data(map)$fill %in% c("white", "navy")))
+})

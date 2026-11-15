@@ -97,14 +97,20 @@ test_that("plot-number maps do not inherit replication or check colours", {
       book <- location_books(design)[[location]]
       numbers <- plot(design, l = location, text.string = "PLOT")$p
       expect_equal(as.character(drawn_text(numbers)[[1L]]$label), as.character(book$PLOT), info = name)
-      expect_length(tile_fills(numbers), 1L)
-      expect_equal(unname(grDevices::col2rgb(tile_fills(numbers))), unname(grDevices::col2rgb("#F2F2F2")),
-                    info = name)
-      expect_length(unique(drawn_text(numbers)[[1L]]$colour), 1L)
       if (name %in% c("partially_replicated_fillers", "multi_location_prep")) {
+        # p-rep maps: plots on the neutral, filler plots white with grey labels
+        filler <- book$TREATMENT == "Filler"
+        tile <- ggplot2::layer_data(numbers, 1L)
+        fill <- tile$fill[match(paste(book$COLUMN, book$ROW), paste(tile$x, tile$y))]
+        expect_true(all(fill[!filler] == "#F2F2F2"), info = name)
+        expect_true(all(fill[filler] == "#FFFFFF"), info = name)
         entries <- plot(design, l = location)$p
-        colours <- apply(grDevices::col2rgb(tile_fills(entries)), 2L, paste, collapse = ",")
-        expect_true("46,139,87" %in% colours, info = name) # seagreen
+        expect_true(fieldhub_replicated_fill() %in% tile_fills(entries), info = name)
+      } else {
+        expect_length(tile_fills(numbers), 1L)
+        expect_equal(unname(grDevices::col2rgb(tile_fills(numbers))), unname(grDevices::col2rgb("#F2F2F2")),
+                      info = name)
+        expect_length(unique(drawn_text(numbers)[[1L]]$colour), 1L)
       }
     }
   }

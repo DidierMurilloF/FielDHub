@@ -313,26 +313,23 @@ draw_layout.fieldhub_diagonal_arrangement <- draw_diagonal_layout
 #' @noRd
 draw_layout.fieldhub_sparse_allocation <- draw_diagonal_layout
 
-# Partially replicated designs: the replicated entries in green
+# Partially replicated designs (single and multi-location): one neutral
+# background inside a white plot grid, the replicated plots on a soft blue and
+# fillers white with grey labels. The plot-number map (text.string = "PLOT")
+# does not highlight the replicated plots.
 draw_prep_layout <- function(x, df, ...) {
   dots <- list(...)
-  plot_numbers <- identical(dots$text.string, "PLOT")
+  text <- if (is.null(dots$text.string)) "ENTRY" else dots$text.string
+  dots$text.string <- NULL
+  # The drawn field book is returned as before.
   df$ENTRY <- as.character(df$ENTRY)
   df$ENTRY[df$TREATMENT == "Filler"] <- "Filler"
   df$binay_checks <- ifelse(df$CHECKS != 0, 1, 0)
-  p1 <- do.call(desplot::ggdesplot, utils::modifyList(list(
-    data = df,
-    form = binay_checks ~ COLUMN + ROW,
-    text.string = "ENTRY",
-    xlab = "COLUMNS",
-    ylab = "ROWS",
-    main = field_title("Partially Replicated Design ", df),
-    cex = 1,
-    shorten = "no",
-    show.key = FALSE,
-    gg = TRUE,
-    col.regions = c(fieldhub_layout_neutral(), if (plot_numbers) fieldhub_layout_neutral() else "seagreen")
-  ), dots))
+  filler <- df$TREATMENT == "Filler"
+  replicated <- if (identical(text, "PLOT")) NULL else df$CHECKS != 0 & !filler
+  p1 <- plot_field_alleys(df, text, field_title("Partially Replicated Design ", df),
+                          checks = replicated, check_fill = fieldhub_replicated_fill(),
+                          fillers = filler, grid = TRUE, extra_args = dots)
   list(p1 = p1, p2 = NULL, data = df)
 }
 

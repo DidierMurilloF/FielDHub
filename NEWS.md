@@ -36,6 +36,11 @@
 
 ## Enhancements
 
+- p-rep and multi-location p-rep field maps use the same style: a white
+  grid around every plot, replicated plots on a soft blue instead of the
+  strong green, and filler plots white with grey labels. The plot-number map
+  still highlights nothing. Field books are unchanged.
+
 - CRD, Latin square, Latin rectangle, factorial, split-plot and
   split-split-plot field maps use the same style. Every plot has a white
   grid line around it; RCBD-type reps and multiple Latin squares get a muted
