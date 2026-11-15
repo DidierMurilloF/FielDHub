@@ -400,22 +400,90 @@
   white-space: normal;
 }
 
+/* About: the maintainer leads, the team follows in two columns, and the
+   package facts sit in a side column like Help's resources. */
+#fieldhub-app .fieldhub-about-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 270px;
+  gap: 36px;
+}
+
+#fieldhub-app .fieldhub-about-main {
+  display: grid;
+  gap: 28px;
+  align-content: start;
+  min-width: 0;
+}
+
+#fieldhub-app .fieldhub-info-page h3.fieldhub-about-label {
+  margin: 0 0 12px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #5f6b73;
+}
+
+#fieldhub-app .fieldhub-team-lead {
+  display: grid;
+  grid-template-columns: 168px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+  padding: 22px;
+  background: #ffffff;
+  border: 1px solid #d7dede;
+  border-radius: 6px;
+}
+
+#fieldhub-app .fieldhub-team-lead-photo {
+  display: block;
+  width: 168px;
+  max-width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+#fieldhub-app .fieldhub-team-lead-body {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+#fieldhub-app .fieldhub-info-page .fieldhub-team-lead h3 {
+  margin: 0 0 4px;
+  font-size: 22px;
+}
+
+#fieldhub-app .fieldhub-about .fieldhub-team-lead .profile-p {
+  margin: 0;
+  max-width: 64ch;
+  font-size: 14.5px;
+  line-height: 1.5;
+}
+
 #fieldhub-app .fieldhub-team-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px 32px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px 32px;
 }
 
-#fieldhub-app .fieldhub-team-profile {
+#fieldhub-app .fieldhub-team-grid .fieldhub-team-profile {
   display: grid;
-  grid-template-columns: 80px minmax(0, 1fr);
-  column-gap: 16px;
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: 6px 14px;
   align-content: start;
-  align-items: center;
+  align-items: start;
 }
 
-#fieldhub-app .fieldhub-team-profile h3 {
-  margin-bottom: 6px;
+#fieldhub-app .fieldhub-team-grid .fieldhub-team-profile > :not(.circular--portrait) {
+  grid-column: 2;
+  min-width: 0;
+}
+
+#fieldhub-app .fieldhub-info-page .fieldhub-team-grid h3 {
+  margin: 0 0 2px;
+  font-size: 16px;
   line-height: 1.3;
 }
 
@@ -426,8 +494,9 @@
 }
 
 #fieldhub-app .fieldhub-about .circular--portrait {
-  width: 80px;
-  height: 80px;
+  grid-row: span 3;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   overflow: hidden;
 }
@@ -439,56 +508,57 @@
 }
 
 #fieldhub-app .fieldhub-about .profile-p {
-  grid-column: 1 / -1;
-  margin: 10px 0 8px;
-  font-size: 14px;
-  line-height: 1.4;
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.5;
 }
 
 #fieldhub-app .fieldhub-team-contact {
-  grid-column: 1 / -1;
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 6px 16px;
 }
 
-#fieldhub-app .fieldhub-team-others {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 10px 20px;
-  margin-top: 16px;
+#fieldhub-app .fieldhub-about-aside {
+  display: grid;
+  gap: 24px;
+  align-content: start;
+  padding-left: 24px;
+  border-left: 1px solid #d7dede;
 }
 
-#fieldhub-app .fieldhub-team-others h3 {
-  font-size: 15px;
+#fieldhub-app .fieldhub-package-info dl {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 6px 14px;
   margin: 0;
+}
+
+#fieldhub-app .fieldhub-package-info dt {
+  font-weight: 400;
+  color: #5f6b73;
+}
+
+#fieldhub-app .fieldhub-package-info dd {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+#fieldhub-app .fieldhub-about-aside p {
+  margin: 0;
+}
+
+#fieldhub-app .fieldhub-about-aside code {
+  white-space: normal;
 }
 
 #fieldhub-app .fieldhub-team-others ul {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 24px;
+  display: grid;
+  gap: 4px;
   list-style: none;
   padding: 0;
   margin: 0;
-}
-
-#fieldhub-app .fieldhub-team-others li {
-  display: flex;
-  gap: 16px;
-  align-items: baseline;
-}
-
-#fieldhub-app .fieldhub-package-info {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 24px;
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid #d7dede;
-  font-size: 12px;
-  color: #5f6b73;
 }
 
 /* Design pages (mod_design_ui()) */

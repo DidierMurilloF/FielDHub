@@ -103,9 +103,21 @@ app_about_ui <- function() {
   info <- fieldhub_about_info()
   team <- fieldhub_team()
   htmltools::htmlTemplate(system.file("app/www/aboutUs.html", package = "FielDHub"),
-    metadata = shiny::div(class = "fieldhub-package-info",
-      shiny::span(paste("Version", info$version)),
-      shiny::span(paste("License:", info$license))),
+    metadata = shiny::tags$aside(class = "fieldhub-about-aside", `aria-label` = "About the package",
+      shiny::tags$section(class = "fieldhub-package-info",
+        shiny::h3(class = "fieldhub-about-label", "Package"),
+        shiny::tags$dl(
+          shiny::tags$dt("Version"), shiny::tags$dd(info$version),
+          shiny::tags$dt("License"), shiny::tags$dd(info$license),
+          shiny::tags$dt("Source"),
+          shiny::tags$dd(app_external_link("GitHub", "https://github.com/DidierMurilloF/FielDHub")),
+          shiny::tags$dt("Issues"), shiny::tags$dd(app_external_link("Report a problem", info$issues)))),
+      shiny::tags$section(
+        shiny::h3(class = "fieldhub-about-label", "Cite FielDHub"),
+        shiny::p("Run ", shiny::tags$code('citation("FielDHub")'), " in R, or read the ",
+                 app_external_link("FielDHub paper", "https://joss.theoj.org/papers/10.21105/joss.03122"),
+                 " in the Journal of Open Source Software.")),
+      app_team_others(team)),
     team = app_team_ui(team), footer = htmltools::HTML(fieldhub_footer()))
 }
 

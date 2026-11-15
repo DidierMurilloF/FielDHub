@@ -48,6 +48,10 @@ knitr::opts_chunk$set(
 
 ## Enhancements
 
+- The About Us page leads with the maintainer's profile and a new portrait;
+  the rest of the team follows in a two-column list, and the version,
+  licence, source, issue tracker, how to cite FielDHub and other contributors
+  sit in a side column, as on the Help page.
 - Augmented RCBD, augmented row-column and RCBD-with-checks entry maps give
   each check its own colour from the same muted palette as the diagonal and
   optimized arrangements, so a check looks the same across designs. Blocks and

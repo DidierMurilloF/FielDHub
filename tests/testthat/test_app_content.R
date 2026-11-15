@@ -54,11 +54,38 @@ test_that("About retains the six legacy profiles without duplicate credits or th
 test_that("additional credited people remain visible without introducing extra portrait rows", {
   team <- fieldhub_team()
   team <- rbind(team, data.frame(name = "Another Contributor", roles = "ctb", email = "person@example.org"))
-  ui <- app_team_ui(team)
-  query <- htmltools::tagQuery(shiny::div(ui))
+  ui <- shiny::div(app_team_ui(team), app_team_others(team))
+  query <- htmltools::tagQuery(ui)
   expect_equal(query$find(".fieldhub-team-profile")$length(), 6L)
   expect_match(as.character(query$find(".fieldhub-team-others")$selectedTags()[[1L]]),
                "Another Contributor", fixed = TRUE)
+  # with everyone portrayed there is no "Other contributors" list
+  expect_null(app_team_others(team[team$name != "Thomas Walk" & team$name != "Another Contributor", ]))
+})
+
+test_that("About leads with the maintainer and keeps package facts beside the team", {
+  ui <- app_about_ui()
+  query <- htmltools::tagQuery(ui)
+  lead <- query$find(".fieldhub-team-lead")$selectedTags()
+  expect_length(lead, 1L)
+  lead <- as.character(lead[[1L]])
+  maintainer <- fieldhub_team()$name[grepl("cre", fieldhub_team()$roles)]
+  expect_match(lead, maintainer, fixed = TRUE)
+  expect_match(lead, 'src="www/didier-murillo.jpg"', fixed = TRUE)
+  expect_match(lead, "genomic and phenomic prediction", fixed = TRUE)
+  expect_match(lead, "https://github.com/DidierMurilloF", fixed = TRUE)
+  expect_true(file.exists(system.file("app/www/didier-murillo.jpg", package = "FielDHub")))
+  # the other five portraits follow in the team list, the maintainer not repeated
+  members <- query$find(".fieldhub-team-grid .fieldhub-team-profile")$selectedTags()
+  expect_length(members, 5L)
+  expect_false(any(grepl(maintainer, vapply(members, as.character, ""), fixed = TRUE)))
+  html <- as.character(ui)
+  aside <- regmatches(html, regexpr('(?s)<aside class="fieldhub-about-aside".*?</aside>', html, perl = TRUE))
+  expect_length(aside, 1L)
+  for (text in c(fieldhub_about_info()$version, fieldhub_about_info()$license, fieldhub_about_info()$issues,
+                 '<code>citation("FielDHub")</code>', "joss.03122", "Thomas Walk")) {
+    expect_match(aside, text, fixed = TRUE)
+  }
 })
 
 test_that("the About page uses maintained package metadata", {
