@@ -127,3 +127,26 @@ test_that("design-page rows stay within the edge-to-edge app container", {
   css <- paste(readLines(system.file("app/www/style.css", package = "FielDHub")), collapse = "\n")
   expect_match(css, "#fieldhub-app .tab-pane > .row {\n  margin-left: 0;\n  margin-right: 0;\n}", fixed = TRUE)
 })
+
+test_that("the Welcome page links every design to its navbar tab", {
+  registry <- fieldhub_app_registry()
+  html <- as.character(app_home_ui(registry))
+  links <- regmatches(html, gregexpr('data-fieldhub-tab="[^"]*"', html))[[1]]
+  targets <- gsub('^data-fieldhub-tab="|"$', "", links)
+  labels <- vapply(registry, `[[`, "", "label")
+  # every design once, by the value its navbar tab carries, plus the Help link
+  expect_setequal(setdiff(targets, "Help"), htmltools::htmlEscape(labels))
+  expect_identical(sum(targets == "Help"), 1L)
+  expect_identical(length(targets), length(labels) + 1L)
+  # one card per menu, with its design count; "New - " shows as a badge
+  query <- htmltools::tagQuery(app_home_designs(registry))
+  groups <- unique(vapply(registry, `[[`, "", "group"))
+  expect_identical(query$find(".fieldhub-home-family")$length(), length(groups))
+  expect_identical(query$find(".fieldhub-home-new")$length(), sum(startsWith(labels, "New - ")))
+  expect_false(grepl(">New - ", as.character(app_home_designs(registry)), fixed = TRUE))
+  expect_match(html, paste0(length(labels), " designs, from RCBD"), fixed = TRUE)
+  expect_match(html, paste("Version", utils::packageVersion("FielDHub")), fixed = TRUE)
+  expect_true(file.exists(system.file("app/www/home-map.png", package = "FielDHub")))
+  expect_true(file.exists(system.file("app/www/drone1.jpg", package = "FielDHub")))
+  expect_match(html, 'src="www/home-map.png"', fixed = TRUE)
+})

@@ -1,47 +1,74 @@
-<div id="showcase">
-    <div class="container">
-      <div class="showcase-content">
-        <h1><span class="text-primary1">&nbspWelcome to</span><span class="text-primary2"> FielDHub&nbsp</span></h1>
+<div class="fieldhub-home">
+  <section class="fieldhub-home-hero">
+    <div class="fieldhub-home-inner fieldhub-home-hero-grid">
+      <div class="fieldhub-home-copy">
+        <p class="fieldhub-home-kicker">Design of experiments for plant breeding</p>
+        <h1>Plan field trials, from randomization to field book.</h1>
+        <p class="fieldhub-home-sub">FielDHub randomizes field, greenhouse and laboratory experiments: {{ design_count }} designs, from RCBD and lattices to augmented and partially replicated trials with checks spread across the field. Every design gives you a field map and a field book to download.</p>
+        <div class="fieldhub-home-actions">
+          <a class="fieldhub-home-btn fieldhub-home-btn-primary" href="#fieldhub-home-designs">Choose a design</a>
+          <a class="fieldhub-home-btn fieldhub-home-btn-ghost" href="#" data-fieldhub-tab="Help">Read the guides</a>
+        </div>
+        <ul class="fieldhub-home-meta">
+          <li>Free and open source</li>
+          <li>On CRAN</li>
+          <li>Published in JOSS</li>
+          <li>Version {{ version }}</li>
+        </ul>
+      </div>
+      <figure class="fieldhub-home-map">
+        <img src="www/home-map.png" width="1320" height="768" alt="Field map of a single diagonal arrangement: 15 rows by 20 columns of entry numbers on light grey, with check plots in muted blue, green, sand and rose spread along diagonals.">
+        <figcaption>
+          <span>Single diagonal arrangement &middot; 270 entries, 4 checks &middot; 15 &times; 20 plots</span>
+          <span class="fieldhub-home-legend" aria-hidden="true">
+            <span><i class="fieldhub-swatch fieldhub-swatch-1"></i>Check 1</span>
+            <span><i class="fieldhub-swatch fieldhub-swatch-2"></i>2</span>
+            <span><i class="fieldhub-swatch fieldhub-swatch-3"></i>3</span>
+            <span><i class="fieldhub-swatch fieldhub-swatch-4"></i>4</span>
+          </span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="fieldhub-home-section fieldhub-home-designs" id="fieldhub-home-designs">
+    <div class="fieldhub-home-inner">
+      <div class="fieldhub-home-head">
+        <h2>Choose a design</h2>
+        <p>Each design opens with sensible defaults. Enter your entries and checks, or upload a list, and FielDHub does the rest.</p>
+      </div>
+      {{ designs }}
+    </div>
+  </section>
+
+  <section class="fieldhub-home-section fieldhub-home-band">
+    <div class="fieldhub-home-inner">
+      <div class="fieldhub-home-head">
+        <h2>What you get</h2>
+      </div>
+      <div class="fieldhub-home-outputs">
+        <div class="fieldhub-home-output">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="1.5"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+          <h3>Field maps</h3>
+          <p>Every plot with its entry, block and checks, in a clean style ready for reports.</p>
+        </div>
+        <div class="fieldhub-home-output">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 3h10l4 4v14H5z"/><path d="M8 11h8M8 15h8M8 7h4"/></svg>
+          <h3>Field books</h3>
+          <p>Rows, columns, plot numbers and entries for every location, to download and load into your database.</p>
+        </div>
+        <div class="fieldhub-home-output">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 20V4M4 20h16"/><path d="M7 15l4-5 3 3 5-6"/></svg>
+          <h3>Simulated data</h3>
+          <p>A simulated response with the randomization, for teaching and for testing an analysis.</p>
+        </div>
+        <div class="fieldhub-home-output">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg>
+          <h3>R functions</h3>
+          <p>Every design is also an R function, so a script can reproduce what the app made.</p>
+        </div>
       </div>
     </div>
-  </div>
-  <section id="home-info" class="bg-dark">
-    <div class="info-img"></div>
-    <div class="info-content">
-      <h2> <span id="text-primary">About the App</span></h2>
-      <p class="p-box">FielD·Hub is an R Shiny design of experiments (DOE) app created by 
-        the NDSU Big Data Pipeline team that aids in the 
-        creation of traditional and non-traditional augmented experiment designs, 
-        including spatial trials with checks assigned to plots in a diagonal 
-        arrangement across the field. Users of FielD·Hub are guided through an 
-        interactive DOE platform that generates randomizations of field, laboratory, 
-        and greenhouse experiments. Outputs from FielD·Hub include interactive field maps, 
-        tables, and field books that can be extracted and saved. 
-        <br><br>
-        A novel feature of FielD·Hub is an option that generates simulated data for a response variable along with the randomization. This feature makes FielD·Hub suitable for classroom teaching purposes, where instructors can either use the graphical dynamic user interface and/or use the formulas included in the R package for teaching R scripting courses.
-   <!-- <br>
-    <br>
-        For field experiments with a strict spatial arrangement, it allows users to specify the dimensions of the field as row and columns, while controlling the percentage of check plots, and obtaining randomized field maps and field books that can be used directly as templates and input files for central databases. Features are built-in separate modules and you can start to discover the advantages of our tool as soon as you download the app!--></p>
-      <!--<a href="about.html" class="btn btn-light">Read More</a>-->
-    </div>
   </section>
-  
-    <section id="features">
-    <div class="box bg-light">
-      <i class="glyphicon glyphicon-ok fieldhub-feature-icon" aria-hidden="true"></i>
-        <h3>Easy to Use</h3>
-        <p>Users are guided in each step of the DOE platform in a reactive interface.</p>
-    </div>
-    <div class="box bg-primary">
-      <i class="glyphicon glyphicon-education fieldhub-feature-icon" aria-hidden="true"></i>
-      <h3>Teaching</h3>
-      <p>The app provides suitable features for classroom teaching purposes.</p>
-    </div>
-    <div class="box bg-light">
-      <i class="glyphicon glyphicon-th fieldhub-feature-icon" aria-hidden="true"></i>
-        <h3>Novel App</h3>
-        <p>FielDHub offers DOE and features not currently available in most apps.</p>
-    </div>
-  </section>
-    <div class="clr"></div>
   {{ footer }}
+</div>

@@ -1,4 +1,9 @@
 @media screen and (max-width: 1100px) {
+#fieldhub-app .fieldhub-home-families,
+#fieldhub-app .fieldhub-home-outputs {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 #fieldhub-app .fieldhub-about-layout {
   grid-template-columns: minmax(0, 1fr);
   gap: 28px;
@@ -9,6 +14,30 @@
   padding: 20px 0 0;
   border-left: 0;
   border-top: 1px solid #d7dede;
+}
+}
+
+@media screen and (max-width: 960px) {
+#fieldhub-app .fieldhub-home-hero-grid {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 28px;
+  padding-top: 36px;
+}
+
+#fieldhub-app .fieldhub-home-copy {
+  padding-bottom: 8px;
+}
+
+#fieldhub-app .fieldhub-home h1 {
+  font-size: 32px;
+}
+
+#fieldhub-app .fieldhub-home-map {
+  margin-bottom: -48px;
+}
+
+#fieldhub-app .fieldhub-home-designs {
+  padding-top: 84px;
 }
 }
 
@@ -27,40 +56,22 @@
   border-top: 1px solid #d7dede;
   padding: 20px 0 0;
 }
-
-/* Showcase */
-#fieldhub-app #showcase {
-  height: 100%;
-}
-
-#fieldhub-app #showcase .showcase-content {
-  padding-top: 70px;
-  padding-bottom: 30px;
-}
-
-/* Home Info */
-/*
-#home-info {
-  height: 550px;
-}
-
-#home-info .info-img {
-  display: none;
-}
-
-#home-info .info-content {
-  float: none;
-  width: 100%;
-}
-*/
-/* Boxes */
-#fieldhub-app .box {
-  float: none;
-  width: 100%;
-}
 }
 
 @media screen and (max-width: 600px) {
+#fieldhub-app .fieldhub-home-inner {
+  padding: 0 16px;
+}
+
+#fieldhub-app .fieldhub-home h1 {
+  font-size: 28px;
+}
+
+#fieldhub-app .fieldhub-home-families,
+#fieldhub-app .fieldhub-home-outputs {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 #fieldhub-app .fieldhub-team-lead {
   grid-template-columns: minmax(0, 1fr);
 }

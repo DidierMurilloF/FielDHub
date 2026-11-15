@@ -60,45 +60,8 @@
   margin: 10px 0;
 }
 
-#fieldhub-app .p-box {
-  font-size: 16px;
-}
-
-#fieldhub-app .text-primary1 {
-  color: #ffc72a;
-  background: rgba(156, 137, 132, 0.55);
-  font-size: 88px;
-  font-weight: bold;
-}
-
-#fieldhub-app .text-primary2 {
-  color: #0a5640;
-  background: rgba(156, 137, 132, 0.55);
-  font-size: 88px;
-  font-weight: bold;
-}
-
-#fieldhub-app .welcome-primary {
-  font-size: 28px;
-  font-weight: bold;
-}
-
-#fieldhub-app #text-primary {
-  color:#ffc72a;
-  font-weight: bold;
-}
-
 #fieldhub-app .footer-label {
   color:#ffc72a;
-}
-
-#fieldhub-app #text-primary2 {
-  color:#0a5640;
-}
-
-#fieldhub-app .tittle-FielDHub {
-  color:#ffc72a;
-  font-weight: bold;
 }
 
 #fieldhub-app .lead {
@@ -122,88 +85,6 @@
 #fieldhub-app .btn:hover {
   background: #18bc9c;
   color: #343a40;
-}
-
-#fieldhub-app .btn-light {
-  background: #f4f4f4;
-  color: #333;
-}
-
-#fieldhub-app .bg-dark {
-  background: #444;
-  color: #fff;
-}
-
-#fieldhub-app .bg-light {
-  background: #f4f4f4;
-  color: #333;
-}
-
-#fieldhub-app .bg-primary {
-  background: #f7c08a;
-  color: #333;
-}
-
-#fieldhub-app .clr {
-  clear: both;
-}
-
-/* Showcase */
-#fieldhub-app #showcase {
-  background: url('baner46.jpg') no-repeat center center/cover;
-  /*background: url('golden.jpg') no-repeat center center/cover;*/
-  height: 550px;
-}
-
-#fieldhub-app #showcase .showcase-content {
-  color: #fff;
-  text-align: center;
-  padding-top: 210px;
-}
-
-#fieldhub-app #showcase .showcase-content p {
-  padding-bottom: 20px;
-  line-height: 1.7em;
-}
-
-/* Features */
-#fieldhub-app .box {
-  float: left;
-  width: 33.3%;
-  padding: 50px;
-  text-align:center;
-}
-
-#fieldhub-app .box i {
-  margin-bottom: 10px;
-}
-
-/* Home Info */
-#fieldhub-app #home-info {
-  height: 450px;
-}
-
-#fieldhub-app #home-info .info-img {
-  float: left;
-  width: 50%;
-  background: url('drone1.jpg') no-repeat;
-  /*background: url('wheatharvest_ndsu.jpg') no-repeat;*/
-  
-  min-height: 100%;
-}
-
-#fieldhub-app #home-info .info-content {
-  float: right;
-  width: 50%;
-  height: 100%;
-  text-align: center;
-  padding: 30px 30px;
-  overflow: hidden;
-}
-
-#fieldhub-app #home-info .info-content p {
-  padding-bottom: 30px;
-  padding-top: 10px;
 }
 
 /* footer */
@@ -275,8 +156,341 @@
   margin-left: 10px;
 }
 
-#fieldhub-app .fieldhub-feature-icon {
-  font-size: 3em;
+/* Welcome page (home.html): an aerial photo of breeding plots behind the
+   hero, a real field map floating over it into the design chooser, then
+   plain white and grey sections. NDSU green and gold are the only accents. */
+#fieldhub-app .fieldhub-home {
+  background: #f3f4f4;
+}
+
+#fieldhub-app .fieldhub-home-inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+#fieldhub-app .fieldhub-home-hero {
+  position: relative;
+  color: #ffffff;
+  background: #12251d url('drone1.jpg') center 55% / cover no-repeat;
+}
+
+#fieldhub-app .fieldhub-home-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, rgba(8, 38, 28, 0.92) 0%, rgba(8, 38, 28, 0.78) 40%, rgba(8, 38, 28, 0.22) 100%);
+}
+
+#fieldhub-app .fieldhub-home-hero-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 44px;
+  align-items: start;
+  padding-top: 56px;
+}
+
+#fieldhub-app .fieldhub-home-copy {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+  padding-bottom: 56px;
+}
+
+#fieldhub-app .fieldhub-home-kicker {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #ffc72a;
+}
+
+#fieldhub-app .fieldhub-home h1 {
+  margin: 0;
+  padding: 0;
+  font-size: 40px;
+  font-weight: 900;
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+  text-wrap: balance;
+}
+
+#fieldhub-app .fieldhub-home-sub {
+  margin: 0;
+  max-width: 52ch;
+  font-size: 16.5px;
+  line-height: 1.55;
+  color: #e6eeea;
+}
+
+#fieldhub-app .fieldhub-home-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+#fieldhub-app .fieldhub-home-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 12px 18px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+}
+
+#fieldhub-app .fieldhub-home-btn-primary {
+  background: #ffc72a;
+  color: #1d2a22;
+}
+
+#fieldhub-app .fieldhub-home-btn-primary:hover,
+#fieldhub-app .fieldhub-home-btn-primary:focus {
+  background: #ffd65c;
+  color: #1d2a22;
+}
+
+#fieldhub-app .fieldhub-home-btn-ghost {
+  border-color: rgba(255, 255, 255, 0.6);
+  color: #ffffff;
+}
+
+#fieldhub-app .fieldhub-home-btn-ghost:hover,
+#fieldhub-app .fieldhub-home-btn-ghost:focus {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+#fieldhub-app .fieldhub-home a:focus-visible {
+  outline: 2px solid #ffc72a;
+  outline-offset: 3px;
+}
+
+#fieldhub-app .fieldhub-home-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+#fieldhub-app .fieldhub-home-meta li + li::before {
+  content: "\2022";
+  margin-right: 8px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+#fieldhub-app .fieldhub-home-map {
+  align-self: end;
+  min-width: 0;
+  margin: 0 0 -72px;
+  padding: 12px;
+  background: #ffffff;
+  border-radius: 6px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+}
+
+#fieldhub-app .fieldhub-home-map img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+#fieldhub-app .fieldhub-home-map figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  margin-top: 8px;
+  padding: 10px 4px 2px;
+  border-top: 1px solid #edf0f0;
+  font-size: 12.5px;
+  color: #5f6b73;
+}
+
+#fieldhub-app .fieldhub-home-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+
+#fieldhub-app .fieldhub-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 5px;
+  border-radius: 2px;
+  vertical-align: -1px;
+}
+
+#fieldhub-app .fieldhub-swatch-1 { background: #b9cadb; }
+#fieldhub-app .fieldhub-swatch-2 { background: #c6d7bf; }
+#fieldhub-app .fieldhub-swatch-3 { background: #e3d3b6; }
+#fieldhub-app .fieldhub-swatch-4 { background: #dec4c4; }
+
+#fieldhub-app .fieldhub-home-section {
+  padding: 40px 0;
+  color: #2c3e50;
+}
+
+#fieldhub-app .fieldhub-home-designs {
+  padding-top: 112px;
+}
+
+#fieldhub-app .fieldhub-home-band {
+  background: #ffffff;
+  border-top: 1px solid #d7dede;
+}
+
+#fieldhub-app .fieldhub-home-head {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 22px;
+}
+
+#fieldhub-app .fieldhub-home h2 {
+  margin: 0;
+  padding: 0;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+#fieldhub-app .fieldhub-home-head p {
+  margin: 0;
+  max-width: 70ch;
+  color: #5f6b73;
+}
+
+#fieldhub-app .fieldhub-home h3 {
+  margin: 0;
+  padding: 0;
+  font-weight: 700;
+}
+
+#fieldhub-app .fieldhub-home-families {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+
+#fieldhub-app .fieldhub-home-family {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  padding: 18px;
+  background: #ffffff;
+  border: 1px solid #d7dede;
+  border-radius: 6px;
+}
+
+#fieldhub-app .fieldhub-home-family-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+}
+
+#fieldhub-app .fieldhub-home-family h3 {
+  font-size: 17px;
+}
+
+#fieldhub-app .fieldhub-home-count {
+  font-size: 12px;
+  color: #5f6b73;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+#fieldhub-app .fieldhub-home-family p {
+  margin: 0;
+  font-size: 13.5px;
+  color: #5f6b73;
+}
+
+#fieldhub-app .fieldhub-home-family ul {
+  display: grid;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+#fieldhub-app .fieldhub-home-family li a {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-top: 1px solid #edf0f0;
+  font-size: 13.5px;
+  color: #2c3e50;
+  text-decoration: none;
+}
+
+#fieldhub-app .fieldhub-home-family li:first-child a {
+  border-top: 0;
+}
+
+#fieldhub-app .fieldhub-home-family li a::after {
+  content: "\203A";
+  color: #5f6b73;
+}
+
+#fieldhub-app .fieldhub-home-family li a:hover,
+#fieldhub-app .fieldhub-home-family li a:focus {
+  color: #0a5640;
+}
+
+#fieldhub-app .fieldhub-home-family li a:focus-visible {
+  outline-color: #0a5640;
+}
+
+#fieldhub-app .fieldhub-home-new {
+  margin-left: 6px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: #e3efe9;
+  color: #0a5640;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+#fieldhub-app .fieldhub-home-outputs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+}
+
+#fieldhub-app .fieldhub-home-output {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+}
+
+#fieldhub-app .fieldhub-home-output svg {
+  width: 28px;
+  height: 28px;
+  color: #0a5640;
+}
+
+#fieldhub-app .fieldhub-home-output h3 {
+  font-size: 16px;
+}
+
+#fieldhub-app .fieldhub-home-output p {
+  margin: 0;
+  font-size: 13.5px;
+  color: #5f6b73;
 }
 
 /* Help and About retain the legacy neutral background and compact columns.

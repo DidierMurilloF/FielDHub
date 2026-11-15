@@ -54,7 +54,8 @@ app_ui <- function(request) {
 #' 
 #' @noRd
 app_add_external_resources <- function(){
-  scripts <- c("corner.js", "shinybusy.js", "task-feedback.js", "output-feedback.js", "layout-images.js")
+  scripts <- c("corner.js", "shinybusy.js", "task-feedback.js", "output-feedback.js", "layout-images.js",
+               "home-links.js")
   stylesheets <- c("style.css", "mobile.css")
   
   shiny::addResourcePath(

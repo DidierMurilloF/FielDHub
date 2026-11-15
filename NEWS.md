@@ -36,6 +36,10 @@
 
 ## Enhancements
 
+- New Welcome page: an aerial photo of breeding plots behind a short
+  introduction and a real field map, then every design grouped as in the
+  menus, each linking straight to its page, and what FielDHub gives you back.
+  The map is rendered by `dev/home_map.R`.
 - The app's styles and scripts are served under a version that changes with
   their contents, so browsers load the current files after an update instead
   of a cached copy that no longer matches the pages.

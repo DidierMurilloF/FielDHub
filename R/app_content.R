@@ -123,7 +123,45 @@ app_about_ui <- function() {
 
 #' Welcome content with the current footer
 #' @noRd
-app_home_ui <- function() {
+app_home_ui <- function(registry = fieldhub_app_registry()) {
   htmltools::htmlTemplate(system.file("app/www/home.html", package = "FielDHub"),
+                          design_count = length(registry),
+                          version = as.character(utils::packageVersion("FielDHub")),
+                          designs = app_home_designs(registry),
                           footer = htmltools::HTML(fieldhub_footer()))
+}
+
+#' The Welcome page's design chooser
+#'
+#' One card per design menu, listing its designs in menu order. Each design
+#' links to its tab (\code{data-fieldhub-tab}, handled by
+#' \code{home-links.js}); a "New - " label shows as a New badge.
+#' @param registry The app's design registry.
+#' @noRd
+app_home_designs <- function(registry = fieldhub_app_registry()) {
+  titles <- c(`Unreplicated Designs` = "Unreplicated",
+              `Partially Replicated Designs` = "Partially replicated",
+              `Lattice Designs` = "Lattice",
+              `Other Designs` = "Other designs")
+  blurbs <- c(`Unreplicated Designs` = "Test many entries once, with replicated checks spread across the field.",
+              `Partially Replicated Designs` = "Replicate a share of the entries, at one location or several.",
+              `Lattice Designs` = "Resolvable incomplete blocks for many entries.",
+              `Other Designs` = "Complete blocks, Latin, factorial, split-plot and row-column designs.")
+  groups <- vapply(registry, `[[`, character(1), "group")
+  shiny::div(class = "fieldhub-home-families",
+    lapply(unique(groups), function(group) {
+      entries <- registry[groups == group]
+      count <- length(entries)
+      shiny::tags$article(class = "fieldhub-home-family",
+        shiny::div(class = "fieldhub-home-family-top",
+          shiny::h3(if (group %in% names(titles)) titles[[group]] else group),
+          shiny::span(class = "fieldhub-home-count", paste(count, if (count == 1L) "design" else "designs"))),
+        if (group %in% names(blurbs)) shiny::p(blurbs[[group]]),
+        shiny::tags$ul(lapply(entries, function(entry) {
+          is_new <- startsWith(entry$label, "New - ")
+          shiny::tags$li(shiny::tags$a(href = "#", `data-fieldhub-tab` = entry$label,
+            shiny::span(sub("^New - ", "", entry$label)),
+            if (is_new) shiny::span(class = "fieldhub-home-new", "New")))
+        })))
+    }))
 }
