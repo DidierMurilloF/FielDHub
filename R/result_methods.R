@@ -154,6 +154,8 @@ print.fieldLayout <- function(x, ...) {
 #'   complete blocks (\code{type = 2}), whose whole plots are numbered in a
 #'   fixed order.
 #'   \item \code{stacked} it can be \code{vertical} or \code{horizontal} stacked layout.
+#'   \item \code{field_grid} \code{FALSE} removes the white line drawn around every
+#'   plot in maps that have one. Other arguments are passed to \code{desplot}.
 #' } 
 #' @author Didier Murillo [aut]
 #' @examples

@@ -240,8 +240,8 @@ test_that("optimized entry maps outline checks without adding outlines to plot-n
 
 # The augmented RCBD layout used to draw its cell text with ggplot2::geom_text()
 # layers on top of a desplot plot whose own text was switched off. desplot draws
-# the same thing natively, and the checks keep their own text colour.
-test_that("augmented RCBD layout draws entries natively, checks in red", {
+# the same thing natively; checks are shown by a grey background, not by colour.
+test_that("augmented RCBD layout draws entries natively with dark labels", {
   a <- RCBD_augmented(
     lines = 110, checks = 4, b = 6, l = 1,
     plotNumber = 101, seed = 1
@@ -249,31 +249,20 @@ test_that("augmented RCBD layout draws entries natively, checks in red", {
   fb <- a$fieldBook
   p <- plot_layout(a, l = 1)
 
-  # p1: entry numbers, verbatim, in a single text layer
+  # p1: entry numbers, verbatim, in a single text layer: dark, fillers grey
   expect_labels_verbatim(p$out_layout, fb$ENTRY)
   d1 <- drawn_text(p$out_layout)[[1]]
+  expect_true(all(as.character(d1$colour) %in% c("gray10", "gray60")))
+  expect_true("gray10" %in% d1$colour)
 
-  # the checks - and only the checks - are red
-  is_check <- as.character(fb$CHECKS) == "1"
-  expect_true(any(is_check))
-  expect_setequal(unique(as.character(d1$colour)), c("gray10", "red3"))
-  expect_equal(
-    sort(as.character(d1$label[d1$colour == "red3"])),
-    sort(as.character(fb$ENTRY[is_check]))
-  )
-
-  # text size and the muted block background are the ones the overlay produced
-  expect_equal(unique(as.numeric(d1$size)), 3.2)
-  expect_length(tile_fills(p$out_layout), length(unique(fb$BLOCK)))
-
-  # p2: plot numbers, verbatim, one colour, same size
+  # p2: plot numbers, verbatim, with the same colours
   expect_labels_verbatim(p$out_layoutPlots, sprintf("%d", as.integer(fb$PLOT)))
   d2 <- drawn_text(p$out_layoutPlots)[[1]]
-  expect_equal(unique(as.character(d2$colour)), "gray10")
-  expect_equal(unique(as.numeric(d2$size)), 3.2)
+  expect_identical(sort(as.character(d2$colour)), sort(as.character(d1$colour)))
+  expect_equal(unique(as.numeric(d1$size)), unique(as.numeric(d2$size)))
 })
 
-test_that("augmented RCBD fills and borders only check cells without changing block backgrounds", {
+test_that("augmented RCBD greys only check cells without changing block backgrounds", {
   design <- RCBD_augmented(lines = 110, checks = 4, b = 6, l = 2, seed = 1)
   before <- serialize(design, NULL)
   for (location in 1:2) for (flip in c(FALSE, TRUE)) {
@@ -281,27 +270,16 @@ test_that("augmented RCBD fills and borders only check cells without changing bl
     entries <- view$out_layout
     numbers <- view$out_layoutPlots
     tile_layers <- function(p) which(vapply(p$layers, function(layer) inherits(layer$geom, "GeomTile"), TRUE))
-    expect_length(tile_layers(entries), 2L)
+    # a single desplot fill layer in both maps
+    expect_length(tile_layers(entries), 1L)
     expect_length(tile_layers(numbers), 1L)
-    # The original muted block fills remain exactly the same as in the number map.
-    background <- ggplot2::layer_data(entries, tile_layers(entries)[1L])
-    expect_equal(background, ggplot2::layer_data(numbers, tile_layers(numbers)[1L]))
-    checks <- ggplot2::layer_data(entries, tile_layers(entries)[2L])
-    data <- entries$data[entries$data$CHECK_TEXT == "check", , drop = FALSE]
-    expect_equal(nrow(checks), nrow(data))
+    e <- ggplot2::layer_data(entries, tile_layers(entries))
+    n <- ggplot2::layer_data(numbers, tile_layers(numbers))
     is_check <- entries$data$CHECK_TEXT == "check"
-    expect_equal(checks$x, background$x[is_check])
-    expect_equal(checks$y, background$y[is_check])
-    expect_true(all(checks$colour == "gray50"))
-    expect_true(all(checks$linewidth == 1))
-    expected <- fieldhub_layout_palette()[-1L][as.integer(factor(data$ENTRY))]
-    expect_identical(checks$fill, expected)
-    expect_length(unique(checks$fill), 4L)
-    # Filled tiles precede both border layers and the native text: labels stay visible.
-    expect_lt(tile_layers(entries)[2L], min(which(vapply(entries$layers,
-      function(layer) inherits(layer$geom, "GeomText"), TRUE))))
-    expect_equal(sum(vapply(entries$layers, function(layer) inherits(layer$stat, "StatTileBorder"), TRUE)), 2L)
-    expect_equal(sum(vapply(numbers$layers, function(layer) inherits(layer$stat, "StatTileBorder"), TRUE)), 2L)
+    expect_true(all(e$fill[is_check] == fieldhub_check_fill()))
+    # outside the checks, both maps draw the same block backgrounds
+    expect_identical(e$fill[!is_check], n$fill[!is_check])
+    expect_false(any(n$fill == fieldhub_check_fill()))
   }
   expect_identical(serialize(design, NULL), before)
 })

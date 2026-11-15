@@ -36,6 +36,41 @@
 
 ## Enhancements
 
+- CRD, Latin square, Latin rectangle, factorial, split-plot and
+  split-split-plot field maps use the same style. Every plot has a white
+  grid line around it; RCBD-type reps and multiple Latin squares get a muted
+  background each and white alleys; whole plots are outlined in grey and
+  split-split-plot sub-plots in a lighter grey. Labels, titles and field
+  books are unchanged.
+
+- RCBD, row-column and strip-plot field maps use the same style: one muted
+  background per replication or block, white alleys between them, and a
+  white line around every plot (for a strip-plot, the strips). RCBD checks
+  share the neutral grey of the augmented designs. Alpha, square and
+  rectangular lattices and incomplete block designs also get the plot grid,
+  drawn as a ggplot2 layer until desplot can draw it. `plot(x, field_grid =
+  FALSE)` removes the grid.
+
+- Augmented RCBD and augmented row-column field maps use the same style.
+  Augmented RCBD blocks get a muted background each and are separated by
+  white alleys, with a thin white line around every plot inside them. In both designs every check plot has the same neutral grey
+  background instead of a colour per check, check numbers are dark instead
+  of red, and filler plots are white with grey numbers. The augmented
+  row-column entry map now shows entry numbers instead of treatment names,
+  like the other entry maps, and both of its maps draw a white line around
+  every plot so that neighbouring checks stay apart. Field books and plot
+  numbers are unchanged.
+
+- Field maps of alpha, square and rectangular lattices and incomplete block
+  designs use a field-plan style: each replication has a single muted
+  background (the tints of the augmented RCBD blocks) and is separated from
+  the next by a white alley, incomplete blocks are outlined in grey, and
+  labels are dark. Entries are no longer coloured one by one,
+  and the plot-number map now shows the incomplete blocks too. Each map is
+  a single desplot call, so arguments passed through `plot()` (such as
+  `col.regions`, `cex` or `main`) override any part of it (#72). Field
+  books, plot numbers and coordinates are unchanged.
+
 - Augmented RCBD designs support optional block-based plot numbering with
   `plotIncrement`: for example, blocks start at 101, 201, 301 with an increment
   of 100. Additional experiment reps receive separate ranges within each

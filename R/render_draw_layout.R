@@ -26,40 +26,32 @@ draw_layout.FielDHub <- function(x, df, ...) {
 #' Treatment and plot maps for registered fixed-coordinate designs
 #' @noRd
 draw_registered_layout <- function(x, df, ...) {
+  dots <- list(...)
   main <- layout_title(paste0(registered_design_entry(x)$title, " "), df)
-  p1 <- plot_desplot(TREATMENT ~ COLUMN + ROW, data = df, text.string = "TREATMENT",
-                    main = main, extra_args = list(...))
+  # Field alleys without alleys: rows and columns are the blocks, shown by the
+  # white plot grid and the axes on one background.
+  p1 <- plot_field_alleys(df, "TREATMENT", main, grid = TRUE, extra_args = dots)
   numbers <- df
   numbers$PLOT <- as.character(numbers$PLOT)
-  p2 <- plot_desplot(PLOT ~ COLUMN + ROW, data = numbers, text.string = "PLOT",
-                    main = main, extra_args = list(...))
+  p2 <- plot_field_alleys(numbers, "PLOT", main, grid = TRUE, extra_args = dots)
   list(p1 = p1, p2 = p2, data = df)
 }
 
-#' Treatment and plot maps of augmented row-column designs
+#' Entry and plot maps of augmented row-column designs
 #'
-#' The treatment map fills each check by \code{CHECKS} with the shared
-#' palette, leaves the test plots neutral and outlines the check plots, as
-#' the diagonal arrangement's entry map does. The plot-number map is neutral.
+#' The field-alleys style without alleys (the field has no blocks): every
+#' plot on the shared neutral inside a white plot grid, check plots on the
+#' check grey, labelled by entry number. The plot-number map keeps the grid
+#' and does not highlight checks.
 #' @noRd
 draw_augmented_row_column_layout <- function(x, df, ...) {
+  dots <- list(...)
   main <- layout_title(paste0(registered_design_entry(x)$title, " "), df)
-  drawn <- df
-  drawn$CHECKS <- as.character(drawn$CHECKS)
-  checks <- unique(df$CHECKS[!is.na(df$CHECKS) & df$CHECKS != 0])
-  checks <- as.character(sort(checks))
-  colours <- c(fieldhub_layout_neutral(),
-               rep(fieldhub_layout_palette()[-1L], length.out = length(checks)))
-  names(colours) <- c("0", checks)
-  p1 <- plot_desplot(CHECKS ~ COLUMN + ROW, data = drawn, text.string = "TREATMENT",
-                     col.regions = colours, out2.string = "CHECKS",
-                     out2.gpar = list(col = "gray50", lwd = 1, lty = 1),
-                     main = main, extra_args = list(...))
-  drawn$PLOT <- sprintf("%d", as.integer(drawn$PLOT))
-  drawn$EXPT <- as.character(drawn$EXPT)
-  p2 <- plot_desplot(EXPT ~ COLUMN + ROW, data = drawn, text.string = "PLOT",
-                     col.regions = rep(fieldhub_layout_neutral(), length(unique(drawn$EXPT))),
-                     main = main, extra_args = list(...))
+  is_check <- !is.na(df$CHECKS) & df$CHECKS != 0
+  p1 <- plot_field_alleys(df, "ENTRY", main, checks = is_check, grid = TRUE, extra_args = dots)
+  numbers <- df
+  numbers$PLOT <- sprintf("%d", as.integer(numbers$PLOT))
+  p2 <- plot_field_alleys(numbers, "PLOT", main, grid = TRUE, extra_args = dots)
   list(p1 = p1, p2 = p2, data = df)
 }
 
@@ -74,19 +66,12 @@ layout_title <- function(title, df) {
 draw_layout.fieldhub_crd <- function(x, df, ...) {
   dots <- list(...)
   main <- layout_title("Completely Randomized Design ", df)
-  p1 <- plot_desplot(TREATMENT ~ COLUMN + ROW,
-                     data = df,
-                     out2.gpar = list(col = "black", lty = 3),
-                     text.string = "TREATMENT",
-                     main = main,
-                     extra_args = dots)
+  # No blocks: one background and a white plot grid.
+  p1 <- plot_field_alleys(df, "TREATMENT", main, grid = TRUE, extra_args = dots)
+  # The drawn field book is returned as before.
   df$REP <- as.factor(df$REP)
   df$PLOT <- as.character(df$PLOT)
-  p2 <- plot_desplot(PLOT ~ COLUMN + ROW,
-                     data = df,
-                     text.string = "PLOT",
-                     main = main,
-                     extra_args = dots)
+  p2 <- plot_field_alleys(df, "PLOT", main, grid = TRUE, extra_args = dots)
   list(p1 = p1, p2 = p2, data = df)
 }
 
@@ -96,29 +81,14 @@ draw_layout.fieldhub_crd <- function(x, df, ...) {
 draw_layout.fieldhub_rcbd <- function(x, df, ...) {
   dots <- list(...)
   main <- layout_title("Randomized Complete Block Design ", df)
-  p1_args <- list(
-    form        = TREATMENT ~ COLUMN + ROW,
-    data        = df,
-    out1.string = "REP",
-    out2.gpar   = list(col = "black", lwd = 1, lty = 3),
-    text.string = "TREATMENT",
-    main        = main,
-    extra_args  = dots
-  )
-  if ("CHECKS" %in% names(df)) {
-    # Colour the plot text by check status and outline the check plots
-    p1_args$data$CHECKS <- as.character(p1_args$data$CHECKS)
-    p1_args$col.string  <- "CHECKS"
-    p1_args$out2.string <- "CHECKS"
-  }
-  p1 <- do.call(plot_desplot, p1_args)
+  # Field alleys: one muted background per block, white alleys, a white plot
+  # grid, and the checks (if any) on the check grey in the treatment map.
+  is_check <- if ("CHECKS" %in% names(df)) !is.na(df$CHECKS) & df$CHECKS != 0 else NULL
+  p1 <- plot_field_alleys(df, "TREATMENT", main, group = "REP", checks = is_check, grid = TRUE,
+                          extra_args = dots)
+  # The drawn field book is returned as before: REP as a factor.
   df$REP <- as.factor(df$REP)
-  p2 <- plot_desplot(REP ~ COLUMN + ROW,
-                     data = df,
-                     out1.string = "REP",
-                     text.string = "PLOT",
-                     main = main,
-                     extra_args = dots)
+  p2 <- plot_field_alleys(df, "PLOT", main, group = "REP", grid = TRUE, extra_args = dots)
   list(p1 = p1, p2 = p2, data = df)
 }
 
@@ -127,39 +97,16 @@ draw_layout.fieldhub_rcbd <- function(x, df, ...) {
 #' @noRd
 draw_layout.fieldhub_full_factorial <- function(x, df, ...) {
   dots <- list(...)
-  if (x$infoDesign$kind == "RCBD") {
-    main <- layout_title("Full Factorial Design (RCBD) ", df)
-    p1 <- plot_desplot(TRT_COMB ~ COLUMN + ROW,
-                       data = df,
-                       out1.string = "REP",
-                       out2.gpar = list(col = "black", lty = 3),
-                       text.string = "TRT_COMB",
-                       main = main,
-                       extra_args = dots)
-    df$PLOT <- as.factor(df$PLOT)
-    df$REP <- as.factor(df$REP)
-    p2 <- plot_desplot(REP ~ COLUMN + ROW,
-                       data = df,
-                       out1.string = "REP",
-                       text.string = "PLOT",
-                       main = main,
-                       extra_args = dots)
-  } else {
-    main <- layout_title("Full Factorial Design (CRD) ", df)
-    p1 <- plot_desplot(TRT_COMB ~ COLUMN + ROW,
-                       data = df,
-                       out2.gpar = list(col = "black", lty = 3),
-                       text.string = "TRT_COMB",
-                       main = main,
-                       extra_args = dots)
-    df$REP <- as.factor(df$REP)
-    df$PLOT <- as.factor(df$PLOT)
-    p2 <- plot_desplot(PLOT ~ COLUMN + ROW,
-                       data = df,
-                       text.string = "PLOT",
-                       main = main,
-                       extra_args = dots)
-  }
+  rcbd <- x$infoDesign$kind == "RCBD"
+  main <- layout_title(if (rcbd) "Full Factorial Design (RCBD) " else "Full Factorial Design (CRD) ", df)
+  # RCBD: a background per rep and alleys; CRD: one background. Both get a
+  # white plot grid.
+  group <- if (rcbd) "REP" else NULL
+  p1 <- plot_field_alleys(df, "TRT_COMB", main, group = group, grid = TRUE, extra_args = dots)
+  # The drawn field book is returned as before.
+  df$PLOT <- as.factor(df$PLOT)
+  df$REP <- as.factor(df$REP)
+  p2 <- plot_field_alleys(df, "PLOT", main, group = group, grid = TRUE, extra_args = dots)
   list(p1 = p1, p2 = p2, data = df)
 }
 
@@ -168,45 +115,23 @@ draw_layout.fieldhub_full_factorial <- function(x, df, ...) {
 #' @noRd
 draw_layout.fieldhub_split_plot <- function(x, df, ...) {
   dots <- list(...)
-  if (x$infoDesign$typeDesign == "RCBD") {
+  rcbd <- x$infoDesign$typeDesign == "RCBD"
+  # The drawn field book is returned as before.
+  if (rcbd) {
     df$WHOLE_PLOT <- as.factor(df$WHOLE_PLOT)
     df$SUB_PLOT <- as.factor(df$SUB_PLOT)
     df$TRT_COMB <- factor(df$TRT_COMB, levels = unique(df$TRT_COMB))
-    df$REP <- as.factor(df$REP)
-    main <- layout_title("Split Plot Design (RCBD) ", df)
-    p1 <- plot_desplot(TRT_COMB ~ COLUMN + ROW,
-                       data = df,
-                       text.string = "TRT_COMB",
-                       out1.string = "REP",
-                       out1.gpar = list(col = "grey"),
-                       main = main,
-                       extra_args = dots)
-    p2 <- plot_desplot(REP ~ COLUMN + ROW,
-                       data = df,
-                       out1.string = "REP",
-                       out2.gpar = list(col = "gray50", lwd = 1, lty = 1),
-                       text.string = "PLOT",
-                       key.cex = 0.7,
-                       main = main,
-                       extra_args = dots)
-  } else {
-    main <- layout_title("Split Plot Design (CRD) ", df)
-    df$REP <- as.factor(df$REP)
-    p1 <- plot_desplot(TRT_COMB ~ COLUMN + ROW,
-                       data = df,
-                       out1.string = "REP",
-                       out2.gpar = list(col = "gray50", lwd = 1, lty = 1),
-                       text.string = "TRT_COMB",
-                       main = main,
-                       extra_args = dots)
-    df$REP <- as.factor(df$REP)
-    df$PLOT <- as.factor(df$PLOT)
-    p2 <- plot_desplot(PLOT ~ COLUMN + ROW,
-                       data = df,
-                       text.string = "PLOT",
-                       main = main,
-                       extra_args = dots)
   }
+  df$REP <- as.factor(df$REP)
+  main <- layout_title(if (rcbd) "Split Plot Design (RCBD) " else "Split Plot Design (CRD) ", df)
+  # Reps (RCBD) get a background and alleys; whole plots (one PLOT number
+  # each) grey lines; sub-plots the white plot grid.
+  group <- if (rcbd) "REP" else NULL
+  p1 <- plot_field_alleys(df, "TRT_COMB", main, group = group, block = "PLOT", grid = TRUE,
+                          extra_args = dots)
+  if (!rcbd) df$PLOT <- as.factor(df$PLOT)
+  p2 <- plot_field_alleys(df, "PLOT", main, group = group, block = "PLOT", grid = TRUE,
+                          extra_args = dots)
   list(p1 = p1, p2 = p2, data = df)
 }
 
@@ -215,72 +140,40 @@ draw_layout.fieldhub_split_plot <- function(x, df, ...) {
 #' @noRd
 draw_layout.fieldhub_split_split_plot <- function(x, df, ...) {
   dots <- list(...)
+  rcbd <- x$infoDesign$typeDesign == "RCBD"
+  # The drawn field book is returned as before.
   df$WHOLE_PLOT <- as.factor(df$WHOLE_PLOT)
   df$SUB_PLOT <- as.factor(df$SUB_PLOT)
   df$SUB_SUB_PLOT <- as.factor(df$SUB_SUB_PLOT)
-  if (x$infoDesign$typeDesign == "RCBD") {
-    df$TRT_COMB <- as.factor(df$TRT_COMB)
-    df$REP <- as.factor(df$REP)
-    main <- layout_title("Split-Split Plot Design (RCBD) ", df)
-    p1 <- plot_desplot(TRT_COMB ~ COLUMN + ROW,
-                       data = df,
-                       out1.string = "REP",
-                       out2.string = "WHOLE_PLOT",
-                       col.string = "WHOLE_PLOT",
-                       out1.gpar = list(col = "black", lwd = 1, lty = 3),
-                       text.string = "TRT_COMB",
-                       main = main,
-                       extra_args = dots)
-    p2 <- plot_desplot(REP ~ COLUMN + ROW,
-                       data = df,
-                       out1.string = "REP",
-                       out2.gpar = list(col = "gray50", lwd = 1, lty = 1),
-                       text.string = "PLOT",
-                       key.cex = 0.7,
-                       main = main,
-                       extra_args = dots)
-  } else {
-    df$REP <- as.factor(df$REP)
-    main <- layout_title("Split-Split Plot Design (CRD) ", df)
-    p1 <- plot_desplot(REP ~ COLUMN + ROW,
-                       data = df,
-                       out1.string = "REP",
-                       out2.string = "WHOLE_PLOT",
-                       out2.gpar = list(col = "gray50", lwd = 1, lty = 1),
-                       text.string = "WHOLE_PLOT",
-                       col.string = "SUB_PLOT",
-                       main = main,
-                       extra_args = dots)
-    df$PLOT <- as.factor(df$PLOT)
-    p2 <- plot_desplot(PLOT ~ COLUMN + ROW,
-                       data = df,
-                       text.string = "PLOT",
-                       main = main,
-                       extra_args = dots)
-  }
+  if (rcbd) df$TRT_COMB <- as.factor(df$TRT_COMB)
+  df$REP <- as.factor(df$REP)
+  main <- layout_title(if (rcbd) "Split-Split Plot Design (RCBD) " else "Split-Split Plot Design (CRD) ", df)
+  # Reps (RCBD) get a background and alleys; whole plots grey lines; sub-plots
+  # lighter grey lines; sub-sub-plots the white plot grid.
+  group <- if (rcbd) "REP" else NULL
+  p1 <- plot_field_alleys(df, "TRT_COMB", main, group = group, block = "PLOT",
+                          sub_block = "SUB_PLOT", grid = TRUE, extra_args = dots)
+  if (!rcbd) df$PLOT <- as.factor(df$PLOT)
+  p2 <- plot_field_alleys(df, "PLOT", main, group = group, block = "PLOT",
+                          sub_block = "SUB_PLOT", grid = TRUE, extra_args = dots)
   list(p1 = p1, p2 = p2, data = df)
 }
 
-# Designs in incomplete blocks: the entries, with the reps and blocks outlined
+# Designs in incomplete blocks (alpha, square and rectangular lattices,
+# incomplete blocks): field-alleys maps of the entries and of the plot
+# numbers: one muted background per replication, white alleys between
+# replications, grey outlines around the incomplete blocks and a white grid
+# around every plot.
 draw_iblock_layout <- function(x, df, title, ...) {
   dots <- list(...)
+  # The drawn field book is returned as before: ENTRY and REP as factors.
   df$ENTRY <- as.factor(df$ENTRY)
-  main <- layout_title(title, df)
-  p1 <- plot_desplot(ENTRY ~ COLUMN + ROW,
-                     data = df,
-                     out1.string = "REP",
-                     out2.string = "IBLOCK",
-                     out2.gpar = list(col = "black", lty = 3),
-                     text.string = "ENTRY",
-                     main = main,
-                     extra_args = dots)
   df$REP <- as.factor(df$REP)
-  p2 <- plot_desplot(REP ~ COLUMN + ROW,
-                     data = df,
-                     out1.string = "REP",
-                     text.string = "PLOT",
-                     main = main,
-                     extra_args = dots)
+  main <- layout_title(title, df)
+  p1 <- plot_field_alleys(df, "ENTRY", main, group = "REP", block = "IBLOCK", grid = TRUE,
+                          extra_args = dots)
+  p2 <- plot_field_alleys(df, "PLOT", main, group = "REP", block = "IBLOCK", grid = TRUE,
+                          extra_args = dots)
   list(p1 = p1, p2 = p2, data = df)
 }
 
@@ -319,24 +212,13 @@ draw_layout.fieldhub_latin_square <- function(x, df, ...) {
   dots <- list(...)
   main <- layout_title("Latin Square Design ", df)
   df$TREATMENT <- as.factor(df$TREATMENT)
-  # Outline the squares when there are several
-  squares <- if (dplyr::n_distinct(x$fieldBook$SQUARE) > 1) list(out1.string = "SQUARE") else list()
-  p1 <- do.call(plot_desplot, c(list(
-    form = TREATMENT ~ COLUMN + ROW,
-    data = df,
-    out2.gpar = list(col = "black", lty = 3),
-    text.string = "TREATMENT",
-    main = main,
-    extra_args = dots
-  ), squares))
+  # Rows and columns are the blocks, shown by the white plot grid and the axes.
+  # Several squares get a background each and alleys between them.
+  group <- if (dplyr::n_distinct(x$fieldBook$SQUARE) > 1) "SQUARE" else NULL
+  p1 <- plot_field_alleys(df, "TREATMENT", main, group = group, grid = TRUE, extra_args = dots)
+  # The drawn field book is returned as before.
   df$SQUARE <- as.factor(df$SQUARE)
-  p2 <- do.call(plot_desplot, c(list(
-    form = SQUARE ~ COLUMN + ROW,
-    data = df,
-    text.string = "PLOT",
-    main = main,
-    extra_args = dots
-  ), squares))
+  p2 <- plot_field_alleys(df, "PLOT", main, group = group, grid = TRUE, extra_args = dots)
   list(p1 = p1, p2 = p2, data = df)
 }
 
@@ -346,21 +228,12 @@ draw_layout.fieldhub_latin_square <- function(x, df, ...) {
 draw_layout.fieldhub_strip_plot <- function(x, df, ...) {
   dots <- list(...)
   main <- layout_title("Strip-Plot Design ", df)
+  # Every plot edge inside a replication is a strip edge (rows are horizontal
+  # strips, columns vertical strips), so the white plot grid shows the strips.
   df$TRT_COMB <- as.factor(df$TRT_COMB)
-  p1 <- plot_desplot(TRT_COMB ~ COLUMN + ROW,
-                     data = df,
-                     out1.string = "REP",
-                     out2.gpar = list(col = "black", lty = 3),
-                     text.string = "TRT_COMB",
-                     main = main,
-                     extra_args = dots)
   df$REP <- as.factor(df$REP)
-  p2 <- plot_desplot(REP ~ COLUMN + ROW,
-                     data = df,
-                     out1.string = "REP",
-                     text.string = "PLOT",
-                     main = main,
-                     extra_args = dots)
+  p1 <- plot_field_alleys(df, "TRT_COMB", main, group = "REP", grid = TRUE, extra_args = dots)
+  p2 <- plot_field_alleys(df, "PLOT", main, group = "REP", grid = TRUE, extra_args = dots)
   list(p1 = p1, p2 = p2, data = df)
 }
 
@@ -370,21 +243,12 @@ draw_layout.fieldhub_strip_plot <- function(x, df, ...) {
 draw_layout.fieldhub_row_column <- function(x, df, ...) {
   dots <- list(...)
   main <- layout_title("Row-Column Design ", df)
+  # Rows and columns are the blocks inside each replication: the white plot
+  # grid and the axes show them, white alleys separate the replications.
   df$ENTRY <- as.factor(df$ENTRY)
-  p1 <- plot_desplot(ENTRY ~ COLUMN + ROW,
-                     data = df,
-                     out1.string = "REP",
-                     out2.gpar = list(col = "black", lty = 3),
-                     text.string = "ENTRY",
-                     main = main,
-                     extra_args = dots)
   df$REP <- as.factor(df$REP)
-  p2 <- plot_desplot(REP ~ COLUMN + ROW,
-                     data = df,
-                     out1.string = "REP",
-                     text.string = "PLOT",
-                     main = main,
-                     extra_args = dots)
+  p1 <- plot_field_alleys(df, "ENTRY", main, group = "REP", grid = TRUE, extra_args = dots)
+  p2 <- plot_field_alleys(df, "PLOT", main, group = "REP", grid = TRUE, extra_args = dots)
   list(p1 = p1, p2 = p2, data = df)
 }
 
@@ -523,58 +387,23 @@ draw_layout.fieldhub_rcbd_augmented <- function(x, df, ...) {
   df$ENTRY <- as.character(df$ENTRY)
   df$CHECKS <- as.character(df$CHECKS)
   df$BLOCK <- as.character(df$BLOCK)
-  # plot numbers as plain integers, whatever PLOT is stored as
+  # The returned field book keeps these columns, as before: plot numbers as
+  # plain integers and the check status (fillers have CHECKS = NA).
   df$PLOT_TXT <- sprintf("%d", as.integer(df$PLOT))
-  # text color groups for p1: checks are highlighted, test lines are not;
-  # filler plots have CHECKS = NA and are drawn like test lines
   df$CHECK_TEXT <- ifelse(!is.na(df$CHECKS) & df$CHECKS == "1", "check", "test")
-  check_text_cols <- c(check = "red3", test = "gray10")
-  # Muted palette for the block background
-  block_levels <- sort(unique(df$BLOCK))
-  muted6 <- c(fieldhub_layout_neutral(), "#E6EEF5", "#E9F2EC", "#F3EEE6", "#EDE7F2", "#F1E9E9")
-  if (length(block_levels) > length(muted6)) {
-    muted6 <- grDevices::colorRampPalette(muted6)(length(block_levels))
-  } else {
-    muted6 <- muted6[seq_along(block_levels)]
-  }
-  fill_vals <- stats::setNames(muted6, block_levels)
-  augmented_map <- function(text, main, ...) {
-    do.call(desplot::ggdesplot, utils::modifyList(list(
-      data = df,
-      form = BLOCK ~ COLUMN + ROW,
-      text.string = text,
-      cex = 0.8,
-      shorten = "no",
-      out1.string = "EXPT",
-      out2.string = "BLOCK",
-      xlab = "COLUMNS",
-      ylab = "ROWS",
-      main = main,
-      show.key = FALSE,
-      gg = TRUE,
-      ticks = "all",
-      panel.border = FALSE,
-      out2.gpar = list(col = "gray50", lwd = 1, lty = 1),
-      col.regions = fill_vals,
-      ...
-    ), dots)) +
-      fieldhub_layout_theme()
-  }
-  # p1: entries, with the checks highlighted; p2: plot numbers
-  p1 <- augmented_map("ENTRY", field_title("Augmented RCBD Layout ", df),
-                      col.string = "CHECK_TEXT", col.text = check_text_cols)
-  # Fill and outline only check cells, beneath the existing block outlines and
-  # labels. Using the drawn data also respects desplot's coordinate transforms.
-  cells <- p1$data[p1$data$CHECK_TEXT == "check", , drop = FALSE]
-  if (nrow(cells)) {
-    checks <- factor(cells$ENTRY)
-    colours <- rep(fieldhub_layout_palette()[-1L], length.out = nlevels(checks))
-    check_tiles <- ggplot2::geom_tile(data = cells, ggplot2::aes(x = COLUMN, y = ROW),
-      inherit.aes = FALSE, fill = colours[as.integer(checks)], colour = "gray50", linewidth = 1)
-    background <- which(vapply(p1$layers, function(layer) inherits(layer$geom, "GeomTile"), TRUE))[1L]
-    p1$layers <- append(p1$layers, list(check_tiles), after = background)
-  }
-  p2 <- augmented_map("PLOT_TXT", field_title("Augmented RCBD Plot Number Layout ", df),
-                      col.text = "gray10")
+  # Block numbers restart in each experiment: every experiment's block is a group.
+  drawn <- df
+  drawn$FIELD_BLOCK_GROUP <- paste(match(drawn$EXPT, unique(drawn$EXPT)), drawn$BLOCK, sep = ".")
+  drawn$FIELD_BLOCK_GROUP <- factor(drawn$FIELD_BLOCK_GROUP,
+    levels = unique(drawn$FIELD_BLOCK_GROUP[order(match(drawn$EXPT, unique(drawn$EXPT)),
+                                                  as.integer(drawn$BLOCK))]))
+  is_check <- df$CHECK_TEXT == "check"
+  is_filler <- is.na(df$CHECKS)
+  p1 <- plot_field_alleys(drawn, "ENTRY", field_title("Augmented RCBD Layout ", df),
+                          group = "FIELD_BLOCK_GROUP", checks = is_check, fillers = is_filler,
+                          grid = TRUE, extra_args = dots)
+  p2 <- plot_field_alleys(drawn, "PLOT_TXT", field_title("Augmented RCBD Plot Number Layout ", df),
+                          group = "FIELD_BLOCK_GROUP", fillers = is_filler, grid = TRUE,
+                          extra_args = dots)
   list(p1 = p1, p2 = p2, data = df)
 }

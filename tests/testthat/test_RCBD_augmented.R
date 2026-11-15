@@ -59,11 +59,19 @@ test_that("RCBD_augmented() returns numeric ENTRY and CHECKS columns", {
   }
 })
 
-test_that("the augmented RCBD field map draws filler plots like test lines", {
+test_that("the augmented RCBD field map draws filler plots as empty plots", {
   arcbd <- RCBD_augmented(lines = 122, checks = 4, b = 5, nrows = 5, ncols = 29,
                           random = TRUE, seed = 7)
   p <- plot_layout(arcbd, l = 1)
+  book <- p$fieldBookXY
+  filler <- is.na(book$CHECKS)
+  expect_true(any(filler))
   drawn <- ggplot2::ggplot_build(p$out_layout)$data
   text <- drawn[[which(vapply(drawn, function(d) "label" %in% names(d), logical(1)))[1]]]
-  expect_setequal(unique(as.character(text$colour)), c("gray10", "red3"))
+  tiles <- drawn[[1]]
+  at <- function(d) match(paste(book$COLUMN, book$ROW), paste(d$x, d$y))
+  # fillers: white plots with grey numbers; checks and test lines: dark numbers
+  expect_true(all(tiles$fill[at(tiles)][filler] == "#FFFFFF"))
+  expect_true(all(text$colour[at(text)][filler] == "gray60"))
+  expect_true(all(text$colour[at(text)][!filler] == "gray10"))
 })

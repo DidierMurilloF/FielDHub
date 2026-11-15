@@ -1243,38 +1243,6 @@ arc_api_printed_value <- function(line, name) {
   as.numeric(sub(paste0(".*\\b", name, " = ([-+.0-9e]+).*"), "\\1", line))
 }
 
-# Unit cell edges of a map's segments, as "h x y" (horizontal, centred at
-# x) and "v x y" (vertical, centred at y)
-arc_api_segment_edges <- function(segments) {
-  edges <- character()
-  for (i in seq_len(nrow(segments))) {
-    s <- segments[i, ]
-    if (s$y == s$yend) {
-      centres <- seq(min(s$x, s$xend) + 0.5, max(s$x, s$xend) - 0.5, by = 1)
-      edges <- c(edges, paste("h", centres, s$y))
-    } else {
-      centres <- seq(min(s$y, s$yend) + 0.5, max(s$y, s$yend) - 0.5, by = 1)
-      edges <- c(edges, paste("v", s$x, centres))
-    }
-  }
-  unique(edges)
-}
-
-# Interior edges of a field book between neighbouring plots, split by
-# whether the two plots differ in CHECKS and whether both are test plots
-arc_api_book_edges <- function(fb) {
-  key <- paste(fb$COLUMN, fb$ROW)
-  checks <- stats::setNames(fb$CHECKS, key)
-  right <- paste(fb$COLUMN + 1L, fb$ROW)
-  up <- paste(fb$COLUMN, fb$ROW + 1L)
-  edges <- c(paste("v", fb$COLUMN + 0.5, fb$ROW), paste("h", fb$COLUMN, fb$ROW + 0.5))
-  here <- c(fb$CHECKS, fb$CHECKS)
-  there <- unname(checks[c(right, up)])
-  inside <- !is.na(there)
-  list(differ = edges[inside & here != there],
-       tests = edges[inside & here == 0L & there == 0L])
-}
-
 test_that("the registry declares the presentation fields of the design", {
   registry <- fieldhub_design_registry()
   entry <- registry$augmented_row_column
@@ -1437,7 +1405,7 @@ test_that("field_layout(), plot() and draw_layout() work in both orientations", 
   }
 })
 
-test_that("the treatment map fills and outlines the checks by CHECKS", {
+test_that("the entry map labels entries and greys every check plot", {
   checks <- c("Check A", "B", "C", "D")
   for (direction in arc_api_directions) {
     x <- arc_api_oriented(direction, checks = checks, budget = 100, seed = 17)
@@ -1447,30 +1415,19 @@ test_that("the treatment map fills and outlines the checks by CHECKS", {
     geoms <- vapply(p1$layers, function(layer) class(layer$geom)[1L], "")
     tiles <- built[[match("GeomTile", geoms)]]
     text <- built[[match("GeomText", geoms)]]
-    segments <- built[[match("GeomSegment", geoms)]]
     at <- paste(book$COLUMN, book$ROW)
     fill <- tiles$fill[match(at, paste(tiles$x, tiles$y))]
     expect_false(anyNA(fill))
-    # Each plot shows its treatment label
-    expect_identical(text$label[match(at, paste(text$x, text$y))], book$TREATMENT)
-    # Fill groups are exactly the CHECKS groups: tests neutral, one shared
-    # palette colour per check, distinct across checks
+    # Each plot shows its entry number, not its treatment name
+    expect_identical(text$label[match(at, paste(text$x, text$y))], as.character(book$ENTRY))
+    # Test plots on the shared neutral; every check plot on the one check grey
     test <- book$CHECKS == 0L
     expect_true(all(fill[test] == fieldhub_layout_neutral()), label = direction)
-    expect_identical(length(unique(fill)), length(unique(book$CHECKS)))
-    expect_identical(nrow(unique(data.frame(fill, book$CHECKS))),
-                     length(unique(book$CHECKS)))
-    by_check <- vapply(split(fill[!test], book$CHECKS[!test]),
-                       function(f) paste(unique(f), collapse = " "), "")
-    expect_identical(unname(by_check), fieldhub_layout_palette()[2:5],
-                     label = direction)
-    # Check borders: every edge between plots of different CHECKS is drawn,
-    # and none between two test plots
-    expect_true(all(segments$colour == "gray50"))
-    drawn_edges <- arc_api_segment_edges(segments)
-    expected <- arc_api_book_edges(book)
-    expect_true(all(expected$differ %in% drawn_edges), label = direction)
-    expect_false(any(expected$tests %in% drawn_edges), label = direction)
+    expect_true(all(fill[!test] == fieldhub_check_fill()), label = direction)
+    # A single desplot fill layer and one white plot grid: the field has no blocks
+    expect_identical(sum(geoms == "GeomTile"), 1L)
+    expect_identical(sum(geoms == "GeomSegment"), 1L)
+    expect_identical(unique(built[[match("GeomSegment", geoms)]]$colour), "white")
   }
 })
 
