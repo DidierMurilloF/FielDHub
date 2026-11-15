@@ -79,65 +79,67 @@ app_team_roles <- function(roles) {
 #' A person's profile links
 #' @noRd
 app_team_links <- function(profile) {
-  shiny::div(class = "fieldhub-team-contact",
+  shiny::p(class = "fh-contact",
     if (!is.null(profile$url)) app_external_link("LinkedIn", profile$url),
     if (!is.null(profile$github)) app_external_link("GitHub", profile$github))
 }
 
-#' The maintainer's profile and the team list
+#' Initials shown in place of a missing portrait
+#' @noRd
+app_team_initials <- function(name) {
+  words <- strsplit(name, " ", fixed = TRUE)[[1L]]
+  toupper(paste(substr(words[c(1L, length(words))], 1L, 1L), collapse = ""))
+}
+
+#' A team member's card: portrait (or initials), name, roles, a bio clamped
+#' to a few lines with a "Read more" toggle that needs no JavaScript, and
+#' profile links.
+#' @noRd
+app_team_card <- function(name, roles, profile) {
+  id <- paste0("fh-bio-", gsub("[^a-z0-9]+", "-", tolower(name)))
+  avatar <- if (!is.null(profile$photo)) {
+    shiny::tags$img(class = "fh-avatar", src = paste0("www/", profile$photo), alt = "", width = 72, height = 72)
+  } else {
+    shiny::span(class = "fh-avatar fh-avatar-mono", `aria-hidden` = "true", app_team_initials(name))
+  }
+  shiny::tags$li(class = "fh-card",
+    avatar,
+    shiny::div(class = "fh-card-head", shiny::h3(name), shiny::p(class = "fh-role", app_team_roles(roles))),
+    if (!is.null(profile$bio)) shiny::div(class = "fh-card-body",
+      shiny::tags$input(class = "fh-bio-toggle", type = "checkbox", id = id),
+      shiny::p(class = "fh-bio fh-bio-clamp", profile$bio),
+      shiny::tags$label(class = "fh-bio-label", `for` = id,
+        shiny::span(class = "fh-more", "Read more"), shiny::span(class = "fh-less", "Show less"),
+        shiny::span(class = "sr-only", paste(" about", name)))),
+    app_team_links(profile))
+}
+
+#' The maintainer's profile and a card for everyone else
 #'
-#' The maintainer leads with a full portrait; the others with a portrait
-#' follow in a two-column list. People without a portrait are listed by
-#' \code{app_team_others()}.
+#' The maintainer leads with a full portrait; the others follow as cards,
+#' people with a portrait first in profile order, then the rest with their
+#' initials.
 #' @noRd
 app_team_ui <- function(team = fieldhub_team()) {
   people <- app_team_people(team)
   team <- people$team
   profiles <- app_team_profiles()
-  profile_of <- function(i) profiles[[people$family[i]]]
+  profile_of <- function(i) profiles[[people$family[i]]] %||% list()
   lead <- if (!is.na(people$lead)) {
     i <- people$lead
     profile <- profile_of(i)
-    shiny::tags$article(class = "fieldhub-team-profile fieldhub-team-lead",
-      shiny::tags$img(class = "fieldhub-team-lead-photo", src = paste0("www/", profile$photo),
-                      alt = team$name[i]),
-      shiny::div(class = "fieldhub-team-lead-body",
-        shiny::tags$header(
-          shiny::h3(team$name[i]),
-          shiny::p(class = "fieldhub-team-role", app_team_roles(team$roles[i]))),
-        shiny::p(class = "profile-p", profile$bio),
+    shiny::tags$article(class = "fh-lead",
+      shiny::tags$img(src = paste0("www/", profile$photo), alt = team$name[i], width = 168, height = 210),
+      shiny::div(class = "fh-person",
+        shiny::div(shiny::h2(team$name[i]), shiny::p(class = "fh-role", app_team_roles(team$roles[i]))),
+        shiny::p(class = "fh-bio", profile$bio),
         app_team_links(profile)))
   }
-  members <- if (length(people$members)) shiny::tags$section(class = "fieldhub-team",
-    `aria-label` = "Team",
-    shiny::h3(class = "fieldhub-about-label", "Team"),
-    shiny::div(class = "fieldhub-team-grid",
-      lapply(people$members, function(i) {
-        profile <- profile_of(i)
-        shiny::tags$article(class = "fieldhub-team-profile",
-          shiny::div(class = "circular--portrait",
-            shiny::tags$img(src = paste0("www/", profile$photo), alt = team$name[i])),
-          shiny::tags$header(
-            shiny::h3(team$name[i]),
-            shiny::p(class = "fieldhub-team-role", app_team_roles(team$roles[i]))),
-          shiny::p(class = "profile-p", profile$bio),
-          app_team_links(profile))
-      })))
-  shiny::div(class = "fieldhub-about-main", lead, members)
-}
-
-#' Credited people without a portrait, as a compact list
-#' @return A section, or \code{NULL} when everyone has a portrait.
-#' @noRd
-app_team_others <- function(team = fieldhub_team()) {
-  people <- app_team_people(team)
-  if (!length(people$others)) return(NULL)
-  profiles <- app_team_profiles()
-  shiny::tags$section(class = "fieldhub-team-others",
-    shiny::h3(class = "fieldhub-about-label", "Other contributors"),
-    shiny::tags$ul(lapply(people$others, function(i) {
-      profile <- profiles[[people$family[i]]]
-      name <- people$team$name[i]
-      shiny::tags$li(if (!is.null(profile$url)) app_external_link(name, profile$url) else name)
+  others <- c(people$members, people$others)
+  cards <- if (length(others)) shiny::tags$section(class = "fh-team", `aria-labelledby` = "fh-team-title",
+    shiny::h2(class = "fh-section-title", id = "fh-team-title", "Team"),
+    shiny::tags$ul(class = "fh-cards", lapply(others, function(i) {
+      app_team_card(team$name[i], team$roles[i], profile_of(i))
     })))
+  shiny::div(class = "fh-main", lead, cards)
 }

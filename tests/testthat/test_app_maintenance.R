@@ -3,7 +3,9 @@ library(testthat)
 test_that("footer and team come from maintained metadata", {
   footer <- FielDHub:::fieldhub_footer("2042")
   expect_match(footer, "2042", fixed = TRUE)
-  expect_match(footer, "https://sites.google.com/ndsu.edu/plsc-bpdm/home", fixed = TRUE)
+  expect_match(footer, "https://www.ndsu.edu/agricultural-data-analytics", fixed = TRUE)
+  expect_match(footer, "Agricultural Data Analytics</a>, NDSU", fixed = TRUE)
+  expect_false(grepl("Big Data Pipeline|plsc-bpdm", footer))
   for (year in list(NULL, NA, "20xx", "<script>", c("2025", "2026"))) {
     expect_error(FielDHub:::fieldhub_footer(year), class = "fieldhub_input_error")
   }

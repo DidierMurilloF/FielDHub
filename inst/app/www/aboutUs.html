@@ -1,11 +1,19 @@
-<div class="fieldhub-info-page fieldhub-about">
-    <div class="fieldhub-info-content">
-        <h2>About FielDHub</h2>
-        <p class="fieldhub-info-intro">FielDHub is a collaboration of statisticians, plant breeders, and quantitative geneticists who want to facilitate the generation of complex experimental trials with large numbers of entries.</p>
-        <div class="fieldhub-about-layout">
-            {{ team }}
-            {{ metadata }}
-        </div>
+<div class="fh-page fh-about">
+  <header class="fh-banner">
+    <div class="fh-banner-copy">
+      <p class="fh-kicker">About</p>
+      <h1>About FielDHub</h1>
+      <p class="fh-banner-sub">A collaboration of statisticians, plant breeders and quantitative geneticists, built to make complex field trials with many entries easier to design.</p>
     </div>
-    {{ footer }}
+    <figure class="fh-banner-photo fh-pos-mid">
+      <img src="www/about-banner.jpg" alt="Aerial view of a breeding nursery: hundreds of small rectangular plots in a regular grid, in shades of green with a few golden plots.">
+    </figure>
+  </header>
+  <div class="fh-inner">
+    <div class="fh-layout">
+      {{ team }}
+      {{ metadata }}
+    </div>
+  </div>
+  {{ footer }}
 </div>

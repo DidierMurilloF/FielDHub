@@ -36,17 +36,20 @@
 
 ## Enhancements
 
-- New Welcome page: an aerial photo of breeding plots behind a short
-  introduction and a real field map, then every design grouped as in the
-  menus, each linking straight to its page, and what FielDHub gives you back.
-  The map is rendered by `dev/home_map.R`.
+- Redesigned Welcome, Help and About pages, in one style: a green banner
+  beside a photograph, NDSU green links with accessible contrast, and a shared
+  footer. Welcome walks through choosing a design (each linked to its page),
+  shows one example trial from map to field book, simulated response and R
+  call, and has a section for teaching. Help gives every design its guide,
+  reference page and offline `help()` command. About leads with the
+  maintainer, gives every team member a card, and lists the package facts,
+  how to cite FielDHub and the photo credits. The footer and Help now name
+  Agricultural Data Analytics, NDSU
+  (<https://www.ndsu.edu/agricultural-data-analytics>). `dev/page_images.R`
+  renders the example's images.
 - The app's styles and scripts are served under a version that changes with
   their contents, so browsers load the current files after an update instead
   of a cached copy that no longer matches the pages.
-- The About Us page leads with the maintainer's profile and a new portrait;
-  the rest of the team follows in a two-column list, and the version,
-  licence, source, issue tracker, how to cite FielDHub and other contributors
-  sit in a side column, as on the Help page.
 - Augmented RCBD, augmented row-column and RCBD-with-checks entry maps give
   each check its own colour from the same muted palette as the diagonal and
   optimized arrangements, so a check looks the same across designs. Blocks and

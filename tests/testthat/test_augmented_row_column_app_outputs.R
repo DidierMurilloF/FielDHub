@@ -54,7 +54,7 @@ test_that("reproduction code from an app-built result replays the deterministic 
   expect_identical(arc_deterministic_view(environment$design), arc_deterministic_view(x))
 })
 
-test_that("the replay wording is in the reproduction code and the Help, from one source", {
+test_that("the replay wording is in the reproduction code, from one source", {
   x <- arc_app_design()
   code <- design_export_handlers(function() x)$code()
   notes <- design_replay_notes()$augmented_row_column
@@ -62,10 +62,6 @@ test_that("the replay wording is in the reproduction code and the Help, from one
   expect_match(paste(notes, collapse = " "), "did not hit `time_limit`", fixed = TRUE)
   expect_match(paste(notes, collapse = " "), "timing-dependent", fixed = TRUE)
   expect_match(paste(notes, collapse = " "), "200 rows", fixed = TRUE)
-  help <- as.character(app_help_ui())
-  expect_match(help, "Augmented Row-Column", fixed = TRUE)
-  expect_match(help, "Reproduction code", fixed = TRUE)
-  expect_match(help, "may be a different design", fixed = TRUE)
   # other designs get no extra lines
   expect_identical(design_replay_comments(RCBD(t = 5, reps = 3, seed = 38)), character())
   expect_false(grepl("# Replay:", design_export_handlers(function() RCBD(t = 5, reps = 3, seed = 38))$code(),
