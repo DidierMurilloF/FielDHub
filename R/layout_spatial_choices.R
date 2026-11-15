@@ -67,7 +67,8 @@ augmented_block_choices <- function(lines, checks) {
 #' Field sizes of an augmented RCBD with a number of blocks
 #' @inheritParams augmented_block_choices
 #' @param b Number of blocks.
-#' @return \code{list(choices = , selected = )}.
+#' @return \code{list(choices = , selected = )}: the sizes from the squarest
+#'   to the most elongated (\code{squarest_first()}), the squarest selected.
 #' @noRd
 augmented_field_choices <- function(lines, checks, b) {
   check_augmented_counts(lines, checks)
@@ -79,7 +80,22 @@ augmented_field_choices <- function(lines, checks, b) {
     colnames(options) <- c("blocks", "size")
     as.vector(options[options[, "blocks"] == b, "size"])
   }
-  field_size_choices(sizes, paste0("No field size holds ", b, " blocks of these entries."))
+  field_size_choices(squarest_first(sizes),
+                     paste0("No field size holds ", b, " blocks of these entries."))
+}
+
+#' Order field sizes from the squarest to the most elongated
+#'
+#' @param labels Field sizes ("rows x columns").
+#' @return \code{labels} ordered by the difference between rows and columns;
+#'   of two sizes as square as each other, the one with fewer rows comes first
+#'   ("5 x 6" before "6 x 5").
+#' @noRd
+squarest_first <- function(labels) {
+  if (length(labels) == 0L) return(labels)
+  dims <- vapply(strsplit(labels, "x", fixed = TRUE),
+                 function(x) as.numeric(trimws(x[1:2])), numeric(2))
+  labels[order(abs(dims[1, ] - dims[2, ]), dims[1, ])]
 }
 
 #' Check the counts an augmented RCBD's choices are computed from

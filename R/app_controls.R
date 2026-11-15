@@ -68,8 +68,8 @@ fieldhub_control_concepts <- function() {
     random = list(label = "Randomize Entries?", value = TRUE),
     random_note = list(label = NULL),
     sameEntries = list(label = "Repeat entries across experiments", value = FALSE),
-    allow_fillers = list(label = "Allow filler plots", value = FALSE),
-    rowcol_distinct = list(label = "Keep copies in distinct rows and columns", value = FALSE),
+    allow_fillers = list(label = "Allow filler plots", value = TRUE),
+    rowcol_distinct = list(label = "Keep copies in distinct rows and columns", value = TRUE),
     # Steps of the spatial pages, offered after Run! or Randomize!
     dimensions = list(label = "Select dimensions of field:"),
     multi_dimension = list(label = "Set different dimensions across locations", value = FALSE),

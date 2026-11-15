@@ -91,7 +91,12 @@ test_that("augmented RCBD pages offer the blocks and fields their entries fit", 
   expect_identical(offered$choices, unique(set_augmented_blocks(180, 4, start = 3)$b))
   expect_identical(offered$selected, 3)
   fields <- augmented_field_choices(180, 4, 3)
-  expect_identical(fields$selected, "3 x 64")
+  expect_identical(fields$choices, c("12 x 16", "16 x 12", "8 x 24", "24 x 8", "6 x 32", "32 x 6",
+                                     "4 x 48", "48 x 4", "3 x 64", "2 x 96", "96 x 2"))
+  expect_identical(fields$selected, "12 x 16")
+  expect_identical(squarest_first(c("15 x 2", "3 x 10", "2 x 15", "6 x 5", "10 x 3", "5 x 6")),
+                   c("5 x 6", "6 x 5", "3 x 10", "10 x 3", "2 x 15", "15 x 2"))
+  expect_identical(squarest_first(character(0)), character(0))
   expect_error(augmented_field_choices(180, 4, 999), "No field size holds 999 blocks",
                class = "fieldhub_input_error")
   for (value in blank_inputs) {

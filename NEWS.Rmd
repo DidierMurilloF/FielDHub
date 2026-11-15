@@ -53,6 +53,13 @@ knitr::opts_chunk$set(
   optimized arrangements, so a check looks the same across designs. Blocks and
   replications keep their light backgrounds and white alleys; the plot-number
   maps do not highlight checks.
+- In the app, the "Select dimensions of field:" list of the augmented RCBD
+  runs from the squarest field to the most elongated (5 x 6, 6 x 5, 3 x 10,
+  10 x 3, ...), and the squarest field is selected by default. The API's
+  default field (`nrows`/`ncols` left out) is unchanged.
+- In both p-rep modules of the app, "Allow filler plots" and "Keep copies in
+  distinct rows and columns" are now checked by default. The API defaults
+  (`allow_fillers = FALSE`, `rowcol_penalty = 0`) are unchanged.
 - Single and multiple diagonal, sparse allocation and optimized
   arrangement field maps use the same style. Each check keeps its own
   colour, now from a muted palette, and the heavy check borders give way to

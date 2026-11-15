@@ -277,8 +277,8 @@ spatial_defaults <- function(module) {
                                   exptName = "Expt1", locationNames = "FARGO"),
     pREPS = partially_replicated(nrows = 15, ncols = 20, repGens = c(75, 150), repUnits = c(2, 1),
                                  l = 1, plotNumber = 1, seed = 7, exptName = "Expt1",
-                                 locationNames = "FARGO"),
-    RCBD_augmented = RCBD_augmented(lines = 180, checks = 4, b = 3, nrows = 3, ncols = 64, l = 1,
+                                 locationNames = "FARGO", allow_fillers = TRUE, rowcol_penalty = Inf),
+    RCBD_augmented = RCBD_augmented(lines = 180, checks = 4, b = 3, nrows = 12, ncols = 16, l = 1,
                                     plotNumber = 1, seed = 7, exptName = "Expt1",
                                     locationNames = "FARGO"),
     # The check direction has no default: the test chooses it (and a small budget)
@@ -309,7 +309,7 @@ spatial_defaults <- function(module) {
                                           optim_list = do_optim(design = "prep", lines = 312, l = 6,
                                                                 copies_per_entry = 8, add_checks = FALSE,
                                                                 seed = 7),
-                                          seed = 7, allow_fillers = FALSE)
+                                          seed = 7, allow_fillers = TRUE, rowcol_penalty = Inf)
   )
 }
 
@@ -355,15 +355,17 @@ test_that("the p-rep page offers filler plots and builds the API's design", {
   expect_same_design(page_design(spec, raw, steps = list(dimensions = "16 x 19")),
     partially_replicated(nrows = 16, ncols = 19, repGens = c(75, 151), repUnits = c(2, 1), l = 2,
                          planter = "cartesian", plotNumber = c(1, 501), seed = 11, exptName = "P1",
-                         locationNames = c("A", "B"), allow_fillers = TRUE))
+                         locationNames = c("A", "B"), allow_fillers = TRUE, rowcol_penalty = Inf))
   entries <- data.frame(ENTRY = 1:120, NAME = paste0("E", 1:120), REPS = rep(c(2L, 1L), c(40, 80)))
   raw <- utils::modifyList(page_defaults("pREPS"), list(repGens = "", repUnits = NA))
   expect_same_design(page_design(spec, raw, entries, steps = list(dimensions = "16 x 10")),
     partially_replicated(nrows = 16, ncols = 10, plotNumber = 1, seed = 7, exptName = "Expt1",
-                         locationNames = "FARGO", data = entries))
+                         locationNames = "FARGO", data = entries, allow_fillers = TRUE,
+                         rowcol_penalty = Inf))
   expect_error(page_design(spec, utils::modifyList(page_defaults("pREPS"), list(repUnits = "2"))),
                "# of Rep Per Group must have one value per group of entries", class = "fieldhub_input_error")
-  expect_error(page_design(spec, utils::modifyList(page_defaults("pREPS"), list(repGens = "75,157"))),
+  expect_error(page_design(spec, utils::modifyList(page_defaults("pREPS"),
+                                                   list(repGens = "75,157", allow_fillers = FALSE))),
                "Select 'Allow filler plots'", class = "fieldhub_input_error")
 })
 
@@ -534,7 +536,7 @@ test_that("the multi-location p-rep page allocates at Run! and builds the API's 
     multi_location_prep(lines = 150, nrows = vapply(parts, `[[`, 1, 1), ncols = vapply(parts, `[[`, 1, 2),
                         l = 3, planter = "cartesian", plotNumber = c(1, 501, 1001), copies_per_entry = 4,
                         checks = 2, rep_checks = c(6, 6), exptName = "M1", locationNames = c("A", "B", "C"),
-                        optim_list = allocation, seed = 13, allow_fillers = TRUE))
+                        optim_list = allocation, seed = 13, allow_fillers = TRUE, rowcol_penalty = Inf))
   # the allocation table averages the copies over the locations
   view <- spec$setup$view(c(values, list(optim_list = allocation)), list())
   expect_identical(names(view), c("LOC1", "LOC2", "LOC3", "Copies", "Avg"))
