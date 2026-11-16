@@ -20,8 +20,10 @@ build_site <- function() {
   dir.create(docs)
   file.copy(list.files("website/static", full.names = TRUE), docs, recursive = TRUE)
   dir.create(file.path(docs, "man/figures"), recursive = TRUE)
-  file.copy("man/figures/fieldhub-logo.png", file.path(docs, "man/figures"))
-  file.copy(c("man/figures/fieldhub-logo.png", "inst/app/www/favicon.ico"), file.path(docs, "assets"))
+  # Preserve the legacy icon URLs with the current branding.
+  logos <- c("man/figures/fieldhub-logo.png", "man/figures/icon.gif")
+  file.copy(logos, file.path(docs, "man/figures"))
+  file.copy(c(logos, "inst/app/www/favicon.ico"), file.path(docs, "assets"))
   render <- function(source, destination) {
     dir.create(dirname(destination), recursive = TRUE, showWarnings = FALSE)
     input <- file.path(dirname(destination), basename(source))
