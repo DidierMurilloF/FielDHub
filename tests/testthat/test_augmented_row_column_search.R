@@ -1270,10 +1270,13 @@ test_that("the column and joint phases start cooler than calibrated", {
                                   column_t0_multiplier = 1)
   expect_equal(t0_of(a, "column")[1], 0.3 * t0_of(hot_column, "column")[1])
   # The column end ratio leaves the calibration alone and changes the
-  # first column phase's path (visible at a larger budget).
+  # first column phase's path (visible at a larger budget). A ratio of 1
+  # (no cooling) against the default 1e-4 changes the path on every
+  # platform; a nearby ratio such as 1e-3 can leave a short phase unchanged
+  # where floating-point detail differs (macOS on arm64).
   cool <- arc_search_staged(12, 8, 3, max_evals = 3000, seed = 77)
   ratio <- arc_search_staged(12, 8, 3, max_evals = 3000, seed = 77,
-                             column_t_ratio = 1e-3)
+                             column_t_ratio = 1)
   expect_identical(ratio$trace$t0[1], cool$trace$t0[1])
   expect_false(identical(ratio$trace[1, ], cool$trace[1, ]))
 })

@@ -17,7 +17,7 @@ legacy_optimized_engines <- c("incomplete_blocks", "alpha_lattice",
 legacy_reference_platform <- identical(Sys.info()[["sysname"]], "Darwin") &&
   !tolower(Sys.getenv("FIELDHUB_GOLDEN", "true")) %in% c("false", "0", "no")
 
-expect_optimized_legacy_contract <- function(saved, replayed) {
+expect_optimized_legacy_contract <- function(saved, replayed, engine) {
   old <- saved$fieldBook
   new <- replayed$fieldBook
   counts <- function(book, columns) {
@@ -35,7 +35,7 @@ expect_optimized_legacy_contract <- function(saved, replayed) {
   # allocation. Other tests independently check balance and efficiency.
   testthat::expect_identical(
     expect_only_classed_warnings(reproduce_design(replayed), "reproduction"), replayed)
-  if (legacy_reference_platform) {
+  if (legacy_reference_platform && !engine %in% names(legacy_result_changes)) {
     aligned <- align_column_types(old, new)
     testthat::expect_equal(aligned$new, aligned$old, ignore_attr = TRUE)
   }
@@ -73,6 +73,20 @@ legacy_result_changes <- c(
     "the string \"NA\" for filler plots) whenever the field had fillers.",
     "as.numeric() on the 1.5.0 ENTRY/CHECKS columns matches the current",
     "numeric ones; every other column is unchanged."
+  ),
+  sparse_allocation = paste(
+    "sparse_allocation() with two or more locations now allocates with",
+    "FielDHub's own block-design search instead of blocksdesign::blocks(),",
+    "so the allocation, and with it the field book, changes for a given seed",
+    "(NEWS 1.7.0, 'Changes to results for a given seed'). The replay still",
+    "meets the optimized-allocation contract: the same entries, copies and",
+    "location sizes, reproducible from its own seed."
+  ),
+  multi_location_prep = paste(
+    "multi_location_prep() builds its allocation with the same new",
+    "block-design search, so its allocation and field book change for a",
+    "given seed (NEWS 1.7.0, 'Changes to results for a given seed'); the",
+    "replay meets the same optimized-allocation contract."
   )
 )
 
@@ -140,7 +154,7 @@ for (name in names(historical_bundle$calls)) local({
     expect_identical(names(new_book), names(old_book))
 
     if (engine %in% setdiff(legacy_optimized_engines, "row_column")) {
-      expect_optimized_legacy_contract(saved, replayed)
+      expect_optimized_legacy_contract(saved, replayed, engine)
     } else if (!engine %in% names(legacy_result_changes)) {
       aligned <- align_column_types(old_book, new_book)
       expect_equal(aligned$new, aligned$old, ignore_attr = TRUE)
@@ -156,7 +170,7 @@ test_that("row_column()'s legacy twostage method preserves the 1.5.0 contract", 
     do.call(row_column, c(args, list(method = "twostage"))), "row_column(method = twostage)"
   )
 
-  expect_optimized_legacy_contract(saved, twostage)
+  expect_optimized_legacy_contract(saved, twostage, "row_column(method = twostage)")
 })
 
 test_that("split_families() with seed = 38 reproduces the 1.5.0 allocation", {
