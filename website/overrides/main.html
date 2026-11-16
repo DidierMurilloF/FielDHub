@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block extrahead %}
+  {{ super() }}
+  {% if page and page.canonical_url %}
+    {% set title = page.meta.get("title", page.title) %}
+    {% set description = page.meta.get("description", config.site_description) %}
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="{{ config.site_name | e }}">
+    <meta property="og:title" content="{{ title | e }}">
+    <meta property="og:description" content="{{ description | e }}">
+    <meta property="og:url" content="{{ page.canonical_url | e }}">
+    <meta property="og:image" content="{{ config.site_url }}man/figures/README-diagonal-map-1.png">
+    <meta property="og:image:alt" content="FielDHub field map with replicated checks in a diagonal arrangement">
+    <meta name="twitter:card" content="summary_large_image">
+    {% if page.is_homepage %}
+      <script type="application/ld+json">
+        {{ {
+          "@context": "https://schema.org",
+          "@type": "SoftwareSourceCode",
+          "name": config.site_name,
+          "url": page.canonical_url,
+          "description": description,
+          "codeRepository": config.repo_url,
+          "programmingLanguage": "R",
+          "runtimePlatform": "R and Shiny",
+          "version": page.meta.version,
+          "citation": "https://doi.org/10.21105/joss.03122"
+        } | tojson }}
+      </script>
+    {% endif %}
+  {% endif %}
+{% endblock %}

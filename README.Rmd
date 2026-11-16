@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# FielDHub <img src='man/figures/icon.gif' alt="FielDHub logo" width="140px" align="right"/>
+# FielDHub <img src='man/figures/fieldhub-logo.png' alt="FielDHub logo" width="140px" align="right"/>
 
 <!-- badges: start -->
 [![CRAN status](https://www.r-pkg.org/badges/version/FielDHub)](https://cran.r-project.org/package=FielDHub)

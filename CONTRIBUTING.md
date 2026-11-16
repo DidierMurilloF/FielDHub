@@ -212,6 +212,28 @@ namespace with `core_functions()` and `app_functions()` from
 (`inst/ci/compare-core-coverage.R`) measures every `R/` file except `app_*`,
 `mod_*` and `run_app.R`.
 
+## Preview the MkDocs website
+
+Install R, Pandoc, Python, a C++17 toolchain, and the package dependencies
+from `DESCRIPTION`, plus the documentation packages `pkgdown`, `xml2`, and `yaml`. The build installs this checkout into a temporary library before rendering.
+
+```sh
+python3 -m venv /tmp/fieldhub-docs-venv
+source /tmp/fieldhub-docs-venv/bin/activate
+python -m pip install -r requirements-docs.txt
+FIELDHUB_DOCS_PYTHON="$(command -v python)" Rscript tools/build-site.R
+mkdocs serve
+```
+
+Open <http://127.0.0.1:8000/FielDHub/>. R generates the Markdown and figures in
+`.mkdocs-src/`, and MkDocs writes the built site to `.mkdocs-site/`.
+Rerun the R script after editing a vignette, an Rd topic, or `index.Rmd`.
+The build renders the home page, all vignettes and Rd topics.
+The historical `/dev/` tree mirrors the published documentation so existing
+development links continue to resolve. Both trees use production canonical URLs.
+Legacy `reference/fieldLayout.html` redirects to `field_layout.html`, and
+`reference/pipe.html` redirects to the reference index.
+
 ## Attribution
 
 This Contributing is adapted from [CONTRIBUTING](https://gist.github.com/peterdesmet/e90a1b0dc17af6c12daf6e8b2f044e7c).

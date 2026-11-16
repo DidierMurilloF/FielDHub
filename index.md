@@ -1,7 +1,9 @@
 
 <!-- index.md is the pkgdown home page, generated from index.Rmd. Keep it in step with README.Rmd -->
 
-# FielDHub <img src='man/figures/icon.gif' alt="FielDHub logo" width="140px" align="right"/>
+<img src='man/figures/fieldhub-logo.png' alt="FielDHub logo" width="140px" align="right"/>
+
+# FielDHub
 
 <!-- badges: start -->
 

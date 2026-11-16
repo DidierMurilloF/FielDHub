@@ -22,7 +22,7 @@ This vignette shows how to generate an **un-replicated optimized arrangement des
 
 ## Overview
 
-One un-replicated design you can use in FielDHub is the optimized arrangement. Unlike the diagonal design, the optimized arrangement completely randomizes the positions for the checks instead of putting them in a systematic diagonal pattern[@estefanova2011]. Randomization is subject to some restrictions. These restrictions seek to optimize the distribution of control plots in the field and ensure they are spread while keeping a minimum distance between them.
+One un-replicated design you can use in FielDHub is the optimized arrangement. Unlike the diagonal design, the optimized arrangement completely randomizes the positions for the checks instead of putting them in a systematic diagonal pattern [@estefanova2011]. Randomization is subject to some restrictions. These restrictions seek to optimize the distribution of control plots in the field and ensure they are spread while keeping a minimum distance between them.
 
 `FielDHub` includes a function to run such experimental designs, features include options to set the number of entries and the number of checks for the experiment. Users can also choose to run the same experiment over multiple locations. 
 
@@ -215,5 +215,5 @@ It is possible to pass more arguments to `plot()` such as the specific location.
 plot(optim_expt, l = 2)
 ```
 
-# References
+## References
 

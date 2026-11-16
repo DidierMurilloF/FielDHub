@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# FielDHub <img src='man/figures/icon.gif' alt="FielDHub logo" width="140px" align="right"/>
+# FielDHub <img src='man/figures/fieldhub-logo.png' alt="FielDHub logo" width="140px" align="right"/>
 
 <!-- badges: start -->
 
