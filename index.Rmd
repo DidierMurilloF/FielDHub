@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-<img src='man/figures/icon.gif' alt="FielDHub logo" width="140px" align="right"/>
+<img src='man/figures/fieldhub-logo.png' alt="FielDHub logo" width="140px" align="right"/>
 
 # FielDHub
 
