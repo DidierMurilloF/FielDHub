@@ -1,12 +1,12 @@
 site_name: FielDHub
-site_description: Design field and life-science experiments with FielDHub, an open-source R package and Shiny app.
+site_description: Design field and life-science experiments with FielDHub, an open-source
+  R package and Shiny app.
 site_url: https://didiermurillof.github.io/FielDHub/
 repo_name: DidierMurilloF/FielDHub
 repo_url: https://github.com/DidierMurilloF/FielDHub
 docs_dir: .mkdocs-src
 site_dir: .mkdocs-site
 use_directory_urls: false
-
 theme:
   name: material
   custom_dir: website/overrides
@@ -20,52 +20,112 @@ theme:
     text: Lato
     code: IBM Plex Mono
   features:
-    - navigation.tabs
-    - navigation.tabs.sticky
-    - navigation.top
-    - search.highlight
-    - search.suggest
-    - content.code.copy
-
+  - navigation.tabs
+  - navigation.tabs.sticky
+  - navigation.top
+  - search.highlight
+  - search.suggest
+  - content.code.copy
 plugins:
-  - search
-
+- search
 hooks:
-  - website/mkdocs_hooks.py
-
+- website/mkdocs_hooks.py
 markdown_extensions:
-  - attr_list
-  - tables
-  - pymdownx.highlight
-  - pymdownx.superfences
-  - toc:
-      permalink: true
-
+- attr_list
+- tables
+- pymdownx.highlight
+- pymdownx.superfences
+- toc:
+    permalink: true
 validation:
   links:
     absolute_links: relative_to_docs
     anchors: warn
     unrecognized_links: warn
-
 extra_css:
-  - assets/fieldhub.css
-
-copyright: >-
-  <a href="https://www.ndsu.edu/agricultural-data-analytics">© Agricultural Data Analytics, NDSU</a>
-  · <a href="https://joss.theoj.org/papers/10.21105/joss.03122">JOSS paper</a>
-
+- assets/fieldhub.css
+copyright: "<a href=\"https://www.ndsu.edu/agricultural-data-analytics\">\xA9 Agricultural\
+  \ Data Analytics, NDSU</a> \xB7 <a href=\"https://joss.theoj.org/papers/10.21105/joss.03122\"\
+  >JOSS paper</a>"
 nav:
-  - Home: index.md
-  - Get started: https://didiermurillof.github.io/FielDHub/#usage
+- Home: index.md
+- Get started: get-started.md
+- Designs:
+  - Unreplicated Designs:
+    - Single Diagonal Arrangement: articles/diagonal_arrangement.md
+    - Optimized Arrangement: articles/optimized_arrangement.md
+    - Augmented RCBD: articles/RCBD_augmented.md
+    - Augmented Row-Column: articles/augmented_row_column.md
+    - Sparse Allocation: articles/sparse_allocation.md
+  - Partially Replicated Designs:
+    - Single and Multi-Location p-rep: articles/partially_replicated.md
+    - Optimized Multi-Location p-rep: articles/multi_location_prep.md
+  - Lattice Designs:
+    - Square Lattice: articles/square_lattice.md
+    - Rectangular Lattice: articles/rectangular_lattice.md
+    - 'Alpha Lattice: alpha(0,1)': articles/alpha_lattice.md
+  - Other Designs:
+    - Completely Randomized Design (CRD): articles/crd.md
+    - Randomized Complete Block Designs (RCBD): articles/rcbd.md
+    - Latin Square Design (LSD): articles/latin_square.md
+    - Latin Rectangle Design: reference/latin_rectangle.md
+    - Factorial Designs: articles/full_factorial.md
+    - Split-Plot Design: articles/split_plot.md
+    - Split-Split-Plot Design: articles/split_split_plot.md
+    - Strip-Plot Design: articles/strip_plot.md
+    - Incomplete Blocks Design (IBD): articles/incomplete_blocks.md
+    - Resolvable Row-Column Design (RRCD): articles/row_column.md
+- Background:
+  - Methods: articles/methods.md
+  - Scientific Validation: articles/scientific_validation.md
+  - Architecture: articles/architecture.md
+  - Extending Fieldhub: articles/extending_fieldhub.md
+- Reference:
+  - Overview: reference/index.md
   - Designs:
-      - Unreplicated:
-          - Unreplicated Diagonal Arrangement Design: articles/diagonal_arrangement.md
-      - Partially replicated: https://didiermurillof.github.io/FielDHub/articles/partially_replicated.html
-      - Lattice: https://didiermurillof.github.io/FielDHub/articles/alpha_lattice.html
-      - Other designs: https://didiermurillof.github.io/FielDHub/articles/crd.html
-  - Background: https://didiermurillof.github.io/FielDHub/articles/methods.html
-  - Reference:
-      - Designs:
-          - diagonal_arrangement(): reference/diagonal_arrangement.md
-  - News: https://didiermurillof.github.io/FielDHub/news/index.html
-  - CRAN: https://cran.r-project.org/package=FielDHub
+    - CRD: reference/CRD.md
+    - RCBD: reference/RCBD.md
+    - RCBD_augmented: reference/RCBD_augmented.md
+    - alpha_lattice: reference/alpha_lattice.md
+    - augmented_row_column: reference/augmented_row_column.md
+    - diagonal_arrangement: reference/diagonal_arrangement.md
+    - full_factorial: reference/full_factorial.md
+    - incomplete_blocks: reference/incomplete_blocks.md
+    - latin_rectangle: reference/latin_rectangle.md
+    - latin_square: reference/latin_square.md
+    - multi_location_prep: reference/multi_location_prep.md
+    - optimized_arrangement: reference/optimized_arrangement.md
+    - partially_replicated: reference/partially_replicated.md
+    - rectangular_lattice: reference/rectangular_lattice.md
+    - row_column: reference/row_column.md
+    - sparse_allocation: reference/sparse_allocation.md
+    - split_plot: reference/split_plot.md
+    - split_split_plot: reference/split_split_plot.md
+    - square_lattice: reference/square_lattice.md
+    - strip_plot: reference/strip_plot.md
+  - Allocation and optimization:
+    - do_optim: reference/do_optim.md
+    - split_families: reference/split_families.md
+    - swap_pairs: reference/swap_pairs.md
+  - Reading, writing and reproducing:
+    - design_formats: reference/design_formats.md
+    - read_design: reference/read_design.md
+    - reproduce_design: reference/reproduce_design.md
+    - reproduce_simulation: reference/reproduce_simulation.md
+    - write_design: reference/write_design.md
+  - App:
+    - run_app: reference/run_app.md
+  - Results and shared arguments:
+    - design_arguments: reference/design_arguments.md
+    - design_results: reference/design_results.md
+    - field_layout: reference/field_layout.md
+    - plot.FielDHub: reference/plot.FielDHub.md
+    - print.FielDHub: reference/print.FielDHub.md
+    - print.fieldLayout: reference/print.fieldLayout.md
+    - print.summary.FielDHub: reference/print.summary.FielDHub.md
+    - summary.FielDHub: reference/summary.FielDHub.md
+- News:
+  - Changelog: news/index.md
+  - fieldhub-0-1-0: articles/news/fieldhub-0-1-0.md
+  - fieldhub-1-2-0: articles/news/fieldhub-1-2-0.md
+  - fieldhub-1-3-1: articles/news/fieldhub-1-3-1.md

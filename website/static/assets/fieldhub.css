@@ -6,8 +6,8 @@
   --md-accent-fg-color--transparent: #ffc72a36;
   --md-accent-bg-color: #172d24;
   --md-typeset-a-color: #0a5640;
-  --md-default-bg-color: #fafbf8;
-  --md-default-fg-color: #202e28;
+  --md-default-bg-color: #f4f5f4;
+  --md-default-fg-color: #22303c;
   --md-code-bg-color: #edf1ed;
   --md-footer-bg-color: #123b2e;
   --md-footer-bg-color--dark: #0d3025;
@@ -41,7 +41,7 @@
   border: 1px solid #d4e3d9;
   border-top: 2px solid #ffc72a;
   border-radius: 0.65rem;
-  background: #e9f1eb;
+  background: #0a5640;
 }
 
 .fieldhub-hero h1 {
@@ -75,12 +75,12 @@
   border-radius: 0.24rem;
 }
 
-.fieldhub-hero .md-button--primary { background-color: #0a5640; color: #fff; }
+.fieldhub-hero .md-button--primary { background-color: #ffc72a; color: #22303c; }
 .fieldhub-hero .md-button:is(:hover, :focus-visible) { color: #172d24; background: #ffc72a; }
 
 .md-typeset table:not([class]) th {
-  background: #e9f1eb;
-  color: #182e24;
+  background: #0a5640;
+  color: #fff;
 }
 
 .md-typeset img { height: auto; }
@@ -91,3 +91,10 @@
 @media screen and (max-width: 47.9375em) {
   .fieldhub-hero { grid-template-columns: 1fr; }
 }
+
+.fieldhub-hero, .fieldhub-hero h1 { color: #fff; }
+
+.fieldhub-hero { margin: 1.5rem auto 0; width: calc(100% - 2rem); }
+.fieldhub-hero .md-button { display: inline-block; font-size: 0.8rem; font-weight: 700; padding: 0.6rem 1rem; }
+.md-header__source { display: flex; align-items: center; gap: 1rem; }
+.md-header__source .md-source { display: flex; align-items: center; gap: 0.35rem; }
