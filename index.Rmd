@@ -4,6 +4,7 @@ output:
     html_preview: false
 ---
 
+<!-- index.md is the pkgdown home page, generated from index.Rmd. Keep it in step with README.Rmd -->
 
 ```{r, include = FALSE}
 library(FielDHub)
@@ -14,119 +15,173 @@ knitr::opts_chunk$set(
   out.width = "100%"
 )
 ```
-<br>
-<br>
 
-<img src='man/figures/icon.gif' alt="FielDHub logo" width = "140px" align="left"/>
+# FielDHub <img src='man/figures/icon.gif' alt="FielDHub logo" width="140px" align="right"/>
 
-<br>
-<br>
+<!-- badges: start -->
+[![CRAN status](https://www.r-pkg.org/badges/version/FielDHub)](https://cran.r-project.org/package=FielDHub)
+[![R-CMD-check](https://github.com/DidierMurilloF/FielDHub/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/DidierMurilloF/FielDHub/actions/workflows/R-CMD-check.yaml)
+[![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html)
+[![CRAN downloads](https://cranlogs.r-pkg.org/badges/FielDHub)](https://cranlogs.r-pkg.org/badges/FielDHub)
+[![CRAN downloads, total](https://cranlogs.r-pkg.org/badges/grand-total/FielDHub)](https://cranlogs.r-pkg.org/badges/grand-total/FielDHub)
+[![JOSS](https://joss.theoj.org/papers/10.21105/joss.03122/status.svg)](https://doi.org/10.21105/joss.03122)
+<!-- badges: end -->
 
-### \ \ FielDHub
-<br>
-<br>
+## Design of experiments for life sciences
 
-### Overview
+FielDHub is an R package and Shiny app that randomizes field, greenhouse and
+laboratory experiments. It covers classic designs, such as completely
+randomized, complete block, Latin square, factorial and split-plot designs, and
+the unreplicated, augmented and partially replicated designs used in plant
+breeding. It serves agriculture, plant breeding, forestry, and animal and
+biological sciences.
 
-FielDHub is an R package/shiny design of experiments (DOE) app that aids in the creation of traditional, un-replicated, augmented and partially-replicated designs applied to agriculture, plant breeding, forestry, animal and biological sciences. 
+Every design comes with a field map and a field book. Every design in the app is
+also an R function with the same arguments, so a script can reproduce what the
+app made.
 
-For more details and examples of all functions present in the FielDHub package. Please, go to <https://didiermurillof.github.io/FielDHub/reference/index.html>.
+## What's new in 1.7.0
 
-## Version 1.6.0
+- **A new design.** `augmented_row_column()` builds augmented row-column
+  designs, in which every check appears once in every row or every column of
+  the field. It has its own page in the app under Unreplicated Designs.
+- **One style for every field map.** One muted colour per replication or block,
+  white alleys between them, grey lines around incomplete blocks, a white grid
+  around every plot, and one muted colour per check.
+- **Better partially replicated designs.** An optional rule keeps the copies of
+  an entry in distinct rows and columns (`rowcol_penalty`), and the spreading
+  optimizer is much faster.
+- **A refreshed app.** New Welcome, Help and About pages: the Welcome page
+  links to every design, and Help gives each design its guide, reference page
+  and offline `help()` command.
 
-The Shiny app and R package share one release version. This release retains
-the original input panels, adds native plot previews and consistent tab-local
-loading, and simplifies downloads. Required app dependencies install with the
-package; no golem configuration is needed. See the
-[release notes](news/index.html) for migration guidance and scientific
-corrections that may affect existing scripts or seeded results.
+See the [release notes](NEWS.md) for every change, including the changes to
+results for a given seed.
 
-<img src='man/figures/FielDHub_Infographic.jpg' alt="FielDHub design families and workflows" align="center"/>
+## Installation
 
-## Usage
+From CRAN:
 
-This is a basic example which shows you how to launch the app:
+``` r
+install.packages("FielDHub")
+```
+
+The development version, from GitHub:
+
+``` r
+remotes::install_github("DidierMurilloF/FielDHub")
+```
+
+## Launch the app
 
 ``` r
 library(FielDHub)
 run_app()
 ```
-### Diagonal Arrangement Example
 
-A project needs to test 280 genotypes in a field containing 16 rows and 20 columns of plots. In this example, these 280 genotypes are divided among three different experiments. In addition, four checks are included in a systematic diagonal arrangement across experiments to fill 40 plots representing 12.5% of the total number of experimental plots. An option to include filler plots is also available for fields where the number of experimental plots does not equal the number of available field plots.
+The app's dependencies install with the package, and it needs Shiny 1.8.1 or
+newer. To keep other sessions responsive while a long design runs, install
+`mirai` and start the app with `run_app(workers = 2L)`. Workers need an
+installed FielDHub; without `mirai`, or when running from the package source,
+designs run in the app's own session.
 
-<img src='man/figures/DExample.jpg' alt="Diagonal arrangement with replicated checks" align="center"/>
+## Designs
 
-The figure above shows a map of an experiment randomized along with multiple experiments (three) and checks on diagonals. Distinctively colored check plots are replicated throughout the field in a systematic diagonal arrangement.
+FielDHub has `r length(FielDHub:::fieldhub_app_registry())` designs, grouped as
+in the app's menus. Each links to its reference page.
 
-<img src='man/figures/multiple_expts.jpg' alt="Three experiments arranged in one field" align="center"/>
+```{r designs, echo = FALSE, results = "asis"}
+registry <- FielDHub:::fieldhub_app_registry()
+group <- vapply(registry, `[[`, character(1), "group")
+label <- sub("^New - ", "", vapply(registry, `[[`, character(1), "label"))
+engine <- vapply(registry, `[[`, character(1), "engine")
+designs <- data.frame(
+  Menu = ifelse(duplicated(group), "", group),
+  Design = label,
+  `R function` = sprintf("[`%s()`](https://didiermurillof.github.io/FielDHub/reference/%s.html)", engine, engine),
+  check.names = FALSE
+)
+knitr::kable(designs)
+```
 
-The figure above shows the layout for the three experiments in the field. 
+## What you get
 
-### Using the FielDHub function `diagonal_arrangement()`
+- **A field map** of every location, ready for reports.
+- **A field book** with plot numbers, rows, columns and entries, to download
+  and load into a database or field app.
+- **Simulated data.** The app can simulate a response variable along with the
+  randomization, for teaching and for testing an analysis before the season.
+- **A reproducible record.** `write_design()` saves a design or a standalone
+  replay script, `read_design()` reads it back, and `reproduce_design()`
+  rebuilds it from its recorded inputs and seed.
 
-To illustrate using FielDHub to build experimental designs through R code, the design produced in the R Shiny interface described above can also be created using the function `diagonal_arrangement()` in the R script below. Note, that to obtain identical results, users must include the same random seed in the script as was used in the Shiny app. In this case, the random seed is 1249. 
+## Example: a multiple diagonal arrangement
+
+A project needs to test 280 genotypes in a field of 16 rows and 20 columns,
+split among three experiments. Four checks are placed on diagonals across the
+experiments and fill 40 plots, 12.5% of the field. To get the same design in
+the app and in a script, use the same seed, here 1249.
 
 ```{r}
 diagonal <- diagonal_arrangement(
-  nrows = 16, 
-  ncols = 20, 
-  lines = 280, 
-  checks = 4, 
-  plotNumber = 101, 
-  splitBy = "row", 
-  seed = 1249, 
-  kindExpt = "DBUDC", 
-  blocks = c(100, 100, 80), 
+  nrows = 16,
+  ncols = 20,
+  lines = 280,
+  checks = 4,
+  plotNumber = 101,
+  splitBy = "row",
+  seed = 1249,
+  kindExpt = "DBUDC",
+  blocks = c(100, 100, 80),
   exptName = c("Expt1", "Expt2", "Expt3")
 )
 ```
 
-Users can print the returned values from `diagonal_arrangement()` as follow,
+A summary of the design:
 
 ```{r}
 print(diagonal)
 ```
 
-First 12 rows of the fieldbook,
+The first 12 rows of the field book:
 
 ```{r}
 head(diagonal$fieldBook, 12)
 ```
 
-Users can plot the layout design from `diagonal_arrangement()` using the function `plot()` as follows,
+The field map. Each check has its own muted colour and appears throughout the
+field; the grey lines mark where each experiment starts and ends.
 
-```{r, fig.align='center', fig.width=6.8, fig.height=4.7, fig.alt='Native plot of the diagonal arrangement with colored checks'}
+```{r diagonal-map, fig.align='center', fig.width=9, fig.height=6, fig.alt='Field map of the multiple diagonal arrangement: entry numbers on light grey plots, four checks in muted colours along diagonals, and grey lines between the three experiments.'}
 plot(diagonal)
 ```
 
-In the figure, salmon, green, and blue shade the blocks of unreplicated experiments, while distinctively colored check plots are replicated throughout the field in a systematic diagonal arrangement.
+The same field by experiment:
 
+```{r diagonal-experiments, fig.align='center', fig.width=9, fig.height=6, fig.alt='Field map of the three experiments, each on its own light background and labelled by name.'}
+plot(diagonal, text.string = "EXPT")
+```
 
-The main difference between using the `FielDHub` Shiny app and using the standalone function `diagonal_arrangement()` is that the standalone function will allocate filler only if it is necessary, while in Shiny App, users can customize the number of fillers if it is needed. In cases where users include fillers, either between or after experiments, the Shiny app is preferable for filling and visualizing all field plots.
+In the app you can also choose how many filler plots to add and where. The R
+function adds fillers only when the experiments do not fill the field.
 
-To see more examples, go to <https://didiermurillof.github.io/FielDHub/articles/diagonal_arrangement.html>
+More examples are in the
+[diagonal arrangement article](https://didiermurillof.github.io/FielDHub/articles/diagonal_arrangement.html).
 
-### Partially Replicated Design Example
+## Example: a partially replicated design
 
-Partially replicated designs are commonly employed in early generation field trials. This type of design is characterized by replication of a portion of the entries, with the remaining entries only appearing once in the experiment. As an example, considered a field trial with 288 plots containing 75 entries appearing two times each, and 138 entries only appearing once. This field trials is arranged in a field of 16 rows by 18 columns.
-
-<img src='man/figures/prep_shiny.jpg' alt="Partially replicated field layout in the Shiny app" align="center"/>
-
-
-In the figure above, green plots contain replicated entries, and the other plots contain entries that only appear once.
-
-### Using the FielDHub function `partially_replicated()`
-
-Instead of using the Shiny FielDHub app, users can use the standalone FielDHub function `partially_replicated()`. The partially replicated layout described above can be produced through scripting as follows. As noted in the previous example, to obtain identical results between the script and the Shiny app, users need to use the same random seed, which, in this case, is 77.
+Partially replicated (p-rep) designs are common in early-generation trials:
+some entries are replicated and the rest appear once. Here 75 entries appear
+twice and 138 entries once, in a field of 16 rows and 18 columns (288 plots),
+with seed 77.
 
 ```{r}
 pREP <- partially_replicated(
-  nrows = 16, 
-  ncols = 18,  
-  repGens = c(138,75),
-  repUnits = c(1,2),
-  planter = "serpentine", 
+  nrows = 16,
+  ncols = 18,
+  repGens = c(138, 75),
+  repUnits = c(1, 2),
+  planter = "serpentine",
   plotNumber = 1,
   exptName = "ExptA",
   locationNames = "FARGO",
@@ -134,26 +189,56 @@ pREP <- partially_replicated(
 )
 ```
 
-
-Users can print returned values from `partially_replicated()` as follows,
+A summary of the design:
 
 ```{r}
 print(pREP)
 ```
 
-First 12 rows of the fieldbook,
+The first 12 rows of the field book:
 
 ```{r}
 head(pREP$fieldBook, 12)
 ```
 
-Users can plot the layout design from `partially_replicated()` using the function `plot()` as follows,
+The field map. Replicated entries are on soft blue and the rest on light grey.
 
-```{r, fig.align='center', fig.width=6.8, fig.height=4.7, fig.alt='Native plot showing replicated and unreplicated p-rep entries'}
+```{r prep-map, fig.align='center', fig.width=9, fig.height=7.4, fig.alt='Field map of the p-rep design: entry numbers in a white grid, replicated entries on soft blue and unreplicated entries on light grey.'}
 plot(pREP)
 ```
 
-To see more examples, please go to <https://didiermurillof.github.io/FielDHub/articles/partially_replicated.html>
+More examples are in the
+[partially replicated article](https://didiermurillof.github.io/FielDHub/articles/partially_replicated.html).
 
-<br>
-<br>
+## For teaching
+
+FielDHub is used in courses on statistics, experimental design and plant
+breeding. Students see the randomization, the field layout and the data in one
+place; simulated responses give them a data set to analyse from the first
+class; and because every design is an R function with a seed, an assignment
+can give each student the same randomization, or a different one.
+
+## Documentation and help
+
+- The [FielDHub website](https://didiermurillof.github.io/FielDHub/) has a
+  guide for every design, worked examples and the function reference.
+- In R, `help("diagonal_arrangement", package = "FielDHub")` and the other help
+  pages work offline.
+- [Video tutorials](https://www.youtube.com/channel/UC4i3oTcU58Za42DbWwqF9Kg)
+  walk through the app.
+- Found a bug or missing a design?
+  [Open an issue](https://github.com/DidierMurilloF/FielDHub/issues).
+
+## Citation
+
+If you use FielDHub, please cite the paper in the Journal of Open Source
+Software. Run `citation("FielDHub")` in R for the reference.
+
+## Contributing
+
+Contributions are welcome; see the [contributing guide](CONTRIBUTING.md) and
+the [code of conduct](CODE_OF_CONDUCT.md).
+
+FielDHub is developed at
+[Agricultural Data Analytics](https://www.ndsu.edu/agricultural-data-analytics),
+North Dakota State University.
