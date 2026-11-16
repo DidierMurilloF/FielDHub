@@ -1,4 +1,0 @@
-# License
-
-    YEAR: 2021
-    COPYRIGHT HOLDER: North Dakota State University (NDSU)
