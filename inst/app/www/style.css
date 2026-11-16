@@ -60,47 +60,6 @@
   margin: 10px 0;
 }
 
-#fieldhub-app .p-box {
-  font-size: 16px;
-}
-
-#fieldhub-app .text-primary1 {
-  color: #ffc72a;
-  background: rgba(156, 137, 132, 0.55);
-  font-size: 88px;
-  font-weight: bold;
-}
-
-#fieldhub-app .text-primary2 {
-  color: #0a5640;
-  background: rgba(156, 137, 132, 0.55);
-  font-size: 88px;
-  font-weight: bold;
-}
-
-#fieldhub-app .welcome-primary {
-  font-size: 28px;
-  font-weight: bold;
-}
-
-#fieldhub-app #text-primary {
-  color:#ffc72a;
-  font-weight: bold;
-}
-
-#fieldhub-app .footer-label {
-  color:#ffc72a;
-}
-
-#fieldhub-app #text-primary2 {
-  color:#0a5640;
-}
-
-#fieldhub-app .tittle-FielDHub {
-  color:#ffc72a;
-  font-weight: bold;
-}
-
 #fieldhub-app .lead {
   font-size: 20px;
   font-weight: bold;
@@ -124,88 +83,6 @@
   color: #343a40;
 }
 
-#fieldhub-app .btn-light {
-  background: #f4f4f4;
-  color: #333;
-}
-
-#fieldhub-app .bg-dark {
-  background: #444;
-  color: #fff;
-}
-
-#fieldhub-app .bg-light {
-  background: #f4f4f4;
-  color: #333;
-}
-
-#fieldhub-app .bg-primary {
-  background: #f7c08a;
-  color: #333;
-}
-
-#fieldhub-app .clr {
-  clear: both;
-}
-
-/* Showcase */
-#fieldhub-app #showcase {
-  background: url('baner46.jpg') no-repeat center center/cover;
-  /*background: url('golden.jpg') no-repeat center center/cover;*/
-  height: 550px;
-}
-
-#fieldhub-app #showcase .showcase-content {
-  color: #fff;
-  text-align: center;
-  padding-top: 210px;
-}
-
-#fieldhub-app #showcase .showcase-content p {
-  padding-bottom: 20px;
-  line-height: 1.7em;
-}
-
-/* Features */
-#fieldhub-app .box {
-  float: left;
-  width: 33.3%;
-  padding: 50px;
-  text-align:center;
-}
-
-#fieldhub-app .box i {
-  margin-bottom: 10px;
-}
-
-/* Home Info */
-#fieldhub-app #home-info {
-  height: 450px;
-}
-
-#fieldhub-app #home-info .info-img {
-  float: left;
-  width: 50%;
-  background: url('drone1.jpg') no-repeat;
-  /*background: url('wheatharvest_ndsu.jpg') no-repeat;*/
-  
-  min-height: 100%;
-}
-
-#fieldhub-app #home-info .info-content {
-  float: right;
-  width: 50%;
-  height: 100%;
-  text-align: center;
-  padding: 30px 30px;
-  overflow: hidden;
-}
-
-#fieldhub-app #home-info .info-content p {
-  padding-bottom: 30px;
-  padding-top: 10px;
-}
-
 /* footer */
 #fieldhub-app .container-fluid {
   width: 100%;
@@ -217,17 +94,6 @@
   font-size: 16px;
 }
   
-#fieldhub-app .fieldhub-footer {
-  text-align: center;
-  background: #444;
-  color: #fff;
-  padding: 20px;
-}
-
-#fieldhub-app .fieldhub-footer a {
-  text-decoration: none;
-}
-
 /* Dialogs and print exports can live outside the app's root element. */
 .fieldhub-input-error {
   color: #b00020;
@@ -275,221 +141,704 @@
   margin-left: 10px;
 }
 
-#fieldhub-app .fieldhub-feature-icon {
-  font-size: 3em;
-}
+/* Welcome, Help and About (home.html, app_help_ui(), aboutUs.html): a green
+   banner beside a photograph, closed by a gold rule, then calm white and
+   grey sections. NDSU green and gold are the only accents; links are
+   NDSU green for contrast. Breakpoints are in mobile.css. */
 
-/* Help and About retain the legacy neutral background and compact columns.
-   Content flows with the page: no nested scrolling or clipped biographies. */
-#fieldhub-app .fieldhub-info-page {
+#fieldhub-app .fh-page {
+  --fh-green: #0a5640;
+  --fh-green-dark: #073d2e;
+  --fh-gold: #ffc72a;
+  --fh-ink: #22303c;
+  --fh-muted: #56626b;
+  --fh-line: #dde2e2;
+  --fh-bg: #f4f5f4;
+  background: var(--fh-bg);
+  color: var(--fh-ink);
+  font-size: 15px;
+  line-height: 1.55;
   display: flex;
   flex-direction: column;
   min-height: calc(100vh - var(--fieldhub-navbar-height, 60px));
-  background: #f3f4f4;
 }
 
-#fieldhub-app .fieldhub-info-content {
-  width: 100%;
-  max-width: 1360px;
-  margin: 0 auto;
-  padding: 20px 32px;
-  flex: 1;
-}
-
-#fieldhub-app .fieldhub-info-page h2 {
-  margin: 0 0 10px;
+#fieldhub-app .fh-page h1,
+#fieldhub-app .fh-page h2,
+#fieldhub-app .fh-page h3,
+#fieldhub-app .fh-page h4 {
+  margin: 0;
   padding: 0;
-  font-size: 25px;
-  font-weight: 600;
+  font-family: "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 700;
+  line-height: 1.2;
+  color: inherit;
 }
 
-#fieldhub-app .fieldhub-info-page h3 {
-  margin: 0 0 10px;
-  padding: 0;
-  font-size: 18px;
-  font-weight: 600;
+#fieldhub-app .fh-page p { margin: 0; }
+#fieldhub-app .fh-page ul,
+#fieldhub-app .fh-page ol { margin: 0; padding: 0; list-style: none; }
+
+#fieldhub-app .fh-page a {
+  font-size: inherit;
+  color: var(--fh-green);
+  text-decoration: underline;
+  text-decoration-color: rgba(10, 86, 64, 0.35);
+  text-underline-offset: 3px;
 }
 
-#fieldhub-app .fieldhub-info-intro {
-  margin: 0 0 20px;
-  max-width: 1100px;
-  font-size: 15px;
-  line-height: 1.5;
-}
+#fieldhub-app .fh-page a:hover { text-decoration-color: currentColor; }
 
-#fieldhub-app .fieldhub-info-page a {
-  font-size: 14px;
-  overflow-wrap: anywhere;
-}
-
-#fieldhub-app .fieldhub-info-page a:focus-visible,
-#fieldhub-app .fieldhub-offline-help summary:focus-visible {
-  outline: 2px solid #2c7da3;
+#fieldhub-app .fh-page a:focus-visible,
+#fieldhub-app .fh-page summary:focus-visible {
+  outline: 2px solid var(--fh-green);
   outline-offset: 3px;
+  border-radius: 2px;
 }
 
-#fieldhub-app .fieldhub-info-page .fieldhub-footer {
-  padding: 12px 24px;
+#fieldhub-app .fh-page a[target="_blank"]::after {
+  content: "\2197";
+  display: inline-block;
+  margin-left: 3px;
+  font-size: 0.82em;
+  text-decoration: none;
+  opacity: 0.7;
 }
 
-#fieldhub-app .fieldhub-info-page .fieldhub-footer p {
+#fieldhub-app .fh-page code {
+  padding: 2px 6px;
+  background: #eceeed;
+  border-radius: 3px;
+  color: var(--fh-ink);
+  font-family: Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 12.5px;
+}
+
+#fieldhub-app .fh-inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+#fieldhub-app .fh-label {
+  font-family: "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--fh-muted);
+}
+
+/* ---------- Banner: green panel + photograph (hero and page headers) ---------- */
+
+#fieldhub-app .fh-banner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  background: var(--fh-green);
+  border-bottom: 4px solid var(--fh-gold);
+  color: #ffffff;
+}
+
+#fieldhub-app .fh-banner-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+  padding: 36px 48px 36px max(32px, calc((100vw - 1180px) / 2 + 32px));
+}
+
+#fieldhub-app .fh-banner-photo {
+  position: relative;
+  min-height: 190px;
   margin: 0;
+  background: var(--fh-green-dark);
 }
 
-#fieldhub-app .fieldhub-help-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 260px;
-  gap: 40px;
-}
-
-#fieldhub-app .fieldhub-help-topics {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 24px 32px;
-  align-items: start;
-}
-
-#fieldhub-app .fieldhub-help ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-#fieldhub-app .fieldhub-help li {
-  margin: 0 0 7px;
-  line-height: 1.45;
-}
-
-#fieldhub-app .fieldhub-help-resources {
-  border-left: 1px solid #d7dede;
-  padding-left: 24px;
-}
-
-#fieldhub-app .fieldhub-help-resources h3:not(:first-child) {
-  margin-top: 24px;
-}
-
-#fieldhub-app .fieldhub-offline-help {
-  margin-top: 24px;
-  padding-top: 16px;
-  border-top: 1px solid #d7dede;
-}
-
-#fieldhub-app .fieldhub-offline-help summary {
-  display: list-item;
-  list-style-position: inside;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-#fieldhub-app .fieldhub-offline-help dl {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 8px 24px;
-  margin: 16px 0 0;
-}
-
-#fieldhub-app .fieldhub-offline-help dt,
-#fieldhub-app .fieldhub-offline-help dd {
-  min-width: 0;
-  margin: 0;
-  overflow-wrap: anywhere;
-}
-
-#fieldhub-app .fieldhub-offline-help code {
-  white-space: normal;
-}
-
-#fieldhub-app .fieldhub-team-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px 32px;
-}
-
-#fieldhub-app .fieldhub-team-profile {
-  display: grid;
-  grid-template-columns: 80px minmax(0, 1fr);
-  column-gap: 16px;
-  align-content: start;
-  align-items: center;
-}
-
-#fieldhub-app .fieldhub-team-profile h3 {
-  margin-bottom: 6px;
-  line-height: 1.3;
-}
-
-#fieldhub-app .fieldhub-team-role {
-  margin: 0;
-  font-size: 13px;
-  color: #5f6b73;
-}
-
-#fieldhub-app .fieldhub-about .circular--portrait {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  overflow: hidden;
-}
-
-#fieldhub-app .fieldhub-about .circular--portrait img {
+#fieldhub-app .fh-banner-photo img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-#fieldhub-app .fieldhub-about .profile-p {
-  grid-column: 1 / -1;
-  margin: 10px 0 8px;
-  font-size: 14px;
-  line-height: 1.4;
-}
+#fieldhub-app .fh-pos-mid img { object-position: 50% 55%; }
 
-#fieldhub-app .fieldhub-team-contact {
-  grid-column: 1 / -1;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-}
-
-#fieldhub-app .fieldhub-team-others {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 10px 20px;
-  margin-top: 16px;
-}
-
-#fieldhub-app .fieldhub-team-others h3 {
-  font-size: 15px;
-  margin: 0;
-}
-
-#fieldhub-app .fieldhub-team-others ul {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 24px;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-#fieldhub-app .fieldhub-team-others li {
-  display: flex;
-  gap: 16px;
-  align-items: baseline;
-}
-
-#fieldhub-app .fieldhub-package-info {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 24px;
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid #d7dede;
+#fieldhub-app .fh-kicker {
+  font-family: "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 12px;
-  color: #5f6b73;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fh-gold);
 }
+
+#fieldhub-app .fh-banner h1 {
+  font-size: 30px;
+  letter-spacing: -0.005em;
+  color: #ffffff;
+}
+
+#fieldhub-app .fh-banner-sub {
+  max-width: 50ch;
+  font-size: 16px;
+  color: #e4eeea;
+}
+
+/* Welcome hero: the same banner, taller */
+#fieldhub-app .fh-hero .fh-banner-copy {
+  gap: 20px;
+  padding-top: 64px;
+  padding-bottom: 64px;
+}
+
+#fieldhub-app .fh-hero .fh-banner-photo { min-height: 440px; }
+
+#fieldhub-app .fh-hero h1 {
+  font-size: 42px;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+#fieldhub-app .fh-hero .fh-banner-sub { font-size: 17px; }
+
+#fieldhub-app .fh-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+#fieldhub-app .fh-page a.fh-btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 20px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+#fieldhub-app .fh-page a.fh-btn-primary { background: var(--fh-gold); color: #1b2a22; }
+#fieldhub-app .fh-page a.fh-btn-primary:hover { background: #ffd65c; }
+#fieldhub-app .fh-page a.fh-btn-ghost { border-color: rgba(255, 255, 255, 0.65); color: #ffffff; }
+#fieldhub-app .fh-page a.fh-btn-ghost:hover { background: rgba(255, 255, 255, 0.12); }
+
+#fieldhub-app .fh-banner a:focus-visible { outline-color: var(--fh-gold); }
+
+#fieldhub-app .fh-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  font-size: 13.5px;
+}
+
+#fieldhub-app .fh-page .fh-meta a {
+  color: #e4eeea;
+  text-decoration-color: rgba(255, 255, 255, 0.4);
+}
+
+/* ---------- Sections ---------- */
+
+#fieldhub-app .fh-section { padding: 52px 0; }
+#fieldhub-app .fh-section-white { background: #ffffff; border-top: 1px solid var(--fh-line); border-bottom: 1px solid var(--fh-line); }
+
+#fieldhub-app .fh-head {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 24px;
+}
+
+#fieldhub-app .fh-head h2 { font-size: 26px; }
+#fieldhub-app .fh-head p { max-width: 68ch; color: var(--fh-muted); }
+
+/* How it works */
+#fieldhub-app .fh-steps-band {
+  background: #ffffff;
+  border-bottom: 1px solid var(--fh-line);
+}
+
+#fieldhub-app .fh-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  counter-reset: fh-step;
+}
+
+#fieldhub-app .fh-steps li {
+  position: relative;
+  padding: 24px 28px 24px 46px;
+  counter-increment: fh-step;
+}
+
+#fieldhub-app .fh-steps li + li { border-left: 1px solid var(--fh-line); padding-left: 74px; }
+#fieldhub-app .fh-steps li:first-child { padding-left: 46px; }
+
+#fieldhub-app .fh-steps li::before {
+  content: counter(fh-step);
+  position: absolute;
+  top: 24px;
+  left: 0;
+  width: 30px;
+  height: 30px;
+  border: 1.5px solid var(--fh-green);
+  border-radius: 50%;
+  color: var(--fh-green);
+  font-family: "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 27px;
+  text-align: center;
+}
+
+#fieldhub-app .fh-steps li + li::before { left: 28px; }
+#fieldhub-app .fh-steps h3 { font-size: 16px; margin-bottom: 3px; }
+#fieldhub-app .fh-steps p { font-size: 14px; color: var(--fh-muted); }
+
+/* Design directory */
+#fieldhub-app .fh-families { display: grid; gap: 14px; }
+
+#fieldhub-app .fh-family {
+  display: grid;
+  grid-template-columns: minmax(0, 350px) minmax(0, 1fr);
+  gap: 36px;
+  padding: 22px 24px;
+  background: #ffffff;
+  border: 1px solid var(--fh-line);
+  border-radius: 4px;
+}
+
+#fieldhub-app .fh-family-intro {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+#fieldhub-app .fh-family-intro img {
+  display: block;
+  width: 112px;
+  height: auto;
+  border: 1px solid var(--fh-line);
+  border-radius: 2px;
+}
+
+#fieldhub-app .fh-family h3 { font-size: 18px; }
+#fieldhub-app .fh-count { display: block; margin: 2px 0 6px; font-size: 12.5px; color: var(--fh-muted); }
+#fieldhub-app .fh-family-intro p { font-size: 13.5px; line-height: 1.45; color: var(--fh-muted); }
+
+#fieldhub-app .fh-family ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(232px, 1fr));
+  column-gap: 28px;
+  align-content: start;
+}
+
+#fieldhub-app .fh-page .fh-family li a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 6px 2px;
+  border-bottom: 1px solid #eceeed;
+  color: var(--fh-ink);
+  font-size: 14.5px;
+  line-height: 1.3;
+  text-decoration: none;
+}
+
+#fieldhub-app .fh-page .fh-family li a::after {
+  content: "\203A";
+  margin-left: auto;
+  color: #9aa5a5;
+  font-size: 17px;
+}
+
+#fieldhub-app .fh-page .fh-family li a:hover { color: var(--fh-green); border-bottom-color: var(--fh-green); }
+#fieldhub-app .fh-page .fh-family li a:hover::after { color: var(--fh-green); }
+
+#fieldhub-app .fh-new {
+  padding: 1px 6px;
+  border: 1px solid #b9cfc6;
+  border-radius: 3px;
+  color: var(--fh-green);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* What you get: four numbered panels built from one real design */
+#fieldhub-app .fh-bento {
+  display: grid;
+  grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr);
+  gap: 20px;
+}
+
+#fieldhub-app .fh-panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  margin: 0;
+  background: #ffffff;
+  border: 1px solid var(--fh-line);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+#fieldhub-app .fh-panel figcaption {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 12px;
+  padding: 18px 20px 14px;
+}
+
+#fieldhub-app .fh-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--fh-green);
+  color: #ffffff;
+  font-family: "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 28px;
+  text-align: center;
+}
+
+#fieldhub-app .fh-panel h3 { font-size: 17px; line-height: 28px; }
+#fieldhub-app .fh-panel figcaption p { font-size: 14px; line-height: 1.5; color: var(--fh-muted); }
+
+#fieldhub-app .fh-panel-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  padding: 4px 20px 20px;
+}
+
+#fieldhub-app .fh-panel-body img { display: block; width: 100%; height: auto; }
+#fieldhub-app .fh-scroll { overflow-x: auto; }
+
+#fieldhub-app .fh-book {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+#fieldhub-app .fh-book th,
+#fieldhub-app .fh-book td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #eceeed;
+  text-align: right;
+  white-space: nowrap;
+}
+
+#fieldhub-app .fh-book th {
+  border-bottom-color: var(--fh-line);
+  color: var(--fh-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+#fieldhub-app .fh-book th:nth-last-child(2),
+#fieldhub-app .fh-book td:nth-last-child(2) { text-align: left; }
+#fieldhub-app .fh-book th:last-child,
+#fieldhub-app .fh-book td:last-child { background: #f1f5f2; color: var(--fh-green-dark); font-weight: 600; }
+#fieldhub-app .fh-book tbody tr:last-child td { border-bottom: 0; }
+
+#fieldhub-app .fh-chk {
+  display: inline-block;
+  min-width: 24px;
+  padding: 0 6px;
+  border-radius: 3px;
+  text-align: center;
+}
+
+#fieldhub-app .fh-chk-1 { background: #b9cadb; }
+#fieldhub-app .fh-chk-2 { background: #c6d7bf; }
+#fieldhub-app .fh-chk-3 { background: #e3d3b6; }
+#fieldhub-app .fh-chk-4 { background: #dec4c4; }
+
+#fieldhub-app .fh-panel-body img.fh-heat { max-width: 390px; margin: 0 auto; }
+
+#fieldhub-app .fh-scale {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 12.5px;
+  color: var(--fh-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+#fieldhub-app .fh-scale i {
+  width: 120px;
+  height: 8px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #e8efea, #0a5640);
+}
+
+#fieldhub-app .fh-scale-name { margin-left: 8px; }
+
+#fieldhub-app .fh-panel-dark { background: #22303c; border-color: #22303c; color: #ffffff; }
+#fieldhub-app .fh-panel-dark figcaption p { color: #c3ccd3; }
+#fieldhub-app .fh-panel-dark .fh-num { background: var(--fh-gold); color: #1b2a22; }
+
+#fieldhub-app .fh-page .fh-pre {
+  margin: 0;
+  padding: 16px 18px;
+  background: #18232c;
+  border: 0;
+  border-radius: 4px;
+  overflow-x: auto;
+}
+
+#fieldhub-app .fh-page .fh-pre code {
+  padding: 0;
+  background: none;
+  color: #e6ebef;
+  font-size: 13px;
+  line-height: 1.65;
+  white-space: pre;
+}
+
+#fieldhub-app .fh-page .fh-pre span { color: #9fb0bd; }
+
+/* For teaching */
+#fieldhub-app .fh-teach-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 56px;
+  align-items: start;
+}
+
+#fieldhub-app .fh-teach-intro { display: grid; gap: 14px; }
+#fieldhub-app .fh-teach-intro h2 { font-size: 28px; line-height: 1.18; text-wrap: balance; }
+#fieldhub-app .fh-teach-intro > p:not([class]) { font-size: 16px; color: var(--fh-muted); max-width: 46ch; }
+#fieldhub-app .fh-teach-install { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+#fieldhub-app .fh-page .fh-teach-install code { padding: 7px 11px; background: #ffffff; border: 1px solid var(--fh-line); font-size: 13px; }
+
+#fieldhub-app .fh-teach-list {
+  background: #ffffff;
+  border: 1px solid var(--fh-line);
+  border-top: 3px solid var(--fh-gold);
+  border-radius: 6px;
+}
+
+#fieldhub-app .fh-teach-list li { padding: 20px 24px; }
+#fieldhub-app .fh-teach-list li + li { border-top: 1px solid var(--fh-line); }
+#fieldhub-app .fh-teach-list h3 { margin-bottom: 4px; font-size: 16.5px; }
+#fieldhub-app .fh-teach-list p { font-size: 14.5px; color: var(--fh-muted); }
+
+/* ---------- Help and About: main column + facts column ---------- */
+
+#fieldhub-app .fh-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 240px;
+  gap: 40px;
+  padding: 40px 0 56px;
+}
+
+#fieldhub-app .fh-main { display: grid; gap: 32px; align-content: start; min-width: 0; }
+
+#fieldhub-app .fh-aside {
+  display: grid;
+  gap: 26px;
+  align-content: start;
+  padding-left: 28px;
+  border-left: 1px solid var(--fh-line);
+  font-size: 14px;
+}
+
+#fieldhub-app .fh-aside section { display: grid; gap: 8px; }
+#fieldhub-app .fh-aside li { padding: 3px 0; }
+#fieldhub-app .fh-aside dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 14px; margin: 0; }
+#fieldhub-app .fh-aside dt { color: var(--fh-muted); font-weight: 400; }
+#fieldhub-app .fh-aside dd { margin: 0; }
+#fieldhub-app .fh-small { font-size: 12.5px; color: var(--fh-muted); line-height: 1.5; }
+
+/* Help */
+#fieldhub-app .fh-start {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+#fieldhub-app .fh-page a.fh-start-card {
+  display: grid;
+  gap: 4px;
+  padding: 16px 18px;
+  background: #ffffff;
+  border: 1px solid var(--fh-line);
+  border-radius: 4px;
+  color: var(--fh-ink);
+  text-decoration: none;
+}
+
+#fieldhub-app .fh-page a.fh-start-card:hover { border-color: var(--fh-green); }
+#fieldhub-app .fh-page a.fh-start-card::after { content: none; }
+#fieldhub-app .fh-start-card strong { color: var(--fh-green); font-family: "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 16px; }
+#fieldhub-app .fh-start-card span { color: var(--fh-muted); font-size: 13.5px; line-height: 1.45; }
+
+#fieldhub-app .fh-guides { display: grid; gap: 10px; }
+#fieldhub-app .fh-guides > h2 { font-size: 22px; }
+#fieldhub-app .fh-guides > p { color: var(--fh-muted); max-width: 70ch; }
+
+#fieldhub-app .fh-guide-group {
+  margin-top: 10px;
+  background: #ffffff;
+  border: 1px solid var(--fh-line);
+  border-radius: 4px;
+}
+
+#fieldhub-app .fh-guide-group h3 {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--fh-line);
+  font-size: 15px;
+}
+
+#fieldhub-app .fh-guide-group li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 400px);
+  gap: 6px 20px;
+  align-items: center;
+  padding: 9px 18px;
+}
+
+#fieldhub-app .fh-guide-group li + li { border-top: 1px solid #eceeed; }
+#fieldhub-app .fh-page .fh-guide-name { font-weight: 600; text-decoration-color: transparent; }
+#fieldhub-app .fh-page .fh-guide-name:hover { text-decoration-color: currentColor; }
+#fieldhub-app .fh-page .fh-guide-ref { color: var(--fh-muted); font-size: 13px; }
+#fieldhub-app .fh-guide-group code { justify-self: start; font-size: 12px; overflow-wrap: anywhere; }
+
+/* About */
+#fieldhub-app .fh-lead {
+  display: grid;
+  grid-template-columns: 168px minmax(0, 1fr);
+  gap: 28px;
+  padding: 28px;
+  background: #ffffff;
+  border: 1px solid var(--fh-line);
+  border-top: 3px solid var(--fh-gold);
+  border-radius: 6px;
+}
+
+#fieldhub-app .fh-lead img { display: block; width: 168px; height: auto; border-radius: 4px; }
+#fieldhub-app .fh-person { display: grid; gap: 10px; align-content: start; min-width: 0; }
+#fieldhub-app .fh-lead h2 { font-size: 26px; }
+#fieldhub-app .fh-role { font-size: 13px; color: var(--fh-muted); }
+#fieldhub-app .fh-bio { max-width: 70ch; font-size: 14.5px; line-height: 1.6; }
+#fieldhub-app .fh-contact { display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 14px; }
+
+#fieldhub-app .fh-team { display: grid; gap: 16px; }
+#fieldhub-app .fh-page .fh-section-title { font-size: 22px; }
+
+#fieldhub-app .fh-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+#fieldhub-app .fh-card {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  grid-template-rows: auto 1fr auto;
+  align-content: start;
+  gap: 12px 16px;
+  padding: 20px;
+  background: #ffffff;
+  border: 1px solid var(--fh-line);
+  border-radius: 6px;
+}
+
+/* Portraits vary from 128 to 600 px: a fixed 72 px circle keeps them all sharp. */
+#fieldhub-app .fh-avatar {
+  display: block;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #e4e9e6;
+}
+
+#fieldhub-app .fh-avatar-mono {
+  color: var(--fh-green);
+  font-family: "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 72px;
+  text-align: center;
+}
+
+#fieldhub-app .fh-card-head { align-self: center; }
+#fieldhub-app .fh-card h3 { font-size: 17px; }
+#fieldhub-app .fh-card-body,
+#fieldhub-app .fh-card .fh-contact { grid-column: 1 / -1; }
+#fieldhub-app .fh-card .fh-contact { align-self: end; }
+#fieldhub-app .fh-card-body { position: relative; }
+#fieldhub-app .fh-card .fh-bio { font-size: 14px; }
+
+#fieldhub-app .fh-bio-clamp {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  overflow: hidden;
+}
+
+#fieldhub-app .fh-bio-toggle {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+}
+
+#fieldhub-app .fh-bio-toggle:checked + .fh-bio-clamp { display: block; }
+
+#fieldhub-app .fh-bio-label {
+  display: inline-block;
+  margin: 6px 0 0;
+  padding: 4px 0;
+  color: var(--fh-green);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#fieldhub-app .fh-bio-label:hover { text-decoration: underline; }
+#fieldhub-app .fh-bio-toggle:focus-visible ~ .fh-bio-label { outline: 2px solid var(--fh-green); outline-offset: 3px; border-radius: 2px; }
+#fieldhub-app .fh-less,
+#fieldhub-app .fh-bio-toggle:checked ~ .fh-bio-label .fh-more { display: none; }
+#fieldhub-app .fh-bio-toggle:checked ~ .fh-bio-label .fh-less { display: inline; }
+
+/* ---------- Footer ---------- */
+
+#fieldhub-app .fh-footer {
+  margin-top: auto;
+  background: #2c3e50;
+  color: #d5dce2;
+  font-size: 13.5px;
+}
+
+#fieldhub-app .fh-footer .fh-inner {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 28px;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+#fieldhub-app .fh-footer ul { display: flex; flex-wrap: wrap; gap: 4px 20px; }
+#fieldhub-app .fh-page .fh-footer a { color: #ffffff; text-decoration-color: rgba(255, 255, 255, 0.4); }
+#fieldhub-app .fh-page .fh-footer a.fh-org { color: var(--fh-gold); }
+#fieldhub-app .fh-page .fh-footer a.fh-org::after { content: none; }
+#fieldhub-app .fh-page .fh-footer a:focus-visible { outline-color: var(--fh-gold); }
 
 /* Design pages (mod_design_ui()) */
 #fieldhub-app .fieldhub-task-region {

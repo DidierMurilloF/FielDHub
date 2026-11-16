@@ -54,6 +54,9 @@ app_ui <- function(request) {
 #' 
 #' @noRd
 app_add_external_resources <- function(){
+  scripts <- c("corner.js", "shinybusy.js", "task-feedback.js", "output-feedback.js", "layout-images.js",
+               "home-links.js")
+  stylesheets <- c("style.css", "mobile.css")
   
   shiny::addResourcePath(
     'www', app_sys('app/www')
@@ -63,12 +66,29 @@ app_add_external_resources <- function(){
     shiny::tags$link(rel = "shortcut icon", href = "www/favicon.ico"),
     htmltools::htmlDependency(
       name = "fieldhub-resources",
-      version = as.character(utils::packageVersion("FielDHub")),
+      version = app_resources_version(c(scripts, stylesheets)),
       src = app_sys("app/www"),
-      script = c("corner.js", "shinybusy.js", "task-feedback.js", "output-feedback.js", "layout-images.js"),
-      stylesheet = c("style.css", "mobile.css"),
+      script = scripts,
+      stylesheet = stylesheets,
       all_files = TRUE
     ),
     shiny::tags$title("FielDHub")
   )
+}
+
+#' Version of the app's own scripts and styles, for the browser cache
+#'
+#' The package version plus a fingerprint of the files' contents: the
+#' resources are served under a path with this version, so a browser fetches
+#' them again whenever a file changes, not only on a new release.
+#' @param files File names in \code{app/www}.
+#' @return A version string such as \code{"1.7.0.123456789"}.
+#' @noRd
+app_resources_version <- function(files) {
+  sums <- tools::md5sum(file.path(app_sys("app/www"), files))
+  combined <- tempfile()
+  on.exit(unlink(combined), add = TRUE)
+  writeLines(unname(sums), combined)
+  fingerprint <- unname(tools::md5sum(combined))
+  paste0(utils::packageVersion("FielDHub"), ".", strtoi(substr(fingerprint, 1L, 7L), 16L))
 }

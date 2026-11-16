@@ -32,12 +32,14 @@ test_that("both p-rep modules forward the box through their values", {
   expect_identical(multi_values$rowcol_distinct, TRUE)
 })
 
-test_that("both p-rep modules offer the box once, unchecked by default", {
+test_that("both p-rep modules offer the boxes once, checked by default", {
   specs <- fieldhub_design_specs()
   for (module in c("pREPS", "multi_loc_preps")) {
     ids <- vapply(specs[[module]]$controls, `[[`, "", "id")
     expect_identical(sum(ids == "rowcol_distinct"), 1L, label = module)
     control <- specs[[module]]$controls[[which(ids == "rowcol_distinct")]]
-    expect_false(isTRUE(control$value), label = module)
+    expect_true(isTRUE(control$value), label = module)
+    fillers <- specs[[module]]$controls[[which(ids == "allow_fillers")]]
+    expect_true(isTRUE(fillers$value), label = module)
   }
 })

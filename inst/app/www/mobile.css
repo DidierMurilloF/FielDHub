@@ -1,65 +1,49 @@
-@media screen and (max-width: 1100px) {
-#fieldhub-app .fieldhub-team-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-}
+/* Breakpoints of the Welcome, Help and About pages (see style.css). */
 
-@media screen and (max-width: 768px) {
-#fieldhub-app .fieldhub-info-content {
-  padding: 20px;
-}
-
-#fieldhub-app .fieldhub-help-layout {
-  grid-template-columns: minmax(0, 1fr);
-  gap: 24px;
-}
-
-#fieldhub-app .fieldhub-help-resources {
+@media screen and (max-width: 1000px) {
+#fieldhub-app .fh-family { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+#fieldhub-app .fh-bento,
+#fieldhub-app .fh-teach-grid { grid-template-columns: minmax(0, 1fr); }
+#fieldhub-app .fh-teach-grid { gap: 28px; }
+#fieldhub-app .fh-layout { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+#fieldhub-app .fh-aside {
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  padding: 24px 0 0;
   border-left: 0;
-  border-top: 1px solid #d7dede;
-  padding: 20px 0 0;
+  border-top: 1px solid var(--fh-line);
+}
+#fieldhub-app .fh-guide-group li { grid-template-columns: minmax(0, 1fr) auto; }
+#fieldhub-app .fh-guide-group code { grid-column: 1 / -1; }
 }
 
-/* Showcase */
-#fieldhub-app #showcase {
-  height: 100%;
-}
-
-#fieldhub-app #showcase .showcase-content {
-  padding-top: 70px;
-  padding-bottom: 30px;
-}
-
-/* Home Info */
-/*
-#home-info {
-  height: 550px;
-}
-
-#home-info .info-img {
-  display: none;
-}
-
-#home-info .info-content {
-  float: none;
-  width: 100%;
-}
-*/
-/* Boxes */
-#fieldhub-app .box {
-  float: none;
-  width: 100%;
-}
-}
-
-@media screen and (max-width: 600px) {
-#fieldhub-app .fieldhub-team-grid,
-#fieldhub-app .fieldhub-help-topics,
-#fieldhub-app .fieldhub-offline-help dl {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-#fieldhub-app .fieldhub-offline-help dd {
-  margin-bottom: 8px;
-}
+@media screen and (max-width: 760px) {
+#fieldhub-app .fh-banner { grid-template-columns: minmax(0, 1fr); }
+#fieldhub-app .fh-banner-photo { order: -1; min-height: 120px; }
+#fieldhub-app .fh-hero .fh-banner-photo { min-height: 210px; }
+#fieldhub-app .fh-banner-copy,
+#fieldhub-app .fh-hero .fh-banner-copy { padding: 28px 16px 32px; }
+#fieldhub-app .fh-hero h1 { font-size: 31px; }
+#fieldhub-app .fh-banner h1 { font-size: 26px; }
+#fieldhub-app .fh-inner { padding: 0 16px; }
+#fieldhub-app .fh-section { padding: 36px 0; }
+#fieldhub-app .fh-steps { grid-template-columns: minmax(0, 1fr); }
+#fieldhub-app .fh-steps li,
+#fieldhub-app .fh-steps li + li { padding: 16px 0 16px 46px; border-left: 0; }
+#fieldhub-app .fh-steps li + li { border-top: 1px solid var(--fh-line); }
+#fieldhub-app .fh-steps li::before,
+#fieldhub-app .fh-steps li + li::before { top: 16px; left: 0; }
+#fieldhub-app .fh-family { padding: 18px 16px; }
+#fieldhub-app .fh-family-intro { grid-template-columns: 84px minmax(0, 1fr); gap: 14px; }
+#fieldhub-app .fh-family-intro img { width: 84px; }
+#fieldhub-app .fh-page .fh-family li a { min-height: 44px; }
+#fieldhub-app .fh-start,
+#fieldhub-app .fh-cards { grid-template-columns: minmax(0, 1fr); }
+#fieldhub-app .fh-teach-intro h2 { font-size: 24px; }
+#fieldhub-app .fh-panel figcaption { padding: 16px 16px 12px; }
+#fieldhub-app .fh-panel-body { padding: 4px 16px 16px; }
+#fieldhub-app .fh-teach-list li { padding: 16px 18px; }
+#fieldhub-app .fh-lead { grid-template-columns: minmax(0, 1fr); padding: 18px; }
+#fieldhub-app .fh-lead img { width: 128px; }
+#fieldhub-app .fh-layout { padding: 28px 0 40px; }
+#fieldhub-app .fh-guide-group li { padding: 10px 14px; }
 }
