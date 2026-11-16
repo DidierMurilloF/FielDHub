@@ -30,6 +30,9 @@ plot(x, ...)
 
   - `stacked` it can be `vertical` or `horizontal` stacked layout.
 
+  - `field_grid` `FALSE` removes the white line drawn around every plot
+    in maps that have one. Other arguments are passed to `desplot`.
+
 ## Value
 
 - a plot object inheriting from class `fieldLayout`

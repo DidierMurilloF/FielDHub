@@ -1,44 +1,57 @@
-  
-  
+# FielDHub ![FielDHub logo](reference/figures/icon.gif)
 
-![FielDHub logo](reference/figures/icon.gif)
+## Design of experiments for life sciences
 
-  
-  
+FielDHub is an R package and Shiny app that randomizes field, greenhouse
+and laboratory experiments. It covers classic designs, such as
+completely randomized, complete block, Latin square, factorial and
+split-plot designs, and the unreplicated, augmented and partially
+replicated designs used in plant breeding. It serves agriculture, plant
+breeding, forestry, and animal and biological sciences.
 
-###   FielDHub
+Every design comes with a field map and a field book. Every design in
+the app is also an R function with the same arguments, so a script can
+reproduce what the app made.
 
-  
-  
+## What’s new in 1.7.0
 
-### Overview
+- **A new design.**
+  [`augmented_row_column()`](https://didiermurillof.github.io/FielDHub/reference/augmented_row_column.md)
+  builds augmented row-column designs, in which every check appears once
+  in every row or every column of the field. It has its own page in the
+  app under Unreplicated Designs.
+- **One style for every field map.** One muted colour per replication or
+  block, white alleys between them, grey lines around incomplete blocks,
+  a white grid around every plot, and one muted colour per check.
+- **Better partially replicated designs.** An optional rule keeps the
+  copies of an entry in distinct rows and columns (`rowcol_penalty`),
+  and the spreading optimizer is much faster.
+- **A refreshed app.** New Welcome, Help and About pages: the Welcome
+  page links to every design, and Help gives each design its guide,
+  reference page and offline
+  [`help()`](https://rdrr.io/r/utils/help.html) command.
 
-FielDHub is an R package/shiny design of experiments (DOE) app that aids
-in the creation of traditional, un-replicated, augmented and
-partially-replicated designs applied to agriculture, plant breeding,
-forestry, animal and biological sciences.
-
-For more details and examples of all functions present in the FielDHub
-package. Please, go to
-<https://didiermurillof.github.io/FielDHub/reference/index.html>.
-
-## Version 1.6.0
-
-The Shiny app and R package share one release version. This release
-retains the original input panels, adds native plot previews and
-consistent tab-local loading, and simplifies downloads. Required app
-dependencies install with the package; no golem configuration is needed.
 See the [release
-notes](https://didiermurillof.github.io/FielDHub/news/index.md) for
-migration guidance and scientific corrections that may affect existing
-scripts or seeded results.
+notes](https://didiermurillof.github.io/FielDHub/NEWS.md) for every
+change, including the changes to results for a given seed.
 
-![FielDHub design families and
-workflows](reference/figures/FielDHub_Infographic.jpg)
+## Installation
 
-## Usage
+From CRAN:
 
-This is a basic example which shows you how to launch the app:
+``` r
+
+install.packages("FielDHub")
+```
+
+The development version, from GitHub:
+
+``` r
+
+remotes::install_github("DidierMurilloF/FielDHub")
+```
+
+## Launch the app
 
 ``` r
 
@@ -46,39 +59,64 @@ library(FielDHub)
 run_app()
 ```
 
-### Diagonal Arrangement Example
+The app’s dependencies install with the package, and it needs Shiny
+1.8.1 or newer. To keep other sessions responsive while a long design
+runs, install `mirai` and start the app with `run_app(workers = 2L)`.
+Workers need an installed FielDHub; without `mirai`, or when running
+from the package source, designs run in the app’s own session.
 
-A project needs to test 280 genotypes in a field containing 16 rows and
-20 columns of plots. In this example, these 280 genotypes are divided
-among three different experiments. In addition, four checks are included
-in a systematic diagonal arrangement across experiments to fill 40 plots
-representing 12.5% of the total number of experimental plots. An option
-to include filler plots is also available for fields where the number of
-experimental plots does not equal the number of available field plots.
+## Designs
 
-![Diagonal arrangement with replicated
-checks](reference/figures/DExample.jpg)
+FielDHub has 21 designs, grouped as in the app’s menus. Each links to
+its reference page.
 
-The figure above shows a map of an experiment randomized along with
-multiple experiments (three) and checks on diagonals. Distinctively
-colored check plots are replicated throughout the field in a systematic
-diagonal arrangement.
+| Menu | Design | R function |
+|:---|:---|:---|
+| Unreplicated Designs | Single Diagonal Arrangement | [`diagonal_arrangement()`](https://didiermurillof.github.io/FielDHub/reference/diagonal_arrangement.html) |
+|  | Multiple Diagonal Arrangement | [`diagonal_arrangement()`](https://didiermurillof.github.io/FielDHub/reference/diagonal_arrangement.html) |
+|  | Optimized Arrangement | [`optimized_arrangement()`](https://didiermurillof.github.io/FielDHub/reference/optimized_arrangement.html) |
+|  | Augmented RCBD | [`RCBD_augmented()`](https://didiermurillof.github.io/FielDHub/reference/RCBD_augmented.html) |
+|  | Augmented Row-Column | [`augmented_row_column()`](https://didiermurillof.github.io/FielDHub/reference/augmented_row_column.html) |
+|  | Sparse Allocation | [`sparse_allocation()`](https://didiermurillof.github.io/FielDHub/reference/sparse_allocation.html) |
+| Partially Replicated Designs | Single and Multi-Location p-rep | [`partially_replicated()`](https://didiermurillof.github.io/FielDHub/reference/partially_replicated.html) |
+|  | Optimized Multi-Location p-rep | [`multi_location_prep()`](https://didiermurillof.github.io/FielDHub/reference/multi_location_prep.html) |
+| Lattice Designs | Square Lattice | [`square_lattice()`](https://didiermurillof.github.io/FielDHub/reference/square_lattice.html) |
+|  | Rectangular Lattice | [`rectangular_lattice()`](https://didiermurillof.github.io/FielDHub/reference/rectangular_lattice.html) |
+|  | Alpha Lattice: alpha(0,1) | [`alpha_lattice()`](https://didiermurillof.github.io/FielDHub/reference/alpha_lattice.html) |
+| Other Designs | Completely Randomized Design (CRD) | [`CRD()`](https://didiermurillof.github.io/FielDHub/reference/CRD.html) |
+|  | Randomized Complete Block Designs (RCBD) | [`RCBD()`](https://didiermurillof.github.io/FielDHub/reference/RCBD.html) |
+|  | Latin Square Design (LSD) | [`latin_square()`](https://didiermurillof.github.io/FielDHub/reference/latin_square.html) |
+|  | Latin Rectangle Design | [`latin_rectangle()`](https://didiermurillof.github.io/FielDHub/reference/latin_rectangle.html) |
+|  | Factorial Designs | [`full_factorial()`](https://didiermurillof.github.io/FielDHub/reference/full_factorial.html) |
+|  | Split-Plot Design | [`split_plot()`](https://didiermurillof.github.io/FielDHub/reference/split_plot.html) |
+|  | Split-Split-Plot Design | [`split_split_plot()`](https://didiermurillof.github.io/FielDHub/reference/split_split_plot.html) |
+|  | Strip-Plot Design | [`strip_plot()`](https://didiermurillof.github.io/FielDHub/reference/strip_plot.html) |
+|  | Incomplete Blocks Design (IBD) | [`incomplete_blocks()`](https://didiermurillof.github.io/FielDHub/reference/incomplete_blocks.html) |
+|  | Resolvable Row-Column Design (RRCD) | [`row_column()`](https://didiermurillof.github.io/FielDHub/reference/row_column.html) |
 
-![Three experiments arranged in one
-field](reference/figures/multiple_expts.jpg)
+## What you get
 
-The figure above shows the layout for the three experiments in the
-field.
+- **A field map** of every location, ready for reports.
+- **A field book** with plot numbers, rows, columns and entries, to
+  download and load into a database or field app.
+- **Simulated data.** The app can simulate a response variable along
+  with the randomization, for teaching and for testing an analysis
+  before the season.
+- **A reproducible record.**
+  [`write_design()`](https://didiermurillof.github.io/FielDHub/reference/write_design.md)
+  saves a design or a standalone replay script,
+  [`read_design()`](https://didiermurillof.github.io/FielDHub/reference/read_design.md)
+  reads it back, and
+  [`reproduce_design()`](https://didiermurillof.github.io/FielDHub/reference/reproduce_design.md)
+  rebuilds it from its recorded inputs and seed.
 
-### Using the FielDHub function `diagonal_arrangement()`
+## Example: a multiple diagonal arrangement
 
-To illustrate using FielDHub to build experimental designs through R
-code, the design produced in the R Shiny interface described above can
-also be created using the function
-[`diagonal_arrangement()`](https://didiermurillof.github.io/FielDHub/reference/diagonal_arrangement.md)
-in the R script below. Note, that to obtain identical results, users
-must include the same random seed in the script as was used in the Shiny
-app. In this case, the random seed is 1249.
+A project needs to test 280 genotypes in a field of 16 rows and 20
+columns, split among three experiments. Four checks are placed on
+diagonals across the experiments and fill 40 plots, 12.5% of the field.
+To get the same design in the app and in a script, use the same seed,
+here 1249.
 
 ``` r
 
@@ -96,9 +134,7 @@ diagonal <- diagonal_arrangement(
 )
 ```
 
-Users can print the returned values from
-[`diagonal_arrangement()`](https://didiermurillof.github.io/FielDHub/reference/diagonal_arrangement.md)
-as follow,
+A summary of the design:
 
 ``` r
 print(diagonal)
@@ -120,7 +156,7 @@ List of 11
  $ fillers       : num 0
  $ seed          : num 1249
 
- 10 First observations of the data frame with the diagonal_arrangement field book:
+ 10 First observations of the data frame with the diagonal_arrangement field book: 
    ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
 1   1 Expt1        1 2026  101   1      1      0    42    Gen-42
 2   2 Expt1        1 2026  102   1      2      0    23    Gen-23
@@ -134,7 +170,7 @@ List of 11
 10 10 Expt1        1 2026  110   1     10      0   102   Gen-102
 ```
 
-First 12 rows of the fieldbook,
+The first 12 rows of the field book:
 
 ``` r
 head(diagonal$fieldBook, 12)
@@ -153,68 +189,52 @@ head(diagonal$fieldBook, 12)
 12 12 Expt1        1 2026  112   1     12      0    75    Gen-75
 ```
 
-Users can plot the layout design from
-[`diagonal_arrangement()`](https://didiermurillof.github.io/FielDHub/reference/diagonal_arrangement.md)
-using the function
-[`plot()`](https://rdrr.io/r/graphics/plot.default.html) as follows,
+The field map. Each check has its own muted colour and appears
+throughout the field; the grey lines mark where each experiment starts
+and ends.
 
 ``` r
 
 plot(diagonal)
 ```
 
-![Native plot of the diagonal arrangement with colored
-checks](reference/figures/README-unnamed-chunk-5-1.png)
+![Field map of the multiple diagonal arrangement: entry numbers on light
+grey plots, four checks in muted colours along diagonals, and grey lines
+between the three
+experiments.](reference/figures/README-diagonal-map-1.png)
 
-In the figure, salmon, green, and blue shade the blocks of unreplicated
-experiments, while distinctively colored check plots are replicated
-throughout the field in a systematic diagonal arrangement.
+The same field by experiment:
 
-The main difference between using the `FielDHub` Shiny app and using the
-standalone function
-[`diagonal_arrangement()`](https://didiermurillof.github.io/FielDHub/reference/diagonal_arrangement.md)
-is that the standalone function will allocate filler only if it is
-necessary, while in Shiny App, users can customize the number of fillers
-if it is needed. In cases where users include fillers, either between or
-after experiments, the Shiny app is preferable for filling and
-visualizing all field plots.
+``` r
 
-To see more examples, go to
-<https://didiermurillof.github.io/FielDHub/articles/diagonal_arrangement.html>
+plot(diagonal, text.string = "EXPT")
+```
 
-### Partially Replicated Design Example
+![Field map of the three experiments, each on its own light background
+and labelled by
+name.](reference/figures/README-diagonal-experiments-1.png)
 
-Partially replicated designs are commonly employed in early generation
-field trials. This type of design is characterized by replication of a
-portion of the entries, with the remaining entries only appearing once
-in the experiment. As an example, considered a field trial with 288
-plots containing 75 entries appearing two times each, and 138 entries
-only appearing once. This field trials is arranged in a field of 16 rows
-by 18 columns.
+In the app you can also choose how many filler plots to add and where.
+The R function adds fillers only when the experiments do not fill the
+field.
 
-![Partially replicated field layout in the Shiny
-app](reference/figures/prep_shiny.jpg)
+More examples are in the [diagonal arrangement
+article](https://didiermurillof.github.io/FielDHub/articles/diagonal_arrangement.html).
 
-In the figure above, green plots contain replicated entries, and the
-other plots contain entries that only appear once.
+## Example: a partially replicated design
 
-### Using the FielDHub function `partially_replicated()`
-
-Instead of using the Shiny FielDHub app, users can use the standalone
-FielDHub function
-[`partially_replicated()`](https://didiermurillof.github.io/FielDHub/reference/partially_replicated.md).
-The partially replicated layout described above can be produced through
-scripting as follows. As noted in the previous example, to obtain
-identical results between the script and the Shiny app, users need to
-use the same random seed, which, in this case, is 77.
+Partially replicated (p-rep) designs are common in early-generation
+trials: some entries are replicated and the rest appear once. Here 75
+entries appear twice and 138 entries once, in a field of 16 rows and 18
+columns (288 plots), with seed 77.
 
 ``` r
 
 pREP <- partially_replicated(
   nrows = 16,
   ncols = 18,
-  repGens = c(138,75),
-  repUnits = c(1,2),
+  repGens = c(138, 75),
+  repUnits = c(1, 2),
   planter = "serpentine",
   plotNumber = 1,
   exptName = "ExptA",
@@ -223,19 +243,17 @@ pREP <- partially_replicated(
 )
 ```
 
-Users can print returned values from
-[`partially_replicated()`](https://didiermurillof.github.io/FielDHub/reference/partially_replicated.md)
-as follows,
+A summary of the design:
 
 ``` r
 print(pREP)
-Partially Replicated Design
+Partially Replicated Design 
 
-Replications within location:
+Replications within location: 
   LOCATION Replicated Unreplicated
 1    FARGO         75          138
 
- Information on the design parameters:
+ Information on the design parameters: 
 List of 10
  $ rows              : num 16
  $ columns           : num 18
@@ -248,58 +266,92 @@ List of 10
  $ fillers           : num 0
  $ seed              : num 77
 
- 10 First observations of the data frame with the partially_replicated field book:
+ 10 First observations of the data frame with the partially_replicated field book: 
 # A tibble: 10 × 11
       ID EXPT  LOCATION YEAR   PLOT   ROW COLUMN   REP CHECKS ENTRY TREATMENT
-   <int> <chr> <chr>    <chr> <dbl> <int>  <int> <int>  <dbl> <dbl> <chr>
- 1     1 ExptA FARGO    2026      1     1      1     1      0    69 G69
- 2     2 ExptA FARGO    2026      2     1      2     1    158   158 G158
- 3     3 ExptA FARGO    2026      3     1      3     1    157   157 G157
- 4     4 ExptA FARGO    2026      4     1      4     1    201   201 G201
- 5     5 ExptA FARGO    2026      5     1      5     1      0    79 G79
- 6     6 ExptA FARGO    2026      6     1      6     1    213   213 G213
- 7     7 ExptA FARGO    2026      7     1      7     1      0     1 G1
- 8     8 ExptA FARGO    2026      8     1      8     1      0   103 G103
- 9     9 ExptA FARGO    2026      9     1      9     1      0    37 G37
-10    10 ExptA FARGO    2026     10     1     10     1      0    12 G12
+   <int> <chr> <chr>    <chr> <dbl> <int>  <int> <int>  <dbl> <dbl> <chr>    
+ 1     1 ExptA FARGO    2026      1     1      1     1      0    69 G69      
+ 2     2 ExptA FARGO    2026      2     1      2     1    158   158 G158     
+ 3     3 ExptA FARGO    2026      3     1      3     1    157   157 G157     
+ 4     4 ExptA FARGO    2026      4     1      4     1    201   201 G201     
+ 5     5 ExptA FARGO    2026      5     1      5     1      0    79 G79      
+ 6     6 ExptA FARGO    2026      6     1      6     1    213   213 G213     
+ 7     7 ExptA FARGO    2026      7     1      7     1      0     1 G1       
+ 8     8 ExptA FARGO    2026      8     1      8     1      0   103 G103     
+ 9     9 ExptA FARGO    2026      9     1      9     1      0    37 G37      
+10    10 ExptA FARGO    2026     10     1     10     1      0    12 G12      
 ```
 
-First 12 rows of the fieldbook,
+The first 12 rows of the field book:
 
 ``` r
 head(pREP$fieldBook, 12)
 # A tibble: 12 × 11
       ID EXPT  LOCATION YEAR   PLOT   ROW COLUMN   REP CHECKS ENTRY TREATMENT
-   <int> <chr> <chr>    <chr> <dbl> <int>  <int> <int>  <dbl> <dbl> <chr>
- 1     1 ExptA FARGO    2026      1     1      1     1      0    69 G69
- 2     2 ExptA FARGO    2026      2     1      2     1    158   158 G158
- 3     3 ExptA FARGO    2026      3     1      3     1    157   157 G157
- 4     4 ExptA FARGO    2026      4     1      4     1    201   201 G201
- 5     5 ExptA FARGO    2026      5     1      5     1      0    79 G79
- 6     6 ExptA FARGO    2026      6     1      6     1    213   213 G213
- 7     7 ExptA FARGO    2026      7     1      7     1      0     1 G1
- 8     8 ExptA FARGO    2026      8     1      8     1      0   103 G103
- 9     9 ExptA FARGO    2026      9     1      9     1      0    37 G37
-10    10 ExptA FARGO    2026     10     1     10     1      0    12 G12
-11    11 ExptA FARGO    2026     11     1     11     1      0    99 G99
-12    12 ExptA FARGO    2026     12     1     12     1      0    50 G50
+   <int> <chr> <chr>    <chr> <dbl> <int>  <int> <int>  <dbl> <dbl> <chr>    
+ 1     1 ExptA FARGO    2026      1     1      1     1      0    69 G69      
+ 2     2 ExptA FARGO    2026      2     1      2     1    158   158 G158     
+ 3     3 ExptA FARGO    2026      3     1      3     1    157   157 G157     
+ 4     4 ExptA FARGO    2026      4     1      4     1    201   201 G201     
+ 5     5 ExptA FARGO    2026      5     1      5     1      0    79 G79      
+ 6     6 ExptA FARGO    2026      6     1      6     1    213   213 G213     
+ 7     7 ExptA FARGO    2026      7     1      7     1      0     1 G1       
+ 8     8 ExptA FARGO    2026      8     1      8     1      0   103 G103     
+ 9     9 ExptA FARGO    2026      9     1      9     1      0    37 G37      
+10    10 ExptA FARGO    2026     10     1     10     1      0    12 G12      
+11    11 ExptA FARGO    2026     11     1     11     1      0    99 G99      
+12    12 ExptA FARGO    2026     12     1     12     1      0    50 G50      
 ```
 
-Users can plot the layout design from
-[`partially_replicated()`](https://didiermurillof.github.io/FielDHub/reference/partially_replicated.md)
-using the function
-[`plot()`](https://rdrr.io/r/graphics/plot.default.html) as follows,
+The field map. Replicated entries are on soft blue and the rest on light
+grey.
 
 ``` r
 
 plot(pREP)
 ```
 
-![Native plot showing replicated and unreplicated p-rep
-entries](reference/figures/README-unnamed-chunk-9-1.png)
+![Field map of the p-rep design: entry numbers in a white grid,
+replicated entries on soft blue and unreplicated entries on light
+grey.](reference/figures/README-prep-map-1.png)
 
-To see more examples, please go to
-<https://didiermurillof.github.io/FielDHub/articles/partially_replicated.html>
+More examples are in the [partially replicated
+article](https://didiermurillof.github.io/FielDHub/articles/partially_replicated.html).
 
-  
-  
+## For teaching
+
+FielDHub is used in courses on statistics, experimental design and plant
+breeding. Students see the randomization, the field layout and the data
+in one place; simulated responses give them a data set to analyse from
+the first class; and because every design is an R function with a seed,
+an assignment can give each student the same randomization, or a
+different one.
+
+## Documentation and help
+
+- The [FielDHub website](https://didiermurillof.github.io/FielDHub/) has
+  a guide for every design, worked examples and the function reference.
+- In R,
+  [`help("diagonal_arrangement", package = "FielDHub")`](https://didiermurillof.github.io/FielDHub/reference/diagonal_arrangement.md)
+  and the other help pages work offline.
+- [Video
+  tutorials](https://www.youtube.com/channel/UC4i3oTcU58Za42DbWwqF9Kg)
+  walk through the app.
+- Found a bug or missing a design? [Open an
+  issue](https://github.com/DidierMurilloF/FielDHub/issues).
+
+## Citation
+
+If you use FielDHub, please cite the paper in the Journal of Open Source
+Software. Run `citation("FielDHub")` in R for the reference.
+
+## Contributing
+
+Contributions are welcome; see the [contributing
+guide](https://didiermurillof.github.io/FielDHub/CONTRIBUTING.md) and
+the [code of
+conduct](https://didiermurillof.github.io/FielDHub/CODE_OF_CONDUCT.md).
+
+FielDHub is developed at [Agricultural Data
+Analytics](https://www.ndsu.edu/agricultural-data-analytics), North
+Dakota State University.

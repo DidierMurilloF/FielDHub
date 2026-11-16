@@ -191,8 +191,8 @@ print(rcd)
               Level Blocks D-Efficiency A-Efficiency   A-Bound
     1           Rep      3    1.0000000    1.0000000 1.0000000
     2           Row     15    0.8945848    0.8781404 0.8842892
-    3        Column     27    0.7901480    0.7590840 0.7674419
-    4 Row-by-Column     NA    0.6982517    0.6686962        NA
+    3        Column     27    0.7898707    0.7581934 0.7674419
+    4 Row-by-Column     NA    0.6994594    0.6708798        NA
 
     Information on the design parameters: 
     List of 8
@@ -207,16 +207,16 @@ print(rcd)
 
      10 First observations of the data frame with the row_column field book: 
        ID LOCATION PLOT REP ROW COLUMN ENTRY TREATMENT
-    1   1    FARGO  101   1   1      1    10      G-10
-    2   2    FARGO  102   1   1      2     9       G-9
-    3   3    FARGO  103   1   1      3    37      G-37
-    4   4    FARGO  104   1   1      4    33      G-33
-    5   5    FARGO  105   1   1      5    43      G-43
-    6   6    FARGO  106   1   1      6    39      G-39
-    7   7    FARGO  107   1   1      7    27      G-27
-    8   8    FARGO  108   1   1      8     7       G-7
-    9   9    FARGO  109   1   1      9    22      G-22
-    10 10    FARGO  110   1   2      1    30      G-30
+    1   1    FARGO  101   1   1      1     1       G-1
+    2   2    FARGO  102   1   1      2    12      G-12
+    3   3    FARGO  103   1   1      3    14      G-14
+    4   4    FARGO  104   1   1      4    26      G-26
+    5   5    FARGO  105   1   1      5    27      G-27
+    6   6    FARGO  106   1   1      6    17      G-17
+    7   7    FARGO  107   1   1      7    11      G-11
+    8   8    FARGO  108   1   1      8    43      G-43
+    9   9    FARGO  109   1   1      9    18      G-18
+    10 10    FARGO  110   1   2      1    29      G-29
 
 ### Access to `rcd` object
 
@@ -240,16 +240,16 @@ head(rcd$fieldBook, 10)
 ```
 
        ID LOCATION PLOT REP ROW COLUMN ENTRY TREATMENT
-    1   1    FARGO  101   1   1      1    10      G-10
-    2   2    FARGO  102   1   1      2     9       G-9
-    3   3    FARGO  103   1   1      3    37      G-37
-    4   4    FARGO  104   1   1      4    33      G-33
-    5   5    FARGO  105   1   1      5    43      G-43
-    6   6    FARGO  106   1   1      6    39      G-39
-    7   7    FARGO  107   1   1      7    27      G-27
-    8   8    FARGO  108   1   1      8     7       G-7
-    9   9    FARGO  109   1   1      9    22      G-22
-    10 10    FARGO  110   1   2      1    30      G-30
+    1   1    FARGO  101   1   1      1     1       G-1
+    2   2    FARGO  102   1   1      2    12      G-12
+    3   3    FARGO  103   1   1      3    14      G-14
+    4   4    FARGO  104   1   1      4    26      G-26
+    5   5    FARGO  105   1   1      5    27      G-27
+    6   6    FARGO  106   1   1      6    17      G-17
+    7   7    FARGO  107   1   1      7    11      G-11
+    8   8    FARGO  108   1   1      8    43      G-43
+    9   9    FARGO  109   1   1      9    18      G-18
+    10 10    FARGO  110   1   2      1    29      G-29
 
 ### Plot the field layout
 
@@ -291,8 +291,8 @@ rcd$blocksModel[[1]]
           Level Blocks D-Efficiency A-Efficiency   A-Bound
 1           Rep      3    1.0000000    1.0000000 1.0000000
 2           Row     15    0.8945848    0.8781404 0.8842892
-3        Column     27    0.7901480    0.7590840 0.7674419
-4 Row-by-Column     NA    0.6982517    0.6686962        NA
+3        Column     27    0.7898707    0.7581934 0.7674419
+4 Row-by-Column     NA    0.6994594    0.6708798        NA
 ```
 
 while the historical two-stage method typically reports a lower joint
@@ -313,9 +313,9 @@ rcd_twostage <- row_column(
 rcd_twostage$blocksModel[[1]]
           Level Blocks D-Efficiency A-Efficiency   A-Bound
 1           Rep      3    1.0000000    1.0000000 1.0000000
-2           Row     15    0.8934163    0.8750417 0.8842892
-3        Column     27    0.7912128    0.7623551 0.7674419
-4 Row-by-Column     NA    0.6802175    0.6251449        NA
+2           Row     15    0.8930083    0.8739363 0.8842892
+3        Column     27    0.7912213    0.7623567 0.7674419
+4 Row-by-Column     NA    0.6790707    0.6229284        NA
 ```
 
 Setting `latinize = TRUE` (only available with `method = "onestage"`)
@@ -342,8 +342,8 @@ rcd_latinized$blocksModel[[1]]
           Level Blocks D-Efficiency A-Efficiency   A-Bound
 1           Rep      3    1.0000000    1.0000000 1.0000000
 2           Row      5    0.9835497    0.9821140 0.9821140
-3        Column      9    0.9487643    0.9421772 0.9425511
-4 Row-by-Column     NA    0.9329143    0.9257166        NA
+3        Column      9    0.9488328    0.9423398 0.9425511
+4 Row-by-Column     NA    0.9328882    0.9256556        NA
 ```
 
 Because a latinized design optimizes the rows and columns as crossed
