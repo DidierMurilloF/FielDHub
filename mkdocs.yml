@@ -1,0 +1,71 @@
+site_name: FielDHub
+site_description: Design field and life-science experiments with FielDHub, an open-source R package and Shiny app.
+site_url: https://didiermurillof.github.io/FielDHub/
+repo_name: DidierMurilloF/FielDHub
+repo_url: https://github.com/DidierMurilloF/FielDHub
+docs_dir: .mkdocs-src
+site_dir: .mkdocs-site
+use_directory_urls: false
+
+theme:
+  name: material
+  custom_dir: website/overrides
+  logo: assets/icon.gif
+  favicon: assets/favicon.ico
+  palette:
+    scheme: fieldhub
+    primary: custom
+    accent: custom
+  font:
+    text: Lato
+    code: IBM Plex Mono
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.top
+    - search.highlight
+    - search.suggest
+    - content.code.copy
+
+plugins:
+  - search
+
+hooks:
+  - website/mkdocs_hooks.py
+
+markdown_extensions:
+  - attr_list
+  - tables
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - toc:
+      permalink: true
+
+validation:
+  links:
+    absolute_links: relative_to_docs
+    anchors: warn
+    unrecognized_links: warn
+
+extra_css:
+  - assets/fieldhub.css
+
+copyright: >-
+  <a href="https://www.ndsu.edu/agricultural-data-analytics">© Agricultural Data Analytics, NDSU</a>
+  · <a href="https://joss.theoj.org/papers/10.21105/joss.03122">JOSS paper</a>
+
+nav:
+  - Home: index.md
+  - Get started: https://didiermurillof.github.io/FielDHub/#usage
+  - Designs:
+      - Unreplicated:
+          - Unreplicated Diagonal Arrangement Design: articles/diagonal_arrangement.md
+      - Partially replicated: https://didiermurillof.github.io/FielDHub/articles/partially_replicated.html
+      - Lattice: https://didiermurillof.github.io/FielDHub/articles/alpha_lattice.html
+      - Other designs: https://didiermurillof.github.io/FielDHub/articles/crd.html
+  - Background: https://didiermurillof.github.io/FielDHub/articles/methods.html
+  - Reference:
+      - Designs:
+          - diagonal_arrangement(): reference/diagonal_arrangement.md
+  - News: https://didiermurillof.github.io/FielDHub/news/index.html
+  - CRAN: https://cran.r-project.org/package=FielDHub

@@ -90,3 +90,8 @@ src/*.dll
 
 # Offline study material retained locally
 /data-raw/augmented-row-column/
+
+# Generated MkDocs source and site
+/.mkdocs-src/
+/.mkdocs-site/
+/website/__pycache__/

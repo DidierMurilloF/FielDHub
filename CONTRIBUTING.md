@@ -212,6 +212,27 @@ namespace with `core_functions()` and `app_functions()` from
 (`inst/ci/compare-core-coverage.R`) measures every `R/` file except `app_*`,
 `mod_*` and `run_app.R`.
 
+## Preview the MkDocs website
+
+Install R, Pandoc, Python, a C++17 toolchain, and the package dependencies
+from `DESCRIPTION`. Install FielDHub from this checkout in your R library
+before rendering the examples.
+
+```sh
+R CMD INSTALL --preclean --clean .
+python3 -m venv /tmp/fieldhub-docs-venv
+source /tmp/fieldhub-docs-venv/bin/activate
+python -m pip install -r requirements-docs.txt
+Rscript tools/build-site.R && mkdocs build --strict
+mkdocs serve
+```
+
+Open <http://127.0.0.1:8000/FielDHub/>. R generates the Markdown and figures in
+`.mkdocs-src/`, and MkDocs writes the built site to `.mkdocs-site/`.
+Rerun the R script after editing a vignette, an Rd topic, or `index.Rmd`.
+The preview contains the home page, the diagonal arrangement article, and
+its function reference. Its other navigation links point to the live site.
+
 ## Attribution
 
 This Contributing is adapted from [CONTRIBUTING](https://gist.github.com/peterdesmet/e90a1b0dc17af6c12daf6e8b2f044e7c).
