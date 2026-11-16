@@ -63,5 +63,3 @@ $run_dev.*
 
 ^tools/prepare-site\.py$
 ^tools/check-site\.py$
-^field-trial-aerial\.jpg$
-^hero-trials\.jpg$

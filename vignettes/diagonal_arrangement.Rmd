@@ -418,6 +418,6 @@ For plotting the layout in function of the coordinates `ROW` and `COLUMN` in the
 plot(multi_diag)
 ```
 
-The figure above shows a map of an experiment randomized as a multiple unreplicated diagonal arrangement design. Light backgrounds distinguish the experiment blocks, with grey lines between experiments. Muted per-check colours identify the replicated checks along the diagonals.
+The figure above shows a map of an experiment randomized as a multiple unreplicated diagonal arrangement design. All experiment blocks share a light grey background, with grey lines separating the experiments. Muted per-check colours identify the replicated checks along the diagonals.
 
 ## References

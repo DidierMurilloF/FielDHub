@@ -27,9 +27,18 @@ for page in root.rglob("*.md"):
         return "](" + url + ")"
     text = re.sub(r"\]\(([^)]+)\)", link, text)
     page.write_text(text)
+def page_title(path):
+    text = path.read_text()
+    if text.startswith("---"):
+        metadata = yaml.safe_load(text.split("---", 2)[1]) or {}
+        if metadata.get("title"):
+            return metadata["title"]
+    heading = re.search(r"^#{1,6} (.+)$", text, re.MULTILINE)
+    return heading.group(1) if heading else path.stem
+
 references = sorted(p.name for p in (root / "reference").glob("*.md") if p.name != "index.md")
 (root / "reference/index.md").write_text("# Reference\n\n" + "\n".join(
-    f"- [{Path(name).stem}]({name})" for name in references))
+    f"- [{Path(name).stem} — {page_title(root / 'reference' / name)}]({name})" for name in references))
 (root / "articles/index.md").write_text("# Articles\n\n" + "\n".join(
     f"- [{p.stem}]({p.name})" for p in sorted((root / "articles").glob("*.md")) if p.name != "index.md"))
 config = yaml.safe_load(Path("mkdocs.yml").read_text())
@@ -40,7 +49,7 @@ config["nav"] = [
     {"Designs": [{"Articles": "articles/index.md"}] + [{name.replace("_", " ").title(): f"articles/{name}.md"} for name in sorted(articles)]},
     {"Background": [{name.replace("_", " ").title(): f"articles/{name}.md"} for name in background]},
     {"Reference": [{"Overview": "reference/index.md"}] + [{Path(name).stem: f"reference/{name}"} for name in references]},
-    {"News": [{"Changelog": "news/index.md"}] + [{p.stem: str(p.relative_to(root))} for p in sorted((root / "articles/news").glob("*.md"))]}]
+    {"News": [{"Changelog": "news/index.md"}] + [{page_title(p): str(p.relative_to(root))} for p in sorted((root / "articles/news").glob("*.md"))]}]
 Path("mkdocs.yml").write_text(yaml.safe_dump(config, sort_keys=False))
 
 if (root / "topics.csv").exists():

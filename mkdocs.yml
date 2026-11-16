@@ -37,6 +37,8 @@ markdown_extensions:
 - pymdownx.superfences
 - toc:
     permalink: true
+- pymdownx.arithmatex:
+    generic: true
 validation:
   links:
     absolute_links: relative_to_docs
@@ -126,6 +128,9 @@ nav:
     - summary.FielDHub: reference/summary.FielDHub.md
 - News:
   - Changelog: news/index.md
-  - fieldhub-0-1-0: articles/news/fieldhub-0-1-0.md
-  - fieldhub-1-2-0: articles/news/fieldhub-1-2-0.md
-  - fieldhub-1-3-1: articles/news/fieldhub-1-3-1.md
+  - FielDHub 0.1.0: articles/news/fieldhub-0-1-0.md
+  - FielDHub 1.2.0: articles/news/fieldhub-1-2-0.md
+  - FielDHub 1.3.1: articles/news/fieldhub-1-3-1.md
+extra_javascript:
+- assets/mathjax.js
+- https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js

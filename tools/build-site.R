@@ -27,7 +27,10 @@ build_site <- function() {
     input <- file.path(dirname(destination), basename(source))
     file.copy(source, input, overwrite = TRUE)
     title <- rmarkdown::yaml_front_matter(input)$title
-    if (is.null(title)) title <- "Design of experiments for life sciences"
+    if (is.null(title)) {
+      headings <- grep("^#{1,6} ", readLines(input, warn = FALSE), value = TRUE)
+      title <- if (length(headings)) sub("^#{1,6} ", "", headings[[1]]) else "FielDHub"
+    }
     knitr::opts_chunk$set(error = FALSE, fig.retina = 2)
     rmarkdown::render(input,
       output_format = rmarkdown::md_document(
@@ -72,7 +75,31 @@ build_site <- function() {
   for (source in c("CONTRIBUTING.md", "CODE_OF_CONDUCT.md", "LICENSE.md", "RELEASING.md")) {
     file.copy(source, docs)
   }
-  writeLines(c("# Authors and citation", capture.output(print(citation("FielDHub")))),
+  description <- read.dcf("DESCRIPTION")[1, ]
+  authors <- eval(parse(text = description[["Authors@R"]]))
+  roles <- c(aut = "Author", cre = "Maintainer", ctb = "Contributor", cph = "Copyright holder")
+  author_lines <- vapply(seq_along(authors), function(i) {
+    person <- authors[i]
+    name <- paste(c(person$given, person$family), collapse = " ")
+    paste0("- **", name, "** — ", paste(unname(roles[person$role]), collapse = ", "))
+  }, character(1))
+  # The manual citation identifies the version and year of this documentation build.
+  year <- format(Sys.Date(), "%Y")
+  package_citation <- utils::bibentry(
+    bibtype = "Manual", title = paste0("FielDHub: ", description[["Title"]]),
+    author = authors[vapply(seq_along(authors), function(i) "aut" %in% authors[i]$role, logical(1))],
+    year = year, note = paste("R package version", description[["Version"]]),
+    url = "https://cran.r-project.org/package=FielDHub"
+  )
+  writeLines(c("# Authors and citation", "", author_lines, "",
+               "## Package citation", "",
+               paste0("Citation for version ", description[["Version"]], " as documented in ", year, "."),
+               "", format(package_citation, style = "text"), "",
+               "```bibtex", format(package_citation, style = "Bibtex"), "```", "",
+               "## JOSS paper", "",
+               "Murillo et al. (2021). FielDHub: A Shiny App for Design of Experiments in Life Sciences.",
+               "Journal of Open Source Software, 6(61), 3122.",
+               "[Read the paper](https://joss.theoj.org/papers/10.21105/joss.03122)."),
              file.path(docs, "authors.md"))
   writeLines(c("# License", readLines("LICENSE")), file.path(docs, "LICENSE-text.md"))
   topics <- getFromNamespace("fieldhub_help_topics", "FielDHub")()

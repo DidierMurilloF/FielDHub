@@ -1,14 +1,5 @@
 {% extends "base.html" %}
 
-{% block hero %}
-{% if page and page.is_homepage %}
-<section class="fieldhub-hero md-grid">
-  <div><h1>Design of experiments for life sciences</h1>
-  <a class="md-button md-button--primary" href="{{ 'get-started.html' | url }}">Get started</a></div>
-  <figure><img src="{{ 'man/figures/README-diagonal-map-1.png' | url }}" width="864" height="576" alt="Diagonal checks in muted colours, with light backgrounds and grey boundaries between experiments"></figure>
-</section>
-{% endif %}
-{% endblock %}
 {% block extrahead %}
   {{ super() }}
   {% if page and page.canonical_url %}
