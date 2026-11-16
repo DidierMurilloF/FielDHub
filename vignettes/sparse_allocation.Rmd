@@ -330,7 +330,7 @@ plot(sparse_example, l = 2)
 ```
 
 The figure above shows a map of an experiment randomized as an unreplicated arrangement design. 
-The blue plots represent the unreplicated treatments, while the yellow-boxed colored check plots are 
+The light plots represent the unreplicated treatments, while the muted coloured check plots are
 replicated throughout the field in a systematic diagonal arrangement. The red plots with 0s are are fillers. 
 
-# References
+## References

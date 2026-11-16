@@ -388,7 +388,7 @@ is indexable by location using the dollar sign operator as well.
 plot(optim_multi_prep, l = 1)
 ```
 
-In the figure above, green plots contain replicated entries, and gray plots contain entries 
+In the figure above, soft blue plots contain replicated entries, and gray plots contain entries
 that only appear once.
 
 #### Field Layout for Location 5
@@ -399,4 +399,4 @@ Also, for example the location five:
 plot(optim_multi_prep, l = 5)
 ```
 
-# References
+## References
