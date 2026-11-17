@@ -3413,17 +3413,17 @@ Optional entry table with exactly the columns <code>ENTRY</code> and <code>NAME<
 <span class="c1">#&gt; [1] 12</span>
 <span class="n">x</span><span class="o">$</span><span class="n">statistics</span>
 <span class="c1">#&gt;   LOCATION     E_aug     V_tt     V_tc      V_cc   max_tt   max_tc residual_df</span>
-<span class="c1">#&gt; 1        1 0.5900639 3.492972 1.867456 0.2760943 4.077778 2.002083          12</span>
+<span class="c1">#&gt; 1        1 0.5884851 3.502748 1.872188 0.2767563 4.120002 2.037172          12</span>
 <span class="c1">#&gt;     authority lambda_min_rel</span>
-<span class="c1">#&gt; 1 full_layout      0.1635441</span>
+<span class="c1">#&gt; 1 full_layout      0.1722068</span>
 <span class="nf">head</span><span class="p">(</span><span class="n">x</span><span class="o">$</span><span class="n">fieldBook</span><span class="p">)</span>
 <span class="c1">#&gt;   ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT CHECK_DIRECTION</span>
-<span class="c1">#&gt; 1  1 Expt1        1 2026  101   1      1      0    20       G20         columns</span>
-<span class="c1">#&gt; 2  2 Expt1        1 2026  102   1      2      1     1       CH1         columns</span>
-<span class="c1">#&gt; 3  3 Expt1        1 2026  103   1      3      2     2       CH2         columns</span>
-<span class="c1">#&gt; 4  4 Expt1        1 2026  104   1      4      3     3       CH3         columns</span>
-<span class="c1">#&gt; 5  5 Expt1        1 2026  105   1      5      0    37       G37         columns</span>
-<span class="c1">#&gt; 6  6 Expt1        1 2026  106   1      6      0    15       G15         columns</span>
+<span class="c1">#&gt; 1  1 Expt1        1 2026  101   1      1      0     7        G7         columns</span>
+<span class="c1">#&gt; 2  2 Expt1        1 2026  102   1      2      3     3       CH3         columns</span>
+<span class="c1">#&gt; 3  3 Expt1        1 2026  103   1      3      1     1       CH1         columns</span>
+<span class="c1">#&gt; 4  4 Expt1        1 2026  104   1      4      4     4       CH4         columns</span>
+<span class="c1">#&gt; 5  5 Expt1        1 2026  105   1      5      0    30       G30         columns</span>
+<span class="c1">#&gt; 6  6 Expt1        1 2026  106   1      6      0     8        G8         columns</span>
 <span class="c1"># Check plots per field column: each check once in every column</span>
 <span class="n">checks</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">x</span><span class="o">$</span><span class="n">fieldBook</span><span class="p">[</span><span class="n">x</span><span class="o">$</span><span class="n">fieldBook</span><span class="o">$</span><span class="n">CHECKS</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="m">0</span><span class="p">,</span><span class="w"> </span><span class="p">]</span>
 <span class="nf">table</span><span class="p">(</span><span class="n">checks</span><span class="o">$</span><span class="n">TREATMENT</span><span class="p">,</span><span class="w"> </span><span class="n">checks</span><span class="o">$</span><span class="n">COLUMN</span><span class="p">)</span>
@@ -3443,10 +3443,10 @@ Optional entry table with exactly the columns <code>ENTRY</code> and <code>NAME<
 <span class="n">y</span><span class="o">$</span><span class="n">contraction</span>
 <span class="c1">#&gt; $`1`</span>
 <span class="c1">#&gt;      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8]</span>
-<span class="c1">#&gt; [1,]    7    5    9    6    2    8    3    4</span>
-<span class="c1">#&gt; [2,]    9    1    6    7    8    2   10    5</span>
-<span class="c1">#&gt; [3,]    4    7    3    2    1    5    8   10</span>
-<span class="c1">#&gt; [4,]   10    3    1    8    4    9    2    6</span>
+<span class="c1">#&gt; [1,]   10    7    5    9    6    1    2    8</span>
+<span class="c1">#&gt; [2,]    8    3    9    6    4    2    5    7</span>
+<span class="c1">#&gt; [3,]    2   10    1    7    5    8    3    4</span>
+<span class="c1">#&gt; [4,]    9    1    4    3   10    6    8    2</span>
 <span class="c1">#&gt; </span>
 
 <span class="c1"># Replay from the recorded parameters</span>
