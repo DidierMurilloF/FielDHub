@@ -3921,12 +3921,12 @@
 <p>Features include the field dimensions, the number of checks (or the check labels), test labels or an uploaded entry list, the check direction, one of three search criteria, multiple locations, serpentine or cartesian plot numbering, and reproducible results from a recorded seed.</p>
 <h2 id="attribution">Attribution<a class="headerlink" href="#attribution" title="Permanent link">&para;</a></h2>
 <p><strong>The construction</strong> is that of Piepho and Williams (2026): an augmented row-column design generated from a small auxiliary array called a <em>contraction</em>. They show that the efficiency of the contraction and of the augmented design are closely linked, so a design can be described and searched through the small contraction rather than the whole field.</p>
-<p><strong>The square-array foundation</strong> is Bailey and Haines (2025): square fields ($<code>v = s</code>$) represented through a $<code>k \times t</code>$ auxiliary block design, with results on connectedness and randomization. Square fields in FielDHub include these square-array designs.</p>
+<p><strong>The square-array foundation</strong> is Bailey and Haines (2025): square fields (<span class="arithmatex">\(v = s\)</span>) represented through a <span class="arithmatex">\(k \times t\)</span> auxiliary block design, with results on connectedness and randomization. Square fields in FielDHub include these square-array designs.</p>
 <p><strong>FielDHub’s own contribution</strong> is the search for the check positions, the restricted placement rules adopted here, the orientation handling, the field book and the app. The search described below is FielDHub’s own method. It is not part of the published construction, and the published articles are not responsible for it.</p>
 <p>All computation is FielDHub code. No published design is copied into the package; published layouts are cited only as literature.</p>
 <h2 id="the-method">The method<a class="headerlink" href="#the-method" title="Permanent link">&para;</a></h2>
 <h3 id="notation">Notation<a class="headerlink" href="#notation" title="Permanent link">&para;</a></h3>
-<p>The method works in a <em>mathematical</em> orientation with $<code>v</code>$ rows and $<code>s</code>$ columns, in which each check appears once in every mathematical column. The section on the check direction explains how this maps to physical field rows and columns.</p>
+<p>The method works in a <em>mathematical</em> orientation with <span class="arithmatex">\(v\)</span> rows and <span class="arithmatex">\(s\)</span> columns, in which each check appears once in every mathematical column. The section on the check direction explains how this maps to physical field rows and columns.</p>
 <table>
 <thead>
 <tr>
@@ -3936,80 +3936,76 @@
 </thead>
 <tbody>
 <tr>
-<td>$<code>v</code>$</td>
+<td><span class="arithmatex">\(v\)</span></td>
 <td>Plots in each line along the check direction (mathematical rows)</td>
 </tr>
 <tr>
-<td>$<code>s</code>$</td>
+<td><span class="arithmatex">\(s\)</span></td>
 <td>Lines along the check direction (mathematical columns)</td>
 </tr>
 <tr>
-<td>$<code>k</code>$</td>
-<td>Number of checks, $<code>2 \le k &lt; v</code>$</td>
+<td><span class="arithmatex">\(k\)</span></td>
+<td>Number of checks, <span class="arithmatex">\(2 \le k &lt; v\)</span></td>
 </tr>
 <tr>
-<td>$<code>n = vs</code>$</td>
+<td><span class="arithmatex">\(n = vs\)</span></td>
 <td>Number of plots</td>
 </tr>
 <tr>
-<td>$<code>T = (v - k)s</code>$</td>
+<td><span class="arithmatex">\(T = (v - k)s\)</span></td>
 <td>Number of test entries, each on one plot</td>
 </tr>
 <tr>
-<td>$<code>v^* = T + k</code>$</td>
+<td><span class="arithmatex">\(v^* = T + k\)</span></td>
 <td>Number of treatments (tests plus checks)</td>
 </tr>
 <tr>
-<td>$<code>u</code>$</td>
-<td>Replications: 1 for each test, $<code>s</code>$ for each check</td>
+<td><span class="arithmatex">\(u\)</span></td>
+<td>Replications: 1 for each test, <span class="arithmatex">\(s\)</span> for each check</td>
 </tr>
 <tr>
-<td>$<code>r_h</code>$</td>
-<td>Number of check plots in mathematical row $<code>h</code>$</td>
+<td><span class="arithmatex">\(r_h\)</span></td>
+<td>Number of check plots in mathematical row <span class="arithmatex">\(h\)</span></td>
 </tr>
 </tbody>
 </table>
-<p>Every check occupies $<code>s</code>$ plots, so the checks take $<code>ks</code>$ plots and the tests the remaining $<code>(v-k)s</code>$.</p>
+<p>Every check occupies <span class="arithmatex">\(s\)</span> plots, so the checks take <span class="arithmatex">\(ks\)</span> plots and the tests the remaining <span class="arithmatex">\((v-k)s\)</span>.</p>
 <h3 id="the-contraction">The contraction<a class="headerlink" href="#the-contraction" title="Permanent link">&para;</a></h3>
-<p>The check positions are described by a $<code>k \times s</code>$ matrix $<code>L</code>$, the contraction. Its entry $<code>L_{ij} \in \{1, \dots, v\}</code>$ is the row that holds check $<code>i</code>$ in column $<code>j</code>$. Expanding $<code>L</code>$ places check $<code>i</code>$ at field cell $<code>(L_{ij}, j)</code>$; the test entries fill the other $<code>T</code>$ cells (Piepho and Williams 2026).</p>
-<p>Reading the columns of $<code>L</code>$ as blocks, $<code>L</code>$ is a small block design for $<code>v</code>$ “pseudo-treatments” (the field rows) in $<code>s</code>$ blocks of size $<code>k</code>$. For square fields this is the auxiliary block design of Bailey and Haines (2025).</p>
+<p>The check positions are described by a <span class="arithmatex">\(k \times s\)</span> matrix <span class="arithmatex">\(L\)</span>, the contraction. Its entry <span class="arithmatex">\(L_{ij} \in \{1, \dots, v\}\)</span> is the row that holds check <span class="arithmatex">\(i\)</span> in column <span class="arithmatex">\(j\)</span>. Expanding <span class="arithmatex">\(L\)</span> places check <span class="arithmatex">\(i\)</span> at field cell <span class="arithmatex">\((L_{ij}, j)\)</span>; the test entries fill the other <span class="arithmatex">\(T\)</span> cells (Piepho and Williams 2026).</p>
+<p>Reading the columns of <span class="arithmatex">\(L\)</span> as blocks, <span class="arithmatex">\(L\)</span> is a small block design for <span class="arithmatex">\(v\)</span> “pseudo-treatments” (the field rows) in <span class="arithmatex">\(s\)</span> blocks of size <span class="arithmatex">\(k\)</span>. For square fields this is the auxiliary block design of Bailey and Haines (2025).</p>
 <p>FielDHub enforces a <strong>restricted placement</strong>. This is the restricted mode adopted for FielDHub, matching the binary contractions of Piepho and Williams (2026):</p>
 <ul>
-<li>$<code>s \le v</code>$;</li>
-<li>no repeat within a column of $<code>L</code>$: two checks never share a plot;</li>
-<li>no repeat within a row of $<code>L</code>$: no check appears twice in the same mathematical row;</li>
-<li>balanced row loads: every $<code>r_h \ge 1</code>$ and $<code>r_h \in \{\lfloor ks/v \rfloor, \lceil ks/v \rceil\}</code>$, with $<code>\sum_h r_h = ks</code>$. In words: every cross-line carries between $<code>\lfloor ks/v \rfloor</code>$ and $<code>\lceil ks/v \rceil</code>$ check plots, at least one.</li>
+<li><span class="arithmatex">\(s \le v\)</span>;</li>
+<li>no repeat within a column of <span class="arithmatex">\(L\)</span>: two checks never share a plot;</li>
+<li>no repeat within a row of <span class="arithmatex">\(L\)</span>: no check appears twice in the same mathematical row;</li>
+<li>balanced row loads: every <span class="arithmatex">\(r_h \ge 1\)</span> and <span class="arithmatex">\(r_h \in \{\lfloor ks/v \rfloor, \lceil ks/v \rceil\}\)</span>, with <span class="arithmatex">\(\sum_h r_h = ks\)</span>. In words: every cross-line carries between <span class="arithmatex">\(\lfloor ks/v \rfloor\)</span> and <span class="arithmatex">\(\lceil ks/v \rceil\)</span> check plots, at least one.</li>
 </ul>
 <p>Other placements, such as letting a check repeat within a cross-line, are not offered.</p>
 <h3 id="model">Model<a class="headerlink" href="#model" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>y = X\tau + Z_R\rho + Z_C\gamma + \varepsilon, \qquad \varepsilon \sim N(0, \sigma^2 I),
-</code></pre></div>
-<p>with fixed treatment effects $<code>\tau</code>$ (tests and checks), fixed row effects $<code>\rho</code>$, fixed column effects $<code>\gamma</code>$ and independent errors. $<code>X</code>$ ($<code>n \times v^*</code>$), $<code>Z_R</code>$ ($<code>n \times v</code>$) and $<code>Z_C</code>$ ($<code>n \times s</code>$) are the plot-level design matrices.</p>
+<div class="arithmatex">\[y = X\tau + Z_R\rho + Z_C\gamma + \varepsilon, \qquad \varepsilon \sim N(0, \sigma^2 I),\]</div>
+<p>with fixed treatment effects <span class="arithmatex">\(\tau\)</span> (tests and checks), fixed row effects <span class="arithmatex">\(\rho\)</span>, fixed column effects <span class="arithmatex">\(\gamma\)</span> and independent errors. <span class="arithmatex">\(X\)</span> (<span class="arithmatex">\(n \times v^*\)</span>), <span class="arithmatex">\(Z_R\)</span> (<span class="arithmatex">\(n \times v\)</span>) and <span class="arithmatex">\(Z_C\)</span> (<span class="arithmatex">\(n \times s\)</span>) are the plot-level design matrices.</p>
 <p>The treatment information matrix is</p>
-<div class="highlight"><pre><span></span><code>C = \operatorname{diag}(u) - \frac{1}{s} M_R M_R^\mathsf{T} - \frac{1}{v} M_C M_C^\mathsf{T} + \frac{1}{n} u u^\mathsf{T}, \qquad M_R = X^\mathsf{T} Z_R, \quad M_C = X^\mathsf{T} Z_C.
-</code></pre></div>
-<p>All variances are reported in units of $<code>\sigma^2</code>$: for treatments $<code>a</code>$ and $<code>b</code>$,</p>
-<div class="highlight"><pre><span></span><code>\operatorname{Var}(\hat\tau_a - \hat\tau_b)/\sigma^2 = (e_a - e_b)^\mathsf{T} C^{-} (e_a - e_b),
-</code></pre></div>
-<p>where $<code>e_a</code>$ is the $<code>a</code>$-th unit vector and $<code>C^{-}</code>$ a generalized inverse of $<code>C</code>$.</p>
+<div class="arithmatex">\[C = \operatorname{diag}(u) - \frac{1}{s} M_R M_R^\mathsf{T} - \frac{1}{v} M_C M_C^\mathsf{T} + \frac{1}{n} u u^\mathsf{T}, \qquad M_R = X^\mathsf{T} Z_R, \quad M_C = X^\mathsf{T} Z_C.\]</div>
+<p>All variances are reported in units of <span class="arithmatex">\(\sigma^2\)</span>: for treatments <span class="arithmatex">\(a\)</span> and <span class="arithmatex">\(b\)</span>,</p>
+<div class="arithmatex">\[\operatorname{Var}(\hat\tau_a - \hat\tau_b)/\sigma^2 = (e_a - e_b)^\mathsf{T} C^{-} (e_a - e_b),\]</div>
+<p>where <span class="arithmatex">\(e_a\)</span> is the <span class="arithmatex">\(a\)</span>-th unit vector and <span class="arithmatex">\(C^{-}\)</span> a generalized inverse of <span class="arithmatex">\(C\)</span>.</p>
 <h3 id="connectivity-and-residual-degrees-of-freedom">Connectivity and residual degrees of freedom<a class="headerlink" href="#connectivity-and-residual-degrees-of-freedom" title="Permanent link">&para;</a></h3>
 <p>A design is <em>connected</em> when every treatment comparison is estimable. FielDHub decides this from the eigenvalues of an information matrix, not from a pivoted QR rank, and a design that is not connected is never scored or returned.</p>
 <p>A connected design has</p>
-<div class="highlight"><pre><span></span><code>\mathrm{df} = ks - k - v - s + 2
-</code></pre></div>
-<p>residual degrees of freedom (the $<code>n</code>$ plots minus the $<code>v^* + (v - 1) + (s - 1)</code>$ estimated effects). It depends only on $<code>v</code>$, $<code>s</code>$ and $<code>k</code>$, never on where the checks are placed.</p>
-<p>Fields with $<code>\mathrm{df} &lt; 1</code>$ are rejected before any search: the residual variance could not be estimated. The section on residual degrees of freedom covers fields with fewer than 10.</p>
+<div class="arithmatex">\[\mathrm{df} = ks - k - v - s + 2\]</div>
+<p>residual degrees of freedom (the <span class="arithmatex">\(n\)</span> plots minus the <span class="arithmatex">\(v^* + (v - 1) + (s - 1)\)</span> estimated effects). It depends only on <span class="arithmatex">\(v\)</span>, <span class="arithmatex">\(s\)</span> and <span class="arithmatex">\(k\)</span>, never on where the checks are placed.</p>
+<p>Fields with <span class="arithmatex">\(\mathrm{df} &lt; 1\)</span> are rejected before any search: the residual variance could not be estimated. The section on residual degrees of freedom covers fields with fewer than 10.</p>
 <h3 id="how-fieldhub-searches-the-check-positions">How FielDHub searches the check positions<a class="headerlink" href="#how-fieldhub-searches-the-check-positions" title="Permanent link">&para;</a></h3>
-<p>The search works on the contraction $<code>L</code>$, not on the full field. It keeps every candidate within the restricted placement rules and discards candidates that are not connected.</p>
+<p>The search works on the contraction <span class="arithmatex">\(L\)</span>, not on the full field. It keeps every candidate within the restricted placement rules and discards candidates that are not connected.</p>
 <p>The available method is <code>method = "staged"</code>: staged annealing with recoloring restarts. Each restart:</p>
 <ul>
 <li>starts from a random balanced contraction;</li>
-<li>anneals the column composition of $<code>L</code>$ (which rows each column uses), scored by a fast column-design efficiency proxy;</li>
-<li>re-arranges the rows of $<code>L</code>$ by several random <em>recolorings</em> (re-assignments of which check takes which row within each column, keeping the column composition) and anneals the row arrangement under the chosen objective;</li>
+<li>anneals the column composition of <span class="arithmatex">\(L\)</span> (which rows each column uses), scored by a fast column-design efficiency proxy;</li>
+<li>re-arranges the rows of <span class="arithmatex">\(L\)</span> by several random <em>recolorings</em> (re-assignments of which check takes which row within each column, keeping the column composition) and anneals the row arrangement under the chosen objective;</li>
 <li>anneals rows and columns jointly under the chosen objective;</li>
 <li>finishes with a short local polish that accepts only improvements.</li>
 </ul>
-<p>In square fields ($<code>v = s</code>$) every row arrangement gives the same objective value, so the row phase is skipped and its share goes to the column phase.</p>
+<p>In square fields (<span class="arithmatex">\(v = s\)</span>) every row arrangement gives the same objective value, so the row phase is skipped and its share goes to the column phase.</p>
 <p><strong>Budget.</strong> <code>budget</code> is the number of objective-function calls allowed per location, shared by all restarts and phases; proxy calls count against it too. The search stops when the budget is spent. Final scoring of the returned design is outside the budget. The internal parameters (restarts, recolorings, phase shares, temperatures) are fixed by the package and are not user settings. When <code>budget</code> is not given, a default budget that depends on the field size is used; the rule is stated in <code>?augmented_row_column</code>.</p>
 <p><strong>No silent fallback.</strong> If no connected starting design is found within a bounded number of tries, or the budget or time limit runs out before any design is produced, the function stops with a <code>fieldhub_arc_search_error</code>; it never switches to another method.</p>
 <p>Only <code>"staged"</code> is accepted.</p>
@@ -4018,7 +4014,7 @@
 <p>After the search, from the same seed stream:</p>
 <ul>
 <li>the mathematical rows and columns are permuted uniformly at random;</li>
-<li>the $<code>k</code>$ check labels receive one global random permutation;</li>
+<li>the <span class="arithmatex">\(k\)</span> check labels receive one global random permutation;</li>
 <li>the test entries are assigned to the test plots by a uniform random permutation;</li>
 <li>the result is mapped to physical <code>ROW</code> and <code>COLUMN</code>.</li>
 </ul>
@@ -4036,17 +4032,17 @@
 <tbody>
 <tr>
 <td><code>"V_tt"</code></td>
-<td>Mean of $<code>\operatorname{Var}(\hat\tau_a - \hat\tau_b)/\sigma^2</code>$ over all $<code>\binom{T}{2}</code>$ pairs of test entries</td>
+<td>Mean of <span class="arithmatex">\(\operatorname{Var}(\hat\tau_a - \hat\tau_b)/\sigma^2\)</span> over all <span class="arithmatex">\(\binom{T}{2}\)</span> pairs of test entries</td>
 <td>Minimize</td>
 </tr>
 <tr>
 <td><code>"V_tc"</code></td>
-<td>Mean over all $<code>Tk</code>$ test-versus-check pairs</td>
+<td>Mean over all <span class="arithmatex">\(Tk\)</span> test-versus-check pairs</td>
 <td>Minimize</td>
 </tr>
 <tr>
 <td><code>"E_aug"</code></td>
-<td>Harmonic mean of the $<code>v^* - 1</code>$ nonzero eigenvalues of $<code>A^* = \operatorname{diag}(u)^{-1/2}\, C \operatorname{diag}(u)^{-1/2}</code>$: the average efficiency factor of Piepho and Williams (2026)</td>
+<td>Harmonic mean of the <span class="arithmatex">\(v^* - 1\)</span> nonzero eigenvalues of <span class="arithmatex">\(A^* = \operatorname{diag}(u)^{-1/2}\, C \operatorname{diag}(u)^{-1/2}\)</span>: the average efficiency factor of Piepho and Williams (2026)</td>
 <td>Maximize</td>
 </tr>
 </tbody>
@@ -4058,31 +4054,30 @@
 <li><code>E_aug</code> is the average efficiency relative to a completely randomized design with the same replications.</li>
 </ul>
 <p>The criteria are related by</p>
-<div class="highlight"><pre><span></span><code>\frac{n(v^* - 1)}{E_{\mathrm{aug}}} = \sum_{i&lt;j} u_i u_j \operatorname{Var}(\hat\tau_i - \hat\tau_j)/\sigma^2 .
-</code></pre></div>
-<p><code>E_aug</code> therefore weights each test-versus-test pair by 1, each test-versus-check pair by $<code>s</code>$ and each check-versus-check pair by $<code>s^2</code>$, so it emphasizes comparisons involving checks more than <code>V_tt</code> does.</p>
+<div class="arithmatex">\[\frac{n(v^* - 1)}{E_{\mathrm{aug}}} = \sum_{i&lt;j} u_i u_j \operatorname{Var}(\hat\tau_i - \hat\tau_j)/\sigma^2 .\]</div>
+<p><code>E_aug</code> therefore weights each test-versus-test pair by 1, each test-versus-check pair by <span class="arithmatex">\(s\)</span> and each check-versus-check pair by <span class="arithmatex">\(s^2\)</span>, so it emphasizes comparisons involving checks more than <code>V_tt</code> does.</p>
 <p>In square row- and column-binary designs the three criteria rank designs identically (Bailey and Haines 2025). In rectangular fields they can rank two designs differently, which is why all three are reported.</p>
 <p>The default objective is currently <code>"V_tt"</code>. Pass <code>objective</code> and <code>budget</code> explicitly when a result must be reproducible across package versions. Reproduction code always records both.</p>
 <h2 id="check-direction">Check direction<a class="headerlink" href="#check-direction" title="Permanent link">&para;</a></h2>
 <p><code>check_direction</code> is required, with no default. It names the physical direction along which every check appears once per line:</p>
 <ul>
-<li><code>"columns"</code>: each check appears once in every field column, so $<code>v</code>$ = <code>nrows</code> and $<code>s</code>$ = <code>ncols</code>;</li>
-<li><code>"rows"</code>: each check appears once in every field row, so $<code>v</code>$ = <code>ncols</code> and $<code>s</code>$ = <code>nrows</code>.</li>
+<li><code>"columns"</code>: each check appears once in every field column, so <span class="arithmatex">\(v\)</span> = <code>nrows</code> and <span class="arithmatex">\(s\)</span> = <code>ncols</code>;</li>
+<li><code>"rows"</code>: each check appears once in every field row, so <span class="arithmatex">\(v\)</span> = <code>ncols</code> and <span class="arithmatex">\(s\)</span> = <code>nrows</code>.</li>
 </ul>
 <p>The choice is never inferred from the field shape and the field is never turned silently. It is recorded in <code>infoDesign</code>, in the recorded parameters and in the <code>CHECK_DIRECTION</code> column of the field book.</p>
-<p>The design needs $<code>s \le v</code>$. A field and direction with $<code>s &gt; v</code>$ are rejected before any random number is drawn, with an error naming the other direction (see the examples below).</p>
+<p>The design needs <span class="arithmatex">\(s \le v\)</span>. A field and direction with <span class="arithmatex">\(s &gt; v\)</span> are rejected before any random number is drawn, with an error naming the other direction (see the examples below).</p>
 <p>Choose the direction along which you want every check represented in every line, for example along the planting or harvesting pass.</p>
 <p><code>ROW</code> and <code>COLUMN</code> in the field book are always the physical field coordinates. Because the field book also carries <code>CHECK_DIRECTION</code>, a CSV export alone is enough to recompute the orientation and verify that each check appears once per line.</p>
 <h2 id="residual-degrees-of-freedom">Residual degrees of freedom<a class="headerlink" href="#residual-degrees-of-freedom" title="Permanent link">&para;</a></h2>
 <ul>
-<li>$<code>\mathrm{df} &lt; 1</code>$: rejected (no residual variance estimate).</li>
-<li>$<code>1 \le \mathrm{df} &lt; 10</code>$: allowed, with a warning (<code>fieldhub_arc_low_df_warning</code>) at construction, and a persistent notice printed by <code>print()</code> and <code>summary()</code> every time.</li>
+<li><span class="arithmatex">\(\mathrm{df} &lt; 1\)</span>: rejected (no residual variance estimate).</li>
+<li><span class="arithmatex">\(1 \le \mathrm{df} &lt; 10\)</span>: allowed, with a warning (<code>fieldhub_arc_low_df_warning</code>) at construction, and a persistent notice printed by <code>print()</code> and <code>summary()</code> every time.</li>
 </ul>
-<p>The warning states the df and, under independent normal errors, the relative standard deviation of the residual-variance estimate, $<code>\sqrt{2/\mathrm{df}}</code>$ (about 82% at 3 df, 45% at 10 df).</p>
-<p>Only adding a check or changing the number of rows or columns raises the residual degrees of freedom. Because df depends only on $<code>v</code>$, $<code>s</code>$ and $<code>k</code>$, a longer search or another objective never changes it.</p>
-<p>For example, the 12 × 8 field with three checks in the upload example below has $<code>\mathrm{df} = 3 \cdot 8 - 3 - 12 - 8 + 2 = 3</code>$. This field geometry is one tabulated by Piepho and Williams (2026) (their Table 1).</p>
+<p>The warning states the df and, under independent normal errors, the relative standard deviation of the residual-variance estimate, <span class="arithmatex">\(\sqrt{2/\mathrm{df}}\)</span> (about 82% at 3 df, 45% at 10 df).</p>
+<p>Only adding a check or changing the number of rows or columns raises the residual degrees of freedom. Because df depends only on <span class="arithmatex">\(v\)</span>, <span class="arithmatex">\(s\)</span> and <span class="arithmatex">\(k\)</span>, a longer search or another objective never changes it.</p>
+<p>For example, the 12 × 8 field with three checks in the upload example below has <span class="arithmatex">\(\mathrm{df} = 3 \cdot 8 - 3 - 12 - 8 + 2 = 3\)</span>. This field geometry is one tabulated by Piepho and Williams (2026) (their Table 1).</p>
 <h2 id="use-case">Use case<a class="headerlink" href="#use-case" title="Permanent link">&para;</a></h2>
-<p>A breeding program needs to test 80 lines with four checks at two locations, FARGO and CASSELTON, in a field of 12 rows and 10 columns at each location. Every check must appear once in every field column. The field has $<code>12 \times 10 = 120</code>$ plots: each of the four checks takes one plot in each of the 10 columns (40 check plots), and the 80 lines fill the remaining plots. The design has $<code>4 \cdot 10 - 4 - 12 - 10 + 2 = 16</code>$ residual degrees of freedom.</p>
+<p>A breeding program needs to test 80 lines with four checks at two locations, FARGO and CASSELTON, in a field of 12 rows and 10 columns at each location. Every check must appear once in every field column. The field has <span class="arithmatex">\(12 \times 10 = 120\)</span> plots: each of the four checks takes one plot in each of the 10 columns (40 check plots), and the 80 lines fill the remaining plots. The design has <span class="arithmatex">\(4 \cdot 10 - 4 - 12 - 10 + 2 = 16\)</span> residual degrees of freedom.</p>
 <h2 id="running-the-shiny-app">Running the Shiny App<a class="headerlink" href="#running-the-shiny-app" title="Permanent link">&para;</a></h2>
 <p>To launch the app you need to run either</p>
 <div class="highlight"><pre><span></span><code><span class="n">FielDHub</span><span class="o">::</span><span class="nf">run_app</span><span class="p">()</span>
@@ -4265,7 +4260,7 @@ Line 007
 
 <ol>
 <li><strong>Input # of Rows:</strong> and <strong>Input # of Columns:</strong> the field size (12 and 10 in the use case).</li>
-<li><strong>Input # of Entries:</strong> the number of test entries (shown only without an upload). It must equal the number of test plots, $<code>T</code>$ = rows × columns − checks × $<code>s</code>$ (80).</li>
+<li><strong>Input # of Entries:</strong> the number of test entries (shown only without an upload). It must equal the number of test plots, <span class="arithmatex">\(T\)</span> = rows × columns − checks × <span class="arithmatex">\(s\)</span> (80).</li>
 <li><strong>Input # of Checks:</strong> the number of checks, at least 2 (4).</li>
 <li><strong>Each check appears once in every:</strong> <code>column</code> or <code>row</code>. No default: it must be chosen (<code>column</code>).</li>
 <li><strong>Search objective:</strong> <code>V_tt: test versus test variance</code>, <code>V_tc: test versus check variance</code> or <code>E_aug: efficiency of all comparisons</code>. The value selected when the page opens is the default, <code>V_tt</code>.</li>
@@ -4293,10 +4288,10 @@ Line 007
 </code></pre></div>
 <h3 id="inputs-of-augmented_row_column">Inputs of <code>augmented_row_column()</code><a class="headerlink" href="#inputs-of-augmented_row_column" title="Permanent link">&para;</a></h3>
 <ul>
-<li><code>checks</code>: a count $<code>k \ge 2</code>$ gives labels <code>CH1</code>, …, <code>CHk</code>; or a character vector of at least two distinct, non-missing, non-blank labels, used in that order.</li>
-<li><code>entries</code>: <code>NULL</code> (default) fills every test plot with labels <code>G(k+1)</code>, …, <code>G(k+T)</code>; a count must equal $<code>T</code>$ and gives the same labels; a character vector of distinct labels must have length $<code>T</code>$.</li>
+<li><code>checks</code>: a count <span class="arithmatex">\(k \ge 2\)</span> gives labels <code>CH1</code>, …, <code>CHk</code>; or a character vector of at least two distinct, non-missing, non-blank labels, used in that order.</li>
+<li><code>entries</code>: <code>NULL</code> (default) fills every test plot with labels <code>G(k+1)</code>, …, <code>G(k+T)</code>; a count must equal <span class="arithmatex">\(T\)</span> and gives the same labels; a character vector of distinct labels must have length <span class="arithmatex">\(T\)</span>.</li>
 <li>Check and test labels must differ. Labels are kept exactly as given, including spaces and punctuation, and are compared exactly.</li>
-<li><code>data</code>: an entry table with exactly the columns <code>ENTRY | NAME</code>. With <code>data</code>, <code>checks</code> must be the count $<code>k</code>$ (the first $<code>k</code>$ rows are the checks), and <code>entries</code> must be <code>NULL</code>; supplying both is an error naming the conflict, never a silent choice. The table must have $<code>k + T</code>$ rows.</li>
+<li><code>data</code>: an entry table with exactly the columns <code>ENTRY | NAME</code>. With <code>data</code>, <code>checks</code> must be the count <span class="arithmatex">\(k\)</span> (the first <span class="arithmatex">\(k\)</span> rows are the checks), and <code>entries</code> must be <code>NULL</code>; supplying both is an error naming the conflict, never a silent choice. The table must have <span class="arithmatex">\(k + T\)</span> rows.</li>
 <li><code>ENTRY</code> in the field book: <code>1..k</code> for checks and <code>k+1..k+T</code> for tests without <code>data</code>; the uploaded values with <code>data</code>.</li>
 <li><code>exptName</code> defaults to <code>"Expt1"</code>, <code>year</code> to the current year, <code>locationNames</code> to <code>1..l</code>; the effective values are recorded, so a later replay reproduces them.</li>
 </ul>
@@ -4321,14 +4316,14 @@ Line 007
 <ul>
 <li><code>nrows = 12</code>, <code>ncols = 10</code>: the field size, 120 plots per location.</li>
 <li><code>checks = 4</code>: four checks, labeled <code>CH1</code> to <code>CH4</code>.</li>
-<li><code>check_direction = "columns"</code>: every check appears once in every field column, so $<code>v = 12</code>$ and $<code>s = 10</code>$.</li>
+<li><code>check_direction = "columns"</code>: every check appears once in every field column, so <span class="arithmatex">\(v = 12\)</span> and <span class="arithmatex">\(s = 10\)</span>.</li>
 <li><code>entries</code> is not given, so the 80 test plots get the labels <code>G5</code> to <code>G84</code>.</li>
 <li><code>objective = "V_tt"</code>: minimize the mean test-versus-test variance.</li>
 <li><code>method = "staged"</code>: the only search method.</li>
 <li><code>budget = 500</code>: at most 500 objective calls per location. This is far below the default and is used only to keep the example fast; it says nothing about the quality of the result.</li>
 <li><code>l = 2</code>, <code>plotNumber = c(1001, 2001)</code>, <code>locationNames = c("FARGO", "CASSELTON")</code>: two locations, each with its own first plot number.</li>
 <li><code>exptName</code>, <code>year</code>: recorded in the <code>EXPT</code> and <code>YEAR</code> columns.</li>
-<li><code>seed = 2026</code>: the seed. Location $<code>i</code>$ runs with seed <code>2026 + i - 1</code>.</li>
+<li><code>seed = 2026</code>: the seed. Location <span class="arithmatex">\(i\)</span> runs with seed <code>2026 + i - 1</code>.</li>
 </ul>
 <h3 id="print-arc-output">Print arc output<a class="headerlink" href="#print-arc-output" title="Permanent link">&para;</a></h3>
 <p><code>print()</code> shows, for every location, the residual df, the value of the optimized objective, all three objectives, the worst-case variances and the search status.</p>
@@ -4419,7 +4414,7 @@ Line 007
 <span class="o">$</span><span class="n">time_limit_hit</span>
 <span class="p">[</span><span class="m">1</span><span class="p">]</span><span class="w"> </span><span class="kc">FALSE</span>
 </code></pre></div>
-<p><code>arc$contraction</code> holds the $<code>k \times s</code>$ contraction of each location: entry $<code>(h, j)</code>$ is the field row that holds check $<code>h</code>$ in field column $<code>j</code>$.</p>
+<p><code>arc$contraction</code> holds the <span class="arithmatex">\(k \times s\)</span> contraction of each location: entry <span class="arithmatex">\((h, j)\)</span> is the field row that holds check <span class="arithmatex">\(h\)</span> in field column <span class="arithmatex">\(j\)</span>.</p>
 <div class="highlight"><pre><span></span><code><span class="n">arc</span><span class="o">$</span><span class="n">contraction</span><span class="o">$</span><span class="n">FARGO</span>
 <span class="w">     </span><span class="p">[,</span><span class="m">1</span><span class="p">]</span><span class="w"> </span><span class="p">[,</span><span class="m">2</span><span class="p">]</span><span class="w"> </span><span class="p">[,</span><span class="m">3</span><span class="p">]</span><span class="w"> </span><span class="p">[,</span><span class="m">4</span><span class="p">]</span><span class="w"> </span><span class="p">[,</span><span class="m">5</span><span class="p">]</span><span class="w"> </span><span class="p">[,</span><span class="m">6</span><span class="p">]</span><span class="w"> </span><span class="p">[,</span><span class="m">7</span><span class="p">]</span><span class="w"> </span><span class="p">[,</span><span class="m">8</span><span class="p">]</span><span class="w"> </span><span class="p">[,</span><span class="m">9</span><span class="p">]</span><span class="w"> </span><span class="p">[,</span><span class="m">10</span><span class="p">]</span>
 <span class="p">[</span><span class="m">1</span><span class="p">,]</span><span class="w">   </span><span class="m">10</span><span class="w">    </span><span class="m">2</span><span class="w">    </span><span class="m">4</span><span class="w">    </span><span class="m">6</span><span class="w">    </span><span class="m">3</span><span class="w">    </span><span class="m">8</span><span class="w">    </span><span class="m">7</span><span class="w">   </span><span class="m">12</span><span class="w">    </span><span class="m">5</span><span class="w">    </span><span class="m">11</span>
@@ -4483,7 +4478,7 @@ Line 007
 <span class="m">9</span><span class="w">          </span><span class="n">columns</span>
 <span class="m">10</span><span class="w">         </span><span class="n">columns</span>
 </code></pre></div>
-<p>The field book alone is enough to verify the placement. At FARGO each check appears once in every field column, and every field row holds 3 or 4 check plots ($<code>\lfloor 40/12 \rfloor = 3</code>$, $<code>\lceil 40/12 \rceil = 4</code>$):</p>
+<p>The field book alone is enough to verify the placement. At FARGO each check appears once in every field column, and every field row holds 3 or 4 check plots (<span class="arithmatex">\(\lfloor 40/12 \rfloor = 3\)</span>, <span class="arithmatex">\(\lceil 40/12 \rceil = 4\)</span>):</p>
 <div class="highlight"><pre><span></span><code><span class="n">book</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">arc</span><span class="o">$</span><span class="n">fieldBook</span>
 <span class="n">fargo_checks</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">book</span><span class="p">[</span><span class="n">book</span><span class="o">$</span><span class="n">LOCATION</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">&quot;FARGO&quot;</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">book</span><span class="o">$</span><span class="n">CHECKS</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="m">0</span><span class="p">,</span><span class="w"> </span><span class="p">]</span>
 <span class="nf">table</span><span class="p">(</span><span class="n">fargo_checks</span><span class="o">$</span><span class="n">TREATMENT</span><span class="p">,</span><span class="w"> </span><span class="n">fargo_checks</span><span class="o">$</span><span class="n">COLUMN</span><span class="p">)</span>
@@ -4547,7 +4542,7 @@ Line 007
 <span class="o">!</span><span class="w"> </span><span class="n">With</span><span class="w"> </span><span class="n">check_direction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;columns&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">every</span><span class="w"> </span><span class="n">check</span><span class="w"> </span><span class="n">appears</span><span class="w"> </span><span class="n">once</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="n">each</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="m">12</span><span class="w"> </span><span class="n">field</span><span class="w"> </span><span class="n">columns</span><span class="p">,</span><span class="w"> </span><span class="n">which</span><span class="w"> </span><span class="n">needs</span><span class="w"> </span><span class="n">at</span><span class="w"> </span><span class="n">least</span><span class="w"> </span><span class="m">12</span><span class="w"> </span><span class="n">field</span><span class="w"> </span><span class="n">rows</span><span class="p">;</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">field</span><span class="w"> </span><span class="n">has</span><span class="w"> </span><span class="m">10</span><span class="w"> </span><span class="p">(</span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">12</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">10</span><span class="p">)</span><span class="n">.</span><span class="w"> </span><span class="n">Use</span><span class="w"> </span><span class="n">check_direction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;rows&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">or</span><span class="w"> </span><span class="n">change</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">numbers</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">rows</span><span class="w"> </span><span class="n">and</span><span class="w"> </span><span class="n">columns.</span>
 </code></pre></div>
 <h3 id="uploading-an-entry-list">Uploading an entry list<a class="headerlink" href="#uploading-an-entry-list" title="Permanent link">&para;</a></h3>
-<p>An entry list with the columns <code>ENTRY | NAME</code> can be passed as <code>data</code>. Here a 12 × 8 field with three checks along the columns has $<code>T = (12 - 3) \cdot 8 = 72</code>$ test plots, so the list has 75 rows, checks first. This field has only 3 residual degrees of freedom, so the call warns:</p>
+<p>An entry list with the columns <code>ENTRY | NAME</code> can be passed as <code>data</code>. Here a 12 × 8 field with three checks along the columns has <span class="arithmatex">\(T = (12 - 3) \cdot 8 = 72\)</span> test plots, so the list has 75 rows, checks first. This field has only 3 residual degrees of freedom, so the call warns:</p>
 <div class="highlight"><pre><span></span><code><span class="n">k</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="m">3</span>
 <span class="n">n_tests</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="p">(</span><span class="m">12</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">k</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="m">8</span>
 <span class="n">entries_list</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">data.frame</span><span class="p">(</span>
