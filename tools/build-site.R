@@ -37,7 +37,8 @@ build_site <- function() {
     rmarkdown::render(input,
       output_format = rmarkdown::md_document(
         variant = "gfm+raw_html", fig_retina = 2,
-        pandoc_args = c("--wrap=none", "--lua-filter", file.path(root, "website/heading-ids.lua"))),
+        pandoc_args = c("--wrap=none", "--lua-filter", file.path(root, "website/heading-ids.lua"),
+                        "--lua-filter", file.path(root, "website/math.lua"))),
       output_file = basename(destination), envir = new.env(), quiet = TRUE)
     content <- readLines(destination, warn = FALSE)
     writeLines(c("---", yaml::as.yaml(list(title = title,
