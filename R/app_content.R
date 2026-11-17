@@ -27,8 +27,8 @@ fieldhub_about_info <- function() {
 
 #' Accessible links that do not give the new tab access to the app
 #' @noRd
-app_external_link <- function(label, url) {
-  shiny::tags$a(label, href = url, target = "_blank", rel = "noopener noreferrer")
+app_external_link <- function(label, url, ...) {
+  shiny::tags$a(label, href = url, target = "_blank", rel = "noopener noreferrer", ...)
 }
 
 #' Licence for display: "MIT + file LICENSE" reads as "MIT"
@@ -138,8 +138,8 @@ app_about_ui <- function() {
       shiny::tags$section(id = "photo-credits",
         shiny::h2(class = "fh-label", "Photo credits"),
         shiny::p(class = "fh-small",
-          "Welcome: aerial view of an NDSU breeding trial, by ",
-          app_external_link(unit$name, unit$url), ", NDSU; cropped."),
+          "Welcome: aerial view of a barley field trial at the Prosper Research Site, North Dakota, by ",
+          app_external_link(unit$name, unit$url, .noWS = "after"), ", NDSU; cropped."),
         shiny::p(class = "fh-small",
           "Help and About: illustrative images (AI-generated), not photographs of real trials."))),
     team = app_team_ui(team), footer = htmltools::HTML(fieldhub_footer()))

@@ -81,7 +81,7 @@ test_that("About keeps package facts, citation, the developing unit and photo cr
   info <- fieldhub_about_info()
   for (text in c(info$version, fieldhub_license_label(info$license), info$issues,
                  '<code>citation("FielDHub")</code>', "joss.03122", fieldhub_unit()$name, fieldhub_unit()$url,
-                 'id="photo-credits"', "aerial view of an NDSU breeding trial", "AI-generated")) {
+                 'id="photo-credits"', "barley field trial at the Prosper Research Site, North Dakota", "AI-generated")) {
     expect_match(aside, text, fixed = TRUE)
   }
   expect_false(grepl("+ file LICENSE", aside, fixed = TRUE))

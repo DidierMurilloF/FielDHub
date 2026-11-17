@@ -58,8 +58,8 @@ knitr::opts_chunk$set(
   how to cite FielDHub and the photo credits. The footer and Help now name
   Agricultural Data Analytics, NDSU
   (<https://www.ndsu.edu/agricultural-data-analytics>). The Welcome banner is
-  an aerial photograph of an NDSU breeding trial by Agricultural Data
-  Analytics. `dev/page_images.R` renders the example's images.
+  an aerial photograph of a barley field trial at the Prosper Research Site,
+  North Dakota, by Agricultural Data Analytics. `dev/page_images.R` renders the example's images.
 - The app's styles and scripts are served under a version that changes with
   their contents, so browsers load the current files after an update instead
   of a cached copy that no longer matches the pages.
