@@ -1,6 +1,7 @@
 #' Function to re-randomize IBD design
 #'
-#' @param ibd_design Input design from the `blocksdesign` package
+#' @param ibd_design A resolvable design from `blocks_engine(resolvable = TRUE)`:
+#'   `Design` with `Level_1`, `Level_2`, `plots` and `treatments`
 #' @return Modified IBD design with re-randomized treatments
 #' @author Didier Murillo
 #' @noRd

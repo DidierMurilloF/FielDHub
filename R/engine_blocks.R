@@ -44,6 +44,7 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
   n <- v * replicates
   total_blocks <- if (resolvable) as.double(replicates) * blocks else as.double(blocks)
   cycle <- FALSE
+  unoptimised <- FALSE
   if (n > .Machine$integer.max) {
     fieldhub_abort("The design has too many plots for the block engine.",
                    data = list(plots = n))
@@ -56,16 +57,14 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
     }
     # Two replicates of blocks of two need no search (closed form below).
     cycle <- replicates == 2 && treatments == 2 * blocks && is.null(start)
-    if (total_blocks > resolvable_block_limit && !cycle) {
-      fieldhub_abort("The block engine supports at most ", resolvable_block_limit,
-                     " blocks in a resolvable design; this one has ", total_blocks, ".",
-                     data = list(blocks = total_blocks, limit = resolvable_block_limit))
-    }
+    # Above the block limit the design is built without a search (owner
+    # decision, spec section 10).
+    unoptimised <- total_blocks > resolvable_block_limit && !cycle
   } else if (blocks > 1000) {
     fieldhub_abort("The block engine supports at most 1000 blocks and 1e8 treatment-block cells.",
                    data = list(blocks = blocks, treatments = treatments))
   }
-  if (v * total_blocks > 1e8) {
+  if (v * total_blocks > 1e8 && !unoptimised) {
     fieldhub_abort("The block engine supports at most ",
                    if (resolvable) paste0(resolvable_block_limit, " blocks") else "1000 blocks",
                    " and 1e8 treatment-block cells.",
@@ -94,6 +93,14 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
   }
   if (resolvable && cycle) {
     return(cycle_resolvable_design(treatments, blocks))
+  }
+  if (unoptimised) {
+    fieldhub_warn("The design has ", total_blocks, " incomplete blocks, more than the ",
+                  resolvable_block_limit, " the block search supports, so it was not optimized: ",
+                  "it is a random connected resolvable design. A larger block size gives fewer ",
+                  "blocks and an optimized design.",
+                  class = "fieldhub_design_warning", call = NULL)
+    return(random_resolvable_design(treatments, replicates, blocks))
   }
   pairs <- if (resolvable) replicates * v * (v - 1) / 2 else n * (n - 1) / 2
   if (resolvable && missing(searches)) searches <- resolvable_searches(total_blocks)
@@ -211,6 +218,46 @@ cycle_resolvable_design <- function(v, blocks) {
                         searches_done = 0L, refreshes = 0, drift_events = 0, repairs = 0,
                         even_repairs = 0L, debug_max_error = NA_real_)
   result
+}
+
+#' Unoptimised resolvable design above the block limit (spec section 10)
+#'
+#' Each replicate is a random permutation of the treatments cut into blocks.
+#' The treatment-block graph is checked for connectivity by label propagation
+#' (O(n) per sweep, no dense algebra); a disconnected layout is reshuffled, up
+#' to 10 layouts. Level 2 efficiencies are left NA: the callers report them
+#' from the field book.
+#' @noRd
+random_resolvable_design <- function(v, r, blocks) {
+  k <- v %/% blocks
+  block <- rep(seq_len(r * blocks), each = k)
+  for (attempt in seq_len(10L)) {
+    treat <- as.vector(vapply(seq_len(r), function(m) sample.int(v), integer(v)))
+    if (resolvable_connected(treat, block, v)) {
+      result <- resolvable_engine_output(treat, v, r, blocks)
+      result$search <- list(evaluations = 0, budget = 0, stop_reason = "unoptimised",
+                            searches_done = 0L, refreshes = 0, drift_events = 0, repairs = 0,
+                            even_repairs = 0L, debug_max_error = NA_real_)
+      return(result)
+    }
+  }
+  fieldhub_abort("No connected starting design was found within 10 random resolvable layouts.",
+                 class = c("fieldhub_unconnected_error", "fieldhub_input_error"),
+                 data = list(treatments = v, replicates = r, blocks = blocks))
+}
+
+#' Connectivity of a treatment-block layout: every treatment and block takes the
+#' smallest label among its neighbours until no label changes.
+#' @noRd
+resolvable_connected <- function(treat, block, v) {
+  label <- seq_len(v)
+  repeat {
+    block_label <- tapply(label[treat], block, min)
+    next_label <- pmin(label, tapply(block_label[block], treat, min)[as.character(seq_len(v))])
+    if (identical(as.integer(next_label), as.integer(label))) break
+    label <- as.integer(next_label)
+  }
+  all(label == 1L)
 }
 
 #' Resolvable-mode limits (nested-engine spec section 6.2). B is the total

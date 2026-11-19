@@ -55,3 +55,15 @@ test_that("incomplete_blocks() builds many blocks of two plots", {
   level2 <- y$blocksModel[y$blocksModel$Level == 2, ]
   expect_lte(abs(level2[["A-Efficiency"]] - 3 / 101), 1e-7)
 })
+
+test_that("incomplete_blocks() returns an unoptimized resolvable design above the block limit", {
+  # 700 / 2 * 3 = 1050 blocks, beyond the block search: the design is still
+  # built, connected and resolvable, with a warning that it was not optimized.
+  expect_warning(x <- incomplete_blocks(t = 700, k = 2, reps = 3, seed = 1),
+                 "not optimized", class = "fieldhub_design_warning")
+  book <- x$fieldBook
+  expect_true(all(table(book$ENTRY, book$REP) == 1))
+  expect_true(all(table(interaction(book$REP, book$IBLOCK, drop = TRUE)) == 2))
+  level2 <- x$blocksModel[x$blocksModel$Level == 2, ]
+  expect_gt(level2[["A-Efficiency"]], 0)
+})
