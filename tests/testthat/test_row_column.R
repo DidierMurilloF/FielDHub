@@ -329,3 +329,15 @@ test_that("the twostage row A-efficiency reaches the recorded baseline mean", {
   bm <- des$blocksModel[[1]]
   expect_gte(bm$`A-Efficiency`[bm$Level == "Row"], 0.9424677)
 })
+
+test_that("the smallest twostage effort still returns connected rows", {
+  # With rows of two plots the column design's rows are often disconnected
+  # (Row A-Efficiency 0). The row step connects them first, whatever the
+  # search effort is.
+  for (seed in c(3, 10, 11, 18, 19)) {
+    des <- row_column(t = 20, nrows = 10, reps = 2, method = "twostage", seed = seed,
+                      iterations = 1)
+    bm <- des$blocksModel[[1]]
+    expect_gt(bm$`A-Efficiency`[bm$Level == "Row"], 0)
+  }
+})

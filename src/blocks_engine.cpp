@@ -291,12 +291,16 @@ const double kDisconnectRel = 1e-9;
 
 // Random swaps that never increase the number of components, until the
 // design is connected. Each check is charged one evaluation, like a swap
-// evaluation; its O(n + v + b) union-find is recorded as work. Returns true if
-// connected.
+// evaluation; its O(n + v + b) union-find is recorded as work. In
+// rows-within-columns mode a check is recorded as work only: the given design
+// is the only start there, so its repair must not depend on the evaluation
+// budget, which the caller's effort can make as small as one evaluation; the
+// 50 n tries bound it instead. Returns true if connected.
 bool repair_connectivity(const Layout& lay, std::vector<int>& treat, Budget& budget, Search& out) {
   int comp = components(lay, treat);
   for (double tries = 0; comp > 1 && tries < 50.0 * lay.n; ++tries) {
-    if (!budget.spend(1.0) || !budget.work(static_cast<double>(lay.n + lay.v + lay.b))) return false;
+    if (!lay.columns && !budget.spend(1.0)) return false;
+    if (!budget.work(static_cast<double>(lay.n + lay.v + lay.b))) return false;
     int x, y;
     if (!draw_swap(lay, treat, x, y)) continue;
     std::swap(treat[x], treat[y]);
@@ -407,9 +411,12 @@ void run_search(const Layout& lay, int jumps_per_escape, int max_stale_escapes, 
   if (start && lay.columns) {
     // Rows within columns: the given design is the only start. Its column
     // design is connected, its rows need not be: a disconnected start is
-    // first repaired with column-preserving swaps. Scoring the start is not
-    // charged to the evaluation budget, so the smallest budget still returns
-    // the (repaired) start.
+    // first repaired with column-preserving swaps (up to 10 rounds of 50 n
+    // tries). Neither the repair nor scoring the start is charged to the
+    // evaluation budget (both are recorded as work), so the smallest budget
+    // still returns the repaired start; only the work cap or the time limit
+    // can end the repair early. A start whose rows stay disconnected after
+    // the 10 rounds gives no design.
     treat = *start;
     for (int attempt = 0; attempt < 10 && components(lay, treat) > 1; ++attempt) {
       if (!repair_connectivity(lay, treat, budget, out) && budget.stopped()) return;
