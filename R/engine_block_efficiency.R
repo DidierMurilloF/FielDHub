@@ -67,8 +67,12 @@ block_incidence_efficiency <- function(incidence) {
 #'
 #' A-efficiency bounds use the documented blocksdesign::A_bound() API.
 #' Retain the established report column names, order, and seven-digit rounding.
+#' `known`, if given, holds the D- and A-efficiencies of each block factor in
+#' order (columns `D-Efficiency` and `A-Efficiency`, as the block engine
+#' reports them): they are reported, rounded, instead of being recomputed with
+#' the singular value decomposition.
 #' @noRd
-BlockEfficiencies <- function(Design) {
+BlockEfficiencies <- function(Design, known = NULL) {
   if (!is.data.frame(Design) || nrow(Design) == 0L || anyNA(names(Design)) ||
       anyDuplicated(names(Design)) || !all(c("plots", "treatments") %in% names(Design))) {
     fieldhub_abort("A block model needs named plots, treatments, and block-factor columns.")
@@ -83,7 +87,12 @@ BlockEfficiencies <- function(Design) {
     bound <- if (length(unique(replication)) == 1L && length(unique(block_size)) == 1L) {
       blocksdesign::A_bound(nrow(Design), nrow(incidence), ncol(incidence))
     } else 1
-    efficiency <- block_incidence_efficiency(incidence)
+    efficiency <- if (is.null(known)) {
+      block_incidence_efficiency(incidence)
+    } else {
+      list(Deffic = round(known[["D-Efficiency"]][level], 7),
+           Aeffic = round(known[["A-Efficiency"]][level], 7))
+    }
     data.frame(Level = level, Blocks = ncol(incidence),
                `D-Efficiency` = efficiency$Deffic, `A-Efficiency` = efficiency$Aeffic,
                `A-Bound` = round(bound, 7), check.names = FALSE)
