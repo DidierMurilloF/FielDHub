@@ -15,6 +15,9 @@
 #' pair from a quasi-difference matrix (Bose, Shrikhande & Parker 1960). The
 #' remaining orders below 50 use pairs found by FielDHub's own search
 #' (`stored_mols`, R/engine_mols_data.R) or products of the above.
+#' Rectangular lattices (v = s (s - 1), blocks of s - 1) come from a square
+#' lattice with one block deleted (Shrikhande's method, Cochran & Cox 1957,
+#' p. 417) or, at r = 3, from a Latin square with a transversal deleted.
 #'
 #' Clean room: written from the cited mathematics and the spec only.
 #' @noRd
@@ -307,27 +310,170 @@ lattice_classes <- function(q, classes) {
   unname(groups)
 }
 
+#' Groups of a rectangular lattice: v = s (s - 1) treatments in s blocks of
+#' s - 1 per replicate, as a v x r matrix of 0-based groups, or NULL
+#'
+#' Shrikhande's method (Cochran & Cox 1957, p. 417) when r + 1 <= 2 +
+#' `mols_max(s)`: in a square lattice of order s with r + 1 orthogonal
+#' classes, group 0 of class r + 1 meets every block of the other classes in
+#' exactly one treatment, so deleting its s treatments and dropping class r + 1
+#' leaves r resolvable classes of s blocks of s - 1. Otherwise, at r = 3, the
+#' rows, columns and symbols of the cells of a Latin square of order s outside
+#' one transversal (`transversal_square()`): each row, column and symbol loses
+#' exactly one cell.
+#' @noRd
+rectangular_lattice_classes <- function(s, r) {
+  s <- as.integer(s)
+  r <- as.integer(r)
+  if (s < 3L || r < 2L) return(NULL)
+  if (r + 1L <= 2L + mols_max(s)) {
+    groups <- lattice_classes(s, r + 1L)
+    if (is.null(groups)) return(NULL)
+    return(groups[groups[, r + 1L] != 0L, seq_len(r), drop = FALSE])
+  }
+  if (r != 3L) return(NULL)
+  square <- transversal_square(s)
+  keep <- matrix(TRUE, s, s)
+  keep[square$transversal] <- FALSE
+  cells <- which(keep, arr.ind = TRUE)
+  unname(cbind(cells[, 1L] - 1L, cells[, 2L] - 1L, square$square[cells]))
+}
+
+#' A Latin square of order s >= 3 (0-based symbols) and one of its
+#' transversals, `list(square, transversal)`, the transversal as an s x 2
+#' matrix of 1-based (row, column) cells
+#'
+#' Odd s: the cyclic square (i + j) mod s, whose main diagonal holds the
+#' distinct symbols 2i mod s. Even s: the cyclic square of the odd order
+#' u = s - 1 prolonged along its main diagonal (Denes & Keedwell 1974, section
+#' 1.5): each diagonal cell's symbol moves to the new last column of its row
+#' and the new last row of its column, the diagonal cells and the corner take
+#' the new symbol u. Its transversal is found by depth-first search over the
+#' rows, deterministic and with no random draws: row i (0-based) tries the
+#' columns i + 1, i + 2, ... cyclically. The search then takes no step back,
+#' because the first choices already form a transversal: cells (i, i + 1 mod
+#' u) for i < u hold the distinct symbols 2 i + 1 mod u (u odd) and miss the
+#' diagonal, and the corner (u, u) adds the symbol u (own derivation). Plain
+#' increasing column order needed 50 s at s = 38. NULL if the search finds
+#' none.
+#' @noRd
+transversal_square <- function(s) {
+  s <- as.integer(s)
+  if (s %% 2L == 1L) {
+    square <- outer(0:(s - 1L), 0:(s - 1L), function(i, j) (i + j) %% s)
+    return(list(square = square, transversal = cbind(seq_len(s), seq_len(s))))
+  }
+  u <- s - 1L
+  square <- matrix(u, s, s)
+  square[seq_len(u), seq_len(u)] <- outer(0:(u - 1L), 0:(u - 1L), function(i, j) (i + j) %% u)
+  diagonal <- cbind(seq_len(u), seq_len(u))
+  square[cbind(seq_len(u), s)] <- square[diagonal]
+  square[cbind(s, seq_len(u))] <- square[diagonal]
+  square[diagonal] <- u
+  storage.mode(square) <- "integer"
+  column_used <- logical(s)
+  symbol_used <- logical(s)
+  pick <- integer(s)  # column chosen in each row, 0 while unset
+  row <- 1L
+  while (row >= 1L && row <= s) {
+    if (pick[row] > 0L) {
+      # Undo this row's choice before trying its next column.
+      column_used[pick[row]] <- FALSE
+      symbol_used[square[row, pick[row]] + 1L] <- FALSE
+    }
+    # Columns in cyclic order from the one after the diagonal; `tried` is the
+    # number of them this row has used up.
+    order_of_row <- (row + seq_len(s) - 1L) %% s + 1L
+    tried <- if (pick[row] == 0L) 0L else match(pick[row], order_of_row)
+    next_column <- 0L
+    for (column in order_of_row[seq_len(s) > tried]) {
+      if (!column_used[column] && !symbol_used[square[row, column] + 1L]) {
+        next_column <- column
+        break
+      }
+    }
+    if (next_column == 0L) {
+      pick[row] <- 0L
+      row <- row - 1L
+    } else {
+      pick[row] <- next_column
+      column_used[next_column] <- TRUE
+      symbol_used[square[row, next_column] + 1L] <- TRUE
+      row <- row + 1L
+    }
+  }
+  if (row < 1L) return(NULL)
+  list(square = square, transversal = cbind(seq_len(s), pick))
+}
+
+#' Groups of a lattice for a resolvable shape (v, r, b): the square lattice
+#' when v = b^2 (`lattice_classes()`), the rectangular lattice when
+#' v = b (b - 1) (`rectangular_lattice_classes()`), otherwise NULL
+#' @noRd
+lattice_groups <- function(v, r, b) {
+  if (b < 2 || r < 2) return(NULL)
+  if (v == b * b) {
+    if (r > 2L + mols_max(b)) return(NULL)
+    return(lattice_classes(b, r))
+  }
+  if (b >= 3 && v == b * (b - 1)) return(rectangular_lattice_classes(b, r))
+  NULL
+}
+
 #' Algebraic start for a resolvable shape (v treatments, r replicates, b
 #' blocks per replicate), or NULL
 #'
 #' The shape is recognised from (v, b) alone, whatever function asked for the
-#' design: a square lattice when v = b^2 and 2 <= r <= 2 + `mols_max(b)`.
-#' The start holds v r 1-based treatments in engine plot order (replicate m
-#' in plots (m - 1) v + 1 .. m v, block j of it in the j-th run of v / b
-#' plots). Treatment labels and the block order within each replicate are
-#' permuted with `sample.int()`; returning NULL makes no random draws, so
-#' shapes without a construction keep their seeded results.
+#' design: a square lattice when v = b^2 and 2 <= r <= 2 + `mols_max(b)`, a
+#' rectangular lattice when v = b (b - 1) and either r + 1 <= 2 +
+#' `mols_max(b)` or r = 3 (`lattice_groups()`). The start holds v r 1-based
+#' treatments in engine plot order (replicate m in plots (m - 1) v + 1 .. m v,
+#' block j of it in the j-th run of v / b plots). Treatment labels and the
+#' block order within each replicate are permuted with `sample.int()`;
+#' returning NULL makes no random draws, so shapes without a construction keep
+#' their seeded results.
 #' @noRd
 resolvable_lattice_start <- function(v, r, b) {
-  if (b < 2 || r < 2 || v != b * b) return(NULL)
-  if (r > 2L + mols_max(b)) return(NULL)
-  groups <- lattice_classes(b, r)
+  groups <- lattice_groups(v, r, b)
   if (is.null(groups)) return(NULL)
   v <- as.integer(v)
   b <- as.integer(b)
   groups <- groups[sample.int(v), , drop = FALSE]
   for (m in seq_len(r)) groups[, m] <- (sample.int(b) - 1L)[groups[, m] + 1L]
   as.integer(unlist(lapply(seq_len(r), function(m) order(groups[, m])), use.names = FALSE))
+}
+
+#' Level 2 efficiencies of a resolvable design from its block concurrences
+#'
+#' `start` in engine plot order (see `resolvable_lattice_start()`), blocks of
+#' k = v / b. With N the v x B incidence, the efficiency factors are the
+#' eigenvalues of I - N N' / (r k) on the treatment contrasts. The nonzero
+#' eigenvalues of N N' are those of the B x B matrix N' N, whose (i, j) entry
+#' counts the treatments blocks i and j share; one of them, r k, belongs to the
+#' grand mean. So the rank(N) - 1 other nonzero eigenvalues mu give factors
+#' 1 - mu / (r k), and the remaining v - rank(N) contrasts have factor 1. D and
+#' A are their geometric and harmonic means. Costs O(B^3) and B^2 memory,
+#' not v B. Own derivation.
+#' @noRd
+resolvable_dual_efficiencies <- function(start, v, r, b) {
+  v <- as.integer(v)
+  k <- v %/% as.integer(b)
+  total <- as.integer(r) * as.integer(b)
+  block <- matrix(0L, v, r)  # 1-based block of each treatment in each replicate
+  for (m in seq_len(r)) {
+    block[start[(m - 1L) * v + seq_len(v)], m] <- (m - 1L) * b + (seq_len(v) - 1L) %/% k + 1L
+  }
+  concurrence <- matrix(0, total, total)
+  for (m in seq_len(r)) {
+    for (l in seq_len(r)) {
+      counts <- tabulate((block[, m] - 1L) * total + block[, l], total * total)
+      concurrence <- concurrence + matrix(counts, total, total, byrow = TRUE)
+    }
+  }
+  mu <- eigen(concurrence / (r * k), symmetric = TRUE, only.values = TRUE)$values
+  nonzero <- mu[mu > 1e-9]
+  factors <- c(1 - nonzero[-1L], rep(1, v - length(nonzero)))
+  c(D = exp(mean(log(factors))), A = (v - 1) / sum(1 / factors))
 }
 
 #' Efficiencies of a square lattice of order q with r <= q + 1 orthogonal

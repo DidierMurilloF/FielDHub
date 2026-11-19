@@ -96,10 +96,36 @@ test_that("square lattices of orders 14, 18 and 26 are A-optimal with four repli
   }
 })
 
-test_that("a large square lattice is built at its A-bound", {
+test_that("large lattices are built at their A-bound", {
   # q = 64, r = 4: the construction attains the bound, so the engine returns it
   # without searching (before, one search spent about 7 s confirming it).
   x <- square_lattice(t = 4096, k = 64, reps = 4, seed = 1)
   m <- x$blocksModel[x$blocksModel$Level == 2, ]
   expect_gte(m[["A-Efficiency"]], m[["A-Bound"]] - 1.5e-7)
+  # s = 150, r = 3: too large for the search, so the rectangular construction
+  # is returned with its efficiencies computed from the block concurrences.
+  x <- rectangular_lattice(t = 22350, k = 149, reps = 3, seed = 1)
+  m <- x$blocksModel[x$blocksModel$Level == 2, ]
+  expect_gte(m[["A-Efficiency"]], m[["A-Bound"]] - 1.5e-7)
+})
+
+test_that("rectangular lattices with a construction are A-optimal", {
+  # Shrikhande's method (Cochran & Cox 1957, p. 417) deletes one block of an
+  # (r + 1)-replicate square lattice of order s; at r = 3 and s = 6, 14 (no
+  # third orthogonal square) the rows, columns and symbols of a Latin square
+  # with a transversal deleted. Search alone misses every shape here on seed 1.
+  for (shape in list(c(42, 6, 4), c(56, 7, 4), c(72, 8, 4), c(30, 5, 3), c(90, 9, 3),
+                     c(182, 13, 3))) {
+    for (seed in 1:3) {
+      x <- rectangular_lattice(t = shape[1], k = shape[2], reps = shape[3], seed = seed)
+      m <- x$blocksModel[x$blocksModel$Level == 2, ]
+      expect_gte(m[["A-Efficiency"]], m[["A-Bound"]] - 1.5e-7)
+    }
+  }
+  # Seeds where the search alone stopped below the bound.
+  for (call in list(c(20, 4, 5, 108), c(72, 8, 3, 195))) {
+    x <- rectangular_lattice(t = call[1], k = call[2], reps = call[3], seed = call[4])
+    m <- x$blocksModel[x$blocksModel$Level == 2, ]
+    expect_gte(m[["A-Efficiency"]], m[["A-Bound"]] - 1.5e-7)
+  }
 })

@@ -117,8 +117,13 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
   if (unoptimised && lattice) {
     # A construction the admission refuses attains the A-bound; its closed-form
     # efficiencies equal its score, so it is not scored (scoring allocates
-    # about 8 v B bytes).
-    efficiency <- square_lattice_efficiencies(blocks, replicates)
+    # about 8 v B bytes). A rectangular lattice is scored from its B x B block
+    # concurrences instead.
+    efficiency <- if (treatments == blocks * blocks) {
+      square_lattice_efficiencies(blocks, replicates)
+    } else {
+      resolvable_dual_efficiencies(start, treatments, replicates, blocks)
+    }
     return(unsearched_resolvable_design(start, treatments, replicates, blocks,
                                         efficiency[["D"]], efficiency[["A"]], "construction"))
   }
@@ -283,8 +288,9 @@ cycle_resolvable_design <- function(v, blocks) {
 #'
 #' Used when the start attains the resolvable A-bound (`resolvable_a_bound()`,
 #' stop reason "optimal_start", efficiencies scored by the engine), or when the
-#' admission refuses a square-lattice construction (stop reason "construction",
-#' closed-form efficiencies from `square_lattice_efficiencies()`, not scored).
+#' admission refuses a lattice construction (stop reason "construction",
+#' closed-form efficiencies from `square_lattice_efficiencies()`, or for a
+#' rectangular lattice `resolvable_dual_efficiencies()`, not scored by the engine).
 #' No warning: the design is A-optimal. Only the within-block plot shuffle of
 #' `resolvable_engine_output()` draws from the generator.
 #' @noRd
