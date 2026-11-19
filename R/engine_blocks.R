@@ -14,7 +14,7 @@
 #' clock, so they reproduce from the seed on the same platform and build, and
 #' the total number of blocks is limited to `resolvable_block_limit`. Two
 #' replicates of blocks of two are built in closed form (one 2v-cycle, which
-#' every connected such design is). `start`, if given, holds v r 1-based
+#' every connected such design is), so the block limit does not apply to them. `start`, if given, holds v r 1-based
 #' treatments in plot order (replicate m in plots m v + 1 .. m v + v, each a
 #' permutation of 1..v) and is the start of a single search.
 #' @return A list with `Design`, `Blocks_model` and `search` (evaluations,
@@ -43,6 +43,7 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
   v <- as.double(treatments)
   n <- v * replicates
   total_blocks <- if (resolvable) as.double(replicates) * blocks else as.double(blocks)
+  cycle <- FALSE
   if (n > .Machine$integer.max) {
     fieldhub_abort("The design has too many plots for the block engine.",
                    data = list(plots = n))
@@ -53,7 +54,9 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
                      ") to divide the number of treatments (", treatments, ").",
                      data = list(treatments = treatments, blocks = blocks))
     }
-    if (total_blocks > resolvable_block_limit) {
+    # Two replicates of blocks of two need no search (closed form below).
+    cycle <- replicates == 2 && treatments == 2 * blocks && is.null(start)
+    if (total_blocks > resolvable_block_limit && !cycle) {
       fieldhub_abort("The block engine supports at most ", resolvable_block_limit,
                      " blocks in a resolvable design; this one has ", total_blocks, ".",
                      data = list(blocks = total_blocks, limit = resolvable_block_limit))
@@ -89,7 +92,7 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
     fieldhub_abort("`time_limit` must be one positive number of seconds.",
                    data = list(argument = "time_limit"))
   }
-  if (resolvable && replicates == 2 && treatments == 2 * blocks && is.null(start)) {
+  if (resolvable && cycle) {
     return(cycle_resolvable_design(treatments, blocks))
   }
   pairs <- if (resolvable) replicates * v * (v - 1) / 2 else n * (n - 1) / 2
@@ -214,10 +217,13 @@ cycle_resolvable_design <- function(v, blocks) {
 #' number of blocks r b. A refresh of the dense block space costs about B^3
 #' multiply-adds, so many blocks get fewer searches and a longer refresh
 #' interval, every run is bounded by a fixed amount of work (reproducible from
-#' the seed, unlike the wall clock), and B is limited to the largest value
-#' that finishes within 10 s on the reference machine (measured in Task 2).
+#' the seed, unlike the wall clock), and B is limited. The limit is provisional
+#' (Task 2, measured with 16 of 18 cores busy): above 1000 blocks the work cap
+#' ended the only search after under 15% of its evaluations and runs took 60 s
+#' or more, past the default time limit; it is to be re-measured on an idle
+#' machine against the 10 s target of spec section 6.2.
 #' @noRd
-resolvable_block_limit <- 1500
+resolvable_block_limit <- 1000
 
 #' @noRd
 resolvable_budget_multiplier <- 1
