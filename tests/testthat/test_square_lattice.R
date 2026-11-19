@@ -35,3 +35,26 @@ test_that("square_lattice() randomizes the plot order within blocks", {
   }, logical(1))
   expect_lte(sum(patterned), 1)
 })
+
+test_that("square lattices with a finite-field construction are A-optimal", {
+  # Bose (1938) squares over GF(q) give r <= q + 1 orthogonal replicates when q
+  # is a prime power; search alone misses (64, 8, 4) on every seed.
+  level2 <- function(x) x$blocksModel[x$blocksModel$Level == 2, ]
+  expect_optimal <- function(x) {
+    m <- level2(x)
+    expect_gte(m[["A-Efficiency"]], m[["A-Bound"]] - 1.5e-7)
+  }
+  for (shape in list(c(64, 8, 4), c(81, 9, 4), c(64, 8, 5), c(25, 5, 6))) {
+    for (seed in 1:3) {
+      expect_optimal(square_lattice(t = shape[1], k = shape[2], reps = shape[3], seed = seed))
+    }
+  }
+  # Seeds where the search alone stopped below the bound.
+  expect_optimal(square_lattice(t = 25, k = 5, reps = 4, seed = 3))
+  expect_optimal(square_lattice(t = 16, k = 4, reps = 4, seed = 140))
+  # The start depends on the shape, not on the calling function.
+  expect_optimal(incomplete_blocks(t = 25, k = 5, reps = 4, seed = 3))
+  expect_optimal(alpha_lattice(t = 25, k = 5, reps = 4, seed = 3))
+  # q = 6 has no finite field; the design is still built.
+  expect_s3_class(square_lattice(t = 36, k = 6, reps = 4, seed = 1), "FielDHub")
+})

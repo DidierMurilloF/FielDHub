@@ -17,7 +17,11 @@
 #' otherwise it is returned as a random connected resolvable design with a
 #' warning. Two replicates of blocks of two are built in closed form (one
 #' 2v-cycle, which every connected such design is), so the limits do not apply
-#' to them. `start`, if given, holds v r 1-based
+#' to them. Without a `start`, a shape with an algebraic lattice construction
+#' (`resolvable_lattice_start()`, spec section 6.5) starts its one search from
+#' it, whatever function asked for the design; when admission refuses such a
+#' shape the construction is returned unsearched, without a warning, since it
+#' already reaches the A-bound. `start`, if given, holds v r 1-based
 #' treatments in plot order (replicate m in plots m v + 1 .. m v + v, each a
 #' permutation of 1..v) and is the start of a single search.
 #' @return A list with `Design`, `Blocks_model` and `search` (evaluations,
@@ -47,6 +51,7 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
   n <- v * replicates
   total_blocks <- if (resolvable) as.double(replicates) * blocks else as.double(blocks)
   cycle <- FALSE
+  lattice <- FALSE
   unoptimised <- FALSE
   if (n > .Machine$integer.max) {
     fieldhub_abort("The design has too many plots for the block engine.",
@@ -60,6 +65,12 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
     }
     # Two replicates of blocks of two need no search (closed form below).
     cycle <- replicates == 2 && treatments == 2 * blocks && is.null(start)
+    # An algebraic lattice start, recognised from the shape alone (spec section
+    # 6.5); it draws from the generator only when the shape has one.
+    if (!cycle && is.null(start)) {
+      start <- resolvable_lattice_start(treatments, replicates, blocks)
+      lattice <- !is.null(start)
+    }
     # A shape the search cannot finish inside the work cap is built without a
     # search (owner decision, spec section 10).
     unoptimised <- !cycle && !resolvable_searchable(v, replicates, total_blocks, !is.null(start))
@@ -78,7 +89,7 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
                    class = c("fieldhub_unconnected_error", "fieldhub_input_error"),
                    data = list(plots = n, blocks = total_blocks))
   }
-  if (!is.null(start)) {
+  if (!is.null(start) && !lattice) {
     segments_ok <- is.numeric(start) && length(start) == n && !anyNA(start) &&
       all(start == round(start)) &&
       all(vapply(seq_len(replicates), function(m) {
@@ -100,6 +111,10 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
   }
   if (resolvable && cycle) {
     return(cycle_resolvable_design(treatments, blocks))
+  }
+  if (unoptimised && lattice) {
+    # The construction already reaches the A-bound: return it unsearched.
+    return(lattice_unsearched_design(start, treatments, replicates, blocks))
   }
   if (unoptimised) {
     fieldhub_warn("The design (", treatments, " treatments in ", total_blocks,
@@ -240,6 +255,22 @@ cycle_resolvable_design <- function(v, blocks) {
   result$Blocks_model[2L, c("D-Efficiency", "A-Efficiency")] <-
     c(efficiency[["D-Efficiency"]], efficiency[["A-Efficiency"]])
   result$search <- list(evaluations = 0, budget = 0, stop_reason = "closed_form",
+                        searches_done = 0L, refreshes = 0, drift_events = 0, repairs = 0,
+                        even_repairs = 0L, debug_max_error = NA_real_)
+  result
+}
+
+#' A square-lattice start returned without search (spec section 6.2b, decision 4)
+#'
+#' Used when the work-based admission refuses the shape: the construction is
+#' already A-optimal, so it is returned as is, with its closed-form Level 2
+#' efficiencies (`square_lattice_efficiencies()`) and no warning.
+#' @noRd
+lattice_unsearched_design <- function(start, v, r, blocks) {
+  result <- resolvable_engine_output(start, v, r, blocks)
+  efficiency <- square_lattice_efficiencies(blocks, r)
+  result$Blocks_model[2L, c("D-Efficiency", "A-Efficiency")] <- c(efficiency[["D"]], efficiency[["A"]])
+  result$search <- list(evaluations = 0, budget = 0, stop_reason = "construction",
                         searches_done = 0L, refreshes = 0, drift_events = 0, repairs = 0,
                         even_repairs = 0L, debug_max_error = NA_real_)
   result
