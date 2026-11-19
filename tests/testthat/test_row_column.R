@@ -278,3 +278,54 @@ test_that("two-stage row_column() returns complete replicate grids", {
     expect_true(all(cells == 1))
   }
 })
+
+# The twostage row step (nested-engine spec section 6.8) swaps plots only inside
+# a column of a replicate, so it must keep the column design built before it.
+twostage_column_sets <- function(fb) {
+  key <- paste(fb$LOCATION, fb$REP, fb$COLUMN)
+  lapply(split(fb$ENTRY, key), sort)
+}
+
+test_that("the twostage row step keeps each column's treatments", {
+  # iterations = 1 is the smallest row-search effort; the column design is
+  # built before the row step from the same seed, so it is the same in both.
+  small <- row_column(t = 30, nrows = 5, reps = 3, method = "twostage", seed = 11,
+                      iterations = 1)
+  full <- row_column(t = 30, nrows = 5, reps = 3, method = "twostage", seed = 11)
+  expect_identical(twostage_column_sets(full$fieldBook), twostage_column_sets(small$fieldBook))
+  # The full search did move plots between rows.
+  row_of <- function(fb) fb$ROW[order(fb$REP, fb$ENTRY)]
+  expect_false(identical(row_of(full$fieldBook), row_of(small$fieldBook)))
+})
+
+test_that("every replicate of a twostage design holds each entry once", {
+  des <- row_column(t = 36, nrows = 4, reps = 4, method = "twostage", seed = 5)
+  fb <- des$fieldBook
+  expect_true(all(table(factor(fb$ENTRY, levels = 1:36), fb$REP) == 1L))
+  expect_true(all(table(fb$REP, fb$ROW, fb$COLUMN) == 1L))
+})
+
+test_that("the reported twostage row A-efficiency is that of the field book's rows", {
+  des <- row_column(t = 30, nrows = 6, reps = 3, method = "twostage", seed = 3)
+  fb <- des$fieldBook
+  # Treatment x (REP, ROW) incidence; C = r I - N K^-1 N', A is the harmonic
+  # mean of its v - 1 nonzero eigenvalues divided by r.
+  N <- table(factor(fb$ENTRY), paste(fb$REP, fb$ROW))
+  r <- 3
+  C <- r * diag(nrow(N)) - N %*% diag(1 / colSums(N)) %*% t(N)
+  ev <- sort(eigen(C, symmetric = TRUE, only.values = TRUE)$values, decreasing = TRUE)
+  eff <- ev[seq_len(nrow(N) - 1L)] / r
+  bm <- des$blocksModel[[1]]
+  reported <- bm$`A-Efficiency`[bm$Level == "Row"]
+  expect_lt(abs(reported - length(eff) / sum(1 / eff)), 1e-7)
+})
+
+test_that("the twostage row A-efficiency reaches the recorded baseline mean", {
+  # Engine results can differ across platforms and builds.
+  skip_on_cran()
+  # 0.9424677 is the mean row A over seeds 1..200 of FielDHub 1.7.0's R row
+  # step for this shape (tools/nested-goldens-rc-baseline.csv.gz).
+  des <- row_column(t = 100, nrows = 5, reps = 3, method = "twostage", seed = 1)
+  bm <- des$blocksModel[[1]]
+  expect_gte(bm$`A-Efficiency`[bm$Level == "Row"], 0.9424677)
+})

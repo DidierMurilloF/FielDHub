@@ -4,7 +4,10 @@
 // spec sections 5 and 6.1) nests the blocks in complete replicates: starts,
 // swaps and full passes stay inside a replicate, so every replicate keeps each
 // treatment once, and the block-space score is unchanged because the
-// replicate columns lie in the span of the block columns.
+// replicate columns lie in the span of the block columns. Rows-within-columns
+// mode (spec section 6.8) is resolvable mode with the rows of a row-column
+// design as the blocks and one more constraint: a swap exchanges two plots of
+// the same column of the same replicate, so every column keeps its treatments.
 #include <cpp11.hpp>
 #include <R_ext/Random.h>
 #include <algorithm>
@@ -38,14 +41,58 @@ struct Layout {
   // the plots evenly). reps is r then, and 1 segment otherwise.
   bool resolvable;
   int reps;
+  // Swap segments: a swap exchanges two plots of one segment, and a full pass
+  // scans the pairs inside every segment. Segment s holds the seg_size plots
+  // seg_plots[s seg_size ..]. In single-level and resolvable mode the segments
+  // are the replicates (one segment, all plots, in single-level mode) in plot
+  // order; in rows-within-columns mode (`columns`) they are the columns of each
+  // replicate, plots in row order.
+  bool columns;
+  int segs, seg_size;
+  std::vector<int> seg_plots;
 };
 
 Layout make_layout(int v, int r, int b, bool resolvable = false) {
-  Layout lay{v, r, b, v * r, std::vector<int>(), resolvable, resolvable ? r : 1};
+  Layout lay{v, r, b, v * r, std::vector<int>(), resolvable, resolvable ? r : 1,
+             false, 0, 0, std::vector<int>()};
   lay.block_of.reserve(lay.n);
   for (int j = 0; j < b; ++j) {
     int k = lay.n / b + (j < lay.n % b ? 1 : 0);
     for (int x = 0; x < k; ++x) lay.block_of.push_back(j);
+  }
+  lay.segs = lay.reps;
+  lay.seg_size = lay.n / lay.reps;
+  lay.seg_plots.resize(lay.n);
+  std::iota(lay.seg_plots.begin(), lay.seg_plots.end(), 0);
+  return lay;
+}
+
+// Rows-within-columns layout (spec section 6.8): the b blocks are the rows,
+// b / r in each replicate, each of v r / b plots; column_of gives the column
+// (0-based, within the replicate) of every plot, and every row must hold each
+// column once. The segments are the columns of each replicate, so a swap moves
+// two plots of one column between rows. Throws if column_of does not fit.
+Layout make_column_layout(int v, int r, int b, const std::vector<int>& column_of) {
+  Layout lay = make_layout(v, r, b, true);
+  const int rows = b / r, cols = lay.n / b;
+  if (static_cast<int>(column_of.size()) != lay.n || b % r != 0 || lay.n % b != 0) {
+    cpp11::stop("`column_of` must give the column of every plot.");
+  }
+  std::vector<int> seen(static_cast<size_t>(b) * cols, 0);
+  for (int x = 0; x < lay.n; ++x) {
+    int c = column_of[x];
+    if (c < 0 || c >= cols || seen[static_cast<size_t>(lay.block_of[x]) * cols + c]++ > 0) {
+      cpp11::stop("Every row must hold each column once.");
+    }
+  }
+  lay.columns = true;
+  lay.segs = r * cols;
+  lay.seg_size = rows;
+  lay.seg_plots.assign(lay.n, 0);
+  std::vector<int> fill(lay.segs, 0);
+  for (int x = 0; x < lay.n; ++x) {  // plots in block order, so each column in row order
+    int s = (lay.block_of[x] / rows) * cols + column_of[x];
+    lay.seg_plots[static_cast<size_t>(s) * rows + fill[s]++] = x;
   }
   return lay;
 }
@@ -116,8 +163,16 @@ std::vector<int> lattice_start(const Layout& lay) {
 }
 
 // Draw one random swap; returns false if the pair is not a valid swap. In
-// resolvable mode a replicate is drawn first, then two plots inside it.
+// resolvable mode a replicate is drawn first, then two plots inside it; in
+// rows-within-columns mode a column of a replicate (all hold the same number
+// of plots), then two of its plots.
 bool draw_swap(const Layout& lay, const std::vector<int>& treat, int& x, int& y) {
+  if (lay.columns) {
+    const int* s = lay.seg_plots.data() + static_cast<size_t>(draw_index(lay.segs)) * lay.seg_size;
+    x = s[draw_index(lay.seg_size)];
+    y = s[draw_index(lay.seg_size)];
+    return lay.block_of[x] != lay.block_of[y] && treat[x] != treat[y];
+  }
   if (lay.resolvable) {
     int base = draw_index(lay.reps) * lay.v;
     x = base + draw_index(lay.v);
@@ -281,15 +336,17 @@ bool escape(BlockSpace& bs, const Layout& lay, std::vector<int>& treat, int jump
   return true;
 }
 
-// Candidate swap pairs of one full pass: all plot pairs, or in resolvable mode
-// the pairs inside a replicate, r v (v - 1) / 2.
+// Candidate swap pairs of one full pass: all plot pairs, in resolvable mode
+// the pairs inside a replicate, r v (v - 1) / 2, and in rows-within-columns
+// mode the pairs inside a column of a replicate.
 double pass_pairs(const Layout& lay) {
-  const double seg = lay.n / lay.reps;
-  return lay.reps * seg * (seg - 1) / 2.0;
+  const double seg = lay.seg_size;
+  return lay.segs * seg * (seg - 1) / 2.0;
 }
 
 // Full-pass descent to a single-swap local optimum. The plot order is shuffled
-// once (in resolvable mode, inside each replicate's segment); the pairs are
+// once (inside each swap segment: a replicate, or a column of a replicate);
+// the pairs are
 // then scanned cyclically in that order (segment by segment), first
 // improvement, until every pair has been scanned since the last accepted swap,
 // which proves the local optimum without a separate confirming pass. Only
@@ -299,16 +356,16 @@ double pass_pairs(const Layout& lay) {
 bool descend_full(BlockSpace& bs, const Layout& lay, std::vector<int>& treat, std::vector<int>& order,
                   int& accepted, int& interval, Search& out, Budget& budget, bool& optimum) {
   optimum = false;
-  const int seg = lay.n / lay.reps;
-  for (int i = 0; i < lay.n; ++i) order[i] = i;
-  for (int m = 0; m < lay.reps; ++m) {
+  const int seg = lay.seg_size;
+  for (int i = 0; i < lay.n; ++i) order[i] = lay.seg_plots[i];
+  for (int m = 0; m < lay.segs; ++m) {
     int* o = order.data() + static_cast<size_t>(m) * seg;
     for (int i = seg - 1; i > 0; --i) std::swap(o[i], o[draw_index(i + 1)]);
   }
   const double total = pass_pairs(lay);
   double since = 0.0;
   for (;;) {
-    for (int m = 0; m < lay.reps; ++m) {
+    for (int m = 0; m < lay.segs; ++m) {
       const int* o = order.data() + static_cast<size_t>(m) * seg;
       for (int i = 0; i < seg; ++i) {
         for (int j = i + 1; j < seg; ++j) {
@@ -347,7 +404,22 @@ void run_search(const Layout& lay, int jumps_per_escape, int max_stale_escapes, 
   // long before a local optimum when there are many candidate pairs.
   const bool exhaustive = lay.resolvable || pass_pairs(lay) <= kExhaustivePairs;
   const bool cache = lay.resolvable ? static_cast<double>(lay.b) * lay.v <= kCacheCells : exhaustive;
-  if (start) {
+  if (start && lay.columns) {
+    // Rows within columns: the given design is the only start. Its column
+    // design is connected, its rows need not be: a disconnected start is
+    // first repaired with column-preserving swaps. Scoring the start is not
+    // charged to the evaluation budget, so the smallest budget still returns
+    // the (repaired) start.
+    treat = *start;
+    for (int attempt = 0; attempt < 10 && components(lay, treat) > 1; ++attempt) {
+      if (!repair_connectivity(lay, treat, budget, out) && budget.stopped()) return;
+    }
+    if (components(lay, treat) > 1) return;
+    bs.reset(new BlockSpace(lay.v, lay.b, lay.r, counts_of(lay, treat)));
+    if (cache) bs->enable_cache();
+    bs->enable_fast_inverse();
+    if (!budget.work(refresh_work(lay)) || !bs->refresh()) return;
+  } else if (start) {
     // A lattice start is connected; random starts follow if it can't be
     // scored. A start given from R (resolvable mode) is checked connected
     // there, and is never replaced by a random one.
@@ -359,6 +431,7 @@ void run_search(const Layout& lay, int jumps_per_escape, int max_stale_escapes, 
     if (!budget.work(refresh_work(lay)) || !bs->refresh()) bs.reset();
     if (!bs && lay.resolvable) return;
   }
+  if (lay.columns && !bs) return;  // rows within columns never starts at random
   for (int attempt = 0; attempt < 10 && !bs; ++attempt) {
     if (!budget.spend(static_cast<double>(lay.n + lay.b))) return;
     if (lay.resolvable) {  // an independent random permutation per replicate
@@ -552,20 +625,28 @@ cpp11::integers lattice_start_probe_cpp(int v, int r, int b) {
   return out;
 }
 
-// b is the total number of blocks. Resolvable mode nests b / r blocks in each
-// of r complete replicates and skips the single-level lattice start and the
-// even-up repair (a no-op there: every count is 0 or 1). A non-empty `start`
-// (n 1-based treatments by plot, replicate m in plots m v .. m v + v - 1) is
-// the start of exactly one search. `evaluation_work` work units are charged
-// for every evaluation, so the work cap bounds the whole run. Single-level
-// callers pass work_cap = Inf, refresh_every = 256 and evaluation_work = 0,
-// which keeps their results unchanged.
+// b is the total number of blocks. `mode` 0 is single-level; 1 (resolvable)
+// nests b / r blocks in each of r complete replicates and skips the
+// single-level lattice start and the even-up repair (a no-op there: every
+// count is 0 or 1); 2 (rows within columns, spec section 6.8) is mode 1 with
+// the rows as the blocks and swaps only inside a column of a replicate, whose
+// column (0-based) `column_of` gives for every plot, and needs a `start`. A
+// non-empty `start` (n 1-based treatments by plot, replicate m in plots
+// m v .. m v + v - 1) is the start of exactly one search. `evaluation_work`
+// work units are charged for every evaluation, so the work cap bounds the
+// whole run. Single-level callers pass work_cap = Inf, refresh_every = 256 and
+// evaluation_work = 0, which keeps their results unchanged.
 [[cpp11::register]]
 cpp11::list blocks_engine_cpp(int v, int r, int b, int searches, int jumps_per_escape,
                               int max_stale_escapes, double budget, double time_limit,
-                              bool debug, bool resolvable, cpp11::integers start,
-                              double work_cap, int refresh_every, double evaluation_work) {
-  Layout lay = make_layout(v, r, b, resolvable);
+                              bool debug, cpp11::integers start, double work_cap,
+                              int refresh_every, double evaluation_work, int mode,
+                              cpp11::integers column_of) {
+  if (mode < 0 || mode > 2) cpp11::stop("`mode` must be 0, 1 or 2.");
+  const bool resolvable = mode != 0;
+  Layout lay = mode == 2 ? make_column_layout(v, r, b, std::vector<int>(column_of.begin(), column_of.end()))
+                         : make_layout(v, r, b, resolvable);
+  if (mode == 2 && start.size() == 0) cpp11::stop("Rows within columns needs a `start`.");
   Budget bud(budget, time_limit, work_cap, evaluation_work);
   Search out;
   out.debug = debug;

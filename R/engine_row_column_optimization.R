@@ -1,73 +1,51 @@
-# Function to randomly swap a pair of treatments within a random 
-# level of Level_2 for all levels of Level_1
-#' @noRd
-swap_treatments <- function(df) {
-  # Split the dataframe by Level_1
-  df_split <- split(df, df$Level_1)
-  
-  # Initialize an empty dataframe to store the results
-  result <- data.frame()
-  
-  # Loop through each level of Level_1
-  for (level1 in names(df_split)) {
-    df_level1 <- df_split[[level1]]
-    
-    # Get the unique values of Level_2
-    unique_levels2 <- unique(df_level1$Level_2)
-    
-    # Randomly select one level of Level_2
-    random_level2 <- sample(unique_levels2, 1)
-    df_level2 <- df_level1[df_level1$Level_2 == random_level2, ]
-    
-    if (nrow(df_level2) >= 2) {
-      # Randomly select two different rows to swap treatments
-      rows_to_swap <- sample(seq_len(nrow(df_level2)), 2)
-      temp <- df_level2$treatments[rows_to_swap[1]]
-      df_level2$treatments[rows_to_swap[1]] <- df_level2$treatments[rows_to_swap[2]]
-      df_level2$treatments[rows_to_swap[2]] <- temp
-    }
-    
-    # Combine the modified dataframe with the rest
-    df_level1[df_level1$Level_2 == random_level2, ] <- df_level2
-    result <- rbind(result, df_level1)
-  }
-  
-  return(result)
-}
-
-# Function to improve A-Efficiency for Level 2
+# Twostage row step (nested-engine spec section 6.8): improves the rows of a
+# twostage row-column design (Level_1 = replicate, Level_2 = column, Level_3 =
+# row nested in its replicate) and keeps every column's treatments, with the
+# block engine's rows-within-columns search (rows_within_columns()). The
+# generator is seeded with `seed`. `iterations` is the search effort: the
+# engine's default budget is scaled by iterations / 1000, so the default 1000
+# is the full search and 1 the smallest. A design that is not a complete
+# row-column grid in every replicate, or has one row per replicate, has no
+# column-preserving swap to make and is returned unchanged. Returns the
+# improved design, the row-level BlockEfficiencies() report (replicates and
+# rows) and the row A-efficiency.
 #' @noRd
 improve_efficiency <- function(design, iterations, seed) {
   validate_iteration_budget(iterations)
   set.seed(seed)
-  # Initial design
   best_design <- design
-  
-  # Calculate initial efficiencies
-  row_blocks <- best_design |> 
-    dplyr::select(Level_1, Level_3, plots, treatments)
-  efficiencies <- BlockEfficiencies(row_blocks)
-  best_a_efficiency <- efficiencies$`A-Efficiency`[efficiencies$Level == 2]
-  best_efficiencies <- efficiencies
-  
-  # Run iterations to improve A-Efficiency
-  for (i in seq_len(iterations)) {
-    # Generate a new design by swapping treatments
-    new_design <- swap_treatments(best_design)
-    
-    # Calculate efficiencies for the new design
-    new_row_blocks <- new_design |> 
-      dplyr::select(Level_1, Level_3, plots, treatments)
-    new_efficiencies <- BlockEfficiencies(new_row_blocks)
-    new_a_efficiency <- new_efficiencies$`A-Efficiency`[new_efficiencies$Level == 2]
-    
-    # Update the best design if the new A-Efficiency is higher
-    if (new_a_efficiency > best_a_efficiency) {
-      best_design <- new_design
-      best_a_efficiency <- new_a_efficiency
-      best_efficiencies <- new_efficiencies
+  rep_of <- as.integer(factor(design$Level_1, levels = unique(design$Level_1)))
+  row_of <- as.integer(factor(design$Level_3, levels = unique(design$Level_3)))
+  column <- paste(design$Level_1, design$Level_2, sep = "\r")
+  col_of <- stats::ave(seq_along(column), rep_of,
+                       FUN = function(i) match(column[i], unique(column[i])))
+  code <- as.integer(factor(design$treatments))
+  v <- max(code)
+  r <- max(rep_of)
+  rows <- max(row_of) %/% r
+  cols <- v %/% max(rows, 1L)
+  # Engine plot order: replicate by replicate, row by row
+  ord <- order(rep_of, row_of, col_of)
+  grid_ok <- rows * r == max(row_of) && rows * cols == v && length(code) == v * r &&
+    all(tabulate(row_of, max(row_of)) == cols) &&
+    all(table(factor(code, levels = seq_len(v)), rep_of) == 1L) &&
+    all(rep_of[ord] == rep(seq_len(r), each = v)) &&
+    all(row_of[ord] == rep(seq_len(r * rows), each = cols)) &&
+    !anyDuplicated(paste(row_of, col_of)) && max(col_of) == cols
+  known <- NULL
+  if (grid_ok) {
+    step <- rows_within_columns(code[ord], col_of[ord], v, r, rows,
+                                effort = iterations / 1000)
+    value <- design$treatments[match(seq_len(v), code)]  # one label per code
+    best_design$treatments[ord] <- value[step$treatments]
+    if (!is.na(step$a_efficiency)) {
+      known <- data.frame(`D-Efficiency` = c(1, step$d_efficiency),
+                          `A-Efficiency` = c(1, step$a_efficiency), check.names = FALSE)
     }
   }
+  row_blocks <- best_design[c("Level_1", "Level_3", "plots", "treatments")]
+  best_efficiencies <- BlockEfficiencies(row_blocks, known = known)
+  best_a_efficiency <- best_efficiencies$`A-Efficiency`[best_efficiencies$Level == 2]
   return(
     list(
       best_design = best_design, 
