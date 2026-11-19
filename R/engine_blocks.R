@@ -116,7 +116,7 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
   }
   validate_iteration_budget(budget, "budget", minimum = 1)
   work_cap <- if (resolvable) resolvable_work_cap(v, replicates, total_blocks, searches) else Inf
-  refresh_every <- if (resolvable) resolvable_refresh_every(total_blocks) else 256L
+  refresh_every <- 256L
   out <- blocks_engine_cpp(as.integer(treatments), as.integer(replicates), as.integer(total_blocks),
                            as.integer(searches), as.integer(jumps_per_escape),
                            as.integer(max_stale_escapes), as.double(budget),
@@ -283,11 +283,6 @@ resolvable_work_cap <- function(v, r, B, searches) {
   refresh <- B^3 + n * r + n * B
   swap <- 4 * B^2 + 2 * B * v
   max(1e10, searches * (10 * refresh + 3 * n * swap))
-}
-
-#' @noRd
-resolvable_refresh_every <- function(B) {
-  as.integer(if (B <= 512) 256 else min(4096, 256 * ceiling(B / 512)))
 }
 
 #' Default evaluation budget per search (spec-m5 6.4): 25 full passes over the

@@ -51,7 +51,8 @@ bool spd_inverse(std::vector<double>& a, int n, double& log_det) {
 BlockSpace::BlockSpace(int v, int b, int r, const std::vector<int>& counts)
     : v_(v), b_(b), r_(r), n_(static_cast<double>(v) * r), counts_(counts),
       sizes_(b, 0), blocks_of_(static_cast<size_t>(v) * r, 0),
-      minv_(static_cast<size_t>(b) * b, 0.0), h_(b, 0.0),
+      minv_(static_cast<size_t>(b) * b, 0.0), hz_j_(2 * r, 0), hz_v_(2 * r, 0.0),
+      mw_(b, 0.0), mh_(b, 0.0),
       log_det_(std::numeric_limits<double>::quiet_NaN()) {
   std::vector<int> filled(v, 0);
   for (int j = 0; j < b; ++j) {
@@ -134,25 +135,46 @@ double BlockSpace::delta_cached(int a, int p, int c, int q) const {
   return first_ - second_;
 }
 
-void BlockSpace::h_vector(int a, int c, std::vector<double>& h) const {
-  h.assign(b_, 0.0);
-  for (int j = 0; j < b_; ++j)
-    h[j] = static_cast<double>(counts_[a + v_ * j] - counts_[c + v_ * j]) / r_;
+int BlockSpace::h_sparse(int a, int c) const {
+  const int m = 2 * r_;
+  int* id = hz_j_.data();
+  const int* ba = &blocks_of_[static_cast<size_t>(a) * r_];
+  const int* bc = &blocks_of_[static_cast<size_t>(c) * r_];
+  for (int x = 0; x < r_; ++x) { id[x] = ba[x]; id[r_ + x] = bc[x]; }
+  for (int x = 1; x < m; ++x) {  // insertion sort: m is small
+    int key = id[x], y = x - 1;
+    while (y >= 0 && id[y] > key) { id[y + 1] = id[y]; --y; }
+    id[y + 1] = key;
+  }
+  int nz = 0;
+  for (int x = 0; x < m; ++x) {
+    if (x > 0 && id[x] == id[x - 1]) continue;
+    const int j = id[x];
+    const double h = static_cast<double>(counts_[a + v_ * j] - counts_[c + v_ * j]) / r_;
+    if (h == 0.0) continue;
+    hz_j_[nz] = j;  // nz <= x, so the unread ids ahead are not overwritten
+    hz_v_[nz] = h;
+    ++nz;
+  }
+  return nz;
 }
 
 double BlockSpace::delta(int a, int p, int c, int q) const {
-  std::vector<double>& h = h_;
-  for (int j = 0; j < b_; ++j)
-    h[j] = static_cast<double>(counts_[a + v_ * j] - counts_[c + v_ * j]) / r_;
+  // h has at most 2 r nonzero entries (the blocks of a and c), so the ratio
+  // costs O(r^2) instead of O(b^2).
+  const int nz = h_sparse(a, c);
+  const int* zj = hz_j_.data();
+  const double* zh = hz_v_.data();
   const double t = 2.0 / r_;
   double alpha = minv_[q + b_ * q] + minv_[p + b_ * p] - 2.0 * minv_[p + b_ * q];
   double mh_p = 0.0, mh_q = 0.0, gamma = 0.0;
-  for (int j = 0; j < b_; ++j) {
-    if (h[j] == 0.0) continue;
-    mh_p += minv_[p + b_ * j] * h[j];
-    mh_q += minv_[q + b_ * j] * h[j];
-    for (int l = 0; l < b_; ++l)
-      if (h[l] != 0.0) gamma += h[l] * minv_[l + b_ * j] * h[j];
+  for (int y = 0; y < nz; ++y) {
+    const int j = zj[y];
+    const double hj = zh[y];
+    const double* mj = &minv_[static_cast<size_t>(b_) * j];
+    mh_p += mj[p] * hj;
+    mh_q += mj[q] * hj;
+    for (int x = 0; x < nz; ++x) gamma += zh[x] * mj[zj[x]] * hj;
   }
   double beta = mh_q - mh_p;
   first_ = (1.0 - beta) * (1.0 - beta);
@@ -165,25 +187,36 @@ double BlockSpace::last_scale() const {
 }
 
 void BlockSpace::apply(int a, int p, int c, int q, double ratio) {
-  std::vector<double> h;
-  h_vector(a, c, h);
+  // Minv h sums the at most 2 r columns of Minv where h is nonzero, O(r b)
+  // instead of O(b^2); the sums run in the dense loop's order, and both b^2
+  // loops walk the column-major matrix down its columns.
+  const int nz = h_sparse(a, c);
   const double t = 2.0 / r_;
-  std::vector<double> mw(b_), mh(b_, 0.0);
-  for (int i = 0; i < b_; ++i) {
-    mw[i] = minv_[i + b_ * q] - minv_[i + b_ * p];
-    for (int j = 0; j < b_; ++j) mh[i] += minv_[i + b_ * j] * h[j];
+  std::vector<double>& mw = mw_;
+  std::vector<double>& mh = mh_;
+  {
+    const double* mq = &minv_[static_cast<size_t>(b_) * q];
+    const double* mp = &minv_[static_cast<size_t>(b_) * p];
+    for (int i = 0; i < b_; ++i) { mw[i] = mq[i] - mp[i]; mh[i] = 0.0; }
+  }
+  for (int y = 0; y < nz; ++y) {
+    const double hj = hz_v_[y];
+    const double* mj = &minv_[static_cast<size_t>(b_) * hz_j_[y]];
+    for (int i = 0; i < b_; ++i) mh[i] += mj[i] * hj;
   }
   double alpha = mw[q] - mw[p];
   double beta = mh[q] - mh[p];
   double gamma = 0.0;
-  for (int j = 0; j < b_; ++j) gamma += h[j] * mh[j];
+  for (int y = 0; y < nz; ++y) gamma += hz_v_[y] * mh[hz_j_[y]];
   // W = (T^{-1} - Q)^{-1}, T^{-1} = [[0, 1], [1, -t]], det(T^{-1} - Q) = -ratio.
   double det = alpha * (t + gamma) - (1.0 - beta) * (1.0 - beta);
   double w00 = (-t - gamma) / det, w01 = -(1.0 - beta) / det, w11 = -alpha / det;
-  for (int i = 0; i < b_; ++i)
-    for (int j = 0; j < b_; ++j)
-      minv_[i + b_ * j] += w00 * mw[i] * mw[j] + w01 * (mw[i] * mh[j] + mh[i] * mw[j]) +
-                           w11 * mh[i] * mh[j];
+  for (int j = 0; j < b_; ++j) {
+    double* mj = &minv_[static_cast<size_t>(b_) * j];
+    const double mwj = mw[j], mhj = mh[j];
+    for (int i = 0; i < b_; ++i)
+      mj[i] += w00 * mw[i] * mwj + w01 * (mw[i] * mhj + mh[i] * mwj) + w11 * mh[i] * mhj;
+  }
   if (cached_) {
     // G' = Minv' N' / r with N'' = N' + w u' (w = e_q - e_p, u = e_a - e_c):
     // G' = G + [mw mh] W [w'G; h'G] + (Minv' w) u' / r.
@@ -255,4 +288,34 @@ double BlockSpace::drift() const {
       if (e > worst) worst = e;
     }
   return worst;
+}
+
+double BlockSpace::drift_sparse() const {
+  // Column j of Bhat Minv - I: k_l m_lj - (1/r) sum_i N_il s_i + sum_q m_qj / b
+  // - [l = j], with s_i the sum of m_qj over the plots of treatment i.
+  std::vector<double> res(b_);
+  double worst = 0.0;
+  for (int j = 0; j < b_; ++j) {
+    const double* mj = &minv_[static_cast<size_t>(b_) * j];
+    double cs = 0.0;
+    for (int l = 0; l < b_; ++l) cs += mj[l];
+    cs /= b_;
+    for (int l = 0; l < b_; ++l) res[l] = sizes_[l] * mj[l] + cs;
+    res[j] -= 1.0;
+    for (int i = 0; i < v_; ++i) {
+      const int* bl = &blocks_of_[static_cast<size_t>(i) * r_];
+      double sum = 0.0;
+      for (int x = 0; x < r_; ++x) sum += mj[bl[x]];
+      sum /= r_;
+      for (int x = 0; x < r_; ++x) res[bl[x]] -= sum;
+    }
+    for (int l = 0; l < b_; ++l) worst = std::max(worst, std::fabs(res[l]));
+  }
+  return worst;
+}
+
+double BlockSpace::a_efficiency_equal_sizes() const {
+  double tr = 0.0;
+  for (int j = 0; j < b_; ++j) tr += minv_[j + static_cast<size_t>(b_) * j];
+  return (v_ - 1.0) / ((v_ - b_) + sizes_[0] * (tr - 1.0));
 }

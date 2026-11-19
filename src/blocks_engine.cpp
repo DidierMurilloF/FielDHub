@@ -22,7 +22,11 @@ namespace {
 const double kTie = 1e-10;        // spec section 8: accept if ratio > 1 + 1e-10 (relative, below)
 const int kRefreshMin = 16;       // smallest interval after repeated drift alarms
 const double kDriftAlarm = 1e-8;  // spec section 8: drift alarm threshold
-const double kExhaustivePairs = 200000;  // full passes only when pass_pairs() <= 2e5 (spec-m5 6.4)
+const double kExhaustivePairs = 200000;  // single-level full passes only when pass_pairs() <= 2e5 (spec-m5 6.4)
+// Resolvable mode keeps the G cache (O(r) ratios, O(b v) more per accepted
+// swap) up to this many blocks; above it the O(r^2) delta() is cheaper overall
+// because accepted swaps dominate (nested-engine spec 6.2b).
+const int kCacheBlocks = 500;
 
 struct Layout {
   int v, r, b, n;
@@ -139,6 +143,29 @@ bool checked_refresh(BlockSpace& bs, const Layout& lay, Budget& budget, Search& 
   return true;
 }
 
+// Work of one rank-2 update: the b^2 update of Minv plus Minv h and Minv w,
+// and the b v update of the G cache when it is kept.
+double swap_work(const BlockSpace& bs, const Layout& lay) {
+  return 4.0 * lay.b * lay.b + 2.0 * lay.b * (bs.cached() ? lay.v : lay.r);
+}
+
+// Work of one sparse drift check, O(b (b + n)).
+double drift_work(const Layout& lay) {
+  return static_cast<double>(lay.b) * (3.0 * lay.b + 2.0 * lay.n);
+}
+
+// Resolvable mode refreshes on demand (nested-engine spec 6.2b): the running
+// state is checked with the sparse drift, and Minv is rebuilt only on a drift
+// alarm, which also halves the check interval. `fresh` is false if the check
+// or the refresh stopped the run.
+bool refresh_on_alarm(BlockSpace& bs, const Layout& lay, int& interval, Budget& budget, Search& out) {
+  if (!budget.work(drift_work(lay))) return false;
+  if (bs.drift_sparse() <= kDriftAlarm) return true;
+  out.drift_events += 1;
+  interval = std::max(kRefreshMin, interval / 2);
+  return checked_refresh(bs, lay, budget, out);
+}
+
 // Apply an accepted swap. Returns false if a scheduled refresh fails or the
 // time limit stops the run, which ends the search.
 bool apply_swap(BlockSpace& bs, const Layout& lay, std::vector<int>& treat, int x, int y,
@@ -157,6 +184,14 @@ bool apply_swap(BlockSpace& bs, const Layout& lay, std::vector<int>& treat, int 
       double e = std::fabs(ratio - exact) / std::max(1.0, exact);
       if (e > out.debug_max_error) out.debug_max_error = e;
     }
+  }
+  if (lay.resolvable) {
+    if (!budget.work(swap_work(bs, lay))) return false;
+    if (++accepted % interval == 0) {
+      if (!budget.spend(static_cast<double>(lay.n + lay.b))) return true;
+      return refresh_on_alarm(bs, lay, interval, budget, out);
+    }
+    return true;
   }
   if (!budget.work(4.0 * lay.b * lay.b + 2.0 * lay.b * lay.v)) return false;  // the rank-2 updates
   if (++accepted % interval == 0) {
@@ -217,7 +252,7 @@ bool escape(BlockSpace& bs, const Layout& lay, std::vector<int>& treat, int jump
   for (int jump = 0; jump < jumps_per_escape && !budget.stopped();) {
     if (!budget.spend(1.0)) break;
     if (!draw_swap(lay, treat, x, y)) continue;
-    if (lay.resolvable && !budget.work(2.0 * lay.r * lay.b)) return false;  // delta()
+    if (lay.resolvable && !budget.work(4.0 * lay.r * (lay.r + 1))) return false;  // the O(r^2) delta()
     double ratio = bs.delta(treat[x], lay.block_of[x], treat[y], lay.block_of[y]);
     double scale = bs.last_scale();
     if (ratio <= kJumpSafe * scale) {
@@ -272,7 +307,10 @@ bool descend_full(BlockSpace& bs, const Layout& lay, std::vector<int>& treat, st
           int x = o[i], y = o[j];
           if (lay.block_of[x] == lay.block_of[y] || treat[x] == treat[y]) continue;
           if (!budget.spend(1.0)) return true;
-          double ratio = bs.delta_cached(treat[x], lay.block_of[x], treat[y], lay.block_of[y]);
+          // Evaluations are bounded by the evaluation budget, so the uncached
+          // O(r^2) ratio is not charged as work.
+          double ratio = bs.cached() ? bs.delta_cached(treat[x], lay.block_of[x], treat[y], lay.block_of[y])
+                                     : bs.delta(treat[x], lay.block_of[x], treat[y], lay.block_of[y]);
           if (improves(bs, ratio)) {
             if (!apply_swap(bs, lay, treat, x, y, ratio, accepted, interval, out, budget)) return false;
             if (budget.stopped()) return true;
@@ -298,11 +336,12 @@ void run_search(const Layout& lay, int jumps_per_escape, int max_stale_escapes, 
   // runs full passes (nested-engine spec 6.2b): random sampling stops a pass
   // long before a local optimum when there are many candidate pairs.
   const bool exhaustive = lay.resolvable || pass_pairs(lay) <= kExhaustivePairs;
+  const bool cache = lay.resolvable ? lay.b <= kCacheBlocks : exhaustive;
   if (start) {  // a lattice start is connected; random starts follow if it can't be scored
     if (!budget.spend(static_cast<double>(lay.n + lay.b))) return;
     treat = *start;
     bs.reset(new BlockSpace(lay.v, lay.b, lay.r, counts_of(lay, treat)));
-    if (exhaustive) bs->enable_cache();
+    if (cache) bs->enable_cache();
     if (!budget.work(refresh_work(lay)) || !bs->refresh()) bs.reset();
   }
   for (int attempt = 0; attempt < 10 && !bs; ++attempt) {
@@ -317,7 +356,7 @@ void run_search(const Layout& lay, int jumps_per_escape, int max_stale_escapes, 
     }
     if (!repair_connectivity(lay, treat, budget, out)) continue;
     bs.reset(new BlockSpace(lay.v, lay.b, lay.r, counts_of(lay, treat)));
-    if (exhaustive) bs->enable_cache();
+    if (cache) bs->enable_cache();
     if (!budget.work(refresh_work(lay)) || !bs->refresh()) bs.reset();
   }
   if (!bs) return;  // no connected start within 10 repaired shuffles
@@ -353,8 +392,11 @@ void run_search(const Layout& lay, int jumps_per_escape, int max_stale_escapes, 
       if (!ok || budget.stopped()) break;
     }
     // Local optimum reached: score it from a fresh refresh (spec section 8),
-    // not from the running log determinant.
-    if (!checked_refresh(*bs, lay, budget, out)) { ok = false; break; }
+    // not from the running log determinant. In resolvable mode the running
+    // log determinant is used unless the sparse drift check raises an alarm
+    // (its drift stays near 1e-14 over thousands of swaps).
+    if (lay.resolvable ? !refresh_on_alarm(*bs, lay, interval, budget, out)
+                       : !checked_refresh(*bs, lay, budget, out)) { ok = false; break; }
     if (bs->log_det() > local_best + kTie) {
       local_best = bs->log_det();
       local_treat = treat;
@@ -377,7 +419,13 @@ void run_search(const Layout& lay, int jumps_per_escape, int max_stale_escapes, 
   // limit this O(b^3) step is skipped (the run is flagged as not reproducible,
   // and every local optimum already has a fresh score), unless no state has
   // been scored yet.
-  if (budget.stop() != STOP_TIME || local_treat.empty()) {
+  bool scored = false;
+  if (lay.resolvable && ok && budget.work(drift_work(lay)) && bs->drift_sparse() <= kDriftAlarm) {
+    // The running state is accurate: no O(b^3) score from scratch per search.
+    if (bs->log_det() > local_best) { local_best = bs->log_det(); local_treat = treat; }
+    scored = true;
+  }
+  if (!scored && (budget.stop() != STOP_TIME || local_treat.empty())) {
     BlockSpace fin(lay.v, lay.b, lay.r, counts_of(lay, treat));
     if (fin.refresh() && fin.log_det() > local_best) { local_best = fin.log_det(); local_treat = treat; }
   }
@@ -522,7 +570,12 @@ cpp11::list blocks_engine_cpp(int v, int r, int b, int searches, int jumps_per_e
   double d_eff = NA_REAL, a_eff = NA_REAL, log_det = NA_REAL;
   if (!out.best_treat.empty()) {
     BlockSpace fin(v, b, r, counts_of(lay, out.best_treat));
-    if (fin.refresh()) { log_det = fin.log_det(); d_eff = fin.d_efficiency(); a_eff = fin.a_efficiency(); }
+    if (fin.refresh()) {
+      log_det = fin.log_det();
+      d_eff = fin.d_efficiency();
+      // Resolvable blocks all have v / b plots: A from the trace of Minv.
+      a_eff = resolvable ? fin.a_efficiency_equal_sizes() : fin.a_efficiency();
+    }
     for (int x = 0; x < lay.n; ++x) { treatments[x] = out.best_treat[x] + 1; blocks[x] = lay.block_of[x] + 1; }
   } else {
     for (int x = 0; x < lay.n; ++x) { treatments[x] = NA_INTEGER; blocks[x] = lay.block_of[x] + 1; }

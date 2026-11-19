@@ -28,12 +28,25 @@ class BlockSpace {
   double log_det() const { return log_det_; }
   double d_efficiency() const;   // geometric mean of nonzero eigenvalues of C over r
   double a_efficiency() const;   // harmonic mean of nonzero eigenvalues of C over r; O(b^3)
-  double drift() const;          // max |Bhat Minv - I|
+  double drift() const;          // max |Bhat Minv - I|, dense O(b^3)
+  // The same quantity from the sparse form of Bhat (K - N'N / r + J / b) in
+  // O(b (b + n)); its rounding differs from drift(), so single-level mode keeps
+  // drift().
+  double drift_sparse() const;
+  // A-efficiency from the trace of Minv when every block has the same size k:
+  // S + y y' = Bhat / k, so tr((S + y y')^{-1}) - 1 = k (tr(Minv) - 1). Needs a
+  // fresh Minv; equal to a_efficiency() up to rounding, without its inversion.
+  double a_efficiency_equal_sizes() const;
+  bool cached() const { return cached_; }
   int count(int i, int j) const { return counts_[i + v_ * j]; }
   const std::vector<int>& counts() const { return counts_; }
 
  private:
-  void h_vector(int a, int c, std::vector<double>& h) const;
+  // The nonzero entries of h = (N_a. - N_c.) / r in ascending block order (at
+  // most 2 r) into hz_j_ / hz_v_; returns their number. Sums over them run in
+  // the order of a dense loop over all blocks that skips zeros, so delta() and
+  // apply() give the same bits as their dense forms.
+  int h_sparse(int a, int c) const;
   void update_counts(int a, int p, int c, int q);
   // N'N from the per-treatment block lists in O(v r^2): entry (p, q) is
   // sum_i N_ip N_iq, an exact integer in double, so the order of summation
@@ -48,7 +61,9 @@ class BlockSpace {
   bool cached_ = false;
   std::vector<double> g_;     // b x v, column i = Minv N_i.' / r (only if cached_)
   void rebuild_g();
-  mutable std::vector<double> h_;  // scratch for delta(), size b
+  mutable std::vector<int> hz_j_;     // scratch for h_sparse(), size 2 r
+  mutable std::vector<double> hz_v_;
+  std::vector<double> mw_, mh_;       // scratch for apply(), size b
   mutable double first_ = 0.0, second_ = 0.0;  // the two terms of the last delta()
   double log_det_;
 };
