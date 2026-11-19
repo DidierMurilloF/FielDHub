@@ -150,9 +150,12 @@ knitr::opts_chunk$set(
   column step of `row_column(method = "twostage")` are now built by the same
   compiled block search, in a resolvable mode that keeps every replicate
   complete, instead of `blocksdesign::blocks()`. Each run stops at a fixed
-  amount of work rather than a clock, so it reproduces from its seed on the
-  same platform and build. Two replicates of blocks of two are built in
-  closed form.
+  amount of work, so it reproduces from its seed on the same platform and
+  build. A 60-second time limit remains as a safeguard (on the reference
+  machine the largest shapes searched reached the work limit in 8 to 13
+  seconds); a run stopped by it
+  warns, and its result may not be reproducible from the seed. Two replicates
+  of blocks of two are built in closed form.
 - Square and rectangular lattices that have an algebraic construction start
   from it and are A-optimal: their Level 2 A-efficiency reaches the
   `A-Bound` reported in `blocksModel`.
@@ -165,9 +168,19 @@ knitr::opts_chunk$set(
   s (s - 1) entries come from a square lattice of order s with one block
   deleted (Shrikhande's method) and, with three replicates, from a Latin
   square of order s with a transversal deleted, so every s from 3 has a
-  three-replicate construction. Order 6 has no orthogonal pair and order 38
-  has a single square here, so square lattices of 36 and 1,444 entries with
-  four or more replicates are still searched.
+  three-replicate construction. So a square lattice of order q with r
+  replicates has a construction when r is at most m + 2, and a rectangular
+  lattice of s (s - 1) entries when r is at most m + 1 or r is 3, where m is
+  the number of orthogonal squares FielDHub builds at that order: q - 1 at a
+  prime power; otherwise one less than the smallest prime-power factor of the
+  order, raised to 2 where one of the constructions above gives a pair. Up to
+  order 50, m is 1 at orders 6 (which has no orthogonal pair) and 38; 2 at 10,
+  12, 14, 15, 18, 21, 22, 24, 26, 30, 33, 34, 39, 42, 46, 48 and 50; 3 at 20,
+  28, 36 and 44; and 4 at 35, 40 and 45. A lattice with more replicates than
+  that, such as `square_lattice(t = 100, k = 10, reps = 5)` or
+  `rectangular_lattice(t = 90, k = 9, reps = 4)`, has no construction: it is
+  searched from random starts like any other incomplete-block design and is
+  not guaranteed to reach the `A-Bound`.
 - `row_column(method = "twostage")` now improves the rows with the same
   block search, swapping two plots of the same column in different rows, so
   the column design is kept. For twostage, `iterations` is now an effort
@@ -215,11 +228,21 @@ by:
   from onestage to twostage. The default `method = "onestage"` still uses
   `blocksdesign::design()` and is unchanged.
 
-The designs' efficiencies are equal to or better than before: on a
-validation grid of 300 incomplete-block, lattice and row-column shapes, each
-run on many seeds, and on a separate grid for the twostage rows, every shape
-passed a non-inferiority check against the previous results. Square and
-rectangular lattices with a construction (see Enhancements) are A-optimal.
+The designs are not less efficient than before, by a non-inferiority check
+against the previous results: over many seeds, the mean efficiency of a shape
+must not be lower than the previous mean, at 95% confidence, by more than
+half a standard deviation of the previous results. Every shape passed, with no exception
+accepted, on a validation grid of 300 incomplete-block, lattice and
+row-column shapes and on a separate grid of 132 shapes for the twostage rows.
+(Shapes of 1,000 entries or more were run on five seeds and checked on their
+worst seed only.) On the twostage grid, the mean Row A- and D-efficiency and
+the mean Column A-efficiency were never below the previous mean. The
+`Row-by-Column` efficiency is not what the twostage search optimizes, and its
+mean can be slightly lower: over two sets of seeds it was below the previous
+mean in 5 and 7 of the 132 shapes for A (by at most 0.0008) and in 12 and 10
+for D, all within the margin.
+Square and rectangular lattices with a construction (see Enhancements) are
+A-optimal.
 
 The resolvable search has a limit. A design is searched only when it has at
 most 2,000 incomplete blocks in total (replicates times blocks per
@@ -228,9 +251,13 @@ cap; with blocks of four or more plots the cap is reached at roughly 3,700
 to 4,500 entries with two replicates, 2,400 to 3,000 with three and 1,700 to
 2,300 with four. A larger design is still returned, but unoptimized: a random
 connected resolvable design, with a warning of class
-`fieldhub_design_warning`. A lattice with a construction is the exception:
-it is returned from the construction, without search or warning, and is
-A-optimal.
+`fieldhub_design_warning`. There are two exceptions, both returned without
+search or warning: a lattice with a construction, which is returned from the
+construction and is A-optimal, and two replicates of blocks of two, which are
+built in closed form at any size. The row search of
+`row_column(method = "twostage")` has a limit of the same kind (at most 2,000
+rows in total, and a predicted work within the cap); above it the rows are
+left as the column design gave them, with a warning of the same class.
 
 Every other design is unchanged.
 

@@ -110,7 +110,9 @@ its
 Incomplete-block, lattice and twostage row-column designs, and sparse and p-rep
 allocation across locations, use FielDHub's own compiled block search instead;
 its efficiencies are checked against the same eigenvalue definitions
-(`test_blocks_engine_designs.R`).
+(`test_blocks_engine_designs.R` for a single level of blocks, and
+`test_square_lattice.R` and `test_alpha_lattice.R` for resolvable designs,
+`test_row_column.R` for twostage rows).
 These checks validate achieved designs, not a claim of global optimality or
 uniform sampling over all possible randomizations.
 
@@ -136,7 +138,7 @@ biological experiment.
 | Single diagonal check optimization | At most 100 accepted exchanges or 100,000 candidate evaluations per location; an interrupted scan is never reported as a local optimum |
 | Pair-swap optimization | A finite geometry-dependent threshold range, at most `stop_iter` sweeps per threshold, and bounded sampled candidates per swap; diagnostics distinguish exhaustion, completion, and an empty range |
 | Row-column search | Positive finite whole-number `iterations`; onestage passes it as the number of external searches (default 200); twostage uses it as the effort of the row search, scaling the row search's evaluation budget by `iterations / 1000` (default 1,000, the full search) |
-| Resolvable block search (incomplete-block, lattice and twostage row-column designs) | 20 searches (fewer above 1,000 blocks; one from a lattice construction) under an evaluation budget and a fixed work cap, so a run stops at a point set by the seed and inputs rather than the clock; shapes above 2,000 blocks or whose predicted work exceeds the cap get an unoptimized connected design with a warning |
+| Resolvable block search (incomplete-block, lattice and twostage row-column designs) | 20 searches (fewer above 1,000 blocks; one from a lattice construction) under an evaluation budget and a fixed work cap, so a run stops at a point set by the seed and inputs; a 60-second wall-clock limit remains as a safeguard and warns if it stops a run; shapes above 2,000 blocks or whose predicted work exceeds the cap get an unoptimized connected design with a warning, except a lattice with an algebraic construction (returned from the construction, A-optimal, no warning) and two replicates of blocks of two (built in closed form, no warning); twostage rows above the same kind of limit are left as the column design gave them, with a warning |
 | Allocation block search | 20 searches under an evaluation budget, with full swap passes up to 632 plots and a lattice start for square-lattice shapes, with interrupts checked; a 60-second wall-clock limit warns and records the stop; a final even-up step leaves each entry with at most one copy more at any location than at another |
 | Allocation balancing | At most one upward pass through the allocation rows; warns if no eligible entry can complete the balancing |
 | Dimension cache | At most 64 retained queries and 4 MiB of retained keys and results; temporary search memory is outside this bound |
