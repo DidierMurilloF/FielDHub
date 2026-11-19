@@ -16,8 +16,8 @@ lattice_start_probe_cpp <- function(v, r, b) {
   .Call(`_FielDHub_lattice_start_probe_cpp`, v, r, b)
 }
 
-blocks_engine_cpp <- function(v, r, b, searches, jumps_per_escape, max_stale_escapes, budget, time_limit, debug) {
-  .Call(`_FielDHub_blocks_engine_cpp`, v, r, b, searches, jumps_per_escape, max_stale_escapes, budget, time_limit, debug)
+blocks_engine_cpp <- function(v, r, b, searches, jumps_per_escape, max_stale_escapes, budget, time_limit, debug, resolvable, start, work_cap, refresh_every) {
+  .Call(`_FielDHub_blocks_engine_cpp`, v, r, b, searches, jumps_per_escape, max_stale_escapes, budget, time_limit, debug, resolvable, start, work_cap, refresh_every)
 }
 
 engine_draw_indices_cpp <- function(n, m) {

@@ -1,51 +1,116 @@
-#' Single-level block design engine (internal)
+#' Block design engine (internal)
 #'
 #' Clean-room D-optimal search for one block factor, following Edmondson (2020),
 #' JABES 25:500-522, sections 2.2-2.3, with the block-space swap updates in the
 #' research derivation (gate G0). Draws come from R's generator; the caller owns
-#' the seed. Output has the shape of `blocksdesign::blocks()` for a single
-#' integer `blocks`.
-#' @return A list with `Design` (`Level_1`, `plots`, `treatments` factors),
-#'   `Blocks_model` (one row: `Level`, `Blocks`, `D-Efficiency`, `A-Efficiency`,
-#'   `A-Bound`) and `search` (evaluations, budget, stop reason, refresh counts, the
-#'   number of even-up repair swaps `even_repairs` (spec-m5 section 6.1) and,
-#'   when `FIELDHUB_ENGINE_DEBUG=1`, the largest relative error of the running
-#'   log determinant against a fresh computation after each accepted swap).
+#' the seed.
+#'
+#' With `resolvable = TRUE` (nested-engine spec sections 5 and 6.2) the blocks
+#' are nested in `replicates` complete replicates and `blocks` is the number of
+#' blocks per replicate, which must divide `treatments`. Starts, swaps and full
+#' passes stay inside a replicate; the block-space score of the r b blocks is
+#' the resolvable design's Level 2 score unchanged, because each replicate is
+#' the union of its blocks. Runs are bounded by a work cap rather than the
+#' clock, so they reproduce from the seed on the same platform and build, and
+#' the total number of blocks is limited to `resolvable_block_limit`. Two
+#' replicates of blocks of two are built in closed form (one 2v-cycle, which
+#' every connected such design is). `start`, if given, holds v r 1-based
+#' treatments in plot order (replicate m in plots m v + 1 .. m v + v, each a
+#' permutation of 1..v) and is the start of a single search.
+#' @return A list with `Design`, `Blocks_model` and `search` (evaluations,
+#'   budget, stop reason, refresh counts, the number of even-up repair swaps
+#'   `even_repairs` (spec-m5 section 6.1) and, when `FIELDHUB_ENGINE_DEBUG=1`,
+#'   the largest relative error of the running log determinant against a fresh
+#'   computation after each accepted swap). Single-level: `Design` has the
+#'   factors `Level_1`, `plots`, `treatments` and `Blocks_model` one row
+#'   (`Level`, `Blocks`, `D-Efficiency`, `A-Efficiency`, `A-Bound`), the shape
+#'   of `blocksdesign::blocks()` for a single integer `blocks`. Resolvable:
+#'   `Design` has `Level_1` (replicates `B1..Br`), `Level_2` (blocks
+#'   `B<m>.B<j>`), `plots` and `treatments`, with the plots shuffled within
+#'   every block, and `Blocks_model` two rows (replicates, then blocks).
 #' @noRd
 blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
                           jumps_per_escape = NULL, max_stale_escapes = 5L,
-                          budget = NULL, time_limit = 60) {
+                          budget = NULL, time_limit = 60, resolvable = FALSE,
+                          start = NULL) {
   validate_iteration_budget(treatments, "treatments", minimum = 2)
   validate_iteration_budget(replicates, "replicates", minimum = 1)
   validate_iteration_budget(blocks, "blocks", minimum = 2)
   validate_iteration_budget(searches, "searches", minimum = 1)
-  n <- as.double(treatments) * replicates
-  if (is.null(jumps_per_escape)) jumps_per_escape <- blocks_engine_default_jumps(n)
-  validate_iteration_budget(jumps_per_escape, "jumps_per_escape", minimum = 1)
-  validate_iteration_budget(max_stale_escapes, "max_stale_escapes", minimum = 1)
+  if (!is.logical(resolvable) || length(resolvable) != 1L || is.na(resolvable)) {
+    fieldhub_abort("`resolvable` must be TRUE or FALSE.", data = list(argument = "resolvable"))
+  }
+  v <- as.double(treatments)
+  n <- v * replicates
+  total_blocks <- if (resolvable) as.double(replicates) * blocks else as.double(blocks)
   if (n > .Machine$integer.max) {
     fieldhub_abort("The design has too many plots for the block engine.",
                    data = list(plots = n))
   }
-  if (blocks > 1000 || as.double(treatments) * blocks > 1e8) {
+  if (resolvable) {
+    if (treatments %% blocks != 0) {
+      fieldhub_abort("A resolvable design needs the blocks per replicate (", blocks,
+                     ") to divide the number of treatments (", treatments, ").",
+                     data = list(treatments = treatments, blocks = blocks))
+    }
+    if (total_blocks > resolvable_block_limit) {
+      fieldhub_abort("The block engine supports at most ", resolvable_block_limit,
+                     " blocks in a resolvable design; this one has ", total_blocks, ".",
+                     data = list(blocks = total_blocks, limit = resolvable_block_limit))
+    }
+  } else if (blocks > 1000) {
     fieldhub_abort("The block engine supports at most 1000 blocks and 1e8 treatment-block cells.",
                    data = list(blocks = blocks, treatments = treatments))
   }
-  if (n < 2 * blocks || treatments + blocks - 1 > n) {
-    fieldhub_abort("There are too few plots for ", blocks, " connected blocks.",
-                   data = list(plots = n, blocks = blocks))
+  if (v * total_blocks > 1e8) {
+    fieldhub_abort("The block engine supports at most ",
+                   if (resolvable) paste0(resolvable_block_limit, " blocks") else "1000 blocks",
+                   " and 1e8 treatment-block cells.",
+                   data = list(blocks = total_blocks, treatments = treatments))
   }
-  if (is.null(budget)) budget <- blocks_engine_default_budget(n, searches)
-  validate_iteration_budget(budget, "budget", minimum = 1)
+  if (n < 2 * total_blocks || v + total_blocks - 1 > n) {
+    fieldhub_abort("There are too few plots for ", total_blocks, " connected blocks.",
+                   class = c("fieldhub_unconnected_error", "fieldhub_input_error"),
+                   data = list(plots = n, blocks = total_blocks))
+  }
+  if (!is.null(start)) {
+    segments_ok <- is.numeric(start) && length(start) == n && !anyNA(start) &&
+      all(start == round(start)) &&
+      all(vapply(seq_len(replicates), function(m) {
+        identical(sort(as.integer(start[(m - 1) * v + seq_len(v)])), seq_len(v))
+      }, logical(1)))
+    if (!resolvable || !segments_ok) {
+      fieldhub_abort("`start` must hold, for each replicate in turn, a permutation of the treatments.",
+                     data = list(argument = "start"))
+    }
+  }
   if (!is.numeric(time_limit) || length(time_limit) != 1L || !is.finite(time_limit) ||
       time_limit <= 0) {
     fieldhub_abort("`time_limit` must be one positive number of seconds.",
                    data = list(argument = "time_limit"))
   }
-  out <- blocks_engine_cpp(as.integer(treatments), as.integer(replicates), as.integer(blocks),
+  if (resolvable && replicates == 2 && treatments == 2 * blocks && is.null(start)) {
+    return(cycle_resolvable_design(treatments, blocks))
+  }
+  pairs <- if (resolvable) replicates * v * (v - 1) / 2 else n * (n - 1) / 2
+  if (resolvable && missing(searches)) searches <- resolvable_searches(total_blocks)
+  if (is.null(jumps_per_escape)) jumps_per_escape <- blocks_engine_default_jumps(n, pairs)
+  validate_iteration_budget(jumps_per_escape, "jumps_per_escape", minimum = 1)
+  validate_iteration_budget(max_stale_escapes, "max_stale_escapes", minimum = 1)
+  if (is.null(budget)) {
+    budget <- blocks_engine_default_budget(
+      n, searches, pairs, multiplier = if (resolvable) resolvable_budget_multiplier else 1
+    )
+  }
+  validate_iteration_budget(budget, "budget", minimum = 1)
+  work_cap <- if (resolvable) resolvable_work_cap(v, replicates, total_blocks) else Inf
+  refresh_every <- if (resolvable) resolvable_refresh_every(total_blocks) else 256L
+  out <- blocks_engine_cpp(as.integer(treatments), as.integer(replicates), as.integer(total_blocks),
                            as.integer(searches), as.integer(jumps_per_escape),
                            as.integer(max_stale_escapes), as.double(budget),
-                           as.double(time_limit), identical(Sys.getenv("FIELDHUB_ENGINE_DEBUG"), "1"))
+                           as.double(time_limit), identical(Sys.getenv("FIELDHUB_ENGINE_DEBUG"), "1"),
+                           resolvable, as.integer(if (is.null(start)) integer() else start),
+                           as.double(work_cap), as.integer(refresh_every))
   stop_reason <- c("budget", "stale", "time_limit", "no_start")[out$stop_reason]
   if (anyNA(out$treatments)) {
     if (stop_reason %in% c("budget", "time_limit")) {
@@ -65,6 +130,17 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
                   " seconds; the result may not be reproducible from the seed.",
                   class = "fieldhub_design_warning", call = NULL)
   }
+  search <- list(evaluations = out$evaluations, budget = budget, stop_reason = stop_reason,
+                 searches_done = out$searches_done, refreshes = out$refreshes,
+                 drift_events = out$drift_events, repairs = out$repairs, even_repairs = out$even_repairs,
+                 debug_max_error = out$debug_max_error)
+  if (resolvable) {
+    result <- resolvable_engine_output(out$treatments, treatments, replicates, blocks)
+    result$Blocks_model[2L, c("D-Efficiency", "A-Efficiency")] <-
+      c(out$d_efficiency, out$a_efficiency)
+    result$search <- c(search, list(work_cap = work_cap, refresh_every = refresh_every))
+    return(result)
+  }
   sizes <- tabulate(out$blocks, nbins = blocks)
   design <- data.frame(
     Level_1 = factor(paste0("B", out$blocks), levels = paste0("B", seq_len(blocks))),
@@ -75,34 +151,115 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
                       `D-Efficiency` = out$d_efficiency, `A-Efficiency` = out$a_efficiency,
                       `A-Bound` = block_a_bound(treatments, replicates, sizes),
                       check.names = FALSE)
-  list(Design = design, Blocks_model = model,
-       search = list(evaluations = out$evaluations, budget = budget, stop_reason = stop_reason,
-                     searches_done = out$searches_done, refreshes = out$refreshes,
-                     drift_events = out$drift_events, repairs = out$repairs, even_repairs = out$even_repairs,
-                     debug_max_error = out$debug_max_error))
+  list(Design = design, Blocks_model = model, search = search)
+}
+
+#' Two-level output of a resolvable design (nested-engine spec section 6.2)
+#'
+#' `treat` holds the treatments by plot, replicate by replicate and block by
+#' block (`blocks` blocks of `v / blocks` plots per replicate). The plots are
+#' shuffled within every block with R's generator, so a plot's position inside
+#' its block carries no pattern from the construction. The Level 2 row has the
+#' one-way bound for the r b blocks; its efficiencies are filled by the caller.
+#' @noRd
+resolvable_engine_output <- function(treat, v, r, blocks) {
+  k <- v %/% blocks
+  total <- r * blocks
+  for (j in seq_len(total)) {
+    idx <- (j - 1) * k + seq_len(k)
+    treat[idx] <- treat[idx][sample.int(k)]
+  }
+  block <- rep(seq_len(blocks), each = k, times = r)
+  rep_of <- rep(seq_len(r), each = v)
+  design <- data.frame(
+    Level_1 = factor(paste0("B", rep_of), levels = paste0("B", seq_len(r))),
+    Level_2 = factor(paste0("B", rep_of, ".B", block),
+                     levels = paste0("B", rep(seq_len(r), each = blocks), ".B",
+                                     rep(seq_len(blocks), times = r))),
+    plots = factor(seq_len(v * r)),
+    treatments = factor(treat, levels = seq_len(v))
+  )
+  model <- data.frame(Level = 1:2, Blocks = as.integer(c(r, total)),
+                      `D-Efficiency` = c(1, NA_real_), `A-Efficiency` = c(1, NA_real_),
+                      `A-Bound` = c(1, block_a_bound(v, r, rep(k, total))),
+                      check.names = FALSE)
+  list(Design = design, Blocks_model = model)
+}
+
+#' Two replicates of blocks of two (nested-engine spec section 6.2)
+#'
+#' Every connected design of this shape is one cycle through all v treatments
+#' and all such cycles are isomorphic (efficiency factors (1 - cos(2 pi j / v)) / 2,
+#' j = 1..v-1; A = 3 / (v + 1)), so no search is needed: for a random order p,
+#' replicate 1 holds {p1, p2}, {p3, p4}, ... and replicate 2 {p2, p3}, ...,
+#' {pv, p1}; the block order within each replicate is then shuffled, and the
+#' plots within blocks by `resolvable_engine_output()`.
+#' @noRd
+cycle_resolvable_design <- function(v, blocks) {
+  p <- sample.int(v)
+  first <- matrix(p, nrow = 2L)
+  second <- matrix(c(p[-1L], p[1L]), nrow = 2L)
+  treat <- c(first[, sample.int(blocks)], second[, sample.int(blocks)])
+  result <- resolvable_engine_output(treat, v, 2L, blocks)
+  efficiency <- BlockEfficiencies(result$Design[, c("Level_2", "plots", "treatments")])
+  result$Blocks_model[2L, c("D-Efficiency", "A-Efficiency")] <-
+    c(efficiency[["D-Efficiency"]], efficiency[["A-Efficiency"]])
+  result$search <- list(evaluations = 0, budget = 0, stop_reason = "closed_form",
+                        searches_done = 0L, refreshes = 0, drift_events = 0, repairs = 0,
+                        even_repairs = 0L, debug_max_error = NA_real_)
+  result
+}
+
+#' Resolvable-mode limits (nested-engine spec section 6.2). B is the total
+#' number of blocks r b. A refresh of the dense block space costs about B^3
+#' multiply-adds, so many blocks get fewer searches and a longer refresh
+#' interval, every run is bounded by a fixed amount of work (reproducible from
+#' the seed, unlike the wall clock), and B is limited to the largest value
+#' that finishes within 10 s on the reference machine (measured in Task 2).
+#' @noRd
+resolvable_block_limit <- 1500
+
+#' @noRd
+resolvable_budget_multiplier <- 1
+
+#' @noRd
+resolvable_work_cap <- function(v, r, B) {
+  1e10
+}
+
+#' @noRd
+resolvable_searches <- function(B) {
+  as.integer(max(1, min(20, floor(1e10 / (40 * B^3)))))
+}
+
+#' @noRd
+resolvable_refresh_every <- function(B) {
+  as.integer(if (B <= 512) 256 else min(4096, 256 * ceiling(B / 512)))
 }
 
 #' Default evaluation budget per search (spec-m5 6.4): 25 full passes over the
-#' plot pairs when a pass has at most 2000 pairs, max(10 passes, 50 n) up to 2e5
-#' pairs (the engine's full-pass threshold), otherwise 50 n sampled evaluations;
-#' at least 5000 per search and at most `.Machine$integer.max` in total. A
-#' descent from a random start takes about three to four passes and each failed
-#' escape about one more, so ten passes per search cover roughly one search's
-#' descent and its `max_stale_escapes` = 5 escapes. The budget is one pool for
-#' all searches, so harder shapes still stop on it.
+#' candidate pairs when a pass has at most 2000 pairs, max(10 passes, 50 n) up to
+#' 2e5 pairs (the engine's full-pass threshold), otherwise 50 n sampled
+#' evaluations; at least 5000 per search and at most `.Machine$integer.max` in
+#' total. A descent from a random start takes about three to four passes and
+#' each failed escape about one more, so ten passes per search cover roughly one
+#' search's descent and its `max_stale_escapes` = 5 escapes. The budget is one
+#' pool for all searches, so harder shapes still stop on it. The candidate pairs
+#' are all plot pairs, n (n - 1) / 2, or in resolvable mode the pairs inside a
+#' replicate, r v (v - 1) / 2; `multiplier` (resolvable mode only) scales the
+#' per-search budget.
 #' @noRd
-blocks_engine_default_budget <- function(n, searches) {
-  pairs <- n * (n - 1) / 2
+blocks_engine_default_budget <- function(n, searches, pairs = n * (n - 1) / 2, multiplier = 1) {
   per_search <- if (pairs <= 2000) 25 * pairs else if (pairs <= 2e5) max(10 * pairs, 50 * n) else 50 * n
-  min(as.double(searches) * max(per_search, 5000), .Machine$integer.max)
+  min(as.double(searches) * max(multiplier * per_search, 5000), .Machine$integer.max)
 }
 
-#' Default escape size: 3 random swaps in full-pass mode (at most 2e5 plot
+#' Default escape size: 3 random swaps in full-pass mode (at most 2e5 candidate
 #' pairs), where a search stands at a proven local optimum and returns to its
 #' best one after a failed escape; 10 in sampled mode, as before.
 #' @noRd
-blocks_engine_default_jumps <- function(n) {
-  if (n * (n - 1) / 2 <= 2e5) 3L else 10L
+blocks_engine_default_jumps <- function(n, pairs = n * (n - 1) / 2) {
+  if (pairs <= 2e5) 3L else 10L
 }
 
 #' Convexity upper bound for the A-efficiency of an equireplicate one-way design
