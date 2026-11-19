@@ -139,8 +139,14 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
                      " was reached before a connected starting design was built.",
                      data = list(budget = budget, time_limit = time_limit))
     }
-    fieldhub_abort(if (is.null(start)) "No connected starting design was found within 10 repaired random starts."
-                   else "The given start could not be scored as a connected design.",
+    if (!is.null(start)) {
+      # `start` was checked connected above, so this is a numerical failure,
+      # not a lack of replication: callers must not translate it.
+      fieldhub_abort("The given start could not be scored; no design is returned.",
+                     class = "fieldhub_numerical_error",
+                     data = list(treatments = treatments, replicates = replicates, blocks = blocks))
+    }
+    fieldhub_abort("No connected starting design was found within 10 repaired random starts.",
                    class = c("fieldhub_unconnected_error", "fieldhub_input_error"),
                    data = list(treatments = treatments, replicates = replicates, blocks = blocks))
   }

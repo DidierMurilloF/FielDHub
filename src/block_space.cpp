@@ -5,8 +5,11 @@
 #include <limits>
 
 // Dot product with eight partial sums in a fixed order, so the compiler can
-// keep eight additions in flight without reassociating: the same bits on every
-// compiler, but not the bits of a single running sum.
+// keep eight additions in flight without reassociating. Its bits differ from
+// those of a single running sum, and, like all the engine's arithmetic, they
+// can differ between compilers and architectures (a compiler may fuse a
+// multiply and an add into one FMA instruction), which is why engine goldens
+// are platform-gated.
 static inline double dot8(const double* x, const double* y, int n) {
   double s0 = 0, s1 = 0, s2 = 0, s3 = 0, s4 = 0, s5 = 0, s6 = 0, s7 = 0;
   int k = 0;

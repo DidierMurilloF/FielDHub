@@ -33,9 +33,12 @@ class BlockSpace {
   // O(b (b + n)); its rounding differs from drift(), so single-level mode keeps
   // drift().
   double drift_sparse() const;
-  // A-efficiency from the trace of Minv when every block has the same size k:
-  // S + y y' = Bhat / k, so tr((S + y y')^{-1}) - 1 = k (tr(Minv) - 1). Needs a
-  // fresh Minv; equal to a_efficiency() up to rounding, without its inversion.
+  // A-efficiency from the trace of Minv when every block has the same size k.
+  // With S = B / k and y y' = J / b as in a_efficiency(), Bhat / k = S + J / (b k),
+  // which is not S + y y'. Both add a multiple of J to S, whose null vector is
+  // 1, and tr((S + c J)^{-1}) = tr(S^+) + 1 / (c b); so tr(S^+) =
+  // tr((S + y y')^{-1}) - 1 = k tr(Minv) - k = k (tr(Minv) - 1). Needs a fresh
+  // Minv; equal to a_efficiency() up to rounding, without its inversion.
   double a_efficiency_equal_sizes() const;
   bool cached() const { return cached_; }
   // Invert with spd_inverse8() from now on (resolvable mode only).
