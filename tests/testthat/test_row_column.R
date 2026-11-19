@@ -267,3 +267,14 @@ test_that("row_column() resolvableBlocks holds each replicate's row-by-column la
     }
   }
 })
+
+test_that("two-stage row_column() returns complete replicate grids", {
+  des <- row_column(t = 20, nrows = 4, reps = 2, method = "twostage", seed = 1)
+  fb <- des$fieldBook
+  expect_true(all(table(fb$ENTRY, fb$REP) == 1))
+  for (rep in unique(fb$REP)) {
+    cells <- table(factor(fb$ROW[fb$REP == rep], levels = 1:4),
+                   factor(fb$COLUMN[fb$REP == rep], levels = 1:5))
+    expect_true(all(cells == 1))
+  }
+})

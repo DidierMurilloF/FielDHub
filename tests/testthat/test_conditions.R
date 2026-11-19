@@ -215,3 +215,18 @@ test_that("no *_server function body calls shinyjs::useShinyjs()", {
   ))
   expect_setequal(direct_shinyjs, character(0))
 })
+
+test_that("one replicate is rejected as not enough replication by every resolvable design", {
+  calls <- list(
+    incomplete_blocks = list(t = 20, k = 4, reps = 1),
+    alpha_lattice = list(t = 20, k = 4, reps = 1),
+    square_lattice = list(t = 16, k = 4, reps = 1),
+    rectangular_lattice = list(t = 20, k = 4, reps = 1),
+    row_column = list(t = 20, nrows = 4, reps = 1, method = "twostage")
+  )
+  for (caller in names(calls)) {
+    expect_error(do.call(caller, c(calls[[caller]], seed = 1)),
+                 paste0("^", caller, "\\(\\) cannot build a resolvable design.*not enough replication"),
+                 class = "fieldhub_input_error", info = caller)
+  }
+})

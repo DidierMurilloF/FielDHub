@@ -44,3 +44,14 @@ test_that("lattice entry tables must have two columns before they are indexed", 
     expect_error(do.call(name, args), class = "fieldhub_input_error")
   }
 })
+
+test_that("incomplete_blocks() builds many blocks of two plots", {
+  expect_no_warning(x <- incomplete_blocks(t = 200, k = 2, reps = 3, seed = 1))
+  expect_equal(nrow(x$fieldBook), 600)
+  # With two replicates of blocks of two, every connected design is one cycle
+  # through all treatments, whose A-efficiency is 3 / (v + 1) (reported to
+  # seven decimals).
+  y <- incomplete_blocks(t = 100, k = 2, reps = 2, seed = 1)
+  level2 <- y$blocksModel[y$blocksModel$Level == 2, ]
+  expect_lte(abs(level2[["A-Efficiency"]] - 3 / 101), 1e-7)
+})

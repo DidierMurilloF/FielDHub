@@ -40,3 +40,33 @@ block_efficiency_oracle <- function(book) {
   if (length(nonzero) != length(replication) - 1L) return(0)
   length(nonzero) / sum(replication[1L] / nonzero)
 }
+
+# D- and A-efficiency of the treatment x (REP, IBLOCK) incidence of one
+# location, from C = diag(r) - N K^-1 N': the geometric and harmonic means of
+# the nonzero eigenvalues of C divided by r.
+nested_block_efficiencies <- function(book) {
+  block <- interaction(book$REP, book$IBLOCK, drop = TRUE)
+  incidence <- unclass(table(factor(book$ENTRY), block))
+  r <- rowSums(incidence)[1L]
+  information <- diag(rowSums(incidence)) -
+    incidence %*% diag(1 / colSums(incidence)) %*% t(incidence)
+  values <- eigen(information, symmetric = TRUE, only.values = TRUE)$values
+  values <- values[seq_len(nrow(incidence) - 1L)] / r
+  c(D = exp(mean(log(values))), A = 1 / mean(1 / values))
+}
+
+# A resolvable incomplete-block result: every (LOCATION, REP) holds each ENTRY
+# once, every IBLOCK has k plots, and the reported Level 2 efficiencies (rounded
+# to seven decimals) are those of the first location's field book.
+expect_resolvable_blocks <- function(x, k) {
+  book <- x$fieldBook
+  per_rep <- table(book$ENTRY, interaction(book$LOCATION, book$REP, drop = TRUE))
+  expect_true(all(per_rep == 1))
+  sizes <- table(interaction(book$LOCATION, book$REP, book$IBLOCK, drop = TRUE))
+  expect_true(all(sizes == k))
+  first <- book[book$LOCATION == book$LOCATION[1L], ]
+  observed <- nested_block_efficiencies(first)
+  level2 <- x$blocksModel[x$blocksModel$Level == 2, ]
+  expect_lte(abs(level2[["D-Efficiency"]] - observed[["D"]]), 1e-7)
+  expect_lte(abs(level2[["A-Efficiency"]] - observed[["A"]]), 1e-7)
+}
