@@ -10,19 +10,18 @@
 - `augmented_row_column()` generates augmented row-column designs:
   replicated checks and unreplicated test entries in a complete
   rectangular field, with every check appearing exactly once in every
-  field line along a chosen `check_direction` (“columns” or “rows”)
-  and every test entry appearing once. The check positions are chosen
-  by a staged annealing search under one of three criteria: `V_tt`
-  (the default; mean variance of test-versus-test comparisons), `V_tc`
+  field line along a chosen `check_direction` (“columns” or “rows”) and
+  every test entry appearing once. The check positions are chosen by a
+  staged annealing search under one of three criteria: `V_tt` (the
+  default; mean variance of test-versus-test comparisons), `V_tc`
   (test-versus-check) or `E_aug` (harmonic-mean efficiency of all
-  treatment comparisons), with fixed row and column effects. The
-  search is FielDHub’s own method, not part of the published
-  construction. Several locations are supported, and the field book
-  includes a `CHECK_DIRECTION` column. Fields with fewer than 10
-  residual degrees of freedom raise a warning. Results record the seed
-  and replay exactly with `reproduce_design()` within the same
-  environment (package and R versions, BLAS/LAPACK library and thread
-  count, and platform).
+  treatment comparisons), with fixed row and column effects. The search
+  is FielDHub’s own method, not part of the published construction.
+  Several locations are supported, and the field book includes a
+  `CHECK_DIRECTION` column. Fields with fewer than 10 residual degrees
+  of freedom raise a warning. Results record the seed and replay exactly
+  with `reproduce_design()` within the same environment (package and R
+  versions, BLAS/LAPACK library and thread count, and platform).
 - The app has a new page, Augmented Row-Column, under Unreplicated
   Designs.
 - A new vignette, “Augmented Row-Column Design”, is added to the
@@ -30,165 +29,245 @@
 - The design arguments vocabulary gains `entries`: the test entries
   excluding checks, as a count or as a vector of labels (see
   `help("design_arguments", package = "FielDHub")`).
-- The construction follows Piepho and Williams (2026); the
-  square-array foundation follows Bailey and Haines (2025). Existing
-  designs are unchanged.
+- The construction follows Piepho and Williams (2026); the square-array
+  foundation follows Bailey and Haines (2025). Existing designs are
+  unchanged.
 
 ## Enhancements
 
 - Redesigned Welcome, Help and About pages, in one style: a green banner
-  beside a photograph, NDSU green links with accessible contrast, and a shared
-  footer. Welcome walks through choosing a design (each linked to its page),
-  shows one example trial from map to field book, simulated response and R
-  call, and has a section for teaching. Help gives every design its guide,
-  reference page and offline `help()` command. About leads with the
-  maintainer, gives every team member a card, and lists the package facts,
-  how to cite FielDHub and the photo credits. The footer and Help now name
-  Agricultural Data Analytics, NDSU
-  (<https://www.ndsu.edu/agricultural-data-analytics>). The Welcome banner is
-  an aerial photograph of a barley field trial at the Prosper Research Site,
-  North Dakota, by Agricultural Data Analytics. `dev/page_images.R` renders the example's images.
-- The app's styles and scripts are served under a version that changes with
-  their contents, so browsers load the current files after an update instead
-  of a cached copy that no longer matches the pages.
-- Augmented RCBD, augmented row-column and RCBD-with-checks entry maps give
-  each check its own colour from the same muted palette as the diagonal and
-  optimized arrangements, so a check looks the same across designs. Blocks and
-  replications keep their light backgrounds and white alleys; the plot-number
-  maps do not highlight checks.
-- In the app, the "Select dimensions of field:" list of the augmented RCBD
-  runs from the squarest field to the most elongated (5 x 6, 6 x 5, 3 x 10,
-  10 x 3, ...), and the squarest field is selected by default. The API's
-  default field (`nrows`/`ncols` left out) is unchanged.
-- In both p-rep modules of the app, "Allow filler plots" and "Keep copies in
-  distinct rows and columns" are now checked by default. The API defaults
-  (`allow_fillers = FALSE`, `rowcol_penalty = 0`) are unchanged.
+  beside a photograph, NDSU green links with accessible contrast, and a
+  shared footer. Welcome walks through choosing a design (each linked to
+  its page), shows one example trial from map to field book, simulated
+  response and R call, and has a section for teaching. Help gives every
+  design its guide, reference page and offline `help()` command. About
+  leads with the maintainer, gives every team member a card, and lists
+  the package facts, how to cite FielDHub and the photo credits. The
+  footer and Help now name Agricultural Data Analytics, NDSU
+  (<https://www.ndsu.edu/agricultural-data-analytics>). The Welcome
+  banner is an aerial photograph of a barley field trial at the Prosper
+  Research Site, North Dakota, by Agricultural Data Analytics.
+  `dev/page_images.R` renders the example’s images.
+
+- The app’s styles and scripts are served under a version that changes
+  with their contents, so browsers load the current files after an
+  update instead of a cached copy that no longer matches the pages.
+
+- Augmented RCBD, augmented row-column and RCBD-with-checks entry maps
+  give each check its own colour from the same muted palette as the
+  diagonal and optimized arrangements, so a check looks the same across
+  designs. Blocks and replications keep their light backgrounds and
+  white alleys; the plot-number maps do not highlight checks.
+
+- In the app, the “Select dimensions of field:” list of the augmented
+  RCBD runs from the squarest field to the most elongated (5 x 6, 6 x 5,
+  3 x 10, 10 x 3, …), and the squarest field is selected by default. The
+  API’s default field (`nrows`/`ncols` left out) is unchanged.
+
+- In both p-rep modules of the app, “Allow filler plots” and “Keep
+  copies in distinct rows and columns” are now checked by default. The
+  API defaults (`allow_fillers = FALSE`, `rowcol_penalty = 0`) are
+  unchanged.
+
 - Single and multiple diagonal, sparse allocation and optimized
   arrangement field maps use the same style. Each check keeps its own
-  colour, now from a muted palette, and the heavy check borders give way to
-  a white grid around every plot. In a multiple diagonal the experiments are
-  outlined in a mid-grey line so their start and end are clear; the
-  experiment map also gives each experiment a muted background. Fillers are
-  white with grey labels. Field books are unchanged.
+  colour, now from a muted palette, and the heavy check borders give way
+  to a white grid around every plot. In a multiple diagonal the
+  experiments are outlined in a mid-grey line so their start and end are
+  clear; the experiment map also gives each experiment a muted
+  background. Fillers are white with grey labels. Field books are
+  unchanged.
 
 - p-rep and multi-location p-rep field maps use the same style: a white
   grid around every plot, replicated plots on a soft blue instead of the
-  strong green, and filler plots white with grey labels. The plot-number map
-  still highlights nothing. Field books are unchanged.
+  strong green, and filler plots white with grey labels. The plot-number
+  map still highlights nothing. Field books are unchanged.
 
 - CRD, Latin square, Latin rectangle, factorial, split-plot and
   split-split-plot field maps use the same style. Every plot has a white
-  grid line around it; RCBD-type reps and multiple Latin squares get a muted
-  background each and white alleys; whole plots are outlined in grey and
-  split-split-plot sub-plots in a lighter grey. Labels, titles and field
-  books are unchanged.
+  grid line around it; RCBD-type reps and multiple Latin squares get a
+  muted background each and white alleys; whole plots are outlined in
+  grey and split-split-plot sub-plots in a lighter grey. Labels, titles
+  and field books are unchanged.
 
-- RCBD, row-column and strip-plot field maps use the same style: one muted
-  background per replication or block, white alleys between them, and a
-  white line around every plot (for a strip-plot, the strips). RCBD checks
-  share the neutral grey of the augmented designs. Alpha, square and
-  rectangular lattices and incomplete block designs also get the plot grid,
-  drawn as a ggplot2 layer until desplot can draw it. `plot(x, field_grid =
-  FALSE)` removes the grid.
+- RCBD, row-column and strip-plot field maps use the same style: one
+  muted background per replication or block, white alleys between them,
+  and a white line around every plot (for a strip-plot, the strips).
+  RCBD checks share the neutral grey of the augmented designs. Alpha,
+  square and rectangular lattices and incomplete block designs also get
+  the plot grid, drawn as a ggplot2 layer until desplot can draw it.
+  `plot(x, field_grid = FALSE)` removes the grid.
 
 - Augmented RCBD and augmented row-column field maps use the same style.
   Augmented RCBD blocks get a muted background each and are separated by
-  white alleys, with a thin white line around every plot inside them. In both designs every check plot has the same neutral grey
-  background instead of a colour per check, check numbers are dark instead
-  of red, and filler plots are white with grey numbers. The augmented
-  row-column entry map now shows entry numbers instead of treatment names,
-  like the other entry maps, and both of its maps draw a white line around
-  every plot so that neighbouring checks stay apart. Field books and plot
+  white alleys, with a thin white line around every plot inside them. In
+  both designs every check plot has the same neutral grey background
+  instead of a colour per check, check numbers are dark instead of red,
+  and filler plots are white with grey numbers. The augmented row-column
+  entry map now shows entry numbers instead of treatment names, like the
+  other entry maps, and both of its maps draw a white line around every
+  plot so that neighbouring checks stay apart. Field books and plot
   numbers are unchanged.
 
-- Field maps of alpha, square and rectangular lattices and incomplete block
-  designs use a field-plan style: each replication has a single muted
-  background (the tints of the augmented RCBD blocks) and is separated from
-  the next by a white alley, incomplete blocks are outlined in grey, and
-  labels are dark. Entries are no longer coloured one by one,
-  and the plot-number map now shows the incomplete blocks too. Each map is
-  a single desplot call, so arguments passed through `plot()` (such as
-  `col.regions`, `cex` or `main`) override any part of it (#72). Field
-  books, plot numbers and coordinates are unchanged.
+- Field maps of alpha, square and rectangular lattices and incomplete
+  block designs use a field-plan style: each replication has a single
+  muted background (the tints of the augmented RCBD blocks) and is
+  separated from the next by a white alley, incomplete blocks are
+  outlined in grey, and labels are dark. Entries are no longer coloured
+  one by one, and the plot-number map now shows the incomplete blocks
+  too. Each map is a single desplot call, so arguments passed through
+  `plot()` (such as `col.regions`, `cex` or `main`) override any part of
+  it (#72). Field books, plot numbers and coordinates are unchanged.
 
-- Augmented RCBD designs support optional block-based plot numbering with
-  `plotIncrement`: for example, blocks start at 101, 201, 301 with an increment
-  of 100. Additional experiment reps receive separate ranges within each
-  location. The app exposes this through "Number plots by block". Continuous
-  numbering remains the default (#82).
+- Augmented RCBD designs support optional block-based plot numbering
+  with `plotIncrement`: for example, blocks start at 101, 201, 301 with
+  an increment of 100. Additional experiment reps receive separate
+  ranges within each location. The app exposes this through “Number
+  plots by block”. Continuous numbering remains the default (#82).
 
-- Sparse and multi-location p-rep allocations (`do_optim()`, and through it
-  `sparse_allocation()`, `multi_location_prep()` and both app pages) now use
-  FielDHub's own compiled block-design search instead of
+- Sparse and multi-location p-rep allocations (`do_optim()`, and through
+  it `sparse_allocation()`, `multi_location_prep()` and both app pages)
+  now use FielDHub’s own compiled block-design search instead of
   `blocksdesign::blocks()`. It reaches the same design efficiency in a
-  fraction of the time: the median end-to-end run is about 24 times faster
-  at 300 entries and over 100 times faster at 600, and a 2,000-entry
-  allocation over six locations takes about one second and under 100 MB of
-  memory, where `blocksdesign` needed 15 to 30 GB. Every allocation is now
-  even: each entry has
-  `floor(copies_per_entry / l)` or one more copies at each location. Designs
-  of up to 632 plots get full swap passes, and square-lattice shapes (q^2
-  entries, q per location) start one search from the lattice. How the
-  search ended is recorded in `metadata$allocation_search`. Installing
-  FielDHub from source, including the `app.R` and `dev/run_dev.R` launchers,
-  now needs a C++17 toolchain: Rtools on Windows and the Xcode command line
-  tools on macOS.
-- The p-rep spreading optimizer (`swap_pairs()`, and the optimizer inside
-  `partially_replicated()`, `multi_location_prep()` and
+  fraction of the time: the median end-to-end run is about 24 times
+  faster at 300 entries and over 100 times faster at 600, and a
+  2,000-entry allocation over six locations takes about one second and
+  under 100 MB of memory, where `blocksdesign` needed 15 to 30 GB. Every
+  allocation is now even: each entry has `floor(copies_per_entry / l)`
+  or one more copies at each location. Designs of up to 632 plots get
+  full swap passes, and square-lattice shapes (q^2 entries, q per
+  location) start one search from the lattice. How the search ended is
+  recorded in `metadata$allocation_search`. Installing FielDHub from
+  source, including the `app.R` and `dev/run_dev.R` launchers, now needs
+  a C++17 toolchain: Rtools on Windows and the Xcode command line tools
+  on macOS.
+
+- Resolvable incomplete-block and lattice designs
+  (`incomplete_blocks()`, `alpha_lattice()`, `square_lattice()` and
+  `rectangular_lattice()`) and the column step of
+  `row_column(method = "twostage")` are now built by the same compiled
+  block search, in a resolvable mode that keeps every replicate
+  complete, instead of `blocksdesign::blocks()`. Each run stops at a
+  fixed amount of work rather than a clock, so it reproduces from its
+  seed on the same platform and build. Two replicates of blocks of two
+  are built in closed form.
+
+- Square and rectangular lattices that have an algebraic construction
+  start from it and are A-optimal: their Level 2 A-efficiency reaches
+  the `A-Bound` reported in `blocksModel`. Square lattices of order q
+  use orthogonal Latin squares from the finite field GF(q) at
+  prime-power orders (up to q + 1 replicates), products of such squares
+  (MacNeish) at other orders, the 3m + 1 construction (orders 10, 22,
+  34, 46, …), pairs of orders 14, 18 and 26 found by FielDHub’s own
+  computer search, and products of these (30, 42, 50, …); a design with
+  r replicates needs r - 2 orthogonal squares. Rectangular lattices of s
+  (s - 1) entries come from a square lattice of order s with one block
+  deleted (Shrikhande’s method) and, with three replicates, from a Latin
+  square of order s with a transversal deleted, so every s from 3 has a
+  three-replicate construction. Order 6 has no orthogonal pair and order
+  38 has a single square here, so square lattices of 36 and 1,444
+  entries with four or more replicates are still searched.
+
+- `row_column(method = "twostage")` now improves the rows with the same
+  block search, swapping two plots of the same column in different rows,
+  so the column design is kept. For twostage, `iterations` is now an
+  effort scale rather than a count of row-swap iterations: the row
+  search’s budget is scaled by `iterations / 1000`, and the default 1000
+  is the full search. For onestage, `iterations` keeps its meaning.
+
+- The p-rep spreading optimizer (`swap_pairs()`, and the optimizer
+  inside `partially_replicated()`, `multi_location_prep()` and
   `optimized_arrangement()`) is much faster, about 50 times on a
-  3,000-plot field. Its pair distances are built in one vectorized pass, and
-  candidate swaps are scored from a coordinate index. Every layout is unchanged
-  for the same seed.
-- New opt-in rule that keeps the copies of a replicated entry in distinct rows
-  and columns: `rowcol_penalty` (default 0, off) and `rowcol_scope` in
-  `swap_pairs()`, `partially_replicated()` and `multi_location_prep()`, and a
-  "Keep copies in distinct rows and columns" box in both p-rep modules of the
-  app. `rowcol_penalty = Inf` puts distinct rows and columns first, and the
-  shared pairs left are reported in `infoDesign$shared_pairs`. With the default,
-  every layout is unchanged.
+  3,000-plot field. Its pair distances are built in one vectorized pass,
+  and candidate swaps are scored from a coordinate index. Every layout
+  is unchanged for the same seed.
+
+- New opt-in rule that keeps the copies of a replicated entry in
+  distinct rows and columns: `rowcol_penalty` (default 0, off) and
+  `rowcol_scope` in `swap_pairs()`, `partially_replicated()` and
+  `multi_location_prep()`, and a “Keep copies in distinct rows and
+  columns” box in both p-rep modules of the app. `rowcol_penalty = Inf`
+  puts distinct rows and columns first, and the shared pairs left are
+  reported in `infoDesign$shared_pairs`. With the default, every layout
+  is unchanged.
 
 ## Changes to results for a given seed
 
 The new allocation search changes the allocation, and so the field book,
 produced for a given seed by:
 
-* `do_optim()` with two or more locations;
-* `sparse_allocation()` and `multi_location_prep()` when they build the
+- `do_optim()` with two or more locations;
+- `sparse_allocation()` and `multi_location_prep()` when they build the
   allocation themselves (two or more locations);
-* the Sparse Allocation and Multi-Location P-rep pages of the Shiny app.
+- the Sparse Allocation and Multi-Location P-rep pages of the Shiny app.
 
-Field books built from an allocation passed in (`sparse_list`, `optim_list`),
-one-location allocations, and every other design are unchanged. A search
-stopped by its 60-second limit warns, and its result may not be reproducible
-from the seed on another machine.
+Field books built from an allocation passed in (`sparse_list`,
+`optim_list`) and one-location allocations are unchanged. A search
+stopped by its 60-second limit warns, and its result may not be
+reproducible from the seed on another machine.
+
+The resolvable block search changes the field book produced for a given
+seed by:
+
+- `incomplete_blocks()`, and the Incomplete Blocks Design (IBD) page;
+- `alpha_lattice()`, and the Alpha Lattice page;
+- `square_lattice()`, and the Square Lattice page;
+- `rectangular_lattice()`, and the Rectangular Lattice page;
+- `row_column(method = "twostage")`, both its columns and its rows, and
+  the Resolvable Row-Column Design (RRCD) page when a small design falls
+  back from onestage to twostage. The default `method = "onestage"`
+  still uses `blocksdesign::design()` and is unchanged.
+
+The designs’ efficiencies are equal to or better than before: on a
+validation grid of 300 incomplete-block, lattice and row-column shapes,
+each run on many seeds, and on a separate grid for the twostage rows,
+every shape passed a non-inferiority check against the previous results.
+Square and rectangular lattices with a construction (see Enhancements)
+are A-optimal.
+
+The resolvable search has a limit. A design is searched only when it has
+at most 2,000 incomplete blocks in total (replicates times blocks per
+replicate) and the predicted work of its search fits within a fixed work
+cap; with blocks of four or more plots the cap is reached at roughly
+3,700 to 4,500 entries with two replicates, 2,400 to 3,000 with three
+and 1,700 to 2,300 with four. A larger design is still returned, but
+unoptimized: a random connected resolvable design, with a warning of
+class `fieldhub_design_warning`. A lattice with a construction is the
+exception: it is returned from the construction, without search or
+warning, and is A-optimal.
+
+Every other design is unchanged.
 
 # FielDHub 1.6.0
 
 ## Release highlights
 
 - Single Diagonal Arrangement now records check-spacing metrics with
-  optimization off and on. `print()` adds a compact report,
-  `summary()` adds per-check details, and the app shows the selected
-  location’s report in Get Random. Optimized results show the original
-  and final assignments; distances use the chosen grid metric and the
-  neighbor radius is 5 steps. Check placement and search behavior are
-  unchanged.
+  optimization off and on. `print()` adds a compact report, `summary()`
+  adds per-check details, and the app shows the selected location’s
+  report in Get Random. Optimized results show the original and final
+  assignments; distances use the chosen grid metric and the neighbor
+  radius is 5 steps. Check placement and search behavior are unchanged.
 
-- Single Diagonal Arrangement now offers opt-in check-spacing optimization
-  through `spread_checks = TRUE`, with Euclidean or Manhattan distance. Only
-  check identities are exchanged; test entries, fillers, check positions and
-  replication remain fixed. The default layouts and least-filler option are
-  unchanged. Results record search limits and minimum check distances.
-- The Single Diagonal Arrangement page caches complete results by percentage
-  and seeded inputs within each session. Background workers prepare the other
-  valid percentages after the selected result; without workers, options are
-  computed on demand and cached. Older jobs cannot replace a newer selection.
+- Single Diagonal Arrangement now offers opt-in check-spacing
+  optimization through `spread_checks = TRUE`, with Euclidean or
+  Manhattan distance. Only check identities are exchanged; test entries,
+  fillers, check positions and replication remain fixed. The default
+  layouts and least-filler option are unchanged. Results record search
+  limits and minimum check distances.
+
+- The Single Diagonal Arrangement page caches complete results by
+  percentage and seeded inputs within each session. Background workers
+  prepare the other valid percentages after the selected result; without
+  workers, options are computed on demand and cached. Older jobs cannot
+  replace a newer selection.
 
 - R-devel’s additional binomial RNG setting is recorded and restored
   without rejecting valid results. Older three-setting records retain
   the historical binomial algorithm when replayed on newer R; newer
   four-setting records report a clear error on R versions that cannot
   restore them.
+
 - Current-R checks run on macOS, Linux and Windows for every PR and
   push. Extended Linux checks (R-devel, oldrel and R 4.1.0) run weekly,
   on release tags, and manually before publication. Historical

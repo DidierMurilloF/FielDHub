@@ -145,6 +145,35 @@ knitr::opts_chunk$set(
   FielDHub from source, including the `app.R` and `dev/run_dev.R` launchers,
   now needs a C++17 toolchain: Rtools on Windows and the Xcode command line
   tools on macOS.
+- Resolvable incomplete-block and lattice designs (`incomplete_blocks()`,
+  `alpha_lattice()`, `square_lattice()` and `rectangular_lattice()`) and the
+  column step of `row_column(method = "twostage")` are now built by the same
+  compiled block search, in a resolvable mode that keeps every replicate
+  complete, instead of `blocksdesign::blocks()`. Each run stops at a fixed
+  amount of work rather than a clock, so it reproduces from its seed on the
+  same platform and build. Two replicates of blocks of two are built in
+  closed form.
+- Square and rectangular lattices that have an algebraic construction start
+  from it and are A-optimal: their Level 2 A-efficiency reaches the
+  `A-Bound` reported in `blocksModel`.
+  Square lattices of order q use orthogonal Latin squares from the finite
+  field GF(q) at prime-power orders (up to q + 1 replicates), products of
+  such squares (MacNeish) at other orders, the 3m + 1 construction (orders
+  10, 22, 34, 46, ...), pairs of orders 14, 18 and 26 found by FielDHub's own
+  computer search, and products of these (30, 42, 50, ...); a design with r
+  replicates needs r - 2 orthogonal squares. Rectangular lattices of
+  s (s - 1) entries come from a square lattice of order s with one block
+  deleted (Shrikhande's method) and, with three replicates, from a Latin
+  square of order s with a transversal deleted, so every s from 3 has a
+  three-replicate construction. Order 6 has no orthogonal pair and order 38
+  has a single square here, so square lattices of 36 and 1,444 entries with
+  four or more replicates are still searched.
+- `row_column(method = "twostage")` now improves the rows with the same
+  block search, swapping two plots of the same column in different rows, so
+  the column design is kept. For twostage, `iterations` is now an effort
+  scale rather than a count of row-swap iterations: the row search's budget
+  is scaled by `iterations / 1000`, and the default 1000 is the full search.
+  For onestage, `iterations` keeps its meaning.
 - The p-rep spreading optimizer (`swap_pairs()`, and the optimizer inside
   `partially_replicated()`, `multi_location_prep()` and
   `optimized_arrangement()`) is much faster, about 50 times on a
@@ -169,10 +198,41 @@ produced for a given seed by:
   allocation themselves (two or more locations);
 * the Sparse Allocation and Multi-Location P-rep pages of the Shiny app.
 
-Field books built from an allocation passed in (`sparse_list`, `optim_list`),
-one-location allocations, and every other design are unchanged. A search
-stopped by its 60-second limit warns, and its result may not be reproducible
-from the seed on another machine.
+Field books built from an allocation passed in (`sparse_list`, `optim_list`)
+and one-location allocations are unchanged. A search stopped by its
+60-second limit warns, and its result may not be reproducible from the seed
+on another machine.
+
+The resolvable block search changes the field book produced for a given seed
+by:
+
+* `incomplete_blocks()`, and the Incomplete Blocks Design (IBD) page;
+* `alpha_lattice()`, and the Alpha Lattice page;
+* `square_lattice()`, and the Square Lattice page;
+* `rectangular_lattice()`, and the Rectangular Lattice page;
+* `row_column(method = "twostage")`, both its columns and its rows, and the
+  Resolvable Row-Column Design (RRCD) page when a small design falls back
+  from onestage to twostage. The default `method = "onestage"` still uses
+  `blocksdesign::design()` and is unchanged.
+
+The designs' efficiencies are equal to or better than before: on a
+validation grid of 300 incomplete-block, lattice and row-column shapes, each
+run on many seeds, and on a separate grid for the twostage rows, every shape
+passed a non-inferiority check against the previous results. Square and
+rectangular lattices with a construction (see Enhancements) are A-optimal.
+
+The resolvable search has a limit. A design is searched only when it has at
+most 2,000 incomplete blocks in total (replicates times blocks per
+replicate) and the predicted work of its search fits within a fixed work
+cap; with blocks of four or more plots the cap is reached at roughly 3,700
+to 4,500 entries with two replicates, 2,400 to 3,000 with three and 1,700 to
+2,300 with four. A larger design is still returned, but unoptimized: a random
+connected resolvable design, with a warning of class
+`fieldhub_design_warning`. A lattice with a construction is the exception:
+it is returned from the construction, without search or warning, and is
+A-optimal.
+
+Every other design is unchanged.
 
 # FielDHub 1.6.0
 
