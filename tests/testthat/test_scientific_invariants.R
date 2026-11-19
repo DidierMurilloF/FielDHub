@@ -7,7 +7,8 @@ test_that("every field design has distinct final physical coordinates", {
   # catalogue entry is expected to have one, so the count is derived from
   # the catalogue itself and needs no edit when a field-book-producing
   # entry is added.
-  no_field_book <- c("do_optim_sparse", "do_optim_prep", "split_families", "swap_pairs")
+  no_field_book <- c("do_optim_sparse", "do_optim_sparse_sampled", "do_optim_sparse_lattice_start",
+                     "do_optim_prep", "split_families", "swap_pairs")
   expect_setequal(setdiff(names(catalogue), entries), no_field_book)
   expect_length(entries, length(catalogue) - length(no_field_book))
   for (name in entries) {
