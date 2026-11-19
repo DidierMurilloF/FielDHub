@@ -37,6 +37,18 @@ expect_optimized_legacy_contract <- function(saved, replayed, engine) {
   # allocation. Other tests independently check balance and efficiency.
   testthat::expect_identical(
     expect_only_classed_warnings(reproduce_design(replayed), "reproduction"), replayed)
+  # A design whose layout changed must be at least as efficient as the
+  # recorded 1.5.0 one: Level 2 (blocks within replicates) A-efficiency of
+  # the resolvable incomplete-block designs, with the engines' tolerance.
+  if (engine %in% names(legacy_result_changes) &&
+      replayed$metadata$design %in% c("incomplete_blocks", "alpha_lattice", "square_lattice",
+                                      "rectangular_lattice")) {
+    level_2_a <- function(x) {
+      x$blocksModel[as.character(x$blocksModel$Level) == "2", "A-Efficiency"]
+    }
+    testthat::expect_length(level_2_a(saved), 1L)
+    testthat::expect_gte(level_2_a(replayed), level_2_a(saved) - 1.5e-7)
+  }
   if (legacy_reference_platform && !engine %in% names(legacy_result_changes)) {
     aligned <- align_column_types(old, new)
     testthat::expect_equal(aligned$new, aligned$old, ignore_attr = TRUE)
