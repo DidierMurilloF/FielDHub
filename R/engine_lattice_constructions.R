@@ -12,7 +12,9 @@
 #' nonzero a (Bose 1938, Sankhya 3:323-338), so r <= q + 1. At other orders
 #' they are direct products of the prime-power factors' squares (MacNeish
 #' 1922, Ann. Math. 23:221-227), and at q = 3m + 1 (10, 22, 34, 46, ...) a
-#' pair from a quasi-difference matrix (Bose, Shrikhande & Parker 1960).
+#' pair from a quasi-difference matrix (Bose, Shrikhande & Parker 1960). The
+#' remaining orders below 50 use pairs found by FielDHub's own search
+#' (`stored_mols`, R/engine_mols_data.R) or products of the above.
 #'
 #' Clean room: written from the cited mathematics and the spec only.
 #' @noRd
@@ -144,16 +146,42 @@ prime_power_factors <- function(q) {
 
 #' Number of mutually orthogonal Latin squares of order q that `mols()` builds:
 #' q - 1 when q is a prime power, otherwise the MacNeish count, the least
-#' p^e - 1 over the prime-power factors of q, raised to 2 when q = 3m + 1 with
-#' m not 2 or 6 and two orthogonal squares of order m (`three_m_plus_one()`).
+#' p^e - 1 over the prime-power factors of q. When that is below 2 (q = 2 mod
+#' 4) it is 2 if q = 3m + 1 with m not 2 or 6 and two orthogonal squares of
+#' order m (`three_m_plus_one()`), if a pair of order q is stored
+#' (`stored_mols`), or if q = m n with two squares of each order
+#' (`product_split()`).
 #' @noRd
 mols_max <- function(q) {
   q <- as.integer(q)
   if (is.na(q) || q < 2L) return(0L)
   if (!is.null(prime_power(q))) return(q - 1L)
   count <- as.integer(min(prime_power_factors(q)) - 1L)
-  if (count < 2L && three_m_plus_one_order(q)) count <- 2L
+  if (count < 2L && (three_m_plus_one_order(q) || has_stored_mols(q) || !is.null(product_split(q)))) {
+    count <- 2L
+  }
   count
+}
+
+#' Whether an orthogonal pair of order q is stored in `stored_mols`
+#' @noRd
+has_stored_mols <- function(q) !is.null(stored_mols[[as.character(q)]])
+
+#' A factorisation q = m n (the smallest m > 1) with at least two orthogonal
+#' squares of each order, as c(m, n), or NULL
+#'
+#' The direct product of orthogonal squares of orders m and n is orthogonal
+#' whatever the factors (MacNeish 1922), so N(m n) >= min(N(m), N(n)) also
+#' holds when the factors' squares come from `three_m_plus_one()` or
+#' `stored_mols`: order 30 = 3 x 10.
+#' @noRd
+product_split <- function(q) {
+  m <- 2L
+  while (m * m <= q) {
+    if (q %% m == 0L && mols_max(m) >= 2L && mols_max(q %/% m) >= 2L) return(c(m, q %/% m))
+    m <- m + 1L
+  }
+  NULL
 }
 
 #' Whether q = 3m + 1 with m not in {2, 6} and `mols_max(m) >= 2`
@@ -219,16 +247,20 @@ three_m_plus_one <- function(q) {
 #' is the direct product of the factors' a-th squares (MacNeish 1922): cell
 #' ((x1, x2), (y1, y2)), x = x1 q2 + x2, holds L1[x1, y1] q2 + L2[x2, y2],
 #' folded over the factors in turn. Direct products of orthogonal squares are
-#' orthogonal, so the count is the least p^e - 1. When that is below 2 and q =
-#' 3m + 1, two squares come from `three_m_plus_one()`.
+#' orthogonal, so the count is the least p^e - 1. When that is below 2, two
+#' squares come from `three_m_plus_one()` when q = 3m + 1, else from
+#' `stored_mols`, else from the direct product over `product_split()`.
 #' @noRd
 mols <- function(q, count) {
   if (count == 0L) return(list())
   if (count < 0L || count > mols_max(q)) return(NULL)
   q <- as.integer(q)
   if (is.null(prime_power(q))) {
-    if (count <= min(prime_power_factors(q)) - 1L) return(macneish_mols(q, count))
-    return(three_m_plus_one(q)[seq_len(count)])
+    factors <- prime_power_factors(q)
+    if (count <= min(factors) - 1L) return(direct_product_mols(factors, count))
+    if (three_m_plus_one_order(q)) return(three_m_plus_one(q)[seq_len(count)])
+    if (has_stored_mols(q)) return(unname(stored_mols[[as.character(q)]][seq_len(count)]))
+    return(direct_product_mols(product_split(q), count))
   }
   field <- gf_tables(q)
   x <- rep(0:(q - 1L), times = q)  # row index of each cell, column-major
@@ -238,11 +270,10 @@ mols <- function(q, count) {
   })
 }
 
-#' MacNeish (1922) direct product of the prime-power factors' squares;
-#' `count` must not exceed the least p^e - 1
+#' MacNeish (1922) direct product of `count` orthogonal squares of each order
+#' in `factors`; every order must have that many
 #' @noRd
-macneish_mols <- function(q, count) {
-  factors <- prime_power_factors(q)
+direct_product_mols <- function(factors, count) {
   q1 <- factors[1L]
   squares <- mols(q1, count)
   for (q2 in factors[-1L]) {

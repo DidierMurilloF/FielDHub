@@ -139,16 +139,27 @@ nested_golden_record <- function(caller, t, k, r, seed, iterations = NULL) {
 }
 
 # Number of mutually orthogonal Latin squares that spec 6.5 expects the package
-# to build for order q, by arithmetic only. It never calls the package.
+# to build for order q, by arithmetic only. It never calls the package. Prime
+# power: q - 1. Otherwise the least p^e - 1 over the prime-power factors, and
+# when that is below 2: 2 if a pair of order q was found by search (spec 6.7,
+# the literal orders below), if q = 3m + 1 with m not 2 or 6 and two squares of
+# order m, or if q = m n with two squares of each order.
+nested_searched_orders <- c(14L, 18L, 26L)
 expected_mols <- function(q) {
   q <- as.integer(q)
   if (q < 2L) return(0L)
   factors <- nested_prime_power_factors(q)
   mols <- min(factors) - 1L
-  if (length(factors) == 1L) return(as.integer(mols))
+  if (length(factors) == 1L || mols >= 2L) return(as.integer(mols))
+  if (q %in% nested_searched_orders) return(2L)
   if (q %% 3L == 1L) {
     m <- (q - 1L) %/% 3L
-    if (!m %in% c(2L, 6L) && expected_mols(m) >= 2L) mols <- max(mols, 2L)
+    if (!m %in% c(2L, 6L) && expected_mols(m) >= 2L) return(2L)
+  }
+  m <- 2L
+  while (m * m <= q) {
+    if (q %% m == 0L && expected_mols(m) >= 2L && expected_mols(q %/% m) >= 2L) return(2L)
+    m <- m + 1L
   }
   as.integer(mols)
 }
