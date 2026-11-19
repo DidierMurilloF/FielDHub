@@ -63,3 +63,4 @@ $run_dev.*
 
 ^tools/prepare-site\.py$
 ^tools/check-site\.py$
+^tools/nested-goldens-baseline\.csv\.gz$

@@ -8,7 +8,9 @@
 # Optional shard=i/k runs only shard i of k: shapes are spread over shards by
 # longest-processing-time on the estimated cost (t r)^2 x seeds. Run each shard
 # on its own core with its own results path, then concatenate the CSVs.
-# Compare two results with tools/check-nested-goldens.R.
+# The committed baseline is the concatenated shard CSVs of a full run, gzipped, as
+# tools/nested-goldens-baseline.csv.gz; compare a candidate run with it using
+# tools/check-nested-goldens.R.
 arguments <- commandArgs(trailingOnly = TRUE)
 shard_arg <- grep("^shard=", arguments, value = TRUE)
 offset_arg <- grep("^seed_offset=", arguments, value = TRUE)

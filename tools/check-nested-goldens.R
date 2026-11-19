@@ -1,8 +1,9 @@
 # Compares a candidate run with the recorded baseline under the acceptance
 # rules of spec 7 and writes <candidate>.md with the failures first. Exits with
 # status 1 when any shape fails.
-#   Rscript tools/check-nested-goldens.R baseline.csv candidate.csv [accepted-loss.csv]
-# Both CSVs come from tools/generate-nested-goldens.R. accepted-loss.csv lists
+#   Rscript tools/check-nested-goldens.R tools/nested-goldens-baseline.csv.gz candidate.csv [accepted-loss.csv]
+# Both arguments are raw per-seed records from tools/generate-nested-goldens.R,
+# as .csv or .csv.gz; the committed baseline is tools/nested-goldens-baseline.csv.gz. accepted-loss.csv lists
 # caller,t,k,r of the shapes whose loss the owner accepted (spec 10): they are
 # reported with their shortfall and do not fail the run.
 arguments <- commandArgs(trailingOnly = TRUE)

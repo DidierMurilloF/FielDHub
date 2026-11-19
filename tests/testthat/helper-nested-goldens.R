@@ -204,7 +204,10 @@ nested_bootstrap_lower <- function(baseline, candidate, resamples = 2000L) {
 # Applies the acceptance rules of spec 7 to two summaries (shapes of `baseline`
 # are looked up in `candidate`). `bootstrap = FALSE` is the CI mode: no
 # bootstrap. A constant baseline is SD = 0 over at least 50 seeds, so at the 5
-# seeds of CI no shape qualifies. `accepted_loss` is NULL or a data.frame of caller, t, k, r
+# seeds of CI no shape qualifies. Optimum rule (spec 7): a non-gap lattice shape
+# must hit the A-bound (A >= bound - 1.5e-7) on every seed, and so must any other
+# shape with t < 1000 where the baseline hit on every seed; for row_column the
+# hit compares col_A with the Column A-Bound. `accepted_loss` is NULL or a data.frame of caller, t, k, r
 # that the owner accepted: those shapes get pass = NA and report the shortfall.
 nested_acceptance <- function(baseline, candidate, accepted_loss = NULL, bootstrap = TRUE) {
   tol <- nested_golden_tolerance
@@ -258,7 +261,7 @@ nested_acceptance <- function(baseline, candidate, accepted_loss = NULL, bootstr
     row$worst_ok <- worst
     row$constant_ok <- constant
     row$noninferior_ok <- if (run_bootstrap) noninferior else NA
-    base_all_hit <- b$seeds > 0L && b$hits == b$seeds
+    base_all_hit <- b$t < 1000 && b$seeds > 0L && b$hits == b$seeds
     required <- (b$caller %in% c("square_lattice", "rectangular_lattice") &&
                    !nested_gap(b$caller, b$t, b$r)) || base_all_hit
     row$optimum_ok <- !required || (cand$seeds > 0L && cand$hits == cand$seeds)
