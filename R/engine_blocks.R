@@ -19,9 +19,11 @@
 #' 2v-cycle, which every connected such design is), so the limits do not apply
 #' to them. Without a `start`, a shape with an algebraic lattice construction
 #' (`resolvable_lattice_start()`, spec section 6.5) starts its one search from
-#' it, whatever function asked for the design; when admission refuses such a
-#' shape the construction is returned unsearched, without a warning, since it
-#' already reaches the A-bound. `start`, if given, holds v r 1-based
+#' it, whatever function asked for the design. A start (constructed or given)
+#' whose A-efficiency attains `resolvable_a_bound()` is scored once and
+#' returned without search or admission (ruling R18); a construction too large
+#' to score is returned with its closed-form efficiencies. Neither gives a
+#' warning. `start`, if given, holds v r 1-based
 #' treatments in plot order (replicate m in plots m v + 1 .. m v + v, each a
 #' permutation of 1..v) and is the start of a single search.
 #' @return A list with `Design`, `Blocks_model` and `search` (evaluations,
@@ -112,9 +114,23 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
   if (resolvable && cycle) {
     return(cycle_resolvable_design(treatments, blocks))
   }
+  if (resolvable && !is.null(start) && total_blocks <= resolvable_block_limit &&
+      v * total_blocks <= 1e8) {
+    # A start that attains the resolvable A-bound is returned without search
+    # (ruling R18): no search can improve its A, and admission is not needed.
+    score <- resolvable_score_cpp(as.integer(treatments), as.integer(replicates),
+                                  as.integer(total_blocks), as.integer(start))
+    if (!anyNA(score) &&
+        score[2L] >= resolvable_a_bound(treatments, replicates, blocks) - 1.5e-7) {
+      return(unsearched_resolvable_design(start, treatments, replicates, blocks,
+                                          score[1L], score[2L], "optimal_start"))
+    }
+  }
   if (unoptimised && lattice) {
-    # The construction already reaches the A-bound: return it unsearched.
-    return(lattice_unsearched_design(start, treatments, replicates, blocks))
+    # Too large to score: the construction attains the A-bound (closed form).
+    efficiency <- square_lattice_efficiencies(blocks, replicates)
+    return(unsearched_resolvable_design(start, treatments, replicates, blocks,
+                                        efficiency[["D"]], efficiency[["A"]], "construction"))
   }
   if (unoptimised) {
     fieldhub_warn("The design (", treatments, " treatments in ", total_blocks,
@@ -231,7 +247,7 @@ resolvable_engine_output <- function(treat, v, r, blocks) {
   )
   model <- data.frame(Level = 1:2, Blocks = as.integer(c(r, total)),
                       `D-Efficiency` = c(1, NA_real_), `A-Efficiency` = c(1, NA_real_),
-                      `A-Bound` = c(1, block_a_bound(v, r, rep(k, total))),
+                      `A-Bound` = c(1, resolvable_a_bound(v, r, blocks)),
                       check.names = FALSE)
   list(Design = design, Blocks_model = model)
 }
@@ -260,17 +276,20 @@ cycle_resolvable_design <- function(v, blocks) {
   result
 }
 
-#' A square-lattice start returned without search (spec section 6.2b, decision 4)
+#' A resolvable start returned without search (spec section 6.2b, decision 4;
+#' ruling R18)
 #'
-#' Used when the work-based admission refuses the shape: the construction is
-#' already A-optimal, so it is returned as is, with its closed-form Level 2
-#' efficiencies (`square_lattice_efficiencies()`) and no warning.
+#' Used when the start attains the resolvable A-bound (`resolvable_a_bound()`,
+#' stop reason "optimal_start", efficiencies scored by the engine), or when a
+#' square-lattice construction is too large to score (stop reason
+#' "construction", closed-form efficiencies from `square_lattice_efficiencies()`).
+#' No warning: the design is A-optimal. Only the within-block plot shuffle of
+#' `resolvable_engine_output()` draws from the generator.
 #' @noRd
-lattice_unsearched_design <- function(start, v, r, blocks) {
+unsearched_resolvable_design <- function(start, v, r, blocks, d_efficiency, a_efficiency, reason) {
   result <- resolvable_engine_output(start, v, r, blocks)
-  efficiency <- square_lattice_efficiencies(blocks, r)
-  result$Blocks_model[2L, c("D-Efficiency", "A-Efficiency")] <- c(efficiency[["D"]], efficiency[["A"]])
-  result$search <- list(evaluations = 0, budget = 0, stop_reason = "construction",
+  result$Blocks_model[2L, c("D-Efficiency", "A-Efficiency")] <- c(d_efficiency, a_efficiency)
+  result$search <- list(evaluations = 0, budget = 0, stop_reason = reason,
                         searches_done = 0L, refreshes = 0, drift_events = 0, repairs = 0,
                         even_repairs = 0L, debug_max_error = NA_real_)
   result
@@ -420,12 +439,30 @@ blocks_engine_default_jumps <- function(n, pairs = n * (n - 1) / 2) {
 #' With efficiencies of C/r on the contrast space, at least max(0, v - b) equal 1;
 #' the remaining m = min(v, b) - 1 sum to m - T with T at its minimum when every
 #' block's counts are as even as possible; the harmonic mean is then at most
-#' (v - 1) / (max(0, v - b) + m^2 / (m - T)).
+#' (v - 1) / (max(0, v - b) + m^2 / (m - T)). `rank` replaces b in m when the
+#' block incidence has a smaller known rank (resolvable designs,
+#' `resolvable_a_bound()`); the default keeps the one-way bound unchanged.
 #' @noRd
-block_a_bound <- function(v, r, k) {
+block_a_bound <- function(v, r, k, rank = length(k)) {
   lo <- k %/% v
   hi <- k %% v
   t_min <- sum((hi * (lo + 1)^2 + (v - hi) * lo^2) / (r * k)) - 1
-  m <- min(v, length(k)) - 1
-  (v - 1) / (max(0, v - length(k)) + m^2 / (m - t_min))
+  m <- min(v, rank) - 1
+  (v - 1) / (max(0, v - rank) + m^2 / (m - t_min))
+}
+
+#' A-efficiency bound of a resolvable design (Level 2, ruling R18)
+#'
+#' The r replicates' block indicators each sum to the all-ones vector, so the
+#' incidence N of the B = r b blocks has rank at most B - r + 1 and at most
+#' m = min(v, B - r + 1) - 1 contrast efficiencies differ from 1. With the
+#' same sum argument as `block_a_bound()` (T = b - 1 for binary blocks of
+#' v / b plots) the harmonic mean is at most (v - 1 - m + m^2 / (m - T)). A
+#' square lattice with r <= q + 1 orthogonal replicates attains it. Own
+#' derivation (controller ruling R18, checked on 3000 random resolvable
+#' designs).
+#' @noRd
+resolvable_a_bound <- function(v, r, blocks) {
+  total <- r * blocks
+  block_a_bound(v, r, rep(v %/% blocks, total), rank = total - r + 1)
 }

@@ -58,3 +58,11 @@ test_that("square lattices with a finite-field construction are A-optimal", {
   # q = 6 has no finite field; the design is still built.
   expect_s3_class(square_lattice(t = 36, k = 6, reps = 4, seed = 1), "FielDHub")
 })
+
+test_that("a large square lattice is built at its A-bound", {
+  # q = 64, r = 4: the construction attains the bound, so the engine returns it
+  # without searching (before, one search spent about 7 s confirming it).
+  x <- square_lattice(t = 4096, k = 64, reps = 4, seed = 1)
+  m <- x$blocksModel[x$blocksModel$Level == 2, ]
+  expect_gte(m[["A-Efficiency"]], m[["A-Bound"]] - 1.5e-7)
+})

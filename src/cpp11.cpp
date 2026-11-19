@@ -40,6 +40,13 @@ extern "C" SEXP _FielDHub_blocks_engine_cpp(SEXP v, SEXP r, SEXP b, SEXP searche
     return cpp11::as_sexp(blocks_engine_cpp(cpp11::as_cpp<cpp11::decay_t<int>>(v), cpp11::as_cpp<cpp11::decay_t<int>>(r), cpp11::as_cpp<cpp11::decay_t<int>>(b), cpp11::as_cpp<cpp11::decay_t<int>>(searches), cpp11::as_cpp<cpp11::decay_t<int>>(jumps_per_escape), cpp11::as_cpp<cpp11::decay_t<int>>(max_stale_escapes), cpp11::as_cpp<cpp11::decay_t<double>>(budget), cpp11::as_cpp<cpp11::decay_t<double>>(time_limit), cpp11::as_cpp<cpp11::decay_t<bool>>(debug), cpp11::as_cpp<cpp11::decay_t<bool>>(resolvable), cpp11::as_cpp<cpp11::decay_t<cpp11::integers>>(start), cpp11::as_cpp<cpp11::decay_t<double>>(work_cap), cpp11::as_cpp<cpp11::decay_t<int>>(refresh_every), cpp11::as_cpp<cpp11::decay_t<double>>(evaluation_work)));
   END_CPP11
 }
+// blocks_engine.cpp
+cpp11::doubles resolvable_score_cpp(int v, int r, int b, cpp11::integers start);
+extern "C" SEXP _FielDHub_resolvable_score_cpp(SEXP v, SEXP r, SEXP b, SEXP start) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(resolvable_score_cpp(cpp11::as_cpp<cpp11::decay_t<int>>(v), cpp11::as_cpp<cpp11::decay_t<int>>(r), cpp11::as_cpp<cpp11::decay_t<int>>(b), cpp11::as_cpp<cpp11::decay_t<cpp11::integers>>(start)));
+  END_CPP11
+}
 // engine_rng.cpp
 cpp11::integers engine_draw_indices_cpp(int n, int m);
 extern "C" SEXP _FielDHub_engine_draw_indices_cpp(SEXP n, SEXP m) {
@@ -56,6 +63,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_FielDHub_engine_draw_indices_cpp",      (DL_FUNC) &_FielDHub_engine_draw_indices_cpp,       2},
     {"_FielDHub_even_repair_probe_cpp",        (DL_FUNC) &_FielDHub_even_repair_probe_cpp,         4},
     {"_FielDHub_lattice_start_probe_cpp",      (DL_FUNC) &_FielDHub_lattice_start_probe_cpp,       3},
+    {"_FielDHub_resolvable_score_cpp",         (DL_FUNC) &_FielDHub_resolvable_score_cpp,          4},
     {NULL, NULL, 0}
 };
 }

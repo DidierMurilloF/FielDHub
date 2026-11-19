@@ -611,3 +611,24 @@ cpp11::list blocks_engine_cpp(int v, int r, int b, int searches, int jumps_per_e
       "even_repairs"_nm = even_repairs, "work"_nm = bud.work_used(), "work_capped"_nm = bud.capped(),
       "debug_max_error"_nm = debug ? out.debug_max_error : NA_REAL});
 }
+
+// Scores a resolvable design without searching (nested-engine spec 6.2b,
+// ruling R18): `start` holds n 1-based treatments by plot as for
+// blocks_engine_cpp(). Returns the D- and A-efficiency of its r b blocks, NA
+// when the block-space matrix cannot be factorised. No random draws.
+[[cpp11::register]]
+cpp11::doubles resolvable_score_cpp(int v, int r, int b, cpp11::integers start) {
+  Layout lay = make_layout(v, r, b, true);
+  if (start.size() != lay.n) cpp11::stop("`start` must hold one treatment per plot.");
+  std::vector<int> treat(lay.n);
+  for (int x = 0; x < lay.n; ++x) treat[x] = start[x] - 1;
+  BlockSpace fin(v, b, r, counts_of(lay, treat));
+  fin.enable_fast_inverse();
+  double d_eff = NA_REAL, a_eff = NA_REAL;
+  if (fin.refresh()) {
+    d_eff = fin.d_efficiency();
+    a_eff = fin.a_efficiency_equal_sizes();
+  }
+  cpp11::writable::doubles out({d_eff, a_eff});
+  return out;
+}
