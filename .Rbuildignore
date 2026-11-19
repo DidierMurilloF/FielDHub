@@ -65,3 +65,4 @@ $run_dev.*
 ^tools/check-site\.py$
 ^tools/nested-goldens-baseline\.csv\.gz$
 ^AGENTS\.md$
+^tools/nested-goldens-rc-baseline\.csv\.gz$

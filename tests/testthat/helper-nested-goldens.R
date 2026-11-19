@@ -15,7 +15,8 @@ nested_golden_tolerance <- 1.5e-7
 
 # The shapes to run. `k` is the block size, nrows for row_column. `iterations`
 # is NA except for the CI row-column shapes, which run with 50.
-nested_golden_grid <- function(protocol = c("full", "ci")) {
+# The "rc" protocol (spec 6.8) is the extended row_column twostage grid only.
+nested_golden_grid <- function(protocol = c("full", "ci", "rc")) {
   protocol <- match.arg(protocol)
   seeds_for <- function(t) if (t <= 300) 200L else if (t == 500) 50L else 5L
   shape <- function(caller, t, k, r) {
@@ -28,6 +29,22 @@ nested_golden_grid <- function(protocol = c("full", "ci")) {
   divisors <- function(t, from) {
     d <- seq.int(from, t %/% 2L)
     d[t %% d == 0L]
+  }
+  if (protocol == "rc") {
+    rc <- list()
+    for (t in c(20, 30, 50, 100, 200, 300, 500)) {
+      iterations <- if (t %in% c(50, 200)) list(NA_integer_, 100L, 5000L) else list(NA_integer_)
+      for (k in thin(divisors(t, 2L))) {
+        for (it in iterations) {
+          x <- shape("row_column", t, k, 2:4)
+          x$iterations <- it
+          rc[[length(rc) + 1L]] <- x
+        }
+      }
+    }
+    rc <- do.call(rbind, rc)
+    rownames(rc) <- NULL
+    return(rc)
   }
   grid <- list()
   q_extra <- c(3, 4, 5, 7)
@@ -85,6 +102,7 @@ nested_golden_record <- function(caller, t, k, r, seed, iterations = NULL) {
                        row_D = NA_real_, row_A = NA_real_, col_D = NA_real_, col_A = NA_real_,
                        joint_D = NA_real_, joint_A = NA_real_,
                        seconds = NA_real_, status = "ok", message = "",
+                       iterations = if (is.null(iterations)) NA_integer_ else as.integer(iterations),
                        stringsAsFactors = FALSE)
   design <- NULL
   record$seconds <- system.time(tryCatch(
@@ -167,16 +185,30 @@ nested_gap <- function(caller, t, r) {
   FALSE
 }
 
-nested_shape_key <- function(x) paste(x$caller, x$t, x$k, x$r, sep = "|")
+# The shape key; `iterations` joins it only when set (the rc protocol runs one
+# shape at several iteration counts)
+nested_shape_key <- function(x) {
+  key <- paste(x$caller, x$t, x$k, x$r, sep = "|")
+  if ("iterations" %in% names(x)) key <- ifelse(is.na(x$iterations), key, paste(key, x$iterations, sep = "|"))
+  key
+}
 
 # One row per shape with mean, SD, min, max and range of every efficiency, the
 # number of seeds that hit the A-bound, and the per-seed values in `values`
 nested_summary <- function(records) {
+  base <- paste(records$caller, records$t, records$k, records$r, sep = "|")
+  if ("iterations" %in% names(records)) {
+    # iterations is kept only for shapes recorded at several iteration counts
+    varied <- tapply(records$iterations, base, function(v) length(unique(v)) > 1L)
+    records$iterations[!varied[base]] <- NA
+  } else {
+    records$iterations <- NA_integer_
+  }
   key <- nested_shape_key(records)
   rows <- lapply(split(records, factor(key, levels = unique(key))), function(x) {
     ok <- x[x$status == "ok", , drop = FALSE]
     row <- data.frame(caller = x$caller[1], t = x$t[1], k = x$k[1], r = x$r[1],
-                      seeds = nrow(ok), errors = nrow(x) - nrow(ok),
+                      iterations = as.integer(x$iterations[1]), seeds = nrow(ok), errors = nrow(x) - nrow(ok),
                       stringsAsFactors = FALSE)
     for (e in nested_golden_efficiencies) {
       v <- ok[[e]][!is.na(ok[[e]])]
