@@ -2,6 +2,13 @@
 # tools/ source this file; the CI test uses the same code. It only calls the
 # public functions, so it measures the same thing before and after an engine
 # change.
+#
+# CI mode (nested_acceptance(bootstrap = FALSE), 5 seeds) does not apply the
+# worst-seed rule to the row_* and joint_* efficiencies of row_column (ruling
+# R11): they come from the random greedy row step improve_efficiency(), which
+# the engine does not change, and its 5-seed tails are noise. They stay judged
+# by both the bootstrap and the worst-seed rule in the full run
+# (bootstrap = TRUE). The column level (col_*, D, A, bound) keeps every rule.
 
 nested_golden_efficiencies <- c("D", "A", "row_D", "row_A", "col_D", "col_A", "joint_D", "joint_A")
 nested_golden_tolerance <- 1.5e-7
@@ -249,7 +256,8 @@ nested_acceptance <- function(baseline, candidate, accepted_loss = NULL, bootstr
         worst <- FALSE
         next
       }
-      worst <- worst && min(cx) >= min(bx) - (max(bx) - min(bx)) - tol
+      greedy_rows <- !bootstrap && grepl("^(row|joint)_", e)  # ruling R11
+      if (!greedy_rows) worst <- worst && min(cx) >= min(bx) - (max(bx) - min(bx)) - tol
       if (b$t < 1000 && length(bx) >= 50L && max(bx) - min(bx) < 1e-12) {
         constant <- constant && all(cx >= bx[1] - tol)
       }
