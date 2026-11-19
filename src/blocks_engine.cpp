@@ -151,18 +151,26 @@ double swap_work(const BlockSpace& bs, const Layout& lay) {
   return 4.0 * lay.b * lay.b + 2.0 * lay.b * (bs.cached() ? lay.v : lay.r);
 }
 
-// Work of one sparse drift check, O(b (b + n)).
-double drift_work(const Layout& lay) {
-  return static_cast<double>(lay.b) * (3.0 * lay.b + 2.0 * lay.n);
+// Work of one sparse drift check, O(b (b + n)), plus the O(b n) check of the
+// G cache when it is kept.
+double drift_work(const BlockSpace& bs, const Layout& lay) {
+  return static_cast<double>(lay.b) * (3.0 * lay.b + (bs.cached() ? 3.0 : 2.0) * lay.n);
+}
+
+// The running state is trusted while both Minv and the G cache agree with the
+// counts: the cached ratios and the running log determinant are read from G,
+// which gathers rounding error independently of Minv.
+bool state_accurate(const BlockSpace& bs) {
+  return bs.drift_sparse() <= kDriftAlarm && bs.drift_cache() <= kDriftAlarm;
 }
 
 // Resolvable mode refreshes on demand (nested-engine spec 6.2b): the running
-// state is checked with the sparse drift, and Minv is rebuilt only on a drift
-// alarm, which also halves the check interval. `fresh` is false if the check
-// or the refresh stopped the run.
+// state (Minv and the G cache) is checked with the sparse drift, and both are
+// rebuilt only on a drift alarm, which also halves the check interval. False
+// if the check or the refresh stopped the run.
 bool refresh_on_alarm(BlockSpace& bs, const Layout& lay, int& interval, Budget& budget, Search& out) {
-  if (!budget.work(drift_work(lay))) return false;
-  if (bs.drift_sparse() <= kDriftAlarm) return true;
+  if (!budget.work(drift_work(bs, lay))) return false;
+  if (state_accurate(bs)) return true;
   out.drift_events += 1;
   interval = std::max(kRefreshMin, interval / 2);
   return checked_refresh(bs, lay, budget, out);
@@ -428,7 +436,7 @@ void run_search(const Layout& lay, int jumps_per_escape, int max_stale_escapes, 
   // and every local optimum already has a fresh score), unless no state has
   // been scored yet.
   bool scored = false;
-  if (lay.resolvable && bs->drift_sparse() <= kDriftAlarm) {
+  if (lay.resolvable && state_accurate(*bs)) {
     // The running state is accurate: no O(b^3) score from scratch per search.
     // This O(b (b + n)) check runs once per search, also after the budget
     // stopped the run, so it is not charged.

@@ -33,6 +33,11 @@ class BlockSpace {
   // O(b (b + n)); its rounding differs from drift(), so single-level mode keeps
   // drift().
   double drift_sparse() const;
+  // max |G - Minv N' / r| over the cache, O(b n); 0 without a cache. G is
+  // updated from its own entries, so it gathers rounding error independently of
+  // Minv, and the cached ratios and the running log determinant are read from
+  // it: drift_sparse() alone does not vouch for them.
+  double drift_cache() const;
   // A-efficiency from the trace of Minv when every block has the same size k.
   // With S = B / k and y y' = J / b as in a_efficiency(), Bhat / k = S + J / (b k),
   // which is not S + y y'. Both add a multiple of J to S, whose null vector is

@@ -368,6 +368,23 @@ double BlockSpace::drift_sparse() const {
   return worst;
 }
 
+double BlockSpace::drift_cache() const {
+  if (!cached_) return 0.0;
+  std::vector<double> col(b_);
+  double worst = 0.0;
+  for (int i = 0; i < v_; ++i) {
+    const double* gi = &g_[static_cast<size_t>(b_) * i];
+    const int* bl = &blocks_of_[static_cast<size_t>(i) * r_];
+    std::fill(col.begin(), col.end(), 0.0);
+    for (int x = 0; x < r_; ++x) {
+      const double* m = &minv_[static_cast<size_t>(b_) * bl[x]];
+      for (int j = 0; j < b_; ++j) col[j] += m[j];
+    }
+    for (int j = 0; j < b_; ++j) worst = std::max(worst, std::fabs(gi[j] - col[j] / r_));
+  }
+  return worst;
+}
+
 double BlockSpace::a_efficiency_equal_sizes() const {
   double tr = 0.0;
   for (int j = 0; j < b_; ++j) tr += minv_[j + static_cast<size_t>(b_) * j];
