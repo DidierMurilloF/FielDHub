@@ -59,6 +59,29 @@ test_that("square lattices with a finite-field construction are A-optimal", {
   expect_s3_class(square_lattice(t = 36, k = 6, reps = 4, seed = 1), "FielDHub")
 })
 
+test_that("square lattices of composite order are A-optimal", {
+  # MacNeish (1922) products of the prime-power factors' squares, and the
+  # order 3m + 1 pair of Bose, Shrikhande & Parker (1960) for q = 10. Search
+  # alone misses (144, 12, 4), (225, 15, 4) and (100, 10, 4) on every seed.
+  level2 <- function(x) x$blocksModel[x$blocksModel$Level == 2, ]
+  expect_optimal <- function(x) {
+    m <- level2(x)
+    expect_gte(m[["A-Efficiency"]], m[["A-Bound"]] - 1.5e-7)
+  }
+  for (shape in list(c(36, 6, 3), c(144, 12, 4), c(225, 15, 4), c(100, 10, 4))) {
+    for (seed in 1:3) {
+      expect_optimal(square_lattice(t = shape[1], k = shape[2], reps = shape[3], seed = seed))
+    }
+  }
+  for (seed in 1:3) {
+    expect_optimal(alpha_lattice(t = 100, k = 10, reps = 4, seed = seed))
+    expect_optimal(incomplete_blocks(t = 100, k = 10, reps = 3, seed = seed))
+  }
+  # Seeds where the search alone stopped below the bound.
+  expect_optimal(square_lattice(t = 81, k = 9, reps = 3, seed = 74))
+  expect_optimal(incomplete_blocks(t = 100, k = 10, reps = 3, seed = 11))
+})
+
 test_that("a large square lattice is built at its A-bound", {
   # q = 64, r = 4: the construction attains the bound, so the engine returns it
   # without searching (before, one search spent about 7 s confirming it).

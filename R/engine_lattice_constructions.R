@@ -9,7 +9,9 @@
 #' meet in at most one block, every pair of replicates is orthogonal, and the
 #' design reaches the A-efficiency bound. The squares come from the finite
 #' field GF(q) when q is a prime power: L_a(x, y) = a x + y for the q - 1
-#' nonzero a (Bose 1938, Sankhya 3:323-338), so r <= q + 1.
+#' nonzero a (Bose 1938, Sankhya 3:323-338), so r <= q + 1. At other orders
+#' they are direct products of the prime-power factors' squares (MacNeish
+#' 1922, Ann. Math. 23:221-227).
 #'
 #' Clean room: written from the cited mathematics and the spec only.
 #' @noRd
@@ -119,26 +121,77 @@ gf_tables <- function(q) {
   list(add = add, mul = mul)
 }
 
-#' Number of mutually orthogonal Latin squares of order q that `mols()` builds:
-#' q - 1 when q is a prime power, otherwise 0.
+#' Prime-power factors p^e of q (increasing p); integer(0) for q < 2
 #' @noRd
-mols_max <- function(q) {
-  if (is.null(prime_power(q))) 0L else as.integer(q) - 1L
+prime_power_factors <- function(q) {
+  q <- as.integer(q)
+  factors <- integer(0)
+  p <- 2L
+  while (q > 1L) {
+    if (q %% p == 0L) {
+      power <- 1L
+      while (q %% p == 0L) {
+        q <- q %/% p
+        power <- power * p
+      }
+      factors <- c(factors, power)
+    }
+    p <- p + 1L
+  }
+  factors
 }
 
-#' `count` mutually orthogonal Latin squares of order q (q x q, 0-based): the
-#' Bose squares L_a(x, y) = a x + y over GF(q), a = 1..count. NULL when there
-#' are not that many.
+#' Number of mutually orthogonal Latin squares of order q that `mols()` builds:
+#' q - 1 when q is a prime power, otherwise the MacNeish count, the least
+#' p^e - 1 over the prime-power factors of q.
+#' @noRd
+mols_max <- function(q) {
+  q <- as.integer(q)
+  if (is.na(q) || q < 2L) return(0L)
+  if (!is.null(prime_power(q))) return(q - 1L)
+  as.integer(min(prime_power_factors(q)) - 1L)
+}
+
+#' `count` mutually orthogonal Latin squares of order q (q x q, 0-based), or
+#' NULL when there are not that many.
+#'
+#' Prime power q: the Bose squares L_a(x, y) = a x + y over GF(q), a =
+#' 1..count. Otherwise, with q = q_1 q_2 ... the prime-power factors, square a
+#' is the direct product of the factors' a-th squares (MacNeish 1922): cell
+#' ((x1, x2), (y1, y2)), x = x1 q2 + x2, holds L1[x1, y1] q2 + L2[x2, y2],
+#' folded over the factors in turn. Direct products of orthogonal squares are
+#' orthogonal, so the count is the least p^e - 1.
 #' @noRd
 mols <- function(q, count) {
   if (count == 0L) return(list())
   if (count < 0L || count > mols_max(q)) return(NULL)
-  field <- gf_tables(q)
   q <- as.integer(q)
+  if (is.null(prime_power(q))) return(macneish_mols(q, count))
+  field <- gf_tables(q)
   x <- rep(0:(q - 1L), times = q)  # row index of each cell, column-major
   y <- rep(0:(q - 1L), each = q)
   lapply(seq_len(count), function(a) {
     matrix(field$add[cbind(field$mul[a + 1L, x + 1L] + 1L, y + 1L)], q, q)
+  })
+}
+
+#' MacNeish (1922) direct product of the prime-power factors' squares;
+#' `count` must not exceed the least p^e - 1
+#' @noRd
+macneish_mols <- function(q, count) {
+  factors <- prime_power_factors(q)
+  squares <- mols(factors[1L], count)
+  for (q2 in factors[-1L]) {
+    second <- mols(q2, count)
+    q1 <- nrow(squares[[1L]])
+    squares <- lapply(seq_len(count), function(a) {
+      kronecker(squares[[a]] * q2, matrix(1L, q2, q2)) +
+        kronecker(matrix(1L, q1, q1), second[[a]])
+    })
+  }
+  lapply(squares, function(square) {
+    storage.mode(square) <- "integer"
+    square
   })
 }
 
