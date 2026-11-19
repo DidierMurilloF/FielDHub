@@ -12,9 +12,12 @@
 #' nonzero a (Bose 1938, Sankhya 3:323-338), so r <= q + 1. At other orders
 #' they are direct products of the prime-power factors' squares (MacNeish
 #' 1922, Ann. Math. 23:221-227), and at q = 3m + 1 (10, 22, 34, 46, ...) a
-#' pair from a quasi-difference matrix (Bose, Shrikhande & Parker 1960). The
-#' remaining orders below 50 use pairs found by FielDHub's own search
-#' (`stored_mols`, R/engine_mols_data.R) or products of the above.
+#' pair from a quasi-difference matrix (Bose, Shrikhande & Parker 1960).
+#' Orders 14, 18 and 26 use pairs found by FielDHub's own search
+#' (`stored_mols`, R/engine_mols_data.R), and 30, 42 and 50 products of the
+#' above. From order 3 to 50 that leaves two orders with fewer than two squares:
+#' 6, which has no orthogonal pair (Tarry 1900), and 38 (2 x 19, not 3m + 1,
+#' not searched), which has one square, so no lattice with r > 3.
 #' Rectangular lattices (v = s (s - 1), blocks of s - 1) come from a square
 #' lattice with one block deleted (Shrikhande's method, Cochran & Cox 1957,
 #' p. 417) or, at r = 3, from a Latin square with a transversal deleted.

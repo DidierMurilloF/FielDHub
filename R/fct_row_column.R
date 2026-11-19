@@ -227,7 +227,7 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
     searches_onestage <- iterations
     iterations_twostage <- iterations
   }
-  # latinize is only meaningful for method = "onestage" (the two-stage greedy
+  # latinize is only meaningful for method = "onestage" (the two-stage row
   # search cannot latinize across replicates); for method = "twostage" it is
   # ignored, with a warning if it was explicitly set to TRUE.
   if (latinize && method == "twostage") {

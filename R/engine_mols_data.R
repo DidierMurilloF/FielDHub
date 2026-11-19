@@ -4,13 +4,15 @@
 #' R/engine_lattice_constructions.R gives two orthogonal squares at these
 #' orders (not prime powers, 2 mod 4, not 3m + 1), although pairs exist
 #' (Bose, Shrikhande & Parker 1960, Canad. J. Math. 12:189-203). Each pair
-#' below is the output of `tools/search-mols.R <q> <seed> 60 <out.rds>`, which
-#' checks that both squares are Latin and that the q^2 ordered pairs
-#' (L[i, j], M[i, j]) are all different. The squares are 0-based and written
+#' below is the output of `tools/search-mols.R` with the command in its
+#' comment, which checks that both squares are Latin and that the q^2 ordered
+#' pairs (L[i, j], M[i, j]) are all different. The squares are 0-based and written
 #' column by column. `mols()` and `mols_max()` read this list by order.
 #' @noRd
 stored_mols <- list(
-  # Order 14: seed 1, method 1 (transversal exact cover), 1.12 minutes.
+  # Order 14: seed 1, method 1 (transversal exact cover), 1.12 minutes when found
+  # (4.45 minutes on a rerun, 2026-11-19); the same pair is found by:
+  # Rscript tools/search-mols.R 14 1 60 out.rds
   "14" = list(
     L = matrix(c(
       11L, 0L, 7L, 12L, 9L, 8L, 5L, 3L, 10L, 4L, 13L, 2L, 6L, 1L,
@@ -43,7 +45,9 @@ stored_mols <- list(
       1L, 9L, 10L, 8L, 5L, 13L, 2L, 7L, 3L, 4L, 0L, 11L, 12L, 6L,
       7L, 0L, 3L, 5L, 11L, 4L, 12L, 10L, 13L, 2L, 9L, 6L, 1L, 8L), 14L, 14L)
   ),
-  # Order 18: seed 1, method 3 (pair developed over Z_(q-1) with one fixed point), 30.00 minutes.
+  # Order 18: seed 1, method 3 (pair developed over Z_(q-1) with one fixed point).
+  # Forcing method 3 finds this pair in under 1 s:
+  # Rscript tools/search-mols.R 18 1 1 out.rds 3
   "18" = list(
     L = matrix(c(
       10L, 9L, 16L, 5L, 0L, 4L, 12L, 17L, 2L, 7L, 15L, 11L, 13L, 8L, 6L, 1L, 3L, 14L,
@@ -84,7 +88,9 @@ stored_mols <- list(
       12L, 16L, 13L, 7L, 1L, 11L, 6L, 8L, 0L, 2L, 9L, 14L, 3L, 15L, 17L, 5L, 4L, 10L,
       13L, 14L, 15L, 16L, 0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L, 12L, 17L), 18L, 18L)
   ),
-  # Order 26: seed 1, method 3 (pair developed over Z_(q-1) with one fixed point), 30.00 minutes.
+  # Order 26: seed 1, method 3 (pair developed over Z_(q-1) with one fixed point).
+  # Forcing method 3 finds this pair in under 1 s:
+  # Rscript tools/search-mols.R 26 1 1 out.rds 3
   "26" = list(
     L = matrix(c(
       13L, 11L, 4L, 15L, 21L, 9L, 17L, 5L, 2L, 16L, 25L, 6L, 1L, 12L, 10L, 18L, 7L, 22L, 24L, 20L, 3L, 14L, 19L, 23L, 8L, 0L,

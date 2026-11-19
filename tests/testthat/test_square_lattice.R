@@ -111,9 +111,11 @@ test_that("large lattices are built at their A-bound", {
 
 test_that("rectangular lattices with a construction are A-optimal", {
   # Shrikhande's method (Cochran & Cox 1957, p. 417) deletes one block of an
-  # (r + 1)-replicate square lattice of order s; at r = 3 and s = 6, 14 (no
-  # third orthogonal square) the rows, columns and symbols of a Latin square
-  # with a transversal deleted. Search alone misses every shape here on seed 1.
+  # (r + 1)-replicate square lattice of order s; at r = 3 and s = 6 (no
+  # orthogonal pair) the rows, columns and symbols of a Latin square with a
+  # transversal deleted. s = 10 and 14 have a pair (3m + 1 and the stored
+  # pair), so they use Shrikhande's method. Search alone misses every shape
+  # here on seed 1.
   for (shape in list(c(42, 6, 4), c(56, 7, 4), c(72, 8, 4), c(30, 5, 3), c(90, 9, 3),
                      c(182, 13, 3))) {
     for (seed in 1:3) {
