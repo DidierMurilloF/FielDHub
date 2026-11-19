@@ -203,8 +203,8 @@ nested_bootstrap_lower <- function(baseline, candidate, resamples = 2000L) {
 
 # Applies the acceptance rules of spec 7 to two summaries (shapes of `baseline`
 # are looked up in `candidate`). `bootstrap = FALSE` is the CI mode: no
-# bootstrap, and a constant baseline is any baseline with a single value over
-# at least 5 seeds. `accepted_loss` is NULL or a data.frame of caller, t, k, r
+# bootstrap. A constant baseline is SD = 0 over at least 50 seeds, so at the 5
+# seeds of CI no shape qualifies. `accepted_loss` is NULL or a data.frame of caller, t, k, r
 # that the owner accepted: those shapes get pass = NA and report the shortfall.
 nested_acceptance <- function(baseline, candidate, accepted_loss = NULL, bootstrap = TRUE) {
   tol <- nested_golden_tolerance
@@ -217,7 +217,6 @@ nested_acceptance <- function(baseline, candidate, accepted_loss = NULL, bootstr
       if (exists(".Random.seed", envir = globalenv())) rm(".Random.seed", envir = globalenv())
     } else assign(".Random.seed", seed_state, envir = globalenv()))
   }
-  min_constant_seeds <- if (bootstrap) 50L else 5L
   rows <- lapply(seq_len(nrow(baseline)), function(i) {
     b <- baseline[i, ]
     j <- match(nested_shape_key(b), candidate_key)
@@ -248,7 +247,7 @@ nested_acceptance <- function(baseline, candidate, accepted_loss = NULL, bootstr
         next
       }
       worst <- worst && min(cx) >= min(bx) - (max(bx) - min(bx)) - tol
-      if (b$t < 1000 && length(bx) >= min_constant_seeds && max(bx) - min(bx) < 1e-12) {
+      if (b$t < 1000 && length(bx) >= 50L && max(bx) - min(bx) < 1e-12) {
         constant <- constant && all(cx >= bx[1] - tol)
       }
       if (run_bootstrap && length(bx) > 1L) {
