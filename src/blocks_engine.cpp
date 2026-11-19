@@ -24,9 +24,11 @@ const int kRefreshMin = 16;       // smallest interval after repeated drift alar
 const double kDriftAlarm = 1e-8;  // spec section 8: drift alarm threshold
 const double kExhaustivePairs = 200000;  // single-level full passes only when pass_pairs() <= 2e5 (spec-m5 6.4)
 // Resolvable mode keeps the G cache (O(r) ratios, O(b v) more per accepted
-// swap) up to this many blocks; above it the O(r^2) delta() is cheaper overall
-// because accepted swaps dominate (nested-engine spec 6.2b).
-const int kCacheBlocks = 500;
+// swap) while it holds at most this many b x v entries (200 MB); beyond it the
+// O(r^2) delta() is used. With full passes evaluations far outnumber accepted
+// swaps, so the cache was 1.5-2.2 times faster at 1000-1500 blocks
+// (nested-engine spec 6.2b, Task 2b report).
+const double kCacheCells = 2.5e7;
 
 struct Layout {
   int v, r, b, n;
@@ -336,13 +338,18 @@ void run_search(const Layout& lay, int jumps_per_escape, int max_stale_escapes, 
   // runs full passes (nested-engine spec 6.2b): random sampling stops a pass
   // long before a local optimum when there are many candidate pairs.
   const bool exhaustive = lay.resolvable || pass_pairs(lay) <= kExhaustivePairs;
-  const bool cache = lay.resolvable ? lay.b <= kCacheBlocks : exhaustive;
-  if (start) {  // a lattice start is connected; random starts follow if it can't be scored
+  const bool cache = lay.resolvable ? static_cast<double>(lay.b) * lay.v <= kCacheCells : exhaustive;
+  if (start) {
+    // A lattice start is connected; random starts follow if it can't be
+    // scored. A start given from R (resolvable mode) is checked connected
+    // there, and is never replaced by a random one.
     if (!budget.spend(static_cast<double>(lay.n + lay.b))) return;
     treat = *start;
     bs.reset(new BlockSpace(lay.v, lay.b, lay.r, counts_of(lay, treat)));
     if (cache) bs->enable_cache();
+    if (lay.resolvable) bs->enable_fast_inverse();
     if (!budget.work(refresh_work(lay)) || !bs->refresh()) bs.reset();
+    if (!bs && lay.resolvable) return;
   }
   for (int attempt = 0; attempt < 10 && !bs; ++attempt) {
     if (!budget.spend(static_cast<double>(lay.n + lay.b))) return;
@@ -357,6 +364,7 @@ void run_search(const Layout& lay, int jumps_per_escape, int max_stale_escapes, 
     if (!repair_connectivity(lay, treat, budget, out)) continue;
     bs.reset(new BlockSpace(lay.v, lay.b, lay.r, counts_of(lay, treat)));
     if (cache) bs->enable_cache();
+    if (lay.resolvable) bs->enable_fast_inverse();
     if (!budget.work(refresh_work(lay)) || !bs->refresh()) bs.reset();
   }
   if (!bs) return;  // no connected start within 10 repaired shuffles
@@ -420,13 +428,16 @@ void run_search(const Layout& lay, int jumps_per_escape, int max_stale_escapes, 
   // and every local optimum already has a fresh score), unless no state has
   // been scored yet.
   bool scored = false;
-  if (lay.resolvable && ok && budget.work(drift_work(lay)) && bs->drift_sparse() <= kDriftAlarm) {
+  if (lay.resolvable && bs->drift_sparse() <= kDriftAlarm) {
     // The running state is accurate: no O(b^3) score from scratch per search.
+    // This O(b (b + n)) check runs once per search, also after the budget
+    // stopped the run, so it is not charged.
     if (bs->log_det() > local_best) { local_best = bs->log_det(); local_treat = treat; }
     scored = true;
   }
   if (!scored && (budget.stop() != STOP_TIME || local_treat.empty())) {
     BlockSpace fin(lay.v, lay.b, lay.r, counts_of(lay, treat));
+    if (lay.resolvable) fin.enable_fast_inverse();
     if (fin.refresh() && fin.log_det() > local_best) { local_best = fin.log_det(); local_treat = treat; }
   }
   if (!local_treat.empty() && local_best > out.best_log_det) {
@@ -570,6 +581,7 @@ cpp11::list blocks_engine_cpp(int v, int r, int b, int searches, int jumps_per_e
   double d_eff = NA_REAL, a_eff = NA_REAL, log_det = NA_REAL;
   if (!out.best_treat.empty()) {
     BlockSpace fin(v, b, r, counts_of(lay, out.best_treat));
+    if (resolvable) fin.enable_fast_inverse();
     if (fin.refresh()) {
       log_det = fin.log_det();
       d_eff = fin.d_efficiency();

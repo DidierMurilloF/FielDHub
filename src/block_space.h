@@ -38,6 +38,8 @@ class BlockSpace {
   // fresh Minv; equal to a_efficiency() up to rounding, without its inversion.
   double a_efficiency_equal_sizes() const;
   bool cached() const { return cached_; }
+  // Invert with spd_inverse8() from now on (resolvable mode only).
+  void enable_fast_inverse() { fast_inverse_ = true; }
   int count(int i, int j) const { return counts_[i + v_ * j]; }
   const std::vector<int>& counts() const { return counts_; }
 
@@ -59,6 +61,7 @@ class BlockSpace {
   std::vector<int> blocks_of_;  // v x r: the block of each plot of each treatment
   std::vector<double> minv_;  // b x b
   bool cached_ = false;
+  bool fast_inverse_ = false;
   std::vector<double> g_;     // b x v, column i = Minv N_i.' / r (only if cached_)
   void rebuild_g();
   mutable std::vector<int> hz_j_;     // scratch for h_sparse(), size 2 r
@@ -71,3 +74,4 @@ class BlockSpace {
 // In-place inverse of a symmetric positive-definite n x n matrix (column-major)
 // by Cholesky. Returns false if not positive definite; log_det receives log det.
 bool spd_inverse(std::vector<double>& a, int n, double& log_det);
+bool spd_inverse8(std::vector<double>& a, int n, double& log_det);

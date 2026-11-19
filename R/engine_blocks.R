@@ -85,6 +85,10 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
       fieldhub_abort("`start` must hold, for each replicate in turn, a permutation of the treatments.",
                      data = list(argument = "start"))
     }
+    if (!resolvable_connected(as.integer(start), rep(seq_len(total_blocks), each = v %/% blocks), v)) {
+      fieldhub_abort("`start` is a disconnected design; a connected start is needed.",
+                     data = list(argument = "start"))
+    }
   }
   if (!is.numeric(time_limit) || length(time_limit) != 1L || !is.finite(time_limit) ||
       time_limit <= 0) {
@@ -103,6 +107,11 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
     return(random_resolvable_design(treatments, replicates, blocks))
   }
   pairs <- if (resolvable) replicates * v * (v - 1) / 2 else n * (n - 1) / 2
+  if (resolvable && !is.null(start)) {
+    searches <- 1L  # a given start is the start of one search
+  } else if (resolvable && missing(searches)) {
+    searches <- resolvable_searches(total_blocks)
+  }
   if (is.null(jumps_per_escape)) {
     jumps_per_escape <- if (resolvable) 3L else blocks_engine_default_jumps(n, pairs)
   }
@@ -115,7 +124,7 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
     )
   }
   validate_iteration_budget(budget, "budget", minimum = 1)
-  work_cap <- if (resolvable) resolvable_work_cap(v, replicates, total_blocks, searches) else Inf
+  work_cap <- if (resolvable) resolvable_work_cap(v, replicates, total_blocks, budget, pairs) else Inf
   refresh_every <- 256L
   out <- blocks_engine_cpp(as.integer(treatments), as.integer(replicates), as.integer(total_blocks),
                            as.integer(searches), as.integer(jumps_per_escape),
@@ -130,7 +139,9 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
                      " was reached before a connected starting design was built.",
                      data = list(budget = budget, time_limit = time_limit))
     }
-    fieldhub_abort("No connected starting design was found within 10 repaired random starts.",
+    fieldhub_abort(if (is.null(start)) "No connected starting design was found within 10 repaired random starts."
+                   else "The given start could not be scored as a connected design.",
+                   class = c("fieldhub_unconnected_error", "fieldhub_input_error"),
                    data = list(treatments = treatments, replicates = replicates, blocks = blocks))
   }
   if (is.na(out$d_efficiency) || is.na(out$a_efficiency)) {
@@ -262,27 +273,41 @@ resolvable_connected <- function(treat, block, v) {
   all(label == 1L)
 }
 
-#' Resolvable-mode limits (nested-engine spec section 6.2). B is the total
-#' number of blocks r b. A refresh of the dense block space costs about B^3
-#' multiply-adds, so many blocks get fewer searches and a longer refresh
-#' interval, every run is bounded by a fixed amount of work (reproducible from
-#' the seed, unlike the wall clock), and B is limited. The limit is provisional
-#' (Task 2, measured with 16 of 18 cores busy): above 1000 blocks the work cap
-#' ended the only search after under 15% of its evaluations and runs took 60 s
-#' or more, past the default time limit; it is to be re-measured on an idle
-#' machine against the 10 s target of spec section 6.2.
+#' Resolvable-mode limits (nested-engine spec sections 6.2 and 6.2b). B is the
+#' total number of blocks r b. Every run is bounded by its evaluation budget
+#' and by a work cap on the dense algebra (refreshes, rank-2 updates, drift
+#' checks), both fixed by the inputs, so a run ends at a point fixed by the
+#' seed rather than on the wall clock. The cap is derived from the budget.
+#' Measured on an installed build (2026-11-18), a search makes about 1.5-2 B
+#' accepted swaps and a few refreshes, and a search runs about 30-70 full passes
+#' before it goes stale, so the cap allows 3 (one refresh + 2 B rank-2 updates)
+#' for each search the budget can start, min(budget / per-search budget,
+#' passes / 30), and at least 1e10 units. Runs used 0.1-0.4 of it from B = 375
+#' to 3000; the floor covers smaller shapes. 20 searches up to 1000 blocks and
+#' 20 (1000 / B)^3 above. The block limit, 2000, is the largest B measured to
+#' be far faster than blocksdesign (B = 2000: 5-14 s against 222 s and more
+#' than 600 s on the reference machine) and to end well inside the 60 s time
+#' limit even under load; B = 3000 took 38 s idle and hit the time limit
+#' under load.
 #' @noRd
-resolvable_block_limit <- 1000
+resolvable_block_limit <- 2000
 
 #' @noRd
 resolvable_budget_multiplier <- 1
 
 #' @noRd
-resolvable_work_cap <- function(v, r, B, searches) {
+resolvable_searches <- function(B) {
+  as.integer(if (B <= 1000) 20 else max(1, floor(20 * (1000 / B)^3)))
+}
+
+#' @noRd
+resolvable_work_cap <- function(v, r, B, budget, pairs) {
   n <- v * r
   refresh <- B^3 + n * r + n * B
-  swap <- 4 * B^2 + 2 * B * v
-  max(1e10, searches * (10 * refresh + 3 * n * swap))
+  swap <- 4 * B^2 + 2 * B * (if (B * v <= 2.5e7) v else r)  # with the G cache up to 2.5e7 cells
+  passes <- budget / pairs
+  searches <- min(budget / max(10 * pairs, 50 * n), ceiling(passes / 30))
+  max(1e10, searches * 3 * (refresh + 2 * B * swap))
 }
 
 #' Default evaluation budget per search (spec-m5 6.4): 25 full passes over the

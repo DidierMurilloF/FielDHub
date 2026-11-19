@@ -4,6 +4,57 @@
 #include <cmath>
 #include <limits>
 
+// Dot product with eight partial sums in a fixed order, so the compiler can
+// keep eight additions in flight without reassociating: the same bits on every
+// compiler, but not the bits of a single running sum.
+static inline double dot8(const double* x, const double* y, int n) {
+  double s0 = 0, s1 = 0, s2 = 0, s3 = 0, s4 = 0, s5 = 0, s6 = 0, s7 = 0;
+  int k = 0;
+  for (; k + 8 <= n; k += 8) {
+    s0 += x[k] * y[k]; s1 += x[k + 1] * y[k + 1]; s2 += x[k + 2] * y[k + 2]; s3 += x[k + 3] * y[k + 3];
+    s4 += x[k + 4] * y[k + 4]; s5 += x[k + 5] * y[k + 5]; s6 += x[k + 6] * y[k + 6]; s7 += x[k + 7] * y[k + 7];
+  }
+  double s = ((s0 + s1) + (s2 + s3)) + ((s4 + s5) + (s6 + s7));
+  for (; k < n; ++k) s += x[k] * y[k];
+  return s;
+}
+
+// The Cholesky inverse below with eight-way dot products, about three times
+// faster at many blocks. Resolvable mode only: single-level results keep the
+// rounding of spd_inverse().
+bool spd_inverse8(std::vector<double>& a, int n, double& log_det) {
+  std::vector<double> l(static_cast<size_t>(n) * n, 0.0);
+  log_det = 0.0;
+  for (int j = 0; j < n; ++j) {
+    const double* lj = &l[static_cast<size_t>(j) * n];
+    double d = a[j + static_cast<size_t>(n) * j] - dot8(lj, lj, j);
+    if (!std::isfinite(d) || d <= 1e-9 * std::fabs(a[j + static_cast<size_t>(n) * j])) return false;
+    double ljj = std::sqrt(d);
+    l[static_cast<size_t>(j) * n + j] = ljj;
+    log_det += 2.0 * std::log(ljj);
+    for (int i = j + 1; i < n; ++i) {
+      const double* li_row = &l[static_cast<size_t>(i) * n];
+      l[static_cast<size_t>(i) * n + j] = (a[i + static_cast<size_t>(n) * j] - dot8(li_row, lj, j)) / ljj;
+    }
+  }
+  std::vector<double> li(static_cast<size_t>(n) * n, 0.0);
+  for (int j = 0; j < n; ++j) {
+    li[j + static_cast<size_t>(n) * j] = 1.0 / l[static_cast<size_t>(j) * n + j];
+    for (int i = j + 1; i < n; ++i) {
+      const double* l_row = &l[static_cast<size_t>(i) * n];
+      li[i + static_cast<size_t>(n) * j] = -dot8(l_row + j, &li[j + static_cast<size_t>(n) * j], i - j) / l_row[i];
+    }
+  }
+  for (int i = 0; i < n; ++i) {
+    for (int j = 0; j <= i; ++j) {
+      double s = dot8(&li[i + static_cast<size_t>(n) * i], &li[i + static_cast<size_t>(n) * j], n - i);
+      a[i + static_cast<size_t>(n) * j] = s;
+      a[j + static_cast<size_t>(n) * i] = s;
+    }
+  }
+  return true;
+}
+
 bool spd_inverse(std::vector<double>& a, int n, double& log_det) {
   // L is stored row-major (l[i * n + k] = L_ik) so the inner products run over
   // contiguous memory; the arithmetic and its order are those of the textbook
@@ -96,7 +147,7 @@ bool BlockSpace::refresh() {
     }
   }
   double ld = 0.0;
-  if (!spd_inverse(bh, b_, ld)) return false;
+  if (!(fast_inverse_ ? spd_inverse8(bh, b_, ld) : spd_inverse(bh, b_, ld))) return false;
   minv_.swap(bh);
   log_det_ = ld;
   if (cached_) rebuild_g();
