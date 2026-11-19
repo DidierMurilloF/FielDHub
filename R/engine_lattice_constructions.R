@@ -11,7 +11,8 @@
 #' field GF(q) when q is a prime power: L_a(x, y) = a x + y for the q - 1
 #' nonzero a (Bose 1938, Sankhya 3:323-338), so r <= q + 1. At other orders
 #' they are direct products of the prime-power factors' squares (MacNeish
-#' 1922, Ann. Math. 23:221-227).
+#' 1922, Ann. Math. 23:221-227), and at q = 3m + 1 (10, 22, 34, 46, ...) a
+#' pair from a quasi-difference matrix (Bose, Shrikhande & Parker 1960).
 #'
 #' Clean room: written from the cited mathematics and the spec only.
 #' @noRd
@@ -143,13 +144,71 @@ prime_power_factors <- function(q) {
 
 #' Number of mutually orthogonal Latin squares of order q that `mols()` builds:
 #' q - 1 when q is a prime power, otherwise the MacNeish count, the least
-#' p^e - 1 over the prime-power factors of q.
+#' p^e - 1 over the prime-power factors of q, raised to 2 when q = 3m + 1 with
+#' m not 2 or 6 and two orthogonal squares of order m (`three_m_plus_one()`).
 #' @noRd
 mols_max <- function(q) {
   q <- as.integer(q)
   if (is.na(q) || q < 2L) return(0L)
   if (!is.null(prime_power(q))) return(q - 1L)
-  as.integer(min(prime_power_factors(q)) - 1L)
+  count <- as.integer(min(prime_power_factors(q)) - 1L)
+  if (count < 2L && three_m_plus_one_order(q)) count <- 2L
+  count
+}
+
+#' Whether q = 3m + 1 with m not in {2, 6} and `mols_max(m) >= 2`
+#' @noRd
+three_m_plus_one_order <- function(q) {
+  if (q %% 3L != 1L) return(FALSE)
+  m <- (q - 1L) %/% 3L
+  !m %in% c(2L, 6L) && mols_max(m) >= 2L
+}
+
+#' Two orthogonal Latin squares of order q = 3m + 1 (Bose, Shrikhande &
+#' Parker 1960, Canad. J. Math. 12:189-203; van Lint & Wilson, ch. 22)
+#'
+#' Nested-engine spec section 6.5. Symbols are 0..2m (the group Z_(2m+1))
+#' and the m infinite points inf_i = 2m + i. The columns of an OA(4, q) are
+#' (1) for i = 1..m the base columns (inf_i, 0, i, 2i), (0, inf_i, 2i, i),
+#' (i, 2i, inf_i, 0), (2i, i, 0, inf_i), each developed over Z_(2m+1) (g =
+#' 0..2m added to the finite entries, inf_i fixed); (2) the 2m + 1 constant
+#' columns (g, g, g, g); (3) the m^2 columns (2m + 1 + x, 2m + 1 + y,
+#' 2m + 1 + H1[x, y], 2m + 1 + H2[x, y]) from two orthogonal squares H1, H2
+#' of order m, filling the infinite hole. That is 4m (2m + 1) + 2m + 1 + m^2 =
+#' q^2 columns; rows 1-2 index the cell and rows 3-4 give the two squares.
+#' @noRd
+three_m_plus_one <- function(q) {
+  q <- as.integer(q)
+  m <- (q - 1L) %/% 3L
+  hole <- mols(m, 2L)
+  z <- 2L * m + 1L
+  g <- 0:(z - 1L)
+  develop <- function(base, inf) {
+    # One developed column per g: finite entries shifted by g mod z.
+    vapply(base, function(entry) if (entry == inf) rep(inf, z) else (entry + g) %% z,
+           integer(z))  # z x 4
+  }
+  pieces <- list()
+  for (i in seq_len(m)) {
+    inf <- 2L * m + i
+    for (base in list(c(inf, 0L, i, 2L * i), c(0L, inf, 2L * i, i),
+                      c(i, 2L * i, inf, 0L), c(2L * i, i, 0L, inf))) {
+      pieces[[length(pieces) + 1L]] <- develop(base, inf)
+    }
+  }
+  pieces[[length(pieces) + 1L]] <- cbind(g, g, g, g)
+  x <- rep(0:(m - 1L), times = m)
+  y <- rep(0:(m - 1L), each = m)
+  hole_symbols <- vapply(hole, function(h) h[cbind(x + 1L, y + 1L)], integer(m * m))
+  pieces[[length(pieces) + 1L]] <- z + cbind(x, y, matrix(hole_symbols, m * m, 2L))
+  oa <- do.call(rbind, pieces)  # q^2 x 4, one OA column per row
+  colnames(oa) <- c("row", "column", "first", "second")
+  cells <- cbind(oa[, "row"] + 1L, oa[, "column"] + 1L)
+  lapply(c("first", "second"), function(symbol) {
+    square <- matrix(NA_integer_, q, q)
+    square[cells] <- as.integer(oa[, symbol])
+    square
+  })
 }
 
 #' `count` mutually orthogonal Latin squares of order q (q x q, 0-based), or
@@ -160,13 +219,17 @@ mols_max <- function(q) {
 #' is the direct product of the factors' a-th squares (MacNeish 1922): cell
 #' ((x1, x2), (y1, y2)), x = x1 q2 + x2, holds L1[x1, y1] q2 + L2[x2, y2],
 #' folded over the factors in turn. Direct products of orthogonal squares are
-#' orthogonal, so the count is the least p^e - 1.
+#' orthogonal, so the count is the least p^e - 1. When that is below 2 and q =
+#' 3m + 1, two squares come from `three_m_plus_one()`.
 #' @noRd
 mols <- function(q, count) {
   if (count == 0L) return(list())
   if (count < 0L || count > mols_max(q)) return(NULL)
   q <- as.integer(q)
-  if (is.null(prime_power(q))) return(macneish_mols(q, count))
+  if (is.null(prime_power(q))) {
+    if (count <= min(prime_power_factors(q)) - 1L) return(macneish_mols(q, count))
+    return(three_m_plus_one(q)[seq_len(count)])
+  }
   field <- gf_tables(q)
   x <- rep(0:(q - 1L), times = q)  # row index of each cell, column-major
   y <- rep(0:(q - 1L), each = q)
@@ -180,14 +243,15 @@ mols <- function(q, count) {
 #' @noRd
 macneish_mols <- function(q, count) {
   factors <- prime_power_factors(q)
-  squares <- mols(factors[1L], count)
+  q1 <- factors[1L]
+  squares <- mols(q1, count)
   for (q2 in factors[-1L]) {
     second <- mols(q2, count)
-    q1 <- nrow(squares[[1L]])
     squares <- lapply(seq_len(count), function(a) {
       kronecker(squares[[a]] * q2, matrix(1L, q2, q2)) +
         kronecker(matrix(1L, q1, q1), second[[a]])
     })
+    q1 <- q1 * q2
   }
   lapply(squares, function(square) {
     storage.mode(square) <- "integer"

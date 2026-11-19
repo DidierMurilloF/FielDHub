@@ -21,9 +21,9 @@
 #' (`resolvable_lattice_start()`, spec section 6.5) starts its one search from
 #' it, whatever function asked for the design. A start (constructed or given)
 #' whose A-efficiency attains `resolvable_a_bound()` is scored once and
-#' returned without search or admission (ruling R18); a construction too large
-#' to score is returned with its closed-form efficiencies. Neither gives a
-#' warning. `start`, if given, holds v r 1-based
+#' returned without search or admission (ruling R18); a construction that the
+#' admission refuses is returned unscored, with its closed-form efficiencies.
+#' Neither gives a warning. `start`, if given, holds v r 1-based
 #' treatments in plot order (replicate m in plots m v + 1 .. m v + v, each a
 #' permutation of 1..v) and is the start of a single search.
 #' @return A list with `Design`, `Blocks_model` and `search` (evaluations,
@@ -114,6 +114,14 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
   if (resolvable && cycle) {
     return(cycle_resolvable_design(treatments, blocks))
   }
+  if (unoptimised && lattice) {
+    # A construction the admission refuses attains the A-bound; its closed-form
+    # efficiencies equal its score, so it is not scored (scoring allocates
+    # about 8 v B bytes).
+    efficiency <- square_lattice_efficiencies(blocks, replicates)
+    return(unsearched_resolvable_design(start, treatments, replicates, blocks,
+                                        efficiency[["D"]], efficiency[["A"]], "construction"))
+  }
   if (resolvable && !is.null(start) && total_blocks <= resolvable_block_limit &&
       v * total_blocks <= 1e8) {
     # A start that attains the resolvable A-bound is returned without search
@@ -125,12 +133,6 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
       return(unsearched_resolvable_design(start, treatments, replicates, blocks,
                                           score[1L], score[2L], "optimal_start"))
     }
-  }
-  if (unoptimised && lattice) {
-    # Too large to score: the construction attains the A-bound (closed form).
-    efficiency <- square_lattice_efficiencies(blocks, replicates)
-    return(unsearched_resolvable_design(start, treatments, replicates, blocks,
-                                        efficiency[["D"]], efficiency[["A"]], "construction"))
   }
   if (unoptimised) {
     fieldhub_warn("The design (", treatments, " treatments in ", total_blocks,
@@ -280,9 +282,9 @@ cycle_resolvable_design <- function(v, blocks) {
 #' ruling R18)
 #'
 #' Used when the start attains the resolvable A-bound (`resolvable_a_bound()`,
-#' stop reason "optimal_start", efficiencies scored by the engine), or when a
-#' square-lattice construction is too large to score (stop reason
-#' "construction", closed-form efficiencies from `square_lattice_efficiencies()`).
+#' stop reason "optimal_start", efficiencies scored by the engine), or when the
+#' admission refuses a square-lattice construction (stop reason "construction",
+#' closed-form efficiencies from `square_lattice_efficiencies()`, not scored).
 #' No warning: the design is A-optimal. Only the within-block plot shuffle of
 #' `resolvable_engine_output()` draws from the generator.
 #' @noRd
