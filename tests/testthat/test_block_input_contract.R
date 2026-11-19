@@ -67,4 +67,13 @@ test_that("incomplete_blocks() returns an unoptimized resolvable design above th
   expect_true(all(table(interaction(book$REP, book$IBLOCK, drop = TRUE)) == 2))
   level2 <- x$blocksModel[x$blocksModel$Level == 2, ]
   expect_gt(level2[["A-Efficiency"]], 0)
+  # Within the block limit but too much work for the search: 1000 blocks of
+  # 12 took about a minute, up to the time limit, where a run no longer
+  # reproduces from its seed. The design is not optimized either, and the
+  # same seed gives the same field book.
+  expect_warning(y <- incomplete_blocks(t = 6000, k = 12, reps = 2, seed = 1),
+                 "not optimized", class = "fieldhub_design_warning")
+  expect_true(all(table(y$fieldBook$ENTRY, y$fieldBook$REP) == 1))
+  z <- suppressWarnings(incomplete_blocks(t = 6000, k = 12, reps = 2, seed = 1))
+  expect_identical(y$fieldBook, z$fieldBook)
 })

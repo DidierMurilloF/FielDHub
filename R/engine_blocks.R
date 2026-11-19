@@ -11,10 +11,13 @@
 #' passes stay inside a replicate; the block-space score of the r b blocks is
 #' the resolvable design's Level 2 score unchanged, because each replicate is
 #' the union of its blocks. Runs are bounded by a work cap rather than the
-#' clock, so they reproduce from the seed on the same platform and build, and
-#' the total number of blocks is limited to `resolvable_block_limit`. Two
-#' replicates of blocks of two are built in closed form (one 2v-cycle, which
-#' every connected such design is), so the block limit does not apply to them. `start`, if given, holds v r 1-based
+#' clock, so they reproduce from the seed on the same platform and build. A
+#' shape is searched only when it has at most `resolvable_block_limit` blocks
+#' and its predicted work fits in that cap (`resolvable_searchable()`);
+#' otherwise it is returned as a random connected resolvable design with a
+#' warning. Two replicates of blocks of two are built in closed form (one
+#' 2v-cycle, which every connected such design is), so the limits do not apply
+#' to them. `start`, if given, holds v r 1-based
 #' treatments in plot order (replicate m in plots m v + 1 .. m v + v, each a
 #' permutation of 1..v) and is the start of a single search.
 #' @return A list with `Design`, `Blocks_model` and `search` (evaluations,
@@ -57,9 +60,9 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
     }
     # Two replicates of blocks of two need no search (closed form below).
     cycle <- replicates == 2 && treatments == 2 * blocks && is.null(start)
-    # Above the block limit the design is built without a search (owner
-    # decision, spec section 10).
-    unoptimised <- total_blocks > resolvable_block_limit && !cycle
+    # A shape the search cannot finish inside the work cap is built without a
+    # search (owner decision, spec section 10).
+    unoptimised <- !cycle && !resolvable_searchable(v, replicates, total_blocks, !is.null(start))
   } else if (blocks > 1000) {
     fieldhub_abort("The block engine supports at most 1000 blocks and 1e8 treatment-block cells.",
                    data = list(blocks = blocks, treatments = treatments))
@@ -99,10 +102,11 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
     return(cycle_resolvable_design(treatments, blocks))
   }
   if (unoptimised) {
-    fieldhub_warn("The design has ", total_blocks, " incomplete blocks, more than the ",
-                  resolvable_block_limit, " the block search supports, so it was not optimized: ",
-                  "it is a random connected resolvable design. A larger block size gives fewer ",
-                  "blocks and an optimized design.",
+    fieldhub_warn("The design (", treatments, " treatments in ", total_blocks,
+                  " incomplete blocks) is too large for the block search, so it was not ",
+                  "optimized: it is a random connected resolvable design. ",
+                  if (total_blocks > resolvable_block_limit) "A larger block size gives fewer blocks and may allow an optimized design."
+                  else "Fewer treatments may allow an optimized design.",
                   class = "fieldhub_design_warning", call = NULL)
     return(random_resolvable_design(treatments, replicates, blocks))
   }
@@ -124,14 +128,15 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
     )
   }
   validate_iteration_budget(budget, "budget", minimum = 1)
-  work_cap <- if (resolvable) resolvable_work_cap(v, replicates, total_blocks, budget, pairs) else Inf
+  work_cap <- if (resolvable) resolvable_work_limit else Inf
+  evaluation_work <- if (resolvable) resolvable_evaluation_work(v, replicates, total_blocks) else 0
   refresh_every <- 256L
   out <- blocks_engine_cpp(as.integer(treatments), as.integer(replicates), as.integer(total_blocks),
                            as.integer(searches), as.integer(jumps_per_escape),
                            as.integer(max_stale_escapes), as.double(budget),
                            as.double(time_limit), identical(Sys.getenv("FIELDHUB_ENGINE_DEBUG"), "1"),
                            resolvable, as.integer(if (is.null(start)) integer() else start),
-                           as.double(work_cap), as.integer(refresh_every))
+                           as.double(work_cap), as.integer(refresh_every), as.double(evaluation_work))
   stop_reason <- c("budget", "stale", "time_limit", "no_start")[out$stop_reason]
   if (anyNA(out$treatments)) {
     if (stop_reason %in% c("budget", "time_limit")) {
@@ -167,7 +172,8 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
     result <- resolvable_engine_output(out$treatments, treatments, replicates, blocks)
     result$Blocks_model[2L, c("D-Efficiency", "A-Efficiency")] <-
       c(out$d_efficiency, out$a_efficiency)
-    result$search <- c(search, list(work = out$work, work_cap = work_cap, refresh_every = refresh_every))
+    result$search <- c(search, list(work = out$work, work_cap = work_cap, work_capped = out$work_capped,
+                                    refresh_every = refresh_every))
     return(result)
   }
   sizes <- tabulate(out$blocks, nbins = blocks)
@@ -280,23 +286,44 @@ resolvable_connected <- function(treat, block, v) {
 }
 
 #' Resolvable-mode limits (nested-engine spec sections 6.2 and 6.2b). B is the
-#' total number of blocks r b. Every run is bounded by its evaluation budget
-#' and by a work cap on the dense algebra (refreshes, rank-2 updates, drift
-#' checks), both fixed by the inputs, so a run ends at a point fixed by the
-#' seed rather than on the wall clock. The cap is derived from the budget.
-#' Measured on an installed build (2026-11-18), a search makes about 1.5-2 B
-#' accepted swaps and a few refreshes, and a search runs about 30-70 full passes
-#' before it goes stale, so the cap allows 3 (one refresh + 2 B rank-2 updates)
-#' for each search the budget can start, min(budget / per-search budget,
-#' passes / 30), and at least 1e10 units. Runs used 0.1-0.4 of it from B = 375
-#' to 3000; the floor covers smaller shapes. 20 searches up to 1000 blocks and
-#' 20 (1000 / B)^3 above. The block limit, 2000, is the largest B measured to
-#' be far faster than blocksdesign (B = 2000: 5-14 s against 222 s and more
-#' than 600 s on the reference machine) and to end well inside the 60 s time
-#' limit even under load; B = 3000 took 38 s idle and hit the time limit
-#' under load.
+#' total number of blocks r b, n = v r the plots.
+#'
+#' Work. One work unit is about one floating-point multiply-add of the dense
+#' algebra. An accepted swap costs 4 B^2 units for Minv plus 2 B v for the G
+#' cache (2 B r without it), a refresh B^3 + n r + n B, and every evaluation is
+#' charged `resolvable_evaluation_work()` units, because a cached ratio reads G
+#' and Minv at scattered places: it took 9-34 ns as B v grew from 2.5e5 to
+#' 8e6, against about 0.1 ns per unit of an accepted swap.
+#'
+#' Work cap. Every run stops, with stop reason "budget", once its work passes
+#' `resolvable_work_limit`, a point fixed by the seed and the inputs, not by
+#' the clock. Measured 2026-11-19 on the reference machine (installed build,
+#' idle, one run at a time): with the evaluation budget lifted, the cap was
+#' reached after 8.1-13.3 s on the largest admitted shape of each of twelve
+#' families (k in 2, 3, 4, 6, 12, r in 2, 3, 4), so a machine or a load four
+#' times slower still ends before the 60 s time limit.
+#'
+#' Admission. A shape is searched when it has at most `resolvable_block_limit`
+#' blocks (the B x B and B x v matrices and the B^3 refresh) and the predicted
+#' work of a first descent from a random start is at most 0.8 of the cap, so
+#' that a searched design is a proven single-swap local optimum. The
+#' prediction takes 0.3 r (1 - 1/k) n accepted swaps and 5 + 2.5 r log2(k)
+#' full passes. Measured on 131 first descents (k in 2, 4, 6, 12, r in 2, 3, 4,
+#' B = 250, 500, 1000 and 2000, three seeds), which accepted 0.32-1.12 n swaps
+#' and scanned 3.4-60 passes, the work was 0.36-1.19 of the prediction (median
+#' 0.67), never above 1 / 0.8. On the largest admitted shapes the first
+#' descent used 0.23-0.79 of the cap (three seeds each). A given start needs
+#' no descent: one confirming pass. Larger shapes get the unoptimised design
+#' and a warning (spec section 10). The block limit alone is not enough: at
+#' 2000 blocks (12000, 12, 2) ran into the time limit and (3000, 6, 4) took
+#' 31 s.
+#'
+#' Searches: 20 up to 1000 blocks and 20 (1000 / B)^3 above.
 #' @noRd
 resolvable_block_limit <- 2000
+
+#' @noRd
+resolvable_work_limit <- 2e11
 
 #' @noRd
 resolvable_budget_multiplier <- 1
@@ -306,14 +333,28 @@ resolvable_searches <- function(B) {
   as.integer(if (B <= 1000) 20 else max(1, floor(20 * (1000 / B)^3)))
 }
 
+#' Work units charged per evaluation: 250 with the G cache (kept by the engine
+#' up to 2.5e7 b x v cells), 300 r for the uncached O(r^2) ratio.
 #' @noRd
-resolvable_work_cap <- function(v, r, B, budget, pairs) {
+resolvable_evaluation_work <- function(v, r, B) {
+  if (B * v <= 2.5e7) 250 else 300 * r
+}
+
+#' Whether the block search takes a resolvable shape (see the limits above)
+#' @noRd
+resolvable_searchable <- function(v, r, B, given_start = FALSE) {
+  if (B > resolvable_block_limit) return(FALSE)
   n <- v * r
+  k <- n / B
+  pairs <- r * v * (v - 1) / 2
   refresh <- B^3 + n * r + n * B
-  swap <- 4 * B^2 + 2 * B * (if (B * v <= 2.5e7) v else r)  # with the G cache up to 2.5e7 cells
-  passes <- budget / pairs
-  searches <- min(budget / max(10 * pairs, 50 * n), ceiling(passes / 30))
-  max(1e10, searches * 3 * (refresh + 2 * B * swap))
+  evaluation <- resolvable_evaluation_work(v, r, B)
+  limit <- 0.8 * resolvable_work_limit
+  if (given_start) return(refresh + pairs * evaluation <= limit)
+  swap <- 4 * B^2 + 2 * B * (if (B * v <= 2.5e7) v else r)
+  accepted <- 0.3 * r * (1 - 1 / k) * n
+  passes <- 5 + 2.5 * r * log2(k)
+  2 * refresh + accepted * swap + passes * pairs * evaluation <= limit
 }
 
 #' Default evaluation budget per search (spec-m5 6.4): 25 full passes over the

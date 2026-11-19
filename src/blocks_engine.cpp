@@ -317,8 +317,8 @@ bool descend_full(BlockSpace& bs, const Layout& lay, std::vector<int>& treat, st
           int x = o[i], y = o[j];
           if (lay.block_of[x] == lay.block_of[y] || treat[x] == treat[y]) continue;
           if (!budget.spend(1.0)) return true;
-          // Evaluations are bounded by the evaluation budget, so the uncached
-          // O(r^2) ratio is not charged as work.
+          // In resolvable mode every evaluation spent is also charged to
+          // the work cap (the budget's evaluation work).
           double ratio = bs.cached() ? bs.delta_cached(treat[x], lay.block_of[x], treat[y], lay.block_of[y])
                                      : bs.delta(treat[x], lay.block_of[x], treat[y], lay.block_of[y]);
           if (improves(bs, ratio)) {
@@ -556,15 +556,17 @@ cpp11::integers lattice_start_probe_cpp(int v, int r, int b) {
 // of r complete replicates and skips the single-level lattice start and the
 // even-up repair (a no-op there: every count is 0 or 1). A non-empty `start`
 // (n 1-based treatments by plot, replicate m in plots m v .. m v + v - 1) is
-// the start of exactly one search. Single-level callers pass work_cap = Inf
-// and refresh_every = 256, which keeps their results unchanged.
+// the start of exactly one search. `evaluation_work` work units are charged
+// for every evaluation, so the work cap bounds the whole run. Single-level
+// callers pass work_cap = Inf, refresh_every = 256 and evaluation_work = 0,
+// which keeps their results unchanged.
 [[cpp11::register]]
 cpp11::list blocks_engine_cpp(int v, int r, int b, int searches, int jumps_per_escape,
                               int max_stale_escapes, double budget, double time_limit,
                               bool debug, bool resolvable, cpp11::integers start,
-                              double work_cap, int refresh_every) {
+                              double work_cap, int refresh_every, double evaluation_work) {
   Layout lay = make_layout(v, r, b, resolvable);
-  Budget bud(budget, time_limit, work_cap);
+  Budget bud(budget, time_limit, work_cap, evaluation_work);
   Search out;
   out.debug = debug;
   int done = 0;
@@ -606,6 +608,6 @@ cpp11::list blocks_engine_cpp(int v, int r, int b, int searches, int jumps_per_e
       "d_efficiency"_nm = d_eff, "a_efficiency"_nm = a_eff,
       "evaluations"_nm = bud.used(), "stop_reason"_nm = stop, "searches_done"_nm = done,
       "refreshes"_nm = out.refreshes, "drift_events"_nm = out.drift_events, "repairs"_nm = out.repairs,
-      "even_repairs"_nm = even_repairs, "work"_nm = bud.work_used(),
+      "even_repairs"_nm = even_repairs, "work"_nm = bud.work_used(), "work_capped"_nm = bud.capped(),
       "debug_max_error"_nm = debug ? out.debug_max_error : NA_REAL});
 }
