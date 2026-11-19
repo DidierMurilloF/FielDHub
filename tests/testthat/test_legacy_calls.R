@@ -69,15 +69,17 @@ legacy_result_changes <- c(
   row_column = paste(
     "row_column()'s new default, method = \"onestage\", jointly optimizes",
     "rows and columns instead of the 1.5.x two-step optimization (NEWS,",
-    "'Changes to results for a given seed'). method = \"twostage\" keeps the",
-    "1.5.x two-step method, but its column design now comes from FielDHub's",
-    "own block search, so its field book changes for a given seed too (NEWS",
-    "1.7.0, 'Changes to results for a given seed')."
+    "'Changes to results for a given seed'). method = \"twostage\" still",
+    "optimizes columns first and then rows, but its column and row designs",
+    "now come from FielDHub's own block search, so its field book changes",
+    "for a given seed too (NEWS 1.7.0, 'Changes to results for a given",
+    "seed')."
   ),
   `row_column(method = twostage)` = paste(
-    "The twostage column design comes from FielDHub's own block search",
-    "instead of blocksdesign::blocks() (NEWS 1.7.0, 'Changes to results for",
-    "a given seed'); the replay meets the optimized-design contract."
+    "The twostage column and row designs come from FielDHub's own block",
+    "search instead of blocksdesign::blocks() and the 1.5.x row swaps (NEWS",
+    "1.7.0, 'Changes to results for a given seed'); the replay meets the",
+    "optimized-design contract."
   ),
   incomplete_blocks = paste(
     "incomplete_blocks() builds its resolvable design with FielDHub's own",
