@@ -294,8 +294,10 @@ void run_search(const Layout& lay, int jumps_per_escape, int max_stale_escapes, 
   }
   std::unique_ptr<BlockSpace> bs;
   // Full passes read swap ratios from the cache (spec-m5 6.5); it is switched on
-  // before the start's refresh, which then builds it.
-  const bool exhaustive = pass_pairs(lay) <= kExhaustivePairs;
+  // before the start's refresh, which then builds it. Resolvable mode always
+  // runs full passes (nested-engine spec 6.2b): random sampling stops a pass
+  // long before a local optimum when there are many candidate pairs.
+  const bool exhaustive = lay.resolvable || pass_pairs(lay) <= kExhaustivePairs;
   if (start) {  // a lattice start is connected; random starts follow if it can't be scored
     if (!budget.spend(static_cast<double>(lay.n + lay.b))) return;
     treat = *start;
@@ -531,6 +533,6 @@ cpp11::list blocks_engine_cpp(int v, int r, int b, int searches, int jumps_per_e
       "d_efficiency"_nm = d_eff, "a_efficiency"_nm = a_eff,
       "evaluations"_nm = bud.used(), "stop_reason"_nm = stop, "searches_done"_nm = done,
       "refreshes"_nm = out.refreshes, "drift_events"_nm = out.drift_events, "repairs"_nm = out.repairs,
-      "even_repairs"_nm = even_repairs,
+      "even_repairs"_nm = even_repairs, "work"_nm = bud.work_used(),
       "debug_max_error"_nm = debug ? out.debug_max_error : NA_REAL});
 }

@@ -51,6 +51,7 @@ class Budget {
     return std::chrono::duration<double>(std::chrono::steady_clock::now() - start_).count();
   }
   double used() const { return used_; }
+  double work_used() const { return work_; }
   int stop() const { return stop_; }
   bool stopped() const { return stop_ != STOP_NONE; }
 

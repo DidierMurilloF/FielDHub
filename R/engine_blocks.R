@@ -103,17 +103,19 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
     return(random_resolvable_design(treatments, replicates, blocks))
   }
   pairs <- if (resolvable) replicates * v * (v - 1) / 2 else n * (n - 1) / 2
-  if (resolvable && missing(searches)) searches <- resolvable_searches(total_blocks)
-  if (is.null(jumps_per_escape)) jumps_per_escape <- blocks_engine_default_jumps(n, pairs)
+  if (is.null(jumps_per_escape)) {
+    jumps_per_escape <- if (resolvable) 3L else blocks_engine_default_jumps(n, pairs)
+  }
   validate_iteration_budget(jumps_per_escape, "jumps_per_escape", minimum = 1)
   validate_iteration_budget(max_stale_escapes, "max_stale_escapes", minimum = 1)
   if (is.null(budget)) {
     budget <- blocks_engine_default_budget(
-      n, searches, pairs, multiplier = if (resolvable) resolvable_budget_multiplier else 1
+      n, searches, pairs, multiplier = if (resolvable) resolvable_budget_multiplier else 1,
+      full_passes = resolvable
     )
   }
   validate_iteration_budget(budget, "budget", minimum = 1)
-  work_cap <- if (resolvable) resolvable_work_cap(v, replicates, total_blocks) else Inf
+  work_cap <- if (resolvable) resolvable_work_cap(v, replicates, total_blocks, searches) else Inf
   refresh_every <- if (resolvable) resolvable_refresh_every(total_blocks) else 256L
   out <- blocks_engine_cpp(as.integer(treatments), as.integer(replicates), as.integer(total_blocks),
                            as.integer(searches), as.integer(jumps_per_escape),
@@ -148,7 +150,7 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
     result <- resolvable_engine_output(out$treatments, treatments, replicates, blocks)
     result$Blocks_model[2L, c("D-Efficiency", "A-Efficiency")] <-
       c(out$d_efficiency, out$a_efficiency)
-    result$search <- c(search, list(work_cap = work_cap, refresh_every = refresh_every))
+    result$search <- c(search, list(work = out$work, work_cap = work_cap, refresh_every = refresh_every))
     return(result)
   }
   sizes <- tabulate(out$blocks, nbins = blocks)
@@ -276,13 +278,11 @@ resolvable_block_limit <- 1000
 resolvable_budget_multiplier <- 1
 
 #' @noRd
-resolvable_work_cap <- function(v, r, B) {
-  1e10
-}
-
-#' @noRd
-resolvable_searches <- function(B) {
-  as.integer(max(1, min(20, floor(1e10 / (40 * B^3)))))
+resolvable_work_cap <- function(v, r, B, searches) {
+  n <- v * r
+  refresh <- B^3 + n * r + n * B
+  swap <- 4 * B^2 + 2 * B * v
+  max(1e10, searches * (10 * refresh + 3 * n * swap))
 }
 
 #' @noRd
@@ -300,10 +300,12 @@ resolvable_refresh_every <- function(B) {
 #' pool for all searches, so harder shapes still stop on it. The candidate pairs
 #' are all plot pairs, n (n - 1) / 2, or in resolvable mode the pairs inside a
 #' replicate, r v (v - 1) / 2; `multiplier` (resolvable mode only) scales the
-#' per-search budget.
+#' per-search budget. Resolvable mode always runs full passes (`full_passes`,
+#' nested-engine spec 6.2b), so it keeps max(10 passes, 50 n) above 2e5 pairs.
 #' @noRd
-blocks_engine_default_budget <- function(n, searches, pairs = n * (n - 1) / 2, multiplier = 1) {
-  per_search <- if (pairs <= 2000) 25 * pairs else if (pairs <= 2e5) max(10 * pairs, 50 * n) else 50 * n
+blocks_engine_default_budget <- function(n, searches, pairs = n * (n - 1) / 2, multiplier = 1,
+                                         full_passes = FALSE) {
+  per_search <- if (pairs <= 2000) 25 * pairs else if (pairs <= 2e5 || full_passes) max(10 * pairs, 50 * n) else 50 * n
   min(as.double(searches) * max(multiplier * per_search, 5000), .Machine$integer.max)
 }
 
