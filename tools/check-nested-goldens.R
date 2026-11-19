@@ -1,22 +1,47 @@
 # Compares a candidate run with the recorded baseline under the acceptance
 # rules of spec 7 and writes <candidate>.md with the failures first. Exits with
 # status 1 when any shape fails.
-#   Rscript tools/check-nested-goldens.R tools/nested-goldens-baseline.csv.gz candidate.csv [accepted-loss.csv]
-# Both arguments are raw per-seed records from tools/generate-nested-goldens.R,
-# as .csv or .csv.gz; the committed baseline is tools/nested-goldens-baseline.csv.gz. accepted-loss.csv lists
-# caller,t,k,r of the shapes whose loss the owner accepted (spec 10): they are
-# reported with their shortfall and do not fail the run.
+#   Rscript tools/check-nested-goldens.R tools/nested-goldens-baseline.csv.gz candidate.csv [pairs.csv] [accepted-loss.csv]
+# The first two arguments are raw per-seed records from
+# tools/generate-nested-goldens.R, as .csv or .csv.gz; the committed baseline is
+# tools/nested-goldens-baseline.csv.gz. pairs.csv holds paired timings from
+# tools/time-nested-pairs.R (recognised by its bd_seconds column): the speed
+# rule nested_speed() is applied to it and a shape slower than blocksdesign's
+# median + 0.05 s fails. accepted-loss.csv lists caller,t,k,r of the shapes
+# whose loss the owner accepted (spec 10): they are reported with their
+# shortfall and do not fail the run.
 arguments <- commandArgs(trailingOnly = TRUE)
-if (length(arguments) < 2L || length(arguments) > 3L) {
-  stop("Usage: Rscript tools/check-nested-goldens.R baseline.csv candidate.csv [accepted-loss.csv]")
+if (length(arguments) < 2L || length(arguments) > 4L) {
+  stop("Usage: Rscript tools/check-nested-goldens.R baseline.csv.gz candidate.csv [pairs.csv] [accepted-loss.csv]")
 }
 script_dir <- dirname(sub("^--file=", "", grep("^--file=", commandArgs(), value = TRUE)[1]))
 source(file.path(script_dir, "..", "tests", "testthat", "helper-nested-goldens.R"))
 baseline <- nested_summary(utils::read.csv(arguments[1], stringsAsFactors = FALSE))
 candidate <- nested_summary(utils::read.csv(arguments[2], stringsAsFactors = FALSE))
-accepted <- if (length(arguments) == 3L) utils::read.csv(arguments[3], stringsAsFactors = FALSE)
+pairs <- NULL
+accepted <- NULL
+for (extra in arguments[-(1:2)]) {
+  x <- utils::read.csv(extra, stringsAsFactors = FALSE)
+  if ("bd_seconds" %in% names(x)) pairs <- x else accepted <- x
+}
 res <- nested_acceptance(baseline, candidate, accepted_loss = accepted)
 res$gap <- mapply(nested_gap, res$caller, res$t, res$r)
+speed_lines <- character(0)
+if (!is.null(pairs)) {
+  speed <- nested_speed(pairs)
+  j <- match(nested_shape_key(res), nested_shape_key(speed))
+  res$bd_median <- speed$bd_median[j]
+  res$engine_median <- speed$engine_median[j]
+  res$speed_ok <- speed$speed_ok[j]
+  res$pass <- ifelse(is.na(res$pass), NA, res$pass & !is.na(res$speed_ok) & res$speed_ok)
+  slow <- speed[!speed$speed_ok, ]
+  speed_lines <- c(sprintf("Speed rule (paired timing): %d of %d shapes timed, %d slower than blocksdesign + 0.05 s.",
+                           sum(!is.na(j)), nrow(res), nrow(slow)),
+                   if (nrow(slow) > 0L) sprintf("- slow: %s (t = %d, k = %d, r = %d): engine %.3f s, blocksdesign %.3f s",
+                                                slow$caller, slow$t, slow$k, slow$r,
+                                                slow$engine_median, slow$bd_median),
+                   "")
+}
 failed <- !is.na(res$pass) & !res$pass
 res <- res[order(!failed, is.na(res$pass), res$caller, res$t, res$k, res$r), ]
 
@@ -30,7 +55,8 @@ table <- c(paste("|", paste(names(res), collapse = " | "), "|"),
 header <- c("# Nested golden comparison",
             sprintf("%d shapes: %d pass, %d fail, %d accepted loss.", nrow(res),
                     sum(res$pass, na.rm = TRUE), sum(failed), sum(is.na(res$pass))),
-            "", "Wall time at the largest shape of each caller (reported only):", times, "")
+            "", speed_lines,
+            "Wall time at the largest shape of each caller (reported only):", times, "")
 writeLines(c(header, table), paste0(arguments[2], ".md"))
 cat(header, sep = "\n")
 if (any(failed)) quit(status = 1L)

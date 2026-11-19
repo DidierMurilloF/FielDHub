@@ -286,3 +286,22 @@ nested_acceptance <- function(baseline, candidate, accepted_loss = NULL, bootstr
   rownames(out) <- NULL
   out
 }
+
+# Speed rule (spec 7, owner decision 2026-11-18): from paired timings (one row
+# per shape and seed with bd_seconds and engine_seconds, as written by
+# tools/time-nested-pairs.R), one row per shape with the median time of each
+# side; the shape is fast enough when the engine's median is at most
+# blocksdesign's median + `slack` seconds.
+nested_speed <- function(timings, slack = 0.05) {
+  key <- nested_shape_key(timings)
+  rows <- lapply(split(timings, factor(key, levels = unique(key))), function(x) {
+    data.frame(caller = x$caller[1], t = x$t[1], k = x$k[1], r = x$r[1], seeds = nrow(x),
+               bd_median = stats::median(x$bd_seconds),
+               engine_median = stats::median(x$engine_seconds),
+               stringsAsFactors = FALSE)
+  })
+  out <- do.call(rbind, rows)
+  rownames(out) <- NULL
+  out$speed_ok <- out$engine_median <= out$bd_median + slack
+  out
+}
