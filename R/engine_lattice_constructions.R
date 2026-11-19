@@ -335,8 +335,9 @@ rectangular_lattice_classes <- function(s, r) {
   square <- transversal_square(s)
   keep <- matrix(TRUE, s, s)
   keep[square$transversal] <- FALSE
-  cells <- which(keep, arr.ind = TRUE)
-  unname(cbind(cells[, 1L] - 1L, cells[, 2L] - 1L, square$square[cells]))
+  rows <- row(keep)[keep]
+  columns <- col(keep)[keep]
+  unname(cbind(rows - 1L, columns - 1L, square$square[keep]))
 }
 
 #' A Latin square of order s >= 3 (0-based symbols) and one of its
