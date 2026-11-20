@@ -10,6 +10,9 @@
 # median + 0.05 s fails. accepted-loss.csv lists caller,t,k,r of the shapes
 # whose loss the owner accepted (spec 10): they are reported with their
 # shortfall and do not fail the run.
+# The optimum rule is gated on the recorded baseline bound (phase 2 spec 6.4):
+# a candidate seed is a hit when A >= the baseline's recorded bound - 1.5e-7.
+# The A-Bound the candidate reports itself never gates.
 # Shapes are matched by caller, t, k, r and, where a shape was run at several
 # iteration counts, by iterations; the candidate and the pairs must be complete
 # runs of the baseline's grid. In a partial run that holds one iteration count

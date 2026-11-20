@@ -11,6 +11,13 @@
 # (improve_efficiency()) and a change to it must not go unseen. The full run
 # (bootstrap = TRUE) judges every efficiency by both the bootstrap and the
 # worst-seed rule.
+#
+# The optimum rule is gated on the recorded baseline bound (phase 2 spec 6.4):
+# a candidate seed is a hit when A >= the baseline's recorded bound - 1.5e-7,
+# for every protocol. The candidate's own reported A-Bound never gates, so a
+# change to the reported bound cannot turn an unchanged design into a miss.
+# `hits` in a summary is that summary's own count (A against the bound recorded
+# with it); nested_acceptance() reads it from the baseline only.
 
 nested_golden_efficiencies <- c("D", "A", "row_D", "row_A", "col_D", "col_A", "joint_D", "joint_A")
 nested_golden_tolerance <- 1.5e-7
@@ -394,7 +401,10 @@ nested_bootstrap_lower <- function(baseline, candidate, resamples = 2000L) {
 # seeds of CI no shape qualifies. Optimum rule (spec 7): a non-gap lattice shape
 # must hit the A-bound (A >= bound - 1.5e-7) on every seed, and so must any other
 # shape with t < 1000 where the baseline hit on every seed; for row_column the
-# hit compares col_A with the Column A-Bound. `accepted_loss` is NULL or a data.frame of caller, t, k, r
+# hit compares col_A with the Column A-Bound. The bound is always the
+# baseline's recorded one (spec 6.4), never the candidate's own: `b$hits` is
+# the baseline's own count, and a candidate seed hits when its A reaches
+# `b$bound`. `accepted_loss` is NULL or a data.frame of caller, t, k, r
 # that the owner accepted: those shapes get pass = NA and report the shortfall.
 # Onestage callers: `fallback_ok` is the count rule (candidate fallbacks <=
 # baseline fallbacks, and 0 where onestage_rule_holds()). `clash_ok` is the
@@ -486,7 +496,10 @@ nested_acceptance <- function(baseline, candidate, accepted_loss = NULL, bootstr
     base_all_hit <- b$t < 1000 && b$seeds > 0L && b$hits == b$seeds
     required <- (b$caller %in% c("square_lattice", "rectangular_lattice") &&
                    !nested_gap(b$caller, b$t, b$r)) || base_all_hit
-    row$optimum_ok <- !required || (cand$seeds > 0L && cand$hits == cand$seeds)
+    # candidate hits against the baseline's recorded bound (spec 6.4); an NA
+    # A or an NA recorded bound is no hit
+    cand_hits <- sum(cv$A >= b$bound - tol, na.rm = TRUE)
+    row$optimum_ok <- !required || (cand$seeds > 0L && cand_hits == cand$seeds)
     if (onestage) {
       # a hit is A >= the baseline's recorded bound - tol, per factor; the
       # factor must hit on every ok seed wherever the baseline did
