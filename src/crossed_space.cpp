@@ -28,11 +28,19 @@ bool cholesky_pd(std::vector<double>& a, int n) {
   return true;
 }
 
+// log det of the positive definite a (column-major), which is destroyed.
+bool cholesky_log_det(std::vector<double>& a, int n, double& log_det) {
+  if (!cholesky_pd(a, n)) return false;
+  log_det = 0.0;
+  for (int j = 0; j < n; ++j) log_det += 2.0 * std::log(a[j + static_cast<size_t>(n) * j]);
+  return true;
+}
+
 }  // namespace
 
 CrossedSpace::CrossedSpace(int v, int r, int B, int F, const std::vector<int>& plot_block,
-                           const std::vector<int>& treat)
-    : v_(v), r_(r), B_(B), F_(F), n_(v * r), plot_block_(plot_block), wt_(B, 0.0), sq_(B, 0.0),
+                           const std::vector<int>& treat, double ridge)
+    : v_(v), r_(r), B_(B), F_(F), n_(v * r), ridge_(ridge), plot_block_(plot_block), wt_(B, 0.0), sq_(B, 0.0),
       treat_(treat), lists_(static_cast<size_t>(v) * F * r, 0),
       m_(static_cast<size_t>(B) * B, 0.0), g_(static_cast<size_t>(B) * v, 0.0),
       mu_(B, 0.0), mg_(B, 0.0), log_det_(std::numeric_limits<double>::quiet_NaN()) {
@@ -51,10 +59,10 @@ CrossedSpace::CrossedSpace(int v, int r, int B, int F, const std::vector<int>& p
   }
 }
 
-void CrossedSpace::build_what(const std::vector<int>& lists, std::vector<double>& w) const {
+void CrossedSpace::build_what(const std::vector<int>& lists, std::vector<double>& w, double diagonal) const {
   w.assign(static_cast<size_t>(B_) * B_, 0.0);
   for (int l = 0; l < B_; ++l)
-    for (int j = 0; j < B_; ++j) w[j + static_cast<size_t>(B_) * l] = (j == l ? 1.0 : 0.0) + sq_[j] * sq_[l] / n_;
+    for (int j = 0; j < B_; ++j) w[j + static_cast<size_t>(B_) * l] = (j == l ? diagonal : 0.0) + sq_[j] * sq_[l] / n_;
   const int len = F_ * r_;
   for (int i = 0; i < v_; ++i) {
     const int* li = &lists[static_cast<size_t>(i) * len];
@@ -65,7 +73,7 @@ void CrossedSpace::build_what(const std::vector<int>& lists, std::vector<double>
 
 bool CrossedSpace::refresh() {
   std::vector<double> w;
-  build_what(lists_, w);
+  build_what(lists_, w, 1.0 + ridge_);
   double ld = 0.0;
   if (!spd_inverse8(w, B_, ld)) return false;
   m_.swap(w);
@@ -86,12 +94,31 @@ bool CrossedSpace::refresh() {
 
 bool CrossedSpace::full_rank() const {
   std::vector<double> w;
-  build_what(lists_, w);
+  build_what(lists_, w, 1.0);
   for (int j = 0; j < B_; ++j) w[j + static_cast<size_t>(B_) * j] -= kFullRank;
   return cholesky_pd(w, B_);
 }
 
+bool CrossedSpace::log_det_fresh(double& log_det) const {
+  std::vector<double> w;
+  build_what(lists_, w, 1.0 + ridge_);
+  return cholesky_log_det(w, B_, log_det);
+}
+
+bool CrossedSpace::log_det_after(int p, int q, double& log_det) const {
+  std::vector<double> w;
+  build_what(lists_after(p, q), w, 1.0 + ridge_);
+  return cholesky_log_det(w, B_, log_det);
+}
+
 bool CrossedSpace::full_rank_after(int p, int q) const {
+  std::vector<double> w;
+  build_what(lists_after(p, q), w, 1.0);
+  for (int j = 0; j < B_; ++j) w[j + static_cast<size_t>(B_) * j] -= kFullRank;
+  return cholesky_pd(w, B_);
+}
+
+std::vector<int> CrossedSpace::lists_after(int p, int q) const {
   std::vector<int> lists = lists_;
   const int a = treat_[p], c = treat_[q], len = F_ * r_;
   for (int f = 0; f < F_; ++f) {
@@ -102,10 +129,7 @@ bool CrossedSpace::full_rank_after(int p, int q) const {
     int* lc = &lists[static_cast<size_t>(c) * len];
     for (int x = 0; x < len; ++x) if (lc[x] == bq) { lc[x] = bp; break; }
   }
-  std::vector<double> w;
-  build_what(lists, w);
-  for (int j = 0; j < B_; ++j) w[j + static_cast<size_t>(B_) * j] -= kFullRank;
-  return cholesky_pd(w, B_);
+  return lists;
 }
 
 int CrossedSpace::u_sparse(int p, int q) const {
@@ -277,7 +301,7 @@ double CrossedSpace::drift() const {
     const double* ml = &m_[static_cast<size_t>(B_) * l];
     double ym = 0.0;
     for (int j = 0; j < B_; ++j) ym += sq_[j] * ml[j];
-    for (int j = 0; j < B_; ++j) res[j] = ml[j] + sq_[j] * ym / n_;
+    for (int j = 0; j < B_; ++j) res[j] = (1.0 + ridge_) * ml[j] + sq_[j] * ym / n_;
     res[l] -= 1.0;
     for (int i = 0; i < v_; ++i) {
       const int* li = &lists_[static_cast<size_t>(i) * len];

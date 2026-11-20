@@ -68,6 +68,25 @@
 // g'G_.i), and then columns c and a gain +- M'' u. The update of M reads only
 // M (Mu and Mg from its columns), never G, so the cache's rounding cannot
 // feed back into M.
+//
+// Ridge (the joint-rank repair, spec 6.1 stage 2). The repair maximises
+// log det(C / r + eps P), P the projector on the contrasts, whose eigenvalues
+// there are e_i + eps = 1 + eps - lambda_i. In block space that is What with
+// I_B replaced by (1 + eps) I_B:
+//   What_eps = (1 + eps) I_B - N' N / r + y y' / n
+// has eigenvalue 1 + eps - F + F = 1 + eps along y, 1 + eps - lambda_i for
+// the m nonzero lambda_i and 1 + eps on the rest, so
+//   log det What_eps = sum_i log(e_i + eps) + (B - v + 1) log(1 + eps),
+// the repair criterion plus a constant of the layout. What_eps is positive
+// definite for every design (lambda_i <= 1), and a swap changes it by the
+// same - U S U', so ratio(), after() and apply() hold unchanged with
+// M = What_eps^-1. A state built with `ridge` = eps is this state; the
+// full-rank test never includes the ridge. M then has entries near 1 / eps on
+// a singular design and a rank-2 ratio loses digits, so the repair confirms
+// every accepted swap with log_det_after(), a factorisation from the counts.
+// The check `tools/check-onestage-engine.R repair` verifies the identity
+// (the engine's criterion value against the dense eigenvalues).
+//
 // The check `tools/check-onestage-engine.R crossed` verifies the identity
 // (values against a dense qr.resid() reference) and this update (accepted
 // ratios against fresh refreshes, FIELDHUB_ENGINE_DEBUG=1).
@@ -79,14 +98,23 @@ class CrossedSpace {
   // plot_block: n x F, plot-major (entry p F + f is the 0-based block column,
   // in 0 .. B - 1, of plot p in factor f); treat: the 0-based treatment of
   // every plot, each treatment r times. Block sizes are read from plot_block.
+  // ridge: eps of What_eps (0 for the plain state).
   CrossedSpace(int v, int r, int B, int F, const std::vector<int>& plot_block,
-               const std::vector<int>& treat);
+               const std::vector<int>& treat, double ridge = 0.0);
   // Rebuild M, the cache G and log det What from the design. False if What is
   // not positive definite (C below rank v - 1); the state is then unchanged.
   bool refresh();
   // The full-rank test of spec 5.1b on the current design (from the counts,
-  // not the running state): every efficiency factor >= 1e-7.
+  // not the running state, and without the ridge): every efficiency factor
+  // >= 1e-7.
   bool full_rank() const;
+  // log det What (with the ridge) of the current design and of the design
+  // after swapping plots p and q, by a Cholesky factorisation from the counts
+  // (not the running state). False if What is not positive definite. Both use
+  // the same arithmetic, so their difference is the exact gain of the swap up
+  // to the rounding of one factorisation.
+  bool log_det_fresh(double& log_det) const;
+  bool log_det_after(int p, int q, double& log_det) const;
   // The same test on the design after swapping plots p and q.
   bool full_rank_after(int p, int q) const;
   // det What'' / det What for swapping plots p and q (treatments differ), O(r)
@@ -115,12 +143,16 @@ class CrossedSpace {
   const std::vector<int>& treatments() const { return treat_; }
 
  private:
-  // Dense What from the per-treatment block lists `lists` (v x F r).
-  void build_what(const std::vector<int>& lists, std::vector<double>& w) const;
+  // Dense What from the per-treatment block lists `lists` (v x F r), with
+  // `diagonal` in place of the 1 of I_B.
+  void build_what(const std::vector<int>& lists, std::vector<double>& w, double diagonal) const;
+  // The block lists after swapping plots p and q.
+  std::vector<int> lists_after(int p, int q) const;
   // u of the swap of p and q: its entries in u_j_ / u_v_, returns how many.
   int u_sparse(int p, int q) const;
   void mg_of(int a, int c, std::vector<double>& mg) const;  // M g, from M
   int v_, r_, B_, F_, n_;
+  double ridge_;
   std::vector<int> plot_block_;   // n x F
   std::vector<double> wt_;        // 1 / sqrt(k_j)
   std::vector<double> sq_;        // sqrt(k_j)

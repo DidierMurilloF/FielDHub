@@ -37,30 +37,69 @@
 # [baseline], seeds= and tmax= are ignored. Checks:
 # (a) values: 20 random complete designs (nested and shared, v <= 30, set.seed
 #     fixed), crossed_search(budget = 1): `full_rank` agrees with the dense
-#     reference (smallest canonical efficiency of C/r >= 1e-7, C from
-#     qr.resid() as in row_column_joint_efficiency(), unrounded); where full
-#     rank, `joint_log_det` (sum of log efficiencies) and `joint_d` (their
-#     geometric mean) match it to 1e-9, and `row_d`, `row_a` (and the stage 1
-#     values of the start) match the one-way eigenvalue reference to 1e-9.
-#     This verifies the block-space identity and its full-rank test.
+#     reference on the returned design (smallest canonical efficiency of C/r
+#     >= 1e-7, C from qr.resid() as in row_column_joint_efficiency(),
+#     unrounded), and a full-rank start is never returned not full rank;
+#     where full rank, `joint_log_det` (sum of log efficiencies) and `joint_d`
+#     (their geometric mean) match it to 1e-9, and `row_d`, `row_a` (and the
+#     stage 1 values of the start) match the one-way eigenvalue reference to
+#     1e-9. This verifies the block-space identity and its full-rank test. A
+#     singular start is repaired first (`repair`); a result that is still not
+#     full rank has NA joint values and no evaluations.
 # (b) invariants after full searches from onestage_stage1() starts (24/6/2,
 #     30/5/2, 48/6/3 nested and 24/6/2, 30/5/2 latinized, seeds 1:8), run with
-#     FIELDHUB_ENGINE_DEBUG=1: every replicate complete; row_d >=
-#     stage1_row_d and row_a >= stage1_row_a (relative 1e-9: the engine
-#     compares running values with the fixed stage 1 values, 1e-10 slack, so
-#     nothing accumulates); joint log det >= the start's (reference) - 1e-9;
+#     FIELDHUB_ENGINE_DEBUG=1: every replicate complete; the Row floors (see
+#     below); joint log det >= the start's (reference) - 1e-9;
 #     the final values match the reference to 1e-9; debug_max_error <= 1e-8
 #     (the largest relative error of an accepted rank-2 ratio, joint or Row,
 #     against fresh refreshes: this verifies the low-rank update). The same
 #     invariants on 12/4/2 and 16/4/2 nested (stage 1 often singular or
 #     nearly so) and on 60 random complete starts (v 8-16, many
-#     near-singular: the ill-conditioned states where a rank-2 score loses
-#     digits), at least 20 of them searched.
+#     near-singular or singular and then repaired: the ill-conditioned states
+#     where a rank-2 score loses digits), at least 20 of them searched.
 # (c) parity: single-search mean joint_d >= the spec 6.1 "Floor on Row only"
 #     value - 0.001: 0.5929 (24/6/2 nested), 0.6349 (30/5/2 nested), 0.7173
 #     (48/6/3 nested, seeds 1:4), 0.8466 (24/6/2 latinized).
+# (d) the exact Row guarantee's last line of defence. With
+#     FIELDHUB_ENGINE_DEBUG=slack_floors the engine skips the exact Row
+#     confirmation of each swap (the search of the 1e-10 running floors
+#     alone), so a final design can lie one rounding below stage 1 and the
+#     end-of-search comparison must replace it. On 24/6/2 and 48/6/3 nested,
+#     seeds 1:8: the Row floors hold on every seed, every result is full rank
+#     and not below the start in joint log det, and at least one seed took
+#     the replacement (`floor_fallback` 1).
 #
-# repair: Task 7.
+# The Row floors, in `crossed` and `repair` alike (spec 6.1: Row D and Row A
+# never fall below their stage 1 values):
+# - exactly, on the engine's unrounded values: row_d >= stage1_row_d and
+#   row_a >= stage1_row_a with no tolerance, and `floor_fallback` 0 (the
+#   engine confirms each swap between rows from scratch, so the end
+#   comparison never has to replace a result);
+# - on the one-way eigenvalue reference of the final design against that of
+#   the start, to a relative 1e-12 (the rounding of two eigen-decompositions;
+#   measured differences are below 1e-14).
+#
+# repair: the joint-rank repair of mode 3 (spec 6.1 stage 2; phase 2 Task 7).
+# [baseline], seeds= and tmax= are ignored. Every shape with r = 2-4, 2-4
+# rows and 2-4 columns (v <= 16) where the rule of spec 5.1b holds: 22 nested
+# and 27 shared, seeds 1:8 each (392 runs), from onestage_stage1() starts.
+# Each run makes three calls from one generator state: A, the search; B, the
+# same call with budget = 0 (the repair alone: a budget below one evaluation
+# runs no joint stage and draws nothing); C, the search from B's design,
+# continuing B's generator stream (the joint stage with the repair's work
+# excluded). Checks, per shape and coding:
+# - `full_rank` on every run, the dense reference agrees, and
+#   row_column_joint_efficiency() of the final design has a non-NA Aeffic;
+# - every replicate complete, and the Row floors (above);
+# - budget: A's `evaluations` equal C's and A's design is C's; B has 0
+#   evaluations and the same `repair_evaluations` and `repair_swaps` as A; a
+#   start that is already full rank has `repair_evaluations` 0, a singular
+#   one more than 0; C (a full-rank start) has 0;
+# - criterion: the engine's block-space value before and after the repair,
+#   log det((1 + eps) I_B - N'N / r + y y' / n), equals the dense
+#   sum_i log(e_i + eps) + (B - v + 1) log(1 + eps), eps = 1e-6, of the start
+#   and of B's design to 1e-7 (the e_i from qr.resid(), as the report).
+# At least one start must be singular, or the check has tested no repair.
 
 arguments <- commandArgs(trailingOnly = TRUE)
 named <- grepl("^[a-z]+=", arguments)
@@ -97,7 +136,8 @@ report <- function(ok, label) {
   invisible(ok)
 }
 
-if (check == "crossed") {
+FLOOR <- 1e-12
+if (check %in% c("crossed", "repair")) {
   ns <- asNamespace("FielDHub")
   for (f in c("crossed_search", "crossed_default_budget", "onestage_stage1")) {
     if (!exists(f, envir = ns, inherits = FALSE)) {
@@ -129,7 +169,7 @@ if (check == "crossed") {
     e <- sort(eigen(crossprod(resid), symmetric = TRUE, only.values = TRUE)$values,
               decreasing = TRUE)[seq_len(v - 1L)] / r
     list(full = min(e) >= 1e-7, log_det = if (min(e) > 0) sum(log(e)) else -Inf,
-         d = if (min(e) > 0) exp(mean(log(e))) else 0)
+         d = if (min(e) > 0) exp(mean(log(e))) else 0, e = e)
   }
   row_ref <- function(trt, block, v, r) {
     b <- max(block)
@@ -143,6 +183,22 @@ if (check == "crossed") {
     length(trt) == v * r && !anyNA(trt) &&
       all(vapply(seq_len(r), function(m) identical(sort(as.integer(trt[lay$rep == m])), seq_len(v)), logical(1)))
   }
+  # The Row floors of a result against its start (header): a problem, or NULL.
+  floor_problem <- function(res, trt, start, lay, v, r, fallback = 0) {
+    rw <- row_ref(trt, lay$row, v, r)
+    rw0 <- row_ref(start, lay$row, v, r)
+    if (!(res$row_d >= res$stage1_row_d)) return(sprintf("Row D %.17g below stage 1 %.17g", res$row_d, res$stage1_row_d))
+    if (!(res$row_a >= res$stage1_row_a)) return(sprintf("Row A %.17g below stage 1 %.17g", res$row_a, res$stage1_row_a))
+    if (!(rw[["d"]] >= rw0[["d"]] * (1 - FLOOR))) return(sprintf("reference Row D %.15f below the start's %.15f", rw[["d"]], rw0[["d"]]))
+    if (!(rw[["a"]] >= rw0[["a"]] * (1 - FLOOR))) return(sprintf("reference Row A %.15f below the start's %.15f", rw[["a"]], rw0[["a"]]))
+    if (!is.null(fallback) && !identical(as.integer(res$search$floor_fallback), as.integer(fallback))) {
+      return(sprintf("floor_fallback %s", format(res$search$floor_fallback)))
+    }
+    NULL
+  }
+}
+
+if (check == "crossed") {
 
   # (a) values on random complete designs, budget = 1
   set.seed(20261120)
@@ -166,18 +222,21 @@ if (check == "crossed") {
                     error = function(e) e)
     if (inherits(res, "error")) { report(FALSE, paste0(label, ": error ", conditionMessage(res))); next }
     ref0 <- joint_ref(start, lay, v, r)
-    if (!identical(res$full_rank, ref0$full)) {
-      report(FALSE, sprintf("%s: full_rank %s, reference %s", label, format(res$full_rank), ref0$full))
+    trt <- as.integer(res$treatments)
+    ref <- joint_ref(trt, lay, v, r)
+    if (!identical(res$full_rank, ref$full) || (ref0$full && !ref$full)) {
+      report(FALSE, sprintf("%s: full_rank %s, reference %s (start %s)", label, format(res$full_rank), ref$full, ref0$full))
       next
     }
-    if (!ref0$full) {
-      report(identical(as.integer(res$treatments), as.integer(start)) && res$search$evaluations == 0,
-             paste0(label, ": not full rank, start returned without search"))
+    if (!ref$full) {
+      # (No repair runs when the rows of the start are disconnected.)
+      report(complete_reps(trt, lay, v, r) && is.na(res$joint_d) && res$search$evaluations == 0,
+             sprintf("%s: not full rank (%g repair evaluations), no joint stage", label,
+                     res$search$repair_evaluations))
       next
     }
     n_full <- n_full + 1L
-    trt <- as.integer(res$treatments)
-    ref <- joint_ref(trt, lay, v, r)
+    if (!ref0$full) label <- paste(label, "(repaired)")
     rw <- row_ref(trt, lay$row, v, r)
     rw0 <- row_ref(start, lay$row, v, r)
     ok <- complete_reps(trt, lay, v, r) && close(res$joint_log_det, ref$log_det) &&
@@ -218,8 +277,8 @@ if (check == "crossed") {
       if (!isTRUE(res$full_rank)) { if (ref0$full) fail("full-rank start reported not full rank"); next }
       ref <- joint_ref(trt, lay, v, r)
       rw <- row_ref(trt, lay$row, v, r)
-      if (!(res$row_d >= res$stage1_row_d * (1 - VAL))) fail(sprintf("Row D %.10f below stage 1 %.10f", res$row_d, res$stage1_row_d))
-      if (!(res$row_a >= res$stage1_row_a * (1 - VAL))) fail(sprintf("Row A %.10f below stage 1 %.10f", res$row_a, res$stage1_row_a))
+      fp <- floor_problem(res, trt, s1$treatments, lay, v, r)
+      if (!is.null(fp)) fail(fp)
       if (!(ref$log_det >= ref0$log_det - VAL)) fail(sprintf("joint log det %.10f below the start's %.10f", ref$log_det, ref0$log_det))
       if (!(close(res$joint_log_det, ref$log_det) && close(res$joint_d, ref$d) &&
             close(res$row_d, rw[["d"]]) && close(res$row_a, rw[["a"]]))) fail("final values differ from the reference")
@@ -252,14 +311,17 @@ if (check == "crossed") {
     start <- as.vector(replicate(r, sample.int(v)))
     ref0 <- joint_ref(start, lay, v, r)
     res <- crossed(start, v, r, nrows, v / nrows, shared, work_cap = work_limit)
-    if (!identical(res$full_rank, ref0$full)) { problems <- c(problems, sprintf("start %d: full_rank differs", i)); next }
-    if (!ref0$full) next
-    searched <- searched + 1L
     trt <- as.integer(res$treatments)
     ref <- joint_ref(trt, lay, v, r)
+    if (!identical(res$full_rank, ref$full) || (ref0$full && !ref$full)) {
+      problems <- c(problems, sprintf("start %d: full_rank differs", i))
+      next
+    }
+    if (!ref$full) next
+    searched <- searched + 1L
     dbg <- res$search$debug_max_error
     if (!complete_reps(trt, lay, v, r) || !(ref$log_det >= ref0$log_det - VAL) ||
-        !(res$row_d >= res$stage1_row_d * (1 - VAL)) || !(res$row_a >= res$stage1_row_a * (1 - VAL)) ||
+        !is.null(floor_problem(res, trt, start, lay, v, r)) ||
         !close(res$joint_log_det, ref$log_det) || !is.numeric(dbg) || is.na(dbg) || dbg > 1e-8) {
       problems <- c(problems, sprintf("start %d (%d/%d/%d): invariant or debug error %s", i, v, nrows, r, format(dbg)))
     } else worst_debug <- max(worst_debug, dbg)
@@ -267,13 +329,135 @@ if (check == "crossed") {
   report(length(problems) == 0L && searched >= 20L,
          sprintf("crossed ill-conditioned random starts: %d searched, max debug error %.2e%s", searched,
                  worst_debug, if (length(problems)) paste0(": ", problems[1]) else ""))
+  # (d) the end-of-search Row comparison, reached through the check hook
+  Sys.setenv(FIELDHUB_ENGINE_DEBUG = "slack_floors")
+  problems <- character()
+  replaced <- character()
+  for (shape in list(c(24, 6, 2), c(48, 6, 3))) {
+    v <- shape[1]; nrows <- shape[2]; r <- shape[3]; ncols <- v / nrows
+    lay <- layout_of(v, r, nrows, FALSE)
+    for (seed in 1:8) {
+      set.seed(seed)
+      s1 <- stage1(v, nrows, ncols, r, FALSE, work_limit)
+      res <- crossed(s1$treatments, v, r, nrows, ncols, FALSE, work_cap = max(work_limit - s1$work, 1))
+      trt <- as.integer(res$treatments)
+      tag <- sprintf("%d/%d/%d seed %d", v, nrows, r, seed)
+      fp <- floor_problem(res, trt, s1$treatments, lay, v, r, fallback = NULL)
+      ref <- joint_ref(trt, lay, v, r)
+      ref0 <- joint_ref(s1$treatments, lay, v, r)
+      if (!is.null(fp)) problems <- c(problems, paste0(tag, ": ", fp))
+      else if (!complete_reps(trt, lay, v, r) || !isTRUE(res$full_rank) || !ref$full ||
+               !(ref$log_det >= ref0$log_det - VAL) || !close(res$joint_log_det, ref$log_det)) {
+        problems <- c(problems, paste0(tag, ": not a full-rank design at or above the start"))
+      }
+      if (identical(as.integer(res$search$floor_fallback), 1L)) {
+        replaced <- c(replaced, sprintf("%s (joint D %.4f, start %.4f)", tag, res$joint_d, ref0$d))
+      }
+    }
+  }
+  report(length(problems) == 0L && length(replaced) >= 1L,
+         sprintf("crossed end-of-search Row comparison (hook, 16 runs): %d replaced%s%s", length(replaced),
+                 if (length(replaced)) paste0(": ", paste(replaced, collapse = "; ")) else "",
+                 if (length(problems)) paste0("; PROBLEM ", problems[1]) else ""))
   Sys.unsetenv("FIELDHUB_ENGINE_DEBUG")
   cat(failures, "FAIL(s)\n")
   quit(status = if (failures > 0L) 1 else 0)
 }
-if (check != "stage1") {
-  report(FALSE, paste(check, "is not implemented yet (phase 2 Task 7)"))
-  quit(status = 1)
+
+if (check == "repair") {
+  EPS <- 1e-6
+  joint_a_report <- get("row_column_joint_efficiency", envir = ns)
+  grid <- expand.grid(nrows = 2:4, ncols = 2:4, r = 2:4, shared = c(FALSE, TRUE))
+  grid$v <- grid$nrows * grid$ncols
+  rule <- ifelse(grid$shared, grid$v * grid$r - grid$r - grid$nrows - grid$ncols + 2 >= grid$v - 1,
+                 grid$r * (grid$nrows - 1) * (grid$ncols - 1) >= grid$v - 1)
+  grid <- grid[rule & grid$v <= 16, ]
+  grid <- grid[order(grid$shared, grid$v, grid$nrows, grid$r), ]
+  report(sum(!grid$shared) == 22L && sum(grid$shared) == 27L,
+         sprintf("repair grid: %d nested and %d shared shapes (review 2: 22 and 27)", sum(!grid$shared), sum(grid$shared)))
+  # The repair criterion from the dense efficiency factors (header).
+  criterion <- function(trt, lay, v, r, B) {
+    e <- pmax(joint_ref(trt, lay, v, r)$e, 0)
+    sum(log(e + EPS)) + (B - v + 1) * log1p(EPS)
+  }
+  total <- c(runs = 0L, full = 0L, singular = 0L)
+  worst <- c(criterion = 0, score = 0)
+  for (g in seq_len(nrow(grid))) {
+    v <- grid$v[g]; nrows <- grid$nrows[g]; ncols <- grid$ncols[g]; r <- grid$r[g]; shared <- grid$shared[g]
+    lay <- layout_of(v, r, nrows, shared)
+    B <- max(lay$row) + max(lay$col)
+    label <- sprintf("%d/%d/%d %s", v, nrows, r, if (shared) "latinized" else "nested")
+    problems <- character()
+    n_full <- 0L; n_start <- 0L; swaps <- 0; evals <- 0
+    for (seed in 1:8) {
+      fail <- function(what) problems <<- c(problems, sprintf("seed %d: %s", seed, what))
+      set.seed(seed)
+      s1 <- stage1(v, nrows, ncols, r, shared, work_limit)
+      start <- as.integer(s1$treatments)
+      cap <- max(work_limit - s1$work, 1)
+      ref0 <- joint_ref(start, lay, v, r)
+      n_start <- n_start + ref0$full
+      state <- get(".Random.seed", envir = globalenv())
+      run <- function(from, ...) tryCatch(crossed(from, v, r, nrows, ncols, shared, work_cap = cap, ...),
+                                          error = function(e) e)
+      A <- run(start)
+      assign(".Random.seed", state, envir = globalenv())
+      B0 <- run(start, budget = 0)
+      C <- if (inherits(B0, "error")) B0 else run(as.integer(B0$treatments))
+      total[["runs"]] <- total[["runs"]] + 1L
+      if (!ref0$full) total[["singular"]] <- total[["singular"]] + 1L
+      bad <- Filter(function(x) inherits(x, "error"), list(A, B0, C))
+      if (length(bad)) { fail(paste("error:", conditionMessage(bad[[1]]))); next }
+      trt <- as.integer(A$treatments)
+      if (!complete_reps(trt, lay, v, r)) { fail("a replicate is not complete"); next }
+      # full rank, by the engine, the reference and the report
+      ref <- joint_ref(trt, lay, v, r)
+      design <- data.frame(Level_3 = lay$row, Level_2 = lay$col, treatments = trt)
+      if (!isTRUE(A$full_rank)) { fail("not full rank"); next }
+      n_full <- n_full + 1L
+      total[["full"]] <- total[["full"]] + 1L
+      if (!ref$full) fail("full_rank, but the reference is not")
+      if (is.na(joint_a_report(design)$Aeffic)) fail("row_column_joint_efficiency() gives NA")
+      if (is.na(A$joint_a) || !close(A$joint_log_det, ref$log_det)) fail("joint values differ from the reference")
+      fp <- floor_problem(A, trt, start, lay, v, r)
+      if (!is.null(fp)) fail(fp)
+      # budget: the repair spends none of it
+      sa <- A$search; sb <- B0$search; sc <- C$search
+      if (!identical(sa$evaluations, sc$evaluations) || !identical(trt, as.integer(C$treatments))) {
+        fail(sprintf("evaluations %s, without the repair %s%s", format(sa$evaluations), format(sc$evaluations),
+                     if (identical(trt, as.integer(C$treatments))) "" else " (designs differ)"))
+      }
+      if (!identical(sb$evaluations, 0) || !identical(sb$repair_evaluations, sa$repair_evaluations) ||
+          !identical(sb$repair_swaps, sa$repair_swaps) || !isTRUE(B0$full_rank)) {
+        fail("the repair depends on the evaluation budget")
+      }
+      if (!identical(sc$repair_evaluations, 0)) fail("a full-rank start was repaired")
+      if (!(sa$evaluations <= get("crossed_default_budget", envir = ns)(v, r))) fail("evaluations above the budget")
+      if (ref0$full) {
+        if (!identical(sa$repair_evaluations, 0) || !identical(sa$repair_swaps, 0)) fail("a full-rank start was repaired")
+      } else {
+        if (!(sa$repair_evaluations > 0 && sa$repair_swaps > 0)) fail("a singular start has no repair evaluations")
+        swaps <- max(swaps, sa$repair_swaps); evals <- max(evals, sa$repair_evaluations)
+        want <- c(criterion(start, lay, v, r, B), criterion(as.integer(B0$treatments), lay, v, r, B))
+        got <- sa$repair_log_det
+        err <- if (length(got) == 2L && !anyNA(got)) max(abs(got - want)) else Inf
+        worst[["criterion"]] <- max(worst[["criterion"]], err)
+        if (!(err <= 1e-7)) fail(sprintf("repair criterion %s, dense %s", paste(format(got, digits = 12), collapse = " -> "),
+                                         paste(format(want, digits = 12), collapse = " -> ")))
+        worst[["score"]] <- max(worst[["score"]], sa$repair_score_error)
+      }
+    }
+    report(length(problems) == 0L && n_full == 8L,
+           sprintf("repair %s: full rank %d of 8 (at the start %d), most repair swaps %g, evaluations %g%s", label, n_full,
+                   n_start, swaps, evals, if (length(problems)) paste0(": ", problems[1]) else ""))
+  }
+  report(total[["full"]] == total[["runs"]] && total[["singular"]] >= 1L,
+         sprintf("repair: full rank on %d of %d runs; %d starts were singular", total[["full"]], total[["runs"]],
+                 total[["singular"]]))
+  cat(sprintf("  largest |engine criterion - dense|: %.2e; largest rank-2 score error of an accepted repair swap: %.2e\n",
+              worst[["criterion"]], worst[["score"]]))
+  cat(failures, "FAIL(s)\n")
+  quit(status = if (failures > 0L) 1 else 0)
 }
 
 # A-efficiency of one block factor: C = r I - N K^-1 N', canonical efficiency

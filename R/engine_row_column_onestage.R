@@ -156,15 +156,31 @@ crossed_default_budget <- function(v, r) {
 #' log det of rows and columns, under the Row D and Row A floors (running
 #' values against the fixed values of `start`), with escapes from
 #' row-preserving pairs. Rows and columns are nested in the replicates, or
-#' `shared` across them. A start that fails the full-rank test of spec 5.1b
-#' is returned unsearched with `full_rank = FALSE`. Draws from R's generator.
+#' `shared` across them. Draws from R's generator.
+#'
+#' A start that fails the full-rank test of spec 5.1b is first repaired
+#' (spec 6.1 stage 2): first improvement on log det(C / r + eps P), eps =
+#' 1e-6, over the same swaps and under the same Row floors, until the test
+#' passes. The repair has its own allowance (30 full passes), charged to
+#' `work_cap` and never to `budget`: `evaluations` excludes it and
+#' `repair_evaluations` counts it. If it fails, its last design is returned
+#' with `full_rank = FALSE` and no joint stage runs.
+#'
+#' Row D and Row A of the result are never below those of `start`, compared
+#' exactly as the unrounded values returned here.
 #'
 #' @return A list with `treatments` (1-based, plot order as `start`),
 #'   `full_rank`, unrounded `row_d`, `row_a`, `joint_d`, `joint_a`,
 #'   `joint_log_det` of the result (joint values NA when not full rank), the
-#'   Row values of `start` (`stage1_row_d`, `stage1_row_a`) and `search`
-#'   (`evaluations`, `work`, `stop_reason`, `repair_swaps`,
-#'   `repair_evaluations`, `refreshes`, `drift_events`, `debug_max_error`).
+#'   Row values of `start` (`stage1_row_d`, `stage1_row_a`) and `search`:
+#'   `evaluations`, `work`, `stop_reason`, `repair_swaps`,
+#'   `repair_evaluations`, `repair_log_det` (the repair criterion in block
+#'   space, log det((1 + eps) I - N'N / r + y y' / n), before and after the
+#'   repair; NA without one), `repair_score_error` (the largest error of the
+#'   rank-2 score of an accepted repair swap), `floor_fallback` (1 if the
+#'   result was replaced to keep the Row floors exactly, 2 if the repair's
+#'   output was rejected for them, else 0), `refreshes`, `drift_events`,
+#'   `work_capped`, `debug_max_error`.
 #' @noRd
 crossed_search <- function(start, v, r, nrows, ncols, shared, budget = crossed_default_budget(v, r),
                            work_cap, jumps_per_escape = 3L, max_stale_escapes = 5L) {
@@ -187,7 +203,10 @@ crossed_search <- function(start, v, r, nrows, ncols, shared, budget = crossed_d
   b_rows <- if (shared) nrows else r * nrows
   B <- b_rows + (if (shared) ncols else r * ncols)
   time_limit <- 60
-  out <- blocks_engine_cpp(v, r, as.integer(b_rows), 1L, as.integer(jumps_per_escape),
+  # Check hook (tools/check-onestage-engine.R): 2L skips the exact Row
+  # confirmation of each swap, so the end-of-search comparison can be reached.
+  hook <- if (identical(Sys.getenv("FIELDHUB_ENGINE_DEBUG"), "slack_floors")) 2L else 1L
+  out <- blocks_engine_cpp(v, r, as.integer(b_rows), hook, as.integer(jumps_per_escape),
                            as.integer(max_stale_escapes), as.double(budget), time_limit,
                            identical(Sys.getenv("FIELDHUB_ENGINE_DEBUG"), "1"),
                            as.integer(start), as.double(work_cap), 256L,
@@ -205,6 +224,9 @@ crossed_search <- function(start, v, r, nrows, ncols, shared, budget = crossed_d
        stage1_row_d = out$stage1_row_d, stage1_row_a = out$stage1_row_a,
        search = list(evaluations = out$evaluations, work = out$work, stop_reason = stop_reason,
                      repair_swaps = out$repair_swaps, repair_evaluations = out$repair_evaluations,
+                     repair_log_det = c(out$repair_log_det_start, out$repair_log_det),
+                     repair_score_error = out$repair_score_error,
+                     floor_fallback = out$floor_fallback,
                      refreshes = out$refreshes, drift_events = out$drift_events,
                      work_capped = out$work_capped, debug_max_error = out$debug_max_error))
 }
