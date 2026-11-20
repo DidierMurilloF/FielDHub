@@ -10,6 +10,11 @@
 # median + 0.05 s fails. accepted-loss.csv lists caller,t,k,r of the shapes
 # whose loss the owner accepted (spec 10): they are reported with their
 # shortfall and do not fail the run.
+# Shapes are matched by caller, t, k, r and, where a shape was run at several
+# iteration counts, by iterations; the candidate and the pairs must be complete
+# runs of the baseline's grid. In a partial run that holds one iteration count
+# of such a shape, that count is not kept, and the lone variant is compared
+# with the default-iterations baseline.
 arguments <- commandArgs(trailingOnly = TRUE)
 if (length(arguments) < 2L || length(arguments) > 4L) {
   stop("Usage: Rscript tools/check-nested-goldens.R baseline.csv.gz candidate.csv [pairs.csv] [accepted-loss.csv]")
@@ -37,8 +42,10 @@ if (!is.null(pairs)) {
   slow <- speed[!speed$speed_ok, ]
   speed_lines <- c(sprintf("Speed rule (paired timing): %d of %d shapes timed, %d slower than blocksdesign + 0.05 s.",
                            sum(!is.na(j)), nrow(res), nrow(slow)),
-                   if (nrow(slow) > 0L) sprintf("- slow: %s (t = %d, k = %d, r = %d): engine %.3f s, blocksdesign %.3f s",
+                   if (nrow(slow) > 0L) sprintf("- slow: %s (t = %d, k = %d, r = %d%s): engine %.3f s, blocksdesign %.3f s",
                                                 slow$caller, slow$t, slow$k, slow$r,
+                                                ifelse(is.na(slow$iterations), "",
+                                                       paste0(", iterations = ", slow$iterations)),
                                                 slow$engine_median, slow$bd_median),
                    "")
 }

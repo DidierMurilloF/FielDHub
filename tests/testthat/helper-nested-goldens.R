@@ -4,11 +4,13 @@
 # change.
 #
 # CI mode (nested_acceptance(bootstrap = FALSE), 5 seeds) does not apply the
-# worst-seed rule to the row_* and joint_* efficiencies of row_column (ruling
-# R11): they come from the random greedy row step improve_efficiency(), which
-# the engine does not change, and its 5-seed tails are noise. They stay judged
-# by both the bootstrap and the worst-seed rule in the full run
-# (bootstrap = TRUE). The column level (col_*, D, A, bound) keeps every rule.
+# worst-seed rule to the joint_* efficiencies of row_column: the twostage
+# search optimises the columns and then the rows, not the joint Row-by-Column
+# criterion, so the 5-seed tails of joint_* are noise. The row_* efficiencies
+# keep the rule in CI, because the block engine now runs the row step
+# (improve_efficiency()) and a change to it must not go unseen. The full run
+# (bootstrap = TRUE) judges every efficiency by both the bootstrap and the
+# worst-seed rule.
 
 nested_golden_efficiencies <- c("D", "A", "row_D", "row_A", "col_D", "col_A", "joint_D", "joint_A")
 nested_golden_tolerance <- 1.5e-7
@@ -259,6 +261,8 @@ nested_bootstrap_lower <- function(baseline, candidate, resamples = 2000L) {
 # shape with t < 1000 where the baseline hit on every seed; for row_column the
 # hit compares col_A with the Column A-Bound. `accepted_loss` is NULL or a data.frame of caller, t, k, r
 # that the owner accepted: those shapes get pass = NA and report the shortfall.
+# The result keeps the baseline's `iterations` (NA unless the shape was recorded
+# at several iteration counts), so nested_shape_key() tells the variants apart.
 nested_acceptance <- function(baseline, candidate, accepted_loss = NULL, bootstrap = TRUE) {
   tol <- nested_golden_tolerance
   candidate_key <- nested_shape_key(candidate)
@@ -274,6 +278,7 @@ nested_acceptance <- function(baseline, candidate, accepted_loss = NULL, bootstr
     b <- baseline[i, ]
     j <- match(nested_shape_key(b), candidate_key)
     row <- data.frame(caller = b$caller, t = b$t, k = b$k, r = b$r,
+                      iterations = if (is.null(b$iterations)) NA_integer_ else as.integer(b$iterations),
                       noninferior_ok = NA, worst_ok = FALSE, constant_ok = TRUE,
                       optimum_ok = FALSE, errors_ok = FALSE, time_ratio = NA_real_,
                       pass = FALSE, accepted_loss = FALSE, shortfall = NA_real_,
@@ -299,8 +304,9 @@ nested_acceptance <- function(baseline, candidate, accepted_loss = NULL, bootstr
         worst <- FALSE
         next
       }
-      greedy_rows <- !bootstrap && grepl("^(row|joint)_", e)  # ruling R11
-      if (!greedy_rows) worst <- worst && min(cx) >= min(bx) - (max(bx) - min(bx)) - tol
+      # CI skips the worst-seed rule for joint_* only (see the top of this file)
+      unsearched_joint <- !bootstrap && startsWith(e, "joint_")
+      if (!unsearched_joint) worst <- worst && min(cx) >= min(bx) - (max(bx) - min(bx)) - tol
       if (b$t < 1000 && length(bx) >= 50L && max(bx) - min(bx) < 1e-12) {
         constant <- constant && all(cx >= bx[1] - tol)
       }
@@ -334,12 +340,14 @@ nested_acceptance <- function(baseline, candidate, accepted_loss = NULL, bootstr
 # per shape and seed with bd_seconds and engine_seconds, as written by
 # tools/time-nested-pairs.R), one row per shape with the median time of each
 # side; the shape is fast enough when the engine's median is at most
-# blocksdesign's median + `slack` seconds.
+# blocksdesign's median + `slack` seconds. A shape timed at several iteration
+# counts gets one row per count (`iterations`, NA for the default).
 nested_speed <- function(timings, slack = 0.05) {
   key <- nested_shape_key(timings)
   rows <- lapply(split(timings, factor(key, levels = unique(key))), function(x) {
-    data.frame(caller = x$caller[1], t = x$t[1], k = x$k[1], r = x$r[1], seeds = nrow(x),
-               bd_median = stats::median(x$bd_seconds),
+    data.frame(caller = x$caller[1], t = x$t[1], k = x$k[1], r = x$r[1],
+               iterations = if (is.null(x$iterations)) NA_integer_ else as.integer(x$iterations[1]),
+               seeds = nrow(x), bd_median = stats::median(x$bd_seconds),
                engine_median = stats::median(x$engine_seconds),
                stringsAsFactors = FALSE)
   })
