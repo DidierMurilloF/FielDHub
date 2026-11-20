@@ -8,6 +8,10 @@
 // mode (spec section 6.8) is resolvable mode with the rows of a row-column
 // design as the blocks and one more constraint: a swap exchanges two plots of
 // the same column of the same replicate, so every column keeps its treatments.
+// Segmented mode (phase 2 spec 6.1, mode 4) is resolvable mode with arbitrary
+// blocks of equal size that may span the segments: a swap exchanges two plots
+// of one segment (a replicate, or a replicate x row cell), so every segment
+// keeps its treatments, and a block may hold a treatment more than once.
 #include <cpp11.hpp>
 #include <R_ext/Random.h>
 #include <algorithm>
@@ -50,11 +54,15 @@ struct Layout {
   bool columns;
   int segs, seg_size;
   std::vector<int> seg_plots;
+  // Segmented mode: block_of and the segments are given (block j need not
+  // follow the plot order, and may span segments); swaps are drawn as in
+  // rows-within-columns mode, a segment first.
+  bool segmented;
 };
 
 Layout make_layout(int v, int r, int b, bool resolvable = false) {
   Layout lay{v, r, b, v * r, std::vector<int>(), resolvable, resolvable ? r : 1,
-             false, 0, 0, std::vector<int>()};
+             false, 0, 0, std::vector<int>(), false};
   lay.block_of.reserve(lay.n);
   for (int j = 0; j < b; ++j) {
     int k = lay.n / b + (j < lay.n % b ? 1 : 0);
@@ -94,6 +102,46 @@ Layout make_column_layout(int v, int r, int b, const std::vector<int>& column_of
     int s = (lay.block_of[x] / rows) * cols + column_of[x];
     lay.seg_plots[static_cast<size_t>(s) * rows + fill[s]++] = x;
   }
+  return lay;
+}
+
+// Segmented layout (phase 2 spec 6.1, mode 4): block_of gives the block
+// (0-based) of every plot, b blocks of n / b plots each, and segment_of its
+// segment (0-based), all segments of the same size. The segments hold their
+// plots in plot order. It reuses the resolvable machinery (full passes,
+// evaluation work, the G cache, the fast inverse, the equal-size A-efficiency,
+// no lattice start and no even-up repair). Throws if the vectors do not fit.
+Layout make_segment_layout(int v, int r, int b, const std::vector<int>& block_of,
+                           const std::vector<int>& segment_of) {
+  Layout lay = make_layout(v, r, b, true);
+  if (static_cast<int>(block_of.size()) != lay.n || static_cast<int>(segment_of.size()) != lay.n) {
+    cpp11::stop("`block_of` and `segment_of` must give the block and segment of every plot.");
+  }
+  if (b < 2 || lay.n % b != 0) cpp11::stop("The plots must divide evenly into the blocks.");
+  std::vector<int> size(b, 0);
+  int segs = 0;
+  for (int x = 0; x < lay.n; ++x) {
+    if (block_of[x] < 0 || block_of[x] >= b) cpp11::stop("`block_of` must lie in 0 .. b - 1.");
+    if (segment_of[x] < 0 || segment_of[x] >= lay.n) cpp11::stop("`segment_of` must lie in 0 .. n - 1.");
+    size[block_of[x]] += 1;
+    segs = std::max(segs, segment_of[x] + 1);
+  }
+  for (int j = 0; j < b; ++j) {
+    if (size[j] != lay.n / b) cpp11::stop("Every block must hold n / b plots.");
+  }
+  if (lay.n % segs != 0) cpp11::stop("Every segment must hold the same number of plots.");
+  std::vector<int> fill(segs, 0);
+  const int seg_size = lay.n / segs;
+  lay.seg_plots.assign(lay.n, 0);
+  for (int x = 0; x < lay.n; ++x) {
+    int s = segment_of[x];
+    if (fill[s] >= seg_size) cpp11::stop("Every segment must hold the same number of plots.");
+    lay.seg_plots[static_cast<size_t>(s) * seg_size + fill[s]++] = x;
+  }
+  lay.block_of = block_of;
+  lay.segmented = true;
+  lay.segs = segs;
+  lay.seg_size = seg_size;
   return lay;
 }
 
@@ -165,9 +213,10 @@ std::vector<int> lattice_start(const Layout& lay) {
 // Draw one random swap; returns false if the pair is not a valid swap. In
 // resolvable mode a replicate is drawn first, then two plots inside it; in
 // rows-within-columns mode a column of a replicate (all hold the same number
-// of plots), then two of its plots.
+// of plots), then two of its plots; in segmented mode a segment, then two of
+// its plots.
 bool draw_swap(const Layout& lay, const std::vector<int>& treat, int& x, int& y) {
-  if (lay.columns) {
+  if (lay.columns || lay.segmented) {
     const int* s = lay.seg_plots.data() + static_cast<size_t>(draw_index(lay.segs)) * lay.seg_size;
     x = s[draw_index(lay.seg_size)];
     y = s[draw_index(lay.seg_size)];
@@ -295,11 +344,12 @@ const double kDisconnectRel = 1e-9;
 // rows-within-columns mode a check is recorded as work only: the given design
 // is the only start there, so its repair must not depend on the evaluation
 // budget, which the caller's effort can make as small as one evaluation; the
-// 50 n tries bound it instead. Returns true if connected.
+// 50 n tries bound it instead. Segmented mode does the same (phase 1 fix I-1:
+// a repair never spends the evaluation budget). Returns true if connected.
 bool repair_connectivity(const Layout& lay, std::vector<int>& treat, Budget& budget, Search& out) {
   int comp = components(lay, treat);
   for (double tries = 0; comp > 1 && tries < 50.0 * lay.n; ++tries) {
-    if (!lay.columns && !budget.spend(1.0)) return false;
+    if (!lay.columns && !lay.segmented && !budget.spend(1.0)) return false;
     if (!budget.work(static_cast<double>(lay.n + lay.v + lay.b))) return false;
     int x, y;
     if (!draw_swap(lay, treat, x, y)) continue;
@@ -408,7 +458,28 @@ void run_search(const Layout& lay, int jumps_per_escape, int max_stale_escapes, 
   // long before a local optimum when there are many candidate pairs.
   const bool exhaustive = lay.resolvable || pass_pairs(lay) <= kExhaustivePairs;
   const bool cache = lay.resolvable ? static_cast<double>(lay.b) * lay.v <= kCacheCells : exhaustive;
-  if (start && lay.columns) {
+  if (start && lay.segmented) {
+    // Segmented mode: every search starts from the given design with each
+    // segment shuffled (one Fisher-Yates per segment, segment by segment), so
+    // each segment keeps its treatments. Scoring the start is charged as a
+    // resolvable random start; a disconnected start is repaired as in rows-
+    // within-columns mode (work only, up to 10 rounds of 50 n tries) and a
+    // start that stays disconnected gives no design from this search.
+    if (!budget.spend(static_cast<double>(lay.n + lay.b))) return;
+    treat = *start;
+    for (int m = 0; m < lay.segs; ++m) {
+      const int* s = lay.seg_plots.data() + static_cast<size_t>(m) * lay.seg_size;
+      for (int i = lay.seg_size - 1; i > 0; --i) std::swap(treat[s[i]], treat[s[draw_index(i + 1)]]);
+    }
+    for (int attempt = 0; attempt < 10 && components(lay, treat) > 1; ++attempt) {
+      if (!repair_connectivity(lay, treat, budget, out) && budget.stopped()) return;
+    }
+    if (components(lay, treat) > 1) return;
+    bs.reset(new BlockSpace(lay.v, lay.b, lay.r, counts_of(lay, treat)));
+    if (cache) bs->enable_cache();
+    bs->enable_fast_inverse();
+    if (!budget.work(refresh_work(lay)) || !bs->refresh()) return;
+  } else if (start && lay.columns) {
     // Rows within columns: the given design is the only start. Its column
     // design is connected, its rows need not be: a disconnected start is
     // first repaired with column-preserving swaps (up to 10 rounds of 50 n
@@ -438,7 +509,7 @@ void run_search(const Layout& lay, int jumps_per_escape, int max_stale_escapes, 
     if (!budget.work(refresh_work(lay)) || !bs->refresh()) bs.reset();
     if (!bs && lay.resolvable) return;
   }
-  if (lay.columns && !bs) return;  // rows within columns never starts at random
+  if ((lay.columns || lay.segmented) && !bs) return;  // nor do these two modes start at random
   for (int attempt = 0; attempt < 10 && !bs; ++attempt) {
     if (!budget.spend(static_cast<double>(lay.n + lay.b))) return;
     if (lay.resolvable) {  // an independent random permutation per replicate
@@ -642,18 +713,29 @@ cpp11::integers lattice_start_probe_cpp(int v, int r, int b) {
 // m v .. m v + v - 1) is the start of exactly one search. `evaluation_work`
 // work units are charged for every evaluation, so the work cap bounds the
 // whole run. Single-level callers pass work_cap = Inf, refresh_every = 256 and
-// evaluation_work = 0, which keeps their results unchanged.
+// evaluation_work = 0, which keeps their results unchanged. Mode 4
+// (segmented, phase 2 spec 6.1) has b blocks of n / b plots, the 0-based block
+// of every plot in `block_of` (blocks may span segments) and its 0-based
+// segment in `segment_of` (swaps only inside a segment); it needs a `start`
+// (each treatment r times), which fixes every segment's treatments, and every
+// one of the `searches` starts from it with each segment shuffled. Modes 0-2
+// pass integer() for `block_of` and `segment_of`; mode 3 (crossed) is not
+// implemented yet.
 [[cpp11::register]]
 cpp11::list blocks_engine_cpp(int v, int r, int b, int searches, int jumps_per_escape,
                               int max_stale_escapes, double budget, double time_limit,
                               bool debug, cpp11::integers start, double work_cap,
                               int refresh_every, double evaluation_work, int mode,
-                              cpp11::integers column_of) {
-  if (mode < 0 || mode > 2) cpp11::stop("`mode` must be 0, 1 or 2.");
+                              cpp11::integers column_of, cpp11::integers block_of,
+                              cpp11::integers segment_of) {
+  if (mode < 0 || mode > 4 || mode == 3) cpp11::stop("`mode` must be 0, 1, 2 or 4.");
   const bool resolvable = mode != 0;
   Layout lay = mode == 2 ? make_column_layout(v, r, b, std::vector<int>(column_of.begin(), column_of.end()))
+             : mode == 4 ? make_segment_layout(v, r, b, std::vector<int>(block_of.begin(), block_of.end()),
+                                               std::vector<int>(segment_of.begin(), segment_of.end()))
                          : make_layout(v, r, b, resolvable);
   if (mode == 2 && start.size() == 0) cpp11::stop("Rows within columns needs a `start`.");
+  if (mode == 4 && start.size() == 0) cpp11::stop("Segmented blocks need a `start`.");
   Budget bud(budget, time_limit, work_cap, evaluation_work);
   Search out;
   out.debug = debug;
@@ -663,13 +745,25 @@ cpp11::list blocks_engine_cpp(int v, int r, int b, int searches, int jumps_per_e
     if (start.size() != lay.n) cpp11::stop("`start` must hold one treatment per plot.");
     given.resize(lay.n);
     for (int x = 0; x < lay.n; ++x) given[x] = start[x] - 1;
-    searches = 1;
+    if (mode == 4) {
+      // Each treatment r times: BlockSpace assumes equal replication.
+      std::vector<int> reps(v, 0);
+      for (int x = 0; x < lay.n; ++x) {
+        if (given[x] < 0 || given[x] >= v) cpp11::stop("`start` must hold treatments 1 .. v.");
+        reps[given[x]] += 1;
+      }
+      for (int i = 0; i < v; ++i) {
+        if (reps[i] != r) cpp11::stop("`start` must hold each treatment r times.");
+      }
+    } else {
+      searches = 1;
+    }
   }
   GetRNGstate();
   std::vector<int> lattice = !given.empty() ? given : (resolvable ? std::vector<int>() : lattice_start(lay));
   for (int s = 0; s < searches && !bud.stopped(); ++s) {
     run_search(lay, jumps_per_escape, max_stale_escapes, refresh_every, bud, out,
-               s == 0 && !lattice.empty() ? &lattice : nullptr);
+               (s == 0 || mode == 4) && !lattice.empty() ? &lattice : nullptr);
     ++done;
   }
   PutRNGstate();

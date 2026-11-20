@@ -25,7 +25,10 @@
 #' admission refuses is returned unscored, with its closed-form efficiencies.
 #' Neither gives a warning. `start`, if given, holds v r 1-based
 #' treatments in plot order (replicate m in plots m v + 1 .. m v + v, each a
-#' permutation of 1..v) and is the start of a single search.
+#' permutation of 1..v) and is the start of a single search. `work_cap`
+#' (resolvable mode only) is the work cap of the run and of its admission
+#' (0.8 of it); the default `resolvable_work_limit` keeps every result as
+#' before. Single-level mode has no work cap.
 #' @return A list with `Design`, `Blocks_model` and `search` (evaluations,
 #'   budget, stop reason, refresh counts, the number of even-up repair swaps
 #'   `even_repairs` (spec-m5 section 6.1) and, when `FIELDHUB_ENGINE_DEBUG=1`,
@@ -41,7 +44,7 @@
 blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
                           jumps_per_escape = NULL, max_stale_escapes = 5L,
                           budget = NULL, time_limit = 60, resolvable = FALSE,
-                          start = NULL) {
+                          start = NULL, work_cap = resolvable_work_limit) {
   validate_iteration_budget(treatments, "treatments", minimum = 2)
   validate_iteration_budget(replicates, "replicates", minimum = 1)
   validate_iteration_budget(blocks, "blocks", minimum = 2)
@@ -75,7 +78,8 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
     }
     # A shape the search cannot finish inside the work cap is built without a
     # search (owner decision, spec section 10).
-    unoptimised <- !cycle && !resolvable_searchable(v, replicates, total_blocks, !is.null(start))
+    unoptimised <- !cycle && !resolvable_searchable(v, replicates, total_blocks, !is.null(start),
+                                                    work_cap)
   } else if (blocks > 1000) {
     fieldhub_abort("The block engine supports at most 1000 blocks and 1e8 treatment-block cells.",
                    data = list(blocks = blocks, treatments = treatments))
@@ -166,7 +170,7 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
     )
   }
   validate_iteration_budget(budget, "budget", minimum = 1)
-  work_cap <- if (resolvable) resolvable_work_limit else Inf
+  work_cap <- if (resolvable) work_cap else Inf
   evaluation_work <- if (resolvable) resolvable_evaluation_work(v, replicates, total_blocks) else 0
   refresh_every <- 256L
   out <- blocks_engine_cpp(as.integer(treatments), as.integer(replicates), as.integer(total_blocks),
@@ -175,7 +179,7 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
                            as.double(time_limit), identical(Sys.getenv("FIELDHUB_ENGINE_DEBUG"), "1"),
                            as.integer(if (is.null(start)) integer() else start),
                            as.double(work_cap), as.integer(refresh_every), as.double(evaluation_work),
-                           if (resolvable) 1L else 0L, integer())
+                           if (resolvable) 1L else 0L, integer(), integer(), integer())
   stop_reason <- c("budget", "stale", "time_limit", "no_start")[out$stop_reason]
   if (anyNA(out$treatments)) {
     if (stop_reason %in% c("budget", "time_limit")) {
@@ -406,14 +410,14 @@ resolvable_evaluation_work <- function(v, r, B) {
 
 #' Whether the block search takes a resolvable shape (see the limits above)
 #' @noRd
-resolvable_searchable <- function(v, r, B, given_start = FALSE) {
+resolvable_searchable <- function(v, r, B, given_start = FALSE, work_cap = resolvable_work_limit) {
   if (B > resolvable_block_limit) return(FALSE)
   n <- v * r
   k <- n / B
   pairs <- r * v * (v - 1) / 2
   refresh <- B^3 + n * r + n * B
   evaluation <- resolvable_evaluation_work(v, r, B)
-  limit <- 0.8 * resolvable_work_limit
+  limit <- 0.8 * work_cap
   if (given_start) return(refresh + pairs * evaluation <= limit)
   swap <- 4 * B^2 + 2 * B * (if (B * v <= 2.5e7) v else r)
   accepted <- 0.3 * r * (1 - 1 / k) * n
@@ -463,7 +467,9 @@ blocks_engine_default_jumps <- function(n, pairs = n * (n - 1) / 2) {
 #' `effort` (at least one evaluation); the resolvable work cap bounds the run.
 #' A start that attains `resolvable_a_bound()` for its rows is returned without
 #' search (as ruling R18), and a shape above the resolvable limits is returned
-#' unchanged with a warning.
+#' unchanged with a warning. `work_cap` is the work cap of the run and of its
+#' admission (0.8 of it); the default `resolvable_work_limit` keeps every
+#' result as before.
 #'
 #' @param start The v r 1-based treatments in plot order: replicate by
 #'   replicate, row by row, `treatments / rows` plots per row.
@@ -474,7 +480,8 @@ blocks_engine_default_jumps <- function(n, pairs = n * (n - 1) / 2) {
 #'   per replicate, a shape above the limits, or rows that could not be
 #'   connected, and then `treatments` is `start`) and `search`.
 #' @noRd
-rows_within_columns <- function(start, column_of, treatments, replicates, rows, effort = 1) {
+rows_within_columns <- function(start, column_of, treatments, replicates, rows, effort = 1,
+                                work_cap = resolvable_work_limit) {
   v <- as.double(treatments)
   r <- as.double(replicates)
   B <- r * rows
@@ -488,7 +495,7 @@ rows_within_columns <- function(start, column_of, treatments, replicates, rows, 
   pairs <- r * cols * rows * (rows - 1) / 2
   evaluation_work <- resolvable_evaluation_work(v, r, B)
   if (B > resolvable_block_limit || v * B > 1e8 ||
-      B^3 + n * r + n * B + 10 * pairs * evaluation_work > 0.8 * resolvable_work_limit) {
+      B^3 + n * r + n * B + 10 * pairs * evaluation_work > 0.8 * work_cap) {
     fieldhub_warn("The rows of the design (", treatments, " treatments in ", B,
                   " rows) are too many for the row search, so they were not optimized.",
                   class = "fieldhub_design_warning", call = NULL)
@@ -507,8 +514,9 @@ rows_within_columns <- function(start, column_of, treatments, replicates, rows, 
   out <- blocks_engine_cpp(as.integer(v), as.integer(r), as.integer(B), 1L, 3L, 5L,
                            as.double(budget), time_limit,
                            identical(Sys.getenv("FIELDHUB_ENGINE_DEBUG"), "1"),
-                           as.integer(start), as.double(resolvable_work_limit), 256L,
-                           as.double(evaluation_work), 2L, as.integer(column_of) - 1L)
+                           as.integer(start), as.double(work_cap), 256L,
+                           as.double(evaluation_work), 2L, as.integer(column_of) - 1L,
+                           integer(), integer())
   stop_reason <- c("budget", "stale", "time_limit", "no_start")[out$stop_reason]
   if (identical(stop_reason, "time_limit")) {
     fieldhub_warn("The row search stopped at its time limit of ", time_limit,
