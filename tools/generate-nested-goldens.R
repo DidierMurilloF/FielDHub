@@ -4,7 +4,8 @@
 # Seeds are seed_offset + 1:seeds, so seed_offset=1000 gives the fresh seeds
 # of the engine comparison. One row per shape and seed is appended as it
 # finishes; rerunning with the same path resumes and skips the rows already
-# present. <results>.meta.rds records the versions and the platform.
+# present. <results>.meta.rds records the versions, the platform and where
+# blocksdesign was loaded from (NA when the library has none).
 # Optional shard=i/k runs only shard i of k: shapes are spread over shards by
 # longest-processing-time on the estimated cost (t r)^2 x seeds (protocol os:
 # times (1 + iterations / 20)). Run each shard
@@ -33,6 +34,10 @@ script_dir <- dirname(sub("^--file=", "", grep("^--file=", commandArgs(), value 
 suppressMessages(library(FielDHub))
 source(file.path(script_dir, "..", "tests", "testthat", "helper-nested-goldens.R"))
 RNGkind("Mersenne-Twister", "Inversion", "Rejection")
+# optimiser_seconds of the onestage records: the timing trace is opt-in
+if (protocol %in% c("os", "ci") && !nested_trace_onestage()) {
+  message("build_row_column_onestage() could not be traced: optimiser_seconds will be NA.")
+}
 
 grid <- nested_golden_grid(protocol)
 if (length(shard_arg) == 1L) {
@@ -54,6 +59,8 @@ if (length(shard_arg) == 1L) {
 saveRDS(list(FielDHub = as.character(utils::packageVersion("FielDHub")),
              blocksdesign = tryCatch(as.character(utils::packageVersion("blocksdesign")),
                                      error = function(e) NA_character_),
+             blocksdesign_path = tryCatch(find.package("blocksdesign"),
+                                          error = function(e) NA_character_),
              R = R.version.string, platform = R.version$platform,
              protocol = protocol, seed_offset = seed_offset),
         paste0(path, ".meta.rds"))

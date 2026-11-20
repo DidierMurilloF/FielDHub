@@ -130,21 +130,39 @@ nested_golden_grid <- function(protocol = c("full", "ci", "rc", "os")) {
 }
 
 # Elapsed seconds spent inside build_row_column_onestage(), which the onestage
-# record reads. The tracer is installed once per process; it measures design()
-# on the pre-change package and the whole onestage build on the candidate.
+# record reads into `optimiser_seconds`. It measures design() on the pre-change
+# package and the whole onestage build on the candidate.
+# The timing is opt-in: a tool that wants it calls nested_trace_onestage() once
+# per process, after loading FielDHub. Nothing else installs the trace, so the
+# test suite never runs against a traced builder and its records carry NA.
+# Every call of the builder within one record adds to `seconds`.
 nested_onestage_timer <- new.env()
+nested_onestage_timer$installed <- FALSE
 nested_onestage_timer$start <- NA_real_
-nested_onestage_timer$seconds <- NA_real_
+nested_onestage_timer$seconds <- 0
+nested_onestage_timer$calls <- 0L
+# Installs the trace and returns TRUE. Where the package has no
+# build_row_column_onestage(), or the trace cannot be set, it returns FALSE and
+# the records carry NA in `optimiser_seconds`; no record is aborted.
 nested_trace_onestage <- function() {
-  if (isTRUE(nested_onestage_timer$installed)) return(invisible())
   timer <- nested_onestage_timer
-  suppressMessages(trace(
-    "build_row_column_onestage", where = asNamespace("FielDHub"), print = FALSE,
-    tracer = bquote(assign("start", proc.time()[["elapsed"]], envir = .(timer))),
-    exit = bquote(assign("seconds", proc.time()[["elapsed"]] - get("start", envir = .(timer)),
-                         envir = .(timer)))))
-  timer$installed <- TRUE
-  invisible()
+  if (isTRUE(timer$installed)) return(invisible(TRUE))
+  namespace <- asNamespace("FielDHub")
+  if (!exists("build_row_column_onestage", envir = namespace, mode = "function", inherits = FALSE)) {
+    return(invisible(FALSE))
+  }
+  timer$installed <- tryCatch({
+    suppressMessages(trace(
+      "build_row_column_onestage", where = namespace, print = FALSE,
+      tracer = bquote(assign("start", proc.time()[["elapsed"]], envir = .(timer))),
+      exit = bquote(local({
+        timer <- .(timer)
+        timer$seconds <- timer$seconds + proc.time()[["elapsed"]] - timer$start
+        timer$calls <- timer$calls + 1L
+      }))))
+    TRUE
+  }, error = function(e) FALSE)
+  invisible(timer$installed)
 }
 
 # Number of repeated levels of ROW (or COLUMN) within each ENTRY of a field book
@@ -154,7 +172,8 @@ nested_clashes <- function(level, entry) sum(tapply(level, entry, function(x) su
 # The onestage callers run row_column(method = "onestage"); `k` is nrows.
 # status is "ok", "fallback" (onestage returned the twostage design),
 # "not_admitted" (a fallback whose warning says the shape is too large for the
-# one-stage search) or "error".
+# one-stage search) or "error". `optimiser_seconds` is NA unless the process
+# called nested_trace_onestage().
 nested_golden_record <- function(caller, t, k, r, seed, iterations = NULL) {
   onestage <- caller %in% nested_onestage_callers
   fun <- getExportedValue("FielDHub", if (onestage) "row_column" else caller)
@@ -178,9 +197,10 @@ nested_golden_record <- function(caller, t, k, r, seed, iterations = NULL) {
                        stringsAsFactors = FALSE)
   design <- NULL
   too_large <- FALSE
-  if (onestage) {
-    nested_trace_onestage()
-    nested_onestage_timer$seconds <- NA_real_
+  timed <- onestage && isTRUE(nested_onestage_timer$installed)
+  if (timed) {
+    nested_onestage_timer$seconds <- 0
+    nested_onestage_timer$calls <- 0L
   }
   record$seconds <- system.time(tryCatch(
     withCallingHandlers(
@@ -196,7 +216,8 @@ nested_golden_record <- function(caller, t, k, r, seed, iterations = NULL) {
       record$status <<- "error"
       record$message <<- gsub("[\r\n,]+", " ", conditionMessage(e))
     }))[["elapsed"]]
-  if (onestage) record$optimiser_seconds <- nested_onestage_timer$seconds
+  # NA when the trace is not installed or the builder was never entered
+  if (timed && nested_onestage_timer$calls > 0L) record$optimiser_seconds <- nested_onestage_timer$seconds
   if (record$status == "error") return(record)
   model <- design$blocksModel
   if (!is.data.frame(model)) model <- model[[1]]
@@ -375,6 +396,10 @@ nested_bootstrap_lower <- function(baseline, candidate, resamples = 2000L) {
 # shape with t < 1000 where the baseline hit on every seed; for row_column the
 # hit compares col_A with the Column A-Bound. `accepted_loss` is NULL or a data.frame of caller, t, k, r
 # that the owner accepted: those shapes get pass = NA and report the shortfall.
+# Onestage callers: `fallback_ok` is the count rule (candidate fallbacks <=
+# baseline fallbacks, and 0 where onestage_rule_holds()). `clash_ok` is the
+# latinization rule and is judged for "onestage_latinized" only; it is TRUE for
+# every other caller, "onestage_nested" included.
 # The result keeps the baseline's `iterations` (NA unless the shape was recorded
 # at several iteration counts), so nested_shape_key() tells the variants apart.
 nested_acceptance <- function(baseline, candidate, accepted_loss = NULL, bootstrap = TRUE) {
@@ -405,9 +430,24 @@ nested_acceptance <- function(baseline, candidate, accepted_loss = NULL, bootstr
     row$errors_ok <- cand$errors <= b$errors
     onestage <- b$caller %in% nested_onestage_callers
     if (onestage) {
-      row$fallback_ok <- cand$fallbacks <= b$fallbacks &&
-        (!onestage_rule_holds(b$t, b$k, b$r, b$caller == "onestage_latinized") || cand$fallbacks == 0)
+      # an NA count on either side is a failure, never a pass
+      row$fallback_ok <- isTRUE(cand$fallbacks <= b$fallbacks &&
+        (!onestage_rule_holds(b$t, b$k, b$r, b$caller == "onestage_latinized") || cand$fallbacks == 0))
+    }
+    if (b$caller == "onestage_latinized") {
+      # Latinization rule (phase 2 spec 7): it applies to latinize = TRUE only.
+      # The nested caller records its clash counts, but they are not judged:
+      # a nested design is free to repeat a treatment in a row or a column.
+      # The counts are compared over the seeds where onestage ran (`*_clash_max`).
+      # - Baseline without an ok seed: there is no baseline count, so the rule
+      #   is vacuous and holds.
+      # - Baseline with ok seeds, candidate without: there is no candidate
+      #   count to compare, so the rule holds here; the candidate then has more
+      #   fallbacks or errors than the baseline, and fallback_ok or errors_ok
+      #   fails the shape.
+      # - Otherwise both counts exist, and an NA in either is a failure.
       clash_fine <- function(cand_max, base_max) {
+        if (b$seeds == 0L || cand$seeds == 0L) return(TRUE)
         isTRUE(cand_max <= base_max) && (isTRUE(base_max > 0) || isTRUE(cand_max == 0))
       }
       row$clash_ok <- clash_fine(cand$row_clash_max, b$row_clash_max) &&
