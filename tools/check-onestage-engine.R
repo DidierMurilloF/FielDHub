@@ -27,6 +27,9 @@
 #   checked whether or not a baseline is given: 48/6/3 nested 0.8581470,
 #   24/6/2 nested 0.6500942, 30/5/2 nested 0.7742182, 24/6/2 latinized
 #   0.8697479.
+# - a given baseline must be usable: it FAILs when it cannot be read, lacks
+#   the needed columns, or holds no constant Row A shape; and every constant
+#   shape (baseline and spec) with t <= tmax must have been checked.
 # The stage 1 run time of each shape (all seeds) is printed; it is not a
 # gate (timings are controller jobs).
 #
@@ -84,15 +87,39 @@ one_way_a <- function(treat, block, v, r) {
   (v - 1) / sum(1 / e)
 }
 
-# Baseline Row A constants, keyed "t|k|r|coding"
+# Baseline Row A constants, keyed "t|k|r|coding". A baseline that cannot be
+# read, lacks the columns the floor needs, or holds no constant Row A shape
+# stops the check with a FAIL: it would otherwise pass with no floor checked.
+baseline_fail <- function(reason) {
+  report(FALSE, paste0("stage1 baseline ", baseline_path, ": ", reason))
+  cat(failures, "FAIL(s)\n")
+  quit(status = 1)
+}
 baseline_floors <- function(path) {
-  summary <- if (grepl("\\.rds$", path)) readRDS(path) else nested_summary(utils::read.csv(path))
+  need <- function(x, columns, what) {
+    absent <- setdiff(columns, names(x))
+    if (length(absent)) baseline_fail(paste0(what, " lacks column(s) ", paste(absent, collapse = ", ")))
+  }
+  summary <- tryCatch({
+    if (grepl("\\.rds$", path)) readRDS(path) else {
+      records <- utils::read.csv(path)
+      need(records, c("caller", "t", "k", "r", "seed", "status", "row_A"), "the recording")
+      nested_summary(records)
+    }
+  }, error = function(e) baseline_fail(paste("cannot be read:", conditionMessage(e))))
+  if (!is.data.frame(summary)) baseline_fail("is not a data frame")
+  need(summary, c("caller", "t", "k", "r", "seeds", "row_A_sd", "row_A_min"), "the summary")
   summary <- summary[summary$caller %in% nested_onestage_callers, , drop = FALSE]
-  constant <- !is.na(summary$row_A_sd) & summary$row_A_sd == 0 & summary$seeds >= 2L
+  constant <- !is.na(summary$row_A_sd) & summary$row_A_sd == 0 & summary$seeds >= 2L &
+    !is.na(summary$row_A_min)
   summary <- summary[constant, , drop = FALSE]
+  if (nrow(summary) == 0L) {
+    baseline_fail("no onestage shape with a constant Row A (SD 0 among at least two ran seeds)")
+  }
   coding <- ifelse(summary$caller == "onestage_latinized", "latinized", "nested")
   key <- paste(summary$t, summary$k, summary$r, coding, sep = "|")
-  tapply(summary$row_A_min, key, max)
+  floors <- tapply(summary$row_A_min, key, max)
+  stats::setNames(as.numeric(floors), names(floors))
 }
 spec_floors <- c("48|6|3|nested" = 0.8581470, "24|6|2|nested" = 0.6500942,
                  "30|5|2|nested" = 0.7742182, "24|6|2|latinized" = 0.8697479)
@@ -170,9 +197,19 @@ for (g in seq_len(nrow(grid))) {
     }
   }
 }
-spec_t <- as.numeric(sub("\\|.*$", "", names(spec_floors)))
-missing_spec <- setdiff(paste("spec", names(spec_floors)[spec_t <= tmax]), checked_floor)
-report(length(missing_spec) == 0L,
-       paste("every spec 6.1 constant shape was checked", if (length(missing_spec)) paste(missing_spec, collapse = ", ") else ""))
+# Every constant shape inside the run (t <= tmax) must have been checked.
+# The names are selected before pasting: paste("spec", character(0)) is "spec ".
+floor_t <- function(x) as.numeric(sub("\\|.*$", "", names(x)))
+for (source in c("baseline", "spec")) {
+  values <- if (source == "baseline") floors else spec_floors
+  if (source == "baseline" && is.null(baseline_path)) next
+  due <- names(values)[floor_t(values) <= tmax]
+  missing <- setdiff(due, sub(paste0("^", source, " "), "", checked_floor[startsWith(checked_floor, paste0(source, " "))]))
+  report(length(missing) == 0L,
+         sprintf("every %s constant shape with t <= %g was checked (%d of %d)%s",
+                 if (source == "spec") "spec 6.1" else "baseline", tmax,
+                 length(due) - length(missing), length(due),
+                 if (length(missing)) paste0(": missing ", paste(missing, collapse = ", ")) else ""))
+}
 cat(failures, "FAIL(s)\n")
 quit(status = if (failures > 0L) 1 else 0)
