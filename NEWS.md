@@ -244,7 +244,7 @@ twostage grid, the mean Row A- and D-efficiency and the mean Column
 A-efficiency were never below the previous mean. The `Row-by-Column`
 efficiency is not what the twostage search optimizes, and its mean can
 be slightly lower: over two sets of seeds it was below the previous mean
-in 5 and 7 of the 132 shapes for A (by at most 0.0008) and in 12 and 10
+in 5 and 8 of the 132 shapes for A (by at most 0.0008) and in 12 and 10
 for D, all within the margin. Square and rectangular lattices with a
 construction (see Enhancements) are A-optimal.
 
