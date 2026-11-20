@@ -30,7 +30,15 @@ nested_golden_tolerance <- 1.5e-7
 # latinize = FALSE / TRUE)), `k` is nrows, `iterations` is 200 or 20.
 nested_onestage_callers <- c("onestage_nested", "onestage_latinized")
 
-# Seeds of the os shapes with t >= 200 (the calibrated recording budget)
+# Seeds of the os shapes with t >= 200: fixed by the Step 4 calibration and the
+# owner's decision (2026-11-20), the recording budget is 50 seeds per row.
+#
+# Trim at t >= 300 (owner decision, 2026-11-20): the calibration (one seed per
+# row, 16 shards, phase2-baseline library) projected ~87 h at 50 seeds for the
+# full grid (t = 300 ~26 h, t = 500 ~49 h), over the 12 h budget. The owner
+# chose to trim t >= 300 to one nrows per r (the thinned divisor closest to
+# sqrt(t), ties to the smaller) at iterations = 20 only; projection ~15 h.
+# The acceptance rules are unchanged.
 nested_os_large_seeds <- 50L
 
 nested_golden_grid <- function(protocol = c("full", "ci", "rc", "os")) {
@@ -50,7 +58,9 @@ nested_golden_grid <- function(protocol = c("full", "ci", "rc", "os")) {
   if (protocol == "os") {
     shapes <- list()
     for (t in c(20, 30, 50, 100, 200, 300, 500)) {
-      shapes[[length(shapes) + 1L]] <- expand.grid(t = t, k = thin(divisors(t, 2L)), r = 2:4)
+      ks <- thin(divisors(t, 2L))
+      if (t >= 300) ks <- ks[which.min(round(abs(ks - sqrt(t)), 9))]
+      shapes[[length(shapes) + 1L]] <- expand.grid(t = t, k = ks, r = 2:4)
     }
     for (t in c(4, 6, 8, 9, 10, 12, 14, 15, 16)) {
       shapes[[length(shapes) + 1L]] <- expand.grid(t = t, k = FielDHub:::valid_block_sizes(t, "row_column"),
@@ -61,9 +71,10 @@ nested_golden_grid <- function(protocol = c("full", "ci", "rc", "os")) {
     shapes <- shapes[!duplicated(shapes), ]
     os <- do.call(rbind, lapply(nested_onestage_callers, function(caller) {
       do.call(rbind, lapply(c(200L, 20L), function(it) {
-        data.frame(caller = caller, t = as.numeric(shapes$t), k = as.integer(shapes$k),
-                   r = as.integer(shapes$r),
-                   seeds = ifelse(shapes$t >= 200, as.integer(nested_os_large_seeds), 200L),
+        sh <- if (it == 200L) shapes[shapes$t < 300, ] else shapes
+        data.frame(caller = caller, t = as.numeric(sh$t), k = as.integer(sh$k),
+                   r = as.integer(sh$r),
+                   seeds = ifelse(sh$t >= 200, as.integer(nested_os_large_seeds), 200L),
                    iterations = it, stringsAsFactors = FALSE)
       }))
     }))
