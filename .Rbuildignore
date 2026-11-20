@@ -66,3 +66,4 @@ $run_dev.*
 ^tools/nested-goldens-baseline\.csv\.gz$
 ^AGENTS\.md$
 ^tools/nested-goldens-rc-baseline\.csv\.gz$
+^tools/nested-goldens-os-baseline\.csv\.gz$

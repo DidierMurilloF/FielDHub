@@ -18,7 +18,15 @@ nested_golden_tolerance <- 1.5e-7
 # The shapes to run. `k` is the block size, nrows for row_column. `iterations`
 # is NA except for the CI row-column shapes, which run with 50.
 # The "rc" protocol (spec 6.8) is the extended row_column twostage grid only.
-nested_golden_grid <- function(protocol = c("full", "ci", "rc")) {
+# The "os" protocol (phase 2 spec 7) is the onestage row-column grid: callers
+# "onestage_nested" and "onestage_latinized" (row_column(method = "onestage",
+# latinize = FALSE / TRUE)), `k` is nrows, `iterations` is 200 or 20.
+nested_onestage_callers <- c("onestage_nested", "onestage_latinized")
+
+# Seeds of the os shapes with t >= 200 (the calibrated recording budget)
+nested_os_large_seeds <- 50L
+
+nested_golden_grid <- function(protocol = c("full", "ci", "rc", "os")) {
   protocol <- match.arg(protocol)
   seeds_for <- function(t) if (t <= 300) 200L else if (t == 500) 50L else 5L
   shape <- function(caller, t, k, r) {
@@ -31,6 +39,30 @@ nested_golden_grid <- function(protocol = c("full", "ci", "rc")) {
   divisors <- function(t, from) {
     d <- seq.int(from, t %/% 2L)
     d[t %% d == 0L]
+  }
+  if (protocol == "os") {
+    shapes <- list()
+    for (t in c(20, 30, 50, 100, 200, 300, 500)) {
+      shapes[[length(shapes) + 1L]] <- expand.grid(t = t, k = thin(divisors(t, 2L)), r = 2:4)
+    }
+    for (t in c(4, 6, 8, 9, 10, 12, 14, 15, 16)) {
+      shapes[[length(shapes) + 1L]] <- expand.grid(t = t, k = FielDHub:::valid_block_sizes(t, "row_column"),
+                                                   r = 2:4)
+    }
+    extras <- data.frame(t = c(45, 36, 48, 24, 30), k = c(5, 6, 6, 6, 5), r = c(3, 3, 3, 2, 2))
+    shapes <- do.call(rbind, c(shapes, list(extras)))
+    shapes <- shapes[!duplicated(shapes), ]
+    os <- do.call(rbind, lapply(nested_onestage_callers, function(caller) {
+      do.call(rbind, lapply(c(200L, 20L), function(it) {
+        data.frame(caller = caller, t = as.numeric(shapes$t), k = as.integer(shapes$k),
+                   r = as.integer(shapes$r),
+                   seeds = ifelse(shapes$t >= 200, as.integer(nested_os_large_seeds), 200L),
+                   iterations = it, stringsAsFactors = FALSE)
+      }))
+    }))
+    os$t <- as.integer(os$t)
+    rownames(os) <- NULL
+    return(os)
   }
   if (protocol == "rc") {
     rc <- list()
@@ -86,15 +118,50 @@ nested_golden_grid <- function(protocol = c("full", "ci", "rc")) {
     ci_rowcol$iterations <- 50L
     grid <- rbind(grid[keep, ], ci_rowcol)
     grid$seeds <- 5L
+    ci_os <- rbind(
+      data.frame(caller = "onestage_nested", t = c(9L, 24L, 48L), k = c(3L, 6L, 6L), r = c(2L, 2L, 3L)),
+      data.frame(caller = "onestage_latinized", t = c(24L, 30L), k = c(6L, 5L), r = 2L))
+    ci_os$seeds <- 5L
+    ci_os$iterations <- 20L
+    grid <- rbind(grid, ci_os)
   }
   rownames(grid) <- NULL
   grid
 }
 
-# Runs one shape at one seed through the public function and reads blocksModel
+# Elapsed seconds spent inside build_row_column_onestage(), which the onestage
+# record reads. The tracer is installed once per process; it measures design()
+# on the pre-change package and the whole onestage build on the candidate.
+nested_onestage_timer <- new.env()
+nested_onestage_timer$start <- NA_real_
+nested_onestage_timer$seconds <- NA_real_
+nested_trace_onestage <- function() {
+  if (isTRUE(nested_onestage_timer$installed)) return(invisible())
+  timer <- nested_onestage_timer
+  suppressMessages(trace(
+    "build_row_column_onestage", where = asNamespace("FielDHub"), print = FALSE,
+    tracer = bquote(assign("start", proc.time()[["elapsed"]], envir = .(timer))),
+    exit = bquote(assign("seconds", proc.time()[["elapsed"]] - get("start", envir = .(timer)),
+                         envir = .(timer)))))
+  timer$installed <- TRUE
+  invisible()
+}
+
+# Number of repeated levels of ROW (or COLUMN) within each ENTRY of a field book
+nested_clashes <- function(level, entry) sum(tapply(level, entry, function(x) sum(duplicated(x))))
+
+# Runs one shape at one seed through the public function and reads blocksModel.
+# The onestage callers run row_column(method = "onestage"); `k` is nrows.
+# status is "ok", "fallback" (onestage returned the twostage design),
+# "not_admitted" (a fallback whose warning says the shape is too large for the
+# one-stage search) or "error".
 nested_golden_record <- function(caller, t, k, r, seed, iterations = NULL) {
-  fun <- getExportedValue("FielDHub", caller)
-  args <- if (caller == "row_column") {
+  onestage <- caller %in% nested_onestage_callers
+  fun <- getExportedValue("FielDHub", if (onestage) "row_column" else caller)
+  args <- if (onestage) {
+    list(t = t, nrows = k, reps = r, seed = seed, method = "onestage",
+         latinize = caller == "onestage_latinized", iterations = iterations)
+  } else if (caller == "row_column") {
     list(t = t, nrows = k, reps = r, seed = seed, method = "twostage", iterations = iterations)
   } else {
     list(t = t, k = k, reps = r, seed = seed)
@@ -105,15 +172,31 @@ nested_golden_record <- function(caller, t, k, r, seed, iterations = NULL) {
                        joint_D = NA_real_, joint_A = NA_real_,
                        seconds = NA_real_, status = "ok", message = "",
                        iterations = if (is.null(iterations)) NA_integer_ else as.integer(iterations),
+                       row_bound = NA_real_, col_bound = NA_real_,
+                       row_clash = NA_real_, col_clash = NA_real_,
+                       optimiser_seconds = NA_real_,
                        stringsAsFactors = FALSE)
   design <- NULL
+  too_large <- FALSE
+  if (onestage) {
+    nested_trace_onestage()
+    nested_onestage_timer$seconds <- NA_real_
+  }
   record$seconds <- system.time(tryCatch(
-    suppressWarnings(suppressMessages(utils::capture.output(
-      design <- do.call(fun, args)))),
+    withCallingHandlers(
+      suppressMessages(utils::capture.output(design <- do.call(fun, args))),
+      warning = function(w) {
+        if (inherits(w, "fieldhub_design_warning") &&
+            grepl("too large for the one-stage search", conditionMessage(w), fixed = TRUE)) {
+          too_large <<- TRUE
+        }
+        invokeRestart("muffleWarning")
+      }),
     error = function(e) {
       record$status <<- "error"
       record$message <<- gsub("[\r\n,]+", " ", conditionMessage(e))
     }))[["elapsed"]]
+  if (onestage) record$optimiser_seconds <- nested_onestage_timer$seconds
   if (record$status == "error") return(record)
   model <- design$blocksModel
   if (!is.data.frame(model)) model <- model[[1]]
@@ -122,7 +205,7 @@ nested_golden_record <- function(caller, t, k, r, seed, iterations = NULL) {
     value <- model[[column]][level == row]
     if (length(value) == 1L) as.numeric(value) else NA_real_
   }
-  if (caller == "row_column") {
+  if (caller == "row_column" || onestage) {
     parts <- c(Row = "row", Column = "col", "Row-by-Column" = "joint")
     for (row in names(parts)) {
       part <- parts[[row]]
@@ -137,7 +220,27 @@ nested_golden_record <- function(caller, t, k, r, seed, iterations = NULL) {
     record$A <- get("2", "A-Efficiency")
     record$bound <- get("2", "A-Bound")
   }
+  if (onestage) {
+    record$row_bound <- get("Row", "A-Bound")
+    record$col_bound <- get("Column", "A-Bound")
+    book <- design$fieldBook
+    record$row_clash <- nested_clashes(book$ROW, book$ENTRY)
+    record$col_clash <- nested_clashes(book$COLUMN, book$ENTRY)
+    if (identical(design$infoDesign$optimization, "twostage")) {
+      record$status <- if (too_large) "not_admitted" else "fallback"
+    }
+  }
   record
+}
+
+# The degrees-of-freedom rule of spec 5.1b, by arithmetic only: TRUE when the
+# joint additive row-and-column model can estimate the treatment contrasts.
+# latinize = FALSE (nested): r (nrows - 1)(ncols - 1) >= t - 1;
+# latinize = TRUE (shared): n - r - nrows - ncols + 2 >= t - 1, with n = t r.
+onestage_rule_holds <- function(t, nrows, r, latinize) {
+  ncols <- t / nrows
+  if (latinize) t * r - r - nrows - ncols + 2 >= t - 1
+  else r * (nrows - 1) * (ncols - 1) >= t - 1
 }
 
 # Number of mutually orthogonal Latin squares that spec 6.5 expects the package
@@ -209,6 +312,10 @@ nested_shape_key <- function(x) {
 # One row per shape with mean, SD, min, max and range of every efficiency, the
 # number of seeds that hit the A-bound, and the per-seed values in `values`
 nested_summary <- function(records) {
+  # records written before the onestage columns existed carry them as NA
+  for (column in c("row_bound", "col_bound", "row_clash", "col_clash", "optimiser_seconds")) {
+    if (!column %in% names(records)) records[[column]] <- NA_real_
+  }
   base <- paste(records$caller, records$t, records$k, records$r, sep = "|")
   if ("iterations" %in% names(records)) {
     # iterations is kept only for shapes recorded at several iteration counts
@@ -221,7 +328,8 @@ nested_summary <- function(records) {
   rows <- lapply(split(records, factor(key, levels = unique(key))), function(x) {
     ok <- x[x$status == "ok", , drop = FALSE]
     row <- data.frame(caller = x$caller[1], t = x$t[1], k = x$k[1], r = x$r[1],
-                      iterations = as.integer(x$iterations[1]), seeds = nrow(ok), errors = nrow(x) - nrow(ok),
+                      iterations = as.integer(x$iterations[1]), seeds = nrow(ok), errors = sum(x$status == "error"),
+                      fallbacks = sum(x$status %in% c("fallback", "not_admitted")),
                       stringsAsFactors = FALSE)
     for (e in nested_golden_efficiencies) {
       v <- ok[[e]][!is.na(ok[[e]])]
@@ -234,9 +342,15 @@ nested_summary <- function(records) {
       row[[paste0(e, "_na")]] <- sum(is.na(ok[[e]]))
     }
     row$bound <- if (nrow(ok) > 0L) mean(ok$bound) else NA_real_
+    row$row_bound <- if (nrow(ok) > 0L) mean(ok$row_bound) else NA_real_
+    row$col_bound <- if (nrow(ok) > 0L) mean(ok$col_bound) else NA_real_
+    clash_max <- function(v) if (length(v) > 0L && !all(is.na(v))) max(v, na.rm = TRUE) else NA_real_
+    row$row_clash_max <- clash_max(ok$row_clash)
+    row$col_clash_max <- clash_max(ok$col_clash)
     row$hits <- sum(ok$A >= ok$bound - nested_golden_tolerance, na.rm = TRUE)
     row$seconds <- if (nrow(ok) > 0L) stats::median(ok$seconds) else NA_real_
-    row$values <- list(ok[c("seed", nested_golden_efficiencies, "bound", "seconds")])
+    row$values <- list(ok[c("seed", nested_golden_efficiencies, "bound", "row_bound", "col_bound",
+                            "row_clash", "col_clash", "seconds")])
     row
   })
   out <- do.call(rbind, rows)
@@ -280,7 +394,8 @@ nested_acceptance <- function(baseline, candidate, accepted_loss = NULL, bootstr
     row <- data.frame(caller = b$caller, t = b$t, k = b$k, r = b$r,
                       iterations = if (is.null(b$iterations)) NA_integer_ else as.integer(b$iterations),
                       noninferior_ok = NA, worst_ok = FALSE, constant_ok = TRUE,
-                      optimum_ok = FALSE, errors_ok = FALSE, time_ratio = NA_real_,
+                      optimum_ok = FALSE, errors_ok = FALSE, fallback_ok = TRUE, clash_ok = TRUE,
+                      time_ratio = NA_real_,
                       pass = FALSE, accepted_loss = FALSE, shortfall = NA_real_,
                       stringsAsFactors = FALSE)
     if (is.na(j)) return(row)
@@ -288,6 +403,16 @@ nested_acceptance <- function(baseline, candidate, accepted_loss = NULL, bootstr
     bv <- b$values[[1]]
     cv <- cand$values[[1]]
     row$errors_ok <- cand$errors <= b$errors
+    onestage <- b$caller %in% nested_onestage_callers
+    if (onestage) {
+      row$fallback_ok <- cand$fallbacks <= b$fallbacks &&
+        (!onestage_rule_holds(b$t, b$k, b$r, b$caller == "onestage_latinized") || cand$fallbacks == 0)
+      clash_fine <- function(cand_max, base_max) {
+        isTRUE(cand_max <= base_max) && (isTRUE(base_max > 0) || isTRUE(cand_max == 0))
+      }
+      row$clash_ok <- clash_fine(cand$row_clash_max, b$row_clash_max) &&
+        clash_fine(cand$col_clash_max, b$col_clash_max)
+    }
     row$time_ratio <- cand$seconds / b$seconds
     worst <- TRUE
     constant <- TRUE
@@ -305,7 +430,7 @@ nested_acceptance <- function(baseline, candidate, accepted_loss = NULL, bootstr
         next
       }
       # CI skips the worst-seed rule for joint_* only (see the top of this file)
-      unsearched_joint <- !bootstrap && startsWith(e, "joint_")
+      unsearched_joint <- !bootstrap && b$caller == "row_column" && startsWith(e, "joint_")
       if (!unsearched_joint) worst <- worst && min(cx) >= min(bx) - (max(bx) - min(bx)) - tol
       if (b$t < 1000 && length(bx) >= 50L && max(bx) - min(bx) < 1e-12) {
         constant <- constant && all(cx >= bx[1] - tol)
@@ -322,8 +447,18 @@ nested_acceptance <- function(baseline, candidate, accepted_loss = NULL, bootstr
     required <- (b$caller %in% c("square_lattice", "rectangular_lattice") &&
                    !nested_gap(b$caller, b$t, b$r)) || base_all_hit
     row$optimum_ok <- !required || (cand$seeds > 0L && cand$hits == cand$seeds)
+    if (onestage) {
+      # a hit is A >= the baseline's recorded bound - tol, per factor; the
+      # factor must hit on every ok seed wherever the baseline did
+      hit_all <- function(a, bound) length(a) > 0L && !anyNA(a) && all(a >= bound - tol)
+      ok_factor <- function(a_name, bound_name) {
+        base_hits <- b$t < 1000 && hit_all(bv[[a_name]], bv[[bound_name]])
+        !base_hits || hit_all(cv[[a_name]], b[[bound_name]])
+      }
+      row$optimum_ok <- ok_factor("row_A", "row_bound") && ok_factor("col_A", "col_bound")
+    }
     row$pass <- all(c(row$noninferior_ok, row$worst_ok, row$constant_ok, row$optimum_ok,
-                      row$errors_ok), na.rm = TRUE)
+                      row$errors_ok, row$fallback_ok, row$clash_ok), na.rm = TRUE)
     if (nested_shape_key(b) %in% accepted_key) {
       row$pass <- NA
       row$accepted_loss <- TRUE

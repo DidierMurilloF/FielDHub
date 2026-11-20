@@ -15,6 +15,8 @@
 # runs of the baseline's grid. In a partial run that holds one iteration count
 # of such a shape, that count is not kept, and the lone variant is compared
 # with the default-iterations baseline.
+# The table has one column per rule, including fallback_ok and clash_ok (the
+# onestage callers of protocol os; TRUE for every other caller).
 arguments <- commandArgs(trailingOnly = TRUE)
 if (length(arguments) < 2L || length(arguments) > 4L) {
   stop("Usage: Rscript tools/check-nested-goldens.R baseline.csv.gz candidate.csv [pairs.csv] [accepted-loss.csv]")
