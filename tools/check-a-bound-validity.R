@@ -24,9 +24,16 @@
 #   alpha, incomplete-block, twostage row-column and onestage nested factors
 #   are resolvable (R = r); onestage latinized rows and columns are general
 #   (shared labels, 5.2b (e)), except on fallback seeds, which report the
-#   nested twostage design.
+#   nested twostage design. A golden check never passes on nothing: a file
+#   fails when it has no rows, lacks a column its callers carry (caller, t,
+#   r, k; A for block callers; col_A and row_A for row-column callers), has a
+#   missing caller or status, has a factor with no recorded A at all, or has
+#   a row whose bound is missing (the bound of its shape, or the recorded
+#   `bound` of a row with a recorded A). Rows without a recorded A are left
+#   out of the comparison and counted on the line, "error" rows apart.
 # A violation is A > bound + 1.5e-7. The tool exits with status 1 on any
-# violation or on a known value that does not match.
+# violation, on a value that cannot be compared (NA), on a golden failure
+# above, or on a known value that does not match.
 
 arguments <- commandArgs(trailingOnly = TRUE)
 suppressPackageStartupMessages(library(parallel))
@@ -38,12 +45,38 @@ nrep <- as.integer(Sys.getenv("NREP", "2000"))
 cores <- as.integer(Sys.getenv("CORES", "4"))
 failures <- character(0)
 
+# An NA excess cannot be compared with the bound: it fails the check
 line <- function(check, excess) {
+  missing <- sum(is.na(excess))
   excess <- excess[!is.na(excess)]
   bad <- sum(excess > tol)
   cat(sprintf("%-52s designs %7d  violations %d  largest A - bound %.3g\n",
               check, length(excess), bad, if (length(excess)) max(excess) else NA_real_))
-  if (bad > 0L) failures <<- c(failures, check)
+  if (missing > 0L) cat(sprintf("  FAIL %s: %d designs with an NA A or bound\n", check, missing))
+  if (bad > 0L || missing > 0L) failures <<- c(failures, check)
+}
+fail <- function(check, why) {
+  cat(sprintf("  FAIL %s: %s\n", check, why))
+  failures <<- c(failures, check)
+}
+# One factor of a golden file: `A` the recorded values, `bound` the bound of
+# each row's shape, `error` the rows with status "error", which carry no
+# design. Rows without a recorded A are left out and counted; no recorded A
+# at all, or a missing bound, fails the check.
+golden_line <- function(check, A, bound, error) {
+  A <- suppressWarnings(as.numeric(A))
+  have <- !is.na(A)
+  line(check, A[have] - bound[have])
+  dropped <- sum(!have)
+  if (dropped > 0L) {
+    cat(sprintf("  %s: %d rows without a recorded A left out (%d with status error, %d other)\n",
+                check, dropped, sum(!have & error), sum(!have & !error)))
+  }
+  if (!any(have)) fail(check, "no recorded A to check")
+  # the have rows with an NA bound are already failed by line()
+  if (any(is.na(bound) & !have)) {
+    fail(check, sprintf("%d rows without a recorded A have an NA bound", sum(is.na(bound) & !have)))
+  }
 }
 expect <- function(what, value, target, digits = 7) {
   ok <- isTRUE(abs(value - target) <= 0.5 * 10^-digits + 1e-12)
@@ -302,35 +335,70 @@ nested_case("v = 4, k = 3",
 resolvable_shape <- function(t, r, k) fieldhub_a_bound(t, r, k, r * t / k, "resolvable", R = r)[["bound"]]
 general_shape <- function(t, r, k) fieldhub_a_bound(t, r, k, t * r / k, "general")[["bound"]]
 memo <- new.env()
+# NA when the shape is incomplete or the helper turns it down
 shape_bound <- function(kind, t, r, k) {
+  if (anyNA(c(t, r, k))) return(NA_real_)
   key <- paste(kind, t, r, k)
   if (is.null(memo[[key]])) {
-    memo[[key]] <- if (kind == "resolvable") resolvable_shape(t, r, k) else general_shape(t, r, k)
+    memo[[key]] <- tryCatch(
+      if (kind == "resolvable") resolvable_shape(t, r, k) else general_shape(t, r, k),
+      error = function(e) NA_real_)
   }
   memo[[key]]
 }
 for (path in arguments) {
   g <- utils::read.csv(path, stringsAsFactors = FALSE)
-  if (!"status" %in% names(g)) g$status <- "ok"
   name <- basename(path)
   cat("Golden file", name, "\n")
+  file_check <- sprintf("golden %s", name)
+  absent <- setdiff(c("caller", "t", "r", "k"), names(g))
+  if (length(absent)) {
+    fail(file_check, sprintf("no column %s", paste(absent, collapse = ", ")))
+    next
+  }
+  if (!nrow(g)) {
+    fail(file_check, "no rows")
+    next
+  }
+  if (!"status" %in% names(g)) g$status <- "ok"
+  unknown <- is.na(g$caller) | is.na(g$status) | !nzchar(g$caller) | !nzchar(g$status)
+  if (any(unknown)) fail(file_check, sprintf("%d rows with a missing caller or status", sum(unknown)))
+  error <- g$status %in% "error"
   rowcol <- g$caller %in% c("row_column", "onestage_nested", "onestage_latinized")
   # shared labels only where a latinized onestage design was returned; a
   # fallback seed reports the nested twostage design
-  shared <- g$caller == "onestage_latinized" & g$status == "ok"
+  shared <- g$caller %in% "onestage_latinized" & g$status %in% "ok"
   # blocks of k plots (columns of a row-column design: k = nrows plots, or
   # r * nrows when shared, in ncols blocks)
   col_bound <- mapply(function(t, r, k, sh) {
     if (sh) shape_bound("general", t, r, r * k) else shape_bound("resolvable", t, r, k)
   }, g$t, g$r, g$k, shared)
-  if (any(!rowcol)) line(sprintf("golden %s blocks A", name), g$A[!rowcol] - col_bound[!rowcol])
+  # the recorded bound is the gate of the optimum rule (spec 6.4): a row
+  # with a recorded A carries one
+  if ("bound" %in% names(g)) {
+    recorded_A <- if ("A" %in% names(g)) g$A else g$col_A
+    unbounded <- is.na(suppressWarnings(as.numeric(g$bound))) &
+      !is.na(suppressWarnings(as.numeric(recorded_A)))
+    if (length(unbounded) && any(unbounded)) {
+      fail(file_check, sprintf("%d rows with a recorded A and an NA recorded bound", sum(unbounded)))
+    }
+  }
+  golden_factor <- function(label, column, rows, bound) {
+    check <- sprintf("golden %s %s", name, label)
+    if (!column %in% names(g)) {
+      fail(check, sprintf("no column %s (%d rows should carry it)", column, sum(rows)))
+      return(invisible())
+    }
+    golden_line(check, g[[column]][rows], bound, error[rows])
+  }
+  if (any(!rowcol)) golden_factor("blocks A", "A", !rowcol, col_bound[!rowcol])
   if (any(rowcol)) {
-    line(sprintf("golden %s column A", name), g$col_A[rowcol] - col_bound[rowcol])
+    golden_factor("column A", "col_A", rowcol, col_bound[rowcol])
     # rows: ncols = t / nrows plots each (r * ncols when shared, in nrows blocks)
     row_bound <- mapply(function(t, r, k, sh) {
       if (sh) shape_bound("general", t, r, r * t / k) else shape_bound("resolvable", t, r, t / k)
     }, g$t[rowcol], g$r[rowcol], g$k[rowcol], shared[rowcol])
-    line(sprintf("golden %s row A", name), g$row_A[rowcol] - row_bound)
+    golden_factor("row A", "row_A", rowcol, row_bound)
   }
 }
 
