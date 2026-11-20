@@ -64,10 +64,16 @@
 #     FIELDHUB_ENGINE_DEBUG=slack_floors the engine skips the exact Row
 #     confirmation of each swap (the search of the 1e-10 running floors
 #     alone), so a final design can lie one rounding below stage 1 and the
-#     end-of-search comparison must replace it. On 24/6/2 and 48/6/3 nested,
-#     seeds 1:8: the Row floors hold on every seed, every result is full rank
-#     and not below the start in joint log det, and at least one seed took
-#     the replacement (`floor_fallback` 1).
+#     end-of-search comparison must replace it. On 24/6/2, 48/6/3 and 16/8/4
+#     nested, seeds 1:8 (24 runs): the Row floors hold on every seed, every
+#     result is full rank and not below the start in joint log det, and at
+#     least two seeds took the replacement (`floor_fallback` 1; 16/8/4 takes
+#     it on several seeds, so the path does not hang on one rounding).
+#     The repair's output gets the same comparison: on 8/4/3 nested seed 36
+#     (a singular stage 1 start) the hook lets the repair reach a full-rank
+#     design one rounding below the Row floors, which must be rejected:
+#     `floor_fallback` 2, the start returned unchanged, `full_rank` FALSE with
+#     NA joint values, no evaluations, and the Row floors exact.
 #
 # The Row floors, in `crossed` and `repair` alike (spec 6.1: Row D and Row A
 # never fall below their stage 1 values):
@@ -333,7 +339,8 @@ if (check == "crossed") {
   Sys.setenv(FIELDHUB_ENGINE_DEBUG = "slack_floors")
   problems <- character()
   replaced <- character()
-  for (shape in list(c(24, 6, 2), c(48, 6, 3))) {
+  hooked <- 0L
+  for (shape in list(c(24, 6, 2), c(48, 6, 3), c(16, 8, 4))) {
     v <- shape[1]; nrows <- shape[2]; r <- shape[3]; ncols <- v / nrows
     lay <- layout_of(v, r, nrows, FALSE)
     for (seed in 1:8) {
@@ -341,6 +348,7 @@ if (check == "crossed") {
       s1 <- stage1(v, nrows, ncols, r, FALSE, work_limit)
       res <- crossed(s1$treatments, v, r, nrows, ncols, FALSE, work_cap = max(work_limit - s1$work, 1))
       trt <- as.integer(res$treatments)
+      hooked <- hooked + 1L
       tag <- sprintf("%d/%d/%d seed %d", v, nrows, r, seed)
       fp <- floor_problem(res, trt, s1$treatments, lay, v, r, fallback = NULL)
       ref <- joint_ref(trt, lay, v, r)
@@ -355,10 +363,28 @@ if (check == "crossed") {
       }
     }
   }
-  report(length(problems) == 0L && length(replaced) >= 1L,
-         sprintf("crossed end-of-search Row comparison (hook, 16 runs): %d replaced%s%s", length(replaced),
-                 if (length(replaced)) paste0(": ", paste(replaced, collapse = "; ")) else "",
+  report(length(problems) == 0L && length(replaced) >= 2L,
+         sprintf("crossed end-of-search Row comparison (hook, %d runs): %d replaced (need >= 2)%s%s", hooked,
+                 length(replaced), if (length(replaced)) paste0(": ", paste(replaced, collapse = "; ")) else "",
                  if (length(problems)) paste0("; PROBLEM ", problems[1]) else ""))
+  # The repair's output under the hook: full rank, but below the Row floors.
+  v <- 8; nrows <- 4; ncols <- 2; r <- 3
+  lay <- layout_of(v, r, nrows, FALSE)
+  set.seed(36)
+  s1 <- stage1(v, nrows, ncols, r, FALSE, work_limit)
+  start <- as.integer(s1$treatments)
+  res <- crossed(start, v, r, nrows, ncols, FALSE, work_cap = max(work_limit - s1$work, 1))
+  trt <- as.integer(res$treatments)
+  fp <- floor_problem(res, trt, start, lay, v, r, fallback = 2)
+  why <- if (joint_ref(start, lay, v, r)$full) "the start is full rank, so no repair ran"
+         else if (!is.null(fp)) fp
+         else if (!identical(trt, start)) "the start was not returned"
+         else if (!identical(res$full_rank, FALSE) || !is.na(res$joint_d) || !is.na(res$joint_a)) "full_rank or joint values claimed"
+         else if (!identical(res$search$evaluations, 0) || !(res$search$repair_swaps > 0)) "evaluations spent, or no repair swap"
+         else NULL
+  report(is.null(why), sprintf("crossed repair output below the Row floors (hook, 8/4/3 nested seed 36): floor_fallback %s, %g repair swaps, start returned%s",
+                               format(res$search$floor_fallback), res$search$repair_swaps,
+                               if (is.null(why)) "" else paste0("; PROBLEM ", why)))
   Sys.unsetenv("FIELDHUB_ENGINE_DEBUG")
   cat(failures, "FAIL(s)\n")
   quit(status = if (failures > 0L) 1 else 0)
