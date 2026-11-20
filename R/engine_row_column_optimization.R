@@ -57,7 +57,8 @@ improve_efficiency <- function(design, iterations, seed) {
 
 # Function to build a resolvable row-column layout in a single optimization
 # stage using blocksdesign::design() (Genstat "onestage" method), instead of
-# the default two-stage greedy search. Rows and columns are optimized jointly.
+# the two-stage method (columns first, then the block engine's row search).
+# Rows and columns are optimized jointly.
 # Returns a data frame with the same structure as the two-stage best_design
 # (Level_1 = Rep, Level_2 = Column, Level_3 = Row, plots, treatments) so the
 # downstream field book construction is unchanged.
