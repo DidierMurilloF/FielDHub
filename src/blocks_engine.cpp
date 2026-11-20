@@ -675,6 +675,13 @@ int even_repair(const Layout& lay, std::vector<int>& treat) {
 
 }  // namespace
 
+// Mode 3 (crossed_engine.cpp).
+cpp11::list crossed_engine(int v, int r, int b, const std::vector<int>& row_of,
+                           const std::vector<int>& col_of, const std::vector<int>& start,
+                           int jumps_per_escape, int max_stale_escapes, double budget_cap,
+                           double time_limit, bool debug, double work_cap, int refresh_every,
+                           double evaluation_work);
+
 // Test hook: run the even-up repair on a design given as the treatment of each
 // plot (1-based, plots in block order as in blocks_engine()). Returns the
 // repaired treatments and the number of swaps (-1 if it could not finish).
@@ -719,8 +726,12 @@ cpp11::integers lattice_start_probe_cpp(int v, int r, int b) {
 // segment in `segment_of` (swaps only inside a segment); it needs a `start`
 // (each treatment r times), which fixes every segment's treatments, and every
 // one of the `searches` starts from it with each segment shuffled. Modes 0-2
-// pass integer() for `block_of` and `segment_of`; mode 3 (crossed) is not
-// implemented yet.
+// pass integer() for `block_of` and `segment_of`. Mode 3 (crossed, phase 2
+// spec 6.1, crossed_engine.cpp) is the joint stage of a row-column design: b
+// row blocks, the 0-based row block of every plot in `block_of` and its
+// 0-based column block in `column_of`; replicate m holds plots m v .. m v +
+// v - 1, each a complete grid; `start` is required and the call runs one
+// search from it (`searches` and `segment_of` are ignored).
 [[cpp11::register]]
 cpp11::list blocks_engine_cpp(int v, int r, int b, int searches, int jumps_per_escape,
                               int max_stale_escapes, double budget, double time_limit,
@@ -728,7 +739,16 @@ cpp11::list blocks_engine_cpp(int v, int r, int b, int searches, int jumps_per_e
                               int refresh_every, double evaluation_work, int mode,
                               cpp11::integers column_of, cpp11::integers block_of,
                               cpp11::integers segment_of) {
-  if (mode < 0 || mode > 4 || mode == 3) cpp11::stop("`mode` must be 0, 1, 2 or 4.");
+  if (mode < 0 || mode > 4) cpp11::stop("`mode` must be 0, 1, 2, 3 or 4.");
+  if (mode == 3) {
+    if (start.size() != static_cast<R_xlen_t>(v) * r) cpp11::stop("Crossed mode needs a `start` of one treatment per plot.");
+    std::vector<int> given(start.size());
+    for (R_xlen_t x = 0; x < start.size(); ++x) given[x] = start[x] - 1;
+    return crossed_engine(v, r, b, std::vector<int>(block_of.begin(), block_of.end()),
+                          std::vector<int>(column_of.begin(), column_of.end()), given, jumps_per_escape,
+                          max_stale_escapes, budget, time_limit, debug, work_cap, refresh_every,
+                          evaluation_work);
+  }
   const bool resolvable = mode != 0;
   Layout lay = mode == 2 ? make_column_layout(v, r, b, std::vector<int>(column_of.begin(), column_of.end()))
              : mode == 4 ? make_segment_layout(v, r, b, std::vector<int>(block_of.begin(), block_of.end()),

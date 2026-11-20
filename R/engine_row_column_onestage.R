@@ -140,3 +140,71 @@ onestage_stage1 <- function(nt, nrows, ncols, reps, latinize, work_cap = onestag
   }
   list(treatments = as.integer(treat), work = work)
 }
+
+#' Evaluation budget of one joint-stage search (phase 2 spec 6.1): the default
+#' full-pass budget of one resolvable search over the r v (v - 1) / 2 pairs
+#' inside the replicates.
+#' @noRd
+crossed_default_budget <- function(v, r) {
+  blocks_engine_default_budget(v * r, 1L, pairs = r * v * (v - 1) / 2, full_passes = TRUE)
+}
+
+#' Joint stage of the onestage search (block engine mode 3, phase 2 spec 6.1)
+#'
+#' One search from `start` (a complete row-column design in canonical plot
+#' order: replicate, row, column): first-improvement full passes on the joint
+#' log det of rows and columns, under the Row D and Row A floors (running
+#' values against the fixed values of `start`), with escapes from
+#' row-preserving pairs. Rows and columns are nested in the replicates, or
+#' `shared` across them. A start that fails the full-rank test of spec 5.1b
+#' is returned unsearched with `full_rank = FALSE`. Draws from R's generator.
+#'
+#' @return A list with `treatments` (1-based, plot order as `start`),
+#'   `full_rank`, unrounded `row_d`, `row_a`, `joint_d`, `joint_a`,
+#'   `joint_log_det` of the result (joint values NA when not full rank), the
+#'   Row values of `start` (`stage1_row_d`, `stage1_row_a`) and `search`
+#'   (`evaluations`, `work`, `stop_reason`, `repair_swaps`,
+#'   `repair_evaluations`, `refreshes`, `drift_events`, `debug_max_error`).
+#' @noRd
+crossed_search <- function(start, v, r, nrows, ncols, shared, budget = crossed_default_budget(v, r),
+                           work_cap, jumps_per_escape = 3L, max_stale_escapes = 5L) {
+  v <- as.integer(v)
+  r <- as.integer(r)
+  nrows <- as.integer(nrows)
+  ncols <- as.integer(ncols)
+  if (nrows * ncols != v || length(start) != v * r || anyNA(start)) {
+    fieldhub_abort("`start` must give one treatment per plot of a complete nrows x ncols grid.",
+                   data = list(treatments = v, nrows = nrows, ncols = ncols, replicates = r))
+  }
+  if (!is.numeric(work_cap) || length(work_cap) != 1L || is.na(work_cap) || work_cap <= 0) {
+    fieldhub_abort("`work_cap` must be one positive number.", data = list(argument = "work_cap"))
+  }
+  rep0 <- rep(seq_len(r) - 1L, each = v)
+  row_in <- rep(rep(seq_len(nrows) - 1L, each = ncols), r)
+  col_in <- rep(seq_len(ncols) - 1L, nrows * r)
+  row_block <- if (shared) row_in else rep0 * nrows + row_in
+  col_block <- if (shared) col_in else rep0 * ncols + col_in
+  b_rows <- if (shared) nrows else r * nrows
+  B <- b_rows + (if (shared) ncols else r * ncols)
+  time_limit <- 60
+  out <- blocks_engine_cpp(v, r, as.integer(b_rows), 1L, as.integer(jumps_per_escape),
+                           as.integer(max_stale_escapes), as.double(budget), time_limit,
+                           identical(Sys.getenv("FIELDHUB_ENGINE_DEBUG"), "1"),
+                           as.integer(start), as.double(work_cap), 256L,
+                           as.double(resolvable_evaluation_work(v, r, B)), 3L,
+                           as.integer(col_block), as.integer(row_block), integer())
+  stop_reason <- c("budget", "stale", "time_limit", "no_start")[out$stop_reason]
+  if (identical(stop_reason, "time_limit")) {
+    fieldhub_warn("The joint row-column search stopped at its time limit of ", time_limit,
+                  " seconds; the result may not be reproducible from the seed.",
+                  class = "fieldhub_design_warning", call = NULL)
+  }
+  list(treatments = out$treatments, full_rank = out$full_rank,
+       row_d = out$row_d, row_a = out$row_a, joint_d = out$joint_d, joint_a = out$joint_a,
+       joint_log_det = out$joint_log_det,
+       stage1_row_d = out$stage1_row_d, stage1_row_a = out$stage1_row_a,
+       search = list(evaluations = out$evaluations, work = out$work, stop_reason = stop_reason,
+                     repair_swaps = out$repair_swaps, repair_evaluations = out$repair_evaluations,
+                     refreshes = out$refreshes, drift_events = out$drift_events,
+                     work_capped = out$work_capped, debug_max_error = out$debug_max_error))
+}
