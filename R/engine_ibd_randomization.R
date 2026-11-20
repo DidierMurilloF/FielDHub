@@ -29,7 +29,9 @@ rerandomize_ibd <- function(ibd_design) {
 
   model <- mydes$Blocks_model
   known <- if (is.data.frame(model) && !anyNA(model[c("D-Efficiency", "A-Efficiency")])) model
-  mydes$Blocks_model_new <- BlockEfficiencies(mydes$Design_new, known = known)
+  mydes$Blocks_model_new <- BlockEfficiencies(mydes$Design_new, known = known,
+                                              nested_in_replicates = TRUE,
+                                              replicates = "Level_1")
 
   return(mydes)
 }

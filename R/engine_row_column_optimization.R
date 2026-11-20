@@ -44,7 +44,8 @@ improve_efficiency <- function(design, iterations, seed) {
     }
   }
   row_blocks <- best_design[c("Level_1", "Level_3", "plots", "treatments")]
-  best_efficiencies <- BlockEfficiencies(row_blocks, known = known)
+  best_efficiencies <- BlockEfficiencies(row_blocks, known = known,
+                                         nested_in_replicates = TRUE, replicates = "Level_1")
   best_a_efficiency <- best_efficiencies$`A-Efficiency`[best_efficiencies$Level == 2]
   return(
     list(
@@ -156,13 +157,18 @@ row_column_joint_efficiency <- function(design) {
   )
 }
 
-# Function to calculate and return combined BlockEfficiencies
+# Function to calculate and return combined BlockEfficiencies. `nested` says
+# whether the reported design's rows and columns are nested in its replicates
+# (Level_1): they are then claimed nested and their class verified
+# (BlockEfficiencies()); otherwise they are shared across replicates and use
+# the general class (spec 6.2). The replicate factor is always claimed.
 #' @noRd
-report_efficiency <- function(design) {
+report_efficiency <- function(design, nested = TRUE) {
   # Calculate row block efficiencies
   row_blocks <- design |> 
     dplyr::select(Level_1, Level_3, plots, treatments)
-  row_efficiencies <- BlockEfficiencies(row_blocks)
+  row_efficiencies <- BlockEfficiencies(row_blocks, nested_in_replicates = c(TRUE, nested),
+                                        replicates = "Level_1")
   row_efficiencies <- row_efficiencies |> 
     dplyr::filter(Level == 2) |> 
     dplyr::mutate(Level = "Row")
@@ -170,13 +176,15 @@ report_efficiency <- function(design) {
   # Calculate column block efficiencies
   col_blocks <- design |> 
     dplyr::select(Level_1, Level_2, plots, treatments)
-  col_efficiencies <- BlockEfficiencies(col_blocks)
+  col_efficiencies <- BlockEfficiencies(col_blocks, nested_in_replicates = c(TRUE, nested),
+                                        replicates = "Level_1")
   col_efficiencies <- col_efficiencies |> 
     dplyr::filter(Level == 2) |> 
     dplyr::mutate(Level = "Column")
   
   # Get replication efficiencies
-  rep_efficiencies <- BlockEfficiencies(row_blocks) |> 
+  rep_efficiencies <- BlockEfficiencies(row_blocks, nested_in_replicates = TRUE,
+                                        replicates = "Level_1") |> 
     dplyr::filter(Level == 1) |> 
     dplyr::mutate(Level = "Rep")
   

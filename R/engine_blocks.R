@@ -223,7 +223,10 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
   )
   model <- data.frame(Level = 1L, Blocks = as.integer(blocks),
                       `D-Efficiency` = out$d_efficiency, `A-Efficiency` = out$a_efficiency,
-                      `A-Bound` = block_a_bound(treatments, replicates, sizes),
+                      `A-Bound` = if (length(unique(sizes)) == 1L) {
+                        fieldhub_a_bound(treatments, replicates, sizes[1L], blocks,
+                                         "general")[["bound"]]
+                      } else block_a_bound(treatments, replicates, sizes),
                       check.names = FALSE)
   list(Design = design, Blocks_model = model, search = search)
 }
@@ -234,7 +237,8 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
 #' block (`blocks` blocks of `v / blocks` plots per replicate). The plots are
 #' shuffled within every block with R's generator, so a plot's position inside
 #' its block carries no pattern from the construction. The Level 2 row has the
-#' one-way bound for the r b blocks; its efficiencies are filled by the caller.
+#' bound of `fieldhub_a_bound()` for the r b blocks in the resolvable class;
+#' its efficiencies are filled by the caller.
 #' @noRd
 resolvable_engine_output <- function(treat, v, r, blocks) {
   k <- v %/% blocks
@@ -255,7 +259,8 @@ resolvable_engine_output <- function(treat, v, r, blocks) {
   )
   model <- data.frame(Level = 1:2, Blocks = as.integer(c(r, total)),
                       `D-Efficiency` = c(1, NA_real_), `A-Efficiency` = c(1, NA_real_),
-                      `A-Bound` = c(1, resolvable_a_bound(v, r, blocks)),
+                      `A-Bound` = c(1, fieldhub_a_bound(v, r, k, total, "resolvable",
+                                                         R = r)[["bound"]]),
                       check.names = FALSE)
   list(Design = design, Blocks_model = model)
 }
@@ -441,39 +446,6 @@ blocks_engine_default_budget <- function(n, searches, pairs = n * (n - 1) / 2, m
 #' @noRd
 blocks_engine_default_jumps <- function(n, pairs = n * (n - 1) / 2) {
   if (pairs <= 2e5) 3L else 10L
-}
-
-#' Convexity upper bound for the A-efficiency of an equireplicate one-way design
-#'
-#' With efficiencies of C/r on the contrast space, at least max(0, v - b) equal 1;
-#' the remaining m = min(v, b) - 1 sum to m - T with T at its minimum when every
-#' block's counts are as even as possible; the harmonic mean is then at most
-#' (v - 1) / (max(0, v - b) + m^2 / (m - T)). `rank` replaces b in m when the
-#' block incidence has a smaller known rank (resolvable designs,
-#' `resolvable_a_bound()`); the default keeps the one-way bound unchanged.
-#' @noRd
-block_a_bound <- function(v, r, k, rank = length(k)) {
-  lo <- k %/% v
-  hi <- k %% v
-  t_min <- sum((hi * (lo + 1)^2 + (v - hi) * lo^2) / (r * k)) - 1
-  m <- min(v, rank) - 1
-  (v - 1) / (max(0, v - rank) + m^2 / (m - t_min))
-}
-
-#' A-efficiency bound of a resolvable design (Level 2, ruling R18)
-#'
-#' The r replicates' block indicators each sum to the all-ones vector, so the
-#' incidence N of the B = r b blocks has rank at most B - r + 1 and at most
-#' m = min(v, B - r + 1) - 1 contrast efficiencies differ from 1. With the
-#' same sum argument as `block_a_bound()` (T = b - 1 for binary blocks of
-#' v / b plots) the harmonic mean is at most (v - 1 - m + m^2 / (m - T)). A
-#' square lattice with r <= q + 1 orthogonal replicates attains it. Own
-#' derivation (controller ruling R18, checked on 3000 random resolvable
-#' designs).
-#' @noRd
-resolvable_a_bound <- function(v, r, blocks) {
-  total <- r * blocks
-  block_a_bound(v, r, rep(v %/% blocks, total), rank = total - r + 1)
 }
 
 #' Rows within columns: the twostage row step (nested-engine spec section 6.8)

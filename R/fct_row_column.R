@@ -363,7 +363,9 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
                                              seed = offset_design_seed(seed, i))
       field_book_best_design <- improved_design$best_design
     }
-    row_column_efficiency <- report_efficiency(field_book_best_design)
+    # The flag describes the reported design, after any fallback (spec 6.2).
+    row_column_efficiency <- report_efficiency(field_book_best_design,
+                                               nested = method == "twostage" || !latinize)
     blocks_model[[i]] <- row_column_efficiency
     row_col_fieldbook <- field_book_best_design |>
       dplyr::rename(

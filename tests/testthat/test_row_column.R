@@ -341,3 +341,29 @@ test_that("the smallest twostage effort still returns connected rows", {
     expect_gt(bm$`A-Efficiency`[bm$Level == "Row"], 0)
   }
 })
+
+test_that("row and column A-Bounds follow the reported coding", {
+  # Spec 5.2b and 6.2: latinized rows and columns are shared across the
+  # replicates (general class); nested ones lie within replicates that hold
+  # every entry once (resolvable class). The replicate factor's bound is 1.
+  factor_rows <- function(des) {
+    bm <- des$blocksModel[[1]]
+    stats::setNames(bm[["A-Bound"]], bm$Level)
+  }
+  expected <- list(`TRUE` = c(Row = 0.8707723, Column = 0.9387755),
+                   `FALSE` = c(Row = 0.6529968, Column = 0.7806789))
+  expect_valid_bounds <- function(des) {
+    bm <- des$blocksModel[[1]]
+    bm <- bm[bm$Level %in% c("Rep", "Row", "Column"), ]
+    expect_true(all(bm[["A-Efficiency"]] <= bm[["A-Bound"]] + 1.5e-7))
+  }
+  for (L in c(TRUE, FALSE)) {
+    des <- row_column(t = 24, nrows = 6, reps = 2, seed = 21, iterations = 20, latinize = L)
+    bounds <- factor_rows(des)
+    expect_equal(bounds[c("Row", "Column")], expected[[as.character(L)]], tolerance = 1e-7)
+    expect_equal(bounds[["Rep"]], 1)
+    expect_valid_bounds(des)
+  }
+  expect_valid_bounds(row_column(t = 24, nrows = 6, reps = 2, seed = 21, iterations = 20,
+                                 method = "twostage"))
+})
