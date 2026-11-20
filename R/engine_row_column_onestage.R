@@ -5,8 +5,16 @@
 # block is (m - 1) ncols + j nested and j shared.
 
 #' Work cap of one onestage build (phase 2 spec 6.1, "Work cap and
-#' admission"): stage 1, the repair and the joint stage together. Set from
-#' measurement in phase 2 Task 8.
+#' admission"): every stage 1, repair and joint search of the build together.
+#' Each engine call gets the work left; once it is spent no further search
+#' starts. A shape is admitted when `onestage_predicted_work()` is at most 0.8
+#' of it (`onestage_admitted()`). PROVISIONAL (Task 8): kept at the resolvable
+#' cap, 2e11, until the controller's measurement at t = 300-2000 sets it so
+#' that the largest admitted shape stops on the cap well inside the 60 s time
+#' limit at a quarter of the reference machine's speed (phase 1 rule). The
+#' measurements so far are with `onestage_predicted_work()`: at t <= 200 the
+#' largest search used 8.4e9 units, at 4-16e9 units per second on a loaded
+#' machine.
 #' @noRd
 onestage_work_limit <- 2e11
 
@@ -30,7 +38,7 @@ onestage_work_limit <- 2e11
 #' @return A list with `treatments` (plot order as `start`), `d_efficiency` and
 #'   `a_efficiency` of the blocks (NA, with `treatments` = `start`, when no
 #'   search found a connected design) and `search` (`evaluations`, `work`,
-#'   `stop_reason`).
+#'   `stop_reason`, `work_capped`: TRUE when the run stopped on `work_cap`).
 #' @noRd
 segmented_blocks <- function(start, block_of, segment_of, treatments, replicates, blocks,
                              searches = 20L, work_cap = onestage_work_limit) {
@@ -66,7 +74,8 @@ segmented_blocks <- function(start, block_of, segment_of, treatments, replicates
   list(treatments = if (found) out$treatments else as.integer(start),
        d_efficiency = if (found) out$d_efficiency else NA_real_,
        a_efficiency = if (found) out$a_efficiency else NA_real_,
-       search = list(evaluations = out$evaluations, work = out$work, stop_reason = stop_reason))
+       search = list(evaluations = out$evaluations, work = out$work, stop_reason = stop_reason,
+                     work_capped = out$work_capped))
 }
 
 #' Stage 1 of the onestage search: rows first (phase 2 spec 6.1)
@@ -83,13 +92,22 @@ segmented_blocks <- function(start, block_of, segment_of, treatments, replicates
 #'   nrows shared rows, segments the replicates, start one `sample.int(nt)`
 #'   per replicate), then for the columns (blocks the ncols shared columns,
 #'   segments the replicate x row cells, start the row design).
-#' The work cap applies to the whole build: each step gets what the earlier
-#' ones left. Stage 1 never warns: a warning from a step (a shape refused by
-#' its admission, or a time limit) is an admission defect and becomes an
-#' error. Draws from R's generator; the caller owns the seed.
+#'
+#' The work cap applies to the whole stage: each step gets what the earlier
+#' ones left. Nested, the row step gets `work_cap` less the column step's
+#' admission need (`onestage_column_reserve()`), so a row step that ends below
+#' its cap always leaves the column step admitted. Each step is checked
+#' against its own admission before it runs. A step that its admission would
+#' refuse, a step that stops on its work cap, and a warning from a step (a
+#' time limit) all abort with class `onestage_not_admitted` (also
+#' `onestage_infeasible`): the stage did not finish inside the work cap it was
+#' given, so the shape (or, for a later search of a build, the work left) is
+#' too small for it. Stage 1 never warns. Draws from R's generator; the caller
+#' owns the seed.
 #'
 #' @return A list with `treatments` (1-based, canonical plot order, every
-#'   replicate holding each treatment once) and `work` (the work units used).
+#'   replicate holding each treatment once), `work` (the work units used) and
+#'   `step_work` (the row step's and the column step's work).
 #' @noRd
 onestage_stage1 <- function(nt, nrows, ncols, reps, latinize, work_cap = onestage_work_limit) {
   v <- as.integer(nt)
@@ -100,50 +118,74 @@ onestage_stage1 <- function(nt, nrows, ncols, reps, latinize, work_cap = onestag
     fieldhub_abort("nrows * ncols must equal the number of treatments.",
                    data = list(nrows = nrows, ncols = ncols, treatments = nt))
   }
-  step <- function(expr) {
+  where <- paste0(" (t = ", nt, ", nrows = ", nrows, ", r = ", reps, ")")
+  refuse <- function(what, parent = NULL) {
+    fieldhub_abort("The onestage stage 1 ", what, where, ".",
+                   class = c("onestage_not_admitted", "onestage_infeasible",
+                             "fieldhub_optimization_error"),
+                   data = list(parent = parent), call = NULL)
+  }
+  step <- function(name, expr) {
     withCallingHandlers(expr, warning = function(w) {
-      fieldhub_abort("The onestage stage 1 search was not admitted for t = ", nt, ", nrows = ",
-                     nrows, ", r = ", reps, ": ", conditionMessage(w),
-                     class = c("fieldhub_optimization_error"),
-                     data = list(parent = w), call = NULL)
+      refuse(paste0(name, " step stopped on a warning: ", conditionMessage(w)), w)
     })
+  }
+  capped <- function(name, search) {
+    if (isTRUE(search$work_capped)) refuse(paste0(name, " step reached its work cap"))
   }
   used <- function(search) if (is.null(search$work)) 0 else search$work
   rep_of <- rep(seq_len(r), each = v)
   row_in <- rep(rep(seq_len(nrows), each = ncols), r)
   col_in <- rep(seq_len(ncols), nrows * r)
   if (!latinize) {
-    rows <- step(blocks_engine(v, r, nrows, resolvable = TRUE, work_cap = work_cap))
+    reserve <- onestage_column_reserve(v, r, nrows, ncols)
+    row_cap <- work_cap - reserve
+    if (!onestage_row_step_admitted(v, r, nrows, row_cap)) {
+      refuse("row step is not admitted inside the work cap")
+    }
+    rows <- step("row", blocks_engine(v, r, nrows, resolvable = TRUE, work_cap = row_cap))
+    capped("row", rows$search)
     # Plot order of the engine output: replicate, row (block), plot in row,
     # which is the canonical order with the plot's position as its column.
     treat <- as.integer(rows$Design$treatments)
-    work <- used(rows$search)
-    # Transposed grid: replicate, column, row.
+    row_work <- used(rows$search)
+    # Transposed grid: replicate, column, row. The row step ended below
+    # row_cap, so at least `reserve` is left and the column step is admitted.
     transposed <- order(rep_of, col_in, row_in)
-    cols <- step(rows_within_columns(treat[transposed], row_in[transposed], v, r, ncols,
-                                     effort = 1, work_cap = max(work_cap - work, 0)))
+    cols <- step("column", rows_within_columns(treat[transposed], row_in[transposed], v, r, ncols,
+                                               effort = 1, work_cap = work_cap - row_work))
+    capped("column", cols$search)
     treat[transposed] <- cols$treatments
-    work <- work + used(cols$search)
   } else {
     start <- as.vector(vapply(seq_len(r), function(m) sample.int(v), integer(v)))
-    rows <- step(segmented_blocks(start, row_in, rep_of, v, r, nrows, work_cap = work_cap))
+    rows <- step("row", segmented_blocks(start, row_in, rep_of, v, r, nrows, work_cap = work_cap))
+    capped("row", rows$search)
     if (is.na(rows$a_efficiency)) {
-      fieldhub_abort("The onestage stage 1 row search found no connected design.",
+      fieldhub_abort("The onestage stage 1 row search found no connected design", where, ".",
                      class = "fieldhub_numerical_error",
                      data = list(treatments = nt, nrows = nrows, replicates = reps), call = NULL)
     }
-    work <- used(rows$search)
-    cols <- step(segmented_blocks(rows$treatments, col_in, (rep_of - 1L) * nrows + row_in, v, r,
-                                  ncols, work_cap = max(work_cap - work, 1)))
+    row_work <- used(rows$search)
+    if (work_cap - row_work <= 0) refuse("row step used the whole work cap")
+    cols <- step("column", segmented_blocks(rows$treatments, col_in, (rep_of - 1L) * nrows + row_in,
+                                            v, r, ncols, work_cap = work_cap - row_work))
+    capped("column", cols$search)
     treat <- cols$treatments
-    work <- work + used(cols$search)
   }
-  list(treatments = as.integer(treat), work = work)
+  step_work <- c(rows = row_work, columns = used(cols$search))
+  list(treatments = as.integer(treat), work = sum(step_work), step_work = step_work)
 }
 
 #' Evaluation budget of one joint-stage search (phase 2 spec 6.1): the default
 #' full-pass budget of one resolvable search over the r v (v - 1) / 2 pairs
-#' inside the replicates.
+#' inside the replicates. Besides one evaluation per ratio and per accepted
+#' escape jump, every drift check charges n + B evaluations to it (as in
+#' resolvable mode), so on small shapes the budget, not staleness, can end a
+#' search (the Task 6 review saw it at 24/6/2 on some seeds). The joint stage's effort
+#' is set by the number of searches (`onestage_joint_searches()`), not by this
+#' budget. The work model of mode 3 (evaluation work, swap and refresh costs)
+#' is resolvable mode's, copied rather than measured; the work cap and the
+#' admission fit above rest on measured work, not on that model.
 #' @noRd
 crossed_default_budget <- function(v, r) {
   blocks_engine_default_budget(v * r, 1L, pairs = r * v * (v - 1) / 2, full_passes = TRUE)
@@ -229,4 +271,123 @@ crossed_search <- function(start, v, r, nrows, ncols, shared, budget = crossed_d
                      floor_fallback = out$floor_fallback,
                      refreshes = out$refreshes, drift_events = out$drift_events,
                      work_capped = out$work_capped, debug_max_error = out$debug_max_error))
+}
+
+#' Whether the joint row-column model can estimate every treatment contrast
+#' (phase 2 spec 5.1b): the residual degrees of freedom of the joint additive
+#' model, n - 1 - (r - 1) - row df - column df, are at least v - 1. Nested:
+#' r (nrows - 1)(ncols - 1) >= v - 1; shared: v r - r - nrows - ncols + 2 >=
+#' v - 1. Necessary for a full-rank design, not sufficient for a given one.
+#' @noRd
+onestage_feasible <- function(v, r, nrows, ncols, latinize) {
+  if (latinize) v * r - r - nrows - ncols + 2 >= v - 1 else r * (nrows - 1) * (ncols - 1) >= v - 1
+}
+
+#' Joint searches at `iterations = 200` (phase 2 spec 6.2); each search has its
+#' own stage 1 design, repair and joint stage.
+#' @noRd
+onestage_searches_at_200 <- 10
+
+#' Number of joint searches of an onestage build: max(1, round(10 iterations /
+#' 200)) (phase 2 spec 6.2). `iterations` sets the joint stage's effort only.
+#' @noRd
+onestage_joint_searches <- function(iterations) {
+  max(1L, as.integer(round(onestage_searches_at_200 * as.double(iterations) / 200)))
+}
+
+#' Admission need of the nested column step of stage 1: the work cap for which
+#' `rows_within_columns()` (its rows the ncols columns of each replicate)
+#' admits the shape, i.e. its fixed cost (one refresh and ten passes) over 0.8.
+#' @noRd
+onestage_column_reserve <- function(v, r, nrows, ncols) {
+  B <- as.double(r) * ncols
+  n <- as.double(v) * r
+  pairs <- as.double(r) * nrows * ncols * (ncols - 1) / 2
+  fixed <- B^3 + n * r + n * B + 10 * pairs * resolvable_evaluation_work(v, r, B)
+  fixed / 0.8 * (1 + 1e-9)
+}
+
+#' Whether the nested row step of stage 1 (`blocks_engine(resolvable = TRUE)`
+#' with nrows blocks per replicate) searches the shape inside `work_cap`
+#' without its own large-design warning: the closed-form two-plot cycle, or
+#' `resolvable_searchable()` for a random start (which implies it for a
+#' lattice start), and the engine's 1e8 cell limit.
+#' @noRd
+onestage_row_step_admitted <- function(v, r, nrows, work_cap) {
+  B <- as.double(r) * nrows
+  if (work_cap <= 0 || v * B > 1e8) return(FALSE)
+  (r == 2 && v == 2 * nrows) || resolvable_searchable(v, r, B, FALSE, work_cap)
+}
+
+#' Predicted work of one onestage search: stage 1, the repair and one joint
+#' search (phase 2 spec 6.1, "Work cap and admission"; Task 8 Step 5).
+#'
+#' PROVISIONAL (2026-11-20, Task 8 implementer): fitted on t <= 200 only; the
+#' controller extends the measurement to t = 300-2000 and finalises this fit
+#' and `onestage_work_limit`.
+#'
+#' Model: 1.5 (E + S). E is the evaluation work the budgets allow: 250 work
+#' units (`resolvable_evaluation_work()`) per evaluation of the row step's
+#' budget (`resolvable_searches()` searches over the r v (v - 1) / 2 pairs
+#' inside the replicates), the column step's (one search nested, 20 shared,
+#' over the r nrows ncols (ncols - 1) / 2 pairs inside the rows) and one joint
+#' search's (`crossed_default_budget()`). S stands for the accepted swaps: n
+#' swaps per search of each step, each costing 4 B^2 + 2 B v for the step's B
+#' blocks (rows Br = r nrows nested or nrows shared, columns Bc likewise, and
+#' the joint stage both its Bj = Br + Bc blocks and the Row state's Br).
+#'
+#' Measurement (tools/measure-onestage-work.R, installed build, work_cap =
+#' Inf, seeds 1-2): every `os` shape with t <= 200, both codings, the 219
+#' shape-codings that pass `onestage_feasible()` (438 runs). Measured work
+#' over the model's E + S: median 0.33, 90th percentile 0.93, largest 1.27
+#' (30/15/4 nested; ratios above 1 occur only below 4e8 work units), so the
+#' factor 1.5 bounds every run. Stage 1 is most of the work (median share
+#' 0.94). The largest run used 8.4e9 units (200/100/4 nested) in 1.24 s on a
+#' loaded machine; throughput was 4-16e9 units per second. Every measured
+#' shape is predicted below 3e10, far below 0.8 of the cap. Not measured:
+#' t >= 300, where the budget term E overstates the work (searches end stale
+#' long before the budget: median 0.36 of the row step's E at t <= 200).
+#' @noRd
+onestage_predicted_work <- function(v, r, nrows, ncols, latinize) {
+  v <- as.double(v)
+  r <- as.double(r)
+  n <- v * r
+  Br <- if (latinize) nrows else r * nrows
+  Bc <- if (latinize) ncols else r * ncols
+  Bj <- Br + Bc
+  swap <- function(B) 4 * B^2 + 2 * B * v
+  row_searches <- if (latinize) 20 else resolvable_searches(Br)
+  col_searches <- if (latinize) 20 else 1
+  budget <- function(searches, pairs) blocks_engine_default_budget(n, searches, pairs, full_passes = TRUE)
+  E <- resolvable_evaluation_work(v, r, Br) * budget(row_searches, r * v * (v - 1) / 2) +
+    resolvable_evaluation_work(v, r, Bc) * budget(col_searches, r * nrows * ncols * (ncols - 1) / 2) +
+    resolvable_evaluation_work(v, r, Bj) * crossed_default_budget(v, r)
+  S <- n * (row_searches * swap(Br) + col_searches * swap(Bc) + swap(Bj) + swap(Br))
+  1.5 * (E + S)
+}
+
+#' Whether the onestage build admits a shape (phase 2 spec 6.1): the
+#' predicted work of stage 1, the repair and one joint search
+#' (`onestage_predicted_work()`) is at most 0.8 of `work_cap`, and the stage 1
+#' steps' own limits hold at that cap, so no step of an admitted build gives
+#' its large-design warning: nested, the row step is admitted with the column
+#' step's need reserved (`onestage_row_step_admitted()`,
+#' `onestage_column_reserve()`) and the column step's blocks fit the block
+#' engine (at most `resolvable_block_limit` blocks and 1e8 cells); shared, the
+#' row and column blocks are at most nrows + ncols and the joint stage's B v
+#' at most 1e8 cells.
+#' @noRd
+onestage_admitted <- function(v, r, nrows, ncols, latinize, work_cap = onestage_work_limit) {
+  v <- as.double(v)
+  r <- as.double(r)
+  B_joint <- if (latinize) nrows + ncols else r * (nrows + ncols)
+  if (v * B_joint > 1e8) return(FALSE)
+  if (!latinize) {
+    if (r * ncols > resolvable_block_limit || v * r * ncols > 1e8) return(FALSE)
+    if (!onestage_row_step_admitted(v, r, nrows,
+                                    work_cap - onestage_column_reserve(v, r, nrows, ncols))) {
+      return(FALSE)
+    }
+  }
+  onestage_predicted_work(v, r, nrows, ncols, latinize) <= 0.8 * work_cap
 }

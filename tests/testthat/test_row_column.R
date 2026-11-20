@@ -39,8 +39,7 @@ joint_aeff <- function(des) {
 # on the rank-deficient block model and underestimated the joint efficiency).
 # For nested (two-stage / latinize = FALSE) designs the rows and columns are
 # taken within each replicate; for latinized designs they are shared across
-# replicates (crossed = TRUE). This value equals the A-Efficiency blocksdesign
-# reports for the full ~ Reps + Rows + Cols model of the corresponding coding.
+# replicates (crossed = TRUE).
 joint_aeff_oracle <- function(fb, crossed = FALSE, with_reps = FALSE) {
   if (crossed) {
     RepRow <- factor(fb$ROW)
@@ -101,8 +100,7 @@ test_that("method = 'onestage' produces a valid resolvable row-column design", {
 })
 
 test_that("method = 'onestage' with latinize = TRUE is valid and latinized", {
-  # Achieving zero clashes depends on the blocksdesign optimizer converging, so
-  # keep this off CRAN where the optimizer version can differ.
+  # Engine results can differ across platforms and builds.
   skip_on_cran()
   des <- row_column(t = 24, nrows = 6, reps = 2, seed = 21, iterations = 30,
                     method = "onestage", latinize = TRUE)
@@ -210,7 +208,7 @@ test_that("reported joint A-Efficiency matches the crossed oracle for latinized 
 test_that("onestage falls back to twostage (with a warning) when over-parameterized", {
   # t = 8, nrows = 4, ncols = 2, r = 2 has no residual df for the nested joint
   # model, so onestage is infeasible; row_column() must fall back to twostage
-  # instead of failing. Depends on blocksdesign erroring for this geometry.
+  # instead of failing.
   skip_on_cran()
   # capture_warnings() so the incidental "NaNs produced" warnings that the
   # two-stage efficiency report emits for such a degenerate design (pre-existing
@@ -220,6 +218,8 @@ test_that("onestage falls back to twostage (with a warning) when over-parameteri
                       method = "onestage", latinize = FALSE)
   )
   expect_match(w, "twostage", all = FALSE)
+  expect_match(w, "returned a twostage design", all = FALSE)
+  expect_false(any(grepl("blocksdesign", w)))
   expect_valid_row_column(des, t = 8, nrows = 4, r = 2)
   # The produced design is the two-stage fallback.
   expect_equal(des$infoDesign$optimization, "twostage")
@@ -229,11 +229,9 @@ test_that("the default (onestage) falls back for a small app-style design", {
   # The Shiny app offers nrows = 2 by default for t = 8 and passes no method or
   # iterations, so the default must not dead-end on such small designs.
   skip_on_cran()
-  expect_warning(
-    des <- row_column(t = 8, nrows = 2, reps = 2, seed = 21),
-    'twostage',
-    class = "fieldhub_design_warning"
-  )
+  w <- capture_warnings(des <- row_column(t = 8, nrows = 2, reps = 2, seed = 21))
+  expect_match(w, "returned a twostage design", all = FALSE)
+  expect_false(any(grepl("blocksdesign", w)))
   expect_valid_row_column(des, t = 8, nrows = 2, r = 2)
   expect_equal(des$infoDesign$optimization, "twostage")
 })
@@ -366,4 +364,88 @@ test_that("row and column A-Bounds follow the reported coding", {
   }
   expect_valid_bounds(row_column(t = 24, nrows = 6, reps = 2, seed = 21, iterations = 20,
                                  method = "twostage"))
+})
+
+row_a <- function(des, i = 1) {
+  bm <- des$blocksModel[[i]]
+  bm$`A-Efficiency`[bm$Level == "Row"]
+}
+
+test_that("onestage reaches the recorded Row optimum", {
+  # Engine results can differ across platforms and builds.
+  skip_on_cran()
+  # Row A of FielDHub 1.7.0's onestage, constant over its seeds (phase 2 spec 6.1).
+  shapes <- list(list(t = 48, nrows = 6, reps = 3, latinize = FALSE, row = 0.8581470),
+                 list(t = 24, nrows = 6, reps = 2, latinize = FALSE, row = 0.6500942),
+                 list(t = 24, nrows = 6, reps = 2, latinize = TRUE, row = 0.8697479))
+  for (s in shapes) {
+    for (seed in 1:3) {
+      des <- row_column(t = s$t, nrows = s$nrows, reps = s$reps, latinize = s$latinize,
+                        seed = seed, iterations = 20)
+      expect_equal(des$infoDesign$optimization, "onestage")
+      expect_gte(row_a(des), s$row - 1.5e-7)
+    }
+  }
+})
+
+test_that("onestage runs where blocksdesign fell back on some seeds", {
+  skip_on_cran()
+  shapes <- list(list(t = 9, nrows = 3, reps = 2, latinize = FALSE),
+                 list(t = 4, nrows = 2, reps = 3, latinize = FALSE),
+                 list(t = 4, nrows = 2, reps = 4, latinize = FALSE),
+                 list(t = 4, nrows = 2, reps = 4, latinize = TRUE))
+  for (s in shapes) {
+    for (seed in 1:10) {
+      w <- capture_warnings(
+        des <- row_column(t = s$t, nrows = s$nrows, reps = s$reps, latinize = s$latinize,
+                          seed = seed)
+      )
+      expect_false(any(grepl("twostage", w)))
+      if (s$latinize) expect_match(w, "full latinization", all = FALSE)
+      expect_equal(des$infoDesign$optimization, "onestage")
+      expect_false(is.na(joint_aeff(des)))
+    }
+  }
+})
+
+test_that("several locations each get their own onestage design", {
+  layout <- function(fb) fb$ENTRY[order(fb$REP, fb$ROW, fb$COLUMN)]
+  for (L in c(FALSE, TRUE)) {
+    des <- row_column(t = 12, nrows = 3, reps = 2, l = 3, seed = 7, iterations = 20,
+                      latinize = L)
+    expect_identical(row_column(t = 12, nrows = 3, reps = 2, l = 3, seed = 7, iterations = 20,
+                                latinize = L), des)
+    fb <- des$fieldBook
+    sites <- unique(fb$LOCATION)
+    expect_length(sites, 3)
+    layouts <- lapply(sites, function(site) layout(fb[fb$LOCATION == site, ]))
+    expect_false(identical(layouts[[1]], layouts[[2]]) && identical(layouts[[2]], layouts[[3]]))
+    for (i in seq_along(sites)) {
+      one <- des
+      one$fieldBook <- fb[fb$LOCATION == sites[i], ]
+      one$blocksModel <- des$blocksModel[i]
+      expect_valid_row_column(one, t = 12, nrows = 3, r = 2)
+    }
+  }
+})
+
+test_that("latinized onestage keeps uploaded labels and has no clashes", {
+  skip_on_cran()
+  labels <- data.frame(ENTRY = 1:24, TREATMENT = paste0("G", 1:24))
+  des <- row_column(t = 24, nrows = 6, reps = 2, seed = 21, iterations = 20,
+                    latinize = TRUE, data = labels)
+  fb <- des$fieldBook
+  expect_true(all(table(factor(fb$TREATMENT, levels = labels$TREATMENT), fb$REP) == 1L))
+  expect_equal(sum(tapply(fb$ROW, fb$TREATMENT, function(x) sum(duplicated(x)))), 0)
+  expect_equal(sum(tapply(fb$COLUMN, fb$TREATMENT, function(x) sum(duplicated(x)))), 0)
+})
+
+test_that("iterations sets the joint effort only", {
+  skip_on_cran()
+  # The rows are searched in full whatever iterations is.
+  des <- row_column(t = 24, nrows = 6, reps = 2, seed = 3, iterations = 1)
+  expect_equal(des$infoDesign$optimization, "onestage")
+  expect_gte(row_a(des), 0.6500942 - 1.5e-7)
+  expect_no_warning(big <- row_column(t = 12, nrows = 3, reps = 2, seed = 5, iterations = 5000))
+  expect_identical(row_column(t = 12, nrows = 3, reps = 2, seed = 5, iterations = 5000), big)
 })

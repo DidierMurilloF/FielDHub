@@ -56,62 +56,119 @@ improve_efficiency <- function(design, iterations, seed) {
   )
 }
 
-# Function to build a resolvable row-column layout in a single optimization
-# stage using blocksdesign::design() (Genstat "onestage" method), instead of
-# the two-stage method (columns first, then the block engine's row search).
-# Rows and columns are optimized jointly.
-# Returns a data frame with the same structure as the two-stage best_design
-# (Level_1 = Rep, Level_2 = Column, Level_3 = Row, plots, treatments) so the
-# downstream field book construction is unchanged.
+# Builds a resolvable row-column layout with the staged onestage search of
+# FielDHub's block engine (phase 2 spec 6.1 and 6.2): per joint search, a
+# rows-first stage 1 design (onestage_stage1()), then the joint-rank repair and
+# the joint stage (crossed_search()). `searches` is the row_column()
+# `iterations`: it sets the number of joint searches only
+# (onestage_joint_searches()); stage 1 and the repair always run in full.
+#
+# - A shape that onestage_admitted() refuses aborts with class
+#   onestage_not_admitted (also onestage_infeasible); a shape that fails the
+#   degrees-of-freedom rule (onestage_feasible()) aborts with
+#   onestage_infeasible. row_column() turns both into the twostage fallback.
+# - Otherwise the generator is seeded once with `seed` and the searches run in
+#   turn from that stream, each building its own stage 1 design. One work cap,
+#   onestage_work_limit, covers the whole build: each engine call gets the
+#   work left, and once it is spent no further search starts. A later search
+#   whose stage 1 would not finish inside the work left is not run; the first
+#   search's is an admission defect and aborts as not admitted.
+# - Return rule (spec 6.2): of the searches whose design has a joint
+#   A-efficiency (row_column_joint_efficiency(), the report's full-rank test),
+#   keep those within 1.5e-7 of the best Row D, then of the best Row A (the
+#   engine's unrounded values), then return the highest joint D, the earliest
+#   on a tie. If none is full rank it aborts with onestage_infeasible
+#   (onestage_not_admitted when the work cap cut a search short).
+#
+# Returns a data frame with the structure of the pre-change builder
+# (tools/reference-onestage.R): Level_1 = Rep, Level_2 = Column, Level_3 = Row,
+# plots, treatments, all factors, in plot order replicate, row, column; rows
+# and columns are labelled "<rep>_<i>" when nested and "<i>" when shared.
 #' @noRd
 build_row_column_onestage <- function(nt, nrows, ncols, reps, latinize, searches, seed) {
   validate_iteration_budget(searches, "searches")
-  N <- nt * reps
-  trt  <- gl(nt, reps, N)      # each treatment replicated reps times
-  Reps <- gl(reps, nt, N)      # replicate blocking factor
-  RowW <- gl(nrows, ncols, N)  # row within replicate (1..nrows)
-  ColW <- gl(ncols, 1, N)      # column within replicate (1..ncols)
-  if (latinize) {
-    # Crossed (latinized) row/column effects shared across replicates
-    Rows <- factor(RowW)
-    Cols <- factor(ColW)
-  } else {
-    # Nested row/column effects within each replicate (standard resolvable RC)
-    Rows <- factor(paste(Reps, RowW, sep = "_"))
-    Cols <- factor(paste(Reps, ColW, sep = "_"))
+  where <- paste0("t = ", nt, ", nrows = ", nrows, ", r = ", reps)
+  if (!onestage_admitted(nt, reps, nrows, ncols, latinize)) {
+    fieldhub_abort("The onestage search does not admit this design (", where, ").",
+                   class = c("onestage_not_admitted", "onestage_infeasible",
+                             "fieldhub_optimization_error"), call = NULL)
   }
-  optd <- tryCatch(
-    blocksdesign::design(
-      treatments = data.frame(treatments = trt),
-      blocks     = data.frame(Reps = Reps, Rows = Rows, Cols = Cols),
-      searches   = searches,
-      seed       = seed
-    ),
-    error = function(e) e
-  )
-  if (inherits(optd, "error")) {
-    # The joint row-and-column model is (most often) over-parameterized for a
-    # design this small. Signal a recoverable, classed condition that carries the
-    # underlying blocksdesign message, so the caller can fall back to the
-    # two-stage method while still surfacing (not masking) an unrelated failure.
-    fieldhub_abort(
-      conditionMessage(optd),
-      class = c("onestage_infeasible", "fieldhub_optimization_error"),
-      data = list(parent = optd),
-      call = NULL
-    )
+  if (!onestage_feasible(nt, reps, nrows, ncols, latinize)) {
+    fieldhub_abort("The joint row-and-column model has too few residual degrees of freedom (",
+                   where, ").",
+                   class = c("onestage_infeasible", "fieldhub_optimization_error"), call = NULL)
   }
-  des <- optd$Design
-  # Map to the two-stage layout structure (Level_2 = columns, Level_3 = rows),
-  # keeping the design() ordering (Reps, Rows, Cols).
-  best_design <- data.frame(
-    Level_1    = factor(des$Reps, levels = unique(des$Reps)),
-    Level_2    = factor(des$Cols, levels = unique(des$Cols)),
-    Level_3    = factor(des$Rows, levels = unique(des$Rows)),
-    plots      = des$plots,
-    treatments = des$treatments
+  set.seed(seed)
+  left <- onestage_work_limit
+  results <- list()
+  cut_short <- FALSE
+  for (s in seq_len(onestage_joint_searches(searches))) {
+    if (left <= 0) break
+    stage1 <- tryCatch(onestage_stage1(nt, nrows, ncols, reps, latinize, work_cap = left),
+                       onestage_not_admitted = function(cnd) cnd)
+    if (inherits(stage1, "onestage_not_admitted")) {
+      if (s == 1L) {
+        fieldhub_abort(conditionMessage(stage1),
+                       class = c("onestage_not_admitted", "onestage_infeasible",
+                                 "fieldhub_optimization_error"),
+                       data = list(parent = stage1), call = NULL)
+      }
+      break
+    }
+    left <- left - stage1$work
+    if (left <= 0) {
+      if (s == 1L) {
+        fieldhub_abort("The onestage stage 1 used the whole work cap (", where, ").",
+                       class = c("onestage_not_admitted", "onestage_infeasible",
+                                 "fieldhub_optimization_error"), call = NULL)
+      }
+      break
+    }
+    joint <- crossed_search(stage1$treatments, nt, reps, nrows, ncols, shared = latinize,
+                            work_cap = left)
+    left <- left - joint$search$work
+    results[[s]] <- joint
+    if (isTRUE(joint$search$work_capped)) {
+      cut_short <- TRUE
+      break
+    }
+  }
+  designs <- lapply(results, function(x) onestage_design_frame(x$treatments, nt, nrows, ncols,
+                                                               reps, latinize))
+  kept <- which(vapply(seq_along(results), function(i) {
+    isTRUE(results[[i]]$full_rank) &&
+      !is.na(row_column_joint_efficiency(designs[[i]])$Aeffic)
+  }, logical(1)))
+  if (length(kept) == 0L) {
+    fieldhub_abort("No onestage search found a full-rank design (", where, ").",
+                   class = c(if (cut_short) "onestage_not_admitted", "onestage_infeasible",
+                             "fieldhub_optimization_error"), call = NULL)
+  }
+  value <- function(name) vapply(results[kept], function(x) x[[name]], numeric(1))
+  row_d <- value("row_d")
+  kept <- kept[row_d >= max(row_d) - 1.5e-7]
+  row_a <- value("row_a")
+  kept <- kept[row_a >= max(row_a) - 1.5e-7]
+  joint_d <- value("joint_d")
+  designs[[kept[which.max(joint_d)]]]
+}
+
+# The onestage output frame (structure of tools/reference-onestage.R) of a
+# design given as 1-based treatments in plot order replicate, row, column.
+#' @noRd
+onestage_design_frame <- function(treatments, nt, nrows, ncols, reps, latinize) {
+  rep_of <- rep(seq_len(reps), each = nt)
+  row_in <- rep(rep(seq_len(nrows), each = ncols), reps)
+  col_in <- rep(seq_len(ncols), nrows * reps)
+  rows <- if (latinize) as.character(row_in) else paste(rep_of, row_in, sep = "_")
+  cols <- if (latinize) as.character(col_in) else paste(rep_of, col_in, sep = "_")
+  data.frame(
+    Level_1    = factor(rep_of, levels = seq_len(reps)),
+    Level_2    = factor(cols, levels = unique(cols)),
+    Level_3    = factor(rows, levels = unique(rows)),
+    plots      = factor(seq_len(nt * reps)),
+    treatments = factor(treatments, levels = seq_len(nt))
   )
-  return(best_design)
 }
 
 # Function to calculate the joint (combined) row-by-column A- and D-Efficiency

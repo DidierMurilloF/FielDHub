@@ -27,25 +27,39 @@
 #' differ.
 #'
 #' When \code{method = "onestage"} (the default, also called simultaneous),
-#' the rows and columns are optimized jointly in a single stage with
-#' \code{blocksdesign::design()} instead of optimizing the columns first and the
-#' rows afterwards. The joint row-by-column A-Efficiency of the standard analysis
-#' model (rows and columns adjusted together) is reported as the
+#' the rows and columns are optimized together by FielDHub's block engine, in
+#' stages. First the rows are searched on their own, as incomplete blocks
+#' within each replicate, and the columns are then arranged within the rows
+#' without changing them. A joint stage then improves the joint row-by-column
+#' D-criterion of the standard analysis model (rows and columns adjusted
+#' together) with swaps of two plots of the same replicate, accepting a swap
+#' only if it does not lower the row efficiencies reached in the first stage;
+#' a first-stage design whose joint model is singular is repaired before this
+#' stage. Several joint searches are run, each from its own first-stage
+#' design; of those that end with a joint model of full rank, the one with the
+#' best row D- and A-Efficiency, and then the best joint D-Efficiency, is
+#' returned. The joint row-by-column A-Efficiency is reported as the
 #' \code{Row-by-Column} row of \code{blocksModel}. With the default
-#' \code{latinize = FALSE} the joint optimization targets this within-replicate
-#' criterion and typically increases it relative to \code{"twostage"}; with
-#' \code{latinize = TRUE} it instead targets the across-replicate latinization
-#' described below. The per-factor (marginal) \code{Row} and \code{Column}
-#' A-Efficiencies are already close to optimal under both methods and differ only
-#' slightly between them (and not systematically in one direction). The size of
-#' the joint gain is layout-dependent and tends to be largest for small designs
-#' with few replicates. For \code{method = "onestage"}, the \code{iterations}
-#' argument is passed to \code{blocksdesign::design()} as its number of
-#' \code{searches}. For a very small design, the joint one-stage model can be
-#' over-parameterized (no residual degrees of freedom); in that case
-#' \code{row_column()} issues a warning and automatically falls back to
-#' \code{method = "twostage"} rather than failing, so a design is still
-#' produced.
+#' \code{latinize = FALSE} the rows and columns are nested within the
+#' replicates, the criterion that \code{"twostage"} also uses, and the joint
+#' efficiency is typically higher than with \code{"twostage"}; with
+#' \code{latinize = TRUE} the rows and columns are shared across replicates
+#' (see below). The size of the joint gain is layout-dependent and tends to be
+#' largest for small designs with few replicates. For \code{method =
+#' "onestage"}, \code{iterations} sets the effort of the joint stage only (see
+#' \code{iterations}).
+#'
+#' \code{method = "onestage"} falls back to \code{method = "twostage"} with a
+#' single warning, rather than failing, so a design is still produced, when:
+#' \itemize{
+#'   \item the joint row-and-column model has too few residual degrees of
+#'   freedom to estimate every treatment comparison (very small designs), or no
+#'   joint search found a design whose joint model has full rank;
+#'   \item the design is too large for the one-stage search, whose total work
+#'   is capped so that a call ends in a bounded time.
+#' }
+#' The fallback design is a nested twostage design: with \code{latinize =
+#' TRUE} the warning says that the returned design is not latinized.
 #'
 #' Setting \code{latinize = TRUE} (only available with \code{method =
 #' "onestage"}) codes the rows and columns as crossed blocking factors shared
@@ -73,9 +87,13 @@
 #' @param locationNames (optional) Names for each location.
 #' @param iterations Finite positive whole-number optimization budget, at most
 #' \code{.Machine$integer.max}. Its meaning and default
-#' depend on \code{method}. For \code{method = "onestage"} it is passed to
-#' \code{blocksdesign::design()} as its number of \code{searches} (default 200;
-#' values beyond a few hundred rarely improve the design). For
+#' depend on \code{method}. For \code{method = "onestage"} it is the effort of
+#' the joint stage only: the number of joint searches is
+#' \code{max(1, round(10 * iterations / 200))}, so the default 200 runs 10
+#' joint searches and values up to 29 run one. The first stage (the row search
+#' and the columns within the rows) and the repair of a singular joint model
+#' always run in full, whatever \code{iterations} is. The total work of a call
+#' is capped, so a very large value stops once the cap is spent. For
 #' \code{method = "twostage"} it is the effort of the row search: its default
 #' evaluation budget is scaled by \code{iterations / 1000}, so the default
 #' 1000 is the full search, smaller values stop it earlier (1 is the smallest
@@ -85,25 +103,27 @@
 #' @param data (optional) Data frame with label list of treatments
 #' @param method Optimization strategy for the row and column blocking factors.
 #' Either \code{"onestage"} (default) or \code{"twostage"}. With
-#' \code{"onestage"} (also known as simultaneous) the rows and columns are
-#' optimized jointly with \code{blocksdesign::design()}, which usually yields a
-#' higher joint row-by-column A-Efficiency while leaving the per-factor row and
-#' column efficiencies almost unchanged (see Details and the
-#' \code{Row-by-Column} row of \code{blocksModel}); for \code{"onestage"} the
-#' \code{iterations} argument is passed as the number of \code{searches} to
-#' \code{blocksdesign::design()}. With \code{"twostage"} the columns are
+#' \code{"onestage"} (also known as simultaneous) FielDHub's block engine
+#' searches the rows first and then improves the joint row-by-column
+#' D-criterion without lowering the row efficiencies, which usually yields a
+#' higher joint row-by-column A-Efficiency (see Details and the
+#' \code{Row-by-Column} row of \code{blocksModel}); \code{iterations} sets the
+#' effort of its joint stage. With \code{"twostage"} the columns are
 #' optimized first, as blocks nested in replicates, by FielDHub's own block
 #' engine, and the rows are then improved by the same engine, keeping the
-#' columns fixed. \code{"onestage"} automatically falls back to \code{"twostage"}
-#' (with a warning) for very small designs whose joint one-stage model is
-#' over-parameterized, so \code{"twostage"} rarely has to be requested
-#' explicitly.
+#' columns fixed. \code{"onestage"} falls back to \code{"twostage"}, with one
+#' warning, for very small designs whose joint model has too few residual
+#' degrees of freedom (or where no full-rank joint design was found) and for
+#' designs too large for the one-stage search, so \code{"twostage"} rarely has
+#' to be requested explicitly.
 #' @param latinize If \code{TRUE}, optimize the row and column blocking factors
 #' as crossed (latinized) effects shared across the replicates, so that each
 #' treatment tends to appear in different rows and columns across the replicates.
 #' By default \code{FALSE}. Only meaningful with \code{method = "onestage"}; it
 #' is ignored for \code{method = "twostage"} (which cannot latinize across
 #' replicates), where passing \code{latinize = TRUE} is ignored with a warning.
+#' If \code{method = "onestage"} falls back to \code{"twostage"} (see Details),
+#' the returned design is not latinized and the warning says so.
 #'
 #' @author Didier Murillo [aut],
 #'         Salvador Gezan [aut],
@@ -129,15 +149,11 @@
 #' }
 #'
 #'
-#' @references
-#' Edmondson., R. N. (2021). blocksdesign: Nested and crossed block designs for 
-#' factorial and unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign
-#'
 #' @examples
 #' 
 #' # Example 1: Generates a row-column design with 2 full blocks and 24 treatments
 #' # and 6 rows, for one location. This uses the default method = "onestage", for
-#' # which a small number of iterations (passed as searches) already captures most
+#' # which a small number of iterations (one joint search) already captures most
 #' # of the joint-efficiency gain.
 #' rowcold1 <- row_column(
 #'   t = 24, 
@@ -215,8 +231,8 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
   )
   method <- match_design_choice(method, c("onestage", "twostage"), "method")
   # iterations has a method-specific meaning and default: for "onestage" it is
-  # the number of blocksdesign::design() searches (a few hundred already
-  # captures the gain), for "twostage" the effort of the row search
+  # the effort of the joint stage (onestage_joint_searches(): 10 joint searches
+  # at 200), for "twostage" the effort of the row search
   # (improve_efficiency(): the engine's budget scaled by iterations / 1000).
   # When left NULL, pick a value appropriate to the method.
   if (is.null(iterations)) {
@@ -307,12 +323,13 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
     reps <- r
     ncols <- nt / nunits
     if (method == "onestage") {
-      # One-stage: optimize rows and columns jointly with design(). If the joint
-      # model is over-parameterized for a design this small, design() errors;
-      # rather than failing, fall back to the two-stage method with a warning so
-      # small designs (and the Shiny app, which does not expose method) still
-      # produce a design. The dimensions are identical across locations, so the
-      # fallback, once triggered, applies to the remaining locations too.
+      # One-stage: FielDHub's staged search of rows and columns
+      # (build_row_column_onestage()). A shape the search does not admit, or
+      # whose joint model cannot be fitted (too few residual degrees of freedom,
+      # or no full-rank design found), falls back to the two-stage method with
+      # one warning, so small designs (and the Shiny app, which does not expose
+      # method) still produce a design. Once triggered, the fallback applies to
+      # the remaining locations too.
       onestage_fit <- tryCatch(
         build_row_column_onestage(
           nt = nt, nrows = nrows, ncols = ncols, reps = reps,
@@ -321,15 +338,27 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
         onestage_infeasible = function(cnd) cnd
       )
       if (inherits(onestage_fit, "onestage_infeasible")) {
-        fieldhub_warn(
-          'method = "onestage" is not feasible for these dimensions ',
-          '(t = ', nt, ', nrows = ', nrows, ', r = ', r, '): the joint ',
-          'one-stage row-and-column model is over-parameterized, so ',
-          'row_column() falls back to method = "twostage". ',
-          'blocksdesign::design() reported: ',
-          conditionMessage(onestage_fit),
-          class = "fieldhub_design_warning", call = NULL
-        )
+        not_latinized <- if (latinize) {
+          paste0(" The returned design is not latinized: its rows and columns are nested ",
+                 "within replicates.")
+        } else ""
+        dims <- paste0("(t = ", nt, ", nrows = ", nrows, ", r = ", r, ")")
+        if (inherits(onestage_fit, "onestage_not_admitted")) {
+          fieldhub_warn(
+            "The design ", dims, " is too large for the one-stage search, so ",
+            'method = "onestage" was not run and row_column() returned a twostage design.',
+            not_latinized,
+            class = "fieldhub_design_warning", call = NULL
+          )
+        } else {
+          fieldhub_warn(
+            'method = "onestage" is not feasible for these dimensions ', dims,
+            ": the joint row-and-column model has too few residual degrees of freedom, ",
+            'or no full-rank design was found, so method = "onestage" was not run and ',
+            "row_column() returned a twostage design.", not_latinized,
+            class = "fieldhub_design_warning", call = NULL
+          )
+        }
         method <- "twostage"
       } else {
         field_book_best_design <- onestage_fit
