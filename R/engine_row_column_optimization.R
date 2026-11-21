@@ -81,11 +81,14 @@ improve_efficiency <- function(design, iterations, seed) {
 # - Return rule (spec 6.2): of the searches the engine ends full rank, keep
 #   those within 1.5e-7 of the best Row D, then of the best Row A (the
 #   engine's unrounded values), then take the highest joint D, the earliest
-#   on a tie (onestage_best_search()). The report's full-rank test
-#   (row_column_joint_efficiency() gives a joint A-efficiency) is confirmed on
-#   that search only: it is an n x v QR and a v x v eigen problem, too costly
-#   to run on every search. If it fails, the search is dropped and the rest
-#   are ranked again. If no search is left it aborts with onestage_infeasible
+#   on a tie (onestage_best_search()). This is applied to the searches that
+#   also pass the report's full-rank test (row_column_joint_efficiency() gives
+#   a joint A-efficiency), exactly as if they were filtered first, but that
+#   test is an n x v QR and a v x v eigen problem, so it is run (once per
+#   search, cached) only on the searches the outcome rests on: the one with
+#   the best Row D, the one with the best Row A among those kept for Row D,
+#   and the winner. If one of them fails it is dropped and the rest are
+#   ranked again. If no search is left it aborts with onestage_infeasible
 #   (onestage_not_admitted when the work cap cut a search short).
 #
 # Returns a data frame with the structure of the pre-change builder
@@ -148,31 +151,49 @@ build_row_column_onestage <- function(nt, nrows, ncols, reps, latinize, searches
   row_a <- value("row_a")
   joint_d <- value("joint_d")
   candidates <- which(vapply(results, function(x) isTRUE(x$full_rank), logical(1)))
+  designs <- vector("list", length(results))
+  joint_efficiency <- vector("list", length(results))
+  confirmed <- function(i) {
+    if (is.null(joint_efficiency[[i]])) {
+      designs[[i]] <<- onestage_design_frame(results[[i]]$treatments, nt, nrows, ncols, reps,
+                                             latinize)
+      joint_efficiency[[i]] <<- row_column_joint_efficiency(designs[[i]])
+    }
+    !is.na(joint_efficiency[[i]]$Aeffic)
+  }
   while (length(candidates) > 0L) {
-    pick <- candidates[onestage_best_search(row_d[candidates], row_a[candidates],
+    # The best Row D search, the best Row A search and the winner, in this order
+    best <- candidates[onestage_best_search(row_d[candidates], row_a[candidates],
                                             joint_d[candidates])]
-    design <- onestage_design_frame(results[[pick]]$treatments, nt, nrows, ncols, reps, latinize)
-    joint_efficiency <- row_column_joint_efficiency(design)
-    if (!is.na(joint_efficiency$Aeffic)) {
-      attr(design, "joint_efficiency") <- joint_efficiency
+    failed <- unique(best)[!vapply(unique(best), confirmed, logical(1))]
+    if (length(failed) == 0L) {
+      pick <- best[3L]
+      design <- designs[[pick]]
+      attr(design, "joint_efficiency") <- joint_efficiency[[pick]]
       return(design)
     }
-    candidates <- setdiff(candidates, pick)
+    candidates <- setdiff(candidates, failed)
   }
   fieldhub_abort("No onestage search found a full-rank design (", where, ").",
                  class = c(if (cut_short) "onestage_not_admitted", "onestage_infeasible",
                            "fieldhub_optimization_error"), call = NULL)
 }
 
-# The search the onestage return rule picks (spec 6.2), as its position in
-# the vectors: within 1.5e-7 of the highest Row D, then within 1.5e-7 of the
-# highest Row A among those, then the highest joint D, the earliest on a tie.
+# The onestage return rule (spec 6.2) on the given searches: keep those
+# within 1.5e-7 of the highest Row D, then those within 1.5e-7 of the highest
+# Row A among them, then take the highest joint D, the earliest on a tie.
+# Returns the positions of the searches the outcome rests on: `row_d`, a
+# search with the highest Row D; `row_a`, one with the highest Row A among
+# those kept for Row D; and the `winner`. If all three belong to a subset of
+# the searches, the winner is also the rule's winner on that subset.
 #' @noRd
 onestage_best_search <- function(row_d, row_a, joint_d) {
   kept <- seq_along(row_d)
-  kept <- kept[row_d[kept] >= max(row_d[kept]) - 1.5e-7]
-  kept <- kept[row_a[kept] >= max(row_a[kept]) - 1.5e-7]
-  kept[which.max(joint_d[kept])]
+  best_d <- kept[which.max(row_d[kept])]
+  kept <- kept[row_d[kept] >= row_d[best_d] - 1.5e-7]
+  best_a <- kept[which.max(row_a[kept])]
+  kept <- kept[row_a[kept] >= row_a[best_a] - 1.5e-7]
+  c(row_d = best_d, row_a = best_a, winner = kept[which.max(joint_d[kept])])
 }
 
 # The onestage output frame (structure of tools/reference-onestage.R) of a
