@@ -23,6 +23,10 @@
 # 1..5 at t = 500. shard=i/k runs shard i of k (rows spread by
 # longest-processing-time on (t r)^2 x seeds). Judge the result with
 # nested_speed() (tests/testthat/helper-nested-goldens.R).
+#
+# <pairs.csv>.meta.rds records the provenance of the run: the version and
+# library path of FielDHub and of blocksdesign (which the reference builder
+# calls), R, the platform, the grid, the seeds and the shard.
 arguments <- commandArgs(trailingOnly = TRUE)
 option <- function(name, default) {
   hit <- grep(paste0("^", name, "="), arguments, value = TRUE)
@@ -68,6 +72,17 @@ for (i in order(-cost, seq_along(cost))) {
   load[owner[i]] <- load[owner[i]] + cost[i]
 }
 grid <- grid[owner == ik[1], , drop = FALSE]
+
+saveRDS(list(FielDHub = as.character(utils::packageVersion("FielDHub")),
+             FielDHub_path = find.package("FielDHub"),
+             blocksdesign = tryCatch(as.character(utils::packageVersion("blocksdesign")),
+                                     error = function(e) NA_character_),
+             blocksdesign_path = tryCatch(find.package("blocksdesign"),
+                                          error = function(e) NA_character_),
+             R = R.version.string, platform = R.version$platform,
+             grid_name = grid_name, seeds = seeds, shard = shard,
+             grid = grid[c("caller", "t", "k", "r", "iterations", "seeds")]),
+        paste0(path, ".meta.rds"))
 
 timed <- function(builder, args) {
   system.time(tryCatch(suppressWarnings(do.call(builder, args)), error = function(e) NULL))[["elapsed"]]

@@ -213,10 +213,15 @@ test_that("onestage falls back to twostage (with a warning) when over-parameteri
   # capture_warnings() so the incidental "NaNs produced" warnings that the
   # two-stage efficiency report emits for such a degenerate design (pre-existing
   # behaviour, unrelated to the fallback) do not clutter the test output.
-  w <- capture_warnings(
+  fallback <- NULL
+  w <- capture_warnings(withCallingHandlers(
     des <- row_column(t = 8, nrows = 4, reps = 2, seed = 21, iterations = 20,
-                      method = "onestage", latinize = FALSE)
-  )
+                      method = "onestage", latinize = FALSE),
+    warning = function(cnd) {
+      if (grepl("returned a twostage design", conditionMessage(cnd))) fallback <<- cnd
+    }
+  ))
+  expect_s3_class(fallback, "fieldhub_design_warning")
   expect_match(w, "twostage", all = FALSE)
   expect_match(w, "returned a twostage design", all = FALSE)
   expect_false(any(grepl("blocksdesign", w)))
@@ -229,7 +234,14 @@ test_that("the default (onestage) falls back for a small app-style design", {
   # The Shiny app offers nrows = 2 by default for t = 8 and passes no method or
   # iterations, so the default must not dead-end on such small designs.
   skip_on_cran()
-  w <- capture_warnings(des <- row_column(t = 8, nrows = 2, reps = 2, seed = 21))
+  fallback <- NULL
+  w <- capture_warnings(withCallingHandlers(
+    des <- row_column(t = 8, nrows = 2, reps = 2, seed = 21),
+    warning = function(cnd) {
+      if (grepl("returned a twostage design", conditionMessage(cnd))) fallback <<- cnd
+    }
+  ))
+  expect_s3_class(fallback, "fieldhub_design_warning")
   expect_match(w, "returned a twostage design", all = FALSE)
   expect_false(any(grepl("blocksdesign", w)))
   expect_valid_row_column(des, t = 8, nrows = 2, r = 2)

@@ -98,12 +98,21 @@ segmented_blocks <- function(start, block_of, segment_of, treatments, replicates
 #' admission need (`onestage_column_reserve()`), so a row step that ends below
 #' its cap always leaves the column step admitted. Each step is checked
 #' against its own admission before it runs. A step that its admission would
-#' refuse, a step that stops on its work cap, and a warning from a step (a
-#' time limit) all abort with class `onestage_not_admitted` (also
-#' `onestage_infeasible`): the stage did not finish inside the work cap it was
-#' given, so the shape (or, for a later search of a build, the work left) is
-#' too small for it. Stage 1 never warns. Draws from R's generator; the caller
-#' owns the seed.
+#' refuse, a step that stops on its work cap and a callee's own large-design
+#' refusal (class `fieldhub_search_refused_warning`) all abort with class
+#' `onestage_not_admitted` (also `onestage_infeasible`): the stage did not
+#' finish inside the work cap it was given, so the shape (or, for a later
+#' search of a build, the work left) is too small for it. These stops depend
+#' on the work counts only, so they are reproducible from the seed.
+#'
+#' Any other warning of a step is passed on unchanged. A step that stops at
+#' its 60 s time limit therefore warns once (`fieldhub_design_warning`, "may
+#' not be reproducible from the seed"), as `crossed_search()` does, and the
+#' stage goes on with that step's design.
+#'
+#' A row step that finds no connected design aborts with class
+#' `onestage_infeasible` (no full-rank design can follow), so `row_column()`
+#' falls back to twostage. Draws from R's generator; the caller owns the seed.
 #'
 #' @return A list with `treatments` (1-based, canonical plot order, every
 #'   replicate holding each treatment once), `work` (the work units used) and
@@ -125,9 +134,17 @@ onestage_stage1 <- function(nt, nrows, ncols, reps, latinize, work_cap = onestag
                              "fieldhub_optimization_error"),
                    data = list(parent = parent), call = NULL)
   }
+  unconnected <- function(parent = NULL) {
+    fieldhub_abort("The onestage stage 1 row search found no connected design", where, ".",
+                   class = c("onestage_infeasible", "fieldhub_optimization_error"),
+                   data = list(treatments = nt, nrows = nrows, replicates = reps, parent = parent),
+                   call = NULL)
+  }
+  # Only a callee's large-design refusal becomes a refusal of the stage; a
+  # time-limit warning, or any other, reaches the caller as it is.
   step <- function(name, expr) {
-    withCallingHandlers(expr, warning = function(w) {
-      refuse(paste0(name, " step stopped on a warning: ", conditionMessage(w)), w)
+    withCallingHandlers(expr, fieldhub_search_refused_warning = function(w) {
+      refuse(paste0(name, " step was refused by its search: ", conditionMessage(w)), w)
     })
   }
   capped <- function(name, search) {
@@ -143,7 +160,10 @@ onestage_stage1 <- function(nt, nrows, ncols, reps, latinize, work_cap = onestag
     if (!onestage_row_step_admitted(v, r, nrows, row_cap)) {
       refuse("row step is not admitted inside the work cap")
     }
-    rows <- step("row", blocks_engine(v, r, nrows, resolvable = TRUE, work_cap = row_cap))
+    rows <- tryCatch(
+      step("row", blocks_engine(v, r, nrows, resolvable = TRUE, work_cap = row_cap)),
+      fieldhub_unconnected_error = function(e) unconnected(e)
+    )
     capped("row", rows$search)
     # Plot order of the engine output: replicate, row (block), plot in row,
     # which is the canonical order with the plot's position as its column.
@@ -160,11 +180,7 @@ onestage_stage1 <- function(nt, nrows, ncols, reps, latinize, work_cap = onestag
     start <- as.vector(vapply(seq_len(r), function(m) sample.int(v), integer(v)))
     rows <- step("row", segmented_blocks(start, row_in, rep_of, v, r, nrows, work_cap = work_cap))
     capped("row", rows$search)
-    if (is.na(rows$a_efficiency)) {
-      fieldhub_abort("The onestage stage 1 row search found no connected design", where, ".",
-                     class = "fieldhub_numerical_error",
-                     data = list(treatments = nt, nrows = nrows, replicates = reps), call = NULL)
-    }
+    if (is.na(rows$a_efficiency)) unconnected()
     row_work <- used(rows$search)
     if (work_cap - row_work <= 0) refuse("row step used the whole work cap")
     cols <- step("column", segmented_blocks(rows$treatments, col_in, (rep_of - 1L) * nrows + row_in,

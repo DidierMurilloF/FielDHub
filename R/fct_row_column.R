@@ -322,6 +322,7 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
   for (i in 1:l) {
     reps <- r
     ncols <- nt / nunits
+    joint_known <- NULL
     if (method == "onestage") {
       # One-stage: FielDHub's staged search of rows and columns
       # (build_row_column_onestage()). A shape the search does not admit, or
@@ -361,6 +362,9 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
         }
         method <- "twostage"
       } else {
+        # The builder's joint efficiency of this design is reused by the report.
+        joint_known <- attr(onestage_fit, "joint_efficiency")
+        attr(onestage_fit, "joint_efficiency") <- NULL
         field_book_best_design <- onestage_fit
       }
     }
@@ -394,7 +398,8 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
     }
     # The flag describes the reported design, after any fallback (spec 6.2).
     row_column_efficiency <- report_efficiency(field_book_best_design,
-                                               nested = method == "twostage" || !latinize)
+                                               nested = method == "twostage" || !latinize,
+                                               joint = joint_known)
     blocks_model[[i]] <- row_column_efficiency
     row_col_fieldbook <- field_book_best_design |>
       dplyr::rename(

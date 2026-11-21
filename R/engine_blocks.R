@@ -149,7 +149,7 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
                   "optimized: it is a random connected resolvable design. ",
                   if (total_blocks > resolvable_block_limit) "A larger block size gives fewer blocks and may allow an optimized design."
                   else "Fewer treatments may allow an optimized design.",
-                  class = "fieldhub_design_warning", call = NULL)
+                  class = c("fieldhub_search_refused_warning", "fieldhub_design_warning"), call = NULL)
     return(random_resolvable_design(treatments, replicates, blocks))
   }
   pairs <- if (resolvable) replicates * v * (v - 1) / 2 else n * (n - 1) / 2
@@ -498,7 +498,7 @@ rows_within_columns <- function(start, column_of, treatments, replicates, rows, 
       B^3 + n * r + n * B + 10 * pairs * evaluation_work > 0.8 * work_cap) {
     fieldhub_warn("The rows of the design (", treatments, " treatments in ", B,
                   " rows) are too many for the row search, so they were not optimized.",
-                  class = "fieldhub_design_warning", call = NULL)
+                  class = c("fieldhub_search_refused_warning", "fieldhub_design_warning"), call = NULL)
     return(unchanged("unoptimised"))
   }
   score <- resolvable_score_cpp(as.integer(v), as.integer(r), as.integer(B), as.integer(start))

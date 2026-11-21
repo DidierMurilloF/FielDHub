@@ -71,19 +71,29 @@ improve_efficiency <- function(design, iterations, seed) {
 #   turn from that stream, each building its own stage 1 design. One work cap,
 #   onestage_work_limit, covers the whole build: each engine call gets the
 #   work left, and once it is spent no further search starts. A later search
-#   whose stage 1 would not finish inside the work left is not run; the first
-#   search's is an admission defect and aborts as not admitted.
-# - Return rule (spec 6.2): of the searches whose design has a joint
-#   A-efficiency (row_column_joint_efficiency(), the report's full-rank test),
-#   keep those within 1.5e-7 of the best Row D, then of the best Row A (the
-#   engine's unrounded values), then return the highest joint D, the earliest
-#   on a tie. If none is full rank it aborts with onestage_infeasible
+#   whose stage 1 would not finish inside the work left, or finds no connected
+#   row design, is not run and ends the build's searches; the first search's
+#   aborts (not admitted: an admission defect; no connected design:
+#   onestage_infeasible). Only these stops, which depend on the work counts
+#   and the seed alone, end the searches without a warning. A stage that stops
+#   at its 60 s time limit warns (fieldhub_design_warning, from the stage) and
+#   the build goes on.
+# - Return rule (spec 6.2): of the searches the engine ends full rank, keep
+#   those within 1.5e-7 of the best Row D, then of the best Row A (the
+#   engine's unrounded values), then take the highest joint D, the earliest
+#   on a tie (onestage_best_search()). The report's full-rank test
+#   (row_column_joint_efficiency() gives a joint A-efficiency) is confirmed on
+#   that search only: it is an n x v QR and a v x v eigen problem, too costly
+#   to run on every search. If it fails, the search is dropped and the rest
+#   are ranked again. If no search is left it aborts with onestage_infeasible
 #   (onestage_not_admitted when the work cap cut a search short).
 #
 # Returns a data frame with the structure of the pre-change builder
 # (tools/reference-onestage.R): Level_1 = Rep, Level_2 = Column, Level_3 = Row,
 # plots, treatments, all factors, in plot order replicate, row, column; rows
-# and columns are labelled "<rep>_<i>" when nested and "<i>" when shared.
+# and columns are labelled "<rep>_<i>" when nested and "<i>" when shared. Its
+# attribute "joint_efficiency" is the row_column_joint_efficiency() of the
+# design, for report_efficiency().
 #' @noRd
 build_row_column_onestage <- function(nt, nrows, ncols, reps, latinize, searches, seed) {
   validate_iteration_budget(searches, "searches")
@@ -105,12 +115,12 @@ build_row_column_onestage <- function(nt, nrows, ncols, reps, latinize, searches
   for (s in seq_len(onestage_joint_searches(searches))) {
     if (left <= 0) break
     stage1 <- tryCatch(onestage_stage1(nt, nrows, ncols, reps, latinize, work_cap = left),
-                       onestage_not_admitted = function(cnd) cnd)
-    if (inherits(stage1, "onestage_not_admitted")) {
+                       onestage_infeasible = function(cnd) cnd)
+    if (inherits(stage1, "onestage_infeasible")) {
       if (s == 1L) {
         fieldhub_abort(conditionMessage(stage1),
-                       class = c("onestage_not_admitted", "onestage_infeasible",
-                                 "fieldhub_optimization_error"),
+                       class = c(if (inherits(stage1, "onestage_not_admitted")) "onestage_not_admitted",
+                                 "onestage_infeasible", "fieldhub_optimization_error"),
                        data = list(parent = stage1), call = NULL)
       }
       break
@@ -133,24 +143,36 @@ build_row_column_onestage <- function(nt, nrows, ncols, reps, latinize, searches
       break
     }
   }
-  designs <- lapply(results, function(x) onestage_design_frame(x$treatments, nt, nrows, ncols,
-                                                               reps, latinize))
-  kept <- which(vapply(seq_along(results), function(i) {
-    isTRUE(results[[i]]$full_rank) &&
-      !is.na(row_column_joint_efficiency(designs[[i]])$Aeffic)
-  }, logical(1)))
-  if (length(kept) == 0L) {
-    fieldhub_abort("No onestage search found a full-rank design (", where, ").",
-                   class = c(if (cut_short) "onestage_not_admitted", "onestage_infeasible",
-                             "fieldhub_optimization_error"), call = NULL)
-  }
-  value <- function(name) vapply(results[kept], function(x) x[[name]], numeric(1))
+  value <- function(name) vapply(results, function(x) as.double(x[[name]]), numeric(1))
   row_d <- value("row_d")
-  kept <- kept[row_d >= max(row_d) - 1.5e-7]
   row_a <- value("row_a")
-  kept <- kept[row_a >= max(row_a) - 1.5e-7]
   joint_d <- value("joint_d")
-  designs[[kept[which.max(joint_d)]]]
+  candidates <- which(vapply(results, function(x) isTRUE(x$full_rank), logical(1)))
+  while (length(candidates) > 0L) {
+    pick <- candidates[onestage_best_search(row_d[candidates], row_a[candidates],
+                                            joint_d[candidates])]
+    design <- onestage_design_frame(results[[pick]]$treatments, nt, nrows, ncols, reps, latinize)
+    joint_efficiency <- row_column_joint_efficiency(design)
+    if (!is.na(joint_efficiency$Aeffic)) {
+      attr(design, "joint_efficiency") <- joint_efficiency
+      return(design)
+    }
+    candidates <- setdiff(candidates, pick)
+  }
+  fieldhub_abort("No onestage search found a full-rank design (", where, ").",
+                 class = c(if (cut_short) "onestage_not_admitted", "onestage_infeasible",
+                           "fieldhub_optimization_error"), call = NULL)
+}
+
+# The search the onestage return rule picks (spec 6.2), as its position in
+# the vectors: within 1.5e-7 of the highest Row D, then within 1.5e-7 of the
+# highest Row A among those, then the highest joint D, the earliest on a tie.
+#' @noRd
+onestage_best_search <- function(row_d, row_a, joint_d) {
+  kept <- seq_along(row_d)
+  kept <- kept[row_d[kept] >= max(row_d[kept]) - 1.5e-7]
+  kept <- kept[row_a[kept] >= max(row_a[kept]) - 1.5e-7]
+  kept[which.max(joint_d[kept])]
 }
 
 # The onestage output frame (structure of tools/reference-onestage.R) of a
@@ -188,8 +210,8 @@ onestage_design_frame <- function(treatments, nt, nrows, ncols, reps, latinize) 
 # treatments jointly; either way adding Reps does not change the treatment
 # information matrix. (This relies on each replicate being a complete balanced
 # array; it would not hold for unbalanced or partially replicated layouts.) The
-# resulting A-Efficiency equals the A-Efficiency blocksdesign reports for the
-# full ~Reps + Rows + Cols model of the corresponding (nested or crossed) coding.
+# resulting A-Efficiency is that of the full ~Reps + Rows + Cols model of the
+# corresponding (nested or crossed) coding.
 # Returns NA when the joint model is not estimable (e.g. a design too small to
 # have residual degrees of freedom for every treatment contrast).
 #' @noRd
@@ -218,9 +240,11 @@ row_column_joint_efficiency <- function(design) {
 # whether the reported design's rows and columns are nested in its replicates
 # (Level_1): they are then claimed nested and their class verified
 # (BlockEfficiencies()); otherwise they are shared across replicates and use
-# the general class (spec 6.2). The replicate factor is always claimed.
+# the general class (spec 6.2). The replicate factor is always claimed. `joint`
+# is the row_column_joint_efficiency() of `design` when the caller already has
+# it (the onestage builder computes it for its return rule); NULL computes it.
 #' @noRd
-report_efficiency <- function(design, nested = TRUE) {
+report_efficiency <- function(design, nested = TRUE, joint = NULL) {
   # Calculate row block efficiencies
   row_blocks <- design |> 
     dplyr::select(Level_1, Level_3, plots, treatments)
@@ -247,7 +271,7 @@ report_efficiency <- function(design, nested = TRUE) {
   
   # Joint (combined) row-by-column efficiency of the standard resolvable
   # row-column analysis model.
-  joint <- row_column_joint_efficiency(design)
+  if (is.null(joint)) joint <- row_column_joint_efficiency(design)
   joint_efficiency <- data.frame(
     Level = "Row-by-Column",
     Blocks = NA_integer_,
