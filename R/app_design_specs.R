@@ -73,6 +73,7 @@ build_design_specs <- function() {
   classic <- function(module, title, engine, controls, upload, upload_columns,
                       values, omit_na = TRUE, upload_check = identity,
                       data = function(upload, controls) upload, summary = FALSE,
+                      summary_field = FALSE,
                       long_running = FALSE, busy_message = "Randomizing design...") {
     workflow <- classic_workflow_spec(module)
     list(
@@ -82,6 +83,9 @@ build_design_specs <- function() {
       data = data, values = values,
       args = get(paste0("design_args_", module), mode = "function"),
       kind = "classic", workflow = workflow, layout = workflow$layout, summary = summary,
+      # the field book of the design has no rows and columns: the summary
+      # shows the plots and the field of the layout in view
+      summary_field = summary_field,
       long_running = long_running, busy_message = busy_message
     )
   }
@@ -233,11 +237,11 @@ build_design_specs <- function() {
 
   list(
     CRD = classic("CRD", "Completely Randomized Design", CRD, upload = "crd",
-      upload_columns = "TREATMENT",
-      controls = list(
+      upload_columns = "TREATMENT", summary = TRUE, summary_field = TRUE,
+      controls = plain_labels(list(
         ctl_count("t", 15, min = 1, generated_only = TRUE), ctl_reps(4, min = 1),
         ctl_planter(), ctl_plot_start(), ctl_location_names(), ctl_seed()
-      ),
+      )),
       # CRD() reads each treatment's replicates from the file's REP column
       data = function(upload, controls) {
         if (is.null(upload)) return(NULL)

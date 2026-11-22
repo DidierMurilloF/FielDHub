@@ -9,7 +9,7 @@ app_sidebar_layout <- function(spec) {
   spatial_end <- list(c("plot_start", "expt_name"), c("seed", "location_names"))
   location_row <- list(c("l", "location_view"))
   rows <- switch(spec$module,
-    CRD = c(list("t", "upload_file", "reps"), classic_end),
+    CRD = list("upload_file", c("t", "reps"), c("planter", "plot_start"), c("location_names", "seed")),
     RCBD = list("t", "upload_file", "reps", "use_checks", c("checks", "rep_checks"),
       "spread_checks", "checks_note", "l", "planter", c("plot_start", "continuous"),
       "location_names", "seed"),

@@ -671,6 +671,35 @@ html[data-theme="dark"] .modal { color-scheme: dark; }
 }
 #fieldhub-app .fh-view-menu-panel[hidden] { display: none; }
 #fieldhub-app .fh-view-menu-panel .shiny-input-container { width: 100%; }
+/* The layout options sit side by side in a short band, and the plot moves
+   down by the height of the band while it is open (layout-menu.js sets
+   --fh-menu-shift): the menu never covers the title of the plot. The image
+   is moved, not resized (layout-images.js measures it where it rests), so
+   nothing is drawn again. */
+#fieldhub-app .fh-view-bar .fh-view-menu-panel:not(.fh-spacing) {
+  display: flex;
+  flex-wrap: wrap;
+  width: max-content;
+  padding: 10px 12px 12px;
+  box-shadow: 0 4px 14px var(--fhd-shadow);
+}
+#fieldhub-app .fh-view-bar .fh-view-menu-panel:not(.fh-spacing)[hidden] { display: none; }
+#fieldhub-app .fh-view-bar .fh-view-menu-panel:not(.fh-spacing) > * { flex: 0 0 auto; width: 160px; }
+#fieldhub-app .fh-view-bar .fh-view-menu-panel:not(.fh-spacing) > [hidden] { display: none; }
+#fieldhub-app .fieldhub-plot-panel { padding-bottom: var(--fh-menu-shift, 0px); }
+#fieldhub-app .fieldhub-plot-panel > .fieldhub-layout-image {
+  transform: translateY(var(--fh-menu-shift, 0px));
+}
+/* A pair whose first field is not asked (the treatments come from the
+   file): the other takes the row. Shiny marks a shown conditional panel
+   with a class; where no panel has it (an older Shiny), the pair stays. */
+#fieldhub-app:has(.shiny-conditional--shown) .fh-design .fieldhub-input-row > [class*="col-"]:has(> .shiny-panel-conditional:only-child:not(.shiny-conditional--shown)) {
+  display: none;
+}
+#fieldhub-app:has(.shiny-conditional--shown) .fh-design .fieldhub-input-row > [class*="col-"]:has(> .shiny-panel-conditional:only-child:not(.shiny-conditional--shown)) + [class*="col-"] {
+  width: 100%;
+  padding-left: 15px;
+}
 #fieldhub-app .fh-view-menu-panel .control-label { margin-bottom: 4px; color: var(--fhd-muted); font-weight: 600; }
 #fieldhub-app .fh-design .fh-view-menu-panel select.form-control {
   height: 36px;

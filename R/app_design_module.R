@@ -177,7 +177,11 @@ mod_design_server <- function(id, spec) {
         if (is.null(state)) {
           return(shiny::p(class = "fh-summary-empty", "Generate the design to see the summary."))
         }
-        app_design_summary(design(), tabset = session$ns("result_tabs"))
+        if (!isTRUE(spec$summary_field)) {
+          return(app_design_summary(design(), tabset = session$ns("result_tabs")))
+        }
+        app_design_summary(design(), tabset = session$ns("result_tabs"),
+                           book = layout()[[workflow$book_component]], field = TRUE)
       })
     }
 

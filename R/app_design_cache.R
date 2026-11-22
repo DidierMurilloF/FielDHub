@@ -31,8 +31,8 @@ app_accept_design_job <- function(job, on_done) {
   }
   for (condition in job$warnings) app_report_problem(condition)
   if (!isTRUE(job$ok) && !inherits(job$condition, "shiny.silent.error")) {
+    # The problem is shown once, where the result would be: no dialog on top
     if (!inherits(job$condition, "fieldhub_error")) app_log_problem(job$condition)
-    app_report_problem(job$condition)
   }
   job
 }

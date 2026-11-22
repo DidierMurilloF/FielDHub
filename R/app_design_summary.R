@@ -12,13 +12,17 @@
 #' @param block_levels Names for the rows of \code{blocksModel}, outermost
 #'   blocks first, or \code{NULL} to number them.
 #' @param rows How many field book rows to preview.
+#' @param book The field book to preview: the design's, or the one of the
+#'   layout in view where the design's has no rows and columns.
+#' @param field Whether to show the plots and the rows and columns of
+#'   \code{book} among the parameters.
 #' @param tabset The id of the page's result tabs, for the link to the
 #'   field book (design-summary.js), or \code{NULL} for no link.
 #' @return A \code{shiny::div()}.
 #' @noRd
-app_design_summary <- function(x, block_levels = NULL, rows = 6L, tabset = NULL) {
+app_design_summary <- function(x, block_levels = NULL, rows = 6L, tabset = NULL,
+                               book = x$fieldBook, field = FALSE) {
   info <- x$infoDesign
-  book <- x$fieldBook
   seed <- if (!is.null(info$seed)) format(info$seed, scientific = FALSE, trim = TRUE)
   preview <- utils::head(book, rows)
   # A design keeps one efficiency table, or one for each location (alike)
@@ -28,7 +32,7 @@ app_design_summary <- function(x, block_levels = NULL, rows = 6L, tabset = NULL)
   shiny::div(class = "fh-summary",
     shiny::tags$section(
       shiny::h3("Design"),
-      shiny::tags$dl(class = "fh-stats", lapply(app_summary_items(info, book), function(item) {
+      shiny::tags$dl(class = "fh-stats", lapply(app_summary_items(info, book, field), function(item) {
         shiny::div(shiny::tags$dt(app_summary_term(item$label, item$tip)), shiny::tags$dd(item$value),
                    if (!is.null(item$names)) shiny::tags$small(app_summary_names(item$names)))
       })),
@@ -101,16 +105,16 @@ app_summary_copy <- function(value) {
 
 #' The parameters of a design, with the labels a person would use
 #' @noRd
-app_summary_items <- function(info, book) {
+app_summary_items <- function(info, book, field = FALSE) {
   # The designs name the same things differently: one label for each
-  labels <- c(NumberTreatments = "Treatments", number.of.treatments = "Treatments", treatments = "Treatments",
+  labels <- c(NumberTreatments = "Treatments", numberofTreatments = "Treatments", number.of.treatments = "Treatments", treatments = "Treatments",
     Reps = "Replicates", reps = "Replicates", blocks = "Blocks",
     iBlocks = "Blocks per replicate", IBlocks = "Blocks per replicate",
     rows = "Rows", columns = "Columns", nrows = "Rows", ncols = "Columns", entries = "Entries",
     nTrt = "Treatments", nRows = "Rows", checks = "Checks", fillers = "Filler plots",
     NumberLocations = "Locations", locations = "Locations", l = "Locations", lambda = "Lambda",
     planter = "Plot order", percent_checks = "Plots with checks", min_distance = "Minimum distance",
-    optimization = "Optimization")
+    optimization = "Optimization", locationName = "Location")
   tips <- c(lambda = "How often two treatments share an incomplete block, on average.",
     min_distance = "The smallest distance between two plots of the same entry.",
     fillers = "Plots left without an entry so the field is a full rectangle.",
@@ -144,6 +148,15 @@ app_summary_items <- function(info, book) {
   if (length(blocks) == 1L && !is.null(info$NumberTreatments)) {
     items <- append(items, list(list(label = "Plots per block",
       value = value(info$NumberTreatments / blocks))), after = which(shown %in% c("iBlocks", "IBlocks")))
+  }
+  if (isTRUE(field) && all(c("ROW", "COLUMN") %in% names(book))) {
+    extent <- function(v) max(as.numeric(as.character(v)))
+    # after the treatments and the replicates, before where the field is
+    after <- max(0L, which(vapply(items, `[[`, "", "label") %in% c("Treatments", "Replicates")))
+    items <- append(items, list(
+      list(label = "Plots", value = value(nrow(book))),
+      list(label = "Field", value = paste(extent(book$ROW), "\u00d7", extent(book$COLUMN)),
+           tip = "Rows by columns of the layout in view.")), after = after)
   }
   items
 }

@@ -7,7 +7,7 @@ app_classic_layout_panel <- function(ns, spec, x, planter = "serpentine", locati
   layout <- spec$layout
   # The menu holds plain selects: a selectize list would open a menu inside the menu
   select <- function(...) shiny::selectInput(..., selectize = FALSE)
-  choices <- layout_choices(x, planter = planter, stacked = "vertical")
+  choices <- layout_choice_labels(x, planter = planter, stacked = "vertical")
   controls <- list(shiny::radioButtons(ns(spec$ids[["plot_type"]]), "Type of plot",
     c("Entries" = 1, "Plots" = 2, "Heatmap" = 3), inline = TRUE))
   if ("stacked" %in% names(layout$ids)) {
@@ -57,9 +57,13 @@ app_layout_toolbar <- function(menu_id, controls, menu = TRUE) {
 app_classic_layout <- function(input, output, session, design, planter, spec,
                                 locations = function() NULL) {
   output[[spec$layout$output]] <- shiny::renderUI({
-    shiny::req(design()$fieldBook)
+    # A design that failed says so where the plot would be, not here too
+    state <- app_design_state(design)
+    shiny::req(!inherits(state, "condition"), state$fieldBook)
     validate_design(app_classic_layout_panel(session$ns, spec, design(),
       planter = if (spec$layout$current_planter) planter() else "serpentine", locations = locations()))
   })
+  # The field book and the summary read the selection before the plot is seen
+  shiny::outputOptions(output, spec$layout$output, suspendWhenHidden = FALSE)
   app_layout_selection(input, session, design = design, planter = planter, ids = spec$layout$ids)
 }

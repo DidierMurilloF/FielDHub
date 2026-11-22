@@ -2,7 +2,7 @@
 # app_sidebar_layout(), with the added diagonal optimization controls. Each
 # slash denotes the original 6/6 Bootstrap columns.
 original_sidebar_rows <- list(
-  CRD = c("t", "reps", "planter", "plot_start/location_names", "seed"),
+  CRD = c("t/reps", "planter/plot_start", "location_names/seed"),
   RCBD = c("t", "reps", "use_checks", "checks/rep_checks", "spread_checks", "checks_note",
     "l", "planter", "plot_start/continuous", "location_names", "seed"),
   LSD = c("t", "reps", "planter", "plot_start/location_names", "seed"),

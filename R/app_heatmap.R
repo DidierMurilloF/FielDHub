@@ -10,7 +10,7 @@ app_field_heatmap <- function(field_book, response_name, selected = 1L,
     include_site, include_checks
   )
   app_tile_heatmap(data, response_name, height,
-                   title = paste("Heatmap for ", response_name), classic = TRUE)
+                   title = paste("Heatmap for", response_name), classic = TRUE)
 }
 
 #' Shared renderer for existing spatial simulation outputs

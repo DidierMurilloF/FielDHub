@@ -29,14 +29,19 @@
       var rect = panel.getBoundingClientRect();
       var side = sidebar.getBoundingClientRect();
       var width = Math.max(1, Math.floor(rect.width));
-      var top = rect.top + window.scrollY;
+      // Open layout options move the image down (layout-menu.js): measure it where it rests.
+      var plot = panel.closest(".fieldhub-plot-panel");
+      var shift = plot ? parseFloat(plot.style.getPropertyValue("--fh-menu-shift")) || 0 : 0;
+      var rest = rect.top - shift;
+      var top = rest + window.scrollY;
       var available = viewport - top - 24;
       // A stacked mobile sidebar may put the result below the fold.
       if (available <= 0) available = viewport - 48;
       // Keep a landscape preview instead of filling a tall sidebar or monitor.
       available = Math.min(available, width * 0.625, 700);
       if (side.right <= main.getBoundingClientRect().left + 1) {
-        available = Math.min(available, side.bottom - rect.top - 4);
+        // Follow a long sidebar, but keep a plot worth reading beside a short one.
+        available = Math.min(available, Math.max(side.bottom - rest - 4, Math.min(width * 0.5, 420)));
       }
       var height = Math.max(1, Math.floor(available));
       panel.style.setProperty("--fieldhub-preview-height", height + "px");
