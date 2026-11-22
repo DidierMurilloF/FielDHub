@@ -43,8 +43,9 @@ the joint stage only: the number of joint searches is
 \code{max(1, round(10 * iterations / 200))}, so the default 200 runs 10
 joint searches and values up to 29 run one. The first stage (the row search
 and the columns within the rows) and the repair of a singular joint model
-always run in full, whatever \code{iterations} is. The total work of a call
-is capped, so a very large value stops once the cap is spent. For
+always run in full, whatever \code{iterations} is. On large designs the work
+cap of the search ends it before that many joint searches have run, so
+\code{iterations} is then an upper limit on their number. For
 \code{method = "twostage"} it is the effort of the row search: its default
 evaluation budget is scaled by \code{iterations / 1000}, so the default
 1000 is the full search, smaller values stop it earlier (1 is the smallest
@@ -66,9 +67,8 @@ optimized first, as blocks nested in replicates, by FielDHub's own block
 engine, and the rows are then improved by the same engine, keeping the
 columns fixed. \code{"onestage"} falls back to \code{"twostage"}, with one
 warning, for very small designs whose joint model has too few residual
-degrees of freedom (or where no full-rank joint design was found) and for
-designs too large for the one-stage search, so \code{"twostage"} rarely has
-to be requested explicitly.}
+degrees of freedom (or where no full-rank joint design was found), so
+\code{"twostage"} rarely has to be requested explicitly.}
 
 \item{latinize}{If \code{TRUE}, optimize the row and column blocking factors
 as crossed (latinized) effects shared across the replicates, so that each
@@ -85,6 +85,11 @@ the returned design is not latinized and the warning says so.}
 A list with five elements.
 \itemize{
   \item \code{infoDesign} is a list with information on the design parameters.
+  For an onestage design it includes \code{joint_searches}, a list with
+  \code{requested}, the number of joint searches \code{iterations} asks
+  for, and \code{completed}, one number per location: the joint searches
+  that ran to their own end, not cut short by the work cap of the search.
+  It is absent when the result is a twostage design.
   \item \code{blocksModel} is a list (one element per location) with the
   efficiency of the design. In addition to the per-factor \code{Rep},
   \code{Row} and \code{Column} A- and D-Efficiencies, it reports a
@@ -145,16 +150,25 @@ largest for small designs with few replicates. For \code{method =
 \code{iterations}).
 
 \code{method = "onestage"} falls back to \code{method = "twostage"} with a
-single warning, rather than failing, so a design is still produced, when:
-\itemize{
-  \item the joint row-and-column model has too few residual degrees of
-  freedom to estimate every treatment comparison (very small designs), or no
-  joint search found a design whose joint model has full rank;
-  \item the design is too large for the one-stage search, whose total work
-  is capped so that a call ends in a bounded time.
-}
-The fallback design is a nested twostage design: with \code{latinize =
-TRUE} the warning says that the returned design is not latinized.
+single warning, rather than failing, so a design is still produced, when
+the joint row-and-column model has too few residual degrees of freedom to
+estimate every treatment comparison (very small designs), or no joint
+search found a design whose joint model has full rank. The fallback design
+is a nested twostage design: with \code{latinize = TRUE} the warning says
+that the returned design is not latinized.
+
+No design is refused for its size. The work of the onestage search is
+capped instead: once the cap is spent the search stops and returns the
+design it holds. On large designs it is therefore the cap, not
+\code{iterations}, that sets the number of joint searches, and
+\code{infoDesign$joint_searches} reports the number asked for and the
+number that ran to their end. The result is still an optimized onestage
+design, with the rows and columns coded as requested, and it is
+reproducible from the seed; no warning is given for it. Only for designs
+beyond about 2000 treatments, whose joint search cannot be started at all,
+does \code{row_column()} give one warning: it then returns an onestage
+design in which the rows, and the columns within the rows, were optimized
+as far as their own searches could be started, and says which.
 
 Setting \code{latinize = TRUE} (only available with \code{method =
 "onestage"}) codes the rows and columns as crossed blocking factors shared

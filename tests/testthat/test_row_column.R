@@ -406,6 +406,8 @@ test_that("onestage reaches the recorded joint efficiency on a larger nested sha
   # Mean joint D of FielDHub 1.7.0's onestage over 200 seeds at iterations = 20
   # (SD 0.000135). The one joint search of the call has to get there; ten
   # passes and five escapes ended 0.0002 to 0.0005 below it on these seeds.
+  # Margin: over seeds 1:100 the worst joint D of this call was 0.74603,
+  # 0.00025 above the threshold (re-review of a79c37f, 2026-11-22).
   for (seed in 1:3) {
     des <- row_column(t = 100, nrows = 5, reps = 4, seed = seed, iterations = 20)
     expect_equal(des$infoDesign$optimization, "onestage")
@@ -474,4 +476,36 @@ test_that("iterations sets the joint effort only", {
   expect_gte(row_a(des), 0.6500942 - 1.5e-7)
   expect_no_warning(big <- row_column(t = 12, nrows = 3, reps = 2, seed = 5, iterations = 5000))
   expect_identical(row_column(t = 12, nrows = 3, reps = 2, seed = 5, iterations = 5000), big)
+})
+
+test_that("onestage builds a large latinized design without falling back", {
+  skip_on_cran()
+  # No design is refused for its size: the work cap of the search cuts it
+  # short instead, and the design stays latinized.
+  w <- capture_warnings(
+    des <- row_column(t = 1000, nrows = 2, reps = 2, latinize = TRUE, seed = 1, iterations = 20)
+  )
+  expect_false(any(grepl("twostage|too large|not latinized", w)))
+  expect_equal(des$infoDesign$optimization, "onestage")
+  expect_valid_row_column(des, t = 1000, nrows = 2, r = 2)
+  # Shared rows and columns: 2 rows and 500 columns (nested would be 4 and 1000).
+  bm <- des$blocksModel[[1]]
+  expect_equal(bm$Blocks[bm$Level == "Row"], 2)
+  expect_equal(bm$Blocks[bm$Level == "Column"], 500)
+  expect_equal(des$infoDesign$joint_searches$requested, 1)
+})
+
+test_that("infoDesign reports the joint searches of onestage", {
+  skip_on_cran()
+  des <- row_column(t = 24, nrows = 6, reps = 2, seed = 1, iterations = 200)
+  expect_equal(des$infoDesign$joint_searches$requested, 10)
+  expect_equal(des$infoDesign$joint_searches$completed, 10)
+  two <- row_column(t = 24, nrows = 6, reps = 2, l = 2, seed = 1, iterations = 200)
+  expect_length(two$infoDesign$joint_searches$completed, 2)
+  # A twostage result has no joint searches, asked for or fallen back to.
+  twostage <- row_column(t = 24, nrows = 6, reps = 2, seed = 1, method = "twostage")
+  expect_null(twostage$infoDesign$joint_searches)
+  fallback <- suppressWarnings(row_column(t = 8, nrows = 4, reps = 2, seed = 21, iterations = 20))
+  expect_equal(fallback$infoDesign$optimization, "twostage")
+  expect_null(fallback$infoDesign$joint_searches)
 })

@@ -37,7 +37,9 @@
 #' closed-form cycle, the lattice start and the optimal-start return (R18)
 #' stay. The dense state is then built from the treatment space (spec 5.1c)
 #' when there are fewer treatments than blocks and more blocks than
-#' `resolvable_block_limit`. The default keeps every other result as before.
+#' `resolvable_block_limit`, and the work cap is strict: a step that would
+#' pass it is not made, so `search$work` never exceeds `work_cap`. The default
+#' keeps every other result as before.
 #' @return A list with `Design`, `Blocks_model` and `search` (evaluations,
 #'   budget, stop reason, refresh counts, the number of even-up repair swaps
 #'   `even_repairs` (spec-m5 section 6.1) and, when `FIELDHUB_ENGINE_DEBUG=1`,
@@ -190,12 +192,14 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
                            as.double(work_cap), as.integer(refresh_every), as.double(evaluation_work),
                            if (resolvable) 1L else 0L, integer(), integer(), integer(),
                            engine_form_option(resolvable && !admission, v, total_blocks,
-                                              resolvable_block_limit))
+                                              resolvable_block_limit) +
+                             (if (resolvable && !admission) 2L else 0L))
   stop_reason <- c("budget", "stale", "time_limit", "no_start")[out$stop_reason]
   if (anyNA(out$treatments)) {
     if (stop_reason %in% c("budget", "time_limit")) {
       fieldhub_abort("The search ", if (stop_reason == "budget") "budget" else "time limit",
                      " was reached before a connected starting design was built.",
+                     class = c("fieldhub_no_start_error", "fieldhub_input_error"),
                      data = list(budget = budget, time_limit = time_limit))
     }
     if (!is.null(start)) {
@@ -250,8 +254,9 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
 
 #' Whether `flag` is among the comma-separated values of the environment
 #' variable FIELDHUB_ENGINE_DEBUG, the engine's check hooks: "1" (report the
-#' largest error of an accepted ratio), "slack_floors" (mode 3) and
-#' "treatment_form" (below).
+#' largest error of an accepted ratio), "slack_floors" (mode 3),
+#' "treatment_form" (below) and "seconds" (mode 3 reports the seconds of its
+#' start and of its finish).
 #' @noRd
 engine_debug <- function(flag) {
   flag %in% unlist(strsplit(Sys.getenv("FIELDHUB_ENGINE_DEBUG"), ",", fixed = TRUE))
@@ -506,7 +511,8 @@ blocks_engine_default_jumps <- function(n, pairs = n * (n - 1) / 2) {
 #' run is cut by `work_cap`, the start is scored for the optimal-start return
 #' only inside the block and cell limits, and the dense state is built from
 #' the treatment space (spec 5.1c) when there are fewer treatments than rows
-#' and more rows than `resolvable_block_limit`.
+#' and more rows than `resolvable_block_limit`; the work cap is then strict
+#' (`search$work` never exceeds it).
 #'
 #' @param start The v r 1-based treatments in plot order: replicate by
 #'   replicate, row by row, `treatments / rows` plots per row.
@@ -556,7 +562,8 @@ rows_within_columns <- function(start, column_of, treatments, replicates, rows, 
                            as.integer(start), as.double(work_cap), 256L,
                            as.double(evaluation_work), 2L, as.integer(column_of) - 1L,
                            integer(), integer(),
-                           engine_form_option(!admission, v, B, resolvable_block_limit))
+                           engine_form_option(!admission, v, B, resolvable_block_limit) +
+                             (if (admission) 0L else 2L))
   stop_reason <- c("budget", "stale", "time_limit", "no_start")[out$stop_reason]
   if (identical(stop_reason, "time_limit")) {
     fieldhub_warn("The row search stopped at its time limit of ", time_limit,

@@ -188,10 +188,10 @@ nested_clashes <- function(level, entry) sum(tapply(level, entry, function(x) su
 
 # Runs one shape at one seed through the public function and reads blocksModel.
 # The onestage callers run row_column(method = "onestage"); `k` is nrows.
-# status is "ok", "fallback" (onestage returned the twostage design),
-# "not_admitted" (a fallback whose warning says the shape is too large for the
-# one-stage search) or "error". `optimiser_seconds` is NA unless the process
-# called nested_trace_onestage().
+# status is "ok", "fallback" (onestage returned the twostage design) or
+# "error". There is no fallback for size (phase 2 spec 7, Amendment 1), so
+# every fallback is one of spec 5.1b. `optimiser_seconds` is NA unless the
+# process called nested_trace_onestage().
 nested_golden_record <- function(caller, t, k, r, seed, iterations = NULL) {
   onestage <- caller %in% nested_onestage_callers
   fun <- getExportedValue("FielDHub", if (onestage) "row_column" else caller)
@@ -214,7 +214,6 @@ nested_golden_record <- function(caller, t, k, r, seed, iterations = NULL) {
                        optimiser_seconds = NA_real_,
                        stringsAsFactors = FALSE)
   design <- NULL
-  too_large <- FALSE
   timed <- onestage && isTRUE(nested_onestage_timer$installed)
   if (timed) {
     nested_onestage_timer$seconds <- 0
@@ -223,13 +222,7 @@ nested_golden_record <- function(caller, t, k, r, seed, iterations = NULL) {
   record$seconds <- system.time(tryCatch(
     withCallingHandlers(
       suppressMessages(utils::capture.output(design <- do.call(fun, args))),
-      warning = function(w) {
-        if (inherits(w, "fieldhub_design_warning") &&
-            grepl("too large for the one-stage search", conditionMessage(w), fixed = TRUE)) {
-          too_large <<- TRUE
-        }
-        invokeRestart("muffleWarning")
-      }),
+      warning = function(w) invokeRestart("muffleWarning")),
     error = function(e) {
       record$status <<- "error"
       record$message <<- gsub("[\r\n,]+", " ", conditionMessage(e))
@@ -266,7 +259,7 @@ nested_golden_record <- function(caller, t, k, r, seed, iterations = NULL) {
     record$row_clash <- nested_clashes(book$ROW, book$ENTRY)
     record$col_clash <- nested_clashes(book$COLUMN, book$ENTRY)
     if (identical(design$infoDesign$optimization, "twostage")) {
-      record$status <- if (too_large) "not_admitted" else "fallback"
+      record$status <- "fallback"
     }
   }
   record
@@ -368,7 +361,7 @@ nested_summary <- function(records) {
     ok <- x[x$status == "ok", , drop = FALSE]
     row <- data.frame(caller = x$caller[1], t = x$t[1], k = x$k[1], r = x$r[1],
                       iterations = as.integer(x$iterations[1]), seeds = nrow(ok), errors = sum(x$status == "error"),
-                      fallbacks = sum(x$status %in% c("fallback", "not_admitted")),
+                      fallbacks = sum(x$status == "fallback"),
                       stringsAsFactors = FALSE)
     for (e in nested_golden_efficiencies) {
       v <- ok[[e]][!is.na(ok[[e]])]

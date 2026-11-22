@@ -50,16 +50,25 @@
 #' \code{iterations}).
 #'
 #' \code{method = "onestage"} falls back to \code{method = "twostage"} with a
-#' single warning, rather than failing, so a design is still produced, when:
-#' \itemize{
-#'   \item the joint row-and-column model has too few residual degrees of
-#'   freedom to estimate every treatment comparison (very small designs), or no
-#'   joint search found a design whose joint model has full rank;
-#'   \item the design is too large for the one-stage search, whose total work
-#'   is capped so that a call ends in a bounded time.
-#' }
-#' The fallback design is a nested twostage design: with \code{latinize =
-#' TRUE} the warning says that the returned design is not latinized.
+#' single warning, rather than failing, so a design is still produced, when
+#' the joint row-and-column model has too few residual degrees of freedom to
+#' estimate every treatment comparison (very small designs), or no joint
+#' search found a design whose joint model has full rank. The fallback design
+#' is a nested twostage design: with \code{latinize = TRUE} the warning says
+#' that the returned design is not latinized.
+#'
+#' No design is refused for its size. The work of the onestage search is
+#' capped instead: once the cap is spent the search stops and returns the
+#' design it holds. On large designs it is therefore the cap, not
+#' \code{iterations}, that sets the number of joint searches, and
+#' \code{infoDesign$joint_searches} reports the number asked for and the
+#' number that ran to their end. The result is still an optimized onestage
+#' design, with the rows and columns coded as requested, and it is
+#' reproducible from the seed; no warning is given for it. Only for designs
+#' beyond about 2000 treatments, whose joint search cannot be started at all,
+#' does \code{row_column()} give one warning: it then returns an onestage
+#' design in which the rows, and the columns within the rows, were optimized
+#' as far as their own searches could be started, and says which.
 #'
 #' Setting \code{latinize = TRUE} (only available with \code{method =
 #' "onestage"}) codes the rows and columns as crossed blocking factors shared
@@ -92,8 +101,9 @@
 #' \code{max(1, round(10 * iterations / 200))}, so the default 200 runs 10
 #' joint searches and values up to 29 run one. The first stage (the row search
 #' and the columns within the rows) and the repair of a singular joint model
-#' always run in full, whatever \code{iterations} is. The total work of a call
-#' is capped, so a very large value stops once the cap is spent. For
+#' always run in full, whatever \code{iterations} is. On large designs the work
+#' cap of the search ends it before that many joint searches have run, so
+#' \code{iterations} is then an upper limit on their number. For
 #' \code{method = "twostage"} it is the effort of the row search: its default
 #' evaluation budget is scaled by \code{iterations / 1000}, so the default
 #' 1000 is the full search, smaller values stop it earlier (1 is the smallest
@@ -113,9 +123,8 @@
 #' engine, and the rows are then improved by the same engine, keeping the
 #' columns fixed. \code{"onestage"} falls back to \code{"twostage"}, with one
 #' warning, for very small designs whose joint model has too few residual
-#' degrees of freedom (or where no full-rank joint design was found) and for
-#' designs too large for the one-stage search, so \code{"twostage"} rarely has
-#' to be requested explicitly.
+#' degrees of freedom (or where no full-rank joint design was found), so
+#' \code{"twostage"} rarely has to be requested explicitly.
 #' @param latinize If \code{TRUE}, optimize the row and column blocking factors
 #' as crossed (latinized) effects shared across the replicates, so that each
 #' treatment tends to appear in different rows and columns across the replicates.
@@ -138,6 +147,11 @@
 #' @return A list with five elements.
 #' \itemize{
 #'   \item \code{infoDesign} is a list with information on the design parameters.
+#'   For an onestage design it includes \code{joint_searches}, a list with
+#'   \code{requested}, the number of joint searches \code{iterations} asks
+#'   for, and \code{completed}, one number per location: the joint searches
+#'   that ran to their own end, not cut short by the work cap of the search.
+#'   It is absent when the result is a twostage design.
 #'   \item \code{blocksModel} is a list (one element per location) with the
 #'   efficiency of the design. In addition to the per-factor \code{Rep},
 #'   \code{Row} and \code{Column} A- and D-Efficiencies, it reports a
@@ -319,18 +333,21 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
   out_row_col_loc <- vector(mode = "list", length = l)
   blocks_model <- list()
   local_optimizer_options()
+  searches_requested <- NULL
+  searches_completed <- integer()
+  joint_warned <- FALSE
   for (i in 1:l) {
     reps <- r
     ncols <- nt / nunits
     joint_known <- NULL
     if (method == "onestage") {
       # One-stage: FielDHub's staged search of rows and columns
-      # (build_row_column_onestage()). A shape the search does not admit, or
-      # whose joint model cannot be fitted (too few residual degrees of freedom,
-      # or no full-rank design found), falls back to the two-stage method with
-      # one warning, so small designs (and the Shiny app, which does not expose
-      # method) still produce a design. Once triggered, the fallback applies to
-      # the remaining locations too.
+      # (build_row_column_onestage()). A shape whose joint model cannot be
+      # fitted (too few residual degrees of freedom, or no full-rank design
+      # found) falls back to the two-stage method with one warning, so small
+      # designs (and the Shiny app, which does not expose method) still
+      # produce a design. Once triggered, the fallback applies to the
+      # remaining locations too. No design is refused for its size.
       onestage_fit <- tryCatch(
         build_row_column_onestage(
           nt = nt, nrows = nrows, ncols = ncols, reps = reps,
@@ -344,28 +361,48 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
                  "within replicates.")
         } else ""
         dims <- paste0("(t = ", nt, ", nrows = ", nrows, ", r = ", r, ")")
-        if (inherits(onestage_fit, "onestage_not_admitted")) {
-          fieldhub_warn(
-            "The design ", dims, " is too large for the one-stage search, so ",
-            'method = "onestage" was not run and row_column() returned a twostage design.',
-            not_latinized,
-            class = "fieldhub_design_warning", call = NULL
-          )
-        } else {
-          fieldhub_warn(
-            'method = "onestage" is not feasible for these dimensions ', dims,
-            ": the joint row-and-column model has too few residual degrees of freedom, ",
-            'or no full-rank design was found, so method = "onestage" was not run and ',
-            "row_column() returned a twostage design.", not_latinized,
-            class = "fieldhub_design_warning", call = NULL
-          )
-        }
+        fieldhub_warn(
+          'method = "onestage" is not feasible for these dimensions ', dims,
+          ": the joint row-and-column model has too few residual degrees of freedom, ",
+          'or no full-rank design was found, so method = "onestage" was not run and ',
+          "row_column() returned a twostage design.", not_latinized,
+          class = "fieldhub_design_warning", call = NULL
+        )
         method <- "twostage"
       } else {
         # The builder's joint efficiency of this design is reused by the report.
         joint_known <- attr(onestage_fit, "joint_efficiency")
+        search <- attr(onestage_fit, "onestage_search")
         attr(onestage_fit, "joint_efficiency") <- NULL
+        attr(onestage_fit, "onestage_search") <- NULL
         field_book_best_design <- onestage_fit
+        searches_requested <- search$requested
+        searches_completed <- c(searches_completed, search$complete)
+        # A joint stage too large to start (beyond about 2000 treatments): the
+        # design is still an onestage design, and the user is told once which
+        # part was optimized.
+        if (identical(search$joint_stage, "not_started") && !joint_warned) {
+          joint_warned <- TRUE
+          rows_done <- search$row_step != "not_started"
+          columns_done <- search$column_step != "not_started"
+          done <- if (rows_done && columns_done) {
+            "the rows, and then the columns within the rows, were optimized"
+          } else if (rows_done) {
+            "only the rows were optimized"
+          } else if (columns_done) {
+            "only the columns within the rows were optimized"
+          } else {
+            "nothing was optimized"
+          }
+          fieldhub_warn(
+            "The design (t = ", nt, ", nrows = ", nrows, ", r = ", r, ") has too many ",
+            'treatments and blocks for the joint search of method = "onestage" (', nt,
+            " treatments, ", search$blocks, " row and column blocks), so its rows and columns ",
+            "were not optimized jointly. row_column() returned an onestage design in which ",
+            done, ".",
+            class = "fieldhub_design_warning", call = NULL
+          )
+        }
       }
     }
     if (method == "twostage") {
@@ -497,6 +534,17 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
     optimization = method,
     id_design = 9
   )
+  # The joint searches of an onestage result: the number `iterations` asks
+  # for, and per location the number that ran to their own end (the work cap
+  # of the search may cut it short on large designs).
+  if (method == "onestage") {
+    infoDesign <- append(
+      infoDesign,
+      list(joint_searches = list(requested = as.integer(searches_requested),
+                                 completed = as.integer(searches_completed))),
+      after = which(names(infoDesign) == "optimization")
+    )
+  }
   output <- list(
     infoDesign = infoDesign,
     blocksModel = blocks_model,

@@ -698,7 +698,7 @@ cpp11::list crossed_engine(int v, int r, int b, const std::vector<int>& row_of,
                            const std::vector<int>& col_of, const std::vector<int>& start,
                            int jumps_per_escape, int max_stale_escapes, double budget_cap,
                            double time_limit, bool debug, double work_cap, int refresh_every,
-                           double evaluation_work, bool slack_floors, bool treatment_form);
+                           double evaluation_work, bool slack_floors, bool treatment_form, bool strict);
 
 // Test hook: run the even-up repair on a design given as the treatment of each
 // plot (1-based, plots in block order as in blocks_engine()). Returns the
@@ -755,7 +755,9 @@ cpp11::integers lattice_start_probe_cpp(int v, int r, int b) {
 // `options` is a sum of flags, 0 for every caller of phase 1: 1 builds the
 // dense state from the treatment space where there are fewer treatments than
 // block columns (phase 2 spec 5.1c; modes 1-4 only, and in modes 1, 2 and 4
-// only with blocks of one size).
+// only with blocks of one size); 2 makes the work cap strict (Budget: a
+// charge that would pass the cap is refused and not counted, so the reported
+// work never exceeds `work_cap`; the calls of the onestage search).
 [[cpp11::register]]
 cpp11::list blocks_engine_cpp(int v, int r, int b, int searches, int jumps_per_escape,
                               int max_stale_escapes, double budget, double time_limit,
@@ -764,8 +766,9 @@ cpp11::list blocks_engine_cpp(int v, int r, int b, int searches, int jumps_per_e
                               cpp11::integers column_of, cpp11::integers block_of,
                               cpp11::integers segment_of, int options) {
   if (mode < 0 || mode > 4) cpp11::stop("`mode` must be 0, 1, 2, 3 or 4.");
-  if (options < 0 || options > 1) cpp11::stop("`options` must be 0 or 1.");
+  if (options < 0 || options > 3) cpp11::stop("`options` must be 0, 1, 2 or 3.");
   const bool treatment_form = (options & 1) != 0;
+  const bool strict = (options & 2) != 0;
   if (mode == 3) {
     if (start.size() != static_cast<R_xlen_t>(v) * r) cpp11::stop("Crossed mode needs a `start` of one treatment per plot.");
     std::vector<int> given(start.size());
@@ -773,7 +776,7 @@ cpp11::list blocks_engine_cpp(int v, int r, int b, int searches, int jumps_per_e
     return crossed_engine(v, r, b, std::vector<int>(block_of.begin(), block_of.end()),
                           std::vector<int>(column_of.begin(), column_of.end()), given, jumps_per_escape,
                           max_stale_escapes, budget, time_limit, debug, work_cap, refresh_every,
-                          evaluation_work, searches == 2, treatment_form);
+                          evaluation_work, searches == 2, treatment_form, strict);
   }
   const bool resolvable = mode != 0;
   Layout lay = mode == 2 ? make_column_layout(v, r, b, std::vector<int>(column_of.begin(), column_of.end()))
@@ -783,7 +786,7 @@ cpp11::list blocks_engine_cpp(int v, int r, int b, int searches, int jumps_per_e
   lay.form = treatment_form && resolvable && lay.n % lay.b == 0 && lay.v < lay.b;
   if (mode == 2 && start.size() == 0) cpp11::stop("Rows within columns needs a `start`.");
   if (mode == 4 && start.size() == 0) cpp11::stop("Segmented blocks need a `start`.");
-  Budget bud(budget, time_limit, work_cap, evaluation_work);
+  Budget bud(budget, time_limit, work_cap, evaluation_work, strict);
   Search out;
   out.debug = debug;
   int done = 0;

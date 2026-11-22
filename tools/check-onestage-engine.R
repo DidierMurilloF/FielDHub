@@ -1,7 +1,8 @@
 # Engine checks of the staged onestage row-column search (phase 2 spec 6.1).
 # Engine correctness is verified here, not by testthat (constraints: Tests).
 #
-#   Rscript tools/check-onestage-engine.R <stage1|crossed|repair|treatment_form|report>
+#   Rscript tools/check-onestage-engine.R
+#           <stage1|crossed|repair|treatment_form|report|truncation>
 #           [baseline] [library] [seeds=20] [tmax=100]
 #
 # One PASS / FAIL line per check; exit status 1 on any FAIL. [library]
@@ -174,14 +175,59 @@
 #   the seventh decimal.
 # It also times the function at 2000/2/4 nested on a random complete design
 # and prints the seconds; the QR report took 158 s there (spec 6.1 W7).
+#
+# truncation: the work cap cuts, it never refuses (spec 6.1 W1-W6; phase 2
+# Task 8 Step 3b). [baseline], seeds= and tmax= are ignored.
+# Calls. The row step, the column step and the joint call, nested and shared,
+# on 24/6/2, 100/5/4, 200/100/4, 500/10/4 and 1000/2/4, seeds 1:3, each given
+# a room of 1, 1.5 and 3 times w (start + finish) of onestage_call_work(), as
+# onestage_stage1() and the build give it (the engine limit is room / w for
+# the joint call and room / w less the finish for a step). The column step
+# starts from the row step's design at the largest room, the joint call from
+# the column step's. Per call:
+# - it returns a design that is complete in each replicate and scored;
+# - the joint call's result is full rank where its start is (by
+#   onestage_joint_efficiency()), and not below the Row floors;
+# - the engine's reported work, plus the reserved finish for a step, is at
+#   most room / w;
+# - joint call: the start formula is at least the engine's start work, the
+#   finish formula equals the charged finish, and the charged finish is at
+#   least the work of the finish steps the engine counted;
+# - the same seed gives the same design twice.
+# Builds, through build_row_column_onestage(limits = ) with lowered limits on
+# 24/6/2 and 48/6/3, nested and shared, seeds 1:5. At these small caps the
+# default shares would cut search 1 itself, so each build gets the shares
+# that just hold the stage 1 steps the measurement saw (1.02 times their
+# work over the cap):
+# - search 2 cut in each of its calls in turn. The work of every call of
+#   searches 1 and 2 is measured first; `work` is then set so that search 1
+#   runs in full and the call of search 2 that is aimed at gets a room
+#   between its start plus finish and what it used. Each build returns a
+#   full-rank design, never an error, the same design twice, and reports one
+#   complete search (a call whose work is not above its start plus finish
+#   cannot be cut and is skipped; each of the three calls must be cut on at
+#   least one seed per shape and coding);
+# - a later search whose row step has room but returns no scored design
+#   (review finding I-1). With correct formulas that cannot be produced by
+#   `work`, so onestage_call_work() is replaced, for this check only, by one
+#   whose row-step start is too small: search 2 is dropped, the build returns
+#   search 1's design, and search 1 itself treats the step as not started;
+# - `startup` below the joint call's need: `joint_stage` "not_started", one
+#   search, and the stage 1 design returned; `startup` of one unit: the row
+#   and the column step "not_started" as well (the design is then random
+#   connected rows, returned if it is full rank, else onestage_infeasible);
+# - 9/3/2 nested, `work` from 1e3 to 1e7 on a grid: every build returns a
+#   full-rank design or ends in onestage_infeasible, and where the repair of
+#   search 1 is cut it reports `repair` "cut" and ends in
+#   onestage_infeasible (review finding I-4); that must occur.
 
 arguments <- commandArgs(trailingOnly = TRUE)
 named <- grepl("^[a-z]+=", arguments)
 opts <- arguments[named]
 positional <- arguments[!named]
-usage <- "Usage: Rscript tools/check-onestage-engine.R <stage1|crossed|repair|treatment_form|report> [baseline|-] [library] [seeds=20] [tmax=100]"
+usage <- "Usage: Rscript tools/check-onestage-engine.R <stage1|crossed|repair|treatment_form|report|truncation> [baseline|-] [library] [seeds=20] [tmax=100]"
 if (length(positional) < 1L || length(positional) > 3L ||
-    !positional[1] %in% c("stage1", "crossed", "repair", "treatment_form", "report")) {
+    !positional[1] %in% c("stage1", "crossed", "repair", "treatment_form", "report", "truncation")) {
   message(usage)
   quit(status = 1)
 }
@@ -248,8 +294,7 @@ if (check == "report") {
           set.seed(seed)
           trt <- if (kind == "stage 1") {
             s1 <- tryCatch(suppressWarnings(
-              if ("first" %in% names(formals(stage1))) stage1(v, nrows, ncols, r, shared, work_limit, TRUE)
-              else stage1(v, nrows, ncols, r, shared, work_limit)), error = function(e) e)
+              stage1(v, nrows, ncols, r, shared, work_limit, TRUE)), error = function(e) e)
             if (inherits(s1, "error")) { fail(paste("stage 1 error:", conditionMessage(s1))); next }
             as.integer(s1$treatments)
           } else as.vector(vapply(seq_len(r), function(m) sample.int(v), integer(v)))
@@ -287,6 +332,301 @@ if (check == "report") {
   seconds <- system.time(big <- fast(design))[["elapsed"]]
   report(!is.na(big$Aeffic), sprintf("report 2000/2/4 nested, random complete design: D %.7f, A %.7f", big$Deffic, big$Aeffic))
   cat(sprintf("  time 2000/2/4 nested: %.1f s (the QR report: 158 s, spec 6.1 W7)\n", seconds))
+  cat(failures, "FAIL(s)\n")
+  quit(status = if (failures > 0L) 1 else 0)
+}
+
+if (check == "truncation") {
+  ns <- asNamespace("FielDHub")
+  needed <- c("onestage_call_work", "onestage_work_weight", "onestage_startable", "onestage_limits",
+              "onestage_stage1", "crossed_search", "segmented_blocks", "onestage_joint_efficiency")
+  absent <- needed[!vapply(needed, exists, logical(1), envir = ns, inherits = FALSE)]
+  if (length(absent)) {
+    report(FALSE, paste0(paste(absent, collapse = "(), "), "() exist in the installed FielDHub"))
+    cat(failures, "FAIL(s)\n")
+    quit(status = 1)
+  }
+  call_work <- ns$onestage_call_work
+  weight_of <- ns$onestage_work_weight
+  stage1 <- ns$onestage_stage1
+  crossed <- ns$crossed_search
+  segmented <- ns$segmented_blocks
+  build <- ns$build_row_column_onestage
+  joint_eff <- ns$onestage_joint_efficiency
+  frame <- ns$onestage_design_frame
+  complete <- function(trt, v, r) {
+    length(trt) == v * r && !anyNA(trt) &&
+      all(vapply(seq_len(r), function(m) identical(sort(as.integer(trt[(m - 1L) * v + seq_len(v)])), seq_len(v)), logical(1)))
+  }
+  full_rank <- function(trt, v, nrows, r, shared) !is.na(joint_eff(frame(as.integer(trt), v, nrows, v / nrows, r, shared))$Aeffic)
+  quietly <- function(expr) tryCatch(suppressWarnings(expr), error = function(e) e)
+
+  # ---- Calls
+  factors <- c(1, 1.5, 3)
+  for (shape in list(c(24, 6, 2), c(100, 5, 4), c(200, 100, 4), c(500, 10, 4), c(1000, 2, 4))) {
+    v <- shape[1]; nrows <- shape[2]; r <- shape[3]; ncols <- v / nrows
+    rep_of <- rep(seq_len(r), each = v)
+    row_in <- rep(rep(seq_len(nrows), each = ncols), r)
+    col_in <- rep(seq_len(ncols), nrows * r)
+    transposed <- order(rep_of, col_in, row_in)
+    for (shared in c(FALSE, TRUE)) {
+      label <- sprintf("%d/%d/%d %s", v, nrows, r, if (shared) "latinized" else "nested")
+      B_row <- if (shared) nrows else r * nrows
+      B_col <- if (shared) ncols else r * ncols
+      steps <- list(
+        row = list(mode = if (shared) 4L else 1L, B = B_row, work = call_work(if (shared) 4L else 1L, v, r, B_row)),
+        column = list(mode = if (shared) 4L else 2L, B = B_col, work = call_work(if (shared) 4L else 2L, v, r, B_col)),
+        joint = list(mode = 3L, B = B_row + B_col, work = call_work(3L, v, r, B_row + B_col, B_row)))
+      problems <- list(row = character(), column = character(), joint = character())
+      seconds <- system.time(for (seed in 1:3) {
+        # One call of a stage at a factor of its start plus finish: a list
+        # with `treatments`, `scored`, `work` (reported, NA when no engine
+        # ran), `limit` (the engine limit) and the raw result.
+        run <- function(stage, factor, start) {
+          st <- steps[[stage]]
+          w <- weight_of(st$mode, st$B)
+          room <- factor * w * sum(st$work)
+          limit <- if (stage == "joint") room / w else room / w - st$work[["finish"]]
+          set.seed(1000 * seed + match(stage, names(steps)))
+          out <- quietly(
+            if (stage == "joint") crossed(start, v, r, nrows, ncols, shared, work_cap = limit)
+            else if (shared && stage == "row") segmented(start, row_in, rep_of, v, r, nrows, work_cap = limit)
+            else if (shared) segmented(start, col_in, (rep_of - 1L) * nrows + row_in, v, r, ncols, work_cap = limit)
+            else if (stage == "row") ns$blocks_engine(v, r, nrows, resolvable = TRUE, work_cap = limit, admission = FALSE)
+            else ns$rows_within_columns(start[transposed], row_in[transposed], v, r, ncols, effort = 1,
+                                        work_cap = limit, admission = FALSE))
+          if (inherits(out, "error")) return(list(error = conditionMessage(out)))
+          if (stage == "joint") {
+            list(treatments = as.integer(out$treatments), scored = !is.na(out$row_d) && !is.na(out$row_a),
+                 work = out$search$work, limit = limit, raw = out)
+          } else if (shared) {
+            list(treatments = as.integer(out$treatments), scored = !is.na(out$a_efficiency),
+                 work = out$search$work, limit = limit, raw = out)
+          } else if (stage == "row") {
+            list(treatments = as.integer(out$Design$treatments), scored = !is.na(out$Blocks_model$`A-Efficiency`[2]),
+                 work = if (is.null(out$search$work)) NA_real_ else out$search$work, limit = limit, raw = out)
+          } else {
+            back <- start
+            back[transposed] <- out$treatments
+            list(treatments = as.integer(back),
+                 scored = !is.na(out$a_efficiency) || identical(out$search$stop_reason, "no_swaps"),
+                 work = if (is.null(out$search$work)) NA_real_ else out$search$work, limit = limit, raw = out)
+          }
+        }
+        set.seed(seed)
+        start <- as.vector(vapply(seq_len(r), function(m) sample.int(v), integer(v)))
+        for (stage in names(steps)) {
+          st <- steps[[stage]]
+          fail <- function(what) problems[[stage]] <<- c(problems[[stage]], sprintf("seed %d, %g x: %s", seed, f, what))
+          last <- NULL
+          for (f in factors) {
+            a <- run(stage, f, start)
+            if (!is.null(a$error)) { fail(paste("error:", a$error)); next }
+            b <- run(stage, f, start)
+            if (!complete(a$treatments, v, r)) { fail("a replicate is not complete"); next }
+            if (!a$scored) { fail("no scored design"); next }
+            if (!identical(a$treatments, b$treatments)) fail("the same seed gave another design")
+            if (!is.na(a$work) && !(a$work <= a$limit)) {
+              fail(sprintf("reported work %.6g above the limit %.6g", a$work, a$limit))
+            }
+            if (stage == "joint") {
+              sr <- a$raw$search
+              if (!(a$raw$row_d >= a$raw$stage1_row_d && a$raw$row_a >= a$raw$stage1_row_a)) fail("below the Row floors")
+              if (full_rank(start, v, nrows, r, shared) && !(isTRUE(a$raw$full_rank) && full_rank(a$treatments, v, nrows, r, shared))) {
+                fail("a full-rank start returned not full rank")
+              }
+              if (!(st$work[["start"]] >= sr$start_work)) fail(sprintf("start formula %.6g below the engine's %.6g", st$work[["start"]], sr$start_work))
+              if (!isTRUE(all.equal(st$work[["finish"]], sr$finish_charged, tolerance = 1e-12))) {
+                fail(sprintf("finish formula %.6g, charged %.6g", st$work[["finish"]], sr$finish_charged))
+              }
+              if (!(sr$finish_charged >= sr$finish_work)) fail(sprintf("charged finish %.6g below the counted %.6g", sr$finish_charged, sr$finish_work))
+            }
+            last <- a
+          }
+          if (!is.null(last)) start <- last$treatments
+        }
+      })[["elapsed"]]
+      for (stage in names(steps)) {
+        report(length(problems[[stage]]) == 0L,
+               sprintf("truncation call, %s %s (start %.3g, finish %.3g; 3 seeds x 3 rooms)%s", label, stage,
+                       steps[[stage]]$work[["start"]], steps[[stage]]$work[["finish"]],
+                       if (length(problems[[stage]])) paste0(": ", problems[[stage]][1]) else ""))
+      }
+      cat(sprintf("  %s: %.1f s\n", label, seconds))
+    }
+  }
+
+  # ---- Builds with lowered limits
+  base <- ns$onestage_limits()
+  base$row_share <- 0.9
+  base$column_share <- 0.05
+  lowered <- function(...) utils::modifyList(base, list(...))
+  # Limits with the cap `work` and shares that hold the measured steps.
+  fitted <- function(work, used, ...) {
+    lowered(work = work, row_share = 1.02 * max(used[[1]][["row"]], used[[2]][["row"]]) / work,
+            column_share = 1.02 * max(used[[1]][["column"]], used[[2]][["column"]]) / work, ...)
+  }
+  run_build <- function(v, nrows, r, shared, searches, seed, limits) {
+    tryCatch(suppressWarnings(build(v, nrows, v / nrows, r, shared, searches, seed, limits = limits)),
+             error = function(e) e)
+  }
+  # The weighted work of every call of searches 1 and 2 with no limit binding.
+  measure <- function(v, nrows, r, shared, seed) {
+    ncols <- v / nrows
+    B_row <- if (shared) nrows else r * nrows
+    B <- B_row + if (shared) ncols else r * ncols
+    w <- weight_of(3L, B)
+    set.seed(seed)
+    left <- base$work
+    out <- list()
+    for (s in 1:2) {
+      s1 <- stage1(v, nrows, ncols, r, shared, left, s == 1L, base)
+      left <- left - s1$work
+      j <- crossed(s1$treatments, v, r, nrows, ncols, shared, work_cap = left / w)
+      left <- left - w * j$search$work
+      out[[s]] <- c(row = s1$step_work[["row"]], column = s1$step_work[["column"]], joint = w * j$search$work)
+    }
+    out
+  }
+  for (shape in list(c(24, 6, 2), c(48, 6, 3))) {
+    v <- shape[1]; nrows <- shape[2]; r <- shape[3]; ncols <- v / nrows
+    for (shared in c(FALSE, TRUE)) {
+      label <- sprintf("%d/%d/%d %s", v, nrows, r, if (shared) "latinized" else "nested")
+      B_row <- if (shared) nrows else r * nrows
+      B_col <- if (shared) ncols else r * ncols
+      need <- c(row = sum(call_work(if (shared) 4L else 1L, v, r, B_row)) * weight_of(if (shared) 4L else 1L, B_row),
+                column = sum(call_work(if (shared) 4L else 2L, v, r, B_col)) * weight_of(if (shared) 4L else 2L, B_col),
+                joint = sum(call_work(3L, v, r, B_row + B_col, B_row)) * weight_of(3L, B_row + B_col))
+      problems <- character()
+      hit <- c(row = 0L, column = 0L, joint = 0L)
+      for (seed in 1:5) {
+        used <- measure(v, nrows, r, shared, seed)
+        before <- c(row = 0, column = used[[2]][["row"]], joint = used[[2]][["row"]] + used[[2]][["column"]])
+        for (target in names(need)) {
+          if (!(used[[2]][[target]] > need[[target]] * 1.02)) next
+          work <- sum(used[[1]]) + before[[target]] + (need[[target]] + used[[2]][[target]]) / 2
+          lim <- fitted(work, used)
+          if (!ns$onestage_startable(3L, v, r, B_row + B_col, limits = lim, B_row = B_row)) next
+          a <- run_build(v, nrows, r, shared, 40, seed, lim)
+          b <- run_build(v, nrows, r, shared, 40, seed, lim)
+          tag <- sprintf("seed %d, search 2 cut in its %s call", seed, target)
+          if (inherits(a, "error")) { problems <- c(problems, paste0(tag, ": error ", conditionMessage(a))); next }
+          info <- attr(a, "onestage_search")
+          if (!identical(a, b)) problems <- c(problems, paste0(tag, ": the same seed gave another design"))
+          else if (is.na(attr(a, "joint_efficiency")$Aeffic)) problems <- c(problems, paste0(tag, ": not full rank"))
+          else if (info$complete != 1L || !info$started %in% 1:2 || (target == "joint" && info$started != 2L)) {
+            problems <- c(problems, sprintf("%s: %d searches started, %d complete", tag, info$started, info$complete))
+          } else hit[[target]] <- hit[[target]] + 1L
+        }
+      }
+      report(length(problems) == 0L && all(hit >= 1L),
+             sprintf("truncation build, %s: search 2 cut in its row, column and joint call on %s of 5 seeds%s", label,
+                     paste(hit, collapse = ", "), if (length(problems)) paste0(": ", problems[1]) else ""))
+
+      # A row step that has room but returns no scored design (the formula of
+      # its start replaced by one unit, for this check only).
+      real <- ns$onestage_call_work
+      broken <- local({
+        blocks <- B_row
+        function(mode, v, r, B, B_row = NULL) {
+          work <- real(mode, v, r, B, B_row)
+          if (mode %in% c(1L, 4L) && B == blocks) work[["start"]] <- 1
+          work
+        }
+      })
+      swap_in <- function(f) {
+        unlockBinding("onestage_call_work", ns)
+        assign("onestage_call_work", f, envir = ns)
+        lockBinding("onestage_call_work", ns)
+      }
+      problems <- character()
+      for (seed in 1:5) {
+        used <- measure(v, nrows, r, shared, seed)
+        finish <- real(if (shared) 4L else 1L, v, r, B_row)[["finish"]]
+        # Search 2's row step gets its finish plus a few units: room for the
+        # broken formula, far too little to score a start.
+        lim <- fitted(sum(used[[1]]) + finish + 10, used)
+        whole <- run_build(v, nrows, r, shared, 20, seed, lowered())
+        swap_in(broken)
+        dropped <- run_build(v, nrows, r, shared, 40, seed, lim)
+        first <- run_build(v, nrows, r, shared, 20, seed, lowered(work = (finish + 10) / base$row_share))
+        swap_in(real)
+        tag <- sprintf("seed %d", seed)
+        if (inherits(dropped, "error")) { problems <- c(problems, paste0(tag, ": error ", conditionMessage(dropped))); next }
+        info <- attr(dropped, "onestage_search")
+        if (info$started != 1L || !identical(as.integer(dropped$treatments), as.integer(whole$treatments))) {
+          problems <- c(problems, sprintf("%s: %d searches started, or not search 1's design", tag, info$started))
+        }
+        # In search 1 the same defect is a step that is not started.
+        if (inherits(first, "error")) {
+          if (!inherits(first, "onestage_infeasible")) problems <- c(problems, paste0(tag, ": error ", conditionMessage(first)))
+        } else if (!identical(attr(first, "onestage_search")$row_step, "not_started")) {
+          problems <- c(problems, paste0(tag, ": search 1 did not treat the step as not started"))
+        }
+      }
+      report(length(problems) == 0L,
+             sprintf("truncation build, %s: a row step with room and no scored design drops search 2, and is not started in search 1%s",
+                     label, if (length(problems)) paste0(": ", problems[1]) else ""))
+
+      # The backstop: calls that are not startable.
+      problems <- character()
+      outcomes <- character()
+      for (seed in 1:5) {
+        tag <- sprintf("seed %d", seed)
+        lim <- lowered(startup = need[["joint"]] * 0.99)
+        a <- run_build(v, nrows, r, shared, 200, seed, lim)
+        set.seed(seed)
+        s1 <- quietly(stage1(v, nrows, ncols, r, shared, lim$work, TRUE, lim))
+        if (inherits(a, "error")) {
+          info <- a$search
+          if (!inherits(a, "onestage_infeasible") || full_rank(s1$treatments, v, nrows, r, shared)) {
+            problems <- c(problems, paste0(tag, ": error ", conditionMessage(a)))
+          }
+        } else {
+          info <- attr(a, "onestage_search")
+          if (!identical(as.integer(a$treatments), as.integer(s1$treatments))) problems <- c(problems, paste0(tag, ": not the stage 1 design"))
+        }
+        if (!identical(info$joint_stage, "not_started") || info$started != 1L || info$complete != 0L) {
+          problems <- c(problems, sprintf("%s: joint stage %s, %s searches", tag, format(info$joint_stage), format(info$started)))
+        }
+        none <- run_build(v, nrows, r, shared, 200, seed, lowered(startup = 1))
+        info <- if (inherits(none, "error")) none$search else attr(none, "onestage_search")
+        if (inherits(none, "error") && !inherits(none, "onestage_infeasible")) {
+          problems <- c(problems, paste0(tag, ": error ", conditionMessage(none)))
+        } else if (!identical(c(info$row_step, info$column_step, info$joint_stage), rep("not_started", 3L))) {
+          problems <- c(problems, paste0(tag, ": a stage started with a start-up limit of one unit"))
+        } else if (!inherits(none, "error") && !(complete(as.integer(none$treatments), v, r) &&
+                                                  full_rank(none$treatments, v, nrows, r, shared))) {
+          problems <- c(problems, paste0(tag, ": the design returned is not complete and full rank"))
+        }
+        outcomes <- c(outcomes, if (inherits(none, "error")) "infeasible" else "design")
+      }
+      report(length(problems) == 0L,
+             sprintf("truncation build, %s: joint stage not started below its start-up need; nothing started at one unit (%s)%s",
+                     label, paste(outcomes, collapse = " "), if (length(problems)) paste0(": ", problems[1]) else ""))
+    }
+  }
+  # A repair cut in search 1
+  problems <- character()
+  cuts <- 0L; designs <- 0L
+  for (seed in 1:5) {
+    for (work in 10^seq(3, 7, length.out = 65)) {
+      a <- run_build(9, 3, 2, FALSE, 20, seed, lowered(work = work, row_share = 0.45, column_share = 0.1))
+      tag <- sprintf("seed %d, work %.3g", seed, work)
+      if (inherits(a, "error")) {
+        if (!inherits(a, "onestage_infeasible")) { problems <- c(problems, paste0(tag, ": error ", conditionMessage(a))); next }
+        if (identical(a$search$repair, "cut")) cuts <- cuts + 1L
+      } else {
+        designs <- designs + 1L
+        info <- attr(a, "onestage_search")
+        if (identical(info$repair, "cut")) problems <- c(problems, paste0(tag, ": a design after a cut repair"))
+        if (!full_rank(a$treatments, 9, 3, 2, FALSE)) problems <- c(problems, paste0(tag, ": not full rank"))
+      }
+    }
+  }
+  report(length(problems) == 0L && cuts >= 1L && designs >= 1L,
+         sprintf("truncation build, 9/3/2 nested: %d builds ended in onestage_infeasible after a cut repair, %d returned a full-rank design%s",
+                 cuts, designs, if (length(problems)) paste0(": ", problems[1]) else ""))
   cat(failures, "FAIL(s)\n")
   quit(status = if (failures > 0L) 1 else 0)
 }
@@ -421,7 +761,7 @@ if (check == "crossed") {
     worst_debug <- 0
     seconds <- system.time(for (seed in 1:8) {
       set.seed(seed)
-      s1 <- stage1(v, nrows, ncols, r, shared, work_limit)
+      s1 <- stage1(v, nrows, ncols, r, shared, work_limit, TRUE)
       ref0 <- joint_ref(s1$treatments, lay, v, r)
       res <- tryCatch(crossed(s1$treatments, v, r, nrows, ncols, shared,
                               work_cap = max(work_limit - s1$work, 1)), error = function(e) e)
@@ -494,7 +834,7 @@ if (check == "crossed") {
     lay <- layout_of(v, r, nrows, FALSE)
     for (seed in 1:8) {
       set.seed(seed)
-      s1 <- stage1(v, nrows, ncols, r, FALSE, work_limit)
+      s1 <- stage1(v, nrows, ncols, r, FALSE, work_limit, TRUE)
       res <- crossed(s1$treatments, v, r, nrows, ncols, FALSE, work_cap = max(work_limit - s1$work, 1))
       trt <- as.integer(res$treatments)
       hooked <- hooked + 1L
@@ -520,7 +860,7 @@ if (check == "crossed") {
   v <- 8; nrows <- 4; ncols <- 2; r <- 3
   lay <- layout_of(v, r, nrows, FALSE)
   set.seed(36)
-  s1 <- stage1(v, nrows, ncols, r, FALSE, work_limit)
+  s1 <- stage1(v, nrows, ncols, r, FALSE, work_limit, TRUE)
   start <- as.integer(s1$treatments)
   res <- crossed(start, v, r, nrows, ncols, FALSE, work_cap = max(work_limit - s1$work, 1))
   trt <- as.integer(res$treatments)
@@ -602,7 +942,7 @@ if (check == "treatment_form") {
         fail <- function(what) problems <<- c(problems, sprintf("seed %d, %s start: %s", seed, kind, what))
         set.seed(seed)
         if (kind == "stage 1") {
-          s1 <- stage1(v, nrows, ncols, r, FALSE, work_limit)
+          s1 <- stage1(v, nrows, ncols, r, FALSE, work_limit, TRUE)
           start <- as.integer(s1$treatments)
         } else {
           start <- as.vector(vapply(seq_len(r), function(m) sample.int(v), integer(v)))
@@ -811,7 +1151,7 @@ if (check == "repair") {
     for (seed in 1:8) {
       fail <- function(what) problems <<- c(problems, sprintf("seed %d: %s", seed, what))
       set.seed(seed)
-      s1 <- stage1(v, nrows, ncols, r, shared, work_limit)
+      s1 <- stage1(v, nrows, ncols, r, shared, work_limit, TRUE)
       start <- as.integer(s1$treatments)
       cap <- max(work_limit - s1$work, 1)
       ref0 <- joint_ref(start, lay, v, r)
@@ -957,7 +1297,7 @@ for (g in seq_len(nrow(grid))) {
     seconds <- system.time(for (seed in seq_len(n_seeds)) {
       set.seed(seed)
       warned <- character()
-      res <- tryCatch(withCallingHandlers(stage1(t, nrows, ncols, r, latinize, work_limit),
+      res <- tryCatch(withCallingHandlers(stage1(t, nrows, ncols, r, latinize, work_limit, TRUE),
                                           warning = function(w) {
                                             warned <<- c(warned, conditionMessage(w))
                                             invokeRestart("muffleWarning")

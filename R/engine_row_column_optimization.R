@@ -60,24 +60,30 @@ improve_efficiency <- function(design, iterations, seed) {
 # FielDHub's block engine (phase 2 spec 6.1 and 6.2): per joint search, a
 # rows-first stage 1 design (onestage_stage1()), then the joint-rank repair and
 # the joint stage (crossed_search()). `searches` is the row_column()
-# `iterations`: it sets the number of joint searches only
-# (onestage_joint_searches()); stage 1 and the repair always run in full.
+# `iterations`: it sets the number of joint searches asked for
+# (onestage_joint_searches()).
 #
-# - A shape that onestage_admitted() refuses aborts with class
-#   onestage_not_admitted (also onestage_infeasible); a shape that fails the
-#   degrees-of-freedom rule (onestage_feasible()) aborts with
-#   onestage_infeasible. row_column() turns both into the twostage fallback.
+# - A shape that fails the degrees-of-freedom rule (onestage_feasible())
+#   aborts with class onestage_infeasible, which row_column() turns into the
+#   twostage fallback. No shape is refused for its size (spec 6.1, "Work cap;
+#   no size admission").
 # - Otherwise the generator is seeded once with `seed` and the searches run in
-#   turn from that stream, each building its own stage 1 design. One work cap,
-#   onestage_work_limit, covers the whole build: each engine call gets the
-#   work left, and once it is spent no further search starts. A later search
-#   whose stage 1 would not finish inside the work left, or finds no connected
-#   row design, is not run and ends the build's searches; the first search's
-#   aborts (not admitted: an admission defect; no connected design:
-#   onestage_infeasible). Only these stops, which depend on the work counts
-#   and the seed alone, end the searches without a warning. A stage that stops
-#   at its 60 s time limit warns (fieldhub_design_warning, from the stage) and
-#   the build goes on.
+#   turn from that stream, each building its own stage 1 design. One work
+#   cap, limits$work, covers the whole build in weighted work
+#   (onestage_work_weight()): each call gets the work left as its room, and
+#   the weighted work it used is taken off.
+#   - Search 1 always runs. Where the joint call is not startable by its
+#     shape (onestage_startable(), the backstop beyond the measured universe)
+#     it is the only search and ends with its stage 1 design.
+#   - Search s >= 2 starts only while work is left. It is dropped, and the
+#     searches end, when its stage 1 has no room or returns no design
+#     (onestage_stage1() gives NULL), or when its joint call has no room to
+#     start and finish or returns no scored design. That is never an error.
+#   - A search that the cap cut is kept and enters the return rule like any
+#     other.
+#   - A build that the cap cuts short gives no warning. The engine calls that
+#     stopped at their 60 s time limit are counted, and the build gives one
+#     fieldhub_design_warning for all of them at its end.
 # - Return rule (spec 6.2): of the searches the engine ends full rank, keep
 #   those within 1.5e-7 of the best Row D, then of the best Row A (the
 #   engine's unrounded values), then take the highest joint D, the earliest
@@ -88,63 +94,105 @@ improve_efficiency <- function(design, iterations, seed) {
 #   only on the searches the outcome rests on: the one with
 #   the best Row D, the one with the best Row A among those kept for Row D,
 #   and the winner. If one of them fails it is dropped and the rest are
-#   ranked again. If no search is left it aborts with onestage_infeasible
-#   (onestage_not_admitted when the work cap cut a search short).
+#   ranked again. If no search is left it aborts with onestage_infeasible.
 #
 # Returns a data frame with the structure of the pre-change builder
 # (tools/reference-onestage.R): Level_1 = Rep, Level_2 = Column, Level_3 = Row,
 # plots, treatments, all factors, in plot order replicate, row, column; rows
 # and columns are labelled "<rep>_<i>" when nested and "<i>" when shared. Its
 # attribute "joint_efficiency" is the onestage_joint_efficiency() of the
-# design, for report_efficiency().
+# design, for report_efficiency(). Its attribute "onestage_search", which
+# row_column() removes, describes the build: `requested` (the searches
+# `searches` asks for), `started` (the searches that entered the return
+# rule), `complete` (those whose every engine call ended on its own stop, not
+# on a work or time limit), `row_step`, `column_step`, `joint_stage` (search
+# 1: "complete", "cut" or "not_started"), `repair` (search 1: "none",
+# "complete", "cut", or "failed" when it ended on its own without a full-rank
+# design), `winner` (the search returned) and `winner_cut` (whether any of
+# its calls was cut), `blocks` (the joint stage's block columns) and `work`
+# (the weighted work used). An onestage_infeasible abort raised after the
+# searches carries the same list as its `search` field (`winner` NA).
 #' @noRd
-build_row_column_onestage <- function(nt, nrows, ncols, reps, latinize, searches, seed) {
+build_row_column_onestage <- function(nt, nrows, ncols, reps, latinize, searches, seed,
+                                      limits = onestage_limits()) {
   validate_iteration_budget(searches, "searches")
   where <- paste0("t = ", nt, ", nrows = ", nrows, ", r = ", reps)
-  if (!onestage_admitted(nt, reps, nrows, ncols, latinize)) {
-    fieldhub_abort("The onestage search does not admit this design (", where, ").",
-                   class = c("onestage_not_admitted", "onestage_infeasible",
-                             "fieldhub_optimization_error"), call = NULL)
-  }
   if (!onestage_feasible(nt, reps, nrows, ncols, latinize)) {
     fieldhub_abort("The joint row-and-column model has too few residual degrees of freedom (",
                    where, ").",
                    class = c("onestage_infeasible", "fieldhub_optimization_error"), call = NULL)
   }
   set.seed(seed)
-  left <- onestage_work_limit
+  left <- limits$work
+  requested <- onestage_joint_searches(searches)
+  B_row <- if (latinize) nrows else reps * nrows
+  B <- B_row + (if (latinize) ncols else reps * ncols)
+  weight <- onestage_work_weight(3L, B)
+  need <- weight * sum(onestage_call_work(3L, nt, reps, B, B_row))
+  joint_startable <- onestage_startable(3L, nt, reps, B, limits = limits, B_row = B_row)
+  time_limited <- 0L
+  time_warning <- function() {
+    if (time_limited > 0L) {
+      fieldhub_warn(time_limited, " engine call(s) of the onestage search stopped at the time ",
+                    "limit of 60 seconds; the result may not be reproducible from the seed.",
+                    class = "fieldhub_design_warning", call = NULL)
+    }
+  }
   results <- list()
-  cut_short <- FALSE
-  for (s in seq_len(onestage_joint_searches(searches))) {
-    if (left <= 0) break
-    stage1 <- tryCatch(onestage_stage1(nt, nrows, ncols, reps, latinize, work_cap = left),
-                       onestage_infeasible = function(cnd) cnd)
-    if (inherits(stage1, "onestage_infeasible")) {
-      if (s == 1L) {
-        fieldhub_abort(conditionMessage(stage1),
-                       class = c(if (inherits(stage1, "onestage_not_admitted")) "onestage_not_admitted",
-                                 "onestage_infeasible", "fieldhub_optimization_error"),
-                       data = list(parent = stage1), call = NULL)
-      }
-      break
-    }
+  cut <- logical()
+  first <- list(row_step = "not_started", column_step = "not_started",
+                joint_stage = "not_started", repair = "none")
+  for (s in seq_len(requested)) {
+    if (s > 1L && left <= 0) break
+    # An onestage_infeasible abort of search 1 (no design with connected
+    # rows) goes on to the caller, after the warning for the calls so far.
+    stage1 <- withCallingHandlers(
+      onestage_stage1(nt, nrows, ncols, reps, latinize, work_left = left, first = s == 1L,
+                      limits = limits),
+      onestage_infeasible = function(cnd) time_warning()
+    )
+    if (is.null(stage1)) break
+    time_limited <- time_limited + stage1$time_limited
     left <- left - stage1$work
-    if (left <= 0) {
+    if (s == 1L) {
+      first$row_step <- stage1$steps[["row"]]
+      first$column_step <- stage1$steps[["column"]]
+    }
+    if (!joint_startable || need > left) {
+      # No joint call: a later search is dropped; search 1 ends with its
+      # stage 1 design, which the return rule tests for full rank.
       if (s == 1L) {
-        fieldhub_abort("The onestage stage 1 used the whole work cap (", where, ").",
-                       class = c("onestage_not_admitted", "onestage_infeasible",
-                                 "fieldhub_optimization_error"), call = NULL)
+        results <- list(list(treatments = stage1$treatments, full_rank = TRUE,
+                             row_d = 0, row_a = 0, joint_d = 0))
+        cut <- TRUE
       }
       break
     }
-    joint <- crossed_search(stage1$treatments, nt, reps, nrows, ncols, shared = latinize,
-                            work_cap = left)
-    left <- left - joint$search$work
-    results[[s]] <- joint
-    if (isTRUE(joint$search$work_capped)) {
-      cut_short <- TRUE
-      break
+    joint <- withCallingHandlers(
+      crossed_search(stage1$treatments, nt, reps, nrows, ncols, shared = latinize,
+                     work_cap = left / weight),
+      fieldhub_design_warning = function(w) {
+        if (grepl("time limit", conditionMessage(w), fixed = TRUE)) {
+          time_limited <<- time_limited + 1L
+          invokeRestart("muffleWarning")
+        }
+      }
+    )
+    left <- left - weight * joint$search$work
+    # A later search whose joint call could not score its start is dropped.
+    if (s > 1L && is.na(joint$stage1_row_d)) break
+    joint_cut <- isTRUE(joint$search$work_capped) || identical(joint$search$stop_reason, "time_limit")
+    results[[length(results) + 1L]] <- joint
+    cut[length(results)] <- joint_cut || any(stage1$steps != "complete")
+    if (s == 1L) {
+      first$joint_stage <- if (joint_cut) "cut" else "complete"
+      first$repair <- joint$search$repair
     }
+  }
+  info <- function(winner) {
+    c(list(requested = requested, started = length(results), complete = sum(!cut)), first,
+      list(winner = winner, winner_cut = if (is.na(winner)) NA else cut[winner], blocks = B,
+           work = limits$work - left))
   }
   value <- function(name) vapply(results, function(x) as.double(x[[name]]), numeric(1))
   row_d <- value("row_d")
@@ -170,13 +218,16 @@ build_row_column_onestage <- function(nt, nrows, ncols, reps, latinize, searches
       pick <- best[3L]
       design <- designs[[pick]]
       attr(design, "joint_efficiency") <- joint_efficiency[[pick]]
+      attr(design, "onestage_search") <- info(unname(pick))
+      time_warning()
       return(design)
     }
     candidates <- setdiff(candidates, failed)
   }
+  time_warning()
   fieldhub_abort("No onestage search found a full-rank design (", where, ").",
-                 class = c(if (cut_short) "onestage_not_admitted", "onestage_infeasible",
-                           "fieldhub_optimization_error"), call = NULL)
+                 class = c("onestage_infeasible", "fieldhub_optimization_error"),
+                 data = list(search = info(NA_integer_)), call = NULL)
 }
 
 # The onestage return rule (spec 6.2) on the given searches: keep those
